@@ -1,0 +1,73 @@
+/* AuthForm.css */
+
+.auth-container {
+  width: 30%;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f7f7f7;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  width: 100%;
+  padding: 10px 0 ;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+input::placeholder {
+  /* Add padding-left for the placeholder text */
+  padding-left: 10px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+.google-login {
+  background-color: #4285F4;
+  color: white;
+}
+
+.google-login:hover {
+  background-color: #357ABD;
+}
+
+.facebook-login {
+  background-color: #3B5998;
+  color: white;
+}
+
+.facebook-login:hover {
+  background-color: #29487D;
+}
+
+.or-divider {
+  text-align: center;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+span {
+  background-color: #f7f7f7;
+  padding: 5px 10px;
+}
+
+

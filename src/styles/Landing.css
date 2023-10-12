@@ -1,0 +1,8 @@
+
+.image img {
+    max-width: 900px; /* Set the maximum width */
+    max-height: 700px; /* Set the maximum height */
+    width: auto; /* Allow the width to adjust proportionally */
+    height: auto; /* Allow the height to adjust proportionally */
+    border-radius: 5px;
+  }
