@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/nowry/static/css/main.091dc767.css",
+    "main.js": "/nowry/static/js/main.6362e4b8.js",
+    "static/media/Phrase1.jpeg": "/nowry/static/media/Phrase1.144ae8ac62d1869b9e37.jpeg",
+    "static/media/logo.png": "/nowry/static/media/logo.3714e55e844acf244641.png",
+    "index.html": "/nowry/index.html",
+    "main.091dc767.css.map": "/nowry/static/css/main.091dc767.css.map",
+    "main.6362e4b8.js.map": "/nowry/static/js/main.6362e4b8.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.091dc767.css",
+    "static/js/main.6362e4b8.js"
+  ]
+}
