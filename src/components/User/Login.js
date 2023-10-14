@@ -40,6 +40,12 @@ const Login = () => {
           </button>
           <p>Don't have an account? <Link to="/register">Register here</Link></p>
         </form>
+
+        {/* Add the "Forgot Password" section here */}
+        <div className="forgot-password-section">
+          <p>Forgot your password?</p>
+          <Link to="/resetPassword">Reset it here</Link>
+        </div>
       </div>
     </div>
   );

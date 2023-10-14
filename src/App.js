@@ -10,7 +10,7 @@ import './styles/Login.css';
 import Header from './components/Header';
 import Landing from './components/Landing';
 import Footer from './components/Footer';
-import { Login, Register } from './components/User'; // Import the LoginForm component
+import { Login, Register, ResetPassword } from './components/User'; // Import the LoginForm component
 
 const App = () => {
 
@@ -34,6 +34,7 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path="/" element={<Landing />} />
           </Routes>
         </main>
