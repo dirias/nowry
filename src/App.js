@@ -12,6 +12,7 @@ import Header from './components/Header';
 import Landing from './components/Landing';
 import Footer from './components/Footer';
 import { Login, Register, ResetPassword } from './components/User'; // Import the LoginForm component
+import { Home } from './components/User/Home'; 
 
 const App = () => {
 
@@ -33,6 +34,7 @@ const App = () => {
         <Header />
         <main>
           <Routes>
+            <Route path="/home/:username" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/resetPassword" element={<ResetPassword />} />

@@ -1,12 +1,32 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom for navigation
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Import axios for making API requests
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Handle login logic here (e.g., API request or state management)
+  const handleLogin = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      const response = await axios.post('http://localhost:8000/login', formData);
+
+      // Check if the login was successful
+      if (response.status === 200) {
+        console.log(response)
+        // Redirect to a success page or perform any other action
+        navigate(`/home/${response.data.username}`);
+      } else {
+        // Handle login errors
+        console.error('Login failed:', response.data.detail);
+      }
+    } catch (error) {
+      // Handle network errors or other issues
+      console.error('Login failed:', error.message);
+    }
   };
 
   return (
@@ -38,10 +58,11 @@ const Login = () => {
           <button className="facebook-login" type="button">
             <i className="fab fa-facebook"></i> Login with Facebook
           </button>
-          <p>Don't have an account? <Link to="/register">Register here</Link></p>
+          <p>
+            Don't have an account? <Link to="/register">Register here</Link>
+          </p>
         </form>
 
-        {/* Add the "Forgot Password" section here */}
         <div className="forgot-password-section">
           <p>Forgot your password?</p>
           <Link to="/resetPassword">Reset it here</Link>
