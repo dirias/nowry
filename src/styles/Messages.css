@@ -1,0 +1,50 @@
+/* CSS for the error window */
+.error-window {
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    padding: 20px;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .error-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .error-title {
+    font-size: 1.5rem;
+    color: #d32f2f;
+    margin: 0;
+  }
+  
+  .close-button {
+    background-color: #d32f2f;
+    color: #ffffff;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .close-button:hover {
+    background-color: #b71c1c;
+  }
+  
+  .error-content {
+    margin-top: 15px;
+  }
+  
+  .error-message {
+    margin: 0;
+  }
+  

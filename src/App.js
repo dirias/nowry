@@ -6,6 +6,7 @@ import './styles/Landing.css';
 import './styles/Header.css';
 import './styles/Footer.css';
 import './styles/Login.css';
+import './styles/Messages.css';
 
 import Header from './components/Header';
 import Landing from './components/Landing';
