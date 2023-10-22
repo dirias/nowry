@@ -1,0 +1,36 @@
+.side-menu {
+    width: 20%;
+    height: 100%;
+    background-color: #333;
+    color: white;
+    transition: transform 0.3s ease-in-out;
+    z-index: 999;
+  }
+  
+  .side-menu.open {
+    transform: translateX(20%);
+  }
+  
+  .menu-toggle {
+    background: none;
+    border: none;
+    color: black;
+    font-size: 18px;
+    padding: 50px;
+    margin: 500px;
+    cursor: pointer;
+  }
+  
+  .menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+  
+  .menu-items li {
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  /* Add additional styles as needed */
+  

@@ -1,5 +1,5 @@
 import React from 'react';
-import HomePhrase from '../images/Phrase1.jpeg';
+import HomePhrase from '../../images/Phrase1.jpeg';
 
 const Landing = () => {
   return (

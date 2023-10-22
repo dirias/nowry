@@ -1,4 +1,4 @@
-import React, { useEffect }  from 'react';
+import React, { useEffect, useState }  from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import './styles/App.css';
@@ -7,14 +7,25 @@ import './styles/Header.css';
 import './styles/Footer.css';
 import './styles/Login.css';
 import './styles/Messages.css';
+import './styles/SideMenu.css';
 
-import Header from './components/Header';
-import Landing from './components/Landing';
-import Footer from './components/Footer';
+import {Header, HeaderLoggedIn } from './components/HomePage/Header';
+import Landing from './components/HomePage/Landing';
+import Footer from './components/HomePage/Footer';
 import { Login, Register, ResetPassword } from './components/User'; // Import the LoginForm component
 import { Home } from './components/User/Home'; 
 
 const App = () => {
+  const [isUserLoggedIn, setUserLoggedIn] = useState(false);
+  console.log('isUserLoggedIn', isUserLoggedIn)
+
+  useEffect(() => {
+    // Check if the user has a valid token in local storage
+    const token = localStorage.getItem('authToken'); // Use your token key
+    if (token) {
+      setUserLoggedIn(true);
+    }
+  }, []);
 
   useEffect(() => {
     // Create a <link> element for FontAwesome CSS and append it to the document's <head>
@@ -31,7 +42,7 @@ const App = () => {
   return (
     <Router>
       <div className="App">
-        <Header />
+        {isUserLoggedIn ? <HeaderLoggedIn username={localStorage.getItem('username')}/> : <Header />}
         <main>
           <Routes>
             <Route path="/home/:username" element={<Home />} />
