@@ -14,6 +14,7 @@ import Landing from './components/HomePage/Landing';
 import Footer from './components/HomePage/Footer';
 import { Login, Register, ResetPassword } from './components/User'; // Import the LoginForm component
 import { Home } from './components/User/Home'; 
+import { Book } from './components/Books'; 
 
 const App = () => {
   const [isUserLoggedIn, setUserLoggedIn] = useState(false);
@@ -45,6 +46,7 @@ const App = () => {
         {isUserLoggedIn ? <HeaderLoggedIn username={localStorage.getItem('username')}/> : <Header />}
         <main>
           <Routes>
+            <Route path="/books" element={<Book />} />
             <Route path="/home/:username" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

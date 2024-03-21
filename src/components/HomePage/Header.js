@@ -45,7 +45,9 @@ const HeaderLoggedIn = ({ username }) => {
         <ul className="nav-list">
           <li className="nav-item">Study</li>
           <li className="nav-item">Cards</li>
-          <li className="nav-item">Books</li>
+          <li className="nav-item">
+            <Link to="/books" className="nav-link">Books</Link>
+            </li>
           <li className="nav-item" onClick={logout}>Logout</li>
           <li className="nav-item">Welcome, {username}</li>
         </ul>
