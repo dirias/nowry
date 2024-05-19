@@ -23,7 +23,8 @@ const Login = () => {
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('username', response.data.username);
 
-        navigate(`/home/${response.data.username}`);
+        navigate(`/`);
+        window.location.reload();
       } else {
         // Handle login errors
         console.error('Login failed:', response.data.detail);

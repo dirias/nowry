@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const saveBookPage = async (pageIndex, content) => {
-    console.log('Reaching backined')
+    console.log('Reaching backend')
     const token = localStorage.getItem('authToken'); // Replace with the actual token from your authentication
     console.log(token)
     const config = {

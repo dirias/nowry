@@ -1,0 +1,112 @@
+.book-title-input {
+  padding: 8px 12px;
+  font-size: 16px;
+  border: none;
+  border-bottom: 1px solid #ccc; /* Add border-bottom instead of full border */
+  border-radius: 0;
+  transition: border-color 0.3s ease;
+}
+
+  /* Global Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+}
+
+/* Book Container */
+.book-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 20px auto;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Book Sidebar */
+.book-sidebar {
+  width: 250px;
+  background-color: #007bff;
+  color: #fff;
+  padding: 20px;
+}
+
+.book-sidebar h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.book-sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.book-sidebar li {
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.book-sidebar li:hover {
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Book Main Content */
+.book-main {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.book-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.book-title-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.book-pagination .book-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.book-pagination .book-button:hover {
+  background-color: #0056b3;
+}
+
+.content {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Editor Styles */
+.editor-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 14px;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.editor-textarea {
+  width: 100%;
+  min-height: 200px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+}

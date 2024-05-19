@@ -8,8 +8,13 @@ import './styles/Footer.css';
 import './styles/Login.css';
 import './styles/Messages.css';
 import './styles/SideMenu.css';
+import './styles/Home.css';
+import './styles/Book.css';
 
-import {Header, HeaderLoggedIn } from './components/HomePage/Header';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
+import Header from './components/HomePage/Header';
 import Landing from './components/HomePage/Landing';
 import Footer from './components/HomePage/Footer';
 import { Login, Register, ResetPassword } from './components/User'; // Import the LoginForm component
@@ -40,18 +45,24 @@ const App = () => {
       document.head.removeChild(link);
     };
   }, []); // Run this effect only once on component mount
+
+  const isLoggedIn = localStorage.getItem('authToken');
   return (
     <Router>
       <div className="App">
-        {isUserLoggedIn ? <HeaderLoggedIn username={localStorage.getItem('username')}/> : <Header />}
+       <Header username={localStorage.getItem('username')} />
         <main>
           <Routes>
             <Route path="/books" element={<Book />} />
-            <Route path="/home/:username" element={<Home />} />
+            {isLoggedIn ? (
+              <Route path="/" element={<Home />} />
+            ) : (
+              <Route path="/" element={<Landing />} />
+            )}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
-            <Route path="/" element={<Landing />} />
+            
           </Routes>
         </main>
         <Footer />
