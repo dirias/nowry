@@ -10,7 +10,7 @@ export const saveBookPage = async (pageIndex, content) => {
       },
     };
     console.log(config, 'config');
-    const response = await axios.post('http://localhost:8000/save_book_page', {
+    const response = await axios.post('http://localhost:8000/book_page/save_book_page', {
         title: 'Book Title', // Provide the book title here
         page_number: pageIndex + 1,
         content: content[pageIndex],

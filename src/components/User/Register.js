@@ -35,7 +35,7 @@ const Register = () => {
 
     if (Object.keys(newErrors).length === 0) {
       try {
-        const response = await axios.post('http://localhost:8000/create_user', formData);
+        const response = await axios.post('http://localhost:8000/user/create_user', formData);
         console.log(response)
 
         if (response.status !== 200) {

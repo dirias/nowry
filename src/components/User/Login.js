@@ -14,7 +14,7 @@ const Login = () => {
       const formData = new FormData();
       formData.append("email", email);
       formData.append("password", password);
-      const response = await axios.post('http://localhost:8000/login', formData);
+      const response = await axios.post('http://localhost:8000/session/login', formData);
       console.log(response)
 
       // Check if the login was successful
