@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Editor from './Editor';
-import { saveBookPage } from '../../api/Books';
+import { useParams } from 'react-router-dom';
+import { saveBookPage, getBookById } from '../../api/Books';
 
 export default function Book() {
+  const { id } = useParams();
   const [activePage, setActivePage] = useState(0);
   const [content, setContent] = useState(['']);
   const [bookName, setBookName] = useState('Book name');
-  const [typingTimeout, setTypingTimeout] = useState(null); // State for typing timeout
+  const [typingTimeout, setTypingTimeout] = useState(null);
 
   const handlePreviousPage = async () => {
     if (activePage > 0) {
@@ -26,21 +28,36 @@ export default function Book() {
     const updatedContent = [...content];
     updatedContent[pageIndex] = content[activePage];
     setContent(updatedContent);
-    saveBookPage(pageIndex, content);
+    await saveBookPage(pageIndex, updatedContent[pageIndex]);
   };
 
   const handleEditorChange = (newContent) => {
-    setContent(newContent);
-    clearTimeout(typingTimeout); // Clear previous timeout
-    const timeout = setTimeout(() => savePageContent(activePage), 5000); // Save after 5 seconds of no typing
-    setTypingTimeout(timeout); // Update typing timeout
+    const updatedContent = [...content];
+    updatedContent[activePage] = newContent;
+    setContent(updatedContent);
+    clearTimeout(typingTimeout);
+    const timeout = setTimeout(() => savePageContent(activePage), 5000);
+    setTypingTimeout(timeout);
   };
 
   useEffect(() => {
-    return () => {
-      clearTimeout(typingTimeout); // Cleanup timeout on component unmount
+    const fetchBook = async () => {
+      try {
+        const book = await getBookById(id);
+        console.log(book)
+        setBookName(book.title);
+        setContent(book.content || ['']);
+      } catch (error) {
+        console.error('Error fetching book:', error);
+      }
     };
-  }, [typingTimeout]); // Watch for changes in typingTimeout
+
+    fetchBook();
+
+    return () => {
+      clearTimeout(typingTimeout);
+    };
+  }, [id]);
 
   return (
     <div className="book-container">

@@ -21,6 +21,26 @@ export const saveBookPage = async (pageIndex, content) => {
     console.log(response, 'response')
 };
 
+export const getBookById = async (id) => {
+  try {
+    console.log('Reaching backend');
+    const token = localStorage.getItem('authToken');
+    console.log(token);
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    };
+    console.log(config, 'config');
+    const response = await axios.get(`${SERVER}book/${id}`, config);
+    console.log(response, 'response');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching book:', error);
+    throw error; // Propagate the error to the caller
+  }
+};
+
 export const getAllBooks = async () => {
   
   console.log('Reaching backend')
