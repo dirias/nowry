@@ -66,7 +66,7 @@ export default function BookHome() {
                 <div className='booksCreated'>
                     <button className='createBookBtn' onClick={handleCreateBook}>Create new book</button>
                     {books.map(book => (
-                        <div  className='book'key={book.id}  onClick={() => handleBookClick(book)}>
+                        <div  className='book'key={book._id}  onClick={() => handleBookClick(book)}>
                             <div>{book.title}</div>
                             <div>{book.author}</div>
                             <div>{book.isbn}</div>
