@@ -25,13 +25,11 @@ const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
     };
 
     const handleEditorChange = async (newContent, _, __, editor) => {
-        if (activePage !== undefined) {
-            // Update the content of the active page
-            const updatedContent = [...content];
-            updatedContent[activePage] = newContent;
+        const quillInstance = quillRef.current.getEditor();
+        const innerHTML = quillInstance.root.innerHTML;
             
             // Check word limit and truncate content if necessary
-            if (wordLimit) {
+            /*if (wordLimit) {
                 const words = updatedContent[activePage].split(/\s+/);
                 updatedContent[activePage] = words.slice(0, wordLimit).join(' ');
             }
@@ -40,22 +38,22 @@ const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
             if (lineLimit) {
                 const lines = updatedContent[activePage].split('\n');
                 updatedContent[activePage] = lines.slice(0, lineLimit).join('\n');
-            }
+            }*/
 
-            //await saveBookPage(activePage, updatedContent[activePage]);
-            setContent(updatedContent);
+        setContent(innerHTML);
+        console.log(innerHTML);
 
-            // Update the editor's content to reflect the changes
-            //editor.setText(updatedContent[activePage]);
-        }
+        // Update the editor's content to reflect the changes
+        //editor.setText(updatedContent[activePage]);
     };
 
     return (
         <div>
             <ReactQuill
                 ref={quillRef}
+                theme='snow'
                 modules={modules}
-                value={content[activePage] || ''} // Provide a default value if content is undefined
+                value={content[activePage] || ''}
                 onChange={handleEditorChange}
                 placeholder="Start typing here..."
             />

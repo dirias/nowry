@@ -22,7 +22,7 @@ export default function BookHome() {
 
     const handleCreateBook = async () => {
         try {
-            const newBook = await createBook('Book Title', 'Author Name', 'ISBN Number');
+            const newBook = await createBook(`New book ${books.length}`, localStorage.getItem('username'), 'ISBN Number');
             console.log('Book created successfully');
             setBooks(books => [...books, newBook]);
         } catch (error) {
@@ -40,6 +40,7 @@ export default function BookHome() {
     };
 
     const handleBookClick = (book) => {
+        console.log(book)
         navigate(`/book/${book._id}`, { state: { book } });
     };
 
