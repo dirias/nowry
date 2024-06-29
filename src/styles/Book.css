@@ -114,17 +114,15 @@ body {
 }
 
 .book-pagination .book-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
+  background-color: #fff;
+  color: #007bff;
+  border-radius: 150px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .book-pagination .book-button:hover {
-  background-color: #0056b3;
+  color: red;
 }
 
 .content {
@@ -149,4 +147,8 @@ body {
   border: 1px solid #ccc;
   padding: 8px;
   border-radius: 4px;
+}
+
+.ql-editor {
+  height: 1056px;
 }

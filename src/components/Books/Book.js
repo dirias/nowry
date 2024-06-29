@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Editor from './Editor';
 import { useParams } from 'react-router-dom';
+import { CircleArrowLeft, CircleArrowRight, Save } from 'lucide-react';
 import { saveBookPage, getBookById } from '../../api/Books';
 
 export default function Book() {
   const { id } = useParams();
   const [activePage, setActivePage] = useState(0);
+  const [pages, setPages] = useState([]);
   const [content, setContent] = useState(['']);
   const [bookName, setBookName] = useState('Book name');
   const [typingTimeout, setTypingTimeout] = useState(null);
@@ -15,6 +17,12 @@ export default function Book() {
       await savePageContent(activePage);
       setActivePage(activePage - 1);
     }
+  };
+
+  const handleSavePage = async () => {
+    console.log("Content", content)
+    console.log("Active", activePage)
+      await savePageContent(activePage, content);
   };
 
   const handleNextPage = async () => {
@@ -28,7 +36,9 @@ export default function Book() {
     const updatedContent = [...content];
     updatedContent[pageIndex] = content[activePage];
     setContent(updatedContent);
-    await saveBookPage(pageIndex, updatedContent[pageIndex]);
+    console.log('Book id', id)
+    console.log('updatedContent', updatedContent)
+    await saveBookPage(pageIndex, content[0], id); //Change to book_id
   };
 
   const handleEditorChange = (newContent) => {
@@ -36,7 +46,7 @@ export default function Book() {
     updatedContent[activePage] = newContent;
     setContent(updatedContent);
     clearTimeout(typingTimeout);
-    const timeout = setTimeout(() => savePageContent(activePage), 5000);
+    const timeout = setTimeout(() => console.log('Autosave')/*savePageContent(activePage)*/, 5000);
     setTypingTimeout(timeout);
   };
 
@@ -44,7 +54,9 @@ export default function Book() {
     const fetchBook = async () => {
       try {
         const book = await getBookById(id);
-        console.log(book)
+        setPages(book.pages)
+        console.log('Pages', pages)
+        console.log("Books s", book)
         setBookName(book.title);
         setContent(book.content || ['']);
       } catch (error) {
@@ -82,11 +94,12 @@ export default function Book() {
             />
           </div>
           <div className="book-pagination">
+              <Save className="book-button" onClick={ handleSavePage} />
             <button className="book-button" onClick={handlePreviousPage}>
-              Previous Page
+              <CircleArrowLeft/>
             </button>
             <button className="book-button" onClick={handleNextPage}>
-              Next Page
+              <CircleArrowRight />
             </button>
           </div>
         </div>
