@@ -2,10 +2,9 @@ import axios from 'axios';
 
 const SERVER = 'http://localhost:8000/'
 
-export const saveBookPage = async (pageIndex, pageContent, book_id) => {
+export const saveBookPage = async (activePage, book_id) => {
   console.log('Reaching backend');
   const token = localStorage.getItem('authToken');
-  const username = localStorage.getItem('username');
 
   const config = {
     headers: {
@@ -14,10 +13,10 @@ export const saveBookPage = async (pageIndex, pageContent, book_id) => {
   };
 
   const payload = {
-    page_number: pageIndex,
-    book_id: book_id,
-    content: pageContent,
-    word_count: 50
+    page_number: activePage.page_number,
+    book_id: activePage.book_id,
+    content: activePage.content,
+    word_count: activePage.word_count
 
   };
 
@@ -25,13 +24,10 @@ export const saveBookPage = async (pageIndex, pageContent, book_id) => {
   console.log(payload, 'payload');
 
   try {
-    const response = await axios.post(`${SERVER}book_page/save_book_page`, {
-      page_number: pageIndex,
-      book_id: book_id,
-      content: pageContent,
-      word_count: 50
-  }, config);
-    console.log(response, 'response');
+    const response = await axios.post(`${SERVER}book_page/save_book_page`, activePage, config);
+    console.log('New page', response);
+    return response
+    
   } catch (error) {
     console.error('Error saving book page:', error);
   }

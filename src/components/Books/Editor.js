@@ -39,7 +39,7 @@ const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
                 const lines = updatedContent[activePage].split('\n');
                 updatedContent[activePage] = lines.slice(0, lineLimit).join('\n');
             }*/
-
+        activePage.content = innerHTML;
         setContent(innerHTML);
         console.log(innerHTML);
 
@@ -53,7 +53,7 @@ const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
                 ref={quillRef}
                 theme='snow'
                 modules={modules}
-                value={content[activePage] || ''}
+                value={content}
                 onChange={handleEditorChange}
                 placeholder="Start typing here..."
             />
