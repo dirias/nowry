@@ -68,10 +68,12 @@ body {
 
 /* Book Sidebar */
 .book-sidebar {
-  width: 250px;
+  width: 15%;
   background-color: #007bff;
   color: #fff;
   padding: 20px;
+  overflow: auto;
+  height: 1250px;
 }
 
 .book-sidebar h2 {
@@ -150,5 +152,60 @@ body {
 }
 
 .ql-editor {
-  height: 1056px;
+  height: 1056px !important;
+}
+
+.book-sidebar {
+  padding: 20px;
+}
+
+.pages-overview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  gap: 10px;
+}
+
+.page-overview {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 5px;
+  width: 80%;
+  padding-left: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-height: 160px
+}
+.page-overview:hover{
+  cursor: pointer;
+}
+
+.page-number {
+  display:none;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.page-content {
+  margin: 0;
+  margin-top: 10;
+  color: black;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 160px;
+}
+.page-content * {
+  margin: 0;
+  padding: 0;
+  transform: scale(0.2);
+  transform-origin: 0 0;
+}
+
+.page-content p:has(br) {
+  display: none;
+}
+
+.page-add:hover{
+  cursor: pointer;
 }
