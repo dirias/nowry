@@ -53,6 +53,26 @@ export const getBookById = async (id) => {
   }
 };
 
+export const deleteBook = async (id) => {
+  try {
+    console.log('Reaching backend');
+    const token = localStorage.getItem('authToken');
+    console.log(token);
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    };
+    console.log(config, 'config');
+    const response = await axios.delete(`${SERVER}book/delete/${id}`, config);
+    console.log(response, 'response');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching book:', error);
+    throw error; // Propagate the error to the caller
+  }
+};
+
 export const getAllBooks = async () => {
   
   console.log('Reaching backend')

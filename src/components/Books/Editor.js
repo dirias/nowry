@@ -1,7 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { saveBookPage } from '../../api/Books';
 
 const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
     const quillRef = useRef();
@@ -26,25 +25,12 @@ const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
 
     const handleEditorChange = async (newContent, _, __, editor) => {
         const quillInstance = quillRef.current.getEditor();
+        console.log('activePage', activePage)
         const innerHTML = quillInstance.root.innerHTML;
-            
-            // Check word limit and truncate content if necessary
-            /*if (wordLimit) {
-                const words = updatedContent[activePage].split(/\s+/);
-                updatedContent[activePage] = words.slice(0, wordLimit).join(' ');
-            }
-
-            // Check line limit and truncate content if necessary
-            if (lineLimit) {
-                const lines = updatedContent[activePage].split('\n');
-                updatedContent[activePage] = lines.slice(0, lineLimit).join('\n');
-            }*/
         activePage.content = innerHTML;
         setContent(innerHTML);
         console.log(innerHTML);
 
-        // Update the editor's content to reflect the changes
-        //editor.setText(updatedContent[activePage]);
     };
 
     return (

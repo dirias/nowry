@@ -19,7 +19,7 @@ import Landing from './components/HomePage/Landing';
 import Footer from './components/HomePage/Footer';
 import { Login, Register, ResetPassword } from './components/User'; // Import the LoginForm component
 import { Home } from './components/User/Home'; 
-import { Book, BookHome } from './components/Books'; 
+import { EditorHome, BookHome } from './components/Books'; 
 
 const App = () => {
   const [isUserLoggedIn, setUserLoggedIn] = useState(false);
@@ -54,7 +54,7 @@ const App = () => {
         <main>
           <Routes>
             <Route path="/books" element={<BookHome />} />
-            <Route path="/book/:id" element={<Book />} />
+            <Route path="/book/:id" element={<EditorHome />} />
             {isLoggedIn ? (
               <Route path="/" element={<Home />} />
             ) : (

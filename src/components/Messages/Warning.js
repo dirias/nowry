@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SuccessWindow = ({ title, success_msg, onClose }) => {
+const WarningWindow = ({ title, error_msg, onClose, onConfirm }) => {
   return (
     <div className="backdrop">
       <div className="modal-window">
@@ -11,11 +11,15 @@ const SuccessWindow = ({ title, success_msg, onClose }) => {
           </button>
         </div>
         <div className="modal-content">
-          <p className="modal-message">{success_msg}</p>
+          <p className="modal-message">{error_msg}</p>
+          <div className="modal-actions">
+            <button className="confirm-button" onClick={onConfirm}>Yes</button>
+            <button className="cancel-button" onClick={onClose}>No</button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default SuccessWindow;
+export default WarningWindow;

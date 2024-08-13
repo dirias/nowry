@@ -7,13 +7,13 @@ function Home() {
 
   return (
     <div className="content">
-      <view className="side-container">
+      <div className="side-container">
         <h1>Welcome, {username}!</h1>
         <SideMenu />
-      </view>
-      <view className="carousel-container">
+      </div>
+      <div className="carousel-container">
         <NewsCarousel />
-      </view>
+      </div>
     </div>
   );
 }

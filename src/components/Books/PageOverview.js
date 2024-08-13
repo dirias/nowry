@@ -5,10 +5,6 @@ export default function PageOverview({ pages, setActivePage, setContent, handleS
 
   const changeActivaPage = async (page) => {
     setActivePage(page)
-    console.log('setting a page', page)
-    setContent(page.content)
-    console.log('setting a content', page.content)
-
   }
     return (
       <div className="book-sidebar">
@@ -16,7 +12,6 @@ export default function PageOverview({ pages, setActivePage, setContent, handleS
         <div className="pages-overview-container">
           {pages.map((page, index) => (
             <div key={index} className="page-overview" onClick={() => changeActivaPage(page)} >
-              {console.log('pages from overview', page)}
               <div className="page-number">{index + 1}</div>
               <div className="page-content" dangerouslySetInnerHTML={{ __html: page.content || ""}} />
             </div>
