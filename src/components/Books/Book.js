@@ -1,17 +1,17 @@
-import React from 'react';
+import React from 'react'
 
 export default function Book({ book, handleBookClick, handleContextMenu }) {
-  const { cover_color, cover_image, title, author, isbn } = book;
+  const { cover_color, cover_image, title, author, isbn } = book
 
   const bookStyle = {
-    backgroundColor: cover_color || '#4CAF50',  // Fallback to white if no cover_color
+    backgroundColor: cover_color || '#4CAF50', // Fallback to white if no cover_color
     backgroundImage: cover_image ? `url(${cover_image})` : 'none',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     padding: '20px',
     borderRadius: '8px',
-    color: cover_image ? '#fff' : '#fff', // Use white text on image backgrounds for better readability
-  };
+    color: cover_image ? '#fff' : '#fff' // Use white text on image backgrounds for better readability
+  }
 
   return (
     <div
@@ -25,5 +25,5 @@ export default function Book({ book, handleBookClick, handleContextMenu }) {
       <div>{author}</div>
       <div>{isbn}</div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
 @import './variables.css';
 
-.content{
+.content {
   display: flex;
   align-items: center;
   justify-content: space-evenly;
@@ -13,10 +13,10 @@
   font-weight: bold;
 }
 
-.btn-primary{
+.btn-primary {
   background-color: var(--primary-btn-color-1);
 }
 
-.btn-primary:hover{
+.btn-primary:hover {
   background-color: var(--hover);
 }

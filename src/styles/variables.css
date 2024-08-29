@@ -1,9 +1,7 @@
 :root {
-    --primary-color: #096871;
-    --background-color: #fff;
-    --font-color-1: #fff;
-    --primary-btn-color-1: #fbdb6b;
-    --hover:#FACF39;
-
-    
-  }
+  --primary-color: #096871;
+  --background-color: #fff;
+  --font-color-1: #fff;
+  --primary-btn-color-1: #fbdb6b;
+  --hover: #facf39;
+}

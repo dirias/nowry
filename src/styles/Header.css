@@ -9,36 +9,36 @@
 }
 
 .logo-img {
-    max-width: 250px; /* Adjust the width to your desired size */
-    height: auto;
-  }
+  max-width: 250px; /* Adjust the width to your desired size */
+  height: auto;
+}
 
-  .nav-item span {
-    background-color: transparent;
-    cursor: pointer;
-  }
-  
-  .link {
-    list-style: none;
-    color: var(--font-color-1);
-    text-decoration: none;
-  }
-  .nav-link:hover {
-    color: var(--hover);
-  }
+.nav-item span {
+  background-color: transparent;
+  cursor: pointer;
+}
 
-  .nav {
-    text-align: right; /* Align the navigation items to the right */
-  }
-  
-  .nav-list {
-    list-style: none;
-    display: flex;
-    gap: 20px;
-    justify-content: flex-end; /* Align the list items to the right */
-  }
-  
-  .nav-item {
-    cursor: pointer;
-    font-weight: bold;
-  }
+.link {
+  list-style: none;
+  color: var(--font-color-1);
+  text-decoration: none;
+}
+.nav-link:hover {
+  color: var(--hover);
+}
+
+.nav {
+  text-align: right; /* Align the navigation items to the right */
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end; /* Align the list items to the right */
+}
+
+.nav-item {
+  cursor: pointer;
+  font-weight: bold;
+}
