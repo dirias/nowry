@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { SketchPicker } from 'react-color'
 import Book from './Book'
 import { editBook } from '../../api/Books'
+import { SuccessWindow } from '../Messages'
 
-const BookEditor = ({ book, onCancel }) => {
+const BookEditor = ({ book, refreshBooks, onCancel }) => {
   console.log(book)
   const [title, setTitle] = useState(book.title)
   const [author] = useState(book.author)
@@ -29,6 +30,8 @@ const BookEditor = ({ book, onCancel }) => {
     try {
       await editBook(book._id, updatedData)
       console.log('Book updated successfully')
+      refreshBooks()
+      onCancel()
     } catch (error) {
       console.error('Error updating book:', error)
     }

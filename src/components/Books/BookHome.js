@@ -43,6 +43,10 @@ export default function BookHome() {
     }
   }
 
+  const refreshBooks = () => {
+    fetchBooks()
+  }
+
   const handleSearch = (e) => {
     const term = e.target.value
     setSearchTerm(term)
@@ -164,7 +168,7 @@ export default function BookHome() {
       {showSuccess && <SuccessWindow title='Success' success_msg='Book was successfully deleted.' onClose={handleSuccessClose} />}
       {showEditor && bookToEdit && (
         <div className='modal-overlay'>
-          <BookEditor book={bookToEdit} onCancel={handleEditorClose} />
+          <BookEditor book={bookToEdit} refreshBooks={refreshBooks} onCancel={handleEditorClose} />
         </div>
       )}
     </section>
