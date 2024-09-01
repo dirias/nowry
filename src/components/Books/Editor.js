@@ -1,9 +1,16 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 
-const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
+const Editor = ({ activePage, content, setContent }) => {
   const quillRef = useRef()
+
+  useEffect(() => {
+    // Ensure the content is set correctly when activePage changes
+    if (activePage && activePage.content) {
+      setContent(activePage.content)
+    }
+  }, [activePage, setContent])
 
   const modules = {
     toolbar: [
@@ -23,13 +30,21 @@ const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
     ]
   }
 
-  const handleEditorChange = async (newContent, _, __, editor) => {
+  const handleEditorChange = async (newContent) => {
     const quillInstance = quillRef.current.getEditor()
-    console.log('activePage', activePage)
     const innerHTML = quillInstance.root.innerHTML
+
+    // Update activePage content without directly mutating state
+    const updatedPage = {
+      ...activePage,
+      content: innerHTML
+    }
     activePage.content = innerHTML
-    setContent(innerHTML)
-    console.log(innerHTML)
+
+    setContent(updatedPage.content)
+
+    console.log('Updated innerHTML:', innerHTML)
+    console.log('Updated activePage:', updatedPage)
   }
 
   return (
@@ -38,7 +53,7 @@ const Editor = ({ activePage, content, setContent, wordLimit, lineLimit }) => {
         ref={quillRef}
         theme='snow'
         modules={modules}
-        value={content}
+        value={content || ''}
         onChange={handleEditorChange}
         placeholder='Start typing here...'
       />

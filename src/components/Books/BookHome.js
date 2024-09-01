@@ -137,6 +137,7 @@ export default function BookHome() {
             </button>
           )}
           {books.map((book) => (
+            // eslint-disable-next-line react/jsx-key
             <Book book={book} handleBookClick={handleBookClick} handleContextMenu={handleContextMenu} />
           ))}
         </div>
