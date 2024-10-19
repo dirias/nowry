@@ -114,6 +114,7 @@ body {
 /* Book Sidebar */
 .book-sidebar {
   width: 15%; /* Adjusted for better spacing */
+  min-width: 15%;
   background-color: #2c3e50; /* Darker shade for better focus */
   color: #ecf0f1; /* Light text for contrast */
   padding: 20px;
@@ -407,7 +408,6 @@ body {
 .display-row {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
 }
 
 .display-column {

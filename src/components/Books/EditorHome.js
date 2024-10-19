@@ -13,22 +13,22 @@ export default function EditorHome() {
   const [activePage, setActivePage] = useState({})
   const [pages, setPages] = useState(book.pages)
   const [content, setContent] = useState('')
-  const [bookName, setBookName] = useState(book.title) // Initialize bookName state with the book title
+  const [bookName, setBookName] = useState(book.title)
 
   const handleSavePage = async (page) => {
     if (!page) {
       page = {
         book_id: id,
         page_number: pages.length + 1,
-        content: '<p></p>' // issue not here
+        content: '<p></p>'
       }
       console.log('Page to add:', page)
       const newPage = await saveBookPage(page)
-      setPages((prevPages) => [...prevPages, newPage]) // Add the new page to the list
-      setActivePage(newPage) // Set the new page as active
-      setContent(newPage.content) // Update content state
+      setPages((prevPages) => [...prevPages, newPage])
+      setActivePage(newPage)
+      setContent(newPage.content)
     } else {
-      page.content = content // Update page content before saving
+      page.content = content
       console.log('Updating page:', page)
       await saveBookPage(page)
     }
@@ -39,9 +39,8 @@ export default function EditorHome() {
       try {
         const book = await getBookById(id)
         setPages(book.pages)
-
         setActivePage(book.pages[0])
-        setContent(book.pages[0]?.content || '') // Initialize content with the first page's content
+        setContent(book.pages[0]?.content || '')
       } catch (error) {
         console.error('Error fetching book:', error)
       }
@@ -56,12 +55,7 @@ export default function EditorHome() {
       <div className='book-main'>
         <div className='book-header'>
           <div className='book-title'>
-            <input
-              type='text'
-              className='book-title-input'
-              value={bookName} // Use bookName state
-              onChange={(e) => setBookName(e.target.value)} // Update bookName state on change
-            />
+            <input type='text' className='book-title-input' value={bookName} onChange={(e) => setBookName(e.target.value)} />
           </div>
           <div className='book-pagination'>
             <Save className='book-button' onClick={() => handleSavePage(activePage)} />
