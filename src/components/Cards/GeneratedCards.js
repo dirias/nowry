@@ -1,6 +1,6 @@
 import React from 'react'
 
-const StudyCard = ({ cards, onCancel }) => {
+const GeneratedCards = ({ cards, onCancel }) => {
   return (
     <div className='backdrop'>
       <div className='modal-window' style={{ boxSizing: 'unset' }}>
@@ -30,4 +30,4 @@ const StudyCard = ({ cards, onCancel }) => {
   )
 }
 
-export default StudyCard
+export default GeneratedCards

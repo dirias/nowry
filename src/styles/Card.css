@@ -71,3 +71,23 @@
     width: 100%;
   }
 }
+
+.lastAddedCards {
+  overflow-x: auto;
+  width: 100%;           /* ensures container respects screen width */
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+
+.lastAddedCards .MuiStack-root {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  min-width: max-content;  /* ensures child stack is wider than container */
+  padding: 10px;
+}
+
+.lastAddedCardItem {
+  flex: 0 0 280px;     /* fixed width, no shrinking */
+  max-width: 280px;
+}

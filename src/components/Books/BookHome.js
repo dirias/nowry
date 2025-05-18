@@ -3,19 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { getAllBooks, createBook, deleteBook } from '../../api/Books'
 import { WarningWindow, SuccessWindow } from '../Messages'
 import BookEditor from './BookEditor'
-import Book from './Book' // Import the BookEditor component
+import Book from './Book'
+import { Box, Typography, Input, Button, Sheet, Stack, IconButton, Menu, MenuItem, Skeleton } from '@mui/joy'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 export default function BookHome() {
   const [books, setBooks] = useState([])
   const [allBooks, setAllBooks] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, book: null })
+  const [contextBook, setContextBook] = useState(null)
+  const [menuAnchor, setMenuAnchor] = useState(null)
   const [showWarning, setShowWarning] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [bookToDelete, setBookToDelete] = useState(null)
-
   const [showEditor, setShowEditor] = useState(false)
   const [bookToEdit, setBookToEdit] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const navigate = useNavigate()
 
@@ -24,8 +27,10 @@ export default function BookHome() {
       const fetchedBooks = await getAllBooks()
       setBooks(fetchedBooks)
       setAllBooks(fetchedBooks)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching books:', error)
+      setLoading(false)
     }
   }
 
@@ -36,23 +41,20 @@ export default function BookHome() {
   const handleCreateBook = async () => {
     try {
       const newBook = await createBook(`New book ${books.length}`, localStorage.getItem('username'), 'ISBN Number')
-      setBooks((prevBooks) => [...prevBooks, newBook])
-      setAllBooks((prevBooks) => [...prevBooks, newBook])
+      const updatedBooks = [...books, newBook]
+      setBooks(updatedBooks)
+      setAllBooks(updatedBooks)
     } catch (error) {
       console.error('Error creating book:', error)
     }
-  }
-
-  const refreshBooks = () => {
-    fetchBooks()
   }
 
   const handleSearch = (e) => {
     const term = e.target.value
     setSearchTerm(term)
     if (term) {
-      const filteredBooks = allBooks.filter((book) => book.title.toLowerCase().includes(term.toLowerCase()))
-      setBooks(filteredBooks)
+      const filtered = allBooks.filter((b) => b.title.toLowerCase().includes(term.toLowerCase()))
+      setBooks(filtered)
     } else {
       setBooks(allBooks)
     }
@@ -62,36 +64,32 @@ export default function BookHome() {
     navigate(`/book/${book._id}`, { state: { book } })
   }
 
-  const handleContextMenu = (event, book) => {
-    event.preventDefault()
-    setContextMenu({
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      book
-    })
+  const openMenu = (event, book) => {
+    setContextBook(book)
+    setMenuAnchor(event.currentTarget)
   }
 
-  const handleClickOutside = () => {
-    setContextMenu({ visible: false, x: 0, y: 0, book: null })
+  const closeMenu = () => {
+    setMenuAnchor(null)
   }
 
-  const handleMenuClick = (action) => {
-    setContextMenu({ visible: false, x: 0, y: 0, book: null })
-    if (action === 'delete') {
-      setBookToDelete(contextMenu.book)
-      setShowWarning(true)
-    } else if (action === 'edit') {
-      setBookToEdit(contextMenu.book)
+  const handleMenuAction = (action) => {
+    closeMenu()
+    if (action === 'edit') {
+      setBookToEdit(contextBook)
       setShowEditor(true)
+    } else if (action === 'delete') {
+      setBookToDelete(contextBook)
+      setShowWarning(true)
     }
   }
 
   const handleDeleteBook = async () => {
     try {
       await deleteBook(bookToDelete._id)
-      setBooks((prevBooks) => prevBooks.filter((book) => book._id !== bookToDelete._id))
-      setAllBooks((prevBooks) => prevBooks.filter((book) => book._id !== bookToDelete._id))
+      const updated = books.filter((b) => b._id !== bookToDelete._id)
+      setBooks(updated)
+      setAllBooks(updated)
       setShowWarning(false)
       setShowSuccess(true)
     } catch (error) {
@@ -99,79 +97,74 @@ export default function BookHome() {
     }
   }
 
-  const handleWarningClose = () => {
-    setShowWarning(false)
-    setBookToDelete(null)
-  }
-
-  const handleSuccessClose = () => {
-    setShowSuccess(false)
-  }
-
-  const handleEditorClose = () => {
-    setShowEditor(false)
-    setBookToEdit(null)
-  }
-
-  const handleSaveChanges = (updatedBookData) => {
-    setBooks((prevBooks) => prevBooks.map((book) => (book._id === bookToEdit._id ? { ...book, ...updatedBookData } : book)))
-    setAllBooks((prevBooks) => prevBooks.map((book) => (book._id === bookToEdit._id ? { ...book, ...updatedBookData } : book)))
-    handleEditorClose()
-  }
-
   return (
-    <section className='booksHome' onClick={handleClickOutside}>
-      <div className='searchSection'>
-        <input type='text' placeholder='Search by title' value={searchTerm} onChange={handleSearch} />
-      </div>
+    <Box sx={{ p: 4 }}>
+      <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center' mb={3}>
+        <Typography level='h3'>Tus libros</Typography>
+        <Button onClick={handleCreateBook}>Crear nuevo libro</Button>
+      </Stack>
 
-      {searchTerm && books.length === 0 ? (
-        <div className='noBooksMsg'>
-          <p>No books match your search.</p>
-        </div>
+      {!loading && allBooks.length > 0 && (
+        <Input placeholder='Buscar por título' value={searchTerm} onChange={handleSearch} fullWidth sx={{ mb: 3 }} />
+      )}
+
+      {!loading && allBooks.length === 0 ? (
+        <Typography color='neutral'>Aún no has creado ningún libro.</Typography>
+      ) : searchTerm && books.length === 0 && !loading ? (
+        <Typography>No hay libros que coincidan con la búsqueda.</Typography>
       ) : (
-        <div className='booksCreated'>
-          {!searchTerm && (
-            <button className='createBookBtn' onClick={handleCreateBook}>
-              Create new book
-            </button>
-          )}
-          {books.map((book) => (
-            // eslint-disable-next-line react/jsx-key
-            <Book book={book} handleBookClick={handleBookClick} handleContextMenu={handleContextMenu} />
+        <Stack direction='row' spacing={2} flexWrap='wrap'>
+          {(loading ? Array.from({ length: 4 }) : books).map((book, idx) => (
+            <Sheet
+              key={idx}
+              variant='outlined'
+              sx={{
+                p: 2,
+                borderRadius: 'md',
+                minWidth: 200,
+                position: 'relative',
+                transition: '0.2s ease-in-out',
+                '&:hover': { boxShadow: 'md', transform: 'translateY(-4px)' }
+              }}
+            >
+              {loading ? (
+                <Skeleton variant='rectangular' height={100} sx={{ borderRadius: 'sm', mb: 1 }} />
+              ) : (
+                <>
+                  <IconButton size='sm' sx={{ position: 'absolute', top: 8, right: 8 }} onClick={(e) => openMenu(e, book)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Book book={book} handleBookClick={handleBookClick} />
+                </>
+              )}
+            </Sheet>
           ))}
-        </div>
+        </Stack>
       )}
-      {contextMenu.visible && (
-        <div
-          className='contextMenu'
-          style={{
-            top: contextMenu.y,
-            left: contextMenu.x,
-            position: 'absolute',
-            backgroundColor: 'white',
-            border: '1px solid #ccc',
-            zIndex: 1000
-          }}
-        >
-          <div onClick={() => handleMenuClick('edit')}>Edit</div>
-          <div onClick={() => handleMenuClick('delete')}>Delete</div>
-        </div>
-      )}
+
+      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}>
+        <MenuItem onClick={() => handleMenuAction('edit')}>Editar</MenuItem>
+        <MenuItem onClick={() => handleMenuAction('delete')}>Eliminar</MenuItem>
+      </Menu>
+
       {showWarning && (
         <WarningWindow
-          title='Confirm Deletion'
-          error_msg='Do you really want to delete this book?\nThis operation will delete the book along with its pages.'
-          onClose={handleWarningClose}
+          title='Confirmar eliminación'
+          error_msg='¿Deseas eliminar este libro y todas sus páginas?'
+          onClose={() => setShowWarning(false)}
           onConfirm={handleDeleteBook}
         />
       )}
-      {showSuccess && <SuccessWindow title='Success' success_msg='Book was successfully deleted.' onClose={handleSuccessClose} />}
+
+      {showSuccess && (
+        <SuccessWindow title='Éxito' success_msg='El libro fue eliminado exitosamente.' onClose={() => setShowSuccess(false)} />
+      )}
+
       {showEditor && bookToEdit && (
         <div className='modal-overlay'>
-          <BookEditor book={bookToEdit} refreshBooks={refreshBooks} onCancel={handleEditorClose} />
+          <BookEditor book={bookToEdit} refreshBooks={fetchBooks} onCancel={() => setShowEditor(false)} />
         </div>
       )}
-    </section>
+    </Box>
   )
 }
