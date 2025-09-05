@@ -84,16 +84,14 @@ export default function EditorHome() {
           </Stack>
         </Sheet>
 
-        <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
-          <Editor
-            activePage={activePage}
-            setActivePage={setActivePage}
-            content={content}
-            setContent={setContent}
-            wordLimit={250}
-            lineLimit={10}
-          />
-        </Box>
+        <Editor
+          activePage={activePage}
+          setActivePage={setActivePage}
+          content={content}
+          setContent={setContent}
+          wordLimit={250}
+          lineLimit={10}
+        />
       </Box>
     </Box>
   )

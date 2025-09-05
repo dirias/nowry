@@ -14,6 +14,7 @@ import './styles/Home.css'
 import './styles/Book.css'
 import './styles/TextMenu.css'
 import './styles/Card.css'
+import './styles/LexicalEditor.css'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'

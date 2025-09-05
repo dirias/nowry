@@ -1,0 +1,122 @@
+/* ====== Editor Base Styles ====== */
+.editor-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  font-family: 'Segoe UI', 'Helvetica', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #2e2e2e;
+}
+
+.editor-content {
+  outline: none;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--joy-palette-text-primary);
+  background: transparent;
+  min-height: 600px;
+  padding: 1rem;
+}
+
+.editor-placeholder {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: var(--joy-palette-neutral-400);
+  pointer-events: none;
+}
+
+/* ====== Paragraph ====== */
+.editor-paragraph {
+  margin: 0 0 1rem 0;
+}
+
+/* ====== Text Formatting ====== */
+.editor-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.editor-text.bold {
+  font-weight: bold;
+}
+
+.editor-text.italic {
+  font-style: italic;
+}
+
+.editor-text.underline {
+  text-decoration: underline;
+}
+
+/* ====== Headings ====== */
+.editor-heading-h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 1.2em 0 0.5em;
+}
+
+.editor-heading-h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 1em 0 0.4em;
+}
+
+.editor-heading-h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0.8em 0 0.4em;
+}
+
+/* ====== Lists ====== */
+ul.editor-list-ul {
+  padding-left: 1.5em;
+  list-style-type: disc;
+}
+
+ol.editor-list-ol {
+  padding-left: 1.5em;
+  list-style-type: decimal;
+}
+
+.editor-list-item {
+  margin-bottom: 0.5em;
+}
+
+/* ====== Quotes ====== */
+.editor-quote {
+  font-style: italic;
+  color: #555;
+  border-left: 3px solid #ccc;
+  padding-left: 1em;
+  margin: 1em 0;
+}
+
+/* ====== Inline Code ====== */
+.editor-code {
+  background-color: #f5f5f5;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* ====== Inline Styles Fix ====== */
+.editor-content span[style] {
+  white-space: pre-wrap;
+}
+
+.editor-content span[style*='color'] {
+  color: inherit;
+}
+
+.editor-content span[style*='background-color'] {
+  background-color: inherit;
+}
+
+/* ====== Layout Fix ====== */
+.MuiCard-root {
+  height: 100%;
+}
