@@ -1,1 +1,2 @@
-export { default as StudyCard } from './Card'
+export { default as GeneratedCards } from './GeneratedCards'
+export { default as CardHome } from './CardHome'

@@ -1,13 +1,18 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Error, Success } from '../Messages'
-import axios from 'axios' // Import axios for making API requests
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { Box, Typography, Input, Button, Divider, Sheet, useColorScheme, Link } from '@mui/joy'
+import { Error } from '../Messages'
+import axios from 'axios'
+import Facebook from '@mui/icons-material/FacebookOutlined'
+import Google from '@mui/icons-material/Google'
 
 const Login = () => {
   const [email, setEmail] = useState('')
-  const [errors, setErrors] = useState('')
   const [password, setPassword] = useState('')
+  const [errors, setErrors] = useState('')
   const navigate = useNavigate()
+  const { mode } = useColorScheme()
+  const isDark = mode === 'dark'
 
   const handleLogin = async () => {
     try {
@@ -15,67 +20,92 @@ const Login = () => {
       formData.append('email', email)
       formData.append('password', password)
       const response = await axios.post('http://localhost:8000/session/login', formData)
-      console.log(response)
 
-      // Check if the login was successful
       if (response.status === 200) {
-        // Store the token in local storage
         localStorage.setItem('authToken', response.data.token)
         localStorage.setItem('username', response.data.username)
-
         navigate(`/`)
         window.location.reload()
       } else {
-        // Handle login errors
-        console.error('Login failed:', response.data.detail)
         setErrors(response.data.detail)
       }
     } catch (error) {
-      // Handle network errors or other issues
-      console.log(error)
-      setErrors(error.response.data.detail)
-      console.error('Login failed:', error.response.data.detail)
+      setErrors(error.response?.data?.detail || 'Login failed')
     }
   }
 
-  const close = () => {
-    setErrors(false)
-  }
   return (
-    <div className='content'>
-      <div className='auth-container'>
-        {errors ? (
-          <Error title={'Unable to access to the account'} error_msg={errors} onClose={close} />
-        ) : (
-          <div>
-            <h2>Login</h2>
-            <form>
-              <input type='email' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-              <input type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button type='button' onClick={handleLogin} className='btn-primary'>
-                Login
-              </button>
-              <div className='or-divider'>
-                <span>OR</span>
-              </div>
-              <button className='google-login' type='button'>
-                <i className='fab fa-google'></i> Login with Google
-              </button>
-              <button className='facebook-login' type='button'>
-                <i className='fab fa-facebook'></i> Login with Facebook
-              </button>
-              <p>
-                Don't have an account? <Link to='/register'>Register here</Link>
-              </p>
-            </form>
-          </div>
-        )}
-        <div className='forgot-password-section'>
-          <p>Forgot your password?</p>
-          <Link to='/resetPassword'>Reset it here</Link>
-        </div>
-      </div>
-    </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: isDark ? 'neutral.900' : 'background.body',
+        px: 2
+      }}
+    >
+      <Sheet
+        variant='outlined'
+        sx={{
+          p: 4,
+          borderRadius: 'md',
+          width: '100%',
+          maxWidth: 400,
+          boxShadow: 'lg',
+          backgroundColor: isDark ? 'neutral.800' : 'background.surface'
+        }}
+      >
+        <Typography level='h4' textAlign='center' fontWeight='lg' mb={2}>
+          Login to Nowry
+        </Typography>
+
+        {errors && <Error title='Login Failed' error_msg={errors} onClose={() => setErrors('')} />}
+
+        <Input type='email' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} fullWidth sx={{ mb: 2 }} />
+
+        <Input
+          type='password'
+          placeholder='Password'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+
+        <Button variant='solid' color='primary' fullWidth onClick={handleLogin}>
+          Login
+        </Button>
+
+        <Divider sx={{ my: 2 }}>OR</Divider>
+
+        <Button variant='outlined' color='neutral' fullWidth startDecorator={<Google sx={{ color: 'text.icon' }} />}>
+          Login with Google
+        </Button>
+
+        <Button
+          variant='outlined'
+          color='neutral'
+          fullWidth
+          startDecorator={<Facebook sx={{ color: '#1877F2' }} />} // Optional FB blue
+        >
+          Login with Facebook
+        </Button>
+
+        <Typography level='body-sm' textAlign='center'>
+          Don&apos;t have an account?{' '}
+          <Link component={RouterLink} to='/register'>
+            Register here
+          </Link>
+        </Typography>
+
+        <Typography level='body-sm' textAlign='center' mt={1}>
+          <Link component={RouterLink} to='/resetPassword'>
+            Forgot your password?
+          </Link>
+        </Typography>
+      </Sheet>
+    </Box>
   )
 }
 

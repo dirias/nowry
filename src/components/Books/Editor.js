@@ -1,82 +1,125 @@
 import React, { useRef, useEffect, useState } from 'react'
-import ReactQuill from 'react-quill'
-import 'react-quill/dist/quill.snow.css'
+import { Box, Typography, useTheme } from '@mui/joy'
+import { LexicalComposer } from '@lexical/react/LexicalComposer'
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
+import { ContentEditable } from '@lexical/react/LexicalContentEditable'
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
+import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin'
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
+import { $getRoot } from 'lexical'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+
+// Plugins and nodes
+import RegisterListPlugin from '../../plugin/RegisterListPlugin'
+import RegisterHorizontalRulePlugin from '../../plugin/RegisterHorizontalRulePlugin'
+import TablePlugin from '../Editor/plugins/TablePlugin'
+import SlashCommandPlugin from '../Editor/SlashCommandPlugin'
+import WordCountPlugin from '../Editor/WordCountPlugin'
+import { HorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
+import { ImageNode } from '../../nodes/ImageNode'
+import { HeadingNode, QuoteNode } from '@lexical/rich-text'
+import { ListNode, ListItemNode } from '@lexical/list'
+import { CodeNode } from '@lexical/code'
+import { AutoLinkNode, LinkNode } from '@lexical/link'
+
+// UI Components
+import Toolbar from './Toolbar'
 import TextMenu from '../Menu/TextMenu'
-import StudyCard from '../Cards/Card'
+import StudyCard from '../Cards/GeneratedCards'
 import { generateCard } from '../../api/StudyCards'
 
-const Editor = ({ activePage, content, setContent }) => {
-  const quillRef = useRef()
+const EditorTheme = {
+  ltr: 'ltr',
+  rtl: 'rtl',
+  paragraph: 'editor-paragraph',
+  quote: 'editor-quote',
+  heading: {
+    h1: 'editor-heading-h1',
+    h2: 'editor-heading-h2'
+  },
+  list: {
+    nested: { listitem: 'editor-nested-listitem' },
+    ol: 'editor-list-ol',
+    ul: 'editor-list-ul',
+    listitem: 'editor-list-item'
+  },
+  code: 'editor-code',
+  image: 'editor-image',
+  link: 'editor-link',
+  text: {
+    bold: 'editor-textBold',
+    italic: 'editor-textItalic',
+    underline: 'editor-textUnderline',
+    code: 'editor-textCode'
+  }
+}
+
+function EditorContent({ setContent }) {
+  const [editor] = useLexicalComposerContext()
+  return (
+    <OnChangePlugin
+      onChange={(editorState) => {
+        editorState.read(() => {
+          const html = $generateHtmlFromNodes(editor, null)
+          setContent(html)
+        })
+      }}
+    />
+  )
+}
+
+export default function Editor({ activePage, content, setContent }) {
+  const theme = useTheme()
   const menuRef = useRef()
+  const containerRef = useRef()
   const [showMenu, setShowMenu] = useState(false)
   const [showStudyCard, setShowStudyCard] = useState(false)
-  const [selectedText, setSelectedText] = useState(false)
-  const [cards, setCards] = useState([
-    {
-      title: 'What is Quantum Physics Basics?',
-      content: 'Quantum physics is the study of matter and energy at the most fundamental level.'
-    },
-    { title: 'What is Physics?', content: 'Physics is the science that studies the universe.' }
-  ])
+  const [selectedText, setSelectedText] = useState('')
+  const [cards, setCards] = useState([])
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 })
 
+  const editorConfig = {
+    namespace: 'NowryEditor',
+    theme: EditorTheme,
+    onError: (e) => console.error('Lexical error:', e),
+    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, AutoLinkNode, LinkNode, HorizontalRuleNode, ImageNode],
+    editorState: (editor) => {
+      const parser = new DOMParser()
+      const dom = parser.parseFromString(content || '<p></p>', 'text/html')
+      const nodes = $generateNodesFromDOM(editor, dom)
+      editor.update(() => {
+        const root = $getRoot()
+        root.clear()
+        root.append(...nodes)
+      })
+    }
+  }
+
   useEffect(() => {
-    if (activePage && activePage.content) {
+    // When the active page changes, you can sync the external state if needed
+    if (activePage?.content != null) {
       setContent(activePage.content)
     }
   }, [activePage, setContent])
 
   useEffect(() => {
+    // Hide context menu when clicking outside
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowMenu(false)
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const modules = {
-    toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],
-      ['blockquote', 'code-block'],
-      [{ header: 1 }, { header: 2 }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      [{ script: 'sub' }, { script: 'super' }],
-      [{ indent: '-1' }, { indent: '+1' }],
-      [{ direction: 'rtl' }],
-      [{ size: ['small', false, 'large', 'huge'] }],
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [{ color: [] }, { background: [] }],
-      [{ font: [] }],
-      [{ align: [] }],
-      ['clean']
-    ]
-  }
-
-  const handleEditorChange = (newContent) => {
-    const quillInstance = quillRef.current.getEditor()
-    const innerHTML = quillInstance.root.innerHTML
-
-    const updatedPage = {
-      ...activePage,
-      content: innerHTML
-    }
-
-    setContent(updatedPage.content)
-  }
-
   const handleRightClick = (event) => {
-    event.preventDefault() // Prevent the default right-click context menu
+    event.preventDefault()
     const selection = window.getSelection()
-    setSelectedText(selection.toString())
-    console.log('Right click detected, selection:', selection.toString())
-    if (selection.toString().length > 0) {
-      console.log('Setting menu position to:', event.pageX, event.pageY)
+    const text = selection?.toString()
+    if (text?.trim()) {
+      setSelectedText(text)
       setMenuPosition({ x: event.pageX, y: event.pageY })
       setShowMenu(true)
     } else {
@@ -85,47 +128,138 @@ const Editor = ({ activePage, content, setContent }) => {
   }
 
   const handleOptionClick = async (option) => {
-    console.log(`Option selected: ${option}`)
     setShowMenu(false)
-    if (option === 'create_study_card') {
-      console.log('selectedText', selectedText)
-      if (selectedText) {
-        try {
-          // Here, you call the createBook function
-          const response = await generateCard(selectedText, 2)
-          console.log('Study card generated:', response)
-          setCards(response)
-          setShowStudyCard(true)
-        } catch (error) {
-          console.error('Error generating study card:', error)
-        }
-      } else {
-        console.log('No text selected.')
+    if (option === 'create_study_card' && selectedText) {
+      try {
+        const response = await generateCard(selectedText, 2)
+        setCards(response)
+        setShowStudyCard(true)
+      } catch (error) {
+        console.error('Error generating study card:', error)
       }
-      setShowStudyCard(true) // code here
     }
   }
 
   return (
-    <div onContextMenu={handleRightClick}>
-      <ReactQuill
-        ref={quillRef}
-        theme='snow'
-        modules={modules}
-        value={content || ''}
-        onChange={handleEditorChange}
-        placeholder='Start typing here...'
-      />
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+        bgcolor: 'background.level1',
+        overflow: 'auto',
+        py: 3
+      }}
+    >
+      <LexicalComposer key={activePage?._id || 'editor'} initialConfig={editorConfig}>
+        {/* 🧭 Floating toolbar inside LexicalComposer */}
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 12,
+            zIndex: 10,
+            bgcolor: 'background.body',
+            boxShadow: 'sm',
+            borderRadius: 'lg',
+            px: 2,
+            py: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 1,
+            mb: 3,
+            width: 'auto',
+            minWidth: 'fit-content'
+          }}
+        >
+          <div className='editor-toolbar'>
+            <Toolbar /> {/* ✅ now inside Lexical context */}
+          </div>
+        </Box>
+
+        {/* 📄 Main “sheet” area */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+            pb: 6
+          }}
+          onContextMenu={handleRightClick}
+          ref={containerRef}
+        >
+          <Box
+            sx={{
+              position: 'relative',
+              width: '21cm',
+              minHeight: '29.7cm',
+              bgcolor: '#fff',
+              borderRadius: 'md',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              border: '1px solid #ddd',
+              px: '2.5cm',
+              py: '2.5cm',
+              overflow: 'hidden'
+            }}
+          >
+            <RichTextPlugin
+              contentEditable={<ContentEditable className='editor-content' />}
+              placeholder={<div className='editor-placeholder'>Start typing here...</div>}
+            />
+          </Box>
+        </Box>
+
+        {/* Plugins */}
+        <EditorContent setContent={setContent} />
+        <HistoryPlugin />
+        <AutoFocusPlugin />
+        <RegisterListPlugin />
+        <RegisterHorizontalRulePlugin />
+        <SlashCommandPlugin />
+        <TablePlugin />
+        <WordCountPlugin />
+      </LexicalComposer>
+
+      {/* 📊 Word count footer */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 12,
+          right: 24,
+          px: 2,
+          py: 1,
+          fontSize: 'sm',
+          color: 'text.secondary',
+          bgcolor: 'background.level2',
+          borderRadius: 'md',
+          boxShadow: 'sm'
+        }}
+      >
+        Words: 0 | Characters: 0
+      </Box>
+
+      {/* Context menu + Study card */}
       {showMenu && (
-        <TextMenu
-          ref={menuRef} // Pass the menuRef to TextMenu
-          onOptionClick={handleOptionClick}
-          style={{ top: menuPosition.y, left: menuPosition.x }}
-        />
+        <Box
+          ref={menuRef}
+          sx={{
+            position: 'absolute',
+            top: menuPosition.y,
+            left: menuPosition.x,
+            zIndex: 1000,
+            bgcolor: 'white',
+            boxShadow: 'md',
+            borderRadius: 'sm'
+          }}
+        >
+          <TextMenu onOptionClick={handleOptionClick} />
+        </Box>
       )}
+
       {showStudyCard && <StudyCard cards={cards} onCancel={() => setShowStudyCard(false)} />}
-    </div>
+    </Box>
   )
 }
-
-export default Editor
