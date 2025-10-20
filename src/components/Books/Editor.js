@@ -7,21 +7,27 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin'
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
-import RegisterListPlugin from '../../plugin/RegisterListPlugin'
 import { $getRoot } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 
-import Toolbar from './Toolbar'
-import TextMenu from '../Menu/TextMenu'
-import StudyCard from '../Cards/GeneratedCards'
-import { generateCard } from '../../api/StudyCards'
-
+// Plugins and nodes
+import RegisterListPlugin from '../../plugin/RegisterListPlugin'
+import RegisterHorizontalRulePlugin from '../../plugin/RegisterHorizontalRulePlugin'
+import TablePlugin from '../Editor/plugins/TablePlugin'
+import SlashCommandPlugin from '../Editor/SlashCommandPlugin'
+import WordCountPlugin from '../Editor/WordCountPlugin'
 import { HorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
 import { ImageNode } from '../../nodes/ImageNode'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
+
+// UI Components
+import Toolbar from './Toolbar'
+import TextMenu from '../Menu/TextMenu'
+import StudyCard from '../Cards/GeneratedCards'
+import { generateCard } from '../../api/StudyCards'
 
 const EditorTheme = {
   ltr: 'ltr',
@@ -30,8 +36,7 @@ const EditorTheme = {
   quote: 'editor-quote',
   heading: {
     h1: 'editor-heading-h1',
-    h2: 'editor-heading-h2',
-    h3: 'editor-heading-h3'
+    h2: 'editor-heading-h2'
   },
   list: {
     nested: { listitem: 'editor-nested-listitem' },
@@ -52,7 +57,6 @@ const EditorTheme = {
 
 function EditorContent({ setContent }) {
   const [editor] = useLexicalComposerContext()
-
   return (
     <OnChangePlugin
       onChange={(editorState) => {
@@ -65,7 +69,7 @@ function EditorContent({ setContent }) {
   )
 }
 
-const Editor = ({ activePage, content, setContent }) => {
+export default function Editor({ activePage, content, setContent }) {
   const theme = useTheme()
   const menuRef = useRef()
   const containerRef = useRef()
@@ -93,12 +97,14 @@ const Editor = ({ activePage, content, setContent }) => {
   }
 
   useEffect(() => {
-    if (activePage?.content) {
+    // When the active page changes, you can sync the external state if needed
+    if (activePage?.content != null) {
       setContent(activePage.content)
     }
   }, [activePage, setContent])
 
   useEffect(() => {
+    // Hide context menu when clicking outside
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowMenu(false)
@@ -135,42 +141,107 @@ const Editor = ({ activePage, content, setContent }) => {
   }
 
   return (
-    <Box sx={{ p: 2, height: '100%', bgcolor: 'background.body' }}>
-      <Typography level='body-sm' sx={{ mb: 1, color: 'text.secondary' }}>
-        Editor de contenido
-      </Typography>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+        bgcolor: 'background.level1',
+        overflow: 'auto',
+        py: 3
+      }}
+    >
+      <LexicalComposer key={activePage?._id || 'editor'} initialConfig={editorConfig}>
+        {/* 🧭 Floating toolbar inside LexicalComposer */}
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 12,
+            zIndex: 10,
+            bgcolor: 'background.body',
+            boxShadow: 'sm',
+            borderRadius: 'lg',
+            px: 2,
+            py: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 1,
+            mb: 3,
+            width: 'auto',
+            minWidth: 'fit-content'
+          }}
+        >
+          <div className='editor-toolbar'>
+            <Toolbar /> {/* ✅ now inside Lexical context */}
+          </div>
+        </Box>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, px: 1 }}>
-        <Typography fontWeight='md'>Nowry Editor</Typography>
-      </Box>
+        {/* 📄 Main “sheet” area */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+            pb: 6
+          }}
+          onContextMenu={handleRightClick}
+          ref={containerRef}
+        >
+          <Box
+            sx={{
+              position: 'relative',
+              width: '21cm',
+              minHeight: '29.7cm',
+              bgcolor: '#fff',
+              borderRadius: 'md',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              border: '1px solid #ddd',
+              px: '2.5cm',
+              py: '2.5cm',
+              overflow: 'hidden'
+            }}
+          >
+            <RichTextPlugin
+              contentEditable={<ContentEditable className='editor-content' />}
+              placeholder={<div className='editor-placeholder'>Start typing here...</div>}
+            />
+          </Box>
+        </Box>
 
+        {/* Plugins */}
+        <EditorContent setContent={setContent} />
+        <HistoryPlugin />
+        <AutoFocusPlugin />
+        <RegisterListPlugin />
+        <RegisterHorizontalRulePlugin />
+        <SlashCommandPlugin />
+        <TablePlugin />
+        <WordCountPlugin />
+      </LexicalComposer>
+
+      {/* 📊 Word count footer */}
       <Box
-        ref={containerRef}
-        onContextMenu={handleRightClick}
         sx={{
-          height: 'calc(100vh - 180px)',
-          overflowY: 'auto',
+          position: 'fixed',
+          bottom: 12,
+          right: 24,
           px: 2,
-          py: 2,
-          border: '1px solid',
-          borderColor: 'divider',
+          py: 1,
+          fontSize: 'sm',
+          color: 'text.secondary',
+          bgcolor: 'background.level2',
           borderRadius: 'md',
-          bgcolor: theme.vars.palette.background.surface
+          boxShadow: 'sm'
         }}
       >
-        <LexicalComposer initialConfig={editorConfig}>
-          <Toolbar />
-          <RichTextPlugin
-            contentEditable={<ContentEditable className='editor-content' />}
-            placeholder={<div className='editor-placeholder'>Empieza a escribir aquí...</div>}
-          />
-          <EditorContent setContent={setContent} />
-          <HistoryPlugin />
-          <AutoFocusPlugin />
-          <RegisterListPlugin />
-        </LexicalComposer>
+        Words: 0 | Characters: 0
       </Box>
 
+      {/* Context menu + Study card */}
       {showMenu && (
         <Box
           ref={menuRef}
@@ -192,5 +263,3 @@ const Editor = ({ activePage, content, setContent }) => {
     </Box>
   )
 }
-
-export default Editor

@@ -1,54 +1,96 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Editor from './Editor'
 import PageOverview from './PageOverview'
 import { useParams, useLocation } from 'react-router-dom'
 import { CircleArrowLeft, CircleArrowRight, Save } from 'lucide-react'
 import { saveBookPage, getBookById } from '../../api/Books'
-import { Box, Typography, Input, IconButton, Sheet, Stack } from '@mui/joy'
+import { Box, Input, IconButton, Sheet, Stack } from '@mui/joy'
+
+// Simple utility for a stable local key when _id is not yet available
+const genClientKey = () => `ck_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+const pageKey = (p) => String(p?._id ?? p?.clientKey ?? p?.page_number ?? '') // always as string
 
 export default function EditorHome() {
   const { id } = useParams()
   const location = useLocation()
   const { book } = location.state
 
-  const [activePage, setActivePage] = useState({})
-  const [pages, setPages] = useState(book.pages)
-  const [content, setContent] = useState('')
+  // On mount, add clientKey to any page that doesn’t have an _id yet
+  const withKeys = (list = []) => (list || []).map((p) => (p._id ? p : { ...p, clientKey: p.clientKey || genClientKey() }))
+
+  const [pages, setPages] = useState(withKeys(book.pages))
+  const [activePage, setActivePage] = useState(pages[0] || null)
+  const [activeKey, setActiveKey] = useState(pageKey(pages[0]) || null)
+  const [content, setContent] = useState(activePage?.content || '')
   const [bookName, setBookName] = useState(book.title)
 
-  const handleSavePage = async (page) => {
-    if (!page) {
-      const newPage = await saveBookPage({
-        book_id: id,
-        page_number: pages.length + 1,
-        content: '<p></p>'
-      })
-      setPages([...pages, newPage])
-      setActivePage(newPage)
-      setContent(newPage.content)
-    } else {
-      page.content = content
-      await saveBookPage(page)
-    }
-  }
+  // When the active page changes, reflect its key
+  useEffect(() => {
+    setActiveKey(pageKey(activePage) || null)
+  }, [activePage])
 
+  // Load the complete book (and normalize keys)
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const fullBook = await getBookById(id)
-        setPages(fullBook.pages)
-        setActivePage(fullBook.pages[0])
-        setContent(fullBook.pages[0]?.content || '')
-      } catch (error) {
-        console.error('Error fetching book:', error)
+        const full = await getBookById(id)
+        const list = withKeys(full.pages)
+        setPages(list)
+        const first = list?.[0] || null
+        setActivePage(first)
+        setContent(first?.content || '')
+      } catch (e) {
+        console.error('Error fetching book:', e)
       }
     }
     fetchBook()
   }, [id])
 
+  const handleSavePage = async (page) => {
+    try {
+      if (!page) {
+        // Create a new “empty” page
+        const draft = {
+          book_id: id,
+          page_number: (pages?.length || 0) + 1,
+          content: '<p></p>'
+        }
+        // 1) Add optimistically with a clientKey so the UI updates immediately
+        const optimistic = { ...draft, clientKey: genClientKey() }
+        setPages((prev) => [...prev, optimistic])
+        setActivePage(optimistic)
+        setContent(optimistic.content)
+
+        // 2) Save to backend
+        const created = await saveBookPage(draft)
+
+        // 3) Replace the optimistic version with the definitive one (with _id) while keeping the same clientKey
+        setPages((prev) => prev.map((p) => (p.clientKey === optimistic.clientKey ? { ...created, clientKey: optimistic.clientKey } : p)))
+
+        // If we’re still on that same page, update activePage with the final version
+        setActivePage((curr) => (curr && pageKey(curr) === pageKey(optimistic) ? { ...created, clientKey: optimistic.clientKey } : curr))
+      } else {
+        // Update existing page
+        const toSave = { ...page, content }
+        await saveBookPage(toSave)
+        setPages((prev) => prev.map((p) => (pageKey(p) === pageKey(page) ? toSave : p)))
+      }
+    } catch (e) {
+      console.error('Error saving page:', e)
+    }
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', height: '100vh' }}>
-      <PageOverview pages={pages} setActivePage={setActivePage} setContent={setContent} handleSavePage={handleSavePage} />
+      <PageOverview
+        pages={pages}
+        activeKey={activeKey} // ← active id/key (string)
+        setActivePage={setActivePage}
+        setContent={setContent}
+        handleSavePage={handleSavePage}
+        liveContent={content} // ← live editor content
+        liveKey={activeKey} // ← page key receiving live updates
+      />
 
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Sheet
@@ -84,14 +126,7 @@ export default function EditorHome() {
           </Stack>
         </Sheet>
 
-        <Editor
-          activePage={activePage}
-          setActivePage={setActivePage}
-          content={content}
-          setContent={setContent}
-          wordLimit={250}
-          lineLimit={10}
-        />
+        <Editor key={activeKey || 'editor'} activePage={activePage} content={content} setContent={setContent} />
       </Box>
     </Box>
   )

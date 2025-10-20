@@ -232,29 +232,6 @@ body {
   margin-bottom: 5px;
 }
 
-.page-content {
-  margin: 0;
-  padding: 4% 4%;
-  margin-top: 10;
-  color: black;
-  overflow: hidden;
-  width: 100px;
-  text-overflow: ellipsis;
-  height: 160px;
-}
-.page-content * {
-  margin: 0;
-  padding: 0;
-  text-wrap: nowrap;
-  transform: scale(0.2);
-  transform-origin: 0 0;
-  line-height: 0.3;
-}
-
-.page-content p:has(br) {
-  display: none;
-}
-
 .page-add:hover {
   cursor: pointer;
 }
@@ -414,3 +391,31 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+.preview-content {
+  font-family: 'Times New Roman', serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #111;
+  word-break: break-word;
+}
+
+.preview-content p,
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content ul,
+.preview-content ol,
+.preview-content blockquote {
+  margin: 0.5em 0;
+}
+
+.preview-content img,
+.preview-content video,
+.preview-content iframe {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.3em auto;
+}
+

@@ -54,10 +54,7 @@ const Toolbar = () => {
         py: 1,
         borderBottom: '1px solid',
         borderColor: 'divider',
-        backgroundColor: 'background.level1',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
+        backgroundColor: 'background.level1'
       }}
     >
       <UndoRedo />
