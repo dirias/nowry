@@ -84,10 +84,6 @@ export default function GeneratedCards({ cards = [], onCancel, onGenerateAgain, 
           </Typography>
         </Box>
 
-        <Typography level='body-sm' sx={{ mb: 2, mt: 1 }}>
-          Select the cards you want to add to your study deck.
-        </Typography>
-
         {cards.length === 0 ? (
           <Typography level='body-md' sx={{ textAlign: 'center', py: 4 }}>
             No cards generated.

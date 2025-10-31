@@ -1,5 +1,5 @@
 .card-container {
-  border: 1px solid #ccc;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
   border-radius: 12px;
   padding: 20px;
   width: 780px;
@@ -32,7 +32,7 @@
 }
 
 .content-container {
-  background-color: #fff;
+  background-color: var(--joy-palette-background-surface);
   border: none;
   border-radius: 8px;
   padding: 20px;
