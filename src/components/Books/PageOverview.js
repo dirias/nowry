@@ -13,11 +13,11 @@ export default function PageOverview({
   handleSavePage,
   liveContent = '',
   liveKey = null,
-  thumbW = 220, // ↑ larger than 180
-  thumbH = 310,
+  thumbW = 245, // Matches Letter aspect ratio (816:1056)
+  thumbH = 317, // Matches Letter aspect ratio
   pageW = 816, // Letter (8.5" * 96dpi)
   pageH = 1056, // 11" * 96dpi
-  pagePadding = 40 // ↓ smaller than 64 to gain usable area
+  pagePadding = 95 // Match editor padding (2.5cm)
 }) {
   const changeActivePage = (page) => {
     setActivePage(page)
@@ -86,8 +86,7 @@ const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumb
       onClick={onClick}
       tabIndex={-1}
       sx={{
-        border: '2px solid',
-        borderColor: isActive ? 'primary.solidBg' : 'neutral.outlinedBorder',
+        border: 'none', // Remove border
         borderRadius: 'sm',
         cursor: 'pointer',
         backgroundColor: 'transparent',
@@ -96,7 +95,7 @@ const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumb
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        boxShadow: 'sm',
+        boxShadow: isActive ? '0 0 0 3px rgba(25, 118, 210, 0.5)' : 'sm', // Blue glow for active
         transition: 'all 0.2s ease',
         outline: 'none',
         '&:hover': { transform: 'translateY(-2px)', boxShadow: 'md' }
@@ -108,7 +107,7 @@ const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumb
           height: thumbH,
           overflow: 'hidden',
           borderRadius: 'xs',
-          backgroundColor: 'background.level1',
+          backgroundColor: 'transparent', // Transparent to avoid gray bars
           position: 'relative',
           display: 'flex',
           justifyContent: 'center',
@@ -121,16 +120,18 @@ const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumb
             width: pageW,
             height: pageH,
             backgroundColor: '#fff',
-            border: '1px solid rgba(0,0,0,.08)',
-            boxShadow: '0 1px 2px rgba(0,0,0,.06)',
+            border: 'none',
+            boxShadow: 'none',
             overflow: 'hidden',
-            borderRadius: '4px',
+            borderRadius: '0',
             pointerEvents: 'none',
-            transform: `scale(${scale}) translate(-50%, -50%)`,
-            transformOrigin: 'top left',
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center', // Center the scaled content
             position: 'absolute',
             top: '50%',
-            left: '50%'
+            left: '50%',
+            marginLeft: `-${pageW / 2}px`, // Offset by half width
+            marginTop: `-${pageH / 2}px` // Offset by half height
           }}
           className='preview-page'
         >

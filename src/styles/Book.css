@@ -2,7 +2,8 @@
   padding: 8px 12px;
   font-size: 16px;
   border: none;
-  border-bottom: 1px solid #ccc; /* Add border-bottom instead of full border */
+  border-bottom: 1px solid #ccc;
+  /* Add border-bottom instead of full border */
   border-radius: 0;
   transition: border-color 0.3s ease;
 }
@@ -18,8 +19,11 @@ body {
 .booksHome {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center items vertically */
+  align-items: center;
+  padding: 40px 5%;
+  background-color: var(--joy-palette-background-body);
 }
+
 .noBooksMsg {
   display: flex;
   flex-direction: column;
@@ -27,24 +31,35 @@ body {
   text-align: center;
   height: 60vh;
 }
+
 .booksCreated {
-  display: flex;
-  width: 80%;
-  flex-wrap: wrap;
-  flex-direction: row;
-  text-align: center;
-  padding: 1%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 32px;
+  /* more breathing room */
+  width: 100%;
+  max-width: 1200px;
+  justify-items: center;
+  align-items: start;
+  padding: 0 10px 80px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
+
 .book {
-  background-color: #4caf50; /* A nicer green color */
-  color: white; /* Make text stand out */
+  background-color: #4caf50;
+  /* A nicer green color */
+  color: white;
+  /* Make text stand out */
   padding: 10px;
   margin: 10px;
   height: 160px;
   width: 120px;
   position: relative;
-  border-radius: 5px; /* Rounded corners */
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); /* Add shadow for 3D effect */
+  border-radius: 5px;
+  /* Rounded corners */
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+  /* Add shadow for 3D effect */
   transition:
     transform 0.3s,
     box-shadow 0.3s;
@@ -57,8 +72,10 @@ body {
   left: 0;
   height: 100%;
   width: 20px;
-  background-color: #388e3c; /* Darker shade for spine */
-  border-radius: 5px 0 0 5px; /* Rounded corners */
+  background-color: #388e3c;
+  /* Darker shade for spine */
+  border-radius: 5px 0 0 5px;
+  /* Rounded corners */
 }
 
 .book div {
@@ -69,35 +86,51 @@ body {
 
 .book:hover {
   cursor: pointer;
-  transform: scale(1.05); /* Slightly enlarge the book */
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5); /* Stronger shadow on hover */
+  transform: scale(1.05);
+  /* Slightly enlarge the book */
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+  /* Stronger shadow on hover */
 }
+
 .searchSection {
   display: flex;
-  margin-top: 1.5%;
-  width: 40%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 32px;
 }
+
+.searchSection input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
+  background-color: var(--joy-palette-background-surface);
+  font-size: 16px;
+}
+
 .createBookBtn {
-  height: 160px;
-  width: 130px;
-  border: none; /* Remove default border */
-  border-radius: 5px; /* Rounded corners */
-  padding: 15px 30px; /* Padding for a larger button */
-  padding: 10px;
-  margin: 10px;
-  font-size: 16px; /* Larger font size */
-  cursor: pointer; /* Pointer cursor on hover */
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); /* Add shadow for 3D effect */
-  transition:
-    background-color 0.3s,
-    transform 0.3s,
-    box-shadow 0.3s; /* Smooth transitions */
+  height: 260px;
+  width: 180px;
+  border-radius: 12px;
+  border: 2px dashed var(--joy-palette-primary-outlinedBorder);
+  background: var(--joy-palette-background-surface);
+  color: var(--joy-palette-primary-plainColor);
+  font-size: 18px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
 .createBookBtn:hover {
-  background-color: #388e3c; /* Darker green on hover */
-  transform: scale(1.05); /* Slightly enlarge on hover */
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5); /* Stronger shadow on hover */
+  background-color: var(--joy-palette-primary-softBg);
+  border-color: var(--joy-palette-primary-solidBg);
+  color: var(--joy-palette-primary-solidColor);
+  transform: translateY(-4px);
 }
 
 /* Book Container */
@@ -105,7 +138,7 @@ body {
   display: flex;
   max-width: 1200px;
   margin: 20px auto;
-  background-color: #fff;
+  background-color: var(--joy-palette-background-surface);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden;
@@ -113,12 +146,16 @@ body {
 
 /* Book Sidebar */
 .book-sidebar {
-  width: 15%; /* Adjusted for better spacing */
+  width: 15%;
+  /* Adjusted for better spacing */
   min-width: 15%;
-  background-color: #2c3e50; /* Darker shade for better focus */
-  color: #ecf0f1; /* Light text for contrast */
+  background-color: #2c3e50;
+  /* Darker shade for better focus */
+  color: #ecf0f1;
+  /* Light text for contrast */
   padding: 20px;
-  overflow-y: auto; /* Ensures scrollability on overflow */
+  overflow-y: auto;
+  /* Ensures scrollability on overflow */
 }
 
 .book-sidebar h2 {
@@ -156,7 +193,7 @@ body {
 }
 
 .book-pagination .book-button {
-  background-color: #fff;
+  background-color: var(--joy-palette-background-surface);
   color: #007bff;
   border-radius: 150px;
   cursor: pointer;
@@ -168,25 +205,25 @@ body {
 }
 
 .content {
-  border: 1px solid #ccc;
-  background-color: #fff;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
+  background-color: var(--joy-palette-background-surface);
   padding: 20px;
   border-radius: 8px;
 }
 
 /* Editor Styles */
 .editor-container {
-  border: 1px solid #ccc;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
   padding: 10px;
   font-size: 14px;
-  background-color: #fff;
+  background-color: var(--joy-palette-background-surface);
   border-radius: 4px;
 }
 
 .editor-textarea {
   width: 100%;
   min-height: 200px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
   padding: 8px;
   border-radius: 4px;
 }
@@ -209,8 +246,8 @@ body {
 }
 
 .page-overview {
-  border: 1px solid #ccc;
-  background-color: #fff;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
+  background-color: var(--joy-palette-background-surface);
   border-radius: 5px;
   width: 100px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -256,7 +293,7 @@ body {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f7f7f7;
+  background-color: var(--joy-palette-background-surface);
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -285,7 +322,7 @@ body {
 .form-group textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
   border-radius: 4px;
   font-size: 16px;
   box-sizing: border-box;
@@ -300,7 +337,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
   cursor: pointer;
 }
 
@@ -366,12 +403,12 @@ body {
 
 .cancel-button {
   background-color: #f44336;
-  color: #fff;
+  color: var(--joy-palette-text-primary);
 }
 
 .save-button {
   background-color: #4caf50;
-  color: #fff;
+  color: var(--joy-palette-text-primary);
 }
 
 .cancel-button:hover {
@@ -393,10 +430,14 @@ body {
 }
 
 .preview-content {
-  font-family: 'Times New Roman', serif;
-  font-size: 12pt;
-  line-height: 1.5;
-  color: #111;
+  font-family: 'Segoe UI', 'Helvetica', sans-serif;
+  /* Match main editor */
+  font-size: 16px;
+  /* Match main editor */
+  line-height: 1.6;
+  /* Match main editor */
+  color: #2e2e2e;
+  /* Match main editor */
   word-break: break-word;
 }
 
@@ -418,4 +459,3 @@ body {
   display: block;
   margin: 0.3em auto;
 }
-

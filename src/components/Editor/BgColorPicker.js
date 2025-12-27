@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { $getSelection, $isRangeSelection } from 'lexical'
 import { $patchStyleText } from '@lexical/selection'
-import { Select, Option } from '@mui/joy'
+import { Dropdown, Menu, MenuItem, MenuButton, IconButton } from '@mui/joy'
+import { Palette } from 'lucide-react'
 
 const BG_COLORS = [
-  { label: 'Default', value: '' },
+  { label: 'No Highlight', value: '' },
   { label: 'Yellow', value: '#fde047' },
   { label: 'Light Green', value: '#bbf7d0' },
   { label: 'Light Blue', value: '#bfdbfe' },
@@ -15,25 +17,84 @@ const BG_COLORS = [
 
 const BgColorPicker = () => {
   const [editor] = useLexicalComposerContext()
-  const [value, setValue] = useState('')
+  const savedSelectionRef = useRef(null)
 
-  const handleChange = (_, newValue) => {
-    setValue(newValue)
-    editor.update(() => {
-      $patchStyleText({
-        'background-color': newValue
-      })
+  // Save selection when dropdown opens
+  const handleDropdownOpen = useCallback(() => {
+    editor.getEditorState().read(() => {
+      const selection = $getSelection()
+      if ($isRangeSelection(selection)) {
+        // Clone the selection to save it
+        savedSelectionRef.current = {
+          anchor: selection.anchor,
+          focus: selection.focus
+        }
+      }
     })
-  }
+  }, [editor])
+
+  const applyBackgroundColor = useCallback(
+    (color) => {
+      editor.update(() => {
+        const selection = $getSelection()
+
+        // Log for debugging
+        console.log('Applying background color:', color)
+        console.log('Selection:', selection)
+
+        if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+          console.log('Applying to range selection')
+          $patchStyleText(selection, { 'background-color': color || null })
+        } else {
+          console.log('No valid range selection')
+        }
+      })
+
+      // Refocus the editor
+      setTimeout(() => {
+        editor.focus()
+      }, 0)
+    },
+    [editor]
+  )
 
   return (
-    <Select size='sm' value={value} onChange={handleChange} sx={{ minWidth: 140 }}>
-      {BG_COLORS.map((bg) => (
-        <Option key={bg.value} value={bg.value}>
-          {bg.label}
-        </Option>
-      ))}
-    </Select>
+    <Dropdown>
+      <MenuButton
+        slots={{ root: IconButton }}
+        slotProps={{ root: { variant: 'outlined', color: 'neutral', size: 'sm' } }}
+        onMouseDown={(e) => {
+          // Prevent default to try to preserve selection
+          e.preventDefault()
+          handleDropdownOpen()
+        }}
+      >
+        <Palette size={16} />
+      </MenuButton>
+      <Menu>
+        {BG_COLORS.map((bg) => (
+          <MenuItem
+            key={bg.value}
+            onMouseDown={(e) => e.preventDefault()} // Prevent losing focus
+            onClick={() => applyBackgroundColor(bg.value)}
+            sx={{
+              '&::before': {
+                content: '""',
+                display: 'inline-block',
+                width: 16,
+                height: 16,
+                backgroundColor: bg.value || '#fff',
+                border: '1px solid #ccc',
+                borderRadius: '2px',
+                marginRight: 1
+              }
+            }}
+          >
+            {bg.label}
+          </MenuItem>
+        ))}
+      </Menu>
+    </Dropdown>
   )
 }
 

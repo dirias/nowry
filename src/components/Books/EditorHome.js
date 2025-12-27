@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Editor from './Editor'
 import PageOverview from './PageOverview'
 import { useParams, useLocation } from 'react-router-dom'
-import { CircleArrowLeft, CircleArrowRight, Save } from 'lucide-react'
+import { Save } from 'lucide-react'
 import { saveBookPage, getBookById } from '../../api/Books'
 import { Box, Input, IconButton, Sheet, Stack } from '@mui/joy'
 
@@ -15,7 +15,7 @@ export default function EditorHome() {
   const location = useLocation()
   const { book } = location.state
 
-  // On mount, add clientKey to any page that doesn’t have an _id yet
+  // On mount, add clientKey to any page that doesn't have an _id yet
   const withKeys = (list = []) => (list || []).map((p) => (p._id ? p : { ...p, clientKey: p.clientKey || genClientKey() }))
 
   const [pages, setPages] = useState(withKeys(book.pages))
@@ -49,7 +49,7 @@ export default function EditorHome() {
   const handleSavePage = async (page) => {
     try {
       if (!page) {
-        // Create a new “empty” page
+        // Create a new "empty" page
         const draft = {
           book_id: id,
           page_number: (pages?.length || 0) + 1,
@@ -67,7 +67,7 @@ export default function EditorHome() {
         // 3) Replace the optimistic version with the definitive one (with _id) while keeping the same clientKey
         setPages((prev) => prev.map((p) => (p.clientKey === optimistic.clientKey ? { ...created, clientKey: optimistic.clientKey } : p)))
 
-        // If we’re still on that same page, update activePage with the final version
+        // If we're still on that same page, update activePage with the final version
         setActivePage((curr) => (curr && pageKey(curr) === pageKey(optimistic) ? { ...created, clientKey: optimistic.clientKey } : curr))
       } else {
         // Update existing page
@@ -99,34 +99,34 @@ export default function EditorHome() {
             px: 4,
             py: 2,
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            flexDirection: 'column',
+            gap: 2,
             borderBottom: '1px solid',
             borderColor: 'divider'
           }}
         >
-          <Input
-            placeholder='Book title'
-            value={bookName}
-            onChange={(e) => setBookName(e.target.value)}
-            variant='plain'
-            sx={{ fontSize: 'lg', fontWeight: 'bold', border: 'none', px: 0 }}
-          />
-
-          <Stack direction='row' spacing={1}>
+          {/* First Row: Title and Save Button */}
+          <Stack direction='row' justifyContent='space-between' alignItems='center'>
+            <Input
+              placeholder='Book title'
+              value={bookName}
+              onChange={(e) => setBookName(e.target.value)}
+              variant='plain'
+              sx={{ fontSize: 'lg', fontWeight: 'bold', border: 'none', px: 0 }}
+            />
             <IconButton variant='soft' color='success' onClick={() => handleSavePage(activePage)}>
               <Save />
-            </IconButton>
-            <IconButton variant='outlined'>
-              <CircleArrowLeft />
-            </IconButton>
-            <IconButton variant='outlined'>
-              <CircleArrowRight />
             </IconButton>
           </Stack>
         </Sheet>
 
-        <Editor key={activeKey || 'editor'} activePage={activePage} content={content} setContent={setContent} />
+        <Editor
+          key={activeKey || 'editor'}
+          activePage={activePage}
+          content={content}
+          setContent={setContent}
+          onSave={() => handleSavePage(activePage)}
+        />
       </Box>
     </Box>
   )

@@ -69,6 +69,11 @@ export default function BookHome() {
     setMenuAnchor(event.currentTarget)
   }
 
+  const handleContextMenu = (event, book) => {
+    event.preventDefault()
+    openMenu(event, book)
+  }
+
   const closeMenu = () => {
     setMenuAnchor(null)
   }
@@ -134,7 +139,7 @@ export default function BookHome() {
                   <IconButton size='sm' sx={{ position: 'absolute', top: 8, right: 8 }} onClick={(e) => openMenu(e, book)}>
                     <MoreVertIcon />
                   </IconButton>
-                  <Book book={book} handleBookClick={handleBookClick} />
+                  <Book book={book} handleBookClick={handleBookClick} handleContextMenu={handleContextMenu} />
                 </>
               )}
             </Sheet>

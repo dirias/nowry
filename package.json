@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-free": "^6.4.2",
@@ -45,10 +48,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "npm run format && npm run lint && npm start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint  --fix \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "lint": "eslint  --fix \"src/**/*.{js,jsx,ts,tsx}\"",
     "format": "prettier \"src/**/*.{js,jsx,ts,tsx,json,css,md}\" --write --config ./.prettierrc"
   },
   "eslintConfig": {

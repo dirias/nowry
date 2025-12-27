@@ -16,21 +16,45 @@ export default function WordCountPlugin() {
   const [charCount, setCharCount] = useState(0)
 
   useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
+    const updateCounts = () => {
+      editor.getEditorState().read(() => {
         const root = $getRoot()
         const textContent = root.getTextContent()
         const { words, characters } = countWordsAndCharacters(textContent)
         setWordCount(words)
         setCharCount(characters)
       })
+    }
+
+    // Initial count
+    updateCounts()
+
+    // Register listener for all updates
+    const unregister = editor.registerUpdateListener(() => {
+      updateCounts()
     })
+
+    return unregister
   }, [editor])
 
   return (
-    <Box sx={{ mt: 2, textAlign: 'right', color: 'text.tertiary' }}>
+    <Box
+      sx={{
+        position: 'fixed',
+        bottom: 12,
+        right: 24,
+        px: 2,
+        py: 1,
+        fontSize: 'sm',
+        color: 'text.secondary',
+        bgcolor: 'background.level2',
+        borderRadius: 'md',
+        boxShadow: 'sm',
+        zIndex: 1000
+      }}
+    >
       <Typography level='body-sm'>
-        Palabras: {wordCount} | Caracteres: {charCount}
+        Words: {wordCount} | Characters: {charCount}
       </Typography>
     </Box>
   )

@@ -17,13 +17,16 @@
   color: var(--joy-palette-text-primary);
   background: transparent;
   min-height: 600px;
-  padding: 1rem;
+  padding: 0;
+  /* Remove padding - parent Box has padding */
 }
 
 .editor-placeholder {
   position: absolute;
-  top: 2.5cm;   /* same as your py padding */
-  left: 2.5cm;  /* same as your px padding */
+  top: 2.5cm;
+  /* same as your py padding */
+  left: 2.5cm;
+  /* same as your px padding */
   right: 2.5cm;
   color: #9ca3af;
   pointer-events: none;
@@ -53,6 +56,26 @@
 
 .editor-text.underline {
   text-decoration: underline;
+}
+
+.editor-text.strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-textBold {
+  font-weight: bold;
+}
+
+.editor-textItalic {
+  font-style: italic;
+}
+
+.editor-textUnderline {
+  text-decoration: underline;
+}
+
+.editor-textStrikethrough {
+  text-decoration: line-through;
 }
 
 /* ====== Headings ====== */
@@ -112,14 +135,6 @@ ol.editor-list-ol {
   white-space: pre-wrap;
 }
 
-.editor-content span[style*='color'] {
-  color: inherit;
-}
-
-.editor-content span[style*='background-color'] {
-  background-color: inherit;
-}
-
 /* ====== Layout Fix ====== */
 .MuiCard-root {
   height: 100%;
@@ -170,10 +185,9 @@ ol.editor-list-ol {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #f9fafb;            /* same as editor background */
+  background: #f9fafb;
+  /* same as editor background */
   border-bottom: 1px solid #e5e7eb;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
-
-

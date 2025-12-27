@@ -1,64 +1,73 @@
-import React, { useEffect, useState } from 'react'
-import { Box } from '@mui/joy'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getSelection, $isRangeSelection } from 'lexical'
+import React from 'react'
+import { Box, Divider, IconButton } from '@mui/joy'
+import { Save } from 'lucide-react'
 
-// Subcomponentes
+// Toolbar components
+import UndoRedo from '../Editor/UndoRedo'
+import TextFormatButtons from '../Editor/TextFormatButtons'
 import BlockFormatDropdown from '../Editor/BlockFormatDropdown'
 import FontSizeDropdown from '../Editor/FontSizeDropdown'
 import FontFamilyDropdown from '../Editor/FontFamilyDropdown'
 import TextColorPicker from '../Editor/TextColorPicker'
 import BgColorPicker from '../Editor/BgColorPicker'
-import InsertDropdown from '../Editor/InsertDropdown'
 import AlignDropdown from '../Editor/AlignDropdown'
-import UndoRedo from '../Editor/UndoRedo'
+import InsertDropdown from '../Editor/InsertDropdown'
 
-const Toolbar = () => {
-  const [editor] = useLexicalComposerContext()
-
-  const [selectionInfo, setSelectionInfo] = useState({
-    isBold: false,
-    isItalic: false,
-    blockType: 'paragraph',
-    fontSize: '16px',
-    fontFamily: 'Arial',
-    textColor: '#000000',
-    bgColor: '#ffffff',
-    alignment: 'left'
-  })
-
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        const selection = $getSelection()
-        if ($isRangeSelection(selection)) {
-          // Aquí puedes usar helpers propios para detectar estado de selección
-          // Puedes usar tu lógica actual o futura aquí
-          setSelectionInfo((prev) => ({
-            ...prev
-            // valores reales de selección según el estado
-          }))
-        }
-      })
-    })
-  }, [editor])
-
+const Toolbar = ({ onSave }) => {
   return (
     <Box
       sx={{
         display: 'flex',
         alignItems: 'center',
-        gap: 1,
-        flexWrap: 'wrap',
-        px: 2,
-        py: 1,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        backgroundColor: 'background.level1'
+        gap: 1.5,
+        flexWrap: 'nowrap'
       }}
     >
+      {/* Undo/Redo */}
       <UndoRedo />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Text Format Buttons */}
+      <TextFormatButtons />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Font Settings */}
+      <FontFamilyDropdown />
+      <FontSizeDropdown />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Block Format */}
       <BlockFormatDropdown />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Alignment */}
+      <AlignDropdown />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Colors */}
+      <TextColorPicker />
+      <BgColorPicker />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Insert */}
+      <InsertDropdown />
+
+      {onSave && (
+        <>
+          <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+          {/* Save Button */}
+          <IconButton variant='soft' color='success' size='sm' onClick={onSave}>
+            <Save size={18} />
+          </IconButton>
+        </>
+      )}
     </Box>
   )
 }

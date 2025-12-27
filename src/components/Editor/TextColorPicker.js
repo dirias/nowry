@@ -29,7 +29,7 @@ const TextColorPicker = () => {
 
       if ($isRangeSelection(selection)) {
         // Aplica color al texto seleccionado
-        $patchStyleText({ color: newValue || null }) // `null` remueve el color
+        $patchStyleText(selection, { color: newValue || null }) // `null` remueve el color
       }
     })
   }

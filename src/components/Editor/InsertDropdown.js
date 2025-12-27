@@ -4,7 +4,7 @@ import { INSERT_TABLE_COMMAND } from '@lexical/table'
 import { TOGGLE_LINK_COMMAND } from '@lexical/link'
 import { $insertNodes } from 'lexical'
 import { $createHorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
-import { Box, Dropdown, Menu, MenuItem, IconButton } from '@mui/joy'
+import { Box, Dropdown, Menu, MenuItem, MenuButton, IconButton } from '@mui/joy'
 import { Plus } from 'lucide-react'
 import { $createImageNode } from '../../nodes/ImageNode'
 
@@ -41,9 +41,9 @@ const InsertDropdown = () => {
 
   return (
     <Dropdown>
-      <IconButton size='sm' variant='outlined' color='neutral'>
+      <MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'outlined', color: 'neutral', size: 'sm' } }}>
         <Plus size={16} />
-      </IconButton>
+      </MenuButton>
       <Menu>
         <MenuItem onClick={insertLink}>Insert Link</MenuItem>
         <MenuItem onClick={insertImage}>Insert Image</MenuItem>
