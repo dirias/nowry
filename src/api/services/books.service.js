@@ -84,5 +84,26 @@ export const booksService = {
       params: { title: searchTerm }
     })
     return data
+  },
+
+  /**
+   * Import a book from file (PDF, DOCX, TXT)
+   * @param {File} file - File to import
+   * @param {string} username - Current user's username
+   * @param {boolean} preview - If true, returns preview for validation
+   * @returns {Promise<Object>} Created book with pages or preview data
+   */
+  async importFile(file, username, preview = false) {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('username', username)
+    formData.append('preview', preview.toString())
+
+    const { data } = await apiClient.post('/book/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return data
   }
 }

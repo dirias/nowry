@@ -16,6 +16,17 @@ export const ENDPOINTS = {
     save: '/book_page/save_book_page'
   },
   studyCards: {
-    generate: '/study_card/generate'
+    generate: '/card/generate',
+    all: '/study-cards/',
+    create: '/study-cards/',
+    update: (id) => `/study-cards/${id}`,
+    delete: (id) => `/study-cards/${id}`
+  },
+  decks: {
+    all: '/decks/',
+    create: '/decks/',
+    update: (id) => `/decks/${id}`,
+    delete: (id) => `/decks/${id}`,
+    byId: (id) => `/decks/${id}`
   }
 }

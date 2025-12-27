@@ -1,4 +1,5 @@
 import React from 'react'
+import { X } from 'lucide-react'
 
 const ErrorWindow = ({ title, error_msg, onClose }) => {
   return (
@@ -6,7 +7,7 @@ const ErrorWindow = ({ title, error_msg, onClose }) => {
       <div className='error-header'>
         <h3 className='error-title'>{title}</h3>
         <button className='close-button' onClick={onClose}>
-          X
+          <X size={20} />
         </button>
       </div>
       <div className='error-content'>

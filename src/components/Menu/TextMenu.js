@@ -1,14 +1,22 @@
 import React, { forwardRef } from 'react'
 
 const TextMenu = forwardRef(({ onOptionClick, style }, ref) => {
+  const options = [
+    { label: 'Create study card', value: 'create_study_card' },
+    { label: 'Create questionnaire', value: 'create_questionnaire' },
+    { label: 'Generate related text', value: 'generate_related_text' },
+    { label: 'Reproduce text', value: 'reproduce_text' },
+    { label: 'Create visual support content', value: 'create_visual_content' }
+  ]
+
   return (
     <div className='text-menu' style={style} ref={ref}>
       <ul>
-        <li onClick={() => onOptionClick('create_study_card')}>Create study card</li>
-        <li onClick={() => onOptionClick('create_questionary')}>Create questionnaire</li>
-        <li onClick={() => onOptionClick('generate_related_text')}>Generate related text</li>
-        <li onClick={() => onOptionClick('reproduce_text')}>Reproduce text</li>
-        <li onClick={() => onOptionClick('create_visual_support')}>Create visual support content</li>
+        {options.map((option) => (
+          <li key={option.value} onClick={() => onOptionClick(option.value)}>
+            {option.label}
+          </li>
+        ))}
       </ul>
     </div>
   )

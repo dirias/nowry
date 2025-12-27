@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { Box, Typography, useTheme } from '@mui/joy'
+import { Box, Typography, Button, useTheme } from '@mui/joy'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
@@ -22,12 +22,14 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
+import { ColumnContainerNode, ColumnNode } from '../../nodes/ColumnNodes'
 
 // UI Components
 import Toolbar from './Toolbar'
 import TextMenu from '../Menu/TextMenu'
 import StudyCard from '../Cards/GeneratedCards'
 import { cardsService } from '../../api/services'
+import ColumnPlugin from '../../plugin/ColumnPlugin'
 
 const EditorTheme = {
   ltr: 'ltr',
@@ -84,9 +86,22 @@ export default function Editor({ activePage, content, setContent, onSave }) {
     namespace: 'NowryEditor',
     theme: EditorTheme,
     onError: (e) => console.error('Lexical error:', e),
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, AutoLinkNode, LinkNode, HorizontalRuleNode, ImageNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+      AutoLinkNode,
+      LinkNode,
+      HorizontalRuleNode,
+      ImageNode,
+      ColumnContainerNode,
+      ColumnNode // Multi-column support
+    ],
     editorState: (editor) => {
       const parser = new DOMParser()
+      // Use flattened content if in edit mode for multi-column pages
       const dom = parser.parseFromString(content || '<p></p>', 'text/html')
       const nodes = $generateNodesFromDOM(editor, dom)
       editor.update(() => {
@@ -141,6 +156,7 @@ export default function Editor({ activePage, content, setContent, onSave }) {
     }
   }
 
+  // Render editable content with column support
   return (
     <Box
       sx={{
@@ -159,7 +175,7 @@ export default function Editor({ activePage, content, setContent, onSave }) {
         <Box
           sx={{
             position: 'fixed',
-            top: 85, // More space below the main header
+            top: 85,
             left: 320, // Sidebar width
             right: 0,
             zIndex: 100,
@@ -177,7 +193,6 @@ export default function Editor({ activePage, content, setContent, onSave }) {
         >
           <Toolbar onSave={onSave} />
         </Box>
-
         {/* 📄 Main "sheet" area - add top padding to account for fixed toolbar */}
         <Box
           sx={{
@@ -211,7 +226,6 @@ export default function Editor({ activePage, content, setContent, onSave }) {
             />
           </Box>
         </Box>
-
         {/* Plugins */}
         <EditorContent setContent={setContent} />
         <HistoryPlugin />
@@ -221,6 +235,7 @@ export default function Editor({ activePage, content, setContent, onSave }) {
         <SlashCommandPlugin />
         <TablePlugin />
         <WordCountPlugin />
+        <ColumnPlugin /> {/* Multi-column support */}
       </LexicalComposer>
 
       {/* Context menu + Study card */}

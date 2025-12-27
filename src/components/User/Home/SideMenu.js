@@ -1,46 +1,91 @@
 import * as React from 'react'
-import { Sheet, Typography, Stack, Box, Input, IconButton, Tooltip, Select, Option } from '@mui/joy'
+import { Sheet, Typography, Stack, Box, Input, IconButton, Tooltip, Select, Option, CircularProgress } from '@mui/joy'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import FilterAltRoundedIcon from '@mui/icons-material/FilterAltRounded'
-import { v4 as uuidv4 } from 'uuid'
 import SortableTask from '../../Task/SortableTask'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { tasksService } from '../../../api/services'
 
 const SideMenu = () => {
   const [tasks, setTasks] = React.useState([])
   const [search, setSearch] = React.useState('')
   const [statusFilter, setStatusFilter] = React.useState('all')
+  const [loading, setLoading] = React.useState(true)
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor))
 
-  const addTask = (title) => {
-    const now = new Date().toISOString()
-    const task = {
-      id: uuidv4(),
-      user_id: uuidv4(),
-      title: title.trim(),
-      description: '',
-      is_completed: false,
-      priority: 'medium',
-      deadline: null,
-      created_at: now,
-      updated_at: now,
-      tags: [],
-      position: tasks.length + 1,
-      repeat_interval: null
+  // Load tasks on mount
+  React.useEffect(() => {
+    loadTasks()
+  }, [])
+
+  const loadTasks = async () => {
+    try {
+      setLoading(true)
+      const data = await tasksService.getAll()
+      setTasks(data)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error loading tasks:', error)
+      setLoading(false)
     }
-    setTasks([...tasks, task])
-    setSearch('')
   }
 
-  const removeTask = (id) => setTasks(tasks.filter((t) => t.id !== id))
+  const addTask = async (title) => {
+    try {
+      const newTask = {
+        title: title.trim(),
+        description: '',
+        is_completed: false,
+        priority: 'medium',
+        deadline: null,
+        tags: [],
+        category: 'general'
+      }
 
-  const toggleTask = (id) => setTasks(tasks.map((t) => (t.id === id ? { ...t, is_completed: !t.is_completed } : t)))
+      const created = await tasksService.create(newTask)
+      setTasks([...tasks, created])
+      setSearch('')
+    } catch (error) {
+      console.error('Error adding task:', error)
+    }
+  }
 
-  const updateTask = (updatedTask) => {
-    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)))
+  const removeTask = async (id) => {
+    try {
+      await tasksService.delete(id)
+      setTasks(tasks.filter((t) => (t._id || t.id) !== id))
+    } catch (error) {
+      console.error('Error deleting task:', error)
+    }
+  }
+
+  const toggleTask = async (task) => {
+    try {
+      const updated = await tasksService.toggleComplete(task._id || task.id, task.is_completed)
+      setTasks(tasks.map((t) => ((t._id || t.id) === (updated._id || updated.id) ? updated : t)))
+    } catch (error) {
+      console.error('Error toggling task:', error)
+    }
+  }
+
+  const updateTask = async (updatedTask) => {
+    try {
+      const taskId = updatedTask._id || updatedTask.id
+      const updates = {
+        title: updatedTask.title,
+        deadline: updatedTask.deadline,
+        priority: updatedTask.priority,
+        is_completed: updatedTask.is_completed
+      }
+
+      const updated = await tasksService.update(taskId, updates)
+      setTasks((prev) => prev.map((t) => ((t._id || t.id) === taskId ? updated : t)))
+    } catch (error) {
+      console.error('Error updating task:', error)
+    }
   }
 
   const filteredTasks = tasks.filter((t) => {
@@ -58,14 +103,32 @@ const SideMenu = () => {
   const handleDragEnd = (event) => {
     const { active, over } = event
     if (active.id !== over?.id) {
-      const oldIndex = tasks.findIndex((t) => t.id === active.id)
-      const newIndex = tasks.findIndex((t) => t.id === over.id)
-      const newTasks = arrayMove(tasks, oldIndex, newIndex).map((t, i) => ({
-        ...t,
-        position: i + 1
-      }))
+      const oldIndex = tasks.findIndex((t) => (t._id || t.id) === active.id)
+      const newIndex = tasks.findIndex((t) => (t._id || t.id) === over.id)
+      const newTasks = arrayMove(tasks, oldIndex, newIndex)
       setTasks(newTasks)
+      // Note: You could also persist the new order to the backend here if needed
     }
+  }
+
+  if (loading) {
+    return (
+      <Sheet
+        variant='outlined'
+        sx={{
+          backgroundColor: 'background.body',
+          borderRadius: 'md',
+          p: 2,
+          boxShadow: 'sm',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 300
+        }}
+      >
+        <CircularProgress />
+      </Sheet>
+    )
   }
 
   return (
@@ -126,15 +189,15 @@ const SideMenu = () => {
 
       {/* Task List */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={filteredTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={filteredTasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
           <Stack spacing={1}>
             {filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
                 <SortableTask
-                  key={task.id}
+                  key={task._id || task.id}
                   task={task}
-                  onToggle={() => toggleTask(task.id)}
-                  onDelete={() => removeTask(task.id)}
+                  onToggle={() => toggleTask(task)}
+                  onDelete={() => removeTask(task._id || task.id)}
                   onUpdate={updateTask}
                 />
               ))
