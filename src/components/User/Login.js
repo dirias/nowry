@@ -2,9 +2,10 @@ import React, { useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { Box, Typography, Input, Button, Divider, Sheet, useColorScheme, Link } from '@mui/joy'
 import { Error } from '../Messages'
-import axios from 'axios'
 import Facebook from '@mui/icons-material/FacebookOutlined'
 import Google from '@mui/icons-material/Google'
+
+import { authService } from '../../api/services'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -16,21 +17,28 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const formData = new FormData()
-      formData.append('email', email)
-      formData.append('password', password)
-      const response = await axios.post('http://localhost:8000/session/login', formData)
+      const data = await authService.login(email, password)
 
-      if (response.status === 200) {
-        localStorage.setItem('authToken', response.data.token)
-        localStorage.setItem('username', response.data.username)
-        navigate(`/`)
-        window.location.reload()
-      } else {
-        setErrors(response.data.detail)
-      }
+      localStorage.setItem('authToken', data.token)
+      localStorage.setItem('username', data.username)
+      navigate(`/`)
+      window.location.reload()
     } catch (error) {
-      setErrors(error.response?.data?.detail || 'Login failed')
+      console.error('Login error details:', error.response?.data)
+      const detail = error.response?.data?.detail
+
+      if (Array.isArray(detail)) {
+        // Format FastAPI validation errors into a readable string
+        const errorMsg = detail
+          .map((err) => {
+            const field = err.loc[err.loc.length - 1]
+            return `${field}: ${err.msg}`
+          })
+          .join(', ')
+        setErrors(errorMsg)
+      } else {
+        setErrors(error.response?.data?.detail || error.message || 'Login failed')
+      }
     }
   }
 
@@ -83,16 +91,11 @@ const Login = () => {
           Login with Google
         </Button>
 
-        <Button
-          variant='outlined'
-          color='neutral'
-          fullWidth
-          startDecorator={<Facebook sx={{ color: '#1877F2' }} />} // Optional FB blue
-        >
+        <Button variant='outlined' color='neutral' fullWidth startDecorator={<Facebook sx={{ color: '#1877F2' }} />}>
           Login with Facebook
         </Button>
 
-        <Typography level='body-sm' textAlign='center'>
+        <Typography level='body-sm' textAlign='center' sx={{ mt: 2 }}>
           Don&apos;t have an account?{' '}
           <Link component={RouterLink} to='/register'>
             Register here
