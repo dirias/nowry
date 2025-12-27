@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { SketchPicker } from 'react-color'
 import Book from './Book'
-import { editBook } from '../../api/Books'
+import { booksService } from '../../api/services'
 import { Box, Typography, Button, Input, Textarea, Chip, Stack, Sheet, IconButton, Modal } from '@mui/joy'
 import CloseIcon from '@mui/icons-material/Close'
 
@@ -26,7 +26,7 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
       tags
     }
     try {
-      await editBook(book._id, updatedData)
+      await booksService.update(book._id, updatedData)
       refreshBooks()
       onCancel()
     } catch (error) {

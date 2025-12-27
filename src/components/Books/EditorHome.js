@@ -3,7 +3,7 @@ import Editor from './Editor'
 import PageOverview from './PageOverview'
 import { useParams, useLocation } from 'react-router-dom'
 import { Save } from 'lucide-react'
-import { saveBookPage, getBookById } from '../../api/Books'
+import { booksService, pagesService } from '../../api/services'
 import { Box, Input, IconButton, Sheet, Stack } from '@mui/joy'
 
 // Simple utility for a stable local key when _id is not yet available
@@ -33,7 +33,7 @@ export default function EditorHome() {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const full = await getBookById(id)
+        const full = await booksService.getById(id)
         const list = withKeys(full.pages)
         setPages(list)
         const first = list?.[0] || null
@@ -62,7 +62,7 @@ export default function EditorHome() {
         setContent(optimistic.content)
 
         // 2) Save to backend
-        const created = await saveBookPage(draft)
+        const created = await pagesService.savePage(draft)
 
         // 3) Replace the optimistic version with the definitive one (with _id) while keeping the same clientKey
         setPages((prev) => prev.map((p) => (p.clientKey === optimistic.clientKey ? { ...created, clientKey: optimistic.clientKey } : p)))
@@ -72,7 +72,7 @@ export default function EditorHome() {
       } else {
         // Update existing page
         const toSave = { ...page, content }
-        await saveBookPage(toSave)
+        await pagesService.savePage(toSave)
         setPages((prev) => prev.map((p) => (pageKey(p) === pageKey(page) ? toSave : p)))
       }
     } catch (e) {

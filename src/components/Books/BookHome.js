@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getAllBooks, createBook, deleteBook } from '../../api/Books'
+import { booksService } from '../../api/services'
 import { WarningWindow, SuccessWindow } from '../Messages'
 import BookEditor from './BookEditor'
 import Book from './Book'
@@ -24,7 +24,7 @@ export default function BookHome() {
 
   const fetchBooks = async () => {
     try {
-      const fetchedBooks = await getAllBooks()
+      const fetchedBooks = await booksService.getAll()
       setBooks(fetchedBooks)
       setAllBooks(fetchedBooks)
       setLoading(false)
@@ -40,7 +40,11 @@ export default function BookHome() {
 
   const handleCreateBook = async () => {
     try {
-      const newBook = await createBook(`New book ${books.length}`, localStorage.getItem('username'), 'ISBN Number')
+      const newBook = await booksService.create({
+        title: `New book ${books.length}`,
+        author: localStorage.getItem('username'),
+        isbn: 'ISBN Number'
+      })
       const updatedBooks = [...books, newBook]
       setBooks(updatedBooks)
       setAllBooks(updatedBooks)
@@ -91,7 +95,7 @@ export default function BookHome() {
 
   const handleDeleteBook = async () => {
     try {
-      await deleteBook(bookToDelete._id)
+      await booksService.delete(bookToDelete._id)
       const updated = books.filter((b) => b._id !== bookToDelete._id)
       setBooks(updated)
       setAllBooks(updated)

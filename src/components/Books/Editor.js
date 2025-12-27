@@ -27,7 +27,7 @@ import { AutoLinkNode, LinkNode } from '@lexical/link'
 import Toolbar from './Toolbar'
 import TextMenu from '../Menu/TextMenu'
 import StudyCard from '../Cards/GeneratedCards'
-import { generateCard } from '../../api/StudyCards'
+import { cardsService } from '../../api/services'
 
 const EditorTheme = {
   ltr: 'ltr',
@@ -132,7 +132,7 @@ export default function Editor({ activePage, content, setContent, onSave }) {
     setShowMenu(false)
     if (option === 'create_study_card' && selectedText) {
       try {
-        const response = await generateCard(selectedText, 2)
+        const response = await cardsService.generate(selectedText, 2)
         setCards(response)
         setShowStudyCard(true)
       } catch (error) {
