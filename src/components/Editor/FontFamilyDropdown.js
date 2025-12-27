@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { $getSelection, $isRangeSelection } from 'lexical'
 import { $patchStyleText } from '@lexical/selection'
 import { Select, Option } from '@mui/joy'
 
@@ -19,9 +20,10 @@ const FontFamilyDropdown = () => {
   const handleChange = (_, newValue) => {
     setValue(newValue)
     editor.update(() => {
-      $patchStyleText({
-        'font-family': newValue
-      })
+      const selection = $getSelection()
+      if ($isRangeSelection(selection)) {
+        $patchStyleText(selection, { 'font-family': newValue || null })
+      }
     })
   }
 

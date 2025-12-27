@@ -1,5 +1,10 @@
 # Project
-*lock*
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+Pipfile.lock
+poetry.lock
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -183,3 +188,9 @@ cython_debug/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Temporary notes and debugging files
+.notes/
+DEBUG_*.md
+*_FIXES.md
+*.local.md

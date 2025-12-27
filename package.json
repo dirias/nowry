@@ -48,10 +48,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "npm run format && npm run lint && npm start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint  --fix \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "lint": "eslint  --fix \"src/**/*.{js,jsx,ts,tsx}\"",
     "format": "prettier \"src/**/*.{js,jsx,ts,tsx,json,css,md}\" --write --config ./.prettierrc"
   },
   "eslintConfig": {

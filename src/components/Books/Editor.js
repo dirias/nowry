@@ -51,6 +51,7 @@ const EditorTheme = {
     bold: 'editor-textBold',
     italic: 'editor-textItalic',
     underline: 'editor-textUnderline',
+    strikethrough: 'editor-textStrikethrough',
     code: 'editor-textCode'
   }
 }
@@ -69,7 +70,7 @@ function EditorContent({ setContent }) {
   )
 }
 
-export default function Editor({ activePage, content, setContent }) {
+export default function Editor({ activePage, content, setContent, onSave }) {
   const theme = useTheme()
   const menuRef = useRef()
   const containerRef = useRef()
@@ -154,39 +155,38 @@ export default function Editor({ activePage, content, setContent }) {
       }}
     >
       <LexicalComposer key={activePage?._id || 'editor'} initialConfig={editorConfig}>
-        {/* 🧭 Floating toolbar inside LexicalComposer */}
+        {/* 🧭 Toolbar fixed at top */}
         <Box
           sx={{
-            position: 'sticky',
-            top: 12,
-            zIndex: 10,
-            bgcolor: 'background.body',
-            boxShadow: 'sm',
-            borderRadius: 'lg',
-            px: 2,
-            py: 1,
+            position: 'fixed',
+            top: 85, // More space below the main header
+            left: 320, // Sidebar width
+            right: 0,
+            zIndex: 100,
+            bgcolor: 'background.surface',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            px: 3,
+            py: 2, // Increased vertical padding
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: 'center', // Center the toolbar content
             alignItems: 'center',
             gap: 1,
-            mb: 3,
-            width: 'auto',
-            minWidth: 'fit-content'
+            boxShadow: 'xs' // Add subtle shadow for depth
           }}
         >
-          <div className='editor-toolbar'>
-            <Toolbar /> {/* ✅ now inside Lexical context */}
-          </div>
+          <Toolbar onSave={onSave} />
         </Box>
 
-        {/* 📄 Main “sheet” area */}
+        {/* 📄 Main "sheet" area - add top padding to account for fixed toolbar */}
         <Box
           sx={{
             flexGrow: 1,
             display: 'flex',
             justifyContent: 'center',
             width: '100%',
-            pb: 6
+            pb: 6,
+            pt: '95px' // Adjusted space for fixed toolbar
           }}
           onContextMenu={handleRightClick}
           ref={containerRef}
@@ -223,40 +223,16 @@ export default function Editor({ activePage, content, setContent }) {
         <WordCountPlugin />
       </LexicalComposer>
 
-      {/* 📊 Word count footer */}
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 12,
-          right: 24,
-          px: 2,
-          py: 1,
-          fontSize: 'sm',
-          color: 'text.secondary',
-          bgcolor: 'background.level2',
-          borderRadius: 'md',
-          boxShadow: 'sm'
-        }}
-      >
-        Words: 0 | Characters: 0
-      </Box>
-
       {/* Context menu + Study card */}
       {showMenu && (
-        <Box
+        <TextMenu
           ref={menuRef}
-          sx={{
-            position: 'absolute',
+          onOptionClick={handleOptionClick}
+          style={{
             top: menuPosition.y,
-            left: menuPosition.x,
-            zIndex: 1000,
-            bgcolor: 'white',
-            boxShadow: 'md',
-            borderRadius: 'sm'
+            left: menuPosition.x
           }}
-        >
-          <TextMenu onOptionClick={handleOptionClick} />
-        </Box>
+        />
       )}
 
       {showStudyCard && <StudyCard cards={cards} onCancel={() => setShowStudyCard(false)} />}

@@ -2,7 +2,8 @@
   padding: 8px 12px;
   font-size: 16px;
   border: none;
-  border-bottom: 1px solid #ccc; /* Add border-bottom instead of full border */
+  border-bottom: 1px solid #ccc;
+  /* Add border-bottom instead of full border */
   border-radius: 0;
   transition: border-color 0.3s ease;
 }
@@ -34,7 +35,8 @@ body {
 .booksCreated {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 32px; /* more breathing room */
+  gap: 32px;
+  /* more breathing room */
   width: 100%;
   max-width: 1200px;
   justify-items: center;
@@ -45,15 +47,19 @@ body {
 }
 
 .book {
-  background-color: #4caf50; /* A nicer green color */
-  color: white; /* Make text stand out */
+  background-color: #4caf50;
+  /* A nicer green color */
+  color: white;
+  /* Make text stand out */
   padding: 10px;
   margin: 10px;
   height: 160px;
   width: 120px;
   position: relative;
-  border-radius: 5px; /* Rounded corners */
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); /* Add shadow for 3D effect */
+  border-radius: 5px;
+  /* Rounded corners */
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+  /* Add shadow for 3D effect */
   transition:
     transform 0.3s,
     box-shadow 0.3s;
@@ -66,8 +72,10 @@ body {
   left: 0;
   height: 100%;
   width: 20px;
-  background-color: #388e3c; /* Darker shade for spine */
-  border-radius: 5px 0 0 5px; /* Rounded corners */
+  background-color: #388e3c;
+  /* Darker shade for spine */
+  border-radius: 5px 0 0 5px;
+  /* Rounded corners */
 }
 
 .book div {
@@ -78,8 +86,10 @@ body {
 
 .book:hover {
   cursor: pointer;
-  transform: scale(1.05); /* Slightly enlarge the book */
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5); /* Stronger shadow on hover */
+  transform: scale(1.05);
+  /* Slightly enlarge the book */
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+  /* Stronger shadow on hover */
 }
 
 .searchSection {
@@ -136,12 +146,16 @@ body {
 
 /* Book Sidebar */
 .book-sidebar {
-  width: 15%; /* Adjusted for better spacing */
+  width: 15%;
+  /* Adjusted for better spacing */
   min-width: 15%;
-  background-color: #2c3e50; /* Darker shade for better focus */
-  color: #ecf0f1; /* Light text for contrast */
+  background-color: #2c3e50;
+  /* Darker shade for better focus */
+  color: #ecf0f1;
+  /* Light text for contrast */
   padding: 20px;
-  overflow-y: auto; /* Ensures scrollability on overflow */
+  overflow-y: auto;
+  /* Ensures scrollability on overflow */
 }
 
 .book-sidebar h2 {
@@ -291,19 +305,6 @@ body {
   text-align: center;
 }
 
-div[data-lexical-editor="true"] span,
-div[data-lexical-editor="true"] mark {
-  background-color: transparent !important;
-}
-
-.preview-page span,
-.preview-page mark,
-.preview-page [style*="background-color"],
-.preview-page [data-lexical-text="true"] {
-  background-color: transparent !important;
-}
-
-
 .form-group {
   display: flex;
   flex-direction: row;
@@ -429,10 +430,14 @@ div[data-lexical-editor="true"] mark {
 }
 
 .preview-content {
-  font-family: 'Times New Roman', serif;
-  font-size: 12pt;
-  line-height: 1.5;
-  color: #111;
+  font-family: 'Segoe UI', 'Helvetica', sans-serif;
+  /* Match main editor */
+  font-size: 16px;
+  /* Match main editor */
+  line-height: 1.6;
+  /* Match main editor */
+  color: #2e2e2e;
+  /* Match main editor */
   word-break: break-word;
 }
 
@@ -454,4 +459,3 @@ div[data-lexical-editor="true"] mark {
   display: block;
   margin: 0.3em auto;
 }
-

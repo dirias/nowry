@@ -1,7 +1,7 @@
 import React from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { FORMAT_ELEMENT_COMMAND } from 'lexical'
-import { Dropdown, Menu, MenuItem, IconButton } from '@mui/joy'
+import { Dropdown, Menu, MenuItem, MenuButton, IconButton } from '@mui/joy'
 
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react'
 
@@ -14,9 +14,9 @@ const AlignDropdown = () => {
 
   return (
     <Dropdown>
-      <IconButton size='sm' variant='outlined' color='neutral'>
+      <MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'outlined', color: 'neutral', size: 'sm' } }}>
         <AlignLeft size={16} />
-      </IconButton>
+      </MenuButton>
       <Menu>
         <MenuItem onClick={() => setAlign('left')}>
           <AlignLeft size={16} style={{ marginRight: 8 }} />

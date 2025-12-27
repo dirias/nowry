@@ -1,3 +1,4 @@
+import React from 'react'
 import { DecoratorNode } from 'lexical'
 
 export class ImageNode extends DecoratorNode {
@@ -34,6 +35,10 @@ export class ImageNode extends DecoratorNode {
       src: this.__src,
       altText: this.__altText
     }
+  }
+
+  decorate() {
+    return <img src={this.__src} alt={this.__altText} style={{ maxWidth: '100%' }} />
   }
 }
 
