@@ -7,6 +7,7 @@ import { $createHorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
 import { Box, Dropdown, Menu, MenuItem, MenuButton, IconButton } from '@mui/joy'
 import { Plus } from 'lucide-react'
 import { $createImageNode } from '../../nodes/ImageNode'
+import { INSERT_COLUMN_LAYOUT_COMMAND } from '../../plugin/ColumnPlugin'
 
 const InsertDropdown = () => {
   const [editor] = useLexicalComposerContext()
@@ -39,6 +40,10 @@ const InsertDropdown = () => {
     })
   }
 
+  const insertColumns = (columns) => {
+    editor.dispatchCommand(INSERT_COLUMN_LAYOUT_COMMAND, columns)
+  }
+
   return (
     <Dropdown>
       <MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'outlined', color: 'neutral', size: 'sm' } }}>
@@ -48,6 +53,8 @@ const InsertDropdown = () => {
         <MenuItem onClick={insertLink}>Insert Link</MenuItem>
         <MenuItem onClick={insertImage}>Insert Image</MenuItem>
         <MenuItem onClick={insertTable}>Insert Table</MenuItem>
+        <MenuItem onClick={() => insertColumns(2)}>Insert 2 Columns</MenuItem>
+        <MenuItem onClick={() => insertColumns(3)}>Insert 3 Columns</MenuItem>
         <MenuItem onClick={insertLine}>Insert Horizontal Line</MenuItem>
       </Menu>
     </Dropdown>

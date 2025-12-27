@@ -28,6 +28,7 @@ import { Login, Register, ResetPassword } from './components/User'
 import { Home } from './components/User/Home'
 import { EditorHome, BookHome } from './components/Books'
 import { CardHome } from './components/Cards'
+import StudySession from './components/Cards/StudySession'
 
 const App = () => {
   const [isUserLoggedIn, setUserLoggedIn] = useState(false)
@@ -80,6 +81,7 @@ const App = () => {
               <Route path='/book/:id' element={<EditorHome />} />
               {isLoggedIn ? <Route path='/' element={<Home />} /> : <Route path='/' element={<Landing />} />}
               <Route path='/cards' element={<CardHome />} />
+              <Route path='/study/:deckId' element={<StudySession />} />
               <Route path='/login' element={<Login />} />
               <Route path='/register' element={<Register />} />
               <Route path='/resetPassword' element={<ResetPassword />} />

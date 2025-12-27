@@ -1,21 +1,26 @@
 import * as React from 'react'
-import Sheet from '@mui/joy/Sheet'
-import Stack from '@mui/joy/Stack'
-import Typography from '@mui/joy/Typography'
-import Box from '@mui/joy/Box'
+import { Sheet, Stack, Typography, Box } from '@mui/joy'
 import StudyCard from './StudyCard'
 
-const cards = [
-  { title: 'What is AI?', content: 'AI stands for Artificial Intelligence...', tags: 'AI' },
-  { title: 'What is Machine Learning?', content: 'Machine Learning is...', tags: 'ML' },
-  { title: 'What is Deep Learning?', content: 'Deep Learning uses neural nets...', tags: 'DL' },
-  { title: 'What is NLP?', content: 'Natural Language Processing...', tags: 'NLP' },
-  { title: 'What is CV?', content: 'Computer Vision is...', tags: 'CV' },
-  { title: 'What is RL?', content: 'Reinforcement Learning uses reward...', tags: 'RL' },
-  { title: 'What is a Neural Network?', content: 'Neural nets are...', tags: 'NN' }
-]
+export default function LastCardsAdded({ cards = [], onEdit, onDelete }) {
+  if (cards.length === 0) {
+    return (
+      <Sheet
+        variant='soft'
+        sx={{
+          borderRadius: 'lg',
+          p: 4,
+          textAlign: 'center',
+          backgroundColor: '#f1fbfb'
+        }}
+      >
+        <Typography level='body-md' sx={{ color: 'neutral.500' }}>
+          No hay tarjetas recientes.
+        </Typography>
+      </Sheet>
+    )
+  }
 
-export default function LastCardsAdded() {
   return (
     <Sheet
       variant='soft'
@@ -31,10 +36,6 @@ export default function LastCardsAdded() {
         overflowX: 'auto'
       }}
     >
-      <Typography level='h3' sx={{ fontWeight: 'bold', mb: 3, color: 'primary.700' }}>
-        Últimas tarjetas añadidas
-      </Typography>
-
       <Box
         sx={{
           overflowX: 'auto',
@@ -57,7 +58,7 @@ export default function LastCardsAdded() {
           }}
         >
           {cards.map((card, index) => (
-            <StudyCard key={index} card={card} />
+            <StudyCard key={card._id || index} card={card} onEdit={onEdit} onDelete={onDelete} />
           ))}
         </Stack>
       </Box>

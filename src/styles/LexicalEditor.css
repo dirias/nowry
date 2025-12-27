@@ -191,3 +191,60 @@ ol.editor-list-ol {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
+
+/* ====== Multi-Column Layout Support (Custom Lexical Nodes) ====== */
+.editor-column-container {
+  display: grid;
+  gap: 1.5rem;
+  margin: 1rem 0;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  transition: border-color 0.2s;
+}
+
+.editor-column-container:hover {
+  border-color: #cbd5e1;
+}
+
+.editor-column {
+  min-height: 100px;
+  padding-right: 0.75rem;
+  border-right: 1px solid #e5e7eb;
+}
+
+.editor-column:last-child {
+  border-right: none;
+  padding-right: 0;
+  padding-left: 0.75rem;
+}
+
+.editor-column p {
+  margin-bottom: 0.75em;
+}
+
+/* Legacy support for imported HTML columns */
+.editor-content div[style*='grid'] {
+  display: grid !important;
+  gap: 1.5rem !important;
+  margin: 1rem 0;
+}
+
+.editor-content .column-left,
+.editor-content .column-right {
+  padding-right: 0.75rem;
+}
+
+.editor-content .column-left {
+  border-right: 1px solid #e5e7eb;
+}
+
+.editor-content .column-right {
+  padding-left: 0.75rem;
+  padding-right: 0;
+  border-right: none;
+}
+
+.editor-content .column-left p,
+.editor-content .column-right p {
+  margin-bottom: 0.75em;
+}

@@ -1,4 +1,3 @@
-/* eslint-env es6 */
 import axios from 'axios'
 
 // Get base URL from environment or use default
