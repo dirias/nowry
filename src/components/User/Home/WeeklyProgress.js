@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Box, Typography, Sheet, CircularProgress } from '@mui/joy'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Box, Typography, Card, CardContent, CircularProgress, Stack, Chip } from '@mui/joy'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { cardsService } from '../../../api/services'
 
 export default function WeeklyProgress() {
@@ -14,7 +14,24 @@ export default function WeeklyProgress() {
   const fetchStatistics = async () => {
     try {
       const stats = await cardsService.getStatistics()
-      setWeeklyData(stats.weekly_progress || [])
+      let weeklyData = stats.weekly_progress || []
+
+      // Fallback: If old format (just 'cards'), convert to new format
+      weeklyData = weeklyData.map((day) => {
+        if (day.cards !== undefined && day.flashcards === undefined) {
+          // Old format - distribute evenly or treat all as flashcards
+          return {
+            ...day,
+            flashcards: day.cards || 0,
+            quizzes: 0,
+            visual: 0,
+            books: 0
+          }
+        }
+        return day
+      })
+
+      setWeeklyData(weeklyData)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching statistics:', error)
@@ -24,48 +41,72 @@ export default function WeeklyProgress() {
 
   if (loading) {
     return (
-      <Sheet variant='soft' sx={{ p: 3, borderRadius: 'md', textAlign: 'center' }}>
-        <CircularProgress />
-      </Sheet>
+      <Card variant='outlined' sx={{ height: '100%' }}>
+        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 350 }}>
+          <CircularProgress />
+        </CardContent>
+      </Card>
     )
   }
 
-  const maxCards = Math.max(...weeklyData.map((d) => d.cards), 1)
+  // Calculate totals for each type
+  const totals = {
+    flashcards: weeklyData.reduce((sum, d) => sum + (d.flashcards || 0), 0),
+    quizzes: weeklyData.reduce((sum, d) => sum + (d.quizzes || 0), 0),
+    visual: weeklyData.reduce((sum, d) => sum + (d.visual || 0), 0),
+    books: weeklyData.reduce((sum, d) => sum + (d.books || 0), 0)
+  }
+  const totalAll = totals.flashcards + totals.quizzes + totals.visual + totals.books
 
   return (
-    <Sheet variant='soft' sx={{ p: 3, borderRadius: 'md' }}>
-      <Typography level='title-md' sx={{ mb: 3, fontWeight: 'bold' }}>
-        📊 Progreso semanal
-      </Typography>
-
-      <ResponsiveContainer width='100%' height={250}>
-        <LineChart data={weeklyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray='3 3' opacity={0.3} />
-          <XAxis dataKey='day' tick={{ fontSize: 12 }} stroke='#888' />
-          <YAxis
-            tick={{ fontSize: 12 }}
-            stroke='#888'
-            domain={[0, maxCards + 2]}
-            label={{ value: 'Tarjetas', angle: -90, position: 'insideLeft', fontSize: 12 }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              padding: '8px'
-            }}
-            labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
-          />
-          <Line type='monotone' dataKey='cards' stroke='#0B6BCB' strokeWidth={3} dot={{ r: 5, fill: '#0B6BCB' }} />
-        </LineChart>
-      </ResponsiveContainer>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-          Total esta semana: <strong>{weeklyData.reduce((sum, d) => sum + d.cards, 0)} tarjetas</strong>
+    <Card variant='outlined' sx={{ height: '100%' }}>
+      <CardContent>
+        <Typography level='title-lg' fontWeight={600} sx={{ mb: 3 }}>
+          📊 Weekly Activity
         </Typography>
-      </Box>
-    </Sheet>
+
+        <ResponsiveContainer width='100%' height={250}>
+          <LineChart data={weeklyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray='3 3' opacity={0.3} />
+            <XAxis dataKey='day' tick={{ fontSize: 12 }} stroke='#888' />
+            <YAxis tick={{ fontSize: 12 }} stroke='#888' label={{ value: 'Items', angle: -90, position: 'insideLeft', fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#fff',
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                padding: '8px'
+              }}
+              labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+            />
+            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+            <Line type='monotone' dataKey='flashcards' stroke='#0B6BCB' name='Flashcards' strokeWidth={2} dot={{ r: 4 }} />
+            <Line type='monotone' dataKey='quizzes' stroke='#F57C00' name='Quizzes' strokeWidth={2} dot={{ r: 4 }} />
+            <Line type='monotone' dataKey='visual' stroke='#0288D1' name='Visual' strokeWidth={2} dot={{ r: 4 }} />
+            <Line type='monotone' dataKey='books' stroke='#388E3C' name='Books' strokeWidth={2} dot={{ r: 4 }} />
+          </LineChart>
+        </ResponsiveContainer>
+
+        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Stack direction='row' spacing={2} flexWrap='wrap'>
+            <Chip size='sm' variant='soft' color='primary'>
+              📇 Flashcards: {totals.flashcards}
+            </Chip>
+            <Chip size='sm' variant='soft' color='warning'>
+              ❓ Quizzes: {totals.quizzes}
+            </Chip>
+            <Chip size='sm' variant='soft' color='info'>
+              🎨 Visual: {totals.visual}
+            </Chip>
+            <Chip size='sm' variant='soft' color='success'>
+              📚 Books: {totals.books}
+            </Chip>
+            <Chip size='sm' variant='solid'>
+              Total: {totalAll}
+            </Chip>
+          </Stack>
+        </Box>
+      </CardContent>
+    </Card>
   )
 }

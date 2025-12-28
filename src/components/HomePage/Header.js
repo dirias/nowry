@@ -1,10 +1,12 @@
 // src/components/Header/Header.js
 import * as React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Box, Typography, Button, IconButton, Sheet, Stack, Avatar, Tooltip } from '@mui/joy'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Box, Typography, Button, IconButton, Sheet, Stack, Avatar, Tooltip, Dropdown, Menu, MenuButton, MenuItem } from '@mui/joy'
 import LogoutIcon from '@mui/icons-material/Logout'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
+import PersonIcon from '@mui/icons-material/Person'
+import SettingsIcon from '@mui/icons-material/Settings'
 import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 
@@ -15,8 +17,17 @@ const ModeToggle = () => {
 
   return (
     <Tooltip title={isDark ? 'Light mode' : 'Dark mode'}>
-      <IconButton variant='soft' size='sm' color='neutral' onClick={() => setMode(isDark ? 'light' : 'dark')} sx={{ ml: 1 }}>
-        {isDark ? <Brightness7Icon /> : <Brightness4Icon />}
+      <IconButton
+        variant='plain'
+        size='sm'
+        color='neutral'
+        onClick={() => setMode(isDark ? 'light' : 'dark')}
+        sx={{
+          borderRadius: 'sm',
+          '&:hover': { bgcolor: 'background.level1' }
+        }}
+      >
+        {isDark ? <Brightness7Icon fontSize='small' /> : <Brightness4Icon fontSize='small' />}
       </IconButton>
     </Tooltip>
   )
@@ -24,6 +35,7 @@ const ModeToggle = () => {
 
 const Header = ({ username }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const isLoggedIn = localStorage.getItem('authToken')
 
   const logout = () => {
@@ -33,24 +45,26 @@ const Header = ({ username }) => {
     window.location.reload()
   }
 
+  const isActive = (path) => location.pathname === path
+
   return (
     <Sheet
       component='header'
-      color='primary'
-      variant='solid'
-      sx={{
-        backgroundColor: 'primary.solidBg',
-        color: 'primary.solidColor',
+      sx={(theme) => ({
+        borderBottom: '1px solid',
+        borderColor: 'divider',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        px: 4,
-        py: 2,
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        px: { xs: 2, md: 4 },
+        py: 1.5,
         position: 'sticky',
         top: 0,
-        zIndex: 1100
-      }}
+        zIndex: 1100,
+        backdropFilter: 'blur(12px)',
+        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(13, 17, 23, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+        boxShadow: theme.palette.mode === 'dark' ? 'md' : 'sm'
+      })}
     >
       {/* Logo + Title */}
       <Box
@@ -60,60 +74,148 @@ const Header = ({ username }) => {
           display: 'flex',
           alignItems: 'center',
           textDecoration: 'none',
-          color: 'inherit'
+          color: 'inherit',
+          transition: 'opacity 0.2s',
+          '&:hover': { opacity: 0.8 }
         }}
       >
-        <Box component='img' src={Logo} alt='Nowry logo' sx={{ height: 48, mr: 1 }} />
-        <Typography level='title-lg' sx={{ fontWeight: 'lg' }}>
+        <Box component='img' src={Logo} alt='Nowry logo' sx={{ height: 40, mr: 1.5 }} />
+        <Typography level='h4' fontWeight={700} sx={{ color: 'primary.600' }}>
           Nowry
         </Typography>
       </Box>
 
       {/* Navigation */}
-      <Stack direction='row' spacing={2} alignItems='center'>
+      <Stack direction='row' spacing={{ xs: 0.5, md: 1 }} alignItems='center'>
         {!isLoggedIn ? (
           <>
-            <Button variant='plain' color='neutral' component={Link} to='/about'>
+            <Button
+              variant='plain'
+              color='neutral'
+              component={Link}
+              to='/about'
+              size='sm'
+              sx={{
+                fontWeight: 500,
+                '&:hover': { bgcolor: 'background.level1' }
+              }}
+            >
               About
             </Button>
-            <Button variant='plain' color='neutral' component={Link} to='/contact'>
+            <Button
+              variant='plain'
+              color='neutral'
+              component={Link}
+              to='/contact'
+              size='sm'
+              sx={{
+                fontWeight: 500,
+                '&:hover': { bgcolor: 'background.level1' }
+              }}
+            >
               Contact
             </Button>
-            <Button variant='plain' color='neutral' component={Link} to='/services'>
-              Services
-            </Button>
-            <Button variant='plain' color='neutral' component={Link} to='/faq'>
-              FAQ
-            </Button>
-            <Button variant='soft' color='success' component={Link} to='/login'>
-              Login
+            <Button variant='soft' color='primary' component={Link} to='/login' size='sm' sx={{ ml: 1 }}>
+              Sign In
             </Button>
           </>
         ) : (
           <>
-            <Button variant='plain' color='neutral' component={Link} to='/study'>
+            <Button
+              variant={isActive('/study') ? 'soft' : 'plain'}
+              color={isActive('/study') ? 'primary' : 'neutral'}
+              component={Link}
+              to='/study'
+              size='sm'
+              sx={{
+                fontWeight: isActive('/study') ? 600 : 500,
+                '&:hover': { bgcolor: 'background.level1' }
+              }}
+            >
               Study
             </Button>
-            <Button variant='plain' color='neutral' component={Link} to='/cards'>
+            <Button
+              variant={isActive('/cards') ? 'soft' : 'plain'}
+              color={isActive('/cards') ? 'primary' : 'neutral'}
+              component={Link}
+              to='/cards'
+              size='sm'
+              sx={{
+                fontWeight: isActive('/cards') ? 600 : 500,
+                '&:hover': { bgcolor: 'background.level1' }
+              }}
+            >
               Cards
             </Button>
-            <Button variant='plain' color='neutral' component={Link} to='/books'>
+            <Button
+              variant={isActive('/books') ? 'soft' : 'plain'}
+              color={isActive('/books') ? 'primary' : 'neutral'}
+              component={Link}
+              to='/books'
+              size='sm'
+              sx={{
+                fontWeight: isActive('/books') ? 600 : 500,
+                '&:hover': { bgcolor: 'background.level1' }
+              }}
+            >
               Books
             </Button>
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <Avatar variant='soft' size='sm' color='neutral'>
-                {username?.charAt(0).toUpperCase()}
-              </Avatar>
-              <Typography level='body-sm'>{username}</Typography>
-              <Tooltip title='Logout'>
-                <IconButton variant='plain' color='neutral' onClick={logout}>
-                  <LogoutIcon />
-                </IconButton>
-              </Tooltip>
-            </Stack>
+
+            <Box sx={{ width: 1, height: 24, bgcolor: 'divider', mx: 1 }} />
+
+            <ModeToggle />
+
+            {/* User Menu */}
+            <Dropdown>
+              <MenuButton
+                slots={{ root: IconButton }}
+                slotProps={{
+                  root: {
+                    variant: 'plain',
+                    color: 'neutral',
+                    size: 'sm'
+                  }
+                }}
+              >
+                <Avatar
+                  size='sm'
+                  color='primary'
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  {username?.charAt(0).toUpperCase()}
+                </Avatar>
+              </MenuButton>
+              <Menu placement='bottom-end' size='sm'>
+                <MenuItem disabled>
+                  <Stack spacing={0.5}>
+                    <Typography level='body-sm' fontWeight={600}>
+                      {username}
+                    </Typography>
+                    <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
+                      Manage your account
+                    </Typography>
+                  </Stack>
+                </MenuItem>
+                <MenuItem onClick={() => navigate('/profile')}>
+                  <PersonIcon fontSize='small' sx={{ mr: 1 }} />
+                  Profile
+                </MenuItem>
+                <MenuItem onClick={() => navigate('/settings')}>
+                  <SettingsIcon fontSize='small' sx={{ mr: 1 }} />
+                  Settings
+                </MenuItem>
+                <MenuItem onClick={logout} color='danger'>
+                  <LogoutIcon fontSize='small' sx={{ mr: 1 }} />
+                  Logout
+                </MenuItem>
+              </Menu>
+            </Dropdown>
           </>
         )}
-        <ModeToggle />
+        {!isLoggedIn && <ModeToggle />}
       </Stack>
     </Sheet>
   )

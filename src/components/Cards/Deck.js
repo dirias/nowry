@@ -15,13 +15,40 @@ import {
   MenuButton,
   MenuItem
 } from '@mui/joy'
+import QuizIcon from '@mui/icons-material/Quiz'
+import StyleIcon from '@mui/icons-material/Style'
+import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import SchoolIcon from '@mui/icons-material/School'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 
 export default function Deck({ deck, onStudy, onEdit, onDelete }) {
-  const { name: deckName, total_cards: deckTotal, image_url: url, status = 'default', progress = null } = deck
+  const { name: deckName, total_cards: deckTotal, image_url: url, status = 'default', progress = null, deck_type } = deck
+
+  // Configuration for different deck types
+  let config = {
+    icon: StyleIcon,
+    label: 'Card',
+    gradient: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
+    color: 'primary.600'
+  }
+
+  if (deck_type === 'quiz') {
+    config = {
+      icon: QuizIcon,
+      label: 'Question',
+      gradient: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
+      color: 'warning.600'
+    }
+  } else if (deck_type === 'visual') {
+    config = {
+      icon: AccountTreeIcon,
+      label: 'Diagram',
+      gradient: 'linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%)', // Cyan
+      color: 'info.600'
+    }
+  }
 
   const statusColor =
     {
@@ -49,11 +76,11 @@ export default function Deck({ deck, onStudy, onEdit, onDelete }) {
           transform: 'translateY(-2px)',
           boxShadow: 'md'
         },
-        position: 'relative'
+        position: 'relative',
+        bgcolor: 'background.surface'
       }}
     >
       <Box sx={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 1, zIndex: 1, alignItems: 'center' }}>
-        {/* Badge */}
         {statusLabel && (
           <Chip
             size='sm'
@@ -61,13 +88,11 @@ export default function Deck({ deck, onStudy, onEdit, onDelete }) {
             color={statusColor}
             startDecorator={status === 'attention' ? '⚠️' : '✨'}
             sx={{
-              px: 1.2,
-              fontSize: 11,
-              borderRadius: 'xl',
+              px: 1,
+              fontSize: 10,
+              borderRadius: 'md',
               fontWeight: 600,
-              overflow: 'visible', // Fix cut-off
-              backgroundColor: status === 'attention' ? '#ffe5e5' : status === 'new' ? '#e5fff1' : 'transparent',
-              color: status === 'attention' ? '#b30000' : status === 'new' ? '#027a4c' : '#333'
+              bgcolor: 'background.surface'
             }}
           >
             {statusLabel}
@@ -75,7 +100,17 @@ export default function Deck({ deck, onStudy, onEdit, onDelete }) {
         )}
 
         <Dropdown>
-          <MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'plain', color: 'neutral', size: 'sm' } }}>
+          <MenuButton
+            slots={{ root: IconButton }}
+            slotProps={{
+              root: {
+                variant: 'plain',
+                color: 'neutral',
+                size: 'sm',
+                sx: { bgcolor: 'background.surface', borderRadius: '50%', '&:hover': { bgcolor: 'background.level1' } }
+              }
+            }}
+          >
             <MoreVertIcon />
           </MenuButton>
           <Menu placement='bottom-end'>
@@ -90,56 +125,50 @@ export default function Deck({ deck, onStudy, onEdit, onDelete }) {
       </Box>
 
       {/* Deck Info */}
-      <Typography level='title-md' sx={{ fontWeight: 600 }}>
+      <Typography level='title-md' sx={{ fontWeight: 600, mt: 0.5 }}>
         {deckName}
       </Typography>
-      <Typography level='body-xs' textColor='neutral.500'>
-        Total: {deckTotal}
+
+      {/* Minimal Metadata Row */}
+      <Typography level='body-xs' textColor='neutral.500' sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+        <config.icon sx={{ fontSize: 14 }} />
+        {deckTotal} {deckTotal === 1 ? config.label : `${config.label}s`}
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1 }}>
-        {Array.isArray(deck.tags) ? (
-          deck.tags.slice(0, 3).map((tag, idx) => (
-            <Chip key={idx} size='sm' variant='soft' color='neutral' sx={{ fontSize: '9px', fontWeight: 600 }}>
-              {tag.toUpperCase()}
-            </Chip>
-          ))
-        ) : deck.tags ? (
-          <Chip size='sm' variant='soft' color='neutral' sx={{ fontSize: '9px', fontWeight: 600 }}>
-            {deck.tags.toUpperCase()}
-          </Chip>
-        ) : null}
+      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5, minHeight: 20 }}>
+        {Array.isArray(deck.tags)
+          ? deck.tags.slice(0, 3).map((tag, idx) => (
+              <Chip
+                key={idx}
+                size='sm'
+                variant='outlined'
+                color='neutral'
+                sx={{ fontSize: '9px', border: 'none', bgcolor: 'background.level1' }}
+              >
+                #{tag.toLowerCase()}
+              </Chip>
+            ))
+          : null}
       </Box>
 
-      {/* Flag or icon */}
-      <AspectRatio ratio='4/3' sx={{ borderRadius: 'sm', my: 1 }}>
+      {/* Dynamic Cover Area */}
+      <AspectRatio ratio='2/1' sx={{ borderRadius: 'md', bgcolor: 'transparent' }}>
         {url ? (
-          <img
-            src={url}
-            alt={deckName}
-            loading='lazy'
-            onError={(e) => {
-              e.target.style.display = 'none'
-              e.target.nextSibling.style.display = 'flex'
+          <img src={url} alt={deckName} loading='lazy' style={{ borderRadius: 8 }} />
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundImage: config.gradient,
+              color: config.color,
+              borderRadius: 'md'
             }}
-          />
-        ) : null}
-        <Box
-          sx={{
-            display: url ? 'none' : 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'primary.50',
-            color: 'primary.500',
-            flexDirection: 'column',
-            gap: 1
-          }}
-        >
-          <SchoolIcon sx={{ fontSize: '2rem', opacity: 0.5 }} />
-          <Typography level='h2' sx={{ opacity: 0.2, fontWeight: 'bold' }}>
-            {deckName?.charAt(0).toUpperCase()}
-          </Typography>
-        </Box>
+          >
+            <config.icon sx={{ fontSize: '2.5rem', opacity: 0.8 }} />
+          </Box>
+        )}
       </AspectRatio>
 
       {/* Optional progress */}
@@ -147,7 +176,7 @@ export default function Deck({ deck, onStudy, onEdit, onDelete }) {
 
       {/* Call to action */}
       <CardActions>
-        <Button size='sm' variant='solid' color='primary' onClick={() => onStudy?.(deck)}>
+        <Button size='sm' variant='solid' color='primary' onClick={() => onStudy?.(deck)} fullWidth>
           Study
         </Button>
       </CardActions>

@@ -43,9 +43,11 @@ export default function GeneratedCards({ cards = [], onCancel, onGenerateAgain }
   const loadDecks = async () => {
     try {
       const data = await decksService.getAll()
-      setDecks(data)
-      if (data.length > 0) {
-        setSelectedDeckId(data[0]._id)
+      // Filter Flashcard decks (explicit 'flashcard' or missing type for legacy)
+      const flashcardDecks = data.filter((d) => d.deck_type === 'flashcard' || !d.deck_type)
+      setDecks(flashcardDecks)
+      if (flashcardDecks.length > 0) {
+        setSelectedDeckId(flashcardDecks[0]._id)
       }
     } catch (error) {
       console.error('Error loading decks:', error)
@@ -75,7 +77,11 @@ export default function GeneratedCards({ cards = [], onCancel, onGenerateAgain }
     if (!newDeckName.trim()) return
     try {
       setLoading(true)
-      const newDeck = await decksService.create({ name: newDeckName, description: 'Created from generated cards' })
+      const newDeck = await decksService.create({
+        name: newDeckName,
+        description: 'Created from generated cards',
+        deck_type: 'flashcard'
+      })
       setDecks([...decks, newDeck])
       setSelectedDeckId(newDeck._id) // Auto-select new deck
       setNewDeckName('')
