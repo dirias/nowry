@@ -6,13 +6,31 @@ import { WarningWindow, SuccessWindow, Error as ErrorWindow } from '../Messages'
 import BookEditor from './BookEditor'
 import Book from './Book'
 import ImportPreviewModal from './ImportPreviewModal'
-import { Box, Typography, Input, Button, Sheet, Stack, IconButton, Menu, MenuItem, Skeleton, Card, CardContent, Chip, Grid } from '@mui/joy'
+import {
+  Box,
+  Typography,
+  Input,
+  Button,
+  Sheet,
+  Stack,
+  IconButton,
+  Menu,
+  MenuItem,
+  Skeleton,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  Container,
+  AspectRatio
+} from '@mui/joy'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import AddIcon from '@mui/icons-material/Add'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import SearchIcon from '@mui/icons-material/Search'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
 
 export default function BookHome() {
   const [books, setBooks] = useState([])
@@ -209,68 +227,155 @@ export default function BookHome() {
   }
 
   return (
-    <Box sx={{ p: 4, maxWidth: 1400, mx: 'auto' }}>
+    <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Header with Stats */}
       <Box sx={{ mb: 4 }}>
         <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center' mb={3}>
           <Box>
-            <Typography level='h2' sx={{ mb: 0.5, fontWeight: 'bold' }}>
-              📚 Biblioteca
+            <Typography level='h2' fontWeight={700} sx={{ mb: 0.5 }}>
+              📚 Library
             </Typography>
             <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-              {allBooks.length} {allBooks.length === 1 ? 'libro' : 'libros'} en tu colección
+              Your personal collection
             </Typography>
           </Box>
 
-          <Stack direction='row' spacing={2}>
+          <Stack direction='row' spacing={1.5}>
             <Button
               startDecorator={<AddIcon />}
               onClick={handleCreateBook}
-              size='lg'
+              size='md'
               variant='solid'
               color='primary'
-              sx={{
-                borderRadius: 'lg',
-                px: 3
-              }}
+              sx={{ borderRadius: 'md' }}
             >
-              Crear libro
+              Create Book
             </Button>
             <Button
               startDecorator={<UploadFileIcon />}
               {...getRootProps()}
-              size='lg'
+              size='md'
               variant='soft'
               color='success'
               loading={uploading}
-              sx={{
-                borderRadius: 'lg',
-                px: 3
-              }}
+              sx={{ borderRadius: 'md' }}
             >
               <input {...getInputProps()} />
-              Importar
+              Import
             </Button>
           </Stack>
         </Stack>
 
-        {/* Search Bar */}
+        {/* Stats Dashboard */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid xs={12} sm={4}>
+            <Card variant='soft' color='primary'>
+              <CardContent>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 'md',
+                      bgcolor: 'primary.solidBg',
+                      color: 'primary.solidColor'
+                    }}
+                  >
+                    <AutoStoriesIcon />
+                  </Box>
+                  <Box>
+                    <Typography level='h3' fontWeight={700}>
+                      {allBooks.length}
+                    </Typography>
+                    <Typography level='body-sm' sx={{ color: 'primary.600' }}>
+                      Total Books
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid xs={12} sm={4}>
+            <Card variant='soft' color='success'>
+              <CardContent>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 'md',
+                      bgcolor: 'success.solidBg',
+                      color: 'success.solidColor'
+                    }}
+                  >
+                    <MenuBookIcon />
+                  </Box>
+                  <Box>
+                    <Typography level='h3' fontWeight={700}>
+                      {
+                        allBooks.filter((b) => {
+                          if (!b.updated_at) return false
+                          const daysSince = (Date.now() - new Date(b.updated_at).getTime()) / (1000 * 60 * 60 * 24)
+                          return daysSince <= 7
+                        }).length
+                      }
+                    </Typography>
+                    <Typography level='body-sm' sx={{ color: 'success.600' }}>
+                      Updated This Week
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid xs={12} sm={4}>
+            <Card variant='soft' color='warning'>
+              <CardContent>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 'md',
+                      bgcolor: 'warning.solidBg',
+                      color: 'warning.solidColor'
+                    }}
+                  >
+                    <CloudUploadIcon />
+                  </Box>
+                  <Box>
+                    <Typography level='h3' fontWeight={700}>
+                      {allBooks.reduce((sum, b) => sum + (b.page_count || 0), 0)}
+                    </Typography>
+                    <Typography level='body-sm' sx={{ color: 'warning.600' }}>
+                      Total Pages
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Search and Filter Bar */}
         {allBooks.length > 0 && (
-          <Input
-            placeholder='Buscar por título...'
-            value={searchTerm}
-            onChange={handleSearch}
-            startDecorator={<SearchIcon />}
-            size='lg'
-            sx={{
-              borderRadius: 'lg',
-              '--Input-focusedThickness': '2px'
-            }}
-          />
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3}>
+            <Input
+              placeholder='Search by title, author, or ISBN...'
+              value={searchTerm}
+              onChange={handleSearch}
+              startDecorator={<SearchIcon />}
+              size='md'
+              sx={{
+                flex: 1,
+                '--Input-focusedThickness': '0.25rem',
+                borderRadius: 'md'
+              }}
+            />
+          </Stack>
         )}
       </Box>
 
-      {/* Drop Zone */}
+      {/* Empty State / Drop Zone */}
       {allBooks.length === 0 && !loading && (
         <Card
           {...getRootProps()}
@@ -294,12 +399,12 @@ export default function BookHome() {
           <CardContent>
             <CloudUploadIcon sx={{ fontSize: 64, color: 'primary.500', mb: 2 }} />
             <Typography level='h4' sx={{ mb: 1 }}>
-              {isDragActive ? '¡Suelta los archivos aquí!' : 'Arrastra archivos o haz clic para importar'}
+              {isDragActive ? 'Drop files here!' : 'Drag files or click to import'}
             </Typography>
-            <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-              Soporta PDF, DOCX, DOC, TXT
+            <Typography level='body-sm' sx={{ color: 'neutral.600', mb: 3 }}>
+              Supports PDF, DOCX, DOC, TXT
             </Typography>
-            <Stack direction='row' spacing={1} justifyContent='center' sx={{ mt: 3 }}>
+            <Stack direction='row' spacing={1} justifyContent='center'>
               <Chip size='sm' color='primary' variant='soft'>
                 PDF
               </Chip>
@@ -326,18 +431,18 @@ export default function BookHome() {
           <CardContent>
             <AutoStoriesIcon sx={{ fontSize: 64, color: 'neutral.400', mb: 2 }} />
             <Typography level='h4' sx={{ mb: 1 }}>
-              Tu biblioteca está vacía
+              Your library is empty
             </Typography>
             <Typography level='body-md' sx={{ color: 'neutral.600', mb: 3 }}>
-              Crea un nuevo libro o importa documentos para comenzar
+              Create a new book or import documents to get started
             </Typography>
             <Stack direction='row' spacing={2} justifyContent='center'>
               <Button startDecorator={<AddIcon />} onClick={handleCreateBook} size='lg'>
-                Crear libro
+                Create Book
               </Button>
               <Button startDecorator={<UploadFileIcon />} {...getRootProps()} variant='soft' size='lg' loading={uploading}>
                 <input {...getInputProps()} />
-                Importar archivo
+                Import File
               </Button>
             </Stack>
           </CardContent>
@@ -345,58 +450,91 @@ export default function BookHome() {
       ) : searchTerm && books.length === 0 && !loading ? (
         <Card variant='outlined' sx={{ textAlign: 'center', py: 4 }}>
           <CardContent>
-            <Typography level='body-lg'>No hay libros que coincidan con &quot;{searchTerm}&quot;</Typography>
+            <Typography level='body-lg'>No books match &quot;{searchTerm}&quot;</Typography>
           </CardContent>
         </Card>
       ) : (
-        <Grid container spacing={3}>
-          {(loading ? Array.from({ length: 6 }) : books).map((book, idx) => (
-            <Grid key={idx} xs={12} sm={6} md={4} lg={3}>
-              <Sheet
-                variant='outlined'
-                sx={{
-                  p: 2.5,
-                  borderRadius: 'lg',
-                  position: 'relative',
-                  transition: 'all 0.25s ease',
-                  cursor: loading ? 'default' : 'pointer',
-                  '&:hover': loading
-                    ? {}
-                    : {
-                        boxShadow: 'lg',
-                        transform: 'translateY(-4px)',
-                        borderColor: 'primary.400'
-                      }
-                }}
-                onClick={loading ? undefined : () => handleBookClick(book)}
-              >
-                {loading ? (
-                  <>
-                    <Skeleton variant='rectangular' height={140} sx={{ borderRadius: 'sm', mb: 2 }} />
-                    <Skeleton variant='text' level='h4' sx={{ mb: 1 }} />
-                    <Skeleton variant='text' level='body-sm' width='60%' />
-                  </>
-                ) : (
-                  <>
-                    <IconButton
-                      size='sm'
-                      sx={{
-                        position: 'absolute',
-                        top: 12,
-                        right: 12,
-                        zIndex: 10
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        openMenu(e, book)
-                      }}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                    <Book book={book} handleBookClick={handleBookClick} handleContextMenu={handleContextMenu} />
-                  </>
-                )}
-              </Sheet>
+        <Grid container spacing={2.5}>
+          {(loading ? Array.from({ length: 8 }) : books).map((book, idx) => (
+            <Grid key={idx} xs={12} sm={6} md={4} lg={2.4}>
+              {loading ? (
+                <Card variant='outlined'>
+                  <Skeleton variant='rectangular' height={180} sx={{ borderRadius: 'sm', mb: 2 }} />
+                  <Skeleton variant='text' level='h4' sx={{ mb: 1 }} />
+                  <Skeleton variant='text' level='body-sm' width='60%' />
+                </Card>
+              ) : (
+                <Card
+                  variant='outlined'
+                  sx={{
+                    position: 'relative',
+                    transition: 'all 0.25s ease',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      boxShadow: 'lg',
+                      transform: 'translateY(-4px)',
+                      borderColor: 'primary.400'
+                    }
+                  }}
+                  onClick={() => handleBookClick(book)}
+                >
+                  <IconButton
+                    size='sm'
+                    variant='soft'
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      zIndex: 10,
+                      bgcolor: 'background.surface'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openMenu(e, book)
+                    }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+
+                  <CardContent sx={{ p: 0 }}>
+                    {/* Book Cover */}
+                    <AspectRatio ratio='2/3' sx={{ mb: 1.5 }}>
+                      {book.cover_image ? (
+                        <img src={book.cover_image} alt={book.title} loading='lazy' style={{ objectFit: 'cover' }} />
+                      ) : (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: book.cover_color || 'primary.softBg',
+                            color: 'primary.solidColor'
+                          }}
+                        >
+                          <MenuBookIcon sx={{ fontSize: 48 }} />
+                        </Box>
+                      )}
+                    </AspectRatio>
+
+                    {/* Book Info */}
+                    <Box sx={{ px: 2, pb: 2 }}>
+                      <Typography level='title-sm' fontWeight={600} noWrap sx={{ mb: 0.5 }}>
+                        {book.title}
+                      </Typography>
+                      <Typography level='body-xs' sx={{ color: 'neutral.600', mb: 1 }} noWrap>
+                        {book.author || 'Unknown Author'}
+                      </Typography>
+
+                      {/* Last Updated */}
+                      {book.updated_at && (
+                        <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
+                          Updated {new Date(book.updated_at).toLocaleDateString()}
+                        </Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
             </Grid>
           ))}
         </Grid>
@@ -456,6 +594,6 @@ export default function BookHome() {
         onConfirm={handleConfirmImport}
         loading={confirmingImport}
       />
-    </Box>
+    </Container>
   )
 }

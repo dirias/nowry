@@ -28,7 +28,9 @@ import { ColumnContainerNode, ColumnNode } from '../../nodes/ColumnNodes'
 import Toolbar from './Toolbar'
 import TextMenu from '../Menu/TextMenu'
 import StudyCard from '../Cards/GeneratedCards'
-import { cardsService } from '../../api/services'
+import QuestionnaireModal from '../Cards/QuestionnaireModal'
+import VisualizerModal from '../Cards/VisualizerModal'
+import { cardsService, quizzesService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
 
 const EditorTheme = {
@@ -78,8 +80,11 @@ export default function Editor({ activePage, content, setContent, onSave }) {
   const containerRef = useRef()
   const [showMenu, setShowMenu] = useState(false)
   const [showStudyCard, setShowStudyCard] = useState(false)
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false)
+  const [showVisualizer, setShowVisualizer] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const [cards, setCards] = useState([])
+  const [questionnaireData, setQuestionnaireData] = useState([])
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 })
 
   const editorConfig = {
@@ -153,6 +158,17 @@ export default function Editor({ activePage, content, setContent, onSave }) {
       } catch (error) {
         console.error('Error generating study card:', error)
       }
+    } else if (option === 'create_questionnaire' && selectedText) {
+      try {
+        // Default to easy/medium mixed, 5 questions
+        const response = await quizzesService.generate(selectedText, 5, 'Medium')
+        setQuestionnaireData(response)
+        setShowQuestionnaire(true)
+      } catch (error) {
+        console.error('Error generating questionnaire:', error)
+      }
+    } else if (option === 'create_visual_content' && selectedText) {
+      setShowVisualizer(true)
     }
   }
 
@@ -251,6 +267,8 @@ export default function Editor({ activePage, content, setContent, onSave }) {
       )}
 
       {showStudyCard && <StudyCard cards={cards} onCancel={() => setShowStudyCard(false)} />}
+      {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
+      {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}
     </Box>
   )
 }

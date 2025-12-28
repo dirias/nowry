@@ -34,6 +34,7 @@
     "keen-slider": "^6.8.6",
     "lexical": "^0.31.2",
     "lucide-react": "^0.396.0",
+    "mermaid": "^11.12.2",
     "react-bootstrap": "^2.10.2",
     "react-calendar-heatmap": "^1.10.0",
     "react-color": "^2.19.3",

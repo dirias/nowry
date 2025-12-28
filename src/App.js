@@ -29,6 +29,7 @@ import { Home } from './components/User/Home'
 import { EditorHome, BookHome } from './components/Books'
 import { CardHome } from './components/Cards'
 import StudySession from './components/Cards/StudySession'
+import StudyCenter from './components/Study/StudyCenter'
 
 const App = () => {
   const [isUserLoggedIn, setUserLoggedIn] = useState(false)
@@ -39,6 +40,22 @@ const App = () => {
   }, [])
 
   useEffect(() => {
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+      const timer = setTimeout(
+        () => {
+          setUserLoggedIn(false)
+          window.location.href = '/login'
+        },
+        60 * 60 * 1000
+      ) // 1 hour in milliseconds
+      return () => clearTimeout(timer) // Clear timeout on cleanup
+    }
+  }, [isUserLoggedIn])
+
+  const isLoggedIn = !!localStorage.getItem('authToken')
+
+  useEffect(() => {
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css'
@@ -47,8 +64,6 @@ const App = () => {
       document.head.removeChild(link)
     }
   }, [])
-
-  const isLoggedIn = localStorage.getItem('authToken')
 
   const ModeToggle = () => {
     const { mode, setMode } = useColorScheme()
@@ -81,6 +96,7 @@ const App = () => {
               <Route path='/book/:id' element={<EditorHome />} />
               {isLoggedIn ? <Route path='/' element={<Home />} /> : <Route path='/' element={<Landing />} />}
               <Route path='/cards' element={<CardHome />} />
+              <Route path='/study' element={<StudyCenter />} />
               <Route path='/study/:deckId' element={<StudySession />} />
               <Route path='/login' element={<Login />} />
               <Route path='/register' element={<Register />} />

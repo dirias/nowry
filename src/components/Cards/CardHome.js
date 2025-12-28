@@ -7,87 +7,109 @@ import {
   Box,
   Input,
   Chip,
-  Divider,
-  LinearProgress,
-  Skeleton,
   Button,
   Select,
   Option,
-  IconButton
+  IconButton,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  Card,
+  CardContent,
+  Grid,
+  Divider
 } from '@mui/joy'
-import { Plus, Search, Filter, X } from 'lucide-react'
+import { Search, Add, GridView, ViewList, FilterList, TrendingUp, School, Download, MoreVert } from '@mui/icons-material'
 import DecksView from './DecksView'
-import LastCardsAdded from './LastCardsAdded'
 import CreateDeckModal from './CreateDeckModal'
 import CreateCardModal from './CreateCardModal'
+import ManageContent from './ManageContent'
 import { decksService, cardsService } from '../../api/services'
 
-const CardHome = () => {
-  const [loading, setLoading] = useState(true)
+export default function CardHome() {
+  const navigate = useNavigate()
+
+  // State
+  const [activeTab, setActiveTab] = useState(0)
   const [decks, setDecks] = useState([])
   const [cards, setCards] = useState([])
-  const [searchTerm, setSearchTerm] = useState('')
-
-  const [selectedTags, setSelectedTags] = useState([])
-
-  // Modal states
-  const [isDeckModalOpen, setIsDeckModalOpen] = useState(false)
-  const [isCardModalOpen, setIsCardModalOpen] = useState(false)
-
-  // Edit data states
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterType, setFilterType] = useState('all')
+  const [sortBy, setSortBy] = useState('recent')
+  const [viewMode, setViewMode] = useState('grid')
+  const [showCreateDeck, setShowCreateDeck] = useState(false)
+  const [showCreateCard, setShowCreateCard] = useState(false)
   const [editingDeck, setEditingDeck] = useState(null)
   const [editingCard, setEditingCard] = useState(null)
 
-  const navigate = useNavigate()
-
-  const handleStudy = (deck) => {
-    navigate(`/study/${deck._id || deck.id}`)
-  }
-
-  const fetchData = async (silent = false) => {
-    if (!silent) setLoading(true)
-    try {
-      const [decksData, cardsData] = await Promise.all([decksService.getAll(), cardsService.getAll()])
-      setDecks(decksData || [])
-      setCards(cardsData || [])
-    } catch (error) {
-      console.error('Error fetching cards data:', error)
-    } finally {
-      if (!silent) setLoading(false)
-    }
-  }
+  // Stats
+  const [stats, setStats] = useState({
+    dueToday: 0,
+    streak: 5,
+    totalCards: 0
+  })
 
   useEffect(() => {
     fetchData()
   }, [])
 
-  // Extract all unique tags
-  const allTags = Array.from(new Set([...decks.flatMap((d) => d.tags || []), ...cards.flatMap((c) => c.tags || [])])).sort()
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const [decksData, cardsData] = await Promise.all([decksService.getAll(), cardsService.getAll()])
 
-  const handleTagToggle = (tag) => {
-    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+      setDecks(decksData)
+      setCards(cardsData)
+
+      // Calculate stats
+      const now = new Date()
+      const dueCards = cardsData.filter((card) => {
+        if (!card.next_review) return true
+        const nextReview = new Date(card.next_review)
+        return nextReview <= now
+      })
+
+      setStats({
+        dueToday: dueCards.length,
+        streak: 5, // TODO: Calculate real streak
+        totalCards: cardsData.length
+      })
+
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    }
   }
 
-  const handleDeckSaved = (savedDeck) => {
-    fetchData(true)
+  const handleStudy = (deck) => {
+    navigate(`/study/${deck._id}`)
+  }
+
+  const handleDeckSaved = () => {
+    fetchData()
+    setShowCreateDeck(false)
     setEditingDeck(null)
   }
 
-  const handleCardSaved = (savedCard) => {
-    fetchData(true)
+  const handleCardSaved = () => {
+    fetchData()
+    setShowCreateCard(false)
     setEditingCard(null)
   }
 
   const handleEditDeck = (deck) => {
     setEditingDeck(deck)
-    setIsDeckModalOpen(true)
+    setShowCreateDeck(true)
   }
 
   const handleDeleteDeck = async (deck) => {
-    if (window.confirm(`¿Estás seguro de que quieres eliminar el mazo "${deck.name}"?`)) {
+    if (window.confirm(`Are you sure you want to delete "${deck.name}"?`)) {
       try {
-        await decksService.delete(deck._id || deck.id)
-        fetchData(true)
+        await decksService.delete(deck._id)
+        fetchData()
       } catch (error) {
         console.error('Error deleting deck:', error)
       }
@@ -96,290 +118,249 @@ const CardHome = () => {
 
   const handleEditCard = (card) => {
     setEditingCard(card)
-    setIsCardModalOpen(true)
+    setShowCreateCard(true)
   }
 
   const handleDeleteCard = async (card) => {
-    if (window.confirm(`¿Estás seguro de que quieres eliminar la tarjeta "${card.title}"?`)) {
+    if (window.confirm('Are you sure you want to delete this card?')) {
       try {
-        await cardsService.delete(card._id || card.id)
-        fetchData(true)
+        await cardsService.delete(card._id)
+        fetchData()
       } catch (error) {
         console.error('Error deleting card:', error)
       }
     }
   }
 
-  const filteredDecks = decks.filter((deck) => {
-    const matchesSearch = deck.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTags = selectedTags.length === 0 || (deck.tags && selectedTags.every((tag) => deck.tags.includes(tag)))
-    return matchesSearch && matchesTags
-  })
+  // Filter and sort decks
+  const getFilteredDecks = () => {
+    let filtered = decks
 
-  const filteredCards = cards.filter((card) => {
-    const matchesSearch =
-      card.title?.toLowerCase().includes(searchTerm.toLowerCase()) || card.content?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTags = selectedTags.length === 0 || (card.tags && selectedTags.every((tag) => card.tags.includes(tag)))
-    return matchesSearch && matchesTags
-  })
+    // Filter by type
+    if (filterType !== 'all') {
+      filtered = filtered.filter((d) => d.deck_type === filterType)
+    }
+
+    // Filter by search
+    if (searchQuery) {
+      filtered = filtered.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    }
+
+    // Sort
+    switch (sortBy) {
+      case 'name':
+        filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'cards':
+        filtered = [...filtered].sort((a, b) => (b.total_cards || 0) - (a.total_cards || 0))
+        break
+      case 'recent':
+      default:
+        filtered = [...filtered].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+        break
+    }
+
+    return filtered
+  }
+
+  const filteredDecks = getFilteredDecks()
 
   return (
-    <Container maxWidth='lg' sx={{ py: 4, transition: 'background-color 0.3s ease' }}>
-      <Stack spacing={4} direction='column'>
-        {/* Header Title */}
-        {loading ? (
-          <Skeleton variant='text' width={300} sx={{ mx: 'auto', height: 40 }} />
-        ) : (
-          <Typography level='h2' sx={{ fontWeight: 'bold', color: 'primary.700', textAlign: 'center', transition: 'color 0.3s ease' }}>
-            ¡Sigue aprendiendo!
+    <Container maxWidth='xl' sx={{ py: 4 }}>
+      {/* Header */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between' alignItems='flex-start' sx={{ mb: 3 }}>
+        <Box>
+          <Typography level='h2' sx={{ mb: 0.5, fontWeight: 700 }}>
+            📚 Deck Library
           </Typography>
-        )}
-
-        {/* Search and Filters */}
-        <Box sx={{ maxWidth: 800, mx: 'auto', width: '100%' }}>
-          {loading ? (
-            <Skeleton variant='rectangular' height={40} sx={{ borderRadius: 'lg' }} />
-          ) : (
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center'>
-              <Input
-                placeholder='Buscar mazos o tarjetas...'
-                startDecorator={<Search size={18} />}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                variant='outlined'
-                fullWidth
-                sx={{
-                  borderRadius: 'lg',
-                  transition: 'all 0.3s ease',
-                  flex: 1
-                }}
-              />
-
-              {allTags.length > 0 && (
-                <Select
-                  multiple
-                  placeholder='Filtrar por etiquetas'
-                  value={selectedTags}
-                  onChange={(_, newValue) => setSelectedTags(newValue)}
-                  startDecorator={<Filter size={18} />}
-                  slotProps={{
-                    listbox: {
-                      sx: {
-                        borderRadius: 'md',
-                        boxShadow: 'md',
-                        border: '1px solid',
-                        borderColor: 'neutral.outlinedBorder',
-                        padding: '4px',
-                        gap: '2px'
-                      }
-                    }
-                  }}
-                  sx={{
-                    minWidth: 200,
-                    borderRadius: 'lg',
-                    backgroundColor: 'background.surface'
-                  }}
-                  renderValue={(selected) => (
-                    <Box sx={{ display: 'flex', gap: '0.25rem' }}>
-                      {selected.length === 0 ? (
-                        <Typography level='body-sm' textColor='neutral.400'>
-                          Etiquetas
-                        </Typography>
-                      ) : (
-                        <Chip variant='soft' color='primary' size='sm'>
-                          {selected.length} {selected.length === 1 ? 'etiqueta' : 'etiquetas'}
-                        </Chip>
-                      )}
-                    </Box>
-                  )}
-                >
-                  {allTags.map((tag) => (
-                    <Option
-                      key={tag}
-                      value={tag}
-                      sx={{
-                        minHeight: '40px',
-                        px: 1.5,
-                        py: 1,
-                        borderRadius: 'sm',
-                        cursor: 'pointer',
-                        backgroundColor: 'background.surface',
-                        color: 'text.primary',
-
-                        // Explicitly override ALL focus states to prevent "sticky" first item
-                        '&:focus': {
-                          backgroundColor: 'background.surface !important'
-                        },
-                        '&.Mui-focusVisible': {
-                          backgroundColor: 'background.surface !important',
-                          outline: 'none'
-                        },
-                        '&:focus-visible': {
-                          backgroundColor: 'background.surface !important'
-                        },
-
-                        // ONLY show blue background on actual mouse hover
-                        '&:hover': {
-                          backgroundColor: 'primary.softBg !important',
-                          color: 'primary.700'
-                        },
-
-                        // Selected items: no background change, just checkmark
-                        '&[aria-selected="true"]': {
-                          backgroundColor: 'background.surface !important',
-                          color: 'primary.700',
-                          fontWeight: 'bold',
-                          '&::after': {
-                            content: '"✓"',
-                            color: 'primary.500',
-                            fontSize: '1.1rem',
-                            marginLeft: 'auto'
-                          },
-                          // Even selected items only show blue on hover
-                          '&:hover': {
-                            backgroundColor: 'primary.softBg !important'
-                          },
-                          // But NOT on focus
-                          '&:focus': {
-                            backgroundColor: 'background.surface !important'
-                          }
-                        }
-                      }}
-                    >
-                      {tag}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-
-              {selectedTags.length > 0 && (
-                <IconButton size='sm' variant='plain' color='neutral' onClick={() => setSelectedTags([])} title='Limpiar filtros'>
-                  <X size={18} />
-                </IconButton>
-              )}
-            </Stack>
-          )}
+          <Typography level='body-md' sx={{ color: 'neutral.600' }}>
+            Manage your flashcards, quizzes, and visual learning materials
+          </Typography>
         </Box>
 
-        {/* Learning Summary */}
-        {loading ? (
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-            <Skeleton variant='rectangular' width={100} height={60} sx={{ borderRadius: 'md' }} />
-            <Skeleton variant='rectangular' width={100} height={60} sx={{ borderRadius: 'md' }} />
-            <Skeleton variant='rectangular' width={120} height={60} sx={{ borderRadius: 'md' }} />
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 3,
-              justifyContent: 'center',
-              alignItems: 'center',
-              p: 3,
-              borderRadius: 'lg',
-              backgroundColor: 'background.level1',
-              boxShadow: 'sm',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <Box textAlign='center'>
-              <Typography level='h4' fontWeight='lg'>
-                {cards.length}
-              </Typography>
-              <Typography level='body-sm' color='neutral'>
-                tarjetas en total
-              </Typography>
-            </Box>
-            <Divider orientation='vertical' sx={{ height: 40 }} />
-            <Box textAlign='center'>
-              <Typography level='h4' fontWeight='lg'>
-                Mazos: {decks.length}
-              </Typography>
-              <Chip size='sm' variant='soft' color={decks.length > 0 ? 'success' : 'neutral'}>
-                {decks.length > 0 ? 'Activo' : 'Sin mazos'}
-              </Chip>
-            </Box>
-            <Divider orientation='vertical' sx={{ height: 40 }} />
-            <Box textAlign='center'>
-              <Typography level='body-sm'>Progreso general</Typography>
-              <LinearProgress determinate value={75} sx={{ width: 120, borderRadius: 'md' }} />
-            </Box>
-          </Box>
-        )}
-
-        {/* Decks Section */}
-        <Box>
-          <Stack direction='row' justifyContent='space-between' alignItems='center' mb={2}>
-            <Typography level='h3' sx={{ fontWeight: 'bold', color: 'primary.700', transition: 'color 0.3s ease' }}>
-              Tus mazos
-            </Typography>
-            <Button
-              variant='soft'
-              startDecorator={<Plus size={18} />}
-              onClick={() => {
-                setEditingDeck(null)
-                setIsDeckModalOpen(true)
-              }}
-            >
-              Nuevo Mazo
-            </Button>
-          </Stack>
-          {loading ? (
-            <Skeleton variant='rectangular' height={200} sx={{ borderRadius: 'lg' }} />
-          ) : (
-            <DecksView decks={filteredDecks} onStudy={handleStudy} onEdit={handleEditDeck} onDelete={handleDeleteDeck} />
-          )}
-        </Box>
-
-        {/* Recently Added Cards Section */}
-        <Box>
-          <Stack direction='row' justifyContent='space-between' alignItems='center' mb={2}>
-            <Typography level='h3' sx={{ fontWeight: 'bold', color: 'primary.700', transition: 'color 0.3s ease' }}>
-              Tarjetas añadidas recientemente
-            </Typography>
-            <Button
-              variant='soft'
-              color='neutral'
-              startDecorator={<Plus size={18} />}
-              onClick={() => {
-                setEditingCard(null)
-                setIsCardModalOpen(true)
-              }}
-            >
-              Añadir Tarjeta
-            </Button>
-          </Stack>
-          {loading ? (
-            <Skeleton variant='rectangular' height={150} sx={{ borderRadius: 'lg' }} />
-          ) : (
-            <LastCardsAdded cards={filteredCards.slice(0, 10)} onEdit={handleEditCard} onDelete={handleDeleteCard} />
-          )}
-        </Box>
+        <Stack direction='row' spacing={1}>
+          <Button startDecorator={<TrendingUp />} onClick={() => navigate('/study')} variant='solid' color='primary' size='lg'>
+            Study Center
+          </Button>
+          <Button startDecorator={<Add />} onClick={() => setShowCreateDeck(true)} variant='soft' color='primary' size='lg'>
+            New Deck
+          </Button>
+        </Stack>
       </Stack>
 
+      {/* Stats Dashboard */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid xs={12} sm={4}>
+          <Card variant='soft' color='primary'>
+            <CardContent>
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Box>
+                  <Typography level='body-sm' sx={{ color: 'primary.700' }}>
+                    Due Today
+                  </Typography>
+                  <Typography level='h2' sx={{ color: 'primary.600' }}>
+                    {stats.dueToday}
+                  </Typography>
+                </Box>
+                <School sx={{ fontSize: 40, opacity: 0.5, color: 'primary.600' }} />
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid xs={12} sm={4}>
+          <Card variant='soft' color='warning'>
+            <CardContent>
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Box>
+                  <Typography level='body-sm' sx={{ color: 'warning.700' }}>
+                    Study Streak
+                  </Typography>
+                  <Typography level='h2' sx={{ color: 'warning.600' }}>
+                    {stats.streak} days
+                  </Typography>
+                </Box>
+                <TrendingUp sx={{ fontSize: 40, opacity: 0.5, color: 'warning.600' }} />
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid xs={12} sm={4}>
+          <Card variant='soft' color='neutral'>
+            <CardContent>
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Box>
+                  <Typography level='body-sm' sx={{ color: 'neutral.700' }}>
+                    Total Cards
+                  </Typography>
+                  <Typography level='h2' sx={{ color: 'neutral.600' }}>
+                    {stats.totalCards}
+                  </Typography>
+                </Box>
+                <GridView sx={{ fontSize: 40, opacity: 0.5, color: 'neutral.600' }} />
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)} sx={{ mb: 3 }}>
+        <TabList>
+          <Tab>Browse Decks</Tab>
+          <Tab>Manage Content</Tab>
+        </TabList>
+      </Tabs>
+
+      {/* Browse Tab */}
+      {activeTab === 0 && (
+        <>
+          {/* Toolbar */}
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems='center'>
+            {/* Search */}
+            <Input
+              placeholder='Search decks...'
+              startDecorator={<Search />}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{ flex: 1, minWidth: 200 }}
+            />
+
+            {/* Filter by Type */}
+            <Select value={filterType} onChange={(e, val) => setFilterType(val)} startDecorator={<FilterList />} sx={{ minWidth: 150 }}>
+              <Option value='all'>All Types</Option>
+              <Option value='flashcard'>Flashcards</Option>
+              <Option value='quiz'>Quizzes</Option>
+              <Option value='visual'>Visual</Option>
+            </Select>
+
+            {/* Sort */}
+            <Select value={sortBy} onChange={(e, val) => setSortBy(val)} sx={{ minWidth: 150 }}>
+              <Option value='recent'>Recent</Option>
+              <Option value='name'>Name</Option>
+              <Option value='cards'>Card Count</Option>
+            </Select>
+
+            {/* View Mode */}
+            <Stack direction='row' spacing={0.5}>
+              <IconButton variant={viewMode === 'grid' ? 'solid' : 'outlined'} color='neutral' onClick={() => setViewMode('grid')}>
+                <GridView />
+              </IconButton>
+              <IconButton variant={viewMode === 'list' ? 'solid' : 'outlined'} color='neutral' onClick={() => setViewMode('list')}>
+                <ViewList />
+              </IconButton>
+            </Stack>
+          </Stack>
+
+          {/* Deck Count & Type Filter Chips */}
+          <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
+            <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+              {filteredDecks.length} deck{filteredDecks.length !== 1 ? 's' : ''}
+            </Typography>
+            {filterType !== 'all' && (
+              <Chip size='sm' variant='soft' endDecorator={<span onClick={() => setFilterType('all')}>×</span>}>
+                {filterType}
+              </Chip>
+            )}
+          </Stack>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {/* Decks Grid/List */}
+          {loading ? (
+            <Typography>Loading...</Typography>
+          ) : (
+            <DecksView
+              decks={filteredDecks}
+              onStudy={handleStudy}
+              onEdit={handleEditDeck}
+              onDelete={handleDeleteDeck}
+              viewMode={viewMode}
+            />
+          )}
+        </>
+      )}
+
+      {/* Manage Tab */}
+      {activeTab === 1 && (
+        <ManageContent
+          decks={decks}
+          cards={cards}
+          onEditDeck={handleEditDeck}
+          onDeleteDeck={handleDeleteDeck}
+          onEditCard={handleEditCard}
+          onDeleteCard={handleDeleteCard}
+          onAddCard={(deck) => {
+            // Set the deck context for the new card
+            setShowCreateCard(true)
+          }}
+        />
+      )}
+
       {/* Modals */}
-      <CreateDeckModal
-        open={isDeckModalOpen}
-        onClose={() => {
-          setIsDeckModalOpen(false)
-          setEditingDeck(null)
-        }}
-        onSaved={handleDeckSaved}
-        initialData={editingDeck}
-      />
-      <CreateCardModal
-        open={isCardModalOpen}
-        onClose={() => {
-          setIsCardModalOpen(false)
-          setEditingCard(null)
-        }}
-        onSaved={handleCardSaved}
-        decks={decks}
-        initialData={editingCard}
-      />
+      {showCreateDeck && (
+        <CreateDeckModal
+          open={showCreateDeck}
+          onClose={() => {
+            setShowCreateDeck(false)
+            setEditingDeck(null)
+          }}
+          onDeckSaved={handleDeckSaved}
+          deck={editingDeck}
+        />
+      )}
+
+      {showCreateCard && (
+        <CreateCardModal
+          open={showCreateCard}
+          onClose={() => {
+            setShowCreateCard(false)
+            setEditingCard(null)
+          }}
+          onCardSaved={handleCardSaved}
+          decks={decks}
+          card={editingCard}
+        />
+      )}
     </Container>
   )
 }
-
-export default CardHome

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Grid, Typography } from '@mui/joy'
+import { Box, Grid, Typography, Container } from '@mui/joy'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import DailyFocus from './DailyFocus'
@@ -11,32 +11,39 @@ function Home() {
   const username = localStorage.getItem('username')
 
   return (
-    <Box sx={{ px: 4, py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography level='h3' sx={{ fontWeight: 'lg', color: 'primary.500' }}>
-          Welcome back, {username}!
+    <Container maxWidth='xl' sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5 }}>
+          👋 Welcome back, {username}!
+        </Typography>
+        <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+          Here&apos;s your learning overview for today
         </Typography>
       </Box>
 
-      <Grid container spacing={4} sx={{ mb: 4 }}>
-        <Grid xs={12} md={4}>
-          <SideMenu />
-        </Grid>
+      {/* Top Row - News & Quick Access */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid xs={12} md={8}>
           <NewsCarousel />
         </Grid>
+        <Grid xs={12} md={4}>
+          <SideMenu />
+        </Grid>
       </Grid>
 
-      <Grid container spacing={4} sx={{ mb: 4 }}>
-        <Grid xs={12} md={6}>
+      {/* Middle Row - Daily Focus & Motivation */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid xs={12} lg={8}>
           <DailyFocus />
         </Grid>
-        <Grid xs={12} md={6}>
+        <Grid xs={12} lg={4}>
           <MotivationBanner />
         </Grid>
       </Grid>
 
-      <Grid container spacing={4}>
+      {/* Bottom Row - Weekly Progress & Recent Performance */}
+      <Grid container spacing={3}>
         <Grid xs={12} md={6}>
           <WeeklyProgress />
         </Grid>
@@ -44,7 +51,7 @@ function Home() {
           <StudyCalendar />
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   )
 }
 
