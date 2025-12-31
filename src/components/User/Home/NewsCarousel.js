@@ -168,11 +168,11 @@ export default function NewsCarousel() {
         const categories =
           userInterests.length > 0
             ? userInterests
-              .map((interest) => {
-                const category = getCategoryFromInterest(interest)
-                return category
-              })
-              .filter((cat) => cat !== 'general')
+                .map((interest) => {
+                  const category = getCategoryFromInterest(interest)
+                  return category
+                })
+                .filter((cat) => cat !== 'general')
             : []
 
         // If no specific categories, use general
@@ -393,10 +393,10 @@ const NewsCard = ({ article, loading, t }) => {
         '&:hover': loading
           ? {}
           : {
-            transform: 'translateY(-4px)',
-            boxShadow: 'lg',
-            borderColor: 'primary.outlinedBorder'
-          }
+              transform: 'translateY(-4px)',
+              boxShadow: 'lg',
+              borderColor: 'primary.outlinedBorder'
+            }
       }}
       onClick={!loading && article?.url ? () => window.open(article.url, '_blank', 'noopener,noreferrer') : undefined}
     >
