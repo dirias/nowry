@@ -1,14 +1,14 @@
 import axios from 'axios'
 
 // Get base URL from environment or use default
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
 
 /**
  * Main API client instance with configured defaults
  */
 export const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
+  timeout: Number(process.env.REACT_APP_API_TIMEOUT) || 10000,
   headers: {
     'Content-Type': 'application/json'
   },
