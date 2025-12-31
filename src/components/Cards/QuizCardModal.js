@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Modal,
   ModalDialog,
@@ -16,7 +18,8 @@ import {
   IconButton,
   Box,
   Radio,
-  RadioGroup
+  RadioGroup,
+  Alert
 } from '@mui/joy'
 import { Add, Delete } from '@mui/icons-material'
 import { cardsService } from '../../api/services'
@@ -29,10 +32,18 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
   const [deckId, setDeckId] = useState('')
   const [tags, setTags] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [isLimitError, setIsLimitError] = useState(false)
+  const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const isEdit = !!initialData
 
   useEffect(() => {
+    if (open) {
+      setError('')
+      setIsLimitError(false)
+    }
     if (initialData) {
       setTitle(initialData.title || '')
       setOptions(initialData.options || ['', '', '', ''])
@@ -106,6 +117,15 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
       onClose()
     } catch (error) {
       console.error('Error saving quiz card:', error)
+      const status = error.response?.status
+      const msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
+
+      if (status === 403) {
+        setIsLimitError(true)
+        setError(t('subscription.errors.limitReached'))
+      } else {
+        setError(msg)
+      }
     } finally {
       setLoading(false)
     }
@@ -142,6 +162,22 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
             Quiz
           </Chip>
         </Stack>
+
+        {error && (
+          <Alert
+            color='danger'
+            sx={{ mb: 2 }}
+            endDecorator={
+              isLimitError && (
+                <Button size='sm' variant='soft' color='danger' onClick={() => navigate('/profile')}>
+                  {t('subscription.upgrade')}
+                </Button>
+              )
+            }
+          >
+            {error}
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit}>
           <Stack spacing={3}>

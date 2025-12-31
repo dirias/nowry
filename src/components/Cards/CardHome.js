@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Container,
   Stack,
@@ -29,6 +30,7 @@ import { decksService, cardsService } from '../../api/services'
 
 export default function CardHome() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   // State
   const [activeTab, setActiveTab] = useState(0)
@@ -47,7 +49,7 @@ export default function CardHome() {
   // Stats
   const [stats, setStats] = useState({
     dueToday: 0,
-    streak: 5,
+    streak: 0,
     totalCards: 0
   })
 
@@ -58,12 +60,17 @@ export default function CardHome() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [decksData, cardsData] = await Promise.all([decksService.getAll(), cardsService.getAll()])
+      const [decksData, cardsData, statisticsData] = await Promise.all([
+        decksService.getAll(),
+        cardsService.getAll(),
+        cardsService.getStatistics()
+      ])
 
       setDecks(decksData)
       setCards(cardsData)
 
-      // Calculate stats
+      // Use real stats from API - API returns data in summary object
+      const summary = statisticsData.summary || {}
       const now = new Date()
       const dueCards = cardsData.filter((card) => {
         if (!card.next_review) return true
@@ -73,8 +80,8 @@ export default function CardHome() {
 
       setStats({
         dueToday: dueCards.length,
-        streak: 5, // TODO: Calculate real streak
-        totalCards: cardsData.length
+        streak: summary.current_streak || 0,
+        totalCards: summary.total_cards || cardsData.length
       })
 
       setLoading(false)
@@ -106,7 +113,7 @@ export default function CardHome() {
   }
 
   const handleDeleteDeck = async (deck) => {
-    if (window.confirm(`Are you sure you want to delete "${deck.name}"?`)) {
+    if (window.confirm(t('cards.confirmDeleteDeck', { name: deck.name }))) {
       try {
         await decksService.delete(deck._id)
         fetchData()
@@ -122,7 +129,7 @@ export default function CardHome() {
   }
 
   const handleDeleteCard = async (card) => {
-    if (window.confirm('Are you sure you want to delete this card?')) {
+    if (window.confirm(t('cards.confirmDeleteCard'))) {
       try {
         await cardsService.delete(card._id)
         fetchData()
@@ -168,86 +175,95 @@ export default function CardHome() {
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Header */}
-      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between' alignItems='flex-start' sx={{ mb: 3 }}>
-        <Box>
-          <Typography level='h2' sx={{ mb: 0.5, fontWeight: 700 }}>
-            📚 Deck Library
+      <Stack spacing={4} sx={{ mb: 4 }}>
+        {/* Title Row */}
+        {/* Title Row */}
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          justifyContent='space-between'
+          alignItems={{ xs: 'center', md: 'center' }}
+          spacing={2}
+          sx={{ width: '100%' }}
+        >
+          {/* Left: Title */}
+          <Typography level='h2' fontWeight={600}>
+            {t('cards.title')}
           </Typography>
-          <Typography level='body-md' sx={{ color: 'neutral.600' }}>
-            Manage your flashcards, quizzes, and visual learning materials
-          </Typography>
-        </Box>
 
-        <Stack direction='row' spacing={1}>
-          <Button startDecorator={<TrendingUp />} onClick={() => navigate('/study')} variant='solid' color='primary' size='lg'>
-            Study Center
-          </Button>
-          <Button startDecorator={<Add />} onClick={() => setShowCreateDeck(true)} variant='soft' color='primary' size='lg'>
-            New Deck
-          </Button>
+          {/* Center: Subtitle */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', flex: 1 }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', display: 'flex', alignItems: 'center', gap: 1 }}>
+              {t('cards.subtitle')}
+              {stats.streak > 0 && (
+                <Typography component='span' level='body-xs' sx={{ color: 'warning.plainColor' }}>
+                  • 🔥 {stats.streak} {t('profile.stats.days')}
+                </Typography>
+              )}
+            </Typography>
+          </Box>
+
+          {/* Mobile Only Subtitle (stacked) */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, width: '100%', justifyContent: 'center' }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
+              {t('cards.subtitle')}
+            </Typography>
+          </Box>
+
+          {/* Right: Buttons */}
+          <Stack direction='row' spacing={1}>
+            <Button startDecorator={<TrendingUp />} onClick={() => navigate('/study')} variant='solid' color='primary' size='lg'>
+              {t('cards.studyCenter')}
+            </Button>
+            <Button startDecorator={<Add />} onClick={() => setShowCreateDeck(true)} variant='soft' color='primary' size='lg'>
+              {t('cards.newDeck')}
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
 
-      {/* Stats Dashboard */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid xs={12} sm={4}>
-          <Card variant='soft' color='primary'>
-            <CardContent>
-              <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                <Box>
-                  <Typography level='body-sm' sx={{ color: 'primary.700' }}>
-                    Due Today
-                  </Typography>
-                  <Typography level='h2' sx={{ color: 'primary.600' }}>
-                    {stats.dueToday}
-                  </Typography>
-                </Box>
-                <School sx={{ fontSize: 40, opacity: 0.5, color: 'primary.600' }} />
-              </Stack>
-            </CardContent>
-          </Card>
+        {/* Stats Dashboard */}
+        <Grid container spacing={2}>
+          <Grid xs={12} sm={6}>
+            <Card variant='soft' color='danger'>
+              <CardContent>
+                <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                  <Box>
+                    <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
+                      {t('cards.dueToday')}
+                    </Typography>
+                    <Typography level='h2' sx={{ color: 'danger.solidBg' }}>
+                      {stats.dueToday}
+                    </Typography>
+                  </Box>
+                  <School sx={{ fontSize: 40, opacity: 0.5, color: 'danger.solidBg' }} />
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid xs={12} sm={6}>
+            <Card variant='soft' color='neutral'>
+              <CardContent>
+                <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                  <Box>
+                    <Typography level='body-sm' sx={{ color: 'neutral.plainColor' }}>
+                      {t('cards.totalCards')}
+                    </Typography>
+                    <Typography level='h2' sx={{ color: 'neutral.solidBg' }}>
+                      {stats.totalCards}
+                    </Typography>
+                  </Box>
+                  <GridView sx={{ fontSize: 40, opacity: 0.5, color: 'neutral.solidBg' }} />
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid xs={12} sm={4}>
-          <Card variant='soft' color='warning'>
-            <CardContent>
-              <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                <Box>
-                  <Typography level='body-sm' sx={{ color: 'warning.700' }}>
-                    Study Streak
-                  </Typography>
-                  <Typography level='h2' sx={{ color: 'warning.600' }}>
-                    {stats.streak} days
-                  </Typography>
-                </Box>
-                <TrendingUp sx={{ fontSize: 40, opacity: 0.5, color: 'warning.600' }} />
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid xs={12} sm={4}>
-          <Card variant='soft' color='neutral'>
-            <CardContent>
-              <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                <Box>
-                  <Typography level='body-sm' sx={{ color: 'neutral.700' }}>
-                    Total Cards
-                  </Typography>
-                  <Typography level='h2' sx={{ color: 'neutral.600' }}>
-                    {stats.totalCards}
-                  </Typography>
-                </Box>
-                <GridView sx={{ fontSize: 40, opacity: 0.5, color: 'neutral.600' }} />
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      </Stack>
 
       {/* Tabs */}
       <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)} sx={{ mb: 3 }}>
         <TabList>
-          <Tab>Browse Decks</Tab>
-          <Tab>Manage Content</Tab>
+          <Tab>{t('cards.browse')}</Tab>
+          <Tab>{t('cards.manage')}</Tab>
         </TabList>
       </Tabs>
 
@@ -258,7 +274,7 @@ export default function CardHome() {
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems='center'>
             {/* Search */}
             <Input
-              placeholder='Search decks...'
+              placeholder={t('cards.search')}
               startDecorator={<Search />}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -267,17 +283,17 @@ export default function CardHome() {
 
             {/* Filter by Type */}
             <Select value={filterType} onChange={(e, val) => setFilterType(val)} startDecorator={<FilterList />} sx={{ minWidth: 150 }}>
-              <Option value='all'>All Types</Option>
-              <Option value='flashcard'>Flashcards</Option>
-              <Option value='quiz'>Quizzes</Option>
-              <Option value='visual'>Visual</Option>
+              <Option value='all'>{t('cards.allTypes')}</Option>
+              <Option value='flashcard'>{t('study.types.flashcards')}</Option>
+              <Option value='quiz'>{t('study.types.quizzes')}</Option>
+              <Option value='visual'>{t('study.types.visual')}</Option>
             </Select>
 
             {/* Sort */}
             <Select value={sortBy} onChange={(e, val) => setSortBy(val)} sx={{ minWidth: 150 }}>
-              <Option value='recent'>Recent</Option>
-              <Option value='name'>Name</Option>
-              <Option value='cards'>Card Count</Option>
+              <Option value='recent'>{t('cards.recent')}</Option>
+              <Option value='name'>{t('cards.name')}</Option>
+              <Option value='cards'>{t('cards.cardCount')}</Option>
             </Select>
 
             {/* View Mode */}
@@ -294,7 +310,7 @@ export default function CardHome() {
           {/* Deck Count & Type Filter Chips */}
           <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
             <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-              {filteredDecks.length} deck{filteredDecks.length !== 1 ? 's' : ''}
+              {t('cards.deckCount_plural', { count: filteredDecks.length })}
             </Typography>
             {filterType !== 'all' && (
               <Chip size='sm' variant='soft' endDecorator={<span onClick={() => setFilterType('all')}>×</span>}>
@@ -307,7 +323,7 @@ export default function CardHome() {
 
           {/* Decks Grid/List */}
           {loading ? (
-            <Typography>Loading...</Typography>
+            <Typography>{t('cards.loading')}</Typography>
           ) : (
             <DecksView
               decks={filteredDecks}
@@ -331,6 +347,7 @@ export default function CardHome() {
           onDeleteCard={handleDeleteCard}
           onAddCard={(deck) => {
             // Set the deck context for the new card
+            setEditingCard({ deck_id: deck._id })
             setShowCreateCard(true)
           }}
         />
@@ -344,8 +361,8 @@ export default function CardHome() {
             setShowCreateDeck(false)
             setEditingDeck(null)
           }}
-          onDeckSaved={handleDeckSaved}
-          deck={editingDeck}
+          onSaved={handleDeckSaved}
+          initialData={editingDeck}
         />
       )}
 

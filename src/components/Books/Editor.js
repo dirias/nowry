@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { Box, Typography, Button, useTheme } from '@mui/joy'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Box, Typography, Button, useTheme, Snackbar, Alert } from '@mui/joy'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
@@ -7,7 +9,17 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin'
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
-import { $getRoot } from 'lexical'
+import {
+  $createParagraphNode,
+  $getRoot,
+  $getSelection,
+  $isRangeSelection,
+  $isElementNode,
+  $isDecoratorNode,
+  FORMAT_TEXT_COMMAND,
+  headers,
+  TextNode
+} from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 
 // Plugins and nodes
@@ -32,6 +44,17 @@ import QuestionnaireModal from '../Cards/QuestionnaireModal'
 import VisualizerModal from '../Cards/VisualizerModal'
 import { cardsService, quizzesService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
+import PaginationPlugin from '../Editor/plugins/PaginationPlugin'
+import PageFlowPlugin from '../Editor/plugins/PageFlowPlugin'
+import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
+
+const toPx = (val) => {
+  if (typeof val === 'number') return val
+  if (typeof val === 'string' && val.endsWith('mm')) return parseFloat(val) * 3.7795
+  if (typeof val === 'string' && val.endsWith('cm')) return parseFloat(val) * 37.795
+  if (typeof val === 'string' && val.endsWith('in')) return parseFloat(val) * 96
+  return 1123
+}
 
 const EditorTheme = {
   ltr: 'ltr',
@@ -60,6 +83,47 @@ const EditorTheme = {
   }
 }
 
+const EditorContentUpdater = ({ content, trigger }) => {
+  const [editor] = useLexicalComposerContext()
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    editor.update(() => {
+      const parser = new DOMParser()
+      const dom = parser.parseFromString(content || '<p></p>', 'text/html')
+      const nodes = $generateNodesFromDOM(editor, dom)
+      const root = $getRoot()
+      root.clear()
+
+      // Fix: Ensure only Element/Decorator nodes go to Root. Wrap others in Paragraph.
+      const validNodes = []
+      let currentParagraph = null
+
+      nodes.forEach((node) => {
+        if ($isElementNode(node) || $isDecoratorNode(node)) {
+          if (currentParagraph) {
+            validNodes.push(currentParagraph)
+            currentParagraph = null
+          }
+          validNodes.push(node)
+        } else {
+          // Wrap text/linebreaks in a paragraph
+          if (!currentParagraph) currentParagraph = $createParagraphNode()
+          currentParagraph.append(node)
+        }
+      })
+      if (currentParagraph) validNodes.push(currentParagraph)
+
+      root.append(...validNodes)
+    })
+  }, [trigger, editor])
+  return null
+}
+
 function EditorContent({ setContent }) {
   const [editor] = useLexicalComposerContext()
   return (
@@ -74,7 +138,7 @@ function EditorContent({ setContent }) {
   )
 }
 
-export default function Editor({ activePage, content, setContent, onSave }) {
+export default function Editor({ activePage, content, setContent, onSave, pageSize = 'a4', setPageSize, onPageOverflow, onMergeBack }) {
   const theme = useTheme()
   const menuRef = useRef()
   const containerRef = useRef()
@@ -86,6 +150,10 @@ export default function Editor({ activePage, content, setContent, onSave }) {
   const [cards, setCards] = useState([])
   const [questionnaireData, setQuestionnaireData] = useState([])
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 })
+  const [error, setError] = useState(null)
+  const [isLimitError, setIsLimitError] = useState(false)
+  const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const editorConfig = {
     namespace: 'NowryEditor',
@@ -112,7 +180,25 @@ export default function Editor({ activePage, content, setContent, onSave }) {
       editor.update(() => {
         const root = $getRoot()
         root.clear()
-        root.append(...nodes)
+
+        const validNodes = []
+        let currentParagraph = null
+
+        nodes.forEach((node) => {
+          if ($isElementNode(node) || $isDecoratorNode(node)) {
+            if (currentParagraph) {
+              validNodes.push(currentParagraph)
+              currentParagraph = null
+            }
+            validNodes.push(node)
+          } else {
+            if (!currentParagraph) currentParagraph = $createParagraphNode()
+            currentParagraph.append(node)
+          }
+        })
+        if (currentParagraph) validNodes.push(currentParagraph)
+
+        root.append(...validNodes)
       })
     }
   }
@@ -121,6 +207,12 @@ export default function Editor({ activePage, content, setContent, onSave }) {
     // When the active page changes, you can sync the external state if needed
     if (activePage?.content != null) {
       setContent(activePage.content)
+    }
+    // Force scroll to top when page changes or reloads
+    if (containerRef.current) {
+      setTimeout(() => {
+        containerRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+      }, 10)
     }
   }, [activePage, setContent])
 
@@ -150,6 +242,7 @@ export default function Editor({ activePage, content, setContent, onSave }) {
 
   const handleOptionClick = async (option) => {
     setShowMenu(false)
+    setError(null)
     if (option === 'create_study_card' && selectedText) {
       try {
         const response = await cardsService.generate(selectedText, 2)
@@ -157,6 +250,15 @@ export default function Editor({ activePage, content, setContent, onSave }) {
         setShowStudyCard(true)
       } catch (error) {
         console.error('Error generating study card:', error)
+        const status = error.response?.status
+        const msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
+
+        if (status === 403) {
+          setIsLimitError(true)
+          setError(t('subscription.errors.upgradeToUse'))
+        } else {
+          setError(msg)
+        }
       }
     } else if (option === 'create_questionnaire' && selectedText) {
       try {
@@ -166,6 +268,15 @@ export default function Editor({ activePage, content, setContent, onSave }) {
         setShowQuestionnaire(true)
       } catch (error) {
         console.error('Error generating questionnaire:', error)
+        const status = error.response?.status
+        const msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
+
+        if (status === 403) {
+          setIsLimitError(true)
+          setError(t('subscription.errors.upgradeToUse'))
+        } else {
+          setError(msg)
+        }
       }
     } else if (option === 'create_visual_content' && selectedText) {
       setShowVisualizer(true)
@@ -182,42 +293,55 @@ export default function Editor({ activePage, content, setContent, onSave }) {
         width: '100%',
         height: '100%',
         bgcolor: 'background.level1',
-        overflow: 'auto',
-        py: 3
+        overflow: 'hidden', // Prevent outer scroll
+        py: 0 // Remove vertical padding from root
       }}
     >
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)} color='danger' variant='soft'>
+        <Alert
+          color='danger'
+          variant='soft'
+          endDecorator={
+            isLimitError ? (
+              <Button size='sm' variant='solid' color='danger' onClick={() => navigate('/profile')}>
+                {t('subscription.upgrade')}
+              </Button>
+            ) : null
+          }
+        >
+          {error}
+        </Alert>
+      </Snackbar>
+
       <LexicalComposer key={activePage?._id || 'editor'} initialConfig={editorConfig}>
-        {/* 🧭 Toolbar fixed at top */}
+        {/* 🧭 Toolbar - Static Flex Item */}
         <Box
           sx={{
-            position: 'fixed',
-            top: 85,
-            left: 320, // Sidebar width
-            right: 0,
             zIndex: 100,
             bgcolor: 'background.surface',
             borderBottom: '1px solid',
             borderColor: 'divider',
+            width: '100%',
             px: 3,
-            py: 2, // Increased vertical padding
+            py: 2,
             display: 'flex',
-            justifyContent: 'center', // Center the toolbar content
+            justifyContent: 'center',
             alignItems: 'center',
             gap: 1,
-            boxShadow: 'xs' // Add subtle shadow for depth
+            boxShadow: 'xs'
           }}
         >
-          <Toolbar onSave={onSave} />
+          <Toolbar onSave={onSave} pageSize={pageSize} setPageSize={setPageSize} />
         </Box>
-        {/* 📄 Main "sheet" area - add top padding to account for fixed toolbar */}
+        {/* 📄 Main "sheet" area - Scrollable */}
         <Box
           sx={{
             flexGrow: 1,
-            display: 'flex',
-            justifyContent: 'center',
+            display: 'block', // Use block for scroll container
             width: '100%',
-            pb: 6,
-            pt: '95px' // Adjusted space for fixed toolbar
+            overflow: 'auto', // Independent scrolling
+            pb: 12,
+            pt: 4
           }}
           onContextMenu={handleRightClick}
           ref={containerRef}
@@ -225,8 +349,9 @@ export default function Editor({ activePage, content, setContent, onSave }) {
           <Box
             sx={{
               position: 'relative',
-              width: '21cm',
-              minHeight: '29.7cm',
+              width: toPx(PAGE_SIZES[pageSize]?.width || '210mm'),
+              height: toPx(PAGE_SIZES[pageSize]?.height || '297mm'),
+              mx: 'auto', // Center horizontally
               bgcolor: '#fff',
               borderRadius: 'md',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
@@ -243,6 +368,8 @@ export default function Editor({ activePage, content, setContent, onSave }) {
           </Box>
         </Box>
         {/* Plugins */}
+        <EditorContentUpdater content={content} trigger={activePage?._id || activePage?.clientKey} />
+        <PageFlowPlugin onMergeBack={onMergeBack} />
         <EditorContent setContent={setContent} />
         <HistoryPlugin />
         <AutoFocusPlugin />
@@ -251,6 +378,7 @@ export default function Editor({ activePage, content, setContent, onSave }) {
         <SlashCommandPlugin />
         <TablePlugin />
         <WordCountPlugin />
+        <PaginationPlugin pageHeight={toPx(PAGE_SIZES[pageSize]?.height || '297mm') - toPx('5cm')} onOverflow={onPageOverflow} />
         <ColumnPlugin /> {/* Multi-column support */}
       </LexicalComposer>
 

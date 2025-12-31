@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { apiClient } from '../client'
 
 /**
  * Auth Service
@@ -17,11 +17,7 @@ export const authService = {
     console.log('Attempting login with JSON payload:', payload)
 
     try {
-      const { data } = await axios.post('http://localhost:8000/session/login', payload, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+      const { data } = await apiClient.post('/session/login', payload)
       return data
     } catch (error) {
       if (error.response?.status === 422) {
@@ -32,7 +28,7 @@ export const authService = {
         params.append('email', email)
         params.append('password', password)
 
-        const { data } = await axios.post('http://localhost:8000/session/login', params, {
+        const { data } = await apiClient.post('/session/login', params, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
@@ -47,8 +43,7 @@ export const authService = {
    * Log out the current user
    */
   logout() {
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('username')
+    // Session is handled by HttpOnly cookie
     window.location.href = '/login'
   }
 }

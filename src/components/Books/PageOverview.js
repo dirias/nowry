@@ -1,9 +1,17 @@
-// PageOverview.jsx
 import React, { memo, useMemo, useRef, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { Box, Typography, Sheet, Stack, IconButton } from '@mui/joy'
+import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
 
 const keyOf = (p) => String(p?._id ?? p?.clientKey ?? p?.page_number ?? '')
+
+const toPx = (val) => {
+  if (typeof val === 'number') return val
+  if (typeof val === 'string' && val.endsWith('mm')) return parseFloat(val) * 3.7795
+  if (typeof val === 'string' && val.endsWith('cm')) return parseFloat(val) * 37.795
+  if (typeof val === 'string' && val.endsWith('in')) return parseFloat(val) * 96
+  return 1123
+}
 
 export default function PageOverview({
   pages,
@@ -13,15 +21,16 @@ export default function PageOverview({
   handleSavePage,
   liveContent = '',
   liveKey = null,
-  thumbW = 245, // Matches Letter aspect ratio (816:1056)
-  thumbH = 317, // Matches Letter aspect ratio
-  pageW = 816, // Letter (8.5" * 96dpi)
-  pageH = 1056, // 11" * 96dpi
+  pageSize = 'a4',
   pagePadding = 95 // Match editor padding (2.5cm)
 }) {
+  const size = PAGE_SIZES[pageSize] || PAGE_SIZES.a4
+  const pageW = toPx(size.width)
+  const pageH = toPx(size.height)
+  const thumbW = 245
+  const thumbH = thumbW * (pageH / pageW)
   const changeActivePage = (page) => {
     setActivePage(page)
-    setContent(page.content || '')
   }
 
   return (
@@ -86,7 +95,7 @@ const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumb
       onClick={onClick}
       tabIndex={-1}
       sx={{
-        border: 'none', // Remove border
+        border: isActive ? '2px solid #0B6BCB' : '2px solid transparent', // High visibility border
         borderRadius: 'sm',
         cursor: 'pointer',
         backgroundColor: 'transparent',
@@ -95,7 +104,7 @@ const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumb
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        boxShadow: isActive ? '0 0 0 3px rgba(25, 118, 210, 0.5)' : 'sm', // Blue glow for active
+        boxShadow: isActive ? 'md' : 'sm',
         transition: 'all 0.2s ease',
         outline: 'none',
         '&:hover': { transform: 'translateY(-2px)', boxShadow: 'md' }
@@ -114,12 +123,11 @@ const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumb
           alignItems: 'center'
         }}
       >
-        {/* Inner viewport: applies zoom to the content but preserves quality */}
         <Box
           sx={{
             width: pageW,
             height: pageH,
-            backgroundColor: '#fff',
+            backgroundColor: '#ffffff',
             border: 'none',
             boxShadow: 'none',
             overflow: 'hidden',

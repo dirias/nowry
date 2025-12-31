@@ -1,44 +1,66 @@
 import React, { useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
-import { Box, Typography, Input, Button, Divider, Sheet, useColorScheme, Link } from '@mui/joy'
-import { Error } from '../Messages'
-import Facebook from '@mui/icons-material/FacebookOutlined'
-import Google from '@mui/icons-material/Google'
+import { useTranslation } from 'react-i18next'
+import {
+  Box,
+  Typography,
+  Input,
+  Button,
+  Divider,
+  Sheet,
+  useColorScheme,
+  Link,
+  FormControl,
+  FormLabel,
+  Alert,
+  LinearProgress,
+  Stack,
+  IconButton
+} from '@mui/joy'
+import { EmailRounded, LockRounded, VisibilityRounded, VisibilityOffRounded, LoginRounded, Google, Facebook } from '@mui/icons-material'
 
-import { authService } from '../../api/services'
+import { useAuth } from '../../context/AuthContext'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { mode } = useColorScheme()
   const isDark = mode === 'dark'
+  const { t } = useTranslation()
+  const { login } = useAuth()
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
     try {
-      const data = await authService.login(email, password)
+      // Use login from AuthContext (which handles cookie)
+      await login({ email, password })
 
-      localStorage.setItem('authToken', data.token)
-      localStorage.setItem('username', data.username)
-      navigate(`/`)
-      window.location.reload()
+      // Navigate to home
+      // Context will update 'user' state via checkUser()
+      navigate('/')
     } catch (error) {
-      console.error('Login error details:', error.response?.data)
+      console.error('Login error:', error.response?.data)
       const detail = error.response?.data?.detail
 
       if (Array.isArray(detail)) {
-        // Format FastAPI validation errors into a readable string
         const errorMsg = detail
           .map((err) => {
             const field = err.loc[err.loc.length - 1]
             return `${field}: ${err.msg}`
           })
           .join(', ')
-        setErrors(errorMsg)
+        setError(errorMsg)
       } else {
-        setErrors(error.response?.data?.detail || error.message || 'Login failed')
+        setError(detail || error.message || t('auth.errors.loginFailed'))
       }
+      setLoading(false)
     }
   }
 
@@ -49,65 +71,193 @@ const Login = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isDark ? 'neutral.900' : 'background.body',
-        px: 2
+        backgroundColor: isDark ? 'neutral.900' : 'neutral.50',
+        px: 2,
+        transition: 'background 0.3s ease'
       }}
     >
       <Sheet
         variant='outlined'
         sx={{
-          p: 4,
-          borderRadius: 'md',
+          p: 5,
+          borderRadius: 'xl',
           width: '100%',
-          maxWidth: 400,
-          boxShadow: 'lg',
-          backgroundColor: isDark ? 'neutral.800' : 'background.surface'
+          maxWidth: 440,
+          boxShadow: 'xl',
+          backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          border: 'none',
+          transform: 'translateY(0)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }
         }}
       >
-        <Typography level='h4' textAlign='center' fontWeight='lg' mb={2}>
-          Login to Nowry
-        </Typography>
+        {/* Header */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography
+            level='h2'
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              color: isDark ? 'primary.300' : 'primary.700'
+            }}
+          >
+            {t('auth.welcomeBack')}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+            {t('auth.signInSubtitle')}
+          </Typography>
+        </Box>
 
-        {errors && <Error title='Login Failed' error_msg={errors} onClose={() => setErrors('')} />}
+        {/* Error Alert */}
+        {error && (
+          <Alert color='danger' variant='soft' sx={{ mb: 3, animation: 'fadeIn 0.3s ease' }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
 
-        <Input type='email' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} fullWidth sx={{ mb: 2 }} />
+        {/* Login Form */}
+        <form onSubmit={handleLogin}>
+          <Stack spacing={2.5}>
+            {/* Email Field */}
+            <FormControl>
+              <FormLabel>{t('auth.email')}</FormLabel>
+              <Input
+                type='email'
+                placeholder='you@example.com'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                startDecorator={<EmailRounded />}
+                size='lg'
+                required
+                sx={{
+                  '--Input-focusedThickness': '0.25rem',
+                  transition: 'all 0.2s ease'
+                }}
+              />
+            </FormControl>
 
-        <Input
-          type='password'
-          placeholder='Password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          fullWidth
-          sx={{ mb: 2 }}
-        />
+            {/* Password Field */}
+            <FormControl>
+              <FormLabel>{t('auth.password')}</FormLabel>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder='••••••••'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                startDecorator={<LockRounded />}
+                endDecorator={
+                  <IconButton variant='plain' color='neutral' onClick={() => setShowPassword(!showPassword)} sx={{ mr: -1 }}>
+                    {showPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
+                  </IconButton>
+                }
+                size='lg'
+                required
+                sx={{
+                  '--Input-focusedThickness': '0.25rem',
+                  transition: 'all 0.2s ease'
+                }}
+              />
+            </FormControl>
 
-        <Button variant='solid' color='primary' fullWidth onClick={handleLogin}>
-          Login
-        </Button>
+            {/* Forgot Password Link */}
+            <Box sx={{ textAlign: 'right' }}>
+              <Link component={RouterLink} to='/resetPassword' level='body-sm' sx={{ transition: 'color 0.2s ease' }}>
+                {t('auth.forgotPassword')}
+              </Link>
+            </Box>
 
-        <Divider sx={{ my: 2 }}>OR</Divider>
+            {/* Login Button */}
+            <Button
+              type='submit'
+              size='lg'
+              fullWidth
+              loading={loading}
+              startDecorator={!loading && <LoginRounded />}
+              sx={{
+                mt: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 'lg'
+                },
+                '&:active': {
+                  transform: 'translateY(0)'
+                }
+              }}
+            >
+              {t('auth.signIn')}
+            </Button>
+          </Stack>
+        </form>
 
-        <Button variant='outlined' color='neutral' fullWidth startDecorator={<Google sx={{ color: 'text.icon' }} />}>
-          Login with Google
-        </Button>
+        {/* Divider */}
+        <Divider sx={{ my: 3 }}>
+          <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
+            {t('auth.orContinueWith')}
+          </Typography>
+        </Divider>
 
-        <Button variant='outlined' color='neutral' fullWidth startDecorator={<Facebook sx={{ color: '#1877F2' }} />}>
-          Login with Facebook
-        </Button>
+        {/* Social Login */}
+        <Stack spacing={1.5}>
+          <Button
+            variant='outlined'
+            color='neutral'
+            size='lg'
+            fullWidth
+            startDecorator={<Google />}
+            sx={{
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                borderColor: '#EA4335',
+                backgroundColor: 'rgba(234, 67, 53, 0.08)'
+              }
+            }}
+          >
+            {t('auth.signInGoogle')}
+          </Button>
 
-        <Typography level='body-sm' textAlign='center' sx={{ mt: 2 }}>
-          Don&apos;t have an account?{' '}
-          <Link component={RouterLink} to='/register'>
-            Register here
-          </Link>
-        </Typography>
+          <Button
+            variant='outlined'
+            color='neutral'
+            size='lg'
+            fullWidth
+            startDecorator={<Facebook />}
+            sx={{
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                borderColor: '#1877F2',
+                backgroundColor: 'rgba(24, 119, 242, 0.08)'
+              }
+            }}
+          >
+            {t('auth.signInFacebook')}
+          </Button>
+        </Stack>
 
-        <Typography level='body-sm' textAlign='center' mt={1}>
-          <Link component={RouterLink} to='/resetPassword'>
-            Forgot your password?
+        {/* Register Link */}
+        <Typography level='body-sm' textAlign='center' sx={{ mt: 3 }}>
+          {t('auth.noAccount')}{' '}
+          <Link component={RouterLink} to='/register' fontWeight={600} color='primary'>
+            {t('auth.createOne')}
           </Link>
         </Typography>
       </Sheet>
+
+      {/* Loading Bar */}
+      {loading && (
+        <LinearProgress
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 10000
+          }}
+        />
+      )}
     </Box>
   )
 }

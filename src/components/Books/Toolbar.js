@@ -13,7 +13,9 @@ import BgColorPicker from '../Editor/BgColorPicker'
 import AlignDropdown from '../Editor/AlignDropdown'
 import InsertDropdown from '../Editor/InsertDropdown'
 
-const Toolbar = ({ onSave }) => {
+import PageSizeDropdown from '../Editor/PageSizeDropdown'
+
+const Toolbar = ({ onSave, pageSize, setPageSize }) => {
   return (
     <Box
       sx={{
@@ -25,6 +27,11 @@ const Toolbar = ({ onSave }) => {
     >
       {/* Undo/Redo */}
       <UndoRedo />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Page Size */}
+      <PageSizeDropdown pageSize={pageSize} setPageSize={setPageSize} />
 
       <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
 
@@ -57,17 +64,6 @@ const Toolbar = ({ onSave }) => {
 
       {/* Insert */}
       <InsertDropdown />
-
-      {onSave && (
-        <>
-          <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
-
-          {/* Save Button */}
-          <IconButton variant='soft' color='success' size='sm' onClick={onSave}>
-            <Save size={18} />
-          </IconButton>
-        </>
-      )}
     </Box>
   )
 }

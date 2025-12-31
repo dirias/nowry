@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button, CircularProgress, Stack } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import { cardsService, decksService } from '../../../api/services'
 
 const DailyFocus = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [decksDue, setDecksDue] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -85,10 +87,10 @@ const DailyFocus = () => {
         }}
       >
         <Typography level='title-lg' sx={{ mb: 1 }}>
-          🎉 ¡Todo al día!
+          {t('dashboard.dailyFocus.allCaughtUp')}
         </Typography>
         <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-          No tienes tarjetas pendientes. ¡Buen trabajo!
+          {t('dashboard.dailyFocus.noDueCards')}
         </Typography>
       </Box>
     )
@@ -118,15 +120,14 @@ const DailyFocus = () => {
       >
         <Box>
           <Typography level='body-sm' sx={{ color: 'primary.700', fontWeight: '500', mb: 0.5 }}>
-            📚 Hoy podrías repasar
+            {t('dashboard.dailyFocus.reviewToday')}
           </Typography>
           <Typography level='title-md' sx={{ fontWeight: 'bold' }}>
-            {topDeck.name} — {topDeck.dueCount} {topDeck.dueCount === 1 ? 'tarjeta' : 'tarjetas'}{' '}
-            {topDeck.dueCount === 1 ? 'pendiente' : 'pendientes'}
+            {topDeck.name} — {t('dashboard.dailyFocus.cardsPending', { count: topDeck.dueCount })}
           </Typography>
         </Box>
         <Button variant='solid' color='primary' size='md' onClick={() => handleStudy(topDeck.id)}>
-          ¡Vamos!
+          {t('dashboard.dailyFocus.start')}
         </Button>
       </Box>
 
@@ -151,16 +152,16 @@ const DailyFocus = () => {
               }}
             >
               <Typography level='body-sm' sx={{ fontWeight: '500' }}>
-                {deck.name} — {deck.dueCount} {deck.dueCount === 1 ? 'tarjeta' : 'tarjetas'}
+                {deck.name} — {t('dashboard.dailyFocus.cardsPending', { count: deck.dueCount })}
               </Typography>
               <Button variant='plain' size='sm' onClick={() => handleStudy(deck.id)}>
-                Estudiar
+                {t('dashboard.dailyFocus.study')}
               </Button>
             </Box>
           ))}
           {decksDue.length > 4 && (
             <Typography level='body-xs' sx={{ textAlign: 'center', color: 'neutral.500', mt: 1 }}>
-              Y {decksDue.length - 4} {decksDue.length - 4 === 1 ? 'deck más' : 'decks más'} con tarjetas pendientes
+              {t('dashboard.dailyFocus.moreDecks', { count: decksDue.length - 4 })}
             </Typography>
           )}
         </Stack>

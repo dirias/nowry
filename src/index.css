@@ -10,3 +10,138 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+/* === Fixes for Background Artifacts & Conflicts === */
+
+/* Remove default mark/highlight backgrounds */
+mark {
+  background-color: transparent;
+  color: inherit;
+}
+
+/* Customize selection to use user's theme color with good readability */
+::selection {
+  background-color: var(--joy-palette-primary-200, rgba(59, 130, 246, 0.3));
+  color: var(--joy-palette-text-primary);
+}
+
+/* Dark mode: Use lighter shade of theme color for better contrast */
+[data-joy-color-scheme='dark'] ::selection {
+  background-color: var(--joy-palette-primary-700, rgba(96, 165, 250, 0.35));
+  color: var(--joy-palette-common-white);
+}
+
+/* Force Editor content to have transparent background to fix "black lines" */
+.editor-content span,
+.editor-content p,
+.editor-content div {
+  background-color: transparent;
+}
+
+/* Force Preview content to have transparent background by default */
+/* This applies to elements without explicit background styling */
+.preview-content span:not([style*='background']),
+.preview-content p:not([style*='background']),
+.preview-content div:not([style*='background']),
+.preview-page span:not([style*='background']),
+.preview-page p:not([style*='background']),
+.preview-page div:not([style*='background']),
+.preview-page h1:not([style*='background']),
+.preview-page h2:not([style*='background']),
+.preview-page h3:not([style*='background']),
+.preview-page h4:not([style*='background']),
+.preview-page h5:not([style*='background']),
+.preview-page h6:not([style*='background']) {
+  background-color: transparent;
+}
+
+/* Remove Bootstrap generic button/input overrides if they leak */
+button,
+input,
+select,
+textarea {
+  background-color: transparent;
+}
+
+/* COMPREHENSIVE FIX: Remove all backgrounds from icons and their wrappers */
+/* Target all possible icon container elements */
+button *,
+a *,
+[role='button'] * {
+  background-color: transparent !important;
+}
+
+/* Specific targeting for Joy UI components */
+.MuiButton-root *,
+.MuiIconButton-root *,
+.MuiChip-root *,
+[class*='MuiButton'] *,
+[class*='MuiChip'] * {
+  background-color: transparent !important;
+}
+
+/* Target SVG icons specifically */
+svg,
+svg * {
+  background-color: transparent !important;
+}
+
+/* Target Material-UI icon components */
+.MuiSvgIcon-root,
+.MuiSvgIcon-root * {
+  background-color: transparent !important;
+}
+
+/* Ensure focus outlines don't create double-box artifacts (Joy UI uses box-shadow) */
+button:focus,
+input:focus,
+a:focus {
+  outline: none;
+}
+
+/* === Smooth Animations for Auth & Onboarding === */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Sheet, Typography, Stack, Box, Input, IconButton, Tooltip, Select, Option, CircularProgress } from '@mui/joy'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
@@ -13,6 +14,7 @@ const SideMenu = () => {
   const [search, setSearch] = React.useState('')
   const [statusFilter, setStatusFilter] = React.useState('all')
   const [loading, setLoading] = React.useState(true)
+  const { t } = useTranslation()
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor))
 
@@ -144,7 +146,7 @@ const SideMenu = () => {
       {/* Header */}
       <Stack direction='row' alignItems='center' justifyContent='space-between'>
         <Typography level='title-md' color='primary'>
-          Tasks
+          {t('tasks.title')}
         </Typography>
 
         <Select
@@ -155,9 +157,9 @@ const SideMenu = () => {
           startDecorator={<FilterAltRoundedIcon fontSize='sm' />}
           sx={{ width: 130 }}
         >
-          <Option value='all'>All</Option>
-          <Option value='completed'>Completed</Option>
-          <Option value='pending'>Pending</Option>
+          <Option value='all'>{t('tasks.filter.all')}</Option>
+          <Option value='completed'>{t('tasks.filter.completed')}</Option>
+          <Option value='pending'>{t('tasks.filter.pending')}</Option>
         </Select>
       </Stack>
 
@@ -165,7 +167,7 @@ const SideMenu = () => {
       <Box sx={{ position: 'relative', mt: 1, mb: 1 }}>
         <Input
           size='sm'
-          placeholder='Search or add tasks...'
+          placeholder={t('tasks.searchPlaceholder')}
           startDecorator={<SearchRoundedIcon />}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -173,7 +175,7 @@ const SideMenu = () => {
           sx={{ width: '100%' }}
         />
         {search && filteredTasks.length === 0 && (
-          <Tooltip title={`Add "${search}"`}>
+          <Tooltip title={t('tasks.addTooltip', { title: search })}>
             <IconButton
               onClick={() => addTask(search)}
               size='sm'
@@ -203,9 +205,7 @@ const SideMenu = () => {
               ))
             ) : (
               <Box sx={{ textAlign: 'center', color: 'text.tertiary', py: 3 }}>
-                <Typography level='body-sm'>
-                  {tasks.length === 0 ? 'No tasks yet. Type to add one!' : 'No tasks match your filters'}
-                </Typography>
+                <Typography level='body-sm'>{tasks.length === 0 ? t('tasks.empty') : t('tasks.noMatch')}</Typography>
               </Box>
             )}
           </Stack>

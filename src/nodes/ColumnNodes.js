@@ -59,6 +59,18 @@ export class ColumnContainerNode extends ElementNode {
     }
   }
 
+  exportDOM() {
+    const element = document.createElement('div')
+    element.className = 'editor-column-container'
+    element.setAttribute('data-columns', this.__columns.toString())
+    // Essential for support in other environments
+    element.style.display = 'grid'
+    element.style.gridTemplateColumns = `repeat(${this.__columns}, 1fr)`
+    element.style.gap = '1.5rem'
+    element.style.margin = '1rem 0'
+    return { element }
+  }
+
   static importJSON(serializedNode) {
     const node = $createColumnContainerNode(serializedNode.columns)
     return node
@@ -132,6 +144,15 @@ export class ColumnNode extends ElementNode {
         return null
       }
     }
+  }
+
+  exportDOM() {
+    const element = document.createElement('div')
+    element.className = 'editor-column'
+    element.style.minHeight = '100px'
+    element.style.borderRight = '1px solid #e5e7eb'
+    element.style.paddingRight = '0.75rem'
+    return { element }
   }
 
   static importJSON(serializedNode) {

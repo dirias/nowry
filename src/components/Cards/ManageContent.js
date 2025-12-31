@@ -17,12 +17,46 @@ import {
   Grid,
   Table
 } from '@mui/joy'
-import { Edit, Delete, Add, Style, Quiz as QuizIcon, AccountTree, LocalOffer, Search } from '@mui/icons-material'
+import { Edit, Delete, Add, Style, Quiz as QuizIcon, AccountTree, LocalOffer, Search, Visibility } from '@mui/icons-material'
+import CardPreviewModal from './CardPreviewModal'
 
 export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, onEditCard, onDeleteCard, onAddCard }) {
   const [activeView, setActiveView] = useState(0) // 0 = Decks, 1 = Cards
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all')
+
+  // Preview State
+  const [previewState, setPreviewState] = useState({
+    open: false,
+    title: '',
+    cards: [],
+    initialIndex: 0
+  })
+
+  const handleClosePreview = () => {
+    setPreviewState((prev) => ({ ...prev, open: false }))
+  }
+
+  const handlePreviewDeck = (deck) => {
+    const deckCards = getCardsForDeck(deck._id)
+    setPreviewState({
+      open: true,
+      title: deck.name,
+      cards: deckCards,
+      initialIndex: 0
+    })
+  }
+
+  const handlePreviewCard = (card) => {
+    // Find index of card in current filtered list
+    const index = filteredCards.findIndex((c) => c._id === card._id)
+    setPreviewState({
+      open: true,
+      title: 'Card Preview',
+      cards: filteredCards,
+      initialIndex: index !== -1 ? index : 0
+    })
+  }
 
   const getDeckIcon = (type) => {
     switch (type) {
@@ -68,32 +102,62 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
 
   // Filter decks
   const filteredDecks = decks.filter((deck) => {
-    const matchesSearch = deck.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const deckType = deck.deck_type || 'flashcard' // Default to flashcard if no type
-    const matchesType =
-      filterType === 'all' || deckType === filterType || (filterType === 'flashcard' && (deckType === 'studycard' || !deckType)) // Handle studycard alias
-    return matchesSearch && matchesType
+    const query = searchQuery.toLowerCase()
+
+    // Split by comma for OR condition
+    const orGroups = query.split(',')
+
+    // Check if matches ANY of the comma-separated groups
+    const matchesSearch = orGroups.some((group) => {
+      const terms = group.trim().split(/\s+/).filter(Boolean)
+      if (terms.length === 0) return false // Ignore empty groups
+
+      // Check if ALL terms in this group match (Name OR Tags)
+      return terms.every((term) => deck.name.toLowerCase().includes(term) || deck.tags?.some((tag) => tag.toLowerCase().includes(term)))
+    })
+
+    const deckType = deck.deck_type || 'flashcard'
+    const matchesType = filterType === 'all' || deckType === filterType
+    return (searchQuery.trim() === '' || matchesSearch) && matchesType
   })
 
   // Filter cards
   const filteredCards = cards.filter((card) => {
-    const matchesSearch =
-      card.title?.toLowerCase().includes(searchQuery.toLowerCase()) || card.content?.toLowerCase().includes(searchQuery.toLowerCase())
-    const cardType = card.card_type || 'flashcard' // Default to flashcard if no type
-    const matchesType =
-      filterType === 'all' || cardType === filterType || (filterType === 'flashcard' && (cardType === 'studycard' || !cardType)) // Handle studycard alias
-    return matchesSearch && matchesType
+    const query = searchQuery.toLowerCase()
+    const deckName = getDeckName(card.deck_id).toLowerCase()
+
+    // Split by comma for OR condition
+    const orGroups = query.split(',')
+
+    // Check if matches ANY of the comma-separated groups
+    const matchesSearch = orGroups.some((group) => {
+      const terms = group.trim().split(/\s+/).filter(Boolean)
+      if (terms.length === 0) return false
+
+      // Check if ALL terms in this group match
+      return terms.every(
+        (term) =>
+          card.title?.toLowerCase().includes(term) ||
+          card.content?.toLowerCase().includes(term) ||
+          card.tags?.some((tag) => tag.toLowerCase().includes(term)) ||
+          deckName.includes(term)
+      )
+    })
+
+    const cardType = card.card_type || 'flashcard'
+    const matchesType = filterType === 'all' || cardType === filterType
+    return (searchQuery.trim() === '' || matchesSearch) && matchesType
   })
 
   return (
     <Box>
       {/* Header */}
-      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 3 }}>
+      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 4 }}>
         <Box>
-          <Typography level='h4' sx={{ mb: 0.5 }}>
+          <Typography level='h3' fontWeight={600} sx={{ mb: 0.5 }}>
             Content Manager
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
             {decks.length} decks • {cards.length} total cards
           </Typography>
         </Box>
@@ -114,35 +178,60 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
           startDecorator={<Search />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          variant='soft'
           sx={{ flex: 1 }}
         />
 
         {/* Type Filter */}
-        <Stack direction='row' spacing={1}>
-          <Chip variant={filterType === 'all' ? 'solid' : 'outlined'} onClick={() => setFilterType('all')} sx={{ cursor: 'pointer' }}>
+        <Stack direction='row' spacing={0.5}>
+          <Chip
+            variant='soft'
+            onClick={() => setFilterType('all')}
+            sx={{
+              cursor: 'pointer',
+              textDecoration: filterType === 'all' ? 'underline' : 'none',
+              textUnderlineOffset: '4px',
+              textDecorationThickness: '2px'
+            }}
+          >
             All
           </Chip>
           <Chip
-            variant={filterType === 'flashcard' ? 'solid' : 'outlined'}
+            variant='soft'
             color='primary'
             onClick={() => setFilterType('flashcard')}
-            sx={{ cursor: 'pointer' }}
+            sx={{
+              cursor: 'pointer',
+              textDecoration: filterType === 'flashcard' ? 'underline' : 'none',
+              textUnderlineOffset: '4px',
+              textDecorationThickness: '2px'
+            }}
           >
             Flashcards
           </Chip>
           <Chip
-            variant={filterType === 'quiz' ? 'solid' : 'outlined'}
+            variant='soft'
             color='warning'
             onClick={() => setFilterType('quiz')}
-            sx={{ cursor: 'pointer' }}
+            sx={{
+              cursor: 'pointer',
+              textDecoration: filterType === 'quiz' ? 'underline' : 'none',
+              textUnderlineOffset: '4px',
+              textDecorationThickness: '2px'
+            }}
           >
             Quizzes
           </Chip>
           <Chip
-            variant={filterType === 'visual' ? 'solid' : 'outlined'}
+            variant='soft'
             color='info'
             onClick={() => setFilterType('visual')}
-            sx={{ cursor: 'pointer' }}
+            sx={{
+              cursor: 'pointer',
+              textDecoration: filterType === 'visual' ? 'underline' : 'none',
+              textUnderlineOffset: '4px',
+              textDecorationThickness: '2px'
+            }}
           >
             Visual
           </Chip>
@@ -160,11 +249,14 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
               <Grid key={deck._id} xs={12} sm={6} md={4}>
                 <Card
                   variant='outlined'
+                  onClick={() => handlePreviewDeck(deck)}
                   sx={{
                     transition: 'all 0.2s',
+                    cursor: 'pointer',
                     '&:hover': {
                       boxShadow: 'md',
-                      borderColor: `${deckColor}.outlinedBorder`
+                      borderColor: `${deckColor}.outlinedBorder`,
+                      transform: 'translateY(-2px)'
                     }
                   }}
                 >
@@ -183,7 +275,7 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                           {getDeckIcon(deck.deck_type)}
                         </Box>
                         <Box sx={{ flex: 1 }}>
-                          <Typography level='title-md' fontWeight={600}>
+                          <Typography level='title-lg' fontWeight={700}>
                             {deck.name}
                           </Typography>
                           <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
@@ -194,7 +286,7 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
 
                       {/* Tags */}
                       <Stack direction='row' spacing={1} flexWrap='wrap'>
-                        <Chip size='sm' variant='soft' color={deckColor}>
+                        <Chip size='sm' variant='soft' color={deckColor} sx={{ fontWeight: 600 }}>
                           {deck.deck_type || 'flashcard'}
                         </Chip>
                         {deck.tags?.map((tag, idx) => (
@@ -205,16 +297,20 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                       </Stack>
 
                       {/* Actions */}
-                      <Stack direction='row' spacing={1}>
+                      <Stack direction='row' spacing={1} onClick={(e) => e.stopPropagation()}>
                         <Button size='sm' variant='soft' color='success' startDecorator={<Add />} onClick={() => onAddCard(deck)} fullWidth>
                           Add Card
                         </Button>
-                        <IconButton size='sm' variant='soft' onClick={() => onEditDeck(deck)}>
-                          <Edit />
-                        </IconButton>
-                        <IconButton size='sm' variant='soft' color='danger' onClick={() => onDeleteDeck(deck)}>
-                          <Delete />
-                        </IconButton>
+                        <Tooltip title='Edit Deck'>
+                          <IconButton size='sm' variant='soft' onClick={() => onEditDeck(deck)}>
+                            <Edit />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title='Delete Deck'>
+                          <IconButton size='sm' variant='soft' color='danger' onClick={() => onDeleteDeck(deck)}>
+                            <Delete />
+                          </IconButton>
+                        </Tooltip>
                       </Stack>
                     </Stack>
                   </CardContent>
@@ -248,11 +344,14 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
               <Card
                 key={card._id}
                 variant='outlined'
+                onClick={() => handlePreviewCard(card)}
                 sx={{
                   transition: 'all 0.2s',
+                  cursor: 'pointer',
                   '&:hover': {
                     boxShadow: 'sm',
-                    borderColor: `${cardColor}.outlinedBorder`
+                    borderColor: `${cardColor}.outlinedBorder`,
+                    bgcolor: 'background.surface'
                   }
                 }}
               >
@@ -273,15 +372,20 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                     {/* Card Content */}
                     <Box sx={{ flex: 1 }}>
                       <Typography level='title-md' fontWeight={600}>
-                        {card.title}
+                        {card.title || 'Untitled Card'}
                       </Typography>
                       <Typography level='body-sm' sx={{ color: 'neutral.600', mt: 0.5 }}>
-                        {card.content?.substring(0, 150)}
-                        {card.content?.length > 150 && '...'}
+                        {card.content ? (
+                          card.content.substring(0, 150) + (card.content.length > 150 ? '...' : '')
+                        ) : (
+                          <Typography component='span' sx={{ fontStyle: 'italic', opacity: 0.7 }}>
+                            No content
+                          </Typography>
+                        )}
                       </Typography>
 
                       <Stack direction='row' spacing={1} sx={{ mt: 1.5 }} flexWrap='wrap'>
-                        <Chip size='sm' variant='soft' color={cardColor}>
+                        <Chip size='sm' variant='soft' color={cardColor} sx={{ fontWeight: 600 }}>
                           {getCardTypeLabel(card.card_type)}
                         </Chip>
                         <Chip size='sm' variant='outlined' startDecorator='📚'>
@@ -296,7 +400,12 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                     </Box>
 
                     {/* Actions */}
-                    <Stack direction='row' spacing={0.5}>
+                    <Stack direction='row' spacing={0.5} onClick={(e) => e.stopPropagation()}>
+                      <Tooltip title='Preview'>
+                        <IconButton size='sm' variant='plain' color='primary' onClick={() => handlePreviewCard(card)}>
+                          <Visibility />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title='Edit Card'>
                         <IconButton size='sm' variant='soft' onClick={() => onEditCard(card)}>
                           <Edit />
@@ -326,6 +435,14 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
           )}
         </Stack>
       )}
+      {/* Preview Modal */}
+      <CardPreviewModal
+        open={previewState.open}
+        onClose={handleClosePreview}
+        title={previewState.title}
+        cards={previewState.cards}
+        initialIndex={previewState.initialIndex}
+      />
     </Box>
   )
 }

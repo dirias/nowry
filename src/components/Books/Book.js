@@ -1,39 +1,33 @@
 import React from 'react'
-import { Card, CardContent, Typography, Box, AspectRatio, Sheet } from '@mui/joy'
+import { Card, Typography, Box, AspectRatio, IconButton, Stack, Chip } from '@mui/joy'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 
-export default function Book({ book, handleBookClick = () => {}, handleContextMenu = () => {} }) {
+export default function Book({ book, handleBookClick = () => {}, onEdit, onDelete }) {
   const { cover_color, cover_image, title, author, isbn } = book
 
   return (
-    <Sheet
-      component='article'
+    <Card
+      variant='plain'
       sx={{
-        width: 180,
-        height: 260,
-        position: 'relative',
+        width: '100%',
+        maxWidth: 200,
+        p: 0,
+        backgroundColor: 'transparent',
         cursor: 'pointer',
-        borderRadius: 'lg',
-        overflow: 'hidden',
-        transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-        backgroundColor: 'background.surface',
+        position: 'relative',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        boxShadow: '2px 4px 8px rgba(0,0,0,0.15), 4px 8px 16px rgba(0,0,0,0.1)',
         '&:hover': {
-          transform: 'translateY(-6px)',
-          boxShadow: 'md'
-        },
-        '&:focus-visible': {
-          outline: '2px solid var(--joy-palette-primary-outlinedBorder)',
-          outlineOffset: '2px'
+          transform: 'translateY(-4px)',
+          boxShadow: '3px 6px 12px rgba(0,0,0,0.2), 6px 12px 24px rgba(0,0,0,0.15)',
+          '& .book-actions': { opacity: 1 }
         }
       }}
       onClick={() => handleBookClick(book)}
-      onContextMenu={(e) => {
-        e.preventDefault()
-        handleContextMenu(e, book)
-      }}
-      tabIndex={0}
     >
-      {/* Book binding */}
+      {/* Book Spine (Left Edge) */}
       <Box
         sx={{
           position: 'absolute',
@@ -41,68 +35,175 @@ export default function Book({ book, handleBookClick = () => {}, handleContextMe
           top: 0,
           bottom: 0,
           width: 10,
-          background: (theme) => `linear-gradient(to bottom, ${theme.palette.neutral[300]}, ${theme.palette.neutral[400]})`,
-          borderTopLeftRadius: 'lg',
-          borderBottomLeftRadius: 'lg'
+          background: cover_image
+            ? 'linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.3), rgba(255,255,255,0.1))'
+            : `linear-gradient(to right, ${cover_color || '#0B6BCB'}dd, ${cover_color || '#0B6BCB'}88, rgba(255,255,255,0.1))`,
+          borderRadius: '4px 0 0 4px',
+          zIndex: 5,
+          boxShadow: 'inset -1px 0 2px rgba(0,0,0,0.3)'
         }}
       />
 
-      <Card
-        variant='outlined'
-        color='neutral'
+      <AspectRatio
+        ratio='2/3'
         sx={{
-          height: '100%',
-          borderRadius: 'lg',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          p: 2.5,
-          pl: 3,
-          textAlign: 'center',
-          backgroundColor: 'background.level1',
-          boxShadow: 'sm'
+          borderRadius: '4px',
+          overflow: 'hidden',
+          position: 'relative',
+          backgroundColor: 'background.surface'
         }}
       >
-        <AspectRatio ratio='1' sx={{ width: 80, borderRadius: 'md', mb: 1.5 }}>
-          {cover_image ? (
-            <img
-              src={cover_image}
-              alt={title}
-              loading='lazy'
-              style={{
-                objectFit: 'cover',
-                borderRadius: 8,
-                backgroundColor: cover_color || 'var(--joy-palette-primary-softBg)'
-              }}
-            />
-          ) : (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: cover_color || 'primary.softBg',
-                color: 'primary.solidColor'
-              }}
-            >
-              <MenuBookIcon sx={{ fontSize: 40 }} />
-            </Box>
+        {/* Cover Image/Color with Gradient Texture */}
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: cover_color || 'primary.solidBg',
+            background: cover_image
+              ? `url(${cover_image}) center/cover`
+              : `radial-gradient(circle at 30% 30%, ${cover_color || '#0B6BCB'}dd, ${cover_color || '#0B6BCB'} 60%, ${cover_color || '#0B6BCB'}bb 100%)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {!cover_image && <MenuBookIcon sx={{ fontSize: 48, opacity: 0.2, color: '#fff' }} />}
+          {cover_image && (
+            <img src={cover_image} alt={title} loading='lazy' style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           )}
-        </AspectRatio>
+        </Box>
 
-        <CardContent sx={{ p: 0 }}>
-          <Typography level='title-sm' fontWeight='lg' noWrap>
+        {/* Embossed Relief Overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.1) 100%)',
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+
+        {/* Top Overlay: Tags */}
+        {book.tags && book.tags.length > 0 && (
+          <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, p: 1, zIndex: 10 }}>
+            <Stack direction='row' flexWrap='wrap' spacing={0.5}>
+              {book.tags.slice(0, 3).map((tag, i) => (
+                <Chip
+                  key={i}
+                  size='sm'
+                  variant='solid'
+                  sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: 'black', fontSize: '10px', height: 20 }}
+                >
+                  {tag}
+                </Chip>
+              ))}
+              {book.tags.length > 3 && (
+                <Chip size='sm' variant='solid' sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: 'black', fontSize: '10px', height: 20 }}>
+                  +{book.tags.length - 3}
+                </Chip>
+              )}
+            </Stack>
+          </Box>
+        )}
+
+        {/* Gradient Overlay for Text */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            p: 2,
+            pt: 8,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%)',
+            zIndex: 2
+          }}
+        >
+          <Typography
+            level='title-md'
+            sx={{
+              color: '#fff',
+              mb: 0.5,
+              textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              backgroundColor: 'transparent'
+            }}
+          >
             {title}
           </Typography>
-          <Typography level='body-sm' color='text.secondary' noWrap>
-            {author || 'Autor desconocido'}
+          <Typography
+            level='body-xs'
+            sx={{
+              color: 'neutral.300',
+              textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+              display: 'block',
+              backgroundColor: 'transparent'
+            }}
+            noWrap
+          >
+            {author || 'Unknown Author'}
           </Typography>
-          <Typography level='body-xs' color='text.tertiary' noWrap>
-            {isbn || 'Sin ISBN'}
-          </Typography>
-        </CardContent>
-      </Card>
-    </Sheet>
+        </Box>
+
+        {/* Actions Overlay (Top Right) */}
+        {(onEdit || onDelete) && (
+          <Stack
+            className='book-actions'
+            direction='row'
+            spacing={1}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 20,
+              opacity: 0,
+              transition: 'opacity 0.2s ease-in-out'
+            }}
+          >
+            {onEdit && (
+              <IconButton
+                size='sm'
+                variant='solid'
+                color='neutral'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit(book)
+                }}
+                sx={{
+                  borderRadius: '50%',
+                  boxShadow: 'sm',
+                  bgcolor: 'background.surface',
+                  color: 'text.primary',
+                  '&:hover': { bgcolor: 'primary.solidBg', color: '#fff' }
+                }}
+              >
+                <EditIcon fontSize='small' />
+              </IconButton>
+            )}
+            {onDelete && (
+              <IconButton
+                size='sm'
+                variant='solid'
+                color='danger'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(book)
+                }}
+                sx={{
+                  borderRadius: '50%',
+                  boxShadow: 'sm'
+                }}
+              >
+                <DeleteIcon fontSize='small' />
+              </IconButton>
+            )}
+          </Stack>
+        )}
+      </AspectRatio>
+    </Card>
   )
 }

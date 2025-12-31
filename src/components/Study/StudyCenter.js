@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Container, Typography, Box, Card, CardContent, Stack, Button, Chip, Grid, LinearProgress } from '@mui/joy'
 import { School, Quiz as QuizIcon, Style, AccountTree, TrendingUp, CalendarToday } from '@mui/icons-material'
 import { decksService, cardsService } from '../../api/services'
+import { useTranslation } from 'react-i18next'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [decks, setDecks] = useState([])
   const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
@@ -23,12 +25,20 @@ export default function StudyCenter() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [decksData, cardsData] = await Promise.all([decksService.getAll(), cardsService.getAll()])
+      const [decksData, cardsData, statisticsData] = await Promise.all([
+        decksService.getAll(),
+        cardsService.getAll(),
+        cardsService.getStatistics()
+      ])
 
       setDecks(decksData)
       setCards(cardsData)
 
-      // Calculate stats
+      // Use real stats from API - API returns data in summary object
+      const summary = statisticsData.summary || {}
+      const weeklyData = statisticsData.weekly_progress || []
+
+      // Calculate due today cards
       const now = new Date()
       const dueCards = cardsData.filter((card) => {
         if (!card.next_review) return true
@@ -36,11 +46,15 @@ export default function StudyCenter() {
         return nextReview <= now
       })
 
+      // Calculate reviewed today from weekly progress (today is last item)
+      const todayData = weeklyData[weeklyData.length - 1]
+      const reviewedToday = todayData ? todayData.cards || 0 : 0
+
       setStats({
         dueToday: dueCards.length,
-        reviewedToday: 0, // TODO: Track reviewed today
-        totalActive: cardsData.length,
-        streak: 5 // TODO: Calculate actual streak
+        reviewedToday: reviewedToday,
+        totalActive: summary.total_cards || cardsData.length,
+        streak: summary.current_streak || 0
       })
 
       setLoading(false)
@@ -70,7 +84,7 @@ export default function StudyCenter() {
       <Container maxWidth='xl' sx={{ py: 4 }}>
         <LinearProgress />
         <Typography level='body-lg' sx={{ mt: 2, textAlign: 'center' }}>
-          Loading Study Center...
+          {t('common.loading')}
         </Typography>
       </Container>
     )
@@ -79,125 +93,126 @@ export default function StudyCenter() {
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5 }}>
-          📚 Study Center
-        </Typography>
-        <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-          Your personalized learning hub
-        </Typography>
-      </Box>
+      <Stack spacing={4} sx={{ mb: 4 }}>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          justifyContent='space-between'
+          alignItems={{ xs: 'center', md: 'center' }}
+          spacing={2}
+          sx={{ width: '100%' }}
+        >
+          {/* Left: Title */}
+          <Typography level='h2' fontWeight={600} sx={{ mb: 0.5 }}>
+            {t('study.title')}
+          </Typography>
 
-      {/* Stats Dashboard */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid xs={12} sm={6} md={3}>
-          <Card variant='soft' color='danger'>
-            <CardContent>
-              <Stack direction='row' spacing={2} alignItems='center'>
-                <Box
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 'md',
-                    bgcolor: 'danger.solidBg',
-                    color: 'danger.solidColor'
-                  }}
-                >
-                  <TrendingUp />
-                </Box>
-                <Box>
-                  <Typography level='h3' fontWeight={700}>
-                    {stats.dueToday}
-                  </Typography>
-                  <Typography level='body-sm' sx={{ color: 'danger.700' }}>
-                    Due Today
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
+          {/* Center: Subtitle */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', flex: 1 }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', display: 'flex', alignItems: 'center', gap: 1 }}>
+              {t('study.subtitle')}
+              {stats.streak > 0 && (
+                <Typography component='span' level='body-xs' sx={{ color: 'warning.plainColor' }}>
+                  • 🔥 {stats.streak} {t('profile.stats.days')}
+                </Typography>
+              )}
+            </Typography>
+          </Box>
 
-        <Grid xs={12} sm={6} md={3}>
-          <Card variant='soft' color='success'>
-            <CardContent>
-              <Stack direction='row' spacing={2} alignItems='center'>
-                <Box
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 'md',
-                    bgcolor: 'success.solidBg',
-                    color: 'success.solidColor'
-                  }}
-                >
-                  <School />
-                </Box>
-                <Box>
-                  <Typography level='h3' fontWeight={700}>
-                    {stats.reviewedToday}
-                  </Typography>
-                  <Typography level='body-sm' sx={{ color: 'success.700' }}>
-                    Reviewed Today
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
+          {/* Mobile Only Subtitle */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, width: '100%', justifyContent: 'center' }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
+              {t('study.subtitle')}
+            </Typography>
+          </Box>
 
-        <Grid xs={12} sm={6} md={3}>
-          <Card variant='soft' color='warning'>
-            <CardContent>
-              <Stack direction='row' spacing={2} alignItems='center'>
-                <Box
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 'md',
-                    bgcolor: 'warning.solidBg',
-                    color: 'warning.solidColor'
-                  }}
-                >
-                  <CalendarToday />
-                </Box>
-                <Box>
-                  <Typography level='h3' fontWeight={700}>
-                    {stats.streak}
-                  </Typography>
-                  <Typography level='body-sm' sx={{ color: 'warning.700' }}>
-                    Day Streak
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
+          {/* Empty Right Side to Balance Layout if needed, or just let it expand */}
+          <Box sx={{ width: { xs: 0, md: 'auto' } }} />
+        </Stack>
 
-        <Grid xs={12} sm={6} md={3}>
-          <Card variant='soft' color='primary'>
-            <CardContent>
-              <Stack direction='row' spacing={2} alignItems='center'>
-                <Box
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 'md',
-                    bgcolor: 'primary.solidBg',
-                    color: 'primary.solidColor'
-                  }}
-                >
-                  <Style />
-                </Box>
-                <Box>
-                  <Typography level='h3' fontWeight={700}>
-                    {stats.totalActive}
-                  </Typography>
-                  <Typography level='body-sm' sx={{ color: 'primary.700' }}>
-                    Total Cards
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
+        {/* Stats Dashboard */}
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid xs={12} sm={6} md={3}>
+            <Card variant='soft' color='danger'>
+              <CardContent>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 'md',
+                      bgcolor: 'danger.solidBg',
+                      color: 'danger.solidColor'
+                    }}
+                  >
+                    <TrendingUp />
+                  </Box>
+                  <Box>
+                    <Typography level='h3' fontWeight={700} sx={{ color: 'danger.solidBg' }}>
+                      {stats.dueToday}
+                    </Typography>
+                    <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
+                      {t('study.stats.dueToday')}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid xs={12} sm={6} md={3}>
+            <Card variant='soft' color='success'>
+              <CardContent>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 'md',
+                      bgcolor: 'success.solidBg',
+                      color: 'success.solidColor'
+                    }}
+                  >
+                    <School />
+                  </Box>
+                  <Box>
+                    <Typography level='h3' fontWeight={700} sx={{ color: 'success.solidBg' }}>
+                      {stats.reviewedToday}
+                    </Typography>
+                    <Typography level='body-sm' sx={{ color: 'success.plainColor' }}>
+                      {t('study.stats.reviewedToday')}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid xs={12} sm={6} md={3}>
+            <Card variant='soft' color='primary'>
+              <CardContent>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 'md',
+                      bgcolor: 'primary.solidBg',
+                      color: 'primary.solidColor'
+                    }}
+                  >
+                    <Style />
+                  </Box>
+                  <Box>
+                    <Typography level='h3' fontWeight={700} sx={{ color: 'primary.solidBg' }}>
+                      {stats.totalActive}
+                    </Typography>
+                    <Typography level='body-sm' sx={{ color: 'primary.plainColor' }}>
+                      {t('study.stats.totalCards')}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+      </Stack>
 
       {/* Quick Start Actions */}
       {stats.dueToday > 0 && (
@@ -218,14 +233,14 @@ export default function StudyCenter() {
             <Stack direction='row' spacing={2} alignItems='center' justifyContent='space-between' flexWrap='wrap'>
               <Box>
                 <Typography level='title-lg' fontWeight={600} sx={{ mb: 0.5 }}>
-                  🎯 Start Your Daily Review
+                  🎯 {t('study.startReview')}
                 </Typography>
                 <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-                  You have {stats.dueToday} cards ready to review
+                  {t('study.reviewMsg', { count: stats.dueToday })}
                 </Typography>
               </Box>
               <Button size='lg' color='danger' onClick={() => navigate('/cards')}>
-                Start Studying →
+                {t('study.startStudying')}
               </Button>
             </Stack>
           </CardContent>
@@ -234,7 +249,7 @@ export default function StudyCenter() {
 
       {/* Study by Type */}
       <Typography level='h4' fontWeight={600} sx={{ mb: 3 }}>
-        Study by Type
+        {t('study.byType')}
       </Typography>
 
       <Grid container spacing={3}>
@@ -266,7 +281,7 @@ export default function StudyCenter() {
                 </Box>
                 <Box>
                   <Typography level='title-lg' fontWeight={600}>
-                    Flashcards
+                    {t('study.types.flashcards')}
                   </Typography>
                   <Chip size='sm' variant='soft' color='primary'>
                     {getDecksByType('flashcard').length} decks
@@ -275,13 +290,13 @@ export default function StudyCenter() {
               </Stack>
 
               <Typography level='body-sm' sx={{ mb: 2, color: 'neutral.600' }}>
-                Classic flip-style cards for quick memorization
+                {t('study.types.flashcardsDesc')}
               </Typography>
 
               <Stack spacing={1}>
                 {getDecksByType('flashcard').length === 0 ? (
                   <Typography level='body-xs' sx={{ color: 'neutral.500', textAlign: 'center', py: 2 }}>
-                    No flashcard decks yet
+                    {t('study.types.noDecks', { type: t('study.types.flashcards') })}
                   </Typography>
                 ) : (
                   <>
@@ -298,13 +313,17 @@ export default function StudyCenter() {
                             sx={{ justifyContent: 'space-between' }}
                           >
                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                            {dueCount > 0 && <Chip size='sm'>{dueCount} due</Chip>}
+                            {dueCount > 0 && (
+                              <Chip size='sm'>
+                                {dueCount} {t('study.due')}
+                              </Chip>
+                            )}
                           </Button>
                         )
                       })}
                     {getDecksByType('flashcard').length > 3 && (
                       <Button variant='plain' size='sm' onClick={() => navigate('/cards')}>
-                        View all {getDecksByType('flashcard').length} decks →
+                        {t('study.viewAll', { count: getDecksByType('flashcard').length })}
                       </Button>
                     )}
                   </>
@@ -342,7 +361,7 @@ export default function StudyCenter() {
                 </Box>
                 <Box>
                   <Typography level='title-lg' fontWeight={600}>
-                    Quizzes
+                    {t('study.types.quizzes')}
                   </Typography>
                   <Chip size='sm' variant='soft' color='warning'>
                     {getDecksByType('quiz').length} decks
@@ -351,13 +370,13 @@ export default function StudyCenter() {
               </Stack>
 
               <Typography level='body-sm' sx={{ mb: 2, color: 'neutral.600' }}>
-                Multiple-choice with instant feedback
+                {t('study.types.quizzesDesc')}
               </Typography>
 
               <Stack spacing={1}>
                 {getDecksByType('quiz').length === 0 ? (
                   <Typography level='body-xs' sx={{ color: 'neutral.500', textAlign: 'center', py: 2 }}>
-                    No quiz decks yet
+                    {t('study.types.noDecks', { type: t('study.types.quizzes') })}
                   </Typography>
                 ) : (
                   <>
@@ -374,13 +393,17 @@ export default function StudyCenter() {
                             sx={{ justifyContent: 'space-between' }}
                           >
                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                            {dueCount > 0 && <Chip size='sm'>{dueCount} due</Chip>}
+                            {dueCount > 0 && (
+                              <Chip size='sm'>
+                                {dueCount} {t('study.due')}
+                              </Chip>
+                            )}
                           </Button>
                         )
                       })}
                     {getDecksByType('quiz').length > 3 && (
                       <Button variant='plain' size='sm' onClick={() => navigate('/cards')}>
-                        View all {getDecksByType('quiz').length} decks →
+                        {t('study.viewAll', { count: getDecksByType('quiz').length })}
                       </Button>
                     )}
                   </>
@@ -418,7 +441,7 @@ export default function StudyCenter() {
                 </Box>
                 <Box>
                   <Typography level='title-lg' fontWeight={600}>
-                    Visual Diagrams
+                    {t('study.types.visual')}
                   </Typography>
                   <Chip size='sm' variant='soft' color='info'>
                     {getDecksByType('visual').length} decks
@@ -427,13 +450,13 @@ export default function StudyCenter() {
               </Stack>
 
               <Typography level='body-sm' sx={{ mb: 2, color: 'neutral.600' }}>
-                Mind maps, flowcharts & visual aids
+                {t('study.types.visualDesc')}
               </Typography>
 
               <Stack spacing={1}>
                 {getDecksByType('visual').length === 0 ? (
                   <Typography level='body-xs' sx={{ color: 'neutral.500', textAlign: 'center', py: 2 }}>
-                    No visual decks yet
+                    {t('study.types.noDecks', { type: t('study.types.visual') })}
                   </Typography>
                 ) : (
                   <>
@@ -450,13 +473,17 @@ export default function StudyCenter() {
                             sx={{ justifyContent: 'space-between' }}
                           >
                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                            {dueCount > 0 && <Chip size='sm'>{dueCount} due</Chip>}
+                            {dueCount > 0 && (
+                              <Chip size='sm'>
+                                {dueCount} {t('study.due')}
+                              </Chip>
+                            )}
                           </Button>
                         )
                       })}
                     {getDecksByType('visual').length > 3 && (
                       <Button variant='plain' size='sm' onClick={() => navigate('/cards')}>
-                        View all {getDecksByType('visual').length} decks →
+                        {t('study.viewAll', { count: getDecksByType('visual').length })}
                       </Button>
                     )}
                   </>
