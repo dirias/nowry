@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import { CssVarsProvider, CssBaseline } from '@mui/joy' // ✅ Added CssBaseline here
-import { useColorScheme } from '@mui/joy/styles'
-import theme from './theme/theme'
+import { DynamicThemeProvider } from './theme/DynamicThemeProvider'
 
 import './styles/App.css'
 import './styles/Landing.css'
@@ -16,44 +14,28 @@ import './styles/TextMenu.css'
 import './styles/Card.css'
 import './styles/LexicalEditor.css'
 
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-
 import 'keen-slider/keen-slider.min.css'
 
 import Header from './components/HomePage/Header'
 import Landing from './components/HomePage/Landing'
+import About from './components/HomePage/About'
+import Contact from './components/HomePage/Contact'
 import Footer from './components/HomePage/Footer'
 import { Login, Register, ResetPassword } from './components/User'
+import OnboardingWizard from './components/User/OnboardingWizard'
 import { Home } from './components/User/Home'
 import { EditorHome, BookHome } from './components/Books'
 import { CardHome } from './components/Cards'
 import StudySession from './components/Cards/StudySession'
 import StudyCenter from './components/Study/StudyCenter'
+import UserProfile from './components/User/Profile/UserProfile'
+import AccountSettings from './components/User/Profile/AccountSettings'
+import BugDashboard from './components/Bugs/BugDashboard'
 
-const App = () => {
-  const [isUserLoggedIn, setUserLoggedIn] = useState(false)
+import { AuthProvider, useAuth } from './context/AuthContext'
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken')
-    if (token) setUserLoggedIn(true)
-  }, [])
-
-  useEffect(() => {
-    const token = localStorage.getItem('authToken')
-    if (!token) {
-      const timer = setTimeout(
-        () => {
-          setUserLoggedIn(false)
-          window.location.href = '/login'
-        },
-        60 * 60 * 1000
-      ) // 1 hour in milliseconds
-      return () => clearTimeout(timer) // Clear timeout on cleanup
-    }
-  }, [isUserLoggedIn])
-
-  const isLoggedIn = !!localStorage.getItem('authToken')
+const AppContent = () => {
+  const { isAuthenticated, user, loading } = useAuth()
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -65,48 +47,46 @@ const App = () => {
     }
   }, [])
 
-  const ModeToggle = () => {
-    const { mode, setMode } = useColorScheme()
-    return (
-      <button
-        style={{
-          background: 'transparent',
-          color: mode === 'light' ? '#000' : '#fff',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: '1rem',
-          marginLeft: 'auto'
-        }}
-        onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
-      >
-        {mode === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
-      </button>
-    )
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>
   }
 
   return (
-    <CssVarsProvider theme={theme} defaultMode='light' disableNestedContext>
-      <CssBaseline />
-      <Router>
-        <div className='App'>
-          <Header username={localStorage.getItem('username')} />
-          <main style={{ justifyContent: 'space-between' }}>
-            <Routes>
-              <Route path='/books' element={<BookHome />} />
-              <Route path='/book/:id' element={<EditorHome />} />
-              {isLoggedIn ? <Route path='/' element={<Home />} /> : <Route path='/' element={<Landing />} />}
-              <Route path='/cards' element={<CardHome />} />
-              <Route path='/study' element={<StudyCenter />} />
-              <Route path='/study/:deckId' element={<StudySession />} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/register' element={<Register />} />
-              <Route path='/resetPassword' element={<ResetPassword />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </CssVarsProvider>
+    <div className='App' style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Header username={user?.username} />
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Routes>
+          <Route path='/books' element={<BookHome />} />
+          <Route path='/book/:id' element={<EditorHome />} />
+          {isAuthenticated ? <Route path='/' element={<Home />} /> : <Route path='/' element={<Landing />} />}
+          <Route path='/about' element={<About />} />
+          <Route path='/contact' element={<Contact />} />
+          <Route path='/cards' element={<CardHome />} />
+          <Route path='/study' element={<StudyCenter />} />
+          <Route path='/study/:deckId' element={<StudySession />} />
+          <Route path='/profile' element={<UserProfile />} />
+          <Route path='/settings' element={<AccountSettings />} />
+          <Route path='/bugs/dashboard' element={<BugDashboard />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+          <Route path='/onboarding' element={<OnboardingWizard />} />
+          <Route path='/resetPassword' element={<ResetPassword />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <DynamicThemeProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </DynamicThemeProvider>
+    </AuthProvider>
   )
 }
 

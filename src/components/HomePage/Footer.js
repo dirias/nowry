@@ -1,9 +1,11 @@
 import * as React from 'react'
 import { Box, Typography, Divider, useColorScheme } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 const Footer = () => {
   const { mode } = useColorScheme()
   const isDark = mode === 'dark'
+  const { t } = useTranslation()
 
   return (
     <Box
@@ -18,7 +20,7 @@ const Footer = () => {
       }}
     >
       <Typography level='body-sm' color='neutral'>
-        © {new Date().getFullYear()} Nowry — All rights reserved.
+        © {new Date().getFullYear()} Nowry — {t('footer.rights')}
       </Typography>
     </Box>
   )

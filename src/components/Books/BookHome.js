@@ -1,43 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { booksService } from '../../api/services'
 import { WarningWindow, SuccessWindow, Error as ErrorWindow } from '../Messages'
 import BookEditor from './BookEditor'
+import { useThemePreferences } from '../../theme/DynamicThemeProvider'
+import { useAuth } from '../../context/AuthContext'
 import Book from './Book'
 import ImportPreviewModal from './ImportPreviewModal'
-import {
-  Box,
-  Typography,
-  Input,
-  Button,
-  Sheet,
-  Stack,
-  IconButton,
-  Menu,
-  MenuItem,
-  Skeleton,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Container,
-  AspectRatio
-} from '@mui/joy'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { Box, Typography, Input, Button, Stack, IconButton, Card, Grid, Container, Chip } from '@mui/joy'
 import AddIcon from '@mui/icons-material/Add'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import SearchIcon from '@mui/icons-material/Search'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
 
 export default function BookHome() {
   const [books, setBooks] = useState([])
   const [allBooks, setAllBooks] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [contextBook, setContextBook] = useState(null)
-  const [menuAnchor, setMenuAnchor] = useState(null)
+
   const [showWarning, setShowWarning] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -57,6 +40,9 @@ export default function BookHome() {
   const [confirmingImport, setConfirmingImport] = useState(false)
 
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const { themeColor } = useThemePreferences()
+  const { user } = useAuth()
 
   const fetchBooks = async () => {
     try {
@@ -78,23 +64,29 @@ export default function BookHome() {
     try {
       const newBook = await booksService.create({
         title: `New book ${books.length}`,
-        author: localStorage.getItem('username'),
+        author: user?.username || 'Unknown',
         isbn: 'Sin ISBN'
       })
       const updatedBooks = [...books, newBook]
       setBooks(updatedBooks)
       setAllBooks(updatedBooks)
-      setSuccessMessage('Libro creado exitosamente')
+      setSuccessMessage(t('books.successCreate'))
       setShowSuccess(true)
     } catch (error) {
       console.error('Error creating book:', error)
+      let msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
+      if (error.response?.status === 403) {
+        msg = t('subscription.errors.bookLimit')
+      }
+      setErrorMessage(msg)
+      setShowError(true)
     }
   }
 
   const onDrop = useCallback(
     async (acceptedFiles) => {
       setUploading(true)
-      const username = localStorage.getItem('username') || 'Unknown'
+      const username = user?.username || 'Unknown'
 
       try {
         // Store files for processing
@@ -120,7 +112,7 @@ export default function BookHome() {
 
   const handleConfirmImport = async () => {
     setConfirmingImport(true)
-    const username = localStorage.getItem('username') || 'Unknown'
+    const username = user?.username || 'Unknown'
 
     try {
       const importedBooks = []
@@ -140,13 +132,16 @@ export default function BookHome() {
       await fetchBooks()
 
       setSuccessMessage(
-        `${importedBooks.length} ${importedBooks.length === 1 ? 'libro importado' : 'libros importados'} exitosamente! ${importedBooks.reduce((sum, book) => sum + book.page_count, 0)} páginas totales.`
+        t('books.successImport_plural', {
+          count: importedBooks.length,
+          pages: importedBooks.reduce((sum, book) => sum + book.page_count, 0)
+        })
       )
       setShowSuccess(true)
       setConfirmingImport(false)
     } catch (error) {
       console.error('Error importing files:', error)
-      setErrorMessage(error.response?.data?.detail || 'Error al importar archivos. Por favor, inténtalo de nuevo.')
+      setErrorMessage(error.response?.data?.detail || t('books.errorImport'))
       setShowError(true)
       setConfirmingImport(false)
       setShowPreview(false)
@@ -187,31 +182,6 @@ export default function BookHome() {
     navigate(`/book/${book._id}`, { state: { book } })
   }
 
-  const openMenu = (event, book) => {
-    setContextBook(book)
-    setMenuAnchor(event.currentTarget)
-  }
-
-  const handleContextMenu = (event, book) => {
-    event.preventDefault()
-    openMenu(event, book)
-  }
-
-  const closeMenu = () => {
-    setMenuAnchor(null)
-  }
-
-  const handleMenuAction = (action) => {
-    closeMenu()
-    if (action === 'edit') {
-      setBookToEdit(contextBook)
-      setShowEditor(true)
-    } else if (action === 'delete') {
-      setBookToDelete(contextBook)
-      setShowWarning(true)
-    }
-  }
-
   const handleDeleteBook = async () => {
     try {
       await booksService.delete(bookToDelete._id)
@@ -219,7 +189,7 @@ export default function BookHome() {
       setBooks(updated)
       setAllBooks(updated)
       setShowWarning(false)
-      setSuccessMessage('Libro eliminado exitosamente')
+      setSuccessMessage(t('books.successDelete'))
       setShowSuccess(true)
     } catch (error) {
       console.error('Error deleting book:', error)
@@ -228,337 +198,185 @@ export default function BookHome() {
 
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
-      {/* Header with Stats */}
-      <Box sx={{ mb: 4 }}>
-        <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center' mb={3}>
-          <Box>
-            <Typography level='h2' fontWeight={700} sx={{ mb: 0.5 }}>
-              📚 Library
-            </Typography>
-            <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-              Your personal collection
+      {/* Minimalist Header */}
+      <Box sx={{ mb: 3 }}>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={2}
+          justifyContent='space-between'
+          alignItems={{ xs: 'start', md: 'center' }}
+          mb={6}
+        >
+          {/* Left: Title */}
+          <Typography level='h2' fontWeight={600} sx={{ mb: 0.5 }}>
+            {t('books.title')}
+          </Typography>
+
+          {/* Center: Subtitle */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', flex: 1 }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', display: 'flex', alignItems: 'center', gap: 1 }}>
+              {t('books.subtitle')}
+
+              {allBooks.length > 0 && (
+                <Typography component='span' level='body-xs' sx={{ color: 'text.tertiary' }}>
+                  • 📚 {allBooks.length} {t('books.totalBooks')} • 📄 {allBooks.reduce((sum, b) => sum + (b.page_count || 0), 0)}{' '}
+                  {t('books.totalPages')}
+                </Typography>
+              )}
             </Typography>
           </Box>
 
-          <Stack direction='row' spacing={1.5}>
+          {/* Mobile Only Subtitle */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, width: '100%', justifyContent: 'center' }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
+              {t('books.subtitle')}
+            </Typography>
+          </Box>
+
+          <Stack direction='row' spacing={1.5} alignItems='center' sx={{ width: { xs: '100%', md: 'auto' } }}>
+            {/* Search Bar - Integrated in Header for minimalism */}
+            {allBooks.length > 0 && (
+              <Input
+                placeholder={t('books.searchPlaceholder')}
+                value={searchTerm}
+                onChange={handleSearch}
+                startDecorator={<SearchIcon />}
+                size='sm'
+                sx={{
+                  width: { xs: '100%', md: 240 },
+                  '--Input-focusedThickness': '1px',
+                  borderRadius: 'md',
+                  transition: 'width 0.2s',
+                  '&:focus-within': { width: { xs: '100%', md: 280 } }
+                }}
+              />
+            )}
+
             <Button
               startDecorator={<AddIcon />}
               onClick={handleCreateBook}
-              size='md'
+              size='sm'
               variant='solid'
               color='primary'
-              sx={{ borderRadius: 'md' }}
+              sx={{ borderRadius: 'md', px: 2 }}
             >
-              Create Book
+              {t('books.create')}
             </Button>
             <Button
               startDecorator={<UploadFileIcon />}
               {...getRootProps()}
-              size='md'
+              size='sm'
               variant='soft'
-              color='success'
+              color='neutral'
               loading={uploading}
-              sx={{ borderRadius: 'md' }}
+              sx={{ borderRadius: 'md', px: 2 }}
             >
               <input {...getInputProps()} />
-              Import
+              {t('books.import')}
             </Button>
           </Stack>
         </Stack>
-
-        {/* Stats Dashboard */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid xs={12} sm={4}>
-            <Card variant='soft' color='primary'>
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'primary.solidBg',
-                      color: 'primary.solidColor'
-                    }}
-                  >
-                    <AutoStoriesIcon />
-                  </Box>
-                  <Box>
-                    <Typography level='h3' fontWeight={700}>
-                      {allBooks.length}
-                    </Typography>
-                    <Typography level='body-sm' sx={{ color: 'primary.600' }}>
-                      Total Books
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid xs={12} sm={4}>
-            <Card variant='soft' color='success'>
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'success.solidBg',
-                      color: 'success.solidColor'
-                    }}
-                  >
-                    <MenuBookIcon />
-                  </Box>
-                  <Box>
-                    <Typography level='h3' fontWeight={700}>
-                      {
-                        allBooks.filter((b) => {
-                          if (!b.updated_at) return false
-                          const daysSince = (Date.now() - new Date(b.updated_at).getTime()) / (1000 * 60 * 60 * 24)
-                          return daysSince <= 7
-                        }).length
-                      }
-                    </Typography>
-                    <Typography level='body-sm' sx={{ color: 'success.600' }}>
-                      Updated This Week
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid xs={12} sm={4}>
-            <Card variant='soft' color='warning'>
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'warning.solidBg',
-                      color: 'warning.solidColor'
-                    }}
-                  >
-                    <CloudUploadIcon />
-                  </Box>
-                  <Box>
-                    <Typography level='h3' fontWeight={700}>
-                      {allBooks.reduce((sum, b) => sum + (b.page_count || 0), 0)}
-                    </Typography>
-                    <Typography level='body-sm' sx={{ color: 'warning.600' }}>
-                      Total Pages
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        {/* Search and Filter Bar */}
-        {allBooks.length > 0 && (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3}>
-            <Input
-              placeholder='Search by title, author, or ISBN...'
-              value={searchTerm}
-              onChange={handleSearch}
-              startDecorator={<SearchIcon />}
-              size='md'
-              sx={{
-                flex: 1,
-                '--Input-focusedThickness': '0.25rem',
-                borderRadius: 'md'
-              }}
-            />
-          </Stack>
-        )}
       </Box>
 
-      {/* Empty State / Drop Zone */}
+      {/* Unified Empty State & Drop Zone */}
       {allBooks.length === 0 && !loading && (
         <Card
           {...getRootProps()}
-          variant='soft'
+          variant='outlined'
           sx={{
-            mb: 4,
             textAlign: 'center',
             py: 8,
+            px: 4,
             cursor: 'pointer',
-            border: '2px dashed',
+            borderStyle: 'dashed',
             borderColor: isDragActive ? 'primary.500' : 'neutral.300',
-            backgroundColor: isDragActive ? 'primary.softBg' : 'neutral.softBg',
-            transition: 'all 0.3s ease',
+            backgroundColor: isDragActive ? 'primary.softBg' : 'transparent',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: 400,
             '&:hover': {
               borderColor: 'primary.400',
-              backgroundColor: 'primary.softBg'
+              backgroundColor: 'neutral.softBg'
             }
           }}
         >
           <input {...getInputProps()} />
-          <CardContent>
-            <CloudUploadIcon sx={{ fontSize: 64, color: 'primary.500', mb: 2 }} />
-            <Typography level='h4' sx={{ mb: 1 }}>
-              {isDragActive ? 'Drop files here!' : 'Drag files or click to import'}
-            </Typography>
-            <Typography level='body-sm' sx={{ color: 'neutral.600', mb: 3 }}>
-              Supports PDF, DOCX, DOC, TXT
-            </Typography>
-            <Stack direction='row' spacing={1} justifyContent='center'>
-              <Chip size='sm' color='primary' variant='soft'>
-                PDF
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: '50%',
+              bgcolor: 'neutral.softBg',
+              mb: 3,
+              color: 'neutral.500',
+              transition: 'transform 0.2s',
+              ...(isDragActive && { transform: 'scale(1.1)', bgcolor: 'primary.softBg', color: 'primary.500' })
+            }}
+          >
+            <CloudUploadIcon sx={{ fontSize: 48 }} />
+          </Box>
+          <Typography level='h4' fontWeight={600} sx={{ mb: 1 }}>
+            {isDragActive ? 'Drop files here!' : t('books.dropTitle')}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'neutral.600', mb: 4, maxWidth: 400 }}>
+            {t('books.dropSubtitle')}
+          </Typography>
+
+          <Stack direction='row' spacing={1} justifyContent='center'>
+            {['PDF', 'Word', 'TXT'].map((type) => (
+              <Chip key={type} size='sm' variant='outlined' color='neutral'>
+                {type}
               </Chip>
-              <Chip size='sm' color='primary' variant='soft'>
-                Word
-              </Chip>
-              <Chip size='sm' color='primary' variant='soft'>
-                TXT
-              </Chip>
-            </Stack>
-          </CardContent>
+            ))}
+          </Stack>
         </Card>
       )}
 
+      {/* Books Grid - Filtered Results */}
+      {!loading && allBooks.length > 0 && books.length === 0 && (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography level='body-md' color='neutral'>
+            No found books for &quot;{searchTerm}&quot;
+          </Typography>
+        </Box>
+      )}
+
       {/* Books Grid */}
-      {!loading && allBooks.length === 0 ? (
-        <Card
-          variant='outlined'
-          sx={{
-            textAlign: 'center',
-            py: 6
-          }}
-        >
-          <CardContent>
-            <AutoStoriesIcon sx={{ fontSize: 64, color: 'neutral.400', mb: 2 }} />
-            <Typography level='h4' sx={{ mb: 1 }}>
-              Your library is empty
-            </Typography>
-            <Typography level='body-md' sx={{ color: 'neutral.600', mb: 3 }}>
-              Create a new book or import documents to get started
-            </Typography>
-            <Stack direction='row' spacing={2} justifyContent='center'>
-              <Button startDecorator={<AddIcon />} onClick={handleCreateBook} size='lg'>
-                Create Book
-              </Button>
-              <Button startDecorator={<UploadFileIcon />} {...getRootProps()} variant='soft' size='lg' loading={uploading}>
-                <input {...getInputProps()} />
-                Import File
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
-      ) : searchTerm && books.length === 0 && !loading ? (
-        <Card variant='outlined' sx={{ textAlign: 'center', py: 4 }}>
-          <CardContent>
-            <Typography level='body-lg'>No books match &quot;{searchTerm}&quot;</Typography>
-          </CardContent>
-        </Card>
-      ) : (
-        <Grid container spacing={2.5}>
-          {(loading ? Array.from({ length: 8 }) : books).map((book, idx) => (
-            <Grid key={idx} xs={12} sm={6} md={4} lg={2.4}>
-              {loading ? (
-                <Card variant='outlined'>
-                  <Skeleton variant='rectangular' height={180} sx={{ borderRadius: 'sm', mb: 2 }} />
-                  <Skeleton variant='text' level='h4' sx={{ mb: 1 }} />
-                  <Skeleton variant='text' level='body-sm' width='60%' />
-                </Card>
-              ) : (
-                <Card
-                  variant='outlined'
-                  sx={{
-                    position: 'relative',
-                    transition: 'all 0.25s ease',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      boxShadow: 'lg',
-                      transform: 'translateY(-4px)',
-                      borderColor: 'primary.400'
-                    }
-                  }}
-                  onClick={() => handleBookClick(book)}
-                >
-                  <IconButton
-                    size='sm'
-                    variant='soft'
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      zIndex: 10,
-                      bgcolor: 'background.surface'
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      openMenu(e, book)
-                    }}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-
-                  <CardContent sx={{ p: 0 }}>
-                    {/* Book Cover */}
-                    <AspectRatio ratio='2/3' sx={{ mb: 1.5 }}>
-                      {book.cover_image ? (
-                        <img src={book.cover_image} alt={book.title} loading='lazy' style={{ objectFit: 'cover' }} />
-                      ) : (
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: book.cover_color || 'primary.softBg',
-                            color: 'primary.solidColor'
-                          }}
-                        >
-                          <MenuBookIcon sx={{ fontSize: 48 }} />
-                        </Box>
-                      )}
-                    </AspectRatio>
-
-                    {/* Book Info */}
-                    <Box sx={{ px: 2, pb: 2 }}>
-                      <Typography level='title-sm' fontWeight={600} noWrap sx={{ mb: 0.5 }}>
-                        {book.title}
-                      </Typography>
-                      <Typography level='body-xs' sx={{ color: 'neutral.600', mb: 1 }} noWrap>
-                        {book.author || 'Unknown Author'}
-                      </Typography>
-
-                      {/* Last Updated */}
-                      {book.updated_at && (
-                        <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
-                          Updated {new Date(book.updated_at).toLocaleDateString()}
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </Card>
-              )}
+      {!loading && books.length > 0 && (
+        <Grid container spacing={3}>
+          {books.map((book) => (
+            <Grid key={book._id} xs={12} sm={6} md={4} lg={3}>
+              <Book
+                book={book}
+                handleBookClick={handleBookClick}
+                onEdit={(b) => {
+                  setBookToEdit(b)
+                  setShowEditor(true)
+                }}
+                onDelete={(b) => {
+                  setBookToDelete(b)
+                  setShowWarning(true)
+                }}
+              />
             </Grid>
           ))}
         </Grid>
       )}
 
-      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}>
-        <MenuItem onClick={() => handleMenuAction('edit')}>Editar</MenuItem>
-        <MenuItem onClick={() => handleMenuAction('delete')} color='danger'>
-          Eliminar
-        </MenuItem>
-      </Menu>
-
       {showWarning && (
         <WarningWindow
-          title='Confirmar eliminación'
-          error_msg='¿Deseas eliminar este libro y todas sus páginas?'
           onClose={() => setShowWarning(false)}
           onConfirm={handleDeleteBook}
+          title={t('books.deleteConfirmTitle')}
+          error_msg={t('books.deleteConfirmMsg')}
         />
       )}
 
       {showSuccess && (
         <SuccessWindow
-          title='¡Éxito!'
+          title='Success'
           success_msg={successMessage}
           onClose={() => {
             setShowSuccess(false)
@@ -568,25 +386,22 @@ export default function BookHome() {
       )}
 
       {showError && (
-        <div className='backdrop'>
-          <ErrorWindow
-            title='Error'
-            error_msg={errorMessage}
-            onClose={() => {
-              setShowError(false)
-              setErrorMessage('')
-            }}
-          />
-        </div>
+        <ErrorWindow
+          title='Error'
+          error_msg={errorMessage}
+          onClose={() => {
+            setShowError(false)
+            setErrorMessage('')
+          }}
+        />
       )}
 
       {showEditor && bookToEdit && (
-        <div className='modal-overlay'>
+        <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1300, bgcolor: 'background.surface' }}>
           <BookEditor book={bookToEdit} refreshBooks={fetchBooks} onCancel={() => setShowEditor(false)} />
-        </div>
+        </Box>
       )}
 
-      {/* Import Preview Modal */}
       <ImportPreviewModal
         open={showPreview}
         onClose={handleCancelPreview}

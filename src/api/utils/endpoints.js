@@ -13,7 +13,8 @@ export const ENDPOINTS = {
     search: '/book/search'
   },
   pages: {
-    save: '/book_page/save_book_page'
+    save: '/book_page/save_book_page',
+    delete: (id) => `/book_page/delete/${id}`
   },
   studyCards: {
     generate: '/card/generate',

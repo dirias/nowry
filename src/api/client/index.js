@@ -8,21 +8,19 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
  */
 export const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // Enable sending cookies with requests
 })
 
 /**
- * Request interceptor - Adds authentication token to all requests
+ * Request interceptor
+ * Note: Authorization header is no longer needed as we use HttpOnly cookies
  */
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
     return config
   },
   (error) => {
@@ -37,12 +35,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle unauthorized - clear token and redirect to login
+    // Handle unauthorized - redirect to login logic is handled by AuthContext or components
     if (error.response?.status === 401) {
-      console.warn('Unauthorized - clearing auth token')
-      localStorage.removeItem('authToken')
-      // Optionally redirect to login
-      // window.location.href = '/login'
+      console.warn('Unauthorized - auth cookie might be missing or expired')
     }
 
     // Handle other common errors

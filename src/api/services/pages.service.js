@@ -18,5 +18,10 @@ export const pagesService = {
   async savePage(pageData) {
     const { data } = await apiClient.post(ENDPOINTS.pages.save, pageData)
     return data
+  },
+
+  async deletePage(pageId) {
+    const { data } = await apiClient.delete(ENDPOINTS.pages.delete(pageId))
+    return data
   }
 }

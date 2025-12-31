@@ -1,17 +1,13 @@
 /* eslint-disable react/react-in-jsx-scope */
 // components/MotivationBanner.js
 import { Typography, Sheet } from '@mui/joy'
-
-const phrases = [
-  '¡Un poco cada día te acerca a la fluidez!',
-  'Hoy es un gran día para aprender algo nuevo.',
-  'Estudiar un poco ahora te ahorra mucho después.',
-  'Constancia es más importante que perfección.',
-  'Tu esfuerzo de hoy se convierte en progreso mañana.'
-]
+import { useTranslation } from 'react-i18next'
 
 export function MotivationBanner() {
-  const phrase = phrases[Math.floor(Math.random() * phrases.length)]
+  const { t } = useTranslation()
+  const phrases = t('motivation.phrases', { returnObjects: true })
+  const phraseList = Array.isArray(phrases) ? phrases : ['Keep learning!']
+  const phrase = phraseList[Math.floor(Math.random() * phraseList.length)]
   return (
     <Sheet
       variant='soft'

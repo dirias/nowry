@@ -1,8 +1,26 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Box, Typography, Input, Button, Checkbox, FormControl, FormHelperText, Sheet, useColorScheme, Link as JoyLink } from '@mui/joy'
-import { Error, SuccessWindow } from '../Messages'
-import axios from 'axios'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import {
+  Box,
+  Typography,
+  Input,
+  Button,
+  Checkbox,
+  FormControl,
+  FormLabel,
+  FormHelperText,
+  Sheet,
+  useColorScheme,
+  Link,
+  Alert,
+  LinearProgress,
+  Stack,
+  IconButton
+} from '@mui/joy'
+import { PersonRounded, EmailRounded, LockRounded, VisibilityRounded, VisibilityOffRounded, CheckCircleRounded } from '@mui/icons-material'
+import { apiClient } from '../../api/client'
+import { useAuth } from '../../context/AuthContext'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,11 +31,44 @@ const Register = () => {
     acceptedTerms: false
   })
 
-  const [registrationSuccess, setRegistrationSuccess] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [registrationSuccess, setRegistrationSuccess] = useState(false)
   const navigate = useNavigate()
   const { mode } = useColorScheme()
   const isDark = mode === 'dark'
+  const { t } = useTranslation()
+  const { login } = useAuth()
+
+  // Password strength calculation
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, label: '', color: 'neutral' }
+    let strength = 0
+    if (password.length >= 8) strength += 25
+    if (password.length >= 12) strength += 25
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25
+    if (/\d/.test(password)) strength += 15
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 10
+
+    let label = '',
+      color = 'neutral'
+    if (strength < 40) {
+      label = t('auth.passwordStrength.weak')
+      color = 'danger'
+    } else if (strength < 70) {
+      label = t('auth.passwordStrength.fair')
+      color = 'warning'
+    } else {
+      label = t('auth.passwordStrength.strong')
+      color = 'success'
+    }
+
+    return { strength, label, color }
+  }
+
+  const passwordStrength = getPasswordStrength(formData.password)
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -25,35 +76,101 @@ const Register = () => {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     })
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: null })
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = {}
 
+    // Validation
+    if (!formData.username) newErrors.username = t('auth.errors.usernameRequired')
+    if (!formData.email) newErrors.email = t('auth.errors.emailRequired')
+    if (!formData.password) newErrors.password = t('auth.errors.passwordRequired')
+    if (formData.password.length < 8) newErrors.password = t('auth.errors.passwordLength')
     if (formData.password !== formData.passwordConfirmation) {
-      newErrors.passwordConfirmation = 'Passwords do not match'
+      newErrors.passwordConfirmation = t('auth.errors.passwordMismatch')
     }
-
     if (!formData.acceptedTerms) {
-      newErrors.acceptedTerms = 'You must accept the terms and conditions'
+      newErrors.acceptedTerms = t('auth.errors.termsRequired')
     }
 
     if (Object.keys(newErrors).length === 0) {
+      setLoading(true)
       try {
-        const response = await axios.post('http://localhost:8000/user/create_user', formData)
+        // 1. Create User
+        const response = await apiClient.post('/users/create_user', formData)
+
         if (response.status === 200) {
-          setRegistrationSuccess(true)
-        } else {
-          newErrors.serverError = response.data.detail || 'Failed to register'
+          // 2. Login immediately to get token
+          try {
+            await login({ email: formData.email, password: formData.password })
+
+            setRegistrationSuccess(true)
+
+            // Redirect to onboarding wizard after 1.5 seconds
+            setTimeout(() => {
+              navigate('/onboarding')
+            }, 1500)
+          } catch (loginError) {
+            console.error('Auto-login failed:', loginError)
+            // Fallback: redirect to login page if auto-login fails
+            navigate('/login')
+          }
         }
       } catch (error) {
-        newErrors.serverError = error.response?.data?.detail || 'An error occurred during registration'
+        newErrors.serverError = error.response?.data?.detail || t('auth.errors.serverError')
+        setErrors(newErrors)
+        setLoading(false)
       }
-      setErrors(newErrors)
     } else {
       setErrors(newErrors)
     }
+  }
+
+  if (registrationSuccess) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          background: isDark ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          px: 2
+        }}
+      >
+        <Sheet
+          variant='outlined'
+          sx={{
+            p: 5,
+            borderRadius: 'xl',
+            width: '100%',
+            maxWidth: 440,
+            boxShadow: 'xl',
+            backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            border: 'none',
+            textAlign: 'center'
+          }}
+        >
+          <CheckCircleRounded sx={{ fontSize: 80, color: 'success.500', mb: 2 }} />
+          <Typography level='h3' fontWeight={700} mb={1}>
+            {t('auth.success.welcome')}
+          </Typography>
+          <Typography level='body-md' sx={{ color: 'neutral.600', mb: 3 }}>
+            {t('auth.success.accountCreated')}
+          </Typography>
+          <LinearProgress sx={{ mb: 2 }} />
+          <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
+            {t('auth.success.redirecting')}
+          </Typography>
+        </Sheet>
+      </Box>
+    )
   }
 
   return (
@@ -63,92 +180,221 @@ const Register = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isDark ? 'neutral.900' : 'background.body',
-        px: 2
+        backgroundColor: isDark ? 'neutral.900' : 'neutral.50',
+        px: 2,
+        py: 4,
+        transition: 'background 0.3s ease'
       }}
     >
       <Sheet
         variant='outlined'
         sx={{
-          p: 4,
-          borderRadius: 'md',
+          p: 5,
+          borderRadius: 'xl',
           width: '100%',
-          maxWidth: 400,
-          boxShadow: 'lg',
-          backgroundColor: isDark ? 'neutral.800' : 'background.surface'
+          maxWidth: 480,
+          boxShadow: 'xl',
+          backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          border: 'none',
+          transform: 'translateY(0)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }
         }}
       >
-        {registrationSuccess ? (
-          <SuccessWindow success_msg='Registration successful! You can now log in.' onClose={() => navigate('/login')} />
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <Typography level='h4' textAlign='center' mb={2}>
-              Register
-            </Typography>
+        {/* Header */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography
+            level='h2'
+            fontWeight={700}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 1
+            }}
+          >
+            {t('auth.createAccount')}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+            {t('auth.createAccountSubtitle')}
+          </Typography>
+        </Box>
 
-            {errors.serverError && <Error title='Registration Error' error_msg={errors.serverError} onClose={() => setErrors({})} />}
+        {/* Error Alert */}
+        {errors.serverError && (
+          <Alert
+            color='danger'
+            variant='soft'
+            sx={{ mb: 3, animation: 'fadeIn 0.3s ease' }}
+            onClose={() => setErrors({ ...errors, serverError: null })}
+          >
+            {errors.serverError}
+          </Alert>
+        )}
 
-            <FormControl sx={{ mb: 2 }}>
-              <Input type='text' name='username' placeholder='Username' value={formData.username} onChange={handleChange} />
-            </FormControl>
-
-            <FormControl sx={{ mb: 2 }}>
-              <Input type='email' name='email' placeholder='Email' value={formData.email} onChange={handleChange} />
-            </FormControl>
-
-            <FormControl sx={{ mb: 2 }}>
-              <Input type='password' name='password' placeholder='Password' value={formData.password} onChange={handleChange} />
-            </FormControl>
-
-            <FormControl sx={{ mb: 2 }} error={!!errors.passwordConfirmation}>
+        {/* Registration Form */}
+        <form onSubmit={handleSubmit}>
+          <Stack spacing={2.5}>
+            {/* Username Field */}
+            <FormControl error={!!errors.username}>
+              <FormLabel>{t('auth.username')}</FormLabel>
               <Input
-                type='password'
+                type='text'
+                name='username'
+                placeholder='johndoe'
+                value={formData.username}
+                onChange={handleChange}
+                startDecorator={<PersonRounded />}
+                size='lg'
+                sx={{ '--Input-focusedThickness': '0.25rem' }}
+              />
+              {errors.username && <FormHelperText>{errors.username}</FormHelperText>}
+            </FormControl>
+
+            {/* Email Field */}
+            <FormControl error={!!errors.email}>
+              <FormLabel>{t('auth.email')}</FormLabel>
+              <Input
+                type='email'
+                name='email'
+                placeholder='you@example.com'
+                value={formData.email}
+                onChange={handleChange}
+                startDecorator={<EmailRounded />}
+                size='lg'
+                sx={{ '--Input-focusedThickness': '0.25rem' }}
+              />
+              {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
+            </FormControl>
+
+            {/* Password Field */}
+            <FormControl error={!!errors.password}>
+              <FormLabel>{t('auth.password')}</FormLabel>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                name='password'
+                placeholder='••••••••'
+                value={formData.password}
+                onChange={handleChange}
+                startDecorator={<LockRounded />}
+                endDecorator={
+                  <IconButton variant='plain' color='neutral' onClick={() => setShowPassword(!showPassword)} sx={{ mr: -1 }}>
+                    {showPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
+                  </IconButton>
+                }
+                size='lg'
+                sx={{ '--Input-focusedThickness': '0.25rem' }}
+              />
+              {formData.password && (
+                <Box sx={{ mt: 1 }}>
+                  <Stack direction='row' justifyContent='space-between' mb={0.5}>
+                    <Typography level='body-xs' sx={{ color: `${passwordStrength.color}.600` }}>
+                      {passwordStrength.label}
+                    </Typography>
+                    <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
+                      {passwordStrength.strength}%
+                    </Typography>
+                  </Stack>
+                  <LinearProgress determinate value={passwordStrength.strength} color={passwordStrength.color} sx={{ height: 4 }} />
+                </Box>
+              )}
+              {errors.password && <FormHelperText>{errors.password}</FormHelperText>}
+            </FormControl>
+
+            {/* Confirm Password Field */}
+            <FormControl error={!!errors.passwordConfirmation}>
+              <FormLabel>{t('auth.confirmPassword')}</FormLabel>
+              <Input
+                type={showConfirmPassword ? 'text' : 'password'}
                 name='passwordConfirmation'
-                placeholder='Confirm Password'
+                placeholder='••••••••'
                 value={formData.passwordConfirmation}
                 onChange={handleChange}
+                startDecorator={<LockRounded />}
+                endDecorator={
+                  <IconButton variant='plain' color='neutral' onClick={() => setShowConfirmPassword(!showConfirmPassword)} sx={{ mr: -1 }}>
+                    {showConfirmPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
+                  </IconButton>
+                }
+                size='lg'
+                sx={{ '--Input-focusedThickness': '0.25rem' }}
               />
               {errors.passwordConfirmation && <FormHelperText>{errors.passwordConfirmation}</FormHelperText>}
             </FormControl>
 
-            <FormControl
-              orientation='horizontal'
-              sx={{
-                alignItems: 'center',
-                mb: 2,
-                flexWrap: 'wrap',
-                gap: 1,
-                '& label': {
-                  lineHeight: 1.3,
-                  fontSize: 13,
-                  color: isDark ? 'neutral.300' : 'neutral.700'
-                }
-              }}
-              error={!!errors.acceptedTerms}
-            >
-              <Checkbox checked={formData.acceptedTerms} onChange={handleChange} name='acceptedTerms' size='sm' sx={{ mt: 0.4 }} />
-              <label htmlFor='acceptedTerms'>
-                I accept the{' '}
-                <JoyLink component={Link} to='/terms' underline='hover'>
-                  terms and conditions
-                </JoyLink>
-              </label>
-              {errors.acceptedTerms && <FormHelperText sx={{ width: '100%', mt: 0.5 }}>{errors.acceptedTerms}</FormHelperText>}
+            {/* Terms Checkbox */}
+            <FormControl error={!!errors.acceptedTerms}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                <Checkbox checked={formData.acceptedTerms} onChange={handleChange} name='acceptedTerms' size='md' sx={{ mt: 0.2 }} />
+                <Typography level='body-sm' sx={{ pt: 0.3, lineHeight: 1.5 }}>
+                  {t('auth.agreeTerms')}{' '}
+                  <Link component={RouterLink} to='/terms' underline='always'>
+                    {t('auth.termsOfService')}
+                  </Link>{' '}
+                  {t('auth.and')}{' '}
+                  <Link component={RouterLink} to='/privacy' underline='always'>
+                    {t('auth.privacyPolicy')}
+                  </Link>
+                </Typography>
+              </Box>
+              {errors.acceptedTerms && <FormHelperText>{errors.acceptedTerms}</FormHelperText>}
             </FormControl>
 
-            <Button type='submit' fullWidth variant='solid' color='primary'>
-              Register
+            {/* Register Button */}
+            <Button
+              type='submit'
+              size='lg'
+              fullWidth
+              loading={loading}
+              sx={{
+                mt: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 'lg'
+                },
+                '&:active': {
+                  transform: 'translateY(0)'
+                }
+              }}
+            >
+              {t('auth.signUp')}
             </Button>
+          </Stack>
+        </form>
 
-            <Typography level='body-sm' textAlign='center' mt={2}>
-              Already have an account?{' '}
-              <JoyLink component={Link} to='/login'>
-                Log in here
-              </JoyLink>
-            </Typography>
-          </form>
-        )}
+        {/* Login Link */}
+        <Typography level='body-sm' textAlign='center' sx={{ mt: 3 }}>
+          {t('auth.hasAccount')}{' '}
+          <Link
+            component={RouterLink}
+            to='/login'
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              color: isDark ? 'primary.300' : 'primary.700'
+            }}
+          >
+            {t('auth.signInLink')}
+          </Link>
+        </Typography>
       </Sheet>
+
+      {/* Loading Bar */}
+      {loading && (
+        <LinearProgress
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 10000
+          }}
+        />
+      )}
     </Box>
   )
 }

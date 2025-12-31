@@ -1,0 +1,409 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "news": {
+    "title": "Latest News",
+    "noArticles": "No articles found",
+    "readMore": "Read more",
+    "updated": "Updated",
+    "categories": {
+      "general": "General",
+      "technology": "Technology",
+      "science": "Science",
+      "business": "Business",
+      "health": "Health",
+      "entertainment": "Entertainment",
+      "politics": "Politics",
+      "sports": "Sports"
+    }
+  },
+  "header": {
+    "study": "Study",
+    "cards": "Cards",
+    "books": "Books",
+    "settings": "Settings"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  },
+  "study": {
+    "title": "Study Center",
+    "subtitle": "Your personalized learning hub",
+    "stats": {
+      "dueToday": "Due Today",
+      "reviewedToday": "Reviewed Today",
+      "dayStreak": "Day Streak",
+      "totalCards": "Total Cards"
+    },
+    "byType": "Study by Type",
+    "types": {
+      "flashcards": "Flashcards",
+      "flashcardsDesc": "Classic flip-style cards for quick memorization",
+      "quizzes": "Quizzes",
+      "quizzesDesc": "Multiple-choice with instant feedback",
+      "visual": "Visual Diagrams",
+      "visualDesc": "Mind maps, flowcharts & visual aids",
+      "noDecks": "No {{type}} decks yet"
+    },
+    "startReview": "Start Your Daily Review",
+    "reviewMsg": "You have {{count}} cards ready to review",
+    "startStudying": "Start Studying →",
+    "viewAll": "View all {{count}} decks →",
+    "due": "due"
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "signInSubtitle": "Sign in to continue your learning journey",
+    "createAccount": "Create Account",
+    "createAccountSubtitle": "Join thousands of learners worldwide",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "signUp": "Create Account",
+    "orContinueWith": "or continue with",
+    "signInGoogle": "Sign in with Google",
+    "signInFacebook": "Sign in with Facebook",
+    "noAccount": "Don't have an account?",
+    "createOne": "Create one",
+    "hasAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "agreeTerms": "I agree to the",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "passwordStrength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "strong": "Strong"
+    },
+    "errors": {
+      "loginFailed": "Login failed. Please check your credentials.",
+      "usernameRequired": "Username is required",
+      "emailRequired": "Email is required",
+      "passwordRequired": "Password is required",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "termsRequired": "You must accept the terms and conditions",
+      "serverError": "An error occurred during registration"
+    },
+    "success": {
+      "welcome": "Welcome to Nowry! 🎉",
+      "accountCreated": "Your account has been created successfully. Let's personalize your experience!",
+      "redirecting": "Redirecting to setup wizard..."
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "subtitle": {
+        "step1": "We'll send you a verification code",
+        "step2": "Enter the code sent to your email",
+        "step3": "Choose a strong new password"
+      },
+      "codeSent": "Verification code sent to your email!",
+      "verifyCode": "Verify Code",
+      "sendCode": "Send Verification Code",
+      "resend": "Resend",
+      "resendPrompt": "Didn't receive the code?",
+      "successTitle": "Password Reset Success! 🎉",
+      "successMsg": "Your password has been successfully reset. You can now sign in with your new password.",
+      "goToLogin": "Go to Login",
+      "backToLogin": "Back to Login",
+      "emailLabel": "Email Address",
+      "codeLabel": "Verification Code",
+      "newPasswordLabel": "New Password",
+      "confirmNewPasswordLabel": "Confirm New Password",
+      "errors": {
+        "codeRequired": "Verification code is required",
+        "codeLength": "Code must be 6 digits"
+      }
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Nowry!",
+      "subtitle": "Let's personalize your learning experience in just a few steps",
+      "quick": "Quick & Easy",
+      "quickDesc": "Takes less than 2 minutes",
+      "tailored": "Tailored for You",
+      "tailoredDesc": "Customized to your learning style",
+      "changeable": "Always Changeable",
+      "changeableDesc": "You can update these settings anytime"
+    },
+    "language": {
+      "title": "Choose Your Language",
+      "subtitle": "Select your preferred language for the interface"
+    },
+    "theme": {
+      "title": "Customize Your Theme",
+      "subtitle": "Make Nowry truly yours with colors and mode",
+      "mode": "Appearance Mode",
+      "light": "Light",
+      "dark": "Dark",
+      "accent": "Accent Color",
+      "custom": "Or choose a custom color",
+      "customLabel": "Custom Color"
+    },
+    "interests": {
+      "title": "What Interests You?",
+      "subtitle": "Select topics you'd like to see content about",
+      "selected": "Selected: {{count}} topic",
+      "selected_plural": "Selected: {{count}} topics",
+      "items": {
+        "Technology": "Technology",
+        "Science": "Science",
+        "History": "History",
+        "Languages": "Languages",
+        "Art": "Art",
+        "Mathematics": "Mathematics",
+        "Literature": "Literature",
+        "Music": "Music",
+        "Business": "Business",
+        "Health": "Health",
+        "Philosophy": "Philosophy",
+        "Psychology": "Psychology"
+      }
+    },
+    "learning": {
+      "title": "Learning Style & Goals",
+      "subtitle": "Help us tailor your experience",
+      "styleTitle": "How do you learn best?",
+      "goalTitle": "What's your main goal?",
+      "styles": {
+        "visual": "Visual",
+        "visualDesc": "I learn best with images and diagrams",
+        "auditory": "Auditory",
+        "auditoryDesc": "I prefer listening and discussions",
+        "reading": "Reading/Writing",
+        "readingDesc": "I learn through text and notes",
+        "kinesthetic": "Kinesthetic",
+        "kinestheticDesc": "I learn by doing and practicing"
+      },
+      "goals": {
+        "general": "General Knowledge",
+        "academic": "Academic Success",
+        "career": "Career Development",
+        "language": "Language Learning",
+        "hobby": "Personal Interest"
+      }
+    },
+    "steps": "Step {{current}} of {{total}}",
+    "complete": "{{percent}}% Complete",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Finish Setup",
+    "skip": "Skip for now"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "searchPlaceholder": "Search or add tasks...",
+    "filter": {
+      "all": "All",
+      "completed": "Completed",
+      "pending": "Pending"
+    },
+    "empty": "No tasks yet. Type to add one!",
+    "noMatch": "No tasks match your filters",
+    "addTooltip": "Add \"{{title}}\""
+  },
+  "sidemenu": {
+    "dashboard": "Dashboard",
+    "study": "Study",
+    "deck": "Decks",
+    "daily_focus": "Daily Focus",
+    "books": "Library",
+    "tasks": "Tasks",
+    "community": "Community"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your account information and preferences",
+    "edit": "Edit Profile",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "fullName": "Full Name",
+    "username": "Username",
+    "email": "Email",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us about yourself...",
+    "noBio": "No bio yet. Click Edit to add one!",
+    "notSet": "Not set",
+    "uploadImage": "Image size must be less than 2MB",
+    "selectImage": "Please select an image file",
+    "memberSince": "Member for {{days}} days",
+    "joined": "Joined {{date}}",
+    "stats": {
+      "totalCards": "Total Cards",
+      "booksCreated": "Books Created",
+      "studyStreak": "Study Streak",
+      "days": "days"
+    }
+  },
+  "settings": {
+    "title": "Account Settings",
+    "subtitle": "Manage your preferences, security, and account settings",
+    "general": {
+      "title": "General Preferences",
+      "appearance": "Appearance",
+      "appearanceDesc": "Switch between Light and Dark mode",
+      "language": "Language",
+      "themeColor": "Theme Color",
+      "themeColorDesc": "Select your preferred accent color. This will update the entire application theme.",
+      "interests": "Interests",
+      "interestsDesc": "Select topics you want to see news and focus content for"
+    },
+    "security": {
+      "title": "Security",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "updatePassword": "Update Password",
+      "twoFactor": "Two-Factor Authentication",
+      "twoFactorDesc": "Add an extra layer of security to your account",
+      "enable2FA": "Enable 2FA",
+      "disable2FA": "Disable",
+      "success2FA": "2FA Enabled! Backup codes:",
+      "disabled2FA": "2FA disabled successfully"
+    },
+    "notifications": {
+      "title": "Notification Preferences",
+      "emailDigest": "Email Digest",
+      "emailDigestDesc": "Receive daily summary of your study activity",
+      "studyReminders": "Study Reminders",
+      "studyRemindersDesc": "Get notified when cards are due for review",
+      "newsUpdates": "News Updates",
+      "newsUpdatesDesc": "Receive updates about new features and improvements",
+      "marketing": "Marketing Emails",
+      "marketingDesc": "Receive promotional offers and tips"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "deleteAccount": "Delete Account",
+      "deleteDesc": "Permanently delete your account and all associated data",
+      "confirmTitle": "Are you absolutely sure?",
+      "confirmDesc": "This action cannot be undone. All your data including books, cards, and progress will be permanently deleted.",
+      "confirmBtn": "Yes, Delete My Account",
+      "cancelBtn": "Cancel"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}!",
+    "overview": "Here's your learning overview for today",
+    "dailyFocus": {
+      "allCaughtUp": "🎉 All Caught Up!",
+      "noDueCards": "You have no pending cards. Great job!",
+      "reviewToday": "📚 Review Today",
+      "cardsPending": "{{count}} card pending",
+      "cardsPending_other": "{{count}} cards pending",
+      "cardsPending_plural": "{{count}} cards pending",
+      "start": "Let's Go!",
+      "study": "Study",
+      "moreDecks": "And {{count}} more deck with pending cards",
+      "moreDecks_other": "And {{count}} more decks with pending cards"
+    }
+  },
+  "motivation": {
+    "phrases": [
+      "Every little bit brings you closer to fluency!",
+      "Today is a great day to learn something new.",
+      "Studying a little now saves a lot later.",
+      "Consistency is more important than perfection.",
+      "Your effort today becomes progress tomorrow."
+    ]
+  },
+  "weekly": {
+    "title": "Weekly Activity",
+    "total": "Total",
+    "types": {
+      "flashcards": "Flashcards",
+      "quizzes": "Quizzes",
+      "visual": "Visual",
+      "books": "Books"
+    }
+  },
+  "calendar": {
+    "title": "Recent Performance",
+    "noActivity": "No activity yet. Start studying to see your progress!",
+    "streak": "🔥 Current streak: {{count}} day",
+    "streak_other": "🔥 Current streak: {{count}} days",
+    "types": {
+      "quiz": "Quiz",
+      "visual": "Visual",
+      "book": "Book",
+      "flashcard": "Flashcard"
+    }
+  },
+  "books": {
+    "title": "Books",
+    "library": "Deck Library",
+    "subtitle": "Your personal collection",
+    "create": "Create Book",
+    "import": "Import",
+    "totalBooks": "Total Books",
+    "updatedWeek": "Updated This Week",
+    "totalPages": "Total Pages",
+    "searchPlaceholder": "Search by title, author, or ISBN...",
+    "dropTitle": "Drag files or click to import",
+    "dropSubtitle": "Supports PDF, DOCX, DOC, TXT",
+    "emptyTitle": "Your library is empty",
+    "emptySubtitle": "Create a new book or import documents to get started",
+    "noMatches": "No books match \"{{query}}\"",
+    "unknownAuthor": "Unknown Author",
+    "updated": "Updated {{date}}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Confirm Deletion",
+    "deleteConfirmMsg": "Do you want to delete this book and all its pages?",
+    "successCreate": "Book created successfully",
+    "successDelete": "Book deleted successfully",
+    "successImport": "{{count}} book imported successfully! {{pages}} total pages.",
+    "successImport_plural": "{{count}} books imported successfully! {{pages}} total pages.",
+    "errorImport": "Error processing file. Please try again."
+  },
+  "cards": {
+    "title": "Deck Library",
+    "subtitle": "Manage your flashcards, quizzes, and visual learning materials",
+    "studyCenter": "Study Center",
+    "newDeck": "New Deck",
+    "dueToday": "Due Today",
+    "studyStreak": "Study Streak",
+    "totalCards": "Total Cards",
+    "browse": "Browse Decks",
+    "manage": "Manage Content",
+    "search": "Search decks...",
+    "allTypes": "All Types",
+    "recent": "Recent",
+    "name": "Name",
+    "cardCount": "Card Count",
+    "deckCount": "{{count}} deck",
+    "deckCount_plural": "{{count}} decks",
+    "loading": "Loading...",
+    "confirmDeleteDeck": "Are you sure you want to delete \"{{name}}\"?",
+    "confirmDeleteCard": "Are you sure you want to delete this card?"
+  },
+  "subscription": {
+    "upgrade": "Upgrade",
+    "errors": {
+      "limitReached": "Limit reached for your plan.",
+      "bookLimit": "Book limit reached. Please upgrade to create more books.",
+      "pageLimit": "Page limit reached. Please upgrade to add more pages.",
+      "aiLimit": "AI generation limit reached.",
+      "upgradeToUse": "Upgrade to use AI features.",
+      "genericCreate": "Error creating item. Please try again.",
+      "upgradeAdvice": "Please upgrade your plan in Settings."
+    }
+  }
+}

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Card, CardContent, CircularProgress, Stack, Chip } from '@mui/joy'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { cardsService } from '../../../api/services'
 
 export default function WeeklyProgress() {
+  const { t } = useTranslation()
   const [weeklyData, setWeeklyData] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -62,7 +64,7 @@ export default function WeeklyProgress() {
     <Card variant='outlined' sx={{ height: '100%' }}>
       <CardContent>
         <Typography level='title-lg' fontWeight={600} sx={{ mb: 3 }}>
-          📊 Weekly Activity
+          📊 {t('weekly.title')}
         </Typography>
 
         <ResponsiveContainer width='100%' height={250}>
@@ -72,10 +74,11 @@ export default function WeeklyProgress() {
             <YAxis tick={{ fontSize: 12 }} stroke='#888' label={{ value: 'Items', angle: -90, position: 'insideLeft', fontSize: 12 }} />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
+                backgroundColor: 'var(--joy-palette-background-surface)',
+                border: '1px solid var(--joy-palette-divider)',
                 borderRadius: '8px',
-                padding: '8px'
+                padding: '8px',
+                color: 'var(--joy-palette-text-primary)'
               }}
               labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
             />
@@ -90,19 +93,19 @@ export default function WeeklyProgress() {
         <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
           <Stack direction='row' spacing={2} flexWrap='wrap'>
             <Chip size='sm' variant='soft' color='primary'>
-              📇 Flashcards: {totals.flashcards}
+              📇 {t('weekly.types.flashcards')}: {totals.flashcards}
             </Chip>
             <Chip size='sm' variant='soft' color='warning'>
-              ❓ Quizzes: {totals.quizzes}
+              ❓ {t('weekly.types.quizzes')}: {totals.quizzes}
             </Chip>
             <Chip size='sm' variant='soft' color='info'>
-              🎨 Visual: {totals.visual}
+              🎨 {t('weekly.types.visual')}: {totals.visual}
             </Chip>
             <Chip size='sm' variant='soft' color='success'>
-              📚 Books: {totals.books}
+              📚 {t('weekly.types.books')}: {totals.books}
             </Chip>
             <Chip size='sm' variant='solid'>
-              Total: {totalAll}
+              {t('weekly.total')}: {totalAll}
             </Chip>
           </Stack>
         </Box>

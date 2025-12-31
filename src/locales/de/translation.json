@@ -1,0 +1,349 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "search": "Suchen",
+    "settings": "Einstellungen",
+    "profile": "Profil",
+    "logout": "Abmelden"
+  },
+  "news": {
+    "title": "Aktuelle Nachrichten",
+    "noArticles": "Keine Artikel gefunden",
+    "readMore": "Weiterlesen",
+    "updated": "Aktualisiert",
+    "categories": {
+      "general": "Allgemein",
+      "technology": "Technologie",
+      "science": "Wissenschaft",
+      "business": "Wirtschaft",
+      "health": "Gesundheit",
+      "entertainment": "Unterhaltung",
+      "politics": "Politik",
+      "sports": "Sport"
+    }
+  },
+  "header": {
+    "study": "Lernen",
+    "cards": "Karten",
+    "books": "Bücher",
+    "settings": "Einstellungen"
+  },
+  "footer": {
+    "rights": "Alle Rechte vorbehalten."
+  },
+  "study": {
+    "title": "Lernzentrum",
+    "subtitle": "Dein persönlicher Lernbereich",
+    "stats": {
+      "dueToday": "Heute fällig",
+      "reviewedToday": "Heute gelernt",
+      "dayStreak": "Tages-Serie",
+      "totalCards": "Karten gesamt"
+    },
+    "byType": "Nach Typ lernen",
+    "types": {
+      "flashcards": "Lernkarten",
+      "flashcardsDesc": "Klassische Karten zum schnellen Einprägen",
+      "quizzes": "Quiz",
+      "quizzesDesc": "Multiple-Choice mit sofortigem Feedback",
+      "visual": "Visuelle Diagramme",
+      "visualDesc": "Mindmaps, Abläufe & visuelle Hilfen",
+      "noDecks": "Keine {{type}}-Decks"
+    },
+    "startReview": "Beginne deine tägliche Überprüfung",
+    "reviewMsg": "Du hast {{count}} Karten zur Überprüfung bereit",
+    "startStudying": "Lernen beginnen →",
+    "viewAll": "Alle {{count}} Decks anzeigen →",
+    "due": "fällig"
+  },
+  "auth": {
+    "welcomeBack": "Willkommen zurück",
+    "signInSubtitle": "Melde dich an, um weiterzulernen",
+    "createAccount": "Konto erstellen",
+    "createAccountSubtitle": "Schließe dich tausenden Lernenden weltweit an",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "username": "Benutzername",
+    "confirmPassword": "Passwort bestätigen",
+    "forgotPassword": "Passwort vergessen?",
+    "signIn": "Anmelden",
+    "signUp": "Konto erstellen",
+    "orContinueWith": "oder weiter mit",
+    "signInGoogle": "Mit Google anmelden",
+    "signInFacebook": "Mit Facebook anmelden",
+    "noAccount": "Noch kein Konto?",
+    "createOne": "Erstelle eins",
+    "hasAccount": "Hast du schon ein Konto?",
+    "signInLink": "Anmelden",
+    "agreeTerms": "Ich stimme den",
+    "termsOfService": "Nutzungsbedingungen",
+    "and": "und",
+    "privacyPolicy": "Datenschutzrichtlinien",
+    "passwordStrength": {
+      "weak": "Schwach",
+      "fair": "Mittel",
+      "strong": "Stark"
+    },
+    "errors": {
+      "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten.",
+      "usernameRequired": "Benutzername ist erforderlich",
+      "emailRequired": "E-Mail ist erforderlich",
+      "passwordRequired": "Passwort ist erforderlich",
+      "passwordLength": "Passwort muss mindestens 8 Zeichen lang sein",
+      "passwordMismatch": "Passwörter stimmen nicht überein",
+      "termsRequired": "Du musst die Nutzungsbedingungen akzeptieren",
+      "serverError": "Ein Fehler ist bei der Registrierung aufgetreten"
+    },
+    "success": {
+      "welcome": "Willkommen bei Nowry! 🎉",
+      "accountCreated": "Dein Konto wurde erfolgreich erstellt. Lass uns dein Erlebnis personalisieren!",
+      "redirecting": "Weiterleitung zum Einrichtungsassistenten..."
+    },
+    "resetPassword": {
+      "title": "Passwort zurücksetzen",
+      "subtitle": {
+        "step1": "Wir senden dir einen Bestätigungscode",
+        "step2": "Gib den Code ein, der an deine E-Mail gesendet wurde",
+        "step3": "Wähle ein starkes neues Passwort"
+      },
+      "codeSent": "Bestätigungscode an deine E-Mail gesendet!",
+      "verifyCode": "Code bestätigen",
+      "sendCode": "Bestätigungscode senden",
+      "resend": "Erneut senden",
+      "resendPrompt": "Code nicht erhalten?",
+      "successTitle": "Passwort erfolgreich zurückgesetzt! 🎉",
+      "successMsg": "Dein Passwort wurde erfolgreich zurückgesetzt. Du kannst dich jetzt mit deinem neuen Passwort anmelden.",
+      "goToLogin": "Zur Anmeldung",
+      "backToLogin": "Zurück zur Anmeldung",
+      "emailLabel": "E-Mail-Adresse",
+      "codeLabel": "Bestätigungscode",
+      "newPasswordLabel": "Neues Passwort",
+      "confirmNewPasswordLabel": "Neues Passwort bestätigen",
+      "errors": {
+        "codeRequired": "Bestätigungscode ist erforderlich",
+        "codeLength": "Code muss 6 Ziffern haben"
+      }
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Willkommen bei Nowry!",
+      "subtitle": "Lass uns dein Lernerlebnis in wenigen Schritten personalisieren",
+      "quick": "Schnell & Einfach",
+      "quickDesc": "Dauert weniger als 2 Minuten",
+      "tailored": "Maßgeschneidert für dich",
+      "tailoredDesc": "Angepasst an deinen Lernstil",
+      "changeable": "Jederzeit änderbar",
+      "changeableDesc": "Du kannst diese Einstellungen jederzeit aktualisieren"
+    },
+    "language": {
+      "title": "Wähle deine Sprache",
+      "subtitle": "Wähle deine bevorzugte Sprache für die Benutzeroberfläche"
+    },
+    "theme": {
+      "title": "Personalisiere dein Design",
+      "subtitle": "Mache Nowry zu deinem eigenen mit Farben und Modi",
+      "mode": "Erscheinungsbild",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "accent": "Akzentfarbe",
+      "custom": "Oder wähle eine benutzerdefinierte Farbe",
+      "customLabel": "Benutzerdefinierte Farbe"
+    },
+    "interests": {
+      "title": "Was interessiert dich?",
+      "subtitle": "Wähle Themen aus, über die du Inhalte sehen möchtest",
+      "selected": "Ausgewählt: {{count}} Thema",
+      "selected_plural": "Ausgewählt: {{count}} Themen",
+      "items": {
+        "Technology": "Technologie",
+        "Science": "Wissenschaft",
+        "History": "Geschichte",
+        "Languages": "Sprachen",
+        "Art": "Kunst",
+        "Mathematics": "Mathematik",
+        "Literature": "Literatur",
+        "Music": "Musik",
+        "Business": "Wirtschaft",
+        "Health": "Gesundheit",
+        "Philosophy": "Philosophie",
+        "Psychology": "Psychologie"
+      }
+    },
+    "learning": {
+      "title": "Lernstil & Ziele",
+      "subtitle": "Hilf uns, dein Erlebnis anzupassen",
+      "styleTitle": "Wie lernst du am besten?",
+      "goalTitle": "Was ist dein Hauptziel?",
+      "styles": {
+        "visual": "Visuell",
+        "visualDesc": "Ich lerne am besten mit Bildern und Diagrammen",
+        "auditory": "Auditiv",
+        "auditoryDesc": "Ich bevorzuge Zuhören und Diskussionen",
+        "reading": "Lesen/Schreiben",
+        "readingDesc": "Ich lerne durch Text und Notizen",
+        "kinesthetic": "Kinästhetisch",
+        "kinestheticDesc": "Ich lerne durch Tun und Üben"
+      },
+      "goals": {
+        "general": "Allgemeinwissen",
+        "academic": "Akademischer Erfolg",
+        "career": "Berufliche Entwicklung",
+        "language": "Sprachenlernen",
+        "hobby": "Persönliches Interesse"
+      }
+    },
+    "steps": "Schritt {{current}} von {{total}}",
+    "complete": "{{percent}}% Abgeschlossen",
+    "next": "Weiter",
+    "back": "Zurück",
+    "finish": "Einrichtung abschließen",
+    "skip": "Vorerst überspringen"
+  },
+  "tasks": {
+    "title": "Aufgaben",
+    "searchPlaceholder": "Aufgaben suchen oder hinzufügen...",
+    "filter": {
+      "all": "Alle",
+      "completed": "Erledigt",
+      "pending": "Ausstehend"
+    },
+    "empty": "Noch keine Aufgaben. Tippe, um eine hinzuzufügen!",
+    "noMatch": "Keine Aufgaben entsprechen deinen Filtern",
+    "addTooltip": "\"{{title}}\" hinzufügen"
+  },
+  "sidemenu": {
+    "dashboard": "Dashboard",
+    "study": "Lernen",
+    "deck": "Decks",
+    "daily_focus": "Tagesfokus",
+    "books": "Bibliothek",
+    "tasks": "Aufgaben",
+    "community": "Community"
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "subtitle": "Verwalte deine Kontoinformationen und Einstellungen",
+    "edit": "Profil Bearbeiten",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Speichere...",
+    "fullName": "Vollständiger Name",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "bio": "Bio",
+    "bioPlaceholder": "Erzähl uns von dir...",
+    "noBio": "Keine Bio. Klicke auf Bearbeiten, um eine hinzuzufügen!",
+    "notSet": "Nicht festgelegt",
+    "uploadImage": "Bildgröße muss kleiner als 2MB sein",
+    "selectImage": "Bitte wähle eine Bilddatei",
+    "memberSince": "Mitglied seit {{days}} Tagen",
+    "joined": "Beigetreten am {{date}}",
+    "stats": {
+      "totalCards": "Karten Gesamt",
+      "booksCreated": "Bücher Erstellt",
+      "studyStreak": "Lernserie",
+      "days": "Tage"
+    }
+  },
+  "settings": {
+    "title": "Kontoeinstellungen",
+    "subtitle": "Verwalte Präferenzen, Sicherheit und Konto",
+    "general": {
+      "title": "Allgemeine Einstellungen",
+      "appearance": "Erscheinungsbild",
+      "appearanceDesc": "Zwischen Hell- und Dunkelmodus wechseln",
+      "language": "Sprache",
+      "themeColor": "Themenfarbe",
+      "themeColorDesc": "Wähle deine Akzentfarbe. Dies aktualisiert das gesamte Design.",
+      "interests": "Interessen",
+      "interestsDesc": "Wähle Themen für Nachrichten und Fokus-Inhalte"
+    },
+    "security": {
+      "title": "Sicherheit",
+      "changePassword": "Passwort Ändern",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Neues Passwort Bestätigen",
+      "updatePassword": "Passwort Aktualisieren",
+      "twoFactor": "Zwei-Faktor-Authentifizierung",
+      "twoFactorDesc": "Füge deinem Konto eine zusätzliche Sicherheitsebene hinzu",
+      "enable2FA": "2FA Aktivieren",
+      "disable2FA": "Deaktivieren",
+      "success2FA": "2FA Aktiviert! Backup-Codes:",
+      "disabled2FA": "2FA erfolgreich deaktiviert"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "emailDigest": "E-Mail-Zusammenfassung",
+      "emailDigestDesc": "Erhalte eine tägliche Zusammenfassung deiner Aktivitäten",
+      "studyReminders": "Lernerinnerungen",
+      "studyRemindersDesc": "Werde benachrichtigt, wenn Karten fällig sind",
+      "newsUpdates": "Neuigkeiten",
+      "newsUpdatesDesc": "Erhalte Updates über neue Funktionen",
+      "marketing": "Marketing-E-Mails",
+      "marketingDesc": "Erhalte Angebote und Tipps"
+    },
+    "danger": {
+      "title": "Gefahrenzone",
+      "deleteAccount": "Konto Löschen",
+      "deleteDesc": "Dein Konto und alle Daten dauerhaft löschen",
+      "confirmTitle": "Bist du absolut sicher?",
+      "confirmDesc": "Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Daten werden gelöscht.",
+      "confirmBtn": "Ja, Konto Löschen",
+      "cancelBtn": "Abbrechen"
+    }
+  },
+  "dashboard": {
+    "welcome": "Willkommen zurück, {{name}}!",
+    "overview": "Hier ist dein Lernüberblick für heute",
+    "dailyFocus": {
+      "allCaughtUp": "🎉 Alles erledigt!",
+      "noDueCards": "Du hast keine ausstehenden Karten. Gute Arbeit!",
+      "reviewToday": "📚 Heute wiederholen",
+      "cardsPending": "{{count}} Karte ausstehend",
+      "cardsPending_other": "{{count}} Karten ausstehend",
+      "cardsPending_plural": "{{count}} Karten ausstehend",
+      "start": "Los geht's!",
+      "study": "Lernen",
+      "moreDecks": "Und {{count}} weiteres Deck mit Karten",
+      "moreDecks_other": "Und {{count}} weitere Decks mit Karten"
+    }
+  },
+  "motivation": {
+    "phrases": [
+      "Jeder Schritt bringt dich weiter!",
+      "Heute ist ein toller Tag um zu lernen.",
+      "Jetzt ein wenig lernen spart später viel Zeit.",
+      "Beständigkeit ist wichtiger als Perfektion.",
+      "Dein Einsatz heute ist dein Fortschritt morgen."
+    ]
+  },
+  "weekly": {
+    "title": "Wöchentliche Aktivität",
+    "total": "Gesamt",
+    "types": {
+      "flashcards": "Karteikarten",
+      "quizzes": "Quiz",
+      "visual": "Visuell",
+      "books": "Bücher"
+    }
+  },
+  "calendar": {
+    "title": "Aktuelle Leistung",
+    "noActivity": "Noch keine Aktivität. Fang an zu lernen!",
+    "streak": "🔥 Aktuelle Serie: {{count}} Tag",
+    "streak_other": "🔥 Aktuelle Serie: {{count}} Tage",
+    "types": {
+      "quiz": "Quiz",
+      "visual": "Visuell",
+      "book": "Buch",
+      "flashcard": "Karteikarte"
+    }
+  }
+}

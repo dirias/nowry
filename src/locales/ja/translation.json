@@ -1,0 +1,349 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "edit": "編集",
+    "delete": "削除",
+    "search": "検索",
+    "settings": "設定",
+    "profile": "プロフィール",
+    "logout": "ログアウト"
+  },
+  "news": {
+    "title": "最新ニュース",
+    "noArticles": "記事が見つかりません",
+    "readMore": "もっと読む",
+    "updated": "更新日",
+    "categories": {
+      "general": "一般",
+      "technology": "テクノロジー",
+      "science": "科学",
+      "business": "ビジネス",
+      "health": "健康",
+      "entertainment": "エンターテイメント",
+      "politics": "政治",
+      "sports": "スポーツ"
+    }
+  },
+  "header": {
+    "study": "学習",
+    "cards": "カード",
+    "books": "ブック",
+    "settings": "設定"
+  },
+  "footer": {
+    "rights": "無断転載を禁じます。"
+  },
+  "study": {
+    "title": "学習センター",
+    "subtitle": "あなただけの学習ハブ",
+    "stats": {
+      "dueToday": "今日の課題",
+      "reviewedToday": "今日の復習",
+      "dayStreak": "連続日数",
+      "totalCards": "カード総数"
+    },
+    "byType": "タイプ別学習",
+    "types": {
+      "flashcards": "フラッシュカード",
+      "flashcardsDesc": "暗記のためのクラシックなカード",
+      "quizzes": "クイズ",
+      "quizzesDesc": "フィードバック付きの選択問題",
+      "visual": "ビジュアル図解",
+      "visualDesc": "マインドマップやフローチャート",
+      "noDecks": "{{type}}のデッキはまだありません"
+    },
+    "startReview": "毎日の復習を始める",
+    "reviewMsg": "復習が必要なカードが{{count}}枚あります",
+    "startStudying": "学習を始める →",
+    "viewAll": "全{{count}}デッキを表示 →",
+    "due": "期限"
+  },
+  "auth": {
+    "welcomeBack": "おかえりなさい",
+    "signInSubtitle": "学習の旅を続けましょう",
+    "createAccount": "アカウント作成",
+    "createAccountSubtitle": "世界中の学習者と共に学びましょう",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "username": "ユーザー名",
+    "confirmPassword": "パスワード確認",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "signIn": "サインイン",
+    "signUp": "アカウント作成",
+    "orContinueWith": "または以下で続行",
+    "signInGoogle": "Googleでサインイン",
+    "signInFacebook": "Facebookでサインイン",
+    "noAccount": "アカウントをお持ちでないですか？",
+    "createOne": "作成する",
+    "hasAccount": "すでにアカウントをお持ちですか？",
+    "signInLink": "サインイン",
+    "agreeTerms": "私は同意します",
+    "termsOfService": "利用規約",
+    "and": "および",
+    "privacyPolicy": "プライバシーポリシー",
+    "passwordStrength": {
+      "weak": "弱い",
+      "fair": "普通",
+      "strong": "強い"
+    },
+    "errors": {
+      "loginFailed": "ログインに失敗しました。認証情報を確認してください。",
+      "usernameRequired": "ユーザー名は必須です",
+      "emailRequired": "メールアドレスは必須です",
+      "passwordRequired": "パスワードは必須です",
+      "passwordLength": "パスワードは8文字以上である必要があります",
+      "passwordMismatch": "パスワードが一致しません",
+      "termsRequired": "利用規約に同意する必要があります",
+      "serverError": "登録中にエラーが発生しました"
+    },
+    "success": {
+      "welcome": "Nowryへようこそ！ 🎉",
+      "accountCreated": "アカウントが正常に作成されました。体験をカスタマイズしましょう！",
+      "redirecting": "セットアップウィザードへリダイレクト中..."
+    },
+    "resetPassword": {
+      "title": "パスワードのリセット",
+      "subtitle": {
+        "step1": "確認コードをお送りします",
+        "step2": "メールに送信されたコードを入力してください",
+        "step3": "強力な新しいパスワードを選択してください"
+      },
+      "codeSent": "確認コードをメールに送信しました！",
+      "verifyCode": "コードを確認",
+      "sendCode": "確認コードを送信",
+      "resend": "再送信",
+      "resendPrompt": "コードが届きませんか？",
+      "successTitle": "パスワードのリセット成功！ 🎉",
+      "successMsg": "パスワードが正常にリセットされました。新しいパスワードでサインインできます。",
+      "goToLogin": "ログインへ移動",
+      "backToLogin": "ログインへ戻る",
+      "emailLabel": "メールアドレス",
+      "codeLabel": "確認コード",
+      "newPasswordLabel": "新しいパスワード",
+      "confirmNewPasswordLabel": "新しいパスワードを確認",
+      "errors": {
+        "codeRequired": "確認コードは必須です",
+        "codeLength": "コードは6桁である必要があります"
+      }
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Nowryへようこそ！",
+      "subtitle": "いくつかのステップで学習体験をパーソナライズしましょう",
+      "quick": "簡単＆迅速",
+      "quickDesc": "2分以内で完了します",
+      "tailored": "あなたに最適化",
+      "tailoredDesc": "学習スタイルに合わせてカスタマイズ",
+      "changeable": "いつでも変更可能",
+      "changeableDesc": "設定はいつでも更新できます"
+    },
+    "language": {
+      "title": "言語を選択",
+      "subtitle": "インターフェースの優先言語を選択してください"
+    },
+    "theme": {
+      "title": "テーマのカスタマイズ",
+      "subtitle": "カラーとモードでNowryを自分好みに",
+      "mode": "外観モード",
+      "light": "ライト",
+      "dark": "ダーク",
+      "accent": "アクセントカラー",
+      "custom": "またはカスタムカラーを選択",
+      "customLabel": "カスタムカラー"
+    },
+    "interests": {
+      "title": "興味のあることは？",
+      "subtitle": "コンテンツを見たいトピックを選択してください",
+      "selected": "選択中: {{count}}トピック",
+      "selected_plural": "選択中: {{count}}トピック",
+      "items": {
+        "Technology": "テクノロジー",
+        "Science": "科学",
+        "History": "歴史",
+        "Languages": "言語",
+        "Art": "芸術",
+        "Mathematics": "数学",
+        "Literature": "文学",
+        "Music": "音楽",
+        "Business": "ビジネス",
+        "Health": "健康",
+        "Philosophy": "哲学",
+        "Psychology": "心理学"
+      }
+    },
+    "learning": {
+      "title": "学習スタイルと目標",
+      "subtitle": "体験を最適化するために教えてください",
+      "styleTitle": "どのような学習方法が得意ですか？",
+      "goalTitle": "主な目標は何ですか？",
+      "styles": {
+        "visual": "視覚的",
+        "visualDesc": "画像や図解で学ぶのが得意",
+        "auditory": "聴覚的",
+        "auditoryDesc": "聞いたり議論したりするのが得意",
+        "reading": "読み書き",
+        "readingDesc": "テキストやノートで学ぶのが得意",
+        "kinesthetic": "体験的",
+        "kinestheticDesc": "実践や演習で学ぶのが得意"
+      },
+      "goals": {
+        "general": "一般教養",
+        "academic": "学業成績",
+        "career": "キャリアアップ",
+        "language": "語学学習",
+        "hobby": "個人の趣味"
+      }
+    },
+    "steps": "ステップ {{current}} / {{total}}",
+    "complete": "{{percent}}% 完了",
+    "next": "次へ",
+    "back": "戻る",
+    "finish": "セットアップ完了",
+    "skip": "今はスキップ"
+  },
+  "tasks": {
+    "title": "タスク",
+    "searchPlaceholder": "タスクを検索または追加...",
+    "filter": {
+      "all": "すべて",
+      "completed": "完了",
+      "pending": "未完了"
+    },
+    "empty": "タスクはまだありません。入力して追加しましょう！",
+    "noMatch": "フィルターに一致するタスクはありません",
+    "addTooltip": "\"{{title}}\" を追加"
+  },
+  "sidemenu": {
+    "dashboard": "ダッシュボード",
+    "study": "学習",
+    "deck": "デッキ",
+    "daily_focus": "デイリーフォーカス",
+    "books": "ライブラリ",
+    "tasks": "タスク",
+    "community": "コミュニティ"
+  },
+  "profile": {
+    "title": "マイプロフィール",
+    "subtitle": "アカウント情報と設定を管理",
+    "edit": "プロフィール編集",
+    "cancel": "キャンセル",
+    "save": "変更を保存",
+    "saving": "保存中...",
+    "fullName": "氏名",
+    "username": "ユーザー名",
+    "email": "メールアドレス",
+    "bio": "自己紹介",
+    "bioPlaceholder": "あなたについて教えてください...",
+    "noBio": "自己紹介がありません。編集をクリックして追加しましょう！",
+    "notSet": "未設定",
+    "uploadImage": "画像サイズは2MB未満である必要があります",
+    "selectImage": "画像ファイルを選択してください",
+    "memberSince": "参加して{{days}}日",
+    "joined": "参加日: {{date}}",
+    "stats": {
+      "totalCards": "総カード数",
+      "booksCreated": "作成したブック",
+      "studyStreak": "学習ストリーク",
+      "days": "日"
+    }
+  },
+  "settings": {
+    "title": "アカウント設定",
+    "subtitle": "設定、セキュリティ、アカウントの管理",
+    "general": {
+      "title": "一般設定",
+      "appearance": "外観",
+      "appearanceDesc": "ライトモードとダークモードの切り替え",
+      "language": "言語",
+      "themeColor": "テーマカラー",
+      "themeColorDesc": "アクセントカラーを選択してください。テーマ全体が更新されます。",
+      "interests": "興味・関心",
+      "interestsDesc": "ニュースやフォーカスコンテンツのトピックを選択"
+    },
+    "security": {
+      "title": "セキュリティ",
+      "changePassword": "パスワード変更",
+      "currentPassword": "現在のパスワード",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "新しいパスワード（確認）",
+      "updatePassword": "パスワードを更新",
+      "twoFactor": "2要素認証",
+      "twoFactorDesc": "アカウントにセキュリティレイヤーを追加",
+      "enable2FA": "2FAを有効化",
+      "disable2FA": "無効化",
+      "success2FA": "2FAが有効になりました！バックアップコード：",
+      "disabled2FA": "2FAが正常に無効化されました"
+    },
+    "notifications": {
+      "title": "通知設定",
+      "emailDigest": "メールダイジェスト",
+      "emailDigestDesc": "学習活動の毎日のサマリーを受け取る",
+      "studyReminders": "学習リマインダー",
+      "studyRemindersDesc": "カードの復習期限が来たら通知する",
+      "newsUpdates": "ニュース更新",
+      "newsUpdatesDesc": "新機能や改善に関する更新を受け取る",
+      "marketing": "マーケティングメール",
+      "marketingDesc": "プロモーションオファーやヒントを受け取る"
+    },
+    "danger": {
+      "title": "危険エリア",
+      "deleteAccount": "アカウント削除",
+      "deleteDesc": "アカウントと関連データを完全に削除します",
+      "confirmTitle": "本当に削除しますか？",
+      "confirmDesc": "この操作は取り消せません。ブック、カード、進捗を含むすべてのデータが完全に削除されます。",
+      "confirmBtn": "はい、アカウントを削除します",
+      "cancelBtn": "キャンセル"
+    }
+  },
+  "dashboard": {
+    "welcome": "おかえりなさい、{{name}}さん！",
+    "overview": "今日の学習概要です",
+    "dailyFocus": {
+      "allCaughtUp": "🎉 すべて完了！",
+      "noDueCards": "復習が必要なカードはありません。素晴らしい！",
+      "reviewToday": "📚 今日の復習",
+      "cardsPending": "{{count}}枚のカード保留中",
+      "cardsPending_other": "{{count}}枚のカード保留中",
+      "cardsPending_plural": "{{count}}枚のカード保留中",
+      "start": "始める！",
+      "study": "学習する",
+      "moreDecks": "他 {{count}} デッキに保留中のカードがあります",
+      "moreDecks_other": "他 {{count}} デッキに保留中のカードがあります"
+    }
+  },
+  "motivation": {
+    "phrases": [
+      "毎日の積み重ねが大切です！",
+      "今日は新しいことを学ぶのに最適な日です。",
+      "今少し勉強すれば、後は楽になります。",
+      "完璧よりも継続が重要です。",
+      "今日の努力が明日の進歩になります。"
+    ]
+  },
+  "weekly": {
+    "title": "週間アクティビティ",
+    "total": "合計",
+    "types": {
+      "flashcards": "カード",
+      "quizzes": "クイズ",
+      "visual": "ビジュアル",
+      "books": "ブック"
+    }
+  },
+  "calendar": {
+    "title": "最近のパフォーマンス",
+    "noActivity": "アクティビティはまだありません。勉強を始めましょう！",
+    "streak": "🔥 現在のストリーク: {{count}}日",
+    "streak_other": "🔥 現在のストリーク: {{count}}日",
+    "types": {
+      "quiz": "クイズ",
+      "visual": "ビジュアル",
+      "book": "ブック",
+      "flashcard": "カード"
+    }
+  }
+}

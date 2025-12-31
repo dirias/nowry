@@ -64,34 +64,87 @@ const CreateDeckModal = ({ open, onClose, onSaved, initialData = null }) => {
     <Modal open={open} onClose={onClose}>
       <ModalDialog sx={{ maxWidth: 500, width: '100%' }}>
         <ModalClose />
-        <Typography level='h4' mb={2}>
-          {isEdit ? 'Editar Mazo' : 'Crear Nuevo Mazo'}
+        <Typography level='h4' fontWeight={600} mb={3}>
+          {isEdit ? 'Edit Deck' : 'New Deck'}
         </Typography>
         <form onSubmit={handleSubmit}>
-          <Stack spacing={2}>
-            <FormControl required>
-              <FormLabel>Nombre del Mazo</FormLabel>
-              <Input autoFocus placeholder='Ej. Vocabulario Japonés' value={name} onChange={(e) => setName(e.target.value)} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Descripción</FormLabel>
+          <Stack spacing={3}>
+            {/* Deck Name */}
+            <Stack spacing={1.5}>
+              <Typography
+                level='body-xs'
+                textTransform='uppercase'
+                fontWeight={600}
+                sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
+              >
+                Deck Name
+              </Typography>
+              <Input
+                autoFocus
+                placeholder='E.g., Japanese Vocabulary'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                size='lg'
+                variant='soft'
+                sx={{
+                  '--Input-focusedThickness': '2px',
+                  fontSize: 'md'
+                }}
+              />
+            </Stack>
+
+            {/* Description */}
+            <Stack spacing={1.5}>
+              <Typography
+                level='body-xs'
+                textTransform='uppercase'
+                fontWeight={600}
+                sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
+              >
+                Description
+              </Typography>
               <Textarea
-                placeholder='¿Sobre qué es este mazo?'
+                placeholder='What is this deck about?'
                 minRows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                size='lg'
+                variant='soft'
+                sx={{
+                  '--Textarea-focusedThickness': '2px',
+                  fontSize: 'md'
+                }}
               />
-            </FormControl>
-            <FormControl>
-              <FormLabel>URL de la Imagen</FormLabel>
-              <Input placeholder='https://ejemplo.com/imagen.png' value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Etiquetas (separadas por coma)</FormLabel>
-              <Input placeholder='idiomas, japonés, básico' value={tags} onChange={(e) => setTags(e.target.value)} />
-            </FormControl>
-            <Button type='submit' loading={loading} fullWidth sx={{ mt: 1 }}>
-              {isEdit ? 'Guardar Cambios' : 'Crear Mazo'}
+            </Stack>
+
+            {/* Meta Information - More Subtle */}
+            <Stack spacing={1.5} sx={{ pt: 1 }}>
+              <Input
+                placeholder='🖼️  Image URL (optional)'
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                variant='plain'
+                sx={{
+                  '--Input-focusedThickness': '1px',
+                  fontSize: 'sm'
+                }}
+              />
+
+              <Input
+                placeholder='🏷️  Add tags (e.g., languages, japanese, basic)'
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                variant='plain'
+                sx={{
+                  '--Input-focusedThickness': '1px',
+                  fontSize: 'sm'
+                }}
+              />
+            </Stack>
+
+            <Button type='submit' loading={loading} fullWidth size='lg' sx={{ mt: 2 }}>
+              {isEdit ? '💾  Save' : '✨  Create'}
             </Button>
           </Stack>
         </form>

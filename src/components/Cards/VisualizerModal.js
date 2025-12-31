@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Modal,
   ModalDialog,
@@ -12,7 +14,8 @@ import {
   CircularProgress,
   FormControl,
   FormLabel,
-  Input
+  Input,
+  Alert
 } from '@mui/joy'
 import mermaid from 'mermaid'
 import { visualizerService, decksService, cardsService } from '../../api/services'
@@ -24,25 +27,49 @@ mermaid.initialize({
   fontFamily: 'Inter, sans-serif'
 })
 
+// ... MermaidChart component is unchanged ...
 const MermaidChart = ({ code }) => {
   const ref = useRef(null)
   const [svg, setSvg] = useState('')
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (code && ref.current) {
-      // Reset SVG
       setSvg('')
+      setError(null)
       const id = `mermaid-${Date.now()}`
-      try {
-        mermaid.render(id, code).then((result) => {
+
+      mermaid
+        .render(id, code)
+        .then((result) => {
           setSvg(result.svg)
+          setError(null)
         })
-      } catch (e) {
-        console.error('Mermaid render error:', e)
-        setSvg('<div style="color:red; padding:20px;">Unable to render diagram. Code syntax might be invalid.</div>')
-      }
+        .catch((e) => {
+          console.error('Mermaid render error:', e)
+          setError('Unable to render diagram. The generated syntax may be invalid. Please try generating again.')
+        })
     }
   }, [code])
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          p: 4,
+          textAlign: 'center',
+          color: 'danger.plainColor',
+          bgcolor: 'danger.softBg',
+          borderRadius: 'md'
+        }}
+      >
+        <Typography level='title-md' sx={{ mb: 1 }}>
+          ⚠️ Diagram Error
+        </Typography>
+        <Typography level='body-sm'>{error}</Typography>
+      </Box>
+    )
+  }
 
   return <div ref={ref} dangerouslySetInnerHTML={{ __html: svg }} style={{ width: '100%', overflow: 'auto', textAlign: 'center' }} />
 }
@@ -57,10 +84,15 @@ export default function VisualizerModal({ open, onClose, text }) {
   const [isCreatingDeck, setIsCreatingDeck] = useState(false)
   const [newDeckName, setNewDeckName] = useState('')
   const [loadingDecks, setLoadingDecks] = useState(false)
+  const [error, setError] = useState('')
+  const [isLimitError, setIsLimitError] = useState(false)
+  const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const handleCreateDeck = async () => {
     if (!newDeckName) return
     setLoadingDecks(true)
+    setError('')
     try {
       const newDeck = await decksService.create({ name: newDeckName, deck_type: 'visual' })
       setDecks([...decks, newDeck])
@@ -69,6 +101,15 @@ export default function VisualizerModal({ open, onClose, text }) {
       setNewDeckName('')
     } catch (e) {
       console.error(e)
+      const status = e.response?.status
+      const msg = e.response?.data?.detail || t('subscription.errors.genericCreate')
+
+      if (status === 403) {
+        setIsLimitError(true)
+        setError(t('subscription.errors.limitReached'))
+      } else {
+        setError(msg)
+      }
     } finally {
       setLoadingDecks(false)
     }
@@ -77,11 +118,20 @@ export default function VisualizerModal({ open, onClose, text }) {
   const handleGenerate = async () => {
     if (!text) return
     setLoading(true)
+    setError('')
     try {
       const res = await visualizerService.generate(text, vizType)
       setResult(res)
     } catch (e) {
       console.error(e)
+      const status = e.response?.status
+      const msg = e.response?.data?.detail || t('subscription.errors.genericCreate')
+      if (status === 403) {
+        setIsLimitError(true)
+        setError(t('subscription.errors.aiLimit'))
+      } else {
+        setError(msg)
+      }
     } finally {
       setLoading(false)
     }
@@ -90,6 +140,8 @@ export default function VisualizerModal({ open, onClose, text }) {
   // Fetch decks and reset state
   useEffect(() => {
     if (open) {
+      setError('')
+      setIsLimitError(false)
       setResult(null)
       setSelectedDeckId('')
       decksService.getAll().then(setDecks).catch(console.error)
@@ -99,6 +151,7 @@ export default function VisualizerModal({ open, onClose, text }) {
   const handleSave = async () => {
     if (!selectedDeckId || !result) return
     setSaving(true)
+    setError('')
     try {
       await cardsService.create({
         deck_id: selectedDeckId,
@@ -111,6 +164,15 @@ export default function VisualizerModal({ open, onClose, text }) {
       onClose()
     } catch (e) {
       console.error(e)
+      const status = e.response?.status
+      const msg = e.response?.data?.detail || t('subscription.errors.genericCreate')
+
+      if (status === 403) {
+        setIsLimitError(true)
+        setError(t('subscription.errors.limitReached'))
+      } else {
+        setError(msg)
+      }
     } finally {
       setSaving(false)
     }
@@ -126,6 +188,22 @@ export default function VisualizerModal({ open, onClose, text }) {
         <Typography level='body-sm' color='neutral' sx={{ mb: 2 }}>
           Generate diagrams from your study content.
         </Typography>
+
+        {error && (
+          <Alert
+            color='danger'
+            sx={{ mb: 2 }}
+            endDecorator={
+              isLimitError && (
+                <Button size='sm' variant='soft' color='danger' onClick={() => navigate('/profile')}>
+                  {t('subscription.upgrade')}
+                </Button>
+              )
+            }
+          >
+            {error}
+          </Alert>
+        )}
 
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems='center'>
           <Select value={vizType} onChange={(_, v) => setVizType(v)} sx={{ minWidth: 160 }}>
