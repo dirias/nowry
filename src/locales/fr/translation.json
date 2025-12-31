@@ -1,0 +1,349 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "search": "Rechercher",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion"
+  },
+  "news": {
+    "title": "Dernières Actualités",
+    "noArticles": "Aucun article trouvé",
+    "readMore": "Lire la suite",
+    "updated": "Mis à jour",
+    "categories": {
+      "general": "Général",
+      "technology": "Technologie",
+      "science": "Science",
+      "business": "Affaires",
+      "health": "Santé",
+      "entertainment": "Divertissement",
+      "politics": "Politique",
+      "sports": "Sports"
+    }
+  },
+  "header": {
+    "study": "Études",
+    "cards": "Cartes",
+    "books": "Livres",
+    "settings": "Paramètres"
+  },
+  "footer": {
+    "rights": "Tous droits réservés."
+  },
+  "study": {
+    "title": "Centre d'Étude",
+    "subtitle": "Votre espace d'apprentissage personnalisé",
+    "stats": {
+      "dueToday": "À faire",
+      "reviewedToday": "Revues aujourd'hui",
+      "dayStreak": "Jours consécutifs",
+      "totalCards": "Total cartes"
+    },
+    "byType": "Étudier par Type",
+    "types": {
+      "flashcards": "Flashcards",
+      "flashcardsDesc": "Cartes classiques pour mémorisation rapide",
+      "quizzes": "Quiz",
+      "quizzesDesc": "Choix multiple avec retour instantané",
+      "visual": "Diagrammes Visuels",
+      "visualDesc": "Cartes mentales, flux et aides visuelles",
+      "noDecks": "Pas de paquets {{type}}"
+    },
+    "startReview": "Commencez votre révision quotidienne",
+    "reviewMsg": "Vous avez {{count}} cartes prêtes à être révisées",
+    "startStudying": "Commencer à étudier →",
+    "viewAll": "Voir tous les {{count}} paquets →",
+    "due": "à faire"
+  },
+  "auth": {
+    "welcomeBack": "Bon retour",
+    "signInSubtitle": "Connectez-vous pour continuer votre apprentissage",
+    "createAccount": "Créer un compte",
+    "createAccountSubtitle": "Rejoignez des milliers d'apprenants dans le monde",
+    "email": "Email",
+    "password": "Mot de passe",
+    "username": "Nom d'utilisateur",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "orContinueWith": "ou continuer avec",
+    "signInGoogle": "Continuer avec Google",
+    "signInFacebook": "Continuer avec Facebook",
+    "noAccount": "Pas encore de compte ?",
+    "createOne": "En créer un",
+    "hasAccount": "Vous avez déjà un compte ?",
+    "signInLink": "Connectez-vous",
+    "agreeTerms": "J'accepte les",
+    "termsOfService": "Conditions d'utilisation",
+    "and": "et",
+    "privacyPolicy": "Politique de confidentialité",
+    "passwordStrength": {
+      "weak": "Faible",
+      "fair": "Moyen",
+      "strong": "Fort"
+    },
+    "errors": {
+      "loginFailed": "Échec de la connexion. Vérifiez vos identifiants.",
+      "usernameRequired": "Nom d'utilisateur requis",
+      "emailRequired": "Email requis",
+      "passwordRequired": "Mot de passe requis",
+      "passwordLength": "Le mot de passe doit contenir au moins 8 caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "termsRequired": "Vous devez accepter les conditions d'utilisation",
+      "serverError": "Une erreur est survenue lors de l'inscription"
+    },
+    "success": {
+      "welcome": "Bienvenue sur Nowry ! 🎉",
+      "accountCreated": "Votre compte a été créé avec succès. Personnalisons votre expérience !",
+      "redirecting": "Redirection vers l'assistant de configuration..."
+    },
+    "resetPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": {
+        "step1": "Nous vous enverrons un code de vérification",
+        "step2": "Entrez le code envoyé à votre email",
+        "step3": "Choisissez un nouveau mot de passe fort"
+      },
+      "codeSent": "Code de vérification envoyé à votre email !",
+      "verifyCode": "Vérifier le code",
+      "sendCode": "Envoyer le code de vérification",
+      "resend": "Renvoyer",
+      "resendPrompt": "Vous n'avez pas reçu le code ?",
+      "successTitle": "Mot de passe réinitialisé ! 🎉",
+      "successMsg": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+      "goToLogin": "Aller à la connexion",
+      "backToLogin": "Retour à la connexion",
+      "emailLabel": "Adresse Email",
+      "codeLabel": "Code de Vérification",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "confirmNewPasswordLabel": "Confirmer le nouveau mot de passe",
+      "errors": {
+        "codeRequired": "Le code de vérification est requis",
+        "codeLength": "Le code doit comporter 6 chiffres"
+      }
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenue sur Nowry !",
+      "subtitle": "Personnalisons votre expérience d'apprentissage en quelques étapes",
+      "quick": "Rapide et Facile",
+      "quickDesc": "Prend moins de 2 minutes",
+      "tailored": "Adapté pour Vous",
+      "tailoredDesc": "Personnalisé selon votre style d'apprentissage",
+      "changeable": "Toujours Modifiable",
+      "changeableDesc": "Vous pouvez mettre à jour ces paramètres à tout moment"
+    },
+    "language": {
+      "title": "Choisissez votre Langue",
+      "subtitle": "Sélectionnez votre langue préférée pour l'interface"
+    },
+    "theme": {
+      "title": "Personnalisez votre Thème",
+      "subtitle": "Rendez Nowry unique avec des couleurs et des modes",
+      "mode": "Mode d'Apparence",
+      "light": "Clair",
+      "dark": "Sombre",
+      "accent": "Couleur d'Accent",
+      "custom": "Ou choisissez une couleur personnalisée",
+      "customLabel": "Couleur Personnalisée"
+    },
+    "interests": {
+      "title": "Qu'est-ce qui vous intéresse ?",
+      "subtitle": "Sélectionnez les sujets sur lesquels vous aimeriez voir du contenu",
+      "selected": "Sélectionné : {{count}} sujet",
+      "selected_plural": "Sélectionnés : {{count}} sujets",
+      "items": {
+        "Technology": "Technologie",
+        "Science": "Science",
+        "History": "Histoire",
+        "Languages": "Langues",
+        "Art": "Art",
+        "Mathematics": "Mathématiques",
+        "Literature": "Littérature",
+        "Music": "Musique",
+        "Business": "Affaires",
+        "Health": "Santé",
+        "Philosophy": "Philosophie",
+        "Psychology": "Psychologie"
+      }
+    },
+    "learning": {
+      "title": "Style d'Apprentissage et Objectifs",
+      "subtitle": "Aidez-nous à adapter votre expérience",
+      "styleTitle": "Comment apprenez-vous le mieux ?",
+      "goalTitle": "Quel est votre objectif principal ?",
+      "styles": {
+        "visual": "Visuel",
+        "visualDesc": "J'apprends mieux avec des images et des diagrammes",
+        "auditory": "Auditif",
+        "auditoryDesc": "Je préfère écouter et discuter",
+        "reading": "Lecture/Écriture",
+        "readingDesc": "J'apprends par le texte et les notes",
+        "kinesthetic": "Kinesthésique",
+        "kinestheticDesc": "J'apprends en faisant et en pratiquant"
+      },
+      "goals": {
+        "general": "Culture Générale",
+        "academic": "Réussite Scolaire",
+        "career": "Développement Professionnel",
+        "language": "Apprentissage des Langues",
+        "hobby": "Intérêt Personnel"
+      }
+    },
+    "steps": "Étape {{current}} sur {{total}}",
+    "complete": "{{percent}}% Terminé",
+    "next": "Suivant",
+    "back": "Retour",
+    "finish": "Terminer la configuration",
+    "skip": "Passer pour l'instant"
+  },
+  "tasks": {
+    "title": "Tâches",
+    "searchPlaceholder": "Rechercher ou ajouter des tâches...",
+    "filter": {
+      "all": "Toutes",
+      "completed": "Terminées",
+      "pending": "En attente"
+    },
+    "empty": "Pas encore de tâches. Écrivez pour en ajouter une !",
+    "noMatch": "Aucune tâche ne correspond à vos filtres",
+    "addTooltip": "Ajouter \"{{title}}\""
+  },
+  "sidemenu": {
+    "dashboard": "Tableau de bord",
+    "study": "Étudier",
+    "deck": "Paquets",
+    "daily_focus": "Focus Quotidien",
+    "books": "Bibliothèque",
+    "tasks": "Tâches",
+    "community": "Communauté"
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "subtitle": "Gérez vos informations de compte et préférences",
+    "edit": "Modifier le Profil",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "fullName": "Nom Complet",
+    "username": "Nom d'utilisateur",
+    "email": "Email",
+    "bio": "Bio",
+    "bioPlaceholder": "Parlez-nous de vous...",
+    "noBio": "Pas de bio. Cliquez sur Modifier pour en ajouter une !",
+    "notSet": "Non défini",
+    "uploadImage": "L'image doit faire moins de 2Mo",
+    "selectImage": "Veuillez sélectionner une image",
+    "memberSince": "Membre depuis {{days}} jours",
+    "joined": "Rejoint le {{date}}",
+    "stats": {
+      "totalCards": "Total Cartes",
+      "booksCreated": "Livres Créés",
+      "studyStreak": "Série d'Étude",
+      "days": "jours"
+    }
+  },
+  "settings": {
+    "title": "Paramètres du Compte",
+    "subtitle": "Gérez vos préférences, sécurité et compte",
+    "general": {
+      "title": "Préférences Générales",
+      "appearance": "Apparence",
+      "appearanceDesc": "Basculer entre mode Clair et Sombre",
+      "language": "Langue",
+      "themeColor": "Couleur du Thème",
+      "themeColorDesc": "Sélectionnez votre couleur d'accent. Cela mettra à jour tout le thème.",
+      "interests": "Intérêts",
+      "interestsDesc": "Sélectionnez les sujets pour voir des actualités et du contenu"
+    },
+    "security": {
+      "title": "Sécurité",
+      "changePassword": "Changer le Mot de Passe",
+      "currentPassword": "Mot de Passe Actuel",
+      "newPassword": "Nouveau Mot de Passe",
+      "confirmPassword": "Confirmer le Nouveau Mot de Passe",
+      "updatePassword": "Mettre à Jour",
+      "twoFactor": "Authentification à Deux Facteurs",
+      "twoFactorDesc": "Ajoutez une couche de sécurité supplémentaire",
+      "enable2FA": "Activer 2FA",
+      "disable2FA": "Désactiver",
+      "success2FA": "2FA Activé ! Codes de secours :",
+      "disabled2FA": "2FA désactivé avec succès"
+    },
+    "notifications": {
+      "title": "Préférences de Notification",
+      "emailDigest": "Résumé par Email",
+      "emailDigestDesc": "Recevez un résumé quotidien de votre activité",
+      "studyReminders": "Rappels d'Étude",
+      "studyRemindersDesc": "Soyez notifié quand des cartes sont à réviser",
+      "newsUpdates": "Mises à Jour",
+      "newsUpdatesDesc": "Recevez des nouvelles sur les fonctionnalités",
+      "marketing": "Emails Marketing",
+      "marketingDesc": "Recevez des offres promotionnelles"
+    },
+    "danger": {
+      "title": "Zone de Danger",
+      "deleteAccount": "Supprimer le Compte",
+      "deleteDesc": "Supprimer définitivement votre compte et toutes les données",
+      "confirmTitle": "Êtes-vous absolument sûr ?",
+      "confirmDesc": "Cette action est irréversible. Toutes vos données seront supprimées.",
+      "confirmBtn": "Oui, Supprimer Mon Compte",
+      "cancelBtn": "Annuler"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bon retour, {{name}} !",
+    "overview": "Voici votre aperçu d'apprentissage pour aujourd'hui",
+    "dailyFocus": {
+      "allCaughtUp": "🎉 Tout est à jour !",
+      "noDueCards": "Aucune carte en attente. Beau travail !",
+      "reviewToday": "📚 À réviser aujourd'hui",
+      "cardsPending": "{{count}} carte en attente",
+      "cardsPending_other": "{{count}} cartes en attente",
+      "cardsPending_plural": "{{count}} cartes en attente",
+      "start": "C'est Parti !",
+      "study": "Étudier",
+      "moreDecks": "Et {{count}} autre deck avec des cartes",
+      "moreDecks_other": "Et {{count}} autres decks avec des cartes"
+    }
+  },
+  "motivation": {
+    "phrases": [
+      "Chaque petit pas vous rapproche !",
+      "Aujourd'hui est un grand jour pour apprendre.",
+      "Étudier un peu maintenant économise beaucoup plus tard.",
+      "La constance est plus importante que la perfection.",
+      "Votre effort d'aujourd'hui devient le progrès de demain."
+    ]
+  },
+  "weekly": {
+    "title": "Activité Hebdomadaire",
+    "total": "Total",
+    "types": {
+      "flashcards": "Flashcards",
+      "quizzes": "Quiz",
+      "visual": "Visuel",
+      "books": "Livres"
+    }
+  },
+  "calendar": {
+    "title": "Performance Récente",
+    "noActivity": "Pas encore d'activité. Commencez à étudier !",
+    "streak": "🔥 Série actuelle : {{count}} jour",
+    "streak_other": "🔥 Série actuelle : {{count}} jours",
+    "types": {
+      "quiz": "Quiz",
+      "visual": "Visuel",
+      "book": "Livre",
+      "flashcard": "Flashcard"
+    }
+  }
+}

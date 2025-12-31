@@ -1,0 +1,95 @@
+.card-container {
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
+  border-radius: 12px;
+  padding: 20px;
+  width: 780px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  background-color: #f9f9f9;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.card-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.title-container {
+  background-color: #eaf4f4;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.title {
+  font-size: 1.8em;
+  font-weight: 600;
+  color: #096871;
+  text-align: center;
+}
+
+.content-container {
+  background-color: var(--joy-palette-background-surface);
+  border: none;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.content {
+  font-size: 1.1em;
+  color: #333;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.backdrop {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+.modal-window {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 1.6em;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #096871;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .card-container {
+    width: 100%;
+  }
+}
+
+.lastAddedCards {
+  overflow-x: auto;
+  width: 100%; /* ensures container respects screen width */
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+
+.lastAddedCards .MuiStack-root {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  min-width: max-content; /* ensures child stack is wider than container */
+  padding: 10px;
+}
+
+.lastAddedCardItem {
+  flex: 0 0 280px; /* fixed width, no shrinking */
+  max-width: 280px;
+}
