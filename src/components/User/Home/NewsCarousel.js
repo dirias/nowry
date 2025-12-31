@@ -6,7 +6,7 @@ import { userService } from '../../../api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
 
 // Map user interests to categories (multilingual support)
 const INTEREST_TO_CATEGORY = {
@@ -168,11 +168,11 @@ export default function NewsCarousel() {
         const categories =
           userInterests.length > 0
             ? userInterests
-                .map((interest) => {
-                  const category = getCategoryFromInterest(interest)
-                  return category
-                })
-                .filter((cat) => cat !== 'general')
+              .map((interest) => {
+                const category = getCategoryFromInterest(interest)
+                return category
+              })
+              .filter((cat) => cat !== 'general')
             : []
 
         // If no specific categories, use general
@@ -393,10 +393,10 @@ const NewsCard = ({ article, loading, t }) => {
         '&:hover': loading
           ? {}
           : {
-              transform: 'translateY(-4px)',
-              boxShadow: 'lg',
-              borderColor: 'primary.outlinedBorder'
-            }
+            transform: 'translateY(-4px)',
+            boxShadow: 'lg',
+            borderColor: 'primary.outlinedBorder'
+          }
       }}
       onClick={!loading && article?.url ? () => window.open(article.url, '_blank', 'noopener,noreferrer') : undefined}
     >
