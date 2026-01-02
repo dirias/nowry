@@ -83,6 +83,15 @@ export const userService = {
   },
 
   /**
+   * Complete onboarding wizard
+   * @returns {Promise<Object>}
+   */
+  async completeWizard() {
+    const { data } = await apiClient.post('/users/complete-wizard')
+    return data
+  },
+
+  /**
    * Enable two-factor authentication
    * @returns {Promise<Object>} Backup codes
    */

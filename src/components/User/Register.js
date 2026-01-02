@@ -139,7 +139,6 @@ const Register = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          background: isDark ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           px: 2
         }}
       >
@@ -151,7 +150,7 @@ const Register = () => {
             width: '100%',
             maxWidth: 440,
             boxShadow: 'xl',
-            backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: 'background.surface',
             backdropFilter: 'blur(10px)',
             border: 'none',
             textAlign: 'center'
@@ -161,11 +160,11 @@ const Register = () => {
           <Typography level='h3' fontWeight={700} mb={1}>
             {t('auth.success.welcome')}
           </Typography>
-          <Typography level='body-md' sx={{ color: 'neutral.600', mb: 3 }}>
+          <Typography level='body-md' sx={{ color: 'text.secondary', mb: 3 }}>
             {t('auth.success.accountCreated')}
           </Typography>
           <LinearProgress sx={{ mb: 2 }} />
-          <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
             {t('auth.success.redirecting')}
           </Typography>
         </Sheet>
@@ -180,7 +179,7 @@ const Register = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isDark ? 'neutral.900' : 'neutral.50',
+        backgroundColor: 'background.body',
         px: 2,
         py: 4,
         transition: 'background 0.3s ease'
@@ -194,7 +193,7 @@ const Register = () => {
           width: '100%',
           maxWidth: 480,
           boxShadow: 'xl',
-          backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: 'background.surface',
           backdropFilter: 'blur(10px)',
           border: 'none',
           transform: 'translateY(0)',
@@ -210,15 +209,13 @@ const Register = () => {
             level='h2'
             fontWeight={700}
             sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: 'text.primary',
               mb: 1
             }}
           >
             {t('auth.createAccount')}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
             {t('auth.createAccountSubtitle')}
           </Typography>
         </Box>
@@ -294,7 +291,7 @@ const Register = () => {
                     <Typography level='body-xs' sx={{ color: `${passwordStrength.color}.600` }}>
                       {passwordStrength.label}
                     </Typography>
-                    <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                       {passwordStrength.strength}%
                     </Typography>
                   </Stack>
@@ -327,19 +324,39 @@ const Register = () => {
 
             {/* Terms Checkbox */}
             <FormControl error={!!errors.acceptedTerms}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                <Checkbox checked={formData.acceptedTerms} onChange={handleChange} name='acceptedTerms' size='md' sx={{ mt: 0.2 }} />
-                <Typography level='body-sm' sx={{ pt: 0.3, lineHeight: 1.5 }}>
-                  {t('auth.agreeTerms')}{' '}
-                  <Link component={RouterLink} to='/terms' underline='always'>
-                    {t('auth.termsOfService')}
-                  </Link>{' '}
-                  {t('auth.and')}{' '}
-                  <Link component={RouterLink} to='/privacy' underline='always'>
-                    {t('auth.privacyPolicy')}
-                  </Link>
-                </Typography>
-              </Box>
+              <Checkbox
+                name='acceptedTerms'
+                checked={formData.acceptedTerms}
+                onChange={handleChange}
+                variant='solid'
+                color='primary'
+                label={
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    {t('auth.agreeTerms')}{' '}
+                    <Link
+                      component={RouterLink}
+                      to='/terms'
+                      sx={{
+                        textDecoration: 'underline',
+                        textUnderlineOffset: '2px'
+                      }}
+                    >
+                      {t('auth.termsOfService')}
+                    </Link>{' '}
+                    {t('auth.and')}{' '}
+                    <Link
+                      component={RouterLink}
+                      to='/privacy'
+                      sx={{
+                        textDecoration: 'underline',
+                        textUnderlineOffset: '2px'
+                      }}
+                    >
+                      {t('auth.privacyPolicy')}
+                    </Link>
+                  </Typography>
+                }
+              />
               {errors.acceptedTerms && <FormHelperText>{errors.acceptedTerms}</FormHelperText>}
             </FormControl>
 
@@ -375,7 +392,7 @@ const Register = () => {
             sx={{
               fontWeight: 700,
               mb: 1,
-              color: isDark ? 'primary.300' : 'primary.700'
+              color: isDark ? 'text.primary' : 'text.primary'
             }}
           >
             {t('auth.signInLink')}

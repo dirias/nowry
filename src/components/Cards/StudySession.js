@@ -348,7 +348,9 @@ export default function StudySession() {
 
         {/* TTS Controls Sidebar */}
         <Box sx={{ width: { xs: '100%', md: 350 } }}>
-          <TTSControls text={`${currentCard.title}. ${currentCard.content || ''}`} />
+          <TTSControls
+            text={isQuiz ? `${currentCard.title}. ${currentCard.options?.join(', ')}` : isFlipped ? currentCard.content : currentCard.title}
+          />
         </Box>
       </Stack>
     </Container>

@@ -22,7 +22,7 @@ import {
 import { BookOpen, RefreshCw, Layers, Plus } from 'lucide-react'
 import { decksService, cardsService } from '../../api/services'
 
-export default function GeneratedCards({ cards = [], onCancel, onGenerateAgain }) {
+export default function GeneratedCards({ cards = [], book, onCancel, onGenerateAgain }) {
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
   const [selectedCards, setSelectedCards] = useState([])
   const [loading, setLoading] = useState(false)
@@ -76,11 +76,11 @@ export default function GeneratedCards({ cards = [], onCancel, onGenerateAgain }
   const handleCreateDeck = async () => {
     if (!newDeckName.trim()) return
     try {
-      setLoading(true)
       const newDeck = await decksService.create({
         name: newDeckName,
         description: 'Created from generated cards',
-        deck_type: 'flashcard'
+        deck_type: 'flashcard',
+        image_url: book?.cover_image || null
       })
       setDecks([...decks, newDeck])
       setSelectedDeckId(newDeck._id) // Auto-select new deck

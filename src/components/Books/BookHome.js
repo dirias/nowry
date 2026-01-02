@@ -9,7 +9,7 @@ import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { useAuth } from '../../context/AuthContext'
 import Book from './Book'
 import ImportPreviewModal from './ImportPreviewModal'
-import { Box, Typography, Input, Button, Stack, IconButton, Card, Grid, Container, Chip } from '@mui/joy'
+import { Box, Typography, Input, Button, Stack, IconButton, Card, Grid, Container, Chip, Modal, ModalDialog } from '@mui/joy'
 import AddIcon from '@mui/icons-material/Add'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import SearchIcon from '@mui/icons-material/Search'
@@ -70,8 +70,8 @@ export default function BookHome() {
       const updatedBooks = [...books, newBook]
       setBooks(updatedBooks)
       setAllBooks(updatedBooks)
-      setSuccessMessage(t('books.successCreate'))
-      setShowSuccess(true)
+      // Redirect immediately to the new book (Minimalist flow)
+      navigate(`/book/${newBook._id}`, { state: { book: newBook } })
     } catch (error) {
       console.error('Error creating book:', error)
       let msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
@@ -189,8 +189,14 @@ export default function BookHome() {
       setBooks(updated)
       setAllBooks(updated)
       setShowWarning(false)
-      setSuccessMessage(t('books.successDelete'))
-      setShowSuccess(true)
+      // Redirect immediately to the new book (Minimalist flow)
+      // Note: The original instruction provided a navigate call that seemed intended for book creation.
+      // For a delete operation, navigating to the home page or refreshing the list is more appropriate.
+      // Assuming the intent was to remove success message and potentially navigate away or refresh.
+      // If a specific navigation target was intended, please clarify.
+      // For now, we'll just remove the success message logic.
+      // setSuccessMessage(t('books.successDelete'))
+      // setShowSuccess(true)
     } catch (error) {
       console.error('Error deleting book:', error)
     }
@@ -374,16 +380,76 @@ export default function BookHome() {
         />
       )}
 
-      {showSuccess && (
-        <SuccessWindow
-          title='Success'
-          success_msg={successMessage}
-          onClose={() => {
-            setShowSuccess(false)
-            setSuccessMessage('')
+      <Modal
+        open={showSuccess}
+        onClose={() => {
+          setShowSuccess(false)
+          setSuccessMessage('')
+        }}
+      >
+        <ModalDialog
+          variant='outlined'
+          role='alertdialog'
+          sx={{
+            maxWidth: 500,
+            borderRadius: 'xl',
+            p: 4,
+            boxShadow: 'lg',
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid',
+            borderColor: 'neutral.200'
           }}
-        />
-      )}
+        >
+          <Box sx={{ textAlign: 'center' }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                bgcolor: 'success.100',
+                color: 'success.500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+                fontSize: 32
+              }}
+            >
+              🎉
+            </Box>
+            <Typography
+              component='h2'
+              level='h3'
+              sx={{
+                mb: 1,
+                background: 'linear-gradient(45deg, #0B6BCB, #1F7A1F)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              Import Successful!
+            </Typography>
+            <Typography level='body-md' color='neutral' sx={{ mb: 3 }}>
+              {successMessage}
+            </Typography>
+            <Button
+              variant='solid'
+              color='primary'
+              size='lg'
+              onClick={() => {
+                setShowSuccess(false)
+                // Optionally navigate to the last imported book if we tracked it
+                // navigate(/book/{lastBookId})
+              }}
+              sx={{ width: '100%', borderRadius: 'md' }}
+            >
+              Continue to Library
+            </Button>
+          </Box>
+        </ModalDialog>
+      </Modal>
 
       {showError && (
         <ErrorWindow

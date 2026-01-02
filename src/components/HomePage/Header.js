@@ -20,9 +20,7 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
-import PersonIcon from '@mui/icons-material/Person'
-import SettingsIcon from '@mui/icons-material/Settings'
-import BugReportIcon from '@mui/icons-material/BugReport'
+import { AutoStoriesRounded, SchoolRounded, MenuBookRounded, BugReportRounded, LogoutRounded } from '@mui/icons-material'
 import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 import { useTranslation } from 'react-i18next'
@@ -59,6 +57,8 @@ const Header = () => {
   const { user, logout: contextLogout } = useAuth()
   const isLoggedIn = !!user
   const { t } = useTranslation()
+  const { mode } = useColorScheme()
+  const isDark = mode === 'dark'
 
   // Bug report state
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
@@ -112,7 +112,7 @@ const Header = () => {
         {/* Logo + Title */}
         <Box
           component={Link}
-          to={isLoggedIn ? '/' : '/'}
+          to='/'
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -125,9 +125,42 @@ const Header = () => {
           <Box component='img' src={Logo} alt='Nowry logo' sx={{ height: 40 }} />
         </Box>
 
-        {/* Navigation */}
-        <Stack direction='row' spacing={{ xs: 0.5, md: 1 }} alignItems='center'>
-          {!isLoggedIn ? (
+        {/* Spacer to push navigation to the right */}
+        <Box sx={{ flex: 1 }} />
+
+        {/* Navigation Links - Right aligned */}
+        <Stack direction='row' spacing={1} alignItems='center' sx={{ display: { xs: 'none', md: 'flex' } }}>
+          {user ? (
+            <>
+              {[
+                { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
+                { name: t('header.cards'), path: '/cards', icon: <SchoolRounded /> },
+                { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> }
+              ].map((item) => (
+                <Button
+                  key={item.name}
+                  component={Link}
+                  to={item.path}
+                  variant='plain'
+                  size='sm'
+                  startDecorator={item.icon}
+                  sx={{
+                    fontWeight: isActive(item.path) ? 600 : 500,
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    textDecoration: isActive(item.path) ? 'underline' : 'none',
+                    textUnderlineOffset: '4px',
+                    textDecorationThickness: '2px',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white'
+                    }
+                  }}
+                >
+                  {item.name}
+                </Button>
+              ))}
+            </>
+          ) : (
             <>
               <Button
                 variant='plain'
@@ -135,12 +168,18 @@ const Header = () => {
                 to='/about'
                 size='sm'
                 sx={{
-                  fontWeight: 500,
+                  fontWeight: isActive('/about') ? 600 : 500,
                   color: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
+                  textDecoration: isActive('/about') ? 'underline' : 'none',
+                  textUnderlineOffset: '4px',
+                  textDecorationThickness: '2px',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white'
+                  }
                 }}
               >
-                About
+                {t('header.about')}
               </Button>
               <Button
                 variant='plain'
@@ -148,174 +187,155 @@ const Header = () => {
                 to='/contact'
                 size='sm'
                 sx={{
-                  fontWeight: 500,
+                  fontWeight: isActive('/contact') ? 600 : 500,
                   color: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
+                  textDecoration: isActive('/contact') ? 'underline' : 'none',
+                  textUnderlineOffset: '4px',
+                  textDecorationThickness: '2px',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white'
+                  }
                 }}
               >
-                Contact
-              </Button>
-              <Button variant='solid' color='success' component={Link} to='/login' size='sm' sx={{ ml: 1 }}>
-                Sign In
+                {t('header.contact')}
               </Button>
             </>
-          ) : (
+          )}
+        </Stack>
+
+        {/* Right Section */}
+        <Stack direction='row' spacing={1.5} alignItems='center'>
+          {user ? (
             <>
-              <Button
-                variant='plain'
-                component={Link}
-                to='/study'
-                size='sm'
-                sx={{
-                  fontWeight: isActive('/study') ? 600 : 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  textDecoration: isActive('/study') ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {t('header.study')}
-              </Button>
-              <Button
-                variant='plain'
-                component={Link}
-                to='/cards'
-                size='sm'
-                sx={{
-                  fontWeight: isActive('/cards') ? 600 : 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  textDecoration: isActive('/cards') ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {t('header.cards')}
-              </Button>
-              <Button
-                variant='plain'
-                component={Link}
-                to='/books'
-                size='sm'
-                sx={{
-                  fontWeight: isActive('/books') ? 600 : 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  textDecoration: isActive('/books') ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {t('header.books')}
-              </Button>
-
-              <Box sx={{ width: 1, height: 24, bgcolor: 'divider', mx: 1 }} />
-
-              <ModeToggle />
-
-              {/* User Menu */}
               <Dropdown>
                 <MenuButton
-                  slots={{ root: IconButton }}
-                  slotProps={{
-                    root: {
-                      variant: 'plain',
-                      color: 'neutral',
-                      size: 'sm',
-                      sx: { borderRadius: '50%' }
-                    }
+                  variant='plain'
+                  size='sm'
+                  sx={{
+                    maxWidth: '32px',
+                    maxHeight: '32px',
+                    borderRadius: '9999999px',
+                    p: 0,
+                    minHeight: 'unset',
+                    border: '2px solid rgba(255,255,255,0.2)'
                   }}
                 >
                   <Avatar
-                    size='sm'
-                    variant='solid'
-                    color='primary'
+                    src={user.avatar}
                     sx={{
-                      fontWeight: 600,
-                      fontSize: '0.875rem'
+                      maxWidth: '32px',
+                      maxHeight: '32px'
                     }}
-                  >
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </Avatar>
+                  />
                 </MenuButton>
                 <Menu
                   placement='bottom-end'
                   size='sm'
                   sx={{
-                    zIndex: '9999', // Ensure it sits on top of everything
-                    minWidth: 200,
-                    boxShadow: 'lg', // Stronger shadow for depth
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    p: 1
+                    zIndex: '99999',
+                    p: 1,
+                    gap: 1,
+                    '--ListItem-radius': 'var(--joy-radius-sm)'
                   }}
                 >
-                  <Box sx={{ px: 1, py: 0.5, mb: 1 }}>
-                    <Typography level='title-sm' fontWeight={700}>
-                      {user?.username}
-                    </Typography>
-                    <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
-                      Manage account
-                    </Typography>
-                  </Box>
-                  <MenuItem onClick={() => navigate('/profile')} sx={{ borderRadius: 'sm' }}>
-                    <PersonIcon fontSize='small' sx={{ mr: 1 }} />
+                  <MenuItem>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar src={user.avatar} sx={{ mr: 2 }} />
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography level='title-sm'>{user.name}</Typography>
+                        <Typography level='body-xs' noWrap>
+                          {user.email}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </MenuItem>
+                  <ListDivider />
+                  <MenuItem component={Link} to='/profile'>
                     {t('common.profile')}
                   </MenuItem>
-                  <MenuItem onClick={() => navigate('/settings')} sx={{ borderRadius: 'sm' }}>
-                    <SettingsIcon fontSize='small' sx={{ mr: 1 }} />
-                    {t('header.settings')}
+                  <MenuItem component={Link} to='/settings'>
+                    {t('common.settings')}
                   </MenuItem>
-
-                  {/* Dev-only Bug Dashboard */}
-                  {(user?.role === 'dev' || user?.role === 'beta') && (
-                    <MenuItem onClick={() => navigate('/bugs/dashboard')} sx={{ borderRadius: 'sm' }}>
-                      <BugReportIcon fontSize='small' sx={{ mr: 1 }} />
-                      Bug Dashboard
-                    </MenuItem>
-                  )}
-
                   <ListDivider />
-                  <MenuItem onClick={logout} color='danger' variant='soft' sx={{ borderRadius: 'sm', mt: 0.5 }}>
-                    <LogoutIcon fontSize='small' sx={{ mr: 1 }} />
+                  <MenuItem onClick={logout} color='danger'>
+                    <LogoutRounded />
                     {t('common.logout')}
                   </MenuItem>
                 </Menu>
               </Dropdown>
+              <ModeToggle />
+            </>
+          ) : (
+            <>
+              {/* Login/Register Buttons */}
+              <Button
+                component={Link}
+                to='/login'
+                variant='plain'
+                size='sm'
+                sx={{
+                  fontWeight: isActive('/login') ? 600 : 500,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  textDecoration: isActive('/login') ? 'underline' : 'none',
+                  textUnderlineOffset: '4px',
+                  textDecorationThickness: '2px',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white'
+                  }
+                }}
+              >
+                {t('auth.signIn')}
+              </Button>
+              <Button
+                component={Link}
+                to='/register'
+                variant='plain'
+                size='sm'
+                sx={{
+                  fontWeight: isActive('/register') ? 600 : 500,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  textDecoration: isActive('/register') ? 'underline' : 'none',
+                  textUnderlineOffset: '4px',
+                  textDecorationThickness: '2px',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white'
+                  }
+                }}
+              >
+                {t('auth.signUp')}
+              </Button>
+              <ModeToggle />
+            </>
+          )}
 
+          {/* Bug Report Button - Only for logged dev users */}
+          {user && user.role === 'dev' && (
+            <>
               {/* Separator */}
-              <Box sx={{ width: 1, height: 24, bgcolor: 'divider', mx: 1 }} />
+              <Box sx={{ width: 1, height: 24, bgcolor: 'rgba(255,255,255,0.2)', mx: 1 }} />
 
-              {/* Bug Report Button */}
               <Tooltip title='Report a Bug'>
                 <IconButton
-                  variant='soft'
-                  color='warning'
+                  variant='plain'
                   size='sm'
                   onClick={() => setBugReportOpen(true)}
                   sx={{
                     borderRadius: 'sm',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     '&:hover': {
-                      bgcolor: 'rgba(255, 200, 100, 0.2)'
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white'
                     }
                   }}
                 >
-                  <BugReportIcon fontSize='small' />
+                  <BugReportRounded fontSize='small' />
                 </IconButton>
               </Tooltip>
             </>
           )}
-          {!isLoggedIn && <ModeToggle />}
         </Stack>
       </Sheet>
 

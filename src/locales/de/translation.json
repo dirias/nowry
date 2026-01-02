@@ -31,6 +31,8 @@
     "study": "Lernen",
     "cards": "Karten",
     "books": "Bücher",
+    "about": "Über uns",
+    "contact": "Kontakt",
     "settings": "Einstellungen"
   },
   "footer": {
@@ -344,6 +346,85 @@
       "visual": "Visuell",
       "book": "Buch",
       "flashcard": "Karteikarte"
+    }
+  },
+  "about": {
+    "title": "Über Nowry",
+    "subtitle": "Wir haben uns zum Ziel gesetzt, das Lernen für alle durch innovative Technologie und evidenzbasierte Methoden zugänglich, effektiv und angenehm zu machen.",
+    "mission": {
+      "title": "Unsere Mission",
+      "desc": "Lernende weltweit mit intelligenten Tools zu stärken, die sich an ihren einzigartigen Lernstil anpassen und den Wissenserwerb schneller, effizienter und angenehmer als je zuvor machen."
+    },
+    "vision": {
+      "title": "Unsere Vision",
+      "desc": "Eine Welt, in der jeder Zugang zu personalisierten, KI-gesteuerten Lernerfahrungen hat, die sein volles Potenzial freisetzen. Wir stellen uns Bildung vor, die sich an Sie anpasst, nicht umgekehrt."
+    },
+    "values": {
+      "title": "Unsere Grundwerte",
+      "subtitle": "Die Prinzipien, die alles leiten, was wir tun",
+      "innovation": {
+        "title": "Innovation",
+        "desc": "Wir entwickeln unsere Plattform ständig mit modernsten Lerntechniken und KI weiter"
+      },
+      "community": {
+        "title": "Gemeinschaft",
+        "desc": "Aufbau einer unterstützenden Umgebung, in der sich Lernende gegenseitig zum Erfolg verhelfen"
+      },
+      "trust": {
+        "title": "Vertrauen",
+        "desc": "Ihre Daten und Privatsphäre sind unsere obersten Prioritäten, immer sicher und geschützt"
+      },
+      "support": {
+        "title": "Unterstützung",
+        "desc": "Engagiert, Ihnen zu helfen, Ihre Lernziele mit reaktionsschneller Unterstützung zu erreichen"
+      }
+    },
+    "cta": {
+      "title": "Bereit Anzufangen?",
+      "subtitle": "Beginnen Sie heute Ihre Lernreise mit Nowry. Erstellen Sie jetzt Ihr kostenloses Konto!",
+      "primary": "Kostenlos Starten",
+      "secondary": "Kontaktieren Sie Uns"
+    }
+  },
+  "contact": {
+    "title": "Kontaktieren Sie Uns",
+    "subtitle": "Haben Sie Fragen? Wir würden gerne von Ihnen hören. Senden Sie uns eine Nachricht und wir werden so schnell wie möglich antworten.",
+    "info": {
+      "email": {
+        "title": "Senden Sie uns eine E-Mail",
+        "desc": "Wir antworten normalerweise innerhalb von 24 Stunden"
+      },
+      "phone": {
+        "title": "Rufen Sie uns an",
+        "desc": "Mo-Fr, 9-18 Uhr EST"
+      },
+      "visit": {
+        "title": "Besuchen Sie uns",
+        "desc": "San Francisco, CA 94102"
+      }
+    },
+    "form": {
+      "title": "Senden Sie uns eine Nachricht",
+      "success": "Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet. Wir werden uns bald bei Ihnen melden.",
+      "name": "Ihr Name",
+      "namePlaceholder": "Max Mustermann",
+      "email": "E-Mail-Adresse",
+      "subject": "Betreff",
+      "subjectPlaceholder": "Wie können wir helfen?",
+      "message": "Nachricht",
+      "messagePlaceholder": "Erzählen Sie uns mehr über Ihre Frage oder Ihr Feedback...",
+      "send": "Nachricht Senden"
+    },
+    "faq": {
+      "title": "Häufig Gestellte Fragen",
+      "q1": "Wie fange ich an?",
+      "a1": "Erstellen Sie einfach ein kostenloses Konto und beginnen Sie, unsere Funktionen zu erkunden. Keine Kreditkarte erforderlich!",
+      "q2": "Ist Nowry wirklich kostenlos?",
+      "a2": "Ja! Unsere Kernfunktionen sind völlig kostenlos. Wir bieten auch Premium-Pläne mit erweiterten Funktionen an.",
+      "q3": "Kann ich meine vorhandenen Karteikarten importieren?",
+      "a3": "Absolut! Wir unterstützen den Import aus verschiedenen Formaten, einschließlich CSV, Anki und Quizlet.",
+      "q4": "Bieten Sie Studentenrabatte an?",
+      "a4": "Ja, wir bieten Sonderpreise für verifizierte Studenten an. Kontaktieren Sie uns für weitere Details."
     }
   }
 }

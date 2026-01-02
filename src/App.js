@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom'
 import { DynamicThemeProvider } from './theme/DynamicThemeProvider'
 
 import './styles/App.css'
@@ -36,6 +36,8 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 
 const AppContent = () => {
   const { isAuthenticated, user, loading } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -46,6 +48,13 @@ const AppContent = () => {
       document.head.removeChild(link)
     }
   }, [])
+
+  useEffect(() => {
+    // Redirect to onboarding if user is authenticated but wizard is not completed
+    if (!loading && isAuthenticated && user && user.wizard_completed === false && location.pathname !== '/onboarding') {
+      navigate('/onboarding')
+    }
+  }, [loading, isAuthenticated, user, location.pathname, navigate])
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>

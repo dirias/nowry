@@ -172,6 +172,10 @@ const OnboardingWizard = () => {
 
       console.log('[Onboarding] Preferences saved successfully.')
 
+      // Mark wizard as complete
+      await userService.completeWizard()
+      console.log('[Onboarding] Wizard marked as complete.')
+
       // Navigate to home after a brief delay
       setTimeout(() => {
         navigate('/')

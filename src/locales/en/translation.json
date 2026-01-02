@@ -31,6 +31,8 @@
     "study": "Study",
     "cards": "Cards",
     "books": "Books",
+    "about": "About",
+    "contact": "Contact",
     "settings": "Settings"
   },
   "footer": {
@@ -93,6 +95,7 @@
       "loginFailed": "Login failed. Please check your credentials.",
       "usernameRequired": "Username is required",
       "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
       "passwordRequired": "Password is required",
       "passwordLength": "Password must be at least 8 characters",
       "passwordMismatch": "Passwords do not match",
@@ -128,6 +131,134 @@
         "codeRequired": "Verification code is required",
         "codeLength": "Code must be 6 digits"
       }
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Learn Smarter,\nNot Harder",
+      "subtitle": "Transform your study habits with AI-powered flashcards, smart books, and spaced repetition. Start learning more effectively today.",
+      "ctaPrimary": "Start Learning Free",
+      "ctaSecondary": "Learn More"
+    },
+    "features": {
+      "title": "Everything You Need to Excel",
+      "subtitle": "Powerful features designed to make learning enjoyable and effective",
+      "smartBooks": {
+        "title": "Smart Books",
+        "desc": "Create, import, and organize your learning materials in one beautiful space"
+      },
+      "aiPowered": {
+        "title": "AI-Powered",
+        "desc": "Intelligent flashcards and study recommendations tailored to your learning style"
+      },
+      "spacedRepetition": {
+        "title": "Spaced Repetition",
+        "desc": "Proven learning techniques that optimize retention and save you time"
+      },
+      "trackProgress": {
+        "title": "Track Progress",
+        "desc": "Visual analytics to monitor your growth and celebrate achievements"
+      }
+    },
+    "social": {
+      "title": "Start Learning Today",
+      "subtitle": "Join Nowry and discover a better way to learn with modern tools designed for your success",
+      "benefits": {
+        "1": "Create unlimited books and flashcards",
+        "2": "Access from any device, anywhere",
+        "3": "Track your progress with analytics",
+        "4": "Join study groups and collaborate"
+      },
+      "cta": "Get Started Now"
+    }
+  },
+  "about": {
+    "title": "About Nowry",
+    "subtitle": "We're on a mission to make learning accessible, effective, and enjoyable for everyone through innovative technology and evidence-based methods.",
+    "mission": {
+      "title": "Our Mission",
+      "desc": "To empower learners worldwide with intelligent tools that adapt to their unique learning style, making knowledge acquisition faster, more efficient, and more enjoyable than ever before."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "desc": "A world where every person has access to personalized, AI-powered learning experiences that unlock their full potential. We envision education that adapts to you, not the other way around."
+    },
+    "values": {
+      "title": "Our Core Values",
+      "subtitle": "The principles that guide everything we do",
+      "innovation": {
+        "title": "Innovation",
+        "desc": "We constantly evolve our platform with cutting-edge learning techniques and AI"
+      },
+      "community": {
+        "title": "Community",
+        "desc": "Building a supportive environment where learners help each other succeed"
+      },
+      "trust": {
+        "title": "Trust",
+        "desc": "Your data and privacy are our top priorities, always secure and protected"
+      },
+      "support": {
+        "title": "Support",
+        "desc": "Dedicated to helping you achieve your learning goals with responsive assistance"
+      }
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Start your learning journey with Nowry today. Create your free account now!",
+      "primary": "Get Started Free",
+      "secondary": "Contact Us"
+    }
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "subtitle": "Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+    "info": {
+      "email": {
+        "title": "Email Us",
+        "desc": "We typically respond within 24 hours"
+      },
+      "phone": {
+        "title": "Call Us",
+        "desc": "Mon-Fri, 9AM-6PM EST"
+      },
+      "visit": {
+        "title": "Visit Us",
+        "desc": "San Francisco, CA 94102"
+      }
+    },
+    "form": {
+      "title": "Send us a Message",
+      "success": "Thank you! Your message has been sent successfully. We'll get back to you soon.",
+      "name": "Your Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email Address",
+      "subject": "Subject",
+      "subjectPlaceholder": "How can we help?",
+      "message": "Message",
+      "messagePlaceholder": "Tell us more about your question or feedback...",
+      "send": "Send Message"
+    },
+    "faq": {
+      "title": "Frequently Asked",
+      "q1": "How do I get started?",
+      "a1": "Simply create a free account and start exploring our features. No credit card required!",
+      "q2": "Is Nowry really free?",
+      "a2": "Yes! Our core features are completely free. We also offer premium plans with advanced features.",
+      "q3": "Can I import my existing flashcards?",
+      "a3": "Absolutely! We support importing from various formats including CSV, Anki, and Quizlet.",
+      "q4": "Do you offer student discounts?",
+      "a4": "Yes! Students with a valid .edu email get 50% off all premium plans."
+    },
+    "followUs": "Follow Us",
+    "location": {
+      "title": "Our Location",
+      "subtitle": "Interactive map coming soon"
+    },
+    "hours": {
+      "title": "Business Hours",
+      "weekdays": "Monday - Friday",
+      "weekends": "Saturday - Sunday"
     }
   },
   "onboarding": {

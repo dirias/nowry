@@ -39,11 +39,7 @@ const Login = () => {
     setLoading(true)
 
     try {
-      // Use login from AuthContext (which handles cookie)
       await login({ email, password })
-
-      // Navigate to home
-      // Context will update 'user' state via checkUser()
       navigate('/')
     } catch (error) {
       console.error('Login error:', error.response?.data)
@@ -71,26 +67,24 @@ const Login = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isDark ? 'neutral.900' : 'neutral.50',
-        px: 2,
-        transition: 'background 0.3s ease'
+        backgroundColor: 'background.body',
+        px: 2
       }}
     >
       <Sheet
         variant='outlined'
         sx={{
-          p: 5,
+          p: { xs: 3, sm: 5 },
           borderRadius: 'xl',
           width: '100%',
           maxWidth: 440,
-          boxShadow: 'xl',
-          backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          border: 'none',
-          transform: 'translateY(0)',
+          boxShadow: 'md',
+          backgroundColor: 'background.surface',
+          border: '1px solid',
+          borderColor: 'divider',
           transition: 'all 0.3s ease',
           '&:hover': {
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+            boxShadow: 'lg'
           }
         }}
       >
@@ -101,19 +95,19 @@ const Login = () => {
             sx={{
               fontWeight: 700,
               mb: 1,
-              color: isDark ? 'primary.300' : 'primary.700'
+              color: 'text.primary'
             }}
           >
             {t('auth.welcomeBack')}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
             {t('auth.signInSubtitle')}
           </Typography>
         </Box>
 
         {/* Error Alert */}
         {error && (
-          <Alert color='danger' variant='soft' sx={{ mb: 3, animation: 'fadeIn 0.3s ease' }} onClose={() => setError('')}>
+          <Alert color='danger' variant='soft' sx={{ mb: 3 }} onClose={() => setError('')}>
             {error}
           </Alert>
         )}
@@ -132,10 +126,6 @@ const Login = () => {
                 startDecorator={<EmailRounded />}
                 size='lg'
                 required
-                sx={{
-                  '--Input-focusedThickness': '0.25rem',
-                  transition: 'all 0.2s ease'
-                }}
               />
             </FormControl>
 
@@ -155,16 +145,22 @@ const Login = () => {
                 }
                 size='lg'
                 required
-                sx={{
-                  '--Input-focusedThickness': '0.25rem',
-                  transition: 'all 0.2s ease'
-                }}
               />
             </FormControl>
 
             {/* Forgot Password Link */}
             <Box sx={{ textAlign: 'right' }}>
-              <Link component={RouterLink} to='/resetPassword' level='body-sm' sx={{ transition: 'color 0.2s ease' }}>
+              <Link
+                component={RouterLink}
+                to='/resetPassword'
+                level='body-sm'
+                sx={{
+                  color: 'text.secondary',
+                  '&:hover': {
+                    color: 'text.primary'
+                  }
+                }}
+              >
                 {t('auth.forgotPassword')}
               </Link>
             </Box>
@@ -177,11 +173,11 @@ const Login = () => {
               loading={loading}
               startDecorator={!loading && <LoginRounded />}
               sx={{
-                mt: 3,
-                transition: 'all 0.3s ease',
+                mt: 2,
+                transition: 'all 0.2s ease',
                 '&:hover': {
                   transform: 'translateY(-2px)',
-                  boxShadow: 'lg'
+                  boxShadow: 'md'
                 },
                 '&:active': {
                   transform: 'translateY(0)'
@@ -195,7 +191,7 @@ const Login = () => {
 
         {/* Divider */}
         <Divider sx={{ my: 3 }}>
-          <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
             {t('auth.orContinueWith')}
           </Typography>
         </Divider>
@@ -209,10 +205,9 @@ const Login = () => {
             fullWidth
             startDecorator={<Google />}
             sx={{
-              transition: 'all 0.2s ease',
               '&:hover': {
-                borderColor: '#EA4335',
-                backgroundColor: 'rgba(234, 67, 53, 0.08)'
+                borderColor: 'neutral.outlinedHoverBorder',
+                backgroundColor: 'neutral.outlinedHoverBg'
               }
             }}
           >
@@ -226,10 +221,9 @@ const Login = () => {
             fullWidth
             startDecorator={<Facebook />}
             sx={{
-              transition: 'all 0.2s ease',
               '&:hover': {
-                borderColor: '#1877F2',
-                backgroundColor: 'rgba(24, 119, 242, 0.08)'
+                borderColor: 'neutral.outlinedHoverBorder',
+                backgroundColor: 'neutral.outlinedHoverBg'
               }
             }}
           >
@@ -238,9 +232,17 @@ const Login = () => {
         </Stack>
 
         {/* Register Link */}
-        <Typography level='body-sm' textAlign='center' sx={{ mt: 3 }}>
+        <Typography level='body-sm' textAlign='center' sx={{ mt: 3, color: 'text.secondary' }}>
           {t('auth.noAccount')}{' '}
-          <Link component={RouterLink} to='/register' fontWeight={600} color='primary'>
+          <Link
+            component={RouterLink}
+            to='/register'
+            fontWeight={600}
+            sx={{
+              textDecoration: 'underline',
+              textUnderlineOffset: '2px'
+            }}
+          >
             {t('auth.createOne')}
           </Link>
         </Typography>

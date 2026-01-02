@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, Typography, Button, Sheet, Stack, Card, CardContent, Container, Grid } from '@mui/joy'
 import { useColorScheme } from '@mui/joy/styles'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import HomePhrase from '../../images/Phrase1.jpeg'
 import {
   AutoStoriesRounded,
@@ -15,30 +16,31 @@ import {
 const Landing = () => {
   const { mode } = useColorScheme()
   const isDark = mode === 'dark'
+  const { t } = useTranslation()
 
   const features = [
     {
       icon: <AutoStoriesRounded />,
-      title: 'Smart Books',
-      description: 'Create, import, and organize your learning materials in one beautiful space',
+      title: t('landing.features.smartBooks.title'),
+      description: t('landing.features.smartBooks.desc'),
       color: 'primary'
     },
     {
       icon: <PsychologyRounded />,
-      title: 'AI-Powered',
-      description: 'Intelligent flashcards and study recommendations tailored to your learning style',
+      title: t('landing.features.aiPowered.title'),
+      description: t('landing.features.aiPowered.desc'),
       color: 'success'
     },
     {
       icon: <SpeedRounded />,
-      title: 'Spaced Repetition',
-      description: 'Proven learning techniques that optimize retention and save you time',
+      title: t('landing.features.spacedRepetition.title'),
+      description: t('landing.features.spacedRepetition.desc'),
       color: 'warning'
     },
     {
       icon: <TrendingUpRounded />,
-      title: 'Track Progress',
-      description: 'Visual analytics to monitor your growth and celebrate achievements',
+      title: t('landing.features.trackProgress.title'),
+      description: t('landing.features.trackProgress.desc'),
       color: 'danger'
     }
   ]
@@ -83,9 +85,7 @@ const Landing = () => {
                 color: isDark ? 'primary.300' : 'primary.700'
               }}
             >
-              Learn Smarter,
-              <br />
-              Not Harder
+              <span style={{ whiteSpace: 'pre-line' }}>{t('landing.hero.title')}</span>
             </Typography>
 
             {/* Subheadline */}
@@ -96,8 +96,7 @@ const Landing = () => {
                 fontSize: { xs: '1rem', md: '1.25rem' }
               }}
             >
-              Transform your study habits with AI-powered flashcards, smart books, and spaced repetition. Start learning more effectively
-              today.
+              {t('landing.hero.subtitle')}
             </Typography>
 
             {/* CTA Buttons */}
@@ -119,7 +118,7 @@ const Landing = () => {
                   }
                 }}
               >
-                Start Learning Free
+                {t('landing.hero.ctaPrimary')}
               </Button>
               <Button
                 component={Link}
@@ -139,7 +138,7 @@ const Landing = () => {
                   }
                 }}
               >
-                Learn More
+                {t('landing.hero.ctaSecondary')}
               </Button>
             </Stack>
           </Stack>
@@ -169,14 +168,14 @@ const Landing = () => {
         <Box sx={{ py: 8 }}>
           <Typography
             level='h2'
-            textAlign='center'
+            textAlign='left'
             fontWeight={700}
             sx={{ mb: 2, fontSize: { xs: '2rem', md: '2.5rem' }, color: isDark ? 'primary.300' : 'primary.700' }}
           >
-            Everything You Need to Excel
+            {t('landing.features.title')}
           </Typography>
-          <Typography level='body-lg' textAlign='center' sx={{ color: 'text.secondary', mb: 6, maxWidth: 600, mx: 'auto' }}>
-            Powerful features designed to make learning enjoyable and effective
+          <Typography level='body-lg' textAlign='left' sx={{ color: 'text.secondary', mb: 6, maxWidth: 600 }}>
+            {t('landing.features.subtitle')}
           </Typography>
 
           <Grid container spacing={3}>
@@ -225,7 +224,7 @@ const Landing = () => {
         </Box>
 
         {/* Social Proof */}
-        <Box sx={{ py: 8, textAlign: 'center' }}>
+        <Box sx={{ py: 8, textAlign: 'left' }}>
           <Card
             variant='soft'
             color='primary'
@@ -235,18 +234,18 @@ const Landing = () => {
           >
             <GroupsRounded sx={{ fontSize: 60, color: 'primary.500', mb: 2 }} />
             <Typography level='h3' fontWeight={700} mb={2}>
-              Start Learning Today
+              {t('landing.social.title')}
             </Typography>
-            <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 600, mx: 'auto', mb: 4 }}>
-              Join Nowry and discover a better way to learn with modern tools designed for your success
+            <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 600, mb: 4 }}>
+              {t('landing.social.subtitle')}
             </Typography>
 
-            <Stack spacing={2} sx={{ maxWidth: 500, mx: 'auto', textAlign: 'left' }}>
+            <Stack spacing={2} sx={{ maxWidth: 500, textAlign: 'left' }}>
               {[
-                'Create unlimited books and flashcards',
-                'Access from any device, anywhere',
-                'Track your progress with analytics',
-                'Join study groups and collaborate'
+                t('landing.social.benefits.1'),
+                t('landing.social.benefits.2'),
+                t('landing.social.benefits.3'),
+                t('landing.social.benefits.4')
               ].map((benefit, index) => (
                 <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <CheckCircleRounded sx={{ color: 'success.500', fontSize: 24 }} />
@@ -270,7 +269,7 @@ const Landing = () => {
                 }
               }}
             >
-              Get Started Now
+              {t('landing.social.cta')}
             </Button>
           </Card>
         </Box>

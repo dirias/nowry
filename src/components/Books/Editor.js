@@ -138,7 +138,17 @@ function EditorContent({ setContent }) {
   )
 }
 
-export default function Editor({ activePage, content, setContent, onSave, pageSize = 'a4', setPageSize, onPageOverflow, onMergeBack }) {
+export default function Editor({
+  activePage,
+  book,
+  content,
+  setContent,
+  onSave,
+  pageSize = 'a4',
+  setPageSize,
+  onPageOverflow,
+  onMergeBack
+}) {
   const theme = useTheme()
   const menuRef = useRef()
   const containerRef = useRef()
@@ -394,7 +404,7 @@ export default function Editor({ activePage, content, setContent, onSave, pageSi
         />
       )}
 
-      {showStudyCard && <StudyCard cards={cards} onCancel={() => setShowStudyCard(false)} />}
+      {showStudyCard && <StudyCard cards={cards} book={book} onCancel={() => setShowStudyCard(false)} />}
       {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
       {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}
     </Box>

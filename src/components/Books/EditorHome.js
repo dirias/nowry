@@ -75,6 +75,17 @@ export default function EditorHome() {
 
   const handleSavePage = async (page, contentOverride = null) => {
     try {
+      // 1. Save Book Title if changed
+      if (bookName && bookName !== book.title) {
+        try {
+          await booksService.update(id, { title: bookName })
+          // We don't update local 'book' state here because it comes from location.state
+          // but the next time we load this book, it will have the new title.
+        } catch (e) {
+          console.error('Error updating book title:', e)
+        }
+      }
+
       if (!page) {
         // Create a new "empty" page
         const draft = {
@@ -265,6 +276,7 @@ export default function EditorHome() {
         <Editor
           key={pageKey(activePage) || 'editor'}
           activePage={activePage}
+          book={book}
           content={content}
           setContent={setContent}
           onSave={() => handleSavePage(activePage)}

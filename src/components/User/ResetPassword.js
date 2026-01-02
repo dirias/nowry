@@ -87,7 +87,7 @@ const ResetPassword = () => {
     setTimeout(() => {
       setLoading(false)
       setStep(2)
-      setSuccessMessage(t('resetPassword.codeSent'))
+      setSuccessMessage(t('auth.resetPassword.codeSent'))
       setTimeout(() => setSuccessMessage(''), 3000)
     }, 1000)
   }
@@ -96,8 +96,8 @@ const ResetPassword = () => {
     e.preventDefault()
     const newErrors = {}
 
-    if (!verificationCode) newErrors.verificationCode = t('resetPassword.errors.codeRequired')
-    if (verificationCode.length !== 6) newErrors.verificationCode = t('resetPassword.errors.codeLength')
+    if (!verificationCode) newErrors.verificationCode = t('auth.resetPassword.errors.codeRequired')
+    if (verificationCode.length !== 6) newErrors.verificationCode = t('auth.resetPassword.errors.codeLength')
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -144,7 +144,6 @@ const ResetPassword = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          background: isDark ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           px: 2
         }}
       >
@@ -156,7 +155,7 @@ const ResetPassword = () => {
             width: '100%',
             maxWidth: 440,
             boxShadow: 'xl',
-            backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: 'background.surface',
             backdropFilter: 'blur(10px)',
             border: 'none',
             textAlign: 'center'
@@ -164,25 +163,24 @@ const ResetPassword = () => {
         >
           <CheckCircleRounded sx={{ fontSize: 80, color: 'success.500', mb: 2 }} />
           <Typography level='h3' fontWeight={700} mb={1}>
-            {t('resetPassword.successTitle')}
+            {t('auth.resetPassword.successTitle')}
           </Typography>
-          <Typography level='body-md' sx={{ color: 'neutral.600', mb: 4 }}>
-            {t('resetPassword.successMsg')}
+          <Typography level='body-md' sx={{ color: 'text.secondary', mb: 4 }}>
+            {t('auth.resetPassword.successMsg')}
           </Typography>
           <Button
             size='lg'
             fullWidth
             onClick={() => navigate('/login')}
             sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              transition: 'all 0.3s ease',
+              transition: 'all 0.2s ease',
               '&:hover': {
                 transform: 'translateY(-2px)',
-                boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)'
+                boxShadow: 'md'
               }
             }}
           >
-            {t('resetPassword.goToLogin')}
+            {t('auth.resetPassword.goToLogin')}
           </Button>
         </Sheet>
       </Box>
@@ -196,7 +194,7 @@ const ResetPassword = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isDark ? 'neutral.900' : 'neutral.50',
+        backgroundColor: 'background.body',
         px: 2,
         transition: 'background 0.3s ease'
       }}
@@ -209,7 +207,7 @@ const ResetPassword = () => {
           width: '100%',
           maxWidth: 440,
           boxShadow: 'xl',
-          backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: 'background.surface',
           backdropFilter: 'blur(10px)',
           border: 'none',
           transform: 'translateY(0)',
@@ -229,7 +227,7 @@ const ResetPassword = () => {
           to='/login'
           sx={{ mb: 2, alignSelf: 'flex-start' }}
         >
-          {t('resetPassword.backToLogin')}
+          {t('auth.resetPassword.backToLogin')}
         </Button>
 
         {/* Header */}
@@ -239,15 +237,15 @@ const ResetPassword = () => {
             fontWeight={700}
             sx={{
               mb: 0.5,
-              color: isDark ? 'primary.300' : 'primary.700'
+              color: isDark ? 'text.primary' : 'text.primary'
             }}
           >
-            {t('resetPassword.title')}
+            {t('auth.resetPassword.title')}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-            {step === 1 && t('resetPassword.subtitle.step1')}
-            {step === 2 && t('resetPassword.subtitle.step2')}
-            {step === 3 && t('resetPassword.subtitle.step3')}
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            {step === 1 && t('auth.resetPassword.subtitle.step1')}
+            {step === 2 && t('auth.resetPassword.subtitle.step2')}
+            {step === 3 && t('auth.resetPassword.subtitle.step3')}
           </Typography>
         </Box>
 
@@ -281,7 +279,7 @@ const ResetPassword = () => {
           <form onSubmit={handleSendCode}>
             <Stack spacing={2.5}>
               <FormControl error={!!errors.email}>
-                <FormLabel>{t('resetPassword.emailLabel')}</FormLabel>
+                <FormLabel>{t('auth.resetPassword.emailLabel')}</FormLabel>
                 <Input
                   type='email'
                   placeholder='you@example.com'
@@ -304,15 +302,14 @@ const ResetPassword = () => {
                 loading={loading}
                 sx={{
                   mt: 2,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)'
+                    boxShadow: 'md'
                   }
                 }}
               >
-                {t('resetPassword.sendCode')}
+                {t('auth.resetPassword.sendCode')}
               </Button>
             </Stack>
           </form>
@@ -323,7 +320,7 @@ const ResetPassword = () => {
           <form onSubmit={handleVerifyCode}>
             <Stack spacing={2.5}>
               <FormControl error={!!errors.verificationCode}>
-                <FormLabel>{t('resetPassword.codeLabel')}</FormLabel>
+                <FormLabel>{t('auth.resetPassword.codeLabel')}</FormLabel>
                 <Input
                   type='text'
                   placeholder='000000'
@@ -348,10 +345,10 @@ const ResetPassword = () => {
                 {errors.verificationCode && <FormHelperText>{errors.verificationCode}</FormHelperText>}
               </FormControl>
 
-              <Typography level='body-xs' textAlign='center' sx={{ color: 'neutral.600' }}>
-                {t('resetPassword.resendPrompt')}{' '}
+              <Typography level='body-xs' textAlign='center' sx={{ color: 'text.secondary' }}>
+                {t('auth.resetPassword.resendPrompt')}{' '}
                 <Link onClick={() => setStep(1)} sx={{ cursor: 'pointer' }}>
-                  {t('resetPassword.resend')}
+                  {t('auth.resetPassword.resend')}
                 </Link>
               </Typography>
 
@@ -362,15 +359,14 @@ const ResetPassword = () => {
                 loading={loading}
                 sx={{
                   mt: 2,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)'
+                    boxShadow: 'md'
                   }
                 }}
               >
-                {t('resetPassword.verifyCode')}
+                {t('auth.resetPassword.verifyCode')}
               </Button>
             </Stack>
           </form>
@@ -381,7 +377,7 @@ const ResetPassword = () => {
           <form onSubmit={handleResetPassword}>
             <Stack spacing={2.5}>
               <FormControl error={!!errors.newPassword}>
-                <FormLabel>{t('resetPassword.newPasswordLabel')}</FormLabel>
+                <FormLabel>{t('auth.resetPassword.newPasswordLabel')}</FormLabel>
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   placeholder='••••••••'
@@ -405,7 +401,7 @@ const ResetPassword = () => {
                       <Typography level='body-xs' sx={{ color: `${passwordStrength.color}.600` }}>
                         {passwordStrength.label}
                       </Typography>
-                      <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
+                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                         {passwordStrength.strength}%
                       </Typography>
                     </Stack>
@@ -416,7 +412,7 @@ const ResetPassword = () => {
               </FormControl>
 
               <FormControl error={!!errors.confirmNewPassword}>
-                <FormLabel>{t('resetPassword.confirmNewPasswordLabel')}</FormLabel>
+                <FormLabel>{t('auth.resetPassword.confirmNewPasswordLabel')}</FormLabel>
                 <Input
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder='••••••••'
@@ -449,15 +445,14 @@ const ResetPassword = () => {
                 loading={loading}
                 sx={{
                   mt: 2,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)'
+                    boxShadow: 'md'
                   }
                 }}
               >
-                {t('resetPassword.title')}
+                {t('auth.resetPassword.title')}
               </Button>
             </Stack>
           </form>

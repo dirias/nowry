@@ -31,6 +31,8 @@
     "study": "Estudio",
     "cards": "Tarjetas",
     "books": "Libros",
+    "about": "Acerca de",
+    "contact": "Contacto",
     "settings": "Ajustes"
   },
   "footer": {
@@ -404,6 +406,85 @@
       "upgradeToUse": "Mejora tu plan para usar funciones de IA.",
       "genericCreate": "Error al crear el elemento. Inténtalo de nuevo.",
       "upgradeAdvice": "Por favor mejora tu plan en Configuración."
+    }
+  },
+  "about": {
+    "title": "Acerca de Nowry",
+    "subtitle": "Estamos en una misión para hacer el aprendizaje accesible, efectivo y agradable para todos a través de tecnología innovadora y métodos basados en evidencia.",
+    "mission": {
+      "title": "Nuestra Misión",
+      "desc": "Empoderar a estudiantes de todo el mundo con herramientas inteligentes que se adaptan a su estilo de aprendizaje único, haciendo que la adquisición de conocimiento sea más rápida, más eficiente y más agradable que nunca."
+    },
+    "vision": {
+      "title": "Nuestra Visión",
+      "desc": "Un mundo donde cada persona tenga acceso a experiencias de aprendizaje personalizadas e impulsadas por IA que desbloqueen todo su potencial. Imaginamos una educación que se adapte a ti, no al revés."
+    },
+    "values": {
+      "title": "Nuestros Valores Fundamentales",
+      "subtitle": "Los principios que guían todo lo que hacemos",
+      "innovation": {
+        "title": "Innovación",
+        "desc": "Evolucionamos constantemente nuestra plataforma con técnicas de aprendizaje de vanguardia e IA"
+      },
+      "community": {
+        "title": "Comunidad",
+        "desc": "Construyendo un entorno de apoyo donde los estudiantes se ayudan mutuamente a tener éxito"
+      },
+      "trust": {
+        "title": "Confianza",
+        "desc": "Tus datos y privacidad son nuestras principales prioridades, siempre seguros y protegidos"
+      },
+      "support": {
+        "title": "Soporte",
+        "desc": "Dedicados a ayudarte a alcanzar tus objetivos de aprendizaje con asistencia receptiva"
+      }
+    },
+    "cta": {
+      "title": "¿Listo para Comenzar?",
+      "subtitle": "Comienza tu viaje de aprendizaje con Nowry hoy. ¡Crea tu cuenta gratuita ahora!",
+      "primary": "Empezar Gratis",
+      "secondary": "Contáctanos"
+    }
+  },
+  "contact": {
+    "title": "Ponte en Contacto",
+    "subtitle": "¿Tienes preguntas? Nos encantaría saber de ti. Envíanos un mensaje y te responderemos lo antes posible.",
+    "info": {
+      "email": {
+        "title": "Envíanos un Email",
+        "desc": "Normalmente respondemos en 24 horas"
+      },
+      "phone": {
+        "title": "Llámanos",
+        "desc": "Lun-Vie, 9AM-6PM EST"
+      },
+      "visit": {
+        "title": "Visítanos",
+        "desc": "San Francisco, CA 94102"
+      }
+    },
+    "form": {
+      "title": "Envíanos un Mensaje",
+      "success": "¡Gracias! Tu mensaje ha sido enviado exitosamente. Te responderemos pronto.",
+      "name": "Tu Nombre",
+      "namePlaceholder": "Juan Pérez",
+      "email": "Correo Electrónico",
+      "subject": "Asunto",
+      "subjectPlaceholder": "¿Cómo podemos ayudarte?",
+      "message": "Mensaje",
+      "messagePlaceholder": "Cuéntanos más sobre tu pregunta o comentario...",
+      "send": "Enviar Mensaje"
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "q1": "¿Cómo empiezo?",
+      "a1": "Simplemente crea una cuenta gratuita y comienza a explorar nuestras funciones. ¡No se requiere tarjeta de crédito!",
+      "q2": "¿Nowry es realmente gratis?",
+      "a2": "¡Sí! Nuestras funciones principales son completamente gratuitas. También ofrecemos planes premium con funciones avanzadas.",
+      "q3": "¿Puedo importar mis tarjetas existentes?",
+      "a3": "¡Absolutamente! Admitimos la importación de varios formatos, incluidos CSV, Anki y Quizlet.",
+      "q4": "¿Ofrecen descuentos para estudiantes?",
+      "a4": "Sí, ofrecemos precios especiales para estudiantes verificados. Contáctanos para más detalles."
     }
   }
 }
