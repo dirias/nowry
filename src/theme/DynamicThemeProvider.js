@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext'
 // Context to allow other components to update theme settings
 export const ThemePreferencesContext = createContext({
   themeColor: '#2a6971', // Match base theme teal
-  setThemeColor: () => { }
+  setThemeColor: () => {}
 })
 
 export const useThemePreferences = () => useContext(ThemePreferencesContext)

@@ -6,7 +6,7 @@ import { userService } from '../../../api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/'
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
 
 // Map user interests to categories (multilingual support)
 const INTEREST_TO_CATEGORY = {
