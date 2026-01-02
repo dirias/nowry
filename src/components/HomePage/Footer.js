@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { Box, Typography, Divider, useColorScheme, Stack, Button, Dropdown, MenuButton, Menu, MenuItem } from '@mui/joy'
+import { Box, Typography, Divider, useColorScheme, Stack, Button, Dropdown, MenuButton, Menu, MenuItem, IconButton } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { Language as LanguageIcon } from '@mui/icons-material'
+import { Language as LanguageIcon, Brightness4, Brightness7 } from '@mui/icons-material'
 
 const Footer = () => {
-  const { mode } = useColorScheme()
+  const { mode, setMode } = useColorScheme()
   const isDark = mode === 'dark'
   const { t, i18n } = useTranslation()
 
@@ -20,6 +20,10 @@ const Footer = () => {
 
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode)
+  }
+
+  const toggleTheme = () => {
+    setMode(isDark ? 'light' : 'dark')
   }
 
   return (
@@ -45,35 +49,62 @@ const Footer = () => {
           © {new Date().getFullYear()} Nowry — {t('footer.rights')}
         </Typography>
 
-        {/* Language Selector */}
-        <Dropdown>
-          <MenuButton
+        {/* Language & Theme Selector */}
+        <Stack
+          direction='row'
+          spacing={1.5}
+          alignItems='center'
+          divider={
+            <Typography level='body-sm' sx={{ color: 'neutral.plainColor' }}>
+              |
+            </Typography>
+          }
+        >
+          {/* Language Dropdown */}
+          <Dropdown>
+            <MenuButton
+              variant='plain'
+              size='sm'
+              startDecorator={<LanguageIcon fontSize='small' />}
+              sx={{
+                fontWeight: 500,
+                color: 'neutral.plainColor',
+                '&:hover': { bgcolor: isDark ? 'neutral.800' : 'neutral.100' }
+              }}
+            >
+              {currentLanguage.label}
+            </MenuButton>
+            <Menu
+              placement='top-end'
+              size='sm'
+              sx={{
+                minWidth: 160,
+                zIndex: 99999
+              }}
+            >
+              {languages.map((lang) => (
+                <MenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)} selected={i18n.language === lang.code}>
+                  {lang.label}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Dropdown>
+
+          {/* Theme Toggle */}
+          <Button
             variant='plain'
             size='sm'
-            startDecorator={<LanguageIcon fontSize='small' />}
+            startDecorator={isDark ? <Brightness7 fontSize='small' /> : <Brightness4 fontSize='small' />}
+            onClick={toggleTheme}
             sx={{
               fontWeight: 500,
-              color: 'neutral.600',
+              color: 'neutral.plainColor',
               '&:hover': { bgcolor: isDark ? 'neutral.800' : 'neutral.100' }
             }}
           >
-            {currentLanguage.label}
-          </MenuButton>
-          <Menu
-            placement='top-end'
-            size='sm'
-            sx={{
-              minWidth: 160,
-              zIndex: 99999
-            }}
-          >
-            {languages.map((lang) => (
-              <MenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)} selected={i18n.language === lang.code}>
-                {lang.label}
-              </MenuItem>
-            ))}
-          </Menu>
-        </Dropdown>
+            {isDark ? 'Light' : 'Dark'}
+          </Button>
+        </Stack>
       </Stack>
     </Box>
   )

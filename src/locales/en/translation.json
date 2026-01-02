@@ -38,6 +38,10 @@
   "footer": {
     "rights": "All rights reserved."
   },
+  "routes": {
+    "terms": "/terms",
+    "privacy": "/privacy"
+  },
   "study": {
     "title": "Study Center",
     "subtitle": "Your personalized learning hub",

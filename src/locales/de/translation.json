@@ -38,6 +38,10 @@
   "footer": {
     "rights": "Alle Rechte vorbehalten."
   },
+  "routes": {
+    "terms": "/nutzungsbedingungen",
+    "privacy": "/datenschutz"
+  },
   "study": {
     "title": "Lernzentrum",
     "subtitle": "Dein persönlicher Lernbereich",
@@ -130,6 +134,45 @@
         "codeRequired": "Bestätigungscode ist erforderlich",
         "codeLength": "Code muss 6 Ziffern haben"
       }
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Besser Lernen,\nNicht Härter",
+      "subtitle": "Verwandeln Sie Ihre Lerngewohnheiten mit KI-gesteuerten Lernkarten, intelligenten Büchern und verteilter Wiederholung. Beginnen Sie heute effektiver zu lernen.",
+      "ctaPrimary": "Kostenlos Starten",
+      "ctaSecondary": "Mehr Erfahren"
+    },
+    "features": {
+      "title": "Alles, Was Sie zum Erfolg Brauchen",
+      "subtitle": "Leistungsstarke Funktionen, die das Lernen angenehm und effektiv machen",
+      "smartBooks": {
+        "title": "Intelligente Bücher",
+        "desc": "Erstellen, importieren und organisieren Sie Ihre Lernmaterialien in einem schönen Raum"
+      },
+      "aiPowered": {
+        "title": "KI-Gesteuert",
+        "desc": "Intelligente Lernkarten und Studienempfehlungen, angepasst an Ihren Lernstil"
+      },
+      "spacedRepetition": {
+        "title": "Verteilte Wiederholung",
+        "desc": "Bewährte Lerntechniken, die die Erinnerung optimieren und Zeit sparen"
+      },
+      "trackProgress": {
+        "title": "Fortschritt Verfolgen",
+        "desc": "Visuelle Analysen zur Überwachung Ihres Wachstums und Feier von Erfolgen"
+      }
+    },
+    "social": {
+      "title": "Beginnen Sie Heute zu Lernen",
+      "subtitle": "Treten Sie Nowry bei und entdecken Sie einen besseren Weg zu lernen mit modernen Tools für Ihren Erfolg",
+      "benefits": {
+        "1": "Erstellen Sie unbegrenzt Bücher und Lernkarten",
+        "2": "Greifen Sie von jedem Gerät überall zu",
+        "3": "Verfolgen Sie Ihren Fortschritt mit Analysen",
+        "4": "Treten Sie Lerngruppen bei und arbeiten Sie zusammen"
+      },
+      "cta": "Jetzt Starten"
     }
   },
   "onboarding": {

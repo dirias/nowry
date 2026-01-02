@@ -45,6 +45,39 @@
     *   *Incorrect:* `Create Book`
     *   Account for variable text lengths in different languages (avoid fixed-width text containers).
     *   **Tooltips:** MUST use translation keys. Never hardcode tooltip text.
+*   **Capitalization Standards:**
+    *   Follow modern UI/UX best practices for consistent capitalization across the application.
+    *   **Sentence case** (recommended for most UI text):
+        *   **When to use:** Body text, descriptions, helper text, error messages, empty states, notifications, toast messages
+        *   **Examples:** "No articles found", "You're all caught up", "Try searching for something else"
+        *   **Tone:** Conversational, friendly, easier to read
+        *   **Reference:** Google Material Design, Apple HIG, Microsoft Fluent Design
+    *   **Title Case:**
+        *   **When to use:** Page titles, section headings, primary navigation items, major button labels
+        *   **Examples:** "Account Settings", "Study Center", "Create New Account", "Learn More"
+        *   **Tone:** More formal, emphatic
+        *   **Rule:** Capitalize first letter of major words (nouns, verbs, adjectives, adverbs)
+    *   **ALL CAPS:**
+        *   **When to use:** Rarely - only for specific UI badges, labels, or abbreviations (e.g., "NEW", "BETA", "API")
+        *   **Warning:** Use sparingly as it reduces readability and can feel aggressive
+    *   **Quick Reference Guide:**
+        ```
+        ✅ Sentence case:
+        - "No tasks yet" (empty state)
+        - "Password must be at least 8 characters" (validation)
+        - "Successfully saved your changes" (success message)
+        - "Try adjusting your filters" (helper text)
+
+        ✅ Title Case:
+        - "Dashboard" (navigation)
+        - "Create Account" (primary button)
+        - "Study Center" (page title)
+        - "Account Settings" (section header)
+
+        ✅ ALL CAPS (minimal use):
+        - "NEW" (badge)
+        - "API KEY" (technical label)
+        ```
 
 ---
 

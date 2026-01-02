@@ -38,6 +38,10 @@
   "footer": {
     "rights": "Todos los derechos reservados."
   },
+  "routes": {
+    "terms": "/terminos",
+    "privacy": "/privacidad"
+  },
   "study": {
     "title": "Centro de Estudio",
     "subtitle": "Tu centro de aprendizaje personalizado",
@@ -130,6 +134,45 @@
         "codeRequired": "El código de verificación es obligatorio",
         "codeLength": "El código debe tener 6 dígitos"
       }
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Aprende Mejor,\nNo Más Duro",
+      "subtitle": "Transforma tus hábitos de estudio con tarjetas de memoria impulsadas por IA, libros inteligentes y repetición espaciada. Comienza a aprender de manera más efectiva hoy.",
+      "ctaPrimary": "Empezar Gratis",
+      "ctaSecondary": "Saber Más"
+    },
+    "features": {
+      "title": "Todo lo que Necesitas para Destacar",
+      "subtitle": "Funciones poderosas diseñadas para hacer el aprendizaje agradable y efectivo",
+      "smartBooks": {
+        "title": "Libros Inteligentes",
+        "desc": "Crea, importa y organiza tus materiales de aprendizaje en un espacio hermoso"
+      },
+      "aiPowered": {
+        "title": "Impulsado por IA",
+        "desc": "Tarjetas de memoria inteligentes y recomendaciones de estudio adaptadas a tu estilo de aprendizaje"
+      },
+      "spacedRepetition": {
+        "title": "Repetición Espaciada",
+        "desc": "Técnicas de aprendizaje probadas que optimizan la retención y te ahorran tiempo"
+      },
+      "trackProgress": {
+        "title": "Seguimiento del Progreso",
+        "desc": "Análisis visuales para monitorear tu crecimiento y celebrar logros"
+      }
+    },
+    "social": {
+      "title": "Comienza a Aprender Hoy",
+      "subtitle": "Únete a Nowry y descubre una mejor manera de aprender con herramientas modernas diseñadas para tu éxito",
+      "benefits": {
+        "1": "Crea libros y tarjetas de memoria ilimitados",
+        "2": "Accede desde cualquier dispositivo, en cualquier lugar",
+        "3": "Rastrea tu progreso con análisis",
+        "4": "Únete a grupos de estudio y colabora"
+      },
+      "cta": "Empezar Ahora"
     }
   },
   "onboarding": {

@@ -15,41 +15,31 @@ import {
   MenuButton,
   MenuItem,
   ListDivider,
-  Snackbar
+  Snackbar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemDecorator
 } from '@mui/joy'
 import LogoutIcon from '@mui/icons-material/Logout'
-import Brightness4Icon from '@mui/icons-material/Brightness4'
-import Brightness7Icon from '@mui/icons-material/Brightness7'
-import { AutoStoriesRounded, SchoolRounded, MenuBookRounded, BugReportRounded, LogoutRounded } from '@mui/icons-material'
+import {
+  AutoStoriesRounded,
+  SchoolRounded,
+  MenuBookRounded,
+  BugReportRounded,
+  LogoutRounded,
+  MenuRounded,
+  CloseRounded,
+  PersonRounded,
+  SettingsRounded
+} from '@mui/icons-material'
 import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 import { useTranslation } from 'react-i18next'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '../../api/services/bugs.service'
 import { useAuth } from '../../context/AuthContext'
-
-// 🌗 Theme toggle button
-const ModeToggle = () => {
-  const { mode, setMode } = useColorScheme()
-  const isDark = mode === 'dark'
-
-  return (
-    <Tooltip title={isDark ? 'Light mode' : 'Dark mode'}>
-      <IconButton
-        variant='plain'
-        size='sm'
-        onClick={() => setMode(isDark ? 'light' : 'dark')}
-        sx={{
-          borderRadius: 'sm',
-          color: 'rgba(255, 255, 255, 0.9)',
-          '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
-        }}
-      >
-        {isDark ? <Brightness7Icon fontSize='small' /> : <Brightness4Icon fontSize='small' />}
-      </IconButton>
-    </Tooltip>
-  )
-}
 
 const Header = () => {
   const navigate = useNavigate()
@@ -63,6 +53,9 @@ const Header = () => {
   // Bug report state
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', color: 'success' })
+
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
 
   const logout = async () => {
     await contextLogout()
@@ -206,108 +199,127 @@ const Header = () => {
 
         {/* Right Section */}
         <Stack direction='row' spacing={1.5} alignItems='center'>
+          {/* Mobile Menu Button */}
+          <IconButton
+            variant='plain'
+            size='sm'
+            onClick={() => setMobileMenuOpen(true)}
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              color: 'rgba(255, 255, 255, 0.9)',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
+            }}
+          >
+            <MenuRounded />
+          </IconButton>
+
           {user ? (
             <>
-              <Dropdown>
-                <MenuButton
-                  variant='plain'
-                  size='sm'
-                  sx={{
-                    maxWidth: '32px',
-                    maxHeight: '32px',
-                    borderRadius: '9999999px',
-                    p: 0,
-                    minHeight: 'unset',
-                    border: '2px solid rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <Avatar
-                    src={user.avatar}
+              {/* Hide on mobile since we have mobile menu */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Dropdown>
+                  <MenuButton
+                    variant='plain'
+                    size='sm'
                     sx={{
                       maxWidth: '32px',
-                      maxHeight: '32px'
+                      maxHeight: '32px',
+                      borderRadius: '9999999px',
+                      p: 0,
+                      minHeight: 'unset',
+                      border: '2px solid rgba(255,255,255,0.2)'
                     }}
-                  />
-                </MenuButton>
-                <Menu
-                  placement='bottom-end'
-                  size='sm'
-                  sx={{
-                    zIndex: '99999',
-                    p: 1,
-                    gap: 1,
-                    '--ListItem-radius': 'var(--joy-radius-sm)'
-                  }}
-                >
-                  <MenuItem>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar src={user.avatar} sx={{ mr: 2 }} />
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography level='title-sm'>{user.name}</Typography>
-                        <Typography level='body-xs' noWrap>
-                          {user.email}
-                        </Typography>
+                  >
+                    <Avatar
+                      src={user.avatar}
+                      sx={{
+                        maxWidth: '32px',
+                        maxHeight: '32px'
+                      }}
+                    />
+                  </MenuButton>
+                  <Menu
+                    placement='bottom-end'
+                    size='sm'
+                    sx={{
+                      zIndex: '99999',
+                      p: 1,
+                      gap: 1,
+                      '--ListItem-radius': 'var(--joy-radius-sm)'
+                    }}
+                  >
+                    <MenuItem>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar src={user.avatar} sx={{ mr: 2 }} />
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography level='title-sm'>{user.name}</Typography>
+                          <Typography level='body-xs' noWrap>
+                            {user.email}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  </MenuItem>
-                  <ListDivider />
-                  <MenuItem component={Link} to='/profile'>
-                    {t('common.profile')}
-                  </MenuItem>
-                  <MenuItem component={Link} to='/settings'>
-                    {t('common.settings')}
-                  </MenuItem>
-                  <ListDivider />
-                  <MenuItem onClick={logout} color='danger'>
-                    <LogoutRounded />
-                    {t('common.logout')}
-                  </MenuItem>
-                </Menu>
-              </Dropdown>
-              <ModeToggle />
+                    </MenuItem>
+                    <ListDivider />
+                    <MenuItem component={Link} to='/profile'>
+                      <PersonRounded sx={{ mr: 1, fontSize: 20 }} />
+                      {t('common.profile')}
+                    </MenuItem>
+                    <MenuItem component={Link} to='/settings'>
+                      <SettingsRounded sx={{ mr: 1, fontSize: 20 }} />
+                      {t('common.settings')}
+                    </MenuItem>
+                    <ListDivider />
+                    <MenuItem onClick={logout} color='danger'>
+                      <LogoutRounded />
+                      {t('common.logout')}
+                    </MenuItem>
+                  </Menu>
+                </Dropdown>
+              </Box>
             </>
           ) : (
             <>
-              {/* Login/Register Buttons */}
-              <Button
-                component={Link}
-                to='/login'
-                variant='plain'
-                size='sm'
-                sx={{
-                  fontWeight: isActive('/login') ? 600 : 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  textDecoration: isActive('/login') ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {t('auth.signIn')}
-              </Button>
-              <Button
-                component={Link}
-                to='/register'
-                variant='plain'
-                size='sm'
-                sx={{
-                  fontWeight: isActive('/register') ? 600 : 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  textDecoration: isActive('/register') ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {t('auth.signUp')}
-              </Button>
-              <ModeToggle />
+              {/* Login/Register Buttons - Hide on mobile since we have mobile menu */}
+              <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+                <Button
+                  component={Link}
+                  to='/login'
+                  variant='plain'
+                  size='sm'
+                  sx={{
+                    fontWeight: isActive('/login') ? 600 : 500,
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    textDecoration: isActive('/login') ? 'underline' : 'none',
+                    textUnderlineOffset: '4px',
+                    textDecorationThickness: '2px',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white'
+                    }
+                  }}
+                >
+                  {t('auth.signIn')}
+                </Button>
+                <Button
+                  component={Link}
+                  to='/register'
+                  variant='plain'
+                  size='sm'
+                  sx={{
+                    fontWeight: isActive('/register') ? 600 : 500,
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    textDecoration: isActive('/register') ? 'underline' : 'none',
+                    textUnderlineOffset: '4px',
+                    textDecorationThickness: '2px',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white'
+                    }
+                  }}
+                >
+                  {t('auth.signUp')}
+                </Button>
+              </Box>
             </>
           )}
 
@@ -352,6 +364,118 @@ const Header = () => {
       >
         {snackbar.message}
       </Snackbar>
+
+      {/* Mobile Navigation Drawer */}
+      <Drawer
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        anchor='right'
+        size='sm'
+        sx={{
+          '& .MuiDrawer-content': {
+            bgcolor: isDark ? 'neutral.900' : 'background.surface'
+          }
+        }}
+      >
+        {/* Drawer Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <Typography level='title-lg' fontWeight={600}>
+            Menu
+          </Typography>
+          <IconButton variant='plain' size='sm' onClick={() => setMobileMenuOpen(false)}>
+            <CloseRounded />
+          </IconButton>
+        </Box>
+
+        {/* Drawer Content */}
+        <Box sx={{ p: 2 }}>
+          <List>
+            {user ? (
+              <>
+                {/* Logged-in User Navigation */}
+                {[
+                  { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
+                  { name: t('header.cards'), path: '/cards', icon: <SchoolRounded /> },
+                  { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> }
+                ].map((item) => (
+                  <ListItem key={item.name}>
+                    <ListItemButton component={Link} to={item.path} onClick={() => setMobileMenuOpen(false)} selected={isActive(item.path)}>
+                      <ListItemDecorator>{item.icon}</ListItemDecorator>
+                      {item.name}
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+                <ListDivider sx={{ my: 1 }} />
+                <ListItem>
+                  <ListItemButton component={Link} to='/profile' onClick={() => setMobileMenuOpen(false)}>
+                    <ListItemDecorator>
+                      <PersonRounded />
+                    </ListItemDecorator>
+                    {t('common.profile')}
+                  </ListItemButton>
+                </ListItem>
+                <ListItem>
+                  <ListItemButton component={Link} to='/settings' onClick={() => setMobileMenuOpen(false)}>
+                    <ListItemDecorator>
+                      <SettingsRounded />
+                    </ListItemDecorator>
+                    {t('common.settings')}
+                  </ListItemButton>
+                </ListItem>
+                <ListDivider sx={{ my: 1 }} />
+                <ListItem>
+                  <ListItemButton
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      logout()
+                    }}
+                    color='danger'
+                  >
+                    <ListItemDecorator>
+                      <LogoutRounded />
+                    </ListItemDecorator>
+                    {t('common.logout')}
+                  </ListItemButton>
+                </ListItem>
+              </>
+            ) : (
+              <>
+                {/* Logged-out User Navigation */}
+                <ListItem>
+                  <ListItemButton component={Link} to='/about' onClick={() => setMobileMenuOpen(false)}>
+                    {t('header.about')}
+                  </ListItemButton>
+                </ListItem>
+                <ListItem>
+                  <ListItemButton component={Link} to='/contact' onClick={() => setMobileMenuOpen(false)}>
+                    {t('header.contact')}
+                  </ListItemButton>
+                </ListItem>
+                <ListDivider sx={{ my: 1 }} />
+                <ListItem>
+                  <ListItemButton component={Link} to='/login' onClick={() => setMobileMenuOpen(false)}>
+                    {t('auth.signIn')}
+                  </ListItemButton>
+                </ListItem>
+                <ListItem>
+                  <ListItemButton component={Link} to='/register' onClick={() => setMobileMenuOpen(false)}>
+                    {t('auth.signUp')}
+                  </ListItemButton>
+                </ListItem>
+              </>
+            )}
+          </List>
+        </Box>
+      </Drawer>
     </>
   )
 }

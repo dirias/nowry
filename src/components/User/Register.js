@@ -6,7 +6,6 @@ import {
   Typography,
   Input,
   Button,
-  Checkbox,
   FormControl,
   FormLabel,
   FormHelperText,
@@ -18,7 +17,16 @@ import {
   Stack,
   IconButton
 } from '@mui/joy'
-import { PersonRounded, EmailRounded, LockRounded, VisibilityRounded, VisibilityOffRounded, CheckCircleRounded } from '@mui/icons-material'
+import {
+  PersonRounded,
+  EmailRounded,
+  LockRounded,
+  VisibilityRounded,
+  VisibilityOffRounded,
+  CheckCircleRounded,
+  CheckBoxOutlineBlank,
+  CheckBox
+} from '@mui/icons-material'
 import { apiClient } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 
@@ -324,39 +332,69 @@ const Register = () => {
 
             {/* Terms Checkbox */}
             <FormControl error={!!errors.acceptedTerms}>
-              <Checkbox
-                name='acceptedTerms'
-                checked={formData.acceptedTerms}
-                onChange={handleChange}
-                variant='solid'
-                color='primary'
-                label={
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {t('auth.agreeTerms')}{' '}
-                    <Link
-                      component={RouterLink}
-                      to='/terms'
-                      sx={{
-                        textDecoration: 'underline',
-                        textUnderlineOffset: '2px'
-                      }}
-                    >
-                      {t('auth.termsOfService')}
-                    </Link>{' '}
-                    {t('auth.and')}{' '}
-                    <Link
-                      component={RouterLink}
-                      to='/privacy'
-                      sx={{
-                        textDecoration: 'underline',
-                        textUnderlineOffset: '2px'
-                      }}
-                    >
-                      {t('auth.privacyPolicy')}
-                    </Link>
-                  </Typography>
-                }
-              />
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  cursor: 'pointer',
+                  '&:hover .checkbox-icon': {
+                    color: formData.acceptedTerms ? 'primary.solidHoverBg' : 'primary.plainColor'
+                  },
+                  '&:hover .checkbox-text': {
+                    color: 'neutral.plainHoverColor'
+                  }
+                }}
+                onClick={(e) => {
+                  // Don't toggle if clicking on links
+                  if (e.target.tagName !== 'A') {
+                    setFormData({ ...formData, acceptedTerms: !formData.acceptedTerms })
+                    if (errors.acceptedTerms) {
+                      setErrors({ ...errors, acceptedTerms: null })
+                    }
+                  }
+                }}
+              >
+                {/* Custom Checkbox using Icons */}
+                <Box
+                  className='checkbox-icon'
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: formData.acceptedTerms ? 'primary.solidBg' : 'neutral.outlinedBorder',
+                    transition: 'color 0.2s ease'
+                  }}
+                >
+                  {formData.acceptedTerms ? <CheckBox sx={{ fontSize: 24 }} /> : <CheckBoxOutlineBlank sx={{ fontSize: 24 }} />}
+                </Box>
+                <Typography level='body-sm' className='checkbox-text' sx={{ color: 'neutral.plainColor', flex: 1 }}>
+                  {t('auth.agreeTerms')}{' '}
+                  <Link
+                    component={RouterLink}
+                    to={t('routes.terms')}
+                    sx={{
+                      textDecoration: 'underline',
+                      textUnderlineOffset: '2px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {t('auth.termsOfService')}
+                  </Link>{' '}
+                  {t('auth.and')}{' '}
+                  <Link
+                    component={RouterLink}
+                    to={t('routes.privacy')}
+                    sx={{
+                      textDecoration: 'underline',
+                      textUnderlineOffset: '2px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {t('auth.privacyPolicy')}
+                  </Link>
+                </Typography>
+              </Box>
               {errors.acceptedTerms && <FormHelperText>{errors.acceptedTerms}</FormHelperText>}
             </FormControl>
 

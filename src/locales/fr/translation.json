@@ -38,6 +38,10 @@
   "footer": {
     "rights": "Tous droits réservés."
   },
+  "routes": {
+    "terms": "/conditions",
+    "privacy": "/confidentialite"
+  },
   "study": {
     "title": "Centre d'Étude",
     "subtitle": "Votre espace d'apprentissage personnalisé",
@@ -130,6 +134,45 @@
         "codeRequired": "Le code de vérification est requis",
         "codeLength": "Le code doit comporter 6 chiffres"
       }
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Apprendre Mieux,\nPas Plus Dur",
+      "subtitle": "Transformez vos habitudes d'étude avec des cartes mémoire alimentées par l'IA, des livres intelligents et la répétition espacée. Commencez à apprendre plus efficacement aujourd'hui.",
+      "ctaPrimary": "Commencer Gratuitement",
+      "ctaSecondary": "En Savoir Plus"
+    },
+    "features": {
+      "title": "Tout ce dont Vous Avez Besoin pour Exceller",
+      "subtitle": "Des fonctionnalités puissantes conçues pour rendre l'apprentissage agréable et efficace",
+      "smartBooks": {
+        "title": "Livres Intelligents",
+        "desc": "Créez, importez et organisez vos supports d'apprentissage dans un seul espace élégant"
+      },
+      "aiPowered": {
+        "title": "Alimenté par l'IA",
+        "desc": "Cartes mémoire intelligentes et recommandations d'étude adaptées à votre style d'apprentissage"
+      },
+      "spacedRepetition": {
+        "title": "Répétition Espacée",
+        "desc": "Techniques d'apprentissage éprouvées qui optimisent la rétention et vous font gagner du temps"
+      },
+      "trackProgress": {
+        "title": "Suivi des Progrès",
+        "desc": "Analyses visuelles pour suivre votre croissance et célébrer vos réussites"
+      }
+    },
+    "social": {
+      "title": "Commencez à Apprendre Aujourd'hui",
+      "subtitle": "Rejoignez Nowry et découvrez une meilleure façon d'apprendre avec des outils modernes conçus pour votre succès",
+      "benefits": {
+        "1": "Créez des livres et cartes mémoire illimités",
+        "2": "Accédez depuis n'importe quel appareil, n'importe où",
+        "3": "Suivez vos progrès avec des analyses",
+        "4": "Rejoignez des groupes d'étude et collaborez"
+      },
+      "cta": "Commencer Maintenant"
     }
   },
   "onboarding": {

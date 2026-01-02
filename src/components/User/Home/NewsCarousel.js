@@ -6,7 +6,7 @@ import { userService } from '../../../api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/'
 
 // Map user interests to categories (multilingual support)
 const INTEREST_TO_CATEGORY = {
@@ -182,7 +182,14 @@ export default function NewsCarousel() {
         // Fetch from ALL categories in parallel
         const promises = finalCategories.map((category) =>
           fetch(`${API_BASE_URL}/news/${userLang}/${category}`)
-            .then((res) => res.json())
+            .then(async (res) => {
+              // Handle non-200 responses (including 404)
+              if (!res.ok) {
+                console.warn(`News API returned ${res.status} for ${category}`)
+                return []
+              }
+              return res.json()
+            })
             .then((data) => {
               // Tag each article with its category
               if (data.status === 'success' && data.articles) {
@@ -194,7 +201,7 @@ export default function NewsCarousel() {
               return []
             })
             .catch((err) => {
-              console.error(`Failed to fetch ${category}:`, err)
+              console.warn(`Failed to fetch ${category} news:`, err.message)
               return []
             })
         )
@@ -224,6 +231,54 @@ export default function NewsCarousel() {
 
   const placeholderCount = 3
 
+  // Empty State Component
+  const EmptyState = () => (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 8,
+        px: 4,
+        textAlign: 'center',
+        minHeight: 300
+      }}
+    >
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          backgroundColor: 'neutral.softBg',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 3,
+          animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          '@keyframes pulse': {
+            '0%, 100%': {
+              opacity: 1
+            },
+            '50%': {
+              opacity: 0.5
+            }
+          }
+        }}
+      >
+        <TrendingUp sx={{ fontSize: 40, color: 'neutral.plainColor' }} />
+      </Box>
+      <Typography level='h4' sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
+        {t('news.noArticles')}
+      </Typography>
+      <Typography level='body-sm' sx={{ color: 'text.secondary', maxWidth: 400 }}>
+        {userPreferences?.interests?.length > 0
+          ? 'Try adjusting your interests in Settings to see personalized news.'
+          : 'Set your interests in Settings to see personalized news articles.'}
+      </Typography>
+    </Box>
+  )
+
   return (
     <Box sx={{ position: 'relative', width: '100%', py: 4 }}>
       {/* Header */}
@@ -242,130 +297,137 @@ export default function NewsCarousel() {
         )}
       </Stack>
 
-      {/* Slider Container */}
-      <Box
-        sx={{
-          position: 'relative',
-          mx: 'auto',
-          maxWidth: '1200px',
-          px: { xs: 6, md: 8 }
-        }}
-      >
-        <Box
-          ref={sliderRef}
-          className='keen-slider'
-          sx={{
-            overflow: 'hidden',
-            borderRadius: 'md',
-            mx: 2
-          }}
-        >
-          {(() => {
-            const itemsToRender = loading ? Array.from({ length: placeholderCount }) : news
-            return itemsToRender.map((article, index) => (
-              <Box
-                key={loading ? `skeleton-${index}` : article?.url || index}
-                className='keen-slider__slide'
-                sx={{
-                  minHeight: 400,
-                  minWidth: '320px',
-                  width: '320px'
-                }}
-              >
-                <Box sx={{ px: 1, height: '100%' }}>
-                  <NewsCard article={article} loading={loading} t={t} />
-                </Box>
-              </Box>
-            ))
-          })()}
-        </Box>
-
-        {/* Navigation Arrows */}
-        {!loading && news.length > 1 && instanceRef.current && (
-          <>
-            <IconButton
-              variant='solid'
-              color='neutral'
-              size='sm'
-              onClick={(e) => {
-                e.stopPropagation()
-                instanceRef.current?.prev()
-              }}
-              sx={{
-                position: 'absolute',
-                left: 0,
-                top: '40%',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-                backgroundColor: 'background.surface',
-                border: '1px solid',
-                borderColor: 'neutral.outlinedBorder',
-                boxShadow: 'sm',
-                '&:hover': {
-                  backgroundColor: 'background.surface',
-                  borderColor: 'primary.outlinedBorder',
-                  transform: 'translateY(-50%) scale(1.1)'
-                }
-              }}
-            >
-              <ArrowBackIosNew />
-            </IconButton>
-
-            <IconButton
-              variant='solid'
-              color='neutral'
-              size='sm'
-              onClick={(e) => {
-                e.stopPropagation()
-                instanceRef.current?.next()
-              }}
-              sx={{
-                position: 'absolute',
-                right: 0,
-                top: '40%',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-                backgroundColor: 'background.surface',
-                border: '1px solid',
-                borderColor: 'neutral.outlinedBorder',
-                boxShadow: 'sm',
-                '&:hover': {
-                  backgroundColor: 'background.surface',
-                  borderColor: 'primary.outlinedBorder',
-                  transform: 'translateY(-50%) scale(1.1)'
-                }
-              }}
-            >
-              <ArrowForwardIos />
-            </IconButton>
-          </>
-        )}
-      </Box>
-
-      {/* Pagination Dots */}
-      {!loading && news.length > 0 && instanceRef.current && (
-        <Stack direction='row' justifyContent='center' spacing={1} sx={{ mt: 3 }}>
-          {Array.from({ length: news.length }).map((_, idx) => (
+      {/* Show Empty State if no loading and no news */}
+      {!loading && news.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <>
+          {/* Slider Container */}
+          <Box
+            sx={{
+              position: 'relative',
+              mx: 'auto',
+              maxWidth: '1200px',
+              px: { xs: 6, md: 8 }
+            }}
+          >
             <Box
-              key={idx}
-              onClick={() => {
-                instanceRef.current?.moveToIdx(idx)
-              }}
+              ref={sliderRef}
+              className='keen-slider'
               sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                backgroundColor: currentSlide === idx ? 'primary.500' : 'neutral.300',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                transform: currentSlide === idx ? 'scale(1.2)' : 'scale(1)',
-                '&:hover': {
-                  backgroundColor: 'primary.400'
-                }
+                overflow: 'hidden',
+                borderRadius: 'md',
+                mx: 2
               }}
-            />
-          ))}
-        </Stack>
+            >
+              {(() => {
+                const itemsToRender = loading ? Array.from({ length: placeholderCount }) : news
+                return itemsToRender.map((article, index) => (
+                  <Box
+                    key={loading ? `skeleton-${index}` : article?.url || index}
+                    className='keen-slider__slide'
+                    sx={{
+                      minHeight: 400,
+                      minWidth: '320px',
+                      width: '320px'
+                    }}
+                  >
+                    <Box sx={{ px: 1, height: '100%' }}>
+                      <NewsCard article={article} loading={loading} t={t} />
+                    </Box>
+                  </Box>
+                ))
+              })()}
+            </Box>
+
+            {/* Navigation Arrows */}
+            {!loading && news.length > 1 && instanceRef.current && (
+              <>
+                <IconButton
+                  variant='solid'
+                  color='neutral'
+                  size='sm'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    instanceRef.current?.prev()
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '40%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 10,
+                    backgroundColor: 'background.surface',
+                    border: '1px solid',
+                    borderColor: 'neutral.outlinedBorder',
+                    boxShadow: 'sm',
+                    '&:hover': {
+                      backgroundColor: 'background.surface',
+                      borderColor: 'primary.outlinedBorder',
+                      transform: 'translateY(-50%) scale(1.1)'
+                    }
+                  }}
+                >
+                  <ArrowBackIosNew />
+                </IconButton>
+
+                <IconButton
+                  variant='solid'
+                  color='neutral'
+                  size='sm'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    instanceRef.current?.next()
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '40%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 10,
+                    backgroundColor: 'background.surface',
+                    border: '1px solid',
+                    borderColor: 'neutral.outlinedBorder',
+                    boxShadow: 'sm',
+                    '&:hover': {
+                      backgroundColor: 'background.surface',
+                      borderColor: 'primary.outlinedBorder',
+                      transform: 'translateY(-50%) scale(1.1)'
+                    }
+                  }}
+                >
+                  <ArrowForwardIos />
+                </IconButton>
+              </>
+            )}
+          </Box>
+
+          {/* Pagination Dots */}
+          {!loading && news.length > 0 && instanceRef.current && (
+            <Stack direction='row' justifyContent='center' spacing={1} sx={{ mt: 3 }}>
+              {Array.from({ length: news.length }).map((_, idx) => (
+                <Box
+                  key={idx}
+                  onClick={() => {
+                    instanceRef.current?.moveToIdx(idx)
+                  }}
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: currentSlide === idx ? 'primary.500' : 'neutral.300',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    transform: currentSlide === idx ? 'scale(1.2)' : 'scale(1)',
+                    '&:hover': {
+                      backgroundColor: 'primary.400'
+                    }
+                  }}
+                />
+              ))}
+            </Stack>
+          )}
+        </>
       )}
     </Box>
   )
