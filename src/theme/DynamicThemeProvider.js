@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext'
 // Context to allow other components to update theme settings
 export const ThemePreferencesContext = createContext({
   themeColor: '#2a6971', // Match base theme teal
-  setThemeColor: () => {}
+  setThemeColor: () => { }
 })
 
 export const useThemePreferences = () => useContext(ThemePreferencesContext)
@@ -82,7 +82,7 @@ export const DynamicThemeProvider = ({ children }) => {
 
   return (
     <ThemePreferencesContext.Provider value={contextValue}>
-      <CssVarsProvider theme={dynamicTheme} defaultMode='system' disableNestedContext>
+      <CssVarsProvider theme={dynamicTheme} defaultMode='light' disableNestedContext>
         <CssBaseline />
         {children}
       </CssVarsProvider>
