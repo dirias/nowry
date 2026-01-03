@@ -1,10 +1,12 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Sheet, Typography, Stack, Box, Input, IconButton, Tooltip, Select, Option, CircularProgress } from '@mui/joy'
+import { Sheet, Typography, Stack, Box, Input, IconButton, Tooltip, Select, Option, CircularProgress, Button } from '@mui/joy'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import FilterAltRoundedIcon from '@mui/icons-material/FilterAltRounded'
+import TimelineRoundedIcon from '@mui/icons-material/TimelineRounded'
 import SortableTask from '../../Task/SortableTask'
+import { Link } from 'react-router-dom'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { tasksService } from '../../../api/services'
@@ -143,6 +145,20 @@ const SideMenu = () => {
         boxShadow: 'sm'
       }}
     >
+      {/* Annual Planning Quick Access */}
+      <Button
+        component={Link}
+        to='/annual-planning'
+        variant='soft'
+        color='primary'
+        fullWidth
+        startDecorator={<TimelineRoundedIcon />}
+        sx={{ mb: 2, justifyContent: 'space-between' }}
+        endDecorator={<Typography level='body-xs'>2026</Typography>}
+      >
+        {t('annualPlanning.title')}
+      </Button>
+
       {/* Header */}
       <Stack direction='row' alignItems='center' justifyContent='space-between'>
         <Typography level='title-md' color='primary'>

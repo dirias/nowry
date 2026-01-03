@@ -29,9 +29,17 @@
     *   Standard padding/margins: `1` (8px), `2` (16px), `3` (24px).
     *   Avoid magic numbers (e.g., `margin: 13px`).
 *   **Whitespace:** Embrace negative space. It creates breathing room and groups related content visually without needing borders.
-*   **Responsiveness:**
-    *   Mobile-First approach.
+*   **Responsiveness (Mandatory):**
+    *   **Universal Compatibility:** ALL pages and components MUST function seamlessly on all device sizes (Mobile, Tablet, Desktop).
+    *   **Mobile-First approach.**
     *   Use responsive props: `sx={{ flexDirection: { xs: 'column', md: 'row' } }}`.
+*   **Page Structure:**
+    *   **Main Container:** Wrap all page content in a Joy UI `<Container>`.
+    *   **Width Standard:**
+        *   **Dashboards / Main Views:** Use `maxWidth='xl'` for immersive, full-width experiences (e.g., Home, Annual Planner, Study Center).
+        *   **Forms / Settings:** Use `maxWidth='lg'` or `md` to maintain readability on wide screens.
+    *   **Padding:** Default vertical padding is `py: 4` (32px).
+    *   *Implementation:* `<Container maxWidth='xl' sx={{ py: 4 }}>`
 
 ---
 
@@ -40,6 +48,7 @@
     *   *Headings:* Bold/Semi-bold, short, and punchy.
     *   *Body:* Readable contrast not pure black (`text.secondary` is often better for detailed text).
 *   **Internationalization (i18n):**
+    *   **Universal Support:** The entire application MUST be fully multilingual. No user-facing text should ever be hardcoded.
     *   **NO Hardcoded Text:** All text must use translation keys.
     *   *Correct:* `{t('books.create')}`
     *   *Incorrect:* `Create Book`

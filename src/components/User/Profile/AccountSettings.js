@@ -18,7 +18,19 @@ import {
   Option,
   Chip
 } from '@mui/joy'
-import { Security, Notifications, Delete, KeyOff, VpnKey, Warning, Palette, Translate, DarkMode, LightMode } from '@mui/icons-material'
+import {
+  Security,
+  Notifications,
+  Delete,
+  KeyOff,
+  VpnKey,
+  Warning,
+  Palette,
+  Translate,
+  DarkMode,
+  LightMode,
+  Timer
+} from '@mui/icons-material'
 import { userService } from '../../../api/services'
 import { useColorScheme } from '@mui/joy/styles'
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
@@ -36,7 +48,12 @@ export default function AccountSettings() {
   const [preferences, setPreferences] = useState({
     interests: [],
     theme_color: '#0b6bcb',
-    language: 'en'
+    language: 'en',
+    pomodoro_work_minutes: 25,
+    pomodoro_short_break_minutes: 5,
+    pomodoro_long_break_minutes: 15,
+    pomodoro_auto_start: false,
+    pomodoro_enabled: false
   })
 
   // ... (password data, notifications, 2fa state) ...
@@ -76,7 +93,12 @@ export default function AccountSettings() {
           setPreferences({
             interests: profile.preferences.interests || [],
             theme_color: profile.preferences.theme_color || '#0b6bcb',
-            language: profile.preferences.language || 'en'
+            language: profile.preferences.language || 'en',
+            pomodoro_work_minutes: profile.preferences.pomodoro_work_minutes || 25,
+            pomodoro_short_break_minutes: profile.preferences.pomodoro_short_break_minutes || 5,
+            pomodoro_long_break_minutes: profile.preferences.pomodoro_long_break_minutes || 15,
+            pomodoro_auto_start: profile.preferences.pomodoro_auto_start || false,
+            pomodoro_enabled: profile.preferences.pomodoro_enabled || false
           })
           // Sync global theme if different
           setThemeColor(profile.preferences.theme_color || '#0b6bcb')
@@ -286,7 +308,7 @@ export default function AccountSettings() {
                   <Option value='es'>Español</Option>
                   <Option value='fr'>Français</Option>
                   <Option value='de'>Deutsch</Option>
-                  <Option value='jp'>日本語</Option>
+                  <Option value='ja'>日本語</Option>
                 </Select>
               </Box>
 
@@ -358,6 +380,107 @@ export default function AccountSettings() {
                   ))}
                 </Box>
               </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Productivity (Pomodoro) */}
+        <Card>
+          <CardContent>
+            <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 3 }}>
+              <Timer color='primary' />
+              <Typography level='h4' fontWeight={600}>
+                Productivity
+              </Typography>
+            </Stack>
+
+            <Stack spacing={3}>
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Box>
+                  <Typography level='title-md'>Enable Productivity Timer</Typography>
+                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                    Show timer in header and enable floating widget
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={preferences.pomodoro_enabled}
+                  onChange={(e) => handlePreferenceUpdate('pomodoro_enabled', e.target.checked)}
+                />
+              </Stack>
+
+              {preferences.pomodoro_enabled && (
+                <>
+                  <Divider />
+                  <Box>
+                    <Typography level='title-sm' sx={{ mb: 1 }}>
+                      Focus Duration (minutes)
+                    </Typography>
+                    <Stack direction='row' spacing={2} alignItems='center'>
+                      <Input
+                        type='number'
+                        value={preferences.pomodoro_work_minutes}
+                        onChange={(e) => handlePreferenceUpdate('pomodoro_work_minutes', parseInt(e.target.value) || 25)}
+                        sx={{ width: 80 }}
+                        slotProps={{ input: { min: 1, max: 60 } }}
+                      />
+                      <Typography level='body-sm' textColor='neutral.500'>
+                        Recommended: 25
+                      </Typography>
+                    </Stack>
+                  </Box>
+
+                  <Box>
+                    <Typography level='title-sm' sx={{ mb: 1 }}>
+                      Short Break (minutes)
+                    </Typography>
+                    <Stack direction='row' spacing={2} alignItems='center'>
+                      <Input
+                        type='number'
+                        value={preferences.pomodoro_short_break_minutes}
+                        onChange={(e) => handlePreferenceUpdate('pomodoro_short_break_minutes', parseInt(e.target.value) || 5)}
+                        sx={{ width: 80 }}
+                        slotProps={{ input: { min: 1, max: 30 } }}
+                      />
+                      <Typography level='body-sm' textColor='neutral.500'>
+                        Recommended: 5
+                      </Typography>
+                    </Stack>
+                  </Box>
+
+                  <Box>
+                    <Typography level='title-sm' sx={{ mb: 1 }}>
+                      Long Break (minutes)
+                    </Typography>
+                    <Stack direction='row' spacing={2} alignItems='center'>
+                      <Input
+                        type='number'
+                        value={preferences.pomodoro_long_break_minutes}
+                        onChange={(e) => handlePreferenceUpdate('pomodoro_long_break_minutes', parseInt(e.target.value) || 15)}
+                        sx={{ width: 80 }}
+                        slotProps={{ input: { min: 5, max: 60 } }}
+                      />
+                      <Typography level='body-sm' textColor='neutral.500'>
+                        Recommended: 15
+                      </Typography>
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                    <Box>
+                      <Typography level='title-sm'>Auto-start Timer</Typography>
+                      <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                        Automatically start the next timer when one finishes
+                      </Typography>
+                    </Box>
+                    <Switch
+                      checked={preferences.pomodoro_auto_start}
+                      onChange={(e) => handlePreferenceUpdate('pomodoro_auto_start', e.target.checked)}
+                    />
+                  </Stack>
+                </>
+              )}
             </Stack>
           </CardContent>
         </Card>

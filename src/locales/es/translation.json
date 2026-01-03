@@ -529,5 +529,168 @@
       "q4": "¿Ofrecen descuentos para estudiantes?",
       "a4": "Sí, ofrecemos precios especiales para estudiantes verificados. Contáctanos para más detalles."
     }
+  },
+  "annualPlanning": {
+    "title": "Planificación Anual",
+    "subtitle": "Concéntrate en lo que más importa este año",
+    "myPlan": "Mi Plan 2026",
+    "empty": "Comienza tu año enfocado definiendo tus 3 áreas principales",
+    "stats": {
+      "totalGoals": "Total de Objetivos",
+      "inProgress": "En Progreso",
+      "completed": "Completado",
+      "completionRate": "Tasa de Finalización",
+      "priorities": "Prioridades"
+    },
+    "focusArea": {
+      "title": "Áreas de Enfoque",
+      "subtitle": "Elige 3 áreas principales para enfocarte este año",
+      "limit": "Puedes tener un máximo de 3 áreas de enfoque",
+      "limitReached": "Límite de áreas de enfoque alcanzado (3/3)",
+      "add": "Agregar Área de Enfoque",
+      "edit": "Editar Área",
+      "delete": "Eliminar Área",
+      "name": "Nombre del Área",
+      "description": "¿Qué quieres lograr aquí?",
+      "selectIcon": "Seleccionar Ícono",
+      "selectColor": "Seleccionar Color",
+      "setup": {
+        "intro": {
+          "title": "El Poder de 3",
+          "message": "La investigación muestra que enfocarse en 3 áreas clave lleva a mayor éxito que intentar mejorar todo a la vez. Definamos tus 3 áreas para este año."
+        },
+        "tips": [
+          "Sé específico sobre lo que más importa",
+          "Elige áreas que se alineen con tus valores",
+          "Piensa en el equilibrio entre diferentes dominios de la vida"
+        ]
+      },
+      "examples": [
+        "Crecimiento Profesional",
+        "Salud y Vitalidad",
+        "Libertad Financiera",
+        "Relaciones",
+        "Proyectos Creativos",
+        "Aprendizaje y Habilidades"
+      ]
+    },
+    "priority": {
+      "title": "Prioridades Anuales",
+      "add": "Agregar Prioridad",
+      "edit": "Editar Prioridad",
+      "delete": "Eliminar Prioridad",
+      "name": "Prioridad",
+      "deadline": "Fecha Objetivo",
+      "linkedTo": "Vinculado a {{area}}",
+      "noGoals": "Sin objetivos vinculados aún"
+    },
+    "goal": {
+      "add": "Agregar Objetivo",
+      "edit": "Editar Objetivo",
+      "delete": "Eliminar Objetivo",
+      "title": "Título del Objetivo",
+      "description": "Descripción",
+      "focusArea": "Área de Enfoque",
+      "linkToPriority": "Vincular a Prioridad (opcional)",
+      "targetDate": "Fecha Objetivo",
+      "progress": "Progreso",
+      "status": {
+        "notStarted": "No Iniciado",
+        "inProgress": "En Progreso",
+        "completed": "Completado"
+      },
+      "image": "Inspiración Visual (opcional)",
+      "imageUrl": "URL de la Imagen",
+      "generateImage": "Generar con IA",
+      "uploadImage": "Subir Imagen",
+      "daysLeft": "Queda {{count}} día",
+      "daysLeft_plural": "Quedan {{count}} días",
+      "overdue": "Vencido",
+      "noDeadline": "Sin fecha objetivo",
+      "smartHelper": "Hazlo SMART: Específico, Medible, Alcanzable, Relevante, Temporal",
+      "activitiesCount": "{{count}} actividad",
+      "activitiesCount_plural": "{{count}} actividades",
+      "viewBoard": "Ver como Tablero"
+    },
+    "activity": {
+      "title": "Actividades y Hábitos",
+      "add": "Agregar Actividad",
+      "edit": "Editar Actividad",
+      "delete": "Eliminar Actividad",
+      "name": "Nombre de la Actividad",
+      "description": "Descripción",
+      "frequency": "Frecuencia",
+      "timeOfDay": "Momento del Día",
+      "duration": "Duración (minutos)",
+      "linkedGoal": "Vinculado al Objetivo",
+      "frequencies": {
+        "daily": "Diario",
+        "weekly": "Semanal",
+        "custom": "Personalizado"
+      },
+      "timeSlots": {
+        "morning": "Mañana",
+        "afternoon": "Tarde",
+        "evening": "Noche",
+        "anytime": "Cualquier momento"
+      },
+      "todaysTasks": "Actividades de Hoy",
+      "noActivities": "No hay actividades aún. Agrega acciones diarias/semanales para lograr tus objetivos.",
+      "markComplete": "Marcar Completado",
+      "toggleActive": "Alternar Activo"
+    },
+    "dailyRoutine": {
+      "title": "Planificador de Rutina Diaria",
+      "subtitle": "Diseña tu día ideal para lograr tus objetivos",
+      "morning": "Rutina Mañanera",
+      "afternoon": "Rutina de Tarde",
+      "evening": "Rutina Nocturna",
+      "addBlock": "Agregar Bloque de Tiempo",
+      "templates": {
+        "title": "Comenzar con una Plantilla",
+        "weekday": "Horario Laboral",
+        "weekend": "Horario de Fin de Semana",
+        "earlyBird": "Madrugador",
+        "nightOwl": "Nocturno",
+        "blank": "Comenzar desde Cero"
+      },
+      "distribution": "Distribución del Tiempo en Áreas de Enfoque",
+      "balanced": "Equilibrado",
+      "lopsided": "Un área está recibiendo la mayor parte de tu tiempo",
+      "dragActivities": "Arrastra actividades de tus objetivos a los bloques de tiempo",
+      "saveTemplate": "Guardar como Plantilla"
+    },
+    "progress": {
+      "title": "Panel de Progreso",
+      "overview": "Resumen del Año",
+      "breakdown": "Desglose por Área",
+      "goalProgress": "Progreso de Objetivos",
+      "activityStreak": "Racha de Actividades",
+      "upcomingDeadlines": "Próximos Vencimientos",
+      "insights": "Insights",
+      "noDeadlines": "No hay vencimientos próximos",
+      "suggestions": {
+        "noProgress": "No has actualizado {{area}} en {{days}} días",
+        "balanced": "¡Genial! Estás progresando en todas las áreas",
+        "nearDeadline": "{{goal}} vence en {{days}} días"
+      }
+    },
+    "actions": {
+      "setFocusAreas": "Configurar Áreas",
+      "addGoal": "Agregar Objetivo",
+      "viewRoutine": "Ver Rutina Diaria",
+      "seeAllGoals": "Ver Todos los Objetivos",
+      "editPlan": "Editar Título",
+      "exportPlan": "Exportar Plan"
+    },
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este {{type}}? Esta acción no se puede deshacer.",
+    "celebration": "🎉 ¡Objetivo Completado! ¡Estás haciendo un progreso increíble!",
+    "errors": {
+      "loadFailed": "Error al cargar el plan anual",
+      "createFailed": "Error al crear {{type}}",
+      "updateFailed": "Error al actualizar {{type}}",
+      "deleteFailed": "Error al eliminar {{type}}",
+      "focusAreaLimit": "Solo puedes tener 3 áreas de enfoque. Elimina una para añadir otra."
+    }
   }
 }

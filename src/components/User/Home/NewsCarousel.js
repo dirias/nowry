@@ -282,7 +282,7 @@ export default function NewsCarousel() {
   return (
     <Box sx={{ position: 'relative', width: '100%', py: 4 }}>
       {/* Header */}
-      <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 3, px: 2 }}>
+      <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 3, px: { xs: 1, md: 2 } }}>
         <Stack direction='row' alignItems='center' spacing={1}>
           <TrendingUp sx={{ color: 'primary.500', fontSize: 28 }} />
           <Typography level='h3' fontWeight={700} sx={{ color: 'text.primary' }}>
@@ -308,7 +308,7 @@ export default function NewsCarousel() {
               position: 'relative',
               mx: 'auto',
               maxWidth: '1200px',
-              px: { xs: 6, md: 8 }
+              px: { xs: 2, md: 8 }
             }}
           >
             <Box
@@ -327,9 +327,9 @@ export default function NewsCarousel() {
                     key={loading ? `skeleton-${index}` : article?.url || index}
                     className='keen-slider__slide'
                     sx={{
-                      minHeight: 400,
-                      minWidth: '320px',
-                      width: '320px'
+                      minHeight: { xs: 350, md: 400 },
+                      minWidth: { xs: '280px', sm: '320px' },
+                      width: { xs: '280px', sm: '320px' }
                     }}
                   >
                     <Box sx={{ px: 1, height: '100%' }}>
@@ -352,6 +352,7 @@ export default function NewsCarousel() {
                     instanceRef.current?.prev()
                   }}
                   sx={{
+                    display: { xs: 'none', md: 'flex' },
                     position: 'absolute',
                     left: 0,
                     top: '40%',
@@ -380,6 +381,7 @@ export default function NewsCarousel() {
                     instanceRef.current?.next()
                   }}
                   sx={{
+                    display: { xs: 'none', md: 'flex' },
                     position: 'absolute',
                     right: 0,
                     top: '40%',
@@ -405,26 +407,32 @@ export default function NewsCarousel() {
           {/* Pagination Dots */}
           {!loading && news.length > 0 && instanceRef.current && (
             <Stack direction='row' justifyContent='center' spacing={1} sx={{ mt: 3 }}>
-              {Array.from({ length: news.length }).map((_, idx) => (
-                <Box
-                  key={idx}
-                  onClick={() => {
-                    instanceRef.current?.moveToIdx(idx)
-                  }}
-                  sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    backgroundColor: currentSlide === idx ? 'primary.500' : 'neutral.300',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    transform: currentSlide === idx ? 'scale(1.2)' : 'scale(1)',
-                    '&:hover': {
-                      backgroundColor: 'primary.400'
-                    }
-                  }}
-                />
-              ))}
+              {Array.from({ length: Math.min(news.length, 7) }).map((_, idx) => {
+                // Smart pagination: show first, current, and last on mobile
+                const shouldShow = news.length <= 7 || idx < 2 || idx === currentSlide || idx >= news.length - 2
+                if (!shouldShow) return null
+
+                return (
+                  <Box
+                    key={idx}
+                    onClick={() => {
+                      instanceRef.current?.moveToIdx(idx)
+                    }}
+                    sx={{
+                      width: { xs: 6, md: 8 },
+                      height: { xs: 6, md: 8 },
+                      borderRadius: '50%',
+                      backgroundColor: currentSlide === idx ? 'primary.500' : 'neutral.300',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      transform: currentSlide === idx ? 'scale(1.2)' : 'scale(1)',
+                      '&:hover': {
+                        backgroundColor: 'primary.400'
+                      }
+                    }}
+                  />
+                )
+              })}
             </Stack>
           )}
         </>

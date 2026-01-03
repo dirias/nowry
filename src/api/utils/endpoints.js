@@ -18,16 +18,50 @@ export const ENDPOINTS = {
   },
   studyCards: {
     generate: '/card/generate',
-    all: '/study-cards/',
-    create: '/study-cards/',
+    all: '/study-cards',
+    create: '/study-cards',
     update: (id) => `/study-cards/${id}`,
     delete: (id) => `/study-cards/${id}`
   },
   decks: {
-    all: '/decks/',
-    create: '/decks/',
+    all: '/decks',
+    create: '/decks',
     update: (id) => `/decks/${id}`,
     delete: (id) => `/decks/${id}`,
     byId: (id) => `/decks/${id}`
+  },
+  annualPlan: {
+    base: '/annual-plan',
+    get: '/annual-plan'
+  },
+  focusAreas: {
+    base: '/annual-plan/focus-areas',
+    all: (planId) => `/annual-plan/focus-areas?annual_plan_id=${planId}`,
+    create: '/annual-plan/focus-areas',
+    update: (id) => `/annual-plan/focus-areas/${id}`,
+    delete: (id) => `/annual-plan/focus-areas/${id}`
+  },
+  priorities: {
+    all: (planId) => `/annual-plan/priorities?annual_plan_id=${planId}`,
+    create: '/annual-plan/priorities',
+    update: (id) => `/annual-plan/priorities/${id}`,
+    delete: (id) => `/annual-plan/priorities/${id}`
+  },
+  goals: {
+    all: (focusAreaId) => `/annual-plan/goals?focus_area_id=${focusAreaId}`,
+    create: '/annual-plan/goals',
+    update: (id) => `/annual-plan/goals/${id}`,
+    delete: (id) => `/annual-plan/goals/${id}`
+  },
+  activities: {
+    byGoal: (goalId) => `/annual-plan/goals/${goalId}/activities`,
+    create: (goalId) => `/annual-plan/goals/${goalId}/activities`,
+    update: (id) => `/annual-plan/activities/${id}`,
+    delete: (id) => `/annual-plan/activities/${id}`
+  },
+  dailyRoutine: {
+    base: '/annual-plan/daily-routine',
+    get: '/annual-plan/daily-routine',
+    update: '/annual-plan/daily-routine'
   }
 }

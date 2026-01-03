@@ -540,5 +540,161 @@
       "genericCreate": "Error creating item. Please try again.",
       "upgradeAdvice": "Please upgrade your plan in Settings."
     }
+  },
+  "annualPlanning": {
+    "title": "Annual Planning",
+    "subtitle": "Focus on what matters most this year",
+    "myPlan": "My 2026 Plan",
+    "empty": "Start your focused year by defining your 3 main focus areas",
+    "stats": {
+      "totalGoals": "Total Goals",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "completionRate": "Completion Rate",
+      "priorities": "Priorities"
+    },
+    "focusArea": {
+      "title": "Focus Areas",
+      "subtitle": "Choose 3 main areas to focus on this year",
+      "limit": "You can have a maximum of 3 focus areas",
+      "limitReached": "Focus area limit reached (3/3)",
+      "add": "Add Focus Area",
+      "edit": "Edit Focus Area",
+      "delete": "Delete Focus Area",
+      "name": "Area Name",
+      "description": "What do you want to achieve here?",
+      "selectIcon": "Select Icon",
+      "selectColor": "Select Color",
+      "setup": {
+        "intro": {
+          "title": "The Power of 3",
+          "message": "Research shows that focusing on 3 key life areas leads to greater success than trying to improve everything at once. Let's define your 3 focus areas for this year."
+        },
+        "tips": [
+          "Be specific about what matters most",
+          "Choose areas that align with your values",
+          "Think about balance across different life domains"
+        ]
+      },
+      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
+    },
+    "priority": {
+      "title": "Yearly Priorities",
+      "add": "Add Priority",
+      "edit": "Edit Priority",
+      "delete": "Delete Priority",
+      "name": "Priority",
+      "deadline": "Target Date",
+      "linkedTo": "Linked to {{area}}",
+      "noGoals": "No priorities added yet"
+    },
+    "goal": {
+      "add": "Add Goal",
+      "edit": "Edit Goal",
+      "delete": "Delete Goal",
+      "title": "Goal Title",
+      "description": "Description",
+      "focusArea": "Focus Area",
+      "linkToPriority": "Link to Priority (optional)",
+      "targetDate": "Target Date",
+      "progress": "Progress",
+      "status": {
+        "notStarted": "Not Started",
+        "inProgress": "In Progress",
+        "completed": "Completed"
+      },
+      "image": "Visual Inspiration (optional)",
+      "imageUrl": "Image URL",
+      "generateImage": "Generate with AI",
+      "uploadImage": "Upload Image",
+      "daysLeft": "{{count}} day left",
+      "daysLeft_plural": "{{count}} days left",
+      "overdue": "Overdue",
+      "noDeadline": "No target date",
+      "smartHelper": "Make it SMART: Specific, Measurable, Achievable, Relevant, Time-bound",
+      "activitiesCount": "{{count}} activity",
+      "activitiesCount_plural": "{{count}} activities",
+      "viewBoard": "View as Visual Board"
+    },
+    "activity": {
+      "title": "Activities & Habits",
+      "add": "Add Activity",
+      "edit": "Edit Activity",
+      "delete": "Delete Activity",
+      "name": "Activity Name",
+      "description": "Description",
+      "frequency": "Frequency",
+      "timeOfDay": "Time of Day",
+      "duration": "Duration (minutes)",
+      "linkedGoal": "Linked to Goal",
+      "frequencies": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "custom": "Custom Schedule"
+      },
+      "timeSlots": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "anytime": "Anytime"
+      },
+      "todaysTasks": "Today's Activities",
+      "noActivities": "No activities yet. Add daily/weekly actions to achieve your goals.",
+      "markComplete": "Mark Complete",
+      "toggleActive": "Toggle Active"
+    },
+    "dailyRoutine": {
+      "title": "Daily Routine Planner",
+      "subtitle": "Design your ideal day to achieve your goals",
+      "morning": "Morning Routine",
+      "afternoon": "Afternoon Routine",
+      "evening": "Evening Routine",
+      "addBlock": "Add Time Block",
+      "templates": {
+        "title": "Start with a Template",
+        "weekday": "Weekday Schedule",
+        "weekend": "Weekend Schedule",
+        "earlyBird": "Early Bird",
+        "nightOwl": "Night Owl",
+        "blank": "Start from Scratch"
+      },
+      "distribution": "Time Distribution Across Focus Areas",
+      "balanced": "Balanced",
+      "lopsided": "One area is getting most of your time",
+      "dragActivities": "Drag activities from your goals into time slots",
+      "saveTemplate": "Save as Template"
+    },
+    "progress": {
+      "title": "Progress Dashboard",
+      "overview": "Year Overview",
+      "breakdown": "Focus Area Breakdown",
+      "goalProgress": "Goal Progress",
+      "activityStreak": "Activity Streak",
+      "upcomingDeadlines": "Upcoming Deadlines",
+      "insights": "Insights",
+      "noDeadlines": "No upcoming deadlines",
+      "suggestions": {
+        "noProgress": "You haven't updated {{area}} in {{days}} days",
+        "balanced": "Great! You're making progress across all focus areas",
+        "nearDeadline": "{{goal}} is due in {{days}} days"
+      }
+    },
+    "actions": {
+      "setFocusAreas": "Set Focus Areas",
+      "addGoal": "Add Goal",
+      "viewRoutine": "View Daily Routine",
+      "seeAllGoals": "See All Goals",
+      "editPlan": "Edit Plan Title",
+      "exportPlan": "Export Plan"
+    },
+    "deleteConfirm": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
+    "celebration": "🎉 Goal Completed! You're making amazing progress!",
+    "errors": {
+      "loadFailed": "Failed to load annual plan",
+      "createFailed": "Failed to create {{type}}",
+      "updateFailed": "Failed to update {{type}}",
+      "deleteFailed": "Failed to delete {{type}}",
+      "focusAreaLimit": "You can only have 3 focus areas. Delete one to add another."
+    }
   }
 }

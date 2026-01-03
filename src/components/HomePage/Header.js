@@ -32,8 +32,13 @@ import {
   MenuRounded,
   CloseRounded,
   PersonRounded,
-  SettingsRounded
+  SettingsRounded,
+  TimelineRounded,
+  Timer,
+  PlayArrow,
+  Pause
 } from '@mui/icons-material'
+import { usePomodoro } from '../../context/PomodoroContext'
 import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 import { useTranslation } from 'react-i18next'
@@ -56,6 +61,15 @@ const Header = () => {
 
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+
+  // Pomodoro
+  const { timeLeft, isActive: isTimerActive, showWidget, setShowWidget, settings } = usePomodoro()
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
 
   const logout = async () => {
     await contextLogout()
@@ -125,10 +139,36 @@ const Header = () => {
         <Stack direction='row' spacing={1} alignItems='center' sx={{ display: { xs: 'none', md: 'flex' } }}>
           {user ? (
             <>
+              {/* Pomodoro Timer Button - Desktop */}
+              {settings.enabled && (
+                <>
+                  <IconButton
+                    variant='plain'
+                    size='sm'
+                    onClick={() => setShowWidget(!showWidget)}
+                    sx={{
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' },
+                      fontFamily: 'monospace',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      gap: 0.5,
+                      px: 1
+                    }}
+                  >
+                    <Timer fontSize='small' />
+                    {isTimerActive && formatTime(timeLeft)}
+                  </IconButton>
+                  {/* Separator */}
+                  <Box sx={{ width: 2, height: 24, bgcolor: 'rgba(255,255,255,0.35)', mx: 2 }} />
+                </>
+              )}
+
               {[
                 { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
                 { name: t('header.cards'), path: '/cards', icon: <SchoolRounded /> },
-                { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> }
+                { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
+                { name: t('annualPlanning.title'), path: '/annual-planning', icon: <TimelineRounded /> }
               ].map((item) => (
                 <Button
                   key={item.name}
@@ -405,7 +445,8 @@ const Header = () => {
                 {[
                   { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
                   { name: t('header.cards'), path: '/cards', icon: <SchoolRounded /> },
-                  { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> }
+                  { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
+                  { name: t('annualPlanning.title'), path: '/annual-planning', icon: <TimelineRounded /> }
                 ].map((item) => (
                   <ListItem key={item.name}>
                     <ListItemButton component={Link} to={item.path} onClick={() => setMobileMenuOpen(false)} selected={isActive(item.path)}>
@@ -414,6 +455,7 @@ const Header = () => {
                     </ListItemButton>
                   </ListItem>
                 ))}
+
                 <ListDivider sx={{ my: 1 }} />
                 <ListItem>
                   <ListItemButton component={Link} to='/profile' onClick={() => setMobileMenuOpen(false)}>
@@ -431,6 +473,28 @@ const Header = () => {
                     {t('common.settings')}
                   </ListItemButton>
                 </ListItem>
+
+                {/* Pomodoro Timer - Mobile */}
+                {settings.enabled && (
+                  <>
+                    <ListDivider sx={{ my: 1 }} />
+                    <ListItem>
+                      <ListItemButton
+                        onClick={() => {
+                          setShowWidget(!showWidget)
+                          setMobileMenuOpen(false)
+                        }}
+                        selected={isTimerActive}
+                      >
+                        <ListItemDecorator>
+                          <Timer />
+                        </ListItemDecorator>
+                        {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : 'Pomodoro Timer'}
+                      </ListItemButton>
+                    </ListItem>
+                  </>
+                )}
+
                 <ListDivider sx={{ my: 1 }} />
                 <ListItem>
                   <ListItemButton

@@ -469,5 +469,168 @@
       "q4": "Offrez-vous des réductions étudiantes?",
       "a4": "Oui, nous offrons des tarifs spéciaux pour les étudiants vérifiés. Contactez-nous pour plus de détails."
     }
+  },
+  "annualPlanning": {
+    "title": "Planification Annuelle",
+    "subtitle": "Concentrez-vous sur l'essentiel cette année",
+    "myPlan": "Mon Plan 2026",
+    "empty": "Commencez votre année ciblée en définissant vos 3 domaines prioritaires",
+    "stats": {
+      "totalGoals": "Total des Objectifs",
+      "inProgress": "En Cours",
+      "completed": "Terminé",
+      "completionRate": "Taux de Réussite",
+      "priorities": "Priorités"
+    },
+    "focusArea": {
+      "title": "Domaines Prioritaires",
+      "subtitle": "Choisissez 3 domaines principaux sur lesquels vous concentrer",
+      "limit": "Vous pouvez avoir un maximum de 3 domaines prioritaires",
+      "limitReached": "Limite atteinte (3/3)",
+      "add": "Ajouter un Domaine",
+      "edit": "Modifier le Domaine",
+      "delete": "Supprimer le Domaine",
+      "name": "Nom du Domaine",
+      "description": "Que voulez-vous accomplir ici ?",
+      "selectIcon": "Sélectionner une Icône",
+      "selectColor": "Sélectionner une Couleur",
+      "setup": {
+        "intro": {
+          "title": "Le Pouvoir de 3",
+          "message": "Les recherches montrent que se concentrer sur 3 domaines clés mène à plus de succès que d'essayer de tout améliorer à la fois. Définissons vos 3 domaines pour cette année."
+        },
+        "tips": [
+          "Soyez précis sur ce qui compte le plus",
+          "Choisissez des domaines alignés avec vos valeurs",
+          "Pensez à l'équilibre entre les différents aspects de la vie"
+        ]
+      },
+      "examples": [
+        "Croissance Professionnelle",
+        "Santé et Vitalité",
+        "Liberté Financière",
+        "Relations",
+        "Projets Créatifs",
+        "Apprentissage et Compétences"
+      ]
+    },
+    "priority": {
+      "title": "Priorités Annuelles",
+      "add": "Ajouter une Priorité",
+      "edit": "Modifier la Priorité",
+      "delete": "Supprimer la Priorité",
+      "name": "Priorité",
+      "deadline": "Date Cible",
+      "linkedTo": "Lié à {{area}}",
+      "noGoals": "Aucun objectif lié pour le moment"
+    },
+    "goal": {
+      "add": "Ajouter un Objectif",
+      "edit": "Modifier l'Objectif",
+      "delete": "Supprimer l'Objectif",
+      "title": "Titre de l'Objectif",
+      "description": "Description",
+      "focusArea": "Domaine Prioritaire",
+      "linkToPriority": "Lier à une Priorité (optionnel)",
+      "targetDate": "Date Cible",
+      "progress": "Progrès",
+      "status": {
+        "notStarted": "Pas Commencé",
+        "inProgress": "En Cours",
+        "completed": "Terminé"
+      },
+      "image": "Inspiration Visuelle (optionnel)",
+      "imageUrl": "URL de l'Image",
+      "generateImage": "Générer avec l'IA",
+      "uploadImage": "Téléverser une Image",
+      "daysLeft": "Il reste {{count}} jour",
+      "daysLeft_plural": "Il reste {{count}} jours",
+      "overdue": "En Retard",
+      "noDeadline": "Pas de date cible",
+      "smartHelper": "Rendez-le SMART : Spécifique, Mesurable, Atteignable, Pertinent, Temporel",
+      "activitiesCount": "{{count}} activité",
+      "activitiesCount_plural": "{{count}} activités",
+      "viewBoard": "Voir en Tableau"
+    },
+    "activity": {
+      "title": "Activités & Habitudes",
+      "add": "Ajouter une Activité",
+      "edit": "Modifier l'Activité",
+      "delete": "Supprimer l'Activité",
+      "name": "Nom de l'Activité",
+      "description": "Description",
+      "frequency": "Fréquence",
+      "timeOfDay": "Moment de la Journée",
+      "duration": "Durée (minutes)",
+      "linkedGoal": "Lié à l'Objectif",
+      "frequencies": {
+        "daily": "Quotidien",
+        "weekly": "Hebdomadaire",
+        "custom": "Personnalisé"
+      },
+      "timeSlots": {
+        "morning": "Matin",
+        "afternoon": "Après-midi",
+        "evening": "Soir",
+        "anytime": "N'importe quand"
+      },
+      "todaysTasks": "Activités d'Aujourd'hui",
+      "noActivities": "Aucune activité pour l'instant. Ajoutez des actions quotidiennes/hebdomadaires pour atteindre vos objectifs.",
+      "markComplete": "Marquer comme Terminé",
+      "toggleActive": "Activer/Désactiver"
+    },
+    "dailyRoutine": {
+      "title": "Planificateur de Routine Quotidienne",
+      "subtitle": "Concevez votre journée idéale pour atteindre vos objectifs",
+      "morning": "Routine Matinale",
+      "afternoon": "Routine de l'Après-midi",
+      "evening": "Routine du Soir",
+      "addBlock": "Ajouter un Bloc de Temps",
+      "templates": {
+        "title": "Commencer avec un Modèle",
+        "weekday": "Horaire de Semaine",
+        "weekend": "Horaire de Week-end",
+        "earlyBird": "Lève-tôt",
+        "nightOwl": "Oiseau de Nuit",
+        "blank": "Partir de Zéro"
+      },
+      "distribution": "Répartition du Temps par Domaine",
+      "balanced": "Équilibré",
+      "lopsided": "Un domaine accapare la majorité de votre temps",
+      "dragActivities": "Glissez les activités de vos objectifs dans les créneaux horaires",
+      "saveTemplate": "Enregistrer comme Modèle"
+    },
+    "progress": {
+      "title": "Tableau de Bord des Progrès",
+      "overview": "Vue d'Ensemble Annuelle",
+      "breakdown": "Répartition par Domaine",
+      "goalProgress": "Progrès des Objectifs",
+      "activityStreak": "Série d'Activités",
+      "upcomingDeadlines": "Échéances à Venir",
+      "insights": "Aperçus",
+      "noDeadlines": "Aucune échéance à venir",
+      "suggestions": {
+        "noProgress": "Vous n'avez pas mis à jour {{area}} depuis {{days}} jours",
+        "balanced": "Super ! Vous progressez dans tous les domaines",
+        "nearDeadline": "{{goal}} arrive à échéance dans {{days}} jours"
+      }
+    },
+    "actions": {
+      "setFocusAreas": "Définir Domaines",
+      "addGoal": "Ajouter Objectif",
+      "viewRoutine": "Voir Routine",
+      "seeAllGoals": "Voir Tous les Objectifs",
+      "editPlan": "Modifier le Titre",
+      "exportPlan": "Exporter le Plan"
+    },
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce {{type}} ? Cette action est irréversible.",
+    "celebration": "🎉 Objectif Atteint ! Vous faites des progrès incroyables !",
+    "errors": {
+      "loadFailed": "Échec du chargement du plan annuel",
+      "createFailed": "Échec de la création de {{type}}",
+      "updateFailed": "Échec de la mise à jour de {{type}}",
+      "deleteFailed": "Échec de la suppression de {{type}}",
+      "focusAreaLimit": "Vous ne pouvez avoir que 3 domaines prioritaires. Supprimez-en un pour en ajouter un autre."
+    }
   }
 }

@@ -469,5 +469,168 @@
       "q4": "Bieten Sie Studentenrabatte an?",
       "a4": "Ja, wir bieten Sonderpreise für verifizierte Studenten an. Kontaktieren Sie uns für weitere Details."
     }
+  },
+  "annualPlanning": {
+    "title": "Jahresplanung",
+    "subtitle": "Konzentrieren Sie sich dieses Jahr auf das Wichtigste",
+    "myPlan": "Mein Plan 2026",
+    "empty": "Beginnen Sie Ihr fokussiertes Jahr, indem Sie Ihre 3 Hauptbereiche definieren",
+    "stats": {
+      "totalGoals": "Ziele Gesamt",
+      "inProgress": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "completionRate": "Abschlussrate",
+      "priorities": "Prioritäten"
+    },
+    "focusArea": {
+      "title": "Fokusbereiche",
+      "subtitle": "Wählen Sie 3 Hauptbereiche, auf die Sie sich dieses Jahr konzentrieren möchten",
+      "limit": "Sie können maximal 3 Fokusbereiche haben",
+      "limitReached": "Fokusbereichslimit erreicht (3/3)",
+      "add": "Fokusbereich Hinzufügen",
+      "edit": "Bereich Bearbeiten",
+      "delete": "Bereich Löschen",
+      "name": "Bereichsname",
+      "description": "Was möchten Sie hier erreichen?",
+      "selectIcon": "Icon Auswählen",
+      "selectColor": "Farbe Auswählen",
+      "setup": {
+        "intro": {
+          "title": "Die Kraft der 3",
+          "message": "Untersuchungen zeigen, dass die Konzentration auf 3 wichtige Lebensbereiche zu größerem Erfolg führt, als zu versuchen, alles auf einmal zu verbessern. Definieren wir Ihre 3 Bereiche für dieses Jahr."
+        },
+        "tips": [
+          "Seien Sie spezifisch, was am wichtigsten ist",
+          "Wählen Sie Bereiche, die Ihren Werten entsprechen",
+          "Denken Sie an ein Gleichgewicht zwischen verschiedenen Lebensbereichen"
+        ]
+      },
+      "examples": [
+        "Karrierewachstum",
+        "Gesundheit & Vitalität",
+        "Finanzielle Freiheit",
+        "Beziehungen",
+        "Kreative Projekte",
+        "Lernen & Fähigkeiten"
+      ]
+    },
+    "priority": {
+      "title": "Jahresprioritäten",
+      "add": "Priorität Hinzufügen",
+      "edit": "Priorität Bearbeiten",
+      "delete": "Priorität Löschen",
+      "name": "Priorität",
+      "deadline": "Zieldatum",
+      "linkedTo": "Verknüpft mit {{area}}",
+      "noGoals": "Noch keine Ziele verknüpft"
+    },
+    "goal": {
+      "add": "Ziel Hinzufügen",
+      "edit": "Ziel Bearbeiten",
+      "delete": "Ziel Löschen",
+      "title": "Zieltitel",
+      "description": "Beschreibung",
+      "focusArea": "Fokusbereich",
+      "linkToPriority": "Mit Priorität verknüpfen (optional)",
+      "targetDate": "Zieldatum",
+      "progress": "Fortschritt",
+      "status": {
+        "notStarted": "Nicht Begonnen",
+        "inProgress": "In Bearbeitung",
+        "completed": "Abgeschlossen"
+      },
+      "image": "Visuelle Inspiration (optional)",
+      "imageUrl": "Bild-URL",
+      "generateImage": "Mit KI Generieren",
+      "uploadImage": "Bild Hochladen",
+      "daysLeft": "Noch {{count}} Tag",
+      "daysLeft_plural": "Noch {{count}} Tage",
+      "overdue": "Überfällig",
+      "noDeadline": "Kein Zieldatum",
+      "smartHelper": "Machen Sie es SMART: Spezifisch, Messbar, Erreichbar, Relevant, Zeitgebunden",
+      "activitiesCount": "{{count}} Aktivität",
+      "activitiesCount_plural": "{{count}} Aktivitäten",
+      "viewBoard": "Als Board Anzeigen"
+    },
+    "activity": {
+      "title": "Aktivitäten & Gewohnheiten",
+      "add": "Aktivität Hinzufügen",
+      "edit": "Aktivität Bearbeiten",
+      "delete": "Aktivität Löschen",
+      "name": "Aktivitätsname",
+      "description": "Beschreibung",
+      "frequency": "Häufigkeit",
+      "timeOfDay": "Tageszeit",
+      "duration": "Dauer (Minuten)",
+      "linkedGoal": "Verknüpftes Ziel",
+      "frequencies": {
+        "daily": "Täglich",
+        "weekly": "Wöchentlich",
+        "custom": "Benutzerdefiniert"
+      },
+      "timeSlots": {
+        "morning": "Morgen",
+        "afternoon": "Nachmittag",
+        "evening": "Abend",
+        "anytime": "Jederzeit"
+      },
+      "todaysTasks": "Heutige Aktivitäten",
+      "noActivities": "Noch keine Aktivitäten. Fügen Sie tägliche/wöchentliche Aktionen hinzu, um Ihre Ziele zu erreichen.",
+      "markComplete": "Als Erledigt Markieren",
+      "toggleActive": "Aktiv Umschalten"
+    },
+    "dailyRoutine": {
+      "title": "Tagesablauf Planer",
+      "subtitle": "Gestalten Sie Ihren idealen Tag, um Ihre Ziele zu erreichen",
+      "morning": "Morgenroutine",
+      "afternoon": "Nachmittagsroutine",
+      "evening": "Abendroutine",
+      "addBlock": "Zeitblock Hinzufügen",
+      "templates": {
+        "title": "Mit Vorlage Beginnen",
+        "weekday": "Wochenplan",
+        "weekend": "Wochenendplan",
+        "earlyBird": "Frühaufsteher",
+        "nightOwl": "Nachteule",
+        "blank": "Von Grund auf Neu"
+      },
+      "distribution": "Zeitverteilung über Fokusbereiche",
+      "balanced": "Ausgeglichen",
+      "lopsided": "Ein Bereich beansprucht die meiste Zeit",
+      "dragActivities": "Ziehen Sie Aktivitäten von Ihren Zielen in die Zeitfenster",
+      "saveTemplate": "Als Vorlage Speichern"
+    },
+    "progress": {
+      "title": "Fortschritts-Dashboard",
+      "overview": "Jahresübersicht",
+      "breakdown": "Aufschlüsselung nach Bereich",
+      "goalProgress": "Zielfortschritt",
+      "activityStreak": "Aktivitätssträhne",
+      "upcomingDeadlines": "Kommende Fristen",
+      "insights": "Einblicke",
+      "noDeadlines": "Keine anstehenden Fristen",
+      "suggestions": {
+        "noProgress": "Sie haben {{area}} seit {{days}} Tagen nicht aktualisiert",
+        "balanced": "Super! Sie machen Fortschritte in allen Bereichen",
+        "nearDeadline": "{{goal}} ist in {{days}} Tagen fällig"
+      }
+    },
+    "actions": {
+      "setFocusAreas": "Bereiche Festlegen",
+      "addGoal": "Ziel Hinzufügen",
+      "viewRoutine": "Tagesablauf Anzeigen",
+      "seeAllGoals": "Alle Ziele Anzeigen",
+      "editPlan": "Plan Bearbeiten",
+      "exportPlan": "Plan Exportieren"
+    },
+    "deleteConfirm": "Sind Sie sicher, dass Sie dieses {{type}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "celebration": "🎉 Ziel Erreicht! Sie machen erstaunliche Fortschritte!",
+    "errors": {
+      "loadFailed": "Laden des Jahresplans fehlgeschlagen",
+      "createFailed": "Erstellen von {{type}} fehlgeschlagen",
+      "updateFailed": "Aktualisieren von {{type}} fehlgeschlagen",
+      "deleteFailed": "Löschen von {{type}} fehlgeschlagen",
+      "focusAreaLimit": "Sie können nur 3 Fokusbereiche haben. Löschen Sie einen, um einen anderen hinzuzufügen."
+    }
   }
 }

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { apiClient } from '../api/client'
+import i18n from '../i18n'
 
 const AuthContext = createContext(null)
 
@@ -15,6 +16,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiClient.get('/users/me')
       setUser(response.data)
+      if (response.data?.preferences?.language) {
+        i18n.changeLanguage(response.data.preferences.language)
+      }
     } catch (error) {
       // If 401, it just means not logged in
       setUser(null)

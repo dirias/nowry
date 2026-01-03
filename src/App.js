@@ -13,6 +13,7 @@ import './styles/Book.css'
 import './styles/TextMenu.css'
 import './styles/Card.css'
 import './styles/LexicalEditor.css'
+import './styles/AnnualPlanning.css'
 
 import 'keen-slider/keen-slider.min.css'
 
@@ -31,8 +32,11 @@ import StudyCenter from './components/Study/StudyCenter'
 import UserProfile from './components/User/Profile/UserProfile'
 import AccountSettings from './components/User/Profile/AccountSettings'
 import BugDashboard from './components/Bugs/BugDashboard'
+import { AnnualPlanningHome, FocusAreaSetup, FocusAreaView, DailyRoutinePlanner } from './components/AnnualPlanning'
 
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { PomodoroProvider } from './context/PomodoroContext'
+import PomodoroWidget from './components/Pomodoro/PomodoroWidget'
 
 const AppContent = () => {
   const { isAuthenticated, user, loading } = useAuth()
@@ -80,9 +84,14 @@ const AppContent = () => {
           <Route path='/register' element={<Register />} />
           <Route path='/onboarding' element={<OnboardingWizard />} />
           <Route path='/resetPassword' element={<ResetPassword />} />
+          <Route path='/annual-planning' element={<AnnualPlanningHome />} />
+          <Route path='/annual-planning/setup' element={<FocusAreaSetup />} />
+          <Route path='/annual-planning/area/:id' element={<FocusAreaView />} />
+          <Route path='/annual-planning/daily-routine' element={<DailyRoutinePlanner />} />
         </Routes>
       </main>
       <Footer />
+      <PomodoroWidget />
     </div>
   )
 }
@@ -90,11 +99,13 @@ const AppContent = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <DynamicThemeProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </DynamicThemeProvider>
+      <PomodoroProvider>
+        <DynamicThemeProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </DynamicThemeProvider>
+      </PomodoroProvider>
     </AuthProvider>
   )
 }

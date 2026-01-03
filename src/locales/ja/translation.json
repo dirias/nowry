@@ -469,5 +469,157 @@
       "q4": "学生割引はありますか？",
       "a4": "はい、確認済みの学生向けに特別価格を提供しています。詳細についてはお問い合わせください。"
     }
+  },
+  "annualPlanning": {
+    "title": "年間計画",
+    "subtitle": "今年最も重要なことに集中しましょう",
+    "myPlan": "私の2026年プラン",
+    "empty": "3つの主要な重点分野を定義して、集中した1年を始めましょう",
+    "stats": {
+      "totalGoals": "合計目標数",
+      "inProgress": "進行中",
+      "completed": "完了",
+      "completionRate": "完了率",
+      "priorities": "優先事項"
+    },
+    "focusArea": {
+      "title": "重点分野",
+      "subtitle": "今年集中する3つの主要な分野を選択してください",
+      "limit": "重点分野は最大3つまでです",
+      "limitReached": "重点分野の上限に達しました (3/3)",
+      "add": "重点分野を追加",
+      "edit": "分野を編集",
+      "delete": "分野を削除",
+      "name": "分野名",
+      "description": "ここで何を達成したいですか？",
+      "selectIcon": "アイコンを選択",
+      "selectColor": "色を選択",
+      "setup": {
+        "intro": {
+          "title": "3の力",
+          "message": "研究によると、一度にすべてを改善しようとするよりも、3つの主要な生活分野に集中する方が大きな成功につながります。今年の3つの分野を定義しましょう。"
+        },
+        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"]
+      },
+      "examples": ["キャリア成長", "健康と活力", "経済的自由", "人間関係", "創造的な活動", "学習とスキル"]
+    },
+    "priority": {
+      "title": "年間優先事項",
+      "add": "優先事項を追加",
+      "edit": "優先事項を編集",
+      "delete": "優先事項を削除",
+      "name": "優先事項",
+      "deadline": "目標日",
+      "linkedTo": "{{area}}に関連",
+      "noGoals": "まだ目標がリンクされていません"
+    },
+    "goal": {
+      "add": "目標を追加",
+      "edit": "目標を編集",
+      "delete": "目標を削除",
+      "title": "目標タイトル",
+      "description": "説明",
+      "focusArea": "重点分野",
+      "linkToPriority": "優先事項にリンク (オプション)",
+      "targetDate": "目標日",
+      "progress": "進捗",
+      "status": {
+        "notStarted": "未着手",
+        "inProgress": "進行中",
+        "completed": "完了"
+      },
+      "image": "ビジュアルインスピレーション (オプション)",
+      "imageUrl": "画像URL",
+      "generateImage": "AIで生成",
+      "uploadImage": "画像をアップロード",
+      "daysLeft": "残り{{count}}日",
+      "daysLeft_plural": "残り{{count}}日",
+      "overdue": "期限切れ",
+      "noDeadline": "目標日なし",
+      "smartHelper": "SMARTにする：具体的、測定可能、達成可能、関連性、期限付き",
+      "activitiesCount": "{{count}} アクティビティ",
+      "activitiesCount_plural": "{{count}} アクティビティ",
+      "viewBoard": "ボードとして表示"
+    },
+    "activity": {
+      "title": "活動＆習慣",
+      "add": "活動を追加",
+      "edit": "活動を編集",
+      "delete": "活動を削除",
+      "name": "活動名",
+      "description": "説明",
+      "frequency": "頻度",
+      "timeOfDay": "時間帯",
+      "duration": "期間 (分)",
+      "linkedGoal": "リンクされた目標",
+      "frequencies": {
+        "daily": "毎日",
+        "weekly": "毎週",
+        "custom": "カスタム"
+      },
+      "timeSlots": {
+        "morning": "朝",
+        "afternoon": "午後",
+        "evening": "夜",
+        "anytime": "いつでも"
+      },
+      "todaysTasks": "今日の活動",
+      "noActivities": "活動はまだありません。目標を達成するために、毎日/毎週のアクションを追加してください。",
+      "markComplete": "完了としてマーク",
+      "toggleActive": "有効/無効を切り替え"
+    },
+    "dailyRoutine": {
+      "title": "日課プランナー",
+      "subtitle": "目標を達成するための理想的な一日をデザインしましょう",
+      "morning": "朝のルーチン",
+      "afternoon": "午後のルーチン",
+      "evening": "夜のルーチン",
+      "addBlock": "タイムブロックを追加",
+      "templates": {
+        "title": "テンプレートから開始",
+        "weekday": "平日スケジュール",
+        "weekend": "週末スケジュール",
+        "earlyBird": "早起き",
+        "nightOwl": "夜型",
+        "blank": "ゼロから開始"
+      },
+      "distribution": "重点分野別時間配分",
+      "balanced": "バランス良好",
+      "lopsided": "1つの分野に時間が偏っています",
+      "dragActivities": "活動を目標からタイムスロットにドラッグしてください",
+      "saveTemplate": "テンプレートとして保存"
+    },
+    "progress": {
+      "title": "進捗ダッシュボード",
+      "overview": "年間概要",
+      "breakdown": "分野別内訳",
+      "goalProgress": "目標進捗",
+      "activityStreak": "活動ストリーク",
+      "upcomingDeadlines": "今後の締め切り",
+      "insights": "インサイト",
+      "noDeadlines": "今後の締め切りはありません",
+      "suggestions": {
+        "noProgress": "{{days}}日間、{{area}}を更新していません",
+        "balanced": "素晴らしい！すべての分野で進歩しています",
+        "nearDeadline": "{{goal}}の期限が{{days}}日後に迫っています"
+      }
+    },
+    "actions": {
+      "setFocusAreas": "分野を設定",
+      "addGoal": "目標を追加",
+      "viewRoutine": "日課を表示",
+      "seeAllGoals": "全目標を表示",
+      "editPlan": "タイトルを編集",
+      "exportPlan": "プランをエクスポート"
+    },
+    "deleteConfirm": "この{{type}}を削除してもよろしいですか？この操作は元に戻せません。",
+    "celebration": "🎉 目標達成！素晴らしい進歩です！",
+    "errors": {
+      "loadFailed": "年間計画の読み込みに失敗しました",
+      "createFailed": "{{type}}の作成に失敗しました",
+      "updateFailed": "{{type}}の更新に失敗しました",
+      "deleteFailed": "{{type}}の削除に失敗しました",
+      "focusAreaLimit": "重点分野は3つまでです。追加するには1つ削除してください。"
+    }
   }
 }

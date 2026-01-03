@@ -56,13 +56,13 @@ const Landing = () => {
         {/* Hero Section */}
         <Box
           sx={{
-            minHeight: '100vh',
+            minHeight: { xs: 'auto', md: '100vh' },
             display: 'flex',
             flexDirection: { xs: 'column-reverse', md: 'row' },
             alignItems: 'center',
             justifyContent: 'center',
-            gap: { xs: 4, md: 8 },
-            py: { xs: 4, md: 8 }
+            gap: { xs: 3, md: 8 },
+            py: { xs: 3, md: 8 }
           }}
         >
           {/* Text Section */}
@@ -78,9 +78,9 @@ const Landing = () => {
             <Typography
               level='h1'
               sx={{
-                fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' },
+                fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
                 fontWeight: 800,
-                letterSpacing: -2,
+                letterSpacing: { xs: -1, md: -2 },
                 lineHeight: 1.1,
                 color: isDark ? 'primary.300' : 'primary.700'
               }}
@@ -100,16 +100,22 @@ const Landing = () => {
             </Typography>
 
             {/* CTA Buttons */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              sx={{ justifyContent: { xs: 'center', md: 'flex-start' }, width: { xs: '100%', sm: 'auto' } }}
+            >
               <Button
                 component={Link}
                 to='/register'
                 size='lg'
                 variant='solid'
                 color='primary'
+                fullWidth={{ xs: true, sm: false }}
                 sx={{
                   px: 4,
                   py: 1.5,
+                  minHeight: 48,
                   fontSize: '1.1rem',
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -126,9 +132,11 @@ const Landing = () => {
                 size='lg'
                 variant='outlined'
                 color='neutral'
+                fullWidth={{ xs: true, sm: false }}
                 sx={{
                   px: 4,
                   py: 1.5,
+                  minHeight: 48,
                   fontSize: '1.1rem',
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -151,7 +159,7 @@ const Landing = () => {
             sx={{
               flex: 1,
               width: { xs: '100%', md: '50%' },
-              maxWidth: 550,
+              maxWidth: { xs: 400, md: 550 },
               borderRadius: 'xl',
               boxShadow: 'xl',
               objectFit: 'cover',
@@ -165,7 +173,7 @@ const Landing = () => {
         </Box>
 
         {/* Features Section */}
-        <Box sx={{ py: 8 }}>
+        <Box sx={{ py: { xs: 4, md: 8 } }}>
           <Typography
             level='h2'
             textAlign='left'
@@ -224,12 +232,12 @@ const Landing = () => {
         </Box>
 
         {/* Social Proof */}
-        <Box sx={{ py: 8, textAlign: 'left' }}>
+        <Box sx={{ py: { xs: 4, md: 8 }, textAlign: 'left' }}>
           <Card
             variant='soft'
             color='primary'
             sx={{
-              p: 6
+              p: { xs: 3, md: 6 }
             }}
           >
             <GroupsRounded sx={{ fontSize: 60, color: 'primary.500', mb: 2 }} />
@@ -260,9 +268,11 @@ const Landing = () => {
               size='lg'
               variant='solid'
               color='primary'
+              fullWidth={{ xs: true, sm: false }}
               sx={{
                 mt: 4,
                 px: 5,
+                minHeight: 48,
                 '&:hover': {
                   transform: 'translateY(-2px)',
                   boxShadow: 'lg'

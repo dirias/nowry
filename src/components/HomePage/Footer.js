@@ -2,11 +2,14 @@ import * as React from 'react'
 import { Box, Typography, Divider, useColorScheme, Stack, Button, Dropdown, MenuButton, Menu, MenuItem, IconButton } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { Language as LanguageIcon, Brightness4, Brightness7 } from '@mui/icons-material'
+import { useAuth } from '../../context/AuthContext'
+import { userService } from '../../api/services'
 
 const Footer = () => {
   const { mode, setMode } = useColorScheme()
   const isDark = mode === 'dark'
   const { t, i18n } = useTranslation()
+  const { user } = useAuth()
 
   const languages = [
     { code: 'en', label: 'English' },
@@ -18,8 +21,16 @@ const Footer = () => {
 
   const currentLanguage = languages.find((lang) => lang.code === i18n.language) || languages[0]
 
-  const handleLanguageChange = (langCode) => {
+  const handleLanguageChange = async (langCode) => {
     i18n.changeLanguage(langCode)
+
+    if (user) {
+      try {
+        await userService.updateGeneralPreferences({ language: langCode })
+      } catch (error) {
+        console.error('Failed to sync language preference:', error)
+      }
+    }
   }
 
   const toggleTheme = () => {
