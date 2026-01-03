@@ -1,41 +1,55 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getRoot } from 'lexical'
 import { Box, Typography } from '@mui/joy'
 
-function countWordsAndCharacters(text) {
-  const trimmed = text.trim()
-  const words = trimmed ? trimmed.split(/\s+/).length : 0
-  const characters = trimmed.length
-  return { words, characters }
-}
-
-export default function WordCountPlugin() {
+export default function WordCountPlugin({ onUpdate }) {
   const [editor] = useLexicalComposerContext()
   const [wordCount, setWordCount] = useState(0)
   const [charCount, setCharCount] = useState(0)
+  const lastCountsRef = useRef({ words: 0, characters: 0 })
 
   useEffect(() => {
-    const updateCounts = () => {
-      editor.getEditorState().read(() => {
+    const updateCounts = (editorState) => {
+      editorState.read(() => {
         const root = $getRoot()
-        const textContent = root.getTextContent()
-        const { words, characters } = countWordsAndCharacters(textContent)
-        setWordCount(words)
-        setCharCount(characters)
+        const text = root.getTextContent()
+
+        const words = text
+          .trim()
+          .split(/\s+/)
+          .filter((word) => word.length > 0)
+        const newWordCount = words.length
+        const newCharCount = text.length
+
+        // Only update if values actually changed
+        const lastCounts = lastCountsRef.current
+        if (newWordCount !== lastCounts.words || newCharCount !== lastCounts.characters) {
+          // Update ref immediately to prevent re-entry
+          lastCountsRef.current = { words: newWordCount, characters: newCharCount }
+
+          // Update state
+          setWordCount(newWordCount)
+          setCharCount(newCharCount)
+
+          // Call optional callback
+          if (onUpdate) {
+            onUpdate({ words: newWordCount, characters: newCharCount })
+          }
+        }
       })
     }
 
     // Initial count
-    updateCounts()
+    updateCounts(editor.getEditorState())
 
-    // Register listener for all updates
-    const unregister = editor.registerUpdateListener(() => {
-      updateCounts()
+    // Register listener
+    const unregister = editor.registerUpdateListener(({ editorState }) => {
+      updateCounts(editorState)
     })
 
     return unregister
-  }, [editor])
+  }, [editor]) // Only editor in deps, not onUpdate or state
 
   return (
     <Box

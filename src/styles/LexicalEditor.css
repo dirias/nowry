@@ -163,27 +163,9 @@ ol.editor-list-ol {
   padding: 0;
 }
 
-.editor-scroll-container {
-  height: calc(100vh - 200px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: var(--joy-palette-background-surface);
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
-}
+/* .editor-scroll-container removed - handled by EditorHome.js sx prop */
 
-.editor-page {
-  position: relative;
-  width: 21cm;
-  min-height: 29.7cm;
-  padding: 2cm;
-  background: #fff;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
-  border: 1px solid #ddd;
-  box-sizing: border-box;
-  margin-top: 1rem;
-}
+/* .editor-page removed - handled by Editor.js */
 
 .editor-toolbar {
   position: sticky;
@@ -277,4 +259,64 @@ ol.editor-list-ol {
 .preview-content p {
   margin: 0;
   padding: 0;
+}
+
+/* ====== Image Wrapper Styles ====== */
+.image-wrapper,
+.editor-image {
+  display: block;
+  margin: 16px auto;
+  position: relative;
+  max-width: 100%;
+}
+
+/* Left Alignment - Text wraps on right */
+.image-wrapper.alignment-left,
+.editor-image.alignment-left {
+  float: left;
+  margin-right: 16px;
+  margin-left: 0;
+  margin-bottom: 8px;
+}
+
+/* Right Alignment - Text wraps on left */
+.image-wrapper.alignment-right,
+.editor-image.alignment-right {
+  float: right;
+  margin-left: 16px;
+  margin-right: 0;
+  margin-bottom: 8px;
+}
+
+/* Center Alignment - Block centered */
+.image-wrapper.alignment-center,
+.editor-image.alignment-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  float: none;
+}
+
+/* Inline Alignment - Flows with text */
+.image-wrapper.alignment-inline,
+.editor-image.alignment-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px;
+}
+
+.image-wrapper img,
+.editor-image {
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  display: block;
+}
+
+/* Selection state */
+.image-wrapper:focus,
+.editor-image:focus {
+  outline: 2px solid var(--joy-palette-primary-500, #0b6bcb);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

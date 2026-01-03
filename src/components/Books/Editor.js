@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Button, useTheme, Snackbar, Alert } from '@mui/joy'
+import { Box, useTheme, Snackbar, Alert, Button } from '@mui/joy'
+import DOMPurify from 'dompurify'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
@@ -12,14 +13,13 @@ import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
 import {
   $createParagraphNode,
   $getRoot,
-  $getSelection,
-  $isRangeSelection,
   $isElementNode,
   $isDecoratorNode,
-  FORMAT_TEXT_COMMAND,
-  headers,
-  TextNode
+  BLUR_COMMAND,
+  FOCUS_COMMAND,
+  COMMAND_PRIORITY_LOW
 } from 'lexical'
+import { $createPageNode } from '../../nodes/PageNode'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 
 // Plugins and nodes
@@ -28,8 +28,11 @@ import RegisterHorizontalRulePlugin from '../../plugin/RegisterHorizontalRulePlu
 import TablePlugin from '../Editor/plugins/TablePlugin'
 import SlashCommandPlugin from '../Editor/SlashCommandPlugin'
 import WordCountPlugin from '../Editor/WordCountPlugin'
+import ContinuousPaginationPlugin from '../Editor/plugins/ContinuousPaginationPlugin'
+import ImageUploadPlugin from '../Editor/plugins/ImageUploadPlugin'
 import { HorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
 import { ImageNode } from '../../nodes/ImageNode'
+import { PageNode } from '../../nodes/PageNode'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { CodeNode } from '@lexical/code'
@@ -37,15 +40,13 @@ import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { ColumnContainerNode, ColumnNode } from '../../nodes/ColumnNodes'
 
 // UI Components
-import Toolbar from './Toolbar'
 import TextMenu from '../Menu/TextMenu'
 import StudyCard from '../Cards/GeneratedCards'
 import QuestionnaireModal from '../Cards/QuestionnaireModal'
 import VisualizerModal from '../Cards/VisualizerModal'
 import { cardsService, quizzesService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
-import PaginationPlugin from '../Editor/plugins/PaginationPlugin'
-import PageFlowPlugin from '../Editor/plugins/PageFlowPlugin'
+import EditorErrorBoundary from '../Editor/EditorErrorBoundary'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
 
 const toPx = (val) => {
@@ -83,71 +84,72 @@ const EditorTheme = {
   }
 }
 
-const EditorContentUpdater = ({ content, trigger }) => {
+function EditorSyncPlugin({ onHtmlChange }) {
   const [editor] = useLexicalComposerContext()
-  const isFirstRender = useRef(true)
+  const previousHtml = useRef('')
+  const isUpdating = useRef(false)
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
-    editor.update(() => {
-      const parser = new DOMParser()
-      const dom = parser.parseFromString(content || '<p></p>', 'text/html')
-      const nodes = $generateNodesFromDOM(editor, dom)
-      const root = $getRoot()
-      root.clear()
-
-      // Fix: Ensure only Element/Decorator nodes go to Root. Wrap others in Paragraph.
-      const validNodes = []
-      let currentParagraph = null
-
-      nodes.forEach((node) => {
-        if ($isElementNode(node) || $isDecoratorNode(node)) {
-          if (currentParagraph) {
-            validNodes.push(currentParagraph)
-            currentParagraph = null
-          }
-          validNodes.push(node)
-        } else {
-          // Wrap text/linebreaks in a paragraph
-          if (!currentParagraph) currentParagraph = $createParagraphNode()
-          currentParagraph.append(node)
-        }
-      })
-      if (currentParagraph) validNodes.push(currentParagraph)
-
-      root.append(...validNodes)
-    })
-  }, [trigger, editor])
-  return null
-}
-
-function EditorContent({ setContent }) {
-  const [editor] = useLexicalComposerContext()
   return (
     <OnChangePlugin
       onChange={(editorState) => {
+        // Prevent re-entrant calls
+        if (isUpdating.current) return
+
         editorState.read(() => {
           const html = $generateHtmlFromNodes(editor, null)
-          setContent(html)
+          // Only call onHtmlChange if HTML actually changed
+          if (html !== previousHtml.current) {
+            previousHtml.current = html
+            isUpdating.current = true
+
+            // Use setTimeout to break out of the current event loop
+            setTimeout(() => {
+              onHtmlChange(html)
+              isUpdating.current = false
+            }, 0)
+          }
         })
       }}
     />
   )
 }
 
+function FocusReportPlugin({ onFocus }) {
+  const [editor] = useLexicalComposerContext()
+  useEffect(() => {
+    // Report focus immediately on mount if needed, or wait for event
+    // If this is the *only* editor, we can just say we are focused.
+    onFocus(editor)
+    return editor.registerCommand(
+      FOCUS_COMMAND,
+      () => {
+        onFocus(editor)
+        return false
+      },
+      COMMAND_PRIORITY_LOW
+    )
+  }, [editor, onFocus])
+  return null
+}
+
+function EditorEditablePlugin({ isReadOnly }) {
+  const [editor] = useLexicalComposerContext()
+  useEffect(() => {
+    editor.setEditable(!isReadOnly)
+  }, [editor, isReadOnly])
+  return null
+}
+
 export default function Editor({
-  activePage,
+  initialContent,
   book,
-  content,
-  setContent,
   onSave,
+  onFocus,
+  onPageCountChange,
+  onImageUpload,
   pageSize = 'a4',
-  setPageSize,
-  onPageOverflow,
-  onMergeBack
+  pageZoom = 1.0,
+  isReadOnly = false
 }) {
   const theme = useTheme()
   const menuRef = useRef()
@@ -165,69 +167,130 @@ export default function Editor({
   const navigate = useNavigate()
   const { t } = useTranslation()
 
-  const editorConfig = {
-    namespace: 'NowryEditor',
-    theme: EditorTheme,
-    onError: (e) => console.error('Lexical error:', e),
-    nodes: [
-      HeadingNode,
-      QuoteNode,
-      ListNode,
-      ListItemNode,
-      CodeNode,
-      AutoLinkNode,
-      LinkNode,
-      HorizontalRuleNode,
-      ImageNode,
-      ColumnContainerNode,
-      ColumnNode // Multi-column support
-    ],
-    editorState: (editor) => {
-      const parser = new DOMParser()
-      // Use flattened content if in edit mode for multi-column pages
-      const dom = parser.parseFromString(content || '<p></p>', 'text/html')
-      const nodes = $generateNodesFromDOM(editor, dom)
-      editor.update(() => {
-        const root = $getRoot()
-        root.clear()
+  // We keep track of content for auto-save, though ideally EditorHome handles the heavy lifting
+  // But SyncPlugin pushes updates up
+  const [internalContent, setInternalContent] = useState(initialContent || '')
 
-        const validNodes = []
-        let currentParagraph = null
+  useEffect(() => {
+    if (onSave) {
+      onSave(internalContent)
+    }
+  }, [internalContent, onSave])
 
-        nodes.forEach((node) => {
-          if ($isElementNode(node) || $isDecoratorNode(node)) {
-            if (currentParagraph) {
-              validNodes.push(currentParagraph)
-              currentParagraph = null
-            }
-            validNodes.push(node)
-          } else {
-            if (!currentParagraph) currentParagraph = $createParagraphNode()
-            currentParagraph.append(node)
-          }
-        })
-        if (currentParagraph) validNodes.push(currentParagraph)
+  // Ref to track last page data to prevent infinite loops
+  const lastPagesJsonRef = useRef('')
+  const pageUpdateTimeoutRef = useRef(null)
 
-        root.append(...validNodes)
+  // Page Tracking Logic (Count + Preview)
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const updatePages = () => {
+      if (!containerRef.current) return
+      const pageElements = containerRef.current.querySelectorAll('.editor-page')
+      const pagesData = Array.from(pageElements).map((el, index) => ({
+        index,
+        content: el.innerHTML
+      }))
+
+      // Prevent infinite loop by checking if pages data actually changed
+      const currentPagesJson = JSON.stringify(pagesData.map((p) => p.content.length))
+
+      if (lastPagesJsonRef.current !== currentPagesJson) {
+        lastPagesJsonRef.current = currentPagesJson
+        if (onPageCountChange) {
+          onPageCountChange(pagesData)
+        }
+      }
+    }
+
+    // Use requestAnimationFrame to ensure browser repaints with new pageSize before capturing
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Double RAF ensures paint has completed
+        updatePages()
       })
+    })
+
+    const observer = new MutationObserver((mutations) => {
+      // Debounce updates from content changes (reduced to 500ms for better responsiveness)
+      if (pageUpdateTimeoutRef.current) clearTimeout(pageUpdateTimeoutRef.current)
+      pageUpdateTimeoutRef.current = setTimeout(updatePages, 500)
+    })
+
+    // We observe the containerRef for content changes
+    observer.observe(containerRef.current, { childList: true, subtree: true, characterData: true })
+
+    return () => {
+      observer.disconnect()
+      if (pageUpdateTimeoutRef.current) clearTimeout(pageUpdateTimeoutRef.current)
     }
-  }
+  }, [onPageCountChange, pageSize])
+
+  const editorConfig = useMemo(
+    () => ({
+      namespace: `NowryEditor-${book?._id}`,
+      theme: EditorTheme,
+      nodes: [
+        PageNode,
+        HeadingNode,
+        QuoteNode,
+        ListNode,
+        ListItemNode,
+        CodeNode,
+        AutoLinkNode,
+        LinkNode,
+        HorizontalRuleNode,
+        ImageNode,
+        ColumnContainerNode,
+        ColumnNode
+      ],
+      editorState: (editor) => {
+        const parser = new DOMParser()
+        const sanitized = DOMPurify.sanitize(initialContent || '<p></p>')
+        const dom = parser.parseFromString(sanitized, 'text/html')
+        const nodes = $generateNodesFromDOM(editor, dom)
+        editor.update(() => {
+          const root = $getRoot()
+          root.clear()
+
+          // Create the first page container
+          const page = $createPageNode()
+
+          const validNodes = []
+          let currentParagraph = null
+
+          nodes.forEach((node) => {
+            // Basic normalization
+            if ($isElementNode(node) || $isDecoratorNode(node)) {
+              if (currentParagraph) {
+                validNodes.push(currentParagraph)
+                currentParagraph = null
+              }
+              validNodes.push(node)
+            } else {
+              if (!currentParagraph) currentParagraph = $createParagraphNode()
+              currentParagraph.append(node)
+            }
+          })
+
+          if (currentParagraph) validNodes.push(currentParagraph)
+
+          // If no content, add an empty paragraph so the page is focusable
+          if (validNodes.length === 0) {
+            validNodes.push($createParagraphNode())
+          }
+
+          page.append(...validNodes)
+          root.append(page)
+        })
+      },
+      onError: (e) => console.error('Lexical error:', e)
+    }),
+    [book?._id, initialContent] // Re-init if book ID changes. initialContent only matters on mount logic usually.
+  )
 
   useEffect(() => {
-    // When the active page changes, you can sync the external state if needed
-    if (activePage?.content != null) {
-      setContent(activePage.content)
-    }
-    // Force scroll to top when page changes or reloads
-    if (containerRef.current) {
-      setTimeout(() => {
-        containerRef.current?.scrollTo({ top: 0, behavior: 'instant' })
-      }, 10)
-    }
-  }, [activePage, setContent])
-
-  useEffect(() => {
-    // Hide context menu when clicking outside
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowMenu(false)
@@ -237,7 +300,7 @@ export default function Editor({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleRightClick = (event) => {
+  const handleRightClick = useCallback((event) => {
     event.preventDefault()
     const selection = window.getSelection()
     const text = selection?.toString()
@@ -248,165 +311,135 @@ export default function Editor({
     } else {
       setShowMenu(false)
     }
-  }
+  }, [])
 
-  const handleOptionClick = async (option) => {
-    setShowMenu(false)
-    setError(null)
-    if (option === 'create_study_card' && selectedText) {
+  const handleOptionClick = useCallback(
+    async (option) => {
+      setShowMenu(false)
+      setError(null)
       try {
-        const response = await cardsService.generate(selectedText, 2)
-        setCards(response)
-        setShowStudyCard(true)
+        if (option === 'create_study_card' && selectedText) {
+          const response = await cardsService.generate(selectedText, 2)
+          setCards(response)
+          setShowStudyCard(true)
+        } else if (option === 'create_questionnaire' && selectedText) {
+          const response = await quizzesService.generate(selectedText, 5, 'Medium')
+          setQuestionnaireData(response)
+          setShowQuestionnaire(true)
+        } else if (option === 'create_visual_content' && selectedText) {
+          setShowVisualizer(true)
+        }
       } catch (error) {
-        console.error('Error generating study card:', error)
+        console.error('Error:', error)
         const status = error.response?.status
-        const msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
-
         if (status === 403) {
           setIsLimitError(true)
           setError(t('subscription.errors.upgradeToUse'))
         } else {
-          setError(msg)
+          setError(error.response?.data?.detail || t('subscription.errors.genericCreate'))
         }
       }
-    } else if (option === 'create_questionnaire' && selectedText) {
-      try {
-        // Default to easy/medium mixed, 5 questions
-        const response = await quizzesService.generate(selectedText, 5, 'Medium')
-        setQuestionnaireData(response)
-        setShowQuestionnaire(true)
-      } catch (error) {
-        console.error('Error generating questionnaire:', error)
-        const status = error.response?.status
-        const msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
+    },
+    [selectedText, t]
+  )
 
-        if (status === 403) {
-          setIsLimitError(true)
-          setError(t('subscription.errors.upgradeToUse'))
-        } else {
-          setError(msg)
-        }
-      }
-    } else if (option === 'create_visual_content' && selectedText) {
-      setShowVisualizer(true)
-    }
-  }
+  const fixedWidth = `${toPx(PAGE_SIZES[pageSize]?.width || '210mm')}px`
+  const fixedHeight = `${toPx(PAGE_SIZES[pageSize]?.height || '297mm')}px`
 
-  // Render editable content with column support
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%',
-        bgcolor: 'background.level1',
-        overflow: 'hidden', // Prevent outer scroll
-        py: 0 // Remove vertical padding from root
-      }}
-    >
-      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)} color='danger' variant='soft'>
-        <Alert
-          color='danger'
-          variant='soft'
-          endDecorator={
-            isLimitError ? (
-              <Button size='sm' variant='solid' color='danger' onClick={() => navigate('/profile')}>
-                {t('subscription.upgrade')}
-              </Button>
-            ) : null
-          }
-        >
-          {error}
-        </Alert>
-      </Snackbar>
+    <EditorErrorBoundary>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          flexGrow: 1,
+          position: 'relative'
+        }}
+      >
+        <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)} color='danger' variant='soft'>
+          <Alert
+            color='danger'
+            variant='soft'
+            endDecorator={
+              isLimitError ? (
+                <Button size='sm' variant='solid' color='danger' onClick={() => navigate('/profile')}>
+                  {t('subscription.upgrade')}
+                </Button>
+              ) : null
+            }
+          >
+            {error}
+          </Alert>
+        </Snackbar>
 
-      <LexicalComposer key={activePage?._id || 'editor'} initialConfig={editorConfig}>
-        {/* 🧭 Toolbar - Static Flex Item */}
-        <Box
-          sx={{
-            zIndex: 100,
-            bgcolor: 'background.surface',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            width: '100%',
-            px: 3,
-            py: 2,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 1,
-            boxShadow: 'xs'
-          }}
-        >
-          <Toolbar onSave={onSave} pageSize={pageSize} setPageSize={setPageSize} />
-        </Box>
-        {/* 📄 Main "sheet" area - Scrollable */}
-        <Box
-          sx={{
-            flexGrow: 1,
-            display: 'block', // Use block for scroll container
-            width: '100%',
-            overflow: 'auto', // Independent scrolling
-            pb: 12,
-            pt: 4
-          }}
-          onContextMenu={handleRightClick}
-          ref={containerRef}
-        >
+        <LexicalComposer initialConfig={editorConfig}>
           <Box
             sx={{
               position: 'relative',
-              width: toPx(PAGE_SIZES[pageSize]?.width || '210mm'),
-              height: toPx(PAGE_SIZES[pageSize]?.height || '297mm'),
-              mx: 'auto', // Center horizontally
-              bgcolor: '#fff',
-              borderRadius: 'md',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              border: '1px solid #ddd',
-              px: '2.5cm',
-              py: '2.5cm',
-              overflow: 'hidden'
+              // If Zoom < 1, force fixed page width so it scales down the "print layout"
+              // If Zoom >= 1, allow fluid width on mobile for editing
+              width: pageZoom < 1 ? fixedWidth : { xs: '100%', md: fixedWidth },
+              maxWidth: pageZoom < 1 ? 'none' : '100%', // Allow overflow if scaled down
+              minHeight: { xs: '500px', md: fixedHeight },
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              transform: `scale(${pageZoom})`,
+              transformOrigin: 'top center',
+              // Responsive Variables for PageNode
+              '--page-width': pageZoom < 1 ? fixedWidth : { xs: '100%', md: fixedWidth },
+              '--page-height': fixedHeight,
+              '--page-py': '96px', // Always enforce Print vertical margins for pagination consistency
+              '--page-px': pageZoom < 1 ? '96px' : { xs: '24px', md: '96px' }
             }}
+            onContextMenu={handleRightClick}
+            ref={containerRef}
           >
             <RichTextPlugin
-              contentEditable={<ContentEditable className='editor-content' />}
-              placeholder={<div className='editor-placeholder'>Start typing here...</div>}
+              contentEditable={
+                <ContentEditable
+                  className='editor-content'
+                  role='textbox'
+                  aria-multiline='true'
+                  style={{
+                    outline: 'none',
+                    minHeight: '100%',
+                    width: '100%',
+                    paddingBottom: '100px' // Bottom scroll space
+                  }}
+                />
+              }
+              placeholder={null}
+              ErrorBoundary={EditorErrorBoundary}
             />
           </Box>
-        </Box>
-        {/* Plugins */}
-        <EditorContentUpdater content={content} trigger={activePage?._id || activePage?.clientKey} />
-        <PageFlowPlugin onMergeBack={onMergeBack} />
-        <EditorContent setContent={setContent} />
-        <HistoryPlugin />
-        <AutoFocusPlugin />
-        <RegisterListPlugin />
-        <RegisterHorizontalRulePlugin />
-        <SlashCommandPlugin />
-        <TablePlugin />
-        <WordCountPlugin />
-        <PaginationPlugin pageHeight={toPx(PAGE_SIZES[pageSize]?.height || '297mm') - toPx('5cm')} onOverflow={onPageOverflow} />
-        <ColumnPlugin /> {/* Multi-column support */}
-      </LexicalComposer>
 
-      {/* Context menu + Study card */}
-      {showMenu && (
-        <TextMenu
-          ref={menuRef}
-          onOptionClick={handleOptionClick}
-          style={{
-            top: menuPosition.y,
-            left: menuPosition.x
-          }}
-        />
-      )}
+          {/* Plugins */}
+          <FocusReportPlugin onFocus={onFocus} />
+          <EditorEditablePlugin isReadOnly={isReadOnly} />
+          <EditorSyncPlugin onHtmlChange={setInternalContent} />
+          <ImageUploadPlugin bookId={book?._id} onUploadComplete={onImageUpload} />
+          <HistoryPlugin />
+          {/* <AutoFocusPlugin /> */}
+          <RegisterListPlugin />
+          <RegisterHorizontalRulePlugin />
+          <SlashCommandPlugin />
+          <TablePlugin />
+          <WordCountPlugin />
+          <ContinuousPaginationPlugin key={`pagination-${pageSize}`} pageHeight={toPx(PAGE_SIZES[pageSize]?.height || '297mm')} />
+          <ColumnPlugin />
+          <ImageUploadPlugin bookId={book?._id} />
 
-      {showStudyCard && <StudyCard cards={cards} book={book} onCancel={() => setShowStudyCard(false)} />}
-      {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
-      {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}
-    </Box>
+          {/* Overlays */}
+          {showMenu && <TextMenu ref={menuRef} onOptionClick={handleOptionClick} style={{ top: menuPosition.y, left: menuPosition.x }} />}
+          {showStudyCard && <StudyCard cards={cards} book={book} onCancel={() => setShowStudyCard(false)} />}
+          {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
+          {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}
+        </LexicalComposer>
+      </Box>
+    </EditorErrorBoundary>
   )
 }

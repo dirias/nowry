@@ -64,10 +64,21 @@ const AppContent = () => {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>
   }
 
+  const isEditor = location.pathname.startsWith('/book/') && location.pathname !== '/books'
+
   return (
-    <div className='App' style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className='App' style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <Header username={user?.username} />
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          overflowY: isEditor ? 'hidden' : 'auto', // Editor handles its own scroll; others use main scroll
+          overflowX: 'hidden'
+        }}
+      >
         <Routes>
           <Route path='/books' element={<BookHome />} />
           <Route path='/book/:id' element={<EditorHome />} />
@@ -90,7 +101,7 @@ const AppContent = () => {
           <Route path='/annual-planning/daily-routine' element={<DailyRoutinePlanner />} />
         </Routes>
       </main>
-      <Footer />
+      {!location.pathname.startsWith('/book/') && <Footer />}
       <PomodoroWidget />
     </div>
   )

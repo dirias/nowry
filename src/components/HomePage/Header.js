@@ -102,9 +102,8 @@ const Header = () => {
           alignItems: 'center',
           px: { xs: 2, md: 4 },
           py: 1.5,
-          position: 'sticky',
-          top: 0,
           zIndex: 1100,
+          flexShrink: 0,
           backdropFilter: 'blur(12px)',
           // Use theme colors dynamically
           backgroundColor:

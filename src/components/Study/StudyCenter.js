@@ -217,33 +217,35 @@ export default function StudyCenter() {
       {/* Quick Start Actions */}
       {stats.dueToday > 0 && (
         <Card
+          orientation='horizontal'
           variant='outlined'
           color='danger'
+          size='sm'
           sx={{
             mb: 4,
-            borderWidth: 2,
-            transition: 'all 0.3s',
-            '&:hover': {
-              borderColor: 'danger.500',
-              boxShadow: 'lg'
-            }
+            px: 3,
+            py: 2,
+            alignItems: 'center',
+            boxShadow: 'sm',
+            borderColor: 'danger.200',
+            backgroundColor: 'danger.50',
+            // FORCE COMPACTING: override any default or inherited sizing
+            height: 'auto',
+            minHeight: 'unset',
+            width: '100%'
           }}
         >
-          <CardContent>
-            <Stack direction='row' spacing={2} alignItems='center' justifyContent='space-between' flexWrap='wrap'>
-              <Box>
-                <Typography level='title-lg' fontWeight={600} sx={{ mb: 0.5 }}>
-                  🎯 {t('study.startReview')}
-                </Typography>
-                <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-                  {t('study.reviewMsg', { count: stats.dueToday })}
-                </Typography>
-              </Box>
-              <Button size='lg' color='danger' onClick={() => navigate('/cards')}>
-                {t('study.startStudying')}
-              </Button>
-            </Stack>
-          </CardContent>
+          <Box sx={{ flex: 1 }}>
+            <Typography level='title-md' fontWeight={600} sx={{ mb: 0.5 }}>
+              🎯 {t('study.startReview')}
+            </Typography>
+            <Typography level='body-sm' sx={{ color: 'neutral.600', lineHeight: 1.2 }}>
+              {t('study.reviewMsg', { count: stats.dueToday })}
+            </Typography>
+          </Box>
+          <Button size='sm' color='danger' onClick={() => navigate('/cards')}>
+            {t('study.startStudying')}
+          </Button>
         </Card>
       )}
 

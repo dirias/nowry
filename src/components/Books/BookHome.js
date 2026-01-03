@@ -38,6 +38,7 @@ export default function BookHome() {
   const [pendingFiles, setPendingFiles] = useState([])
   const [currentFileIndex, setCurrentFileIndex] = useState(0)
   const [confirmingImport, setConfirmingImport] = useState(false)
+  const [lastImportedBookId, setLastImportedBookId] = useState(null)
 
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -110,16 +111,20 @@ export default function BookHome() {
     [books]
   )
 
-  const handleConfirmImport = async () => {
+  const handleConfirmImport = async (inputTitle) => {
     setConfirmingImport(true)
     const username = user?.username || 'Unknown'
 
     try {
       const importedBooks = []
 
+      // If we have a custom title and only one file, use it.
+      // Otherwise, fallback to filename (backend default)
+      const useTitle = pendingFiles.length === 1 && inputTitle ? inputTitle : null
+
       for (const file of pendingFiles) {
         // Actually import with preview=false
-        const result = await booksService.importFile(file, username, false)
+        const result = await booksService.importFile(file, username, false, useTitle)
         importedBooks.push(result)
       }
 
@@ -137,6 +142,11 @@ export default function BookHome() {
           pages: importedBooks.reduce((sum, book) => sum + book.page_count, 0)
         })
       )
+
+      if (importedBooks.length === 1) {
+        setLastImportedBookId(importedBooks[0]._id)
+      }
+
       setShowSuccess(true)
       setConfirmingImport(false)
     } catch (error) {
@@ -189,58 +199,43 @@ export default function BookHome() {
       setBooks(updated)
       setAllBooks(updated)
       setShowWarning(false)
-      // Redirect immediately to the new book (Minimalist flow)
-      // Note: The original instruction provided a navigate call that seemed intended for book creation.
-      // For a delete operation, navigating to the home page or refreshing the list is more appropriate.
-      // Assuming the intent was to remove success message and potentially navigate away or refresh.
-      // If a specific navigation target was intended, please clarify.
-      // For now, we'll just remove the success message logic.
-      // setSuccessMessage(t('books.successDelete'))
-      // setShowSuccess(true)
     } catch (error) {
       console.error('Error deleting book:', error)
+      // If book is already gone (404), sync UI to remove it
+      if (error.response?.status === 404) {
+        const updated = books.filter((b) => b._id !== bookToDelete._id)
+        setBooks(updated)
+        setAllBooks(updated)
+        setShowWarning(false)
+        return
+      }
+      // Otherwise show error
+      setErrorMessage(t('books.errorDelete'))
+      setShowError(true)
+      setShowWarning(false)
     }
   }
 
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Minimalist Header */}
-      <Box sx={{ mb: 3 }}>
+      <Stack spacing={4} sx={{ mb: 4 }}>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
           justifyContent='space-between'
           alignItems={{ xs: 'start', md: 'center' }}
-          mb={6}
+          spacing={2}
         >
-          {/* Left: Title */}
-          <Typography level='h2' fontWeight={600} sx={{ mb: 0.5 }}>
-            {t('books.title')}
-          </Typography>
-
-          {/* Center: Subtitle */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', flex: 1 }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {t('books.subtitle')}
-
-              {allBooks.length > 0 && (
-                <Typography component='span' level='body-xs' sx={{ color: 'text.tertiary' }}>
-                  • 📚 {allBooks.length} {t('books.totalBooks')} • 📄 {allBooks.reduce((sum, b) => sum + (b.page_count || 0), 0)}{' '}
-                  {t('books.totalPages')}
-                </Typography>
-              )}
+          <Box>
+            <Typography level='h2' fontWeight={600}>
+              {t('books.title')}
             </Typography>
-          </Box>
-
-          {/* Mobile Only Subtitle */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, width: '100%', justifyContent: 'center' }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
               {t('books.subtitle')}
             </Typography>
           </Box>
 
           <Stack direction='row' spacing={1.5} alignItems='center' sx={{ width: { xs: '100%', md: 'auto' } }}>
-            {/* Search Bar - Integrated in Header for minimalism */}
             {allBooks.length > 0 && (
               <Input
                 placeholder={t('books.searchPlaceholder')}
@@ -248,41 +243,43 @@ export default function BookHome() {
                 onChange={handleSearch}
                 startDecorator={<SearchIcon />}
                 size='sm'
-                sx={{
-                  width: { xs: '100%', md: 240 },
-                  '--Input-focusedThickness': '1px',
-                  borderRadius: 'md',
-                  transition: 'width 0.2s',
-                  '&:focus-within': { width: { xs: '100%', md: 280 } }
-                }}
+                variant='outlined'
+                sx={{ width: { xs: '100%', md: 240 }, height: 32 }}
               />
             )}
 
-            <Button
-              startDecorator={<AddIcon />}
-              onClick={handleCreateBook}
-              size='sm'
-              variant='solid'
-              color='primary'
-              sx={{ borderRadius: 'md', px: 2 }}
-            >
+            <Button startDecorator={<AddIcon />} onClick={handleCreateBook} size='sm' variant='solid' color='primary' sx={{ height: 32 }}>
               {t('books.create')}
             </Button>
             <Button
               startDecorator={<UploadFileIcon />}
               {...getRootProps()}
               size='sm'
-              variant='soft'
+              variant='plain'
               color='neutral'
               loading={uploading}
-              sx={{ borderRadius: 'md', px: 2 }}
+              sx={{ px: 2, height: 32 }}
             >
               <input {...getInputProps()} />
               {t('books.import')}
             </Button>
           </Stack>
         </Stack>
-      </Box>
+
+        {/* Minimalist Stats - Only show if useful */}
+        {allBooks.length > 0 && (
+          <Stack direction='row' spacing={3} sx={{ borderBottom: '1px solid', borderColor: 'divider', pb: 2 }}>
+            <Typography level='body-xs' fontWeight='lg' sx={{ color: 'text.secondary' }}>
+              📚 {allBooks.length} {t('books.totalBooks')}
+            </Typography>
+            <Typography level='body-xs' fontWeight='lg' sx={{ color: 'text.secondary' }}>
+              📄 {allBooks.reduce((sum, b) => sum + (b.page_count || 0), 0)} {t('books.totalPages')}
+            </Typography>
+          </Stack>
+        )}
+      </Stack>
+
+      <input {...getInputProps()} />
 
       {/* Unified Empty State & Drop Zone */}
       {allBooks.length === 0 && !loading && (
@@ -291,7 +288,7 @@ export default function BookHome() {
           variant='outlined'
           sx={{
             textAlign: 'center',
-            py: 8,
+            py: 12,
             px: 4,
             cursor: 'pointer',
             borderStyle: 'dashed',
@@ -305,28 +302,27 @@ export default function BookHome() {
             minHeight: 400,
             '&:hover': {
               borderColor: 'primary.400',
-              backgroundColor: 'neutral.softBg'
+              backgroundColor: 'background.level1'
             }
           }}
         >
-          <input {...getInputProps()} />
           <Box
             sx={{
               p: 2,
               borderRadius: '50%',
-              bgcolor: 'neutral.softBg',
-              mb: 3,
-              color: 'neutral.500',
+              bgcolor: 'background.level1',
+              mb: 2,
+              color: 'text.tertiary',
               transition: 'transform 0.2s',
               ...(isDragActive && { transform: 'scale(1.1)', bgcolor: 'primary.softBg', color: 'primary.500' })
             }}
           >
-            <CloudUploadIcon sx={{ fontSize: 48 }} />
+            <CloudUploadIcon sx={{ fontSize: 32 }} />
           </Box>
-          <Typography level='h4' fontWeight={600} sx={{ mb: 1 }}>
-            {isDragActive ? 'Drop files here!' : t('books.dropTitle')}
+          <Typography level='title-lg' fontWeight={600} sx={{ mb: 1 }}>
+            {isDragActive ? 'Drop files here' : t('books.dropTitle')}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.600', mb: 4, maxWidth: 400 }}>
+          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 4, maxWidth: 400 }}>
             {t('books.dropSubtitle')}
           </Typography>
 
@@ -351,7 +347,7 @@ export default function BookHome() {
 
       {/* Books Grid */}
       {!loading && books.length > 0 && (
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {books.map((book) => (
             <Grid key={book._id} xs={12} sm={6} md={4} lg={3}>
               <Book
@@ -385,68 +381,71 @@ export default function BookHome() {
         onClose={() => {
           setShowSuccess(false)
           setSuccessMessage('')
+          setLastImportedBookId(null)
         }}
       >
         <ModalDialog
           variant='outlined'
           role='alertdialog'
           sx={{
-            maxWidth: 500,
-            borderRadius: 'xl',
-            p: 4,
-            boxShadow: 'lg',
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid',
-            borderColor: 'neutral.200'
+            maxWidth: 400,
+            borderRadius: 'lg',
+            p: 3,
+            boxShadow: 'lg'
           }}
         >
           <Box sx={{ textAlign: 'center' }}>
             <Box
               sx={{
-                width: 64,
-                height: 64,
+                width: 48,
+                height: 48,
                 borderRadius: '50%',
-                bgcolor: 'success.100',
-                color: 'success.500',
+                bgcolor: 'success.softBg',
+                color: 'success.solidBg',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 mx: 'auto',
                 mb: 2,
-                fontSize: 32
+                fontSize: 24
               }}
             >
               🎉
             </Box>
-            <Typography
-              component='h2'
-              level='h3'
-              sx={{
-                mb: 1,
-                background: 'linear-gradient(45deg, #0B6BCB, #1F7A1F)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}
-            >
-              Import Successful!
+            <Typography component='h2' level='title-lg' sx={{ mb: 1 }}>
+              Import Successful
             </Typography>
-            <Typography level='body-md' color='neutral' sx={{ mb: 3 }}>
+            <Typography level='body-sm' color='neutral' sx={{ mb: 3 }}>
               {successMessage}
             </Typography>
-            <Button
-              variant='solid'
-              color='primary'
-              size='lg'
-              onClick={() => {
-                setShowSuccess(false)
-                // Optionally navigate to the last imported book if we tracked it
-                // navigate(/book/{lastBookId})
-              }}
-              sx={{ width: '100%', borderRadius: 'md' }}
-            >
-              Continue to Library
-            </Button>
+
+            <Stack spacing={2}>
+              {lastImportedBookId && (
+                <Button
+                  variant='solid'
+                  color='primary'
+                  onClick={() => {
+                    setShowSuccess(false)
+                    navigate(`/book/${lastImportedBookId}`)
+                  }}
+                  sx={{ width: '100%' }}
+                >
+                  Open Book
+                </Button>
+              )}
+
+              <Button
+                variant={lastImportedBookId ? 'plain' : 'solid'}
+                color={lastImportedBookId ? 'neutral' : 'primary'}
+                onClick={() => {
+                  setShowSuccess(false)
+                  setLastImportedBookId(null)
+                }}
+                sx={{ width: '100%' }}
+              >
+                Continue to Library
+              </Button>
+            </Stack>
           </Box>
         </ModalDialog>
       </Modal>

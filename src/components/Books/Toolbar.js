@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, Divider, IconButton } from '@mui/joy'
-import { Save } from 'lucide-react'
+import { Save, Image as ImageIcon } from 'lucide-react'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 
 // Toolbar components
 import UndoRedo from '../Editor/UndoRedo'
@@ -15,7 +16,8 @@ import InsertDropdown from '../Editor/InsertDropdown'
 
 import PageSizeDropdown from '../Editor/PageSizeDropdown'
 
-const Toolbar = ({ onSave, pageSize, setPageSize }) => {
+const Toolbar = ({ onSave, pageSize, setPageSize, disabled = false }) => {
+  const [editor] = useLexicalComposerContext()
   return (
     <Box
       sx={{
@@ -61,6 +63,11 @@ const Toolbar = ({ onSave, pageSize, setPageSize }) => {
       <BgColorPicker />
 
       <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Insert Image */}
+      <IconButton size='sm' variant='plain' disabled={disabled} onClick={() => editor?.triggerImageUpload?.()} sx={{ minWidth: 32 }}>
+        <ImageIcon size={16} />
+      </IconButton>
 
       {/* Insert */}
       <InsertDropdown />

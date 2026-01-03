@@ -12,10 +12,6 @@ export const ENDPOINTS = {
     delete: (id) => `/book/delete/${id}`,
     search: '/book/search'
   },
-  pages: {
-    save: '/book_page/save_book_page',
-    delete: (id) => `/book_page/delete/${id}`
-  },
   studyCards: {
     generate: '/card/generate',
     all: '/study-cards',

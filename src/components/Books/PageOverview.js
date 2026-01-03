@@ -1,9 +1,7 @@
-import React, { memo, useMemo, useRef, useEffect } from 'react'
+import React, { memo } from 'react'
 import { Plus } from 'lucide-react'
-import { Box, Typography, Sheet, Stack, IconButton } from '@mui/joy'
+import { Box, Typography, Sheet, Stack, IconButton, Skeleton } from '@mui/joy'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
-
-const keyOf = (p) => String(p?._id ?? p?.clientKey ?? p?.page_number ?? '')
 
 const toPx = (val) => {
   if (typeof val === 'number') return val
@@ -13,149 +11,166 @@ const toPx = (val) => {
   return 1123
 }
 
-export default function PageOverview({
-  pages,
-  activeKey,
-  setActivePage,
-  setContent,
-  handleSavePage,
-  liveContent = '',
-  liveKey = null,
-  pageSize = 'a4',
-  pagePadding = 95 // Match editor padding (2.5cm)
-}) {
+export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageClick, activePageIndex = 0 }) {
   const size = PAGE_SIZES[pageSize] || PAGE_SIZES.a4
   const pageW = toPx(size.width)
   const pageH = toPx(size.height)
-  const thumbW = 245
-  const thumbH = thumbW * (pageH / pageW)
-  const changeActivePage = (page) => {
-    setActivePage(page)
+
+  // Calculate thumbnail dimensions
+  const thumbW = 180
+  const scale = thumbW / pageW
+  const thumbH = pageH * scale
+
+  // If no data yet (layout pending), show skeletons
+  if (!pagesData || pagesData.length === 0) {
+    return (
+      <Sheet
+        sx={{
+          p: 2,
+          width: '100%',
+          height: '100%',
+          overflowY: 'auto',
+          backgroundColor: 'background.surface',
+          border: 'none',
+          '&::-webkit-scrollbar': { display: 'none' }
+        }}
+      >
+        <Typography
+          level='title-sm'
+          sx={{ mb: 2, px: 1, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 'sm', fontSize: 'xs' }}
+        >
+          Table of Contents
+        </Typography>
+        <Stack spacing={2} alignItems='center'>
+          {[1, 2, 3].map((i) => (
+            <Box key={i}>
+              <Box sx={{ width: thumbW, height: thumbH, mb: 1 }}>
+                <Skeleton variant='rectangular' width={thumbW} height={thumbH} sx={{ borderRadius: 'sm' }} />
+              </Box>
+              <Skeleton variant='text' width={60} sx={{ mx: 'auto' }} />
+            </Box>
+          ))}
+        </Stack>
+      </Sheet>
+    )
   }
 
   return (
     <Sheet
-      variant='outlined'
       sx={{
         p: 2,
-        borderRadius: 'md',
-        width: 320,
+        width: '100%', // Responsive: fills Drawer or Sidebar container
         height: '100%',
         overflowY: 'auto',
-        backgroundColor: 'background.level1'
+        backgroundColor: 'background.surface',
+        border: 'none',
+        '&::-webkit-scrollbar': { display: 'none' }
       }}
     >
-      <Typography level='title-md' sx={{ mb: 2 }}>
-        Pages (Overview)
+      <Typography
+        level='title-sm'
+        sx={{ mb: 2, px: 1, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 'sm', fontSize: 'xs' }}
+      >
+        Table of Contents ({pagesData.length})
       </Typography>
 
-      <Stack spacing={2} alignItems='center'>
-        {pages.map((page) => {
-          const k = keyOf(page)
-          const isActive = String(activeKey) === k
-          const previewHtml = isActive && String(liveKey) === k ? liveContent || '' : page.content || ''
+      <Stack spacing={2} alignItems='center' pb={10}>
+        {pagesData.map((page, i) => {
+          const isActive = activePageIndex === page.index
           return (
             <PageCard
-              key={k}
+              key={`${page.index}-${pageSize}`}
+              index={page.index}
+              content={page.content}
               isActive={isActive}
-              onClick={() => changeActivePage(page)}
-              html={previewHtml}
+              onClick={() => onPageClick(page.index)}
               thumbW={thumbW}
               thumbH={thumbH}
+              scale={scale}
               pageW={pageW}
               pageH={pageH}
-              pagePadding={pagePadding}
             />
           )
         })}
-
-        <IconButton onClick={() => handleSavePage(null)} variant='soft' color='primary' size='sm' sx={{ alignSelf: 'center', mt: 2 }}>
-          <Plus />
-        </IconButton>
       </Stack>
     </Sheet>
   )
 }
 
-const PageCard = memo(function PageCard({ isActive, onClick, html, thumbW, thumbH, pageW, pageH, pagePadding }) {
-  const sanitizedHtml = useMemo(() => html || '', [html])
-  const cardRef = useRef(null)
-
-  const scale = Math.min(thumbW / pageW, thumbH / pageH)
-
-  useEffect(() => {
-    if (isActive && cardRef.current) {
-      cardRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-    }
-  }, [isActive])
-
-  return (
-    <Box
-      ref={cardRef}
-      onClick={onClick}
-      tabIndex={-1}
-      sx={{
-        border: isActive ? '2px solid #0B6BCB' : '2px solid transparent', // High visibility border
-        borderRadius: 'sm',
-        cursor: 'pointer',
-        backgroundColor: 'transparent',
-        width: thumbW,
-        height: thumbH,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        boxShadow: isActive ? 'md' : 'sm',
-        transition: 'all 0.2s ease',
-        outline: 'none',
-        '&:hover': { transform: 'translateY(-2px)', boxShadow: 'md' }
-      }}
-    >
-      <Box
-        sx={{
-          width: thumbW,
-          height: thumbH,
-          overflow: 'hidden',
-          borderRadius: 'xs',
-          backgroundColor: 'transparent', // Transparent to avoid gray bars
-          position: 'relative',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}
-      >
+const PageCard = memo(
+  function PageCard({ index, content, isActive, onClick, thumbW, thumbH, scale, pageW, pageH }) {
+    return (
+      <Box>
         <Box
+          onClick={onClick}
           sx={{
-            width: pageW,
-            height: pageH,
-            backgroundColor: '#ffffff',
-            border: 'none',
-            boxShadow: 'none',
-            overflow: 'hidden',
-            borderRadius: '0',
-            pointerEvents: 'none',
-            transform: `scale(${scale})`,
-            transformOrigin: 'center center', // Center the scaled content
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            marginLeft: `-${pageW / 2}px`, // Offset by half width
-            marginTop: `-${pageH / 2}px` // Offset by half height
+            width: thumbW,
+            height: thumbH,
+            position: 'relative',
+            backgroundColor: 'background.level1', // visible if loading
+            borderRadius: 'sm',
+            mb: 1,
+            cursor: 'pointer',
+            border: isActive ? '2px solid' : '1px solid',
+            borderColor: isActive ? 'primary.500' : 'neutral.outlinedBorder',
+            boxShadow: isActive ? 'md' : 'xs',
+            transition: 'all 0.2s ease',
+            overflow: 'hidden', // Clip the scaled content
+            display: 'block',
+            '&:hover': {
+              borderColor: isActive ? 'primary.500' : 'primary.300',
+              transform: 'translateY(-2px)',
+              boxShadow: 'md'
+            }
           }}
-          className='preview-page'
         >
-          <div
-            style={{
+          {/* Scaled Content Container */}
+          <Box
+            sx={{
+              width: pageW,
+              height: pageH,
+              bgcolor: 'white',
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+              pointerEvents: 'none', // Prevent interaction with preview
+              overflow: 'hidden',
               boxSizing: 'border-box',
-              width: '100%',
-              height: '100%',
-              padding: pagePadding,
-              overflow: 'hidden'
+              padding: '96px' // Fixed print padding for thumbnails
             }}
           >
-            <div className='preview-content' dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
-          </div>
+            <div className='preview-content' dangerouslySetInnerHTML={{ __html: content || '' }} />
+          </Box>
+
+          {/* Page Number Badge */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 8,
+              right: 8,
+              bgcolor: 'background.surface',
+              px: 0.8,
+              py: 0.2,
+              borderRadius: 'xs',
+              border: '1px solid',
+              borderColor: 'divider',
+              zIndex: 2,
+              boxShadow: 'sm'
+            }}
+          >
+            <Typography level='body-xs' fontWeight='bold'>
+              {index + 1}
+            </Typography>
+          </Box>
         </Box>
+        <Typography level='body-xs' textAlign='center' sx={{ color: isActive ? 'primary.600' : 'text.tertiary' }}>
+          Page {index + 1}
+        </Typography>
       </Box>
-    </Box>
-  )
-})
+    )
+  },
+  (prev, next) => {
+    // Custom memo comparison to avoid excessive re-renders if content hasn't changed meaningfully
+    // But HTML strings can be large.
+    return prev.index === next.index && prev.isActive === next.isActive && prev.content === next.content
+  }
+)

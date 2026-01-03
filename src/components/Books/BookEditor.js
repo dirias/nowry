@@ -15,15 +15,11 @@ import {
   FormControl,
   FormLabel,
   Grid,
-  AspectRatio,
-  Card,
   Divider,
   Tooltip
 } from '@mui/joy'
 import CloseIcon from '@mui/icons-material/Close'
 import PaletteIcon from '@mui/icons-material/Palette'
-import AutoStoriesIcon from '@mui/icons-material/AutoStories'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
 import CheckIcon from '@mui/icons-material/Check'
 
 const PRESET_COLORS = [
@@ -37,6 +33,8 @@ const PRESET_COLORS = [
   '#555555' // Grey
 ]
 
+import Book from './Book'
+
 const BookEditor = ({ book, refreshBooks, onCancel }) => {
   const [title, setTitle] = useState(book.title)
   const [createdAt] = useState(new Date(book.created_at) || new Date())
@@ -48,6 +46,16 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
   const [tags, setTags] = useState(book.tags || [])
   const [displayColorPicker, setDisplayColorPicker] = useState(false)
   const [newTag, setNewTag] = useState('')
+
+  // Construct preview object for the Book component
+  const previewBook = {
+    ...book,
+    title,
+    cover_image: coverImage,
+    cover_color: coverColor,
+    tags,
+    summary
+  }
 
   const handleSave = async () => {
     const updatedData = {
@@ -264,127 +272,9 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
               Live Preview
             </Typography>
 
-            {/* Preview Card Mockup */}
-            <Box
-              sx={{
-                width: 280,
-                position: 'relative',
-                boxShadow: '2px 4px 8px rgba(0,0,0,0.15), 4px 8px 16px rgba(0,0,0,0.1)',
-                borderRadius: '4px',
-                overflow: 'hidden',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '3px 6px 12px rgba(0,0,0,0.2), 6px 12px 24px rgba(0,0,0,0.15)'
-                }
-              }}
-            >
-              {/* Book Spine (Left Edge) */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 10,
-                  background: coverImage
-                    ? 'linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.3), rgba(255,255,255,0.1))'
-                    : `linear-gradient(to right, ${coverColor}dd, ${coverColor}88, rgba(255,255,255,0.1))`,
-                  borderRadius: '4px 0 0 4px',
-                  zIndex: 5,
-                  boxShadow: 'inset -1px 0 2px rgba(0,0,0,0.3)'
-                }}
-              />
-
-              <AspectRatio
-                ratio='2/3'
-                sx={{
-                  width: '100%',
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}
-              >
-                {/* Simulated Content */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: coverColor,
-                    background: coverImage
-                      ? `url(${coverImage}) center/cover`
-                      : `radial-gradient(circle at 30% 30%, ${coverColor}dd, ${coverColor} 60%, ${coverColor}bb 100%)`,
-                    color: 'white'
-                  }}
-                >
-                  {!coverImage && <MenuBookIcon sx={{ fontSize: 64, opacity: 0.2 }} />}
-                  {coverImage && <img src={coverImage} alt='Cover' style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                </Box>
-
-                {/* Embossed Relief Overlay */}
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.1) 100%)',
-                    pointerEvents: 'none',
-                    zIndex: 1
-                  }}
-                />
-
-                {/* Top Overlay: Tags */}
-                <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, p: 1 }}>
-                  <Stack direction='row' flexWrap='wrap' spacing={0.5}>
-                    {tags.slice(0, 3).map((tag, i) => (
-                      <Chip
-                        key={i}
-                        size='sm'
-                        variant='solid'
-                        sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: 'black', fontSize: '10px', height: 20 }}
-                      >
-                        {tag}
-                      </Chip>
-                    ))}
-                    {tags.length > 3 && (
-                      <Chip
-                        size='sm'
-                        variant='solid'
-                        sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: 'black', fontSize: '10px', height: 20 }}
-                      >
-                        +{tags.length - 3}
-                      </Chip>
-                    )}
-                  </Stack>
-                </Box>
-
-                {/* Bottom Overlay: Metadata */}
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    p: 2,
-                    pt: 6,
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%)'
-                  }}
-                >
-                  <Typography level='title-lg' sx={{ color: 'white', mb: 0.5, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                    {title || 'Untitled Book'}
-                  </Typography>
-                  <Stack direction='row' spacing={1} alignItems='center'>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <AutoStoriesIcon sx={{ fontSize: 14, color: 'neutral.400' }} />
-                      <Typography level='body-xs' sx={{ color: 'neutral.300' }}>
-                        0
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
-              </AspectRatio>
+            {/* Live Preview using unified Book component */}
+            <Box sx={{ width: 220, pointerEvents: 'none' }}>
+              <Book book={previewBook} />
             </Box>
 
             <Typography level='body-xs' sx={{ mt: 4, color: 'text.tertiary', textAlign: 'center' }}>

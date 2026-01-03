@@ -53,13 +53,15 @@ export const booksService = {
    * @param {Array} updates.tags - Book tags
    * @returns {Promise<Object>} Updated book
    */
-  async update(id, { title, coverColor, coverImage, summary, tags }) {
+  async update(id, { title, coverColor, coverImage, summary, tags, full_content, page_size }) {
     const { data } = await apiClient.put(ENDPOINTS.books.update(id), {
       title,
       cover_color: coverColor, // Convert camelCase to snake_case for backend
       cover_image: coverImage,
       summary,
-      tags
+      tags,
+      full_content,
+      page_size
     })
     return data
   },
@@ -91,13 +93,15 @@ export const booksService = {
    * @param {File} file - File to import
    * @param {string} username - Current user's username
    * @param {boolean} preview - If true, returns preview for validation
+   * @param {string} title - Optional override title
    * @returns {Promise<Object>} Created book with pages or preview data
    */
-  async importFile(file, username, preview = false) {
+  async importFile(file, username, preview = false, title = null) {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('username', username)
     formData.append('preview', preview.toString())
+    if (title) formData.append('title', title)
 
     const { data } = await apiClient.post('/book/import', formData, {
       headers: {

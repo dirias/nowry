@@ -119,6 +119,8 @@ export default function SlashCommandPlugin() {
   return createPortal(
     <Sheet
       ref={menuRef}
+      role='listbox'
+      aria-label='Formatting commands'
       sx={{
         position: 'absolute',
         top: menuPosition.top,
@@ -135,6 +137,8 @@ export default function SlashCommandPlugin() {
         {COMMANDS.map((cmd, index) => (
           <ListItem
             key={cmd.label}
+            role='option'
+            aria-selected={index === selectedIndex}
             selected={index === selectedIndex}
             onClick={() => executeCommand(cmd.command)}
             sx={{

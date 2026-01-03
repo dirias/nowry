@@ -3,7 +3,6 @@
  * Central export point for all API services
  */
 export * from './books.service'
-export * from './pages.service'
 export * from './cards.service'
 export * from './auth.service'
 export * from './decks.service'

@@ -24,7 +24,8 @@ export default function PaginationPlugin({ pageHeight = 1122, onOverflow }) {
         const rootElement = editor.getRootElement()
         if (!rootElement) return
 
-        const buffer = 15
+        // Trigger immediately when content exceeds the printable area
+        const buffer = 0
         if (rootElement.scrollHeight > pageHeight + buffer) {
           const root = $getRoot()
           const currentHtml = $generateHtmlFromNodes(editor, null)
@@ -100,30 +101,51 @@ export default function PaginationPlugin({ pageHeight = 1122, onOverflow }) {
             }
 
             // --- IMMEDIATE REMOVAL ---
-            // We remove the nodes from the current editor immediately.
-            // This prevents the scrollHeight from staying large and triggering duplicate events.
             for (let i = allRootChildren.length - 1; i >= splitIdx; i--) {
               allRootChildren[i].remove()
             }
 
-            // Notify parent to update backend and other pages
+            // Notify parent
             onOverflow(remainingHtml, movedHtml, shouldSwitch)
 
-            // Release lock after a generous cooldown to allow React to catch up
+            // Seamless jump to next editor
+            if (shouldSwitch) {
+              setTimeout(() => {
+                const root = editor.getRootElement()
+                const currentContainer = root?.closest('.page-sheet-container')
+                if (currentContainer) {
+                  const allPages = Array.from(document.querySelectorAll('.page-sheet-container'))
+                  const currentIndex = allPages.indexOf(currentContainer)
+                  if (currentIndex !== -1 && currentIndex < allPages.length - 1) {
+                    const nextEditor = allPages[currentIndex + 1].querySelector('.editor-content')
+                    if (nextEditor) {
+                      nextEditor.focus()
+                    }
+                  }
+                }
+              }, 50)
+            }
+
+            // Release lock
             setTimeout(() => {
               isProcessingRef.current = false
-            }, 1000)
+            }, 500)
           }
         }
       })
     }
 
-    const unregister = editor.registerUpdateListener(({ editorState }) => {
-      // Check overflow on every update
-      checkOverflow()
+    // Faster check for modern browsers
+    const unregister = editor.registerUpdateListener(({ dirtyElements, dirtyNodes }) => {
+      // Use optional chaining to prevent "size of undefined" error
+      if ((dirtyElements?.size || 0) > 0 || (dirtyNodes?.size || 0) > 0) {
+        checkOverflow()
+      }
     })
 
-    return unregister
+    return () => {
+      unregister()
+    }
   }, [editor, pageHeight, onOverflow])
 
   return null

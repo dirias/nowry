@@ -38,15 +38,8 @@ const BgColorPicker = () => {
       editor.update(() => {
         const selection = $getSelection()
 
-        // Log for debugging
-        console.log('Applying background color:', color)
-        console.log('Selection:', selection)
-
         if ($isRangeSelection(selection) && !selection.isCollapsed()) {
-          console.log('Applying to range selection')
           $patchStyleText(selection, { 'background-color': color || null })
-        } else {
-          console.log('No valid range selection')
         }
       })
 
