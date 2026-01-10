@@ -36,84 +36,96 @@ const AnnualPlanningHome = () => {
     try {
       setLoading(true)
       const year = new Date().getFullYear()
-      const planData = await annualPlanningService.getAnnualPlan(year)
 
-      if (planData) {
-        setPlan(planData)
-        setEditTitle(planData.title || `Annual Plan ${year}`)
+      try {
+        const planData = await annualPlanningService.getAnnualPlan(year)
 
-        const [areasData, prioritiesData] = await Promise.all([
-          annualPlanningService.getFocusAreas(planData._id),
-          annualPlanningService.getPriorities(planData._id)
-        ])
+        if (planData) {
+          setPlan(planData)
+          setEditTitle(planData.title || `Annual Plan ${year}`)
 
-        setPriorities(prioritiesData)
+          const [areasData, prioritiesData] = await Promise.all([
+            annualPlanningService.getFocusAreas(planData._id),
+            annualPlanningService.getPriorities(planData._id)
+          ])
 
-        // Calculate Metrics Aggregation
-        // 1. Total Goals
-        // 2. Completed Goals
-        // 3. Overall Progress (Average of all goal progresses, where goal progress is based on milestones if present)
+          setPriorities(prioritiesData)
 
-        const goals = await Promise.all(areasData.map((a) => annualPlanningService.getGoals(a._id)))
-        // Initialize enriched areas with progress
-        const enrichedAreas = areasData.map((area, index) => {
-          const areaGoals = goals[index] || []
-          let areaProgressSum = 0
+          // Calculate Metrics Aggregation
+          // 1. Total Goals
+          // 2. Completed Goals
+          // 3. Overall Progress (Average of all goal progresses, where goal progress is based on milestones if present)
 
-          areaGoals.forEach((g) => {
-            let p = 0
-            if (g.milestones && g.milestones.length > 0) {
-              const completed = g.milestones.filter((m) => m.completed).length
-              p = (completed / g.milestones.length) * 100
-            } else {
-              p = g.progress || 0
+          const goals = await Promise.all(areasData.map((a) => annualPlanningService.getGoals(a._id)))
+          // Initialize enriched areas with progress
+          const enrichedAreas = areasData.map((area, index) => {
+            const areaGoals = goals[index] || []
+            let areaProgressSum = 0
+
+            areaGoals.forEach((g) => {
+              let p = 0
+              if (g.milestones && g.milestones.length > 0) {
+                const completed = g.milestones.filter((m) => m.completed).length
+                p = (completed / g.milestones.length) * 100
+              } else {
+                p = g.progress || 0
+              }
+              areaProgressSum += p
+            })
+
+            return {
+              ...area,
+              progress: areaGoals.length > 0 ? Math.round(areaProgressSum / areaGoals.length) : 0
             }
-            areaProgressSum += p
           })
 
-          return {
-            ...area,
-            progress: areaGoals.length > 0 ? Math.round(areaProgressSum / areaGoals.length) : 0
-          }
-        })
+          setAreas(enrichedAreas)
 
-        setAreas(enrichedAreas)
+          // Global Metrics Calculation
+          const allGoals = goals.flat()
+          let totalProgressSum = 0
+          let totalGoalsCount = allGoals.length
+          let completedGoalsCount = 0
 
-        // Global Metrics Calculation
-        const allGoals = goals.flat()
-        let totalProgressSum = 0
-        let totalGoalsCount = allGoals.length
-        let completedGoalsCount = 0
+          allGoals.forEach((g) => {
+            let goalProgress = 0
+            if (g.milestones && g.milestones.length > 0) {
+              const completedMilestones = g.milestones.filter((m) => m.completed).length
+              goalProgress = (completedMilestones / g.milestones.length) * 100
+            } else {
+              goalProgress = g.progress || 0
+            }
 
-        allGoals.forEach((g) => {
-          let goalProgress = 0
-          if (g.milestones && g.milestones.length > 0) {
-            const completedMilestones = g.milestones.filter((m) => m.completed).length
-            goalProgress = (completedMilestones / g.milestones.length) * 100
-          } else {
-            goalProgress = g.progress || 0
-          }
+            // Check if goal is completed based on status or 100% progress
+            if (g.status === 'completed' || goalProgress === 100) {
+              completedGoalsCount++
+            }
 
-          // Check if goal is completed based on status or 100% progress
-          if (g.status === 'completed' || goalProgress === 100) {
-            completedGoalsCount++
-          }
+            totalProgressSum += goalProgress
+          })
 
-          totalProgressSum += goalProgress
-        })
-
-        setMetrics({
-          totalGoals: totalGoalsCount,
-          completedGoals: completedGoalsCount,
-          progress: totalGoalsCount > 0 ? Math.round(totalProgressSum / totalGoalsCount) : 0
-        })
-      } else {
-        // No plan found, redirect to setup
-        // navigate('/annual-planning/setup')
+          setMetrics({
+            totalGoals: totalGoalsCount,
+            completedGoals: completedGoalsCount,
+            progress: totalGoalsCount > 0 ? Math.round(totalProgressSum / totalGoalsCount) : 0
+          })
+        } else {
+          // No plan found, redirect to setup
+          // navigate('/annual-planning/setup')
+        }
+      } catch (error) {
+        // Handle 404 (no plan exists)
+        if (error.response?.status === 404) {
+          console.log('No annual plan found')
+          setPlan(null)
+        } else {
+          console.error('Failed to load annual plan', error)
+        }
+      } finally {
+        setLoading(false)
       }
     } catch (error) {
-      console.error('Failed to load annual plan', error)
-    } finally {
+      console.error('Error in fetchData:', error)
       setLoading(false)
     }
   }
@@ -144,17 +156,58 @@ const AnnualPlanningHome = () => {
     )
   }
 
+  const handleCreatePlan = async () => {
+    try {
+      setLoading(true)
+      const year = new Date().getFullYear()
+      const newPlan = await annualPlanningService.createAnnualPlan({
+        year,
+        title: `My ${year} Plan`
+      })
+      setPlan(newPlan)
+      setEditTitle(newPlan.title)
+      // Fetch data to check for focus areas
+      await fetchData()
+    } catch (error) {
+      console.error('Failed to create annual plan:', error)
+      setLoading(false)
+    }
+  }
+
   if (!plan && !loading) {
     return (
-      <Container maxWidth='sm' sx={{ py: 10, textAlign: 'center' }}>
-        <Typography level='h2' sx={{ mb: 2 }}>
-          {new Date().getFullYear()} Planning
-        </Typography>
-        <Typography level='body-lg' sx={{ mb: 4 }}>
-          You haven&apos;t set up your annual plan yet.
-        </Typography>
+      <Container maxWidth='md' sx={{ py: 10, textAlign: 'center' }}>
+        <Box sx={{ mb: 4 }}>
+          <TimelineIcon sx={{ fontSize: 80, color: 'primary.plainColor', mb: 2 }} />
+          <Typography level='h2' sx={{ mb: 2 }}>
+            {t('annualPlanning.home.startJourney', { year: new Date().getFullYear() })}
+          </Typography>
+          <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 500, mx: 'auto' }}>
+            {t('annualPlanning.home.startDescription')}
+          </Typography>
+        </Box>
+        <Button onClick={handleCreatePlan} size='lg' endDecorator={<ArrowForwardIcon />}>
+          {t('annualPlanning.home.createPlan')}
+        </Button>
+      </Container>
+    )
+  }
+
+  // Show focus area setup if plan exists but no focus areas
+  if (plan && areas.length === 0 && !loading) {
+    return (
+      <Container maxWidth='md' sx={{ py: 10, textAlign: 'center' }}>
+        <Box sx={{ mb: 4 }}>
+          <FlagIcon sx={{ fontSize: 80, color: 'primary.plainColor', mb: 2 }} />
+          <Typography level='h2' sx={{ mb: 2 }}>
+            {t('annualPlanning.home.defineFocusAreas')}
+          </Typography>
+          <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 600, mx: 'auto', mb: 3 }}>
+            {t('annualPlanning.home.focusAreasDescription')}
+          </Typography>
+        </Box>
         <Button component={Link} to='/annual-planning/setup' size='lg' endDecorator={<ArrowForwardIcon />}>
-          Create Plan
+          {t('annualPlanning.home.addFocusAreas')}
         </Button>
       </Container>
     )
@@ -176,14 +229,15 @@ const AnnualPlanningHome = () => {
                   fontWeight: 700,
                   fontFamily: 'inherit',
                   border: 'none',
-                  borderBottom: '2px solid #000',
+                  borderBottom: '2px solid',
+                  borderColor: 'var(--joy-palette-text-primary)',
                   outline: 'none',
                   background: 'transparent',
                   maxWidth: '400px'
                 }}
               />
               <Button size='sm' variant='soft' color='success' onClick={handleSaveTitle} startDecorator={<SaveIcon />}>
-                Save
+                {t('annualPlanning.home.save')}
               </Button>
               <Button size='sm' variant='plain' color='neutral' onClick={() => setIsEditingTitle(false)}>
                 <CancelIcon />
@@ -199,15 +253,15 @@ const AnnualPlanningHome = () => {
             </Typography>
           )}
           <Typography level='body-md' textColor='text.tertiary'>
-            Overview of your focus areas and goals
+            {t('annualPlanning.home.overview')}
           </Typography>
         </Box>
         <Stack direction='row' spacing={2}>
           <Button component={Link} to='/annual-planning/daily-routine' variant='soft' color='warning' startDecorator={<DayIcon />}>
-            Daily Routine
+            {t('annualPlanning.home.dailyRoutineBtn')}
           </Button>
           <Button component={Link} to='/annual-planning/setup' variant='outlined' startDecorator={<EditIcon />}>
-            Edit Plan
+            {t('annualPlanning.home.editPlanBtn')}
           </Button>
         </Stack>
       </Stack>
@@ -218,7 +272,7 @@ const AnnualPlanningHome = () => {
           <Card variant='outlined' sx={{ height: '100%', bgcolor: 'background.surface' }}>
             <CardContent>
               <Typography level='title-sm' textColor='text.tertiary' mb={1}>
-                TOTAL PROGRESS
+                {t('annualPlanning.home.totalProgress')}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                 <Typography level='h2'>{metrics.progress}%</Typography>
@@ -242,7 +296,7 @@ const AnnualPlanningHome = () => {
             <CardContent>
               <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
                 <Typography level='title-sm' textColor='text.tertiary'>
-                  COMPLETED GOALS
+                  {t('annualPlanning.home.completedGoals')}
                 </Typography>
                 <CheckCircleIcon color='success' fontSize='small' />
               </Stack>
@@ -260,7 +314,7 @@ const AnnualPlanningHome = () => {
             <CardContent>
               <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
                 <Typography level='title-sm' textColor='text.tertiary'>
-                  TOP PRIORITIES
+                  {t('annualPlanning.home.topPriorities')}
                 </Typography>
                 <FlagIcon color='warning' fontSize='small' />
               </Stack>
@@ -282,7 +336,7 @@ const AnnualPlanningHome = () => {
                 </Stack>
               ) : (
                 <Typography level='body-sm' textColor='text.tertiary' fontStyle='italic'>
-                  No priorities set
+                  {t('annualPlanning.home.noPrioritiesSet')}
                 </Typography>
               )}
             </CardContent>
@@ -292,7 +346,7 @@ const AnnualPlanningHome = () => {
 
       {/* Focus Areas Grid */}
       <Typography level='h4' sx={{ mb: 2 }}>
-        Focus Areas
+        {t('annualPlanning.home.focusAreas')}
       </Typography>
       <Grid container spacing={3} sx={{ mb: 6 }}>
         {areas.map((area, index) => (
@@ -330,7 +384,7 @@ const AnnualPlanningHome = () => {
                 <Box sx={{ mt: 'auto', pt: 2 }}>
                   <Stack direction='row' justifyContent='space-between' alignItems='center' mb={1}>
                     <Typography level='body-xs' textColor='text.tertiary'>
-                      Progress
+                      {t('annualPlanning.home.progress')}
                     </Typography>
                     <Typography level='body-xs' textColor='text.secondary'>
                       {area.progress || 0}%
@@ -354,7 +408,7 @@ const AnnualPlanningHome = () => {
 
       {/* Yearly Priorities Section */}
       <Stack direction='row' alignItems='center' spacing={2} sx={{ mb: 2 }}>
-        <Typography level='h4'>Yearly Priorities</Typography>
+        <Typography level='h4'>{t('annualPlanning.home.yearlyPriorities')}</Typography>
         <Button size='sm' variant='soft' color='neutral' onClick={() => setShowPriorityDialog(true)} sx={{ minHeight: 32, px: 1 }}>
           +
         </Button>
@@ -362,7 +416,7 @@ const AnnualPlanningHome = () => {
 
       {priorities.length === 0 ? (
         <Typography level='body-md' textColor='text.tertiary'>
-          No priorities added yet
+          {t('annualPlanning.home.noPrioritiesAdded')}
         </Typography>
       ) : (
         <Grid container spacing={2}>

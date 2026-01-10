@@ -683,6 +683,26 @@
       "editPlan": "Editar Título",
       "exportPlan": "Exportar Plan"
     },
+    "home": {
+      "startJourney": "Comienza tu Viaje de {{year}}",
+      "startDescription": "Crea tu plan anual para establecer metas, seguir el progreso y  alcanzar tus sueños este año.",
+      "createPlan": "Crear Mi Plan Anual",
+      "defineFocusAreas": "Define tus Áreas de Enfoque",
+      "focusAreasDescription": "Las áreas de enfoque son los pilares clave de tu vida que quieres mejorar este año. Ejemplos: Salud, Carrera, Relaciones, Crecimiento Personal, Finanzas.",
+      "addFocusAreas": "Agregar Áreas de Enfoque",
+      "overview": "Resumen de tus áreas de enfoque y objetivos",
+      "dailyRoutineBtn": "Rutina Diaria",
+      "editPlanBtn": "Editar Plan",
+      "totalProgress": "PROGRESO TOTAL",
+      "completedGoals": "OBJETIVOS COMPLETADOS",
+      "topPriorities": "PRINCIPALES PRIORIDADES",
+      "noPrioritiesSet": "Sin prioridades establecidas",
+      "focusAreas": "Áreas de Enfoque",
+      "yearlyPriorities": "Prioridades Anuales",
+      "noPrioritiesAdded": "Aún no se han agregado prioridades",
+      "progress": "Progreso",
+      "save": "Guardar"
+    },
     "deleteConfirm": "¿Estás seguro de que quieres eliminar este {{type}}? Esta acción no se puede deshacer.",
     "celebration": "🎉 ¡Objetivo Completado! ¡Estás haciendo un progreso increíble!",
     "errors": {

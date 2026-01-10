@@ -688,6 +688,26 @@
       "editPlan": "Edit Plan Title",
       "exportPlan": "Export Plan"
     },
+    "home": {
+      "startJourney": "Start Your {{year}} Journey",
+      "startDescription": "Create your annual plan to set goals, track progress, and achieve your dreams this year.",
+      "createPlan": "Create My Annual Plan",
+      "defineFocusAreas": "Define Your Focus Areas",
+      "focusAreasDescription": "Focus areas are the key pillars of your life that you want to improve this year. Examples: Health, Career, Relationships, Personal Growth, Finance.",
+      "addFocusAreas": "Add Focus Areas",
+      "overview": "Overview of your focus areas and goals",
+      "dailyRoutineBtn": "Daily Routine",
+      "editPlanBtn": "Edit Plan",
+      "totalProgress": "TOTAL PROGRESS",
+      "completedGoals": "COMPLETED GOALS",
+      "topPriorities": "TOP PRIORITIES",
+      "noPrioritiesSet": "No priorities set",
+      "focusAreas": "Focus Areas",
+      "yearlyPriorities": "Yearly Priorities",
+      "noPrioritiesAdded": "No priorities added yet",
+      "progress": "Progress",
+      "save": "Save"
+    },
     "deleteConfirm": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
     "celebration": "🎉 Goal Completed! You're making amazing progress!",
     "errors": {
