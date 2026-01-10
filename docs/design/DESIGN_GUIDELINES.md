@@ -129,6 +129,27 @@
     *   **Benefits:** Maintains visual consistency, avoids contrast issues, follows minimalist principles.
     *   **Examples:** Filter chips, navigation tabs, category selectors.
 
+### 6.1 Mobile Navigation (Specialized)
+*   **Segmented Controls:** For top-level mobile view switching (e.g., "Goals" vs "Priorities"), use a **Segmented Control** instead of standard tabs.
+    *   **Appearance:** Pill-shaped container (`background.level1`) with internal pills for items.
+    *   **Active State:** `background.surface`, `shadow: 'sm'`, `color: 'primary.main'` (or context color).
+    *   **Interaction:** Instant switch, no underline.
+    *   **Usage:** Only on `xs` viewports. Desktop should revert to standard Tabs or Grid views.
+
+### 6.2 Mobile Action Buttons
+*   **Row-First Layout:** On mobile, place primary actions (e.g., "Create", "Import") in a **single horizontal row** whenever possible.
+    *   **Avoid Stacking:** Do not stack buttons vertically unless they have long labels that force a break.
+    *   **Compact Width:** Buttons should only be as wide as their content (or flex share), not forced full-width (`width: '100%'`) unless intended as a sticky bottom bar.
+    *   **Space Optimization:** "Aprovechar el espacio" — use horizontal space efficiently to show more content above the fold.
+
+### 6.3 Mobile Stats Layout
+*   **Horizontal Row:** When displaying high-level statistics (counts, percentages) on mobile, use a **single horizontal row** (Grid `xs={4}` or `xs={6}`) instead of stacking vertical cards.
+    *   **Why:** Stacking consumes too much vertical space, pushing content off-screen.
+    *   **Hide Elements:** Hide secondary elements (like progress bars or labels) on mobile if space is tight, showing only the key metric.
+### 6.4 Horizontal Headers
+*   **Avoid Center Stacking:** For clear hierarchical headers (e.g., entity titles like "Health", "Reading"), use a **Left-Aligned Horizontal Row** layout (Icon + Text side-by-side) instead of stacking them vertically in the center.
+    *   *Why:* Vertical stacking wastes space and breaks the natural "reading flow" (left-to-right).
+    *   *Exception:* Empty states or marketing banners may use center stacking for emphasis.
 ---
 
 ## 7. Code Quality for UI
@@ -144,4 +165,16 @@
     *   **documentation:** See `nowry/docs/SUBSCRIPTION_SYSTEM_PLAN.md`.
     *   UI should reflect these limits (e.g., disable "Create" buttons if limit reached, or show a premium badge).
     *   Always utilize the central subscription hooks or services to check permissions.
+
+---
+
+## 9. Smart Empty States (Reduction of Clutter)
+*   **Hide Zero-State Dashboards:** Do NOT show dashboard statistics or "0" counters when a user has not yet created any content.
+    *   *Incorrect:* Showing "Total Goals: 0", "Completion: 0%" on a blank dashboard.
+    *   *Correct:* Hide the stats row entirely and show a prominent "Start Planning" call-to-action (CTA).
+*   **Progressive Disclosure:** Only reveal complex controls or statistics once there is data to populate them.
+    *   *Goal:* Reduce cognitive load for new users and provide a cleaner "First Run Experience" (FRE).
+
+*   **Single Primary Action:** Avoid showing multiple buttons that perform the exact same action on the same screen (e.g., in the header AND in an empty state card). 
+    *   *Rule:* If a prominent "Empty State" CTA exists, hide the corresponding toolbar/header action until the user has created their first item.
 

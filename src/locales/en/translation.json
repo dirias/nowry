@@ -543,6 +543,7 @@
   },
   "annualPlanning": {
     "title": "Annual Planning",
+    "back": "Back to Plan",
     "subtitle": "Focus on what matters most this year",
     "myPlan": "My 2026 Plan",
     "empty": "Start your focused year by defining your 3 main focus areas",

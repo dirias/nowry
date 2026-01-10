@@ -129,128 +129,136 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
           borderRadius: 'xl',
           boxShadow: 'lg',
           maxHeight: '85vh',
-          overflow: 'auto',
-          p: 3,
-          minWidth: 600
+          minWidth: 600,
+          p: 0, // Remove default padding to control layout manually
+          overflow: 'hidden', // Prevent dialog itself from scrolling
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        <ModalClose sx={{ position: 'absolute', top: 8, right: 8 }} />
+        <ModalClose sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }} />
 
-        {/* Header */}
-        <Box sx={{ pr: 6, mb: 2 }}>
-          <Typography level='h4' sx={{ fontWeight: 'bold' }}>
-            {step === 'select_cards' ? 'New Study Cards' : 'Add to Deck'}
-          </Typography>
-          <Typography level='body-sm'>
-            {step === 'select_cards' ? 'Select the cards you want to add to your study deck.' : 'Choose a deck to save your cards to.'}
-          </Typography>
+        {/* Fixed Header */}
+        <Box sx={{ p: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ pr: 6 }}>
+            <Typography level='h4' sx={{ fontWeight: 'bold' }}>
+              {step === 'select_cards' ? 'New Study Cards' : 'Add to Deck'}
+            </Typography>
+            <Typography level='body-sm'>
+              {step === 'select_cards' ? 'Select the cards you want to add to your study deck.' : 'Choose a deck to save your cards to.'}
+            </Typography>
+          </Box>
         </Box>
 
-        {step === 'select_cards' && (
-          <>
-            {/* Regenerate Button */}
-            <Tooltip title='Generate again'>
-              <Button
-                size='sm'
-                variant='outlined'
-                onClick={handleGenerateAgain}
-                disabled={loading}
-                sx={{ position: 'absolute', top: 16, right: 48, minWidth: 36, p: 0.8 }}
-              >
-                {loading ? <CircularProgress size='sm' /> : <RefreshCw size={18} />}
-              </Button>
-            </Tooltip>
-
-            <Stack direction='row' flexWrap='wrap' gap={2} justifyContent='center' sx={{ mt: 2, minHeight: 200 }}>
-              {cards.map((card, index) => {
-                const isSelected = selectedCards.includes(index)
-                return (
-                  <Card
-                    key={index}
-                    onClick={() => toggleCardSelection(index)}
-                    variant='outlined'
-                    sx={{
-                      width: 260,
-                      minHeight: 180,
-                      display: 'flex',
-                      bgcolor: isSelected ? 'primary.softBg' : 'background.body',
-                      borderColor: isSelected ? 'primary.solidBg' : 'neutral.outlinedBorder',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      '&:hover': { transform: 'translateY(-2px)', boxShadow: 'sm' }
-                    }}
-                  >
-                    <CardOverflow sx={{ px: 2, pt: 2 }}>
-                      <Typography level='title-md' startDecorator={<BookOpen size={16} />}>
-                        {card.title}
-                      </Typography>
-                    </CardOverflow>
-                    <Divider />
-                    <CardContent>
-                      <Typography level='body-sm' color='neutral'>
-                        {card.content}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </Stack>
-          </>
-        )}
-
-        {step === 'select_deck' && (
-          <Stack spacing={3} sx={{ mt: 2, minHeight: 200, px: 2 }}>
-            <FormControl>
-              <FormLabel>Select Deck</FormLabel>
-              <Select value={selectedDeckId} onChange={(_, val) => setSelectedDeckId(val)} placeholder='Choose a deck...'>
-                {decks.map((deck) => (
-                  <Option key={deck._id} value={deck._id}>
-                    {deck.name}
-                  </Option>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Divider>OR</Divider>
-
-            <Box
-              sx={{ p: 2, border: '1px dashed', borderColor: 'neutral.outlinedBorder', borderRadius: 'md', bgcolor: 'background.level1' }}
-            >
-              {!isCreatingDeck ? (
-                <Button variant='plain' startDecorator={<Plus />} onClick={() => setIsCreatingDeck(true)} fullWidth>
-                  Create New Deck
+        {/* Scrollable Content Area */}
+        <Box sx={{ p: 3, overflowY: 'auto', flexGrow: 1 }}>
+          {step === 'select_cards' && (
+            <>
+              {/* Regenerate Button */}
+              <Tooltip title='Generate again'>
+                <Button
+                  size='sm'
+                  variant='outlined'
+                  onClick={handleGenerateAgain}
+                  disabled={loading}
+                  sx={{ position: 'absolute', top: 16, right: 48, minWidth: 36, p: 0.8 }}
+                >
+                  {loading ? <CircularProgress size='sm' /> : <RefreshCw size={18} />}
                 </Button>
-              ) : (
-                <Stack spacing={2} direction='row'>
-                  <Input placeholder='New Deck Name' value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} fullWidth />
-                  <Button onClick={handleCreateDeck} loading={loading}>
-                    Create
-                  </Button>
-                  <Button variant='plain' color='neutral' onClick={() => setIsCreatingDeck(false)}>
-                    Cancel
-                  </Button>
-                </Stack>
-              )}
-            </Box>
-          </Stack>
-        )}
+              </Tooltip>
 
-        <Divider sx={{ my: 2 }} />
-
-        <Stack direction='row' justifyContent='flex-end' spacing={1}>
-          <Button variant='soft' color='neutral' onClick={onCancel}>
-            Cancel
-          </Button>
-          {step === 'select_cards' ? (
-            <Button variant='solid' color='primary' onClick={handleProceedToDeck} disabled={selectedCards.length === 0}>
-              Proceed ({selectedCards.length})
-            </Button>
-          ) : (
-            <Button variant='solid' color='success' onClick={handleSaveCards} loading={saving} disabled={!selectedDeckId}>
-              Confirm & Save
-            </Button>
+              <Stack direction='row' flexWrap='wrap' gap={2} justifyContent='center' sx={{ minHeight: 200 }}>
+                {cards.map((card, index) => {
+                  const isSelected = selectedCards.includes(index)
+                  return (
+                    <Card
+                      key={index}
+                      onClick={() => toggleCardSelection(index)}
+                      variant='outlined'
+                      sx={{
+                        width: 260,
+                        minHeight: 180,
+                        display: 'flex',
+                        bgcolor: isSelected ? 'primary.softBg' : 'background.body',
+                        borderColor: isSelected ? 'primary.solidBg' : 'neutral.outlinedBorder',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': { transform: 'translateY(-2px)', boxShadow: 'sm' }
+                      }}
+                    >
+                      <CardOverflow sx={{ px: 2, pt: 2 }}>
+                        <Typography level='title-md' startDecorator={<BookOpen size={16} />}>
+                          {card.title}
+                        </Typography>
+                      </CardOverflow>
+                      <Divider />
+                      <CardContent>
+                        <Typography level='body-sm' color='neutral'>
+                          {card.content}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </Stack>
+            </>
           )}
-        </Stack>
+
+          {step === 'select_deck' && (
+            <Stack spacing={3} sx={{ minHeight: 200, px: 2 }}>
+              <FormControl>
+                <FormLabel>Select Deck</FormLabel>
+                <Select value={selectedDeckId} onChange={(_, val) => setSelectedDeckId(val)} placeholder='Choose a deck...'>
+                  {decks.map((deck) => (
+                    <Option key={deck._id} value={deck._id}>
+                      {deck.name}
+                    </Option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Divider>OR</Divider>
+
+              <Box
+                sx={{ p: 2, border: '1px dashed', borderColor: 'neutral.outlinedBorder', borderRadius: 'md', bgcolor: 'background.level1' }}
+              >
+                {!isCreatingDeck ? (
+                  <Button variant='plain' startDecorator={<Plus />} onClick={() => setIsCreatingDeck(true)} fullWidth>
+                    Create New Deck
+                  </Button>
+                ) : (
+                  <Stack spacing={2} direction='row'>
+                    <Input placeholder='New Deck Name' value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} fullWidth />
+                    <Button onClick={handleCreateDeck} loading={loading}>
+                      Create
+                    </Button>
+                    <Button variant='plain' color='neutral' onClick={() => setIsCreatingDeck(false)}>
+                      Cancel
+                    </Button>
+                  </Stack>
+                )}
+              </Box>
+            </Stack>
+          )}
+        </Box>
+
+        {/* Fixed Footer */}
+        <Box sx={{ p: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.surface' }}>
+          <Stack direction='row' justifyContent='flex-end' spacing={1}>
+            <Button variant='soft' color='neutral' onClick={onCancel}>
+              Cancel
+            </Button>
+            {step === 'select_cards' ? (
+              <Button variant='solid' color='primary' onClick={handleProceedToDeck} disabled={selectedCards.length === 0}>
+                Proceed ({selectedCards.length})
+              </Button>
+            ) : (
+              <Button variant='solid' color='success' onClick={handleSaveCards} loading={saving} disabled={!selectedDeckId}>
+                Confirm & Save
+              </Button>
+            )}
+          </Stack>
+        </Box>
       </ModalDialog>
     </Modal>
   )

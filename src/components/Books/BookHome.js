@@ -9,7 +9,7 @@ import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { useAuth } from '../../context/AuthContext'
 import Book from './Book'
 import ImportPreviewModal from './ImportPreviewModal'
-import { Box, Typography, Input, Button, Stack, IconButton, Card, Grid, Container, Chip, Modal, ModalDialog } from '@mui/joy'
+import { Box, Typography, Input, Button, Stack, IconButton, Card, Grid, Container, Chip, Modal, ModalDialog, Skeleton } from '@mui/joy'
 import AddIcon from '@mui/icons-material/Add'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import SearchIcon from '@mui/icons-material/Search'
@@ -235,7 +235,12 @@ export default function BookHome() {
             </Typography>
           </Box>
 
-          <Stack direction='row' spacing={1.5} alignItems='center' sx={{ width: { xs: '100%', md: 'auto' } }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+            sx={{ width: { xs: '100%', md: 'auto' } }}
+          >
             {allBooks.length > 0 && (
               <Input
                 placeholder={t('books.searchPlaceholder')}
@@ -248,21 +253,30 @@ export default function BookHome() {
               />
             )}
 
-            <Button startDecorator={<AddIcon />} onClick={handleCreateBook} size='sm' variant='solid' color='primary' sx={{ height: 32 }}>
-              {t('books.create')}
-            </Button>
-            <Button
-              startDecorator={<UploadFileIcon />}
-              {...getRootProps()}
-              size='sm'
-              variant='plain'
-              color='neutral'
-              loading={uploading}
-              sx={{ px: 2, height: 32 }}
-            >
-              <input {...getInputProps()} />
-              {t('books.import')}
-            </Button>
+            <Stack direction='row' spacing={1.5} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+              <Button
+                startDecorator={<AddIcon />}
+                onClick={handleCreateBook}
+                size='sm'
+                variant='solid'
+                color='primary'
+                sx={{ height: 32, flex: { xs: 1, sm: 'initial' } }}
+              >
+                {t('books.create')}
+              </Button>
+              <Button
+                startDecorator={<UploadFileIcon />}
+                {...getRootProps()}
+                size='sm'
+                variant='plain'
+                color='neutral'
+                loading={uploading}
+                sx={{ px: 2, height: 32, flex: { xs: 1, sm: 'initial' } }}
+              >
+                <input {...getInputProps()} />
+                {t('books.import')}
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
 
@@ -281,7 +295,31 @@ export default function BookHome() {
 
       <input {...getInputProps()} />
 
-      {/* Unified Empty State & Drop Zone */}
+      {/* Loading Skeleton */}
+      {loading && (
+        <Grid container spacing={2}>
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <Grid key={i} xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Card
+                variant='outlined'
+                sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 2, width: '100%', maxWidth: 200 }}
+              >
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Skeleton variant='rectangular' width={60} height={80} sx={{ borderRadius: 'sm' }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant='text' level='title-md' width='80%' sx={{ mb: 1 }} />
+                    <Skeleton variant='text' level='body-sm' width='40%' />
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 'auto' }}>
+                  <Skeleton variant='rectangular' width={60} height={24} sx={{ borderRadius: 'xs' }} />
+                  <Skeleton variant='circular' width={24} height={24} />
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
       {allBooks.length === 0 && !loading && (
         <Card
           {...getRootProps()}
@@ -292,8 +330,8 @@ export default function BookHome() {
             px: 4,
             cursor: 'pointer',
             borderStyle: 'dashed',
-            borderColor: isDragActive ? 'primary.500' : 'neutral.300',
-            backgroundColor: isDragActive ? 'primary.softBg' : 'transparent',
+            borderColor: isDragActive ? 'primary.500' : 'neutral.outlinedBorder',
+            backgroundColor: isDragActive ? 'primary.softBg' : 'background.surface',
             transition: 'all 0.2s ease',
             display: 'flex',
             flexDirection: 'column',
@@ -301,34 +339,35 @@ export default function BookHome() {
             alignItems: 'center',
             minHeight: 400,
             '&:hover': {
-              borderColor: 'primary.400',
-              backgroundColor: 'background.level1'
+              borderColor: 'primary.main',
+              backgroundColor: 'background.level1',
+              boxShadow: 'sm'
             }
           }}
         >
           <Box
             sx={{
-              p: 2,
+              p: 3,
               borderRadius: '50%',
-              bgcolor: 'background.level1',
-              mb: 2,
+              bgcolor: 'background.level2',
+              mb: 3,
               color: 'text.tertiary',
               transition: 'transform 0.2s',
               ...(isDragActive && { transform: 'scale(1.1)', bgcolor: 'primary.softBg', color: 'primary.500' })
             }}
           >
-            <CloudUploadIcon sx={{ fontSize: 32 }} />
+            <CloudUploadIcon sx={{ fontSize: 40 }} />
           </Box>
-          <Typography level='title-lg' fontWeight={600} sx={{ mb: 1 }}>
-            {isDragActive ? 'Drop files here' : t('books.dropTitle')}
+          <Typography level='h3' fontWeight={600} sx={{ mb: 1 }}>
+            {isDragActive ? t('books.dropTitleActive') : t('books.dropTitle')}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 4, maxWidth: 400 }}>
+          <Typography level='body-md' sx={{ color: 'text.secondary', mb: 4, maxWidth: 450 }}>
             {t('books.dropSubtitle')}
           </Typography>
 
           <Stack direction='row' spacing={1} justifyContent='center'>
             {['PDF', 'Word', 'TXT'].map((type) => (
-              <Chip key={type} size='sm' variant='outlined' color='neutral'>
+              <Chip key={type} size='md' variant='soft' color='neutral'>
                 {type}
               </Chip>
             ))}
@@ -339,8 +378,8 @@ export default function BookHome() {
       {/* Books Grid - Filtered Results */}
       {!loading && allBooks.length > 0 && books.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography level='body-md' color='neutral'>
-            No found books for &quot;{searchTerm}&quot;
+          <Typography level='body-md' color='text.secondary'>
+            {t('books.noResults', { term: searchTerm })}
           </Typography>
         </Box>
       )}
@@ -349,7 +388,7 @@ export default function BookHome() {
       {!loading && books.length > 0 && (
         <Grid container spacing={2}>
           {books.map((book) => (
-            <Grid key={book._id} xs={12} sm={6} md={4} lg={3}>
+            <Grid key={book._id} xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
               <Book
                 book={book}
                 handleBookClick={handleBookClick}

@@ -13,8 +13,8 @@ const TextMenu = forwardRef(({ onOptionClick, style }, ref) => {
   const options = [
     { label: 'Create Study Card', value: 'create_study_card', icon: <StickyNote size={18} /> },
     { label: 'Create Questionnaire', value: 'create_questionnaire', icon: <ScrollText size={18} /> },
-    { label: 'Visualize Content', value: 'create_visual_content', icon: <ImageIcon size={18} /> }
-    // { label: 'Generate related text', value: 'generate_related_text', icon: <Wand2 size={18} /> },
+    { label: 'Imagine Scene', value: 'create_visual_content', icon: <ImageIcon size={18} /> },
+    { label: 'Extract Vocabulary (Pro)', value: 'extract_vocabulary', icon: <Wand2 size={18} /> }
     // { label: 'Reproduce text', value: 'reproduce_text', icon: <Copy size={18} /> },
   ]
 

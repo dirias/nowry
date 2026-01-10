@@ -109,37 +109,42 @@ export default function ImageUploadPlugin({ bookId, onUploadStart, onUploadCompl
 
   useEffect(() => {
     // Handle paste events
+    // Handle paste events
     const removePasteListener = editor.registerCommand(
       PASTE_COMMAND,
-      async (event) => {
+      (event) => {
         const items = (event.clipboardData || event.originalEvent.clipboardData).items
+        let hasImage = false
 
         for (const item of items) {
           if (item.type.indexOf('image') !== -1) {
-            event.preventDefault()
+            hasImage = true
             const file = item.getAsFile()
             if (file) {
-              await handleImageUpload(file)
+              event.preventDefault()
+              // Fire and forget upload (async)
+              handleImageUpload(file).catch(console.error)
               return true
             }
           }
         }
+        // Return false intentionally to let other handlers (text) process the event
         return false
       },
       COMMAND_PRIORITY_LOW
     )
 
     // Handle drop events
+    // Handle drop events
     const removeDropListener = editor.registerCommand(
       DROP_COMMAND,
-      async (event) => {
-        event.preventDefault()
+      (event) => {
         const files = event.dataTransfer?.files
-
         if (files && files.length > 0) {
           const file = files[0]
           if (file.type.startsWith('image/')) {
-            await handleImageUpload(file)
+            event.preventDefault()
+            handleImageUpload(file).catch(console.error)
             return true
           }
         }

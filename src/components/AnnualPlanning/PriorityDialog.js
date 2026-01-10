@@ -72,7 +72,16 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
             annualPlanningService.getDailyRoutine()
           ])
 
-          const tasks = tasksResult.status === 'fulfilled' ? tasksResult.value : []
+          // Handle potential response wrappers for tasks
+          const rawTasks = tasksResult.status === 'fulfilled' ? tasksResult.value : []
+          const tasks = Array.isArray(rawTasks)
+            ? rawTasks
+            : Array.isArray(rawTasks?.data)
+              ? rawTasks.data
+              : Array.isArray(rawTasks?.tasks)
+                ? rawTasks.tasks
+                : []
+
           const routineData = routineResult.status === 'fulfilled' ? routineResult.value : {}
 
           // Fetch Goals from all available Focus Areas
@@ -81,8 +90,12 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
             const goalPromises = focusAreas.map((area) => annualPlanningService.getGoals(area._id))
             const goalResults = await Promise.allSettled(goalPromises)
             goalResults.forEach((res) => {
-              if (res.status === 'fulfilled' && Array.isArray(res.value)) {
-                allGoals.push(...res.value)
+              // Ensure we extract the array from the goal response if needed
+              const val = res.status === 'fulfilled' ? res.value : []
+              const goalsArray = Array.isArray(val) ? val : Array.isArray(val?.data) ? val.data : []
+
+              if (goalsArray.length > 0) {
+                allGoals.push(...goalsArray)
               }
             })
           }
@@ -91,17 +104,19 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
           const routineItems = []
           ;['morning', 'afternoon', 'evening'].forEach((section) => {
             const list = routineData[`${section}_routine`] || []
-            list.forEach((item, index) => {
-              const itemId = item.id || `temp-${section}-${index}`
-              if (item.title) {
-                routineItems.push({
-                  id: itemId,
-                  title: item.title,
-                  type: 'routine',
-                  subtype: `routine_${section}`
-                })
-              }
-            })
+            if (Array.isArray(list)) {
+              list.forEach((item, index) => {
+                const itemId = item.id || `temp-${section}-${index}`
+                if (item.title) {
+                  routineItems.push({
+                    id: itemId,
+                    title: item.title,
+                    type: 'routine',
+                    subtype: `routine_${section}`
+                  })
+                }
+              })
+            }
           })
 
           // Filter out already linked items
@@ -111,9 +126,9 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
           }
 
           setAvailableItems({
-            tasks: tasks.filter((t) => !isLinked(t._id, 'task')) || [],
+            tasks: tasks.filter((t) => !isLinked(t._id || t.id, 'task')).map((t) => ({ ...t, _id: t._id || t.id })) || [],
             routine: routineItems.filter((r) => !isLinked(r.id, r.subtype)),
-            goals: allGoals.filter((g) => !isLinked(g._id, 'goal'))
+            goals: allGoals.map((g) => ({ ...g, _id: g._id || g.id })).filter((g) => !isLinked(g._id, 'goal'))
           })
         } catch (err) {
           console.error('Failed to fetch linkables', err)

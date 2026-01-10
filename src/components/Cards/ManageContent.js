@@ -17,7 +17,7 @@ import {
   Grid,
   Table
 } from '@mui/joy'
-import { Edit, Delete, Add, Style, Quiz as QuizIcon, AccountTree, LocalOffer, Search, Visibility } from '@mui/icons-material'
+import { Edit, Delete, Add, Style, Quiz as QuizIcon, AccountTree, LocalOffer, Search, Visibility, Event } from '@mui/icons-material'
 import CardPreviewModal from './CardPreviewModal'
 
 export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, onEditCard, onDeleteCard, onAddCard }) {
@@ -390,6 +390,14 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                         </Chip>
                         <Chip size='sm' variant='outlined' startDecorator='📚'>
                           {getDeckName(card.deck_id)}
+                        </Chip>
+                        <Chip
+                          size='sm'
+                          variant='outlined'
+                          color={card.next_review ? 'success' : 'primary'}
+                          startDecorator={<Event fontSize='small' />}
+                        >
+                          {card.next_review ? new Date(card.next_review).toLocaleDateString() : 'New'}
                         </Chip>
                         {card.tags?.map((tag, idx) => (
                           <Chip key={idx} size='sm' variant='outlined'>

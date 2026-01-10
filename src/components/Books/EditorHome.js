@@ -3,9 +3,9 @@ import Editor from './Editor'
 import PageOverview from './PageOverview'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
-import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock } from 'lucide-react'
+import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer } from 'lucide-react'
 import { booksService } from '../../api/services'
-import { Box, Input, IconButton, Sheet, Stack, Typography, Divider, Drawer } from '@mui/joy'
+import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer } from '@mui/joy'
 import { LexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import Toolbar from './Toolbar'
 import { useAutoSave, SAVE_STATUS } from '../../hooks/useAutoSave'
@@ -64,6 +64,7 @@ export default function EditorHome() {
 
   const [zoom, setZoom] = useState(1.0)
   const [isLocked, setIsLocked] = useState(false)
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false)
   const [focusedEditor, setFocusedEditor] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -72,7 +73,8 @@ export default function EditorHome() {
       const updateData = {
         title: bookName,
         page_size: pageSize,
-        full_content: currentContent
+        full_content: currentContent,
+        auto_save_enabled: autoSaveEnabled
       }
 
       console.log('Saving book with page_size:', pageSize)
@@ -97,6 +99,22 @@ export default function EditorHome() {
     }
   }
 
+  // Toggle auto-save and save preference immediately
+  const handleToggleAutoSave = async () => {
+    const newAutoSaveState = !autoSaveEnabled
+    setAutoSaveEnabled(newAutoSaveState)
+
+    try {
+      // Save the preference immediately
+      await booksService.update(id, { auto_save_enabled: newAutoSaveState })
+      console.log('Auto-save preference updated:', newAutoSaveState)
+    } catch (e) {
+      console.error('Failed to save auto-save preference:', e)
+      // Revert on error
+      setAutoSaveEnabled(!newAutoSaveState)
+    }
+  }
+
   const handleContentChange = (newHtml) => {
     setContent(newHtml)
   }
@@ -112,21 +130,12 @@ export default function EditorHome() {
     id: book?._id,
     content,
     onSave: (html) => handleSaveBook(html),
-    debounceMs: null, // Disable auto-save
-    forceSaveMs: null // Disable force save
+    debounceMs: autoSaveEnabled ? 2000 : null, // Enable auto-save if toggled on
+    forceSaveMs: autoSaveEnabled ? 30000 : null // Enable force save if toggled on
   })
 
-  // Debounced save for page type changes (500ms after change)
-  useEffect(() => {
-    if (!book?._id || !pageSize) return
-
-    const timer = setTimeout(() => {
-      console.log('Page size changed, triggering save:', pageSize)
-      saveNow()
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [pageSize, book?._id, saveNow])
+  // Note: Page size is saved when user manually saves or when autosave is enabled
+  // No need for separate auto-save effect here
 
   // Load Book & Migrate if needed
   useEffect(() => {
@@ -141,6 +150,11 @@ export default function EditorHome() {
         if (fullBook.page_size) {
           console.log('📚 Loading page size from book:', fullBook.page_size)
           setPageSize(fullBook.page_size) // Use setPageSize directly here to avoid logging on load
+        }
+
+        // Load auto-save preference
+        if (fullBook.auto_save_enabled !== undefined) {
+          setAutoSaveEnabled(fullBook.auto_save_enabled)
         }
 
         const initialHtml = fullBook.full_content || ''
@@ -175,9 +189,13 @@ export default function EditorHome() {
     if (status === SAVE_STATUS.SAVED) {
       return (
         <Stack direction='row' spacing={1} alignItems='center'>
-          <Check size={14} color='var(--joy-palette-success-500)' />
+          {autoSaveEnabled ? (
+            <Check size={14} color='var(--joy-palette-success-500)' />
+          ) : (
+            <AlertTriangle size={14} color='var(--joy-palette-danger-500)' />
+          )}
           <Typography level='body-xs' color='neutral'>
-            Saved
+            {autoSaveEnabled ? 'Saved' : 'Autosave Inactive'}
           </Typography>
         </Stack>
       )
@@ -193,6 +211,17 @@ export default function EditorHome() {
       )
     }
     if (status === SAVE_STATUS.UNSAVED) {
+      // Don't show "Unsaved changes" if autosave is disabled - user is in manual mode
+      if (!autoSaveEnabled) {
+        return (
+          <Stack direction='row' spacing={1} alignItems='center'>
+            <AlertTriangle size={14} color='var(--joy-palette-danger-500)' />
+            <Typography level='body-xs' color='neutral'>
+              Autosave Inactive
+            </Typography>
+          </Stack>
+        )
+      }
       return (
         <Typography level='body-xs' color='neutral' sx={{ fontStyle: 'italic' }}>
           Unsaved changes...
@@ -347,6 +376,31 @@ export default function EditorHome() {
             </Stack>
             <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
 
+            <Button
+              variant='plain'
+              color='neutral'
+              onClick={handleToggleAutoSave}
+              size='sm'
+              startDecorator={<Timer size={14} />}
+              sx={{
+                fontSize: 'xs',
+                fontWeight: autoSaveEnabled ? 'lg' : 'md',
+                textDecoration: autoSaveEnabled ? 'underline' : 'none',
+                textUnderlineOffset: '4px',
+                textDecorationThickness: '2px',
+                '&:hover': {
+                  textDecoration: 'underline',
+                  textUnderlineOffset: '4px'
+                }
+              }}
+            >
+              Autosave
+            </Button>
+
+            <IconButton variant='outlined' color='neutral' onClick={handleManualSave} size='sm' sx={{ borderRadius: 'md' }}>
+              <Save size={16} />
+            </IconButton>
+
             <IconButton
               variant={isLocked ? 'solid' : 'outlined'}
               color={isLocked ? 'danger' : 'neutral'}
@@ -355,10 +409,6 @@ export default function EditorHome() {
               sx={{ borderRadius: 'md' }}
             >
               {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
-            </IconButton>
-
-            <IconButton variant='outlined' color='neutral' onClick={handleManualSave} size='sm' sx={{ borderRadius: 'md' }}>
-              <Save size={16} />
             </IconButton>
           </Stack>
         </Stack>

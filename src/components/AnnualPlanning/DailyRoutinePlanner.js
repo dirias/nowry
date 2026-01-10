@@ -285,37 +285,208 @@ const DailyRoutinePlanner = () => {
       </Card>
     )
   }
+  /* Mobile Swipe Logic */
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0) // 0: Morning, 1: Afternoon, 2: Evening
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe && activeSectionIndex < 2) {
+      setActiveSectionIndex((prev) => prev + 1)
+    }
+    if (isRightSwipe && activeSectionIndex > 0) {
+      setActiveSectionIndex((prev) => prev - 1)
+    }
+  }
+  /* Context Colors for Sections */
+  const getSectionColor = (key) => {
+    switch (key) {
+      case 'morning':
+      case 'afternoon':
+        return 'warning'
+      case 'evening':
+        return 'primary'
+      default:
+        return 'neutral'
+    }
+  }
+
+  const sections = [
+    {
+      key: 'morning',
+      title: t('annualPlanning.dailyRoutine.morning'),
+      icon: <MorningIcon />,
+      color: 'warning'
+    },
+    {
+      key: 'afternoon',
+      title: t('annualPlanning.dailyRoutine.afternoon'),
+      icon: <AfternoonIcon />,
+      color: 'warning'
+    },
+    {
+      key: 'evening',
+      title: t('annualPlanning.dailyRoutine.evening'),
+      icon: <EveningIcon />,
+      color: 'primary'
+    }
+  ]
+
+  const renderSectionContent = (sectionDef) => {
+    return renderSection(sectionDef.title, React.cloneElement(sectionDef.icon, { color: sectionDef.color }), sectionDef.key, sectionDef.key)
+  }
 
   if (loading) return <LinearProgress />
 
   return (
     <Container maxWidth='xl' sx={{ py: 4, pb: 10 }}>
-      <Stack direction='row' justifyContent='space-between' alignItems='center' mb={4}>
+      {/* Header */}
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        justifyContent='space-between'
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+        spacing={2}
+        mb={4}
+      >
         <Box>
-          <Button variant='plain' startDecorator={<ArrowBackIcon />} onClick={() => navigate('/annual-planning')} sx={{ mb: 1 }}>
-            Back to Plan
+          <Button variant='plain' color='neutral' startDecorator={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mb: 1, pl: 0 }}>
+            {t('annualPlanning.back')}
           </Button>
           <Typography level='h2'>{t('annualPlanning.dailyRoutine.title')}</Typography>
-          <Typography level='body-md'>{t('annualPlanning.dailyRoutine.subtitle')}</Typography>
-        </Box>
-        {/* Auto-save enabled, no button needed */}
-        {saving && (
-          <Typography level='body-sm' textColor='success.500'>
-            Saving...
+          <Typography level='body-md' textColor='text.tertiary'>
+            {t('annualPlanning.dailyRoutine.subtitle')}
           </Typography>
+        </Box>
+        {/* Auto-save status */}
+        {saving && (
+          <Stack direction='row' spacing={1} alignItems='center'>
+            <Typography level='body-sm' textColor='success.500' fontWeight={600}>
+              Saving changes...
+            </Typography>
+          </Stack>
         )}
       </Stack>
 
-      <Grid container spacing={3} alignItems='flex-start'>
-        <Grid xs={12} md={4}>
-          {renderSection(t('annualPlanning.dailyRoutine.morning'), <MorningIcon color='warning' />, 'morning', 'morning')}
-        </Grid>
-        <Grid xs={12} md={4}>
-          {renderSection(t('annualPlanning.dailyRoutine.afternoon'), <AfternoonIcon color='warning' />, 'afternoon', 'afternoon')}
-        </Grid>
-        <Grid xs={12} md={4}>
-          {renderSection(t('annualPlanning.dailyRoutine.evening'), <EveningIcon color='primary' />, 'evening', 'evening')}
-        </Grid>
+      {/* Mobile Tabs / Navigation Indicator */}
+      {/* Designed as a premium segmented control */}
+      <Box
+        sx={{
+          display: { xs: 'flex', md: 'none' },
+          p: 0.5,
+          mb: 3,
+          borderRadius: 'xl',
+          bgcolor: 'background.level1',
+          overflow: 'hidden'
+        }}
+      >
+        {sections.map((section, index) => {
+          const isActive = activeSectionIndex === index
+          return (
+            <Box
+              key={section.key}
+              onClick={() => setActiveSectionIndex(index)}
+              sx={{
+                flex: 1,
+                py: 1,
+                px: 1,
+                textAlign: 'center',
+                borderRadius: 'lg',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                bgcolor: isActive ? 'background.surface' : 'transparent',
+                boxShadow: isActive ? 'sm' : 'none',
+                color: isActive ? `${section.color}.main` : 'text.secondary',
+                fontWeight: isActive ? 600 : 500,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                userSelect: 'none'
+              }}
+            >
+              {/* Show icon only on active or larger mobile screens if space permits? sticking to text+icon for delight */}
+              <Box component='span' sx={{ fontSize: '1.1rem', display: 'flex' }}>
+                {React.cloneElement(section.icon, {
+                  color: isActive ? 'inherit' : 'neutral',
+                  fontSize: 'inherit'
+                })}
+              </Box>
+              <Typography level='body-sm' textColor='inherit' fontWeight='inherit'>
+                {section.title}
+              </Typography>
+            </Box>
+          )
+        })}
+      </Box>
+
+      {/* Content Grid (Responsive) */}
+      <Grid
+        container
+        spacing={3}
+        alignItems='flex-start'
+        // Mobile Swipe Handlers
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        sx={{
+          minHeight: '50vh', // Ensure swipe area has height
+          display: { xs: 'flex', md: 'flex' },
+          flexDirection: { xs: 'column', md: 'row' }
+        }}
+      >
+        {/*
+            On Desktop (md+): Show ALL sections.
+        */}
+        <Box sx={{ display: { xs: 'none', md: 'contents' } }}>
+          {sections.map((s) => (
+            <Grid xs={12} md={4} key={s.key}>
+              {renderSectionContent(s)}
+            </Grid>
+          ))}
+        </Box>
+
+        {/* 
+            On Mobile (xs): Show ONLY the active section using CSS transition if possible, 
+            but for now strict conditional rendering is safer for layout. 
+        */}
+        <Box sx={{ display: { xs: 'block', md: 'none' }, width: '100%' }}>
+          {renderSectionContent(sections[activeSectionIndex])}
+
+          {/* Swipe Hint */}
+          <Stack direction='row' alignItems='center' justifyContent='center' spacing={1} sx={{ mt: 3, opacity: 0.5 }}>
+            <Typography level='body-xs'>Swipe to navigate</Typography>
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              {[0, 1, 2].map((i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: i === activeSectionIndex ? 'text.primary' : 'neutral.300',
+                    transition: 'all 0.3s'
+                  }}
+                />
+              ))}
+            </Box>
+          </Stack>
+        </Box>
       </Grid>
     </Container>
   )

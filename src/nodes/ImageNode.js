@@ -121,6 +121,8 @@ function ImageComponent({ src, altText, width, height, alignment, maxWidth, node
           src={imgSrc}
           alt={altText}
           onError={handleError}
+          loading='lazy'
+          decoding='async'
           className={`editor-image alignment-${alignment} ${isSelected && isEditable ? 'selected' : ''}`}
           style={{
             maxWidth: '100%',

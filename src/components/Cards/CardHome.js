@@ -221,89 +221,333 @@ export default function CardHome() {
         </Stack>
 
         {/* Stats Dashboard */}
-        <Grid container spacing={2}>
-          <Grid xs={12} sm={6}>
-            <Card variant='soft' color='danger'>
-              <CardContent>
-                <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                  <Box>
-                    <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
-                      {t('cards.dueToday')}
-                    </Typography>
-                    <Typography level='h2' sx={{ color: 'danger.solidBg' }}>
-                      {stats.dueToday}
-                    </Typography>
-                  </Box>
-                  <School sx={{ fontSize: 40, opacity: 0.5, color: 'danger.solidBg' }} />
-                </Stack>
-              </CardContent>
-            </Card>
+        <Box>
+          {/* Desktop/Tablet Stats */}
+          <Grid container spacing={2} sx={{ display: { xs: 'none', md: 'flex' } }}>
+            <Grid xs={12} sm={6}>
+              <Card variant='soft' color='danger'>
+                <CardContent>
+                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                    <Box>
+                      <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
+                        {t('cards.dueToday')}
+                      </Typography>
+                      <Typography level='h2' sx={{ color: 'danger.solidBg' }}>
+                        {stats.dueToday}
+                      </Typography>
+                    </Box>
+                    <School sx={{ fontSize: 40, opacity: 0.5, color: 'danger.solidBg' }} />
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid xs={12} sm={6}>
+              <Card variant='soft' color='neutral'>
+                <CardContent>
+                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                    <Box>
+                      <Typography level='body-sm' sx={{ color: 'neutral.plainColor' }}>
+                        {t('cards.totalCards')}
+                      </Typography>
+                      <Typography level='h2' sx={{ color: 'neutral.solidBg' }}>
+                        {stats.totalCards}
+                      </Typography>
+                    </Box>
+                    <GridView sx={{ fontSize: 40, opacity: 0.5, color: 'neutral.solidBg' }} />
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-          <Grid xs={12} sm={6}>
-            <Card variant='soft' color='neutral'>
-              <CardContent>
-                <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                  <Box>
-                    <Typography level='body-sm' sx={{ color: 'neutral.plainColor' }}>
-                      {t('cards.totalCards')}
-                    </Typography>
-                    <Typography level='h2' sx={{ color: 'neutral.solidBg' }}>
-                      {stats.totalCards}
-                    </Typography>
-                  </Box>
-                  <GridView sx={{ fontSize: 40, opacity: 0.5, color: 'neutral.solidBg' }} />
-                </Stack>
-              </CardContent>
+
+          {/* Mobile Stats (Compact Row) */}
+          <Stack direction='row' spacing={1} sx={{ display: { xs: 'flex', md: 'none' } }}>
+            <Card
+              variant='soft'
+              color='danger'
+              sx={{ flex: 1, p: 1.5, alignItems: 'center', textAlign: 'center', flexDirection: 'column', gap: 0.5 }}
+            >
+              <School sx={{ fontSize: 20, color: 'danger.solidBg', mb: 0.5 }} />
+              <Typography level='h3' fontWeight={700} sx={{ color: 'danger.solidBg', lineHeight: 1 }}>
+                {stats.dueToday}
+              </Typography>
+              <Typography level='body-xs' fontWeight={600} sx={{ color: 'danger.plainColor', fontSize: '0.7rem' }}>
+                {t('cards.dueToday')}
+              </Typography>
             </Card>
-          </Grid>
-        </Grid>
+
+            <Card
+              variant='soft'
+              color='neutral'
+              sx={{ flex: 1, p: 1.5, alignItems: 'center', textAlign: 'center', flexDirection: 'column', gap: 0.5 }}
+            >
+              <GridView sx={{ fontSize: 20, color: 'neutral.solidBg', mb: 0.5 }} />
+              <Typography level='h3' fontWeight={700} sx={{ color: 'neutral.solidBg', lineHeight: 1 }}>
+                {stats.totalCards}
+              </Typography>
+              <Typography level='body-xs' fontWeight={600} sx={{ color: 'neutral.plainColor', fontSize: '0.7rem' }}>
+                {t('cards.totalCards')}
+              </Typography>
+            </Card>
+          </Stack>
+        </Box>
       </Stack>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)} sx={{ mb: 3 }}>
-        <TabList>
-          <Tab>{t('cards.browse')}</Tab>
-          <Tab>{t('cards.manage')}</Tab>
+      {/* Mobile Tabs (Segmented Control) */}
+      <Box
+        sx={{
+          display: { xs: 'flex', md: 'none' },
+          p: 0.5,
+          mb: 3,
+          borderRadius: 'xl',
+          bgcolor: 'background.level1',
+          overflow: 'hidden'
+        }}
+      >
+        {[t('cards.browse'), t('cards.manage')].map((tabLabel, index) => {
+          const isActive = activeTab === index
+          return (
+            <Box
+              key={index}
+              onClick={() => setActiveTab(index)}
+              sx={{
+                flex: 1,
+                py: 1,
+                px: 1,
+                textAlign: 'center',
+                borderRadius: 'lg',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                bgcolor: isActive ? 'background.surface' : 'transparent',
+                boxShadow: isActive ? 'sm' : 'none',
+                color: isActive ? 'primary.main' : 'text.secondary',
+                fontWeight: isActive ? 600 : 500,
+                userSelect: 'none'
+              }}
+            >
+              <Typography level='body-sm' textColor='inherit' fontWeight='inherit'>
+                {tabLabel}
+              </Typography>
+            </Box>
+          )
+        })}
+      </Box>
+
+      {/* Desktop Tabs (Minimalistic) */}
+      <Tabs
+        value={activeTab}
+        onChange={(e, val) => setActiveTab(val)}
+        sx={{
+          mb: 4,
+          display: { xs: 'none', md: 'flex' },
+          bgcolor: 'transparent'
+        }}
+      >
+        <TabList
+          disableUnderline
+          sx={{
+            p: 0,
+            gap: 4,
+            bgcolor: 'transparent',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '& .MuiTab-root': {
+              bgcolor: 'transparent',
+              border: 'none',
+              boxShadow: 'none !important',
+              outline: 'none !important',
+              '&:hover': { bgcolor: 'transparent', border: 'none' },
+              '&.Mui-selected': { bgcolor: 'transparent', border: 'none' },
+              '&::before': { display: 'none' },
+              '&::after': { display: 'none' }
+            }
+          }}
+        >
+          <Tab
+            disableIndicator
+            value={0}
+            sx={{
+              p: 0,
+              pb: 1.5,
+              minHeight: 'auto',
+              fontSize: 'md',
+              fontWeight: activeTab === 0 ? 700 : 500,
+              color: activeTab === 0 ? 'primary.plainColor' : 'neutral.500',
+              border: 'none',
+              borderBottom: '2px solid',
+              borderColor: activeTab === 0 ? 'primary.plainColor' : 'transparent',
+              bgcolor: 'transparent',
+              transition: 'color 0.2s, border-color 0.2s',
+              '&:hover': {
+                color: 'primary.plainColor',
+                bgcolor: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid',
+                borderColor: 'primary.plainColor'
+              },
+              '&.Mui-selected': {
+                color: 'primary.plainColor',
+                bgcolor: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid',
+                borderColor: 'primary.plainColor'
+              },
+              '&.Mui-focusVisible': {
+                outline: 'none',
+                bgcolor: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid',
+                borderColor: activeTab === 0 ? 'primary.plainColor' : 'transparent'
+              }
+            }}
+          >
+            {t('cards.browse')}
+          </Tab>
+          <Tab
+            disableIndicator
+            value={1}
+            sx={{
+              p: 0,
+              pb: 1.5,
+              minHeight: 'auto',
+              fontSize: 'md',
+              fontWeight: activeTab === 1 ? 700 : 500,
+              color: activeTab === 1 ? 'primary.plainColor' : 'neutral.500',
+              border: 'none',
+              borderBottom: '2px solid',
+              borderColor: activeTab === 1 ? 'primary.plainColor' : 'transparent',
+              bgcolor: 'transparent',
+              transition: 'color 0.2s, border-color 0.2s',
+              '&:hover': {
+                color: 'primary.plainColor',
+                bgcolor: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid',
+                borderColor: 'primary.plainColor'
+              },
+              '&.Mui-selected': {
+                color: 'primary.plainColor',
+                bgcolor: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid',
+                borderColor: 'primary.plainColor'
+              },
+              '&.Mui-focusVisible': {
+                outline: 'none',
+                bgcolor: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid',
+                borderColor: activeTab === 1 ? 'primary.plainColor' : 'transparent'
+              }
+            }}
+          >
+            {t('cards.manage')}
+          </Tab>
         </TabList>
       </Tabs>
 
       {/* Browse Tab */}
       {activeTab === 0 && (
         <>
-          {/* Toolbar */}
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems='center'>
-            {/* Search */}
+          {/* Toolbar (Glassmorphism / Future) */}
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            sx={{
+              mb: 3,
+              p: 1,
+              bgcolor: 'background.surface',
+              borderRadius: 'xl',
+              boxShadow: 'sm',
+              border: '1px solid',
+              borderColor: 'neutral.outlinedBorder'
+            }}
+            alignItems='center'
+          >
+            {/* Search - Pill Shaped */}
             <Input
               placeholder={t('cards.search')}
-              startDecorator={<Search />}
+              startDecorator={<Search sx={{ color: 'primary.plainColor' }} />}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ flex: 1, minWidth: 200 }}
+              variant='plain'
+              sx={{
+                flex: 1,
+                minWidth: { md: 240 },
+                width: '100%',
+                bgcolor: 'transparent',
+                '--Input-focusedHighlight': 'transparent', // Remove default glow
+                '&:hover': { bgcolor: 'transparent' }
+              }}
             />
 
-            {/* Filter by Type */}
-            <Select value={filterType} onChange={(e, val) => setFilterType(val)} startDecorator={<FilterList />} sx={{ minWidth: 150 }}>
-              <Option value='all'>{t('cards.allTypes')}</Option>
-              <Option value='flashcard'>{t('study.types.flashcards')}</Option>
-              <Option value='quiz'>{t('study.types.quizzes')}</Option>
-              <Option value='visual'>{t('study.types.visual')}</Option>
-            </Select>
+            <Divider orientation='vertical' sx={{ display: { xs: 'none', md: 'block' }, height: 24 }} />
 
-            {/* Sort */}
-            <Select value={sortBy} onChange={(e, val) => setSortBy(val)} sx={{ minWidth: 150 }}>
-              <Option value='recent'>{t('cards.recent')}</Option>
-              <Option value='name'>{t('cards.name')}</Option>
-              <Option value='cards'>{t('cards.cardCount')}</Option>
-            </Select>
+            {/* Actions Row */}
+            <Stack direction='row' spacing={1} sx={{ width: { xs: '100%', md: 'auto' } }} alignItems='center'>
+              {/* Filter - Plain & Clean */}
+              <Select
+                value={filterType}
+                onChange={(e, val) => setFilterType(val)}
+                variant='plain'
+                color='neutral'
+                startDecorator={<FilterList fontSize='small' sx={{ color: filterType !== 'all' ? 'primary.plainColor' : 'neutral.400' }} />}
+                sx={{
+                  minWidth: { md: 140 },
+                  '&:hover': { bgcolor: 'background.level1' }
+                }}
+              >
+                <Option value='all'>{t('cards.allTypes')}</Option>
+                <Option value='flashcard'>{t('study.types.flashcards')}</Option>
+                <Option value='quiz'>{t('study.types.quizzes')}</Option>
+                <Option value='visual'>{t('study.types.visual')}</Option>
+              </Select>
 
-            {/* View Mode */}
-            <Stack direction='row' spacing={0.5}>
-              <IconButton variant={viewMode === 'grid' ? 'solid' : 'outlined'} color='neutral' onClick={() => setViewMode('grid')}>
-                <GridView />
-              </IconButton>
-              <IconButton variant={viewMode === 'list' ? 'solid' : 'outlined'} color='neutral' onClick={() => setViewMode('list')}>
-                <ViewList />
-              </IconButton>
+              {/* Sort - Plain & Clean */}
+              <Select
+                value={sortBy}
+                onChange={(e, val) => setSortBy(val)}
+                variant='plain'
+                color='neutral'
+                sx={{
+                  minWidth: { md: 140 },
+                  '&:hover': { bgcolor: 'background.level1' }
+                }}
+              >
+                <Option value='recent'>{t('cards.recent')}</Option>
+                <Option value='name'>{t('cards.name')}</Option>
+                <Option value='cards'>{t('cards.cardCount')}</Option>
+              </Select>
+
+              {/* View Mode Toggle */}
+              <Box
+                sx={{
+                  display: { xs: 'none', sm: 'flex' },
+                  bgcolor: 'background.level1',
+                  borderRadius: 'lg',
+                  p: 0.5,
+                  gap: 0.5
+                }}
+              >
+                <IconButton
+                  size='sm'
+                  variant={viewMode === 'grid' ? 'solid' : 'plain'}
+                  color={viewMode === 'grid' ? 'primary' : 'neutral'}
+                  onClick={() => setViewMode('grid')}
+                  sx={{ borderRadius: 'md', transition: 'all 0.2s' }}
+                >
+                  <GridView fontSize='small' />
+                </IconButton>
+                <IconButton
+                  size='sm'
+                  variant={viewMode === 'list' ? 'solid' : 'plain'}
+                  color={viewMode === 'list' ? 'primary' : 'neutral'}
+                  onClick={() => setViewMode('list')}
+                  sx={{ borderRadius: 'md', transition: 'all 0.2s' }}
+                >
+                  <ViewList fontSize='small' />
+                </IconButton>
+              </Box>
             </Stack>
           </Stack>
 

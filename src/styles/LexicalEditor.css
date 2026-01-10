@@ -143,7 +143,6 @@ ol.editor-list-ol {
 .editor-content {
   box-sizing: border-box;
   width: 100%;
-  min-height: 100%;
   outline: none;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 16px;
@@ -165,7 +164,19 @@ ol.editor-list-ol {
 
 /* .editor-scroll-container removed - handled by EditorHome.js sx prop */
 
-/* .editor-page removed - handled by Editor.js */
+/* Editor Page Styles - Pages created by PageNode */
+.editor-page {
+  position: relative;
+  background-color: white;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* Prevent content from visually escaping page bounds */
+}
+
+.editor-page:last-child {
+  margin-bottom: 100px !important;
+  /* Give scroll space at the bottom */
+}
 
 .editor-toolbar {
   position: sticky;

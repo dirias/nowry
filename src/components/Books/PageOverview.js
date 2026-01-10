@@ -55,11 +55,16 @@ export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageCl
     )
   }
 
+  // Only show skeletons if we have NO data yet
+  // If we have even 1 page, we show that (and trust pagination is fast enough now)
+  const showSkeletons = !pagesData || pagesData.length === 0
+  const skeletonCount = showSkeletons ? 3 : 0
+
   return (
     <Sheet
       sx={{
         p: 2,
-        width: '100%', // Responsive: fills Drawer or Sidebar container
+        width: '100%',
         height: '100%',
         overflowY: 'auto',
         backgroundColor: 'background.surface',
@@ -75,6 +80,7 @@ export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageCl
       </Typography>
 
       <Stack spacing={2} alignItems='center' pb={10}>
+        {/* Render Real Pages */}
         {pagesData.map((page, i) => {
           const isActive = activePageIndex === page.index
           return (
@@ -92,6 +98,16 @@ export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageCl
             />
           )
         })}
+
+        {/* Render Skeletons for missing pages (up to 3) */}
+        {Array.from({ length: skeletonCount }).map((_, i) => (
+          <Box key={`skeleton-${i}`}>
+            <Box sx={{ width: thumbW, height: thumbH, mb: 1 }}>
+              <Skeleton variant='rectangular' width={thumbW} height={thumbH} sx={{ borderRadius: 'sm' }} />
+            </Box>
+            <Skeleton variant='text' width={60} sx={{ mx: 'auto' }} />
+          </Box>
+        ))}
       </Stack>
     </Sheet>
   )
@@ -99,15 +115,45 @@ export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageCl
 
 const PageCard = memo(
   function PageCard({ index, content, isActive, onClick, thumbW, thumbH, scale, pageW, pageH }) {
+    // Render first 3 pages immediately, lazy load the rest
+    const shouldLazyLoad = index >= 3
+    const [isVisible, setIsVisible] = React.useState(!shouldLazyLoad)
+    const [hasRendered, setHasRendered] = React.useState(!shouldLazyLoad)
+    const cardRef = React.useRef(null)
+
+    // Lazy load thumbnail content when scrolling near it (only for pages after first 3)
+    React.useEffect(() => {
+      if (!shouldLazyLoad || !cardRef.current) return
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && !hasRendered) {
+              setIsVisible(true)
+              setHasRendered(true)
+            }
+          })
+        },
+        {
+          root: null,
+          rootMargin: '200px',
+          threshold: 0.01
+        }
+      )
+
+      observer.observe(cardRef.current)
+      return () => observer.disconnect()
+    }, [hasRendered, shouldLazyLoad])
+
     return (
-      <Box>
+      <Box ref={cardRef}>
         <Box
           onClick={onClick}
           sx={{
             width: thumbW,
             height: thumbH,
             position: 'relative',
-            backgroundColor: 'background.level1', // visible if loading
+            backgroundColor: 'background.level1',
             borderRadius: 'sm',
             mb: 1,
             cursor: 'pointer',
@@ -115,8 +161,7 @@ const PageCard = memo(
             borderColor: isActive ? 'primary.500' : 'neutral.outlinedBorder',
             boxShadow: isActive ? 'md' : 'xs',
             transition: 'all 0.2s ease',
-            overflow: 'hidden', // Clip the scaled content
-            display: 'block',
+            overflow: 'hidden',
             '&:hover': {
               borderColor: isActive ? 'primary.500' : 'primary.300',
               transform: 'translateY(-2px)',
@@ -124,22 +169,41 @@ const PageCard = memo(
             }
           }}
         >
-          {/* Scaled Content Container */}
-          <Box
-            sx={{
-              width: pageW,
-              height: pageH,
-              bgcolor: 'white',
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
-              pointerEvents: 'none', // Prevent interaction with preview
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-              padding: '96px' // Fixed print padding for thumbnails
-            }}
-          >
-            <div className='preview-content' dangerouslySetInnerHTML={{ __html: content || '' }} />
-          </Box>
+          {isVisible ? (
+            // Render full preview once visible
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: pageW,
+                height: pageH,
+                bgcolor: 'white',
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+                pointerEvents: 'none',
+                overflow: 'hidden',
+                boxSizing: 'border-box',
+                padding: '96px',
+                fontSize: '12px',
+                lineHeight: '1.2',
+                '& img': {
+                  maxWidth: '100%',
+                  height: 'auto'
+                }
+              }}
+            >
+              <div className='preview-content' dangerouslySetInnerHTML={{ __html: content || '' }} />
+            </Box>
+          ) : (
+            // Show placeholder while not visible
+            <Typography
+              level='body-xs'
+              sx={{ color: 'text.tertiary', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+            >
+              Loading...
+            </Typography>
+          )}
 
           {/* Page Number Badge */}
           <Box
@@ -169,8 +233,6 @@ const PageCard = memo(
     )
   },
   (prev, next) => {
-    // Custom memo comparison to avoid excessive re-renders if content hasn't changed meaningfully
-    // But HTML strings can be large.
     return prev.index === next.index && prev.isActive === next.isActive && prev.content === next.content
   }
 )

@@ -51,18 +51,23 @@ export const booksService = {
    * @param {string} updates.coverImage - Cover image URL
    * @param {string} updates.summary - Book summary
    * @param {Array} updates.tags - Book tags
+   * @param {boolean} updates.auto_save_enabled - Auto-save preference
    * @returns {Promise<Object>} Updated book
    */
-  async update(id, { title, coverColor, coverImage, summary, tags, full_content, page_size }) {
-    const { data } = await apiClient.put(ENDPOINTS.books.update(id), {
-      title,
-      cover_color: coverColor, // Convert camelCase to snake_case for backend
-      cover_image: coverImage,
-      summary,
-      tags,
-      full_content,
-      page_size
-    })
+  async update(id, { title, coverColor, coverImage, summary, tags, full_content, page_size, auto_save_enabled }) {
+    const payload = {}
+
+    // Only include fields that are defined
+    if (title !== undefined) payload.title = title
+    if (coverColor !== undefined) payload.cover_color = coverColor
+    if (coverImage !== undefined) payload.cover_image = coverImage
+    if (summary !== undefined) payload.summary = summary
+    if (tags !== undefined) payload.tags = tags
+    if (full_content !== undefined) payload.full_content = full_content
+    if (page_size !== undefined) payload.page_size = page_size
+    if (auto_save_enabled !== undefined) payload.auto_save_enabled = auto_save_enabled
+
+    const { data } = await apiClient.put(ENDPOINTS.books.update(id), payload)
     return data
   },
 

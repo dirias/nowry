@@ -1,5 +1,6 @@
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
+import { DEFAULT_CARD_GEN_PROMPT } from '../../constants/prompts'
 
 /**
  * Study Cards Service
@@ -14,10 +15,7 @@ export const cardsService = {
    * @returns {Promise<Array>} Array of generated study cards
    */
   async generate(sampleText, sampleNumber, prompt = null) {
-    const generationPrompt =
-      prompt ||
-      process.env.REACT_APP_CARD_GENERATION_PROMPT ||
-      "Generate study cards from the text. Return a JSON array where each object has 'title' (the question or concept) and 'content' (the answer or definition). Do not include any other text."
+    const generationPrompt = prompt || process.env.REACT_APP_CARD_GENERATION_PROMPT || DEFAULT_CARD_GEN_PROMPT
 
     const { data } = await apiClient.post(ENDPOINTS.studyCards.generate, {
       prompt: generationPrompt,

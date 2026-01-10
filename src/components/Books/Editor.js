@@ -48,6 +48,7 @@ import { cardsService, quizzesService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
 import EditorErrorBoundary from '../Editor/EditorErrorBoundary'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
+import { EXTRACT_VOCABULARY_PROMPT } from '../../constants/prompts'
 
 const toPx = (val) => {
   if (typeof val === 'number') return val
@@ -190,7 +191,7 @@ export default function Editor({
       const pageElements = containerRef.current.querySelectorAll('.editor-page')
       const pagesData = Array.from(pageElements).map((el, index) => ({
         index,
-        content: el.innerHTML
+        content: el.innerHTML // Full HTML with images - lazy loading in PageOverview handles performance
       }))
 
       // Prevent infinite loop by checking if pages data actually changed
@@ -204,18 +205,20 @@ export default function Editor({
       }
     }
 
-    // Use requestAnimationFrame to ensure browser repaints with new pageSize before capturing
+    // Call immediately for fast initial load
+    updatePages()
+
+    // Also schedule after RAF for updated content
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // Double RAF ensures paint has completed
         updatePages()
       })
     })
 
     const observer = new MutationObserver((mutations) => {
-      // Debounce updates from content changes (reduced to 500ms for better responsiveness)
+      // Very short debounce for responsive sidebar updates
       if (pageUpdateTimeoutRef.current) clearTimeout(pageUpdateTimeoutRef.current)
-      pageUpdateTimeoutRef.current = setTimeout(updatePages, 500)
+      pageUpdateTimeoutRef.current = setTimeout(updatePages, 100)
     })
 
     // We observe the containerRef for content changes
@@ -328,6 +331,12 @@ export default function Editor({
           setShowQuestionnaire(true)
         } else if (option === 'create_visual_content' && selectedText) {
           setShowVisualizer(true)
+        } else if (option === 'extract_vocabulary' && selectedText) {
+          // Pro Feature: Bulk Extraction
+          // We ask for up to 50 cards to cover long lists, but enforce strict extraction
+          const response = await cardsService.generate(selectedText, 50, EXTRACT_VOCABULARY_PROMPT)
+          setCards(response)
+          setShowStudyCard(true)
         }
       } catch (error) {
         console.error('Error:', error)
@@ -406,9 +415,9 @@ export default function Editor({
                   aria-multiline='true'
                   style={{
                     outline: 'none',
-                    minHeight: '100%',
                     width: '100%',
-                    paddingBottom: '100px' // Bottom scroll space
+                    display: 'block',
+                    overflow: 'visible'
                   }}
                 />
               }

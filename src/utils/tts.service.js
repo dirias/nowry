@@ -25,7 +25,12 @@ class TTSService {
 
     // Auto-select first voice if none selected
     if (!this.selectedVoice && this.voices.length > 0) {
-      this.selectedVoice = this.voices.find((v) => v.lang === this.selectedLanguage) || this.voices[0]
+      // Prioritize "Google" or "Enhanced" voices for better quality
+      const preferredVoice = this.voices.find(
+        (v) => v.lang === this.selectedLanguage && (v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium'))
+      )
+
+      this.selectedVoice = preferredVoice || this.voices.find((v) => v.lang === this.selectedLanguage) || this.voices[0]
     }
   }
 

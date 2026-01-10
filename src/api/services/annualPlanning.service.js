@@ -7,8 +7,8 @@ export const annualPlanningService = {
     const { data } = await apiClient.get(ENDPOINTS.annualPlan.get, { params: { year } })
     return data
   },
-  async updateAnnualPlan(planUpdate) {
-    const { data } = await apiClient.put(ENDPOINTS.annualPlan.get, planUpdate)
+  async updateAnnualPlan(id, planUpdate) {
+    const { data } = await apiClient.put(ENDPOINTS.annualPlan.update(id), planUpdate)
     return data
   },
 

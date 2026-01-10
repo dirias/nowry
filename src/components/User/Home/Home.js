@@ -1,10 +1,9 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Grid, Typography, Container } from '@mui/joy'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import DailyFocus from './DailyFocus'
-import { MotivationBanner } from './MotivationBanner'
 import WeeklyProgress from './WeeklyProgress'
 import StudyCalendar from './StudyCalendar'
 import { useAuth } from '../../../context/AuthContext'
@@ -14,6 +13,12 @@ function Home() {
   const username = user?.username
   const { t } = useTranslation()
 
+  const motivationPhrase = useMemo(() => {
+    const phrases = t('motivation.phrases', { returnObjects: true })
+    const phraseList = Array.isArray(phrases) ? phrases : ['Keep learning!']
+    return phraseList[Math.floor(Math.random() * phraseList.length)]
+  }, [t])
+
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Header */}
@@ -21,8 +26,8 @@ function Home() {
         <Typography level='h2' fontWeight={600} sx={{ mb: 0.5 }}>
           {t('dashboard.welcome', { name: username })}
         </Typography>
-        <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-          {t('dashboard.overview')}
+        <Typography level='title-md' sx={{ color: 'text.secondary', fontWeight: 'normal' }}>
+          {motivationPhrase}
         </Typography>
       </Box>
 
@@ -36,15 +41,10 @@ function Home() {
         </Grid>
       </Grid>
 
-      {/* Middle Row - Daily Focus & Motivation */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} lg={8}>
-          <DailyFocus />
-        </Grid>
-        <Grid xs={12} lg={4}>
-          <MotivationBanner />
-        </Grid>
-      </Grid>
+      {/* Middle Row - Daily Focus (Full Width) */}
+      <Box sx={{ mb: 3 }}>
+        <DailyFocus />
+      </Box>
 
       {/* Bottom Row - Weekly Progress & Recent Performance */}
       <Grid container spacing={3}>
