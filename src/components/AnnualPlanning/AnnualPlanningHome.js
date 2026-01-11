@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Button, Grid, Card, CardContent, Container, Stack, Skeleton, LinearProgress } from '@mui/joy'
+import { Box, Typography, Button, Grid, Card, CardContent, Container, Stack, Skeleton, LinearProgress, Divider } from '@mui/joy'
 import {
   Timeline as TimelineIcon,
   Edit as EditIcon,
@@ -31,6 +31,13 @@ const AnnualPlanningHome = () => {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Auto-redirect to setup if plan exists but no focus areas
+  useEffect(() => {
+    if (plan && areas.length === 0 && !loading) {
+      navigate('/annual-planning/setup')
+    }
+  }, [plan, areas, loading, navigate])
 
   const fetchData = async () => {
     try {
@@ -166,8 +173,8 @@ const AnnualPlanningHome = () => {
       })
       setPlan(newPlan)
       setEditTitle(newPlan.title)
-      // Fetch data to check for focus areas
-      await fetchData()
+      // Navigate immediately to setup
+      navigate('/annual-planning/setup')
     } catch (error) {
       console.error('Failed to create annual plan:', error)
       setLoading(false)
@@ -193,25 +200,7 @@ const AnnualPlanningHome = () => {
     )
   }
 
-  // Show focus area setup if plan exists but no focus areas
-  if (plan && areas.length === 0 && !loading) {
-    return (
-      <Container maxWidth='md' sx={{ py: 10, textAlign: 'center' }}>
-        <Box sx={{ mb: 4 }}>
-          <FlagIcon sx={{ fontSize: 80, color: 'primary.plainColor', mb: 2 }} />
-          <Typography level='h2' sx={{ mb: 2 }}>
-            {t('annualPlanning.home.defineFocusAreas')}
-          </Typography>
-          <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 600, mx: 'auto', mb: 3 }}>
-            {t('annualPlanning.home.focusAreasDescription')}
-          </Typography>
-        </Box>
-        <Button component={Link} to='/annual-planning/setup' size='lg' endDecorator={<ArrowForwardIcon />}>
-          {t('annualPlanning.home.addFocusAreas')}
-        </Button>
-      </Container>
-    )
-  }
+  // Intermediate screen removed - handled by auto-redirect useEffect
 
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
@@ -267,82 +256,114 @@ const AnnualPlanningHome = () => {
       </Stack>
 
       {/* Metrics Dashboard */}
-      <Grid container spacing={2} sx={{ mb: 6 }}>
-        <Grid xs={12} md={4}>
-          <Card variant='outlined' sx={{ height: '100%', bgcolor: 'background.surface' }}>
-            <CardContent>
-              <Typography level='title-sm' textColor='text.tertiary' mb={1}>
-                {t('annualPlanning.home.totalProgress')}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <Typography level='h2'>{metrics.progress}%</Typography>
-              </Box>
-              <LinearProgress
-                determinate
-                value={metrics.progress}
-                thickness={6}
-                sx={{
-                  mt: 2,
-                  bgcolor: 'background.level2',
-                  color: 'primary.plainColor',
-                  '--LinearProgress-radius': '4px'
-                }}
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid xs={12} md={4}>
-          <Card variant='outlined' sx={{ height: '100%', bgcolor: 'background.surface' }}>
-            <CardContent>
-              <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
-                <Typography level='title-sm' textColor='text.tertiary'>
-                  {t('annualPlanning.home.completedGoals')}
+      <Box sx={{ mb: 6 }}>
+        {/* Desktop View */}
+        <Grid container spacing={2} sx={{ display: { xs: 'none', md: 'flex' } }}>
+          <Grid xs={4}>
+            <Card variant='outlined' sx={{ height: '100%', bgcolor: 'background.surface' }}>
+              <CardContent>
+                <Typography level='title-sm' textColor='text.tertiary' mb={1}>
+                  {t('annualPlanning.home.totalProgress')}
                 </Typography>
-                <CheckCircleIcon color='success' fontSize='small' />
-              </Stack>
-              <Typography level='h2' sx={{ mt: 1 }}>
-                {metrics.completedGoals}
-                <Typography level='h4' textColor='text.tertiary' component='span'>
-                  /{metrics.totalGoals}
-                </Typography>
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid xs={12} md={4}>
-          <Card variant='outlined' sx={{ height: '100%', bgcolor: 'background.surface' }}>
-            <CardContent>
-              <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
-                <Typography level='title-sm' textColor='text.tertiary'>
-                  {t('annualPlanning.home.topPriorities')}
-                </Typography>
-                <FlagIcon color='warning' fontSize='small' />
-              </Stack>
-              {priorities.length > 0 ? (
-                <Stack spacing={1}>
-                  {priorities.slice(0, 3).map((p, i) => (
-                    <Stack key={p._id || i} direction='row' spacing={1} alignItems='center'>
-                      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0 }} />
-                      <Typography level='body-sm' noWrap>
-                        {p.title}
-                      </Typography>
-                    </Stack>
-                  ))}
-                  {priorities.length > 3 && (
-                    <Typography level='body-xs' textColor='text.tertiary'>
-                      +{priorities.length - 3} more
-                    </Typography>
-                  )}
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                  <Typography level='h2'>{metrics.progress}%</Typography>
+                </Box>
+                <LinearProgress
+                  determinate
+                  value={metrics.progress}
+                  thickness={6}
+                  sx={{
+                    mt: 2,
+                    bgcolor: 'background.level2',
+                    color: 'primary.plainColor',
+                    '--LinearProgress-radius': '4px'
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid xs={4}>
+            <Card variant='outlined' sx={{ height: '100%', bgcolor: 'background.surface' }}>
+              <CardContent>
+                <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
+                  <Typography level='title-sm' textColor='text.tertiary'>
+                    {t('annualPlanning.home.completedGoals')}
+                  </Typography>
+                  <CheckCircleIcon color='success' fontSize='small' />
                 </Stack>
-              ) : (
-                <Typography level='body-sm' textColor='text.tertiary' fontStyle='italic'>
-                  {t('annualPlanning.home.noPrioritiesSet')}
+                <Typography level='h2' sx={{ mt: 1 }}>
+                  {metrics.completedGoals}
+                  <Typography level='h4' textColor='text.tertiary' component='span'>
+                    /{metrics.totalGoals}
+                  </Typography>
                 </Typography>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid xs={4}>
+            <Card variant='outlined' sx={{ height: '100%', bgcolor: 'background.surface' }}>
+              <CardContent>
+                <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
+                  <Typography level='title-sm' textColor='text.tertiary'>
+                    {t('annualPlanning.home.topPriorities')}
+                  </Typography>
+                  <FlagIcon color='warning' fontSize='small' />
+                </Stack>
+                {priorities.length > 0 ? (
+                  <Stack spacing={1}>
+                    {priorities.slice(0, 3).map((p, i) => (
+                      <Stack key={p._id || i} direction='row' spacing={1} alignItems='center'>
+                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0 }} />
+                        <Typography level='body-sm' noWrap>
+                          {p.title}
+                        </Typography>
+                      </Stack>
+                    ))}
+                    {priorities.length > 3 && (
+                      <Typography level='body-xs' textColor='text.tertiary'>
+                        +{priorities.length - 3} more
+                      </Typography>
+                    )}
+                  </Stack>
+                ) : (
+                  <Typography level='body-sm' textColor='text.tertiary' fontStyle='italic'>
+                    {t('annualPlanning.home.noPrioritiesSet')}
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+
+        {/* Mobile View: Minimalistic Row */}
+        <Card variant='outlined' sx={{ display: { xs: 'flex', md: 'none' }, p: 2 }}>
+          <Stack direction='row' justifyContent='space-between' alignItems='center' divider={<Divider orientation='vertical' />}>
+            <Stack alignItems='center' spacing={0.5} sx={{ width: '33%' }}>
+              <TimelineIcon fontSize='small' sx={{ color: 'primary.plainColor' }} />
+              <Typography level='title-lg'>{metrics.progress}%</Typography>
+              <Typography level='body-xs' textColor='text.tertiary'>
+                Progress
+              </Typography>
+            </Stack>
+            <Stack alignItems='center' spacing={0.5} sx={{ width: '33%' }}>
+              <CheckCircleIcon fontSize='small' color='success' />
+              <Typography level='title-lg'>
+                {metrics.completedGoals}/{metrics.totalGoals}
+              </Typography>
+              <Typography level='body-xs' textColor='text.tertiary'>
+                Goals
+              </Typography>
+            </Stack>
+            <Stack alignItems='center' spacing={0.5} sx={{ width: '33%' }}>
+              <FlagIcon fontSize='small' color='warning' />
+              <Typography level='title-lg'>{priorities.length}</Typography>
+              <Typography level='body-xs' textColor='text.tertiary'>
+                Priorities
+              </Typography>
+            </Stack>
+          </Stack>
+        </Card>
+      </Box>
 
       {/* Focus Areas Grid */}
       <Typography level='h4' sx={{ mb: 2 }}>
@@ -368,15 +389,15 @@ const AnnualPlanningHome = () => {
               }}
             >
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Typography level='h1' sx={{ fontSize: '3rem' }}>
-                    {area.icon}
-                  </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Typography level='h1' sx={{ fontSize: '2.5rem' }}>
+                      {area.icon}
+                    </Typography>
+                    <Typography level='h3'>{area.name}</Typography>
+                  </Box>
                   <ArrowForwardIcon sx={{ color: 'text.tertiary' }} />
                 </Box>
-                <Typography level='h3' sx={{ mb: 1 }}>
-                  {area.name}
-                </Typography>
                 <Typography level='body-sm' textColor='text.secondary'>
                   {area.description}
                 </Typography>

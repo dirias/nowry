@@ -111,7 +111,7 @@ const OnboardingWizard = () => {
 
   const colorPresets = getColorPresets()
 
-  const totalSteps = 5
+  const totalSteps = 6
   const progress = (currentStep / totalSteps) * 100
 
   const handleNext = () => {
@@ -176,6 +176,7 @@ const OnboardingWizard = () => {
       // Mark wizard as complete
       await userService.completeWizard()
       console.log('[Onboarding] Wizard marked as complete.')
+      sessionStorage.setItem('onboarding_completed', 'true') // Set sessionStorage flag
 
       // Navigate to home after a brief delay
       setTimeout(() => {
@@ -198,24 +199,360 @@ const OnboardingWizard = () => {
     }
   }
 
+  const handleSkip = () => {
+    // efficient skip: just mark in session storage so we don't redirect back this session
+    // but DON'T mark as completed in backend so it shows up next time
+    console.log('[Onboarding] Skipping for this session only')
+    sessionStorage.setItem('onboarding_skipped', 'true')
+    navigate('/')
+  }
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
+        // Welcome Step
         return (
-          <Box>
-            {/* ... steps ... */}
-            {/* Existing content for Step 1 omitted for brevity if unchanged, but I must return strict content updates if I touch this block. 
-               Wait, renderStepContent is huge. I should try to target specific blocks if possible or replace the Styles in the render return. 
-               The instruction is to "Optimize Wizard". 
-               State guards are in handleFinish.
-               Visuals are in the main return.
-               Let's do handleFinish first, then the specific style blocks.
-            */}
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography level='h1' sx={{ mb: 2 }}>
+              {t('onboarding.welcome.title')}
+            </Typography>
+            <Typography level='body-lg' sx={{ mb: 4, color: 'text.secondary' }}>
+              {t('onboarding.welcome.subtitle')}
+            </Typography>
+
+            <Stack spacing={2} sx={{ maxWidth: 500, mx: 'auto', mt: 4 }}>
+              <Card variant='outlined' sx={{ textAlign: 'left', bgcolor: 'background.surface' }}>
+                <CardContent>
+                  <Typography level='title-md' sx={{ mb: 1 }}>
+                    {t('onboarding.welcome.quick')}
+                  </Typography>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    {t('onboarding.welcome.quickDesc')}
+                  </Typography>
+                </CardContent>
+              </Card>
+
+              <Card variant='outlined' sx={{ textAlign: 'left', bgcolor: 'background.surface' }}>
+                <CardContent>
+                  <Typography level='title-md' sx={{ mb: 1 }}>
+                    {t('onboarding.welcome.tailored')}
+                  </Typography>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    {t('onboarding.welcome.tailoredDesc')}
+                  </Typography>
+                </CardContent>
+              </Card>
+
+              <Card variant='outlined' sx={{ textAlign: 'left', bgcolor: 'background.surface' }}>
+                <CardContent>
+                  <Typography level='title-md' sx={{ mb: 1 }}>
+                    {t('onboarding.welcome.changeable')}
+                  </Typography>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    {t('onboarding.welcome.changeableDesc')}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Stack>
           </Box>
         )
-      // ... I will skip replacing renderStepContent entirely if I can target the styling in the main return
+
+      case 2:
+        // Language Selection
+        return (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, justifyContent: 'center' }}>
+              <Translate sx={{ color: themeColor, fontSize: 40 }} />
+              <Typography level='h2'>{t('onboarding.language.title')}</Typography>
+            </Box>
+            <Typography level='body-md' sx={{ mb: 4, color: 'text.secondary', textAlign: 'center' }}>
+              {t('onboarding.language.subtitle')}
+            </Typography>
+
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(3, 1fr)' },
+                gap: 2
+              }}
+            >
+              {availableLanguages.map((lang) => {
+                const isSelected = preferences.language === lang.value
+                return (
+                  <Card
+                    key={lang.value}
+                    variant='outlined'
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      borderColor: isSelected ? themeColor : 'neutral.outlinedBorder',
+                      bgcolor: isSelected ? `${themeColor}10` : 'background.surface',
+                      boxShadow: isSelected ? `0 0 0 2px ${themeColor}40` : 'none',
+                      '&:hover': {
+                        borderColor: themeColor,
+                        bgcolor: isSelected ? `${themeColor}15` : 'background.level1'
+                      }
+                    }}
+                    onClick={() => setPreferences({ ...preferences, language: lang.value })}
+                  >
+                    <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 1.5 }}>
+                      <Typography sx={{ fontSize: 32 }}>{lang.flag}</Typography>
+                      <Typography level='title-md' textAlign='center'>
+                        {lang.label}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </Box>
+          </Box>
+        )
+
+      case 3:
+        // Theme Customization
+        return (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, justifyContent: 'center' }}>
+              <Palette sx={{ color: themeColor, fontSize: 40 }} />
+              <Typography level='h2'>{t('onboarding.theme.title')}</Typography>
+            </Box>
+            <Typography level='body-md' sx={{ mb: 4, color: 'text.secondary', textAlign: 'center' }}>
+              {t('onboarding.theme.subtitle')}
+            </Typography>
+
+            {/* Mode Selection */}
+            <FormControl sx={{ mb: 4 }}>
+              <FormLabel sx={{ mb: 1, fontWeight: 600 }}>{t('onboarding.theme.mode')}</FormLabel>
+              <Stack direction='row' spacing={2}>
+                <Card
+                  variant='outlined'
+                  sx={{
+                    flex: 1,
+                    cursor: 'pointer',
+                    borderColor: preferences.theme_mode === 'light' ? themeColor : 'neutral.outlinedBorder',
+                    bgcolor: preferences.theme_mode === 'light' ? `${themeColor}10` : 'background.surface',
+                    transition: 'all 0.2s',
+                    '&:hover': { borderColor: themeColor }
+                  }}
+                  onClick={() => handleThemeModeChange('light')}
+                >
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <LightMode sx={{ fontSize: 40, mb: 1, color: preferences.theme_mode === 'light' ? themeColor : 'text.secondary' }} />
+                    <Typography level='title-md'>{t('onboarding.theme.light')}</Typography>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  variant='outlined'
+                  sx={{
+                    flex: 1,
+                    cursor: 'pointer',
+                    borderColor: preferences.theme_mode === 'dark' ? themeColor : 'neutral.outlinedBorder',
+                    bgcolor: preferences.theme_mode === 'dark' ? `${themeColor}10` : 'background.surface',
+                    transition: 'all 0.2s',
+                    '&:hover': { borderColor: themeColor }
+                  }}
+                  onClick={() => handleThemeModeChange('dark')}
+                >
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <DarkMode sx={{ fontSize: 40, mb: 1, color: preferences.theme_mode === 'dark' ? themeColor : 'text.secondary' }} />
+                    <Typography level='title-md'>{t('onboarding.theme.dark')}</Typography>
+                  </CardContent>
+                </Card>
+              </Stack>
+            </FormControl>
+
+            {/* Color Selection */}
+            <FormControl>
+              <FormLabel sx={{ mb: 2, fontWeight: 600 }}>{t('onboarding.theme.accent')}</FormLabel>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: 'repeat(4, 1fr)', md: 'repeat(6, 1fr)' },
+                  gap: 2,
+                  mb: 2
+                }}
+              >
+                {colorPresets.map((preset) => (
+                  <Box
+                    key={preset.color}
+                    onClick={() => handleColorChange(preset.color)}
+                    sx={{
+                      width: { xs: 50, md: 60 },
+                      height: { xs: 50, md: 60 },
+                      borderRadius: 'md',
+                      bgcolor: preset.color,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      border: '3px solid',
+                      borderColor: preferences.theme_color === preset.color ? 'text.primary' : 'transparent',
+                      boxShadow: preferences.theme_color === preset.color ? `0 0 0 2px ${preset.color}40` : 'none',
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                        boxShadow: `0 4px 12px ${preset.color}60`
+                      }
+                    }}
+                  />
+                ))}
+              </Box>
+            </FormControl>
+          </Box>
+        )
+
+      case 4:
+        // Interests Selection
+        return (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, justifyContent: 'center' }}>
+              <FavoriteBorder sx={{ color: themeColor, fontSize: 40 }} />
+              <Typography level='h2'>{t('onboarding.interests.title')}</Typography>
+            </Box>
+            <Typography level='body-md' sx={{ mb: 1, color: 'text.secondary', textAlign: 'center' }}>
+              {t('onboarding.interests.subtitle')}
+            </Typography>
+            <Typography level='body-sm' sx={{ mb: 4, color: themeColor, textAlign: 'center', fontWeight: 600 }}>
+              {t('onboarding.interests.selected', { count: preferences.interests.length })}
+            </Typography>
+
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1.5,
+                justifyContent: 'center'
+              }}
+            >
+              {availableInterests.map((interest) => (
+                <Chip
+                  key={interest}
+                  variant={preferences.interests.includes(interest) ? 'solid' : 'outlined'}
+                  color={preferences.interests.includes(interest) ? 'primary' : 'neutral'}
+                  onClick={() => handleToggleInterest(interest)}
+                  sx={{
+                    cursor: 'pointer',
+                    fontSize: 'sm',
+                    bgcolor: preferences.interests.includes(interest) ? themeColor : 'transparent',
+                    borderColor: preferences.interests.includes(interest) ? themeColor : 'neutral.outlinedBorder',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      borderColor: themeColor,
+                      bgcolor: preferences.interests.includes(interest) ? themeColor : `${themeColor}15`
+                    }
+                  }}
+                >
+                  {t(`onboarding.interests.items.${interest}`)}
+                </Chip>
+              ))}
+            </Box>
+          </Box>
+        )
+
+      case 5:
+        // Learning Style
+        return (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, justifyContent: 'center' }}>
+              <School sx={{ color: themeColor, fontSize: 40 }} />
+              <Typography level='h2'>{t('onboarding.learning.styleTitle')}</Typography>
+            </Box>
+            <Typography level='body-md' sx={{ mb: 4, color: 'text.secondary', textAlign: 'center' }}>
+              {t('onboarding.learning.subtitle')}
+            </Typography>
+
+            {/* Learning Style */}
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(2, 1fr)' },
+                gap: 2
+              }}
+            >
+              {learningStyles.map((style) => {
+                const isSelected = preferences.learning_style === style.value
+                return (
+                  <Card
+                    key={style.value}
+                    variant='outlined'
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      borderColor: isSelected ? themeColor : 'neutral.outlinedBorder',
+                      bgcolor: isSelected ? `${themeColor}10` : 'background.surface',
+                      boxShadow: isSelected ? `0 0 0 2px ${themeColor}40` : 'none',
+                      '&:hover': {
+                        borderColor: themeColor,
+                        bgcolor: isSelected ? `${themeColor}15` : 'background.level1'
+                      }
+                    }}
+                    onClick={() => setPreferences({ ...preferences, learning_style: style.value })}
+                  >
+                    <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 2, textAlign: 'center' }}>
+                      <Typography sx={{ fontSize: 32 }}>{style.icon}</Typography>
+                      <Typography level='title-md'>{style.label}</Typography>
+                      <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                        {style.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </Box>
+          </Box>
+        )
+
+      case 6:
+        // Study Goals
+        return (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, justifyContent: 'center' }}>
+              <School sx={{ color: themeColor, fontSize: 40 }} />
+              <Typography level='h2'>{t('onboarding.learning.goalTitle')}</Typography>
+            </Box>
+            <Typography level='body-md' sx={{ mb: 4, color: 'text.secondary', textAlign: 'center' }}>
+              {t('onboarding.learning.subtitle')}
+            </Typography>
+
+            {/* Study Goal */}
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(3, 1fr)' },
+                gap: 2
+              }}
+            >
+              {studyGoals.map((goal) => {
+                const isSelected = preferences.study_goal === goal.value
+                return (
+                  <Card
+                    key={goal.value}
+                    variant='outlined'
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      borderColor: isSelected ? themeColor : 'neutral.outlinedBorder',
+                      bgcolor: isSelected ? `${themeColor}10` : 'background.surface',
+                      boxShadow: isSelected ? `0 0 0 2px ${themeColor}40` : 'none',
+                      '&:hover': {
+                        borderColor: themeColor,
+                        bgcolor: isSelected ? `${themeColor}15` : 'background.level1'
+                      }
+                    }}
+                    onClick={() => setPreferences({ ...preferences, study_goal: goal.value })}
+                  >
+                    <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 2, textAlign: 'center' }}>
+                      <Typography sx={{ fontSize: 32 }}>{goal.icon}</Typography>
+                      <Typography level='title-md'>{goal.label}</Typography>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </Box>
+          </Box>
+        )
+
+      default:
+        return null
     }
-    // ...
   }
 
   // ...
@@ -378,7 +715,8 @@ const OnboardingWizard = () => {
             variant='plain'
             size='sm'
             color='neutral'
-            onClick={() => navigate('/')}
+            onClick={handleSkip}
+            disabled={loading}
             sx={{ color: 'text.tertiary', '&:hover': { color: 'text.primary' } }}
           >
             {t('onboarding.skip')}

@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Box, Typography, Button, Card, CardContent, Input, Select, Option, Stack, LinearProgress, Grid, Container } from '@mui/joy'
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Select,
+  Option,
+  Stack,
+  LinearProgress,
+  Grid,
+  Container,
+  FormControl,
+  FormLabel,
+  Textarea,
+  IconButton
+} from '@mui/joy'
 import { ArrowForward as ArrowForwardIcon, ArrowBack as ArrowBackIcon, Check as CheckIcon } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
@@ -48,6 +65,9 @@ const FocusAreaSetup = () => {
     setAreas(newAreas)
   }
 
+  // Alias for backward compatibility with user's code snippets
+  const updateArea = handleAreaChange
+
   const handleSubmit = async () => {
     if (!planId) return
 
@@ -91,7 +111,7 @@ const FocusAreaSetup = () => {
           </ul>
         </CardContent>
       </Card>
-      <Button size='lg' endDecorator={<ArrowForwardIcon />} onClick={handleNext}>
+      <Button size='lg' endDecorator={<ArrowForwardIcon />} onClick={() => setActiveStep(1)}>
         Let&apos;s Start
       </Button>
     </Box>
@@ -107,74 +127,68 @@ const FocusAreaSetup = () => {
       </Typography>
 
       <Stack spacing={3}>
-        <Box>
-          <Typography level='title-sm' sx={{ mb: 1 }}>
-            {t('annualPlanning.focusArea.name')}
-          </Typography>
+        <FormControl>
+          <FormLabel>Name</FormLabel>
           <Input
-            placeholder='e.g. Career Growth'
+            placeholder='e.g. Health & Fitness'
             value={areas[index].name}
-            onChange={(e) => handleAreaChange(index, 'name', e.target.value)}
-            size='lg'
+            onChange={(e) => updateArea(index, 'name', e.target.value)}
           />
-        </Box>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Description (Your &apos;Why&apos;)</FormLabel>
+          <Textarea
+            minRows={3}
+            placeholder='Why is this area important to you this year?'
+            value={areas[index].description}
+            onChange={(e) => updateArea(index, 'description', e.target.value)}
+          />
+        </FormControl>
 
         <Box>
           <Typography level='title-sm' sx={{ mb: 1 }}>
-            {t('annualPlanning.focusArea.description')}
+            {t('annualPlanning.focusArea.selectIcon')}
           </Typography>
-          <Input
-            placeholder={t('annualPlanning.focusArea.description')}
-            value={areas[index].description}
-            onChange={(e) => handleAreaChange(index, 'description', e.target.value)}
-          />
+          <Select value={areas[index].icon} onChange={(e, val) => updateArea(index, 'icon', val)}>
+            {ICONS.map((icon) => (
+              <Option key={icon} value={icon}>
+                {icon}
+              </Option>
+            ))}
+          </Select>
         </Box>
 
-        <Grid container spacing={2}>
-          <Grid xs={6}>
-            <Typography level='title-sm' sx={{ mb: 1 }}>
-              {t('annualPlanning.focusArea.selectIcon')}
-            </Typography>
-            <Select value={areas[index].icon} onChange={(e, val) => handleAreaChange(index, 'icon', val)}>
-              {ICONS.map((icon) => (
-                <Option key={icon} value={icon}>
-                  {icon}
-                </Option>
-              ))}
-            </Select>
-          </Grid>
-          <Grid xs={6}>
-            <Typography level='title-sm' sx={{ mb: 1 }}>
-              {t('annualPlanning.focusArea.selectColor')}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {COLORS.slice(0, 5).map((color) => (
-                <Box
-                  key={color}
-                  onClick={() => handleAreaChange(index, 'color', color)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    bgcolor: color,
-                    cursor: 'pointer',
-                    border: areas[index].color === color ? '2px solid black' : 'none'
-                  }}
-                />
-              ))}
-            </Box>
-          </Grid>
-        </Grid>
-      </Stack>
+        <Box>
+          <FormLabel sx={{ mb: 1.5 }}>Color Theme</FormLabel>
+          <Stack direction='row' spacing={1}>
+            {COLORS.map((color) => (
+              <IconButton
+                key={color}
+                onClick={() => updateArea(index, 'color', color)}
+                sx={{
+                  bgcolor: color,
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  transform: areas[index].color === color ? 'scale(1.2)' : 'none',
+                  border: areas[index].color === color ? '2px solid black' : 'none',
+                  '&:hover': { bgcolor: color }
+                }}
+              />
+            ))}
+          </Stack>
+        </Box>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 6 }}>
-        <Button variant='plain' startDecorator={<ArrowBackIcon />} onClick={handleBack}>
-          Back
-        </Button>
-        <Button endDecorator={<ArrowForwardIcon />} onClick={handleNext} disabled={!areas[index].name}>
-          Next
-        </Button>
-      </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          <Button variant='plain' color='neutral' onClick={handleBack}>
+            Back
+          </Button>
+          <Button endDecorator={activeStep === 3 ? null : <ArrowForwardIcon />} onClick={handleNext} disabled={!areas[index].name}>
+            {activeStep === 3 ? 'Review' : 'Next'}
+          </Button>
+        </Box>
+      </Stack>
     </Box>
   )
 
@@ -214,7 +228,7 @@ const FocusAreaSetup = () => {
 
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
-      <LinearProgress determinate value={(activeStep / 4) * 100} thickness={4} sx={{ mb: 4, maxWidth: 800, mx: 'auto' }} />
+      <LinearProgress determinate value={((activeStep + 1) / 5) * 100} thickness={4} sx={{ mb: 4, maxWidth: 800, mx: 'auto' }} />
 
       {activeStep === 0 && renderIntro()}
       {activeStep === 1 && renderAreaStep(0)}

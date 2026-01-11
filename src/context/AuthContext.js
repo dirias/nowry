@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { apiClient } from '../api/client'
+import { authService } from '../api/services'
 import i18n from '../i18n'
 
 const AuthContext = createContext(null)
@@ -28,16 +29,18 @@ export const AuthProvider = ({ children }) => {
   }
 
   const login = async (credentials) => {
-    // Perform login request - cookie is set by server
-    const response = await apiClient.post('/session/login', credentials)
+    // Perform login with Firebase via authService
+    // credentials should contain email and password
+    const result = await authService.login(credentials.email, credentials.password)
     // After login, fetch user profile to populate state
     await checkUser()
-    return response.data
+    return result
   }
 
   const logout = async () => {
     try {
-      await apiClient.post('/session/logout')
+      // Logout from Firebase client-side
+      await authService.logout()
     } catch (error) {
       console.error('Logout failed', error)
     } finally {

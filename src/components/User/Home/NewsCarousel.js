@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
+import { apiClient } from '../../../api/client'
 import { Card, CardContent, Typography, AspectRatio, Box, Chip, IconButton, Skeleton, Stack, Tabs, TabList, Tab, TabPanel } from '@mui/joy'
 import { useKeenSlider } from 'keen-slider/react'
 import { ArrowBackIosNew, ArrowForwardIos, TrendingUp, OpenInNew, Star, StarBorder } from '@mui/icons-material'
@@ -201,7 +202,7 @@ export default function NewsCarousel() {
           if (oldPrefs !== newPrefs) {
             console.log('🔄 User preferences changed, clearing news cache...')
             try {
-              await fetch(`${API_BASE_URL}/news/cache/clear`, { method: 'DELETE' })
+              await apiClient.delete('/news/cache/clear')
               console.log('✅ Cache cleared')
             } catch (err) {
               console.warn('Failed to clear cache:', err)
@@ -251,17 +252,12 @@ export default function NewsCarousel() {
         setActiveCategory(finalCategories.join(', ')) // Update active categories for display
 
         // Fetch from ALL categories in parallel
+        // Fetch from ALL categories in parallel
         const promises = finalCategories.map((category) =>
-          fetch(`${API_BASE_URL}/news/${userLang}/${category}`)
-            .then(async (res) => {
-              // Handle non-200 responses (including 404)
-              if (!res.ok) {
-                console.warn(`News API returned ${res.status} for ${category}`)
-                return []
-              }
-              return res.json()
-            })
-            .then((data) => {
+          apiClient
+            .get(`/news/${userLang}/${category}`)
+            .then((res) => {
+              const data = res.data
               // Tag each article with its category
               if (data.status === 'success' && data.articles) {
                 return data.articles.map((article) => ({
@@ -272,6 +268,7 @@ export default function NewsCarousel() {
               return []
             })
             .catch((err) => {
+              // Handle non-200 responses (including 404)
               console.warn(`Failed to fetch ${category} news:`, err.message)
               return []
             })

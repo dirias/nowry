@@ -27,8 +27,8 @@ import {
   CheckBoxOutlineBlank,
   CheckBox
 } from '@mui/icons-material'
-import { apiClient } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
+import { authService } from '../../api/services/auth.service'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -109,28 +109,21 @@ const Register = () => {
     if (Object.keys(newErrors).length === 0) {
       setLoading(true)
       try {
-        // 1. Create User
-        const response = await apiClient.post('/users/create_user', formData)
+        // 1. Create user in Firebase Auth & sync to MongoDB
+        await authService.register(formData.email, formData.password, formData.username)
 
-        if (response.status === 200) {
-          // 2. Login immediately to get token
-          try {
-            await login({ email: formData.email, password: formData.password })
+        // Firebase auth service already logs the user in and stores the token
+        // No need to call the old login endpoint
 
-            setRegistrationSuccess(true)
+        setRegistrationSuccess(true)
 
-            // Redirect to onboarding wizard after 1.5 seconds
-            setTimeout(() => {
-              navigate('/onboarding')
-            }, 1500)
-          } catch (loginError) {
-            console.error('Auto-login failed:', loginError)
-            // Fallback: redirect to login page if auto-login fails
-            navigate('/login')
-          }
-        }
+        // Redirect to onboarding wizard after 1.5 seconds
+        setTimeout(() => {
+          navigate('/onboarding')
+        }, 1500)
       } catch (error) {
-        newErrors.serverError = error.response?.data?.detail || t('auth.errors.serverError')
+        console.error('Registration error:', error)
+        newErrors.serverError = error.message || t('auth.errors.serverError')
         setErrors(newErrors)
         setLoading(false)
       }

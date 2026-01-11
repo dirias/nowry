@@ -55,7 +55,8 @@ const AppContent = () => {
 
   useEffect(() => {
     // Redirect to onboarding if user is authenticated but wizard is not completed
-    if (!loading && isAuthenticated && user && user.wizard_completed === false && location.pathname !== '/onboarding') {
+    const skipped = sessionStorage.getItem('onboarding_skipped')
+    if (!loading && isAuthenticated && user && !user.wizard_completed && !skipped && location.pathname !== '/onboarding') {
       navigate('/onboarding')
     }
   }, [loading, isAuthenticated, user, location.pathname, navigate])

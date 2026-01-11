@@ -17,10 +17,18 @@ export const apiClient = axios.create({
 
 /**
  * Request interceptor
- * Note: Authorization header is no longer needed as we use HttpOnly cookies
+ * Adds Firebase token from localStorage to Authorization header
  */
 apiClient.interceptors.request.use(
   (config) => {
+    // Get Firebase token from localStorage
+    const firebaseToken = localStorage.getItem('firebase_token')
+
+    // Add Authorization header if token exists and not already set
+    if (firebaseToken && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${firebaseToken}`
+    }
+
     return config
   },
   (error) => {

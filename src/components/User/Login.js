@@ -20,6 +20,7 @@ import {
 import { EmailRounded, LockRounded, VisibilityRounded, VisibilityOffRounded, LoginRounded, Google, Facebook } from '@mui/icons-material'
 
 import { useAuth } from '../../context/AuthContext'
+import { authService } from '../../api/services/auth.service'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -39,23 +40,32 @@ const Login = () => {
     setLoading(true)
 
     try {
-      await login({ email, password })
-      navigate('/')
-    } catch (error) {
-      console.error('Login error:', error.response?.data)
-      const detail = error.response?.data?.detail
+      // Use Firebase Authentication
+      await authService.login(email, password)
 
-      if (Array.isArray(detail)) {
-        const errorMsg = detail
-          .map((err) => {
-            const field = err.loc[err.loc.length - 1]
-            return `${field}: ${err.msg}`
-          })
-          .join(', ')
-        setError(errorMsg)
-      } else {
-        setError(detail || error.message || t('auth.errors.loginFailed'))
-      }
+      // Firebase auth service already handles token storage
+      // Reload to update auth state and navigate to home
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Login error:', error)
+      setError(error.message || t('auth.errors.loginFailed'))
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setError('')
+    setLoading(true)
+
+    try {
+      // Use Firebase Google OAuth
+      await authService.loginWithGoogle()
+
+      // Reload to update auth state
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Google login error:', error)
+      setError(error.message || t('auth.errors.loginFailed'))
       setLoading(false)
     }
   }
@@ -204,6 +214,8 @@ const Login = () => {
             size='lg'
             fullWidth
             startDecorator={<Google />}
+            onClick={handleGoogleLogin}
+            disabled={loading}
             sx={{
               '&:hover': {
                 borderColor: 'neutral.outlinedHoverBorder',
@@ -212,22 +224,6 @@ const Login = () => {
             }}
           >
             {t('auth.signInGoogle')}
-          </Button>
-
-          <Button
-            variant='outlined'
-            color='neutral'
-            size='lg'
-            fullWidth
-            startDecorator={<Facebook />}
-            sx={{
-              '&:hover': {
-                borderColor: 'neutral.outlinedHoverBorder',
-                backgroundColor: 'neutral.outlinedHoverBg'
-              }
-            }}
-          >
-            {t('auth.signInFacebook')}
           </Button>
         </Stack>
 
