@@ -10,68 +10,28 @@ import {
   FormHelperText,
   Sheet,
   useColorScheme,
-  Link,
   Alert,
   LinearProgress,
-  Stack,
-  IconButton
+  Stack
 } from '@mui/joy'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import {
-  EmailRounded,
-  LockRounded,
-  VisibilityRounded,
-  VisibilityOffRounded,
-  CheckCircleRounded,
-  ArrowBackRounded
-} from '@mui/icons-material'
+import { EmailRounded, CheckCircleRounded, ArrowBackRounded } from '@mui/icons-material'
+import { authService } from '../../api/services/auth.service'
 
 const ResetPassword = () => {
-  const [step, setStep] = useState(1) // 1: Email, 2: Code, 3: New Password
   const [email, setEmail] = useState('')
-  const [verificationCode, setVerificationCode] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmNewPassword, setConfirmNewPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
+  const [error, setError] = useState('')
   const { mode } = useColorScheme()
   const isDark = mode === 'dark'
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
-  // Password strength strength
-  const getPasswordStrength = (password) => {
-    if (!password) return { strength: 0, label: '', color: 'neutral' }
-    let strength = 0
-    if (password.length >= 8) strength += 25
-    if (password.length >= 12) strength += 25
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25
-    if (/\d/.test(password)) strength += 15
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 10
-
-    let label = '',
-      color = 'neutral'
-    if (strength < 40) {
-      label = t('auth.passwordStrength.weak')
-      color = 'danger'
-    } else if (strength < 70) {
-      label = t('auth.passwordStrength.fair')
-      color = 'warning'
-    } else {
-      label = t('auth.passwordStrength.strong')
-      color = 'success'
-    }
-
-    return { strength, label, color }
-  }
-
-  const passwordStrength = getPasswordStrength(newPassword)
-
-  const handleSendCode = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault()
+    setError('')
     const newErrors = {}
 
     if (!email) newErrors.email = t('auth.errors.emailRequired')
@@ -83,60 +43,20 @@ const ResetPassword = () => {
     }
 
     setLoading(true)
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await authService.resetPassword(email, i18n.language)
       setLoading(false)
-      setStep(2)
-      setSuccessMessage(t('auth.resetPassword.codeSent'))
-      setTimeout(() => setSuccessMessage(''), 3000)
-    }, 1000)
+      setIsSubmitted(true)
+    } catch (err) {
+      console.error('Password reset error:', err)
+      setLoading(false)
+      // Firebase specific error codes can be handled here if needed
+      setError(t('auth.errors.serverError') || 'Failed to send reset email. Please try again.')
+    }
   }
 
-  const handleVerifyCode = async (e) => {
-    e.preventDefault()
-    const newErrors = {}
-
-    if (!verificationCode) newErrors.verificationCode = t('auth.resetPassword.errors.codeRequired')
-    if (verificationCode.length !== 6) newErrors.verificationCode = t('auth.resetPassword.errors.codeLength')
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
-    setLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false)
-      setStep(3)
-    }, 1000)
-  }
-
-  const handleResetPassword = async (e) => {
-    e.preventDefault()
-    const newErrors = {}
-
-    if (!newPassword) newErrors.newPassword = t('auth.errors.passwordRequired')
-    if (newPassword.length < 8) newErrors.newPassword = t('auth.errors.passwordLength')
-    if (newPassword !== confirmNewPassword) {
-      newErrors.confirmNewPassword = t('auth.errors.passwordMismatch')
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
-    setLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false)
-      setStep(4)
-    }, 1000)
-  }
-
-  // Success State - Step 4
-  if (step === 4) {
+  // Success State
+  if (isSubmitted) {
     return (
       <Box
         sx={{
@@ -243,220 +163,55 @@ const ResetPassword = () => {
             {t('auth.resetPassword.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {step === 1 && t('auth.resetPassword.subtitle.step1')}
-            {step === 2 && t('auth.resetPassword.subtitle.step2')}
-            {step === 3 && t('auth.resetPassword.subtitle.step3')}
+            {t('auth.resetPassword.subtitle.step1')}
           </Typography>
         </Box>
 
-        {/* Progress Indicator */}
-        <Box sx={{ mb: 4 }}>
-          <Stack direction='row' spacing={1} justifyContent='center'>
-            {[1, 2, 3].map((s) => (
-              <Box
-                key={s}
-                sx={{
-                  width: 40,
-                  height: 4,
-                  borderRadius: 'sm',
-                  backgroundColor: s <= step ? 'primary.500' : 'neutral.200',
-                  transition: 'all 0.3s ease'
-                }}
-              />
-            ))}
-          </Stack>
-        </Box>
-
-        {/* Success Message */}
-        {successMessage && (
-          <Alert color='success' variant='soft' sx={{ mb: 3 }}>
-            {successMessage}
+        {/* General Error Alert */}
+        {error && (
+          <Alert color='danger' variant='soft' sx={{ mb: 3 }}>
+            {error}
           </Alert>
         )}
 
-        {/* Step 1: Email */}
-        {step === 1 && (
-          <form onSubmit={handleSendCode}>
-            <Stack spacing={2.5}>
-              <FormControl error={!!errors.email}>
-                <FormLabel>{t('auth.resetPassword.emailLabel')}</FormLabel>
-                <Input
-                  type='email'
-                  placeholder='you@example.com'
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value)
-                    setErrors({ ...errors, email: null })
-                  }}
-                  startDecorator={<EmailRounded />}
-                  size='lg'
-                  sx={{ '--Input-focusedThickness': '0.25rem' }}
-                />
-                {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
-              </FormControl>
-
-              <Button
-                type='submit'
-                size='lg'
-                fullWidth
-                loading={loading}
-                sx={{
-                  mt: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: 'md'
-                  }
+        {/* Reset Form */}
+        <form onSubmit={handleResetPassword}>
+          <Stack spacing={2.5}>
+            <FormControl error={!!errors.email}>
+              <FormLabel>{t('auth.resetPassword.emailLabel')}</FormLabel>
+              <Input
+                type='email'
+                placeholder='you@example.com'
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setErrors({ ...errors, email: null })
                 }}
-              >
-                {t('auth.resetPassword.sendCode')}
-              </Button>
-            </Stack>
-          </form>
-        )}
-
-        {/* Step 2: Verification Code */}
-        {step === 2 && (
-          <form onSubmit={handleVerifyCode}>
-            <Stack spacing={2.5}>
-              <FormControl error={!!errors.verificationCode}>
-                <FormLabel>{t('auth.resetPassword.codeLabel')}</FormLabel>
-                <Input
-                  type='text'
-                  placeholder='000000'
-                  value={verificationCode}
-                  onChange={(e) => {
-                    setVerificationCode(e.target.value)
-                    setErrors({ ...errors, verificationCode: null })
-                  }}
-                  size='lg'
-                  slotProps={{
-                    input: {
-                      maxLength: 6,
-                      style: {
-                        textAlign: 'center',
-                        fontSize: '24px',
-                        letterSpacing: '8px'
-                      }
-                    }
-                  }}
-                  sx={{ '--Input-focusedThickness': '0.25rem' }}
-                />
-                {errors.verificationCode && <FormHelperText>{errors.verificationCode}</FormHelperText>}
-              </FormControl>
-
-              <Typography level='body-xs' textAlign='center' sx={{ color: 'text.secondary' }}>
-                {t('auth.resetPassword.resendPrompt')}{' '}
-                <Link onClick={() => setStep(1)} sx={{ cursor: 'pointer' }}>
-                  {t('auth.resetPassword.resend')}
-                </Link>
-              </Typography>
-
-              <Button
-                type='submit'
+                startDecorator={<EmailRounded />}
                 size='lg'
-                fullWidth
-                loading={loading}
-                sx={{
-                  mt: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: 'md'
-                  }
-                }}
-              >
-                {t('auth.resetPassword.verifyCode')}
-              </Button>
-            </Stack>
-          </form>
-        )}
+                sx={{ '--Input-focusedThickness': '0.25rem' }}
+              />
+              {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
+            </FormControl>
 
-        {/* Step 3: New Password */}
-        {step === 3 && (
-          <form onSubmit={handleResetPassword}>
-            <Stack spacing={2.5}>
-              <FormControl error={!!errors.newPassword}>
-                <FormLabel>{t('auth.resetPassword.newPasswordLabel')}</FormLabel>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder='••••••••'
-                  value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value)
-                    setErrors({ ...errors, newPassword: null })
-                  }}
-                  startDecorator={<LockRounded />}
-                  endDecorator={
-                    <IconButton variant='plain' color='neutral' onClick={() => setShowPassword(!showPassword)} sx={{ mr: -1 }}>
-                      {showPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
-                    </IconButton>
-                  }
-                  size='lg'
-                  sx={{ '--Input-focusedThickness': '0.25rem' }}
-                />
-                {newPassword && (
-                  <Box sx={{ mt: 1 }}>
-                    <Stack direction='row' justifyContent='space-between' mb={0.5}>
-                      <Typography level='body-xs' sx={{ color: `${passwordStrength.color}.600` }}>
-                        {passwordStrength.label}
-                      </Typography>
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                        {passwordStrength.strength}%
-                      </Typography>
-                    </Stack>
-                    <LinearProgress determinate value={passwordStrength.strength} color={passwordStrength.color} sx={{ height: 4 }} />
-                  </Box>
-                )}
-                {errors.newPassword && <FormHelperText>{errors.newPassword}</FormHelperText>}
-              </FormControl>
-
-              <FormControl error={!!errors.confirmNewPassword}>
-                <FormLabel>{t('auth.resetPassword.confirmNewPasswordLabel')}</FormLabel>
-                <Input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder='••••••••'
-                  value={confirmNewPassword}
-                  onChange={(e) => {
-                    setConfirmNewPassword(e.target.value)
-                    setErrors({ ...errors, confirmNewPassword: null })
-                  }}
-                  startDecorator={<LockRounded />}
-                  endDecorator={
-                    <IconButton
-                      variant='plain'
-                      color='neutral'
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      sx={{ mr: -1 }}
-                    >
-                      {showConfirmPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
-                    </IconButton>
-                  }
-                  size='lg'
-                  sx={{ '--Input-focusedThickness': '0.25rem' }}
-                />
-                {errors.confirmNewPassword && <FormHelperText>{errors.confirmNewPassword}</FormHelperText>}
-              </FormControl>
-
-              <Button
-                type='submit'
-                size='lg'
-                fullWidth
-                loading={loading}
-                sx={{
-                  mt: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: 'md'
-                  }
-                }}
-              >
-                {t('auth.resetPassword.title')}
-              </Button>
-            </Stack>
-          </form>
-        )}
+            <Button
+              type='submit'
+              size='lg'
+              fullWidth
+              loading={loading}
+              sx={{
+                mt: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 'md'
+                }
+              }}
+            >
+              {t('auth.resetPassword.sendCode')}
+            </Button>
+          </Stack>
+        </form>
       </Sheet>
 
       {/* Loading Bar */}

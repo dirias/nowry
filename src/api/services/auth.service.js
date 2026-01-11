@@ -176,9 +176,11 @@ export const authService = {
   /**
    * Send password reset email
    * @param {string} email
+   * @param {string} langCode - Optional language code (e.g., 'es', 'fr')
    */
-  async resetPassword(email) {
+  async resetPassword(email, langCode = 'en') {
     try {
+      auth.languageCode = langCode
       await sendPasswordResetEmail(auth, email)
       return { message: 'Password reset email sent' }
     } catch (error) {
