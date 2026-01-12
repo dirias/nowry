@@ -30,7 +30,8 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
   const [isLimitError, setIsLimitError] = useState(false)
   const { t } = useTranslation()
 
-  const isEdit = !!initialData
+  // Only consider it an edit if there's an actual card ID
+  const isEdit = !!(initialData && (initialData._id || initialData.id))
 
   useEffect(() => {
     if (open) {
@@ -85,7 +86,11 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
 
       let savedCard
       if (isEdit) {
-        savedCard = await cardsService.update(initialData._id || initialData.id, cardPayload)
+        const cardId = initialData._id || initialData.id
+        if (!cardId) {
+          throw new Error('Invalid card ID - cannot update card without ID')
+        }
+        savedCard = await cardsService.update(cardId, cardPayload)
       } else {
         savedCard = await cardsService.create(cardPayload)
       }
@@ -95,7 +100,7 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
     } catch (error) {
       console.error('Error saving flashcard:', error)
       const status = error.response?.status
-      const msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
+      const msg = error.response?.data?.detail || error.message || t('subscription.errors.genericCreate')
 
       if (status === 403) {
         setIsLimitError(true)
