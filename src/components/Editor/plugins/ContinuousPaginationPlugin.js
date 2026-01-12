@@ -4,9 +4,11 @@ import { $getRoot, $getNodeByKey, $isElementNode } from 'lexical'
 import { $createPageNode, $isPageNode, PageNode } from '../../../nodes/PageNode'
 
 const PAGE_HEIGHT_PX = 1123 // A4 at 96 DPI
-// We subtract padding (96px * 2) roughly for content check, OR we check the wrapper height.
-// PageNode dimensions: min-height 1123px.
-// If actual height > 1123px, we overflow.
+const OVERFLOW_BUFFER = 8 // px – move content as soon as it crosses the boundary
+const UNDERFLOW_BUFFER = 96 // px – keep margin to avoid ping-pong
+const MOVE_COOLDOWN_MS = 600 // minimum time before the same node can be moved back
+const MAX_CHILD_RATIO = 0.8 // do not move if child is too large for the page
+const PAGE_PADDING = 96 // matches CSS page padding
 
 export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
   const [editor] = useLexicalComposerContext()
@@ -16,6 +18,9 @@ export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
   const iterationCount = useRef(0)
   const MAX_ITERATIONS = 50 // Prevent infinite loops
   const isPaginating = useRef(false) // Track if we are actively paginating
+  const moveTimestamps = useRef(new Map()) // childKey -> timestamp of last move
+  const lastHeightsRef = useRef([])
+  const frameRef = useRef(null)
 
   // Trigger immediate repagination when pageHeight changes
   useEffect(() => {
@@ -49,26 +54,24 @@ export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
       throw new Error('ContinuousPaginationPlugin: PageNode not registered on editor')
     }
 
-    return editor.registerUpdateListener(({ editorState, dirtyElements, dirtyLeaves }) => {
-      if (isProcessing.current) return
-
-      // Debounce pagination checks to avoid excessive recalculations
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current)
+    return editor.registerUpdateListener(() => {
+      const schedule = () => {
+        if (frameRef.current) return
+        frameRef.current = requestAnimationFrame(() => {
+          frameRef.current = null
+          runPagination()
+        })
       }
 
-      // Dynamic debounce: fast when actively paginating, slow when stable
-      const delay = isPaginating.current ? 10 : 200
+      const runPagination = () => {
+        if (isProcessing.current) return
 
-      debounceTimer.current = setTimeout(() => {
         const rootElement = editor.getRootElement()
-
         if (!rootElement) {
           console.warn('ContinuousPaginationPlugin: rootElement is null, skipping pagination')
           return
         }
 
-        // Check iteration limit to prevent infinite loops
         if (iterationCount.current >= MAX_ITERATIONS) {
           console.warn('ContinuousPaginationPlugin: Max iterations reached, stopping pagination to prevent freeze')
           iterationCount.current = 0
@@ -82,35 +85,59 @@ export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
           try {
             const root = $getRoot()
             const pages = root.getChildren().filter($isPageNode)
-
             if (pages.length === 0) return
+
+            const heightSnapshot = pages.map((p) => {
+              const el = editor.getElementByKey(p.getKey())
+              return { key: p.getKey(), h: el ? el.scrollHeight : 0 }
+            })
+            const unchanged =
+              !isPaginating.current &&
+              heightSnapshot.length === lastHeightsRef.current.length &&
+              heightSnapshot.every((h, idx) => h.h === lastHeightsRef.current[idx]?.h && h.key === lastHeightsRef.current[idx]?.key)
+            if (unchanged) {
+              return
+            }
 
             iterationCount.current++
             let madeChange = false
 
-            // Process pages in order
             for (let i = 0; i < pages.length; i++) {
               const page = pages[i]
               const pageKey = page.getKey()
               const pageElement = editor.getElementByKey(pageKey)
-
               if (!pageElement) continue
 
-              // 1. CHECK OVERFLOW (Move content forward to next page)
-              if (pageElement.offsetHeight > pageHeight + 10) {
+              const pageHeightDelta = pageElement.scrollHeight - pageHeight
+
+              if (pageHeightDelta > OVERFLOW_BUFFER) {
                 const children = page.getChildren()
                 if (children.length === 0) continue
 
-                // Move last child to next page
-                const lastChild = children[children.length - 1]
-                const childKey = lastChild.getKey()
+                let overflowChild = null
+                for (let c = 0; c < children.length; c++) {
+                  const childNode = children[c]
+                  const childKey = childNode.getKey()
+                  const childEl = editor.getElementByKey(childKey)
+                  if (!childEl) continue
+                  const childBottom = childEl.offsetTop + childEl.offsetHeight
+                  const overflows = childBottom > pageHeight - PAGE_PADDING + OVERFLOW_BUFFER
+                  if (overflows) {
+                    overflowChild = childNode
+                    break
+                  }
+                }
 
-                // Check if we recently moved this exact node in the opposite direction
+                const targetChild = overflowChild || children[children.length - 1]
+                const childKey = targetChild.getKey()
+                const lastMoveTs = moveTimestamps.current.get(childKey) || 0
+                if (Date.now() - lastMoveTs < MOVE_COOLDOWN_MS) {
+                  continue
+                }
+
                 const moveSignature = `${childKey}-forward`
                 const reverseSignature = `${childKey}-backward`
-
                 if (lastMoveTracker.current.get(reverseSignature) === i + 1) {
-                  // This would create a ping-pong, skip this element
                   console.warn('ContinuousPaginationPlugin: Detected potential ping-pong, skipping element')
                   continue
                 }
@@ -118,37 +145,31 @@ export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
                 const childElement = editor.getElementByKey(childKey)
                 if (!childElement) continue
 
-                // Don't move if child alone is bigger than page (e.g., large image)
                 const childHeight = childElement.offsetHeight
-                if (childHeight > pageHeight - 192 - 20) {
-                  // This element is too large to ever fit - allow overflow
+                const pageFitLimit = pageHeight * MAX_CHILD_RATIO
+                if (childHeight > pageFitLimit) {
                   console.warn('ContinuousPaginationPlugin: Element too large for page, allowing overflow')
                   continue
                 }
 
-                // Create or get next page
                 let nextPage = i + 1 < pages.length ? pages[i + 1] : null
                 if (!nextPage) {
                   nextPage = $createPageNode()
                   root.append(nextPage)
                 }
 
-                // Move child to next page
                 const firstChild = nextPage.getFirstChild()
                 if (firstChild) {
-                  firstChild.insertBefore(lastChild)
+                  firstChild.insertBefore(targetChild)
                 } else {
-                  nextPage.append(lastChild)
+                  nextPage.append(targetChild)
                 }
 
-                // Track this move
                 lastMoveTracker.current.set(moveSignature, i + 1)
+                moveTimestamps.current.set(childKey, Date.now())
                 madeChange = true
-                break // Process one move at a time
-              }
-
-              // 2. CHECK UNDERFLOW (Pull content from next page)
-              else if (i + 1 < pages.length) {
+                break
+              } else if (i + 1 < pages.length) {
                 const nextPage = pages[i + 1]
                 const nextChildren = nextPage.getChildren()
 
@@ -158,9 +179,8 @@ export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
                   const childElement = editor.getElementByKey(childKey)
 
                   if (childElement) {
-                    // Calculate available space on current page
                     const pageChildren = pageElement.children
-                    let usedHeight = 96 // Top padding
+                    let usedHeight = PAGE_PADDING
 
                     if (pageChildren.length > 0) {
                       const lastPageChild = pageChildren[pageChildren.length - 1]
@@ -170,26 +190,26 @@ export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
                     }
 
                     const childHeight = childElement.offsetHeight
-                    const availableHeight = pageHeight - 96 - 20 // Bottom padding + buffer
+                    const availableHeight = pageHeight - PAGE_PADDING - 20
 
-                    // Check ping-pong
                     const moveSignature = `${childKey}-backward`
                     const reverseSignature = `${childKey}-forward`
 
                     if (lastMoveTracker.current.get(reverseSignature) === i) {
-                      // Would create ping-pong
                       continue
                     }
 
-                    if (usedHeight + childHeight < availableHeight) {
+                    const freeSpace = availableHeight - usedHeight - childHeight
+                    const lastMoveTs = moveTimestamps.current.get(childKey) || 0
+                    if (freeSpace > UNDERFLOW_BUFFER && Date.now() - lastMoveTs >= MOVE_COOLDOWN_MS) {
                       page.append(firstChild)
+                      moveTimestamps.current.set(childKey, Date.now())
                       lastMoveTracker.current.set(moveSignature, i)
                       madeChange = true
                       break
                     }
                   }
                 } else if (pages.length > 1) {
-                  // Remove empty pages (except last one)
                   nextPage.remove()
                   madeChange = true
                   break
@@ -197,22 +217,23 @@ export default function ContinuousPaginationPlugin({ pageHeight = 1123 }) {
               }
             }
 
-            // Update paginating state for next pass
             isPaginating.current = madeChange
 
-            // Reset iteration counter if no changes (stable state)
             if (!madeChange) {
               iterationCount.current = 0
-              // Clean up old moves from tracker
               if (lastMoveTracker.current.size > 100) {
                 lastMoveTracker.current.clear()
               }
             }
+
+            lastHeightsRef.current = heightSnapshot
           } finally {
             isProcessing.current = false
           }
         })
-      }, delay)
+      }
+
+      schedule()
     })
   }, [editor, pageHeight])
 

@@ -170,7 +170,28 @@ ol.editor-list-ol {
   background-color: white;
   box-sizing: border-box;
   overflow: hidden;
+  min-height: var(--page-height, 1123px);
+  max-height: var(--page-height, 1123px);
+  height: var(--page-height, 1123px);
   /* Prevent content from visually escaping page bounds */
+}
+
+.editor-page * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.editor-page img,
+.editor-page table {
+  max-width: 100%;
+  height: auto;
+}
+
+.editor-page table {
+  width: 100%;
+  table-layout: fixed;
+  word-break: break-word;
+  border-collapse: collapse;
 }
 
 .editor-page:last-child {

@@ -63,8 +63,23 @@ export default function StudySession() {
 
     try {
       const deck = await decksService.getById(deckId)
+
       if (deck.voice_settings) {
-        setVoiceSettings(deck.voice_settings)
+        const loadedSettings = {
+          front: {
+            voiceName:
+              deck.voice_settings.front?.voiceName || deck.voice_settings.front?.voice_name || deck.voice_settings.front?.voice || null,
+            rate: deck.voice_settings.front?.rate ?? 1.0,
+            pitch: deck.voice_settings.front?.pitch ?? 1.0
+          },
+          back: {
+            voiceName:
+              deck.voice_settings.back?.voiceName || deck.voice_settings.back?.voice_name || deck.voice_settings.back?.voice || null,
+            rate: deck.voice_settings.back?.rate ?? 1.0,
+            pitch: deck.voice_settings.back?.pitch ?? 1.0
+          }
+        }
+        setVoiceSettings(loadedSettings)
       }
     } catch (error) {
       console.error('Error fetching deck settings:', error)
@@ -163,11 +178,24 @@ export default function StudySession() {
     // Update local state immediately
     setVoiceSettings(updatedSettings)
 
+    // Normalize for backend: use voice_name keys
+    const normalized = {
+      front: {
+        voice_name: updatedSettings.front.voiceName || updatedSettings.front.voice_name || null,
+        rate: updatedSettings.front.rate ?? 1.0,
+        pitch: updatedSettings.front.pitch ?? 1.0
+      },
+      back: {
+        voice_name: updatedSettings.back.voiceName || updatedSettings.back.voice_name || null,
+        rate: updatedSettings.back.rate ?? 1.0,
+        pitch: updatedSettings.back.pitch ?? 1.0
+      }
+    }
+
     // Save to DB
     if (deckId !== 'daily-review') {
       try {
-        console.log('[StudySession] Saving voice settings to deck:', deckId, updatedSettings)
-        await decksService.update(deckId, { voice_settings: updatedSettings })
+        await decksService.update(deckId, { voice_settings: normalized })
       } catch (error) {
         console.error('Error saving voice settings:', error)
       }
@@ -178,13 +206,12 @@ export default function StudySession() {
 
       if (targetDeckId) {
         try {
-          console.log('[StudySession] Saving voice settings to target deck:', targetDeckId, updatedSettings)
-          await decksService.update(targetDeckId, { voice_settings: updatedSettings })
+          await decksService.update(targetDeckId, { voice_settings: normalized })
         } catch (error) {
           console.error('Error saving voice settings to target deck:', error)
         }
       } else {
-        console.warn('[StudySession] Could not identify target deck for current card. Settings not saved.')
+        console.warn('Could not identify target deck for current card. Settings not saved.')
       }
     }
   }

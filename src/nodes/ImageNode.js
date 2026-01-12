@@ -16,6 +16,9 @@ import ImageToolbar from '../components/Editor/ImageToolbar'
 import ResizeHandles from '../components/Editor/ResizeHandles'
 
 const FALLBACK_IMAGE = 'https://placehold.co/600x400?text=Image+Not+Found'
+const MAX_IMAGE_WIDTH = 650
+const MAX_IMAGE_HEIGHT = 900
+const MIN_IMAGE_SIZE = 24
 
 function ImageComponent({ src, altText, width, height, alignment, maxWidth, nodeKey }) {
   const [editor] = useLexicalComposerContext()
@@ -125,7 +128,8 @@ function ImageComponent({ src, altText, width, height, alignment, maxWidth, node
           decoding='async'
           className={`editor-image alignment-${alignment} ${isSelected && isEditable ? 'selected' : ''}`}
           style={{
-            maxWidth: '100%',
+            maxWidth: 'min(100%, 650px)',
+            maxHeight: '900px',
             height: 'auto',
             display: 'block',
             cursor: isEditable ? 'pointer' : 'default',
@@ -273,8 +277,12 @@ export class ImageNode extends DecoratorNode {
 
   setWidthAndHeight(width, height) {
     const writable = this.getWritable()
-    writable.__width = width
-    writable.__height = height
+    const clamp = (value, min, max) => {
+      if (typeof value !== 'number' || Number.isNaN(value)) return min
+      return Math.max(min, Math.min(max, value))
+    }
+    writable.__width = clamp(width, MIN_IMAGE_SIZE, MAX_IMAGE_WIDTH)
+    writable.__height = clamp(height, MIN_IMAGE_SIZE, MAX_IMAGE_HEIGHT)
   }
 
   isInline() {

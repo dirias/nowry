@@ -19,6 +19,7 @@ export function useAutoSave({ id, content, onSave, debounceMs = 2000, forceSaveM
   const abortControllerRef = useRef(null)
   const timeoutRef = useRef(null)
   const forceSaveIntervalRef = useRef(null)
+  const failureCountRef = useRef(0)
 
   // Update ref when content changes
   useEffect(() => {
@@ -59,6 +60,7 @@ export function useAutoSave({ id, content, onSave, debounceMs = 2000, forceSaveM
       setStatus(SAVE_STATUS.SAVED)
       setLastSaved(new Date())
       lastSavedContentRef.current = currentContent
+      failureCountRef.current = 0
 
       // Clear backup on successful save (optional, or keep it?)
       // Keeping it is safer, maybe clear on explicit "Close/Exit"?
@@ -70,6 +72,7 @@ export function useAutoSave({ id, content, onSave, debounceMs = 2000, forceSaveM
       console.error('AutoSave failed:', err)
       setStatus(SAVE_STATUS.ERROR)
       setError(err.message || 'Save failed')
+      failureCountRef.current += 1
     }
   }, [onSave])
 
@@ -77,9 +80,11 @@ export function useAutoSave({ id, content, onSave, debounceMs = 2000, forceSaveM
   useEffect(() => {
     if (!debounceMs) return
 
+    const effectiveDebounceMs = Math.min(8000, debounceMs * (1 + failureCountRef.current))
+
     if (status === SAVE_STATUS.UNSAVED) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(saveNow, debounceMs)
+      timeoutRef.current = setTimeout(saveNow, effectiveDebounceMs)
     }
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -90,12 +95,14 @@ export function useAutoSave({ id, content, onSave, debounceMs = 2000, forceSaveM
   useEffect(() => {
     if (!forceSaveMs) return
 
+    const effectiveForceMs = Math.min(60000, forceSaveMs * (1 + failureCountRef.current))
+
     forceSaveIntervalRef.current = setInterval(() => {
       if (status === SAVE_STATUS.UNSAVED) {
         console.log('Force saving due to time limit...')
         saveNow()
       }
-    }, forceSaveMs)
+    }, effectiveForceMs)
     return () => clearInterval(forceSaveIntervalRef.current)
   }, [status, saveNow, forceSaveMs])
 

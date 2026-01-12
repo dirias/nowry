@@ -26,6 +26,7 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
     // Load voices
     const loadVoices = () => {
       const allVoices = ttsService.getVoices()
+
       // Filter for natural voices only as requested
       const naturalVoices = allVoices.filter(
         (v) => v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Natural')
@@ -57,6 +58,7 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
   useEffect(() => {
     if (voiceSettings && voices.length > 0) {
       const targetVoice = voiceSettings.voiceName || voiceSettings.voice_name
+
       if (targetVoice) {
         const matchedVoice = voices.find((v) => v.name === targetVoice)
         if (matchedVoice) {
@@ -97,13 +99,15 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
   const handleVoiceChange = (event, value) => {
     if (!value) return
     const voice = voices.find((v) => v.name === value)
+
     if (voice) {
       setSelectedVoice(voice)
       ttsService.setVoice(voice)
 
       // Notify parent
       if (onVoiceSettingsChange) {
-        onVoiceSettingsChange({ voiceName: voice.name, rate, pitch: 1.0 })
+        const payload = { voiceName: voice.name, rate, pitch: 1.0 }
+        onVoiceSettingsChange(payload)
       }
     }
   }
@@ -112,7 +116,8 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
     setRate(val)
     // Debounce or commit? For now just notify on change (user unlikely to spam)
     if (onVoiceSettingsChange) {
-      onVoiceSettingsChange({ voiceName: selectedVoice?.name, rate: val, pitch: 1.0 })
+      const payload = { voiceName: selectedVoice?.name, rate: val, pitch: 1.0 }
+      onVoiceSettingsChange(payload)
     }
   }
 
@@ -121,12 +126,18 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Check if click is on a MUI portal/popover (like Select dropdown)
+      const isPortalClick =
+        event.target.closest('[role="presentation"]') ||
+        event.target.closest('[role="listbox"]') ||
+        event.target.closest('.MuiPopover-root') ||
+        event.target.closest('[data-mui-portal]')
+
+      if (isPortalClick) {
+        return // Don't close if clicking on a portal element
+      }
+
       if (settingsRef.current && !settingsRef.current.contains(event.target)) {
-        // Check if the click was on the toggle button (to prevent immediate reopen)
-        // This logic is tricky without a separate ref for the button, but usually simple outside check is enough
-        // if the button itself doesn't contain the event target.
-        // We will just close it. If user clicked button, button's onClick might toggle it back.
-        // To avoid conflict, we usually rely on the button stopping propagation or check
         setSettingsOpen(false)
       }
     }

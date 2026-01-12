@@ -239,6 +239,8 @@ export default function EditorHome() {
     setPagesData(data)
   }, [])
 
+  // Pages data comes from pagination plugin; no placeholders to avoid stale counts
+
   const handleScrollToPage = (index) => {
     const pages = document.querySelectorAll('.editor-page')
     if (pages[index]) {
@@ -359,6 +361,11 @@ export default function EditorHome() {
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
               <StatusBadge />
             </Box>
+            {saveError && (
+              <Typography level='body-xs' color='danger' sx={{ display: { xs: 'none', sm: 'block' } }}>
+                {saveError}
+              </Typography>
+            )}
           </Stack>
 
           <Stack direction='row' spacing={1.5} alignItems='center'>

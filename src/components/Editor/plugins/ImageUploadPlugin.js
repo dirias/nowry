@@ -1,9 +1,13 @@
 import { useEffect, useCallback } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { COMMAND_PRIORITY_LOW, PASTE_COMMAND, DROP_COMMAND, $getSelection, $getRoot } from 'lexical'
+import { $createPageNode, $isPageNode } from '../../../nodes/PageNode'
 import imageCompression from 'browser-image-compression'
 import { $createImageNode } from '../../../nodes/ImageNode'
 import { imageService } from '../../../api/services/image.service'
+
+const MAX_UPLOAD_MB = 8
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 /**
  * Image Upload Plugin
@@ -15,6 +19,22 @@ export default function ImageUploadPlugin({ bookId, onUploadStart, onUploadCompl
   const handleImageUpload = useCallback(
     async (file) => {
       try {
+        if (!file) {
+          if (onUploadError) onUploadError('No file provided')
+          return
+        }
+
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          if (onUploadError) onUploadError('Unsupported file type')
+          return
+        }
+
+        const fileSizeMb = file.size / 1024 / 1024
+        if (fileSizeMb > MAX_UPLOAD_MB) {
+          if (onUploadError) onUploadError(`Image too large (${fileSizeMb.toFixed(2)} MB). Max ${MAX_UPLOAD_MB} MB.`)
+          return
+        }
+
         // Notify upload start
         if (onUploadStart) {
           onUploadStart(file.name)
@@ -37,10 +57,24 @@ export default function ImageUploadPlugin({ bookId, onUploadStart, onUploadCompl
 
         console.log('Compressed size:', compressedFile.size / 1024 / 1024, 'MB')
 
-        // Upload to backend with progress tracking
-        const result = await imageService.upload(compressedFile, bookId, (percent) => {
-          console.log(`Upload progress: ${percent}%`)
-        })
+        const uploadWithRetry = async (attempt = 0) => {
+          try {
+            return await imageService.upload(compressedFile, bookId, (percent) => {
+              console.log(`Upload progress: ${percent}%`)
+            })
+          } catch (err) {
+            const shouldRetry = attempt < 1
+            if (shouldRetry) {
+              const backoff = 500 * (attempt + 1)
+              await new Promise((res) => setTimeout(res, backoff))
+              return uploadWithRetry(attempt + 1)
+            }
+            throw err
+          }
+        }
+
+        // Upload to backend with progress tracking and retry
+        const result = await uploadWithRetry()
 
         // Calculate smart display dimensions based on the natural dimensions
         // This prevents huge images from breaking pagination or layout
@@ -83,14 +117,46 @@ export default function ImageUploadPlugin({ bookId, onUploadStart, onUploadCompl
             height: displayHeight
           })
 
+          const root = $getRoot()
           const selection = $getSelection()
-          if (selection) {
-            selection.insertNodes([imageNode])
-          } else {
-            // If no selection (e.g. drag & drop), append to end
-            const root = $getRoot()
-            root.append(imageNode)
+
+          // Helper: find the nearest PageNode for the current selection anchor
+          const findPageForSelection = () => {
+            if (!selection) return null
+            let node = selection.anchor.getNode()
+            while (node) {
+              if ($isPageNode(node)) return node
+              node = node.getParent()
+            }
+            return null
           }
+
+          const pageFromSelection = findPageForSelection()
+
+          if (selection && pageFromSelection) {
+            // Normal path: selection is inside a page, so just insert there
+            selection.insertNodes([imageNode])
+            return
+          }
+
+          // Fallback: ensure we always insert inside a page, even if there is no selection
+          let targetPage = root.getChildren().find($isPageNode) || null
+          if (!targetPage) {
+            targetPage = $createPageNode()
+            root.append(targetPage)
+          } else if (root.getChildren().filter($isPageNode).length > 0) {
+            // Prefer the last page if there are multiple
+            const pages = root.getChildren().filter($isPageNode)
+            targetPage = pages[pages.length - 1]
+          }
+
+          const lastChild = targetPage.getLastChild()
+          if (lastChild) {
+            lastChild.insertAfter(imageNode)
+          } else {
+            targetPage.append(imageNode)
+          }
+          targetPage.selectEnd()
         })
 
         // Notify success

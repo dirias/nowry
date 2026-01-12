@@ -21,7 +21,12 @@ export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageCl
   const scale = thumbW / pageW
   const thumbH = pageH * scale
 
-  // If no data yet (layout pending), show skeletons
+  const windowBuffer = 3
+  const windowSize = 30
+  const windowStart = Math.max(0, activePageIndex - windowBuffer)
+  const windowEnd = Math.min(pagesData.length - 1, activePageIndex + windowSize)
+
+  // If no data yet (layout pending) or not ready, show skeletons
   if (!pagesData || pagesData.length === 0) {
     return (
       <Sheet
@@ -55,8 +60,6 @@ export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageCl
     )
   }
 
-  // Only show skeletons if we have NO data yet
-  // If we have even 1 page, we show that (and trust pagination is fast enough now)
   const showSkeletons = !pagesData || pagesData.length === 0
   const skeletonCount = showSkeletons ? 3 : 0
 
@@ -83,35 +86,83 @@ export default function PageOverview({ pagesData = [], pageSize = 'a4', onPageCl
         {/* Render Real Pages */}
         {pagesData.map((page, i) => {
           const isActive = activePageIndex === page.index
-          return (
-            <PageCard
-              key={`${page.index}-${pageSize}`}
-              index={page.index}
-              content={page.content}
-              isActive={isActive}
-              onClick={() => onPageClick(page.index)}
-              thumbW={thumbW}
-              thumbH={thumbH}
-              scale={scale}
-              pageW={pageW}
-              pageH={pageH}
-            />
-          )
+          const isVirtualized = i < windowStart || i > windowEnd
+          if (isVirtualized) {
+            return (
+              <LightPageRow
+                key={`${page.index}-light-${pageSize}`}
+                index={page.index}
+                isActive={isActive}
+                onClick={() => onPageClick(page.index)}
+                thumbW={thumbW}
+                thumbH={thumbH}
+              />
+            )
+          } else {
+            return (
+              <PageCard
+                key={`${page.index}-${pageSize}`}
+                index={page.index}
+                content={page.content}
+                isActive={isActive}
+                onClick={() => onPageClick(page.index)}
+                thumbW={thumbW}
+                thumbH={thumbH}
+                scale={scale}
+                pageW={pageW}
+                pageH={pageH}
+              />
+            )
+          }
         })}
 
-        {/* Render Skeletons for missing pages (up to 3) */}
-        {Array.from({ length: skeletonCount }).map((_, i) => (
-          <Box key={`skeleton-${i}`}>
-            <Box sx={{ width: thumbW, height: thumbH, mb: 1 }}>
-              <Skeleton variant='rectangular' width={thumbW} height={thumbH} sx={{ borderRadius: 'sm' }} />
+        {/* Skeletons when data is not ready */}
+        {showSkeletons &&
+          Array.from({ length: Math.max(3, pagesData?.length || 0) }).map((_, i) => (
+            <Box key={`skeleton-${i}`}>
+              <Box sx={{ width: thumbW, height: thumbH, mb: 1 }}>
+                <Skeleton variant='rectangular' width={thumbW} height={thumbH} sx={{ borderRadius: 'sm' }} />
+              </Box>
+              <Skeleton variant='text' width={60} sx={{ mx: 'auto' }} />
             </Box>
-            <Skeleton variant='text' width={60} sx={{ mx: 'auto' }} />
-          </Box>
-        ))}
+          ))}
       </Stack>
     </Sheet>
   )
 }
+
+const LightPageRow = memo(function LightPageRow({ index, isActive, onClick, thumbW, thumbH }) {
+  return (
+    <Box>
+      <Box
+        onClick={onClick}
+        sx={{
+          width: thumbW,
+          height: thumbH,
+          position: 'relative',
+          backgroundColor: 'background.level1',
+          borderRadius: 'sm',
+          mb: 1,
+          cursor: 'pointer',
+          border: isActive ? '2px solid' : '1px dashed',
+          borderColor: isActive ? 'primary.500' : 'neutral.outlinedBorder',
+          boxShadow: isActive ? 'md' : 'xs',
+          transition: 'all 0.2s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          Preview on scroll
+        </Typography>
+      </Box>
+      <Typography level='body-xs' textAlign='center' sx={{ color: isActive ? 'primary.600' : 'text.tertiary' }}>
+        Page {index + 1}
+      </Typography>
+    </Box>
+  )
+})
 
 const PageCard = memo(
   function PageCard({ index, content, isActive, onClick, thumbW, thumbH, scale, pageW, pageH }) {
@@ -120,6 +171,7 @@ const PageCard = memo(
     const [isVisible, setIsVisible] = React.useState(!shouldLazyLoad)
     const [hasRendered, setHasRendered] = React.useState(!shouldLazyLoad)
     const cardRef = React.useRef(null)
+    const isReady = content && content.trim().length > 0
 
     // Lazy load thumbnail content when scrolling near it (only for pages after first 3)
     React.useEffect(() => {
@@ -136,8 +188,8 @@ const PageCard = memo(
         },
         {
           root: null,
-          rootMargin: '200px',
-          threshold: 0.01
+          rootMargin: '300px 0px 300px 0px',
+          threshold: 0.1
         }
       )
 
@@ -170,33 +222,35 @@ const PageCard = memo(
           }}
         >
           {isVisible ? (
-            // Render full preview once visible
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: pageW,
-                height: pageH,
-                bgcolor: 'white',
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                pointerEvents: 'none',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-                padding: '96px',
-                fontSize: '12px',
-                lineHeight: '1.2',
-                '& img': {
-                  maxWidth: '100%',
-                  height: 'auto'
-                }
-              }}
-            >
-              <div className='preview-content' dangerouslySetInnerHTML={{ __html: content || '' }} />
-            </Box>
+            isReady ? (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: pageW,
+                  height: pageH,
+                  bgcolor: 'white',
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                  pointerEvents: 'none',
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
+                  padding: '96px',
+                  fontSize: '12px',
+                  lineHeight: '1.2',
+                  '& img': {
+                    maxWidth: '100%',
+                    height: 'auto'
+                  }
+                }}
+              >
+                <div className='preview-content' dangerouslySetInnerHTML={{ __html: content || '' }} />
+              </Box>
+            ) : (
+              <Skeleton variant='rectangular' width='100%' height='100%' />
+            )
           ) : (
-            // Show placeholder while not visible
             <Typography
               level='body-xs'
               sx={{ color: 'text.tertiary', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}

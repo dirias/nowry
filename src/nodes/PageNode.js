@@ -16,6 +16,8 @@ export class PageNode extends ElementNode {
     div.style.position = 'relative'
     div.style.backgroundColor = 'white'
     div.style.minHeight = 'var(--page-height, 1123px)'
+    div.style.height = 'var(--page-height, 1123px)'
+    div.style.maxHeight = 'var(--page-height, 1123px)'
     div.style.width = 'var(--page-width, 794px)'
     div.style.margin = '20px auto'
     // Split padding to support Mobile (Narrow X, Standard Y) vs Print (Standard X, Standard Y)

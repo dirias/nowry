@@ -181,21 +181,28 @@ export default function Editor({
   // Ref to track last page data to prevent infinite loops
   const lastPagesJsonRef = useRef('')
   const pageUpdateTimeoutRef = useRef(null)
+  const lastPageCaptureTsRef = useRef(0)
 
-  // Page Tracking Logic (Count + Preview)
+  // Page Tracking Logic (Count + Preview - lightweight text only)
   useEffect(() => {
     if (!containerRef.current) return
 
     const updatePages = () => {
       if (!containerRef.current) return
-      const pageElements = containerRef.current.querySelectorAll('.editor-page')
-      const pagesData = Array.from(pageElements).map((el, index) => ({
-        index,
-        content: el.innerHTML // Full HTML with images - lazy loading in PageOverview handles performance
-      }))
+      const now = performance.now()
+      // Throttle to avoid excessive captures during rapid edits
+      if (now - lastPageCaptureTsRef.current < 100) return
+      lastPageCaptureTsRef.current = now
 
-      // Prevent infinite loop by checking if pages data actually changed
-      const currentPagesJson = JSON.stringify(pagesData.map((p) => p.content.length))
+      const MAX_PREVIEW_CHARS = 8000
+      const pageElements = containerRef.current.querySelectorAll('.editor-page')
+      const pagesData = Array.from(pageElements).map((el, index) => {
+        const html = (el.innerHTML || '').slice(0, MAX_PREVIEW_CHARS)
+        return { index, content: html }
+      })
+
+      // Prevent unnecessary updates: track count + text lengths
+      const currentPagesJson = JSON.stringify(pagesData.map((p) => `${p.index}:${p.content.length}`))
 
       if (lastPagesJsonRef.current !== currentPagesJson) {
         lastPagesJsonRef.current = currentPagesJson
@@ -215,10 +222,10 @@ export default function Editor({
       })
     })
 
-    const observer = new MutationObserver((mutations) => {
-      // Very short debounce for responsive sidebar updates
+    const observer = new MutationObserver(() => {
+      // rAF throttle for responsive sidebar updates
       if (pageUpdateTimeoutRef.current) clearTimeout(pageUpdateTimeoutRef.current)
-      pageUpdateTimeoutRef.current = setTimeout(updatePages, 100)
+      pageUpdateTimeoutRef.current = requestAnimationFrame(updatePages)
     })
 
     // We observe the containerRef for content changes
@@ -226,7 +233,7 @@ export default function Editor({
 
     return () => {
       observer.disconnect()
-      if (pageUpdateTimeoutRef.current) clearTimeout(pageUpdateTimeoutRef.current)
+      if (pageUpdateTimeoutRef.current) cancelAnimationFrame(pageUpdateTimeoutRef.current)
     }
   }, [onPageCountChange, pageSize])
 
@@ -258,34 +265,18 @@ export default function Editor({
           root.clear()
 
           // Create the first page container
-          const page = $createPageNode()
+          const firstPage = $createPageNode()
+          root.append(firstPage)
 
-          const validNodes = []
-          let currentParagraph = null
-
+          // Append all nodes to first page; pagination plugin will split across pages
           nodes.forEach((node) => {
-            // Basic normalization
-            if ($isElementNode(node) || $isDecoratorNode(node)) {
-              if (currentParagraph) {
-                validNodes.push(currentParagraph)
-                currentParagraph = null
-              }
-              validNodes.push(node)
-            } else {
-              if (!currentParagraph) currentParagraph = $createParagraphNode()
-              currentParagraph.append(node)
-            }
+            firstPage.append(node)
           })
 
-          if (currentParagraph) validNodes.push(currentParagraph)
-
-          // If no content, add an empty paragraph so the page is focusable
-          if (validNodes.length === 0) {
-            validNodes.push($createParagraphNode())
+          // Ensure at least one paragraph for focus
+          if (firstPage.getChildren().length === 0) {
+            firstPage.append($createParagraphNode())
           }
-
-          page.append(...validNodes)
-          root.append(page)
         })
       },
       onError: (e) => console.error('Lexical error:', e)
