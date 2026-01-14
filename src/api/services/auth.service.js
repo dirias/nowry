@@ -199,13 +199,64 @@ export const authService = {
 
   /**
    * Get current Firebase ID token
+   * @param {boolean} forceRefresh - Force token refresh
    * @returns {Promise<string>} ID token
    */
-  async getIdToken() {
+  async getIdToken(forceRefresh = false) {
     const user = auth.currentUser
     if (!user) {
       throw new Error('No user logged in')
     }
-    return await user.getIdToken()
+    return await user.getIdToken(forceRefresh)
+  },
+
+  /**
+   * Refresh the Firebase ID token and update localStorage
+   * @returns {Promise<string>} New ID token
+   */
+  async refreshToken() {
+    try {
+      const user = auth.currentUser
+      if (!user) {
+        throw new Error('No user logged in')
+      }
+
+      // Force refresh the token
+      const newToken = await user.getIdToken(true)
+
+      // Update localStorage
+      localStorage.setItem('firebase_token', newToken)
+
+      console.log('[AuthService] Token refreshed successfully')
+      return newToken
+    } catch (error) {
+      console.error('[AuthService] Token refresh failed:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Check if current token is expired or about to expire
+   * @returns {Promise<boolean>} True if token needs refresh
+   */
+  async isTokenExpired() {
+    try {
+      const user = auth.currentUser
+      if (!user) return true
+
+      // Get token result with expiration time
+      const tokenResult = await user.getIdTokenResult()
+      const expirationTime = new Date(tokenResult.expirationTime).getTime()
+      const currentTime = Date.now()
+
+      // Check if token expires in less than 5 minutes
+      const fiveMinutes = 5 * 60 * 1000
+      const isExpiringSoon = expirationTime - currentTime < fiveMinutes
+
+      return isExpiringSoon
+    } catch (error) {
+      console.error('[AuthService] Error checking token expiration:', error)
+      return true
+    }
   }
 }

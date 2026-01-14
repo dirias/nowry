@@ -25,6 +25,7 @@ import { Search, Add, GridView, ViewList, FilterList, TrendingUp, School, Downlo
 import DecksView from './DecksView'
 import CreateDeckModal from './CreateDeckModal'
 import CreateCardModal from './CreateCardModal'
+import CardPreviewModal from './CardPreviewModal'
 import ManageContent from './ManageContent'
 import { decksService, cardsService } from '../../api/services'
 
@@ -45,6 +46,12 @@ export default function CardHome() {
   const [showCreateCard, setShowCreateCard] = useState(false)
   const [editingDeck, setEditingDeck] = useState(null)
   const [editingCard, setEditingCard] = useState(null)
+  const [previewState, setPreviewState] = useState({
+    open: false,
+    title: '',
+    cards: [],
+    initialIndex: 0
+  })
 
   // Stats
   const [stats, setStats] = useState({
@@ -66,12 +73,27 @@ export default function CardHome() {
         cardsService.getStatistics()
       ])
 
-      setDecks(decksData)
+      // Calculate due cards for each deck
+      const now = new Date()
+      const decksWithDueCount = decksData.map((deck) => {
+        const deckCards = cardsData.filter((card) => card.deck_id === deck._id || card.deck_id?._id === deck._id)
+        const dueCards = deckCards.filter((card) => {
+          if (!card.next_review) return true
+          const nextReview = new Date(card.next_review)
+          return nextReview <= now
+        })
+        return {
+          ...deck,
+          due_cards: dueCards.length,
+          has_cards: deckCards.length > 0
+        }
+      })
+
+      setDecks(decksWithDueCount)
       setCards(cardsData)
 
       // Use real stats from API - API returns data in summary object
       const summary = statisticsData.summary || {}
-      const now = new Date()
       const dueCards = cardsData.filter((card) => {
         if (!card.next_review) return true
         const nextReview = new Date(card.next_review)
@@ -93,6 +115,20 @@ export default function CardHome() {
 
   const handleStudy = (deck) => {
     navigate(`/study/${deck._id}`)
+  }
+
+  const handlePreview = (deck) => {
+    const deckCards = cards.filter((card) => card.deck_id === deck._id || card.deck_id?._id === deck._id)
+    setPreviewState({
+      open: true,
+      title: deck.name,
+      cards: deckCards,
+      initialIndex: 0
+    })
+  }
+
+  const handleClosePreview = () => {
+    setPreviewState((prev) => ({ ...prev, open: false }))
   }
 
   const handleDeckSaved = () => {
@@ -571,7 +607,9 @@ export default function CardHome() {
           ) : (
             <DecksView
               decks={filteredDecks}
+              cards={cards}
               onStudy={handleStudy}
+              onPreview={handlePreview}
               onEdit={handleEditDeck}
               onDelete={handleDeleteDeck}
               viewMode={viewMode}
@@ -620,6 +658,16 @@ export default function CardHome() {
           onCardSaved={handleCardSaved}
           decks={decks}
           card={editingCard}
+        />
+      )}
+
+      {previewState.open && (
+        <CardPreviewModal
+          open={previewState.open}
+          onClose={handleClosePreview}
+          title={previewState.title}
+          cards={previewState.cards}
+          initialIndex={previewState.initialIndex}
         />
       )}
     </Container>

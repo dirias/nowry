@@ -43,16 +43,38 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle unauthorized - redirect to login logic is handled by AuthContext or components
+    // Handle unauthorized (401) - Token expired or invalid
     if (error.response?.status === 401) {
-      console.warn('Unauthorized - auth cookie might be missing or expired')
+      console.warn('Unauthorized: Token expired or invalid. Logging out...')
+
+      // Clear all authentication data
+      localStorage.removeItem('firebase_token')
+      localStorage.removeItem('firebase_user')
+
+      // Dispatch a custom event that AuthContext can listen to
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+
+      // Only redirect if not already on auth pages
+      const currentPath = window.location.pathname
+      const authPaths = ['/login', '/register', '/forgot-password']
+      if (!authPaths.includes(currentPath)) {
+        // Redirect to login with return URL
+        const returnUrl = encodeURIComponent(currentPath + window.location.search)
+        window.location.href = `/login?returnUrl=${returnUrl}`
+      }
     }
 
-    // Handle other common errors
+    // Handle forbidden (403) - User doesn't have permission
+    if (error.response?.status === 403) {
+      console.error('Forbidden: Insufficient permissions')
+    }
+
+    // Handle not found (404)
     if (error.response?.status === 404) {
       console.error('Resource not found:', error.config?.url)
     }
 
+    // Handle server errors (5xx)
     if (error.response?.status >= 500) {
       console.error('Server error:', error.response?.status)
     }

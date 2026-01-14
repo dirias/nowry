@@ -65,7 +65,8 @@
     "reviewMsg": "You have {{count}} cards ready to review",
     "startStudying": "Start Studying →",
     "viewAll": "View all {{count}} decks →",
-    "due": "due"
+    "due": "due",
+    "allReviewed": "All reviewed"
   },
   "auth": {
     "welcomeBack": "Welcome Back",

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { apiClient } from '../api/client'
 import { authService } from '../api/services'
 import i18n from '../i18n'
@@ -8,10 +8,66 @@ const AuthContext = createContext(null)
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const refreshingRef = useRef(false) // Prevent concurrent refresh attempts
 
+  // Initial user check - runs once on mount
   useEffect(() => {
     checkUser()
   }, [])
+
+  // Listen for unauthorized events - runs once on mount
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      console.log('[AuthContext] Received unauthorized event, logging out user')
+      setUser(null)
+    }
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized)
+
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized)
+    }
+  }, [])
+
+  // Token refresh interval - runs once on mount, checks every 30 minutes
+  useEffect(() => {
+    const tokenRefreshInterval = setInterval(
+      async () => {
+        // Only refresh if we have a token
+        const token = localStorage.getItem('firebase_token')
+        if (!token) return
+
+        // Prevent concurrent refresh attempts
+        if (refreshingRef.current) {
+          console.log('[AuthContext] Token refresh already in progress, skipping')
+          return
+        }
+
+        try {
+          refreshingRef.current = true
+          const isExpired = await authService.isTokenExpired()
+
+          if (isExpired) {
+            console.log('[AuthContext] Token expired or expiring soon, refreshing...')
+            await authService.refreshToken()
+          }
+        } catch (error) {
+          console.error('[AuthContext] Token refresh check failed:', error)
+          // If refresh fails, log out the user
+          setUser(null)
+          localStorage.removeItem('firebase_token')
+          window.location.href = '/login'
+        } finally {
+          refreshingRef.current = false
+        }
+      },
+      30 * 60 * 1000
+    ) // Check every 30 minutes
+
+    return () => {
+      clearInterval(tokenRefreshInterval)
+    }
+  }, []) // Empty array - only run once on mount
 
   const checkUser = async () => {
     try {

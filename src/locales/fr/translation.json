@@ -65,7 +65,8 @@
     "reviewMsg": "Vous avez {{count}} cartes prêtes à être révisées",
     "startStudying": "Commencer à étudier →",
     "viewAll": "Voir tous les {{count}} paquets →",
-    "due": "à faire"
+    "due": "à faire",
+    "allReviewed": "Tout révisé"
   },
   "auth": {
     "welcomeBack": "Bon retour",

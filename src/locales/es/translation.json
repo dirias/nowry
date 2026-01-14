@@ -65,7 +65,8 @@
     "reviewMsg": "Tienes {{count}} tarjetas listas para repasar",
     "startStudying": "Empezar a Estudiar →",
     "viewAll": "Ver todos los {{count}} mazos →",
-    "due": "para hoy"
+    "due": "para hoy",
+    "allReviewed": "Todo revisado"
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",

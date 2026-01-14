@@ -13,18 +13,30 @@ import {
   Dropdown,
   Menu,
   MenuButton,
-  MenuItem
+  MenuItem,
+  Tooltip,
+  Stack
 } from '@mui/joy'
 import QuizIcon from '@mui/icons-material/Quiz'
 import StyleIcon from '@mui/icons-material/Style'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import SchoolIcon from '@mui/icons-material/School'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 
-export default function Deck({ deck, onStudy, onEdit, onDelete }) {
-  const { name: deckName, total_cards: deckTotal, image_url: url, status = 'default', progress = null, deck_type } = deck
+export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPreview }) {
+  const {
+    name: deckName,
+    total_cards: deckTotal,
+    image_url: url,
+    status = 'default',
+    progress = null,
+    deck_type,
+    due_cards = 0,
+    has_cards = false
+  } = deck
 
   // Configuration for different deck types
   let config = {
@@ -176,9 +188,33 @@ export default function Deck({ deck, onStudy, onEdit, onDelete }) {
 
       {/* Call to action */}
       <CardActions>
-        <Button size='sm' variant='solid' color='primary' onClick={() => onStudy?.(deck)} fullWidth>
-          Study
-        </Button>
+        {!has_cards ? (
+          // Empty state - no cards in deck
+          <Button size='sm' variant='outlined' color='neutral' disabled fullWidth>
+            No cards yet
+          </Button>
+        ) : due_cards === 0 ? (
+          // All cards reviewed - show preview option
+          <Tooltip title='All cards reviewed! Come back later or preview the deck' variant='soft' placement='top'>
+            <Button
+              size='sm'
+              variant='soft'
+              color='neutral'
+              onClick={() => onPreview?.(deck)}
+              startDecorator={<VisibilityIcon />}
+              fullWidth
+            >
+              Preview
+            </Button>
+          </Tooltip>
+        ) : (
+          // Cards due - show study button
+          <Stack direction='row' spacing={1} sx={{ width: '100%' }}>
+            <Button size='sm' variant='solid' color='primary' onClick={() => onStudy?.(deck)} fullWidth startDecorator={<SchoolIcon />}>
+              Study {due_cards > 0 && `(${due_cards})`}
+            </Button>
+          </Stack>
+        )}
       </CardActions>
     </Card>
   )

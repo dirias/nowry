@@ -65,7 +65,8 @@
     "reviewMsg": "復習が必要なカードが{{count}}枚あります",
     "startStudying": "学習を始める →",
     "viewAll": "全{{count}}デッキを表示 →",
-    "due": "期限"
+    "due": "期限",
+    "allReviewed": "すべて復習済み"
   },
   "auth": {
     "welcomeBack": "おかえりなさい",

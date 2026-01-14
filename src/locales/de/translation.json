@@ -65,7 +65,8 @@
     "reviewMsg": "Du hast {{count}} Karten zur Überprüfung bereit",
     "startStudying": "Lernen beginnen →",
     "viewAll": "Alle {{count}} Decks anzeigen →",
-    "due": "fällig"
+    "due": "fällig",
+    "allReviewed": "Alles überprüft"
   },
   "auth": {
     "welcomeBack": "Willkommen zurück",

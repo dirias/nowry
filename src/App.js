@@ -36,6 +36,7 @@ import { AnnualPlanningHome, FocusAreaSetup, FocusAreaView, DailyRoutinePlanner 
 
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PomodoroProvider } from './context/PomodoroContext'
+import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute'
 import PomodoroWidget from './components/Pomodoro/PomodoroWidget'
 
 const AppContent = () => {
@@ -81,25 +82,144 @@ const AppContent = () => {
         }}
       >
         <Routes>
-          <Route path='/books' element={<BookHome />} />
-          <Route path='/book/:id' element={<EditorHome />} />
-          {isAuthenticated ? <Route path='/' element={<Home />} /> : <Route path='/' element={<Landing />} />}
+          {/* Public Routes - Accessible to everyone */}
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
-          <Route path='/cards' element={<CardHome />} />
-          <Route path='/study' element={<StudyCenter />} />
-          <Route path='/study/:deckId' element={<StudySession />} />
-          <Route path='/profile' element={<UserProfile />} />
-          <Route path='/settings' element={<AccountSettings />} />
-          <Route path='/bugs/dashboard' element={<BugDashboard />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
-          <Route path='/onboarding' element={<OnboardingWizard />} />
-          <Route path='/resetPassword' element={<ResetPassword />} />
-          <Route path='/annual-planning' element={<AnnualPlanningHome />} />
-          <Route path='/annual-planning/setup' element={<FocusAreaSetup />} />
-          <Route path='/annual-planning/area/:id' element={<FocusAreaView />} />
-          <Route path='/annual-planning/daily-routine' element={<DailyRoutinePlanner />} />
+
+          {/* Public Only Routes - Redirect to home if authenticated */}
+          <Route
+            path='/login'
+            element={
+              <PublicOnlyRoute>
+                <Login />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path='/register'
+            element={
+              <PublicOnlyRoute>
+                <Register />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path='/resetPassword'
+            element={
+              <PublicOnlyRoute>
+                <ResetPassword />
+              </PublicOnlyRoute>
+            }
+          />
+
+          {/* Home Route - Shows Landing for guests, Home for authenticated */}
+          {isAuthenticated ? <Route path='/' element={<Home />} /> : <Route path='/' element={<Landing />} />}
+
+          {/* Protected Routes - Require authentication */}
+          <Route
+            path='/books'
+            element={
+              <ProtectedRoute>
+                <BookHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/book/:id'
+            element={
+              <ProtectedRoute>
+                <EditorHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/cards'
+            element={
+              <ProtectedRoute>
+                <CardHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/study'
+            element={
+              <ProtectedRoute>
+                <StudyCenter />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/study/:deckId'
+            element={
+              <ProtectedRoute>
+                <StudySession />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/profile'
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/settings'
+            element={
+              <ProtectedRoute>
+                <AccountSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/bugs/dashboard'
+            element={
+              <ProtectedRoute>
+                <BugDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/onboarding'
+            element={
+              <ProtectedRoute>
+                <OnboardingWizard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/annual-planning'
+            element={
+              <ProtectedRoute>
+                <AnnualPlanningHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/annual-planning/setup'
+            element={
+              <ProtectedRoute>
+                <FocusAreaSetup />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/annual-planning/area/:id'
+            element={
+              <ProtectedRoute>
+                <FocusAreaView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/annual-planning/daily-routine'
+            element={
+              <ProtectedRoute>
+                <DailyRoutinePlanner />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
       {!location.pathname.startsWith('/book/') && <Footer />}

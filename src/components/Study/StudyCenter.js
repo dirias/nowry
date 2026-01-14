@@ -450,18 +450,25 @@ export default function StudyCenter() {
                         .slice(0, 3)
                         .map((deck) => {
                           const dueCount = getDueCardsForDeck(deck._id)
+                          const hasDueCards = dueCount > 0
+
                           return (
                             <Button
                               key={deck._id}
                               variant='soft'
-                              color='primary'
-                              onClick={() => navigate(`/study/${deck._id}`)}
+                              color={hasDueCards ? 'primary' : 'neutral'}
+                              onClick={() => navigate(hasDueCards ? `/study/${deck._id}` : `/cards`)}
+                              disabled={!hasDueCards}
                               sx={{ justifyContent: 'space-between' }}
                             >
                               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                              {dueCount > 0 && (
+                              {hasDueCards ? (
                                 <Chip size='sm'>
                                   {dueCount} {t('study.due')}
+                                </Chip>
+                              ) : (
+                                <Chip size='sm' variant='outlined'>
+                                  {t('study.allReviewed')}
                                 </Chip>
                               )}
                             </Button>
@@ -537,18 +544,25 @@ export default function StudyCenter() {
                         .slice(0, 3)
                         .map((deck) => {
                           const dueCount = getDueCardsForDeck(deck._id)
+                          const hasDueCards = dueCount > 0
+
                           return (
                             <Button
                               key={deck._id}
                               variant='soft'
-                              color='warning'
-                              onClick={() => navigate(`/study/${deck._id}`)}
+                              color={hasDueCards ? 'warning' : 'neutral'}
+                              onClick={() => navigate(hasDueCards ? `/study/${deck._id}` : `/cards`)}
+                              disabled={!hasDueCards}
                               sx={{ justifyContent: 'space-between' }}
                             >
                               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                              {dueCount > 0 && (
+                              {hasDueCards ? (
                                 <Chip size='sm'>
                                   {dueCount} {t('study.due')}
+                                </Chip>
+                              ) : (
+                                <Chip size='sm' variant='outlined'>
+                                  {t('study.allReviewed')}
                                 </Chip>
                               )}
                             </Button>
@@ -624,18 +638,25 @@ export default function StudyCenter() {
                         .slice(0, 3)
                         .map((deck) => {
                           const dueCount = getDueCardsForDeck(deck._id)
+                          const hasDueCards = dueCount > 0
+
                           return (
                             <Button
                               key={deck._id}
                               variant='soft'
-                              color='info'
-                              onClick={() => navigate(`/study/${deck._id}`)}
+                              color={hasDueCards ? 'info' : 'neutral'}
+                              onClick={() => navigate(hasDueCards ? `/study/${deck._id}` : `/cards`)}
+                              disabled={!hasDueCards}
                               sx={{ justifyContent: 'space-between' }}
                             >
                               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                              {dueCount > 0 && (
+                              {hasDueCards ? (
                                 <Chip size='sm'>
                                   {dueCount} {t('study.due')}
+                                </Chip>
+                              ) : (
+                                <Chip size='sm' variant='outlined'>
+                                  {t('study.allReviewed')}
                                 </Chip>
                               )}
                             </Button>
