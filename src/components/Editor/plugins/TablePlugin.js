@@ -15,10 +15,13 @@ export default function TablePlugin() {
       INSERT_TABLE_COMMAND,
       (payload) => {
         editor.update(() => {
+          const rows = payload?.rows || 3
+          const columns = payload?.columns || 3
+
           const table = new TableNode()
-          for (let i = 0; i < 3; i++) {
+          for (let i = 0; i < rows; i++) {
             const row = new TableRowNode()
-            for (let j = 0; j < 3; j++) {
+            for (let j = 0; j < columns; j++) {
               const cell = new TableCellNode()
               row.append(cell)
             }

@@ -286,9 +286,6 @@ export default function BookHome() {
             <Typography level='body-xs' fontWeight='lg' sx={{ color: 'text.secondary' }}>
               📚 {allBooks.length} {t('books.totalBooks')}
             </Typography>
-            <Typography level='body-xs' fontWeight='lg' sx={{ color: 'text.secondary' }}>
-              📄 {allBooks.reduce((sum, b) => sum + (b.page_count || 0), 0)} {t('books.totalPages')}
-            </Typography>
           </Stack>
         )}
       </Stack>

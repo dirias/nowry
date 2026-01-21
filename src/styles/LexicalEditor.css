@@ -10,6 +10,14 @@
   color: #2e2e2e;
 }
 
+/* Mobile: Scale down base font at root level */
+@media (max-width: 899px) {
+  .editor-root {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+}
+
 .editor-content {
   outline: none;
   font-size: 16px;
@@ -19,6 +27,14 @@
   min-height: 600px;
   padding: 0;
   /* Remove padding - parent Box has padding */
+}
+
+/* Mobile: Scale down editor content */
+@media (max-width: 899px) {
+  .editor-content {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
 }
 
 .editor-placeholder {
@@ -79,22 +95,37 @@
 }
 
 /* ====== Headings ====== */
-.editor-heading-h1 {
-  font-size: 2rem;
-  font-weight: 600;
-  margin: 1.2em 0 0.5em;
+/* Support both class-based and element-based styling */
+.editor-heading-h1,
+.editor-page h1,
+h1 {
+  font-size: 2.5rem !important; /* 40px - Much larger */
+  font-weight: 700 !important; /* Bold */
+  line-height: 1.2 !important;
+  margin: 1.5em 0 0.5em !important;
+  color: var(--joy-palette-text-primary) !important;
+  letter-spacing: -0.02em !important; /* Tighter for large headings */
 }
 
-.editor-heading-h2 {
-  font-size: 1.5rem;
-  font-weight: 500;
-  margin: 1em 0 0.4em;
+.editor-heading-h2,
+.editor-page h2,
+h2 {
+  font-size: 2rem !important; /* 32px - Noticeably different */
+  font-weight: 600 !important; /* Semi-bold */
+  line-height: 1.3 !important;
+  margin: 1.2em 0 0.4em !important;
+  color: var(--joy-palette-text-primary) !important;
+  letter-spacing: -0.01em !important;
 }
 
-.editor-heading-h3 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin: 0.8em 0 0.4em;
+.editor-heading-h3,
+.editor-page h3,
+h3 {
+  font-size: 1.5rem !important; /* 24px - Clear distinction */
+  font-weight: 600 !important; /* Semi-bold */
+  line-height: 1.4 !important;
+  margin: 1em 0 0.4em !important;
+  color: var(--joy-palette-text-primary) !important;
 }
 
 /* ====== Lists ====== */
@@ -122,12 +153,63 @@ ol.editor-list-ol {
 }
 
 /* ====== Inline Code ====== */
+/* ====== Code Block Styles ====== */
+
+/* Inline code (text with code formatting) */
+.editor-textCode {
+  background-color: rgba(135, 131, 120, 0.15);
+  color: #eb5757;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+  font-size: 85%;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(135, 131, 120, 0.2);
+}
+
+/* Code block container */
 .editor-code {
-  background-color: #f5f5f5;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  padding: 2px 4px;
-  border-radius: 4px;
+  background-color: #f6f8fa;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 16px;
+  margin: 12px 0;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  overflow-x: auto; /* Horizontal scroll for long lines */
+  overflow-y: hidden; /* No vertical scroll */
+  white-space: pre;
+  color: #24292f;
+  tab-size: 2;
+  max-width: 100%; /* Respect parent container width */
+  width: 100%; /* Take full available width */
+  box-sizing: border-box; /* Include padding in width calculation */
+  display: block; /* Ensure block-level behavior */
+}
+
+/* Code block on dark theme */
+@media (prefers-color-scheme: dark) {
+  .editor-code {
+    background-color: #161b22;
+    border-color: #30363d;
+    color: #c9d1d9;
+  }
+
+  .editor-textCode {
+    background-color: rgba(110, 118, 129, 0.4);
+    border-color: rgba(110, 118, 129, 0.5);
+    color: #ff7b72;
+  }
+}
+
+/* Preserve whitespace in code blocks but ensure they don't break container */
+.editor-code * {
+  white-space: pre !important;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  max-width: 100%;
+  display: inline; /* Keep inline for proper text flow */
 }
 
 /* ====== Inline Styles Fix ====== */
@@ -135,12 +217,45 @@ ol.editor-list-ol {
   white-space: pre-wrap;
 }
 
-/* ====== Layout Fix ====== */
-.MuiCard-root {
+/* ====== Multi-Page Editor (Production Solution) ====== */
+
+/* Pages container - holds all visual page boxes (BEHIND content) */
+.pages-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.editor-content {
+/* Individual page boxes (Word-like white sheets) */
+.word-page {
+  position: relative;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  margin: 20px auto;
+  overflow: hidden;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+@media (max-width: 899px) {
+  .word-page {
+    width: calc(100% - 32px) !important;
+    margin: 12px auto !important;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  }
+}
+
+/* Content flows across pages (ABOVE page boxes) */
+.editor-content-flat {
   box-sizing: border-box;
   width: 100%;
   outline: none;
@@ -154,26 +269,170 @@ ol.editor-list-ol {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
+  z-index: 2;
+  pointer-events: auto;
+
+  /* Cursor styling - theme aware */
+  caret-color: var(--joy-palette-text-primary);
+  cursor: text;
 }
 
-/* remove default paragraph margin */
-.editor-content p {
-  margin: 0;
+/* CRITICAL: Ensure text is visible */
+.editor-content-flat,
+.editor-content-flat *,
+.editor-content-flat p,
+.editor-content-flat span,
+.editor-content-flat div {
+  font-size: inherit !important;
+  color: var(--joy-palette-text-primary) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+/* Mobile: Responsive styling */
+@media (max-width: 899px) {
+  .editor-content-flat {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+}
+
+/* Paragraph styling */
+.editor-content-flat > p,
+.editor-content-flat p {
+  margin: 0 0 1rem 0;
   padding: 0;
+  background: transparent !important;
+  color: #222 !important;
 }
 
-/* .editor-scroll-container removed - handled by EditorHome.js sx prop */
+/* Ensure all text elements are visible */
+.editor-content-flat span,
+.editor-content-flat *,
+.editor-page,
+.editor-page *,
+.editor-page p,
+.editor-page span {
+  color: var(--joy-palette-text-primary);
+}
+
+.editor-paragraph {
+  margin: 0 0 1rem 0;
+  color: var(--joy-palette-text-primary);
+}
+
+/* Text formatting */
+.editor-text {
+  color: var(--joy-palette-text-primary);
+}
 
 /* Editor Page Styles - Pages created by PageNode */
 .editor-page {
   position: relative;
-  background-color: white;
+  background-color: var(--joy-palette-background-surface, white);
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible; /* Keep visible for measurement */
   min-height: var(--page-height, 1123px);
   max-height: var(--page-height, 1123px);
   height: var(--page-height, 1123px);
-  /* Prevent content from visually escaping page bounds */
+  color: var(--joy-palette-text-primary, #000);
+}
+
+/* CRITICAL: All text inside pages must use theme colors */
+.editor-page p,
+.editor-page span,
+.editor-page div,
+.editor-page h1,
+.editor-page h2,
+.editor-page h3,
+.editor-page li,
+.editor-page * {
+  color: var(--joy-palette-text-primary, #000);
+  /* CRITICAL: Ensure clicking anywhere in the page focuses properly */
+  cursor: text;
+}
+
+/* Apply overflow hidden after measurement (when pagination runs) */
+.editor-page.paginated {
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0); /* Ensures content is clipped to page bounds */
+}
+
+/* Mobile: Override all height and overflow properties */
+@media (max-width: 899px) {
+  .editor-page {
+    overflow: visible !important; /* CHANGED: Keep visible so we can measure */
+    /* Honor selected page type height (no multiplier) */
+    min-height: var(--page-height, 1123px) !important;
+    height: var(--page-height, 1123px) !important;
+    max-height: var(--page-height, 1123px) !important;
+  }
+}
+
+/* Mobile-specific page styles for premium reading experience */
+@media (max-width: 899px) {
+  .editor-page {
+    /* CRITICAL: Override inline styles with !important */
+    /* Pages scale to fit within viewport with comfortable margins */
+    width: calc(100% - 16px) !important; /* 8px padding on each side */
+    max-width: calc(100vw - 32px) !important; /* Account for container padding */
+    margin: 12px auto !important; /* Vertical spacing between pages (8px grid) */
+
+    /* Honor selected page type height */
+    min-height: var(--page-height, 1123px) !important;
+    height: var(--page-height, 1123px) !important;
+    max-height: var(--page-height, 1123px) !important;
+
+    /* Refined shadows for depth without harshness */
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      0 1px 2px rgba(0, 0, 0, 0.04) !important;
+
+    /* Subtle border radius for modern feel */
+    border-radius: 8px !important;
+
+    /* Slight border for definition in light mode */
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+
+    /* CRITICAL: Reduced padding for mobile */
+    padding: 24px 20px !important; /* Very compact for mobile */
+
+    /* Keep overflow hidden for pagination */
+    overflow: hidden !important;
+  }
+
+  /* Scale down ALL content inside pages for mobile - High specificity */
+  .editor-page *,
+  .editor-page p,
+  .editor-page span,
+  .editor-page div,
+  .editor-page h1,
+  .editor-page h2,
+  .editor-page h3,
+  .editor-page li {
+    line-height: 1.5 !important;
+  }
+
+  /* Images - Scale down */
+  .editor-page img,
+  .editor-page .editor-image,
+  .editor-page .image-wrapper,
+  .editor-page .image-wrapper img {
+    max-width: 85% !important;
+    height: auto !important;
+    margin: 8px auto !important;
+    display: block !important;
+  }
+
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .editor-page {
+      background-color: #fefefe !important;
+      box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.2) !important;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+  }
 }
 
 .editor-page * {
@@ -192,6 +451,30 @@ ol.editor-list-ol {
   table-layout: fixed;
   word-break: break-word;
   border-collapse: collapse;
+  margin: 12px 0;
+  border: 1px solid #d0d7de;
+}
+
+.editor-page table td,
+.editor-page table th {
+  border: 1px solid #d0d7de;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  min-height: 35px;
+}
+
+.editor-page table th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+}
+
+.editor-page table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.editor-page table tr:hover {
+  background-color: #f0f3f6;
 }
 
 .editor-page:last-child {

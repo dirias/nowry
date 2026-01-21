@@ -718,5 +718,29 @@
       "deleteFailed": "Failed to delete {{type}}",
       "focusAreaLimit": "You can only have 3 focus areas. Delete one to add another."
     }
+  },
+  "editor": {
+    "slashCommands": {
+      "menuLabel": "Formatting commands",
+      "hint": "↑↓ to navigate, ↵ to select, esc to dismiss",
+      "paragraph": "Text",
+      "paragraphDesc": "Plain text paragraph",
+      "heading1": "Heading 1",
+      "heading1Desc": "Large section heading",
+      "heading2": "Heading 2",
+      "heading2Desc": "Medium section heading",
+      "heading3": "Heading 3",
+      "heading3Desc": "Small section heading",
+      "bulletList": "Bullet list",
+      "bulletListDesc": "Unordered list",
+      "numberedList": "Numbered list",
+      "numberedListDesc": "Ordered list",
+      "quote": "Quote",
+      "quoteDesc": "Blockquote",
+      "codeBlock": "Code block",
+      "codeBlockDesc": "Code with syntax highlighting",
+      "divider": "Divider",
+      "dividerDesc": "Horizontal line"
+    }
   }
 }

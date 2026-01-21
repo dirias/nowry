@@ -62,26 +62,72 @@ export default function EditorHome() {
     setPageSize(newSize)
   }
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Dynamic zoom based on device - mobile gets 0.75x for better overview
   const [zoom, setZoom] = useState(1.0)
+
+  // Set locked by default on mobile, unlocked on desktop
   const [isLocked, setIsLocked] = useState(false)
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false)
   const [focusedEditor, setFocusedEditor] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // Detect mobile device and set appropriate zoom + locked state
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 900 // md breakpoint
+      setIsMobile(mobile)
+
+      // Set optimal zoom for mobile reading (0.75x gives better page overview)
+      if (mobile) {
+        setZoom(0.75)
+        // Set locked on mobile for read-first experience
+        if (!book) {
+          setIsLocked(true)
+        }
+      } else {
+        setZoom(1.0) // Reset to normal on desktop
+      }
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Set locked on mobile when book loads
+  useEffect(() => {
+    if (book && isMobile) {
+      setIsLocked(true)
+    }
+  }, [book, isMobile])
+
   const handleSaveBook = async (currentContent) => {
     try {
+      // Prepare content for saving
+      let contentToSave = currentContent
+
+      // If content is a JSON object, stringify it
+      if (typeof currentContent === 'object' && currentContent !== null) {
+        contentToSave = JSON.stringify(currentContent)
+      }
+
       const updateData = {
         title: bookName,
         page_size: pageSize,
-        full_content: currentContent,
+        full_content: contentToSave,
         auto_save_enabled: autoSaveEnabled
       }
 
-      console.log('Saving book with page_size:', pageSize)
+      console.log('💾 Saving book (JSON Content-First format)')
+      console.log('  - Page size:', pageSize)
+      console.log('  - Content size:', contentToSave.length, 'bytes')
       await booksService.update(id, updateData)
-      console.log('Save successful')
+      console.log('✓ Save successful')
     } catch (e) {
-      console.error('Error updating book:', e)
+      console.error('❌ Error updating book:', e)
     }
   }
 
@@ -272,10 +318,31 @@ export default function EditorHome() {
       }
     )
 
-    const pages = document.querySelectorAll('.editor-page')
-    pages.forEach((p) => observer.observe(p))
+    // Observe all existing pages
+    const observePages = () => {
+      const pages = document.querySelectorAll('.editor-page')
+      pages.forEach((page) => observer.observe(page))
+    }
 
-    return () => observer.disconnect()
+    // Initial observation
+    observePages()
+
+    // Re-observe when pages are added/removed (e.g., after paste)
+    const mutationObserver = new MutationObserver(() => {
+      // Disconnect and re-observe all pages
+      observer.disconnect()
+      observePages()
+    })
+
+    mutationObserver.observe(container, {
+      childList: true,
+      subtree: true
+    })
+
+    return () => {
+      observer.disconnect()
+      mutationObserver.disconnect()
+    }
   }, [pagesData.length])
 
   if (loading) {
@@ -479,14 +546,15 @@ export default function EditorHome() {
           sx={{
             flexGrow: 1,
             bgcolor: 'background.level2',
-            pt: 6,
-            pb: 15,
-            px: { xs: 1, md: 4 }, // Responsive content padding
+            pt: { xs: 3, md: 6 }, // 24px mobile (following 8px grid), 48px desktop
+            pb: { xs: 8, md: 15 }, // More bottom space on mobile for comfortable scrolling
+            px: { xs: 2, md: 4 }, // 16px mobile padding (8px grid), 32px desktop
             overflowY: 'auto',
+            overflowX: 'hidden', // Prevent horizontal scroll
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 6,
+            gap: { xs: 3, md: 6 }, // 24px gap on mobile (breathing room between pages), 48px desktop
             scrollBehavior: 'smooth'
           }}
         >

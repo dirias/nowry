@@ -62,6 +62,54 @@ const Header = () => {
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
 
+  // Swipe gesture refs for mobile menu
+  const touchStart = React.useRef(null)
+  const touchEnd = React.useRef(null)
+  const minSwipeDistance = 75 // Minimum swipe distance in px
+
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e) => {
+    touchEnd.current = null
+    touchStart.current = e.targetTouches[0].clientX
+  }
+
+  const handleTouchMove = (e) => {
+    touchEnd.current = e.targetTouches[0].clientX
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart.current || !touchEnd.current) return
+    const distance = touchStart.current - touchEnd.current
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    // Swipe Left (finger moves left) -> Open Menu
+    if (isLeftSwipe) {
+      setMobileMenuOpen(true)
+    }
+
+    // Swipe Right (finger moves right) -> Close Menu (only if open)
+    if (isRightSwipe && mobileMenuOpen) {
+      setMobileMenuOpen(false)
+    }
+  }
+
+  // Attach swipe listeners to body on mobile
+  React.useEffect(() => {
+    const isMobile = window.innerWidth < 900 // md breakpoint
+    if (!isMobile) return
+
+    document.body.addEventListener('touchstart', handleTouchStart)
+    document.body.addEventListener('touchmove', handleTouchMove)
+    document.body.addEventListener('touchend', handleTouchEnd)
+
+    return () => {
+      document.body.removeEventListener('touchstart', handleTouchStart)
+      document.body.removeEventListener('touchmove', handleTouchMove)
+      document.body.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [mobileMenuOpen]) // Re-attach when menu state changes
+
   // Pomodoro
   const { timeLeft, isActive: isTimerActive, showWidget, setShowWidget, settings } = usePomodoro()
 
