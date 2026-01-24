@@ -238,100 +238,130 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
         </Stack>
       </Stack>
 
-      {/* Decks View */}
+      {/* Decks View - Compact Minimal List */}
       {activeView === 0 && (
-        <Grid container spacing={2}>
+        <Stack spacing={1}>
           {filteredDecks.map((deck) => {
             const deckColor = getDeckColor(deck.deck_type)
             const cardCount = getCardsForDeck(deck._id).length
 
             return (
-              <Grid key={deck._id} xs={12} sm={6} md={4}>
-                <Card
-                  variant='outlined'
-                  onClick={() => handlePreviewDeck(deck)}
-                  sx={{
-                    transition: 'all 0.2s',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      boxShadow: 'md',
-                      borderColor: `${deckColor}.outlinedBorder`,
-                      transform: 'translateY(-2px)'
-                    }
-                  }}
-                >
-                  <CardContent>
-                    <Stack spacing={2}>
-                      {/* Icon & Name */}
-                      <Stack direction='row' spacing={2} alignItems='center'>
-                        <Box
-                          sx={{
-                            p: 1.5,
-                            borderRadius: 'md',
-                            bgcolor: `${deckColor}.softBg`,
-                            color: `${deckColor}.solidBg`
-                          }}
-                        >
-                          {getDeckIcon(deck.deck_type)}
-                        </Box>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography level='title-lg' fontWeight={700}>
-                            {deck.name}
-                          </Typography>
-                          <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
-                            {cardCount} cards
-                          </Typography>
-                        </Box>
-                      </Stack>
+              <Card
+                key={deck._id}
+                variant='outlined'
+                onClick={() => handlePreviewDeck(deck)}
+                sx={{
+                  transition: 'all 0.15s',
+                  cursor: 'pointer',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.surface',
+                  '&:hover': {
+                    borderColor: 'neutral.outlinedBorder',
+                    bgcolor: 'background.level1',
+                    boxShadow: 'sm'
+                  }
+                }}
+              >
+                <Box sx={{ py: 1.5, px: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {/* Icon - Small and Subtle */}
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 'sm',
+                      bgcolor: `${deckColor}.softBg`,
+                      color: `${deckColor}.solidBg`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    {getDeckIcon(deck.deck_type)}
+                  </Box>
 
-                      {/* Tags */}
-                      <Stack direction='row' spacing={1} flexWrap='wrap'>
-                        <Chip size='sm' variant='soft' color={deckColor} sx={{ fontWeight: 600 }}>
-                          {deck.deck_type || 'flashcard'}
-                        </Chip>
-                        {deck.tags?.map((tag, idx) => (
-                          <Chip key={idx} size='sm' variant='outlined' startDecorator={<LocalOffer fontSize='small' />}>
-                            {tag}
-                          </Chip>
-                        ))}
-                      </Stack>
+                  {/* Name & Count */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      level='title-sm'
+                      sx={{
+                        fontWeight: 600,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        mb: 0.25
+                      }}
+                    >
+                      {deck.name}
+                    </Typography>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
+                      {cardCount} {cardCount === 1 ? 'card' : 'cards'}
+                    </Typography>
+                  </Box>
 
-                      {/* Actions */}
-                      <Stack direction='row' spacing={1} onClick={(e) => e.stopPropagation()}>
-                        <Button size='sm' variant='soft' color='success' startDecorator={<Add />} onClick={() => onAddCard(deck)} fullWidth>
-                          Add Card
-                        </Button>
-                        <Tooltip title='Edit Deck'>
-                          <IconButton size='sm' variant='soft' onClick={() => onEditDeck(deck)}>
-                            <Edit />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title='Delete Deck'>
-                          <IconButton size='sm' variant='soft' color='danger' onClick={() => onDeleteDeck(deck)}>
-                            <Delete />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
+                  {/* Type Label - Minimal */}
+                  <Chip
+                    size='sm'
+                    variant='soft'
+                    color={deckColor}
+                    sx={{
+                      fontSize: '0.65rem',
+                      height: 20,
+                      px: 1,
+                      fontWeight: 600,
+                      flexShrink: 0
+                    }}
+                  >
+                    {deck.deck_type || 'flashcard'}
+                  </Chip>
+
+                  {/* Actions - Compact */}
+                  <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                    <Tooltip title='Add Card' size='sm'>
+                      <IconButton
+                        size='sm'
+                        variant='soft'
+                        color='success'
+                        onClick={() => onAddCard(deck)}
+                        sx={{ minWidth: 32, minHeight: 32 }}
+                      >
+                        <Add sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Edit' size='sm'>
+                      <IconButton size='sm' variant='plain' onClick={() => onEditDeck(deck)} sx={{ minWidth: 32, minHeight: 32 }}>
+                        <Edit sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Delete' size='sm'>
+                      <IconButton
+                        size='sm'
+                        variant='plain'
+                        color='danger'
+                        onClick={() => onDeleteDeck(deck)}
+                        sx={{ minWidth: 32, minHeight: 32 }}
+                      >
+                        <Delete sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+              </Card>
             )
           })}
 
           {filteredDecks.length === 0 && (
-            <Grid xs={12}>
-              <Box sx={{ p: 6, textAlign: 'center' }}>
-                <Typography level='h4' sx={{ mb: 1, color: 'neutral.500' }}>
-                  No decks found
-                </Typography>
-                <Typography level='body-sm' sx={{ color: 'neutral.400' }}>
-                  {searchQuery || filterType !== 'all' ? 'Try adjusting your filters' : 'Create your first deck to get started'}
-                </Typography>
-              </Box>
-            </Grid>
+            <Box sx={{ py: 8, textAlign: 'center' }}>
+              <Typography level='h4' sx={{ mb: 1, color: 'text.secondary' }}>
+                No decks found
+              </Typography>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {searchQuery || filterType !== 'all' ? 'Try adjusting your filters' : 'Create your first deck to get started'}
+              </Typography>
+            </Box>
           )}
-        </Grid>
+        </Stack>
       )}
 
       {/* Cards View */}
@@ -399,6 +429,22 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                         >
                           {card.next_review ? new Date(card.next_review).toLocaleDateString() : 'New'}
                         </Chip>
+                        {/* Show Ease Factor (Review Factor) - SM-2 parameter */}
+                        {card.ease_factor && (
+                          <Tooltip title='Ease Factor: How easy you found this card (1.3-2.5)' variant='soft'>
+                            <Chip size='sm' variant='outlined' color='neutral' startDecorator='📊'>
+                              Factor: {card.ease_factor.toFixed(2)}
+                            </Chip>
+                          </Tooltip>
+                        )}
+                        {/* Show Interval (days until next review) */}
+                        {card.interval !== undefined && (
+                          <Tooltip title='Interval: Days until next review' variant='soft'>
+                            <Chip size='sm' variant='outlined' color='neutral' startDecorator='⏱️'>
+                              {card.interval}d
+                            </Chip>
+                          </Tooltip>
+                        )}
                         {card.tags?.map((tag, idx) => (
                           <Chip key={idx} size='sm' variant='outlined'>
                             {tag}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import Editor from './Editor'
-import PageOverview from './PageOverview'
+import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
 import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer } from 'lucide-react'
@@ -20,6 +20,11 @@ export default function EditorHome() {
   // book might be stale from location state if we just navigated
   const [book, setBook] = useState(location.state?.book || null)
   const [bookName, setBookName] = useState(book?.title || '')
+
+  // Flow content state (TOC and reading stats)
+  const [tocData, setTocData] = useState([])
+  const [readingTime, setReadingTime] = useState(0)
+
   // Swipe Gesture Ref
   const touchStart = useRef(null)
   const touchEnd = useRef(null)
@@ -421,10 +426,6 @@ export default function EditorHome() {
               }}
             />
             <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', md: 'block' } }} />
-            <Typography level='body-xs' sx={{ color: 'text.tertiary', display: { xs: 'none', md: 'block' } }}>
-              {pagesData.length || 1} Pages • {pageSize.toUpperCase()}
-            </Typography>
-            <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', md: 'block' } }} />
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
               <StatusBadge />
             </Box>
@@ -494,7 +495,7 @@ export default function EditorHome() {
           <Box sx={{ height: 50, display: 'flex', alignItems: 'center', px: { xs: 2, md: 3 }, overflowX: 'auto' }}>
             {focusedEditor ? (
               <LexicalComposerContext.Provider value={[focusedEditor, {}]}>
-                <Toolbar onSave={handleManualSave} pageSize={pageSize} setPageSize={handlePageSizeChange} disabled={isLocked} />
+                <Toolbar onSave={handleManualSave} disabled={isLocked} />
               </LexicalComposerContext.Provider>
             ) : (
               <Typography level='body-sm' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
@@ -511,7 +512,7 @@ export default function EditorHome() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* 📋 Sidebar (Desktop) */}
+        {/* 📋 Left Sidebar - Content Navigator (Desktop) */}
         <Box
           sx={{
             width: 280,
@@ -522,21 +523,13 @@ export default function EditorHome() {
             overflow: 'hidden'
           }}
         >
-          <PageOverview pagesData={pagesData} pageSize={pageSize} onPageClick={handleScrollToPage} activePageIndex={activePageIndex} />
+          <ContentNavigator toc={tocData} readingTime={readingTime} />
         </Box>
 
         {/* 📋 Sidebar (Mobile Drawer) */}
         <Drawer open={showMobileSidebar} onClose={() => setShowMobileSidebar(false)} size='sm'>
-          <Box sx={{ height: '100%', overflow: 'hidden', pt: 6 }}>
-            <PageOverview
-              pagesData={pagesData}
-              pageSize={pageSize}
-              onPageClick={(idx) => {
-                handleScrollToPage(idx)
-                setShowMobileSidebar(false)
-              }}
-              activePageIndex={activePageIndex}
-            />
+          <Box sx={{ height: '100%', overflow: 'hidden', pt: 2 }}>
+            <ContentNavigator toc={tocData} readingTime={readingTime} />
           </Box>
         </Drawer>
 
@@ -569,6 +562,8 @@ export default function EditorHome() {
             isReadOnly={isLocked}
             onFocus={(editor) => setFocusedEditor(editor)}
             onPageCountChange={handlePageUpdate}
+            onTOCChange={setTocData}
+            onReadingStatsChange={(stats) => setReadingTime(stats.readingTime || 0)}
           />
         </Box>
       </Box>

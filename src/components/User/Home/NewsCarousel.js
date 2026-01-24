@@ -348,24 +348,35 @@ export default function NewsCarousel() {
   )
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', py: 4, px: { xs: 1, md: 2 } }}>
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        minHeight: { xs: 380, md: 500 },
+        py: { xs: 2, md: 4 },
+        px: { xs: 0.5, md: 2 },
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
       {/* Tabs for Latest News and Favorites */}
-      <Tabs defaultValue={0}>
+      <Tabs defaultValue={0} sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Tab Header */}
-        <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 2 }}>
+        <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: { xs: 1.5, md: 2 }, px: { xs: 1, md: 0 } }}>
           <TabList>
-            <Tab>
-              <TrendingUp sx={{ mr: 1, fontSize: 20 }} />
+            <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
+              <TrendingUp sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
               Latest News
             </Tab>
-            <Tab>
-              <Star sx={{ mr: 1, fontSize: 20 }} />
+            <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
+              <Star sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
               Favorites {favoriteNews.length > 0 && `(${favoriteNews.length})`}
             </Tab>
           </TabList>
 
           {userPreferences?.language && (
-            <Chip variant='soft' color='primary' size='sm'>
+            <Chip variant='soft' color='primary' size='sm' sx={{ fontSize: { xs: '0.65rem', md: '0.75rem' }, height: { xs: 20, md: 24 } }}>
               {userPreferences.language.toUpperCase()}
             </Chip>
           )}
@@ -401,12 +412,12 @@ export default function NewsCarousel() {
                         key={loading ? `skeleton-${index}` : article?.url || index}
                         className='keen-slider__slide'
                         sx={{
-                          minHeight: { xs: 350, md: 400 },
-                          minWidth: { xs: '280px', sm: '320px' },
-                          width: { xs: '280px', sm: '320px' }
+                          minHeight: { xs: 320, md: 400 },
+                          minWidth: { xs: '260px', sm: '320px' },
+                          width: { xs: '260px', sm: '320px' }
                         }}
                       >
-                        <Box sx={{ px: 1, height: '100%' }}>
+                        <Box sx={{ px: { xs: 0.5, md: 1 }, height: '100%' }}>
                           <NewsCard
                             article={article}
                             loading={loading}
@@ -751,13 +762,14 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
       </AspectRatio>
 
       {/* Content */}
-      <CardContent sx={{ flex: 1, p: 2.5 }}>
+      <CardContent sx={{ flex: 1, p: { xs: 1.5, md: 2.5 } }}>
         {/* Title */}
         <Typography
           level='title-md'
           sx={{
-            mb: 1.5,
+            mb: { xs: 1, md: 1.5 },
             fontWeight: 600,
+            fontSize: { xs: '0.875rem', md: '1rem' },
             color: 'text.primary',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
@@ -774,12 +786,13 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
           level='body-sm'
           sx={{
             color: 'text.secondary',
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: { xs: 2, md: 3 },
             overflow: 'hidden',
             lineHeight: 1.6,
-            mb: 2
+            mb: { xs: 1, md: 2 }
           }}
         >
           {loading ? (
@@ -803,10 +816,10 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
                 color='primary'
                 size='sm'
                 sx={{
-                  fontSize: '0.65rem',
-                  height: '20px',
-                  minHeight: '20px',
-                  px: 1,
+                  fontSize: { xs: '0.6rem', md: '0.65rem' },
+                  height: { xs: '18px', md: '20px' },
+                  minHeight: { xs: '18px', md: '20px' },
+                  px: { xs: 0.75, md: 1 },
                   py: 0
                 }}
               >
@@ -814,7 +827,7 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
               </Chip>
             )}
             <Box sx={{ flex: 1 }} />
-            <OpenInNew sx={{ fontSize: 16, color: 'primary.500' }} />
+            <OpenInNew sx={{ fontSize: { xs: 14, md: 16 }, color: 'primary.500' }} />
           </Stack>
         )}
       </CardContent>

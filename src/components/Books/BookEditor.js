@@ -34,14 +34,16 @@ const PRESET_COLORS = [
 ]
 
 import Book from './Book'
+import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 
 const BookEditor = ({ book, refreshBooks, onCancel }) => {
+  const { themeColor } = useThemePreferences() // Get user's theme color
   const [title, setTitle] = useState(book.title)
   const [createdAt] = useState(new Date(book.created_at) || new Date())
   const [updatedAt] = useState(new Date(book.updated_at) || new Date())
   const [pageLimit] = useState(book.page_limit)
   const [coverImage, setCoverImage] = useState(book.cover_image)
-  const [coverColor, setCoverColor] = useState(book.cover_color || '#0B6BCB')
+  const [coverColor, setCoverColor] = useState(book.cover_color || themeColor || '#0B6BCB') // Use theme color as default
   const [summary, setSummary] = useState(book.summary || '')
   const [tags, setTags] = useState(book.tags || [])
   const [displayColorPicker, setDisplayColorPicker] = useState(false)
@@ -87,92 +89,113 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
   }
 
   return (
-    <Modal open onClose={onCancel} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(4px)' }}>
+    <Modal
+      open
+      onClose={onCancel}
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        p: 2
+      }}
+    >
       <Sheet
         variant='outlined'
         sx={{
-          width: '95%',
+          width: '100%',
           maxWidth: 1000,
           maxHeight: '90vh',
-          borderRadius: 'lg',
+          borderRadius: 'md',
           boxShadow: 'lg',
-          overflow: 'auto',
+          overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column',
-          p: 0
+          flexDirection: 'column'
         }}
       >
-        {/* Header */}
+        {/* Header - Compact */}
         <Box
           sx={{
-            p: 3,
+            p: { xs: 2, md: 2.5 },
             borderBottom: '1px solid',
             borderColor: 'divider',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
-            bgcolor: 'background.level1'
+            alignItems: 'center'
           }}
         >
           <Box>
-            <Typography level='h4' fontWeight='lg'>
+            <Typography level='h4' sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
               Book Editor
             </Typography>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-              Edit details and appearance for &quot;{book.title}&quot;
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+              Edit details for &quot;{book.title}&quot;
             </Typography>
           </Box>
-          <IconButton onClick={onCancel} variant='plain' color='neutral'>
+          <IconButton onClick={onCancel} variant='plain' color='neutral' size='sm'>
             <CloseIcon />
           </IconButton>
         </Box>
 
-        <Grid container sx={{ flex: 1, minHeight: 0 }}>
-          {/* Left Column: Form */}
-          <Grid xs={12} md={7} sx={{ p: 3, borderRight: { md: '1px solid' }, borderColor: 'divider' }}>
-            <Stack spacing={3}>
+        <Grid container sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+          {/* Left Column: Form - Compact spacing */}
+          <Grid
+            xs={12}
+            md={7}
+            sx={{
+              p: { xs: 2, md: 3 },
+              borderRight: { md: '1px solid' },
+              borderColor: 'divider',
+              overflow: 'auto'
+            }}
+          >
+            <Stack spacing={2.5}>
               <FormControl>
-                <FormLabel>Title</FormLabel>
+                <FormLabel sx={{ fontSize: '0.875rem', mb: 0.5 }}>Title</FormLabel>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  size='lg'
+                  size='md'
                   placeholder='Enter book title...'
                   variant='outlined'
                 />
               </FormControl>
 
               <FormControl>
-                <FormLabel>
+                <FormLabel sx={{ fontSize: '0.875rem', mb: 0.75, display: 'flex', alignItems: 'center', gap: 1 }}>
                   Cover Color
-                  <IconButton size='sm' onClick={() => setDisplayColorPicker(!displayColorPicker)} sx={{ ml: 1, verticalAlign: 'middle' }}>
-                    <PaletteIcon fontSize='small' />
+                  <IconButton size='sm' onClick={() => setDisplayColorPicker(!displayColorPicker)} variant='soft' color='neutral'>
+                    <PaletteIcon sx={{ fontSize: 16 }} />
                   </IconButton>
                 </FormLabel>
 
-                {/* Color Presets */}
-                <Stack direction='row' spacing={1} flexWrap='wrap' sx={{ mb: 1 }}>
+                {/* Color Presets - Compact */}
+                <Stack direction='row' spacing={1} flexWrap='wrap' sx={{ gap: 0.75 }}>
                   {PRESET_COLORS.map((color) => (
                     <Box
                       key={color}
                       onClick={() => setCoverColor(color)}
                       sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '50%',
+                        width: 36,
+                        height: 36,
+                        borderRadius: 'sm',
                         bgcolor: color,
                         cursor: 'pointer',
-                        boxShadow: 'sm',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        transition: 'transform 0.1s',
-                        '&:hover': { transform: 'scale(1.1)' },
-                        border: coverColor === color ? '2px solid white' : 'none',
-                        outline: coverColor === color ? `2px solid ${color}` : 'none'
+                        transition: 'all 0.15s',
+                        border: '2px solid',
+                        borderColor: coverColor === color ? color : 'transparent',
+                        outline: coverColor === color ? '2px solid' : 'none',
+                        outlineColor: coverColor === color ? 'primary.outlinedBorder' : 'transparent',
+                        outlineOffset: '2px',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                          boxShadow: 'sm'
+                        }
                       }}
                     >
-                      {coverColor === color && <CheckIcon sx={{ color: 'white', fontSize: 16 }} />}
+                      {coverColor === color && <CheckIcon sx={{ color: 'white', fontSize: 18 }} />}
                     </Box>
                   ))}
                   <Box sx={{ position: 'relative' }}>
@@ -190,34 +213,36 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
               </FormControl>
 
               <FormControl>
-                <FormLabel>Cover Image URL</FormLabel>
+                <FormLabel sx={{ fontSize: '0.875rem', mb: 0.5 }}>Cover Image URL</FormLabel>
                 <Input
                   value={coverImage || ''}
                   onChange={(e) => setCoverImage(e.target.value)}
+                  size='sm'
                   placeholder='https://example.com/image.jpg'
                   variant='outlined'
                 />
               </FormControl>
 
               <FormControl>
-                <FormLabel>Tags</FormLabel>
+                <FormLabel sx={{ fontSize: '0.875rem', mb: 0.75 }}>Tags</FormLabel>
                 <Box
                   sx={{
-                    p: 1.5,
+                    p: 1.25,
                     border: '1px solid',
                     borderColor: 'neutral.outlinedBorder',
-                    borderRadius: 'md',
-                    minHeight: 100,
+                    borderRadius: 'sm',
+                    minHeight: 80,
                     bgcolor: 'background.surface'
                   }}
                 >
-                  <Stack direction='row' flexWrap='wrap' spacing={1} sx={{ mb: 1.5 }}>
+                  <Stack direction='row' flexWrap='wrap' spacing={0.75} sx={{ mb: tags.length > 0 ? 1 : 0 }}>
                     {tags.map((tag, index) => (
                       <Chip
                         key={index}
                         variant='soft'
                         color='primary'
-                        endDecorator={<CloseIcon fontSize='small' />}
+                        size='sm'
+                        endDecorator={<CloseIcon sx={{ fontSize: 14 }} />}
                         onDelete={() => handleRemoveTag(index)}
                       >
                         {tag}
@@ -228,6 +253,7 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                     variant='plain'
                     placeholder='Type tag and press Enter...'
                     value={newTag}
+                    size='sm'
                     onChange={(e) => setNewTag(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -235,72 +261,82 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                         handleAddTag()
                       }
                     }}
-                    sx={{ p: 0 }}
+                    sx={{ p: 0, fontSize: '0.875rem' }}
                   />
                 </Box>
               </FormControl>
 
               <FormControl>
-                <FormLabel>Summary</FormLabel>
+                <FormLabel sx={{ fontSize: '0.875rem', mb: 0.5 }}>Summary</FormLabel>
                 <Textarea
-                  minRows={4}
+                  minRows={3}
                   placeholder='Brief description of the book...'
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
+                  size='sm'
+                  sx={{ fontSize: '0.875rem' }}
                 />
               </FormControl>
             </Stack>
           </Grid>
 
-          {/* Right Column: Preview */}
+          {/* Right Column: Preview - Compact */}
           <Grid
             xs={12}
             md={5}
             sx={{
               bgcolor: 'background.level1',
-              p: 3,
+              p: { xs: 2, md: 2.5 },
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              overflow: 'auto'
             }}
           >
             <Typography
-              level='title-sm'
-              sx={{ width: '100%', mb: 2, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+              level='body-sm'
+              sx={{
+                width: '100%',
+                mb: 2,
+                color: 'text.tertiary',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontSize: '0.75rem',
+                fontWeight: 600
+              }}
             >
               Live Preview
             </Typography>
 
             {/* Live Preview using unified Book component */}
-            <Box sx={{ width: 220, pointerEvents: 'none' }}>
+            <Box sx={{ width: 200, pointerEvents: 'none' }}>
               <Book book={previewBook} />
             </Box>
 
-            <Typography level='body-xs' sx={{ mt: 4, color: 'text.tertiary', textAlign: 'center' }}>
+            <Typography level='body-xs' sx={{ mt: 3, color: 'text.tertiary', textAlign: 'center', fontSize: '0.7rem' }}>
               Created: {createdAt.toLocaleDateString()}
               <br />
-              Last editted: {updatedAt.toLocaleDateString()}
+              Last edited: {updatedAt.toLocaleDateString()}
             </Typography>
           </Grid>
         </Grid>
 
-        {/* Footer actions */}
+        {/* Footer actions - Compact */}
         <Box
           sx={{
-            p: 2,
+            p: { xs: 1.5, md: 2 },
             borderTop: '1px solid',
             borderColor: 'divider',
             display: 'flex',
             justifyContent: 'flex-end',
-            gap: 1,
-            bgcolor: 'background.surface'
+            gap: 1
           }}
         >
-          <Button variant='plain' color='neutral' onClick={onCancel}>
+          <Button variant='plain' color='neutral' onClick={onCancel} size='sm'>
             Cancel
           </Button>
-          <Button variant='solid' color='primary' onClick={handleSave}>
+          <Button variant='solid' color='primary' onClick={handleSave} size='sm'>
             Save Changes
           </Button>
         </Box>

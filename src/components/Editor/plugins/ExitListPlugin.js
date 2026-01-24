@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getSelection, $isRangeSelection, $createParagraphNode, KEY_ENTER_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical'
+import { $getSelection, $isRangeSelection, $createParagraphNode, $isElementNode, KEY_ENTER_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical'
 import { $isListNode, $isListItemNode } from '@lexical/list'
+import { $isTableCellNode } from '@lexical/table'
 import { $setBlocksType } from '@lexical/selection'
 
 /**
@@ -17,6 +18,7 @@ import { $setBlocksType } from '@lexical/selection'
  * - Tracks the key of the last empty list item where Enter was pressed
  * - Only exits if Enter is pressed again on the same empty item
  * - Resets tracking when user types or moves cursor
+ * - Handles table cells properly to avoid errors
  */
 
 export default function ExitListPlugin() {
@@ -34,18 +36,29 @@ export default function ExitListPlugin() {
           return
         }
 
-        const anchorNode = selection.anchor.getNode()
-        const listItemNode = anchorNode.getParent()
+        try {
+          const anchorNode = selection.anchor.getNode()
+          let parent = $isElementNode(anchorNode) ? anchorNode : anchorNode.getParent()
 
-        if ($isListItemNode(listItemNode)) {
-          const textContent = listItemNode.getTextContent().trim()
+          // Skip if we're in a table cell (different context)
+          if (parent && $isTableCellNode(parent)) {
+            lastEmptyListItemKey.current = null
+            return
+          }
 
-          // If the current item has content, reset tracking
-          if (textContent !== '') {
+          if ($isListItemNode(parent)) {
+            const textContent = parent.getTextContent().trim()
+
+            // If the current item has content, reset tracking
+            if (textContent !== '') {
+              lastEmptyListItemKey.current = null
+            }
+          } else {
+            // Not in a list anymore, reset tracking
             lastEmptyListItemKey.current = null
           }
-        } else {
-          // Not in a list anymore, reset tracking
+        } catch (e) {
+          // Ignore errors from nodes that don't have proper parent structure
           lastEmptyListItemKey.current = null
         }
       })
@@ -60,48 +73,59 @@ export default function ExitListPlugin() {
           return false
         }
 
-        const anchorNode = selection.anchor.getNode()
-        const listItemNode = anchorNode.getParent()
+        try {
+          const anchorNode = selection.anchor.getNode()
+          let parent = $isElementNode(anchorNode) ? anchorNode : anchorNode.getParent()
 
-        if (!$isListItemNode(listItemNode)) {
-          lastEmptyListItemKey.current = null
-          return false // Not in a list
-        }
-
-        // Check if the list item is empty
-        const textContent = listItemNode.getTextContent().trim()
-        const currentItemKey = listItemNode.getKey()
-
-        if (textContent === '') {
-          // Empty list item
-
-          if (lastEmptyListItemKey.current === currentItemKey) {
-            // This is the SECOND Enter on the same empty item - EXIT LIST
-            console.log('🔄 Second Enter on empty list item, exiting list...')
-
-            editor.update(() => {
-              const selection = $getSelection()
-              if ($isRangeSelection(selection)) {
-                // Convert the empty list item to a paragraph
-                $setBlocksType(selection, () => $createParagraphNode())
-                console.log('✅ Exited list')
-              }
-            })
-
-            // Reset tracking
-            lastEmptyListItemKey.current = null
-
-            return true // Prevent default Enter behavior
-          } else {
-            // This is the FIRST Enter on this empty item - TRACK IT
-            console.log('📝 First Enter on empty list item, tracking...')
-            lastEmptyListItemKey.current = currentItemKey
-
-            // Let default behavior create a new list item
+          // Skip if we're in a table cell
+          if (parent && $isTableCellNode(parent)) {
             return false
           }
-        } else {
-          // List item has content, reset tracking
+
+          if (!$isListItemNode(parent)) {
+            lastEmptyListItemKey.current = null
+            return false // Not in a list
+          }
+
+          // Check if the list item is empty
+          const textContent = parent.getTextContent().trim()
+          const currentItemKey = parent.getKey()
+
+          if (textContent === '') {
+            // Empty list item
+
+            if (lastEmptyListItemKey.current === currentItemKey) {
+              // This is the SECOND Enter on the same empty item - EXIT LIST
+              console.log('🔄 Second Enter on empty list item, exiting list...')
+
+              editor.update(() => {
+                const selection = $getSelection()
+                if ($isRangeSelection(selection)) {
+                  // Convert the empty list item to a paragraph
+                  $setBlocksType(selection, () => $createParagraphNode())
+                  console.log('✅ Exited list')
+                }
+              })
+
+              // Reset tracking
+              lastEmptyListItemKey.current = null
+
+              return true // Prevent default Enter behavior
+            } else {
+              // This is the FIRST Enter on this empty item - TRACK IT
+              console.log('📝 First Enter on empty list item, tracking...')
+              lastEmptyListItemKey.current = currentItemKey
+
+              // Let default behavior create a new list item
+              return false
+            }
+          } else {
+            // List item has content, reset tracking
+            lastEmptyListItemKey.current = null
+            return false
+          }
+        } catch (e) {
+          // Ignore errors from nodes without proper parent structure
           lastEmptyListItemKey.current = null
           return false
         }

@@ -3,9 +3,11 @@ import { Card, Typography, Box, AspectRatio, IconButton, Stack, Chip } from '@mu
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 
 export default function Book({ book, handleBookClick = () => {}, onEdit, onDelete }) {
   const { cover_color, cover_image, title, author, isbn } = book
+  const { themeColor } = useThemePreferences()
 
   return (
     <Card
@@ -60,10 +62,10 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
           sx={{
             width: '100%',
             height: '100%',
-            backgroundColor: cover_color || '#09090D', // Default to dark premium
+            backgroundColor: cover_color || themeColor || '#0B6BCB', // Use user's theme color as fallback
             background: cover_image
               ? `url(${cover_image}) center/cover`
-              : `linear-gradient(135deg, ${cover_color || '#0B6BCB'} 0%, #000000 120%)`, // Deep tech gradient
+              : `linear-gradient(135deg, ${cover_color || themeColor || '#0B6BCB'} 0%, #000000 120%)`, // Deep tech gradient with theme color
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'

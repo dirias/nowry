@@ -46,10 +46,10 @@
     "title": "学習センター",
     "subtitle": "あなただけの学習ハブ",
     "stats": {
-      "dueToday": "今日の課題",
-      "reviewedToday": "今日の復習",
-      "dayStreak": "連続日数",
-      "totalCards": "カード総数"
+      "dueToday": "課題",
+      "reviewedToday": "復習済",
+      "dayStreak": "連続",
+      "totalCards": "合計"
     },
     "byType": "タイプ別学習",
     "types": {
@@ -98,8 +98,17 @@
     },
     "errors": {
       "loginFailed": "ログインに失敗しました。認証情報を確認してください。",
+      "unableToSignIn": "サインインできません",
+      "invalidCredentials": "メールアドレスまたはパスワードが正しくありません。確認してもう一度お試しください。",
+      "accountDisabled": "このアカウントは無効化されています。サポートにお問い合わせください。",
+      "tooManyAttempts": "試行回数が多すぎます。数分後にもう一度お試しください。",
+      "networkError": "ネットワーク接続に失敗しました。インターネット接続を確認してもう一度お試しください。",
+      "googleCancelled": "サインインがキャンセルされました。続行する場合はもう一度お試しください。",
+      "popupBlocked": "サインインポップアップがブロックされました。このサイトのポップアップを許可してください。",
+      "accountExistsDifferent": "このメールアドレスは既に別のサインイン方法で使用されています。",
       "usernameRequired": "ユーザー名は必須です",
       "emailRequired": "メールアドレスは必須です",
+      "emailInvalid": "有効なメールアドレスを入力してください",
       "passwordRequired": "パスワードは必須です",
       "passwordLength": "パスワードは8文字以上である必要があります",
       "passwordMismatch": "パスワードが一致しません",
@@ -294,7 +303,7 @@
       "totalCards": "総カード数",
       "booksCreated": "作成したブック",
       "studyStreak": "学習ストリーク",
-      "days": "日"
+      "days": "連続"
     }
   },
   "settings": {
@@ -351,6 +360,11 @@
     "dailyFocus": {
       "allCaughtUp": "🎉 すべて完了！",
       "noDueCards": "復習が必要なカードはありません。素晴らしい！",
+      "cardDue": "枚のカードが復習待ち",
+      "cardsDue": "枚のカードが復習待ち",
+      "readyToReview": "復習の準備完了",
+      "reviewCount": "{{count}}枚を復習",
+      "reviewCount_plural": "{{count}}枚を復習",
       "reviewToday": "📚 今日の復習",
       "cardsPending": "{{count}}枚のカード保留中",
       "cardsPending_other": "{{count}}枚のカード保留中",

@@ -42,6 +42,7 @@ export default function SmartPaginationPlugin({
   const debounceRef = useRef(null)
   const lastPageCountRef = useRef(0)
   const skipNextUpdate = useRef(false) // Skip update listener after Enter key
+  const lastModificationTimeRef = useRef(0) // Track when pagination last modified content
 
   console.log('📄 SmartPaginationPlugin initialized:', {
     pageHeight: `${pageHeight}px`,
@@ -400,6 +401,12 @@ export default function SmartPaginationPlugin({
 
           console.log(pagesModified ? '✅ Pagination complete (modified)' : '✅ Pagination complete (no changes)')
 
+          // Track if we actually modified anything (prevents infinite loop)
+          if (pagesModified) {
+            lastModificationTimeRef.current = Date.now()
+            console.log('🔵 Set lastModificationTime:', lastModificationTimeRef.current)
+          }
+
           // After pagination, scroll to cursor position if needed
           if (pagesModified) {
             console.log('📜 Pages were modified, scheduling scroll to cursor...')
@@ -487,19 +494,43 @@ export default function SmartPaginationPlugin({
     // Initialize on mount
     setTimeout(initializePages, 100)
 
-    // Register for editor updates (but skip if Enter key just fired)
-    const unregister = editor.registerUpdateListener(({ editorState, dirtyElements, dirtyLeaves }) => {
-      // Skip if Enter key just triggered immediate pagination
+    // Register for editor updates with proper guards
+    const unregister = editor.registerUpdateListener(({ editorState, dirtyElements, dirtyLeaves, tags }) => {
+      // GUARD 1: Skip if Enter key just triggered immediate pagination
       if (skipNextUpdate.current) {
-        console.log('⏭️ Skipping debounced pagination (Enter key handled it)')
+        console.log('⏭️ Skipping pagination (Enter key handled it)')
         skipNextUpdate.current = false
         return
       }
 
-      // Only paginate if content actually changed
-      if (dirtyElements.size > 0 || dirtyLeaves.size > 0) {
-        schedulePagination(false) // Use debounced pagination for typing
+      // GUARD 2: Skip if currently processing
+      if (isProcessingRef.current) {
+        console.log('⏭️ Skipping pagination (already processing)')
+        return
       }
+
+      // GUARD 3: CRITICAL - Skip if this update was caused by pagination itself
+      // If update happened within 200ms of pagination modifying content, it's probably our own change
+      const timeSinceLastModification = Date.now() - lastModificationTimeRef.current
+      if (timeSinceLastModification < 200) {
+        console.log('⏭️ Skipping pagination (update caused by pagination itself)', {
+          timeSinceLastMod: `${timeSinceLastModification}ms`
+        })
+        return
+      }
+
+      // GUARD 4: Only paginate if there are actual content changes
+      if (dirtyElements.size === 0 && dirtyLeaves.size === 0) {
+        console.log('⏭️ Skipping pagination (no dirty elements/leaves)')
+        return
+      }
+
+      console.log('🔄 Legitimate content change detected, scheduling pagination...', {
+        dirtyElements: dirtyElements.size,
+        dirtyLeaves: dirtyLeaves.size,
+        timeSinceLastMod: `${timeSinceLastModification}ms`
+      })
+      schedulePagination(false) // Use debounced pagination for typing
     })
 
     return () => {

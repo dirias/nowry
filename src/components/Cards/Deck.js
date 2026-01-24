@@ -42,23 +42,23 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
   let config = {
     icon: StyleIcon,
     label: 'Card',
-    gradient: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
-    color: 'primary.600'
+    gradient: 'linear-gradient(135deg, var(--joy-palette-primary-50) 0%, var(--joy-palette-primary-100) 100%)',
+    color: 'primary.solidBg'
   }
 
   if (deck_type === 'quiz') {
     config = {
       icon: QuizIcon,
       label: 'Question',
-      gradient: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
-      color: 'warning.600'
+      gradient: 'linear-gradient(135deg, var(--joy-palette-warning-50) 0%, var(--joy-palette-warning-100) 100%)',
+      color: 'warning.solidBg'
     }
   } else if (deck_type === 'visual') {
     config = {
       icon: AccountTreeIcon,
       label: 'Diagram',
-      gradient: 'linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%)', // Cyan
-      color: 'info.600'
+      gradient: 'linear-gradient(135deg, var(--joy-palette-success-50) 0%, var(--joy-palette-success-100) 100%)',
+      color: 'success.solidBg'
     }
   }
 
@@ -77,40 +77,75 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
 
   return (
     <Card
-      variant='soft'
-      color='neutral'
+      variant='outlined'
       sx={{
-        width: 240,
+        width: '100%',
+        maxWidth: { xs: '100%', sm: 260 },
+        minHeight: 220,
         mx: 'auto',
-        boxShadow: 'xs',
-        transition: 'transform 0.2s ease',
+        transition: 'all 0.15s ease',
+        border: '1px solid',
+        borderColor: 'divider',
         '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: 'md'
+          borderColor: 'neutral.outlinedBorder',
+          boxShadow: 'sm'
         },
         position: 'relative',
-        bgcolor: 'background.surface'
+        bgcolor: 'background.surface',
+        p: 1.5,
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
-      <Box sx={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 1, zIndex: 1, alignItems: 'center' }}>
-        {statusLabel && (
-          <Chip
-            size='sm'
-            variant='soft'
-            color={statusColor}
-            startDecorator={status === 'attention' ? '⚠️' : '✨'}
+      {/* Preview Area - Fixed Height for Consistency */}
+      <Box sx={{ mb: 1.5, height: 87, borderRadius: 'sm', overflow: 'hidden' }}>
+        {url ? (
+          <img
+            src={url}
+            alt={deckName}
+            loading='lazy'
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '6px'
+            }}
+          />
+        ) : (
+          <Box
             sx={{
-              px: 1,
-              fontSize: 10,
-              borderRadius: 'md',
-              fontWeight: 600,
-              bgcolor: 'background.surface'
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundImage: config.gradient,
+              borderRadius: 'sm'
             }}
           >
-            {statusLabel}
-          </Chip>
+            <config.icon sx={{ fontSize: 40, opacity: 0.6, color: config.color }} />
+          </Box>
         )}
+      </Box>
 
+      {/* Header Row - Title + Actions */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5, gap: 1 }}>
+        {/* Title */}
+        <Typography
+          level='title-md'
+          sx={{
+            fontWeight: 600,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            color: 'text.primary',
+            flex: 1
+          }}
+        >
+          {deckName}
+        </Typography>
+
+        {/* Actions Menu */}
         <Dropdown>
           <MenuButton
             slots={{ root: IconButton }}
@@ -119,103 +154,94 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
                 variant: 'plain',
                 color: 'neutral',
                 size: 'sm',
-                sx: { bgcolor: 'background.surface', borderRadius: '50%', '&:hover': { bgcolor: 'background.level1' } }
+                sx: {
+                  minWidth: 24,
+                  minHeight: 24,
+                  '&:hover': { bgcolor: 'background.level1' }
+                }
               }
             }}
           >
-            <MoreVertIcon />
+            <MoreVertIcon sx={{ fontSize: 16 }} />
           </MenuButton>
-          <Menu placement='bottom-end'>
+          <Menu placement='bottom-end' size='sm'>
             <MenuItem onClick={() => onEdit(deck)}>
-              <EditIcon /> Editar
+              <EditIcon sx={{ fontSize: 16 }} /> Editar
             </MenuItem>
-            <MenuItem onClick={() => onDelete(deck)} variant='soft' color='danger'>
-              <DeleteIcon /> Eliminar
+            <MenuItem onClick={() => onDelete(deck)} color='danger'>
+              <DeleteIcon sx={{ fontSize: 16 }} /> Eliminar
             </MenuItem>
           </Menu>
         </Dropdown>
       </Box>
 
-      {/* Deck Info */}
-      <Typography level='title-md' sx={{ fontWeight: 600, mt: 0.5 }}>
-        {deckName}
-      </Typography>
+      {/* Metadata Row - Compact, Single Line */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+        <Typography level='body-sm' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
+          {deckTotal} {deckTotal === 1 ? config.label.toLowerCase() : `${config.label.toLowerCase()}s`}
+        </Typography>
 
-      {/* Minimal Metadata Row */}
-      <Typography level='body-xs' textColor='neutral.500' sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-        <config.icon sx={{ fontSize: 14 }} />
-        {deckTotal} {deckTotal === 1 ? config.label : `${config.label}s`}
-      </Typography>
-
-      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5, minHeight: 20 }}>
-        {Array.isArray(deck.tags)
-          ? deck.tags.slice(0, 3).map((tag, idx) => (
-              <Chip
-                key={idx}
-                size='sm'
-                variant='outlined'
-                color='neutral'
-                sx={{ fontSize: '9px', border: 'none', bgcolor: 'background.level1' }}
-              >
-                #{tag.toLowerCase()}
-              </Chip>
-            ))
-          : null}
-      </Box>
-
-      {/* Dynamic Cover Area */}
-      <AspectRatio ratio='2/1' sx={{ borderRadius: 'md', bgcolor: 'transparent' }}>
-        {url ? (
-          <img src={url} alt={deckName} loading='lazy' style={{ borderRadius: 8 }} />
-        ) : (
-          <Box
+        {due_cards > 0 && (
+          <Typography
+            level='body-sm'
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundImage: config.gradient,
-              color: config.color,
-              borderRadius: 'md'
+              color: 'primary.solidBg',
+              fontSize: '0.75rem',
+              fontWeight: 600
             }}
           >
-            <config.icon sx={{ fontSize: '2.5rem', opacity: 0.8 }} />
-          </Box>
+            {due_cards} due
+          </Typography>
         )}
-      </AspectRatio>
+      </Box>
 
-      {/* Optional progress */}
-      {progress !== null && <LinearProgress determinate value={progress} thickness={6} sx={{ borderRadius: 'lg', mb: 1 }} />}
+      {/* Optional progress bar - Ultra-thin */}
+      {progress !== null && (
+        <LinearProgress
+          determinate
+          value={progress}
+          thickness={3}
+          sx={{
+            borderRadius: 'xs',
+            mb: 1,
+            bgcolor: 'background.level1'
+          }}
+        />
+      )}
 
-      {/* Call to action */}
-      <CardActions>
-        {!has_cards ? (
-          // Empty state - no cards in deck
-          <Button size='sm' variant='outlined' color='neutral' disabled fullWidth>
-            No cards yet
-          </Button>
-        ) : due_cards === 0 ? (
-          // All cards reviewed - show preview option
-          <Tooltip title='All cards reviewed! Come back later or preview the deck' variant='soft' placement='top'>
-            <Button
-              size='sm'
-              variant='soft'
-              color='neutral'
-              onClick={() => onPreview?.(deck)}
-              startDecorator={<VisibilityIcon />}
-              fullWidth
-            >
-              Preview
-            </Button>
-          </Tooltip>
-        ) : (
-          // Cards due - show study button
-          <Stack direction='row' spacing={1} sx={{ width: '100%' }}>
-            <Button size='sm' variant='solid' color='primary' onClick={() => onStudy?.(deck)} fullWidth startDecorator={<SchoolIcon />}>
-              Study {due_cards > 0 && `(${due_cards})`}
-            </Button>
-          </Stack>
-        )}
-      </CardActions>
+      {/* Spacer to push button to bottom */}
+      <Box sx={{ flex: 1 }} />
+
+      {/* Call to action - Minimalistic Button */}
+      {!has_cards ? (
+        <Button size='sm' variant='outlined' color='neutral' disabled fullWidth sx={{ fontSize: '0.75rem', py: 0.75 }}>
+          No cards yet
+        </Button>
+      ) : due_cards === 0 ? (
+        <Button
+          size='sm'
+          variant='outlined'
+          color='neutral'
+          onClick={() => onPreview?.(deck)}
+          startDecorator={<VisibilityIcon sx={{ fontSize: 14 }} />}
+          fullWidth
+          sx={{ fontSize: '0.75rem', py: 0.75 }}
+        >
+          Preview
+        </Button>
+      ) : (
+        <Button
+          size='sm'
+          variant='solid'
+          color='primary'
+          onClick={() => onStudy?.(deck)}
+          fullWidth
+          startDecorator={<SchoolIcon sx={{ fontSize: 14 }} />}
+          sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
+        >
+          Study ({due_cards})
+        </Button>
+      )}
     </Card>
   )
 }

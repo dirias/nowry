@@ -46,10 +46,10 @@
     "title": "Lernzentrum",
     "subtitle": "Dein persönlicher Lernbereich",
     "stats": {
-      "dueToday": "Heute fällig",
-      "reviewedToday": "Heute gelernt",
-      "dayStreak": "Tages-Serie",
-      "totalCards": "Karten gesamt"
+      "dueToday": "Fällig",
+      "reviewedToday": "Gelernt",
+      "dayStreak": "Serie",
+      "totalCards": "Gesamt"
     },
     "byType": "Nach Typ lernen",
     "types": {
@@ -98,8 +98,17 @@
     },
     "errors": {
       "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten.",
+      "unableToSignIn": "Anmeldung nicht möglich",
+      "invalidCredentials": "E-Mail oder Passwort ist falsch. Bitte überprüfen und erneut versuchen.",
+      "accountDisabled": "Dieses Konto wurde deaktiviert. Bitte kontaktieren Sie den Support für Hilfe.",
+      "tooManyAttempts": "Zu viele fehlgeschlagene Versuche. Bitte versuchen Sie es in einigen Minuten erneut.",
+      "networkError": "Netzwerkverbindung fehlgeschlagen. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+      "googleCancelled": "Anmeldung abgebrochen. Bitte versuchen Sie es erneut, wenn Sie fortfahren möchten.",
+      "popupBlocked": "Anmelde-Popup wurde blockiert. Bitte erlauben Sie Popups für diese Seite.",
+      "accountExistsDifferent": "Ein Konto mit dieser E-Mail existiert bereits und verwendet eine andere Anmeldemethode.",
       "usernameRequired": "Benutzername ist erforderlich",
       "emailRequired": "E-Mail ist erforderlich",
+      "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
       "passwordRequired": "Passwort ist erforderlich",
       "passwordLength": "Passwort muss mindestens 8 Zeichen lang sein",
       "passwordMismatch": "Passwörter stimmen nicht überein",
@@ -294,7 +303,7 @@
       "totalCards": "Karten Gesamt",
       "booksCreated": "Bücher Erstellt",
       "studyStreak": "Lernserie",
-      "days": "Tage"
+      "days": "Serie"
     }
   },
   "settings": {
@@ -351,6 +360,11 @@
     "dailyFocus": {
       "allCaughtUp": "🎉 Alles erledigt!",
       "noDueCards": "Du hast keine ausstehenden Karten. Gute Arbeit!",
+      "cardDue": "Karte fällig",
+      "cardsDue": "Karten fällig",
+      "readyToReview": "Bereit zum Wiederholen",
+      "reviewCount": "{{count}} Karte wiederholen",
+      "reviewCount_plural": "{{count}} Karten wiederholen",
       "reviewToday": "📚 Heute wiederholen",
       "cardsPending": "{{count}} Karte ausstehend",
       "cardsPending_other": "{{count}} Karten ausstehend",

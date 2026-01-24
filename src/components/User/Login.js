@@ -48,7 +48,37 @@ const Login = () => {
       window.location.href = '/'
     } catch (error) {
       console.error('Login error:', error)
-      setError(error.message || t('auth.errors.loginFailed'))
+
+      // Parse Firebase error codes for user-friendly messages
+      let errorMessage = t('auth.errors.loginFailed')
+
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/wrong-password':
+          case 'auth/user-not-found':
+            errorMessage = t('auth.errors.invalidCredentials')
+            break
+          case 'auth/invalid-email':
+            errorMessage = t('auth.errors.emailInvalid')
+            break
+          case 'auth/user-disabled':
+            errorMessage = t('auth.errors.accountDisabled')
+            break
+          case 'auth/too-many-requests':
+            errorMessage = t('auth.errors.tooManyAttempts')
+            break
+          case 'auth/network-request-failed':
+            errorMessage = t('auth.errors.networkError')
+            break
+          default:
+            errorMessage = error.message || t('auth.errors.loginFailed')
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      setError(errorMessage)
       setLoading(false)
     }
   }
@@ -65,7 +95,32 @@ const Login = () => {
       window.location.href = '/'
     } catch (error) {
       console.error('Google login error:', error)
-      setError(error.message || t('auth.errors.loginFailed'))
+
+      // Parse Google login errors
+      let errorMessage = t('auth.errors.loginFailed')
+
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = t('auth.errors.googleCancelled')
+            break
+          case 'auth/popup-blocked':
+            errorMessage = t('auth.errors.popupBlocked')
+            break
+          case 'auth/account-exists-with-different-credential':
+            errorMessage = t('auth.errors.accountExistsDifferent')
+            break
+          case 'auth/network-request-failed':
+            errorMessage = t('auth.errors.networkError')
+            break
+          default:
+            errorMessage = error.message || t('auth.errors.loginFailed')
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      setError(errorMessage)
       setLoading(false)
     }
   }
@@ -115,10 +170,25 @@ const Login = () => {
           </Typography>
         </Box>
 
-        {/* Error Alert */}
+        {/* Error Alert - Improved UX */}
         {error && (
-          <Alert color='danger' variant='soft' sx={{ mb: 3 }} onClose={() => setError('')}>
-            {error}
+          <Alert
+            color='danger'
+            variant='soft'
+            sx={{
+              mb: 3,
+              fontSize: '0.875rem',
+              '--Alert-padding': '12px 16px'
+            }}
+          >
+            <Box>
+              <Typography level='body-sm' sx={{ fontWeight: 600, mb: 0.5 }}>
+                {t('auth.errors.unableToSignIn')}
+              </Typography>
+              <Typography level='body-sm' sx={{ color: 'inherit', opacity: 0.9 }}>
+                {error}
+              </Typography>
+            </Box>
           </Alert>
         )}
 

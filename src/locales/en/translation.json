@@ -46,10 +46,10 @@
     "title": "Study Center",
     "subtitle": "Your personalized learning hub",
     "stats": {
-      "dueToday": "Due Today",
-      "reviewedToday": "Reviewed Today",
-      "dayStreak": "Day Streak",
-      "totalCards": "Total Cards"
+      "dueToday": "Due",
+      "reviewedToday": "Reviewed",
+      "dayStreak": "Streak",
+      "totalCards": "Total"
     },
     "byType": "Study by Type",
     "types": {
@@ -98,6 +98,14 @@
     },
     "errors": {
       "loginFailed": "Login failed. Please check your credentials.",
+      "unableToSignIn": "Unable to sign in",
+      "invalidCredentials": "Email or password is incorrect. Please double-check and try again.",
+      "accountDisabled": "This account has been disabled. Please contact support for assistance.",
+      "tooManyAttempts": "Too many failed attempts. Please try again in a few minutes.",
+      "networkError": "Network connection failed. Please check your internet and try again.",
+      "googleCancelled": "Sign-in cancelled. Please try again if you'd like to continue.",
+      "popupBlocked": "Sign-in popup was blocked. Please allow popups for this site.",
+      "accountExistsDifferent": "An account already exists with this email using a different sign-in method.",
       "usernameRequired": "Username is required",
       "emailRequired": "Email is required",
       "emailInvalid": "Please enter a valid email address",
@@ -384,7 +392,7 @@
       "totalCards": "Total Cards",
       "booksCreated": "Books Created",
       "studyStreak": "Study Streak",
-      "days": "days"
+      "days": "Streak"
     }
   },
   "settings": {
@@ -439,8 +447,13 @@
     "welcome": "Welcome back, {{name}}!",
     "overview": "Here's your learning overview for today",
     "dailyFocus": {
-      "allCaughtUp": "🎉 All Caught Up!",
+      "allCaughtUp": "🎉 All caught up!",
       "noDueCards": "You have no pending cards. Great job!",
+      "cardDue": "card due",
+      "cardsDue": "cards due",
+      "readyToReview": "Ready to review",
+      "reviewCount": "Review {{count}} card",
+      "reviewCount_plural": "Review {{count}} cards",
       "reviewToday": "📚 Review Today",
       "cardsPending": "{{count}} card pending",
       "cardsPending_other": "{{count}} cards pending",
@@ -449,6 +462,35 @@
       "study": "Study",
       "moreDecks": "And {{count}} more deck with pending cards",
       "moreDecks_other": "And {{count}} more decks with pending cards"
+    },
+    "annualGoals": {
+      "title": "Annual Goals",
+      "noGoals": "No goals set yet",
+      "createGoal": "Create Your First Goal",
+      "viewFullPlan": "View Full Plan"
+    },
+    "priorities": {
+      "title": "Today's Priorities",
+      "noTasks": "You're all caught up!",
+      "addTask": "Add a Task",
+      "viewAll": "View All Tasks"
+    },
+    "stats": {
+      "title": "This Week",
+      "goalsOnTrack": "Goals On Track",
+      "tasksCompleted": "Tasks Completed",
+      "cardsReviewed": "Cards Reviewed",
+      "studyStreak": "Study Streak",
+      "days": "days"
+    },
+    "quickAccess": {
+      "title": "Quick Access",
+      "studyCenter": "Study Center",
+      "books": "Books",
+      "annualPlanning": "Annual Planning",
+      "newsFeed": "News Feed",
+      "taskManager": "Task Manager",
+      "bugReport": "Report Bug"
     }
   },
   "motivation": {
@@ -507,7 +549,10 @@
     "successDelete": "Book deleted successfully",
     "successImport": "{{count}} book imported successfully! {{pages}} total pages.",
     "successImport_plural": "{{count}} books imported successfully! {{pages}} total pages.",
-    "errorImport": "Error processing file. Please try again."
+    "errorImport": "Error processing file. Please try again.",
+    "tableOfContents": "Table of Contents",
+    "noHeadings": "No headings yet",
+    "useHeadings": "Use /h1, /h2, /h3 to create structure"
   },
   "cards": {
     "title": "Deck Library",
@@ -739,8 +784,17 @@
       "quoteDesc": "Blockquote",
       "codeBlock": "Code block",
       "codeBlockDesc": "Code with syntax highlighting",
+      "table": "Table",
+      "tableDesc": "Insert a table",
       "divider": "Divider",
       "dividerDesc": "Horizontal line"
+    },
+    "table": {
+      "addRowBelow": "Add row below",
+      "addColumnRight": "Add column right",
+      "deleteRow": "Delete row",
+      "deleteColumn": "Delete column",
+      "deleteTable": "Delete table"
     }
   }
 }

@@ -32,6 +32,7 @@ import StudyCenter from './components/Study/StudyCenter'
 import UserProfile from './components/User/Profile/UserProfile'
 import AccountSettings from './components/User/Profile/AccountSettings'
 import BugDashboard from './components/Bugs/BugDashboard'
+import News from './pages/News'
 import { AnnualPlanningHome, FocusAreaSetup, FocusAreaView, DailyRoutinePlanner } from './components/AnnualPlanning'
 
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -117,6 +118,14 @@ const AppContent = () => {
 
           {/* Protected Routes - Require authentication */}
           <Route
+            path='/news'
+            element={
+              <ProtectedRoute>
+                <News />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path='/books'
             element={
               <ProtectedRoute>
@@ -174,6 +183,14 @@ const AppContent = () => {
           />
           <Route
             path='/bugs/dashboard'
+            element={
+              <ProtectedRoute>
+                <BugDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/report-bug'
             element={
               <ProtectedRoute>
                 <BugDashboard />

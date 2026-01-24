@@ -47,9 +47,9 @@
     "subtitle": "Votre espace d'apprentissage personnalisé",
     "stats": {
       "dueToday": "À faire",
-      "reviewedToday": "Revues aujourd'hui",
-      "dayStreak": "Jours consécutifs",
-      "totalCards": "Total cartes"
+      "reviewedToday": "Revues",
+      "dayStreak": "Série",
+      "totalCards": "Total"
     },
     "byType": "Étudier par Type",
     "types": {
@@ -98,8 +98,17 @@
     },
     "errors": {
       "loginFailed": "Échec de la connexion. Vérifiez vos identifiants.",
+      "unableToSignIn": "Impossible de se connecter",
+      "invalidCredentials": "Email ou mot de passe incorrect. Veuillez vérifier et réessayer.",
+      "accountDisabled": "Ce compte a été désactivé. Veuillez contacter le support pour obtenir de l'aide.",
+      "tooManyAttempts": "Trop de tentatives échouées. Veuillez réessayer dans quelques minutes.",
+      "networkError": "Échec de la connexion réseau. Veuillez vérifier votre internet et réessayer.",
+      "googleCancelled": "Connexion annulée. Veuillez réessayer si vous souhaitez continuer.",
+      "popupBlocked": "La fenêtre de connexion a été bloquée. Veuillez autoriser les popups pour ce site.",
+      "accountExistsDifferent": "Un compte existe déjà avec cet email en utilisant une méthode de connexion différente.",
       "usernameRequired": "Nom d'utilisateur requis",
       "emailRequired": "Email requis",
+      "emailInvalid": "Veuillez entrer une adresse email valide",
       "passwordRequired": "Mot de passe requis",
       "passwordLength": "Le mot de passe doit contenir au moins 8 caractères",
       "passwordMismatch": "Les mots de passe ne correspondent pas",
@@ -294,7 +303,7 @@
       "totalCards": "Total Cartes",
       "booksCreated": "Livres Créés",
       "studyStreak": "Série d'Étude",
-      "days": "jours"
+      "days": "Série"
     }
   },
   "settings": {
@@ -351,6 +360,11 @@
     "dailyFocus": {
       "allCaughtUp": "🎉 Tout est à jour !",
       "noDueCards": "Aucune carte en attente. Beau travail !",
+      "cardDue": "carte à réviser",
+      "cardsDue": "cartes à réviser",
+      "readyToReview": "Prêtes à réviser",
+      "reviewCount": "Réviser {{count}} carte",
+      "reviewCount_plural": "Réviser {{count}} cartes",
       "reviewToday": "📚 À réviser aujourd'hui",
       "cardsPending": "{{count}} carte en attente",
       "cardsPending_other": "{{count}} cartes en attente",

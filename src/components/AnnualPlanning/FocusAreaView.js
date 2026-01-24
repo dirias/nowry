@@ -22,7 +22,8 @@ import {
   DialogContent,
   List,
   ListItem,
-  ListItemDecorator
+  ListItemDecorator,
+  Divider
 } from '@mui/joy'
 import {
   Add as AddIcon,
@@ -50,6 +51,9 @@ const FocusAreaView = () => {
   // Expanded Activities State
   const [expandedGoals, setExpandedGoals] = useState(new Set())
   const [goalActivities, setGoalActivities] = useState({}) // Cache: { goalId: [activities] }
+
+  // Expanded Milestones State
+  const [expandedMilestones, setExpandedMilestones] = useState(new Set())
 
   // Error Modal State
   const [errorModal, setErrorModal] = useState({ open: false, message: '', milestones: [] })
@@ -181,6 +185,36 @@ const FocusAreaView = () => {
       }
     }
     setExpandedGoals(newExpanded)
+  }
+
+  const handleToggleMilestones = (goalId) => {
+    const newExpanded = new Set(expandedMilestones)
+    if (newExpanded.has(goalId)) {
+      newExpanded.delete(goalId)
+    } else {
+      newExpanded.add(goalId)
+    }
+    setExpandedMilestones(newExpanded)
+  }
+
+  const handleToggleMilestone = async (goal, milestoneIndex) => {
+    try {
+      const updatedMilestones = [...goal.milestones]
+      updatedMilestones[milestoneIndex] = {
+        ...updatedMilestones[milestoneIndex],
+        completed: !updatedMilestones[milestoneIndex].completed
+      }
+
+      await annualPlanningService.updateGoal(goal._id, {
+        ...goal,
+        milestones: updatedMilestones
+      })
+
+      // Refresh data to update progress
+      await fetchData()
+    } catch (error) {
+      console.error('Failed to update milestone:', error)
+    }
   }
 
   const handleGoalSuccess = async () => {
@@ -535,6 +569,95 @@ const FocusAreaView = () => {
                             </Box>
                           </Box>
                           <Typography level='body-xs'>{calculateProgress(goal)}% Complete</Typography>
+
+                          {/* Milestones Dropdown */}
+                          {goal.milestones && goal.milestones.length > 0 && (
+                            <Box sx={{ mt: 1.5, bgcolor: 'transparent' }}>
+                              <Divider sx={{ my: 1 }} />
+                              <Button
+                                variant='plain'
+                                size='sm'
+                                onClick={() => handleToggleMilestones(goal._id)}
+                                endDecorator={expandedMilestones.has(goal._id) ? <CollapseIcon /> : <ExpandIcon />}
+                                sx={{
+                                  width: '100%',
+                                  justifyContent: 'space-between',
+                                  fontSize: '0.75rem',
+                                  color: 'text.secondary',
+                                  bgcolor: 'transparent',
+                                  '&:hover': { bgcolor: 'transparent', opacity: 0.8 }
+                                }}
+                              >
+                                Milestones ({goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length})
+                              </Button>
+
+                              {expandedMilestones.has(goal._id) && (
+                                <Stack spacing={0.75} sx={{ mt: 1, pl: 0.5, bgcolor: 'transparent' }}>
+                                  {goal.milestones.map((milestone, idx) => (
+                                    <Box
+                                      key={idx}
+                                      sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        py: 0.5,
+                                        px: 1,
+                                        borderRadius: 'sm',
+                                        bgcolor: 'transparent',
+                                        transition: 'opacity 0.2s',
+                                        cursor: 'pointer',
+                                        '&:hover': { opacity: 0.8 }
+                                      }}
+                                      onClick={() => handleToggleMilestone(goal, idx)}
+                                    >
+                                      <Box
+                                        sx={{
+                                          width: 20,
+                                          height: 20,
+                                          border: `2px solid ${area?.color || '#ef4444'}`,
+                                          borderRadius: '4px',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          bgcolor: milestone.completed ? area?.color || '#ef4444' : 'transparent',
+                                          flexShrink: 0,
+                                          transition: 'all 0.2s'
+                                        }}
+                                      >
+                                        {milestone.completed && (
+                                          <Box
+                                            component='svg'
+                                            width='14'
+                                            height='14'
+                                            viewBox='0 0 24 24'
+                                            fill='none'
+                                            stroke='white'
+                                            strokeWidth='3'
+                                            strokeLinecap='round'
+                                            strokeLinejoin='round'
+                                          >
+                                            <polyline points='20 6 9 17 4 12' />
+                                          </Box>
+                                        )}
+                                      </Box>
+                                      <Typography
+                                        level='body-xs'
+                                        sx={{
+                                          flex: 1,
+                                          textDecoration: milestone.completed ? 'line-through' : 'none',
+                                          color: milestone.completed ? 'text.tertiary' : 'text.primary',
+                                          fontSize: '0.75rem',
+                                          backgroundColor: 'transparent'
+                                        }}
+                                      >
+                                        {milestone.title}
+                                      </Typography>
+                                    </Box>
+                                  ))}
+                                </Stack>
+                              )}
+                            </Box>
+                          )}
                         </CardContent>
                       </Card>
                     </Grid>
@@ -650,6 +773,95 @@ const FocusAreaView = () => {
                           </Box>
                         </Box>
                         <Typography level='body-xs'>{calculateProgress(goal)}% Complete</Typography>
+
+                        {/* Milestones Dropdown */}
+                        {goal.milestones && goal.milestones.length > 0 && (
+                          <Box sx={{ mt: 1.5, bgcolor: 'transparent' }}>
+                            <Divider sx={{ my: 1 }} />
+                            <Button
+                              variant='plain'
+                              size='sm'
+                              onClick={() => handleToggleMilestones(goal._id)}
+                              endDecorator={expandedMilestones.has(goal._id) ? <CollapseIcon /> : <ExpandIcon />}
+                              sx={{
+                                width: '100%',
+                                justifyContent: 'space-between',
+                                fontSize: '0.75rem',
+                                color: 'text.secondary',
+                                bgcolor: 'transparent',
+                                '&:hover': { bgcolor: 'transparent', opacity: 0.8 }
+                              }}
+                            >
+                              Milestones ({goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length})
+                            </Button>
+
+                            {expandedMilestones.has(goal._id) && (
+                              <Stack spacing={0.75} sx={{ mt: 1, pl: 0.5, bgcolor: 'transparent' }}>
+                                {goal.milestones.map((milestone, idx) => (
+                                  <Box
+                                    key={idx}
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 1,
+                                      py: 0.5,
+                                      px: 1,
+                                      borderRadius: 'sm',
+                                      bgcolor: 'transparent',
+                                      transition: 'opacity 0.2s',
+                                      cursor: 'pointer',
+                                      '&:hover': { opacity: 0.8 }
+                                    }}
+                                    onClick={() => handleToggleMilestone(goal, idx)}
+                                  >
+                                    <Box
+                                      sx={{
+                                        width: 20,
+                                        height: 20,
+                                        border: `2px solid ${area?.color || '#ef4444'}`,
+                                        borderRadius: '4px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        bgcolor: milestone.completed ? area?.color || '#ef4444' : 'transparent',
+                                        flexShrink: 0,
+                                        transition: 'all 0.2s'
+                                      }}
+                                    >
+                                      {milestone.completed && (
+                                        <Box
+                                          component='svg'
+                                          width='14'
+                                          height='14'
+                                          viewBox='0 0 24 24'
+                                          fill='none'
+                                          stroke='white'
+                                          strokeWidth='3'
+                                          strokeLinecap='round'
+                                          strokeLinejoin='round'
+                                        >
+                                          <polyline points='20 6 9 17 4 12' />
+                                        </Box>
+                                      )}
+                                    </Box>
+                                    <Typography
+                                      level='body-xs'
+                                      sx={{
+                                        flex: 1,
+                                        textDecoration: milestone.completed ? 'line-through' : 'none',
+                                        color: milestone.completed ? 'text.tertiary' : 'text.primary',
+                                        fontSize: '0.75rem',
+                                        backgroundColor: 'transparent'
+                                      }}
+                                    >
+                                      {milestone.title}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Stack>
+                            )}
+                          </Box>
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>

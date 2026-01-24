@@ -39,10 +39,19 @@ const SideMenu = () => {
   const { t } = useTranslation()
   const [tasks, setTasks] = React.useState([])
   const [search, setSearch] = React.useState('')
-  const [statusFilter, setStatusFilter] = React.useState('all')
+  const [statusFilter, setStatusFilter] = React.useState('pending')
   const [loading, setLoading] = React.useState(true)
   const [routine, setRoutine] = React.useState(null)
-  const [activeTab, setActiveTab] = React.useState('tasks')
+
+  // Helper function to determine current time period
+  const getCurrentPeriod = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'morning'
+    if (hour < 18) return 'afternoon'
+    return 'evening'
+  }
+
+  const [activeTab, setActiveTab] = React.useState(getCurrentPeriod())
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor))
 
@@ -59,7 +68,6 @@ const SideMenu = () => {
       setRoutine(routineData)
     } catch (error) {
       console.error('Error loading data:', error)
-      // Ensure we stop loading even on error
       setLoading(false)
     } finally {
       setLoading(false)
@@ -219,7 +227,7 @@ const SideMenu = () => {
         p: 2,
         boxShadow: 'sm',
         height: '100%',
-        minHeight: 500, // Ensure valuable height matching the NewsCarousel usually
+        minHeight: 500,
         display: 'flex',
         flexDirection: 'column'
       }}

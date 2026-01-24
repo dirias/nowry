@@ -25,15 +25,16 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import RegisterListPlugin from '../../plugin/RegisterListPlugin'
 import RegisterHorizontalRulePlugin from '../../plugin/RegisterHorizontalRulePlugin'
 import TablePlugin from '../Editor/plugins/TablePlugin'
+import TableActionMenuPlugin from '../Editor/plugins/TableActionMenuPlugin'
 import SlashCommandPlugin from '../Editor/SlashCommandPlugin'
 import WordCountPlugin from '../Editor/WordCountPlugin'
-import SmartPaginationPlugin from '../Editor/plugins/SmartPaginationPlugin'
+import FlowContentPlugin from '../Editor/plugins/FlowContentPlugin'
+import TrailingParagraphPlugin from '../Editor/plugins/TrailingParagraphPlugin'
 import ImageUploadPlugin from '../Editor/plugins/ImageUploadPlugin'
 import CodePastePlugin from '../Editor/plugins/CodePastePlugin'
 import ExitListPlugin from '../Editor/plugins/ExitListPlugin'
 import { HorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
 import { ImageNode } from '../../nodes/ImageNode'
-import { PageNode } from '../../nodes/PageNode'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { CodeNode } from '@lexical/code'
@@ -165,6 +166,8 @@ export default function Editor({
   onFocus,
   onPageCountChange,
   onImageUpload,
+  onTOCChange,
+  onReadingStatsChange,
   pageSize = 'a4',
   pageZoom = 1.0,
   isReadOnly = false
@@ -185,6 +188,19 @@ export default function Editor({
   const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 900 : false))
   const navigate = useNavigate()
   const { t } = useTranslation()
+
+  // Flow content state (no pagination)
+  const [toc, setTOC] = useState([])
+  const [readingStats, setReadingStats] = useState({ wordCount: 0, readingTime: 0, characterCount: 0 })
+
+  // Pass TOC and stats to parent
+  useEffect(() => {
+    if (onTOCChange) onTOCChange(toc)
+  }, [toc, onTOCChange])
+
+  useEffect(() => {
+    if (onReadingStatsChange) onReadingStatsChange(readingStats)
+  }, [readingStats, onReadingStatsChange])
 
   // We keep track of content for auto-save
   // Content is now stored as JSON (Content-First approach)
@@ -275,7 +291,6 @@ export default function Editor({
       namespace: `NowryEditor-${book?._id}`,
       theme: EditorTheme,
       nodes: [
-        PageNode,
         HeadingNode,
         QuoteNode,
         ListNode,
@@ -451,31 +466,14 @@ export default function Editor({
               alignItems: 'center',
               gap: 0,
               transform: `scale(${adjustedZoom})`,
-              transformOrigin: 'top center',
-              // CSS Variables for page styling (not used with MultiPageRendererPlugin)
-              '--page-width': fixedWidth,
-              '--page-height': fixedHeight,
-              '--page-py': fixedPaddingY,
-              '--page-px': fixedPaddingX
+              transformOrigin: 'top center'
             }}
             onContextMenu={handleRightClick}
             ref={containerRef}
           >
             <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  className='editor-content-flat'
-                  role='textbox'
-                  aria-multiline='true'
-                  style={{
-                    outline: 'none',
-                    width: '100%',
-                    minHeight: '100%',
-                    display: 'block'
-                  }}
-                />
-              }
-              placeholder={null}
+              contentEditable={<ContentEditable className='editor-content' role='textbox' aria-multiline='true' />}
+              placeholder={<div className='editor-placeholder'>Start writing your book...</div>}
               ErrorBoundary={EditorErrorBoundary}
             />
           </Box>
@@ -493,16 +491,10 @@ export default function Editor({
           <SlashCommandPlugin />
           <ExitListPlugin />
           <TablePlugin />
+          <TableActionMenuPlugin />
           <WordCountPlugin />
-          <SmartPaginationPlugin
-            key={`pagination-${pageSize}`}
-            pageHeight={toPx(PAGE_SIZES[pageSize]?.height || '297mm')}
-            pageWidth={toPx(PAGE_SIZES[pageSize]?.width || '210mm')}
-            paddingTop={toPx(PAGE_SIZES[pageSize]?.paddingY || '25mm')}
-            paddingBottom={toPx(PAGE_SIZES[pageSize]?.paddingY || '25mm')}
-            paddingX={toPx(PAGE_SIZES[pageSize]?.paddingX || '20mm')}
-            onPageCountChange={handlePageUpdate}
-          />
+          <FlowContentPlugin onTOCChange={setTOC} onProgressChange={setReadingStats} />
+          <TrailingParagraphPlugin />
           <ColumnPlugin />
 
           {/* Overlays */}

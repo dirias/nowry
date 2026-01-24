@@ -17,8 +17,9 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { createPortal } from 'react-dom'
 import { List, ListItem, Typography, Sheet, Box } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { Type, Heading1, Heading2, Heading3, List as ListIcon, ListOrdered, Quote as QuoteIcon, Minus, Code2 } from 'lucide-react'
+import { Type, Heading1, Heading2, Heading3, List as ListIcon, ListOrdered, Quote as QuoteIcon, Minus, Code2, Table } from 'lucide-react'
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '../../plugin/RegisterHorizontalRulePlugin'
+import { INSERT_TABLE_COMMAND } from './plugins/TablePlugin'
 
 /**
  * SlashCommandPlugin - Production-grade slash command menu
@@ -167,6 +168,16 @@ export default function SlashCommandPlugin() {
             $setBlocksType(selection, () => $createCodeNode())
           }
         })
+      }
+    },
+    {
+      key: 'table',
+      label: t('editor.slashCommands.table', 'Table'),
+      description: t('editor.slashCommands.tableDesc', 'Insert a table'),
+      icon: Table,
+      aliases: ['table', 'grid'],
+      execute: (editor) => {
+        editor.dispatchCommand(INSERT_TABLE_COMMAND, { columns: '2', rows: '2' })
       }
     },
     {

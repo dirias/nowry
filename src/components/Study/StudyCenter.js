@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Typography, Box, Card, CardContent, Stack, Button, Chip, Grid, LinearProgress } from '@mui/joy'
+import { Container, Typography, Box, Card, CardContent, Stack, Button, Chip, Grid, LinearProgress, Divider } from '@mui/joy'
 import { School, Quiz as QuizIcon, Style, AccountTree, TrendingUp, CalendarToday } from '@mui/icons-material'
 import { decksService, cardsService } from '../../api/services'
 import { useTranslation } from 'react-i18next'
@@ -123,173 +123,189 @@ export default function StudyCenter() {
   }
 
   return (
-    <Container maxWidth='xl' sx={{ py: 4 }}>
+    <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
       {/* Header */}
-      <Stack spacing={4} sx={{ mb: 4 }}>
+      <Stack spacing={1.5} sx={{ mb: 1.5 }}>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           justifyContent='space-between'
-          alignItems={{ xs: 'center', md: 'center' }}
-          spacing={2}
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+          spacing={0.5}
           sx={{ width: '100%' }}
         >
-          {/* Left: Title */}
-          <Typography level='h2' fontWeight={600} sx={{ mb: 0.5 }}>
+          {/* Title */}
+          <Typography level='h2' fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}>
             {t('study.title')}
           </Typography>
 
-          {/* Center: Subtitle */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', flex: 1 }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {t('study.subtitle')}
-              {stats.streak > 0 && (
-                <Typography component='span' level='body-xs' sx={{ color: 'warning.plainColor' }}>
-                  • 🔥 {stats.streak} {t('profile.stats.days')}
-                </Typography>
-              )}
-            </Typography>
-          </Box>
-
-          {/* Mobile Only Subtitle */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, width: '100%', justifyContent: 'center' }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
-              {t('study.subtitle')}
-            </Typography>
-          </Box>
-
-          {/* Empty Right Side to Balance Layout if needed, or just let it expand */}
-          <Box sx={{ width: { xs: 0, md: 'auto' } }} />
+          {/* Subtitle */}
+          <Typography level='body-sm' sx={{ color: 'text.tertiary', fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+            {t('study.subtitle')}
+          </Typography>
         </Stack>
 
-        {/* Stats Dashboard */}
-        <Grid container spacing={2} sx={{ mb: 4, display: { xs: 'none', md: 'flex' } }}>
-          <Grid xs={12} sm={6} md={3}>
-            <Card variant='soft' color='danger'>
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'danger.solidBg',
-                      color: 'danger.solidColor'
-                    }}
-                  >
-                    <TrendingUp />
-                  </Box>
-                  <Box>
-                    <Typography level='h3' fontWeight={700} sx={{ color: 'danger.solidBg' }}>
-                      {stats.dueToday}
-                    </Typography>
-                    <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
-                      {t('study.stats.dueToday')}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
+        {/* Stats Dashboard - Compact Minimalistic Design */}
+        <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 2 }}>
+          <Grid xs={3} sm={3} md={3}>
+            <Box
+              sx={{
+                py: 1.5,
+                px: 1,
+                borderRadius: 'sm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                minHeight: { xs: 80, md: 90 },
+                transition: 'all 0.15s',
+                bgcolor: 'transparent',
+                '&:hover': {
+                  bgcolor: 'primary.softBg'
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                <TrendingUp sx={{ fontSize: 20, color: 'primary.solidBg', opacity: 0.7 }} />
+                <Typography
+                  level='h2'
+                  sx={{
+                    color: 'text.primary',
+                    lineHeight: 1,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  {stats.dueToday}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+                {t('study.stats.dueToday')}
+              </Typography>
+            </Box>
           </Grid>
 
-          <Grid xs={12} sm={6} md={3}>
-            <Card variant='soft' color='success'>
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'success.solidBg',
-                      color: 'success.solidColor'
-                    }}
-                  >
-                    <School />
-                  </Box>
-                  <Box>
-                    <Typography level='h3' fontWeight={700} sx={{ color: 'success.solidBg' }}>
-                      {stats.reviewedToday}
-                    </Typography>
-                    <Typography level='body-sm' sx={{ color: 'success.plainColor' }}>
-                      {t('study.stats.reviewedToday')}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
+          <Grid xs={3} sm={3} md={3}>
+            <Box
+              sx={{
+                py: 1.5,
+                px: 1,
+                borderRadius: 'sm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                minHeight: { xs: 80, md: 90 },
+                transition: 'all 0.15s',
+                bgcolor: 'transparent',
+                '&:hover': {
+                  bgcolor: 'success.softBg'
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                <School sx={{ fontSize: 20, color: 'success.solidBg', opacity: 0.7 }} />
+                <Typography
+                  level='h2'
+                  sx={{
+                    color: 'text.primary',
+                    lineHeight: 1,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  {stats.reviewedToday}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+                {t('study.stats.reviewedToday')}
+              </Typography>
+            </Box>
           </Grid>
 
-          <Grid xs={12} sm={6} md={3}>
-            <Card variant='soft' color='primary'>
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'primary.solidBg',
-                      color: 'primary.solidColor'
-                    }}
-                  >
-                    <Style />
-                  </Box>
-                  <Box>
-                    <Typography level='h3' fontWeight={700} sx={{ color: 'primary.solidBg' }}>
-                      {stats.totalActive}
-                    </Typography>
-                    <Typography level='body-sm' sx={{ color: 'primary.plainColor' }}>
-                      {t('study.stats.totalCards')}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
+          <Grid xs={3} sm={3} md={3}>
+            <Box
+              sx={{
+                py: 1.5,
+                px: 1,
+                borderRadius: 'sm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                minHeight: { xs: 80, md: 90 },
+                transition: 'all 0.15s',
+                bgcolor: 'transparent',
+                '&:hover': {
+                  bgcolor: 'neutral.softBg'
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                <Style sx={{ fontSize: 20, color: 'neutral.solidBg', opacity: 0.7 }} />
+                <Typography
+                  level='h2'
+                  sx={{
+                    color: 'text.primary',
+                    lineHeight: 1,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  {stats.totalActive}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+                {t('study.stats.totalCards')}
+              </Typography>
+            </Box>
+          </Grid>
+
+          <Grid xs={3} sm={3} md={3}>
+            <Box
+              sx={{
+                py: 1.5,
+                px: 1,
+                borderRadius: 'sm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                minHeight: { xs: 80, md: 90 },
+                transition: 'all 0.15s',
+                bgcolor: 'transparent',
+                '&:hover': {
+                  bgcolor: 'warning.softBg'
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                <CalendarToday sx={{ fontSize: 20, color: 'warning.solidBg', opacity: 0.7 }} />
+                <Typography
+                  level='h2'
+                  sx={{
+                    color: 'text.primary',
+                    lineHeight: 1,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  {stats.streak}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+                {t('profile.stats.days')}
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
-
-        {/* Minimalist Stats (Mobile) */}
-        <Stack direction='row' spacing={1} sx={{ mb: 4, display: { xs: 'flex', md: 'none' } }}>
-          <Card
-            variant='soft'
-            color='danger'
-            sx={{ flex: 1, p: 1.5, alignItems: 'center', textAlign: 'center', flexDirection: 'column', gap: 0.5 }}
-          >
-            <TrendingUp sx={{ fontSize: 20, color: 'danger.solidBg', mb: 0.5 }} />
-            <Typography level='h3' fontWeight={700} sx={{ color: 'danger.solidBg', lineHeight: 1 }}>
-              {stats.dueToday}
-            </Typography>
-            <Typography level='body-xs' fontWeight={600} sx={{ color: 'danger.plainColor', fontSize: '0.7rem' }}>
-              {t('study.stats.dueToday')}
-            </Typography>
-          </Card>
-
-          <Card
-            variant='soft'
-            color='success'
-            sx={{ flex: 1, p: 1.5, alignItems: 'center', textAlign: 'center', flexDirection: 'column', gap: 0.5 }}
-          >
-            <School sx={{ fontSize: 20, color: 'success.solidBg', mb: 0.5 }} />
-            <Typography level='h3' fontWeight={700} sx={{ color: 'success.solidBg', lineHeight: 1 }}>
-              {stats.reviewedToday}
-            </Typography>
-            <Typography level='body-xs' fontWeight={600} sx={{ color: 'success.plainColor', fontSize: '0.7rem' }}>
-              {t('study.stats.reviewedToday')}
-            </Typography>
-          </Card>
-
-          <Card
-            variant='soft'
-            color='primary'
-            sx={{ flex: 1, p: 1.5, alignItems: 'center', textAlign: 'center', flexDirection: 'column', gap: 0.5 }}
-          >
-            <Style sx={{ fontSize: 20, color: 'primary.solidBg', mb: 0.5 }} />
-            <Typography level='h3' fontWeight={700} sx={{ color: 'primary.solidBg', lineHeight: 1 }}>
-              {stats.totalActive}
-            </Typography>
-            <Typography level='body-xs' fontWeight={600} sx={{ color: 'primary.plainColor', fontSize: '0.7rem' }}>
-              {t('study.stats.totalCards')}
-            </Typography>
-          </Card>
-        </Stack>
       </Stack>
+
+      {/* Subtle Divider for Visual Separation */}
+      <Divider sx={{ my: 3, opacity: 0.3 }} />
 
       {/* Quick Start Actions */}
       {stats.dueToday > 0 && (
@@ -326,14 +342,16 @@ export default function StudyCenter() {
       )}
 
       {/* Study by Type */}
-      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 3 }}>
-        <Typography level='h4' fontWeight={600}>
+      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, mt: 1 }}>
+        <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
           {t('study.byType')}
         </Typography>
 
         {/* Swipe Hint (Mobile) */}
         <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1, color: 'text.tertiary' }}>
-          <Typography level='body-xs'>Swipe to navigate</Typography>
+          <Typography level='body-xs' sx={{ fontSize: '0.7rem' }}>
+            Swipe to navigate
+          </Typography>
         </Box>
       </Stack>
 

@@ -43,7 +43,7 @@ export default function DecksView({ decks = [], cards = [], onStudy, onEdit, onD
         justifyContent: 'center'
       }}
     >
-      <Grid container spacing={3} sx={{ width: '100%' }}>
+      <Grid container spacing={{ xs: 1, md: 1.5 }} sx={{ width: '100%' }}>
         {decks.map((deck, idx) => (
           <Grid key={deck._id || idx} xs={12} sm={6} md={4} lg={3}>
             <Deck deck={deck} cards={cards} onStudy={onStudy} onEdit={onEdit} onDelete={onDelete} onPreview={onPreview} viewMode='grid' />

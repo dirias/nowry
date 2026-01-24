@@ -21,7 +21,7 @@ import {
   Grid,
   Divider
 } from '@mui/joy'
-import { Search, Add, GridView, ViewList, FilterList, TrendingUp, School, Download, MoreVert } from '@mui/icons-material'
+import { Search, Add, GridView, ViewList, FilterList, TrendingUp, School, Download, MoreVert, CalendarToday } from '@mui/icons-material'
 import DecksView from './DecksView'
 import CreateDeckModal from './CreateDeckModal'
 import CreateCardModal from './CreateCardModal'
@@ -209,125 +209,175 @@ export default function CardHome() {
   const filteredDecks = getFilteredDecks()
 
   return (
-    <Container maxWidth='xl' sx={{ py: 4 }}>
+    <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
       {/* Header */}
-      <Stack spacing={4} sx={{ mb: 4 }}>
-        {/* Title Row */}
+      <Stack spacing={1.5} sx={{ mb: 1.5 }}>
         {/* Title Row */}
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           justifyContent='space-between'
-          alignItems={{ xs: 'center', md: 'center' }}
-          spacing={2}
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+          spacing={{ xs: 1.5, md: 0.5 }}
           sx={{ width: '100%' }}
         >
-          {/* Left: Title */}
-          <Typography level='h2' fontWeight={600}>
-            {t('cards.title')}
-          </Typography>
-
-          {/* Center: Subtitle */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', flex: 1 }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {t('cards.subtitle')}
-              {stats.streak > 0 && (
-                <Typography component='span' level='body-xs' sx={{ color: 'warning.plainColor' }}>
-                  • 🔥 {stats.streak} {t('profile.stats.days')}
-                </Typography>
-              )}
+          {/* Title & Subtitle */}
+          <Box>
+            <Typography level='h2' fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' }, mb: 0.25 }}>
+              {t('cards.title')}
             </Typography>
-          </Box>
-
-          {/* Mobile Only Subtitle (stacked) */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, width: '100%', justifyContent: 'center' }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
               {t('cards.subtitle')}
             </Typography>
           </Box>
 
-          {/* Right: Buttons */}
+          {/* Action Buttons */}
           <Stack direction='row' spacing={1}>
-            <Button startDecorator={<TrendingUp />} onClick={() => navigate('/study')} variant='solid' color='primary' size='lg'>
+            <Button
+              startDecorator={<TrendingUp />}
+              onClick={() => navigate('/study')}
+              variant='solid'
+              color='primary'
+              size='sm'
+              sx={{ fontSize: '0.8125rem' }}
+            >
               {t('cards.studyCenter')}
             </Button>
-            <Button startDecorator={<Add />} onClick={() => setShowCreateDeck(true)} variant='soft' color='primary' size='lg'>
+            <Button
+              startDecorator={<Add />}
+              onClick={() => setShowCreateDeck(true)}
+              variant='outlined'
+              color='primary'
+              size='sm'
+              sx={{ fontSize: '0.8125rem' }}
+            >
               {t('cards.newDeck')}
             </Button>
           </Stack>
         </Stack>
 
-        {/* Stats Dashboard */}
-        <Box>
-          {/* Desktop/Tablet Stats */}
-          <Grid container spacing={2} sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <Grid xs={12} sm={6}>
-              <Card variant='soft' color='danger'>
-                <CardContent>
-                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                    <Box>
-                      <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
-                        {t('cards.dueToday')}
-                      </Typography>
-                      <Typography level='h2' sx={{ color: 'danger.solidBg' }}>
-                        {stats.dueToday}
-                      </Typography>
-                    </Box>
-                    <School sx={{ fontSize: 40, opacity: 0.5, color: 'danger.solidBg' }} />
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid xs={12} sm={6}>
-              <Card variant='soft' color='neutral'>
-                <CardContent>
-                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                    <Box>
-                      <Typography level='body-sm' sx={{ color: 'neutral.plainColor' }}>
-                        {t('cards.totalCards')}
-                      </Typography>
-                      <Typography level='h2' sx={{ color: 'neutral.solidBg' }}>
-                        {stats.totalCards}
-                      </Typography>
-                    </Box>
-                    <GridView sx={{ fontSize: 40, opacity: 0.5, color: 'neutral.solidBg' }} />
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          {/* Mobile Stats (Compact Row) */}
-          <Stack direction='row' spacing={1} sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <Card
-              variant='soft'
-              color='danger'
-              sx={{ flex: 1, p: 1.5, alignItems: 'center', textAlign: 'center', flexDirection: 'column', gap: 0.5 }}
+        {/* Stats Dashboard - Compact Minimalistic Design */}
+        <Grid container spacing={{ xs: 2, md: 3 }}>
+          <Grid xs={4} sm={4} md={4}>
+            <Box
+              sx={{
+                py: 1.5,
+                px: 1,
+                borderRadius: 'sm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                minHeight: { xs: 80, md: 90 },
+                transition: 'all 0.15s',
+                bgcolor: 'transparent',
+                '&:hover': {
+                  bgcolor: 'danger.softBg'
+                }
+              }}
             >
-              <School sx={{ fontSize: 20, color: 'danger.solidBg', mb: 0.5 }} />
-              <Typography level='h3' fontWeight={700} sx={{ color: 'danger.solidBg', lineHeight: 1 }}>
-                {stats.dueToday}
-              </Typography>
-              <Typography level='body-xs' fontWeight={600} sx={{ color: 'danger.plainColor', fontSize: '0.7rem' }}>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                <School sx={{ fontSize: 20, color: 'danger.solidBg', opacity: 0.7 }} />
+                <Typography
+                  level='h2'
+                  sx={{
+                    color: 'text.primary',
+                    lineHeight: 1,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  {stats.dueToday}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
                 {t('cards.dueToday')}
               </Typography>
-            </Card>
+            </Box>
+          </Grid>
 
-            <Card
-              variant='soft'
-              color='neutral'
-              sx={{ flex: 1, p: 1.5, alignItems: 'center', textAlign: 'center', flexDirection: 'column', gap: 0.5 }}
+          <Grid xs={4} sm={4} md={4}>
+            <Box
+              sx={{
+                py: 1.5,
+                px: 1,
+                borderRadius: 'sm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                minHeight: { xs: 80, md: 90 },
+                transition: 'all 0.15s',
+                bgcolor: 'transparent',
+                '&:hover': {
+                  bgcolor: 'neutral.softBg'
+                }
+              }}
             >
-              <GridView sx={{ fontSize: 20, color: 'neutral.solidBg', mb: 0.5 }} />
-              <Typography level='h3' fontWeight={700} sx={{ color: 'neutral.solidBg', lineHeight: 1 }}>
-                {stats.totalCards}
-              </Typography>
-              <Typography level='body-xs' fontWeight={600} sx={{ color: 'neutral.plainColor', fontSize: '0.7rem' }}>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                <GridView sx={{ fontSize: 20, color: 'neutral.solidBg', opacity: 0.7 }} />
+                <Typography
+                  level='h2'
+                  sx={{
+                    color: 'text.primary',
+                    lineHeight: 1,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  {stats.totalCards}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
                 {t('cards.totalCards')}
               </Typography>
-            </Card>
-          </Stack>
-        </Box>
+            </Box>
+          </Grid>
+
+          <Grid xs={4} sm={4} md={4}>
+            <Box
+              sx={{
+                py: 1.5,
+                px: 1,
+                borderRadius: 'sm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                minHeight: { xs: 80, md: 90 },
+                transition: 'all 0.15s',
+                bgcolor: 'transparent',
+                '&:hover': {
+                  bgcolor: 'warning.softBg'
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                <CalendarToday sx={{ fontSize: 20, color: 'warning.solidBg', opacity: 0.7 }} />
+                <Typography
+                  level='h2'
+                  sx={{
+                    color: 'text.primary',
+                    lineHeight: 1,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  {stats.streak}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+                {t('profile.stats.days')}
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
       </Stack>
+
+      {/* Subtle Divider for Visual Separation */}
+      <Divider sx={{ my: 3, opacity: 0.3 }} />
 
       {/* Mobile Tabs (Segmented Control) */}
       <Box

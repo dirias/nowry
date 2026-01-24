@@ -31,6 +31,8 @@ const FocusAreaSetup = () => {
   const navigate = useNavigate()
   const [activeStep, setActiveStep] = useState(0)
   const [planId, setPlanId] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   const [areas, setAreas] = useState([
     { name: '', description: '', icon: '⭐', color: COLORS[0] },
@@ -38,16 +40,57 @@ const FocusAreaSetup = () => {
     { name: '', description: '', icon: '💰', color: COLORS[2] }
   ])
 
+  // Always maintain exactly 3 focus areas
+  const REQUIRED_AREAS_COUNT = 3
+
   useEffect(() => {
     fetchPlan()
   }, [])
 
   const fetchPlan = async () => {
     try {
+      setLoading(true)
       const plan = await annualPlanningService.getAnnualPlan(new Date().getFullYear())
       setPlanId(plan._id)
+
+      // Try to load existing focus areas
+      try {
+        const existingAreas = await annualPlanningService.getFocusAreas(plan._id)
+        if (existingAreas && existingAreas.length > 0) {
+          // Edit mode: load existing areas
+          setIsEditMode(true)
+
+          // Ensure we always have exactly 3 areas
+          const loadedAreas = existingAreas.slice(0, REQUIRED_AREAS_COUNT).map((area) => ({
+            _id: area._id, // Keep the ID for updating
+            name: area.name,
+            description: area.description,
+            icon: area.icon,
+            color: area.color,
+            order: area.order
+          }))
+
+          // Fill in missing slots with empty templates if needed
+          while (loadedAreas.length < REQUIRED_AREAS_COUNT) {
+            const index = loadedAreas.length
+            loadedAreas.push({
+              name: '',
+              description: '',
+              icon: ICONS[index],
+              color: COLORS[index]
+            })
+          }
+
+          setAreas(loadedAreas)
+        }
+      } catch (error) {
+        // No existing areas, stay in create mode
+        console.log('No existing areas found, starting fresh')
+      }
     } catch (error) {
       console.error('Failed to init setup', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -72,17 +115,30 @@ const FocusAreaSetup = () => {
     if (!planId) return
 
     try {
-      // Create all 3 areas
-      for (let i = 0; i < areas.length; i++) {
-        await annualPlanningService.createFocusArea({
-          annual_plan_id: planId,
-          name: areas[i].name,
-          description: areas[i].description,
-          icon: areas[i].icon,
-          color: areas[i].color,
-          order: i + 1
-        })
+      // Always save exactly 3 areas
+      for (let i = 0; i < REQUIRED_AREAS_COUNT; i++) {
+        if (areas[i]._id) {
+          // Update existing area
+          await annualPlanningService.updateFocusArea(areas[i]._id, {
+            name: areas[i].name,
+            description: areas[i].description,
+            icon: areas[i].icon,
+            color: areas[i].color,
+            order: i + 1
+          })
+        } else {
+          // Create new area (only if one doesn't exist yet)
+          await annualPlanningService.createFocusArea({
+            annual_plan_id: planId,
+            name: areas[i].name,
+            description: areas[i].description,
+            icon: areas[i].icon,
+            color: areas[i].color,
+            order: i + 1
+          })
+        }
       }
+
       navigate('/annual-planning')
     } catch (error) {
       console.error('Failed to save focus areas:', error)
@@ -92,10 +148,12 @@ const FocusAreaSetup = () => {
   const renderIntro = () => (
     <Box sx={{ textAlign: 'center', maxWidth: 600, mx: 'auto', mt: 4 }}>
       <Typography level='h1' sx={{ mb: 2 }}>
-        {t('annualPlanning.focusArea.setup.intro.title')}
+        {isEditMode ? 'Edit Your Focus Areas' : t('annualPlanning.focusArea.setup.intro.title')}
       </Typography>
       <Typography level='body-lg' sx={{ mb: 4 }}>
-        {t('annualPlanning.focusArea.setup.intro.message')}
+        {isEditMode
+          ? 'Review and update your focus areas. Make changes to names, descriptions, icons, or colors to better reflect your current priorities.'
+          : t('annualPlanning.focusArea.setup.intro.message')}
       </Typography>
       <Card variant='soft' color='primary' sx={{ mb: 4, textAlign: 'left' }}>
         <CardContent>
@@ -112,7 +170,7 @@ const FocusAreaSetup = () => {
         </CardContent>
       </Card>
       <Button size='lg' endDecorator={<ArrowForwardIcon />} onClick={() => setActiveStep(1)}>
-        Let&apos;s Start
+        {isEditMode ? 'Review & Edit' : "Let's Start"}
       </Button>
     </Box>
   )
@@ -220,7 +278,7 @@ const FocusAreaSetup = () => {
           Back
         </Button>
         <Button size='lg' startDecorator={<CheckIcon />} onClick={handleSubmit}>
-          Finalize Plan
+          {isEditMode ? 'Save Changes' : 'Finalize Plan'}
         </Button>
       </Box>
     </Box>
@@ -228,13 +286,24 @@ const FocusAreaSetup = () => {
 
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
-      <LinearProgress determinate value={((activeStep + 1) / 5) * 100} thickness={4} sx={{ mb: 4, maxWidth: 800, mx: 'auto' }} />
+      {loading ? (
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <LinearProgress />
+          <Typography level='body-sm' sx={{ mt: 2 }}>
+            Loading your plan...
+          </Typography>
+        </Box>
+      ) : (
+        <>
+          <LinearProgress determinate value={((activeStep + 1) / 5) * 100} thickness={4} sx={{ mb: 4, maxWidth: 800, mx: 'auto' }} />
 
-      {activeStep === 0 && renderIntro()}
-      {activeStep === 1 && renderAreaStep(0)}
-      {activeStep === 2 && renderAreaStep(1)}
-      {activeStep === 3 && renderAreaStep(2)}
-      {activeStep === 4 && renderReview()}
+          {activeStep === 0 && renderIntro()}
+          {activeStep === 1 && renderAreaStep(0)}
+          {activeStep === 2 && renderAreaStep(1)}
+          {activeStep === 3 && renderAreaStep(2)}
+          {activeStep === 4 && renderReview()}
+        </>
+      )}
     </Container>
   )
 }

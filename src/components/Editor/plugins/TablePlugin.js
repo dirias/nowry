@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getSelection, $insertNodes, createCommand } from 'lexical'
+import { $getSelection, $insertNodes, $createParagraphNode, createCommand } from 'lexical'
 import { TableNode, TableCellNode, TableRowNode } from '@lexical/table'
 import { useEffect } from 'react'
 
@@ -15,8 +15,8 @@ export default function TablePlugin() {
       INSERT_TABLE_COMMAND,
       (payload) => {
         editor.update(() => {
-          const rows = payload?.rows || 3
-          const columns = payload?.columns || 3
+          const rows = payload?.rows || 2
+          const columns = payload?.columns || 2
 
           const table = new TableNode()
           for (let i = 0; i < rows; i++) {
@@ -30,7 +30,19 @@ export default function TablePlugin() {
 
           const selection = $getSelection()
           if (selection) {
-            $insertNodes([table])
+            // Insert table and a paragraph after it for continued editing
+            const paragraph = $createParagraphNode()
+            $insertNodes([table, paragraph])
+
+            // Move cursor to the first cell
+            setTimeout(() => {
+              editor.update(() => {
+                const firstCell = table.getFirstChild()?.getFirstChild()
+                if (firstCell) {
+                  firstCell.selectStart()
+                }
+              })
+            }, 0)
           }
         })
         return true

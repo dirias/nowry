@@ -46,10 +46,10 @@
     "title": "Centro de Estudio",
     "subtitle": "Tu centro de aprendizaje personalizado",
     "stats": {
-      "dueToday": "Para hoy",
-      "reviewedToday": "Estudiadas hoy",
-      "dayStreak": "Racha (días)",
-      "totalCards": "Total Tarjetas"
+      "dueToday": "Pendientes",
+      "reviewedToday": "Estudiadas",
+      "dayStreak": "Racha",
+      "totalCards": "Total"
     },
     "byType": "Estudiar por Tipo",
     "types": {
@@ -98,8 +98,17 @@
     },
     "errors": {
       "loginFailed": "Fallo al iniciar sesión. Verifique sus credenciales.",
+      "unableToSignIn": "No se puede iniciar sesión",
+      "invalidCredentials": "Email o contraseña incorrectos. Por favor verifica e intenta de nuevo.",
+      "accountDisabled": "Esta cuenta ha sido deshabilitada. Por favor contacta soporte para asistencia.",
+      "tooManyAttempts": "Demasiados intentos fallidos. Por favor intenta de nuevo en unos minutos.",
+      "networkError": "Fallo de conexión de red. Por favor verifica tu internet e intenta de nuevo.",
+      "googleCancelled": "Inicio de sesión cancelado. Por favor intenta de nuevo si deseas continuar.",
+      "popupBlocked": "La ventana de inicio de sesión fue bloqueada. Por favor permite las ventanas emergentes para este sitio.",
+      "accountExistsDifferent": "Ya existe una cuenta con este email usando un método de inicio de sesión diferente.",
       "usernameRequired": "El nombre de usuario es obligatorio",
       "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "Por favor ingresa una dirección de correo válida",
       "passwordRequired": "La contraseña es obligatoria",
       "passwordLength": "La contraseña debe tener al menos 8 caracteres",
       "passwordMismatch": "Las contraseñas no coinciden",
@@ -294,7 +303,7 @@
       "totalCards": "Total de Tarjetas",
       "booksCreated": "Libros Creados",
       "studyStreak": "Racha de Estudio",
-      "days": "días"
+      "days": "Racha"
     }
   },
   "settings": {
@@ -351,6 +360,11 @@
     "dailyFocus": {
       "allCaughtUp": "🎉 ¡Todo al día!",
       "noDueCards": "No tienes tarjetas pendientes. ¡Buen trabajo!",
+      "cardDue": "tarjeta pendiente",
+      "cardsDue": "tarjetas pendientes",
+      "readyToReview": "Listas para repasar",
+      "reviewCount": "Repasar {{count}} tarjeta",
+      "reviewCount_plural": "Repasar {{count}} tarjetas",
       "reviewToday": "📚 Hoy podrías repasar",
       "cardsPending": "{{count}} tarjeta pendiente",
       "cardsPending_other": "{{count}} tarjetas pendientes",

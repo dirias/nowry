@@ -28,6 +28,7 @@ export default function StudySession() {
   const [mermaidSvg, setMermaidSvg] = useState('')
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [reviewQueue, setReviewQueue] = useState([]) // Queue failed reviews for retry
   const [voiceSettings, setVoiceSettings] = useState({
     front: { voiceName: null, rate: 1.0, pitch: 1.0 },
     back: { voiceName: null, rate: 1.0, pitch: 1.0 }
@@ -44,6 +45,39 @@ export default function StudySession() {
     fetchDeckCards()
     fetchDeckSettings()
   }, [deckId])
+
+  // Retry failed reviews in background
+  useEffect(() => {
+    if (reviewQueue.length === 0) return
+
+    const retryFailedReviews = async () => {
+      const pendingReviews = [...reviewQueue]
+
+      for (const review of pendingReviews) {
+        if (review.retryCount >= 3) {
+          // Max retries reached, remove from queue
+          console.error('Max retries reached for review:', review.cardId)
+          setReviewQueue((prev) => prev.filter((r) => r !== review))
+          continue
+        }
+
+        try {
+          await cardsService.review(review.cardId, review.grade)
+          // Success! Remove from queue
+          setReviewQueue((prev) => prev.filter((r) => r !== review))
+          console.log('Successfully synced queued review:', review.cardId)
+        } catch (error) {
+          // Failed again, increment retry count
+          setReviewQueue((prev) => prev.map((r) => (r === review ? { ...r, retryCount: r.retryCount + 1 } : r)))
+          console.warn('Retry failed, will try again:', review.cardId)
+        }
+      }
+    }
+
+    // Retry after 5 seconds
+    const retryTimer = setTimeout(retryFailedReviews, 5000)
+    return () => clearTimeout(retryTimer)
+  }, [reviewQueue])
 
   useEffect(() => {
     // Render Mermaid diagram for visual cards
@@ -135,13 +169,96 @@ export default function StudySession() {
 
   const handleGrade = async (grade) => {
     const currentCard = cards[currentIndex]
+    const cardId = currentCard._id || currentCard.id
 
-    try {
-      await cardsService.review(currentCard._id || currentCard.id, grade)
-    } catch (error) {
-      console.error('Error reviewing card:', error)
+    // OPTIMISTIC UPDATE: Calculate SM-2 locally for instant feedback
+    const currentEaseFactor = currentCard.ease_factor || 2.5
+    const currentInterval = currentCard.interval || 1
+    const currentRepetitions = currentCard.repetitions || 0
+
+    // Simple SM-2 calculation (client-side estimation)
+    const gradeMap = { again: 0, hard: 3, good: 4, easy: 5 }
+    const quality = gradeMap[grade]
+
+    let newEaseFactor = currentEaseFactor
+    let newInterval = currentInterval
+    let newRepetitions = currentRepetitions
+
+    if (quality < 3) {
+      newRepetitions = 0
+      newInterval = 1
+    } else {
+      newEaseFactor = Math.max(1.3, Math.min(2.5, currentEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))))
+
+      if (currentRepetitions === 0) {
+        newInterval = 1
+      } else if (currentRepetitions === 1) {
+        newInterval = 6
+      } else {
+        newInterval = Math.round(currentInterval * newEaseFactor)
+      }
+
+      newRepetitions = currentRepetitions + 1
     }
+
+    const newNextReview = new Date()
+    newNextReview.setDate(newNextReview.getDate() + newInterval)
+
+    // INSTANT UI UPDATE (Optimistic)
+    const optimisticUpdate = {
+      ...currentCard,
+      last_reviewed: new Date().toISOString(),
+      next_review: newNextReview.toISOString(),
+      ease_factor: parseFloat(newEaseFactor.toFixed(2)),
+      interval: newInterval,
+      repetitions: newRepetitions
+    }
+
+    const updatedCards = [...cards]
+    updatedCards[currentIndex] = optimisticUpdate
+    setCards(updatedCards)
+
+    // Move to next card IMMEDIATELY
     handleNext()
+
+    // BACKGROUND SYNC: Send to backend (fire-and-forget)
+    try {
+      const response = await cardsService.review(cardId, grade)
+
+      // If backend returns different values, update silently
+      if (response && response.sm2_data) {
+        const syncedCards = [...cards]
+        const cardIndex = syncedCards.findIndex((c) => (c._id || c.id) === cardId)
+
+        if (cardIndex !== -1) {
+          syncedCards[cardIndex] = {
+            ...syncedCards[cardIndex],
+            last_reviewed: response.sm2_data.last_reviewed,
+            next_review: response.sm2_data.next_review,
+            ease_factor: response.sm2_data.ease_factor,
+            interval: response.sm2_data.interval,
+            repetitions: response.sm2_data.repetitions
+          }
+          setCards(syncedCards)
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing review to backend:', error)
+
+      // QUEUE FAILED REQUEST for retry
+      setReviewQueue((prev) => [
+        ...prev,
+        {
+          cardId,
+          grade,
+          timestamp: Date.now(),
+          retryCount: 0
+        }
+      ])
+
+      // Note: Keep optimistic update in UI, will retry in background
+      console.warn('Review queued for retry:', cardId, grade)
+    }
   }
 
   const handleNext = () => {
@@ -151,6 +268,7 @@ export default function StudySession() {
       setSelectedAnswer(null)
       setShowExplanation(false)
       setMermaidSvg('')
+      // Don't clear feedback - let it auto-dismiss naturally
     } else {
       setSessionComplete(true)
     }
@@ -163,6 +281,7 @@ export default function StudySession() {
       setSelectedAnswer(null)
       setShowExplanation(false)
       setMermaidSvg('')
+      // Don't clear feedback - let it auto-dismiss naturally
     }
   }
 
@@ -320,20 +439,32 @@ export default function StudySession() {
   const isVisual = currentCard.card_type === 'visual'
 
   const GradingButtons = () => (
-    <Stack direction='row' spacing={1} sx={{ mt: 4, width: '100%' }} justifyContent='center'>
-      <Button size='lg' variant='soft' color='danger' onClick={() => handleGrade('again')} sx={{ flex: 1 }}>
-        Again
-      </Button>
-      <Button size='lg' variant='soft' color='warning' onClick={() => handleGrade('hard')} sx={{ flex: 1 }}>
-        Hard
-      </Button>
-      <Button size='lg' variant='soft' color='success' onClick={() => handleGrade('good')} sx={{ flex: 1 }}>
-        Good
-      </Button>
-      <Button size='lg' variant='solid' color='primary' onClick={() => handleGrade('easy')} sx={{ flex: 1 }}>
-        Easy
-      </Button>
-    </Stack>
+    <Box sx={{ width: '100%' }}>
+      {/* Show pending sync indicator */}
+      {reviewQueue.length > 0 && (
+        <Box sx={{ mb: 2, textAlign: 'center' }}>
+          <Typography level='body-xs' sx={{ color: 'warning.plainColor', opacity: 0.8 }}>
+            ⏳ Syncing {reviewQueue.length} review{reviewQueue.length > 1 ? 's' : ''}...
+          </Typography>
+        </Box>
+      )}
+
+      {/* Grading Buttons */}
+      <Stack direction='row' spacing={1} sx={{ mt: 4, width: '100%' }} justifyContent='center'>
+        <Button size='lg' variant='soft' color='danger' onClick={() => handleGrade('again')} sx={{ flex: 1 }}>
+          Again
+        </Button>
+        <Button size='lg' variant='soft' color='warning' onClick={() => handleGrade('hard')} sx={{ flex: 1 }}>
+          Hard
+        </Button>
+        <Button size='lg' variant='soft' color='success' onClick={() => handleGrade('good')} sx={{ flex: 1 }}>
+          Good
+        </Button>
+        <Button size='lg' variant='solid' color='primary' onClick={() => handleGrade('easy')} sx={{ flex: 1 }}>
+          Easy
+        </Button>
+      </Stack>
+    </Box>
   )
 
   return (
