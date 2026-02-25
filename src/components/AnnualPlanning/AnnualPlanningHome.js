@@ -269,95 +269,114 @@ const AnnualPlanningHome = () => {
         </Stack>
       </Stack>
 
-      {/* Metrics Dashboard */}
+      {/* Metrics Dashboard - Ultra-Compact (Following Design Guidelines 5.6) */}
       <Box sx={{ mb: { xs: 2, md: 3 } }}>
         {/* Desktop View */}
-        <Grid container spacing={{ xs: 1, md: 1.5 }} sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <Grid xs={4}>
-            <Card variant='outlined' sx={{ height: '100%', p: { xs: 0.75, md: 1 } }}>
-              <CardContent sx={{ p: 0 }}>
-                <Typography level='body-xs' textColor='text.tertiary' mb={0.5} sx={{ fontSize: { xs: '0.6rem', md: '0.65rem' } }}>
-                  {t('annualPlanning.home.totalProgress')}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                  <Typography
-                    level='h4'
-                    fontWeight={700}
-                    sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, backgroundColor: 'transparent' }}
-                  >
-                    {metrics.progress}%
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  determinate
-                  value={metrics.progress}
-                  thickness={4}
-                  sx={{
-                    mt: 1,
-                    bgcolor: 'background.level2',
-                    color: 'primary.plainColor',
-                    '--LinearProgress-radius': '2px'
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid xs={4}>
-            <Card variant='outlined' sx={{ height: '100%', p: { xs: 0.75, md: 1 } }}>
-              <CardContent sx={{ p: 0 }}>
-                <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
-                  <Typography level='body-xs' textColor='text.tertiary' sx={{ fontSize: { xs: '0.6rem', md: '0.65rem' } }}>
-                    {t('annualPlanning.home.completedGoals')}
-                  </Typography>
-                  <CheckCircleIcon color='success' sx={{ fontSize: { xs: 16, md: 18 } }} />
-                </Stack>
+        <Stack direction='row' spacing={1} sx={{ display: { xs: 'none', md: 'flex' } }}>
+          <Box
+            sx={{
+              py: 1,
+              px: 1.25,
+              borderRadius: 'sm',
+              border: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.surface',
+              minWidth: 140,
+              transition: 'all 0.2s',
+              '&:hover': {
+                borderColor: 'primary.outlinedBorder',
+                bgcolor: 'background.level1'
+              }
+            }}
+          >
+            <Stack direction='row' alignItems='center' spacing={0.75} mb={0.5}>
+              <TimelineIcon sx={{ fontSize: 14, color: 'text.secondary', opacity: 0.5 }} />
+              <Typography
+                level='body-xs'
+                sx={{
+                  fontSize: '0.625rem',
+                  opacity: 0.7,
+                  color: 'text.tertiary',
+                  textTransform: 'uppercase'
+                }}
+              >
+                {t('annualPlanning.home.totalProgress')}
+              </Typography>
+            </Stack>
+            <Typography
+              level='h2'
+              sx={{
+                fontSize: '1.75rem',
+                fontWeight: 700,
+                lineHeight: 1,
+                mb: 0.75
+              }}
+            >
+              {metrics.progress}%
+            </Typography>
+            <LinearProgress
+              determinate
+              value={metrics.progress}
+              thickness={2}
+              sx={{
+                bgcolor: 'background.level2',
+                color: 'primary.plainColor',
+                '--LinearProgress-radius': '2px'
+              }}
+            />
+          </Box>
+
+          {/* Only show completed goals if user has goals */}
+          {metrics.totalGoals > 0 && (
+            <Box
+              sx={{
+                py: 1,
+                px: 1.25,
+                borderRadius: 'sm',
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'background.surface',
+                minWidth: 140,
+                transition: 'all 0.2s',
+                '&:hover': {
+                  borderColor: 'success.outlinedBorder',
+                  bgcolor: 'background.level1'
+                }
+              }}
+            >
+              <Stack direction='row' alignItems='center' spacing={0.75} mb={0.5}>
+                <CheckCircleIcon sx={{ fontSize: 14, color: 'text.secondary', opacity: 0.5 }} />
                 <Typography
-                  level='h4'
-                  fontWeight={700}
-                  sx={{ mt: 0.5, fontSize: { xs: '1.25rem', md: '1.5rem' }, backgroundColor: 'transparent' }}
+                  level='body-xs'
+                  sx={{
+                    fontSize: '0.625rem',
+                    opacity: 0.7,
+                    color: 'text.tertiary',
+                    textTransform: 'uppercase'
+                  }}
                 >
-                  {metrics.completedGoals}
-                  <Typography level='body-sm' textColor='text.tertiary' component='span' sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}>
-                    /{metrics.totalGoals}
-                  </Typography>
+                  {t('annualPlanning.home.completedGoals')}
                 </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid xs={4}>
-            <Card variant='outlined' sx={{ height: '100%', p: { xs: 0.75, md: 1 } }}>
-              <CardContent sx={{ p: 0 }}>
-                <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={1}>
-                  <Typography level='body-xs' textColor='text.tertiary' sx={{ fontSize: { xs: '0.6rem', md: '0.65rem' } }}>
-                    {t('annualPlanning.home.topPriorities')}
-                  </Typography>
-                  <FlagIcon color='warning' sx={{ fontSize: { xs: 16, md: 18 } }} />
-                </Stack>
-                {priorities.length > 0 ? (
-                  <Stack spacing={0.5}>
-                    {priorities.slice(0, 3).map((p, i) => (
-                      <Stack key={p._id || i} direction='row' spacing={1} alignItems='center'>
-                        <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0 }} />
-                        <Typography level='body-xs' noWrap sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-                          {p.title}
-                        </Typography>
-                      </Stack>
-                    ))}
-                    {priorities.length > 3 && (
-                      <Typography level='body-xs' textColor='text.tertiary' sx={{ fontSize: '0.65rem' }}>
-                        +{priorities.length - 3} more
-                      </Typography>
-                    )}
-                  </Stack>
-                ) : (
-                  <Typography level='body-xs' textColor='text.tertiary' fontStyle='italic' sx={{ fontSize: '0.7rem' }}>
-                    {t('annualPlanning.home.noPrioritiesSet')}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+              </Stack>
+              <Typography
+                level='h2'
+                sx={{
+                  fontSize: '1.75rem',
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  mb: 0.75
+                }}
+              >
+                {metrics.completedGoals}
+                <Typography level='body-sm' textColor='text.tertiary' component='span' sx={{ fontSize: '1rem' }}>
+                  /{metrics.totalGoals}
+                </Typography>
+              </Typography>
+              {/* Empty space to match progress bar height */}
+              <Box sx={{ height: 2 }} />
+            </Box>
+          )}
+        </Stack>
 
         {/* Mobile View: Minimalistic Row */}
         <Card variant='outlined' sx={{ display: { xs: 'flex', md: 'none' }, p: 1.5 }}>
@@ -483,49 +502,105 @@ const AnnualPlanningHome = () => {
           {t('annualPlanning.home.noPrioritiesAdded')}
         </Typography>
       ) : (
-        <Grid container spacing={{ xs: 1.5, md: 2 }}>
-          {priorities.map((priority) => (
-            <Grid key={priority._id} xs={12} md={6}>
-              <Card
-                component={priority.focus_area_id ? Link : 'div'}
-                to={priority.focus_area_id ? `/annual-planning/area/${priority.focus_area_id}` : undefined}
-                variant='outlined'
-                sx={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  p: { xs: 1.5, md: 2 },
-                  textDecoration: 'none',
-                  cursor: priority.focus_area_id ? 'pointer' : 'default',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': priority.focus_area_id
-                    ? {
-                        transform: 'translateY(-1px)',
-                        boxShadow: 'md'
-                      }
-                    : {}
-                }}
-              >
-                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0 }} />
-                <Box>
-                  <Typography level='body-sm' fontWeight={600} sx={{ fontSize: { xs: '0.875rem', md: '0.9375rem' } }}>
-                    {priority.title}
-                  </Typography>
-                  {priority.description && (
-                    <Typography level='body-xs' textColor='text.tertiary' sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-                      {priority.description}
-                    </Typography>
-                  )}
-                </Box>
-                {priority.deadline && (
-                  <Typography level='body-xs' sx={{ ml: 'auto', fontSize: { xs: '0.65rem', md: '0.7rem' } }}>
-                    {new Date(priority.deadline).toLocaleDateString()}
+        <Stack spacing={1}>
+          {priorities.slice(0, 5).map((priority) => (
+            <Box
+              key={priority._id}
+              component={priority.focus_area_id ? Link : 'div'}
+              to={priority.focus_area_id ? `/annual-planning/area/${priority.focus_area_id}` : undefined}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                py: 1,
+                px: 1.5,
+                borderRadius: 'sm',
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'background.surface',
+                textDecoration: 'none',
+                cursor: priority.focus_area_id ? 'pointer' : 'default',
+                transition: 'all 0.2s',
+                '&:hover': priority.focus_area_id
+                  ? {
+                      borderColor: 'warning.outlinedBorder',
+                      bgcolor: 'background.level1'
+                    }
+                  : {}
+              }}
+            >
+              {/* Flag Icon */}
+              <FlagIcon sx={{ fontSize: 18, color: 'warning.plainColor', flexShrink: 0 }} />
+
+              {/* Content */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography level='body-sm' fontWeight={600} sx={{ fontSize: { xs: '0.875rem', md: '0.9375rem' } }}>
+                  {priority.title}
+                </Typography>
+                {priority.description && (
+                  <Typography
+                    level='body-xs'
+                    textColor='text.tertiary'
+                    sx={{
+                      fontSize: { xs: '0.7rem', md: '0.75rem' },
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    {priority.description}
                   </Typography>
                 )}
-              </Card>
-            </Grid>
+              </Box>
+
+              {/* Deadline Badge */}
+              {priority.deadline && (
+                <Box
+                  sx={{
+                    py: 0.5,
+                    px: 1,
+                    borderRadius: 'sm',
+                    bgcolor: 'background.level2',
+                    flexShrink: 0
+                  }}
+                >
+                  <Typography level='body-xs' sx={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                    {new Date(priority.deadline).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Arrow indicator for clickable items */}
+              {priority.focus_area_id && <ArrowForwardIcon sx={{ fontSize: 16, color: 'text.tertiary', flexShrink: 0 }} />}
+            </Box>
           ))}
-        </Grid>
+
+          {/* View All Link - Show when more than 5 priorities */}
+          {priorities.length > 5 && (
+            <Button
+              component={Link}
+              to='/annual-planning'
+              variant='plain'
+              size='sm'
+              endDecorator={<ArrowForwardIcon />}
+              sx={{
+                justifyContent: 'flex-start',
+                pl: 1.5,
+                color: 'text.secondary',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                '&:hover': {
+                  bgcolor: 'background.level1'
+                }
+              }}
+            >
+              {t('annualPlanning.home.viewAllPriorities', { count: priorities.length })}
+            </Button>
+          )}
+        </Stack>
       )}
 
       <PriorityDialog

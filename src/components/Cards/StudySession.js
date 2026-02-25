@@ -442,25 +442,90 @@ export default function StudySession() {
     <Box sx={{ width: '100%' }}>
       {/* Show pending sync indicator */}
       {reviewQueue.length > 0 && (
-        <Box sx={{ mb: 2, textAlign: 'center' }}>
-          <Typography level='body-xs' sx={{ color: 'warning.plainColor', opacity: 0.8 }}>
+        <Box sx={{ mb: 1.5, textAlign: 'center' }}>
+          <Typography level='body-xs' sx={{ color: 'warning.plainColor', opacity: 0.7, fontSize: '0.7rem' }}>
             ⏳ Syncing {reviewQueue.length} review{reviewQueue.length > 1 ? 's' : ''}...
           </Typography>
         </Box>
       )}
 
-      {/* Grading Buttons */}
-      <Stack direction='row' spacing={1} sx={{ mt: 4, width: '100%' }} justifyContent='center'>
-        <Button size='lg' variant='soft' color='danger' onClick={() => handleGrade('again')} sx={{ flex: 1 }}>
+      {/* Grading Buttons - Compact for Mobile */}
+      <Stack direction='row' spacing={{ xs: 0.75, md: 1 }} sx={{ mt: { xs: 2, md: 3 }, width: '100%' }} justifyContent='center'>
+        <Button
+          size='sm'
+          variant='outlined'
+          color='danger'
+          onClick={() => handleGrade('again')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.25 },
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
+            fontWeight: 600,
+            border: '1.5px solid',
+            borderColor: 'danger.outlinedBorder',
+            bgcolor: 'transparent',
+            '&:hover': {
+              bgcolor: 'danger.softBg',
+              borderColor: 'danger.solidBg'
+            }
+          }}
+        >
           Again
         </Button>
-        <Button size='lg' variant='soft' color='warning' onClick={() => handleGrade('hard')} sx={{ flex: 1 }}>
+        <Button
+          size='sm'
+          variant='outlined'
+          color='warning'
+          onClick={() => handleGrade('hard')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.25 },
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
+            fontWeight: 600,
+            border: '1.5px solid',
+            borderColor: 'warning.outlinedBorder',
+            bgcolor: 'transparent',
+            '&:hover': {
+              bgcolor: 'warning.softBg',
+              borderColor: 'warning.solidBg'
+            }
+          }}
+        >
           Hard
         </Button>
-        <Button size='lg' variant='soft' color='success' onClick={() => handleGrade('good')} sx={{ flex: 1 }}>
+        <Button
+          size='sm'
+          variant='outlined'
+          color='success'
+          onClick={() => handleGrade('good')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.25 },
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
+            fontWeight: 600,
+            border: '1.5px solid',
+            borderColor: 'success.outlinedBorder',
+            bgcolor: 'transparent',
+            '&:hover': {
+              bgcolor: 'success.softBg',
+              borderColor: 'success.solidBg'
+            }
+          }}
+        >
           Good
         </Button>
-        <Button size='lg' variant='solid' color='primary' onClick={() => handleGrade('easy')} sx={{ flex: 1 }}>
+        <Button
+          size='sm'
+          variant='solid'
+          color='primary'
+          onClick={() => handleGrade('easy')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.25 },
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
+            fontWeight: 600
+          }}
+        >
           Easy
         </Button>
       </Stack>
@@ -719,12 +784,12 @@ export default function StudySession() {
                   flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  textAlign: 'center',
+                  textAlign: isFlipped ? 'justify' : 'center',
                   height: '100%',
-                  p: 6,
-                  pt: 8, // Ensure top buttons don't overlap text
+                  p: { xs: 3, md: 6 },
+                  pt: { xs: 6, md: 8 },
                   transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                  backfaceVisibility: 'hidden' // Hide back when not flipped (if 2 faces) - simplified here
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 {!isFlipped ? (
@@ -751,11 +816,31 @@ export default function StudySession() {
                   <>
                     <Typography
                       level='body-xs'
-                      sx={{ mb: 3, color: 'success.500', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}
+                      sx={{
+                        mb: { xs: 1.5, md: 2 },
+                        color: 'success.solidBg',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px',
+                        fontSize: { xs: '0.65rem', md: '0.7rem' },
+                        opacity: 0.6
+                      }}
                     >
                       Answer
                     </Typography>
-                    <Typography level='h3' sx={{ wordBreak: 'break-word', fontWeight: 500 }}>
+                    <Typography
+                      level={currentCard.content?.length > 100 ? 'body-lg' : 'h3'}
+                      sx={{
+                        wordBreak: 'break-word',
+                        fontWeight: currentCard.content?.length > 100 ? 400 : 500,
+                        fontSize: currentCard.content?.length > 100 ? { xs: '1rem', md: '1.125rem' } : { xs: '1.5rem', md: '2rem' },
+                        lineHeight: currentCard.content?.length > 100 ? 1.6 : 1.3,
+                        textAlign: 'justify',
+                        width: '100%',
+                        maxWidth: { xs: '100%', md: 600 },
+                        color: 'text.primary'
+                      }}
+                    >
                       {currentCard.content}
                     </Typography>
                     <GradingButtons />

@@ -247,24 +247,24 @@ export default function AccountSettings() {
   const availableInterests = ['Technology', 'Science', 'History', 'Languages', 'Art', 'Mathematics', 'Literature', 'Music']
 
   return (
-    <Container maxWidth='md' sx={{ py: 4 }}>
+    <Container maxWidth='md' sx={{ py: { xs: 2, md: 4 } }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5 }}>
-          ⚙️ {t('settings.title')}
+      <Box sx={{ mb: { xs: 2, md: 3 } }}>
+        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.5rem', md: '2rem' } }}>
+          {t('settings.title')}
         </Typography>
-        <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
           {t('settings.subtitle')}
         </Typography>
       </Box>
 
-      <Stack spacing={3}>
+      <Stack spacing={{ xs: 2, md: 3 }}>
         {/* General Preferences */}
-        <Card>
-          <CardContent>
+        <Card variant='outlined'>
+          <CardContent sx={{ p: { xs: 2, md: 3 } }}>
             <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 3 }}>
-              <Palette color='primary' />
-              <Typography level='h4' fontWeight={600}>
+              <Palette sx={{ color: 'primary.solidBg' }} />
+              <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
                 {t('settings.general.title')}
               </Typography>
             </Stack>
@@ -277,16 +277,16 @@ export default function AccountSettings() {
                 </Typography>
                 <Stack direction='row' spacing={2} alignItems='center'>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LightMode sx={{ color: mode === 'light' ? 'warning.500' : 'neutral.500' }} />
+                    <LightMode sx={{ color: mode === 'light' ? 'warning.solidBg' : 'text.tertiary' }} />
                     <Switch
                       checked={mode === 'dark'}
                       onChange={(event) => setMode(event.target.checked ? 'dark' : 'light')}
                       color={mode === 'dark' ? 'primary' : 'neutral'}
                       variant={mode === 'dark' ? 'solid' : 'outlined'}
                     />
-                    <DarkMode sx={{ color: mode === 'dark' ? 'primary.400' : 'neutral.500' }} />
+                    <DarkMode sx={{ color: mode === 'dark' ? 'primary.solidBg' : 'text.tertiary' }} />
                   </Box>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('settings.general.appearanceDesc')}
                   </Typography>
                 </Stack>
@@ -335,11 +335,12 @@ export default function AccountSettings() {
                       '&:hover': { transform: 'scale(1.1)' }
                     }}
                   >
-                    <input
+                    <Box
+                      component='input'
                       type='color'
                       value={preferences.theme_color}
                       onChange={(e) => handlePreferenceUpdate('theme_color', e.target.value)}
-                      style={{
+                      sx={{
                         position: 'absolute',
                         top: '-50%',
                         left: '-50%',
@@ -350,7 +351,7 @@ export default function AccountSettings() {
                       }}
                     />
                   </Box>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('settings.general.themeColorDesc')}
                   </Typography>
                 </Stack>
@@ -363,7 +364,7 @@ export default function AccountSettings() {
                 <Typography level='title-sm' sx={{ mb: 1 }}>
                   {t('settings.general.interests')}
                 </Typography>
-                <Typography level='body-xs' sx={{ mb: 2, color: 'neutral.600' }}>
+                <Typography level='body-xs' sx={{ mb: 2, color: 'text.secondary' }}>
                   {t('settings.general.interestsDesc')}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -385,11 +386,11 @@ export default function AccountSettings() {
         </Card>
 
         {/* Productivity (Pomodoro) */}
-        <Card>
-          <CardContent>
+        <Card variant='outlined'>
+          <CardContent sx={{ p: { xs: 2, md: 3 } }}>
             <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 3 }}>
-              <Timer color='primary' />
-              <Typography level='h4' fontWeight={600}>
+              <Timer sx={{ color: 'primary.solidBg' }} />
+              <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
                 Productivity
               </Typography>
             </Stack>
@@ -398,7 +399,7 @@ export default function AccountSettings() {
               <Stack direction='row' justifyContent='space-between' alignItems='center'>
                 <Box>
                   <Typography level='title-md'>Enable Productivity Timer</Typography>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     Show timer in header and enable floating widget
                   </Typography>
                 </Box>
@@ -423,7 +424,7 @@ export default function AccountSettings() {
                         sx={{ width: 80 }}
                         slotProps={{ input: { min: 1, max: 60 } }}
                       />
-                      <Typography level='body-sm' textColor='neutral.500'>
+                      <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                         Recommended: 25
                       </Typography>
                     </Stack>
@@ -441,7 +442,7 @@ export default function AccountSettings() {
                         sx={{ width: 80 }}
                         slotProps={{ input: { min: 1, max: 30 } }}
                       />
-                      <Typography level='body-sm' textColor='neutral.500'>
+                      <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                         Recommended: 5
                       </Typography>
                     </Stack>
@@ -459,7 +460,7 @@ export default function AccountSettings() {
                         sx={{ width: 80 }}
                         slotProps={{ input: { min: 5, max: 60 } }}
                       />
-                      <Typography level='body-sm' textColor='neutral.500'>
+                      <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                         Recommended: 15
                       </Typography>
                     </Stack>
@@ -470,7 +471,7 @@ export default function AccountSettings() {
                   <Stack direction='row' justifyContent='space-between' alignItems='center'>
                     <Box>
                       <Typography level='title-sm'>Auto-start Timer</Typography>
-                      <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                      <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                         Automatically start the next timer when one finishes
                       </Typography>
                     </Box>
@@ -486,11 +487,11 @@ export default function AccountSettings() {
         </Card>
 
         {/* Security Section */}
-        <Card>
-          <CardContent>
+        <Card variant='outlined'>
+          <CardContent sx={{ p: { xs: 2, md: 3 } }}>
             <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 3 }}>
-              <Security color='primary' />
-              <Typography level='h4' fontWeight={600}>
+              <Security sx={{ color: 'primary.solidBg' }} />
+              <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
                 {t('settings.security.title')}
               </Typography>
             </Stack>
@@ -524,7 +525,7 @@ export default function AccountSettings() {
                   {passwordData.newPassword && (
                     <Box sx={{ mt: 1 }}>
                       <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.5 }}>
-                        <Typography level='body-xs' sx={{ color: `${passwordStrength.color}.600` }}>
+                        <Typography level='body-xs' color={passwordStrength.color}>
                           {passwordStrength.label}
                         </Typography>
                       </Stack>
@@ -548,6 +549,7 @@ export default function AccountSettings() {
                   onClick={handlePasswordChange}
                   loading={loading}
                   disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                  size='sm'
                 >
                   {t('settings.security.updatePassword')}
                 </Button>
@@ -563,7 +565,7 @@ export default function AccountSettings() {
                   <Typography level='title-md' sx={{ mb: 0.5 }}>
                     {t('settings.security.twoFactor')}
                   </Typography>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('settings.security.twoFactorDesc')}
                   </Typography>
                 </Box>
@@ -573,6 +575,7 @@ export default function AccountSettings() {
                     variant='soft'
                     color='danger'
                     startDecorator={<KeyOff />}
+                    size='sm'
                     onClick={async () => {
                       try {
                         await userService.disable2FA()
@@ -587,7 +590,7 @@ export default function AccountSettings() {
                     {t('settings.security.disable2FA')}
                   </Button>
                 ) : (
-                  <Button variant='soft' color='success' startDecorator={<VpnKey />} onClick={handleEnable2FA} loading={loading}>
+                  <Button variant='soft' color='success' startDecorator={<VpnKey />} onClick={handleEnable2FA} loading={loading} size='sm'>
                     {t('settings.security.enable2FA')}
                   </Button>
                 )}
@@ -597,11 +600,11 @@ export default function AccountSettings() {
         </Card>
 
         {/* Notifications Section */}
-        <Card>
-          <CardContent>
+        <Card variant='outlined'>
+          <CardContent sx={{ p: { xs: 2, md: 3 } }}>
             <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 3 }}>
-              <Notifications color='primary' />
-              <Typography level='h4' fontWeight={600}>
+              <Notifications sx={{ color: 'primary.solidBg' }} />
+              <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
                 {t('settings.notifications.title')}
               </Typography>
             </Stack>
@@ -610,7 +613,7 @@ export default function AccountSettings() {
               <Stack direction='row' justifyContent='space-between' alignItems='center'>
                 <Box>
                   <Typography level='title-sm'>{t('settings.notifications.emailDigest')}</Typography>
-                  <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {t('settings.notifications.emailDigestDesc')}
                   </Typography>
                 </Box>
@@ -620,7 +623,7 @@ export default function AccountSettings() {
               <Stack direction='row' justifyContent='space-between' alignItems='center'>
                 <Box>
                   <Typography level='title-sm'>{t('settings.notifications.studyReminders')}</Typography>
-                  <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {t('settings.notifications.studyRemindersDesc')}
                   </Typography>
                 </Box>
@@ -633,7 +636,7 @@ export default function AccountSettings() {
               <Stack direction='row' justifyContent='space-between' alignItems='center'>
                 <Box>
                   <Typography level='title-sm'>{t('settings.notifications.newsUpdates')}</Typography>
-                  <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {t('settings.notifications.newsUpdatesDesc')}
                   </Typography>
                 </Box>
@@ -643,7 +646,7 @@ export default function AccountSettings() {
               <Stack direction='row' justifyContent='space-between' alignItems='center'>
                 <Box>
                   <Typography level='title-sm'>{t('settings.notifications.marketing')}</Typography>
-                  <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {t('settings.notifications.marketingDesc')}
                   </Typography>
                 </Box>
@@ -669,11 +672,11 @@ export default function AccountSettings() {
                   <Typography level='title-md' sx={{ mb: 0.5 }}>
                     {t('settings.danger.deleteAccount')}
                   </Typography>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('settings.danger.deleteDesc')}
                   </Typography>
                 </Box>
-                <Button variant='soft' color='danger' startDecorator={<Delete />} onClick={() => setShowDeleteConfirm(true)}>
+                <Button variant='soft' color='danger' startDecorator={<Delete />} onClick={() => setShowDeleteConfirm(true)} size='sm'>
                   {t('settings.danger.deleteAccount')}
                 </Button>
               </Stack>

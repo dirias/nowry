@@ -638,6 +638,11 @@
       "editPlan": "Plan Bearbeiten",
       "exportPlan": "Plan Exportieren"
     },
+    "home": {
+      "yearlyPriorities": "Jahresprioritäten",
+      "noPrioritiesAdded": "Noch keine Prioritäten hinzugefügt",
+      "viewAllPriorities": "Alle {{count}} Prioritäten anzeigen →"
+    },
     "deleteConfirm": "Sind Sie sicher, dass Sie dieses {{type}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "celebration": "🎉 Ziel Erreicht! Sie machen erstaunliche Fortschritte!",
     "errors": {

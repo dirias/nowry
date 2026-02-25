@@ -751,6 +751,7 @@
       "focusAreas": "Focus Areas",
       "yearlyPriorities": "Yearly Priorities",
       "noPrioritiesAdded": "No priorities added yet",
+      "viewAllPriorities": "View all {{count}} priorities →",
       "progress": "Progress",
       "save": "Save"
     },

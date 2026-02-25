@@ -180,8 +180,7 @@ const SideMenu = () => {
             justifyContent: 'center',
             alignItems: 'center',
             bgcolor: 'background.level1',
-            borderRadius: 'sm',
-            mt: 2
+            borderRadius: 'sm'
           }}
         >
           <Typography level='body-sm' sx={{ color: 'text.secondary', textAlign: 'center' }}>
@@ -191,7 +190,7 @@ const SideMenu = () => {
       )
     }
     return (
-      <List sx={{ '--ListItem-paddingY': '0.5rem', maxHeight: 400, overflowY: 'auto' }}>
+      <List sx={{ '--ListItem-paddingY': '0.5rem', flex: 1, overflowY: 'auto' }}>
         {items.map((item, index) => (
           <ListItem
             key={index}
@@ -236,7 +235,7 @@ const SideMenu = () => {
         aria-label='Routine and Tasks'
         value={activeTab}
         onChange={(e, val) => setActiveTab(val)}
-        sx={{ bgcolor: 'transparent', height: '100%', display: 'flex', flexDirection: 'column' }}
+        sx={{ bgcolor: 'transparent', height: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}
       >
         <TabList
           disableUnderline
@@ -245,7 +244,8 @@ const SideMenu = () => {
             gap: 0.5,
             borderRadius: 'xl',
             bgcolor: 'background.level1',
-            mb: 2
+            mb: 2,
+            flexShrink: 0
           }}
         >
           <Tab
@@ -298,117 +298,155 @@ const SideMenu = () => {
         {/* Note: TabPanel by default in Joy might not fill height, we use Box to ensure correct scrolling if needed */}
 
         {/* Morning */}
-        <TabPanel value='morning' sx={{ p: 0, flex: 1, overflowY: 'hidden' }}>
-          <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
-            <Typography level='title-md' startDecorator={<WbSunnyIcon color='primary' />}>
-              Morning Routine
-            </Typography>
-            <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
-              <EditRoundedIcon />
-            </IconButton>
-          </Stack>
-          {renderRoutineList(getRoutineItems('morning'), 'morning')}
-        </TabPanel>
+        {activeTab === 'morning' && (
+          <TabPanel
+            value='morning'
+            sx={{
+              p: '0 !important',
+              m: 0,
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
+              <Typography level='title-md' startDecorator={<WbSunnyIcon color='primary' />}>
+                Morning Routine
+              </Typography>
+              <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
+                <EditRoundedIcon />
+              </IconButton>
+            </Stack>
+            {renderRoutineList(getRoutineItems('morning'), 'morning')}
+          </TabPanel>
+        )}
 
         {/* Afternoon */}
-        <TabPanel value='afternoon' sx={{ p: 0, flex: 1, overflowY: 'hidden' }}>
-          <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
-            <Typography level='title-md' startDecorator={<WbTwilightIcon color='primary' />}>
-              Afternoon Routine
-            </Typography>
-            <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
-              <EditRoundedIcon />
-            </IconButton>
-          </Stack>
-          {renderRoutineList(getRoutineItems('afternoon'), 'afternoon')}
-        </TabPanel>
+        {activeTab === 'afternoon' && (
+          <TabPanel
+            value='afternoon'
+            sx={{
+              p: '0 !important',
+              m: 0,
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
+              <Typography level='title-md' startDecorator={<WbTwilightIcon color='primary' />}>
+                Afternoon Routine
+              </Typography>
+              <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
+                <EditRoundedIcon />
+              </IconButton>
+            </Stack>
+            {renderRoutineList(getRoutineItems('afternoon'), 'afternoon')}
+          </TabPanel>
+        )}
 
         {/* Evening */}
-        <TabPanel value='evening' sx={{ p: 0, flex: 1, overflowY: 'hidden' }}>
-          <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
-            <Typography level='title-md' startDecorator={<NightsStayIcon color='primary' />}>
-              Night Routine
-            </Typography>
-            <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
-              <EditRoundedIcon />
-            </IconButton>
-          </Stack>
-          {renderRoutineList(getRoutineItems('evening'), 'evening')}
-        </TabPanel>
+        {activeTab === 'evening' && (
+          <TabPanel
+            value='evening'
+            sx={{
+              p: '0 !important',
+              m: 0,
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
+              <Typography level='title-md' startDecorator={<NightsStayIcon color='primary' />}>
+                Night Routine
+              </Typography>
+              <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
+                <EditRoundedIcon />
+              </IconButton>
+            </Stack>
+            {renderRoutineList(getRoutineItems('evening'), 'evening')}
+          </TabPanel>
+        )}
 
         {/* Tasks */}
-        <TabPanel value='tasks' sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
-          {/* Header & Filter */}
-          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 1 }}>
-            <Typography level='title-md' color='primary'>
-              {t('tasks.title')}
-            </Typography>
+        {activeTab === 'tasks' && (
+          <TabPanel value='tasks' sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Header & Filter */}
+            <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 1 }}>
+              <Typography level='title-md' color='primary'>
+                {t('tasks.title')}
+              </Typography>
 
-            <Select
-              size='sm'
-              variant='soft'
-              value={statusFilter}
-              onChange={(_, val) => setStatusFilter(val)}
-              startDecorator={<FilterAltRoundedIcon fontSize='sm' />}
-              sx={{ width: 130 }}
-            >
-              <Option value='all'>{t('tasks.filter.all')}</Option>
-              <Option value='completed'>{t('tasks.filter.completed')}</Option>
-              <Option value='pending'>{t('tasks.filter.pending')}</Option>
-            </Select>
-          </Stack>
+              <Select
+                size='sm'
+                variant='soft'
+                value={statusFilter}
+                onChange={(_, val) => setStatusFilter(val)}
+                startDecorator={<FilterAltRoundedIcon fontSize='sm' />}
+                sx={{ width: 130 }}
+              >
+                <Option value='all'>{t('tasks.filter.all')}</Option>
+                <Option value='completed'>{t('tasks.filter.completed')}</Option>
+                <Option value='pending'>{t('tasks.filter.pending')}</Option>
+              </Select>
+            </Stack>
 
-          {/* Search / Add Input */}
-          <Box sx={{ position: 'relative', mt: 1, mb: 1 }}>
-            <Input
-              size='sm'
-              placeholder={t('tasks.searchPlaceholder')}
-              startDecorator={<SearchRoundedIcon />}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={handleKeyDown}
-              sx={{ width: '100%' }}
-            />
-            {search && filteredTasks.length === 0 && (
-              <Tooltip title={t('tasks.addTooltip', { title: search })}>
-                <IconButton
-                  onClick={() => addTask(search)}
-                  size='sm'
-                  color='success'
-                  variant='plain'
-                  sx={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)' }}
-                >
-                  <AddRoundedIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
+            {/* Search / Add Input */}
+            <Box sx={{ position: 'relative', mt: 1, mb: 1 }}>
+              <Input
+                size='sm'
+                placeholder={t('tasks.searchPlaceholder')}
+                startDecorator={<SearchRoundedIcon />}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={handleKeyDown}
+                sx={{ width: '100%' }}
+              />
+              {search && filteredTasks.length === 0 && (
+                <Tooltip title={t('tasks.addTooltip', { title: search })}>
+                  <IconButton
+                    onClick={() => addTask(search)}
+                    size='sm'
+                    color='success'
+                    variant='plain'
+                    sx={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)' }}
+                  >
+                    <AddRoundedIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
 
-          {/* Task List */}
-          <Box sx={{ flex: 1, overflowY: 'auto' }}>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={filteredTasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
-                <Stack spacing={1}>
-                  {filteredTasks.length > 0 ? (
-                    filteredTasks.map((task) => (
-                      <SortableTask
-                        key={task._id || task.id}
-                        task={task}
-                        onToggle={() => toggleTask(task)}
-                        onDelete={() => removeTask(task._id || task.id)}
-                        onUpdate={updateTask}
-                      />
-                    ))
-                  ) : (
-                    <Box sx={{ textAlign: 'center', color: 'text.tertiary', py: 3 }}>
-                      <Typography level='body-sm'>{tasks.length === 0 ? t('tasks.empty') : t('tasks.noMatch')}</Typography>
-                    </Box>
-                  )}
-                </Stack>
-              </SortableContext>
-            </DndContext>
-          </Box>
-        </TabPanel>
+            {/* Task List */}
+            <Box sx={{ flex: 1, overflowY: 'auto' }}>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={filteredTasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
+                  <Stack spacing={1}>
+                    {filteredTasks.length > 0 ? (
+                      filteredTasks.map((task) => (
+                        <SortableTask
+                          key={task._id || task.id}
+                          task={task}
+                          onToggle={() => toggleTask(task)}
+                          onDelete={() => removeTask(task._id || task.id)}
+                          onUpdate={updateTask}
+                        />
+                      ))
+                    ) : (
+                      <Box sx={{ textAlign: 'center', color: 'text.tertiary', py: 3 }}>
+                        <Typography level='body-sm'>{tasks.length === 0 ? t('tasks.empty') : t('tasks.noMatch')}</Typography>
+                      </Box>
+                    )}
+                  </Stack>
+                </SortableContext>
+              </DndContext>
+            </Box>
+          </TabPanel>
+        )}
       </Tabs>
     </Sheet>
   )

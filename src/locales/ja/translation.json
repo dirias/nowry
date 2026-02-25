@@ -627,6 +627,11 @@
       "editPlan": "タイトルを編集",
       "exportPlan": "プランをエクスポート"
     },
+    "home": {
+      "yearlyPriorities": "年間優先事項",
+      "noPrioritiesAdded": "まだ優先事項が追加されていません",
+      "viewAllPriorities": "{{count}}件の優先事項をすべて表示 →"
+    },
     "deleteConfirm": "この{{type}}を削除してもよろしいですか？この操作は元に戻せません。",
     "celebration": "🎉 目標達成！素晴らしい進歩です！",
     "errors": {

@@ -176,31 +176,31 @@ export default function UserProfile() {
   }
 
   return (
-    <Container maxWidth='lg' sx={{ py: 4 }}>
+    <Container maxWidth='lg' sx={{ py: { xs: 2, md: 4 } }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5 }}>
-          👤 {t('profile.title')}
+      <Box sx={{ mb: { xs: 2, md: 3 } }}>
+        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.5rem', md: '2rem' } }}>
+          {t('profile.title')}
         </Typography>
-        <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
           {t('profile.subtitle')}
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, md: 3 }}>
         {/* Left Column - Profile Card */}
         <Grid xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center', p: 4 }}>
+          <Card variant='outlined'>
+            <CardContent sx={{ textAlign: 'center', p: { xs: 3, md: 4 } }}>
               {/* Avatar */}
               <Box sx={{ position: 'relative', display: 'inline-block', mb: 2 }}>
                 <Avatar
                   src={editData.avatarUrl}
                   sx={{
-                    width: 120,
-                    height: 120,
-                    fontSize: '3rem',
-                    bgcolor: 'primary.500'
+                    width: { xs: 100, md: 120 },
+                    height: { xs: 100, md: 120 },
+                    fontSize: { xs: '2.5rem', md: '3rem' },
+                    bgcolor: 'primary.solidBg'
                   }}
                 >
                   {editData.fullName ? editData.fullName.charAt(0).toUpperCase() : editData.username.charAt(0).toUpperCase()}
@@ -226,10 +226,10 @@ export default function UserProfile() {
               </Box>
 
               {/* Name & Username */}
-              <Typography level='h4' fontWeight={600} sx={{ mb: 0.5 }}>
+              <Typography level='h4' fontWeight={600} sx={{ mb: 0.5, fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
                 {userData.fullName || userData.username}
               </Typography>
-              <Typography level='body-sm' sx={{ color: 'neutral.600', mb: 2 }}>
+              <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
                 @{userData.username}
               </Typography>
 
@@ -248,8 +248,10 @@ export default function UserProfile() {
                   {/* Books Usage */}
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography level='body-xs'>Books</Typography>
-                      <Typography level='body-xs'>
+                      <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                        Books
+                      </Typography>
+                      <Typography level='body-xs' sx={{ fontWeight: 600 }}>
                         {userData.subscription.limits.books === -1
                           ? `${userData.subscription.usage?.books || 0} / ∞`
                           : `${userData.subscription.usage?.books || 0} / ${userData.subscription.limits.books}`}
@@ -268,7 +270,10 @@ export default function UserProfile() {
                         sx={{
                           width: `${getUsagePercentage(userData.subscription.usage?.books || 0, userData.subscription.limits.books)}%`,
                           height: '100%',
-                          bgcolor: getTierColor(userData.subscription.tier) + '.500'
+                          bgcolor:
+                            getTierColor(userData.subscription.tier) === 'neutral'
+                              ? 'neutral.solidBg'
+                              : `${getTierColor(userData.subscription.tier)}.solidBg`
                         }}
                       />
                     </Box>
@@ -277,8 +282,10 @@ export default function UserProfile() {
                   {/* Flashcards Usage */}
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography level='body-xs'>Flashcards</Typography>
-                      <Typography level='body-xs'>
+                      <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                        Flashcards
+                      </Typography>
+                      <Typography level='body-xs' sx={{ fontWeight: 600 }}>
                         {userData.subscription.limits.flashcards === -1
                           ? `${userData.subscription.usage?.flashcards || 0} / ∞`
                           : `${userData.subscription.usage?.flashcards || 0} / ${userData.subscription.limits.flashcards}`}
@@ -297,7 +304,10 @@ export default function UserProfile() {
                         sx={{
                           width: `${getUsagePercentage(userData.subscription.usage?.flashcards || 0, userData.subscription.limits.flashcards)}%`,
                           height: '100%',
-                          bgcolor: getTierColor(userData.subscription.tier) + '.500'
+                          bgcolor:
+                            getTierColor(userData.subscription.tier) === 'neutral'
+                              ? 'neutral.solidBg'
+                              : `${getTierColor(userData.subscription.tier)}.solidBg`
                         }}
                       />
                     </Box>
@@ -308,7 +318,7 @@ export default function UserProfile() {
               {/* Quick Stats */}
               <Stack spacing={2} sx={{ mt: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('profile.stats.totalCards')}
                   </Typography>
                   <Typography level='title-md' fontWeight={600}>
@@ -316,7 +326,7 @@ export default function UserProfile() {
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('profile.stats.booksCreated')}
                   </Typography>
                   <Typography level='title-md' fontWeight={600}>
@@ -324,7 +334,7 @@ export default function UserProfile() {
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('profile.stats.studyStreak')}
                   </Typography>
                   <Typography level='title-md' fontWeight={600} color='warning'>
@@ -336,12 +346,12 @@ export default function UserProfile() {
               {/* Member Since */}
               <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Stack direction='row' spacing={1} alignItems='center' justifyContent='center'>
-                  <CalendarToday sx={{ fontSize: 16, color: 'neutral.500' }} />
-                  <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                  <CalendarToday sx={{ fontSize: 16, color: 'text.tertiary' }} />
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {t('profile.memberSince', { days: daysAgo })}
                   </Typography>
                 </Stack>
-                <Typography level='body-xs' sx={{ color: 'neutral.500', mt: 0.5 }}>
+                <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                   {t('profile.joined', { date: formatDate(userData.createdAt) })}
                 </Typography>
               </Box>
@@ -351,24 +361,24 @@ export default function UserProfile() {
 
         {/* Right Column - Editable Info */}
         <Grid xs={12} md={8}>
-          <Card>
-            <CardContent sx={{ p: 4 }}>
+          <Card variant='outlined'>
+            <CardContent sx={{ p: { xs: 3, md: 4 } }}>
               {/* Header with Edit Button */}
               <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 3 }}>
-                <Typography level='h4' fontWeight={600}>
+                <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
                   {t('profile.subtitle')}
                 </Typography>
 
                 {!isEditing ? (
-                  <Button startDecorator={<Edit />} onClick={() => setIsEditing(true)} variant='soft'>
+                  <Button startDecorator={<Edit />} onClick={() => setIsEditing(true)} variant='soft' size='sm'>
                     {t('profile.edit')}
                   </Button>
                 ) : (
                   <Stack direction='row' spacing={1}>
-                    <Button startDecorator={<Cancel />} onClick={handleCancel} variant='plain' color='neutral'>
+                    <Button startDecorator={<Cancel />} onClick={handleCancel} variant='plain' color='neutral' size='sm'>
                       {t('profile.cancel')}
                     </Button>
-                    <Button startDecorator={<Save />} onClick={handleSave} loading={loading} color='primary'>
+                    <Button startDecorator={<Save />} onClick={handleSave} loading={loading} color='primary' size='sm'>
                       {loading ? t('profile.saving') : t('profile.save')}
                     </Button>
                   </Stack>
@@ -387,7 +397,13 @@ export default function UserProfile() {
                       size='lg'
                     />
                   ) : (
-                    <Typography level='body-lg'>{userData.fullName || <em style={{ color: '#999' }}>{t('profile.notSet')}</em>}</Typography>
+                    <Typography level='body-lg'>
+                      {userData.fullName || (
+                        <Typography component='span' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
+                          {t('profile.notSet')}
+                        </Typography>
+                      )}
+                    </Typography>
                   )}
                 </FormControl>
 
@@ -395,9 +411,9 @@ export default function UserProfile() {
                 <FormControl>
                   <FormLabel>{t('profile.username')}</FormLabel>
                   <Stack direction='row' spacing={1} alignItems='center'>
-                    <AccountCircle sx={{ color: 'neutral.500' }} />
+                    <AccountCircle sx={{ color: 'text.secondary' }} />
                     <Typography level='body-lg'>@{userData.username}</Typography>
-                    <Chip size='sm' variant='outlined'>
+                    <Chip size='sm' variant='outlined' color='neutral'>
                       Cannot be changed
                     </Chip>
                   </Stack>
@@ -407,10 +423,10 @@ export default function UserProfile() {
                 <FormControl>
                   <FormLabel>{t('profile.email')}</FormLabel>
                   <Stack direction='row' spacing={1} alignItems='center'>
-                    <Email sx={{ color: 'neutral.500' }} />
+                    <Email sx={{ color: 'text.secondary' }} />
                     <Typography level='body-lg'>{userData.email}</Typography>
                   </Stack>
-                  <Typography level='body-xs' sx={{ color: 'neutral.500', mt: 0.5 }}>
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                     Managed in Account Settings
                   </Typography>
                 </FormControl>
@@ -428,7 +444,11 @@ export default function UserProfile() {
                     />
                   ) : (
                     <Typography level='body-md' sx={{ whiteSpace: 'pre-wrap' }}>
-                      {userData.bio || <em style={{ color: '#999' }}>{t('profile.noBio')}</em>}
+                      {userData.bio || (
+                        <Typography component='span' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
+                          {t('profile.noBio')}
+                        </Typography>
+                      )}
                     </Typography>
                   )}
                 </FormControl>
