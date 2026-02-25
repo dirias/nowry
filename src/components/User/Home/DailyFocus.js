@@ -89,7 +89,7 @@ const DailyFocus = () => {
         <Typography level='title-lg' sx={{ mb: 1 }}>
           {t('dashboard.dailyFocus.allCaughtUp')}
         </Typography>
-        <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
           {t('dashboard.dailyFocus.noDueCards')}
         </Typography>
       </Box>
@@ -160,7 +160,7 @@ const DailyFocus = () => {
             </Box>
           ))}
           {decksDue.length > 4 && (
-            <Typography level='body-xs' sx={{ textAlign: 'center', color: 'neutral.500', mt: 1 }}>
+            <Typography level='body-xs' sx={{ textAlign: 'center', color: 'text.tertiary', mt: 1 }}>
               {t('dashboard.dailyFocus.moreDecks', { count: decksDue.length - 4 })}
             </Typography>
           )}

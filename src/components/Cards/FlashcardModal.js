@@ -15,8 +15,11 @@ import {
   Select,
   Option,
   Chip,
-  Alert
+  Alert,
+  Box,
+  Snackbar
 } from '@mui/joy'
+import { CheckCircleOutline } from '@mui/icons-material'
 import { cardsService } from '../../api/services'
 
 export default function FlashcardModal({ open, onClose, onSaved, decks = [], initialData = null }) {
@@ -28,6 +31,7 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isLimitError, setIsLimitError] = useState(false)
+  const [successMsg, setSuccessMsg] = useState('')
   const { t } = useTranslation()
 
   // Only consider it an edit if there's an actual card ID
@@ -37,6 +41,11 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
     if (open) {
       setError('') // Reset error when opened
       setIsLimitError(false)
+      setSuccessMsg('')
+      // Auto-focus logic when modal opens
+      setTimeout(() => {
+        document.getElementById('flashcard-question-input')?.focus()
+      }, 100)
     }
     if (initialData) {
       setTitle(initialData.title || '')
@@ -64,6 +73,7 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log('FLASHCARD SUBMIT TRIGGERED! isEdit:', isEdit)
     setLoading(true)
     setError('')
     setIsLimitError(false)
@@ -91,12 +101,28 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
           throw new Error('Invalid card ID - cannot update card without ID')
         }
         savedCard = await cardsService.update(cardId, cardPayload)
+
+        onSaved(savedCard)
+        onClose()
       } else {
         savedCard = await cardsService.create(cardPayload)
-      }
 
-      onSaved(savedCard)
-      onClose()
+        onSaved(savedCard)
+        // Continuous creation flow
+        setTitle('')
+        setContent('')
+        setSuccessMsg('Flashcard created successfully! You can add another one.')
+
+        // Auto-focus question input
+        setTimeout(() => {
+          document.getElementById('flashcard-question-input')?.focus()
+        }, 10)
+
+        // Auto-hide success message
+        setTimeout(() => {
+          setSuccessMsg('')
+        }, 4000)
+      }
     } catch (error) {
       console.error('Error saving flashcard:', error)
       const status = error.response?.status
@@ -114,124 +140,155 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
   }
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <ModalDialog sx={{ maxWidth: 600, width: '100%' }}>
-        <ModalClose />
-        <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 3 }}>
-          <Typography level='h4' fontWeight={600}>
-            {isEdit ? 'Edit Flashcard' : 'New Flashcard'}
-          </Typography>
-          <Chip size='sm' color='primary' variant='soft'>
-            📇 Flashcard
-          </Chip>
-        </Stack>
+    <>
+      <Snackbar
+        autoHideDuration={4000}
+        open={!!successMsg && !error}
+        variant='soft'
+        color='success'
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        startDecorator={<CheckCircleOutline />}
+        onClose={() => setSuccessMsg('')}
+      >
+        {successMsg}
+      </Snackbar>
 
-        {error && (
-          <Alert
-            color='danger'
-            variant='soft'
-            sx={{ mb: 3 }}
-            endDecorator={
-              isLimitError && (
-                <Button size='sm' variant='soft' color='danger' onClick={() => navigate('/profile')}>
-                  {t('subscription.upgrade')}
+      <Modal
+        open={open}
+        onClose={(event, reason) => {
+          console.log('FLASHCARD MODAL CLOSING!', reason)
+          onClose(event, reason)
+        }}
+      >
+        <ModalDialog aria-labelledby='modal-title' sx={{ maxWidth: 600, width: '100%' }}>
+          <ModalClose />
+          <Box sx={{ mb: 2 }}>
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <Typography id='modal-title' level='title-lg' fontWeight={600}>
+                {isEdit ? 'Edit Flashcard' : 'New Flashcard'}
+              </Typography>
+              <Chip size='sm' color='primary' variant='soft'>
+                📇 Flashcard
+              </Chip>
+            </Stack>
+          </Box>
+
+          {error && (
+            <Alert
+              color='danger'
+              variant='soft'
+              sx={{ mb: 3 }}
+              endDecorator={
+                isLimitError && (
+                  <Button size='sm' variant='soft' color='danger' onClick={() => navigate('/profile')}>
+                    {t('subscription.upgrade')}
+                  </Button>
+                )
+              }
+            >
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={3}>
+              {/* Question Section */}
+              <Stack spacing={1.5}>
+                <Typography
+                  level='body-xs'
+                  textTransform='uppercase'
+                  fontWeight={600}
+                  sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
+                >
+                  Question
+                </Typography>
+                <Input
+                  id='flashcard-question-input'
+                  autoFocus
+                  placeholder='What is the capital of France?'
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  size='lg'
+                  variant='soft'
+                  sx={{
+                    '--Input-focusedThickness': '2px',
+                    fontSize: 'md'
+                  }}
+                />
+              </Stack>
+
+              {/* Answer Section */}
+              <Stack spacing={1.5}>
+                <Typography
+                  level='body-xs'
+                  textTransform='uppercase'
+                  fontWeight={600}
+                  sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
+                >
+                  Answer
+                </Typography>
+                <Textarea
+                  placeholder='Paris'
+                  minRows={3}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required
+                  size='lg'
+                  variant='soft'
+                  sx={{
+                    '--Textarea-focusedThickness': '2px',
+                    fontSize: 'md'
+                  }}
+                />
+              </Stack>
+
+              {/* Meta Information - More Subtle */}
+              <Stack spacing={1.5} sx={{ pt: 1 }}>
+                <Input
+                  placeholder='🏷️  Add tags (e.g., geography, capitals, france)'
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  variant='plain'
+                  sx={{
+                    '--Input-focusedThickness': '1px',
+                    fontSize: 'sm'
+                  }}
+                />
+
+                <Select
+                  placeholder='📚  Assign to deck (optional)'
+                  value={deckId}
+                  onChange={(_, newValue) => setDeckId(newValue)}
+                  variant='plain'
+                  sx={{ fontSize: 'sm' }}
+                >
+                  {decks.map((deck) => {
+                    const deckValue = deck._id || deck.id
+                    return (
+                      <Option key={deckValue} value={deckValue}>
+                        {deck.name}
+                      </Option>
+                    )
+                  })}
+                </Select>
+              </Stack>
+
+              {/* Modal Actions */}
+              <Box
+                sx={{ mt: 1, pt: 2, display: 'flex', gap: 1, justifyContent: 'flex-end', borderTop: '1px solid', borderColor: 'divider' }}
+              >
+                <Button variant='plain' color='neutral' onClick={onClose}>
+                  {t('common.cancel', 'Cancel')}
                 </Button>
-              )
-            }
-          >
-            {error}
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={3}>
-            {/* Question Section */}
-            <Stack spacing={1.5}>
-              <Typography
-                level='body-xs'
-                textTransform='uppercase'
-                fontWeight={600}
-                sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
-              >
-                Question
-              </Typography>
-              <Input
-                autoFocus
-                placeholder='What is the capital of France?'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                size='lg'
-                variant='soft'
-                sx={{
-                  '--Input-focusedThickness': '2px',
-                  fontSize: 'md'
-                }}
-              />
+                <Button type='submit' loading={loading} size='md'>
+                  {isEdit ? '💾  Save' : '✨  Create'}
+                </Button>
+              </Box>
             </Stack>
-
-            {/* Answer Section */}
-            <Stack spacing={1.5}>
-              <Typography
-                level='body-xs'
-                textTransform='uppercase'
-                fontWeight={600}
-                sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
-              >
-                Answer
-              </Typography>
-              <Textarea
-                placeholder='Paris'
-                minRows={3}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                size='lg'
-                variant='soft'
-                sx={{
-                  '--Textarea-focusedThickness': '2px',
-                  fontSize: 'md'
-                }}
-              />
-            </Stack>
-
-            {/* Meta Information - More Subtle */}
-            <Stack spacing={1.5} sx={{ pt: 1 }}>
-              <Input
-                placeholder='🏷️  Add tags (e.g., geography, capitals, france)'
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                variant='plain'
-                sx={{
-                  '--Input-focusedThickness': '1px',
-                  fontSize: 'sm'
-                }}
-              />
-
-              <Select
-                placeholder='📚  Assign to deck (optional)'
-                value={deckId}
-                onChange={(_, newValue) => setDeckId(newValue)}
-                variant='plain'
-                sx={{ fontSize: 'sm' }}
-              >
-                {decks.map((deck) => {
-                  const deckValue = deck._id || deck.id
-                  return (
-                    <Option key={deckValue} value={deckValue}>
-                      {deck.name}
-                    </Option>
-                  )
-                })}
-              </Select>
-            </Stack>
-
-            <Button type='submit' loading={loading} fullWidth size='lg' sx={{ mt: 2 }}>
-              {isEdit ? '💾  Save' : '✨  Create'}
-            </Button>
-          </Stack>
-        </form>
-      </ModalDialog>
-    </Modal>
+          </form>
+        </ModalDialog>
+      </Modal>
+    </>
   )
 }

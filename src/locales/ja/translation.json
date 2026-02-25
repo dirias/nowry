@@ -25,7 +25,12 @@
       "entertainment": "エンターテイメント",
       "politics": "政治",
       "sports": "スポーツ"
-    }
+    },
+    "favorites": "お気に入り",
+    "noFavorites": "まだお気に入りがありません",
+    "noFavoritesHint": "記事の星アイコンをクリックするとお気に入りに追加できます。",
+    "adjustInterests": "設定で興味を調整して、パーソナライズされたニュースを表示してください。",
+    "setInterests": "設定で興味を登録して、パーソナライズされた記事を表示してください。"
   },
   "header": {
     "study": "学習",
@@ -268,8 +273,19 @@
       "completed": "完了",
       "pending": "未完了"
     },
+    "lists": {
+      "all": "すべて",
+      "addList": "新しいリスト",
+      "listPlaceholder": "リスト名..."
+    },
     "empty": "タスクはまだありません。入力して追加しましょう！",
     "noMatch": "フィルターに一致するタスクはありません",
+    "addTooltip": "\"{{title}}\" を追加"
+  },
+  "books": {
+    "emptySubtitle": "新しいブックを作成するか、ドキュメントをインポートして始めましょう",
+    "noResults": "\"{{term}}\" に一致するブックは見つかりませんでした",
+    "noMatches": "\"{{query}}\" に一致するブックはありません",
     "addTooltip": "\"{{title}}\" を追加"
   },
   "sidemenu": {
@@ -404,6 +420,39 @@
       "visual": "ビジュアル",
       "book": "ブック",
       "flashcard": "カード"
+    }
+  },
+  "calendarModal": {
+    "title": "カレンダー",
+    "tooltip": "カレンダーを開く",
+    "filters": {
+      "all": "すべて",
+      "tasks": "タスク",
+      "goals": "目標",
+      "priorities": "優先事項",
+      "activities": "活動"
+    },
+    "noEvents": "この日のイベントはありません",
+    "today": "今日",
+    "loading": "読み込み中...",
+    "addEvent": "イベントを追加",
+    "editEvent": "イベントを編集",
+    "form": {
+      "selectType": "イベントの種類",
+      "title": "タイトル",
+      "date": "日付",
+      "description": "説明",
+      "focusArea": "フォーカスエリア",
+      "goal": "目標",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "saveError": "保存に失敗しました。もう一度お試しください。",
+      "types": {
+        "task": "タスク",
+        "priority": "優先事項",
+        "goal": "目標",
+        "activity": "アクティビティ"
+      }
     }
   },
   "about": {

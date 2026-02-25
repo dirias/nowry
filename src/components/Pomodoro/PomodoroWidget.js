@@ -1,8 +1,9 @@
 import React from 'react'
-import { Box, Typography, IconButton, Stack, Sheet } from '@mui/joy'
-import { PlayArrowRounded, PauseRounded, RefreshRounded, CloseRounded } from '@mui/icons-material'
+import { Box, Typography, IconButton, Stack, Sheet, Tooltip } from '@mui/joy'
+import { PlayArrowRounded, PauseRounded, RefreshRounded, CloseRounded, VolumeUpRounded } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
 import { ClickAwayListener } from '@mui/base/ClickAwayListener'
+import { playPomodoroNotification } from '../../utils/pomodoroSound'
 
 const PomodoroWidget = () => {
   const { timeLeft, isActive, mode, showWidget, setShowWidget, toggleTimer, resetTimer, changeMode, settings } = usePomodoro()
@@ -51,8 +52,24 @@ const PomodoroWidget = () => {
           }
         }}
       >
-        {/* Header with Close */}
-        <Stack direction='row' justifyContent='flex-end' sx={{ p: 1 }}>
+        {/* Header with Test Sound & Close */}
+        <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ p: 1 }}>
+          <Tooltip title='Test notification sound' size='sm'>
+            <IconButton
+              size='sm'
+              variant='plain'
+              color='neutral'
+              onClick={playPomodoroNotification}
+              sx={{
+                '--IconButton-size': '28px',
+                opacity: 0.6,
+                '&:hover': { opacity: 1 }
+              }}
+            >
+              <VolumeUpRounded fontSize='small' />
+            </IconButton>
+          </Tooltip>
+
           <IconButton size='sm' variant='plain' color='neutral' onClick={() => setShowWidget(false)} sx={{ '--IconButton-size': '28px' }}>
             <CloseRounded fontSize='small' />
           </IconButton>

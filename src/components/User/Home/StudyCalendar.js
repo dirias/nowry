@@ -64,7 +64,7 @@ export default function StudyCalendar() {
         <Box sx={{ maxHeight: 400, overflowY: 'auto', mb: 2 }}>
           <Stack spacing={2}>
             {recentPerformance.length === 0 ? (
-              <Typography level='body-sm' sx={{ color: 'neutral.500', textAlign: 'center', py: 3 }}>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center', py: 3 }}>
                 {t('calendar.noActivity')}
               </Typography>
             ) : (
@@ -96,7 +96,7 @@ export default function StudyCalendar() {
                           {typeInfo.icon} {typeInfo.label}
                         </Chip>
                       </Stack>
-                      <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                      <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                         {item.card_title}
                       </Typography>
                     </Box>

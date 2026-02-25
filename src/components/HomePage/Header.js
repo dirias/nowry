@@ -184,33 +184,30 @@ const Header = () => {
 
         {/* Navigation Links - Right aligned */}
         <Stack direction='row' spacing={1} alignItems='center' sx={{ display: { xs: 'none', md: 'flex' } }}>
+          {/* Public Browse Link - Always visible */}
+          <Button
+            component={Link}
+            to='/browse'
+            variant='plain'
+            size='sm'
+            startDecorator={<SchoolRounded />}
+            sx={{
+              fontWeight: isActive('/browse') ? 600 : 500,
+              color: 'rgba(255, 255, 255, 0.9)',
+              textDecoration: isActive('/browse') ? 'underline' : 'none',
+              textUnderlineOffset: '4px',
+              textDecorationThickness: '2px',
+              '&:hover': {
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+                color: 'white'
+              }
+            }}
+          >
+            {t('public.browse')}
+          </Button>
+
           {user ? (
             <>
-              {/* Pomodoro Timer Button - Desktop */}
-              {settings.enabled && (
-                <>
-                  <IconButton
-                    variant='plain'
-                    size='sm'
-                    onClick={() => setShowWidget(!showWidget)}
-                    sx={{
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' },
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      gap: 0.5,
-                      px: 1
-                    }}
-                  >
-                    <Timer fontSize='small' />
-                    {isTimerActive && formatTime(timeLeft)}
-                  </IconButton>
-                  {/* Separator */}
-                  <Box sx={{ width: 2, height: 24, bgcolor: 'rgba(255,255,255,0.35)', mx: 2 }} />
-                </>
-              )}
-
               {[
                 { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
                 { name: t('header.cards'), path: '/cards', icon: <SchoolRounded /> },
@@ -355,6 +352,13 @@ const Header = () => {
                       <SettingsRounded sx={{ mr: 1, fontSize: 20 }} />
                       {t('common.settings')}
                     </MenuItem>
+                    {/* Pomodoro Timer - Desktop */}
+                    {settings.enabled && (
+                      <MenuItem onClick={() => setShowWidget(!showWidget)}>
+                        <Timer sx={{ mr: 1, fontSize: 20 }} />
+                        {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : t('common.pomodoro')}
+                      </MenuItem>
+                    )}
                     <ListDivider />
                     <MenuItem onClick={logout} color='danger'>
                       <LogoutRounded />
@@ -409,32 +413,6 @@ const Header = () => {
               </Box>
             </>
           )}
-
-          {/* Bug Report Button - Only for logged dev users */}
-          {user && user.role === 'dev' && (
-            <>
-              {/* Separator */}
-              <Box sx={{ width: 1, height: 24, bgcolor: 'rgba(255,255,255,0.2)', mx: 1 }} />
-
-              <Tooltip title='Report a Bug'>
-                <IconButton
-                  variant='plain'
-                  size='sm'
-                  onClick={() => setBugReportOpen(true)}
-                  sx={{
-                    borderRadius: 'sm',
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                      color: 'white'
-                    }
-                  }}
-                >
-                  <BugReportRounded fontSize='small' />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
         </Stack>
       </Sheet>
 
@@ -486,6 +464,26 @@ const Header = () => {
         {/* Drawer Content */}
         <Box sx={{ p: 2 }}>
           <List>
+            {/* Browse Public Content - Always visible at top */}
+            <ListItem>
+              <ListItemButton
+                component={Link}
+                to='/browse'
+                onClick={() => setMobileMenuOpen(false)}
+                selected={isActive('/browse')}
+                sx={{
+                  bgcolor: isActive('/browse') ? 'primary.softBg' : 'transparent'
+                }}
+              >
+                <ListItemDecorator>
+                  <SchoolRounded />
+                </ListItemDecorator>
+                {t('public.browse')}
+              </ListItemButton>
+            </ListItem>
+
+            {user && <ListDivider sx={{ my: 1 }} />}
+
             {user ? (
               <>
                 {/* Logged-in User Navigation */}

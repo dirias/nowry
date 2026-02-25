@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { userService } from '../api/services'
 import { useAuth } from './AuthContext'
+import { playPomodoroNotification, showBrowserNotification } from '../utils/pomodoroSound'
 
 const PomodoroContext = createContext()
 const STORAGE_KEY = 'NOWRY_POMODORO_STATE'
@@ -139,6 +140,13 @@ export const PomodoroProvider = ({ children }) => {
     clearInterval(timerRef.current)
     setIsActive(false)
     setEndTime(null)
+
+    // Play notification sound
+    playPomodoroNotification()
+
+    // Show browser notification if permitted
+    const modeMessage = mode === 'work' ? 'Work session complete! Time for a break.' : 'Break complete! Ready to focus?'
+    showBrowserNotification('Pomodoro Timer', modeMessage)
   }
 
   const toggleTimer = () => {

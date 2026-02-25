@@ -25,7 +25,12 @@
       "entertainment": "Divertissement",
       "politics": "Politique",
       "sports": "Sports"
-    }
+    },
+    "favorites": "Favoris",
+    "noFavorites": "Aucun favori pour l'instant",
+    "noFavoritesHint": "Cliquez sur l'étoile d'un article pour l'ajouter à vos favoris.",
+    "adjustInterests": "Ajustez vos intérêts dans les paramètres pour voir des actualités personnalisées.",
+    "setInterests": "Définissez vos intérêts dans les paramètres pour voir des articles personnalisés."
   },
   "header": {
     "study": "Études",
@@ -268,6 +273,11 @@
       "completed": "Terminées",
       "pending": "En attente"
     },
+    "lists": {
+      "all": "Toutes",
+      "addList": "Nouvelle liste",
+      "listPlaceholder": "Nom de la liste..."
+    },
     "empty": "Pas encore de tâches. Écrivez pour en ajouter une !",
     "noMatch": "Aucune tâche ne correspond à vos filtres",
     "addTooltip": "Ajouter \"{{title}}\""
@@ -404,6 +414,39 @@
       "visual": "Visuel",
       "book": "Livre",
       "flashcard": "Flashcard"
+    }
+  },
+  "calendarModal": {
+    "title": "Calendrier",
+    "tooltip": "Ouvrir le calendrier",
+    "filters": {
+      "all": "Tout",
+      "tasks": "Tâches",
+      "goals": "Objectifs",
+      "priorities": "Priorités",
+      "activities": "Activités"
+    },
+    "noEvents": "Aucun événement pour ce jour",
+    "today": "Aujourd'hui",
+    "loading": "Chargement...",
+    "addEvent": "Ajouter un événement",
+    "editEvent": "Modifier l'événement",
+    "form": {
+      "selectType": "Type d'événement",
+      "title": "Titre",
+      "date": "Date",
+      "description": "Description",
+      "focusArea": "Domaine de focus",
+      "goal": "Objectif",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "saveError": "Échec de l'enregistrement. Veuillez réessayer.",
+      "types": {
+        "task": "Tâche",
+        "priority": "Priorité",
+        "goal": "Objectif",
+        "activity": "Activité"
+      }
     }
   },
   "about": {
@@ -637,6 +680,11 @@
       "seeAllGoals": "Voir Tous les Objectifs",
       "editPlan": "Modifier le Titre",
       "exportPlan": "Exporter le Plan"
+    },
+    "home": {
+      "yearlyPriorities": "Priorités Annuelles",
+      "noPrioritiesAdded": "Aucune priorité ajoutée pour le moment",
+      "viewAllPriorities": "Voir les {{count}} priorités →"
     },
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce {{type}} ? Cette action est irréversible.",
     "celebration": "🎉 Objectif Atteint ! Vous faites des progrès incroyables !",

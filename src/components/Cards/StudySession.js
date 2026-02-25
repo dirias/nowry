@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Container, Card, CardContent, Typography, Button, Stack, Box, LinearProgress, IconButton, Radio, RadioGroup } from '@mui/joy'
 import { ArrowBack, ArrowForward, CheckCircle, Lightbulb, Fullscreen, FullscreenExit } from '@mui/icons-material'
 import { cardsService, decksService } from '../../api/services'
@@ -16,6 +17,7 @@ mermaid.initialize({
 export default function StudySession() {
   const { deckId } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const mermaidRef = useRef(null)
 
   const [cards, setCards] = useState([])
@@ -30,9 +32,10 @@ export default function StudySession() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [reviewQueue, setReviewQueue] = useState([]) // Queue failed reviews for retry
   const [voiceSettings, setVoiceSettings] = useState({
-    front: { voiceName: null, rate: 1.0, pitch: 1.0 },
-    back: { voiceName: null, rate: 1.0, pitch: 1.0 }
+    front: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false },
+    back: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false }
   })
+  const [decksSettingsMap, setDecksSettingsMap] = useState({}) // Stores voice_settings keyed by deck_id
 
   // Swipe state
   const touchStart = useRef(null)
@@ -92,33 +95,74 @@ export default function StudySession() {
   }, [currentIndex, cards])
 
   const fetchDeckSettings = async () => {
-    // Skip settings for global review, use defaults
-    if (deckId === 'daily-review') return
-
     try {
-      const deck = await decksService.getById(deckId)
-
-      if (deck.voice_settings) {
-        const loadedSettings = {
-          front: {
-            voiceName:
-              deck.voice_settings.front?.voiceName || deck.voice_settings.front?.voice_name || deck.voice_settings.front?.voice || null,
-            rate: deck.voice_settings.front?.rate ?? 1.0,
-            pitch: deck.voice_settings.front?.pitch ?? 1.0
-          },
-          back: {
-            voiceName:
-              deck.voice_settings.back?.voiceName || deck.voice_settings.back?.voice_name || deck.voice_settings.back?.voice || null,
-            rate: deck.voice_settings.back?.rate ?? 1.0,
-            pitch: deck.voice_settings.back?.pitch ?? 1.0
+      if (deckId === 'daily-review') {
+        const allDecks = await decksService.getAll()
+        const settingsMap = {}
+        allDecks.forEach((deck) => {
+          if (deck.voice_settings) {
+            settingsMap[deck._id || deck.id] = {
+              front: {
+                voiceName:
+                  deck.voice_settings.front?.voiceName || deck.voice_settings.front?.voice_name || deck.voice_settings.front?.voice || null,
+                rate: deck.voice_settings.front?.rate ?? 1.0,
+                pitch: deck.voice_settings.front?.pitch ?? 1.0,
+                autoPlay: deck.voice_settings.front?.autoPlay || deck.voice_settings.front?.auto_play || false
+              },
+              back: {
+                voiceName:
+                  deck.voice_settings.back?.voiceName || deck.voice_settings.back?.voice_name || deck.voice_settings.back?.voice || null,
+                rate: deck.voice_settings.back?.rate ?? 1.0,
+                pitch: deck.voice_settings.back?.pitch ?? 1.0,
+                autoPlay: deck.voice_settings.back?.autoPlay || deck.voice_settings.back?.auto_play || false
+              }
+            }
           }
+        })
+        setDecksSettingsMap(settingsMap)
+      } else {
+        const deck = await decksService.getById(deckId)
+        if (deck.voice_settings) {
+          const loadedSettings = {
+            front: {
+              voiceName:
+                deck.voice_settings.front?.voiceName || deck.voice_settings.front?.voice_name || deck.voice_settings.front?.voice || null,
+              rate: deck.voice_settings.front?.rate ?? 1.0,
+              pitch: deck.voice_settings.front?.pitch ?? 1.0,
+              autoPlay: deck.voice_settings.front?.autoPlay || deck.voice_settings.front?.auto_play || false
+            },
+            back: {
+              voiceName:
+                deck.voice_settings.back?.voiceName || deck.voice_settings.back?.voice_name || deck.voice_settings.back?.voice || null,
+              rate: deck.voice_settings.back?.rate ?? 1.0,
+              pitch: deck.voice_settings.back?.pitch ?? 1.0,
+              autoPlay: deck.voice_settings.back?.autoPlay || deck.voice_settings.back?.auto_play || false
+            }
+          }
+          setVoiceSettings(loadedSettings)
         }
-        setVoiceSettings(loadedSettings)
       }
     } catch (error) {
       console.error('Error fetching deck settings:', error)
     }
   }
+
+  // Effect to sync voice settings for the current card during daily-review
+  useEffect(() => {
+    if (deckId === 'daily-review' && cards.length > 0) {
+      const currentCard = cards[currentIndex]
+      const targetDeckId = currentCard?.deck_id?._id || currentCard?.deck_id
+      if (targetDeckId && decksSettingsMap[targetDeckId]) {
+        setVoiceSettings(decksSettingsMap[targetDeckId])
+      } else {
+        // Fallback to defaults if no specific settings found
+        setVoiceSettings({
+          front: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false },
+          back: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false }
+        })
+      }
+    }
+  }, [currentIndex, cards, deckId, decksSettingsMap])
 
   const fetchDeckCards = async () => {
     try {
@@ -302,12 +346,14 @@ export default function StudySession() {
       front: {
         voice_name: updatedSettings.front.voiceName || updatedSettings.front.voice_name || null,
         rate: updatedSettings.front.rate ?? 1.0,
-        pitch: updatedSettings.front.pitch ?? 1.0
+        pitch: updatedSettings.front.pitch ?? 1.0,
+        auto_play: updatedSettings.front.autoPlay || false
       },
       back: {
         voice_name: updatedSettings.back.voiceName || updatedSettings.back.voice_name || null,
         rate: updatedSettings.back.rate ?? 1.0,
-        pitch: updatedSettings.back.pitch ?? 1.0
+        pitch: updatedSettings.back.pitch ?? 1.0,
+        auto_play: updatedSettings.back.autoPlay || false
       }
     }
 
@@ -324,6 +370,12 @@ export default function StudySession() {
       const targetDeckId = currentCard?.deck_id?._id || currentCard?.deck_id
 
       if (targetDeckId) {
+        // Optimistically update the map
+        setDecksSettingsMap((prev) => ({
+          ...prev,
+          [targetDeckId]: updatedSettings
+        }))
+
         try {
           await decksService.update(targetDeckId, { voice_settings: normalized })
         } catch (error) {
@@ -387,8 +439,8 @@ export default function StudySession() {
     return (
       <Container maxWidth='lg' sx={{ py: 4 }}>
         <LinearProgress />
-        <Typography level='body-lg' sx={{ mt: 2, textAlign: 'center' }}>
-          Loading study session...
+        <Typography level='body-lg' sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
+          {t('cards.session.loading')}
         </Typography>
       </Container>
     )
@@ -400,12 +452,12 @@ export default function StudySession() {
         <Card sx={{ textAlign: 'center', py: 6, borderRadius: 'xl', boxShadow: 'sm' }}>
           <CardContent>
             <Typography level='h4' sx={{ mb: 2 }}>
-              🎉 All caught up!
+              {t('cards.session.allCaughtUp')}
             </Typography>
-            <Typography level='body-md' sx={{ mb: 3 }}>
-              No cards are due for review right now.
+            <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
+              {t('cards.session.noDue')}
             </Typography>
-            <Button onClick={() => navigate('/cards')}>Go Back</Button>
+            <Button onClick={() => navigate('/cards')}>{t('cards.session.goBack')}</Button>
           </CardContent>
         </Card>
       </Container>
@@ -419,13 +471,13 @@ export default function StudySession() {
           <CardContent>
             <CheckCircle sx={{ fontSize: 80, color: 'success.500', mb: 2 }} />
             <Typography level='h3' sx={{ mb: 1 }}>
-              Session Complete!
+              {t('cards.session.complete.title')}
             </Typography>
-            <Typography level='body-lg' sx={{ mb: 3, color: 'neutral.600' }}>
-              You&apos;ve reviewed {cards.length} cards. Great job!
+            <Typography level='body-lg' sx={{ mb: 3, color: 'text.secondary' }}>
+              {t('cards.session.complete.body', { count: cards.length })}
             </Typography>
             <Button size='lg' onClick={() => navigate('/cards')}>
-              Back to Library
+              {t('cards.session.complete.backToLibrary')}
             </Button>
           </CardContent>
         </Card>
@@ -444,7 +496,7 @@ export default function StudySession() {
       {reviewQueue.length > 0 && (
         <Box sx={{ mb: 1.5, textAlign: 'center' }}>
           <Typography level='body-xs' sx={{ color: 'warning.plainColor', opacity: 0.7, fontSize: '0.7rem' }}>
-            ⏳ Syncing {reviewQueue.length} review{reviewQueue.length > 1 ? 's' : ''}...
+            {t('cards.session.syncing', { count: reviewQueue.length })}
           </Typography>
         </Box>
       )}
@@ -470,7 +522,7 @@ export default function StudySession() {
             }
           }}
         >
-          Again
+          {t('cards.session.grading.again')}
         </Button>
         <Button
           size='sm'
@@ -491,7 +543,7 @@ export default function StudySession() {
             }
           }}
         >
-          Hard
+          {t('cards.session.grading.hard')}
         </Button>
         <Button
           size='sm'
@@ -512,7 +564,7 @@ export default function StudySession() {
             }
           }}
         >
-          Good
+          {t('cards.session.grading.good')}
         </Button>
         <Button
           size='sm'
@@ -526,7 +578,7 @@ export default function StudySession() {
             fontWeight: 600
           }}
         >
-          Easy
+          {t('cards.session.grading.easy')}
         </Button>
       </Stack>
     </Box>
@@ -550,8 +602,8 @@ export default function StudySession() {
             <ArrowBack />
           </IconButton>
           <Box sx={{ flex: 1 }}>
-            <Typography level='body-sm' sx={{ color: 'neutral.500', fontWeight: 600, mb: 0.5 }}>
-              CARD {currentIndex + 1} OF {cards.length}
+            <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 600, mb: 0.5 }}>
+              {t('cards.session.card', { current: currentIndex + 1, total: cards.length })}
             </Typography>
             <LinearProgress
               determinate
@@ -651,9 +703,9 @@ export default function StudySession() {
               <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8 }}>
                 <Typography
                   level='body-xs'
-                  sx={{ mb: 2, color: 'warning.600', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px' }}
+                  sx={{ mb: 2, color: 'warning.plainColor', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px' }}
                 >
-                  Quiz Question
+                  {t('cards.session.labels.quiz')}
                 </Typography>
                 <Typography level='h3' sx={{ mb: 4, fontWeight: 600 }}>
                   {currentCard.title}
@@ -697,10 +749,17 @@ export default function StudySession() {
                   <>
                     {currentCard.explanation && (
                       <Box
-                        sx={{ mt: 3, p: 2, bgcolor: 'primary.50', borderRadius: 'md', borderLeft: '4px solid', borderColor: 'primary.500' }}
+                        sx={{
+                          mt: 3,
+                          p: 2,
+                          bgcolor: 'primary.softBg',
+                          borderRadius: 'md',
+                          borderLeft: '4px solid',
+                          borderColor: 'primary.500'
+                        }}
                       >
                         <Typography level='title-sm' color='primary' sx={{ mb: 1 }}>
-                          Explanation
+                          {t('cards.session.labels.explanation')}
                         </Typography>
                         <Typography level='body-sm'>{currentCard.explanation}</Typography>
                       </Box>
@@ -724,9 +783,9 @@ export default function StudySession() {
               <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8 }}>
                 <Typography
                   level='body-xs'
-                  sx={{ mb: 2, color: 'info.600', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px' }}
+                  sx={{ mb: 2, color: 'success.plainColor', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px' }}
                 >
-                  Visual Diagram
+                  {t('cards.session.labels.visual')}
                 </Typography>
                 <Typography level='h3' sx={{ mb: 3, fontWeight: 600 }}>
                   {currentCard.title}
@@ -737,7 +796,7 @@ export default function StudySession() {
                   sx={{
                     p: 4,
                     border: '1px dashed',
-                    borderColor: 'neutral.300',
+                    borderColor: 'neutral.outlinedBorder',
                     borderRadius: 'lg',
                     bgcolor: 'background.body',
                     minHeight: 300,
@@ -750,7 +809,7 @@ export default function StudySession() {
                 />
 
                 {currentCard.content && (
-                  <Box sx={{ mt: 3, p: 2, bgcolor: 'neutral.50', borderRadius: 'md' }}>
+                  <Box sx={{ mt: 3, p: 2, bgcolor: 'background.level1', borderRadius: 'md' }}>
                     <Typography level='body-sm' textColor='text.secondary'>
                       {currentCard.content}
                     </Typography>
@@ -798,17 +857,17 @@ export default function StudySession() {
                       level='body-xs'
                       sx={{ mb: 3, color: 'primary.500', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}
                     >
-                      Question
+                      {t('cards.session.labels.question')}
                     </Typography>
                     <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600 }}>
                       {currentCard.title}
                     </Typography>
-                    <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'neutral.400' }}>
+                    <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'text.tertiary' }}>
                       <Box component='span' sx={{ display: { xs: 'inline', md: 'none' } }}>
-                        Tap to flip • Swipe to skip
+                        {t('cards.session.hints.tapFlip')}
                       </Box>
                       <Box component='span' sx={{ display: { xs: 'none', md: 'inline' } }}>
-                        Click to flip
+                        {t('cards.session.hints.clickFlip')}
                       </Box>
                     </Typography>
                   </>
@@ -818,7 +877,7 @@ export default function StudySession() {
                       level='body-xs'
                       sx={{
                         mb: { xs: 1.5, md: 2 },
-                        color: 'success.solidBg',
+                        color: 'success.plainColor',
                         fontWeight: 600,
                         textTransform: 'uppercase',
                         letterSpacing: '1px',
@@ -826,7 +885,7 @@ export default function StudySession() {
                         opacity: 0.6
                       }}
                     >
-                      Answer
+                      {t('cards.session.labels.answer')}
                     </Typography>
                     <Typography
                       level={currentCard.content?.length > 100 ? 'body-lg' : 'h3'}

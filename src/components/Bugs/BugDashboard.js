@@ -64,7 +64,7 @@ export default function BugDashboard() {
       {/* Header */}
       <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 3 }}>
         <Bug size={32} color='#f97316' />
-        <Typography level='h2'>Bug Dashboard</Typography>
+        <Typography level='h3'>Bug Dashboard</Typography>
         <Chip size='sm' color='warning'>
           Developer
         </Chip>
@@ -148,7 +148,7 @@ export default function BugDashboard() {
         <Sheet variant='soft' sx={{ p: 4, textAlign: 'center', borderRadius: 'sm' }}>
           <Bug size={48} style={{ opacity: 0.3, marginBottom: 8 }} />
           <Typography level='body-lg'>No bugs found</Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
             Try adjusting your filters or wait for users to report bugs
           </Typography>
         </Sheet>
@@ -180,7 +180,7 @@ export default function BugDashboard() {
                     >
                       {bug.title}
                     </Typography>
-                    <Typography level='body-xs' sx={{ color: 'neutral.500', mt: 0.5 }}>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                       {bug.description.substring(0, 80)}
                       {bug.description.length > 80 && '...'}
                     </Typography>
@@ -338,7 +338,7 @@ function BugDetailModal({ bug, onClose, onStatusChange, onRefresh }) {
                 <Typography level='body-sm'>
                   {bug.browser_info.name} {bug.browser_info.version} • {bug.browser_info.os} • {bug.browser_info.screen_resolution}
                 </Typography>
-                <Typography level='body-xs' sx={{ color: 'neutral.500', mt: 0.5 }}>
+                <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                   URL: {bug.url}
                 </Typography>
               </Box>
@@ -382,7 +382,7 @@ function BugDetailModal({ bug, onClose, onStatusChange, onRefresh }) {
 
             {/* Metadata */}
             <Box sx={{ p: 2, bgcolor: 'background.level1', borderRadius: 'sm' }}>
-              <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 Created: {new Date(bug.created_at).toLocaleString()} • Updated: {new Date(bug.updated_at).toLocaleString()}
                 {bug.resolved_at && ` • Resolved: ${new Date(bug.resolved_at).toLocaleString()}`}
               </Typography>

@@ -17,7 +17,7 @@ const News = () => {
     <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography level='h2' fontWeight={600} sx={{ mb: 0.5 }}>
+        <Typography level='h3' fontWeight={600} sx={{ mb: 0.5 }}>
           {t('news.title', 'Latest News')}
         </Typography>
         <Typography level='body-md' sx={{ color: 'text.secondary' }}>

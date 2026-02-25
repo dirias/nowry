@@ -16,11 +16,11 @@ import {
   Typography,
   Box,
   IconButton,
-  List,
-  ListItem,
-  Chip
+  Card,
+  Divider,
+  AspectRatio
 } from '@mui/joy'
-import { Add as AddIcon, Delete as DeleteIcon, CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material'
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
 
@@ -199,43 +199,89 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
     <Modal open={open} onClose={onClose}>
       <ModalDialog
         sx={{
-          maxWidth: { xs: '100%', md: 600 },
-          width: { xs: '100%', md: 600 },
-          height: { xs: '100%', md: 'auto' },
+          // Mobile-first responsive width
+          width: { xs: '95%', sm: '85%', md: '75%', lg: '700px' },
+          maxWidth: '700px',
+          height: { xs: '95vh', md: 'auto' },
+          maxHeight: { xs: '95vh', md: '90vh' },
           overflowY: 'auto',
-          p: { xs: 2, md: 3 },
-          m: { xs: 0, md: 'auto' },
-          borderRadius: { xs: 0, md: 'md' }
+          p: 0,
+          m: { xs: 'auto', md: 'auto' },
+          borderRadius: { xs: 'lg', md: 'xl' },
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+          border: '1px solid',
+          borderColor: 'divider'
         }}
       >
-        <DialogTitle>{goal && goal._id ? t('annualPlanning.goal.edit') : t('annualPlanning.goal.add')}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2}>
-            {/* Context Header (Read-Only) */}
+        {/* Header - Elevated */}
+        <Box
+          sx={{
+            px: { xs: 2, sm: 3, md: 4 },
+            py: { xs: 2, md: 3 },
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.level1'
+          }}
+        >
+          <DialogTitle level='h4' sx={{ m: 0, fontWeight: 700, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
+            {goal && goal._id ? t('annualPlanning.goal.edit') : t('annualPlanning.goal.add')}
+          </DialogTitle>
+          {goal && goal._id && (
+            <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
+              Update your goal details
+            </Typography>
+          )}
+        </Box>
+
+        {/* Content - Generous padding */}
+        <DialogContent sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, md: 3 } }}>
+          <Stack spacing={3}>
+            {/* Context Header - Premium Design */}
             {(goal && !goal._id && (goal.type || goal.quarter || goal.parent_id)) || (goal && goal._id) ? (
-              <Box sx={{ bgcolor: 'background.level1', p: 1.5, borderRadius: 'sm', display: 'flex', gap: 2, alignItems: 'center' }}>
-                {goal.quarter ? (
-                  <Chip color='primary' variant='solid' size='sm'>
-                    Q{goal.quarter}
-                  </Chip>
-                ) : (
-                  <Chip color='neutral' variant='soft' size='sm'>
-                    Yearly Objective
-                  </Chip>
-                )}
+              <Stack
+                direction='row'
+                spacing={1}
+                alignItems='center'
+                sx={{
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: 'md',
+                  bgcolor: goal.quarter ? 'primary.softBg' : 'neutral.softBg',
+                  border: '1px solid',
+                  borderColor: goal.quarter ? 'primary.outlinedBorder' : 'neutral.outlinedBorder'
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: goal.quarter ? 'primary.solidBg' : 'neutral.solidBg'
+                  }}
+                />
+                <Typography level='body-sm' sx={{ fontWeight: 600, color: goal.quarter ? 'primary.solidBg' : 'text.primary' }}>
+                  {goal.quarter ? `Q${goal.quarter} Goal` : 'Yearly Objective'}
+                </Typography>
                 {goal.parent_id && (
-                  <Typography level='body-sm' fontWeight={500}>
-                    ↳ {yearlyObjectives.find((o) => o._id === goal.parent_id)?.title || 'Parent Objective'}
-                  </Typography>
+                  <>
+                    <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                      •
+                    </Typography>
+                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                      ↳ {yearlyObjectives.find((o) => o._id === goal.parent_id)?.title || 'Parent Objective'}
+                    </Typography>
+                  </>
                 )}
-              </Box>
+              </Stack>
             ) : (
-              /* Editable Selectors (Only shown if no context exists, e.g. generic edit) */
-              <Stack spacing={2}>
-                {/* Timeframe Selection (Infers Type) */}
-                <Stack direction='row' spacing={2}>
-                  <FormControl sx={{ flex: 1 }}>
-                    <FormLabel>Timeframe</FormLabel>
+              /* Editable Timeframe Selector */
+              <Box>
+                <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
+                  Timeframe
+                </Typography>
+                <Stack spacing={2}>
+                  <FormControl>
+                    <FormLabel sx={{ fontWeight: 600 }}>When do you want to achieve this?</FormLabel>
                     <Select
                       value={formData.type === 'yearly' ? 'yearly' : formData.quarter}
                       onChange={(e, val) => {
@@ -247,56 +293,92 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                           handleChange('quarter', val)
                         }
                       }}
+                      size='lg'
                     >
-                      <Option value='yearly'>All Year (Objective)</Option>
+                      <Option value='yearly'>📅 All Year (Objective)</Option>
                       <Option value={1}>Q1 (Jan - Mar)</Option>
                       <Option value={2}>Q2 (Apr - Jun)</Option>
                       <Option value={3}>Q3 (Jul - Sep)</Option>
                       <Option value={4}>Q4 (Oct - Dec)</Option>
                     </Select>
                   </FormControl>
-                </Stack>
 
-                {formData.type === 'quarterly' && (
-                  <FormControl>
-                    <FormLabel>Parent Objective</FormLabel>
-                    <Select
-                      value={formData.parent_id}
-                      onChange={(e, val) => handleChange('parent_id', val)}
-                      placeholder='Select Yearly Objective...'
-                    >
-                      {yearlyObjectives.map((obj) => (
-                        <Option key={obj._id} value={obj._id}>
-                          {obj.title}
-                        </Option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              </Stack>
+                  {formData.type === 'quarterly' && yearlyObjectives.length > 0 && (
+                    <FormControl>
+                      <FormLabel sx={{ fontWeight: 600 }}>Link to Yearly Objective (optional)</FormLabel>
+                      <Select
+                        value={formData.parent_id}
+                        onChange={(e, val) => handleChange('parent_id', val)}
+                        placeholder='Select parent objective...'
+                        size='lg'
+                      >
+                        {yearlyObjectives.map((obj) => (
+                          <Option key={obj._id} value={obj._id}>
+                            {obj.title}
+                          </Option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                </Stack>
+              </Box>
             )}
 
-            <FormControl required>
-              <FormLabel>{t('annualPlanning.goal.title')}</FormLabel>
-              <Input value={formData.title} onChange={(e) => handleChange('title', e.target.value)} autoFocus size='lg' />
-            </FormControl>
+            {((goal && !goal._id && (goal.type || goal.quarter || goal.parent_id)) || (goal && goal._id)) && <Divider />}
 
-            <FormControl>
-              <FormLabel>{t('annualPlanning.goal.description')}</FormLabel>
-              <Textarea minRows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
-            </FormControl>
-
-            {/* Milestones UI */}
+            {/* Section: Basic Information */}
             <Box>
-              <Stack direction='row' justifyContent='space-between' alignItems='center' mb={1}>
-                <Typography level='title-sm'>Key Results / Milestones</Typography>
-                <Button size='sm' startDecorator={<AddIcon />} variant='plain' onClick={handleAddMilestone}>
+              <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
+                Basic Information
+              </Typography>
+              <Stack spacing={2}>
+                <FormControl required>
+                  <FormLabel sx={{ fontWeight: 600 }}>{t('annualPlanning.goal.title')}</FormLabel>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => handleChange('title', e.target.value)}
+                    placeholder='What do you want to achieve?'
+                    autoFocus
+                    size='lg'
+                    sx={{ fontSize: '1rem' }}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel sx={{ fontWeight: 600 }}>{t('annualPlanning.goal.description')}</FormLabel>
+                  <Textarea
+                    minRows={3}
+                    value={formData.description}
+                    onChange={(e) => handleChange('description', e.target.value)}
+                    placeholder='Add details about this goal...'
+                    sx={{ fontSize: '0.95rem' }}
+                  />
+                </FormControl>
+              </Stack>
+            </Box>
+
+            <Divider />
+
+            {/* Section: Key Results & Milestones */}
+            <Box>
+              <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
+                <Box>
+                  <Typography level='title-md' sx={{ fontWeight: 700, color: 'text.primary' }}>
+                    Key Results & Milestones
+                  </Typography>
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
+                    Break down your goal into measurable steps
+                  </Typography>
+                </Box>
+                <Button size='sm' startDecorator={<AddIcon />} variant='soft' onClick={handleAddMilestone}>
                   Add
                 </Button>
               </Stack>
-              <Stack spacing={1}>
+
+              <Stack spacing={1.5}>
                 {milestones.map((ms, index) => (
-                  <Stack key={index} direction='row' spacing={1} alignItems='center'>
+                  <Stack key={index} direction='row' spacing={1.5} alignItems='center'>
+                    {/* Custom Checkbox - Per Design Guidelines */}
                     <Box
                       onClick={() => {
                         const newM = [...milestones]
@@ -304,19 +386,41 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                         setMilestones(newM)
                       }}
                       sx={{
+                        width: 20,
+                        height: 20,
+                        border: '2px solid',
+                        borderColor: ms.completed ? 'success.solidBg' : 'neutral.outlinedBorder',
+                        borderRadius: '4px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: ms.completed ? 'primary.solidBg' : 'neutral.outlinedBorder',
+                        bgcolor: ms.completed ? 'success.solidBg' : 'transparent',
                         cursor: 'pointer',
-                        transition: 'color 0.2s ease',
+                        transition: 'all 0.2s',
+                        flexShrink: 0,
                         '&:hover': {
-                          color: ms.completed ? 'primary.solidHoverBg' : 'primary.plainColor'
+                          borderColor: ms.completed ? 'success.solidHoverBg' : 'primary.solidBg',
+                          transform: 'scale(1.05)'
                         }
                       }}
                     >
-                      {ms.completed ? <CheckBox sx={{ fontSize: 24 }} /> : <CheckBoxOutlineBlank sx={{ fontSize: 24 }} />}
+                      {ms.completed && (
+                        <Box
+                          component='svg'
+                          width='14'
+                          height='14'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='white'
+                          strokeWidth='3'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        >
+                          <polyline points='20 6 9 17 4 12' />
+                        </Box>
+                      )}
                     </Box>
+
                     <Input
                       slotProps={{ input: { ref: (el) => (milestoneRefs.current[index] = el?.parentElement) } }}
                       fullWidth
@@ -328,40 +432,105 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                           handleAddMilestone()
                         }
                       }}
-                      placeholder='Milestone...'
+                      placeholder='Milestone title...'
+                      sx={{
+                        textDecoration: ms.completed ? 'line-through' : 'none',
+                        color: ms.completed ? 'text.tertiary' : 'text.primary'
+                      }}
                     />
+
                     <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteMilestone(index)}>
                       <DeleteIcon />
                     </IconButton>
                   </Stack>
                 ))}
+
+                {milestones.length === 0 && (
+                  <Box
+                    sx={{
+                      py: 3,
+                      textAlign: 'center',
+                      bgcolor: 'background.level1',
+                      borderRadius: 'md',
+                      border: '1px dashed',
+                      borderColor: 'divider'
+                    }}
+                  >
+                    <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                      No milestones yet. Add your first milestone above.
+                    </Typography>
+                  </Box>
+                )}
               </Stack>
             </Box>
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <FormControl sx={{ flex: 1 }}>
-                <FormLabel>{t('annualPlanning.goal.targetDate')}</FormLabel>
-                <Input type='date' value={formData.target_date} onChange={(e) => handleChange('target_date', e.target.value)} size='lg' />
-              </FormControl>
-            </Stack>
+            <Divider />
 
-            <FormControl>
-              <FormLabel>{t('annualPlanning.goal.imageUrl')}</FormLabel>
-              <Input placeholder='https://...' value={formData.image_url} onChange={(e) => handleChange('image_url', e.target.value)} />
-              {/* Placeholder for AI generation button */}
-            </FormControl>
+            {/* Section: Timeline & Visual */}
+            <Box>
+              <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
+                Timeline & Visual
+              </Typography>
+              <Stack spacing={2}>
+                <FormControl>
+                  <FormLabel sx={{ fontWeight: 600 }}>{t('annualPlanning.goal.targetDate')}</FormLabel>
+                  <Input type='date' value={formData.target_date} onChange={(e) => handleChange('target_date', e.target.value)} size='lg' />
+                </FormControl>
 
-            <Box sx={{ mt: 2 }}>
-              <Stack direction='row' justifyContent='space-between' alignItems='center' mb={1}>
-                <Typography level='title-sm'>{t('annualPlanning.activity.title')}</Typography>
-                <Button size='sm' startDecorator={<AddIcon />} variant='plain' onClick={handleAddActivity}>
+                <FormControl>
+                  <FormLabel sx={{ fontWeight: 600 }}>{t('annualPlanning.goal.imageUrl')}</FormLabel>
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 1 }}>
+                    Add a visual reminder for motivation (optional)
+                  </Typography>
+
+                  {formData.image_url && (
+                    <AspectRatio
+                      ratio='16/9'
+                      sx={{ mb: 2, borderRadius: 'md', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}
+                    >
+                      <img src={formData.image_url} alt='Goal preview' style={{ objectFit: 'cover' }} loading='lazy' />
+                    </AspectRatio>
+                  )}
+
+                  <Input
+                    placeholder='https://example.com/image.jpg'
+                    value={formData.image_url}
+                    onChange={(e) => handleChange('image_url', e.target.value)}
+                  />
+                </FormControl>
+              </Stack>
+            </Box>
+
+            <Divider />
+
+            {/* Section: Recurring Activities */}
+            <Box
+              sx={{
+                bgcolor: 'background.level1',
+                borderRadius: 'lg',
+                p: { xs: 2, md: 3 },
+                border: '1px solid',
+                borderColor: 'divider'
+              }}
+            >
+              <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
+                <Box>
+                  <Typography level='title-md' sx={{ fontWeight: 700, color: 'text.primary' }}>
+                    {t('annualPlanning.activity.title')}
+                  </Typography>
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
+                    What habits will help you reach this goal?
+                  </Typography>
+                </Box>
+                <Button size='sm' startDecorator={<AddIcon />} variant='soft' onClick={handleAddActivity}>
                   Add
                 </Button>
               </Stack>
-              <List>
+
+              <Stack spacing={1.5}>
                 {activities.map((act, index) => (
-                  <ListItem key={index}>
-                    <Stack direction='row' spacing={1} sx={{ width: '100%' }}>
+                  <Card variant='outlined' key={index} sx={{ p: 2, bgcolor: 'background.surface' }}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
                       <Input
                         placeholder='Activity name'
                         value={act.title}
@@ -371,37 +540,62 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                       <Select
                         value={act.frequency}
                         onChange={(e, val) => handleActivityChange(index, 'frequency', val)}
-                        sx={{ width: 100 }}
+                        sx={{ width: { xs: '100%', sm: 130 } }}
                       >
-                        <Option value='daily'>Daily</Option>
-                        <Option value='weekly'>Weekly</Option>
+                        <Option value='daily'>🔄 Daily</Option>
+                        <Option value='weekly'>📅 Weekly</Option>
                       </Select>
                       {!act._id && (
-                        <IconButton size='sm' color='danger' onClick={() => handleActivityDelete(index)}>
+                        <IconButton size='sm' variant='plain' color='danger' onClick={() => handleActivityDelete(index)}>
                           <DeleteIcon />
                         </IconButton>
                       )}
                     </Stack>
-                  </ListItem>
+                  </Card>
                 ))}
-              </List>
-            </Box>
 
-            <Stack
-              direction='row'
-              justifyContent='flex-end'
-              spacing={2}
-              sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}
-            >
-              <Button variant='plain' onClick={onClose} size='lg'>
-                Cancel
-              </Button>
-              <Button loading={loading} onClick={handleSubmit} size='lg' disabled={loading}>
-                Save Goal
-              </Button>
-            </Stack>
+                {activities.length === 0 && (
+                  <Box
+                    sx={{
+                      py: 2,
+                      textAlign: 'center',
+                      bgcolor: 'background.surface',
+                      borderRadius: 'md',
+                      border: '1px dashed',
+                      borderColor: 'divider'
+                    }}
+                  >
+                    <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                      No activities yet. Add recurring habits above.
+                    </Typography>
+                  </Box>
+                )}
+              </Stack>
+            </Box>
           </Stack>
         </DialogContent>
+
+        {/* Footer - Sticky actions */}
+        <Box
+          sx={{
+            px: { xs: 2, sm: 3, md: 4 },
+            py: { xs: 2, md: 3 },
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.surface',
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            gap: 2
+          }}
+        >
+          <Button variant='plain' onClick={onClose} size='lg' sx={{ width: { xs: '100%', sm: 'auto' } }}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} loading={loading} disabled={loading} size='lg' sx={{ width: { xs: '100%', sm: 'auto' } }}>
+            {goal && goal._id ? 'Update Goal' : 'Save Goal'}
+          </Button>
+        </Box>
       </ModalDialog>
     </Modal>
   )

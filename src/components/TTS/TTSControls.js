@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Box, IconButton, Select, Option, Stack, Tooltip, Slider, Typography } from '@mui/joy'
+import { Box, IconButton, Select, Option, Stack, Tooltip, Slider, Typography, Switch } from '@mui/joy'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import PauseIcon from '@mui/icons-material/Pause'
 import StopIcon from '@mui/icons-material/Stop'
@@ -17,6 +17,7 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
   const [rate, setRate] = useState(1.0)
   const [volume, setVolume] = useState(1.0)
   const [internalShowSettings, setInternalShowSettings] = useState(false)
+  const [autoPlay, setAutoPlay] = useState(false)
 
   // Use controlled state if provided, otherwise internal
   const isSettingsOpen = settingsOpen !== undefined ? settingsOpen : internalShowSettings
@@ -70,9 +71,20 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
       if (voiceSettings.pitch !== undefined) {
         /* Pitch not implemented in UI yet but good to have */
       }
+      if (voiceSettings.autoPlay !== undefined) setAutoPlay(voiceSettings.autoPlay)
+      else if (voiceSettings.auto_play !== undefined) setAutoPlay(voiceSettings.auto_play)
       // Volume is usually global preference, but we can adhere if passed
     }
   }, [voiceSettings, voices])
+
+  // Auto-play effect
+  useEffect(() => {
+    if (autoPlay && text && !isPlaying && voices.length > 0) {
+      // Don't auto-play if we just stopped it manually recently, or rely on state.
+      // For now, pure reaction to text changing while autoPlay is true:
+      handlePlay()
+    }
+  }, [text, autoPlay, voices.length]) // Intentional deps: trigger on text or autoPlay change
 
   const handlePlay = () => {
     if (!text) return
@@ -106,7 +118,7 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
 
       // Notify parent
       if (onVoiceSettingsChange) {
-        const payload = { voiceName: voice.name, rate, pitch: 1.0 }
+        const payload = { voiceName: voice.name, rate, pitch: 1.0, autoPlay }
         onVoiceSettingsChange(payload)
       }
     }
@@ -116,7 +128,16 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
     setRate(val)
     // Debounce or commit? For now just notify on change (user unlikely to spam)
     if (onVoiceSettingsChange) {
-      const payload = { voiceName: selectedVoice?.name, rate: val, pitch: 1.0 }
+      const payload = { voiceName: selectedVoice?.name, rate: val, pitch: 1.0, autoPlay }
+      onVoiceSettingsChange(payload)
+    }
+  }
+
+  const handleAutoPlayChange = (e) => {
+    const newVal = e.target.checked
+    setAutoPlay(newVal)
+    if (onVoiceSettingsChange) {
+      const payload = { voiceName: selectedVoice?.name, rate, pitch: 1.0, autoPlay: newVal }
       onVoiceSettingsChange(payload)
     }
   }
@@ -234,6 +255,13 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
                 </Typography>
                 <Slider value={rate} onChange={handleRateChange} min={0.5} max={2.0} step={0.1} size='sm' />
               </Box>
+
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+                  Auto-Play
+                </Typography>
+                <Switch size='sm' checked={autoPlay} onChange={handleAutoPlayChange} />
+              </Stack>
             </Stack>
           </Box>
         )}

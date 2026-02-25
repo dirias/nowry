@@ -179,7 +179,7 @@ export default function UserProfile() {
     <Container maxWidth='lg' sx={{ py: { xs: 2, md: 4 } }}>
       {/* Header */}
       <Box sx={{ mb: { xs: 2, md: 3 } }}>
-        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.5rem', md: '2rem' } }}>
+        <Typography level='h3' fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.5rem', md: '2rem' } }}>
           {t('profile.title')}
         </Typography>
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>

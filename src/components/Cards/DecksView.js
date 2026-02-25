@@ -6,10 +6,10 @@ export default function DecksView({ decks = [], cards = [], onStudy, onEdit, onD
   if (decks.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography level='h4' sx={{ mb: 1, color: 'neutral.500' }}>
+        <Typography level='h4' sx={{ mb: 1, color: 'text.tertiary' }}>
           📭 No decks found
         </Typography>
-        <Typography level='body-md' sx={{ color: 'neutral.400' }}>
+        <Typography level='body-md' sx={{ color: 'text.secondary' }}>
           Create your first deck to start learning
         </Typography>
       </Box>

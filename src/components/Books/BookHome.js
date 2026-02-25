@@ -9,17 +9,37 @@ import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { useAuth } from '../../context/AuthContext'
 import Book from './Book'
 import ImportPreviewModal from './ImportPreviewModal'
-import { Box, Typography, Input, Button, Stack, IconButton, Card, Grid, Container, Chip, Modal, ModalDialog, Skeleton } from '@mui/joy'
+import {
+  Box,
+  Typography,
+  Input,
+  Button,
+  Stack,
+  IconButton,
+  Card,
+  Grid,
+  Container,
+  Chip,
+  Modal,
+  ModalDialog,
+  Skeleton,
+  Avatar
+} from '@mui/joy'
 import AddIcon from '@mui/icons-material/Add'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import SearchIcon from '@mui/icons-material/Search'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import GridViewIcon from '@mui/icons-material/GridView'
+import ViewListIcon from '@mui/icons-material/ViewList'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
 
 export default function BookHome() {
   const [books, setBooks] = useState([])
   const [allBooks, setAllBooks] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [viewMode, setViewMode] = useState(localStorage.getItem('book_view_mode') || 'grid')
 
   const [showWarning, setShowWarning] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -45,9 +65,16 @@ export default function BookHome() {
   const { themeColor } = useThemePreferences()
   const { user } = useAuth()
 
+  const handleViewChange = (newMode) => {
+    setViewMode(newMode)
+    localStorage.setItem('book_view_mode', newMode)
+  }
+
   const fetchBooks = async () => {
     try {
+      console.log('[DEBUG] Fetching books...')
       const fetchedBooks = await booksService.getAll()
+      console.log('[DEBUG] Fetched books count:', fetchedBooks.length)
       setBooks(fetchedBooks)
       setAllBooks(fetchedBooks)
       setLoading(false)
@@ -58,6 +85,7 @@ export default function BookHome() {
   }
 
   useEffect(() => {
+    console.log('[DEBUG] BookHome mounted, fetching books')
     fetchBooks()
   }, [])
 
@@ -195,18 +223,23 @@ export default function BookHome() {
   const handleDeleteBook = async () => {
     try {
       await booksService.delete(bookToDelete._id)
+      // Update state immediately for instant UI feedback
       const updated = books.filter((b) => b._id !== bookToDelete._id)
+      const updatedAll = allBooks.filter((b) => b._id !== bookToDelete._id)
       setBooks(updated)
-      setAllBooks(updated)
+      setAllBooks(updatedAll)
       setShowWarning(false)
+      setBookToDelete(null)
     } catch (error) {
       console.error('Error deleting book:', error)
       // If book is already gone (404), sync UI to remove it
       if (error.response?.status === 404) {
         const updated = books.filter((b) => b._id !== bookToDelete._id)
+        const updatedAll = allBooks.filter((b) => b._id !== bookToDelete._id)
         setBooks(updated)
-        setAllBooks(updated)
+        setAllBooks(updatedAll)
         setShowWarning(false)
+        setBookToDelete(null)
         return
       }
       // Otherwise show error
@@ -227,7 +260,7 @@ export default function BookHome() {
           spacing={2}
         >
           <Box>
-            <Typography level='h2' fontWeight={600}>
+            <Typography level='h3' fontWeight={600}>
               {t('books.title')}
             </Typography>
             <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
@@ -254,6 +287,28 @@ export default function BookHome() {
             )}
 
             <Stack direction='row' spacing={1.5} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+              {/* View Toggle */}
+              {allBooks.length > 0 && (
+                <Stack direction='row' spacing={0.5}>
+                  <IconButton
+                    size='sm'
+                    variant={viewMode === 'grid' ? 'solid' : 'plain'}
+                    onClick={() => handleViewChange('grid')}
+                    sx={{ height: 32 }}
+                  >
+                    <GridViewIcon />
+                  </IconButton>
+                  <IconButton
+                    size='sm'
+                    variant={viewMode === 'list' ? 'solid' : 'plain'}
+                    onClick={() => handleViewChange('list')}
+                    sx={{ height: 32 }}
+                  >
+                    <ViewListIcon />
+                  </IconButton>
+                </Stack>
+              )}
+
               <Button
                 startDecorator={<AddIcon />}
                 onClick={handleCreateBook}
@@ -355,10 +410,10 @@ export default function BookHome() {
           >
             <CloudUploadIcon sx={{ fontSize: 40 }} />
           </Box>
-          <Typography level='h3' fontWeight={600} sx={{ mb: 1 }}>
+          <Typography level='title-md' fontWeight={600} sx={{ mb: 1, color: 'text.secondary' }}>
             {isDragActive ? t('books.dropTitleActive') : t('books.dropTitle')}
           </Typography>
-          <Typography level='body-md' sx={{ color: 'text.secondary', mb: 4, maxWidth: 450 }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 4, maxWidth: 450 }}>
             {t('books.dropSubtitle')}
           </Typography>
 
@@ -375,32 +430,126 @@ export default function BookHome() {
       {/* Books Grid - Filtered Results */}
       {!loading && allBooks.length > 0 && books.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography level='body-md' color='text.secondary'>
+          <Typography level='title-md' color='text.secondary'>
             {t('books.noResults', { term: searchTerm })}
           </Typography>
         </Box>
       )}
 
-      {/* Books Grid */}
+      {/* Books Grid/List */}
       {!loading && books.length > 0 && (
-        <Grid container spacing={2}>
-          {books.map((book) => (
-            <Grid key={book._id} xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Book
-                book={book}
-                handleBookClick={handleBookClick}
-                onEdit={(b) => {
-                  setBookToEdit(b)
-                  setShowEditor(true)
-                }}
-                onDelete={(b) => {
-                  setBookToDelete(b)
-                  setShowWarning(true)
-                }}
-              />
+        <>
+          {viewMode === 'grid' ? (
+            <Grid container spacing={2}>
+              {books.map((book) => (
+                <Grid key={book._id} xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Book
+                    book={book}
+                    handleBookClick={handleBookClick}
+                    onEdit={(b) => {
+                      setBookToEdit(b)
+                      setShowEditor(true)
+                    }}
+                    onDelete={(b) => {
+                      setBookToDelete(b)
+                      setShowWarning(true)
+                    }}
+                  />
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          ) : (
+            <Stack spacing={0}>
+              {books.map((book) => (
+                <Box
+                  key={book._id}
+                  onClick={() => handleBookClick(book)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    py: 1.5,
+                    px: 2,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      bgcolor: 'background.level1'
+                    }
+                  }}
+                >
+                  {/* Book Cover/Icon */}
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 56,
+                      borderRadius: 'sm',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      bgcolor: book.cover_color || themeColor || 'primary.solidBg',
+                      backgroundImage: book.cover_image ? `url(${book.cover_image})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}
+                  >
+                    {!book.cover_image && <MenuBookIcon sx={{ fontSize: 20, color: 'common.white', opacity: 0.8 }} />}
+                  </Box>
+
+                  {/* Title */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography level='title-sm' sx={{ fontWeight: 600 }}>
+                      {book.title}
+                    </Typography>
+                    <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                      {book.author || 'Unknown Author'}
+                    </Typography>
+                  </Box>
+
+                  {/* Tags (hide on mobile) */}
+                  {book.tags && book.tags.length > 0 && (
+                    <Stack
+                      direction='row'
+                      spacing={0.5}
+                      sx={{ display: { xs: 'none', md: 'flex' }, flexWrap: 'wrap', gap: 0.5, maxWidth: 200 }}
+                    >
+                      {book.tags.slice(0, 2).map((tag, i) => (
+                        <Chip key={i} size='sm' variant='soft' sx={{ fontSize: '0.7rem' }}>
+                          {tag}
+                        </Chip>
+                      ))}
+                    </Stack>
+                  )}
+
+                  {/* Page Count (hide on mobile) */}
+                  <Typography level='body-xs' sx={{ display: { xs: 'none', sm: 'block' }, width: 80, color: 'text.tertiary' }}>
+                    {book.page_count ? `${book.page_count} pages` : ''}
+                  </Typography>
+
+                  {/* Actions */}
+                  <Stack direction='row' spacing={0.5}>
+                    <IconButton
+                      size='sm'
+                      variant='plain'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setBookToEdit(book)
+                        setShowEditor(true)
+                      }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </>
       )}
 
       {showWarning && (
@@ -422,15 +571,25 @@ export default function BookHome() {
       >
         <ModalDialog
           variant='outlined'
-          role='alertdialog'
           sx={{
-            maxWidth: 400,
-            borderRadius: 'lg',
-            p: 3,
-            boxShadow: 'lg'
+            width: { xs: '90%', sm: 450 },
+            maxWidth: 450,
+            borderRadius: { xs: 'lg', md: 'xl' },
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+            p: 0
           }}
         >
-          <Box sx={{ textAlign: 'center' }}>
+          {/* Header */}
+          <Box
+            sx={{
+              px: { xs: 2, sm: 3 },
+              py: { xs: 2, md: 2.5 },
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.level1',
+              textAlign: 'center'
+            }}
+          >
             <Box
               sx={{
                 width: 48,
@@ -442,19 +601,34 @@ export default function BookHome() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 mx: 'auto',
-                mb: 2,
+                mb: 1.5,
                 fontSize: 24
               }}
             >
               🎉
             </Box>
-            <Typography component='h2' level='title-lg' sx={{ mb: 1 }}>
+            <Typography level='title-lg' sx={{ fontWeight: 700 }}>
               Import Successful
             </Typography>
-            <Typography level='body-sm' color='neutral' sx={{ mb: 3 }}>
+          </Box>
+
+          {/* Content */}
+          <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, md: 3 }, textAlign: 'center' }}>
+            <Typography level='body-md' sx={{ color: 'text.secondary' }}>
               {successMessage}
             </Typography>
+          </Box>
 
+          {/* Footer */}
+          <Box
+            sx={{
+              px: { xs: 2, sm: 3 },
+              py: { xs: 2, md: 2.5 },
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.surface'
+            }}
+          >
             <Stack spacing={2}>
               {lastImportedBookId && (
                 <Button
@@ -464,7 +638,8 @@ export default function BookHome() {
                     setShowSuccess(false)
                     navigate(`/book/${lastImportedBookId}`)
                   }}
-                  sx={{ width: '100%' }}
+                  size='lg'
+                  fullWidth
                 >
                   Open Book
                 </Button>
@@ -477,7 +652,8 @@ export default function BookHome() {
                   setShowSuccess(false)
                   setLastImportedBookId(null)
                 }}
-                sx={{ width: '100%' }}
+                size='lg'
+                fullWidth
               >
                 Continue to Library
               </Button>

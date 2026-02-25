@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react'
-import { Modal, ModalDialog, ModalClose, Typography, FormControl, FormLabel, Input, Textarea, Button, Stack } from '@mui/joy'
-import { decksService } from '../../api/services'
+import { useTranslation } from 'react-i18next'
+import { Modal, ModalDialog, ModalClose, Typography, FormControl, FormLabel, Input, Textarea, Button, Stack, Box, Divider } from '@mui/joy'
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded'
+import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import PublicIcon from '@mui/icons-material/Public'
+import PublicOffIcon from '@mui/icons-material/PublicOff'
+import { decksService, publicContentService } from '../../api/services'
+import { SuccessWindow, Error as ErrorMsg } from '../Messages'
 
 const CreateDeckModal = ({ open, onClose, onSaved, initialData = null }) => {
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [tags, setTags] = useState('')
   const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState(null)
 
   const isEdit = !!initialData
 
@@ -60,96 +68,156 @@ const CreateDeckModal = ({ open, onClose, onSaved, initialData = null }) => {
     }
   }
 
+  const showMessage = (type, text) => {
+    setMessage({ type, text })
+    setTimeout(() => setMessage(null), 3000)
+  }
+
+  const handlePublish = async () => {
+    try {
+      // Auto-populate with smart defaults
+      const metadata = {
+        category: 'Other',
+        tags: initialData.tags || [],
+        language: 'en',
+        difficulty_level: null,
+        license_type: 'all_rights_reserved',
+        is_original_content: true
+      }
+
+      await publicContentService.publishDeck(initialData._id, metadata)
+      showMessage('success', t('public.publishSuccess', { defaultValue: '✅ Published successfully!' }))
+      onSaved({ ...initialData, is_public: true })
+    } catch (error) {
+      console.error('Error publishing deck:', error)
+      showMessage('error', error.response?.data?.detail || 'Failed to publish')
+    }
+  }
+
+  const handleUnpublish = async () => {
+    try {
+      await publicContentService.unpublishDeck(initialData._id)
+      showMessage('success', t('public.unpublishSuccess'))
+      onSaved({ ...initialData, is_public: false })
+    } catch (error) {
+      console.error('Error unpublishing deck:', error)
+      showMessage('error', error.response?.data?.detail || 'Failed to unpublish')
+    }
+  }
+
   return (
-    <Modal open={open} onClose={onClose}>
-      <ModalDialog sx={{ maxWidth: 500, width: '100%' }}>
-        <ModalClose />
-        <Typography level='h4' fontWeight={600} mb={3}>
-          {isEdit ? 'Edit Deck' : 'New Deck'}
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={3}>
-            {/* Deck Name */}
-            <Stack spacing={1.5}>
-              <Typography
-                level='body-xs'
-                textTransform='uppercase'
-                fontWeight={600}
-                sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
-              >
-                Deck Name
-              </Typography>
-              <Input
-                autoFocus
-                placeholder='E.g., Japanese Vocabulary'
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
+    <>
+      {message && (
+        <Box sx={{ position: 'fixed', top: 80, right: 20, zIndex: 10000 }}>
+          {message.type === 'success' ? <SuccessWindow message={message.text} /> : <ErrorMsg message={message.text} />}
+        </Box>
+      )}
+
+      <Modal open={open} onClose={onClose}>
+        <ModalDialog sx={{ maxWidth: 500, width: '100%' }}>
+          <ModalClose />
+          <Typography level='title-lg' fontWeight={600} mb={3}>
+            {isEdit ? t('cards.create.editTitle') : t('cards.create.newTitle')}
+          </Typography>
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={3}>
+              {/* Deck Name */}
+              <Stack spacing={1}>
+                <Typography level='body-sm' sx={{ color: 'text.tertiary', fontWeight: 500 }}>
+                  {t('cards.create.fields.name')}
+                </Typography>
+                <Input
+                  autoFocus
+                  placeholder={t('cards.create.fields.namePlaceholder')}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  size='lg'
+                  variant='soft'
+                  sx={{
+                    '--Input-focusedThickness': '2px',
+                    fontSize: 'md'
+                  }}
+                />
+              </Stack>
+
+              {/* Description */}
+              <Stack spacing={1}>
+                <Typography level='body-sm' sx={{ color: 'text.tertiary', fontWeight: 500 }}>
+                  {t('cards.create.fields.description')}
+                </Typography>
+                <Textarea
+                  placeholder={t('cards.create.fields.descriptionPlaceholder')}
+                  minRows={2}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  size='lg'
+                  variant='soft'
+                  sx={{
+                    '--Textarea-focusedThickness': '2px',
+                    fontSize: 'md'
+                  }}
+                />
+              </Stack>
+
+              {/* Meta Information - More Subtle */}
+              <Stack spacing={1.5} sx={{ pt: 1 }}>
+                <Input
+                  placeholder={t('cards.create.fields.imageUrl')}
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  variant='plain'
+                  sx={{
+                    '--Input-focusedThickness': '1px',
+                    fontSize: 'sm'
+                  }}
+                />
+
+                <Input
+                  placeholder={t('cards.create.fields.tags')}
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  variant='plain'
+                  sx={{
+                    '--Input-focusedThickness': '1px',
+                    fontSize: 'sm'
+                  }}
+                />
+              </Stack>
+
+              {/* Publish Section (only in edit mode) */}
+              {isEdit && (
+                <>
+                  <Divider sx={{ my: 1 }} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {initialData?.is_public ? (
+                      <Button variant='soft' color='success' onClick={handleUnpublish} size='sm' startDecorator={<PublicOffIcon />}>
+                        {t('public.published', { defaultValue: 'Published' })}
+                      </Button>
+                    ) : (
+                      <Button variant='outlined' color='primary' onClick={handlePublish} size='sm' startDecorator={<PublicIcon />}>
+                        {t('public.publish', { defaultValue: 'Publish' })}
+                      </Button>
+                    )}
+                  </Box>
+                </>
+              )}
+
+              <Button
+                type='submit'
+                loading={loading}
+                fullWidth
                 size='lg'
-                variant='soft'
-                sx={{
-                  '--Input-focusedThickness': '2px',
-                  fontSize: 'md'
-                }}
-              />
-            </Stack>
-
-            {/* Description */}
-            <Stack spacing={1.5}>
-              <Typography
-                level='body-xs'
-                textTransform='uppercase'
-                fontWeight={600}
-                sx={{ color: 'text.tertiary', letterSpacing: '0.5px' }}
+                startDecorator={isEdit ? <SaveRoundedIcon /> : <AddRoundedIcon />}
+                sx={{ mt: 2 }}
               >
-                Description
-              </Typography>
-              <Textarea
-                placeholder='What is this deck about?'
-                minRows={2}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                size='lg'
-                variant='soft'
-                sx={{
-                  '--Textarea-focusedThickness': '2px',
-                  fontSize: 'md'
-                }}
-              />
+                {isEdit ? t('cards.create.save') : t('cards.create.create')}
+              </Button>
             </Stack>
-
-            {/* Meta Information - More Subtle */}
-            <Stack spacing={1.5} sx={{ pt: 1 }}>
-              <Input
-                placeholder='🖼️  Image URL (optional)'
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                variant='plain'
-                sx={{
-                  '--Input-focusedThickness': '1px',
-                  fontSize: 'sm'
-                }}
-              />
-
-              <Input
-                placeholder='🏷️  Add tags (e.g., languages, japanese, basic)'
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                variant='plain'
-                sx={{
-                  '--Input-focusedThickness': '1px',
-                  fontSize: 'sm'
-                }}
-              />
-            </Stack>
-
-            <Button type='submit' loading={loading} fullWidth size='lg' sx={{ mt: 2 }}>
-              {isEdit ? '💾  Save' : '✨  Create'}
-            </Button>
-          </Stack>
-        </form>
-      </ModalDialog>
-    </Modal>
+          </form>
+        </ModalDialog>
+      </Modal>
+    </>
   )
 }
 

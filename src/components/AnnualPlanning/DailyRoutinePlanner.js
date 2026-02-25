@@ -368,7 +368,7 @@ const DailyRoutinePlanner = () => {
           <Button variant='plain' color='neutral' startDecorator={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mb: 1, pl: 0 }}>
             {t('annualPlanning.back')}
           </Button>
-          <Typography level='h2'>{t('annualPlanning.dailyRoutine.title')}</Typography>
+          <Typography level='h3'>{t('annualPlanning.dailyRoutine.title')}</Typography>
           <Typography level='body-md' textColor='text.tertiary'>
             {t('annualPlanning.dailyRoutine.subtitle')}
           </Typography>
@@ -479,7 +479,7 @@ const DailyRoutinePlanner = () => {
                     width: 6,
                     height: 6,
                     borderRadius: '50%',
-                    bgcolor: i === activeSectionIndex ? 'text.primary' : 'neutral.300',
+                    bgcolor: i === activeSectionIndex ? 'text.primary' : 'neutral.outlinedBorder',
                     transition: 'all 0.3s'
                   }}
                 />

@@ -147,18 +147,16 @@ const FocusAreaSetup = () => {
 
   const renderIntro = () => (
     <Box sx={{ textAlign: 'center', maxWidth: 600, mx: 'auto', mt: 4 }}>
-      <Typography level='h1' sx={{ mb: 2 }}>
-        {isEditMode ? 'Edit Your Focus Areas' : t('annualPlanning.focusArea.setup.intro.title')}
+      <Typography level='h3' sx={{ mb: 2 }}>
+        {isEditMode ? t('annualPlanning.focusArea.setup.intro.editTitle') : t('annualPlanning.focusArea.setup.intro.title')}
       </Typography>
       <Typography level='body-lg' sx={{ mb: 4 }}>
-        {isEditMode
-          ? 'Review and update your focus areas. Make changes to names, descriptions, icons, or colors to better reflect your current priorities.'
-          : t('annualPlanning.focusArea.setup.intro.message')}
+        {isEditMode ? t('annualPlanning.focusArea.setup.intro.editMessage') : t('annualPlanning.focusArea.setup.intro.message')}
       </Typography>
       <Card variant='soft' color='primary' sx={{ mb: 4, textAlign: 'left' }}>
         <CardContent>
           <Typography level='title-md' sx={{ mb: 1 }}>
-            Tips:
+            {t('annualPlanning.focusArea.setup.tipsLabel')}
           </Typography>
           <ul style={{ margin: 0, paddingLeft: 20 }}>
             {t('annualPlanning.focusArea.setup.tips', { returnObjects: true }).map((tip, i) => (
@@ -170,7 +168,7 @@ const FocusAreaSetup = () => {
         </CardContent>
       </Card>
       <Button size='lg' endDecorator={<ArrowForwardIcon />} onClick={() => setActiveStep(1)}>
-        {isEditMode ? 'Review & Edit' : "Let's Start"}
+        {isEditMode ? t('annualPlanning.focusArea.setup.buttons.reviewEdit') : t('annualPlanning.focusArea.setup.buttons.letsStart')}
       </Button>
     </Box>
   )
@@ -178,27 +176,27 @@ const FocusAreaSetup = () => {
   const renderAreaStep = (index) => (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
       <Typography level='body-sm' sx={{ mb: 1 }}>
-        Focus Area {index + 1} of 3
+        {t('annualPlanning.focusArea.setup.areaOf', { current: index + 1, total: 3 })}
       </Typography>
-      <Typography level='h2' sx={{ mb: 3 }}>
-        Define Focus Area {index + 1}
+      <Typography level='h3' sx={{ mb: 3 }}>
+        {t('annualPlanning.focusArea.setup.defineArea', { number: index + 1 })}
       </Typography>
 
       <Stack spacing={3}>
         <FormControl>
-          <FormLabel>Name</FormLabel>
+          <FormLabel>{t('annualPlanning.focusArea.setup.nameLabel')}</FormLabel>
           <Input
-            placeholder='e.g. Health & Fitness'
+            placeholder={t('annualPlanning.focusArea.setup.namePlaceholder')}
             value={areas[index].name}
             onChange={(e) => updateArea(index, 'name', e.target.value)}
           />
         </FormControl>
 
         <FormControl>
-          <FormLabel>Description (Your &apos;Why&apos;)</FormLabel>
+          <FormLabel>{t('annualPlanning.focusArea.setup.descriptionLabel')}</FormLabel>
           <Textarea
             minRows={3}
-            placeholder='Why is this area important to you this year?'
+            placeholder={t('annualPlanning.focusArea.setup.descriptionPlaceholder')}
             value={areas[index].description}
             onChange={(e) => updateArea(index, 'description', e.target.value)}
           />
@@ -218,7 +216,7 @@ const FocusAreaSetup = () => {
         </Box>
 
         <Box>
-          <FormLabel sx={{ mb: 1.5 }}>Color Theme</FormLabel>
+          <FormLabel sx={{ mb: 1.5 }}>{t('annualPlanning.focusArea.setup.colorTheme')}</FormLabel>
           <Stack direction='row' spacing={1}>
             {COLORS.map((color) => (
               <IconButton
@@ -240,10 +238,10 @@ const FocusAreaSetup = () => {
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
           <Button variant='plain' color='neutral' onClick={handleBack}>
-            Back
+            {t('annualPlanning.focusArea.setup.buttons.back')}
           </Button>
           <Button endDecorator={activeStep === 3 ? null : <ArrowForwardIcon />} onClick={handleNext} disabled={!areas[index].name}>
-            {activeStep === 3 ? 'Review' : 'Next'}
+            {activeStep === 3 ? t('annualPlanning.focusArea.setup.buttons.review') : t('annualPlanning.focusArea.setup.buttons.next')}
           </Button>
         </Box>
       </Stack>
@@ -252,8 +250,8 @@ const FocusAreaSetup = () => {
 
   const renderReview = () => (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
-      <Typography level='h2' sx={{ mb: 4, textAlign: 'center' }}>
-        Your Plan for 2026
+      <Typography level='h3' sx={{ mb: 4, textAlign: 'center' }}>
+        {t('annualPlanning.focusArea.setup.reviewTitle', { year: new Date().getFullYear() })}
       </Typography>
       <Grid container spacing={3}>
         {areas.map((area, index) => (
@@ -266,7 +264,7 @@ const FocusAreaSetup = () => {
                 <Typography level='title-lg'>{area.name}</Typography>
                 <Typography level='body-sm'>{area.description}</Typography>
                 <Button variant='plain' size='sm' sx={{ mt: 2 }} onClick={() => setActiveStep(index + 1)}>
-                  Edit
+                  {t('annualPlanning.focusArea.setup.buttons.edit')}
                 </Button>
               </CardContent>
             </Card>
@@ -275,10 +273,10 @@ const FocusAreaSetup = () => {
       </Grid>
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 6 }}>
         <Button variant='plain' onClick={handleBack}>
-          Back
+          {t('annualPlanning.focusArea.setup.buttons.back')}
         </Button>
         <Button size='lg' startDecorator={<CheckIcon />} onClick={handleSubmit}>
-          {isEditMode ? 'Save Changes' : 'Finalize Plan'}
+          {isEditMode ? t('annualPlanning.focusArea.setup.buttons.saveChanges') : t('annualPlanning.focusArea.setup.buttons.finalizePlan')}
         </Button>
       </Box>
     </Box>
@@ -290,7 +288,7 @@ const FocusAreaSetup = () => {
         <Box sx={{ textAlign: 'center', mt: 8 }}>
           <LinearProgress />
           <Typography level='body-sm' sx={{ mt: 2 }}>
-            Loading your plan...
+            {t('annualPlanning.focusArea.setup.loading')}
           </Typography>
         </Box>
       ) : (

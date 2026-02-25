@@ -70,7 +70,7 @@ export default function NewsCarousel() {
   const [activeCategory, setActiveCategory] = useState('general')
   const [currentSlide, setCurrentSlide] = useState(0)
 
-  const { user, checkUser } = useAuth()
+  const { user } = useAuth()
   const [userPreferences, setUserPreferences] = useState(null)
 
   // Get favorite articles from user preferences (not filtered from news)
@@ -83,45 +83,36 @@ export default function NewsCarousel() {
   // Toggle favorite - persist full article to user preferences
   const toggleFavorite = async (article) => {
     const isFavorite = favoriteUrls.includes(article.url)
-    console.log('🔄 Toggling favorite:', { article: article.title, isFavorite })
+    // Snapshot current prefs for rollback on error
+    const prevPreferences = userPreferences
+
+    const newFavoriteNews = isFavorite
+      ? favoriteNews.filter((fav) => fav.url !== article.url)
+      : [
+          ...favoriteNews,
+          {
+            url: article.url,
+            title: article.title,
+            description: article.description || '',
+            urlToImage: article.urlToImage || '',
+            category: article.category || ''
+          }
+        ]
+
+    // Optimistic update for immediate UI feedback
+    setUserPreferences((prev) => ({
+      ...prev,
+      favorite_news: newFavoriteNews
+    }))
 
     try {
-      const newFavoriteNews = isFavorite
-        ? favoriteNews.filter((fav) => fav.url !== article.url)
-        : [
-            ...favoriteNews,
-            {
-              url: article.url,
-              title: article.title,
-              description: article.description || '',
-              urlToImage: article.urlToImage || '',
-              category: article.category || ''
-            }
-          ]
-
-      console.log('📝 New favorites count:', newFavoriteNews.length)
-
-      // Optimistic update for immediate UI feedback
-      setUserPreferences((prev) => ({
-        ...prev,
-        favorite_news: newFavoriteNews
-      }))
-
-      // Update via user preferences API
-      console.log('📤 Sending to backend...')
       await userService.updateGeneralPreferences({
         favorite_news: newFavoriteNews
       })
-      console.log('✅ Backend updated')
-
-      // Refresh user from backend to ensure sync
-      console.log('🔄 Refreshing user from backend...')
-      await checkUser()
-      console.log('✅ User refreshed')
     } catch (error) {
-      console.error('❌ Failed to toggle favorite:', error)
+      console.error('Failed to update favorite:', error)
       // Revert optimistic update on error
-      await checkUser()
+      setUserPreferences(prevPreferences)
     }
   }
 
@@ -191,28 +182,22 @@ export default function NewsCarousel() {
   // Sync preferences from AuthContext and handle cache clearing
   useEffect(() => {
     const syncPreferences = async () => {
-      if (user?.preferences) {
-        console.log('🔄 Syncing preferences from user:', user.preferences.favorite_news?.length || 0, 'favorites')
+      if (!user?.preferences) return
 
-        // Check if preferences changed to clear cache
-        if (userPreferences) {
-          const oldPrefs = JSON.stringify(userPreferences)
-          const newPrefs = JSON.stringify(user.preferences)
-
-          if (oldPrefs !== newPrefs) {
-            console.log('🔄 User preferences changed, clearing news cache...')
-            try {
-              await apiClient.delete('/news/cache/clear')
-              console.log('✅ Cache cleared')
-            } catch (err) {
-              console.warn('Failed to clear cache:', err)
-            }
+      // If language or interests changed, ask the backend to clear its news cache
+      if (userPreferences) {
+        const oldPrefs = JSON.stringify(userPreferences)
+        const newPrefs = JSON.stringify(user.preferences)
+        if (oldPrefs !== newPrefs) {
+          try {
+            await apiClient.delete('/news/cache/clear')
+          } catch {
+            // Non-critical: cache clear failure doesn't affect UX
           }
         }
-
-        setUserPreferences(user.preferences)
-        console.log('✅ Preferences synced:', user.preferences.favorite_news?.length || 0, 'favorites')
       }
+
+      setUserPreferences(user.preferences)
     }
     syncPreferences()
   }, [user])
@@ -340,9 +325,7 @@ export default function NewsCarousel() {
         {t('news.noArticles')}
       </Typography>
       <Typography level='body-sm' sx={{ color: 'text.secondary', maxWidth: 400 }}>
-        {userPreferences?.interests?.length > 0
-          ? 'Try adjusting your interests in Settings to see personalized news.'
-          : 'Set your interests in Settings to see personalized news articles.'}
+        {userPreferences?.interests?.length > 0 ? t('news.adjustInterests') : t('news.setInterests')}
       </Typography>
     </Box>
   )
@@ -367,11 +350,11 @@ export default function NewsCarousel() {
           <TabList>
             <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
               <TrendingUp sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
-              Latest News
+              {t('news.title')}
             </Tab>
             <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
               <Star sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
-              Favorites {favoriteNews.length > 0 && `(${favoriteNews.length})`}
+              {t('news.favorites')} {favoriteNews.length > 0 && `(${favoriteNews.length})`}
             </Tab>
           </TabList>
 
@@ -513,12 +496,12 @@ export default function NewsCarousel() {
                           width: { xs: 6, md: 8 },
                           height: { xs: 6, md: 8 },
                           borderRadius: '50%',
-                          backgroundColor: currentSlide === idx ? 'primary.500' : 'neutral.300',
+                          backgroundColor: currentSlide === idx ? 'primary.solidBg' : 'neutral.outlinedBorder',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
                           transform: currentSlide === idx ? 'scale(1.2)' : 'scale(1)',
                           '&:hover': {
-                            backgroundColor: 'primary.400'
+                            backgroundColor: 'primary.outlinedHoverBorder'
                           }
                         }}
                       />
@@ -544,12 +527,12 @@ export default function NewsCarousel() {
                 textAlign: 'center'
               }}
             >
-              <Star sx={{ fontSize: 60, color: 'neutral.300', mb: 2 }} />
+              <Star sx={{ fontSize: 60, color: 'text.tertiary', mb: 2 }} />
               <Typography level='h4' sx={{ mb: 1, color: 'text.primary' }}>
-                No Favorites Yet
+                {t('news.noFavorites')}
               </Typography>
               <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                Click the star icon on any news article to add it to your favorites.
+                {t('news.noFavoritesHint')}
               </Typography>
             </Box>
           ) : (
@@ -852,7 +835,7 @@ const FavoritesCarousel = ({ favorites, toggleFavorite, t }) => {
           background: 'transparent'
         },
         '&::-webkit-scrollbar-thumb': {
-          background: 'neutral.400',
+          background: 'neutral.outlinedBorder',
           borderRadius: 'sm'
         }
       }}

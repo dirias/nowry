@@ -64,14 +64,14 @@ textarea {
 }
 
 /* COMPREHENSIVE FIX: Remove all backgrounds from icons and their wrappers */
-/* Target all possible icon container elements */
-button *,
-a *,
-[role='button'] * {
+/* Target icon container elements — but NOT checkbox internals */
+button *:not([class*='MuiCheckbox']):not([class*='checkbox']),
+a *:not([class*='MuiCheckbox']):not([class*='checkbox']),
+[role='button'] *:not([class*='MuiCheckbox']):not([class*='checkbox']) {
   background-color: transparent !important;
 }
 
-/* Specific targeting for Joy UI components */
+/* Specific targeting for Joy UI components — exclude checkbox */
 .MuiButton-root *,
 .MuiIconButton-root *,
 .MuiChip-root *,

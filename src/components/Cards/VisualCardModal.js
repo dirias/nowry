@@ -154,7 +154,7 @@ export default function VisualCardModal({ open, onClose, onSaved, decks = [], in
                   onChange={(e) => setDiagramCode(e.target.value)}
                   sx={{ fontFamily: 'monospace', fontSize: '0.875rem' }}
                 />
-                <Typography level='body-xs' sx={{ mt: 0.5, color: 'neutral.500' }}>
+                <Typography level='body-xs' sx={{ mt: 0.5, color: 'text.tertiary' }}>
                   Use{' '}
                   <a href='https://mermaid.js.org/' target='_blank' rel='noopener noreferrer'>
                     Mermaid syntax
@@ -189,7 +189,7 @@ export default function VisualCardModal({ open, onClose, onSaved, decks = [], in
                   ) : previewSvg ? (
                     <div ref={mermaidRef} dangerouslySetInnerHTML={{ __html: previewSvg }} />
                   ) : (
-                    <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
+                    <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                       Enter Mermaid code to see preview
                     </Typography>
                   )}

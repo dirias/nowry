@@ -4,22 +4,30 @@ import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
 import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer } from 'lucide-react'
-import { booksService } from '../../api/services'
-import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer } from '@mui/joy'
+import { booksService, publicContentService } from '../../api/services'
+import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip } from '@mui/joy'
 import { LexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import Toolbar from './Toolbar'
 import { useAutoSave, SAVE_STATUS } from '../../hooks/useAutoSave'
 import { Menu as MenuIcon } from 'lucide-react'
+import PublicIcon from '@mui/icons-material/Public'
+import PublicOffIcon from '@mui/icons-material/PublicOff'
+import { SuccessWindow, Error as ErrorMsg } from '../Messages'
+import { useTranslation } from 'react-i18next'
 
 export default function EditorHome() {
   const { id } = useParams()
   const location = useLocation()
+  const { t } = useTranslation()
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
 
   // book might be stale from location state if we just navigated
   const [book, setBook] = useState(location.state?.book || null)
   const [bookName, setBookName] = useState(book?.title || '')
+
+  // Success/Error messages
+  const [message, setMessage] = useState(null)
 
   // Flow content state (TOC and reading stats)
   const [tocData, setTocData] = useState([])
@@ -225,6 +233,50 @@ export default function EditorHome() {
     window.scrollTo(0, 0)
   }, [])
 
+  // Publish/Unpublish handlers
+  const handlePublish = async () => {
+    try {
+      // Auto-populate with smart defaults
+      const metadata = {
+        category: 'Other', // Default category
+        tags: [], // Empty tags is fine
+        language: 'en',
+        difficulty_level: null, // Optional
+        license_type: 'all_rights_reserved',
+        is_original_content: true
+      }
+
+      await publicContentService.publishBook(book._id, metadata)
+      setMessage({ type: 'success', text: t('public.publishSuccess', { defaultValue: '✅ Published successfully!' }) })
+      // Refresh book to get updated is_public status
+      const updatedBook = await booksService.getById(id)
+      setBook(updatedBook)
+      setTimeout(() => setMessage(null), 3000)
+    } catch (error) {
+      console.error('Error publishing book:', error)
+      setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to publish' })
+      setTimeout(() => setMessage(null), 3000)
+    }
+  }
+
+  const handleUnpublish = async () => {
+    if (!window.confirm(t('public.unpublishConfirm', { defaultValue: 'Are you sure you want to unpublish this book?' }))) {
+      return
+    }
+    try {
+      await publicContentService.unpublishBook(book._id)
+      setMessage({ type: 'success', text: t('public.unpublishSuccess') })
+      // Refresh book to get updated is_public status
+      const updatedBook = await booksService.getById(id)
+      setBook(updatedBook)
+      setTimeout(() => setMessage(null), 3000)
+    } catch (error) {
+      console.error('Error unpublishing book:', error)
+      setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to unpublish' })
+      setTimeout(() => setMessage(null), 3000)
+    }
+  }
+
   // Status Badge Component
   const StatusBadge = () => {
     if (status === SAVE_STATUS.SAVING) {
@@ -372,201 +424,232 @@ export default function EditorHome() {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        flexGrow: 1,
-        minHeight: 0,
-        width: '100%',
-        overflow: 'hidden',
-        position: 'relative',
-        backgroundColor: 'background.level2'
-      }}
-    >
-      {/* 🏛 Top Header & Formatting Ribbon */}
-      <Sheet
-        sx={{
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'background.surface',
-          zIndex: 1000,
-          boxShadow: 'sm',
-          flexShrink: 0
-        }}
-      >
-        {/* Row 1: Book Info */}
-        <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ height: 50, px: { xs: 2, md: 3 } }}>
-          <Stack direction='row' alignItems='center' spacing={2} sx={{ flexGrow: 1 }}>
-            {/* Mobile Menu Button */}
-            <IconButton
-              variant='plain'
-              color='neutral'
-              onClick={() => setShowMobileSidebar(true)}
-              sx={{ display: { xs: 'inline-flex', md: 'none' }, mr: 1 }}
-            >
-              <MenuIcon />
-            </IconButton>
-
-            <Input
-              value={bookName}
-              onChange={(e) => setBookName(e.target.value)}
-              disabled={isLocked}
-              variant='plain'
-              sx={{
-                fontSize: 'lg',
-                fontWeight: 'bold',
-                bgcolor: 'transparent',
-                '&:hover': { bgcolor: isLocked ? 'transparent' : 'background.level1' },
-                px: 1,
-                width: '100%',
-                maxWidth: { xs: 150, md: 400 },
-                textOverflow: 'ellipsis',
-                '&.Mui-disabled': { color: 'text.primary' }
-              }}
-            />
-            <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', md: 'block' } }} />
-            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-              <StatusBadge />
-            </Box>
-            {saveError && (
-              <Typography level='body-xs' color='danger' sx={{ display: { xs: 'none', sm: 'block' } }}>
-                {saveError}
-              </Typography>
-            )}
-          </Stack>
-
-          <Stack direction='row' spacing={1.5} alignItems='center'>
-            {/* Zoom Controls */}
-            <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', sm: 'flex' } }}>
-              <IconButton size='sm' variant='plain' onClick={() => setZoom((prev) => Math.max(0.25, prev - 0.25))} disabled={zoom <= 0.25}>
-                <Minus size={14} />
-              </IconButton>
-              <Typography level='body-xs' sx={{ minWidth: 40, textAlign: 'center' }}>
-                {Math.round(zoom * 100)}%
-              </Typography>
-              <IconButton size='sm' variant='plain' onClick={() => setZoom((prev) => Math.min(2.0, prev + 0.25))} disabled={zoom >= 2.0}>
-                <Plus size={14} />
-              </IconButton>
-            </Stack>
-            <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
-
-            <Button
-              variant='plain'
-              color='neutral'
-              onClick={handleToggleAutoSave}
-              size='sm'
-              startDecorator={<Timer size={14} />}
-              sx={{
-                fontSize: 'xs',
-                fontWeight: autoSaveEnabled ? 'lg' : 'md',
-                textDecoration: autoSaveEnabled ? 'underline' : 'none',
-                textUnderlineOffset: '4px',
-                textDecorationThickness: '2px',
-                '&:hover': {
-                  textDecoration: 'underline',
-                  textUnderlineOffset: '4px'
-                }
-              }}
-            >
-              Autosave
-            </Button>
-
-            <IconButton variant='outlined' color='neutral' onClick={handleManualSave} size='sm' sx={{ borderRadius: 'md' }}>
-              <Save size={16} />
-            </IconButton>
-
-            <IconButton
-              variant={isLocked ? 'solid' : 'outlined'}
-              color={isLocked ? 'danger' : 'neutral'}
-              onClick={() => setIsLocked(!isLocked)}
-              size='sm'
-              sx={{ borderRadius: 'md' }}
-            >
-              {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
-            </IconButton>
-          </Stack>
-        </Stack>
-
-        <Divider />
-
-        {/* Row 2: Formatting Ribbon - Only show when unlocked */}
-        {!isLocked && (
-          <Box sx={{ height: 50, display: 'flex', alignItems: 'center', px: { xs: 2, md: 3 }, overflowX: 'auto' }}>
-            {focusedEditor ? (
-              <LexicalComposerContext.Provider value={[focusedEditor, {}]}>
-                <Toolbar onSave={handleManualSave} disabled={isLocked} />
-              </LexicalComposerContext.Provider>
-            ) : (
-              <Typography level='body-sm' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
-                Editor Ready
-              </Typography>
-            )}
-          </Box>
-        )}
-      </Sheet>
+    <>
+      {/* Success/Error Messages */}
+      {message && (
+        <Box sx={{ position: 'fixed', top: 80, right: 20, zIndex: 10000 }}>
+          {message.type === 'success' ? <SuccessWindow message={message.text} /> : <ErrorMsg message={message.text} />}
+        </Box>
+      )}
 
       <Box
-        sx={{ display: 'flex', flexDirection: 'row', flexGrow: 1, overflow: 'hidden', minHeight: 0 }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          minHeight: 0,
+          width: '100%',
+          overflow: 'hidden',
+          position: 'relative',
+          backgroundColor: 'background.level2'
+        }}
       >
-        {/* 📋 Left Sidebar - Content Navigator (Desktop) */}
-        <Box
+        {/* 🏛 Top Header & Formatting Ribbon */}
+        <Sheet
           sx={{
-            width: 280,
-            borderRight: '1px solid',
+            borderBottom: '1px solid',
             borderColor: 'divider',
             bgcolor: 'background.surface',
-            display: { xs: 'none', md: 'block' },
-            overflow: 'hidden'
+            zIndex: 1000,
+            boxShadow: 'sm',
+            flexShrink: 0
           }}
         >
-          <ContentNavigator toc={tocData} readingTime={readingTime} />
-        </Box>
+          {/* Row 1: Book Info */}
+          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ height: 50, px: { xs: 2, md: 3 } }}>
+            <Stack direction='row' alignItems='center' spacing={2} sx={{ flexGrow: 1 }}>
+              {/* Mobile Menu Button */}
+              <IconButton
+                variant='plain'
+                color='neutral'
+                onClick={() => setShowMobileSidebar(true)}
+                sx={{ display: { xs: 'inline-flex', md: 'none' }, mr: 1 }}
+              >
+                <MenuIcon />
+              </IconButton>
 
-        {/* 📋 Sidebar (Mobile Drawer) */}
-        <Drawer open={showMobileSidebar} onClose={() => setShowMobileSidebar(false)} size='sm'>
-          <Box sx={{ height: '100%', overflow: 'hidden', pt: 2 }}>
+              <Input
+                value={bookName}
+                onChange={(e) => setBookName(e.target.value)}
+                disabled={isLocked}
+                variant='plain'
+                sx={{
+                  fontSize: 'lg',
+                  fontWeight: 'bold',
+                  bgcolor: 'transparent',
+                  '&:hover': { bgcolor: isLocked ? 'transparent' : 'background.level1' },
+                  px: 1,
+                  width: '100%',
+                  maxWidth: { xs: 150, md: 400 },
+                  textOverflow: 'ellipsis',
+                  '&.Mui-disabled': { color: 'text.primary' }
+                }}
+              />
+              <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', md: 'block' } }} />
+              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                <StatusBadge />
+              </Box>
+              {saveError && (
+                <Typography level='body-xs' color='danger' sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  {saveError}
+                </Typography>
+              )}
+            </Stack>
+
+            <Stack direction='row' spacing={1.5} alignItems='center'>
+              {/* Publish/Unpublish Button - One Click! */}
+              {book?.is_public ? (
+                <Tooltip title={t('public.unpublish', { defaultValue: 'Unpublish' })}>
+                  <Button variant='soft' color='success' onClick={handleUnpublish} size='sm' startDecorator={<PublicIcon />}>
+                    {t('public.published', { defaultValue: 'Published' })}
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Tooltip title={t('public.publishInstant', { defaultValue: 'Share with community' })}>
+                  <Button variant='outlined' color='primary' onClick={handlePublish} size='sm' startDecorator={<PublicIcon />}>
+                    {t('public.publish', { defaultValue: 'Publish' })}
+                  </Button>
+                </Tooltip>
+              )}
+
+              <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
+
+              {/* Zoom Controls */}
+              <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  onClick={() => setZoom((prev) => Math.max(0.25, prev - 0.25))}
+                  disabled={zoom <= 0.25}
+                >
+                  <Minus size={14} />
+                </IconButton>
+                <Typography level='body-xs' sx={{ minWidth: 40, textAlign: 'center' }}>
+                  {Math.round(zoom * 100)}%
+                </Typography>
+                <IconButton size='sm' variant='plain' onClick={() => setZoom((prev) => Math.min(2.0, prev + 0.25))} disabled={zoom >= 2.0}>
+                  <Plus size={14} />
+                </IconButton>
+              </Stack>
+              <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
+
+              <Button
+                variant='plain'
+                color='neutral'
+                onClick={handleToggleAutoSave}
+                size='sm'
+                startDecorator={<Timer size={14} />}
+                sx={{
+                  fontSize: 'xs',
+                  fontWeight: autoSaveEnabled ? 'lg' : 'md',
+                  textDecoration: autoSaveEnabled ? 'underline' : 'none',
+                  textUnderlineOffset: '4px',
+                  textDecorationThickness: '2px',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '4px'
+                  }
+                }}
+              >
+                Autosave
+              </Button>
+
+              <IconButton variant='outlined' color='neutral' onClick={handleManualSave} size='sm' sx={{ borderRadius: 'md' }}>
+                <Save size={16} />
+              </IconButton>
+
+              <IconButton
+                variant={isLocked ? 'solid' : 'outlined'}
+                color={isLocked ? 'danger' : 'neutral'}
+                onClick={() => setIsLocked(!isLocked)}
+                size='sm'
+                sx={{ borderRadius: 'md' }}
+              >
+                {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
+              </IconButton>
+            </Stack>
+          </Stack>
+
+          <Divider />
+
+          {/* Row 2: Formatting Ribbon - Only show when unlocked */}
+          {!isLocked && (
+            <Box sx={{ height: 50, display: 'flex', alignItems: 'center', px: { xs: 2, md: 3 }, overflowX: 'auto' }}>
+              {focusedEditor ? (
+                <LexicalComposerContext.Provider value={[focusedEditor, {}]}>
+                  <Toolbar onSave={handleManualSave} disabled={isLocked} />
+                </LexicalComposerContext.Provider>
+              ) : (
+                <Typography level='body-sm' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
+                  Editor Ready
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Sheet>
+
+        <Box
+          sx={{ display: 'flex', flexDirection: 'row', flexGrow: 1, overflow: 'hidden', minHeight: 0 }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* 📋 Left Sidebar - Content Navigator (Desktop) */}
+          <Box
+            sx={{
+              width: 280,
+              borderRight: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.surface',
+              display: { xs: 'none', md: 'block' },
+              overflow: 'hidden'
+            }}
+          >
             <ContentNavigator toc={tocData} readingTime={readingTime} />
           </Box>
-        </Drawer>
 
-        {/* 📄 Editor Workspace */}
-        <Box
-          className='editor-scroll-container'
-          sx={{
-            flexGrow: 1,
-            bgcolor: 'background.level2',
-            pt: { xs: 3, md: 6 }, // 24px mobile (following 8px grid), 48px desktop
-            pb: { xs: 8, md: 15 }, // More bottom space on mobile for comfortable scrolling
-            px: { xs: 2, md: 4 }, // 16px mobile padding (8px grid), 32px desktop
-            overflowY: 'auto',
-            overflowX: 'hidden', // Prevent horizontal scroll
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: { xs: 3, md: 6 }, // 24px gap on mobile (breathing room between pages), 48px desktop
-            scrollBehavior: 'smooth'
-          }}
-        >
-          <Editor
-            key={book._id} // Re-mount if book changes
-            initialContent={content}
-            book={book}
-            onSave={handleContentChange}
-            onImageUpload={handleImageUpload}
-            pageSize={pageSize}
-            pageZoom={zoom}
-            isReadOnly={isLocked}
-            onFocus={(editor) => setFocusedEditor(editor)}
-            onPageCountChange={handlePageUpdate}
-            onTOCChange={setTocData}
-            onReadingStatsChange={(stats) => setReadingTime(stats.readingTime || 0)}
-          />
+          {/* 📋 Sidebar (Mobile Drawer) */}
+          <Drawer open={showMobileSidebar} onClose={() => setShowMobileSidebar(false)} size='sm'>
+            <Box sx={{ height: '100%', overflow: 'hidden', pt: 2 }}>
+              <ContentNavigator toc={tocData} readingTime={readingTime} />
+            </Box>
+          </Drawer>
+
+          {/* 📄 Editor Workspace */}
+          <Box
+            className='editor-scroll-container'
+            sx={{
+              flexGrow: 1,
+              bgcolor: 'background.level2',
+              pt: { xs: 3, md: 6 }, // 24px mobile (following 8px grid), 48px desktop
+              pb: { xs: 8, md: 15 }, // More bottom space on mobile for comfortable scrolling
+              px: { xs: 2, md: 4 }, // 16px mobile padding (8px grid), 32px desktop
+              overflowY: 'auto',
+              overflowX: 'hidden', // Prevent horizontal scroll
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: { xs: 3, md: 6 }, // 24px gap on mobile (breathing room between pages), 48px desktop
+              scrollBehavior: 'smooth'
+            }}
+          >
+            <Editor
+              key={book._id} // Re-mount if book changes
+              initialContent={content}
+              book={book}
+              onSave={handleContentChange}
+              onImageUpload={handleImageUpload}
+              pageSize={pageSize}
+              pageZoom={zoom}
+              isReadOnly={isLocked}
+              onFocus={(editor) => setFocusedEditor(editor)}
+              onPageCountChange={handlePageUpdate}
+              onTOCChange={setTocData}
+              onReadingStatsChange={(stats) => setReadingTime(stats.readingTime || 0)}
+            />
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   )
 }

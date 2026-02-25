@@ -14,14 +14,18 @@ import {
   Autocomplete,
   AutocompleteOption,
   Typography,
-  Divider
+  Divider,
+  Alert
 } from '@mui/joy'
+import InfoIcon from '@mui/icons-material/Info'
 import { annualPlanningService } from '../../api/services'
 import { tasksService } from '../../api/services/tasks.service' // Check import path if needed, usually index exports it
 
-const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existingPriorities = [], onSuccess }) => {
+const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existingPriorities = [], editingPriority = null, onSuccess }) => {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+  const isEditMode = !!editingPriority
+  const [originalDeadline, setOriginalDeadline] = useState(null)
 
   // Form State
   const [formData, setFormData] = useState({
@@ -43,17 +47,33 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
   // Reset form when opening
   useEffect(() => {
     if (open) {
-      setFormData({
-        title: '',
-        description: '',
-        focus_area_id: '',
-        linked_entity_id: null,
-        linked_entity_type: null,
-        deadline: ''
-      })
+      if (isEditMode && editingPriority) {
+        // Populate form with existing priority data
+        const deadline = editingPriority.deadline ? editingPriority.deadline.split('T')[0] : ''
+        setFormData({
+          title: editingPriority.title || '',
+          description: editingPriority.description || '',
+          focus_area_id: editingPriority.focus_area_id || '',
+          linked_entity_id: editingPriority.linked_entity_id || null,
+          linked_entity_type: editingPriority.linked_entity_type || null,
+          deadline: deadline
+        })
+        setOriginalDeadline(deadline)
+      } else {
+        // Reset for new priority
+        setFormData({
+          title: '',
+          description: '',
+          focus_area_id: '',
+          linked_entity_id: null,
+          linked_entity_type: null,
+          deadline: ''
+        })
+        setOriginalDeadline(null)
+      }
       setAvailableItems({ goals: [], tasks: [], routine: [] })
     }
-  }, [open])
+  }, [open, isEditMode, editingPriority])
 
   // Fetch items when Focus Area is selected (Tasks/Routine are global, but Goals are per area)
   // Actually, Users probably want to link *any* task or routine regardless of focus area,
@@ -119,10 +139,16 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
             }
           })
 
-          // Filter out already linked items
+          // Filter out already linked items (except the one being edited)
           const isLinked = (id, type) => {
             if (!existingPriorities) return false
-            return existingPriorities.some((p) => p.linked_entity_id === id && p.linked_entity_type === type)
+            return existingPriorities.some((p) => {
+              // In edit mode, don't filter out the current priority's linked entity
+              if (isEditMode && editingPriority && p._id === editingPriority._id) {
+                return false
+              }
+              return p.linked_entity_id === id && p.linked_entity_type === type
+            })
           }
 
           setAvailableItems({
@@ -204,11 +230,42 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
         description: formData.description || ''
       }
 
-      await annualPlanningService.createPriority(payload)
+      if (isEditMode) {
+        // Extract proper ID from editing priority
+        const priorityId = editingPriority._id || editingPriority.id
+        console.log('[DEBUG] Updating priority with ID:', priorityId)
+        console.log('[DEBUG] Full editing priority object:', editingPriority)
+
+        // Update existing priority
+        await annualPlanningService.updatePriority(priorityId, payload)
+
+        // IMPORTANT: Sync deadline with linked entity (goal or task)
+        if (formData.linked_entity_id && formData.deadline) {
+          const deadlineChanged = originalDeadline !== formData.deadline
+
+          if (deadlineChanged) {
+            if (formData.linked_entity_type === 'goal') {
+              // Update goal's target_date
+              await annualPlanningService.updateGoal(formData.linked_entity_id, {
+                target_date: formData.deadline
+              })
+            } else if (formData.linked_entity_type === 'task') {
+              // Update task's deadline
+              await tasksService.update(formData.linked_entity_id, {
+                deadline: formData.deadline
+              })
+            }
+          }
+        }
+      } else {
+        // Create new priority
+        await annualPlanningService.createPriority(payload)
+      }
+
       onSuccess()
       onClose()
     } catch (error) {
-      console.error('Failed to create priority:', error)
+      console.error(`Failed to ${isEditMode ? 'update' : 'create'} priority:`, error)
     } finally {
       setLoading(false)
     }
@@ -219,7 +276,7 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
   return (
     <Modal open={open} onClose={onClose}>
       <ModalDialog sx={{ maxWidth: 500, width: '100%' }}>
-        <DialogTitle>Add Annual Priority</DialogTitle>
+        <DialogTitle>{isEditMode ? 'Edit Annual Priority' : 'Add Annual Priority'}</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
             {/* Generic Link - Top */}
@@ -265,7 +322,13 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
                     )}
                   </AutocompleteOption>
                 )}
+                disabled={isEditMode && !!formData.linked_entity_id}
               />
+              {isEditMode && formData.linked_entity_id && (
+                <Typography level='body-xs' sx={{ mt: 0.5, color: 'text.tertiary' }}>
+                  Linked item cannot be changed when editing
+                </Typography>
+              )}
             </FormControl>
 
             <Divider />
@@ -289,10 +352,39 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
             </FormControl>
 
             {!isRoutineLink && (
-              <FormControl>
-                <FormLabel>Target Deadline</FormLabel>
-                <Input type='date' value={formData.deadline} onChange={(e) => handleChange('deadline', e.target.value)} />
-              </FormControl>
+              <>
+                {/* Warning Alert - Show when deadline is being changed for a linked entity */}
+                {isEditMode && formData.linked_entity_id && formData.deadline !== originalDeadline && (
+                  <Alert
+                    color='warning'
+                    variant='soft'
+                    startDecorator={<InfoIcon />}
+                    sx={{
+                      fontSize: '0.875rem',
+                      py: 1,
+                      px: 1.5
+                    }}
+                  >
+                    <Stack spacing={0.5}>
+                      <Typography level='body-sm' fontWeight={600}>
+                        Deadline Sync
+                      </Typography>
+                      <Typography level='body-xs'>
+                        Changing this deadline will also update the deadline in the linked{' '}
+                        <strong>
+                          {formData.linked_entity_type === 'goal' ? 'Goal' : formData.linked_entity_type === 'task' ? 'Task' : 'item'}
+                        </strong>{' '}
+                        to keep them synchronized.
+                      </Typography>
+                    </Stack>
+                  </Alert>
+                )}
+
+                <FormControl>
+                  <FormLabel>Target Deadline</FormLabel>
+                  <Input type='date' value={formData.deadline} onChange={(e) => handleChange('deadline', e.target.value)} />
+                </FormControl>
+              </>
             )}
 
             <Stack direction='row' justifyContent='flex-end' spacing={2} sx={{ mt: 2 }}>
@@ -300,7 +392,7 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
                 Cancel
               </Button>
               <Button loading={loading} onClick={handleSubmit}>
-                Add Priority
+                {isEditMode ? 'Save Changes' : 'Add Priority'}
               </Button>
             </Stack>
           </Stack>

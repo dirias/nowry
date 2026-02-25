@@ -26,8 +26,8 @@
   line-height: 1.7;
   color: var(--joy-palette-text-secondary);
   min-height: 800px; /* Increased from 600px for better initial height */
-  padding: 3rem 2rem;
-  max-width: 750px; /* Optimal reading width (slightly wider than before for comfort) */
+  padding: 3rem 4rem; /* A4-style: 48px top/bottom, 64px left/right */
+  max-width: 850px; /* Slightly wider to accommodate margins */
   margin: 0 auto;
   width: 100%;
   position: relative;
@@ -55,8 +55,8 @@
 .editor-placeholder {
   position: absolute;
   top: 3rem;
-  left: 2rem;
-  right: 2rem;
+  left: 4rem; /* Match new padding */
+  right: 4rem; /* Match new padding */
   color: var(--joy-palette-text-tertiary);
   pointer-events: none;
   font-size: 1.125rem; /* Slightly larger for better visibility */

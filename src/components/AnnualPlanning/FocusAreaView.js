@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -11,7 +11,6 @@ import {
   Stack,
   IconButton,
   Skeleton,
-  Chip,
   LinearProgress,
   Container,
   CardOverflow,
@@ -23,7 +22,10 @@ import {
   List,
   ListItem,
   ListItemDecorator,
-  Divider
+  Divider,
+  Input,
+  Avatar,
+  Tooltip
 } from '@mui/joy'
 import {
   Add as AddIcon,
@@ -31,11 +33,18 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   KeyboardArrowDown as ExpandIcon,
-  KeyboardArrowUp as CollapseIcon
+  KeyboardArrowUp as CollapseIcon,
+  Search as SearchIcon,
+  Close as CloseIcon,
+  GridView as GridViewIcon,
+  ViewList as ListIcon,
+  Flag as FlagIcon,
+  Warning as WarningIcon
 } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
 import GoalDialog from './GoalDialog'
+import PriorityList from './PriorityList'
 
 const FocusAreaView = () => {
   const { id } = useParams()
@@ -150,9 +159,21 @@ const FocusAreaView = () => {
 
   const getStatusConfig = (status) => {
     const configs = {
-      not_started: { label: 'Not Started', color: 'neutral', icon: '○' },
-      in_progress: { label: 'In Progress', color: 'primary', icon: '◐' },
-      completed: { label: 'Completed', color: 'success', icon: '●' }
+      not_started: {
+        label: 'Not Started',
+        color: 'neutral',
+        icon: '⭕' // Hollow circle - nothing begun
+      },
+      in_progress: {
+        label: 'In Progress',
+        color: 'warning', // Changed from 'primary' to 'warning' for better visibility
+        icon: '🔄' // Rotation arrow - actively working
+      },
+      completed: {
+        label: 'Completed',
+        color: 'success',
+        icon: '✓' // Checkmark - done!
+      }
     }
     return configs[status] || configs.not_started
   }
@@ -243,9 +264,29 @@ const FocusAreaView = () => {
     return Math.ceil(month / 3)
   }
 
+  const handleDeletePriority = () => {
+    // Refresh data after delete
+    fetchData()
+  }
+
+  const handleEditPriority = () => {
+    // Navigate to annual planning to edit
+    navigate('/annual-planning')
+  }
+
   // Quarter State
   const [quarterFilter, setQuarterFilter] = useState(getCurrentQuarter())
   const [activeTab, setActiveTab] = useState(0) // 0: Goals, 1: Priorities
+
+  // View Mode & Search State (Section 6 Compliance)
+  const [viewMode, setViewMode] = useState(localStorage.getItem('goals_view_mode') || 'grid')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Handle view mode change with persistence
+  const handleViewModeChange = (newMode) => {
+    setViewMode(newMode)
+    localStorage.setItem('goals_view_mode', newMode)
+  }
 
   // Calculate days left in quarter
   const getDaysLeftInQuarter = (q) => {
@@ -266,8 +307,17 @@ const FocusAreaView = () => {
   // Filter Children by Quarter
   const currentQuarterGoals = quarterlyGoals.filter((g) => g.quarter === quarterFilter)
 
-  // Map Children to Parents
-  const goalsByParent = currentQuarterGoals.reduce((acc, goal) => {
+  // Search Filtering (Section 6.4 Compliance)
+  const filteredQuarterlyGoals = useMemo(() => {
+    if (!searchQuery.trim()) return currentQuarterGoals
+    const query = searchQuery.toLowerCase()
+    return currentQuarterGoals.filter(
+      (goal) => goal.title?.toLowerCase().includes(query) || goal.description?.toLowerCase().includes(query)
+    )
+  }, [currentQuarterGoals, searchQuery])
+
+  // Map Children to Parents (use filtered goals)
+  const goalsByParent = filteredQuarterlyGoals.reduce((acc, goal) => {
     const pid = goal.parent_id || 'orphan'
     if (!acc[pid]) acc[pid] = []
     acc[pid].push(goal)
@@ -288,6 +338,409 @@ const FocusAreaView = () => {
     setSelectedGoal({ type: 'quarterly', quarter: quarterFilter, parent_id: parentId })
     setDialogOpen(true)
   }
+
+  // Render Goal Card (Grid View) - Section 6.2 Compliance with Glass-morphism
+  const renderGoalCardGrid = (goal) => {
+    const hasMilestones = goal.milestones && goal.milestones.length > 0
+
+    return (
+      <Card
+        variant='outlined'
+        sx={{
+          position: 'relative',
+          height: { xs: 220, md: 280 },
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          p: 0,
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.surface',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            borderColor: 'primary.outlinedBorder',
+            boxShadow: 'md',
+            transform: 'translateY(-4px)'
+          }
+        }}
+      >
+        {/* Visual Identifier - Image OR Color Accent */}
+        {goal.image_url ? (
+          <>
+            {/* Background Image Layer - Visible but elegant */}
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 0,
+                backgroundImage: `url(${goal.image_url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                opacity: 0.25,
+                filter: 'grayscale(0.2) brightness(1.1)'
+              }}
+            />
+            {/* Theme-aware overlay for text contrast */}
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 1,
+                bgcolor: 'background.surface',
+                opacity: 0.75
+              }}
+            />
+          </>
+        ) : (
+          /* Colored accent for cards without images */
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 4,
+              zIndex: 0,
+              bgcolor: area?.color || 'primary.solidBg',
+              opacity: 0.8
+            }}
+          />
+        )}
+
+        {/* Content Layer */}
+        <CardContent
+          sx={{
+            position: 'relative',
+            zIndex: 2,
+            flex: 1,
+            overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            p: 2,
+            gap: 1
+          }}
+        >
+          {/* Header: Status + Actions */}
+          <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
+            <Box
+              onClick={(e) => {
+                e.stopPropagation()
+                handleStatusChange(goal)
+              }}
+              sx={{
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.5,
+                px: 1,
+                py: 0.5,
+                borderRadius: 'sm',
+                border: '1px solid',
+                borderColor: `${getStatusConfig(goal.status).color}.outlinedBorder`,
+                color: `${getStatusConfig(goal.status).color}.solidBg`,
+                fontWeight: 600,
+                fontSize: '0.65rem',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  borderColor: `${getStatusConfig(goal.status).color}.solidBg`,
+                  bgcolor: 'background.level1'
+                }
+              }}
+            >
+              <span>{getStatusConfig(goal.status).icon}</span>
+              <span>{getStatusConfig(goal.status).label}</span>
+            </Box>
+            <Stack direction='row' spacing={0.5}>
+              <IconButton
+                size='sm'
+                variant='plain'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEditGoal(goal)
+                }}
+                sx={{
+                  transition: 'all 0.2s',
+                  '&:hover': { transform: 'scale(1.1)' }
+                }}
+              >
+                <EditIcon fontSize='small' />
+              </IconButton>
+              <IconButton
+                size='sm'
+                variant='plain'
+                color='danger'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDeleteGoal(goal._id)
+                }}
+                sx={{
+                  transition: 'all 0.2s',
+                  '&:hover': { transform: 'scale(1.1)' }
+                }}
+              >
+                <DeleteIcon fontSize='small' />
+              </IconButton>
+            </Stack>
+          </Stack>
+
+          {/* Title */}
+          <Typography
+            level='title-md'
+            sx={{
+              fontWeight: 700,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              lineHeight: 1.4,
+              color: 'text.primary',
+              letterSpacing: '-0.01em'
+            }}
+          >
+            {goal.title}
+          </Typography>
+
+          {/* Progress */}
+          <Box sx={{ mt: 'auto' }}>
+            <Box
+              sx={{
+                width: '100%',
+                height: 6,
+                bgcolor: 'background.level2',
+                borderRadius: 'sm',
+                overflow: 'hidden',
+                mb: 0.5
+              }}
+            >
+              <Box
+                sx={{
+                  width: `${calculateProgress(goal)}%`,
+                  height: '100%',
+                  bgcolor: area?.color || 'primary.solidBg',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            </Box>
+            <Typography
+              level='body-xs'
+              sx={{
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                color: 'text.secondary'
+              }}
+            >
+              {calculateProgress(goal)}% Complete
+            </Typography>
+          </Box>
+
+          {/* Milestones */}
+          {hasMilestones && (
+            <Box
+              sx={{
+                pt: 1.5,
+                mt: 0.5,
+                borderTop: '1px solid',
+                borderColor: 'divider'
+              }}
+            >
+              <Divider sx={{ mb: 0.5 }} />
+              <Button
+                variant='plain'
+                size='sm'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleToggleMilestones(goal._id)
+                }}
+                endDecorator={expandedMilestones.has(goal._id) ? <CollapseIcon /> : <ExpandIcon />}
+                sx={{
+                  width: '100%',
+                  justifyContent: 'space-between',
+                  fontSize: '0.7rem',
+                  py: 0.75,
+                  px: 1,
+                  minHeight: 'auto',
+                  fontWeight: 600,
+                  color: 'text.secondary',
+                  borderRadius: 'sm',
+                  '&:hover': { bgcolor: 'background.level1' }
+                }}
+              >
+                Milestones ({goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length})
+              </Button>
+
+              {expandedMilestones.has(goal._id) && (
+                <Stack spacing={0.75} sx={{ mt: 1, maxHeight: 100, overflow: 'auto', px: 0.5 }}>
+                  {goal.milestones.map((milestone, idx) => (
+                    <Box
+                      key={idx}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        py: 0.75,
+                        px: 1,
+                        borderRadius: 'sm',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': { bgcolor: 'background.level1' }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleToggleMilestone(goal, idx)
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 14,
+                          height: 14,
+                          border: `1.5px solid ${area?.color || 'var(--joy-palette-danger-solidBg)'}`,
+                          borderRadius: '2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: milestone.completed ? area?.color || 'var(--joy-palette-danger-solidBg)' : 'transparent',
+                          flexShrink: 0,
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {milestone.completed && (
+                          <Box
+                            component='svg'
+                            width='8'
+                            height='8'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='white'
+                            strokeWidth='4'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          >
+                            <polyline points='20 6 9 17 4 12' />
+                          </Box>
+                        )}
+                      </Box>
+                      <Typography
+                        level='body-xs'
+                        sx={{
+                          flex: 1,
+                          textDecoration: milestone.completed ? 'line-through' : 'none',
+                          color: milestone.completed ? 'text.tertiary' : 'text.primary',
+                          fontSize: '0.7rem',
+                          lineHeight: 1.4,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {milestone.title}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              )}
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Render Goal Row (List View) - Section 6.2 Compliance
+  const renderGoalRowList = (goal) => (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        py: 1.5,
+        px: 2,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        minHeight: 56,
+        '&:hover': {
+          bgcolor: 'background.level1'
+        }
+      }}
+    >
+      {/* Status Indicator */}
+      <Box
+        onClick={() => handleStatusChange(goal)}
+        sx={{
+          cursor: 'pointer',
+          flexShrink: 0
+        }}
+      >
+        <Box
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.5,
+            px: 1,
+            py: 0.5,
+            borderRadius: 'sm',
+            border: '1px solid',
+            borderColor: `${getStatusConfig(goal.status).color}.outlinedBorder`,
+            color: `${getStatusConfig(goal.status).color}.solidBg`,
+            fontWeight: 600,
+            fontSize: '0.7rem',
+            minWidth: 90,
+            justifyContent: 'center'
+          }}
+        >
+          <span>{getStatusConfig(goal.status).icon}</span>
+          <span>{getStatusConfig(goal.status).label}</span>
+        </Box>
+      </Box>
+
+      {/* Title */}
+      <Typography level='title-sm' sx={{ flex: 1, minWidth: 0 }}>
+        {goal.title}
+      </Typography>
+
+      {/* Progress */}
+      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1, width: 120 }}>
+        <Box
+          sx={{
+            flex: 1,
+            height: 6,
+            bgcolor: 'background.level2',
+            borderRadius: 'sm',
+            overflow: 'hidden'
+          }}
+        >
+          <Box
+            sx={{
+              width: `${calculateProgress(goal)}%`,
+              height: '100%',
+              bgcolor: area?.color || 'primary.solidBg',
+              transition: 'width 0.3s ease'
+            }}
+          />
+        </Box>
+        <Typography level='body-xs' sx={{ minWidth: 40, textAlign: 'right' }}>
+          {calculateProgress(goal)}%
+        </Typography>
+      </Box>
+
+      {/* Milestones Count */}
+      {goal.milestones && goal.milestones.length > 0 && (
+        <Typography level='body-xs' sx={{ display: { xs: 'none', sm: 'block' }, width: 80, color: 'text.secondary' }}>
+          {goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length} done
+        </Typography>
+      )}
+
+      {/* Actions */}
+      <Stack direction='row' spacing={0.5}>
+        <IconButton size='sm' variant='plain' onClick={() => handleEditGoal(goal)}>
+          <EditIcon fontSize='small' />
+        </IconButton>
+        <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal._id)}>
+          <DeleteIcon fontSize='small' />
+        </IconButton>
+      </Stack>
+    </Box>
+  )
 
   if (loading) {
     return (
@@ -447,6 +900,45 @@ const FocusAreaView = () => {
           </Button>
         </Stack>
 
+        {/* Search & View Toggle (Section 6 Compliance) */}
+        <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 3 }}>
+          <Input
+            placeholder={t('annualPlanning.searchGoals', { defaultValue: 'Search goals...' })}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            startDecorator={<SearchIcon />}
+            endDecorator={
+              searchQuery && (
+                <IconButton size='sm' onClick={() => setSearchQuery('')}>
+                  <CloseIcon />
+                </IconButton>
+              )
+            }
+            size='md'
+            sx={{ flex: 1, maxWidth: { sm: 320 } }}
+          />
+
+          {/* View Toggle */}
+          <Stack direction='row' spacing={0.5} sx={{ ml: 'auto' }}>
+            <IconButton
+              size='sm'
+              variant={viewMode === 'grid' ? 'solid' : 'plain'}
+              onClick={() => handleViewModeChange('grid')}
+              color={viewMode === 'grid' ? 'primary' : 'neutral'}
+            >
+              <GridViewIcon />
+            </IconButton>
+            <IconButton
+              size='sm'
+              variant={viewMode === 'list' ? 'solid' : 'plain'}
+              onClick={() => handleViewModeChange('list')}
+              color={viewMode === 'list' ? 'primary' : 'neutral'}
+            >
+              <ListIcon />
+            </IconButton>
+          </Stack>
+        </Stack>
+
         <Stack spacing={4}>
           {yearlyObjectives.map((objective) => (
             <Box key={objective._id}>
@@ -481,200 +973,46 @@ const FocusAreaView = () => {
 
               {/* Children Goals (Quarterly) */}
               <Box sx={{ pl: { xs: 0, md: 4 }, pr: 0 }}>
-                <Grid container spacing={2}>
-                  {(goalsByParent[objective._id] || []).map((goal) => (
-                    <Grid key={goal._id} xs={12} md={6}>
-                      <Card variant='soft' sx={{ position: 'relative' }}>
-                        {goal.image_url && (
-                          <AspectRatio
-                            ratio='2'
-                            sx={{
-                              mb: 2,
-                              borderRadius: 'md',
-                              position: 'relative',
-                              '&:hover .status-badge': { opacity: 1 }
-                            }}
-                          >
-                            <img src={goal.image_url} alt={goal.title} loading='lazy' />
-                            {/* Status Badge Overlay */}
-                            <Box
-                              className='status-badge'
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleStatusChange(goal)
-                              }}
-                              sx={{
-                                position: 'absolute',
-                                top: 12,
-                                right: 12,
-                                opacity: 0.9,
-                                transition: 'all 0.3s ease',
-                                cursor: 'pointer',
-                                zIndex: 2,
-                                '&:hover': {
-                                  opacity: 1,
-                                  transform: 'scale(1.05)'
-                                }
-                              }}
-                            >
-                              <Chip
-                                color={getStatusConfig(goal.status).color}
-                                variant='solid'
-                                size='sm'
-                                sx={{
-                                  backdropFilter: 'blur(8px)',
-                                  boxShadow: 'lg',
-                                  fontWeight: 600,
-                                  fontSize: '0.75rem',
-                                  py: 0.5,
-                                  px: 1.5,
-                                  borderRadius: 'xl'
-                                }}
-                              >
-                                {getStatusConfig(goal.status).icon} {getStatusConfig(goal.status).label}
-                              </Chip>
-                            </Box>
-                          </AspectRatio>
-                        )}
-                        <CardContent>
-                          <Stack direction='row' justifyContent='space-between'>
-                            <Typography level='title-md'>{goal.title}</Typography>
-                            <Stack direction='row' spacing={0.5}>
-                              <IconButton size='sm' variant='plain' onClick={() => handleEditGoal(goal)}>
-                                <EditIcon fontSize='small' />
-                              </IconButton>
-                              <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal._id)}>
-                                <DeleteIcon fontSize='small' />
-                              </IconButton>
-                            </Stack>
-                          </Stack>
-                          <Box sx={{ my: 1 }}>
-                            <Box
-                              sx={{
-                                width: '100%',
-                                height: 6,
-                                bgcolor: 'background.level2',
-                                borderRadius: 'sm',
-                                overflow: 'hidden'
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  width: `${calculateProgress(goal)}%`,
-                                  height: '100%',
-                                  bgcolor: area?.color || '#3B82F6',
-                                  transition: 'width 0.3s ease'
-                                }}
-                              />
-                            </Box>
-                          </Box>
-                          <Typography level='body-xs'>{calculateProgress(goal)}% Complete</Typography>
+                {viewMode === 'grid' ? (
+                  /* Grid View */
+                  <Grid container spacing={2}>
+                    {(goalsByParent[objective._id] || []).map((goal) => (
+                      <Grid key={goal._id} xs={12} md={6}>
+                        {renderGoalCardGrid(goal)}
+                      </Grid>
+                    ))}
 
-                          {/* Milestones Dropdown */}
-                          {goal.milestones && goal.milestones.length > 0 && (
-                            <Box sx={{ mt: 1.5, bgcolor: 'transparent' }}>
-                              <Divider sx={{ my: 1 }} />
-                              <Button
-                                variant='plain'
-                                size='sm'
-                                onClick={() => handleToggleMilestones(goal._id)}
-                                endDecorator={expandedMilestones.has(goal._id) ? <CollapseIcon /> : <ExpandIcon />}
-                                sx={{
-                                  width: '100%',
-                                  justifyContent: 'space-between',
-                                  fontSize: '0.75rem',
-                                  color: 'text.secondary',
-                                  bgcolor: 'transparent',
-                                  '&:hover': { bgcolor: 'transparent', opacity: 0.8 }
-                                }}
-                              >
-                                Milestones ({goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length})
-                              </Button>
-
-                              {expandedMilestones.has(goal._id) && (
-                                <Stack spacing={0.75} sx={{ mt: 1, pl: 0.5, bgcolor: 'transparent' }}>
-                                  {goal.milestones.map((milestone, idx) => (
-                                    <Box
-                                      key={idx}
-                                      sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                        py: 0.5,
-                                        px: 1,
-                                        borderRadius: 'sm',
-                                        bgcolor: 'transparent',
-                                        transition: 'opacity 0.2s',
-                                        cursor: 'pointer',
-                                        '&:hover': { opacity: 0.8 }
-                                      }}
-                                      onClick={() => handleToggleMilestone(goal, idx)}
-                                    >
-                                      <Box
-                                        sx={{
-                                          width: 20,
-                                          height: 20,
-                                          border: `2px solid ${area?.color || '#ef4444'}`,
-                                          borderRadius: '4px',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          bgcolor: milestone.completed ? area?.color || '#ef4444' : 'transparent',
-                                          flexShrink: 0,
-                                          transition: 'all 0.2s'
-                                        }}
-                                      >
-                                        {milestone.completed && (
-                                          <Box
-                                            component='svg'
-                                            width='14'
-                                            height='14'
-                                            viewBox='0 0 24 24'
-                                            fill='none'
-                                            stroke='white'
-                                            strokeWidth='3'
-                                            strokeLinecap='round'
-                                            strokeLinejoin='round'
-                                          >
-                                            <polyline points='20 6 9 17 4 12' />
-                                          </Box>
-                                        )}
-                                      </Box>
-                                      <Typography
-                                        level='body-xs'
-                                        sx={{
-                                          flex: 1,
-                                          textDecoration: milestone.completed ? 'line-through' : 'none',
-                                          color: milestone.completed ? 'text.tertiary' : 'text.primary',
-                                          fontSize: '0.75rem',
-                                          backgroundColor: 'transparent'
-                                        }}
-                                      >
-                                        {milestone.title}
-                                      </Typography>
-                                    </Box>
-                                  ))}
-                                </Stack>
-                              )}
-                            </Box>
-                          )}
-                        </CardContent>
-                      </Card>
+                    {/* Add Child Button */}
+                    <Grid xs={12} md={6}>
+                      <Button
+                        variant='dashed'
+                        fullWidth
+                        sx={{ height: '100%', minHeight: 80, color: 'text.tertiary' }}
+                        onClick={() => handleAddChildGoal(objective._id)}
+                      >
+                        + Add Goal to Q{quarterFilter}
+                      </Button>
                     </Grid>
-                  ))}
-
-                  {/* Add Child Button */}
-                  <Grid xs={12} md={6}>
-                    <Button
-                      variant='dashed'
-                      fullWidth
-                      sx={{ height: '100%', minHeight: 80, color: 'text.tertiary' }}
-                      onClick={() => handleAddChildGoal(objective._id)}
-                    >
-                      + Add Goal to Q{quarterFilter}
-                    </Button>
                   </Grid>
-                </Grid>
+                ) : (
+                  /* List View */
+                  <Box>
+                    <Stack spacing={0}>
+                      {(goalsByParent[objective._id] || []).map((goal) => (
+                        <Box key={goal._id}>{renderGoalRowList(goal)}</Box>
+                      ))}
+                    </Stack>
+                    <Button
+                      variant='plain'
+                      fullWidth
+                      sx={{ mt: 1, color: 'text.tertiary' }}
+                      onClick={() => handleAddChildGoal(objective._id)}
+                      startDecorator={<AddIcon />}
+                    >
+                      Add Goal to Q{quarterFilter}
+                    </Button>
+                  </Box>
+                )}
               </Box>
             </Box>
           ))}
@@ -685,188 +1023,23 @@ const FocusAreaView = () => {
               <Typography level='title-sm' sx={{ mb: 2, color: 'text.tertiary', textTransform: 'uppercase' }}>
                 Other Q{quarterFilter} Goals
               </Typography>
-              <Grid container spacing={2}>
-                {goalsByParent['orphan'].map((goal) => (
-                  <Grid key={goal._id} xs={12} md={6}>
-                    <Card variant='soft' sx={{ position: 'relative' }}>
-                      {goal.image_url && (
-                        <AspectRatio
-                          ratio='2'
-                          sx={{
-                            mb: 2,
-                            borderRadius: 'md',
-                            position: 'relative',
-                            '&:hover .status-badge': { opacity: 1 }
-                          }}
-                        >
-                          <img src={goal.image_url} alt={goal.title} loading='lazy' />
-                          {/* Status Badge Overlay */}
-                          <Box
-                            className='status-badge'
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleStatusChange(goal)
-                            }}
-                            sx={{
-                              position: 'absolute',
-                              top: 12,
-                              right: 12,
-                              opacity: 0.9,
-                              transition: 'all 0.3s ease',
-                              cursor: 'pointer',
-                              zIndex: 2,
-                              '&:hover': {
-                                opacity: 1,
-                                transform: 'scale(1.05)'
-                              }
-                            }}
-                          >
-                            <Chip
-                              color={getStatusConfig(goal.status).color}
-                              variant='solid'
-                              size='sm'
-                              sx={{
-                                backdropFilter: 'blur(8px)',
-                                boxShadow: 'lg',
-                                fontWeight: 600,
-                                fontSize: '0.75rem',
-                                py: 0.5,
-                                px: 1.5,
-                                borderRadius: 'xl'
-                              }}
-                            >
-                              {getStatusConfig(goal.status).icon} {getStatusConfig(goal.status).label}
-                            </Chip>
-                          </Box>
-                        </AspectRatio>
-                      )}
-                      <CardContent>
-                        <Stack direction='row' justifyContent='space-between'>
-                          <Typography level='title-md'>{goal.title}</Typography>
-                          <Stack direction='row' spacing={0.5}>
-                            <IconButton size='sm' variant='plain' onClick={() => handleEditGoal(goal)}>
-                              <EditIcon fontSize='small' />
-                            </IconButton>
-                            <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal._id)}>
-                              <DeleteIcon fontSize='small' />
-                            </IconButton>
-                          </Stack>
-                        </Stack>
-                        <Box sx={{ my: 1 }}>
-                          <Box
-                            sx={{
-                              width: '100%',
-                              height: 6,
-                              bgcolor: 'background.level2',
-                              borderRadius: 'sm',
-                              overflow: 'hidden'
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: `${calculateProgress(goal)}%`,
-                                height: '100%',
-                                bgcolor: area?.color || '#3B82F6',
-                                transition: 'width 0.3s ease'
-                              }}
-                            />
-                          </Box>
-                        </Box>
-                        <Typography level='body-xs'>{calculateProgress(goal)}% Complete</Typography>
-
-                        {/* Milestones Dropdown */}
-                        {goal.milestones && goal.milestones.length > 0 && (
-                          <Box sx={{ mt: 1.5, bgcolor: 'transparent' }}>
-                            <Divider sx={{ my: 1 }} />
-                            <Button
-                              variant='plain'
-                              size='sm'
-                              onClick={() => handleToggleMilestones(goal._id)}
-                              endDecorator={expandedMilestones.has(goal._id) ? <CollapseIcon /> : <ExpandIcon />}
-                              sx={{
-                                width: '100%',
-                                justifyContent: 'space-between',
-                                fontSize: '0.75rem',
-                                color: 'text.secondary',
-                                bgcolor: 'transparent',
-                                '&:hover': { bgcolor: 'transparent', opacity: 0.8 }
-                              }}
-                            >
-                              Milestones ({goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length})
-                            </Button>
-
-                            {expandedMilestones.has(goal._id) && (
-                              <Stack spacing={0.75} sx={{ mt: 1, pl: 0.5, bgcolor: 'transparent' }}>
-                                {goal.milestones.map((milestone, idx) => (
-                                  <Box
-                                    key={idx}
-                                    sx={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: 1,
-                                      py: 0.5,
-                                      px: 1,
-                                      borderRadius: 'sm',
-                                      bgcolor: 'transparent',
-                                      transition: 'opacity 0.2s',
-                                      cursor: 'pointer',
-                                      '&:hover': { opacity: 0.8 }
-                                    }}
-                                    onClick={() => handleToggleMilestone(goal, idx)}
-                                  >
-                                    <Box
-                                      sx={{
-                                        width: 20,
-                                        height: 20,
-                                        border: `2px solid ${area?.color || '#ef4444'}`,
-                                        borderRadius: '4px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        bgcolor: milestone.completed ? area?.color || '#ef4444' : 'transparent',
-                                        flexShrink: 0,
-                                        transition: 'all 0.2s'
-                                      }}
-                                    >
-                                      {milestone.completed && (
-                                        <Box
-                                          component='svg'
-                                          width='14'
-                                          height='14'
-                                          viewBox='0 0 24 24'
-                                          fill='none'
-                                          stroke='white'
-                                          strokeWidth='3'
-                                          strokeLinecap='round'
-                                          strokeLinejoin='round'
-                                        >
-                                          <polyline points='20 6 9 17 4 12' />
-                                        </Box>
-                                      )}
-                                    </Box>
-                                    <Typography
-                                      level='body-xs'
-                                      sx={{
-                                        flex: 1,
-                                        textDecoration: milestone.completed ? 'line-through' : 'none',
-                                        color: milestone.completed ? 'text.tertiary' : 'text.primary',
-                                        fontSize: '0.75rem',
-                                        backgroundColor: 'transparent'
-                                      }}
-                                    >
-                                      {milestone.title}
-                                    </Typography>
-                                  </Box>
-                                ))}
-                              </Stack>
-                            )}
-                          </Box>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+              {viewMode === 'grid' ? (
+                /* Grid View */
+                <Grid container spacing={2}>
+                  {goalsByParent['orphan'].map((goal) => (
+                    <Grid key={goal._id} xs={12} md={6}>
+                      {renderGoalCardGrid(goal)}
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                /* List View */
+                <Stack spacing={0}>
+                  {goalsByParent['orphan'].map((goal) => (
+                    <Box key={goal._id}>{renderGoalRowList(goal)}</Box>
+                  ))}
+                </Stack>
+              )}
             </Box>
           )}
 
@@ -884,27 +1057,13 @@ const FocusAreaView = () => {
         <Stack direction='row' justifyContent='space-between' alignItems='center' mb={2}>
           <Typography level='h3'>{t('annualPlanning.priority.title')}</Typography>
         </Stack>
-        <Grid container spacing={2}>
-          {priorities.map((priority) => (
-            <Grid key={priority._id} xs={12}>
-              <Card orientation='horizontal' variant='outlined' sx={{ alignItems: 'flex-start' }}>
-                <CardContent>
-                  <Typography level='title-lg' sx={{ mb: 0.5 }}>
-                    {priority.title}
-                  </Typography>
-                  <Typography level='body-sm' textColor='text.tertiary'>
-                    {priority.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-          {priorities.length === 0 && (
-            <Typography level='body-sm' textColor='text.tertiary' sx={{ fontStyle: 'italic' }}>
-              No priorities linked to this area yet.
-            </Typography>
-          )}
-        </Grid>
+
+        <PriorityList
+          priorities={priorities}
+          onEdit={handleEditPriority}
+          onDelete={handleDeletePriority}
+          emptyMessage='No priorities linked to this area yet.'
+        />
       </Box>
 
       <GoalDialog

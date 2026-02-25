@@ -9,7 +9,17 @@
     "search": "Search",
     "settings": "Settings",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "pomodoro": "Pomodoro Timer",
+    "changes": "Changes",
+    "add": "Add",
+    "select": "Select",
+    "optional": "Optional",
+    "back": "Back",
+    "deleteModal": {
+      "whatWillHappen": "What will happen:",
+      "recoveryNotice": "Data can be recovered within 30 days by contacting support"
+    }
   },
   "news": {
     "title": "Latest News",
@@ -25,7 +35,12 @@
       "entertainment": "Entertainment",
       "politics": "Politics",
       "sports": "Sports"
-    }
+    },
+    "favorites": "Favorites",
+    "noFavorites": "No Favorites Yet",
+    "noFavoritesHint": "Click the star icon on any news article to add it to your favorites.",
+    "adjustInterests": "Try adjusting your interests in Settings to see personalized news.",
+    "setInterests": "Set your interests in Settings to see personalized news articles."
   },
   "header": {
     "study": "Study",
@@ -52,6 +67,7 @@
       "totalCards": "Total"
     },
     "byType": "Study by Type",
+    "swipeHint": "Swipe to navigate",
     "types": {
       "flashcards": "Flashcards",
       "flashcardsDesc": "Classic flip-style cards for quick memorization",
@@ -357,6 +373,11 @@
       "completed": "Completed",
       "pending": "Pending"
     },
+    "lists": {
+      "all": "All",
+      "addList": "New list",
+      "listPlaceholder": "List name..."
+    },
     "empty": "No tasks yet. Type to add one!",
     "noMatch": "No tasks match your filters",
     "addTooltip": "Add \"{{title}}\""
@@ -440,7 +461,16 @@
       "confirmTitle": "Are you absolutely sure?",
       "confirmDesc": "This action cannot be undone. All your data including books, cards, and progress will be permanently deleted.",
       "confirmBtn": "Yes, Delete My Account",
-      "cancelBtn": "Cancel"
+      "cancelBtn": "Cancel",
+      "modal": {
+        "title": "Delete Account",
+        "description": "This will permanently remove your account and all associated data",
+        "confirm": "Delete My Account",
+        "consequence1": "All books and notes will be deleted",
+        "consequence2": "All flashcard decks will be deleted",
+        "consequence3": "All annual planning data will be deleted",
+        "consequence4": "Public content will be unpublished immediately"
+      }
     }
   },
   "dashboard": {
@@ -524,6 +554,39 @@
       "flashcard": "Flashcard"
     }
   },
+  "calendarModal": {
+    "title": "Calendar",
+    "tooltip": "Open calendar",
+    "filters": {
+      "all": "All",
+      "tasks": "Tasks",
+      "goals": "Goals",
+      "priorities": "Priorities",
+      "activities": "Activities"
+    },
+    "noEvents": "No events for this day",
+    "today": "Today",
+    "loading": "Loading...",
+    "addEvent": "Add event",
+    "editEvent": "Edit event",
+    "form": {
+      "selectType": "Event type",
+      "title": "Title",
+      "date": "Date",
+      "description": "Description",
+      "focusArea": "Focus area",
+      "goal": "Goal",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saveError": "Failed to save. Please try again.",
+      "types": {
+        "task": "Task",
+        "priority": "Priority",
+        "goal": "Goal",
+        "activity": "Activity"
+      }
+    }
+  },
   "books": {
     "title": "Books",
     "library": "Deck Library",
@@ -538,6 +601,7 @@
     "dropSubtitle": "Supports PDF, DOCX, DOC, TXT",
     "emptyTitle": "Your library is empty",
     "emptySubtitle": "Create a new book or import documents to get started",
+    "noResults": "No books found matching \"{{term}}\"",
     "noMatches": "No books match \"{{query}}\"",
     "unknownAuthor": "Unknown Author",
     "updated": "Updated {{date}}",
@@ -573,7 +637,114 @@
     "deckCount_plural": "{{count}} decks",
     "loading": "Loading...",
     "confirmDeleteDeck": "Are you sure you want to delete \"{{name}}\"?",
-    "confirmDeleteCard": "Are you sure you want to delete this card?"
+    "confirmDeleteCard": "Are you sure you want to delete this card?",
+    "deleteCardError": "Failed to delete card. Please try again.",
+    "studyDue": "Study ({{count}})",
+    "preview": "Preview",
+    "noCardsYet": "No cards yet",
+    "dueLabel": "{{count}} due",
+    "typeLabels": {
+      "card": "Card",
+      "cards": "Cards",
+      "question": "Question",
+      "questions": "Questions",
+      "diagram": "Diagram",
+      "diagrams": "Diagrams"
+    },
+    "manage_content": {
+      "title": "Content manager",
+      "deckCount": "{{decks}} decks · {{cards}} total cards",
+      "tabs": {
+        "decks": "Decks ({{count}})",
+        "cards": "Cards ({{count}})"
+      },
+      "search": {
+        "decks": "Search decks...",
+        "cards": "Search cards..."
+      },
+      "filters": {
+        "all": "All",
+        "flashcards": "Flashcards",
+        "quizzes": "Quizzes",
+        "visual": "Visual"
+      },
+      "cardCount": "{{count}} card",
+      "cardCount_plural": "{{count}} cards",
+      "noContent": "No content",
+      "untitled": "Untitled card",
+      "reviewNew": "New",
+      "empty": {
+        "decks": {
+          "title": "No decks found",
+          "filter": "Try adjusting your filters",
+          "start": "Create your first deck to get started"
+        },
+        "cards": {
+          "title": "No cards found",
+          "filter": "Try adjusting your filters",
+          "start": "Create cards in your decks to get started"
+        }
+      }
+    },
+    "deck": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "addCard": "Add card",
+      "preview": "Preview"
+    },
+    "create": {
+      "newTitle": "New deck",
+      "editTitle": "Edit deck",
+      "fields": {
+        "name": "Deck name",
+        "namePlaceholder": "E.g., Japanese Vocabulary",
+        "description": "Description",
+        "descriptionPlaceholder": "What is this deck about?",
+        "imageUrl": "Image URL (optional)",
+        "tags": "Tags (comma separated)"
+      },
+      "save": "Save deck",
+      "create": "Create deck"
+    },
+    "session": {
+      "loading": "Loading study session...",
+      "allCaughtUp": "All caught up!",
+      "noDue": "No cards are due for review right now.",
+      "goBack": "Go back",
+      "complete": {
+        "title": "Session complete!",
+        "body": "You've reviewed {{count}} cards. Great job!",
+        "backToLibrary": "Back to Library"
+      },
+      "card": "Card {{current}} of {{total}}",
+      "syncing": "Syncing {{count}} review...",
+      "syncing_plural": "Syncing {{count}} reviews...",
+      "labels": {
+        "question": "Question",
+        "answer": "Answer",
+        "quiz": "Quiz question",
+        "visual": "Visual diagram",
+        "explanation": "Explanation"
+      },
+      "hints": {
+        "tapFlip": "Tap to flip · Swipe to skip",
+        "clickFlip": "Click to flip"
+      },
+      "grading": {
+        "again": "Again",
+        "hard": "Hard",
+        "good": "Good",
+        "easy": "Easy"
+      }
+    },
+    "deleteModal": {
+      "title": "Delete Deck",
+      "description": "Are you sure you want to delete \"{{name}}\"?",
+      "confirm": "Delete Deck",
+      "consequence1": "All {{count}} flashcards in this deck will be deleted",
+      "consequence1_plural": "All {{count}} flashcards in this deck will be deleted",
+      "consequence2": "If published, it will be unpublished immediately"
+    }
   },
   "subscription": {
     "upgrade": "Upgrade",
@@ -615,13 +786,35 @@
       "setup": {
         "intro": {
           "title": "The Power of 3",
-          "message": "Research shows that focusing on 3 key life areas leads to greater success than trying to improve everything at once. Let's define your 3 focus areas for this year."
+          "editTitle": "Edit Your Focus Areas",
+          "message": "Research shows that focusing on 3 key life areas leads to greater success than trying to improve everything at once. Let's define your 3 focus areas for this year.",
+          "editMessage": "Review and update your focus areas. Make changes to names, descriptions, icons, or colors to better reflect your current priorities."
         },
         "tips": [
           "Be specific about what matters most",
           "Choose areas that align with your values",
           "Think about balance across different life domains"
-        ]
+        ],
+        "tipsLabel": "Tips:",
+        "areaOf": "Focus Area {{current}} of {{total}}",
+        "defineArea": "Define Focus Area {{number}}",
+        "nameLabel": "Name",
+        "namePlaceholder": "e.g. Health & Fitness",
+        "descriptionLabel": "Description (Your 'Why')",
+        "descriptionPlaceholder": "Why is this area important to you this year?",
+        "colorTheme": "Color Theme",
+        "reviewTitle": "Your Plan for {{year}}",
+        "loading": "Loading your plan...",
+        "buttons": {
+          "back": "Back",
+          "next": "Next",
+          "review": "Review",
+          "reviewEdit": "Review & Edit",
+          "letsStart": "Let's Start",
+          "edit": "Edit",
+          "saveChanges": "Save Changes",
+          "finalizePlan": "Finalize Plan"
+        }
       },
       "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
     },
@@ -797,5 +990,128 @@
       "deleteColumn": "Delete column",
       "deleteTable": "Delete table"
     }
+  },
+  "public": {
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "published": "Published",
+    "browse": "Browse Public Library",
+    "library": "Public Library",
+    "myLikes": "My Likes",
+    "likes": "likes",
+    "views": "views",
+    "forks": "forks",
+    "fork": "Fork to Library",
+    "forkConfirm": "This will create a private copy in your library. Continue?",
+    "forkSuccess": "Forked successfully!",
+    "likeSuccess": "Added to your likes",
+    "unlikeSuccess": "Removed from your likes",
+    "report": "Report",
+    "reported": "Reported",
+    "reportSuccess": "Thank you. We'll review this report.",
+    "category": "Category",
+    "tags": "Tags",
+    "difficulty": "Difficulty",
+    "language": "Language",
+    "license": "License",
+    "originalContent": "This is my original content",
+    "publishSuccess": "Published successfully!",
+    "unpublishSuccess": "Unpublished successfully!",
+    "noResults": "No public content found",
+    "tryFilters": "Try adjusting your filters",
+    "searchPlaceholder": "Search public content...",
+    "sortBy": "Sort by",
+    "filterBy": "Filter",
+    "clearFilters": "Clear filters",
+    "showingResults": "Showing {{count}} results",
+    "loadMore": "Load more",
+    "by": "by",
+    "books": "Books",
+    "decks": "Decks",
+    "all": "All",
+    "categories": {
+      "science": "Science",
+      "math": "Math",
+      "languages": "Languages",
+      "history": "History",
+      "literature": "Literature",
+      "technology": "Technology",
+      "art": "Art",
+      "music": "Music",
+      "business": "Business",
+      "health": "Health",
+      "design": "Design",
+      "programming": "Programming",
+      "technical": "Technical",
+      "documentation": "Documentation",
+      "planning": "Planning",
+      "features": "Features",
+      "deployment": "Deployment"
+    },
+    "difficultyLevels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "licenses": {
+      "all_rights": "All Rights Reserved",
+      "cc_by": "CC BY (Attribution)",
+      "cc_by_sa": "CC BY-SA (Share Alike)",
+      "cc0": "CC0 (Public Domain)"
+    },
+    "sortOptions": {
+      "recent": "Most recent",
+      "popular": "Most popular",
+      "mostLiked": "Most liked",
+      "mostForked": "Most forked"
+    },
+    "reportReasons": {
+      "copyright": "Copyright infringement",
+      "inappropriate": "Inappropriate content",
+      "spam": "Spam or low-quality",
+      "misinformation": "Factually incorrect",
+      "other": "Other"
+    },
+    "publishModal": {
+      "title": "Publish to Public Library",
+      "description": "Share your content with the community",
+      "categoryRequired": "Category is required",
+      "tagsRequired": "At least one tag is required",
+      "addTag": "Add tag",
+      "submit": "Publish Now"
+    },
+    "reportModal": {
+      "title": "Report Content",
+      "description": "Help us keep the community safe",
+      "reason": "Reason for report",
+      "details": "Additional details (optional)",
+      "submit": "Submit Report"
+    },
+    "noLikes": "You haven't liked any content yet",
+    "exploreContent": "Explore public content"
+  },
+  "focusBar": {
+    "modal": {
+      "title": "Select Priorities",
+      "description": "Choose up to 4 priorities to display on your homepage",
+      "noPriorities": "No priorities found",
+      "createPriorities": "Create Priorities",
+      "cancel": "Cancel",
+      "save": "Save Selection"
+    },
+    "entity": {
+      "goal": "Goal",
+      "task": "Task",
+      "routine": "Routine"
+    },
+    "overdue": "Overdue",
+    "daysLeft": "{{count}} days left",
+    "noDeadline": "No deadline",
+    "overdueBy": "Overdue by {{count}} days",
+    "daysRemaining": "{{count}} days remaining",
+    "noDeadlineEntity": "{{entity}} • No deadline",
+    "choosePrioritiesTooltip": "Choose priorities to display",
+    "noPrioritiesYet": "No priorities yet",
+    "createPriority": "Create Priority"
   }
 }

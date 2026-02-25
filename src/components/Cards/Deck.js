@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Card,
   CardContent,
@@ -27,6 +28,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 
 export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPreview }) {
+  const { t } = useTranslation()
   const {
     name: deckName,
     total_cards: deckTotal,
@@ -41,7 +43,8 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
   // Configuration for different deck types
   let config = {
     icon: StyleIcon,
-    label: 'Card',
+    singularKey: 'cards.typeLabels.card',
+    pluralKey: 'cards.typeLabels.cards',
     gradient: 'linear-gradient(135deg, var(--joy-palette-primary-50) 0%, var(--joy-palette-primary-100) 100%)',
     color: 'primary.solidBg'
   }
@@ -49,14 +52,16 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
   if (deck_type === 'quiz') {
     config = {
       icon: QuizIcon,
-      label: 'Question',
+      singularKey: 'cards.typeLabels.question',
+      pluralKey: 'cards.typeLabels.questions',
       gradient: 'linear-gradient(135deg, var(--joy-palette-warning-50) 0%, var(--joy-palette-warning-100) 100%)',
       color: 'warning.solidBg'
     }
   } else if (deck_type === 'visual') {
     config = {
       icon: AccountTreeIcon,
-      label: 'Diagram',
+      singularKey: 'cards.typeLabels.diagram',
+      pluralKey: 'cards.typeLabels.diagrams',
       gradient: 'linear-gradient(135deg, var(--joy-palette-success-50) 0%, var(--joy-palette-success-100) 100%)',
       color: 'success.solidBg'
     }
@@ -69,11 +74,7 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
       default: 'neutral'
     }[status] || 'neutral'
 
-  const statusLabel = {
-    new: 'Nuevo',
-    attention: 'Atención',
-    default: null
-  }[status]
+  const typeLabel = deckTotal === 1 ? t(config.singularKey) : t(config.pluralKey)
 
   return (
     <Card
@@ -166,10 +167,10 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
           </MenuButton>
           <Menu placement='bottom-end' size='sm'>
             <MenuItem onClick={() => onEdit(deck)}>
-              <EditIcon sx={{ fontSize: 16 }} /> Editar
+              <EditIcon sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
             </MenuItem>
             <MenuItem onClick={() => onDelete(deck)} color='danger'>
-              <DeleteIcon sx={{ fontSize: 16 }} /> Eliminar
+              <DeleteIcon sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
             </MenuItem>
           </Menu>
         </Dropdown>
@@ -178,19 +179,19 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
       {/* Metadata Row - Compact, Single Line */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <Typography level='body-sm' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
-          {deckTotal} {deckTotal === 1 ? config.label.toLowerCase() : `${config.label.toLowerCase()}s`}
+          {deckTotal} {typeLabel.toLowerCase()}
         </Typography>
 
         {due_cards > 0 && (
           <Typography
             level='body-sm'
             sx={{
-              color: 'primary.solidBg',
+              color: 'primary.plainColor',
               fontSize: '0.75rem',
               fontWeight: 600
             }}
           >
-            {due_cards} due
+            {t('cards.dueLabel', { count: due_cards })}
           </Typography>
         )}
       </Box>
@@ -215,7 +216,7 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
       {/* Call to action - Minimalistic Button */}
       {!has_cards ? (
         <Button size='sm' variant='outlined' color='neutral' disabled fullWidth sx={{ fontSize: '0.75rem', py: 0.75 }}>
-          No cards yet
+          {t('cards.noCardsYet')}
         </Button>
       ) : due_cards === 0 ? (
         <Button
@@ -227,7 +228,7 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
           fullWidth
           sx={{ fontSize: '0.75rem', py: 0.75 }}
         >
-          Preview
+          {t('cards.preview')}
         </Button>
       ) : (
         <Button
@@ -239,7 +240,7 @@ export default function Deck({ deck, cards = [], onStudy, onEdit, onDelete, onPr
           startDecorator={<SchoolIcon sx={{ fontSize: 14 }} />}
           sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
         >
-          Study ({due_cards})
+          {t('cards.studyDue', { count: due_cards })}
         </Button>
       )}
     </Card>

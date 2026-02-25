@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Modal, ModalDialog, ModalClose, Typography, Box, Button, Stack, Card, CardContent, Divider, IconButton } from '@mui/joy'
 import { ArrowBack, ArrowForward, Flip, Visibility } from '@mui/icons-material'
 import mermaid from 'mermaid'
+import TTSControls from '../TTS/TTSControls'
+import { decksService } from '../../api/services'
 
 // Initialize Mermaid
 mermaid.initialize({
@@ -10,10 +12,16 @@ mermaid.initialize({
   securityLevel: 'loose'
 })
 
-export default function CardPreviewModal({ open, onClose, title, cards = [], initialIndex = 0 }) {
+export default function CardPreviewModal({ open, onClose, title, cards = [], initialIndex = 0, decks = [] }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [isFlipped, setIsFlipped] = useState(false)
   const [svgContent, setSvgContent] = useState('')
+  const [localDecksData, setLocalDecksData] = useState(decks)
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false)
+
+  useEffect(() => {
+    setLocalDecksData(decks)
+  }, [decks])
 
   // Reset state when opening with different props
   useEffect(() => {
@@ -25,6 +33,73 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
   }, [open, initialIndex])
 
   const currentCard = cards[currentIndex]
+
+  // Compute Voice Settings
+  const currentDeck = localDecksData.find((d) => d._id === currentCard?.deck_id || d._id === currentCard?.deck_id?._id)
+
+  const voiceSettings = {
+    front: {
+      voiceName: currentDeck?.voice_settings?.front?.voiceName || currentDeck?.voice_settings?.front?.voice_name || null,
+      rate: currentDeck?.voice_settings?.front?.rate ?? 1.0,
+      pitch: currentDeck?.voice_settings?.front?.pitch ?? 1.0,
+      autoPlay: currentDeck?.voice_settings?.front?.autoPlay || currentDeck?.voice_settings?.front?.auto_play || false
+    },
+    back: {
+      voiceName: currentDeck?.voice_settings?.back?.voiceName || currentDeck?.voice_settings?.back?.voice_name || null,
+      rate: currentDeck?.voice_settings?.back?.rate ?? 1.0,
+      pitch: currentDeck?.voice_settings?.back?.pitch ?? 1.0,
+      autoPlay: currentDeck?.voice_settings?.back?.autoPlay || currentDeck?.voice_settings?.back?.auto_play || false
+    }
+  }
+
+  const handleVoiceSettingsChange = async (newSettings) => {
+    if (!currentDeck) return
+
+    const side = isFlipped ? 'back' : 'front'
+
+    const updatedSettings = {
+      ...(currentDeck.voice_settings?.[side] || {}),
+      ...newSettings
+    }
+
+    const newLocalDecks = localDecksData.map((d) => {
+      if (d._id === currentDeck._id) {
+        return {
+          ...d,
+          voice_settings: {
+            ...d.voice_settings,
+            [side]: updatedSettings
+          }
+        }
+      }
+      return d
+    })
+
+    setLocalDecksData(newLocalDecks)
+
+    const updatedDeck = newLocalDecks.find((d) => d._id === currentDeck._id)
+
+    const normalized = {
+      front: {
+        voice_name: updatedDeck.voice_settings?.front?.voiceName || updatedDeck.voice_settings?.front?.voice_name || null,
+        rate: updatedDeck.voice_settings?.front?.rate ?? 1.0,
+        pitch: updatedDeck.voice_settings?.front?.pitch ?? 1.0,
+        auto_play: updatedDeck.voice_settings?.front?.autoPlay || updatedDeck.voice_settings?.front?.auto_play || false
+      },
+      back: {
+        voice_name: updatedDeck.voice_settings?.back?.voiceName || updatedDeck.voice_settings?.back?.voice_name || null,
+        rate: updatedDeck.voice_settings?.back?.rate ?? 1.0,
+        pitch: updatedDeck.voice_settings?.back?.pitch ?? 1.0,
+        auto_play: updatedDeck.voice_settings?.back?.autoPlay || updatedDeck.voice_settings?.back?.auto_play || false
+      }
+    }
+
+    try {
+      await decksService.update(currentDeck._id, { voice_settings: normalized })
+    } catch (error) {
+      console.error('Error saving voice settings from preview:', error)
+    }
+  }
 
   // Render Mermaid diagram for visual cards
   useEffect(() => {
@@ -106,7 +181,23 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
             <Typography textColor='text.tertiary'>No cards in this deck yet.</Typography>
           </Box>
         ) : (
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
+            {/* Embedded TTS Controls */}
+            {currentCard && (
+              <TTSControls
+                compact
+                settingsOpen={showVoiceSettings}
+                onSettingsChange={setShowVoiceSettings}
+                voiceSettings={isFlipped ? voiceSettings.back : voiceSettings.front}
+                onVoiceSettingsChange={handleVoiceSettingsChange}
+                text={
+                  isFlipped
+                    ? currentCard.answer || currentCard.content || 'No Content'
+                    : currentCard.question || currentCard.title || 'No Title'
+                }
+              />
+            )}
+
             <Card
               variant='outlined'
               onClick={() => setIsFlipped(!isFlipped)}

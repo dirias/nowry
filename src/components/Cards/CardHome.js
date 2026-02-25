@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -19,14 +19,19 @@ import {
   Card,
   CardContent,
   Grid,
-  Divider
+  Divider,
+  CircularProgress,
+  Snackbar,
+  Skeleton
 } from '@mui/joy'
 import { Search, Add, GridView, ViewList, FilterList, TrendingUp, School, Download, MoreVert, CalendarToday } from '@mui/icons-material'
+import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import DecksView from './DecksView'
 import CreateDeckModal from './CreateDeckModal'
 import CreateCardModal from './CreateCardModal'
 import CardPreviewModal from './CardPreviewModal'
 import ManageContent from './ManageContent'
+import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import { decksService, cardsService } from '../../api/services'
 
 export default function CardHome() {
@@ -39,6 +44,7 @@ export default function CardHome() {
   const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [filterType, setFilterType] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
   const [viewMode, setViewMode] = useState('grid')
@@ -46,6 +52,10 @@ export default function CardHome() {
   const [showCreateCard, setShowCreateCard] = useState(false)
   const [editingDeck, setEditingDeck] = useState(null)
   const [editingCard, setEditingCard] = useState(null)
+  const [deletingDeck, setDeletingDeck] = useState(null)
+  const [deletingCard, setDeletingCard] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [errorSnackbar, setErrorSnackbar] = useState(null)
   const [previewState, setPreviewState] = useState({
     open: false,
     title: '',
@@ -63,6 +73,12 @@ export default function CardHome() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 200)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   const fetchData = async () => {
     try {
@@ -133,14 +149,10 @@ export default function CardHome() {
 
   const handleDeckSaved = () => {
     fetchData()
-    setShowCreateDeck(false)
-    setEditingDeck(null)
   }
 
   const handleCardSaved = () => {
     fetchData()
-    setShowCreateCard(false)
-    setEditingCard(null)
   }
 
   const handleEditDeck = (deck) => {
@@ -149,13 +161,22 @@ export default function CardHome() {
   }
 
   const handleDeleteDeck = async (deck) => {
-    if (window.confirm(t('cards.confirmDeleteDeck', { name: deck.name }))) {
-      try {
-        await decksService.delete(deck._id)
-        fetchData()
-      } catch (error) {
-        console.error('Error deleting deck:', error)
-      }
+    setDeletingDeck(deck)
+  }
+
+  const confirmDeleteDeck = async () => {
+    if (!deletingDeck) return
+
+    try {
+      setDeleteLoading(true)
+      await decksService.delete(deletingDeck._id)
+      setDeletingDeck(null)
+      setDeleteLoading(false)
+      fetchData()
+    } catch (error) {
+      console.error('Error deleting deck:', error)
+      setErrorSnackbar(error.response?.data?.detail || t('cards.deleteCardError'))
+      setDeleteLoading(false)
     }
   }
 
@@ -164,52 +185,43 @@ export default function CardHome() {
     setShowCreateCard(true)
   }
 
-  const handleDeleteCard = async (card) => {
-    if (window.confirm(t('cards.confirmDeleteCard'))) {
-      try {
-        await cardsService.delete(card._id)
-        fetchData()
-      } catch (error) {
-        console.error('Error deleting card:', error)
-      }
+  const handleDeleteCard = (card) => {
+    setDeletingCard(card)
+  }
+
+  const confirmDeleteCard = async () => {
+    if (!deletingCard) return
+    try {
+      await cardsService.delete(deletingCard._id)
+      setDeletingCard(null)
+      fetchData()
+    } catch (error) {
+      console.error('Error deleting card:', error)
+      setErrorSnackbar(t('cards.deleteCardError'))
     }
   }
 
-  // Filter and sort decks
-  const getFilteredDecks = () => {
+  const filteredDecks = useMemo(() => {
     let filtered = decks
-
-    // Filter by type
     if (filterType !== 'all') {
       filtered = filtered.filter((d) => d.deck_type === filterType)
     }
-
-    // Filter by search
-    if (searchQuery) {
-      filtered = filtered.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    if (debouncedSearch) {
+      filtered = filtered.filter((d) => d.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
     }
-
-    // Sort
     switch (sortBy) {
       case 'name':
-        filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name))
-        break
+        return [...filtered].sort((a, b) => a.name.localeCompare(b.name))
       case 'cards':
-        filtered = [...filtered].sort((a, b) => (b.total_cards || 0) - (a.total_cards || 0))
-        break
+        return [...filtered].sort((a, b) => (b.total_cards || 0) - (a.total_cards || 0))
       case 'recent':
       default:
-        filtered = [...filtered].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-        break
+        return [...filtered].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
     }
-
-    return filtered
-  }
-
-  const filteredDecks = getFilteredDecks()
+  }, [decks, filterType, debouncedSearch, sortBy])
 
   return (
-    <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
+    <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Header */}
       <Stack spacing={1.5} sx={{ mb: 1.5 }}>
         {/* Title Row */}
@@ -222,7 +234,7 @@ export default function CardHome() {
         >
           {/* Title & Subtitle */}
           <Box>
-            <Typography level='h2' fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' }, mb: 0.25 }}>
+            <Typography level='h3' fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' }, mb: 0.25 }}>
               {t('cards.title')}
             </Typography>
             <Typography level='body-sm' sx={{ color: 'text.tertiary', fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
@@ -251,6 +263,19 @@ export default function CardHome() {
               sx={{ fontSize: '0.8125rem' }}
             >
               {t('cards.newDeck')}
+            </Button>
+            <Button
+              startDecorator={<Add />}
+              onClick={() => {
+                setEditingCard(null)
+                setShowCreateCard(true)
+              }}
+              variant='outlined'
+              color='primary'
+              size='sm'
+              sx={{ fontSize: '0.8125rem' }}
+            >
+              {t('cards.newCard', 'New Card')}
             </Button>
           </Stack>
         </Stack>
@@ -287,10 +312,12 @@ export default function CardHome() {
                     fontWeight: 600
                   }}
                 >
-                  {stats.dueToday}
+                  <Skeleton loading={loading} variant='text' width='2ch'>
+                    {stats.dueToday}
+                  </Skeleton>
                 </Typography>
               </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 {t('cards.dueToday')}
               </Typography>
             </Box>
@@ -326,10 +353,12 @@ export default function CardHome() {
                     fontWeight: 600
                   }}
                 >
-                  {stats.totalCards}
+                  <Skeleton loading={loading} variant='text' width='2ch'>
+                    {stats.totalCards}
+                  </Skeleton>
                 </Typography>
               </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 {t('cards.totalCards')}
               </Typography>
             </Box>
@@ -365,10 +394,12 @@ export default function CardHome() {
                     fontWeight: 600
                   }}
                 >
-                  {stats.streak}
+                  <Skeleton loading={loading} variant='text' width='2ch'>
+                    {stats.streak}
+                  </Skeleton>
                 </Typography>
               </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 {t('profile.stats.days')}
               </Typography>
             </Box>
@@ -377,7 +408,7 @@ export default function CardHome() {
       </Stack>
 
       {/* Subtle Divider for Visual Separation */}
-      <Divider sx={{ my: 3, opacity: 0.3 }} />
+      <Divider sx={{ my: 2, opacity: 0.3 }} />
 
       {/* Mobile Tabs (Segmented Control) */}
       <Box
@@ -458,7 +489,7 @@ export default function CardHome() {
               minHeight: 'auto',
               fontSize: 'md',
               fontWeight: activeTab === 0 ? 700 : 500,
-              color: activeTab === 0 ? 'primary.plainColor' : 'neutral.500',
+              color: activeTab === 0 ? 'primary.plainColor' : 'text.secondary',
               border: 'none',
               borderBottom: '2px solid',
               borderColor: activeTab === 0 ? 'primary.plainColor' : 'transparent',
@@ -498,7 +529,7 @@ export default function CardHome() {
               minHeight: 'auto',
               fontSize: 'md',
               fontWeight: activeTab === 1 ? 700 : 500,
-              color: activeTab === 1 ? 'primary.plainColor' : 'neutral.500',
+              color: activeTab === 1 ? 'primary.plainColor' : 'text.secondary',
               border: 'none',
               borderBottom: '2px solid',
               borderColor: activeTab === 1 ? 'primary.plainColor' : 'transparent',
@@ -577,7 +608,9 @@ export default function CardHome() {
                 onChange={(e, val) => setFilterType(val)}
                 variant='plain'
                 color='neutral'
-                startDecorator={<FilterList fontSize='small' sx={{ color: filterType !== 'all' ? 'primary.plainColor' : 'neutral.400' }} />}
+                startDecorator={
+                  <FilterList fontSize='small' sx={{ color: filterType !== 'all' ? 'primary.plainColor' : 'text.tertiary' }} />
+                }
                 sx={{
                   minWidth: { md: 140 },
                   '&:hover': { bgcolor: 'background.level1' }
@@ -639,7 +672,7 @@ export default function CardHome() {
 
           {/* Deck Count & Type Filter Chips */}
           <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
-            <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
               {t('cards.deckCount_plural', { count: filteredDecks.length })}
             </Typography>
             {filterType !== 'all' && (
@@ -653,7 +686,12 @@ export default function CardHome() {
 
           {/* Decks Grid/List */}
           {loading ? (
-            <Typography>{t('cards.loading')}</Typography>
+            <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
+              <CircularProgress size='md' />
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {t('cards.loading')}
+              </Typography>
+            </Stack>
           ) : (
             <DecksView
               decks={filteredDecks}
@@ -718,8 +756,55 @@ export default function CardHome() {
           title={previewState.title}
           cards={previewState.cards}
           initialIndex={previewState.initialIndex}
+          decks={decks}
         />
       )}
+
+      {/* Delete Deck Confirmation Modal */}
+      {deletingDeck && (
+        <DeleteConfirmationModal
+          open={!!deletingDeck}
+          onClose={() => setDeletingDeck(null)}
+          onConfirm={confirmDeleteDeck}
+          title={t('cards.deleteModal.title')}
+          description={t('cards.deleteModal.description', { name: deletingDeck.name })}
+          confirmText={t('cards.deleteModal.confirm')}
+          loading={deleteLoading}
+          consequences={[
+            {
+              text: t('cards.deleteModal.consequence1', { count: deletingDeck.total_cards || 0 }),
+              icon: <StyleRoundedIcon fontSize='small' />
+            },
+            {
+              text: t('cards.deleteModal.consequence2')
+            }
+          ]}
+        />
+      )}
+
+      {/* Delete Card Confirmation Modal */}
+      {deletingCard && (
+        <DeleteConfirmationModal
+          open={!!deletingCard}
+          onClose={() => setDeletingCard(null)}
+          onConfirm={confirmDeleteCard}
+          title={t('cards.deck.delete')}
+          description={t('cards.confirmDeleteCard')}
+          confirmText={t('cards.deck.delete')}
+        />
+      )}
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!errorSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setErrorSnackbar(null)}
+        color='danger'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {errorSnackbar}
+      </Snackbar>
     </Container>
   )
 }

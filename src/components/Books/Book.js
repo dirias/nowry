@@ -21,12 +21,12 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
         cursor: 'pointer',
         position: 'relative',
         transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', // Subtle base shadow
-        borderRadius: '6px', // Slightly sharper for futuristic look
+        boxShadow: 'sm',
+        borderRadius: 'md',
         overflow: 'hidden',
         '&:hover': {
           transform: 'translateY(-6px) scale(1.02)',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', // Deep lift
+          boxShadow: 'lg',
           '& .book-actions': { opacity: 1 },
           '& .book-shine': { opacity: 1 }
         }
@@ -42,7 +42,8 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
           bottom: 0,
           width: '12px',
           background: 'linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.2) 100%)',
-          borderRight: '1px solid rgba(0,0,0,0.1)',
+          borderRight: '1px solid',
+          borderRightColor: 'divider',
           zIndex: 10,
           boxShadow: 'inset -1px 0 2px rgba(0,0,0,0.1)'
         }}
@@ -51,7 +52,7 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
       <AspectRatio
         ratio='2/3'
         sx={{
-          borderRadius: '6px',
+          borderRadius: 'md',
           overflow: 'hidden',
           position: 'relative',
           backgroundColor: 'background.surface'
@@ -62,10 +63,10 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
           sx={{
             width: '100%',
             height: '100%',
-            backgroundColor: cover_color || themeColor || '#0B6BCB', // Use user's theme color as fallback
+            backgroundColor: cover_color || themeColor || 'primary.solidBg',
             background: cover_image
               ? `url(${cover_image}) center/cover`
-              : `linear-gradient(135deg, ${cover_color || themeColor || '#0B6BCB'} 0%, #000000 120%)`, // Deep tech gradient with theme color
+              : `linear-gradient(135deg, ${cover_color || themeColor || 'var(--joy-palette-primary-solidBg)'} 0%, var(--joy-palette-neutral-900) 120%)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -82,7 +83,7 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
                 backdropFilter: 'blur(4px)'
               }}
             >
-              <MenuBookIcon sx={{ fontSize: 32, color: '#fff', opacity: 0.9 }} />
+              <MenuBookIcon sx={{ fontSize: 32, color: 'common.white', opacity: 0.9 }} />
             </Box>
           )}
           {cover_image && (
@@ -117,7 +118,7 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
                   sx={{
                     bgcolor: 'rgba(0,0,0,0.4)',
                     backdropFilter: 'blur(4px)',
-                    color: 'white',
+                    color: 'common.white',
                     border: '1px solid rgba(255,255,255,0.1)',
                     fontSize: '10px',
                     height: 20
@@ -140,7 +141,6 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
             p: 2,
             pl: 3, // Account for spine
             pt: 6,
-            // Smoother, lighter gradient to avoid "black box" look
             background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
             zIndex: 5
           }}
@@ -148,7 +148,7 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
           <Typography
             level='title-md'
             sx={{
-              color: '#fff',
+              color: 'common.white',
               fontWeight: 600,
               letterSpacing: '0.01em',
               mb: 0.5,
@@ -156,7 +156,8 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              bgcolor: 'transparent'
             }}
           >
             {title}
@@ -164,12 +165,11 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
           <Typography
             level='body-xs'
             sx={{
-              color: 'rgba(255,255,255,0.9)', // Higher contrast for author
+              color: 'rgba(255,255,255,0.9)',
               fontSize: '0.75rem',
               fontWeight: 500,
-              textShadow: '0 1px 2px rgba(0,0,0,0.8)', // Shadow for readability without heavy bg
-              bgcolor: 'transparent',
-              background: 'transparent' // Explicit override
+              textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+              bgcolor: 'transparent'
             }}
             noWrap
           >
@@ -192,7 +192,6 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               transform: 'translateY(-4px)',
               '.MuiCard-root:hover &': {
-                // Apply transform on hover
                 transform: 'translateY(0)'
               }
             }}
@@ -207,12 +206,11 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
                 }}
                 sx={{
                   borderRadius: '50%',
-                  // Glassmorphism Button
                   bgcolor: 'rgba(255,255,255,0.2)',
                   backdropFilter: 'blur(4px)',
-                  color: '#fff', // White icon
+                  color: 'common.white',
                   border: '1px solid rgba(255,255,255,0.3)',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  boxShadow: 'sm',
                   '&:hover': { bgcolor: 'rgba(255,255,255,0.4)', transform: 'scale(1.1)' }
                 }}
               >
@@ -229,13 +227,12 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
                 }}
                 sx={{
                   borderRadius: '50%',
-                  // Glassmorphism Danger Button
                   bgcolor: 'rgba(255,255,255,0.2)',
                   backdropFilter: 'blur(4px)',
-                  color: '#ffcccc', // Light red icon
+                  color: 'danger.softColor',
                   border: '1px solid rgba(255,255,255,0.3)',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                  '&:hover': { bgcolor: 'danger.solidBg', color: '#fff', transform: 'scale(1.1)', border: 'none' }
+                  boxShadow: 'sm',
+                  '&:hover': { bgcolor: 'danger.solidBg', color: 'common.white', transform: 'scale(1.1)', border: 'none' }
                 }}
               >
                 <DeleteIcon fontSize='small' />

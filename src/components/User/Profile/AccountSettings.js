@@ -31,15 +31,21 @@ import {
   LightMode,
   Timer
 } from '@mui/icons-material'
+import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded'
+import BookRoundedIcon from '@mui/icons-material/BookRounded'
+import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import { userService } from '../../../api/services'
 import { useColorScheme } from '@mui/joy/styles'
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
+import DeleteConfirmationModal from '../../Common/DeleteConfirmationModal'
 
 import { useTranslation } from 'react-i18next'
 
 export default function AccountSettings() {
   const [loading, setLoading] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const { mode, setMode } = useColorScheme()
   const { setThemeColor } = useThemePreferences()
   const { t, i18n } = useTranslation()
@@ -208,14 +214,18 @@ export default function AccountSettings() {
 
   const handleDeleteAccount = async () => {
     try {
-      setLoading(true)
+      setDeleteLoading(true)
       await userService.deleteAccount()
+      // Clear auth data
       localStorage.clear()
+      sessionStorage.clear()
+      // Redirect to home
       window.location.href = '/'
     } catch (error) {
       console.error('Error deleting account:', error)
-      alert('Failed to delete account')
-      setLoading(false)
+      alert(error.response?.data?.detail || 'Failed to delete account')
+      setDeleteLoading(false)
+      setShowDeleteModal(false)
     }
   }
 
@@ -250,7 +260,7 @@ export default function AccountSettings() {
     <Container maxWidth='md' sx={{ py: { xs: 2, md: 4 } }}>
       {/* Header */}
       <Box sx={{ mb: { xs: 2, md: 3 } }}>
-        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.5rem', md: '2rem' } }}>
+        <Typography level='h3' fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.5rem', md: '2rem' } }}>
           {t('settings.title')}
         </Typography>
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
@@ -666,43 +676,51 @@ export default function AccountSettings() {
               </Typography>
             </Stack>
 
-            {!showDeleteConfirm ? (
-              <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                <Box>
-                  <Typography level='title-md' sx={{ mb: 0.5 }}>
-                    {t('settings.danger.deleteAccount')}
-                  </Typography>
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {t('settings.danger.deleteDesc')}
-                  </Typography>
-                </Box>
-                <Button variant='soft' color='danger' startDecorator={<Delete />} onClick={() => setShowDeleteConfirm(true)} size='sm'>
+            <Stack direction='row' justifyContent='space-between' alignItems='center'>
+              <Box>
+                <Typography level='title-md' sx={{ mb: 0.5 }}>
                   {t('settings.danger.deleteAccount')}
-                </Button>
-              </Stack>
-            ) : (
-              <Alert color='danger' variant='soft' startDecorator={<Warning />}>
-                <Box>
-                  <Typography level='title-sm' sx={{ mb: 1 }}>
-                    {t('settings.danger.confirmTitle')}
-                  </Typography>
-                  <Typography level='body-sm' sx={{ mb: 2 }}>
-                    {t('settings.danger.confirmDesc')}
-                  </Typography>
-                  <Stack direction='row' spacing={1}>
-                    <Button size='sm' variant='solid' color='danger' onClick={handleDeleteAccount} loading={loading}>
-                      {t('settings.danger.confirmBtn')}
-                    </Button>
-                    <Button size='sm' variant='plain' color='neutral' onClick={() => setShowDeleteConfirm(false)}>
-                      {t('settings.danger.cancelBtn')}
-                    </Button>
-                  </Stack>
-                </Box>
-              </Alert>
-            )}
+                </Typography>
+                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                  {t('settings.danger.deleteDesc')}
+                </Typography>
+              </Box>
+              <Button variant='soft' color='danger' startDecorator={<Delete />} onClick={() => setShowDeleteModal(true)} size='sm'>
+                {t('settings.danger.deleteAccount')}
+              </Button>
+            </Stack>
           </CardContent>
         </Card>
       </Stack>
+
+      {/* Delete Account Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteAccount}
+        title={t('settings.danger.modal.title')}
+        description={t('settings.danger.modal.description')}
+        confirmText={t('settings.danger.modal.confirm')}
+        loading={deleteLoading}
+        consequences={[
+          {
+            text: t('settings.danger.modal.consequence1'),
+            icon: <BookRoundedIcon fontSize='small' />
+          },
+          {
+            text: t('settings.danger.modal.consequence2'),
+            icon: <StyleRoundedIcon fontSize='small' />
+          },
+          {
+            text: t('settings.danger.modal.consequence3'),
+            icon: <DeleteForeverRoundedIcon fontSize='small' />
+          },
+          {
+            text: t('settings.danger.modal.consequence4'),
+            icon: <CheckCircleOutlineRoundedIcon fontSize='small' />
+          }
+        ]}
+      />
     </Container>
   )
 }

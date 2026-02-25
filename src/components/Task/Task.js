@@ -16,14 +16,24 @@ const Task = ({ task, onToggle, onDelete, onUpdate }) => {
 
   const handleDeadlineSave = () => {
     setEditingDeadline(false)
+    // Save as plain YYYY-MM-DD — avoid toISOString() which converts to UTC
+    // and shifts the date back in negative-offset timezones (e.g. CST = UTC-6)
     onUpdate?.({
       ...task,
-      deadline: tempDeadline ? new Date(tempDeadline).toISOString() : null,
+      deadline: tempDeadline || null,
       updated_at: new Date().toISOString()
     })
   }
 
-  const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.is_completed
+  // Parse deadline as local time: date-only strings are UTC in JS → wrong day in CST
+  const parseDeadlineLocal = (d) => {
+    if (!d) return null
+    const s = typeof d === 'string' ? d : String(d)
+    const match = s.match(/^(\d{4}-\d{2}-\d{2})/)
+    return match ? new Date(`${match[1]}T00:00:00`) : new Date(s)
+  }
+  const deadlineDate = parseDeadlineLocal(task.deadline)
+  const isOverdue = deadlineDate && deadlineDate < new Date() && !task.is_completed
 
   return (
     <Box
@@ -77,14 +87,14 @@ const Task = ({ task, onToggle, onDelete, onUpdate }) => {
                 alignItems: 'center',
                 gap: 0.5,
                 cursor: 'pointer',
-                color: isOverdue ? 'danger.400' : 'neutral.400',
-                '&:hover': { color: isOverdue ? 'danger.300' : 'neutral.100' }
+                color: isOverdue ? 'danger.outlinedColor' : 'text.tertiary',
+                '&:hover': { color: isOverdue ? 'danger.plainColor' : 'text.secondary' }
               }}
             >
               <AccessTimeRoundedIcon fontSize='sm' />
               {task.deadline && (
-                <Typography level='body-xs' sx={{ color: isOverdue ? 'danger.400' : 'neutral' }}>
-                  {new Date(task.deadline).toLocaleDateString()}
+                <Typography level='body-xs' sx={{ color: isOverdue ? 'danger.plainColor' : 'text.tertiary' }}>
+                  {deadlineDate ? deadlineDate.toLocaleDateString() : ''}
                 </Typography>
               )}
             </Box>

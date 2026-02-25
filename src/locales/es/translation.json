@@ -25,7 +25,12 @@
       "entertainment": "Entretenimiento",
       "politics": "Política",
       "sports": "Deportes"
-    }
+    },
+    "favorites": "Favoritos",
+    "noFavorites": "Sin favoritos aún",
+    "noFavoritesHint": "Haz clic en el ícono de estrella de cualquier artículo para agregarlo a tus favoritos.",
+    "adjustInterests": "Ajusta tus intereses en Configuración para ver noticias personalizadas.",
+    "setInterests": "Establece tus intereses en Configuración para ver artículos personalizados."
   },
   "header": {
     "study": "Estudio",
@@ -52,6 +57,7 @@
       "totalCards": "Total"
     },
     "byType": "Estudiar por Tipo",
+    "swipeHint": "Desliza para navegar",
     "types": {
       "flashcards": "Tarjetas de Memoria",
       "flashcardsDesc": "Estilo clásico para memorización rápida",
@@ -268,6 +274,11 @@
       "completed": "Completadas",
       "pending": "Pendientes"
     },
+    "lists": {
+      "all": "Todas",
+      "addList": "Nueva lista",
+      "listPlaceholder": "Nombre de lista..."
+    },
     "empty": "No hay tareas. ¡Escribe para añadir una!",
     "noMatch": "Ninguna tarea coincide con tus filtros",
     "addTooltip": "Añadir \"{{title}}\""
@@ -406,6 +417,39 @@
       "flashcard": "Tarjeta"
     }
   },
+  "calendarModal": {
+    "title": "Calendario",
+    "tooltip": "Abrir calendario",
+    "filters": {
+      "all": "Todos",
+      "tasks": "Tareas",
+      "goals": "Objetivos",
+      "priorities": "Prioridades",
+      "activities": "Actividades"
+    },
+    "noEvents": "No hay eventos para este día",
+    "today": "Hoy",
+    "loading": "Cargando...",
+    "addEvent": "Agregar evento",
+    "editEvent": "Editar evento",
+    "form": {
+      "selectType": "Tipo de evento",
+      "title": "Título",
+      "date": "Fecha",
+      "description": "Descripción",
+      "focusArea": "Área de enfoque",
+      "goal": "Objetivo",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saveError": "Error al guardar. Intenta de nuevo.",
+      "types": {
+        "task": "Tarea",
+        "priority": "Prioridad",
+        "goal": "Objetivo",
+        "activity": "Actividad"
+      }
+    }
+  },
   "books": {
     "title": "Libros",
     "library": "Biblioteca de libros",
@@ -452,7 +496,114 @@
     "deckCount_plural": "{{count}} mazos",
     "loading": "Cargando...",
     "confirmDeleteDeck": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
-    "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?"
+    "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?",
+    "deleteCardError": "Error al eliminar la tarjeta. Inténtalo de nuevo.",
+    "studyDue": "Estudiar ({{count}})",
+    "preview": "Vista previa",
+    "noCardsYet": "Sin tarjetas aún",
+    "dueLabel": "{{count}} pendiente",
+    "typeLabels": {
+      "card": "Tarjeta",
+      "cards": "Tarjetas",
+      "question": "Pregunta",
+      "questions": "Preguntas",
+      "diagram": "Diagrama",
+      "diagrams": "Diagramas"
+    },
+    "manage_content": {
+      "title": "Gestor de contenido",
+      "deckCount": "{{decks}} mazos · {{cards}} tarjetas en total",
+      "tabs": {
+        "decks": "Mazos ({{count}})",
+        "cards": "Tarjetas ({{count}})"
+      },
+      "search": {
+        "decks": "Buscar mazos...",
+        "cards": "Buscar tarjetas..."
+      },
+      "filters": {
+        "all": "Todos",
+        "flashcards": "Tarjetas",
+        "quizzes": "Cuestionarios",
+        "visual": "Visual"
+      },
+      "cardCount": "{{count}} tarjeta",
+      "cardCount_plural": "{{count}} tarjetas",
+      "noContent": "Sin contenido",
+      "untitled": "Tarjeta sin título",
+      "reviewNew": "Nueva",
+      "empty": {
+        "decks": {
+          "title": "No se encontraron mazos",
+          "filter": "Intenta ajustar tus filtros",
+          "start": "Crea tu primer mazo para empezar"
+        },
+        "cards": {
+          "title": "No se encontraron tarjetas",
+          "filter": "Intenta ajustar tus filtros",
+          "start": "Crea tarjetas en tus mazos para empezar"
+        }
+      }
+    },
+    "deck": {
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "addCard": "Agregar tarjeta",
+      "preview": "Vista previa"
+    },
+    "create": {
+      "newTitle": "Nuevo mazo",
+      "editTitle": "Editar mazo",
+      "fields": {
+        "name": "Nombre del mazo",
+        "namePlaceholder": "Ej., Vocabulario japonés",
+        "description": "Descripción",
+        "descriptionPlaceholder": "¿De qué trata este mazo?",
+        "imageUrl": "URL de imagen (opcional)",
+        "tags": "Etiquetas (separadas por coma)"
+      },
+      "save": "Guardar mazo",
+      "create": "Crear mazo"
+    },
+    "session": {
+      "loading": "Cargando sesión de estudio...",
+      "allCaughtUp": "¡Al día!",
+      "noDue": "No hay tarjetas pendientes por ahora.",
+      "goBack": "Volver",
+      "complete": {
+        "title": "¡Sesión completa!",
+        "body": "Revisaste {{count}} tarjetas. ¡Buen trabajo!",
+        "backToLibrary": "Volver a la biblioteca"
+      },
+      "card": "Tarjeta {{current}} de {{total}}",
+      "syncing": "Sincronizando {{count}} revisión...",
+      "syncing_plural": "Sincronizando {{count}} revisiones...",
+      "labels": {
+        "question": "Pregunta",
+        "answer": "Respuesta",
+        "quiz": "Pregunta de cuestionario",
+        "visual": "Diagrama visual",
+        "explanation": "Explicación"
+      },
+      "hints": {
+        "tapFlip": "Toca para voltear · Desliza para saltar",
+        "clickFlip": "Haz clic para voltear"
+      },
+      "grading": {
+        "again": "De nuevo",
+        "hard": "Difícil",
+        "good": "Bien",
+        "easy": "Fácil"
+      }
+    },
+    "deleteModal": {
+      "title": "Eliminar mazo",
+      "description": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
+      "confirm": "Eliminar mazo",
+      "consequence1": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence1_plural": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence2": "Si está publicado, se despublicará inmediatamente"
+    }
   },
   "subscription": {
     "upgrade": "Mejorar Plan",
@@ -572,13 +723,35 @@
       "setup": {
         "intro": {
           "title": "El Poder de 3",
-          "message": "La investigación muestra que enfocarse en 3 áreas clave lleva a mayor éxito que intentar mejorar todo a la vez. Definamos tus 3 áreas para este año."
+          "editTitle": "Editar Tus Áreas de Enfoque",
+          "message": "La investigación muestra que enfocarse en 3 áreas clave lleva a mayor éxito que intentar mejorar todo a la vez. Definamos tus 3 áreas para este año.",
+          "editMessage": "Revisa y actualiza tus áreas de enfoque. Realiza cambios en nombres, descripciones, íconos o colores para reflejar mejor tus prioridades actuales."
         },
         "tips": [
           "Sé específico sobre lo que más importa",
           "Elige áreas que se alineen con tus valores",
           "Piensa en el equilibrio entre diferentes dominios de la vida"
-        ]
+        ],
+        "tipsLabel": "Consejos:",
+        "areaOf": "Área de Enfoque {{current}} de {{total}}",
+        "defineArea": "Definir Área de Enfoque {{number}}",
+        "nameLabel": "Nombre",
+        "namePlaceholder": "ej. Salud y Bienestar",
+        "descriptionLabel": "Descripción (Tu '¿Por qué?')",
+        "descriptionPlaceholder": "¿Por qué es importante esta área para ti este año?",
+        "colorTheme": "Tema de Color",
+        "reviewTitle": "Tu Plan para {{year}}",
+        "loading": "Cargando tu plan...",
+        "buttons": {
+          "back": "Atrás",
+          "next": "Siguiente",
+          "review": "Revisar",
+          "reviewEdit": "Revisar y Editar",
+          "letsStart": "¡Empecemos!",
+          "edit": "Editar",
+          "saveChanges": "Guardar Cambios",
+          "finalizePlan": "Finalizar Plan"
+        }
       },
       "examples": [
         "Crecimiento Profesional",
@@ -728,5 +901,29 @@
       "deleteFailed": "Error al eliminar {{type}}",
       "focusAreaLimit": "Solo puedes tener 3 áreas de enfoque. Elimina una para añadir otra."
     }
+  },
+  "focusBar": {
+    "modal": {
+      "title": "Seleccionar Prioridades",
+      "description": "Elige hasta 4 prioridades para mostrar en tu página principal",
+      "noPriorities": "No se encontraron prioridades",
+      "createPriorities": "Crear Prioridades",
+      "cancel": "Cancelar",
+      "save": "Guardar Selección"
+    },
+    "entity": {
+      "goal": "Objetivo",
+      "task": "Tarea",
+      "routine": "Rutina"
+    },
+    "overdue": "Atrasado",
+    "daysLeft": "{{count}} días restantes",
+    "noDeadline": "Sin fecha límite",
+    "overdueBy": "{{count}} días de retraso",
+    "daysRemaining": "{{count}} días restantes",
+    "noDeadlineEntity": "{{entity}} • Sin fecha límite",
+    "choosePrioritiesTooltip": "Elegir prioridades para mostrar",
+    "noPrioritiesYet": "Aún no hay prioridades",
+    "createPriority": "Crear Prioridad"
   }
 }

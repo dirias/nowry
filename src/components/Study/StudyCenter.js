@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Typography, Box, Card, CardContent, Stack, Button, Chip, Grid, LinearProgress, Divider } from '@mui/joy'
+import { Container, Typography, Box, Card, CardContent, Stack, Button, Chip, Grid, Divider, Skeleton } from '@mui/joy'
 import { School, Quiz as QuizIcon, Style, AccountTree, TrendingUp, CalendarToday } from '@mui/icons-material'
 import { decksService, cardsService } from '../../api/services'
 import { useTranslation } from 'react-i18next'
@@ -111,17 +111,6 @@ export default function StudyCenter() {
     }).length
   }
 
-  if (loading) {
-    return (
-      <Container maxWidth='xl' sx={{ py: 4 }}>
-        <LinearProgress />
-        <Typography level='body-lg' sx={{ mt: 2, textAlign: 'center' }}>
-          {t('common.loading')}
-        </Typography>
-      </Container>
-    )
-  }
-
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
       {/* Header */}
@@ -134,7 +123,7 @@ export default function StudyCenter() {
           sx={{ width: '100%' }}
         >
           {/* Title */}
-          <Typography level='h2' fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}>
+          <Typography level='h3' fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}>
             {t('study.title')}
           </Typography>
 
@@ -176,10 +165,12 @@ export default function StudyCenter() {
                     fontWeight: 600
                   }}
                 >
-                  {stats.dueToday}
+                  <Skeleton loading={loading} variant='text' width='2ch'>
+                    {stats.dueToday}
+                  </Skeleton>
                 </Typography>
               </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 {t('study.stats.dueToday')}
               </Typography>
             </Box>
@@ -215,10 +206,12 @@ export default function StudyCenter() {
                     fontWeight: 600
                   }}
                 >
-                  {stats.reviewedToday}
+                  <Skeleton loading={loading} variant='text' width='2ch'>
+                    {stats.reviewedToday}
+                  </Skeleton>
                 </Typography>
               </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 {t('study.stats.reviewedToday')}
               </Typography>
             </Box>
@@ -254,10 +247,12 @@ export default function StudyCenter() {
                     fontWeight: 600
                   }}
                 >
-                  {stats.totalActive}
+                  <Skeleton loading={loading} variant='text' width='2ch'>
+                    {stats.totalActive}
+                  </Skeleton>
                 </Typography>
               </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 {t('study.stats.totalCards')}
               </Typography>
             </Box>
@@ -293,10 +288,12 @@ export default function StudyCenter() {
                     fontWeight: 600
                   }}
                 >
-                  {stats.streak}
+                  <Skeleton loading={loading} variant='text' width='2ch'>
+                    {stats.streak}
+                  </Skeleton>
                 </Typography>
               </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.625rem', opacity: 0.6 }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 {t('profile.stats.days')}
               </Typography>
             </Box>
@@ -350,7 +347,7 @@ export default function StudyCenter() {
         {/* Swipe Hint (Mobile) */}
         <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1, color: 'text.tertiary' }}>
           <Typography level='body-xs' sx={{ fontSize: '0.7rem' }}>
-            Swipe to navigate
+            {t('study.swipeHint')}
           </Typography>
         </Box>
       </Stack>
@@ -453,13 +450,13 @@ export default function StudyCenter() {
                   </Box>
                 </Stack>
 
-                <Typography level='body-sm' sx={{ mb: 2, color: 'neutral.600' }}>
+                <Typography level='body-sm' sx={{ mb: 2, color: 'text.secondary' }}>
                   {t('study.types.flashcardsDesc')}
                 </Typography>
 
                 <Stack spacing={1}>
                   {getDecksByType('flashcard').length === 0 ? (
-                    <Typography level='body-xs' sx={{ color: 'neutral.500', textAlign: 'center', py: 2 }}>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center', py: 2 }}>
                       {t('study.types.noDecks', { type: t('study.types.flashcards') })}
                     </Typography>
                   ) : (
@@ -547,13 +544,13 @@ export default function StudyCenter() {
                   </Box>
                 </Stack>
 
-                <Typography level='body-sm' sx={{ mb: 2, color: 'neutral.600' }}>
+                <Typography level='body-sm' sx={{ mb: 2, color: 'text.secondary' }}>
                   {t('study.types.quizzesDesc')}
                 </Typography>
 
                 <Stack spacing={1}>
                   {getDecksByType('quiz').length === 0 ? (
-                    <Typography level='body-xs' sx={{ color: 'neutral.500', textAlign: 'center', py: 2 }}>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center', py: 2 }}>
                       {t('study.types.noDecks', { type: t('study.types.quizzes') })}
                     </Typography>
                   ) : (
@@ -641,13 +638,13 @@ export default function StudyCenter() {
                   </Box>
                 </Stack>
 
-                <Typography level='body-sm' sx={{ mb: 2, color: 'neutral.600' }}>
+                <Typography level='body-sm' sx={{ mb: 2, color: 'text.secondary' }}>
                   {t('study.types.visualDesc')}
                 </Typography>
 
                 <Stack spacing={1}>
                   {getDecksByType('visual').length === 0 ? (
-                    <Typography level='body-xs' sx={{ color: 'neutral.500', textAlign: 'center', py: 2 }}>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center', py: 2 }}>
                       {t('study.types.noDecks', { type: t('study.types.visual') })}
                     </Typography>
                   ) : (

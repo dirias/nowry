@@ -1,12 +1,14 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Grid, Typography, Container, Button } from '@mui/joy'
+import { Box, Grid, Typography, Container, Button, IconButton, Tooltip } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
+import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import FocusBar from './FocusBar'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import WeeklyProgress from './WeeklyProgress'
 import StudyCalendar from './StudyCalendar'
+import CalendarModal from '../../Calendar/CalendarModal'
 import { useAuth } from '../../../context/AuthContext'
 import { cardsService, decksService } from '../../../api/services'
 
@@ -16,6 +18,7 @@ function Home() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [studyStats, setStudyStats] = useState({ dueCount: 0, loading: true })
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
   const motivationPhrase = useMemo(() => {
     const phrases = t('motivation.phrases', { returnObjects: true })
@@ -59,21 +62,45 @@ function Home() {
           flexWrap: 'wrap'
         }}
       >
-        {/* Left: Welcome Message */}
-        <Box sx={{ flex: 1, minWidth: { xs: 200, md: 250 } }}>
-          <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
-            {t('dashboard.welcome', { name: username })}
-          </Typography>
-          <Typography
-            level='body-sm'
-            sx={{
-              color: 'text.secondary',
-              fontWeight: 'normal',
-              fontSize: { xs: '0.75rem', md: '0.875rem' }
-            }}
-          >
-            {motivationPhrase}
-          </Typography>
+        {/* Left: Welcome Message + Calendar Icon */}
+        <Box sx={{ flex: 1, minWidth: { xs: 200, md: 250 }, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
+              {t('dashboard.welcome', { name: username })}
+            </Typography>
+            <Typography
+              level='body-sm'
+              sx={{
+                color: 'text.secondary',
+                fontWeight: 'normal',
+                fontSize: { xs: '0.75rem', md: '0.875rem' }
+              }}
+            >
+              {motivationPhrase}
+            </Typography>
+          </Box>
+          {/* Calendar Icon – minimalistic */}
+          <Tooltip title={t('calendarModal.tooltip')} size='sm' placement='bottom'>
+            <IconButton
+              size='sm'
+              variant='plain'
+              color='neutral'
+              onClick={() => setCalendarOpen(true)}
+              sx={{
+                '--IconButton-size': '32px',
+                borderRadius: 'sm',
+                border: '1px solid',
+                borderColor: 'divider',
+                transition: 'all 0.15s',
+                '&:hover': {
+                  bgcolor: 'background.level1',
+                  borderColor: 'primary.outlinedBorder'
+                }
+              }}
+            >
+              <CalendarMonthRoundedIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/* Right: Study Status - Minimalist Clickable */}
@@ -83,20 +110,21 @@ function Home() {
             sx={{
               cursor: 'pointer',
               transition: 'all 0.15s ease',
-              px: { xs: 2, md: 2.5 },
-              py: { xs: 1.25, md: 1.5 },
+              px: 1.25,
+              py: 0,
+              height: '32px',
               borderRadius: 'sm',
               border: '1px solid',
               borderColor: 'divider',
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
+              gap: 0.75,
               bgcolor: 'transparent',
               '&:hover': {
                 borderColor: 'primary.outlinedBorder',
                 bgcolor: 'background.level1',
                 '& .arrow-icon': {
-                  transform: 'translateX(4px)',
+                  transform: 'translateX(3px)',
                   opacity: 1
                 }
               },
@@ -107,7 +135,7 @@ function Home() {
           >
             <Box
               sx={{
-                fontSize: '1.5rem',
+                fontSize: '0.95rem',
                 lineHeight: 1,
                 opacity: 0.9
               }}
@@ -115,12 +143,11 @@ function Home() {
               📚
             </Box>
             <Typography
-              level='title-md'
+              level='body-sm'
               sx={{
                 fontWeight: 600,
-                fontSize: { xs: '1rem', md: '1.125rem' },
-                lineHeight: 1.3,
-                flex: 1
+                fontSize: '0.8rem',
+                lineHeight: 1
               }}
             >
               {t('dashboard.dailyFocus.reviewCount', { count: studyStats.dueCount })}
@@ -128,7 +155,7 @@ function Home() {
             <Box
               className='arrow-icon'
               sx={{
-                fontSize: '1.25rem',
+                fontSize: '0.875rem',
                 color: 'text.tertiary',
                 lineHeight: 1,
                 transition: 'all 0.2s ease',
@@ -191,6 +218,9 @@ function Home() {
           <StudyCalendar />
         </Grid>
       </Grid>
+
+      {/* Calendar Modal */}
+      <CalendarModal open={calendarOpen} onClose={() => setCalendarOpen(false)} />
     </Container>
   )
 }

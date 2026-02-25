@@ -232,7 +232,7 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
                       <Typography
                         level='body-xs'
                         fontWeight='bold'
-                        sx={{ mb: 0.5, color: 'neutral.500', display: 'flex', alignItems: 'center', gap: 1 }}
+                        sx={{ mb: 0.5, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 1 }}
                       >
                         <HelpCircle size={14} /> Explanation
                       </Typography>

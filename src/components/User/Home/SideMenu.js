@@ -8,32 +8,57 @@ import {
   Input,
   IconButton,
   Tooltip,
-  Select,
-  Option,
   CircularProgress,
-  Button,
+  Chip,
   Tabs,
   TabList,
   Tab,
   TabPanel,
-  List,
-  ListItem,
-  Checkbox,
   Link as JoyLink
 } from '@mui/joy'
 import { Link as RouterLink } from 'react-router-dom'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
-import FilterAltRoundedIcon from '@mui/icons-material/FilterAltRounded'
 import WbSunnyIcon from '@mui/icons-material/WbSunny'
 import WbTwilightIcon from '@mui/icons-material/WbTwilight'
 import NightsStayIcon from '@mui/icons-material/NightsStay'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import SortableTask from '../../Task/SortableTask'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { tasksService, annualPlanningService } from '../../../api/services'
+
+// ─── localStorage helpers ─────────────────────────────────────────────────────
+const LISTS_KEY = 'nowry_task_lists'
+const ACTIVE_LIST_KEY = 'nowry_active_task_list'
+
+const loadLists = () => {
+  try {
+    const raw = localStorage.getItem(LISTS_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+const saveLists = (lists) => {
+  try {
+    localStorage.setItem(LISTS_KEY, JSON.stringify(lists))
+  } catch {
+    /* ignore storage write errors */
+  }
+}
+
+const loadActiveList = () => {
+  return localStorage.getItem(ACTIVE_LIST_KEY) || 'all'
+}
+
+const saveActiveList = (id) => {
+  localStorage.setItem(ACTIVE_LIST_KEY, id)
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const SideMenu = () => {
   const { t } = useTranslation()
@@ -42,6 +67,14 @@ const SideMenu = () => {
   const [statusFilter, setStatusFilter] = React.useState('pending')
   const [loading, setLoading] = React.useState(true)
   const [routine, setRoutine] = React.useState(null)
+
+  // ── Task lists state ──────────────────────────────────────────────────────
+  const [lists, setLists] = React.useState(loadLists)
+  const [activeList, setActiveList] = React.useState(loadActiveList)
+  const [addingList, setAddingList] = React.useState(false)
+  const [newListName, setNewListName] = React.useState('')
+  const newListInputRef = React.useRef(null)
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Helper function to determine current time period
   const getCurrentPeriod = () => {
@@ -60,6 +93,13 @@ const SideMenu = () => {
     loadData()
   }, [])
 
+  // Focus new list input when shown
+  React.useEffect(() => {
+    if (addingList && newListInputRef.current) {
+      newListInputRef.current.focus()
+    }
+  }, [addingList])
+
   const loadData = async () => {
     try {
       setLoading(true)
@@ -74,6 +114,51 @@ const SideMenu = () => {
     }
   }
 
+  // ── List management ───────────────────────────────────────────────────────
+  const handleSelectList = (id) => {
+    setActiveList(id)
+    saveActiveList(id)
+    setSearch('')
+  }
+
+  const handleStartAddList = () => {
+    setAddingList(true)
+    setNewListName('')
+  }
+
+  const handleConfirmAddList = () => {
+    const trimmed = newListName.trim()
+    if (!trimmed) {
+      setAddingList(false)
+      return
+    }
+    const id = `list_${Date.now()}`
+    const updated = [...lists, { id, label: trimmed }]
+    setLists(updated)
+    saveLists(updated)
+    setActiveList(id)
+    saveActiveList(id)
+    setAddingList(false)
+    setNewListName('')
+  }
+
+  const handleCancelAddList = () => {
+    setAddingList(false)
+    setNewListName('')
+  }
+
+  const handleDeleteList = (e, id) => {
+    e.stopPropagation()
+    const updated = lists.filter((l) => l.id !== id)
+    setLists(updated)
+    saveLists(updated)
+    if (activeList === id) {
+      setActiveList('all')
+      saveActiveList('all')
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   // Task Management
   const addTask = async (title) => {
     try {
@@ -84,7 +169,7 @@ const SideMenu = () => {
         priority: 'medium',
         deadline: null,
         tags: [],
-        category: 'general'
+        category: activeList === 'all' ? 'general' : activeList
       }
 
       const created = await tasksService.create(newTask)
@@ -133,7 +218,8 @@ const SideMenu = () => {
   const filteredTasks = tasks.filter((t) => {
     const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase())
     const matchesStatus = statusFilter === 'all' ? true : statusFilter === 'completed' ? t.is_completed : !t.is_completed
-    return matchesSearch && matchesStatus
+    const matchesList = activeList === 'all' ? true : t.category === activeList
+    return matchesSearch && matchesStatus && matchesList
   })
 
   const handleKeyDown = (e) => {
@@ -174,46 +260,62 @@ const SideMenu = () => {
       return (
         <Box
           sx={{
-            py: 8,
-            px: 2,
+            py: 6,
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
-            bgcolor: 'background.level1',
-            borderRadius: 'sm'
+            alignItems: 'center'
           }}
         >
-          <Typography level='body-sm' sx={{ color: 'text.secondary', textAlign: 'center' }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
             {t(`annualPlanning.dailyRoutine.${period}Empty`, 'No routine items set')}
           </Typography>
         </Box>
       )
     }
     return (
-      <List sx={{ '--ListItem-paddingY': '0.5rem', flex: 1, overflowY: 'auto' }}>
+      <Stack
+        sx={{
+          maxHeight: 240,
+          overflowY: 'auto',
+          '&::-webkit-scrollbar': { width: 4 },
+          '&::-webkit-scrollbar-thumb': { bgcolor: 'neutral.outlinedBorder', borderRadius: 2 },
+          '&::-webkit-scrollbar-track': { bgcolor: 'transparent' }
+        }}
+      >
         {items.map((item, index) => (
-          <ListItem
+          <Box
             key={index}
             sx={{
-              bgcolor: 'background.surface',
-              border: '1px solid',
-              borderColor: 'neutral.outlinedBorder',
-              borderRadius: 'sm',
-              mb: 1,
-              boxShadow: 'sm',
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
-              p: 1.5
+              gap: 1.25,
+              py: 0.75,
+              px: 0.5,
+              borderBottom: index < items.length - 1 ? '1px solid' : 'none',
+              borderColor: 'divider',
+              transition: 'background 0.12s',
+              borderRadius: index === items.length - 1 ? '0 0 sm sm' : 0,
+              '&:hover': { bgcolor: 'background.level1' }
             }}
           >
-            <Checkbox variant='outlined' color='neutral' sx={{ bgcolor: 'transparent' }} />
-            <Typography level='body-sm' sx={{ color: 'text.primary', flex: 1 }}>
+            {/* Custom checkbox per DESIGN_GUIDELINES §5 */}
+            <Box
+              sx={{
+                width: 16,
+                height: 16,
+                border: '1.5px solid',
+                borderColor: 'neutral.outlinedBorder',
+                borderRadius: '4px',
+                flexShrink: 0,
+                cursor: 'default'
+              }}
+            />
+            <Typography level='body-sm' sx={{ color: 'text.primary', flex: 1, userSelect: 'none' }}>
               {item.title}
             </Typography>
-          </ListItem>
+          </Box>
         ))}
-      </List>
+      </Stack>
     )
   }
 
@@ -255,7 +357,7 @@ const SideMenu = () => {
             color={activeTab === 'morning' ? 'primary' : 'neutral'}
             sx={{ borderRadius: 'lg', flex: 1 }}
           >
-            <Tooltip title='Morning Routine' size='sm'>
+            <Tooltip title={t('annualPlanning.dailyRoutine.morning')} size='sm'>
               <WbSunnyIcon />
             </Tooltip>
           </Tab>
@@ -266,18 +368,18 @@ const SideMenu = () => {
             color={activeTab === 'afternoon' ? 'primary' : 'neutral'}
             sx={{ borderRadius: 'lg', flex: 1 }}
           >
-            <Tooltip title='Afternoon Routine' size='sm'>
+            <Tooltip title={t('annualPlanning.dailyRoutine.afternoon')} size='sm'>
               <WbTwilightIcon />
             </Tooltip>
           </Tab>
           <Tab
             disableIndicator
-            value='evening' // Mapping 'night' to 'evening' data key
+            value='evening'
             variant={activeTab === 'evening' ? 'solid' : 'plain'}
             color={activeTab === 'evening' ? 'primary' : 'neutral'}
             sx={{ borderRadius: 'lg', flex: 1 }}
           >
-            <Tooltip title='Night Routine' size='sm'>
+            <Tooltip title={t('annualPlanning.dailyRoutine.evening')} size='sm'>
               <NightsStayIcon />
             </Tooltip>
           </Tab>
@@ -288,14 +390,13 @@ const SideMenu = () => {
             color={activeTab === 'tasks' ? 'primary' : 'neutral'}
             sx={{ borderRadius: 'lg', flex: 1 }}
           >
-            <Tooltip title='Tasks' size='sm'>
+            <Tooltip title={t('tasks.title')} size='sm'>
               <FormatListBulletedIcon />
             </Tooltip>
           </Tab>
         </TabList>
 
         {/* Tab Panels */}
-        {/* Note: TabPanel by default in Joy might not fill height, we use Box to ensure correct scrolling if needed */}
 
         {/* Morning */}
         {activeTab === 'morning' && (
@@ -312,7 +413,7 @@ const SideMenu = () => {
           >
             <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
               <Typography level='title-md' startDecorator={<WbSunnyIcon color='primary' />}>
-                Morning Routine
+                {t('annualPlanning.dailyRoutine.morning')}
               </Typography>
               <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
                 <EditRoundedIcon />
@@ -337,7 +438,7 @@ const SideMenu = () => {
           >
             <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
               <Typography level='title-md' startDecorator={<WbTwilightIcon color='primary' />}>
-                Afternoon Routine
+                {t('annualPlanning.dailyRoutine.afternoon')}
               </Typography>
               <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
                 <EditRoundedIcon />
@@ -362,7 +463,7 @@ const SideMenu = () => {
           >
             <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
               <Typography level='title-md' startDecorator={<NightsStayIcon color='primary' />}>
-                Night Routine
+                {t('annualPlanning.dailyRoutine.evening')}
               </Typography>
               <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
                 <EditRoundedIcon />
@@ -377,26 +478,115 @@ const SideMenu = () => {
           <TabPanel value='tasks' sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
             {/* Header & Filter */}
             <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 1 }}>
-              <Typography level='title-md' color='primary'>
+              <Typography level='title-md' startDecorator={<FormatListBulletedIcon sx={{ fontSize: 18, color: 'primary.500' }} />}>
                 {t('tasks.title')}
               </Typography>
-
-              <Select
-                size='sm'
-                variant='soft'
-                value={statusFilter}
-                onChange={(_, val) => setStatusFilter(val)}
-                startDecorator={<FilterAltRoundedIcon fontSize='sm' />}
-                sx={{ width: 130 }}
-              >
-                <Option value='all'>{t('tasks.filter.all')}</Option>
-                <Option value='completed'>{t('tasks.filter.completed')}</Option>
-                <Option value='pending'>{t('tasks.filter.pending')}</Option>
-              </Select>
+              <Stack direction='row' spacing={0.5}>
+                {['all', 'pending', 'completed'].map((f) => (
+                  <Chip
+                    key={f}
+                    size='sm'
+                    variant={statusFilter === f ? 'solid' : 'plain'}
+                    color={statusFilter === f ? 'primary' : 'neutral'}
+                    onClick={() => setStatusFilter(f)}
+                    sx={{ cursor: 'pointer', fontSize: '0.7rem', px: 1 }}
+                  >
+                    {t(`tasks.filter.${f}`)}
+                  </Chip>
+                ))}
+              </Stack>
             </Stack>
 
+            {/* ── List chips row ──────────────────────────────────────────── */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                flexWrap: 'nowrap',
+                overflowX: 'auto',
+                mb: 1,
+                pb: 0.5,
+                flexShrink: 0,
+                // hide scrollbar but keep functionality
+                '&::-webkit-scrollbar': { display: 'none' },
+                scrollbarWidth: 'none'
+              }}
+            >
+              {/* "All" chip */}
+              <Chip
+                size='sm'
+                variant={activeList === 'all' ? 'solid' : 'outlined'}
+                color={activeList === 'all' ? 'primary' : 'neutral'}
+                onClick={() => handleSelectList('all')}
+                sx={{ cursor: 'pointer', flexShrink: 0, fontSize: '0.72rem' }}
+              >
+                {t('tasks.lists.all')}
+              </Chip>
+
+              {/* User-created list chips */}
+              {lists.map((list) => (
+                <Chip
+                  key={list.id}
+                  size='sm'
+                  variant={activeList === list.id ? 'solid' : 'outlined'}
+                  color={activeList === list.id ? 'primary' : 'neutral'}
+                  onClick={() => handleSelectList(list.id)}
+                  endDecorator={
+                    <Box
+                      component='span'
+                      onClick={(e) => handleDeleteList(e, list.id)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        opacity: 0.5,
+                        '&:hover': { opacity: 1 },
+                        ml: 0.25
+                      }}
+                    >
+                      <CloseRoundedIcon sx={{ fontSize: 12 }} />
+                    </Box>
+                  }
+                  sx={{ cursor: 'pointer', flexShrink: 0, fontSize: '0.72rem' }}
+                >
+                  {list.label}
+                </Chip>
+              ))}
+
+              {/* Inline new-list input or + button */}
+              {addingList ? (
+                <Input
+                  size='sm'
+                  placeholder={t('tasks.lists.listPlaceholder')}
+                  value={newListName}
+                  onChange={(e) => setNewListName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleConfirmAddList()
+                    if (e.key === 'Escape') handleCancelAddList()
+                  }}
+                  onBlur={handleConfirmAddList}
+                  slotProps={{ input: { ref: newListInputRef } }}
+                  sx={{ width: 110, flexShrink: 0, fontSize: '0.72rem', '--Input-minHeight': '24px', py: 0 }}
+                />
+              ) : (
+                <Tooltip title={t('tasks.lists.addList')} size='sm'>
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    onClick={handleStartAddList}
+                    sx={{ flexShrink: 0, '--IconButton-size': '24px', opacity: 0.6, '&:hover': { opacity: 1 } }}
+                  >
+                    <AddRoundedIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
+            {/* ────────────────────────────────────────────────────────────── */}
+
             {/* Search / Add Input */}
-            <Box sx={{ position: 'relative', mt: 1, mb: 1 }}>
+            <Box sx={{ position: 'relative', mb: 1 }}>
               <Input
                 size='sm'
                 placeholder={t('tasks.searchPlaceholder')}
@@ -422,7 +612,15 @@ const SideMenu = () => {
             </Box>
 
             {/* Task List */}
-            <Box sx={{ flex: 1, overflowY: 'auto' }}>
+            <Box
+              sx={{
+                maxHeight: 240,
+                overflowY: 'auto',
+                '&::-webkit-scrollbar': { width: 4 },
+                '&::-webkit-scrollbar-thumb': { bgcolor: 'neutral.outlinedBorder', borderRadius: 2 },
+                '&::-webkit-scrollbar-track': { bgcolor: 'transparent' }
+              }}
+            >
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={filteredTasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
                   <Stack spacing={1}>
@@ -438,7 +636,14 @@ const SideMenu = () => {
                       ))
                     ) : (
                       <Box sx={{ textAlign: 'center', color: 'text.tertiary', py: 3 }}>
-                        <Typography level='body-sm'>{tasks.length === 0 ? t('tasks.empty') : t('tasks.noMatch')}</Typography>
+                        <Typography level='body-sm'>
+                          {tasks.length === 0 ||
+                          (activeList !== 'all' &&
+                            filteredTasks.length === 0 &&
+                            tasks.filter((t) => t.category === activeList).length === 0)
+                            ? t('tasks.empty')
+                            : t('tasks.noMatch')}
+                        </Typography>
                       </Box>
                     )}
                   </Stack>

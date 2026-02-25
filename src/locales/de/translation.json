@@ -25,7 +25,12 @@
       "entertainment": "Unterhaltung",
       "politics": "Politik",
       "sports": "Sport"
-    }
+    },
+    "favorites": "Favoriten",
+    "noFavorites": "Noch keine Favoriten",
+    "noFavoritesHint": "Klicke auf das Stern-Symbol eines Artikels, um ihn zu deinen Favoriten hinzuzufügen.",
+    "adjustInterests": "Passe deine Interessen in den Einstellungen an, um personalisierte Nachrichten zu sehen.",
+    "setInterests": "Lege deine Interessen in den Einstellungen fest, um personalisierte Artikel zu sehen."
   },
   "header": {
     "study": "Lernen",
@@ -268,6 +273,11 @@
       "completed": "Erledigt",
       "pending": "Ausstehend"
     },
+    "lists": {
+      "all": "Alle",
+      "addList": "Neue Liste",
+      "listPlaceholder": "Listenname..."
+    },
     "empty": "Noch keine Aufgaben. Tippe, um eine hinzuzufügen!",
     "noMatch": "Keine Aufgaben entsprechen deinen Filtern",
     "addTooltip": "\"{{title}}\" hinzufügen"
@@ -404,6 +414,39 @@
       "visual": "Visuell",
       "book": "Buch",
       "flashcard": "Karteikarte"
+    }
+  },
+  "calendarModal": {
+    "title": "Kalender",
+    "tooltip": "Kalender öffnen",
+    "filters": {
+      "all": "Alle",
+      "tasks": "Aufgaben",
+      "goals": "Ziele",
+      "priorities": "Prioritäten",
+      "activities": "Aktivitäten"
+    },
+    "noEvents": "Keine Ereignisse für diesen Tag",
+    "today": "Heute",
+    "loading": "Laden...",
+    "addEvent": "Ereignis hinzufügen",
+    "editEvent": "Ereignis bearbeiten",
+    "form": {
+      "selectType": "Ereignistyp",
+      "title": "Titel",
+      "date": "Datum",
+      "description": "Beschreibung",
+      "focusArea": "Fokusbereich",
+      "goal": "Ziel",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "types": {
+        "task": "Aufgabe",
+        "priority": "Priorität",
+        "goal": "Ziel",
+        "activity": "Aktivität"
+      }
     }
   },
   "about": {

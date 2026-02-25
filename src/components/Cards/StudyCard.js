@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, Typography, Chip, Box, IconButton, Dropdown, Menu, MenuButton, MenuItem } from '@mui/joy'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import EditIcon from '@mui/icons-material/Edit'
@@ -9,6 +10,7 @@ import StyleIcon from '@mui/icons-material/Style'
 import ImageIcon from '@mui/icons-material/Image'
 
 export default function StudyCard({ card, onEdit, onDelete }) {
+  const { t } = useTranslation()
   const isQuiz = card.card_type === 'quiz' || (Array.isArray(card.tags) && card.tags.includes('quiz'))
   const isVisual = card.card_type === 'visual'
 
@@ -21,12 +23,12 @@ export default function StudyCard({ card, onEdit, onDelete }) {
     accentColor = 'warning.400'
     hoverColor = 'warning.softBg'
     Icon = QuizIcon
-    previewText = 'Multiple Choice Question'
+    previewText = t('cards.manage_content.filters.quizzes')
   } else if (isVisual) {
     accentColor = 'success.400'
     hoverColor = 'success.softBg'
     Icon = ImageIcon
-    previewText = `AI Diagram (${card.diagram_type || 'Mermaid'})`
+    previewText = `Diagram (${card.diagram_type || 'Mermaid'})`
   }
 
   return (
@@ -45,7 +47,7 @@ export default function StudyCard({ card, onEdit, onDelete }) {
         borderLeft: '4px solid',
         borderLeftColor: accentColor,
         boxShadow: 'sm',
-        backgroundColor: 'white',
+        bgcolor: 'background.surface',
         transition: '0.3s ease',
         '&:hover': {
           boxShadow: 'md',
@@ -62,10 +64,10 @@ export default function StudyCard({ card, onEdit, onDelete }) {
             </MenuButton>
             <Menu placement='bottom-end'>
               <MenuItem onClick={() => onEdit(card)}>
-                <EditIcon /> Editar
+                <EditIcon /> {t('cards.deck.edit')}
               </MenuItem>
               <MenuItem onClick={() => onDelete(card)} variant='soft' color='danger'>
-                <DeleteIcon /> Eliminar
+                <DeleteIcon /> {t('cards.deck.delete')}
               </MenuItem>
             </Menu>
           </Dropdown>
@@ -133,7 +135,7 @@ export default function StudyCard({ card, onEdit, onDelete }) {
             <Typography
               level='body-xs'
               sx={{
-                color: new Date(card.next_review) > new Date() ? 'success.600' : 'warning.600',
+                color: new Date(card.next_review) > new Date() ? 'success.plainColor' : 'warning.plainColor',
                 fontWeight: '600',
                 fontSize: '11px'
               }}
@@ -141,8 +143,8 @@ export default function StudyCard({ card, onEdit, onDelete }) {
               {formatNextReview(card.next_review)}
             </Typography>
           ) : (
-            <Typography level='body-xs' sx={{ color: 'neutral.400', fontWeight: '500', fontSize: '11px' }}>
-              New Card
+            <Typography level='body-xs' sx={{ color: 'text.tertiary', fontWeight: '500', fontSize: '11px' }}>
+              {t('cards.manage_content.reviewNew')}
             </Typography>
           )}
         </Box>
