@@ -131,7 +131,18 @@ const AppContent = () => {
               />
 
               {/* Home Route */}
-              {isAuthenticated ? <Route path='/' element={<Home />} /> : <Route path='/' element={<Landing />} />}
+              <Route
+                path='/'
+                element={
+                  isAuthenticated ? (
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  ) : (
+                    <Landing />
+                  )
+                }
+              />
 
               {/* Protected Routes */}
               <Route

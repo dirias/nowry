@@ -60,6 +60,7 @@ export const ENDPOINTS = {
   dailyRoutine: {
     base: '/annual-plan/daily-routine',
     get: '/annual-plan/daily-routine',
-    update: '/annual-plan/daily-routine'
+    update: '/annual-plan/daily-routine',
+    completions: '/annual-plan/daily-routine/completions'
   }
 }

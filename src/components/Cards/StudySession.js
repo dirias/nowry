@@ -1,8 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Container, Card, CardContent, Typography, Button, Stack, Box, LinearProgress, IconButton, Radio, RadioGroup } from '@mui/joy'
-import { ArrowBack, ArrowForward, CheckCircle, Lightbulb, Fullscreen, FullscreenExit } from '@mui/icons-material'
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Stack,
+  Box,
+  LinearProgress,
+  IconButton,
+  Radio,
+  RadioGroup,
+  Skeleton
+} from '@mui/joy'
+import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit } from '@mui/icons-material'
 import { cardsService, decksService } from '../../api/services'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
@@ -435,13 +448,18 @@ export default function StudySession() {
     }
   }
 
+  // §7: Use Skeleton placeholders, not a full-page loading gate
   if (loading) {
     return (
-      <Container maxWidth='lg' sx={{ py: 4 }}>
-        <LinearProgress />
-        <Typography level='body-lg' sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
-          {t('cards.session.loading')}
-        </Typography>
+      <Container maxWidth='xl' sx={{ py: 4, height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Stack direction='row' alignItems='center' spacing={2} sx={{ mb: 2 }}>
+          <Skeleton variant='circular' width={36} height={36} />
+          <Box sx={{ flex: 1 }}>
+            <Skeleton variant='text' width='8ch' sx={{ mb: 0.5 }} />
+            <Skeleton variant='rectangular' height={4} sx={{ borderRadius: 'sm' }} />
+          </Box>
+        </Stack>
+        <Skeleton variant='rectangular' sx={{ flex: 1, borderRadius: 'xl', minHeight: 500 }} />
       </Container>
     )
   }
@@ -611,7 +629,7 @@ export default function StudySession() {
               sx={{
                 borderRadius: 'sm',
                 bgcolor: 'background.level2',
-                color: 'primary.500',
+                color: 'primary.outlinedBorder',
                 height: 4
               }}
             />
@@ -701,10 +719,7 @@ export default function StudySession() {
               }}
             >
               <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8 }}>
-                <Typography
-                  level='body-xs'
-                  sx={{ mb: 2, color: 'warning.plainColor', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px' }}
-                >
+                <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                   {t('cards.session.labels.quiz')}
                 </Typography>
                 <Typography level='h3' sx={{ mb: 4, fontWeight: 600 }}>
@@ -731,7 +746,9 @@ export default function StudySession() {
                         sx={{
                           cursor: showExplanation ? 'default' : 'pointer',
                           transition: 'all 0.2s',
-                          '&:hover': !showExplanation ? { transform: 'translateY(-2px)', boxShadow: 'md', borderColor: 'primary.300' } : {}
+                          '&:hover': !showExplanation
+                            ? { transform: 'translateY(-2px)', boxShadow: 'md', borderColor: 'primary.outlinedBorder' }
+                            : {}
                         }}
                         onClick={() => !showExplanation && handleQuizAnswer(option)}
                       >
@@ -781,10 +798,7 @@ export default function StudySession() {
               }}
             >
               <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8 }}>
-                <Typography
-                  level='body-xs'
-                  sx={{ mb: 2, color: 'success.plainColor', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px' }}
-                >
+                <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                   {t('cards.session.labels.visual')}
                 </Typography>
                 <Typography level='h3' sx={{ mb: 3, fontWeight: 600 }}>
@@ -853,10 +867,7 @@ export default function StudySession() {
               >
                 {!isFlipped ? (
                   <>
-                    <Typography
-                      level='body-xs'
-                      sx={{ mb: 3, color: 'primary.500', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}
-                    >
+                    <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                       {t('cards.session.labels.question')}
                     </Typography>
                     <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600 }}>
@@ -879,10 +890,8 @@ export default function StudySession() {
                         mb: { xs: 1.5, md: 2 },
                         color: 'success.plainColor',
                         fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '1px',
-                        fontSize: { xs: '0.65rem', md: '0.7rem' },
-                        opacity: 0.6
+                        letterSpacing: '0.5px',
+                        fontSize: { xs: '0.65rem', md: '0.7rem' }
                       }}
                     >
                       {t('cards.session.labels.answer')}

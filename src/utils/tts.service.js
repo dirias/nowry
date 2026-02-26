@@ -11,12 +11,46 @@ class TTSService {
     this.selectedVoice = null
     this.selectedLanguage = 'en-US'
     this.isPlaying = false
+    this._voiceListeners = []
 
     // Load voices when they become available
     if (this.synth) {
       this.loadVoices()
-      // Chrome loads voices asynchronously
-      this.synth.onvoiceschanged = () => this.loadVoices()
+      // Chrome/Android loads voices asynchronously via this event
+      this.synth.onvoiceschanged = () => {
+        this.loadVoices()
+        // Notify all registered components that voices are now available
+        this._voiceListeners.forEach((cb) => cb(this.voices))
+      }
+
+      // iOS Safari & some mobile browsers never fire onvoiceschanged.
+      // Poll until voices are available (max ~3 seconds).
+      if (this.voices.length === 0) {
+        let attempts = 0
+        const poll = setInterval(() => {
+          this.loadVoices()
+          attempts++
+          if (this.voices.length > 0 || attempts >= 30) {
+            clearInterval(poll)
+            if (this.voices.length > 0) {
+              this._voiceListeners.forEach((cb) => cb(this.voices))
+            }
+          }
+        }, 100)
+      }
+    }
+  }
+
+  onVoicesReady(callback) {
+    if (this.voices.length > 0) {
+      // Voices already loaded — call immediately
+      callback(this.voices)
+    } else {
+      this._voiceListeners.push(callback)
+    }
+    // Return cleanup function
+    return () => {
+      this._voiceListeners = this._voiceListeners.filter((cb) => cb !== callback)
     }
   }
 

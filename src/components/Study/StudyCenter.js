@@ -134,7 +134,7 @@ export default function StudyCenter() {
         </Stack>
 
         {/* Stats Dashboard - Compact Minimalistic Design */}
-        <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 2 }}>
+        <Grid container spacing={{ xs: 1, md: 1 }} sx={{ mb: 2 }}>
           <Grid xs={3} sm={3} md={3}>
             <Box
               sx={{
@@ -147,7 +147,7 @@ export default function StudyCenter() {
                 justifyContent: 'center',
                 gap: 0.5,
                 minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.15s',
+                transition: 'all 0.2s',
                 bgcolor: 'transparent',
                 '&:hover': {
                   bgcolor: 'primary.softBg'
@@ -155,7 +155,7 @@ export default function StudyCenter() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <TrendingUp sx={{ fontSize: 20, color: 'primary.solidBg', opacity: 0.7 }} />
+                <TrendingUp sx={{ fontSize: 20, color: 'primary.solidBg' }} />
                 <Typography
                   level='h2'
                   sx={{
@@ -188,7 +188,7 @@ export default function StudyCenter() {
                 justifyContent: 'center',
                 gap: 0.5,
                 minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.15s',
+                transition: 'all 0.2s',
                 bgcolor: 'transparent',
                 '&:hover': {
                   bgcolor: 'success.softBg'
@@ -196,7 +196,7 @@ export default function StudyCenter() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <School sx={{ fontSize: 20, color: 'success.solidBg', opacity: 0.7 }} />
+                <School sx={{ fontSize: 20, color: 'success.solidBg' }} />
                 <Typography
                   level='h2'
                   sx={{
@@ -229,7 +229,7 @@ export default function StudyCenter() {
                 justifyContent: 'center',
                 gap: 0.5,
                 minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.15s',
+                transition: 'all 0.2s',
                 bgcolor: 'transparent',
                 '&:hover': {
                   bgcolor: 'neutral.softBg'
@@ -237,7 +237,7 @@ export default function StudyCenter() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <Style sx={{ fontSize: 20, color: 'neutral.solidBg', opacity: 0.7 }} />
+                <Style sx={{ fontSize: 20, color: 'neutral.solidBg' }} />
                 <Typography
                   level='h2'
                   sx={{
@@ -270,7 +270,7 @@ export default function StudyCenter() {
                 justifyContent: 'center',
                 gap: 0.5,
                 minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.15s',
+                transition: 'all 0.2s',
                 bgcolor: 'transparent',
                 '&:hover': {
                   bgcolor: 'warning.softBg'
@@ -278,7 +278,7 @@ export default function StudyCenter() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <CalendarToday sx={{ fontSize: 20, color: 'warning.solidBg', opacity: 0.7 }} />
+                <CalendarToday sx={{ fontSize: 20, color: 'warning.solidBg' }} />
                 <Typography
                   level='h2'
                   sx={{
@@ -364,6 +364,8 @@ export default function StudyCenter() {
         }}
       >
         {['Flashcards', 'Quizzes', 'Visual'].map((tabLabel, index) => {
+          const tabKey = ['flashcards', 'quizzes', 'visual'][index]
+          const label = t(`study.types.${tabKey}`)
           const isActive = activeSectionIndex === index
           let activeColor = 'primary.main'
           if (index === 1) activeColor = 'warning.main'
@@ -389,7 +391,7 @@ export default function StudyCenter() {
               }}
             >
               <Typography level='body-sm' textColor='inherit' fontWeight='inherit'>
-                {tabLabel}
+                {label}
               </Typography>
             </Box>
           )
@@ -420,11 +422,11 @@ export default function StudyCenter() {
               variant='outlined'
               sx={{
                 height: '100%',
-                transition: 'all 0.25s ease',
+                transition: 'all 0.2s ease',
                 '&:hover': {
                   boxShadow: 'lg',
                   transform: 'translateY(-4px)',
-                  borderColor: 'primary.500'
+                  borderColor: 'primary.outlinedBorder'
                 }
               }}
             >
@@ -514,11 +516,11 @@ export default function StudyCenter() {
               variant='outlined'
               sx={{
                 height: '100%',
-                transition: 'all 0.25s ease',
+                transition: 'all 0.2s ease',
                 '&:hover': {
                   boxShadow: 'lg',
                   transform: 'translateY(-4px)',
-                  borderColor: 'warning.500'
+                  borderColor: 'warning.outlinedBorder'
                 }
               }}
             >
@@ -608,11 +610,11 @@ export default function StudyCenter() {
               variant='outlined'
               sx={{
                 height: '100%',
-                transition: 'all 0.25s ease',
+                transition: 'all 0.2s ease',
                 '&:hover': {
                   boxShadow: 'lg',
                   transform: 'translateY(-4px)',
-                  borderColor: 'info.500'
+                  borderColor: 'neutral.outlinedBorder'
                 }
               }}
             >

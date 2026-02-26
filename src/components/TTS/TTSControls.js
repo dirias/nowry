@@ -24,36 +24,34 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
   const setSettingsOpen = onSettingsChange || setInternalShowSettings
 
   useEffect(() => {
-    // Load voices
-    const loadVoices = () => {
-      const allVoices = ttsService.getVoices()
-
-      // Filter for natural voices only as requested
+    const handleVoices = (allVoices) => {
+      // On desktop, "Google"/"Enhanced"/"Premium" voices exist and are higher quality.
+      // On mobile (iOS/Android) these names don't appear — fall back to all voices.
       const naturalVoices = allVoices.filter(
         (v) => v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Natural')
       )
-
-      // Fallback if no natural voices found (rare but possible) or use found list
       const finalVoices = naturalVoices.length > 0 ? naturalVoices : allVoices
 
       setVoices(finalVoices)
 
-      // Initial selection logic (only if no voiceSettings provided)
-      if (finalVoices.length > 0 && !selectedVoice && !voiceSettings) {
+      // Initial selection (only if no saved voiceSettings provided)
+      if (finalVoices.length > 0 && !voiceSettings) {
         const defaultVoice = finalVoices.find((v) => v.lang.startsWith('en')) || finalVoices[0]
-        setSelectedVoice(defaultVoice)
-        ttsService.setVoice(defaultVoice)
+        setSelectedVoice((prev) => {
+          if (prev) return prev // don't override if already selected
+          ttsService.setVoice(defaultVoice)
+          return defaultVoice
+        })
         setRate(1.0)
         setVolume(1.0)
       }
     }
 
-    loadVoices()
-
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = loadVoices
-    }
-  }, []) // Keep empty dep array for initial load only
+    // onVoicesReady calls immediately if voices are already loaded,
+    // or waits for the polling/event to fire (critical for mobile).
+    const cleanup = ttsService.onVoicesReady(handleVoices)
+    return cleanup
+  }, []) // onVoicesReady is stable (singleton), safe to omit from deps
 
   // Sync with prop changes (Controlled Mode)
   useEffect(() => {

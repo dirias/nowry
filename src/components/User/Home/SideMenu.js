@@ -34,6 +34,9 @@ import { tasksService, annualPlanningService } from '../../../api/services'
 const LISTS_KEY = 'nowry_task_lists'
 const ACTIVE_LIST_KEY = 'nowry_active_task_list'
 
+// Today's date as 'YYYY-MM-DD' — used as the key in daily_completions
+const todayKey = () => new Date().toISOString().slice(0, 10)
+
 const loadLists = () => {
   try {
     const raw = localStorage.getItem(LISTS_KEY)
@@ -67,6 +70,8 @@ const SideMenu = () => {
   const [statusFilter, setStatusFilter] = React.useState('pending')
   const [loading, setLoading] = React.useState(true)
   const [routine, setRoutine] = React.useState(null)
+  // Keys: `${period}_${index}` → true when checked. Sourced from backend (cross-device sync).
+  const [routineCompletions, setRoutineCompletions] = React.useState({})
 
   // ── Task lists state ──────────────────────────────────────────────────────
   const [lists, setLists] = React.useState(loadLists)
@@ -106,9 +111,14 @@ const SideMenu = () => {
       const [tasksData, routineData] = await Promise.all([tasksService.getAll(), annualPlanningService.getDailyRoutine()])
       setTasks(tasksData)
       setRoutine(routineData)
+      // Seed completion state from backend (cross-device sync + midnight reset via date key)
+      const today = todayKey()
+      const backendCompletions = routineData?.daily_completions?.[today] || []
+      // Convert array of keys to object map { "morning_0": true, ... }
+      const completionMap = Object.fromEntries(backendCompletions.map((k) => [k, true]))
+      setRoutineCompletions(completionMap)
     } catch (error) {
       console.error('Error loading data:', error)
-      setLoading(false)
     } finally {
       setLoading(false)
     }
@@ -238,6 +248,20 @@ const SideMenu = () => {
     }
   }
 
+  // Toggle a routine item's completion — optimistic UI, persisted to backend for cross-device sync
+  const toggleRoutineItem = (period, index) => {
+    const key = `${period}_${index}`
+    const updated = { ...routineCompletions, [key]: !routineCompletions[key] }
+    setRoutineCompletions(updated)
+    // Persist to backend: convert map back to array of active keys
+    const activeKeys = Object.entries(updated)
+      .filter(([, v]) => v)
+      .map(([k]) => k)
+    annualPlanningService
+      .updateRoutineCompletions(todayKey(), activeKeys)
+      .catch((err) => console.error('Failed to save routine completion:', err))
+  }
+
   if (loading) {
     return (
       <Sheet
@@ -282,39 +306,75 @@ const SideMenu = () => {
           '&::-webkit-scrollbar-track': { bgcolor: 'transparent' }
         }}
       >
-        {items.map((item, index) => (
-          <Box
-            key={index}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.25,
-              py: 0.75,
-              px: 0.5,
-              borderBottom: index < items.length - 1 ? '1px solid' : 'none',
-              borderColor: 'divider',
-              transition: 'background 0.12s',
-              borderRadius: index === items.length - 1 ? '0 0 sm sm' : 0,
-              '&:hover': { bgcolor: 'background.level1' }
-            }}
-          >
-            {/* Custom checkbox per DESIGN_GUIDELINES §5 */}
+        {items.map((item, index) => {
+          const isChecked = !!routineCompletions[`${period}_${index}`]
+          return (
             <Box
+              key={index}
+              onClick={() => toggleRoutineItem(period, index)}
               sx={{
-                width: 16,
-                height: 16,
-                border: '1.5px solid',
-                borderColor: 'neutral.outlinedBorder',
-                borderRadius: '4px',
-                flexShrink: 0,
-                cursor: 'default'
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.25,
+                py: 0.75,
+                px: 0.5,
+                borderBottom: index < items.length - 1 ? '1px solid' : 'none',
+                borderColor: 'divider',
+                transition: 'background 0.12s',
+                borderRadius: index === items.length - 1 ? '0 0 sm sm' : 0,
+                cursor: 'pointer',
+                '&:hover': { bgcolor: 'background.level1' }
               }}
-            />
-            <Typography level='body-sm' sx={{ color: 'text.primary', flex: 1, userSelect: 'none' }}>
-              {item.title}
-            </Typography>
-          </Box>
-        ))}
+            >
+              {/* Checkbox — §5 custom checkbox pattern */}
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  border: '1.5px solid',
+                  borderColor: isChecked ? 'primary.outlinedBorder' : 'neutral.outlinedBorder',
+                  borderRadius: '4px',
+                  flexShrink: 0,
+                  bgcolor: isChecked ? 'primary.solidBg' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {isChecked && (
+                  <Box
+                    component='svg'
+                    viewBox='0 0 24 24'
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      fill: 'none',
+                      stroke: 'white',
+                      strokeWidth: 3,
+                      strokeLinecap: 'round',
+                      strokeLinejoin: 'round'
+                    }}
+                  >
+                    <polyline points='20 6 9 17 4 12' />
+                  </Box>
+                )}
+              </Box>
+              <Typography
+                level='body-sm'
+                sx={{
+                  color: isChecked ? 'text.tertiary' : 'text.primary',
+                  flex: 1,
+                  userSelect: 'none',
+                  textDecoration: isChecked ? 'line-through' : 'none',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {item.title}
+              </Typography>
+            </Box>
+          )
+        })}
       </Stack>
     )
   }

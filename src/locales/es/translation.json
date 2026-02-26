@@ -532,6 +532,15 @@
       "noContent": "Sin contenido",
       "untitled": "Tarjeta sin título",
       "reviewNew": "Nueva",
+      "diagramPreview": "Diagrama ({{type}})",
+      "nextReview": {
+        "dueNow": "¡Pendiente ahora!",
+        "lessThanHour": "En menos de 1 hora",
+        "inHours": "En {{count}} hora",
+        "inHours_plural": "En {{count}} horas",
+        "tomorrow": "Mañana",
+        "inDays": "En {{count}} días"
+      },
       "empty": {
         "decks": {
           "title": "No se encontraron mazos",

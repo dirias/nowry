@@ -96,5 +96,9 @@ export const annualPlanningService = {
   async updateDailyRoutine(routine) {
     const { data } = await apiClient.put(ENDPOINTS.dailyRoutine.update, routine)
     return data
+  },
+  async updateRoutineCompletions(date, items) {
+    const { data } = await apiClient.patch(ENDPOINTS.dailyRoutine.completions, { date, items })
+    return data
   }
 }

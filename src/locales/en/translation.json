@@ -673,6 +673,15 @@
       "noContent": "No content",
       "untitled": "Untitled card",
       "reviewNew": "New",
+      "diagramPreview": "Diagram ({{type}})",
+      "nextReview": {
+        "dueNow": "Due now!",
+        "lessThanHour": "In less than 1 hour",
+        "inHours": "In {{count}} hour",
+        "inHours_plural": "In {{count}} hours",
+        "tomorrow": "Tomorrow",
+        "inDays": "In {{count}} days"
+      },
       "empty": {
         "decks": {
           "title": "No decks found",

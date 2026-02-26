@@ -14,21 +14,22 @@ export default function StudyCard({ card, onEdit, onDelete }) {
   const isQuiz = card.card_type === 'quiz' || (Array.isArray(card.tags) && card.tags.includes('quiz'))
   const isVisual = card.card_type === 'visual'
 
-  let accentColor = 'primary.500'
+  // §2.1 — semantic tokens only; no shade tokens like primary.500 / warning.400
+  let accentColor = 'primary.plainColor'
   let hoverColor = 'primary.softBg'
   let Icon = StyleIcon
   let previewText = card.content
 
   if (isQuiz) {
-    accentColor = 'warning.400'
+    accentColor = 'warning.plainColor'
     hoverColor = 'warning.softBg'
     Icon = QuizIcon
     previewText = t('cards.manage_content.filters.quizzes')
   } else if (isVisual) {
-    accentColor = 'success.400'
+    accentColor = 'success.plainColor'
     hoverColor = 'success.softBg'
     Icon = ImageIcon
-    previewText = `Diagram (${card.diagram_type || 'Mermaid'})`
+    previewText = t('cards.manage_content.diagramPreview', { type: card.diagram_type || 'Mermaid' })
   }
 
   return (
@@ -86,8 +87,7 @@ export default function StudyCard({ card, onEdit, onDelete }) {
               display: '-webkit-box',
               WebkitLineClamp: 3,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              fontSize: '0.95rem'
+              overflow: 'hidden'
             }}
           >
             {card.title}
@@ -136,14 +136,13 @@ export default function StudyCard({ card, onEdit, onDelete }) {
               level='body-xs'
               sx={{
                 color: new Date(card.next_review) > new Date() ? 'success.plainColor' : 'warning.plainColor',
-                fontWeight: '600',
-                fontSize: '11px'
+                fontWeight: '600'
               }}
             >
-              {formatNextReview(card.next_review)}
+              {formatNextReview(card.next_review, t)}
             </Typography>
           ) : (
-            <Typography level='body-xs' sx={{ color: 'text.tertiary', fontWeight: '500', fontSize: '11px' }}>
+            <Typography level='body-xs' sx={{ color: 'text.tertiary', fontWeight: '500' }}>
               {t('cards.manage_content.reviewNew')}
             </Typography>
           )}
@@ -153,8 +152,8 @@ export default function StudyCard({ card, onEdit, onDelete }) {
   )
 }
 
-// Helper function to format relative time
-function formatNextReview(nextReviewDate) {
+// Helper function to format relative time — all strings via i18n (§4.3)
+function formatNextReview(nextReviewDate, t) {
   const now = new Date()
   const next = new Date(nextReviewDate)
   const diffMs = next - now
@@ -162,14 +161,14 @@ function formatNextReview(nextReviewDate) {
   const diffDays = Math.floor(diffHours / 24)
 
   if (diffMs < 0) {
-    return 'Due now!'
+    return t('cards.manage_content.nextReview.dueNow')
   } else if (diffHours < 1) {
-    return 'in less than 1 hour'
+    return t('cards.manage_content.nextReview.lessThanHour')
   } else if (diffHours < 24) {
-    return `in ${diffHours} ${diffHours === 1 ? 'hour' : 'hours'}`
+    return t('cards.manage_content.nextReview.inHours', { count: diffHours })
   } else if (diffDays === 1) {
-    return 'tomorrow'
+    return t('cards.manage_content.nextReview.tomorrow')
   } else {
-    return `in ${diffDays} days`
+    return t('cards.manage_content.nextReview.inDays', { count: diffDays })
   }
 }
