@@ -233,17 +233,25 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
                   Voice
                 </Typography>
                 <Select size='sm' value={selectedVoice?.name ?? null} onChange={handleVoiceChange} placeholder='Select Voice'>
-                  {voices.map((voice) => (
-                    <Option key={voice.name} value={voice.name}>
-                      {voice.name
-                        .replace('Google', '')
-                        .replace('English', '')
-                        .replace('United States', '')
-                        .replace(/\(.*\)/, '')
-                        .trim()}{' '}
-                      ({voice.lang.split('-')[1] || 'EN'})
-                    </Option>
-                  ))}
+                  {voices.map((voice) => {
+                    // Mobile Chrome uses '_' or no separator (e.g. "en_US", "asm", "bg")
+                    // Desktop Chrome uses '-' (e.g. "en-US"). Handle both.
+                    const langParts = voice.lang.replace(/_/g, '-').split('-')
+                    const regionOrLang = langParts.length > 1 ? langParts[1].toUpperCase() : langParts[0].toUpperCase()
+
+                    const label = voice.name
+                      .replace('Google', '')
+                      .replace('English', '')
+                      .replace('United States', '')
+                      .replace(/\(.*\)/, '')
+                      .trim()
+
+                    return (
+                      <Option key={voice.name} value={voice.name}>
+                        {label} ({regionOrLang})
+                      </Option>
+                    )
+                  })}
                 </Select>
               </Box>
 

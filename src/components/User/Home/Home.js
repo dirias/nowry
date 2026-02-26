@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Grid, Typography, Container, Button, IconButton, Tooltip } from '@mui/joy'
+import { Box, Grid, Typography, Container, Button, IconButton, Tooltip, Skeleton } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import FocusBar from './FocusBar'
@@ -103,13 +103,15 @@ function Home() {
           </Tooltip>
         </Box>
 
-        {/* Right: Study Status - Minimalist Clickable */}
-        {!studyStats.loading && studyStats.dueCount > 0 && (
+        {/* Right: Study Stats - Single ternary keeps header stable at all states */}
+        {studyStats.loading ? (
+          <Skeleton variant='rectangular' width={120} height={32} sx={{ borderRadius: 'sm', flexShrink: 0 }} />
+        ) : studyStats.dueCount > 0 ? (
           <Box
             onClick={() => navigate('/study')}
             sx={{
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
+              transition: 'all 0.2s ease',
               px: 1.25,
               py: 0,
               height: '32px',
@@ -133,47 +135,19 @@ function Home() {
               }
             }}
           >
-            <Box
-              sx={{
-                fontSize: '0.95rem',
-                lineHeight: 1,
-                opacity: 0.9
-              }}
-            >
-              📚
-            </Box>
-            <Typography
-              level='body-sm'
-              sx={{
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                lineHeight: 1
-              }}
-            >
+            <Box sx={{ fontSize: '0.95rem', lineHeight: 1, opacity: 0.9 }}>📚</Box>
+            <Typography level='body-sm' sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1 }}>
               {t('dashboard.dailyFocus.reviewCount', { count: studyStats.dueCount })}
             </Typography>
             <Box
               className='arrow-icon'
-              sx={{
-                fontSize: '0.875rem',
-                color: 'text.tertiary',
-                lineHeight: 1,
-                transition: 'all 0.2s ease',
-                opacity: 0.5
-              }}
+              sx={{ fontSize: '0.875rem', color: 'text.tertiary', lineHeight: 1, transition: 'all 0.2s ease', opacity: 0.5 }}
             >
               →
             </Box>
           </Box>
-        )}
-
-        {/* All Caught Up State */}
-        {!studyStats.loading && studyStats.dueCount === 0 && (
-          <Box
-            sx={{
-              textAlign: 'right'
-            }}
-          >
+        ) : (
+          <Box sx={{ textAlign: 'right' }}>
             <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2, fontSize: { xs: '1rem', md: '1.5rem' } }}>
               {t('dashboard.dailyFocus.allCaughtUp')}
             </Typography>

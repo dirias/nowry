@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Box, Typography, Tooltip, IconButton, Modal, ModalDialog, ModalClose, Stack, Checkbox, Button, Divider } from '@mui/joy'
+import { Box, Typography, Tooltip, IconButton, Modal, ModalDialog, ModalClose, Stack, Checkbox, Button, Divider, Skeleton } from '@mui/joy'
 import { Link as RouterLink } from 'react-router-dom'
 import { annualPlanningService, userService } from '../../../api/services'
 import TuneIcon from '@mui/icons-material/Tune'
@@ -283,8 +283,37 @@ const FocusBar = () => {
     )
   }
 
-  // Don't show if no data
-  if (loading || (focusAreas.length === 0 && displayedPriorities.length === 0 && allPriorities.length === 0)) {
+  // §7: Show Skeleton placeholder during load so layout stays stable (no pop-in shift)
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          mb: 2,
+          px: 1.5,
+          py: 0.75,
+          borderRadius: 'sm',
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.surface',
+          height: 38 // Matches the real bar's height exactly
+        }}
+      >
+        <Skeleton variant='rectangular' width={64} height={26} sx={{ borderRadius: 'sm' }} />
+        <Skeleton variant='rectangular' width={64} height={26} sx={{ borderRadius: 'sm' }} />
+        <Skeleton variant='rectangular' width={64} height={26} sx={{ borderRadius: 'sm' }} />
+        <Box sx={{ width: '1px', height: 20, bgcolor: 'divider', mx: 0.5, display: { xs: 'none', md: 'block' } }} />
+        <Skeleton variant='rectangular' width={120} height={26} sx={{ borderRadius: 'sm' }} />
+        <Skeleton variant='rectangular' width={120} height={26} sx={{ borderRadius: 'sm' }} />
+        <Skeleton variant='circular' width={28} height={28} sx={{ ml: 'auto', flexShrink: 0 }} />
+      </Box>
+    )
+  }
+
+  // Don't render the bar if there's genuinely no data to show
+  if (focusAreas.length === 0 && displayedPriorities.length === 0 && allPriorities.length === 0) {
     return null
   }
 
