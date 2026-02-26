@@ -1,5 +1,8 @@
 import { tasksService } from './tasks.service'
 import { annualPlanningService } from './annualPlanning.service'
+import { apiCache } from '../utils/cache'
+
+const PLAN_TTL = 5 * 60000 // 5 minutes
 
 /**
  * Parse a date value as LOCAL time.
@@ -34,9 +37,10 @@ export const calendarService = {
     const events = []
 
     // ── Run tasks + annual-plan fetch in PARALLEL ────────────────
+    const year = new Date().getFullYear()
     const [tasksResult, planResult] = await Promise.allSettled([
       tasksService.getAll(),
-      annualPlanningService.getAnnualPlan(new Date().getFullYear())
+      apiCache.get(`annualPlan:${year}`, PLAN_TTL, () => annualPlanningService.getAnnualPlan(year))
     ])
 
     // ── 1. Tasks ─────────────────────────────────────────────────
@@ -64,8 +68,8 @@ export const calendarService = {
     if (plan?._id) {
       // Fetch priorities + focus areas IN PARALLEL
       const [prioritiesResult, focusAreasResult] = await Promise.allSettled([
-        annualPlanningService.getPriorities(plan._id),
-        annualPlanningService.getFocusAreas(plan._id)
+        apiCache.get(`priorities:${plan._id}`, PLAN_TTL, () => annualPlanningService.getPriorities(plan._id)),
+        apiCache.get(`focusAreas:${plan._id}`, PLAN_TTL, () => annualPlanningService.getFocusAreas(plan._id))
       ])
 
       // Priorities
@@ -92,7 +96,9 @@ export const calendarService = {
 
         // Fetch all goals for all focus areas IN PARALLEL
         const goalResults = await Promise.allSettled(
-          focusAreas.map((area) => annualPlanningService.getGoals(area._id).then((goals) => ({ area, goals })))
+          focusAreas.map((area) =>
+            apiCache.get(`goals:${area._id}`, PLAN_TTL, () => annualPlanningService.getGoals(area._id)).then((goals) => ({ area, goals }))
+          )
         )
 
         // Collect all (area, goal) pairs and fetch activities IN PARALLEL
@@ -116,8 +122,8 @@ export const calendarService = {
             }
             // Queue activity fetch
             activityFetches.push(
-              annualPlanningService
-                .getActivities(goal._id)
+              apiCache
+                .get(`activities:${goal._id}`, PLAN_TTL, () => annualPlanningService.getActivities(goal._id))
                 .then((activities) => ({ activities, areaColor, areaName: area.name }))
                 .catch(() => null)
             )

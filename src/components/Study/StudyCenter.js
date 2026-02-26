@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Typography, Box, Card, CardContent, Stack, Button, Chip, Grid, Divider, Skeleton } from '@mui/joy'
 import { School, Quiz as QuizIcon, Style, AccountTree, TrendingUp, CalendarToday } from '@mui/icons-material'
-import { decksService, cardsService } from '../../api/services'
 import { useTranslation } from 'react-i18next'
+import { useCardData } from '../../hooks/useCardData'
+import { useStatistics } from '../../hooks/useStatistics'
+import { useDeckData } from '../../hooks/useDeckData'
+import { cardsService, activityService } from '../../api/services'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
@@ -50,20 +53,20 @@ export default function StudyCenter() {
     }
   }
 
+  const { cards: cardsData, loading: cardsLoading } = useCardData()
+  const { statistics: statisticsData, loading: statsLoading } = useStatistics()
+  const { decks: hookDecks, loading: decksLoading } = useDeckData()
+
   useEffect(() => {
+    if (cardsLoading || statsLoading || decksLoading) return
     fetchData()
-  }, [])
+  }, [cardsLoading, statsLoading, decksLoading, cardsData, statisticsData, hookDecks])
 
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [decksData, cardsData, statisticsData] = await Promise.all([
-        decksService.getAll(),
-        cardsService.getAll(),
-        cardsService.getStatistics()
-      ])
 
-      setDecks(decksData)
+      setDecks(hookDecks || [])
       setCards(cardsData)
 
       // Use real stats from API - API returns data in summary object

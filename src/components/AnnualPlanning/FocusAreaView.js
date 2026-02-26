@@ -43,6 +43,7 @@ import {
 } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
+import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import GoalDialog from './GoalDialog'
 import PriorityList from './PriorityList'
 
@@ -50,6 +51,8 @@ const FocusAreaView = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { plan, goals: allGoals, priorities: allPriorities, areas: allAreas, loading: hookLoading, reload } = useAnnualPlan()
+
   const [area, setArea] = useState(null)
   const [priorities, setPriorities] = useState([])
   const [goals, setGoals] = useState([])
@@ -68,51 +71,38 @@ const FocusAreaView = () => {
   const [errorModal, setErrorModal] = useState({ open: false, message: '', milestones: [] })
 
   useEffect(() => {
-    fetchData()
-  }, [id])
+    if (hookLoading) return
 
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      // We don't have getFocusAreaById but we can get all and filter, or I should have added getFocusAreaById.
-      // But I can get it from the list. Or assume I pass it via state?
-      // Better to fetch. Endpoints.js has update(id) but typically one GETs by ID too.
-      // I'll cheat and fetch all for the plan if I knew the plan ID, but I don't know plan ID.
-      // Wait, I can get plan first?
-      // Actually, I should update the service to get By ID or just fetch all areas for current year plan and find it.
-      // Let's fetch plan first.
+    setLoading(true)
+    if (plan && allAreas && allGoals && allPriorities) {
+      const foundArea = allAreas.find((a) => a._id === id)
+      setArea(foundArea)
 
-      const plan = await annualPlanningService.getAnnualPlan(new Date().getFullYear())
-      if (plan) {
-        const areas = await annualPlanningService.getFocusAreas(plan._id)
-        const foundArea = areas.find((a) => a._id === id)
-        setArea(foundArea)
+      if (foundArea) {
+        // Filter goals for this area
+        const areaGoals = allGoals.filter((g) => g.focus_area_id === foundArea._id || g.focus_area_id?._id === foundArea._id)
+        setGoals(areaGoals)
 
-        if (foundArea) {
-          const [pData, gData] = await Promise.all([
-            annualPlanningService.getPriorities(plan._id), // This gets all priorities for plan, we filter
-            annualPlanningService.getGoals(foundArea._id)
-          ])
-          setGoals(gData)
+        // Filter Priorities:
+        // 1. Explicitly assigned to this Focus Area
+        // 2. OR Linked to a Goal that belongs to this Focus Area
+        const areaGoalIds = new Set(areaGoals.map((g) => g._id))
+        const areaPriorities = allPriorities.filter((p) => {
+          const isDirectlyAssigned = p.focus_area_id === id || p.focus_area_id?._id === id
+          const isLinkedToAreaGoal = p.linked_entity_type === 'goal' && areaGoalIds.has(p.linked_entity_id)
+          return isDirectlyAssigned || isLinkedToAreaGoal
+        })
 
-          // Filter Priorities:
-          // 1. Explicitly assigned to this Focus Area
-          // 2. OR Linked to a Goal that belongs to this Focus Area
-          const areaGoalIds = new Set(gData.map((g) => g._id))
-          const areaPriorities = pData.filter((p) => {
-            const isDirectlyAssigned = p.focus_area_id === id
-            const isLinkedToAreaGoal = p.linked_entity_type === 'goal' && areaGoalIds.has(p.linked_entity_id)
-            return isDirectlyAssigned || isLinkedToAreaGoal
-          })
-
-          setPriorities(areaPriorities)
-        }
+        setPriorities(areaPriorities)
       }
-    } catch (error) {
-      console.error('Failed to load focus area:', error)
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
+  }, [id, hookLoading, plan, allAreas, allGoals, allPriorities])
+
+  // We keep a dummy fetchData for compatibility with functions that call it
+  const fetchData = async () => {
+    // Background refresh
+    reload()
   }
 
   const handleAddGoal = () => {

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Typography, Tooltip, IconButton, Modal, ModalDialog, ModalClose, Stack, Checkbox, Button, Divider, Skeleton } from '@mui/joy'
 import { Link as RouterLink } from 'react-router-dom'
-import { annualPlanningService, userService } from '../../../api/services'
+import { userService } from '../../../api/services'
+import { apiCache } from '../../../api/utils/cache'
+import useAnnualPlan from '../../../hooks/useAnnualPlan'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useTranslation } from 'react-i18next'
 
@@ -16,136 +18,60 @@ import { useTranslation } from 'react-i18next'
  */
 const FocusBar = () => {
   const { t } = useTranslation()
-  const [focusAreas, setFocusAreas] = useState([])
-  const [allPriorities, setAllPriorities] = useState([]) // All priorities
-  const [displayedPriorities, setDisplayedPriorities] = useState([]) // Selected priorities to display
-  const [loading, setLoading] = useState(true)
+
+  // All data from the shared hook — no more waterfall, no duplicate getProfile call
+  const { focusAreas, priorities, preferredPriorityIds, loading } = useAnnualPlan()
+
+  const [allPriorities, setAllPriorities] = useState([])
+  const [displayedPriorities, setDisplayedPriorities] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [selectedPriorityIds, setSelectedPriorityIds] = useState([])
   const [saving, setSaving] = useState(false)
 
+  // Enrich priorities and apply user preferences once hook data arrives
   useEffect(() => {
-    loadData()
-  }, [])
+    if (loading || priorities.length === 0) return
 
-  const loadUserPreferences = async () => {
-    try {
-      const profile = await userService.getProfile()
-      return profile.preferences?.homepage_priority_ids || []
-    } catch (error) {
-      console.error('Error loading preferences:', error)
-      return []
+    // Build a flat goal map for linking priorities → focus areas
+    const allGoals = focusAreas.flatMap((a) => (a.goals || []).map((g) => ({ ...g, focus_area_id: a._id || a.id })))
+
+    const enriched = priorities.map((priority) => {
+      if (priority.linked_entity_type === 'goal' && priority.linked_entity_id) {
+        const linkedGoal = allGoals.find((g) => (g._id || g.id) === priority.linked_entity_id)
+        if (linkedGoal?.focus_area_id) {
+          return { ...priority, focus_area_id: linkedGoal.focus_area_id }
+        }
+      }
+      return priority
+    })
+
+    const withDeadline = enriched.filter((p) => p.deadline).sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    const withoutDeadline = enriched.filter((p) => !p.deadline)
+    const sorted = [...withDeadline, ...withoutDeadline]
+
+    setAllPriorities(sorted)
+
+    if (preferredPriorityIds.length > 0) {
+      const selected = sorted.filter((p) => preferredPriorityIds.includes(p._id || p.id))
+      setDisplayedPriorities(selected)
+      setSelectedPriorityIds(preferredPriorityIds)
+    } else {
+      const defaults = sorted.slice(0, 4)
+      setDisplayedPriorities(defaults)
+      setSelectedPriorityIds(defaults.map((p) => p._id || p.id))
     }
-  }
+  }, [loading, priorities, focusAreas, preferredPriorityIds])
 
   const saveUserPreferences = async (priorityIds) => {
     try {
       setSaving(true)
-      await userService.updateGeneralPreferences({
-        homepage_priority_ids: priorityIds
-      })
+      await userService.updateGeneralPreferences({ homepage_priority_ids: priorityIds })
+      // Invalidate the profile cache so the next hook load picks up the new preference
+      apiCache.invalidate('annual:profile')
     } catch (error) {
       console.error('Error saving preferences:', error)
     } finally {
       setSaving(false)
-    }
-  }
-
-  const loadData = async () => {
-    try {
-      const annualPlanData = await annualPlanningService.getAnnualPlan().catch(() => null)
-
-      if (annualPlanData) {
-        const [areas, prioritiesData] = await Promise.all([
-          annualPlanningService.getFocusAreas(annualPlanData._id || annualPlanData.id),
-          annualPlanningService.getPriorities(annualPlanData._id || annualPlanData.id)
-        ])
-
-        // Fetch goals for each focus area and calculate progress
-        const goals = await Promise.all(areas.map((a) => annualPlanningService.getGoals(a._id || a.id)))
-
-        // Create a flat map of all goals with their focus area IDs
-        const allGoals = []
-        areas.forEach((area, index) => {
-          const areaGoals = goals[index] || []
-          areaGoals.forEach((goal) => {
-            allGoals.push({
-              ...goal,
-              focus_area_id: area._id || area.id
-            })
-          })
-        })
-
-        // Enrich areas with calculated progress
-        const enrichedAreas = areas.map((area, index) => {
-          const areaGoals = goals[index] || []
-          let areaProgressSum = 0
-
-          areaGoals.forEach((g) => {
-            let p = 0
-            // Calculate progress based on milestones if they exist
-            if (g.milestones && g.milestones.length > 0) {
-              const completed = g.milestones.filter((m) => m.completed).length
-              p = (completed / g.milestones.length) * 100
-            } else {
-              // Otherwise use manual progress field
-              p = g.progress || 0
-            }
-            areaProgressSum += p
-          })
-
-          return {
-            ...area,
-            progress: areaGoals.length > 0 ? Math.round(areaProgressSum / areaGoals.length) : 0
-          }
-        })
-
-        setFocusAreas(enrichedAreas || [])
-
-        // Enrich priorities with focus_area_id from linked goals
-        const enrichedPriorities = (prioritiesData || []).map((priority) => {
-          if (priority.linked_entity_type === 'goal' && priority.linked_entity_id) {
-            const linkedGoal = allGoals.find((g) => (g._id || g.id) === priority.linked_entity_id)
-            if (linkedGoal && linkedGoal.focus_area_id) {
-              return {
-                ...priority,
-                focus_area_id: linkedGoal.focus_area_id
-              }
-            }
-          }
-          return priority
-        })
-
-        // Get all priorities - those with deadlines first (sorted), then those without
-        const prioritiesWithDeadlines = enrichedPriorities
-          .filter((p) => p.deadline)
-          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-
-        const prioritiesWithoutDeadlines = enrichedPriorities.filter((p) => !p.deadline)
-
-        const sortedPriorities = [...prioritiesWithDeadlines, ...prioritiesWithoutDeadlines]
-
-        setAllPriorities(sortedPriorities)
-
-        // Load user preferences
-        const savedPriorityIds = await loadUserPreferences()
-
-        if (savedPriorityIds.length > 0) {
-          // Show user's selected priorities
-          const selectedPriorities = sortedPriorities.filter((p) => savedPriorityIds.includes(p._id || p.id))
-          setDisplayedPriorities(selectedPriorities)
-          setSelectedPriorityIds(savedPriorityIds)
-        } else {
-          // Default: show first 4 priorities
-          const defaultPriorities = sortedPriorities.slice(0, 4)
-          setDisplayedPriorities(defaultPriorities)
-          setSelectedPriorityIds(defaultPriorities.map((p) => p._id || p.id))
-        }
-      }
-    } catch (error) {
-      console.error('Error loading focus data:', error)
-    } finally {
-      setLoading(false)
     }
   }
 

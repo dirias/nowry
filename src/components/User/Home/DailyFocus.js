@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button, CircularProgress, Stack } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
-import { cardsService, decksService } from '../../../api/services'
+import { useCardData } from '../../../hooks/useCardData'
+import { useDeckData } from '../../../hooks/useDeckData'
 
 const DailyFocus = () => {
   const navigate = useNavigate()
@@ -10,14 +11,17 @@ const DailyFocus = () => {
   const [decksDue, setDecksDue] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const { cards: cardsData, loading: cardsLoading } = useCardData()
+  const { decks: decksData, loading: decksLoading } = useDeckData()
+
   useEffect(() => {
+    if (cardsLoading || decksLoading) return
     fetchDueDecks()
-  }, [])
+  }, [cardsLoading, decksLoading, cardsData, decksData])
 
   const fetchDueDecks = async () => {
     try {
       setLoading(true)
-      const [cardsData, decksData] = await Promise.all([cardsService.getAll(), decksService.getAll()])
 
       // Filter cards that are due today
       const now = new Date()

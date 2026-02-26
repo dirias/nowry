@@ -11,6 +11,7 @@ import StudyCalendar from './StudyCalendar'
 import CalendarModal from '../../Calendar/CalendarModal'
 import { useAuth } from '../../../context/AuthContext'
 import { cardsService, decksService } from '../../../api/services'
+import { useCardData } from '../../../hooks/useCardData'
 
 function Home() {
   const { user } = useAuth()
@@ -26,28 +27,21 @@ function Home() {
     return phraseList[Math.floor(Math.random() * phraseList.length)]
   }, [t])
 
+  const { cards, loading: cardsLoading } = useCardData()
+
   useEffect(() => {
-    loadStudyStats()
-  }, [])
+    if (cardsLoading) return
 
-  const loadStudyStats = async () => {
-    try {
-      const [cardsData] = await Promise.all([cardsService.getAll()])
+    // Filter cards that are due today
+    const now = new Date()
+    const dueCards = cards.filter((card) => {
+      if (!card.next_review) return true // New cards
+      const nextReview = new Date(card.next_review)
+      return nextReview <= now
+    })
 
-      // Filter cards that are due today
-      const now = new Date()
-      const dueCards = cardsData.filter((card) => {
-        if (!card.next_review) return true // New cards
-        const nextReview = new Date(card.next_review)
-        return nextReview <= now
-      })
-
-      setStudyStats({ dueCount: dueCards.length, loading: false })
-    } catch (error) {
-      console.error('Error loading study stats:', error)
-      setStudyStats({ dueCount: 0, loading: false })
-    }
-  }
+    setStudyStats({ dueCount: dueCards.length, loading: false })
+  }, [cards, cardsLoading])
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 3 } }}>

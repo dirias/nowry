@@ -1,0 +1,83 @@
+
+> nowry@0.1.0 build
+> react-scripts build
+
+Creating an optimized production build...
+Failed to compile.
+
+[eslint] 
+src/hooks/useDeckData.js
+  Line 9:3:   Delete `··`                                 prettier/prettier
+  Line 10:1:  Delete `··`                                 prettier/prettier
+  Line 11:1:  Replace `····` with `··`                    prettier/prettier
+  Line 13:1:  Delete `··`                                 prettier/prettier
+  Line 14:1:  Replace `········` with `····`              prettier/prettier
+  Line 15:1:  Replace `········` with `····`              prettier/prettier
+  Line 16:1:  Replace `········` with `····`              prettier/prettier
+  Line 17:1:  Delete `······`                             prettier/prettier
+  Line 18:7:  Delete `······`                             prettier/prettier
+  Line 19:1:  Replace `················` with `········`  prettier/prettier
+  Line 20:7:  Delete `······`                             prettier/prettier
+  Line 21:1:  Replace `········` with `····`              prettier/prettier
+  Line 22:1:  Delete `······`                             prettier/prettier
+  Line 23:9:  Delete `········`                           prettier/prettier
+  Line 24:9:  Delete `········`                           prettier/prettier
+  Line 25:1:  Replace `············` with `······`        prettier/prettier
+  Line 26:1:  Delete `····`                               prettier/prettier
+  Line 27:1:  Replace `············` with `······`        prettier/prettier
+  Line 28:1:  Replace `················` with `········`  prettier/prettier
+  Line 29:1:  Delete `······`                             prettier/prettier
+  Line 30:5:  Delete `····`                               prettier/prettier
+  Line 31:3:  Delete `··`                                 prettier/prettier
+  Line 33:1:  Delete `··`                                 prettier/prettier
+  Line 34:1:  Replace `········` with `····`              prettier/prettier
+  Line 35:1:  Replace `········` with `····`              prettier/prettier
+  Line 36:1:  Replace `········` with `····`              prettier/prettier
+  Line 37:1:  Replace `············` with `······`        prettier/prettier
+  Line 38:1:  Replace `········` with `····`              prettier/prettier
+  Line 39:1:  Delete `··`                                 prettier/prettier
+  Line 41:1:  Delete `··`                                 prettier/prettier
+  Line 42:1:  Replace `········` with `····`              prettier/prettier
+  Line 43:5:  Delete `····`                               prettier/prettier
+  Line 44:3:  Delete `··`                                 prettier/prettier
+  Line 46:1:  Delete `··`                                 prettier/prettier
+
+src/hooks/useTaskData.js
+  Line 9:3:   Delete `··`                                 prettier/prettier
+  Line 10:1:  Delete `··`                                 prettier/prettier
+  Line 11:1:  Replace `····` with `··`                    prettier/prettier
+  Line 13:1:  Delete `··`                                 prettier/prettier
+  Line 14:1:  Replace `········` with `····`              prettier/prettier
+  Line 15:1:  Replace `········` with `····`              prettier/prettier
+  Line 16:1:  Replace `········` with `····`              prettier/prettier
+  Line 17:1:  Delete `······`                             prettier/prettier
+  Line 18:7:  Delete `······`                             prettier/prettier
+  Line 19:1:  Replace `················` with `········`  prettier/prettier
+  Line 20:7:  Delete `······`                             prettier/prettier
+  Line 21:1:  Replace `········` with `····`              prettier/prettier
+  Line 22:1:  Delete `······`                             prettier/prettier
+  Line 23:9:  Delete `········`                           prettier/prettier
+  Line 24:9:  Delete `········`                           prettier/prettier
+  Line 25:1:  Replace `············` with `······`        prettier/prettier
+  Line 26:1:  Delete `····`                               prettier/prettier
+  Line 27:1:  Replace `············` with `······`        prettier/prettier
+  Line 28:1:  Replace `················` with `········`  prettier/prettier
+  Line 29:1:  Delete `······`                             prettier/prettier
+  Line 30:5:  Delete `····`                               prettier/prettier
+  Line 31:3:  Delete `··`                                 prettier/prettier
+  Line 33:1:  Delete `··`                                 prettier/prettier
+  Line 34:1:  Replace `········` with `····`              prettier/prettier
+  Line 35:1:  Replace `········` with `····`              prettier/prettier
+  Line 36:1:  Replace `········` with `····`              prettier/prettier
+  Line 37:1:  Replace `············` with `······`        prettier/prettier
+  Line 38:1:  Replace `········` with `····`              prettier/prettier
+  Line 39:1:  Delete `··`                                 prettier/prettier
+  Line 41:1:  Delete `··`                                 prettier/prettier
+  Line 42:1:  Replace `········` with `····`              prettier/prettier
+  Line 43:5:  Delete `····`                               prettier/prettier
+  Line 44:3:  Delete `··`                                 prettier/prettier
+  Line 46:1:  Delete `··`                                 prettier/prettier
+
+Search for the keywords to learn more about each error.
+
+

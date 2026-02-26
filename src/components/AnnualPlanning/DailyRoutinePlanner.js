@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
+import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 
 const DailyRoutinePlanner = () => {
   const { t } = useTranslation()
@@ -43,20 +44,19 @@ const DailyRoutinePlanner = () => {
   const [editingItem, setEditingItem] = useState(null) // { section, index }
   const [editValue, setEditValue] = useState('')
 
+  const { plan, areas: cacheAreas, goals: cacheGoals, loading: hookLoading } = useAnnualPlan()
+
   useEffect(() => {
+    if (hookLoading) return
     fetchData()
-  }, [])
+  }, [hookLoading, plan, cacheAreas, cacheGoals])
 
   const fetchData = async () => {
     try {
       setLoading(true)
-      const year = new Date().getFullYear()
-      const plan = await annualPlanningService.getAnnualPlan(year)
+      if (!plan) return
 
-      const [routineData, areasData] = await Promise.all([
-        annualPlanningService.getDailyRoutine(),
-        annualPlanningService.getFocusAreas(plan._id)
-      ])
+      const routineData = await annualPlanningService.getDailyRoutine()
 
       // Lazy Migration: Assign IDs to routine items if missing
       let routineUpdated = false
@@ -81,18 +81,20 @@ const DailyRoutinePlanner = () => {
         setRoutine(routineData)
       }
 
-      // Fetch all goals -> activities
+      // Fetch all goals -> activities using cache
       let allActivities = []
-      for (const area of areasData) {
-        const goals = await annualPlanningService.getGoals(area._id)
-        for (const goal of goals) {
-          const acts = await annualPlanningService.getActivities(goal._id)
-          // Attach goal info/color
-          acts.forEach((a) => {
-            a.goalTitle = goal.title
-            a.areaColor = area.color
-          })
-          allActivities = [...allActivities, ...acts]
+      if (cacheAreas) {
+        for (const area of cacheAreas) {
+          const areaGoals = cacheGoals.filter((g) => g.focus_area_id === area._id || g.focus_area_id?._id === area._id)
+          for (const goal of areaGoals) {
+            const acts = await annualPlanningService.getActivities(goal._id)
+            // Attach goal info/color
+            acts.forEach((a) => {
+              a.goalTitle = goal.title
+              a.areaColor = area.color
+            })
+            allActivities = [...allActivities, ...acts]
+          }
         }
       }
       setActivities(allActivities)

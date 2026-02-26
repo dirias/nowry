@@ -29,6 +29,7 @@ import SortableTask from '../../Task/SortableTask'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { tasksService, annualPlanningService } from '../../../api/services'
+import { useTaskData } from '../../../hooks/useTaskData'
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 const LISTS_KEY = 'nowry_task_lists'
@@ -93,10 +94,13 @@ const SideMenu = () => {
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor))
 
-  // Load data on mount
+  const { tasks: tasksData, loading: tasksLoading, reload: reloadTasks } = useTaskData()
+
+  // Load data when tasks are ready
   React.useEffect(() => {
+    if (tasksLoading) return
     loadData()
-  }, [])
+  }, [tasksLoading, tasksData])
 
   // Focus new list input when shown
   React.useEffect(() => {
@@ -108,7 +112,7 @@ const SideMenu = () => {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [tasksData, routineData] = await Promise.all([tasksService.getAll(), annualPlanningService.getDailyRoutine()])
+      const routineData = await annualPlanningService.getDailyRoutine()
       setTasks(tasksData)
       setRoutine(routineData)
       // Seed completion state from backend (cross-device sync + midnight reset via date key)
@@ -184,6 +188,7 @@ const SideMenu = () => {
 
       const created = await tasksService.create(newTask)
       setTasks([...tasks, created])
+      reloadTasks()
       setSearch('')
     } catch (error) {
       console.error('Error adding task:', error)
@@ -194,6 +199,7 @@ const SideMenu = () => {
     try {
       await tasksService.delete(id)
       setTasks(tasks.filter((t) => (t._id || t.id) !== id))
+      reloadTasks()
     } catch (error) {
       console.error('Error deleting task:', error)
     }
@@ -203,6 +209,7 @@ const SideMenu = () => {
     try {
       const updated = await tasksService.toggleComplete(task._id || task.id, task.is_completed)
       setTasks(tasks.map((t) => ((t._id || t.id) === (updated._id || updated.id) ? updated : t)))
+      reloadTasks()
     } catch (error) {
       console.error('Error toggling task:', error)
     }
@@ -220,6 +227,7 @@ const SideMenu = () => {
 
       const updated = await tasksService.update(taskId, updates)
       setTasks((prev) => prev.map((t) => ((t._id || t.id) === taskId ? updated : t)))
+      reloadTasks()
     } catch (error) {
       console.error('Error updating task:', error)
     }

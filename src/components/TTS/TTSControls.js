@@ -206,6 +206,9 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
         {isSettingsOpen && (
           <Box
             ref={settingsRef}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
             sx={{
               position: 'absolute',
               top: 40,

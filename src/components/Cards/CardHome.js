@@ -32,7 +32,10 @@ import CreateCardModal from './CreateCardModal'
 import CardPreviewModal from './CardPreviewModal'
 import ManageContent from './ManageContent'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
-import { decksService, cardsService } from '../../api/services'
+import { decksService } from '../../api/services'
+import { useCardData } from '../../hooks/useCardData'
+import { useStatistics } from '../../hooks/useStatistics'
+import { useDeckData } from '../../hooks/useDeckData'
 
 export default function CardHome() {
   const navigate = useNavigate()
@@ -70,9 +73,14 @@ export default function CardHome() {
     totalCards: 0
   })
 
+  const { cards: hookCards, loading: cardsLoading, reload: reloadCards } = useCardData()
+  const { statistics: hookStats, loading: statsLoading } = useStatistics()
+  const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
+
   useEffect(() => {
+    if (cardsLoading || statsLoading || decksLoading) return
     fetchData()
-  }, [])
+  }, [cardsLoading, statsLoading, decksLoading, hookCards, hookStats, hookDecks])
 
   // Debounce search input
   useEffect(() => {
@@ -83,16 +91,12 @@ export default function CardHome() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [decksData, cardsData, statisticsData] = await Promise.all([
-        decksService.getAll(),
-        cardsService.getAll(),
-        cardsService.getStatistics()
-      ])
+      const decksData = hookDecks || []
 
-      // Calculate due cards for each deck
+      // Calculate due cards for each deck using cached cards
       const now = new Date()
       const decksWithDueCount = decksData.map((deck) => {
-        const deckCards = cardsData.filter((card) => card.deck_id === deck._id || card.deck_id?._id === deck._id)
+        const deckCards = hookCards.filter((card) => card.deck_id === deck._id || card.deck_id?._id === deck._id)
         const dueCards = deckCards.filter((card) => {
           if (!card.next_review) return true
           const nextReview = new Date(card.next_review)
@@ -106,11 +110,11 @@ export default function CardHome() {
       })
 
       setDecks(decksWithDueCount)
-      setCards(cardsData)
+      setCards(hookCards)
 
-      // Use real stats from API - API returns data in summary object
-      const summary = statisticsData.summary || {}
-      const dueCards = cardsData.filter((card) => {
+      // Use real stats from cached API response
+      const summary = hookStats?.summary || {}
+      const dueCards = hookCards.filter((card) => {
         if (!card.next_review) return true
         const nextReview = new Date(card.next_review)
         return nextReview <= now
@@ -119,7 +123,7 @@ export default function CardHome() {
       setStats({
         dueToday: dueCards.length,
         streak: summary.current_streak || 0,
-        totalCards: summary.total_cards || cardsData.length
+        totalCards: summary.total_cards || hookCards.length
       })
 
       setLoading(false)
@@ -147,11 +151,13 @@ export default function CardHome() {
     setPreviewState((prev) => ({ ...prev, open: false }))
   }
 
-  const handleDeckSaved = () => {
-    fetchData()
+  const handleCardSaved = () => {
+    setShowCreateCard(false)
+    setEditingCard(null)
+    reloadCards() // Force a fresh fetch so the new/edited card appears
   }
 
-  const handleCardSaved = () => {
+  const handleDeckSaved = () => {
     fetchData()
   }
 
@@ -172,6 +178,7 @@ export default function CardHome() {
       await decksService.delete(deletingDeck._id)
       setDeletingDeck(null)
       setDeleteLoading(false)
+      reloadDecks()
       fetchData()
     } catch (error) {
       console.error('Error deleting deck:', error)
@@ -192,9 +199,9 @@ export default function CardHome() {
   const confirmDeleteCard = async () => {
     if (!deletingCard) return
     try {
-      await cardsService.delete(deletingCard._id)
+      setCards(cards.filter((c) => c._id !== deletingCard._id))
       setDeletingCard(null)
-      fetchData()
+      reloadCards() // Background cache update
     } catch (error) {
       console.error('Error deleting card:', error)
       setErrorSnackbar(t('cards.deleteCardError'))

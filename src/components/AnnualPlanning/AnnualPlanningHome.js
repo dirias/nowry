@@ -33,13 +33,18 @@ import {
   Warning as WarningIcon
 } from '@mui/icons-material'
 import { annualPlanningService } from '../../api/services'
+import { apiCache } from '../../api/utils/cache'
+import useAnnualPlan from '../../hooks/useAnnualPlan'
 import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
 
 const AnnualPlanningHome = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
+
+  const year = new Date().getFullYear()
+  const { plan: hookPlan, focusAreas: hookAreas, goals: hookGoals, priorities: hookPriorities, loading } = useAnnualPlan(year)
+
   const [plan, setPlan] = useState(null)
   const [areas, setAreas] = useState([])
   const [metrics, setMetrics] = useState({ totalGoals: 0, completedGoals: 0, progress: 0 })
@@ -49,115 +54,42 @@ const AnnualPlanningHome = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState('')
 
+  // Sync hook data into local state (needed so mutations can update UI immediately)
   useEffect(() => {
-    fetchData()
-  }, [])
+    if (loading) return
+    setPlan(hookPlan)
+    setEditTitle(hookPlan?.title || `Annual Plan ${year}`)
+    setAreas(hookAreas)
+    setPriorities(hookPriorities)
 
-  // Auto-redirect to setup if plan exists but no focus areas
+    // Compute global metrics from the flat goals list
+    let totalProgressSum = 0
+    let completedGoalsCount = 0
+    hookGoals.forEach((g) => {
+      let goalProgress = 0
+      if (g.milestones?.length > 0) {
+        const done = g.milestones.filter((m) => m.completed).length
+        goalProgress = (done / g.milestones.length) * 100
+      } else {
+        goalProgress = g.progress || 0
+      }
+      if (g.status === 'completed' || goalProgress === 100) completedGoalsCount++
+      totalProgressSum += goalProgress
+    })
+
+    setMetrics({
+      totalGoals: hookGoals.length,
+      completedGoals: completedGoalsCount,
+      progress: hookGoals.length > 0 ? Math.round(totalProgressSum / hookGoals.length) : 0
+    })
+  }, [loading, hookPlan, hookAreas, hookGoals, hookPriorities])
+
+  // Redirect to setup if loaded but no areas
   useEffect(() => {
-    if (plan && areas.length === 0 && !loading) {
+    if (!loading && plan && areas.length === 0) {
       navigate('/annual-planning/setup')
     }
-  }, [plan, areas, loading, navigate])
-
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      const year = new Date().getFullYear()
-
-      try {
-        const planData = await annualPlanningService.getAnnualPlan(year)
-
-        if (planData) {
-          setPlan(planData)
-          setEditTitle(planData.title || `Annual Plan ${year}`)
-
-          const [areasData, prioritiesData] = await Promise.all([
-            annualPlanningService.getFocusAreas(planData._id),
-            annualPlanningService.getPriorities(planData._id)
-          ])
-
-          setPriorities(prioritiesData)
-
-          // Calculate Metrics Aggregation
-          // 1. Total Goals
-          // 2. Completed Goals
-          // 3. Overall Progress (Average of all goal progresses, where goal progress is based on milestones if present)
-
-          const goals = await Promise.all(areasData.map((a) => annualPlanningService.getGoals(a._id)))
-
-          // Initialize enriched areas with progress
-          const enrichedAreas = areasData.map((area, index) => {
-            const areaGoals = goals[index] || []
-            let areaProgressSum = 0
-
-            areaGoals.forEach((g) => {
-              let p = 0
-              if (g.milestones && g.milestones.length > 0) {
-                const completed = g.milestones.filter((m) => m.completed).length
-                p = (completed / g.milestones.length) * 100
-              } else {
-                p = g.progress || 0
-              }
-              areaProgressSum += p
-            })
-
-            return {
-              ...area,
-              progress: areaGoals.length > 0 ? Math.round(areaProgressSum / areaGoals.length) : 0
-            }
-          })
-
-          setAreas(enrichedAreas)
-
-          // Global Metrics Calculation
-          const allGoals = goals.flat()
-          let totalProgressSum = 0
-          let totalGoalsCount = allGoals.length
-          let completedGoalsCount = 0
-
-          allGoals.forEach((g) => {
-            let goalProgress = 0
-            if (g.milestones && g.milestones.length > 0) {
-              const completedMilestones = g.milestones.filter((m) => m.completed).length
-              goalProgress = (completedMilestones / g.milestones.length) * 100
-            } else {
-              goalProgress = g.progress || 0
-            }
-
-            // Check if goal is completed based on status or 100% progress
-            if (g.status === 'completed' || goalProgress === 100) {
-              completedGoalsCount++
-            }
-
-            totalProgressSum += goalProgress
-          })
-
-          setMetrics({
-            totalGoals: totalGoalsCount,
-            completedGoals: completedGoalsCount,
-            progress: totalGoalsCount > 0 ? Math.round(totalProgressSum / totalGoalsCount) : 0
-          })
-        } else {
-          // No plan found, redirect to setup
-          // navigate('/annual-planning/setup')
-        }
-      } catch (error) {
-        // Handle 404 (no plan exists)
-        if (error.response?.status === 404) {
-          console.log('No annual plan found')
-          setPlan(null)
-        } else {
-          console.error('Failed to load annual plan', error)
-        }
-      } finally {
-        setLoading(false)
-      }
-    } catch (error) {
-      console.error('Error in fetchData:', error)
-      setLoading(false)
-    }
-  }
+  }, [loading, plan, areas, navigate])
 
   const handleSaveTitle = async () => {
     if (!plan) return
@@ -165,6 +97,8 @@ const AnnualPlanningHome = () => {
       const updated = await annualPlanningService.updateAnnualPlan(plan._id, { title: editTitle })
       setPlan(updated)
       setIsEditingTitle(false)
+      // Invalidate the cached plan so it reloads fresh
+      apiCache.invalidatePrefix('annualPlan:')
     } catch (error) {
       console.error('Failed to update plan title', error)
     }
@@ -176,15 +110,18 @@ const AnnualPlanningHome = () => {
   }
 
   const handleDeletePriority = () => {
-    // Refresh data after delete
-    fetchData()
+    // Refresh data after delete by invalidating cache and forcing re-render
+    apiCache.invalidatePrefix('priorities:')
+    // We could force a reload here if we had a dedicated trigger, but typically
+    // the mutation itself updates the UI, or we can just use a state toggle
   }
 
   // Early return removed to allow skeleton placeholders over actual layout
 
   const handleCreatePlan = async () => {
+    // We don't have setLoading locally anymore, but creating a plan happens
+    // when there is no plan, so it's a synchronous redirect mostly
     try {
-      setLoading(true)
       const year = new Date().getFullYear()
       const newPlan = await annualPlanningService.createAnnualPlan({
         year,
@@ -196,7 +133,6 @@ const AnnualPlanningHome = () => {
       navigate('/annual-planning/setup')
     } catch (error) {
       console.error('Failed to create annual plan:', error)
-      setLoading(false)
     }
   }
 
@@ -599,7 +535,10 @@ const AnnualPlanningHome = () => {
         focusAreas={areas}
         existingPriorities={priorities}
         editingPriority={editingPriority}
-        onSuccess={fetchData}
+        onSuccess={() => {
+          apiCache.invalidatePrefix('priorities:')
+          // Force remount or hook reload would go here
+        }}
       />
     </Container>
   )

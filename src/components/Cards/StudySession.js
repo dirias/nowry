@@ -17,6 +17,8 @@ import {
 } from '@mui/joy'
 import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit } from '@mui/icons-material'
 import { cardsService, decksService } from '../../api/services'
+import { useCardData } from '../../hooks/useCardData'
+import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
 
@@ -43,12 +45,20 @@ export default function StudySession() {
   const [mermaidSvg, setMermaidSvg] = useState('')
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [reviewQueue, setReviewQueue] = useState([]) // Queue failed reviews for retry
-  const [voiceSettings, setVoiceSettings] = useState({
-    front: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false },
-    back: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false }
-  })
-  const [decksSettingsMap, setDecksSettingsMap] = useState({}) // Stores voice_settings keyed by deck_id
+  const [reviewQueue, setReviewQueue] = useState([])
+
+  // Centralized voice settings — reads & writes through the shared hook
+  const { voiceSettings, getSettingsForDeck, handleVoiceSettingsChange: _handleVoiceSettingsChange } = useVoiceSettings(deckId)
+
+  // In daily-review mode, voice settings come from the per-card deck lookup
+  const currentCardDeckId = cards[currentIndex]?.deck_id?._id || cards[currentIndex]?.deck_id
+  const activeVoiceSettings = deckId === 'daily-review' && currentCardDeckId ? getSettingsForDeck(currentCardDeckId) : voiceSettings
+
+  const handleVoiceSettingsChange = (newSettings) =>
+    _handleVoiceSettingsChange(newSettings, {
+      isFlipped,
+      currentDeckId: deckId === 'daily-review' ? currentCardDeckId : deckId
+    })
 
   // Swipe state
   const touchStart = useRef(null)
@@ -57,10 +67,12 @@ export default function StudySession() {
   const touchEndY = useRef(null)
   const minSwipeDistance = 50
 
+  const { cards: cardsData, loading: cardsLoading, reload: reloadCards } = useCardData()
+
   useEffect(() => {
+    if (cardsLoading) return
     fetchDeckCards()
-    fetchDeckSettings()
-  }, [deckId])
+  }, [deckId, cardsLoading, cardsData])
 
   // Retry failed reviews in background
   useEffect(() => {
@@ -107,80 +119,9 @@ export default function StudySession() {
     }
   }, [currentIndex, cards])
 
-  const fetchDeckSettings = async () => {
-    try {
-      if (deckId === 'daily-review') {
-        const allDecks = await decksService.getAll()
-        const settingsMap = {}
-        allDecks.forEach((deck) => {
-          if (deck.voice_settings) {
-            settingsMap[deck._id || deck.id] = {
-              front: {
-                voiceName:
-                  deck.voice_settings.front?.voiceName || deck.voice_settings.front?.voice_name || deck.voice_settings.front?.voice || null,
-                rate: deck.voice_settings.front?.rate ?? 1.0,
-                pitch: deck.voice_settings.front?.pitch ?? 1.0,
-                autoPlay: deck.voice_settings.front?.autoPlay || deck.voice_settings.front?.auto_play || false
-              },
-              back: {
-                voiceName:
-                  deck.voice_settings.back?.voiceName || deck.voice_settings.back?.voice_name || deck.voice_settings.back?.voice || null,
-                rate: deck.voice_settings.back?.rate ?? 1.0,
-                pitch: deck.voice_settings.back?.pitch ?? 1.0,
-                autoPlay: deck.voice_settings.back?.autoPlay || deck.voice_settings.back?.auto_play || false
-              }
-            }
-          }
-        })
-        setDecksSettingsMap(settingsMap)
-      } else {
-        const deck = await decksService.getById(deckId)
-        if (deck.voice_settings) {
-          const loadedSettings = {
-            front: {
-              voiceName:
-                deck.voice_settings.front?.voiceName || deck.voice_settings.front?.voice_name || deck.voice_settings.front?.voice || null,
-              rate: deck.voice_settings.front?.rate ?? 1.0,
-              pitch: deck.voice_settings.front?.pitch ?? 1.0,
-              autoPlay: deck.voice_settings.front?.autoPlay || deck.voice_settings.front?.auto_play || false
-            },
-            back: {
-              voiceName:
-                deck.voice_settings.back?.voiceName || deck.voice_settings.back?.voice_name || deck.voice_settings.back?.voice || null,
-              rate: deck.voice_settings.back?.rate ?? 1.0,
-              pitch: deck.voice_settings.back?.pitch ?? 1.0,
-              autoPlay: deck.voice_settings.back?.autoPlay || deck.voice_settings.back?.auto_play || false
-            }
-          }
-          setVoiceSettings(loadedSettings)
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching deck settings:', error)
-    }
-  }
-
-  // Effect to sync voice settings for the current card during daily-review
-  useEffect(() => {
-    if (deckId === 'daily-review' && cards.length > 0) {
-      const currentCard = cards[currentIndex]
-      const targetDeckId = currentCard?.deck_id?._id || currentCard?.deck_id
-      if (targetDeckId && decksSettingsMap[targetDeckId]) {
-        setVoiceSettings(decksSettingsMap[targetDeckId])
-      } else {
-        // Fallback to defaults if no specific settings found
-        setVoiceSettings({
-          front: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false },
-          back: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false }
-        })
-      }
-    }
-  }, [currentIndex, cards, deckId, decksSettingsMap])
-
   const fetchDeckCards = async () => {
     try {
       setLoading(true)
-      const cardsData = await cardsService.getAll()
       let reviewCards = []
 
       const now = new Date()
@@ -339,64 +280,6 @@ export default function StudySession() {
       setShowExplanation(false)
       setMermaidSvg('')
       // Don't clear feedback - let it auto-dismiss naturally
-    }
-  }
-
-  const handleVoiceSettingsChange = async (newSettings) => {
-    // Determine which side we are on
-    const side = isFlipped ? 'back' : 'front'
-
-    const updatedSettings = {
-      ...voiceSettings,
-      [side]: { ...voiceSettings[side], ...newSettings }
-    }
-
-    // Update local state immediately
-    setVoiceSettings(updatedSettings)
-
-    // Normalize for backend: use voice_name keys
-    const normalized = {
-      front: {
-        voice_name: updatedSettings.front.voiceName || updatedSettings.front.voice_name || null,
-        rate: updatedSettings.front.rate ?? 1.0,
-        pitch: updatedSettings.front.pitch ?? 1.0,
-        auto_play: updatedSettings.front.autoPlay || false
-      },
-      back: {
-        voice_name: updatedSettings.back.voiceName || updatedSettings.back.voice_name || null,
-        rate: updatedSettings.back.rate ?? 1.0,
-        pitch: updatedSettings.back.pitch ?? 1.0,
-        auto_play: updatedSettings.back.autoPlay || false
-      }
-    }
-
-    // Save to DB
-    if (deckId !== 'daily-review') {
-      try {
-        await decksService.update(deckId, { voice_settings: normalized })
-      } catch (error) {
-        console.error('Error saving voice settings:', error)
-      }
-    } else {
-      // In daily-review, save to the specific deck this card belongs to
-      const currentCard = cards[currentIndex]
-      const targetDeckId = currentCard?.deck_id?._id || currentCard?.deck_id
-
-      if (targetDeckId) {
-        // Optimistically update the map
-        setDecksSettingsMap((prev) => ({
-          ...prev,
-          [targetDeckId]: updatedSettings
-        }))
-
-        try {
-          await decksService.update(targetDeckId, { voice_settings: normalized })
-        } catch (error) {
-          console.error('Error saving voice settings to target deck:', error)
-        }
-      } else {
-        console.warn('Could not identify target deck for current card. Settings not saved.')
-      }
     }
   }
 
@@ -703,7 +586,7 @@ export default function StudySession() {
             compact
             settingsOpen={showVoiceSettings}
             onSettingsChange={setShowVoiceSettings}
-            voiceSettings={isFlipped ? voiceSettings.back : voiceSettings.front}
+            voiceSettings={isFlipped ? activeVoiceSettings.back : activeVoiceSettings.front}
             onVoiceSettingsChange={handleVoiceSettingsChange}
             text={isQuiz ? `${currentCard.title}. ${currentCard.options?.join(', ')}` : isFlipped ? currentCard.content : currentCard.title}
           />

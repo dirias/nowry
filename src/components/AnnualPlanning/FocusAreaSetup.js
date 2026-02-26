@@ -22,6 +22,7 @@ import {
 import { ArrowForward as ArrowForwardIcon, ArrowBack as ArrowBackIcon, Check as CheckIcon } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
+import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 
 const ICONS = ['⭐', '💼', '💪', '💰', '❤️', '🎨', '📚', '🌱', '✈️', '🏠']
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6']
@@ -43,25 +44,30 @@ const FocusAreaSetup = () => {
   // Always maintain exactly 3 focus areas
   const REQUIRED_AREAS_COUNT = 3
 
+  const { plan, areas: cacheAreas, loading: hookLoading } = useAnnualPlan()
+
   useEffect(() => {
+    if (hookLoading) return
     fetchPlan()
-  }, [])
+  }, [hookLoading, plan, cacheAreas])
 
   const fetchPlan = async () => {
     try {
       setLoading(true)
-      const plan = await annualPlanningService.getAnnualPlan(new Date().getFullYear())
+      if (!plan) {
+        setLoading(false)
+        return
+      }
       setPlanId(plan._id)
 
       // Try to load existing focus areas
       try {
-        const existingAreas = await annualPlanningService.getFocusAreas(plan._id)
-        if (existingAreas && existingAreas.length > 0) {
+        if (cacheAreas && cacheAreas.length > 0) {
           // Edit mode: load existing areas
           setIsEditMode(true)
 
           // Ensure we always have exactly 3 areas
-          const loadedAreas = existingAreas.slice(0, REQUIRED_AREAS_COUNT).map((area) => ({
+          const loadedAreas = cacheAreas.slice(0, REQUIRED_AREAS_COUNT).map((area) => ({
             _id: area._id, // Keep the ID for updating
             name: area.name,
             description: area.description,

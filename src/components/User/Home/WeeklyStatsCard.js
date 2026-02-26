@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Stack, CircularProgress, Sheet, Chip } from '@mui/joy'
 import { TrendingUp, CheckCircle2, BookOpen, Flame } from 'lucide-react'
-import { tasksService, cardsService, annualPlanningService } from '../../../api/services'
+import { useCardData } from '../../../hooks/useCardData'
+import { useAnnualPlan } from '../../../hooks/useAnnualPlan'
+import { useTaskData } from '../../../hooks/useTaskData'
 
 /**
  * WeeklyStatsCard - Shows key weekly metrics
@@ -23,14 +25,18 @@ const WeeklyStatsCard = () => {
   })
   const [loading, setLoading] = useState(true)
 
+  const { cards, loading: cardsLoading } = useCardData()
+  const { goals, loading: goalsLoading } = useAnnualPlan()
+  const { tasks, loading: tasksLoading } = useTaskData()
+
   useEffect(() => {
+    if (cardsLoading || goalsLoading || tasksLoading) return
     fetchStats()
-  }, [])
+  }, [cardsLoading, goalsLoading, tasksLoading, cards, goals, tasks])
 
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const [goals, tasks, cards] = await Promise.all([annualPlanningService.getGoals(), tasksService.getAll(), cardsService.getAll()])
 
       // Calculate goals on track (>= 40% progress)
       const goalsWithProgress = goals.map((goal) => ({

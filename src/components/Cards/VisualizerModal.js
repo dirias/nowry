@@ -19,6 +19,7 @@ import {
 } from '@mui/joy'
 import mermaid from 'mermaid'
 import { visualizerService, decksService, cardsService } from '../../api/services'
+import { useDeckData } from '../../hooks/useDeckData'
 
 mermaid.initialize({
   startOnLoad: false,
@@ -89,6 +90,8 @@ export default function VisualizerModal({ open, onClose, text }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
+  const { decks: cacheDecks, loading: hookDecksLoading, reload: reloadDecks } = useDeckData()
+
   const handleCreateDeck = async () => {
     if (!newDeckName) return
     setLoadingDecks(true)
@@ -99,6 +102,7 @@ export default function VisualizerModal({ open, onClose, text }) {
       setSelectedDeckId(newDeck._id)
       setIsCreatingDeck(false)
       setNewDeckName('')
+      reloadDecks()
     } catch (e) {
       console.error(e)
       const status = e.response?.status
@@ -144,9 +148,11 @@ export default function VisualizerModal({ open, onClose, text }) {
       setIsLimitError(false)
       setResult(null)
       setSelectedDeckId('')
-      decksService.getAll().then(setDecks).catch(console.error)
+      if (!hookDecksLoading) {
+        setDecks(cacheDecks || [])
+      }
     }
-  }, [open])
+  }, [open, hookDecksLoading, cacheDecks])
 
   const handleSave = async () => {
     if (!selectedDeckId || !result) return

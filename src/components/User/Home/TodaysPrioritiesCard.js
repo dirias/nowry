@@ -4,6 +4,7 @@ import { Box, Typography, Checkbox, Button, Stack, CircularProgress, Sheet, Chip
 import { useNavigate } from 'react-router-dom'
 import { CheckSquare, Clock } from 'lucide-react'
 import { tasksService, annualPlanningService } from '../../../api/services'
+import { useTaskData } from '../../../hooks/useTaskData'
 
 /**
  * TodaysPrioritiesCard - Shows today's tasks and routine
@@ -20,14 +21,17 @@ const TodaysPrioritiesCard = () => {
   const [routine, setRoutine] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const { tasks: tasksData, loading: tasksLoading, reload: reloadTasks } = useTaskData()
+
   useEffect(() => {
+    if (tasksLoading) return
     fetchPriorities()
-  }, [])
+  }, [tasksLoading, tasksData])
 
   const fetchPriorities = async () => {
     try {
       setLoading(true)
-      const [tasksData, routineData] = await Promise.all([tasksService.getAll(), annualPlanningService.getDailyRoutine()])
+      const routineData = await annualPlanningService.getDailyRoutine()
 
       // Filter pending tasks, sort by deadline and priority
       const pendingTasks = tasksData
@@ -61,6 +65,7 @@ const TodaysPrioritiesCard = () => {
         is_completed: !task.is_completed
       })
       setTasks(tasks.map((t) => ((t._id || t.id) === (updated._id || updated.id) ? updated : t)))
+      reloadTasks() // trigger background refresh for other widgets
     } catch (error) {
       console.error('Error toggling task:', error)
     }

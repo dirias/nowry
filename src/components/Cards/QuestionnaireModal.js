@@ -29,6 +29,7 @@ import {
 } from '@mui/joy'
 import { CheckCircle, AlertCircle, HelpCircle, ChevronDown, Circle, XCircle, Plus } from 'lucide-react'
 import { decksService, cardsService } from '../../api/services'
+import { useDeckData } from '../../hooks/useDeckData'
 
 export default function QuestionnaireModal({ questions = [], onCancel }) {
   const [step, setStep] = useState('select_questions') // 'select_questions' | 'select_deck'
@@ -44,10 +45,13 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
   const [saving, setSaving] = useState(false)
   const [loadingDecks, setLoadingDecks] = useState(false)
 
+  const { decks: cacheDecks, loading: hookDecksLoading, reload: reloadDecks } = useDeckData()
+
   const loadDecks = async () => {
     try {
       setLoadingDecks(true)
-      const data = await decksService.getAll()
+      if (hookDecksLoading) return
+      const data = cacheDecks || []
       // Filter for QUIZ decks
       const quizDecks = data.filter((d) => d.deck_type === 'quiz')
       setDecks(quizDecks)
@@ -83,6 +87,7 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
       setSelectedDeckId(newDeck._id)
       setNewDeckName('')
       setIsCreatingDeck(false)
+      reloadDecks()
     } catch (error) {
       console.error('Error creating deck:', error)
     } finally {

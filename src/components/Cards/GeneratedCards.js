@@ -21,6 +21,7 @@ import {
 } from '@mui/joy'
 import { BookOpen, RefreshCw, Layers, Plus } from 'lucide-react'
 import { decksService, cardsService } from '../../api/services'
+import { useDeckData } from '../../hooks/useDeckData'
 
 export default function GeneratedCards({ cards = [], book, onCancel, onGenerateAgain }) {
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
@@ -34,15 +35,18 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
   const [isCreatingDeck, setIsCreatingDeck] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  const { decks: cacheDecks, loading: hookDecksLoading, reload: reloadDecks } = useDeckData()
+
   useEffect(() => {
     if (step === 'select_deck') {
       loadDecks()
     }
-  }, [step])
+  }, [step, hookDecksLoading, cacheDecks])
 
   const loadDecks = async () => {
     try {
-      const data = await decksService.getAll()
+      if (hookDecksLoading) return
+      const data = cacheDecks || []
       // Filter Flashcard decks (explicit 'flashcard' or missing type for legacy)
       const flashcardDecks = data.filter((d) => d.deck_type === 'flashcard' || !d.deck_type)
       setDecks(flashcardDecks)
@@ -86,6 +90,7 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
       setSelectedDeckId(newDeck._id) // Auto-select new deck
       setNewDeckName('')
       setIsCreatingDeck(false)
+      reloadDecks()
     } catch (error) {
       console.error('Error creating deck:', error)
     } finally {

@@ -1,51 +1,32 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Card, CardContent, CircularProgress, Stack, Chip } from '@mui/joy'
+import { Box, Typography, Card, CardContent, Stack, Chip, Skeleton } from '@mui/joy'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { cardsService } from '../../../api/services'
+import { useStatistics } from '../../../hooks/useStatistics'
 
 export default function WeeklyProgress() {
   const { t } = useTranslation()
-  const [weeklyData, setWeeklyData] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { statistics, loading } = useStatistics()
 
-  useEffect(() => {
-    fetchStatistics()
-  }, [])
-
-  const fetchStatistics = async () => {
-    try {
-      const stats = await cardsService.getStatistics()
-      let weeklyData = stats.weekly_progress || []
-
-      // Fallback: If old format (just 'cards'), convert to new format
-      weeklyData = weeklyData.map((day) => {
-        if (day.cards !== undefined && day.flashcards === undefined) {
-          // Old format - distribute evenly or treat all as flashcards
-          return {
-            ...day,
-            flashcards: day.cards || 0,
-            quizzes: 0,
-            visual: 0,
-            books: 0
-          }
-        }
-        return day
-      })
-
-      setWeeklyData(weeklyData)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching statistics:', error)
-      setLoading(false)
+  let weeklyData = statistics?.weekly_progress || []
+  weeklyData = weeklyData.map((day) => {
+    if (day.cards !== undefined && day.flashcards === undefined) {
+      return { ...day, flashcards: day.cards || 0, quizzes: 0, visual: 0, books: 0 }
     }
-  }
+    return day
+  })
 
   if (loading) {
     return (
       <Card variant='outlined' sx={{ height: '100%' }}>
-        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 350 }}>
-          <CircularProgress />
+        <CardContent sx={{ p: 3 }}>
+          <Skeleton variant='text' level='title-lg' width='50%' sx={{ mb: 3 }} />
+          <Skeleton variant='rectangular' height={250} sx={{ borderRadius: 'sm', mb: 2 }} />
+          <Stack direction='row' spacing={1} flexWrap='wrap'>
+            <Skeleton variant='rectangular' width={100} height={24} sx={{ borderRadius: 'sm' }} />
+            <Skeleton variant='rectangular' width={100} height={24} sx={{ borderRadius: 'sm' }} />
+            <Skeleton variant='rectangular' width={100} height={24} sx={{ borderRadius: 'sm' }} />
+          </Stack>
         </CardContent>
       </Card>
     )

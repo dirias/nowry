@@ -21,6 +21,7 @@ import {
 } from '@mui/joy'
 import { tasksService } from '../../api/services/tasks.service'
 import { annualPlanningService } from '../../api/services/annualPlanning.service'
+import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 
 // Type color map (must match CalendarModal TYPE_META)
 const TYPE_COLORS = {
@@ -77,10 +78,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const [goalId, setGoalId] = useState('')
 
   // Context for plan-based types
-  const [annualPlanId, setAnnualPlanId] = useState(null)
-  const [focusAreas, setFocusAreas] = useState([])
-  const [allGoals, setAllGoals] = useState([])
-  const [contextLoading, setContextLoading] = useState(false)
+  const { plan: cachedPlan, areas: cachedAreas, goals: cachedGoals, loading: hookLoading } = useAnnualPlan()
 
   // Save state
   const [saving, setSaving] = useState(false)
@@ -109,40 +107,11 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
 
   // ── Fetch annual plan context only when needed ────────────────────────────
   // Only goal and activity creation need focus-area/goal selectors.
-  // We fetch lazily to avoid 3-5 API calls when the user just wants to create a task.
   const needsContext = !isEdit && (type === 'goal' || type === 'activity')
-
-  useEffect(() => {
-    if (!open || !needsContext) return
-    // Avoid refetching if we already have data
-    if (focusAreas.length > 0 || allGoals.length > 0) return
-
-    const fetchContext = async () => {
-      setContextLoading(true)
-      try {
-        const plan = await annualPlanningService.getAnnualPlan(new Date().getFullYear())
-        if (plan?._id) {
-          setAnnualPlanId(plan._id)
-          const [areas, prioritiesResult] = await Promise.allSettled([
-            annualPlanningService.getFocusAreas(plan._id),
-            annualPlanningService.getPriorities(plan._id)
-          ])
-          const areaList = areas.status === 'fulfilled' && Array.isArray(areas.value) ? areas.value : []
-          setFocusAreas(areaList)
-
-          // Pre-load goals for activity creation selector
-          const goalResults = await Promise.allSettled(areaList.map((a) => annualPlanningService.getGoals(a._id)))
-          const goals = goalResults.flatMap((r) => (r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : []))
-          setAllGoals(goals)
-        }
-      } catch (_) {
-        /* annual plan may not exist; silently skip */
-      } finally {
-        setContextLoading(false)
-      }
-    }
-    fetchContext()
-  }, [open, needsContext])
+  const annualPlanId = cachedPlan?._id
+  const focusAreas = cachedAreas || []
+  const allGoals = cachedGoals || []
+  const contextLoading = hookLoading
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const activeType = isEdit ? event?.type || 'task' : type
