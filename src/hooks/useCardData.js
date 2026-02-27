@@ -1,17 +1,11 @@
 /**
  * useCardData — Shared hook for cardsService.getAll()
  *
- * Problem it solves:
- *   Home.js calls cardsService.getAll() to count due cards.
- *   CardHome.js then calls cardsService.getAll() again if the user navigates to /cards.
- *   That's two massive identical payloads downloaded within seconds.
- *
- * Solution:
- *   Cache the result for 30 seconds. The second page load returns instantly.
- *
- * Invalidate after completing study sessions or editing cards:
- *   import { apiCache } from '../api/utils/cache'
- *   apiCache.invalidate('cards:all')
+ * Pre-seeds state from the in-memory cache synchronously so that
+ * navigating back to Home renders existing data instantly (no flash
+ * of empty state). When the cache is cold, fires one fetch and stores
+ * the result. Concurrent callers share the same in-flight Promise via
+ * the deduplication in apiCache.get().
  */
 
 import { useState, useEffect } from 'react'
@@ -21,36 +15,49 @@ import { apiCache } from '../api/utils/cache'
 const CACHE_KEY = 'cards:all'
 const CACHE_TTL = 30000 // 30 seconds
 
+/** Read current cached value without triggering a fetch. */
+function readCache() {
+  // Access the internal store by calling get() with a 0-TTL sentinel
+  // is tricky — instead we expose a helper on apiCache below.
+  return apiCache.peek(CACHE_KEY)
+}
+
 export function useCardData() {
-  const [cards, setCards] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Pre-seed from cache so the component renders real data on remount
+  const [cards, setCards] = useState(() => readCache() ?? [])
+  const [loading, setLoading] = useState(() => readCache() === null)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     let cancelled = false
 
-    apiCache
-      .get(CACHE_KEY, CACHE_TTL, () => cardsService.getAll())
-      .then((data) => {
+    const load = async () => {
+      // If we already pre-seeded from cache, we can skip the loading spinner
+      const preloaded = apiCache.peek(CACHE_KEY)
+      if (!preloaded) setLoading(true)
+
+      try {
+        const data = await apiCache.get(CACHE_KEY, CACHE_TTL, () => cardsService.getAll())
         if (!cancelled) {
           setCards(data)
-          setLoading(false)
+          setError(null)
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         if (!cancelled) {
           console.error('[useCardData] Error:', err)
           setError(err)
-          setLoading(false)
         }
-      })
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
 
+    load()
     return () => {
       cancelled = true
     }
   }, [])
 
-  // Explicit reload function if a consumer needs to force a fresh fetch
   const reload = async () => {
     setLoading(true)
     apiCache.invalidate(CACHE_KEY)
@@ -61,7 +68,7 @@ export function useCardData() {
     } catch (err) {
       setError(err)
     } finally {
-      if (!loading) setLoading(false) // just to trigger re-render if needed
+      setLoading(false)
     }
   }
 

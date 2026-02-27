@@ -31,20 +31,7 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
         (v) => v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Natural')
       )
       const finalVoices = naturalVoices.length > 0 ? naturalVoices : allVoices
-
       setVoices(finalVoices)
-
-      // Initial selection (only if no saved voiceSettings provided)
-      if (finalVoices.length > 0 && !voiceSettings) {
-        const defaultVoice = finalVoices.find((v) => v.lang.startsWith('en')) || finalVoices[0]
-        setSelectedVoice((prev) => {
-          if (prev) return prev // don't override if already selected
-          ttsService.setVoice(defaultVoice)
-          return defaultVoice
-        })
-        setRate(1.0)
-        setVolume(1.0)
-      }
     }
 
     // onVoicesReady calls immediately if voices are already loaded,
@@ -53,13 +40,38 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
     return cleanup
   }, []) // onVoicesReady is stable (singleton), safe to omit from deps
 
-  // Sync with prop changes (Controlled Mode)
+  // ─── Unified voice-settings sync ────────────────────────────────────────────
+  // This single effect handles BOTH "voices just loaded" AND "voiceSettings just
+  // arrived from the hook" by depending on both. Whichever arrives last triggers
+  // the match.
   useEffect(() => {
-    if (voiceSettings && voices.length > 0) {
+    if (!voices.length) return // voices not ready yet
+
+    if (voiceSettings) {
       const targetVoice = voiceSettings.voiceName || voiceSettings.voice_name
 
       if (targetVoice) {
-        const matchedVoice = voices.find((v) => v.name === targetVoice)
+        // Try exact name match first (works on desktop Chrome)
+        let matchedVoice = voices.find((v) => v.name === targetVoice)
+
+        // Fallback: match by language. e.g. "Google 日本語" → look for any ja-* voice.
+        // This is critical for mobile where Google voices don't exist.
+        if (!matchedVoice) {
+          // Try to detect the language from the saved voice name by checking ALL
+          // system voices (not just filtered ones) for the original name.
+          const allSystemVoices = ttsService.getVoices()
+          const originalVoice = allSystemVoices.find((v) => v.name === targetVoice)
+          if (originalVoice) {
+            // Found the original voice in full list — match by language code
+            const targetLang = originalVoice.lang.split('-')[0]
+            matchedVoice = voices.find((v) => v.lang.startsWith(targetLang))
+          } else {
+            // Voice not in system at all — try partial name matching or language guess
+            // Common pattern: "Google 日本語" → lang "ja", "Google Deutsch" → lang "de"
+            matchedVoice = voices.find((v) => targetVoice.toLowerCase().includes(v.lang.split('-')[0]))
+          }
+        }
+
         if (matchedVoice) {
           setSelectedVoice(matchedVoice)
           ttsService.setVoice(matchedVoice)
@@ -71,7 +83,12 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
       }
       if (voiceSettings.autoPlay !== undefined) setAutoPlay(voiceSettings.autoPlay)
       else if (voiceSettings.auto_play !== undefined) setAutoPlay(voiceSettings.auto_play)
-      // Volume is usually global preference, but we can adhere if passed
+    } else if (!selectedVoice && voices.length > 0) {
+      // No saved settings at all — pick a sensible default
+      const defaultVoice = voices.find((v) => v.lang.startsWith('en')) || voices[0]
+      setSelectedVoice(defaultVoice)
+      ttsService.setVoice(defaultVoice)
+      setRate(1.0)
     }
   }, [voiceSettings, voices])
 

@@ -7,12 +7,14 @@ const CACHE_KEY = 'tasks:all'
 const CACHE_TTL = 30000 // 30 seconds
 
 export function useTaskData() {
-  const [tasks, setTasks] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Pre-seed from cache so remounting home shows data instantly
+  const [tasks, setTasks] = useState(() => apiCache.peek(CACHE_KEY) ?? [])
+  const [loading, setLoading] = useState(() => apiCache.peek(CACHE_KEY) === null)
   const [error, setError] = useState(null)
 
   const load = async (isCancelled = () => false) => {
-    setLoading(true)
+    const preloaded = apiCache.peek(CACHE_KEY)
+    if (!preloaded) setLoading(true)
     setError(null)
     try {
       const data = await apiCache.get(CACHE_KEY, CACHE_TTL, () => tasksService.getAll())

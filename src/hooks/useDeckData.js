@@ -7,12 +7,14 @@ const CACHE_KEY = 'decks:all'
 const CACHE_TTL = 60000 // 60 seconds
 
 export function useDeckData() {
-  const [decks, setDecks] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Pre-seed from cache so remounting shows data instantly
+  const [decks, setDecks] = useState(() => apiCache.peek(CACHE_KEY) ?? [])
+  const [loading, setLoading] = useState(() => apiCache.peek(CACHE_KEY) === null)
   const [error, setError] = useState(null)
 
   const load = async (isCancelled = () => false) => {
-    setLoading(true)
+    const preloaded = apiCache.peek(CACHE_KEY)
+    if (!preloaded) setLoading(true)
     setError(null)
     try {
       const data = await apiCache.get(CACHE_KEY, CACHE_TTL, () => decksService.getAll())

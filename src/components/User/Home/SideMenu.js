@@ -30,6 +30,10 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { tasksService, annualPlanningService } from '../../../api/services'
 import { useTaskData } from '../../../hooks/useTaskData'
+import { apiCache } from '../../../api/utils/cache'
+
+const ROUTINE_CACHE_KEY = 'dailyRoutine'
+const ROUTINE_TTL = 2 * 60000 // 2 minutes
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 const LISTS_KEY = 'nowry_task_lists'
@@ -112,7 +116,7 @@ const SideMenu = () => {
   const loadData = async () => {
     try {
       setLoading(true)
-      const routineData = await annualPlanningService.getDailyRoutine()
+      const routineData = await apiCache.get(ROUTINE_CACHE_KEY, ROUTINE_TTL, () => annualPlanningService.getDailyRoutine())
       setTasks(tasksData)
       setRoutine(routineData)
       // Seed completion state from backend (cross-device sync + midnight reset via date key)

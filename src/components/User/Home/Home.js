@@ -102,7 +102,7 @@ function Home() {
           <Skeleton variant='rectangular' width={120} height={32} sx={{ borderRadius: 'sm', flexShrink: 0 }} />
         ) : studyStats.dueCount > 0 ? (
           <Box
-            onClick={() => navigate('/study')}
+            onClick={() => navigate('/study/daily-review')}
             sx={{
               cursor: 'pointer',
               transition: 'all 0.2s ease',
