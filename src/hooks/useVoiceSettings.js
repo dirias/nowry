@@ -103,7 +103,7 @@ export function useVoiceSettings(deckId) {
     return () => {
       cancelled = true
     }
-  }, [deckId])
+  }, [deckId, cacheDecks, hookDecksLoading])
 
   /**
    * Look up per-deck settings in daily-review mode.
