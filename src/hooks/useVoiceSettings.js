@@ -19,9 +19,10 @@ import { useDeckData } from './useDeckData'
 
 /** Read a voice_settings side (front/back) from whatever format the backend returns. */
 function normalizeSide(raw) {
-  if (!raw) return { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false }
+  if (!raw) return { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
   return {
     voiceName: raw.voiceName || raw.voice_name || raw.voice || null,
+    voiceLang: raw.voiceLang || raw.voice_lang || null, // BCP-47 code, e.g. "ja-JP"
     rate: raw.rate ?? 1.0,
     pitch: raw.pitch ?? 1.0,
     autoPlay: raw.autoPlay ?? raw.auto_play ?? false
@@ -32,6 +33,7 @@ function normalizeSide(raw) {
 function serializeSide(side) {
   return {
     voice_name: side.voiceName || null,
+    voice_lang: side.voiceLang || null, // persisted so any device can match by language
     rate: side.rate ?? 1.0,
     pitch: side.pitch ?? 1.0,
     auto_play: side.autoPlay ?? false
@@ -39,8 +41,8 @@ function serializeSide(side) {
 }
 
 const DEFAULT_SETTINGS = {
-  front: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false },
-  back: { voiceName: null, rate: 1.0, pitch: 1.0, autoPlay: false }
+  front: { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false },
+  back: { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
