@@ -96,6 +96,8 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
   const [rate, setRate] = useState(1.0)
   const [autoPlay, setAutoPlay] = useState(false)
   const [internalShowSettings, setInternalShowSettings] = useState(false)
+  // Tracks whether the user has ever initiated playback – required for auto‑play on mobile browsers
+  const [userInitiated, setUserInitiated] = useState(false)
 
   const isSettingsOpen = settingsOpen !== undefined ? settingsOpen : internalShowSettings
   const setSettingsOpen = onSettingsChange || setInternalShowSettings
@@ -146,14 +148,17 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
 
   // ── Auto-play effect ───────────────────────────────────────────────────────
   useEffect(() => {
-    if (autoPlay && text && !isPlaying && allVoices.length > 0) {
+    // Auto‑play is only allowed after a user interaction (required on iOS/Android)
+    if (autoPlay && text && !isPlaying && allVoices.length > 0 && userInitiated) {
       handlePlay()
     }
-  }, [text, autoPlay, allVoices.length])
+  }, [text, autoPlay, allVoices.length, userInitiated])
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handlePlay = () => {
     if (!text) return
+    // Mark that the user has initiated playback – this satisfies the user‑gesture requirement on mobile
+    setUserInitiated(true)
     ttsService.speak(text, {
       rate,
       onStart: () => setIsPlaying(true),
@@ -193,6 +198,8 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
   const handleAutoPlayChange = (e) => {
     const newVal = e.target.checked
     setAutoPlay(newVal)
+    // Enabling auto‑play is a user gesture, so mark interaction
+    if (newVal) setUserInitiated(true)
     if (onVoiceSettingsChange) {
       onVoiceSettingsChange({ voiceName: selectedVoice?.name, voiceLang: selectedVoice?.lang, rate, pitch: 1.0, autoPlay: newVal })
     }
