@@ -45,8 +45,11 @@ const FocusBar = () => {
       return priority
     })
 
-    const withDeadline = enriched.filter((p) => p.deadline).sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-    const withoutDeadline = enriched.filter((p) => !p.deadline)
+    // Only show active (non-completed) priorities in the bar and selection modal
+    const active = enriched.filter((p) => !p.is_completed)
+
+    const withDeadline = active.filter((p) => p.deadline).sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    const withoutDeadline = active.filter((p) => !p.deadline)
     const sorted = [...withDeadline, ...withoutDeadline]
 
     setAllPriorities(sorted)

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { userService } from '../api/services'
+import { apiCache } from '../api/utils/cache'
 import { useAuth } from './AuthContext'
 import { playPomodoroNotification, showBrowserNotification } from '../utils/pomodoroSound'
 
@@ -93,8 +94,10 @@ export const PomodoroProvider = ({ children }) => {
     const fetchPreferences = async () => {
       if (user) {
         try {
-          const profile = await userService.getProfile()
-          if (profile.preferences) {
+          // Use the shared cache key so we reuse data already fetched by useAnnualPlan
+          // instead of firing a duplicate /users/profile network request.
+          const profile = await apiCache.get('annual:profile', 60 * 1000, () => userService.getProfile().catch(() => null))
+          if (profile?.preferences) {
             setSettings({
               work: profile.preferences.pomodoro_work_minutes || 25,
               shortBreak: profile.preferences.pomodoro_short_break_minutes || 5,

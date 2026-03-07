@@ -7,6 +7,11 @@ export const annualPlanningService = {
     const { data } = await apiClient.get(ENDPOINTS.annualPlan.get, { params: { year } })
     return data
   },
+  /** Single-request aggregation: returns { plan, focus_areas, priorities, goals } */
+  async getFullAnnualPlan(year) {
+    const { data } = await apiClient.get(ENDPOINTS.annualPlan.full, { params: { year } })
+    return data
+  },
   async createAnnualPlan(planData) {
     const { data } = await apiClient.post(ENDPOINTS.annualPlan.create, planData)
     return data

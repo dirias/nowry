@@ -43,7 +43,9 @@ import {
 } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
+import { apiCache } from '../../api/utils/cache'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { useAuth } from '../../context/AuthContext'
 import GoalDialog from './GoalDialog'
 import PriorityList from './PriorityList'
 
@@ -51,7 +53,15 @@ const FocusAreaView = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { plan, goals: allGoals, priorities: allPriorities, areas: allAreas, loading: hookLoading, reload } = useAnnualPlan()
+  const { user } = useAuth()
+  const {
+    plan,
+    goals: allGoals,
+    priorities: allPriorities,
+    areas: allAreas,
+    loading: hookLoading,
+    reload
+  } = useAnnualPlan(new Date().getFullYear(), user)
 
   const [area, setArea] = useState(null)
   const [priorities, setPriorities] = useState([])
@@ -99,9 +109,12 @@ const FocusAreaView = () => {
     setLoading(false)
   }, [id, hookLoading, plan, allAreas, allGoals, allPriorities])
 
-  // We keep a dummy fetchData for compatibility with functions that call it
+  // Invalidate cache for the current area's goals then force a fresh reload
   const fetchData = async () => {
-    // Background refresh
+    apiCache.invalidatePrefix('goals:')
+    apiCache.invalidatePrefix('focusAreas:')
+    apiCache.invalidatePrefix('annualPlan:')
+    apiCache.invalidatePrefix('annualPlanFull:')
     reload()
   }
 
@@ -139,11 +152,47 @@ const FocusAreaView = () => {
       }
     }
 
+    // Snapshot original priority state for linked priorities BEFORE the optimistic update
+    // so we can accurately revert to the real original values if the API call fails.
+    const originalPriorityStates = new Map(
+      priorities
+        .filter((p) => p.linked_entity_type === 'goal' && p.linked_entity_id === goal._id)
+        .map((p) => [p._id, { is_completed: p.is_completed, completed_at: p.completed_at }])
+    )
+
+    // Optimistic update — instant UI response, no hook reload needed
+    setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: newStatus } : g)))
+
+    // Cascade to linked priorities optimistically:
+    // completing a goal archives its priorities; un-completing reactivates them.
+    setPriorities((prev) =>
+      prev.map((p) =>
+        p.linked_entity_type === 'goal' && p.linked_entity_id === goal._id
+          ? {
+              ...p,
+              is_completed: newStatus === 'completed',
+              completed_at: newStatus === 'completed' ? new Date().toISOString() : null
+            }
+          : p
+      )
+    )
+
     try {
       await annualPlanningService.updateGoal(goal._id, { ...goal, status: newStatus })
-      fetchData()
+      // Silent cache invalidation so next navigation gets fresh data
+      apiCache.invalidatePrefix('goals:')
+      apiCache.invalidatePrefix('focusAreas:')
+      apiCache.invalidatePrefix('annualPlanFull:')
     } catch (error) {
       console.error('Failed to update status:', error)
+      // Revert both optimistic updates to their exact original values
+      setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: goal.status } : g)))
+      setPriorities((prev) =>
+        prev.map((p) => {
+          const original = originalPriorityStates.get(p._id)
+          return original ? { ...p, ...original } : p
+        })
+      )
     }
   }
 
@@ -209,22 +258,32 @@ const FocusAreaView = () => {
   }
 
   const handleToggleMilestone = async (goal, milestoneIndex) => {
-    try {
-      const updatedMilestones = [...goal.milestones]
-      updatedMilestones[milestoneIndex] = {
-        ...updatedMilestones[milestoneIndex],
-        completed: !updatedMilestones[milestoneIndex].completed
-      }
+    // Milestones are locked once the goal is completed — unchecking would create
+    // an inconsistency (completed goal with incomplete milestones).
+    if (goal.status === 'completed') return
 
+    const updatedMilestones = [...goal.milestones]
+    updatedMilestones[milestoneIndex] = {
+      ...updatedMilestones[milestoneIndex],
+      completed: !updatedMilestones[milestoneIndex].completed
+    }
+
+    // Optimistic update — instant UI response, no hook reload needed
+    setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, milestones: updatedMilestones } : g)))
+
+    try {
       await annualPlanningService.updateGoal(goal._id, {
         ...goal,
         milestones: updatedMilestones
       })
-
-      // Refresh data to update progress
-      await fetchData()
+      // Silent cache invalidation — next navigation gets fresh data,
+      // but we skip the reload since the optimistic state is already correct.
+      apiCache.invalidatePrefix('goals:')
+      apiCache.invalidatePrefix('focusAreas:')
     } catch (error) {
       console.error('Failed to update milestone:', error)
+      // Revert optimistic update on failure
+      setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, milestones: goal.milestones } : g)))
     }
   }
 
@@ -564,6 +623,7 @@ const FocusAreaView = () => {
                   {goal.milestones.map((milestone, idx) => (
                     <Box
                       key={idx}
+                      title={goal.status === 'completed' ? 'Milestones are locked while the goal is completed' : undefined}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -571,42 +631,78 @@ const FocusAreaView = () => {
                         py: 0.75,
                         px: 1,
                         borderRadius: 'sm',
-                        cursor: 'pointer',
+                        cursor: goal.status === 'completed' ? 'not-allowed' : 'pointer',
                         transition: 'all 0.2s',
-                        '&:hover': { bgcolor: 'background.level1' }
+                        opacity: goal.status === 'completed' ? 0.65 : 1,
+                        '&:hover': goal.status === 'completed' ? {} : { bgcolor: 'background.level1' }
                       }}
                       onClick={(e) => {
                         e.stopPropagation()
                         handleToggleMilestone(goal, idx)
                       }}
                     >
-                      <Box
-                        sx={{
-                          width: 14,
-                          height: 14,
-                          border: `1.5px solid ${area?.color || 'var(--joy-palette-danger-solidBg)'}`,
-                          borderRadius: '2px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: milestone.completed ? area?.color || 'var(--joy-palette-danger-solidBg)' : 'transparent',
-                          flexShrink: 0,
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        {milestone.completed && (
+                      {/* Checkbox — shows lock icon overlay when goal is completed */}
+                      <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                        <Box
+                          sx={{
+                            width: 14,
+                            height: 14,
+                            border: `1.5px solid ${area?.color || 'var(--joy-palette-danger-solidBg)'}`,
+                            borderRadius: '2px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: milestone.completed ? area?.color || 'var(--joy-palette-danger-solidBg)' : 'transparent',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {milestone.completed && (
+                            <Box
+                              component='svg'
+                              width='8'
+                              height='8'
+                              viewBox='0 0 24 24'
+                              fill='none'
+                              stroke='white'
+                              strokeWidth='4'
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                            >
+                              <polyline points='20 6 9 17 4 12' />
+                            </Box>
+                          )}
+                        </Box>
+                        {/* Lock badge — only visible when goal is completed */}
+                        {goal.status === 'completed' && (
                           <Box
-                            component='svg'
-                            width='8'
-                            height='8'
-                            viewBox='0 0 24 24'
-                            fill='none'
-                            stroke='white'
-                            strokeWidth='4'
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
+                            sx={{
+                              position: 'absolute',
+                              bottom: -3,
+                              right: -4,
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: 'background.surface',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
                           >
-                            <polyline points='20 6 9 17 4 12' />
+                            <Box
+                              component='svg'
+                              width='6'
+                              height='6'
+                              viewBox='0 0 24 24'
+                              fill='none'
+                              stroke='currentColor'
+                              strokeWidth='2.5'
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              sx={{ color: 'text.tertiary' }}
+                            >
+                              <rect x='3' y='11' width='18' height='11' rx='2' ry='2' />
+                              <path d='M7 11V7a5 5 0 0 1 10 0v4' />
+                            </Box>
                           </Box>
                         )}
                       </Box>

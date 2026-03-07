@@ -1,31 +1,17 @@
 /**
  * useAnnualPlan — Extended shared hook for annual planning data.
  *
- * Improvements over the original:
- *   1. Fetches priorities (were missing from the original).
- *   2. getProfile() now runs IN PARALLEL with getAnnualPlan() — not after.
- *   3. Returns enriched focusAreas (with progress + goals array) for FocusBar.
- *   4. Returns preferredPriorityIds from user profile preferences.
- *   5. Same apiCache integration and TTL as the original.
+ * Primary path: single GET /annual-plan/full request returns plan + focus_areas +
+ * priorities + all goals in one round-trip, replacing a 3-level waterfall:
  *
- * Before (waterfall):
- *   getAnnualPlan()
- *    → getFocusAreas + getPriorities
- *      → N × getGoals
- *        → getProfile()   ← unnecessary delay
+ *   Before: /annual-plan → /focus-areas + /priorities → /goals × N  (3 sequential levels)
+ *   After:  /annual-plan/full                                         (1 request)
  *
- * After:
- *   getAnnualPlan() ─┐
- *   getProfile()    ─┘  concurrent
- *    → getFocusAreas + getPriorities
- *      → N × getGoals (parallel)
+ * Fallback: if /full returns 404 (e.g. backend not yet deployed), the hook
+ * transparently falls back to the original multi-request path so nothing breaks.
  *
- * Invalidate on mutations:
- *   import { apiCache } from '../api/utils/cache'
- *   apiCache.invalidatePrefix('annualPlan:')
- *   apiCache.invalidatePrefix('focusAreas:')
- *   apiCache.invalidatePrefix('goals:')
- *   apiCache.invalidate('annual:profile')
+ * Accepts optional preloadedUser from AuthContext to skip the /users/profile
+ * round-trip (seeds the apiCache so it's a cache hit).
  */
 
 import { useState, useEffect } from 'react'
@@ -49,17 +35,10 @@ function calcAreaProgress(goals) {
 
 /**
  * @param {number} year - Year to fetch (defaults to current year)
- * @returns {{
- *   plan: object|null,
- *   focusAreas: object[],  // enriched with .progress and .goals array
- *   goals: object[],        // flat list of all goals across all areas
- *   priorities: object[],
- *   preferredPriorityIds: string[],
- *   loading: boolean,
- *   error: Error|null
- * }}
+ * @param {object|null} [preloadedUser] - Optional user object from AuthContext.
+ *   When provided, skips the /users/profile network request entirely.
  */
-export const useAnnualPlan = (year = new Date().getFullYear()) => {
+export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = null) => {
   const [plan, setPlan] = useState(null)
   const [focusAreas, setFocusAreas] = useState([])
   const [goals, setGoals] = useState([])
@@ -72,49 +51,89 @@ export const useAnnualPlan = (year = new Date().getFullYear()) => {
     setLoading(true)
     setError(null)
     try {
-      // Level 1: plan + profile fire concurrently — profile doesn't depend on plan
-      const [fetchedPlan, profile] = await Promise.all([
-        apiCache.get(`annualPlan:${year}`, PLAN_TTL, () => annualPlanningService.getAnnualPlan(year)),
+      // Seed profile cache from AuthContext user to avoid a duplicate /users/profile request
+      if (preloadedUser) {
+        apiCache.get('annual:profile', PROFILE_TTL, () => Promise.resolve(preloadedUser))
+      }
+
+      // Fire profile + full plan concurrently
+      const [full, profile] = await Promise.all([
+        apiCache.get(`annualPlanFull:${year}`, PLAN_TTL, () => annualPlanningService.getFullAnnualPlan(year)),
         apiCache.get('annual:profile', PROFILE_TTL, () => userService.getProfile().catch(() => null))
       ])
       if (isCancelled()) return
 
       const preferredIds = profile?.preferences?.homepage_priority_ids || []
       setPreferredPriorityIds(preferredIds)
+
+      const fetchedPlan = full.plan
+      const areasArr = Array.isArray(full.focus_areas) ? full.focus_areas : []
+      const allGoalsList = Array.isArray(full.goals) ? full.goals : []
+      const fetchedPriorities = Array.isArray(full.priorities) ? full.priorities : []
+
       setPlan(fetchedPlan)
+      setPriorities(fetchedPriorities)
 
-      if (!fetchedPlan?._id) {
-        setLoading(false)
-        return
-      }
-
-      // Level 2: areas + priorities in parallel
-      const [fetchedAreas, fetchedPriorities] = await Promise.all([
-        apiCache.get(`focusAreas:${fetchedPlan._id}`, PLAN_TTL, () => annualPlanningService.getFocusAreas(fetchedPlan._id)),
-        apiCache.get(`priorities:${fetchedPlan._id}`, PLAN_TTL, () => annualPlanningService.getPriorities(fetchedPlan._id))
-      ])
-      if (isCancelled()) return
-
-      const areasArr = Array.isArray(fetchedAreas) ? fetchedAreas : []
-      setPriorities(Array.isArray(fetchedPriorities) ? fetchedPriorities : [])
-
-      // Level 3: goals for every area, all in parallel
-      const goalResults = await Promise.allSettled(
-        areasArr.map((area) => apiCache.get(`goals:${area._id}`, PLAN_TTL, () => annualPlanningService.getGoals(area._id)))
-      )
-      if (isCancelled()) return
-
+      // Enrich areas with their goals + progress (same shape as before)
       const allGoals = []
-      const enrichedAreas = areasArr.map((area, i) => {
-        const areaGoals = goalResults[i].status === 'fulfilled' ? goalResults[i].value || [] : []
-        areaGoals.forEach((g) => allGoals.push({ ...g, focus_area_id: area._id || area.id }))
+      const enrichedAreas = areasArr.map((area) => {
+        const areaId = area._id || area.id
+        const areaGoals = allGoalsList
+          .filter((g) => g.focus_area_id === areaId || g.focus_area_id?._id === areaId)
+          .map((g) => ({ ...g, focus_area_id: areaId }))
+        areaGoals.forEach((g) => allGoals.push(g))
         return { ...area, progress: calcAreaProgress(areaGoals), goals: areaGoals }
       })
 
       setFocusAreas(enrichedAreas)
       setGoals(allGoals)
     } catch (err) {
-      if (!isCancelled()) setError(err)
+      if (isCancelled()) return
+      // Fallback: /full endpoint not available yet — use legacy multi-request path
+      if (err?.response?.status === 404 || err?.response?.status === 405) {
+        try {
+          const [fetchedPlan, profile] = await Promise.all([
+            apiCache.get(`annualPlan:${year}`, PLAN_TTL, () => annualPlanningService.getAnnualPlan(year)),
+            apiCache.get('annual:profile', PROFILE_TTL, () => userService.getProfile().catch(() => null))
+          ])
+          if (isCancelled()) return
+
+          setPreferredPriorityIds(profile?.preferences?.homepage_priority_ids || [])
+          setPlan(fetchedPlan)
+
+          if (!fetchedPlan?._id) {
+            setLoading(false)
+            return
+          }
+
+          const [fetchedAreas, fetchedPriorities] = await Promise.all([
+            apiCache.get(`focusAreas:${fetchedPlan._id}`, PLAN_TTL, () => annualPlanningService.getFocusAreas(fetchedPlan._id)),
+            apiCache.get(`priorities:${fetchedPlan._id}`, PLAN_TTL, () => annualPlanningService.getPriorities(fetchedPlan._id))
+          ])
+          if (isCancelled()) return
+
+          const areasArr = Array.isArray(fetchedAreas) ? fetchedAreas : []
+          setPriorities(Array.isArray(fetchedPriorities) ? fetchedPriorities : [])
+
+          const goalResults = await Promise.allSettled(
+            areasArr.map((area) => apiCache.get(`goals:${area._id}`, PLAN_TTL, () => annualPlanningService.getGoals(area._id)))
+          )
+          if (isCancelled()) return
+
+          const allGoals = []
+          const enrichedAreas = areasArr.map((area, i) => {
+            const areaGoals = goalResults[i].status === 'fulfilled' ? goalResults[i].value || [] : []
+            areaGoals.forEach((g) => allGoals.push({ ...g, focus_area_id: area._id || area.id }))
+            return { ...area, progress: calcAreaProgress(areaGoals), goals: areaGoals }
+          })
+          setFocusAreas(enrichedAreas)
+          setGoals(allGoals)
+        } catch (fallbackErr) {
+          if (!isCancelled()) setError(fallbackErr)
+        }
+      } else {
+        setError(err)
+      }
     } finally {
       if (!isCancelled()) setLoading(false)
     }

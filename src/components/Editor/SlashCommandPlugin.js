@@ -236,9 +236,23 @@ export default function SlashCommandPlugin() {
               if (domSelection && domSelection.rangeCount > 0) {
                 const domRange = domSelection.getRangeAt(0)
                 const rect = domRange.getBoundingClientRect()
+                // Use fixed positioning with pure viewport coords — no scroll offset needed.
+                // Smart flip: if there isn't enough space below, place the menu above the cursor.
+                // This is the same technique used by Floating UI / Tippy.js / Notion.
+                const viewportWidth = window.innerWidth
+                const viewportHeight = window.innerHeight
+                const menuWidth = 320
+                // Estimate menu height: ~56px per visible item + 42px hint footer, capped at 60vh
+                const estimatedMenuHeight = Math.min(filteredCommandsRef.current.length * 56 + 42, viewportHeight * 0.6)
+                const spaceBelow = viewportHeight - rect.bottom - 8
+                const spaceAbove = rect.top - 8
+                const flipUp = spaceBelow < estimatedMenuHeight && spaceAbove > spaceBelow
+
+                const clampedLeft = Math.min(rect.left, viewportWidth - menuWidth - 16)
                 setMenuPosition({
-                  top: rect.bottom + window.scrollY + 4,
-                  left: rect.left + window.scrollX
+                  top: flipUp ? rect.top - estimatedMenuHeight - 4 : rect.bottom + 4,
+                  left: Math.max(8, clampedLeft),
+                  flipUp
                 })
                 setMenuVisible(true)
                 return
@@ -414,7 +428,7 @@ export default function SlashCommandPlugin() {
       role='listbox'
       aria-label={t('editor.slashCommands.menuLabel', 'Formatting commands')}
       sx={{
-        position: 'absolute',
+        position: 'fixed',
         top: menuPosition.top,
         left: menuPosition.left,
         zIndex: 9999,
@@ -422,6 +436,8 @@ export default function SlashCommandPlugin() {
         borderRadius: 'md',
         minWidth: 280,
         maxWidth: 320,
+        maxHeight: '60vh',
+        overflowY: 'auto',
         bgcolor: 'background.surface',
         border: '1px solid',
         borderColor: 'neutral.outlinedBorder',

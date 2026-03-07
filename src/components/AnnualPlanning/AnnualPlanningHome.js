@@ -35,6 +35,7 @@ import {
 import { annualPlanningService } from '../../api/services'
 import { apiCache } from '../../api/utils/cache'
 import useAnnualPlan from '../../hooks/useAnnualPlan'
+import { useAuth } from '../../context/AuthContext'
 import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
 
@@ -43,7 +44,8 @@ const AnnualPlanningHome = () => {
   const navigate = useNavigate()
 
   const year = new Date().getFullYear()
-  const { plan: hookPlan, focusAreas: hookAreas, goals: hookGoals, priorities: hookPriorities, loading } = useAnnualPlan(year)
+  const { user } = useAuth()
+  const { plan: hookPlan, focusAreas: hookAreas, goals: hookGoals, priorities: hookPriorities, loading } = useAnnualPlan(year, user)
 
   const [plan, setPlan] = useState(null)
   const [areas, setAreas] = useState([])
