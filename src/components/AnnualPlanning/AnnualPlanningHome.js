@@ -45,7 +45,7 @@ const AnnualPlanningHome = () => {
 
   const year = new Date().getFullYear()
   const { user } = useAuth()
-  const { plan: hookPlan, focusAreas: hookAreas, goals: hookGoals, priorities: hookPriorities, loading } = useAnnualPlan(year, user)
+  const { plan: hookPlan, focusAreas: hookAreas, goals: hookGoals, priorities: hookPriorities, loading, reload } = useAnnualPlan(year, user)
 
   const [plan, setPlan] = useState(null)
   const [areas, setAreas] = useState([])
@@ -112,10 +112,8 @@ const AnnualPlanningHome = () => {
   }
 
   const handleDeletePriority = () => {
-    // Refresh data after delete by invalidating cache and forcing re-render
-    apiCache.invalidatePrefix('priorities:')
-    // We could force a reload here if we had a dedicated trigger, but typically
-    // the mutation itself updates the UI, or we can just use a state toggle
+    // Re-fetch from server to reflect the deleted priority immediately
+    reload()
   }
 
   // Early return removed to allow skeleton placeholders over actual layout
@@ -538,8 +536,9 @@ const AnnualPlanningHome = () => {
         existingPriorities={priorities}
         editingPriority={editingPriority}
         onSuccess={() => {
-          apiCache.invalidatePrefix('priorities:')
-          // Force remount or hook reload would go here
+          reload()
+          setShowPriorityDialog(false)
+          setEditingPriority(null)
         }}
       />
     </Container>

@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { Box, Grid, Typography, Container, Button, IconButton, Tooltip, Skeleton } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
+import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded'
 import FocusBar from './FocusBar'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import WeeklyProgress from './WeeklyProgress'
 import StudyCalendar from './StudyCalendar'
 import CalendarModal from '../../Calendar/CalendarModal'
+import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '../../../context/AuthContext'
 import { cardsService, decksService } from '../../../api/services'
 import { useCardData } from '../../../hooks/useCardData'
@@ -20,6 +22,7 @@ function Home() {
   const navigate = useNavigate()
   const [studyStats, setStudyStats] = useState({ dueCount: 0, loading: true })
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [blackboardOpen, setBlackboardOpen] = useState(false)
 
   const motivationPhrase = useMemo(() => {
     const phrases = t('motivation.phrases', { returnObjects: true })
@@ -73,7 +76,7 @@ function Home() {
               {motivationPhrase}
             </Typography>
           </Box>
-          {/* Calendar Icon – minimalistic */}
+          {/* Calendar Icon */}
           <Tooltip title={t('calendarModal.tooltip')} size='sm' placement='bottom'>
             <IconButton
               size='sm'
@@ -93,6 +96,28 @@ function Home() {
               }}
             >
               <CalendarMonthRoundedIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+          {/* Blackboard Icon */}
+          <Tooltip title={t('blackboard.tooltip', 'Open Blackboard')} size='sm' placement='bottom'>
+            <IconButton
+              size='sm'
+              variant='plain'
+              color='neutral'
+              onClick={() => setBlackboardOpen(true)}
+              sx={{
+                '--IconButton-size': '32px',
+                borderRadius: 'sm',
+                border: '1px solid',
+                borderColor: 'divider',
+                transition: 'all 0.15s',
+                '&:hover': {
+                  bgcolor: 'background.level1',
+                  borderColor: 'primary.outlinedBorder'
+                }
+              }}
+            >
+              <PsychologyRoundedIcon sx={{ fontSize: 18 }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -189,6 +214,8 @@ function Home() {
 
       {/* Calendar Modal */}
       <CalendarModal open={calendarOpen} onClose={() => setCalendarOpen(false)} />
+      {/* Blackboard Modal */}
+      <BlackboardModal open={blackboardOpen} onClose={() => setBlackboardOpen(false)} />
     </Container>
   )
 }

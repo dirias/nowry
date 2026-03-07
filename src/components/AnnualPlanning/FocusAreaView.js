@@ -109,14 +109,9 @@ const FocusAreaView = () => {
     setLoading(false)
   }, [id, hookLoading, plan, allAreas, allGoals, allPriorities])
 
-  // Invalidate cache for the current area's goals then force a fresh reload
-  const fetchData = async () => {
-    apiCache.invalidatePrefix('goals:')
-    apiCache.invalidatePrefix('focusAreas:')
-    apiCache.invalidatePrefix('annualPlan:')
-    apiCache.invalidatePrefix('annualPlanFull:')
-    reload()
-  }
+  // Cache is busted by the service layer (_bustPlanCache) after every mutation.
+  // This just triggers a fresh fetch from the hook.
+  const fetchData = () => reload()
 
   const handleAddGoal = () => {
     setSelectedGoal(null)
@@ -179,10 +174,8 @@ const FocusAreaView = () => {
 
     try {
       await annualPlanningService.updateGoal(goal._id, { ...goal, status: newStatus })
-      // Silent cache invalidation so next navigation gets fresh data
-      apiCache.invalidatePrefix('goals:')
-      apiCache.invalidatePrefix('focusAreas:')
-      apiCache.invalidatePrefix('annualPlanFull:')
+      // Cache is busted by the service. Optimistic state is already correct,
+      // so no need to reload — just let the next navigation get fresh data.
     } catch (error) {
       console.error('Failed to update status:', error)
       // Revert both optimistic updates to their exact original values
@@ -276,10 +269,7 @@ const FocusAreaView = () => {
         ...goal,
         milestones: updatedMilestones
       })
-      // Silent cache invalidation — next navigation gets fresh data,
-      // but we skip the reload since the optimistic state is already correct.
-      apiCache.invalidatePrefix('goals:')
-      apiCache.invalidatePrefix('focusAreas:')
+      // Cache is busted by the service. Optimistic state is already correct.
     } catch (error) {
       console.error('Failed to update milestone:', error)
       // Revert optimistic update on failure
@@ -721,6 +711,34 @@ const FocusAreaView = () => {
                       >
                         {milestone.title}
                       </Typography>
+                      {milestone.due_date &&
+                        !milestone.completed &&
+                        (() => {
+                          const due = new Date(milestone.due_date + 'T00:00:00')
+                          const now = new Date()
+                          const overdue = due < now
+                          const label = due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                          return (
+                            <Box
+                              sx={{
+                                flexShrink: 0,
+                                px: 0.75,
+                                py: 0.25,
+                                borderRadius: 'sm',
+                                bgcolor: overdue ? 'danger.softBg' : 'primary.softBg',
+                                border: '1px solid',
+                                borderColor: overdue ? 'danger.outlinedBorder' : 'primary.outlinedBorder',
+                                fontSize: '0.6rem',
+                                fontWeight: 600,
+                                color: overdue ? 'danger.plainColor' : 'primary.plainColor',
+                                whiteSpace: 'nowrap',
+                                lineHeight: 1.4
+                              }}
+                            >
+                              🗓 {label}
+                            </Box>
+                          )
+                        })()}
                     </Box>
                   ))}
                 </Stack>

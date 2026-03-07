@@ -42,6 +42,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
   // Milestones State (Managed locally before submit)
   const [milestones, setMilestones] = useState([])
   const milestoneRefs = useRef([])
+  const dateInputRefs = useRef([])
 
   // Auto-focus new milestone
   useEffect(() => {
@@ -77,7 +78,9 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
         })
         // Ensure milestones are objects
         const initMilestones = (goal.milestones || []).map((m) =>
-          typeof m === 'string' ? { title: m, completed: false } : { title: m.title || '', completed: m.completed || false }
+          typeof m === 'string'
+            ? { title: m, completed: false, due_date: '' }
+            : { title: m.title || '', completed: m.completed || false, due_date: m.due_date ? m.due_date.split('T')[0] : '' }
         )
         setMilestones(initMilestones)
         fetchActivities(goal._id)
@@ -130,11 +133,11 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
   const handleChange = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }))
 
   // Milestone Handlers
-  const handleAddMilestone = () => setMilestones([...milestones, { title: '', completed: false }])
+  const handleAddMilestone = () => setMilestones([...milestones, { title: '', completed: false, due_date: '' }])
 
-  const handleMilestoneChange = (index, val) => {
+  const handleMilestoneChange = (index, field, val) => {
     const newM = [...milestones]
-    newM[index] = { ...newM[index], title: val }
+    newM[index] = { ...newM[index], [field]: val }
     setMilestones(newM)
   }
 
@@ -163,7 +166,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
       // Filter out empty milestones and ensure structure
       const validMilestones = milestones
         .filter((m) => m.title && m.title.trim() !== '')
-        .map((m) => ({ title: m.title.trim(), completed: m.completed || false }))
+        .map((m) => ({ title: m.title.trim(), completed: m.completed || false, due_date: m.due_date || null }))
 
       const payload = { ...formData, milestones: validMilestones }
 
@@ -425,7 +428,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                       slotProps={{ input: { ref: (el) => (milestoneRefs.current[index] = el?.parentElement) } }}
                       fullWidth
                       value={ms.title}
-                      onChange={(e) => handleMilestoneChange(index, e.target.value)}
+                      onChange={(e) => handleMilestoneChange(index, 'title', e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault()
@@ -438,6 +441,63 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                         color: ms.completed ? 'text.tertiary' : 'text.primary'
                       }}
                     />
+
+                    {/* Optional due date chip */}
+                    <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                      <Box
+                        onClick={() => {
+                          const inp = dateInputRefs.current[index]
+                          if (inp) {
+                            try {
+                              inp.showPicker()
+                            } catch {
+                              inp.click()
+                            }
+                          }
+                        }}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          px: 1,
+                          py: 0.5,
+                          borderRadius: 'sm',
+                          border: '1px dashed',
+                          borderColor: ms.due_date ? 'primary.outlinedBorder' : 'divider',
+                          bgcolor: ms.due_date ? 'primary.softBg' : 'transparent',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem',
+                          color: ms.due_date ? 'primary.plainColor' : 'text.tertiary',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.15s',
+                          '&:hover': { borderColor: 'primary.outlinedBorder', color: 'primary.plainColor' }
+                        }}
+                        title={ms.due_date ? 'Click to change · Right-click to clear' : 'Set target date'}
+                        onContextMenu={(e) => {
+                          e.preventDefault()
+                          handleMilestoneChange(index, 'due_date', '')
+                        }}
+                      >
+                        🗓 {ms.due_date || 'date'}
+                      </Box>
+                      {/* Invisible but properly-sized date input for native picker */}
+                      <input
+                        ref={(el) => (dateInputRefs.current[index] = el)}
+                        type='date'
+                        value={ms.due_date || ''}
+                        onChange={(e) => handleMilestoneChange(index, 'due_date', e.target.value)}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          opacity: 0,
+                          pointerEvents: 'none',
+                          cursor: 'pointer'
+                        }}
+                      />
+                    </Box>
 
                     <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteMilestone(index)}>
                       <DeleteIcon />
@@ -516,10 +576,10 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
               <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
                 <Box>
                   <Typography level='title-md' sx={{ fontWeight: 700, color: 'text.primary' }}>
-                    {t('annualPlanning.activity.title')}
+                    Habits
                   </Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-                    What habits will help you reach this goal?
+                    What will you do regularly to stay on track?
                   </Typography>
                 </Box>
                 <Button size='sm' startDecorator={<AddIcon />} variant='soft' onClick={handleAddActivity}>
@@ -532,7 +592,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                   <Card variant='outlined' key={index} sx={{ p: 2, bgcolor: 'background.surface' }}>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
                       <Input
-                        placeholder='Activity name'
+                        placeholder='What will you do regularly?'
                         value={act.title}
                         onChange={(e) => handleActivityChange(index, 'title', e.target.value)}
                         sx={{ flex: 1 }}
@@ -544,12 +604,30 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                       >
                         <Option value='daily'>🔄 Daily</Option>
                         <Option value='weekly'>📅 Weekly</Option>
+                        <Option value='monthly'>📆 Monthly</Option>
                       </Select>
-                      {!act._id && (
-                        <IconButton size='sm' variant='plain' color='danger' onClick={() => handleActivityDelete(index)}>
-                          <DeleteIcon />
-                        </IconButton>
+                      {/* Streak badge for saved habits */}
+                      {act.streak > 0 && (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                            px: 1,
+                            py: 0.5,
+                            borderRadius: 'sm',
+                            bgcolor: 'warning.softBg',
+                            flexShrink: 0
+                          }}
+                        >
+                          <Typography level='body-xs' sx={{ color: 'warning.plainColor', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            🔥 {act.streak}d
+                          </Typography>
+                        </Box>
                       )}
+                      <IconButton size='sm' variant='plain' color='danger' onClick={() => handleActivityDelete(index)}>
+                        <DeleteIcon />
+                      </IconButton>
                     </Stack>
                   </Card>
                 ))}
@@ -566,7 +644,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                     }}
                   >
                     <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                      No activities yet. Add recurring habits above.
+                      No habits yet. Add recurring habits above.
                     </Typography>
                   </Box>
                 )}

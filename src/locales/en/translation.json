@@ -562,9 +562,12 @@
       "tasks": "Tasks",
       "goals": "Goals",
       "priorities": "Priorities",
-      "activities": "Activities"
+      "milestones": "Milestones",
+      "habits": "Habits",
+      "activities": "Habits"
     },
     "noEvents": "No events for this day",
+    "eventCount": "{{count}} events",
     "today": "Today",
     "loading": "Loading...",
     "addEvent": "Add event",
@@ -585,6 +588,33 @@
         "goal": "Goal",
         "activity": "Activity"
       }
+    }
+  },
+  "blackboard": {
+    "title": "Blackboard",
+    "subtitle": "Brainstorm freely — auto-saved",
+    "tooltip": "Open Blackboard",
+    "toolbar": {
+      "sticky": "Sticky",
+      "addSticky": "Add sticky note",
+      "addGoal": "Add a goal",
+      "addPriority": "Add a priority",
+      "addTask": "Add a task",
+      "clear": "Clear board"
+    },
+    "picker": {
+      "title": {
+        "goal": "Select a goal",
+        "priority": "Select a priority",
+        "task": "Select a task"
+      },
+      "search": "Search...",
+      "empty": "Nothing found"
+    },
+    "clear": {
+      "title": "Clear board?",
+      "desc": "All notes and connections will be permanently removed.",
+      "confirm": "Clear everything"
     }
   },
   "books": {

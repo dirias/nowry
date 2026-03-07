@@ -88,7 +88,15 @@ function resolveVoice(voices, { targetLang, targetName }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function TTSControls({ text, compact = false, settingsOpen, onSettingsChange, voiceSettings, onVoiceSettingsChange }) {
+export default function TTSControls({
+  text,
+  compact = false,
+  settingsOnly = false,
+  settingsOpen,
+  onSettingsChange,
+  voiceSettings,
+  onVoiceSettingsChange
+}) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [allVoices, setAllVoices] = useState([]) // raw list from Web Speech API
   const [selectedLang, setSelectedLang] = useState(null) // e.g. "ja"
@@ -223,7 +231,49 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isSettingsOpen, setSettingsOpen])
 
-  // ── Compact render (embedded in card) ─────────────────────────────────────
+  // ── Settings-only render (used by CardPreviewModal to show panel without floating buttons) ──
+  if (settingsOnly) {
+    return (
+      <Stack spacing={2}>
+        {/* Language selector */}
+        <Box>
+          <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+            Language
+          </Typography>
+          <Select
+            size='sm'
+            value={selectedLang ?? null}
+            onChange={handleLanguageChange}
+            placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
+          >
+            {languageOptions.map((opt) => (
+              <Option key={opt.langBase} value={opt.langBase}>
+                {opt.label}
+              </Option>
+            ))}
+          </Select>
+        </Box>
+
+        {/* Speed slider */}
+        <Box>
+          <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+            Speed: {rate}x
+          </Typography>
+          <Slider value={rate} onChange={handleRateChange} min={0.5} max={2.0} step={0.1} size='sm' />
+        </Box>
+
+        {/* Auto-play toggle */}
+        <Stack direction='row' justifyContent='space-between' alignItems='center'>
+          <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+            Auto-Play
+          </Typography>
+          <Switch size='sm' checked={autoPlay} onChange={handleAutoPlayChange} />
+        </Stack>
+      </Stack>
+    )
+  }
+
+  // ── Compact render (floating over a card) ─────────────────────────────────
   if (compact) {
     return (
       <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10, display: 'flex', gap: 1 }}>
@@ -281,7 +331,6 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
             </Stack>
 
             <Stack spacing={2}>
-              {/* Language selector — cross-device compatible */}
               <Box>
                 <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
                   Language
@@ -290,7 +339,7 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
                   size='sm'
                   value={selectedLang ?? null}
                   onChange={handleLanguageChange}
-                  placeholder={languageOptions.length === 0 ? 'Loading…' : 'Select Language'}
+                  placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
                 >
                   {languageOptions.map((opt) => (
                     <Option key={opt.langBase} value={opt.langBase}>
@@ -320,9 +369,5 @@ export default function TTSControls({ text, compact = false, settingsOpen, onSet
     )
   }
 
-  return (
-    <Box sx={{ p: 2, bgcolor: 'background.level1', borderRadius: 'md' }}>
-      <Typography level='title-sm'>Legacy View</Typography>
-    </Box>
-  )
+  return null
 }

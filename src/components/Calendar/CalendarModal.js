@@ -15,7 +15,8 @@ const TYPE_META = {
   task: { color: '#6366f1', i18nKey: 'calendarModal.filters.tasks' },
   priority: { color: '#f59e0b', i18nKey: 'calendarModal.filters.priorities' },
   goal: { color: '#10b981', i18nKey: 'calendarModal.filters.goals' },
-  activity: { color: '#3b82f6', i18nKey: 'calendarModal.filters.activities' }
+  milestone: { color: '#14b8a6', i18nKey: 'calendarModal.filters.milestones' },
+  activity: { color: '#3b82f6', i18nKey: 'calendarModal.filters.habits' }
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -44,7 +45,7 @@ const CalendarModal = ({ open, onClose }) => {
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [selectedDay, setSelectedDay] = useState(today)
-  const [activeFilters, setActiveFilters] = useState(['task', 'priority', 'goal', 'activity'])
+  const [activeFilters, setActiveFilters] = useState(['task', 'priority', 'goal', 'milestone', 'activity'])
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
 
@@ -181,10 +182,13 @@ const CalendarModal = ({ open, onClose }) => {
               py: 1,
               borderBottom: '1px solid',
               borderColor: 'divider',
-              flexShrink: 0
+              flexShrink: 0,
+              // Horizontal scroll on mobile — keeps chips in a single row
+              overflowX: { xs: 'auto', sm: 'visible' },
+              '&::-webkit-scrollbar': { display: 'none' }
             }}
           >
-            <Stack direction='row' spacing={0.75} flexWrap='wrap' useFlexGap>
+            <Stack direction='row' spacing={0.75} sx={{ flexWrap: { xs: 'nowrap', sm: 'wrap' }, minWidth: 'max-content' }}>
               {Object.entries(TYPE_META).map(([type, meta]) => {
                 const isActive = activeFilters.includes(type)
                 return (
@@ -199,6 +203,9 @@ const CalendarModal = ({ open, onClose }) => {
                       borderColor: meta.color,
                       color: isActive ? '#fff' : 'text.secondary',
                       transition: 'all 0.15s',
+                      // Larger touch target on mobile
+                      minHeight: { xs: 32, sm: 'auto' },
+                      px: { xs: 1.25, sm: 1 },
                       '&:hover': { opacity: 0.85 }
                     }}
                   >
@@ -233,7 +240,13 @@ const CalendarModal = ({ open, onClose }) => {
             >
               {/* Month Navigation */}
               <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 1.5 }}>
-                <IconButton size='sm' variant='plain' color='neutral' onClick={prevMonth}>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  onClick={prevMonth}
+                  sx={{ minWidth: { xs: 44, sm: 32 }, minHeight: { xs: 44, sm: 32 } }}
+                >
                   <ChevronLeftRoundedIcon />
                 </IconButton>
                 <Stack direction='row' alignItems='center' spacing={1}>
@@ -241,12 +254,24 @@ const CalendarModal = ({ open, onClose }) => {
                     {monthLabel}
                   </Typography>
                   <Tooltip title={t('calendarModal.today')} size='sm'>
-                    <IconButton size='sm' variant='plain' color='neutral' onClick={goToday}>
+                    <IconButton
+                      size='sm'
+                      variant='plain'
+                      color='neutral'
+                      onClick={goToday}
+                      sx={{ minWidth: { xs: 44, sm: 32 }, minHeight: { xs: 44, sm: 32 } }}
+                    >
                       <TodayRoundedIcon sx={{ fontSize: 16 }} />
                     </IconButton>
                   </Tooltip>
                 </Stack>
-                <IconButton size='sm' variant='plain' color='neutral' onClick={nextMonth}>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  onClick={nextMonth}
+                  sx={{ minWidth: { xs: 44, sm: 32 }, minHeight: { xs: 44, sm: 32 } }}
+                >
                   <ChevronRightRoundedIcon />
                 </IconButton>
               </Stack>
@@ -365,7 +390,10 @@ const CalendarModal = ({ open, onClose }) => {
                   <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {eventsForSelectedDay.length === 0
                       ? t('calendarModal.noEvents')
-                      : `${eventsForSelectedDay.length} event${eventsForSelectedDay.length !== 1 ? 's' : ''}`}
+                      : t('calendarModal.eventCount', {
+                          count: eventsForSelectedDay.length,
+                          defaultValue: `${eventsForSelectedDay.length} event${eventsForSelectedDay.length !== 1 ? 's' : ''}`
+                        })}
                   </Typography>
                 </Box>
                 {/* Add event button */}
@@ -438,7 +466,7 @@ const CalendarModal = ({ open, onClose }) => {
                           </Typography>
                           {ev.areaName && (
                             <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                              {ev.areaName}
+                              {ev.goalTitle ? `🏁 ${ev.goalTitle}` : ev.areaName}
                             </Typography>
                           )}
                         </Box>
@@ -452,7 +480,7 @@ const CalendarModal = ({ open, onClose }) => {
                           >
                             {t(TYPE_META[ev.type]?.i18nKey || ev.type)}
                           </Chip>
-                          {ev.status && ev.status !== 'active' && (
+                          {ev.status && ev.status !== 'active' && ev.status !== 'pending' && (
                             <Chip
                               size='sm'
                               variant='soft'

@@ -16,16 +16,43 @@ import {
   Tab,
   TabPanel,
   Grid,
-  Table
+  Table,
+  Dropdown,
+  Menu,
+  MenuButton,
+  MenuItem
 } from '@mui/joy'
-import { Edit, Delete, Add, Style, Quiz as QuizIcon, AccountTree, LocalOffer, Search, Visibility, Event } from '@mui/icons-material'
+import {
+  Edit,
+  Delete,
+  Add,
+  Style,
+  Quiz as QuizIcon,
+  AccountTree,
+  LocalOffer,
+  Search,
+  Visibility,
+  Event,
+  School,
+  MoreVert,
+  GridView,
+  ViewList
+} from '@mui/icons-material'
 import CardPreviewModal from './CardPreviewModal'
 
-export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, onEditCard, onDeleteCard, onAddCard }) {
+export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, onEditCard, onDeleteCard, onAddCard, onStudy, onPreview }) {
   const { t } = useTranslation()
   const [activeView, setActiveView] = useState(0) // 0 = Decks, 1 = Cards
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all')
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem('nowry_deck_view_mode') || 'grid'
+  })
+
+  const handleViewChange = (mode) => {
+    setViewMode(mode)
+    localStorage.setItem('nowry_deck_view_mode', mode)
+  }
 
   // Preview State
   const [previewState, setPreviewState] = useState({
@@ -160,18 +187,6 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
 
   return (
     <Box>
-      {/* Header */}
-      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 4 }}>
-        <Box>
-          <Typography level='h3' fontWeight={600} sx={{ mb: 0.5 }}>
-            {t('cards.manage_content.title')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-            {t('cards.manage_content.deckCount', { decks: decks.length, cards: cards.length })}
-          </Typography>
-        </Box>
-      </Stack>
-
       {/* View Tabs - Styled to match CardHome pattern */}
       <Tabs
         value={activeView}
@@ -237,140 +252,57 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           variant='soft'
-          sx={{ flex: 1 }}
+          sx={{ flex: 1, maxWidth: { sm: 320 } }}
         />
 
-        {/* Type Filter - solid/plain chip pattern */}
-        <Stack direction='row' spacing={0.5}>
-          {filters.map(({ key, label, color }) => (
-            <Chip
-              key={key}
-              size='sm'
-              variant={filterType === key ? 'solid' : 'plain'}
-              color={filterType === key ? color : 'neutral'}
-              onClick={() => setFilterType(key)}
-              sx={{ cursor: 'pointer', fontWeight: filterType === key ? 600 : 400 }}
-            >
-              {label}
-            </Chip>
-          ))}
+        {/* Action Row right of search */}
+        <Stack direction='row' spacing={1} sx={{ flex: 1 }} justifyContent='space-between' alignItems='center'>
+          {/* Type Filter - solid/plain chip pattern */}
+          <Stack direction='row' spacing={0.5} sx={{ overflowX: 'auto', pb: { xs: 0.5, sm: 0 } }}>
+            {filters.map(({ key, label, color }) => (
+              <Chip
+                key={key}
+                size='sm'
+                variant={filterType === key ? 'solid' : 'plain'}
+                color={filterType === key ? color : 'neutral'}
+                onClick={() => setFilterType(key)}
+                sx={{ cursor: 'pointer', fontWeight: filterType === key ? 600 : 400 }}
+              >
+                {label}
+              </Chip>
+            ))}
+          </Stack>
+
+          {/* View Toggle (Only show for Decks) */}
+          {activeView === 0 && (
+            <Stack direction='row' spacing={0.5} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+              <IconButton
+                size='sm'
+                variant={viewMode === 'grid' ? 'solid' : 'plain'}
+                color={viewMode === 'grid' ? 'primary' : 'neutral'}
+                onClick={() => handleViewChange('grid')}
+                sx={{ borderRadius: 'md', transition: 'all 0.2s' }}
+              >
+                <GridView fontSize='small' />
+              </IconButton>
+              <IconButton
+                size='sm'
+                variant={viewMode === 'list' ? 'solid' : 'plain'}
+                color={viewMode === 'list' ? 'primary' : 'neutral'}
+                onClick={() => handleViewChange('list')}
+                sx={{ borderRadius: 'md', transition: 'all 0.2s' }}
+              >
+                <ViewList fontSize='small' />
+              </IconButton>
+            </Stack>
+          )}
         </Stack>
       </Stack>
 
-      {/* Decks View - Compact Minimal List */}
+      {/* Decks View */}
       {activeView === 0 && (
-        <Stack spacing={1}>
-          {filteredDecks.map((deck) => {
-            const deckColor = getDeckColor(deck.deck_type)
-            const cardCount = getCardsForDeck(deck._id).length
-
-            return (
-              <Card
-                key={deck._id}
-                variant='outlined'
-                onClick={() => handlePreviewDeck(deck)}
-                sx={{
-                  transition: 'all 0.15s',
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  bgcolor: 'background.surface',
-                  '&:hover': {
-                    borderColor: 'neutral.outlinedBorder',
-                    bgcolor: 'background.level1',
-                    boxShadow: 'sm'
-                  }
-                }}
-              >
-                <Box sx={{ py: 1.5, px: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {/* Icon - Small and Subtle */}
-                  <Box
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 'sm',
-                      bgcolor: `${deckColor}.softBg`,
-                      color: `${deckColor}.solidBg`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}
-                  >
-                    {getDeckIcon(deck.deck_type)}
-                  </Box>
-
-                  {/* Name & Count */}
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      level='title-sm'
-                      sx={{
-                        fontWeight: 600,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        mb: 0.25
-                      }}
-                    >
-                      {deck.name}
-                    </Typography>
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
-                      {t('cards.manage_content.cardCount', { count: cardCount })}
-                    </Typography>
-                  </Box>
-
-                  {/* Type Label - Minimal */}
-                  <Chip
-                    size='sm'
-                    variant='soft'
-                    color={deckColor}
-                    sx={{
-                      fontSize: '0.65rem',
-                      height: 20,
-                      px: 1,
-                      fontWeight: 600,
-                      flexShrink: 0
-                    }}
-                  >
-                    {deck.deck_type || 'flashcard'}
-                  </Chip>
-
-                  {/* Actions - Compact */}
-                  <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-                    <Tooltip title={t('cards.deck.addCard')} size='sm'>
-                      <IconButton
-                        size='sm'
-                        variant='soft'
-                        color='success'
-                        onClick={() => onAddCard(deck)}
-                        sx={{ minWidth: 32, minHeight: 32 }}
-                      >
-                        <Add sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t('cards.deck.edit')} size='sm'>
-                      <IconButton size='sm' variant='plain' onClick={() => onEditDeck(deck)} sx={{ minWidth: 32, minHeight: 32 }}>
-                        <Edit sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t('cards.deck.delete')} size='sm'>
-                      <IconButton
-                        size='sm'
-                        variant='plain'
-                        color='danger'
-                        onClick={() => onDeleteDeck(deck)}
-                        sx={{ minWidth: 32, minHeight: 32 }}
-                      >
-                        <Delete sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Box>
-              </Card>
-            )
-          })}
-
-          {filteredDecks.length === 0 && (
+        <Box>
+          {filteredDecks.length === 0 ? (
             <Box sx={{ py: 8, textAlign: 'center' }}>
               <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
                 {t('cards.manage_content.empty.decks.title')}
@@ -381,8 +313,331 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                   : t('cards.manage_content.empty.decks.start')}
               </Typography>
             </Box>
+          ) : viewMode === 'grid' ? (
+            <Grid container spacing={2}>
+              {filteredDecks.map((deck) => {
+                const deckColor = getDeckColor(deck.deck_type)
+                const cardCount = getCardsForDeck(deck._id).length
+                const gradient =
+                  deck.deck_type === 'quiz'
+                    ? 'linear-gradient(135deg, var(--joy-palette-warning-50) 0%, var(--joy-palette-warning-100) 100%)'
+                    : deck.deck_type === 'visual'
+                      ? 'linear-gradient(135deg, var(--joy-palette-info-50) 0%, var(--joy-palette-info-100) 100%)'
+                      : 'linear-gradient(135deg, var(--joy-palette-primary-50) 0%, var(--joy-palette-primary-100) 100%)'
+
+                return (
+                  <Grid key={deck._id} xs={6} sm={4} md={3}>
+                    <Card
+                      variant='outlined'
+                      sx={{
+                        p: 1.5,
+                        minHeight: 220,
+                        transition: 'all 0.15s',
+                        cursor: 'pointer',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        bgcolor: 'background.surface',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        '&:hover': {
+                          borderColor: 'neutral.outlinedBorder',
+                          boxShadow: 'sm'
+                        }
+                      }}
+                    >
+                      {/* Preview Area - Fixed Height */}
+                      <Box
+                        sx={{ mb: 1.5, height: 90, borderRadius: 'sm', overflow: 'hidden', position: 'relative' }}
+                        onClick={() => handlePreviewDeck(deck)}
+                      >
+                        {deck.image_url ? (
+                          <img
+                            src={deck.image_url}
+                            alt={deck.name}
+                            loading='lazy'
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            sx={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundImage: gradient
+                            }}
+                          >
+                            <Box sx={{ color: `${deckColor}.solidBg`, opacity: 0.6, transform: 'scale(1.5)' }}>
+                              {getDeckIcon(deck.deck_type)}
+                            </Box>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Header Row - Title + Actions */}
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+                        <Typography
+                          level='title-md'
+                          onClick={() => handlePreviewDeck(deck)}
+                          sx={{
+                            fontWeight: 600,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            color: 'text.primary',
+                            flex: 1
+                          }}
+                        >
+                          {deck.name}
+                        </Typography>
+
+                        {/* Actions Menu */}
+                        <Dropdown>
+                          <MenuButton
+                            slots={{ root: IconButton }}
+                            slotProps={{
+                              root: {
+                                variant: 'plain',
+                                color: 'neutral',
+                                size: 'sm',
+                                sx: { minWidth: 24, minHeight: 24, mt: -0.5, mr: -0.5, zIndex: 2 }
+                              }
+                            }}
+                          >
+                            <MoreVert sx={{ fontSize: 16 }} />
+                          </MenuButton>
+                          <Menu placement='bottom-end' size='sm'>
+                            <MenuItem onClick={() => onPreview?.(deck)}>
+                              <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
+                            </MenuItem>
+                            <MenuItem onClick={() => onEditDeck(deck)}>
+                              <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
+                            </MenuItem>
+                            <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
+                              <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
+                            </MenuItem>
+                          </Menu>
+                        </Dropdown>
+                      </Box>
+
+                      {/* Metadata Row */}
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
+                        onClick={() => handlePreviewDeck(deck)}
+                      >
+                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                          {t('cards.manage_content.cardCount', { count: cardCount })}
+                        </Typography>
+
+                        {deck.due_cards > 0 && (
+                          <Typography level='body-xs' sx={{ color: 'primary.plainColor', fontWeight: 600 }}>
+                            {t('cards.studyDue', { count: deck.due_cards })}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Box sx={{ flex: 1 }} onClick={() => handlePreviewDeck(deck)} />
+
+                      {/* Action Button */}
+                      {!deck.has_cards ? (
+                        <Button size='sm' variant='outlined' color='neutral' disabled fullWidth sx={{ fontSize: '0.75rem', py: 0.75 }}>
+                          {t('cards.noCardsYet', 'Empty')}
+                        </Button>
+                      ) : deck.due_cards === 0 ? (
+                        <Button
+                          size='sm'
+                          variant='outlined'
+                          color='neutral'
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onPreview?.(deck)
+                          }}
+                          startDecorator={<Visibility sx={{ fontSize: 14 }} />}
+                          fullWidth
+                          sx={{ fontSize: '0.75rem', py: 0.75 }}
+                        >
+                          {t('cards.preview')}
+                        </Button>
+                      ) : (
+                        <Button
+                          size='sm'
+                          variant='solid'
+                          color='primary'
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onStudy?.(deck)
+                          }}
+                          startDecorator={<School sx={{ fontSize: 14 }} />}
+                          fullWidth
+                          sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
+                        >
+                          {t('cards.studyCenter')}
+                        </Button>
+                      )}
+                    </Card>
+                  </Grid>
+                )
+              })}
+            </Grid>
+          ) : (
+            <Stack spacing={1}>
+              {filteredDecks.map((deck) => {
+                const deckColor = getDeckColor(deck.deck_type)
+                const cardCount = getCardsForDeck(deck._id).length
+
+                return (
+                  <Card
+                    key={deck._id}
+                    variant='outlined'
+                    onClick={() => handlePreviewDeck(deck)}
+                    sx={{
+                      transition: 'all 0.15s',
+                      cursor: 'pointer',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: 'background.surface',
+                      '&:hover': {
+                        borderColor: 'neutral.outlinedBorder',
+                        bgcolor: 'background.level1',
+                        boxShadow: 'sm'
+                      }
+                    }}
+                  >
+                    <Box sx={{ py: 1.5, px: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                      {/* Icon */}
+                      <Box
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 'sm',
+                          bgcolor: `${deckColor}.softBg`,
+                          color: `${deckColor}.solidBg`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}
+                      >
+                        {getDeckIcon(deck.deck_type)}
+                      </Box>
+
+                      {/* Name & Count */}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          level='title-sm'
+                          sx={{
+                            fontWeight: 600,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            mb: 0.25
+                          }}
+                        >
+                          {deck.name}
+                        </Typography>
+                        <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
+                          {t('cards.manage_content.cardCount', { count: cardCount })}
+                        </Typography>
+                      </Box>
+
+                      {/* Type Label */}
+                      <Chip
+                        size='sm'
+                        variant='soft'
+                        color={deckColor}
+                        sx={{
+                          fontSize: '0.65rem',
+                          height: 20,
+                          px: 1,
+                          fontWeight: 600,
+                          flexShrink: 0,
+                          display: { xs: 'none', sm: 'flex' }
+                        }}
+                      >
+                        {deck.deck_type || 'flashcard'}
+                      </Chip>
+
+                      {/* Actions */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                        {deck.has_cards && (
+                          <Button
+                            size='sm'
+                            variant='solid'
+                            color='primary'
+                            onClick={() => onStudy?.(deck)}
+                            startDecorator={<School sx={{ fontSize: 16 }} />}
+                            sx={{ fontSize: '0.75rem', fontWeight: 600, px: 1.5, display: { xs: 'none', sm: 'flex' } }}
+                          >
+                            {deck.due_cards > 0 ? t('cards.studyDue', { count: deck.due_cards }) : t('cards.studyCenter')}
+                          </Button>
+                        )}
+
+                        {deck.has_cards && (
+                          <IconButton
+                            size='sm'
+                            variant='solid'
+                            color='primary'
+                            onClick={() => onStudy?.(deck)}
+                            sx={{ display: { xs: 'flex', sm: 'none' } }}
+                          >
+                            <School sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        )}
+
+                        <Tooltip title={t('cards.deck.addCard')} size='sm'>
+                          <IconButton
+                            size='sm'
+                            variant='soft'
+                            color='success'
+                            onClick={() => onAddCard(deck)}
+                            sx={{ minWidth: 32, minHeight: 32, display: { xs: 'none', sm: 'flex' } }}
+                          >
+                            <Add sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Dropdown>
+                          <MenuButton
+                            slots={{ root: IconButton }}
+                            slotProps={{
+                              root: {
+                                variant: 'plain',
+                                color: 'neutral',
+                                size: 'sm',
+                                sx: { minWidth: 32, minHeight: 32 }
+                              }
+                            }}
+                          >
+                            <MoreVert sx={{ fontSize: 16 }} />
+                          </MenuButton>
+                          <Menu placement='bottom-end' size='sm'>
+                            <MenuItem onClick={() => onPreview?.(deck)}>
+                              <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
+                            </MenuItem>
+                            <MenuItem onClick={() => onAddCard(deck)}>
+                              <Add sx={{ fontSize: 16 }} /> {t('cards.deck.addCard')}
+                            </MenuItem>
+                            <MenuItem onClick={() => onEditDeck(deck)}>
+                              <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
+                            </MenuItem>
+                            <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
+                              <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
+                            </MenuItem>
+                          </Menu>
+                        </Dropdown>
+                      </Box>
+                    </Box>
+                  </Card>
+                )
+              })}
+            </Stack>
           )}
-        </Stack>
+        </Box>
       )}
 
       {/* Cards View */}
@@ -447,27 +702,12 @@ export default function ManageContent({ decks, cards, onEditDeck, onDeleteDeck, 
                           variant='outlined'
                           color={card.next_review ? 'success' : 'primary'}
                           startDecorator={<Event fontSize='small' />}
+                          sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
                         >
                           {card.next_review ? new Date(card.next_review).toLocaleDateString() : t('cards.manage_content.reviewNew')}
                         </Chip>
-                        {/* Show Ease Factor (Review Factor) - SM-2 parameter */}
-                        {card.ease_factor && (
-                          <Tooltip title='Ease Factor: How easy you found this card (1.3-2.5)' variant='soft'>
-                            <Chip size='sm' variant='outlined' color='neutral' startDecorator='📊'>
-                              Factor: {card.ease_factor.toFixed(2)}
-                            </Chip>
-                          </Tooltip>
-                        )}
-                        {/* Show Interval (days until next review) */}
-                        {card.interval !== undefined && (
-                          <Tooltip title='Interval: Days until next review' variant='soft'>
-                            <Chip size='sm' variant='outlined' color='neutral' startDecorator='⏱️'>
-                              {card.interval}d
-                            </Chip>
-                          </Tooltip>
-                        )}
                         {card.tags?.map((tag, idx) => (
-                          <Chip key={idx} size='sm' variant='outlined'>
+                          <Chip key={idx} size='sm' variant='outlined' sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
                             {tag}
                           </Chip>
                         ))}

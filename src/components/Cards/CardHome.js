@@ -26,7 +26,6 @@ import {
 } from '@mui/joy'
 import { Search, Add, GridView, ViewList, FilterList, TrendingUp, School, Download, MoreVert, CalendarToday } from '@mui/icons-material'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
-import DecksView from './DecksView'
 import CreateDeckModal from './CreateDeckModal'
 import CreateCardModal from './CreateCardModal'
 import CardPreviewModal from './CardPreviewModal'
@@ -42,15 +41,9 @@ export default function CardHome() {
   const { t } = useTranslation()
 
   // State
-  const [activeTab, setActiveTab] = useState(0)
   const [decks, setDecks] = useState([])
   const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [filterType, setFilterType] = useState('all')
-  const [sortBy, setSortBy] = useState('recent')
-  const [viewMode, setViewMode] = useState('grid')
   const [showCreateDeck, setShowCreateDeck] = useState(false)
   const [showCreateCard, setShowCreateCard] = useState(false)
   const [editingDeck, setEditingDeck] = useState(null)
@@ -81,12 +74,6 @@ export default function CardHome() {
     if (cardsLoading || statsLoading || decksLoading) return
     fetchData()
   }, [cardsLoading, statsLoading, decksLoading, hookCards, hookStats, hookDecks])
-
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 200)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
 
   const fetchData = async () => {
     try {
@@ -207,25 +194,6 @@ export default function CardHome() {
       setErrorSnackbar(t('cards.deleteCardError'))
     }
   }
-
-  const filteredDecks = useMemo(() => {
-    let filtered = decks
-    if (filterType !== 'all') {
-      filtered = filtered.filter((d) => d.deck_type === filterType)
-    }
-    if (debouncedSearch) {
-      filtered = filtered.filter((d) => d.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-    }
-    switch (sortBy) {
-      case 'name':
-        return [...filtered].sort((a, b) => a.name.localeCompare(b.name))
-      case 'cards':
-        return [...filtered].sort((a, b) => (b.total_cards || 0) - (a.total_cards || 0))
-      case 'recent':
-      default:
-        return [...filtered].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-    }
-  }, [decks, filterType, debouncedSearch, sortBy])
 
   return (
     <Container maxWidth='xl' sx={{ py: 4 }}>
@@ -417,307 +385,19 @@ export default function CardHome() {
       {/* Subtle Divider for Visual Separation */}
       <Divider sx={{ my: 2, opacity: 0.3 }} />
 
-      {/* Mobile Tabs (Segmented Control) */}
-      <Box
-        sx={{
-          display: { xs: 'flex', md: 'none' },
-          p: 0.5,
-          mb: 3,
-          borderRadius: 'xl',
-          bgcolor: 'background.level1',
-          overflow: 'hidden'
-        }}
-      >
-        {[t('cards.browse'), t('cards.manage')].map((tabLabel, index) => {
-          const isActive = activeTab === index
-          return (
-            <Box
-              key={index}
-              onClick={() => setActiveTab(index)}
-              sx={{
-                flex: 1,
-                py: 1,
-                px: 1,
-                textAlign: 'center',
-                borderRadius: 'lg',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                bgcolor: isActive ? 'background.surface' : 'transparent',
-                boxShadow: isActive ? 'sm' : 'none',
-                color: isActive ? 'primary.main' : 'text.secondary',
-                fontWeight: isActive ? 600 : 500,
-                userSelect: 'none'
-              }}
-            >
-              <Typography level='body-sm' textColor='inherit' fontWeight='inherit'>
-                {tabLabel}
-              </Typography>
-            </Box>
-          )
-        })}
-      </Box>
-
-      {/* Desktop Tabs (Minimalistic) */}
-      <Tabs
-        value={activeTab}
-        onChange={(e, val) => setActiveTab(val)}
-        sx={{
-          mb: 4,
-          display: { xs: 'none', md: 'flex' },
-          bgcolor: 'transparent'
-        }}
-      >
-        <TabList
-          disableUnderline
-          sx={{
-            p: 0,
-            gap: 4,
-            bgcolor: 'transparent',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '& .MuiTab-root': {
-              bgcolor: 'transparent',
-              border: 'none',
-              boxShadow: 'none !important',
-              outline: 'none !important',
-              '&:hover': { bgcolor: 'transparent', border: 'none' },
-              '&.Mui-selected': { bgcolor: 'transparent', border: 'none' },
-              '&::before': { display: 'none' },
-              '&::after': { display: 'none' }
-            }
-          }}
-        >
-          <Tab
-            disableIndicator
-            value={0}
-            sx={{
-              p: 0,
-              pb: 1.5,
-              minHeight: 'auto',
-              fontSize: 'md',
-              fontWeight: activeTab === 0 ? 700 : 500,
-              color: activeTab === 0 ? 'primary.plainColor' : 'text.secondary',
-              border: 'none',
-              borderBottom: '2px solid',
-              borderColor: activeTab === 0 ? 'primary.plainColor' : 'transparent',
-              bgcolor: 'transparent',
-              transition: 'color 0.2s, border-color 0.2s',
-              '&:hover': {
-                color: 'primary.plainColor',
-                bgcolor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid',
-                borderColor: 'primary.plainColor'
-              },
-              '&.Mui-selected': {
-                color: 'primary.plainColor',
-                bgcolor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid',
-                borderColor: 'primary.plainColor'
-              },
-              '&.Mui-focusVisible': {
-                outline: 'none',
-                bgcolor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid',
-                borderColor: activeTab === 0 ? 'primary.plainColor' : 'transparent'
-              }
-            }}
-          >
-            {t('cards.browse')}
-          </Tab>
-          <Tab
-            disableIndicator
-            value={1}
-            sx={{
-              p: 0,
-              pb: 1.5,
-              minHeight: 'auto',
-              fontSize: 'md',
-              fontWeight: activeTab === 1 ? 700 : 500,
-              color: activeTab === 1 ? 'primary.plainColor' : 'text.secondary',
-              border: 'none',
-              borderBottom: '2px solid',
-              borderColor: activeTab === 1 ? 'primary.plainColor' : 'transparent',
-              bgcolor: 'transparent',
-              transition: 'color 0.2s, border-color 0.2s',
-              '&:hover': {
-                color: 'primary.plainColor',
-                bgcolor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid',
-                borderColor: 'primary.plainColor'
-              },
-              '&.Mui-selected': {
-                color: 'primary.plainColor',
-                bgcolor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid',
-                borderColor: 'primary.plainColor'
-              },
-              '&.Mui-focusVisible': {
-                outline: 'none',
-                bgcolor: 'transparent',
-                border: 'none',
-                borderBottom: '2px solid',
-                borderColor: activeTab === 1 ? 'primary.plainColor' : 'transparent'
-              }
-            }}
-          >
-            {t('cards.manage')}
-          </Tab>
-        </TabList>
-      </Tabs>
-
-      {/* Browse Tab */}
-      {activeTab === 0 && (
-        <>
-          {/* Toolbar (Glassmorphism / Future) */}
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={2}
-            sx={{
-              mb: 3,
-              p: 1,
-              bgcolor: 'background.surface',
-              borderRadius: 'xl',
-              boxShadow: 'sm',
-              border: '1px solid',
-              borderColor: 'neutral.outlinedBorder'
-            }}
-            alignItems='center'
-          >
-            {/* Search - Pill Shaped */}
-            <Input
-              placeholder={t('cards.search')}
-              startDecorator={<Search sx={{ color: 'primary.plainColor' }} />}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              variant='plain'
-              sx={{
-                flex: 1,
-                minWidth: { md: 240 },
-                width: '100%',
-                bgcolor: 'transparent',
-                '--Input-focusedHighlight': 'transparent', // Remove default glow
-                '&:hover': { bgcolor: 'transparent' }
-              }}
-            />
-
-            <Divider orientation='vertical' sx={{ display: { xs: 'none', md: 'block' }, height: 24 }} />
-
-            {/* Actions Row */}
-            <Stack direction='row' spacing={1} sx={{ width: { xs: '100%', md: 'auto' } }} alignItems='center'>
-              {/* Filter - Plain & Clean */}
-              <Select
-                value={filterType}
-                onChange={(e, val) => setFilterType(val)}
-                variant='plain'
-                color='neutral'
-                startDecorator={
-                  <FilterList fontSize='small' sx={{ color: filterType !== 'all' ? 'primary.plainColor' : 'text.tertiary' }} />
-                }
-                sx={{
-                  minWidth: { md: 140 },
-                  '&:hover': { bgcolor: 'background.level1' }
-                }}
-              >
-                <Option value='all'>{t('cards.allTypes')}</Option>
-                <Option value='flashcard'>{t('study.types.flashcards')}</Option>
-                <Option value='quiz'>{t('study.types.quizzes')}</Option>
-                <Option value='visual'>{t('study.types.visual')}</Option>
-              </Select>
-
-              {/* Sort - Plain & Clean */}
-              <Select
-                value={sortBy}
-                onChange={(e, val) => setSortBy(val)}
-                variant='plain'
-                color='neutral'
-                sx={{
-                  minWidth: { md: 140 },
-                  '&:hover': { bgcolor: 'background.level1' }
-                }}
-              >
-                <Option value='recent'>{t('cards.recent')}</Option>
-                <Option value='name'>{t('cards.name')}</Option>
-                <Option value='cards'>{t('cards.cardCount')}</Option>
-              </Select>
-
-              {/* View Mode Toggle */}
-              <Box
-                sx={{
-                  display: { xs: 'none', sm: 'flex' },
-                  bgcolor: 'background.level1',
-                  borderRadius: 'lg',
-                  p: 0.5,
-                  gap: 0.5
-                }}
-              >
-                <IconButton
-                  size='sm'
-                  variant={viewMode === 'grid' ? 'solid' : 'plain'}
-                  color={viewMode === 'grid' ? 'primary' : 'neutral'}
-                  onClick={() => setViewMode('grid')}
-                  sx={{ borderRadius: 'md', transition: 'all 0.2s' }}
-                >
-                  <GridView fontSize='small' />
-                </IconButton>
-                <IconButton
-                  size='sm'
-                  variant={viewMode === 'list' ? 'solid' : 'plain'}
-                  color={viewMode === 'list' ? 'primary' : 'neutral'}
-                  onClick={() => setViewMode('list')}
-                  sx={{ borderRadius: 'md', transition: 'all 0.2s' }}
-                >
-                  <ViewList fontSize='small' />
-                </IconButton>
-              </Box>
-            </Stack>
-          </Stack>
-
-          {/* Deck Count & Type Filter Chips */}
-          <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
-            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              {t('cards.deckCount_plural', { count: filteredDecks.length })}
-            </Typography>
-            {filterType !== 'all' && (
-              <Chip size='sm' variant='soft' endDecorator={<span onClick={() => setFilterType('all')}>×</span>}>
-                {filterType}
-              </Chip>
-            )}
-          </Stack>
-
-          <Divider sx={{ mb: 3 }} />
-
-          {/* Decks Grid/List */}
-          {loading ? (
-            <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
-              <CircularProgress size='md' />
-              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                {t('cards.loading')}
-              </Typography>
-            </Stack>
-          ) : (
-            <DecksView
-              decks={filteredDecks}
-              cards={cards}
-              onStudy={handleStudy}
-              onPreview={handlePreview}
-              onEdit={handleEditDeck}
-              onDelete={handleDeleteDeck}
-              viewMode={viewMode}
-            />
-          )}
-        </>
-      )}
-
-      {/* Manage Tab */}
-      {activeTab === 1 && (
+      {loading ? (
+        <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
+          <CircularProgress size='md' />
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+            {t('cards.loading')}
+          </Typography>
+        </Stack>
+      ) : (
         <ManageContent
           decks={decks}
           cards={cards}
+          onStudy={handleStudy}
+          onPreview={handlePreview}
           onEditDeck={handleEditDeck}
           onDeleteDeck={handleDeleteDeck}
           onEditCard={handleEditCard}
