@@ -517,7 +517,7 @@
       "title": "Quick Access",
       "studyCenter": "Study Center",
       "books": "Books",
-      "annualPlanning": "Annual Planning",
+      "annualPlanning": "Planning",
       "newsFeed": "News Feed",
       "taskManager": "Task Manager",
       "bugReport": "Report Bug"
@@ -798,7 +798,7 @@
     }
   },
   "annualPlanning": {
-    "title": "Annual Planning",
+    "title": "Planning",
     "back": "Back to Plan",
     "subtitle": "Focus on what matters most this year",
     "myPlan": "My 2026 Plan",
@@ -1034,7 +1034,7 @@
     "publish": "Publish",
     "unpublish": "Unpublish",
     "published": "Published",
-    "browse": "Browse Public Library",
+    "browse": "Browse",
     "library": "Public Library",
     "myLikes": "My Likes",
     "likes": "likes",

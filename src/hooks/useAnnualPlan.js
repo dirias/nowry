@@ -42,6 +42,7 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
   const [plan, setPlan] = useState(null)
   const [focusAreas, setFocusAreas] = useState([])
   const [goals, setGoals] = useState([])
+  const [activities, setActivities] = useState([])
   const [priorities, setPriorities] = useState([])
   const [preferredPriorityIds, setPreferredPriorityIds] = useState([])
   const [loading, setLoading] = useState(true)
@@ -69,6 +70,7 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
       const fetchedPlan = full.plan
       const areasArr = Array.isArray(full.focus_areas) ? full.focus_areas : []
       const allGoalsList = Array.isArray(full.goals) ? full.goals : []
+      const fetchedActivities = Array.isArray(full.activities) ? full.activities : []
       const fetchedPriorities = Array.isArray(full.priorities) ? full.priorities : []
 
       setPlan(fetchedPlan)
@@ -87,6 +89,7 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
 
       setFocusAreas(enrichedAreas)
       setGoals(allGoals)
+      setActivities(fetchedActivities)
     } catch (err) {
       if (isCancelled()) return
       // Fallback: /full endpoint not available yet — use legacy multi-request path
@@ -147,7 +150,7 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
     }
   }, [year])
 
-  return { plan, focusAreas, areas: focusAreas, goals, priorities, preferredPriorityIds, loading, error, reload: load }
+  return { plan, focusAreas, areas: focusAreas, goals, activities, priorities, preferredPriorityIds, loading, error, reload: load }
 }
 
 export default useAnnualPlan

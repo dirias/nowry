@@ -19,6 +19,61 @@ const parseLocalDate = (value) => {
 }
 
 /**
+ * Helper to get calendar occurrences for recurring habits correctly
+ */
+const generateHabitOccurrences = (act, year, areaColor, areaName, events) => {
+  const startDateStr = act.created_at || act.startDate || `${year}-01-01T00:00:00`
+  const startDate = new Date(startDateStr)
+  const start = startDate.getFullYear() < year ? new Date(year, 0, 1) : startDate
+  // Strip time from start for clean date comparison
+  start.setHours(0, 0, 0, 0)
+
+  const end = new Date(year, 11, 31, 0, 0, 0, 0)
+
+  if (act.frequency === 'daily') {
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      events.push({
+        id: `activity-${act._id || act.id}-${d.getTime()}`,
+        title: act.title || act.name,
+        date: new Date(d),
+        type: 'activity',
+        color: areaColor,
+        status: act.status || 'active',
+        areaName
+      })
+    }
+  } else if (act.frequency === 'weekly' || act.frequency === 'custom') {
+    const daysAllowed = act.days_of_week || [] // 0=Mon, 6=Sun
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const jsDay = d.getDay() // 0=Sun, 1=Mon
+      const backendDay = (jsDay + 6) % 7 // shift to 0=Mon, 6=Sun
+      if (daysAllowed.includes(backendDay)) {
+        events.push({
+          id: `activity-${act._id || act.id}-${d.getTime()}`,
+          title: act.title || act.name,
+          date: new Date(d),
+          type: 'activity',
+          color: areaColor,
+          status: act.status || 'active',
+          areaName
+        })
+      }
+    }
+  } else if (act.due_date || act.deadline) {
+    // Fallback for any legacy activities that might actually have a date
+    events.push({
+      id: `activity-${act._id || act.id}`,
+      title: act.title || act.name,
+      date: parseLocalDate(act.due_date || act.deadline),
+      type: 'activity',
+      color: areaColor,
+      status: act.status || 'active',
+      areaName
+    })
+  }
+}
+
+/**
  * Calendar Service
  * Aggregates all user assets with deadline/date fields into a
  * normalized format for the calendar modal.
@@ -101,7 +156,7 @@ export const calendarService = {
 
         // Goals — use top-level `goals` array from API response
         const topLevelGoals = fullPlanResult.value.goals || []
-        const activityFetches = []
+        const topLevelActivities = fullPlanResult.value.activities || []
 
         topLevelGoals.forEach((goal) => {
           const area = areaMap[goal.focus_area_id] || { color: '#10b981', name: '' }
@@ -135,34 +190,12 @@ export const calendarService = {
               })
             }
           })
-
-          // Queue activity fetch — all fired in parallel below
-          activityFetches.push(
-            apiCache
-              .get(`activities:${goal._id}`, PLAN_TTL, () => annualPlanningService.getActivities(goal._id))
-              .then((activities) => ({ activities, areaColor, areaName }))
-              .catch(() => null)
-          )
         })
 
-        // ── Tier 2: all activities in PARALLEL ──────────────────────────
-        const activityResults = await Promise.allSettled(activityFetches)
-        activityResults.forEach((result) => {
-          if (result.status !== 'fulfilled' || !result.value) return
-          const { activities, areaColor, areaName } = result.value
-          activities.forEach((act) => {
-            if (act.due_date || act.deadline) {
-              events.push({
-                id: `activity-${act._id}`,
-                title: act.title || act.name,
-                date: parseLocalDate(act.due_date || act.deadline),
-                type: 'activity',
-                color: areaColor,
-                status: act.status || 'active',
-                areaName
-              })
-            }
-          })
+        // Activities are returned from /full directly
+        topLevelActivities.forEach((act) => {
+          const area = areaMap[act.focus_area_id] || { color: '#10b981', name: '' }
+          generateHabitOccurrences(act, year, area.color, area.name, events)
         })
       } else {
         console.warn('[CalendarService] Could not load annual plan:', fullPlanResult.reason)

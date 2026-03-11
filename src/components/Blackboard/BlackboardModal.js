@@ -133,7 +133,6 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
     }, AUTOSAVE_DELAY)
   }, [setNodes, setEdges])
 
-  // Also save on nodes/edges change (drag, etc.)
   const handleNodesChange = useCallback(
     (changes) => {
       onNodesChange(changes)
@@ -143,6 +142,26 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
       }
     },
     [onNodesChange, scheduleSave]
+  )
+
+  const onNodeDragStart = useCallback(
+    (_, node) => {
+      setNodes((nds) => {
+        const maxZ = Math.max(0, ...nds.map((n) => n.zIndex || 0))
+        return nds.map((n) => (n.id === node.id ? { ...n, zIndex: maxZ + 1 } : n))
+      })
+    },
+    [setNodes]
+  )
+
+  const onNodeClick = useCallback(
+    (_, node) => {
+      setNodes((nds) => {
+        const maxZ = Math.max(0, ...nds.map((n) => n.zIndex || 0))
+        return nds.map((n) => (n.id === node.id && (n.zIndex || 0) < maxZ ? { ...n, zIndex: maxZ + 1 } : n))
+      })
+    },
+    [setNodes]
   )
 
   const handleEdgesChange = useCallback(
@@ -222,6 +241,8 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
         edges={edges}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
+        onNodeDragStart={onNodeDragStart}
+        onNodeClick={onNodeClick}
         onConnect={onConnect}
         onMoveEnd={(_, vp) => {
           viewportRef.current = vp
@@ -229,14 +250,22 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
         }}
         nodeTypes={nodeTypes}
         fitView={nodes.length > 0}
+        fitViewOptions={{ maxZoom: 1, minZoom: 0.2, padding: 0.2 }}
         defaultViewport={viewportRef.current}
         deleteKeyCode='Delete'
         multiSelectionKeyCode='Shift'
+        panOnScroll={true}
+        selectionOnDrag={true}
+        selectionMode='partial'
+        snapToGrid={true}
+        snapGrid={[20, 20]}
         style={{ background: 'transparent' }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1.5} color='var(--joy-palette-neutral-outlinedBorder)' />
         <Controls />
         <MiniMap
+          zoomable
+          pannable
           style={{
             background: 'var(--joy-palette-background-level1)',
             border: '1px solid var(--joy-palette-neutral-outlinedBorder)'
