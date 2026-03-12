@@ -3,6 +3,7 @@ import {
   $getSelection,
   $isRangeSelection,
   $createParagraphNode,
+  $insertNodes,
   COMMAND_PRIORITY_HIGH,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
@@ -17,9 +18,29 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { createPortal } from 'react-dom'
 import { List, ListItem, Typography, Sheet, Box } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { Type, Heading1, Heading2, Heading3, List as ListIcon, ListOrdered, Quote as QuoteIcon, Minus, Code2, Table } from 'lucide-react'
+import {
+  Type,
+  Heading1,
+  Heading2,
+  Heading3,
+  List as ListIcon,
+  ListOrdered,
+  Quote as QuoteIcon,
+  Minus,
+  Code2,
+  Table,
+  AlertTriangle,
+  Info,
+  Lightbulb,
+  Columns,
+  Video,
+  Link as LinkIcon
+} from 'lucide-react'
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '../../plugin/RegisterHorizontalRulePlugin'
 import { INSERT_TABLE_COMMAND } from './plugins/TablePlugin'
+import { $createCalloutNode } from '../../nodes/CalloutNode'
+import { $createColumnContainerNode, $createColumnNode } from '../../nodes/ColumnNodes'
+import { TOGGLE_LINK_COMMAND } from '@lexical/link'
 
 /**
  * SlashCommandPlugin - Production-grade slash command menu
@@ -181,6 +202,33 @@ export default function SlashCommandPlugin() {
       }
     },
     {
+      key: 'link',
+      label: t('editor.slashCommands.link', 'Link'),
+      description: t('editor.slashCommands.linkDesc', 'Add a hyperlink'),
+      icon: LinkIcon,
+      aliases: ['link', 'url', 'http'],
+      execute: (editor) => {
+        // Find if there is a selection
+        editor.update(() => {
+          const selection = $getSelection()
+          if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+            // If selection exists, just toggle with placeholder or prompt
+            const url = prompt('Enter URL:')
+            if (url) {
+              editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url })
+            }
+          } else {
+            // If no selection, we can't easily "insert" a link node without text in Lexical
+            // usually you type text then link it. For now, let's just prompt.
+            const url = prompt('Enter URL:')
+            if (url) {
+              editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url })
+            }
+          }
+        })
+      }
+    },
+    {
       key: 'hr',
       label: t('editor.slashCommands.divider', 'Divider'),
       description: t('editor.slashCommands.dividerDesc', 'Horizontal line'),
@@ -188,6 +236,103 @@ export default function SlashCommandPlugin() {
       aliases: ['hr', 'divider', 'separator', 'line', '---'],
       execute: (editor) => {
         editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
+      }
+    },
+    {
+      key: 'note',
+      label: t('editor.slashCommands.note', 'Note'),
+      description: t('editor.slashCommands.noteDesc', 'Add an info callout'),
+      icon: Info,
+      aliases: ['note', 'info'],
+      execute: (editor) => {
+        editor.update(() => {
+          const selection = $getSelection()
+          if ($isRangeSelection(selection)) {
+            const callout = $createCalloutNode('note')
+            callout.append($createParagraphNode())
+            $insertNodes([callout])
+          }
+        })
+      }
+    },
+    {
+      key: 'tip',
+      label: t('editor.slashCommands.tip', 'Tip'),
+      description: t('editor.slashCommands.tipDesc', 'Add a success tip'),
+      icon: Lightbulb,
+      aliases: ['tip', 'success', 'check'],
+      execute: (editor) => {
+        editor.update(() => {
+          const selection = $getSelection()
+          if ($isRangeSelection(selection)) {
+            const callout = $createCalloutNode('tip')
+            callout.append($createParagraphNode())
+            $insertNodes([callout])
+          }
+        })
+      }
+    },
+    {
+      key: 'warning',
+      label: t('editor.slashCommands.warning', 'Warning'),
+      description: t('editor.slashCommands.warningDesc', 'Add a warning callout'),
+      icon: AlertTriangle,
+      aliases: ['warning', 'alert', 'caution'],
+      execute: (editor) => {
+        editor.update(() => {
+          const selection = $getSelection()
+          if ($isRangeSelection(selection)) {
+            const callout = $createCalloutNode('warning')
+            callout.append($createParagraphNode())
+            $insertNodes([callout])
+          }
+        })
+      }
+    },
+    {
+      key: 'columns',
+      label: t('editor.slashCommands.columns', '2 Columns'),
+      description: t('editor.slashCommands.columnsDesc', 'Side-by-side layout'),
+      icon: Columns,
+      aliases: ['columns', 'layout', 'side', 'split'],
+      execute: (editor) => {
+        editor.update(() => {
+          const selection = $getSelection()
+          if ($isRangeSelection(selection)) {
+            const container = $createColumnContainerNode(2)
+            const col1 = $createColumnNode()
+            const col2 = $createColumnNode()
+
+            // Add initial paragraphs to avoid empty columns issues
+            col1.append($createParagraphNode())
+            col2.append($createParagraphNode())
+
+            container.append(col1, col2)
+            selection.insertNodes([container])
+          }
+        })
+      }
+    },
+    {
+      key: 'video',
+      label: t('editor.slashCommands.video', 'Video'),
+      description: t('editor.slashCommands.videoDesc', 'Embed YouTube or Vimeo'),
+      icon: Video,
+      aliases: ['video', 'youtube', 'vimeo', 'embed'],
+      execute: (editor) => {
+        const url = prompt('Enter Video URL (YouTube/Vimeo):')
+        if (!url) return
+
+        // Simple placeholder approach for now - ideally we'd have a VideoNode
+        // For now we'll insert a styled link or a text placeholder
+        editor.update(() => {
+          const selection = $getSelection()
+          if ($isRangeSelection(selection)) {
+            const p = $createParagraphNode()
+            p.append($createParagraphNode().setTextContent(`📺 Video: ${url}`))
+            selection.insertNodes([p])
+          }
+        })
       }
     }
   ]
@@ -437,75 +582,78 @@ export default function SlashCommandPlugin() {
         minWidth: 280,
         maxWidth: 320,
         maxHeight: '60vh',
-        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
         bgcolor: 'background.surface',
         border: '1px solid',
         borderColor: 'neutral.outlinedBorder',
         overflow: 'hidden'
       }}
     >
-      <List sx={{ py: 0.5, px: 0 }}>
-        {filteredCommands.map((cmd, index) => {
-          const Icon = cmd.icon
-          const isSelected = index === selectedIndex
+      <Box sx={{ overflowY: 'auto', flex: 1 }}>
+        <List sx={{ py: 0.5, px: 0 }}>
+          {filteredCommands.map((cmd, index) => {
+            const Icon = cmd.icon
+            const isSelected = index === selectedIndex
 
-          return (
-            <ListItem
-              key={cmd.key}
-              role='option'
-              aria-selected={isSelected}
-              onClick={() => executeCommand(cmd)}
-              sx={{
-                cursor: 'pointer',
-                px: 2,
-                py: 1.5,
-                bgcolor: isSelected ? 'neutral.softBg' : 'transparent',
-                '&:hover': {
-                  bgcolor: 'neutral.softHoverBg'
-                },
-                transition: 'background-color 0.1s ease',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 1.5
-              }}
-            >
-              <Box
+            return (
+              <ListItem
+                key={cmd.key}
+                role='option'
+                aria-selected={isSelected}
+                onClick={() => executeCommand(cmd)}
                 sx={{
+                  cursor: 'pointer',
+                  px: 2,
+                  py: 1.5,
+                  bgcolor: isSelected ? 'neutral.softBg' : 'transparent',
+                  '&:hover': {
+                    bgcolor: 'neutral.softHoverBg'
+                  },
+                  transition: 'background-color 0.1s ease',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 20,
-                  height: 20,
-                  mt: 0.25,
-                  color: isSelected ? 'primary.500' : 'text.tertiary'
+                  alignItems: 'flex-start',
+                  gap: 1.5
                 }}
               >
-                <Icon size={18} />
-              </Box>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                  level='body-sm'
+                <Box
                   sx={{
-                    fontWeight: isSelected ? 600 : 400,
-                    color: isSelected ? 'text.primary' : 'text.primary'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 20,
+                    height: 20,
+                    mt: 0.25,
+                    color: isSelected ? 'primary.500' : 'text.tertiary'
                   }}
                 >
-                  {cmd.label}
-                </Typography>
-                <Typography
-                  level='body-xs'
-                  sx={{
-                    color: 'text.tertiary',
-                    mt: 0.25
-                  }}
-                >
-                  {cmd.description}
-                </Typography>
-              </Box>
-            </ListItem>
-          )
-        })}
-      </List>
+                  <Icon size={18} />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    level='body-sm'
+                    sx={{
+                      fontWeight: isSelected ? 600 : 400,
+                      color: isSelected ? 'text.primary' : 'text.primary'
+                    }}
+                  >
+                    {cmd.label}
+                  </Typography>
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.tertiary',
+                      mt: 0.25
+                    }}
+                  >
+                    {cmd.description}
+                  </Typography>
+                </Box>
+              </ListItem>
+            )
+          })}
+        </List>
+      </Box>
 
       {/* Helper text at bottom */}
       <Box

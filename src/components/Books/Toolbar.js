@@ -12,6 +12,8 @@ import FontFamilyDropdown from '../Editor/FontFamilyDropdown'
 import TextColorPicker from '../Editor/TextColorPicker'
 import BgColorPicker from '../Editor/BgColorPicker'
 import AlignDropdown from '../Editor/AlignDropdown'
+import FontSizeDropdown from '../Editor/FontSizeDropdown'
+import TableGridPicker from '../Editor/TableGridPicker'
 
 /**
  * Minimalistic Toolbar - Following DESIGN_GUIDELINES.md
@@ -31,13 +33,6 @@ import AlignDropdown from '../Editor/AlignDropdown'
  */
 const Toolbar = ({ onSave, disabled = false }) => {
   const [editor] = useLexicalComposerContext()
-
-  const insertLink = () => {
-    const url = prompt('Enter URL:')
-    if (url) {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url })
-    }
-  }
 
   const insertImage = () => {
     // Trigger the image upload flow if available
@@ -60,8 +55,12 @@ const Toolbar = ({ onSave, disabled = false }) => {
 
       <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
 
-      {/* Text Format (Bold, Italic, Underline, Strikethrough, Code) */}
       <TextFormatButtons />
+
+      <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
+
+      {/* Font Size (+/- and dropdown) */}
+      <FontSizeDropdown />
 
       <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
 
@@ -88,12 +87,8 @@ const Toolbar = ({ onSave, disabled = false }) => {
 
       <Divider orientation='vertical' sx={{ mx: 0.5, height: 24 }} />
 
-      {/* Link */}
-      <Tooltip title='Insert link' placement='bottom'>
-        <IconButton size='sm' variant='plain' onClick={insertLink} disabled={disabled} sx={{ minWidth: 32 }}>
-          <LinkIcon size={16} />
-        </IconButton>
-      </Tooltip>
+      {/* Table Visual Picker */}
+      <TableGridPicker />
 
       {/* Image */}
       <Tooltip title='Insert image' placement='bottom'>

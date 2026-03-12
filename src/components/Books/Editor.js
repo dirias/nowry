@@ -5,10 +5,13 @@ import { Box, useTheme, Snackbar, Alert, Button } from '@mui/joy'
 import DOMPurify from 'dompurify'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
+import { TablePlugin as LexicalTablePlugin } from '@lexical/react/LexicalTablePlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin'
+import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin'
+import { AutoLinkPlugin } from '@lexical/react/LexicalAutoLinkPlugin'
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
 import {
   $createParagraphNode,
@@ -41,6 +44,7 @@ import { CodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { TableNode, TableCellNode, TableRowNode } from '@lexical/table'
 import { ColumnContainerNode, ColumnNode } from '../../nodes/ColumnNodes'
+import { CalloutNode } from '../../nodes/CalloutNode'
 
 // UI Components
 import TextMenu from '../Menu/TextMenu'
@@ -49,6 +53,8 @@ import QuestionnaireModal from '../Cards/QuestionnaireModal'
 import VisualizerModal from '../Cards/VisualizerModal'
 import { cardsService, quizzesService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
+import FloatingToolbarPlugin from '../Editor/plugins/FloatingToolbarPlugin'
+import LinkPreviewPlugin from '../Editor/plugins/LinkPreviewPlugin'
 import EditorErrorBoundary from '../Editor/EditorErrorBoundary'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
 import { EXTRACT_VOCABULARY_PROMPT } from '../../constants/prompts'
@@ -85,7 +91,12 @@ const EditorTheme = {
     underline: 'editor-textUnderline',
     strikethrough: 'editor-textStrikethrough',
     code: 'editor-textCode'
-  }
+  },
+  callout: 'editor-callout',
+  table: 'editor-table',
+  tableCell: 'editor-table-cell',
+  tableCellSelected: 'editor-table-cell-selected',
+  tableRow: 'editor-table-row'
 }
 
 /**
@@ -159,6 +170,25 @@ function EditorEditablePlugin({ isReadOnly }) {
   return null
 }
 
+const URL_MATCHER =
+  /((https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,}))/
+
+const MATCHERS = [
+  (text) => {
+    const match = URL_MATCHER.exec(text)
+    if (match === null) {
+      return null
+    }
+    const fullMatch = match[0]
+    return {
+      index: match.index,
+      length: fullMatch.length,
+      text: fullMatch,
+      url: fullMatch.startsWith('http') ? fullMatch : `https://${fullMatch}`
+    }
+  }
+]
+
 export default function Editor({
   initialContent,
   book,
@@ -175,14 +205,12 @@ export default function Editor({
   const theme = useTheme()
   const menuRef = useRef()
   const containerRef = useRef()
-  const [showMenu, setShowMenu] = useState(false)
   const [showStudyCard, setShowStudyCard] = useState(false)
   const [showQuestionnaire, setShowQuestionnaire] = useState(false)
   const [showVisualizer, setShowVisualizer] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const [cards, setCards] = useState([])
   const [questionnaireData, setQuestionnaireData] = useState([])
-  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 })
   const [error, setError] = useState(null)
   const [isLimitError, setIsLimitError] = useState(false)
   const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 900 : false))
@@ -304,7 +332,8 @@ export default function Editor({
         ColumnNode,
         TableNode,
         TableCellNode,
-        TableRowNode
+        TableRowNode,
+        CalloutNode
       ],
       editorState: (editor) => {
         // Support both JSON (new) and HTML (legacy) formats
@@ -356,47 +385,35 @@ export default function Editor({
   )
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    // Legacy handleClickOutside for TextMenu removed as FloatingToolbarPlugin handles its own state
   }, [])
 
   const handleRightClick = useCallback((event) => {
-    event.preventDefault()
+    // We can keep this to prevent browser menu,
+    // but the FloatingToolbarPlugin will handle the UI on selection
     const selection = window.getSelection()
-    const text = selection?.toString()
-    if (text?.trim()) {
-      setSelectedText(text)
-      setMenuPosition({ x: event.pageX, y: event.pageY })
-      setShowMenu(true)
-    } else {
-      setShowMenu(false)
+    if (selection?.toString().trim()) {
+      event.preventDefault()
     }
   }, [])
 
   const handleOptionClick = useCallback(
-    async (option) => {
-      setShowMenu(false)
+    async (option, overrideText) => {
+      const textToProcess = overrideText || selectedText
       setError(null)
       try {
-        if (option === 'create_study_card' && selectedText) {
-          const response = await cardsService.generate(selectedText, 2)
+        if (option === 'create_study_card' && textToProcess) {
+          const response = await cardsService.generate(textToProcess, 2)
           setCards(response)
           setShowStudyCard(true)
-        } else if (option === 'create_questionnaire' && selectedText) {
-          const response = await quizzesService.generate(selectedText, 5, 'Medium')
+        } else if (option === 'create_questionnaire' && textToProcess) {
+          const response = await quizzesService.generate(textToProcess, 5, 'Medium')
           setQuestionnaireData(response)
           setShowQuestionnaire(true)
-        } else if (option === 'create_visual_content' && selectedText) {
+        } else if (option === 'create_visual_content' && textToProcess) {
           setShowVisualizer(true)
-        } else if (option === 'extract_vocabulary' && selectedText) {
-          // Pro Feature: Bulk Extraction
-          // We ask for up to 50 cards to cover long lists, but enforce strict extraction
-          const response = await cardsService.generate(selectedText, 50, EXTRACT_VOCABULARY_PROMPT)
+        } else if (option === 'extract_vocabulary' && textToProcess) {
+          const response = await cardsService.generate(textToProcess, 50, EXTRACT_VOCABULARY_PROMPT)
           setCards(response)
           setShowStudyCard(true)
         }
@@ -490,15 +507,24 @@ export default function Editor({
           <RegisterHorizontalRulePlugin />
           <SlashCommandPlugin />
           <ExitListPlugin />
+          <LinkPlugin />
+          <LinkPreviewPlugin />
+          <AutoLinkPlugin matchers={MATCHERS} />
           <TablePlugin />
+          <LexicalTablePlugin />
           <TableActionMenuPlugin />
           <WordCountPlugin />
           <FlowContentPlugin onTOCChange={setTOC} onProgressChange={setReadingStats} />
           <TrailingParagraphPlugin />
           <ColumnPlugin />
+          <FloatingToolbarPlugin
+            onOptionClick={(opt, text) => {
+              setSelectedText(text)
+              handleOptionClick(opt, text)
+            }}
+          />
 
           {/* Overlays */}
-          {showMenu && <TextMenu ref={menuRef} onOptionClick={handleOptionClick} style={{ top: menuPosition.y, left: menuPosition.x }} />}
           {showStudyCard && <StudyCard cards={cards} book={book} onCancel={() => setShowStudyCard(false)} />}
           {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
           {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_HIGH, SELECTION_CHANGE_COMMAND } from 'lexical'
+import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_HIGH, SELECTION_CHANGE_COMMAND, $getNodeByKey } from 'lexical'
 import {
   $isTableNode,
   $isTableCellNode,
@@ -9,12 +9,30 @@ import {
   $insertTableRow__EXPERIMENTAL,
   $insertTableColumn__EXPERIMENTAL,
   $deleteTableRow__EXPERIMENTAL,
-  $deleteTableColumn__EXPERIMENTAL
+  $deleteTableColumn__EXPERIMENTAL,
+  $mergeCells,
+  $unmergeCell,
+  $isTableSelection,
+  $computeTableMapSkipCellCheck
 } from '@lexical/table'
 import { createPortal } from 'react-dom'
-import { Box, IconButton, Tooltip, Sheet, Divider } from '@mui/joy'
+import { Box, IconButton, Tooltip, Sheet, Divider, Typography, Stack } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { Plus, Minus, ArrowDown, ArrowRight, Trash2, ChevronDown, ChevronRight, Table } from 'lucide-react'
+import {
+  Plus,
+  Minus,
+  ArrowDown,
+  ArrowRight,
+  Trash2,
+  ChevronDown,
+  ChevronRight,
+  Table,
+  PaintBucket,
+  Layout,
+  Maximize2,
+  Merge,
+  Split
+} from 'lucide-react'
 
 /**
  * TableActionMenuPlugin - Smart floating toolbar for table operations
@@ -32,12 +50,15 @@ export default function TableActionMenuPlugin() {
   const { t } = useTranslation()
   const [editor] = useLexicalComposerContext()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isColorMenuOpen, setIsColorMenuOpen] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const [tableNode, setTableNode] = useState(null)
   const [tableCellNode, setTableCellNode] = useState(null)
   const menuRef = useRef(null)
+  const colorMenuRef = useRef(null)
   const buttonRef = useRef(null)
+  const colorButtonRef = useRef(null)
 
   // Detect when user is in a table
   useEffect(() => {
@@ -45,14 +66,47 @@ export default function TableActionMenuPlugin() {
       editor.getEditorState().read(() => {
         const selection = $getSelection()
 
-        if (!$isRangeSelection(selection)) {
+        if (!$isRangeSelection(selection) && !$isTableSelection(selection)) {
           setIsHovering(false)
           setIsMenuOpen(false)
           return
         }
 
-        const anchorNode = selection.anchor.getNode()
-        const cellNode = $getTableCellNodeFromLexicalNode(anchorNode)
+        // Hide table controls if editor is in read-only mode
+        if (!editor.isEditable()) {
+          setIsHovering(false)
+          setIsMenuOpen(false)
+          return
+        }
+
+        let cellNode = null
+        try {
+          if ($isRangeSelection(selection)) {
+            const anchor = selection.anchor
+            if (anchor) {
+              const anchorNode = anchor.getNode()
+              if (anchorNode) {
+                cellNode = $getTableCellNodeFromLexicalNode(anchorNode)
+              }
+            }
+          } else if ($isTableSelection(selection)) {
+            const nodes = selection.getNodes()
+            for (const node of nodes) {
+              let curr = node
+              while (curr) {
+                if ($isTableCellNode(curr)) {
+                  cellNode = curr
+                  break
+                }
+                curr = curr.getParent()
+              }
+              if (cellNode) break
+            }
+          }
+        } catch (e) {
+          // Selection might be in a transient state during deletion
+          return
+        }
 
         if (cellNode) {
           try {
@@ -60,7 +114,7 @@ export default function TableActionMenuPlugin() {
             setTableNode(table)
             setTableCellNode(cellNode)
 
-            // Position button on the LEFT side of table
+            // Centered top position
             const editorElement = editor.getRootElement()
             if (editorElement) {
               const editorRect = editorElement.getBoundingClientRect()
@@ -69,36 +123,29 @@ export default function TableActionMenuPlugin() {
               if (domNode) {
                 const tableRect = domNode.getBoundingClientRect()
                 setPosition({
-                  top: tableRect.top - editorRect.top,
-                  left: tableRect.left - editorRect.left - 40 // 40px to the LEFT of table
+                  top: tableRect.top - editorRect.top - 45, // Above the table
+                  left: tableRect.left - editorRect.left + tableRect.width / 2 - 80 // Centered
                 })
                 setIsHovering(true)
                 return
               }
             }
           } catch (e) {
-            // Not in a table
+            /* ignored */
           }
         }
 
         setIsHovering(false)
+        setIsMenuOpen(false)
       })
     }
 
-    // Update on selection change
-    const unregister = editor.registerCommand(
-      SELECTION_CHANGE_COMMAND,
-      () => {
-        updateTableState()
-        return false
-      },
-      COMMAND_PRIORITY_HIGH
-    )
+    const unregisterListener = editor.registerUpdateListener(({ editorState }) => {
+      updateTableState()
+    })
 
-    // Initial check
     updateTableState()
-
-    return unregister
+    return unregisterListener
   }, [editor])
 
   // Action handlers
@@ -118,6 +165,32 @@ export default function TableActionMenuPlugin() {
     })
   }
 
+  const setCellColor = (color) => {
+    editor.update(() => {
+      const selection = $getSelection()
+      if ($isRangeSelection(selection) || $isTableSelection(selection)) {
+        const nodes = selection.getNodes()
+        const uniqueCells = new Set()
+
+        nodes.forEach((node) => {
+          const cell = $getTableCellNodeFromLexicalNode(node)
+          if (cell) {
+            uniqueCells.add(cell.getKey())
+          }
+        })
+
+        uniqueCells.forEach((key) => {
+          const cell = $getNodeByKey(key)
+          if ($isTableCellNode(cell)) {
+            cell.setBackgroundColor(color)
+          }
+        })
+      }
+    })
+    setIsMenuOpen(false)
+    setIsColorMenuOpen(false)
+  }
+
   const deleteRow = () => {
     editor.update(() => {
       if (tableCellNode) {
@@ -134,6 +207,58 @@ export default function TableActionMenuPlugin() {
     })
   }
 
+  const handleDelete = () => {
+    editor.update(() => {
+      const selection = $getSelection()
+      if ($isTableSelection(selection)) {
+        const anchor = selection.anchor
+        if (!anchor) return
+        const anchorNode = anchor.getNode()
+        if (!anchorNode) return
+
+        const table = $getTableNodeFromLexicalNodeOrThrow(anchorNode)
+        const [grid] = $computeTableMapSkipCellCheck(table, null, null)
+
+        const height = grid.length
+        const width = grid[0] ? grid[0].length : 0
+
+        const nodes = selection.getNodes()
+        const selectedRowIndices = new Set()
+        const selectedColIndices = new Set()
+
+        const cellToPos = new Map()
+        grid.forEach((row, rowIndex) => {
+          row.forEach((cellInfo, colIndex) => {
+            if (cellInfo && cellInfo.cell) {
+              cellToPos.set(cellInfo.cell.getKey(), { r: rowIndex, c: colIndex })
+            }
+          })
+        })
+
+        nodes.forEach((node) => {
+          const cell = $getTableCellNodeFromLexicalNode(node)
+          if (cell) {
+            const pos = cellToPos.get(cell.getKey())
+            if (pos) {
+              selectedRowIndices.add(pos.r)
+              selectedColIndices.add(pos.c)
+            }
+          }
+        })
+
+        // Smart heuristic: If selection covers all rows but not all columns -> Delete Columns
+        // Otherwise (default for table selection) -> Delete Rows
+        if (selectedRowIndices.size === height && selectedColIndices.size < width) {
+          $deleteTableColumn__EXPERIMENTAL()
+        } else {
+          $deleteTableRow__EXPERIMENTAL()
+        }
+      } else if ($isRangeSelection(selection)) {
+        $deleteTableRow__EXPERIMENTAL()
+      }
+    })
+  }
+
   const deleteTable = () => {
     editor.update(() => {
       if (tableNode) {
@@ -144,11 +269,49 @@ export default function TableActionMenuPlugin() {
     })
   }
 
+  const mergeCells = () => {
+    editor.update(() => {
+      const selection = $getSelection()
+      if ($isTableSelection(selection) || $isRangeSelection(selection)) {
+        const nodes = selection.getNodes()
+        const cellNodes = new Set()
+
+        nodes.forEach((node) => {
+          const cell = $getTableCellNodeFromLexicalNode(node)
+          if (cell && $isTableCellNode(cell)) {
+            cellNodes.add(cell)
+          }
+        })
+
+        if (cellNodes.size > 1) {
+          $mergeCells(Array.from(cellNodes))
+        }
+      }
+    })
+  }
+
+  const unmergeCells = () => {
+    editor.update(() => {
+      const selection = $getSelection()
+      if ($isTableSelection(selection) || $isRangeSelection(selection)) {
+        $unmergeCell()
+      }
+    })
+  }
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target) && buttonRef.current && !buttonRef.current.contains(event.target)) {
         setIsMenuOpen(false)
+      }
+      if (
+        colorMenuRef.current &&
+        !colorMenuRef.current.contains(event.target) &&
+        colorButtonRef.current &&
+        !colorButtonRef.current.contains(event.target)
+      ) {
+        setIsColorMenuOpen(false)
       }
     }
 
@@ -163,100 +326,156 @@ export default function TableActionMenuPlugin() {
 
   return createPortal(
     <>
-      {/* Small trigger button - only visible when hovering table */}
-      <IconButton
-        ref={buttonRef}
-        size='sm'
-        variant='soft'
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      {/* Modern Horizontal Contextual Bar */}
+      <Sheet
+        variant='plain'
         sx={{
           position: 'absolute',
           top: position.top,
           left: position.left,
           zIndex: 10,
-          minWidth: 32,
-          minHeight: 32,
-          opacity: 0.7,
-          transition: 'opacity 0.2s',
-          '&:hover': {
-            opacity: 1
-          }
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          p: 0.5,
+          borderRadius: 'md',
+          boxShadow: 'md',
+          bgcolor: 'background.surface',
+          border: '1px solid',
+          borderColor: 'neutral.outlinedBorder',
+          backdropFilter: 'blur(8px)',
+          animation: 'fadeInUp 0.2s ease-out'
         }}
       >
-        <Table size={16} />
-      </IconButton>
+        <Tooltip title='Table Operations' variant='soft'>
+          <IconButton size='sm' variant='plain' onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <Table size={18} color='var(--joy-palette-primary-500)' />
+            <ChevronDown size={14} />
+          </IconButton>
+        </Tooltip>
 
-      {/* Full menu - only when button clicked */}
+        <Divider orientation='vertical' sx={{ mx: 0.5 }} />
+
+        <Tooltip title='Merge Cells' variant='soft'>
+          <IconButton size='sm' variant='plain' color='neutral' onClick={mergeCells}>
+            <Merge size={18} />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title='Unmerge Cells' variant='soft'>
+          <IconButton size='sm' variant='plain' color='neutral' onClick={unmergeCells}>
+            <Split size={18} />
+          </IconButton>
+        </Tooltip>
+
+        <Divider orientation='vertical' sx={{ mx: 0.5 }} />
+
+        <Tooltip title='Cell Color' variant='soft'>
+          <IconButton
+            ref={colorButtonRef}
+            size='sm'
+            variant='plain'
+            color={isColorMenuOpen ? 'primary' : 'neutral'}
+            onClick={() => setIsColorMenuOpen(!isColorMenuOpen)}
+          >
+            <PaintBucket size={18} />
+          </IconButton>
+        </Tooltip>
+
+        <Divider orientation='vertical' sx={{ mx: 0.5 }} />
+
+        <Tooltip title='Add Row' variant='soft'>
+          <IconButton size='sm' variant='plain' onClick={() => insertRowBelow()}>
+            <ArrowDown size={18} />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title='Add Column' variant='soft'>
+          <IconButton size='sm' variant='plain' onClick={() => insertColumnRight()}>
+            <ArrowRight size={18} />
+          </IconButton>
+        </Tooltip>
+
+        <Divider orientation='vertical' sx={{ mx: 0.5 }} />
+
+        <Tooltip title='Delete' variant='soft'>
+          <IconButton size='sm' variant='plain' color='danger' onClick={handleDelete}>
+            <Trash2 size={18} />
+          </IconButton>
+        </Tooltip>
+      </Sheet>
+
+      {/* Main Operations Menu */}
       {isMenuOpen && (
         <Sheet
           ref={menuRef}
-          onClick={(e) => e.stopPropagation()}
           sx={{
             position: 'absolute',
-            top: position.top + 40,
+            top: position.top + 50,
             left: position.left,
             zIndex: 11,
             display: 'flex',
             flexDirection: 'column',
-            gap: 0.5,
+            gap: 0,
             p: 1,
             borderRadius: 'sm',
             boxShadow: 'lg',
             bgcolor: 'background.surface',
             border: '1px solid',
             borderColor: 'neutral.outlinedBorder',
-            minWidth: 160
+            minWidth: 200
           }}
         >
-          {/* Add Row Below */}
-          <IconButton
-            size='sm'
-            variant='plain'
-            onClick={() => {
-              insertRowBelow()
-              setIsMenuOpen(false)
-            }}
-            sx={{
-              justifyContent: 'flex-start',
-              gap: 1,
-              '&:hover': {
-                bgcolor: 'background.level1'
-              }
-            }}
-          >
-            <Plus size={16} />
-            <ChevronDown size={14} />
-            <Box component='span' sx={{ fontSize: 'sm', ml: 'auto' }}>
-              Row
-            </Box>
-          </IconButton>
+          <Stack direction='column' spacing={0.5}>
+            <IconButton
+              size='sm'
+              variant='plain'
+              onClick={() => {
+                editor.update(() => $insertTableRow__EXPERIMENTAL(false))
+                setIsMenuOpen(false)
+              }}
+              sx={{ justifyContent: 'flex-start', px: 1 }}
+            >
+              <Plus size={14} sx={{ mr: 1 }} /> Row Above
+            </IconButton>
+            <IconButton
+              size='sm'
+              variant='plain'
+              onClick={() => {
+                editor.update(() => $insertTableRow__EXPERIMENTAL(true))
+                setIsMenuOpen(false)
+              }}
+              sx={{ justifyContent: 'flex-start', px: 1 }}
+            >
+              <Plus size={14} sx={{ mr: 1 }} /> Row Below
+            </IconButton>
+            <Divider sx={{ my: 0.5 }} />
+            <IconButton
+              size='sm'
+              variant='plain'
+              onClick={() => {
+                editor.update(() => $insertTableColumn__EXPERIMENTAL(false))
+                setIsMenuOpen(false)
+              }}
+              sx={{ justifyContent: 'flex-start', px: 1 }}
+            >
+              <Plus size={14} sx={{ mr: 1 }} /> Column Left
+            </IconButton>
+            <IconButton
+              size='sm'
+              variant='plain'
+              onClick={() => {
+                editor.update(() => $insertTableColumn__EXPERIMENTAL(true))
+                setIsMenuOpen(false)
+              }}
+              sx={{ justifyContent: 'flex-start', px: 1 }}
+            >
+              <Plus size={14} sx={{ mr: 1 }} /> Column Right
+            </IconButton>
+          </Stack>
 
-          {/* Add Column Right */}
-          <IconButton
-            size='sm'
-            variant='plain'
-            onClick={() => {
-              insertColumnRight()
-              setIsMenuOpen(false)
-            }}
-            sx={{
-              justifyContent: 'flex-start',
-              gap: 1,
-              '&:hover': {
-                bgcolor: 'background.level1'
-              }
-            }}
-          >
-            <Plus size={16} />
-            <ChevronRight size={14} />
-            <Box component='span' sx={{ fontSize: 'sm', ml: 'auto' }}>
-              Column
-            </Box>
-          </IconButton>
+          <Divider sx={{ my: 1 }} />
 
-          <Divider sx={{ my: 0.5 }} />
-
-          {/* Delete Row */}
           <IconButton
             size='sm'
             variant='plain'
@@ -265,22 +484,10 @@ export default function TableActionMenuPlugin() {
               deleteRow()
               setIsMenuOpen(false)
             }}
-            sx={{
-              justifyContent: 'flex-start',
-              gap: 1,
-              '&:hover': {
-                bgcolor: 'danger.softBg'
-              }
-            }}
+            sx={{ justifyContent: 'flex-start', px: 1 }}
           >
-            <Minus size={16} />
-            <ChevronDown size={14} />
-            <Box component='span' sx={{ fontSize: 'sm', ml: 'auto' }}>
-              Row
-            </Box>
+            <Minus size={14} sx={{ mr: 1 }} /> Delete Selected Rows
           </IconButton>
-
-          {/* Delete Column */}
           <IconButton
             size='sm'
             variant='plain'
@@ -289,44 +496,55 @@ export default function TableActionMenuPlugin() {
               deleteColumn()
               setIsMenuOpen(false)
             }}
-            sx={{
-              justifyContent: 'flex-start',
-              gap: 1,
-              '&:hover': {
-                bgcolor: 'danger.softBg'
-              }
-            }}
+            sx={{ justifyContent: 'flex-start', px: 1 }}
           >
-            <Minus size={16} />
-            <ChevronRight size={14} />
-            <Box component='span' sx={{ fontSize: 'sm', ml: 'auto' }}>
-              Column
-            </Box>
+            <Minus size={14} sx={{ mr: 1, transform: 'rotate(90deg)' }} /> Delete Selected Columns
           </IconButton>
-
-          <Divider sx={{ my: 0.5 }} />
-
-          {/* Delete Table */}
-          <IconButton
-            size='sm'
-            variant='plain'
-            color='danger'
-            onClick={() => {
-              deleteTable()
-            }}
-            sx={{
-              justifyContent: 'flex-start',
-              gap: 1,
-              '&:hover': {
-                bgcolor: 'danger.softBg'
-              }
-            }}
-          >
-            <Trash2 size={16} />
-            <Box component='span' sx={{ fontSize: 'sm', ml: 'auto' }}>
-              Delete Table
-            </Box>
+          <IconButton size='sm' variant='plain' color='danger' onClick={() => deleteTable()} sx={{ justifyContent: 'flex-start', px: 1 }}>
+            <Trash2 size={14} sx={{ mr: 1 }} /> Delete Table
           </IconButton>
+        </Sheet>
+      )}
+
+      {/* Color Picker Menu */}
+      {isColorMenuOpen && (
+        <Sheet
+          ref={colorMenuRef}
+          sx={{
+            position: 'absolute',
+            top: position.top + 50,
+            left: position.left + 80, // Offset to appear under bucket
+            zIndex: 12,
+            p: 1,
+            borderRadius: 'sm',
+            boxShadow: 'lg',
+            bgcolor: 'background.surface',
+            border: '1px solid',
+            borderColor: 'neutral.outlinedBorder'
+          }}
+        >
+          <Typography level='body-xs' fontWeight='bold' sx={{ px: 1, py: 0.5, textTransform: 'uppercase', mb: 0.5 }}>
+            Cell Color
+          </Typography>
+          <Stack direction='row' spacing={1}>
+            {['#f8f9fa', '#e3f2fd', '#e8f5e9', '#fff3e0', '#fce4ec', '#f3e5f5', '#fedddd'].map((color) => (
+              <Box
+                key={color}
+                onClick={() => setCellColor(color)}
+                sx={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '4px',
+                  bgcolor: color,
+                  cursor: 'pointer',
+                  border: '1px solid',
+                  borderColor: 'neutral.outlinedBorder',
+                  '&:hover': { transform: 'scale(1.1)', boxShadow: 'sm' },
+                  transition: 'all 0.2s'
+                }}
+              />
+            ))}
+          </Stack>
         </Sheet>
       )}
     </>,

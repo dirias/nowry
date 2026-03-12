@@ -5,14 +5,14 @@ import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
 import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer } from 'lucide-react'
 import { booksService, publicContentService } from '../../api/services'
-import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip } from '@mui/joy'
+import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip, Snackbar } from '@mui/joy'
 import { LexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import Toolbar from './Toolbar'
 import { useAutoSave, SAVE_STATUS } from '../../hooks/useAutoSave'
 import { Menu as MenuIcon } from 'lucide-react'
 import PublicIcon from '@mui/icons-material/Public'
 import PublicOffIcon from '@mui/icons-material/PublicOff'
-import { SuccessWindow, Error as ErrorMsg } from '../Messages'
+import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import { useTranslation } from 'react-i18next'
 
 export default function EditorHome() {
@@ -26,12 +26,18 @@ export default function EditorHome() {
   const [book, setBook] = useState(location.state?.book || null)
   const [bookName, setBookName] = useState(book?.title || '')
 
-  // Success/Error messages
-  const [message, setMessage] = useState(null)
+  // Success/Error Snackbar state
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', color: 'success' })
+  const [confirmUnpublishOpen, setConfirmUnpublishOpen] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   // Flow content state (TOC and reading stats)
   const [tocData, setTocData] = useState([])
   const [readingTime, setReadingTime] = useState(0)
+
+  // refs to prevent redundant fetches and handle cleanup
+  const fetchedIdRef = useRef(null)
+  const abortControllerRef = useRef(null)
 
   // Swipe Gesture Ref
   const touchStart = useRef(null)
@@ -117,32 +123,35 @@ export default function EditorHome() {
     }
   }, [book, isMobile])
 
-  const handleSaveBook = async (currentContent) => {
-    try {
-      // Prepare content for saving
-      let contentToSave = currentContent
+  const handleSaveBook = useCallback(
+    async (currentContent) => {
+      try {
+        // Prepare content for saving
+        let contentToSave = currentContent
 
-      // If content is a JSON object, stringify it
-      if (typeof currentContent === 'object' && currentContent !== null) {
-        contentToSave = JSON.stringify(currentContent)
+        // If content is a JSON object, stringify it
+        if (typeof currentContent === 'object' && currentContent !== null) {
+          contentToSave = JSON.stringify(currentContent)
+        }
+
+        const updateData = {
+          title: bookName,
+          page_size: pageSize,
+          full_content: contentToSave,
+          auto_save_enabled: autoSaveEnabled
+        }
+
+        console.log('💾 Saving book (JSON Content-First format)')
+        console.log('  - Page size:', pageSize)
+        console.log('  - Content size:', contentToSave.length, 'bytes')
+        await booksService.update(id, updateData)
+        console.log('✓ Save successful')
+      } catch (e) {
+        console.error('❌ Error updating book:', e)
       }
-
-      const updateData = {
-        title: bookName,
-        page_size: pageSize,
-        full_content: contentToSave,
-        auto_save_enabled: autoSaveEnabled
-      }
-
-      console.log('💾 Saving book (JSON Content-First format)')
-      console.log('  - Page size:', pageSize)
-      console.log('  - Content size:', contentToSave.length, 'bytes')
-      await booksService.update(id, updateData)
-      console.log('✓ Save successful')
-    } catch (e) {
-      console.error('❌ Error updating book:', e)
-    }
-  }
+    },
+    [id, bookName, pageSize, autoSaveEnabled]
+  )
 
   // Manual save that always executes (bypasses auto-save "no changes" check)
   const handleManualSave = async () => {
@@ -174,9 +183,9 @@ export default function EditorHome() {
     }
   }
 
-  const handleContentChange = (newHtml) => {
+  const handleContentChange = useCallback((newHtml) => {
     setContent(newHtml)
-  }
+  }, [])
 
   // Auto-Save Hook
   const {
@@ -198,17 +207,39 @@ export default function EditorHome() {
 
   // Load Book & Migrate if needed
   useEffect(() => {
+    // If we already have the book with this ID, and it's not stale, we can skip initial skeleton
+    const hasCorrectBook = book && book._id === id
+
     const fetchBook = async () => {
+      // Prevent redundant fetches for the same ID within the same mount cycle
+      // (Handles React StrictMode and rapid re-renders)
+      if (fetchedIdRef.current === id) return
+
+      // Cancel any existing fetch for previous ID
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+      abortControllerRef.current = new AbortController()
+
       try {
-        setLoading(true)
+        // Only show skeleton if we don't have the book data yet
+        if (!hasCorrectBook) {
+          setLoading(true)
+        }
+
+        console.log(`🔗 Fetching book data for ID: ${id}`)
         const fullBook = await booksService.getById(id)
+
+        // Final check to ensure we didn't navigate away during fetch
+        if (fetchedIdRef.current === id) return
+
         setBook(fullBook)
         setBookName(fullBook.title)
 
         // Load page size preference
         if (fullBook.page_size) {
-          console.log('📚 Loading page size from book:', fullBook.page_size)
-          setPageSize(fullBook.page_size) // Use setPageSize directly here to avoid logging on load
+          console.log('📚 Page size:', fullBook.page_size)
+          setPageSize(fullBook.page_size)
         }
 
         // Load auto-save preference
@@ -219,14 +250,29 @@ export default function EditorHome() {
         const initialHtml = fullBook.full_content || ''
         setContent(initialHtml)
         resetBaseline(initialHtml)
+
+        // Mark as successfully fetched
+        fetchedIdRef.current = id
       } catch (e) {
+        if (e.name === 'CanceledError' || e.name === 'AbortError') {
+          console.log('Fetch aborted - user navigated away')
+          return
+        }
         console.error('Error fetching book:', e)
       } finally {
         setLoading(false)
       }
     }
+
     fetchBook()
-  }, [id, resetBaseline])
+
+    return () => {
+      // Clean up on unmount or ID change
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [id, resetBaseline, book]) // Added book to check if we can skip loading
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -236,6 +282,7 @@ export default function EditorHome() {
   // Publish/Unpublish handlers
   const handlePublish = async () => {
     try {
+      setIsProcessing(true)
       // Auto-populate with smart defaults
       const metadata = {
         category: 'Other', // Default category
@@ -247,33 +294,48 @@ export default function EditorHome() {
       }
 
       await publicContentService.publishBook(book._id, metadata)
-      setMessage({ type: 'success', text: t('public.publishSuccess', { defaultValue: '✅ Published successfully!' }) })
+      setSnackbar({
+        open: true,
+        message: t('public.publishSuccess', { defaultValue: '✅ Published successfully!' }),
+        color: 'success'
+      })
       // Refresh book to get updated is_public status
       const updatedBook = await booksService.getById(id)
       setBook(updatedBook)
-      setTimeout(() => setMessage(null), 3000)
     } catch (error) {
       console.error('Error publishing book:', error)
-      setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to publish' })
-      setTimeout(() => setMessage(null), 3000)
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.detail || t('errors.generic', { defaultValue: 'Failed to publish' }),
+        color: 'danger'
+      })
+    } finally {
+      setIsProcessing(false)
     }
   }
 
   const handleUnpublish = async () => {
-    if (!window.confirm(t('public.unpublishConfirm', { defaultValue: 'Are you sure you want to unpublish this book?' }))) {
-      return
-    }
     try {
-      await publicContentService.unpublishBook(book._id)
-      setMessage({ type: 'success', text: t('public.unpublishSuccess') })
+      setIsProcessing(true)
+      await publicContentService.unpublishBook(book?._id)
+      setSnackbar({
+        open: true,
+        message: t('public.unpublishSuccess', { defaultValue: '✅ Unpublished successfully!' }),
+        color: 'success'
+      })
       // Refresh book to get updated is_public status
       const updatedBook = await booksService.getById(id)
       setBook(updatedBook)
-      setTimeout(() => setMessage(null), 3000)
+      setConfirmUnpublishOpen(false)
     } catch (error) {
       console.error('Error unpublishing book:', error)
-      setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to unpublish' })
-      setTimeout(() => setMessage(null), 3000)
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.detail || t('errors.generic', { defaultValue: 'Failed to unpublish' }),
+        color: 'danger'
+      })
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -425,11 +487,32 @@ export default function EditorHome() {
 
   return (
     <>
-      {/* Success/Error Messages */}
-      {message && (
-        <Box sx={{ position: 'fixed', top: 80, right: 20, zIndex: 10000 }}>
-          {message.type === 'success' ? <SuccessWindow message={message.text} /> : <ErrorMsg message={message.text} />}
-        </Box>
+      {/* Notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        color={snackbar.color}
+        variant='soft'
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        {snackbar.message}
+      </Snackbar>
+
+      {/* Unpublish Confirmation Modal */}
+      {confirmUnpublishOpen && (
+        <DeleteConfirmationModal
+          open={confirmUnpublishOpen}
+          onClose={() => setConfirmUnpublishOpen(false)}
+          onConfirm={handleUnpublish}
+          loading={isProcessing}
+          variant='warning'
+          title={t('public.unpublish', { defaultValue: 'Unpublish Book' })}
+          description={t('public.unpublishConfirm', {
+            defaultValue: 'Are you sure you want to unpublish this book? It will no longer be visible in the public library.'
+          })}
+          confirmText={t('public.unpublish', { defaultValue: 'Unpublish' })}
+        />
       )}
 
       <Box
@@ -500,13 +583,27 @@ export default function EditorHome() {
               {/* Publish/Unpublish Button - One Click! */}
               {book?.is_public ? (
                 <Tooltip title={t('public.unpublish', { defaultValue: 'Unpublish' })}>
-                  <Button variant='soft' color='success' onClick={handleUnpublish} size='sm' startDecorator={<PublicIcon />}>
+                  <Button
+                    variant='soft'
+                    color='success'
+                    onClick={() => setConfirmUnpublishOpen(true)}
+                    size='sm'
+                    startDecorator={<PublicIcon />}
+                    loading={isProcessing}
+                  >
                     {t('public.published', { defaultValue: 'Published' })}
                   </Button>
                 </Tooltip>
               ) : (
                 <Tooltip title={t('public.publishInstant', { defaultValue: 'Share with community' })}>
-                  <Button variant='outlined' color='primary' onClick={handlePublish} size='sm' startDecorator={<PublicIcon />}>
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    onClick={handlePublish}
+                    size='sm'
+                    startDecorator={<PublicIcon />}
+                    loading={isProcessing}
+                  >
                     {t('public.publish', { defaultValue: 'Publish' })}
                   </Button>
                 </Tooltip>
