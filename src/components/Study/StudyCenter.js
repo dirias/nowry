@@ -116,233 +116,98 @@ export default function StudyCenter() {
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
-      {/* Header */}
-      <Stack spacing={1.5} sx={{ mb: 1.5 }}>
+      {/* Glass Hero Header */}
+      <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 }, mt: { xs: 1, md: 2 } }}>
+        <Typography level='h2' fontWeight={800} sx={{ mb: 1, letterSpacing: '-0.02em' }}>
+          {t('study.title')}
+        </Typography>
+        <Typography level='body-md' sx={{ color: 'text.tertiary', mb: 3, maxWidth: 500, mx: 'auto' }}>
+          {t('study.subtitle')}
+        </Typography>
+
+        {/* Minimalist Inline Stats */}
         <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          justifyContent='space-between'
-          alignItems={{ xs: 'flex-start', md: 'center' }}
-          spacing={0.5}
-          sx={{ width: '100%' }}
+          direction='row'
+          spacing={{ xs: 1.5, sm: 2 }}
+          justifyContent='center'
+          alignItems='center'
+          sx={{ mb: 5, opacity: 0.8, flexWrap: 'wrap', gap: { xs: 1, sm: 0 } }}
         >
-          {/* Title */}
-          <Typography level='h3' fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}>
-            {t('study.title')}
-          </Typography>
-
-          {/* Subtitle */}
-          <Typography level='body-sm' sx={{ color: 'text.tertiary', fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-            {t('study.subtitle')}
-          </Typography>
-        </Stack>
-
-        {/* Stats Dashboard - Compact Minimalistic Design */}
-        <Grid container spacing={{ xs: 1, md: 1 }} sx={{ mb: 2 }}>
-          <Grid xs={3} sm={3} md={3}>
-            <Box
-              sx={{
-                py: 1.5,
-                px: 1,
-                borderRadius: 'sm',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 0.5,
-                minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.2s',
-                bgcolor: 'transparent',
-                '&:hover': {
-                  bgcolor: 'primary.softBg'
-                }
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <TrendingUp sx={{ fontSize: 20, color: 'primary.solidBg' }} />
-                <Typography
-                  level='h2'
-                  sx={{
-                    color: 'text.primary',
-                    lineHeight: 1,
-                    fontSize: { xs: '2rem', md: '2.5rem' },
-                    fontWeight: 600
-                  }}
-                >
-                  <Skeleton loading={loading} variant='text' width='2ch'>
-                    {stats.dueToday}
-                  </Skeleton>
-                </Typography>
-              </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <TrendingUp sx={{ fontSize: 16, color: 'primary.solidBg', opacity: 0.8 }} />
+            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+              <Skeleton loading={loading} variant='text' width='1ch'>
+                {stats.dueToday}
+              </Skeleton>{' '}
+              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
                 {t('study.stats.dueToday')}
               </Typography>
-            </Box>
-          </Grid>
-
-          <Grid xs={3} sm={3} md={3}>
-            <Box
-              sx={{
-                py: 1.5,
-                px: 1,
-                borderRadius: 'sm',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 0.5,
-                minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.2s',
-                bgcolor: 'transparent',
-                '&:hover': {
-                  bgcolor: 'success.softBg'
-                }
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <School sx={{ fontSize: 20, color: 'success.solidBg' }} />
-                <Typography
-                  level='h2'
-                  sx={{
-                    color: 'text.primary',
-                    lineHeight: 1,
-                    fontSize: { xs: '2rem', md: '2.5rem' },
-                    fontWeight: 600
-                  }}
-                >
-                  <Skeleton loading={loading} variant='text' width='2ch'>
-                    {stats.reviewedToday}
-                  </Skeleton>
-                </Typography>
-              </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                {t('study.stats.reviewedToday')}
-              </Typography>
-            </Box>
-          </Grid>
-
-          <Grid xs={3} sm={3} md={3}>
-            <Box
-              sx={{
-                py: 1.5,
-                px: 1,
-                borderRadius: 'sm',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 0.5,
-                minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.2s',
-                bgcolor: 'transparent',
-                '&:hover': {
-                  bgcolor: 'neutral.softBg'
-                }
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <Style sx={{ fontSize: 20, color: 'neutral.solidBg' }} />
-                <Typography
-                  level='h2'
-                  sx={{
-                    color: 'text.primary',
-                    lineHeight: 1,
-                    fontSize: { xs: '2rem', md: '2.5rem' },
-                    fontWeight: 600
-                  }}
-                >
-                  <Skeleton loading={loading} variant='text' width='2ch'>
-                    {stats.totalActive}
-                  </Skeleton>
-                </Typography>
-              </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                {t('study.stats.totalCards')}
-              </Typography>
-            </Box>
-          </Grid>
-
-          <Grid xs={3} sm={3} md={3}>
-            <Box
-              sx={{
-                py: 1.5,
-                px: 1,
-                borderRadius: 'sm',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 0.5,
-                minHeight: { xs: 80, md: 90 },
-                transition: 'all 0.2s',
-                bgcolor: 'transparent',
-                '&:hover': {
-                  bgcolor: 'warning.softBg'
-                }
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                <CalendarToday sx={{ fontSize: 20, color: 'warning.solidBg' }} />
-                <Typography
-                  level='h2'
-                  sx={{
-                    color: 'text.primary',
-                    lineHeight: 1,
-                    fontSize: { xs: '2rem', md: '2.5rem' },
-                    fontWeight: 600
-                  }}
-                >
-                  <Skeleton loading={loading} variant='text' width='2ch'>
-                    {stats.streak}
-                  </Skeleton>
-                </Typography>
-              </Box>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                {t('profile.stats.days')}
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-      </Stack>
-
-      {/* Subtle Divider for Visual Separation */}
-      <Divider sx={{ my: 3, opacity: 0.3 }} />
-
-      {/* Quick Start Actions */}
-      {stats.dueToday > 0 && (
-        <Card
-          orientation='horizontal'
-          variant='outlined'
-          color='danger'
-          size='sm'
-          sx={{
-            mb: 4,
-            px: 3,
-            py: 2,
-            alignItems: 'center',
-            boxShadow: 'sm',
-            bgcolor: 'danger.softBg',
-            // FORCE COMPACTING: override any default or inherited sizing
-            height: 'auto',
-            minHeight: 'unset',
-            width: '100%'
-          }}
-        >
-          <Box sx={{ flex: 1 }}>
-            <Typography level='title-md' fontWeight={600} sx={{ mb: 0.5, color: 'text.primary' }}>
-              🎯 {t('study.startReview')}
-            </Typography>
-            <Typography level='body-sm' sx={{ color: 'text.secondary', lineHeight: 1.2 }}>
-              {t('study.reviewMsg', { count: stats.dueToday })}
             </Typography>
           </Box>
-          <Button size='sm' color='danger' onClick={() => navigate('/study/daily-review')}>
-            {t('study.startStudying')}
-          </Button>
-        </Card>
-      )}
+          <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <School sx={{ fontSize: 16, color: 'success.solidBg', opacity: 0.8 }} />
+            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+              <Skeleton loading={loading} variant='text' width='1ch'>
+                {stats.reviewedToday}
+              </Skeleton>{' '}
+              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
+                {t('study.stats.reviewedToday')}
+              </Typography>
+            </Typography>
+          </Box>
+          <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Style sx={{ fontSize: 16, color: 'neutral.solidBg', opacity: 0.8 }} />
+            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+              <Skeleton loading={loading} variant='text' width='1ch'>
+                {stats.totalActive}
+              </Skeleton>{' '}
+              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
+                {t('study.stats.totalCards')}
+              </Typography>
+            </Typography>
+          </Box>
+          <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <CalendarToday sx={{ fontSize: 16, color: 'warning.solidBg', opacity: 0.8 }} />
+            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+              <Skeleton loading={loading} variant='text' width='1ch'>
+                {stats.streak}
+              </Skeleton>{' '}
+              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
+                {t('profile.stats.days')}
+              </Typography>
+            </Typography>
+          </Box>
+        </Stack>
+
+        {/* Global Action CTA */}
+        <Box sx={{ minHeight: 60 }}>
+          {stats.dueToday > 0 && (
+            <Stack alignItems='center' spacing={1.5}>
+              <Button
+                size='lg'
+                variant='solid'
+                color='danger'
+                onClick={() => navigate('/study/daily-review')}
+                sx={{ borderRadius: 'xl', px: 6, fontWeight: 700, boxShadow: 'sm' }}
+              >
+                🎯 {t('study.startStudying')}
+              </Button>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                {t('study.reviewMsg', { count: stats.dueToday })}
+              </Typography>
+            </Stack>
+          )}
+        </Box>
+      </Box>
 
       {/* Study by Type */}
-      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, mt: 1 }}>
+      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5 }}>
         <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
           {t('study.byType')}
         </Typography>
@@ -425,10 +290,13 @@ export default function StudyCenter() {
               variant='outlined'
               sx={{
                 height: '100%',
-                transition: 'all 0.2s ease',
+                borderRadius: 'xl',
+                bgcolor: 'background.surface',
+                boxShadow: 'sm',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  boxShadow: 'lg',
-                  transform: 'translateY(-4px)',
+                  boxShadow: 'xl',
+                  transform: 'translateY(-6px)',
                   borderColor: 'primary.outlinedBorder'
                 }
               }}
@@ -519,10 +387,13 @@ export default function StudyCenter() {
               variant='outlined'
               sx={{
                 height: '100%',
-                transition: 'all 0.2s ease',
+                borderRadius: 'xl',
+                bgcolor: 'background.surface',
+                boxShadow: 'sm',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  boxShadow: 'lg',
-                  transform: 'translateY(-4px)',
+                  boxShadow: 'xl',
+                  transform: 'translateY(-6px)',
                   borderColor: 'warning.outlinedBorder'
                 }
               }}
@@ -613,11 +484,14 @@ export default function StudyCenter() {
               variant='outlined'
               sx={{
                 height: '100%',
-                transition: 'all 0.2s ease',
+                borderRadius: 'xl',
+                bgcolor: 'background.surface',
+                boxShadow: 'sm',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  boxShadow: 'lg',
-                  transform: 'translateY(-4px)',
-                  borderColor: 'neutral.outlinedBorder'
+                  boxShadow: 'xl',
+                  transform: 'translateY(-6px)',
+                  borderColor: 'info.outlinedBorder'
                 }
               }}
             >

@@ -362,8 +362,7 @@ const PriorityList = ({
                 color='neutral'
                 onClick={handleCancelDelete}
                 size='lg'
-                fullWidth={{ xs: true, sm: false }}
-                sx={{ minWidth: { sm: 100 } }}
+                sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 100 } }}
               >
                 Cancel
               </Button>
@@ -372,8 +371,7 @@ const PriorityList = ({
                 color='danger'
                 onClick={handleConfirmDelete}
                 size='lg'
-                fullWidth={{ xs: true, sm: false }}
-                sx={{ minWidth: { sm: 100 } }}
+                sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 100 } }}
               >
                 Delete Priority
               </Button>

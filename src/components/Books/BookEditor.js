@@ -10,9 +10,9 @@ import {
   Textarea,
   Chip,
   Stack,
-  Sheet,
   IconButton,
   Modal,
+  ModalDialog,
   FormControl,
   FormLabel,
   Grid,
@@ -68,12 +68,20 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
   }
 
   const handleSave = async () => {
+    // If the user typed a tag but forgot to press Enter, auto-add it
+    let finalTags = [...tags]
+    if (newTag.trim() !== '' && !tags.includes(newTag.trim())) {
+      finalTags.push(newTag.trim())
+      setTags(finalTags)
+      setNewTag('')
+    }
+
     const updatedData = {
       title,
       coverImage,
       coverColor,
       summary,
-      tags
+      tags: finalTags
     }
     try {
       await booksService.update(book._id, updatedData)
@@ -140,17 +148,22 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          p: 2
+          p: { xs: 0, sm: 2 } // flush on mobile
         }}
       >
-        <Sheet
+        <ModalDialog
           variant='outlined'
           sx={{
-            width: '100%',
+            width: { xs: '100vw', sm: '100%' },
             maxWidth: 1000,
-            maxHeight: '90vh',
-            borderRadius: 'md',
-            boxShadow: 'lg',
+            height: { xs: '100dvh', sm: 'auto' },
+            maxHeight: { xs: '100dvh', sm: '90vh' },
+            p: 0,
+            m: 0,
+            borderRadius: { xs: 0, sm: 'md' },
+            border: { xs: 'none', sm: '1px solid' },
+            borderColor: 'divider',
+            boxShadow: { xs: 'none', sm: 'lg' },
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column'
@@ -189,7 +202,8 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                 p: { xs: 2, md: 3 },
                 borderRight: { md: '1px solid' },
                 borderColor: 'divider',
-                overflow: 'auto'
+                overflow: 'auto',
+                bgcolor: 'background.surface'
               }}
             >
               <Stack spacing={2.5}>
@@ -276,7 +290,14 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                       borderColor: 'neutral.outlinedBorder',
                       borderRadius: 'sm',
                       minHeight: 80,
-                      bgcolor: 'background.surface'
+                      bgcolor: 'background.surface',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      transition: 'border-color 0.2s, box-shadow 0.2s',
+                      '&:focus-within': {
+                        borderColor: 'primary.500',
+                        boxShadow: 'inset 0 0 0 1px var(--joy-palette-primary-500)'
+                      }
                     }}
                   >
                     <Stack direction='row' flexWrap='wrap' spacing={0.75} sx={{ mb: tags.length > 0 ? 1 : 0 }}>
@@ -305,7 +326,14 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                           handleAddTag()
                         }
                       }}
-                      sx={{ p: 0, fontSize: '0.875rem' }}
+                      sx={{
+                        p: 0,
+                        flex: 1,
+                        fontSize: '0.875rem',
+                        '--Input-focusedThickness': '0px',
+                        '--Input-minHeight': '24px',
+                        bgcolor: 'transparent'
+                      }}
                     />
                   </Box>
                 </FormControl>
@@ -366,44 +394,46 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
             </Grid>
           </Grid>
 
-          {/* Footer actions - Compact */}
+          {/* Footer actions - Mobile-First */}
           <Box
             sx={{
-              p: { xs: 1.5, md: 2 },
+              p: { xs: 2, md: 2 },
               borderTop: '1px solid',
               borderColor: 'divider',
               display: 'flex',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
               justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 1
+              alignItems: { xs: 'stretch', sm: 'center' },
+              gap: 1.5,
+              bgcolor: 'background.surface'
             }}
           >
             {/* Left: Publish button */}
-            <Box>
+            <Box sx={{ display: 'flex' }}>
               {book.is_public ? (
                 <Tooltip title={t('public.unpublish')}>
-                  <Button variant='soft' color='neutral' onClick={handleUnpublish} size='sm' startDecorator={<PublicOffIcon />}>
+                  <Button fullWidth variant='soft' color='neutral' onClick={handleUnpublish} size='md' startDecorator={<PublicOffIcon />}>
                     {t('public.published')}
                   </Button>
                 </Tooltip>
               ) : (
-                <Button variant='outlined' onClick={() => setShowPublishModal(true)} size='sm' startDecorator={<PublicIcon />}>
+                <Button fullWidth variant='outlined' onClick={() => setShowPublishModal(true)} size='md' startDecorator={<PublicIcon />}>
                   {t('public.publish')}
                 </Button>
               )}
             </Box>
 
             {/* Right: Save/Cancel */}
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button variant='plain' color='neutral' onClick={onCancel} size='sm'>
+            <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+              <Button fullWidth variant='plain' color='neutral' onClick={onCancel} size='md'>
                 {t('common.cancel')}
               </Button>
-              <Button variant='solid' color='primary' onClick={handleSave} size='sm'>
+              <Button fullWidth variant='solid' color='primary' onClick={handleSave} size='md'>
                 {t('common.save')} {t('common.changes', { defaultValue: 'Changes' })}
               </Button>
             </Box>
           </Box>
-        </Sheet>
+        </ModalDialog>
       </Modal>
     </>
   )

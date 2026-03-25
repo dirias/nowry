@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext, useMemo } from 'react'
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import CssBaseline from '@mui/joy/CssBaseline'
+import GlobalStyles from '@mui/joy/GlobalStyles'
 
 import { generateColorScheme } from './colorSchemeGenerator'
 import baseTheme from './theme'
@@ -84,6 +85,18 @@ export const DynamicThemeProvider = ({ children }) => {
     <ThemePreferencesContext.Provider value={contextValue}>
       <CssVarsProvider theme={dynamicTheme} defaultMode='light' disableNestedContext>
         <CssBaseline />
+        <GlobalStyles
+          styles={{
+            body: {
+              backgroundColor: 'var(--joy-palette-background-body)',
+              backgroundImage: `radial-gradient(circle at 10% 20%, rgba(var(--joy-palette-primary-mainChannel) / 0.06), transparent 30%), 
+                                radial-gradient(circle at 90% 80%, rgba(var(--joy-palette-primary-mainChannel) / 0.06), transparent 30%)`,
+              backgroundAttachment: 'fixed',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover'
+            }
+          }}
+        />
         {children}
       </CssVarsProvider>
     </ThemePreferencesContext.Provider>

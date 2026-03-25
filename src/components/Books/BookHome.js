@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
@@ -7,6 +7,7 @@ import { WarningWindow, SuccessWindow, Error as ErrorWindow } from '../Messages'
 import BookEditor from './BookEditor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { useAuth } from '../../context/AuthContext'
+import useBooks from '../../hooks/useBooks'
 import Book from './Book'
 import ImportPreviewModal from './ImportPreviewModal'
 import {
@@ -28,6 +29,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import SearchIcon from '@mui/icons-material/Search'
+import CloseIcon from '@mui/icons-material/Close'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import GridViewIcon from '@mui/icons-material/GridView'
@@ -36,9 +38,9 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 
 export default function BookHome() {
-  const [books, setBooks] = useState([])
-  const [allBooks, setAllBooks] = useState([])
+  const { books: allBooks, loading, error: fetchError, reload: fetchBooks } = useBooks()
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTags, setSelectedTags] = useState([])
   const [viewMode, setViewMode] = useState(localStorage.getItem('book_view_mode') || 'grid')
 
   const [showWarning, setShowWarning] = useState(false)
@@ -49,7 +51,6 @@ export default function BookHome() {
   const [bookToDelete, setBookToDelete] = useState(null)
   const [showEditor, setShowEditor] = useState(false)
   const [bookToEdit, setBookToEdit] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
 
   // Preview modal state
@@ -70,36 +71,42 @@ export default function BookHome() {
     localStorage.setItem('book_view_mode', newMode)
   }
 
-  const fetchBooks = async () => {
-    try {
-      console.log('[DEBUG] Fetching books...')
-      const fetchedBooks = await booksService.getAll()
-      console.log('[DEBUG] Fetched books count:', fetchedBooks.length)
-      setBooks(fetchedBooks)
-      setAllBooks(fetchedBooks)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching books:', error)
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
-    console.log('[DEBUG] BookHome mounted, fetching books')
-    fetchBooks()
-  }, [])
+    if (fetchError) {
+      setErrorMessage(t('books.errorFetch', 'Error fetching books'))
+      setShowError(true)
+    }
+  }, [fetchError, t])
+
+  const availableTags = useMemo(() => {
+    const tags = new Set()
+    allBooks.forEach((book) => {
+      if (book.tags) book.tags.forEach((t) => tags.add(t))
+    })
+    return Array.from(tags).sort()
+  }, [allBooks])
+
+  const books = useMemo(() => {
+    return allBooks.filter((book) => {
+      const matchesSearch =
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (book.author && book.author.toLowerCase().includes(searchTerm.toLowerCase()))
+      const matchesTags = selectedTags.length === 0 || selectedTags.every((tag) => book.tags?.includes(tag))
+      return matchesSearch && matchesTags
+    })
+  }, [allBooks, searchTerm, selectedTags])
+
+  const toggleTag = (tag) => {
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }
 
   const handleCreateBook = async () => {
     try {
       const newBook = await booksService.create({
-        title: `New book ${books.length}`,
+        title: `New book ${allBooks.length}`,
         author: user?.username || 'Unknown',
         isbn: 'Sin ISBN'
       })
-      const updatedBooks = [...books, newBook]
-      setBooks(updatedBooks)
-      setAllBooks(updatedBooks)
-      // Redirect immediately to the new book (Minimalist flow)
       navigate(`/book/${newBook._id}`, { state: { book: newBook } })
     } catch (error) {
       console.error('Error creating book:', error)
@@ -205,17 +212,6 @@ export default function BookHome() {
     noClick: false
   })
 
-  const handleSearch = (e) => {
-    const term = e.target.value
-    setSearchTerm(term)
-    if (term) {
-      const filtered = allBooks.filter((b) => b.title.toLowerCase().includes(term.toLowerCase()))
-      setBooks(filtered)
-    } else {
-      setBooks(allBooks)
-    }
-  }
-
   const handleBookClick = (book) => {
     navigate(`/book/${book._id}`, { state: { book } })
   }
@@ -223,21 +219,13 @@ export default function BookHome() {
   const handleDeleteBook = async () => {
     try {
       await booksService.delete(bookToDelete._id)
-      // Update state immediately for instant UI feedback
-      const updated = books.filter((b) => b._id !== bookToDelete._id)
-      const updatedAll = allBooks.filter((b) => b._id !== bookToDelete._id)
-      setBooks(updated)
-      setAllBooks(updatedAll)
+      await fetchBooks()
       setShowWarning(false)
       setBookToDelete(null)
     } catch (error) {
       console.error('Error deleting book:', error)
-      // If book is already gone (404), sync UI to remove it
       if (error.response?.status === 404) {
-        const updated = books.filter((b) => b._id !== bookToDelete._id)
-        const updatedAll = allBooks.filter((b) => b._id !== bookToDelete._id)
-        setBooks(updated)
-        setAllBooks(updatedAll)
+        await fetchBooks()
         setShowWarning(false)
         setBookToDelete(null)
         return
@@ -250,100 +238,175 @@ export default function BookHome() {
   }
 
   return (
-    <Container maxWidth='xl' sx={{ py: 4 }}>
-      {/* Minimalist Header */}
-      <Stack spacing={4} sx={{ mb: 4 }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          justifyContent='space-between'
-          alignItems={{ xs: 'start', md: 'center' }}
-          spacing={2}
-        >
-          <Box>
-            <Typography level='h3' fontWeight={600}>
-              {t('books.title')}
-            </Typography>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-              {t('books.subtitle')}
-            </Typography>
-          </Box>
+    <Container maxWidth='xl' sx={{ py: { xs: 3, md: 5 } }}>
+      {/* Glass Hero Header */}
+      <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
+        <Typography level='h2' fontWeight={800} sx={{ mb: 1, letterSpacing: '-0.02em' }}>
+          {t('books.title')}
+        </Typography>
+        <Typography level='body-md' sx={{ color: 'text.tertiary', mb: 4, maxWidth: 500, mx: 'auto' }}>
+          {t('books.subtitle')}
+        </Typography>
 
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-            sx={{ width: { xs: '100%', md: 'auto' } }}
-          >
-            {allBooks.length > 0 && (
-              <Input
-                placeholder={t('books.searchPlaceholder')}
-                value={searchTerm}
-                onChange={handleSearch}
-                startDecorator={<SearchIcon />}
-                size='sm'
-                variant='outlined'
-                sx={{ width: { xs: '100%', md: 240 }, height: 32 }}
-              />
-            )}
-
-            <Stack direction='row' spacing={1.5} sx={{ width: { xs: '100%', sm: 'auto' } }}>
-              {/* View Toggle */}
-              {allBooks.length > 0 && (
-                <Stack direction='row' spacing={0.5}>
-                  <IconButton
-                    size='sm'
-                    variant={viewMode === 'grid' ? 'solid' : 'plain'}
-                    onClick={() => handleViewChange('grid')}
-                    sx={{ height: 32 }}
-                  >
-                    <GridViewIcon />
-                  </IconButton>
-                  <IconButton
-                    size='sm'
-                    variant={viewMode === 'list' ? 'solid' : 'plain'}
-                    onClick={() => handleViewChange('list')}
-                    sx={{ height: 32 }}
-                  >
-                    <ViewListIcon />
-                  </IconButton>
+        <Box sx={{ maxWidth: 640, mx: 'auto' }}>
+          {allBooks.length > 0 ? (
+            <Input
+              size='lg'
+              placeholder={t('books.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startDecorator={<SearchIcon sx={{ color: 'text.tertiary', ml: 1 }} />}
+              endDecorator={
+                <Stack direction='row' spacing={1} alignItems='center' sx={{ mr: 0.5 }}>
+                  {searchTerm && (
+                    <IconButton size='sm' variant='plain' color='neutral' onClick={() => setSearchTerm('')} sx={{ borderRadius: '50%' }}>
+                      <CloseIcon />
+                    </IconButton>
+                  )}
+                  <Button size='sm' variant='solid' color='primary' onClick={handleCreateBook} sx={{ borderRadius: 'md', fontWeight: 600 }}>
+                    {t('books.create')}
+                  </Button>
                 </Stack>
-              )}
+              }
+              sx={{
+                width: '100%',
+                borderRadius: 'xl',
+                boxShadow: 'sm',
+                bgcolor: 'rgba(var(--joy-palette-background-surfaceChannel) / 0.8)',
+                backdropFilter: 'blur(12px)',
+                '--Input-focusedThickness': '2px',
+                p: 0.75,
+                pl: 1
+              }}
+            />
+          ) : (
+            <Button size='lg' onClick={handleCreateBook} startDecorator={<AddIcon />} sx={{ borderRadius: 'lg', px: 4, boxShadow: 'sm' }}>
+              {t('books.create')}
+            </Button>
+          )}
+        </Box>
+      </Box>
 
-              <Button
-                startDecorator={<AddIcon />}
-                onClick={handleCreateBook}
-                size='sm'
-                variant='solid'
-                color='primary'
-                sx={{ height: 32, flex: { xs: 1, sm: 'initial' } }}
-              >
-                {t('books.create')}
-              </Button>
-              <Button
-                startDecorator={<UploadFileIcon />}
-                {...getRootProps()}
-                size='sm'
-                variant='plain'
-                color='neutral'
-                loading={uploading}
-                sx={{ px: 2, height: 32, flex: { xs: 1, sm: 'initial' } }}
-              >
-                <input {...getInputProps()} />
-                {t('books.import')}
-              </Button>
-            </Stack>
-          </Stack>
-        </Stack>
-
-        {/* Minimalist Stats - Only show if useful */}
-        {allBooks.length > 0 && (
-          <Stack direction='row' spacing={3} sx={{ borderBottom: '1px solid', borderColor: 'divider', pb: 2 }}>
-            <Typography level='body-xs' fontWeight='lg' sx={{ color: 'text.secondary' }}>
+      {/* Controls & Tactile Carousel */}
+      {allBooks.length > 0 && (
+        <Stack spacing={3} sx={{ mb: 4 }}>
+          <Stack direction='row' justifyContent='space-between' alignItems='center'>
+            <Typography level='title-sm' fontWeight='lg' sx={{ color: 'text.secondary' }}>
               📚 {allBooks.length} {t('books.totalBooks')}
             </Typography>
+
+            <Stack direction='row' spacing={0.5}>
+              <IconButton
+                size='sm'
+                variant={viewMode === 'grid' ? 'solid' : 'plain'}
+                color={viewMode === 'grid' ? 'primary' : 'neutral'}
+                onClick={() => handleViewChange('grid')}
+                sx={{ borderRadius: 'md' }}
+              >
+                <GridViewIcon fontSize='small' />
+              </IconButton>
+              <IconButton
+                size='sm'
+                variant={viewMode === 'list' ? 'solid' : 'plain'}
+                color={viewMode === 'list' ? 'primary' : 'neutral'}
+                onClick={() => handleViewChange('list')}
+                sx={{ borderRadius: 'md' }}
+              >
+                <ViewListIcon fontSize='small' />
+              </IconButton>
+            </Stack>
           </Stack>
-        )}
-      </Stack>
+
+          {availableTags.length > 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1.5,
+                overflowX: 'auto',
+                pb: 1,
+                px: 0.5,
+                mx: -0.5,
+                scrollSnapType: 'x mandatory',
+                WebkitOverflowScrolling: 'touch',
+                '&::-webkit-scrollbar': { display: 'none' },
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
+              {selectedTags.length > 0 && (
+                <Chip
+                  variant='solid'
+                  color='neutral'
+                  size='lg'
+                  onClick={() => setSelectedTags([])}
+                  startDecorator={<CloseIcon sx={{ fontSize: 16 }} />}
+                  sx={{
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    bgcolor: 'background.surface',
+                    color: 'text.primary',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: '12px',
+                    boxShadow: 'sm',
+                    py: 1,
+                    px: 1.5,
+                    flexShrink: 0,
+                    scrollSnapAlign: 'start',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:active': { transform: 'scale(0.95)' },
+                    '&:hover': { bgcolor: 'background.level1' }
+                  }}
+                >
+                  Clear Search
+                </Chip>
+              )}
+              {availableTags.map((tag) => {
+                const isSelected = selectedTags.includes(tag)
+                return (
+                  <Chip
+                    key={tag}
+                    variant={isSelected ? 'solid' : 'outlined'}
+                    color={isSelected ? 'primary' : 'neutral'}
+                    onClick={() => toggleTag(tag)}
+                    size='lg'
+                    sx={{
+                      cursor: 'pointer',
+                      fontWeight: isSelected ? 600 : 500,
+                      py: 1,
+                      px: 1.5,
+                      borderRadius: '12px',
+                      flexShrink: 0,
+                      scrollSnapAlign: 'start',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:active': { transform: 'scale(0.95)' },
+                      ...(isSelected
+                        ? {
+                            bgcolor: themeColor,
+                            color: '#ffffff',
+                            border: '1px solid',
+                            borderColor: themeColor,
+                            boxShadow: `0 4px 10px rgba(0,0,0,0.1)`,
+                            '&:hover': { filter: 'brightness(0.9)' }
+                          }
+                        : {
+                            bgcolor: 'background.surface',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            color: 'text.secondary',
+                            boxShadow: 'none',
+                            '&:hover': { bgcolor: 'background.level1', borderColor: 'neutral.outlinedHoverBorder' }
+                          })
+                    }}
+                  >
+                    {tag}
+                  </Chip>
+                )
+              })}
+            </Box>
+          )}
+        </Stack>
+      )}
 
       <input {...getInputProps()} />
 
@@ -440,9 +503,20 @@ export default function BookHome() {
       {!loading && books.length > 0 && (
         <>
           {viewMode === 'grid' ? (
-            <Grid container spacing={2}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: 'repeat(2, 1fr)',
+                  sm: 'repeat(auto-fill, minmax(160px, 1fr))',
+                  md: 'repeat(auto-fill, minmax(200px, 1fr))'
+                },
+                gap: { xs: 1.5, sm: 2, md: 3 },
+                justifyItems: 'center'
+              }}
+            >
               {books.map((book) => (
-                <Grid key={book._id} xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Box key={book._id} sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                   <Book
                     book={book}
                     handleBookClick={handleBookClick}
@@ -455,9 +529,9 @@ export default function BookHome() {
                       setShowWarning(true)
                     }}
                   />
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Box>
           ) : (
             <Stack spacing={0}>
               {books.map((book) => (

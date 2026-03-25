@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Card, Typography, Box, AspectRatio, IconButton, Stack, Chip } from '@mui/joy'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import EditIcon from '@mui/icons-material/Edit'
@@ -9,10 +9,56 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
   const { cover_color, cover_image, title, author, isbn } = book
   const { themeColor } = useThemePreferences()
 
+  const [transform, setTransform] = useState('')
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
+
+  const handleMouseMove = (e) => {
+    // Calculate mouse position relative to card center to generate 3D tilt
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+
+    const rotateX = ((y - centerY) / centerY) * -12 // Max tilt 12°
+    const rotateY = ((x - centerX) / centerX) * 12
+
+    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`)
+    setGlare({ x: (x / rect.width) * 100, y: (y / rect.height) * 100, opacity: 1 })
+  }
+
+  const handleTouch = (e) => {
+    const touch = e.touches[0]
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = touch.clientX - rect.left
+    const y = touch.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+
+    const rotateX = ((y - centerY) / centerY) * -15
+    const rotateY = ((x - centerX) / centerX) * 15
+
+    // Scale slightly down to simulate a physical press on mobile
+    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(0.97, 0.97, 0.97)`)
+    setGlare({ x: (x / rect.width) * 100, y: (y / rect.height) * 100, opacity: 1 })
+  }
+
+  const handleReset = () => {
+    // Reset to idle state when mouse or touch leaves
+    setTransform('')
+    setGlare((prev) => ({ ...prev, opacity: 0 }))
+  }
+
   return (
     <Card
       variant='plain'
       component='div'
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleReset}
+      onTouchStart={handleTouch}
+      onTouchMove={handleTouch}
+      onTouchEnd={handleReset}
+      onTouchCancel={handleReset}
       sx={{
         width: '100%',
         maxWidth: 200,
@@ -20,15 +66,14 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
         backgroundColor: 'transparent',
         cursor: 'pointer',
         position: 'relative',
-        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease',
-        boxShadow: 'sm',
+        transformStyle: 'preserve-3d',
+        transition: transform ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.5s ease',
+        transform: transform || 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+        boxShadow: transform ? 'xl' : 'sm',
         borderRadius: 'md',
         overflow: 'hidden',
         '&:hover': {
-          transform: 'translateY(-6px) scale(1.02)',
-          boxShadow: 'lg',
-          '& .book-actions': { opacity: 1 },
-          '& .book-shine': { opacity: 1 }
+          '& .book-actions': { opacity: 1 }
         }
       }}
       onClick={() => handleBookClick(book)}
@@ -91,18 +136,18 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
           )}
         </Box>
 
-        {/* 3. Surface Shine Effect (Hover) */}
+        {/* 3. Dynamic 3D Glare (Parallax Hover) */}
         <Box
-          className='book-shine'
+          className='book-glare'
           sx={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 35%, transparent 40%)',
-            backgroundSize: '200% 100%',
-            opacity: 0,
-            transition: 'opacity 0.3s ease',
+            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
+            opacity: glare.opacity,
+            transition: glare.opacity ? 'none' : 'opacity 0.5s ease',
             pointerEvents: 'none',
-            zIndex: 15
+            zIndex: 15,
+            mixBlendMode: 'overlay'
           }}
         />
 
@@ -188,11 +233,12 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
               top: 8,
               right: 8,
               zIndex: 20,
-              opacity: 0,
+              opacity: { xs: 1, md: 0 },
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: 'translateY(-4px)',
+              transform: { xs: 'translateY(0)', md: 'translateY(-4px)' },
               '.MuiCard-root:hover &': {
-                transform: 'translateY(0)'
+                transform: 'translateY(0)',
+                opacity: 1
               }
             }}
           >

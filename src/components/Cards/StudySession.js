@@ -19,6 +19,7 @@ import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit } from
 import { cardsService, decksService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
+import { apiCache } from '../../api/utils/cache'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
 
@@ -46,6 +47,20 @@ export default function StudySession() {
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [reviewQueue, setReviewQueue] = useState([])
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
+  const [isPressing, setIsPressing] = useState(false)
+
+  const handleCardMouseMove = (e) => {
+    if (!e.currentTarget) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    setGlare({ x: (x / rect.width) * 100, y: (y / rect.height) * 100, opacity: 1 })
+  }
+
+  const handleCardMouseLeave = () => {
+    setGlare({ ...glare, opacity: 0 })
+  }
 
   // Centralized voice settings — reads & writes through the shared hook
   const { voiceSettings, getSettingsForDeck, handleVoiceSettingsChange: _handleVoiceSettingsChange } = useVoiceSettings(deckId)
@@ -73,6 +88,15 @@ export default function StudySession() {
     if (cardsLoading) return
     fetchDeckCards()
   }, [deckId, cardsLoading, cardsData])
+
+  // Invalidate cache when leaving study session
+  useEffect(() => {
+    return () => {
+      apiCache.invalidate('cards:statistics')
+      apiCache.invalidate('cards:all')
+      apiCache.invalidate('decks:all')
+    }
+  }, [])
 
   // Retry failed reviews in background
   useEffect(() => {
@@ -392,7 +416,12 @@ export default function StudySession() {
   const isVisual = currentCard.card_type === 'visual'
 
   const GradingButtons = () => (
-    <Box sx={{ width: '100%' }}>
+    <Box
+      sx={{ width: '100%', position: 'relative', zIndex: 20 }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Show pending sync indicator */}
       {reviewQueue.length > 0 && (
         <Box sx={{ mb: 1.5, textAlign: 'center' }}>
@@ -509,11 +538,12 @@ export default function StudySession() {
             <LinearProgress
               determinate
               value={progress}
+              color='primary'
               sx={{
-                borderRadius: 'sm',
+                borderRadius: 'full',
                 bgcolor: 'background.level2',
-                color: 'primary.outlinedBorder',
-                height: 4
+                height: 6,
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
               }}
             />
           </Box>
@@ -598,10 +628,38 @@ export default function StudySession() {
                 minHeight: isFullscreen ? '100vh' : 500,
                 borderRadius: isFullscreen ? 0 : 'xl',
                 boxShadow: isFullscreen ? 'none' : 'sm',
-                overflow: 'auto'
+                position: 'relative',
+                overflow: { xs: 'auto', md: 'hidden' }, // prevent glare spilling, but allow scroll
+                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
+                transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
               }}
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
+              onMouseDown={() => setIsPressing(true)}
+              onMouseUp={() => setIsPressing(false)}
+              onTouchStart={() => setIsPressing(true)}
+              onTouchEnd={() => setIsPressing(false)}
+              onTouchCancel={() => setIsPressing(false)}
             >
-              <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8 }}>
+              {!isFullscreen && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    pointerEvents: 'none',
+                    zIndex: 10,
+                    opacity: glare.opacity,
+                    transition: 'opacity 0.3s ease',
+                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.1) 0%, transparent 60%)`,
+                    mixBlendMode: 'overlay',
+                    display: { xs: 'none', md: 'block' } // Glare is mouse-only
+                  }}
+                />
+              )}
+              <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8, height: '100%', overflowY: 'auto' }}>
                 <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                   {t('cards.session.labels.quiz')}
                 </Typography>
@@ -677,10 +735,38 @@ export default function StudySession() {
                 minHeight: isFullscreen ? '100vh' : 500,
                 borderRadius: isFullscreen ? 0 : 'xl',
                 boxShadow: isFullscreen ? 'none' : 'sm',
-                overflow: 'auto'
+                position: 'relative',
+                overflow: { xs: 'auto', md: 'hidden' },
+                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
+                transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
               }}
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
+              onMouseDown={() => setIsPressing(true)}
+              onMouseUp={() => setIsPressing(false)}
+              onTouchStart={() => setIsPressing(true)}
+              onTouchEnd={() => setIsPressing(false)}
+              onTouchCancel={() => setIsPressing(false)}
             >
-              <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8 }}>
+              {!isFullscreen && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    pointerEvents: 'none',
+                    zIndex: 10,
+                    opacity: glare.opacity,
+                    transition: 'opacity 0.3s ease',
+                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.1) 0%, transparent 60%)`,
+                    mixBlendMode: 'overlay',
+                    display: { xs: 'none', md: 'block' }
+                  }}
+                />
+              )}
+              <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8, height: '100%', overflowY: 'auto' }}>
                 <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                   {t('cards.session.labels.visual')}
                 </Typography>
@@ -724,8 +810,9 @@ export default function StudySession() {
                 borderRadius: isFullscreen ? 0 : 'xl',
                 boxShadow: isFullscreen ? 'none' : 'sm',
                 cursor: 'pointer',
-                transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.27)', // Spring-like flip
-                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                position: 'relative',
+                transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.27), box-shadow 0.3s ease',
+                transform: `scale3d(${isPressing && !isFullscreen ? 0.98 : 1}, ${isPressing && !isFullscreen ? 0.98 : 1}, 1) ${isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'}`,
                 transformStyle: 'preserve-3d',
                 '&:hover': {
                   boxShadow: isFullscreen ? 'none' : 'xl',
@@ -733,14 +820,41 @@ export default function StudySession() {
                 }
               }}
               onClick={handleFlip}
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
+              onMouseDown={() => setIsPressing(true)}
+              onMouseUp={() => setIsPressing(false)}
+              onTouchStart={() => setIsPressing(true)}
+              onTouchEnd={() => setIsPressing(false)}
+              onTouchCancel={() => setIsPressing(false)}
             >
+              {!isFullscreen && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    pointerEvents: 'none',
+                    zIndex: 10,
+                    borderRadius: 'inherit',
+                    opacity: glare.opacity,
+                    transition: 'opacity 0.3s ease',
+                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.1) 0%, transparent 60%)`,
+                    mixBlendMode: 'overlay',
+                    display: { xs: 'none', md: 'block' },
+                    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                  }}
+                />
+              )}
               <CardContent
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  textAlign: isFlipped ? 'justify' : 'center',
+                  textAlign: 'center',
                   height: '100%',
                   p: { xs: 3, md: 6 },
                   pt: { xs: 6, md: 8 },
@@ -786,7 +900,7 @@ export default function StudySession() {
                         fontWeight: currentCard.content?.length > 100 ? 400 : 500,
                         fontSize: currentCard.content?.length > 100 ? { xs: '1rem', md: '1.125rem' } : { xs: '1.5rem', md: '2rem' },
                         lineHeight: currentCard.content?.length > 100 ? 1.6 : 1.3,
-                        textAlign: 'justify',
+                        textAlign: 'center',
                         width: '100%',
                         maxWidth: { xs: '100%', md: 600 },
                         color: 'text.primary'

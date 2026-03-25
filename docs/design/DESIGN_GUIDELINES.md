@@ -1872,3 +1872,35 @@ setErrorMsg(error.response?.data?.detail || t('errors.generic'))
 | Warning before continue | `<Modal>` with custom content |
 | `window.confirm()` | ❌ Never |
 | `window.alert()` | ❌ Never |
+
+---
+
+## 14. Premium UI Enhancements (Llamative Interactions)
+
+To ensure the application feels highly polished, tactile, and professional, we employ specific "llamative" (eye-catching but refined) micro-interactions for key components.
+
+### 14.1 Glassmorphic Search Heroes
+Instead of standard input fields for primary page searches (like the Book Library), use a centered Glass Hero.
+*   **Structure:** Centered layout, large typography (`h2`), and a floating search bar.
+*   **Styling:** 
+    *   `bgcolor: 'rgba(var(--joy-palette-background-surfaceChannel) / 0.8)'`
+    *   `backdropFilter: 'blur(12px)'`
+    *   `boxShadow: 'sm'`
+    *   `borderRadius: 'xl'`
+
+### 14.2 Tactile Scrollable Carousels (Filter Tags)
+When providing multiple filter chips (tags, categories), do not immediately wrap them to the next line on mobile. Instead, create a tactile horizontal carousel.
+*   **Behavior:** `display: 'flex'`, `overflowX: 'auto'`, hide the scrollbar (`&::-webkit-scrollbar: { display: 'none' }`), and optimally enable `scrollSnapType: 'x mandatory'`.
+*   **Pill Styling:** Use "squarcle" shapes (`borderRadius: '12px'`).
+*   **Active State:** Give selected pills a slight pop (`boxShadow: '0 4px 10px rgba(0,0,0,0.1)'`) and use the entity's precise `themeColor` instead of generic primary colors.
+*   **Interaction:** Add a slight shrink on press (`'&:active': { transform: 'scale(0.95)' }`) for physical feedback.
+
+### 14.3 Mobile Grid Adjustments
+Never rely solely on `auto-fill` grids if they risk collapsing into a single full-width column on narrow mobile screens, rendering them cartoonishly large.
+*   **Mobile (xs):** Strictly enforce 2 columns (`gridTemplateColumns: { xs: 'repeat(2, 1fr)' }`) with a slightly tighter gap (`gap: 1.5`).
+*   **Tablet/Desktop (sm, md):** Resume flexible `auto-fill` with appropriate min-widths (`160px` or `200px`).
+
+### 14.4 3D Parallax & Physical Touch
+Cards representing key core objects (like Books) should react dynamically to user input coordinates.
+*   **Desktop (Hover):** Capture `onMouseMove` to calculate the cursor's coordinates relative to the card's center. Apply a CSS `perspective(1000px) rotateX(...) rotateY(...)` transform (max ~12 degrees) and overlay a dynamic radial gradient glare (`mixBlendMode: 'overlay'`) that tracks the cursor.
+*   **Mobile (Touch):** Capture `onTouchStart` and `onTouchMove`. Tilt the card sharply towards the thumb but also apply a slight scale-down (`scale3d(0.97, 0.97, 0.97)`) to simulate the card physically depressing into the glass screen under pressure. Always supply `onTouchCancel` and `onTouchEnd` to reset the tilt.
