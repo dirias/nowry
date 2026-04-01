@@ -69,18 +69,19 @@ const PriorityList = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1.5,
-                py: 1,
+                py: 1.5,
                 px: 1.5,
-                borderRadius: 'sm',
-                border: '1px solid',
-                borderColor: isCompleted ? 'success.outlinedBorder' : 'divider',
-                bgcolor: isCompleted ? 'success.softBg' : 'background.surface',
-                opacity: isCompleted ? 0.75 : 1,
-                transition: 'all 0.2s',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'transparent',
+                opacity: isCompleted ? 0.6 : 1,
+                transition: 'background-color 0.2s ease',
                 '&:hover': {
-                  borderColor: isCompleted ? 'success.outlinedBorder' : 'warning.outlinedBorder',
-                  bgcolor: isCompleted ? 'success.softBg' : 'background.level1',
+                  bgcolor: 'background.level1',
                   opacity: 1
+                },
+                '&:last-child': {
+                  borderBottom: 'none'
                 }
               }}
             >
@@ -171,10 +172,9 @@ const PriorityList = ({
                   sx={{
                     py: 0.5,
                     px: 1,
-                    borderRadius: 'sm',
-                    bgcolor: isCompleted ? 'success.softBg' : 'background.level2',
-                    border: isCompleted ? '1px solid' : 'none',
-                    borderColor: 'success.outlinedBorder',
+                    borderRadius: 'md',
+                    bgcolor: isCompleted ? 'transparent' : 'background.level1',
+                    border: 'none',
                     flexShrink: 0
                   }}
                 >
@@ -183,7 +183,7 @@ const PriorityList = ({
                     sx={{
                       fontSize: '0.7rem',
                       fontWeight: 600,
-                      color: isCompleted ? 'success.plainColor' : 'text.primary',
+                      color: isCompleted ? 'text.tertiary' : 'text.secondary',
                       textDecoration: isCompleted ? 'line-through' : 'none'
                     }}
                   >

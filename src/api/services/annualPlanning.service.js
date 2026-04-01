@@ -29,6 +29,16 @@ export const annualPlanningService = {
     const { data } = await apiClient.put(ENDPOINTS.annualPlan.update(id), planUpdate)
     return data
   },
+  async closeQuarter(payload) {
+    // payload: { year, quarter, annual_plan_id, migrated_goals }
+    const { data } = await apiClient.post(`${ENDPOINTS.annualPlan.base}/close-quarter`, payload)
+    _bustPlanCache()
+    return data
+  },
+  async getQuarterReports(annualPlanId) {
+    const { data } = await apiClient.get(`${ENDPOINTS.annualPlan.base}/quarter-reports/${annualPlanId}`)
+    return data
+  },
 
   // Focus Areas
   async getFocusAreas(annualPlanId) {

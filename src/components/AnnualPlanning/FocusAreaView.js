@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -25,7 +25,8 @@ import {
   Divider,
   Input,
   Avatar,
-  Tooltip
+  Tooltip,
+  Alert
 } from '@mui/joy'
 import {
   Add as AddIcon,
@@ -48,6 +49,7 @@ import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 import GoalDialog from './GoalDialog'
 import PriorityList from './PriorityList'
+import CloseQuarterModal from './CloseQuarterModal'
 
 const FocusAreaView = () => {
   const { id } = useParams()
@@ -79,6 +81,15 @@ const FocusAreaView = () => {
 
   // Error Modal State
   const [errorModal, setErrorModal] = useState({ open: false, message: '', milestones: [] })
+
+  const [quarterReports, setQuarterReports] = useState([])
+  const [showCloseModal, setShowCloseModal] = useState(false)
+
+  useEffect(() => {
+    if (plan?._id) {
+      annualPlanningService.getQuarterReports(plan._id).then(setQuarterReports).catch(console.error)
+    }
+  }, [plan?._id])
 
   useEffect(() => {
     if (hookLoading) return
@@ -314,7 +325,28 @@ const FocusAreaView = () => {
   }
 
   // Quarter State
-  const [quarterFilter, setQuarterFilter] = useState(getCurrentQuarter())
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialQ = searchParams.get('q') ? Number(searchParams.get('q')) : getCurrentQuarter()
+  const [quarterFilter, setQuarterFilter] = useState(initialQ)
+
+  // Sync state to URL whenever it changes internally
+  useEffect(() => {
+    if (searchParams.get('q') !== String(quarterFilter)) {
+      setSearchParams({ q: quarterFilter }, { replace: true })
+    }
+  }, [quarterFilter, searchParams, setSearchParams])
+
+  // Auto-forward to the next quarter if the current real calendar quarter is already closed
+  useEffect(() => {
+    if (quarterReports.length > 0 && plan?.year) {
+      const currentQ = getCurrentQuarter()
+      const isCurrentClosed = quarterReports.some((r) => r.quarter === currentQ && r.year === plan.year)
+      if (isCurrentClosed && quarterFilter === currentQ) {
+        setQuarterFilter(currentQ < 4 ? currentQ + 1 : 1)
+      }
+    }
+  }, [quarterReports, plan?.year])
+  const isQuarterClosed = quarterReports.some((r) => r.quarter === quarterFilter && r.year === plan?.year)
   const [activeTab, setActiveTab] = useState(0) // 0: Goals, 1: Priorities
 
   // View Mode & Search State (Section 6 Compliance)
@@ -343,8 +375,16 @@ const FocusAreaView = () => {
   const yearlyObjectives = goals.filter((g) => g.type === 'yearly' || (!g.type && !g.quarter))
   const quarterlyGoals = goals.filter((g) => g.type === 'quarterly' || g.quarter)
 
-  // Filter Children by Quarter
-  const currentQuarterGoals = quarterlyGoals.filter((g) => g.quarter === quarterFilter)
+  // Filter Children by Quarter (support historical snapshot override)
+  const currentQuarterGoals = useMemo(() => {
+    if (isQuarterClosed) {
+      const report = quarterReports.find((r) => r.quarter === quarterFilter && r.year === plan?.year)
+      if (report && report.goals_summary) {
+        return report.goals_summary.filter((g) => g.focus_area_id === id || g.focus_area_id?._id === id)
+      }
+    }
+    return quarterlyGoals.filter((g) => g.quarter === quarterFilter)
+  }, [quarterlyGoals, quarterFilter, isQuarterClosed, quarterReports, plan?.year, id])
 
   // Search Filtering (Section 6.4 Compliance)
   const filteredQuarterlyGoals = useMemo(() => {
@@ -464,10 +504,10 @@ const FocusAreaView = () => {
             <Box
               onClick={(e) => {
                 e.stopPropagation()
-                handleStatusChange(goal)
+                if (!isQuarterClosed) handleStatusChange(goal)
               }}
               sx={{
-                cursor: 'pointer',
+                cursor: isQuarterClosed ? 'default' : 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 0.5,
@@ -480,46 +520,50 @@ const FocusAreaView = () => {
                 fontWeight: 600,
                 fontSize: '0.65rem',
                 transition: 'all 0.2s',
-                '&:hover': {
-                  borderColor: `${getStatusConfig(goal.status).color}.solidBg`,
-                  bgcolor: 'background.level1'
-                }
+                '&:hover': isQuarterClosed
+                  ? {}
+                  : {
+                      borderColor: `${getStatusConfig(goal.status).color}.solidBg`,
+                      bgcolor: 'background.level1'
+                    }
               }}
             >
               <span>{getStatusConfig(goal.status).icon}</span>
               <span>{getStatusConfig(goal.status).label}</span>
             </Box>
-            <Stack direction='row' spacing={0.5}>
-              <IconButton
-                size='sm'
-                variant='plain'
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEditGoal(goal)
-                }}
-                sx={{
-                  transition: 'all 0.2s',
-                  '&:hover': { transform: 'scale(1.1)' }
-                }}
-              >
-                <EditIcon fontSize='small' />
-              </IconButton>
-              <IconButton
-                size='sm'
-                variant='plain'
-                color='danger'
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDeleteGoal(goal._id)
-                }}
-                sx={{
-                  transition: 'all 0.2s',
-                  '&:hover': { transform: 'scale(1.1)' }
-                }}
-              >
-                <DeleteIcon fontSize='small' />
-              </IconButton>
-            </Stack>
+            {!isQuarterClosed && (
+              <Stack direction='row' spacing={0.5}>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEditGoal(goal)
+                  }}
+                  sx={{
+                    transition: 'all 0.2s',
+                    '&:hover': { transform: 'scale(1.1)' }
+                  }}
+                >
+                  <EditIcon fontSize='small' />
+                </IconButton>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='danger'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteGoal(goal._id)
+                  }}
+                  sx={{
+                    transition: 'all 0.2s',
+                    '&:hover': { transform: 'scale(1.1)' }
+                  }}
+                >
+                  <DeleteIcon fontSize='small' />
+                </IconButton>
+              </Stack>
+            )}
           </Stack>
 
           {/* Title */}
@@ -613,7 +657,7 @@ const FocusAreaView = () => {
                   {goal.milestones.map((milestone, idx) => (
                     <Box
                       key={idx}
-                      title={goal.status === 'completed' ? 'Milestones are locked while the goal is completed' : undefined}
+                      title={goal.status === 'completed' || isQuarterClosed ? 'Milestones are locked' : undefined}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -621,13 +665,14 @@ const FocusAreaView = () => {
                         py: 0.75,
                         px: 1,
                         borderRadius: 'sm',
-                        cursor: goal.status === 'completed' ? 'not-allowed' : 'pointer',
+                        cursor: goal.status === 'completed' || isQuarterClosed ? 'not-allowed' : 'pointer',
                         transition: 'all 0.2s',
-                        opacity: goal.status === 'completed' ? 0.65 : 1,
-                        '&:hover': goal.status === 'completed' ? {} : { bgcolor: 'background.level1' }
+                        opacity: goal.status === 'completed' || isQuarterClosed ? 0.65 : 1,
+                        '&:hover': goal.status === 'completed' || isQuarterClosed ? {} : { bgcolor: 'background.level1' }
                       }}
                       onClick={(e) => {
                         e.stopPropagation()
+                        if (isQuarterClosed) return
                         handleToggleMilestone(goal, idx)
                       }}
                     >
@@ -662,8 +707,8 @@ const FocusAreaView = () => {
                             </Box>
                           )}
                         </Box>
-                        {/* Lock badge — only visible when goal is completed */}
-                        {goal.status === 'completed' && (
+                        {/* Lock badge — only visible when goal is completed or locked */}
+                        {(goal.status === 'completed' || isQuarterClosed) && (
                           <Box
                             sx={{
                               position: 'absolute',
@@ -769,9 +814,11 @@ const FocusAreaView = () => {
     >
       {/* Status Indicator */}
       <Box
-        onClick={() => handleStatusChange(goal)}
+        onClick={() => {
+          if (!isQuarterClosed) handleStatusChange(goal)
+        }}
         sx={{
-          cursor: 'pointer',
+          cursor: isQuarterClosed ? 'default' : 'pointer',
           flexShrink: 0
         }}
       >
@@ -835,14 +882,16 @@ const FocusAreaView = () => {
       )}
 
       {/* Actions */}
-      <Stack direction='row' spacing={0.5}>
-        <IconButton size='sm' variant='plain' onClick={() => handleEditGoal(goal)}>
-          <EditIcon fontSize='small' />
-        </IconButton>
-        <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal._id)}>
-          <DeleteIcon fontSize='small' />
-        </IconButton>
-      </Stack>
+      {!isQuarterClosed && (
+        <Stack direction='row' spacing={0.5}>
+          <IconButton size='sm' variant='plain' onClick={() => handleEditGoal(goal)}>
+            <EditIcon fontSize='small' />
+          </IconButton>
+          <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal._id)}>
+            <DeleteIcon fontSize='small' />
+          </IconButton>
+        </Stack>
+      )}
     </Box>
   )
 
@@ -907,11 +956,27 @@ const FocusAreaView = () => {
         </Box>
       </Box>
 
-      {/* Smart Banner: Days Left (Minimalist) */}
-      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-        <Typography level='title-sm' sx={{ color: 'primary.600' }}>
-          🚀 <b>{getDaysLeftInQuarter(quarterFilter)} days left</b> to crush your Q{quarterFilter} goals!
-        </Typography>
+      {/* Smart Banner: Days Left / Overdue Banner */}
+      <Box sx={{ mb: 2 }}>
+        {getDaysLeftInQuarter(quarterFilter) === 0 && !isQuarterClosed ? (
+          <Alert variant='soft' color='danger' startDecorator={<WarningIcon />} sx={{ alignItems: 'center' }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography level='title-sm' color='danger'>
+                Quarter {quarterFilter} has ended!
+              </Typography>
+              <Typography level='body-sm'>Please review and close the quarter to continue planning accurately.</Typography>
+            </Box>
+            <Button variant='solid' color='danger' size='sm' onClick={() => setShowCloseModal(true)}>
+              Review Now
+            </Button>
+          </Alert>
+        ) : !isQuarterClosed ? (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography level='title-sm' sx={{ color: 'primary.600' }}>
+              🚀 <b>{getDaysLeftInQuarter(quarterFilter)} days left</b> to crush your Q{quarterFilter} goals!
+            </Typography>
+          </Box>
+        ) : null}
       </Box>
 
       {/* Mobile Tabs (View Switcher) */}
@@ -997,11 +1062,12 @@ const FocusAreaView = () => {
               </Box>
             ))}
           </Box>
-
-          <Button startDecorator={<AddIcon />} onClick={handleAddObjective}>
-            {/* Context-aware Button Text */}
-            {quarterFilter ? `Add Q${quarterFilter} Goal` : 'Add Objective'}
-          </Button>
+          {!isQuarterClosed && (
+            <Button startDecorator={<AddIcon />} onClick={handleAddObjective}>
+              {/* Context-aware Button Text */}
+              {quarterFilter ? `Add Q${quarterFilter} Goal` : 'Add Objective'}
+            </Button>
+          )}
         </Stack>
 
         {/* Search & View Toggle (Section 6 Compliance) */}
@@ -1087,16 +1153,18 @@ const FocusAreaView = () => {
                     ))}
 
                     {/* Add Child Button */}
-                    <Grid xs={12} md={6}>
-                      <Button
-                        variant='dashed'
-                        fullWidth
-                        sx={{ height: '100%', minHeight: 80, color: 'text.tertiary' }}
-                        onClick={() => handleAddChildGoal(objective._id)}
-                      >
-                        + Add Goal to Q{quarterFilter}
-                      </Button>
-                    </Grid>
+                    {!isQuarterClosed && (
+                      <Grid xs={12} md={6}>
+                        <Button
+                          variant='dashed'
+                          fullWidth
+                          sx={{ height: '100%', minHeight: 80, color: 'text.tertiary' }}
+                          onClick={() => handleAddChildGoal(objective._id)}
+                        >
+                          + Add Goal to Q{quarterFilter}
+                        </Button>
+                      </Grid>
+                    )}
                   </Grid>
                 ) : (
                   /* List View */
@@ -1106,15 +1174,17 @@ const FocusAreaView = () => {
                         <Box key={goal._id}>{renderGoalRowList(goal)}</Box>
                       ))}
                     </Stack>
-                    <Button
-                      variant='plain'
-                      fullWidth
-                      sx={{ mt: 1, color: 'text.tertiary' }}
-                      onClick={() => handleAddChildGoal(objective._id)}
-                      startDecorator={<AddIcon />}
-                    >
-                      Add Goal to Q{quarterFilter}
-                    </Button>
+                    {!isQuarterClosed && (
+                      <Button
+                        variant='plain'
+                        fullWidth
+                        sx={{ mt: 1, color: 'text.tertiary' }}
+                        onClick={() => handleAddChildGoal(objective._id)}
+                        startDecorator={<AddIcon />}
+                      >
+                        Add Goal to Q{quarterFilter}
+                      </Button>
+                    )}
                   </Box>
                 )}
               </Box>
@@ -1216,6 +1286,23 @@ const FocusAreaView = () => {
           </DialogContent>
         </ModalDialog>
       </Modal>
+
+      {showCloseModal && (
+        <CloseQuarterModal
+          open={showCloseModal}
+          onClose={() => setShowCloseModal(false)}
+          onSuccess={() => {
+            setShowCloseModal(false)
+            fetchData()
+            setQuarterFilter((prev) => (prev < 4 ? prev + 1 : 1))
+          }}
+          targetQuarter={quarterFilter}
+          targetYear={plan?.year}
+          planId={plan?._id}
+          focusAreas={allAreas}
+          goals={allGoals}
+        />
+      )}
     </Container>
   )
 }
