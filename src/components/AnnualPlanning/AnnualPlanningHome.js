@@ -51,7 +51,8 @@ const AnnualPlanningHome = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const selectedQuarter = searchParams.get('q') || 'All'
+  const currentQCalc = String(Math.floor(new Date().getMonth() / 3) + 1)
+  const selectedQuarter = searchParams.get('q') || currentQCalc
 
   const year = new Date().getFullYear()
   const { user } = useAuth()
@@ -191,6 +192,10 @@ const AnnualPlanningHome = () => {
       }
     }
   }
+
+  const overdueEndDateStr = overdueQ
+    ? new Date(overdueY || currentQYear, overdueQ * 3, 0).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })
+    : null
 
   const showCloseCurrentButton =
     daysLeft <= 10 && daysLeft >= 0 && !quarterReports.some((r) => r.quarter === currentQ && r.year === plan?.year)
@@ -360,8 +365,8 @@ const AnnualPlanningHome = () => {
               }}
             >
               {overdueQ
-                ? `Quarter ${overdueQ} ends today!`
-                : `Quarter ${currentQ} ends ${daysLeft === 0 ? 'today' : `in ${daysLeft} days`}!`}
+                ? `Quarter ${overdueQ} ended on ${overdueEndDateStr}`
+                : `Quarter ${currentQ} ends ${daysLeft === 0 ? 'today' : `in ${daysLeft} days`}`}
             </Alert>
           )}
 
@@ -471,76 +476,82 @@ const AnnualPlanningHome = () => {
 
               return (
                 <Grid key={area._id || index} xs={12} md={4}>
-                  <Card
-                    variant='outlined'
+                  <Box
+                    component={Link}
+                    to={`/annual-planning/area/${area._id}${selectedQuarter !== 'All' ? '?q=' + selectedQuarter : ''}`}
                     sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
                       height: '100%',
+                      p: { xs: 2.5, md: 3 },
                       borderRadius: 'xl',
-                      borderColor: 'divider',
-                      boxShadow: 'sm',
-                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      position: 'relative',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
-                        boxShadow: 'md',
-                        transform: 'translateY(-2px)'
+                        bgcolor: 'background.surface',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                        transform: 'translateY(-2px)',
+                        '& .hover-arrow': {
+                          transform: 'translateX(4px)',
+                          opacity: 1,
+                          color: 'primary.plainColor'
+                        }
                       }
                     }}
                   >
-                    <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
-                      {/* Clickable Header */}
-                      <Box
-                        component={Link}
-                        to={`/annual-planning/area/${area._id}${selectedQuarter !== 'All' ? '?q=' + selectedQuarter : ''}`}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          mb: 1.5,
-                          textDecoration: 'none',
-                          transition: 'opacity 0.2s',
-                          '&:hover': { opacity: 0.8 }
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Typography sx={{ fontSize: { xs: '1.75rem', md: '2rem' } }}>{area.icon}</Typography>
-                          <Typography level='h4' sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
-                            {area.name}
-                          </Typography>
-                        </Box>
-                        <ArrowForwardIcon sx={{ color: 'text.tertiary', fontSize: { xs: 18, md: 20 } }} />
+                    {/* Header */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Typography sx={{ fontSize: { xs: '2rem', md: '2.5rem' }, lineHeight: 1 }}>{area.icon}</Typography>
+                        <Typography
+                          level='title-lg'
+                          sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}
+                        >
+                          {area.name}
+                        </Typography>
                       </Box>
+                      <ArrowForwardIcon
+                        className='hover-arrow'
+                        sx={{
+                          color: 'text.tertiary',
+                          fontSize: { xs: 20, md: 22 },
+                          transition: 'all 0.3s ease',
+                          opacity: 0.5
+                        }}
+                      />
+                    </Box>
 
-                      {/* Description */}
-                      <Typography level='body-sm' textColor='text.secondary' sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-                        {area.description}
-                      </Typography>
+                    {/* Description */}
+                    <Typography level='body-sm' textColor='text.tertiary' sx={{ mb: 3, lineHeight: 1.5 }}>
+                      {area.description}
+                    </Typography>
 
-                      {/* Progress Bar */}
-                      <Box sx={{ mt: 'auto', pt: 1.5 }}>
-                        <Stack direction='row' justifyContent='space-between' alignItems='center' mb={0.5}>
-                          <Typography level='body-xs' textColor='text.tertiary' sx={{ fontSize: { xs: '0.65rem', md: '0.7rem' } }}>
-                            {t('annualPlanning.home.progress')}
-                          </Typography>
-                          <Typography
-                            level='body-xs'
-                            textColor='text.secondary'
-                            fontWeight={600}
-                            sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}
-                          >
-                            {displayProgress}%
-                          </Typography>
-                        </Stack>
+                    {/* Minimal Progress Line */}
+                    <Box sx={{ mt: 'auto' }}>
+                      <Stack direction='row' alignItems='center' spacing={2}>
                         <LinearProgress
                           determinate
                           value={displayProgress}
                           thickness={3}
                           sx={{
+                            flex: 1,
                             bgcolor: 'background.level2',
-                            color: area.color || 'primary.plainColor' // Use area color if possible
+                            color: area.color || 'primary.outlinedBorder',
+                            borderRadius: 'xs'
                           }}
                         />
-                      </Box>
-                    </CardContent>
-                  </Card>
+                        <Typography
+                          level='body-xs'
+                          fontWeight={800}
+                          sx={{ color: 'text.secondary', minWidth: '3ch', textAlign: 'right', letterSpacing: 'sm' }}
+                        >
+                          {displayProgress}%
+                        </Typography>
+                      </Stack>
+                    </Box>
+                  </Box>
                 </Grid>
               )
             })}

@@ -25,16 +25,20 @@ const QuarterReportsView = ({ planId }) => {
   if (loading) return null
   if (reports.length === 0) return null
 
+  const getGoalProgress = (g) => {
+    if (g.status === 'completed') return 100
+    if (g.milestones?.length > 0) {
+      const done = g.milestones.filter((m) => m.completed).length
+      return Math.round((done / g.milestones.length) * 100)
+    }
+    return g.progress || 0
+  }
+
   const calculateProgress = (goals) => {
     if (!goals || goals.length === 0) return 0
     let sum = 0
     goals.forEach((g) => {
-      let goalProgress = g.progress || 0
-      if (g.status === 'completed' || goalProgress === 100) {
-        sum += 100
-      } else {
-        sum += goalProgress
-      }
+      sum += getGoalProgress(g)
     })
     return Math.round(sum / goals.length)
   }
@@ -100,11 +104,11 @@ const QuarterReportsView = ({ planId }) => {
                         <Typography level='body-sm' noWrap sx={{ maxWidth: '80%' }}>
                           {g.title}
                         </Typography>
-                        {g.status === 'completed' || g.progress === 100 ? (
+                        {getGoalProgress(g) === 100 ? (
                           <CheckCircleIcon color='success' sx={{ fontSize: 16 }} />
                         ) : (
                           <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                            {g.progress || 0}%
+                            {getGoalProgress(g)}%
                           </Typography>
                         )}
                       </Box>
