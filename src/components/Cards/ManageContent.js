@@ -10,7 +10,7 @@ import {
   Input,
   Tooltip,
   Card,
-  CardContent,
+  Skeleton,
   Tabs,
   TabList,
   Tab,
@@ -44,6 +44,7 @@ import CardPreviewModal from './CardPreviewModal'
 export default function ManageContent({
   decks,
   cards,
+  loading = false,
   onEditDeck,
   onDeleteDeck,
   onEditCard,
@@ -215,7 +216,7 @@ export default function ManageContent({
             borderRadius: 'xl',
             bgcolor: 'background.level1',
             display: 'inline-flex',
-            boxShadow: 'inset 0px 1px 3px rgba(0,0,0,0.02)', // Minimal inset shadow for depth, safe on dark/light
+            boxShadow: 'inset 0 1px 2px var(--joy-palette-neutral-softBg)',
             [`& .${tabClasses.root}`]: {
               minWidth: { xs: 120, sm: 140 },
               fontWeight: 600,
@@ -353,7 +354,13 @@ export default function ManageContent({
       {/* Decks View */}
       {activeView === 0 && (
         <Box>
-          {filteredDecks.length === 0 ? (
+          {loading ? (
+            <Stack spacing={1.5}>
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} variant='rectangular' height={64} sx={{ borderRadius: 'md' }} />
+              ))}
+            </Stack>
+          ) : filteredDecks.length === 0 ? (
             <Box sx={{ py: 8, textAlign: 'center' }}>
               <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
                 {t('cards.manage_content.empty.decks.title')}
@@ -564,100 +571,101 @@ export default function ManageContent({
       {/* Cards View */}
       {activeView === 1 && (
         <Stack spacing={2}>
-          {filteredCards.map((card) => {
-            const cardColor = getDeckColor(card.card_type)
+          {loading
+            ? [...Array(4)].map((_, i) => <Skeleton key={i} variant='rectangular' height={96} sx={{ borderRadius: 'md' }} />)
+            : filteredCards.map((card) => {
+                const cardColor = getDeckColor(card.card_type)
 
-            return (
-              <Card
-                key={card._id}
-                variant='outlined'
-                onClick={() => handlePreviewCard(card)}
-                sx={{
-                  transition: 'all 0.2s',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    boxShadow: 'sm',
-                    borderColor: `${cardColor}.outlinedBorder`,
-                    bgcolor: 'background.surface'
-                  }
-                }}
-              >
-                <CardContent>
-                  <Stack direction='row' alignItems='flex-start' spacing={2}>
-                    {/* Type Icon */}
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 'md',
-                        bgcolor: `${cardColor}.softBg`,
-                        color: `${cardColor}.solidBg`
-                      }}
-                    >
-                      {getDeckIcon(card.card_type)}
-                    </Box>
+                return (
+                  <Card
+                    key={card._id}
+                    variant='outlined'
+                    onClick={() => handlePreviewCard(card)}
+                    sx={{
+                      transition: 'all 0.2s',
+                      cursor: 'pointer',
+                      p: 2,
+                      '&:hover': {
+                        boxShadow: 'sm',
+                        borderColor: `${cardColor}.outlinedBorder`,
+                        bgcolor: 'background.surface'
+                      }
+                    }}
+                  >
+                    <Stack direction='row' alignItems='flex-start' spacing={2}>
+                      {/* Type Icon */}
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 'md',
+                          bgcolor: `${cardColor}.softBg`,
+                          color: `${cardColor}.solidBg`
+                        }}
+                      >
+                        {getDeckIcon(card.card_type)}
+                      </Box>
 
-                    {/* Card Content */}
-                    <Box sx={{ flex: 1 }}>
-                      <Typography level='title-md' fontWeight={600}>
-                        {card.title || t('cards.manage_content.untitled')}
-                      </Typography>
-                      <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.5 }}>
-                        {card.content ? (
-                          card.content.substring(0, 150) + (card.content.length > 150 ? '...' : '')
-                        ) : (
-                          <Typography component='span' sx={{ fontStyle: 'italic', opacity: 0.7 }}>
-                            {t('cards.manage_content.noContent')}
-                          </Typography>
-                        )}
-                      </Typography>
+                      {/* Card Content */}
+                      <Box sx={{ flex: 1 }}>
+                        <Typography level='title-md' fontWeight={600}>
+                          {card.title || t('cards.manage_content.untitled')}
+                        </Typography>
+                        <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.5 }}>
+                          {card.content ? (
+                            card.content.substring(0, 150) + (card.content.length > 150 ? '...' : '')
+                          ) : (
+                            <Typography component='span' sx={{ fontStyle: 'italic', opacity: 0.7 }}>
+                              {t('cards.manage_content.noContent')}
+                            </Typography>
+                          )}
+                        </Typography>
 
-                      <Stack direction='row' spacing={1} sx={{ mt: 1.5 }} flexWrap='wrap'>
-                        <Chip size='sm' variant='soft' color={cardColor} sx={{ fontWeight: 600 }}>
-                          {getCardTypeLabel(card.card_type)}
-                        </Chip>
-                        <Chip size='sm' variant='outlined' startDecorator='📚'>
-                          {getDeckName(card.deck_id)}
-                        </Chip>
-                        <Chip
-                          size='sm'
-                          variant='outlined'
-                          color={card.next_review ? 'success' : 'primary'}
-                          startDecorator={<Event fontSize='small' />}
-                          sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
-                        >
-                          {card.next_review ? new Date(card.next_review).toLocaleDateString() : t('cards.manage_content.reviewNew')}
-                        </Chip>
-                        {card.tags?.map((tag, idx) => (
-                          <Chip key={idx} size='sm' variant='outlined' sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
-                            {tag}
+                        <Stack direction='row' spacing={1} sx={{ mt: 1.5 }} flexWrap='wrap'>
+                          <Chip size='sm' variant='soft' color={cardColor} sx={{ fontWeight: 600 }}>
+                            {getCardTypeLabel(card.card_type)}
                           </Chip>
-                        ))}
-                      </Stack>
-                    </Box>
+                          <Chip size='sm' variant='outlined' startDecorator='📚'>
+                            {getDeckName(card.deck_id)}
+                          </Chip>
+                          <Chip
+                            size='sm'
+                            variant='outlined'
+                            color={card.next_review ? 'success' : 'primary'}
+                            startDecorator={<Event fontSize='small' />}
+                            sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+                          >
+                            {card.next_review ? new Date(card.next_review).toLocaleDateString() : t('cards.manage_content.reviewNew')}
+                          </Chip>
+                          {card.tags?.map((tag, idx) => (
+                            <Chip key={idx} size='sm' variant='outlined' sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
+                              {tag}
+                            </Chip>
+                          ))}
+                        </Stack>
+                      </Box>
 
-                    {/* Actions */}
-                    <Stack direction='row' spacing={0.5} onClick={(e) => e.stopPropagation()}>
-                      <Tooltip title={t('cards.deck.preview')}>
-                        <IconButton size='sm' variant='plain' color='primary' onClick={() => handlePreviewCard(card)}>
-                          <Visibility />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('cards.deck.edit')}>
-                        <IconButton size='sm' variant='soft' onClick={() => onEditCard(card)}>
-                          <Edit />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('cards.deck.delete')}>
-                        <IconButton size='sm' variant='soft' color='danger' onClick={() => onDeleteCard(card)}>
-                          <Delete />
-                        </IconButton>
-                      </Tooltip>
+                      {/* Actions */}
+                      <Stack direction='row' spacing={0.5} onClick={(e) => e.stopPropagation()}>
+                        <Tooltip title={t('cards.deck.preview')}>
+                          <IconButton size='sm' variant='plain' color='primary' onClick={() => handlePreviewCard(card)}>
+                            <Visibility />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('cards.deck.edit')}>
+                          <IconButton size='sm' variant='soft' onClick={() => onEditCard(card)}>
+                            <Edit />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('cards.deck.delete')}>
+                          <IconButton size='sm' variant='soft' color='danger' onClick={() => onDeleteCard(card)}>
+                            <Delete />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                     </Stack>
-                  </Stack>
-                </CardContent>
-              </Card>
-            )
-          })}
+                  </Card>
+                )
+              })}
 
           {filteredCards.length === 0 && (
             <Box sx={{ p: 6, textAlign: 'center' }}>
@@ -773,8 +781,8 @@ function DeckGridCard({
           sx={{
             position: 'absolute',
             inset: 0,
-            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
-            opacity: glare.opacity,
+            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-common-white, #fff) 0%, transparent 60%)`,
+            opacity: glare.opacity * 0.35,
             transition: glare.opacity ? 'none' : 'opacity 0.5s ease',
             pointerEvents: 'none',
             zIndex: 15,

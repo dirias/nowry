@@ -72,7 +72,20 @@
     "startStudying": "Empezar a Estudiar →",
     "viewAll": "Ver todos los {{count}} mazos →",
     "due": "para hoy",
-    "allReviewed": "Todo revisado"
+    "allReviewed": "Todo revisado",
+    "empty": {
+      "streakLabel": "Racha de {{count}} día(s)",
+      "allDone": "Todo al día",
+      "weeklyCards": "{{count}} revisada(s) hoy",
+      "streakZeroLabel": "Comienza tu racha hoy"
+    },
+    "sections": {
+      "yourDecks": "Tus mazos"
+    },
+    "deckPill": {
+      "ariaLabel": "Estudiar {{name}}",
+      "dueSoon": "en {{hours}}h"
+    }
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",

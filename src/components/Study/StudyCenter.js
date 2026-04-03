@@ -17,7 +17,7 @@ import {
   Tab,
   TabPanel,
   tabClasses,
-  CircularProgress
+  Tooltip
 } from '@mui/joy'
 import {
   School,
@@ -35,6 +35,7 @@ import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
 import { cardsService, activityService } from '../../api/services'
 import CardHome from '../Cards/CardHome'
+import CardPreviewModal from '../Cards/CardPreviewModal'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
@@ -48,6 +49,8 @@ export default function StudyCenter() {
     totalActive: 0,
     streak: 0
   })
+
+  const [previewState, setPreviewState] = useState({ open: false, title: '', cards: [], initialIndex: 0 })
 
   // Swipeable Logic
   const [activeSectionIndex, setActiveSectionIndex] = useState(0)
@@ -142,37 +145,91 @@ export default function StudyCenter() {
     }).length
   }
 
+  // Average ease_factor across deck's cards, normalized to mastery %
+  // ease_factor range: 1.3 (min) → 2.5 (max) = 0% → 100%
+  const getMasteryForDeck = (deckId) => {
+    const deckCards = cards.filter((c) => c.deck_id === deckId || c.deck_id?._id === deckId)
+    if (!deckCards.length) return 0
+    const reviewed = deckCards.filter((c) => c.repetitions > 0)
+    if (!reviewed.length) return 0
+    const avg = reviewed.reduce((sum, c) => sum + (c.ease_factor || 2.5), 0) / reviewed.length
+    return Math.round(((avg - 1.3) / (2.5 - 1.3)) * 100)
+  }
+
+  const getLastStudiedForDeck = (deckId) => {
+    const deckCards = cards.filter((c) => c.deck_id === deckId || c.deck_id?._id === deckId)
+    const dates = deckCards
+      .map((c) => c.last_reviewed)
+      .filter(Boolean)
+      .map((d) => new Date(d))
+    if (!dates.length) return null
+    return new Date(Math.max(...dates))
+  }
+
+  const getNewCardsForDeck = (deckId) => {
+    return cards.filter((c) => {
+      const matchesDeck = c.deck_id === deckId || c.deck_id?._id === deckId
+      return matchesDeck && c.repetitions === 0
+    }).length
+  }
+
+  const getNextReviewDateForDeck = (deckId) => {
+    const future = cards
+      .filter((c) => (c.deck_id === deckId || c.deck_id?._id === deckId) && c.next_review)
+      .map((c) => new Date(c.next_review))
+      .filter((d) => d > new Date())
+    if (!future.length) return null
+    return new Date(Math.min(...future))
+  }
+
+  const nonDueDecks = decks
+    .filter((d) => getDueCardsForDeck(d._id) === 0)
+    .sort((a, b) => getMasteryForDeck(b._id) - getMasteryForDeck(a._id))
+
+  const isDeckDueSoon = (deckId) => {
+    const next = getNextReviewDateForDeck(deckId)
+    if (!next) return false
+    return next - new Date() < 24 * 60 * 60 * 1000
+  }
+
+  const getHoursUntilDue = (deckId) => {
+    const next = getNextReviewDateForDeck(deckId)
+    if (!next) return null
+    return Math.max(1, Math.round((next - new Date()) / (1000 * 60 * 60)))
+  }
+
+  const showYourDecks = !loading && nonDueDecks.length >= 2
+
+  const formatRelativeDate = (date) => {
+    if (!date) return null
+    const now = new Date()
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
+    if (diffDays === 0) return t('study.dates.today')
+    if (diffDays === 1) return t('study.dates.yesterday')
+    if (diffDays < 7) return t('study.dates.daysAgo', { count: diffDays })
+    return t('study.dates.weeksAgo', { count: Math.floor(diffDays / 7) })
+  }
+
   return (
-    <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
-      {/* Glass Hero Header (Horizontal Command Center) */}
+    <Container maxWidth='xl' sx={{ py: { xs: 2, md: 4 } }}>
+      {/* Header — Stats & CTA */}
       <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        justifyContent='space-between'
-        alignItems={{ xs: 'center', md: 'flex-end' }}
-        spacing={3}
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent='flex-end'
+        alignItems={{ xs: 'center', sm: 'flex-end' }}
+        spacing={{ xs: 2, md: 3 }}
         sx={{ mb: { xs: 2.5, md: 4 }, mt: { xs: 1, md: 2 } }}
       >
-        {/* Left Column: Title & Subtitle */}
-        <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
-          <Typography level='h2' fontWeight={800} sx={{ mb: 0.5, letterSpacing: '-0.02em' }}>
-            {t('study.title')}
-          </Typography>
-          <Typography level='body-md' sx={{ color: 'text.tertiary', maxWidth: 500 }}>
-            {t('study.subtitle')}
-          </Typography>
-        </Box>
-
-        {/* Right Column: Stats & Global Action CTA */}
-        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'center', sm: 'flex-end' }} spacing={{ xs: 2, md: 3 }}>
-          {/* Minimalist Inline Stats */}
-          <Stack
-            direction='row'
-            spacing={{ xs: 1.5, sm: 2 }}
-            alignItems='center'
-            sx={{ opacity: 0.8, flexWrap: 'wrap', gap: { xs: 1, sm: 0 }, justifyContent: 'center', mb: { xs: 0, sm: 0.5 } }}
-          >
+        {/* Minimalist Inline Stats */}
+        <Stack
+          direction='row'
+          spacing={{ xs: 1.5, sm: 2 }}
+          alignItems='center'
+          sx={{ opacity: 0.8, flexWrap: 'wrap', gap: { xs: 1, sm: 0 }, justifyContent: 'center', mb: { xs: 0, sm: 0.5 } }}
+        >
+          <Tooltip title={t('study.stats.dueToday')} placement='bottom' size='sm'>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <TrendingUp sx={{ fontSize: 16, color: 'primary.solidBg', opacity: 0.8 }} />
+              <TrendingUp sx={{ fontSize: 16, color: 'primary.plainColor', opacity: 0.8 }} />
               <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
                 <Skeleton loading={loading} variant='text' width='1ch'>
                   {stats.dueToday}
@@ -182,10 +239,12 @@ export default function StudyCenter() {
                 </Typography>
               </Typography>
             </Box>
-            <Typography sx={{ color: 'divider' }}>•</Typography>
+          </Tooltip>
+          <Typography sx={{ color: 'divider' }}>•</Typography>
 
+          <Tooltip title={t('study.stats.reviewedToday')} placement='bottom' size='sm'>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <School sx={{ fontSize: 16, color: 'success.solidBg', opacity: 0.8 }} />
+              <School sx={{ fontSize: 16, color: 'success.plainColor', opacity: 0.8 }} />
               <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
                 <Skeleton loading={loading} variant='text' width='1ch'>
                   {stats.reviewedToday}
@@ -195,10 +254,12 @@ export default function StudyCenter() {
                 </Typography>
               </Typography>
             </Box>
-            <Typography sx={{ color: 'divider' }}>•</Typography>
+          </Tooltip>
+          <Typography sx={{ color: 'divider' }}>•</Typography>
 
+          <Tooltip title={t('study.stats.totalCards')} placement='bottom' size='sm'>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Style sx={{ fontSize: 16, color: 'neutral.solidBg', opacity: 0.8 }} />
+              <Style sx={{ fontSize: 16, color: 'text.secondary', opacity: 0.8 }} />
               <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
                 <Skeleton loading={loading} variant='text' width='1ch'>
                   {stats.totalActive}
@@ -208,15 +269,17 @@ export default function StudyCenter() {
                 </Typography>
               </Typography>
             </Box>
-            <Typography sx={{ color: 'divider' }}>•</Typography>
+          </Tooltip>
+          <Typography sx={{ color: 'divider' }}>•</Typography>
 
+          <Tooltip title={t('profile.stats.days')} placement='bottom' size='sm'>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <LocalFireDepartment
                 sx={{
                   fontSize: 18,
-                  color: stats.streak > 0 ? '#ff7b00' : 'neutral.solidBg',
+                  color: stats.streak > 0 ? 'warning.plainColor' : 'text.tertiary',
                   opacity: 0.9,
-                  filter: stats.streak > 2 ? 'drop-shadow(0 0 4px rgba(255,123,0,0.4))' : 'none'
+                  filter: 'none'
                 }}
               />
               <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
@@ -228,20 +291,20 @@ export default function StudyCenter() {
                 </Typography>
               </Typography>
             </Box>
-          </Stack>
-
-          {stats.dueToday > 0 && (
-            <Button
-              size='md'
-              variant='solid'
-              color='danger'
-              onClick={() => navigate('/study/daily-review')}
-              sx={{ borderRadius: 'lg', px: 3, fontWeight: 700, boxShadow: 'sm' }}
-            >
-              🎯 {t('study.startStudying')} ({stats.dueToday})
-            </Button>
-          )}
+          </Tooltip>
         </Stack>
+
+        {stats.dueToday > 0 && (
+          <Button
+            size='md'
+            variant='solid'
+            color='danger'
+            onClick={() => navigate('/study/daily-review')}
+            sx={{ borderRadius: 'lg', px: 3, fontWeight: 700, boxShadow: 'sm' }}
+          >
+            🎯 {t('study.startStudying')} ({stats.dueToday})
+          </Button>
+        )}
       </Stack>
 
       {/* Unified Tab Architecture - Left Aligned */}
@@ -285,116 +348,393 @@ export default function StudyCenter() {
           }}
         >
           <Tab disableIndicator sx={{ borderRadius: 0, px: 1, py: 1 }}>
-            Dashboard
+            {t('study.tabs.dashboard')}
           </Tab>
           <Tab disableIndicator sx={{ borderRadius: 0, px: 1, py: 1 }}>
-            Content Library
+            {t('study.tabs.contentLibrary')}
           </Tab>
         </TabList>
 
         <TabPanel value={0} sx={{ p: 0 }}>
-          {/* Action Zone: Floating Due Decks */}
-          <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, mb: 3 }}>
-            Decks Needing Review
-          </Typography>
+          {/* Zone 1 — Decks Needing Review */}
+          {decks.filter((d) => getDueCardsForDeck(d._id) > 0).length === 0 ? (
+            <Box
+              role='status'
+              aria-label={t('study.empty.allDone')}
+              sx={{ borderLeft: '2px solid', borderColor: 'success.outlinedBorder', pl: 2, py: 0.75, mb: { xs: 3, md: 4 } }}
+            >
+              <Stack direction='row' alignItems='center' flexWrap='wrap' gap={1}>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  {stats.streak > 0 && (
+                    <>
+                      <Skeleton loading={loading} variant='text' width='6ch'>
+                        <Stack direction='row' spacing={0.75} alignItems='center'>
+                          <LocalFireDepartment sx={{ fontSize: 16, color: 'warning.plainColor' }} />
+                          <Typography level='body-sm' fontWeight={700} sx={{ color: 'text.primary' }}>
+                            {t('study.empty.streakLabel', { count: stats.streak })}
+                          </Typography>
+                        </Stack>
+                      </Skeleton>
+                      <Divider orientation='vertical' sx={{ height: 16, alignSelf: 'center' }} />
+                    </>
+                  )}
+                  <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.primary' }}>
+                    {t('study.empty.allDone')}
+                  </Typography>
+                  <Divider orientation='vertical' sx={{ height: 16, alignSelf: 'center' }} />
+                  <Skeleton loading={loading} variant='text' width='8ch'>
+                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                      {t('study.empty.weeklyCards', { count: stats.reviewedToday })}
+                    </Typography>
+                  </Skeleton>
+                </Stack>
+              </Stack>
+            </Box>
+          ) : (
+            <>
+              <Typography level='title-lg' fontWeight={700} sx={{ mb: 2 }}>
+                {t('study.sections.needingReview')}
+              </Typography>
 
-          <Grid container spacing={3}>
-            {decks.filter((d) => getDueCardsForDeck(d._id) > 0).length === 0 ? (
-              <Grid xs={12}>
-                <Typography level='body-md' sx={{ color: 'text.tertiary', textAlign: 'center', py: 4 }}>
-                  {t('study.types.noDecks', { type: 'due' })} You&apos;re all caught up!
-                </Typography>
+              <Grid container spacing={2} sx={{ mb: { xs: 4, md: 6 } }}>
+                {decks
+                  .filter((d) => getDueCardsForDeck(d._id) > 0)
+                  .map((deck) => {
+                    const dueCount = getDueCardsForDeck(deck._id)
+                    const mastery = getMasteryForDeck(deck._id)
+                    const lastStudied = getLastStudiedForDeck(deck._id)
+                    const newCards = getNewCardsForDeck(deck._id)
+
+                    let accentColor = 'primary'
+                    let IconComponent = Style
+                    if (deck.deck_type === 'quiz') {
+                      accentColor = 'warning'
+                      IconComponent = QuizIcon
+                    }
+                    if (deck.deck_type === 'visual') {
+                      accentColor = 'success'
+                      IconComponent = AccountTree
+                    }
+
+                    return (
+                      <Grid xs={12} sm={6} lg={4} key={deck._id}>
+                        <Card
+                          variant='outlined'
+                          onClick={() => navigate(`/study/${deck._id}`)}
+                          sx={{
+                            cursor: 'pointer',
+                            height: '100%',
+                            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                              boxShadow: 'md',
+                              transform: 'translateY(-2px)',
+                              borderColor: `${accentColor}.outlinedBorder`,
+                              '& .hover-arrow': { transform: 'translateX(4px)', opacity: 1 }
+                            }
+                          }}
+                        >
+                          <CardContent sx={{ p: 2.5, gap: 0 }}>
+                            {/* Header row */}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Box
+                                  sx={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 'md',
+                                    bgcolor: `${accentColor}.softBg`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  <IconComponent sx={{ fontSize: 18, color: `${accentColor}.plainColor` }} />
+                                </Box>
+                                <Box>
+                                  <Typography level='title-sm' fontWeight={700} sx={{ lineHeight: 1.2 }}>
+                                    {deck.name}
+                                  </Typography>
+                                  {lastStudied && (
+                                    <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.25 }}>
+                                      {formatRelativeDate(lastStudied)}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Box>
+                              <ArrowForward
+                                className='hover-arrow'
+                                sx={{ color: 'text.tertiary', fontSize: 18, opacity: 0.4, transition: 'all 0.25s ease' }}
+                              />
+                            </Box>
+
+                            {/* Mastery bar */}
+                            <Box sx={{ mb: 2 }}>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
+                                <Typography level='body-xs' sx={{ color: 'text.tertiary', fontWeight: 600 }}>
+                                  {t('study.deck.mastery')}
+                                </Typography>
+                                <Typography level='body-xs' fontWeight={700} sx={{ color: `${accentColor}.plainColor` }}>
+                                  {mastery}%
+                                </Typography>
+                              </Box>
+                              <Box sx={{ height: 4, borderRadius: 'sm', bgcolor: 'background.level2', overflow: 'hidden' }}>
+                                <Box
+                                  sx={{
+                                    height: '100%',
+                                    width: `${mastery}%`,
+                                    borderRadius: 'sm',
+                                    bgcolor: `${accentColor}.solidBg`,
+                                    transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                                  }}
+                                />
+                              </Box>
+                            </Box>
+
+                            {/* Footer stats */}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Stack direction='row' spacing={1.5}>
+                                <Chip size='sm' color='danger' variant='soft'>
+                                  {t('study.dueCount', { count: dueCount })}
+                                </Chip>
+                                {newCards > 0 && (
+                                  <Chip size='sm' color='neutral' variant='soft'>
+                                    {t('study.deck.newCount', { count: newCards })}
+                                  </Chip>
+                                )}
+                              </Stack>
+                              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                                {t(`study.types.${deck.deck_type}s`) || deck.deck_type}
+                              </Typography>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )
+                  })}
               </Grid>
-            ) : (
-              decks
-                .filter((d) => getDueCardsForDeck(d._id) > 0)
-                .map((deck) => {
-                  const dueCount = getDueCardsForDeck(deck._id)
-                  // Calculate percentage for circular progress ring
-                  const totalCards = cards.filter((c) => c.deck_id === deck._id || c.deck_id?._id === deck._id).length
-                  const completed = totalCards - dueCount
-                  const progressVal = totalCards > 0 ? Math.round((completed / totalCards) * 100) : 0
+            </>
+          )}
 
-                  let iconColor = 'primary.main'
+          {/* Zone 1.5 — Your Decks (non-due, compact horizontal scroll) */}
+          {showYourDecks && (
+            <Box sx={{ mb: { xs: 4, md: 6 } }}>
+              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.tertiary', mb: 1.5 }}>
+                {t('study.sections.yourDecks')}
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 1.5,
+                  overflowX: 'auto',
+                  py: 1,
+                  scrollSnapType: 'x mandatory',
+                  WebkitOverflowScrolling: 'touch',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                  scrollbarWidth: 'none',
+                  mx: { xs: -2, md: 0 },
+                  px: { xs: 2, md: 0 }
+                }}
+              >
+                {nonDueDecks.map((deck) => {
+                  const mastery = getMasteryForDeck(deck._id)
+                  const dueSoon = isDeckDueSoon(deck._id)
+                  const hours = getHoursUntilDue(deck._id)
+                  let accentColor = 'primary'
                   let IconComponent = Style
                   if (deck.deck_type === 'quiz') {
-                    iconColor = 'warning.main'
+                    accentColor = 'warning'
                     IconComponent = QuizIcon
                   }
                   if (deck.deck_type === 'visual') {
-                    iconColor = 'info.main'
+                    accentColor = 'success'
                     IconComponent = AccountTree
                   }
 
                   return (
-                    <Grid xs={12} md={6} lg={4} key={deck._id}>
-                      <Box
-                        onClick={() => navigate(`/study/${deck._id}`)}
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          height: '100%',
-                          p: 2.5,
-                          borderRadius: 'xl',
-                          cursor: 'pointer',
-                          bgcolor: 'transparent',
-                          position: 'relative',
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                          '&:hover': {
-                            bgcolor: 'background.surface',
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
-                            transform: 'translateY(-2px)',
-                            '& .hover-arrow': {
-                              transform: 'translateX(4px)',
-                              opacity: 1,
-                              color: iconColor
-                            }
-                          }
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <CircularProgress
-                              determinate
-                              value={progressVal}
-                              color={deck.deck_type === 'quiz' ? 'warning' : deck.deck_type === 'visual' ? 'info' : 'primary'}
-                              sx={{ '--CircularProgress-size': '44px', fontWeight: 700 }}
-                            >
-                              <IconComponent sx={{ fontSize: 20 }} />
-                            </CircularProgress>
-                            <Typography level='title-lg' sx={{ fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-                              {deck.name}
-                            </Typography>
-                          </Box>
-                          <ArrowForward
-                            className='hover-arrow'
+                    <Box
+                      key={deck._id}
+                      role='button'
+                      aria-label={t('study.deckPill.ariaLabel', { name: deck.name })}
+                      onClick={() => {
+                        const deckCards = cards.filter((c) => c.deck_id === deck._id || c.deck_id?._id === deck._id)
+                        setPreviewState({ open: true, title: deck.name, cards: deckCards, initialIndex: 0 })
+                      }}
+                      sx={{
+                        width: 140,
+                        flexShrink: 0,
+                        scrollSnapAlign: 'start',
+                        cursor: 'pointer',
+                        borderRadius: 'lg',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        bgcolor: 'background.surface',
+                        p: 1.5,
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': {
+                          borderColor: `${accentColor}.outlinedBorder`,
+                          transform: 'translateY(-1px)',
+                          boxShadow: 'sm'
+                        },
+                        '&:focus-visible': {
+                          outline: '2px solid',
+                          outlineColor: 'primary.outlinedBorder',
+                          outlineOffset: '2px'
+                        }
+                      }}
+                    >
+                      {/* Row 1: Icon + Name */}
+                      <Stack direction='row' spacing={0.75} alignItems='center' sx={{ mb: 1 }}>
+                        <Box
+                          sx={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: 'sm',
+                            bgcolor: `${accentColor}.softBg`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          <IconComponent sx={{ fontSize: 12, color: `${accentColor}.plainColor` }} />
+                        </Box>
+                        <Typography level='body-xs' fontWeight={700} noWrap sx={{ color: 'text.primary', flex: 1 }}>
+                          {deck.name}
+                        </Typography>
+                      </Stack>
+
+                      {/* Row 2: Mastery bar */}
+                      <Box sx={{ height: 3, borderRadius: 'sm', bgcolor: 'background.level2', overflow: 'hidden', mb: 0.75 }}>
+                        <Box
+                          sx={{
+                            height: '100%',
+                            width: `${mastery}%`,
+                            bgcolor: `${accentColor}.solidBg`,
+                            borderRadius: 'sm',
+                            transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        />
+                      </Box>
+
+                      {/* Row 3: Mastery % + due soon hint */}
+                      <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                          {mastery}%
+                        </Typography>
+                        {dueSoon && hours !== null && (
+                          <Typography level='body-xs' sx={{ color: 'warning.plainColor', fontWeight: 600 }}>
+                            {t('study.deckPill.dueSoon', { hours })}
+                          </Typography>
+                        )}
+                      </Stack>
+                    </Box>
+                  )
+                })}
+              </Box>
+            </Box>
+          )}
+
+          {/* Zone 2 — Weekly Momentum */}
+          {!statsLoading && statisticsData?.weekly_progress?.length > 0 && (
+            <Box sx={{ mb: { xs: 4, md: 6 } }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 2 }}>
+                <Typography level='title-lg' fontWeight={700}>
+                  {t('study.sections.weeklyMomentum')}
+                </Typography>
+                <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                  {t('study.sections.weeklyMomentumSubtitle', {
+                    count: statisticsData.weekly_progress.reduce((s, d) => s + d.cards, 0)
+                  })}
+                </Typography>
+              </Box>
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: { xs: 1, md: 2 }, height: 96, justifyContent: 'space-between' }}>
+                  {statisticsData.weekly_progress.map((day, i) => {
+                    const maxVal = Math.max(...statisticsData.weekly_progress.map((d) => d.cards), 1)
+                    const heightPct = day.cards > 0 ? Math.max((day.cards / maxVal) * 100, 8) : 4
+                    const isToday = i === statisticsData.weekly_progress.length - 1
+                    return (
+                      <Tooltip key={day.date} title={`${day.cards} ${t('study.stats.cards')}`} size='sm' placement='top'>
+                        <Box
+                          sx={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 1,
+                            height: '100%',
+                            justifyContent: 'flex-end'
+                          }}
+                        >
+                          <Box
                             sx={{
-                              color: 'text.tertiary',
-                              fontSize: 22,
-                              transition: 'all 0.3s ease',
-                              opacity: 0.5
+                              width: '100%',
+                              height: `${heightPct}%`,
+                              borderRadius: 'sm',
+                              bgcolor: isToday ? 'primary.solidBg' : day.cards > 0 ? 'primary.softBg' : 'background.level2',
+                              transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                             }}
                           />
-                        </Box>
-
-                        <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                           <Typography
                             level='body-xs'
-                            textColor='text.tertiary'
-                            sx={{ textTransform: 'uppercase', letterSpacing: 'sm', fontWeight: 600 }}
+                            sx={{
+                              color: isToday ? 'primary.plainColor' : 'text.tertiary',
+                              fontWeight: isToday ? 700 : 400,
+                              fontSize: '0.6rem'
+                            }}
                           >
-                            {t(`study.types.${deck.deck_type}s`) || deck.deck_type}
-                          </Typography>
-                          <Typography level='title-md' sx={{ color: iconColor }}>
-                            {dueCount} Due
+                            {day.day}
                           </Typography>
                         </Box>
+                      </Tooltip>
+                    )
+                  })}
+                </Box>
+              </Box>
+            </Box>
+          )}
+
+          {/* Zone 3 — Recent Performance */}
+          {!statsLoading && statisticsData?.recent_performance?.length > 0 && (
+            <Box>
+              <Typography level='title-lg' fontWeight={700} sx={{ mb: 2 }}>
+                {t('study.sections.recentPerformance')}
+              </Typography>
+              <Box>
+                <Stack divider={<Divider />}>
+                  {statisticsData.recent_performance.slice(0, 5).map((item, i) => {
+                    const scoreColor = item.score >= 8 ? 'success' : item.score >= 5 ? 'warning' : 'danger'
+                    return (
+                      <Box key={i} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 0, py: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              flexShrink: 0,
+                              bgcolor: `${scoreColor}.solidBg`
+                            }}
+                          />
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography level='body-sm' fontWeight={600} noWrap>
+                              {item.card_title}
+                            </Typography>
+                            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                              {item.date}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Chip size='sm' color={scoreColor} variant='soft' sx={{ flexShrink: 0, ml: 2 }}>
+                          {item.score}/10
+                        </Chip>
                       </Box>
-                    </Grid>
-                  )
-                })
-            )}
-          </Grid>
+                    )
+                  })}
+                </Stack>
+              </Box>
+            </Box>
+          )}
         </TabPanel>
 
         <TabPanel value={1} sx={{ p: 0 }}>
@@ -403,6 +743,14 @@ export default function StudyCenter() {
           </Box>
         </TabPanel>
       </Tabs>
+
+      <CardPreviewModal
+        open={previewState.open}
+        onClose={() => setPreviewState((prev) => ({ ...prev, open: false }))}
+        title={previewState.title}
+        cards={previewState.cards}
+        initialIndex={previewState.initialIndex}
+      />
     </Container>
   )
 }

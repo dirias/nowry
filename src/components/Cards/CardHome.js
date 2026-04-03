@@ -20,7 +20,6 @@ import {
   CardContent,
   Grid,
   Divider,
-  CircularProgress,
   Snackbar,
   Skeleton,
   Tooltip
@@ -281,31 +280,22 @@ export default function CardHome() {
       {/* Minimal spacer since the gigantic stat box has been integrated into the Hero natively */}
       <Box sx={{ mb: 2 }} />
 
-      {loading ? (
-        <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
-          <CircularProgress size='md' />
-          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-            {t('cards.loading')}
-          </Typography>
-        </Stack>
-      ) : (
-        <ManageContent
-          decks={decks}
-          cards={cards}
-          searchQuery={searchQuery}
-          onStudy={handleStudy}
-          onPreview={handlePreview}
-          onEditDeck={handleEditDeck}
-          onDeleteDeck={handleDeleteDeck}
-          onEditCard={handleEditCard}
-          onDeleteCard={handleDeleteCard}
-          onAddCard={(deck) => {
-            // Set the deck context for the new card
-            setEditingCard({ deck_id: deck._id })
-            setShowCreateCard(true)
-          }}
-        />
-      )}
+      <ManageContent
+        decks={decks}
+        cards={cards}
+        loading={loading}
+        searchQuery={searchQuery}
+        onStudy={handleStudy}
+        onPreview={handlePreview}
+        onEditDeck={handleEditDeck}
+        onDeleteDeck={handleDeleteDeck}
+        onEditCard={handleEditCard}
+        onDeleteCard={handleDeleteCard}
+        onAddCard={(deck) => {
+          setEditingCard({ deck_id: deck._id })
+          setShowCreateCard(true)
+        }}
+      />
 
       {/* Modals */}
       {showCreateDeck && (

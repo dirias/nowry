@@ -71,7 +71,20 @@
     "startStudying": "学習を始める →",
     "viewAll": "全{{count}}デッキを表示 →",
     "due": "期限",
-    "allReviewed": "すべて復習済み"
+    "allReviewed": "すべて復習済み",
+    "empty": {
+      "streakLabel": "{{count}}日連続",
+      "allDone": "全て完了",
+      "weeklyCards": "今日{{count}}枚復習済み",
+      "streakZeroLabel": "今日から連続記録を始めよう"
+    },
+    "sections": {
+      "yourDecks": "あなたのデッキ"
+    },
+    "deckPill": {
+      "ariaLabel": "{{name}}を学習",
+      "dueSoon": "{{hours}}時間後"
+    }
   },
   "auth": {
     "welcomeBack": "おかえりなさい",

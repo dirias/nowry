@@ -71,7 +71,20 @@
     "startStudying": "Lernen beginnen →",
     "viewAll": "Alle {{count}} Decks anzeigen →",
     "due": "fällig",
-    "allReviewed": "Alles überprüft"
+    "allReviewed": "Alles überprüft",
+    "empty": {
+      "streakLabel": "{{count}}-Tage-Serie",
+      "allDone": "Alles erledigt",
+      "weeklyCards": "{{count}} heute wiederholt",
+      "streakZeroLabel": "Starte deine Serie heute"
+    },
+    "sections": {
+      "yourDecks": "Deine Decks"
+    },
+    "deckPill": {
+      "ariaLabel": "Lernen {{name}}",
+      "dueSoon": "in {{hours}}h"
+    }
   },
   "auth": {
     "welcomeBack": "Willkommen zurück",

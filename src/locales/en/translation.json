@@ -60,12 +60,6 @@
   "study": {
     "title": "Study Center",
     "subtitle": "Your personalized learning hub",
-    "stats": {
-      "dueToday": "Due",
-      "reviewedToday": "Reviewed",
-      "dayStreak": "Streak",
-      "totalCards": "Total"
-    },
     "byType": "Study by Type",
     "swipeHint": "Swipe to navigate",
     "types": {
@@ -82,7 +76,48 @@
     "startStudying": "Start Studying →",
     "viewAll": "View all {{count}} decks →",
     "due": "due",
-    "allReviewed": "All reviewed"
+    "allReviewed": "All reviewed",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "contentLibrary": "Content Library"
+    },
+    "deck": {
+      "mastery": "Mastery",
+      "newCount": "{{count}} new"
+    },
+    "sections": {
+      "needingReview": "Decks Needing Review",
+      "weeklyMomentum": "Weekly Momentum",
+      "weeklyMomentumSubtitle": "{{count}} cards this week",
+      "recentPerformance": "Recent Performance",
+      "yourDecks": "Your Decks"
+    },
+    "deckPill": {
+      "ariaLabel": "Study {{name}}",
+      "dueSoon": "due in {{hours}}h"
+    },
+    "dates": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}}d ago",
+      "weeksAgo": "{{count}}w ago"
+    },
+    "stats": {
+      "dueToday": "Due",
+      "reviewedToday": "Reviewed",
+      "dayStreak": "Streak",
+      "totalCards": "Total",
+      "cards": "cards"
+    },
+    "empty": {
+      "caughtUpTitle": "You're all caught up!",
+      "caughtUpSubtitle": "No decks need review right now.",
+      "streakLabel": "{{count}}-day streak",
+      "allDone": "All caught up",
+      "weeklyCards": "{{count}} reviewed today",
+      "streakZeroLabel": "Start your streak today"
+    },
+    "dueCount": "{{count}} due"
   },
   "auth": {
     "welcomeBack": "Welcome Back",

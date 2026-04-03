@@ -54,7 +54,8 @@
       "dueToday": "À faire",
       "reviewedToday": "Revues",
       "dayStreak": "Série",
-      "totalCards": "Total"
+      "totalCards": "Total",
+      "cards": "cartes"
     },
     "byType": "Étudier par Type",
     "types": {
@@ -71,7 +72,41 @@
     "startStudying": "Commencer à étudier →",
     "viewAll": "Voir tous les {{count}} paquets →",
     "due": "à faire",
-    "allReviewed": "Tout révisé"
+    "allReviewed": "Tout révisé",
+    "tabs": {
+      "dashboard": "Tableau de bord",
+      "contentLibrary": "Bibliothèque"
+    },
+    "deck": {
+      "mastery": "Maîtrise",
+      "newCount": "{{count}} nouveau"
+    },
+    "sections": {
+      "needingReview": "Decks à réviser",
+      "weeklyMomentum": "Dynamique hebdomadaire",
+      "weeklyMomentumSubtitle": "{{count}} cartes cette semaine",
+      "recentPerformance": "Performances récentes",
+      "yourDecks": "Vos decks"
+    },
+    "deckPill": {
+      "ariaLabel": "Étudier {{name}}",
+      "dueSoon": "dans {{hours}}h"
+    },
+    "dates": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "daysAgo": "Il y a {{count}}j",
+      "weeksAgo": "Il y a {{count}}sem"
+    },
+    "empty": {
+      "caughtUpTitle": "Tout est à jour !",
+      "caughtUpSubtitle": "Aucun deck ne nécessite de révision pour l'instant.",
+      "streakLabel": "Série de {{count}} jour(s)",
+      "allDone": "Tout est à jour",
+      "weeklyCards": "{{count}} révisé(s) aujourd'hui",
+      "streakZeroLabel": "Commencez votre série aujourd'hui"
+    },
+    "dueCount": "{{count}} à revoir"
   },
   "auth": {
     "welcomeBack": "Bon retour",
