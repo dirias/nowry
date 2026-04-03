@@ -198,7 +198,7 @@ export default function StudyCenter() {
     return Math.max(1, Math.round((next - new Date()) / (1000 * 60 * 60)))
   }
 
-  const showYourDecks = !loading && nonDueDecks.length >= 2
+  const showYourDecks = !loading && nonDueDecks.length >= 1
 
   const formatRelativeDate = (date) => {
     if (!date) return null
