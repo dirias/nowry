@@ -450,6 +450,7 @@ export default function StudySession() {
     <Box
       sx={{ width: '100%', position: 'relative', zIndex: 20 }}
       onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
@@ -829,7 +830,6 @@ export default function StudySession() {
                   transform: `rotateY(${isFlipped ? 180 : 0}deg) scale3d(${isPressing && !isFullscreen ? 0.98 : 1}, ${isPressing && !isFullscreen ? 0.98 : 1}, 1)`,
                   cursor: 'pointer'
                 }}
-                onClick={handleFlip}
                 onMouseDown={() => setIsPressing(true)}
                 onMouseUp={() => setIsPressing(false)}
                 onTouchStart={() => setIsPressing(true)}
@@ -850,6 +850,8 @@ export default function StudySession() {
                     boxShadow: isFullscreen ? 'none' : 'sm',
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
+                    // Critical: prevent hidden front face from blocking grade buttons
+                    pointerEvents: isFlipped ? 'none' : 'auto',
                     overflow: 'hidden',
                     '&:hover': { boxShadow: isFullscreen ? 'none' : 'md', borderColor: 'primary.outlinedBorder' }
                   }}
@@ -871,6 +873,7 @@ export default function StudySession() {
                     />
                   )}
                   <CardContent
+                    onClick={handleFlip}
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -878,6 +881,7 @@ export default function StudySession() {
                       alignItems: 'center',
                       textAlign: 'center',
                       height: '100%',
+                      cursor: 'pointer',
                       p: { xs: 3, md: 6 },
                       pt: { xs: 6, md: 8 }
                     }}
@@ -914,6 +918,8 @@ export default function StudySession() {
                     transform: 'rotateY(180deg)',
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
+                    // Critical: only receive pointer events when this face is visible
+                    pointerEvents: isFlipped ? 'auto' : 'none',
                     borderColor: 'primary.outlinedBorder',
                     overflow: 'hidden'
                   }}
@@ -935,6 +941,7 @@ export default function StudySession() {
                     />
                   )}
                   <CardContent
+                    onClick={handleFlip}
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -942,6 +949,7 @@ export default function StudySession() {
                       alignItems: 'center',
                       textAlign: 'center',
                       height: '100%',
+                      cursor: 'pointer',
                       p: { xs: 3, md: 6 },
                       pt: { xs: 6, md: 8 }
                     }}
