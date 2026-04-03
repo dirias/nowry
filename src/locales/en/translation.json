@@ -16,6 +16,9 @@
     "select": "Select",
     "optional": "Optional",
     "back": "Back",
+    "front": "Front",
+    "listen": "Listen",
+    "voiceSettings": "Voice settings",
     "deleteModal": {
       "whatWillHappen": "What will happen:",
       "recoveryNotice": "Data can be recovered within 30 days by contacting support"
@@ -780,6 +783,11 @@
       "save": "Save deck",
       "create": "Create deck"
     },
+    "preview": {
+      "cardOf": "{{current}} / {{total}}",
+      "clickToFlip": "Click to flip",
+      "description": "Description"
+    },
     "session": {
       "loading": "Loading study session...",
       "allCaughtUp": "All caught up!",
@@ -788,7 +796,8 @@
       "complete": {
         "title": "Session complete!",
         "body": "You've reviewed {{count}} cards. Great job!",
-        "backToLibrary": "Back to Library"
+        "backToLibrary": "Back to Library",
+        "cardsReviewed": "cards reviewed"
       },
       "card": "Card {{current}} of {{total}}",
       "syncing": "Syncing {{count}} review...",

@@ -168,9 +168,9 @@ export default function ContentNavigator({ toc = [], readingTime = 0 }) {
             size='sm'
             sx={{
               height: 2,
-              bgcolor: 'background.level1',
+              bgcolor: 'background.level2',
               '& .MuiLinearProgress-indicator': {
-                background: 'linear-gradient(90deg, var(--joy-palette-primary-400), var(--joy-palette-primary-600))'
+                bgcolor: 'primary.solidBg'
               }
             }}
           />
@@ -214,12 +214,12 @@ export default function ContentNavigator({ toc = [], readingTime = 0 }) {
                     pl: isH3 ? 3 : isH1 ? 1 : 2,
                     py: 0.75,
                     borderLeft: isActive ? '2px solid' : '2px solid transparent',
-                    borderColor: isActive ? 'primary.500' : 'transparent',
+                    borderColor: isActive ? 'primary.outlinedBorder' : 'transparent',
                     bgcolor: isActive ? 'background.level1' : 'transparent',
                     transition: 'all 0.15s ease',
                     '&:hover': {
                       bgcolor: 'background.level1',
-                      borderLeftColor: 'primary.300'
+                      borderLeftColor: 'primary.outlinedBorder'
                     }
                   }}
                 >

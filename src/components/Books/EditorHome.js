@@ -343,53 +343,47 @@ export default function EditorHome() {
   const StatusBadge = () => {
     if (status === SAVE_STATUS.SAVING) {
       return (
-        <Stack direction='row' spacing={1} alignItems='center'>
-          <Loader2 size={14} className='animate-spin' />
-          <Typography level='body-xs' color='neutral'>
-            Saving...
+        <Stack direction='row' spacing={0.75} alignItems='center'>
+          <Loader2 size={13} style={{ color: 'var(--joy-palette-text-tertiary)' }} className='animate-spin' />
+          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+            {t('books.status.saving', { defaultValue: 'Saving…' })}
           </Typography>
         </Stack>
       )
     }
     if (status === SAVE_STATUS.SAVED) {
       return (
-        <Stack direction='row' spacing={1} alignItems='center'>
-          {autoSaveEnabled ? (
-            <Check size={14} color='var(--joy-palette-success-500)' />
-          ) : (
-            <AlertTriangle size={14} color='var(--joy-palette-danger-500)' />
-          )}
-          <Typography level='body-xs' color='neutral'>
-            {autoSaveEnabled ? 'Saved' : 'Autosave Inactive'}
+        <Stack direction='row' spacing={0.75} alignItems='center'>
+          <Check size={13} style={{ color: 'var(--joy-palette-success-plainColor)' }} />
+          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+            {autoSaveEnabled
+              ? t('books.status.saved', { defaultValue: 'Saved' })
+              : t('books.status.manualSave', { defaultValue: 'Manual save' })}
           </Typography>
         </Stack>
       )
     }
     if (status === SAVE_STATUS.ERROR) {
       return (
-        <Stack direction='row' spacing={1} alignItems='center'>
-          <AlertTriangle size={14} color='var(--joy-palette-danger-500)' />
-          <Typography level='body-xs' color='danger'>
-            Save Failed
+        <Stack direction='row' spacing={0.75} alignItems='center'>
+          <AlertTriangle size={13} style={{ color: 'var(--joy-palette-danger-plainColor)' }} />
+          <Typography level='body-xs' sx={{ color: 'danger.plainColor' }}>
+            {t('books.status.saveFailed', { defaultValue: 'Save failed' })}
           </Typography>
         </Stack>
       )
     }
     if (status === SAVE_STATUS.UNSAVED) {
-      // Don't show "Unsaved changes" if autosave is disabled - user is in manual mode
-      if (!autoSaveEnabled) {
+      if (autoSaveEnabled) {
         return (
-          <Stack direction='row' spacing={1} alignItems='center'>
-            <AlertTriangle size={14} color='var(--joy-palette-danger-500)' />
-            <Typography level='body-xs' color='neutral'>
-              Autosave Inactive
-            </Typography>
-          </Stack>
+          <Typography level='body-xs' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
+            {t('books.status.unsaved', { defaultValue: 'Unsaved changes…' })}
+          </Typography>
         )
       }
       return (
-        <Typography level='body-xs' color='neutral' sx={{ fontStyle: 'italic' }}>
-          Unsaved changes...
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          {t('books.status.manualSave', { defaultValue: 'Manual save' })}
         </Typography>
       )
     }
@@ -631,24 +625,14 @@ export default function EditorHome() {
               <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
 
               <Button
-                variant='plain'
-                color='neutral'
+                variant={autoSaveEnabled ? 'soft' : 'plain'}
+                color={autoSaveEnabled ? 'primary' : 'neutral'}
                 onClick={handleToggleAutoSave}
                 size='sm'
                 startDecorator={<Timer size={14} />}
-                sx={{
-                  fontSize: 'xs',
-                  fontWeight: autoSaveEnabled ? 'lg' : 'md',
-                  textDecoration: autoSaveEnabled ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                    textUnderlineOffset: '4px'
-                  }
-                }}
+                sx={{ fontSize: 'xs', fontWeight: 500 }}
               >
-                Autosave
+                {t('books.autosave', { defaultValue: 'Autosave' })}
               </Button>
 
               <IconButton variant='outlined' color='neutral' onClick={handleManualSave} size='sm' sx={{ borderRadius: 'md' }}>
@@ -656,11 +640,15 @@ export default function EditorHome() {
               </IconButton>
 
               <IconButton
-                variant={isLocked ? 'solid' : 'outlined'}
-                color={isLocked ? 'danger' : 'neutral'}
+                variant='outlined'
+                color='neutral'
                 onClick={() => setIsLocked(!isLocked)}
                 size='sm'
-                sx={{ borderRadius: 'md' }}
+                sx={{
+                  borderRadius: 'md',
+                  bgcolor: isLocked ? 'background.level1' : 'transparent',
+                  '&:hover': { bgcolor: 'background.level2' }
+                }}
               >
                 {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
               </IconButton>
@@ -676,11 +664,7 @@ export default function EditorHome() {
                 <LexicalComposerContext.Provider value={[focusedEditor, {}]}>
                   <Toolbar onSave={handleManualSave} disabled={isLocked} />
                 </LexicalComposerContext.Provider>
-              ) : (
-                <Typography level='body-sm' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
-                  Editor Ready
-                </Typography>
-              )}
+              ) : null}
             </Box>
           )}
         </Sheet>

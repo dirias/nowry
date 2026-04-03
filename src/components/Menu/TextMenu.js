@@ -2,7 +2,7 @@ import React, { forwardRef, useState, useEffect, useRef } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 import { TOGGLE_LINK_COMMAND } from '@lexical/link'
-import { Sheet, IconButton, Divider, Stack, Box, Dropdown, Menu, MenuButton, MenuItem, Tooltip, Input } from '@mui/joy'
+import { Sheet, IconButton, Divider, Stack, Box, Dropdown, Menu, MenuButton, MenuItem, Tooltip, Input, Typography } from '@mui/joy'
 import {
   Bold,
   Italic,
@@ -13,13 +13,14 @@ import {
   ScrollText,
   Image as ImageIcon,
   Wand2,
-  ChevronDown,
   Check,
   X
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkEdit }, ref) => {
   const [editor] = useLexicalComposerContext()
+  const { t } = useTranslation()
   const [isEditingLink, setIsEditingLink] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const inputRef = useRef(null)
@@ -54,11 +55,9 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
   }
 
   const aiOptions = [
-    { label: 'Create Study Card', value: 'create_study_card', icon: <StickyNote size={16} /> },
-    { label: 'Create Questionnaire', value: 'create_questionnaire', icon: <ScrollText size={16} /> },
-    { label: 'Imagine Scene', value: 'create_visual_content', icon: <ImageIcon size={16} /> },
-    { label: 'Extract Vocabulary', value: 'extract_vocabulary', icon: <Wand2 size={16} /> },
-    { label: 'Insert Link', value: 'insert_link', icon: <LinkIcon size={16} /> }
+    { label: t('editor.ai.questionnaire', 'Questionnaire'), value: 'create_questionnaire', icon: <ScrollText size={15} /> },
+    { label: t('editor.ai.visual', 'Imagine scene'), value: 'create_visual_content', icon: <ImageIcon size={15} /> },
+    { label: t('editor.ai.vocabulary', 'Extract vocabulary'), value: 'extract_vocabulary', icon: <Wand2 size={15} /> }
   ]
 
   return (
@@ -78,7 +77,7 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
         borderColor: 'neutral.outlinedBorder',
         bgcolor: 'background.surface',
         backdropFilter: 'blur(8px)',
-        height: 40,
+        height: 38,
         ...style
       }}
     >
@@ -112,7 +111,7 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
       ) : (
         <>
           <Stack direction='row' spacing={0.5} sx={{ px: 0.5 }}>
-            <Tooltip title='Bold' variant='soft' size='sm'>
+            <Tooltip title={t('editor.format.bold', 'Bold')} variant='soft' size='sm'>
               <IconButton
                 size='sm'
                 variant={activeFormats.bold ? 'soft' : 'plain'}
@@ -123,7 +122,7 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
               </IconButton>
             </Tooltip>
 
-            <Tooltip title='Italic' variant='soft' size='sm'>
+            <Tooltip title={t('editor.format.italic', 'Italic')} variant='soft' size='sm'>
               <IconButton
                 size='sm'
                 variant={activeFormats.italic ? 'soft' : 'plain'}
@@ -134,7 +133,7 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
               </IconButton>
             </Tooltip>
 
-            <Tooltip title='Underline' variant='soft' size='sm'>
+            <Tooltip title={t('editor.format.underline', 'Underline')} variant='soft' size='sm'>
               <IconButton
                 size='sm'
                 variant={activeFormats.underline ? 'soft' : 'plain'}
@@ -145,7 +144,7 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
               </IconButton>
             </Tooltip>
 
-            <Tooltip title='Link' variant='soft' size='sm'>
+            <Tooltip title={t('editor.format.link', 'Link')} variant='soft' size='sm'>
               <IconButton size='sm' variant='plain' color='neutral' onClick={toggleLink}>
                 <LinkIcon size={16} />
               </IconButton>
@@ -154,22 +153,45 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
 
           <Divider orientation='vertical' sx={{ mx: 0.5 }} />
 
-          <Dropdown>
-            <MenuButton
+          {/* Create Card — primary action, always visible */}
+          <Tooltip title={t('editor.ai.createCardHint', 'Generate a study card from this selection')} variant='soft' size='sm'>
+            <IconButton
               size='sm'
-              variant='plain'
+              variant='soft'
               color='primary'
-              endDecorator={<ChevronDown size={14} />}
+              onClick={() => onOptionClick('create_study_card')}
+              aria-label={t('editor.ai.card', 'Card')}
               sx={{
-                fontWeight: 'bold',
-                fontSize: 'sm',
-                '--Button-gap': '4px',
-                '&:hover': { bgcolor: 'primary.softHoverBg' }
+                borderRadius: 'sm',
+                gap: 0.5,
+                px: 1,
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                minWidth: 'auto'
               }}
             >
-              <Sparkles size={16} style={{ marginRight: 4 }} />
-              Magic
-            </MenuButton>
+              <StickyNote size={14} />
+              <Typography level='body-xs' sx={{ fontWeight: 600, color: 'inherit' }}>
+                {t('editor.ai.card', 'Card')}
+              </Typography>
+            </IconButton>
+          </Tooltip>
+
+          <Divider orientation='vertical' sx={{ mx: 0.5 }} />
+
+          {/* Secondary AI actions — icon-only overflow */}
+          <Dropdown>
+            <Tooltip title={t('editor.ai.more', 'More AI actions')} variant='soft' size='sm'>
+              <MenuButton
+                size='sm'
+                variant='plain'
+                color='neutral'
+                aria-label={t('editor.ai.more', 'More AI actions')}
+                sx={{ minWidth: 28, px: 0.5 }}
+              >
+                <Sparkles size={15} />
+              </MenuButton>
+            </Tooltip>
             <Menu
               placement='bottom-start'
               size='sm'
@@ -182,17 +204,8 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
               }}
             >
               {aiOptions.map((option) => (
-                <MenuItem
-                  key={option.value}
-                  onClick={() => {
-                    if (option.value === 'insert_link') {
-                      toggleLink()
-                    } else {
-                      onOptionClick(option.value)
-                    }
-                  }}
-                >
-                  <Box component='span' sx={{ display: 'flex', color: 'primary.500' }}>
+                <MenuItem key={option.value} onClick={() => onOptionClick(option.value)}>
+                  <Box component='span' sx={{ display: 'flex', color: 'primary.plainColor' }}>
                     {option.icon}
                   </Box>
                   <Box sx={{ ml: 1 }}>{option.label}</Box>

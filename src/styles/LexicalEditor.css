@@ -15,7 +15,7 @@
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--joy-palette-neutral-300);
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder);
 }
 
 .editor-table th {
@@ -25,7 +25,7 @@
 
 .editor-table td,
 .editor-table th {
-  border: 1px solid var(--joy-palette-neutral-200);
+  border: 1px solid var(--joy-palette-divider);
   padding: 8px 12px;
   min-width: 75px;
   vertical-align: top;
@@ -33,8 +33,8 @@
 }
 
 .editor-table-cell-selected {
-  background-color: var(--joy-palette-primary-100) !important;
-  border: 1px solid var(--joy-palette-primary-500) !important;
+  background-color: var(--joy-palette-primary-softBg) !important;
+  border: 1px solid var(--joy-palette-primary-outlinedBorder) !important;
 }
 
 /* Hover effect for row/column selection */
@@ -46,7 +46,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 107, 203, 0.03);
+  background: var(--joy-palette-primary-softBg);
+  opacity: 0.04;
   pointer-events: none;
 }
 
@@ -238,7 +239,7 @@ ol.editor-list-ol {
 .editor-quote {
   font-style: italic;
   color: var(--joy-palette-text-secondary);
-  border-left: 4px solid var(--joy-palette-primary-300);
+  border-left: 3px solid var(--joy-palette-divider);
   padding-left: 1.5em;
   margin: 1.5em 0;
   opacity: 0.9;
@@ -367,31 +368,23 @@ ol.editor-list-ol {
   padding: 0.15em 0.4em;
   border-radius: 4px;
   font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
-  font-size: 0.875em; /* 87.5% of surrounding text */
-  color: #eb5757;
+  font-size: 0.875em;
+  color: var(--joy-palette-danger-plainColor);
   border: 1px solid var(--joy-palette-divider);
   font-weight: 500;
 }
 
-/* Light theme inline code */
-@media (prefers-color-scheme: light) {
-  .editor-textCode {
-    background: rgba(175, 184, 193, 0.2);
-    color: #d73a49;
-  }
-}
-
 /* ====== Links ====== */
 .editor-link {
-  color: var(--joy-palette-primary-500);
+  color: var(--joy-palette-primary-plainColor);
   text-decoration: none;
-  border-bottom: 1px solid var(--joy-palette-primary-300);
+  border-bottom: 1px solid var(--joy-palette-primary-outlinedBorder);
   transition: all 0.2s;
 }
 
 .editor-link:hover {
-  color: var(--joy-palette-primary-600);
-  border-bottom-color: var(--joy-palette-primary-600);
+  color: var(--joy-palette-primary-plainColor);
+  border-bottom-color: var(--joy-palette-primary-plainColor);
 }
 
 /* ====== Images - Responsive ====== */
@@ -406,12 +399,12 @@ ol.editor-list-ol {
 
 /* ====== Caret/Cursor - Theme-aware ====== */
 .editor-content {
-  caret-color: var(--joy-palette-primary-500);
+  caret-color: var(--joy-palette-primary-plainColor);
 }
 
 /* ====== Selection ====== */
 .editor-content ::selection {
-  background: var(--joy-palette-primary-200);
+  background: var(--joy-palette-primary-softBg);
   color: var(--joy-palette-text-primary);
 }
 
@@ -420,18 +413,13 @@ ol.editor-list-ol {
   outline: none;
 }
 
-/* ====== Smooth Animations ====== */
-.editor-paragraph,
-.editor-heading-h1,
-.editor-heading-h2,
-.editor-heading-h3,
-.editor-list-ul,
-.editor-list-ol,
-.editor-quote,
-.horizontal-rule,
+/* ====== Animations — intentional block insertions only ====== */
+/* Paragraphs, headings, and lists are excluded: they update on every keystroke
+   and animating them creates visual noise while typing. */
 .editor-code,
-.editor-image {
-  animation: fadeInUp 0.3s ease-out;
+.editor-image,
+.editor-callout {
+  animation: fadeInUp 0.25s ease-out;
 }
 
 @keyframes fadeInUp {
@@ -558,69 +546,72 @@ ol.editor-list-ol {
 
 /* ====== Editable Callouts ====== */
 .editor-callout {
-  margin: 1.5rem 0;
-  padding: 3rem 1.5rem 1.5rem 1.5rem;
-  border-radius: 12px;
-  position: relative;
-  background: var(--joy-palette-background-level1);
-  border-left: 6px solid transparent;
-  transition: all 0.2s ease;
-  min-height: 100px;
+  margin: 0.875rem 0;
+  padding: 0.625rem 1rem;
+  border-left: 3px solid transparent;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: border-color 0.15s ease;
 }
 
-/* Common label/icon base */
+/* Label row — flows naturally above content, no absolute positioning */
 .editor-callout::before {
-  position: absolute;
-  top: 1rem;
-  left: 1.25rem;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-weight: 800;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   user-select: none;
   pointer-events: none;
+  line-height: 1;
+  padding-bottom: 0.125rem;
+}
+
+/* Brighten icons in dark mode (SVG data URLs can't use CSS vars) */
+[data-joy-color-scheme='dark'] .editor-callout::before {
+  filter: brightness(1.5) saturate(0.85);
 }
 
 /* NOTE */
 .editor-callout-note {
-  border-left-color: var(--joy-palette-primary-500);
-  background: var(--joy-palette-primary-50);
+  border-left-color: var(--joy-palette-primary-outlinedBorder);
 }
 .editor-callout-note::before {
-  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%230b6bcb' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E")
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230b6bcb' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E")
     ' NOTE';
-  color: var(--joy-palette-primary-600);
+  color: var(--joy-palette-primary-plainColor);
 }
 
 /* TIP */
 .editor-callout-tip {
-  border-left-color: var(--joy-palette-success-500);
-  background: var(--joy-palette-success-50);
+  border-left-color: var(--joy-palette-success-outlinedBorder);
 }
 .editor-callout-tip::before {
-  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231f7a1f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2.2 1.5 3.1.8.9 1.3 1.5 1.5 2.5'/%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 22h4'/%3E%3C/svg%3E")
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231f7a1f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2.2 1.5 3.1.8.9 1.3 1.5 1.5 2.5'/%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 22h4'/%3E%3C/svg%3E")
     ' TIP';
-  color: var(--joy-palette-success-700);
+  color: var(--joy-palette-success-plainColor);
 }
 
 /* WARNING */
 .editor-callout-warning {
-  border-left-color: var(--joy-palette-warning-500);
-  background: var(--joy-palette-warning-50);
+  border-left-color: var(--joy-palette-warning-outlinedBorder);
 }
 .editor-callout-warning::before {
-  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%239a5b13' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E")
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239a5b13' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E")
     ' WARNING';
-  color: var(--joy-palette-warning-800);
+  color: var(--joy-palette-warning-plainColor);
 }
 
-/* Ensure paragraph inside callout works well */
+/* Paragraph inside callout */
 .editor-callout .editor-paragraph {
   margin: 0;
-  color: var(--joy-palette-text-primary);
+  color: var(--joy-palette-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 /* ====== Print Styles ====== */

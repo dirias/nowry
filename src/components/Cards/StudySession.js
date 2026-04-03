@@ -391,20 +391,51 @@ export default function StudySession() {
 
   if (sessionComplete) {
     return (
-      <Container maxWidth='md' sx={{ py: 4 }}>
-        <Card sx={{ textAlign: 'center', py: 6, borderRadius: 'xl', boxShadow: 'md' }}>
-          <CardContent>
-            <CheckCircle sx={{ fontSize: 80, color: 'success.500', mb: 2 }} />
-            <Typography level='h3' sx={{ mb: 1 }}>
+      <Container maxWidth='sm' sx={{ py: 4 }}>
+        <Card variant='outlined' sx={{ borderRadius: 'xl', boxShadow: 'md', overflow: 'hidden' }}>
+          {/* Icon zone */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 5, pb: 3 }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                bgcolor: 'success.softBg',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <CheckCircle sx={{ fontSize: 44, color: 'success.plainColor' }} />
+            </Box>
+          </Box>
+
+          {/* Stat block */}
+          <Box sx={{ bgcolor: 'background.level1', mx: 3, borderRadius: 'lg', py: 2.5, px: 3, mb: 3 }}>
+            <Stack direction='row' justifyContent='center' spacing={4}>
+              <Stack alignItems='center'>
+                <Typography level='h2' fontWeight={700}>
+                  {cards.length}
+                </Typography>
+                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                  {t('cards.session.complete.cardsReviewed')}
+                </Typography>
+              </Stack>
+            </Stack>
+          </Box>
+
+          {/* Text + CTA */}
+          <Box sx={{ textAlign: 'center', px: 3, pb: 5 }}>
+            <Typography level='h3' fontWeight={700} sx={{ mb: 1 }}>
               {t('cards.session.complete.title')}
             </Typography>
-            <Typography level='body-lg' sx={{ mb: 3, color: 'text.secondary' }}>
+            <Typography level='body-md' sx={{ mb: 4, color: 'text.secondary' }}>
               {t('cards.session.complete.body', { count: cards.length })}
             </Typography>
-            <Button size='lg' onClick={() => navigate('/study')}>
+            <Button size='lg' variant='solid' color='primary' onClick={() => navigate('/study')}>
               {t('cards.session.complete.backToLibrary')}
             </Button>
-          </CardContent>
+          </Box>
         </Card>
       </Container>
     )
@@ -431,79 +462,54 @@ export default function StudySession() {
         </Box>
       )}
 
-      {/* Grading Buttons - Compact for Mobile */}
-      <Stack direction='row' spacing={{ xs: 0.75, md: 1 }} sx={{ mt: { xs: 2, md: 3 }, width: '100%' }} justifyContent='center'>
+      <Stack direction='row' spacing={{ xs: 0.75, md: 1.5 }} sx={{ mt: { xs: 2, md: 3 }, width: '100%' }} justifyContent='center'>
         <Button
-          size='sm'
           variant='outlined'
           color='danger'
           onClick={() => handleGrade('again')}
           sx={{
             flex: 1,
-            py: { xs: 1, md: 1.25 },
+            py: { xs: 1, md: 1.5 },
             fontSize: { xs: '0.75rem', md: '0.875rem' },
             fontWeight: 600,
-            border: '1.5px solid',
-            borderColor: 'danger.outlinedBorder',
-            bgcolor: 'transparent',
-            '&:hover': {
-              bgcolor: 'danger.softBg',
-              borderColor: 'danger.solidBg'
-            }
+            '&:hover': { bgcolor: 'danger.softBg' }
           }}
         >
           {t('cards.session.grading.again')}
         </Button>
         <Button
-          size='sm'
-          variant='outlined'
+          variant='soft'
           color='warning'
           onClick={() => handleGrade('hard')}
           sx={{
             flex: 1,
-            py: { xs: 1, md: 1.25 },
+            py: { xs: 1, md: 1.5 },
             fontSize: { xs: '0.75rem', md: '0.875rem' },
-            fontWeight: 600,
-            border: '1.5px solid',
-            borderColor: 'warning.outlinedBorder',
-            bgcolor: 'transparent',
-            '&:hover': {
-              bgcolor: 'warning.softBg',
-              borderColor: 'warning.solidBg'
-            }
+            fontWeight: 600
           }}
         >
           {t('cards.session.grading.hard')}
         </Button>
         <Button
-          size='sm'
-          variant='outlined'
+          variant='soft'
           color='success'
           onClick={() => handleGrade('good')}
           sx={{
             flex: 1,
-            py: { xs: 1, md: 1.25 },
+            py: { xs: 1, md: 1.5 },
             fontSize: { xs: '0.75rem', md: '0.875rem' },
-            fontWeight: 600,
-            border: '1.5px solid',
-            borderColor: 'success.outlinedBorder',
-            bgcolor: 'transparent',
-            '&:hover': {
-              bgcolor: 'success.softBg',
-              borderColor: 'success.solidBg'
-            }
+            fontWeight: 600
           }}
         >
           {t('cards.session.grading.good')}
         </Button>
         <Button
-          size='sm'
           variant='solid'
           color='primary'
           onClick={() => handleGrade('easy')}
           sx={{
             flex: 1,
-            py: { xs: 1, md: 1.25 },
+            py: { xs: 1, md: 1.5 },
             fontSize: { xs: '0.75rem', md: '0.875rem' },
             fontWeight: 600
           }}
@@ -543,7 +549,7 @@ export default function StudySession() {
                 borderRadius: 'full',
                 bgcolor: 'background.level2',
                 height: 6,
-                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
+                boxShadow: 'none'
               }}
             />
           </Box>
@@ -604,8 +610,8 @@ export default function StudySession() {
               top: 16,
               left: 16,
               zIndex: 20,
-              bgcolor: isFullscreen ? 'rgba(255,255,255,0.5)' : 'transparent',
-              '&:hover': { bgcolor: isFullscreen ? 'rgba(255,255,255,0.8)' : 'background.level1' }
+              bgcolor: isFullscreen ? 'background.level2' : 'transparent',
+              '&:hover': { bgcolor: isFullscreen ? 'background.level3' : 'background.level1' }
             }}
           >
             {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
@@ -653,7 +659,7 @@ export default function StudySession() {
                     zIndex: 10,
                     opacity: glare.opacity,
                     transition: 'opacity 0.3s ease',
-                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.1) 0%, transparent 60%)`,
+                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
                     mixBlendMode: 'overlay',
                     display: { xs: 'none', md: 'block' } // Glare is mouse-only
                   }}
@@ -713,7 +719,7 @@ export default function StudySession() {
                           bgcolor: 'primary.softBg',
                           borderRadius: 'md',
                           borderLeft: '4px solid',
-                          borderColor: 'primary.500'
+                          borderColor: 'primary.outlinedBorder'
                         }}
                       >
                         <Typography level='title-sm' color='primary' sx={{ mb: 1 }}>
@@ -760,7 +766,7 @@ export default function StudySession() {
                     zIndex: 10,
                     opacity: glare.opacity,
                     transition: 'opacity 0.3s ease',
-                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.1) 0%, transparent 60%)`,
+                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
                     mixBlendMode: 'overlay',
                     display: { xs: 'none', md: 'block' }
                   }}
@@ -802,68 +808,80 @@ export default function StudySession() {
               </CardContent>
             </Card>
           ) : (
-            // Flashcard
-            <Card
-              variant={isFullscreen ? 'plain' : 'outlined'}
+            // Flashcard — true 3D flip
+            <Box
               sx={{
+                perspective: '1200px',
+                width: '100%',
                 minHeight: isFullscreen ? '100vh' : 500,
-                borderRadius: isFullscreen ? 0 : 'xl',
-                boxShadow: isFullscreen ? 'none' : 'sm',
-                cursor: 'pointer',
-                position: 'relative',
-                transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.27), box-shadow 0.3s ease',
-                transform: `scale3d(${isPressing && !isFullscreen ? 0.98 : 1}, ${isPressing && !isFullscreen ? 0.98 : 1}, 1) ${isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'}`,
-                transformStyle: 'preserve-3d',
-                '&:hover': {
-                  boxShadow: isFullscreen ? 'none' : 'xl',
-                  borderColor: 'primary.200'
-                }
+                position: 'relative'
               }}
-              onClick={handleFlip}
               onMouseMove={handleCardMouseMove}
               onMouseLeave={handleCardMouseLeave}
-              onMouseDown={() => setIsPressing(true)}
-              onMouseUp={() => setIsPressing(false)}
-              onTouchStart={() => setIsPressing(true)}
-              onTouchEnd={() => setIsPressing(false)}
-              onTouchCancel={() => setIsPressing(false)}
             >
-              {!isFullscreen && (
-                <Box
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  minHeight: isFullscreen ? '100vh' : 500,
+                  transformStyle: 'preserve-3d',
+                  transition: 'transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1)',
+                  transform: `rotateY(${isFlipped ? 180 : 0}deg) scale3d(${isPressing && !isFullscreen ? 0.98 : 1}, ${isPressing && !isFullscreen ? 0.98 : 1}, 1)`,
+                  cursor: 'pointer'
+                }}
+                onClick={handleFlip}
+                onMouseDown={() => setIsPressing(true)}
+                onMouseUp={() => setIsPressing(false)}
+                onTouchStart={() => setIsPressing(true)}
+                onTouchEnd={() => setIsPressing(false)}
+                onTouchCancel={() => setIsPressing(false)}
+              >
+                {/* Front face */}
+                <Card
+                  variant={isFullscreen ? 'plain' : 'outlined'}
                   sx={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    pointerEvents: 'none',
-                    zIndex: 10,
-                    borderRadius: 'inherit',
-                    opacity: glare.opacity,
-                    transition: 'opacity 0.3s ease',
-                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.1) 0%, transparent 60%)`,
-                    mixBlendMode: 'overlay',
-                    display: { xs: 'none', md: 'block' },
-                    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    minHeight: isFullscreen ? '100vh' : 500,
+                    borderRadius: isFullscreen ? 0 : 'xl',
+                    boxShadow: isFullscreen ? 'none' : 'sm',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    overflow: 'hidden',
+                    '&:hover': { boxShadow: isFullscreen ? 'none' : 'md', borderColor: 'primary.outlinedBorder' }
                   }}
-                />
-              )}
-              <CardContent
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  height: '100%',
-                  p: { xs: 3, md: 6 },
-                  pt: { xs: 6, md: 8 },
-                  transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                  backfaceVisibility: 'hidden'
-                }}
-              >
-                {!isFlipped ? (
-                  <>
+                >
+                  {!isFullscreen && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        pointerEvents: 'none',
+                        zIndex: 10,
+                        borderRadius: 'inherit',
+                        opacity: glare.opacity,
+                        transition: 'opacity 0.3s ease',
+                        background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                        mixBlendMode: 'overlay',
+                        display: { xs: 'none', md: 'block' }
+                      }}
+                    />
+                  )}
+                  <CardContent
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      height: '100%',
+                      p: { xs: 3, md: 6 },
+                      pt: { xs: 6, md: 8 }
+                    }}
+                  >
                     <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                       {t('cards.session.labels.question')}
                     </Typography>
@@ -878,9 +896,56 @@ export default function StudySession() {
                         {t('cards.session.hints.clickFlip')}
                       </Box>
                     </Typography>
-                  </>
-                ) : (
-                  <>
+                  </CardContent>
+                </Card>
+
+                {/* Back face */}
+                <Card
+                  variant={isFullscreen ? 'plain' : 'outlined'}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    minHeight: isFullscreen ? '100vh' : 500,
+                    borderRadius: isFullscreen ? 0 : 'xl',
+                    boxShadow: isFullscreen ? 'none' : 'sm',
+                    transform: 'rotateY(180deg)',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    borderColor: 'primary.outlinedBorder',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {!isFullscreen && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        pointerEvents: 'none',
+                        zIndex: 10,
+                        borderRadius: 'inherit',
+                        opacity: glare.opacity,
+                        transition: 'opacity 0.3s ease',
+                        background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                        mixBlendMode: 'overlay',
+                        display: { xs: 'none', md: 'block' }
+                      }}
+                    />
+                  )}
+                  <CardContent
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      height: '100%',
+                      p: { xs: 3, md: 6 },
+                      pt: { xs: 6, md: 8 }
+                    }}
+                  >
                     <Typography
                       level='body-xs'
                       sx={{
@@ -909,10 +974,10 @@ export default function StudySession() {
                       {currentCard.content}
                     </Typography>
                     <GradingButtons />
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </Box>
+            </Box>
           )}
         </Box>
 

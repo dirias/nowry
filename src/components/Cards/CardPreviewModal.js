@@ -21,6 +21,19 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
   const [svgContent, setSvgContent] = useState('')
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
+  const [isPressing, setIsPressing] = useState(false)
+
+  const handleCardMouseMove = (e) => {
+    if (!e.currentTarget) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    setGlare({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+      opacity: 1
+    })
+  }
+  const handleCardMouseLeave = () => setGlare((prev) => ({ ...prev, opacity: 0 }))
 
   useEffect(() => {
     if (open) {
@@ -163,7 +176,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
 
           {/* ▶ Play — modal-level audio control, belongs in the header chrome */}
           {currentCard && (
-            <Tooltip title='Listen' size='sm'>
+            <Tooltip title={t('common.listen')} size='sm'>
               <IconButton
                 size='sm'
                 variant='solid'
@@ -179,7 +192,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
 
           {/* ⚙ Voice settings toggle */}
           {currentCard && (
-            <Tooltip title='Voice Settings' size='sm'>
+            <Tooltip title={t('common.voiceSettings')} size='sm'>
               <IconButton
                 size='sm'
                 variant={showVoiceSettings ? 'soft' : 'plain'}
@@ -214,27 +227,27 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
             </Box>
           ) : (
             <>
-              <Card
-                variant='outlined'
-                onClick={() => setIsFlipped(!isFlipped)}
-                sx={{
-                  height: { xs: '52dvh', sm: 300 },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  bgcolor: 'background.surface',
-                  transition: 'border-color 0.2s',
-                  borderColor: isFlipped ? 'primary.outlinedBorder' : 'divider',
-                  '&:hover': { borderColor: 'primary.outlinedBorder' },
-                  overflow: 'hidden'
-                }}
-              >
-                {/* Card content only — no UI controls inside the card boundary */}
-                <CardContent sx={{ textAlign: 'center', width: '100%', p: { xs: 2.5, sm: 3 } }}>
-                  {currentCard.card_type === 'visual' ? (
-                    isFlipped ? (
+              {currentCard.card_type === 'visual' ? (
+                // Visual card — no 3D flip needed
+                <Card
+                  variant='outlined'
+                  onClick={() => setIsFlipped(!isFlipped)}
+                  sx={{
+                    height: { xs: '52dvh', sm: 300 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    bgcolor: 'background.surface',
+                    transition: 'border-color 0.2s',
+                    borderColor: isFlipped ? 'primary.outlinedBorder' : 'divider',
+                    '&:hover': { borderColor: 'primary.outlinedBorder' },
+                    overflow: 'hidden'
+                  }}
+                >
+                  <CardContent sx={{ textAlign: 'center', width: '100%', p: { xs: 2.5, sm: 3 } }}>
+                    {isFlipped ? (
                       <Box>
                         <Typography level='title-sm' sx={{ mb: 1.5, color: 'text.secondary' }}>
                           {t('cards.preview.description', { defaultValue: 'Description' })}
@@ -254,30 +267,141 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                           </Typography>
                         )}
                       </Box>
-                    )
-                  ) : (
-                    <Typography
-                      level='h4'
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                // Flashcard — true 3D flip
+                <Box
+                  sx={{
+                    perspective: '1200px',
+                    width: '100%',
+                    height: { xs: '52dvh', sm: 300 },
+                    position: 'relative'
+                  }}
+                  onMouseMove={handleCardMouseMove}
+                  onMouseLeave={handleCardMouseLeave}
+                >
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      width: '100%',
+                      height: '100%',
+                      transformStyle: 'preserve-3d',
+                      transition: 'transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1)',
+                      transform: `rotateY(${isFlipped ? 180 : 0}deg) scale3d(${isPressing ? 0.98 : 1}, ${isPressing ? 0.98 : 1}, 1)`,
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setIsFlipped(!isFlipped)}
+                    onMouseDown={() => setIsPressing(true)}
+                    onMouseUp={() => setIsPressing(false)}
+                    onTouchStart={() => setIsPressing(true)}
+                    onTouchEnd={() => setIsPressing(false)}
+                    onTouchCancel={() => setIsPressing(false)}
+                  >
+                    {/* Front face */}
+                    <Card
+                      variant='outlined'
                       sx={{
-                        color: isFlipped ? 'primary.plainColor' : 'text.primary',
-                        wordBreak: 'break-word',
-                        whiteSpace: 'pre-wrap',
-                        fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        bgcolor: 'background.surface',
+                        borderColor: 'divider',
+                        backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
+                        overflow: 'hidden',
+                        '&:hover': { borderColor: 'primary.outlinedBorder' }
                       }}
                     >
-                      {isFlipped
-                        ? currentCard.answer || currentCard.content || t('cards.manage_content.noContent')
-                        : currentCard.question || currentCard.title || t('cards.manage_content.untitled')}
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          pointerEvents: 'none',
+                          zIndex: 10,
+                          borderRadius: 'inherit',
+                          opacity: glare.opacity,
+                          transition: 'opacity 0.3s ease',
+                          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                          mixBlendMode: 'overlay',
+                          display: { xs: 'none', md: 'block' }
+                        }}
+                      />
+                      <CardContent sx={{ textAlign: 'center', width: '100%', p: { xs: 2.5, sm: 3 } }}>
+                        <Typography
+                          level='h4'
+                          sx={{
+                            color: 'text.primary',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'pre-wrap',
+                            fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                          }}
+                        >
+                          {currentCard.question || currentCard.title || t('cards.manage_content.untitled')}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+
+                    {/* Back face */}
+                    <Card
+                      variant='outlined'
+                      sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        bgcolor: 'background.surface',
+                        borderColor: 'primary.outlinedBorder',
+                        transform: 'rotateY(180deg)',
+                        backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          pointerEvents: 'none',
+                          zIndex: 10,
+                          borderRadius: 'inherit',
+                          opacity: glare.opacity,
+                          transition: 'opacity 0.3s ease',
+                          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                          mixBlendMode: 'overlay',
+                          display: { xs: 'none', md: 'block' }
+                        }}
+                      />
+                      <CardContent sx={{ textAlign: 'center', width: '100%', p: { xs: 2.5, sm: 3 } }}>
+                        <Typography
+                          level='h4'
+                          sx={{
+                            color: 'primary.plainColor',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'pre-wrap',
+                            fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                          }}
+                        >
+                          {currentCard.answer || currentCard.content || t('cards.manage_content.noContent')}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Box>
+                </Box>
+              )}
 
               {/* Subtle flip hint — text only, no buttons, below card */}
               <Stack direction='row' alignItems='center' justifyContent='center' spacing={0.5} sx={{ pt: 1.5, opacity: 0.4 }}>
                 <Flip sx={{ fontSize: 13 }} />
                 <Typography level='body-xs'>
-                  {isFlipped ? t('common.back') : 'Front'} · {isMobileHint ? t('cards.session.hints.tapFlip') : 'Click to flip'}
+                  {isFlipped ? t('common.back') : t('common.front')} ·{' '}
+                  {isMobileHint ? t('cards.session.hints.tapFlip') : t('cards.preview.clickToFlip')}
                 </Typography>
               </Stack>
 
