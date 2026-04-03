@@ -1,12 +1,40 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Typography, Box, Card, CardContent, Stack, Button, Chip, Grid, Divider, Skeleton } from '@mui/joy'
-import { School, Quiz as QuizIcon, Style, AccountTree, TrendingUp, CalendarToday } from '@mui/icons-material'
+import {
+  Container,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Stack,
+  Button,
+  Chip,
+  Grid,
+  Divider,
+  Skeleton,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  tabClasses,
+  CircularProgress
+} from '@mui/joy'
+import {
+  School,
+  Quiz as QuizIcon,
+  Style,
+  AccountTree,
+  TrendingUp,
+  CalendarToday,
+  ArrowForward,
+  LocalFireDepartment
+} from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
 import { cardsService, activityService } from '../../api/services'
+import CardHome from '../Cards/CardHome'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
@@ -116,459 +144,265 @@ export default function StudyCenter() {
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
-      {/* Glass Hero Header */}
-      <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 }, mt: { xs: 1, md: 2 } }}>
-        <Typography level='h2' fontWeight={800} sx={{ mb: 1, letterSpacing: '-0.02em' }}>
-          {t('study.title')}
-        </Typography>
-        <Typography level='body-md' sx={{ color: 'text.tertiary', mb: 3, maxWidth: 500, mx: 'auto' }}>
-          {t('study.subtitle')}
-        </Typography>
-
-        {/* Minimalist Inline Stats */}
-        <Stack
-          direction='row'
-          spacing={{ xs: 1.5, sm: 2 }}
-          justifyContent='center'
-          alignItems='center'
-          sx={{ mb: 5, opacity: 0.8, flexWrap: 'wrap', gap: { xs: 1, sm: 0 } }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <TrendingUp sx={{ fontSize: 16, color: 'primary.solidBg', opacity: 0.8 }} />
-            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-              <Skeleton loading={loading} variant='text' width='1ch'>
-                {stats.dueToday}
-              </Skeleton>{' '}
-              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                {t('study.stats.dueToday')}
-              </Typography>
-            </Typography>
-          </Box>
-          <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <School sx={{ fontSize: 16, color: 'success.solidBg', opacity: 0.8 }} />
-            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-              <Skeleton loading={loading} variant='text' width='1ch'>
-                {stats.reviewedToday}
-              </Skeleton>{' '}
-              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                {t('study.stats.reviewedToday')}
-              </Typography>
-            </Typography>
-          </Box>
-          <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Style sx={{ fontSize: 16, color: 'neutral.solidBg', opacity: 0.8 }} />
-            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-              <Skeleton loading={loading} variant='text' width='1ch'>
-                {stats.totalActive}
-              </Skeleton>{' '}
-              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                {t('study.stats.totalCards')}
-              </Typography>
-            </Typography>
-          </Box>
-          <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <CalendarToday sx={{ fontSize: 16, color: 'warning.solidBg', opacity: 0.8 }} />
-            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-              <Skeleton loading={loading} variant='text' width='1ch'>
-                {stats.streak}
-              </Skeleton>{' '}
-              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                {t('profile.stats.days')}
-              </Typography>
-            </Typography>
-          </Box>
-        </Stack>
-
-        {/* Global Action CTA */}
-        <Box sx={{ minHeight: 60 }}>
-          {stats.dueToday > 0 && (
-            <Stack alignItems='center' spacing={1.5}>
-              <Button
-                size='lg'
-                variant='solid'
-                color='danger'
-                onClick={() => navigate('/study/daily-review')}
-                sx={{ borderRadius: 'xl', px: 6, fontWeight: 700, boxShadow: 'sm' }}
-              >
-                🎯 {t('study.startStudying')}
-              </Button>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                {t('study.reviewMsg', { count: stats.dueToday })}
-              </Typography>
-            </Stack>
-          )}
-        </Box>
-      </Box>
-
-      {/* Study by Type */}
-      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5 }}>
-        <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
-          {t('study.byType')}
-        </Typography>
-
-        {/* Swipe Hint (Mobile) */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1, color: 'text.tertiary' }}>
-          <Typography level='body-xs' sx={{ fontSize: '0.7rem' }}>
-            {t('study.swipeHint')}
+      {/* Glass Hero Header (Horizontal Command Center) */}
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        justifyContent='space-between'
+        alignItems={{ xs: 'center', md: 'flex-end' }}
+        spacing={3}
+        sx={{ mb: { xs: 2.5, md: 4 }, mt: { xs: 1, md: 2 } }}
+      >
+        {/* Left Column: Title & Subtitle */}
+        <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+          <Typography level='h2' fontWeight={800} sx={{ mb: 0.5, letterSpacing: '-0.02em' }}>
+            {t('study.title')}
+          </Typography>
+          <Typography level='body-md' sx={{ color: 'text.tertiary', maxWidth: 500 }}>
+            {t('study.subtitle')}
           </Typography>
         </Box>
-      </Stack>
 
-      {/* Mobile Tabs (Segmented Control) */}
-      <Box
-        sx={{
-          display: { xs: 'flex', md: 'none' },
-          p: 0.5,
-          mb: 3,
-          borderRadius: 'xl',
-          bgcolor: 'background.level1',
-          overflow: 'hidden'
-        }}
-      >
-        {['Flashcards', 'Quizzes', 'Visual'].map((tabLabel, index) => {
-          const tabKey = ['flashcards', 'quizzes', 'visual'][index]
-          const label = t(`study.types.${tabKey}`)
-          const isActive = activeSectionIndex === index
-          let activeColor = 'primary.main'
-          if (index === 1) activeColor = 'warning.main'
-          if (index === 2) activeColor = 'info.main'
-
-          return (
-            <Box
-              key={index}
-              onClick={() => setActiveSectionIndex(index)}
-              sx={{
-                flex: 1,
-                py: 1,
-                px: 1,
-                textAlign: 'center',
-                borderRadius: 'lg',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                bgcolor: isActive ? 'background.surface' : 'transparent',
-                boxShadow: isActive ? 'sm' : 'none',
-                color: isActive ? activeColor : 'text.secondary',
-                fontWeight: isActive ? 600 : 500,
-                userSelect: 'none'
-              }}
-            >
-              <Typography level='body-sm' textColor='inherit' fontWeight='inherit'>
-                {label}
+        {/* Right Column: Stats & Global Action CTA */}
+        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'center', sm: 'flex-end' }} spacing={{ xs: 2, md: 3 }}>
+          {/* Minimalist Inline Stats */}
+          <Stack
+            direction='row'
+            spacing={{ xs: 1.5, sm: 2 }}
+            alignItems='center'
+            sx={{ opacity: 0.8, flexWrap: 'wrap', gap: { xs: 1, sm: 0 }, justifyContent: 'center', mb: { xs: 0, sm: 0.5 } }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <TrendingUp sx={{ fontSize: 16, color: 'primary.solidBg', opacity: 0.8 }} />
+              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+                <Skeleton loading={loading} variant='text' width='1ch'>
+                  {stats.dueToday}
+                </Skeleton>{' '}
+                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
+                  {t('study.stats.dueToday')}
+                </Typography>
               </Typography>
             </Box>
-          )
-        })}
-      </Box>
+            <Typography sx={{ color: 'divider' }}>•</Typography>
 
-      {/* Swipe Container */}
-      <Box
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        sx={{
-          position: 'relative',
-          minHeight: 400
-        }}
-      >
-        <Grid container spacing={3}>
-          {/* Flashcards */}
-          <Grid
-            xs={12}
-            md={4}
-            sx={{
-              display: { xs: activeSectionIndex === 0 ? 'block' : 'none', md: 'block' },
-              animation: { xs: 'fadeIn 0.3s ease-in-out', md: 'none' }
-            }}
-          >
-            <Card
-              variant='outlined'
-              sx={{
-                height: '100%',
-                borderRadius: 'xl',
-                bgcolor: 'background.surface',
-                boxShadow: 'sm',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': {
-                  boxShadow: 'xl',
-                  transform: 'translateY(-6px)',
-                  borderColor: 'primary.outlinedBorder'
-                }
-              }}
-            >
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'primary.softBg',
-                      color: 'primary.solidBg'
-                    }}
-                  >
-                    <Style sx={{ fontSize: 28 }} />
-                  </Box>
-                  <Box>
-                    <Typography level='title-lg' fontWeight={600}>
-                      {t('study.types.flashcards')}
-                    </Typography>
-                    <Chip size='sm' variant='soft' color='primary'>
-                      {getDecksByType('flashcard').length} decks
-                    </Chip>
-                  </Box>
-                </Stack>
-
-                <Typography level='body-sm' sx={{ mb: 2, color: 'text.secondary' }}>
-                  {t('study.types.flashcardsDesc')}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <School sx={{ fontSize: 16, color: 'success.solidBg', opacity: 0.8 }} />
+              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+                <Skeleton loading={loading} variant='text' width='1ch'>
+                  {stats.reviewedToday}
+                </Skeleton>{' '}
+                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
+                  {t('study.stats.reviewedToday')}
                 </Typography>
+              </Typography>
+            </Box>
+            <Typography sx={{ color: 'divider' }}>•</Typography>
 
-                <Stack spacing={1}>
-                  {getDecksByType('flashcard').length === 0 ? (
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center', py: 2 }}>
-                      {t('study.types.noDecks', { type: t('study.types.flashcards') })}
-                    </Typography>
-                  ) : (
-                    <>
-                      {getDecksByType('flashcard')
-                        .slice(0, 3)
-                        .map((deck) => {
-                          const dueCount = getDueCardsForDeck(deck._id)
-                          const hasDueCards = dueCount > 0
-
-                          return (
-                            <Button
-                              key={deck._id}
-                              variant='soft'
-                              color={hasDueCards ? 'primary' : 'neutral'}
-                              onClick={() => navigate(hasDueCards ? `/study/${deck._id}` : `/cards`)}
-                              disabled={!hasDueCards}
-                              sx={{ justifyContent: 'space-between' }}
-                            >
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                              {hasDueCards ? (
-                                <Chip size='sm'>
-                                  {dueCount} {t('study.due')}
-                                </Chip>
-                              ) : (
-                                <Chip size='sm' variant='outlined'>
-                                  {t('study.allReviewed')}
-                                </Chip>
-                              )}
-                            </Button>
-                          )
-                        })}
-                      {getDecksByType('flashcard').length > 3 && (
-                        <Button variant='plain' size='sm' onClick={() => navigate('/cards')}>
-                          {t('study.viewAll', { count: getDecksByType('flashcard').length })}
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Quizzes */}
-          <Grid
-            xs={12}
-            md={4}
-            sx={{
-              display: { xs: activeSectionIndex === 1 ? 'block' : 'none', md: 'block' },
-              animation: { xs: 'fadeIn 0.3s ease-in-out', md: 'none' }
-            }}
-          >
-            <Card
-              variant='outlined'
-              sx={{
-                height: '100%',
-                borderRadius: 'xl',
-                bgcolor: 'background.surface',
-                boxShadow: 'sm',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': {
-                  boxShadow: 'xl',
-                  transform: 'translateY(-6px)',
-                  borderColor: 'warning.outlinedBorder'
-                }
-              }}
-            >
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'warning.softBg',
-                      color: 'warning.solidBg'
-                    }}
-                  >
-                    <QuizIcon sx={{ fontSize: 28 }} />
-                  </Box>
-                  <Box>
-                    <Typography level='title-lg' fontWeight={600}>
-                      {t('study.types.quizzes')}
-                    </Typography>
-                    <Chip size='sm' variant='soft' color='warning'>
-                      {getDecksByType('quiz').length} decks
-                    </Chip>
-                  </Box>
-                </Stack>
-
-                <Typography level='body-sm' sx={{ mb: 2, color: 'text.secondary' }}>
-                  {t('study.types.quizzesDesc')}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <Style sx={{ fontSize: 16, color: 'neutral.solidBg', opacity: 0.8 }} />
+              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+                <Skeleton loading={loading} variant='text' width='1ch'>
+                  {stats.totalActive}
+                </Skeleton>{' '}
+                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
+                  {t('study.stats.totalCards')}
                 </Typography>
+              </Typography>
+            </Box>
+            <Typography sx={{ color: 'divider' }}>•</Typography>
 
-                <Stack spacing={1}>
-                  {getDecksByType('quiz').length === 0 ? (
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center', py: 2 }}>
-                      {t('study.types.noDecks', { type: t('study.types.quizzes') })}
-                    </Typography>
-                  ) : (
-                    <>
-                      {getDecksByType('quiz')
-                        .slice(0, 3)
-                        .map((deck) => {
-                          const dueCount = getDueCardsForDeck(deck._id)
-                          const hasDueCards = dueCount > 0
-
-                          return (
-                            <Button
-                              key={deck._id}
-                              variant='soft'
-                              color={hasDueCards ? 'warning' : 'neutral'}
-                              onClick={() => navigate(hasDueCards ? `/study/${deck._id}` : `/cards`)}
-                              disabled={!hasDueCards}
-                              sx={{ justifyContent: 'space-between' }}
-                            >
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                              {hasDueCards ? (
-                                <Chip size='sm'>
-                                  {dueCount} {t('study.due')}
-                                </Chip>
-                              ) : (
-                                <Chip size='sm' variant='outlined'>
-                                  {t('study.allReviewed')}
-                                </Chip>
-                              )}
-                            </Button>
-                          )
-                        })}
-                      {getDecksByType('quiz').length > 3 && (
-                        <Button variant='plain' size='sm' onClick={() => navigate('/cards')}>
-                          {t('study.viewAll', { count: getDecksByType('quiz').length })}
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Visual Diagrams */}
-          <Grid
-            xs={12}
-            md={4}
-            sx={{
-              display: { xs: activeSectionIndex === 2 ? 'block' : 'none', md: 'block' },
-              animation: { xs: 'fadeIn 0.3s ease-in-out', md: 'none' }
-            }}
-          >
-            <Card
-              variant='outlined'
-              sx={{
-                height: '100%',
-                borderRadius: 'xl',
-                bgcolor: 'background.surface',
-                boxShadow: 'sm',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': {
-                  boxShadow: 'xl',
-                  transform: 'translateY(-6px)',
-                  borderColor: 'info.outlinedBorder'
-                }
-              }}
-            >
-              <CardContent>
-                <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 'md',
-                      bgcolor: 'info.softBg',
-                      color: 'info.solidBg'
-                    }}
-                  >
-                    <AccountTree sx={{ fontSize: 28 }} />
-                  </Box>
-                  <Box>
-                    <Typography level='title-lg' fontWeight={600}>
-                      {t('study.types.visual')}
-                    </Typography>
-                    <Chip size='sm' variant='soft' color='info'>
-                      {getDecksByType('visual').length} decks
-                    </Chip>
-                  </Box>
-                </Stack>
-
-                <Typography level='body-sm' sx={{ mb: 2, color: 'text.secondary' }}>
-                  {t('study.types.visualDesc')}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <LocalFireDepartment
+                sx={{
+                  fontSize: 18,
+                  color: stats.streak > 0 ? '#ff7b00' : 'neutral.solidBg',
+                  opacity: 0.9,
+                  filter: stats.streak > 2 ? 'drop-shadow(0 0 4px rgba(255,123,0,0.4))' : 'none'
+                }}
+              />
+              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
+                <Skeleton loading={loading} variant='text' width='1ch'>
+                  {stats.streak}
+                </Skeleton>{' '}
+                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
+                  {t('profile.stats.days')}
                 </Typography>
+              </Typography>
+            </Box>
+          </Stack>
 
-                <Stack spacing={1}>
-                  {getDecksByType('visual').length === 0 ? (
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center', py: 2 }}>
-                      {t('study.types.noDecks', { type: t('study.types.visual') })}
-                    </Typography>
-                  ) : (
-                    <>
-                      {getDecksByType('visual')
-                        .slice(0, 3)
-                        .map((deck) => {
-                          const dueCount = getDueCardsForDeck(deck._id)
-                          const hasDueCards = dueCount > 0
+          {stats.dueToday > 0 && (
+            <Button
+              size='md'
+              variant='solid'
+              color='danger'
+              onClick={() => navigate('/study/daily-review')}
+              sx={{ borderRadius: 'lg', px: 3, fontWeight: 700, boxShadow: 'sm' }}
+            >
+              🎯 {t('study.startStudying')} ({stats.dueToday})
+            </Button>
+          )}
+        </Stack>
+      </Stack>
 
-                          return (
-                            <Button
-                              key={deck._id}
-                              variant='soft'
-                              color={hasDueCards ? 'info' : 'neutral'}
-                              onClick={() => navigate(hasDueCards ? `/study/${deck._id}` : `/cards`)}
-                              disabled={!hasDueCards}
-                              sx={{ justifyContent: 'space-between' }}
+      {/* Unified Tab Architecture - Left Aligned */}
+      <Tabs aria-label='Study Navigation' defaultValue={0} sx={{ bgcolor: 'transparent', mt: 0 }}>
+        <TabList
+          disableUnderline
+          sx={{
+            p: 0,
+            gap: 4,
+            borderRadius: 0,
+            bgcolor: 'transparent',
+            display: 'flex',
+            mb: { xs: 4, md: 6 },
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            width: '100%',
+            mx: 0,
+            [`& .${tabClasses.root}`]: {
+              bgcolor: 'transparent',
+              fontWeight: 600,
+              color: 'text.tertiary',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              paddingBottom: '8px',
+              marginBottom: '-1px', // Pull the border over the divider
+              borderTop: 'none',
+              borderLeft: 'none',
+              borderRight: 'none',
+              borderBottom: '2px solid transparent',
+              '&:hover': {
+                color: 'text.primary',
+                bgcolor: 'transparent'
+              }
+            },
+            [`& .${tabClasses.root}[aria-selected="true"]`]: {
+              boxShadow: 'none',
+              bgcolor: 'transparent',
+              color: 'primary.plainColor',
+              fontWeight: 800,
+              borderBottomColor: 'primary.solidBg'
+            }
+          }}
+        >
+          <Tab disableIndicator sx={{ borderRadius: 0, px: 1, py: 1 }}>
+            Dashboard
+          </Tab>
+          <Tab disableIndicator sx={{ borderRadius: 0, px: 1, py: 1 }}>
+            Content Library
+          </Tab>
+        </TabList>
+
+        <TabPanel value={0} sx={{ p: 0 }}>
+          {/* Action Zone: Floating Due Decks */}
+          <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, mb: 3 }}>
+            Decks Needing Review
+          </Typography>
+
+          <Grid container spacing={3}>
+            {decks.filter((d) => getDueCardsForDeck(d._id) > 0).length === 0 ? (
+              <Grid xs={12}>
+                <Typography level='body-md' sx={{ color: 'text.tertiary', textAlign: 'center', py: 4 }}>
+                  {t('study.types.noDecks', { type: 'due' })} You&apos;re all caught up!
+                </Typography>
+              </Grid>
+            ) : (
+              decks
+                .filter((d) => getDueCardsForDeck(d._id) > 0)
+                .map((deck) => {
+                  const dueCount = getDueCardsForDeck(deck._id)
+                  // Calculate percentage for circular progress ring
+                  const totalCards = cards.filter((c) => c.deck_id === deck._id || c.deck_id?._id === deck._id).length
+                  const completed = totalCards - dueCount
+                  const progressVal = totalCards > 0 ? Math.round((completed / totalCards) * 100) : 0
+
+                  let iconColor = 'primary.main'
+                  let IconComponent = Style
+                  if (deck.deck_type === 'quiz') {
+                    iconColor = 'warning.main'
+                    IconComponent = QuizIcon
+                  }
+                  if (deck.deck_type === 'visual') {
+                    iconColor = 'info.main'
+                    IconComponent = AccountTree
+                  }
+
+                  return (
+                    <Grid xs={12} md={6} lg={4} key={deck._id}>
+                      <Box
+                        onClick={() => navigate(`/study/${deck._id}`)}
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          height: '100%',
+                          p: 2.5,
+                          borderRadius: 'xl',
+                          cursor: 'pointer',
+                          bgcolor: 'transparent',
+                          position: 'relative',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': {
+                            bgcolor: 'background.surface',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                            transform: 'translateY(-2px)',
+                            '& .hover-arrow': {
+                              transform: 'translateX(4px)',
+                              opacity: 1,
+                              color: iconColor
+                            }
+                          }
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <CircularProgress
+                              determinate
+                              value={progressVal}
+                              color={deck.deck_type === 'quiz' ? 'warning' : deck.deck_type === 'visual' ? 'info' : 'primary'}
+                              sx={{ '--CircularProgress-size': '44px', fontWeight: 700 }}
                             >
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deck.name}</span>
-                              {hasDueCards ? (
-                                <Chip size='sm'>
-                                  {dueCount} {t('study.due')}
-                                </Chip>
-                              ) : (
-                                <Chip size='sm' variant='outlined'>
-                                  {t('study.allReviewed')}
-                                </Chip>
-                              )}
-                            </Button>
-                          )
-                        })}
-                      {getDecksByType('visual').length > 3 && (
-                        <Button variant='plain' size='sm' onClick={() => navigate('/cards')}>
-                          {t('study.viewAll', { count: getDecksByType('visual').length })}
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
+                              <IconComponent sx={{ fontSize: 20 }} />
+                            </CircularProgress>
+                            <Typography level='title-lg' sx={{ fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+                              {deck.name}
+                            </Typography>
+                          </Box>
+                          <ArrowForward
+                            className='hover-arrow'
+                            sx={{
+                              color: 'text.tertiary',
+                              fontSize: 22,
+                              transition: 'all 0.3s ease',
+                              opacity: 0.5
+                            }}
+                          />
+                        </Box>
+
+                        <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                          <Typography
+                            level='body-xs'
+                            textColor='text.tertiary'
+                            sx={{ textTransform: 'uppercase', letterSpacing: 'sm', fontWeight: 600 }}
+                          >
+                            {t(`study.types.${deck.deck_type}s`) || deck.deck_type}
+                          </Typography>
+                          <Typography level='title-md' sx={{ color: iconColor }}>
+                            {dueCount} Due
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  )
+                })
+            )}
           </Grid>
-        </Grid>
-      </Box>
+        </TabPanel>
+
+        <TabPanel value={1} sx={{ p: 0 }}>
+          <Box sx={{ mt: -2 }}>
+            <CardHome />
+          </Box>
+        </TabPanel>
+      </Tabs>
     </Container>
   )
 }

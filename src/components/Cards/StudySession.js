@@ -382,7 +382,7 @@ export default function StudySession() {
             <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
               {t('cards.session.noDue')}
             </Typography>
-            <Button onClick={() => navigate('/cards')}>{t('cards.session.goBack')}</Button>
+            <Button onClick={() => navigate('/study')}>{t('cards.session.goBack')}</Button>
           </CardContent>
         </Card>
       </Container>
@@ -401,7 +401,7 @@ export default function StudySession() {
             <Typography level='body-lg' sx={{ mb: 3, color: 'text.secondary' }}>
               {t('cards.session.complete.body', { count: cards.length })}
             </Typography>
-            <Button size='lg' onClick={() => navigate('/cards')}>
+            <Button size='lg' onClick={() => navigate('/study')}>
               {t('cards.session.complete.backToLibrary')}
             </Button>
           </CardContent>
@@ -528,7 +528,7 @@ export default function StudySession() {
       {/* Header - Hide in Fullscreen */}
       {!isFullscreen && (
         <Stack direction='row' alignItems='center' spacing={2} sx={{ mb: 2 }}>
-          <IconButton onClick={() => navigate('/cards')} variant='plain' color='neutral'>
+          <IconButton onClick={() => navigate('/study')} variant='plain' color='neutral'>
             <ArrowBack />
           </IconButton>
           <Box sx={{ flex: 1 }}>

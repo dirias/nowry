@@ -15,6 +15,7 @@ import {
   TabList,
   Tab,
   TabPanel,
+  tabClasses,
   Grid,
   Table,
   Dropdown,
@@ -197,65 +198,85 @@ export default function ManageContent({
 
   return (
     <Box>
-      {/* View Tabs - Styled to match CardHome pattern */}
+      {/* Premium Segmented Control for Sub-Views */}
       <Tabs
         value={activeView}
         onChange={(e, val) => setActiveView(val)}
         sx={{
           mb: 3,
-          bgcolor: 'transparent',
-          '--Tabs-gap': '0px'
+          bgcolor: 'transparent'
         }}
       >
         <TabList
           disableUnderline
           sx={{
             p: 0.5,
-            gap: 0.5,
+            gap: 1,
             borderRadius: 'xl',
             bgcolor: 'background.level1',
-            display: 'inline-flex'
+            display: 'inline-flex',
+            boxShadow: 'inset 0px 1px 3px rgba(0,0,0,0.02)', // Minimal inset shadow for depth, safe on dark/light
+            [`& .${tabClasses.root}`]: {
+              minWidth: { xs: 120, sm: 140 },
+              fontWeight: 600,
+              color: 'text.secondary',
+              py: 1,
+              px: 2,
+              borderRadius: 'lg',
+              border: 'none',
+              transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              '&:hover': {
+                bgcolor: 'background.level2',
+                color: 'text.primary'
+              },
+              '&:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'primary.solidBg',
+                outlineOffset: '-2px'
+              },
+              boxShadow: 'none'
+            },
+            [`& .${tabClasses.root}[aria-selected="true"]`]: {
+              color: 'primary.plainColor',
+              bgcolor: 'background.surface',
+              boxShadow: 'sm'
+            }
           }}
         >
-          <Tab
-            disableIndicator
-            sx={{
-              borderRadius: 'lg',
-              fontSize: '0.85rem',
-              fontWeight: 500,
-              px: 2,
-              py: 0.75,
-              '&.Mui-selected': {
-                bgcolor: 'background.surface',
-                boxShadow: 'sm',
-                fontWeight: 600
-              }
-            }}
-          >
-            {t('cards.manage_content.tabs.decks', { count: decks.length })}
+          <Tab disableIndicator aria-label={t('cards.manage_content.aria.decks', 'View Decks')}>
+            <Typography level='title-sm' sx={{ fontWeight: 'inherit', color: 'inherit' }}>
+              {t('cards.manage_content.tabs.decksOnly', 'Decks')}
+            </Typography>
+            <Chip
+              size='sm'
+              variant={activeView === 0 ? 'solid' : 'soft'}
+              color={activeView === 0 ? 'primary' : 'neutral'}
+              sx={{ borderRadius: 'xl', fontWeight: 700, fontSize: '0.7rem', px: 1, height: 20 }}
+            >
+              {decks.length}
+            </Chip>
           </Tab>
-          <Tab
-            disableIndicator
-            sx={{
-              borderRadius: 'lg',
-              fontSize: '0.85rem',
-              fontWeight: 500,
-              px: 2,
-              py: 0.75,
-              '&.Mui-selected': {
-                bgcolor: 'background.surface',
-                boxShadow: 'sm',
-                fontWeight: 600
-              }
-            }}
-          >
-            {t('cards.manage_content.tabs.cards', { count: cards.length })}
+          <Tab disableIndicator aria-label={t('cards.manage_content.aria.cards', 'View Cards')}>
+            <Typography level='title-sm' sx={{ fontWeight: 'inherit', color: 'inherit' }}>
+              {t('cards.manage_content.tabs.cardsOnly', 'Cards')}
+            </Typography>
+            <Chip
+              size='sm'
+              variant={activeView === 1 ? 'solid' : 'soft'}
+              color={activeView === 1 ? 'primary' : 'neutral'}
+              sx={{ borderRadius: 'xl', fontWeight: 700, fontSize: '0.7rem', px: 1, height: 20 }}
+            >
+              {cards.length}
+            </Chip>
           </Tab>
         </TabList>
       </Tabs>
 
-      {/* Filter Toolbar & View Toggle */}
-      <Stack direction='row' spacing={2} sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
+      <Stack direction='row' spacing={1.5} sx={{ mb: 2.5, alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Tactile Carousel Filter */}
         <Box
           sx={{
@@ -278,23 +299,24 @@ export default function ManageContent({
             return (
               <Chip
                 key={key}
-                size='lg'
-                variant={isSelected ? 'solid' : 'outlined'}
+                size='sm'
+                variant={isSelected ? 'soft' : 'plain'}
                 color={isSelected ? color : 'neutral'}
                 onClick={() => setFilterType(key)}
                 sx={{
                   cursor: 'pointer',
-                  fontWeight: isSelected ? 600 : 500,
-                  py: 1,
-                  px: 1.5,
-                  borderRadius: '12px',
+                  fontWeight: isSelected ? 700 : 500,
+                  borderRadius: 'xl',
                   flexShrink: 0,
                   scrollSnapAlign: 'start',
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  border: '1px solid',
+                  borderColor: isSelected ? `${color}.outlinedBorder` : 'transparent',
                   '&:active': { transform: 'scale(0.95)' },
-                  ...(isSelected
-                    ? { boxShadow: '0 4px 10px rgba(0,0,0,0.1)', '&:hover': { filter: 'brightness(0.9)' } }
-                    : { boxShadow: 'none', '&:hover': { bgcolor: 'background.level1', borderColor: 'neutral.outlinedHoverBorder' } })
+                  '&:hover': {
+                    bgcolor: isSelected ? `${color}.softHoverBg` : 'background.level1',
+                    borderColor: isSelected ? `${color}.outlinedBorder` : 'neutral.outlinedBorder'
+                  }
                 }}
               >
                 {label}
@@ -466,21 +488,21 @@ export default function ManageContent({
                         {deck.has_cards && (
                           <Button
                             size='sm'
-                            variant='solid'
-                            color='primary'
+                            variant={deck.due_cards > 0 ? 'solid' : 'soft'}
+                            color={deck.due_cards > 0 ? 'primary' : 'neutral'}
                             onClick={() => onStudy?.(deck)}
                             startDecorator={<School sx={{ fontSize: 16 }} />}
                             sx={{ fontSize: '0.75rem', fontWeight: 600, px: 1.5, display: { xs: 'none', sm: 'flex' } }}
                           >
-                            {deck.due_cards > 0 ? t('cards.studyDue', { count: deck.due_cards }) : t('cards.studyCenter')}
+                            {deck.due_cards > 0 ? t('cards.studyDue', { count: deck.due_cards }) : t('cards.review', 'Review')}
                           </Button>
                         )}
 
                         {deck.has_cards && (
                           <IconButton
                             size='sm'
-                            variant='solid'
-                            color='primary'
+                            variant={deck.due_cards > 0 ? 'solid' : 'soft'}
+                            color={deck.due_cards > 0 ? 'primary' : 'neutral'}
                             onClick={() => onStudy?.(deck)}
                             sx={{ display: { xs: 'flex', sm: 'none' } }}
                           >
@@ -866,17 +888,17 @@ function DeckGridCard({
           ) : deck.due_cards === 0 ? (
             <Button
               size='sm'
-              variant='outlined'
+              variant='soft'
               color='neutral'
               onClick={(e) => {
                 e.stopPropagation()
-                onPreview?.(deck)
+                onStudy?.(deck)
               }}
-              startDecorator={<Visibility sx={{ fontSize: 14 }} />}
+              startDecorator={<School sx={{ fontSize: 14 }} />}
               fullWidth
-              sx={{ fontSize: '0.75rem', py: 0.75 }}
+              sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
             >
-              {t('cards.preview')}
+              {t('cards.review', 'Review')}
             </Button>
           ) : (
             <Button
@@ -891,7 +913,7 @@ function DeckGridCard({
               fullWidth
               sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
             >
-              {t('cards.studyCenter')}
+              {t('cards.studyDue', { count: deck.due_cards })}
             </Button>
           )}
         </Box>

@@ -210,7 +210,6 @@ const Header = () => {
             <>
               {[
                 { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
-                { name: t('header.cards'), path: '/cards', icon: <SchoolRounded /> },
                 { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
                 { name: t('annualPlanning.title'), path: '/annual-planning', icon: <TimelineRounded /> }
               ].map((item) => (
@@ -489,7 +488,6 @@ const Header = () => {
                 {/* Logged-in User Navigation */}
                 {[
                   { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
-                  { name: t('header.cards'), path: '/cards', icon: <SchoolRounded /> },
                   { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
                   { name: t('annualPlanning.title'), path: '/annual-planning', icon: <TimelineRounded /> }
                 ].map((item) => (

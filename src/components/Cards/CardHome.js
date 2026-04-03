@@ -210,128 +210,72 @@ export default function CardHome() {
   }
 
   return (
-    <Container maxWidth='xl' sx={{ py: 4 }}>
-      {/* Glass Hero Header */}
-      <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 }, mt: { xs: 1, md: 2 } }}>
-        <Typography level='h2' fontWeight={800} sx={{ mb: 1, letterSpacing: '-0.02em' }}>
-          {t('cards.title')}
-        </Typography>
-        <Typography level='body-md' sx={{ color: 'text.tertiary', mb: 2, maxWidth: 500, mx: 'auto' }}>
-          {t('cards.subtitle')}
-        </Typography>
-
-        {/* Minimalist Inline Stats */}
-        <Stack direction='row' spacing={2} justifyContent='center' alignItems='center' sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <School sx={{ fontSize: 16, color: 'danger.solidBg', opacity: 0.8 }} />
-            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-              <Skeleton loading={loading} variant='text' width='1ch'>
-                {stats.dueToday}
-              </Skeleton>{' '}
-              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                {t('cards.dueToday')}
-              </Typography>
-            </Typography>
-          </Box>
-          <Typography sx={{ color: 'divider' }}>•</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <GridView sx={{ fontSize: 16, color: 'neutral.solidBg', opacity: 0.8 }} />
-            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-              <Skeleton loading={loading} variant='text' width='2ch'>
-                {stats.totalCards}
-              </Skeleton>{' '}
-              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                {t('cards.totalCards')}
-              </Typography>
-            </Typography>
-          </Box>
-          <Typography sx={{ color: 'divider' }}>•</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <CalendarToday sx={{ fontSize: 16, color: 'warning.solidBg', opacity: 0.8 }} />
-            <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-              <Skeleton loading={loading} variant='text' width='1ch'>
-                {stats.streak}
-              </Skeleton>{' '}
-              <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                {t('profile.stats.days')}
-              </Typography>
-            </Typography>
-          </Box>
-        </Stack>
-
-        <Box sx={{ maxWidth: 640, mx: 'auto' }}>
-          {decks.length > 0 || cards.length > 0 ? (
-            <Input
+    <Container maxWidth='xl' sx={{ py: 0 }}>
+      <Box sx={{ maxWidth: 640, mx: 'auto' }}>
+        {decks.length > 0 || cards.length > 0 ? (
+          <Input
+            size='md'
+            placeholder={t('cards.manage_content.search.decks', 'Search decks and cards...')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            startDecorator={<Search sx={{ fontSize: 18, color: 'text.tertiary' }} />}
+            endDecorator={
+              <Stack direction='row' spacing={0.5} alignItems='center'>
+                {searchQuery && (
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    onClick={() => setSearchQuery('')}
+                    sx={{ borderRadius: 'xl', minWidth: 28, minHeight: 28 }}
+                  >
+                    <Close sx={{ fontSize: 16 }} />
+                  </IconButton>
+                )}
+                <Button
+                  size='sm'
+                  variant='solid'
+                  color='primary'
+                  onClick={() => setShowCreateDeck(true)}
+                  sx={{ borderRadius: 'lg', fontWeight: 600, fontSize: '0.8rem', px: 1.5 }}
+                >
+                  {t('cards.newDeck')}
+                </Button>
+                <Button
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  onClick={() => {
+                    setEditingCard(null)
+                    setShowCreateCard(true)
+                  }}
+                  sx={{ borderRadius: 'lg', fontWeight: 600, fontSize: '0.8rem', px: 1.5, display: { xs: 'none', sm: 'inline-flex' } }}
+                >
+                  {t('cards.newCard', 'New Card')}
+                </Button>
+              </Stack>
+            }
+            sx={{
+              width: '100%',
+              borderRadius: 'xl',
+              boxShadow: 'sm',
+              bgcolor: 'background.surface',
+              '--Input-focusedThickness': '1.5px',
+              '--Input-paddingInline': '12px'
+            }}
+          />
+        ) : (
+          <Stack direction='row' spacing={2} justifyContent='center'>
+            <Button
               size='lg'
-              placeholder={t('cards.manage_content.search.decks', 'Search decks and cards...')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              startDecorator={<Search sx={{ color: 'text.tertiary', ml: 1 }} />}
-              endDecorator={
-                <Stack direction='row' spacing={1} alignItems='center' sx={{ mr: 0.5 }}>
-                  {searchQuery && (
-                    <IconButton size='sm' variant='plain' color='neutral' onClick={() => setSearchQuery('')} sx={{ borderRadius: '50%' }}>
-                      <Close sx={{ fontSize: 20 }} />
-                    </IconButton>
-                  )}
-                  <Tooltip title={t('cards.studyCenter')} size='sm'>
-                    <IconButton
-                      size='sm'
-                      variant='soft'
-                      color='primary'
-                      onClick={() => navigate('/study')}
-                      sx={{ borderRadius: 'md', display: { xs: 'none', sm: 'inline-flex' } }}
-                    >
-                      <TrendingUp sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </Tooltip>
-                  <Button
-                    size='sm'
-                    variant='solid'
-                    color='primary'
-                    onClick={() => setShowCreateDeck(true)}
-                    sx={{ borderRadius: 'md', fontWeight: 600 }}
-                  >
-                    {t('cards.newDeck')}
-                  </Button>
-                  <Button
-                    size='sm'
-                    variant='outlined'
-                    color='primary'
-                    onClick={() => {
-                      setEditingCard(null)
-                      setShowCreateCard(true)
-                    }}
-                    sx={{ borderRadius: 'md', fontWeight: 600, display: { xs: 'none', sm: 'inline-flex' } }}
-                  >
-                    {t('cards.newCard', 'New Card')}
-                  </Button>
-                </Stack>
-              }
-              sx={{
-                width: '100%',
-                borderRadius: 'xl',
-                boxShadow: 'sm',
-                bgcolor: 'rgba(var(--joy-palette-background-surfaceChannel) / 0.8)',
-                backdropFilter: 'blur(12px)',
-                '--Input-focusedThickness': '2px',
-                p: 0.75,
-                pl: 1
-              }}
-            />
-          ) : (
-            <Stack direction='row' spacing={2} justifyContent='center'>
-              <Button
-                size='lg'
-                onClick={() => setShowCreateDeck(true)}
-                startDecorator={<Add />}
-                sx={{ borderRadius: 'lg', px: 4, boxShadow: 'sm' }}
-              >
-                {t('cards.newDeck')}
-              </Button>
-            </Stack>
-          )}
-        </Box>
+              onClick={() => setShowCreateDeck(true)}
+              startDecorator={<Add />}
+              sx={{ borderRadius: 'lg', px: 4, boxShadow: 'sm' }}
+            >
+              {t('cards.newDeck')}
+            </Button>
+          </Stack>
+        )}
       </Box>
 
       {/* Minimal spacer since the gigantic stat box has been integrated into the Hero natively */}

@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react'
-import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { DynamicThemeProvider } from './theme/DynamicThemeProvider'
 import { Box, CircularProgress } from '@mui/joy'
 
@@ -173,7 +173,7 @@ const AppContent = () => {
                 path='/cards'
                 element={
                   <ProtectedRoute>
-                    <CardHome />
+                    <Navigate to='/study' replace />
                   </ProtectedRoute>
                 }
               />
