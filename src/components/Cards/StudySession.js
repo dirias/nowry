@@ -158,18 +158,9 @@ export default function StudySession() {
           return nextReview <= now
         })
       } else {
-        // Deck Review: Filter by deck
-        const deckCards = cardsData.filter((card) => card.deck_id === deckId || card.deck_id?._id === deckId)
-
-        // Only show cards that are due for review
-        const dueCards = deckCards.filter((card) => {
-          if (!card.next_review) return true
-          const nextReview = new Date(card.next_review)
-          return nextReview <= now
-        })
-
-        // If no due cards in deck, show all (existing logic)
-        reviewCards = dueCards.length > 0 ? dueCards : deckCards
+        // Deck Review: Fetch due cards directly from API (avoids pagination truncation)
+        const dueCards = await cardsService.getDueCards(deckId)
+        reviewCards = dueCards
       }
 
       setCards(reviewCards)
@@ -889,7 +880,7 @@ export default function StudySession() {
                     <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                       {t('cards.session.labels.question')}
                     </Typography>
-                    <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600 }}>
+                    <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600, whiteSpace: 'pre-wrap' }}>
                       {currentCard.title}
                     </Typography>
                     <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'text.tertiary' }}>
@@ -970,6 +961,7 @@ export default function StudySession() {
                       level={currentCard.content?.length > 100 ? 'body-lg' : 'h3'}
                       sx={{
                         wordBreak: 'break-word',
+                        whiteSpace: 'pre-wrap',
                         fontWeight: currentCard.content?.length > 100 ? 400 : 500,
                         fontSize: currentCard.content?.length > 100 ? { xs: '1rem', md: '1.125rem' } : { xs: '1.5rem', md: '2rem' },
                         lineHeight: currentCard.content?.length > 100 ? 1.6 : 1.3,

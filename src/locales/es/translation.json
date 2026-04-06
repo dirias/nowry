@@ -69,7 +69,7 @@
     },
     "startReview": "Comienza tu Repaso Diario",
     "reviewMsg": "Tienes {{count}} tarjetas listas para repasar",
-    "startStudying": "Empezar a Estudiar →",
+    "startStudying": "Empezar a Estudiar",
     "viewAll": "Ver todos los {{count}} mazos →",
     "due": "para hoy",
     "allReviewed": "Todo revisado",
@@ -84,7 +84,8 @@
     },
     "deckPill": {
       "ariaLabel": "Estudiar {{name}}",
-      "dueSoon": "en {{hours}}h"
+      "dueSoon": "en {{hours}}h",
+      "new": "Nuevo"
     }
   },
   "auth": {
@@ -495,6 +496,10 @@
     "subtitle": "Gestiona tus tarjetas, cuestionarios y material visual",
     "studyCenter": "Centro de Estudio",
     "newDeck": "Nuevo Mazo",
+    "newCard": "Nueva Tarjeta",
+    "import": {
+      "label": "Importar mazo"
+    },
     "dueToday": "Para hoy",
     "studyStreak": "Racha (días)",
     "totalCards": "Total Tarjetas",
@@ -512,6 +517,7 @@
     "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?",
     "deleteCardError": "Error al eliminar la tarjeta. Inténtalo de nuevo.",
     "studyDue": "Estudiar ({{count}})",
+    "studyNew": "Aprender ({{count}} nuevas)",
     "preview": "Vista previa",
     "noCardsYet": "Sin tarjetas aún",
     "dueLabel": "{{count}} pendiente",
@@ -532,7 +538,13 @@
       },
       "search": {
         "decks": "Buscar mazos...",
-        "cards": "Buscar tarjetas..."
+        "cards": "Buscar tarjetas...",
+        "placeholder": "Buscar mazos y tarjetas..."
+      },
+      "aria": {
+        "search": "Buscar contenido",
+        "gridView": "Vista de cuadrícula",
+        "listView": "Vista de lista"
       },
       "filters": {
         "all": "Todos",
@@ -625,6 +637,16 @@
       "consequence1": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
       "consequence1_plural": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
       "consequence2": "Si está publicado, se despublicará inmediatamente"
+    }
+  },
+  "filters": {
+    "toggle": "Alternar filtros",
+    "type": "Tipo",
+    "tags": "Etiquetas",
+    "clearAll": "Borrar todo",
+    "remove": {
+      "type": "Eliminar filtro de tipo",
+      "tag": "Eliminar filtro de etiqueta {{tag}}"
     }
   },
   "subscription": {
@@ -947,5 +969,42 @@
     "choosePrioritiesTooltip": "Elegir prioridades para mostrar",
     "noPrioritiesYet": "Aún no hay prioridades",
     "createPriority": "Crear Prioridad"
+  },
+  "deckSettings": {
+    "menuItem": "Configuración",
+    "openAria": "Abrir configuración de {{name}}",
+    "nav": { "study": "Estudio", "audio": "Audio", "publishing": "Publicación" },
+    "study": {
+      "paceMode": "Ritmo de estudio",
+      "newPerDay": "Tarjetas nuevas por día",
+      "maxReviews": "Máx. repasos por día",
+      "cardsPerDay": "tarjetas / día",
+      "reviewsPerDay": "repasos / día"
+    },
+    "pace": {
+      "relaxed": "Relajado",
+      "balanced": "Equilibrado",
+      "intensive": "Intensivo",
+      "relaxedHint": "Ideal para aprendizaje casual o mazos grandes",
+      "balancedHint": "Recomendado para la mayoría",
+      "intensiveHint": "Para preparación de exámenes"
+    },
+    "audio": {
+      "front": "Frente",
+      "back": "Reverso",
+      "autoplay": "Reproducción automática",
+      "voice": "Voz",
+      "systemDefault": "Por defecto del sistema",
+      "rate": "Velocidad",
+      "pitch": "Tono"
+    },
+    "publish": {
+      "title": "Hacer público el mazo",
+      "description": "Cualquier persona con el enlace puede ver y copiar este mazo",
+      "publicDescription": "Descripción pública",
+      "publishedOn": "Publicado el {{date}}"
+    },
+    "saving": "Guardando...",
+    "saved": "Guardado"
   }
 }

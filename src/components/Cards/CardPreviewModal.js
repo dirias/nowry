@@ -252,7 +252,9 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                         <Typography level='title-sm' sx={{ mb: 1.5, color: 'text.secondary' }}>
                           {t('cards.preview.description', { defaultValue: 'Description' })}
                         </Typography>
-                        <Typography level='body-md'>{currentCard.content || t('cards.manage_content.noContent')}</Typography>
+                        <Typography level='body-md' sx={{ whiteSpace: 'pre-wrap' }}>
+                          {currentCard.content || t('cards.manage_content.noContent')}
+                        </Typography>
                       </Box>
                     ) : (
                       <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

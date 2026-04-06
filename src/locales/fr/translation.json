@@ -69,7 +69,7 @@
     },
     "startReview": "Commencez votre révision quotidienne",
     "reviewMsg": "Vous avez {{count}} cartes prêtes à être révisées",
-    "startStudying": "Commencer à étudier →",
+    "startStudying": "Commencer à étudier",
     "viewAll": "Voir tous les {{count}} paquets →",
     "due": "à faire",
     "allReviewed": "Tout révisé",
@@ -90,7 +90,8 @@
     },
     "deckPill": {
       "ariaLabel": "Étudier {{name}}",
-      "dueSoon": "dans {{hours}}h"
+      "dueSoon": "dans {{hours}}h",
+      "new": "Nouveau"
     },
     "dates": {
       "today": "Aujourd'hui",
@@ -730,5 +731,42 @@
       "deleteFailed": "Échec de la suppression de {{type}}",
       "focusAreaLimit": "Vous ne pouvez avoir que 3 domaines prioritaires. Supprimez-en un pour en ajouter un autre."
     }
+  },
+  "deckSettings": {
+    "menuItem": "Paramètres",
+    "openAria": "Ouvrir les paramètres de {{name}}",
+    "nav": { "study": "Étude", "audio": "Audio", "publishing": "Publication" },
+    "study": {
+      "paceMode": "Rythme d'étude",
+      "newPerDay": "Nouvelles cartes par jour",
+      "maxReviews": "Révisions max par jour",
+      "cardsPerDay": "cartes / jour",
+      "reviewsPerDay": "révisions / jour"
+    },
+    "pace": {
+      "relaxed": "Détendu",
+      "balanced": "Équilibré",
+      "intensive": "Intensif",
+      "relaxedHint": "Idéal pour un apprentissage décontracté",
+      "balancedHint": "Recommandé pour la plupart des apprenants",
+      "intensiveHint": "Pour la préparation aux examens"
+    },
+    "audio": {
+      "front": "Recto",
+      "back": "Verso",
+      "autoplay": "Lecture auto",
+      "voice": "Voix",
+      "systemDefault": "Par défaut du système",
+      "rate": "Vitesse",
+      "pitch": "Tonalité"
+    },
+    "publish": {
+      "title": "Rendre le paquet public",
+      "description": "Toute personne avec le lien peut voir et copier ce paquet",
+      "publicDescription": "Description publique",
+      "publishedOn": "Publié le {{date}}"
+    },
+    "saving": "Enregistrement...",
+    "saved": "Enregistré"
   }
 }

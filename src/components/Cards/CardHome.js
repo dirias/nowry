@@ -1,54 +1,22 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  Container,
-  Stack,
-  Typography,
-  Box,
-  Input,
-  Chip,
-  Button,
-  Select,
-  Option,
-  IconButton,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  Card,
-  CardContent,
-  Grid,
-  Divider,
-  Snackbar,
-  Skeleton,
-  Tooltip
-} from '@mui/joy'
-import {
-  Search,
-  Add,
-  GridView,
-  ViewList,
-  FilterList,
-  TrendingUp,
-  School,
-  Download,
-  MoreVert,
-  CalendarToday,
-  Close
-} from '@mui/icons-material'
+import { Container, Snackbar } from '@mui/joy'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import CreateDeckModal from './CreateDeckModal'
 import CreateCardModal from './CreateCardModal'
 import CardPreviewModal from './CardPreviewModal'
 import ManageContent from './ManageContent'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
-import { decksService } from '../../api/services'
+import ImportDeckModal from './ImportDeckModal'
+import DeckSettingsModal from '../Study/DeckSettingsModal'
+import { decksService, cardsService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
+import { apiCache } from '../../api/utils/cache'
 
-export default function CardHome() {
+export default function CardHome({ onDeckChange } = {}) {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
@@ -58,6 +26,7 @@ export default function CardHome() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [showCreateDeck, setShowCreateDeck] = useState(false)
+  const [showImportDeck, setShowImportDeck] = useState(false)
   const [showCreateCard, setShowCreateCard] = useState(false)
   const [editingDeck, setEditingDeck] = useState(null)
   const [editingCard, setEditingCard] = useState(null)
@@ -65,12 +34,16 @@ export default function CardHome() {
   const [deletingCard, setDeletingCard] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [errorSnackbar, setErrorSnackbar] = useState(null)
+  const [selectedTags, setSelectedTags] = useState([])
+  const [availableTags, setAvailableTags] = useState([])
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [previewState, setPreviewState] = useState({
     open: false,
     title: '',
     cards: [],
     initialIndex: 0
   })
+  const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null })
 
   // Stats
   const [stats, setStats] = useState({
@@ -79,7 +52,20 @@ export default function CardHome() {
     totalCards: 0
   })
 
-  const { cards: hookCards, loading: cardsLoading, reload: reloadCards } = useCardData()
+  // Debounce search so we don't fire an API call on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 400)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const {
+    cards: hookCards,
+    total: hookTotal,
+    hasMore: hookHasMore,
+    loading: cardsLoading,
+    reload: reloadCards,
+    fetchMore: reloadFetchMore
+  } = useCardData(selectedTags, debouncedSearch)
   const { statistics: hookStats, loading: statsLoading } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
@@ -88,42 +74,45 @@ export default function CardHome() {
     fetchData()
   }, [cardsLoading, statsLoading, decksLoading, hookCards, hookStats, hookDecks])
 
+  useEffect(() => {
+    let cancelled = false
+    cardsService
+      .getTags()
+      .then((tags) => {
+        if (!cancelled) setAvailableTags(tags)
+      })
+      .catch(() => {
+        /* tags are non-critical — silently ignore */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const fetchData = async () => {
     try {
       setLoading(true)
       const decksData = hookDecks || []
 
-      // Calculate due cards for each deck using cached cards
-      const now = new Date()
       const decksWithDueCount = decksData.map((deck) => {
-        const deckCards = hookCards.filter((card) => card.deck_id === deck._id || card.deck_id?._id === deck._id)
-        const dueCards = deckCards.filter((card) => {
-          if (!card.next_review) return true
-          const nextReview = new Date(card.next_review)
-          return nextReview <= now
-        })
         return {
           ...deck,
-          due_cards: dueCards.length,
-          has_cards: deckCards.length > 0
+          due_cards: deck.due_cards || 0,
+          total_cards: deck.total_cards || 0,
+          has_cards: (deck.total_cards || 0) > 0
         }
       })
 
       setDecks(decksWithDueCount)
       setCards(hookCards)
 
-      // Use real stats from cached API response
+      // Use global stats (already accurate from backend)
       const summary = hookStats?.summary || {}
-      const dueCards = hookCards.filter((card) => {
-        if (!card.next_review) return true
-        const nextReview = new Date(card.next_review)
-        return nextReview <= now
-      })
 
       setStats({
-        dueToday: dueCards.length,
+        dueToday: summary.due_today || 0,
         streak: summary.current_streak || 0,
-        totalCards: summary.total_cards || hookCards.length
+        totalCards: summary.total_cards || 0
       })
 
       setLoading(false)
@@ -210,79 +199,12 @@ export default function CardHome() {
 
   return (
     <Container maxWidth='xl' sx={{ py: 0 }}>
-      <Box sx={{ maxWidth: 640, mx: 'auto' }}>
-        {decks.length > 0 || cards.length > 0 ? (
-          <Input
-            size='md'
-            placeholder={t('cards.manage_content.search.decks', 'Search decks and cards...')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            startDecorator={<Search sx={{ fontSize: 18, color: 'text.tertiary' }} />}
-            endDecorator={
-              <Stack direction='row' spacing={0.5} alignItems='center'>
-                {searchQuery && (
-                  <IconButton
-                    size='sm'
-                    variant='plain'
-                    color='neutral'
-                    onClick={() => setSearchQuery('')}
-                    sx={{ borderRadius: 'xl', minWidth: 28, minHeight: 28 }}
-                  >
-                    <Close sx={{ fontSize: 16 }} />
-                  </IconButton>
-                )}
-                <Button
-                  size='sm'
-                  variant='solid'
-                  color='primary'
-                  onClick={() => setShowCreateDeck(true)}
-                  sx={{ borderRadius: 'lg', fontWeight: 600, fontSize: '0.8rem', px: 1.5 }}
-                >
-                  {t('cards.newDeck')}
-                </Button>
-                <Button
-                  size='sm'
-                  variant='plain'
-                  color='neutral'
-                  onClick={() => {
-                    setEditingCard(null)
-                    setShowCreateCard(true)
-                  }}
-                  sx={{ borderRadius: 'lg', fontWeight: 600, fontSize: '0.8rem', px: 1.5, display: { xs: 'none', sm: 'inline-flex' } }}
-                >
-                  {t('cards.newCard', 'New Card')}
-                </Button>
-              </Stack>
-            }
-            sx={{
-              width: '100%',
-              borderRadius: 'xl',
-              boxShadow: 'sm',
-              bgcolor: 'background.surface',
-              '--Input-focusedThickness': '1.5px',
-              '--Input-paddingInline': '12px'
-            }}
-          />
-        ) : (
-          <Stack direction='row' spacing={2} justifyContent='center'>
-            <Button
-              size='lg'
-              onClick={() => setShowCreateDeck(true)}
-              startDecorator={<Add />}
-              sx={{ borderRadius: 'lg', px: 4, boxShadow: 'sm' }}
-            >
-              {t('cards.newDeck')}
-            </Button>
-          </Stack>
-        )}
-      </Box>
-
-      {/* Minimal spacer since the gigantic stat box has been integrated into the Hero natively */}
-      <Box sx={{ mb: 2 }} />
-
       <ManageContent
         decks={decks}
         cards={cards}
+        totalCards={hookTotal}
+        hasMore={hookHasMore}
+        onLoadMore={reloadFetchMore}
         loading={loading}
         searchQuery={searchQuery}
         onStudy={handleStudy}
@@ -295,6 +217,18 @@ export default function CardHome() {
           setEditingCard({ deck_id: deck._id })
           setShowCreateCard(true)
         }}
+        availableTags={availableTags}
+        selectedTags={selectedTags}
+        onTagToggle={(tag) => setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))}
+        onClearTags={() => setSelectedTags([])}
+        onSearchChange={setSearchQuery}
+        onImport={() => setShowImportDeck(true)}
+        onNewCard={() => {
+          setEditingCard(null)
+          setShowCreateCard(true)
+        }}
+        onNewDeck={() => setShowCreateDeck(true)}
+        onDeckSettings={(deck) => setDeckSettingsState({ open: true, deckId: deck._id })}
       />
 
       {/* Modals */}
@@ -307,6 +241,20 @@ export default function CardHome() {
           }}
           onSaved={handleDeckSaved}
           initialData={editingDeck}
+        />
+      )}
+
+      {showImportDeck && (
+        <ImportDeckModal
+          open={showImportDeck}
+          onClose={() => setShowImportDeck(false)}
+          onImported={() => {
+            reloadDecks()
+            reloadCards()
+            apiCache.invalidate('cards:statistics')
+            onDeckChange?.()
+            setShowImportDeck(false)
+          }}
         />
       )}
 
@@ -367,6 +315,16 @@ export default function CardHome() {
           confirmText={t('cards.deck.delete')}
         />
       )}
+
+      <DeckSettingsModal
+        open={deckSettingsState.open}
+        onClose={() => setDeckSettingsState({ open: false, deckId: null })}
+        deckId={deckSettingsState.deckId}
+        onSaved={() => {
+          reloadDecks()
+          onDeckChange?.()
+        }}
+      />
 
       {/* Error Snackbar */}
       <Snackbar

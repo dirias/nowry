@@ -68,7 +68,7 @@
     },
     "startReview": "毎日の復習を始める",
     "reviewMsg": "復習が必要なカードが{{count}}枚あります",
-    "startStudying": "学習を始める →",
+    "startStudying": "学習を始める",
     "viewAll": "全{{count}}デッキを表示 →",
     "due": "期限",
     "allReviewed": "すべて復習済み",
@@ -83,7 +83,8 @@
     },
     "deckPill": {
       "ariaLabel": "{{name}}を学習",
-      "dueSoon": "{{hours}}時間後"
+      "dueSoon": "{{hours}}時間後",
+      "new": "新規"
     }
   },
   "auth": {
@@ -703,5 +704,42 @@
       "deleteFailed": "{{type}}の削除に失敗しました",
       "focusAreaLimit": "重点分野は3つまでです。追加するには1つ削除してください。"
     }
+  },
+  "deckSettings": {
+    "menuItem": "設定",
+    "openAria": "{{name}}の設定を開く",
+    "nav": { "study": "学習", "audio": "音声", "publishing": "公開" },
+    "study": {
+      "paceMode": "学習ペース",
+      "newPerDay": "1日の新規カード数",
+      "maxReviews": "1日の最大復習数",
+      "cardsPerDay": "枚 / 日",
+      "reviewsPerDay": "回 / 日"
+    },
+    "pace": {
+      "relaxed": "のんびり",
+      "balanced": "バランス",
+      "intensive": "集中",
+      "relaxedHint": "大きなデッキや気軽な学習に最適",
+      "balancedHint": "ほとんどの学習者に推奨",
+      "intensiveHint": "試験対策や短期集中に"
+    },
+    "audio": {
+      "front": "表面",
+      "back": "裏面",
+      "autoplay": "自動再生",
+      "voice": "音声",
+      "systemDefault": "システム既定",
+      "rate": "速度",
+      "pitch": "ピッチ"
+    },
+    "publish": {
+      "title": "デッキを公開する",
+      "description": "リンクを知っている人は誰でも閲覧・フォークできます",
+      "publicDescription": "公開説明",
+      "publishedOn": "{{date}}に公開"
+    },
+    "saving": "保存中...",
+    "saved": "保存済み"
   }
 }

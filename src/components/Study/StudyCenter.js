@@ -17,7 +17,8 @@ import {
   Tab,
   TabPanel,
   tabClasses,
-  Tooltip
+  Tooltip,
+  IconButton
 } from '@mui/joy'
 import {
   School,
@@ -27,30 +28,33 @@ import {
   TrendingUp,
   CalendarToday,
   ArrowForward,
-  LocalFireDepartment
+  LocalFireDepartment,
+  Settings
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
-import { cardsService, activityService } from '../../api/services'
+import { decksService } from '../../api/services'
 import CardHome from '../Cards/CardHome'
 import CardPreviewModal from '../Cards/CardPreviewModal'
+import DeckSettingsModal from './DeckSettingsModal'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [decks, setDecks] = useState([])
-  const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     dueToday: 0,
+    newToday: 0,
     reviewedToday: 0,
     totalActive: 0,
     streak: 0
   })
 
   const [previewState, setPreviewState] = useState({ open: false, title: '', cards: [], initialIndex: 0 })
+  const [settingsState, setSettingsState] = useState({ open: false, deckId: null })
+  const [settingsEverSaved, setSettingsEverSaved] = useState(false)
 
   // Swipeable Logic
   const [activeSectionIndex, setActiveSectionIndex] = useState(0)
@@ -84,42 +88,37 @@ export default function StudyCenter() {
     }
   }
 
-  const { cards: cardsData, loading: cardsLoading } = useCardData()
   const { statistics: statisticsData, loading: statsLoading } = useStatistics()
-  const { decks: hookDecks, loading: decksLoading } = useDeckData()
+  const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
   useEffect(() => {
-    if (cardsLoading || statsLoading || decksLoading) return
+    if (statsLoading || decksLoading) return
     fetchData()
-  }, [cardsLoading, statsLoading, decksLoading, cardsData, statisticsData, hookDecks])
+  }, [statsLoading, decksLoading, statisticsData, hookDecks])
 
   const fetchData = async () => {
     try {
       setLoading(true)
 
-      setDecks(hookDecks || [])
-      setCards(cardsData)
+      const resolvedDecks = hookDecks || []
+      setDecks(resolvedDecks)
 
-      // Use real stats from API - API returns data in summary object
-      const summary = statisticsData.summary || {}
-      const weeklyData = statisticsData.weekly_progress || []
+      // Derive global counts directly from deck data — single source of truth
+      const dueToday = resolvedDecks.reduce((sum, d) => sum + (d.due_cards || 0), 0)
+      const newToday = resolvedDecks.reduce((sum, d) => sum + (d.new_cards || 0), 0)
+      const totalActive = resolvedDecks.reduce((sum, d) => sum + (d.total_cards || 0), 0)
 
-      // Calculate due today cards
-      const now = new Date()
-      const dueCards = cardsData.filter((card) => {
-        if (!card.next_review) return true
-        const nextReview = new Date(card.next_review)
-        return nextReview <= now
-      })
-
-      // Calculate reviewed today from weekly progress (today is last item)
+      // Streak + weekly progress come exclusively from the statistics endpoint
+      const summary = statisticsData?.summary || {}
+      const weeklyData = statisticsData?.weekly_progress || []
       const todayData = weeklyData[weeklyData.length - 1]
       const reviewedToday = todayData ? todayData.cards || 0 : 0
 
       setStats({
-        dueToday: dueCards.length,
-        reviewedToday: reviewedToday,
-        totalActive: summary.total_cards || cardsData.length,
+        dueToday,
+        newToday,
+        reviewedToday,
+        totalActive,
         streak: summary.current_streak || 0
       })
 
@@ -135,68 +134,47 @@ export default function StudyCenter() {
   }
 
   const getDueCardsForDeck = (deckId) => {
-    const now = new Date()
-    return cards.filter((card) => {
-      const matchesDeck = card.deck_id === deckId || card.deck_id?._id === deckId
-      if (!matchesDeck) return false
-      if (!card.next_review) return true
-      const nextReview = new Date(card.next_review)
-      return nextReview <= now
-    }).length
+    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
+    return deck?.due_cards || 0
   }
 
-  // Average ease_factor across deck's cards, normalized to mastery %
-  // ease_factor range: 1.3 (min) → 2.5 (max) = 0% → 100%
   const getMasteryForDeck = (deckId) => {
-    const deckCards = cards.filter((c) => c.deck_id === deckId || c.deck_id?._id === deckId)
-    if (!deckCards.length) return 0
-    const reviewed = deckCards.filter((c) => c.repetitions > 0)
-    if (!reviewed.length) return 0
-    const avg = reviewed.reduce((sum, c) => sum + (c.ease_factor || 2.5), 0) / reviewed.length
-    return Math.round(((avg - 1.3) / (2.5 - 1.3)) * 100)
-  }
-
-  const getLastStudiedForDeck = (deckId) => {
-    const deckCards = cards.filter((c) => c.deck_id === deckId || c.deck_id?._id === deckId)
-    const dates = deckCards
-      .map((c) => c.last_reviewed)
-      .filter(Boolean)
-      .map((d) => new Date(d))
-    if (!dates.length) return null
-    return new Date(Math.max(...dates))
+    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
+    return deck?.mastery || 0
   }
 
   const getNewCardsForDeck = (deckId) => {
-    return cards.filter((c) => {
-      const matchesDeck = c.deck_id === deckId || c.deck_id?._id === deckId
-      return matchesDeck && c.repetitions === 0
-    }).length
+    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
+    return deck?.new_cards || 0
   }
 
-  const getNextReviewDateForDeck = (deckId) => {
-    const future = cards
-      .filter((c) => (c.deck_id === deckId || c.deck_id?._id === deckId) && c.next_review)
-      .map((c) => new Date(c.next_review))
-      .filter((d) => d > new Date())
-    if (!future.length) return null
-    return new Date(Math.min(...future))
+  const getLastStudiedForDeck = (deckId) => {
+    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
+    return deck?.last_studied ? new Date(deck.last_studied) : null
   }
-
-  const nonDueDecks = decks
-    .filter((d) => getDueCardsForDeck(d._id) === 0)
-    .sort((a, b) => getMasteryForDeck(b._id) - getMasteryForDeck(a._id))
 
   const isDeckDueSoon = (deckId) => {
-    const next = getNextReviewDateForDeck(deckId)
-    if (!next) return false
-    return next - new Date() < 24 * 60 * 60 * 1000
+    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
+    return deck?.is_due_soon || false
   }
 
   const getHoursUntilDue = (deckId) => {
-    const next = getNextReviewDateForDeck(deckId)
-    if (!next) return null
-    return Math.max(1, Math.round((next - new Date()) / (1000 * 60 * 60)))
+    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
+    return deck?.hours_until_due ?? null
   }
+
+  const decksNeedingReview = decks
+    .filter((d) => (d.due_cards || 0) > 0 || (d.new_cards || 0) > 0)
+    .sort((a, b) => {
+      // Prioritize due cards first, then new cards
+      const aTotal = (a.due_cards || 0) + (a.new_cards || 0)
+      const bTotal = (b.due_cards || 0) + (b.new_cards || 0)
+      return bTotal - aTotal
+    })
+
+  const nonDueDecks = decks
+    .filter((d) => (d.due_cards || 0) === 0 && (d.new_cards || 0) === 0)
+    .sort((a, b) => (b.mastery || 0) - (a.mastery || 0))
 
   const showYourDecks = !loading && nonDueDecks.length >= 1
 
@@ -294,15 +272,42 @@ export default function StudyCenter() {
           </Tooltip>
         </Stack>
 
-        {stats.dueToday > 0 && (
+        {(stats.dueToday > 0 || stats.newToday > 0) && (
           <Button
-            size='md'
-            variant='solid'
-            color='danger'
+            size='sm'
+            variant='outlined'
+            color='primary'
             onClick={() => navigate('/study/daily-review')}
-            sx={{ borderRadius: 'lg', px: 3, fontWeight: 700, boxShadow: 'sm' }}
+            endDecorator={<ArrowForward sx={{ fontSize: 13, opacity: 0.7, transition: 'transform 0.2s ease' }} />}
+            sx={{
+              borderRadius: 'xl',
+              px: 2,
+              py: 0.75,
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              letterSpacing: '0.01em',
+              borderColor: 'primary.outlinedBorder',
+              color: 'primary.plainColor',
+              bgcolor: 'primary.softBg',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                bgcolor: 'primary.softHoverBg',
+                borderColor: 'primary.solidBg',
+                transform: 'translateY(-1px)',
+                boxShadow: 'sm',
+                '& .MuiButton-endDecorator svg': { transform: 'translateX(3px)', opacity: 1 }
+              },
+              '&:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'primary.solidBg',
+                outlineOffset: '3px'
+              }
+            }}
           >
-            🎯 {t('study.startStudying')} ({stats.dueToday})
+            {t('study.startStudying')}
+            <Typography component='span' level='body-xs' sx={{ ml: 0.75, opacity: 0.6, fontWeight: 500 }}>
+              {stats.dueToday + stats.newToday}
+            </Typography>
           </Button>
         )}
       </Stack>
@@ -356,8 +361,8 @@ export default function StudyCenter() {
         </TabList>
 
         <TabPanel value={0} sx={{ p: 0 }}>
-          {/* Zone 1 — Decks Needing Review */}
-          {decks.filter((d) => getDueCardsForDeck(d._id) > 0).length === 0 ? (
+          {/* Zone 1 — Decks Needing Review / Attention */}
+          {decksNeedingReview.length === 0 ? (
             <Box
               role='status'
               aria-label={t('study.empty.allDone')}
@@ -397,120 +402,153 @@ export default function StudyCenter() {
               </Typography>
 
               <Grid container spacing={2} sx={{ mb: { xs: 4, md: 6 } }}>
-                {decks
-                  .filter((d) => getDueCardsForDeck(d._id) > 0)
-                  .map((deck) => {
-                    const dueCount = getDueCardsForDeck(deck._id)
-                    const mastery = getMasteryForDeck(deck._id)
-                    const lastStudied = getLastStudiedForDeck(deck._id)
-                    const newCards = getNewCardsForDeck(deck._id)
+                {decksNeedingReview.map((deck) => {
+                  const dueCount = getDueCardsForDeck(deck._id)
+                  const mastery = getMasteryForDeck(deck._id)
+                  const lastStudied = getLastStudiedForDeck(deck._id)
+                  const newCards = getNewCardsForDeck(deck._id)
+                  const isAllNew = deck.total_cards > 0 && deck.total_cards === (deck.new_cards || 0)
 
-                    let accentColor = 'primary'
-                    let IconComponent = Style
-                    if (deck.deck_type === 'quiz') {
-                      accentColor = 'warning'
-                      IconComponent = QuizIcon
-                    }
-                    if (deck.deck_type === 'visual') {
-                      accentColor = 'success'
-                      IconComponent = AccountTree
-                    }
+                  let accentColor = 'primary'
+                  let IconComponent = Style
+                  if (deck.deck_type === 'quiz') {
+                    accentColor = 'warning'
+                    IconComponent = QuizIcon
+                  }
+                  if (deck.deck_type === 'visual') {
+                    accentColor = 'success'
+                    IconComponent = AccountTree
+                  }
 
-                    return (
-                      <Grid xs={12} sm={6} lg={4} key={deck._id}>
-                        <Card
-                          variant='outlined'
-                          onClick={() => navigate(`/study/${deck._id}`)}
-                          sx={{
-                            cursor: 'pointer',
-                            height: '100%',
-                            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                            '&:hover': {
-                              boxShadow: 'md',
-                              transform: 'translateY(-2px)',
-                              borderColor: `${accentColor}.outlinedBorder`,
-                              '& .hover-arrow': { transform: 'translateX(4px)', opacity: 1 }
-                            }
-                          }}
-                        >
-                          <CardContent sx={{ p: 2.5, gap: 0 }}>
-                            {/* Header row */}
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Box
+                  return (
+                    <Grid xs={12} sm={6} lg={4} key={deck._id}>
+                      <Card
+                        variant='outlined'
+                        onClick={() => navigate(`/study/${deck._id}`)}
+                        sx={{
+                          cursor: 'pointer',
+                          height: '100%',
+                          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': {
+                            boxShadow: 'md',
+                            transform: 'translateY(-2px)',
+                            borderColor: `${accentColor}.outlinedBorder`,
+                            '& .hover-arrow': { transform: 'translateX(4px)', opacity: 1 },
+                            '& .settings-btn': { opacity: 1 }
+                          }
+                        }}
+                      >
+                        <CardContent sx={{ p: 2.5, gap: 0 }}>
+                          {/* Header row */}
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Box
+                                sx={{
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: 'md',
+                                  bgcolor: `${accentColor}.softBg`,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <IconComponent sx={{ fontSize: 18, color: `${accentColor}.plainColor` }} />
+                              </Box>
+                              <Box>
+                                <Typography level='title-sm' fontWeight={700} sx={{ lineHeight: 1.2 }}>
+                                  {deck.name}
+                                </Typography>
+                                {lastStudied && (
+                                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.25 }}>
+                                    {formatRelativeDate(lastStudied)}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Tooltip title={t('deckSettings.menuItem')} size='sm'>
+                                <IconButton
+                                  size='sm'
+                                  variant='plain'
+                                  color='neutral'
+                                  className='settings-btn'
+                                  aria-label={t('deckSettings.openAria', { name: deck.name })}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSettingsState({ open: true, deckId: deck._id })
+                                  }}
                                   sx={{
-                                    width: 36,
-                                    height: 36,
-                                    borderRadius: 'md',
-                                    bgcolor: `${accentColor}.softBg`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
+                                    opacity: { xs: 1, md: 0 },
+                                    transition: 'opacity 0.2s',
+                                    borderRadius: 'sm',
+                                    minWidth: 28,
+                                    minHeight: 28,
+                                    '&:focus-visible': {
+                                      opacity: 1,
+                                      outline: '2px solid',
+                                      outlineColor: 'primary.outlinedBorder'
+                                    }
                                   }}
                                 >
-                                  <IconComponent sx={{ fontSize: 18, color: `${accentColor}.plainColor` }} />
-                                </Box>
-                                <Box>
-                                  <Typography level='title-sm' fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                                    {deck.name}
-                                  </Typography>
-                                  {lastStudied && (
-                                    <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.25 }}>
-                                      {formatRelativeDate(lastStudied)}
-                                    </Typography>
-                                  )}
-                                </Box>
-                              </Box>
+                                  <Settings sx={{ fontSize: 15 }} />
+                                </IconButton>
+                              </Tooltip>
                               <ArrowForward
                                 className='hover-arrow'
                                 sx={{ color: 'text.tertiary', fontSize: 18, opacity: 0.4, transition: 'all 0.25s ease' }}
                               />
                             </Box>
+                          </Box>
 
-                            {/* Mastery bar */}
-                            <Box sx={{ mb: 2 }}>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
-                                <Typography level='body-xs' sx={{ color: 'text.tertiary', fontWeight: 600 }}>
-                                  {t('study.deck.mastery')}
-                                </Typography>
-                                <Typography level='body-xs' fontWeight={700} sx={{ color: `${accentColor}.plainColor` }}>
-                                  {mastery}%
-                                </Typography>
-                              </Box>
-                              <Box sx={{ height: 4, borderRadius: 'sm', bgcolor: 'background.level2', overflow: 'hidden' }}>
-                                <Box
-                                  sx={{
-                                    height: '100%',
-                                    width: `${mastery}%`,
-                                    borderRadius: 'sm',
-                                    bgcolor: `${accentColor}.solidBg`,
-                                    transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-                                  }}
-                                />
-                              </Box>
-                            </Box>
-
-                            {/* Footer stats */}
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Stack direction='row' spacing={1.5}>
-                                <Chip size='sm' color='danger' variant='soft'>
-                                  {t('study.dueCount', { count: dueCount })}
-                                </Chip>
-                                {newCards > 0 && (
-                                  <Chip size='sm' color='neutral' variant='soft'>
-                                    {t('study.deck.newCount', { count: newCards })}
-                                  </Chip>
-                                )}
-                              </Stack>
-                              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                                {t(`study.types.${deck.deck_type}s`) || deck.deck_type}
+                          {/* Mastery bar */}
+                          <Box sx={{ mb: 2 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
+                              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontWeight: 600 }}>
+                                {t('study.deck.mastery')}
+                              </Typography>
+                              <Typography
+                                level='body-xs'
+                                fontWeight={700}
+                                sx={{ color: isAllNew ? 'text.tertiary' : `${accentColor}.plainColor` }}
+                              >
+                                {isAllNew ? t('study.deckPill.new') : `${mastery}%`}
                               </Typography>
                             </Box>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    )
-                  })}
+                            <Box sx={{ height: 4, borderRadius: 'sm', bgcolor: 'background.level2', overflow: 'hidden' }}>
+                              <Box
+                                sx={{
+                                  height: '100%',
+                                  width: isAllNew ? '100%' : `${mastery}%`,
+                                  borderRadius: 'sm',
+                                  bgcolor: isAllNew ? 'background.level3' : `${accentColor}.solidBg`,
+                                  transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                                }}
+                              />
+                            </Box>
+                          </Box>
+
+                          {/* Footer stats */}
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Stack direction='row' spacing={1.5}>
+                              <Chip size='sm' color='danger' variant='soft'>
+                                {t('study.dueCount', { count: dueCount })}
+                              </Chip>
+                              {newCards > 0 && (
+                                <Chip size='sm' color='neutral' variant='soft'>
+                                  {t('study.deck.newCount', { count: newCards })}
+                                </Chip>
+                              )}
+                            </Stack>
+                            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                              {t(`study.types.${deck.deck_type}s`) || deck.deck_type}
+                            </Typography>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  )
+                })}
               </Grid>
             </>
           )}
@@ -519,7 +557,7 @@ export default function StudyCenter() {
           {showYourDecks && (
             <Box sx={{ mb: { xs: 4, md: 6 } }}>
               <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.tertiary', mb: 1.5 }}>
-                {t('study.sections.yourDecks')}
+                {decksNeedingReview.length > 0 ? t('study.sections.otherDecks', 'Other decks') : t('study.sections.yourDecks')}
               </Typography>
               <Box
                 sx={{
@@ -539,6 +577,7 @@ export default function StudyCenter() {
                   const mastery = getMasteryForDeck(deck._id)
                   const dueSoon = isDeckDueSoon(deck._id)
                   const hours = getHoursUntilDue(deck._id)
+                  const isAllNew = deck.total_cards > 0 && deck.total_cards === (deck.new_cards || 0)
                   let accentColor = 'primary'
                   let IconComponent = Style
                   if (deck.deck_type === 'quiz') {
@@ -555,9 +594,21 @@ export default function StudyCenter() {
                       key={deck._id}
                       role='button'
                       aria-label={t('study.deckPill.ariaLabel', { name: deck.name })}
-                      onClick={() => {
-                        const deckCards = cards.filter((c) => c.deck_id === deck._id || c.deck_id?._id === deck._id)
-                        setPreviewState({ open: true, title: deck.name, cards: deckCards, initialIndex: 0 })
+                      onClick={async () => {
+                        // Only navigate directly to study for decks never studied before (fresh import/creation).
+                        // Partially or fully studied decks open the preview modal instead.
+                        const neverStudied = !deck.last_studied && (deck.new_cards || 0) > 0
+                        if (neverStudied) {
+                          navigate(`/study/${deck._id}`)
+                          return
+                        }
+                        setPreviewState({ open: true, title: deck.name, cards: [], initialIndex: 0 })
+                        try {
+                          const result = await decksService.getCards(deck._id, 0, 200)
+                          setPreviewState((prev) => ({ ...prev, cards: result.items || [] }))
+                        } catch {
+                          // preview stays with empty cards
+                        }
                       }}
                       sx={{
                         width: 140,
@@ -608,8 +659,8 @@ export default function StudyCenter() {
                         <Box
                           sx={{
                             height: '100%',
-                            width: `${mastery}%`,
-                            bgcolor: `${accentColor}.solidBg`,
+                            width: isAllNew ? '100%' : `${mastery}%`,
+                            bgcolor: isAllNew ? 'background.level3' : `${accentColor}.solidBg`,
                             borderRadius: 'sm',
                             transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
                           }}
@@ -619,7 +670,7 @@ export default function StudyCenter() {
                       {/* Row 3: Mastery % + due soon hint */}
                       <Stack direction='row' justifyContent='space-between' alignItems='center'>
                         <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                          {mastery}%
+                          {isAllNew ? t('study.deckPill.new') : `${mastery}%`}
                         </Typography>
                         {dueSoon && hours !== null && (
                           <Typography level='body-xs' sx={{ color: 'warning.plainColor', fontWeight: 600 }}>
@@ -739,7 +790,7 @@ export default function StudyCenter() {
 
         <TabPanel value={1} sx={{ p: 0 }}>
           <Box sx={{ mt: -2 }}>
-            <CardHome />
+            <CardHome onDeckChange={reloadDecks} />
           </Box>
         </TabPanel>
       </Tabs>
@@ -750,6 +801,13 @@ export default function StudyCenter() {
         title={previewState.title}
         cards={previewState.cards}
         initialIndex={previewState.initialIndex}
+      />
+
+      <DeckSettingsModal
+        open={settingsState.open}
+        onClose={() => setSettingsState({ open: false, deckId: null })}
+        deckId={settingsState.deckId}
+        onSaved={reloadDecks}
       />
     </Container>
   )

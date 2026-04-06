@@ -50,5 +50,13 @@ export function useStatistics() {
     }
   }, [])
 
-  return { statistics, loading, error }
+  const reload = () => {
+    apiCache.invalidate(CACHE_KEY)
+    apiCache
+      .get(CACHE_KEY, CACHE_TTL, () => cardsService.getStatistics())
+      .then((data) => setStatistics(data))
+      .catch((err) => console.error('[useStatistics] Reload error:', err))
+  }
+
+  return { statistics, loading, error, reload }
 }

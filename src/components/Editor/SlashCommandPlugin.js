@@ -604,16 +604,16 @@ export default function SlashCommandPlugin() {
                 onClick={() => executeCommand(cmd)}
                 sx={{
                   cursor: 'pointer',
-                  px: 2,
-                  py: 1.5,
+                  px: 1.5,
+                  py: 0.875,
                   bgcolor: isSelected ? 'neutral.softBg' : 'transparent',
                   '&:hover': {
                     bgcolor: 'neutral.softHoverBg'
                   },
                   transition: 'background-color 0.1s ease',
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 1.5
+                  alignItems: 'center',
+                  gap: 1
                 }}
               >
                 <Box
@@ -621,13 +621,16 @@ export default function SlashCommandPlugin() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 20,
-                    height: 20,
-                    mt: 0.25,
-                    color: isSelected ? 'primary.500' : 'text.tertiary'
+                    width: 28,
+                    height: 28,
+                    borderRadius: 'sm',
+                    flexShrink: 0,
+                    bgcolor: isSelected ? 'primary.softBg' : 'background.level1',
+                    color: isSelected ? 'primary.plainColor' : 'text.secondary',
+                    transition: 'background-color 0.1s ease'
                   }}
                 >
-                  <Icon size={18} />
+                  <Icon size={15} />
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography

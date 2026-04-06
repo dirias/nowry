@@ -24,7 +24,8 @@ export const ENDPOINTS = {
     create: '/decks',
     update: (id) => `/decks/${id}`,
     delete: (id) => `/decks/${id}`,
-    byId: (id) => `/decks/${id}`
+    byId: (id) => `/decks/${id}`,
+    cards: (id) => `/decks/${id}/cards`
   },
   annualPlan: {
     base: '/annual-plan',

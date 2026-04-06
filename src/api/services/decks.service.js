@@ -39,6 +39,22 @@ export const decksService = {
   },
 
   /**
+   * Update deck settings (config, voice_settings, is_public, public_metadata)
+   */
+  async updateSettings(id, settings) {
+    const { data } = await apiClient.patch(`/decks/${id}/settings`, settings)
+    return data
+  },
+
+  /**
+   * Get cards for a deck (paginated)
+   */
+  async getCards(id, skip = 0, limit = 200) {
+    const { data } = await apiClient.get(`${ENDPOINTS.decks.cards(id)}?skip=${skip}&limit=${limit}`)
+    return data
+  },
+
+  /**
    * Delete a deck
    */
   async delete(id) {

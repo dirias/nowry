@@ -87,7 +87,7 @@ const TextMenu = forwardRef(({ onOptionClick, style, activeFormats = {}, onLinkE
             autoFocus
             size='sm'
             variant='plain'
-            placeholder='Paste or type a link...'
+            placeholder={t('editor.format.linkPlaceholder', 'Paste or type a link…')}
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
             onKeyDown={(e) => {

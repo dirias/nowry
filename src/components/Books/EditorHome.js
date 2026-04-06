@@ -33,7 +33,7 @@ export default function EditorHome() {
 
   // Flow content state (TOC and reading stats)
   const [tocData, setTocData] = useState([])
-  const [readingTime, setReadingTime] = useState(0)
+  const [readingStats, setReadingStats] = useState({ wordCount: 0, readingTime: 0 })
 
   // refs to prevent redundant fetches and handle cleanup
   const fetchedIdRef = useRef(null)
@@ -686,13 +686,13 @@ export default function EditorHome() {
               overflow: 'hidden'
             }}
           >
-            <ContentNavigator toc={tocData} readingTime={readingTime} />
+            <ContentNavigator toc={tocData} readingTime={readingStats.readingTime} />
           </Box>
 
           {/* 📋 Sidebar (Mobile Drawer) */}
           <Drawer open={showMobileSidebar} onClose={() => setShowMobileSidebar(false)} size='sm'>
             <Box sx={{ height: '100%', overflow: 'hidden', pt: 2 }}>
-              <ContentNavigator toc={tocData} readingTime={readingTime} />
+              <ContentNavigator toc={tocData} readingTime={readingStats.readingTime} />
             </Box>
           </Drawer>
 
@@ -726,9 +726,43 @@ export default function EditorHome() {
               onFocus={(editor) => setFocusedEditor(editor)}
               onPageCountChange={handlePageUpdate}
               onTOCChange={setTocData}
-              onReadingStatsChange={(stats) => setReadingTime(stats.readingTime || 0)}
+              onReadingStatsChange={(stats) => setReadingStats({ wordCount: stats.wordCount || 0, readingTime: stats.readingTime || 0 })}
             />
           </Box>
+
+          {/* Floating word count badge */}
+          {readingStats.wordCount > 0 && (
+            <Box
+              sx={{
+                position: 'fixed',
+                bottom: { xs: 16, md: 24 },
+                right: { xs: 16, md: 32 },
+                zIndex: 100,
+                display: { xs: 'none', md: 'flex' },
+                alignItems: 'center',
+                gap: 1,
+                px: 1.5,
+                py: 0.625,
+                borderRadius: 'xl',
+                bgcolor: 'background.surface',
+                border: '1px solid',
+                borderColor: 'divider',
+                boxShadow: 'sm',
+                opacity: 0.75,
+                transition: 'opacity 0.2s ease',
+                '&:hover': { opacity: 1 },
+                pointerEvents: 'none'
+              }}
+            >
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' }}>
+                {readingStats.wordCount.toLocaleString()} {t('editor.stats.words', 'words')}
+              </Typography>
+              <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: 'text.tertiary', opacity: 0.4 }} />
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                {readingStats.readingTime} {t('editor.stats.minRead', 'min read')}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
     </>

@@ -13,7 +13,7 @@ import CalendarModal from '../../Calendar/CalendarModal'
 import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '../../../context/AuthContext'
 import { cardsService, decksService } from '../../../api/services'
-import { useCardData } from '../../../hooks/useCardData'
+import { useDeckData } from '../../../hooks/useDeckData'
 
 function Home() {
   const { user } = useAuth()
@@ -30,21 +30,16 @@ function Home() {
     return phraseList[Math.floor(Math.random() * phraseList.length)]
   }, [t])
 
-  const { cards, loading: cardsLoading } = useCardData()
+  const { decks, loading: decksLoading } = useDeckData()
 
   useEffect(() => {
-    if (cardsLoading) return
+    if (decksLoading) return
 
-    // Filter cards that are due today
-    const now = new Date()
-    const dueCards = cards.filter((card) => {
-      if (!card.next_review) return true // New cards
-      const nextReview = new Date(card.next_review)
-      return nextReview <= now
-    })
+    // Use deck-level stats which are already budget-aware and capped by the backend
+    const totalStudy = decks.reduce((acc, deck) => acc + (deck.due_cards || 0) + (deck.new_cards || 0), 0)
 
-    setStudyStats({ dueCount: dueCards.length, loading: false })
-  }, [cards, cardsLoading])
+    setStudyStats({ dueCount: totalStudy, loading: false })
+  }, [decks, decksLoading])
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 3 } }}>

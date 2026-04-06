@@ -644,3 +644,17 @@ ol.editor-list-ol {
     page-break-after: avoid;
   }
 }
+
+/* ====== Reading Mode — editor is locked (contenteditable=false) ====== */
+.editor-content[contenteditable='false'] {
+  max-width: 680px;
+  line-height: 1.85;
+  font-size: 1.0625rem;
+  color: var(--joy-palette-text-primary);
+  cursor: default;
+}
+
+.editor-content[contenteditable='false'] .editor-paragraph {
+  line-height: 1.85;
+  margin: 0.875em 0;
+}

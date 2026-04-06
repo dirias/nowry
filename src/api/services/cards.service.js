@@ -27,10 +27,26 @@ export const cardsService = {
   },
 
   /**
-   * Get all study cards
+   * Get paginated study cards
+   * @param {number} skip - Offset for pagination
+   * @param {number} limit - Number of cards to fetch
+   * @param {string[]} tags - Optional tag filters (OR logic on backend)
+   * @param {string} search - Optional search query (server-side, title/content/tags/deck)
    */
-  async getAll() {
-    const { data } = await apiClient.get(ENDPOINTS.studyCards.all)
+  async getAll(skip = 0, limit = 50, tags = [], search = '') {
+    const params = new URLSearchParams({ skip, limit })
+    tags.forEach((t) => params.append('tags', t))
+    if (search) params.append('search', search)
+    const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
+    return data
+  },
+
+  /**
+   * Get all tags used across the user's cards with their counts
+   * @returns {Promise<Array<{tag: string, count: number}>>}
+   */
+  async getTags() {
+    const { data } = await apiClient.get('/study-cards/tags')
     return data
   },
 
@@ -66,6 +82,17 @@ export const cardsService = {
   async review(id, grade) {
     const { data } = await apiClient.post(`/study-cards/${id}/review?grade=${grade}`)
     return data
+  },
+
+  /**
+   * Get due cards for a specific deck directly from the API
+   * @param {string} deckId - Deck ID to fetch due cards for
+   * @returns {Promise<Array>} Array of due study cards
+   */
+  async getDueCards(deckId) {
+    const params = new URLSearchParams({ deck_id: deckId, due_only: 'true', limit: 500 })
+    const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
+    return data.cards || []
   },
 
   /**

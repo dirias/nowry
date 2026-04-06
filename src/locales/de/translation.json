@@ -68,7 +68,7 @@
     },
     "startReview": "Beginne deine tägliche Überprüfung",
     "reviewMsg": "Du hast {{count}} Karten zur Überprüfung bereit",
-    "startStudying": "Lernen beginnen →",
+    "startStudying": "Lernen beginnen",
     "viewAll": "Alle {{count}} Decks anzeigen →",
     "due": "fällig",
     "allReviewed": "Alles überprüft",
@@ -83,7 +83,8 @@
     },
     "deckPill": {
       "ariaLabel": "Lernen {{name}}",
-      "dueSoon": "in {{hours}}h"
+      "dueSoon": "in {{hours}}h",
+      "new": "Neu"
     }
   },
   "auth": {
@@ -708,5 +709,42 @@
       "deleteFailed": "Löschen von {{type}} fehlgeschlagen",
       "focusAreaLimit": "Sie können nur 3 Fokusbereiche haben. Löschen Sie einen, um einen anderen hinzuzufügen."
     }
+  },
+  "deckSettings": {
+    "menuItem": "Einstellungen",
+    "openAria": "Einstellungen für {{name}} öffnen",
+    "nav": { "study": "Lernen", "audio": "Audio", "publishing": "Veröffentlichen" },
+    "study": {
+      "paceMode": "Lerntempo",
+      "newPerDay": "Neue Karten pro Tag",
+      "maxReviews": "Max. Wiederholungen pro Tag",
+      "cardsPerDay": "Karten / Tag",
+      "reviewsPerDay": "Wiederholungen / Tag"
+    },
+    "pace": {
+      "relaxed": "Entspannt",
+      "balanced": "Ausgewogen",
+      "intensive": "Intensiv",
+      "relaxedHint": "Ideal für entspanntes Lernen oder große Stapel",
+      "balancedHint": "Für die meisten Lernenden empfohlen",
+      "intensiveHint": "Zur Prüfungsvorbereitung"
+    },
+    "audio": {
+      "front": "Vorderseite",
+      "back": "Rückseite",
+      "autoplay": "Autoplay",
+      "voice": "Stimme",
+      "systemDefault": "Systemstandard",
+      "rate": "Geschwindigkeit",
+      "pitch": "Tonhöhe"
+    },
+    "publish": {
+      "title": "Stapel öffentlich machen",
+      "description": "Jeder mit dem Link kann diesen Stapel ansehen und kopieren",
+      "publicDescription": "Öffentliche Beschreibung",
+      "publishedOn": "Veröffentlicht am {{date}}"
+    },
+    "saving": "Speichern...",
+    "saved": "Gespeichert"
   }
 }
