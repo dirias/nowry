@@ -148,19 +148,13 @@ export default function StudySession() {
       setLoading(true)
       let reviewCards = []
 
-      const now = new Date()
-
       if (deckId === 'daily-review') {
-        // Global Review: Get ALL cards that are due
-        reviewCards = cardsData.filter((card) => {
-          if (!card.next_review) return true
-          const nextReview = new Date(card.next_review)
-          return nextReview <= now
-        })
+        // Global Review: backend aggregates per-deck budgets and locks today's
+        // selection via `introduced_at` so the same cards reappear across sessions.
+        reviewCards = await cardsService.getDailyReviewCards()
       } else {
         // Deck Review: Fetch due cards directly from API (avoids pagination truncation)
-        const dueCards = await cardsService.getDueCards(deckId)
-        reviewCards = dueCards
+        reviewCards = await cardsService.getDueCards(deckId)
       }
 
       setCards(reviewCards)

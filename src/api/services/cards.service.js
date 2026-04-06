@@ -96,6 +96,17 @@ export const cardsService = {
   },
 
   /**
+   * Get today's locked daily review session across all active decks.
+   * The selection is sticky for the day on the backend (introduced_at stamp),
+   * so the same cards reappear across sessions until graded.
+   * @returns {Promise<Array>} Array of cards (new + due reviews) for today
+   */
+  async getDailyReviewCards() {
+    const { data } = await apiClient.get('/study-cards/daily-review')
+    return data.cards || []
+  },
+
+  /**
    * Get study statistics
    */
   async getStatistics() {

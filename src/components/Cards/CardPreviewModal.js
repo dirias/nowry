@@ -160,7 +160,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
             </Typography>
             <Stack direction='row' alignItems='center' spacing={0.75}>
               <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                {t('cards.preview.cardOf', {
+                {t('cards.previewModal.cardOf', {
                   current: currentIndex + 1,
                   total: cards.length,
                   defaultValue: `${currentIndex + 1} / ${cards.length}`
@@ -250,7 +250,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                     {isFlipped ? (
                       <Box>
                         <Typography level='title-sm' sx={{ mb: 1.5, color: 'text.secondary' }}>
-                          {t('cards.preview.description', { defaultValue: 'Description' })}
+                          {t('cards.previewModal.description', { defaultValue: 'Description' })}
                         </Typography>
                         <Typography level='body-md' sx={{ whiteSpace: 'pre-wrap' }}>
                           {currentCard.content || t('cards.manage_content.noContent')}
@@ -403,7 +403,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                 <Flip sx={{ fontSize: 13 }} />
                 <Typography level='body-xs'>
                   {isFlipped ? t('common.back') : t('common.front')} ·{' '}
-                  {isMobileHint ? t('cards.session.hints.tapFlip') : t('cards.preview.clickToFlip')}
+                  {isMobileHint ? t('cards.session.hints.tapFlip') : t('cards.previewModal.clickToFlip')}
                 </Typography>
               </Stack>
 

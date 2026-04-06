@@ -699,11 +699,9 @@ export default function ManageContent({
                             startDecorator={<School sx={{ fontSize: 16 }} />}
                             sx={{ fontSize: '0.75rem', fontWeight: 600, px: 1.5, display: { xs: 'none', sm: 'flex' } }}
                           >
-                            {deck.due_cards > 0
-                              ? t('cards.studyDue', { count: deck.due_cards })
-                              : deck.new_cards > 0
-                                ? t('cards.studyNew', { count: deck.new_cards })
-                                : t('cards.review', 'Review')}
+                            {(deck.due_cards || 0) + (deck.new_cards || 0) > 0
+                              ? t('cards.studyTotal', { count: (deck.due_cards || 0) + (deck.new_cards || 0) })
+                              : t('cards.review', 'Review')}
                           </Button>
                         )}
 

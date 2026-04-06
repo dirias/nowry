@@ -712,8 +712,9 @@
     "confirmDeleteDeck": "Are you sure you want to delete \"{{name}}\"?",
     "confirmDeleteCard": "Are you sure you want to delete this card?",
     "deleteCardError": "Failed to delete card. Please try again.",
-    "studyDue": "Study ({{count}})",
+    "studyDue": "Review ({{count}})",
     "studyNew": "Learn ({{count}} new)",
+    "studyTotal": "Study ({{count}})",
     "preview": "Preview",
     "noCardsYet": "No cards yet",
     "dueLabel": "{{count}} due",
@@ -799,7 +800,7 @@
       "save": "Save deck",
       "create": "Create deck"
     },
-    "preview": {
+    "previewModal": {
       "cardOf": "{{current}} / {{total}}",
       "clickToFlip": "Click to flip",
       "description": "Description"
