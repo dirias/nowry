@@ -10,7 +10,8 @@
     "search": "Buscar",
     "settings": "Configuración",
     "profile": "Perfil",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "toggleTheme": "Cambiar tema"
   },
   "news": {
     "title": "Últimas Noticias",
@@ -39,10 +40,40 @@
     "books": "Libros",
     "about": "Acerca de",
     "contact": "Contacto",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "getStarted": "Comenzar",
+    "drawer": {
+      "menu": "Menú"
+    }
   },
   "footer": {
-    "rights": "Todos los derechos reservados."
+    "rights": "Todos los derechos reservados.",
+    "brand": {
+      "tagline": "La manera más inteligente de aprender."
+    },
+    "links": {
+      "title": "Producto",
+      "browse": "Explorar",
+      "about": "Acerca de",
+      "planner": "Planificador Anual"
+    },
+    "support": {
+      "title": "Soporte",
+      "email": "support@nowry.app",
+      "contact": "Contáctanos"
+    },
+    "social": {
+      "title": "Síguenos",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "x": "X (Twitter)"
+    },
+    "theme": {
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "bugReport": "Reportar error"
   },
   "routes": {
     "terms": "/terminos",
@@ -97,6 +128,8 @@
     "email": "Correo electrónico",
     "password": "Contraseña",
     "username": "Nombre de usuario",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "usernamePlaceholder": "juanlopez",
     "confirmPassword": "Confirmar Contraseña",
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "signIn": "Iniciar Sesión",
@@ -170,29 +203,51 @@
   "landing": {
     "hero": {
       "title": "Aprende Mejor,\nNo Más Duro",
-      "subtitle": "Transforma tus hábitos de estudio con tarjetas de memoria impulsadas por IA, libros inteligentes y repetición espaciada. Comienza a aprender de manera más efectiva hoy.",
+      "subtitle": "La app de estudio todo en uno con libros inteligentes, tarjetas con IA y repetición espaciada — para quienes se toman el aprendizaje en serio.",
       "ctaPrimary": "Empezar Gratis",
-      "ctaSecondary": "Saber Más"
+      "ctaSecondary": "Explorar funciones"
+    },
+    "howItWorks": {
+      "title": "Cómo funciona Nowry",
+      "subtitle": "De cero a estudiar en tres pasos",
+      "step1": {
+        "title": "Construye tu biblioteca",
+        "desc": "Agrega libros, escribe notas y crea mazos de tarjetas con tu propio material"
+      },
+      "step2": {
+        "title": "Estudia con ciencia",
+        "desc": "Nuestro motor de repetición espaciada programa cada repaso en el momento justo"
+      },
+      "step3": {
+        "title": "Planifica y registra",
+        "desc": "Establece metas anuales y conéctalas a lo que estudias cada día"
+      }
     },
     "features": {
       "title": "Todo lo que Necesitas para Destacar",
       "subtitle": "Funciones poderosas diseñadas para hacer el aprendizaje agradable y efectivo",
       "smartBooks": {
         "title": "Libros Inteligentes",
-        "desc": "Crea, importa y organiza tus materiales de aprendizaje en un espacio hermoso"
+        "desc": "Escribe notas, resalta párrafos y genera tarjetas de cualquier pasaje con un toque"
       },
       "aiPowered": {
         "title": "Impulsado por IA",
-        "desc": "Tarjetas de memoria inteligentes y recomendaciones de estudio adaptadas a tu estilo de aprendizaje"
+        "desc": "La IA sugiere tarjetas a partir de tus resaltados y se adapta a tus áreas débiles"
       },
       "spacedRepetition": {
         "title": "Repetición Espaciada",
-        "desc": "Técnicas de aprendizaje probadas que optimizan la retención y te ahorran tiempo"
+        "desc": "Califica cada tarjeta como Fácil, Bien, Difícil o Fallida — el algoritmo hace el resto"
       },
       "trackProgress": {
         "title": "Seguimiento del Progreso",
-        "desc": "Análisis visuales para monitorear tu crecimiento y celebrar logros"
+        "desc": "Ve tus rachas, tasa de dominio y tiempo de estudio de un vistazo"
       }
+    },
+    "cta": {
+      "title": "Sé parte desde el principio",
+      "subtitle": "Nowry está en acceso anticipado. Únete ahora y ayuda a dar forma al producto.",
+      "primary": "Empieza gratis hoy",
+      "social": "Síguenos"
     },
     "social": {
       "title": "Comienza a Aprender Hoy",
@@ -974,7 +1029,11 @@
   "deckSettings": {
     "menuItem": "Configuración",
     "openAria": "Abrir configuración de {{name}}",
-    "nav": { "study": "Estudio", "audio": "Audio", "publishing": "Publicación" },
+    "nav": {
+      "study": "Estudio",
+      "audio": "Audio",
+      "publishing": "Publicación"
+    },
     "study": {
       "paceMode": "Ritmo de estudio",
       "newPerDay": "Tarjetas nuevas por día",

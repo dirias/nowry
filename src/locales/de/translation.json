@@ -9,7 +9,8 @@
     "search": "Suchen",
     "settings": "Einstellungen",
     "profile": "Profil",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "toggleTheme": "Thema wechseln"
   },
   "news": {
     "title": "Aktuelle Nachrichten",
@@ -38,10 +39,40 @@
     "books": "Bücher",
     "about": "Über uns",
     "contact": "Kontakt",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "getStarted": "Loslegen",
+    "drawer": {
+      "menu": "Menü"
+    }
   },
   "footer": {
-    "rights": "Alle Rechte vorbehalten."
+    "rights": "Alle Rechte vorbehalten.",
+    "brand": {
+      "tagline": "Der intelligentere Weg zu lernen."
+    },
+    "links": {
+      "title": "Produkt",
+      "browse": "Erkunden",
+      "about": "Über uns",
+      "planner": "Jahresplaner"
+    },
+    "support": {
+      "title": "Support",
+      "email": "support@nowry.app",
+      "contact": "Kontakt"
+    },
+    "social": {
+      "title": "Folge uns",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "x": "X (Twitter)"
+    },
+    "theme": {
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
+    "bugReport": "Fehler melden"
   },
   "routes": {
     "terms": "/nutzungsbedingungen",
@@ -95,6 +126,8 @@
     "email": "E-Mail",
     "password": "Passwort",
     "username": "Benutzername",
+    "emailPlaceholder": "du@beispiel.de",
+    "usernamePlaceholder": "maxmustermann",
     "confirmPassword": "Passwort bestätigen",
     "forgotPassword": "Passwort vergessen?",
     "signIn": "Anmelden",
@@ -168,29 +201,51 @@
   "landing": {
     "hero": {
       "title": "Besser Lernen,\nNicht Härter",
-      "subtitle": "Verwandeln Sie Ihre Lerngewohnheiten mit KI-gesteuerten Lernkarten, intelligenten Büchern und verteilter Wiederholung. Beginnen Sie heute effektiver zu lernen.",
+      "subtitle": "Die All-in-One-Lern-App mit intelligenten Büchern, KI-Karteikarten und Spaced Repetition — für Menschen, die Lernen ernst nehmen.",
       "ctaPrimary": "Kostenlos Starten",
-      "ctaSecondary": "Mehr Erfahren"
+      "ctaSecondary": "Funktionen erkunden"
+    },
+    "howItWorks": {
+      "title": "Wie Nowry funktioniert",
+      "subtitle": "In drei Schritten vom Anfang bis zum Lernen",
+      "step1": {
+        "title": "Bibliothek aufbauen",
+        "desc": "Bücher hinzufügen, Notizen schreiben und Karteikarten aus eigenem Material erstellen"
+      },
+      "step2": {
+        "title": "Wissenschaftlich lernen",
+        "desc": "Unser Spaced-Repetition-System plant jede Wiederholung zum optimalen Zeitpunkt"
+      },
+      "step3": {
+        "title": "Planen und verfolgen",
+        "desc": "Jahresziele setzen und mit dem täglichen Lernen verknüpfen"
+      }
     },
     "features": {
       "title": "Alles, Was Sie zum Erfolg Brauchen",
       "subtitle": "Leistungsstarke Funktionen, die das Lernen angenehm und effektiv machen",
       "smartBooks": {
         "title": "Intelligente Bücher",
-        "desc": "Erstellen, importieren und organisieren Sie Ihre Lernmaterialien in einem schönen Raum"
+        "desc": "Notizen schreiben, Passagen markieren und Karteikarten aus beliebigen Absätzen generieren"
       },
       "aiPowered": {
         "title": "KI-Gesteuert",
-        "desc": "Intelligente Lernkarten und Studienempfehlungen, angepasst an Ihren Lernstil"
+        "desc": "KI schlägt Karteikarten aus Ihren Markierungen vor und passt sich Ihren Schwächen an"
       },
       "spacedRepetition": {
         "title": "Verteilte Wiederholung",
-        "desc": "Bewährte Lerntechniken, die die Erinnerung optimieren und Zeit sparen"
+        "desc": "Jede Karte als Einfach, Gut, Schwer oder Verpasst bewerten — der Algorithmus erledigt den Rest"
       },
       "trackProgress": {
         "title": "Fortschritt Verfolgen",
-        "desc": "Visuelle Analysen zur Überwachung Ihres Wachstums und Feier von Erfolgen"
+        "desc": "Serien, Beherrschungsrate und Lernzeit auf einen Blick sehen"
       }
+    },
+    "cta": {
+      "title": "Teil von etwas Besonderem sein",
+      "subtitle": "Nowry befindet sich im Early Access. Mach jetzt mit und gestalte das Produkt.",
+      "primary": "Heute kostenlos starten",
+      "social": "Folge unserer Reise"
     },
     "social": {
       "title": "Beginnen Sie Heute zu Lernen",
@@ -713,7 +768,11 @@
   "deckSettings": {
     "menuItem": "Einstellungen",
     "openAria": "Einstellungen für {{name}} öffnen",
-    "nav": { "study": "Lernen", "audio": "Audio", "publishing": "Veröffentlichen" },
+    "nav": {
+      "study": "Lernen",
+      "audio": "Audio",
+      "publishing": "Veröffentlichen"
+    },
     "study": {
       "paceMode": "Lerntempo",
       "newPerDay": "Neue Karten pro Tag",

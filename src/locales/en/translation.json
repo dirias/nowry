@@ -23,7 +23,8 @@
     "deleteModal": {
       "whatWillHappen": "What will happen:",
       "recoveryNotice": "Data can be recovered within 30 days by contacting support"
-    }
+    },
+    "toggleTheme": "Toggle theme"
   },
   "news": {
     "title": "Latest News",
@@ -52,10 +53,40 @@
     "books": "Books",
     "about": "About",
     "contact": "Contact",
-    "settings": "Settings"
+    "settings": "Settings",
+    "getStarted": "Get Started",
+    "drawer": {
+      "menu": "Menu"
+    }
   },
   "footer": {
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "brand": {
+      "tagline": "The smarter way to learn."
+    },
+    "links": {
+      "title": "Product",
+      "browse": "Browse",
+      "about": "About",
+      "planner": "Annual Planner"
+    },
+    "support": {
+      "title": "Support",
+      "email": "support@nowry.app",
+      "contact": "Contact Us"
+    },
+    "social": {
+      "title": "Follow Us",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "x": "X (Twitter)"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "bugReport": "Report Bug"
   },
   "routes": {
     "terms": "/terms",
@@ -132,6 +163,8 @@
     "email": "Email",
     "password": "Password",
     "username": "Username",
+    "emailPlaceholder": "you@example.com",
+    "usernamePlaceholder": "johndoe",
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot password?",
     "signIn": "Sign In",
@@ -205,29 +238,51 @@
   "landing": {
     "hero": {
       "title": "Learn Smarter,\nNot Harder",
-      "subtitle": "Transform your study habits with AI-powered flashcards, smart books, and spaced repetition. Start learning more effectively today.",
+      "subtitle": "The all-in-one study app with smart books, AI-powered flashcards, and spaced repetition — built for people who take learning seriously.",
       "ctaPrimary": "Start Learning Free",
-      "ctaSecondary": "Learn More"
+      "ctaSecondary": "Explore Features"
+    },
+    "howItWorks": {
+      "title": "How Nowry Works",
+      "subtitle": "From zero to studying in three steps",
+      "step1": {
+        "title": "Build Your Library",
+        "desc": "Add books, write notes, and create flashcard decks from your own material"
+      },
+      "step2": {
+        "title": "Study With Science",
+        "desc": "Our spaced repetition engine schedules every review at the right moment"
+      },
+      "step3": {
+        "title": "Plan & Track",
+        "desc": "Set annual goals and connect them to what you study every day"
+      }
     },
     "features": {
       "title": "Everything You Need to Excel",
       "subtitle": "Powerful features designed to make learning enjoyable and effective",
       "smartBooks": {
         "title": "Smart Books",
-        "desc": "Create, import, and organize your learning materials in one beautiful space"
+        "desc": "Write notes, highlight passages, and generate flashcards from any paragraph with one tap"
       },
       "aiPowered": {
         "title": "AI-Powered",
-        "desc": "Intelligent flashcards and study recommendations tailored to your learning style"
+        "desc": "AI suggests flashcards from your book highlights and adapts to your weak areas"
       },
       "spacedRepetition": {
         "title": "Spaced Repetition",
-        "desc": "Proven learning techniques that optimize retention and save you time"
+        "desc": "Rate each card as Easy, Good, Hard, or Missed — the algorithm handles the rest"
       },
       "trackProgress": {
         "title": "Track Progress",
-        "desc": "Visual analytics to monitor your growth and celebrate achievements"
+        "desc": "See your review streaks, card mastery rate, and study time at a glance"
       }
+    },
+    "cta": {
+      "title": "Be Part of Something Early",
+      "subtitle": "Nowry is in early access. Join now and help shape the product.",
+      "primary": "Start Free Today",
+      "social": "Follow our journey"
     },
     "social": {
       "title": "Start Learning Today",

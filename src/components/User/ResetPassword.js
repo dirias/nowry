@@ -1,21 +1,15 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Typography,
-  Input,
-  Button,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Sheet,
-  useColorScheme,
-  Alert,
-  LinearProgress,
-  Stack
-} from '@mui/joy'
+import { Box, Typography, Input, Button, FormControl, FormLabel, FormHelperText, Alert, LinearProgress, Stack } from '@mui/joy'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { EmailRounded, CheckCircleRounded, ArrowBackRounded } from '@mui/icons-material'
+import {
+  EmailRounded,
+  CheckCircleRounded,
+  ArrowBackRounded,
+  AutoStoriesRounded,
+  PsychologyRounded,
+  SpeedRounded
+} from '@mui/icons-material'
 import { authService } from '../../api/services/auth.service'
 
 const ResetPassword = () => {
@@ -24,8 +18,6 @@ const ResetPassword = () => {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { mode } = useColorScheme()
-  const isDark = mode === 'dark'
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
 
@@ -50,183 +42,140 @@ const ResetPassword = () => {
     } catch (err) {
       console.error('Password reset error:', err)
       setLoading(false)
-      // Firebase specific error codes can be handled here if needed
-      setError(t('auth.errors.serverError') || 'Failed to send reset email. Please try again.')
+      setError(t('auth.errors.serverError'))
     }
   }
 
-  // Success State
   if (isSubmitted) {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          px: 2
-        }}
-      >
-        <Sheet
-          variant='outlined'
-          sx={{
-            p: 5,
-            borderRadius: 'xl',
-            width: '100%',
-            maxWidth: 440,
-            boxShadow: 'xl',
-            backgroundColor: 'background.surface',
-            backdropFilter: 'blur(10px)',
-            border: 'none',
-            textAlign: 'center'
-          }}
-        >
-          <CheckCircleRounded sx={{ fontSize: 80, color: 'success.500', mb: 2 }} />
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', px: 3 }}>
+        <Box sx={{ textAlign: 'center', maxWidth: 360 }}>
+          <CheckCircleRounded sx={{ fontSize: 72, color: 'success.plainColor', mb: 2 }} />
           <Typography level='h3' fontWeight={700} mb={1}>
             {t('auth.resetPassword.successTitle')}
           </Typography>
           <Typography level='body-md' sx={{ color: 'text.secondary', mb: 4 }}>
             {t('auth.resetPassword.successMsg')}
           </Typography>
-          <Button
-            size='lg'
-            fullWidth
-            onClick={() => navigate('/login')}
-            sx={{
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: 'md'
-              }
-            }}
-          >
+          <Button size='lg' fullWidth onClick={() => navigate('/login')} sx={{ '&:hover': { boxShadow: 'md' } }}>
             {t('auth.resetPassword.goToLogin')}
           </Button>
-        </Sheet>
+        </Box>
       </Box>
     )
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'background.body',
-        px: 2,
-        transition: 'background 0.3s ease'
-      }}
-    >
-      <Sheet
-        variant='outlined'
-        sx={{
-          p: 5,
-          borderRadius: 'xl',
-          width: '100%',
-          maxWidth: 440,
-          boxShadow: 'xl',
-          backgroundColor: 'background.surface',
-          backdropFilter: 'blur(10px)',
-          border: 'none',
-          transform: 'translateY(0)',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-          }
-        }}
-      >
-        {/* Back Button */}
-        <Button
-          variant='plain'
-          color='neutral'
-          size='sm'
-          startDecorator={<ArrowBackRounded />}
-          component={RouterLink}
-          to='/login'
-          sx={{ mb: 2, alignSelf: 'flex-start' }}
+    <>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
+        {/* LEFT PANEL — teal brand (desktop only) */}
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            flex: '0 0 42%',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            px: 7,
+            py: 6,
+            bgcolor: 'primary.solidBg',
+            gap: 5
+          }}
         >
-          {t('auth.resetPassword.backToLogin')}
-        </Button>
+          <Box>
+            <Typography level='h2' sx={{ color: 'white', fontWeight: 800, lineHeight: 1.2, mb: 2 }}>
+              {t('landing.hero.title')}
+            </Typography>
+            <Typography level='body-md' sx={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.7 }}>
+              {t('landing.hero.subtitle')}
+            </Typography>
+          </Box>
 
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography
-            level='h2'
-            fontWeight={700}
-            sx={{
-              mb: 0.5,
-              color: isDark ? 'text.primary' : 'text.primary'
-            }}
-          >
-            {t('auth.resetPassword.title')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('auth.resetPassword.subtitle.step1')}
-          </Typography>
+          <Stack spacing={2}>
+            {[
+              { icon: <AutoStoriesRounded sx={{ fontSize: 18 }} />, label: t('landing.features.smartBooks.title') },
+              { icon: <PsychologyRounded sx={{ fontSize: 18 }} />, label: t('landing.features.aiPowered.title') },
+              { icon: <SpeedRounded sx={{ fontSize: 18 }} />, label: t('landing.features.spacedRepetition.title') }
+            ].map((f) => (
+              <Stack key={f.label} direction='row' spacing={1.5} alignItems='center'>
+                <Box sx={{ color: 'rgba(255,255,255,0.6)', display: 'flex' }}>{f.icon}</Box>
+                <Typography level='body-sm' sx={{ color: 'rgba(255,255,255,0.85)' }}>
+                  {f.label}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
         </Box>
 
-        {/* General Error Alert */}
-        {error && (
-          <Alert color='danger' variant='soft' sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        {/* Reset Form */}
-        <form onSubmit={handleResetPassword}>
-          <Stack spacing={2.5}>
-            <FormControl error={!!errors.email}>
-              <FormLabel>{t('auth.resetPassword.emailLabel')}</FormLabel>
-              <Input
-                type='email'
-                placeholder='you@example.com'
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value)
-                  setErrors({ ...errors, email: null })
-                }}
-                startDecorator={<EmailRounded />}
-                size='lg'
-                sx={{ '--Input-focusedThickness': '0.25rem' }}
-              />
-              {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
-            </FormControl>
-
-            <Button
-              type='submit'
-              size='lg'
-              fullWidth
-              loading={loading}
-              sx={{
-                mt: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: 'md'
-                }
-              }}
-            >
-              {t('auth.resetPassword.sendCode')}
-            </Button>
-          </Stack>
-        </form>
-      </Sheet>
-
-      {/* Loading Bar */}
-      {loading && (
-        <LinearProgress
+        {/* RIGHT PANEL — form */}
+        <Box
           sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 10000
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'background.surface',
+            px: { xs: 3, sm: 6, md: 8 },
+            py: { xs: 4, md: 6 },
+            overflowY: 'auto'
           }}
-        />
-      )}
-    </Box>
+        >
+          <Box sx={{ width: '100%', maxWidth: 400 }}>
+            <Button
+              variant='plain'
+              color='neutral'
+              size='sm'
+              startDecorator={<ArrowBackRounded />}
+              component={RouterLink}
+              to='/login'
+              sx={{ mb: 3, ml: -1 }}
+            >
+              {t('auth.resetPassword.backToLogin')}
+            </Button>
+
+            <Box sx={{ mb: 4 }}>
+              <Typography level='h2' fontWeight={700} sx={{ color: 'text.primary', mb: 1 }}>
+                {t('auth.resetPassword.title')}
+              </Typography>
+              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                {t('auth.resetPassword.subtitle.step1')}
+              </Typography>
+            </Box>
+
+            {error && (
+              <Alert color='danger' variant='soft' sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+
+            <form onSubmit={handleResetPassword}>
+              <Stack spacing={2.5}>
+                <FormControl error={!!errors.email}>
+                  <FormLabel>{t('auth.resetPassword.emailLabel')}</FormLabel>
+                  <Input
+                    type='email'
+                    placeholder={t('auth.emailPlaceholder')}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      setErrors({ ...errors, email: null })
+                    }}
+                    startDecorator={<EmailRounded />}
+                    size='lg'
+                  />
+                  {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
+                </FormControl>
+
+                <Button type='submit' size='lg' fullWidth loading={loading} sx={{ '&:hover': { boxShadow: 'md' } }}>
+                  {t('auth.resetPassword.sendCode')}
+                </Button>
+              </Stack>
+            </form>
+          </Box>
+        </Box>
+      </Box>
+
+      {loading && <LinearProgress sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10000 }} />}
+    </>
   )
 }
 

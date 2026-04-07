@@ -36,7 +36,11 @@ import {
   TimelineRounded,
   Timer,
   PlayArrow,
-  Pause
+  Pause,
+  Brightness4,
+  Brightness7,
+  LoginRounded,
+  PersonAddRounded
 } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
 import { useColorScheme } from '@mui/joy/styles'
@@ -46,14 +50,61 @@ import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '../../api/services/bugs.service'
 import { useAuth } from '../../context/AuthContext'
 
+const HeaderUtils = ({ variant = 'header' }) => {
+  const { mode, setMode } = useColorScheme()
+  const { i18n, t } = useTranslation()
+  const languages = [
+    { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' },
+    { code: 'fr', label: 'FR' },
+    { code: 'de', label: 'DE' },
+    { code: 'ja', label: 'JA' }
+  ]
+
+  const isDrawer = variant === 'drawer'
+  const colorSx = isDrawer
+    ? {
+        color: 'text.secondary',
+        '&:hover': { bgcolor: 'background.level2', color: 'text.primary' }
+      }
+    : {
+        color: 'rgba(255, 255, 255, 0.9)',
+        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+      }
+
+  return (
+    <Stack direction='row' spacing={0.5} alignItems='center'>
+      <Dropdown>
+        <MenuButton variant='plain' size='sm' sx={{ minWidth: 'unset', px: 1, ...colorSx }}>
+          {(languages.find((l) => l.code === i18n.language) || languages[0]).label}
+        </MenuButton>
+        <Menu size='sm' sx={{ zIndex: 99999, minWidth: 100 }}>
+          {languages.map((lang) => (
+            <MenuItem key={lang.code} onClick={() => i18n.changeLanguage(lang.code)} selected={i18n.language === lang.code}>
+              {lang.label}
+            </MenuItem>
+          ))}
+        </Menu>
+      </Dropdown>
+      <IconButton
+        variant='plain'
+        size='sm'
+        onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+        sx={colorSx}
+        aria-label={t('common.toggleTheme')}
+      >
+        {mode === 'dark' ? <Brightness7 fontSize='small' /> : <Brightness4 fontSize='small' />}
+      </IconButton>
+    </Stack>
+  )
+}
+
 const Header = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout: contextLogout } = useAuth()
   const isLoggedIn = !!user
   const { t } = useTranslation()
-  const { mode } = useColorScheme()
-  const isDark = mode === 'dark'
 
   // Bug report state
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
@@ -83,12 +134,10 @@ const Header = () => {
     const isLeftSwipe = distance > minSwipeDistance
     const isRightSwipe = distance < -minSwipeDistance
 
-    // Swipe Left (finger moves left) -> Open Menu
     if (isLeftSwipe) {
       setMobileMenuOpen(true)
     }
 
-    // Swipe Right (finger moves right) -> Close Menu (only if open)
     if (isRightSwipe && mobileMenuOpen) {
       setMobileMenuOpen(false)
     }
@@ -108,7 +157,7 @@ const Header = () => {
       document.body.removeEventListener('touchmove', handleTouchMove)
       document.body.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [mobileMenuOpen]) // Re-attach when menu state changes
+  }, [mobileMenuOpen])
 
   // Pomodoro
   const { timeLeft, isActive: isTimerActive, showWidget, setShowWidget, settings } = usePomodoro()
@@ -122,8 +171,6 @@ const Header = () => {
   const logout = async () => {
     await contextLogout()
     navigate('/')
-    // Window reload is handled by context/state update usually, but if needed for cleaning state:
-    // window.location.reload()
   }
 
   const handleBugSubmit = async (bugData) => {
@@ -137,6 +184,18 @@ const Header = () => {
   }
 
   const isActive = (path) => location.pathname === path
+
+  const navLinkSx = (path) => ({
+    fontWeight: isActive(path) ? 600 : 400,
+    color: isActive(path) ? 'white' : 'rgba(255, 255, 255, 0.72)',
+    bgcolor: isActive(path) ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+    borderRadius: 'md',
+    px: 1.5,
+    '&:hover': {
+      bgcolor: 'rgba(255, 255, 255, 0.10)',
+      color: 'white'
+    }
+  })
 
   return (
     <>
@@ -153,17 +212,13 @@ const Header = () => {
           zIndex: 1100,
           flexShrink: 0,
           backdropFilter: 'blur(12px)',
-          // Use theme colors dynamically
-          backgroundColor:
-            theme.palette.mode === 'dark'
-              ? theme.palette.primary.solidHoverBg // Uses #245a63 from your theme
-              : theme.palette.primary.solidBg, // Uses #2a6971 from your theme
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.solidHoverBg : theme.palette.primary.solidBg,
           opacity: 0.95,
           boxShadow: theme.palette.mode === 'dark' ? 'md' : 'lg',
-          color: 'white' // Ensure text is readable on teal background
+          color: 'white'
         })}
       >
-        {/* Logo + Title */}
+        {/* Logo */}
         <Box
           component={Link}
           to='/'
@@ -179,35 +234,17 @@ const Header = () => {
           <Box component='img' src={Logo} alt='Nowry logo' sx={{ height: 40 }} />
         </Box>
 
-        {/* Spacer to push navigation to the right */}
+        {/* Spacer */}
         <Box sx={{ flex: 1 }} />
 
-        {/* Navigation Links - Right aligned */}
+        {/* Desktop Navigation */}
         <Stack direction='row' spacing={1} alignItems='center' sx={{ display: { xs: 'none', md: 'flex' } }}>
-          {/* Public Browse Link - Always visible */}
-          <Button
-            component={Link}
-            to='/browse'
-            variant='plain'
-            size='sm'
-            startDecorator={<SchoolRounded />}
-            sx={{
-              fontWeight: isActive('/browse') ? 600 : 500,
-              color: 'rgba(255, 255, 255, 0.9)',
-              textDecoration: isActive('/browse') ? 'underline' : 'none',
-              textUnderlineOffset: '4px',
-              textDecorationThickness: '2px',
-              '&:hover': {
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                color: 'white'
-              }
-            }}
-          >
-            {t('public.browse')}
-          </Button>
-
           {user ? (
             <>
+              {/* Browse - logged nav, with icon */}
+              <Button component={Link} to='/browse' variant='plain' size='sm' startDecorator={<SchoolRounded />} sx={navLinkSx('/browse')}>
+                {t('public.browse')}
+              </Button>
               {[
                 { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
                 { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
@@ -220,17 +257,7 @@ const Header = () => {
                   variant='plain'
                   size='sm'
                   startDecorator={item.icon}
-                  sx={{
-                    fontWeight: isActive(item.path) ? 600 : 500,
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    textDecoration: isActive(item.path) ? 'underline' : 'none',
-                    textUnderlineOffset: '4px',
-                    textDecorationThickness: '2px',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                      color: 'white'
-                    }
-                  }}
+                  sx={navLinkSx(item.path)}
                 >
                   {item.name}
                 </Button>
@@ -238,43 +265,11 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Button
-                variant='plain'
-                component={Link}
-                to='/about'
-                size='sm'
-                sx={{
-                  fontWeight: isActive('/about') ? 600 : 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  textDecoration: isActive('/about') ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {t('header.about')}
+              <Button variant='plain' component={Link} to='/browse' size='sm' sx={navLinkSx('/browse')}>
+                {t('public.browse')}
               </Button>
-              <Button
-                variant='plain'
-                component={Link}
-                to='/contact'
-                size='sm'
-                sx={{
-                  fontWeight: isActive('/contact') ? 600 : 500,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  textDecoration: isActive('/contact') ? 'underline' : 'none',
-                  textUnderlineOffset: '4px',
-                  textDecorationThickness: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {t('header.contact')}
+              <Button variant='plain' component={Link} to='/about' size='sm' sx={navLinkSx('/about')}>
+                {t('header.about')}
               </Button>
             </>
           )}
@@ -292,13 +287,13 @@ const Header = () => {
               color: 'rgba(255, 255, 255, 0.9)',
               '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
             }}
+            aria-label={t('header.drawer.menu')}
           >
             <MenuRounded />
           </IconButton>
 
           {user ? (
             <>
-              {/* Hide on mobile since we have mobile menu */}
               <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                 <Dropdown>
                   <MenuButton
@@ -310,7 +305,8 @@ const Header = () => {
                       borderRadius: '9999999px',
                       p: 0,
                       minHeight: 'unset',
-                      border: '2px solid rgba(255,255,255,0.2)'
+                      border: '2px solid',
+                      borderColor: 'divider'
                     }}
                   >
                     <Avatar
@@ -351,7 +347,6 @@ const Header = () => {
                       <SettingsRounded sx={{ mr: 1, fontSize: 20 }} />
                       {t('common.settings')}
                     </MenuItem>
-                    {/* Pomodoro Timer - Desktop */}
                     {settings.enabled && (
                       <MenuItem onClick={() => setShowWidget(!showWidget)}>
                         <Timer sx={{ mr: 1, fontSize: 20 }} />
@@ -369,23 +364,16 @@ const Header = () => {
             </>
           ) : (
             <>
-              {/* Login/Register Buttons - Hide on mobile since we have mobile menu */}
-              <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+              <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
                 <Button
                   component={Link}
                   to='/login'
                   variant='plain'
                   size='sm'
                   sx={{
-                    fontWeight: isActive('/login') ? 600 : 500,
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    textDecoration: isActive('/login') ? 'underline' : 'none',
-                    textUnderlineOffset: '4px',
-                    textDecorationThickness: '2px',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                      color: 'white'
-                    }
+                    fontWeight: 500,
+                    color: 'rgba(255, 255, 255, 0.88)',
+                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.10)', color: 'white' }
                   }}
                 >
                   {t('auth.signIn')}
@@ -393,22 +381,20 @@ const Header = () => {
                 <Button
                   component={Link}
                   to='/register'
-                  variant='plain'
+                  variant='solid'
                   size='sm'
                   sx={{
-                    fontWeight: isActive('/register') ? 600 : 500,
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    textDecoration: isActive('/register') ? 'underline' : 'none',
-                    textUnderlineOffset: '4px',
-                    textDecorationThickness: '2px',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                      color: 'white'
-                    }
+                    fontWeight: 600,
+                    bgcolor: 'white',
+                    color: 'primary.solidBg',
+                    borderRadius: 'xl',
+                    px: 2.5,
+                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.92)' }
                   }}
                 >
-                  {t('auth.signUp')}
+                  {t('header.getStarted')}
                 </Button>
+                <HeaderUtils />
               </Box>
             </>
           )}
@@ -437,7 +423,7 @@ const Header = () => {
         size='sm'
         sx={{
           '& .MuiDrawer-content': {
-            bgcolor: isDark ? 'neutral.900' : 'background.surface'
+            bgcolor: 'background.surface'
           }
         }}
       >
@@ -453,9 +439,9 @@ const Header = () => {
           }}
         >
           <Typography level='title-lg' fontWeight={600}>
-            Menu
+            {t('header.drawer.menu')}
           </Typography>
-          <IconButton variant='plain' size='sm' onClick={() => setMobileMenuOpen(false)}>
+          <IconButton variant='plain' size='sm' onClick={() => setMobileMenuOpen(false)} aria-label={t('common.close')}>
             <CloseRounded />
           </IconButton>
         </Box>
@@ -463,29 +449,30 @@ const Header = () => {
         {/* Drawer Content */}
         <Box sx={{ p: 2 }}>
           <List>
-            {/* Browse Public Content - Always visible at top */}
-            <ListItem>
-              <ListItemButton
-                component={Link}
-                to='/browse'
-                onClick={() => setMobileMenuOpen(false)}
-                selected={isActive('/browse')}
-                sx={{
-                  bgcolor: isActive('/browse') ? 'primary.softBg' : 'transparent'
-                }}
-              >
-                <ListItemDecorator>
-                  <SchoolRounded />
-                </ListItemDecorator>
-                {t('public.browse')}
-              </ListItemButton>
-            </ListItem>
+            {/* Browse - logged nav only (non-logged branch renders its own Browse) */}
+            {user && (
+              <ListItem>
+                <ListItemButton
+                  component={Link}
+                  to='/browse'
+                  onClick={() => setMobileMenuOpen(false)}
+                  selected={isActive('/browse')}
+                  sx={{
+                    bgcolor: isActive('/browse') ? 'primary.softBg' : 'transparent'
+                  }}
+                >
+                  <ListItemDecorator>
+                    <SchoolRounded />
+                  </ListItemDecorator>
+                  {t('public.browse')}
+                </ListItemButton>
+              </ListItem>
+            )}
 
             {user && <ListDivider sx={{ my: 1 }} />}
 
             {user ? (
               <>
-                {/* Logged-in User Navigation */}
                 {[
                   { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
                   { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
@@ -517,7 +504,6 @@ const Header = () => {
                   </ListItemButton>
                 </ListItem>
 
-                {/* Pomodoro Timer - Mobile */}
                 {settings.enabled && (
                   <>
                     <ListDivider sx={{ my: 1 }} />
@@ -532,7 +518,7 @@ const Header = () => {
                         <ListItemDecorator>
                           <Timer />
                         </ListItemDecorator>
-                        {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : 'Pomodoro Timer'}
+                        {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : t('common.pomodoro')}
                       </ListItemButton>
                     </ListItem>
                   </>
@@ -556,27 +542,69 @@ const Header = () => {
               </>
             ) : (
               <>
-                {/* Logged-out User Navigation */}
+                {/* Get Started */}
                 <ListItem>
-                  <ListItemButton component={Link} to='/about' onClick={() => setMobileMenuOpen(false)}>
-                    {t('header.about')}
+                  <ListItemButton
+                    component={Link}
+                    to='/register'
+                    onClick={() => setMobileMenuOpen(false)}
+                    color='primary'
+                    sx={{ borderRadius: 'sm', fontWeight: 700 }}
+                  >
+                    <ListItemDecorator>
+                      <PersonAddRounded />
+                    </ListItemDecorator>
+                    {t('header.getStarted')}
                   </ListItemButton>
                 </ListItem>
+
+                {/* Sign In */}
                 <ListItem>
-                  <ListItemButton component={Link} to='/contact' onClick={() => setMobileMenuOpen(false)}>
-                    {t('header.contact')}
-                  </ListItemButton>
-                </ListItem>
-                <ListDivider sx={{ my: 1 }} />
-                <ListItem>
-                  <ListItemButton component={Link} to='/login' onClick={() => setMobileMenuOpen(false)}>
+                  <ListItemButton component={Link} to='/login' onClick={() => setMobileMenuOpen(false)} sx={{ borderRadius: 'sm' }}>
+                    <ListItemDecorator>
+                      <LoginRounded />
+                    </ListItemDecorator>
                     {t('auth.signIn')}
                   </ListItemButton>
                 </ListItem>
+
+                <ListDivider sx={{ my: 1 }} />
+
+                {/* Nav links */}
                 <ListItem>
-                  <ListItemButton component={Link} to='/register' onClick={() => setMobileMenuOpen(false)}>
-                    {t('auth.signUp')}
+                  <ListItemButton
+                    component={Link}
+                    to='/browse'
+                    onClick={() => setMobileMenuOpen(false)}
+                    selected={isActive('/browse')}
+                    sx={{ borderRadius: 'sm' }}
+                  >
+                    <ListItemDecorator>
+                      <SchoolRounded />
+                    </ListItemDecorator>
+                    {t('public.browse')}
                   </ListItemButton>
+                </ListItem>
+                <ListItem>
+                  <ListItemButton
+                    component={Link}
+                    to='/about'
+                    onClick={() => setMobileMenuOpen(false)}
+                    selected={isActive('/about')}
+                    sx={{ borderRadius: 'sm' }}
+                  >
+                    <ListItemDecorator>
+                      <MenuBookRounded />
+                    </ListItemDecorator>
+                    {t('header.about')}
+                  </ListItemButton>
+                </ListItem>
+
+                <ListDivider sx={{ my: 1 }} />
+
+                {/* Utilities */}
+                <ListItem>
+                  <HeaderUtils variant='drawer' />
                 </ListItem>
               </>
             )}

@@ -1,23 +1,17 @@
 import React, { useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Box, Typography, Input, Button, Divider, Link, FormControl, FormLabel, Alert, LinearProgress, Stack, IconButton } from '@mui/joy'
 import {
-  Box,
-  Typography,
-  Input,
-  Button,
-  Divider,
-  Sheet,
-  useColorScheme,
-  Link,
-  FormControl,
-  FormLabel,
-  Alert,
-  LinearProgress,
-  Stack,
-  IconButton
-} from '@mui/joy'
-import { EmailRounded, LockRounded, VisibilityRounded, VisibilityOffRounded, LoginRounded, Google, Facebook } from '@mui/icons-material'
+  EmailRounded,
+  LockRounded,
+  VisibilityRounded,
+  VisibilityOffRounded,
+  Google,
+  AutoStoriesRounded,
+  PsychologyRounded,
+  SpeedRounded
+} from '@mui/icons-material'
 
 import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../api/services/auth.service'
@@ -29,8 +23,6 @@ const Login = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const { mode } = useColorScheme()
-  const isDark = mode === 'dark'
   const { t } = useTranslation()
   const { login } = useAuth()
 
@@ -126,207 +118,174 @@ const Login = () => {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'background.body',
-        px: 2
-      }}
-    >
-      <Sheet
-        variant='outlined'
-        sx={{
-          p: { xs: 3, sm: 5 },
-          borderRadius: 'xl',
-          width: '100%',
-          maxWidth: 440,
-          boxShadow: 'md',
-          backgroundColor: 'background.surface',
-          border: '1px solid',
-          borderColor: 'divider',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            boxShadow: 'lg'
-          }
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography
-            level='h2'
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-              color: 'text.primary'
-            }}
-          >
-            {t('auth.welcomeBack')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('auth.signInSubtitle')}
-          </Typography>
+    <>
+      {/* Full-height split layout */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
+        {/* LEFT PANEL — teal brand (desktop only) */}
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            flex: '0 0 42%',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            px: 7,
+            py: 6,
+            bgcolor: 'primary.solidBg',
+            gap: 5
+          }}
+        >
+          <Box>
+            <Typography level='h2' sx={{ color: 'white', fontWeight: 800, lineHeight: 1.2, mb: 2 }}>
+              {t('landing.hero.title')}
+            </Typography>
+            <Typography level='body-md' sx={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.7 }}>
+              {t('landing.hero.subtitle')}
+            </Typography>
+          </Box>
+
+          <Stack spacing={2}>
+            {[
+              { icon: <AutoStoriesRounded sx={{ fontSize: 18 }} />, label: t('landing.features.smartBooks.title') },
+              { icon: <PsychologyRounded sx={{ fontSize: 18 }} />, label: t('landing.features.aiPowered.title') },
+              { icon: <SpeedRounded sx={{ fontSize: 18 }} />, label: t('landing.features.spacedRepetition.title') }
+            ].map((f) => (
+              <Stack key={f.label} direction='row' spacing={1.5} alignItems='center'>
+                <Box sx={{ color: 'rgba(255,255,255,0.6)', display: 'flex' }}>{f.icon}</Box>
+                <Typography level='body-sm' sx={{ color: 'rgba(255,255,255,0.85)' }}>
+                  {f.label}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
         </Box>
 
-        {/* Error Alert - Improved UX */}
-        {error && (
-          <Alert
-            color='danger'
-            variant='soft'
-            sx={{
-              mb: 3,
-              fontSize: '0.875rem',
-              '--Alert-padding': '12px 16px'
-            }}
-          >
-            <Box>
-              <Typography level='body-sm' sx={{ fontWeight: 600, mb: 0.5 }}>
-                {t('auth.errors.unableToSignIn')}
+        {/* RIGHT PANEL — form */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'background.surface',
+            px: { xs: 3, sm: 6, md: 8 },
+            py: { xs: 4, md: 6 },
+            overflowY: 'auto'
+          }}
+        >
+          <Box sx={{ width: '100%', maxWidth: 400 }}>
+            {/* Header */}
+            <Box sx={{ mb: 4 }}>
+              <Typography level='h2' sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                {t('auth.welcomeBack')}
               </Typography>
-              <Typography level='body-sm' sx={{ color: 'inherit', opacity: 0.9 }}>
-                {error}
+              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                {t('auth.signInSubtitle')}
               </Typography>
             </Box>
-          </Alert>
-        )}
 
-        {/* Login Form */}
-        <form onSubmit={handleLogin}>
-          <Stack spacing={2.5}>
-            {/* Email Field */}
-            <FormControl>
-              <FormLabel>{t('auth.email')}</FormLabel>
-              <Input
-                type='email'
-                placeholder='you@example.com'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                startDecorator={<EmailRounded />}
+            {/* Error Alert */}
+            {error && (
+              <Alert color='danger' variant='soft' sx={{ mb: 3 }}>
+                <Box>
+                  <Typography level='body-sm' sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {t('auth.errors.unableToSignIn')}
+                  </Typography>
+                  <Typography level='body-sm' sx={{ opacity: 0.9 }}>
+                    {error}
+                  </Typography>
+                </Box>
+              </Alert>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleLogin}>
+              <Stack spacing={2.5}>
+                <FormControl>
+                  <FormLabel>{t('auth.email')}</FormLabel>
+                  <Input
+                    type='email'
+                    placeholder={t('auth.emailPlaceholder')}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    startDecorator={<EmailRounded />}
+                    size='lg'
+                    required
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>{t('auth.password')}</FormLabel>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder='••••••••'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    startDecorator={<LockRounded />}
+                    endDecorator={
+                      <IconButton variant='plain' color='neutral' onClick={() => setShowPassword(!showPassword)} sx={{ mr: -1 }}>
+                        {showPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
+                      </IconButton>
+                    }
+                    size='lg'
+                    required
+                  />
+                </FormControl>
+
+                <Box sx={{ textAlign: 'right' }}>
+                  <Link
+                    component={RouterLink}
+                    to='/resetPassword'
+                    level='body-sm'
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+                  >
+                    {t('auth.forgotPassword')}
+                  </Link>
+                </Box>
+
+                <Button type='submit' size='lg' fullWidth loading={loading} sx={{ '&:hover': { boxShadow: 'md' } }}>
+                  {t('auth.signIn')}
+                </Button>
+              </Stack>
+            </form>
+
+            <Divider sx={{ my: 3 }}>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {t('auth.orContinueWith')}
+              </Typography>
+            </Divider>
+
+            <Stack spacing={1.5}>
+              <Button
+                variant='outlined'
+                color='neutral'
                 size='lg'
-                required
-              />
-            </FormControl>
-
-            {/* Password Field */}
-            <FormControl>
-              <FormLabel>{t('auth.password')}</FormLabel>
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                placeholder='••••••••'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                startDecorator={<LockRounded />}
-                endDecorator={
-                  <IconButton variant='plain' color='neutral' onClick={() => setShowPassword(!showPassword)} sx={{ mr: -1 }}>
-                    {showPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
-                  </IconButton>
-                }
-                size='lg'
-                required
-              />
-            </FormControl>
-
-            {/* Forgot Password Link */}
-            <Box sx={{ textAlign: 'right' }}>
-              <Link
-                component={RouterLink}
-                to='/resetPassword'
-                level='body-sm'
+                fullWidth
+                startDecorator={<Google />}
+                onClick={handleGoogleLogin}
+                disabled={loading}
                 sx={{
-                  color: 'text.secondary',
                   '&:hover': {
-                    color: 'text.primary'
+                    borderColor: 'neutral.outlinedHoverBorder',
+                    backgroundColor: 'neutral.outlinedHoverBg'
                   }
                 }}
               >
-                {t('auth.forgotPassword')}
+                {t('auth.signInGoogle')}
+              </Button>
+            </Stack>
+
+            <Typography level='body-sm' textAlign='center' sx={{ mt: 3, color: 'text.secondary' }}>
+              {t('auth.noAccount')}{' '}
+              <Link component={RouterLink} to='/register' fontWeight={600} sx={{ color: 'primary.plainColor' }}>
+                {t('auth.createOne')}
               </Link>
-            </Box>
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
 
-            {/* Login Button */}
-            <Button
-              type='submit'
-              size='lg'
-              fullWidth
-              loading={loading}
-              startDecorator={!loading && <LoginRounded />}
-              sx={{
-                mt: 2,
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: 'md'
-                },
-                '&:active': {
-                  transform: 'translateY(0)'
-                }
-              }}
-            >
-              {t('auth.signIn')}
-            </Button>
-          </Stack>
-        </form>
-
-        {/* Divider */}
-        <Divider sx={{ my: 3 }}>
-          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-            {t('auth.orContinueWith')}
-          </Typography>
-        </Divider>
-
-        {/* Social Login */}
-        <Stack spacing={1.5}>
-          <Button
-            variant='outlined'
-            color='neutral'
-            size='lg'
-            fullWidth
-            startDecorator={<Google />}
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            sx={{
-              '&:hover': {
-                borderColor: 'neutral.outlinedHoverBorder',
-                backgroundColor: 'neutral.outlinedHoverBg'
-              }
-            }}
-          >
-            {t('auth.signInGoogle')}
-          </Button>
-        </Stack>
-
-        {/* Register Link */}
-        <Typography level='body-sm' textAlign='center' sx={{ mt: 3, color: 'text.secondary' }}>
-          {t('auth.noAccount')}{' '}
-          <Link
-            component={RouterLink}
-            to='/register'
-            fontWeight={600}
-            sx={{
-              textDecoration: 'underline',
-              textUnderlineOffset: '2px'
-            }}
-          >
-            {t('auth.createOne')}
-          </Link>
-        </Typography>
-      </Sheet>
-
-      {/* Loading Bar */}
-      {loading && (
-        <LinearProgress
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 10000
-          }}
-        />
-      )}
-    </Box>
+      {loading && <LinearProgress sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10000 }} />}
+    </>
   )
 }
 

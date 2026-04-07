@@ -76,6 +76,8 @@ const AppContent = () => {
   }, [loading, isAuthenticated, user, location.pathname, navigate])
 
   const isEditor = location.pathname.startsWith('/book/') && location.pathname !== '/books'
+  // Public marketing pages use natural document scroll (no viewport prison)
+  const isPublicPage = !isAuthenticated && ['/', '/about', '/contact'].includes(location.pathname)
 
   // While Firebase is restoring the session, show a neutral full-screen spinner.
   // This prevents the flash of the logged-out header/landing page
@@ -83,7 +85,14 @@ const AppContent = () => {
   if (loading) return <PageLoader />
 
   return (
-    <div className='App' style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div
+      className='App'
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        ...(isPublicPage ? { minHeight: '100vh' } : { height: '100vh', overflow: 'hidden' })
+      }}
+    >
       <Header username={user?.username} />
       <main
         style={{
@@ -91,8 +100,7 @@ const AppContent = () => {
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
-          overflowY: isEditor ? 'hidden' : 'auto',
-          overflowX: 'hidden'
+          ...(isPublicPage ? {} : { overflowY: isEditor ? 'hidden' : 'auto', overflowX: 'hidden' })
         }}
       >
         <ErrorBoundary>

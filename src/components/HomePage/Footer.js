@@ -1,178 +1,134 @@
 import * as React from 'react'
-import {
-  Box,
-  Typography,
-  Divider,
-  useColorScheme,
-  Stack,
-  Button,
-  Dropdown,
-  MenuButton,
-  Menu,
-  MenuItem,
-  IconButton,
-  Snackbar
-} from '@mui/joy'
+import { Box, Typography, Stack, Button, IconButton, Snackbar } from '@mui/joy'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Language as LanguageIcon, Brightness4, Brightness7, BugReportRounded } from '@mui/icons-material'
+import { BugReportRounded } from '@mui/icons-material'
 import { useAuth } from '../../context/AuthContext'
 import { usePomodoro } from '../../context/PomodoroContext'
-import { userService } from '../../api/services'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '../../api/services/bugs.service'
+import Logo from '../../images/logo.png'
 
 const Footer = () => {
-  const { mode, setMode } = useColorScheme()
-  const isDark = mode === 'dark'
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { showWidget, settings: pomodoroSettings } = usePomodoro()
   const fabVisible = pomodoroSettings?.enabled && !showWidget
 
-  // Bug report state
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', color: 'success' })
 
-  const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'es', label: 'Español' },
-    { code: 'fr', label: 'Français' },
-    { code: 'de', label: 'Deutsch' },
-    { code: 'ja', label: '日本語' }
-  ]
-
-  const currentLanguage = languages.find((lang) => lang.code === i18n.language) || languages[0]
-
-  const handleLanguageChange = async (langCode) => {
-    i18n.changeLanguage(langCode)
-
-    if (user) {
-      try {
-        await userService.updateGeneralPreferences({ language: langCode })
-      } catch (error) {
-        console.error('Failed to sync language preference:', error)
-      }
-    }
-  }
-
-  const toggleTheme = () => {
-    setMode(isDark ? 'light' : 'dark')
-  }
-
   const handleBugSubmit = async (bugData) => {
     const response = await bugsService.submitBug(bugData)
-    setSnackbar({
-      open: true,
-      message: response.message || 'Bug report submitted successfully!',
-      color: 'success'
-    })
+    setSnackbar({ open: true, message: response.message || 'Bug report submitted successfully!', color: 'success' })
     setBugReportOpen(false)
   }
+
+  const navLinks = [
+    { label: t('footer.links.browse'), path: '/browse' },
+    { label: t('footer.links.about'), path: '/about' },
+    { label: t('footer.support.contact'), path: '/contact' }
+  ]
+
+  const socialLinks = [
+    { label: t('footer.social.tiktok'), href: 'https://www.tiktok.com/@nowry_app', text: 'TT' },
+    { label: t('footer.social.instagram'), href: 'https://www.instagram.com/nowry_app/', text: 'IG' },
+    { label: t('footer.social.x'), href: 'https://x.com/Nowry_app', text: '𝕏' },
+    { label: t('footer.social.facebook'), href: 'https://www.facebook.com/profile.php?id=61575408886765', text: 'FB' }
+  ]
 
   return (
     <>
       <Box
         component='footer'
         sx={{
-          py: 3,
-          mt: 4,
           borderTop: '1px solid',
           borderColor: 'divider',
-          backgroundColor: isDark ? 'neutral.900' : 'background.level1'
+          bgcolor: 'background.level1',
+          pr: fabVisible ? '88px' : 0
         }}
       >
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
-          alignItems='center'
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
           justifyContent='space-between'
-          sx={{ maxWidth: 1200, mx: 'auto', px: 2, pr: fabVisible ? '88px' : 2 }}
+          flexWrap='wrap'
+          gap={1}
+          sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 4 }, py: 2 }}
         >
-          {/* Copyright */}
-          <Typography level='body-sm' color='neutral'>
-            © {new Date().getFullYear()} Nowry — {t('footer.rights')}
-          </Typography>
+          {/* Left: logo + copyright */}
+          <Stack direction='row' spacing={1.5} alignItems='center'>
+            <Box component='img' src={Logo} alt='Nowry' sx={{ height: 22 }} />
+            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+              © {new Date().getFullYear()} Nowry
+            </Typography>
+          </Stack>
 
-          {/* Language & Theme Selector */}
-          <Stack
-            direction='row'
-            spacing={1.5}
-            alignItems='center'
-            divider={
-              <Typography level='body-sm' sx={{ color: 'neutral.plainColor' }}>
-                |
-              </Typography>
-            }
-          >
-            {/* Language Dropdown */}
-            <Dropdown>
-              <MenuButton
-                variant='plain'
-                size='sm'
-                startDecorator={<LanguageIcon fontSize='small' />}
-                sx={{
-                  fontWeight: 500,
-                  color: 'neutral.plainColor',
-                  '&:hover': { bgcolor: isDark ? 'neutral.800' : 'neutral.100' }
-                }}
-              >
-                {currentLanguage.label}
-              </MenuButton>
-              <Menu
-                placement='top-end'
-                size='sm'
-                sx={{
-                  minWidth: 160,
-                  zIndex: 99999
-                }}
-              >
-                {languages.map((lang) => (
-                  <MenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)} selected={i18n.language === lang.code}>
-                    {lang.label}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Dropdown>
-
-            {/* Theme Toggle */}
-            <Button
-              variant='plain'
-              size='sm'
-              startDecorator={isDark ? <Brightness7 fontSize='small' /> : <Brightness4 fontSize='small' />}
-              onClick={toggleTheme}
-              sx={{
-                fontWeight: 500,
-                color: 'neutral.plainColor',
-                '&:hover': { bgcolor: isDark ? 'neutral.800' : 'neutral.100' }
-              }}
-            >
-              {isDark ? 'Light' : 'Dark'}
-            </Button>
-
-            {/* Bug Report - Only for dev users */}
-            {user && user.role === 'dev' && (
+          {/* Center: nav + support links */}
+          <Stack direction='row' spacing={0} alignItems='center' flexWrap='wrap'>
+            {navLinks.map((link) => (
               <Button
+                key={link.path}
+                component={Link}
+                to={link.path}
                 variant='plain'
+                color='neutral'
                 size='sm'
-                startDecorator={<BugReportRounded fontSize='small' />}
-                onClick={() => setBugReportOpen(true)}
-                sx={{
-                  fontWeight: 500,
-                  color: 'neutral.plainColor',
-                  '&:hover': { bgcolor: isDark ? 'neutral.800' : 'neutral.100' }
-                }}
+                sx={{ color: 'text.secondary', fontWeight: 400, px: 1, '&:hover': { color: 'text.primary', bgcolor: 'background.level2' } }}
               >
-                Report Bug
+                {link.label}
               </Button>
+            ))}
+            <Button
+              component='a'
+              href='mailto:support@nowry.app'
+              variant='plain'
+              color='neutral'
+              size='sm'
+              sx={{ color: 'text.secondary', fontWeight: 400, px: 1, '&:hover': { color: 'text.primary', bgcolor: 'background.level2' } }}
+            >
+              {t('footer.support.email')}
+            </Button>
+          </Stack>
+
+          {/* Right: social icons + optional bug report */}
+          <Stack direction='row' spacing={0} alignItems='center'>
+            {socialLinks.map((social) => (
+              <IconButton
+                key={social.label}
+                component='a'
+                href={social.href}
+                target='_blank'
+                rel='noopener noreferrer'
+                variant='plain'
+                color='neutral'
+                size='sm'
+                aria-label={social.label}
+                sx={{ color: 'text.secondary', '&:hover': { bgcolor: 'background.level2', color: 'text.primary' } }}
+              >
+                <Typography level='body-xs' fontWeight={700}>
+                  {social.text}
+                </Typography>
+              </IconButton>
+            ))}
+            {user?.role === 'dev' && (
+              <IconButton
+                variant='plain'
+                color='neutral'
+                size='sm'
+                onClick={() => setBugReportOpen(true)}
+                aria-label={t('footer.bugReport')}
+                sx={{ color: 'text.secondary', '&:hover': { bgcolor: 'background.level2', color: 'text.primary' } }}
+              >
+                <BugReportRounded fontSize='small' />
+              </IconButton>
             )}
           </Stack>
         </Stack>
       </Box>
 
-      {/* Bug Report Modal */}
       <BugReportModal open={bugReportOpen} onClose={() => setBugReportOpen(false)} onSubmit={handleBugSubmit} />
 
-      {/* Success Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
