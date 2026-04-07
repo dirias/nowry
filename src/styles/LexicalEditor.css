@@ -76,32 +76,51 @@
 .editor-content {
   outline: none;
   font-size: 1rem;
-  line-height: 1.7;
-  color: var(--joy-palette-text-secondary);
-  min-height: 800px; /* Increased from 600px for better initial height */
-  padding: 3rem 4rem; /* A4-style: 48px top/bottom, 64px left/right */
-  max-width: 850px; /* Slightly wider to accommodate margins */
-  margin: 0 auto;
-  width: 100%;
-  position: relative;
+  line-height: 1.75;
+  color: var(--joy-palette-text-primary);
   background: var(--joy-palette-background-surface);
-  border-radius: 8px;
-
-  /* Clean, minimalist shadow */
+  border-radius: 3px;
   box-shadow:
     0 0 0 1px var(--joy-palette-divider),
-    0 4px 20px rgba(0, 0, 0, 0.06);
+    0 2px 8px rgba(0, 0, 0, 0.07),
+    0 8px 32px rgba(0, 0, 0, 0.05);
+  margin: 0 auto;
+  min-height: 1060px;
+  width: 100%;
+  position: relative;
+  transition:
+    width 0.2s ease,
+    padding 0.2s ease;
 }
 
-/* Mobile: Full width */
 @media (max-width: 899px) {
   .editor-content {
-    font-size: 0.9375rem !important;
-    max-width: 100%;
-    min-height: 600px; /* Slightly taller on mobile */
-    padding: 1.5rem 1rem;
-    box-shadow: none;
-    border-radius: 0;
+    width: calc(100% - 16px) !important;
+    margin: 0 8px !important;
+    padding: 1.5rem 1.25rem !important;
+    border-radius: 3px;
+    box-shadow:
+      0 0 0 1px var(--joy-palette-divider),
+      0 2px 8px rgba(0, 0, 0, 0.06);
+    min-height: 100svh;
+    font-size: 1.0625rem;
+    line-height: 1.85;
+    color: var(--joy-palette-text-primary);
+    background: var(--joy-palette-background-surface);
+    transition: none;
+  }
+
+  .editor-heading-h1,
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  .editor-heading-h2,
+  h2 {
+    font-size: 1.375rem !important;
+  }
+  .editor-heading-h3,
+  h3 {
+    font-size: 1.125rem !important;
   }
 }
 
@@ -408,6 +427,12 @@ ol.editor-list-ol {
   color: var(--joy-palette-text-primary);
 }
 
+/* Light mode: softBg is too faint against a white surface — use a more opaque token */
+[data-joy-color-scheme='light'] .editor-content ::selection {
+  background: var(--joy-palette-primary-200);
+  color: var(--joy-palette-text-primary);
+}
+
 /* ====== Focus State ====== */
 .editor-content:focus {
   outline: none;
@@ -647,7 +672,6 @@ ol.editor-list-ol {
 
 /* ====== Reading Mode — editor is locked (contenteditable=false) ====== */
 .editor-content[contenteditable='false'] {
-  max-width: 680px;
   line-height: 1.85;
   font-size: 1.0625rem;
   color: var(--joy-palette-text-primary);

@@ -25,7 +25,7 @@ export const PAGE_SIZES = {
     paddingX: '1in'
   },
   a5: {
-    label: 'A5',
+    label: 'A5 · Book',
     width: '148mm',
     height: '210mm',
     paddingY: '15mm', // Smaller margins for A5

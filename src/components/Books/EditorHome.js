@@ -3,9 +3,9 @@ import Editor from './Editor'
 import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
-import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer } from 'lucide-react'
+import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer, PencilLine } from 'lucide-react'
 import { booksService, publicContentService } from '../../api/services'
-import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip, Snackbar } from '@mui/joy'
+import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip, Snackbar, LinearProgress } from '@mui/joy'
 import { LexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import Toolbar from './Toolbar'
 import { useAutoSave, SAVE_STATUS } from '../../hooks/useAutoSave'
@@ -14,6 +14,7 @@ import PublicIcon from '@mui/icons-material/Public'
 import PublicOffIcon from '@mui/icons-material/PublicOff'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import { useTranslation } from 'react-i18next'
+import MobileBottomActionStrip from '../Editor/plugins/MobileBottomActionStrip'
 
 export default function EditorHome() {
   const { id } = useParams()
@@ -73,7 +74,7 @@ export default function EditorHome() {
   const handleTouchMove = (e) => (touchEnd.current = e.targetTouches[0].clientX)
 
   const [content, setContent] = useState('')
-  const [pageSize, setPageSize] = useState('a4')
+  const [pageSize, setPageSize] = useState('a5')
 
   // Wrapped setPageSize with logging
   const handlePageSizeChange = (newSize) => {
@@ -92,6 +93,7 @@ export default function EditorHome() {
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false)
   const [focusedEditor, setFocusedEditor] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [scrollPercent, setScrollPercent] = useState(0)
 
   // Detect mobile device and set appropriate zoom + locked state
   useEffect(() => {
@@ -99,15 +101,11 @@ export default function EditorHome() {
       const mobile = window.innerWidth < 900 // md breakpoint
       setIsMobile(mobile)
 
-      // Set optimal zoom for mobile reading (0.75x gives better page overview)
+      // Set locked on mobile for read-first experience
       if (mobile) {
-        setZoom(0.75)
-        // Set locked on mobile for read-first experience
         if (!book) {
           setIsLocked(true)
         }
-      } else {
-        setZoom(1.0) // Reset to normal on desktop
       }
     }
 
@@ -122,6 +120,20 @@ export default function EditorHome() {
       setIsLocked(true)
     }
   }, [book, isMobile])
+
+  // Reading progress bar — track scroll position on mobile
+  useEffect(() => {
+    if (!isMobile) return
+    const container = document.querySelector('.editor-scroll-container')
+    if (!container) return
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container
+      const total = scrollHeight - clientHeight
+      setScrollPercent(total > 0 ? Math.round((scrollTop / total) * 100) : 0)
+    }
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [isMobile, loading])
 
   const handleSaveBook = useCallback(
     async (currentContent) => {
@@ -272,7 +284,7 @@ export default function EditorHome() {
         abortControllerRef.current.abort()
       }
     }
-  }, [id, resetBaseline, book]) // Added book to check if we can skip loading
+  }, [id, resetBaseline]) // book is intentionally excluded: hasCorrectBook is a local snapshot, and including book causes the effect to re-fire after publish/unpublish state updates, triggering redundant fetches
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -396,6 +408,10 @@ export default function EditorHome() {
 
   const handlePageUpdate = useCallback((data) => {
     setPagesData(data)
+  }, [])
+
+  const handleReadingStatsChange = useCallback((stats) => {
+    setReadingStats({ wordCount: stats.wordCount || 0, readingTime: stats.readingTime || 0 })
   }, [])
 
   // Pages data comes from pagination plugin; no placeholders to avoid stale counts
@@ -647,7 +663,8 @@ export default function EditorHome() {
                 sx={{
                   borderRadius: 'md',
                   bgcolor: isLocked ? 'background.level1' : 'transparent',
-                  '&:hover': { bgcolor: 'background.level2' }
+                  '&:hover': { bgcolor: 'background.level2' },
+                  display: { xs: 'none', md: 'flex' }
                 }}
               >
                 {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
@@ -668,6 +685,22 @@ export default function EditorHome() {
             </Box>
           )}
         </Sheet>
+
+        {isMobile && (
+          <LinearProgress
+            determinate
+            value={scrollPercent}
+            size='sm'
+            color='primary'
+            sx={{
+              borderRadius: 0,
+              height: '2px',
+              display: { xs: 'block', md: 'none' },
+              '--LinearProgress-radius': '0px',
+              flexShrink: 0
+            }}
+          />
+        )}
 
         <Box
           sx={{ display: 'flex', flexDirection: 'row', flexGrow: 1, overflow: 'hidden', minHeight: 0 }}
@@ -702,15 +735,15 @@ export default function EditorHome() {
             sx={{
               flexGrow: 1,
               bgcolor: 'background.level2',
-              pt: { xs: 3, md: 6 }, // 24px mobile (following 8px grid), 48px desktop
-              pb: { xs: 8, md: 15 }, // More bottom space on mobile for comfortable scrolling
-              px: { xs: 2, md: 4 }, // 16px mobile padding (8px grid), 32px desktop
+              pt: { xs: 2, md: 6 },
+              pb: { xs: 12, md: 16 },
+              px: 0,
               overflowY: 'auto',
               overflowX: 'hidden', // Prevent horizontal scroll
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: { xs: 3, md: 6 }, // 24px gap on mobile (breathing room between pages), 48px desktop
+              gap: { xs: 3, md: 6 },
               scrollBehavior: 'smooth'
             }}
           >
@@ -723,10 +756,10 @@ export default function EditorHome() {
               pageSize={pageSize}
               pageZoom={zoom}
               isReadOnly={isLocked}
-              onFocus={(editor) => setFocusedEditor(editor)}
+              onFocus={setFocusedEditor}
               onPageCountChange={handlePageUpdate}
               onTOCChange={setTocData}
-              onReadingStatsChange={(stats) => setReadingStats({ wordCount: stats.wordCount || 0, readingTime: stats.readingTime || 0 })}
+              onReadingStatsChange={handleReadingStatsChange}
             />
           </Box>
 
@@ -764,6 +797,47 @@ export default function EditorHome() {
             </Box>
           )}
         </Box>
+
+        {/* Mobile FAB — edit/done toggle, replaces Lock button on mobile */}
+        {isMobile && !loading && (
+          <Box
+            sx={{
+              position: 'fixed',
+              bottom: 90,
+              right: 20,
+              zIndex: 200,
+              display: { xs: 'flex', md: 'none' }
+            }}
+          >
+            <Tooltip
+              title={isLocked ? t('editor.mobile.editMode', 'Edit') : t('editor.mobile.doneEditing', 'Done')}
+              placement='left'
+              variant='soft'
+              size='sm'
+            >
+              <IconButton
+                size='lg'
+                variant='soft'
+                color={isLocked ? 'neutral' : 'primary'}
+                onClick={() => setIsLocked(!isLocked)}
+                aria-label={isLocked ? t('editor.mobile.editMode', 'Edit') : t('editor.mobile.doneEditing', 'Done')}
+                sx={{
+                  borderRadius: '50%',
+                  width: 56,
+                  height: 56,
+                  boxShadow: 'md',
+                  opacity: isLocked ? 0.72 : 1,
+                  transition: 'opacity 0.2s ease, background-color 0.2s ease'
+                }}
+              >
+                {isLocked ? <PencilLine size={22} /> : <Check size={22} />}
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
+
+        {/* Mobile bottom action strip — appears in edit mode above keyboard */}
+        {isMobile && !isLocked && focusedEditor && <MobileBottomActionStrip editor={focusedEditor} />}
       </Box>
     </>
   )

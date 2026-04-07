@@ -4,6 +4,7 @@
     "error": "Error",
     "save": "Guardar",
     "cancel": "Cancelar",
+    "close": "Cerrar",
     "edit": "Editar",
     "delete": "Eliminar",
     "search": "Buscar",
@@ -1006,5 +1007,92 @@
     },
     "saving": "Guardando...",
     "saved": "Guardado"
+  },
+  "editor": {
+    "slashCommands": {
+      "menuLabel": "Comandos de formato",
+      "hint": "↑↓ para navegar, ↵ para seleccionar, esc para cerrar",
+      "paragraph": "Texto",
+      "paragraphDesc": "Párrafo de texto normal",
+      "heading1": "Encabezado 1",
+      "heading1Desc": "Encabezado de sección grande",
+      "heading2": "Encabezado 2",
+      "heading2Desc": "Encabezado de sección mediano",
+      "heading3": "Encabezado 3",
+      "heading3Desc": "Encabezado de sección pequeño",
+      "bulletList": "Lista de viñetas",
+      "bulletListDesc": "Lista desordenada",
+      "numberedList": "Lista numerada",
+      "numberedListDesc": "Lista ordenada",
+      "quote": "Cita",
+      "quoteDesc": "Cita en bloque",
+      "codeBlock": "Bloque de código",
+      "codeBlockDesc": "Código con resaltado de sintaxis",
+      "table": "Tabla",
+      "tableDesc": "Insertar una tabla",
+      "divider": "Divisor",
+      "dividerDesc": "Línea horizontal",
+      "note": "Nota",
+      "noteDesc": "Agregar un aviso informativo",
+      "tip": "Sugerencia",
+      "tipDesc": "Agregar un consejo útil",
+      "warning": "Advertencia",
+      "warningDesc": "Agregar una advertencia",
+      "columns": "2 Columnas",
+      "columnsDesc": "Diseño en paralelo",
+      "video": "Video",
+      "videoDesc": "Insertar YouTube o Vimeo",
+      "link": "Enlace",
+      "linkDesc": "Agregar un hipervínculo"
+    },
+    "format": {
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "underline": "Subrayado",
+      "link": "Enlace",
+      "linkPlaceholder": "Pega o escribe un enlace…",
+      "turnInto": "Convertir en"
+    },
+    "blockTypes": {
+      "paragraph": "Texto",
+      "h1": "Encabezado 1",
+      "h2": "Encabezado 2",
+      "h3": "Encabezado 3",
+      "bullet": "Lista de viñetas",
+      "number": "Lista numerada",
+      "quote": "Cita",
+      "code": "Bloque de código",
+      "note": "Nota informativa",
+      "tip": "Sugerencia",
+      "warning": "Advertencia",
+      "mixed": "Mixto"
+    },
+    "ai": {
+      "card": "Tarjeta",
+      "createCardHint": "Generar una tarjeta de estudio a partir de esta selección",
+      "more": "Más acciones de IA",
+      "questionnaire": "Cuestionario",
+      "visual": "Imaginar escena",
+      "vocabulary": "Extraer vocabulario"
+    },
+    "table": {
+      "addRowBelow": "Agregar fila abajo",
+      "addColumnRight": "Agregar columna a la derecha",
+      "deleteRow": "Eliminar fila",
+      "deleteColumn": "Eliminar columna",
+      "deleteTable": "Eliminar tabla"
+    },
+    "mobile": {
+      "editMode": "Editar",
+      "doneEditing": "Listo",
+      "insertBlock": "Insertar bloque",
+      "formatActions": "Formato"
+    }
+  },
+  "public": {
+    "signUpFree": "Regístrate gratis",
+    "endCTAAuth": "Bifurca este libro a tu biblioteca para editarlo y hacerlo tuyo",
+    "endCTAGuest": "Escrito con Nowry · Empieza tu propio libro gratis",
+    "startWriting": "Empieza a escribir"
   }
 }

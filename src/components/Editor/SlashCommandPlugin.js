@@ -5,6 +5,7 @@ import {
   $createParagraphNode,
   $insertNodes,
   COMMAND_PRIORITY_HIGH,
+  CONTROLLED_TEXT_INSERTION_COMMAND,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
   KEY_ENTER_COMMAND,
@@ -352,6 +353,28 @@ export default function SlashCommandPlugin() {
   useEffect(() => {
     setSelectedIndex(0)
   }, [queryString])
+
+  // 🛡️ Preserve selected text when "/" is typed
+  // Without this, Lexical would replace the selection with "/", losing the content.
+  // Instead we collapse to the anchor point and insert "/" there — text is kept intact,
+  // and the block transformation will apply to it normally.
+  useEffect(() => {
+    return editor.registerCommand(
+      CONTROLLED_TEXT_INSERTION_COMMAND,
+      (payload) => {
+        // Payload is either a plain string or an InputEvent — extract the text in both cases
+        const text = typeof payload === 'string' ? payload : payload?.data
+        if (text !== '/') return false
+        const selection = $getSelection()
+        if (!$isRangeSelection(selection) || selection.isCollapsed()) return false
+        // Collapse to anchor (start of selection) so the selected text is not deleted
+        selection.focus.set(selection.anchor.key, selection.anchor.offset, selection.anchor.type)
+        selection.insertText('/')
+        return true // Consume — prevents Lexical from inserting "/" a second time
+      },
+      COMMAND_PRIORITY_HIGH
+    )
+  }, [editor])
 
   // 🧠 Detect "/" and show menu
   useEffect(() => {

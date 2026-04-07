@@ -4,6 +4,7 @@
     "error": "Error",
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
     "edit": "Edit",
     "delete": "Delete",
     "search": "Search",
@@ -1093,12 +1094,48 @@
       "divider": "Divider",
       "dividerDesc": "Horizontal line"
     },
+    "format": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "link": "Link",
+      "linkPlaceholder": "Paste or type a link…",
+      "turnInto": "Turn into"
+    },
+    "blockTypes": {
+      "paragraph": "Text",
+      "h1": "Heading 1",
+      "h2": "Heading 2",
+      "h3": "Heading 3",
+      "bullet": "Bullet list",
+      "number": "Numbered list",
+      "quote": "Quote",
+      "code": "Code block",
+      "note": "Note callout",
+      "tip": "Tip callout",
+      "warning": "Warning callout",
+      "mixed": "Mixed"
+    },
+    "ai": {
+      "card": "Card",
+      "createCardHint": "Generate a study card from this selection",
+      "more": "More AI actions",
+      "questionnaire": "Questionnaire",
+      "visual": "Imagine scene",
+      "vocabulary": "Extract vocabulary"
+    },
     "table": {
       "addRowBelow": "Add row below",
       "addColumnRight": "Add column right",
       "deleteRow": "Delete row",
       "deleteColumn": "Delete column",
       "deleteTable": "Delete table"
+    },
+    "mobile": {
+      "editMode": "Edit",
+      "doneEditing": "Done",
+      "insertBlock": "Insert block",
+      "formatActions": "Format"
     }
   },
   "public": {
@@ -1198,7 +1235,12 @@
       "submit": "Submit Report"
     },
     "noLikes": "You haven't liked any content yet",
-    "exploreContent": "Explore public content"
+    "exploreContent": "Explore public content",
+    "signUpFree": "Sign up free",
+    "backToBrowse": "Back to Browse",
+    "endCTAAuth": "Fork this book to your library to edit and make it yours",
+    "endCTAGuest": "Written with Nowry · Start your own book for free",
+    "startWriting": "Start writing"
   },
   "focusBar": {
     "modal": {

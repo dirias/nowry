@@ -146,19 +146,20 @@ function EditorSyncPlugin({ onContentChange }) {
 
 function FocusReportPlugin({ onFocus }) {
   const [editor] = useLexicalComposerContext()
+  const onFocusRef = useRef(onFocus)
   useEffect(() => {
-    // Report focus immediately on mount if needed, or wait for event
-    // If this is the *only* editor, we can just say we are focused.
-    onFocus(editor)
+    onFocusRef.current = onFocus
+  })
+  useEffect(() => {
     return editor.registerCommand(
       FOCUS_COMMAND,
       () => {
-        onFocus(editor)
+        onFocusRef.current(editor)
         return false
       },
       COMMAND_PRIORITY_LOW
     )
-  }, [editor, onFocus])
+  }, [editor])
   return null
 }
 
@@ -381,7 +382,10 @@ export default function Editor({
       },
       onError: (e) => console.error('Lexical error:', e)
     }),
-    [book?._id, initialContent]
+    [book?._id]
+    // initialContent is intentionally excluded: the editorState initializer is called once
+    // by Lexical on mount. Including initialContent here would re-create the LexicalComposer
+    // on every keystroke (parent content state update), causing an infinite re-render loop.
   )
 
   useEffect(() => {
@@ -435,7 +439,7 @@ export default function Editor({
   const fixedHeight = `${toPx(PAGE_SIZES[pageSize]?.height || '297mm')}px`
   const fixedPaddingY = `${toPx(PAGE_SIZES[pageSize]?.paddingY || '25mm')}px`
   const fixedPaddingX = `${toPx(PAGE_SIZES[pageSize]?.paddingX || '20mm')}px`
-  const adjustedZoom = useMemo(() => (isMobile ? 0.75 : pageZoom), [isMobile, pageZoom])
+  const adjustedZoom = useMemo(() => pageZoom, [pageZoom])
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 900)
@@ -489,8 +493,40 @@ export default function Editor({
             ref={containerRef}
           >
             <RichTextPlugin
-              contentEditable={<ContentEditable className='editor-content' role='textbox' aria-multiline='true' />}
-              placeholder={<div className='editor-placeholder'>Start writing your book...</div>}
+              contentEditable={
+                <ContentEditable
+                  className='editor-content'
+                  role='textbox'
+                  aria-multiline='true'
+                  style={
+                    isMobile
+                      ? undefined
+                      : {
+                          width: fixedWidth,
+                          paddingTop: fixedPaddingY,
+                          paddingBottom: fixedPaddingY,
+                          paddingLeft: fixedPaddingX,
+                          paddingRight: fixedPaddingX
+                        }
+                  }
+                />
+              }
+              placeholder={
+                <div
+                  className='editor-placeholder'
+                  style={
+                    isMobile
+                      ? undefined
+                      : {
+                          top: fixedPaddingY,
+                          left: fixedPaddingX,
+                          right: fixedPaddingX
+                        }
+                  }
+                >
+                  {t('editor.placeholder', 'Start writing your book...')}
+                </div>
+              }
               ErrorBoundary={EditorErrorBoundary}
             />
           </Box>
