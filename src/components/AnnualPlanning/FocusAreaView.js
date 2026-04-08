@@ -908,52 +908,120 @@ const FocusAreaView = () => {
 
   return (
     <Container maxWidth='xl' sx={{ py: 4, pb: 10 }}>
-      {/* Header */}
-      <Button
-        variant='plain'
-        color='neutral'
-        startDecorator={<ArrowBackIcon />}
-        onClick={() => navigate('/annual-planning')}
-        sx={{ mb: 2, pl: 0 }}
-      >
-        Back to Plan
-      </Button>
+      {/* Premium Back Navigation Row */}
+      <Box sx={{ mb: 2 }}>
+        <IconButton
+          variant='plain'
+          color='neutral'
+          onClick={() => navigate('/annual-planning')}
+          size='sm'
+          sx={{
+            ml: -1, // Pull slightly left to optically align the arrow stem with the layout grid
+            borderRadius: '50%',
+            transition: 'all 0.2s',
+            '&:hover': { bgcolor: 'background.level1', transform: 'translateX(-4px)' } // Slide left on hover
+          }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
+      </Box>
 
-      <Box sx={{ mb: 4 }}>
+      {/* Header Area */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: 2.5,
+          mb: 4
+        }}
+      >
+        {/* Glowing Icon Container */}
         <Box
           sx={{
-            p: { xs: 3, md: 4 },
-            width: '100%',
+            width: { xs: 56, md: 64 }, // Scaled down to match text block height exactly
+            height: { xs: 56, md: 64 },
+            borderRadius: 'xl',
             bgcolor: area.color ? `${area.color}15` : 'background.level1',
-            borderRadius: 'lg',
             border: '1px solid',
             borderColor: area.color ? `${area.color}30` : 'divider',
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            textAlign: 'left',
-            gap: 2
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: { xs: '2rem', md: '2.5rem' },
+            flexShrink: 0,
+            boxShadow: area.color ? `0 4px 24px ${area.color}20` : 'sm'
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-            <Box
-              sx={{
-                fontSize: { xs: '2.5rem', md: '3rem' },
-                lineHeight: 1,
-                flexShrink: 0
-              }}
-            >
-              {area.icon}
-            </Box>
-            <Typography level='h2' fontWeight={700}>
-              {area.name}
-            </Typography>
-          </Box>
+          {area.icon}
+        </Box>
 
+        {/* Text Area */}
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Typography
+            level='h1'
+            fontSize={{ xs: '2rem', md: '2.5rem' }}
+            fontWeight={800}
+            sx={{ letterSpacing: '-0.02em', mb: 0, lineHeight: 1.1 }}
+          >
+            {area.name}
+          </Typography>
           <Typography level='body-md' textColor='text.tertiary' maxWidth='600px'>
             {area.description}
           </Typography>
         </Box>
+
+        {/* Lateral Area Switcher */}
+        {allAreas && allAreas.length > 1 && (
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 0.5,
+              bgcolor: 'background.level1',
+              p: 0.5,
+              borderRadius: 'lg',
+              alignSelf: { xs: 'flex-start', md: 'flex-end' },
+              mt: { xs: 1, md: 0 }
+            }}
+          >
+            {allAreas.map((a) => {
+              const isActive = a._id === id
+              return (
+                <Box
+                  key={a._id}
+                  onClick={() => !isActive && navigate(`/annual-planning/area/${a._id}`)}
+                  sx={{
+                    px: 1.5,
+                    py: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                    borderRadius: 'md',
+                    cursor: isActive ? 'default' : 'pointer',
+                    bgcolor: isActive ? 'background.surface' : 'transparent',
+                    boxShadow: isActive ? 'sm' : 'none',
+                    transition: 'all 0.2s',
+                    '&:hover': isActive ? {} : { bgcolor: 'background.level2' }
+                  }}
+                >
+                  <Typography level='body-sm' sx={{ fontSize: '1.25rem', lineHeight: 1 }}>
+                    {a.icon}
+                  </Typography>
+                  <Typography
+                    level='title-sm'
+                    sx={{
+                      color: isActive ? 'text.primary' : 'text.tertiary',
+                      fontWeight: isActive ? 600 : 500,
+                      display: { xs: 'none', lg: 'block' } // Hide text on small screens, just show icon
+                    }}
+                  >
+                    {a.name}
+                  </Typography>
+                </Box>
+              )
+            })}
+          </Box>
+        )}
       </Box>
 
       {/* Smart Banner: Days Left / Overdue Banner */}

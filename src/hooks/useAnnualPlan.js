@@ -44,6 +44,7 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
   const [goals, setGoals] = useState([])
   const [activities, setActivities] = useState([])
   const [priorities, setPriorities] = useState([])
+  const [quarterReports, setQuarterReports] = useState([])
   const [preferredPriorityIds, setPreferredPriorityIds] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -72,9 +73,11 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
       const allGoalsList = Array.isArray(full.goals) ? full.goals : []
       const fetchedActivities = Array.isArray(full.activities) ? full.activities : []
       const fetchedPriorities = Array.isArray(full.priorities) ? full.priorities : []
+      const fetchedQuarterReports = Array.isArray(full.quarter_reports) ? full.quarter_reports : []
 
       setPlan(fetchedPlan)
       setPriorities(fetchedPriorities)
+      setQuarterReports(fetchedQuarterReports)
 
       // Enrich areas with their goals + progress (same shape as before)
       const allGoals = []
@@ -150,7 +153,19 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
     }
   }, [year])
 
-  return { plan, focusAreas, areas: focusAreas, goals, activities, priorities, preferredPriorityIds, loading, error, reload: load }
+  return {
+    plan,
+    focusAreas,
+    areas: focusAreas,
+    goals,
+    activities,
+    priorities,
+    quarterReports,
+    preferredPriorityIds,
+    loading,
+    error,
+    reload: load
+  }
 }
 
 export default useAnnualPlan

@@ -56,7 +56,15 @@ const AnnualPlanningHome = () => {
 
   const year = new Date().getFullYear()
   const { user } = useAuth()
-  const { plan: hookPlan, focusAreas: hookAreas, goals: hookGoals, priorities: hookPriorities, loading, reload } = useAnnualPlan(year, user)
+  const {
+    plan: hookPlan,
+    focusAreas: hookAreas,
+    goals: hookGoals,
+    priorities: hookPriorities,
+    quarterReports: hookQuarterReports,
+    loading,
+    reload
+  } = useAnnualPlan(year, user)
 
   const [plan, setPlan] = useState(null)
   const [areas, setAreas] = useState([])
@@ -71,12 +79,6 @@ const AnnualPlanningHome = () => {
   const [closingQuarter, setClosingQuarter] = useState(null)
   const [closingYear, setClosingYear] = useState(null)
 
-  useEffect(() => {
-    if (plan?._id) {
-      annualPlanningService.getQuarterReports(plan._id).then(setQuarterReports).catch(console.error)
-    }
-  }, [plan])
-
   // Sync hook data into local state (needed so mutations can update UI immediately)
   useEffect(() => {
     if (loading) return
@@ -84,6 +86,7 @@ const AnnualPlanningHome = () => {
     setEditTitle(hookPlan?.title || `Annual Plan ${year}`)
     setAreas(hookAreas)
     setPriorities(hookPriorities)
+    setQuarterReports(hookQuarterReports || [])
 
     // Compute global metrics from the flat goals list
     let totalProgressSum = 0
@@ -169,7 +172,7 @@ const AnnualPlanningHome = () => {
     }
   }
 
-  // Quarter Closing Logic
+  // Quarter Closing Logic (Evaluated strictly by backend)
   const now = new Date()
   const currentQMonth = now.getMonth()
   const currentQYear = now.getFullYear()
@@ -178,20 +181,8 @@ const AnnualPlanningHome = () => {
   const currentQEndDate = new Date(currentQYear, currentQEndMonth + 1, 0)
   const daysLeft = Math.ceil((currentQEndDate.getTime() - now.getTime()) / (1000 * 3600 * 24))
 
-  let overdueQ = null
-  let overdueY = null
-  if (plan) {
-    const pastQuarters = [1, 2, 3, 4].filter((q) => currentQYear > plan.year || (currentQYear === plan.year && currentQ > q))
-    for (let pq of pastQuarters) {
-      const hasReport = quarterReports.some((r) => r.quarter === pq && r.year === plan.year)
-      const hasGoals = hookGoals.some((g) => g.quarter === pq && g.year === plan.year)
-      if (!hasReport && hasGoals) {
-        overdueQ = pq
-        overdueY = plan.year
-        break
-      }
-    }
-  }
+  const overdueQ = plan?.overdue_quarter?.quarter || null
+  const overdueY = plan?.overdue_quarter?.year || null
 
   const overdueEndDateStr = overdueQ
     ? new Date(overdueY || currentQYear, overdueQ * 3, 0).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })
@@ -643,7 +634,6 @@ const AnnualPlanningHome = () => {
           onSuccess={() => {
             setShowCloseModal(false)
             reload()
-            annualPlanningService.getQuarterReports(plan._id).then(setQuarterReports)
           }}
           targetQuarter={closingQuarter}
           targetYear={closingYear}

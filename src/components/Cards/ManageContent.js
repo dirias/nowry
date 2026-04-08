@@ -1114,15 +1114,18 @@ function DeckGridCard({
             {t('cards.manage_content.cardCount', { count: cardCount })}
           </Typography>
 
-          {deck.due_cards > 0 ? (
-            <Typography level='body-xs' sx={{ color: 'primary.plainColor', fontWeight: 600 }}>
-              {t('cards.studyDue', { count: deck.due_cards })}
-            </Typography>
-          ) : deck.new_cards > 0 ? (
-            <Typography level='body-xs' sx={{ color: 'success.plainColor', fontWeight: 600 }}>
-              {t('study.deck.newCount', { count: deck.new_cards })}
-            </Typography>
-          ) : null}
+          <Stack direction='row' spacing={1} alignItems='center'>
+            {deck.due_cards > 0 && (
+              <Typography level='body-xs' sx={{ color: 'primary.plainColor', fontWeight: 600 }}>
+                {t('study.dueCount', { count: deck.due_cards })}
+              </Typography>
+            )}
+            {deck.new_cards > 0 && (
+              <Typography level='body-xs' sx={{ color: 'success.plainColor', fontWeight: 600 }}>
+                {t('study.deck.newCount', { count: deck.new_cards })}
+              </Typography>
+            )}
+          </Stack>
         </Box>
 
         <Box sx={{ flex: 1, zIndex: 1 }} onClick={() => handlePreviewDeck(deck)} />
@@ -1133,7 +1136,7 @@ function DeckGridCard({
             <Button size='sm' variant='outlined' color='neutral' disabled fullWidth sx={{ fontSize: '0.75rem', py: 0.75 }}>
               {t('cards.noCardsYet', 'Empty')}
             </Button>
-          ) : deck.due_cards > 0 ? (
+          ) : (deck.due_cards || 0) + (deck.new_cards || 0) > 0 ? (
             <Button
               size='sm'
               variant='solid'
@@ -1146,22 +1149,7 @@ function DeckGridCard({
               fullWidth
               sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
             >
-              {t('cards.studyDue', { count: deck.due_cards })}
-            </Button>
-          ) : deck.new_cards > 0 ? (
-            <Button
-              size='sm'
-              variant='solid'
-              color='success'
-              onClick={(e) => {
-                e.stopPropagation()
-                onStudy?.(deck)
-              }}
-              startDecorator={<School sx={{ fontSize: 14 }} />}
-              fullWidth
-              sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
-            >
-              {t('cards.studyNew', { count: deck.new_cards })}
+              {t('cards.studyTotal', { count: (deck.due_cards || 0) + (deck.new_cards || 0) })}
             </Button>
           ) : (
             <Button
