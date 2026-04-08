@@ -562,17 +562,23 @@ export default function BookHome() {
                       overflow: 'hidden',
                       flexShrink: 0,
                       bgcolor: book.cover_color || themeColor || 'primary.solidBg',
-                      backgroundImage: book.cover_image ? `url(${book.cover_image})` : 'none',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       border: '1px solid',
-                      borderColor: 'divider'
+                      borderColor: 'divider',
+                      position: 'relative'
                     }}
                   >
                     {!book.cover_image && <MenuBookIcon sx={{ fontSize: 20, color: 'common.white', opacity: 0.8 }} />}
+                    {book.cover_image && (
+                      <img
+                        src={book.cover_image}
+                        alt={book.title}
+                        loading='lazy'
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+                      />
+                    )}
                   </Box>
 
                   {/* Title */}

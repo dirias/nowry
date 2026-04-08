@@ -48,9 +48,10 @@ import { CalloutNode } from '../../nodes/CalloutNode'
 
 // UI Components
 import TextMenu from '../Menu/TextMenu'
-import StudyCard from '../Cards/GeneratedCards'
-import QuestionnaireModal from '../Cards/QuestionnaireModal'
-import VisualizerModal from '../Cards/VisualizerModal'
+// Heavy UI Components (Lazy Loaded for performance)
+const StudyCard = React.lazy(() => import('../Cards/GeneratedCards'))
+const QuestionnaireModal = React.lazy(() => import('../Cards/QuestionnaireModal'))
+const VisualizerModal = React.lazy(() => import('../Cards/VisualizerModal'))
 import { cardsService, quizzesService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
 import FloatingToolbarPlugin from '../Editor/plugins/FloatingToolbarPlugin'
@@ -560,10 +561,27 @@ export default function Editor({
             }}
           />
 
-          {/* Overlays */}
-          {showStudyCard && <StudyCard cards={cards} book={book} onCancel={() => setShowStudyCard(false)} />}
-          {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
-          {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}
+          {/* Overlays (Lazy Loaded) */}
+          <React.Suspense
+            fallback={
+              <Box
+                sx={{
+                  position: 'fixed',
+                  inset: 0,
+                  zIndex: 1200,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: 'rgba(0,0,0,0.1)',
+                  backdropFilter: 'blur(2px)'
+                }}
+              />
+            }
+          >
+            {showStudyCard && <StudyCard cards={cards} book={book} onCancel={() => setShowStudyCard(false)} />}
+            {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
+            {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}
+          </React.Suspense>
         </LexicalComposer>
       </Box>
     </EditorErrorBoundary>
