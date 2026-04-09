@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -20,7 +20,8 @@ import {
   Button,
   IconButton,
   Skeleton,
-  Avatar
+  Avatar,
+  Tooltip
 } from '@mui/joy'
 import {
   Search as SearchIcon,
@@ -88,11 +89,7 @@ const PublicBrowse = () => {
     localStorage.setItem('public_view_mode', newMode)
   }
 
-  useEffect(() => {
-    fetchContent()
-  }, [activeTab, filters])
-
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     const isLoadingMore = filters.skip > 0
 
     if (isLoadingMore) {
@@ -131,32 +128,23 @@ const PublicBrowse = () => {
         setLoading(false)
       }
     }
-  }
+  }, [activeTab, filters])
+
+  useEffect(() => {
+    fetchContent()
+  }, [fetchContent])
 
   const fetchDeckCards = async (decks) => {
     const cardsData = {}
-
     for (const deck of decks) {
       try {
-        // Fetch first 3 cards for preview - use the cards endpoint for the deck
-        const response = await fetch(`http://localhost:8000/decks/${deck._id}/cards?limit=3`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('firebase_token')}`
-          }
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          cardsData[deck._id] = data.cards || data.items || []
-        } else {
-          cardsData[deck._id] = []
-        }
+        const data = await publicContentService.getPublicDeckCards(deck._id, 6)
+        cardsData[deck._id] = data.cards || []
       } catch (error) {
         console.error(`Error fetching cards for deck ${deck._id}:`, error)
         cardsData[deck._id] = []
       }
     }
-
     setDeckCards(cardsData)
   }
 
@@ -215,12 +203,28 @@ const PublicBrowse = () => {
 
           {/* View Toggle */}
           <Stack direction='row' spacing={0.5}>
-            <IconButton size='md' variant={viewMode === 'grid' ? 'solid' : 'plain'} onClick={() => handleViewChange('grid')}>
-              <GridViewIcon />
-            </IconButton>
-            <IconButton size='md' variant={viewMode === 'list' ? 'solid' : 'plain'} onClick={() => handleViewChange('list')}>
-              <ViewListIcon />
-            </IconButton>
+            <Tooltip title={t('public.gridView', { defaultValue: 'Grid view' })} size='sm' variant='soft' placement='bottom'>
+              <IconButton
+                size='sm'
+                variant={viewMode === 'grid' ? 'solid' : 'plain'}
+                onClick={() => handleViewChange('grid')}
+                aria-label={t('public.gridView', { defaultValue: 'Grid view' })}
+                sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }}
+              >
+                <GridViewIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t('public.listView', { defaultValue: 'List view' })} size='sm' variant='soft' placement='bottom'>
+              <IconButton
+                size='sm'
+                variant={viewMode === 'list' ? 'solid' : 'plain'}
+                onClick={() => handleViewChange('list')}
+                aria-label={t('public.listView', { defaultValue: 'List view' })}
+                sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }}
+              >
+                <ViewListIcon />
+              </IconButton>
+            </Tooltip>
           </Stack>
 
           {/* Sort */}
@@ -233,18 +237,20 @@ const PublicBrowse = () => {
           </Select>
 
           {/* Filter Toggle */}
-          <IconButton
-            variant='outlined'
-            onClick={() => setShowFilters(!showFilters)}
-            size='md'
-            sx={{
-              '&:hover': {
-                bgcolor: 'background.level1'
-              }
-            }}
-          >
-            <FilterIcon />
-          </IconButton>
+          <Tooltip title={t('public.filterBy')} size='sm' variant='soft' placement='bottom'>
+            <IconButton
+              variant='outlined'
+              onClick={() => setShowFilters(!showFilters)}
+              size='sm'
+              aria-label={t('public.filterBy')}
+              sx={{
+                '&:hover': { bgcolor: 'background.level1' },
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
+              }}
+            >
+              <FilterIcon />
+            </IconButton>
+          </Tooltip>
         </Stack>
 
         {/* Expandable Filters */}
@@ -313,12 +319,12 @@ const PublicBrowse = () => {
       {!loading && items.length > 0 && (
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
-            {t('public.showingResults', { count: items.length })} {total > items.length && `of ${total}`}
+            {t('public.showingResults', { count: items.length })} {total > items.length && t('public.ofTotal', { total })}
           </Typography>
 
           {items.length < total && (
             <Button variant='outlined' onClick={handleLoadMore} size='sm' loading={loadingMore} disabled={loadingMore}>
-              {loadingMore ? 'Loading...' : t('public.loadMore')}
+              {t('public.loadMore')}
             </Button>
           )}
         </Box>
@@ -328,7 +334,7 @@ const PublicBrowse = () => {
       {loadingMore && (
         <Box sx={{ mt: 2, textAlign: 'center' }}>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Loading more items...
+            {t('public.loadingMore')}
           </Typography>
         </Box>
       )}
@@ -421,10 +427,11 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                         sx={{
                           width: '100%',
                           height: '100%',
-                          background:
-                            item.cover_color ||
-                            item.color ||
-                            'linear-gradient(135deg, var(--joy-palette-primary-solidBg) 0%, var(--joy-palette-primary-900) 100%)',
+                          background: item.image_url
+                            ? 'none'
+                            : item.cover_color ||
+                              item.color ||
+                              'linear-gradient(135deg, var(--joy-palette-primary-solidBg) 0%, var(--joy-palette-primary-900) 100%)',
                           borderRadius: 'sm',
                           display: 'flex',
                           flexDirection: 'column',
@@ -436,27 +443,44 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                             content: '""',
                             position: 'absolute',
                             inset: 0,
-                            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.2) 100%)'
+                            background: item.image_url ? 'none' : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.2) 100%)'
                           }
                         }}
                       >
-                        {/* Card stack indicator */}
-                        <Typography level='h1' sx={{ fontSize: '4rem', opacity: 0.9, color: 'common.white', zIndex: 1, mb: 1 }}>
-                          🎴
-                        </Typography>
-                        <Chip
-                          variant='solid'
-                          size='lg'
-                          sx={{
-                            bgcolor: 'background.surface',
-                            color: item.cover_color || item.color || 'primary.solidBg',
-                            fontWeight: 700,
-                            fontSize: '0.875rem',
-                            zIndex: 1
-                          }}
-                        >
-                          {deckCards[item._id].length} cards
-                        </Chip>
+                        {item.image_url ? (
+                          <Box
+                            component='img'
+                            src={item.image_url}
+                            alt={item.name || item.title}
+                            sx={{
+                              position: 'absolute',
+                              inset: 0,
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              borderRadius: 'sm'
+                            }}
+                          />
+                        ) : (
+                          <>
+                            <Typography level='h1' sx={{ fontSize: '4rem', opacity: 0.9, color: 'common.white', zIndex: 1, mb: 1 }}>
+                              🎴
+                            </Typography>
+                            <Chip
+                              variant='solid'
+                              size='lg'
+                              sx={{
+                                bgcolor: 'background.surface',
+                                color: item.cover_color || item.color || 'primary.solidBg',
+                                fontWeight: 700,
+                                fontSize: '0.875rem',
+                                zIndex: 1
+                              }}
+                            >
+                              {deckCards[item._id].length} {t('public.cards')}
+                            </Chip>
+                          </>
+                        )}
                       </Box>
                     ) : (
                       // Fallback: Elegant placeholder
@@ -511,12 +535,11 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                             fontWeight: 500,
                             fontSize: '0.7rem',
                             mb: 1,
-                            textTransform: 'uppercase',
                             letterSpacing: '0.05em',
                             bgcolor: 'transparent'
                           }}
                         >
-                          by {item.author_name}
+                          {t('public.byAuthor', { name: item.author_name })}
                         </Typography>
                       )}
 
@@ -540,17 +563,30 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                       )}
 
                       {/* Card count badge */}
-                      <Chip
-                        size='sm'
-                        variant='soft'
-                        color='primary'
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: '0.7rem'
-                        }}
-                      >
-                        {item.total_cards || 0} {t('public.cards', { defaultValue: 'cards' })}
-                      </Chip>
+                      <Stack direction='row' spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                        <Chip
+                          size='sm'
+                          variant='soft'
+                          color='primary'
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: '0.7rem'
+                          }}
+                        >
+                          {item.total_cards || 0} {t('public.cards', { defaultValue: 'cards' })}
+                        </Chip>
+                        {item?.forked_from && (
+                          <Chip
+                            size='sm'
+                            variant='soft'
+                            color='neutral'
+                            startDecorator={<ForkIcon sx={{ fontSize: 11 }} />}
+                            sx={{ fontSize: '0.65rem', height: 'auto', py: 0.25 }}
+                          >
+                            {t('public.forkBadge')}
+                          </Chip>
+                        )}
+                      </Stack>
                     </Box>
 
                     {/* Stats */}
@@ -615,7 +651,7 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
               overflow: 'hidden',
               flexShrink: 0,
               bgcolor: item.cover_color || item.color || 'primary.solidBg',
-              backgroundImage: item.cover_image ? `url(${item.cover_image})` : 'none',
+              backgroundImage: item.cover_image ? `url(${item.cover_image})` : item.image_url ? `url(${item.image_url})` : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               display: 'flex',
@@ -630,11 +666,24 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
 
           {/* Title & Author */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography level='title-sm' sx={{ fontWeight: 600, bgcolor: 'transparent' }}>
-              {isBook ? item.title : item.name}
-            </Typography>
+            <Stack direction='row' spacing={0.75} alignItems='center' sx={{ flexWrap: 'wrap', gap: 0.5, mb: 0.25 }}>
+              <Typography level='title-sm' sx={{ fontWeight: 600, bgcolor: 'transparent' }}>
+                {isBook ? item.title : item.name}
+              </Typography>
+              {item?.forked_from && (
+                <Chip
+                  size='sm'
+                  variant='soft'
+                  color='neutral'
+                  startDecorator={<ForkIcon sx={{ fontSize: 11 }} />}
+                  sx={{ fontSize: '0.65rem', height: 'auto', py: 0.25 }}
+                >
+                  {t('public.forkBadge')}
+                </Chip>
+              )}
+            </Stack>
             <Typography level='body-xs' sx={{ color: 'text.secondary', bgcolor: 'transparent' }}>
-              {item.author_name || 'Unknown'}
+              {item.author_name || t('public.unknownAuthor')}
             </Typography>
           </Box>
 

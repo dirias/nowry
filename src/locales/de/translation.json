@@ -10,6 +10,7 @@
     "settings": "Einstellungen",
     "profile": "Profil",
     "logout": "Abmelden",
+    "pomodoro": "Pomodoro-Timer",
     "toggleTheme": "Thema wechseln"
   },
   "news": {
@@ -43,6 +44,14 @@
     "getStarted": "Loslegen",
     "drawer": {
       "menu": "Menü"
+    },
+    "profileMenu": {
+      "open": "Profilmenü öffnen",
+      "viewProfile": "Profil anzeigen",
+      "tier": {
+        "free": "Kostenlos",
+        "pro": "Pro"
+      }
     }
   },
   "footer": {
@@ -72,6 +81,9 @@
       "light": "Hell",
       "dark": "Dunkel"
     },
+    "copyright": "© {{year}} Nowry. Alle Rechte vorbehalten.",
+    "toggleTheme": "Design wechseln",
+    "language": "Sprache",
     "bugReport": "Fehler melden"
   },
   "routes": {
@@ -386,8 +398,44 @@
     }
   },
   "settings": {
-    "title": "Kontoeinstellungen",
-    "subtitle": "Verwalte Präferenzen, Sicherheit und Konto",
+    "title": "Einstellungen",
+    "subtitle": "Verwalte dein Konto und deine Präferenzen",
+    "nav": {
+      "account": "Konto",
+      "appearance": "Erscheinungsbild",
+      "productivity": "Produktivität",
+      "notifications": "Benachrichtigungen",
+      "security": "Sicherheit",
+      "danger": "Gefahrenzone",
+      "jump": "Zum Abschnitt navigieren",
+      "jumpTo": "Gehe zu"
+    },
+    "account": {
+      "title": "Konto",
+      "fullName": "Anzeigename",
+      "emailManaged": "Die E-Mail wird von deinem Authentifizierungsanbieter verwaltet",
+      "editPhoto": "Foto ändern"
+    },
+    "appearance": {
+      "title": "Erscheinungsbild",
+      "mode": "Thema",
+      "modeDesc": "Hell- oder Dunkelmodus wählen",
+      "language": "Sprache",
+      "accentColor": "Akzentfarbe",
+      "accentColorDesc": "Passe die Akzentfarbe der App an",
+      "interests": "Interessen"
+    },
+    "productivity": {
+      "title": "Produktivität",
+      "enableTimer": "Pomodoro-Timer aktivieren",
+      "enableTimerDesc": "Timer in der Kopfzeile anzeigen und schwebendes Widget aktivieren",
+      "focusDuration": "Fokuszeit (Minuten)",
+      "shortBreak": "Kurze Pause (Minuten)",
+      "longBreak": "Lange Pause (Minuten)",
+      "recommendedMinutes": "Empfohlen: {{count}}",
+      "autoStart": "Automatisch starten",
+      "autoStartDesc": "Nächste Sitzung automatisch starten"
+    },
     "general": {
       "title": "Allgemeine Einstellungen",
       "appearance": "Erscheinungsbild",
@@ -400,13 +448,23 @@
     },
     "security": {
       "title": "Sicherheit",
-      "changePassword": "Passwort Ändern",
+      "changePassword": "Passwort ändern",
+      "changePasswordCta": "Passwort ändern",
       "currentPassword": "Aktuelles Passwort",
       "newPassword": "Neues Passwort",
-      "confirmPassword": "Neues Passwort Bestätigen",
+      "confirmPassword": "Neues Passwort bestätigen",
       "updatePassword": "Passwort Aktualisieren",
+      "passwordMismatch": "Passwörter stimmen nicht überein",
+      "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen haben",
+      "passwordTooWeak": "Das Passwort ist zu schwach",
+      "wrongPassword": "Das aktuelle Passwort ist falsch",
+      "reauthRequired": "Gib dein aktuelles Passwort ein, um fortzufahren",
+      "passwordChangeFailed": "Passwort konnte nicht aktualisiert werden. Bitte erneut versuchen.",
+      "passwordChanged": "Passwort erfolgreich aktualisiert",
+      "save": "Passwort aktualisieren",
       "twoFactor": "Zwei-Faktor-Authentifizierung",
       "twoFactorDesc": "Füge deinem Konto eine zusätzliche Sicherheitsebene hinzu",
+      "comingSoon": "Demnächst",
       "enable2FA": "2FA Aktivieren",
       "disable2FA": "Deaktivieren",
       "success2FA": "2FA Aktiviert! Backup-Codes:",
@@ -421,16 +479,31 @@
       "newsUpdates": "Neuigkeiten",
       "newsUpdatesDesc": "Erhalte Updates über neue Funktionen",
       "marketing": "Marketing-E-Mails",
-      "marketingDesc": "Erhalte Angebote und Tipps"
+      "marketingDesc": "Erhalte Angebote und Tipps",
+      "comingSoon": "Benachrichtigungen demnächst",
+      "comingSoonDesc": "Wir arbeiten an intelligenten Benachrichtigungen für deine Lernsessions"
     },
     "danger": {
       "title": "Gefahrenzone",
-      "deleteAccount": "Konto Löschen",
-      "deleteDesc": "Dein Konto und alle Daten dauerhaft löschen",
+      "deleteAccount": "Konto löschen",
+      "deleteDesc": "Dein Konto und alle Daten dauerhaft löschen. Dies kann nicht rückgängig gemacht werden.",
       "confirmTitle": "Bist du absolut sicher?",
       "confirmDesc": "Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Daten werden gelöscht.",
       "confirmBtn": "Ja, Konto Löschen",
-      "cancelBtn": "Abbrechen"
+      "cancelBtn": "Abbrechen",
+      "modal": {
+        "title": "Konto Löschen",
+        "description": "Dies löscht dauerhaft dein Konto und alle zugehörigen Daten",
+        "confirm": "Konto Löschen",
+        "consequence1": "Alle Bücher und Notizen werden gelöscht",
+        "consequence2": "Alle Karteikartendecks werden gelöscht",
+        "consequence3": "Alle Jahresplanungsdaten werden gelöscht",
+        "consequence4": "Öffentliche Inhalte werden sofort depubliziert"
+      }
+    },
+    "errors": {
+      "loadFailed": "Einstellungen konnten nicht geladen werden. Bitte neu laden.",
+      "networkError": "Netzwerkfehler. Überprüfe deine Verbindung."
     }
   },
   "dashboard": {

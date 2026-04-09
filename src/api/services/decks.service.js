@@ -55,6 +55,30 @@ export const decksService = {
   },
 
   /**
+   * Publish a deck to the community
+   */
+  async publish(id, payload) {
+    const { data } = await apiClient.post(`/public/decks/${id}/publish`, payload)
+    return data
+  },
+
+  /**
+   * Remove a deck from the community
+   */
+  async unpublish(id) {
+    const { data } = await apiClient.post(`/public/decks/${id}/unpublish`, {})
+    return data
+  },
+
+  /**
+   * Get deck settings
+   */
+  async getSettings(id) {
+    const { data } = await apiClient.get(`/decks/${id}/settings`)
+    return data
+  },
+
+  /**
    * Delete a deck
    */
   async delete(id) {

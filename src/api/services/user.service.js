@@ -44,16 +44,18 @@ export const userService = {
   },
 
   /**
-   * Change user password
-   * @param {Object} passwordData
-   * @param {string} passwordData.current_password
-   * @param {string} passwordData.new_password
-   * @returns {Promise<Object>}
+   * Patch user profile (partial update)
+   * @param {Object} profileData
+   * @param {string} [profileData.full_name]
+   * @returns {Promise<Object>} Updated profile
    */
-  async changePassword(passwordData) {
-    const { data } = await apiClient.put('/users/password', passwordData)
+  async patchProfile(profileData) {
+    const { data } = await apiClient.patch('/users/profile', profileData)
     return data
   },
+
+  // changePassword has been removed — password changes are now handled
+  // client-side via Firebase (EmailAuthProvider + updatePassword).
 
   /**
    * Update notification preferences

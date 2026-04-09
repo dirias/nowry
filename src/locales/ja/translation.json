@@ -10,6 +10,7 @@
     "settings": "設定",
     "profile": "プロフィール",
     "logout": "ログアウト",
+    "pomodoro": "ポモドーロタイマー",
     "toggleTheme": "テーマを切り替える"
   },
   "news": {
@@ -43,6 +44,14 @@
     "getStarted": "始める",
     "drawer": {
       "menu": "メニュー"
+    },
+    "profileMenu": {
+      "open": "プロフィールメニューを開く",
+      "viewProfile": "プロフィールを見る",
+      "tier": {
+        "free": "無料",
+        "pro": "Pro"
+      }
     }
   },
   "footer": {
@@ -72,6 +81,9 @@
       "light": "ライト",
       "dark": "ダーク"
     },
+    "copyright": "© {{year}} Nowry. 無断転載を禁じます。",
+    "toggleTheme": "テーマを切り替え",
+    "language": "言語",
     "bugReport": "バグを報告"
   },
   "routes": {
@@ -392,8 +404,44 @@
     }
   },
   "settings": {
-    "title": "アカウント設定",
-    "subtitle": "設定、セキュリティ、アカウントの管理",
+    "title": "設定",
+    "subtitle": "アカウントと設定の管理",
+    "nav": {
+      "account": "アカウント",
+      "appearance": "外観",
+      "productivity": "生産性",
+      "notifications": "通知",
+      "security": "セキュリティ",
+      "danger": "危険エリア",
+      "jump": "セクションに移動",
+      "jumpTo": "ジャンプ"
+    },
+    "account": {
+      "title": "アカウント",
+      "fullName": "表示名",
+      "emailManaged": "メールは認証プロバイダーによって管理されています",
+      "editPhoto": "写真を変更"
+    },
+    "appearance": {
+      "title": "外観",
+      "mode": "テーマ",
+      "modeDesc": "ライトモードまたはダークモードを選択",
+      "language": "言語",
+      "accentColor": "アクセントカラー",
+      "accentColorDesc": "アプリのアクセントカラーをカスタマイズ",
+      "interests": "興味・関心"
+    },
+    "productivity": {
+      "title": "生産性",
+      "enableTimer": "ポモドーロタイマーを有効にする",
+      "enableTimerDesc": "ヘッダーにタイマーを表示し、フローティングウィジェットを有効にする",
+      "focusDuration": "集中時間（分）",
+      "shortBreak": "短い休憩（分）",
+      "longBreak": "長い休憩（分）",
+      "recommendedMinutes": "推奨：{{count}}",
+      "autoStart": "自動開始",
+      "autoStartDesc": "次のセッションを自動的に開始する"
+    },
     "general": {
       "title": "一般設定",
       "appearance": "外観",
@@ -406,20 +454,30 @@
     },
     "security": {
       "title": "セキュリティ",
-      "changePassword": "パスワード変更",
+      "changePassword": "パスワードを変更",
+      "changePasswordCta": "パスワードを変更",
       "currentPassword": "現在のパスワード",
       "newPassword": "新しいパスワード",
       "confirmPassword": "新しいパスワード（確認）",
       "updatePassword": "パスワードを更新",
+      "passwordMismatch": "パスワードが一致しません",
+      "passwordTooShort": "パスワードは8文字以上必要です",
+      "passwordTooWeak": "パスワードが弱すぎます",
+      "wrongPassword": "現在のパスワードが正しくありません",
+      "reauthRequired": "続行するには現在のパスワードを入力してください",
+      "passwordChangeFailed": "パスワードの更新に失敗しました。もう一度お試しください。",
+      "passwordChanged": "パスワードが正常に更新されました",
+      "save": "パスワードを更新",
       "twoFactor": "2要素認証",
       "twoFactorDesc": "アカウントにセキュリティレイヤーを追加",
+      "comingSoon": "近日公開",
       "enable2FA": "2FAを有効化",
       "disable2FA": "無効化",
       "success2FA": "2FAが有効になりました！バックアップコード：",
       "disabled2FA": "2FAが正常に無効化されました"
     },
     "notifications": {
-      "title": "通知設定",
+      "title": "通知",
       "emailDigest": "メールダイジェスト",
       "emailDigestDesc": "学習活動の毎日のサマリーを受け取る",
       "studyReminders": "学習リマインダー",
@@ -427,16 +485,31 @@
       "newsUpdates": "ニュース更新",
       "newsUpdatesDesc": "新機能や改善に関する更新を受け取る",
       "marketing": "マーケティングメール",
-      "marketingDesc": "プロモーションオファーやヒントを受け取る"
+      "marketingDesc": "プロモーションオファーやヒントを受け取る",
+      "comingSoon": "通知機能は近日公開",
+      "comingSoonDesc": "学習セッション向けのスマート通知を開発中です"
     },
     "danger": {
       "title": "危険エリア",
-      "deleteAccount": "アカウント削除",
-      "deleteDesc": "アカウントと関連データを完全に削除します",
+      "deleteAccount": "アカウントを削除",
+      "deleteDesc": "アカウントとすべてのデータを完全に削除します。この操作は取り消せません。",
       "confirmTitle": "本当に削除しますか？",
       "confirmDesc": "この操作は取り消せません。ブック、カード、進捗を含むすべてのデータが完全に削除されます。",
       "confirmBtn": "はい、アカウントを削除します",
-      "cancelBtn": "キャンセル"
+      "cancelBtn": "キャンセル",
+      "modal": {
+        "title": "アカウント削除",
+        "description": "アカウントと関連するすべてのデータが完全に削除されます",
+        "confirm": "アカウントを削除",
+        "consequence1": "すべてのブックとメモが削除されます",
+        "consequence2": "すべてのカードデッキが削除されます",
+        "consequence3": "すべての年間計画データが削除されます",
+        "consequence4": "公開コンテンツはすぐに非公開になります"
+      }
+    },
+    "errors": {
+      "loadFailed": "設定を読み込めませんでした。ページを更新して再試行してください。",
+      "networkError": "ネットワークエラーです。接続を確認してください。"
     }
   },
   "dashboard": {

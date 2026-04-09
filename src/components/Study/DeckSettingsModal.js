@@ -21,6 +21,8 @@ import {
   Switch,
   Textarea,
   Sheet,
+  Chip,
+  Button,
   CircularProgress,
   Skeleton,
   Tabs,
@@ -32,6 +34,7 @@ import {
 import { MenuBook, GraphicEq, Public, Style, Quiz as QuizIcon, AccountTree, Check } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { decksService } from '../../api/services'
+import DeckPublishSheet from './DeckPublishSheet'
 
 const SECTIONS = [
   { key: 'study', Icon: MenuBook },
@@ -68,6 +71,7 @@ export default function DeckSettingsModal({ open, onClose, deckId, onSaved }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [savedSection, setSavedSection] = useState(null)
+  const [publishSheetOpen, setPublishSheetOpen] = useState(false)
 
   const debounceTimer = useRef(null)
   const savedOnceRef = useRef(false)
@@ -153,433 +157,425 @@ export default function DeckSettingsModal({ open, onClose, deckId, onSaved }) {
   const { color: accentColor, Icon: DeckTypeIcon } = deck ? getDeckAccent(deck.deck_type) : { color: 'primary', Icon: Style }
 
   return (
-    <Modal open={open} onClose={handleClose}>
-      <ModalDialog
-        size='lg'
-        layout='center'
-        sx={{
-          width: { xs: '100%', sm: 580 },
-          maxHeight: '85vh',
-          p: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
-        <ModalClose sx={{ zIndex: 10 }} />
-
-        {/* Header */}
-        <Box
+    <>
+      <Modal open={open} onClose={handleClose}>
+        <ModalDialog
+          size='lg'
+          layout='center'
           sx={{
-            px: 3,
-            pt: 2.5,
-            pb: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            flexShrink: 0
+            width: { xs: '100%', sm: 580 },
+            maxHeight: '85vh',
+            p: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
           }}
         >
-          <Stack direction='row' alignItems='center' gap={1.5}>
-            {loading ? (
-              <Skeleton variant='text' width={200} height={24} />
-            ) : (
-              <>
-                <Box
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 'md',
-                    bgcolor: `${accentColor}.softBg`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                >
-                  <DeckTypeIcon sx={{ fontSize: 16, color: `${accentColor}.plainColor` }} />
-                </Box>
-                <Box>
-                  <Typography level='title-md' fontWeight={700}>
-                    {deck?.name}
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {deck ? t(`study.types.${deck.deck_type}s`) : null}
-                  </Typography>
-                </Box>
-              </>
-            )}
-          </Stack>
-        </Box>
+          <ModalClose sx={{ zIndex: 10 }} />
 
-        {/* Body */}
-        <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ flex: 1, overflow: 'hidden' }}>
-          {/* Left Nav — desktop only */}
+          {/* Header */}
           <Box
             sx={{
-              width: 152,
-              flexShrink: 0,
-              borderRight: '1px solid',
+              px: 3,
+              pt: 2.5,
+              pb: 2,
+              borderBottom: '1px solid',
               borderColor: 'divider',
-              p: 1.5,
-              display: { xs: 'none', sm: 'flex' },
-              flexDirection: 'column'
+              flexShrink: 0
             }}
           >
-            <List size='sm' sx={{ gap: 0.25 }}>
-              {SECTIONS.map(({ key, Icon }) => (
-                <ListItem key={key} disablePadding>
-                  <ListItemButton
-                    selected={activeSection === key}
-                    onClick={() => setActiveSection(key)}
-                    sx={{ borderRadius: 'sm', gap: 1 }}
+            <Stack direction='row' alignItems='center' gap={1.5}>
+              {loading ? (
+                <Skeleton variant='text' width={200} height={24} />
+              ) : (
+                <>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 'md',
+                      bgcolor: `${accentColor}.softBg`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
                   >
-                    <Icon sx={{ fontSize: 16 }} />
-                    <Typography level='body-sm' sx={{ flex: 1 }}>
-                      {t(`deckSettings.nav.${key}`)}
+                    <DeckTypeIcon sx={{ fontSize: 16, color: `${accentColor}.plainColor` }} />
+                  </Box>
+                  <Box>
+                    <Typography level='title-md' fontWeight={700}>
+                      {deck?.name}
                     </Typography>
-                    {saving && activeSection === key && savedSection === key && (
-                      <CircularProgress size='sm' sx={{ '--CircularProgress-size': '14px' }} />
-                    )}
-                    {saved && savedSection === key && <Check sx={{ fontSize: 14, color: 'success.plainColor' }} />}
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                      {deck ? t(`study.types.${deck.deck_type}s`) : null}
+                    </Typography>
+                  </Box>
+                </>
+              )}
+            </Stack>
           </Box>
 
-          {/* Right Content */}
-          <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3 } }}>
-            {/* xs only: horizontal tabs */}
-            <Tabs
-              value={activeSection}
-              onChange={(_, val) => setActiveSection(val)}
-              sx={{ display: { xs: 'block', sm: 'none' }, mb: 2, bgcolor: 'transparent' }}
+          {/* Body */}
+          <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ flex: 1, overflow: 'hidden' }}>
+            {/* Left Nav — desktop only */}
+            <Box
+              sx={{
+                width: 152,
+                flexShrink: 0,
+                borderRight: '1px solid',
+                borderColor: 'divider',
+                p: 1.5,
+                display: { xs: 'none', sm: 'flex' },
+                flexDirection: 'column'
+              }}
             >
-              <TabList
-                disableUnderline
-                sx={{
-                  bgcolor: 'background.level1',
-                  borderRadius: 'xl',
-                  p: 0.5,
-                  gap: 0.5,
-                  [`& .${tabClasses.root}`]: {
-                    borderRadius: 'lg',
-                    fontWeight: 500,
-                    fontSize: '0.75rem'
-                  },
-                  [`& .${tabClasses.root}[aria-selected="true"]`]: {
-                    bgcolor: 'background.surface',
-                    boxShadow: 'sm'
-                  }
-                }}
-              >
-                {SECTIONS.map(({ key }) => (
-                  <Tab key={key} disableIndicator value={key}>
-                    {t(`deckSettings.nav.${key}`)}
-                  </Tab>
+              <List size='sm' sx={{ gap: 0.25 }}>
+                {SECTIONS.map(({ key, Icon }) => (
+                  <ListItem key={key} disablePadding>
+                    <ListItemButton
+                      selected={activeSection === key}
+                      onClick={() => setActiveSection(key)}
+                      sx={{ borderRadius: 'sm', gap: 1 }}
+                    >
+                      <Icon sx={{ fontSize: 16 }} />
+                      <Typography level='body-sm' sx={{ flex: 1 }}>
+                        {t(`deckSettings.nav.${key}`)}
+                      </Typography>
+                      {saving && activeSection === key && savedSection === key && (
+                        <CircularProgress size='sm' sx={{ '--CircularProgress-size': '14px' }} />
+                      )}
+                      {saved && savedSection === key && <Check sx={{ fontSize: 14, color: 'success.plainColor' }} />}
+                    </ListItemButton>
+                  </ListItem>
                 ))}
-              </TabList>
-            </Tabs>
+              </List>
+            </Box>
 
-            {/* Study Section */}
-            {activeSection === 'study' && (
-              <Stack gap={3}>
-                <FormControl>
-                  <FormLabel>{t('deckSettings.study.paceMode')}</FormLabel>
-                  {loading ? (
-                    <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                  ) : (
-                    <>
-                      <RadioGroup
-                        orientation='horizontal'
-                        value={config.pace_mode}
+            {/* Right Content */}
+            <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3 } }}>
+              {/* xs only: horizontal tabs */}
+              <Tabs
+                value={activeSection}
+                onChange={(_, val) => setActiveSection(val)}
+                sx={{ display: { xs: 'block', sm: 'none' }, mb: 2, bgcolor: 'transparent' }}
+              >
+                <TabList
+                  disableUnderline
+                  sx={{
+                    bgcolor: 'background.level1',
+                    borderRadius: 'xl',
+                    p: 0.5,
+                    gap: 0.5,
+                    [`& .${tabClasses.root}`]: {
+                      borderRadius: 'lg',
+                      fontWeight: 500,
+                      fontSize: '0.75rem'
+                    },
+                    [`& .${tabClasses.root}[aria-selected="true"]`]: {
+                      bgcolor: 'background.surface',
+                      boxShadow: 'sm'
+                    }
+                  }}
+                >
+                  {SECTIONS.map(({ key }) => (
+                    <Tab key={key} disableIndicator value={key}>
+                      {t(`deckSettings.nav.${key}`)}
+                    </Tab>
+                  ))}
+                </TabList>
+              </Tabs>
+
+              {/* Study Section */}
+              {activeSection === 'study' && (
+                <Stack gap={3}>
+                  <FormControl>
+                    <FormLabel>{t('deckSettings.study.paceMode')}</FormLabel>
+                    {loading ? (
+                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
+                    ) : (
+                      <>
+                        <RadioGroup
+                          orientation='horizontal'
+                          value={config.pace_mode}
+                          onChange={(e) => {
+                            const mode = e.target.value
+                            const newConfig = { ...config, pace_mode: mode, ...PACE_DEFAULTS[mode] }
+                            setConfig(newConfig)
+                            debouncedSave({ config: newConfig })
+                            setSavedSection('study')
+                          }}
+                          sx={{ gap: 2, flexWrap: 'wrap' }}
+                        >
+                          <Radio value='relaxed' label={t('deckSettings.pace.relaxed')} size='sm' />
+                          <Radio value='balanced' label={t('deckSettings.pace.balanced')} size='sm' />
+                          <Radio value='intensive' label={t('deckSettings.pace.intensive')} size='sm' />
+                        </RadioGroup>
+                        <FormHelperText>{t(`deckSettings.pace.${config.pace_mode}Hint`)}</FormHelperText>
+                      </>
+                    )}
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>{t('deckSettings.study.newPerDay')}</FormLabel>
+                    {loading ? (
+                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
+                    ) : (
+                      <Input
+                        type='number'
+                        size='sm'
+                        value={config.new_per_day ?? 20}
+                        slotProps={{ input: { min: 1, max: 500 } }}
+                        endDecorator={
+                          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                            {t('deckSettings.study.cardsPerDay')}
+                          </Typography>
+                        }
                         onChange={(e) => {
-                          const mode = e.target.value
-                          const newConfig = { ...config, pace_mode: mode, ...PACE_DEFAULTS[mode] }
+                          const val = Math.max(1, Math.min(500, parseInt(e.target.value) || 1))
+                          const newConfig = { ...config, new_per_day: val }
                           setConfig(newConfig)
                           debouncedSave({ config: newConfig })
                           setSavedSection('study')
                         }}
-                        sx={{ gap: 2, flexWrap: 'wrap' }}
-                      >
-                        <Radio value='relaxed' label={t('deckSettings.pace.relaxed')} size='sm' />
-                        <Radio value='balanced' label={t('deckSettings.pace.balanced')} size='sm' />
-                        <Radio value='intensive' label={t('deckSettings.pace.intensive')} size='sm' />
-                      </RadioGroup>
-                      <FormHelperText>{t(`deckSettings.pace.${config.pace_mode}Hint`)}</FormHelperText>
-                    </>
-                  )}
-                </FormControl>
+                      />
+                    )}
+                  </FormControl>
 
-                <FormControl>
-                  <FormLabel>{t('deckSettings.study.newPerDay')}</FormLabel>
-                  {loading ? (
-                    <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                  ) : (
-                    <Input
-                      type='number'
-                      size='sm'
-                      value={config.new_per_day ?? 20}
-                      slotProps={{ input: { min: 1, max: 500 } }}
-                      endDecorator={
-                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                          {t('deckSettings.study.cardsPerDay')}
-                        </Typography>
-                      }
-                      onChange={(e) => {
-                        const val = Math.max(1, Math.min(500, parseInt(e.target.value) || 1))
-                        const newConfig = { ...config, new_per_day: val }
-                        setConfig(newConfig)
-                        debouncedSave({ config: newConfig })
-                        setSavedSection('study')
-                      }}
-                    />
-                  )}
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>{t('deckSettings.study.maxReviews')}</FormLabel>
-                  {loading ? (
-                    <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                  ) : (
-                    <Input
-                      type='number'
-                      size='sm'
-                      value={config.max_reviews_per_day ?? 100}
-                      slotProps={{ input: { min: 1, max: 1000 } }}
-                      endDecorator={
-                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                          {t('deckSettings.study.reviewsPerDay')}
-                        </Typography>
-                      }
-                      onChange={(e) => {
-                        const val = Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))
-                        const newConfig = { ...config, max_reviews_per_day: val }
-                        setConfig(newConfig)
-                        debouncedSave({ config: newConfig })
-                        setSavedSection('study')
-                      }}
-                    />
-                  )}
-                </FormControl>
-              </Stack>
-            )}
-
-            {/* Audio Section */}
-            {activeSection === 'audio' && (
-              <Stack gap={2.5}>
-                {/* Front / Back toggle */}
-                <Stack direction='row' gap={0.5} sx={{ alignSelf: 'flex-start' }}>
-                  {['front', 'back'].map((side) => (
-                    <Box
-                      key={side}
-                      role='button'
-                      aria-pressed={audioSide === side}
-                      onClick={() => setAudioSide(side)}
-                      sx={{
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 'sm',
-                        cursor: 'pointer',
-                        bgcolor: audioSide === side ? 'primary.softBg' : 'transparent',
-                        color: audioSide === side ? 'primary.plainColor' : 'text.tertiary',
-                        fontWeight: audioSide === side ? 700 : 400,
-                        fontSize: '0.8rem',
-                        transition: 'all 0.15s',
-                        border: '1px solid',
-                        borderColor: audioSide === side ? 'primary.outlinedBorder' : 'transparent',
-                        '&:hover': { color: 'text.primary' }
-                      }}
-                    >
-                      {t(`common.${side}`)}
-                    </Box>
-                  ))}
-                </Stack>
-
-                {/* Autoplay */}
-                <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                  <Typography level='body-sm' fontWeight={500}>
-                    {t('deckSettings.audio.autoplay')}
-                  </Typography>
-                  {loading ? (
-                    <Skeleton variant='rectangular' width={32} height={18} sx={{ borderRadius: 'sm' }} />
-                  ) : (
-                    <Switch
-                      size='sm'
-                      checked={voiceSettings[audioSide]?.auto_play ?? false}
-                      onChange={(e) => {
-                        const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], auto_play: e.target.checked } }
-                        setVoiceSettings(updated)
-                        debouncedSave({ voice_settings: updated })
-                        setSavedSection('audio')
-                      }}
-                    />
-                  )}
-                </Stack>
-
-                {/* Voice */}
-                <FormControl>
-                  <FormLabel>{t('deckSettings.audio.voice')}</FormLabel>
-                  {loading ? (
-                    <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                  ) : (
-                    <Select
-                      size='sm'
-                      value={voiceSettings[audioSide]?.voice_name || ''}
-                      placeholder={t('deckSettings.audio.systemDefault')}
-                      onChange={(_, val) => {
-                        const selectedVoice = availableVoices.find((v) => v.name === val)
-                        const updated = {
-                          ...voiceSettings,
-                          [audioSide]: { ...voiceSettings[audioSide], voice_name: val || null, voice_lang: selectedVoice?.lang || null }
+                  <FormControl>
+                    <FormLabel>{t('deckSettings.study.maxReviews')}</FormLabel>
+                    {loading ? (
+                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
+                    ) : (
+                      <Input
+                        type='number'
+                        size='sm'
+                        value={config.max_reviews_per_day ?? 100}
+                        slotProps={{ input: { min: 1, max: 1000 } }}
+                        endDecorator={
+                          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                            {t('deckSettings.study.reviewsPerDay')}
+                          </Typography>
                         }
-                        setVoiceSettings(updated)
-                        debouncedSave({ voice_settings: updated })
-                        setSavedSection('audio')
-                      }}
-                    >
-                      <Option value=''>{t('deckSettings.audio.systemDefault')}</Option>
-                      {availableVoices.map((v) => (
-                        <Option key={v.name} value={v.name}>
-                          {v.name} ({v.lang})
-                        </Option>
-                      ))}
-                    </Select>
-                  )}
-                </FormControl>
-
-                {/* Speed + Pitch side by side */}
-                <Stack direction='row' gap={2}>
-                  <FormControl sx={{ flex: 1 }}>
-                    <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
-                      <FormLabel sx={{ mb: 0 }}>{t('deckSettings.audio.rate')}</FormLabel>
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                        {voiceSettings[audioSide]?.rate ?? 1.0}x
-                      </Typography>
-                    </Stack>
-                    {loading ? (
-                      <Skeleton variant='rectangular' height={20} sx={{ borderRadius: 'sm' }} />
-                    ) : (
-                      <Slider
-                        size='sm'
-                        min={0.5}
-                        max={2}
-                        step={0.1}
-                        value={voiceSettings[audioSide]?.rate ?? 1.0}
-                        onChange={(_, val) => {
-                          const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], rate: val } }
-                          setVoiceSettings(updated)
-                          debouncedSave({ voice_settings: updated })
-                          setSavedSection('audio')
-                        }}
-                      />
-                    )}
-                  </FormControl>
-
-                  <FormControl sx={{ flex: 1 }}>
-                    <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
-                      <FormLabel sx={{ mb: 0 }}>{t('deckSettings.audio.pitch')}</FormLabel>
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                        {voiceSettings[audioSide]?.pitch ?? 1.0}x
-                      </Typography>
-                    </Stack>
-                    {loading ? (
-                      <Skeleton variant='rectangular' height={20} sx={{ borderRadius: 'sm' }} />
-                    ) : (
-                      <Slider
-                        size='sm'
-                        min={0}
-                        max={2}
-                        step={0.1}
-                        value={voiceSettings[audioSide]?.pitch ?? 1.0}
-                        onChange={(_, val) => {
-                          const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], pitch: val } }
-                          setVoiceSettings(updated)
-                          debouncedSave({ voice_settings: updated })
-                          setSavedSection('audio')
+                        onChange={(e) => {
+                          const val = Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))
+                          const newConfig = { ...config, max_reviews_per_day: val }
+                          setConfig(newConfig)
+                          debouncedSave({ config: newConfig })
+                          setSavedSection('study')
                         }}
                       />
                     )}
                   </FormControl>
                 </Stack>
-              </Stack>
-            )}
+              )}
 
-            {/* Publishing Section */}
-            {activeSection === 'publishing' && (
-              <Stack gap={2.5}>
-                <Sheet variant='outlined' sx={{ borderRadius: 'md', p: 2 }}>
-                  <Stack direction='row' justifyContent='space-between' alignItems='flex-start' gap={2}>
-                    <Box>
-                      <Typography level='title-sm' fontWeight={600}>
-                        {t('deckSettings.publish.title')}
-                      </Typography>
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-                        {t('deckSettings.publish.description')}
-                      </Typography>
-                    </Box>
+              {/* Audio Section */}
+              {activeSection === 'audio' && (
+                <Stack gap={2.5}>
+                  {/* Front / Back toggle */}
+                  <Stack direction='row' gap={0.5} sx={{ alignSelf: 'flex-start' }}>
+                    {['front', 'back'].map((side) => (
+                      <Box
+                        key={side}
+                        role='button'
+                        aria-pressed={audioSide === side}
+                        onClick={() => setAudioSide(side)}
+                        sx={{
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 'sm',
+                          cursor: 'pointer',
+                          bgcolor: audioSide === side ? 'primary.softBg' : 'transparent',
+                          color: audioSide === side ? 'primary.plainColor' : 'text.tertiary',
+                          fontWeight: audioSide === side ? 700 : 400,
+                          fontSize: '0.8rem',
+                          transition: 'all 0.15s',
+                          border: '1px solid',
+                          borderColor: audioSide === side ? 'primary.outlinedBorder' : 'transparent',
+                          '&:hover': { color: 'text.primary' }
+                        }}
+                      >
+                        {t(`common.${side}`)}
+                      </Box>
+                    ))}
+                  </Stack>
+
+                  {/* Autoplay */}
+                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                    <Typography level='body-sm' fontWeight={500}>
+                      {t('deckSettings.audio.autoplay')}
+                    </Typography>
                     {loading ? (
                       <Skeleton variant='rectangular' width={32} height={18} sx={{ borderRadius: 'sm' }} />
                     ) : (
                       <Switch
-                        checked={deck?.is_public || false}
+                        size='sm'
+                        checked={voiceSettings[audioSide]?.auto_play ?? false}
                         onChange={(e) => {
-                          const updated = { ...deck, is_public: e.target.checked }
-                          setDeck(updated)
-                          decksService
-                            .updateSettings(deckId, { is_public: e.target.checked })
-                            .then(() => {
-                              savedOnceRef.current = true
-                              setSaved(true)
-                              setSavedSection('publishing')
-                              setTimeout(() => setSaved(false), 1500)
-                            })
-                            .catch(console.error)
+                          const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], auto_play: e.target.checked } }
+                          setVoiceSettings(updated)
+                          debouncedSave({ voice_settings: updated })
+                          setSavedSection('audio')
                         }}
                       />
                     )}
                   </Stack>
-                </Sheet>
 
-                {deck?.is_public && (
+                  {/* Voice */}
                   <FormControl>
-                    <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
-                      <FormLabel sx={{ mb: 0 }}>{t('deckSettings.publish.publicDescription')}</FormLabel>
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                        {(deck?.public_metadata?.description || '').length}/280
-                      </Typography>
-                    </Stack>
-                    <Textarea
-                      size='sm'
-                      minRows={2}
-                      maxRows={4}
-                      value={deck?.public_metadata?.description || ''}
-                      onChange={(e) => {
-                        const desc = e.target.value.slice(0, 280)
-                        const updated = {
-                          ...deck,
-                          public_metadata: { ...(deck.public_metadata || {}), description: desc }
-                        }
-                        setDeck(updated)
-                        debouncedSave({ public_metadata: { description: desc } })
-                        setSavedSection('publishing')
-                      }}
-                    />
+                    <FormLabel>{t('deckSettings.audio.voice')}</FormLabel>
+                    {loading ? (
+                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
+                    ) : (
+                      <Select
+                        size='sm'
+                        value={voiceSettings[audioSide]?.voice_name || ''}
+                        placeholder={t('deckSettings.audio.systemDefault')}
+                        onChange={(_, val) => {
+                          const selectedVoice = availableVoices.find((v) => v.name === val)
+                          const updated = {
+                            ...voiceSettings,
+                            [audioSide]: { ...voiceSettings[audioSide], voice_name: val || null, voice_lang: selectedVoice?.lang || null }
+                          }
+                          setVoiceSettings(updated)
+                          debouncedSave({ voice_settings: updated })
+                          setSavedSection('audio')
+                        }}
+                      >
+                        <Option value=''>{t('deckSettings.audio.systemDefault')}</Option>
+                        {availableVoices.map((v) => (
+                          <Option key={v.name} value={v.name}>
+                            {v.name} ({v.lang})
+                          </Option>
+                        ))}
+                      </Select>
+                    )}
                   </FormControl>
-                )}
 
-                {deck?.published_at && (
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {t('deckSettings.publish.publishedOn', {
-                      date: new Date(deck.published_at).toLocaleDateString()
-                    })}
-                  </Typography>
-                )}
-              </Stack>
-            )}
-          </Box>
-        </Stack>
-      </ModalDialog>
-    </Modal>
+                  {/* Speed + Pitch side by side */}
+                  <Stack direction='row' gap={2}>
+                    <FormControl sx={{ flex: 1 }}>
+                      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
+                        <FormLabel sx={{ mb: 0 }}>{t('deckSettings.audio.rate')}</FormLabel>
+                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                          {voiceSettings[audioSide]?.rate ?? 1.0}x
+                        </Typography>
+                      </Stack>
+                      {loading ? (
+                        <Skeleton variant='rectangular' height={20} sx={{ borderRadius: 'sm' }} />
+                      ) : (
+                        <Slider
+                          size='sm'
+                          min={0.5}
+                          max={2}
+                          step={0.1}
+                          value={voiceSettings[audioSide]?.rate ?? 1.0}
+                          onChange={(_, val) => {
+                            const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], rate: val } }
+                            setVoiceSettings(updated)
+                            debouncedSave({ voice_settings: updated })
+                            setSavedSection('audio')
+                          }}
+                        />
+                      )}
+                    </FormControl>
+
+                    <FormControl sx={{ flex: 1 }}>
+                      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
+                        <FormLabel sx={{ mb: 0 }}>{t('deckSettings.audio.pitch')}</FormLabel>
+                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                          {voiceSettings[audioSide]?.pitch ?? 1.0}x
+                        </Typography>
+                      </Stack>
+                      {loading ? (
+                        <Skeleton variant='rectangular' height={20} sx={{ borderRadius: 'sm' }} />
+                      ) : (
+                        <Slider
+                          size='sm'
+                          min={0}
+                          max={2}
+                          step={0.1}
+                          value={voiceSettings[audioSide]?.pitch ?? 1.0}
+                          onChange={(_, val) => {
+                            const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], pitch: val } }
+                            setVoiceSettings(updated)
+                            debouncedSave({ voice_settings: updated })
+                            setSavedSection('audio')
+                          }}
+                        />
+                      )}
+                    </FormControl>
+                  </Stack>
+                </Stack>
+              )}
+
+              {/* Publishing Section */}
+              {activeSection === 'publishing' && (
+                <Stack gap={2}>
+                  <Sheet variant='outlined' sx={{ borderRadius: 'md', p: 2 }}>
+                    <Stack direction='row' justifyContent='space-between' alignItems='center' gap={2}>
+                      <Box>
+                        <Typography level='title-sm' fontWeight={600}>
+                          {t(deck?.is_public ? 'publish.status.public' : 'publish.status.private')}
+                        </Typography>
+                        <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
+                          {deck?.is_public && deck?.published_at
+                            ? t('deckSettings.publish.publishedOn', {
+                                date: new Date(deck.published_at).toLocaleDateString()
+                              })
+                            : t('publish.notYetPublished')}
+                        </Typography>
+                      </Box>
+                      <Chip size='sm' color={deck?.is_public ? 'success' : 'neutral'} variant='soft'>
+                        {t(deck?.is_public ? 'publish.status.public' : 'publish.status.private')}
+                      </Chip>
+                    </Stack>
+                  </Sheet>
+
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    size='sm'
+                    startDecorator={<Public sx={{ fontSize: 16 }} />}
+                    onClick={() => setPublishSheetOpen(true)}
+                    aria-label={t(deck?.is_public ? 'publish.manageButton' : 'publish.publishButton')}
+                    sx={{
+                      alignSelf: 'flex-start',
+                      '&:focus-visible': {
+                        outline: '2px solid',
+                        outlineColor: 'primary.outlinedBorder',
+                        outlineOffset: '3px'
+                      }
+                    }}
+                  >
+                    {t(deck?.is_public ? 'publish.manageButton' : 'publish.publishButton')}
+                  </Button>
+                </Stack>
+              )}
+            </Box>
+          </Stack>
+        </ModalDialog>
+      </Modal>
+
+      <DeckPublishSheet
+        open={publishSheetOpen}
+        onClose={() => setPublishSheetOpen(false)}
+        deckId={deckId}
+        deck={deck}
+        onPublished={() => {
+          setPublishSheetOpen(false)
+          if (onSaved) onSaved()
+          if (deckId) {
+            decksService
+              .getSettings(deckId)
+              .then((data) => {
+                if (data) setDeck((prev) => ({ ...prev, is_public: data.is_public, published_at: data.published_at }))
+              })
+              .catch(() => {})
+          }
+        }}
+      />
+    </>
   )
 }

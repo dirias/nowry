@@ -611,6 +611,7 @@ export default function StudyCenter() {
                         }
                       }}
                       sx={{
+                        position: 'relative',
                         width: 140,
                         flexShrink: 0,
                         scrollSnapAlign: 'start',

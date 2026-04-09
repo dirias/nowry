@@ -23,7 +23,9 @@ import {
   Dropdown,
   Menu,
   MenuButton,
-  MenuItem
+  MenuItem,
+  ListItemDecorator,
+  ListDivider
 } from '@mui/joy'
 import {
   Edit,
@@ -42,7 +44,9 @@ import {
   ViewList,
   FilterAlt,
   FileUpload,
-  Settings
+  Settings,
+  CloudUpload,
+  Public
 } from '@mui/icons-material'
 import CardPreviewModal from './CardPreviewModal'
 
@@ -69,7 +73,8 @@ export default function ManageContent({
   onImport,
   onNewCard,
   onNewDeck,
-  onDeckSettings
+  onDeckSettings,
+  onPublishDeck
 }) {
   const { t } = useTranslation()
   const [activeView, setActiveView] = useState(0) // 0 = Decks, 1 = Cards
@@ -605,6 +610,7 @@ export default function ManageContent({
                     onDeleteDeck={onDeleteDeck}
                     onStudy={onStudy}
                     onDeckSettings={onDeckSettings}
+                    onPublishDeck={onPublishDeck}
                     t={t}
                   />
                 )
@@ -654,18 +660,30 @@ export default function ManageContent({
 
                       {/* Name & Count */}
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography
-                          level='title-sm'
-                          sx={{
-                            fontWeight: 600,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            mb: 0.25
-                          }}
-                        >
-                          {deck.name}
-                        </Typography>
+                        <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.25 }}>
+                          <Typography
+                            level='title-sm'
+                            sx={{
+                              fontWeight: 600,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {deck.name}
+                          </Typography>
+                          {deck.is_public && (
+                            <Chip
+                              size='sm'
+                              color='success'
+                              variant='soft'
+                              startDecorator={<Public sx={{ fontSize: 12 }} />}
+                              sx={{ fontSize: '0.65rem', py: 0.25, px: 0.75, height: 'auto', flexShrink: 0 }}
+                            >
+                              {t('publish.status.public')}
+                            </Chip>
+                          )}
+                        </Stack>
                         <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
                           {t('cards.manage_content.cardCount', { count: cardCount })}
                         </Typography>
@@ -744,6 +762,22 @@ export default function ManageContent({
                             <MoreVert sx={{ fontSize: 16 }} />
                           </MenuButton>
                           <Menu placement='bottom-end' size='sm'>
+                            <MenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                onPublishDeck(deck)
+                              }}
+                            >
+                              <ListItemDecorator>
+                                {deck.is_public ? (
+                                  <Public sx={{ fontSize: 18, color: 'success.plainColor' }} />
+                                ) : (
+                                  <CloudUpload sx={{ fontSize: 18 }} />
+                                )}
+                              </ListItemDecorator>
+                              {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
+                            </MenuItem>
+                            <ListDivider />
                             <MenuItem onClick={() => onPreview?.(deck)}>
                               <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
                             </MenuItem>
@@ -931,6 +965,7 @@ function DeckGridCard({
   onDeleteDeck,
   onStudy,
   onDeckSettings,
+  onPublishDeck,
   t
 }) {
   const [transform, setTransform] = useState('')
@@ -1058,20 +1093,31 @@ function DeckGridCard({
 
         {/* Header Row - Title + Actions */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1, gap: 1, zIndex: 1 }}>
-          <Typography
-            level='title-md'
-            onClick={() => handlePreviewDeck(deck)}
-            sx={{
-              fontWeight: 600,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              color: 'text.primary',
-              flex: 1
-            }}
-          >
-            {deck.name}
-          </Typography>
+          <Box sx={{ flex: 1, minWidth: 0 }} onClick={() => handlePreviewDeck(deck)}>
+            <Typography
+              level='title-md'
+              sx={{
+                fontWeight: 600,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                color: 'text.primary'
+              }}
+            >
+              {deck.name}
+            </Typography>
+            {deck.is_public && (
+              <Chip
+                size='sm'
+                color='success'
+                variant='soft'
+                startDecorator={<Public sx={{ fontSize: 12 }} />}
+                sx={{ fontSize: '0.65rem', py: 0.25, px: 0.75, height: 'auto', mt: 0.5 }}
+              >
+                {t('publish.status.public')}
+              </Chip>
+            )}
+          </Box>
 
           {/* Actions Menu */}
           <Dropdown>
@@ -1089,6 +1135,18 @@ function DeckGridCard({
               <MoreVert sx={{ fontSize: 16 }} />
             </MenuButton>
             <Menu placement='bottom-end' size='sm'>
+              <MenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onPublishDeck(deck)
+                }}
+              >
+                <ListItemDecorator>
+                  {deck.is_public ? <Public sx={{ fontSize: 18, color: 'success.plainColor' }} /> : <CloudUpload sx={{ fontSize: 18 }} />}
+                </ListItemDecorator>
+                {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
+              </MenuItem>
+              <ListDivider />
               <MenuItem onClick={() => onPreview?.(deck)}>
                 <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
               </MenuItem>

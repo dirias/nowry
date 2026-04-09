@@ -57,6 +57,14 @@
     "getStarted": "Get Started",
     "drawer": {
       "menu": "Menu"
+    },
+    "profileMenu": {
+      "open": "Open profile menu",
+      "viewProfile": "View profile",
+      "tier": {
+        "free": "Free",
+        "pro": "Pro"
+      }
     }
   },
   "footer": {
@@ -77,15 +85,18 @@
     },
     "social": {
       "title": "Follow Us",
-      "tiktok": "TikTok",
-      "facebook": "Facebook",
-      "instagram": "Instagram",
-      "x": "X (Twitter)"
+      "tiktok": "Follow us on TikTok",
+      "facebook": "Follow us on Facebook",
+      "instagram": "Follow us on Instagram",
+      "x": "Follow us on X"
     },
     "theme": {
       "light": "Light",
       "dark": "Dark"
     },
+    "copyright": "© {{year}} Nowry. All rights reserved.",
+    "toggleTheme": "Toggle theme",
+    "language": "Language",
     "bugReport": "Report Bug"
   },
   "routes": {
@@ -512,8 +523,44 @@
     }
   },
   "settings": {
-    "title": "Account Settings",
-    "subtitle": "Manage your preferences, security, and account settings",
+    "title": "Settings",
+    "subtitle": "Manage your account and preferences",
+    "nav": {
+      "account": "Account",
+      "appearance": "Appearance",
+      "productivity": "Productivity",
+      "notifications": "Notifications",
+      "security": "Security",
+      "danger": "Danger Zone",
+      "jump": "Navigate to section",
+      "jumpTo": "Jump to"
+    },
+    "account": {
+      "title": "Account",
+      "fullName": "Display name",
+      "emailManaged": "Email is managed by your authentication provider",
+      "editPhoto": "Change photo"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "mode": "Theme",
+      "modeDesc": "Choose light or dark mode",
+      "language": "Language",
+      "accentColor": "Accent color",
+      "accentColorDesc": "Customize the app accent color",
+      "interests": "Interests"
+    },
+    "productivity": {
+      "title": "Productivity",
+      "enableTimer": "Enable Pomodoro Timer",
+      "enableTimerDesc": "Show timer in header and enable floating widget",
+      "focusDuration": "Focus duration (minutes)",
+      "shortBreak": "Short break (minutes)",
+      "longBreak": "Long break (minutes)",
+      "recommendedMinutes": "Recommended: {{count}}",
+      "autoStart": "Auto-start timer",
+      "autoStartDesc": "Automatically start the next session"
+    },
     "general": {
       "title": "General Preferences",
       "appearance": "Appearance",
@@ -526,33 +573,45 @@
     },
     "security": {
       "title": "Security",
-      "changePassword": "Change Password",
-      "currentPassword": "Current Password",
-      "newPassword": "New Password",
-      "confirmPassword": "Confirm New Password",
+      "changePassword": "Change password",
+      "changePasswordCta": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
       "updatePassword": "Update Password",
-      "twoFactor": "Two-Factor Authentication",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordTooWeak": "Password is too weak",
+      "wrongPassword": "Current password is incorrect",
+      "reauthRequired": "Please enter your current password to continue",
+      "passwordChangeFailed": "Failed to update password. Please try again.",
+      "passwordChanged": "Password updated successfully",
+      "save": "Update password",
+      "twoFactor": "Two-factor authentication",
       "twoFactorDesc": "Add an extra layer of security to your account",
+      "comingSoon": "Coming soon",
       "enable2FA": "Enable 2FA",
       "disable2FA": "Disable",
       "success2FA": "2FA Enabled! Backup codes:",
       "disabled2FA": "2FA disabled successfully"
     },
     "notifications": {
-      "title": "Notification Preferences",
-      "emailDigest": "Email Digest",
+      "title": "Notifications",
+      "emailDigest": "Email digest",
       "emailDigestDesc": "Receive daily summary of your study activity",
-      "studyReminders": "Study Reminders",
+      "studyReminders": "Study reminders",
       "studyRemindersDesc": "Get notified when cards are due for review",
-      "newsUpdates": "News Updates",
+      "newsUpdates": "News updates",
       "newsUpdatesDesc": "Receive updates about new features and improvements",
-      "marketing": "Marketing Emails",
-      "marketingDesc": "Receive promotional offers and tips"
+      "marketing": "Marketing emails",
+      "marketingDesc": "Receive promotional offers and tips",
+      "comingSoon": "Notifications coming soon",
+      "comingSoonDesc": "We're working on smart notifications for your study sessions"
     },
     "danger": {
       "title": "Danger Zone",
-      "deleteAccount": "Delete Account",
-      "deleteDesc": "Permanently delete your account and all associated data",
+      "deleteAccount": "Delete account",
+      "deleteDesc": "Permanently delete your account and all data. This cannot be undone.",
       "confirmTitle": "Are you absolutely sure?",
       "confirmDesc": "This action cannot be undone. All your data including books, cards, and progress will be permanently deleted.",
       "confirmBtn": "Yes, Delete My Account",
@@ -566,6 +625,10 @@
         "consequence3": "All annual planning data will be deleted",
         "consequence4": "Public content will be unpublished immediately"
       }
+    },
+    "errors": {
+      "loadFailed": "Failed to load settings. Please refresh and try again.",
+      "networkError": "Network error. Please check your connection."
     }
   },
   "dashboard": {
@@ -1295,7 +1358,21 @@
     "backToBrowse": "Back to Browse",
     "endCTAAuth": "Fork this book to your library to edit and make it yours",
     "endCTAGuest": "Written with Nowry · Start your own book for free",
-    "startWriting": "Start writing"
+    "startWriting": "Start writing",
+    "like": "Like",
+    "liked": "Liked",
+    "unlike": "Remove like",
+    "forkToLibrary": "Fork to My Library",
+    "loadingMore": "Loading more...",
+    "unknownAuthor": "Unknown author",
+    "contentNotFound": "Content not found",
+    "byAuthor": "by {{name}}",
+    "ofTotal": "of {{total}}",
+    "cards": "cards",
+    "forkedFrom": "Forked from \"{{title}}\" by {{author}}",
+    "forkBadge": "Fork",
+    "forkOwnContent": "This is your own deck — duplicate it from your library instead.",
+    "alreadyForked": "You already forked this — taking you to your copy..."
   },
   "focusBar": {
     "modal": {
@@ -1361,5 +1438,45 @@
     },
     "saving": "Saving...",
     "saved": "Saved"
+  },
+  "publish": {
+    "openSheet": "Share to community",
+    "confirm": "Publish deck",
+    "unpublish": "Remove from community",
+    "manageButton": "Manage publishing",
+    "publishButton": "Publish to community",
+    "success": "Deck published — learners can now discover it",
+    "notYetPublished": "Not published yet",
+    "firstTimeHint": "Your deck will appear in the community Browse section for others to discover and fork.",
+    "alreadyPublished": "Published on {{date}}",
+    "sheetSubtitle": "Share with the Nowry community",
+    "status": {
+      "public": "Published",
+      "private": "Private"
+    },
+    "error": {
+      "generic": "Something went wrong. Please try again.",
+      "alreadyPublished": "This deck is already published.",
+      "notOwner": "You can only publish decks you own."
+    },
+    "form": {
+      "description": "Description",
+      "descriptionHint": "Help learners understand what this deck covers.",
+      "tags": "Tags",
+      "tagsPlaceholder": "biology, cells, AP exam",
+      "tagsHint": "Comma-separated. Helps learners find your deck.",
+      "difficulty": "Difficulty",
+      "language": "Language"
+    },
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "forkedFrom": {
+      "label": "Attribution (immutable)",
+      "value": "Forked from \"{{title}}\" by {{author}}",
+      "immutableNote": "This attribution is permanent and will be shown publicly."
+    }
   }
 }

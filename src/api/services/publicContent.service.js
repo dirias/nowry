@@ -80,6 +80,14 @@ export const publicContentService = {
   },
 
   /**
+   * Get cards for a public deck without ownership required (browse preview)
+   * @param {string} deckId - Deck ID
+   * @param {number} limit - Max number of cards to return
+   * @returns {Promise<Object>} Cards list
+   */
+  getPublicDeckCards: (deckId, limit = 6) => apiClient.get(`/public/decks/${deckId}/cards`, { params: { limit } }).then((r) => r.data),
+
+  /**
    * Publish a book
    * @param {string} id - Book ID
    * @param {Object} metadata - Public metadata

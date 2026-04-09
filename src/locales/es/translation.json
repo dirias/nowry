@@ -11,6 +11,7 @@
     "settings": "Configuración",
     "profile": "Perfil",
     "logout": "Cerrar Sesión",
+    "pomodoro": "Temporizador Pomodoro",
     "toggleTheme": "Cambiar tema"
   },
   "news": {
@@ -44,6 +45,14 @@
     "getStarted": "Comenzar",
     "drawer": {
       "menu": "Menú"
+    },
+    "profileMenu": {
+      "open": "Abrir menú de perfil",
+      "viewProfile": "Ver perfil",
+      "tier": {
+        "free": "Gratis",
+        "pro": "Pro"
+      }
     }
   },
   "footer": {
@@ -64,15 +73,18 @@
     },
     "social": {
       "title": "Síguenos",
-      "tiktok": "TikTok",
-      "facebook": "Facebook",
-      "instagram": "Instagram",
-      "x": "X (Twitter)"
+      "tiktok": "Síguenos en TikTok",
+      "facebook": "Síguenos en Facebook",
+      "instagram": "Síguenos en Instagram",
+      "x": "Síguenos en X"
     },
     "theme": {
       "light": "Claro",
       "dark": "Oscuro"
     },
+    "copyright": "© {{year}} Nowry. Todos los derechos reservados.",
+    "toggleTheme": "Cambiar tema",
+    "language": "Idioma",
     "bugReport": "Reportar error"
   },
   "routes": {
@@ -388,8 +400,44 @@
     }
   },
   "settings": {
-    "title": "Configuración de Cuenta",
-    "subtitle": "Gestiona tus preferencias, seguridad y cuenta",
+    "title": "Ajustes",
+    "subtitle": "Gestiona tu cuenta y preferencias",
+    "nav": {
+      "account": "Cuenta",
+      "appearance": "Apariencia",
+      "productivity": "Productividad",
+      "notifications": "Notificaciones",
+      "security": "Seguridad",
+      "danger": "Zona de peligro",
+      "jump": "Navegar a sección",
+      "jumpTo": "Ir a"
+    },
+    "account": {
+      "title": "Cuenta",
+      "fullName": "Nombre de pantalla",
+      "emailManaged": "El email está gestionado por tu proveedor de autenticación",
+      "editPhoto": "Cambiar foto"
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "mode": "Tema",
+      "modeDesc": "Elige el modo claro u oscuro",
+      "language": "Idioma",
+      "accentColor": "Color de acento",
+      "accentColorDesc": "Personaliza el color de acento de la app",
+      "interests": "Intereses"
+    },
+    "productivity": {
+      "title": "Productividad",
+      "enableTimer": "Activar temporizador Pomodoro",
+      "enableTimerDesc": "Mostrar temporizador en el encabezado y activar widget flotante",
+      "focusDuration": "Duración de enfoque (minutos)",
+      "shortBreak": "Pausa corta (minutos)",
+      "longBreak": "Pausa larga (minutos)",
+      "recommendedMinutes": "Recomendado: {{count}}",
+      "autoStart": "Inicio automático",
+      "autoStartDesc": "Iniciar automáticamente la siguiente sesión"
+    },
     "general": {
       "title": "Preferencias Generales",
       "appearance": "Apariencia",
@@ -402,37 +450,62 @@
     },
     "security": {
       "title": "Seguridad",
-      "changePassword": "Cambiar Contraseña",
-      "currentPassword": "Contraseña Actual",
-      "newPassword": "Nueva Contraseña",
-      "confirmPassword": "Confirmar Nueva Contraseña",
+      "changePassword": "Cambiar contraseña",
+      "changePasswordCta": "Cambiar contraseña",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
       "updatePassword": "Actualizar Contraseña",
-      "twoFactor": "Autenticación de Dos Factores",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+      "passwordTooWeak": "La contraseña es demasiado débil",
+      "wrongPassword": "La contraseña actual es incorrecta",
+      "reauthRequired": "Introduce tu contraseña actual para continuar",
+      "passwordChangeFailed": "No se pudo actualizar la contraseña. Inténtalo de nuevo.",
+      "passwordChanged": "Contraseña actualizada correctamente",
+      "save": "Actualizar contraseña",
+      "twoFactor": "Autenticación de dos factores",
       "twoFactorDesc": "Añade una capa extra de seguridad a tu cuenta",
+      "comingSoon": "Próximamente",
       "enable2FA": "Activar 2FA",
       "disable2FA": "Desactivar",
       "success2FA": "¡2FA Activado! Códigos de respaldo:",
       "disabled2FA": "2FA desactivado exitosamente"
     },
     "notifications": {
-      "title": "Preferencias de Notificación",
-      "emailDigest": "Resumen por Email",
+      "title": "Notificaciones",
+      "emailDigest": "Resumen por email",
       "emailDigestDesc": "Recibe un resumen diario de tu actividad",
-      "studyReminders": "Recordatorios de Estudio",
+      "studyReminders": "Recordatorios de estudio",
       "studyRemindersDesc": "Recibe notificaciones cuando las tarjetas deban repasarse",
       "newsUpdates": "Actualizaciones",
       "newsUpdatesDesc": "Recibe noticias sobre nuevas funciones",
-      "marketing": "Emails de Marketing",
-      "marketingDesc": "Recibe ofertas promocionales y consejos"
+      "marketing": "Emails de marketing",
+      "marketingDesc": "Recibe ofertas promocionales y consejos",
+      "comingSoon": "Notificaciones próximamente",
+      "comingSoonDesc": "Estamos trabajando en notificaciones inteligentes para tus sesiones de estudio"
     },
     "danger": {
-      "title": "Zona de Peligro",
-      "deleteAccount": "Eliminar Cuenta",
-      "deleteDesc": "Eliminar permanentemente tu cuenta y todos los datos asociados",
+      "title": "Zona de peligro",
+      "deleteAccount": "Eliminar cuenta",
+      "deleteDesc": "Eliminar permanentemente tu cuenta y todos los datos. Esto no se puede deshacer.",
       "confirmTitle": "¿Estás absolutamente seguro?",
       "confirmDesc": "Esta acción no se puede deshacer. Todos tus datos serán eliminados permanentemente.",
       "confirmBtn": "Sí, Eliminar Mi Cuenta",
-      "cancelBtn": "Cancelar"
+      "cancelBtn": "Cancelar",
+      "modal": {
+        "title": "Eliminar Cuenta",
+        "description": "Esto eliminará permanentemente tu cuenta y todos los datos asociados",
+        "confirm": "Eliminar Mi Cuenta",
+        "consequence1": "Todos los libros y notas serán eliminados",
+        "consequence2": "Todos los mazos de tarjetas serán eliminados",
+        "consequence3": "Todos los datos de planificación anual serán eliminados",
+        "consequence4": "El contenido público será despublicado inmediatamente"
+      }
+    },
+    "errors": {
+      "loadFailed": "No se pudieron cargar los ajustes. Recarga e inténtalo de nuevo.",
+      "networkError": "Error de red. Comprueba tu conexión."
     }
   },
   "dashboard": {
@@ -1149,9 +1222,161 @@
     }
   },
   "public": {
+    "publish": "Publicar",
+    "unpublish": "Retirar",
+    "published": "Publicado",
+    "browse": "Explorar",
+    "library": "Biblioteca pública",
+    "myLikes": "Mis favoritos",
+    "likes": "me gusta",
+    "views": "vistas",
+    "forks": "bifurcaciones",
+    "fork": "Bifurcar biblioteca",
+    "forkConfirm": "Esto creará una copia privada en tu biblioteca. ¿Continuar?",
+    "forkSuccess": "¡Bifurcado con éxito!",
+    "likeSuccess": "Añadido a tus favoritos",
+    "unlikeSuccess": "Eliminado de tus favoritos",
+    "report": "Reportar",
+    "reported": "Reportado",
+    "reportSuccess": "Gracias. Revisaremos este reporte.",
+    "category": "Categoría",
+    "tags": "Etiquetas",
+    "difficulty": "Dificultad",
+    "language": "Idioma",
+    "license": "Licencia",
+    "originalContent": "Este es mi contenido original",
+    "publishSuccess": "¡Publicado con éxito!",
+    "unpublishSuccess": "¡Retirado con éxito!",
+    "noResults": "No se encontró contenido público",
+    "tryFilters": "Intenta ajustar tus filtros",
+    "searchPlaceholder": "Buscar contenido público...",
+    "sortBy": "Ordenar por",
+    "filterBy": "Filtrar",
+    "clearFilters": "Limpiar filtros",
+    "showingResults": "Mostrando {{count}} resultados",
+    "loadMore": "Cargar más",
+    "by": "de",
+    "books": "Libros",
+    "decks": "Mazos",
+    "all": "Todos",
+    "categories": {
+      "science": "Ciencia",
+      "math": "Matemáticas",
+      "languages": "Idiomas",
+      "history": "Historia",
+      "literature": "Literatura",
+      "technology": "Tecnología",
+      "art": "Arte",
+      "music": "Música",
+      "business": "Negocios",
+      "health": "Salud",
+      "design": "Diseño",
+      "programming": "Programación",
+      "technical": "Técnico",
+      "documentation": "Documentación",
+      "planning": "Planificación",
+      "features": "Características",
+      "deployment": "Despliegue"
+    },
+    "difficultyLevels": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "licenses": {
+      "all_rights": "Todos los derechos reservados",
+      "cc_by": "CC BY (Atribución)",
+      "cc_by_sa": "CC BY-SA (Compartir igual)",
+      "cc0": "CC0 (Dominio público)"
+    },
+    "sortOptions": {
+      "recent": "Más reciente",
+      "popular": "Más popular",
+      "mostLiked": "Más valorado",
+      "mostForked": "Más bifurcado"
+    },
+    "reportReasons": {
+      "copyright": "Infracción de derechos de autor",
+      "inappropriate": "Contenido inapropiado",
+      "spam": "Spam o baja calidad",
+      "misinformation": "Información incorrecta",
+      "other": "Otro"
+    },
+    "publishModal": {
+      "title": "Publicar en la biblioteca pública",
+      "description": "Comparte tu contenido con la comunidad",
+      "categoryRequired": "La categoría es obligatoria",
+      "tagsRequired": "Se requiere al menos una etiqueta",
+      "addTag": "Añadir etiqueta",
+      "submit": "Publicar ahora"
+    },
+    "reportModal": {
+      "title": "Reportar contenido",
+      "description": "Ayúdanos a mantener la comunidad segura",
+      "reason": "Motivo del reporte",
+      "details": "Detalles adicionales (opcional)",
+      "submit": "Enviar reporte"
+    },
+    "noLikes": "Aún no has valorado ningún contenido",
+    "exploreContent": "Explorar contenido público",
     "signUpFree": "Regístrate gratis",
+    "backToBrowse": "Volver a explorar",
     "endCTAAuth": "Bifurca este libro a tu biblioteca para editarlo y hacerlo tuyo",
     "endCTAGuest": "Escrito con Nowry · Empieza tu propio libro gratis",
-    "startWriting": "Empieza a escribir"
+    "startWriting": "Empieza a escribir",
+    "like": "Me gusta",
+    "liked": "Valorado",
+    "unlike": "Quitar me gusta",
+    "forkToLibrary": "Bifurcar a mi biblioteca",
+    "loadingMore": "Cargando más...",
+    "unknownAuthor": "Autor desconocido",
+    "contentNotFound": "Contenido no encontrado",
+    "byAuthor": "de {{name}}",
+    "ofTotal": "de {{total}}",
+    "cards": "tarjetas",
+    "forkedFrom": "Bifurcado de \"{{title}}\" por {{author}}",
+    "forkBadge": "Bifurcación",
+    "forkOwnContent": "Este es tu propio mazo — duplícalo desde tu biblioteca.",
+    "alreadyForked": "Ya bifurcaste esto — llevándote a tu copia..."
+  },
+  "publish": {
+    "openSheet": "Compartir con la comunidad",
+    "confirm": "Publicar mazo",
+    "unpublish": "Retirar de la comunidad",
+    "manageButton": "Gestionar publicación",
+    "publishButton": "Publicar en la comunidad",
+    "success": "Mazo publicado — los estudiantes ya pueden descubrirlo",
+    "notYetPublished": "Aún no publicado",
+    "firstTimeHint": "Tu mazo aparecerá en la sección Explorar de la comunidad para que otros puedan descubrirlo y bifurcarlo.",
+    "alreadyPublished": "Publicado el {{date}}",
+    "sheetSubtitle": "Compartir con la comunidad Nowry",
+    "status": {
+      "public": "Publicado",
+      "private": "Privado"
+    },
+    "error": {
+      "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
+      "alreadyPublished": "Este mazo ya está publicado.",
+      "notOwner": "Solo puedes publicar mazos que te pertenecen."
+    },
+    "form": {
+      "description": "Descripción",
+      "descriptionHint": "Ayuda a los estudiantes a entender qué cubre este mazo.",
+      "tags": "Etiquetas",
+      "tagsPlaceholder": "biología, células, examen AP",
+      "tagsHint": "Separadas por comas. Ayuda a los estudiantes a encontrar tu mazo.",
+      "difficulty": "Dificultad",
+      "language": "Idioma"
+    },
+    "difficulty": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "forkedFrom": {
+      "label": "Atribución (inmutable)",
+      "value": "Bifurcado de \"{{title}}\" por {{author}}",
+      "immutableNote": "Esta atribución es permanente y se mostrará públicamente."
+    }
   }
 }

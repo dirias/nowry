@@ -10,6 +10,7 @@ import ManageContent from './ManageContent'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import ImportDeckModal from './ImportDeckModal'
 import DeckSettingsModal from '../Study/DeckSettingsModal'
+import DeckPublishSheet from '../Study/DeckPublishSheet'
 import { decksService, cardsService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
@@ -44,6 +45,7 @@ export default function CardHome({ onDeckChange } = {}) {
     initialIndex: 0
   })
   const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null })
+  const [publishSheetState, setPublishSheetState] = useState({ open: false, deckId: null, deck: null })
 
   // Stats
   const [stats, setStats] = useState({
@@ -176,6 +178,10 @@ export default function CardHome({ onDeckChange } = {}) {
     }
   }
 
+  const handlePublishDeck = (deck) => {
+    setPublishSheetState({ open: true, deckId: deck._id, deck })
+  }
+
   const handleEditCard = (card) => {
     setEditingCard(card)
     setShowCreateCard(true)
@@ -229,6 +235,7 @@ export default function CardHome({ onDeckChange } = {}) {
         }}
         onNewDeck={() => setShowCreateDeck(true)}
         onDeckSettings={(deck) => setDeckSettingsState({ open: true, deckId: deck._id })}
+        onPublishDeck={handlePublishDeck}
       />
 
       {/* Modals */}
@@ -323,6 +330,17 @@ export default function CardHome({ onDeckChange } = {}) {
         onSaved={() => {
           reloadDecks()
           onDeckChange?.()
+        }}
+      />
+
+      <DeckPublishSheet
+        open={publishSheetState.open}
+        onClose={() => setPublishSheetState({ open: false, deckId: null, deck: null })}
+        deckId={publishSheetState.deckId}
+        deck={publishSheetState.deck}
+        onPublished={() => {
+          setPublishSheetState({ open: false, deckId: null, deck: null })
+          reloadDecks()
         }}
       />
 

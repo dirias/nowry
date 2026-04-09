@@ -9,6 +9,7 @@ import {
   Sheet,
   Stack,
   Avatar,
+  Chip,
   Tooltip,
   Dropdown,
   Menu,
@@ -34,7 +35,7 @@ import {
   PersonRounded,
   SettingsRounded,
   TimelineRounded,
-  Timer,
+  TimerRounded,
   PlayArrow,
   Pause,
   Brightness4,
@@ -104,6 +105,8 @@ const Header = () => {
   const location = useLocation()
   const { user, logout: contextLogout } = useAuth()
   const isLoggedIn = !!user
+  const displayName = user?.full_name || user?.username || user?.email?.split('@')[0] || ''
+  const resolvedAvatarUrl = user?.avatar_url || user?.avatar || undefined
   const { t } = useTranslation()
 
   // Bug report state
@@ -297,66 +300,148 @@ const Header = () => {
               <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                 <Dropdown>
                   <MenuButton
-                    variant='plain'
-                    size='sm'
+                    slots={{ root: 'div' }}
+                    slotProps={{ root: { style: { cursor: 'pointer' } } }}
                     sx={{
-                      maxWidth: '32px',
-                      maxHeight: '32px',
-                      borderRadius: '9999999px',
                       p: 0,
                       minHeight: 'unset',
-                      border: '2px solid',
-                      borderColor: 'divider'
+                      border: 'none',
+                      background: 'none',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                   >
-                    <Avatar
-                      src={user.avatar}
-                      sx={{
-                        maxWidth: '32px',
-                        maxHeight: '32px'
-                      }}
-                    />
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <Avatar
+                        src={resolvedAvatarUrl}
+                        size='sm'
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          border: '2px solid',
+                          borderColor: 'rgba(255, 255, 255, 0.35)',
+                          borderRadius: '50%',
+                          cursor: 'pointer'
+                        }}
+                        aria-label={t('header.profileMenu.open')}
+                      />
+                      {isTimerActive && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            inset: -3,
+                            borderRadius: '50%',
+                            border: '2px solid rgba(255, 255, 255, 0.6)',
+                            animation: 'nowry-pulse 2s ease-in-out infinite',
+                            '@keyframes nowry-pulse': {
+                              '0%, 100%': { opacity: 1 },
+                              '50%': { opacity: 0.35 }
+                            },
+                            pointerEvents: 'none'
+                          }}
+                        />
+                      )}
+                    </Box>
                   </MenuButton>
+
                   <Menu
                     placement='bottom-end'
                     size='sm'
                     sx={{
-                      zIndex: '99999',
-                      p: 1,
-                      gap: 1,
+                      zIndex: 99999,
+                      minWidth: 240,
+                      maxWidth: 280,
+                      p: 0.5,
                       '--ListItem-radius': 'var(--joy-radius-sm)'
                     }}
                   >
-                    <MenuItem>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar src={user.avatar} sx={{ mr: 2 }} />
-                        <Box sx={{ minWidth: 0 }}>
-                          <Typography level='title-sm'>{user.name}</Typography>
-                          <Typography level='body-xs' noWrap>
-                            {user.email}
-                          </Typography>
-                        </Box>
-                      </Box>
+                    {/* Identity Panel — clickable, navigates to /profile */}
+                    <MenuItem
+                      component={Link}
+                      to='/profile'
+                      aria-label={t('header.profileMenu.viewProfile')}
+                      sx={{
+                        px: 2,
+                        pt: 1.5,
+                        pb: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        borderRadius: 'var(--joy-radius-sm)',
+                        '&:hover': {
+                          bgcolor: 'background.level1'
+                        }
+                      }}
+                    >
+                      <Avatar src={resolvedAvatarUrl} size='md' sx={{ width: 36, height: 36, flexShrink: 0 }} />
+                      <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                        <Typography level='title-sm' sx={{ color: 'text.primary' }}>
+                          {displayName}
+                        </Typography>
+                        <Typography level='body-xs' noWrap sx={{ color: 'text.tertiary', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {user?.email}
+                        </Typography>
+                        {user?.subscription?.tier && user.subscription.tier !== 'free' && (
+                          <Box sx={{ mt: 0.25 }}>
+                            <Chip size='sm' variant='soft' color='primary' sx={{ fontSize: '0.625rem', height: 18 }}>
+                              {t(`header.profileMenu.tier.${user.subscription.tier}`)}
+                            </Chip>
+                          </Box>
+                        )}
+                      </Stack>
                     </MenuItem>
-                    <ListDivider />
-                    <MenuItem component={Link} to='/profile'>
-                      <PersonRounded sx={{ mr: 1, fontSize: 20 }} />
-                      {t('common.profile')}
+
+                    <ListDivider sx={{ my: 0.5 }} />
+
+                    {/* Group 1 — Account */}
+                    <MenuItem component={Link} to='/settings' sx={{ gap: 1.5 }}>
+                      <ListItemDecorator sx={{ minWidth: 'unset' }}>
+                        <SettingsRounded sx={{ fontSize: 18 }} />
+                      </ListItemDecorator>
+                      <Typography level='body-sm'>{t('common.settings')}</Typography>
                     </MenuItem>
-                    <MenuItem component={Link} to='/settings'>
-                      <SettingsRounded sx={{ mr: 1, fontSize: 20 }} />
-                      {t('common.settings')}
-                    </MenuItem>
+
+                    {/* Group 2 — Pomodoro Tool (conditional) */}
                     {settings.enabled && (
-                      <MenuItem onClick={() => setShowWidget(!showWidget)}>
-                        <Timer sx={{ mr: 1, fontSize: 20 }} />
-                        {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : t('common.pomodoro')}
-                      </MenuItem>
+                      <>
+                        <ListDivider sx={{ my: 0.5 }} />
+                        <MenuItem onClick={() => setShowWidget(!showWidget)} sx={{ gap: 1.5 }}>
+                          <ListItemDecorator sx={{ minWidth: 'unset', position: 'relative' }}>
+                            <TimerRounded sx={{ fontSize: 18 }} />
+                            {isTimerActive && (
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  top: -2,
+                                  right: -2,
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: '50%',
+                                  bgcolor: 'success.solidBg'
+                                }}
+                              />
+                            )}
+                          </ListItemDecorator>
+                          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ flex: 1 }}>
+                            <Typography level='body-sm'>{t('common.pomodoro')}</Typography>
+                            {isTimerActive && (
+                              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatTime(timeLeft)}
+                              </Typography>
+                            )}
+                          </Stack>
+                        </MenuItem>
+                      </>
                     )}
-                    <ListDivider />
-                    <MenuItem onClick={logout} color='danger'>
-                      <LogoutRounded />
-                      {t('common.logout')}
+
+                    <ListDivider sx={{ my: 0.5 }} />
+
+                    {/* Group 3 — Danger */}
+                    <MenuItem onClick={logout} color='danger' sx={{ gap: 1.5 }}>
+                      <ListItemDecorator sx={{ minWidth: 'unset' }}>
+                        <LogoutRounded sx={{ fontSize: 18 }} />
+                      </ListItemDecorator>
+                      <Typography level='body-sm'>{t('common.logout')}</Typography>
                     </MenuItem>
                   </Menu>
                 </Dropdown>
@@ -516,7 +601,7 @@ const Header = () => {
                         selected={isTimerActive}
                       >
                         <ListItemDecorator>
-                          <Timer />
+                          <TimerRounded />
                         </ListItemDecorator>
                         {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : t('common.pomodoro')}
                       </ListItemButton>

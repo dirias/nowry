@@ -53,7 +53,6 @@ const FocusAreaSetup = lazy(() => import('./components/AnnualPlanning').then((m)
 const FocusAreaView = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.FocusAreaView })))
 const DailyRoutinePlanner = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.DailyRoutinePlanner })))
 const PomodoroWidget = lazy(() => import('./components/Pomodoro/PomodoroWidget'))
-const PomodoroFAB = lazy(() => import('./components/Pomodoro/PomodoroFAB'))
 
 /** Full-page loading fallback shown while lazy chunks download */
 const PageLoader = () => (
@@ -290,7 +289,6 @@ const AppContent = () => {
 
       <Suspense fallback={null}>
         <PomodoroWidget />
-        <PomodoroFAB />
       </Suspense>
     </div>
   )

@@ -19,7 +19,9 @@ import {
   ListItemButton,
   Drawer,
   LinearProgress,
-  Tooltip
+  Tooltip,
+  Snackbar,
+  Alert
 } from '@mui/joy'
 import {
   Favorite as FavoriteIcon,
@@ -33,7 +35,6 @@ import {
 import { publicContentService } from '../api/services'
 import { useAuth } from '../context/AuthContext'
 import ReportModal from '../components/Public/ReportModal'
-import { SuccessWindow, Error as ErrorMsg } from '../components/Messages'
 import ContentRenderer from '../components/Public/ContentRenderer'
 import Editor from '../components/Books/Editor'
 import { extractTableOfContents, calculateReadingStats } from '../utils/lexicalHelpers'
@@ -42,15 +43,16 @@ const PublicView = () => {
   const { t } = useTranslation()
   const { type, id } = useParams() // type = 'books' or 'decks'
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
 
   const [content, setContent] = useState(null)
   const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
-  const [message, setMessage] = useState(null)
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', color: 'success' })
   const [actionLoading, setActionLoading] = useState(false)
+  const [likeLoading, setLikeLoading] = useState(false)
   const [activeHeading, setActiveHeading] = useState(null)
 
   // New state
@@ -81,7 +83,7 @@ const PublicView = () => {
       }
     } catch (error) {
       console.error('Error fetching content:', error)
-      showMessage('error', 'Failed to load content')
+      showMessage('error', t('common.errorGeneric', { defaultValue: 'Something went wrong' }))
     } finally {
       setLoading(false)
     }
@@ -89,15 +91,8 @@ const PublicView = () => {
 
   const fetchDeckCards = async () => {
     try {
-      const token = localStorage.getItem('firebase_token')
-      const response = await fetch(`http://localhost:8000/decks/${id}/cards?limit=100`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setCards(data.items || [])
-      }
+      const data = await publicContentService.getPublicDeckCards(id, 10)
+      setCards(data.cards || [])
     } catch (error) {
       console.error('Error fetching deck cards:', error)
     }
@@ -116,21 +111,20 @@ const PublicView = () => {
   }, [content, type])
 
   const showMessage = (type, text) => {
-    setMessage({ type, text })
-    setTimeout(() => setMessage(null), 3000)
+    const colorMap = { success: 'success', error: 'danger', warning: 'warning', info: 'neutral' }
+    setSnackbar({ open: true, message: text, color: colorMap[type] || 'neutral' })
   }
 
   const handleLike = async () => {
     if (!isAuthenticated) {
-      showMessage('error', 'Please login to like content')
+      showMessage('error', t('auth.loginRequired', { defaultValue: 'Please log in to continue' }))
       return
     }
 
-    setActionLoading(true)
+    setLikeLoading(true)
     try {
-      const service = type === 'books' ? publicContentService : publicContentService
       if (isLiked) {
-        await (type === 'books' ? service.unlikeBook(id) : service.unlikeDeck(id))
+        await (type === 'books' ? publicContentService.unlikeBook(id) : publicContentService.unlikeDeck(id))
         setIsLiked(false)
         setContent((prev) => ({
           ...prev,
@@ -141,7 +135,7 @@ const PublicView = () => {
         }))
         showMessage('success', t('public.unlikeSuccess'))
       } else {
-        await (type === 'books' ? service.likeBook(id) : service.likeDeck(id))
+        await (type === 'books' ? publicContentService.likeBook(id) : publicContentService.likeDeck(id))
         setIsLiked(true)
         setContent((prev) => ({
           ...prev,
@@ -154,35 +148,48 @@ const PublicView = () => {
       }
     } catch (error) {
       console.error('Error toggling like:', error)
-      showMessage('error', error.response?.data?.detail || 'Failed to update like')
+      showMessage('error', error.response?.data?.detail || t('common.errorGeneric', { defaultValue: 'Something went wrong' }))
     } finally {
-      setActionLoading(false)
+      setLikeLoading(false)
     }
   }
 
   const handleFork = async () => {
     if (!isAuthenticated) {
-      showMessage('error', 'Please login to fork content')
-      return
-    }
-
-    if (!window.confirm(t('public.forkConfirm'))) {
+      showMessage('error', t('auth.loginRequired', { defaultValue: 'Please log in to continue' }))
       return
     }
 
     setActionLoading(true)
     try {
-      const service = type === 'books' ? publicContentService.forkBook : publicContentService.forkDeck
-      const forked = await service(id)
+      const forkService = type === 'books' ? publicContentService.forkBook : publicContentService.forkDeck
+      const forked = await forkService(id)
       showMessage('success', t('public.forkSuccess'))
 
       // Navigate to forked content after 1 second
       setTimeout(() => {
-        navigate(type === 'books' ? `/book/${forked._id}` : `/decks`)
+        navigate(type === 'books' ? `/book/${forked._id}` : `/study`)
       }, 1000)
     } catch (error) {
       console.error('Error forking content:', error)
-      showMessage('error', error.response?.data?.detail || 'Failed to fork')
+      const status = error.response?.status
+      const detail = error.response?.data?.detail
+
+      if (status === 400 && detail === 'cannot_fork_own_content') {
+        showMessage('warning', t('public.forkOwnContent'))
+        return
+      }
+
+      if (status === 409 && detail?.code === 'already_forked') {
+        const existingId = detail.forked_content_id
+        showMessage('info', t('public.alreadyForked'))
+        setTimeout(() => {
+          navigate(type === 'books' ? `/book/${existingId}` : `/study`)
+        }, 1500)
+        return
+      }
+
+      showMessage('error', error.response?.data?.detail || t('common.errorGeneric', { defaultValue: 'Something went wrong' }))
     } finally {
       setActionLoading(false)
     }
@@ -195,7 +202,7 @@ const PublicView = () => {
       setShowReportModal(false)
     } catch (error) {
       console.error('Error reporting content:', error)
-      showMessage('error', error.response?.data?.detail || 'Failed to submit report')
+      showMessage('error', error.response?.data?.detail || t('common.errorGeneric', { defaultValue: 'Something went wrong' }))
     }
   }
 
@@ -247,21 +254,16 @@ const PublicView = () => {
   if (!content) {
     return (
       <Container maxWidth='lg' sx={{ py: { xs: 2, md: 4 } }}>
-        <Typography level='h3'>Content not found</Typography>
+        <Typography level='h3'>{t('public.contentNotFound')}</Typography>
       </Container>
     )
   }
 
   const contentType = type === 'books' ? 'book' : 'deck'
+  const isOwnContent = isAuthenticated && user?.uid && content?.user_id === user.uid
 
   return (
     <>
-      {message && (
-        <Box sx={{ position: 'fixed', top: 80, right: 20, zIndex: 10000 }}>
-          {message.type === 'success' ? <SuccessWindow message={message.text} /> : <ErrorMsg message={message.text} />}
-        </Box>
-      )}
-
       <ReportModal
         open={showReportModal}
         onClose={() => setShowReportModal(false)}
@@ -319,24 +321,12 @@ const PublicView = () => {
                 <Box sx={{ display: { xs: 'none', sm: 'block' }, width: '1px', height: '16px', bgcolor: 'divider' }} />
               )}
 
-              {/* Stats - Compact */}
+              {/* Stats - Views only (likes and forks shown on interactive buttons) */}
               <Stack direction='row' spacing={2}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <ViewIcon sx={{ fontSize: 16, color: 'text.tertiary' }} />
                   <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {content.public_metadata?.views || 0}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <FavoriteIcon sx={{ fontSize: 16, color: 'text.tertiary' }} />
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {content.public_metadata?.likes || 0}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <ForkIcon sx={{ fontSize: 16, color: 'text.tertiary' }} />
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {content.public_metadata?.forks || 0}
                   </Typography>
                 </Box>
               </Stack>
@@ -398,37 +388,71 @@ const PublicView = () => {
               </Typography>
             )}
 
-            {/* Action Buttons - Minimal */}
-            <Stack direction='row' spacing={1.5} sx={{ mt: 3 }}>
-              <Button
-                variant={isLiked ? 'solid' : 'outlined'}
-                color={isLiked ? 'danger' : 'neutral'}
-                size='sm'
-                startDecorator={<FavoriteIcon />}
-                onClick={handleLike}
-                disabled={!isAuthenticated || actionLoading}
-                sx={{
-                  minWidth: '80px',
-                  fontWeight: 500
-                }}
-              >
-                {isLiked ? t('public.liked', { defaultValue: 'Liked' }) : t('public.like', { defaultValue: 'Like' })}
-              </Button>
+            {/* Fork attribution — shown when this published item is itself a fork */}
+            {content?.forked_from && (
+              <Stack direction='row' spacing={0.75} alignItems='center' sx={{ mt: 1.5 }}>
+                <ForkIcon sx={{ fontSize: 13, color: 'text.tertiary' }} />
+                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                  {t('public.forkedFrom', {
+                    title: content.forked_from.title,
+                    author: content.forked_from.author_name || t('public.unknownAuthor')
+                  })}
+                </Typography>
+              </Stack>
+            )}
 
-              {isAuthenticated && (
+            {/* Action Buttons - Minimal */}
+            <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mt: 3 }}>
+              <Stack direction='row' alignItems='center' spacing={0.5}>
+                <Tooltip title={t(isLiked ? 'public.unlike' : 'public.like')} size='sm' variant='soft' placement='top'>
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color={isLiked ? 'danger' : 'neutral'}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleLike()
+                    }}
+                    disabled={!isAuthenticated || likeLoading}
+                    aria-label={t(isLiked ? 'public.unlike' : 'public.like')}
+                    sx={{
+                      transition: 'transform 0.15s ease',
+                      '&:active': { transform: 'scale(0.9)' },
+                      '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
+                    }}
+                  >
+                    {isLiked ? (
+                      <FavoriteIcon sx={{ fontSize: 18, color: 'danger.plainColor' }} />
+                    ) : (
+                      <FavoriteBorderIcon sx={{ fontSize: 18 }} />
+                    )}
+                  </IconButton>
+                </Tooltip>
+                <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 500, minWidth: '1ch' }}>
+                  {content?.public_metadata?.likes || 0}
+                </Typography>
+              </Stack>
+
+              {isAuthenticated && !isOwnContent && (
                 <Button
                   variant='outlined'
                   color='neutral'
                   size='sm'
-                  startDecorator={<ForkIcon />}
+                  startDecorator={<ForkIcon sx={{ fontSize: 16 }} />}
                   onClick={handleFork}
-                  disabled={actionLoading}
+                  loading={actionLoading}
+                  aria-label={t('public.fork')}
                   sx={{
-                    minWidth: '80px',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
                   }}
                 >
-                  {t('public.fork', { defaultValue: 'Fork' })}
+                  {t('public.fork')}
+                  {(content?.public_metadata?.forks || 0) > 0 && (
+                    <Typography component='span' level='body-xs' sx={{ ml: 0.75, opacity: 0.55, fontWeight: 500 }}>
+                      {content.public_metadata.forks}
+                    </Typography>
+                  )}
                 </Button>
               )}
 
@@ -436,17 +460,16 @@ const PublicView = () => {
                 variant='plain'
                 color='neutral'
                 size='sm'
-                startDecorator={<ReportIcon />}
+                startDecorator={<ReportIcon sx={{ fontSize: 16 }} />}
                 onClick={() => setShowReportModal(true)}
                 sx={{
                   fontWeight: 500,
                   color: 'text.tertiary',
-                  '&:hover': {
-                    bgcolor: 'background.level1'
-                  }
+                  '&:hover': { bgcolor: 'background.level1' },
+                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
                 }}
               >
-                {t('public.report', { defaultValue: 'Report' })}
+                {t('public.report')}
               </Button>
             </Stack>
           </Box>
@@ -455,7 +478,7 @@ const PublicView = () => {
           {cards.length > 0 && (
             <Box sx={{ mb: 3 }}>
               <Typography level='h4' sx={{ mb: 2.5, fontWeight: 600 }}>
-                {t('public.cards', { defaultValue: 'Cards' })} ({cards.length})
+                {t('public.cards')} ({cards.length})
               </Typography>
               <Grid container spacing={2}>
                 {cards.map((card, index) => (
@@ -476,7 +499,7 @@ const PublicView = () => {
                     >
                       {/* Card number */}
                       <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 1.5, fontWeight: 600 }}>
-                        Card {index + 1}
+                        {t('public.cards')} {index + 1}
                       </Typography>
 
                       {/* Card title/front */}
@@ -577,6 +600,15 @@ const PublicView = () => {
                   {content.author_name}
                 </Typography>
               )}
+              {content?.forked_from && (
+                <Typography level='body-xs' noWrap sx={{ color: 'text.tertiary', lineHeight: 1.2 }}>
+                  <ForkIcon sx={{ fontSize: 11, verticalAlign: 'middle', mr: 0.5 }} />
+                  {t('public.forkedFrom', {
+                    title: content.forked_from.title,
+                    author: content.forked_from.author_name || t('public.unknownAuthor')
+                  })}
+                </Typography>
+              )}
             </Box>
 
             {/* Views */}
@@ -589,39 +621,62 @@ const PublicView = () => {
 
             {/* Like with count */}
             <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center', flexShrink: 0 }}>
-              <IconButton
-                size='sm'
-                variant={isLiked ? 'soft' : 'plain'}
-                color={isLiked ? 'danger' : 'neutral'}
-                onClick={handleLike}
-                disabled={actionLoading}
-                aria-label={t('public.like', 'Like')}
-              >
-                {isLiked ? <FavoriteIcon sx={{ fontSize: 16 }} /> : <FavoriteBorderIcon sx={{ fontSize: 16 }} />}
-              </IconButton>
-              <Typography level='body-xs' sx={{ color: 'text.tertiary', minWidth: 12 }}>
+              <Tooltip title={t(isLiked ? 'public.unlike' : 'public.like')} size='sm' variant='soft' placement='bottom'>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color={isLiked ? 'danger' : 'neutral'}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleLike()
+                  }}
+                  disabled={likeLoading}
+                  aria-label={t(isLiked ? 'public.unlike' : 'public.like')}
+                  sx={{
+                    transition: 'transform 0.15s ease',
+                    '&:active': { transform: 'scale(0.9)' },
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
+                  }}
+                >
+                  {isLiked ? (
+                    <FavoriteIcon sx={{ fontSize: 16, color: 'danger.plainColor' }} />
+                  ) : (
+                    <FavoriteBorderIcon sx={{ fontSize: 16 }} />
+                  )}
+                </IconButton>
+              </Tooltip>
+              <Typography level='body-xs' sx={{ color: 'text.secondary', minWidth: 12, fontWeight: 500 }}>
                 {content.public_metadata?.likes || 0}
               </Typography>
             </Stack>
 
             {/* Primary CTA */}
-            {isAuthenticated ? (
+            {isAuthenticated && !isOwnContent ? (
               <Button
                 size='sm'
                 variant='outlined'
                 color='neutral'
                 startDecorator={<ForkIcon sx={{ fontSize: 15 }} />}
                 onClick={handleFork}
-                disabled={actionLoading}
-                sx={{ flexShrink: 0 }}
+                loading={actionLoading}
+                aria-label={t('public.fork')}
+                sx={{
+                  flexShrink: 0,
+                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
+                }}
               >
-                {t('public.fork', 'Fork')}
+                {t('public.fork')}
+                {(content?.public_metadata?.forks || 0) > 0 && (
+                  <Typography component='span' level='body-xs' sx={{ ml: 0.75, opacity: 0.55, fontWeight: 500 }}>
+                    {content.public_metadata.forks}
+                  </Typography>
+                )}
               </Button>
-            ) : (
+            ) : !isAuthenticated ? (
               <Button size='sm' variant='soft' color='primary' onClick={() => navigate('/register')} sx={{ flexShrink: 0 }}>
-                {t('public.signUpFree', 'Sign up free')}
+                {t('public.signUpFree')}
               </Button>
-            )}
+            ) : null}
           </Sheet>
 
           {/* Reading progress */}
@@ -727,15 +782,21 @@ const PublicView = () => {
                       ? t('public.endCTAAuth', 'Fork this book to your library to edit and make it yours')
                       : t('public.endCTAGuest', 'Written with Nowry · Start your own book for free')}
                   </Typography>
-                  <Button
-                    size='sm'
-                    variant='soft'
-                    color='primary'
-                    sx={{ mt: 1.5 }}
-                    onClick={isAuthenticated ? handleFork : () => navigate('/register')}
-                  >
-                    {isAuthenticated ? t('public.forkToLibrary', 'Fork to My Library') : t('public.startWriting', 'Start writing')}
-                  </Button>
+                  {!isOwnContent && (
+                    <Button
+                      size='sm'
+                      variant='solid'
+                      color='primary'
+                      loading={isAuthenticated ? actionLoading : false}
+                      sx={{
+                        mt: 1.5,
+                        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
+                      }}
+                      onClick={isAuthenticated ? handleFork : () => navigate('/register')}
+                    >
+                      {isAuthenticated ? t('public.forkToLibrary') : t('public.startWriting')}
+                    </Button>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -796,6 +857,18 @@ const PublicView = () => {
           </Drawer>
         </Box>
       )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        sx={{ zIndex: 10000 }}
+      >
+        <Alert variant='soft' color={snackbar.color} size='sm' sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   )
 }

@@ -10,6 +10,8 @@
     "settings": "Paramètres",
     "profile": "Profil",
     "logout": "Déconnexion",
+    "close": "Fermer",
+    "pomodoro": "Minuteur Pomodoro",
     "toggleTheme": "Changer le thème"
   },
   "news": {
@@ -43,6 +45,14 @@
     "getStarted": "Commencer",
     "drawer": {
       "menu": "Menu"
+    },
+    "profileMenu": {
+      "open": "Ouvrir le menu du profil",
+      "viewProfile": "Voir le profil",
+      "tier": {
+        "free": "Gratuit",
+        "pro": "Pro"
+      }
     }
   },
   "footer": {
@@ -72,6 +82,9 @@
       "light": "Clair",
       "dark": "Sombre"
     },
+    "copyright": "© {{year}} Nowry. Tous droits réservés.",
+    "toggleTheme": "Changer le thème",
+    "language": "Langue",
     "bugReport": "Signaler un bug"
   },
   "routes": {
@@ -408,8 +421,44 @@
     }
   },
   "settings": {
-    "title": "Paramètres du Compte",
-    "subtitle": "Gérez vos préférences, sécurité et compte",
+    "title": "Paramètres",
+    "subtitle": "Gérez votre compte et vos préférences",
+    "nav": {
+      "account": "Compte",
+      "appearance": "Apparence",
+      "productivity": "Productivité",
+      "notifications": "Notifications",
+      "security": "Sécurité",
+      "danger": "Zone de danger",
+      "jump": "Naviguer vers la section",
+      "jumpTo": "Aller à"
+    },
+    "account": {
+      "title": "Compte",
+      "fullName": "Nom d'affichage",
+      "emailManaged": "L'email est géré par votre fournisseur d'authentification",
+      "editPhoto": "Changer la photo"
+    },
+    "appearance": {
+      "title": "Apparence",
+      "mode": "Thème",
+      "modeDesc": "Choisissez le mode clair ou sombre",
+      "language": "Langue",
+      "accentColor": "Couleur d'accent",
+      "accentColorDesc": "Personnalisez la couleur d'accent de l'application",
+      "interests": "Centres d'intérêt"
+    },
+    "productivity": {
+      "title": "Productivité",
+      "enableTimer": "Activer le minuteur Pomodoro",
+      "enableTimerDesc": "Afficher le minuteur dans l'en-tête et activer le widget flottant",
+      "focusDuration": "Durée de concentration (minutes)",
+      "shortBreak": "Pause courte (minutes)",
+      "longBreak": "Pause longue (minutes)",
+      "recommendedMinutes": "Recommandé : {{count}}",
+      "autoStart": "Démarrage automatique",
+      "autoStartDesc": "Démarrer automatiquement la session suivante"
+    },
     "general": {
       "title": "Préférences Générales",
       "appearance": "Apparence",
@@ -422,37 +471,62 @@
     },
     "security": {
       "title": "Sécurité",
-      "changePassword": "Changer le Mot de Passe",
-      "currentPassword": "Mot de Passe Actuel",
-      "newPassword": "Nouveau Mot de Passe",
-      "confirmPassword": "Confirmer le Nouveau Mot de Passe",
+      "changePassword": "Changer le mot de passe",
+      "changePasswordCta": "Changer le mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
       "updatePassword": "Mettre à Jour",
-      "twoFactor": "Authentification à Deux Facteurs",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+      "passwordTooWeak": "Le mot de passe est trop faible",
+      "wrongPassword": "Le mot de passe actuel est incorrect",
+      "reauthRequired": "Entrez votre mot de passe actuel pour continuer",
+      "passwordChangeFailed": "Échec de la mise à jour du mot de passe. Réessayez.",
+      "passwordChanged": "Mot de passe mis à jour avec succès",
+      "save": "Mettre à jour le mot de passe",
+      "twoFactor": "Authentification à deux facteurs",
       "twoFactorDesc": "Ajoutez une couche de sécurité supplémentaire",
+      "comingSoon": "Bientôt disponible",
       "enable2FA": "Activer 2FA",
       "disable2FA": "Désactiver",
       "success2FA": "2FA Activé ! Codes de secours :",
       "disabled2FA": "2FA désactivé avec succès"
     },
     "notifications": {
-      "title": "Préférences de Notification",
-      "emailDigest": "Résumé par Email",
+      "title": "Notifications",
+      "emailDigest": "Résumé par email",
       "emailDigestDesc": "Recevez un résumé quotidien de votre activité",
-      "studyReminders": "Rappels d'Étude",
+      "studyReminders": "Rappels d'étude",
       "studyRemindersDesc": "Soyez notifié quand des cartes sont à réviser",
-      "newsUpdates": "Mises à Jour",
+      "newsUpdates": "Mises à jour",
       "newsUpdatesDesc": "Recevez des nouvelles sur les fonctionnalités",
-      "marketing": "Emails Marketing",
-      "marketingDesc": "Recevez des offres promotionnelles"
+      "marketing": "Emails marketing",
+      "marketingDesc": "Recevez des offres promotionnelles",
+      "comingSoon": "Notifications bientôt disponibles",
+      "comingSoonDesc": "Nous travaillons sur des notifications intelligentes pour vos sessions d'étude"
     },
     "danger": {
-      "title": "Zone de Danger",
-      "deleteAccount": "Supprimer le Compte",
-      "deleteDesc": "Supprimer définitivement votre compte et toutes les données",
+      "title": "Zone de danger",
+      "deleteAccount": "Supprimer le compte",
+      "deleteDesc": "Supprimer définitivement votre compte et toutes les données. Cette action est irréversible.",
       "confirmTitle": "Êtes-vous absolument sûr ?",
       "confirmDesc": "Cette action est irréversible. Toutes vos données seront supprimées.",
       "confirmBtn": "Oui, Supprimer Mon Compte",
-      "cancelBtn": "Annuler"
+      "cancelBtn": "Annuler",
+      "modal": {
+        "title": "Supprimer le Compte",
+        "description": "Cela supprimera définitivement votre compte et toutes les données associées",
+        "confirm": "Supprimer Mon Compte",
+        "consequence1": "Tous les livres et notes seront supprimés",
+        "consequence2": "Tous les paquets de cartes seront supprimés",
+        "consequence3": "Toutes les données de planification annuelle seront supprimées",
+        "consequence4": "Le contenu public sera dépublié immédiatement"
+      }
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger les paramètres. Actualisez et réessayez.",
+      "networkError": "Erreur réseau. Vérifiez votre connexion."
     }
   },
   "dashboard": {

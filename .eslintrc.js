@@ -19,12 +19,17 @@ module.exports = {
     node: true,
     es6: true
   },
+  plugins: [
+    'react-hooks'
+  ],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:prettier/recommended' // Make this the last element so prettier config overrides other formatting rules
   ],
   rules: {
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
     'react/prop-types': 'off',
     'no-unused-vars': 'off',
     //'no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: false }],
