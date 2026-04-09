@@ -39,22 +39,22 @@ const MyLikes = () => {
   const [message, setMessage] = useState(null)
 
   useEffect(() => {
+    const fetchLikedContent = async () => {
+      setLoading(true)
+      try {
+        const contentType = activeTab === 0 ? 'all' : activeTab === 1 ? 'book' : 'deck'
+        const data = await publicContentService.getMyLikes(contentType)
+        setItems(data || [])
+      } catch (error) {
+        console.error('Error fetching liked content:', error)
+        setItems([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchLikedContent()
   }, [activeTab])
-
-  const fetchLikedContent = async () => {
-    setLoading(true)
-    try {
-      const contentType = activeTab === 0 ? 'all' : activeTab === 1 ? 'book' : 'deck'
-      const data = await publicContentService.getMyLikes(contentType)
-      setItems(data || [])
-    } catch (error) {
-      console.error('Error fetching liked content:', error)
-      setItems([])
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const showMessage = (type, text) => {
     setMessage({ type, text })

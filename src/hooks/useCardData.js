@@ -72,6 +72,7 @@ export function useCardData(selectedTags = [], search = '') {
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey]) // re-run whenever tags or search changes
 
   const reload = async () => {

@@ -74,7 +74,7 @@ export function useAutoSave({ id, content, onSave, debounceMs = 2000, forceSaveM
       setError(err.message || 'Save failed')
       failureCountRef.current += 1
     }
-  }, [onSave])
+  }, [onSave, status])
 
   // Effect: Debounced Autosave
   useEffect(() => {

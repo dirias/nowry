@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
@@ -61,11 +61,21 @@ const PublicView = () => {
   const [mobileTocOpen, setMobileTocOpen] = useState(false)
   const scrollRef = useRef(null)
 
-  useEffect(() => {
-    fetchContent()
-  }, [type, id])
+  const showMessage = useCallback((type, text) => {
+    const colorMap = { success: 'success', error: 'danger', warning: 'warning', info: 'neutral' }
+    setSnackbar({ open: true, message: text, color: colorMap[type] || 'neutral' })
+  }, [])
 
-  const fetchContent = async () => {
+  const fetchDeckCards = useCallback(async () => {
+    try {
+      const data = await publicContentService.getPublicDeckCards(id, 10)
+      setCards(data.cards || [])
+    } catch (error) {
+      console.error('Error fetching deck cards:', error)
+    }
+  }, [id])
+
+  const fetchContent = useCallback(async () => {
     setLoading(true)
     try {
       const service = type === 'books' ? publicContentService.getPublicBook : publicContentService.getPublicDeck
@@ -87,16 +97,11 @@ const PublicView = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [type, id, isAuthenticated, showMessage, t, fetchDeckCards])
 
-  const fetchDeckCards = async () => {
-    try {
-      const data = await publicContentService.getPublicDeckCards(id, 10)
-      setCards(data.cards || [])
-    } catch (error) {
-      console.error('Error fetching deck cards:', error)
-    }
-  }
+  useEffect(() => {
+    fetchContent()
+  }, [fetchContent])
 
   // Extract headings from Lexical content for TOC (reuses shared utility)
   const tableOfContents = useMemo(() => {
@@ -109,11 +114,6 @@ const PublicView = () => {
     if (!content?.full_content || type !== 'books') return null
     return calculateReadingStats(content.full_content)
   }, [content, type])
-
-  const showMessage = (type, text) => {
-    const colorMap = { success: 'success', error: 'danger', warning: 'warning', info: 'neutral' }
-    setSnackbar({ open: true, message: text, color: colorMap[type] || 'neutral' })
-  }
 
   const handleLike = async () => {
     if (!isAuthenticated) {

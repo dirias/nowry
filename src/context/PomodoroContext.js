@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
 import { userService } from '../api/services'
 import { apiCache } from '../api/utils/cache'
 import { useAuth } from './AuthContext'
@@ -114,6 +114,19 @@ export const PomodoroProvider = ({ children }) => {
     fetchPreferences()
   }, [user])
 
+  const handleTimerComplete = useCallback(() => {
+    clearInterval(timerRef.current)
+    setIsActive(false)
+    setEndTime(null)
+
+    // Play notification sound
+    playPomodoroNotification()
+
+    // Show browser notification if permitted
+    const modeMessage = mode === 'work' ? 'Work session complete! Time for a break.' : 'Break complete! Ready to focus?'
+    showBrowserNotification('Pomodoro Timer', modeMessage)
+  }, [mode])
+
   // Timer tick logic
   useEffect(() => {
     if (isRestoringRef.current) {
@@ -137,20 +150,7 @@ export const PomodoroProvider = ({ children }) => {
     }
 
     return () => clearInterval(timerRef.current)
-  }, [isActive, timeLeft, endTime])
-
-  const handleTimerComplete = () => {
-    clearInterval(timerRef.current)
-    setIsActive(false)
-    setEndTime(null)
-
-    // Play notification sound
-    playPomodoroNotification()
-
-    // Show browser notification if permitted
-    const modeMessage = mode === 'work' ? 'Work session complete! Time for a break.' : 'Break complete! Ready to focus?'
-    showBrowserNotification('Pomodoro Timer', modeMessage)
-  }
+  }, [isActive, timeLeft, endTime, handleTimerComplete])
 
   const toggleTimer = () => {
     if (!isActive) {
