@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal, ModalDialog, ModalClose, Typography, Box, Button, Stack, Card, CardContent, Chip, IconButton, Tooltip } from '@mui/joy'
 import { ArrowBack, ArrowForward, Flip, PlayArrow, Settings } from '@mui/icons-material'
 import mermaid from 'mermaid'
+import DOMPurify from 'dompurify'
 import ttsService from '../../utils/tts.service'
 import TTSControls from '../TTS/TTSControls'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
@@ -47,7 +48,10 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
   const currentDeckId = currentCard?.deck_id?._id || currentCard?.deck_id || null
 
   const { voiceSettings, handleVoiceSettingsChange: _handleVoiceSettingsChange } = useVoiceSettings(currentDeckId)
-  const handleVoiceSettingsChange = (newSettings) => _handleVoiceSettingsChange(newSettings, { isFlipped, currentDeckId })
+  const handleVoiceSettingsChange = React.useCallback(
+    (newSettings) => _handleVoiceSettingsChange(newSettings, { isFlipped, currentDeckId }),
+    [_handleVoiceSettingsChange, isFlipped, currentDeckId]
+  )
 
   const cardText = currentCard
     ? isFlipped
@@ -57,21 +61,21 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
 
   const currentAutoPlay = voiceSettings?.front?.autoPlay ?? voiceSettings?.front?.auto_play ?? false
 
-  const handlePlayTTS = () => {
+  const handlePlayTTS = React.useCallback(() => {
     if (!cardText) return
     ttsService.speak(cardText, {
       onStart: () => setIsPlaying(true),
       onEnd: () => setIsPlaying(false),
       onError: () => setIsPlaying(false)
     })
-  }
+  }, [cardText])
 
   // Auto-play: trigger when card text changes (card flip or navigation) if setting is on
   useEffect(() => {
     if (!open || !cardText || !currentAutoPlay) return
     const timer = setTimeout(() => handlePlayTTS(), 300)
     return () => clearTimeout(timer)
-  }, [cardText, open, currentAutoPlay]) // handlePlayTTS intentionally omitted — stable ref not needed
+  }, [cardText, open, currentAutoPlay, handlePlayTTS])
 
   // Render Mermaid diagram for visual cards
   useEffect(() => {
@@ -262,7 +266,10 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                           {currentCard.title}
                         </Typography>
                         {svgContent ? (
-                          <div dangerouslySetInnerHTML={{ __html: svgContent }} style={{ maxWidth: '100%', overflow: 'auto' }} />
+                          <div
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svgContent) }}
+                            style={{ maxWidth: '100%', overflow: 'auto' }}
+                          />
                         ) : (
                           <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                             {t('common.loading')}

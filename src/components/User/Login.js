@@ -81,10 +81,15 @@ const Login = () => {
 
     try {
       // Use Firebase Google OAuth
-      await authService.loginWithGoogle()
+      const response = await authService.loginWithGoogle()
 
-      // Reload to update auth state
-      window.location.href = '/'
+      // Check if user needs onboarding (wizard not completed)
+      if (response && response.backendUser && response.backendUser.wizard_completed === false) {
+        window.location.href = '/onboarding'
+      } else {
+        // Reload to update auth state
+        window.location.href = '/'
+      }
     } catch (error) {
       console.error('Google login error:', error)
 
@@ -260,19 +265,34 @@ const Login = () => {
                 color='neutral'
                 size='lg'
                 fullWidth
-                startDecorator={<Google />}
+                startDecorator={<Google sx={{ color: '#4285F4' }} />}
                 onClick={handleGoogleLogin}
                 disabled={loading}
                 sx={{
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
                   '&:hover': {
-                    borderColor: 'neutral.outlinedHoverBorder',
-                    backgroundColor: 'neutral.outlinedHoverBg'
+                    borderColor: 'primary.outlinedBorder',
+                    backgroundColor: 'primary.softBg',
+                    boxShadow: 'sm',
+                    transform: 'translateY(-1px)'
                   }
                 }}
               >
                 {t('auth.signInGoogle')}
               </Button>
             </Stack>
+
+            <Typography level='body-xs' textAlign='center' sx={{ mt: 2, color: 'text.tertiary', lineHeight: 1.5 }}>
+              {t('auth.byContinuing')}{' '}
+              <Link component={RouterLink} to={t('routes.terms')} sx={{ fontWeight: 500 }}>
+                {t('auth.termsOfService')}
+              </Link>{' '}
+              {t('auth.and')}{' '}
+              <Link component={RouterLink} to={t('routes.privacy')} sx={{ fontWeight: 500 }}>
+                {t('auth.privacyPolicy')}
+              </Link>
+            </Typography>
 
             <Typography level='body-sm' textAlign='center' sx={{ mt: 3, color: 'text.secondary' }}>
               {t('auth.noAccount')}{' '}

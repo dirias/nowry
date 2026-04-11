@@ -309,10 +309,10 @@ const FocusAreaView = () => {
   }
 
   // Determine current quarter for authentic default
-  const getCurrentQuarter = () => {
+  const getCurrentQuarter = React.useCallback(() => {
     const month = new Date().getMonth() + 1
     return Math.ceil(month / 3)
-  }
+  }, [])
 
   const handleDeletePriority = () => {
     // Refresh data after delete
@@ -332,20 +332,20 @@ const FocusAreaView = () => {
   // Sync state to URL whenever it changes internally
   useEffect(() => {
     if (searchParams.get('q') !== String(quarterFilter)) {
-      setSearchParams({ q: quarterFilter }, { replace: true })
+      setSearchParams({ q: String(quarterFilter) }, { replace: true })
     }
   }, [quarterFilter, searchParams, setSearchParams])
 
   // Auto-forward to the next quarter if the current real calendar quarter is already closed
   useEffect(() => {
+    const currentQ = getCurrentQuarter()
     if (quarterReports.length > 0 && plan?.year) {
-      const currentQ = getCurrentQuarter()
       const isCurrentClosed = quarterReports.some((r) => r.quarter === currentQ && r.year === plan.year)
       if (isCurrentClosed && quarterFilter === currentQ) {
         setQuarterFilter(currentQ < 4 ? currentQ + 1 : 1)
       }
     }
-  }, [quarterReports, plan?.year])
+  }, [quarterReports, plan?.year, quarterFilter, getCurrentQuarter])
   const isQuarterClosed = quarterReports.some((r) => r.quarter === quarterFilter && r.year === plan?.year)
   const [activeTab, setActiveTab] = useState(0) // 0: Goals, 1: Priorities
 

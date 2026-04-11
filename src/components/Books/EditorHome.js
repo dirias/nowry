@@ -112,7 +112,7 @@ export default function EditorHome() {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [book, isMobile])
 
   // Set locked on mobile when book loads
   useEffect(() => {
@@ -284,7 +284,7 @@ export default function EditorHome() {
         abortControllerRef.current.abort()
       }
     }
-  }, [id, resetBaseline]) // book is intentionally excluded: hasCorrectBook is a local snapshot, and including book causes the effect to re-fire after publish/unpublish state updates, triggering redundant fetches
+  }, [id, resetBaseline, book, isMobile, bookName, pageSize, autoSaveEnabled])
 
   // Scroll to top when component mounts
   useEffect(() => {

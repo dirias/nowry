@@ -37,13 +37,7 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
 
   const { decks: cacheDecks, loading: hookDecksLoading, reload: reloadDecks } = useDeckData()
 
-  useEffect(() => {
-    if (step === 'select_deck') {
-      loadDecks()
-    }
-  }, [step, hookDecksLoading, cacheDecks])
-
-  const loadDecks = async () => {
+  const loadDecks = React.useCallback(async () => {
     try {
       if (hookDecksLoading) return
       const data = cacheDecks || []
@@ -56,7 +50,13 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
     } catch (error) {
       console.error('Error loading decks:', error)
     }
-  }
+  }, [hookDecksLoading, cacheDecks])
+
+  useEffect(() => {
+    if (step === 'select_deck') {
+      loadDecks()
+    }
+  }, [step, loadDecks])
 
   const toggleCardSelection = (index) => {
     setSelectedCards((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]))

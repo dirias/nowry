@@ -49,7 +49,9 @@ const Footer = () => {
   const navLinks = [
     { label: t('footer.links.browse'), path: '/browse' },
     { label: t('footer.links.about'), path: '/about' },
-    { label: t('footer.support.contact'), path: '/contact' }
+    { label: t('footer.support.contact'), path: '/contact' },
+    { label: t('footer.links.privacy'), path: '/privacy' },
+    { label: t('footer.links.terms'), path: '/terms' }
   ]
 
   const socialLinks = [

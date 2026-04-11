@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -46,12 +46,7 @@ const FocusAreaSetup = () => {
 
   const { plan, areas: cacheAreas, loading: hookLoading } = useAnnualPlan()
 
-  useEffect(() => {
-    if (hookLoading) return
-    fetchPlan()
-  }, [hookLoading, plan, cacheAreas])
-
-  const fetchPlan = async () => {
+  const fetchPlan = useCallback(async () => {
     try {
       setLoading(true)
       if (!plan) {
@@ -98,7 +93,12 @@ const FocusAreaSetup = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [plan, cacheAreas, REQUIRED_AREAS_COUNT])
+
+  useEffect(() => {
+    if (hookLoading) return
+    fetchPlan()
+  }, [hookLoading, fetchPlan])
 
   const handleNext = () => {
     setActiveStep((prev) => prev + 1)

@@ -71,27 +71,7 @@ export default function CardHome({ onDeckChange } = {}) {
   const { statistics: hookStats, loading: statsLoading } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
-  useEffect(() => {
-    if (cardsLoading || statsLoading || decksLoading) return
-    fetchData()
-  }, [cardsLoading, statsLoading, decksLoading, hookCards, hookStats, hookDecks])
-
-  useEffect(() => {
-    let cancelled = false
-    cardsService
-      .getTags()
-      .then((tags) => {
-        if (!cancelled) setAvailableTags(tags)
-      })
-      .catch(() => {
-        /* tags are non-critical — silently ignore */
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true)
       const decksData = hookDecks || []
@@ -122,7 +102,12 @@ export default function CardHome({ onDeckChange } = {}) {
       console.error('Error fetching data:', error)
       setLoading(false)
     }
-  }
+  }, [hookDecks, hookCards, hookStats])
+
+  useEffect(() => {
+    if (cardsLoading || statsLoading || decksLoading) return
+    fetchData()
+  }, [cardsLoading, statsLoading, decksLoading, fetchData])
 
   const handleStudy = (deck) => {
     navigate(`/study/${deck._id}`)

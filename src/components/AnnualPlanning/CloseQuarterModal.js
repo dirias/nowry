@@ -45,32 +45,41 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
 
   // Compute metrics
   const totalGoals = quarterGoals.length
-  let completedGoalsCount = 0
-  let totalMilestonesCount = 0
-  let completedMilestonesCount = 0
+  const { pendingGoals, completedGoalsCount, totalMilestonesCount, completedMilestonesCount, totalProgressSum } = React.useMemo(() => {
+    const pending = []
+    let completedCount = 0
+    let totalMilestones = 0
+    let completedMilestones = 0
+    let progressSum = 0
 
-  const pendingGoals = []
-  let totalProgressSum = 0
+    quarterGoals.forEach((g) => {
+      let goalProgress = g.progress || 0
 
-  quarterGoals.forEach((g) => {
-    let goalProgress = g.progress || 0
+      if (g.milestones && g.milestones.length > 0) {
+        const done = g.milestones.filter((m) => m.completed).length
+        goalProgress = Math.round((done / g.milestones.length) * 100)
+        totalMilestones += g.milestones.length
+        completedMilestones += done
+      }
 
-    if (g.milestones && g.milestones.length > 0) {
-      const done = g.milestones.filter((m) => m.completed).length
-      goalProgress = Math.round((done / g.milestones.length) * 100)
-      totalMilestonesCount += g.milestones.length
-      completedMilestonesCount += done
+      progressSum += goalProgress
+
+      let isCompleted = g.status === 'completed' || goalProgress === 100
+      if (isCompleted) {
+        completedCount++
+      } else {
+        pending.push(g)
+      }
+    })
+
+    return {
+      pendingGoals: pending,
+      completedGoalsCount: completedCount,
+      totalMilestonesCount: totalMilestones,
+      completedMilestonesCount: completedMilestones,
+      totalProgressSum: progressSum
     }
-
-    totalProgressSum += goalProgress
-
-    let isCompleted = g.status === 'completed' || goalProgress === 100
-    if (isCompleted) {
-      completedGoalsCount++
-    } else {
-      pendingGoals.push(g)
-    }
-  })
+  }, [quarterGoals])
 
   const progressPercentage = totalGoals > 0 ? Math.round(totalProgressSum / totalGoals) : 0
 
@@ -97,7 +106,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
       }
     })
     setMigrationData(initialData)
-  }, [pendingGoals.length, targetQuarter, targetYear])
+  }, [pendingGoals, targetQuarter, targetYear])
 
   const handleMigrationChange = (goalId, field, value) => {
     setMigrationData((prev) => {

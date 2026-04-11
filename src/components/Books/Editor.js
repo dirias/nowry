@@ -150,7 +150,7 @@ function FocusReportPlugin({ onFocus }) {
   const onFocusRef = useRef(onFocus)
   useEffect(() => {
     onFocusRef.current = onFocus
-  })
+  }, [onFocus])
   useEffect(() => {
     return editor.registerCommand(
       FOCUS_COMMAND,
@@ -259,19 +259,16 @@ export default function Editor({
 
   // Page Tracking Logic - Direct capture with minimal debounce
   useEffect(() => {
-    if (!containerRef.current) return
+    const container = containerRef.current
+    if (!container) return
 
     const capturePages = () => {
-      if (!containerRef.current) return
-
-      const MAX_PREVIEW_CHARS = 8000
-      const pageElements = containerRef.current.querySelectorAll('.editor-page')
+      const pageElements = container.querySelectorAll('.editor-page')
       const pagesData = Array.from(pageElements).map((el, index) => {
-        const html = (el.innerHTML || '').slice(0, MAX_PREVIEW_CHARS)
+        const html = (el.innerHTML || '').slice(0, 8000)
         return { index, content: html }
       })
 
-      // Only update if count or content changed
       const currentSignature = `${pagesData.length}:${pagesData.map((p) => p.content.length).join(',')}`
       if (lastPagesJsonRef.current !== currentSignature) {
         lastPagesJsonRef.current = currentSignature
@@ -281,37 +278,27 @@ export default function Editor({
       }
     }
 
-    // Initial capture
     capturePages()
 
-    // Minimal debounce for rapid changes (typing), immediate for paste
     let debounceTimer = null
     const observer = new MutationObserver((mutations) => {
       clearTimeout(debounceTimer)
-
-      // Check if this is a large mutation (paste operation)
       const isLargeMutation = mutations.some((m) => m.addedNodes.length > 1 || m.target.childNodes.length > 10)
-
-      if (isLargeMutation) {
-        // Large paste: capture immediately after a short delay for DOM to settle
-        debounceTimer = setTimeout(capturePages, 50)
-      } else {
-        // Small change (typing): debounce normally
-        debounceTimer = setTimeout(capturePages, 200)
-      }
+      debounceTimer = setTimeout(capturePages, isLargeMutation ? 50 : 200)
     })
 
-    observer.observe(containerRef.current, {
+    observer.observe(container, {
       childList: true,
       subtree: true,
       characterData: true
     })
 
+    const currentTimeout = pageUpdateTimeoutRef.current
     return () => {
       observer.disconnect()
       clearTimeout(debounceTimer)
-      if (pageUpdateTimeoutRef.current) {
-        cancelAnimationFrame(pageUpdateTimeoutRef.current)
+      if (currentTimeout) {
+        cancelAnimationFrame(currentTimeout)
       }
     }
   }, [onPageCountChange, pageSize])
@@ -383,10 +370,7 @@ export default function Editor({
       },
       onError: (e) => console.error('Lexical error:', e)
     }),
-    [book?._id]
-    // initialContent is intentionally excluded: the editorState initializer is called once
-    // by Lexical on mount. Including initialContent here would re-create the LexicalComposer
-    // on every keystroke (parent content state update), causing an infinite re-render loop.
+    [book?._id, initialContent]
   )
 
   useEffect(() => {

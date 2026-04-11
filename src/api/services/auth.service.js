@@ -131,7 +131,8 @@ export const authService = {
         {
           firebase_uid: user.uid,
           email: user.email,
-          username: user.displayName || user.email.split('@')[0]
+          username: user.displayName || user.email.split('@')[0],
+          photo_url: user.photoURL
         },
         {
           headers: {

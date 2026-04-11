@@ -100,20 +100,7 @@ const SideMenu = () => {
 
   const { tasks: tasksData, loading: tasksLoading, reload: reloadTasks } = useTaskData()
 
-  // Load data when tasks are ready
-  React.useEffect(() => {
-    if (tasksLoading) return
-    loadData()
-  }, [tasksLoading, tasksData])
-
-  // Focus new list input when shown
-  React.useEffect(() => {
-    if (addingList && newListInputRef.current) {
-      newListInputRef.current.focus()
-    }
-  }, [addingList])
-
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     try {
       setLoading(true)
       const routineData = await apiCache.get(ROUTINE_CACHE_KEY, ROUTINE_TTL, () => annualPlanningService.getDailyRoutine())
@@ -130,7 +117,20 @@ const SideMenu = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [tasksData])
+
+  // Load data when tasks are ready
+  React.useEffect(() => {
+    if (tasksLoading) return
+    loadData()
+  }, [tasksLoading, loadData])
+
+  // Focus new list input when shown
+  React.useEffect(() => {
+    if (addingList && newListInputRef.current) {
+      newListInputRef.current.focus()
+    }
+  }, [addingList])
 
   // ── List management ───────────────────────────────────────────────────────
   const handleSelectList = (id) => {

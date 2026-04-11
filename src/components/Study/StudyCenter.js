@@ -91,12 +91,7 @@ export default function StudyCenter() {
   const { statistics: statisticsData, loading: statsLoading } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
-  useEffect(() => {
-    if (statsLoading || decksLoading) return
-    fetchData()
-  }, [statsLoading, decksLoading, statisticsData, hookDecks])
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true)
 
@@ -127,7 +122,12 @@ export default function StudyCenter() {
       console.error('Error fetching study data:', error)
       setLoading(false)
     }
-  }
+  }, [hookDecks, statisticsData])
+
+  useEffect(() => {
+    if (statsLoading || decksLoading) return
+    fetchData()
+  }, [statsLoading, decksLoading, fetchData])
 
   const getDecksByType = (type) => {
     return decks.filter((d) => d.deck_type === type)

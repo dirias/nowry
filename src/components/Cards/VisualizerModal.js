@@ -18,6 +18,7 @@ import {
   Alert
 } from '@mui/joy'
 import mermaid from 'mermaid'
+import DOMPurify from 'dompurify'
 import { visualizerService, decksService, cardsService } from '../../api/services'
 import { useDeckData } from '../../hooks/useDeckData'
 
@@ -72,7 +73,13 @@ const MermaidChart = ({ code }) => {
     )
   }
 
-  return <div ref={ref} dangerouslySetInnerHTML={{ __html: svg }} style={{ width: '100%', overflow: 'auto', textAlign: 'center' }} />
+  return (
+    <div
+      ref={ref}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg) }}
+      style={{ width: '100%', overflow: 'auto', textAlign: 'center' }}
+    />
+  )
 }
 
 export default function VisualizerModal({ open, onClose, text }) {

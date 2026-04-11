@@ -14,7 +14,8 @@ import {
   Alert,
   LinearProgress,
   Stack,
-  IconButton
+  IconButton,
+  Divider
 } from '@mui/joy'
 import {
   PersonRounded,
@@ -25,7 +26,8 @@ import {
   CheckCircleRounded,
   AutoStoriesRounded,
   PsychologyRounded,
-  SpeedRounded
+  SpeedRounded,
+  Google
 } from '@mui/icons-material'
 import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../api/services/auth.service'
@@ -127,6 +129,53 @@ const Register = () => {
       }
     } else {
       setErrors(newErrors)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setErrors({})
+    setLoading(true)
+
+    try {
+      // Use Firebase Google OAuth
+      const response = await authService.loginWithGoogle()
+
+      // Redirection: First time Google users go to onboarding, existing ones to home
+      // In register page, we naturally assume success leads to onboarding
+      if (response && response.backendUser && response.backendUser.wizard_completed === false) {
+        window.location.href = '/onboarding'
+      } else {
+        window.location.href = '/'
+      }
+    } catch (error) {
+      console.error('Google login error:', error)
+
+      // Parse Google login errors
+      let errorMessage = t('auth.errors.loginFailed')
+
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = t('auth.errors.googleCancelled')
+            break
+          case 'auth/popup-blocked':
+            errorMessage = t('auth.errors.popupBlocked')
+            break
+          case 'auth/account-exists-with-different-credential':
+            errorMessage = t('auth.errors.accountExistsDifferent')
+            break
+          case 'auth/network-request-failed':
+            errorMessage = t('auth.errors.networkError')
+            break
+          default:
+            errorMessage = error.message || t('auth.errors.loginFailed')
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      setErrors({ serverError: errorMessage })
+      setLoading(false)
     }
   }
 
@@ -334,6 +383,47 @@ const Register = () => {
                 </Button>
               </Stack>
             </form>
+
+            <Divider sx={{ my: 3 }}>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {t('auth.orContinueWith')}
+              </Typography>
+            </Divider>
+
+            <Stack spacing={1.5}>
+              <Button
+                variant='outlined'
+                color='neutral'
+                size='lg'
+                fullWidth
+                startDecorator={<Google sx={{ color: '#4285F4' }} />}
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                sx={{
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    borderColor: 'primary.outlinedBorder',
+                    backgroundColor: 'primary.softBg',
+                    boxShadow: 'sm',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+              >
+                {t('auth.signInGoogle')}
+              </Button>
+            </Stack>
+
+            <Typography level='body-xs' textAlign='center' sx={{ mt: 2, color: 'text.tertiary', lineHeight: 1.5 }}>
+              {t('auth.byContinuing')}{' '}
+              <Link component={RouterLink} to={t('routes.terms')} sx={{ fontWeight: 500 }}>
+                {t('auth.termsOfService')}
+              </Link>{' '}
+              {t('auth.and')}{' '}
+              <Link component={RouterLink} to={t('routes.privacy')} sx={{ fontWeight: 500 }}>
+                {t('auth.privacyPolicy')}
+              </Link>
+            </Typography>
 
             <Typography level='body-sm' textAlign='center' sx={{ mt: 3, color: 'text.secondary' }}>
               {t('auth.hasAccount')}{' '}

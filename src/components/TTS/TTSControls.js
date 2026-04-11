@@ -152,18 +152,10 @@ export default function TTSControls({
         ttsService.setVoice(def)
       }
     }
-  }, [voiceSettings, allVoices])
-
-  // ── Auto-play effect ───────────────────────────────────────────────────────
-  useEffect(() => {
-    // Auto‑play is only allowed after a user interaction (required on iOS/Android)
-    if (autoPlay && text && !isPlaying && allVoices.length > 0 && userInitiated) {
-      handlePlay()
-    }
-  }, [text, autoPlay, allVoices.length, userInitiated])
+  }, [voiceSettings, allVoices, selectedVoice, onVoiceSettingsChange])
 
   // ── Handlers ───────────────────────────────────────────────────────────────
-  const handlePlay = () => {
+  const handlePlay = React.useCallback(() => {
     if (!text) return
     // Mark that the user has initiated playback – this satisfies the user‑gesture requirement on mobile
     setUserInitiated(true)
@@ -173,12 +165,20 @@ export default function TTSControls({
       onEnd: () => setIsPlaying(false),
       onError: () => setIsPlaying(false)
     })
-  }
+  }, [text, rate])
 
   const handlePause = () => {
     ttsService.pause()
     setIsPlaying(false)
   }
+
+  // ── Auto-play effect ───────────────────────────────────────────────────────
+  useEffect(() => {
+    // Auto‑play is only allowed after a user interaction (required on iOS/Android)
+    if (autoPlay && text && !isPlaying && allVoices.length > 0 && userInitiated) {
+      handlePlay()
+    }
+  }, [text, autoPlay, allVoices.length, userInitiated, handlePlay, isPlaying])
 
   const handleLanguageChange = (event, langBase) => {
     if (!langBase) return

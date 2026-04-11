@@ -22,6 +22,7 @@ import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import { apiCache } from '../../api/utils/cache'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
+import DOMPurify from 'dompurify'
 
 // Initialize Mermaid
 mermaid.initialize({
@@ -50,17 +51,17 @@ export default function StudySession() {
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
   const [isPressing, setIsPressing] = useState(false)
 
-  const handleCardMouseMove = (e) => {
+  const handleCardMouseMove = React.useCallback((e) => {
     if (!e.currentTarget) return
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    setGlare({ x: (x / rect.width) * 100, y: (y / rect.height) * 100, opacity: 1 })
-  }
+    setGlare((prev) => ({ x: (x / rect.width) * 100, y: (y / rect.height) * 100, opacity: 1 }))
+  }, [])
 
-  const handleCardMouseLeave = () => {
-    setGlare({ ...glare, opacity: 0 })
-  }
+  const handleCardMouseLeave = React.useCallback(() => {
+    setGlare((prev) => ({ ...prev, opacity: 0 }))
+  }, [])
 
   // Centralized voice settings — reads & writes through the shared hook
   const { voiceSettings, getSettingsForDeck, handleVoiceSettingsChange: _handleVoiceSettingsChange } = useVoiceSettings(deckId)
@@ -69,11 +70,14 @@ export default function StudySession() {
   const currentCardDeckId = cards[currentIndex]?.deck_id?._id || cards[currentIndex]?.deck_id
   const activeVoiceSettings = deckId === 'daily-review' && currentCardDeckId ? getSettingsForDeck(currentCardDeckId) : voiceSettings
 
-  const handleVoiceSettingsChange = (newSettings) =>
-    _handleVoiceSettingsChange(newSettings, {
-      isFlipped,
-      currentDeckId: deckId === 'daily-review' ? currentCardDeckId : deckId
-    })
+  const handleVoiceSettingsChange = React.useCallback(
+    (newSettings) =>
+      _handleVoiceSettingsChange(newSettings, {
+        isFlipped,
+        currentDeckId: deckId === 'daily-review' ? currentCardDeckId : deckId
+      }),
+    [_handleVoiceSettingsChange, isFlipped, deckId, currentCardDeckId]
+  )
 
   // Swipe state
   const touchStart = useRef(null)
@@ -84,10 +88,38 @@ export default function StudySession() {
 
   const { cards: cardsData, loading: cardsLoading, reload: reloadCards } = useCardData()
 
+  const fetchDeckCards = React.useCallback(async () => {
+    try {
+      setLoading(true)
+      let reviewCards = []
+
+      if (deckId === 'daily-review') {
+        reviewCards = await cardsService.getDailyReviewCards()
+      } else {
+        reviewCards = await cardsService.getDueCards(deckId)
+      }
+
+      if (reviewCards && (reviewCards.length > 0 || reviewCards.items?.length > 0)) {
+        const processed = (reviewCards.items || reviewCards).map((card) => ({
+          ...card,
+          id: card._id || card.id
+        }))
+        setCards(processed)
+      } else {
+        setCards([])
+        setSessionComplete(true)
+      }
+    } catch (error) {
+      console.error('Error fetching cards:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [deckId])
+
   useEffect(() => {
     if (cardsLoading) return
     fetchDeckCards()
-  }, [deckId, cardsLoading, cardsData])
+  }, [cardsLoading, fetchDeckCards])
 
   // Invalidate cache when leaving study session
   useEffect(() => {
@@ -143,174 +175,151 @@ export default function StudySession() {
     }
   }, [currentIndex, cards])
 
-  const fetchDeckCards = async () => {
-    try {
-      setLoading(true)
-      let reviewCards = []
+  const handleFlip = React.useCallback(() => {
+    setIsFlipped((prev) => !prev)
+  }, [])
 
-      if (deckId === 'daily-review') {
-        // Global Review: backend aggregates per-deck budgets and locks today's
-        // selection via `introduced_at` so the same cards reappear across sessions.
-        reviewCards = await cardsService.getDailyReviewCards()
-      } else {
-        // Deck Review: Fetch due cards directly from API (avoids pagination truncation)
-        reviewCards = await cardsService.getDueCards(deckId)
-      }
-
-      setCards(reviewCards)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching cards:', error)
-      setLoading(false)
-    }
-  }
-
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped)
-  }
-
-  const handleQuizAnswer = (option) => {
+  const handleQuizAnswer = React.useCallback((option) => {
     setSelectedAnswer(option)
     setShowExplanation(true)
-  }
+  }, [])
 
-  const handleGrade = async (grade) => {
-    const currentCard = cards[currentIndex]
-    const cardId = currentCard._id || currentCard.id
-
-    // OPTIMISTIC UPDATE: Calculate SM-2 locally for instant feedback
-    const currentEaseFactor = currentCard.ease_factor || 2.5
-    const currentInterval = currentCard.interval || 1
-    const currentRepetitions = currentCard.repetitions || 0
-
-    // Simple SM-2 calculation (client-side estimation)
-    const gradeMap = { again: 0, hard: 3, good: 4, easy: 5 }
-    const quality = gradeMap[grade]
-
-    let newEaseFactor = currentEaseFactor
-    let newInterval = currentInterval
-    let newRepetitions = currentRepetitions
-
-    if (quality < 3) {
-      newRepetitions = 0
-      newInterval = 1
-    } else {
-      newEaseFactor = Math.max(1.3, Math.min(2.5, currentEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))))
-
-      if (currentRepetitions === 0) {
-        newInterval = 1
-      } else if (currentRepetitions === 1) {
-        newInterval = 6
-      } else {
-        newInterval = Math.round(currentInterval * newEaseFactor)
-      }
-
-      newRepetitions = currentRepetitions + 1
-    }
-
-    const newNextReview = new Date()
-    newNextReview.setDate(newNextReview.getDate() + newInterval)
-
-    // INSTANT UI UPDATE (Optimistic)
-    const optimisticUpdate = {
-      ...currentCard,
-      last_reviewed: new Date().toISOString(),
-      next_review: newNextReview.toISOString(),
-      ease_factor: parseFloat(newEaseFactor.toFixed(2)),
-      interval: newInterval,
-      repetitions: newRepetitions
-    }
-
-    const updatedCards = [...cards]
-    updatedCards[currentIndex] = optimisticUpdate
-    setCards(updatedCards)
-
-    // Move to next card IMMEDIATELY
-    handleNext()
-
-    // BACKGROUND SYNC: Send to backend (fire-and-forget)
-    try {
-      const response = await cardsService.review(cardId, grade)
-
-      // If backend returns different values, update silently
-      if (response && response.sm2_data) {
-        const syncedCards = [...cards]
-        const cardIndex = syncedCards.findIndex((c) => (c._id || c.id) === cardId)
-
-        if (cardIndex !== -1) {
-          syncedCards[cardIndex] = {
-            ...syncedCards[cardIndex],
-            last_reviewed: response.sm2_data.last_reviewed,
-            next_review: response.sm2_data.next_review,
-            ease_factor: response.sm2_data.ease_factor,
-            interval: response.sm2_data.interval,
-            repetitions: response.sm2_data.repetitions
-          }
-          setCards(syncedCards)
-        }
-      }
-    } catch (error) {
-      console.error('Error syncing review to backend:', error)
-
-      // QUEUE FAILED REQUEST for retry
-      setReviewQueue((prev) => [
-        ...prev,
-        {
-          cardId,
-          grade,
-          timestamp: Date.now(),
-          retryCount: 0
-        }
-      ])
-
-      // Note: Keep optimistic update in UI, will retry in background
-      console.warn('Review queued for retry:', cardId, grade)
-    }
-  }
-
-  const handleNext = () => {
+  const handleNext = React.useCallback(() => {
     if (currentIndex < cards.length - 1) {
-      setCurrentIndex(currentIndex + 1)
+      setCurrentIndex((prev) => prev + 1)
       setIsFlipped(false)
       setSelectedAnswer(null)
       setShowExplanation(false)
       setMermaidSvg('')
-      // Don't clear feedback - let it auto-dismiss naturally
     } else {
       setSessionComplete(true)
     }
-  }
+  }, [currentIndex, cards.length])
 
-  const handlePrev = () => {
+  const handleGrade = React.useCallback(
+    async (grade) => {
+      const currentCard = cards[currentIndex]
+      const cardId = currentCard._id || currentCard.id
+
+      // OPTIMISTIC UPDATE: Calculate SM-2 locally for instant feedback
+      const currentEaseFactor = currentCard.ease_factor || 2.5
+      const currentInterval = currentCard.interval || 1
+      const currentRepetitions = currentCard.repetitions || 0
+
+      // Simple SM-2 calculation (client-side estimation)
+      const gradeMap = { again: 0, hard: 3, good: 4, easy: 5 }
+      const quality = gradeMap[grade]
+
+      let newEaseFactor = currentEaseFactor
+      let newInterval = currentInterval
+      let newRepetitions = currentRepetitions
+
+      if (quality < 3) {
+        newRepetitions = 0
+        newInterval = 1
+      } else {
+        newEaseFactor = Math.max(1.3, Math.min(2.5, currentEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))))
+
+        if (currentRepetitions === 0) {
+          newInterval = 1
+        } else if (currentRepetitions === 1) {
+          newInterval = 6
+        } else {
+          newInterval = Math.round(currentInterval * newEaseFactor)
+        }
+
+        newRepetitions = currentRepetitions + 1
+      }
+
+      const newNextReview = new Date()
+      newNextReview.setDate(newNextReview.getDate() + newInterval)
+
+      // INSTANT UI UPDATE (Optimistic)
+      const optimisticUpdate = {
+        ...currentCard,
+        last_reviewed: new Date().toISOString(),
+        next_review: newNextReview.toISOString(),
+        ease_factor: parseFloat(newEaseFactor.toFixed(2)),
+        interval: newInterval,
+        repetitions: newRepetitions
+      }
+
+      const updatedCards = [...cards]
+      updatedCards[currentIndex] = optimisticUpdate
+      setCards(updatedCards)
+
+      // Move to next card IMMEDIATELY
+      handleNext()
+
+      // BACKGROUND SYNC: Send to backend (fire-and-forget)
+      try {
+        const response = await cardsService.review(cardId, grade)
+
+        // If backend returns different values, update silently
+        if (response && response.sm2_data) {
+          const syncedCards = [...cards]
+          const cardIndex = syncedCards.findIndex((c) => (c._id || c.id) === cardId)
+
+          if (cardIndex !== -1) {
+            syncedCards[cardIndex] = {
+              ...syncedCards[cardIndex],
+              last_reviewed: response.sm2_data.last_reviewed,
+              next_review: response.sm2_data.next_review,
+              ease_factor: response.sm2_data.ease_factor,
+              interval: response.sm2_data.interval,
+              repetitions: response.sm2_data.repetitions
+            }
+            setCards(syncedCards)
+          }
+        }
+      } catch (error) {
+        console.error('Error syncing review to backend:', error)
+
+        // QUEUE FAILED REQUEST for retry
+        setReviewQueue((prev) => [
+          ...prev,
+          {
+            cardId,
+            grade,
+            timestamp: Date.now(),
+            retryCount: 0
+          }
+        ])
+
+        // Note: Keep optimistic update in UI, will retry in background
+        console.warn('Review queued for retry:', cardId, grade)
+      }
+    },
+    [cards, currentIndex, handleNext]
+  )
+
+  const handlePrev = React.useCallback(() => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1)
+      setCurrentIndex((prev) => prev - 1)
       setIsFlipped(false)
       setSelectedAnswer(null)
       setShowExplanation(false)
       setMermaidSvg('')
-      // Don't clear feedback - let it auto-dismiss naturally
     }
-  }
+  }, [currentIndex])
 
-  // Helper for Fullscreen Toggle
-  const handleFullscreenToggle = () => {
-    setIsFullscreen(!isFullscreen)
-  }
+  const handleFullscreenToggle = React.useCallback(() => {
+    setIsFullscreen((prev) => !prev)
+  }, [])
 
-  // Swipe Handlers
-  const onTouchStart = (e) => {
+  const onTouchStart = React.useCallback((e) => {
     touchEnd.current = null
     touchEndY.current = null
     touchStart.current = e.targetTouches[0].clientX
     touchStartY.current = e.targetTouches[0].clientY
-  }
+  }, [])
 
-  const onTouchMove = (e) => {
+  const onTouchMove = React.useCallback((e) => {
     touchEnd.current = e.targetTouches[0].clientX
     touchEndY.current = e.targetTouches[0].clientY
-  }
+  }, [])
 
-  const onTouchEnd = () => {
+  const onTouchEnd = React.useCallback(() => {
     if (!touchStart.current || !touchEnd.current || !touchStartY.current || !touchEndY.current) return
 
     const distanceX = touchStart.current - touchEnd.current
@@ -325,20 +334,17 @@ export default function StudySession() {
       if (isLeftSwipe) handleNext()
       if (isRightSwipe) handlePrev()
     } else {
-      // Vertical Swipe
       const isUpSwipe = distanceY > minSwipeDistance
       const isDownSwipe = distanceY < -minSwipeDistance
 
       if (isUpSwipe) {
-        // Swipe Up -> Flip Card
         handleFlip()
       }
       if (isDownSwipe) {
-        // Swipe Down -> Show Voice Menu
         setShowVoiceSettings(true)
       }
     }
-  }
+  }, [handleNext, handlePrev, handleFlip])
 
   // §7: Use Skeleton placeholders, not a full-page loading gate
   if (loading) {
@@ -780,7 +786,7 @@ export default function StudySession() {
                     alignItems: 'center',
                     overflow: 'auto'
                   }}
-                  dangerouslySetInnerHTML={{ __html: mermaidSvg }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mermaidSvg) }}
                 />
 
                 {currentCard.content && (

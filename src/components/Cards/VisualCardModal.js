@@ -17,6 +17,7 @@ import {
   Alert
 } from '@mui/joy'
 import mermaid from 'mermaid'
+import DOMPurify from 'dompurify'
 import { cardsService } from '../../api/services'
 
 // Initialize Mermaid
@@ -187,7 +188,7 @@ export default function VisualCardModal({ open, onClose, onSaved, decks = [], in
                       {error}
                     </Alert>
                   ) : previewSvg ? (
-                    <div ref={mermaidRef} dangerouslySetInnerHTML={{ __html: previewSvg }} />
+                    <div ref={mermaidRef} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewSvg) }} />
                   ) : (
                     <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                       Enter Mermaid code to see preview

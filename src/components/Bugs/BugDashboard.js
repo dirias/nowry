@@ -31,11 +31,7 @@ export default function BugDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [filters])
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -48,7 +44,11 @@ export default function BugDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleStatusChange = async (bugId, newStatus) => {
     try {

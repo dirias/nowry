@@ -83,7 +83,7 @@ export const DynamicThemeProvider = ({ children }) => {
 
   return (
     <ThemePreferencesContext.Provider value={contextValue}>
-      <CssVarsProvider theme={dynamicTheme} defaultMode='light' disableNestedContext>
+      <CssVarsProvider theme={dynamicTheme} defaultMode='system' disableNestedContext>
         <CssBaseline />
         <GlobalStyles
           styles={{

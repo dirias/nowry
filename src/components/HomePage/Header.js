@@ -106,7 +106,7 @@ const Header = () => {
   const { user, logout: contextLogout } = useAuth()
   const isLoggedIn = !!user
   const displayName = user?.full_name || user?.username || user?.email?.split('@')[0] || ''
-  const resolvedAvatarUrl = user?.avatar_url || user?.avatar || undefined
+  const resolvedAvatarUrl = user?.avatar_url || user?.photo_url || user?.avatar || undefined
   const { t } = useTranslation()
 
   // Bug report state
@@ -122,16 +122,16 @@ const Header = () => {
   const minSwipeDistance = 75 // Minimum swipe distance in px
 
   // Touch handlers for swipe gestures
-  const handleTouchStart = (e) => {
+  const handleTouchStart = React.useCallback((e) => {
     touchEnd.current = null
     touchStart.current = e.targetTouches[0].clientX
-  }
+  }, [])
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = React.useCallback((e) => {
     touchEnd.current = e.targetTouches[0].clientX
-  }
+  }, [])
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = React.useCallback(() => {
     if (!touchStart.current || !touchEnd.current) return
     const distance = touchStart.current - touchEnd.current
     const isLeftSwipe = distance > minSwipeDistance
@@ -144,7 +144,7 @@ const Header = () => {
     if (isRightSwipe && mobileMenuOpen) {
       setMobileMenuOpen(false)
     }
-  }
+  }, [mobileMenuOpen])
 
   // Attach swipe listeners to body on mobile
   React.useEffect(() => {
@@ -160,7 +160,7 @@ const Header = () => {
       document.body.removeEventListener('touchmove', handleTouchMove)
       document.body.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [mobileMenuOpen])
+  }, [mobileMenuOpen, handleTouchEnd, handleTouchMove, handleTouchStart])
 
   // Pomodoro
   const { timeLeft, isActive: isTimerActive, showWidget, setShowWidget, settings } = usePomodoro()

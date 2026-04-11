@@ -53,6 +53,8 @@ const FocusAreaSetup = lazy(() => import('./components/AnnualPlanning').then((m)
 const FocusAreaView = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.FocusAreaView })))
 const DailyRoutinePlanner = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.DailyRoutinePlanner })))
 const PomodoroWidget = lazy(() => import('./components/Pomodoro/PomodoroWidget'))
+const PrivacyPolicy = lazy(() => import('./components/HomePage/PrivacyPolicy'))
+const TermsOfService = lazy(() => import('./components/HomePage/TermsOfService'))
 
 /** Full-page loading fallback shown while lazy chunks download */
 const PageLoader = () => (
@@ -111,7 +113,11 @@ const AppContent = () => {
               <Route path='/browse' element={<PublicBrowse />} />
               <Route path='/public/:type/:id' element={<PublicView />} />
 
-              {/* Public Only Routes */}
+              {/* Legal Pages */}
+              <Route path='/privacy' element={<PrivacyPolicy />} />
+              <Route path='/terms' element={<TermsOfService />} />
+
+              {/* Application Dashboard (Protected) */}
               <Route
                 path='/login'
                 element={

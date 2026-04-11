@@ -46,12 +46,7 @@ const DailyRoutinePlanner = () => {
 
   const { plan, areas: cacheAreas, goals: cacheGoals, loading: hookLoading } = useAnnualPlan()
 
-  useEffect(() => {
-    if (hookLoading) return
-    fetchData()
-  }, [hookLoading, plan, cacheAreas, cacheGoals])
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true)
       if (!plan) return
@@ -103,7 +98,12 @@ const DailyRoutinePlanner = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [plan, cacheAreas, cacheGoals])
+
+  useEffect(() => {
+    if (hookLoading) return
+    fetchData()
+  }, [hookLoading, fetchData])
 
   const persistRoutine = async (updatedRoutine) => {
     try {

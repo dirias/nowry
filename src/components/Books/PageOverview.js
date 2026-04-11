@@ -1,5 +1,6 @@
 import React, { memo, useMemo, useRef, useEffect } from 'react'
 import { Box, Typography, Sheet, Stack, Skeleton } from '@mui/joy'
+import DOMPurify from 'dompurify'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
 
 const toPx = (val) => {
@@ -182,7 +183,7 @@ const PageThumbnail = memo(
                 }
               }}
             >
-              <div className='preview-content' dangerouslySetInnerHTML={{ __html: content || '' }} />
+              <div className='preview-content' dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }} />
             </Box>
           ) : (
             <Box

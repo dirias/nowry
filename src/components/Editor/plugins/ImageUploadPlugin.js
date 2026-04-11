@@ -170,7 +170,7 @@ export default function ImageUploadPlugin({ bookId, onUploadStart, onUploadCompl
         }
       }
     },
-    [editor, bookId]
+    [editor, bookId, onUploadStart, onUploadComplete, onUploadError]
   )
 
   useEffect(() => {

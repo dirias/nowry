@@ -97,7 +97,7 @@ const AnnualPlanningHome = () => {
 
     // Pull from snapshot if the quarter is historically closed
     if (selectedQuarter !== 'All' && hookPlan?.year) {
-      const report = quarterReports.find((r) => r.quarter === Number(selectedQuarter) && r.year === hookPlan.year)
+      const report = (hookQuarterReports || []).find((r) => r.quarter === Number(selectedQuarter) && r.year === hookPlan.year)
       if (report && report.goals_summary) {
         activeGoals = report.goals_summary
       }
@@ -120,7 +120,7 @@ const AnnualPlanningHome = () => {
       completedGoals: completedGoalsCount,
       progress: activeGoals.length > 0 ? Math.round(totalProgressSum / activeGoals.length) : 0
     })
-  }, [loading, hookPlan, hookAreas, hookGoals, hookPriorities, selectedQuarter])
+  }, [loading, hookPlan, hookAreas, hookGoals, hookPriorities, hookQuarterReports, selectedQuarter, year])
 
   // Redirect to setup if loaded but no areas
   useEffect(() => {

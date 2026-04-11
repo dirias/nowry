@@ -20,11 +20,7 @@ const AnnualGoalsCard = () => {
   const [goals, setGoals] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchGoals()
-  }, [])
-
-  const fetchGoals = async () => {
+  const fetchGoals = React.useCallback(async () => {
     try {
       setLoading(true)
       const data = await annualPlanningService.getGoals()
@@ -44,7 +40,11 @@ const AnnualGoalsCard = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchGoals()
+  }, [fetchGoals])
 
   const calculateProgress = (goal) => {
     if (!goal.activities || goal.activities.length === 0) return 0

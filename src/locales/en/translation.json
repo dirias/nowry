@@ -76,7 +76,9 @@
       "title": "Product",
       "browse": "Browse",
       "about": "About",
-      "planner": "Annual Planner"
+      "planner": "Annual Planner",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
     },
     "support": {
       "title": "Support",
@@ -183,14 +185,15 @@
     "orContinueWith": "or continue with",
     "signInGoogle": "Sign in with Google",
     "signInFacebook": "Sign in with Facebook",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "byContinuing": "By continuing, you agree to our",
     "noAccount": "Don't have an account?",
     "createOne": "Create one",
     "hasAccount": "Already have an account?",
     "signInLink": "Sign in",
     "agreeTerms": "I agree to the",
-    "termsOfService": "Terms of Service",
     "and": "and",
-    "privacyPolicy": "Privacy Policy",
     "passwordStrength": {
       "weak": "Weak",
       "fair": "Fair",
@@ -1477,6 +1480,101 @@
       "label": "Attribution (immutable)",
       "value": "Forked from \"{{title}}\" by {{author}}",
       "immutableNote": "This attribution is permanent and will be shown publicly."
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: {{date}}",
+      "intro": {
+        "title": "1. Introduction",
+        "content": "Welcome to Nowry. We respect your privacy and are committed to protecting your personal data. This Privacy Policy informs you about how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you."
+      },
+      "dataCollect": {
+        "title": "2. Data We Collect",
+        "content": "We may collect, use, store and transfer different kinds of personal data about you, including:",
+        "items": {
+          "identity": "<strong>Identity Data:</strong> Username or similar identifier.",
+          "contact": "<strong>Contact Data:</strong> Email address.",
+          "technical": "<strong>Technical Data:</strong> Browser type and version, time zone setting, and location.",
+          "usage": "<strong>Usage Data:</strong> Information about how you use our website, including your learning progress and AI-generated content."
+        }
+      },
+      "usage": {
+        "title": "3. How We Use Your Data",
+        "content": "We use your data primarily to provide and improve our educational services. This includes:",
+        "items": [
+          "Facilitating your account creation and login process via Firebase Authentication.",
+          "Personalizing your learning experience using AI algorithms.",
+          "Improving our website, services, and user experience.",
+          "Sending periodic emails regarding your account or other products and services."
+        ]
+      },
+      "ai": {
+        "title": "4. AI and Data Processing",
+        "content": "Nowry uses artificial intelligence to generate learning materials and provide insights. Any content you provide may be processed by our AI models to improve your learning outcomes. We do not use your personal identity data to train public AI models."
+      },
+      "security": {
+        "title": "5. Data Security",
+        "content": "We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used, or accessed in an unauthorized way. We use Firebase's industry-standard security protocols for authentication and data storage."
+      },
+      "rights": {
+        "title": "6. Your Legal Rights",
+        "content": "Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to request access, correction, erasure, or restriction of your personal data."
+      },
+      "contact": {
+        "title": "7. Contact Us",
+        "content": "If you have any questions about this Privacy Policy, please contact us at:",
+        "email": "Email: support@nowry.app"
+      }
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: {{date}}",
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "content": "By accessing or using Nowry, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our services."
+      },
+      "service": {
+        "title": "2. Description of Service",
+        "content": "Nowry provides an AI-powered educational platform, including but not limited to, book summaries, flashcard generation, and learning tracking tools. We reserve the right to modify or discontinue any part of the service at any time."
+      },
+      "accounts": {
+        "title": "3. User Accounts",
+        "content": "To use certain features, you must create an account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account."
+      },
+      "content": {
+        "title": "4. User Content and AI Generation",
+        "content1": "You retain ownership of any content you upload. However, by using Nowry, you grant us a license to process your content for the purpose of providing and improving the service, including the use of AI models.",
+        "content2": "AI-generated content is provided for educational purposes. While we strive for accuracy, Nowry does not guarantee the correctness of AI-generated materials."
+      },
+      "conduct": {
+        "title": "5. Prohibited Conduct",
+        "content": "You agree not to:",
+        "items": [
+          "Attempt to reverse-engineer our AI models or platform.",
+          "Use the service for any illegal purposes.",
+          "Upload malicious code or content that violates intellectual property rights.",
+          "Interfere with the security or operation of the service."
+        ]
+      },
+      "liability": {
+        "title": "6. Limitation of Liability",
+        "content": "Nowry shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use or inability to use the service."
+      },
+      "termination": {
+        "title": "7. Termination",
+        "content": "We reserve the right to terminate or suspend your account at our sole discretion, without notice, for conduct that we believe violates these Terms of Service or is harmful to other users or our business interests."
+      },
+      "changes": {
+        "title": "8. Changes to Terms",
+        "content": "We may update these Terms of Service from time to time. Your continued use of the service after any changes constitutes acceptance of the new terms."
+      },
+      "contact": {
+        "title": "9. Contact Information",
+        "content": "For any questions regarding these Terms, please contact us at:",
+        "email": "Email: support@nowry.app"
+      }
     }
   }
 }

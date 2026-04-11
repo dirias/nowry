@@ -22,11 +22,14 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
+    supportedLngs: ['en', 'es', 'fr', 'de', 'ja'],
+    nonExplicitSupportedLngs: true, // Allows 'es-MX' to map to 'es'
+    load: 'languageOnly', // Only load 'es' if 'es-MX' is detected
     interpolation: {
       escapeValue: false // React already safes from xss
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage', 'navigator', 'htmlTag', 'path', 'subdomain'],
       caches: ['localStorage'] // Cache language in local storage
     }
   })

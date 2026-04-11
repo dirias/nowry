@@ -147,6 +147,7 @@
     "orContinueWith": "oder weiter mit",
     "signInGoogle": "Mit Google anmelden",
     "signInFacebook": "Mit Facebook anmelden",
+    "byContinuing": "Durch Fortfahren akzeptieren Sie unsere",
     "noAccount": "Noch kein Konto?",
     "createOne": "Erstelle eins",
     "hasAccount": "Hast du schon ein Konto?",
@@ -878,5 +879,100 @@
     },
     "saving": "Speichern...",
     "saved": "Gespeichert"
+  },
+  "legal": {
+    "privacy": {
+      "title": "Datenschutzerklärung",
+      "lastUpdated": "Zuletzt aktualisiert: {{date}}",
+      "intro": {
+        "title": "1. Einleitung",
+        "content": "Willkommen bei Nowry. Wir respektieren Ihre Privatsphäre und setzen uns für den Schutz Ihrer personenbezogenen Daten ein. Diese Datenschutzerklärung informiert Sie darüber, wie wir mit Ihren personenbezogenen Daten umgehen, wenn Sie unsere Website besuchen, und informiert Sie über Ihre Datenschutzrechte und wie das Gesetz Sie schützt."
+      },
+      "dataCollect": {
+        "title": "2. Daten, die wir sammeln",
+        "content": "Wir können verschiedene Arten von personenbezogenen Daten über Sie sammeln, verwenden, speichern und übertragen, einschließlich:",
+        "items": {
+          "identity": "<strong>Identitätsdaten:</strong> Benutzername oder ähnlicher Identifikator.",
+          "contact": "<strong>Kontaktdaten:</strong> E-Mail-Adresse.",
+          "technical": "<strong>Technische Daten:</strong> Browsertyp und -version, Zeitzoneneinstellung und Standort.",
+          "usage": "<strong>Nutzungsdaten:</strong> Informationen darüber, wie Sie unsere Website nutzen, einschließlich Ihres Lernfortschritts und KI-generierter Inhalte."
+        }
+      },
+      "usage": {
+        "title": "3. Wie wir Ihre Daten verwenden",
+        "content": "Wir verwenden Ihre Daten in erster Linie zur Bereitstellung und Verbesserung unserer Bildungsdienstleistungen. Dies umfasst:",
+        "items": [
+          "Erleichterung Ihrer Kontoerstellung und des Anmeldevorgangs über Firebase Authentication.",
+          "Personalisierung Ihrer Lernerfahrung mithilfe von KI-Algorithmen.",
+          "Verbesserung unserer Website, Dienstleistungen und Nutzererfahrung.",
+          "Versand regelmäßiger E-Mails bezüglich Ihres Kontos oder anderer Produkte und Dienstleistungen."
+        ]
+      },
+      "ai": {
+        "title": "4. KI und Datenverarbeitung",
+        "content": "Nowry nutzt künstliche Intelligenz, um Lernmaterialien zu generieren und Erkenntnisse zu liefern. Alle von Ihnen bereitgestellten Inhalte können von unseren KI-Modellen verarbeitet werden, um Ihre Lernergebnisse zu verbessern. Wir verwenden Ihre persönlichen Identitätsdaten nicht zum Trainieren öffentlicher KI-Modelle."
+      },
+      "security": {
+        "title": "5. Datensicherheit",
+        "content": "Wir haben angemessene Sicherheitsmaßnahmen getroffen, um zu verhindern, dass Ihre personenbezogenen Daten versehentlich verloren gehen, verwendet oder auf unbefugte Weise aufgerufen werden. Wir verwenden branchenübliche Sicherheitsprotokolle von Firebase für die Authentifizierung und Datenspeicherung."
+      },
+      "rights": {
+        "title": "6. Ihre gesetzlichen Rechte",
+        "content": "Unter bestimmten Umständen haben Sie Rechte gemäß den Datenschutzgesetzen in Bezug auf Ihre personenbezogenen Daten, einschließlich des Rechts auf Auskunft, Berichtigung, Löschung oder Einschränkung Ihrer personenbezogenen Daten."
+      },
+      "contact": {
+        "title": "7. Kontakt",
+        "content": "Wenn Sie Fragen zu dieser Datenschutzerklärung haben, kontaktieren Sie uns bitte unter:",
+        "email": "E-Mail: support@nowry.app"
+      }
+    },
+    "terms": {
+      "title": "Nutzungsbedingungen",
+      "lastUpdated": "Zuletzt aktualisiert: {{date}}",
+      "acceptance": {
+        "title": "1. Annahme der Bedingungen",
+        "content": "Durch den Zugriff auf Nowry oder dessen Nutzung erklären Sie sich mit diesen Nutzungsbedingungen einverstanden. Wenn Sie mit einem Teil dieser Bedingungen nicht einverstanden sind, dürfen Sie unsere Dienste nicht nutzen."
+      },
+      "service": {
+        "title": "2. Beschreibung des Dienstes",
+        "content": "Nowry bietet eine KI-gestützte Bildungsplattform, die unter anderem Buchzusammenfassungen, die Erstellung von Lernkarten und Tools zur Lernverfolgung umfasst. Wir behalten uns das Recht vor, jeden Teil des Dienstes jederzeit zu ändern oder einzustellen."
+      },
+      "accounts": {
+        "title": "3. Benutzerkonten",
+        "content": "Um bestimmte Funktionen nutzen zu können, müssen Sie ein Konto erstellen. Sie sind für die Wahrung der Vertraulichkeit Ihrer Kontoinformationen und für alle Aktivitäten verantwortlich, die unter Ihrem Konto stattfinden. Sie müssen uns unverzüglich über jede unbefugte Nutzung Ihres Kontos informieren."
+      },
+      "content": {
+        "title": "4. Benutzerinhalte und KI-Generierung",
+        "content1": "Sie behalten das Eigentum an allen von Ihnen hochgeladenen Inhalten. Durch die Nutzung von Nowry gewähren Sie uns jedoch eine Lizenz zur Verarbeitung Ihrer Inhalte zum Zweck der Bereitstellung und Verbesserung des Dienstes, einschließlich der Nutzung von KI-Modellen.",
+        "content2": "KI-generierte Inhalte werden für Bildungszwecke bereitgestellt. Obwohl wir uns um Genauigkeit bemühen, garantiert Nowry nicht für die Richtigkeit der KI-generierten Materialien."
+      },
+      "conduct": {
+        "title": "5. Verbotenes Verhalten",
+        "content": "Sie stimmen zu, Folgendes nicht zu tun:",
+        "items": [
+          "Versuch des Reverse-Engineerings unserer KI-Modelle oder Plattform.",
+          "Nutzung des Dienstes für illegale Zwecke.",
+          "Hochladen von bösartigem Code oder Inhalten, die geistige Eigentumsrechte verletzen.",
+          "Beeinträchtigung der Sicherheit oder des Betriebs des Dienstes."
+        ]
+      },
+      "liability": {
+        "title": "6. Haftungsbeschränkung",
+        "content": "Nowry haftet nicht für indirekte, zufällige, besondere, Folgeschäden oder Strafschadensersatz, die sich aus Ihrer Nutzung oder der Unfähigkeit zur Nutzung des Dienstes ergeben."
+      },
+      "termination": {
+        "title": "7. Kündigung",
+        "content": "Wir behalten uns das Recht vor, Ihr Konto nach eigenem Ermessen und ohne Vorankündigung zu kündigen oder auszusetzen, wenn ein Verhalten vorliegt, von dem wir glauben, dass es gegen diese Nutzungsbedingungen verstößt oder für andere Benutzer oder unsere Geschäftsinteressen schädlich ist."
+      },
+      "changes": {
+        "title": "8. Änderungen der Bedingungen",
+        "content": "Wir können diese Nutzungsbedingungen von Zeit zu Zeit aktualisieren. Ihre fortgesetzte Nutzung des Dienstes nach Änderungen gilt als Annahme der neuen Bedingungen."
+      },
+      "contact": {
+        "title": "9. Kontaktinformationen",
+        "content": "Bei Fragen zu diesen Bedingungen kontaktieren Sie uns bitte unter:",
+        "email": "E-Mail: support@nowry.app"
+      }
+    }
   }
 }

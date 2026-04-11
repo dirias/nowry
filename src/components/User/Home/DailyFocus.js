@@ -14,12 +14,7 @@ const DailyFocus = () => {
   const { cards: cardsData, loading: cardsLoading } = useCardData()
   const { decks: decksData, loading: decksLoading } = useDeckData()
 
-  useEffect(() => {
-    if (cardsLoading || decksLoading) return
-    fetchDueDecks()
-  }, [cardsLoading, decksLoading, cardsData, decksData])
-
-  const fetchDueDecks = async () => {
+  const fetchDueDecks = React.useCallback(async () => {
     try {
       setLoading(true)
 
@@ -56,7 +51,12 @@ const DailyFocus = () => {
       console.error('Error fetching due decks:', error)
       setLoading(false)
     }
-  }
+  }, [cardsData, decksData])
+
+  useEffect(() => {
+    if (cardsLoading || decksLoading) return
+    fetchDueDecks()
+  }, [cardsLoading, decksLoading, fetchDueDecks])
 
   const handleStudy = (deckId) => {
     navigate(`/study/${deckId}`)

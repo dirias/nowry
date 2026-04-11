@@ -162,7 +162,7 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
       }
       fetchLinkables()
     }
-  }, [open, focusAreas])
+  }, [open, focusAreas, isEditMode, editingPriority, existingPriorities])
 
   // Handle Linking Item
   // Handle Linking Item

@@ -34,7 +34,7 @@ export default function VisualPaginationOverlay({
   const debounceRef = useRef(null)
 
   // Calculate page breaks from flat content
-  const calculateBreaks = () => {
+  const calculateBreaks = React.useCallback(() => {
     if (!contentRef.current) return []
 
     const availableHeight = pageHeight - paddingTop - paddingBottom
@@ -75,7 +75,7 @@ export default function VisualPaginationOverlay({
     }
 
     return breaks
-  }
+  }, [contentRef, pageHeight, paddingTop, paddingBottom])
 
   // Recalculate on content change
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function VisualPaginationOverlay({
       }
       clearTimeout(debounceRef.current)
     }
-  }, [contentRef, pageHeight, paddingTop, paddingBottom, onPageCountChange])
+  }, [contentRef, pageHeight, paddingTop, paddingBottom, onPageCountChange, calculateBreaks])
 
   return (
     <>

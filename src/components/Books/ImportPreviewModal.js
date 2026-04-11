@@ -19,6 +19,7 @@ import WarningIcon from '@mui/icons-material/Warning'
 import InfoIcon from '@mui/icons-material/Info'
 import ViewColumnIcon from '@mui/icons-material/ViewColumn'
 import ArticleIcon from '@mui/icons-material/Article'
+import DOMPurify from 'dompurify'
 
 export default function ImportPreviewModal({ open, onClose, previewData, onConfirm, loading }) {
   const [editedTitle, setEditedTitle] = React.useState('')
@@ -271,7 +272,7 @@ export default function ImportPreviewModal({ open, onClose, previewData, onConfi
                         borderRight: 'none'
                       }
                     }}
-                    dangerouslySetInnerHTML={{ __html: currentPage.content_preview }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentPage.content_preview) }}
                   />
 
                   {/* Navigation Buttons */}

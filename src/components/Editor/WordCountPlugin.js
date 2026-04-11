@@ -49,7 +49,7 @@ export default function WordCountPlugin({ onUpdate }) {
     })
 
     return unregister
-  }, [editor]) // Only editor in deps, not onUpdate or state
+  }, [editor, onUpdate])
 
   return (
     <Box

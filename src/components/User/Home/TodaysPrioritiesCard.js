@@ -23,12 +23,7 @@ const TodaysPrioritiesCard = () => {
 
   const { tasks: tasksData, loading: tasksLoading, reload: reloadTasks } = useTaskData()
 
-  useEffect(() => {
-    if (tasksLoading) return
-    fetchPriorities()
-  }, [tasksLoading, tasksData])
-
-  const fetchPriorities = async () => {
+  const fetchPriorities = React.useCallback(async () => {
     try {
       setLoading(true)
       const routineData = await annualPlanningService.getDailyRoutine()
@@ -56,7 +51,12 @@ const TodaysPrioritiesCard = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [tasksData])
+
+  useEffect(() => {
+    if (tasksLoading) return
+    fetchPriorities()
+  }, [tasksLoading, fetchPriorities])
 
   const handleToggleTask = async (task) => {
     try {

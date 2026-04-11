@@ -177,7 +177,7 @@ export default function NewsCarousel() {
         })
       }, 100)
     }
-  }, [news])
+  }, [news, instanceRef])
 
   // Sync preferences from AuthContext and handle cache clearing
   useEffect(() => {
@@ -200,12 +200,13 @@ export default function NewsCarousel() {
       setUserPreferences(user.preferences)
     }
     syncPreferences()
-  }, [user])
+  }, [user, userPreferences])
 
   // Reset fetch ref when preferences change to allow re-fetching
+  const prefInterests = JSON.stringify(userPreferences?.interests)
   useEffect(() => {
     fetchedRef.current = false
-  }, [userPreferences?.language, JSON.stringify(userPreferences?.interests)])
+  }, [userPreferences?.language, prefInterests])
 
   // Fetch news from backend
   useEffect(() => {
@@ -280,7 +281,7 @@ export default function NewsCarousel() {
     }
 
     fetchNews()
-  }, [userPreferences?.language, JSON.stringify(userPreferences?.interests)])
+  }, [userPreferences?.language, prefInterests, userPreferences?.interests])
 
   const placeholderCount = 3
 

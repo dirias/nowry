@@ -66,10 +66,10 @@ export default function BookHome() {
   const { themeColor } = useThemePreferences()
   const { user } = useAuth()
 
-  const handleViewChange = (newMode) => {
+  const handleViewChange = useCallback((newMode) => {
     setViewMode(newMode)
     localStorage.setItem('book_view_mode', newMode)
-  }
+  }, [])
 
   useEffect(() => {
     if (fetchError) {
@@ -96,11 +96,11 @@ export default function BookHome() {
     })
   }, [allBooks, searchTerm, selectedTags])
 
-  const toggleTag = (tag) => {
+  const toggleTag = useCallback((tag) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
-  }
+  }, [])
 
-  const handleCreateBook = async () => {
+  const handleCreateBook = useCallback(async () => {
     try {
       const newBook = await booksService.create({
         title: `New book ${allBooks.length}`,
@@ -117,7 +117,7 @@ export default function BookHome() {
       setErrorMessage(msg)
       setShowError(true)
     }
-  }
+  }, [allBooks.length, user?.username, navigate, t])
 
   const onDrop = useCallback(
     async (acceptedFiles) => {
@@ -143,62 +143,65 @@ export default function BookHome() {
         setUploading(false)
       }
     },
-    [books]
+    [user?.username]
   )
 
-  const handleConfirmImport = async (inputTitle) => {
-    setConfirmingImport(true)
-    const username = user?.username || 'Unknown'
+  const handleConfirmImport = useCallback(
+    async (inputTitle) => {
+      setConfirmingImport(true)
+      const username = user?.username || 'Unknown'
 
-    try {
-      const importedBooks = []
+      try {
+        const importedBooks = []
 
-      // If we have a custom title and only one file, use it.
-      // Otherwise, fallback to filename (backend default)
-      const useTitle = pendingFiles.length === 1 && inputTitle ? inputTitle : null
+        // If we have a custom title and only one file, use it.
+        // Otherwise, fallback to filename (backend default)
+        const useTitle = pendingFiles.length === 1 && inputTitle ? inputTitle : null
 
-      for (const file of pendingFiles) {
-        // Actually import with preview=false
-        const result = await booksService.importFile(file, username, false, useTitle)
-        importedBooks.push(result)
+        for (const file of pendingFiles) {
+          // Actually import with preview=false
+          const result = await booksService.importFile(file, username, false, useTitle)
+          importedBooks.push(result)
+        }
+
+        // Close preview modal
+        setShowPreview(false)
+        setPreviewData(null)
+        setPendingFiles([])
+
+        // Refresh book list
+        await fetchBooks()
+
+        setSuccessMessage(
+          t('books.successImport_plural', {
+            count: importedBooks.length,
+            pages: importedBooks.reduce((sum, book) => sum + book.page_count, 0)
+          })
+        )
+
+        if (importedBooks.length === 1) {
+          setLastImportedBookId(importedBooks[0]._id)
+        }
+
+        setShowSuccess(true)
+        setConfirmingImport(false)
+      } catch (error) {
+        console.error('Error importing files:', error)
+        setErrorMessage(error.response?.data?.detail || t('books.errorImport'))
+        setShowError(true)
+        setConfirmingImport(false)
+        setShowPreview(false)
       }
+    },
+    [user?.username, pendingFiles, fetchBooks, t]
+  )
 
-      // Close preview modal
-      setShowPreview(false)
-      setPreviewData(null)
-      setPendingFiles([])
-
-      // Refresh book list
-      await fetchBooks()
-
-      setSuccessMessage(
-        t('books.successImport_plural', {
-          count: importedBooks.length,
-          pages: importedBooks.reduce((sum, book) => sum + book.page_count, 0)
-        })
-      )
-
-      if (importedBooks.length === 1) {
-        setLastImportedBookId(importedBooks[0]._id)
-      }
-
-      setShowSuccess(true)
-      setConfirmingImport(false)
-    } catch (error) {
-      console.error('Error importing files:', error)
-      setErrorMessage(error.response?.data?.detail || t('books.errorImport'))
-      setShowError(true)
-      setConfirmingImport(false)
-      setShowPreview(false)
-    }
-  }
-
-  const handleCancelPreview = () => {
+  const handleCancelPreview = useCallback(() => {
     setShowPreview(false)
     setPreviewData(null)
     setPendingFiles([])
     setCurrentFileIndex(0)
-  }
+  }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -212,11 +215,14 @@ export default function BookHome() {
     noClick: false
   })
 
-  const handleBookClick = (book) => {
-    navigate(`/book/${book._id}`, { state: { book } })
-  }
+  const handleBookClick = useCallback(
+    (book) => {
+      navigate(`/book/${book._id}`, { state: { book } })
+    },
+    [navigate]
+  )
 
-  const handleDeleteBook = async () => {
+  const handleDeleteBook = useCallback(async () => {
     try {
       await booksService.delete(bookToDelete._id)
       await fetchBooks()
@@ -235,7 +241,7 @@ export default function BookHome() {
       setShowError(true)
       setShowWarning(false)
     }
-  }
+  }, [bookToDelete, fetchBooks, t])
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 3, md: 5 } }}>

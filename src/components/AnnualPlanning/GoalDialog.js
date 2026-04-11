@@ -56,9 +56,18 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
         }, 50)
       }
     }
-  }, [milestones.length])
+  }, [milestones])
 
   const [loading, setLoading] = useState(false)
+
+  const fetchActivities = async (goalId) => {
+    try {
+      const data = await annualPlanningService.getActivities(goalId)
+      setActivities(data)
+    } catch (error) {
+      console.error('Failed to load activities', error)
+    }
+  }
 
   useEffect(() => {
     if (open) {
@@ -118,16 +127,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
         setActivities([])
       }
     }
-  }, [open, goal, focusAreaId])
-
-  const fetchActivities = async (goalId) => {
-    try {
-      const data = await annualPlanningService.getActivities(goalId)
-      setActivities(data)
-    } catch (error) {
-      console.error('Failed to load activities', error)
-    }
-  }
+  }, [open, goal, focusAreaId, yearlyObjectives])
 
   // Handler helpers
   const handleChange = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }))

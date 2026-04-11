@@ -29,12 +29,7 @@ const WeeklyStatsCard = () => {
   const { goals, loading: goalsLoading } = useAnnualPlan()
   const { tasks, loading: tasksLoading } = useTaskData()
 
-  useEffect(() => {
-    if (cardsLoading || goalsLoading || tasksLoading) return
-    fetchStats()
-  }, [cardsLoading, goalsLoading, tasksLoading, cards, goals, tasks])
-
-  const fetchStats = async () => {
+  const fetchStats = React.useCallback(async () => {
     try {
       setLoading(true)
 
@@ -68,7 +63,12 @@ const WeeklyStatsCard = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [cards, goals, tasks])
+
+  useEffect(() => {
+    if (cardsLoading || goalsLoading || tasksLoading) return
+    fetchStats()
+  }, [cardsLoading, goalsLoading, tasksLoading, fetchStats])
 
   const calculateProgress = (goal) => {
     if (!goal.activities || goal.activities.length === 0) return 0

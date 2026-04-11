@@ -42,72 +42,6 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
   const autosaveTimer = useRef(null)
   const viewportRef = useRef({ x: 0, y: 0, zoom: 1 })
 
-  // ── Load board on mount ────────────────────────────────────────────────
-  useEffect(() => {
-    blackboardService
-      .getBoard(BOARD_ID)
-      .then((board) => {
-        // Rehydrate callbacks — they're stripped out during JSON serialization
-        const rehydratedNodes = (board.nodes || []).map((n) => rehydrateNode(n))
-        setNodes(rehydratedNodes)
-        setEdges(board.edges || [])
-        if (board.viewport) viewportRef.current = board.viewport
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-
-  // ── Rehydrate node callbacks after load ───────────────────────────────
-  const rehydrateNode = useCallback((node) => {
-    if (node.type === 'stickyNote') {
-      return {
-        ...node,
-        data: {
-          ...node.data,
-          onUpdate: (updates) => updateNodeData(node.id, updates),
-          onDelete: () => deleteNode(node.id)
-        }
-      }
-    }
-    if (node.type === 'entity') {
-      return {
-        ...node,
-        data: {
-          ...node.data,
-          onDelete: () => deleteNode(node.id)
-        }
-      }
-    }
-    return node
-  }, [])
-
-  // ── Node CRUD helpers ─────────────────────────────────────────────────
-  const updateNodeData = useCallback(
-    (id, updates) => {
-      setNodes((nds) => nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, ...updates } } : n)))
-      scheduleSave()
-    },
-    [setNodes]
-  )
-
-  const deleteNode = useCallback(
-    (id) => {
-      setNodes((nds) => nds.filter((n) => n.id !== id))
-      setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id))
-      scheduleSave()
-    },
-    [setNodes, setEdges]
-  )
-
-  // ── Edge connect ──────────────────────────────────────────────────────
-  const onConnect = useCallback(
-    (params) => {
-      setEdges((eds) => addEdge({ ...params, type: 'smoothstep', animated: true }, eds))
-      scheduleSave()
-    },
-    [setEdges]
-  )
-
   // ── Auto-save (debounced 1.5s) ────────────────────────────────────────
   const scheduleSave = useCallback(() => {
     clearTimeout(autosaveTimer.current)
@@ -132,6 +66,77 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
       })
     }, AUTOSAVE_DELAY)
   }, [setNodes, setEdges])
+
+  // ── Node CRUD helpers ─────────────────────────────────────────────────
+  const updateNodeData = useCallback(
+    (id, updates) => {
+      setNodes((nds) => nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, ...updates } } : n)))
+      scheduleSave()
+    },
+    [setNodes, scheduleSave]
+  )
+
+  const deleteNode = useCallback(
+    (id) => {
+      setNodes((nds) => nds.filter((n) => n.id !== id))
+      setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id))
+      scheduleSave()
+    },
+    [setNodes, setEdges, scheduleSave]
+  )
+
+  // ── Rehydrate node callbacks after load ───────────────────────────────
+  const rehydrateNode = useCallback(
+    (node) => {
+      if (node.type === 'stickyNote') {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            onUpdate: (updates) => updateNodeData(node.id, updates),
+            onDelete: () => deleteNode(node.id)
+          }
+        }
+      }
+      if (node.type === 'entity') {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            onDelete: () => deleteNode(node.id)
+          }
+        }
+      }
+      return node
+    },
+    [updateNodeData, deleteNode]
+  )
+
+  // ── Load board on mount ────────────────────────────────────────────────
+  useEffect(() => {
+    blackboardService
+      .getBoard(BOARD_ID)
+      .then((board) => {
+        // Rehydrate callbacks — they're stripped out during JSON serialization
+        const rehydratedNodes = (board.nodes || []).map((n) => rehydrateNode(n))
+        setNodes(rehydratedNodes)
+        setEdges(board.edges || [])
+        if (board.viewport) viewportRef.current = board.viewport
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [rehydrateNode, setEdges, setNodes])
+
+  // ── Edge connect ──────────────────────────────────────────────────────
+  const onConnect = useCallback(
+    (params) => {
+      setEdges((eds) => addEdge({ ...params, type: 'smoothstep', animated: true }, eds))
+      scheduleSave()
+    },
+    [setEdges, scheduleSave]
+  )
+
+  // ── Edge connect ──────────────────────────────────────────────────────
 
   const handleNodesChange = useCallback(
     (changes) => {
