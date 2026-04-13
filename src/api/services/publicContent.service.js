@@ -176,7 +176,7 @@ export const publicContentService = {
    */
   async forkBook(id) {
     const { data } = await apiClient.post(`/public/books/${id}/fork`)
-    return data
+    return data.forked_book
   },
 
   /**
@@ -186,7 +186,7 @@ export const publicContentService = {
    */
   async forkDeck(id) {
     const { data } = await apiClient.post(`/public/decks/${id}/fork`)
-    return data
+    return data.forked_deck
   },
 
   /**

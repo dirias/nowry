@@ -5,11 +5,15 @@ import {
   Typography,
   Stack,
   Box,
+  Button,
   Input,
   IconButton,
   Tooltip,
   CircularProgress,
+  LinearProgress,
   Chip,
+  ChipDelete,
+  Divider,
   Tabs,
   TabList,
   Tab,
@@ -24,13 +28,13 @@ import WbSunnyIcon from '@mui/icons-material/WbSunny'
 import WbTwilightIcon from '@mui/icons-material/WbTwilight'
 import NightsStayIcon from '@mui/icons-material/NightsStay'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import SortableTask from '../../Task/SortableTask'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { tasksService, annualPlanningService } from '../../../api/services'
 import { useTaskData } from '../../../hooks/useTaskData'
 import { apiCache } from '../../../api/utils/cache'
+import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
 
 const ROUTINE_CACHE_KEY = 'dailyRoutine'
 const ROUTINE_TTL = 2 * 60000 // 2 minutes
@@ -70,6 +74,20 @@ const saveActiveList = (id) => {
 
 const SideMenu = () => {
   const { t } = useTranslation()
+  const { themeColor } = useThemePreferences()
+
+  // Chip style helpers — use the user's preferred color directly
+  const activeChipSx = {
+    bgcolor: `${themeColor}22`, // ~13% opacity tint background
+    color: themeColor,
+    fontWeight: 600,
+    border: 'none'
+  }
+  const inactiveChipSx = {
+    bgcolor: 'background.level2',
+    color: 'text.secondary',
+    border: 'none'
+  }
   const [tasks, setTasks] = React.useState([])
   const [search, setSearch] = React.useState('')
   const [statusFilter, setStatusFilter] = React.useState('pending')
@@ -84,6 +102,7 @@ const SideMenu = () => {
   const [addingList, setAddingList] = React.useState(false)
   const [newListName, setNewListName] = React.useState('')
   const newListInputRef = React.useRef(null)
+  const searchInputRef = React.useRef(null)
   // ─────────────────────────────────────────────────────────────────────────
 
   // Helper function to determine current time period
@@ -244,8 +263,10 @@ const SideMenu = () => {
     return matchesSearch && matchesStatus && matchesList
   })
 
+  const isExactTitleMatch = (text) => tasks.some((t) => t.title.trim().toLowerCase() === text.trim().toLowerCase())
+
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && search.trim() && filteredTasks.length === 0) {
+    if (e.key === 'Enter' && search.trim() && !isExactTitleMatch(search)) {
       addTask(search)
     }
   }
@@ -291,20 +312,46 @@ const SideMenu = () => {
     return routine[`${period}_routine`] || []
   }
 
+  const periodIcon = {
+    morning: <WbSunnyIcon sx={{ fontSize: 32, color: 'warning.400' }} />,
+    afternoon: <WbTwilightIcon sx={{ fontSize: 32, color: 'warning.500' }} />,
+    evening: <NightsStayIcon sx={{ fontSize: 32, color: 'primary.400' }} />
+  }
+
   const renderRoutineList = (items, period) => {
     if (!items || items.length === 0) {
       return (
         <Box
           sx={{
-            py: 6,
+            py: 4,
+            px: 2,
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1.5,
+            textAlign: 'center'
           }}
         >
-          <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
-            {t(`annualPlanning.dailyRoutine.${period}Empty`, 'No routine items set')}
-          </Typography>
+          {periodIcon[period]}
+          <Box>
+            <Typography level='title-sm' sx={{ mb: 0.5 }}>
+              {t(`annualPlanning.dailyRoutine.${period}EmptyTitle`)}
+            </Typography>
+            <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+              {t('annualPlanning.dailyRoutine.emptySubtitle')}
+            </Typography>
+          </Box>
+          <Button
+            component={RouterLink}
+            to='/annual-planning/daily-routine'
+            size='sm'
+            variant='outlined'
+            color='neutral'
+            aria-label={t('annualPlanning.dailyRoutine.emptyCta')}
+            sx={{ mt: 0.5, fontSize: 'xs' }}
+          >
+            {t('annualPlanning.dailyRoutine.emptyCta')}
+          </Button>
         </Box>
       )
     }
@@ -389,6 +436,24 @@ const SideMenu = () => {
         })}
       </Stack>
     )
+  }
+
+  // Map a category id → display label
+  const getCategoryLabel = (catId) => {
+    if (!catId || catId === 'general' || catId === 'all') return t('tasks.lists.general')
+    const found = lists.find((l) => l.id === catId)
+    return found ? found.label : catId
+  }
+
+  // Group filteredTasks by category — only used when activeList === 'all'
+  const getGroupedTasks = () => {
+    const groups = {}
+    filteredTasks.forEach((task) => {
+      const cat = task.category || 'general'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(task)
+    })
+    return Object.entries(groups).map(([id, items]) => ({ id, label: getCategoryLabel(id), tasks: items }))
   }
 
   return (
@@ -550,7 +615,7 @@ const SideMenu = () => {
           <TabPanel value='tasks' sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
             {/* Header & Filter */}
             <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 1 }}>
-              <Typography level='title-md' startDecorator={<FormatListBulletedIcon sx={{ fontSize: 18, color: 'primary.500' }} />}>
+              <Typography level='title-md' startDecorator={<FormatListBulletedIcon sx={{ fontSize: 18, color: 'primary.plainColor' }} />}>
                 {t('tasks.title')}
               </Typography>
               <Stack direction='row' spacing={0.5}>
@@ -558,16 +623,53 @@ const SideMenu = () => {
                   <Chip
                     key={f}
                     size='sm'
-                    variant={statusFilter === f ? 'solid' : 'plain'}
-                    color={statusFilter === f ? 'primary' : 'neutral'}
+                    variant='plain'
+                    color='neutral'
                     onClick={() => setStatusFilter(f)}
-                    sx={{ cursor: 'pointer', fontSize: '0.7rem', px: 1 }}
+                    sx={{ cursor: 'pointer', fontSize: '0.7rem', px: 1, ...(statusFilter === f ? activeChipSx : inactiveChipSx) }}
                   >
                     {t(`tasks.filter.${f}`)}
                   </Chip>
                 ))}
               </Stack>
             </Stack>
+
+            {/* ── Completion progress ─────────────────────────────────────── */}
+            {(() => {
+              const listTasks = activeList === 'all' ? tasks : tasks.filter((t) => t.category === activeList)
+              const total = listTasks.length
+              const done = listTasks.filter((t) => t.is_completed).length
+              const pct = total === 0 ? 0 : Math.round((done / total) * 100)
+              return (
+                <Box sx={{ mb: 1.5, flexShrink: 0 }}>
+                  <Stack direction='row' justifyContent='space-between' alignItems='baseline' sx={{ mb: 0.5 }}>
+                    <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                      {total === 0 ? t('tasks.progress.noTasks') : t('tasks.progress.label', { done, total })}
+                    </Typography>
+                    {total > 0 && (
+                      <Typography
+                        level='body-xs'
+                        sx={{ color: pct === 100 ? 'success.plainColor' : 'text.tertiary', fontWeight: pct === 100 ? 600 : 400 }}
+                      >
+                        {pct}%
+                      </Typography>
+                    )}
+                  </Stack>
+                  <LinearProgress
+                    determinate
+                    value={pct}
+                    color='primary'
+                    size='sm'
+                    sx={{
+                      borderRadius: 'sm',
+                      '--LinearProgress-thickness': '5px',
+                      bgcolor: 'background.level2'
+                    }}
+                  />
+                </Box>
+              )
+            })()}
+            {/* ────────────────────────────────────────────────────────────── */}
 
             {/* ── List chips row ──────────────────────────────────────────── */}
             <Box
@@ -588,10 +690,10 @@ const SideMenu = () => {
               {/* "All" chip */}
               <Chip
                 size='sm'
-                variant={activeList === 'all' ? 'solid' : 'outlined'}
-                color={activeList === 'all' ? 'primary' : 'neutral'}
+                variant='plain'
+                color='neutral'
                 onClick={() => handleSelectList('all')}
-                sx={{ cursor: 'pointer', flexShrink: 0, fontSize: '0.72rem' }}
+                sx={{ cursor: 'pointer', flexShrink: 0, fontSize: '0.72rem', ...(activeList === 'all' ? activeChipSx : inactiveChipSx) }}
               >
                 {t('tasks.lists.all')}
               </Chip>
@@ -601,26 +703,18 @@ const SideMenu = () => {
                 <Chip
                   key={list.id}
                   size='sm'
-                  variant={activeList === list.id ? 'solid' : 'outlined'}
-                  color={activeList === list.id ? 'primary' : 'neutral'}
+                  variant='plain'
+                  color='neutral'
                   onClick={() => handleSelectList(list.id)}
                   endDecorator={
-                    <Box
-                      component='span'
-                      onClick={(e) => handleDeleteList(e, list.id)}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        cursor: 'pointer',
-                        opacity: 0.5,
-                        '&:hover': { opacity: 1 },
-                        ml: 0.25
-                      }}
-                    >
-                      <CloseRoundedIcon sx={{ fontSize: 12 }} />
-                    </Box>
+                    <ChipDelete onDelete={(e) => handleDeleteList(e, list.id)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }} />
                   }
-                  sx={{ cursor: 'pointer', flexShrink: 0, fontSize: '0.72rem' }}
+                  sx={{
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    fontSize: '0.72rem',
+                    ...(activeList === list.id ? activeChipSx : inactiveChipSx)
+                  }}
                 >
                   {list.label}
                 </Chip>
@@ -661,20 +755,25 @@ const SideMenu = () => {
             <Box sx={{ position: 'relative', mb: 1 }}>
               <Input
                 size='sm'
-                placeholder={t('tasks.searchPlaceholder')}
+                placeholder={
+                  activeList === 'all'
+                    ? t('tasks.searchPlaceholder')
+                    : t('tasks.addToListPlaceholder', { list: getCategoryLabel(activeList) })
+                }
                 startDecorator={<SearchRoundedIcon />}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleKeyDown}
+                slotProps={{ input: { ref: searchInputRef } }}
                 sx={{ width: '100%' }}
               />
-              {search && filteredTasks.length === 0 && (
+              {search.trim() && !isExactTitleMatch(search) && (
                 <Tooltip title={t('tasks.addTooltip', { title: search })}>
                   <IconButton
                     onClick={() => addTask(search)}
                     size='sm'
-                    color='success'
-                    variant='plain'
+                    color='primary'
+                    variant='soft'
                     sx={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)' }}
                   >
                     <AddRoundedIcon />
@@ -686,18 +785,78 @@ const SideMenu = () => {
             {/* Task List */}
             <Box
               sx={{
-                maxHeight: 240,
+                flex: 1,
                 overflowY: 'auto',
                 '&::-webkit-scrollbar': { width: 4 },
                 '&::-webkit-scrollbar-thumb': { bgcolor: 'neutral.outlinedBorder', borderRadius: 2 },
                 '&::-webkit-scrollbar-track': { bgcolor: 'transparent' }
               }}
             >
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={filteredTasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
-                  <Stack spacing={1}>
-                    {filteredTasks.length > 0 ? (
-                      filteredTasks.map((task) => (
+              {tasks.length === 0 ? (
+                /* ── Fully empty ── */
+                <Box sx={{ py: 4, px: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, textAlign: 'center' }}>
+                  <FormatListBulletedIcon sx={{ fontSize: 32, color: 'text.secondary' }} />
+                  <Box>
+                    <Typography level='title-sm' sx={{ mb: 0.5 }}>
+                      {t('tasks.emptyTitle')}
+                    </Typography>
+                    <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                      {t('tasks.emptySubtitle')}
+                    </Typography>
+                  </Box>
+                </Box>
+              ) : filteredTasks.length === 0 ? (
+                /* ── No match ── */
+                <Box sx={{ py: 3, px: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, textAlign: 'center' }}>
+                  <FormatListBulletedIcon sx={{ fontSize: 24, color: 'text.secondary', opacity: 0.6 }} />
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    {t('tasks.noMatchTitle')}
+                  </Typography>
+                </Box>
+              ) : activeList === 'all' ? (
+                /* ── Grouped by category ── */
+                <Stack spacing={0}>
+                  {getGroupedTasks().map((group, gi) => (
+                    <Box key={group.id}>
+                      {gi > 0 && <Divider sx={{ my: 1 }} />}
+                      <Typography
+                        level='body-xs'
+                        sx={{
+                          px: 0.5,
+                          pb: 0.5,
+                          color: 'text.tertiary',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          fontSize: '0.62rem'
+                        }}
+                      >
+                        {group.label}
+                      </Typography>
+                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={group.tasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
+                          <Stack spacing={0.5}>
+                            {group.tasks.map((task) => (
+                              <SortableTask
+                                key={task._id || task.id}
+                                task={task}
+                                onToggle={() => toggleTask(task)}
+                                onDelete={() => removeTask(task._id || task.id)}
+                                onUpdate={updateTask}
+                              />
+                            ))}
+                          </Stack>
+                        </SortableContext>
+                      </DndContext>
+                    </Box>
+                  ))}
+                </Stack>
+              ) : (
+                /* ── Single list flat view ── */
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={filteredTasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
+                    <Stack spacing={0.5}>
+                      {filteredTasks.map((task) => (
                         <SortableTask
                           key={task._id || task.id}
                           task={task}
@@ -705,22 +864,11 @@ const SideMenu = () => {
                           onDelete={() => removeTask(task._id || task.id)}
                           onUpdate={updateTask}
                         />
-                      ))
-                    ) : (
-                      <Box sx={{ textAlign: 'center', color: 'text.tertiary', py: 3 }}>
-                        <Typography level='body-sm'>
-                          {tasks.length === 0 ||
-                          (activeList !== 'all' &&
-                            filteredTasks.length === 0 &&
-                            tasks.filter((t) => t.category === activeList).length === 0)
-                            ? t('tasks.empty')
-                            : t('tasks.noMatch')}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                </SortableContext>
-              </DndContext>
+                      ))}
+                    </Stack>
+                  </SortableContext>
+                </DndContext>
+              )}
             </Box>
           </TabPanel>
         )}

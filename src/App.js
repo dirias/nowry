@@ -242,7 +242,8 @@ const AppContent = () => {
                 path='/onboarding'
                 element={
                   <ProtectedRoute>
-                    <OnboardingWizard />
+                    {/* Wizard is a one-time experience — completed users go straight to home */}
+                    {user?.wizard_completed ? <Navigate to='/' replace /> : <OnboardingWizard />}
                   </ProtectedRoute>
                 }
               />

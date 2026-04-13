@@ -300,23 +300,26 @@
       "customLabel": "Color Personalizado"
     },
     "interests": {
-      "title": "¿Qué te Interesa?",
-      "subtitle": "Selecciona temas sobre los que te gustaría ver contenido",
+      "title": "What topics interest you?",
+      "subtitle": "We'll curate your home feed around these.",
+      "groupLabel": "Interest selection",
       "selected": "Seleccionado: {{count}} tema",
       "selected_plural": "Seleccionados: {{count}} temas",
       "items": {
-        "Technology": "Tecnología",
-        "Science": "Ciencia",
-        "History": "Historia",
-        "Languages": "Idiomas",
-        "Art": "Arte",
-        "Mathematics": "Matemáticas",
-        "Literature": "Literatura",
-        "Music": "Música",
-        "Business": "Negocios",
-        "Health": "Salud",
-        "Philosophy": "Filosofía",
-        "Psychology": "Psicología"
+        "ai": "AI & Machine Learning",
+        "technology": "Technology",
+        "science": "Science",
+        "mathematics": "Mathematics",
+        "history": "History",
+        "languages": "Languages",
+        "literature": "Literature",
+        "art": "Art & Creativity",
+        "music": "Music",
+        "business": "Business",
+        "health": "Health & Fitness",
+        "philosophy": "Philosophy",
+        "design": "Design",
+        "psychology": "Psychology"
       }
     },
     "learning": {
@@ -347,7 +350,42 @@
     "next": "Siguiente",
     "back": "Atrás",
     "finish": "Finalizar Configuración",
-    "skip": "Saltar por ahora"
+    "skip": "Saltar por ahora",
+    "progressLabel": "Onboarding progress",
+    "defer": "Set up later in settings",
+    "identity": {
+      "title": "Elige tu idioma.",
+      "subtitle": "Selecciona el idioma que prefieras."
+    },
+    "appearance": {
+      "title": "Make it yours.",
+      "subtitle": "Light or dark. Pick a color you'll see every day.",
+      "colorLabel": "Select {{name}}",
+      "colorGroupLabel": "Accent color selection"
+    },
+    "focus": {
+      "title": "What are you here to learn?",
+      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "topics": {
+        "technology": "Technology",
+        "science": "Science",
+        "history": "History",
+        "languages": "Languages",
+        "art": "Art",
+        "mathematics": "Mathematics",
+        "literature": "Literature",
+        "business": "Business"
+      }
+    },
+    "ready": {
+      "title": "You're all set, {{name}}.",
+      "titleNoName": "You're all set.",
+      "subtitle": "Your personalized study space is ready.",
+      "cta": "Enter Nowry"
+    },
+    "error": {
+      "saveFailed": "Something went wrong. Please try again."
+    }
   },
   "tasks": {
     "title": "Tareas",
@@ -359,12 +397,22 @@
     },
     "lists": {
       "all": "Todas",
+      "general": "General",
       "addList": "Nueva lista",
       "listPlaceholder": "Nombre de lista..."
     },
     "empty": "No hay tareas. ¡Escribe para añadir una!",
     "noMatch": "Ninguna tarea coincide con tus filtros",
-    "addTooltip": "Añadir \"{{title}}\""
+    "emptyTitle": "Aún no hay tareas",
+    "emptySubtitle": "Empieza a organizar tu día añadiendo tu primera tarea.",
+    "emptyCta": "Añadir una tarea",
+    "noMatchTitle": "Sin tareas coincidentes",
+    "addToListPlaceholder": "Añadir a {{list}}...",
+    "addTooltip": "Añadir \"{{title}}\"",
+    "progress": {
+      "label": "{{done}} de {{total}} completadas",
+      "noTasks": "Aún no hay tareas"
+    }
   },
   "sidemenu": {
     "dashboard": "Panel",
@@ -1020,7 +1068,12 @@
       "balanced": "Equilibrado",
       "lopsided": "Un área está recibiendo la mayor parte de tu tiempo",
       "dragActivities": "Arrastra actividades de tus objetivos a los bloques de tiempo",
-      "saveTemplate": "Guardar como Plantilla"
+      "saveTemplate": "Guardar como Plantilla",
+      "morningEmptyTitle": "Empieza tu mañana bien.",
+      "afternoonEmptyTitle": "Domina tu tarde.",
+      "eveningEmptyTitle": "Termina el día con intención.",
+      "emptySubtitle": "Configura tu rutina diaria para mantenerte en curso cada día.",
+      "emptyCta": "Configurar rutina"
     },
     "progress": {
       "title": "Panel de Progreso",
@@ -1473,6 +1526,13 @@
         "content": "Para cualquier pregunta relacionada con estos Términos, póngase en contacto con nosotros en:",
         "email": "Correo electrónico: support@nowry.app"
       }
+    }
+  },
+  "home": {
+    "setupBanner": {
+      "message": "Tu perfil no está completo todavía.",
+      "cta": "Completar configuración",
+      "dismiss": "Descartar"
     }
   }
 }

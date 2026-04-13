@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../config/firebase.config'
 import { apiClient } from '../api/client'
 import { authService } from '../api/services'
+import { apiCache } from '../api/utils/cache'
 import i18n from '../i18n'
 
 const AuthContext = createContext(null)
@@ -21,8 +22,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiClient.get('/users/me')
       setUser(response.data)
-      if (response.data?.preferences?.language) {
-        i18n.changeLanguage(response.data.preferences.language)
+      // Preferences are nested under preferences.general in the backend
+      const lang = response.data?.preferences?.general?.language
+      if (lang) {
+        i18n.changeLanguage(lang)
       }
     } catch {
       // 401 here means the backend session is invalid despite a Firebase user existing.
@@ -109,6 +112,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout failed', error)
     } finally {
+      // Clear ALL cached API data so the next user never sees stale data
+      // from the previous session (tasks, plans, books, etc.)
+      apiCache.clear()
       setUser(null)
     }
   }

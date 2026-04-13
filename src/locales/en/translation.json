@@ -425,23 +425,26 @@
       "customLabel": "Custom Color"
     },
     "interests": {
-      "title": "What Interests You?",
-      "subtitle": "Select topics you'd like to see content about",
+      "title": "What topics interest you?",
+      "subtitle": "We'll curate your home feed around these.",
+      "groupLabel": "Interest selection",
       "selected": "Selected: {{count}} topic",
       "selected_plural": "Selected: {{count}} topics",
       "items": {
-        "Technology": "Technology",
-        "Science": "Science",
-        "History": "History",
-        "Languages": "Languages",
-        "Art": "Art",
-        "Mathematics": "Mathematics",
-        "Literature": "Literature",
-        "Music": "Music",
-        "Business": "Business",
-        "Health": "Health",
-        "Philosophy": "Philosophy",
-        "Psychology": "Psychology"
+        "ai": "AI & Machine Learning",
+        "technology": "Technology",
+        "science": "Science",
+        "mathematics": "Mathematics",
+        "history": "History",
+        "languages": "Languages",
+        "literature": "Literature",
+        "art": "Art & Creativity",
+        "music": "Music",
+        "business": "Business",
+        "health": "Health & Fitness",
+        "philosophy": "Philosophy",
+        "design": "Design",
+        "psychology": "Psychology"
       }
     },
     "learning": {
@@ -472,7 +475,42 @@
     "next": "Next",
     "back": "Back",
     "finish": "Finish Setup",
-    "skip": "Skip for now"
+    "skip": "Skip for now",
+    "progressLabel": "Onboarding progress",
+    "defer": "Set up later in settings",
+    "identity": {
+      "title": "Choose your language.",
+      "subtitle": "Pick the language that feels right."
+    },
+    "appearance": {
+      "title": "Make it yours.",
+      "subtitle": "Light or dark. Pick a color you'll see every day.",
+      "colorLabel": "Select {{name}}",
+      "colorGroupLabel": "Accent color selection"
+    },
+    "focus": {
+      "title": "What are you here to learn?",
+      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "topics": {
+        "technology": "Technology",
+        "science": "Science",
+        "history": "History",
+        "languages": "Languages",
+        "art": "Art",
+        "mathematics": "Mathematics",
+        "literature": "Literature",
+        "business": "Business"
+      }
+    },
+    "ready": {
+      "title": "You're all set, {{name}}.",
+      "titleNoName": "You're all set.",
+      "subtitle": "Your personalized study space is ready.",
+      "cta": "Enter Nowry"
+    },
+    "error": {
+      "saveFailed": "Something went wrong. Please try again."
+    }
   },
   "tasks": {
     "title": "Tasks",
@@ -484,12 +522,22 @@
     },
     "lists": {
       "all": "All",
+      "general": "General",
       "addList": "New list",
       "listPlaceholder": "List name..."
     },
     "empty": "No tasks yet. Type to add one!",
     "noMatch": "No tasks match your filters",
-    "addTooltip": "Add \"{{title}}\""
+    "emptyTitle": "No tasks yet",
+    "emptySubtitle": "Start organizing your day by adding your first task.",
+    "emptyCta": "Add a task",
+    "noMatchTitle": "No matching tasks",
+    "addToListPlaceholder": "Add to {{list}}...",
+    "addTooltip": "Add \"{{title}}\"",
+    "progress": {
+      "label": "{{done}} of {{total}} complete",
+      "noTasks": "No tasks yet"
+    }
   },
   "sidemenu": {
     "dashboard": "Dashboard",
@@ -1134,7 +1182,12 @@
       "balanced": "Balanced",
       "lopsided": "One area is getting most of your time",
       "dragActivities": "Drag activities from your goals into time slots",
-      "saveTemplate": "Save as Template"
+      "saveTemplate": "Save as Template",
+      "morningEmptyTitle": "Start your morning right.",
+      "afternoonEmptyTitle": "Own your afternoon.",
+      "eveningEmptyTitle": "Wind down with intention.",
+      "emptySubtitle": "Set up your daily routine to stay on track every day.",
+      "emptyCta": "Set up routine"
     },
     "progress": {
       "title": "Progress Dashboard",
@@ -1575,6 +1628,13 @@
         "content": "For any questions regarding these Terms, please contact us at:",
         "email": "Email: support@nowry.app"
       }
+    }
+  },
+  "home": {
+    "setupBanner": {
+      "message": "Your profile setup isn't complete yet.",
+      "cta": "Finish setup",
+      "dismiss": "Dismiss"
     }
   }
 }

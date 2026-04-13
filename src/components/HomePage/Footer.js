@@ -7,6 +7,7 @@ import { useColorScheme } from '@mui/joy/styles'
 import { useAuth } from '../../context/AuthContext'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '../../api/services/bugs.service'
+import { userService } from '../../api/services'
 
 const InstagramIcon = () => (
   <SvgIcon sx={{ fontSize: 18 }}>
@@ -119,7 +120,14 @@ const Footer = () => {
                 size='sm'
                 variant='plain'
                 value={i18n.language?.split('-')[0] || 'en'}
-                onChange={(_, val) => val && i18n.changeLanguage(val)}
+                onChange={(_, val) => {
+                  if (!val) return
+                  i18n.changeLanguage(val)
+                  // Persist to backend only when authenticated — guests get session-only change
+                  if (user) {
+                    userService.updateGeneralPreferences({ language: val }).catch(() => {})
+                  }
+                }}
                 startDecorator={<LanguageRounded sx={{ fontSize: 16 }} />}
                 indicator={null}
                 slotProps={{

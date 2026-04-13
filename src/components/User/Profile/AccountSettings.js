@@ -257,15 +257,17 @@ export default function AccountSettings() {
       }
 
       if (profile.preferences) {
+        const general = profile.preferences.general || {}
+        const pomodoro = profile.preferences.pomodoro || {}
         const prefs = {
-          interests: profile.preferences.interests || [],
-          theme_color: profile.preferences.theme_color || '#0b6bcb',
-          language: profile.preferences.language || 'en',
-          pomodoro_work_minutes: profile.preferences.pomodoro_work_minutes || 25,
-          pomodoro_short_break_minutes: profile.preferences.pomodoro_short_break_minutes || 5,
-          pomodoro_long_break_minutes: profile.preferences.pomodoro_long_break_minutes || 15,
-          pomodoro_auto_start: profile.preferences.pomodoro_auto_start || false,
-          pomodoro_enabled: profile.preferences.pomodoro_enabled || false
+          interests: general.interests || [],
+          theme_color: general.theme_color || '#0b6bcb',
+          language: general.language || 'en',
+          pomodoro_work_minutes: pomodoro.work_minutes ?? general.pomodoro_work_minutes ?? 25,
+          pomodoro_short_break_minutes: pomodoro.short_break_minutes ?? general.pomodoro_short_break_minutes ?? 5,
+          pomodoro_long_break_minutes: pomodoro.long_break_minutes ?? general.pomodoro_long_break_minutes ?? 15,
+          pomodoro_auto_start: pomodoro.auto_start ?? general.pomodoro_auto_start ?? false,
+          pomodoro_enabled: pomodoro.enabled ?? general.pomodoro_enabled ?? false
         }
         setPreferences(prefs)
         setThemeColor(prefs.theme_color)

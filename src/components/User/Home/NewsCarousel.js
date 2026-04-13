@@ -182,12 +182,12 @@ export default function NewsCarousel() {
   // Sync preferences from AuthContext and handle cache clearing
   useEffect(() => {
     const syncPreferences = async () => {
-      if (!user?.preferences) return
+      if (!user?.preferences?.general) return
 
       // If language or interests changed, ask the backend to clear its news cache
       if (userPreferences) {
         const oldPrefs = JSON.stringify(userPreferences)
-        const newPrefs = JSON.stringify(user.preferences)
+        const newPrefs = JSON.stringify(user.preferences?.general)
         if (oldPrefs !== newPrefs) {
           try {
             await apiClient.delete('/news/cache/clear')
@@ -197,7 +197,8 @@ export default function NewsCarousel() {
         }
       }
 
-      setUserPreferences(user.preferences)
+      // Preferences live under preferences.general in the backend
+      setUserPreferences(user.preferences?.general)
     }
     syncPreferences()
   }, [user, userPreferences])

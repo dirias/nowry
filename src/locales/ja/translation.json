@@ -298,23 +298,26 @@
       "customLabel": "カスタムカラー"
     },
     "interests": {
-      "title": "興味のあることは？",
-      "subtitle": "コンテンツを見たいトピックを選択してください",
+      "title": "What topics interest you?",
+      "subtitle": "We'll curate your home feed around these.",
+      "groupLabel": "Interest selection",
       "selected": "選択中: {{count}}トピック",
       "selected_plural": "選択中: {{count}}トピック",
       "items": {
-        "Technology": "テクノロジー",
-        "Science": "科学",
-        "History": "歴史",
-        "Languages": "言語",
-        "Art": "芸術",
-        "Mathematics": "数学",
-        "Literature": "文学",
-        "Music": "音楽",
-        "Business": "ビジネス",
-        "Health": "健康",
-        "Philosophy": "哲学",
-        "Psychology": "心理学"
+        "ai": "AI & Machine Learning",
+        "technology": "Technology",
+        "science": "Science",
+        "mathematics": "Mathematics",
+        "history": "History",
+        "languages": "Languages",
+        "literature": "Literature",
+        "art": "Art & Creativity",
+        "music": "Music",
+        "business": "Business",
+        "health": "Health & Fitness",
+        "philosophy": "Philosophy",
+        "design": "Design",
+        "psychology": "Psychology"
       }
     },
     "learning": {
@@ -345,7 +348,42 @@
     "next": "次へ",
     "back": "戻る",
     "finish": "セットアップ完了",
-    "skip": "今はスキップ"
+    "skip": "今はスキップ",
+    "progressLabel": "Onboarding progress",
+    "defer": "Set up later in settings",
+    "identity": {
+      "title": "言語を選んでください。",
+      "subtitle": "お好みの言語を選択してください。"
+    },
+    "appearance": {
+      "title": "Make it yours.",
+      "subtitle": "Light or dark. Pick a color you'll see every day.",
+      "colorLabel": "Select {{name}}",
+      "colorGroupLabel": "Accent color selection"
+    },
+    "focus": {
+      "title": "What are you here to learn?",
+      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "topics": {
+        "technology": "Technology",
+        "science": "Science",
+        "history": "History",
+        "languages": "Languages",
+        "art": "Art",
+        "mathematics": "Mathematics",
+        "literature": "Literature",
+        "business": "Business"
+      }
+    },
+    "ready": {
+      "title": "You're all set, {{name}}.",
+      "titleNoName": "You're all set.",
+      "subtitle": "Your personalized study space is ready.",
+      "cta": "Enter Nowry"
+    },
+    "error": {
+      "saveFailed": "Something went wrong. Please try again."
+    }
   },
   "tasks": {
     "title": "タスク",
@@ -357,12 +395,22 @@
     },
     "lists": {
       "all": "すべて",
+      "general": "一般",
       "addList": "新しいリスト",
       "listPlaceholder": "リスト名..."
     },
     "empty": "タスクはまだありません。入力して追加しましょう！",
     "noMatch": "フィルターに一致するタスクはありません",
-    "addTooltip": "\"{{title}}\" を追加"
+    "emptyTitle": "タスクはまだありません",
+    "emptySubtitle": "最初のタスクを追加して、今日の予定を整理しましょう。",
+    "emptyCta": "タスクを追加",
+    "noMatchTitle": "一致するタスクはありません",
+    "addToListPlaceholder": "{{list}} に追加...",
+    "addTooltip": "\"{{title}}\" を追加",
+    "progress": {
+      "label": "{{total}} 件中 {{done}} 件完了",
+      "noTasks": "タスクはまだありません"
+    }
   },
   "books": {
     "emptySubtitle": "新しいブックを作成するか、ドキュメントをインポートして始めましょう",
@@ -794,7 +842,12 @@
       "balanced": "バランス良好",
       "lopsided": "1つの分野に時間が偏っています",
       "dragActivities": "活動を目標からタイムスロットにドラッグしてください",
-      "saveTemplate": "テンプレートとして保存"
+      "saveTemplate": "テンプレートとして保存",
+      "morningEmptyTitle": "朝を上手くスタートしよう。",
+      "afternoonEmptyTitle": "午後を自分のものに。",
+      "eveningEmptyTitle": "意図を持って一日を締めくくろう。",
+      "emptySubtitle": "毎日のルーティンを設定して、常に軌道に乗り続けましょう。",
+      "emptyCta": "ルーティンを設定"
     },
     "progress": {
       "title": "進捗ダッシュボード",
@@ -968,6 +1021,13 @@
         "content": "これらの規約に関するご質問は、以下までご連絡ください。",
         "email": "メールアドレス: support@nowry.app"
       }
+    }
+  },
+  "home": {
+    "setupBanner": {
+      "message": "プロフィールの設定がまだ完了していません。",
+      "cta": "セットアップを完了する",
+      "dismiss": "閉じる"
     }
   }
 }

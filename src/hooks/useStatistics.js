@@ -11,22 +11,27 @@
  *
  * Invalidate after a study session completes:
  *   import { apiCache } from '../api/utils/cache'
- *   apiCache.invalidate('cards:statistics')
+ *   apiCache.invalidate(`cards:statistics:${user.id}`)
  */
 
 import { useState, useEffect } from 'react'
 import { cardsService } from '../api/services'
 import { apiCache } from '../api/utils/cache'
+import { useAuth } from '../context/AuthContext'
 
-const CACHE_KEY = 'cards:statistics'
 const CACHE_TTL = 60000 // 60 seconds
 
 export function useStatistics() {
+  const { user } = useAuth()
+  // Scope cache key to the logged-in user to prevent cross-account data leaks
+  const CACHE_KEY = user?.id ? `cards:statistics:${user.id}` : null
+
   const [statistics, setStatistics] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (!CACHE_KEY) return
     let cancelled = false
 
     apiCache
@@ -48,9 +53,10 @@ export function useStatistics() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [CACHE_KEY])
 
   const reload = () => {
+    if (!CACHE_KEY) return
     apiCache.invalidate(CACHE_KEY)
     apiCache
       .get(CACHE_KEY, CACHE_TTL, () => cardsService.getStatistics())

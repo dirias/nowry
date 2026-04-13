@@ -21,19 +21,18 @@ export const DynamicThemeProvider = ({ children }) => {
   const { user } = useAuth()
   const { i18n } = useTranslation()
 
-  // Update theme when user changes
+  // Update theme when user changes.
+  // Preferences are stored under preferences.general.* in the backend.
   useEffect(() => {
-    if (user?.preferences) {
-      // Set theme color
-      if (user.preferences.theme_color) {
-        setThemeColor(user.preferences.theme_color)
-      }
+    const general = user?.preferences?.general
+    if (!general) return
 
-      // Set language
-      if (user.preferences.language && i18n.language !== user.preferences.language) {
-        console.log('🌐 Setting language to:', user.preferences.language)
-        i18n.changeLanguage(user.preferences.language)
-      }
+    if (general.theme_color) {
+      setThemeColor(general.theme_color)
+    }
+
+    if (general.language && i18n.language !== general.language) {
+      i18n.changeLanguage(general.language)
     }
   }, [user, i18n])
 
