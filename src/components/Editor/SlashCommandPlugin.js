@@ -3,6 +3,7 @@ import {
   $getSelection,
   $isRangeSelection,
   $createParagraphNode,
+  $createTextNode,
   $insertNodes,
   COMMAND_PRIORITY_HIGH,
   CONTROLLED_TEXT_INSERTION_COMMAND,
@@ -199,7 +200,7 @@ export default function SlashCommandPlugin() {
       icon: Table,
       aliases: ['table', 'grid'],
       execute: (editor) => {
-        editor.dispatchCommand(INSERT_TABLE_COMMAND, { columns: '2', rows: '2' })
+        editor.dispatchCommand(INSERT_TABLE_COMMAND, { columns: 2, rows: 2 })
       }
     },
     {
@@ -330,7 +331,7 @@ export default function SlashCommandPlugin() {
           const selection = $getSelection()
           if ($isRangeSelection(selection)) {
             const p = $createParagraphNode()
-            p.append($createParagraphNode().setTextContent(`📺 Video: ${url}`))
+            p.append($createTextNode(`📺 Video: ${url}`))
             selection.insertNodes([p])
           }
         })

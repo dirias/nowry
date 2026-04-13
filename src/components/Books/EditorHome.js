@@ -165,15 +165,16 @@ export default function EditorHome() {
     [id, bookName, pageSize, autoSaveEnabled]
   )
 
-  // Manual save that always executes (bypasses auto-save "no changes" check)
+  // Manual save always uses the latest content ref to avoid stale React state
   const handleManualSave = async () => {
     try {
+      const latestContent = latestContentRef.current || content
       console.log('Manual save triggered')
       console.log('Current pageSize state:', pageSize)
-      console.log('Current content length:', content?.length)
-      await handleSaveBook(content)
+      console.log('Current content length:', latestContent?.length)
+      await handleSaveBook(latestContent)
       // Update the auto-save baseline to prevent redundant saves
-      resetBaseline(content)
+      resetBaseline(latestContent)
     } catch (e) {
       console.error('Manual save failed:', e)
     }
@@ -195,8 +196,11 @@ export default function EditorHome() {
     }
   }
 
-  const handleContentChange = useCallback((newHtml) => {
-    setContent(newHtml)
+  const latestContentRef = useRef('')
+
+  const handleContentChange = useCallback((newContent) => {
+    latestContentRef.current = newContent
+    setContent(newContent)
   }, [])
 
   // Auto-Save Hook
@@ -239,11 +243,9 @@ export default function EditorHome() {
           setLoading(true)
         }
 
+        fetchedIdRef.current = id
         console.log(`🔗 Fetching book data for ID: ${id}`)
         const fullBook = await booksService.getById(id)
-
-        // Final check to ensure we didn't navigate away during fetch
-        if (fetchedIdRef.current === id) return
 
         setBook(fullBook)
         setBookName(fullBook.title)
@@ -262,9 +264,6 @@ export default function EditorHome() {
         const initialHtml = fullBook.full_content || ''
         setContent(initialHtml)
         resetBaseline(initialHtml)
-
-        // Mark as successfully fetched
-        fetchedIdRef.current = id
       } catch (e) {
         if (e.name === 'CanceledError' || e.name === 'AbortError') {
           console.log('Fetch aborted - user navigated away')
@@ -283,8 +282,10 @@ export default function EditorHome() {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }
+      fetchedIdRef.current = null
     }
-  }, [id, resetBaseline, book, isMobile, bookName, pageSize, autoSaveEnabled])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, resetBaseline])
 
   // Scroll to top when component mounts
   useEffect(() => {

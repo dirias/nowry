@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getSelection, $insertNodes, $createParagraphNode, createCommand } from 'lexical'
-import { TableNode, TableCellNode, TableRowNode } from '@lexical/table'
+import { $createTableNode, $createTableRowNode, $createTableCellNode } from '@lexical/table'
 import { useEffect } from 'react'
 
 // Command that can be imported and triggered from the toolbar
@@ -18,11 +18,12 @@ export default function TablePlugin() {
           const rows = payload?.rows || 2
           const columns = payload?.columns || 2
 
-          const table = new TableNode()
+          const table = $createTableNode()
           for (let i = 0; i < rows; i++) {
-            const row = new TableRowNode()
+            const row = $createTableRowNode()
             for (let j = 0; j < columns; j++) {
-              const cell = new TableCellNode()
+              const cell = $createTableCellNode(0)
+              cell.append($createParagraphNode())
               row.append(cell)
             }
             table.append(row)

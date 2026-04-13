@@ -1,7 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { COMMAND_PRIORITY_LOW, PASTE_COMMAND, DROP_COMMAND, $getSelection, $getRoot } from 'lexical'
-import { $createPageNode, $isPageNode } from '../../../nodes/PageNode'
 import imageCompression from 'browser-image-compression'
 import { $createImageNode } from '../../../nodes/ImageNode'
 import { imageService } from '../../../api/services/image.service'
@@ -19,6 +18,11 @@ export default function ImageUploadPlugin({ bookId, onUploadStart, onUploadCompl
   const handleImageUpload = useCallback(
     async (file) => {
       try {
+        if (!bookId) {
+          if (onUploadError) onUploadError('Cannot upload image: book not saved yet')
+          return
+        }
+
         if (!file) {
           if (onUploadError) onUploadError('No file provided')
           return
@@ -120,43 +124,18 @@ export default function ImageUploadPlugin({ bookId, onUploadStart, onUploadCompl
           const root = $getRoot()
           const selection = $getSelection()
 
-          // Helper: find the nearest PageNode for the current selection anchor
-          const findPageForSelection = () => {
-            if (!selection) return null
-            let node = selection.anchor.getNode()
-            while (node) {
-              if ($isPageNode(node)) return node
-              node = node.getParent()
-            }
-            return null
-          }
-
-          const pageFromSelection = findPageForSelection()
-
-          if (selection && pageFromSelection) {
-            // Normal path: selection is inside a page, so just insert there
+          if (selection) {
             selection.insertNodes([imageNode])
             return
           }
 
-          // Fallback: ensure we always insert inside a page, even if there is no selection
-          let targetPage = root.getChildren().find($isPageNode) || null
-          if (!targetPage) {
-            targetPage = $createPageNode()
-            root.append(targetPage)
-          } else if (root.getChildren().filter($isPageNode).length > 0) {
-            // Prefer the last page if there are multiple
-            const pages = root.getChildren().filter($isPageNode)
-            targetPage = pages[pages.length - 1]
-          }
-
-          const lastChild = targetPage.getLastChild()
+          // Fallback: flat insertion when there is no active selection
+          const lastChild = root.getLastChild()
           if (lastChild) {
             lastChild.insertAfter(imageNode)
           } else {
-            targetPage.append(imageNode)
+            root.append(imageNode)
           }
-          targetPage.selectEnd()
         })
 
         // Notify success

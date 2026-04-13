@@ -117,14 +117,13 @@ export default function TableActionMenuPlugin() {
             // Centered top position
             const editorElement = editor.getRootElement()
             if (editorElement) {
-              const editorRect = editorElement.getBoundingClientRect()
               const domNode = editor.getElementByKey(table.getKey())
 
               if (domNode) {
                 const tableRect = domNode.getBoundingClientRect()
                 setPosition({
-                  top: tableRect.top - editorRect.top - 45, // Above the table
-                  left: tableRect.left - editorRect.left + tableRect.width / 2 - 80 // Centered
+                  top: tableRect.top - 45, // Above the table, viewport-relative for fixed positioning
+                  left: tableRect.left + tableRect.width / 2 - 80 // Centered, viewport-relative
                 })
                 setIsHovering(true)
                 return
@@ -330,7 +329,7 @@ export default function TableActionMenuPlugin() {
       <Sheet
         variant='plain'
         sx={{
-          position: 'absolute',
+          position: 'fixed',
           top: position.top,
           left: position.left,
           zIndex: 10,
@@ -410,7 +409,7 @@ export default function TableActionMenuPlugin() {
         <Sheet
           ref={menuRef}
           sx={{
-            position: 'absolute',
+            position: 'fixed',
             top: position.top + 50,
             left: position.left,
             zIndex: 11,
@@ -511,7 +510,7 @@ export default function TableActionMenuPlugin() {
         <Sheet
           ref={colorMenuRef}
           sx={{
-            position: 'absolute',
+            position: 'fixed',
             top: position.top + 50,
             left: position.left + 80, // Offset to appear under bucket
             zIndex: 12,
@@ -548,6 +547,6 @@ export default function TableActionMenuPlugin() {
         </Sheet>
       )}
     </>,
-    editorElement.parentElement
+    document.body
   )
 }

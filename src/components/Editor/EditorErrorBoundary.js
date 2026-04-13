@@ -6,6 +6,7 @@ class EditorErrorBoundary extends React.Component {
   constructor(props) {
     super(props)
     this.state = { hasError: false, error: null }
+    this.handleReset = this.handleReset.bind(this)
   }
 
   static getDerivedStateFromError(error) {
@@ -24,10 +25,7 @@ class EditorErrorBoundary extends React.Component {
 
   handleReset() {
     this.setState({ hasError: false, error: null })
-    // Optionally reload the page or reset editor state
-    if (this.props.onReset) {
-      this.props.onReset()
-    }
+    if (this.props.onReset) this.props.onReset()
   }
 
   render() {

@@ -179,29 +179,35 @@ export default function NewsCarousel() {
     }
   }, [news, instanceRef])
 
-  // Sync preferences from AuthContext and handle cache clearing
+  // Refs that track the last-synced language and interests so we can detect
+  // real feed-affecting changes without comparing the entire preferences object
+  // (which would include favorite_news and incorrectly trigger a cache flush).
+  const lastLangRef = useRef(null)
+  const lastInterestsRef = useRef(null)
+
+  // Sync preferences from AuthContext and selectively clear the news cache
+  // only when the fields that affect the feed (language, interests) change.
   useEffect(() => {
-    const syncPreferences = async () => {
-      if (!user?.preferences?.general) return
+    if (!user?.preferences?.general) return
 
-      // If language or interests changed, ask the backend to clear its news cache
-      if (userPreferences) {
-        const oldPrefs = JSON.stringify(userPreferences)
-        const newPrefs = JSON.stringify(user.preferences?.general)
-        if (oldPrefs !== newPrefs) {
-          try {
-            await apiClient.delete('/news/cache/clear')
-          } catch {
-            // Non-critical: cache clear failure doesn't affect UX
-          }
-        }
-      }
+    const general = user.preferences.general
+    const newLang = general.language ?? null
+    const newInterests = JSON.stringify(general.interests ?? [])
 
-      // Preferences live under preferences.general in the backend
-      setUserPreferences(user.preferences?.general)
+    const feedChanged =
+      lastLangRef.current !== null && // skip on first mount
+      (lastLangRef.current !== newLang || lastInterestsRef.current !== newInterests)
+
+    if (feedChanged) {
+      // Fire-and-forget: failure is non-critical; the cache will expire naturally
+      apiClient.delete('/news/cache/clear').catch(() => {})
     }
-    syncPreferences()
-  }, [user, userPreferences])
+
+    lastLangRef.current = newLang
+    lastInterestsRef.current = newInterests
+
+    setUserPreferences(general)
+  }, [user])
 
   // Reset fetch ref when preferences change to allow re-fetching
   const prefInterests = JSON.stringify(userPreferences?.interests)

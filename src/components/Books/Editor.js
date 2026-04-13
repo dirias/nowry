@@ -8,6 +8,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { TablePlugin as LexicalTablePlugin } from '@lexical/react/LexicalTablePlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin'
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin'
@@ -30,7 +31,6 @@ import RegisterHorizontalRulePlugin from '../../plugin/RegisterHorizontalRulePlu
 import TablePlugin from '../Editor/plugins/TablePlugin'
 import TableActionMenuPlugin from '../Editor/plugins/TableActionMenuPlugin'
 import SlashCommandPlugin from '../Editor/SlashCommandPlugin'
-import WordCountPlugin from '../Editor/WordCountPlugin'
 import FlowContentPlugin from '../Editor/plugins/FlowContentPlugin'
 import TrailingParagraphPlugin from '../Editor/plugins/TrailingParagraphPlugin'
 import ImageUploadPlugin from '../Editor/plugins/ImageUploadPlugin'
@@ -111,33 +111,17 @@ const EditorTheme = {
  * - Enables future collaboration features
  */
 function EditorSyncPlugin({ onContentChange }) {
-  const [editor] = useLexicalComposerContext()
   const previousContent = useRef('')
-  const isUpdating = useRef(false)
 
   return (
     <OnChangePlugin
       onChange={(editorState) => {
-        // Prevent re-entrant calls
-        if (isUpdating.current) return
-
         editorState.read(() => {
-          // Get full JSON from editor state (already flat - no PageNodes)
           const fullJson = editorState.toJSON()
-
-          // Convert to string for comparison
           const contentString = JSON.stringify(fullJson)
-
-          // Only trigger if content actually changed
           if (contentString !== previousContent.current) {
             previousContent.current = contentString
-            isUpdating.current = true
-
-            // Use setTimeout to break out of current event loop
-            setTimeout(() => {
-              onContentChange(fullJson)
-              isUpdating.current = false
-            }, 0)
+            onContentChange(fullJson)
           }
         })
       }}
@@ -236,7 +220,14 @@ export default function Editor({
   // Content is now stored as JSON (Content-First approach)
   const [internalContent, setInternalContent] = useState(initialContent || '')
 
+  // hasMounted prevents onSave from firing on the initial render (which would
+  // incorrectly mark the document as UNSAVED and trigger a spurious auto-save).
+  const hasMounted = useRef(false)
   useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true
+      return
+    }
     if (onSave) {
       onSave(internalContent)
     }
@@ -520,7 +511,7 @@ export default function Editor({
           <FocusReportPlugin onFocus={onFocus} />
           <EditorEditablePlugin isReadOnly={isReadOnly} />
           <EditorSyncPlugin onContentChange={setInternalContent} />
-          <ImageUploadPlugin bookId={book?._id} onUploadComplete={onImageUpload} />
+          <ImageUploadPlugin bookId={book?._id} onUploadComplete={onImageUpload} onUploadError={(msg) => setError(msg)} />
           <CodePastePlugin />
           <HistoryPlugin />
           {/* <AutoFocusPlugin /> */}
@@ -528,13 +519,13 @@ export default function Editor({
           <RegisterHorizontalRulePlugin />
           <SlashCommandPlugin />
           <ExitListPlugin />
+          <TabIndentationPlugin />
           <LinkPlugin />
           <LinkPreviewPlugin />
           <AutoLinkPlugin matchers={MATCHERS} />
           <TablePlugin />
           <LexicalTablePlugin />
           <TableActionMenuPlugin />
-          <WordCountPlugin />
           <FlowContentPlugin onTOCChange={setTOC} onProgressChange={setReadingStats} />
           <TrailingParagraphPlugin />
           <ColumnPlugin />

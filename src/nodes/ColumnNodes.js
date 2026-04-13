@@ -119,7 +119,7 @@ export class ColumnNode extends ElementNode {
     const dom = document.createElement('div')
     dom.className = 'editor-column'
     dom.style.minHeight = '100px'
-    dom.style.borderRight = '1px solid #e5e7eb'
+    dom.style.borderRight = '1px solid var(--joy-palette-divider)'
     dom.style.paddingRight = '0.75rem'
     return dom
   }
@@ -150,7 +150,7 @@ export class ColumnNode extends ElementNode {
     const element = document.createElement('div')
     element.className = 'editor-column'
     element.style.minHeight = '100px'
-    element.style.borderRight = '1px solid #e5e7eb'
+    element.style.borderRight = '1px solid var(--joy-palette-divider)'
     element.style.paddingRight = '0.75rem'
     return { element }
   }

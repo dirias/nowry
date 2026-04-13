@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getRoot, $createParagraphNode, $isDecoratorNode, $getSelection, $isRangeSelection } from 'lexical'
 import { $isCodeNode } from '@lexical/code'
@@ -16,6 +16,7 @@ import { COMMAND_PRIORITY_LOW, KEY_ENTER_COMMAND } from 'lexical'
 
 export default function TrailingParagraphPlugin() {
   const [editor] = useLexicalComposerContext()
+  const timerRef = useRef(null)
 
   useEffect(() => {
     const ensureTrailingParagraph = () => {
@@ -64,8 +65,9 @@ export default function TrailingParagraphPlugin() {
     // Run on every content change
     const unregister = editor.registerUpdateListener(({ editorState, dirtyElements, dirtyLeaves }) => {
       if (dirtyElements.size > 0 || dirtyLeaves.size > 0) {
-        // Small delay to ensure DOM is settled
-        setTimeout(ensureTrailingParagraph, 50)
+        // Debounce — cancel any pending timer before scheduling a new one
+        clearTimeout(timerRef.current)
+        timerRef.current = setTimeout(ensureTrailingParagraph, 50)
       }
     })
 
@@ -74,6 +76,7 @@ export default function TrailingParagraphPlugin() {
 
     return () => {
       unregister()
+      clearTimeout(timerRef.current)
     }
   }, [editor])
 

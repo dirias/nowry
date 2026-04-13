@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getRoot } from 'lexical'
 import { $isHeadingNode } from '@lexical/rich-text'
@@ -12,6 +12,7 @@ import { $isHeadingNode } from '@lexical/rich-text'
 export default function FlowContentPlugin({ onTOCChange, onProgressChange }) {
   const [editor] = useLexicalComposerContext()
   const [updateCounter, setUpdateCounter] = useState(0)
+  const debounceTimer = useRef(null)
 
   useEffect(() => {
     console.log('📚 FlowContentPlugin initialized - No pagination, just flow!')
@@ -71,8 +72,9 @@ export default function FlowContentPlugin({ onTOCChange, onProgressChange }) {
     // Listen for content changes
     const unregister = editor.registerUpdateListener(({ editorState, dirtyElements, dirtyLeaves }) => {
       if (dirtyElements.size > 0 || dirtyLeaves.size > 0) {
-        // Debounce updates
-        setTimeout(() => {
+        // Debounce updates — cancel any pending timer before scheduling a new one
+        clearTimeout(debounceTimer.current)
+        debounceTimer.current = setTimeout(() => {
           generateTOC()
           calculateProgress()
         }, 300)
@@ -81,6 +83,7 @@ export default function FlowContentPlugin({ onTOCChange, onProgressChange }) {
 
     return () => {
       unregister()
+      clearTimeout(debounceTimer.current)
     }
   }, [editor, onTOCChange, onProgressChange, updateCounter])
 

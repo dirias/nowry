@@ -31,8 +31,8 @@ export default function LinkPreviewPlugin() {
           const rect = range.getBoundingClientRect()
 
           setPosition({
-            top: rect.bottom + window.scrollY + 10,
-            left: rect.left + window.scrollX + rect.width / 2
+            top: rect.bottom + 10,
+            left: rect.left + rect.width / 2
           })
           setIsLink(true)
           return
@@ -95,7 +95,7 @@ export default function LinkPreviewPlugin() {
       ref={menuRef}
       variant='elevated'
       sx={{
-        position: 'absolute',
+        position: 'fixed',
         top: position.top,
         left: position.left,
         transform: 'translateX(-50%)',

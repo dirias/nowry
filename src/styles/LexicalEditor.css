@@ -250,8 +250,40 @@ ol.editor-list-ol {
   padding-left: 0.5em;
 }
 
+/*
+ * Lexical nests lists by placing a <ul>/<ol> *inside* a <li>.
+ * That <li> carries .editor-nested-listitem.
+ * We must suppress its own marker so only the inner list's markers show,
+ * otherwise the parent <li> marker and the child list markers stack
+ * producing the "○ ○ ○" artifact.
+ */
 .editor-nested-listitem {
+  list-style-type: none;
+  /* Remove any indentation Lexical or browser defaults add to this wrapper
+     <li> — the nested <ul>/<ol> child handles its own padding. */
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+/* Level-2 unordered: circle bullets */
+.editor-nested-listitem > ul.editor-list-ul {
   list-style-type: circle;
+  padding-left: 1.5em;
+  margin: 0;
+}
+
+/* Level-2 ordered: keeps decimal numbering */
+.editor-nested-listitem > ol.editor-list-ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin: 0;
+}
+
+/* Level-3+ unordered: square bullets */
+.editor-nested-listitem > ul.editor-list-ul .editor-nested-listitem > ul.editor-list-ul {
+  list-style-type: square;
+  padding-left: 1.5em;
+  margin: 0;
 }
 
 /* ====== Quotes - Elegant style ====== */
