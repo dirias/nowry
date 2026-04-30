@@ -1,0 +1,72 @@
+# Frontend Deploy — Nowry React App
+#
+# Triggers on push to main. Runs validation (lint, build, test) before
+# Vercel's GitHub integration automatically deploys to production.
+#
+# Required GitHub Secrets (Settings → Secrets and Variables → Actions):
+#   REACT_APP_SENTRY_DSN  — Sentry frontend DSN (from Sentry project settings)
+#   VERCEL_TOKEN          — Vercel API token (only needed if NOT using Vercel GitHub integration)
+#
+# Deployment note: If Vercel GitHub integration is configured (recommended),
+# Vercel auto-deploys when this workflow completes — no additional step needed.
+# If not configured, uncomment the deploy job below and set VERCEL_TOKEN secret.
+
+name: Frontend Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Validate & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true  # Lint warnings do not block deployment
+
+      - name: Build
+        run: npm run build
+        env:
+          REACT_APP_SENTRY_DSN: ${{ secrets.REACT_APP_SENTRY_DSN }}
+          REACT_APP_ENVIRONMENT: production
+          # CI=false prevents react-scripts from treating warnings as errors
+          CI: false
+
+      - name: Test
+        run: npm test -- --watchAll=false --passWithNoTests
+        continue-on-error: true  # Tests are advisory in Phase 1 (no test suite yet)
+
+  # Vercel deployment is automatic via GitHub integration.
+  # Uncomment this job only if Vercel GitHub integration is NOT configured:
+  # deploy:
+  #   name: Deploy to Vercel
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Deploy to Vercel (production)
+  #       uses: amondnet/vercel-action@v25
+  #       with:
+  #         vercel-token: ${{ secrets.VERCEL_TOKEN }}
+  #         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+  #         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+  #         vercel-args: '--prod'
