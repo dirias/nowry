@@ -248,7 +248,7 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
                           p: 1.5,
                           borderRadius: 'md',
                           borderLeft: '3px solid',
-                          borderColor: 'primary.500'
+                          borderColor: 'primary.solidBg'
                         }}
                       >
                         {q.explanation}

@@ -42,7 +42,7 @@ const TableGridPicker = () => {
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Typography level='body-xs' fontWeight='bold' textAlign='center' textColor='primary.500'>
+          <Typography level='body-xs' fontWeight='bold' textAlign='center' textColor='primary.plainColor'>
             {hoveredSize.rows > 0 ? `${hoveredSize.rows} x ${hoveredSize.cols} Table` : 'Select size'}
           </Typography>
 
@@ -69,14 +69,14 @@ const TableGridPicker = () => {
                     width: 16,
                     height: 16,
                     border: '1px solid',
-                    borderColor: isHighlighted ? 'primary.500' : 'neutral.outlinedBorder',
-                    bgcolor: isHighlighted ? 'primary.100' : 'transparent',
+                    borderColor: isHighlighted ? 'primary.solidBg' : 'neutral.outlinedBorder',
+                    bgcolor: isHighlighted ? 'primary.softHoverBg' : 'transparent',
                     borderRadius: '2px',
                     cursor: 'pointer',
                     transition: 'all 0.1s ease',
                     '&:hover': {
-                      borderColor: 'primary.500',
-                      bgcolor: 'primary.200'
+                      borderColor: 'primary.solidBg',
+                      bgcolor: 'primary.softActiveBg'
                     }
                   }}
                 />

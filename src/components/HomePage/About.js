@@ -50,7 +50,7 @@ const About = () => {
     <Sheet
       sx={{
         minHeight: '100vh',
-        backgroundColor: isDark ? 'neutral.900' : 'background.body'
+        backgroundColor: isDark ? 'background.level2' : 'background.body'
       }}
     >
       <Container maxWidth='lg'>
@@ -70,7 +70,7 @@ const About = () => {
               letterSpacing: -2,
               lineHeight: 1.1,
               mb: 3,
-              color: isDark ? 'primary.300' : 'primary.700'
+              color: 'primary.plainColor'
             }}
           >
             {t('about.title')}
@@ -105,7 +105,7 @@ const About = () => {
                 }
               }}
             >
-              <RocketLaunchRounded sx={{ fontSize: 48, color: 'primary.500', mb: 2 }} />
+              <RocketLaunchRounded sx={{ fontSize: 48, color: 'primary.solidBg', mb: 2 }} />
               <Typography level='h3' fontWeight={700} mb={2}>
                 {t('about.mission.title')}
               </Typography>
@@ -203,7 +203,7 @@ const About = () => {
               p: 6
             }}
           >
-            <FavoriteBorder sx={{ fontSize: 60, color: 'primary.500', mb: 2 }} />
+            <FavoriteBorder sx={{ fontSize: 60, color: 'primary.solidBg', mb: 2 }} />
             <Typography level='h3' fontWeight={700} mb={2}>
               {t('about.cta.title')}
             </Typography>

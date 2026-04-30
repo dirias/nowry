@@ -148,12 +148,12 @@ const PageThumbnail = memo(
             mb: 1,
             cursor: 'pointer',
             border: isActive ? '2px solid' : '1px solid',
-            borderColor: isActive ? 'primary.500' : 'neutral.outlinedBorder',
+            borderColor: isActive ? 'primary.solidBg' : 'neutral.outlinedBorder',
             boxShadow: isActive ? 'md' : 'xs',
             transition: 'all 0.2s ease',
             overflow: 'hidden',
             '&:hover': {
-              borderColor: isActive ? 'primary.500' : 'primary.300',
+              borderColor: isActive ? 'primary.solidBg' : 'primary.outlinedBorder',
               transform: 'translateY(-2px)',
               boxShadow: 'md'
             }
@@ -220,7 +220,7 @@ const PageThumbnail = memo(
             </Typography>
           </Box>
         </Box>
-        <Typography level='body-xs' textAlign='center' sx={{ color: isActive ? 'primary.600' : 'text.tertiary' }}>
+        <Typography level='body-xs' textAlign='center' sx={{ color: isActive ? 'primary.solidHoverBg' : 'text.tertiary' }}>
           Page {index + 1}
         </Typography>
       </Box>

@@ -221,10 +221,10 @@ export default function SmartNavigation({ toc = [], readingTime = 0, bookTitle =
                     pl: 2 + heading.indent * 2,
                     py: 1.5,
                     borderLeft: heading.level === 'h1' ? '3px solid' : 'none',
-                    borderColor: 'primary.500',
+                    borderColor: 'primary.solidBg',
                     '&:hover': {
                       background: 'background.level1',
-                      borderLeftColor: 'primary.600'
+                      borderLeftColor: 'primary.solidHoverBg'
                     }
                   }}
                 >

@@ -176,7 +176,7 @@ export default function BugDashboard() {
                       sx={{
                         cursor: 'pointer',
                         fontWeight: 500,
-                        '&:hover': { textDecoration: 'underline', color: 'primary.500' }
+                        '&:hover': { textDecoration: 'underline', color: 'primary.plainColor' }
                       }}
                       onClick={() => setSelectedBug(bug)}
                     >

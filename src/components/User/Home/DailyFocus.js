@@ -123,7 +123,7 @@ const DailyFocus = () => {
         }}
       >
         <Box>
-          <Typography level='body-sm' sx={{ color: 'primary.700', fontWeight: '500', mb: 0.5 }}>
+          <Typography level='body-sm' sx={{ color: 'primary.solidHoverBg', fontWeight: '500', mb: 0.5 }}>
             {t('dashboard.dailyFocus.reviewToday')}
           </Typography>
           <Typography level='title-md' sx={{ fontWeight: 'bold' }}>

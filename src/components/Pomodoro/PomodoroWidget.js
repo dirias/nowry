@@ -25,8 +25,8 @@ const PomodoroWidget = () => {
   }
 
   const getModeColor = () => {
-    if (mode === 'work') return 'primary.500'
-    return 'success.500'
+    if (mode === 'work') return 'primary.solidBg'
+    return 'success.solidBg'
   }
 
   return (

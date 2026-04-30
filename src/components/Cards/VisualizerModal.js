@@ -300,7 +300,7 @@ export default function VisualizerModal({ open, onClose, text }) {
               <MermaidChart code={result.mermaid_code} />
             </Box>
 
-            <Box sx={{ bgcolor: 'primary.50', p: 2, borderRadius: 'md', borderLeft: '4px solid', borderColor: 'primary.500' }}>
+            <Box sx={{ bgcolor: 'primary.softBg', p: 2, borderRadius: 'md', borderLeft: '4px solid', borderColor: 'primary.solidBg' }}>
               <Typography level='title-sm' color='primary'>
                 Explanation
               </Typography>

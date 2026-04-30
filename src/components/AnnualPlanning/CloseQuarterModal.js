@@ -214,7 +214,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
               </Typography>
               <Stack spacing={4}>
                 <Box>
-                  <Typography level='title-sm' sx={{ mb: 1, color: 'success.600' }}>
+                  <Typography level='title-sm' sx={{ mb: 1, color: 'success.solidHoverBg' }}>
                     What were your biggest wins this quarter?
                   </Typography>
                   <Textarea
@@ -236,7 +236,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
                   />
                 </Box>
                 <Box>
-                  <Typography level='title-sm' sx={{ mb: 1, color: 'primary.600' }}>
+                  <Typography level='title-sm' sx={{ mb: 1, color: 'primary.solidHoverBg' }}>
                     What is your main focus for next quarter?
                   </Typography>
                   <Textarea

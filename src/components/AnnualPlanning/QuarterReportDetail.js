@@ -83,7 +83,7 @@ const QuarterReportDetail = ({
                 </Typography>
               </Card>
               <Card variant='outlined' sx={{ flex: 1, bgcolor: 'background.surface' }}>
-                <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'primary.500', mb: 1 }}>
+                <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'primary.plainColor', mb: 1 }}>
                   Next Focus
                 </Typography>
                 <Typography level='body-md' sx={{ fontStyle: 'italic', color: 'text.secondary' }}>

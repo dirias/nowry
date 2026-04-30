@@ -818,7 +818,7 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
               </Chip>
             )}
             <Box sx={{ flex: 1 }} />
-            <OpenInNew sx={{ fontSize: { xs: 14, md: 16 }, color: 'primary.500' }} />
+            <OpenInNew sx={{ fontSize: { xs: 14, md: 16 }, color: 'primary.plainColor' }} />
           </Stack>
         )}
       </CardContent>

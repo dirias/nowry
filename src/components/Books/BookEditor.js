@@ -295,8 +295,8 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                       flexDirection: 'column',
                       transition: 'border-color 0.2s, box-shadow 0.2s',
                       '&:focus-within': {
-                        borderColor: 'primary.500',
-                        boxShadow: 'inset 0 0 0 1px var(--joy-palette-primary-500)'
+                        borderColor: 'primary.solidBg',
+                        boxShadow: 'inset 0 0 0 1px var(--joy-palette-primary-solidBg)'
                       }
                     }}
                   >

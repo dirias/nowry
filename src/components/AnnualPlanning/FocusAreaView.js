@@ -1052,7 +1052,7 @@ const FocusAreaView = () => {
           </Alert>
         ) : !isQuarterClosed ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography level='title-sm' sx={{ color: 'primary.600' }}>
+            <Typography level='title-sm' sx={{ color: 'primary.solidHoverBg' }}>
               🚀 <b>{getDaysLeftInQuarter(quarterFilter)} days left</b> to crush your Q{quarterFilter} goals!
             </Typography>
           </Box>
@@ -1193,11 +1193,11 @@ const FocusAreaView = () => {
           {yearlyObjectives.map((objective) => (
             <Box key={objective._id}>
               {/* Objective Header Card */}
-              <Card variant='outlined' sx={{ mb: 2, borderColor: 'primary.200', bgcolor: 'primary.50' }}>
+              <Card variant='outlined' sx={{ mb: 2, borderColor: 'primary.outlinedBorder', bgcolor: 'primary.softBg' }}>
                 <CardContent>
                   <Stack direction='row' justifyContent='space-between' alignItems='center'>
                     <Box>
-                      <Typography level='body-xs' fontWeight={700} textColor='primary.600' letterSpacing='1px' mb={0.5}>
+                      <Typography level='body-xs' fontWeight={700} textColor='primary.solidHoverBg' letterSpacing='1px' mb={0.5}>
                         YEARLY OBJECTIVE
                       </Typography>
                       <Typography level='h4' fontWeight={600}>

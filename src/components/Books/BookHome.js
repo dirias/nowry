@@ -449,7 +449,7 @@ export default function BookHome() {
             px: 4,
             cursor: 'pointer',
             borderStyle: 'dashed',
-            borderColor: isDragActive ? 'primary.500' : 'neutral.outlinedBorder',
+            borderColor: isDragActive ? 'primary.solidBg' : 'neutral.outlinedBorder',
             backgroundColor: isDragActive ? 'primary.softBg' : 'background.surface',
             transition: 'all 0.2s ease',
             display: 'flex',
@@ -472,7 +472,7 @@ export default function BookHome() {
               mb: 3,
               color: 'text.tertiary',
               transition: 'transform 0.2s',
-              ...(isDragActive && { transform: 'scale(1.1)', bgcolor: 'primary.softBg', color: 'primary.500' })
+              ...(isDragActive && { transform: 'scale(1.1)', bgcolor: 'primary.softBg', color: 'primary.plainColor' })
             }}
           >
             <CloudUploadIcon sx={{ fontSize: 40 }} />
