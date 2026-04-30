@@ -42,6 +42,11 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
   const autosaveTimer = useRef(null)
   const viewportRef = useRef({ x: 0, y: 0, zoom: 1 })
 
+  // ── Cleanup autosave timer on unmount ─────────────────────────────────
+  useEffect(() => {
+    return () => clearTimeout(autosaveTimer.current)
+  }, [])
+
   // ── Auto-save (debounced 1.5s) ────────────────────────────────────────
   const scheduleSave = useCallback(() => {
     clearTimeout(autosaveTimer.current)
@@ -240,7 +245,8 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
           data: {
             ...n.data,
             onUpdate: (updates) => updateNodeData(n.id, updates),
-            onDelete: () => deleteNode(n.id)
+            onDelete: () => deleteNode(n.id),
+            onChange: (value) => updateNodeData(n.id, { label: value })
           }
         }))}
         edges={edges}
@@ -254,8 +260,6 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
           scheduleSave()
         }}
         nodeTypes={nodeTypes}
-        fitView={nodes.length > 0}
-        fitViewOptions={{ maxZoom: 1, minZoom: 0.2, padding: 0.2 }}
         defaultViewport={viewportRef.current}
         deleteKeyCode='Delete'
         multiSelectionKeyCode='Shift'

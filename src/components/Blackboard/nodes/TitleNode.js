@@ -31,7 +31,7 @@ export default function TitleNode({ data, selected }) {
       />
 
       <textarea
-        defaultValue={data.label}
+        value={data.label ?? ''}
         onChange={handleChange}
         placeholder='Heading...'
         className='nodrag'
