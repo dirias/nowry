@@ -890,7 +890,9 @@
       "optionPlaceholder": "Option {{number}}",
       "explanationPlaceholder": "Explain why this is the correct answer...",
       "tagsPlaceholder": "geography, capitals, france",
-      "deckPlaceholder": "Select a deck (optional)"
+      "deckPlaceholder": "Select a deck (optional)",
+      "saveChanges": "Save Changes",
+      "createButton": "Create Quiz Question"
     },
     "flashcard": {
       "frontPlaceholder": "What is the capital of France?",
@@ -899,7 +901,13 @@
       "deckPlaceholder": "Assign to deck (optional)"
     },
     "visual": {
-      "explanationPlaceholder": "Additional explanation..."
+      "explanationPlaceholder": "Additional explanation...",
+      "editTitle": "Edit Visual Diagram",
+      "createTitle": "Create Visual Diagram",
+      "saveChanges": "Save Changes",
+      "chipLabel": "Visual",
+      "diagramTitleLabel": "Diagram Title",
+      "deckPlaceholder": "Select a deck (optional)"
     },
     "dueToday": "Due Today",
     "studyStreak": "Study Streak",
@@ -1208,7 +1216,12 @@
       "lessonsPlaceholder": "What did you learn?"
     },
     "priorityDialog": {
-      "searchPlaceholder": "Select goal, task, or routine..."
+      "searchPlaceholder": "Select goal, task, or routine...",
+      "editTitle": "Edit Annual Priority",
+      "addTitle": "Add Annual Priority",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "addPriority": "Add Priority"
     },
     "dailyRoutine": {
       "title": "Daily Routine Planner",
