@@ -225,7 +225,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
                   />
                 </Box>
                 <Box>
-                  <Typography level='title-sm' sx={{ mb: 1, color: 'danger.600' }}>
+                  <Typography level='title-sm' sx={{ mb: 1, color: 'danger.plainColor' }}>
                     What were your biggest challenges?
                   </Typography>
                   <Textarea

@@ -67,7 +67,7 @@ const QuarterReportDetail = ({
             </Typography>
             <Stack spacing={2} direction={{ xs: 'column', md: 'row' }}>
               <Card variant='outlined' sx={{ flex: 1, bgcolor: 'background.surface' }}>
-                <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'success.500', mb: 1 }}>
+                <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'success.plainColor', mb: 1 }}>
                   Biggest Wins
                 </Typography>
                 <Typography level='body-md' sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
@@ -75,7 +75,7 @@ const QuarterReportDetail = ({
                 </Typography>
               </Card>
               <Card variant='outlined' sx={{ flex: 1, bgcolor: 'background.surface' }}>
-                <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'danger.500', mb: 1 }}>
+                <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'danger.plainColor', mb: 1 }}>
                   Challenges
                 </Typography>
                 <Typography level='body-md' sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
