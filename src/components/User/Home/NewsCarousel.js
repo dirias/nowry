@@ -735,14 +735,14 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
               top: 8,
               right: 8,
               zIndex: 10,
-              backgroundColor: isFavorite ? 'warning.500' : 'rgba(0, 0, 0, 0.5)',
+              backgroundColor: isFavorite ? 'warning.solidBg' : 'background.level2',
               backdropFilter: 'blur(8px)',
               transition: 'all 0.2s',
               // Always visible on mobile (xs/sm), hover-based on desktop (md+)
               opacity: { xs: 1, md: isHovering || isFavorite ? 1 : 0 },
               transform: { xs: 'scale(1)', md: isHovering || isFavorite ? 'scale(1)' : 'scale(0.8)' },
               '&:hover': {
-                backgroundColor: isFavorite ? 'warning.600' : 'rgba(0, 0, 0, 0.7)',
+                backgroundColor: isFavorite ? 'warning.solidHoverBg' : 'background.level3',
                 transform: 'scale(1.1)'
               }
             }}

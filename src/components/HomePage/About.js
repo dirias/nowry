@@ -128,7 +128,7 @@ const About = () => {
                 }
               }}
             >
-              <VisibilityRounded sx={{ fontSize: 48, color: 'success.500', mb: 2 }} />
+              <VisibilityRounded sx={{ fontSize: 48, color: 'success.plainColor', mb: 2 }} />
               <Typography level='h3' fontWeight={700} mb={2}>
                 {t('about.vision.title')}
               </Typography>
