@@ -50,6 +50,7 @@ import { useAuth } from '../../context/AuthContext'
 import GoalDialog from './GoalDialog'
 import PriorityList from './PriorityList'
 import CloseQuarterModal from './CloseQuarterModal'
+import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 
 const FocusAreaView = () => {
   const { id } = useParams()
@@ -71,6 +72,8 @@ const FocusAreaView = () => {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState(null)
+  const [deletingGoal, setDeletingGoal] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   // Expanded Activities State
   const [expandedGoals, setExpandedGoals] = useState(new Set())
@@ -134,10 +137,19 @@ const FocusAreaView = () => {
     setDialogOpen(true)
   }
 
-  const handleDeleteGoal = async (goalId) => {
-    if (window.confirm('Delete this goal?')) {
-      await annualPlanningService.deleteGoal(goalId)
+  const handleDeleteGoal = (goal) => {
+    setDeletingGoal(goal)
+  }
+
+  const confirmDeleteGoal = async () => {
+    if (!deletingGoal) return
+    setDeleteLoading(true)
+    try {
+      await annualPlanningService.deleteGoal(deletingGoal._id)
       fetchData()
+    } finally {
+      setDeleteLoading(false)
+      setDeletingGoal(null)
     }
   }
 
@@ -553,7 +565,7 @@ const FocusAreaView = () => {
                   color='danger'
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleDeleteGoal(goal._id)
+                    handleDeleteGoal(goal)
                   }}
                   sx={{
                     transition: 'all 0.2s',
@@ -887,7 +899,7 @@ const FocusAreaView = () => {
           <IconButton size='sm' variant='plain' onClick={() => handleEditGoal(goal)}>
             <EditIcon fontSize='small' />
           </IconButton>
-          <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal._id)}>
+          <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal)}>
             <DeleteIcon fontSize='small' />
           </IconButton>
         </Stack>
@@ -1201,7 +1213,7 @@ const FocusAreaView = () => {
                       <IconButton size='sm' onClick={() => handleEditGoal(objective)}>
                         <EditIcon />
                       </IconButton>
-                      <IconButton size='sm' color='danger' onClick={() => handleDeleteGoal(objective._id)}>
+                      <IconButton size='sm' color='danger' onClick={() => handleDeleteGoal(objective)}>
                         <DeleteIcon />
                       </IconButton>
                     </Stack>
@@ -1354,6 +1366,15 @@ const FocusAreaView = () => {
           </DialogContent>
         </ModalDialog>
       </Modal>
+
+      <DeleteConfirmationModal
+        open={!!deletingGoal}
+        onClose={() => setDeletingGoal(null)}
+        onConfirm={confirmDeleteGoal}
+        loading={deleteLoading}
+        title={t('annualPlanning.goal.deleteConfirm.title')}
+        description={t('annualPlanning.goal.deleteConfirm.description')}
+      />
 
       {showCloseModal && (
         <CloseQuarterModal

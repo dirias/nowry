@@ -11,7 +11,8 @@
     "profile": "Profil",
     "logout": "Abmelden",
     "pomodoro": "Pomodoro-Timer",
-    "toggleTheme": "Thema wechseln"
+    "toggleTheme": "Thema wechseln",
+    "studyBuddy": "Lernbegleiter"
   },
   "news": {
     "title": "Aktuelle Nachrichten",
@@ -1034,5 +1035,223 @@
       "cta": "Einrichtung abschließen",
       "dismiss": "Schließen"
     }
+  },
+  "pet": {
+    "stage": {
+      "1": {
+        "name": "Funke"
+      },
+      "2": {
+        "name": "Geist"
+      },
+      "3": {
+        "name": "Späher"
+      },
+      "4": {
+        "name": "Weiser"
+      },
+      "5": {
+        "name": "Orakel"
+      },
+      "6": {
+        "name": "Leuchte"
+      }
+    },
+    "levelUp": {
+      "reached": "Du hast Level {{level}} erreicht",
+      "dismiss": "Tippen zum Schließen"
+    }
+  },
+  "agent": {
+    "defaultName": "Lernbegleiter",
+    "welcomeMessage": "Hallo! 👋 Ich bin {{petName}}.",
+    "tabs": {
+      "personality": "Persönlichkeit",
+      "companion": "Begleiter",
+      "interventions": "Eingriffe"
+    },
+    "settings": {
+      "interventions": {
+        "requiresNudging": "Aktiviere proaktive Erinnerungen im Tab 'Persönlichkeit', um Eingriffe zu konfigurieren.",
+        "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+        "frequency": {
+          "sectionTitle": "Häufigkeit der Eingriffe",
+          "sectionDesc": "Wie oft dein Begleiter dich mit Nachrichten unterbricht.",
+          "conservative": "Konservativ",
+          "conservativeDesc": "Höchstens 1 Nachricht pro Sitzung. 20 Minuten Ruhezeit nach dem Schließen.",
+          "balanced": "Ausgewogen",
+          "balancedDesc": "Höchstens 2 Nachrichten pro Sitzung. 10 Minuten Ruhezeit nach dem Schließen.",
+          "frequent": "Häufig",
+          "frequentDesc": "Höchstens 4 Nachrichten pro Sitzung. 3 Minuten Ruhezeit nach dem Schließen."
+        },
+        "focusMode": {
+          "title": "Fokusmodus",
+          "label": "Während Lernsitzungen schweigen",
+          "desc": "Unterdrückt Falsch-Antwort-Nachrichten während des aktiven Lernens. Sitzungszusammenfassungen erscheinen weiterhin am Ende."
+        },
+        "types": {
+          "sectionTitle": "Nachrichtentypen",
+          "sectionDesc": "Deaktiviere bestimmte Nachrichtenarten von deinem Begleiter.",
+          "wrongAnswer": "Lehrmomente",
+          "wrongAnswerDesc": "Eine kurze Erklärung, nachdem du eine Karte falsch beantwortet hast.",
+          "sessionSummary": "Sitzungszusammenfassungen",
+          "sessionSummaryDesc": "Eine Diagnosenachricht am Ende jeder Lernsitzung.",
+          "preSession": "Vorbereitung vor der Sitzung",
+          "preSessionDesc": "Eine kurze Orientierung, bevor eine Lernsitzung beginnt.",
+          "reEngagement": "Wiedereinstiegs-Erinnerungen",
+          "reEngagementDesc": "Eine Nachricht, wenn sich Karten in deinen Stapeln angesammelt haben.",
+          "streakMilestone": "Streak-Meilensteine",
+          "streakMilestoneDesc": "Eine Nachricht, wenn du 7, 14, 30, 60 oder 100 aufeinanderfolgende Lerntage erreichst."
+        }
+      },
+      "personality": {
+        "replyLength": {
+          "title": "Antwortlänge",
+          "desc": "Steuere, wie viel dein Begleiter pro Antwort schreibt."
+        },
+        "tone": {
+          "title": "Persönlichkeit & Ton",
+          "desc": "Wähle, wie dein Begleiter mit dir kommunizieren soll."
+        },
+        "knowledge": {
+          "title": "Wissenszugriff",
+          "desc": "Lass deinen Begleiter deine Bibliothek, Decks und Ziele lesen. Deine Daten werden nie extern gesendet.",
+          "libraryToggleLabel": "Zugriff auf meine Bibliothek & Decks erlauben",
+          "libraryToggleDesc": "Aktiviert die RAG-Pipeline (nur Lesen).",
+          "nudgesLabel": "Proaktive Lern-Erinnerungen",
+          "nudgesDesc": "Begrüßt dich im Dashboard mit einem Hinweis bei fälligen Karten.",
+          "nudgesRequires": " Erfordert Wissenszugriff.",
+          "unlockAlert": "Aktiviere den Wissenszugriff für intelligentere Antworten und proaktive Erinnerungen.",
+          "roamingLabel": "Wandernder Begleiter",
+          "roamingDesc": "Dein Begleiter bewegt sich beim Lernen über den Bildschirm."
+        },
+        "saved": "Gespeichert",
+        "preview": {
+          "title": "Live-Vorschau",
+          "caption": "Die Vorschau aktualisiert sich bei Änderungen.",
+          "captionSave": "Änderungen werden automatisch gespeichert."
+        },
+        "conciseness": {
+          "concise": {
+            "label": "Knapp",
+            "description": "1–2 Sätze. Direkt auf den Punkt."
+          },
+          "balanced": {
+            "label": "Ausgewogen",
+            "description": "Vollständige Antworten ohne Füllwörter."
+          },
+          "detailed": {
+            "label": "Ausführlich",
+            "description": "Gründliche Erklärungen mit Beispielen."
+          }
+        },
+        "toneOptions": {
+          "friendly": {
+            "label": "Freundlich",
+            "description": "Warm, ermutigend und gesprächig."
+          },
+          "professional": {
+            "label": "Professionell",
+            "description": "Präzise, akademisch, ohne Schnörkel."
+          },
+          "strict": {
+            "label": "Streng",
+            "description": "Verantwortung zuerst. Kein leeres Lob."
+          },
+          "socratic": {
+            "label": "Sokratisch",
+            "description": "Beantwortet Fragen mit lenkenden Gegenfragen."
+          }
+        }
+      }
+    },
+    "avatar": {
+      "generateError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+      "rateLimitError": "Monatliches Portätlimit erreicht.",
+      "freeTierError": "Upgrade auf Plus, um Porträts zu generieren.",
+      "missingSpeciesError": "Wähle zuerst eine Begleiterspezies.",
+      "portraitAlt": "Dein Begleiter-Porträt",
+      "regenPendingTitle": "Dein Begleiter hat sich entwickelt!",
+      "regenPendingDesc": "Generiere ihr neues Porträt, um ihre gewachsene Form zu sehen.",
+      "regenPendingAction": "Neues Porträt generieren"
+    },
+    "companion": {
+      "nameTitle": "Gib deinem Begleiter einen Namen",
+      "nameDescription": "Wähle einen Namen, der zu deinem Lernbegleiter passt.",
+      "nameLabel": "Name des Begleiters",
+      "namePlaceholder": "z.B. Eule, Nova, Funke...",
+      "nameAriaLabel": "Name deines Begleiters",
+      "speciesTitle": "Wähle eine Spezies",
+      "speciesDescription": "Die Spezies deines Begleiters prägt seine Persönlichkeit.",
+      "suggestedLabel": "Vorschlag basierend auf deinen Interessen",
+      "colorTitle": "Akzentfarbe",
+      "colorDescription": "Legt die Leuchtfarbe des Orbs deines Begleiters fest.",
+      "colorAriaLabel": "Farbe {{color}} auswählen",
+      "previewLabel": "Live-Vorschau",
+      "previewCaption": "Aktualisiert sich mit deinen Änderungen",
+      "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "avatarTitle": "KI-Porträt",
+      "avatarDescription": "Generiere ein einzigartiges KI-Porträt deines Begleiters basierend auf deinem Profil.",
+      "avatarLockedTitle": "KI-Porträt",
+      "avatarLockedDescription": "Erhalte ein einzigartiges KI-generiertes Porträt deines Begleiters.",
+      "avatarGenerating": "Begleiter wird erstellt...",
+      "generateAvatar": "Begleiter generieren",
+      "generateAvatarAriaLabel": "KI-Porträt deines Begleiters generieren",
+      "regenerate": "Regenerieren",
+      "regenerating": "Wird regeneriert...",
+      "regenerateAriaLabel": "Begleiter-Porträt regenerieren",
+      "generationsRemaining": "{{count}} übrig diesen Monat",
+      "upgradePlus": "Auf Plus upgraden",
+      "upgradePlusAriaLabel": "Upgrade auf Plus, um KI-Porträts freizuschalten",
+      "species": {
+        "owl": "Eule",
+        "fox": "Fuchs",
+        "cat": "Katze",
+        "dragon": "Drache",
+        "robot": "Roboter",
+        "star": "Stern",
+        "phoenix": "Phönix",
+        "crystal": "Kristall",
+        "leaf": "Blatt",
+        "music": "Note"
+      },
+      "colors": {
+        "ocean": "Ozean",
+        "violet": "Violett",
+        "mint": "Minze",
+        "gold": "Gold",
+        "rose": "Rose",
+        "coral": "Koralle",
+        "sky": "Himmel",
+        "ember": "Glut"
+      },
+      "dismiss": "Schließen",
+      "tellMeMore": "Mehr erfahren",
+      "interventions": {
+        "preSessionFraming": {
+          "noStruggle": "{{deckName}} hat {{dueCount}} fällige Karten. Das ist eine fokussierte Sitzung.",
+          "withStruggle": "{{deckName}} hat {{dueCount}} fällige Karten. In der letzten Sitzung bereitete {{strugglePattern}} Schwierigkeiten — heute lohnt sich ein genauer Blick."
+        },
+        "reEngagement": {
+          "withDue": "{{totalDue}} Karten haben sich in deinen Stapeln angesammelt. {{topDeckName}} hat mit {{topDeckDue}} die meisten — ein guter Ausgangspunkt.",
+          "noDue": "Heute sind keine Karten fällig, aber {{topDeckName}} lohnt sich zur Auffrischung der Gedächtnisleistung."
+        },
+        "streakMilestone": {
+          "day7": "Sieben aufeinanderfolgende Wiederholungstage markieren nach der Gewohnheitsforschung den ersten stabilen Anker.",
+          "day14": "Zwei Wochen täglicher Wiederholung erzeugt laut Studien zur verteilten Wiederholung messbare Langzeitbehaltensgewinne.",
+          "day30": "Dreißig Tage konsequenter Wiederholung ordnet dieses Material in die Kategorie dauerhaftes Langzeitgedächtnis ein.",
+          "day60": "Sechzig Tage ununterbrochener Wiederholung ist ein Ergebnis, das die meisten Lernenden nie erreichen.",
+          "day100": "Einhundert Tage. Die Forschung zur Gewohnheitsstabilität hört an diesem Punkt auf zu unterscheiden — das ist jetzt einfach ein Teil von dir."
+        }
+      }
+    },
+    "settingsSubtitle": "Verhalten und Persönlichkeit deines Begleiters konfigurieren",
+    "headerStatus": "Lv{{level}} · {{tier}} · {{remaining}} Funken übrig",
+    "headerStatusUnlimited": "Lv{{level}} · {{tier}} · unbegrenzt",
+    "welcomePrompt": "{{name}}, frag mich alles oder sag mir, was du heute lernst.",
+    "welcomePromptNoName": "Frag mich alles oder sag mir, was du heute lernst.",
+    "inputPlaceholder": "Frag mich etwas...",
+    "inputAriaLabel": "Nachricht an deinen Lernbegleiter",
+    "limitReachedPlaceholder": "Monatslimit erreicht — upgrade für mehr Funken"
   }
 }

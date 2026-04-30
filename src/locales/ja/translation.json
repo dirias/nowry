@@ -11,7 +11,8 @@
     "profile": "プロフィール",
     "logout": "ログアウト",
     "pomodoro": "ポモドーロタイマー",
-    "toggleTheme": "テーマを切り替える"
+    "toggleTheme": "テーマを切り替える",
+    "studyBuddy": "学習パートナー"
   },
   "news": {
     "title": "最新ニュース",
@@ -1029,5 +1030,223 @@
       "cta": "セットアップを完了する",
       "dismiss": "閉じる"
     }
+  },
+  "pet": {
+    "stage": {
+      "1": {
+        "name": "光の粒"
+      },
+      "2": {
+        "name": "精霊"
+      },
+      "3": {
+        "name": "探索者"
+      },
+      "4": {
+        "name": "賢者"
+      },
+      "5": {
+        "name": "神託"
+      },
+      "6": {
+        "name": "光輝"
+      }
+    },
+    "levelUp": {
+      "reached": "レベル{{level}}に到達しました",
+      "dismiss": "タップして閉じる"
+    }
+  },
+  "agent": {
+    "defaultName": "学習の友",
+    "welcomeMessage": "こんにちは！👋 私は{{petName}}です。",
+    "tabs": {
+      "personality": "個性",
+      "companion": "コンパニオン",
+      "interventions": "介入"
+    },
+    "settings": {
+      "interventions": {
+        "requiresNudging": "介入を設定するには、「個性」タブでプロアクティブなリマインダーを有効にしてください。",
+        "saveError": "保存できませんでした。もう一度お試しください。",
+        "frequency": {
+          "sectionTitle": "介入頻度",
+          "sectionDesc": "コンパニオンがメッセージで割り込む頻度。",
+          "conservative": "控えめ",
+          "conservativeDesc": "セッションあたり最大1件。閉じた後20分間の静寂ウィンドウ。",
+          "balanced": "バランス",
+          "balancedDesc": "セッションあたり最大2件。閉じた後10分間の静寂ウィンドウ。",
+          "frequent": "頻繁",
+          "frequentDesc": "セッションあたり最大4件。閉じた後3分間の静寂ウィンドウ。"
+        },
+        "focusMode": {
+          "title": "集中モード",
+          "label": "学習セッション中は静かにする",
+          "desc": "アクティブに学習中は不正解メッセージを抑制します。セッション終了時にはサマリーが表示されます。"
+        },
+        "types": {
+          "sectionTitle": "メッセージの種類",
+          "sectionDesc": "コンパニオンから特定の種類のメッセージをオフにする。",
+          "wrongAnswer": "学習のきっかけ",
+          "wrongAnswerDesc": "カードに不正解した後の簡単な解説。",
+          "sessionSummary": "セッションサマリー",
+          "sessionSummaryDesc": "各学習セッション終了時の診断メッセージ。",
+          "preSession": "セッション前の説明",
+          "preSessionDesc": "学習セッション開始前の簡単な案内。",
+          "reEngagement": "再参加リマインダー",
+          "reEngagementDesc": "デッキにカードが積み上がっているときのメッセージ。",
+          "streakMilestone": "ストリークのマイルストーン",
+          "streakMilestoneDesc": "連続学習日数が7、14、30、60、100日に達したときのメッセージ。"
+        }
+      },
+      "personality": {
+        "replyLength": {
+          "title": "返答の長さ",
+          "desc": "パートナーが1回の返答で書く量を調整します。"
+        },
+        "tone": {
+          "title": "キャラクターとトーン",
+          "desc": "パートナーとのコミュニケーションスタイルを選んでください。"
+        },
+        "knowledge": {
+          "title": "ナレッジアクセス",
+          "desc": "パートナーがライブラリ・デッキ・目標を読み取り、より的確なアドバイスを提供できるようにします。データは外部に送信されません。",
+          "libraryToggleLabel": "ライブラリとデッキへのアクセスを許可",
+          "libraryToggleDesc": "RAG検索パイプラインを有効にします（読み取り専用）。",
+          "nudgesLabel": "プロアクティブな学習リマインダー",
+          "nudgesDesc": "復習カードがある場合、ダッシュボードでお知らせします。",
+          "nudgesRequires": " ナレッジアクセスが必要です。",
+          "unlockAlert": "ナレッジアクセスを有効にして、より賢い回答とリマインダーをアンロックしましょう。",
+          "roamingLabel": "徘徊するパートナー",
+          "roamingDesc": "学習中、パートナーが画面を自由に動き回ります。"
+        },
+        "saved": "保存しました",
+        "preview": {
+          "title": "ライブプレビュー",
+          "caption": "設定を変えるとリアルタイムで更新されます。",
+          "captionSave": "変更は自動的に保存されます。"
+        },
+        "conciseness": {
+          "concise": {
+            "label": "簡潔",
+            "description": "1〜2文。要点だけ。"
+          },
+          "balanced": {
+            "label": "バランス",
+            "description": "余分なく、完結した回答。"
+          },
+          "detailed": {
+            "label": "詳細",
+            "description": "例を交えた丁寧な説明。"
+          }
+        },
+        "toneOptions": {
+          "friendly": {
+            "label": "フレンドリー",
+            "description": "温かく、励ましのある会話スタイル。"
+          },
+          "professional": {
+            "label": "プロフェッショナル",
+            "description": "正確で学術的、余分なし。"
+          },
+          "strict": {
+            "label": "厳格",
+            "description": "責任重視。空虚な称賛なし。"
+          },
+          "socratic": {
+            "label": "ソクラテス式",
+            "description": "質問には問いで返し、考えさせる。"
+          }
+        }
+      }
+    },
+    "avatar": {
+      "generateError": "問題が発生しました。もう一度お試しください。",
+      "rateLimitError": "今月の肖像生成上限に達しました。",
+      "freeTierError": "肖像を生成するにはPlusにアップグレードしてください。",
+      "missingSpeciesError": "まずコンパニオンの種族を選んでください。",
+      "portraitAlt": "コンパニオンの肖像",
+      "regenPendingTitle": "コンパニオンが進化しました！",
+      "regenPendingDesc": "新しい肖像を生成して、成長した姿を見てみましょう。",
+      "regenPendingAction": "新しい肖像を生成"
+    },
+    "companion": {
+      "nameTitle": "コンパニオンに名前をつける",
+      "nameDescription": "学習コンパニオンにぴったりの名前をつけましょう。",
+      "nameLabel": "コンパニオン名",
+      "namePlaceholder": "例：フクロウ、ノヴァ、スパーク...",
+      "nameAriaLabel": "コンパニオンの名前",
+      "speciesTitle": "種族を選ぶ",
+      "speciesDescription": "コンパニオンの種族が個性を形作ります。",
+      "suggestedLabel": "興味に基づいた提案",
+      "colorTitle": "アクセントカラー",
+      "colorDescription": "コンパニオンのオーブの光の色を設定します。",
+      "colorAriaLabel": "{{color}}を選択",
+      "previewLabel": "ライブプレビュー",
+      "previewCaption": "変更に合わせてリアルタイムで更新されます",
+      "saveError": "保存できませんでした。もう一度お試しください。",
+      "avatarTitle": "AIポートレート",
+      "avatarDescription": "プロフィールに基づいてコンパニオンのユニークなAIポートレートを生成します。",
+      "avatarLockedTitle": "AIポートレート",
+      "avatarLockedDescription": "コンパニオンのユニークなAI生成ポートレートを取得しましょう。",
+      "avatarGenerating": "コンパニオンを作成中...",
+      "generateAvatar": "コンパニオンを生成する",
+      "generateAvatarAriaLabel": "コンパニオンのAIポートレートを生成",
+      "regenerate": "再生成",
+      "regenerating": "再生成中...",
+      "regenerateAriaLabel": "コンパニオンのポートレートを再生成",
+      "generationsRemaining": "今月残り{{count}}回",
+      "upgradePlus": "Plusにアップグレード",
+      "upgradePlusAriaLabel": "AIポートレートを解放するにはPlusにアップグレード",
+      "species": {
+        "owl": "フクロウ",
+        "fox": "キツネ",
+        "cat": "ネコ",
+        "dragon": "ドラゴン",
+        "robot": "ロボット",
+        "star": "スター",
+        "phoenix": "フェニックス",
+        "crystal": "クリスタル",
+        "leaf": "リーフ",
+        "music": "ノート"
+      },
+      "colors": {
+        "ocean": "オーシャン",
+        "violet": "バイオレット",
+        "mint": "ミント",
+        "gold": "ゴールド",
+        "rose": "ローズ",
+        "coral": "コーラル",
+        "sky": "スカイ",
+        "ember": "エンバー"
+      },
+      "dismiss": "閉じる",
+      "tellMeMore": "詳しく見る",
+      "interventions": {
+        "preSessionFraming": {
+          "noStruggle": "{{deckName}}には{{dueCount}}枚の復習カードがあります。集中したセッションにしましょう。",
+          "withStruggle": "{{deckName}}には{{dueCount}}枚の復習カードがあります。前回のセッションでは{{strugglePattern}}が難しかったようです — 今日は丁寧に読み返しましょう。"
+        },
+        "reEngagement": {
+          "withDue": "{{totalDue}}枚のカードがデッキに積み重なっています。{{topDeckName}}が最も多く{{topDeckDue}}枚あります — ここから始めるとよいでしょう。",
+          "noDue": "今日は復習カードがありませんが、記憶の定着を保つために{{topDeckName}}を一通り見ておくことをおすすめします。"
+        },
+        "streakMilestone": {
+          "day7": "7日連続の復習は、習慣形成の研究が最初の定着ポイントと位置づける段階です。",
+          "day14": "2週間の毎日の復習は、間隔反復の研究によると長期記憶の定着に測定可能な改善をもたらします。",
+          "day30": "30日間の継続的な復習は、この内容を耐久性のある長期記憶の領域に移行させます。",
+          "day60": "60日間の途切れのない復習は、ほとんどの学習者が到達しない結果です。",
+          "day100": "100日間。この時点では習慣の持続性に関する研究も区別をやめます — これはもう単純にあなたの一部です。"
+        }
+      }
+    },
+    "settingsSubtitle": "パートナーの動作とキャラクターを設定する",
+    "headerStatus": "Lv{{level}} · {{tier}} · 残り{{remaining}}スパーク",
+    "headerStatusUnlimited": "Lv{{level}} · {{tier}} · 無制限",
+    "welcomePrompt": "{{name}}、何でも聞いてください。今日の学習内容を教えてくれてもOK。",
+    "welcomePromptNoName": "何でも聞いてください。今日の学習内容を教えてくれてもOK。",
+    "inputPlaceholder": "何でも聞いてみて...",
+    "inputAriaLabel": "学習パートナーにメッセージを送る",
+    "limitReachedPlaceholder": "月間上限に達しました — プランをアップグレード"
   }
 }

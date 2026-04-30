@@ -15,11 +15,13 @@ import PublicOffIcon from '@mui/icons-material/PublicOff'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import { useTranslation } from 'react-i18next'
 import MobileBottomActionStrip from '../Editor/plugins/MobileBottomActionStrip'
+import { usePet } from '../../context/AgentContext'
 
 export default function EditorHome() {
   const { id } = useParams()
   const location = useLocation()
   const { t } = useTranslation()
+  const { setViewContext } = usePet()
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
 
@@ -202,6 +204,18 @@ export default function EditorHome() {
     latestContentRef.current = newContent
     setContent(newContent)
   }, [])
+
+  // Tell the pet which book is open. The backend handles RAG retrieval —
+  // we only need to send the book_id and title, not the content.
+  useEffect(() => {
+    if (!book) return
+    setViewContext({
+      page: 'book',
+      book_id: id,
+      book_title: bookName || book.title
+    })
+    return () => setViewContext(null)
+  }, [id, bookName, book, setViewContext])
 
   // Auto-Save Hook
   const {

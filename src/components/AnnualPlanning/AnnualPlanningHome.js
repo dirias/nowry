@@ -199,7 +199,7 @@ const AnnualPlanningHome = () => {
 
   if (!plan && !loading) {
     return (
-      <Container maxWidth='md' sx={{ py: { xs: 4, md: 8 }, textAlign: 'center' }}>
+      <Container maxWidth='xl' sx={{ py: { xs: 4, md: 8 }, textAlign: 'center' }}>
         <Box sx={{ mb: 3 }}>
           <TimelineIcon sx={{ fontSize: { xs: 60, md: 80 }, color: 'primary.plainColor', mb: 1.5 }} />
           <Typography level='title-md' sx={{ mb: 1.5, fontSize: { xs: '1.75rem', md: '2rem' } }}>

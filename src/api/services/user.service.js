@@ -72,6 +72,15 @@ export const userService = {
   },
 
   /**
+   * Get current user's general preferences
+   * @returns {Promise<Object>} Current preferences including agent settings
+   */
+  async getGeneralPreferences() {
+    const { data } = await apiClient.get('/users/preferences/general')
+    return data
+  },
+
+  /**
    * Update general preferences (interests, theme, language)
    * @param {Object} preferences
    * @param {string[]} preferences.interests

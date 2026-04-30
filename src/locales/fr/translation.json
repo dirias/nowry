@@ -12,7 +12,8 @@
     "logout": "Déconnexion",
     "close": "Fermer",
     "pomodoro": "Minuteur Pomodoro",
-    "toggleTheme": "Changer le thème"
+    "toggleTheme": "Changer le thème",
+    "studyBuddy": "Compagnon d'étude"
   },
   "news": {
     "title": "Dernières Actualités",
@@ -1057,5 +1058,223 @@
       "cta": "Terminer la configuration",
       "dismiss": "Ignorer"
     }
+  },
+  "pet": {
+    "stage": {
+      "1": {
+        "name": "Luciole"
+      },
+      "2": {
+        "name": "Esprit"
+      },
+      "3": {
+        "name": "Éclaireur"
+      },
+      "4": {
+        "name": "Sage"
+      },
+      "5": {
+        "name": "Oracle"
+      },
+      "6": {
+        "name": "Luminaire"
+      }
+    },
+    "levelUp": {
+      "reached": "Vous avez atteint le niveau {{level}}",
+      "dismiss": "Appuyer pour fermer"
+    }
+  },
+  "agent": {
+    "defaultName": "Compagnon d'études",
+    "welcomeMessage": "Salut ! 👋 Je suis {{petName}}.",
+    "tabs": {
+      "personality": "Personnalité",
+      "companion": "Compagnon",
+      "interventions": "Interventions"
+    },
+    "settings": {
+      "interventions": {
+        "requiresNudging": "Activez les rappels proactifs dans l'onglet Personnalité pour configurer les interventions.",
+        "saveError": "Impossible de sauvegarder. Veuillez réessayer.",
+        "frequency": {
+          "sectionTitle": "Fréquence des interventions",
+          "sectionDesc": "À quelle fréquence votre compagnon vous interrompt avec des messages.",
+          "conservative": "Conservateur",
+          "conservativeDesc": "Au maximum 1 message par session. Fenêtre de silence de 20 minutes après fermeture.",
+          "balanced": "Équilibré",
+          "balancedDesc": "Au maximum 2 messages par session. Fenêtre de silence de 10 minutes après fermeture.",
+          "frequent": "Fréquent",
+          "frequentDesc": "Au maximum 4 messages par session. Fenêtre de silence de 3 minutes après fermeture."
+        },
+        "focusMode": {
+          "title": "Mode concentration",
+          "label": "Rester silencieux pendant les sessions d'étude",
+          "desc": "Supprime les messages de mauvaise réponse pendant que vous étudiez activement. Les résumés de session s'affichent toujours à la fin."
+        },
+        "types": {
+          "sectionTitle": "Types de messages",
+          "sectionDesc": "Désactivez des types de messages spécifiques de votre compagnon.",
+          "wrongAnswer": "Moments d'enseignement",
+          "wrongAnswerDesc": "Une courte explication après avoir répondu incorrectement à une carte.",
+          "sessionSummary": "Résumés de session",
+          "sessionSummaryDesc": "Un message de diagnostic à la fin de chaque session d'étude.",
+          "preSession": "Cadrage pré-session",
+          "preSessionDesc": "Une brève orientation avant le début d'une session d'étude.",
+          "reEngagement": "Rappels de réengagement",
+          "reEngagementDesc": "Un message lorsque des cartes se sont accumulées dans vos paquets.",
+          "streakMilestone": "Jalons de série",
+          "streakMilestoneDesc": "Un message lorsque vous atteignez 7, 14, 30, 60 ou 100 jours d'étude consécutifs."
+        }
+      },
+      "personality": {
+        "replyLength": {
+          "title": "Longueur de réponse",
+          "desc": "Contrôle combien ton compagnon écrit par réponse."
+        },
+        "tone": {
+          "title": "Personnalité et ton",
+          "desc": "Choisis comment ton compagnon doit te parler."
+        },
+        "knowledge": {
+          "title": "Accès aux connaissances",
+          "desc": "Laisse ton compagnon lire ta bibliothèque, tes paquets et tes objectifs. Tes données ne sont jamais envoyées à l'extérieur.",
+          "libraryToggleLabel": "Autoriser l'accès à ma bibliothèque et mes paquets",
+          "libraryToggleDesc": "Active le pipeline de récupération RAG (lecture seule).",
+          "nudgesLabel": "Rappels d'étude proactifs",
+          "nudgesDesc": "Accueille-toi sur le tableau de bord si tu as des cartes à revoir.",
+          "nudgesRequires": " Nécessite l'accès aux connaissances.",
+          "unlockAlert": "Active l'accès aux connaissances pour des réponses plus intelligentes.",
+          "roamingLabel": "Compagnon itinérant",
+          "roamingDesc": "Ton compagnon se déplace sur l'écran pendant que tu étudies."
+        },
+        "saved": "Enregistré",
+        "preview": {
+          "title": "Aperçu en direct",
+          "caption": "L'aperçu se met à jour au fil des changements.",
+          "captionSave": "Les modifications sont enregistrées automatiquement."
+        },
+        "conciseness": {
+          "concise": {
+            "label": "Concis",
+            "description": "1–2 phrases. Direct et précis."
+          },
+          "balanced": {
+            "label": "Équilibré",
+            "description": "Réponses complètes sans rembourrage."
+          },
+          "detailed": {
+            "label": "Détaillé",
+            "description": "Explications approfondies avec exemples."
+          }
+        },
+        "toneOptions": {
+          "friendly": {
+            "label": "Amical",
+            "description": "Chaleureux, encourageant et conversationnel."
+          },
+          "professional": {
+            "label": "Professionnel",
+            "description": "Précis, académique, sans superflu."
+          },
+          "strict": {
+            "label": "Strict",
+            "description": "La responsabilité d'abord. Pas de fausse louange."
+          },
+          "socratic": {
+            "label": "Socratique",
+            "description": "Répond aux questions par des questions guides."
+          }
+        }
+      }
+    },
+    "avatar": {
+      "generateError": "Une erreur s'est produite. Veuillez réessayer.",
+      "rateLimitError": "Limite mensuelle de portraits atteinte.",
+      "freeTierError": "Passez à Plus pour générer des portraits.",
+      "missingSpeciesError": "Choisissez d'abord une espèce de compagnon.",
+      "portraitAlt": "Le portrait de votre compagnon",
+      "regenPendingTitle": "Votre compagnon a évolué !",
+      "regenPendingDesc": "Générez son nouveau portrait pour voir sa forme développée.",
+      "regenPendingAction": "Générer un nouveau portrait"
+    },
+    "companion": {
+      "nameTitle": "Nommez votre compagnon",
+      "nameDescription": "Donnez à votre compagnon d'études un nom qui vous convient.",
+      "nameLabel": "Nom du compagnon",
+      "namePlaceholder": "Ex. Hibou, Nova, Étincelle...",
+      "nameAriaLabel": "Nommez votre compagnon",
+      "speciesTitle": "Choisissez une espèce",
+      "speciesDescription": "L'espèce de votre compagnon façonne sa personnalité.",
+      "suggestedLabel": "Suggestion basée sur vos centres d'intérêt",
+      "colorTitle": "Couleur d'accent",
+      "colorDescription": "Définit la couleur du halo de l'orbe de votre compagnon.",
+      "colorAriaLabel": "Sélectionner la couleur {{color}}",
+      "previewLabel": "Aperçu en direct",
+      "previewCaption": "Se met à jour avec vos modifications",
+      "saveError": "Impossible d'enregistrer. Veuillez réessayer.",
+      "avatarTitle": "Portrait IA",
+      "avatarDescription": "Générez un portrait IA unique de votre compagnon basé sur votre profil.",
+      "avatarLockedTitle": "Portrait IA",
+      "avatarLockedDescription": "Obtenez un portrait unique généré par IA de votre compagnon.",
+      "avatarGenerating": "Création de votre compagnon...",
+      "generateAvatar": "Générer votre compagnon",
+      "generateAvatarAriaLabel": "Générer un portrait IA de votre compagnon",
+      "regenerate": "Régénérer",
+      "regenerating": "Régénération...",
+      "regenerateAriaLabel": "Régénérer le portrait du compagnon",
+      "generationsRemaining": "{{count}} restant(s) ce mois",
+      "upgradePlus": "Passer à Plus",
+      "upgradePlusAriaLabel": "Passez à Plus pour débloquer les portraits IA",
+      "species": {
+        "owl": "Hibou",
+        "fox": "Renard",
+        "cat": "Chat",
+        "dragon": "Dragon",
+        "robot": "Robot",
+        "star": "Étoile",
+        "phoenix": "Phénix",
+        "crystal": "Cristal",
+        "leaf": "Feuille",
+        "music": "Note"
+      },
+      "colors": {
+        "ocean": "Océan",
+        "violet": "Violet",
+        "mint": "Menthe",
+        "gold": "Or",
+        "rose": "Rose",
+        "coral": "Corail",
+        "sky": "Ciel",
+        "ember": "Braise"
+      },
+      "dismiss": "Fermer",
+      "tellMeMore": "En savoir plus",
+      "interventions": {
+        "preSessionFraming": {
+          "noStruggle": "{{deckName}} a {{dueCount}} cartes à revoir. C'est une session concentrée.",
+          "withStruggle": "{{deckName}} a {{dueCount}} cartes à revoir. Lors de la dernière session, {{strugglePattern}} vous a posé problème — à relire attentivement aujourd'hui."
+        },
+        "reEngagement": {
+          "withDue": "{{totalDue}} cartes se sont accumulées dans vos paquets. {{topDeckName}} en a le plus avec {{topDeckDue}} — un bon point de départ.",
+          "noDue": "Aucune carte n'est due aujourd'hui, mais {{topDeckName}} mérite une révision pour maintenir la rétention."
+        },
+        "streakMilestone": {
+          "day7": "Sept jours consécutifs de révision correspondent à ce que la recherche sur la formation des habitudes identifie comme le premier ancrage durable.",
+          "day14": "Deux semaines de révision quotidienne produisent des gains mesurables en rétention à long terme selon les études sur la répétition espacée.",
+          "day30": "Trente jours de révision régulière placent ce contenu dans la catégorie de la mémoire durable à long terme.",
+          "day60": "Soixante jours de révision ininterrompue est un résultat que la plupart des apprenants n'atteignent jamais.",
+          "day100": "Cent jours. La recherche sur la durabilité des habitudes cesse de faire des distinctions à ce stade — c'est simplement qui vous êtes maintenant."
+        }
+      }
+    },
+    "settingsSubtitle": "Configurez le comportement et la personnalité de votre compagnon",
+    "headerStatus": "Nv{{level}} · {{tier}} · {{remaining}} étincelles restantes",
+    "headerStatusUnlimited": "Nv{{level}} · {{tier}} · illimité",
+    "welcomePrompt": "{{name}}, pose-moi n'importe quelle question, ou dis-moi ce que tu étudies aujourd'hui.",
+    "welcomePromptNoName": "Pose-moi n'importe quelle question, ou dis-moi ce que tu étudies aujourd'hui.",
+    "inputPlaceholder": "Pose-moi une question...",
+    "inputAriaLabel": "Envoyer un message à ton compagnon",
+    "limitReachedPlaceholder": "Limite mensuelle atteinte — améliore ton abonnement"
   }
 }

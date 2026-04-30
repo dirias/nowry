@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Container,
@@ -35,9 +35,12 @@ import { useTranslation } from 'react-i18next'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
 import { decksService } from '../../api/services'
+import { agentService } from '../../api/services/agent.service'
+import { usePet } from '../../context/AgentContext'
 import CardHome from '../Cards/CardHome'
 import CardPreviewModal from '../Cards/CardPreviewModal'
 import DeckSettingsModal from './DeckSettingsModal'
+import RecentSessions from './RecentSessions'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
@@ -90,6 +93,7 @@ export default function StudyCenter() {
 
   const { statistics: statisticsData, loading: statsLoading } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
+  const { queuePreSessionIntervention } = usePet()
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -128,6 +132,93 @@ export default function StudyCenter() {
     if (statsLoading || decksLoading) return
     fetchData()
   }, [statsLoading, decksLoading, fetchData])
+
+  // Phase 2 — Proactive companion: pre-session triggers evaluated once per render cycle
+  // when all data is loaded. Priority order: re-engagement → pre-session framing → streak milestone.
+  const phase2FiredRef = useRef(false)
+  useEffect(() => {
+    if (loading || statsLoading || !statisticsData || !decks?.length) return
+    // Only fire once per component mount — data may re-derive but we don't re-trigger
+    if (phase2FiredRef.current) return
+    phase2FiredRef.current = true
+
+    const todayUTC = new Date().toISOString().slice(0, 10)
+
+    // --- Priority 1: Re-engagement (gap >= 3 calendar days) ---
+    const lastStudyDate = statisticsData.summary?.last_study_date
+    if (lastStudyDate) {
+      const lastDate = new Date(lastStudyDate)
+      const nowDate = new Date()
+      const gapDays = Math.floor((nowDate - lastDate) / (1000 * 60 * 60 * 24))
+      if (gapDays >= 3) {
+        const reengagementKey = `nowry_reengagement_seen_${todayUTC}`
+        if (!localStorage.getItem(reengagementKey)) {
+          const topDeck = decksNeedingReview[0]
+          const totalDueCount = (statisticsData.summary?.due_today ?? 0) + (statisticsData.summary?.new_today ?? 0)
+          const daysSince = Math.floor((Date.now() - new Date(statisticsData.summary.last_study_date).getTime()) / (1000 * 60 * 60 * 24))
+          agentService
+            .postIntervention({
+              type: 're_engagement',
+              total_due_count: totalDueCount,
+              top_deck_name: topDeck?.name ?? '',
+              top_deck_due: topDeck?.due_cards ?? 0,
+              days_since_last_session: daysSince
+            })
+            .then((result) => {
+              localStorage.setItem(reengagementKey, '1')
+              queuePreSessionIntervention(result)
+            })
+            .catch(() => {
+              // Non-fatal — key intentionally not set so next visit can retry
+            })
+          return
+        }
+      }
+    }
+
+    // --- Priority 2: Pre-session framing (top deck >= 15 due cards) ---
+    const topDeck = decksNeedingReview[0]
+    if (topDeck && (topDeck.due_cards ?? 0) >= 15) {
+      const presessionKey = `nowry_presession_seen_${topDeck._id}_${todayUTC}`
+      if (!localStorage.getItem(presessionKey)) {
+        agentService
+          .postIntervention({
+            type: 'pre_session_framing',
+            deck_id: topDeck._id,
+            deck_name: topDeck.name,
+            due_count: topDeck.due_cards,
+            last_struggle_pattern: statisticsData.summary?.last_session_struggle ?? null
+          })
+          .then((result) => {
+            localStorage.setItem(presessionKey, '1')
+            queuePreSessionIntervention(result)
+          })
+          .catch(() => {
+            // Non-fatal
+          })
+        return
+      }
+    }
+
+    // --- Priority 3: Streak milestone ---
+    const currentStreak = statisticsData.summary?.current_streak
+    const milestoneSteaks = [7, 14, 30, 60, 100]
+    if (currentStreak && milestoneSteaks.includes(currentStreak)) {
+      agentService
+        .postIntervention({
+          type: 'streak_milestone',
+          streak_count: currentStreak
+        })
+        .then((result) => {
+          if (result.already_seen === true) return
+          queuePreSessionIntervention(result)
+        })
+        .catch(() => {
+          // Non-fatal
+        })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, statsLoading, statisticsData, decks])
 
   const getDecksByType = (type) => {
     return decks.filter((d) => d.deck_type === type)
@@ -746,7 +837,10 @@ export default function StudyCenter() {
             </Box>
           )}
 
-          {/* Zone 3 — Recent Performance */}
+          {/* Zone 3 — Session History */}
+          <RecentSessions />
+
+          {/* Zone 4 — Recent Performance (SM-2 card reviews) */}
           {!statsLoading && statisticsData?.recent_performance?.length > 0 && (
             <Box>
               <Typography level='title-lg' fontWeight={700} sx={{ mb: 2 }}>

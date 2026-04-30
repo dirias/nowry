@@ -34,7 +34,6 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import { tasksService, annualPlanningService } from '../../../api/services'
 import { useTaskData } from '../../../hooks/useTaskData'
 import { apiCache } from '../../../api/utils/cache'
-import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
 
 const ROUTINE_CACHE_KEY = 'dailyRoutine'
 const ROUTINE_TTL = 2 * 60000 // 2 minutes
@@ -74,12 +73,12 @@ const saveActiveList = (id) => {
 
 const SideMenu = () => {
   const { t } = useTranslation()
-  const { themeColor } = useThemePreferences()
 
-  // Chip style helpers — use the user's preferred color directly
+  // Chip style helpers — use semantic primary tokens so dark mode and
+  // user color preference both work correctly through the Joy UI palette.
   const activeChipSx = {
-    bgcolor: `${themeColor}22`, // ~13% opacity tint background
-    color: themeColor,
+    bgcolor: 'primary.softBg',
+    color: 'primary.plainColor',
     fontWeight: 600,
     border: 'none'
   }

@@ -12,11 +12,11 @@ import EventFormModal from './EventFormModal'
 
 // ─── Type Metadata ──────────────────────────────────────────────────────────
 const TYPE_META = {
-  task: { color: '#6366f1', i18nKey: 'calendarModal.filters.tasks' },
-  priority: { color: '#f59e0b', i18nKey: 'calendarModal.filters.priorities' },
-  goal: { color: '#10b981', i18nKey: 'calendarModal.filters.goals' },
-  milestone: { color: '#14b8a6', i18nKey: 'calendarModal.filters.milestones' },
-  activity: { color: '#3b82f6', i18nKey: 'calendarModal.filters.habits' }
+  task: { color: 'var(--joy-palette-primary-solidBg)', i18nKey: 'calendarModal.filters.tasks' },
+  priority: { color: 'var(--joy-palette-warning-solidBg)', i18nKey: 'calendarModal.filters.priorities' },
+  goal: { color: 'var(--joy-palette-success-solidBg)', i18nKey: 'calendarModal.filters.goals' },
+  milestone: { color: 'var(--joy-palette-success-plainColor)', i18nKey: 'calendarModal.filters.milestones' },
+  activity: { color: 'var(--joy-palette-primary-softColor)', i18nKey: 'calendarModal.filters.habits' }
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ const CalendarModal = ({ open, onClose }) => {
                       cursor: 'pointer',
                       bgcolor: isActive ? meta.color : 'transparent',
                       borderColor: meta.color,
-                      color: isActive ? '#fff' : 'text.secondary',
+                      color: isActive ? 'common.white' : 'text.secondary',
                       transition: 'all 0.15s',
                       // Larger touch target on mobile
                       minHeight: { xs: 32, sm: 'auto' },
@@ -350,7 +350,7 @@ const CalendarModal = ({ open, onClose }) => {
                                   width: 4,
                                   height: 4,
                                   borderRadius: '50%',
-                                  bgcolor: isSelected ? 'rgba(255,255,255,0.85)' : color,
+                                  bgcolor: isSelected ? 'primary.solidColor' : color,
                                   flexShrink: 0
                                 }}
                               />
@@ -447,7 +447,7 @@ const CalendarModal = ({ open, onClose }) => {
                           transition: 'all 0.12s',
                           '&:hover': {
                             bgcolor: 'background.level1',
-                            borderColor: ev.color + '55',
+                            borderColor: 'neutral.outlinedBorder',
                             '& .edit-btn': { opacity: 1 }
                           }
                         }}
@@ -473,11 +473,7 @@ const CalendarModal = ({ open, onClose }) => {
 
                         {/* Chips + edit button */}
                         <Stack direction='row' spacing={0.5} alignItems='center' flexShrink={0}>
-                          <Chip
-                            size='sm'
-                            variant='soft'
-                            sx={{ bgcolor: ev.color + '22', color: ev.color, fontWeight: 600, fontSize: '0.65rem', height: 20, px: 0.75 }}
-                          >
+                          <Chip size='sm' variant='soft' sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20, px: 0.75 }}>
                             {t(TYPE_META[ev.type]?.i18nKey || ev.type)}
                           </Chip>
                           {ev.status && ev.status !== 'active' && ev.status !== 'pending' && (

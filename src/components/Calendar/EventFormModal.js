@@ -25,10 +25,10 @@ import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 
 // Type color map (must match CalendarModal TYPE_META)
 const TYPE_COLORS = {
-  task: '#6366f1',
-  priority: '#f59e0b',
-  goal: '#10b981',
-  activity: '#3b82f6'
+  task: 'var(--joy-palette-primary-solidBg)',
+  priority: 'var(--joy-palette-warning-solidBg)',
+  goal: 'var(--joy-palette-success-solidBg)',
+  activity: 'var(--joy-palette-primary-softColor)'
 }
 
 const TYPES = ['task', 'priority', 'goal', 'activity']
@@ -115,7 +115,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const activeType = isEdit ? event?.type || 'task' : type
-  const typeColor = TYPE_COLORS[activeType] || '#6366f1'
   const needsFocusArea = !isEdit && type === 'goal'
   const needsGoal = !isEdit && type === 'activity'
   const needsDescription = activeType === 'priority'
@@ -222,7 +221,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                 width: 10,
                 height: 10,
                 borderRadius: '50%',
-                bgcolor: typeColor,
+                bgcolor: 'primary.solidBg',
                 flexShrink: 0
               }}
             />
@@ -249,7 +248,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                         cursor: 'pointer',
                         bgcolor: type === typeKey ? TYPE_COLORS[typeKey] : 'transparent',
                         borderColor: TYPE_COLORS[typeKey],
-                        color: type === typeKey ? '#fff' : 'text.secondary',
+                        color: type === typeKey ? 'common.white' : 'text.secondary',
                         transition: 'all 0.15s',
                         '&:hover': { opacity: 0.85 }
                       }}
@@ -267,8 +266,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                 <Chip
                   size='sm'
                   sx={{
-                    bgcolor: typeColor + '22',
-                    color: typeColor,
                     fontWeight: 600,
                     fontSize: '0.7rem',
                     border: 'none'
@@ -383,9 +380,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                 disabled={!canSave}
                 onClick={handleSave}
                 sx={{
-                  bgcolor: typeColor,
-                  color: '#fff',
-                  '&:hover': { bgcolor: typeColor, filter: 'brightness(0.9)' },
                   '&:disabled': { opacity: 0.5 }
                 }}
               >

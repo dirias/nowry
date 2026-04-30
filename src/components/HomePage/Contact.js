@@ -16,7 +16,6 @@ import {
   Alert
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { useColorScheme } from '@mui/joy/styles'
 import {
   EmailRounded,
   LocationOnRounded,
@@ -30,8 +29,6 @@ import {
 } from '@mui/icons-material'
 
 const Contact = () => {
-  const { mode } = useColorScheme()
-  const isDark = mode === 'dark'
   const { t } = useTranslation()
 
   const [formData, setFormData] = useState({
@@ -68,10 +65,10 @@ const Contact = () => {
   ]
 
   const socialLinks = [
-    { icon: <X />, label: 'Twitter', url: '#', color: '#1DA1F2' },
-    { icon: <Facebook />, label: 'Facebook', url: '#', color: '#1877F2' },
-    { icon: <LinkedIn />, label: 'LinkedIn', url: '#', color: '#0A66C2' },
-    { icon: <Instagram />, label: 'Instagram', url: '#', color: '#E4405F' }
+    { icon: <X />, label: 'Twitter', url: '#' },
+    { icon: <Facebook />, label: 'Facebook', url: '#' },
+    { icon: <LinkedIn />, label: 'LinkedIn', url: '#' },
+    { icon: <Instagram />, label: 'Instagram', url: '#' }
   ]
 
   const faqs = [
@@ -117,7 +114,7 @@ const Contact = () => {
     <Sheet
       sx={{
         minHeight: '100vh',
-        backgroundColor: isDark ? 'neutral.900' : 'background.body'
+        bgcolor: 'background.body'
       }}
     >
       <Container maxWidth='lg'>
@@ -137,7 +134,7 @@ const Contact = () => {
               letterSpacing: -2,
               lineHeight: 1.1,
               mb: 3,
-              color: isDark ? 'primary.300' : 'primary.700'
+              color: 'primary.plainColor'
             }}
           >
             {t('contact.title')}
@@ -328,15 +325,15 @@ const Contact = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: isDark ? 'neutral.800' : 'neutral.100',
+                        bgcolor: 'background.level1',
                         color: 'text.primary',
                         transition: 'all 0.2s ease',
                         textDecoration: 'none',
                         '&:hover': {
-                          backgroundColor: social.color,
-                          color: 'white',
+                          bgcolor: 'primary.solidBg',
+                          color: 'primary.solidColor',
                           transform: 'translateY(-3px)',
-                          boxShadow: `0 8px 20px ${social.color}40`
+                          boxShadow: 'md'
                         }
                       }}
                     >
@@ -358,13 +355,11 @@ const Contact = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: isDark
-                ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)'
-                : 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)'
+              bgcolor: 'background.level1'
             }}
           >
             <Stack spacing={2} alignItems='center'>
-              <LocationOnRounded sx={{ fontSize: 60, color: 'primary.500' }} />
+              <LocationOnRounded sx={{ fontSize: 60, color: 'primary.plainColor' }} />
               <Typography level='h4' fontWeight={600}>
                 {t('contact.location.title')}
               </Typography>

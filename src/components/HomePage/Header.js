@@ -41,9 +41,11 @@ import {
   Brightness4,
   Brightness7,
   LoginRounded,
-  PersonAddRounded
+  PersonAddRounded,
+  AutoAwesomeRounded
 } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
+import { usePet } from '../../context/AgentContext'
 import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 import { useTranslation } from 'react-i18next'
@@ -108,6 +110,7 @@ const Header = () => {
   const displayName = user?.full_name || user?.username || user?.email?.split('@')[0] || ''
   const resolvedAvatarUrl = user?.avatar_url || user?.photo_url || user?.avatar || undefined
   const { t } = useTranslation()
+  const { petName } = usePet()
 
   // Bug report state
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
@@ -400,6 +403,12 @@ const Header = () => {
                       </ListItemDecorator>
                       <Typography level='body-sm'>{t('common.settings')}</Typography>
                     </MenuItem>
+                    <MenuItem component={Link} to='/settings/agent' sx={{ gap: 1.5 }}>
+                      <ListItemDecorator sx={{ minWidth: 'unset' }}>
+                        <AutoAwesomeRounded sx={{ fontSize: 18 }} />
+                      </ListItemDecorator>
+                      <Typography level='body-sm'>{petName || t('common.studyBuddy')}</Typography>
+                    </MenuItem>
 
                     {/* Group 2 — Pomodoro Tool (conditional) */}
                     {settings.enabled && (
@@ -586,6 +595,14 @@ const Header = () => {
                       <SettingsRounded />
                     </ListItemDecorator>
                     {t('common.settings')}
+                  </ListItemButton>
+                </ListItem>
+                <ListItem>
+                  <ListItemButton component={Link} to='/settings/agent' onClick={() => setMobileMenuOpen(false)}>
+                    <ListItemDecorator>
+                      <AutoAwesomeRounded />
+                    </ListItemDecorator>
+                    {petName || t('common.studyBuddy')}
                   </ListItemButton>
                 </ListItem>
 

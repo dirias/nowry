@@ -1,308 +1,403 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Stack,
-  Input,
-  Textarea,
-  Select,
+  Box,
   Button,
-  FormLabel,
+  Chip,
+  DialogContent,
+  Divider,
+  FormControl,
   FormHelperText,
-  Option,
+  FormLabel,
   IconButton,
-  Alert
+  Input,
+  Modal,
+  ModalClose,
+  ModalDialog,
+  Snackbar,
+  Stack,
+  Textarea,
+  Tooltip,
+  Typography
 } from '@mui/joy'
-import { Bug, Upload, X, AlertCircle } from 'lucide-react'
+import { Bug, Upload, X } from 'lucide-react'
 
-/**
- * Bug Report Modal Component
- *
- * Allows users to submit bug reports with:
- * - Title and description
- * - Steps to reproduce
- * - Expected vs actual behavior
- * - Severity and category
- * - Screenshot attachments (max 3)
- */
+// ─── Severity config ──────────────────────────────────────────────────────────
+const SEVERITIES = [
+  { value: 'low', color: 'success' },
+  { value: 'medium', color: 'warning' },
+  { value: 'high', color: 'danger' },
+  { value: 'critical', color: 'danger' }
+]
+
+// ─── Category config ──────────────────────────────────────────────────────────
+const CATEGORIES = ['ui', 'performance', 'functionality', 'data', 'other']
+
+// ─── Initial form state ───────────────────────────────────────────────────────
+const INITIAL_FORM = {
+  title: '',
+  description: '',
+  steps_to_reproduce: '',
+  severity: 'medium',
+  category: 'functionality',
+  screenshots: []
+}
+
+// ─── BugReportModal ───────────────────────────────────────────────────────────
 export default function BugReportModal({ open, onClose, onSubmit }) {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    steps_to_reproduce: '',
-    expected_behavior: '',
-    actual_behavior: '',
-    severity: 'medium',
-    category: 'functionality',
-    screenshots: []
-  })
+  const { t } = useTranslation()
 
+  const [formData, setFormData] = useState(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [snackbar, setSnackbar] = useState({ open: false, color: 'success', msg: '' })
 
-  const handleScreenshotUpload = async (e) => {
-    const file = e.target.files[0]
+  const fileInputRef = useRef(null)
+
+  // ── Field helpers ────────────────────────────────────────────────────────────
+  const set = (field) => (e) => setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+
+  // ── Screenshot upload ────────────────────────────────────────────────────────
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0]
+    // Reset input so same file can be re-selected if removed
+    if (fileInputRef.current) fileInputRef.current.value = ''
     if (!file) return
 
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file')
-      return
-    }
-
-    // Check max screenshots
-    if (formData.screenshots.length >= 3) {
-      setError('Maximum 3 screenshots allowed')
-      return
-    }
+    if (formData.screenshots.length >= 3) return
 
     try {
-      setError(null)
-      // Compress and convert to base64
       const base64 = await compressAndConvert(file)
-
       setFormData((prev) => ({
         ...prev,
-        screenshots: [
-          ...prev.screenshots,
-          {
-            filename: file.name,
-            data: base64,
-            uploaded_at: new Date().toISOString()
-          }
-        ]
+        screenshots: [...prev.screenshots, { filename: file.name, data: base64, uploaded_at: new Date().toISOString() }]
       }))
     } catch (err) {
-      setError('Failed to upload screenshot. Please try again.')
       console.error('Screenshot upload error:', err)
     }
   }
 
-  const removeScreenshot = (index) => {
-    setFormData({
-      ...formData,
-      screenshots: formData.screenshots.filter((_, i) => i !== index)
-    })
+  const removeScreenshot = (idx) => {
+    setFormData((prev) => ({
+      ...prev,
+      screenshots: prev.screenshots.filter((_, i) => i !== idx)
+    }))
   }
 
+  // ── Submit ───────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    // Validate required fields
-    if (!formData.title.trim()) {
-      setError('Please enter a bug title')
-      return
-    }
-
-    if (!formData.description.trim()) {
-      setError('Please enter a description')
-      return
-    }
+    if (!formData.title.trim() || !formData.description.trim()) return
 
     setLoading(true)
-    setError(null)
-
     try {
-      // Capture browser info automatically
-      const browserInfo = getBrowserInfo()
-
       await onSubmit({
         ...formData,
         url: window.location.pathname,
-        browser_info: browserInfo
+        browser_info: getBrowserInfo()
       })
-
-      // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        steps_to_reproduce: '',
-        expected_behavior: '',
-        actual_behavior: '',
-        severity: 'medium',
-        category: 'functionality',
-        screenshots: []
-      })
-
+      setFormData(INITIAL_FORM)
+      setSnackbar({ open: true, color: 'success', msg: t('bugs.modal.successMsg') })
       onClose()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to submit bug report. Please try again.')
       console.error('Bug submission error:', err)
+      setSnackbar({ open: true, color: 'danger', msg: t('bugs.modal.errorMsg') })
     } finally {
       setLoading(false)
     }
   }
 
+  const canSubmit = formData.title.trim() && formData.description.trim()
+  const maxReached = formData.screenshots.length >= 3
+
   return (
-    <Modal open={open} onClose={onClose}>
-      <ModalDialog sx={{ width: 600, maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto' }}>
-        <ModalClose />
+    <>
+      <Modal open={open} onClose={onClose}>
+        <ModalDialog
+          sx={{
+            width: { xs: '95%', sm: '85%', md: '75%', lg: '600px' },
+            maxWidth: '600px',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
+            p: 0,
+            overflow: 'hidden'
+          }}
+        >
+          {/* ── Header ── */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              px: 3,
+              py: 2,
+              bgcolor: 'background.level1',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              flexShrink: 0
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 'sm',
+                bgcolor: 'warning.softBg',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <Bug size={18} color='var(--joy-palette-warning-plainColor)' />
+            </Box>
+            <Typography level='h4' sx={{ flex: 1 }}>
+              {t('bugs.modal.title')}
+            </Typography>
+            <ModalClose sx={{ position: 'static', mt: 0 }} />
+          </Box>
 
-        <Stack spacing={2}>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Bug size={24} color='#f97316' />
-            <h2 style={{ margin: 0 }}>Report a Bug</h2>
-          </div>
+          {/* ── Scrollable body ── */}
+          <DialogContent sx={{ px: 3, py: 2.5, overflowY: 'auto' }}>
+            <Stack spacing={3}>
+              {/* Bug title */}
+              <FormControl required>
+                <FormLabel>{t('bugs.modal.titleField')}</FormLabel>
+                <Input
+                  placeholder={t('bugs.modal.titlePlaceholder')}
+                  value={formData.title}
+                  onChange={set('title')}
+                  aria-label={t('bugs.modal.titleField')}
+                  sx={{ '&:focus-within': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }}
+                />
+              </FormControl>
 
-          <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-            Help us improve Nowry by reporting issues you encounter. Your feedback is valuable!
-          </p>
+              {/* Description */}
+              <FormControl required>
+                <FormLabel>{t('bugs.modal.description')}</FormLabel>
+                <Textarea
+                  placeholder={t('bugs.modal.descPlaceholder')}
+                  minRows={3}
+                  value={formData.description}
+                  onChange={set('description')}
+                  aria-label={t('bugs.modal.description')}
+                />
+              </FormControl>
 
-          {/* Error Alert */}
-          {error && (
-            <Alert color='danger' startDecorator={<AlertCircle size={20} />}>
-              {error}
-            </Alert>
-          )}
+              {/* Steps to reproduce */}
+              <FormControl>
+                <FormLabel>{t('bugs.modal.steps')}</FormLabel>
+                <Textarea
+                  placeholder={t('bugs.modal.stepsPlaceholder')}
+                  minRows={3}
+                  value={formData.steps_to_reproduce}
+                  onChange={set('steps_to_reproduce')}
+                  aria-label={t('bugs.modal.steps')}
+                />
+              </FormControl>
 
-          {/* Title */}
-          <div>
-            <FormLabel required>Bug Title</FormLabel>
-            <Input
-              placeholder='e.g., Editor crashes when pasting large content'
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-            />
-            <FormHelperText>Briefly describe the issue</FormHelperText>
-          </div>
+              <Divider />
 
-          {/* Description */}
-          <div>
-            <FormLabel required>Description</FormLabel>
-            <Textarea
-              placeholder='Provide details about what happened...'
-              minRows={3}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
-            />
-          </div>
+              {/* Severity */}
+              <Box>
+                <Typography level='body-sm' sx={{ mb: 1, fontWeight: 'md', color: 'text.secondary' }}>
+                  {t('bugs.modal.severity')}
+                </Typography>
+                <Stack direction='row' spacing={0.75} flexWrap='wrap' useFlexGap>
+                  {SEVERITIES.map(({ value, color }) => {
+                    const isActive = formData.severity === value
+                    return (
+                      <Chip
+                        key={value}
+                        size='sm'
+                        variant={isActive ? 'solid' : 'outlined'}
+                        color={isActive ? color : 'neutral'}
+                        onClick={() => setFormData((prev) => ({ ...prev, severity: value }))}
+                        sx={{
+                          cursor: 'pointer',
+                          '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' },
+                          '&:active': { transform: 'scale(0.95)' }
+                        }}
+                      >
+                        {t(`bugs.severity.${value}`)}
+                      </Chip>
+                    )
+                  })}
+                </Stack>
+              </Box>
 
-          {/* Steps to Reproduce */}
-          <div>
-            <FormLabel>Steps to Reproduce</FormLabel>
-            <Textarea
-              placeholder='1. Go to...\n2. Click on...\n3. See error'
-              minRows={3}
-              value={formData.steps_to_reproduce}
-              onChange={(e) => setFormData({ ...formData, steps_to_reproduce: e.target.value })}
-            />
-            <FormHelperText>Help us recreate the issue</FormHelperText>
-          </div>
+              {/* Category */}
+              <Box>
+                <Typography level='body-sm' sx={{ mb: 1, fontWeight: 'md', color: 'text.secondary' }}>
+                  {t('bugs.modal.category')}
+                </Typography>
+                <Stack direction='row' spacing={0.75} flexWrap='wrap' useFlexGap>
+                  {CATEGORIES.map((value) => {
+                    const isActive = formData.category === value
+                    return (
+                      <Chip
+                        key={value}
+                        size='sm'
+                        variant={isActive ? 'solid' : 'outlined'}
+                        color='neutral'
+                        onClick={() => setFormData((prev) => ({ ...prev, category: value }))}
+                        sx={{
+                          cursor: 'pointer',
+                          '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' },
+                          '&:active': { transform: 'scale(0.95)' }
+                        }}
+                      >
+                        {t(`bugs.category.${value}`)}
+                      </Chip>
+                    )
+                  })}
+                </Stack>
+              </Box>
 
-          {/* Expected vs Actual Behavior */}
-          <Stack direction='row' spacing={2}>
-            <div style={{ flex: 1 }}>
-              <FormLabel>Expected Behavior</FormLabel>
-              <Textarea
-                placeholder='What should happen?'
-                minRows={2}
-                value={formData.expected_behavior}
-                onChange={(e) => setFormData({ ...formData, expected_behavior: e.target.value })}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <FormLabel>Actual Behavior</FormLabel>
-              <Textarea
-                placeholder='What actually happened?'
-                minRows={2}
-                value={formData.actual_behavior}
-                onChange={(e) => setFormData({ ...formData, actual_behavior: e.target.value })}
-              />
-            </div>
-          </Stack>
+              <Divider />
 
-          {/* Severity & Category */}
-          <Stack direction='row' spacing={2}>
-            <div style={{ flex: 1 }}>
-              <FormLabel>Severity</FormLabel>
-              <Select value={formData.severity} onChange={(e, value) => setFormData({ ...formData, severity: value })}>
-                <Option value='low'>Low - Minor inconvenience</Option>
-                <Option value='medium'>Medium - Noticeable issue</Option>
-                <Option value='high'>High - Major problem</Option>
-                <Option value='critical'>Critical - App unusable</Option>
-              </Select>
-            </div>
-            <div style={{ flex: 1 }}>
-              <FormLabel>Category</FormLabel>
-              <Select value={formData.category} onChange={(e, value) => setFormData({ ...formData, category: value })}>
-                <Option value='ui'>UI/Design</Option>
-                <Option value='functionality'>Functionality</Option>
-                <Option value='performance'>Performance</Option>
-                <Option value='other'>Other</Option>
-              </Select>
-            </div>
-          </Stack>
+              {/* Screenshots */}
+              <FormControl>
+                <FormLabel>{t('bugs.modal.screenshots')}</FormLabel>
 
-          {/* Screenshot Upload */}
-          <div>
-            <FormLabel>Screenshots (Optional - Max 3)</FormLabel>
+                {/* Hidden native file input */}
+                <input ref={fileInputRef} type='file' accept='image/*' hidden onChange={handleUpload} aria-hidden='true' />
+
+                <Button
+                  variant='outlined'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={<Upload size={14} />}
+                  disabled={maxReached}
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label={t('bugs.modal.uploadBtn')}
+                  sx={{
+                    alignSelf: 'flex-start',
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                  }}
+                >
+                  {maxReached ? t('bugs.modal.maxReached') : t('bugs.modal.uploadBtn')}
+                </Button>
+
+                {/* Thumbnail list */}
+                {formData.screenshots.length > 0 && (
+                  <Stack spacing={0.75} sx={{ mt: 1.5 }}>
+                    {formData.screenshots.map((screenshot, idx) => (
+                      <Box
+                        key={idx}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: 'sm',
+                          bgcolor: 'background.level1',
+                          border: '1px solid',
+                          borderColor: 'divider'
+                        }}
+                      >
+                        <Typography
+                          level='body-xs'
+                          sx={{
+                            color: 'text.secondary',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            flex: 1,
+                            mr: 1
+                          }}
+                        >
+                          {screenshot.filename}
+                        </Typography>
+                        <Tooltip title={t('bugs.modal.removeScreenshot')} size='sm'>
+                          <IconButton
+                            size='sm'
+                            variant='plain'
+                            color='danger'
+                            onClick={() => removeScreenshot(idx)}
+                            aria-label={t('bugs.modal.removeScreenshot')}
+                            sx={{
+                              flexShrink: 0,
+                              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                            }}
+                          >
+                            <X size={14} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
+
+                <FormHelperText sx={{ color: 'text.tertiary' }}>
+                  {t('bugs.modal.screenshotsHint', { count: formData.screenshots.length })}
+                </FormHelperText>
+              </FormControl>
+            </Stack>
+          </DialogContent>
+
+          {/* ── Sticky footer ── */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              px: 3,
+              py: 2,
+              bgcolor: 'background.surface',
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              flexShrink: 0
+            }}
+          >
             <Button
-              component='label'
-              variant='outlined'
+              variant='plain'
               color='neutral'
-              startDecorator={<Upload size={16} />}
-              disabled={formData.screenshots.length >= 3}
+              onClick={onClose}
+              disabled={loading}
+              aria-label={t('common.cancel')}
+              sx={{
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+              }}
             >
-              {formData.screenshots.length >= 3 ? 'Maximum reached' : 'Upload Screenshot'}
-              <input type='file' hidden accept='image/*' onChange={handleScreenshotUpload} disabled={formData.screenshots.length >= 3} />
-            </Button>
-
-            {formData.screenshots.length > 0 && (
-              <Stack spacing={1} sx={{ mt: 1 }}>
-                {formData.screenshots.map((screenshot, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '8px 12px',
-                      background: '#f5f5f5',
-                      borderRadius: '6px'
-                    }}
-                  >
-                    <span style={{ fontSize: '0.9rem' }}>{screenshot.filename}</span>
-                    <IconButton size='sm' variant='plain' color='danger' onClick={() => removeScreenshot(idx)}>
-                      <X size={16} />
-                    </IconButton>
-                  </div>
-                ))}
-              </Stack>
-            )}
-            <FormHelperText>{formData.screenshots.length}/3 screenshots • Images will be compressed</FormHelperText>
-          </div>
-
-          {/* Submit Button */}
-          <Stack direction='row' spacing={2} sx={{ mt: 2 }}>
-            <Button variant='outlined' color='neutral' onClick={onClose} fullWidth disabled={loading}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
-              fullWidth
-              onClick={handleSubmit}
+              variant='solid'
+              color='primary'
               loading={loading}
-              disabled={!formData.title.trim() || !formData.description.trim()}
-              startDecorator={!loading && <Bug size={16} />}
+              disabled={!canSubmit}
+              onClick={handleSubmit}
+              startDecorator={!loading ? <Bug size={14} /> : null}
+              aria-label={t('bugs.modal.submit')}
+              sx={{
+                ml: 'auto',
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+              }}
             >
-              Submit Bug Report
+              {loading ? t('bugs.modal.submitting') : t('bugs.modal.submit')}
             </Button>
-          </Stack>
-        </Stack>
-      </ModalDialog>
-    </Modal>
+          </Box>
+        </ModalDialog>
+      </Modal>
+
+      {/* ── Snackbar feedback ── */}
+      <Snackbar
+        open={snackbar.open}
+        color={snackbar.color}
+        variant='soft'
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {snackbar.msg}
+      </Snackbar>
+    </>
   )
 }
 
-// Helper functions
-
-/**
- * Get browser information
- */
+// ─── Browser info helpers ─────────────────────────────────────────────────────
 function getBrowserInfo() {
   const ua = navigator.userAgent
-
   return {
     name: getBrowserName(ua),
     version: getBrowserVersion(ua),
@@ -334,14 +429,11 @@ function getOS(ua) {
   return 'Unknown'
 }
 
-/**
- * Compress image and convert to base64
- * Max size: 500KB
- */
+// ─── Image compression ────────────────────────────────────────────────────────
 async function compressAndConvert(file) {
   const MAX_WIDTH = 1200
   const MAX_HEIGHT = 800
-  const MAX_SIZE = 500 * 1024 // 500KB
+  const MAX_SIZE = 500 * 1024 // 500 KB
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -351,33 +443,26 @@ async function compressAndConvert(file) {
 
       img.onload = () => {
         const canvas = document.createElement('canvas')
-        let width = img.width
-        let height = img.height
+        let { width, height } = img
 
-        // Calculate new dimensions
         if (width > height) {
           if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width
+            height = Math.round((height * MAX_WIDTH) / width)
             width = MAX_WIDTH
           }
         } else {
           if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height
+            width = Math.round((width * MAX_HEIGHT) / height)
             height = MAX_HEIGHT
           }
         }
 
         canvas.width = width
         canvas.height = height
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height)
 
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, width, height)
-
-        // Try different quality levels to get under MAX_SIZE
         let quality = 0.7
         let dataURL = canvas.toDataURL('image/jpeg', quality)
-
-        // Reduce quality if still too large
         while (dataURL.length > MAX_SIZE && quality > 0.1) {
           quality -= 0.1
           dataURL = canvas.toDataURL('image/jpeg', quality)

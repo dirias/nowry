@@ -5,7 +5,6 @@ import { useDropzone } from 'react-dropzone'
 import { booksService } from '../../api/services'
 import { WarningWindow, SuccessWindow, Error as ErrorWindow } from '../Messages'
 import BookEditor from './BookEditor'
-import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { useAuth } from '../../context/AuthContext'
 import useBooks from '../../hooks/useBooks'
 import Book from './Book'
@@ -63,7 +62,6 @@ export default function BookHome() {
 
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { themeColor } = useThemePreferences()
   const { user } = useAuth()
 
   const handleViewChange = useCallback((newMode) => {
@@ -388,10 +386,10 @@ export default function BookHome() {
                       '&:active': { transform: 'scale(0.95)' },
                       ...(isSelected
                         ? {
-                            bgcolor: themeColor,
-                            color: '#ffffff',
+                            bgcolor: 'primary.solidBg',
+                            color: 'primary.solidColor',
                             border: '1px solid',
-                            borderColor: themeColor,
+                            borderColor: 'primary.solidBg',
                             boxShadow: `0 4px 10px rgba(0,0,0,0.1)`,
                             '&:hover': { filter: 'brightness(0.9)' }
                           }
@@ -567,7 +565,7 @@ export default function BookHome() {
                       borderRadius: 'sm',
                       overflow: 'hidden',
                       flexShrink: 0,
-                      bgcolor: book.cover_color || themeColor || 'primary.solidBg',
+                      bgcolor: book.cover_color || 'primary.solidBg',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

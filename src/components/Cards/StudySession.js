@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePet } from '../../context/AgentContext'
 import {
   Container,
   Card,
@@ -17,6 +18,7 @@ import {
 } from '@mui/joy'
 import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit } from '@mui/icons-material'
 import { cardsService, decksService } from '../../api/services'
+import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import { apiCache } from '../../api/utils/cache'
@@ -79,6 +81,43 @@ export default function StudySession() {
     [_handleVoiceSettingsChange, isFlipped, deckId, currentCardDeckId]
   )
 
+  const { setViewContext, queueIntervention, resetCompanionSession, setStudySession } = usePet()
+
+  const buildStudyContext = React.useCallback(
+    (cardIdx, flipped) => {
+      const card = cards[cardIdx]
+      if (!card) return null
+      return {
+        page: 'study_session',
+        deckId: deckId === 'daily-review' ? card.deck_id?._id || card.deck_id || null : deckId,
+        deckName: card.deck_id?.name || card.deck_id?.title || null,
+        cardIndex: cardIdx + 1,
+        totalCards: cards.length,
+        cardType: card.card_type || 'basic',
+        isFlipped: flipped,
+        front: card.title || '',
+        back: flipped ? card.content || '' : null,
+        isDailyReview: deckId === 'daily-review'
+      }
+    },
+    [cards, deckId]
+  )
+
+  // Signal to AgentContext that a study session is active
+  useEffect(() => {
+    setStudySession(true)
+    return () => setStudySession(false)
+  }, [setStudySession])
+
+  // Companion intervention tracking
+  const interventionFiredCardIds = useRef(new Set())
+  const wrongCountPerCardId = useRef({})
+  const interventionTimerRef = useRef(null)
+
+  // Session history tracking
+  const sessionStartTime = useRef(new Date())
+  const gradedCards = useRef([]) // accumulates { cardId, cardTitle, grade, evaluation } per card
+
   // Swipe state
   const touchStart = useRef(null)
   const touchEnd = useRef(null)
@@ -121,14 +160,17 @@ export default function StudySession() {
     fetchDeckCards()
   }, [cardsLoading, fetchDeckCards])
 
-  // Invalidate cache when leaving study session
+  // Invalidate cache when leaving study session; reset companion state
   useEffect(() => {
     return () => {
       apiCache.invalidate('cards:statistics')
       apiCache.invalidate('cards:all')
       apiCache.invalidate('decks:all')
+      setViewContext(null)
+      resetCompanionSession()
+      if (interventionTimerRef.current) clearTimeout(interventionTimerRef.current)
     }
-  }, [])
+  }, [setViewContext, resetCompanionSession])
 
   // Retry failed reviews in background
   useEffect(() => {
@@ -174,6 +216,50 @@ export default function StudySession() {
         .catch((err) => console.error('Mermaid render error:', err))
     }
   }, [currentIndex, cards])
+
+  // Inject structured screen context into the Study Pet on card change and flip
+  useEffect(() => {
+    if (!cards || cards.length === 0) return
+    const ctx = buildStudyContext(currentIndex, isFlipped)
+    setViewContext(ctx)
+  }, [currentIndex, isFlipped, cards, buildStudyContext, setViewContext])
+
+  // Clear pet context when session is complete + fire session_summary intervention
+  useEffect(() => {
+    if (!sessionComplete) return
+    setViewContext(null)
+
+    const wrongCounts = wrongCountPerCardId.current
+    const mostMissedEntry = Object.entries(wrongCounts).sort((a, b) => b[1] - a[1])[0]
+    const mostMissedCardId = mostMissedEntry?.[0] ?? null
+    const totalWrong = Object.values(wrongCounts).reduce((acc, n) => acc + n, 0)
+
+    queueIntervention({
+      type: 'session_summary',
+      session_total_cards: cards.length,
+      session_wrong_count: totalWrong,
+      most_missed_card_id: mostMissedCardId,
+      most_missed_card_front: mostMissedCardId ? (cards.find((c) => (c._id || c.id) === mostMissedCardId)?.title ?? null) : null
+    })
+
+    // LOG SESSION HISTORY — fire-and-forget, never blocks the UI
+    if (gradedCards.current.length > 0) {
+      const firstCard = cards[0]
+      const deckIdValue = deckId === 'daily-review' ? null : deckId
+      const deckNameValue = deckId === 'daily-review' ? 'Daily Review' : firstCard?.deck_id?.name || firstCard?.deck_id?.title || null
+
+      studySessionsService
+        .log({
+          deckId: deckIdValue,
+          deckName: deckNameValue,
+          startedAt: sessionStartTime.current,
+          cards: gradedCards.current
+        })
+        .catch(() => {
+          // Non-fatal — history logging never interrupts the study experience
+        })
+    }
+  }, [sessionComplete, setViewContext, queueIntervention, cards, deckId])
 
   const handleFlip = React.useCallback(() => {
     setIsFlipped((prev) => !prev)
@@ -250,6 +336,40 @@ export default function StudySession() {
 
       // Move to next card IMMEDIATELY
       handleNext()
+
+      // HISTORY: accumulate this grade for session-level logging on completion
+      const gradeToEval = { again: 'incorrect', hard: 'partial', good: 'correct', easy: 'correct' }
+      gradedCards.current.push({
+        cardId: cardId,
+        cardTitle: currentCard.title || currentCard.front || null,
+        grade,
+        evaluation: gradeToEval[grade] ?? 'incorrect'
+      })
+
+      // COMPANION INTERVENTION: trigger a delayed nudge for 'again' grade
+      if (grade === 'again') {
+        const wrongCardId = currentCard._id || currentCard.id
+        wrongCountPerCardId.current[wrongCardId] = (wrongCountPerCardId.current[wrongCardId] || 0) + 1
+
+        if (!interventionFiredCardIds.current.has(wrongCardId)) {
+          interventionFiredCardIds.current.add(wrongCardId)
+          if (interventionTimerRef.current) clearTimeout(interventionTimerRef.current)
+
+          const delay = 3000 + Math.random() * 5000
+          interventionTimerRef.current = setTimeout(() => {
+            queueIntervention({
+              type: 'wrong_answer',
+              card_id: wrongCardId,
+              card_front: currentCard.title || currentCard.front || '',
+              card_back: currentCard.content || currentCard.back || '',
+              card_notes: currentCard.notes || null,
+              card_type: currentCard.card_type || 'basic',
+              session_card_index: currentIndex + 1,
+              session_total_cards: cards.length
+            })
+          }, delay)
+        }
+      }
 
       // BACKGROUND SYNC: Send to backend (fire-and-forget)
       try {

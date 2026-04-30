@@ -49,7 +49,7 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
   const [updatedAt] = useState(new Date(book.updated_at) || new Date())
   const [pageLimit] = useState(book.page_limit)
   const [coverImage, setCoverImage] = useState(book.cover_image)
-  const [coverColor, setCoverColor] = useState(book.cover_color || themeColor || '#0B6BCB') // Use theme color as default
+  const [coverColor, setCoverColor] = useState(book.cover_color || themeColor)
   const [summary, setSummary] = useState(book.summary || '')
   const [tags, setTags] = useState(book.tags || [])
   const [displayColorPicker, setDisplayColorPicker] = useState(false)

@@ -24,7 +24,8 @@
       "whatWillHappen": "What will happen:",
       "recoveryNotice": "Data can be recovered within 30 days by contacting support"
     },
-    "toggleTheme": "Toggle theme"
+    "toggleTheme": "Toggle theme",
+    "studyBuddy": "Study Buddy"
   },
   "news": {
     "title": "Latest News",
@@ -574,6 +575,9 @@
     }
   },
   "settings": {
+    "quiz": {
+      "question_count": "Questions per AI quiz"
+    },
     "title": "Settings",
     "subtitle": "Manage your account and preferences",
     "nav": {
@@ -581,6 +585,7 @@
       "appearance": "Appearance",
       "productivity": "Productivity",
       "notifications": "Notifications",
+      "agent": "Study Buddy",
       "security": "Security",
       "danger": "Danger Zone",
       "jump": "Navigate to section",
@@ -601,26 +606,39 @@
       "accentColorDesc": "Customize the app accent color",
       "interests": "Interests"
     },
+    "general": {
+      "title": "General Preferences",
+      "appearance": "Appearance",
+      "appearanceDesc": "Toggle between Light and Dark mode",
+      "language": "Language",
+      "themeColor": "Theme Color",
+      "themeColorDesc": "Select your accent color. This will update the entire theme.",
+      "interests": "Interests",
+      "interestsDesc": "Select topics to see news and content"
+    },
     "productivity": {
       "title": "Productivity",
       "enableTimer": "Enable Pomodoro Timer",
-      "enableTimerDesc": "Show timer in header and enable floating widget",
+      "enableTimerDesc": "Display timer in the header and enable the floating widget",
       "focusDuration": "Focus duration (minutes)",
       "shortBreak": "Short break (minutes)",
       "longBreak": "Long break (minutes)",
       "recommendedMinutes": "Recommended: {{count}}",
-      "autoStart": "Auto-start timer",
+      "autoStart": "Auto-start",
       "autoStartDesc": "Automatically start the next session"
     },
-    "general": {
-      "title": "General Preferences",
-      "appearance": "Appearance",
-      "appearanceDesc": "Switch between Light and Dark mode",
-      "language": "Language",
-      "themeColor": "Theme Color",
-      "themeColorDesc": "Select your preferred accent color. This will update the entire application theme.",
-      "interests": "Interests",
-      "interestsDesc": "Select topics you want to see news and focus content for"
+    "notifications": {
+      "title": "Notifications",
+      "emailDigest": "Email digest",
+      "emailDigestDesc": "Receive a daily summary of your activity",
+      "studyReminders": "Study reminders",
+      "studyRemindersDesc": "Get notified when cards are due for review",
+      "newsUpdates": "News updates",
+      "newsUpdatesDesc": "Receive updates about new features",
+      "marketing": "Marketing emails",
+      "marketingDesc": "Receive promotional offers",
+      "comingSoon": "Notifications coming soon",
+      "comingSoonDesc": "We are working on smart notifications for your study sessions"
     },
     "security": {
       "title": "Security",
@@ -629,57 +647,44 @@
       "currentPassword": "Current password",
       "newPassword": "New password",
       "confirmPassword": "Confirm new password",
-      "updatePassword": "Update Password",
+      "updatePassword": "Update",
       "passwordMismatch": "Passwords do not match",
       "passwordTooShort": "Password must be at least 8 characters",
       "passwordTooWeak": "Password is too weak",
       "wrongPassword": "Current password is incorrect",
-      "reauthRequired": "Please enter your current password to continue",
+      "reauthRequired": "Enter your current password to continue",
       "passwordChangeFailed": "Failed to update password. Please try again.",
       "passwordChanged": "Password updated successfully",
       "save": "Update password",
       "twoFactor": "Two-factor authentication",
-      "twoFactorDesc": "Add an extra layer of security to your account",
+      "twoFactorDesc": "Add an extra layer of security",
       "comingSoon": "Coming soon",
       "enable2FA": "Enable 2FA",
       "disable2FA": "Disable",
       "success2FA": "2FA Enabled! Backup codes:",
       "disabled2FA": "2FA disabled successfully"
     },
-    "notifications": {
-      "title": "Notifications",
-      "emailDigest": "Email digest",
-      "emailDigestDesc": "Receive daily summary of your study activity",
-      "studyReminders": "Study reminders",
-      "studyRemindersDesc": "Get notified when cards are due for review",
-      "newsUpdates": "News updates",
-      "newsUpdatesDesc": "Receive updates about new features and improvements",
-      "marketing": "Marketing emails",
-      "marketingDesc": "Receive promotional offers and tips",
-      "comingSoon": "Notifications coming soon",
-      "comingSoonDesc": "We're working on smart notifications for your study sessions"
-    },
     "danger": {
       "title": "Danger Zone",
       "deleteAccount": "Delete account",
-      "deleteDesc": "Permanently delete your account and all data. This cannot be undone.",
+      "deleteDesc": "Permanently delete your account and all data. This action is irreversible.",
       "confirmTitle": "Are you absolutely sure?",
-      "confirmDesc": "This action cannot be undone. All your data including books, cards, and progress will be permanently deleted.",
+      "confirmDesc": "This action is irreversible. All your data will be deleted.",
       "confirmBtn": "Yes, Delete My Account",
       "cancelBtn": "Cancel",
       "modal": {
         "title": "Delete Account",
-        "description": "This will permanently remove your account and all associated data",
+        "description": "This will permanently delete your account and all associated data",
         "confirm": "Delete My Account",
         "consequence1": "All books and notes will be deleted",
-        "consequence2": "All flashcard decks will be deleted",
+        "consequence2": "All card decks will be deleted",
         "consequence3": "All annual planning data will be deleted",
-        "consequence4": "Public content will be unpublished immediately"
+        "consequence4": "Public content will be immediately unpublished"
       }
     },
     "errors": {
-      "loadFailed": "Failed to load settings. Please refresh and try again.",
-      "networkError": "Network error. Please check your connection."
+      "loadFailed": "Could not load settings. Refresh and try again.",
+      "networkError": "Network error. Check your connection."
     }
   },
   "dashboard": {
@@ -1112,6 +1117,10 @@
       "add": "Add Goal",
       "edit": "Edit Goal",
       "delete": "Delete Goal",
+      "deleteConfirm": {
+        "title": "Delete goal",
+        "description": "This goal and all its milestones will be permanently removed. This action cannot be undone."
+      },
       "title": "Goal Title",
       "description": "Description",
       "focusArea": "Focus Area",
@@ -1635,6 +1644,383 @@
       "message": "Your profile setup isn't complete yet.",
       "cta": "Finish setup",
       "dismiss": "Dismiss"
+    }
+  },
+  "pet": {
+    "stage": {
+      "1": {
+        "name": "Wisp"
+      },
+      "2": {
+        "name": "Sprite"
+      },
+      "3": {
+        "name": "Scout"
+      },
+      "4": {
+        "name": "Sage"
+      },
+      "5": {
+        "name": "Oracle"
+      },
+      "6": {
+        "name": "Luminary"
+      }
+    },
+    "levelUp": {
+      "reached": "You reached level {{level}}",
+      "dismiss": "Tap to dismiss"
+    }
+  },
+  "quiz": {
+    "mode_label": "Quiz Mode",
+    "exit_aria": "Exit quiz mode",
+    "select_deck": "Which deck should we practice?",
+    "select_deck_aria": "Select {{name}} deck for quiz",
+    "due": "due",
+    "input_placeholder": "Type your answer...",
+    "no_decks": "No decks yet. Create one to start practicing.",
+    "go_to_study": "Go to Study Center",
+    "type": {
+      "definition": "Definition",
+      "contextual": "Contextual",
+      "comparison": "Compare",
+      "fill_in": "Fill In",
+      "open_recall": "Open Recall",
+      "fill_in_blank": "Fill in the blank",
+      "multiple_choice": "Multiple choice",
+      "short_answer": "Short answer"
+    },
+    "hint_label": "Hint",
+    "answer_label": "Answer",
+    "next_card": "Next →",
+    "next_card_aria": "Go to next card",
+    "see_results": "See Results",
+    "summary_title": "Session Complete",
+    "weak_cards_label": "Cards to review",
+    "review_weak": "Review Weak Cards",
+    "review_weak_aria": "Start review session for weak cards",
+    "done": "Done",
+    "done_aria": "Close quiz summary",
+    "confirm_exit_prompt": "Are you sure you want to exit the quiz?",
+    "confirm_exit_yes": "Exit Quiz",
+    "confirm_exit_no": "Keep Going",
+    "choose_deck_title": "Choose a deck",
+    "choose_deck_subtitle": "Pick what you want to practice",
+    "new": "new",
+    "error_loading_decks": "Could not load decks. Please try again.",
+    "error_starting": "Could not start the quiz. Please try again.",
+    "error_submitting": "Could not submit your answer. Please try again.",
+    "retry": "Retry",
+    "skip_card": "Skip this card",
+    "ai": {
+      "starting": "Generating your {{topic}} quiz…",
+      "error": "Couldn't start the quiz. Try again?"
+    },
+    "mode": {
+      "ai": "AI Quiz"
+    },
+    "topic_label": "Topic: {{topic}}",
+    "summary": {
+      "view_history": "View history"
+    }
+  },
+  "sessions": {
+    "title": "Recent Sessions",
+    "totalCount": "{{count}} total",
+    "aiQuiz": "AI Quiz",
+    "deckQuiz": "Deck Quiz",
+    "cardCount": "{{count}} cards",
+    "viewAll": "View {{count}} more sessions",
+    "showLess": "Show less",
+    "expandAria": "Expand session details",
+    "collapseAria": "Collapse session details",
+    "noCardDetail": "No card detail available.",
+    "cardRef": "Card #{{id}}",
+    "unknownTopic": "Unknown topic",
+    "srsReview": "Flashcard Review",
+    "empty": "No sessions yet. Complete a study session or quiz to see your history here.",
+    "viewHistory": "View history",
+    "emptyHint": "Complete a study session to see it here",
+    "loadMore": "Load {{count}} more"
+  },
+  "agent": {
+    "aria": {
+      "openBuddy": "Open Study Buddy",
+      "closeBuddy": "Close Study Buddy",
+      "sendMessage": "Send message"
+    },
+    "errors": {
+      "resting": "The Study Buddy is resting. Try again in a moment.",
+      "settingsLoadFailed": "Could not load your settings. Showing defaults.",
+      "quizStartFailed": "Couldn't start the quiz. Please try again.",
+      "quizAnswerFailed": "Something went wrong evaluating your answer. The session has been reset — you can start a new quiz."
+    },
+    "defaultName": "Study Buddy",
+    "settingsSubtitle": "Configure your companion's behavior and personality",
+    "welcomeMessage": "Hey there! 👋 I'm {{petName}}.",
+    "welcomePrompt": "{{name}}, ask me anything, or tell me what you're studying today.",
+    "welcomePromptNoName": "Ask me anything, or tell me what you're studying today.",
+    "headerStatus": "Lv{{level}} · {{tier}} · {{remaining}} sparks left",
+    "headerStatusUnlimited": "Lv{{level}} · {{tier}} · unlimited",
+    "inputPlaceholder": "Ask me anything...",
+    "inputAriaLabel": "Message your Study Buddy",
+    "limitReachedPlaceholder": "Monthly limit reached — upgrade for more sparks",
+    "tabs": {
+      "personality": "Personality",
+      "companion": "Companion",
+      "interventions": "Interventions"
+    },
+    "settings": {
+      "backToSettings": "Back to Settings",
+      "levelLabel": "Level {{level}}",
+      "xpToNextLevel": "{{count}} XP to next level",
+      "sparks": "sparks",
+      "previewMessage": "What should I study today?",
+      "personality": {
+        "replyLength": {
+          "title": "Reply Length",
+          "desc": "Control how much your buddy writes per response."
+        },
+        "tone": {
+          "title": "Personality & Tone",
+          "desc": "Choose how your buddy should communicate with you."
+        },
+        "knowledge": {
+          "title": "Knowledge Access",
+          "desc": "Let your buddy read your library, decks, and goals to give smarter advice. Your data is",
+          "descBold": "never sent externally",
+          "descSuffix": "— only used to generate your reply.",
+          "libraryToggleLabel": "Allow access to my library & decks",
+          "libraryToggleDesc": "Enables the RAG retrieval pipeline (read-only).",
+          "nudgesLabel": "Proactive study nudges",
+          "nudgesDesc": "Greet you on the dashboard with a nudge if you have due cards.",
+          "nudgesRequires": " Requires Knowledge Access.",
+          "unlockAlert": "Enable Knowledge Access to unlock smarter answers and proactive nudges.",
+          "roamingLabel": "Roaming companion",
+          "roamingDesc": "Your buddy wanders around the screen between elements while you study."
+        },
+        "saved": "Saved",
+        "preview": {
+          "title": "Live Preview",
+          "caption": "This preview updates as you change settings above.",
+          "captionSave": "Changes are saved automatically."
+        },
+        "conciseness": {
+          "concise": {
+            "label": "Concise",
+            "description": "1–2 sentences. Straight to the point.",
+            "preview": "You have 8 cards due. Start your session!"
+          },
+          "balanced": {
+            "label": "Balanced",
+            "description": "Complete answers without padding.",
+            "preview": "You have 8 due cards spread across 2 decks. I'd suggest starting with 'Organic Chemistry' since it has the most overdue items. Head to your Study Session when you're ready!"
+          },
+          "detailed": {
+            "label": "Detailed",
+            "description": "Thorough explanations with examples.",
+            "preview": "Great question! You have 8 cards due today across 2 decks:\n• Organic Chemistry — 5 due, 2 new\n• Linear Algebra — 3 due\n\nI'd recommend tackling Organic Chemistry first since those cards are the most overdue and you're at 62% mastery there. Your study streak is at 4 days — don't break it! 🔥"
+          }
+        },
+        "toneOptions": {
+          "friendly": {
+            "label": "Friendly",
+            "description": "Warm, encouraging, and conversational.",
+            "preview": "You're doing great! Let's keep that momentum going. Hit your study session! ✨"
+          },
+          "professional": {
+            "label": "Professional",
+            "description": "Precise, academic, no fluff.",
+            "preview": "You have 8 items due for review. Completing them will improve retention by reinforcing spaced repetition intervals."
+          },
+          "strict": {
+            "label": "Strict",
+            "description": "Accountability-first. No empty praise.",
+            "preview": "8 cards overdue. That's falling behind. Get into your session now — every day you skip increases relearning time."
+          },
+          "socratic": {
+            "label": "Socratic",
+            "description": "Answers questions with guiding questions.",
+            "preview": "Before I tell you, what do you think happens to a memory trace when you skip a review? Think about what spaced repetition is designed to prevent."
+          }
+        }
+      },
+      "interventions": {
+        "requiresNudging": "Enable Proactive nudges in the Personality tab to configure interventions.",
+        "saveError": "Could not save. Please try again.",
+        "frequency": {
+          "sectionTitle": "Intervention frequency",
+          "sectionDesc": "How often your companion interrupts you with messages.",
+          "conservative": "Conservative",
+          "conservativeDesc": "At most 1 message per session. 20-minute quiet window after dismissal.",
+          "balanced": "Balanced",
+          "balancedDesc": "At most 2 messages per session. 10-minute quiet window after dismissal.",
+          "frequent": "Frequent",
+          "frequentDesc": "At most 4 messages per session. 3-minute quiet window after dismissal."
+        },
+        "focusMode": {
+          "title": "Focus mode",
+          "label": "Stay silent during study sessions",
+          "desc": "Suppresses wrong-answer messages while you are actively studying. Session summaries still fire at the end."
+        },
+        "types": {
+          "sectionTitle": "Message types",
+          "sectionDesc": "Turn off specific kinds of messages from your companion.",
+          "wrongAnswer": "Teaching moments",
+          "wrongAnswerDesc": "A short explanation after you answer a card incorrectly.",
+          "sessionSummary": "Session summaries",
+          "sessionSummaryDesc": "A diagnostic message at the end of each study session.",
+          "preSession": "Pre-session framing",
+          "preSessionDesc": "A brief orientation before a study session begins.",
+          "reEngagement": "Re-engagement nudges",
+          "reEngagementDesc": "A message when cards have been building up across your decks.",
+          "streakMilestone": "Streak milestones",
+          "streakMilestoneDesc": "A message when you hit 7, 14, 30, 60, or 100 consecutive study days."
+        }
+      }
+    },
+    "avatar": {
+      "generateError": "Something went wrong. Please try again.",
+      "rateLimitError": "Monthly portrait limit reached.",
+      "freeTierError": "Upgrade to Plus to generate portraits.",
+      "missingSpeciesError": "Choose a companion species first.",
+      "portraitAlt": "Your companion portrait",
+      "regenPendingTitle": "Your companion has evolved!",
+      "regenPendingDesc": "Generate their new portrait to see their grown form.",
+      "regenPendingAction": "Generate new portrait"
+    },
+    "animation": {
+      "generateError": "Something went wrong generating the animation. Please try again.",
+      "rateLimitError": "Monthly animation limit reached.",
+      "freeTierError": "Upgrade to Plus to generate animations.",
+      "requiresAvatar": "Generate a portrait first to unlock animation.",
+      "requiresHostedAvatar": "Regenerate your portrait to unlock animation."
+    },
+    "companion": {
+      "nameTitle": "Name your companion",
+      "nameDescription": "Give your study companion a name that feels right.",
+      "nameLabel": "Companion name",
+      "namePlaceholder": "e.g. Hoot, Nova, Spark...",
+      "nameAriaLabel": "Name your companion",
+      "speciesTitle": "Choose a species",
+      "speciesDescription": "Your companion's species shapes its personality.",
+      "suggestedLabel": "Suggested based on your interests",
+      "colorTitle": "Accent color",
+      "colorDescription": "Sets the glow color of your companion's orb.",
+      "colorAriaLabel": "Select {{color}} color",
+      "previewLabel": "Live preview",
+      "previewCaption": "Updates as you make changes",
+      "saveError": "Could not save. Please try again.",
+      "avatarTitle": "AI Portrait",
+      "avatarDescription": "Generate a unique AI portrait of your companion based on your profile.",
+      "avatarLockedTitle": "AI Portrait",
+      "avatarLockedDescription": "Get a unique AI-generated portrait of your companion.",
+      "avatarGenerating": "Creating your companion...",
+      "generateAvatar": "Generate your companion",
+      "generateAvatarAriaLabel": "Generate AI portrait of your companion",
+      "regenerate": "Regenerate",
+      "regenerating": "Regenerating...",
+      "regenerateAriaLabel": "Regenerate companion portrait",
+      "generationsRemaining": "{{count}} left this month",
+      "upgradePlus": "Upgrade to Plus",
+      "upgradePlusAriaLabel": "Upgrade to Plus to unlock AI portraits",
+      "avatarStage0": "Preparing your companion's portrait...",
+      "avatarStage1": "Painting with AI brushes...",
+      "avatarStage2": "Adding the finishing touches...",
+      "avatarStage3": "Almost there — final details...",
+      "elapsedSeconds": "{{seconds}}s elapsed",
+      "animationTitle": "Companion animation",
+      "animationDescription": "Generate a looping animation of your companion in motion. Takes 1–3 minutes.",
+      "animationLockedDescription": "Upgrade to Plus to unlock animated companions.",
+      "animationRequiresAvatar": "Generate a portrait first to unlock the animation.",
+      "animationRequiresNewPortrait": "Your portrait needs to be regenerated once to unlock animation. Click Regenerate above.",
+      "generateAnimation": "Generate animation",
+      "generateAnimationAriaLabel": "Generate looping animation for your companion",
+      "animationReady": "Animation ready",
+      "regenerateAnimation": "Regenerate",
+      "regenerateAnimationAriaLabel": "Regenerate companion animation",
+      "animStage0": "Studying how your companion moves...",
+      "animStage1": "Bringing them to life...",
+      "animStage2": "Smoothing the loop...",
+      "animStage3": "Rendering final frames...",
+      "animStage4": "Almost ready — worth the wait ✨",
+      "species": {
+        "owl": "Owl",
+        "fox": "Fox",
+        "cat": "Cat",
+        "dragon": "Dragon",
+        "robot": "Robot",
+        "star": "Star",
+        "phoenix": "Phoenix",
+        "crystal": "Crystal",
+        "leaf": "Leaf",
+        "music": "Note"
+      },
+      "colors": {
+        "ocean": "Ocean",
+        "violet": "Violet",
+        "mint": "Mint",
+        "gold": "Gold",
+        "rose": "Rose",
+        "coral": "Coral",
+        "sky": "Sky",
+        "ember": "Ember"
+      },
+      "dismiss": "Dismiss",
+      "tellMeMore": "Tell me more",
+      "interventions": {
+        "preSessionFraming": {
+          "noStruggle": "{{deckName}} has {{dueCount}} cards due. This is a focused session.",
+          "withStruggle": "{{deckName}} has {{dueCount}} cards due. Last session, {{strugglePattern}} gave you trouble — worth a close read today."
+        },
+        "reEngagement": {
+          "withDue": "{{totalDue}} cards have built up across your decks. {{topDeckName}} has the most at {{topDeckDue}} — a good place to start.",
+          "noDue": "No cards are due today, but {{topDeckName}} is worth a pass to keep retention sharp."
+        },
+        "streakMilestone": {
+          "day7": "Seven consecutive days of review is where habit formation research places the first durable anchor.",
+          "day14": "Two weeks of daily review produces measurable long-term retention gains according to spaced repetition studies.",
+          "day30": "Thirty days of consistent review puts this material into the category of durable long-term memory.",
+          "day60": "Sixty days of unbroken review is a result most learners never reach.",
+          "day100": "One hundred days. The research on habit durability stops distinguishing at this point — this is simply part of who you are now."
+        }
+      }
+    }
+  },
+  "bugs": {
+    "modal": {
+      "title": "Report a Bug",
+      "titleField": "Bug title",
+      "titlePlaceholder": "e.g., Editor crashes when pasting large content",
+      "description": "Description",
+      "descPlaceholder": "Describe what happened in detail...",
+      "steps": "Steps to reproduce",
+      "stepsPlaceholder": "1. Go to...\n2. Click on...\n3. See error",
+      "severity": "Severity",
+      "category": "Category",
+      "screenshots": "Screenshots",
+      "screenshotsHint": "{{count}}/3 screenshots · Images are compressed automatically",
+      "uploadBtn": "Upload screenshot",
+      "maxReached": "Maximum reached",
+      "submit": "Submit bug report",
+      "submitting": "Submitting...",
+      "successMsg": "Bug report submitted. Thank you!",
+      "errorMsg": "Failed to submit bug report. Please try again.",
+      "removeScreenshot": "Remove screenshot"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "category": {
+      "ui": "UI / Design",
+      "performance": "Performance",
+      "functionality": "Functionality",
+      "data": "Data / Content",
+      "other": "Other"
     }
   }
 }

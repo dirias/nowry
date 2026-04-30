@@ -173,7 +173,7 @@ export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublis
 
             {/* Fork attribution — immutable, only shown when deck is a fork */}
             {deck?.forked_from && (
-              <Sheet variant='soft' color='neutral' sx={{ borderRadius: 'md', p: 1.5, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+              <Box sx={{ bgcolor: 'background.level1', borderRadius: 'sm', p: 1.5, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                 <CallSplit sx={{ fontSize: 15, color: 'text.tertiary', mt: 0.25, flexShrink: 0 }} />
                 <Box>
                   <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 600 }}>
@@ -189,7 +189,7 @@ export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublis
                     {t('publish.forkedFrom.immutableNote')}
                   </Typography>
                 </Box>
-              </Sheet>
+              </Box>
             )}
 
             {/* Description */}

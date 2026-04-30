@@ -24,8 +24,10 @@ import Footer from './components/HomePage/Footer'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PomodoroProvider } from './context/PomodoroContext'
 import { NotificationProvider } from './context/NotificationContext'
+import { AgentProvider } from './context/AgentContext'
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/Common/ErrorBoundary'
+import StudyPet from './components/Agent/StudyPet'
 
 // ── Lazily loaded: code-split at route level ─────────────────────────
 const Landing = lazy(() => import('./components/HomePage/Landing'))
@@ -43,12 +45,14 @@ const StudySession = lazy(() => import('./components/Cards/StudySession'))
 const StudyCenter = lazy(() => import('./components/Study/StudyCenter'))
 const UserProfile = lazy(() => import('./components/User/Profile/UserProfile'))
 const AccountSettings = lazy(() => import('./components/User/Profile/AccountSettings'))
+const AgentSettings = lazy(() => import('./components/Agent/AgentSettings'))
 const BugDashboard = lazy(() => import('./components/Bugs/BugDashboard'))
 const News = lazy(() => import('./pages/News'))
 const PublicBrowse = lazy(() => import('./pages/PublicBrowse'))
 const PublicView = lazy(() => import('./pages/PublicView'))
 const MyLikes = lazy(() => import('./pages/MyLikes'))
 const AnnualPlanningHome = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.AnnualPlanningHome })))
+const StudyHistory = lazy(() => import('./components/Study/StudyHistory'))
 const FocusAreaSetup = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.FocusAreaSetup })))
 const FocusAreaView = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.FocusAreaView })))
 const DailyRoutinePlanner = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.DailyRoutinePlanner })))
@@ -199,6 +203,14 @@ const AppContent = () => {
                 }
               />
               <Route
+                path='/study/history'
+                element={
+                  <ProtectedRoute>
+                    <StudyHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path='/study/:deckId'
                 element={
                   <ProtectedRoute>
@@ -219,6 +231,14 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     <AccountSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/settings/agent'
+                element={
+                  <ProtectedRoute>
+                    <AgentSettings />
                   </ProtectedRoute>
                 }
               />
@@ -297,6 +317,9 @@ const AppContent = () => {
       <Suspense fallback={null}>
         <PomodoroWidget />
       </Suspense>
+
+      {/* Study Buddy — always mounted for authenticated users; portal renders above all content */}
+      <StudyPet />
     </div>
   )
 }
@@ -307,9 +330,11 @@ const App = () => {
       <PomodoroProvider>
         <DynamicThemeProvider>
           <NotificationProvider>
-            <Router>
-              <AppContent />
-            </Router>
+            <AgentProvider>
+              <Router>
+                <AppContent />
+              </Router>
+            </AgentProvider>
           </NotificationProvider>
         </DynamicThemeProvider>
       </PomodoroProvider>

@@ -63,8 +63,10 @@ const notifyUser = (message, severity = 'error') => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle request timeout
-    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+    // Handle request timeout — suppress for AI generation endpoints that manage their own UI state
+    const timeoutUrl = error.config?.url || ''
+    const isAiGeneration = timeoutUrl.includes('generate-avatar') || timeoutUrl.includes('generate-animation')
+    if (!isAiGeneration && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
       notifyUser('Request timed out. Please check your connection and try again.', 'warning')
     }
 

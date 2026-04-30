@@ -3,11 +3,8 @@ import { Card, Typography, Box, AspectRatio, IconButton, Stack, Chip } from '@mu
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { useThemePreferences } from '../../theme/DynamicThemeProvider'
-
 export default function Book({ book, handleBookClick = () => {}, onEdit, onDelete }) {
   const { cover_color, cover_image, title, author, isbn } = book
-  const { themeColor } = useThemePreferences()
 
   const [transform, setTransform] = useState('')
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
@@ -108,10 +105,10 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
           sx={{
             width: '100%',
             height: '100%',
-            backgroundColor: cover_color || themeColor || 'primary.solidBg',
+            backgroundColor: cover_color || 'var(--joy-palette-primary-solidBg)',
             background: cover_image
               ? `url(${cover_image}) center/cover`
-              : `linear-gradient(135deg, ${cover_color || themeColor || 'var(--joy-palette-primary-solidBg)'} 0%, var(--joy-palette-neutral-900) 120%)`,
+              : `linear-gradient(135deg, ${cover_color || 'var(--joy-palette-primary-solidBg)'} 0%, var(--joy-palette-neutral-900) 120%)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'

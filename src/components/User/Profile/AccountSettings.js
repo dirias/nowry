@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
+
 import {
   Container,
   Typography,
@@ -49,16 +51,19 @@ import {
   WarningAmberRounded,
   NotificationsOffRounded
 } from '@mui/icons-material'
+import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded'
 import MenuRounded from '@mui/icons-material/MenuRounded'
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded'
 import BookRoundedIcon from '@mui/icons-material/BookRounded'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import { userService } from '../../../api/services'
+import { agentService } from '../../../api/services/agent.service'
 import { useColorScheme } from '@mui/joy/styles'
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
 import DeleteConfirmationModal from '../../Common/DeleteConfirmationModal'
 import { useAuth } from '../../../context/AuthContext'
+import { usePet } from '../../../context/AgentContext'
 import { auth } from '../../../config/firebase.config'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
@@ -69,6 +74,7 @@ const SECTION_IDS = [
   'section-appearance',
   'section-productivity',
   'section-notifications',
+  'section-agent',
   'section-security',
   'section-danger'
 ]
@@ -180,7 +186,8 @@ export default function AccountSettings() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const { mode, setMode } = useColorScheme()
-  const { setThemeColor } = useThemePreferences()
+  const { themeColor: ctxThemeColor, setThemeColor } = useThemePreferences()
+  const { knowledgeAccessEnabled, proactiveNudgingEnabled, updateAgentPrefs } = usePet()
 
   // ── Page state ──────────────────────────────────────────────────────────────
   const [pageLoading, setPageLoading] = useState(true)
@@ -195,7 +202,7 @@ export default function AccountSettings() {
   // ── Preferences ─────────────────────────────────────────────────────────────
   const [preferences, setPreferences] = useState({
     interests: [],
-    theme_color: '#0b6bcb',
+    theme_color: ctxThemeColor,
     language: 'en',
     pomodoro_work_minutes: 25,
     pomodoro_short_break_minutes: 5,
@@ -213,6 +220,12 @@ export default function AccountSettings() {
   })
   const [notifSavingKey, setNotifSavingKey] = useState(null)
   const [notifSavedKey, setNotifSavedKey] = useState(null)
+
+  // ── Agent Settings ─────────────────────────────────────────────────────────
+  const [agentKnowledgeAccess, setAgentKnowledgeAccess] = useState(knowledgeAccessEnabled)
+  const [agentNudging, setAgentNudging] = useState(proactiveNudgingEnabled)
+  const [agentSavingKey, setAgentSavingKey] = useState(null)
+  const [agentSavedKey, setAgentSavedKey] = useState(null)
 
   // ── Security ────────────────────────────────────────────────────────────────
   const [showPasswordForm, setShowPasswordForm] = useState(false)
@@ -259,9 +272,10 @@ export default function AccountSettings() {
       if (profile.preferences) {
         const general = profile.preferences.general || {}
         const pomodoro = profile.preferences.pomodoro || {}
+        const agent = profile.preferences.agent || {}
         const prefs = {
           interests: general.interests || [],
-          theme_color: general.theme_color || '#0b6bcb',
+          theme_color: general.theme_color || ctxThemeColor,
           language: general.language || 'en',
           pomodoro_work_minutes: pomodoro.work_minutes ?? general.pomodoro_work_minutes ?? 25,
           pomodoro_short_break_minutes: pomodoro.short_break_minutes ?? general.pomodoro_short_break_minutes ?? 5,
@@ -271,6 +285,9 @@ export default function AccountSettings() {
         }
         setPreferences(prefs)
         setThemeColor(prefs.theme_color)
+        // Sync agent toggles from stored preferences
+        setAgentKnowledgeAccess(agent.knowledge_access ?? false)
+        setAgentNudging(agent.proactive_nudging ?? false)
       }
     } catch {
       setPageError(t('settings.errors.loadFailed'))
@@ -317,6 +334,32 @@ export default function AccountSettings() {
     const curr = preferences.interests
     const next = curr.includes(interest) ? curr.filter((i) => i !== interest) : [...curr, interest]
     handlePreferenceUpdate('interests', next)
+  }
+
+  // ── Handlers — Agent Settings ────────────────────────────────────────────────
+  const handleAgentSettingUpdate = async (key, value) => {
+    const apiKey = key === 'knowledgeAccess' ? 'agent_knowledge_access' : 'agent_proactive_nudging'
+    // Optimistic update
+    if (key === 'knowledgeAccess') setAgentKnowledgeAccess(value)
+    else setAgentNudging(value)
+    setAgentSavingKey(key)
+    setAgentSavedKey(null)
+    try {
+      await agentService.updatePreferences({ [apiKey]: value })
+      // Sync global AgentContext so pet behavior updates instantly
+      updateAgentPrefs({
+        knowledgeAccessEnabled: key === 'knowledgeAccess' ? value : agentKnowledgeAccess,
+        proactiveNudgingEnabled: key === 'nudging' ? value : agentNudging
+      })
+      setAgentSavedKey(key)
+      setTimeout(() => setAgentSavedKey(null), 2000)
+    } catch {
+      // Roll back on failure
+      if (key === 'knowledgeAccess') setAgentKnowledgeAccess(!value)
+      else setAgentNudging(!value)
+    } finally {
+      setAgentSavingKey(null)
+    }
   }
 
   // ── Handlers — Notifications ─────────────────────────────────────────────────
@@ -844,6 +887,39 @@ export default function AccountSettings() {
                   {t('settings.security.comingSoon')}
                 </Chip>
               </Box>
+            </SectionBlock>
+            <Divider />
+
+            {/* ── Section: Study Buddy ──────────────────────────────────────────── */}
+            <SectionBlock id='section-agent' title='Study Buddy' loading={pageLoading}>
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Box>
+                  <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.5 }}>
+                    <AutoAwesomeRounded sx={{ fontSize: 18, color: 'primary.plainColor' }} />
+                    <Typography level='title-sm'>AI Companion Settings</Typography>
+                  </Stack>
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                    Configure personality, reply length, tone, and knowledge access.
+                    {agentKnowledgeAccess && (
+                      <>
+                        &nbsp;
+                        <Chip size='sm' variant='soft' color='success' sx={{ fontSize: '0.6rem', height: 16, py: 0 }}>
+                          Knowledge On
+                        </Chip>
+                      </>
+                    )}
+                  </Typography>
+                </Box>
+                <Button
+                  component={RouterLink}
+                  to='/settings/agent'
+                  variant='outlined'
+                  size='sm'
+                  startDecorator={<AutoAwesomeRounded sx={{ fontSize: 16 }} />}
+                >
+                  Manage
+                </Button>
+              </Stack>
             </SectionBlock>
             <Divider />
 
