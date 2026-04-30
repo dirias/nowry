@@ -133,16 +133,16 @@ export default function VisualCardModal({ open, onClose, onSaved, decks = [], in
       <ModalDialog sx={{ maxWidth: 900, width: '100%', maxHeight: '90vh', overflow: 'auto' }}>
         <ModalClose />
         <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 2 }}>
-          <Typography level='h4'>{isEdit ? 'Edit Visual Diagram' : 'Create Visual Diagram'}</Typography>
+          <Typography level='h4'>{isEdit ? t('cards.visual.editTitle') : t('cards.visual.createTitle')}</Typography>
           <Chip size='sm' color='info' variant='soft'>
-            Visual
+            {t('cards.visual.chipLabel')}
           </Chip>
         </Stack>
 
         <form onSubmit={handleSubmit}>
           <Stack spacing={3}>
             <FormControl required>
-              <FormLabel>Diagram Title</FormLabel>
+              <FormLabel>{t('cards.visual.diagramTitleLabel')}</FormLabel>
               <Input autoFocus placeholder='Machine Learning Workflow' value={title} onChange={(e) => setTitle(e.target.value)} size='lg' />
             </FormControl>
 
@@ -217,7 +217,7 @@ export default function VisualCardModal({ open, onClose, onSaved, decks = [], in
 
             <FormControl>
               <FormLabel>Assign to Deck</FormLabel>
-              <Select placeholder='Select a deck (optional)' value={deckId} onChange={(_, newValue) => setDeckId(newValue)}>
+              <Select placeholder={t('cards.visual.deckPlaceholder')} value={deckId} onChange={(_, newValue) => setDeckId(newValue)}>
                 {decks.map((deck) => {
                   const deckValue = deck._id || deck.id
                   return (
@@ -230,7 +230,7 @@ export default function VisualCardModal({ open, onClose, onSaved, decks = [], in
             </FormControl>
 
             <Button type='submit' loading={loading} fullWidth size='lg' disabled={!!error || !diagramCode.trim()} sx={{ mt: 1 }}>
-              {isEdit ? 'Save Changes' : 'Create Visual Diagram'}
+              {isEdit ? t('cards.visual.saveChanges') : t('cards.visual.createTitle')}
             </Button>
           </Stack>
         </form>

@@ -276,7 +276,7 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
   return (
     <Modal open={open} onClose={onClose}>
       <ModalDialog sx={{ maxWidth: 500, width: '100%' }}>
-        <DialogTitle>{isEditMode ? 'Edit Annual Priority' : 'Add Annual Priority'}</DialogTitle>
+        <DialogTitle>{isEditMode ? t('annualPlanning.priorityDialog.editTitle') : t('annualPlanning.priorityDialog.addTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
             {/* Generic Link - Top */}
@@ -389,10 +389,10 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
 
             <Stack direction='row' justifyContent='flex-end' spacing={2} sx={{ mt: 2 }}>
               <Button variant='plain' onClick={onClose}>
-                Cancel
+                {t('annualPlanning.priorityDialog.cancel')}
               </Button>
               <Button loading={loading} onClick={handleSubmit}>
-                {isEditMode ? 'Save Changes' : 'Add Priority'}
+                {isEditMode ? t('annualPlanning.priorityDialog.saveChanges') : t('annualPlanning.priorityDialog.addPriority')}
               </Button>
             </Stack>
           </Stack>

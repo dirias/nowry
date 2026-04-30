@@ -253,7 +253,7 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
             </FormControl>
 
             <Button type='submit' loading={loading} fullWidth size='lg' disabled={!correctAnswer} sx={{ mt: 1 }}>
-              {isEdit ? 'Save Changes' : 'Create Quiz Question'}
+              {isEdit ? t('cards.quiz.saveChanges') : t('cards.quiz.createButton')}
             </Button>
           </Stack>
         </form>
