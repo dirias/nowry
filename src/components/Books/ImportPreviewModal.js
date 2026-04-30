@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Modal,
   ModalDialog,
@@ -22,6 +23,7 @@ import ArticleIcon from '@mui/icons-material/Article'
 import DOMPurify from 'dompurify'
 
 export default function ImportPreviewModal({ open, onClose, previewData, onConfirm, loading }) {
+  const { t } = useTranslation()
   const [editedTitle, setEditedTitle] = React.useState('')
   const [currentPageIndex, setCurrentPageIndex] = React.useState(0)
 
@@ -127,7 +129,7 @@ export default function ImportPreviewModal({ open, onClose, previewData, onConfi
                   <Input
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
-                    placeholder='Enter book title...'
+                    placeholder={t('books.import.titlePlaceholder')}
                     size='lg'
                     sx={{ fontWeight: 600 }}
                   />

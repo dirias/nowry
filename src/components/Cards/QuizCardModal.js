@@ -157,7 +157,7 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
       <ModalDialog sx={{ maxWidth: 700, width: '100%', maxHeight: '90vh', overflow: 'auto' }}>
         <ModalClose />
         <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 2 }}>
-          <Typography level='h4'>{isEdit ? 'Edit Quiz Question' : 'Create Quiz Question'}</Typography>
+          <Typography level='h4'>{isEdit ? t('cards.quiz.editTitle') : t('cards.quiz.createTitle')}</Typography>
           <Chip size='sm' color='warning' variant='soft'>
             Quiz
           </Chip>
@@ -185,7 +185,7 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
               <FormLabel>Question</FormLabel>
               <Textarea
                 autoFocus
-                placeholder='What is the capital of France?'
+                placeholder={t('cards.quiz.questionPlaceholder')}
                 minRows={2}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -207,7 +207,7 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
                     <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Radio value={option} disabled={!option.trim()} />
                       <Input
-                        placeholder={`Option ${index + 1}`}
+                        placeholder={t('cards.quiz.optionPlaceholder', { number: index + 1 })}
                         value={option}
                         onChange={(e) => updateOption(index, e.target.value)}
                         sx={{ flex: 1 }}
@@ -226,7 +226,7 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
             <FormControl>
               <FormLabel>Explanation (optional)</FormLabel>
               <Textarea
-                placeholder='Explain why this is the correct answer...'
+                placeholder={t('cards.quiz.explanationPlaceholder')}
                 minRows={2}
                 value={explanation}
                 onChange={(e) => setExplanation(e.target.value)}
@@ -235,12 +235,12 @@ export default function QuizCardModal({ open, onClose, onSaved, decks = [], init
 
             <FormControl>
               <FormLabel>Tags (comma-separated)</FormLabel>
-              <Input placeholder='geography, capitals, france' value={tags} onChange={(e) => setTags(e.target.value)} />
+              <Input placeholder={t('cards.quiz.tagsPlaceholder')} value={tags} onChange={(e) => setTags(e.target.value)} />
             </FormControl>
 
             <FormControl>
               <FormLabel>Assign to Deck</FormLabel>
-              <Select placeholder='Select a deck (optional)' value={deckId} onChange={(_, newValue) => setDeckId(newValue)}>
+              <Select placeholder={t('cards.quiz.deckPlaceholder')} value={deckId} onChange={(_, newValue) => setDeckId(newValue)}>
                 {decks.map((deck) => {
                   const deckValue = deck._id || deck.id
                   return (

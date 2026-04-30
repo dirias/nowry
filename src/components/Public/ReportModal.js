@@ -105,7 +105,7 @@ const ReportModal = ({ open, onClose, onSubmit, contentType = 'book', contentTit
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder='Please provide more context...'
+              placeholder={t('reports.modal.contextPlaceholder')}
               minRows={3}
               maxRows={6}
             />

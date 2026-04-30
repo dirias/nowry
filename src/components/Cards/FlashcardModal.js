@@ -205,7 +205,7 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
                 <Input
                   id='flashcard-question-input'
                   autoFocus
-                  placeholder='What is the capital of France?'
+                  placeholder={t('cards.flashcard.frontPlaceholder')}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
@@ -229,7 +229,7 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
                   Answer
                 </Typography>
                 <Textarea
-                  placeholder='Paris'
+                  placeholder={t('cards.flashcard.backPlaceholder')}
                   minRows={3}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
@@ -246,7 +246,7 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
               {/* Meta Information - More Subtle */}
               <Stack spacing={1.5} sx={{ pt: 1 }}>
                 <Input
-                  placeholder='🏷️  Add tags (e.g., geography, capitals, france)'
+                  placeholder={t('cards.flashcard.tagsPlaceholder')}
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   variant='plain'
@@ -257,7 +257,7 @@ export default function FlashcardModal({ open, onClose, onSaved, decks = [], ini
                 />
 
                 <Select
-                  placeholder='📚  Assign to deck (optional)'
+                  placeholder={t('cards.flashcard.deckPlaceholder')}
                   value={deckId}
                   onChange={(_, newValue) => setDeckId(newValue)}
                   variant='plain'

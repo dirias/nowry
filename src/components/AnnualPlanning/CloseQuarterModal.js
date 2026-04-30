@@ -219,7 +219,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
                   </Typography>
                   <Textarea
                     minRows={3}
-                    placeholder='E.g., I finally launched my project and hit my gym goals consistently!'
+                    placeholder={t('annualPlanning.closeQuarter.achievementsPlaceholder')}
                     value={reflections.biggest_wins}
                     onChange={(e) => setReflections({ ...reflections, biggest_wins: e.target.value })}
                   />
@@ -230,7 +230,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
                   </Typography>
                   <Textarea
                     minRows={3}
-                    placeholder='E.g., I struggled with time management in February due to unexpected work.'
+                    placeholder={t('annualPlanning.closeQuarter.challengesPlaceholder')}
                     value={reflections.biggest_challenges}
                     onChange={(e) => setReflections({ ...reflections, biggest_challenges: e.target.value })}
                   />
@@ -241,7 +241,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
                   </Typography>
                   <Textarea
                     minRows={2}
-                    placeholder='E.g., Doubling down on language learning and maintaining my morning routine.'
+                    placeholder={t('annualPlanning.closeQuarter.lessonsPlaceholder')}
                     value={reflections.next_quarter_focus}
                     onChange={(e) => setReflections({ ...reflections, next_quarter_focus: e.target.value })}
                   />

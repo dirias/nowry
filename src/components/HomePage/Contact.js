@@ -235,7 +235,7 @@ const Contact = () => {
                     <Input
                       type='email'
                       name='email'
-                      placeholder='you@example.com'
+                      placeholder={t('contact.emailPlaceholder')}
                       value={formData.email}
                       onChange={handleChange}
                       size='lg'

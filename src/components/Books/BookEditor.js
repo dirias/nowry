@@ -213,7 +213,7 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     size='md'
-                    placeholder='Enter book title...'
+                    placeholder={t('books.editor.titlePlaceholder')}
                     variant='outlined'
                   />
                 </FormControl>
@@ -342,7 +342,7 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                   <FormLabel sx={{ fontSize: '0.875rem', mb: 0.5 }}>Summary</FormLabel>
                   <Textarea
                     minRows={3}
-                    placeholder='Brief description of the book...'
+                    placeholder={t('books.editor.summaryPlaceholder')}
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
                     size='sm'

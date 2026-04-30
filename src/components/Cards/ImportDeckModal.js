@@ -266,7 +266,7 @@ export default function ImportDeckModal({ open, onClose, onImported }) {
             <Input
               id='import-deck-name'
               size='md'
-              placeholder='Deck name'
+              placeholder={t('cards.import.deckNamePlaceholder')}
               value={deckName}
               onChange={(e) => setDeckName(e.target.value)}
               sx={{ fontWeight: 600 }}
@@ -274,7 +274,7 @@ export default function ImportDeckModal({ open, onClose, onImported }) {
             <Textarea
               id='import-deck-desc'
               size='sm'
-              placeholder='Description (optional)'
+              placeholder={t('cards.import.descriptionPlaceholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               minRows={2}

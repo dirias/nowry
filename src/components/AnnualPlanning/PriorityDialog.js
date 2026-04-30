@@ -283,7 +283,7 @@ const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existing
             <FormControl>
               <FormLabel>Link to Item (Optional)</FormLabel>
               <Autocomplete
-                placeholder='Select goal, task, or routine...'
+                placeholder={t('annualPlanning.priorityDialog.searchPlaceholder')}
                 options={[
                   ...availableItems.goals.map((g) => ({ ...g, type: 'goal', label: g.title, group: 'Goals', valueId: g._id })),
                   ...availableItems.tasks.map((t) => ({ ...t, type: 'task', label: t.title, group: 'Tasks', valueId: t._id })),

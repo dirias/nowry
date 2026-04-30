@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -20,6 +21,7 @@ import { Bug, Filter, TrendingUp } from 'lucide-react'
 import { bugsService } from '../../api/services/bugs.service'
 
 export default function BugDashboard() {
+  const { t } = useTranslation()
   const [bugs, setBugs] = useState([])
   const [stats, setStats] = useState(null)
   const [filters, setFilters] = useState({
@@ -93,12 +95,12 @@ export default function BugDashboard() {
         <Stack direction='row' alignItems='center' spacing={2}>
           <Filter size={20} />
           <Select
-            placeholder='All Status'
+            placeholder={t('bugs.filters.allStatus')}
             value={filters.status}
             onChange={(e, value) => setFilters({ ...filters, status: value || '' })}
             sx={{ minWidth: 150 }}
           >
-            <Option value=''>All Status</Option>
+            <Option value=''>{t('bugs.filters.allStatus')}</Option>
             <Option value='open'>Open</Option>
             <Option value='in-progress'>In Progress</Option>
             <Option value='resolved'>Resolved</Option>
@@ -106,12 +108,12 @@ export default function BugDashboard() {
           </Select>
 
           <Select
-            placeholder='All Severity'
+            placeholder={t('bugs.filters.allSeverity')}
             value={filters.severity}
             onChange={(e, value) => setFilters({ ...filters, severity: value || '' })}
             sx={{ minWidth: 150 }}
           >
-            <Option value=''>All Severity</Option>
+            <Option value=''>{t('bugs.filters.allSeverity')}</Option>
             <Option value='critical'>Critical</Option>
             <Option value='high'>High</Option>
             <Option value='medium'>Medium</Option>
@@ -119,12 +121,12 @@ export default function BugDashboard() {
           </Select>
 
           <Select
-            placeholder='All Categories'
+            placeholder={t('bugs.filters.allCategories')}
             value={filters.category}
             onChange={(e, value) => setFilters({ ...filters, category: value || '' })}
             sx={{ minWidth: 150 }}
           >
-            <Option value=''>All Categories</Option>
+            <Option value=''>{t('bugs.filters.allCategories')}</Option>
             <Option value='ui'>UI/Design</Option>
             <Option value='functionality'>Functionality</Option>
             <Option value='performance'>Performance</Option>

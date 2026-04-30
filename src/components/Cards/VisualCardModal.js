@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Modal,
   ModalDialog,
@@ -28,6 +29,7 @@ mermaid.initialize({
 })
 
 export default function VisualCardModal({ open, onClose, onSaved, decks = [], initialData = null }) {
+  const { t } = useTranslation()
   const [title, setTitle] = useState('')
   const [diagramCode, setDiagramCode] = useState('')
   const [content, setContent] = useState('')
@@ -201,7 +203,7 @@ export default function VisualCardModal({ open, onClose, onSaved, decks = [], in
             <FormControl>
               <FormLabel>Description (optional)</FormLabel>
               <Textarea
-                placeholder='Additional explanation about this diagram...'
+                placeholder={t('cards.visual.explanationPlaceholder')}
                 minRows={2}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}

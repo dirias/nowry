@@ -272,7 +272,7 @@ const DailyRoutinePlanner = () => {
           {/* Add Input */}
           <Stack direction='row' spacing={1} mt={2}>
             <Input
-              placeholder='Add item...'
+              placeholder={t('annualPlanning.dailyRoutine.addItemPlaceholder')}
               value={newItem[inputKey]}
               onChange={(e) => setNewItem({ ...newItem, [inputKey]: e.target.value })}
               fullWidth
