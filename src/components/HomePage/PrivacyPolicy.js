@@ -3,6 +3,7 @@ import { Container, Typography, Box, Stack, Divider, Link, Button } from '@mui/j
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { ArrowBackRounded as ArrowBackIcon } from '@mui/icons-material'
+import DOMPurify from 'dompurify'
 
 const PrivacyPolicy = () => {
   const { t, i18n } = useTranslation()
@@ -58,7 +59,7 @@ const PrivacyPolicy = () => {
             {['identity', 'contact', 'technical', 'usage'].map((item) => (
               <li key={item}>
                 <Typography level='body-md' component='span'>
-                  <span dangerouslySetInnerHTML={{ __html: t(`legal.privacy.dataCollect.items.${item}`) }} />
+                  <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t(`legal.privacy.dataCollect.items.${item}`)) }} />
                 </Typography>
               </li>
             ))}
