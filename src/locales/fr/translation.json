@@ -703,6 +703,7 @@
     }
   },
   "contact": {
+    "emailPlaceholder": "vous@exemple.com",
     "title": "Nous Contacter",
     "subtitle": "Vous avez des questions? Nous serions ravis de vous entendre. Envoyez-nous un message et nous vous répondrons dès que possible.",
     "info": {
@@ -852,6 +853,14 @@
       "markComplete": "Marquer comme Terminé",
       "toggleActive": "Activer/Désactiver"
     },
+    "closeQuarter": {
+      "achievementsPlaceholder": "Listez ce que vous avez accompli ce trimestre...",
+      "challengesPlaceholder": "Décrivez les défis auxquels vous avez fait face...",
+      "lessonsPlaceholder": "Qu'avez-vous appris ?"
+    },
+    "priorityDialog": {
+      "searchPlaceholder": "Sélectionner un objectif, une tâche ou une routine..."
+    },
     "dailyRoutine": {
       "title": "Planificateur de Routine Quotidienne",
       "subtitle": "Concevez votre journée idéale pour atteindre vos objectifs",
@@ -859,6 +868,7 @@
       "afternoon": "Routine de l'Après-midi",
       "evening": "Routine du Soir",
       "addBlock": "Ajouter un Bloc de Temps",
+      "addItemPlaceholder": "Ajouter un élément...",
       "templates": {
         "title": "Commencer avec un Modèle",
         "weekday": "Horaire de Semaine",
@@ -1276,5 +1286,52 @@
     "inputPlaceholder": "Pose-moi une question...",
     "inputAriaLabel": "Envoyer un message à ton compagnon",
     "limitReachedPlaceholder": "Limite mensuelle atteinte — améliore ton abonnement"
+  },
+  "cards": {
+    "import": {
+      "deckNamePlaceholder": "Nom du paquet",
+      "descriptionPlaceholder": "Description (optionnelle)"
+    },
+    "quiz": {
+      "editTitle": "Modifier la question du quiz",
+      "createTitle": "Créer une question de quiz",
+      "questionPlaceholder": "Quelle est la capitale de la France ?",
+      "optionPlaceholder": "Option {{number}}",
+      "explanationPlaceholder": "Expliquez pourquoi c'est la bonne réponse...",
+      "tagsPlaceholder": "géographie, capitales, france",
+      "deckPlaceholder": "Sélectionner un paquet (optionnel)"
+    },
+    "flashcard": {
+      "frontPlaceholder": "Quelle est la capitale de la France ?",
+      "backPlaceholder": "Paris",
+      "tagsPlaceholder": "Ajouter des tags...",
+      "deckPlaceholder": "Assigner à un paquet (optionnel)"
+    },
+    "visual": {
+      "explanationPlaceholder": "Explication supplémentaire..."
+    }
+  },
+  "books": {
+    "editor": {
+      "titlePlaceholder": "Entrez le titre du livre...",
+      "contentPlaceholder": "Commencez à écrire...",
+      "notesPlaceholder": "Ajouter des notes...",
+      "summaryPlaceholder": "Ajouter un résumé..."
+    },
+    "import": {
+      "titlePlaceholder": "Entrez le titre du livre..."
+    }
+  },
+  "reports": {
+    "modal": {
+      "contextPlaceholder": "Veuillez fournir plus de contexte..."
+    }
+  },
+  "bugs": {
+    "filters": {
+      "allStatus": "Tous les statuts",
+      "allSeverity": "Toutes les gravités",
+      "allCategories": "Toutes les catégories"
+    }
   }
 }

@@ -680,6 +680,7 @@
     }
   },
   "contact": {
+    "emailPlaceholder": "du@beispiel.com",
     "title": "Kontaktieren Sie Uns",
     "subtitle": "Haben Sie Fragen? Wir würden gerne von Ihnen hören. Senden Sie uns eine Nachricht und wir werden so schnell wie möglich antworten.",
     "info": {
@@ -829,6 +830,14 @@
       "markComplete": "Als Erledigt Markieren",
       "toggleActive": "Aktiv Umschalten"
     },
+    "closeQuarter": {
+      "achievementsPlaceholder": "Liste auf, was du dieses Quartal erreicht hast...",
+      "challengesPlaceholder": "Beschreibe die Herausforderungen, denen du begegnet bist...",
+      "lessonsPlaceholder": "Was hast du gelernt?"
+    },
+    "priorityDialog": {
+      "searchPlaceholder": "Ziel, Aufgabe oder Routine auswählen..."
+    },
     "dailyRoutine": {
       "title": "Tagesablauf Planer",
       "subtitle": "Gestalten Sie Ihren idealen Tag, um Ihre Ziele zu erreichen",
@@ -836,6 +845,7 @@
       "afternoon": "Nachmittagsroutine",
       "evening": "Abendroutine",
       "addBlock": "Zeitblock Hinzufügen",
+      "addItemPlaceholder": "Element hinzufügen...",
       "templates": {
         "title": "Mit Vorlage Beginnen",
         "weekday": "Wochenplan",
@@ -1253,5 +1263,52 @@
     "inputPlaceholder": "Frag mich etwas...",
     "inputAriaLabel": "Nachricht an deinen Lernbegleiter",
     "limitReachedPlaceholder": "Monatslimit erreicht — upgrade für mehr Funken"
+  },
+  "cards": {
+    "import": {
+      "deckNamePlaceholder": "Stapelname",
+      "descriptionPlaceholder": "Beschreibung (optional)"
+    },
+    "quiz": {
+      "editTitle": "Quizfrage bearbeiten",
+      "createTitle": "Quizfrage erstellen",
+      "questionPlaceholder": "Was ist die Hauptstadt von Frankreich?",
+      "optionPlaceholder": "Option {{number}}",
+      "explanationPlaceholder": "Erkläre, warum dies die richtige Antwort ist...",
+      "tagsPlaceholder": "geografie, hauptstädte, frankreich",
+      "deckPlaceholder": "Stapel auswählen (optional)"
+    },
+    "flashcard": {
+      "frontPlaceholder": "Was ist die Hauptstadt von Frankreich?",
+      "backPlaceholder": "Paris",
+      "tagsPlaceholder": "Tags hinzufügen...",
+      "deckPlaceholder": "Einem Stapel zuweisen (optional)"
+    },
+    "visual": {
+      "explanationPlaceholder": "Zusätzliche Erklärung..."
+    }
+  },
+  "books": {
+    "editor": {
+      "titlePlaceholder": "Buchtitel eingeben...",
+      "contentPlaceholder": "Beginne zu schreiben...",
+      "notesPlaceholder": "Notizen hinzufügen...",
+      "summaryPlaceholder": "Zusammenfassung hinzufügen..."
+    },
+    "import": {
+      "titlePlaceholder": "Buchtitel eingeben..."
+    }
+  },
+  "reports": {
+    "modal": {
+      "contextPlaceholder": "Bitte gib mehr Kontext an..."
+    }
+  },
+  "bugs": {
+    "filters": {
+      "allStatus": "Alle Status",
+      "allSeverity": "Alle Schweregrade",
+      "allCategories": "Alle Kategorien"
+    }
   }
 }

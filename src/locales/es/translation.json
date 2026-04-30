@@ -648,6 +648,15 @@
     }
   },
   "books": {
+    "editor": {
+      "titlePlaceholder": "Ingresa el título del libro...",
+      "contentPlaceholder": "Empieza a escribir...",
+      "notesPlaceholder": "Agregar notas...",
+      "summaryPlaceholder": "Agregar resumen..."
+    },
+    "import": {
+      "titlePlaceholder": "Ingresa el título del libro..."
+    },
     "title": "Libros",
     "library": "Biblioteca de libros",
     "subtitle": "Tu colección personal",
@@ -681,7 +690,27 @@
     "newDeck": "Nuevo Mazo",
     "newCard": "Nueva Tarjeta",
     "import": {
-      "label": "Importar mazo"
+      "label": "Importar mazo",
+      "deckNamePlaceholder": "Nombre del mazo",
+      "descriptionPlaceholder": "Descripción (opcional)"
+    },
+    "quiz": {
+      "editTitle": "Editar pregunta de prueba",
+      "createTitle": "Crear pregunta de prueba",
+      "questionPlaceholder": "¿Cuál es la capital de Francia?",
+      "optionPlaceholder": "Opción {{number}}",
+      "explanationPlaceholder": "Explica por qué esta es la respuesta correcta...",
+      "tagsPlaceholder": "geografía, capitales, francia",
+      "deckPlaceholder": "Selecciona un mazo (opcional)"
+    },
+    "flashcard": {
+      "frontPlaceholder": "¿Cuál es la capital de Francia?",
+      "backPlaceholder": "París",
+      "tagsPlaceholder": "Añadir etiquetas...",
+      "deckPlaceholder": "Asignar a mazo (opcional)"
+    },
+    "visual": {
+      "explanationPlaceholder": "Explicación adicional..."
     },
     "dueToday": "Para hoy",
     "studyStreak": "Racha (días)",
@@ -883,6 +912,7 @@
     }
   },
   "contact": {
+    "emailPlaceholder": "tu@ejemplo.com",
     "title": "Ponte en Contacto",
     "subtitle": "¿Tienes preguntas? Nos encantaría saber de ti. Envíanos un mensaje y te responderemos lo antes posible.",
     "info": {
@@ -1058,6 +1088,14 @@
       "markComplete": "Marcar Completado",
       "toggleActive": "Alternar Activo"
     },
+    "closeQuarter": {
+      "achievementsPlaceholder": "Lista lo que lograste este trimestre...",
+      "challengesPlaceholder": "Describe los desafíos que enfrentaste...",
+      "lessonsPlaceholder": "¿Qué aprendiste?"
+    },
+    "priorityDialog": {
+      "searchPlaceholder": "Selecciona objetivo, tarea o rutina..."
+    },
     "dailyRoutine": {
       "title": "Planificador de Rutina Diaria",
       "subtitle": "Diseña tu día ideal para lograr tus objetivos",
@@ -1065,6 +1103,7 @@
       "afternoon": "Rutina de Tarde",
       "evening": "Rutina Nocturna",
       "addBlock": "Agregar Bloque de Tiempo",
+      "addItemPlaceholder": "Agregar elemento...",
       "templates": {
         "title": "Comenzar con una Plantilla",
         "weekday": "Horario Laboral",
@@ -1859,7 +1898,17 @@
       }
     }
   },
+  "reports": {
+    "modal": {
+      "contextPlaceholder": "Por favor, proporciona más contexto..."
+    }
+  },
   "bugs": {
+    "filters": {
+      "allStatus": "Todos los estados",
+      "allSeverity": "Toda la gravedad",
+      "allCategories": "Todas las categorías"
+    },
     "modal": {
       "title": "Reportar un error",
       "titleField": "Título del error",

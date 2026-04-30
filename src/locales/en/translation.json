@@ -350,6 +350,7 @@
     }
   },
   "contact": {
+    "emailPlaceholder": "you@example.com",
     "title": "Get in Touch",
     "subtitle": "Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
     "info": {
@@ -832,6 +833,15 @@
     }
   },
   "books": {
+    "editor": {
+      "titlePlaceholder": "Enter book title...",
+      "contentPlaceholder": "Start writing...",
+      "notesPlaceholder": "Add notes...",
+      "summaryPlaceholder": "Add summary..."
+    },
+    "import": {
+      "titlePlaceholder": "Enter book title..."
+    },
     "title": "Books",
     "library": "Deck Library",
     "subtitle": "Your personal collection",
@@ -869,7 +879,27 @@
     "newDeck": "New Deck",
     "newCard": "New Card",
     "import": {
-      "label": "Import deck"
+      "label": "Import deck",
+      "deckNamePlaceholder": "Deck name",
+      "descriptionPlaceholder": "Description (optional)"
+    },
+    "quiz": {
+      "editTitle": "Edit Quiz Question",
+      "createTitle": "Create Quiz Question",
+      "questionPlaceholder": "What is the capital of France?",
+      "optionPlaceholder": "Option {{number}}",
+      "explanationPlaceholder": "Explain why this is the correct answer...",
+      "tagsPlaceholder": "geography, capitals, france",
+      "deckPlaceholder": "Select a deck (optional)"
+    },
+    "flashcard": {
+      "frontPlaceholder": "What is the capital of France?",
+      "backPlaceholder": "Paris",
+      "tagsPlaceholder": "Add tags...",
+      "deckPlaceholder": "Assign to deck (optional)"
+    },
+    "visual": {
+      "explanationPlaceholder": "Additional explanation..."
     },
     "dueToday": "Due Today",
     "studyStreak": "Study Streak",
@@ -1172,6 +1202,14 @@
       "markComplete": "Mark Complete",
       "toggleActive": "Toggle Active"
     },
+    "closeQuarter": {
+      "achievementsPlaceholder": "List what you achieved this quarter...",
+      "challengesPlaceholder": "Describe challenges you faced...",
+      "lessonsPlaceholder": "What did you learn?"
+    },
+    "priorityDialog": {
+      "searchPlaceholder": "Select goal, task, or routine..."
+    },
     "dailyRoutine": {
       "title": "Daily Routine Planner",
       "subtitle": "Design your ideal day to achieve your goals",
@@ -1179,6 +1217,7 @@
       "afternoon": "Afternoon Routine",
       "evening": "Evening Routine",
       "addBlock": "Add Time Block",
+      "addItemPlaceholder": "Add item...",
       "templates": {
         "title": "Start with a Template",
         "weekday": "Weekday Schedule",
@@ -1988,7 +2027,17 @@
       }
     }
   },
+  "reports": {
+    "modal": {
+      "contextPlaceholder": "Please provide more context..."
+    }
+  },
   "bugs": {
+    "filters": {
+      "allStatus": "All Status",
+      "allSeverity": "All Severity",
+      "allCategories": "All Categories"
+    },
     "modal": {
       "title": "Report a Bug",
       "titleField": "Bug title",
