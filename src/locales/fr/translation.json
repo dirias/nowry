@@ -574,6 +574,28 @@
         "consequence4": "Le contenu public sera dépublié immédiatement"
       }
     },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteButton": "Delete account",
+      "exportTitle": "Export Your Data",
+      "exportDescription": "Download a copy of all your data including books, decks, cards, tasks, and plans.",
+      "exportButton": "Export data"
+    },
+    "deleteAccount": {
+      "title": "Delete your account",
+      "message": "This will permanently delete your account and all associated data (books, decks, cards, plans, goals). Your data will be retained for 30 days before final removal.",
+      "emailLabel": "Confirm your email address",
+      "emailPlaceholder": "Enter your email to confirm",
+      "emailRequired": "Email address is required to confirm deletion",
+      "emailMismatch": "Email address does not match. Please try again.",
+      "confirmDisabled": "Enter email to confirm",
+      "confirmEnabled": "Delete permanently",
+      "recoveryNotice": "Your data can be recovered within 30 days by contacting support. After 30 days, it will be permanently deleted."
+    },
+    "exportData": {
+      "error": "Failed to export data. Please try again."
+    },
     "errors": {
       "loadFailed": "Impossible de charger les paramètres. Actualisez et réessayez.",
       "networkError": "Erreur réseau. Vérifiez votre connexion."
