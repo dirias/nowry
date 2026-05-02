@@ -54,6 +54,8 @@ import {
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded'
 import MenuRounded from '@mui/icons-material/MenuRounded'
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded'
+import WarningRoundedIcon from '@mui/icons-material/WarningRounded'
+import FileDownloadRoundedIcon from '@mui/icons-material/FileDownloadRounded'
 import BookRoundedIcon from '@mui/icons-material/BookRounded'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
@@ -243,6 +245,9 @@ export default function AccountSettings() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState('')
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportError, setExportError] = React.useState(null)
 
   // ── Sidebar / drawer ─────────────────────────────────────────────────────────
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -450,17 +455,39 @@ export default function AccountSettings() {
 
   // ── Handlers — Danger ────────────────────────────────────────────────────────
   const handleDeleteAccount = async () => {
+    if (deleteConfirmEmail !== user?.email) return
     setDeleteError(null)
     try {
       setDeleteLoading(true)
       await userService.deleteAccount()
       localStorage.clear()
       sessionStorage.clear()
+      setDeleteConfirmEmail('')
       window.location.href = '/'
     } catch (err) {
       setDeleteError(err.response?.data?.detail || t('settings.errors.networkError'))
       setDeleteLoading(false)
       setShowDeleteModal(false)
+    }
+  }
+
+  const handleExportData = async () => {
+    setExportLoading(true)
+    setExportError(null)
+    try {
+      const blob = await userService.exportData()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `nowry_export_${new Date().toISOString().slice(0, 10)}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      setExportError(err.response?.data?.detail || t('settings.exportData.error'))
+    } finally {
+      setExportLoading(false)
     }
   }
 
@@ -1044,33 +1071,69 @@ export default function AccountSettings() {
             <Divider />
 
             {/* ── Section 6: Danger Zone ─────────────────────────────────────────── */}
-            <SectionBlock id='section-danger' title={t('settings.danger.title')} loading={pageLoading} titleColor='danger.plainColor'>
-              <Stack spacing={2}>
-                {deleteError && (
-                  <Alert color='danger' variant='soft' size='sm'>
-                    {deleteError}
-                  </Alert>
-                )}
+            <Box id='section-danger' sx={{ scrollMarginTop: 88, py: 4 }}>
+              <Typography level='h4' sx={{ mb: 1, fontWeight: 700, color: 'danger.solidBg' }}>
+                {t('settings.dangerZone.title')}
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-                <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                  <Box sx={{ flex: 1, pr: 2 }}>
-                    <Typography level='title-sm'>{t('settings.danger.deleteAccount')}</Typography>
-                    <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                      {t('settings.danger.deleteDesc')}
-                    </Typography>
-                  </Box>
+              <Stack spacing={3}>
+                {/* Export Data */}
+                <Box sx={{
+                  bgcolor: 'background.level1',
+                  borderRadius: 'lg',
+                  p: 3,
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  <Typography level='title-sm' sx={{ mb: 0.5, fontWeight: 700 }}>
+                    {t('settings.dangerZone.exportTitle')}
+                  </Typography>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
+                    {t('settings.dangerZone.exportDescription')}
+                  </Typography>
                   <Button
-                    variant='soft'
-                    color='danger'
-                    size='sm'
-                    startDecorator={<Delete sx={{ fontSize: 16 }} />}
-                    onClick={() => setShowDeleteModal(true)}
+                    variant='outlined'
+                    color='neutral'
+                    size='md'
+                    loading={exportLoading}
+                    onClick={handleExportData}
+                    startDecorator={!exportLoading && <FileDownloadRoundedIcon />}
+                    aria-label={t('settings.dangerZone.exportButton')}
                   >
-                    {t('settings.danger.deleteAccount')}
+                    {t('settings.dangerZone.exportButton')}
                   </Button>
-                </Stack>
+                  {exportError && (
+                    <Alert color='danger' variant='soft' sx={{ mt: 1 }}>
+                      {exportError}
+                    </Alert>
+                  )}
+                </Box>
+
+                {/* Delete Account */}
+                <Box sx={{
+                  bgcolor: 'danger.softBg',
+                  borderRadius: 'lg',
+                  p: 3,
+                  border: '1px solid',
+                  borderColor: 'danger.outlinedBorder'
+                }}>
+                  <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 2 }}>
+                    {t('settings.dangerZone.description')}
+                  </Typography>
+                  <Button
+                    color='danger'
+                    variant='solid'
+                    size='lg'
+                    startDecorator={<DeleteForeverRoundedIcon />}
+                    onClick={() => setShowDeleteModal(true)}
+                    aria-label={t('settings.dangerZone.deleteButton')}
+                  >
+                    {t('settings.dangerZone.deleteButton')}
+                  </Button>
+                </Box>
               </Stack>
-            </SectionBlock>
+            </Box>
           </Box>
         </Grid>
       </Grid>
@@ -1215,21 +1278,120 @@ export default function AccountSettings() {
       </Modal>
 
       {/* ── Delete Account Confirmation Modal ─────────────────────────────────── */}
-      <DeleteConfirmationModal
+      <Modal
         open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDeleteAccount}
-        title={t('settings.danger.modal.title')}
-        description={t('settings.danger.modal.description')}
-        confirmText={t('settings.danger.modal.confirm')}
-        loading={deleteLoading}
-        consequences={[
-          { text: t('settings.danger.modal.consequence1'), icon: <BookRoundedIcon fontSize='small' /> },
-          { text: t('settings.danger.modal.consequence2'), icon: <StyleRoundedIcon fontSize='small' /> },
-          { text: t('settings.danger.modal.consequence3'), icon: <DeleteForeverRoundedIcon fontSize='small' /> },
-          { text: t('settings.danger.modal.consequence4'), icon: <CheckCircleOutlineRoundedIcon fontSize='small' /> }
-        ]}
-      />
+        onClose={() => { setShowDeleteModal(false); setDeleteConfirmEmail('') }}
+      >
+        <ModalDialog
+          role='alertdialog'
+          sx={{
+            width: { xs: '95%', sm: '85%', md: '520px' },
+            maxWidth: '520px',
+            height: { xs: '95vh', md: 'auto' },
+            maxHeight: { xs: '95vh', md: '90vh' },
+            overflowY: 'auto',
+            p: 0,
+            borderRadius: { xs: 'lg', md: 'xl' },
+            border: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Stack direction='row' spacing={1.5} alignItems='center'>
+              <Box sx={{
+                width: 40, height: 40, borderRadius: '50%',
+                bgcolor: 'danger.softBg', color: 'danger.solidBg',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+              }}>
+                <WarningRoundedIcon sx={{ fontSize: 22 }} />
+              </Box>
+              <Typography level='title-lg' sx={{ m: 0, fontWeight: 700, lineHeight: 1 }}>
+                {t('settings.deleteAccount.title')}
+              </Typography>
+            </Stack>
+          </Box>
+
+          {/* Content */}
+          <Box sx={{ px: 3, py: 3 }}>
+            <Stack spacing={3}>
+              <Typography level='body-md' sx={{ color: 'text.primary', lineHeight: 1.6 }}>
+                {t('settings.deleteAccount.message')}
+              </Typography>
+
+              <FormControl required>
+                <FormLabel sx={{ fontWeight: 400 }}>
+                  {t('settings.deleteAccount.emailLabel')}
+                </FormLabel>
+                <Input
+                  type='email'
+                  size='lg'
+                  autoFocus
+                  placeholder={t('settings.deleteAccount.emailPlaceholder')}
+                  value={deleteConfirmEmail}
+                  onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                  aria-label={t('settings.deleteAccount.emailLabel')}
+                />
+                {deleteConfirmEmail && deleteConfirmEmail !== user?.email && (
+                  <FormHelperText sx={{ color: 'danger.solidBg' }}>
+                    {t('settings.deleteAccount.emailMismatch')}
+                  </FormHelperText>
+                )}
+                {!deleteConfirmEmail && (
+                  <FormHelperText sx={{ color: 'text.tertiary' }}>
+                    {t('settings.deleteAccount.emailRequired')}
+                  </FormHelperText>
+                )}
+              </FormControl>
+
+              <Box sx={{
+                p: 2, borderRadius: 'md',
+                bgcolor: 'background.level1',
+                border: '1px solid', borderColor: 'divider'
+              }}>
+                <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
+                  {t('settings.deleteAccount.recoveryNotice')}
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+
+          {/* Footer */}
+          <Box sx={{
+            px: 3, py: 2,
+            borderTop: '1px solid', borderColor: 'divider',
+            bgcolor: 'background.surface',
+            display: 'flex',
+            flexDirection: { xs: 'column-reverse', sm: 'row' },
+            justifyContent: 'flex-end',
+            gap: 2
+          }}>
+            <Button
+              variant='outlined'
+              color='neutral'
+              size='lg'
+              onClick={() => { setShowDeleteModal(false); setDeleteConfirmEmail('') }}
+              disabled={deleteLoading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant='solid'
+              color='danger'
+              size='lg'
+              loading={deleteLoading}
+              disabled={deleteConfirmEmail !== user?.email || !deleteConfirmEmail}
+              onClick={handleDeleteAccount}
+              startDecorator={!deleteLoading && <DeleteForeverRoundedIcon />}
+              aria-label={t('settings.deleteAccount.title')}
+            >
+              {deleteConfirmEmail === user?.email && deleteConfirmEmail
+                ? t('settings.deleteAccount.confirmEnabled')
+                : t('settings.deleteAccount.confirmDisabled')}
+            </Button>
+          </Box>
+        </ModalDialog>
+      </Modal>
     </Container>
   )
 }
