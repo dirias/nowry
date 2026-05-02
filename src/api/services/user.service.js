@@ -127,5 +127,17 @@ export const userService = {
   async deleteAccount() {
     const { data } = await apiClient.delete('/users/account')
     return data
+  },
+
+  /**
+   * Export all user data as a downloadable JSON file.
+   * The server responds with Content-Disposition: attachment.
+   * @returns {Promise<Blob>} JSON blob for download
+   */
+  async exportData() {
+    const response = await apiClient.get('/users/export', {
+      responseType: 'blob'
+    })
+    return response.data
   }
 }
