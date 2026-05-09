@@ -104,9 +104,13 @@ apiClient.interceptors.response.use(
       notifyUser('You do not have permission to perform this action.', 'warning')
     }
 
-    // Handle not found (404) — log only, no intrusive toast
+    // Handle not found (404) — silent in production, debug-only log
+    // 404 is expected for empty-state resources (no annual plan, no deck yet, etc.)
+    // The calling hook is responsible for treating 404 as empty state, not an error.
     if (error.response?.status === 404) {
-      console.error('Resource not found:', error.config?.url)
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[404] No resource at:', error.config?.url)
+      }
     }
 
     // Handle server errors (5xx)

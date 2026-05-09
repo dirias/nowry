@@ -1079,13 +1079,15 @@ export default function AccountSettings() {
 
               <Stack spacing={3}>
                 {/* Export Data */}
-                <Box sx={{
-                  bgcolor: 'background.level1',
-                  borderRadius: 'lg',
-                  p: 3,
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}>
+                <Box
+                  sx={{
+                    bgcolor: 'background.level1',
+                    borderRadius: 'lg',
+                    p: 3,
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
                   <Typography level='title-sm' sx={{ mb: 0.5, fontWeight: 700 }}>
                     {t('settings.dangerZone.exportTitle')}
                   </Typography>
@@ -1111,13 +1113,15 @@ export default function AccountSettings() {
                 </Box>
 
                 {/* Delete Account */}
-                <Box sx={{
-                  bgcolor: 'danger.softBg',
-                  borderRadius: 'lg',
-                  p: 3,
-                  border: '1px solid',
-                  borderColor: 'danger.outlinedBorder'
-                }}>
+                <Box
+                  sx={{
+                    bgcolor: 'danger.softBg',
+                    borderRadius: 'lg',
+                    p: 3,
+                    border: '1px solid',
+                    borderColor: 'danger.outlinedBorder'
+                  }}
+                >
                   <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 2 }}>
                     {t('settings.dangerZone.description')}
                   </Typography>
@@ -1280,7 +1284,10 @@ export default function AccountSettings() {
       {/* ── Delete Account Confirmation Modal ─────────────────────────────────── */}
       <Modal
         open={showDeleteModal}
-        onClose={() => { setShowDeleteModal(false); setDeleteConfirmEmail('') }}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteConfirmEmail('')
+        }}
       >
         <ModalDialog
           role='alertdialog'
@@ -1299,11 +1306,19 @@ export default function AccountSettings() {
           {/* Header */}
           <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Stack direction='row' spacing={1.5} alignItems='center'>
-              <Box sx={{
-                width: 40, height: 40, borderRadius: '50%',
-                bgcolor: 'danger.softBg', color: 'danger.solidBg',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-              }}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  bgcolor: 'danger.softBg',
+                  color: 'danger.solidBg',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}
+              >
                 <WarningRoundedIcon sx={{ fontSize: 22 }} />
               </Box>
               <Typography level='title-lg' sx={{ m: 0, fontWeight: 700, lineHeight: 1 }}>
@@ -1320,9 +1335,7 @@ export default function AccountSettings() {
               </Typography>
 
               <FormControl required>
-                <FormLabel sx={{ fontWeight: 400 }}>
-                  {t('settings.deleteAccount.emailLabel')}
-                </FormLabel>
+                <FormLabel sx={{ fontWeight: 400 }}>{t('settings.deleteAccount.emailLabel')}</FormLabel>
                 <Input
                   type='email'
                   size='lg'
@@ -1333,22 +1346,22 @@ export default function AccountSettings() {
                   aria-label={t('settings.deleteAccount.emailLabel')}
                 />
                 {deleteConfirmEmail && deleteConfirmEmail !== user?.email && (
-                  <FormHelperText sx={{ color: 'danger.solidBg' }}>
-                    {t('settings.deleteAccount.emailMismatch')}
-                  </FormHelperText>
+                  <FormHelperText sx={{ color: 'danger.solidBg' }}>{t('settings.deleteAccount.emailMismatch')}</FormHelperText>
                 )}
                 {!deleteConfirmEmail && (
-                  <FormHelperText sx={{ color: 'text.tertiary' }}>
-                    {t('settings.deleteAccount.emailRequired')}
-                  </FormHelperText>
+                  <FormHelperText sx={{ color: 'text.tertiary' }}>{t('settings.deleteAccount.emailRequired')}</FormHelperText>
                 )}
               </FormControl>
 
-              <Box sx={{
-                p: 2, borderRadius: 'md',
-                bgcolor: 'background.level1',
-                border: '1px solid', borderColor: 'divider'
-              }}>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 'md',
+                  bgcolor: 'background.level1',
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}
+              >
                 <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
                   {t('settings.deleteAccount.recoveryNotice')}
                 </Typography>
@@ -1357,20 +1370,27 @@ export default function AccountSettings() {
           </Box>
 
           {/* Footer */}
-          <Box sx={{
-            px: 3, py: 2,
-            borderTop: '1px solid', borderColor: 'divider',
-            bgcolor: 'background.surface',
-            display: 'flex',
-            flexDirection: { xs: 'column-reverse', sm: 'row' },
-            justifyContent: 'flex-end',
-            gap: 2
-          }}>
+          <Box
+            sx={{
+              px: 3,
+              py: 2,
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.surface',
+              display: 'flex',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              justifyContent: 'flex-end',
+              gap: 2
+            }}
+          >
             <Button
               variant='outlined'
               color='neutral'
               size='lg'
-              onClick={() => { setShowDeleteModal(false); setDeleteConfirmEmail('') }}
+              onClick={() => {
+                setShowDeleteModal(false)
+                setDeleteConfirmEmail('')
+              }}
               disabled={deleteLoading}
             >
               {t('common.cancel')}

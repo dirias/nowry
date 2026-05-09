@@ -96,8 +96,14 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
         setActivities(fetchedActivities)
       } catch (err) {
         if (isCancelled()) return
-        // Fallback: /full endpoint not available yet — use legacy multi-request path
-        if (err?.response?.status === 404 || err?.response?.status === 405) {
+        // A 404 from /full means no plan exists for this year — clean empty state, not an error.
+        // A 405 means /full endpoint not yet deployed — fall back to the legacy multi-request path.
+        if (err?.response?.status === 404) {
+          // No plan for this year — leave all state at defaults (null / [])
+          return
+        }
+        if (err?.response?.status === 405) {
+          // Fallback: /full endpoint not available yet — use legacy multi-request path
           try {
             const [fetchedPlan, profile] = await Promise.all([
               apiCache.get(`annualPlan:${year}`, PLAN_TTL, () => annualPlanningService.getAnnualPlan(year)),
@@ -136,7 +142,10 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
             setFocusAreas(enrichedAreas)
             setGoals(allGoals)
           } catch (fallbackErr) {
-            if (!isCancelled()) setError(fallbackErr)
+            // A 404 from the legacy getAnnualPlan means no plan exists — not an error
+            if (!isCancelled() && fallbackErr?.response?.status !== 404) {
+              setError(fallbackErr)
+            }
           }
         } else {
           setError(err)
