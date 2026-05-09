@@ -77,6 +77,7 @@ const SECTION_IDS = [
   'section-productivity',
   'section-notifications',
   'section-agent',
+  'section-plan',
   'section-security',
   'section-danger'
 ]
@@ -186,7 +187,7 @@ function useActiveSection(sectionIds) {
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function AccountSettings() {
   const { t, i18n } = useTranslation()
-  const { user } = useAuth()
+  const { user, subscriptionTier } = useAuth()
   const { mode, setMode } = useColorScheme()
   const { themeColor: ctxThemeColor, setThemeColor } = useThemePreferences()
   const { knowledgeAccessEnabled, proactiveNudgingEnabled, updateAgentPrefs } = usePet()
@@ -946,6 +947,40 @@ export default function AccountSettings() {
                 >
                   Manage
                 </Button>
+              </Stack>
+            </SectionBlock>
+            <Divider />
+
+            {/* ── Section: Plan & Billing ───────────────────────────────────────── */}
+            <SectionBlock id='section-plan' title={t('accountSettings.plan.title')} loading={pageLoading}>
+              <Stack spacing={2}>
+                <Typography level='body-md' sx={{ color: 'text.secondary' }}>
+                  {t('accountSettings.plan.current', {
+                    plan: t(`subscription.tier.${subscriptionTier ?? 'free'}`)
+                  })}
+                </Typography>
+                <Stack direction='row' spacing={1} flexWrap='wrap'>
+                  <Button
+                    component={RouterLink}
+                    to='/subscription'
+                    variant='outlined'
+                    size='sm'
+                    aria-label={t('accountSettings.plan.manage')}
+                  >
+                    {t('accountSettings.plan.manage')}
+                  </Button>
+                  {(subscriptionTier ?? 'free') !== 'pro' && (
+                    <Button
+                      component={RouterLink}
+                      to='/plans'
+                      variant='solid'
+                      size='sm'
+                      aria-label={t('accountSettings.plan.upgrade')}
+                    >
+                      {t('accountSettings.plan.upgrade')}
+                    </Button>
+                  )}
+                </Stack>
               </Stack>
             </SectionBlock>
             <Divider />
