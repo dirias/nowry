@@ -1,20 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import {
-  Box,
-  Container,
-  Typography,
-  Stack,
-  Button,
-  Alert,
-  Skeleton,
-  Chip,
-  Divider,
-  LinearProgress,
-  Modal,
-  ModalDialog
-} from '@mui/joy'
+import { Box, Container, Typography, Stack, Button, Alert, Skeleton, Chip, Divider, LinearProgress, Modal, ModalDialog } from '@mui/joy'
 import { subscriptionService } from '../../api/services'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useAuth } from '../../context/AuthContext'
@@ -25,12 +12,40 @@ const AI_LIMITS = { free: 0, plus: 100, pro: null } // null = unlimited
 export default function SubscriptionPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { tier, aiUsageCount, aiUsageResetDate, nextBillingDate } = useSubscription()
+  const { tier: contextTier, aiUsageCount, aiUsageResetDate, nextBillingDate } = useSubscription()
   const [searchParams] = useSearchParams()
   const upgraded = searchParams.get('upgraded') === 'true'
   const [portalLoading, setPortalLoading] = useState(false)
   const [portalError, setPortalError] = useState(null)
   const [showCelebration, setShowCelebration] = useState(upgraded)
+  // freshTier: re-fetched from API after upgrade redirect to beat webhook race condition
+  const [freshTier, setFreshTier] = useState(null)
+  const [fetchingTier, setFetchingTier] = useState(upgraded)
+
+  const tier = freshTier ?? contextTier
+
+  const pollForTierUpgrade = useCallback(async () => {
+    // Stripe webhook can arrive a few seconds after redirect — poll up to 10s
+    const maxAttempts = 5
+    const delayMs = 2000
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        const sub = await subscriptionService.getSubscriptionStatus()
+        if (sub && sub.tier && sub.tier !== 'free') {
+          setFreshTier(sub.tier)
+          setFetchingTier(false)
+          return
+        }
+      } catch { /* ignore — AuthContext tier is the fallback */ }
+      if (i < maxAttempts - 1) await new Promise(r => setTimeout(r, delayMs))
+    }
+    // After polling, use whatever AuthContext has (may still be free if webhook was slow)
+    setFetchingTier(false)
+  }, [])
+
+  useEffect(() => {
+    if (upgraded) pollForTierUpgrade()
+  }, [upgraded, pollForTierUpgrade])
 
   const handleManageBilling = async () => {
     setPortalLoading(true)
@@ -53,7 +68,7 @@ export default function SubscriptionPage() {
   return (
     <Container maxWidth='md' sx={{ py: 4 }}>
       {/* Post-upgrade celebration modal — triggered by ?upgraded=true */}
-      <Modal open={showCelebration} onClose={() => setShowCelebration(false)}>
+      <Modal open={showCelebration} onClose={() => !fetchingTier && setShowCelebration(false)}>
         <ModalDialog
           sx={{
             p: 4,
@@ -63,20 +78,24 @@ export default function SubscriptionPage() {
             width: '90%'
           }}
         >
-          <Typography level='h2' sx={{ color: 'text.primary', mb: 1 }}>
-            {t('subscription.page.upgraded.title', { plan: t(`subscription.tier.${tier}`) })}
-          </Typography>
-          <Typography level='body-md' sx={{ color: 'text.secondary', mb: 3 }}>
-            {t('subscription.page.upgraded.message')}
-          </Typography>
-          <Button
-            onClick={() => setShowCelebration(false)}
-            variant='solid'
-            color='primary'
-            aria-label={t('upgrade.welcome.cta')}
-          >
-            {t('upgrade.welcome.cta')}
-          </Button>
+          {fetchingTier ? (
+            <Stack spacing={1} alignItems='center'>
+              <Skeleton variant='text' width={200} />
+              <Skeleton variant='text' width={280} />
+            </Stack>
+          ) : (
+            <>
+              <Typography level='h2' sx={{ color: 'text.primary', mb: 1 }}>
+                {t('subscription.page.upgraded.title', { plan: t(`subscription.tier.${tier}`) })}
+              </Typography>
+              <Typography level='body-md' sx={{ color: 'text.secondary', mb: 3 }}>
+                {t('subscription.page.upgraded.message')}
+              </Typography>
+              <Button onClick={() => setShowCelebration(false)} variant='solid' color='primary' aria-label={t('upgrade.welcome.cta')}>
+                {t('upgrade.welcome.cta')}
+              </Button>
+            </>
+          )}
         </ModalDialog>
       </Modal>
 
@@ -110,9 +129,7 @@ export default function SubscriptionPage() {
             <Skeleton loading={isLoading} variant='text'>
               <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                 {t('subscription.nextBillingDate')}:{' '}
-                {nextBillingDate
-                  ? new Date(nextBillingDate).toLocaleDateString()
-                  : t('subscription.noBillingDate')}
+                {nextBillingDate ? new Date(nextBillingDate).toLocaleDateString() : t('subscription.noBillingDate')}
               </Typography>
             </Skeleton>
           )}
@@ -178,13 +195,7 @@ export default function SubscriptionPage() {
             color='danger'
             variant='soft'
             endDecorator={
-              <Button
-                size='sm'
-                variant='plain'
-                color='danger'
-                onClick={() => setPortalError(null)}
-                aria-label={t('common.close')}
-              >
+              <Button size='sm' variant='plain' color='danger' onClick={() => setPortalError(null)} aria-label={t('common.close')}>
                 {t('common.close')}
               </Button>
             }
