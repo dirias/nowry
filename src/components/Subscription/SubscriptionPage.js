@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { Box, Container, Typography, Stack, Button, Alert, Skeleton, Chip, Divider, LinearProgress, Modal, ModalDialog } from '@mui/joy'
@@ -24,28 +24,30 @@ export default function SubscriptionPage() {
 
   const tier = freshTier ?? contextTier
 
-  const pollForTierUpgrade = useCallback(async () => {
-    // Stripe webhook can arrive a few seconds after redirect — poll up to 10s
-    const maxAttempts = 5
-    const delayMs = 2000
-    for (let i = 0; i < maxAttempts; i++) {
-      try {
-        const sub = await subscriptionService.getSubscriptionStatus()
-        if (sub && sub.tier && sub.tier !== 'free') {
-          setFreshTier(sub.tier)
-          setFetchingTier(false)
-          return
-        }
-      } catch { /* ignore — AuthContext tier is the fallback */ }
-      if (i < maxAttempts - 1) await new Promise(r => setTimeout(r, delayMs))
-    }
-    // After polling, use whatever AuthContext has (may still be free if webhook was slow)
-    setFetchingTier(false)
-  }, [])
-
   useEffect(() => {
-    if (upgraded) pollForTierUpgrade()
-  }, [upgraded, pollForTierUpgrade])
+    if (!upgraded) return
+    let cancelled = false
+    const run = async () => {
+      const maxAttempts = 5
+      const delayMs = 2000
+      for (let i = 0; i < maxAttempts; i++) {
+        if (cancelled) return
+        try {
+          const sub = await subscriptionService.getSubscriptionStatus()
+          if (cancelled) return
+          if (sub && sub.tier && sub.tier !== 'free') {
+            setFreshTier(sub.tier)
+            setFetchingTier(false)
+            return
+          }
+        } catch { /* ignore */ }
+        if (i < maxAttempts - 1) await new Promise(r => setTimeout(r, delayMs))
+      }
+      if (!cancelled) setFetchingTier(false)
+    }
+    run()
+    return () => { cancelled = true }
+  }, [upgraded])
 
   const handleManageBilling = async () => {
     setPortalLoading(true)
