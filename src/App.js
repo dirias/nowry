@@ -20,6 +20,7 @@ import 'keen-slider/keen-slider.min.css'
 
 // ── Eagerly loaded: always needed, tiny, or above-the-fold ──────────
 import Header from './components/HomePage/Header'
+import PaymentFailureBanner from './components/Subscription/PaymentFailureBanner'
 import Footer from './components/HomePage/Footer'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PomodoroProvider } from './context/PomodoroContext'
@@ -59,6 +60,8 @@ const DailyRoutinePlanner = lazy(() => import('./components/AnnualPlanning').the
 const PomodoroWidget = lazy(() => import('./components/Pomodoro/PomodoroWidget'))
 const PrivacyPolicy = lazy(() => import('./components/HomePage/PrivacyPolicy'))
 const TermsOfService = lazy(() => import('./components/HomePage/TermsOfService'))
+const PlansPage = lazy(() => import('./components/Subscription/PlansPage'))
+const SubscriptionPage = lazy(() => import('./components/Subscription/SubscriptionPage'))
 
 /** Full-page loading fallback shown while lazy chunks download */
 const PageLoader = () => (
@@ -98,6 +101,7 @@ const AppContent = () => {
         ...(isPublicPage ? { minHeight: '100vh' } : { height: '100vh', overflow: 'hidden' })
       }}
     >
+      <PaymentFailureBanner />
       <Header username={user?.username} />
       <main
         style={{
@@ -304,6 +308,22 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     <MyLikes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/plans'
+                element={
+                  <ProtectedRoute>
+                    <PlansPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/subscription'
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionPage />
                   </ProtectedRoute>
                 }
               />

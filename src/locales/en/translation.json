@@ -1101,6 +1101,112 @@
       "upgradeToUse": "Upgrade to use AI features.",
       "genericCreate": "Error creating item. Please try again.",
       "upgradeAdvice": "Please upgrade your plan in Settings."
+    },
+    "title": "Subscription & Billing",
+    "currentPlan": "Current Plan",
+    "nextBillingDate": "Next billing date",
+    "noBillingDate": "—",
+    "manageBilling": "Manage billing in Stripe",
+    "downgrade": "Downgrade plan",
+    "aiUsage": {
+      "title": "Monthly AI Usage",
+      "meter": "{{used}} / {{limit}} this month",
+      "reset": "Resets on {{date}}",
+      "empty": "No AI usage this month"
+    },
+    "tier": {
+      "free": "Free",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "status": {
+      "active": "Active",
+      "past_due": "Payment Past Due",
+      "canceled": "Canceled"
+    },
+    "page": {
+      "upgraded": {
+        "title": "Welcome to {{plan}}!",
+        "message": "Your upgrade is active. Start exploring new features.",
+        "cta": "Get started"
+      }
+    },
+    "error": {
+      "portalFailed": "Could not open billing portal. Please try again.",
+      "loadFailed": "Unable to load subscription. Please try again."
+    },
+    "downgradeModal": {
+      "title": "Downgrade to Free?",
+      "message": "You'll lose access to paid features. Existing content remains but creation of Pro-only content is blocked.",
+      "confirm": "Downgrade",
+      "cancel": "Keep current plan"
+    }
+  },
+  "plans": {
+    "title": "Choose Your Plan",
+    "subtitle": "Unlock AI features that match your learning style",
+    "currentPlan": "Your current plan",
+    "billingToggle": {
+      "label": "Billing period:",
+      "monthly": "Monthly",
+      "annual": "Annual (Save 17%)"
+    },
+    "cta": {
+      "upgradeToPlus": "Upgrade to Plus",
+      "upgradeToPro": "Upgrade to Pro",
+      "switchToPro": "Switch to Pro",
+      "getStarted": "Get started"
+    },
+    "features": {
+      "cardGeneration": "Generate cards from text",
+      "cardGenerationFree": "Up to 2 cards",
+      "cardGenerationPlus": "Book-level analysis (20 cards)",
+      "cardGenerationPro": "Full deck AI redesign",
+      "bookExpansion": "Expand selected text with AI",
+      "bookExpansionFree": "Character limited",
+      "bookExpansionPlus": "Soft limit",
+      "bookExpansionPro": "Unlimited",
+      "quizGeneration": "Generate quiz questions",
+      "quizGenerationFree": "Up to 5 questions",
+      "quizGenerationPlus": "Book-level (20 questions)",
+      "quizGenerationPro": "Full deck AI redesign",
+      "aiUsage": "Monthly AI generations",
+      "aiUsageFree": "0 (view only)",
+      "aiUsagePlus": "100 / month",
+      "aiUsagePro": "Unlimited",
+      "studyCards": "Flashcard study sessions",
+      "studyCardsAll": "Unlimited",
+      "books": "Smart Books",
+      "booksAll": "Unlimited",
+      "support": "Support",
+      "supportFree": "Community",
+      "supportPlus": "Email support",
+      "supportPro": "Priority support"
+    },
+    "error": {
+      "checkoutFailed": "Could not start checkout. Please try again."
+    }
+  },
+  "billing": {
+    "paymentFailed": {
+      "title": "Payment failed",
+      "message": "Your payment method failed. Update it by {{date}} to keep access.",
+      "cta": "Update payment method"
+    }
+  },
+  "upgrade": {
+    "welcome": {
+      "title": "Welcome to {{plan}}!",
+      "message": "Your upgrade is active. Start exploring new features.",
+      "cta": "Get started"
+    }
+  },
+  "accountSettings": {
+    "plan": {
+      "title": "Plan & Billing",
+      "current": "You are on the {{plan}} plan",
+      "upgrade": "View plans & upgrade",
+      "manage": "Manage subscription"
     }
   },
   "annualPlanning": {
