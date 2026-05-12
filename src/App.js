@@ -26,6 +26,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { PomodoroProvider } from './context/PomodoroContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { AgentProvider } from './context/AgentContext'
+import { SubscriptionProvider } from './context/SubscriptionContext'
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/Common/ErrorBoundary'
 import StudyPet from './components/Agent/StudyPet'
@@ -350,11 +351,13 @@ const App = () => {
       <PomodoroProvider>
         <DynamicThemeProvider>
           <NotificationProvider>
-            <AgentProvider>
-              <Router>
-                <AppContent />
-              </Router>
-            </AgentProvider>
+            <SubscriptionProvider>
+              <AgentProvider>
+                <Router>
+                  <AppContent />
+                </Router>
+              </AgentProvider>
+            </SubscriptionProvider>
           </NotificationProvider>
         </DynamicThemeProvider>
       </PomodoroProvider>
