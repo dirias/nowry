@@ -777,20 +777,9 @@
           "title": "3の力",
           "message": "研究によると、一度にすべてを改善しようとするよりも、3つの主要な生活分野に集中する方が大きな成功につながります。今年の3つの分野を定義しましょう。"
         },
-        "tips": [
-          "最も重要なことについて具体的に",
-          "自分の価値観に合った分野を選ぶ",
-          "さまざまな生活領域のバランスを考える"
-        ]
+        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"]
       },
-      "examples": [
-        "キャリア成長",
-        "健康と活力",
-        "経済的自由",
-        "人間関係",
-        "創造的な活動",
-        "学習とスキル"
-      ]
+      "examples": ["キャリア成長", "健康と活力", "経済的自由", "人間関係", "創造的な活動", "学習とスキル"]
     },
     "priority": {
       "title": "年間優先事項",
@@ -1380,6 +1369,17 @@
       "title": "Welcome to {{plan}}!",
       "message": "Your upgrade is active. Start exploring new features.",
       "cta": "Get started"
+    },
+    "modelBadge": "Powered by Llama 3.3 (free)",
+    "inlineCtaText": "These results were generated with the free model — upgrade to Pro for smarter AI.",
+    "inlineCtaDismiss": "Dismiss",
+    "modal": {
+      "title": "Unlock Premium AI",
+      "description": "Upgrade to Plus or Pro for smarter AI models and faster generations.",
+      "feature1": "Pro uses Gemini Pro — 10x better at complex topics",
+      "feature2": "Unlimited generations — no monthly limits",
+      "feature3": "Access to personalized AI companion",
+      "cta": "View Plans & Upgrade"
     }
   },
   "accountSettings": {
