@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import { Box, Container, Typography, Stack, Button, Alert, Skeleton, Chip, Divider, LinearProgress, Modal, ModalDialog } from '@mui/joy'
+import { Box, Container, Typography, Stack, Button, Alert, Skeleton, Chip, Divider, Modal, ModalDialog } from '@mui/joy'
 import { subscriptionService } from '../../api/services'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useAuth } from '../../context/AuthContext'
 
-// AI usage limits by tier (mirrors backend AI_USAGE_LIMITS)
-const AI_LIMITS = { free: 0, plus: 100, pro: null } // null = unlimited
-
 export default function SubscriptionPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { tier: contextTier, aiUsageCount, aiUsageResetDate, nextBillingDate } = useSubscription()
+  const { tier: contextTier, nextBillingDate } = useSubscription()
   const [searchParams] = useSearchParams()
   const upgraded = searchParams.get('upgraded') === 'true'
   const [portalLoading, setPortalLoading] = useState(false)
@@ -40,13 +37,17 @@ export default function SubscriptionPage() {
             setFetchingTier(false)
             return
           }
-        } catch { /* ignore */ }
-        if (i < maxAttempts - 1) await new Promise(r => setTimeout(r, delayMs))
+        } catch {
+          /* ignore */
+        }
+        if (i < maxAttempts - 1) await new Promise((r) => setTimeout(r, delayMs))
       }
       if (!cancelled) setFetchingTier(false)
     }
     run()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [upgraded])
 
   const handleManageBilling = async () => {
@@ -62,8 +63,6 @@ export default function SubscriptionPage() {
     }
   }
 
-  const usageLimit = AI_LIMITS[tier] ?? 0
-  const usagePercent = usageLimit > 0 ? Math.min((aiUsageCount / usageLimit) * 100, 100) : 0
   const tierColor = { free: 'neutral', plus: 'primary', pro: 'success' }[tier] || 'neutral'
   const isLoading = !user
 
@@ -138,58 +137,6 @@ export default function SubscriptionPage() {
         </Box>
 
         <Divider />
-
-        {/* ── AI Usage Meter ────────────────────────────────────────────────── */}
-        <Box
-          sx={{
-            p: 3,
-            borderRadius: 'lg',
-            bgcolor: 'background.surface',
-            border: '1px solid',
-            borderColor: 'divider'
-          }}
-        >
-          <Typography level='title-md' sx={{ color: 'text.primary', mb: 2 }}>
-            {t('subscription.aiUsage.title')}
-          </Typography>
-
-          <Skeleton loading={isLoading} variant='rectangular' height={48}>
-            <Box>
-              {AI_LIMITS[tier] === null ? (
-                /* Pro tier — unlimited */
-                <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-                  {t('plans.features.aiUsagePro')}
-                </Typography>
-              ) : usageLimit === 0 ? (
-                /* Free tier — no AI access */
-                <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-                  {t('subscription.aiUsage.empty')}
-                </Typography>
-              ) : (
-                /* Plus tier — metered usage */
-                <>
-                  <LinearProgress
-                    determinate
-                    value={usagePercent}
-                    color='primary'
-                    sx={{ mb: 1 }}
-                    aria-label={t('subscription.aiUsage.title')}
-                  />
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {t('subscription.aiUsage.meter', { used: aiUsageCount, limit: usageLimit })}
-                  </Typography>
-                  {aiUsageResetDate && (
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-                      {t('subscription.aiUsage.reset', {
-                        date: new Date(aiUsageResetDate).toLocaleDateString()
-                      })}
-                    </Typography>
-                  )}
-                </>
-              )}
-            </Box>
-          </Skeleton>
-        </Box>
 
         {/* ── Actions ───────────────────────────────────────────────────────── */}
         {portalError && (

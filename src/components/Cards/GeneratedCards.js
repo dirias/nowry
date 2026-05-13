@@ -17,13 +17,22 @@ import {
   Option,
   Input,
   FormControl,
-  FormLabel
+  FormLabel,
+  Chip
 } from '@mui/joy'
 import { BookOpen, RefreshCw, Layers, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { decksService, cardsService } from '../../api/services'
 import { useDeckData } from '../../hooks/useDeckData'
+import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import UpgradePrompt from '../Common/UpgradePrompt'
 
 export default function GeneratedCards({ cards = [], book, onCancel, onGenerateAgain }) {
+  const { t } = useTranslation()
+  const { tier } = useSubscription()
+  const { upgradeDismissed, dismissUpgrade, isUpgradeModalOpen, openUpgradeModal, closeUpgradeModal } = useSubscriptionContext()
+
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
   const [selectedCards, setSelectedCards] = useState([])
   const [loading, setLoading] = useState(false)
@@ -206,6 +215,61 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
                   )
                 })}
               </Stack>
+
+              {/* ── Free tier: model badge ─────────────────────────────────── */}
+              {tier === 'free' && (
+                <Chip
+                  size='sm'
+                  color='neutral'
+                  variant='soft'
+                  sx={{ mt: 1.5 }}
+                  aria-label={t('upgrade.modelBadge')}
+                >
+                  {t('upgrade.modelBadge')}
+                </Chip>
+              )}
+
+              {/* ── Free tier: dismissible inline upgrade CTA ─────────────── */}
+              {!upgradeDismissed && tier === 'free' && (
+                <Box
+                  sx={{
+                    p: 2,
+                    mt: 2,
+                    borderRadius: 'md',
+                    bgcolor: 'background.level1',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Stack direction='row' spacing={1} justifyContent='space-between' alignItems='center'>
+                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                      {t('upgrade.inlineCtaText')}
+                    </Typography>
+                    <Stack direction='row' spacing={1} sx={{ flexShrink: 0 }}>
+                      <Button
+                        size='sm'
+                        variant='plain'
+                        onClick={dismissUpgrade}
+                        aria-label={t('upgrade.inlineCtaDismiss')}
+                      >
+                        {t('upgrade.inlineCtaDismiss')}
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='solid'
+                        color='primary'
+                        onClick={openUpgradeModal}
+                        aria-label={t('upgrade.modal.cta')}
+                      >
+                        {t('upgrade.modal.cta')}
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Box>
+              )}
+
+              {/* ── Upgrade modal (controlled by SubscriptionContext) ─────── */}
+              <UpgradePrompt open={isUpgradeModalOpen} onClose={closeUpgradeModal} />
             </>
           )}
 
