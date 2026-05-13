@@ -16,15 +16,15 @@ import { MemoryRouter } from 'react-router-dom'
 // Mock i18next — return key as value so we can assert on keys
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key) => key,
-  }),
+    t: (key) => key
+  })
 }))
 
 // Mock react-router-dom navigate
 const mockNavigate = jest.fn()
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => mockNavigate
 }))
 
 // These imports will fail until UpgradePrompt.js is created (Wave 0 expected)
@@ -33,7 +33,7 @@ import UpgradePrompt from '../UpgradePrompt'
 describe('UpgradePrompt — GATE-03, GATE-04', () => {
   const defaultProps = {
     open: true,
-    onClose: jest.fn(),
+    onClose: jest.fn()
   }
 
   beforeEach(() => {
@@ -108,18 +108,18 @@ describe('ModelBadge inline (GATE-04)', () => {
   // If ModelBadge is extracted to its own file, update the import below.
 
   test('model badge key "upgrade.modelBadge" is defined in translation.json', () => {
-    const translation = require('../../../../locales/en/translation.json')
+    const translation = require('../../../locales/en/translation.json')
     expect(translation.upgrade?.modelBadge).toBeDefined()
     expect(translation.upgrade?.modelBadge).not.toBe('')
   })
 
   test('inline CTA key "upgrade.inlineCtaText" is defined in translation.json', () => {
-    const translation = require('../../../../locales/en/translation.json')
+    const translation = require('../../../locales/en/translation.json')
     expect(translation.upgrade?.inlineCtaText).toBeDefined()
   })
 
   test('modal title key "upgrade.modal.title" is defined in translation.json', () => {
-    const translation = require('../../../../locales/en/translation.json')
+    const translation = require('../../../locales/en/translation.json')
     expect(translation.upgrade?.modal?.title).toBeDefined()
   })
 })
