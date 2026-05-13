@@ -18,6 +18,8 @@ export default function SubscriptionPage() {
   // freshTier: re-fetched from API after upgrade redirect to beat webhook race condition
   const [freshTier, setFreshTier] = useState(null)
   const [fetchingTier, setFetchingTier] = useState(upgraded)
+  // upgradeProcessing: true when polling exhausted without a tier change (webhook delay)
+  const [upgradeProcessing, setUpgradeProcessing] = useState(false)
 
   const tier = freshTier ?? contextTier
 
@@ -42,7 +44,10 @@ export default function SubscriptionPage() {
         }
         if (i < maxAttempts - 1) await new Promise((r) => setTimeout(r, delayMs))
       }
-      if (!cancelled) setFetchingTier(false)
+      if (!cancelled) {
+        setFetchingTier(false)
+        setUpgradeProcessing(true)
+      }
     }
     run()
     return () => {
@@ -83,6 +88,18 @@ export default function SubscriptionPage() {
             <Stack spacing={1} alignItems='center'>
               <Skeleton variant='text' width={200} />
               <Skeleton variant='text' width={280} />
+            </Stack>
+          ) : upgradeProcessing ? (
+            <Stack spacing={2} alignItems='center'>
+              <Typography level='h3' sx={{ color: 'text.primary' }}>
+                {t('subscription.upgradeProcessing.title')}
+              </Typography>
+              <Typography level='body-md' sx={{ color: 'text.secondary' }}>
+                {t('subscription.upgradeProcessing.message')}
+              </Typography>
+              <Button onClick={() => setShowCelebration(false)} variant='outlined' color='neutral' aria-label={t('common.close')}>
+                {t('common.close')}
+              </Button>
             </Stack>
           ) : (
             <>

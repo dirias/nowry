@@ -1141,6 +1141,10 @@
       "message": "You'll lose access to paid features. Existing content remains but creation of Pro-only content is blocked.",
       "confirm": "Downgrade",
       "cancel": "Keep current plan"
+    },
+    "upgradeProcessing": {
+      "title": "Upgrade in Progress",
+      "message": "Your payment was received. Your plan will update within a few minutes — please refresh the page shortly."
     }
   },
   "plans": {
