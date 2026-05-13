@@ -1308,6 +1308,23 @@
     },
     "visual": {
       "explanationPlaceholder": "Zusätzliche Erklärung..."
+    },
+    "generatedCards": {
+      "titleSelectCards": "New Study Cards",
+      "titleAddToDeck": "Add to Deck",
+      "subtitleSelectCards": "Select the cards you want to add to your study deck.",
+      "subtitleAddToDeck": "Choose a deck to save your cards to.",
+      "generateAgainTooltip": "Generate again",
+      "selectDeckLabel": "Select Deck",
+      "chooseDeckPlaceholder": "Choose a deck...",
+      "orDivider": "OR",
+      "createNewDeck": "Create New Deck",
+      "newDeckNamePlaceholder": "New Deck Name",
+      "createButton": "Create",
+      "cancelButton": "Cancel",
+      "proceedCount": "Proceed ({{count}})",
+      "confirmSave": "Confirm & Save",
+      "saveError": "Failed to save cards. Please try again."
     }
   },
   "books": {

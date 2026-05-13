@@ -18,7 +18,8 @@ import {
   Input,
   FormControl,
   FormLabel,
-  Chip
+  Chip,
+  Alert
 } from '@mui/joy'
 import { BookOpen, RefreshCw, Layers, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -36,6 +37,8 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
   const [selectedCards, setSelectedCards] = useState([])
   const [loading, setLoading] = useState(false)
+  // WR-02: separate loading state for deck creation, distinct from regenerate loading
+  const [createLoading, setCreateLoading] = useState(false)
 
   // Deck selection state
   const [decks, setDecks] = useState([])
@@ -43,6 +46,8 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
   const [newDeckName, setNewDeckName] = useState('')
   const [isCreatingDeck, setIsCreatingDeck] = useState(false)
   const [saving, setSaving] = useState(false)
+  // WR-03: error state for save failures
+  const [saveError, setSaveError] = useState(null)
 
   const { decks: cacheDecks, loading: hookDecksLoading, reload: reloadDecks } = useDeckData()
 
@@ -86,8 +91,10 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
     setStep('select_deck')
   }
 
+  // WR-02: uses createLoading (not shared loading) so create and regenerate spinners are independent
   const handleCreateDeck = async () => {
     if (!newDeckName.trim()) return
+    setCreateLoading(true)
     try {
       const newDeck = await decksService.create({
         name: newDeckName,
@@ -103,12 +110,14 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
     } catch (error) {
       console.error('Error creating deck:', error)
     } finally {
-      setLoading(false)
+      setCreateLoading(false)
     }
   }
 
+  // WR-03: surface save errors to the user via saveError state
   const handleSaveCards = async () => {
     if (!selectedDeckId) return
+    setSaveError(null)
     try {
       setSaving(true)
       const cardsToSave = selectedCards.map((index) => cards[index])
@@ -129,6 +138,7 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
       onCancel() // Close modal on success
     } catch (error) {
       console.error('Error saving cards:', error)
+      setSaveError(t('cards.generatedCards.saveError'))
     } finally {
       setSaving(false)
     }
@@ -155,11 +165,12 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
         {/* Fixed Header */}
         <Box sx={{ p: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ pr: 6 }}>
+            {/* WR-04: replace hardcoded strings with t() keys */}
             <Typography level='h4' sx={{ fontWeight: 'bold' }}>
-              {step === 'select_cards' ? 'New Study Cards' : 'Add to Deck'}
+              {step === 'select_cards' ? t('cards.generatedCards.titleSelectCards') : t('cards.generatedCards.titleAddToDeck')}
             </Typography>
             <Typography level='body-sm'>
-              {step === 'select_cards' ? 'Select the cards you want to add to your study deck.' : 'Choose a deck to save your cards to.'}
+              {step === 'select_cards' ? t('cards.generatedCards.subtitleSelectCards') : t('cards.generatedCards.subtitleAddToDeck')}
             </Typography>
           </Box>
         </Box>
@@ -169,12 +180,13 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
           {step === 'select_cards' && (
             <>
               {/* Regenerate Button */}
-              <Tooltip title='Generate again'>
+              <Tooltip title={t('cards.generatedCards.generateAgainTooltip')}>
                 <Button
                   size='sm'
                   variant='outlined'
                   onClick={handleGenerateAgain}
                   disabled={loading}
+                  aria-label={t('cards.generatedCards.generateAgainTooltip')}
                   sx={{ position: 'absolute', top: 16, right: 48, minWidth: 36, p: 0.8 }}
                 >
                   {loading ? <CircularProgress size='sm' /> : <RefreshCw size={18} />}
@@ -276,8 +288,12 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
           {step === 'select_deck' && (
             <Stack spacing={3} sx={{ minHeight: 200, px: 2 }}>
               <FormControl>
-                <FormLabel>Select Deck</FormLabel>
-                <Select value={selectedDeckId} onChange={(_, val) => setSelectedDeckId(val)} placeholder='Choose a deck...'>
+                <FormLabel>{t('cards.generatedCards.selectDeckLabel')}</FormLabel>
+                <Select
+                  value={selectedDeckId}
+                  onChange={(_, val) => setSelectedDeckId(val)}
+                  placeholder={t('cards.generatedCards.chooseDeckPlaceholder')}
+                >
                   {decks.map((deck) => (
                     <Option key={deck._id} value={deck._id}>
                       {deck.name}
@@ -286,23 +302,28 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
                 </Select>
               </FormControl>
 
-              <Divider>OR</Divider>
+              <Divider>{t('cards.generatedCards.orDivider')}</Divider>
 
               <Box
                 sx={{ p: 2, border: '1px dashed', borderColor: 'neutral.outlinedBorder', borderRadius: 'md', bgcolor: 'background.level1' }}
               >
                 {!isCreatingDeck ? (
                   <Button variant='plain' startDecorator={<Plus />} onClick={() => setIsCreatingDeck(true)} fullWidth>
-                    Create New Deck
+                    {t('cards.generatedCards.createNewDeck')}
                   </Button>
                 ) : (
                   <Stack spacing={2} direction='row'>
-                    <Input placeholder='New Deck Name' value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} fullWidth />
-                    <Button onClick={handleCreateDeck} loading={loading}>
-                      Create
+                    <Input
+                      placeholder={t('cards.generatedCards.newDeckNamePlaceholder')}
+                      value={newDeckName}
+                      onChange={(e) => setNewDeckName(e.target.value)}
+                      fullWidth
+                    />
+                    <Button onClick={handleCreateDeck} loading={createLoading}>
+                      {t('cards.generatedCards.createButton')}
                     </Button>
                     <Button variant='plain' color='neutral' onClick={() => setIsCreatingDeck(false)}>
-                      Cancel
+                      {t('cards.generatedCards.cancelButton')}
                     </Button>
                   </Stack>
                 )}
@@ -313,17 +334,23 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
 
         {/* Fixed Footer */}
         <Box sx={{ p: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.surface' }}>
+          {/* WR-03: render save error alert above footer actions */}
+          {saveError && (
+            <Alert color='danger' variant='soft' sx={{ mb: 1.5 }}>
+              {saveError}
+            </Alert>
+          )}
           <Stack direction='row' justifyContent='flex-end' spacing={1}>
             <Button variant='soft' color='neutral' onClick={onCancel}>
-              Cancel
+              {t('cards.generatedCards.cancelButton')}
             </Button>
             {step === 'select_cards' ? (
               <Button variant='solid' color='primary' onClick={handleProceedToDeck} disabled={selectedCards.length === 0}>
-                Proceed ({selectedCards.length})
+                {t('cards.generatedCards.proceedCount', { count: selectedCards.length })}
               </Button>
             ) : (
               <Button variant='solid' color='success' onClick={handleSaveCards} loading={saving} disabled={!selectedDeckId}>
-                Confirm & Save
+                {t('cards.generatedCards.confirmSave')}
               </Button>
             )}
           </Stack>

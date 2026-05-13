@@ -868,6 +868,23 @@
       "consequence1": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
       "consequence1_plural": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
       "consequence2": "Si está publicado, se despublicará inmediatamente"
+    },
+    "generatedCards": {
+      "titleSelectCards": "New Study Cards",
+      "titleAddToDeck": "Add to Deck",
+      "subtitleSelectCards": "Select the cards you want to add to your study deck.",
+      "subtitleAddToDeck": "Choose a deck to save your cards to.",
+      "generateAgainTooltip": "Generate again",
+      "selectDeckLabel": "Select Deck",
+      "chooseDeckPlaceholder": "Choose a deck...",
+      "orDivider": "OR",
+      "createNewDeck": "Create New Deck",
+      "newDeckNamePlaceholder": "New Deck Name",
+      "createButton": "Create",
+      "cancelButton": "Cancel",
+      "proceedCount": "Proceed ({{count}})",
+      "confirmSave": "Confirm & Save",
+      "saveError": "Failed to save cards. Please try again."
     }
   },
   "filters": {
