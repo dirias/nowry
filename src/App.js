@@ -351,13 +351,13 @@ const App = () => {
       <PomodoroProvider>
         <DynamicThemeProvider>
           <NotificationProvider>
-            <SubscriptionProvider>
-              <AgentProvider>
-                <Router>
+            <AgentProvider>
+              <Router>
+                <SubscriptionProvider>
                   <AppContent />
-                </Router>
-              </AgentProvider>
-            </SubscriptionProvider>
+                </SubscriptionProvider>
+              </Router>
+            </AgentProvider>
           </NotificationProvider>
         </DynamicThemeProvider>
       </PomodoroProvider>
