@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, useTheme, Snackbar, Alert, Button } from '@mui/joy'
+import { Box, useTheme, Snackbar, Alert, Button, LinearProgress } from '@mui/joy'
 import DOMPurify from 'dompurify'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
@@ -17,8 +17,10 @@ import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
 import {
   $createParagraphNode,
   $getRoot,
+  $getSelection,
   $isElementNode,
   $isDecoratorNode,
+  $isRangeSelection,
   BLUR_COMMAND,
   FOCUS_COMMAND,
   COMMAND_PRIORITY_LOW
@@ -52,7 +54,7 @@ import TextMenu from '../Menu/TextMenu'
 const StudyCard = React.lazy(() => import('../Cards/GeneratedCards'))
 const QuestionnaireModal = React.lazy(() => import('../Cards/QuestionnaireModal'))
 const VisualizerModal = React.lazy(() => import('../Cards/VisualizerModal'))
-import { cardsService, quizzesService } from '../../api/services'
+import { booksService, cardsService, quizzesService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
 import FloatingToolbarPlugin from '../Editor/plugins/FloatingToolbarPlugin'
 import LinkPreviewPlugin from '../Editor/plugins/LinkPreviewPlugin'
@@ -156,6 +158,14 @@ function EditorEditablePlugin({ isReadOnly }) {
   return null
 }
 
+function EditorRefPlugin({ editorRef }) {
+  const [editor] = useLexicalComposerContext()
+  useEffect(() => {
+    editorRef.current = editor
+  }, [editor, editorRef])
+  return null
+}
+
 const URL_MATCHER =
   /((https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,}))/
 
@@ -191,6 +201,7 @@ export default function Editor({
   const theme = useTheme()
   const menuRef = useRef()
   const containerRef = useRef()
+  const editorInstanceRef = useRef(null)
   const [showStudyCard, setShowStudyCard] = useState(false)
   const [showQuestionnaire, setShowQuestionnaire] = useState(false)
   const [showVisualizer, setShowVisualizer] = useState(false)
@@ -199,6 +210,7 @@ export default function Editor({
   const [questionnaireData, setQuestionnaireData] = useState([])
   const [error, setError] = useState(null)
   const [isLimitError, setIsLimitError] = useState(false)
+  const [isExpandingText, setIsExpandingText] = useState(false)
   const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 900 : false))
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -396,6 +408,31 @@ export default function Editor({
           const response = await cardsService.generate(textToProcess, 50, EXTRACT_VOCABULARY_PROMPT)
           setCards(response)
           setShowStudyCard(true)
+        } else if (option === 'expand_with_ai' && textToProcess) {
+          setIsExpandingText(true)
+          try {
+            const { expanded_text } = await booksService.aiExpand(book?._id, textToProcess, '')
+            const editor = editorInstanceRef.current
+            if (editor) {
+              editor.update(() => {
+                const selection = $getSelection()
+                if ($isRangeSelection(selection)) {
+                  selection.insertText(expanded_text)
+                }
+              })
+            }
+          } catch (err) {
+            console.error('Error expanding text:', err)
+            const status = err.response?.status
+            if (status === 403) {
+              setIsLimitError(true)
+              setError(t('subscription.errors.upgradeToUse'))
+            } else {
+              setError(err.response?.data?.detail || t('aiMagic.expandError'))
+            }
+          } finally {
+            setIsExpandingText(false)
+          }
         }
       } catch (error) {
         console.error('Error:', error)
@@ -408,7 +445,7 @@ export default function Editor({
         }
       }
     },
-    [selectedText, t]
+    [selectedText, t, book]
   )
 
   const fixedWidth = `${toPx(PAGE_SIZES[pageSize]?.width || '210mm')}px`
@@ -435,6 +472,18 @@ export default function Editor({
           position: 'relative'
         }}
       >
+        {isExpandingText && (
+          <LinearProgress
+            size='sm'
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 10,
+            }}
+          />
+        )}
         <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)} color='danger' variant='soft'>
           <Alert
             color='danger'
@@ -508,6 +557,7 @@ export default function Editor({
           </Box>
 
           {/* Plugins */}
+          <EditorRefPlugin editorRef={editorInstanceRef} />
           <FocusReportPlugin onFocus={onFocus} />
           <EditorEditablePlugin isReadOnly={isReadOnly} />
           <EditorSyncPlugin onContentChange={setInternalContent} />

@@ -82,6 +82,7 @@ const TextMenu = forwardRef(
     }
 
     const aiOptions = [
+      { label: t('editor.ai.expand', 'Expand with AI'), value: 'expand_with_ai', icon: <Sparkles size={15} /> },
       { label: t('editor.ai.questionnaire', 'Questionnaire'), value: 'create_questionnaire', icon: <ScrollText size={15} /> },
       { label: t('editor.ai.visual', 'Imagine scene'), value: 'create_visual_content', icon: <ImageIcon size={15} /> },
       { label: t('editor.ai.vocabulary', 'Extract vocabulary'), value: 'extract_vocabulary', icon: <Wand2 size={15} /> }
