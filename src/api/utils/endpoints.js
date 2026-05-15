@@ -23,7 +23,7 @@ export const ENDPOINTS = {
     analyzeDeck: '/card/analyze-deck',
   },
   quiz: {
-    generateFromBook: '/quiz/generate-from-book',
+    generateFromBook: '/v1/assistant/quiz/generate-from-book',
   },
   decks: {
     all: '/decks',
