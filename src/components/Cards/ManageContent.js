@@ -46,9 +46,14 @@ import {
   FileUpload,
   Settings,
   CloudUpload,
-  Public
+  Public,
+  Lock as LockIcon,
+  Psychology as PsychologyIcon
 } from '@mui/icons-material'
 import CardPreviewModal from './CardPreviewModal'
+import DeckAnalysisPanel from './DeckAnalysisPanel'
+import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscriptionContext } from '../../context/SubscriptionContext'
 
 export default function ManageContent({
   decks,
@@ -77,6 +82,15 @@ export default function ManageContent({
   onPublishDeck
 }) {
   const { t } = useTranslation()
+  const { tier } = useSubscription()
+  const { openUpgradeModal } = useSubscriptionContext()
+  const [activeDeckAnalysis, setActiveDeckAnalysis] = useState(null) // deck._id or null
+
+  const handleAnalyzeDeck = (deckId) => {
+    // Toggle: clicking the same deck again closes the panel
+    setActiveDeckAnalysis((prev) => (prev === deckId ? null : deckId))
+  }
+
   const [activeView, setActiveView] = useState(0) // 0 = Decks, 1 = Cards
   const [filterType, setFilterType] = useState('all')
   const [viewMode, setViewMode] = useState(() => {
@@ -611,6 +625,9 @@ export default function ManageContent({
                     onStudy={onStudy}
                     onDeckSettings={onDeckSettings}
                     onPublishDeck={onPublishDeck}
+                    tier={tier}
+                    onAnalyzeDeck={handleAnalyzeDeck}
+                    openUpgradeModal={openUpgradeModal}
                     t={t}
                   />
                 )
@@ -623,8 +640,8 @@ export default function ManageContent({
                 const cardCount = deck.total_cards || 0
 
                 return (
+                  <React.Fragment key={deck._id}>
                   <Card
-                    key={deck._id}
                     variant='outlined'
                     onClick={() => handlePreviewDeck(deck)}
                     sx={{
@@ -790,6 +807,27 @@ export default function ManageContent({
                             <MenuItem onClick={() => onEditDeck(deck)}>
                               <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
                             </MenuItem>
+                            {/* Analyze Deck — Pro only */}
+                            {tier === 'pro' ? (
+                              <MenuItem
+                                onClick={() => handleAnalyzeDeck(deck._id)}
+                                aria-label={t('aiMagic.analyzeDeck.ariaLabel')}
+                              >
+                                <ListItemDecorator><PsychologyIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
+                                {t('aiMagic.analyzeDeck.label')}
+                              </MenuItem>
+                            ) : (
+                              <MenuItem
+                                onClick={() => openUpgradeModal(t('upgrade.headlines.analyzeDeck'))}
+                                aria-label={t('aiMagic.analyzeDeck.lockedAriaLabel')}
+                              >
+                                <ListItemDecorator><LockIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
+                                {t('aiMagic.analyzeDeck.label')}
+                                <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
+                                  {t('plans.pro')}
+                                </Chip>
+                              </MenuItem>
+                            )}
                             <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
                               <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
                             </MenuItem>
@@ -798,6 +836,13 @@ export default function ManageContent({
                       </Box>
                     </Box>
                   </Card>
+                  {activeDeckAnalysis === deck._id && (
+                    <DeckAnalysisPanel
+                      deckId={String(deck._id)}
+                      onClose={() => setActiveDeckAnalysis(null)}
+                    />
+                  )}
+                  </React.Fragment>
                 )
               })}
             </Stack>
@@ -966,6 +1011,9 @@ function DeckGridCard({
   onStudy,
   onDeckSettings,
   onPublishDeck,
+  tier,
+  onAnalyzeDeck,
+  openUpgradeModal,
   t
 }) {
   const [transform, setTransform] = useState('')
@@ -1156,6 +1204,27 @@ function DeckGridCard({
               <MenuItem onClick={() => onEditDeck(deck)}>
                 <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
               </MenuItem>
+              {/* Analyze Deck — Pro only */}
+              {tier === 'pro' ? (
+                <MenuItem
+                  onClick={() => onAnalyzeDeck(deck._id)}
+                  aria-label={t('aiMagic.analyzeDeck.ariaLabel')}
+                >
+                  <ListItemDecorator><PsychologyIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
+                  {t('aiMagic.analyzeDeck.label')}
+                </MenuItem>
+              ) : (
+                <MenuItem
+                  onClick={() => openUpgradeModal(t('upgrade.headlines.analyzeDeck'))}
+                  aria-label={t('aiMagic.analyzeDeck.lockedAriaLabel')}
+                >
+                  <ListItemDecorator><LockIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
+                  {t('aiMagic.analyzeDeck.label')}
+                  <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
+                    {t('plans.pro')}
+                  </Chip>
+                </MenuItem>
+              )}
               <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
                 <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
               </MenuItem>
