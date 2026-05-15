@@ -27,6 +27,30 @@ export const cardsService = {
   },
 
   /**
+   * Generate flashcards from full book content (Plus+ only)
+   * @param {string} bookId - Book ID
+   * @returns {Promise<{cards: Array<{title: string, content: string}>}>}
+   */
+  async generateFromBook(bookId) {
+    const { data } = await apiClient.post(ENDPOINTS.studyCards.generateFromBook, {
+      book_id: bookId,
+    })
+    return data
+  },
+
+  /**
+   * Run AI deck analysis: duplicates, gaps, rewrite suggestions (Pro only)
+   * @param {string} deckId - Deck ID
+   * @returns {Promise<{duplicates: Array, gaps: Array, rewrite_suggestions: Array}>}
+   */
+  async analyzeDeck(deckId) {
+    const { data } = await apiClient.post(ENDPOINTS.studyCards.analyzeDeck, {
+      deck_id: deckId,
+    })
+    return data
+  },
+
+  /**
    * Get paginated study cards
    * @param {number} skip - Offset for pagination
    * @param {number} limit - Number of cards to fetch

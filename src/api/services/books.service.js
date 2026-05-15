@@ -101,6 +101,21 @@ export const booksService = {
    * @param {string} title - Optional override title
    * @returns {Promise<Object>} Created book with pages or preview data
    */
+  /**
+   * Expand selected text using AI (all tiers; model quality varies by tier)
+   * @param {string} bookId - Book ID (ownership verification)
+   * @param {string} selectedText - Text to expand
+   * @param {string} [instruction] - Optional custom instruction
+   * @returns {Promise<{expanded_text: string}>}
+   */
+  async aiExpand(bookId, selectedText, instruction = '') {
+    const { data } = await apiClient.post(ENDPOINTS.books.aiExpand(bookId), {
+      selected_text: selectedText,
+      ...(instruction ? { instruction } : {}),
+    })
+    return data
+  },
+
   async importFile(file, username, preview = false, title = null) {
     const formData = new FormData()
     formData.append('file', file)

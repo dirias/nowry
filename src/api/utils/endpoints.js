@@ -10,14 +10,20 @@ export const ENDPOINTS = {
     create: '/book/create',
     update: (id) => `/book/edit/${id}`,
     delete: (id) => `/book/delete/${id}`,
-    search: '/book/search'
+    search: '/book/search',
+    aiExpand: (bookId) => `/book/${bookId}/ai-expand`,
   },
   studyCards: {
     generate: '/card/generate',
     all: '/study-cards',
     create: '/study-cards',
     update: (id) => `/study-cards/${id}`,
-    delete: (id) => `/study-cards/${id}`
+    delete: (id) => `/study-cards/${id}`,
+    generateFromBook: '/card/generate-from-book',
+    analyzeDeck: '/card/analyze-deck',
+  },
+  quiz: {
+    generateFromBook: '/quiz/generate-from-book',
   },
   decks: {
     all: '/decks',

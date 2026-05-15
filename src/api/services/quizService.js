@@ -3,6 +3,7 @@
  * Handles AI-driven quiz mode endpoints for the Study Partner feature.
  */
 import { apiClient } from '../client'
+import { ENDPOINTS } from '../utils/endpoints'
 
 export const quizService = {
   /**
@@ -41,5 +42,17 @@ export const quizService = {
    * @returns {Promise<{ session_id: string, total_cards: number, first_question: Object }>}
    */
   startAIQuiz: ({ topic, question_count, language = 'en' }) =>
-    apiClient.post('/v1/assistant/quiz/start-ai', { topic, question_count, language })
+    apiClient.post('/v1/assistant/quiz/start-ai', { topic, question_count, language }),
+
+  /**
+   * Generate quiz questions from full book content (Plus+ only)
+   * @param {string} bookId - Book ID
+   * @returns {Promise<{questions: Array}>}
+   */
+  async generateFromBook(bookId) {
+    const { data } = await apiClient.post(ENDPOINTS.quiz.generateFromBook, {
+      book_id: bookId,
+    })
+    return data
+  },
 }
