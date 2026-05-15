@@ -4,8 +4,14 @@ import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
 import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer, PencilLine } from 'lucide-react'
-import { booksService, publicContentService } from '../../api/services'
-import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip, Snackbar, LinearProgress } from '@mui/joy'
+import { booksService, publicContentService, cardsService, quizService } from '../../api/services'
+import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip, Snackbar, LinearProgress, Chip, Alert } from '@mui/joy'
+import LockIcon from '@mui/icons-material/Lock'
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import GeneratedCards from '../Cards/GeneratedCards'
+import QuestionnaireModal from '../Cards/QuestionnaireModal'
+import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { LexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import Toolbar from './Toolbar'
 import { useAutoSave, SAVE_STATUS } from '../../hooks/useAutoSave'
@@ -22,6 +28,8 @@ export default function EditorHome() {
   const location = useLocation()
   const { t } = useTranslation()
   const { setViewContext } = usePet()
+  const { tier } = useSubscription()
+  const { openUpgradeModal } = useSubscriptionContext()
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
 
@@ -33,6 +41,21 @@ export default function EditorHome() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', color: 'success' })
   const [confirmUnpublishOpen, setConfirmUnpublishOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Tier gate — Plus+ required for book-wide AI generation
+  const isPlusLocked = tier === 'free'
+
+  // Generate Cards from Book state
+  const [isGeneratingCards, setIsGeneratingCards] = useState(false)
+  const [generatedCards, setGeneratedCards] = useState([])
+  const [showGeneratedCards, setShowGeneratedCards] = useState(false)
+  const [generateCardsError, setGenerateCardsError] = useState(null)
+
+  // Generate Quiz from Book state
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false)
+  const [generatedQuizQuestions, setGeneratedQuizQuestions] = useState([])
+  const [showGeneratedQuiz, setShowGeneratedQuiz] = useState(false)
+  const [generateQuizError, setGenerateQuizError] = useState(null)
 
   // Flow content state (TOC and reading stats)
   const [tocData, setTocData] = useState([])
@@ -166,6 +189,46 @@ export default function EditorHome() {
     },
     [id, bookName, pageSize, autoSaveEnabled]
   )
+
+  const handleGenerateCards = async () => {
+    setIsGeneratingCards(true)
+    setGenerateCardsError(null)
+    try {
+      const { cards } = await cardsService.generateFromBook(book?._id || book?.id)
+      setGeneratedCards(cards)
+      setShowGeneratedCards(true)
+    } catch (err) {
+      console.error('Error generating cards from book:', err)
+      const status = err.response?.status
+      if (status === 403) {
+        openUpgradeModal(t('upgrade.headlines.generateFromBook'))
+      } else {
+        setGenerateCardsError(err.response?.data?.detail || t('aiMagic.generateFromBook.error'))
+      }
+    } finally {
+      setIsGeneratingCards(false)
+    }
+  }
+
+  const handleGenerateQuiz = async () => {
+    setIsGeneratingQuiz(true)
+    setGenerateQuizError(null)
+    try {
+      const { questions } = await quizService.generateFromBook(book?._id || book?.id)
+      setGeneratedQuizQuestions(questions)
+      setShowGeneratedQuiz(true)
+    } catch (err) {
+      console.error('Error generating quiz from book:', err)
+      const status = err.response?.status
+      if (status === 403) {
+        openUpgradeModal(t('upgrade.headlines.generateQuizFromBook'))
+      } else {
+        setGenerateQuizError(err.response?.data?.detail || t('aiMagic.generateFromBook.errorQuiz'))
+      }
+    } finally {
+      setIsGeneratingQuiz(false)
+    }
+  }
 
   // Manual save always uses the latest content ref to avoid stale React state
   const handleManualSave = async () => {
@@ -655,6 +718,82 @@ export default function EditorHome() {
               </Stack>
               <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
 
+              {/* Generate Cards from Book — Plus+ only */}
+              <Tooltip
+                title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''}
+                variant='soft'
+                size='sm'
+              >
+                <span>
+                  {isPlusLocked ? (
+                    <Button
+                      size='sm'
+                      variant='outlined'
+                      color='neutral'
+                      disabled
+                      startDecorator={<LockIcon sx={{ fontSize: 16 }} />}
+                      onClick={() => openUpgradeModal(t('upgrade.headlines.generateFromBook'))}
+                      aria-label={t('aiMagic.generateFromBook.lockedAriaLabel')}
+                    >
+                      {t('aiMagic.generateFromBook.label')}
+                      <Chip size='sm' color='warning' variant='soft' sx={{ ml: 1 }}>
+                        {t('plans.plus')}
+                      </Chip>
+                    </Button>
+                  ) : (
+                    <Button
+                      size='sm'
+                      variant='soft'
+                      color='primary'
+                      startDecorator={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
+                      onClick={handleGenerateCards}
+                      loading={isGeneratingCards}
+                      aria-label={t('aiMagic.generateFromBook.ariaLabel')}
+                    >
+                      {t('aiMagic.generateFromBook.label')}
+                    </Button>
+                  )}
+                </span>
+              </Tooltip>
+
+              {/* Generate Quiz from Book — Plus+ only */}
+              <Tooltip
+                title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''}
+                variant='soft'
+                size='sm'
+              >
+                <span>
+                  {isPlusLocked ? (
+                    <Button
+                      size='sm'
+                      variant='outlined'
+                      color='neutral'
+                      disabled
+                      startDecorator={<LockIcon sx={{ fontSize: 16 }} />}
+                      onClick={() => openUpgradeModal(t('upgrade.headlines.generateQuizFromBook'))}
+                      aria-label={t('aiMagic.generateFromBook.lockedAriaLabelQuiz')}
+                    >
+                      {t('aiMagic.generateFromBook.labelQuiz')}
+                      <Chip size='sm' color='warning' variant='soft' sx={{ ml: 1 }}>
+                        {t('plans.plus')}
+                      </Chip>
+                    </Button>
+                  ) : (
+                    <Button
+                      size='sm'
+                      variant='soft'
+                      color='primary'
+                      startDecorator={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
+                      onClick={handleGenerateQuiz}
+                      loading={isGeneratingQuiz}
+                      aria-label={t('aiMagic.generateFromBook.ariaLabelQuiz')}
+                    >
+                      {t('aiMagic.generateFromBook.labelQuiz')}
+                    </Button>
+                  )}
+                </span>
+              </Tooltip>
+
               <Button
                 variant={autoSaveEnabled ? 'soft' : 'plain'}
                 color={autoSaveEnabled ? 'primary' : 'neutral'}
@@ -854,6 +993,46 @@ export default function EditorHome() {
         {/* Mobile bottom action strip — appears in edit mode above keyboard */}
         {isMobile && !isLocked && focusedEditor && <MobileBottomActionStrip editor={focusedEditor} />}
       </Box>
+
+      {/* Generate Cards from Book — results modal */}
+      {showGeneratedCards && (
+        <GeneratedCards
+          cards={generatedCards}
+          book={book}
+          onCancel={() => { setShowGeneratedCards(false); setGeneratedCards([]) }}
+        />
+      )}
+
+      {/* Generate Quiz from Book — results modal */}
+      {showGeneratedQuiz && (
+        <QuestionnaireModal
+          questions={generatedQuizQuestions}
+          onCancel={() => { setShowGeneratedQuiz(false); setGeneratedQuizQuestions([]) }}
+        />
+      )}
+
+      {/* Error snackbars for book-wide AI generation */}
+      <Snackbar
+        open={!!generateCardsError}
+        autoHideDuration={4000}
+        onClose={() => setGenerateCardsError(null)}
+        color='danger'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert color='danger' variant='soft'>{generateCardsError}</Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!generateQuizError}
+        autoHideDuration={4000}
+        onClose={() => setGenerateQuizError(null)}
+        color='danger'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert color='danger' variant='soft'>{generateQuizError}</Alert>
+      </Snackbar>
     </>
   )
 }
