@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 
-const UpgradePrompt = ({ open, onClose }) => {
+const UpgradePrompt = ({ open, onClose, headline }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -73,7 +73,7 @@ const UpgradePrompt = ({ open, onClose }) => {
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography level='title-lg' sx={{ fontWeight: 700, mb: 0.5 }}>
-                {t('upgrade.modal.title')}
+                {headline || t('upgrade.modal.title')}
               </Typography>
               <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                 {t('upgrade.modal.description')}

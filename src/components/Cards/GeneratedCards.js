@@ -27,7 +27,7 @@ import { decksService, cardsService } from '../../api/services'
 import { useDeckData } from '../../hooks/useDeckData'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
-import UpgradePrompt from '../Common/UpgradePrompt'
+// UpgradePrompt is rendered centrally in SubscriptionProvider — no local import needed
 
 export default function GeneratedCards({ cards = [], book, onCancel, onGenerateAgain }) {
   const { t } = useTranslation()
@@ -280,8 +280,7 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
                 </Box>
               )}
 
-              {/* ── Upgrade modal (controlled by SubscriptionContext) ─────── */}
-              <UpgradePrompt open={isUpgradeModalOpen} onClose={closeUpgradeModal} />
+              {/* UpgradePrompt is rendered centrally in SubscriptionProvider */}
             </>
           )}
 
