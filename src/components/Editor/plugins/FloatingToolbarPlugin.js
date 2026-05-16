@@ -9,7 +9,7 @@ import { $createCalloutNode } from '../../../nodes/CalloutNode'
 import { createPortal } from 'react-dom'
 import TextMenu from '../../Menu/TextMenu'
 
-export default function FloatingToolbarPlugin({ onOptionClick }) {
+export default function FloatingToolbarPlugin({ onOptionClick, illustrationCount = 0, tier = 'free' }) {
   const [editor] = useLexicalComposerContext()
   const [showMenu, setShowMenu] = useState(false)
   const [isEditingLink, setIsEditingLink] = useState(false)
@@ -180,6 +180,7 @@ export default function FloatingToolbarPlugin({ onOptionClick }) {
       activeFormats={activeFormats}
       currentBlockType={currentBlockType}
       onBlockTypeChange={onBlockTypeChange}
+      illustrationCount={illustrationCount}
       style={{ top: position.top, left: position.left }}
     />,
     document.body

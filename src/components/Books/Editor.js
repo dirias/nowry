@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, useTheme, Snackbar, Alert, Button, LinearProgress } from '@mui/joy'
+import DiagramPreviewPanel from './DiagramPreviewPanel'
 import DOMPurify from 'dompurify'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
@@ -16,6 +17,7 @@ import { AutoLinkPlugin } from '@lexical/react/LexicalAutoLinkPlugin'
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
 import {
   $createParagraphNode,
+  $createTextNode,
   $getRoot,
   $getSelection,
   $isElementNode,
@@ -42,7 +44,7 @@ import { HorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
 import { ImageNode } from '../../nodes/ImageNode'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
-import { CodeNode } from '@lexical/code'
+import { CodeNode, $createCodeNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { TableNode, TableCellNode, TableRowNode } from '@lexical/table'
 import { ColumnContainerNode, ColumnNode } from '../../nodes/ColumnNodes'
@@ -158,11 +160,12 @@ function EditorEditablePlugin({ isReadOnly }) {
   return null
 }
 
-function EditorRefPlugin({ editorRef }) {
+function EditorRefPlugin({ editorRef, onEditorReady }) {
   const [editor] = useLexicalComposerContext()
   useEffect(() => {
     editorRef.current = editor
-  }, [editor, editorRef])
+    if (onEditorReady) onEditorReady(editor)
+  }, [editor, editorRef, onEditorReady])
   return null
 }
 
@@ -196,7 +199,10 @@ export default function Editor({
   onReadingStatsChange,
   pageSize = 'a4',
   pageZoom = 1.0,
-  isReadOnly = false
+  isReadOnly = false,
+  onEditorReady,         // NEW: callback fires with editor instance when Lexical mounts
+  illustrationCount = 0, // NEW: threaded from EditorHome → FloatingToolbarPlugin → TextMenu
+  tier = 'free',         // NEW: threaded from EditorHome → FloatingToolbarPlugin → TextMenu
 }) {
   const theme = useTheme()
   const menuRef = useRef()
@@ -205,6 +211,7 @@ export default function Editor({
   const [showStudyCard, setShowStudyCard] = useState(false)
   const [showQuestionnaire, setShowQuestionnaire] = useState(false)
   const [showVisualizer, setShowVisualizer] = useState(false)
+  const [showDiagramPanel, setShowDiagramPanel] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const [cards, setCards] = useState([])
   const [questionnaireData, setQuestionnaireData] = useState([])
@@ -389,6 +396,22 @@ export default function Editor({
     }
   }, [])
 
+  // Insert mermaid diagram as a CodeNode at cursor position after DiagramPreviewPanel confirm
+  const handleDiagramInsert = useCallback((mermaidCode) => {
+    const editor = editorInstanceRef.current
+    if (editor) {
+      editor.update(() => {
+        const selection = $getSelection()
+        if ($isRangeSelection(selection)) {
+          const codeNode = $createCodeNode('mermaid')
+          codeNode.append($createTextNode(mermaidCode))
+          selection.insertNodes([codeNode])
+        }
+      })
+    }
+    setShowDiagramPanel(false)
+  }, [])
+
   const handleOptionClick = useCallback(
     async (option, overrideText) => {
       const textToProcess = overrideText || selectedText
@@ -433,6 +456,9 @@ export default function Editor({
           } finally {
             setIsExpandingText(false)
           }
+        } else if (option === 'generate_diagram' && textToProcess) {
+          setSelectedText(textToProcess)
+          setShowDiagramPanel(true)
         }
       } catch (error) {
         console.error('Error:', error)
@@ -557,7 +583,7 @@ export default function Editor({
           </Box>
 
           {/* Plugins */}
-          <EditorRefPlugin editorRef={editorInstanceRef} />
+          <EditorRefPlugin editorRef={editorInstanceRef} onEditorReady={onEditorReady} />
           <FocusReportPlugin onFocus={onFocus} />
           <EditorEditablePlugin isReadOnly={isReadOnly} />
           <EditorSyncPlugin onContentChange={setInternalContent} />
@@ -584,9 +610,20 @@ export default function Editor({
               setSelectedText(text)
               handleOptionClick(opt, text)
             }}
+            illustrationCount={illustrationCount}
+            tier={tier}
           />
 
           {/* Overlays (Lazy Loaded) */}
+          {/* DiagramPreviewPanel — rendered outside Suspense (not lazy-loaded) */}
+          <DiagramPreviewPanel
+            open={showDiagramPanel}
+            onClose={() => setShowDiagramPanel(false)}
+            selectedText={selectedText}
+            bookId={book?._id || book?.id}
+            onInsert={handleDiagramInsert}
+          />
+
           <React.Suspense
             fallback={
               <Box
