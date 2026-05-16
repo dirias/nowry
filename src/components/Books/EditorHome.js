@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import Editor from './Editor'
+import TTSToolbar from './TTSToolbar'
 import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
@@ -60,6 +61,9 @@ export default function EditorHome() {
   // Flow content state (TOC and reading stats)
   const [tocData, setTocData] = useState([])
   const [readingStats, setReadingStats] = useState({ wordCount: 0, readingTime: 0 })
+
+  // Lexical editor instance ref — populated via onEditorReady callback from Editor/EditorRefPlugin
+  const editorRef = useRef(null)
 
   // refs to prevent redundant fetches and handle cleanup
   const fetchedIdRef = useRef(null)
@@ -267,6 +271,14 @@ export default function EditorHome() {
     latestContentRef.current = newContent
     setContent(newContent)
   }, [])
+
+  // Callback fired by EditorRefPlugin when Lexical mounts — stores instance for TTS use
+  const handleEditorReady = useCallback((editor) => {
+    editorRef.current = editor
+  }, [])
+
+  // Illustration count from already-loaded book data (no extra fetch needed)
+  const illustrationCount = book?.illustration_count ?? 0
 
   // Tell the pet which book is open. The backend handles RAG retrieval —
   // we only need to send the book_id and title, not the content.
@@ -794,6 +806,16 @@ export default function EditorHome() {
                 </span>
               </Tooltip>
 
+              {/* TTS Toolbar — desktop only (md+), between AI buttons and Save controls */}
+              <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+                <Divider orientation='vertical' sx={{ height: 20, mx: 0.5 }} />
+                <TTSToolbar
+                  tier={tier}
+                  editorInstanceRef={editorRef}
+                  bookId={book?._id}
+                />
+              </Box>
+
               <Button
                 variant={autoSaveEnabled ? 'soft' : 'plain'}
                 color={autoSaveEnabled ? 'primary' : 'neutral'}
@@ -914,6 +936,9 @@ export default function EditorHome() {
               onPageCountChange={handlePageUpdate}
               onTOCChange={setTocData}
               onReadingStatsChange={handleReadingStatsChange}
+              onEditorReady={handleEditorReady}
+              illustrationCount={illustrationCount}
+              tier={tier}
             />
           </Box>
 
