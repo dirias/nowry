@@ -12,6 +12,8 @@ export const ENDPOINTS = {
     delete: (id) => `/book/delete/${id}`,
     search: '/book/search',
     aiExpand: (bookId) => `/book/${bookId}/ai-expand`,
+    diagram: (bookId) => `/book/${bookId}/diagram`,
+    tts: (bookId) => `/book/${bookId}/tts`,
   },
   studyCards: {
     generate: '/card/generate',
