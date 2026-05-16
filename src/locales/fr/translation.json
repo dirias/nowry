@@ -1492,12 +1492,15 @@
     "headlines": {
       "generateFromBook": "Unlock book-wide AI card generation with Plus",
       "generateQuizFromBook": "Unlock book-wide quiz generation with Plus",
-      "analyzeDeck": "Unlock AI deck analysis with Pro"
+      "analyzeDeck": "Unlock AI deck analysis with Pro",
+      "tts": "Hear your book read aloud with Plus",
+      "illustrations": "Unlock unlimited diagrams with Plus"
     }
   },
   "editor": {
     "ai": {
-      "expand": "Expand with AI"
+      "expand": "Expand with AI",
+      "generateDiagram": "Generate Diagram"
     }
   },
   "aiMagic": {
@@ -1535,6 +1538,55 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      }
+    },
+    "tts": {
+      "label": "Listen",
+      "playTooltip": "Listen to this book",
+      "playAriaLabel": "Play book audio",
+      "loadingAriaLabel": "Generating audio...",
+      "pauseTooltip": "Pause",
+      "pauseAriaLabel": "Pause audio playback",
+      "resumeTooltip": "Resume",
+      "resumeAriaLabel": "Resume audio playback",
+      "stopTooltip": "Stop",
+      "stopAriaLabel": "Stop audio playback",
+      "lockedTooltip": "Available with Plus — upgrade to unlock",
+      "lockedAriaLabel": "Listen to book — available with Plus",
+      "languageAriaLabel": "Select TTS language",
+      "loading": "Generating audio...",
+      "error": "Couldn't generate audio. Please try again.",
+      "fullBook": "Full book",
+      "fullBookHint": "Read the entire book",
+      "sectionPickerTitle": "Choose a section",
+      "languages": {
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "ja": "Japanese",
+        "pt": "Portuguese",
+        "zh": "Chinese"
+      }
+    },
+    "diagram": {
+      "panelTitle": "Generate Diagram",
+      "loading": "Generating diagram...",
+      "error": "Couldn't generate diagram. Please try again.",
+      "regenerate": "Regenerate",
+      "regenerateAriaLabel": "Regenerate diagram",
+      "insert": "Insert into Book",
+      "insertAriaLabel": "Insert diagram into book at cursor",
+      "explanation": "Explanation",
+      "typeAriaLabel": "Select diagram type",
+      "renderError": "Unable to render diagram. The syntax may be invalid. Try regenerating.",
+      "lockedTooltip": "Unlock unlimited diagrams with Plus",
+      "types": {
+        "auto": "Auto",
+        "mindmap": "Mind Map",
+        "flowchart": "Flowchart",
+        "sequence": "Sequence Diagram",
+        "er": "ER Diagram"
       }
     }
   },
