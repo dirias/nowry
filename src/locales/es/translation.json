@@ -2118,7 +2118,8 @@
       "lockedTooltip": "Available with Plus — upgrade to unlock",
       "loading": "Analyzing book content...",
       "error": "Couldn't generate from book. Please try again.",
-      "errorQuiz": "Couldn't generate quiz from book. Please try again."
+      "errorQuiz": "Couldn't generate quiz from book. Please try again.",
+      "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento."
     },
     "analyzeDeck": {
       "label": "Analyze Deck",

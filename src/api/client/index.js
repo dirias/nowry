@@ -63,10 +63,16 @@ const notifyUser = (message, severity = 'error') => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle request timeout — suppress for AI generation endpoints that manage their own UI state
-    const timeoutUrl = error.config?.url || ''
-    const isAiGeneration = timeoutUrl.includes('generate-avatar') || timeoutUrl.includes('generate-animation')
-    if (!isAiGeneration && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
+    // Classify the failing URL once — used by multiple error handlers below
+    const errorUrl = error.config?.url || ''
+    // Endpoints that manage their own error/loading UI — global toasts would duplicate feedback
+    const isAiGenerationEndpoint =
+      errorUrl.includes('generate-avatar') ||
+      errorUrl.includes('generate-animation') ||
+      errorUrl.includes('generate-from-book')
+
+    // Handle request timeout — suppress for AI generation endpoints
+    if (!isAiGenerationEndpoint && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
       notifyUser('Request timed out. Please check your connection and try again.', 'warning')
     }
 
@@ -98,8 +104,8 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle forbidden (403)
-    if (error.response?.status === 403) {
+    // Handle forbidden (403) — suppress for AI generation endpoints that open their own upgrade modal
+    if (error.response?.status === 403 && !isAiGenerationEndpoint) {
       console.error('Forbidden: Insufficient permissions')
       notifyUser('You do not have permission to perform this action.', 'warning')
     }
@@ -113,8 +119,8 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle server errors (5xx)
-    if (error.response?.status >= 500) {
+    // Handle server errors (5xx) — suppress for AI generation endpoints that surface their own error UI
+    if (error.response?.status >= 500 && !isAiGenerationEndpoint) {
       console.error('Server error:', error.response?.status)
       notifyUser('A server error occurred. Please try again later.', 'error')
     }

@@ -6,7 +6,22 @@ import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
 import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer, PencilLine } from 'lucide-react'
 import { booksService, publicContentService, cardsService, quizService } from '../../api/services'
-import { Box, Input, IconButton, Button, Sheet, Stack, Typography, Divider, Drawer, Tooltip, Snackbar, LinearProgress, Chip, Alert } from '@mui/joy'
+import {
+  Box,
+  Input,
+  IconButton,
+  Button,
+  Sheet,
+  Stack,
+  Typography,
+  Divider,
+  Drawer,
+  Tooltip,
+  Snackbar,
+  LinearProgress,
+  Chip,
+  Alert
+} from '@mui/joy'
 import LockIcon from '@mui/icons-material/Lock'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import GeneratedCards from '../Cards/GeneratedCards'
@@ -207,7 +222,12 @@ export default function EditorHome() {
       if (status === 403) {
         openUpgradeModal(t('upgrade.headlines.generateFromBook'))
       } else {
-        setGenerateCardsError(err.response?.data?.detail || t('aiMagic.generateFromBook.error'))
+        // 503/502/429 → surface backend detail (already user-friendly) or AI service key
+        const isAiServiceError = status === 503 || status === 502 || status === 429
+        const fallback = isAiServiceError
+          ? t('aiMagic.generateFromBook.errorAiService')
+          : t('aiMagic.generateFromBook.error')
+        setGenerateCardsError(err.response?.data?.detail || fallback)
       }
     } finally {
       setIsGeneratingCards(false)
@@ -227,7 +247,12 @@ export default function EditorHome() {
       if (status === 403) {
         openUpgradeModal(t('upgrade.headlines.generateQuizFromBook'))
       } else {
-        setGenerateQuizError(err.response?.data?.detail || t('aiMagic.generateFromBook.errorQuiz'))
+        // 503/502/429 → surface backend detail (already user-friendly) or AI service key
+        const isAiServiceError = status === 503 || status === 502 || status === 429
+        const fallback = isAiServiceError
+          ? t('aiMagic.generateFromBook.errorAiService')
+          : t('aiMagic.generateFromBook.errorQuiz')
+        setGenerateQuizError(err.response?.data?.detail || fallback)
       }
     } finally {
       setIsGeneratingQuiz(false)
@@ -731,11 +756,7 @@ export default function EditorHome() {
               <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
 
               {/* Generate Cards from Book — Plus+ only */}
-              <Tooltip
-                title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''}
-                variant='soft'
-                size='sm'
-              >
+              <Tooltip title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''} variant='soft' size='sm'>
                 <span>
                   {isPlusLocked ? (
                     <Button
@@ -769,11 +790,7 @@ export default function EditorHome() {
               </Tooltip>
 
               {/* Generate Quiz from Book — Plus+ only */}
-              <Tooltip
-                title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''}
-                variant='soft'
-                size='sm'
-              >
+              <Tooltip title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''} variant='soft' size='sm'>
                 <span>
                   {isPlusLocked ? (
                     <Button
@@ -809,11 +826,7 @@ export default function EditorHome() {
               {/* TTS Toolbar — desktop only (md+), between AI buttons and Save controls */}
               <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
                 <Divider orientation='vertical' sx={{ height: 20, mx: 0.5 }} />
-                <TTSToolbar
-                  tier={tier}
-                  editorInstanceRef={editorRef}
-                  bookId={book?._id}
-                />
+                <TTSToolbar tier={tier} editorInstanceRef={editorRef} bookId={book?._id} />
               </Box>
 
               <Button
@@ -1024,7 +1037,10 @@ export default function EditorHome() {
         <GeneratedCards
           cards={generatedCards}
           book={book}
-          onCancel={() => { setShowGeneratedCards(false); setGeneratedCards([]) }}
+          onCancel={() => {
+            setShowGeneratedCards(false)
+            setGeneratedCards([])
+          }}
         />
       )}
 
@@ -1032,7 +1048,10 @@ export default function EditorHome() {
       {showGeneratedQuiz && (
         <QuestionnaireModal
           questions={generatedQuizQuestions}
-          onCancel={() => { setShowGeneratedQuiz(false); setGeneratedQuizQuestions([]) }}
+          onCancel={() => {
+            setShowGeneratedQuiz(false)
+            setGeneratedQuizQuestions([])
+          }}
         />
       )}
 
@@ -1045,7 +1064,9 @@ export default function EditorHome() {
         variant='soft'
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert color='danger' variant='soft'>{generateCardsError}</Alert>
+        <Alert color='danger' variant='soft'>
+          {generateCardsError}
+        </Alert>
       </Snackbar>
 
       <Snackbar
@@ -1056,7 +1077,9 @@ export default function EditorHome() {
         variant='soft'
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert color='danger' variant='soft'>{generateQuizError}</Alert>
+        <Alert color='danger' variant='soft'>
+          {generateQuizError}
+        </Alert>
       </Snackbar>
     </>
   )
