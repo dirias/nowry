@@ -222,12 +222,12 @@ export default function EditorHome() {
       if (status === 403) {
         openUpgradeModal(t('upgrade.headlines.generateFromBook'))
       } else {
-        // 503/502/429 → surface backend detail (already user-friendly) or AI service key
         const isAiServiceError = status === 503 || status === 502 || status === 429
-        const fallback = isAiServiceError
-          ? t('aiMagic.generateFromBook.errorAiService')
-          : t('aiMagic.generateFromBook.error')
-        setGenerateCardsError(err.response?.data?.detail || fallback)
+        setGenerateCardsError(
+          isAiServiceError
+            ? t('aiMagic.generateFromBook.errorAiService')
+            : err.response?.data?.detail || t('aiMagic.generateFromBook.error')
+        )
       }
     } finally {
       setIsGeneratingCards(false)
@@ -247,12 +247,12 @@ export default function EditorHome() {
       if (status === 403) {
         openUpgradeModal(t('upgrade.headlines.generateQuizFromBook'))
       } else {
-        // 503/502/429 → surface backend detail (already user-friendly) or AI service key
         const isAiServiceError = status === 503 || status === 502 || status === 429
-        const fallback = isAiServiceError
-          ? t('aiMagic.generateFromBook.errorAiService')
-          : t('aiMagic.generateFromBook.errorQuiz')
-        setGenerateQuizError(err.response?.data?.detail || fallback)
+        setGenerateQuizError(
+          isAiServiceError
+            ? t('aiMagic.generateFromBook.errorAiService')
+            : err.response?.data?.detail || t('aiMagic.generateFromBook.errorQuiz')
+        )
       }
     } finally {
       setIsGeneratingQuiz(false)
@@ -781,9 +781,13 @@ export default function EditorHome() {
                       startDecorator={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
                       onClick={handleGenerateCards}
                       loading={isGeneratingCards}
+                      loadingPosition='start'
+                      sx={{ minWidth: 160 }}
                       aria-label={t('aiMagic.generateFromBook.ariaLabel')}
                     >
-                      {t('aiMagic.generateFromBook.label')}
+                      {isGeneratingCards
+                        ? t('aiMagic.generateFromBook.generating')
+                        : t('aiMagic.generateFromBook.label')}
                     </Button>
                   )}
                 </span>
@@ -815,13 +819,24 @@ export default function EditorHome() {
                       startDecorator={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
                       onClick={handleGenerateQuiz}
                       loading={isGeneratingQuiz}
+                      loadingPosition='start'
+                      sx={{ minWidth: 160 }}
                       aria-label={t('aiMagic.generateFromBook.ariaLabelQuiz')}
                     >
-                      {t('aiMagic.generateFromBook.labelQuiz')}
+                      {isGeneratingQuiz
+                        ? t('aiMagic.generateFromBook.generatingQuiz')
+                        : t('aiMagic.generateFromBook.labelQuiz')}
                     </Button>
                   )}
                 </span>
               </Tooltip>
+
+              {/* AI generation hint — visible only while generating */}
+              {(isGeneratingCards || isGeneratingQuiz) && (
+                <Typography level='body-xs' sx={{ color: 'text.tertiary', alignSelf: 'center' }}>
+                  {t('aiMagic.generateFromBook.generatingHint')}
+                </Typography>
+              )}
 
               {/* TTS Toolbar — desktop only (md+), between AI buttons and Save controls */}
               <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
