@@ -2161,6 +2161,7 @@
       "languageAriaLabel": "Select TTS language",
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
+      "playSection": "Reproducir sección: {{title}}",
       "fullBook": "Full book",
       "fullBookHint": "Read the entire book",
       "sectionPickerTitle": "Choose a section",

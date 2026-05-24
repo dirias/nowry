@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import Editor from './Editor'
-import TTSToolbar from './TTSToolbar'
 import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
@@ -785,9 +784,7 @@ export default function EditorHome() {
                       sx={{ minWidth: 160 }}
                       aria-label={t('aiMagic.generateFromBook.ariaLabel')}
                     >
-                      {isGeneratingCards
-                        ? t('aiMagic.generateFromBook.generating')
-                        : t('aiMagic.generateFromBook.label')}
+                      {isGeneratingCards ? t('aiMagic.generateFromBook.generating') : t('aiMagic.generateFromBook.label')}
                     </Button>
                   )}
                 </span>
@@ -823,9 +820,7 @@ export default function EditorHome() {
                       sx={{ minWidth: 160 }}
                       aria-label={t('aiMagic.generateFromBook.ariaLabelQuiz')}
                     >
-                      {isGeneratingQuiz
-                        ? t('aiMagic.generateFromBook.generatingQuiz')
-                        : t('aiMagic.generateFromBook.labelQuiz')}
+                      {isGeneratingQuiz ? t('aiMagic.generateFromBook.generatingQuiz') : t('aiMagic.generateFromBook.labelQuiz')}
                     </Button>
                   )}
                 </span>
@@ -837,12 +832,6 @@ export default function EditorHome() {
                   {t('aiMagic.generateFromBook.generatingHint')}
                 </Typography>
               )}
-
-              {/* TTS Toolbar — desktop only (md+), between AI buttons and Save controls */}
-              <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
-                <Divider orientation='vertical' sx={{ height: 20, mx: 0.5 }} />
-                <TTSToolbar tier={tier} editorInstanceRef={editorRef} bookId={book?._id} />
-              </Box>
 
               <Button
                 variant={autoSaveEnabled ? 'soft' : 'plain'}
@@ -923,13 +912,25 @@ export default function EditorHome() {
               overflow: 'hidden'
             }}
           >
-            <ContentNavigator toc={tocData} readingTime={readingStats.readingTime} />
+            <ContentNavigator
+              toc={tocData}
+              readingTime={readingStats.readingTime}
+              editorInstanceRef={editorRef}
+              bookId={book?._id}
+              tier={tier}
+            />
           </Box>
 
           {/* 📋 Sidebar (Mobile Drawer) */}
           <Drawer open={showMobileSidebar} onClose={() => setShowMobileSidebar(false)} size='sm'>
             <Box sx={{ height: '100%', overflow: 'hidden', pt: 2 }}>
-              <ContentNavigator toc={tocData} readingTime={readingStats.readingTime} />
+              <ContentNavigator
+                toc={tocData}
+                readingTime={readingStats.readingTime}
+                editorInstanceRef={editorRef}
+                bookId={book?._id}
+                tier={tier}
+              />
             </Box>
           </Drawer>
 
