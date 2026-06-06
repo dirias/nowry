@@ -57,7 +57,7 @@ import TextMenu from '../Menu/TextMenu'
 const StudyCard = React.lazy(() => import('../Cards/GeneratedCards'))
 const QuestionnaireModal = React.lazy(() => import('../Cards/QuestionnaireModal'))
 const VisualizerModal = React.lazy(() => import('../Cards/VisualizerModal'))
-import { booksService, cardsService, quizzesService } from '../../api/services'
+import { booksService, cardsService, quizzesService, illustrationsService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
 import FloatingToolbarPlugin from '../Editor/plugins/FloatingToolbarPlugin'
 import LinkPreviewPlugin from '../Editor/plugins/LinkPreviewPlugin'
@@ -201,9 +201,10 @@ export default function Editor({
   pageSize = 'a4',
   pageZoom = 1.0,
   isReadOnly = false,
-  onEditorReady, // NEW: callback fires with editor instance when Lexical mounts
-  illustrationCount = 0, // NEW: threaded from EditorHome → FloatingToolbarPlugin → TextMenu
-  tier = 'free' // NEW: threaded from EditorHome → FloatingToolbarPlugin → TextMenu
+  onEditorReady,
+  illustrationCount = 0,
+  onDiagramInserted, // called after successful diagram insert to update parent count
+  tier = 'free'
 }) {
   const theme = useTheme()
   const menuRef = useRef()
@@ -404,7 +405,25 @@ export default function Editor({
   // Insert mermaid diagram as a new block BELOW the paragraph that was selected
   // when the user triggered "Generate Diagram". The anchor block key is saved
   // in diagramAnchorKeyRef before the modal opens (modal focus clears the selection).
-  const handleDiagramInsert = useCallback((mermaidCode) => {
+  const handleDiagramInsert = useCallback(async (mermaidCode) => {
+    // Confirm the insert with the backend first — this is where the Free-tier
+    // counter increments (count-on-insert, not count-on-generate).
+    const bookId = book?._id
+    if (bookId) {
+      try {
+        await illustrationsService.confirmDiagram(bookId)
+      } catch (err) {
+        if (err.response?.status === 403) {
+          // Cap reached between generate and insert (race condition) — show upgrade
+          setShowDiagramPanel(false)
+          setIsLimitError(true)
+          setError(t('subscription.errors.upgradeToUse'))
+          return
+        }
+        // Non-403 errors: still allow insert (don't block on counter failure)
+      }
+    }
+
     const editor = editorInstanceRef.current
     if (editor) {
       editor.update(() => {
@@ -412,16 +431,13 @@ export default function Editor({
         const codeNode = $createCodeNode('mermaid')
         codeNode.append($createTextNode(mermaidCode))
 
-        // Prefer the pre-captured anchor key (selection is gone when modal closes)
         const anchorKey = diagramAnchorKeyRef.current
         diagramAnchorKeyRef.current = null
         const anchorBlock = anchorKey ? $getNodeByKey(anchorKey) : null
 
         if (anchorBlock && anchorBlock.getParent() === root) {
-          // Insert right below the paragraph the user selected
           anchorBlock.insertAfter(codeNode)
         } else {
-          // Fallback: try current selection
           const selection = $getSelection()
           if ($isRangeSelection(selection)) {
             let topBlock = selection.focus.getNode()
@@ -436,14 +452,14 @@ export default function Editor({
           }
         }
 
-        // Trailing empty paragraph so cursor lands somewhere editable
         const trailingParagraph = $createParagraphNode()
         codeNode.insertAfter(trailingParagraph)
         trailingParagraph.select()
       })
+      if (onDiagramInserted) onDiagramInserted()
     }
     setShowDiagramPanel(false)
-  }, [])
+  }, [book, onDiagramInserted, t])
 
   const handleOptionClick = useCallback(
     async (option, overrideText) => {

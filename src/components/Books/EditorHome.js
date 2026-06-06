@@ -301,8 +301,12 @@ export default function EditorHome() {
     editorRef.current = editor
   }, [])
 
-  // Illustration count from already-loaded book data (no extra fetch needed)
+  // Illustration count — derived from book state, incremented locally on insert
+  // so the TextMenu lock re-evaluates without a full book refetch.
   const illustrationCount = book?.illustration_count ?? 0
+  const handleDiagramInserted = useCallback(() => {
+    setBook(prev => prev ? { ...prev, illustration_count: (prev.illustration_count ?? 0) + 1 } : prev)
+  }, [])
 
   // Tell the pet which book is open. The backend handles RAG retrieval —
   // we only need to send the book_id and title, not the content.
@@ -967,6 +971,7 @@ export default function EditorHome() {
               onReadingStatsChange={handleReadingStatsChange}
               onEditorReady={handleEditorReady}
               illustrationCount={illustrationCount}
+              onDiagramInserted={handleDiagramInserted}
               tier={tier}
             />
           </Box>

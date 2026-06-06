@@ -13,7 +13,8 @@ export const ENDPOINTS = {
     search: '/book/search',
     aiExpand: (bookId) => `/book/${bookId}/ai-expand`,
     diagram: (bookId) => `/book/${bookId}/diagram`,
-    tts: (bookId) => `/book/${bookId}/tts`,
+    diagramConfirm: (bookId) => `/book/${bookId}/diagram/confirm`,
+    tts: (bookId) => `/book/${bookId}/tts`
   },
   studyCards: {
     generate: '/card/generate',
@@ -22,10 +23,10 @@ export const ENDPOINTS = {
     update: (id) => `/study-cards/${id}`,
     delete: (id) => `/study-cards/${id}`,
     generateFromBook: '/card/generate-from-book',
-    analyzeDeck: '/card/analyze-deck',
+    analyzeDeck: '/card/analyze-deck'
   },
   quiz: {
-    generateFromBook: '/v1/assistant/quiz/generate-from-book',
+    generateFromBook: '/v1/assistant/quiz/generate-from-book'
   },
   decks: {
     all: '/decks',
