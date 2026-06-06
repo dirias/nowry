@@ -21,6 +21,7 @@ import { AnimatePresence, motion, useAnimation, useDragControls } from 'framer-m
 import { useTranslation } from 'react-i18next'
 import { usePet } from '../../context/AgentContext'
 import { useAuth } from '../../context/AuthContext'
+import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '../../utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import LevelUpCelebration from './LevelUpCelebration'
@@ -422,6 +423,7 @@ const StudyPet = () => {
 
   const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuth()
+  const { openUpgradeModal } = useSubscriptionContext()
   const { themeColor } = useThemePreferences()
   const navigate = useNavigate()
   const resolvedColor = themeColor
@@ -1493,10 +1495,7 @@ const StudyPet = () => {
                       >
                         <span>{t('agent.chat.error.limitReached')}</span>
                         <button
-                          onClick={() => {
-                            // Navigate to plans page — openUpgradeModal not available in StudyPet inline
-                            // The input is already disabled, so this just provides context
-                          }}
+                          onClick={() => openUpgradeModal(t('agent.upgrade.unlimitedMessages'))}
                           style={{
                             background: 'var(--joy-palette-danger-solidBg)',
                             border: 'none',
