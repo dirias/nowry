@@ -20,8 +20,11 @@ import TitleNode from './nodes/TitleNode'
 import SquareNode from './nodes/SquareNode'
 import BlackboardToolbar from './BlackboardToolbar'
 import BoardListSelector from './BoardListSelector'
+import ShareBoardModal from './ShareBoardModal'
+import ConvertToCardsModal from './ConvertToCardsModal'
 import { blackboardService } from '../../api/services/blackboard.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { useSubscription } from '../../hooks/useSubscription'
 import { tasksService } from '../../api/services'
 
 const BOARD_ID = 'main' // fallback board id for legacy boards
@@ -35,7 +38,7 @@ const nodeTypes = {
 }
 
 // Inner canvas — must be inside ReactFlowProvider
-function BlackboardCanvas({ goals, priorities, tasks, activeBoardId }) {
+function BlackboardCanvas({ goals, priorities, tasks, activeBoardId, onConvertToCards, onOpenConvertModal, onShareBoard, tier }) {
   const { t } = useTranslation()
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
@@ -197,6 +200,13 @@ function BlackboardCanvas({ goals, priorities, tasks, activeBoardId }) {
     await blackboardService.clearBoard(activeBoardId)
   }, [activeBoardId, setNodes, setEdges])
 
+  // Handle convert to cards — capture selected nodes and open modal
+  const handleConvertToCards = useCallback(() => {
+    const selected = nodes.filter((n) => n.selected)
+    onConvertToCards?.(selected)
+    onOpenConvertModal?.()
+  }, [nodes, onConvertToCards, onOpenConvertModal])
+
   if (loading) {
     return (
       <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -284,7 +294,16 @@ function BlackboardCanvas({ goals, priorities, tasks, activeBoardId }) {
           }}
           nodeColor={(n) => (n.type === 'stickyNote' ? '#f59e0b' : '#10b981')}
         />
-        <BlackboardToolbar goals={goals} priorities={priorities} tasks={tasks} onClearBoard={handleClearBoard} />
+        <BlackboardToolbar
+          goals={goals}
+          priorities={priorities}
+          tasks={tasks}
+          onClearBoard={handleClearBoard}
+          nodes={nodes}
+          onConvertToCards={handleConvertToCards}
+          onShareBoard={onShareBoard}
+          tier={tier}
+        />
       </ReactFlow>
     </Box>
   )
@@ -294,9 +313,13 @@ function BlackboardCanvas({ goals, priorities, tasks, activeBoardId }) {
 export default function BlackboardModal({ open, onClose }) {
   const { t } = useTranslation()
   const { goals, priorities } = useAnnualPlan(new Date().getFullYear())
+  const { tier } = useSubscription()
   const [tasks, setTasks] = React.useState([])
   const [showBoardSelector, setShowBoardSelector] = useState(true) // open on mount
   const [selectedBoardId, setSelectedBoardId] = useState(null)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [showConvertModal, setShowConvertModal] = useState(false)
+  const [selectedNodes, setSelectedNodes] = useState([])
 
   // Derived: active board id — use selected or fall back to legacy 'main'
   const activeBoardId = selectedBoardId || BOARD_ID
@@ -434,9 +457,28 @@ export default function BlackboardModal({ open, onClose }) {
               priorities={priorities}
               tasks={tasks}
               activeBoardId={activeBoardId}
+              tier={tier}
+              onConvertToCards={setSelectedNodes}
+              onOpenConvertModal={() => setShowConvertModal(true)}
+              onShareBoard={() => setShowShareModal(true)}
             />
           </ReactFlowProvider>
         )}
+
+        {/* ── Share Board Modal ── */}
+        <ShareBoardModal
+          open={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          boardId={activeBoardId}
+        />
+
+        {/* ── Convert to Cards Modal ── */}
+        <ConvertToCardsModal
+          open={showConvertModal}
+          onClose={() => setShowConvertModal(false)}
+          boardId={activeBoardId}
+          selectedNodes={selectedNodes}
+        />
       </ModalDialog>
     </Modal>
   )

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { useReactFlow } from '@xyflow/react'
-import { Box, IconButton, Tooltip, Typography, Input, Stack, Chip, Modal, ModalDialog } from '@mui/joy'
+import { Box, Button, Chip, IconButton, Tooltip, Typography, Input, Stack, Modal, ModalDialog } from '@mui/joy'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import FlagRoundedIcon from '@mui/icons-material/FlagRounded'
 import TrackChangesRoundedIcon from '@mui/icons-material/TrackChangesRounded'
@@ -10,18 +10,24 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import CheckBoxOutlineBlankRoundedIcon from '@mui/icons-material/CheckBoxOutlineBlankRounded'
 import TextFieldsRoundedIcon from '@mui/icons-material/TextFieldsRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
+import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
+import ShareRoundedIcon from '@mui/icons-material/ShareRounded'
+import LockRoundedIcon from '@mui/icons-material/LockRounded'
 import { useTranslation } from 'react-i18next'
 import { STICKY_COLORS } from './nodes/StickyNoteNode'
 
 const STICKY_EMOJIS = ['📝', '💡', '🎯', '⚡', '🔥', '✨', '🚀', '💪']
 
-export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoard }) {
+export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoard, nodes, onConvertToCards, onShareBoard, tier }) {
   const { t } = useTranslation()
   const { addNodes, getViewport, screenToFlowPosition } = useReactFlow()
   const [entityPickerOpen, setEntityPickerOpen] = useState(false)
   const [entityType, setEntityType] = useState('goal')
   const [entitySearch, setEntitySearch] = useState('')
   const [confirmClear, setConfirmClear] = useState(false)
+
+  // Compute selected node count for conditional Convert to Cards button
+  const selectedCount = (nodes || []).filter((n) => n.selected).length
 
   // Add a random sticky note at viewport center
   const addSticky = useCallback(() => {
@@ -184,7 +190,7 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
               setEntityType('goal')
               setEntityPickerOpen(true)
             }}
-            sx={{ color: '#10b981', '&:hover': { bgcolor: '#d1fae5' } }}
+            sx={{ color: 'success.plainColor', '&:hover': { bgcolor: 'success.softBg' } }}
           >
             <TrackChangesRoundedIcon sx={{ fontSize: 18 }} />
           </IconButton>
@@ -199,7 +205,7 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
               setEntityType('priority')
               setEntityPickerOpen(true)
             }}
-            sx={{ color: '#f59e0b', '&:hover': { bgcolor: '#fef3c7' } }}
+            sx={{ color: 'warning.plainColor', '&:hover': { bgcolor: 'warning.softBg' } }}
           >
             <FlagRoundedIcon sx={{ fontSize: 18 }} />
           </IconButton>
@@ -214,11 +220,73 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
               setEntityType('task')
               setEntityPickerOpen(true)
             }}
-            sx={{ color: '#6366f1', '&:hover': { bgcolor: '#ede9fe' } }}
+            sx={{ color: 'primary.plainColor', '&:hover': { bgcolor: 'primary.softBg' } }}
           >
             <TaskAltRoundedIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
+
+        {/* Divider before Phase 7 buttons */}
+        {selectedCount > 0 && (
+          <Box sx={{ width: '1px', height: 24, bgcolor: 'divider', flexShrink: 0 }} />
+        )}
+
+        {/* Convert to Cards button — visible when nodes are selected */}
+        {selectedCount > 0 && (
+          <Tooltip title={t('blackboard.toolbar.convertToCards', 'Convert selected nodes to flashcards')} placement='top' size='sm'>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Chip size='sm' variant='soft' color='primary'>{selectedCount}</Chip>
+              <IconButton
+                onClick={onConvertToCards}
+                size='sm'
+                variant='plain'
+                aria-label={t('blackboard.toolbar.convertToCards', 'Convert selected nodes to flashcards')}
+                sx={{
+                  color: 'text.secondary',
+                  '&:hover': { bgcolor: 'primary.softBg' },
+                }}
+              >
+                <StyleRoundedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Box>
+          </Tooltip>
+        )}
+
+        {/* Divider before Share */}
+        <Box sx={{ width: '1px', height: 24, bgcolor: 'divider', flexShrink: 0 }} />
+
+        {/* Share board — tier-gated */}
+        {tier !== 'free' ? (
+          <Tooltip title={t('blackboard.toolbar.shareBoard', 'Share board with collaborators')} placement='top' size='sm'>
+            <IconButton
+              onClick={onShareBoard}
+              size='sm'
+              variant='plain'
+              aria-label={t('blackboard.toolbar.shareBoard', 'Share board with collaborators')}
+              sx={{
+                color: 'text.secondary',
+                '&:hover': { bgcolor: 'background.level1' },
+              }}
+            >
+              <ShareRoundedIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title={t('blackboard.upgrade.share', 'Share boards with Plus or Pro')} placement='top' size='sm'>
+            <span>
+              <IconButton
+                disabled
+                size='sm'
+                variant='plain'
+                aria-label={t('blackboard.toolbar.shareBoard', 'Share board with collaborators') + ' (requires Plus or Pro)'}
+                sx={{ color: 'text.tertiary', position: 'relative' }}
+              >
+                <LockRoundedIcon sx={{ fontSize: 10, position: 'absolute', top: 4, right: 4 }} />
+                <ShareRoundedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
 
         {/* Divider */}
         <Box sx={{ width: '1px', height: 24, bgcolor: 'divider', flexShrink: 0 }} />
@@ -258,9 +326,9 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
             {/* Type switcher */}
             <Stack direction='row' spacing={0.5} sx={{ mr: 1 }}>
               {[
-                { type: 'goal', icon: '🎯', color: '#10b981' },
-                { type: 'priority', icon: '🚩', color: '#f59e0b' },
-                { type: 'task', icon: '✅', color: '#6366f1' }
+                { type: 'goal', icon: '🎯', color: 'success' },
+                { type: 'priority', icon: '🚩', color: 'warning' },
+                { type: 'task', icon: '✅', color: 'primary' }
               ].map(({ type, icon, color }) => (
                 <Box
                   key={type}
@@ -271,7 +339,7 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
                     borderRadius: 'sm',
                     cursor: 'pointer',
                     fontSize: '0.9rem',
-                    bgcolor: entityType === type ? color + '22' : 'transparent',
+                    bgcolor: entityType === type ? `${color}.softBg` : 'transparent',
                     transition: 'bgcolor 0.15s'
                   }}
                 >
@@ -342,29 +410,20 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
             {t('blackboard.clear.desc', 'All notes and connections will be permanently removed.')}
           </Typography>
           <Stack direction='row' spacing={1} justifyContent='flex-end'>
-            <IconButton variant='plain' color='neutral' onClick={() => setConfirmClear(false)}>
-              <CloseRoundedIcon />
-            </IconButton>
-            <Box
-              component='button'
+            <Button variant='plain' color='neutral' onClick={() => setConfirmClear(false)}>
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              variant='solid'
+              color='danger'
               onClick={() => {
                 onClearBoard?.()
                 setConfirmClear(false)
               }}
-              sx={{
-                bgcolor: '#ef4444',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 'sm',
-                px: 2,
-                py: 0.75,
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: 600
-              }}
+              aria-label={t('blackboard.clear.confirm', 'Clear everything')}
             >
               {t('blackboard.clear.confirm', 'Clear everything')}
-            </Box>
+            </Button>
           </Stack>
         </ModalDialog>
       </Modal>

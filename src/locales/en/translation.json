@@ -835,10 +835,15 @@
     "toolbar": {
       "sticky": "Sticky",
       "addSticky": "Add sticky note",
+      "addTitle": "Add text block",
+      "addSquare": "Add square zone",
       "addGoal": "Add a goal",
       "addPriority": "Add a priority",
       "addTask": "Add a task",
-      "clear": "Clear board"
+      "clear": "Clear board",
+      "convertToCards": "Convert selected nodes to flashcards",
+      "shareBoard": "Share board with collaborators",
+      "convertingCards": "Generating cards..."
     },
     "picker": {
       "title": {
@@ -880,6 +885,7 @@
       "inviteLabel": "Invite by email",
       "inviteSubtitle": "They will see this board in their board list",
       "sendInvite": "Send invite",
+      "sharedWith": "Currently shared with",
       "empty": {
         "title": "Not shared yet",
         "body": "Invite someone by their email address"
@@ -888,6 +894,28 @@
         "notFound": "User not found. Check the email address.",
         "alreadyInvited": "This user already has access."
       }
+    },
+    "convert": {
+      "addToDeck": "Add to deck",
+      "empty": {
+        "title": "No text found",
+        "body": "Add content to sticky notes or title nodes and try again"
+      },
+      "error": {
+        "timeout": "Generation took too long. Try with fewer nodes.",
+        "failed": "Card generation failed. Try again."
+      },
+      "truncated": "Some board content was trimmed. Select fewer nodes for complete coverage."
+    },
+    "convertToCardsModal": {
+      "title": "Review generated cards",
+      "selectedNodes": "From {{count}} selected nodes",
+      "confirmDeck": "Choose target deck",
+      "success": "{{count}} cards added to {{deckName}}"
+    },
+    "shareModal": {
+      "sent": "Invitation sent!",
+      "sharedWith": "Currently shared with"
     }
   },
   "books": {
