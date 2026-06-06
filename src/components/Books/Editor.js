@@ -18,6 +18,7 @@ import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html'
 import {
   $createParagraphNode,
   $createTextNode,
+  $getNodeByKey,
   $getRoot,
   $getSelection,
   $isElementNode,
@@ -208,6 +209,10 @@ export default function Editor({
   const menuRef = useRef()
   const containerRef = useRef()
   const editorInstanceRef = useRef(null)
+  // Saves the Lexical node key of the block to insert a diagram after.
+  // Captured on "Generate Diagram" click — before the modal opens and steals focus,
+  // which would clear the editor selection and lose the insertion point.
+  const diagramAnchorKeyRef = useRef(null)
   const [showStudyCard, setShowStudyCard] = useState(false)
   const [showQuestionnaire, setShowQuestionnaire] = useState(false)
   const [showVisualizer, setShowVisualizer] = useState(false)
@@ -396,38 +401,42 @@ export default function Editor({
     }
   }, [])
 
-  // Insert mermaid diagram as a new block BELOW the selected text.
-  // Do NOT use selection.insertNodes() — that replaces the active selection.
-  // Instead: walk up to the top-level block containing the focus point,
-  // then insertAfter() so the diagram appears below the selected paragraph.
+  // Insert mermaid diagram as a new block BELOW the paragraph that was selected
+  // when the user triggered "Generate Diagram". The anchor block key is saved
+  // in diagramAnchorKeyRef before the modal opens (modal focus clears the selection).
   const handleDiagramInsert = useCallback((mermaidCode) => {
     const editor = editorInstanceRef.current
     if (editor) {
       editor.update(() => {
-        const selection = $getSelection()
         const root = $getRoot()
         const codeNode = $createCodeNode('mermaid')
         codeNode.append($createTextNode(mermaidCode))
 
-        if ($isRangeSelection(selection)) {
-          // Walk up from focus node to find the direct child of root
-          let topBlock = selection.focus.getNode()
-          while (topBlock.getParent() !== root && topBlock.getParent() !== null) {
-            topBlock = topBlock.getParent()
-          }
-          // Insert diagram block below the selected paragraph
-          topBlock.insertAfter(codeNode)
+        // Prefer the pre-captured anchor key (selection is gone when modal closes)
+        const anchorKey = diagramAnchorKeyRef.current
+        diagramAnchorKeyRef.current = null
+        const anchorBlock = anchorKey ? $getNodeByKey(anchorKey) : null
+
+        if (anchorBlock && anchorBlock.getParent() === root) {
+          // Insert right below the paragraph the user selected
+          anchorBlock.insertAfter(codeNode)
         } else {
-          // No selection — append at end of document
-          const lastChild = root.getLastChild()
-          if (lastChild) {
-            lastChild.insertAfter(codeNode)
+          // Fallback: try current selection
+          const selection = $getSelection()
+          if ($isRangeSelection(selection)) {
+            let topBlock = selection.focus.getNode()
+            while (topBlock.getParent() !== root && topBlock.getParent() !== null) {
+              topBlock = topBlock.getParent()
+            }
+            topBlock.insertAfter(codeNode)
           } else {
-            root.append(codeNode)
+            const lastChild = root.getLastChild()
+            if (lastChild) lastChild.insertAfter(codeNode)
+            else root.append(codeNode)
           }
         }
 
-        // Add a trailing empty paragraph so the cursor has somewhere to type next
+        // Trailing empty paragraph so cursor lands somewhere editable
         const trailingParagraph = $createParagraphNode()
         codeNode.insertAfter(trailingParagraph)
         trailingParagraph.select()
@@ -481,6 +490,22 @@ export default function Editor({
             setIsExpandingText(false)
           }
         } else if (option === 'generate_diagram' && textToProcess) {
+          // Capture the top-level block key NOW — the modal will steal focus and
+          // clear the Lexical selection before handleDiagramInsert runs.
+          const editorForAnchor = editorInstanceRef.current
+          if (editorForAnchor) {
+            editorForAnchor.read(() => {
+              const sel = $getSelection()
+              if ($isRangeSelection(sel)) {
+                const root = $getRoot()
+                let topBlock = sel.focus.getNode()
+                while (topBlock.getParent() !== root && topBlock.getParent() !== null) {
+                  topBlock = topBlock.getParent()
+                }
+                diagramAnchorKeyRef.current = topBlock.getKey()
+              }
+            })
+          }
           setSelectedText(textToProcess)
           setShowDiagramPanel(true)
         }
