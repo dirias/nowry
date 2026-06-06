@@ -1,0 +1,22 @@
+/* Bridge Joy UI semantic tokens to FullCalendar CSS variables.
+   No hex values — all values reference Joy UI CSS custom properties.
+   Joy UI updates --joy-palette-* vars on theme change;
+   FullCalendar picks up dark mode automatically via var() references. */
+:root {
+  --fc-border-color: var(--joy-palette-divider);
+  --fc-page-bg-color: var(--joy-palette-background-surface);
+  --fc-neutral-bg-color: var(--joy-palette-background-level1);
+  --fc-highlight-color: var(--joy-palette-primary-softBg);
+  --fc-today-bg-color: var(--joy-palette-primary-softBg);
+  --fc-event-bg-color: var(--joy-palette-primary-solidBg);
+  --fc-event-border-color: var(--joy-palette-primary-solidBg);
+  --fc-event-text-color: var(--joy-palette-primary-solidColor);
+  --fc-event-selected-overlay-color: rgba(0, 0, 0, 0.25);
+  --fc-button-bg-color: var(--joy-palette-background-level1);
+  --fc-button-border-color: var(--joy-palette-divider);
+  --fc-button-text-color: var(--joy-palette-text-primary);
+  --fc-button-hover-bg-color: var(--joy-palette-background-level2);
+  --fc-button-hover-border-color: var(--joy-palette-divider);
+  --fc-button-active-bg-color: var(--joy-palette-primary-solidBg);
+  --fc-button-active-border-color: var(--joy-palette-primary-solidBg);
+}
