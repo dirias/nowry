@@ -96,5 +96,20 @@ export const agentService = {
       { timeout: 360000 } // Extended timeout: Luma generation (1–5 min) + Cloudinary upload
     )
     return data
+  },
+
+  /**
+   * Trigger AI personality generation for the current user's pet.
+   * Plus users get 1/month, Pro users get 3/month. Backend enforces limit (402 when exceeded).
+   * @param {string} styleHints - Optional style description from the user.
+   * @param {string} petSpecies - The pet's species (e.g. 'owl', 'fox').
+   * @returns {{ personality_text: string, generations_used: number, generations_limit: number, reset_date: string }}
+   */
+  generatePersonality: async (styleHints, petSpecies) => {
+    const { data } = await apiClient.post('/agent/generate-personality', {
+      style_hints: styleHints || '',
+      pet_species: petSpecies || 'owl'
+    })
+    return data // { personality_text, generations_used, generations_limit, reset_date }
   }
 }

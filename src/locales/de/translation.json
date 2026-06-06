@@ -1158,6 +1158,13 @@
           "roamingDesc": "Dein Begleiter bewegt sich beim Lernen über den Bildschirm."
         },
         "saved": "Gespeichert",
+        "regenerate": "Regenerate Personality",
+        "regenerateButton": "Regenerate",
+        "used": "used this month",
+        "upgrade": "Unlock more personality generations with Pro",
+        "customPersonalityLocked": "Custom personality requires Plus or Pro",
+        "resetDate": "Resets {{date}}",
+        "generating": "Generating personality...",
         "preview": {
           "title": "Live-Vorschau",
           "caption": "Die Vorschau aktualisiert sich bei Änderungen.",
@@ -1284,7 +1291,33 @@
     "welcomePromptNoName": "Frag mich alles oder sag mir, was du heute lernst.",
     "inputPlaceholder": "Frag mich etwas...",
     "inputAriaLabel": "Nachricht an deinen Lernbegleiter",
-    "limitReachedPlaceholder": "Monatslimit erreicht — upgrade für mehr Funken"
+    "limitReachedPlaceholder": "Monatslimit erreicht — upgrade für mehr Funken",
+    "messagesRemaining": "messages this month",
+    "persistentMemory": "Memory on",
+    "sessionOnly": "Session-only memory",
+    "chat": {
+      "empty": {
+        "title": "Start chatting",
+        "body": "Ask me anything about your studies"
+      },
+      "error": {
+        "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
+      },
+      "upgradePlan": "Upgrade plan"
+    },
+    "personality": {
+      "error": {
+        "blocked": "That personality description was flagged. Try different wording.",
+        "failed": "Personality generation failed. Please try again."
+      },
+      "success": "Personality updated"
+    },
+    "upgrade": {
+      "persistentMemory": "Unlock persistent memory with Plus",
+      "customPersonality": "Custom personality requires Plus or Pro",
+      "morePersonality": "Unlock more personality generations with Pro",
+      "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    }
   },
   "cards": {
     "import": {

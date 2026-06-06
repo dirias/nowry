@@ -1143,6 +1143,13 @@
           "roamingDesc": "学習中、パートナーが画面を自由に動き回ります。"
         },
         "saved": "保存しました",
+        "regenerate": "Regenerate Personality",
+        "regenerateButton": "Regenerate",
+        "used": "used this month",
+        "upgrade": "Unlock more personality generations with Pro",
+        "customPersonalityLocked": "Custom personality requires Plus or Pro",
+        "resetDate": "Resets {{date}}",
+        "generating": "Generating personality...",
         "preview": {
           "title": "ライブプレビュー",
           "caption": "設定を変えるとリアルタイムで更新されます。",
@@ -1269,7 +1276,33 @@
     "welcomePromptNoName": "何でも聞いてください。今日の学習内容を教えてくれてもOK。",
     "inputPlaceholder": "何でも聞いてみて...",
     "inputAriaLabel": "学習パートナーにメッセージを送る",
-    "limitReachedPlaceholder": "月間上限に達しました — プランをアップグレード"
+    "limitReachedPlaceholder": "月間上限に達しました — プランをアップグレード",
+    "messagesRemaining": "messages this month",
+    "persistentMemory": "Memory on",
+    "sessionOnly": "Session-only memory",
+    "chat": {
+      "empty": {
+        "title": "Start chatting",
+        "body": "Ask me anything about your studies"
+      },
+      "error": {
+        "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
+      },
+      "upgradePlan": "Upgrade plan"
+    },
+    "personality": {
+      "error": {
+        "blocked": "That personality description was flagged. Try different wording.",
+        "failed": "Personality generation failed. Please try again."
+      },
+      "success": "Personality updated"
+    },
+    "upgrade": {
+      "persistentMemory": "Unlock persistent memory with Plus",
+      "customPersonality": "Custom personality requires Plus or Pro",
+      "morePersonality": "Unlock more personality generations with Pro",
+      "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    }
   },
   "cards": {
     "generatedCards": {

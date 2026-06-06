@@ -1769,6 +1769,32 @@
       "closeBuddy": "Cerrar compañero de estudio",
       "sendMessage": "Enviar mensaje"
     },
+    "messagesRemaining": "messages this month",
+    "persistentMemory": "Memory on",
+    "sessionOnly": "Session-only memory",
+    "chat": {
+      "empty": {
+        "title": "Start chatting",
+        "body": "Ask me anything about your studies"
+      },
+      "error": {
+        "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
+      },
+      "upgradePlan": "Upgrade plan"
+    },
+    "personality": {
+      "error": {
+        "blocked": "That personality description was flagged. Try different wording.",
+        "failed": "Personality generation failed. Please try again."
+      },
+      "success": "Personality updated"
+    },
+    "upgrade": {
+      "persistentMemory": "Unlock persistent memory with Plus",
+      "customPersonality": "Custom personality requires Plus or Pro",
+      "morePersonality": "Unlock more personality generations with Pro",
+      "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    },
     "errors": {
       "resting": "El compañero de estudio está descansando. Inténtalo de nuevo en un momento.",
       "settingsLoadFailed": "No se pudieron cargar tus ajustes. Mostrando valores predeterminados.",
@@ -1820,6 +1846,13 @@
           "roamingDesc": "Tu compañero deambula por la pantalla entre los elementos mientras estudias."
         },
         "saved": "Guardado",
+        "regenerate": "Regenerate Personality",
+        "regenerateButton": "Regenerate",
+        "used": "used this month",
+        "upgrade": "Unlock more personality generations with Pro",
+        "customPersonalityLocked": "Custom personality requires Plus or Pro",
+        "resetDate": "Resets {{date}}",
+        "generating": "Generating personality...",
         "preview": {
           "title": "Vista previa en vivo",
           "caption": "La vista previa se actualiza al cambiar los ajustes.",
