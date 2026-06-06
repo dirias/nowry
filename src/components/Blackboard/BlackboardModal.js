@@ -336,14 +336,14 @@ export default function BlackboardModal({ open, onClose }) {
       .then(async (boards) => {
         if (!boards || boards.length === 0) {
           // No boards yet — auto-create "My Blackboard"
-          const created = await blackboardService.createBoard('My Blackboard')
+          const created = await blackboardService.createBoard(t('blackboard.defaultBoardName'))
           setActiveBoardId(created.id)
-          setActiveBoardName(created.name || 'My Blackboard')
+          setActiveBoardName(created.name || t('blackboard.defaultBoardName'))
         } else {
           // Use first board (most recent from API, Pro multi-board also uses first)
           const first = boards[0]
           setActiveBoardId(first.id)
-          setActiveBoardName(first.name || 'My Blackboard')
+          setActiveBoardName(first.name || t('blackboard.defaultBoardName'))
         }
       })
       .catch(() => {

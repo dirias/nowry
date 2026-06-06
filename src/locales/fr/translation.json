@@ -1636,6 +1636,7 @@
   },
   "blackboard": {
     "title": "Blackboard",
+    "defaultBoardName": "My Blackboard",
     "subtitle": "Brainstorm freely — auto-saved",
     "tooltip": "Open Blackboard",
     "toolbar": {
@@ -1694,7 +1695,8 @@
       },
       "error": {
         "notFound": "User not found. Check the email address.",
-        "alreadyInvited": "This user already has access."
+        "alreadyInvited": "This user already has access.",
+        "notOwner": "Only the board owner can share this board"
       }
     }
   }

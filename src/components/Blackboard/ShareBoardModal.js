@@ -44,8 +44,10 @@ export default function ShareBoardModal({ open, onClose, boardId }) {
         setError(t('blackboard.share.error.notFound'))
       } else if (detail === 'already_collaborator') {
         setError(t('blackboard.share.error.alreadyInvited'))
+      } else if (err.response?.status === 403) {
+        setError(t('blackboard.share.error.notOwner'))
       } else {
-        setError(t('blackboard.share.error.notFound'))
+        setError(t('common.error'))
       }
     } finally {
       setLoading(false)
@@ -86,9 +88,7 @@ export default function ShareBoardModal({ open, onClose, boardId }) {
                 placeholder='collaborator@example.com'
                 aria-label={t('blackboard.share.inviteLabel')}
               />
-              <FormHelperText sx={{ color: 'text.tertiary' }}>
-                {t('blackboard.share.inviteSubtitle')}
-              </FormHelperText>
+              <FormHelperText sx={{ color: 'text.tertiary' }}>{t('blackboard.share.inviteSubtitle')}</FormHelperText>
             </FormControl>
 
             {error && (
