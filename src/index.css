@@ -86,6 +86,15 @@ svg * {
   background-color: transparent !important;
 }
 
+/* Mermaid diagram SVGs must NOT have background-color stripped from their
+   internal elements — Mermaid sets node fill colors inline and the above rule
+   would clobber them, making node backgrounds (and text contrast) disappear.
+   Override the rule for any SVG that is a direct child of a mermaid container. */
+.mermaid-diagram-host svg,
+.mermaid-diagram-host svg * {
+  background-color: unset;
+}
+
 /* Target Material-UI icon components */
 .MuiSvgIcon-root,
 .MuiSvgIcon-root * {
