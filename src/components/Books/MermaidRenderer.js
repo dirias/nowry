@@ -20,7 +20,12 @@ export default function MermaidRenderer({ code }) {
         startOnLoad: false,
         theme: mode === 'dark' ? 'dark' : 'default',
         securityLevel: 'loose',
-        fontFamily: 'Inter, sans-serif'
+        fontFamily: 'Inter, sans-serif',
+        // Mermaid v10+ defaults to htmlLabels:true for flowchart/mindmap/ER,
+        // rendering node text as <foreignObject> HTML. DOMPurify strips
+        // <foreignObject> (XSS vector), leaving boxes with no visible text.
+        // Force SVG-native <text> elements so all diagram types render correctly.
+        htmlLabels: false
       })
       setSvg('')
       setError(null)
