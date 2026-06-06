@@ -19,11 +19,12 @@ import EntityNode from './nodes/EntityNode'
 import TitleNode from './nodes/TitleNode'
 import SquareNode from './nodes/SquareNode'
 import BlackboardToolbar from './BlackboardToolbar'
+import BoardListSelector from './BoardListSelector'
 import { blackboardService } from '../../api/services/blackboard.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { tasksService } from '../../api/services'
 
-const BOARD_ID = 'main' // single global board per user
+const BOARD_ID = 'main' // fallback board id for legacy boards
 const AUTOSAVE_DELAY = 1500
 
 const nodeTypes = {
@@ -34,7 +35,7 @@ const nodeTypes = {
 }
 
 // Inner canvas — must be inside ReactFlowProvider
-function BlackboardCanvas({ goals, priorities, tasks }) {
+function BlackboardCanvas({ goals, priorities, tasks, activeBoardId }) {
   const { t } = useTranslation()
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
@@ -59,7 +60,7 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
             data: Object.fromEntries(Object.entries(n.data).filter(([k]) => typeof n.data[k] !== 'function'))
           }))
           blackboardService
-            .saveBoard(BOARD_ID, {
+            .saveBoard(activeBoardId, {
               nodes: serializableNodes,
               edges: currentEdges,
               viewport: viewportRef.current
@@ -70,7 +71,7 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
         return currentNodes
       })
     }, AUTOSAVE_DELAY)
-  }, [setNodes, setEdges])
+  }, [activeBoardId, setNodes, setEdges])
 
   // ── Node CRUD helpers ─────────────────────────────────────────────────
   const updateNodeData = useCallback(
@@ -117,10 +118,12 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
     [updateNodeData, deleteNode]
   )
 
-  // ── Load board on mount ────────────────────────────────────────────────
+  // ── Load board when activeBoardId changes ─────────────────────────────
   useEffect(() => {
+    if (!activeBoardId) return
+    setLoading(true)
     blackboardService
-      .getBoard(BOARD_ID)
+      .getBoard(activeBoardId)
       .then((board) => {
         // Rehydrate callbacks — they're stripped out during JSON serialization
         const rehydratedNodes = (board.nodes || []).map((n) => rehydrateNode(n))
@@ -130,7 +133,7 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [rehydrateNode, setEdges, setNodes])
+  }, [activeBoardId, rehydrateNode, setEdges, setNodes])
 
   // ── Edge connect ──────────────────────────────────────────────────────
   const onConnect = useCallback(
@@ -191,8 +194,8 @@ function BlackboardCanvas({ goals, priorities, tasks }) {
   const handleClearBoard = useCallback(async () => {
     setNodes([])
     setEdges([])
-    await blackboardService.clearBoard(BOARD_ID)
-  }, [setNodes, setEdges])
+    await blackboardService.clearBoard(activeBoardId)
+  }, [activeBoardId, setNodes, setEdges])
 
   if (loading) {
     return (
@@ -292,6 +295,24 @@ export default function BlackboardModal({ open, onClose }) {
   const { t } = useTranslation()
   const { goals, priorities } = useAnnualPlan(new Date().getFullYear())
   const [tasks, setTasks] = React.useState([])
+  const [showBoardSelector, setShowBoardSelector] = useState(true) // open on mount
+  const [selectedBoardId, setSelectedBoardId] = useState(null)
+
+  // Derived: active board id — use selected or fall back to legacy 'main'
+  const activeBoardId = selectedBoardId || BOARD_ID
+
+  // Reset board selector when the modal is reopened
+  useEffect(() => {
+    if (open) {
+      setShowBoardSelector(true)
+      setSelectedBoardId(null)
+    }
+  }, [open])
+
+  const handleSelectBoard = (board) => {
+    setSelectedBoardId(board.id)
+    setShowBoardSelector(false)
+  }
 
   useEffect(() => {
     if (!open) return
@@ -398,10 +419,24 @@ export default function BlackboardModal({ open, onClose }) {
           </Tooltip>
         </Box>
 
+        {/* ── Board selector modal — shown on entry ── */}
+        <BoardListSelector
+          open={showBoardSelector}
+          onClose={() => setShowBoardSelector(false)}
+          onSelectBoard={handleSelectBoard}
+        />
+
         {/* ── Canvas ── */}
-        <ReactFlowProvider>
-          <BlackboardCanvas goals={goals} priorities={priorities} tasks={tasks} />
-        </ReactFlowProvider>
+        {!showBoardSelector && (
+          <ReactFlowProvider>
+            <BlackboardCanvas
+              goals={goals}
+              priorities={priorities}
+              tasks={tasks}
+              activeBoardId={activeBoardId}
+            />
+          </ReactFlowProvider>
+        )}
       </ModalDialog>
     </Modal>
   )
