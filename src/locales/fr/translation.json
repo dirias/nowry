@@ -1600,5 +1600,67 @@
       "upgrade": "View plans & upgrade",
       "manage": "Manage subscription"
     }
+  },
+  "blackboard": {
+    "title": "Blackboard",
+    "subtitle": "Brainstorm freely — auto-saved",
+    "tooltip": "Open Blackboard",
+    "toolbar": {
+      "sticky": "Sticky",
+      "addSticky": "Add sticky note",
+      "addGoal": "Add a goal",
+      "addPriority": "Add a priority",
+      "addTask": "Add a task",
+      "clear": "Clear board"
+    },
+    "picker": {
+      "title": {
+        "goal": "Select a goal",
+        "priority": "Select a priority",
+        "task": "Select a task"
+      },
+      "search": "Search...",
+      "empty": "Nothing found"
+    },
+    "clear": {
+      "title": "Clear board?",
+      "desc": "All notes and connections will be permanently removed.",
+      "confirm": "Clear everything"
+    },
+    "boardListSelector": {
+      "title": "My Boards",
+      "subtitle": "Select a board to open or create a new one",
+      "newBoard": "New board",
+      "newBoardPlaceholder": "Board name",
+      "ownedBoards": "Your Boards",
+      "sharedBoards": "Shared with You",
+      "empty": {
+        "title": "No boards yet",
+        "body": "Create your first board to get started"
+      },
+      "error": "Could not load boards. Try again.",
+      "sharedWith": "Shared by {{name}}"
+    },
+    "upgrade": {
+      "share": "Share boards with Plus or Pro",
+      "multiBoard": "Unlock unlimited boards with Pro"
+    },
+    "boards": {
+      "newBoard": "New board"
+    },
+    "share": {
+      "title": "Share this board",
+      "inviteLabel": "Invite by email",
+      "inviteSubtitle": "They will see this board in their board list",
+      "sendInvite": "Send invite",
+      "empty": {
+        "title": "Not shared yet",
+        "body": "Invite someone by their email address"
+      },
+      "error": {
+        "notFound": "User not found. Check the email address.",
+        "alreadyInvited": "This user already has access."
+      }
+    }
   }
 }
