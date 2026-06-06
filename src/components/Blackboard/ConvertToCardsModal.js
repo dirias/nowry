@@ -1,19 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  Divider,
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Snackbar,
-  Stack,
-  Typography
-} from '@mui/joy'
+import { Alert, Box, Button, Card, CircularProgress, Divider, Modal, ModalDialog, ModalClose, Snackbar, Stack, Typography } from '@mui/joy'
 import DeckSelector from '../Agent/DeckSelector'
 import { blackboardService } from '../../api/services/blackboard.service'
 import { cardsService } from '../../api/services/cards.service'
@@ -90,16 +77,16 @@ export default function ConvertToCardsModal({ open, onClose, boardId, selectedNo
       for (const card of cards) {
         await cardsService.create({
           deck_id: selectedDeck.id ?? selectedDeck.deck_id,
-          front: card.front,
-          back: card.back,
+          title: card.front,
+          content: card.back
         })
       }
       setSnackbar({
         message: t('blackboard.convertToCardsModal.success', {
           count: cards.length,
-          deckName: selectedDeck.name,
+          deckName: selectedDeck.name
         }),
-        color: 'success',
+        color: 'success'
       })
       onClose()
     } catch {
@@ -222,13 +209,7 @@ export default function ConvertToCardsModal({ open, onClose, boardId, selectedNo
         </ModalDialog>
       </Modal>
 
-      <Snackbar
-        open={!!snackbar}
-        autoHideDuration={4000}
-        color={snackbar?.color}
-        variant='soft'
-        onClose={() => setSnackbar(null)}
-      >
+      <Snackbar open={!!snackbar} autoHideDuration={4000} color={snackbar?.color} variant='soft' onClose={() => setSnackbar(null)}>
         {snackbar?.message}
       </Snackbar>
     </>
