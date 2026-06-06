@@ -200,9 +200,9 @@ export default function Editor({
   pageSize = 'a4',
   pageZoom = 1.0,
   isReadOnly = false,
-  onEditorReady,         // NEW: callback fires with editor instance when Lexical mounts
+  onEditorReady, // NEW: callback fires with editor instance when Lexical mounts
   illustrationCount = 0, // NEW: threaded from EditorHome → FloatingToolbarPlugin → TextMenu
-  tier = 'free',         // NEW: threaded from EditorHome → FloatingToolbarPlugin → TextMenu
+  tier = 'free' // NEW: threaded from EditorHome → FloatingToolbarPlugin → TextMenu
 }) {
   const theme = useTheme()
   const menuRef = useRef()
@@ -396,17 +396,41 @@ export default function Editor({
     }
   }, [])
 
-  // Insert mermaid diagram as a CodeNode at cursor position after DiagramPreviewPanel confirm
+  // Insert mermaid diagram as a new block BELOW the selected text.
+  // Do NOT use selection.insertNodes() — that replaces the active selection.
+  // Instead: walk up to the top-level block containing the focus point,
+  // then insertAfter() so the diagram appears below the selected paragraph.
   const handleDiagramInsert = useCallback((mermaidCode) => {
     const editor = editorInstanceRef.current
     if (editor) {
       editor.update(() => {
         const selection = $getSelection()
+        const root = $getRoot()
+        const codeNode = $createCodeNode('mermaid')
+        codeNode.append($createTextNode(mermaidCode))
+
         if ($isRangeSelection(selection)) {
-          const codeNode = $createCodeNode('mermaid')
-          codeNode.append($createTextNode(mermaidCode))
-          selection.insertNodes([codeNode])
+          // Walk up from focus node to find the direct child of root
+          let topBlock = selection.focus.getNode()
+          while (topBlock.getParent() !== root && topBlock.getParent() !== null) {
+            topBlock = topBlock.getParent()
+          }
+          // Insert diagram block below the selected paragraph
+          topBlock.insertAfter(codeNode)
+        } else {
+          // No selection — append at end of document
+          const lastChild = root.getLastChild()
+          if (lastChild) {
+            lastChild.insertAfter(codeNode)
+          } else {
+            root.append(codeNode)
+          }
         }
+
+        // Add a trailing empty paragraph so the cursor has somewhere to type next
+        const trailingParagraph = $createParagraphNode()
+        codeNode.insertAfter(trailingParagraph)
+        trailingParagraph.select()
       })
     }
     setShowDiagramPanel(false)
@@ -506,7 +530,7 @@ export default function Editor({
               top: 0,
               left: 0,
               right: 0,
-              zIndex: 10,
+              zIndex: 10
             }}
           />
         )}
