@@ -426,6 +426,9 @@ const StudyPet = () => {
   const navigate = useNavigate()
   const resolvedColor = themeColor
   const [input, setInput] = useState('')
+  // Tier enforcement state
+  const messagesUsedThisMonth = messagesUsed
+  const [messageLimitReached, setMessageLimitReached] = useState(false)
   const chatEndRef = useRef(null)
   const inputRef = useRef(null)
   const summaryTimerRef = useRef(null)
@@ -1004,6 +1007,13 @@ const StudyPet = () => {
     // Shift+Enter also works naturally as a second newline
   }
 
+  // Track message limit reached state: triggered by 429 (context error) or usage reaching limit
+  useEffect(() => {
+    if (messagesLimit !== -1 && messagesUsedThisMonth >= messagesLimit) {
+      setMessageLimitReached(true)
+    }
+  }, [messagesUsedThisMonth, messagesLimit])
+
   // Don't render for unauthenticated users
   if (!isAuthenticated) return null
 
@@ -1100,8 +1110,29 @@ const StudyPet = () => {
                               : '🔮'}
                       </span>
                       <div>
-                        <div style={{ color: 'var(--joy-palette-text-primary)', fontSize: 14, fontWeight: 600, lineHeight: 1.2 }}>
-                          {petName || t('agent.defaultName')}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ color: 'var(--joy-palette-text-primary)', fontSize: 14, fontWeight: 600, lineHeight: 1.2 }}>
+                            {petName || t('agent.defaultName')}
+                          </span>
+                          {/* Persistent memory chip — Plus/Pro only */}
+                          {tier !== 'free' && (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                padding: '1px 6px',
+                                borderRadius: 10,
+                                fontSize: 10,
+                                fontWeight: 600,
+                                background: 'var(--joy-palette-success-softBg)',
+                                color: 'var(--joy-palette-success-plainColor)',
+                                lineHeight: 1.6
+                              }}
+                              aria-live='polite'
+                            >
+                              {t('agent.persistentMemory')}
+                            </span>
+                          )}
                         </div>
                         <div style={{ color: resolvedColor, fontSize: 11, fontWeight: 500, opacity: 0.9 }}>
                           {messagesLimit === -1
@@ -1416,14 +1447,82 @@ const StudyPet = () => {
                 {/* Input Area */}
                 <div
                   style={{
-                    padding: '10px 12px 16px',
                     borderTop: '1px solid var(--joy-palette-divider)',
-                    display: 'flex',
-                    gap: 8,
-                    alignItems: 'center',
                     flexShrink: 0
                   }}
                 >
+                  {/* Message counter — Free tier only */}
+                  {tier === 'free' && (
+                    <div
+                      style={{
+                        px: 2,
+                        paddingLeft: 12,
+                        paddingRight: 12,
+                        paddingTop: 6,
+                        paddingBottom: 2,
+                        color: messagesUsedThisMonth >= 45
+                          ? 'var(--joy-palette-warning-plainColor)'
+                          : messageLimitReached
+                            ? 'var(--joy-palette-danger-plainColor)'
+                            : 'var(--joy-palette-text-tertiary)',
+                        fontSize: 11,
+                        fontFamily: 'Inter, sans-serif'
+                      }}
+                      aria-live='polite'
+                    >
+                      {messagesUsedThisMonth} / 50 {t('agent.messagesRemaining')}
+                    </div>
+                  )}
+                  {/* Limit reached alert — Free tier only */}
+                  {messageLimitReached && tier === 'free' && (
+                    <div style={{ padding: '6px 12px 4px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                          background: 'var(--joy-palette-danger-softBg)',
+                          border: '1px solid var(--joy-palette-danger-outlinedBorder)',
+                          borderRadius: 10,
+                          padding: '8px 12px',
+                          fontSize: 12,
+                          color: 'var(--joy-palette-danger-plainColor)',
+                          fontFamily: 'Inter, sans-serif'
+                        }}
+                      >
+                        <span>{t('agent.chat.error.limitReached')}</span>
+                        <button
+                          onClick={() => {
+                            // Navigate to plans page — openUpgradeModal not available in StudyPet inline
+                            // The input is already disabled, so this just provides context
+                          }}
+                          style={{
+                            background: 'var(--joy-palette-danger-solidBg)',
+                            border: 'none',
+                            borderRadius: 6,
+                            color: 'var(--joy-palette-danger-solidColor)',
+                            cursor: 'pointer',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: '4px 10px',
+                            fontFamily: 'Inter, sans-serif',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {t('agent.chat.upgradePlan')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      padding: '10px 12px 16px',
+                      display: 'flex',
+                      gap: 8,
+                      alignItems: 'center'
+                    }}
+                  >
                   <textarea
                     ref={inputRef}
                     id='study-pet-input'
@@ -1489,6 +1588,7 @@ const StudyPet = () => {
                   >
                     ↑
                   </motion.button>
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -49,6 +49,8 @@ import QuizRounded from '@mui/icons-material/QuizRounded'
 import { agentService } from '../../api/services/agent.service'
 import { userService } from '../../api/services'
 import { usePet } from '../../context/AgentContext'
+import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import CompanionTab from './CompanionTab'
 import OrbPreviewPanel from './OrbPreviewPanel'
 import petService from '../../api/services/petService'
@@ -296,6 +298,10 @@ export default function AgentSettings() {
     animationError,
     generateAnimation
   } = usePet()
+  const { tier: subscriptionTier } = useSubscription()
+  const { openUpgradeModal } = useSubscriptionContext()
+  // Use subscriptionTier as fallback if context tier is not yet populated
+  const effectiveTier = tier || subscriptionTier || 'free'
 
   // Local state — loaded from backend on mount
   const [conciseness, setConciseness] = useState('balanced')
@@ -318,6 +324,14 @@ export default function AgentSettings() {
   const [messagesLimit, setMessagesLimit] = useState(50)
   const [currentXp, setCurrentXp] = useState(0)
   const [xpForNextLevel, setXpForNextLevel] = useState(50)
+
+  // PersonalityGenerationCounter state
+  const [generationsUsed, setGenerationsUsed] = useState(0)
+  const [generationsLimit, setGenerationsLimit] = useState(effectiveTier === 'pro' ? 3 : 1)
+  const [resetDate, setResetDate] = useState(null)
+  const [regeneratingPersonality, setRegeneratingPersonality] = useState(false)
+  const [personalityError, setPersonalityError] = useState(null)
+  const [personalitySuccess, setPersonalitySuccess] = useState(false)
 
   const [saving, setSaving] = useState(null)
   const [saved, setSaved] = useState(null)
@@ -359,6 +373,10 @@ export default function AgentSettings() {
         setMessagesLimit(state.messages_limit)
         setCurrentXp(state.current_xp ?? 0)
         setXpForNextLevel(state.xp_for_next_level ?? 50)
+        // Load personality generation counter
+        setGenerationsUsed(state.personality_generations_used || 0)
+        setGenerationsLimit(state.personality_generation_limit || (effectiveTier === 'pro' ? 3 : 1))
+        setResetDate(state.personality_generation_reset_date || null)
         interests = prefs.interests || []
       } catch (err) {
         setLoadError(true)
@@ -505,6 +523,30 @@ export default function AgentSettings() {
       setPetSpecies(petSpecies)
       setPetError(true)
       setTimeout(() => setPetError(false), 4000)
+    }
+  }
+
+  // ── Personality generation handler ────────────────────────────────────────
+
+  const handleRegeneratePersonality = async () => {
+    setRegeneratingPersonality(true)
+    setPersonalityError(null)
+    try {
+      const result = await agentService.generatePersonality(null, petSpecies)
+      setGenerationsUsed(result.generations_used)
+      setGenerationsLimit(result.generations_limit)
+      setPersonalitySuccess(true)
+      setTimeout(() => setPersonalitySuccess(false), 3000)
+    } catch (err) {
+      if (err.response?.status === 402) {
+        if (effectiveTier !== 'pro') openUpgradeModal(t('agent.settings.personality.upgrade'))
+      } else if (err.response?.status === 422) {
+        setPersonalityError(t('agent.personality.error.blocked'))
+      } else {
+        setPersonalityError(t('agent.personality.error.failed'))
+      }
+    } finally {
+      setRegeneratingPersonality(false)
     }
   }
 
@@ -807,6 +849,81 @@ export default function AgentSettings() {
                       </Box>
                     )}
                   </Stack>
+                </Box>
+
+                <Divider />
+
+                {/* Section: PersonalityGenerationCounter — inline sub-component */}
+                <Box>
+                  <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.5 }}>
+                    <AutoAwesomeRounded sx={{ fontSize: 18, color: 'primary.plainColor' }} />
+                    <Typography level='title-md' fontWeight={700}>
+                      {t('agent.settings.personality.regenerate')}
+                    </Typography>
+                  </Stack>
+                  {effectiveTier === 'free' ? (
+                    // Free: show locked placeholder
+                    <Chip
+                      size='sm'
+                      variant='outlined'
+                      color='neutral'
+                      startDecorator={<LockOpenRounded sx={{ fontSize: 14 }} />}
+                      sx={{ mt: 1, cursor: 'default' }}
+                      aria-label={t('agent.settings.personality.customPersonalityLocked')}
+                    >
+                      {t('agent.settings.personality.customPersonalityLocked')}
+                    </Chip>
+                  ) : (
+                    <Box sx={{ mt: 2 }}>
+                      <Stack direction='row' alignItems='center' gap={1.5} flexWrap='wrap'>
+                        <Button
+                          size='sm'
+                          variant='solid'
+                          loading={regeneratingPersonality}
+                          disabled={generationsUsed >= generationsLimit}
+                          onClick={handleRegeneratePersonality}
+                          aria-label={t('agent.settings.personality.regenerateButton')}
+                        >
+                          {t('agent.settings.personality.regenerateButton')}
+                        </Button>
+                        <Chip
+                          size='sm'
+                          variant='soft'
+                          aria-live='polite'
+                          color={generationsUsed >= generationsLimit ? 'danger' : 'neutral'}
+                        >
+                          {generationsUsed} / {generationsLimit} {t('agent.settings.personality.used')}
+                        </Chip>
+                      </Stack>
+                      {generationsUsed >= generationsLimit && effectiveTier !== 'pro' && (
+                        <Typography level='body-sm' sx={{ mt: 0.5, color: 'danger.plainColor' }}>
+                          <Button
+                            size='sm'
+                            variant='plain'
+                            color='danger'
+                            onClick={() => openUpgradeModal(t('agent.settings.personality.upgrade'))}
+                          >
+                            {t('agent.upgrade.morePersonality')}
+                          </Button>
+                        </Typography>
+                      )}
+                      {generationsUsed >= generationsLimit && effectiveTier === 'pro' && resetDate && (
+                        <Typography level='body-sm' sx={{ mt: 0.5, color: 'text.tertiary' }}>
+                          {t('agent.settings.personality.resetDate', { date: resetDate })}
+                        </Typography>
+                      )}
+                      {personalityError && (
+                        <Alert color='warning' variant='soft' size='sm' sx={{ mt: 1 }}>
+                          {personalityError}
+                        </Alert>
+                      )}
+                      {personalitySuccess && (
+                        <Alert color='success' variant='soft' size='sm' sx={{ mt: 1 }}>
+                          {t('agent.personality.success')}
+                        </Alert>
+                      )}
+                    </Box>
+                  )}
                 </Box>
               </Stack>
             </Grid>
