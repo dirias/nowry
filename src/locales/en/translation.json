@@ -843,7 +843,9 @@
       "clear": "Clear board",
       "convertToCards": "Convert selected nodes to flashcards",
       "shareBoard": "Share board with collaborators",
-      "convertingCards": "Generating cards..."
+      "convertingCards": "Generating cards...",
+      "myBoards": "My Boards",
+      "loadingBoard": "Opening your board…"
     },
     "picker": {
       "title": {

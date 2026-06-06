@@ -13,12 +13,13 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import ShareRoundedIcon from '@mui/icons-material/ShareRounded'
 import LockRoundedIcon from '@mui/icons-material/LockRounded'
+import FolderRoundedIcon from '@mui/icons-material/FolderRounded'
 import { useTranslation } from 'react-i18next'
 import { STICKY_COLORS } from './nodes/StickyNoteNode'
 
 const STICKY_EMOJIS = ['📝', '💡', '🎯', '⚡', '🔥', '✨', '🚀', '💪']
 
-export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoard, nodes, onConvertToCards, onShareBoard, tier }) {
+export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoard, nodes, onConvertToCards, onShareBoard, onOpenBoardSwitcher, currentBoardName, tier }) {
   const { t } = useTranslation()
   const { addNodes, getViewport, screenToFlowPosition } = useReactFlow()
   const [entityPickerOpen, setEntityPickerOpen] = useState(false)
@@ -227,15 +228,15 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
         </Tooltip>
 
         {/* Divider before Phase 7 buttons */}
-        {selectedCount > 0 && (
-          <Box sx={{ width: '1px', height: 24, bgcolor: 'divider', flexShrink: 0 }} />
-        )}
+        {selectedCount > 0 && <Box sx={{ width: '1px', height: 24, bgcolor: 'divider', flexShrink: 0 }} />}
 
         {/* Convert to Cards button — visible when nodes are selected */}
         {selectedCount > 0 && (
           <Tooltip title={t('blackboard.toolbar.convertToCards', 'Convert selected nodes to flashcards')} placement='top' size='sm'>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Chip size='sm' variant='soft' color='primary'>{selectedCount}</Chip>
+              <Chip size='sm' variant='soft' color='primary'>
+                {selectedCount}
+              </Chip>
               <IconButton
                 onClick={onConvertToCards}
                 size='sm'
@@ -243,13 +244,51 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
                 aria-label={t('blackboard.toolbar.convertToCards', 'Convert selected nodes to flashcards')}
                 sx={{
                   color: 'text.secondary',
-                  '&:hover': { bgcolor: 'primary.softBg' },
+                  '&:hover': { bgcolor: 'primary.softBg' }
                 }}
               >
                 <StyleRoundedIcon sx={{ fontSize: 18 }} />
               </IconButton>
             </Box>
           </Tooltip>
+        )}
+
+        {/* My Boards — Pro tier only */}
+        {tier === 'pro' && (
+          <>
+            <Box sx={{ width: '1px', height: 24, bgcolor: 'divider', flexShrink: 0 }} />
+            <Tooltip title={t('blackboard.toolbar.myBoards', 'My Boards')} placement='top' size='sm'>
+              <Button
+                size='sm'
+                variant='soft'
+                color='neutral'
+                onClick={onOpenBoardSwitcher}
+                startDecorator={<FolderRoundedIcon sx={{ fontSize: 14 }} />}
+                aria-label={t('blackboard.toolbar.myBoards', 'My Boards')}
+                sx={{
+                  borderRadius: 'lg',
+                  px: 1.25,
+                  py: 0.5,
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  maxWidth: 120,
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  color: 'text.secondary',
+                  bgcolor: 'background.level1',
+                  '&:hover': { bgcolor: 'background.level2' },
+                  '&:focus-visible': {
+                    outline: '2px solid',
+                    outlineColor: 'primary.outlinedBorder',
+                    outlineOffset: 2
+                  }
+                }}
+              >
+                {currentBoardName || t('blackboard.toolbar.myBoards', 'My Boards')}
+              </Button>
+            </Tooltip>
+          </>
         )}
 
         {/* Divider before Share */}
@@ -265,7 +304,7 @@ export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoa
               aria-label={t('blackboard.toolbar.shareBoard', 'Share board with collaborators')}
               sx={{
                 color: 'text.secondary',
-                '&:hover': { bgcolor: 'background.level1' },
+                '&:hover': { bgcolor: 'background.level1' }
               }}
             >
               <ShareRoundedIcon sx={{ fontSize: 18 }} />

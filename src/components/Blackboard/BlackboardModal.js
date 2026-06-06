@@ -38,7 +38,7 @@ const nodeTypes = {
 }
 
 // Inner canvas — must be inside ReactFlowProvider
-function BlackboardCanvas({ goals, priorities, tasks, activeBoardId, onConvertToCards, onOpenConvertModal, onShareBoard, tier }) {
+function BlackboardCanvas({ goals, priorities, tasks, activeBoardId, currentBoardName, onConvertToCards, onOpenConvertModal, onShareBoard, onOpenBoardSwitcher, tier }) {
   const { t } = useTranslation()
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
@@ -302,6 +302,8 @@ function BlackboardCanvas({ goals, priorities, tasks, activeBoardId, onConvertTo
           nodes={nodes}
           onConvertToCards={handleConvertToCards}
           onShareBoard={onShareBoard}
+          onOpenBoardSwitcher={onOpenBoardSwitcher}
+          currentBoardName={currentBoardName}
           tier={tier}
         />
       </ReactFlow>
@@ -315,25 +317,45 @@ export default function BlackboardModal({ open, onClose }) {
   const { goals, priorities } = useAnnualPlan(new Date().getFullYear())
   const { tier } = useSubscription()
   const [tasks, setTasks] = React.useState([])
-  const [showBoardSelector, setShowBoardSelector] = useState(true) // open on mount
-  const [selectedBoardId, setSelectedBoardId] = useState(null)
+  const [boardsLoading, setBoardsLoading] = useState(false)
+  const [activeBoardId, setActiveBoardId] = useState(null)
+  const [activeBoardName, setActiveBoardName] = useState('')
+  const [showBoardSelector, setShowBoardSelector] = useState(false) // Pro switcher only
   const [showShareModal, setShowShareModal] = useState(false)
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState([])
 
-  // Derived: active board id — use selected or fall back to legacy 'main'
-  const activeBoardId = selectedBoardId || BOARD_ID
-
-  // Reset board selector when the modal is reopened
+  // Model B: auto-resolve board on mount — no selector gate for Free/Plus
   useEffect(() => {
-    if (open) {
-      setShowBoardSelector(true)
-      setSelectedBoardId(null)
-    }
+    if (!open) return
+    setBoardsLoading(true)
+    setActiveBoardId(null)
+    setActiveBoardName('')
+    blackboardService
+      .listBoards()
+      .then(async (boards) => {
+        if (!boards || boards.length === 0) {
+          // No boards yet — auto-create "My Blackboard"
+          const created = await blackboardService.createBoard('My Blackboard')
+          setActiveBoardId(created.id)
+          setActiveBoardName(created.name || 'My Blackboard')
+        } else {
+          // Use first board (most recent from API, Pro multi-board also uses first)
+          const first = boards[0]
+          setActiveBoardId(first.id)
+          setActiveBoardName(first.name || 'My Blackboard')
+        }
+      })
+      .catch(() => {
+        // Fallback to legacy board id if API fails
+        setActiveBoardId(BOARD_ID)
+      })
+      .finally(() => setBoardsLoading(false))
   }, [open])
 
   const handleSelectBoard = (board) => {
-    setSelectedBoardId(board.id)
+    setActiveBoardId(board.id)
+    setActiveBoardName(board.name || '')
     setShowBoardSelector(false)
   }
 
@@ -442,35 +464,39 @@ export default function BlackboardModal({ open, onClose }) {
           </Tooltip>
         </Box>
 
-        {/* ── Board selector modal — shown on entry ── */}
-        <BoardListSelector
-          open={showBoardSelector}
-          onClose={() => setShowBoardSelector(false)}
-          onSelectBoard={handleSelectBoard}
-        />
+        {/* ── Board selector modal — Pro switcher only ── */}
+        <BoardListSelector open={showBoardSelector} onClose={() => setShowBoardSelector(false)} onSelectBoard={handleSelectBoard} />
 
-        {/* ── Canvas ── */}
-        {!showBoardSelector && (
+        {/* ── Loading state — resolving board ── */}
+        {boardsLoading && (
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
+            <CircularProgress size='md' />
+            <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+              {t('blackboard.toolbar.loadingBoard', 'Opening your board…')}
+            </Typography>
+          </Box>
+        )}
+
+        {/* ── Canvas — renders once board ID is resolved ── */}
+        {!boardsLoading && activeBoardId && (
           <ReactFlowProvider>
             <BlackboardCanvas
               goals={goals}
               priorities={priorities}
               tasks={tasks}
               activeBoardId={activeBoardId}
+              currentBoardName={activeBoardName}
               tier={tier}
               onConvertToCards={setSelectedNodes}
               onOpenConvertModal={() => setShowConvertModal(true)}
               onShareBoard={() => setShowShareModal(true)}
+              onOpenBoardSwitcher={() => setShowBoardSelector(true)}
             />
           </ReactFlowProvider>
         )}
 
         {/* ── Share Board Modal ── */}
-        <ShareBoardModal
-          open={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          boardId={activeBoardId}
-        />
+        <ShareBoardModal open={showShareModal} onClose={() => setShowShareModal(false)} boardId={activeBoardId} />
 
         {/* ── Convert to Cards Modal ── */}
         <ConvertToCardsModal

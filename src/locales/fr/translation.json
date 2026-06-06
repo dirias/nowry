@@ -1644,7 +1644,9 @@
       "addGoal": "Add a goal",
       "addPriority": "Add a priority",
       "addTask": "Add a task",
-      "clear": "Clear board"
+      "clear": "Clear board",
+      "myBoards": "My Boards",
+      "loadingBoard": "Opening your board…"
     },
     "picker": {
       "title": {
