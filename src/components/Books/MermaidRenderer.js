@@ -1,25 +1,27 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography } from '@mui/joy'
+import { Box, Typography, useColorScheme } from '@mui/joy'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
 
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'neutral',
-  securityLevel: 'loose',
-  fontFamily: 'Inter, sans-serif',
-})
-
 export default function MermaidRenderer({ code }) {
   const { t } = useTranslation()
+  const { mode } = useColorScheme()
   const ref = useRef(null)
   const [svg, setSvg] = useState('')
   const [error, setError] = useState(null)
 
   useEffect(() => {
     if (code && ref.current) {
+      // Re-initialize with correct theme before each render so light/dark
+      // mode changes are reflected in the SVG output (T-6-12 DOMPurify still applied)
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: mode === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose',
+        fontFamily: 'Inter, sans-serif'
+      })
       setSvg('')
       setError(null)
       const id = `mermaid-${Date.now()}`
@@ -33,7 +35,7 @@ export default function MermaidRenderer({ code }) {
           setError(t('aiMagic.diagram.renderError'))
         })
     }
-  }, [code, t])
+  }, [code, mode, t])
 
   if (error) {
     return (
@@ -43,14 +45,10 @@ export default function MermaidRenderer({ code }) {
           textAlign: 'center',
           color: 'danger.plainColor',
           bgcolor: 'danger.softBg',
-          borderRadius: 'md',
+          borderRadius: 'md'
         }}
       >
-        <Typography
-          level="title-md"
-          sx={{ mb: 1 }}
-          startDecorator={<WarningAmberRoundedIcon />}
-        >
+        <Typography level='title-md' sx={{ mb: 1 }} startDecorator={<WarningAmberRoundedIcon />}>
           {t('aiMagic.diagram.renderError')}
         </Typography>
       </Box>
