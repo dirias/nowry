@@ -107,7 +107,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
 
   // ── Fetch annual plan context only when needed ────────────────────────────
   // Only goal and activity creation need focus-area/goal selectors.
-  const needsContext = !isEdit && (type === 'goal' || type === 'activity')
+  const needsContext = !isEdit && (type === 'priority' || type === 'goal' || type === 'activity')
   const annualPlanId = cachedPlan?._id
   const focusAreas = cachedAreas || []
   const allGoals = cachedGoals || []
@@ -120,7 +120,11 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const needsDescription = activeType === 'priority'
 
   // Determine if save should be blocked
-  const canSave = title.trim() && !(needsFocusArea && !focusAreaId) && !(needsGoal && !goalId)
+  const canSave =
+    title.trim() &&
+    !(needsFocusArea && !focusAreaId) &&
+    !(needsGoal && !goalId) &&
+    !(type === 'priority' && !annualPlanId)
 
   // ── Save handlers ─────────────────────────────────────────────────────────
   const handleSave = async () => {
