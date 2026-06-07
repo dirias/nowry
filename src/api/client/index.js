@@ -67,9 +67,7 @@ apiClient.interceptors.response.use(
     const errorUrl = error.config?.url || ''
     // Endpoints that manage their own error/loading UI — global toasts would duplicate feedback
     const isAiGenerationEndpoint =
-      errorUrl.includes('generate-avatar') ||
-      errorUrl.includes('generate-animation') ||
-      errorUrl.includes('generate-from-book')
+      errorUrl.includes('generate-avatar') || errorUrl.includes('generate-animation') || errorUrl.includes('generate-from-book') || errorUrl.includes('goal-ai')
 
     // Handle request timeout — suppress for AI generation endpoints
     if (!isAiGenerationEndpoint && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
