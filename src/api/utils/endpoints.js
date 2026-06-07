@@ -73,5 +73,12 @@ export const ENDPOINTS = {
     get: '/annual-plan/daily-routine',
     update: '/annual-plan/daily-routine',
     completions: '/annual-plan/daily-routine/completions'
+  },
+  sheets: {
+    all: '/sheets',
+    create: '/sheets',
+    byId: (id) => `/sheets/${id}`,
+    update: (id) => `/sheets/${id}`,
+    delete: (id) => `/sheets/${id}`
   }
 }
