@@ -1687,5 +1687,24 @@
     },
     "timeBlock": "New time block",
     "error": "Couldn't load your calendar. Check your connection and try again."
+  },
+  "goalAi": {
+    "buttonLabel": "AI Assist",
+    "panelTitle": "AI Goal Analysis",
+    "refresh": "Refresh analysis",
+    "loading": "Analyzing your annual plan with AI...",
+    "error": "Failed to analyze goals. Please try again.",
+    "noPlan": "No annual plan found for this year. Create a plan to unlock AI analysis.",
+    "upgradeHeadline": "Unlock AI Goal Analysis with Pro",
+    "sections": {
+      "suggestions": "Quarterly Suggestions",
+      "conflicts": "Conflicts Detected",
+      "archiving": "Archiving Recommendations"
+    },
+    "empty": {
+      "suggestions": "No suggestions available.",
+      "conflicts": "No conflicts detected.",
+      "archiving": "No stale goals to archive."
+    }
   }
 }

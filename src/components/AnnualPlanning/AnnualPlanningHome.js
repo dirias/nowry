@@ -36,16 +36,22 @@ import {
   Save as SaveIcon,
   Cancel as CancelIcon,
   Delete as DeleteIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  LockRounded as LockRoundedIcon,
+  AutoAwesome as AutoAwesomeRoundedIcon
 } from '@mui/icons-material'
 import { annualPlanningService } from '../../api/services'
 import { apiCache } from '../../api/utils/cache'
 import useAnnualPlan from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
+import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
 import CloseQuarterModal from './CloseQuarterModal'
 import QuarterReportsView from './QuarterReportsView'
+import GoalAIPanel from './GoalAIPanel'
+import goalAIService from '../../api/services/goalAI.service'
 
 const AnnualPlanningHome = () => {
   const { t } = useTranslation()
@@ -56,6 +62,8 @@ const AnnualPlanningHome = () => {
 
   const year = new Date().getFullYear()
   const { user } = useAuth()
+  const { tier } = useSubscription()
+  const { openUpgradeModal } = useSubscriptionContext()
   const {
     plan: hookPlan,
     focusAreas: hookAreas,
@@ -78,6 +86,13 @@ const AnnualPlanningHome = () => {
   const [quarterReports, setQuarterReports] = useState([])
   const [closingQuarter, setClosingQuarter] = useState(null)
   const [closingYear, setClosingYear] = useState(null)
+
+  // Goal AI state
+  const [panelOpen, setPanelOpen] = useState(false)
+  const [aiAnalysis, setAiAnalysis] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState(false)
+  const [aiNoPlan, setAiNoPlan] = useState(false)
 
   // Sync hook data into local state (needed so mutations can update UI immediately)
   useEffect(() => {
@@ -195,6 +210,50 @@ const AnnualPlanningHome = () => {
     setClosingQuarter(q)
     setClosingYear(y)
     setShowCloseModal(true)
+  }
+
+  // Goal AI handlers
+  const handleAIAssist = async () => {
+    if (tier !== 'pro') {
+      openUpgradeModal(t('goalAi.upgradeHeadline'))
+      return
+    }
+    setPanelOpen(true)
+    setAiLoading(true)
+    setAiError(false)
+    setAiNoPlan(false)
+    setAiAnalysis(null)
+    try {
+      const data = await goalAIService.analyzeGoals()
+      setAiAnalysis(data)
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        setAiNoPlan(true)
+      } else {
+        setAiError(true)
+      }
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  const handleAIRefresh = async () => {
+    setAiLoading(true)
+    setAiError(false)
+    setAiNoPlan(false)
+    setAiAnalysis(null)
+    try {
+      const data = await goalAIService.analyzeGoals()
+      setAiAnalysis(data)
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        setAiNoPlan(true)
+      } else {
+        setAiError(true)
+      }
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   if (!plan && !loading) {
@@ -415,10 +474,32 @@ const AnnualPlanningHome = () => {
               >
                 {t('annualPlanning.home.dailyRoutineBtn')}
               </Button>
+              <Button
+                size='sm'
+                variant={panelOpen ? 'solid' : 'outlined'}
+                color='primary'
+                onClick={handleAIAssist}
+                aria-label={t('goalAi.buttonLabel')}
+                startDecorator={tier !== 'pro' ? <LockRoundedIcon /> : <AutoAwesomeRoundedIcon />}
+                sx={{ minHeight: 36, borderRadius: 'md', fontWeight: 600 }}
+              >
+                {t('goalAi.buttonLabel')}
+              </Button>
             </Stack>
           )}
         </Box>
       </Box>
+
+      {/* Goal AI Panel — inline, rendered below header, above focus areas */}
+      {panelOpen && (
+        <GoalAIPanel
+          analysis={aiAnalysis}
+          loading={aiLoading}
+          error={aiError}
+          noPlan={aiNoPlan}
+          onRefresh={handleAIRefresh}
+        />
+      )}
 
       {/* Focus Areas Grid */}
       <Typography level='h4' sx={{ mb: 1.5, fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
