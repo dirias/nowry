@@ -1706,5 +1706,41 @@
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
     }
+  },
+  "sheets": {
+    "title": "My Sheets",
+    "newSheet": "New sheet",
+    "untitled": "Untitled Sheet",
+    "search": "Search sheets…",
+    "error": "Couldn't load your sheets. Refresh the page to try again.",
+    "view": {
+      "grid": "Switch to grid view",
+      "list": "Switch to list view"
+    },
+    "empty": {
+      "title": "No sheets yet",
+      "body": "Create a spreadsheet to track finances, plans, or anything you like."
+    },
+    "create": {
+      "title": "New sheet",
+      "template": "Template",
+      "confirm": "Create sheet"
+    },
+    "templates": {
+      "blank": "Blank",
+      "budgetTracker": "Budget Tracker",
+      "expenseLog": "Expense Log"
+    },
+    "editor": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "filter": "Filter rows…",
+      "error": "Couldn't load this sheet. Go back to your sheets and try again."
+    },
+    "delete": {
+      "title": "Delete sheet?",
+      "body": "This sheet will be moved to trash and deleted after 30 days.",
+      "confirm": "Delete sheet"
+    }
   }
 }
