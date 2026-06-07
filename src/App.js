@@ -64,6 +64,9 @@ const PrivacyPolicy = lazy(() => import('./components/HomePage/PrivacyPolicy'))
 const TermsOfService = lazy(() => import('./components/HomePage/TermsOfService'))
 const PlansPage = lazy(() => import('./components/Subscription/PlansPage'))
 const SubscriptionPage = lazy(() => import('./components/Subscription/SubscriptionPage'))
+const CalendarPage = lazy(() => import('./components/Calendar/CalendarPage'))
+const SheetsListPage = lazy(() => import('./components/Sheets/SheetsListPage'))
+const SheetsEditor = lazy(() => import('./components/Sheets/SheetsEditor'))
 
 /** Full-page loading fallback shown while lazy chunks download */
 const PageLoader = () => (
@@ -326,6 +329,30 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     <SubscriptionPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/calendar'
+                element={
+                  <ProtectedRoute>
+                    <CalendarPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/sheets'
+                element={
+                  <ProtectedRoute>
+                    <SheetsListPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/sheets/:sheetId'
+                element={
+                  <ProtectedRoute>
+                    <SheetsEditor />
                   </ProtectedRoute>
                 }
               />

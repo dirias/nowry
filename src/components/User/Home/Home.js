@@ -10,7 +10,6 @@ import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import WeeklyProgress from './WeeklyProgress'
 import StudyCalendar from './StudyCalendar'
-import CalendarModal from '../../Calendar/CalendarModal'
 import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '../../../context/AuthContext'
 import { cardsService, decksService } from '../../../api/services'
@@ -23,7 +22,6 @@ function Home() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [studyStats, setStudyStats] = useState({ dueCount: 0, loading: true })
-  const [calendarOpen, setCalendarOpen] = useState(false)
   const [blackboardOpen, setBlackboardOpen] = useState(false)
   const [bannerDismissed, setBannerDismissed] = useState(() => sessionStorage.getItem('setup_banner_dismissed') === 'true')
 
@@ -134,7 +132,7 @@ function Home() {
               size='sm'
               variant='plain'
               color='neutral'
-              onClick={() => setCalendarOpen(true)}
+              onClick={() => navigate('/calendar')}
               sx={{
                 '--IconButton-size': '32px',
                 borderRadius: 'sm',
@@ -264,8 +262,6 @@ function Home() {
         </Grid>
       </Grid>
 
-      {/* Calendar Modal */}
-      <CalendarModal open={calendarOpen} onClose={() => setCalendarOpen(false)} />
       {/* Blackboard Modal */}
       <BlackboardModal open={blackboardOpen} onClose={() => setBlackboardOpen(false)} />
     </Container>
