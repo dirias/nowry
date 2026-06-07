@@ -16,7 +16,8 @@ const goalAIService = {
    */
   async analyzeGoals(year = null) {
     const payload = year ? { year } : {}
-    const { data } = await apiClient.post(ENDPOINTS.goalAI.analyze, payload)
+    // LLM calls (Gemini) can take 30–60 s — override the global 10 s default.
+    const { data } = await apiClient.post(ENDPOINTS.goalAI.analyze, payload, { timeout: 90000 })
     return data
   }
 }
