@@ -80,5 +80,8 @@ export const ENDPOINTS = {
     byId: (id) => `/sheets/${id}`,
     update: (id) => `/sheets/${id}`,
     delete: (id) => `/sheets/${id}`
+  },
+  goalAI: {
+    analyze: '/goal-ai/analyze'
   }
 }
