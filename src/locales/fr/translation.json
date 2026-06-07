@@ -13,7 +13,9 @@
     "close": "Fermer",
     "pomodoro": "Minuteur Pomodoro",
     "toggleTheme": "Changer le thème",
-    "studyBuddy": "Compagnon d'étude"
+    "studyBuddy": "Compagnon d'étude",
+    "moreActions": "More actions",
+    "retry": "Retry"
   },
   "news": {
     "title": "Dernières Actualités",
@@ -1747,7 +1749,10 @@
     "create": {
       "title": "New sheet",
       "template": "Template",
-      "confirm": "Create sheet"
+      "confirm": "Create sheet",
+      "nameLabel": "Name",
+      "templateLabel": "Template",
+      "error": "Failed to create sheet. Please try again."
     },
     "templates": {
       "blank": "Blank",
@@ -1758,12 +1763,27 @@
       "saving": "Saving…",
       "saved": "Saved",
       "filter": "Filter rows…",
-      "error": "Couldn't load this sheet. Go back to your sheets and try again."
+      "error": "Couldn't load this sheet. Go back to your sheets and try again.",
+      "backToSheets": "Back to sheets",
+      "filterReadOnly": "Read-only while filtering",
+      "titleInput": "Sheet name"
     },
     "delete": {
       "title": "Delete sheet?",
       "body": "This sheet will be moved to trash and deleted after 30 days.",
-      "confirm": "Delete sheet"
+      "confirm": "Delete \"{{title}}\"?"
+    },
+    "list": {
+      "title": "My Sheets",
+      "emptyTitle": "No sheets yet",
+      "emptySubtitle": "Create a spreadsheet to track finances, plans, or anything you like.",
+      "new": "New Sheet",
+      "search": "Search sheets…",
+      "errorFetch": "Couldn’t load your sheets. Refresh the page to try again.",
+      "gridView": "Grid view",
+      "listView": "List view",
+      "columns": "Columns",
+      "noResults": "No sheets match \"{{term}}\""
     }
   }
 }

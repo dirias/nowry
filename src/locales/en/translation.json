@@ -25,7 +25,9 @@
       "recoveryNotice": "Data can be recovered within 30 days by contacting support"
     },
     "toggleTheme": "Toggle theme",
-    "studyBuddy": "Study Buddy"
+    "studyBuddy": "Study Buddy",
+    "moreActions": "More actions",
+    "retry": "Retry"
   },
   "news": {
     "title": "Latest News",
@@ -929,14 +931,11 @@
       "notesPlaceholder": "Add notes...",
       "summaryPlaceholder": "Add summary..."
     },
-    "import": {
-      "titlePlaceholder": "Enter book title..."
-    },
+    "import": "Import",
     "title": "Books",
     "library": "Deck Library",
     "subtitle": "Your personal collection",
     "create": "Create Book",
-    "import": "Import",
     "totalBooks": "Total Books",
     "updatedWeek": "Updated This Week",
     "totalPages": "Total Pages",
@@ -1376,7 +1375,14 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
+      "examples": [
+        "Career Growth",
+        "Health & Vitality",
+        "Financial Freedom",
+        "Relationships",
+        "Creative Pursuits",
+        "Learning & Skills"
+      ]
     },
     "priority": {
       "title": "Yearly Priorities",
@@ -2496,7 +2502,10 @@
     "create": {
       "title": "New sheet",
       "template": "Template",
-      "confirm": "Create sheet"
+      "confirm": "Create sheet",
+      "nameLabel": "Name",
+      "templateLabel": "Template",
+      "error": "Failed to create sheet. Please try again."
     },
     "templates": {
       "blank": "Blank",
@@ -2507,12 +2516,27 @@
       "saving": "Saving…",
       "saved": "Saved",
       "filter": "Filter rows…",
-      "error": "Couldn't load this sheet. Go back to your sheets and try again."
+      "error": "Couldn't load this sheet. Go back to your sheets and try again.",
+      "backToSheets": "Back to sheets",
+      "filterReadOnly": "Read-only while filtering",
+      "titleInput": "Sheet name"
     },
     "delete": {
       "title": "Delete sheet?",
       "body": "This sheet will be moved to trash and deleted after 30 days.",
-      "confirm": "Delete sheet"
+      "confirm": "Delete \"{{title}}\"?"
+    },
+    "list": {
+      "title": "My Sheets",
+      "emptyTitle": "No sheets yet",
+      "emptySubtitle": "Create a spreadsheet to track finances, plans, or anything you like.",
+      "new": "New Sheet",
+      "search": "Search sheets…",
+      "errorFetch": "Couldn’t load your sheets. Refresh the page to try again.",
+      "gridView": "Grid view",
+      "listView": "List view",
+      "columns": "Columns",
+      "noResults": "No sheets match \"{{term}}\""
     }
   }
 }

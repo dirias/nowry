@@ -12,7 +12,9 @@
     "logout": "ログアウト",
     "pomodoro": "ポモドーロタイマー",
     "toggleTheme": "テーマを切り替える",
-    "studyBuddy": "学習パートナー"
+    "studyBuddy": "学習パートナー",
+    "moreActions": "More actions",
+    "retry": "Retry"
   },
   "news": {
     "title": "最新ニュース",
@@ -777,9 +779,20 @@
           "title": "3の力",
           "message": "研究によると、一度にすべてを改善しようとするよりも、3つの主要な生活分野に集中する方が大きな成功につながります。今年の3つの分野を定義しましょう。"
         },
-        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"]
+        "tips": [
+          "最も重要なことについて具体的に",
+          "自分の価値観に合った分野を選ぶ",
+          "さまざまな生活領域のバランスを考える"
+        ]
       },
-      "examples": ["キャリア成長", "健康と活力", "経済的自由", "人間関係", "創造的な活動", "学習とスキル"]
+      "examples": [
+        "キャリア成長",
+        "健康と活力",
+        "経済的自由",
+        "人間関係",
+        "創造的な活動",
+        "学習とスキル"
+      ]
     },
     "priority": {
       "title": "年間優先事項",
@@ -1664,7 +1677,10 @@
     "create": {
       "title": "New sheet",
       "template": "Template",
-      "confirm": "Create sheet"
+      "confirm": "Create sheet",
+      "nameLabel": "Name",
+      "templateLabel": "Template",
+      "error": "Failed to create sheet. Please try again."
     },
     "templates": {
       "blank": "Blank",
@@ -1675,12 +1691,27 @@
       "saving": "Saving…",
       "saved": "Saved",
       "filter": "Filter rows…",
-      "error": "Couldn't load this sheet. Go back to your sheets and try again."
+      "error": "Couldn't load this sheet. Go back to your sheets and try again.",
+      "backToSheets": "Back to sheets",
+      "filterReadOnly": "Read-only while filtering",
+      "titleInput": "Sheet name"
     },
     "delete": {
       "title": "Delete sheet?",
       "body": "This sheet will be moved to trash and deleted after 30 days.",
-      "confirm": "Delete sheet"
+      "confirm": "Delete \"{{title}}\"?"
+    },
+    "list": {
+      "title": "My Sheets",
+      "emptyTitle": "No sheets yet",
+      "emptySubtitle": "Create a spreadsheet to track finances, plans, or anything you like.",
+      "new": "New Sheet",
+      "search": "Search sheets…",
+      "errorFetch": "Couldn’t load your sheets. Refresh the page to try again.",
+      "gridView": "Grid view",
+      "listView": "List view",
+      "columns": "Columns",
+      "noResults": "No sheets match \"{{term}}\""
     }
   }
 }
