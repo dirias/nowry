@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Input,
-  Modal,
-  ModalClose,
-  ModalDialog,
-  Skeleton,
-  Snackbar,
-  Stack,
-  Tooltip,
-  Typography
-} from '@mui/joy'
+import { Box, Button, Chip, Divider, Input, Modal, ModalClose, ModalDialog, Skeleton, Snackbar, Stack, Tooltip, Typography } from '@mui/joy'
 import LockRoundedIcon from '@mui/icons-material/LockRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
@@ -88,10 +74,10 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
         }}
       >
         <ModalClose />
-        <Typography level="title-lg" sx={{ mb: 0.5 }}>
+        <Typography level='title-lg' sx={{ mb: 0.5 }}>
           {t('blackboard.boardListSelector.title')}
         </Typography>
-        <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 2 }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
           {t('blackboard.boardListSelector.subtitle')}
         </Typography>
         <Divider />
@@ -100,7 +86,7 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
         {loading && (
           <Stack gap={1} sx={{ mt: 2 }}>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} variant="rectangular" height={48} sx={{ borderRadius: 'md' }} />
+              <Skeleton key={i} variant='rectangular' height={48} sx={{ borderRadius: 'md' }} />
             ))}
           </Stack>
         )}
@@ -108,13 +94,13 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
         {/* Error state */}
         {!loading && error && (
           <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography level="body-sm" sx={{ color: 'danger.plainColor', mb: 1 }}>
+            <Typography level='body-sm' sx={{ color: 'danger.plainColor', mb: 1 }}>
               {error}
             </Typography>
             <Button
-              size="sm"
-              variant="outlined"
-              color="neutral"
+              size='sm'
+              variant='outlined'
+              color='neutral'
               onClick={() => {
                 setLoading(true)
                 setError(null)
@@ -133,13 +119,11 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
         {/* Empty state */}
         {!loading && !error && boards.length === 0 && (
           <Box sx={{ py: 8, textAlign: 'center' }}>
-            <DashboardRoundedIcon
-              sx={{ fontSize: 48, color: 'text.tertiary', opacity: 0.5, mb: 1 }}
-            />
-            <Typography level="title-md" sx={{ color: 'text.secondary' }}>
+            <DashboardRoundedIcon sx={{ fontSize: 48, color: 'text.tertiary', opacity: 0.5, mb: 1 }} />
+            <Typography level='title-md' sx={{ color: 'text.secondary' }}>
               {t('blackboard.boardListSelector.empty.title')}
             </Typography>
-            <Typography level="body-sm" sx={{ color: 'text.tertiary' }}>
+            <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
               {t('blackboard.boardListSelector.empty.body')}
             </Typography>
           </Box>
@@ -150,19 +134,17 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
           <Stack gap={0.5} sx={{ mt: 2 }}>
             {ownedBoards.length > 0 && (
               <>
-                <Typography level="body-sm" sx={{ color: 'text.tertiary', px: 1, pt: 1 }}>
+                <Typography level='body-sm' sx={{ color: 'text.tertiary', px: 1, pt: 1 }}>
                   {t('blackboard.boardListSelector.ownedBoards')}
                 </Typography>
                 {ownedBoards.map((board) => (
                   <Box
                     key={board.id}
-                    role="button"
+                    role='button'
                     tabIndex={0}
                     aria-label={board.name}
                     onClick={() => handleSelectBoard(board)}
-                    onKeyDown={(e) =>
-                      (e.key === 'Enter' || e.key === ' ') && handleSelectBoard(board)
-                    }
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectBoard(board)}
                     sx={{
                       px: 2,
                       py: 1.5,
@@ -177,7 +159,7 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
                       }
                     }}
                   >
-                    <Typography level="body-md" sx={{ color: 'text.primary' }}>
+                    <Typography level='body-md' sx={{ color: 'text.primary' }}>
                       {board.name}
                     </Typography>
                   </Box>
@@ -188,19 +170,17 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
             {sharedBoards.length > 0 && (
               <>
                 <Divider sx={{ my: 1 }} />
-                <Typography level="body-sm" sx={{ color: 'text.tertiary', px: 1 }}>
+                <Typography level='body-sm' sx={{ color: 'text.tertiary', px: 1 }}>
                   {t('blackboard.boardListSelector.sharedBoards')}
                 </Typography>
                 {sharedBoards.map((board) => (
                   <Box
                     key={board.id}
-                    role="button"
+                    role='button'
                     tabIndex={0}
                     aria-label={board.name}
                     onClick={() => handleSelectBoard(board)}
-                    onKeyDown={(e) =>
-                      (e.key === 'Enter' || e.key === ' ') && handleSelectBoard(board)
-                    }
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectBoard(board)}
                     sx={{
                       px: 2,
                       py: 1.5,
@@ -218,14 +198,10 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
                       }
                     }}
                   >
-                    <Typography level="body-md" sx={{ color: 'text.primary', flex: 1 }}>
+                    <Typography level='body-md' sx={{ color: 'text.primary', flex: 1 }}>
                       {board.name}
                     </Typography>
-                    <Chip
-                      size="sm"
-                      variant="soft"
-                      sx={{ bgcolor: 'background.level1', color: 'text.secondary' }}
-                    >
+                    <Chip size='sm' variant='soft' sx={{ bgcolor: 'background.level1', color: 'text.secondary' }}>
                       {t('blackboard.boardListSelector.sharedWith', {
                         name: board.owner_name || '...'
                       })}
@@ -239,29 +215,23 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
 
         {/* New board inline input (Pro only, shown after clicking New board) */}
         {showNewInput && (
-          <Stack direction="row" gap={1} sx={{ mt: 2 }}>
+          <Stack direction='row' gap={1} sx={{ mt: 2 }}>
             <Input
               autoFocus
-              size="sm"
+              size='sm'
               value={newBoardName}
               onChange={(e) => setNewBoardName(e.target.value)}
               placeholder={t('blackboard.boardListSelector.newBoardPlaceholder')}
               onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
               sx={{ flex: 1 }}
             />
-            <Button
-              size="sm"
-              variant="solid"
-              loading={creating}
-              onClick={handleCreateBoard}
-              disabled={!newBoardName.trim()}
-            >
+            <Button size='sm' variant='solid' loading={creating} onClick={handleCreateBoard} disabled={!newBoardName.trim()}>
               {t('common.add') || 'Create'}
             </Button>
             <Button
-              size="sm"
-              variant="plain"
-              color="neutral"
+              size='sm'
+              variant='plain'
+              color='neutral'
               onClick={() => {
                 setShowNewInput(false)
                 setNewBoardName('')
@@ -278,9 +248,9 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
             {tier === 'pro' ? (
               <Button
                 startDecorator={<AddRoundedIcon />}
-                size="sm"
-                variant="outlined"
-                color="neutral"
+                size='sm'
+                variant='outlined'
+                color='neutral'
                 onClick={handleNewBoard}
                 aria-label={t('blackboard.boards.newBoard')}
               >
@@ -291,13 +261,11 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
                 <span>
                   <Button
                     startDecorator={<LockRoundedIcon />}
-                    size="sm"
-                    variant="outlined"
-                    color="neutral"
+                    size='sm'
+                    variant='outlined'
+                    color='neutral'
                     disabled
-                    aria-label={
-                      t('blackboard.boards.newBoard') + ' (requires Pro)'
-                    }
+                    aria-label={t('blackboard.boards.newBoard') + ' (requires Pro)'}
                   >
                     {t('blackboard.boards.newBoard')}
                   </Button>
@@ -307,13 +275,7 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
           </Box>
         )}
 
-        <Snackbar
-          open={!!snackbar}
-          autoHideDuration={3000}
-          color={snackbar?.color}
-          variant="soft"
-          onClose={() => setSnackbar(null)}
-        >
+        <Snackbar open={!!snackbar} autoHideDuration={3000} color={snackbar?.color} variant='soft' onClose={() => setSnackbar(null)}>
           {snackbar?.message}
         </Snackbar>
       </ModalDialog>

@@ -45,16 +45,16 @@ const CalendarPage = () => {
                 status: ev.status,
                 category: ev.category,
                 areaName: ev.areaName,
-                goalTitle: ev.goalTitle,
-              },
+                goalTitle: ev.goalTitle
+              }
             }))
           )
         } catch (err) {
           setCalendarError(err)
           failureCallback(err)
         }
-      },
-    },
+      }
+    }
   ]
 
   // Strip type prefix from compound event ID (e.g. 'task-abc123' → 'abc123')
@@ -112,7 +112,7 @@ const CalendarPage = () => {
       title: ev.title,
       date: ev.start,
       status: ev.extendedProps.status,
-      category: ev.extendedProps.category,
+      category: ev.extendedProps.category
     })
     setFormMode('edit')
     setFormOpen(false) // brief reset to force modal re-mount
@@ -144,12 +144,7 @@ const CalendarPage = () => {
         {/* Header row */}
         <Stack direction='row' justifyContent='space-between' alignItems='center'>
           <Typography level='h2'>{t('calendarPage.title')}</Typography>
-          <Button
-            startDecorator={<AddRoundedIcon />}
-            size='sm'
-            onClick={handleAddEvent}
-            aria-label={t('calendarPage.addEvent')}
-          >
+          <Button startDecorator={<AddRoundedIcon />} size='sm' onClick={handleAddEvent} aria-label={t('calendarPage.addEvent')}>
             {t('calendarPage.addEvent')}
           </Button>
         </Stack>
@@ -170,7 +165,7 @@ const CalendarPage = () => {
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay'
             }}
             eventSources={eventSources}
             editable={true}

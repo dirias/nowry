@@ -12,5 +12,5 @@ export const subscriptionService = {
   getSubscriptionStatus: async () => {
     const response = await apiClient.get('/stripe/subscription-status')
     return response.data
-  },
+  }
 }

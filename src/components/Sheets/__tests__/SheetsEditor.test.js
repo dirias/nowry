@@ -5,10 +5,14 @@
  */
 
 // Mock react-spreadsheet (not yet installed in Wave 0)
-jest.mock('react-spreadsheet', () => ({
-  __esModule: true,
-  default: () => null,
-}), { virtual: true })
+jest.mock(
+  'react-spreadsheet',
+  () => ({
+    __esModule: true,
+    default: () => null
+  }),
+  { virtual: true }
+)
 
 describe.skip('SheetsEditor — SHEET-02: Formula storage', () => {
   it('cells with value starting with = are stored as-is in sheet data', () => {})

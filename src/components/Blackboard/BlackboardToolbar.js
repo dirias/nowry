@@ -19,7 +19,18 @@ import { STICKY_COLORS } from './nodes/StickyNoteNode'
 
 const STICKY_EMOJIS = ['📝', '💡', '🎯', '⚡', '🔥', '✨', '🚀', '💪']
 
-export default function BlackboardToolbar({ goals, priorities, tasks, onClearBoard, nodes, onConvertToCards, onShareBoard, onOpenBoardSwitcher, currentBoardName, tier }) {
+export default function BlackboardToolbar({
+  goals,
+  priorities,
+  tasks,
+  onClearBoard,
+  nodes,
+  onConvertToCards,
+  onShareBoard,
+  onOpenBoardSwitcher,
+  currentBoardName,
+  tier
+}) {
   const { t } = useTranslation()
   const { addNodes, getViewport, screenToFlowPosition } = useReactFlow()
   const [entityPickerOpen, setEntityPickerOpen] = useState(false)

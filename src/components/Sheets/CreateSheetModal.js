@@ -77,11 +77,7 @@ const CreateSheetModal = ({ open, onClose }) => {
           </FormControl>
           <FormControl>
             <FormLabel>{t('sheets.create.templateLabel')}</FormLabel>
-            <Select
-              value={templateId}
-              onChange={(_, val) => setTemplateId(val)}
-              aria-label={t('sheets.create.templateLabel')}
-            >
+            <Select value={templateId} onChange={(_, val) => setTemplateId(val)} aria-label={t('sheets.create.templateLabel')}>
               {TEMPLATE_OPTIONS.map((opt) => (
                 <Option key={opt.id} value={opt.id}>
                   {t(opt.label)}

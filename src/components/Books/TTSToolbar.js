@@ -15,7 +15,7 @@ import {
   Snackbar,
   Stack,
   Tooltip,
-  Typography,
+  Typography
 } from '@mui/joy'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded'
@@ -154,23 +154,19 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
   // Free tier — locked button with Plus badge
   if (tier === 'free') {
     return (
-      <Stack
-        direction="row"
-        alignItems="center"
-        sx={{ display: { xs: 'none', md: 'flex' } }}
-      >
-        <Tooltip title={t('aiMagic.tts.lockedTooltip')} variant="soft" size="sm">
+      <Stack direction='row' alignItems='center' sx={{ display: { xs: 'none', md: 'flex' } }}>
+        <Tooltip title={t('aiMagic.tts.lockedTooltip')} variant='soft' size='sm'>
           <span>
             <Button
-              size="sm"
-              variant="outlined"
-              color="neutral"
+              size='sm'
+              variant='outlined'
+              color='neutral'
               startDecorator={<LockIcon sx={{ fontSize: 16 }} />}
               onClick={() => openUpgradeModal(t('upgrade.headlines.tts'))}
               aria-label={t('aiMagic.tts.lockedAriaLabel')}
             >
               {t('aiMagic.tts.label')}
-              <Chip size="sm" color="warning" variant="soft" sx={{ ml: 1 }}>
+              <Chip size='sm' color='warning' variant='soft' sx={{ ml: 1 }}>
                 {t('plans.plus')}
               </Chip>
             </Button>
@@ -182,47 +178,37 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
 
   // Plus/Pro tier — full TTS controls
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      spacing={0.5}
-      sx={{ display: { xs: 'none', md: 'flex' } }}
-    >
+    <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', md: 'flex' } }}>
       {/* Pro language selector */}
       {tier === 'pro' && (
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={0.5}
-          sx={{ display: { xs: 'none', md: 'flex' } }}
-        >
+        <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', md: 'flex' } }}>
           <Select
-            size="sm"
+            size='sm'
             value={ttsLanguage}
             onChange={(_, val) => setTtsLanguage(val)}
             aria-label={t('aiMagic.tts.languageAriaLabel')}
             sx={{ minWidth: 100 }}
           >
-            <Option value="en-US">{t('aiMagic.tts.languages.en')}</Option>
-            <Option value="es-ES">{t('aiMagic.tts.languages.es')}</Option>
-            <Option value="fr-FR">{t('aiMagic.tts.languages.fr')}</Option>
-            <Option value="de-DE">{t('aiMagic.tts.languages.de')}</Option>
-            <Option value="ja-JP">{t('aiMagic.tts.languages.ja')}</Option>
-            <Option value="pt-BR">{t('aiMagic.tts.languages.pt')}</Option>
-            <Option value="zh-CN">{t('aiMagic.tts.languages.zh')}</Option>
+            <Option value='en-US'>{t('aiMagic.tts.languages.en')}</Option>
+            <Option value='es-ES'>{t('aiMagic.tts.languages.es')}</Option>
+            <Option value='fr-FR'>{t('aiMagic.tts.languages.fr')}</Option>
+            <Option value='de-DE'>{t('aiMagic.tts.languages.de')}</Option>
+            <Option value='ja-JP'>{t('aiMagic.tts.languages.ja')}</Option>
+            <Option value='pt-BR'>{t('aiMagic.tts.languages.pt')}</Option>
+            <Option value='zh-CN'>{t('aiMagic.tts.languages.zh')}</Option>
           </Select>
-          <Divider orientation="vertical" sx={{ height: 20 }} />
+          <Divider orientation='vertical' sx={{ height: 20 }} />
         </Stack>
       )}
 
       {/* Play button — state-driven rendering */}
       {ttsState === 'idle' && (
-        <Tooltip title={t('aiMagic.tts.playTooltip')} variant="soft" size="sm">
+        <Tooltip title={t('aiMagic.tts.playTooltip')} variant='soft' size='sm'>
           <IconButton
             ref={playButtonRef}
-            size="sm"
-            variant="outlined"
-            color="neutral"
+            size='sm'
+            variant='outlined'
+            color='neutral'
             onClick={handleTTSPlayClick}
             aria-label={t('aiMagic.tts.playAriaLabel')}
           >
@@ -232,23 +218,17 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
       )}
 
       {ttsState === 'loading' && (
-        <IconButton
-          size="sm"
-          variant="soft"
-          color="primary"
-          disabled
-          aria-label={t('aiMagic.tts.loadingAriaLabel')}
-        >
-          <CircularProgress size="sm" sx={{ '--CircularProgress-size': '18px' }} />
+        <IconButton size='sm' variant='soft' color='primary' disabled aria-label={t('aiMagic.tts.loadingAriaLabel')}>
+          <CircularProgress size='sm' sx={{ '--CircularProgress-size': '18px' }} />
         </IconButton>
       )}
 
       {ttsState === 'playing' && (
-        <Tooltip title={t('aiMagic.tts.pauseTooltip')} variant="soft" size="sm">
+        <Tooltip title={t('aiMagic.tts.pauseTooltip')} variant='soft' size='sm'>
           <IconButton
-            size="sm"
-            variant="soft"
-            color="primary"
+            size='sm'
+            variant='soft'
+            color='primary'
             onClick={handleTTSPause}
             aria-label={t('aiMagic.tts.pauseAriaLabel')}
             sx={{ bgcolor: 'primary.softBg' }}
@@ -259,14 +239,8 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
       )}
 
       {ttsState === 'paused' && (
-        <Tooltip title={t('aiMagic.tts.resumeTooltip')} variant="soft" size="sm">
-          <IconButton
-            size="sm"
-            variant="outlined"
-            color="primary"
-            onClick={handleTTSResume}
-            aria-label={t('aiMagic.tts.resumeAriaLabel')}
-          >
+        <Tooltip title={t('aiMagic.tts.resumeTooltip')} variant='soft' size='sm'>
+          <IconButton size='sm' variant='outlined' color='primary' onClick={handleTTSResume} aria-label={t('aiMagic.tts.resumeAriaLabel')}>
             <PlayArrowRoundedIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
@@ -274,14 +248,8 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
 
       {/* Stop button — shown while playing or paused */}
       {(ttsState === 'playing' || ttsState === 'paused') && (
-        <Tooltip title={t('aiMagic.tts.stopTooltip')} variant="soft" size="sm">
-          <IconButton
-            size="sm"
-            variant="plain"
-            color="neutral"
-            onClick={handleTTSStop}
-            aria-label={t('aiMagic.tts.stopAriaLabel')}
-          >
+        <Tooltip title={t('aiMagic.tts.stopTooltip')} variant='soft' size='sm'>
+          <IconButton size='sm' variant='plain' color='neutral' onClick={handleTTSStop} aria-label={t('aiMagic.tts.stopAriaLabel')}>
             <StopRoundedIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
@@ -292,7 +260,7 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
         open={ttsPickerOpen}
         onClose={() => setTtsPickerOpen(false)}
         anchorEl={playButtonRef.current}
-        placement="bottom-start"
+        placement='bottom-start'
         sx={{ minWidth: 220, maxWidth: 320, maxHeight: 320, overflowY: 'auto' }}
       >
         {/* Full book option — always first */}
@@ -301,8 +269,8 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
             <MenuBookRoundedIcon sx={{ fontSize: 16 }} />
           </ListItemDecorator>
           <Box>
-            <Typography level="title-sm">{t('aiMagic.tts.fullBook')}</Typography>
-            <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>
+            <Typography level='title-sm'>{t('aiMagic.tts.fullBook')}</Typography>
+            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
               {t('aiMagic.tts.fullBookHint')}
             </Typography>
           </Box>
@@ -314,8 +282,10 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
               <TitleRoundedIcon sx={{ fontSize: 16 }} />
             </ListItemDecorator>
             <Box sx={{ minWidth: 0 }}>
-              <Typography level="title-sm" noWrap>{section.title}</Typography>
-              <Typography level="body-xs" sx={{ color: 'text.tertiary' }} noWrap>
+              <Typography level='title-sm' noWrap>
+                {section.title}
+              </Typography>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }} noWrap>
                 {section.preview}
               </Typography>
             </Box>
@@ -331,8 +301,8 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
         open={!!ttsError}
         autoHideDuration={4000}
         onClose={() => setTtsError(null)}
-        color="danger"
-        variant="soft"
+        color='danger'
+        variant='soft'
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         {ttsError}

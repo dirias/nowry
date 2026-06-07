@@ -641,207 +641,205 @@ export default function ManageContent({
 
                 return (
                   <React.Fragment key={deck._id}>
-                  <Card
-                    variant='outlined'
-                    onClick={() => handlePreviewDeck(deck)}
-                    sx={{
-                      transition: 'all 0.15s',
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      bgcolor: 'background.surface',
-                      '&:hover': {
-                        borderColor: 'neutral.outlinedBorder',
-                        bgcolor: 'background.level1',
-                        boxShadow: 'sm'
-                      }
-                    }}
-                  >
-                    <Box sx={{ py: 1.5, px: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                      {/* Icon */}
-                      <Box
-                        sx={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 'sm',
-                          bgcolor: `${deckColor}.softBg`,
-                          color: `${deckColor}.solidBg`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}
-                      >
-                        {getDeckIcon(deck.deck_type)}
-                      </Box>
+                    <Card
+                      variant='outlined'
+                      onClick={() => handlePreviewDeck(deck)}
+                      sx={{
+                        transition: 'all 0.15s',
+                        cursor: 'pointer',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        bgcolor: 'background.surface',
+                        '&:hover': {
+                          borderColor: 'neutral.outlinedBorder',
+                          bgcolor: 'background.level1',
+                          boxShadow: 'sm'
+                        }
+                      }}
+                    >
+                      <Box sx={{ py: 1.5, px: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                        {/* Icon */}
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 'sm',
+                            bgcolor: `${deckColor}.softBg`,
+                            color: `${deckColor}.solidBg`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          {getDeckIcon(deck.deck_type)}
+                        </Box>
 
-                      {/* Name & Count */}
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.25 }}>
-                          <Typography
-                            level='title-sm'
-                            sx={{
-                              fontWeight: 600,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {deck.name}
-                          </Typography>
-                          {deck.is_public && (
-                            <Chip
-                              size='sm'
-                              color='success'
-                              variant='soft'
-                              startDecorator={<Public sx={{ fontSize: 12 }} />}
-                              sx={{ fontSize: '0.65rem', py: 0.25, px: 0.75, height: 'auto', flexShrink: 0 }}
-                            >
-                              {t('publish.status.public')}
-                            </Chip>
-                          )}
-                        </Stack>
-                        <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
-                          {t('cards.manage_content.cardCount', { count: cardCount })}
-                        </Typography>
-                      </Box>
-
-                      {/* Type Label */}
-                      <Chip
-                        size='sm'
-                        variant='soft'
-                        color={deckColor}
-                        sx={{
-                          fontSize: '0.65rem',
-                          height: 20,
-                          px: 1,
-                          fontWeight: 600,
-                          flexShrink: 0,
-                          display: { xs: 'none', sm: 'flex' }
-                        }}
-                      >
-                        {deck.deck_type || 'flashcard'}
-                      </Chip>
-
-                      {/* Actions */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-                        {deck.has_cards && (
-                          <Button
-                            size='sm'
-                            variant={deck.due_cards > 0 || deck.new_cards > 0 ? 'solid' : 'soft'}
-                            color={deck.due_cards > 0 ? 'primary' : deck.new_cards > 0 ? 'success' : 'neutral'}
-                            onClick={() => onStudy?.(deck)}
-                            startDecorator={<School sx={{ fontSize: 16 }} />}
-                            sx={{ fontSize: '0.75rem', fontWeight: 600, px: 1.5, display: { xs: 'none', sm: 'flex' } }}
-                          >
-                            {(deck.due_cards || 0) + (deck.new_cards || 0) > 0
-                              ? t('cards.studyTotal', { count: (deck.due_cards || 0) + (deck.new_cards || 0) })
-                              : t('cards.review', 'Review')}
-                          </Button>
-                        )}
-
-                        {deck.has_cards && (
-                          <IconButton
-                            size='sm'
-                            variant={deck.due_cards > 0 || deck.new_cards > 0 ? 'solid' : 'soft'}
-                            color={deck.due_cards > 0 ? 'primary' : deck.new_cards > 0 ? 'success' : 'neutral'}
-                            onClick={() => onStudy?.(deck)}
-                            sx={{ display: { xs: 'flex', sm: 'none' } }}
-                          >
-                            <School sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        )}
-
-                        <Tooltip title={t('cards.deck.addCard')} size='sm'>
-                          <IconButton
-                            size='sm'
-                            variant='soft'
-                            color='success'
-                            onClick={() => onAddCard(deck)}
-                            sx={{ minWidth: 32, minHeight: 32, display: { xs: 'none', sm: 'flex' } }}
-                          >
-                            <Add sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Dropdown>
-                          <MenuButton
-                            slots={{ root: IconButton }}
-                            slotProps={{
-                              root: {
-                                variant: 'plain',
-                                color: 'neutral',
-                                size: 'sm',
-                                sx: { minWidth: 32, minHeight: 32 }
-                              }
-                            }}
-                          >
-                            <MoreVert sx={{ fontSize: 16 }} />
-                          </MenuButton>
-                          <Menu placement='bottom-end' size='sm'>
-                            <MenuItem
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                onPublishDeck(deck)
+                        {/* Name & Count */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.25 }}>
+                            <Typography
+                              level='title-sm'
+                              sx={{
+                                fontWeight: 600,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
                               }}
                             >
-                              <ListItemDecorator>
-                                {deck.is_public ? (
-                                  <Public sx={{ fontSize: 18, color: 'success.plainColor' }} />
-                                ) : (
-                                  <CloudUpload sx={{ fontSize: 18 }} />
-                                )}
-                              </ListItemDecorator>
-                              {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
-                            </MenuItem>
-                            <ListDivider />
-                            <MenuItem onClick={() => onPreview?.(deck)}>
-                              <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
-                            </MenuItem>
-                            <MenuItem onClick={() => onAddCard(deck)}>
-                              <Add sx={{ fontSize: 16 }} /> {t('cards.deck.addCard')}
-                            </MenuItem>
-                            <MenuItem onClick={() => onDeckSettings?.(deck)}>
-                              <Settings sx={{ fontSize: 16 }} /> {t('deckSettings.menuItem')}
-                            </MenuItem>
-                            <MenuItem onClick={() => onEditDeck(deck)}>
-                              <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
-                            </MenuItem>
-                            {/* Analyze Deck — Pro only */}
-                            {tier === 'pro' ? (
-                              <MenuItem
-                                onClick={() => handleAnalyzeDeck(deck._id)}
-                                aria-label={t('aiMagic.analyzeDeck.ariaLabel')}
+                              {deck.name}
+                            </Typography>
+                            {deck.is_public && (
+                              <Chip
+                                size='sm'
+                                color='success'
+                                variant='soft'
+                                startDecorator={<Public sx={{ fontSize: 12 }} />}
+                                sx={{ fontSize: '0.65rem', py: 0.25, px: 0.75, height: 'auto', flexShrink: 0 }}
                               >
-                                <ListItemDecorator><PsychologyIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
-                                {t('aiMagic.analyzeDeck.label')}
-                              </MenuItem>
-                            ) : (
-                              <MenuItem
-                                onClick={() => openUpgradeModal(t('upgrade.headlines.analyzeDeck'))}
-                                aria-label={t('aiMagic.analyzeDeck.lockedAriaLabel')}
-                              >
-                                <ListItemDecorator><LockIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
-                                {t('aiMagic.analyzeDeck.label')}
-                                <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
-                                  {t('plans.pro')}
-                                </Chip>
-                              </MenuItem>
+                                {t('publish.status.public')}
+                              </Chip>
                             )}
-                            <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
-                              <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
-                            </MenuItem>
-                          </Menu>
-                        </Dropdown>
+                          </Stack>
+                          <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
+                            {t('cards.manage_content.cardCount', { count: cardCount })}
+                          </Typography>
+                        </Box>
+
+                        {/* Type Label */}
+                        <Chip
+                          size='sm'
+                          variant='soft'
+                          color={deckColor}
+                          sx={{
+                            fontSize: '0.65rem',
+                            height: 20,
+                            px: 1,
+                            fontWeight: 600,
+                            flexShrink: 0,
+                            display: { xs: 'none', sm: 'flex' }
+                          }}
+                        >
+                          {deck.deck_type || 'flashcard'}
+                        </Chip>
+
+                        {/* Actions */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                          {deck.has_cards && (
+                            <Button
+                              size='sm'
+                              variant={deck.due_cards > 0 || deck.new_cards > 0 ? 'solid' : 'soft'}
+                              color={deck.due_cards > 0 ? 'primary' : deck.new_cards > 0 ? 'success' : 'neutral'}
+                              onClick={() => onStudy?.(deck)}
+                              startDecorator={<School sx={{ fontSize: 16 }} />}
+                              sx={{ fontSize: '0.75rem', fontWeight: 600, px: 1.5, display: { xs: 'none', sm: 'flex' } }}
+                            >
+                              {(deck.due_cards || 0) + (deck.new_cards || 0) > 0
+                                ? t('cards.studyTotal', { count: (deck.due_cards || 0) + (deck.new_cards || 0) })
+                                : t('cards.review', 'Review')}
+                            </Button>
+                          )}
+
+                          {deck.has_cards && (
+                            <IconButton
+                              size='sm'
+                              variant={deck.due_cards > 0 || deck.new_cards > 0 ? 'solid' : 'soft'}
+                              color={deck.due_cards > 0 ? 'primary' : deck.new_cards > 0 ? 'success' : 'neutral'}
+                              onClick={() => onStudy?.(deck)}
+                              sx={{ display: { xs: 'flex', sm: 'none' } }}
+                            >
+                              <School sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          )}
+
+                          <Tooltip title={t('cards.deck.addCard')} size='sm'>
+                            <IconButton
+                              size='sm'
+                              variant='soft'
+                              color='success'
+                              onClick={() => onAddCard(deck)}
+                              sx={{ minWidth: 32, minHeight: 32, display: { xs: 'none', sm: 'flex' } }}
+                            >
+                              <Add sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Dropdown>
+                            <MenuButton
+                              slots={{ root: IconButton }}
+                              slotProps={{
+                                root: {
+                                  variant: 'plain',
+                                  color: 'neutral',
+                                  size: 'sm',
+                                  sx: { minWidth: 32, minHeight: 32 }
+                                }
+                              }}
+                            >
+                              <MoreVert sx={{ fontSize: 16 }} />
+                            </MenuButton>
+                            <Menu placement='bottom-end' size='sm'>
+                              <MenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  onPublishDeck(deck)
+                                }}
+                              >
+                                <ListItemDecorator>
+                                  {deck.is_public ? (
+                                    <Public sx={{ fontSize: 18, color: 'success.plainColor' }} />
+                                  ) : (
+                                    <CloudUpload sx={{ fontSize: 18 }} />
+                                  )}
+                                </ListItemDecorator>
+                                {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
+                              </MenuItem>
+                              <ListDivider />
+                              <MenuItem onClick={() => onPreview?.(deck)}>
+                                <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
+                              </MenuItem>
+                              <MenuItem onClick={() => onAddCard(deck)}>
+                                <Add sx={{ fontSize: 16 }} /> {t('cards.deck.addCard')}
+                              </MenuItem>
+                              <MenuItem onClick={() => onDeckSettings?.(deck)}>
+                                <Settings sx={{ fontSize: 16 }} /> {t('deckSettings.menuItem')}
+                              </MenuItem>
+                              <MenuItem onClick={() => onEditDeck(deck)}>
+                                <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
+                              </MenuItem>
+                              {/* Analyze Deck — Pro only */}
+                              {tier === 'pro' ? (
+                                <MenuItem onClick={() => handleAnalyzeDeck(deck._id)} aria-label={t('aiMagic.analyzeDeck.ariaLabel')}>
+                                  <ListItemDecorator>
+                                    <PsychologyIcon sx={{ fontSize: 16 }} />
+                                  </ListItemDecorator>
+                                  {t('aiMagic.analyzeDeck.label')}
+                                </MenuItem>
+                              ) : (
+                                <MenuItem
+                                  onClick={() => openUpgradeModal(t('upgrade.headlines.analyzeDeck'))}
+                                  aria-label={t('aiMagic.analyzeDeck.lockedAriaLabel')}
+                                >
+                                  <ListItemDecorator>
+                                    <LockIcon sx={{ fontSize: 16 }} />
+                                  </ListItemDecorator>
+                                  {t('aiMagic.analyzeDeck.label')}
+                                  <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
+                                    {t('plans.pro')}
+                                  </Chip>
+                                </MenuItem>
+                              )}
+                              <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
+                                <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
+                              </MenuItem>
+                            </Menu>
+                          </Dropdown>
+                        </Box>
                       </Box>
-                    </Box>
-                  </Card>
-                  {activeDeckAnalysis === deck._id && (
-                    <DeckAnalysisPanel
-                      deckId={String(deck._id)}
-                      onClose={() => setActiveDeckAnalysis(null)}
-                    />
-                  )}
+                    </Card>
+                    {activeDeckAnalysis === deck._id && (
+                      <DeckAnalysisPanel deckId={String(deck._id)} onClose={() => setActiveDeckAnalysis(null)} />
+                    )}
                   </React.Fragment>
                 )
               })}
@@ -1206,11 +1204,10 @@ function DeckGridCard({
               </MenuItem>
               {/* Analyze Deck — Pro only */}
               {tier === 'pro' ? (
-                <MenuItem
-                  onClick={() => onAnalyzeDeck(deck._id)}
-                  aria-label={t('aiMagic.analyzeDeck.ariaLabel')}
-                >
-                  <ListItemDecorator><PsychologyIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
+                <MenuItem onClick={() => onAnalyzeDeck(deck._id)} aria-label={t('aiMagic.analyzeDeck.ariaLabel')}>
+                  <ListItemDecorator>
+                    <PsychologyIcon sx={{ fontSize: 16 }} />
+                  </ListItemDecorator>
                   {t('aiMagic.analyzeDeck.label')}
                 </MenuItem>
               ) : (
@@ -1218,7 +1215,9 @@ function DeckGridCard({
                   onClick={() => openUpgradeModal(t('upgrade.headlines.analyzeDeck'))}
                   aria-label={t('aiMagic.analyzeDeck.lockedAriaLabel')}
                 >
-                  <ListItemDecorator><LockIcon sx={{ fontSize: 16 }} /></ListItemDecorator>
+                  <ListItemDecorator>
+                    <LockIcon sx={{ fontSize: 16 }} />
+                  </ListItemDecorator>
                   {t('aiMagic.analyzeDeck.label')}
                   <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
                     {t('plans.pro')}

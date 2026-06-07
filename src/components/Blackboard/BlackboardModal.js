@@ -38,7 +38,18 @@ const nodeTypes = {
 }
 
 // Inner canvas — must be inside ReactFlowProvider
-function BlackboardCanvas({ goals, priorities, tasks, activeBoardId, currentBoardName, onConvertToCards, onOpenConvertModal, onShareBoard, onOpenBoardSwitcher, tier }) {
+function BlackboardCanvas({
+  goals,
+  priorities,
+  tasks,
+  activeBoardId,
+  currentBoardName,
+  onConvertToCards,
+  onOpenConvertModal,
+  onShareBoard,
+  onOpenBoardSwitcher,
+  tier
+}) {
   const { t } = useTranslation()
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])

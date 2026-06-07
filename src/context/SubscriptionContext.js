@@ -43,11 +43,7 @@ export const SubscriptionProvider = ({ children }) => {
         closeUpgradeModal
       }}
     >
-      <UpgradePrompt
-        open={isUpgradeModalOpen}
-        onClose={closeUpgradeModal}
-        headline={upgradeHeadline}
-      />
+      <UpgradePrompt open={isUpgradeModalOpen} onClose={closeUpgradeModal} headline={upgradeHeadline} />
       {children}
     </SubscriptionContext.Provider>
   )

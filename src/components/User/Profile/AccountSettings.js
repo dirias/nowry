@@ -970,13 +970,7 @@ export default function AccountSettings() {
                     {t('accountSettings.plan.manage')}
                   </Button>
                   {(subscriptionTier ?? 'free') !== 'pro' && (
-                    <Button
-                      component={RouterLink}
-                      to='/plans'
-                      variant='solid'
-                      size='sm'
-                      aria-label={t('accountSettings.plan.upgrade')}
-                    >
+                    <Button component={RouterLink} to='/plans' variant='solid' size='sm' aria-label={t('accountSettings.plan.upgrade')}>
                       {t('accountSettings.plan.upgrade')}
                     </Button>
                   )}

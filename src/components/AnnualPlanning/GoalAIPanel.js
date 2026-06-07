@@ -87,7 +87,6 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
       {/* Success — 3 collapsible accordion sections */}
       {!loading && !error && !noPlan && analysis && (
         <AccordionGroup>
-
           {/* GOAL-01: Quarterly Suggestions */}
           <Accordion defaultExpanded>
             <AccordionSummary>
@@ -103,10 +102,7 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
               ) : (
                 <List>
                   {analysis.suggestions.map((s, i) => (
-                    <ListItem
-                      key={i}
-                      sx={{ flexDirection: 'column', alignItems: 'flex-start', pb: 2 }}
-                    >
+                    <ListItem key={i} sx={{ flexDirection: 'column', alignItems: 'flex-start', pb: 2 }}>
                       <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.5 }}>
                         <Chip size='sm' variant='soft' color='primary'>
                           Q{s.quarter}
@@ -125,10 +121,7 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
                         </List>
                       )}
                       {s.rationale && (
-                        <Typography
-                          level='body-sm'
-                          sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}
-                        >
+                        <Typography level='body-sm' sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
                           {s.rationale}
                         </Typography>
                       )}
@@ -154,10 +147,7 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
               ) : (
                 <List>
                   {analysis.conflicts.map((c, i) => (
-                    <ListItem
-                      key={i}
-                      sx={{ flexDirection: 'column', alignItems: 'flex-start' }}
-                    >
+                    <ListItem key={i} sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                       <Typography level='body-md'>{c.description}</Typography>
                       {c.affected_goals?.length > 0 && (
                         <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.25 }}>
@@ -186,10 +176,7 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
               ) : (
                 <List>
                   {analysis.archiving_recommendations.map((r, i) => (
-                    <ListItem
-                      key={i}
-                      sx={{ flexDirection: 'column', alignItems: 'flex-start' }}
-                    >
+                    <ListItem key={i} sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                       <Typography level='title-sm' fontWeight={600}>
                         {r.goal_title}
                       </Typography>
@@ -202,7 +189,6 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
               )}
             </AccordionDetails>
           </Accordion>
-
         </AccordionGroup>
       )}
     </Box>

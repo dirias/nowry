@@ -15,12 +15,7 @@ export const TEMPLATES = {
       [{ value: 'Transport' }, { value: 0 }, { value: 0 }, { value: '=B3-C3' }],
       [{ value: 'Entertainment' }, { value: 0 }, { value: 0 }, { value: '=B4-C4' }],
       [{ value: 'Savings' }, { value: 0 }, { value: 0 }, { value: '=B5-C5' }],
-      [
-        { value: 'TOTAL' },
-        { value: '=SUM(B1:B5)' },
-        { value: '=SUM(C1:C5)' },
-        { value: '=SUM(D1:D5)' }
-      ]
+      [{ value: 'TOTAL' }, { value: '=SUM(B1:B5)' }, { value: '=SUM(C1:C5)' }, { value: '=SUM(D1:D5)' }]
     ]
   },
   expense_log: {

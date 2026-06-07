@@ -32,9 +32,13 @@ export const cardsService = {
    * @returns {Promise<{cards: Array<{title: string, content: string}>}>}
    */
   async generateFromBook(bookId) {
-    const { data } = await apiClient.post(ENDPOINTS.studyCards.generateFromBook, {
-      book_id: bookId,
-    })
+    const { data } = await apiClient.post(
+      ENDPOINTS.studyCards.generateFromBook,
+      {
+        book_id: bookId
+      },
+      { timeout: 120000 }
+    )
     return data
   },
 
@@ -44,9 +48,13 @@ export const cardsService = {
    * @returns {Promise<{duplicates: Array, gaps: Array, rewrite_suggestions: Array}>}
    */
   async analyzeDeck(deckId) {
-    const { data } = await apiClient.post(ENDPOINTS.studyCards.analyzeDeck, {
-      deck_id: deckId,
-    })
+    const { data } = await apiClient.post(
+      ENDPOINTS.studyCards.analyzeDeck,
+      {
+        deck_id: deckId
+      },
+      { timeout: 120000 }
+    )
     return data
   },
 

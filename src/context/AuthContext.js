@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!user,
         subscriptionTier: user?.subscription?.tier ?? 'free',
-        subscriptionStatus: user?.subscription?.status ?? 'active',
+        subscriptionStatus: user?.subscription?.status ?? 'active'
       }}
     >
       {children}

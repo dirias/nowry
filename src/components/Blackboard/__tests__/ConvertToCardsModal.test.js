@@ -2,7 +2,7 @@ import React from 'react'
 import { render } from '@testing-library/react'
 
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k) => k }),
+  useTranslation: () => ({ t: (k) => k })
 }))
 
 describe.skip('ConvertToCardsModal', () => {

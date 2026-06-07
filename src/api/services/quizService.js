@@ -50,9 +50,13 @@ export const quizService = {
    * @returns {Promise<{questions: Array}>}
    */
   async generateFromBook(bookId) {
-    const { data } = await apiClient.post(ENDPOINTS.quiz.generateFromBook, {
-      book_id: bookId,
-    })
+    const { data } = await apiClient.post(
+      ENDPOINTS.quiz.generateFromBook,
+      {
+        book_id: bookId
+      },
+      { timeout: 120000 }
+    )
     return data
-  },
+  }
 }

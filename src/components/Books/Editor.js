@@ -405,61 +405,64 @@ export default function Editor({
   // Insert mermaid diagram as a new block BELOW the paragraph that was selected
   // when the user triggered "Generate Diagram". The anchor block key is saved
   // in diagramAnchorKeyRef before the modal opens (modal focus clears the selection).
-  const handleDiagramInsert = useCallback(async (mermaidCode) => {
-    // Confirm the insert with the backend first — this is where the Free-tier
-    // counter increments (count-on-insert, not count-on-generate).
-    const bookId = book?._id
-    if (bookId) {
-      try {
-        await illustrationsService.confirmDiagram(bookId)
-      } catch (err) {
-        if (err.response?.status === 403) {
-          // Cap reached between generate and insert (race condition) — show upgrade
-          setShowDiagramPanel(false)
-          setIsLimitError(true)
-          setError(t('subscription.errors.upgradeToUse'))
-          return
-        }
-        // Non-403 errors: still allow insert (don't block on counter failure)
-      }
-    }
-
-    const editor = editorInstanceRef.current
-    if (editor) {
-      editor.update(() => {
-        const root = $getRoot()
-        const codeNode = $createCodeNode('mermaid')
-        codeNode.append($createTextNode(mermaidCode))
-
-        const anchorKey = diagramAnchorKeyRef.current
-        diagramAnchorKeyRef.current = null
-        const anchorBlock = anchorKey ? $getNodeByKey(anchorKey) : null
-
-        if (anchorBlock && anchorBlock.getParent() === root) {
-          anchorBlock.insertAfter(codeNode)
-        } else {
-          const selection = $getSelection()
-          if ($isRangeSelection(selection)) {
-            let topBlock = selection.focus.getNode()
-            while (topBlock.getParent() !== root && topBlock.getParent() !== null) {
-              topBlock = topBlock.getParent()
-            }
-            topBlock.insertAfter(codeNode)
-          } else {
-            const lastChild = root.getLastChild()
-            if (lastChild) lastChild.insertAfter(codeNode)
-            else root.append(codeNode)
+  const handleDiagramInsert = useCallback(
+    async (mermaidCode) => {
+      // Confirm the insert with the backend first — this is where the Free-tier
+      // counter increments (count-on-insert, not count-on-generate).
+      const bookId = book?._id
+      if (bookId) {
+        try {
+          await illustrationsService.confirmDiagram(bookId)
+        } catch (err) {
+          if (err.response?.status === 403) {
+            // Cap reached between generate and insert (race condition) — show upgrade
+            setShowDiagramPanel(false)
+            setIsLimitError(true)
+            setError(t('subscription.errors.upgradeToUse'))
+            return
           }
+          // Non-403 errors: still allow insert (don't block on counter failure)
         }
+      }
 
-        const trailingParagraph = $createParagraphNode()
-        codeNode.insertAfter(trailingParagraph)
-        trailingParagraph.select()
-      })
-      if (onDiagramInserted) onDiagramInserted()
-    }
-    setShowDiagramPanel(false)
-  }, [book, onDiagramInserted, t])
+      const editor = editorInstanceRef.current
+      if (editor) {
+        editor.update(() => {
+          const root = $getRoot()
+          const codeNode = $createCodeNode('mermaid')
+          codeNode.append($createTextNode(mermaidCode))
+
+          const anchorKey = diagramAnchorKeyRef.current
+          diagramAnchorKeyRef.current = null
+          const anchorBlock = anchorKey ? $getNodeByKey(anchorKey) : null
+
+          if (anchorBlock && anchorBlock.getParent() === root) {
+            anchorBlock.insertAfter(codeNode)
+          } else {
+            const selection = $getSelection()
+            if ($isRangeSelection(selection)) {
+              let topBlock = selection.focus.getNode()
+              while (topBlock.getParent() !== root && topBlock.getParent() !== null) {
+                topBlock = topBlock.getParent()
+              }
+              topBlock.insertAfter(codeNode)
+            } else {
+              const lastChild = root.getLastChild()
+              if (lastChild) lastChild.insertAfter(codeNode)
+              else root.append(codeNode)
+            }
+          }
+
+          const trailingParagraph = $createParagraphNode()
+          codeNode.insertAfter(trailingParagraph)
+          trailingParagraph.select()
+        })
+        if (onDiagramInserted) onDiagramInserted()
+      }
+      setShowDiagramPanel(false)
+    },
+    [book, onDiagramInserted, t]
+  )
 
   const handleOptionClick = useCallback(
     async (option, overrideText) => {

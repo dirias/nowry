@@ -1462,11 +1462,12 @@ const StudyPet = () => {
                         paddingRight: 12,
                         paddingTop: 6,
                         paddingBottom: 2,
-                        color: messagesUsedThisMonth >= 45
-                          ? 'var(--joy-palette-warning-plainColor)'
-                          : messageLimitReached
-                            ? 'var(--joy-palette-danger-plainColor)'
-                            : 'var(--joy-palette-text-tertiary)',
+                        color:
+                          messagesUsedThisMonth >= 45
+                            ? 'var(--joy-palette-warning-plainColor)'
+                            : messageLimitReached
+                              ? 'var(--joy-palette-danger-plainColor)'
+                              : 'var(--joy-palette-text-tertiary)',
                         fontSize: 11,
                         fontFamily: 'Inter, sans-serif'
                       }}
@@ -1522,71 +1523,73 @@ const StudyPet = () => {
                       alignItems: 'center'
                     }}
                   >
-                  <textarea
-                    ref={inputRef}
-                    id='study-pet-input'
-                    aria-label={t('agent.inputAriaLabel')}
-                    value={input}
-                    onChange={(e) => {
-                      setInput(e.target.value)
-                      // Auto-resize: shrink to auto first, then grow to scrollHeight (max 5 lines ~120px)
-                      e.target.style.height = 'auto'
-                      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
-                    }}
-                    onKeyDown={handleKeyDown}
-                    placeholder={
-                      quizState === 'quiz-active'
-                        ? t('quiz.input_placeholder')
-                        : messagesLimit !== -1 && messagesUsed >= messagesLimit
-                          ? t('agent.limitReachedPlaceholder')
-                          : t('agent.inputPlaceholder')
-                    }
-                    disabled={isTyping || answerPending || (messagesLimit !== -1 && messagesUsed >= messagesLimit && quizState === 'chat')}
-                    rows={1}
-                    style={{
-                      flex: 1,
-                      background: 'var(--joy-palette-background-level1)',
-                      border: '1px solid var(--joy-palette-neutral-outlinedBorder)',
-                      borderRadius: 12,
-                      color: 'var(--joy-palette-text-primary)',
-                      fontSize: 14,
-                      padding: '9px 12px',
-                      resize: 'none',
-                      outline: 'none',
-                      fontFamily: 'Inter, sans-serif',
-                      lineHeight: 1.55,
-                      overflowY: 'auto',
-                      transition: 'border-color 0.15s, height 0.1s ease'
-                    }}
-                  />
-                  <motion.button
-                    id='study-pet-send'
-                    aria-label={t('agent.aria.sendMessage')}
-                    onClick={handleSend}
-                    disabled={!input.trim() || isTyping || answerPending}
-                    whileHover={{ scale: 1.06 }}
-                    whileTap={{ scale: 0.94 }}
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 10,
-                      border: 'none',
-                      background: input.trim() && !isTyping && !answerPending ? resolvedColor : 'var(--joy-palette-background-level2)',
-                      color:
-                        input.trim() && !isTyping && !answerPending
-                          ? 'var(--joy-palette-common-white)'
-                          : 'var(--joy-palette-text-tertiary)',
-                      cursor: input.trim() && !isTyping && !answerPending ? 'pointer' : 'not-allowed',
-                      fontSize: 16,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      transition: 'background 0.2s, color 0.2s'
-                    }}
-                  >
-                    ↑
-                  </motion.button>
+                    <textarea
+                      ref={inputRef}
+                      id='study-pet-input'
+                      aria-label={t('agent.inputAriaLabel')}
+                      value={input}
+                      onChange={(e) => {
+                        setInput(e.target.value)
+                        // Auto-resize: shrink to auto first, then grow to scrollHeight (max 5 lines ~120px)
+                        e.target.style.height = 'auto'
+                        e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
+                      }}
+                      onKeyDown={handleKeyDown}
+                      placeholder={
+                        quizState === 'quiz-active'
+                          ? t('quiz.input_placeholder')
+                          : messagesLimit !== -1 && messagesUsed >= messagesLimit
+                            ? t('agent.limitReachedPlaceholder')
+                            : t('agent.inputPlaceholder')
+                      }
+                      disabled={
+                        isTyping || answerPending || (messagesLimit !== -1 && messagesUsed >= messagesLimit && quizState === 'chat')
+                      }
+                      rows={1}
+                      style={{
+                        flex: 1,
+                        background: 'var(--joy-palette-background-level1)',
+                        border: '1px solid var(--joy-palette-neutral-outlinedBorder)',
+                        borderRadius: 12,
+                        color: 'var(--joy-palette-text-primary)',
+                        fontSize: 14,
+                        padding: '9px 12px',
+                        resize: 'none',
+                        outline: 'none',
+                        fontFamily: 'Inter, sans-serif',
+                        lineHeight: 1.55,
+                        overflowY: 'auto',
+                        transition: 'border-color 0.15s, height 0.1s ease'
+                      }}
+                    />
+                    <motion.button
+                      id='study-pet-send'
+                      aria-label={t('agent.aria.sendMessage')}
+                      onClick={handleSend}
+                      disabled={!input.trim() || isTyping || answerPending}
+                      whileHover={{ scale: 1.06 }}
+                      whileTap={{ scale: 0.94 }}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 10,
+                        border: 'none',
+                        background: input.trim() && !isTyping && !answerPending ? resolvedColor : 'var(--joy-palette-background-level2)',
+                        color:
+                          input.trim() && !isTyping && !answerPending
+                            ? 'var(--joy-palette-common-white)'
+                            : 'var(--joy-palette-text-tertiary)',
+                        cursor: input.trim() && !isTyping && !answerPending ? 'pointer' : 'not-allowed',
+                        fontSize: 16,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'background 0.2s, color 0.2s'
+                      }}
+                    >
+                      ↑
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>

@@ -230,13 +230,7 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
 
               {/* ── Free tier: model badge ─────────────────────────────────── */}
               {tier === 'free' && (
-                <Chip
-                  size='sm'
-                  color='neutral'
-                  variant='soft'
-                  sx={{ mt: 1.5 }}
-                  aria-label={t('upgrade.modelBadge')}
-                >
+                <Chip size='sm' color='neutral' variant='soft' sx={{ mt: 1.5 }} aria-label={t('upgrade.modelBadge')}>
                   {t('upgrade.modelBadge')}
                 </Chip>
               )}
@@ -250,7 +244,7 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
                     borderRadius: 'md',
                     bgcolor: 'background.level1',
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: 'divider'
                   }}
                 >
                   <Stack direction='row' spacing={1} justifyContent='space-between' alignItems='center'>
@@ -258,21 +252,10 @@ export default function GeneratedCards({ cards = [], book, onCancel, onGenerateA
                       {t('upgrade.inlineCtaText')}
                     </Typography>
                     <Stack direction='row' spacing={1} sx={{ flexShrink: 0 }}>
-                      <Button
-                        size='sm'
-                        variant='plain'
-                        onClick={dismissUpgrade}
-                        aria-label={t('upgrade.inlineCtaDismiss')}
-                      >
+                      <Button size='sm' variant='plain' onClick={dismissUpgrade} aria-label={t('upgrade.inlineCtaDismiss')}>
                         {t('upgrade.inlineCtaDismiss')}
                       </Button>
-                      <Button
-                        size='sm'
-                        variant='solid'
-                        color='primary'
-                        onClick={openUpgradeModal}
-                        aria-label={t('upgrade.modal.cta')}
-                      >
+                      <Button size='sm' variant='solid' color='primary' onClick={openUpgradeModal} aria-label={t('upgrade.modal.cta')}>
                         {t('upgrade.modal.cta')}
                       </Button>
                     </Stack>

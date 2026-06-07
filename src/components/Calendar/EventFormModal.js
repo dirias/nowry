@@ -120,11 +120,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const needsDescription = activeType === 'priority'
 
   // Determine if save should be blocked
-  const canSave =
-    title.trim() &&
-    !(needsFocusArea && !focusAreaId) &&
-    !(needsGoal && !goalId) &&
-    !(type === 'priority' && !annualPlanId)
+  const canSave = title.trim() && !(needsFocusArea && !focusAreaId) && !(needsGoal && !goalId) && !(type === 'priority' && !annualPlanId)
 
   // ── Save handlers ─────────────────────────────────────────────────────────
   const handleSave = async () => {
@@ -163,13 +159,22 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
           linked_entity_type: null
         })
         break
-      case 'goal':
+      case 'goal': {
+        // Derive quarter (1–4) and year from the target date so the goal appears
+        // in the correct quarter view in AnnualPlanningHome.
+        // Use T00:00:00 suffix to force local-time parsing (avoids UTC midnight rollback).
+        const targetDate = date ? new Date(`${date}T00:00:00`) : new Date()
+        const goalQuarter = Math.ceil((targetDate.getMonth() + 1) / 3)
+        const goalYear = targetDate.getFullYear()
         await annualPlanningService.createGoal({
           title: title.trim(),
           target_date: date || null,
-          focus_area_id: focusAreaId
+          focus_area_id: focusAreaId,
+          quarter: goalQuarter,
+          year: goalYear
         })
         break
+      }
       case 'activity':
         await annualPlanningService.createActivity(goalId, {
           title: title.trim(),

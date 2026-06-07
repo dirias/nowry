@@ -3,7 +3,7 @@ import { render } from '@testing-library/react'
 
 // i18n mock
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k) => k }),
+  useTranslation: () => ({ t: (k) => k })
 }))
 
 // Skip: component not yet created

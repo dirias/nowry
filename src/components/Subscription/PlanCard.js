@@ -12,7 +12,7 @@ export default function PlanCard({
   ctaLabel,
   onUpgrade,
   loading = false,
-  showSavings = false,
+  showSavings = false
 }) {
   const { t } = useTranslation()
 
@@ -28,7 +28,7 @@ export default function PlanCard({
         flexDirection: 'column',
         gap: 2,
         transition: 'box-shadow 0.2s',
-        '&:hover': { boxShadow: 'md' },
+        '&:hover': { boxShadow: 'md' }
       }}
     >
       {/* Plan name + current/savings badge */}

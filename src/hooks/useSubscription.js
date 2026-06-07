@@ -9,6 +9,6 @@ export const useSubscription = () => {
     aiUsageResetDate: user?.subscription?.ai_usage_reset_date,
     nextBillingDate: user?.subscription?.next_billing_date,
     statusUpdatedAt: user?.subscription?.subscription_status_updated_at,
-    isPastDue: user?.subscription?.status === 'past_due',
+    isPastDue: user?.subscription?.status === 'past_due'
   }
 }

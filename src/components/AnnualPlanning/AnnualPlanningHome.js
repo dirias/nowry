@@ -491,15 +491,7 @@ const AnnualPlanningHome = () => {
       </Box>
 
       {/* Goal AI Panel — inline, rendered below header, above focus areas */}
-      {panelOpen && (
-        <GoalAIPanel
-          analysis={aiAnalysis}
-          loading={aiLoading}
-          error={aiError}
-          noPlan={aiNoPlan}
-          onRefresh={handleAIRefresh}
-        />
-      )}
+      {panelOpen && <GoalAIPanel analysis={aiAnalysis} loading={aiLoading} error={aiError} noPlan={aiNoPlan} onRefresh={handleAIRefresh} />}
 
       {/* Focus Areas Grid */}
       <Typography level='h4' sx={{ mb: 1.5, fontSize: { xs: '1.125rem', md: '1.25rem' } }}>

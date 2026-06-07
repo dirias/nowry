@@ -66,7 +66,9 @@ const SheetsEditor = () => {
   const filteredData = filterText
     ? data.filter((row) =>
         row.some((cell) =>
-          String(cell?.value ?? '').toLowerCase().includes(filterText.toLowerCase())
+          String(cell?.value ?? '')
+            .toLowerCase()
+            .includes(filterText.toLowerCase())
         )
       )
     : data

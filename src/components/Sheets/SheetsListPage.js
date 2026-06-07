@@ -132,11 +132,7 @@ export default function SheetsListPage() {
         <Typography level='h2' fontWeight={700}>
           {t('sheets.list.title')}
         </Typography>
-        <Button
-          startDecorator={<AddIcon />}
-          onClick={() => setShowCreateModal(true)}
-          aria-label={t('sheets.list.new')}
-        >
+        <Button startDecorator={<AddIcon />} onClick={() => setShowCreateModal(true)} aria-label={t('sheets.list.new')}>
           {t('sheets.list.new')}
         </Button>
       </Stack>
@@ -362,12 +358,7 @@ export default function SheetsListPage() {
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button
-              variant='plain'
-              color='neutral'
-              onClick={() => setDeletingSheet(null)}
-              disabled={deleteLoading}
-            >
+            <Button variant='plain' color='neutral' onClick={() => setDeletingSheet(null)} disabled={deleteLoading}>
               {t('common.cancel')}
             </Button>
             <Button color='danger' onClick={handleDelete} loading={deleteLoading}>

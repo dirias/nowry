@@ -30,13 +30,7 @@ import { useSubscriptionContext } from '../../context/SubscriptionContext'
  * Following DESIGN_GUIDELINES.md
  */
 
-export default function ContentNavigator({
-  toc = [],
-  readingTime = 0,
-  editorInstanceRef,
-  bookId,
-  tier
-}) {
+export default function ContentNavigator({ toc = [], readingTime = 0, editorInstanceRef, bookId, tier }) {
   const { t } = useTranslation()
   const { openUpgradeModal } = useSubscriptionContext()
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -140,29 +134,32 @@ export default function ContentNavigator({
   }
 
   // Extract title + all body content under a heading (until the next heading)
-  const extractSectionContent = useCallback((headingId) => {
-    const editor = editorInstanceRef?.current
-    if (!editor) return ''
-    let content = ''
-    let capturing = false
-    editor.getEditorState().read(() => {
-      const children = $getRoot().getChildren()
-      for (const node of children) {
-        const key = node.getKey()
-        const isHeading = node.getType() === 'heading'
-        if (key === headingId) {
-          capturing = true
-          content += node.getTextContent() + '\n'
-          continue
+  const extractSectionContent = useCallback(
+    (headingId) => {
+      const editor = editorInstanceRef?.current
+      if (!editor) return ''
+      let content = ''
+      let capturing = false
+      editor.getEditorState().read(() => {
+        const children = $getRoot().getChildren()
+        for (const node of children) {
+          const key = node.getKey()
+          const isHeading = node.getType() === 'heading'
+          if (key === headingId) {
+            capturing = true
+            content += node.getTextContent() + '\n'
+            continue
+          }
+          if (capturing) {
+            if (isHeading) break
+            content += node.getTextContent() + '\n'
+          }
         }
-        if (capturing) {
-          if (isHeading) break
-          content += node.getTextContent() + '\n'
-        }
-      }
-    })
-    return content.trim()
-  }, [editorInstanceRef])
+      })
+      return content.trim()
+    },
+    [editorInstanceRef]
+  )
 
   const handleAudioEnded = () => {
     if (blobUrlRef.current) {
@@ -172,52 +169,55 @@ export default function ContentNavigator({
     setPlayingId(null)
   }
 
-  const handlePlaySection = useCallback(async (headingId) => {
-    // Clicking currently playing section stops it
-    if (playingId === headingId) {
-      audioRef.current?.pause()
-      if (audioRef.current) audioRef.current.currentTime = 0
+  const handlePlaySection = useCallback(
+    async (headingId) => {
+      // Clicking currently playing section stops it
+      if (playingId === headingId) {
+        audioRef.current?.pause()
+        if (audioRef.current) audioRef.current.currentTime = 0
+        if (blobUrlRef.current) {
+          URL.revokeObjectURL(blobUrlRef.current)
+          blobUrlRef.current = null
+        }
+        setPlayingId(null)
+        return
+      }
+
+      // Stop any prior playback
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current)
         blobUrlRef.current = null
       }
       setPlayingId(null)
-      return
-    }
 
-    // Stop any prior playback
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-    }
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current)
-      blobUrlRef.current = null
-    }
-    setPlayingId(null)
+      // Tier gate — Plus+ required
+      if (!tier || tier === 'free') {
+        openUpgradeModal(t('upgrade.headlines.tts'))
+        return
+      }
 
-    // Tier gate — Plus+ required
-    if (!tier || tier === 'free') {
-      openUpgradeModal(t('upgrade.headlines.tts'))
-      return
-    }
+      const text = extractSectionContent(headingId)
+      if (!text) return
 
-    const text = extractSectionContent(headingId)
-    if (!text) return
-
-    setLoadingId(headingId)
-    try {
-      const blobUrl = await ttsService.generate(bookId, text, ttsLanguage)
-      blobUrlRef.current = blobUrl
-      audioRef.current.src = blobUrl
-      await audioRef.current.play()
-      setPlayingId(headingId)
-    } catch {
-      setTtsError(t('aiMagic.tts.error'))
-    } finally {
-      setLoadingId(null)
-    }
-  }, [playingId, tier, bookId, ttsLanguage, extractSectionContent, openUpgradeModal, t])
+      setLoadingId(headingId)
+      try {
+        const blobUrl = await ttsService.generate(bookId, text, ttsLanguage)
+        blobUrlRef.current = blobUrl
+        audioRef.current.src = blobUrl
+        await audioRef.current.play()
+        setPlayingId(headingId)
+      } catch {
+        setTtsError(t('aiMagic.tts.error'))
+      } finally {
+        setLoadingId(null)
+      }
+    },
+    [playingId, tier, bookId, ttsLanguage, extractSectionContent, openUpgradeModal, t]
+  )
 
   const hasTts = !!(editorInstanceRef && bookId)
 
@@ -277,6 +277,35 @@ export default function ContentNavigator({
           >
             {toc.length} sections
           </Chip>
+          {hasTts && tier === 'pro' && (
+            <Select
+              size='sm'
+              variant='soft'
+              color='neutral'
+              value={ttsLanguage}
+              onChange={(_, v) => setTtsLanguage(v)}
+              aria-label={t('aiMagic.tts.languageAriaLabel')}
+              sx={{
+                ml: 'auto',
+                minWidth: 0,
+                fontSize: 'xs',
+                fontWeight: 500,
+                bgcolor: 'background.level1',
+                color: 'text.secondary',
+                border: 'none',
+                boxShadow: 'none',
+                '--Select-indicatorColor': 'var(--joy-palette-text-secondary)'
+              }}
+            >
+              <Option value='en-US'>EN</Option>
+              <Option value='es-ES'>ES</Option>
+              <Option value='fr-FR'>FR</Option>
+              <Option value='de-DE'>DE</Option>
+              <Option value='ja-JP'>JA</Option>
+              <Option value='pt-BR'>PT</Option>
+              <Option value='zh-CN'>ZH</Option>
+            </Select>
+          )}
         </Stack>
 
         {/* Progress Bar - Sleek */}
@@ -307,25 +336,6 @@ export default function ContentNavigator({
       </Stack>
 
       <Divider sx={{ my: 1 }} />
-
-      {/* Language selector — Pro only, shown when TTS is available */}
-      {hasTts && tier === 'pro' && (
-        <Select
-          size='sm'
-          value={ttsLanguage}
-          onChange={(_, v) => setTtsLanguage(v)}
-          aria-label={t('aiMagic.tts.languageAriaLabel')}
-          sx={{ mb: 1 }}
-        >
-          <Option value='en-US'>{t('aiMagic.tts.languages.en')}</Option>
-          <Option value='es-ES'>{t('aiMagic.tts.languages.es')}</Option>
-          <Option value='fr-FR'>{t('aiMagic.tts.languages.fr')}</Option>
-          <Option value='de-DE'>{t('aiMagic.tts.languages.de')}</Option>
-          <Option value='ja-JP'>{t('aiMagic.tts.languages.ja')}</Option>
-          <Option value='pt-BR'>{t('aiMagic.tts.languages.pt')}</Option>
-          <Option value='zh-CN'>{t('aiMagic.tts.languages.zh')}</Option>
-        </Select>
-      )}
 
       {/* TOC List - Clean */}
       {toc.length === 0 ? (
@@ -393,7 +403,7 @@ export default function ContentNavigator({
                       }}
                       aria-label={t('aiMagic.tts.playSection', { title: heading.text })}
                       sx={{
-                        opacity: (isLoading || isPlaying) ? 1 : 0,
+                        opacity: isLoading || isPlaying ? 1 : 0,
                         transition: 'opacity 0.15s',
                         minWidth: 28,
                         minHeight: 28,
@@ -405,12 +415,13 @@ export default function ContentNavigator({
                         }
                       }}
                     >
-                      {isLoading
-                        ? <CircularProgress size='sm' sx={{ '--CircularProgress-size': '14px' }} />
-                        : isPlaying
-                          ? <PauseRoundedIcon sx={{ fontSize: 14 }} />
-                          : <MicRoundedIcon sx={{ fontSize: 14 }} />
-                      }
+                      {isLoading ? (
+                        <CircularProgress size='sm' sx={{ '--CircularProgress-size': '14px' }} />
+                      ) : isPlaying ? (
+                        <PauseRoundedIcon sx={{ fontSize: 14 }} />
+                      ) : (
+                        <MicRoundedIcon sx={{ fontSize: 14 }} />
+                      )}
                     </IconButton>
                   )}
                 </ListItemButton>

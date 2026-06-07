@@ -68,7 +68,7 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
     try {
       await apiClient.patch(ENDPOINTS.studyCards.update(suggestion.card_id), {
         title: suggestion.suggested_front,
-        content: suggestion.suggested_back,
+        content: suggestion.suggested_back
       })
     } catch (err) {
       // Rollback on failure: add back to the list
@@ -107,7 +107,9 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
   if (error) {
     return (
       <Box sx={{ p: 2 }}>
-        <Alert color='danger' variant='soft'>{error}</Alert>
+        <Alert color='danger' variant='soft'>
+          {error}
+        </Alert>
       </Box>
     )
   }
@@ -133,7 +135,6 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
   return (
     <Box sx={{ px: { xs: 2, md: 3 }, py: { xs: 2, md: 3 }, bgcolor: 'background.surface' }}>
       <Stack spacing={3}>
-
         {/* Duplicates section */}
         {duplicates.length > 0 && (
           <Box>
@@ -198,7 +199,9 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
                   <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
                     <Box sx={{ flex: 1, mr: 2 }}>
                       <Typography level='title-sm'>{gap.topic}</Typography>
-                      <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.5 }}>{gap.description}</Typography>
+                      <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.5 }}>
+                        {gap.description}
+                      </Typography>
                     </Box>
                     <Button
                       size='sm'
@@ -239,8 +242,12 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
                   <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
                     <Box sx={{ flex: 1, mr: 2 }}>
                       <Typography level='title-sm'>{sug.suggested_front}</Typography>
-                      <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.5 }}>{sug.suggested_back}</Typography>
-                      <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5, fontStyle: 'italic' }}>{sug.reason}</Typography>
+                      <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.5 }}>
+                        {sug.suggested_back}
+                      </Typography>
+                      <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5, fontStyle: 'italic' }}>
+                        {sug.reason}
+                      </Typography>
                     </Box>
                     <Stack direction='row' spacing={1} sx={{ flexShrink: 0 }}>
                       <Button
@@ -268,7 +275,6 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
             </Stack>
           </Box>
         )}
-
       </Stack>
 
       {/* Accept error snackbar */}
@@ -280,7 +286,9 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
         variant='soft'
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert color='danger' variant='soft'>{acceptError}</Alert>
+        <Alert color='danger' variant='soft'>
+          {acceptError}
+        </Alert>
       </Snackbar>
     </Box>
   )

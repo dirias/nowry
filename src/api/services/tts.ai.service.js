@@ -12,9 +12,9 @@ export const ttsService = {
     const { data } = await apiClient.post(
       ENDPOINTS.books.tts(bookId),
       { text, language_code: languageCode },
-      { responseType: 'arraybuffer' }
+      { responseType: 'arraybuffer', timeout: 120000 }
     )
     const blob = new Blob([data], { type: 'audio/mpeg' })
     return URL.createObjectURL(blob)
-  },
+  }
 }

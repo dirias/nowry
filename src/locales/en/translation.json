@@ -1375,14 +1375,7 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": [
-        "Career Growth",
-        "Health & Vitality",
-        "Financial Freedom",
-        "Relationships",
-        "Creative Pursuits",
-        "Learning & Skills"
-      ]
+      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
     },
     "priority": {
       "title": "Yearly Priorities",

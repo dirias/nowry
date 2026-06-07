@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Typography,
-  Button,
-  Box,
-  Select,
-  Option,
-  Stack,
-  CircularProgress,
-  Alert,
-} from '@mui/joy'
+import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option, Stack, CircularProgress, Alert } from '@mui/joy'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
@@ -69,11 +57,11 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
   return (
     <Modal open={open} onClose={onClose}>
       <ModalDialog
-        layout="center"
+        layout='center'
         sx={{
           width: { xs: '95%', sm: '90%', md: '85%', lg: '760px' },
           p: 0,
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       >
         {/* Header */}
@@ -83,39 +71,39 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
             py: { xs: 2, md: 2.5 },
             borderBottom: '1px solid',
             borderColor: 'divider',
-            bgcolor: 'background.level1',
+            bgcolor: 'background.level1'
           }}
         >
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Stack direction='row' alignItems='center' justifyContent='space-between'>
+            <Stack direction='row' alignItems='center' spacing={1.5}>
               <Box
                 sx={{
                   p: 1,
                   borderRadius: 'sm',
                   bgcolor: 'primary.softBg',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <AutoAwesomeRoundedIcon sx={{ fontSize: 20, color: 'primary.plainColor' }} />
               </Box>
-              <Typography level="title-lg" fontWeight={600}>
+              <Typography level='title-lg' fontWeight={600}>
                 {t('aiMagic.diagram.panelTitle')}
               </Typography>
             </Stack>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack direction='row' alignItems='center' spacing={1}>
               <Select
-                size="sm"
+                size='sm'
                 value={diagramType}
                 onChange={(_, val) => setDiagramType(val)}
                 aria-label={t('aiMagic.diagram.typeAriaLabel')}
                 sx={{ minWidth: 140 }}
               >
-                <Option value="auto">{t('aiMagic.diagram.types.auto')}</Option>
-                <Option value="mindmap">{t('aiMagic.diagram.types.mindmap')}</Option>
-                <Option value="flowchart">{t('aiMagic.diagram.types.flowchart')}</Option>
-                <Option value="sequence">{t('aiMagic.diagram.types.sequence')}</Option>
-                <Option value="er">{t('aiMagic.diagram.types.er')}</Option>
+                <Option value='auto'>{t('aiMagic.diagram.types.auto')}</Option>
+                <Option value='mindmap'>{t('aiMagic.diagram.types.mindmap')}</Option>
+                <Option value='flowchart'>{t('aiMagic.diagram.types.flowchart')}</Option>
+                <Option value='sequence'>{t('aiMagic.diagram.types.sequence')}</Option>
+                <Option value='er'>{t('aiMagic.diagram.types.er')}</Option>
               </Select>
               <ModalClose />
             </Stack>
@@ -125,23 +113,22 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
         {/* Content */}
         <Box sx={{ overflowY: 'auto', bgcolor: 'background.surface' }}>
           {isLoading && (
-            <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }} spacing={2}>
-              <CircularProgress size="md" />
-              <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+            <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
+              <CircularProgress size='md' />
+              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                 {t('aiMagic.diagram.loading')}
               </Typography>
             </Stack>
           )}
           {error && !isLoading && (
             <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, md: 3 } }}>
-              <Alert color="danger" variant="soft">{error}</Alert>
+              <Alert color='danger' variant='soft'>
+                {error}
+              </Alert>
             </Box>
           )}
           {diagramCode && !isLoading && (
-            <Stack
-              spacing={3}
-              sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, md: 3 } }}
-            >
+            <Stack spacing={3} sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, md: 3 } }}>
               <Box
                 sx={{
                   p: 3,
@@ -153,7 +140,7 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  overflow: 'auto',
+                  overflow: 'auto'
                 }}
               >
                 <MermaidRenderer code={diagramCode} />
@@ -165,13 +152,13 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
                     p: 2,
                     borderRadius: 'md',
                     borderLeft: '3px solid',
-                    borderColor: 'primary.outlinedBorder',
+                    borderColor: 'primary.outlinedBorder'
                   }}
                 >
-                  <Typography level="title-sm" sx={{ color: 'primary.plainColor', mb: 0.5 }}>
+                  <Typography level='title-sm' sx={{ color: 'primary.plainColor', mb: 0.5 }}>
                     {t('aiMagic.diagram.explanation')}
                   </Typography>
-                  <Typography level="body-md" sx={{ color: 'text.primary' }}>
+                  <Typography level='body-md' sx={{ color: 'text.primary' }}>
                     {explanation}
                   </Typography>
                 </Box>
@@ -187,25 +174,16 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
             py: { xs: 2, md: 2.5 },
             borderTop: '1px solid',
             borderColor: 'divider',
-            bgcolor: 'background.surface',
+            bgcolor: 'background.surface'
           }}
         >
-          <Stack
-            direction={{ xs: 'column-reverse', sm: 'row' }}
-            spacing={1.5}
-            justifyContent="flex-end"
-          >
-            <Button
-              variant="plain"
-              color="neutral"
-              onClick={onClose}
-              aria-label={t('common.cancel')}
-            >
+          <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent='flex-end'>
+            <Button variant='plain' color='neutral' onClick={onClose} aria-label={t('common.cancel')}>
               {t('common.cancel')}
             </Button>
             <Button
-              variant="outlined"
-              color="primary"
+              variant='outlined'
+              color='primary'
               onClick={handleGenerate}
               loading={isLoading}
               disabled={isLoading}
@@ -215,8 +193,8 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
               {t('aiMagic.diagram.regenerate')}
             </Button>
             <Button
-              variant="solid"
-              color="primary"
+              variant='solid'
+              color='primary'
               onClick={handleInsert}
               disabled={!diagramCode || isLoading}
               startDecorator={<AddRoundedIcon sx={{ fontSize: 16 }} />}

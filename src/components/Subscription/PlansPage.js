@@ -11,7 +11,7 @@ const PRICE_IDS = {
   plus_monthly: process.env.REACT_APP_STRIPE_PLUS_MONTHLY_PRICE_ID,
   plus_annual: process.env.REACT_APP_STRIPE_PLUS_ANNUAL_PRICE_ID,
   pro_monthly: process.env.REACT_APP_STRIPE_PRO_MONTHLY_PRICE_ID,
-  pro_annual: process.env.REACT_APP_STRIPE_PRO_ANNUAL_PRICE_ID,
+  pro_annual: process.env.REACT_APP_STRIPE_PRO_ANNUAL_PRICE_ID
 }
 
 export default function PlansPage() {
@@ -42,7 +42,7 @@ export default function PlansPage() {
     { label: t('plans.features.quizGeneration'), value: t('plans.features.quizGenerationFree') },
     { label: t('plans.features.aiUsage'), value: t('plans.features.aiUsageFree') },
     { label: t('plans.features.studyCards'), value: t('plans.features.studyCardsAll') },
-    { label: t('plans.features.support'), value: t('plans.features.supportFree') },
+    { label: t('plans.features.support'), value: t('plans.features.supportFree') }
   ]
 
   const PLUS_FEATURES = [
@@ -51,7 +51,7 @@ export default function PlansPage() {
     { label: t('plans.features.quizGeneration'), value: t('plans.features.quizGenerationPlus') },
     { label: t('plans.features.aiUsage'), value: t('plans.features.aiUsagePlus') },
     { label: t('plans.features.studyCards'), value: t('plans.features.studyCardsAll') },
-    { label: t('plans.features.support'), value: t('plans.features.supportPlus') },
+    { label: t('plans.features.support'), value: t('plans.features.supportPlus') }
   ]
 
   const PRO_FEATURES = [
@@ -60,7 +60,7 @@ export default function PlansPage() {
     { label: t('plans.features.quizGeneration'), value: t('plans.features.quizGenerationPro') },
     { label: t('plans.features.aiUsage'), value: t('plans.features.aiUsagePro') },
     { label: t('plans.features.studyCards'), value: t('plans.features.studyCardsAll') },
-    { label: t('plans.features.support'), value: t('plans.features.supportPro') },
+    { label: t('plans.features.support'), value: t('plans.features.supportPro') }
   ]
 
   // CTA label per current tier + target tier
@@ -99,7 +99,7 @@ export default function PlansPage() {
             gap: 0.5,
             bgcolor: 'background.level1',
             p: 0.5,
-            borderRadius: 'xl',
+            borderRadius: 'xl'
           }}
         >
           <Button
@@ -132,13 +132,7 @@ export default function PlansPage() {
           variant='soft'
           sx={{ mb: 3 }}
           endDecorator={
-            <Button
-              size='sm'
-              variant='plain'
-              color='danger'
-              onClick={() => setError(null)}
-              aria-label={t('common.close')}
-            >
+            <Button size='sm' variant='plain' color='danger' onClick={() => setError(null)} aria-label={t('common.close')}>
               {t('common.close')}
             </Button>
           }
@@ -152,7 +146,7 @@ export default function PlansPage() {
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' },
-          gap: 3,
+          gap: 3
         }}
       >
         {/* Free plan */}
@@ -176,11 +170,7 @@ export default function PlansPage() {
           features={PLUS_FEATURES}
           isCurrent={currentTier === 'plus'}
           ctaLabel={getPlusCta()}
-          onUpgrade={
-            currentTier === 'free'
-              ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual)
-              : null
-          }
+          onUpgrade={currentTier === 'free' ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual) : null}
           loading={checkoutLoading}
           showSavings={!isMonthly}
         />
@@ -193,11 +183,7 @@ export default function PlansPage() {
           features={PRO_FEATURES}
           isCurrent={currentTier === 'pro'}
           ctaLabel={getProCta()}
-          onUpgrade={
-            currentTier !== 'pro'
-              ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual)
-              : null
-          }
+          onUpgrade={currentTier !== 'pro' ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual) : null}
           loading={checkoutLoading}
           showSavings={!isMonthly}
         />

@@ -305,7 +305,7 @@ export default function EditorHome() {
   // so the TextMenu lock re-evaluates without a full book refetch.
   const illustrationCount = book?.illustration_count ?? 0
   const handleDiagramInserted = useCallback(() => {
-    setBook(prev => prev ? { ...prev, illustration_count: (prev.illustration_count ?? 0) + 1 } : prev)
+    setBook((prev) => (prev ? { ...prev, illustration_count: (prev.illustration_count ?? 0) + 1 } : prev))
   }, [])
 
   // Tell the pet which book is open. The backend handles RAG retrieval —

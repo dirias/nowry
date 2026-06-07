@@ -14,9 +14,7 @@ export default function PaymentFailureBanner() {
   if (!isPastDue || dismissed) return null
 
   // Deadline = subscription_status_updated_at + 7 days
-  const deadline = statusUpdatedAt
-    ? new Date(new Date(statusUpdatedAt).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
-    : null
+  const deadline = statusUpdatedAt ? new Date(new Date(statusUpdatedAt).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString() : null
 
   const handleUpdatePayment = async () => {
     setLoading(true)
@@ -41,13 +39,7 @@ export default function PaymentFailureBanner() {
         borderColor: 'danger.outlinedBorder'
       }}
       endDecorator={
-        <Button
-          size='sm'
-          variant='plain'
-          color='danger'
-          onClick={() => setDismissed(true)}
-          aria-label={t('common.close')}
-        >
+        <Button size='sm' variant='plain' color='danger' onClick={() => setDismissed(true)} aria-label={t('common.close')}>
           ✕
         </Button>
       }

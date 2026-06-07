@@ -109,10 +109,14 @@ export const booksService = {
    * @returns {Promise<{expanded_text: string}>}
    */
   async aiExpand(bookId, selectedText, instruction = '') {
-    const { data } = await apiClient.post(ENDPOINTS.books.aiExpand(bookId), {
-      selected_text: selectedText,
-      ...(instruction ? { instruction } : {}),
-    })
+    const { data } = await apiClient.post(
+      ENDPOINTS.books.aiExpand(bookId),
+      {
+        selected_text: selectedText,
+        ...(instruction ? { instruction } : {})
+      },
+      { timeout: 120000 }
+    )
     return data
   },
 

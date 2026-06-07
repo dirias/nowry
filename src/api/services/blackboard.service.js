@@ -33,7 +33,7 @@ export const blackboardService = {
 
   async inviteCollaborator(boardId, inviteeEmail) {
     const { data } = await apiClient.put(`/blackboards/${boardId}/invite`, {
-      invitee_email: inviteeEmail,
+      invitee_email: inviteeEmail
     })
     return data
   },
@@ -45,5 +45,5 @@ export const blackboardService = {
       { timeout: 30000 }
     )
     return data
-  },
+  }
 }

@@ -50,9 +50,18 @@ import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 
 const TextMenu = forwardRef(
-  ({ onOptionClick, style, activeFormats = {}, onLinkEdit, currentBlockType = 'paragraph', onBlockTypeChange,
-     illustrationCount = 0,  // from EditorHome → Editor → FloatingToolbarPlugin (book-specific data)
-  }, ref) => {
+  (
+    {
+      onOptionClick,
+      style,
+      activeFormats = {},
+      onLinkEdit,
+      currentBlockType = 'paragraph',
+      onBlockTypeChange,
+      illustrationCount = 0 // from EditorHome → Editor → FloatingToolbarPlugin (book-specific data)
+    },
+    ref
+  ) => {
     const [editor] = useLexicalComposerContext()
     const { t } = useTranslation()
     const { tier } = useSubscription()
@@ -94,7 +103,12 @@ const TextMenu = forwardRef(
 
     const aiOptions = [
       { label: t('editor.ai.expand', 'Expand with AI'), value: 'expand_with_ai', icon: <Sparkles size={15} /> },
-      { label: t('editor.ai.generateDiagram'), value: 'generate_diagram', icon: <AccountTreeRoundedIcon sx={{ fontSize: 15 }} />, locked: isDiagramLocked },
+      {
+        label: t('editor.ai.generateDiagram'),
+        value: 'generate_diagram',
+        icon: <AccountTreeRoundedIcon sx={{ fontSize: 15 }} />,
+        locked: isDiagramLocked
+      },
       { label: t('editor.ai.questionnaire', 'Questionnaire'), value: 'create_questionnaire', icon: <ScrollText size={15} /> },
       { label: t('editor.ai.visual', 'Imagine scene'), value: 'create_visual_content', icon: <ImageIcon size={15} /> },
       { label: t('editor.ai.vocabulary', 'Extract vocabulary'), value: 'extract_vocabulary', icon: <Wand2 size={15} /> }
@@ -312,11 +326,7 @@ const TextMenu = forwardRef(
                 {aiOptions.map((option) => (
                   <MenuItem
                     key={option.value}
-                    onClick={() =>
-                      option.locked
-                        ? openUpgradeModal(t('upgrade.headlines.illustrations'))
-                        : onOptionClick(option.value)
-                    }
+                    onClick={() => (option.locked ? openUpgradeModal(t('upgrade.headlines.illustrations')) : onOptionClick(option.value))}
                   >
                     <Box component='span' sx={{ display: 'flex', color: option.locked ? 'text.secondary' : 'primary.plainColor' }}>
                       {option.locked ? <LockIcon style={{ width: 15 }} /> : option.icon}

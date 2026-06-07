@@ -11,9 +11,7 @@
  * Pattern: DeleteConfirmationModal.js (Joy UI Modal + ModalDialog + semantic tokens)
  */
 import React from 'react'
-import {
-  Modal, ModalDialog, ModalClose, Typography, Box, Button, Stack, List, ListItem,
-} from '@mui/joy'
+import { Modal, ModalDialog, ModalClose, Typography, Box, Button, Stack, List, ListItem } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
@@ -41,7 +39,7 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
           border: '1px solid',
           borderColor: 'divider',
           p: 0,
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       >
         <ModalClose />
@@ -53,7 +51,7 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
             py: { xs: 2, md: 3 },
             borderBottom: '1px solid',
             borderColor: 'divider',
-            bgcolor: 'background.level1',
+            bgcolor: 'background.level1'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
@@ -66,7 +64,7 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexShrink: 0,
+                flexShrink: 0
               }}
             >
               <AutoAwesomeRoundedIcon sx={{ fontSize: 28 }} />
@@ -87,7 +85,7 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
           sx={{
             px: { xs: 2, sm: 3, md: 4 },
             py: { xs: 2, md: 3 },
-            bgcolor: 'background.surface',
+            bgcolor: 'background.surface'
           }}
         >
           <List size='sm' sx={{ '--List-gap': '8px' }}>
@@ -110,28 +108,14 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
             py: { xs: 2, md: 3 },
             borderTop: '1px solid',
             borderColor: 'divider',
-            bgcolor: 'background.surface',
+            bgcolor: 'background.surface'
           }}
         >
           <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5}>
-            <Button
-              variant='outlined'
-              color='neutral'
-              onClick={onClose}
-              fullWidth
-              size='lg'
-              aria-label={t('common.cancel')}
-            >
+            <Button variant='outlined' color='neutral' onClick={onClose} fullWidth size='lg' aria-label={t('common.cancel')}>
               {t('common.cancel')}
             </Button>
-            <Button
-              variant='solid'
-              color='primary'
-              onClick={handleUpgrade}
-              fullWidth
-              size='lg'
-              aria-label={t('upgrade.modal.cta')}
-            >
+            <Button variant='solid' color='primary' onClick={handleUpgrade} fullWidth size='lg' aria-label={t('upgrade.modal.cta')}>
               {t('upgrade.modal.cta')}
             </Button>
           </Stack>

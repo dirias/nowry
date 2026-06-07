@@ -20,14 +20,14 @@ import { SubscriptionProvider, useSubscriptionContext } from '../SubscriptionCon
 const TestConsumer = ({ onRender }) => {
   const ctx = useSubscriptionContext()
   onRender(ctx)
-  return <div data-testid="consumer">ok</div>
+  return <div data-testid='consumer'>ok</div>
 }
 
 describe('SubscriptionContext — GATE-03, GATE-05', () => {
   test('SubscriptionProvider renders children', () => {
     render(
       <SubscriptionProvider>
-        <div data-testid="child">hello</div>
+        <div data-testid='child'>hello</div>
       </SubscriptionProvider>
     )
     expect(screen.getByTestId('child')).toBeInTheDocument()
@@ -37,7 +37,11 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
     let capturedCtx
     render(
       <SubscriptionProvider>
-        <TestConsumer onRender={(ctx) => { capturedCtx = ctx }} />
+        <TestConsumer
+          onRender={(ctx) => {
+            capturedCtx = ctx
+          }}
+        />
       </SubscriptionProvider>
     )
     expect(capturedCtx.upgradeDismissed).toBe(false)
@@ -47,7 +51,11 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
     let capturedCtx
     render(
       <SubscriptionProvider>
-        <TestConsumer onRender={(ctx) => { capturedCtx = ctx }} />
+        <TestConsumer
+          onRender={(ctx) => {
+            capturedCtx = ctx
+          }}
+        />
       </SubscriptionProvider>
     )
     act(() => {
@@ -60,7 +68,11 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
     let capturedCtx
     render(
       <SubscriptionProvider>
-        <TestConsumer onRender={(ctx) => { capturedCtx = ctx }} />
+        <TestConsumer
+          onRender={(ctx) => {
+            capturedCtx = ctx
+          }}
+        />
       </SubscriptionProvider>
     )
     expect(capturedCtx.isUpgradeModalOpen).toBe(false)
@@ -70,7 +82,11 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
     let capturedCtx
     render(
       <SubscriptionProvider>
-        <TestConsumer onRender={(ctx) => { capturedCtx = ctx }} />
+        <TestConsumer
+          onRender={(ctx) => {
+            capturedCtx = ctx
+          }}
+        />
       </SubscriptionProvider>
     )
     act(() => {
@@ -83,7 +99,11 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
     let capturedCtx
     render(
       <SubscriptionProvider>
-        <TestConsumer onRender={(ctx) => { capturedCtx = ctx }} />
+        <TestConsumer
+          onRender={(ctx) => {
+            capturedCtx = ctx
+          }}
+        />
       </SubscriptionProvider>
     )
     act(() => {
