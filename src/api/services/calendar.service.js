@@ -31,33 +31,39 @@ const generateHabitOccurrences = (act, year, areaColor, areaName, events) => {
   const end = new Date(year, 11, 31, 0, 0, 0, 0)
 
   if (act.frequency === 'daily') {
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(start); d <= end; ) {
+      const snapshot = new Date(d) // immutable copy — capture before advancing d
       events.push({
-        id: `activity-${act._id || act.id}-${d.getTime()}`,
+        id: `activity-${act._id || act.id}-${snapshot.getTime()}`,
         title: act.title || act.name,
-        date: new Date(d),
+        date: snapshot,
         type: 'activity',
         color: areaColor,
         status: act.status || 'active',
-        areaName
+        areaName,
+        focusAreaId: act.focus_area_id || null // D-02
       })
+      d.setDate(d.getDate() + 1) // advance AFTER the push
     }
   } else if (act.frequency === 'weekly' || act.frequency === 'custom') {
     const daysAllowed = act.days_of_week || [] // 0=Mon, 6=Sun
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const jsDay = d.getDay() // 0=Sun, 1=Mon
+    for (let d = new Date(start); d <= end; ) {
+      const snapshot = new Date(d) // immutable copy — capture before advancing d
+      const jsDay = snapshot.getDay() // 0=Sun, 1=Mon
       const backendDay = (jsDay + 6) % 7 // shift to 0=Mon, 6=Sun
       if (daysAllowed.includes(backendDay)) {
         events.push({
-          id: `activity-${act._id || act.id}-${d.getTime()}`,
+          id: `activity-${act._id || act.id}-${snapshot.getTime()}`,
           title: act.title || act.name,
-          date: new Date(d),
+          date: snapshot,
           type: 'activity',
           color: areaColor,
           status: act.status || 'active',
-          areaName
+          areaName,
+          focusAreaId: act.focus_area_id || null // D-02
         })
       }
+      d.setDate(d.getDate() + 1) // advance AFTER the check
     }
   } else if (act.due_date || act.deadline) {
     // Fallback for any legacy activities that might actually have a date
@@ -68,7 +74,8 @@ const generateHabitOccurrences = (act, year, areaColor, areaName, events) => {
       type: 'activity',
       color: areaColor,
       status: act.status || 'active',
-      areaName
+      areaName,
+      focusAreaId: act.focus_area_id || null // D-02
     })
   }
 }
@@ -103,6 +110,7 @@ export const calendarService = {
 
     return apiCache.get(cacheKey, CALENDAR_TTL, async () => {
       const events = []
+      let areaMap = {} // D-01: populated from focus_areas; used to build focusAreas array
 
       // ── Tier 1: tasks + full annual plan IN PARALLEL ────────────────────
       const [tasksResult, fullPlanResult] = await Promise.allSettled([
@@ -123,7 +131,8 @@ export const calendarService = {
               type: 'task',
               color: '#6366f1',
               status: task.is_completed ? 'completed' : 'pending',
-              category: task.category || null
+              category: task.category || null,
+              focusAreaId: null // D-02: tasks have no focus area
             })
           }
         })
@@ -144,7 +153,8 @@ export const calendarService = {
               date: parseLocalDate(p.deadline || p.target_date),
               type: 'priority',
               color: '#f59e0b',
-              status: p.status || 'active'
+              status: p.status || 'active',
+              focusAreaId: null // D-02: priorities have no focus area
             })
           }
         })
@@ -152,7 +162,8 @@ export const calendarService = {
         // Build a lookup map: focus_area_id → { color, name }
         // The /full endpoint returns goals as a TOP-LEVEL array (not nested
         // under each focus_area), so we need to map colors by ID.
-        const areaMap = Object.fromEntries(focus_areas.map((area) => [area._id, { color: area.color || '#10b981', name: area.name }]))
+        // Assigned to outer areaMap so focusAreas can be extracted after all event pushes (D-01)
+        areaMap = Object.fromEntries(focus_areas.map((area) => [area._id, { color: area.color || '#10b981', name: area.name }]))
 
         // Goals — use top-level `goals` array from API response
         const topLevelGoals = fullPlanResult.value.goals || []
@@ -171,11 +182,13 @@ export const calendarService = {
               type: 'goal',
               color: areaColor,
               status: goal.status || 'not_started',
-              areaName
+              areaName,
+              focusAreaId: goal.focus_area_id || null // D-02
             })
           }
 
           // Milestone events — push milestones that have a due_date set
+          // idx is raw array index (forEach, not filter().forEach()) — stable across completions
           ;(goal.milestones || []).forEach((ms, idx) => {
             if (ms.due_date && !ms.completed) {
               events.push({
@@ -186,7 +199,9 @@ export const calendarService = {
                 color: areaColor,
                 status: 'pending',
                 areaName,
-                goalTitle: goal.title
+                goalTitle: goal.title,
+                isKeyResult: !!ms.is_key_result,
+                focusAreaId: goal.focus_area_id || null // D-02: milestones inherit from parent goal
               })
             }
           })
@@ -201,7 +216,18 @@ export const calendarService = {
         console.warn('[CalendarService] Could not load annual plan:', fullPlanResult.reason)
       }
 
-      return events
+      // D-01: extract focusAreas from areaMap built earlier in this function
+      const focusAreas = Object.entries(areaMap).map(([id, { color, name }]) => ({ id, name, color }))
+
+      return { events, focusAreas }
     })
+  },
+
+  /**
+   * Flush all cached calendar-events entries for any year.
+   * Called after event create or drag-and-drop to force a fresh fetch.
+   */
+  invalidateCache() {
+    apiCache.invalidatePrefix('calendar:events:')
   }
 }
