@@ -1375,7 +1375,14 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
+      "examples": [
+        "Career Growth",
+        "Health & Vitality",
+        "Financial Freedom",
+        "Relationships",
+        "Creative Pursuits",
+        "Learning & Skills"
+      ]
     },
     "priority": {
       "title": "Yearly Priorities",
@@ -2475,7 +2482,35 @@
     "timeBlock": "New time block",
     "error": "Couldn't load your calendar. Check your connection and try again.",
     "showHabits": "Habits",
-    "showHabitsAriaLabel": "Toggle habit events on calendar"
+    "showHabitsAriaLabel": "Toggle habit events on calendar",
+    "moreFilters": "More filters",
+    "lessFilters": "Less filters",
+    "moreFiltersAriaLabel": "Show more calendar filters",
+    "presets": {
+      "goalsOnly": "Goals only",
+      "goalsOnlyAriaLabel": "Show goals and milestones only",
+      "today": "Today",
+      "todayAriaLabel": "Reset filters for today",
+      "thisWeek": "This week",
+      "thisWeekAriaLabel": "Reset filters for this week"
+    },
+    "filters": {
+      "allAreas": "All areas",
+      "allAreasAriaLabel": "Show all focus areas",
+      "areaAriaLabel": "Filter by {{name}}",
+      "allTypes": "All types",
+      "allTypesAriaLabel": "Show all event types",
+      "typeGoal": "Goals",
+      "typeTask": "Tasks",
+      "typePriority": "Priorities",
+      "typeMilestone": "Milestones",
+      "typeGoalAriaLabel": "Filter by goals",
+      "typeTaskAriaLabel": "Filter by tasks",
+      "typePriorityAriaLabel": "Filter by priorities",
+      "typeMilestoneAriaLabel": "Filter by milestones",
+      "noAreas": "No focus areas",
+      "noAreasBody": "Add a focus area in Annual Planning to filter the calendar"
+    }
   },
   "goalAi": {
     "buttonLabel": "AI Assist",
