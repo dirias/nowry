@@ -2070,7 +2070,23 @@
       "resting": "The Study Buddy is resting. Try again in a moment.",
       "settingsLoadFailed": "Could not load your settings. Showing defaults.",
       "quizStartFailed": "Couldn't start the quiz. Please try again.",
-      "quizAnswerFailed": "Something went wrong evaluating your answer. The session has been reset — you can start a new quiz."
+      "quizAnswerFailed": "Something went wrong evaluating your answer. The session has been reset — you can start a new quiz.",
+      "quizRetry": "Try again",
+      "quizRetryAria": "Retry starting the quiz"
+    },
+    "quiz": {
+      "preparing": "Preparing your quiz on {{topic}}…",
+      "thisTopic": "this topic",
+      "emptyTopic": "I couldn't generate questions for that topic.",
+      "tryDifferentTopic": "Try rephrasing or picking a broader subject."
+    },
+    "quizOffer": {
+      "prompt": "Want me to quiz you on {{topic}}?",
+      "accept": "Yes, quiz me",
+      "acceptAria": "Start a quiz on {{topic}}",
+      "decline": "No thanks",
+      "declineAria": "Dismiss quiz suggestion",
+      "declined": "Okay, let me know if you change your mind!"
     },
     "defaultName": "Study Buddy",
     "settingsSubtitle": "Configure your companion's behavior and personality",
@@ -2457,7 +2473,9 @@
       "day": "Day"
     },
     "timeBlock": "New time block",
-    "error": "Couldn't load your calendar. Check your connection and try again."
+    "error": "Couldn't load your calendar. Check your connection and try again.",
+    "showHabits": "Habits",
+    "showHabitsAriaLabel": "Toggle habit events on calendar"
   },
   "goalAi": {
     "buttonLabel": "AI Assist",

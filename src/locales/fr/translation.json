@@ -1711,7 +1711,9 @@
       "day": "Day"
     },
     "timeBlock": "New time block",
-    "error": "Couldn't load your calendar. Check your connection and try again."
+    "error": "Couldn't load your calendar. Check your connection and try again.",
+    "showHabits": "Habits",
+    "showHabitsAriaLabel": "Toggle habit events on calendar"
   },
   "goalAi": {
     "buttonLabel": "AI Assist",

@@ -1800,7 +1800,23 @@
       "resting": "El compañero de estudio está descansando. Inténtalo de nuevo en un momento.",
       "settingsLoadFailed": "No se pudieron cargar tus ajustes. Mostrando valores predeterminados.",
       "quizStartFailed": "No se pudo iniciar el quiz. Por favor, inténtalo de nuevo.",
-      "quizAnswerFailed": "Algo salió mal al evaluar tu respuesta. La sesión se ha reiniciado — puedes empezar un nuevo quiz."
+      "quizAnswerFailed": "Algo salió mal al evaluar tu respuesta. La sesión se ha reiniciado — puedes empezar un nuevo quiz.",
+      "quizRetry": "Intentar de nuevo",
+      "quizRetryAria": "Reintentar iniciar el quiz"
+    },
+    "quiz": {
+      "preparing": "Preparando tu quiz sobre {{topic}}…",
+      "thisTopic": "este tema",
+      "emptyTopic": "No pude generar preguntas para ese tema.",
+      "tryDifferentTopic": "Intenta reformular o elegir un tema más amplio."
+    },
+    "quizOffer": {
+      "prompt": "¿Quieres que te haga un quiz sobre {{topic}}?",
+      "accept": "Sí, hazme el quiz",
+      "acceptAria": "Iniciar un quiz sobre {{topic}}",
+      "decline": "No, gracias",
+      "declineAria": "Descartar sugerencia de quiz",
+      "declined": "Vale, avísame si cambias de opinión."
     },
     "defaultName": "Compañero de estudio",
     "settingsSubtitle": "Configura el comportamiento y la personalidad de tu compañero",
@@ -2313,7 +2329,9 @@
       "day": "Day"
     },
     "timeBlock": "New time block",
-    "error": "Couldn't load your calendar. Check your connection and try again."
+    "error": "Couldn't load your calendar. Check your connection and try again.",
+    "showHabits": "Habits",
+    "showHabitsAriaLabel": "Toggle habit events on calendar"
   },
   "goalAi": {
     "buttonLabel": "AI Assist",
