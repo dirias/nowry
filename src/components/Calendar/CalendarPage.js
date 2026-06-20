@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react'
+import React, { useRef, useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -10,10 +10,36 @@ import Box from '@mui/joy/Box'
 import Typography from '@mui/joy/Typography'
 import Button from '@mui/joy/Button'
 import Alert from '@mui/joy/Alert'
+import Chip from '@mui/joy/Chip'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
+import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
+import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
+import StarRoundedIcon from '@mui/icons-material/StarRounded'
+import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 import { calendarService } from '../../api/services/calendar.service'
 import { tasksService, annualPlanningService } from '../../api/services'
+import { useCalendarFilters } from '../../hooks/useCalendarFilters'
 import EventFormModal from './EventFormModal'
+
+// Strip type prefix from compound event ID (e.g. 'task-abc123' → 'abc123')
+// Uses startsWith to avoid truncating hyphenated IDs (e.g. UUIDs, compound timestamp IDs)
+const TYPE_PREFIXES = ['task-', 'priority-', 'goal-', 'milestone-', 'activity-']
+const stripTypePrefix = (eventId) => {
+  for (const prefix of TYPE_PREFIXES) {
+    if (eventId.startsWith(prefix)) return eventId.slice(prefix.length)
+  }
+  return eventId
+}
+
+// CAL-01: Icon map for eventContent — milestone handled separately via isKeyResult branch
+const EVENT_ICON_MAP = {
+  task:     CheckCircleOutlinedIcon,
+  priority: FlagOutlinedIcon,
+  goal:     AdjustOutlinedIcon,
+  activity: RepeatRoundedIcon
+}
 
 const CalendarPage = () => {
   const { t } = useTranslation()
@@ -24,48 +50,76 @@ const CalendarPage = () => {
   const [formDefaultDate, setFormDefaultDate] = useState(null)
   const [calendarError, setCalendarError] = useState(null)
 
+  const { filters, setFilters } = useCalendarFilters() // CAL-03: per D-11
+
+  // CAL-01/CAL-02: Custom event rendering — icon + title for all event types
+  const eventContent = useCallback((eventInfo) => {
+    const { type, isKeyResult } = eventInfo.event.extendedProps
+
+    let IconComponent
+    if (type === 'milestone') {
+      IconComponent = isKeyResult ? StarRoundedIcon : DiamondOutlinedIcon
+    } else {
+      IconComponent = EVENT_ICON_MAP[type] ?? AdjustOutlinedIcon
+    }
+
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, overflow: 'hidden' }}>
+        <IconComponent sx={{ fontSize: 14, flexShrink: 0 }} />
+        <Typography level='body-xs' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {eventInfo.event.title}
+        </Typography>
+      </Box>
+    )
+  }, [])
+
   // CAL-01: FullCalendar eventSources — wraps existing calendarService.getAllEvents()
   // Maps service output to FullCalendar event object shape
-  const eventSources = [
-    {
-      events: async (_fetchInfo, successCallback, failureCallback) => {
-        try {
-          setCalendarError(null)
-          const allEvents = await calendarService.getAllEvents()
-          successCallback(
-            allEvents.map((ev) => ({
-              id: ev.id,
-              title: ev.title,
-              start: ev.date,
-              allDay: true,
-              backgroundColor: ev.color,
-              borderColor: ev.color,
-              extendedProps: {
-                type: ev.type,
-                status: ev.status,
-                category: ev.category,
-                areaName: ev.areaName,
-                goalTitle: ev.goalTitle
-              }
-            }))
-          )
-        } catch (err) {
-          setCalendarError(err)
-          failureCallback(err)
+  const eventSources = useMemo(
+    () => [
+      {
+        events: async (_fetchInfo, successCallback, failureCallback) => {
+          try {
+            setCalendarError(null)
+            const allEvents = await calendarService.getAllEvents()
+            const filtered = allEvents.filter((ev) => {
+              if (ev.type === 'activity' && !filters.habitsEnabled) return false
+              return true
+            })
+            successCallback(
+              filtered.map((ev) => ({
+                id: ev.id,
+                title: ev.title,
+                start: ev.date,
+                allDay: true,
+                backgroundColor: ev.color,
+                borderColor: ev.color,
+                extendedProps: {
+                  type: ev.type,
+                  status: ev.status,
+                  category: ev.category,
+                  areaName: ev.areaName,
+                  goalTitle: ev.goalTitle,
+                  isKeyResult: ev.isKeyResult  // CAL-02: from calendar.service.js (Plan 01 Task 2)
+                }
+              }))
+            )
+          } catch (err) {
+            setCalendarError(err)
+            failureCallback(err)
+          }
         }
       }
-    }
-  ]
-
-  // Strip type prefix from compound event ID (e.g. 'task-abc123' → 'abc123')
-  const _rawId = (eventId) => eventId.replace(/^[a-z]+-/, '')
+    ],
+    [filters.habitsEnabled] // CAL-03: habits toggle dep; Phase 16 adds activeTypes, activeAreaIds
+  )
 
   // CAL-03: Drag-and-drop rescheduling
   const handleEventDrop = useCallback(async (info) => {
     const { event, revert } = info
     const newDate = event.start
     const dateStr = newDate.toISOString().split('T')[0]
-    const rawId = _rawId(event.id)
+    const rawId = stripTypePrefix(event.id)
     const type = event.extendedProps.type
 
     try {
@@ -88,9 +142,10 @@ const CalendarPage = () => {
           revert()
           return
       }
-      calendarService.invalidateCache?.()
-    } catch {
+      calendarService.invalidateCache()
+    } catch (err) {
       revert()
+      setCalendarError(err)
     }
   }, [])
 
@@ -115,8 +170,7 @@ const CalendarPage = () => {
       category: ev.extendedProps.category
     })
     setFormMode('edit')
-    setFormOpen(false) // brief reset to force modal re-mount
-    setTimeout(() => setFormOpen(true), 0)
+    setFormOpen(true) // modal re-mounts cleanly via key prop (see EventFormModal below)
   }, [])
 
   // Disable DnD for milestone and activity types (T-08-04-02)
@@ -127,7 +181,7 @@ const CalendarPage = () => {
 
   const handleFormSuccess = useCallback(() => {
     setFormOpen(false)
-    calendarService.invalidateCache?.()
+    calendarService.invalidateCache()
     calendarRef.current?.getApi().refetchEvents()
   }, [])
 
@@ -149,9 +203,24 @@ const CalendarPage = () => {
           </Button>
         </Stack>
 
+        {/* CAL-03: Filter strip — Phase 16 appends chips here */}
+        <Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
+          <Chip
+            size='sm'
+            variant={filters.habitsEnabled ? 'soft' : 'outlined'}
+            color='neutral'
+            onClick={() => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))}
+            aria-label={t('calendarPage.showHabitsAriaLabel')}
+            aria-pressed={filters.habitsEnabled}
+          >
+            {t('calendarPage.showHabits')}
+          </Chip>
+          {/* Phase 16: area filter chips inserted here */}
+        </Stack>
+
         {/* Error state */}
         {calendarError && (
-          <Alert color='danger' variant='soft'>
+          <Alert color='danger' variant='soft' role='alert' aria-live='assertive'>
             {t('calendarPage.error')}
           </Alert>
         )}
@@ -174,13 +243,15 @@ const CalendarPage = () => {
             select={handleSelect}
             eventClick={handleEventClick}
             eventAllow={handleEventAllow}
+            eventContent={eventContent}   {/* CAL-01: type-specific icon rendering */}
             height='100%'
           />
         </Box>
       </Stack>
 
-      {/* Event create/edit modal */}
+      {/* Event create/edit modal — key forces clean re-mount when editing a different event */}
       <EventFormModal
+        key={editingEvent?.id ?? 'new'}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSuccess={handleFormSuccess}
