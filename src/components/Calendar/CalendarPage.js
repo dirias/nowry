@@ -273,8 +273,8 @@ const CalendarPage = () => {
           {/* Habits toggle (D-10) */}
           <Chip
             size='sm'
-            variant={filters.habitsEnabled ? 'soft' : 'outlined'}
-            color='neutral'
+            variant={filters.habitsEnabled ? 'solid' : 'outlined'}
+            color={filters.habitsEnabled ? 'primary' : 'neutral'}
             onClick={() => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))}
             aria-label={t('calendarPage.showHabitsAriaLabel')}
             aria-pressed={filters.habitsEnabled}
@@ -343,8 +343,8 @@ const CalendarPage = () => {
               {/* "All Areas" chip — active when no area filter (D-11) */}
               <Chip
                 size='sm'
-                variant={filters.activeAreaIds.length === 0 ? 'soft' : 'outlined'}
-                color='primary'
+                variant={filters.activeAreaIds.length === 0 ? 'solid' : 'outlined'}
+                color={filters.activeAreaIds.length === 0 ? 'primary' : 'neutral'}
                 onClick={() => setFilters((f) => ({ ...f, activeAreaIds: [] }))}
                 aria-label={t('calendarPage.filters.allAreasAriaLabel')}
                 aria-pressed={filters.activeAreaIds.length === 0}
@@ -388,8 +388,8 @@ const CalendarPage = () => {
               {/* "All Types" chip (D-12) */}
               <Chip
                 size='sm'
-                variant={allTypesActive ? 'soft' : 'outlined'}
-                color='primary'
+                variant={allTypesActive ? 'solid' : 'outlined'}
+                color={allTypesActive ? 'primary' : 'neutral'}
                 onClick={() => setFilters((f) => ({ ...f, activeTypes: ['task', 'priority', 'goal', 'milestone'] }))}
                 aria-label={t('calendarPage.filters.allTypesAriaLabel')}
                 aria-pressed={allTypesActive}
@@ -407,8 +407,8 @@ const CalendarPage = () => {
                 <Chip
                   key={key}
                   size='sm'
-                  variant={filters.activeTypes.includes(key) ? 'soft' : 'outlined'}
-                  color='neutral'
+                  variant={filters.activeTypes.includes(key) ? 'solid' : 'outlined'}
+                  color={filters.activeTypes.includes(key) ? 'primary' : 'neutral'}
                   onClick={() => handleTypeClick(key)}
                   aria-label={t(ariaKey)}
                   aria-pressed={filters.activeTypes.includes(key)}
