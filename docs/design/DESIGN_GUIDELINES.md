@@ -44,6 +44,56 @@ Always prefer the **right column** tokens — they adapt automatically to light/
 
 ## 3. Layout & Spacing
 *   **Grid System:** align elements to a 4px/8px baseline grid.
+
+### 3.1 Spacing Scale (4px Base Grid)
+
+Joy UI `sx` spacing units map to `theme.spacing()` where `1 unit = 8px` by default. However, Nowry uses fractional units to target a 4px base grid:
+
+| sx Value | Pixel Size | Usage |
+|---|---|---|
+| `0.5` | 4px | Micro-gap: icon-to-text, chip internal padding |
+| `1` | 8px | Tight spacing: items in a dense list, badge padding |
+| `1.5` | 12px | Close relationship: label above input, icon beside text |
+| `2` | 16px | Standard gap: `Stack spacing={2}`, form field spacing |
+| `3` | 24px | Section gap: between form sections, between cards |
+| `4` | 32px | Page section gap: between major content blocks |
+| `6` | 48px | Large break: hero section bottom margin |
+| `8` | 64px | Page vertical padding: `Container sx={{ py: 8 }}` |
+
+### 3.2 Component Spacing Conventions
+
+| Component | Property | Value | Notes |
+|---|---|---|---|
+| `<Stack>` between items | `spacing` | `2` (16px) standard, `1.5` (12px) compact | Use `1` for ultra-compact dashboard stats |
+| `<Card>` internal padding | `p` | `{ xs: 2, md: 3 }` | 16px mobile → 24px desktop |
+| Modal content padding | `px` / `py` | `{ xs: 2, sm: 3, md: 4 }` / `{ xs: 2, md: 3 }` | Per Section 8.3 three-part structure |
+| Modal section spacing | `spacing` | `3` between sections, `2` within | `<Stack spacing={3}>` for section list |
+| Filter bar (chips row) | `gap` | `1` (8px) | `sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}` |
+| Page vertical padding | `py` | `4` (32px) default | `<Container sx={{ py: 4 }}>` |
+| Form field to form field | `spacing` | `2` | Inside `<Stack spacing={2}>` |
+
+### 3.3 Mobile Spacing Adjustments
+
+Always use responsive breakpoint objects for spacing that differs between mobile and desktop:
+
+```javascript
+// Standard mobile-first padding pattern
+sx={{ px: { xs: 1, sm: 2, md: 3 } }}  // 8px → 16px → 24px
+
+// Container vertical padding (same at all breakpoints)
+sx={{ py: 4 }}  // 32px — no change needed
+
+// Card padding — tighter on mobile
+sx={{ p: { xs: 2, md: 3 } }}  // 16px → 24px
+
+// Stack gap — tighter on mobile for dashboard stats
+<Stack spacing={{ xs: 1, md: 2 }}>
+
+// Avoid magic numbers — always use scale values:
+// ✅  sx={{ gap: 1.5 }}     (12px — on scale)
+// ❌  sx={{ gap: '13px' }}  (off scale — forbidden)
+```
+
 *   **Consistency:**
     *   Standard padding/margins: `1` (8px), `2` (16px), `3` (24px).
     *   Avoid magic numbers (e.g., `margin: 13px`).
@@ -68,21 +118,32 @@ Always prefer the **right column** tokens — they adapt automatically to light/
 
 Always use the appropriate Joy UI level for the context — never override `fontSize` when the right level exists:
 
-| Level | Size | Weight | Use Case |
-|---|---|---|---|
-| `h1` | 2rem+ | 700 | Page hero title only |
-| `h2` | 1.75rem | 700 | Top section heading |
-| `h3` | 1.5rem | 700 | Sub-section heading, modal complete screen |
-| `h4` | 1.25rem | 700 | Card heading, dialog heading |
-| `title-lg` | 1.125rem | 600 | Modal title, panel header |
-| `title-md` | 1rem | 600 | Card title, section heading, list item heading |
-| `title-sm` | 0.875rem | 600 | Sub-items, compact card title |
-| `body-lg` | 1rem | 400 | Long-form reading text |
-| `body-md` | 0.875rem | 400 | Standard body copy |
-| `body-sm` | 0.75rem | 400 | Secondary info, field labels |
-| `body-xs` | 0.625rem | 400 | Captions, micro-labels, timestamps |
+| Level | Default Size | Weight | Primary Use Case | Mobile Adjustment |
+|---|---|---|---|---|
+| `h1` | 2rem (32px) | 700 | Page hero title — one per page maximum | `fontSize: { xs: '1.5rem', md: '2rem' }` |
+| `h2` | 1.75rem (28px) | 700 | Top section heading, major dashboard panel heading | `fontSize: { xs: '1.25rem', md: '1.75rem' }` |
+| `h3` | 1.5rem (24px) | 700 | Sub-section heading, modal completion screen | `fontSize: { xs: '1.125rem', md: '1.5rem' }` |
+| `h4` | 1.25rem (20px) | 700 | Card heading, dialog heading, drawer title | `fontSize: { xs: '1rem', md: '1.25rem' }` |
+| `title-lg` | 1.125rem (18px) | 600 | Modal title, panel header, prominent label | no override needed |
+| `title-md` | 1rem (16px) | 600 | Card title, section heading, list item heading, empty state heading | no override needed |
+| `title-sm` | 0.875rem (14px) | 600 | Chip label, badge text, compact card title, sub-item label | no override needed |
+| `body-lg` | 1rem (16px) | 400 | Long-form reading text, book content, primary paragraph | no override needed |
+| `body-md` | 0.875rem (14px) | 400 | Standard body copy, form input text, description text | no override needed |
+| `body-sm` | 0.75rem (12px) | 400 | Secondary info, field labels, captions, filter tag labels | no override needed |
+| `body-xs` | 0.625rem (10px) | 400 | Timestamps, metadata, micro-labels, helper text below inputs | no override needed |
 
-> **Rule of thumb:** Empty state heading → `title-md`. Empty state body → `body-sm` + `color: 'text.tertiary'`. Section header → `h3`/`h4`. Card header → `title-md`/`title-lg`.
+### Quick-Decision Rules
+
+| Context | Level to use |
+|---|---|
+| Empty state heading | `title-md` |
+| Empty state body | `body-sm` + `color: 'text.tertiary'` |
+| Section header (page-level) | `h3` or `h4` |
+| Card header | `title-md` or `title-lg` |
+| Form field label | `body-sm` with `fontWeight: 600` via `<FormLabel>` |
+| Timestamps / "3 days ago" | `body-xs` + `color: 'text.tertiary'` |
+| Modal title | `title-lg` (standard) or `h4` (complex form) |
+| Chip / filter pill text | `title-sm` |
 
 ### 4.2 Typography Hierarchy
 *   *Headings:* Bold/Semi-bold, short, and punchy.
