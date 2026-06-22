@@ -275,6 +275,7 @@ const CalendarPage = () => {
             size='sm'
             variant={filters.habitsEnabled ? 'solid' : 'outlined'}
             color={filters.habitsEnabled ? 'primary' : 'neutral'}
+            sx={filters.habitsEnabled ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
             onClick={() => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))}
             aria-label={t('calendarPage.showHabitsAriaLabel')}
             aria-pressed={filters.habitsEnabled}
@@ -325,8 +326,9 @@ const CalendarPage = () => {
           {/* More/Less filters toggle chip (D-08) */}
           <Chip
             size='sm'
-            variant={filtersExpanded ? 'soft' : 'outlined'}
+            variant='outlined'
             color='neutral'
+            sx={{ bgcolor: 'background.level1' }}
             onClick={() => setFiltersExpanded((prev) => !prev)}
             aria-label={t('calendarPage.moreFiltersAriaLabel')}
             aria-expanded={filtersExpanded}
@@ -345,6 +347,7 @@ const CalendarPage = () => {
                 size='sm'
                 variant={filters.activeAreaIds.length === 0 ? 'solid' : 'outlined'}
                 color={filters.activeAreaIds.length === 0 ? 'primary' : 'neutral'}
+                sx={filters.activeAreaIds.length === 0 ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
                 onClick={() => setFilters((f) => ({ ...f, activeAreaIds: [] }))}
                 aria-label={t('calendarPage.filters.allAreasAriaLabel')}
                 aria-pressed={filters.activeAreaIds.length === 0}
@@ -390,6 +393,7 @@ const CalendarPage = () => {
                 size='sm'
                 variant={allTypesActive ? 'solid' : 'outlined'}
                 color={allTypesActive ? 'primary' : 'neutral'}
+                sx={allTypesActive ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
                 onClick={() => setFilters((f) => ({ ...f, activeTypes: ['task', 'priority', 'goal', 'milestone'] }))}
                 aria-label={t('calendarPage.filters.allTypesAriaLabel')}
                 aria-pressed={allTypesActive}
@@ -409,6 +413,7 @@ const CalendarPage = () => {
                   size='sm'
                   variant={filters.activeTypes.includes(key) ? 'solid' : 'outlined'}
                   color={filters.activeTypes.includes(key) ? 'primary' : 'neutral'}
+                  sx={filters.activeTypes.includes(key) ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
                   onClick={() => handleTypeClick(key)}
                   aria-label={t(ariaKey)}
                   aria-pressed={filters.activeTypes.includes(key)}
