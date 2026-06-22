@@ -229,10 +229,18 @@ const CalendarPage = () => {
     api.changeView(isMobile ? 'listWeek' : 'dayGridMonth')
   }, [isMobile])
 
-  // Phase 16: Type chip toggle handler — no-op when trying to deselect the last active type
+  // Phase 16: Type chip toggle handler
+  // When All Types is active (all 4 present), clicking a type isolates to that type only.
+  // When a subset is active, clicking an inactive type adds it; clicking an active type removes it.
+  // No-op when trying to deselect the last remaining type.
   const handleTypeClick = useCallback(
     (typeName) => {
       setFilters((f) => {
+        const allActive = ALL_TYPES.every((t) => f.activeTypes.includes(t))
+        if (allActive) {
+          // Isolate: switch from "all" to just this one type
+          return { ...f, activeTypes: [typeName] }
+        }
         const isActive = f.activeTypes.includes(typeName)
         if (isActive && f.activeTypes.length === 1) return f // no-op: can't deselect last type
         const next = isActive ? f.activeTypes.filter((existingType) => existingType !== typeName) : [...f.activeTypes, typeName]
@@ -357,29 +365,33 @@ const CalendarPage = () => {
 
               {/* Individual area chips (D-11) */}
               {focusAreas.length > 0 ? (
-                focusAreas.map((area) => (
-                  <Chip
-                    key={area.id}
-                    size='sm'
-                    onClick={() => handleAreaClick(area.id)}
-                    aria-label={t('calendarPage.filters.areaAriaLabel', { name: area.name })}
-                    aria-pressed={filters.activeAreaIds.includes(area.id)}
-                    sx={
-                      filters.activeAreaIds.includes(area.id)
-                        ? // area.color is user-defined data hex — not a design token (D-11 exception applies to bgcolor only)
-                          {
-                            bgcolor: area.color,
-                            color: 'background.surface',
-                            '&:hover': { bgcolor: area.color, filter: 'brightness(0.92)' }
-                          }
-                        : undefined
-                    }
-                    variant={filters.activeAreaIds.includes(area.id) ? undefined : 'outlined'}
-                    color={filters.activeAreaIds.includes(area.id) ? undefined : 'neutral'}
-                  >
-                    {area.name}
-                  </Chip>
-                ))
+                focusAreas.map((area) => {
+                  const areaActive = filters.activeAreaIds.includes(area.id)
+                  return (
+                    <Chip
+                      key={area.id}
+                      size='sm'
+                      variant={areaActive ? 'solid' : 'outlined'}
+                      color='neutral'
+                      onClick={() => handleAreaClick(area.id)}
+                      aria-label={t('calendarPage.filters.areaAriaLabel', { name: area.name })}
+                      aria-pressed={areaActive}
+                      sx={
+                        areaActive
+                          ? // area.color is user-defined data hex — not a design token (D-11 exception applies to bgcolor only)
+                            {
+                              bgcolor: area.color,
+                              color: 'white',
+                              borderColor: area.color,
+                              '&:hover': { bgcolor: area.color, filter: 'brightness(0.92)' }
+                            }
+                          : { bgcolor: 'background.level1', borderColor: 'divider' }
+                      }
+                    >
+                      {area.name}
+                    </Chip>
+                  )
+                })
               ) : (
                 <Box sx={{ py: 1 }}>
                   <Typography level='body-sm' sx={{ color: 'text.secondary' }}>

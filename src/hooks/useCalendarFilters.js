@@ -72,24 +72,21 @@ export function useCalendarFilters() {
   }, [])
 
   // D-06: applyPreset — filter-only; no FullCalendar view navigation (Phase 17)
-  const applyPreset = useCallback(
-    (name) => {
-      if (name === 'goals_only') {
-        setFiltersRaw({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
-        setActivePreset('goals_only')
-      } else if (name === 'today') {
-        // TODO Phase 17: navigate FullCalendar view to the target date range.
-        setFiltersRaw({ ...DEFAULT_FILTERS })
-        setActivePreset('today')
-      } else if (name === 'this_week') {
-        // TODO Phase 17: navigate FullCalendar view to the target date range.
-        setFiltersRaw({ ...DEFAULT_FILTERS })
-        setActivePreset('this_week')
-      }
-      // unknown name → no-op (no else branch)
-    },
-    []
-  )
+  const applyPreset = useCallback((name) => {
+    if (name === 'goals_only') {
+      setFiltersRaw({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
+      setActivePreset('goals_only')
+    } else if (name === 'today') {
+      // TODO Phase 17: navigate FullCalendar view to the target date range.
+      setFiltersRaw({ ...DEFAULT_FILTERS })
+      setActivePreset('today')
+    } else if (name === 'this_week') {
+      // TODO Phase 17: navigate FullCalendar view to the target date range.
+      setFiltersRaw({ ...DEFAULT_FILTERS })
+      setActivePreset('this_week')
+    }
+    // unknown name → no-op (no else branch)
+  }, [])
 
   return { filters, setFilters, resetFilters, applyPreset, activePreset }
 }
