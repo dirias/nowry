@@ -9,7 +9,7 @@ const STORAGE_KEY = 'nowry_cal_filters_v1'
 const DEFAULT_FILTERS = {
   habitsEnabled: false,
   activeTypes: ['task', 'priority', 'goal', 'milestone'],
-  activeAreaIds: [], // empty = no area filter (show all areas)
+  activeAreaIds: [] // empty = no area filter (show all areas)
 }
 
 // D-04: Shape validation — must be a plain object with all three fields in the correct types
@@ -25,14 +25,13 @@ function isValidShape(parsed) {
 }
 
 export function useCalendarFilters() {
-  const [filters, setFilters] = useState(() => {
+  const [filters, setFiltersRaw] = useState(() => {
     try {
       // D-05: one-time migration from old key — MUST check OLD_KEY first
       const old = localStorage.getItem(OLD_KEY)
       if (old) {
         const parsed = JSON.parse(old)
-        const habitsEnabled =
-          typeof parsed?.habitsEnabled === 'boolean' ? parsed.habitsEnabled : false
+        const habitsEnabled = typeof parsed?.habitsEnabled === 'boolean' ? parsed.habitsEnabled : false
         const migrated = { ...DEFAULT_FILTERS, habitsEnabled }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
         localStorage.removeItem(OLD_KEY)
@@ -44,11 +43,14 @@ export function useCalendarFilters() {
         const parsed = JSON.parse(saved)
         if (isValidShape(parsed)) return parsed
       }
-      return DEFAULT_FILTERS
+      return { ...DEFAULT_FILTERS }
     } catch {
-      return DEFAULT_FILTERS
+      return { ...DEFAULT_FILTERS }
     }
   })
+
+  // Tracks which preset is currently active (null = no preset / manual filter state)
+  const [activePreset, setActivePreset] = useState(null)
 
   useEffect(() => {
     try {
@@ -58,24 +60,38 @@ export function useCalendarFilters() {
     }
   }, [filters])
 
+  // Public setFilters: clears activePreset on any manual filter change
+  const setFilters = useCallback((updater) => {
+    setFiltersRaw(updater)
+    setActivePreset(null)
+  }, [])
+
   const resetFilters = useCallback(() => {
-    setFilters(DEFAULT_FILTERS)
+    setFiltersRaw({ ...DEFAULT_FILTERS })
+    setActivePreset(null)
   }, [])
 
   // D-06: applyPreset — filter-only; no FullCalendar view navigation (Phase 17)
   const applyPreset = useCallback(
     (name) => {
       if (name === 'goals_only') {
-        setFilters({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
-      } else if (name === 'today' || name === 'this_week') {
-        resetFilters()
+        setFiltersRaw({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
+        setActivePreset('goals_only')
+      } else if (name === 'today') {
+        // TODO Phase 17: navigate FullCalendar view to the target date range.
+        setFiltersRaw({ ...DEFAULT_FILTERS })
+        setActivePreset('today')
+      } else if (name === 'this_week') {
+        // TODO Phase 17: navigate FullCalendar view to the target date range.
+        setFiltersRaw({ ...DEFAULT_FILTERS })
+        setActivePreset('this_week')
       }
       // unknown name → no-op (no else branch)
     },
-    [resetFilters]
+    []
   )
 
-  return { filters, setFilters, resetFilters, applyPreset }
+  return { filters, setFilters, resetFilters, applyPreset, activePreset }
 }
 
 export default useCalendarFilters

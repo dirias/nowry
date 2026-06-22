@@ -66,7 +66,7 @@ const CalendarPage = () => {
   const [filtersExpanded, setFiltersExpanded] = useState(false)
   const [focusAreas, setFocusAreas] = useState([])
 
-  const { filters, setFilters, resetFilters, applyPreset } = useCalendarFilters() // CAL-03: per D-11
+  const { filters, setFilters, resetFilters, applyPreset, activePreset } = useCalendarFilters() // CAL-03: per D-11
 
   // CAL-01/CAL-02: Custom event rendering — icon + title for all event types
   const eventContent = useCallback((eventInfo) => {
@@ -284,26 +284,31 @@ const CalendarPage = () => {
 
           {/* Preset buttons — Button not Chip per D-09 */}
           <Button
-            variant='outlined'
+            variant={activePreset === 'goals_only' ? 'solid' : 'outlined'}
+            color={activePreset === 'goals_only' ? 'primary' : 'neutral'}
             size='sm'
             onClick={() => applyPreset('goals_only')}
             aria-label={t('calendarPage.presets.goalsOnlyAriaLabel')}
+            aria-pressed={activePreset === 'goals_only'}
           >
             {t('calendarPage.presets.goalsOnly')}
           </Button>
           <Button
-            variant='outlined'
+            variant={activePreset === 'today' ? 'solid' : 'outlined'}
+            color={activePreset === 'today' ? 'primary' : 'neutral'}
             size='sm'
             onClick={() => {
               applyPreset('today')
               calendarRef.current?.getApi().today()
             }}
             aria-label={t('calendarPage.presets.todayAriaLabel')}
+            aria-pressed={activePreset === 'today'}
           >
             {t('calendarPage.presets.today')}
           </Button>
           <Button
-            variant='outlined'
+            variant={activePreset === 'this_week' ? 'solid' : 'outlined'}
+            color={activePreset === 'this_week' ? 'primary' : 'neutral'}
             size='sm'
             onClick={() => {
               applyPreset('this_week')
@@ -312,6 +317,7 @@ const CalendarPage = () => {
               api?.today()
             }}
             aria-label={t('calendarPage.presets.thisWeekAriaLabel')}
+            aria-pressed={activePreset === 'this_week'}
           >
             {t('calendarPage.presets.thisWeek')}
           </Button>
@@ -441,40 +447,40 @@ const CalendarPage = () => {
               padding: '0 12px !important',
               boxShadow: 'none !important',
               transition: 'background-color 0.2s, border-color 0.2s !important',
-              textTransform: 'none !important',
+              textTransform: 'none !important'
             },
             '& .fc-button-primary:hover': {
               backgroundColor: 'var(--joy-palette-background-level1) !important',
               borderColor: 'var(--joy-palette-neutral-outlinedBorder) !important',
-              color: 'var(--joy-palette-text-primary) !important',
+              color: 'var(--joy-palette-text-primary) !important'
             },
             '& .fc-button-primary:not(:disabled):active': {
               backgroundColor: 'var(--joy-palette-background-level2) !important',
               borderColor: 'var(--joy-palette-neutral-outlinedBorder) !important',
-              color: 'var(--joy-palette-text-primary) !important',
+              color: 'var(--joy-palette-text-primary) !important'
             },
             '& .fc-button-primary:focus, & .fc-button-primary:focus-visible': {
               outline: 'none !important',
               boxShadow: 'none !important',
-              borderColor: 'var(--joy-palette-primary-outlinedBorder) !important',
+              borderColor: 'var(--joy-palette-primary-outlinedBorder) !important'
             },
             // Active/selected view button (e.g. "Month" when in month view)
             '& .fc-button-primary:not(:disabled).fc-button-active': {
               backgroundColor: 'var(--joy-palette-primary-softBg) !important',
               color: 'var(--joy-palette-primary-softColor) !important',
-              borderColor: 'var(--joy-palette-primary-outlinedBorder) !important',
+              borderColor: 'var(--joy-palette-primary-outlinedBorder) !important'
             },
             '& .fc-button:disabled': {
               opacity: '0.4 !important',
-              cursor: 'not-allowed !important',
+              cursor: 'not-allowed !important'
             },
             // Toolbar title — match title-md typography
             '& .fc-toolbar-title': {
               color: 'var(--joy-palette-text-primary) !important',
               fontSize: '1.125rem !important',
               fontWeight: 'var(--joy-fontWeight-lg) !important',
-              fontFamily: 'var(--joy-fontFamily-body) !important',
-            },
+              fontFamily: 'var(--joy-fontFamily-body) !important'
+            }
           }}
         >
           <FullCalendar
