@@ -30,15 +30,11 @@ jest.mock('../../../hooks/useAnnualPlan', () => ({
 describe('Phase 17 MOB-03: EventFormModal smoke tests', () => {
   it('renders without crashing when open=true', () => {
     const EventFormModal = require('../EventFormModal').default
-    expect(() => render(
-      <EventFormModal open={true} onClose={jest.fn()} onSuccess={jest.fn()} mode='create' />
-    )).not.toThrow()
+    expect(() => render(<EventFormModal open={true} onClose={jest.fn()} onSuccess={jest.fn()} mode='create' />)).not.toThrow()
   })
 
   it('renders without crashing when open=false', () => {
     const EventFormModal = require('../EventFormModal').default
-    expect(() => render(
-      <EventFormModal open={false} onClose={jest.fn()} onSuccess={jest.fn()} mode='create' />
-    )).not.toThrow()
+    expect(() => render(<EventFormModal open={false} onClose={jest.fn()} onSuccess={jest.fn()} mode='create' />)).not.toThrow()
   })
 })

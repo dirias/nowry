@@ -16,7 +16,7 @@ import {
   ListItemContent,
   Chip,
   Divider,
-  LinearProgress,
+  Skeleton,
   Container
 } from '@mui/joy'
 import {
@@ -78,7 +78,7 @@ const DailyRoutinePlanner = () => {
 
       // Fetch all goals -> activities using cache
       let allActivities = []
-      if (cacheAreas) {
+      if (cacheAreas && cacheGoals) {
         for (const area of cacheAreas) {
           const areaGoals = cacheGoals.filter((g) => g.focus_area_id === area._id || g.focus_area_id?._id === area._id)
           for (const goal of areaGoals) {
@@ -205,7 +205,7 @@ const DailyRoutinePlanner = () => {
           {linkedActivities.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography level='body-xs' fontWeight='bold' sx={{ mb: 1 }}>
-                GOAL ACTVITIES
+                {t('annualPlanning.dailyRoutine.goalActivities')}
               </Typography>
               <List>
                 {linkedActivities.map((act) => (
@@ -216,6 +216,7 @@ const DailyRoutinePlanner = () => {
                         Goal: {act.goalTitle}
                       </Typography>
                     </ListItemContent>
+                    {/* act.areaColor is a user-defined hex from COLORS palette — intentional per DESIGN_GUIDELINES Section 5 */}
                     <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: act.areaColor }} />
                   </ListItem>
                 ))}
@@ -225,7 +226,7 @@ const DailyRoutinePlanner = () => {
 
           {/* Custom Routine Items */}
           <Typography level='body-xs' fontWeight='bold' sx={{ mb: 1 }}>
-            ROUTINE ITEMS
+            {t('annualPlanning.dailyRoutine.routineItems')}
           </Typography>
           <List>
             {customItems.map((item, index) => {
@@ -354,8 +355,6 @@ const DailyRoutinePlanner = () => {
     return renderSection(sectionDef.title, React.cloneElement(sectionDef.icon, { color: sectionDef.color }), sectionDef.key, sectionDef.key)
   }
 
-  if (loading) return <LinearProgress />
-
   return (
     <Container maxWidth='xl' sx={{ py: 4, pb: 10 }}>
       {/* Header */}
@@ -378,8 +377,8 @@ const DailyRoutinePlanner = () => {
         {/* Auto-save status */}
         {saving && (
           <Stack direction='row' spacing={1} alignItems='center'>
-            <Typography level='body-sm' textColor='success.500' fontWeight={600}>
-              Saving changes...
+            <Typography level='body-sm' sx={{ color: 'success.plainColor' }} fontWeight={600}>
+              {t('annualPlanning.dailyRoutine.saving')}
             </Typography>
           </Stack>
         )}
@@ -413,7 +412,7 @@ const DailyRoutinePlanner = () => {
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 bgcolor: isActive ? 'background.surface' : 'transparent',
                 boxShadow: isActive ? 'sm' : 'none',
-                color: isActive ? `${section.color}.main` : 'text.secondary',
+                color: isActive ? `${section.color}.plainColor` : 'text.secondary',
                 fontWeight: isActive ? 600 : 500,
                 display: 'flex',
                 alignItems: 'center',
@@ -458,21 +457,25 @@ const DailyRoutinePlanner = () => {
         <Box sx={{ display: { xs: 'none', md: 'contents' } }}>
           {sections.map((s) => (
             <Grid xs={12} md={4} key={s.key}>
-              {renderSectionContent(s)}
+              {loading ? <Skeleton variant='rectangular' height={320} sx={{ borderRadius: 'sm' }} /> : renderSectionContent(s)}
             </Grid>
           ))}
         </Box>
 
-        {/* 
-            On Mobile (xs): Show ONLY the active section using CSS transition if possible, 
-            but for now strict conditional rendering is safer for layout. 
+        {/*
+            On Mobile (xs): Show ONLY the active section using CSS transition if possible,
+            but for now strict conditional rendering is safer for layout.
         */}
         <Box sx={{ display: { xs: 'block', md: 'none' }, width: '100%' }}>
-          {renderSectionContent(sections[activeSectionIndex])}
+          {loading ? (
+            <Skeleton variant='rectangular' height={320} sx={{ borderRadius: 'sm' }} />
+          ) : (
+            renderSectionContent(sections[activeSectionIndex])
+          )}
 
           {/* Swipe Hint */}
           <Stack direction='row' alignItems='center' justifyContent='center' spacing={1} sx={{ mt: 3, opacity: 0.5 }}>
-            <Typography level='body-xs'>Swipe to navigate</Typography>
+            <Typography level='body-xs'>{t('annualPlanning.dailyRoutine.swipeHint')}</Typography>
             <Box sx={{ display: 'flex', gap: 0.5 }}>
               {[0, 1, 2].map((i) => (
                 <Box

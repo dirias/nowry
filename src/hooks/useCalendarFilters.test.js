@@ -1,16 +1,19 @@
 /**
  * Phase 16 — useCalendarFilters tests (FLT-02, FLT-03).
- * Tests pure logic mirrored from the hook — no React rendering required.
+ * FLT-02 migration tests use renderHook to exercise the real hook (WR-04 fix).
  */
 
-// ─── Mirror constants and helpers from the hook ──────────────────────────────
+import { renderHook, act } from '@testing-library/react'
+import { useCalendarFilters } from './useCalendarFilters'
+
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const OLD_KEY = 'nowry:calendarFilters'
 const STORAGE_KEY = 'nowry_cal_filters_v1'
 const DEFAULT_FILTERS = {
   habitsEnabled: false,
   activeTypes: ['task', 'priority', 'goal', 'milestone'],
-  activeAreaIds: [],
+  activeAreaIds: []
 }
 
 function isValidShape(parsed) {
@@ -24,7 +27,7 @@ function isValidShape(parsed) {
   )
 }
 
-// applyPreset pure function (mirrors hook logic without useState)
+// applyPreset pure function used in FLT-03 tests (mirrors hook logic without useState)
 function applyPreset(name, currentFilters) {
   if (name === 'goals_only') {
     return { habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] }
@@ -42,46 +45,42 @@ beforeEach(() => {
 
 afterEach(() => {
   localStorage.clear()
+  jest.restoreAllMocks()
 })
 
 // ─── FLT-02: localStorage migration ─────────────────────────────────────────
+// Tests exercise the real hook via renderHook so that refactors of the hook
+// migration path are caught by these tests (WR-04 fix).
 
 describe('FLT-02: localStorage migration', () => {
   it('migrates habitsEnabled=true from old key to new key and deletes old key', () => {
     // Arrange: set old key with habitsEnabled=true
     localStorage.setItem(OLD_KEY, JSON.stringify({ habitsEnabled: true }))
 
-    // Act: simulate migration logic (mirrors useState initializer in hook)
-    const old = localStorage.getItem(OLD_KEY)
-    const parsed = JSON.parse(old)
-    const habitsEnabled = typeof parsed?.habitsEnabled === 'boolean' ? parsed.habitsEnabled : false
-    const migrated = { ...DEFAULT_FILTERS, habitsEnabled }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
-    localStorage.removeItem(OLD_KEY)
+    // Act: render the real hook — migration runs in the useState initializer
+    const { result } = renderHook(() => useCalendarFilters())
 
-    // Assert: new key has correct habitsEnabled, old key is gone
-    const newVal = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    expect(newVal.habitsEnabled).toBe(true)
-    expect(newVal.activeTypes).toEqual(['task', 'priority', 'goal', 'milestone'])
-    expect(newVal.activeAreaIds).toEqual([])
+    // Assert: hook state reflects migrated value
+    expect(result.current.filters.habitsEnabled).toBe(true)
+    expect(result.current.filters.activeTypes).toEqual(['task', 'priority', 'goal', 'milestone'])
+    expect(result.current.filters.activeAreaIds).toEqual([])
+    // Migration should have removed the old key
     expect(localStorage.getItem(OLD_KEY)).toBeNull()
+    // Migration should have written the new key
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+    expect(stored.habitsEnabled).toBe(true)
   })
 
   it('migrates habitsEnabled=false when old key value is malformed (missing field)', () => {
     // Arrange: old key with missing habitsEnabled (malformed)
     localStorage.setItem(OLD_KEY, JSON.stringify({ someOtherField: 'value' }))
 
-    // Act: simulate migration logic
-    const old = localStorage.getItem(OLD_KEY)
-    const parsed = JSON.parse(old)
-    const habitsEnabled = typeof parsed?.habitsEnabled === 'boolean' ? parsed.habitsEnabled : false
-    const migrated = { ...DEFAULT_FILTERS, habitsEnabled }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
-    localStorage.removeItem(OLD_KEY)
+    // Act: render the real hook
+    const { result } = renderHook(() => useCalendarFilters())
 
     // Assert: habitsEnabled defaults to false, old key removed
-    const newVal = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    expect(newVal.habitsEnabled).toBe(false)
+    expect(result.current.filters.habitsEnabled).toBe(false)
+    expect(result.current.filters.activeTypes).toEqual(['task', 'priority', 'goal', 'milestone'])
     expect(localStorage.getItem(OLD_KEY)).toBeNull()
   })
 
@@ -90,65 +89,22 @@ describe('FLT-02: localStorage migration', () => {
     const validShape = { habitsEnabled: true, activeTypes: ['goal'], activeAreaIds: ['area-1'] }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(validShape))
 
-    // Act: simulate useState initializer (old key absent, so reads new key)
-    let result
-    try {
-      const old = localStorage.getItem(OLD_KEY)
-      if (old) {
-        // migration path — skipped in this test
-        const parsed = JSON.parse(old)
-        const habitsEnabled = typeof parsed?.habitsEnabled === 'boolean' ? parsed.habitsEnabled : false
-        result = { ...DEFAULT_FILTERS, habitsEnabled }
-      } else {
-        const saved = localStorage.getItem(STORAGE_KEY)
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (isValidShape(parsed)) {
-            result = parsed
-          } else {
-            result = DEFAULT_FILTERS
-          }
-        } else {
-          result = DEFAULT_FILTERS
-        }
-      }
-    } catch {
-      result = DEFAULT_FILTERS
-    }
+    // Act: render the real hook
+    const { result } = renderHook(() => useCalendarFilters())
 
     // Assert: returns the stored valid shape
-    expect(result).toEqual(validShape)
+    expect(result.current.filters).toEqual(validShape)
   })
 
   it('falls back to DEFAULT_FILTERS when new key has stale Phase 15 shape (only {habitsEnabled: boolean})', () => {
     // Arrange: new key has old Phase 15 shape — missing activeTypes and activeAreaIds
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ habitsEnabled: false }))
 
-    // Act: simulate useState initializer
-    let result
-    try {
-      const old = localStorage.getItem(OLD_KEY)
-      if (!old) {
-        const saved = localStorage.getItem(STORAGE_KEY)
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (isValidShape(parsed)) {
-            result = parsed
-          } else {
-            result = DEFAULT_FILTERS
-          }
-        } else {
-          result = DEFAULT_FILTERS
-        }
-      } else {
-        result = DEFAULT_FILTERS
-      }
-    } catch {
-      result = DEFAULT_FILTERS
-    }
+    // Act: render the real hook
+    const { result } = renderHook(() => useCalendarFilters())
 
     // Assert: stale shape (missing activeTypes/activeAreaIds) falls back to defaults
-    expect(result).toEqual(DEFAULT_FILTERS)
+    expect(result.current.filters).toEqual(DEFAULT_FILTERS)
   })
 
   it('falls back to DEFAULT_FILTERS when localStorage.getItem throws', () => {
@@ -157,29 +113,11 @@ describe('FLT-02: localStorage migration', () => {
       throw new Error('localStorage unavailable')
     })
 
-    // Act: simulate useState initializer with try/catch
-    let result
-    try {
-      const old = localStorage.getItem(OLD_KEY)
-      if (!old) {
-        const saved = localStorage.getItem(STORAGE_KEY)
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (isValidShape(parsed)) result = parsed
-          else result = DEFAULT_FILTERS
-        } else {
-          result = DEFAULT_FILTERS
-        }
-      }
-    } catch {
-      result = DEFAULT_FILTERS
-    }
+    // Act: render the real hook — exception is caught internally
+    const { result } = renderHook(() => useCalendarFilters())
 
     // Assert: exception caught, defaults returned
-    expect(result).toEqual(DEFAULT_FILTERS)
-
-    // Restore
-    jest.restoreAllMocks()
+    expect(result.current.filters).toEqual(DEFAULT_FILTERS)
   })
 })
 
@@ -238,7 +176,7 @@ describe('FLT-03: applyPreset logic', () => {
     expect(result).toEqual({
       habitsEnabled: false,
       activeTypes: ['goal', 'milestone'],
-      activeAreaIds: [],
+      activeAreaIds: []
     })
   })
 

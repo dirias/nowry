@@ -269,9 +269,15 @@ const CalendarPage = () => {
     <Container maxWidth='xl' sx={{ px: { xs: 1, sm: 2, md: 3 }, py: 4, height: { xs: 'auto', sm: 'calc(100vh - 64px)' } }}>
       <Stack spacing={2} sx={{ height: '100%' }}>
         {/* Header row */}
-        <Stack direction='row' justifyContent='space-between' alignItems='center'>
+        <Stack spacing={1.5}>
           <Typography level='h2'>{t('calendarPage.title')}</Typography>
-          <Button startDecorator={<AddRoundedIcon />} size='sm' onClick={handleAddEvent} aria-label={t('calendarPage.addEvent')}>
+          <Button
+            startDecorator={<AddRoundedIcon />}
+            size='sm'
+            onClick={handleAddEvent}
+            aria-label={t('calendarPage.addEvent')}
+            sx={{ alignSelf: 'flex-end' }}
+          >
             {t('calendarPage.addEvent')}
           </Button>
         </Stack>
@@ -283,7 +289,6 @@ const CalendarPage = () => {
             size='sm'
             variant={filters.habitsEnabled ? 'solid' : 'outlined'}
             color={filters.habitsEnabled ? 'primary' : 'neutral'}
-            sx={filters.habitsEnabled ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
             onClick={() => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))}
             aria-label={t('calendarPage.showHabitsAriaLabel')}
             aria-pressed={filters.habitsEnabled}
@@ -331,12 +336,11 @@ const CalendarPage = () => {
             {t('calendarPage.presets.thisWeek')}
           </Button>
 
-          {/* More/Less filters toggle chip (D-08) */}
+          {/* More/Less filters toggle chip (D-08) — reflects expanded state */}
           <Chip
             size='sm'
-            variant='outlined'
-            color='neutral'
-            sx={{ bgcolor: 'background.level1' }}
+            variant={filtersExpanded ? 'soft' : 'outlined'}
+            color={filtersExpanded ? 'primary' : 'neutral'}
             onClick={() => setFiltersExpanded((prev) => !prev)}
             aria-label={t('calendarPage.moreFiltersAriaLabel')}
             aria-expanded={filtersExpanded}
@@ -346,96 +350,103 @@ const CalendarPage = () => {
           >
             {filtersExpanded ? t('calendarPage.lessFilters') : t('calendarPage.moreFilters')}
           </Chip>
-
-          {/* Expanded: area chips + type chips (D-08) */}
-          {filtersExpanded && (
-            <>
-              {/* "All Areas" chip — active when no area filter (D-11) */}
-              <Chip
-                size='sm'
-                variant={filters.activeAreaIds.length === 0 ? 'solid' : 'outlined'}
-                color={filters.activeAreaIds.length === 0 ? 'primary' : 'neutral'}
-                sx={filters.activeAreaIds.length === 0 ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
-                onClick={() => setFilters((f) => ({ ...f, activeAreaIds: [] }))}
-                aria-label={t('calendarPage.filters.allAreasAriaLabel')}
-                aria-pressed={filters.activeAreaIds.length === 0}
-              >
-                {t('calendarPage.filters.allAreas')}
-              </Chip>
-
-              {/* Individual area chips (D-11) */}
-              {focusAreas.length > 0 ? (
-                focusAreas.map((area) => {
-                  const areaActive = filters.activeAreaIds.includes(area.id)
-                  return (
-                    <Chip
-                      key={area.id}
-                      size='sm'
-                      variant={areaActive ? 'solid' : 'outlined'}
-                      color='neutral'
-                      onClick={() => handleAreaClick(area.id)}
-                      aria-label={t('calendarPage.filters.areaAriaLabel', { name: area.name })}
-                      aria-pressed={areaActive}
-                      sx={
-                        areaActive
-                          ? // area.color is user-defined data hex — not a design token (D-11 exception applies to bgcolor only)
-                            {
-                              bgcolor: area.color,
-                              color: 'white',
-                              borderColor: area.color,
-                              '&:hover': { bgcolor: area.color, filter: 'brightness(0.92)' }
-                            }
-                          : { bgcolor: 'background.level1', borderColor: 'divider' }
-                      }
-                    >
-                      {area.name}
-                    </Chip>
-                  )
-                })
-              ) : (
-                <Box sx={{ py: 1 }}>
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {t('calendarPage.filters.noAreas')}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* "All Types" chip (D-12) */}
-              <Chip
-                size='sm'
-                variant={allTypesActive ? 'solid' : 'outlined'}
-                color={allTypesActive ? 'primary' : 'neutral'}
-                sx={allTypesActive ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
-                onClick={() => setFilters((f) => ({ ...f, activeTypes: ['task', 'priority', 'goal', 'milestone'] }))}
-                aria-label={t('calendarPage.filters.allTypesAriaLabel')}
-                aria-pressed={allTypesActive}
-              >
-                {t('calendarPage.filters.allTypes')}
-              </Chip>
-
-              {/* Individual type chips (D-12) */}
-              {[
-                { key: 'goal', labelKey: 'calendarPage.filters.typeGoal', ariaKey: 'calendarPage.filters.typeGoalAriaLabel' },
-                { key: 'task', labelKey: 'calendarPage.filters.typeTask', ariaKey: 'calendarPage.filters.typeTaskAriaLabel' },
-                { key: 'priority', labelKey: 'calendarPage.filters.typePriority', ariaKey: 'calendarPage.filters.typePriorityAriaLabel' },
-                { key: 'milestone', labelKey: 'calendarPage.filters.typeMilestone', ariaKey: 'calendarPage.filters.typeMilestoneAriaLabel' }
-              ].map(({ key, labelKey, ariaKey }) => (
-                <Chip
-                  key={key}
-                  size='sm'
-                  variant={filters.activeTypes.includes(key) ? 'solid' : 'outlined'}
-                  color={filters.activeTypes.includes(key) ? 'primary' : 'neutral'}
-                  sx={filters.activeTypes.includes(key) ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
-                  onClick={() => handleTypeClick(key)}
-                  aria-label={t(ariaKey)}
-                  aria-pressed={filters.activeTypes.includes(key)}
-                >
-                  {t(labelKey)}
-                </Chip>
-              ))}
-            </>
-          )}
         </Stack>
+
+        {/* Expanded: area chips + type chips — separate row with divider (D-08) */}
+        {filtersExpanded && (
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              pt: 1,
+              borderTop: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
+            {/* "All Areas" chip — active when no area filter (D-11) */}
+            <Chip
+              size='sm'
+              variant={filters.activeAreaIds.length === 0 ? 'solid' : 'outlined'}
+              color={filters.activeAreaIds.length === 0 ? 'primary' : 'neutral'}
+              onClick={() => setFilters((f) => ({ ...f, activeAreaIds: [] }))}
+              aria-label={t('calendarPage.filters.allAreasAriaLabel')}
+              aria-pressed={filters.activeAreaIds.length === 0}
+            >
+              {t('calendarPage.filters.allAreas')}
+            </Chip>
+
+            {/* Individual area chips (D-11) */}
+            {focusAreas.length > 0 ? (
+              focusAreas.map((area) => {
+                const areaActive = filters.activeAreaIds.includes(area.id)
+                return (
+                  <Chip
+                    key={area.id}
+                    size='sm'
+                    variant={areaActive ? 'solid' : 'outlined'}
+                    color='neutral'
+                    onClick={() => handleAreaClick(area.id)}
+                    aria-label={t('calendarPage.filters.areaAriaLabel', { name: area.name })}
+                    aria-pressed={areaActive}
+                    sx={
+                      areaActive
+                        ? // area.color is user-defined data hex — not a design token (D-11 exception applies to bgcolor only)
+                          {
+                            bgcolor: area.color,
+                            color: 'white',
+                            borderColor: area.color,
+                            '&:hover': { bgcolor: area.color, filter: 'brightness(0.92)' }
+                          }
+                        : undefined
+                    }
+                  >
+                    {area.name}
+                  </Chip>
+                )
+              })
+            ) : (
+              <Box sx={{ py: 1 }}>
+                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                  {t('calendarPage.filters.noAreas')}
+                </Typography>
+              </Box>
+            )}
+
+            {/* "All Types" chip (D-12) */}
+            <Chip
+              size='sm'
+              variant={allTypesActive ? 'solid' : 'outlined'}
+              color={allTypesActive ? 'primary' : 'neutral'}
+              onClick={() => setFilters((f) => ({ ...f, activeTypes: ['task', 'priority', 'goal', 'milestone'] }))}
+              aria-label={t('calendarPage.filters.allTypesAriaLabel')}
+              aria-pressed={allTypesActive}
+            >
+              {t('calendarPage.filters.allTypes')}
+            </Chip>
+
+            {/* Individual type chips (D-12) */}
+            {[
+              { key: 'goal', labelKey: 'calendarPage.filters.typeGoal', ariaKey: 'calendarPage.filters.typeGoalAriaLabel' },
+              { key: 'task', labelKey: 'calendarPage.filters.typeTask', ariaKey: 'calendarPage.filters.typeTaskAriaLabel' },
+              { key: 'priority', labelKey: 'calendarPage.filters.typePriority', ariaKey: 'calendarPage.filters.typePriorityAriaLabel' },
+              { key: 'milestone', labelKey: 'calendarPage.filters.typeMilestone', ariaKey: 'calendarPage.filters.typeMilestoneAriaLabel' }
+            ].map(({ key, labelKey, ariaKey }) => (
+              <Chip
+                key={key}
+                size='sm'
+                variant={!allTypesActive && filters.activeTypes.includes(key) ? 'solid' : 'outlined'}
+                color={!allTypesActive && filters.activeTypes.includes(key) ? 'primary' : 'neutral'}
+                onClick={() => handleTypeClick(key)}
+                aria-label={t(ariaKey)}
+                aria-pressed={filters.activeTypes.includes(key)}
+              >
+                {t(labelKey)}
+              </Chip>
+            ))}
+          </Stack>
+        )}
 
         {/* Error state */}
         {calendarError && (

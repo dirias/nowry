@@ -44,7 +44,7 @@ jest.mock('../../../hooks/useCalendarFilters', () => ({
   useCalendarFilters: (...args) => mockUseCalendarFilters(...args)
 }))
 jest.mock('../../../hooks/useIsMobile', () => ({
-  useIsMobile: () => false  // default desktop for all existing tests
+  useIsMobile: () => false // default desktop for all existing tests
 }))
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k })
@@ -64,7 +64,7 @@ beforeEach(() => {
     filters: { habitsEnabled: false },
     setFilters: jest.fn(),
     resetFilters: jest.fn(),
-    applyPreset: jest.fn(),
+    applyPreset: jest.fn()
   })
 })
 
@@ -80,9 +80,9 @@ const StarRoundedIcon = 'StarRoundedIcon'
 const RepeatRoundedIcon = 'RepeatRoundedIcon'
 
 const EVENT_ICON_MAP = {
-  task:     CheckCircleOutlinedIcon,
+  task: CheckCircleOutlinedIcon,
   priority: FlagOutlinedIcon,
-  goal:     AdjustOutlinedIcon,
+  goal: AdjustOutlinedIcon,
   activity: RepeatRoundedIcon
 }
 
@@ -196,11 +196,7 @@ function applyD13Filter(events, filters) {
     // Step 2: type filter (only active when not all 4 types selected)
     if (filters.activeTypes.length < 4 && !filters.activeTypes.includes(ev.type)) return false
     // Step 3: area filter (null focusAreaId always passes through)
-    if (
-      filters.activeAreaIds.length > 0 &&
-      ev.focusAreaId !== null &&
-      !filters.activeAreaIds.includes(ev.focusAreaId)
-    ) return false
+    if (filters.activeAreaIds.length > 0 && ev.focusAreaId !== null && !filters.activeAreaIds.includes(ev.focusAreaId)) return false
     return true
   })
 }
@@ -212,12 +208,12 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
   const defaultFilters = {
     habitsEnabled: false,
     activeTypes: ['task', 'priority', 'goal', 'milestone'],
-    activeAreaIds: [],
+    activeAreaIds: []
   }
 
   const mockFocusAreas = [
     { id: 'area-1', name: 'Learning', color: '#10b981' },
-    { id: 'area-2', name: 'Health', color: '#f59e0b' },
+    { id: 'area-2', name: 'Health', color: '#f59e0b' }
   ]
 
   const { calendarService } = require('../../../api/services/calendar.service')
@@ -228,16 +224,16 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
       filters: {
         habitsEnabled: false,
         activeTypes: ['task', 'priority', 'goal', 'milestone'],
-        activeAreaIds: [],
+        activeAreaIds: []
       },
       setFilters: mockSetFilters,
       resetFilters: jest.fn(),
-      applyPreset: mockApplyPreset,
+      applyPreset: mockApplyPreset
     })
     // getAllEvents returns { events: [], focusAreas: [...] }
     calendarService.getAllEvents.mockResolvedValue({
       events: [],
-      focusAreas: mockFocusAreas,
+      focusAreas: mockFocusAreas
     })
   })
 
@@ -255,9 +251,7 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
     // Joy UI Chip renders aria-label on the outer <div> root, but onClick on inner <button class="MuiChip-action">.
     // We must click the inner action button to trigger the React onClick handler.
     const moreFiltersRoot = container.querySelector('[aria-label="calendarPage.moreFiltersAriaLabel"]')
-    const moreFiltersChip = moreFiltersRoot
-      ? moreFiltersRoot.querySelector('.MuiChip-action') || moreFiltersRoot
-      : null
+    const moreFiltersChip = moreFiltersRoot ? moreFiltersRoot.querySelector('.MuiChip-action') || moreFiltersRoot : null
     if (moreFiltersChip && moreFiltersRoot) {
       act(() => {
         fireEvent.click(moreFiltersChip)
@@ -279,9 +273,7 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
 
     // Joy UI Chip renders aria-label on the outer <div> root, but onClick on inner <button class="MuiChip-action">.
     const moreFiltersRoot = container.querySelector('[aria-label="calendarPage.moreFiltersAriaLabel"]')
-    const moreFiltersActionBtn = moreFiltersRoot
-      ? moreFiltersRoot.querySelector('.MuiChip-action') || moreFiltersRoot
-      : null
+    const moreFiltersActionBtn = moreFiltersRoot ? moreFiltersRoot.querySelector('.MuiChip-action') || moreFiltersRoot : null
     if (moreFiltersActionBtn && moreFiltersRoot) {
       act(() => {
         fireEvent.click(moreFiltersActionBtn)
@@ -310,7 +302,7 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
     const events = [
       { type: 'activity', focusAreaId: null },
       { type: 'task', focusAreaId: null },
-      { type: 'goal', focusAreaId: 'area-1' },
+      { type: 'goal', focusAreaId: 'area-1' }
     ]
     const filters = { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] }
     const result = applyD13Filter(events, filters)
@@ -323,7 +315,7 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
     const events = [
       { type: 'goal', focusAreaId: 'area-1' },
       { type: 'task', focusAreaId: null },
-      { type: 'priority', focusAreaId: null },
+      { type: 'priority', focusAreaId: null }
     ]
     const filters = { habitsEnabled: false, activeTypes: ['goal'], activeAreaIds: [] }
     const result = applyD13Filter(events, filters)
@@ -336,7 +328,7 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
     const events = [
       { type: 'goal', focusAreaId: 'area-1' },
       { type: 'goal', focusAreaId: 'area-2' },
-      { type: 'task', focusAreaId: null }, // null focusAreaId always passes
+      { type: 'task', focusAreaId: null } // null focusAreaId always passes
     ]
     const filters = { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: ['area-1'] }
     const result = applyD13Filter(events, filters)
@@ -348,7 +340,7 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
   it('FLT-02: D-13 step 3 — events with focusAreaId: null always pass through even when area filter is active', () => {
     const events = [
       { type: 'task', focusAreaId: null },
-      { type: 'priority', focusAreaId: null },
+      { type: 'priority', focusAreaId: null }
     ]
     const filters = { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: ['area-1'] }
     const result = applyD13Filter(events, filters)
@@ -428,22 +420,22 @@ describe('Phase 17 MOB-02: MOBILE_TOOLBAR constant shape', () => {
 
 describe('Phase 17 MOB-01: live view switch logic (D-04)', () => {
   it('isMobile=true maps to listWeek', () => {
-    const view = (isMobile) => isMobile ? 'listWeek' : 'dayGridMonth'
+    const view = (isMobile) => (isMobile ? 'listWeek' : 'dayGridMonth')
     expect(view(true)).toBe('listWeek')
   })
   it('isMobile=false maps to dayGridMonth', () => {
-    const view = (isMobile) => isMobile ? 'listWeek' : 'dayGridMonth'
+    const view = (isMobile) => (isMobile ? 'listWeek' : 'dayGridMonth')
     expect(view(false)).toBe('dayGridMonth')
   })
 })
 
 describe('Phase 17 MOB-01: This Week preset changeView logic (D-19)', () => {
   it('uses listWeek on mobile', () => {
-    const getView = (isMobile) => isMobile ? 'listWeek' : 'timeGridWeek'
+    const getView = (isMobile) => (isMobile ? 'listWeek' : 'timeGridWeek')
     expect(getView(true)).toBe('listWeek')
   })
   it('uses timeGridWeek on desktop', () => {
-    const getView = (isMobile) => isMobile ? 'listWeek' : 'timeGridWeek'
+    const getView = (isMobile) => (isMobile ? 'listWeek' : 'timeGridWeek')
     expect(getView(false)).toBe('timeGridWeek')
   })
 })

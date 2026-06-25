@@ -164,13 +164,13 @@ const FocusAreaSetup = () => {
           <Typography level='title-md' sx={{ mb: 1 }}>
             {t('annualPlanning.focusArea.setup.tipsLabel')}
           </Typography>
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
+          <Box component='ul' sx={{ margin: 0, paddingLeft: '20px' }}>
             {t('annualPlanning.focusArea.setup.tips', { returnObjects: true }).map((tip, i) => (
               <li key={i}>
                 <Typography>{tip}</Typography>
               </li>
             ))}
-          </ul>
+          </Box>
         </CardContent>
       </Card>
       <Button size='lg' endDecorator={<ArrowForwardIcon />} onClick={() => setActiveStep(1)}>
@@ -234,7 +234,8 @@ const FocusAreaSetup = () => {
                   height: 32,
                   borderRadius: '50%',
                   transform: areas[index].color === color ? 'scale(1.2)' : 'none',
-                  border: areas[index].color === color ? '2px solid black' : 'none',
+                  border: areas[index].color === color ? '2px solid' : 'none',
+                  borderColor: areas[index].color === color ? 'text.primary' : 'transparent',
                   '&:hover': { bgcolor: color }
                 }}
               />

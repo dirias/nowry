@@ -15,11 +15,11 @@ function setupMatchMedia(matches) {
       const idx = listeners.indexOf(handler)
       if (idx !== -1) listeners.splice(idx, 1)
     }),
-    _trigger: (newMatches) => listeners.forEach((h) => h({ matches: newMatches })),
+    _trigger: (newMatches) => listeners.forEach((h) => h({ matches: newMatches }))
   }
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: jest.fn().mockReturnValue(mq),
+    value: jest.fn().mockReturnValue(mq)
   })
   return mq
 }
@@ -44,14 +44,18 @@ describe('MOB-01: useIsMobile hook', () => {
   it('updates to true when change event fires with matches=true', () => {
     const mq = setupMatchMedia(false)
     const { result } = renderHook(() => useIsMobile())
-    act(() => { mq._trigger(true) })
+    act(() => {
+      mq._trigger(true)
+    })
     expect(result.current).toBe(true)
   })
 
   it('updates to false when change event fires with matches=false', () => {
     const mq = setupMatchMedia(true)
     const { result } = renderHook(() => useIsMobile())
-    act(() => { mq._trigger(false) })
+    act(() => {
+      mq._trigger(false)
+    })
     expect(result.current).toBe(false)
   })
 

@@ -51,9 +51,9 @@ const theme = extendTheme({
         primary: {
           plainColor: '#88c9d1',
           plainHoverBg: '#1c444a',
-          solidBg: '#1e4c54',
-          solidHoverBg: '#245a63',
-          solidActiveBg: '#347f8a',
+          solidBg: '#3a9dac',
+          solidHoverBg: '#2d8a97',
+          solidActiveBg: '#257d8a',
           solidColor: '#fff',
           softBg: '#17393d',
           softHoverBg: '#1c444a',
@@ -71,9 +71,7 @@ const theme = extendTheme({
         }
       }
     }
-  },
-  // 🔥 This stops MUI Joy from merging its built-in blue palette
-  shouldSkipGeneratingVar: (keys) => keys[0] === 'colorSchemes'
+  }
 })
 
 export default theme

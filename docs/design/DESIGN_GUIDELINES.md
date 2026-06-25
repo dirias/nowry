@@ -447,8 +447,6 @@ Always use the appropriate Joy UI level for the context — never override `font
               <Typography 
                 level='body-xs' 
                 sx={{ 
-                  fontSize: '0.625rem', 
-                  opacity: 0.7,
                   color: 'text.tertiary'
                 }}
               >
@@ -1204,7 +1202,7 @@ For forms with image URL inputs (covers, backgrounds, icons):
     value={formData.image_url}
     onChange={(e) => handleChange('image_url', e.target.value)}
   />
-</AspectRatio>
+</FormControl>   {/* was </AspectRatio> — wrong closing tag */}
 ```
 
 **Best Practices:**

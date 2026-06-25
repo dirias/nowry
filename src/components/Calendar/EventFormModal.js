@@ -5,6 +5,7 @@ import {
   ModalDialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   Stack,
   Box,
   FormControl,
@@ -17,7 +18,8 @@ import {
   CircularProgress,
   Typography,
   Divider,
-  Chip
+  Chip,
+  Checkbox
 } from '@mui/joy'
 import { tasksService } from '../../api/services/tasks.service'
 import { annualPlanningService } from '../../api/services/annualPlanning.service'
@@ -28,10 +30,11 @@ const TYPE_COLORS = {
   task: 'var(--joy-palette-primary-solidBg)',
   priority: 'var(--joy-palette-warning-solidBg)',
   goal: 'var(--joy-palette-success-solidBg)',
-  activity: 'var(--joy-palette-primary-softColor)'
+  activity: 'var(--joy-palette-primary-softColor)',
+  milestone: 'var(--joy-palette-neutral-solidBg)'
 }
 
-const TYPES = ['task', 'priority', 'goal', 'activity']
+const TYPES = ['task', 'priority', 'goal', 'milestone', 'activity']
 
 /**
  * Formats a Date (or existing date string) to a YYYY-MM-DD value
@@ -76,6 +79,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const [date, setDate] = useState('')
   const [focusAreaId, setFocusAreaId] = useState('')
   const [goalId, setGoalId] = useState('')
+  const [isKeyResult, setIsKeyResult] = useState(false)
 
   // Context for plan-based types
   const { plan: cachedPlan, areas: cachedAreas, goals: cachedGoals, loading: hookLoading } = useAnnualPlan()
@@ -88,6 +92,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   useEffect(() => {
     if (!open) return
     setError(null)
+    setIsKeyResult(false)
     if (isEdit && event) {
       setType(event.type || 'task')
       setTitle(event.title || '')
@@ -106,8 +111,8 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   }, [open, isEdit, event, defaultDate])
 
   // ── Fetch annual plan context only when needed ────────────────────────────
-  // Only goal and activity creation need focus-area/goal selectors.
-  const needsContext = !isEdit && (type === 'priority' || type === 'goal' || type === 'activity')
+  // Only goal, activity, and milestone creation need focus-area/goal selectors.
+  const needsContext = !isEdit && (type === 'priority' || type === 'goal' || type === 'activity' || type === 'milestone')
   const annualPlanId = cachedPlan?._id
   const focusAreas = cachedAreas || []
   const allGoals = cachedGoals || []
@@ -116,8 +121,11 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   // ── Derived ───────────────────────────────────────────────────────────────
   const activeType = isEdit ? event?.type || 'task' : type
   const needsFocusArea = !isEdit && type === 'goal'
-  const needsGoal = !isEdit && type === 'activity'
+  const needsGoal = !isEdit && (type === 'activity' || type === 'milestone')
   const needsDescription = activeType === 'priority'
+
+  // Filter out completed goals — only show active ones in the goal selector
+  const activeGoals = allGoals.filter((g) => g.status !== 'completed')
 
   // Determine if save should be blocked
   const canSave = title.trim() && !(needsFocusArea && !focusAreaId) && !(needsGoal && !goalId) && !(type === 'priority' && !annualPlanId)
@@ -177,8 +185,14 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
       }
       case 'activity':
         await annualPlanningService.createActivity(goalId, {
+          title: title.trim()
+        })
+        break
+      case 'milestone':
+        await annualPlanningService.createMilestone(goalId, {
           title: title.trim(),
-          due_date: date || null
+          due_date: date || null,
+          is_key_result: isKeyResult
         })
         break
       default:
@@ -210,8 +224,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
         break
       case 'activity':
         await annualPlanningService.updateActivity(rawId, {
-          title: title.trim(),
-          due_date: date || null
+          title: title.trim()
         })
         break
       default:
@@ -221,9 +234,26 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
 
   return (
     <Modal open={open} onClose={!saving ? onClose : undefined}>
-      <ModalDialog sx={{ width: { xs: '95vw', sm: 440 }, maxWidth: '100vw' }}>
+      <ModalDialog
+        sx={{
+          width: { xs: '100vw', sm: 440 },
+          height: { xs: '100dvh', sm: 'auto' },
+          maxHeight: { xs: '100dvh', sm: '90vh' },
+          maxWidth: '100vw',
+          borderRadius: { xs: 0, sm: 'md' },
+          top: { xs: 0, sm: '50%' },
+          left: { xs: 0, sm: '50%' },
+          transform: { xs: 'none', sm: 'translate(-50%, -50%)' },
+          // Fix: establish a bounded flex column so DialogContent can scroll
+          // and DialogActions always stays visible at the bottom.
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          p: 0
+        }}
+      >
         {/* Title */}
-        <DialogTitle>
+        <DialogTitle sx={{ px: 3, pt: 2.5, pb: 1.5, flexShrink: 0 }}>
           <Stack direction='row' alignItems='center' spacing={1}>
             <Box
               sx={{
@@ -240,8 +270,16 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
           </Stack>
         </DialogTitle>
 
-        <DialogContent>
-          <Stack spacing={2} sx={{ pt: 0.5 }}>
+        <DialogContent
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            px: 3,
+            py: 0
+          }}
+        >
+          <Stack spacing={2} sx={{ pt: 0.5, pb: 2 }}>
             {/* ── Type selector (create only) ───────────────────────── */}
             {!isEdit && (
               <FormControl>
@@ -326,7 +364,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
               </FormControl>
             )}
 
-            {/* ── Goal selector (activity creation) ────────────────── */}
+            {/* ── Goal selector (activity / milestone creation) ─────── */}
             {needsGoal && (
               <FormControl required>
                 <FormLabel>{t('calendarModal.form.goal')}</FormLabel>
@@ -334,9 +372,16 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                   <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
                     <CircularProgress size='sm' />
                   </Box>
+                ) : activeGoals.length === 0 ? (
+                  <>
+                    <Select value='' disabled placeholder={t('calendarModal.form.goal')} />
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
+                      {t('calendarModal.form.noActiveGoals')}
+                    </Typography>
+                  </>
                 ) : (
                   <Select value={goalId} onChange={(_, v) => setGoalId(v)} placeholder={t('calendarModal.form.goal')}>
-                    {allGoals.map((g) => (
+                    {activeGoals.map((g) => (
                       <Option key={g._id} value={g._id}>
                         {g.title}
                       </Option>
@@ -366,11 +411,45 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
               </FormControl>
             )}
 
-            {/* ── Date ─────────────────────────────────────────────── */}
-            <FormControl>
-              <FormLabel>{t('calendarModal.form.date')}</FormLabel>
-              <Input type='date' value={date} onChange={(e) => setDate(e.target.value)} />
-            </FormControl>
+            {/* ── Date (hidden for activities — schedule comes from Annual Planning) ── */}
+            {activeType !== 'activity' && activeType !== 'milestone' && (
+              <FormControl>
+                <FormLabel>{t('calendarModal.form.date')}</FormLabel>
+                <Input type='date' value={date} onChange={(e) => setDate(e.target.value)} />
+              </FormControl>
+            )}
+
+            {/* ── Milestone: optional due date + key result toggle ──── */}
+            {activeType === 'milestone' && !isEdit && (
+              <>
+                <FormControl>
+                  <FormLabel>{t('calendarModal.form.dueDateOptional')}</FormLabel>
+                  <Input type='date' value={date} onChange={(e) => setDate(e.target.value)} />
+                </FormControl>
+                <FormControl orientation='horizontal' sx={{ gap: 1.5, alignItems: 'center' }}>
+                  <Checkbox
+                    checked={isKeyResult}
+                    onChange={(e) => setIsKeyResult(e.target.checked)}
+                    label={t('calendarModal.form.isKeyResult')}
+                    size='sm'
+                  />
+                </FormControl>
+              </>
+            )}
+
+            {/* ── Milestone edit note ───────────────────────────────── */}
+            {activeType === 'milestone' && isEdit && (
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', px: 0.5 }}>
+                {t('calendarModal.form.milestoneEditNote')}
+              </Typography>
+            )}
+
+            {/* ── Habit schedule note ───────────────────────────────── */}
+            {activeType === 'activity' && (
+              <Typography level='body-xs' sx={{ color: 'text.tertiary', px: 0.5 }}>
+                {isEdit ? t('calendarModal.form.habitEditNote') : t('calendarModal.form.habitScheduleNote')}
+              </Typography>
+            )}
 
             {/* ── Error ────────────────────────────────────────────── */}
             {error && (
@@ -378,25 +457,33 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                 {error}
               </Typography>
             )}
-
-            {/* ── Actions ──────────────────────────────────────────── */}
-            <Stack direction='row' justifyContent='flex-end' spacing={1} sx={{ pt: 0.5 }}>
-              <Button variant='plain' color='neutral' onClick={onClose} disabled={saving}>
-                {t('calendarModal.form.cancel')}
-              </Button>
-              <Button
-                loading={saving}
-                disabled={!canSave}
-                onClick={handleSave}
-                sx={{
-                  '&:disabled': { opacity: 0.5 }
-                }}
-              >
-                {t('calendarModal.form.save')}
-              </Button>
-            </Stack>
           </Stack>
         </DialogContent>
+
+        <DialogActions
+          sx={{
+            flexShrink: 0,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.surface',
+            px: 3,
+            py: 1.5
+          }}
+        >
+          <Button variant='plain' color='neutral' onClick={onClose} disabled={saving}>
+            {t('calendarModal.form.cancel')}
+          </Button>
+          <Button
+            loading={saving}
+            disabled={!canSave}
+            onClick={handleSave}
+            sx={{
+              '&:disabled': { opacity: 0.5 }
+            }}
+          >
+            {t('calendarModal.form.save')}
+          </Button>
+        </DialogActions>
       </ModalDialog>
     </Modal>
   )

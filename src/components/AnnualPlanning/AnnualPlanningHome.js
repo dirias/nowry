@@ -287,15 +287,15 @@ const AnnualPlanningHome = () => {
               component='input'
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              style={{
+              sx={{
                 fontSize: '2rem',
                 fontWeight: 800,
                 fontFamily: 'inherit',
                 border: 'none',
                 borderBottom: '2px solid',
-                borderColor: 'var(--joy-palette-text-primary)',
+                borderColor: 'text.primary',
                 outline: 'none',
-                background: 'transparent',
+                bgcolor: 'transparent',
                 textAlign: 'center',
                 maxWidth: '400px'
               }}
@@ -359,11 +359,11 @@ const AnnualPlanningHome = () => {
               <>
                 <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <FlagIcon sx={{ fontSize: 18, color: 'warning.solidBg', opacity: 0.8 }} />
+                  <FlagIcon sx={{ fontSize: 18, color: 'warning.plainColor' }} />
                   <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary', fontSize: '1rem' }}>
                     {priorities.length}{' '}
                     <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
-                      Priorities
+                      {t('annualPlanning.stats.priorities')}
                     </Typography>
                   </Typography>
                 </Box>
@@ -374,7 +374,7 @@ const AnnualPlanningHome = () => {
               <>
                 <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <CheckCircleIcon sx={{ fontSize: 18, color: 'success.solidBg', opacity: 0.8 }} />
+                  <CheckCircleIcon sx={{ fontSize: 18, color: 'success.plainColor' }} />
                   <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary', fontSize: '1rem' }}>
                     {metrics.completedGoals} / {metrics.totalGoals}{' '}
                     <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
@@ -402,7 +402,7 @@ const AnnualPlanningHome = () => {
                   onClick={() => handleOpenCloseModal(overdueQ || currentQ, overdueY || currentQYear)}
                   sx={{ borderRadius: 'lg', fontWeight: 600 }}
                 >
-                  Review Now
+                  {t('annualPlanning.home.reviewNow')}
                 </Button>
               }
               sx={{

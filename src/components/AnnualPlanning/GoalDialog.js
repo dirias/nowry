@@ -231,7 +231,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
           </DialogTitle>
           {goal && goal._id && (
             <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-              Update your goal details
+              {t('annualPlanning.goal.editSubtitle')}
             </Typography>
           )}
         </Box>
@@ -262,7 +262,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                     bgcolor: goal.quarter ? 'primary.solidBg' : 'neutral.solidBg'
                   }}
                 />
-                <Typography level='body-sm' sx={{ fontWeight: 600, color: goal.quarter ? 'primary.solidBg' : 'text.primary' }}>
+                <Typography level='body-sm' sx={{ fontWeight: 600, color: goal.quarter ? 'primary.plainColor' : 'text.primary' }}>
                   {goal.quarter ? `Q${goal.quarter} Goal` : 'Yearly Objective'}
                 </Typography>
                 {goal.parent_id && (
@@ -280,11 +280,11 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
               /* Editable Timeframe Selector */
               <Box>
                 <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
-                  Timeframe
+                  {t('annualPlanning.goal.timeframe')}
                 </Typography>
                 <Stack spacing={2}>
                   <FormControl>
-                    <FormLabel sx={{ fontWeight: 600 }}>When do you want to achieve this?</FormLabel>
+                    <FormLabel sx={{ fontWeight: 600 }}>{t('annualPlanning.goal.timeframeQuestion')}</FormLabel>
                     <Select
                       value={formData.type === 'yearly' ? 'yearly' : formData.quarter}
                       onChange={(e, val) => {
@@ -308,7 +308,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
 
                   {formData.type === 'quarterly' && yearlyObjectives.length > 0 && (
                     <FormControl>
-                      <FormLabel sx={{ fontWeight: 600 }}>Link to Yearly Objective (optional)</FormLabel>
+                      <FormLabel sx={{ fontWeight: 600 }}>{t('annualPlanning.goal.linkToObjective')}</FormLabel>
                       <Select
                         value={formData.parent_id}
                         onChange={(e, val) => handleChange('parent_id', val)}
@@ -332,7 +332,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
             {/* Section: Basic Information */}
             <Box>
               <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
-                Basic Information
+                {t('annualPlanning.goal.basicInfo')}
               </Typography>
               <Stack spacing={2}>
                 <FormControl required>
@@ -340,7 +340,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                   <Input
                     value={formData.title}
                     onChange={(e) => handleChange('title', e.target.value)}
-                    placeholder='What do you want to achieve?'
+                    placeholder={t('annualPlanning.goal.titlePlaceholder')}
                     autoFocus
                     size='lg'
                     sx={{ fontSize: '1rem' }}
@@ -353,7 +353,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                     minRows={3}
                     value={formData.description}
                     onChange={(e) => handleChange('description', e.target.value)}
-                    placeholder='Add details about this goal...'
+                    placeholder={t('annualPlanning.goal.descriptionPlaceholder')}
                     sx={{ fontSize: '0.95rem' }}
                   />
                 </FormControl>
@@ -367,7 +367,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
               <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
                 <Box>
                   <Typography level='title-md' sx={{ fontWeight: 700, color: 'text.primary' }}>
-                    Key Results & Milestones
+                    {t('annualPlanning.goal.keyResultsTitle')}
                   </Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                     Break down your goal into measurable steps
@@ -402,7 +402,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                         transition: 'all 0.2s',
                         flexShrink: 0,
                         '&:hover': {
-                          borderColor: ms.completed ? 'success.solidHoverBg' : 'primary.solidBg',
+                          borderColor: ms.completed ? 'success.outlinedBorder' : 'primary.outlinedBorder',
                           transform: 'scale(1.05)'
                         }
                       }}
@@ -435,7 +435,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                           handleAddMilestone()
                         }
                       }}
-                      placeholder='Milestone title...'
+                      placeholder={t('annualPlanning.goal.milestonePlaceholder')}
                       sx={{
                         textDecoration: ms.completed ? 'line-through' : 'none',
                         color: ms.completed ? 'text.tertiary' : 'text.primary'
@@ -481,12 +481,13 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                         🗓 {ms.due_date || 'date'}
                       </Box>
                       {/* Invisible but properly-sized date input for native picker */}
-                      <input
+                      <Box
+                        component='input'
                         ref={(el) => (dateInputRefs.current[index] = el)}
                         type='date'
                         value={ms.due_date || ''}
                         onChange={(e) => handleMilestoneChange(index, 'due_date', e.target.value)}
-                        style={{
+                        sx={{
                           position: 'absolute',
                           top: 0,
                           left: 0,
@@ -517,7 +518,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                     }}
                   >
                     <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                      No milestones yet. Add your first milestone above.
+                      {t('annualPlanning.goal.noMilestones')}
                     </Typography>
                   </Box>
                 )}
@@ -529,7 +530,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
             {/* Section: Timeline & Visual */}
             <Box>
               <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
-                Timeline & Visual
+                {t('annualPlanning.goal.timelineVisual')}
               </Typography>
               <Stack spacing={2}>
                 <FormControl>
@@ -546,9 +547,10 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                   {formData.image_url && (
                     <AspectRatio
                       ratio='16/9'
+                      objectFit='cover'
                       sx={{ mb: 2, borderRadius: 'md', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}
                     >
-                      <img src={formData.image_url} alt='Goal preview' style={{ objectFit: 'cover' }} loading='lazy' />
+                      <img src={formData.image_url} alt='Goal preview' loading='lazy' />
                     </AspectRatio>
                   )}
 
@@ -576,7 +578,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
               <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
                 <Box>
                   <Typography level='title-md' sx={{ fontWeight: 700, color: 'text.primary' }}>
-                    Habits
+                    {t('annualPlanning.goal.habits')}
                   </Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                     What will you do regularly to stay on track?
@@ -592,7 +594,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                   <Card variant='outlined' key={index} sx={{ p: 2, bgcolor: 'background.surface' }}>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
                       <Input
-                        placeholder='What will you do regularly?'
+                        placeholder={t('annualPlanning.goal.habitPlaceholder')}
                         value={act.title}
                         onChange={(e) => handleActivityChange(index, 'title', e.target.value)}
                         sx={{ flex: 1 }}
@@ -668,10 +670,10 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
           }}
         >
           <Button variant='plain' onClick={onClose} size='lg' sx={{ width: { xs: '100%', sm: 'auto' } }}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleSubmit} loading={loading} disabled={loading} size='lg' sx={{ width: { xs: '100%', sm: 'auto' } }}>
-            {goal && goal._id ? 'Update Goal' : 'Save Goal'}
+            {goal && goal._id ? t('annualPlanning.goal.updateGoal') : t('annualPlanning.goal.saveGoal')}
           </Button>
         </Box>
       </ModalDialog>

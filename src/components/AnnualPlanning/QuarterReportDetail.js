@@ -204,8 +204,8 @@ const QuarterReportDetail = ({
                   {report.knowledge_summary.books_finished.map((b, i) => (
                     <Box key={i} sx={{ minWidth: 70, maxWidth: 70, textAlign: 'center' }}>
                       {b.cover_url ? (
-                        <AspectRatio ratio='2/3' sx={{ borderRadius: 'sm', mb: 0.5 }}>
-                          <img src={b.cover_url} alt={b.title} loading='lazy' style={{ objectFit: 'cover' }} />
+                        <AspectRatio ratio='2/3' objectFit='cover' sx={{ borderRadius: 'sm', mb: 0.5 }}>
+                          <img src={b.cover_url} alt={b.title} loading='lazy' />
                         </AspectRatio>
                       ) : (
                         <Box
@@ -263,9 +263,7 @@ const QuarterReportDetail = ({
                     level='title-lg'
                     sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, color: area.color || 'text.primary' }}
                   >
-                    {area.icon && (
-                      <span style={{ fontSize: '1.5rem', filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.15))' }}>{area.icon}</span>
-                    )}
+                    {area.icon && <Box sx={{ fontSize: '1.5rem', filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.15))' }}>{area.icon}</Box>}
                     {area.name}
                   </Typography>
 

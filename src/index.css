@@ -64,19 +64,20 @@ textarea {
 }
 
 /* COMPREHENSIVE FIX: Remove all backgrounds from icons and their wrappers */
-/* Target icon container elements — but NOT checkbox internals */
-button *:not([class*='MuiCheckbox']):not([class*='checkbox']),
-a *:not([class*='MuiCheckbox']):not([class*='checkbox']),
-[role='button'] *:not([class*='MuiCheckbox']):not([class*='checkbox']) {
+/* Target icon container elements — but NOT checkbox internals or Joy UI chip internals */
+/* MuiChip-action is a button child that carries the chip's variant fill — must not be transparent */
+button *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']),
+a *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']),
+[role='button'] *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']) {
   background-color: transparent !important;
 }
 
-/* Specific targeting for Joy UI components — exclude checkbox */
+/* Specific targeting for Joy UI components — exclude checkbox and chip internals */
+/* MuiChip-root is excluded: Joy UI renders the solid variant background on .MuiChip-action
+   (a child button), so stripping child backgrounds breaks solid chip fills entirely */
 .MuiButton-root *,
 .MuiIconButton-root *,
-.MuiChip-root *,
-[class*='MuiButton'] *,
-[class*='MuiChip'] * {
+[class*='MuiButton'] * {
   background-color: transparent !important;
 }
 

@@ -110,6 +110,13 @@ export const annualPlanningService = {
     _bustPlanCache()
     return data
   },
+
+  // Milestones
+  async createMilestone(goalId, milestone) {
+    const { data } = await apiClient.post(ENDPOINTS.milestones.create(goalId), milestone)
+    _bustPlanCache()
+    return data
+  },
   async updateActivity(id, update) {
     const { data } = await apiClient.put(ENDPOINTS.activities.update(id), update)
     return data

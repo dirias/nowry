@@ -41,9 +41,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
     target_date: '2026-12-31',
     focus_area_id: 'area-001',
     status: 'active',
-    milestones: [
-      { title: 'Read 3 books', due_date: '2026-03-31', is_key_result: true, completed: false }
-    ]
+    milestones: [{ title: 'Read 3 books', due_date: '2026-03-31', is_key_result: true, completed: false }]
   }
   const mockTask = {
     _id: 'task-001',
@@ -143,30 +141,75 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 // ─── Phase 15: isKeyResult tests ─────────────────────────────────────────────
 
 describe('calendarService — CAL-02: isKeyResult in milestone extendedProps', () => {
-  it('milestone push block sets isKeyResult: false when ms.is_key_result is false', () => {
-    // Verify that !!false === false
-    expect(!!false).toBe(false)
+  const { tasksService } = require('./tasks.service')
+  const { annualPlanningService } = require('./annualPlanning.service')
+  const { apiCache } = require('../utils/cache')
+
+  // Base goal used across CAL-02 tests; milestones overridden per-test as needed
+  const baseGoal = {
+    _id: 'goal-cal02',
+    title: 'CAL-02 goal',
+    target_date: '2026-12-31',
+    focus_area_id: null,
+    status: 'active'
+  }
+
+  beforeEach(() => {
+    apiCache.get.mockImplementation((_key, _ttl, factory) => factory())
+    tasksService.getAll.mockResolvedValue([])
   })
 
-  it('milestone push block sets isKeyResult: true when ms.is_key_result is true', () => {
-    // Verify that !!true === true
-    expect(!!true).toBe(true)
+  afterEach(() => {
+    jest.clearAllMocks()
   })
 
-  it('milestone push block sets isKeyResult: false when ms.is_key_result is undefined (pre-field doc)', () => {
-    // Verify that !!undefined === false — defensive against legacy MongoDB docs
-    expect(!!undefined).toBe(false)
+  it('milestone event sets isKeyResult: true when ms.is_key_result is true', async () => {
+    annualPlanningService.getFullAnnualPlan.mockResolvedValue({
+      plan: {},
+      priorities: [],
+      focus_areas: [],
+      goals: [{ ...baseGoal, milestones: [{ title: 'KR milestone', due_date: '2026-06-01', is_key_result: true, completed: false }] }],
+      activities: []
+    })
+
+    const { calendarService } = require('./calendar.service')
+    const { events } = await calendarService.getAllEvents()
+    const ms = events.find((e) => e.type === 'milestone')
+    expect(ms).toBeDefined()
+    expect(ms.isKeyResult).toBe(true)
   })
 
-  it('isKeyResult field maps correctly from ms.is_key_result via !! coercion', () => {
-    // Verify the !! coercion used in calendar.service.js line:
-    //   isKeyResult: !!ms.is_key_result
-    // produces the correct boolean for all meaningful input values.
-    const coerce = (val) => !!val
-    expect(coerce(true)).toBe(true)      // explicit true → true
-    expect(coerce(false)).toBe(false)    // explicit false → false
-    expect(coerce(undefined)).toBe(false) // missing field (pre-Phase-15 doc) → false
-    expect(coerce(1)).toBe(true)          // truthy non-boolean → true
-    expect(coerce(0)).toBe(false)         // falsy non-boolean → false
+  it('milestone event sets isKeyResult: false when ms.is_key_result is false', async () => {
+    annualPlanningService.getFullAnnualPlan.mockResolvedValue({
+      plan: {},
+      priorities: [],
+      focus_areas: [],
+      goals: [
+        { ...baseGoal, milestones: [{ title: 'Regular milestone', due_date: '2026-06-01', is_key_result: false, completed: false }] }
+      ],
+      activities: []
+    })
+
+    const { calendarService } = require('./calendar.service')
+    const { events } = await calendarService.getAllEvents()
+    const ms = events.find((e) => e.type === 'milestone')
+    expect(ms).toBeDefined()
+    expect(ms.isKeyResult).toBe(false)
+  })
+
+  it('milestone event sets isKeyResult: false when ms.is_key_result is undefined (pre-field legacy doc)', async () => {
+    annualPlanningService.getFullAnnualPlan.mockResolvedValue({
+      plan: {},
+      priorities: [],
+      focus_areas: [],
+      goals: [{ ...baseGoal, milestones: [{ title: 'Legacy milestone', due_date: '2026-06-01', completed: false }] }],
+      activities: []
+    })
+
+    const { calendarService } = require('./calendar.service')
+    const { events } = await calendarService.getAllEvents()
+    const ms = events.find((e) => e.type === 'milestone')
+    expect(ms).toBeDefined()
+    expect(ms.isKeyResult).toBe(false)
   })
 })

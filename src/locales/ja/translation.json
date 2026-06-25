@@ -667,8 +667,15 @@
         "task": "タスク",
         "priority": "優先事項",
         "goal": "目標",
-        "activity": "アクティビティ"
-      }
+        "milestone": "マイルストーン",
+        "activity": "習慣"
+      },
+      "habitScheduleNote": "習慣のスケジュール（頻度・曜日）は年間計画で設定します。",
+      "habitEditNote": "ここではタイトルのみ編集できます。スケジュールの変更は年間計画で行ってください。",
+      "dueDateOptional": "期日（任意）",
+      "isKeyResult": "キー結果",
+      "milestoneEditNote": "マイルストーンは年間計画で編集してください。",
+      "noActiveGoals": "アクティブな目標がありません。まず年間計画で目標を作成してください。"
     }
   },
   "about": {
@@ -779,20 +786,9 @@
           "title": "3の力",
           "message": "研究によると、一度にすべてを改善しようとするよりも、3つの主要な生活分野に集中する方が大きな成功につながります。今年の3つの分野を定義しましょう。"
         },
-        "tips": [
-          "最も重要なことについて具体的に",
-          "自分の価値観に合った分野を選ぶ",
-          "さまざまな生活領域のバランスを考える"
-        ]
+        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"]
       },
-      "examples": [
-        "キャリア成長",
-        "健康と活力",
-        "経済的自由",
-        "人間関係",
-        "創造的な活動",
-        "学習とスキル"
-      ]
+      "examples": ["キャリア成長", "健康と活力", "経済的自由", "人間関係", "創造的な活動", "学習とスキル"]
     },
     "priority": {
       "title": "年間優先事項",
@@ -830,7 +826,22 @@
       "smartHelper": "SMARTにする：具体的、測定可能、達成可能、関連性、期限付き",
       "activitiesCount": "{{count}} アクティビティ",
       "activitiesCount_plural": "{{count}} アクティビティ",
-      "viewBoard": "ボードとして表示"
+      "viewBoard": "ボードとして表示",
+      "editSubtitle": "目標の詳細を更新",
+      "timeframe": "期間設定",
+      "timeframeQuestion": "いつまでに達成したいですか？",
+      "linkToObjective": "年間目標にリンク (オプション)",
+      "basicInfo": "基本情報",
+      "keyResultsTitle": "主要な結果とマイルストーン",
+      "timelineVisual": "タイムラインとビジュアル",
+      "habits": "習慣",
+      "noMilestones": "まだマイルストーンがありません。上で最初のマイルストーンを追加してください。",
+      "saveGoal": "目標を保存",
+      "updateGoal": "目標を更新",
+      "titlePlaceholder": "何を達成したいですか？",
+      "descriptionPlaceholder": "この目標の詳細を追加...",
+      "milestonePlaceholder": "マイルストーンのタイトル...",
+      "habitPlaceholder": "定期的に何をしますか？"
     },
     "activity": {
       "title": "活動＆習慣",
@@ -883,7 +894,12 @@
       "afternoonEmptyTitle": "午後を自分のものに。",
       "eveningEmptyTitle": "意図を持って一日を締めくくろう。",
       "emptySubtitle": "毎日のルーティンを設定して、常に軌道に乗り続けましょう。",
-      "emptyCta": "ルーティンを設定"
+      "emptyCta": "ルーティンを設定",
+      "addItemPlaceholder": "アイテムを追加...",
+      "goalActivities": "目標アクティビティ",
+      "routineItems": "ルーチンアイテム",
+      "saving": "保存中...",
+      "swipeHint": "スワイプしてナビゲート"
     },
     "progress": {
       "title": "進捗ダッシュボード",
@@ -911,7 +927,8 @@
     "home": {
       "yearlyPriorities": "年間優先事項",
       "noPrioritiesAdded": "まだ優先事項が追加されていません",
-      "viewAllPriorities": "{{count}}件の優先事項をすべて表示 →"
+      "viewAllPriorities": "{{count}}件の優先事項をすべて表示 →",
+      "reviewNow": "今すぐレビュー"
     },
     "deleteConfirm": "この{{type}}を削除してもよろしいですか？この操作は元に戻せません。",
     "celebration": "🎉 目標達成！素晴らしい進歩です！",
@@ -1669,6 +1686,12 @@
       "typeMilestoneAriaLabel": "Filter by milestones",
       "noAreas": "No focus areas",
       "noAreasBody": "Add a focus area in Annual Planning to filter the calendar"
+    },
+    "empty": {
+      "week": {
+        "title": "No events this week",
+        "body": "Add an event or check another week"
+      }
     }
   },
   "goalAi": {
