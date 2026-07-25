@@ -1337,6 +1337,23 @@
       "completionRate": "Completion Rate",
       "priorities": "Priorities"
     },
+    "tabs": {
+      "overview": "Overview",
+      "goals": "Goals",
+      "priorities": "Priorities",
+      "reports": "Reports",
+      "ariaLabel": "Annual Planning sections",
+      "goalsEmptyTitle": "No goals yet",
+      "goalsEmptyBody": "Add goals inside a focus area to see them here.",
+      "errorLoading": "Couldn't load this tab. Please try again.",
+      "gridView": "Grid view",
+      "listView": "List view",
+      "reportsEmptyTitle": "No reports yet",
+      "reportsEmptyBody": "Close a quarter to see its report here."
+    },
+    "breadcrumb": {
+      "root": "Annual Planning"
+    },
     "focusArea": {
       "title": "Focus Areas",
       "subtitle": "Choose 3 main areas to focus on this year",
@@ -1392,7 +1409,21 @@
       "name": "Priority",
       "deadline": "Target Date",
       "linkedTo": "Linked to {{area}}",
-      "noGoals": "No priorities added yet"
+      "noGoals": "No priorities added yet",
+      "noActivePriorities": "No active priorities",
+      "completedSection": "Completed",
+      "done": "Done",
+      "inactive": "Inactive",
+      "activeIcon": "Active",
+      "inactiveIcon": "Inactive",
+      "activate": "Activate",
+      "markInactive": "Mark inactive",
+      "showInactive": "Show inactive ({{count}})",
+      "hideInactive": "Hide inactive",
+      "dragHandle": "Drag to reorder",
+      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
+      "linkedToEntity": "This priority is linked to a {{entityType}}",
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
     },
     "goal": {
       "add": "Add Goal",
@@ -1413,6 +1444,18 @@
         "inProgress": "In Progress",
         "completed": "Completed"
       },
+      "healthStatus": {
+        "onTrack": "On Track",
+        "atRisk": "At Risk",
+        "behind": "Behind",
+        "completed": "Completed"
+      },
+      "activities": "Activities",
+      "noActivities": "No linked activities",
+      "percentComplete": "{{percent}}% Complete",
+      "activitiesError": "Failed to load activities",
+      "completionBlockedTitle": "Cannot mark goal as completed",
+      "completionBlockedBody": "Please complete these milestones first:",
       "image": "Visual Inspiration (optional)",
       "imageUrl": "Image URL",
       "generateImage": "Generate with AI",
@@ -1468,6 +1511,10 @@
       "markComplete": "Mark Complete",
       "toggleActive": "Toggle Active"
     },
+    "milestone": {
+      "label": "Milestones ({{completed}}/{{total}})",
+      "locked": "Milestones are locked"
+    },
     "closeQuarter": {
       "achievementsPlaceholder": "List what you achieved this quarter...",
       "challengesPlaceholder": "Describe challenges you faced...",
@@ -1510,7 +1557,13 @@
       "afternoonEmptyTitle": "Own your afternoon.",
       "eveningEmptyTitle": "Wind down with intention.",
       "emptySubtitle": "Set up your daily routine to stay on track every day.",
-      "emptyCta": "Set up routine"
+      "emptyCta": "Set up routine",
+      "goalPrefix": "Goal: {{title}}",
+      "toggleItem": "Mark as done for today",
+      "noItems": "No routine items configured yet",
+      "deleteItem": "Delete item",
+      "addItem": "Add item",
+      "editRoutine": "Edit routine"
     },
     "progress": {
       "title": "Progress Dashboard",
@@ -1555,7 +1608,38 @@
       "viewAllPriorities": "View all {{count}} priorities →",
       "progress": "Progress",
       "save": "Save",
-      "reviewNow": "Review Now"
+      "reviewNow": "Review Now",
+      "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
+      "quarterEndsToday": "Quarter {{quarter}} ends today",
+      "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
+      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
+      "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
+      "routineCompletion": "items done"
+    },
+    "quarterReport": {
+      "report": "Report",
+      "preview": "Preview",
+      "unassignedArea": "Unassigned",
+      "noneRecorded": "None recorded",
+      "reflections": "Quarterly Reflections",
+      "biggestWins": "Biggest Wins",
+      "challenges": "Challenges",
+      "nextFocus": "Next Focus",
+      "goalsAchieved": "Goals Achieved",
+      "milestonesCompleted": "Milestones Completed",
+      "totalProgress": "Total Progress",
+      "insights": "Quarterly Insights",
+      "routineConsistency": "Routine Consistency",
+      "activeDays": "Active {{count}} day this quarter",
+      "activeDays_plural": "Active {{count}} days this quarter",
+      "activeDays_other": "Active {{count}} days this quarter",
+      "booksFinished": "Books Finished ({{count}})",
+      "breakdownByFocusArea": "Breakdown by Focus Area",
+      "migratedCount": "Migrated {{count}}x",
+      "migratedCount_plural": "Migrated {{count}}x",
+      "migratedCount_other": "Migrated {{count}}x",
+      "due": "Due",
+      "migrateToNextQuarter": "Migrate to Next Quarter"
     },
     "deleteConfirm": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
     "celebration": "🎉 Goal Completed! You're making amazing progress!",

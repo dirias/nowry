@@ -169,7 +169,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
           p: 0,
           borderRadius: { xs: 'lg', md: 'xl' },
           bgcolor: 'background.surface',
-          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)'
+          boxShadow: 'lg'
         }}
       >
         <Box sx={{ p: 3, bgcolor: 'background.level1', borderBottom: '1px solid', borderColor: 'divider' }}>
@@ -214,7 +214,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
               </Typography>
               <Stack spacing={4}>
                 <Box>
-                  <Typography level='title-sm' sx={{ mb: 1, color: 'success.solidHoverBg' }}>
+                  <Typography level='title-sm' sx={{ mb: 1, color: 'success.plainColor' }}>
                     What were your biggest wins this quarter?
                   </Typography>
                   <Textarea
@@ -236,7 +236,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
                   />
                 </Box>
                 <Box>
-                  <Typography level='title-sm' sx={{ mb: 1, color: 'primary.solidHoverBg' }}>
+                  <Typography level='title-sm' sx={{ mb: 1, color: 'primary.plainColor' }}>
                     What is your main focus for next quarter?
                   </Typography>
                   <Textarea
@@ -260,7 +260,7 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
             alignItems: 'center'
           }}
         >
-          <Typography level='body-sm' sx={{ color: 'text.tertiary', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 'sm' }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Step {activeStep + 1} of 2
           </Typography>
           <Stack direction='row' spacing={1}>

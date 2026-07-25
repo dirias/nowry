@@ -211,7 +211,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
           p: 0,
           m: { xs: 'auto', md: 'auto' },
           borderRadius: { xs: 'lg', md: 'xl' },
-          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+          boxShadow: 'lg',
           border: '1px solid',
           borderColor: 'divider'
         }}
@@ -392,12 +392,13 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                         width: 20,
                         height: 20,
                         border: '2px solid',
-                        borderColor: ms.completed ? 'success.solidBg' : 'neutral.outlinedBorder',
+                        borderColor: ms.completed ? 'success.outlinedColor' : 'neutral.outlinedBorder',
                         borderRadius: '4px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: ms.completed ? 'success.solidBg' : 'transparent',
+                        bgcolor: ms.completed ? 'success.softBg' : 'transparent',
+                        color: ms.completed ? 'success.plainColor' : undefined,
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         flexShrink: 0,
@@ -414,7 +415,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
                           height='14'
                           viewBox='0 0 24 24'
                           fill='none'
-                          stroke='white'
+                          stroke='currentColor'
                           strokeWidth='3'
                           strokeLinecap='round'
                           strokeLinejoin='round'

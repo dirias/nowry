@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Stack, Divider, LinearProgress, Card, Chip, Grid, Input, CircularProgress, AspectRatio } from '@mui/joy'
 import {
   EmojiEvents as EmojiEventsIcon,
@@ -7,6 +8,14 @@ import {
   CalendarToday as CalendarIcon,
   ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material'
+
+const LABEL_UPPERCASE_SX = {
+  color: 'text.tertiary',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  mb: 1,
+  fontWeight: 700
+}
 
 const QuarterReportDetail = ({
   report,
@@ -17,6 +26,7 @@ const QuarterReportDetail = ({
   onMigrationChange = () => {},
   hideGoals = false
 }) => {
+  const { t } = useTranslation()
   // Map focus areas
   const areaMap = focusAreas.reduce((acc, fa) => {
     acc[fa._id] = fa
@@ -41,14 +51,15 @@ const QuarterReportDetail = ({
   }
 
   // Fallback icon/color
-  const getArea = (id) => areaMap[id] || { name: 'Unassigned', icon: '🎯', color: 'primary.plainColor' }
+  const getArea = (id) => areaMap[id] || { name: t('annualPlanning.quarterReport.unassignedArea'), icon: '🎯', color: 'primary.plainColor' }
 
   return (
     <Box sx={{ p: 0, bgcolor: 'transparent', mb: 2 }}>
       <Box sx={{ pb: 3, mb: 4, borderBottom: '1px solid', borderColor: 'divider' }}>
         <Stack direction='row' justifyContent='space-between' alignItems='center' mb={2}>
           <Typography level='title-lg' sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <EmojiEventsIcon sx={{ color: 'warning.plainColor' }} />Q{report.quarter} {report.year} Report {isPreview && '(Preview)'}
+            <EmojiEventsIcon sx={{ color: 'warning.plainColor' }} />Q{report.quarter} {report.year}{' '}
+            {t('annualPlanning.quarterReport.report')} {isPreview && `(${t('annualPlanning.quarterReport.preview')})`}
           </Typography>
           {!isPreview && report.created_at && (
             <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
@@ -63,31 +74,31 @@ const QuarterReportDetail = ({
         {!isPreview && report.reflections && (
           <Box sx={{ my: 4, px: { xs: 1, sm: 3 } }}>
             <Typography level='title-md' sx={{ mb: 2, color: 'text.primary' }}>
-              Quarterly Reflections
+              {t('annualPlanning.quarterReport.reflections')}
             </Typography>
             <Stack spacing={2} direction={{ xs: 'column', md: 'row' }}>
               <Card variant='outlined' sx={{ flex: 1, bgcolor: 'background.surface' }}>
                 <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'success.plainColor', mb: 1 }}>
-                  Biggest Wins
+                  {t('annualPlanning.quarterReport.biggestWins')}
                 </Typography>
                 <Typography level='body-md' sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-                  &quot;{report.reflections.biggest_wins || 'None recorded'}&quot;
+                  &quot;{report.reflections.biggest_wins || t('annualPlanning.quarterReport.noneRecorded')}&quot;
                 </Typography>
               </Card>
               <Card variant='outlined' sx={{ flex: 1, bgcolor: 'background.surface' }}>
                 <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'danger.plainColor', mb: 1 }}>
-                  Challenges
+                  {t('annualPlanning.quarterReport.challenges')}
                 </Typography>
                 <Typography level='body-md' sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-                  &quot;{report.reflections.biggest_challenges || 'None recorded'}&quot;
+                  &quot;{report.reflections.biggest_challenges || t('annualPlanning.quarterReport.noneRecorded')}&quot;
                 </Typography>
               </Card>
               <Card variant='outlined' sx={{ flex: 1, bgcolor: 'background.surface' }}>
                 <Typography level='body-xs' sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'primary.plainColor', mb: 1 }}>
-                  Next Focus
+                  {t('annualPlanning.quarterReport.nextFocus')}
                 </Typography>
                 <Typography level='body-md' sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-                  &quot;{report.reflections.next_quarter_focus || 'None recorded'}&quot;
+                  &quot;{report.reflections.next_quarter_focus || t('annualPlanning.quarterReport.noneRecorded')}&quot;
                 </Typography>
               </Card>
             </Stack>
@@ -111,11 +122,8 @@ const QuarterReportDetail = ({
           }}
         >
           <Box sx={{ flex: 1, textAlign: 'center', width: '100%' }}>
-            <Typography
-              level='body-xs'
-              sx={{ color: 'text.tertiary', textTransform: 'uppercase', letterSpacing: 'sm', mb: 1, fontWeight: 700 }}
-            >
-              Goals Achieved
+            <Typography level='body-xs' sx={LABEL_UPPERCASE_SX}>
+              {t('annualPlanning.quarterReport.goalsAchieved')}
             </Typography>
             <Stack direction='row' alignItems='baseline' justifyContent='center' spacing={0.5}>
               <Typography level='h2' sx={{ lineHeight: 1, m: 0 }}>
@@ -127,11 +135,8 @@ const QuarterReportDetail = ({
             </Stack>
           </Box>
           <Box sx={{ flex: 1, textAlign: 'center', width: '100%' }}>
-            <Typography
-              level='body-xs'
-              sx={{ color: 'text.tertiary', textTransform: 'uppercase', letterSpacing: 'sm', mb: 1, fontWeight: 700 }}
-            >
-              Milestones Completed
+            <Typography level='body-xs' sx={LABEL_UPPERCASE_SX}>
+              {t('annualPlanning.quarterReport.milestonesCompleted')}
             </Typography>
             <Stack direction='row' alignItems='baseline' justifyContent='center' spacing={0.5}>
               <Typography level='h2' sx={{ lineHeight: 1, m: 0 }}>
@@ -143,11 +148,8 @@ const QuarterReportDetail = ({
             </Stack>
           </Box>
           <Box sx={{ flex: 1, textAlign: 'center', width: '100%' }}>
-            <Typography
-              level='body-xs'
-              sx={{ color: 'text.tertiary', textTransform: 'uppercase', letterSpacing: 'sm', mb: 1, fontWeight: 700 }}
-            >
-              Total Progress
+            <Typography level='body-xs' sx={LABEL_UPPERCASE_SX}>
+              {t('annualPlanning.quarterReport.totalProgress')}
             </Typography>
             <Stack direction='row' alignItems='baseline' justifyContent='center' spacing={0.5}>
               <Typography
@@ -173,7 +175,7 @@ const QuarterReportDetail = ({
       {!isPreview && (report.routines_summary?.active_days > 0 || report.knowledge_summary?.books_finished?.length > 0) && (
         <Box sx={{ p: { xs: 2, sm: 3 }, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 2 }}>
-            Quarterly Insights
+            {t('annualPlanning.quarterReport.insights')}
           </Typography>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
             {report.routines_summary?.active_days > 0 && (
@@ -187,9 +189,9 @@ const QuarterReportDetail = ({
                   </Typography>
                 </CircularProgress>
                 <Box>
-                  <Typography level='title-sm'>Routine Consistency</Typography>
+                  <Typography level='title-sm'>{t('annualPlanning.quarterReport.routineConsistency')}</Typography>
                   <Typography level='body-xs' color='text.tertiary'>
-                    Active {report.routines_summary.active_days} days this quarter
+                    {t('annualPlanning.quarterReport.activeDays', { count: report.routines_summary.active_days })}
                   </Typography>
                 </Box>
               </Card>
@@ -198,7 +200,7 @@ const QuarterReportDetail = ({
             {report.knowledge_summary?.books_finished?.length > 0 && (
               <Card variant='outlined' sx={{ flex: 2, bgcolor: 'background.surface' }}>
                 <Typography level='title-sm' sx={{ mb: 1 }}>
-                  Books Finished ({report.knowledge_summary.books_finished.length})
+                  {t('annualPlanning.quarterReport.booksFinished', { count: report.knowledge_summary.books_finished.length })}
                 </Typography>
                 <Stack direction='row' spacing={1.5} sx={{ overflowX: 'auto', pb: 1 }}>
                   {report.knowledge_summary.books_finished.map((b, i) => (
@@ -223,7 +225,6 @@ const QuarterReportDetail = ({
                             level='body-xs'
                             sx={{
                               p: 0.5,
-                              fontSize: '0.6rem',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               display: '-webkit-box',
@@ -235,7 +236,7 @@ const QuarterReportDetail = ({
                           </Typography>
                         </Box>
                       )}
-                      <Typography level='body-xs' noWrap sx={{ fontSize: '0.65rem' }}>
+                      <Typography level='body-xs' noWrap>
                         {b.title}
                       </Typography>
                     </Box>
@@ -251,7 +252,7 @@ const QuarterReportDetail = ({
       {!hideGoals && (
         <Box sx={{ p: { xs: 2, sm: 3 } }}>
           <Typography level='title-md' sx={{ mb: 2 }}>
-            Breakdown by Focus Area
+            {t('annualPlanning.quarterReport.breakdownByFocusArea')}
           </Typography>
           <Stack spacing={4}>
             {Object.entries(goalsByArea).map(([areaId, goals]) => {
@@ -263,7 +264,16 @@ const QuarterReportDetail = ({
                     level='title-lg'
                     sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, color: area.color || 'text.primary' }}
                   >
-                    {area.icon && <Box sx={{ fontSize: '1.5rem', filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.15))' }}>{area.icon}</Box>}
+                    {area.icon && (
+                      <Box
+                        sx={{
+                          fontSize: '1.5rem',
+                          filter: 'drop-shadow(0px 2px 4px var(--joy-palette-text-tertiary, rgba(0,0,0,0.15)))'
+                        }}
+                      >
+                        {area.icon}
+                      </Box>
+                    )}
                     {area.name}
                   </Typography>
 
@@ -289,6 +299,7 @@ const QuarterReportDetail = ({
 }
 
 const GoalDetail = ({ goal, interactiveMigration, migrationState, onMigrationChange }) => {
+  const { t } = useTranslation()
   const progress = goal._calculatedProgress !== undefined ? goal._calculatedProgress : goal.progress || 0
   const isComplete = goal.status === 'completed' || progress === 100
 
@@ -308,8 +319,8 @@ const GoalDetail = ({ goal, interactiveMigration, migrationState, onMigrationCha
           <Stack direction='row' alignItems='center' spacing={1} mb={0.5}>
             <Typography level='title-md'>{goal.title}</Typography>
             {!isComplete && (goal.migration_count || 0) >= 2 && (
-              <Chip size='sm' variant='soft' color='warning' sx={{ fontSize: '0.65rem' }}>
-                Migrated {goal.migration_count}x
+              <Chip size='sm' variant='soft' color='warning'>
+                {t('annualPlanning.quarterReport.migratedCount', { count: goal.migration_count })}
               </Chip>
             )}
           </Stack>
@@ -349,8 +360,8 @@ const GoalDetail = ({ goal, interactiveMigration, migrationState, onMigrationCha
                   {(m.due_date || m.target_date) && (
                     <Stack direction='row' alignItems='center' spacing={0.5} sx={{ mt: 0.25 }}>
                       <CalendarIcon sx={{ fontSize: 12, color: m.completed ? 'text.tertiary' : 'warning.plainColor' }} />
-                      <Typography level='body-xs' sx={{ color: m.completed ? 'text.tertiary' : 'warning.plainColor', fontSize: '0.65rem' }}>
-                        Due: {new Date(m.due_date || m.target_date).toLocaleDateString()}
+                      <Typography level='body-xs' sx={{ color: m.completed ? 'text.tertiary' : 'warning.plainColor' }}>
+                        {t('annualPlanning.quarterReport.due')}: {new Date(m.due_date || m.target_date).toLocaleDateString()}
                       </Typography>
                     </Stack>
                   )}
@@ -365,7 +376,7 @@ const GoalDetail = ({ goal, interactiveMigration, migrationState, onMigrationCha
       {!isComplete && interactiveMigration && migrationState && (
         <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px dashed', borderColor: 'divider' }}>
           <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 1, fontWeight: 600, textTransform: 'uppercase' }}>
-            Migrate to Next Quarter
+            {t('annualPlanning.quarterReport.migrateToNextQuarter')}
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
             <ArrowForwardIcon sx={{ display: { xs: 'none', sm: 'block' }, color: 'text.tertiary', mr: 0.5, fontSize: 18 }} />

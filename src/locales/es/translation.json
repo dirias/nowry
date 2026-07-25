@@ -1046,6 +1046,23 @@
       "completionRate": "Tasa de Finalización",
       "priorities": "Prioridades"
     },
+    "tabs": {
+      "overview": "Overview",
+      "goals": "Goals",
+      "priorities": "Priorities",
+      "reports": "Reports",
+      "ariaLabel": "Annual Planning sections",
+      "goalsEmptyTitle": "No goals yet",
+      "goalsEmptyBody": "Add goals inside a focus area to see them here.",
+      "errorLoading": "Couldn't load this tab. Please try again.",
+      "gridView": "Vista de cuadrícula",
+      "listView": "Vista de lista",
+      "reportsEmptyTitle": "No reports yet",
+      "reportsEmptyBody": "Close a quarter to see its report here."
+    },
+    "breadcrumb": {
+      "root": "Annual Planning"
+    },
     "focusArea": {
       "title": "Áreas de Enfoque",
       "subtitle": "Elige 3 áreas principales para enfocarte este año",
@@ -1108,7 +1125,21 @@
       "name": "Prioridad",
       "deadline": "Fecha Objetivo",
       "linkedTo": "Vinculado a {{area}}",
-      "noGoals": "Sin objetivos vinculados aún"
+      "noGoals": "Sin objetivos vinculados aún",
+      "noActivePriorities": "Sin prioridades activas",
+      "completedSection": "Completadas",
+      "done": "Done",
+      "inactive": "Inactiva",
+      "activeIcon": "Activa",
+      "inactiveIcon": "Inactiva",
+      "activate": "Activar",
+      "markInactive": "Marcar como inactiva",
+      "showInactive": "Mostrar inactivas ({{count}})",
+      "hideInactive": "Ocultar inactivas",
+      "dragHandle": "Arrastrar para reordenar",
+      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
+      "linkedToEntity": "This priority is linked to a {{entityType}}",
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
     },
     "goal": {
       "add": "Agregar Objetivo",
@@ -1129,6 +1160,18 @@
         "inProgress": "En Progreso",
         "completed": "Completado"
       },
+      "healthStatus": {
+        "onTrack": "En Buen Camino",
+        "atRisk": "En Riesgo",
+        "behind": "Retrasado",
+        "completed": "Completado"
+      },
+      "activities": "Actividades",
+      "noActivities": "Sin actividades vinculadas",
+      "percentComplete": "{{percent}}% Completado",
+      "activitiesError": "Error al cargar las actividades",
+      "completionBlockedTitle": "No se puede marcar el objetivo como completado",
+      "completionBlockedBody": "Completa primero estos hitos:",
       "image": "Inspiración Visual (opcional)",
       "imageUrl": "URL de la Imagen",
       "generateImage": "Generar con IA",
@@ -1169,6 +1212,10 @@
       "markComplete": "Marcar Completado",
       "toggleActive": "Alternar Activo"
     },
+    "milestone": {
+      "label": "Hitos ({{completed}}/{{total}})",
+      "locked": "Los hitos están bloqueados"
+    },
     "closeQuarter": {
       "achievementsPlaceholder": "Lista lo que lograste este trimestre...",
       "challengesPlaceholder": "Describe los desafíos que enfrentaste...",
@@ -1185,6 +1232,10 @@
       "evening": "Rutina Nocturna",
       "addBlock": "Agregar Bloque de Tiempo",
       "addItemPlaceholder": "Agregar elemento...",
+      "goalActivities": "ACTIVIDADES DEL OBJETIVO",
+      "routineItems": "ELEMENTOS DE RUTINA",
+      "saving": "Guardando cambios...",
+      "swipeHint": "Desliza para navegar",
       "templates": {
         "title": "Comenzar con una Plantilla",
         "weekday": "Horario Laboral",
@@ -1202,7 +1253,13 @@
       "afternoonEmptyTitle": "Domina tu tarde.",
       "eveningEmptyTitle": "Termina el día con intención.",
       "emptySubtitle": "Configura tu rutina diaria para mantenerte en curso cada día.",
-      "emptyCta": "Configurar rutina"
+      "emptyCta": "Configurar rutina",
+      "goalPrefix": "Goal: {{title}}",
+      "toggleItem": "Marcar como hecho hoy",
+      "noItems": "Aún no hay elementos de rutina configurados",
+      "deleteItem": "Eliminar elemento",
+      "addItem": "Agregar elemento",
+      "editRoutine": "Editar rutina"
     },
     "progress": {
       "title": "Panel de Progreso",
@@ -1246,7 +1303,38 @@
       "noPrioritiesAdded": "Aún no se han agregado prioridades",
       "viewAllPriorities": "Ver las {{count}} prioridades →",
       "progress": "Progreso",
-      "save": "Guardar"
+      "save": "Guardar",
+      "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
+      "quarterEndsToday": "Quarter {{quarter}} ends today",
+      "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
+      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
+      "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
+      "routineCompletion": "elementos completados"
+    },
+    "quarterReport": {
+      "report": "Report",
+      "preview": "Preview",
+      "unassignedArea": "Unassigned",
+      "noneRecorded": "None recorded",
+      "reflections": "Quarterly Reflections",
+      "biggestWins": "Biggest Wins",
+      "challenges": "Challenges",
+      "nextFocus": "Next Focus",
+      "goalsAchieved": "Goals Achieved",
+      "milestonesCompleted": "Milestones Completed",
+      "totalProgress": "Total Progress",
+      "insights": "Quarterly Insights",
+      "routineConsistency": "Routine Consistency",
+      "activeDays": "Active {{count}} day this quarter",
+      "activeDays_plural": "Active {{count}} days this quarter",
+      "activeDays_other": "Active {{count}} days this quarter",
+      "booksFinished": "Books Finished ({{count}})",
+      "breakdownByFocusArea": "Breakdown by Focus Area",
+      "migratedCount": "Migrated {{count}}x",
+      "migratedCount_plural": "Migrated {{count}}x",
+      "migratedCount_other": "Migrated {{count}}x",
+      "due": "Due",
+      "migrateToNextQuarter": "Migrate to Next Quarter"
     },
     "deleteConfirm": "¿Estás seguro de que quieres eliminar este {{type}}? Esta acción no se puede deshacer.",
     "celebration": "🎉 ¡Objetivo Completado! ¡Estás haciendo un progreso increíble!",

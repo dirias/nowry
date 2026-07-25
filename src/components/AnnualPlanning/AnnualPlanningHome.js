@@ -38,19 +38,21 @@ import {
   Delete as DeleteIcon,
   Warning as WarningIcon,
   LockRounded as LockRoundedIcon,
-  AutoAwesome as AutoAwesomeRoundedIcon
+  AutoAwesome as AutoAwesomeRoundedIcon,
+  Checklist as ChecklistIcon
 } from '@mui/icons-material'
 import { annualPlanningService } from '../../api/services'
-import { apiCache } from '../../api/utils/cache'
 import useAnnualPlan from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import { apiCache } from '../../api/utils/cache'
+import { ROUTINE_CACHE_KEY, ROUTINE_TTL, todayKey } from '../../api/utils/routineCache'
 import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
 import CloseQuarterModal from './CloseQuarterModal'
-import QuarterReportsView from './QuarterReportsView'
 import GoalAIPanel from './GoalAIPanel'
+import AnnualPlanningTabBar from './AnnualPlanningTabBar'
 import goalAIService from '../../api/services/goalAI.service'
 
 const AnnualPlanningHome = () => {
@@ -71,12 +73,14 @@ const AnnualPlanningHome = () => {
     priorities: hookPriorities,
     quarterReports: hookQuarterReports,
     loading,
+    error,
     reload
   } = useAnnualPlan(year, user)
 
   const [plan, setPlan] = useState(null)
   const [areas, setAreas] = useState([])
   const [metrics, setMetrics] = useState({ totalGoals: 0, completedGoals: 0, progress: 0 })
+  const [routineStats, setRoutineStats] = useState({ total: 0, completedToday: 0 })
   const [priorities, setPriorities] = useState([])
   const [showPriorityDialog, setShowPriorityDialog] = useState(false)
   const [editingPriority, setEditingPriority] = useState(null)
@@ -137,6 +141,29 @@ const AnnualPlanningHome = () => {
     })
   }, [loading, hookPlan, hookAreas, hookGoals, hookPriorities, hookQuarterReports, selectedQuarter, year])
 
+  // RTN-03/D-09: fetch daily routine data via the same apiCache entry SideMenu.js uses,
+  // so a toggle in either surface (Plan 26-02/26-03) keeps this tile's count fresh.
+  useEffect(() => {
+    if (loading) return
+    let cancelled = false
+    apiCache
+      .get(ROUTINE_CACHE_KEY, ROUTINE_TTL, () => annualPlanningService.getDailyRoutine())
+      .then((routine) => {
+        if (cancelled) return
+        const total =
+          (routine?.morning_routine?.length || 0) + (routine?.afternoon_routine?.length || 0) + (routine?.evening_routine?.length || 0)
+        const completedToday = (routine?.daily_completions?.[todayKey()] || []).length
+        setRoutineStats({ total, completedToday })
+      })
+      .catch((error) => {
+        console.error('Failed to load daily routine stats:', error)
+        // fail safe: leave routineStats at { total: 0, completedToday: 0 } so the tile stays hidden
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [loading])
+
   // Redirect to setup if loaded but no areas
   useEffect(() => {
     if (!loading && plan && areas.length === 0) {
@@ -150,8 +177,6 @@ const AnnualPlanningHome = () => {
       const updated = await annualPlanningService.updateAnnualPlan(plan._id, { title: editTitle })
       setPlan(updated)
       setIsEditingTitle(false)
-      // Invalidate the cached plan so it reloads fresh
-      apiCache.invalidatePrefix('annualPlan:')
     } catch (error) {
       console.error('Failed to update plan title', error)
     }
@@ -165,6 +190,18 @@ const AnnualPlanningHome = () => {
   const handleDeletePriority = () => {
     // Re-fetch from server to reflect the deleted priority immediately
     reload()
+  }
+
+  const handleToggleActive = async (priority) => {
+    const originalIsActive = priority.is_active
+    const newIsActive = !originalIsActive
+    setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: newIsActive } : p)))
+    try {
+      await annualPlanningService.updatePriority(priority._id, { is_active: newIsActive })
+    } catch (error) {
+      console.error('Failed to toggle active state:', error)
+      setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: originalIsActive } : p)))
+    }
   }
 
   // Early return removed to allow skeleton placeholders over actual layout
@@ -256,6 +293,26 @@ const AnnualPlanningHome = () => {
     }
   }
 
+  // Fetch error — must be checked before the "no plan" branch below, otherwise a
+  // transient network/500 failure looks identical to "no plan exists yet" and
+  // misdirects an existing user into the onboarding "create a new plan" flow
+  // (risking a duplicate-plan POST). Reuses the same error+retry pattern the
+  // other Annual Planning tabs (GoalsTabView.js/ReportsTabView.js) already use.
+  if (error && !loading) {
+    return (
+      <Container maxWidth='xl' sx={{ py: { xs: 4, md: 8 }, textAlign: 'center' }}>
+        <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
+          <Typography level='title-md' sx={{ color: 'danger.plainColor' }}>
+            {t('annualPlanning.tabs.errorLoading')}
+          </Typography>
+          <Button size='sm' variant='soft' onClick={reload}>
+            {t('common.retry')}
+          </Button>
+        </Stack>
+      </Container>
+    )
+  }
+
   if (!plan && !loading) {
     return (
       <Container maxWidth='xl' sx={{ py: { xs: 4, md: 8 }, textAlign: 'center' }}>
@@ -264,7 +321,7 @@ const AnnualPlanningHome = () => {
           <Typography level='title-md' sx={{ mb: 1.5, fontSize: { xs: '1.75rem', md: '2rem' } }}>
             {t('annualPlanning.home.startJourney', { year: new Date().getFullYear() })}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.tertiary', maxWidth: 500, mx: 'auto', fontSize: { xs: '0.875rem', md: '1rem' } }}>
+          <Typography level='body-md' sx={{ color: 'text.tertiary', maxWidth: 500, mx: 'auto' }}>
             {t('annualPlanning.home.startDescription')}
           </Typography>
         </Box>
@@ -333,10 +390,7 @@ const AnnualPlanningHome = () => {
           </Stack>
         )}
 
-        <Typography
-          level='body-md'
-          sx={{ color: 'text.tertiary', mb: 3, maxWidth: 500, mx: 'auto', fontSize: { xs: '0.875rem', md: '1rem' } }}
-        >
+        <Typography level='body-md' sx={{ color: 'text.tertiary', mb: 3, maxWidth: 500, mx: 'auto' }}>
           {t('annualPlanning.home.overview')}
         </Typography>
 
@@ -345,7 +399,7 @@ const AnnualPlanningHome = () => {
           <Stack direction='row' spacing={2} justifyContent='center' alignItems='center' sx={{ mb: 4, flexWrap: 'wrap', rowGap: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <TimelineIcon sx={{ fontSize: 18, color: 'primary.plainColor', opacity: 0.8 }} />
-              <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary', fontSize: '1rem' }}>
+              <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary' }}>
                 <Skeleton loading={loading} variant='text' width='2ch'>
                   {metrics.progress}%
                 </Skeleton>{' '}
@@ -360,7 +414,7 @@ const AnnualPlanningHome = () => {
                 <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                   <FlagIcon sx={{ fontSize: 18, color: 'warning.plainColor' }} />
-                  <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary', fontSize: '1rem' }}>
+                  <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary' }}>
                     {priorities.length}{' '}
                     <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
                       {t('annualPlanning.stats.priorities')}
@@ -375,10 +429,36 @@ const AnnualPlanningHome = () => {
                 <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                   <CheckCircleIcon sx={{ fontSize: 18, color: 'success.plainColor' }} />
-                  <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary', fontSize: '1rem' }}>
+                  <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary' }}>
                     {metrics.completedGoals} / {metrics.totalGoals}{' '}
                     <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
                       {t('annualPlanning.home.completedGoals')}
+                    </Typography>
+                  </Typography>
+                </Box>
+              </>
+            )}
+
+            {routineStats.total > 0 && (
+              <>
+                <Typography sx={{ color: 'divider', display: { xs: 'none', sm: 'block' } }}>•</Typography>
+                <Box
+                  component={Link}
+                  to='/annual-planning/daily-routine'
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                    cursor: 'pointer',
+                    textDecoration: 'none',
+                    '&:hover': { opacity: 0.8 }
+                  }}
+                >
+                  <ChecklistIcon sx={{ fontSize: 18, color: 'success.plainColor' }} />
+                  <Typography level='title-md' fontWeight={700} sx={{ color: 'text.secondary' }}>
+                    {routineStats.completedToday} / {routineStats.total}{' '}
+                    <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary' }}>
+                      {t('annualPlanning.home.routineCompletion')}
                     </Typography>
                   </Typography>
                 </Box>
@@ -415,8 +495,10 @@ const AnnualPlanningHome = () => {
               }}
             >
               {overdueQ
-                ? `Quarter ${overdueQ} ended on ${overdueEndDateStr}`
-                : `Quarter ${currentQ} ends ${daysLeft === 0 ? 'today' : `in ${daysLeft} days`}`}
+                ? t('annualPlanning.home.quarterEndedOn', { quarter: overdueQ, date: overdueEndDateStr })
+                : daysLeft === 0
+                  ? t('annualPlanning.home.quarterEndsToday', { quarter: currentQ })
+                  : t('annualPlanning.home.quarterEndingIn', { quarter: currentQ, count: daysLeft })}
             </Alert>
           )}
 
@@ -490,6 +572,8 @@ const AnnualPlanningHome = () => {
         </Box>
       </Box>
 
+      <AnnualPlanningTabBar />
+
       {/* Goal AI Panel — inline, rendered below header, above focus areas */}
       {panelOpen && <GoalAIPanel analysis={aiAnalysis} loading={aiLoading} error={aiError} noPlan={aiNoPlan} onRefresh={handleAIRefresh} />}
 
@@ -555,7 +639,7 @@ const AnnualPlanningHome = () => {
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
                         bgcolor: 'background.surface',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                        boxShadow: 'xs',
                         transform: 'translateY(-2px)',
                         '& .hover-arrow': {
                           transform: 'translateX(4px)',
@@ -569,10 +653,7 @@ const AnnualPlanningHome = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Typography sx={{ fontSize: { xs: '2rem', md: '2.5rem' }, lineHeight: 1 }}>{area.icon}</Typography>
-                        <Typography
-                          level='title-lg'
-                          sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}
-                        >
+                        <Typography level='h4' sx={{ fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}>
                           {area.name}
                         </Typography>
                       </Box>
@@ -609,7 +690,7 @@ const AnnualPlanningHome = () => {
                         <Typography
                           level='body-xs'
                           fontWeight={800}
-                          sx={{ color: 'text.secondary', minWidth: '3ch', textAlign: 'right', letterSpacing: 'sm' }}
+                          sx={{ color: 'text.secondary', minWidth: '3ch', textAlign: 'right', letterSpacing: '0.05em' }}
                         >
                           {displayProgress}%
                         </Typography>
@@ -653,6 +734,7 @@ const AnnualPlanningHome = () => {
           priorities={priorities.slice(0, 5)}
           onEdit={handleEditPriority}
           onDelete={handleDeletePriority}
+          onToggleActive={handleToggleActive}
           emptyMessage={t('annualPlanning.home.noPrioritiesAdded')}
         />
       )}
@@ -661,7 +743,7 @@ const AnnualPlanningHome = () => {
       {priorities.length > 5 && (
         <Button
           component={Link}
-          to='/annual-planning'
+          to='/annual-planning/priorities'
           variant='plain'
           size='sm'
           endDecorator={<ArrowForwardIcon />}
@@ -697,8 +779,6 @@ const AnnualPlanningHome = () => {
           setEditingPriority(null)
         }}
       />
-
-      {plan?._id && <QuarterReportsView planId={plan._id} focusAreas={areas} />}
 
       {showCloseModal && closingQuarter && closingYear && (
         <CloseQuarterModal

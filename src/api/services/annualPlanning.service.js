@@ -27,6 +27,7 @@ export const annualPlanningService = {
   },
   async updateAnnualPlan(id, planUpdate) {
     const { data } = await apiClient.put(ENDPOINTS.annualPlan.update(id), planUpdate)
+    _bustPlanCache()
     return data
   },
   async closeQuarter(payload) {
@@ -75,6 +76,11 @@ export const annualPlanningService = {
   },
   async deletePriority(id) {
     const { data } = await apiClient.delete(ENDPOINTS.priorities.delete(id))
+    _bustPlanCache()
+    return data
+  },
+  async reorderPriorities(annualPlanId, priorityIds) {
+    const { data } = await apiClient.patch(ENDPOINTS.priorities.reorder, { annual_plan_id: annualPlanId, priority_ids: priorityIds })
     _bustPlanCache()
     return data
   },

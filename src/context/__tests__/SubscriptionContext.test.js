@@ -12,9 +12,14 @@
 import React from 'react'
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 
 // These imports will fail until SubscriptionContext.js is created (Wave 0 expected)
 import { SubscriptionProvider, useSubscriptionContext } from '../SubscriptionContext'
+
+// SubscriptionProvider always mounts UpgradePrompt (open or closed), which calls
+// useNavigate() unconditionally — every render needs a Router ancestor.
+const renderWithProvider = (children) => render(<MemoryRouter>{children}</MemoryRouter>)
 
 // Helper: test component that reads context
 const TestConsumer = ({ onRender }) => {
@@ -25,7 +30,7 @@ const TestConsumer = ({ onRender }) => {
 
 describe('SubscriptionContext — GATE-03, GATE-05', () => {
   test('SubscriptionProvider renders children', () => {
-    render(
+    renderWithProvider(
       <SubscriptionProvider>
         <div data-testid='child'>hello</div>
       </SubscriptionProvider>
@@ -35,7 +40,7 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
 
   test('initial state: upgradeDismissed is false', () => {
     let capturedCtx
-    render(
+    renderWithProvider(
       <SubscriptionProvider>
         <TestConsumer
           onRender={(ctx) => {
@@ -49,7 +54,7 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
 
   test('dismissUpgrade sets upgradeDismissed to true', () => {
     let capturedCtx
-    render(
+    renderWithProvider(
       <SubscriptionProvider>
         <TestConsumer
           onRender={(ctx) => {
@@ -66,7 +71,7 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
 
   test('isUpgradeModalOpen is false initially', () => {
     let capturedCtx
-    render(
+    renderWithProvider(
       <SubscriptionProvider>
         <TestConsumer
           onRender={(ctx) => {
@@ -80,7 +85,7 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
 
   test('openUpgradeModal sets isUpgradeModalOpen to true', () => {
     let capturedCtx
-    render(
+    renderWithProvider(
       <SubscriptionProvider>
         <TestConsumer
           onRender={(ctx) => {
@@ -97,7 +102,7 @@ describe('SubscriptionContext — GATE-03, GATE-05', () => {
 
   test('closeUpgradeModal sets isUpgradeModalOpen to false', () => {
     let capturedCtx
-    render(
+    renderWithProvider(
       <SubscriptionProvider>
         <TestConsumer
           onRender={(ctx) => {

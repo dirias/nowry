@@ -29,19 +29,24 @@ import {
 } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
+import { apiCache } from '../../api/utils/cache'
+import { ROUTINE_CACHE_KEY, todayKey } from '../../api/utils/routineCache'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 
 const DailyRoutinePlanner = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [routine, setRoutine] = useState(null)
+  // Keys: item.id -> true when checked for today (D-03: id-based, not index-based)
+  const [routineCompletions, setRoutineCompletions] = useState({})
   const [activities, setActivities] = useState([])
   const [saving, setSaving] = useState(false)
   const [newItem, setNewItem] = useState({ morning: '', afternoon: '', evening: '' })
 
   /* State for editing */
-  const [editingItem, setEditingItem] = useState(null) // { section, index }
+  const [editingItem, setEditingItem] = useState(null) // { section, id }
   const [editValue, setEditValue] = useState('')
 
   const { plan, areas: cacheAreas, goals: cacheGoals, loading: hookLoading } = useAnnualPlan()
@@ -49,6 +54,7 @@ const DailyRoutinePlanner = () => {
   const fetchData = React.useCallback(async () => {
     try {
       setLoading(true)
+      setError(false)
       if (!plan) return
 
       const routineData = await annualPlanningService.getDailyRoutine()
@@ -69,12 +75,40 @@ const DailyRoutinePlanner = () => {
         migrationRoutine[`${section}_routine`] = listWithIds
       })
 
-      if (routineUpdated) {
+      // D-04: One-time migration of daily_completions keys (index-based -> id-based).
+      // Mirrors the item.id migration above: detect -> rewrite in-memory -> conditional
+      // persist. Uses migrationRoutine (post-id-migration) as the id lookup source, and
+      // touches ONLY today's entry — every other date in daily_completions is left as-is.
+      let completionsUpdated = false
+      const today = todayKey()
+      const migratedCompletions = { ...(migrationRoutine.daily_completions || {}) }
+      const todayCompletions = migratedCompletions[today] || []
+      migratedCompletions[today] = todayCompletions
+        .map((key) => {
+          if (key.length >= 36) return key // already id-based (UUID) — no rewrite needed
+          const [period, indexStr] = key.split('_')
+          const index = parseInt(indexStr, 10)
+          const periodArray = migrationRoutine[`${period}_routine`] || []
+          if (periodArray[index]?.id) {
+            completionsUpdated = true
+            return periodArray[index].id
+          }
+          completionsUpdated = true // stale key (item since deleted) — drop it
+          return null
+        })
+        .filter(Boolean)
+      migrationRoutine.daily_completions = migratedCompletions
+
+      if (routineUpdated || completionsUpdated) {
         await annualPlanningService.updateDailyRoutine(migrationRoutine)
+        apiCache.invalidate(ROUTINE_CACHE_KEY) // keep SideMenu.js/AnnualPlanningHome.js in sync
         setRoutine(migrationRoutine)
       } else {
         setRoutine(routineData)
       }
+
+      // Seed today's checkbox state from the (possibly migrated) completions map
+      setRoutineCompletions(Object.fromEntries((migrationRoutine.daily_completions?.[today] || []).map((id) => [id, true])))
 
       // Fetch all goals -> activities using cache
       let allActivities = []
@@ -93,8 +127,9 @@ const DailyRoutinePlanner = () => {
         }
       }
       setActivities(allActivities)
-    } catch (error) {
-      console.error('Failed to load routine data', error)
+    } catch (err) {
+      console.error('Failed to load routine data', err)
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -109,6 +144,7 @@ const DailyRoutinePlanner = () => {
     try {
       setSaving(true)
       await annualPlanningService.updateDailyRoutine(updatedRoutine)
+      apiCache.invalidate(ROUTINE_CACHE_KEY) // keep SideMenu.js/AnnualPlanningHome.js in sync
     } catch (error) {
       console.error('Failed to save', error)
     } finally {
@@ -116,8 +152,28 @@ const DailyRoutinePlanner = () => {
     }
   }
 
+  // Toggle a custom routine item's completion for today — optimistic UI,
+  // persisted via the completions-only PATCH endpoint (NOT persistRoutine/PUT).
+  // D-01: only called from the Routine Items block, never Goal Activities.
+  const toggleRoutineItemCompletion = (itemId) => {
+    const previous = routineCompletions
+    const updated = { ...routineCompletions, [itemId]: !routineCompletions[itemId] }
+    setRoutineCompletions(updated)
+    const activeKeys = Object.entries(updated)
+      .filter(([, v]) => v)
+      .map(([k]) => k)
+    annualPlanningService
+      .updateRoutineCompletions(todayKey(), activeKeys)
+      .then(() => apiCache.invalidate(ROUTINE_CACHE_KEY))
+      .catch((err) => {
+        console.error('Failed to save routine completion:', err)
+        setRoutineCompletions(previous) // revert optimistic update on failure
+      })
+  }
+
   const handleAddItem = async (section) => {
-    if (!newItem[section]) return
+    const title = newItem[section].trim()
+    if (!title) return
 
     const updatedRoutine = { ...routine }
     const list = updatedRoutine[`${section}_routine`] || []
@@ -125,7 +181,7 @@ const DailyRoutinePlanner = () => {
       ...list,
       {
         id: crypto.randomUUID(),
-        title: newItem[section],
+        title,
         type: 'custom'
       }
     ]
@@ -137,10 +193,10 @@ const DailyRoutinePlanner = () => {
     await persistRoutine(updatedRoutine)
   }
 
-  const handleDeleteItem = async (section, index) => {
+  const handleDeleteItem = async (section, id) => {
     const updatedRoutine = { ...routine }
     const list = updatedRoutine[`${section}_routine`]
-    updatedRoutine[`${section}_routine`] = list.filter((_, i) => i !== index)
+    updatedRoutine[`${section}_routine`] = list.filter((i) => i.id !== id)
 
     setRoutine(updatedRoutine)
 
@@ -148,14 +204,14 @@ const DailyRoutinePlanner = () => {
     await persistRoutine(updatedRoutine)
   }
 
-  const startEditing = (section, index, currentTitle) => {
-    setEditingItem({ section, index })
+  const startEditing = (section, id, currentTitle) => {
+    setEditingItem({ section, id })
     setEditValue(currentTitle)
   }
 
   const saveEdit = async () => {
     if (!editingItem) return
-    const { section, index } = editingItem
+    const { section, id } = editingItem
 
     const updatedRoutine = { ...routine }
     const list = [...updatedRoutine[`${section}_routine`]]
@@ -165,8 +221,7 @@ const DailyRoutinePlanner = () => {
       // Let's assume user wants to save, if empty prevent or delete.
       // For now, let's just keep old value if empty to avoid accidental deletes.
     } else {
-      list[index] = { ...list[index], title: editValue }
-      updatedRoutine[`${section}_routine`] = list
+      updatedRoutine[`${section}_routine`] = list.map((i) => (i.id === id ? { ...i, title: editValue } : i))
       setRoutine(updatedRoutine)
       await persistRoutine(updatedRoutine)
     }
@@ -213,7 +268,7 @@ const DailyRoutinePlanner = () => {
                     <ListItemContent>
                       <Typography level='body-sm'>{act.title}</Typography>
                       <Typography level='body-xs' textColor='text.tertiary'>
-                        Goal: {act.goalTitle}
+                        {t('annualPlanning.dailyRoutine.goalPrefix', { title: act.goalTitle })}
                       </Typography>
                     </ListItemContent>
                     {/* act.areaColor is a user-defined hex from COLORS palette — intentional per DESIGN_GUIDELINES Section 5 */}
@@ -228,16 +283,29 @@ const DailyRoutinePlanner = () => {
           <Typography level='body-xs' fontWeight='bold' sx={{ mb: 1 }}>
             {t('annualPlanning.dailyRoutine.routineItems')}
           </Typography>
+          {customItems.length === 0 && (
+            <Box sx={{ py: 2, px: 1, textAlign: 'center' }}>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {t('annualPlanning.dailyRoutine.noItems')}
+              </Typography>
+            </Box>
+          )}
           <List>
-            {customItems.map((item, index) => {
-              const isEditing = editingItem?.section === sectionKey && editingItem?.index === index
+            {customItems.map((item) => {
+              const isEditing = editingItem?.section === sectionKey && editingItem?.id === item.id
 
               return (
                 <ListItem
-                  key={index}
+                  key={item.id}
                   endAction={
                     !isEditing && (
-                      <IconButton size='sm' color='danger' variant='plain' onClick={() => handleDeleteItem(sectionKey, index)}>
+                      <IconButton
+                        size='sm'
+                        color='danger'
+                        variant='plain'
+                        onClick={() => handleDeleteItem(sectionKey, item.id)}
+                        aria-label={t('annualPlanning.dailyRoutine.deleteItem')}
+                      >
                         <DeleteIcon />
                       </IconButton>
                     )
@@ -261,9 +329,71 @@ const DailyRoutinePlanner = () => {
                       autoFocus
                     />
                   ) : (
-                    <ListItemContent onClick={() => startEditing(sectionKey, index, item.title)}>
-                      <Typography level='body-sm'>{item.title}</Typography>
-                    </ListItemContent>
+                    <Stack direction='row' alignItems='center' spacing={1.25} sx={{ flex: 1 }}>
+                      {/* D-01: Checkbox only on custom routine items, never on Goal Activities above */}
+                      <Box
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleRoutineItemCompletion(item.id)
+                        }}
+                        role='checkbox'
+                        aria-checked={!!routineCompletions[item.id]}
+                        aria-label={t('annualPlanning.dailyRoutine.toggleItem')}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            toggleRoutineItemCompletion(item.id)
+                          }
+                        }}
+                        sx={{
+                          width: 16,
+                          height: 16,
+                          border: '1.5px solid',
+                          borderColor: routineCompletions[item.id] ? 'primary.outlinedBorder' : 'neutral.outlinedBorder',
+                          borderRadius: '4px',
+                          flexShrink: 0,
+                          bgcolor: routineCompletions[item.id] ? 'primary.solidBg' : 'transparent',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', borderRadius: 'sm' }
+                        }}
+                      >
+                        {routineCompletions[item.id] && (
+                          <Box
+                            component='svg'
+                            viewBox='0 0 24 24'
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              fill: 'none',
+                              stroke: 'var(--joy-palette-common-white)',
+                              strokeWidth: 3,
+                              strokeLinecap: 'round',
+                              strokeLinejoin: 'round'
+                            }}
+                          >
+                            <polyline points='20 6 9 17 4 12' />
+                          </Box>
+                        )}
+                      </Box>
+                      <ListItemContent onClick={() => startEditing(sectionKey, item.id, item.title)} sx={{ cursor: 'pointer' }}>
+                        <Typography
+                          level='body-sm'
+                          sx={{
+                            color: routineCompletions[item.id] ? 'text.tertiary' : 'text.primary',
+                            textDecoration: routineCompletions[item.id] ? 'line-through' : 'none',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {item.title}
+                        </Typography>
+                      </ListItemContent>
+                    </Stack>
                   )}
                 </ListItem>
               )
@@ -280,7 +410,12 @@ const DailyRoutinePlanner = () => {
               size='sm'
               onKeyDown={(e) => e.key === 'Enter' && handleAddItem(sectionKey)}
             />
-            <IconButton variant='solid' color='primary' onClick={() => handleAddItem(sectionKey)}>
+            <IconButton
+              variant='solid'
+              color='primary'
+              onClick={() => handleAddItem(sectionKey)}
+              aria-label={t('annualPlanning.dailyRoutine.addItem')}
+            >
               <AddIcon />
             </IconButton>
           </Stack>
@@ -355,6 +490,21 @@ const DailyRoutinePlanner = () => {
     return renderSection(sectionDef.title, React.cloneElement(sectionDef.icon, { color: sectionDef.color }), sectionDef.key, sectionDef.key)
   }
 
+  if (error && !loading) {
+    return (
+      <Container maxWidth='xl' sx={{ py: { xs: 4, md: 8 }, textAlign: 'center' }}>
+        <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
+          <Typography level='title-md' sx={{ color: 'danger.plainColor' }}>
+            {t('annualPlanning.tabs.errorLoading')}
+          </Typography>
+          <Button size='sm' variant='soft' onClick={fetchData}>
+            {t('common.retry')}
+          </Button>
+        </Stack>
+      </Container>
+    )
+  }
+
   return (
     <Container maxWidth='xl' sx={{ py: 4, pb: 10 }}>
       {/* Header */}
@@ -366,7 +516,13 @@ const DailyRoutinePlanner = () => {
         mb={4}
       >
         <Box>
-          <Button variant='plain' color='neutral' startDecorator={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mb: 1, pl: 0 }}>
+          <Button
+            variant='plain'
+            color='neutral'
+            startDecorator={<ArrowBackIcon />}
+            onClick={() => navigate('/annual-planning')}
+            sx={{ mb: 1, pl: 0 }}
+          >
             {t('annualPlanning.back')}
           </Button>
           <Typography level='h3'>{t('annualPlanning.dailyRoutine.title')}</Typography>

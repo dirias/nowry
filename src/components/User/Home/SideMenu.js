@@ -34,16 +34,11 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import { tasksService, annualPlanningService } from '../../../api/services'
 import { useTaskData } from '../../../hooks/useTaskData'
 import { apiCache } from '../../../api/utils/cache'
-
-const ROUTINE_CACHE_KEY = 'dailyRoutine'
-const ROUTINE_TTL = 2 * 60000 // 2 minutes
+import { ROUTINE_CACHE_KEY, ROUTINE_TTL, todayKey } from '../../../api/utils/routineCache'
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 const LISTS_KEY = 'nowry_task_lists'
 const ACTIVE_LIST_KEY = 'nowry_active_task_list'
-
-// Today's date as 'YYYY-MM-DD' — used as the key in daily_completions
-const todayKey = () => new Date().toISOString().slice(0, 10)
 
 const loadLists = () => {
   try {
@@ -91,8 +86,11 @@ const SideMenu = () => {
   const [search, setSearch] = React.useState('')
   const [statusFilter, setStatusFilter] = React.useState('pending')
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState(false)
   const [routine, setRoutine] = React.useState(null)
-  // Keys: `${period}_${index}` → true when checked. Sourced from backend (cross-device sync).
+  // Keys: item.id -> true when checked (D-05: migrated from index-based keys to stay
+  // consistent with DailyRoutinePlanner.js, which uses the same id-based format).
+  // Sourced from backend (cross-device sync) — seeding logic below is key-format-agnostic.
   const [routineCompletions, setRoutineCompletions] = React.useState({})
 
   // ── Task lists state ──────────────────────────────────────────────────────
@@ -121,6 +119,7 @@ const SideMenu = () => {
   const loadData = React.useCallback(async () => {
     try {
       setLoading(true)
+      setError(false)
       const routineData = await apiCache.get(ROUTINE_CACHE_KEY, ROUTINE_TTL, () => annualPlanningService.getDailyRoutine())
       setTasks(tasksData)
       setRoutine(routineData)
@@ -130,8 +129,9 @@ const SideMenu = () => {
       // Convert array of keys to object map { "morning_0": true, ... }
       const completionMap = Object.fromEntries(backendCompletions.map((k) => [k, true]))
       setRoutineCompletions(completionMap)
-    } catch (error) {
-      console.error('Error loading data:', error)
+    } catch (err) {
+      console.error('Error loading data:', err)
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -280,18 +280,24 @@ const SideMenu = () => {
     }
   }
 
-  // Toggle a routine item's completion — optimistic UI, persisted to backend for cross-device sync
-  const toggleRoutineItem = (period, index) => {
-    const key = `${period}_${index}`
-    const updated = { ...routineCompletions, [key]: !routineCompletions[key] }
+  // Toggle a routine item's completion — optimistic UI, persisted to backend for
+  // cross-device sync. D-05: uses item.id directly (not `${period}_${index}`) to
+  // stay consistent with DailyRoutinePlanner.js's id-based keys and avoid checkmarks
+  // silently reattaching to the wrong item on reorder/delete.
+  const toggleRoutineItem = (itemId) => {
+    const previous = routineCompletions
+    const updated = { ...routineCompletions, [itemId]: !routineCompletions[itemId] }
     setRoutineCompletions(updated)
-    // Persist to backend: convert map back to array of active keys
     const activeKeys = Object.entries(updated)
       .filter(([, v]) => v)
       .map(([k]) => k)
     annualPlanningService
       .updateRoutineCompletions(todayKey(), activeKeys)
-      .catch((err) => console.error('Failed to save routine completion:', err))
+      .then(() => apiCache.invalidate(ROUTINE_CACHE_KEY))
+      .catch((err) => {
+        console.error('Failed to save routine completion:', err)
+        setRoutineCompletions(previous)
+      })
   }
 
   if (loading) {
@@ -318,6 +324,28 @@ const SideMenu = () => {
   }
 
   const renderRoutineList = (items, period) => {
+    if (error) {
+      return (
+        <Box
+          sx={{
+            py: 4,
+            px: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1.5,
+            textAlign: 'center'
+          }}
+        >
+          <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
+            {t('annualPlanning.tabs.errorLoading')}
+          </Typography>
+          <Button size='sm' variant='soft' onClick={loadData} aria-label={t('common.retry')}>
+            {t('common.retry')}
+          </Button>
+        </Box>
+      )
+    }
     if (!items || items.length === 0) {
       return (
         <Box
@@ -365,11 +393,11 @@ const SideMenu = () => {
         }}
       >
         {items.map((item, index) => {
-          const isChecked = !!routineCompletions[`${period}_${index}`]
+          const isChecked = !!routineCompletions[item.id]
           return (
             <Box
-              key={index}
-              onClick={() => toggleRoutineItem(period, index)}
+              key={item.id || index}
+              onClick={() => toggleRoutineItem(item.id)}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -386,6 +414,21 @@ const SideMenu = () => {
             >
               {/* Checkbox — §5 custom checkbox pattern */}
               <Box
+                role='checkbox'
+                aria-checked={isChecked}
+                aria-label={t('annualPlanning.dailyRoutine.toggleItem')}
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleRoutineItem(item.id)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    toggleRoutineItem(item.id)
+                  }
+                }}
                 sx={{
                   width: 16,
                   height: 16,
@@ -397,7 +440,9 @@ const SideMenu = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transition: 'all 0.2s'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', borderRadius: 'sm' }
                 }}
               >
                 {isChecked && (
@@ -408,7 +453,7 @@ const SideMenu = () => {
                       width: 10,
                       height: 10,
                       fill: 'none',
-                      stroke: 'white',
+                      stroke: 'var(--joy-palette-common-white)',
                       strokeWidth: 3,
                       strokeLinecap: 'round',
                       strokeLinejoin: 'round'
@@ -551,7 +596,14 @@ const SideMenu = () => {
               <Typography level='title-md' startDecorator={<WbSunnyIcon color='primary' />}>
                 {t('annualPlanning.dailyRoutine.morning')}
               </Typography>
-              <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
+              <IconButton
+                component={RouterLink}
+                to='/annual-planning/daily-routine'
+                size='sm'
+                variant='plain'
+                color='neutral'
+                aria-label={t('annualPlanning.dailyRoutine.editRoutine')}
+              >
                 <EditRoundedIcon />
               </IconButton>
             </Stack>
@@ -576,7 +628,14 @@ const SideMenu = () => {
               <Typography level='title-md' startDecorator={<WbTwilightIcon color='primary' />}>
                 {t('annualPlanning.dailyRoutine.afternoon')}
               </Typography>
-              <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
+              <IconButton
+                component={RouterLink}
+                to='/annual-planning/daily-routine'
+                size='sm'
+                variant='plain'
+                color='neutral'
+                aria-label={t('annualPlanning.dailyRoutine.editRoutine')}
+              >
                 <EditRoundedIcon />
               </IconButton>
             </Stack>
@@ -601,7 +660,14 @@ const SideMenu = () => {
               <Typography level='title-md' startDecorator={<NightsStayIcon color='primary' />}>
                 {t('annualPlanning.dailyRoutine.evening')}
               </Typography>
-              <IconButton component={RouterLink} to='/annual-planning/daily-routine' size='sm' variant='plain' color='neutral'>
+              <IconButton
+                component={RouterLink}
+                to='/annual-planning/daily-routine'
+                size='sm'
+                variant='plain'
+                color='neutral'
+                aria-label={t('annualPlanning.dailyRoutine.editRoutine')}
+              >
                 <EditRoundedIcon />
               </IconButton>
             </Stack>

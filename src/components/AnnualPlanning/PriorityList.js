@@ -1,7 +1,48 @@
 import React, { useState } from 'react'
-import { Box, Typography, Stack, IconButton, Tooltip, Button, Modal, ModalDialog, DialogTitle, DialogContent } from '@mui/joy'
-import { Edit as EditIcon, Delete as DeleteIcon, Flag as FlagIcon, Warning as WarningIcon } from '@mui/icons-material'
+import { useTranslation, Trans } from 'react-i18next'
+import { Box, Typography, Stack, IconButton, Tooltip, Button, Modal, ModalDialog, DialogTitle, DialogContent, Chip } from '@mui/joy'
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Flag as FlagIcon,
+  FlagOutlined as FlagOutlinedIcon,
+  Warning as WarningIcon,
+  DragHandle as DragHandleIcon
+} from '@mui/icons-material'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { annualPlanningService } from '../../api/services'
+
+/**
+ * SortablePriorityRow
+ * Wraps a priority row's content in dnd-kit's useSortable, exposing a
+ * drag-handle icon on non-completed rows only (D-08).
+ */
+const SortablePriorityRow = ({ priorityId, isCompleted, children }) => {
+  const { t } = useTranslation()
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: priorityId })
+  // isDragging (not transform) identifies the row actually being grabbed —
+  // transform is non-null for every sibling shifting out of the way too, which
+  // would otherwise dim the whole list during a drag (WR-04).
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
+  return (
+    <Box ref={setNodeRef} style={style} sx={{ display: 'flex', alignItems: 'center' }} {...attributes}>
+      {!isCompleted && (
+        <IconButton
+          {...listeners}
+          size='sm'
+          variant='plain'
+          color='neutral'
+          aria-label={t('annualPlanning.priority.dragHandle')}
+          sx={{ cursor: 'grab', color: 'text.tertiary', '&:active': { cursor: 'grabbing' }, flexShrink: 0 }}
+        >
+          <DragHandleIcon sx={{ fontSize: 18 }} />
+        </IconButton>
+      )}
+      <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
+    </Box>
+  )
+}
 
 /**
  * PriorityList Component
@@ -17,12 +58,18 @@ const PriorityList = ({
   priorities = [],
   onEdit,
   onDelete,
+  onToggleActive = null,
+  draggable = false,
   showEditButton = true,
   showDeleteButton = true,
-  emptyMessage = 'No priorities yet.'
+  emptyMessage = null
 }) => {
+  const { t } = useTranslation()
   const [deletingPriority, setDeletingPriority] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const resolvedEmptyMessage = emptyMessage || t('annualPlanning.priority.noGoals')
+  const entityType = deletingPriority?.linked_entity_type || 'routine'
+  const entityTypeCapitalized = entityType.charAt(0).toUpperCase() + entityType.slice(1)
 
   const handleDeleteClick = (priority) => {
     setDeletingPriority(priority)
@@ -51,7 +98,7 @@ const PriorityList = ({
   if (priorities.length === 0) {
     return (
       <Typography level='body-sm' textColor='text.tertiary' sx={{ fontStyle: 'italic' }}>
-        {emptyMessage}
+        {resolvedEmptyMessage}
       </Typography>
     )
   }
@@ -61,10 +108,10 @@ const PriorityList = ({
       <Stack spacing={1}>
         {priorities.map((priority) => {
           const isCompleted = !!priority.is_completed
+          const isInactive = !priority.is_active
 
-          return (
+          const rowContent = (
             <Box
-              key={priority._id}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -92,7 +139,8 @@ const PriorityList = ({
                     width: 18,
                     height: 18,
                     borderRadius: '50%',
-                    bgcolor: 'success.solidBg',
+                    bgcolor: 'success.softBg',
+                    color: 'success.plainColor',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -105,7 +153,7 @@ const PriorityList = ({
                     height='10'
                     viewBox='0 0 24 24'
                     fill='none'
-                    stroke='white'
+                    stroke='currentColor'
                     strokeWidth='3.5'
                     strokeLinecap='round'
                     strokeLinejoin='round'
@@ -114,16 +162,34 @@ const PriorityList = ({
                   </Box>
                 </Box>
               ) : (
-                <FlagIcon sx={{ fontSize: 18, color: 'warning.plainColor', flexShrink: 0 }} />
+                <Tooltip title={isInactive ? t('annualPlanning.priority.activate') : t('annualPlanning.priority.markInactive')} size='sm'>
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onToggleActive?.(priority)
+                    }}
+                    aria-label={isInactive ? t('annualPlanning.priority.activate') : t('annualPlanning.priority.markInactive')}
+                    sx={{ minWidth: 44, minHeight: 44, borderRadius: 'sm', flexShrink: 0 }}
+                  >
+                    {isInactive ? (
+                      <FlagOutlinedIcon sx={{ fontSize: 18, color: 'text.tertiary' }} />
+                    ) : (
+                      <FlagIcon sx={{ fontSize: 18, color: 'warning.plainColor' }} />
+                    )}
+                  </IconButton>
+                </Tooltip>
               )}
 
               {/* Content */}
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography
-                  level='body-sm'
+                  level='body-md'
                   fontWeight={600}
                   sx={{
-                    fontSize: { xs: '0.875rem', md: '0.9375rem' },
                     textDecoration: isCompleted ? 'line-through' : 'none',
                     color: isCompleted ? 'text.tertiary' : 'text.primary'
                   }}
@@ -132,10 +198,9 @@ const PriorityList = ({
                 </Typography>
                 {priority.description && (
                   <Typography
-                    level='body-xs'
+                    level='body-sm'
                     textColor='text.tertiary'
                     sx={{
-                      fontSize: { xs: '0.7rem', md: '0.75rem' },
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -147,23 +212,20 @@ const PriorityList = ({
                 )}
               </Box>
 
-              {/* Completed chip */}
+              {/* Completed chip — visible on all breakpoints (UAT gap-01): on the
+                  flat Overview/FocusArea lists this chip plus the icon shape are
+                  the only state cues, and it was previously hidden on mobile. */}
               {isCompleted && (
-                <Box
-                  sx={{
-                    py: 0.25,
-                    px: 0.75,
-                    borderRadius: 'sm',
-                    bgcolor: 'success.solidBg',
-                    flexShrink: 0,
-                    display: { xs: 'none', sm: 'flex' },
-                    alignItems: 'center'
-                  }}
-                >
-                  <Typography level='body-xs' sx={{ fontSize: '0.65rem', fontWeight: 700, color: 'white' }}>
-                    Done
-                  </Typography>
-                </Box>
+                <Chip size='sm' variant='soft' color='success' sx={{ flexShrink: 0 }}>
+                  {t('annualPlanning.priority.done')}
+                </Chip>
+              )}
+
+              {/* Inactive chip — visible on all breakpoints, same rationale */}
+              {isInactive && !isCompleted && (
+                <Chip size='sm' variant='soft' color='neutral' sx={{ flexShrink: 0 }}>
+                  {t('annualPlanning.priority.inactive')}
+                </Chip>
               )}
 
               {/* Deadline Badge */}
@@ -179,9 +241,8 @@ const PriorityList = ({
                   }}
                 >
                   <Typography
-                    level='body-xs'
+                    level='body-sm'
                     sx={{
-                      fontSize: '0.7rem',
                       fontWeight: 600,
                       color: isCompleted ? 'text.tertiary' : 'text.secondary',
                       textDecoration: isCompleted ? 'line-through' : 'none'
@@ -197,7 +258,7 @@ const PriorityList = ({
 
               {/* Edit Button */}
               {showEditButton && (
-                <Tooltip title='Edit priority' size='sm'>
+                <Tooltip title={t('annualPlanning.priority.edit')} size='sm'>
                   <IconButton
                     size='sm'
                     variant='plain'
@@ -229,7 +290,7 @@ const PriorityList = ({
 
               {/* Delete Button */}
               {showDeleteButton && (
-                <Tooltip title='Delete priority' size='sm'>
+                <Tooltip title={t('annualPlanning.priority.delete')} size='sm'>
                   <IconButton
                     size='sm'
                     variant='plain'
@@ -258,6 +319,15 @@ const PriorityList = ({
               )}
             </Box>
           )
+
+          if (draggable && !isCompleted) {
+            return (
+              <SortablePriorityRow key={priority._id} priorityId={priority._id} isCompleted={isCompleted}>
+                {rowContent}
+              </SortablePriorityRow>
+            )
+          }
+          return <Box key={priority._id}>{rowContent}</Box>
         })}
       </Stack>
 
@@ -287,7 +357,7 @@ const PriorityList = ({
                   height: 40,
                   borderRadius: '50%',
                   bgcolor: 'danger.softBg',
-                  color: 'danger.solidBg',
+                  color: 'danger.plainColor',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -301,19 +371,22 @@ const PriorityList = ({
                 sx={{
                   m: 0,
                   fontWeight: 700,
-                  fontSize: '1.125rem',
                   color: 'text.primary',
                   lineHeight: 1
                 }}
               >
-                Delete Priority
+                {t('annualPlanning.priority.delete')}
               </Typography>
             </Stack>
           </Box>
           <DialogContent>
             <Stack spacing={2}>
               <Typography level='body-md'>
-                Are you sure you want to delete &quot;<strong>{deletingPriority?.title}</strong>&quot;?
+                <Trans
+                  i18nKey='annualPlanning.priority.deleteConfirmMessage'
+                  values={{ title: deletingPriority?.title }}
+                  components={{ bold: <strong /> }}
+                />
               </Typography>
 
               {deletingPriority?.linked_entity_id && (
@@ -327,22 +400,9 @@ const PriorityList = ({
                   }}
                 >
                   <Typography level='body-sm' sx={{ fontWeight: 600, mb: 0.5 }}>
-                    This priority is linked to a{' '}
-                    {deletingPriority.linked_entity_type === 'goal'
-                      ? 'Goal'
-                      : deletingPriority.linked_entity_type === 'task'
-                        ? 'Task'
-                        : 'Routine'}
+                    {t('annualPlanning.priority.linkedToEntity', { entityType: entityTypeCapitalized })}
                   </Typography>
-                  <Typography level='body-sm'>
-                    The priority will be permanently deleted, but the linked{' '}
-                    {deletingPriority.linked_entity_type === 'goal'
-                      ? 'goal'
-                      : deletingPriority.linked_entity_type === 'task'
-                        ? 'task'
-                        : 'routine'}{' '}
-                    will remain unchanged and accessible from its original location.
-                  </Typography>
+                  <Typography level='body-sm'>{t('annualPlanning.priority.linkedEntityRemains', { entityType })}</Typography>
                 </Box>
               )}
             </Stack>
@@ -364,7 +424,7 @@ const PriorityList = ({
                 size='lg'
                 sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 100 } }}
               >
-                Cancel
+                {t('annualPlanning.priorityDialog.cancel')}
               </Button>
               <Button
                 variant='solid'
@@ -373,7 +433,7 @@ const PriorityList = ({
                 size='lg'
                 sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 100 } }}
               >
-                Delete Priority
+                {t('annualPlanning.priority.delete')}
               </Button>
             </Stack>
           </Box>

@@ -769,6 +769,23 @@
       "completionRate": "完了率",
       "priorities": "優先事項"
     },
+    "tabs": {
+      "overview": "Overview",
+      "goals": "Goals",
+      "priorities": "Priorities",
+      "reports": "Reports",
+      "ariaLabel": "Annual Planning sections",
+      "goalsEmptyTitle": "No goals yet",
+      "goalsEmptyBody": "Add goals inside a focus area to see them here.",
+      "errorLoading": "Couldn't load this tab. Please try again.",
+      "gridView": "グリッド表示",
+      "listView": "リスト表示",
+      "reportsEmptyTitle": "No reports yet",
+      "reportsEmptyBody": "Close a quarter to see its report here."
+    },
+    "breadcrumb": {
+      "root": "Annual Planning"
+    },
     "focusArea": {
       "title": "重点分野",
       "subtitle": "今年集中する3つの主要な分野を選択してください",
@@ -798,7 +815,21 @@
       "name": "優先事項",
       "deadline": "目標日",
       "linkedTo": "{{area}}に関連",
-      "noGoals": "まだ目標がリンクされていません"
+      "noGoals": "まだ目標がリンクされていません",
+      "noActivePriorities": "アクティブな優先事項はありません",
+      "completedSection": "完了済み",
+      "done": "Done",
+      "inactive": "非アクティブ",
+      "activeIcon": "アクティブ",
+      "inactiveIcon": "非アクティブ",
+      "activate": "有効にする",
+      "markInactive": "非アクティブにする",
+      "showInactive": "非アクティブを表示 ({{count}})",
+      "hideInactive": "非アクティブを非表示",
+      "dragHandle": "ドラッグして並べ替え",
+      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
+      "linkedToEntity": "This priority is linked to a {{entityType}}",
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
     },
     "goal": {
       "add": "目標を追加",
@@ -815,6 +846,18 @@
         "inProgress": "進行中",
         "completed": "完了"
       },
+      "healthStatus": {
+        "onTrack": "順調",
+        "atRisk": "要注意",
+        "behind": "遅延",
+        "completed": "完了"
+      },
+      "activities": "アクティビティ",
+      "noActivities": "リンクされたアクティビティはありません",
+      "percentComplete": "{{percent}}% 完了",
+      "activitiesError": "アクティビティの読み込みに失敗しました",
+      "completionBlockedTitle": "目標を完了としてマークできません",
+      "completionBlockedBody": "先に次のマイルストーンを完了してください:",
       "image": "ビジュアルインスピレーション (オプション)",
       "imageUrl": "画像URL",
       "generateImage": "AIで生成",
@@ -870,6 +913,10 @@
       "markComplete": "完了としてマーク",
       "toggleActive": "有効/無効を切り替え"
     },
+    "milestone": {
+      "label": "マイルストーン ({{completed}}/{{total}})",
+      "locked": "マイルストーンはロックされています"
+    },
     "dailyRoutine": {
       "title": "日課プランナー",
       "subtitle": "目標を達成するための理想的な一日をデザインしましょう",
@@ -899,7 +946,13 @@
       "goalActivities": "目標アクティビティ",
       "routineItems": "ルーチンアイテム",
       "saving": "保存中...",
-      "swipeHint": "スワイプしてナビゲート"
+      "swipeHint": "スワイプしてナビゲート",
+      "goalPrefix": "Goal: {{title}}",
+      "toggleItem": "今日完了としてマークする",
+      "noItems": "まだルーティン項目が設定されていません",
+      "deleteItem": "項目を削除",
+      "addItem": "項目を追加",
+      "editRoutine": "ルーティンを編集"
     },
     "progress": {
       "title": "進捗ダッシュボード",
@@ -925,10 +978,42 @@
       "exportPlan": "プランをエクスポート"
     },
     "home": {
+      "dailyRoutineBtn": "日課",
       "yearlyPriorities": "年間優先事項",
       "noPrioritiesAdded": "まだ優先事項が追加されていません",
       "viewAllPriorities": "{{count}}件の優先事項をすべて表示 →",
-      "reviewNow": "今すぐレビュー"
+      "reviewNow": "今すぐレビュー",
+      "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
+      "quarterEndsToday": "Quarter {{quarter}} ends today",
+      "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
+      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
+      "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
+      "routineCompletion": "完了"
+    },
+    "quarterReport": {
+      "report": "Report",
+      "preview": "Preview",
+      "unassignedArea": "Unassigned",
+      "noneRecorded": "None recorded",
+      "reflections": "Quarterly Reflections",
+      "biggestWins": "Biggest Wins",
+      "challenges": "Challenges",
+      "nextFocus": "Next Focus",
+      "goalsAchieved": "Goals Achieved",
+      "milestonesCompleted": "Milestones Completed",
+      "totalProgress": "Total Progress",
+      "insights": "Quarterly Insights",
+      "routineConsistency": "Routine Consistency",
+      "activeDays": "Active {{count}} day this quarter",
+      "activeDays_plural": "Active {{count}} days this quarter",
+      "activeDays_other": "Active {{count}} days this quarter",
+      "booksFinished": "Books Finished ({{count}})",
+      "breakdownByFocusArea": "Breakdown by Focus Area",
+      "migratedCount": "Migrated {{count}}x",
+      "migratedCount_plural": "Migrated {{count}}x",
+      "migratedCount_other": "Migrated {{count}}x",
+      "due": "Due",
+      "migrateToNextQuarter": "Migrate to Next Quarter"
     },
     "deleteConfirm": "この{{type}}を削除してもよろしいですか？この操作は元に戻せません。",
     "celebration": "🎉 目標達成！素晴らしい進歩です！",

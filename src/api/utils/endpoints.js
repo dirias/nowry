@@ -54,7 +54,8 @@ export const ENDPOINTS = {
     all: (planId) => `/annual-plan/priorities?annual_plan_id=${planId}`,
     create: '/annual-plan/priorities',
     update: (id) => `/annual-plan/priorities/${id}`,
-    delete: (id) => `/annual-plan/priorities/${id}`
+    delete: (id) => `/annual-plan/priorities/${id}`,
+    reorder: '/annual-plan/priorities/reorder'
   },
   goals: {
     all: (focusAreaId) => `/annual-plan/goals?focus_area_id=${focusAreaId}`,

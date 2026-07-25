@@ -25,7 +25,7 @@ function isValidShape(parsed) {
 }
 
 export function useCalendarFilters() {
-  const [filters, setFiltersRaw] = useState(() => {
+  const [filters, setFilters] = useState(() => {
     try {
       // D-05: one-time migration from old key — MUST check OLD_KEY first
       const old = localStorage.getItem(OLD_KEY)
@@ -49,9 +49,6 @@ export function useCalendarFilters() {
     }
   })
 
-  // Tracks which preset is currently active (null = no preset / manual filter state)
-  const [activePreset, setActivePreset] = useState(null)
-
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
@@ -60,35 +57,26 @@ export function useCalendarFilters() {
     }
   }, [filters])
 
-  // Public setFilters: clears activePreset on any manual filter change
-  const setFilters = useCallback((updater) => {
-    setFiltersRaw(updater)
-    setActivePreset(null)
-  }, [])
-
   const resetFilters = useCallback(() => {
-    setFiltersRaw({ ...DEFAULT_FILTERS })
-    setActivePreset(null)
+    setFilters({ ...DEFAULT_FILTERS })
   }, [])
 
   // D-06: applyPreset — filter-only; no FullCalendar view navigation (Phase 17)
-  const applyPreset = useCallback((name) => {
-    if (name === 'goals_only') {
-      setFiltersRaw({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
-      setActivePreset('goals_only')
-    } else if (name === 'today') {
-      // TODO Phase 17: navigate FullCalendar view to the target date range.
-      setFiltersRaw({ ...DEFAULT_FILTERS })
-      setActivePreset('today')
-    } else if (name === 'this_week') {
-      // TODO Phase 17: navigate FullCalendar view to the target date range.
-      setFiltersRaw({ ...DEFAULT_FILTERS })
-      setActivePreset('this_week')
-    }
-    // unknown name → no-op (no else branch)
-  }, [])
+  const applyPreset = useCallback(
+    (name) => {
+      if (name === 'goals_only') {
+        setFilters({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
+      } else if (name === 'today' || name === 'this_week') {
+        // TODO Phase 17: navigate FullCalendar view to the target date range.
+        // For now, fall back to resetting filters (buttons are disabled in the UI).
+        resetFilters()
+      }
+      // unknown name → no-op (no else branch)
+    },
+    [resetFilters]
+  )
 
-  return { filters, setFilters, resetFilters, applyPreset, activePreset }
+  return { filters, setFilters, resetFilters, applyPreset }
 }
 
 export default useCalendarFilters

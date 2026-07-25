@@ -13,7 +13,6 @@ jest.mock('@fullcalendar/react', () => () => null, { virtual: true })
 jest.mock('@fullcalendar/daygrid', () => ({}), { virtual: true })
 jest.mock('@fullcalendar/timegrid', () => ({}), { virtual: true })
 jest.mock('@fullcalendar/interaction', () => ({}), { virtual: true })
-jest.mock('@fullcalendar/list', () => ({}), { virtual: true })
 
 describe.skip('CalendarPage — CAL-01: All 5 event types in eventSources', () => {
   it('eventSources maps task events to FullCalendar shape with id, title, start, allDay, backgroundColor', () => {})
@@ -42,9 +41,6 @@ describe.skip('CalendarPage — CAL-03: eventDrop calls correct update service',
 const mockUseCalendarFilters = jest.fn()
 jest.mock('../../../hooks/useCalendarFilters', () => ({
   useCalendarFilters: (...args) => mockUseCalendarFilters(...args)
-}))
-jest.mock('../../../hooks/useIsMobile', () => ({
-  useIsMobile: () => false // default desktop for all existing tests
 }))
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k })
@@ -387,55 +383,5 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
     } else {
       expect(thisWeekBtn).not.toBeNull()
     }
-  })
-})
-
-// ─── Phase 17 MOB-01/02: Mobile toolbar constants ────────────────────────────
-
-describe('Phase 17 MOB-02: DESKTOP_TOOLBAR constant shape', () => {
-  const DESKTOP_TOOLBAR = { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }
-
-  it('DESKTOP_TOOLBAR.right has all three view names', () => {
-    expect(DESKTOP_TOOLBAR.right).toBe('dayGridMonth,timeGridWeek,timeGridDay')
-  })
-  it('DESKTOP_TOOLBAR.left is "prev,next today"', () => {
-    expect(DESKTOP_TOOLBAR.left).toBe('prev,next today')
-  })
-  it('DESKTOP_TOOLBAR.center is "title"', () => {
-    expect(DESKTOP_TOOLBAR.center).toBe('title')
-  })
-})
-
-describe('Phase 17 MOB-02: MOBILE_TOOLBAR constant shape', () => {
-  const MOBILE_TOOLBAR = { left: 'prev,next today', center: 'title', right: '' }
-
-  it('MOBILE_TOOLBAR.right is empty string (no view switcher on mobile)', () => {
-    expect(MOBILE_TOOLBAR.right).toBe('')
-  })
-  it('MOBILE_TOOLBAR.left and center match DESKTOP_TOOLBAR', () => {
-    expect(MOBILE_TOOLBAR.left).toBe('prev,next today')
-    expect(MOBILE_TOOLBAR.center).toBe('title')
-  })
-})
-
-describe('Phase 17 MOB-01: live view switch logic (D-04)', () => {
-  it('isMobile=true maps to listWeek', () => {
-    const view = (isMobile) => (isMobile ? 'listWeek' : 'dayGridMonth')
-    expect(view(true)).toBe('listWeek')
-  })
-  it('isMobile=false maps to dayGridMonth', () => {
-    const view = (isMobile) => (isMobile ? 'listWeek' : 'dayGridMonth')
-    expect(view(false)).toBe('dayGridMonth')
-  })
-})
-
-describe('Phase 17 MOB-01: This Week preset changeView logic (D-19)', () => {
-  it('uses listWeek on mobile', () => {
-    const getView = (isMobile) => (isMobile ? 'listWeek' : 'timeGridWeek')
-    expect(getView(true)).toBe('listWeek')
-  })
-  it('uses timeGridWeek on desktop', () => {
-    const getView = (isMobile) => (isMobile ? 'listWeek' : 'timeGridWeek')
-    expect(getView(false)).toBe('timeGridWeek')
   })
 })

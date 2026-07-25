@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams, Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -22,19 +22,17 @@ import {
   List,
   ListItem,
   ListItemDecorator,
-  Divider,
   Input,
   Avatar,
   Tooltip,
-  Alert
+  Alert,
+  Breadcrumbs,
+  Link
 } from '@mui/joy'
 import {
   Add as AddIcon,
-  ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  KeyboardArrowDown as ExpandIcon,
-  KeyboardArrowUp as CollapseIcon,
   Search as SearchIcon,
   Close as CloseIcon,
   GridView as GridViewIcon,
@@ -42,15 +40,68 @@ import {
   Flag as FlagIcon,
   Warning as WarningIcon
 } from '@mui/icons-material'
+import { alpha } from '@mui/system'
 
 import { annualPlanningService } from '../../api/services'
 import { apiCache } from '../../api/utils/cache'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 import GoalDialog from './GoalDialog'
+import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
 import CloseQuarterModal from './CloseQuarterModal'
+import GoalCardGrid from './GoalCardGrid'
+import GoalRowList from './GoalRowList'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
+
+// --- Module-level pure helpers (GOAL-01 computation engine, D-02/D-03/D-04) ---
+// Exported for direct unit testing without rendering the component.
+
+export const getCurrentQuarter = () => {
+  const month = new Date().getMonth() + 1
+  return Math.ceil(month / 3)
+}
+
+export const calculateProgress = (goal) => {
+  if (goal.milestones && goal.milestones.length > 0) {
+    const completedCount = goal.milestones.filter((m) => m.completed).length
+    return Math.round((completedCount / goal.milestones.length) * 100)
+  }
+  return goal.progress || 0
+}
+
+export const calculateTimeElapsedPercentage = (goal, currentQuarter) => {
+  const year = new Date().getFullYear()
+  const today = new Date()
+  if (goal.type === 'yearly') {
+    const yearStart = new Date(year, 0, 1)
+    const yearEnd = new Date(year + 1, 0, 1)
+    const totalDays = (yearEnd - yearStart) / 86400000
+    const daysElapsed = Math.min(Math.max((today - yearStart) / 86400000, 0), totalDays)
+    return Math.round((daysElapsed / totalDays) * 100)
+  }
+  // quarterly
+  const goalQuarter = goal.quarter || currentQuarter
+  if (goalQuarter < currentQuarter) return 100 // that quarter has already fully elapsed
+  if (goalQuarter > currentQuarter) return 0 // that quarter has not started yet
+  const quarterStartMonth = (goalQuarter - 1) * 3
+  const quarterStart = new Date(year, quarterStartMonth, 1)
+  const quarterEnd = new Date(year, quarterStartMonth + 3, 1)
+  const totalDays = (quarterEnd - quarterStart) / 86400000
+  const daysElapsed = Math.min(Math.max((today - quarterStart) / 86400000, 0), totalDays)
+  return Math.round((daysElapsed / totalDays) * 100)
+}
+
+export const getHealthStatus = (goal) => {
+  if (goal.status === 'completed') return 'completed'
+  const quarter = getCurrentQuarter()
+  const timeElapsed = calculateTimeElapsedPercentage(goal, quarter)
+  const progress = calculateProgress(goal)
+  const gap = timeElapsed - progress
+  if (gap <= 0) return 'on_track'
+  if (gap <= 25) return 'at_risk'
+  return 'behind'
+}
 
 const FocusAreaView = () => {
   const { id } = useParams()
@@ -74,6 +125,8 @@ const FocusAreaView = () => {
   const [selectedGoal, setSelectedGoal] = useState(null)
   const [deletingGoal, setDeletingGoal] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [showPriorityDialog, setShowPriorityDialog] = useState(false)
+  const [editingPriority, setEditingPriority] = useState(null)
 
   // Expanded Activities State
   const [expandedGoals, setExpandedGoals] = useState(new Set())
@@ -214,33 +267,11 @@ const FocusAreaView = () => {
 
   const getStatusConfig = (status) => {
     const configs = {
-      not_started: {
-        label: 'Not Started',
-        color: 'neutral',
-        icon: '⭕' // Hollow circle - nothing begun
-      },
-      in_progress: {
-        label: 'In Progress',
-        color: 'warning', // Changed from 'primary' to 'warning' for better visibility
-        icon: '🔄' // Rotation arrow - actively working
-      },
-      completed: {
-        label: 'Completed',
-        color: 'success',
-        icon: '✓' // Checkmark - done!
-      }
+      not_started: { label: t('annualPlanning.goal.status.notStarted'), color: 'neutral', icon: '⭕' },
+      in_progress: { label: t('annualPlanning.goal.status.inProgress'), color: 'warning', icon: '🔄' },
+      completed: { label: t('annualPlanning.goal.status.completed'), color: 'success', icon: '✓' }
     }
     return configs[status] || configs.not_started
-  }
-
-  const calculateProgress = (goal) => {
-    // If goal has milestones, calculate based on completion
-    if (goal.milestones && goal.milestones.length > 0) {
-      const completedCount = goal.milestones.filter((m) => m.completed).length
-      return Math.round((completedCount / goal.milestones.length) * 100)
-    }
-    // Otherwise use manual progress field
-    return goal.progress || 0
   }
 
   const handleToggleExpand = async (goalId) => {
@@ -257,6 +288,11 @@ const FocusAreaView = () => {
           setGoalActivities((prev) => ({ ...prev, [goalId]: activities }))
         } catch (error) {
           console.error('Failed to load goal activities', error)
+          // Error sentinel: null = fetch failed (distinct from undefined = not
+          // yet fetched and [] = fetched, empty) so the Activities accordion in
+          // GoalCardGrid/GoalRowList can render its error state instead of an
+          // infinite Skeleton.
+          setGoalActivities((prev) => ({ ...prev, [goalId]: null }))
         }
       }
     }
@@ -320,24 +356,36 @@ const FocusAreaView = () => {
     }
   }
 
-  // Determine current quarter for authentic default
-  const getCurrentQuarter = React.useCallback(() => {
-    const month = new Date().getMonth() + 1
-    return Math.ceil(month / 3)
-  }, [])
-
   const handleDeletePriority = () => {
     // Refresh data after delete
     fetchData()
   }
 
-  const handleEditPriority = () => {
-    // Navigate to annual planning to edit
-    navigate('/annual-planning')
+  const handleEditPriority = (priority) => {
+    setEditingPriority(priority)
+    setShowPriorityDialog(true)
+  }
+
+  const handleToggleActive = async (priority) => {
+    const originalIsActive = priority.is_active
+    const newIsActive = !originalIsActive
+    setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: newIsActive } : p)))
+    try {
+      await annualPlanningService.updatePriority(priority._id, { is_active: newIsActive })
+    } catch (error) {
+      console.error('Failed to toggle active state:', error)
+      setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: originalIsActive } : p)))
+    }
+  }
+
+  const handleClosePriorityDialog = () => {
+    setShowPriorityDialog(false)
+    setEditingPriority(null)
   }
 
   // Quarter State
   const [searchParams, setSearchParams] = useSearchParams()
+  const qSuffix = searchParams.get('q') ? '?q=' + searchParams.get('q') : ''
   const initialQ = searchParams.get('q') ? Number(searchParams.get('q')) : getCurrentQuarter()
   const [quarterFilter, setQuarterFilter] = useState(initialQ)
 
@@ -357,7 +405,7 @@ const FocusAreaView = () => {
         setQuarterFilter(currentQ < 4 ? currentQ + 1 : 1)
       }
     }
-  }, [quarterReports, plan?.year, quarterFilter, getCurrentQuarter])
+  }, [quarterReports, plan?.year, quarterFilter])
   const isQuarterClosed = quarterReports.some((r) => r.quarter === quarterFilter && r.year === plan?.year)
   const [activeTab, setActiveTab] = useState(0) // 0: Goals, 1: Priorities
 
@@ -430,483 +478,6 @@ const FocusAreaView = () => {
     setDialogOpen(true)
   }
 
-  // Render Goal Card (Grid View) - Section 6.2 Compliance with Glass-morphism
-  const renderGoalCardGrid = (goal) => {
-    const hasMilestones = goal.milestones && goal.milestones.length > 0
-
-    return (
-      <Card
-        variant='outlined'
-        sx={{
-          position: 'relative',
-          height: { xs: 220, md: 280 },
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          p: 0,
-          border: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'background.surface',
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-          '&:hover': {
-            borderColor: 'primary.outlinedBorder',
-            boxShadow: 'md',
-            transform: 'translateY(-4px)'
-          }
-        }}
-      >
-        {/* Visual Identifier - Image OR Color Accent */}
-        {goal.image_url ? (
-          <>
-            {/* Background Image Layer - Visible but elegant */}
-            <Box
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                zIndex: 0,
-                backgroundImage: `url(${goal.image_url})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                opacity: 0.25,
-                filter: 'grayscale(0.2) brightness(1.1)'
-              }}
-            />
-            {/* Theme-aware overlay for text contrast */}
-            <Box
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                zIndex: 1,
-                bgcolor: 'background.surface',
-                opacity: 0.75
-              }}
-            />
-          </>
-        ) : (
-          /* Colored accent for cards without images */
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 4,
-              zIndex: 0,
-              bgcolor: area?.color || 'primary.solidBg',
-              opacity: 0.8
-            }}
-          />
-        )}
-
-        {/* Content Layer */}
-        <CardContent
-          sx={{
-            position: 'relative',
-            zIndex: 2,
-            flex: 1,
-            overflow: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            p: 2,
-            gap: 1
-          }}
-        >
-          {/* Header: Status + Actions */}
-          <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
-            <Box
-              onClick={(e) => {
-                e.stopPropagation()
-                if (!isQuarterClosed) handleStatusChange(goal)
-              }}
-              sx={{
-                cursor: isQuarterClosed ? 'default' : 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0.5,
-                px: 1,
-                py: 0.5,
-                borderRadius: 'sm',
-                border: '1px solid',
-                borderColor: `${getStatusConfig(goal.status).color}.outlinedBorder`,
-                color: `${getStatusConfig(goal.status).color}.solidBg`,
-                fontWeight: 600,
-                fontSize: '0.65rem',
-                transition: 'all 0.2s',
-                '&:hover': isQuarterClosed
-                  ? {}
-                  : {
-                      borderColor: `${getStatusConfig(goal.status).color}.solidBg`,
-                      bgcolor: 'background.level1'
-                    }
-              }}
-            >
-              <span>{getStatusConfig(goal.status).icon}</span>
-              <span>{getStatusConfig(goal.status).label}</span>
-            </Box>
-            {!isQuarterClosed && (
-              <Stack direction='row' spacing={0.5}>
-                <IconButton
-                  size='sm'
-                  variant='plain'
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleEditGoal(goal)
-                  }}
-                  sx={{
-                    transition: 'all 0.2s',
-                    '&:hover': { transform: 'scale(1.1)' }
-                  }}
-                >
-                  <EditIcon fontSize='small' />
-                </IconButton>
-                <IconButton
-                  size='sm'
-                  variant='plain'
-                  color='danger'
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDeleteGoal(goal)
-                  }}
-                  sx={{
-                    transition: 'all 0.2s',
-                    '&:hover': { transform: 'scale(1.1)' }
-                  }}
-                >
-                  <DeleteIcon fontSize='small' />
-                </IconButton>
-              </Stack>
-            )}
-          </Stack>
-
-          {/* Title */}
-          <Typography
-            level='title-md'
-            sx={{
-              fontWeight: 700,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              lineHeight: 1.4,
-              color: 'text.primary',
-              letterSpacing: '-0.01em'
-            }}
-          >
-            {goal.title}
-          </Typography>
-
-          {/* Progress */}
-          <Box sx={{ mt: 'auto' }}>
-            <Box
-              sx={{
-                width: '100%',
-                height: 6,
-                bgcolor: 'background.level2',
-                borderRadius: 'sm',
-                overflow: 'hidden',
-                mb: 0.5
-              }}
-            >
-              <Box
-                sx={{
-                  width: `${calculateProgress(goal)}%`,
-                  height: '100%',
-                  bgcolor: area?.color || 'primary.solidBg',
-                  transition: 'width 0.3s ease'
-                }}
-              />
-            </Box>
-            <Typography
-              level='body-xs'
-              sx={{
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                color: 'text.secondary'
-              }}
-            >
-              {calculateProgress(goal)}% Complete
-            </Typography>
-          </Box>
-
-          {/* Milestones */}
-          {hasMilestones && (
-            <Box
-              sx={{
-                pt: 1.5,
-                mt: 0.5,
-                borderTop: '1px solid',
-                borderColor: 'divider'
-              }}
-            >
-              <Divider sx={{ mb: 0.5 }} />
-              <Button
-                variant='plain'
-                size='sm'
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleToggleMilestones(goal._id)
-                }}
-                endDecorator={expandedMilestones.has(goal._id) ? <CollapseIcon /> : <ExpandIcon />}
-                sx={{
-                  width: '100%',
-                  justifyContent: 'space-between',
-                  fontSize: '0.7rem',
-                  py: 0.75,
-                  px: 1,
-                  minHeight: 'auto',
-                  fontWeight: 600,
-                  color: 'text.secondary',
-                  borderRadius: 'sm',
-                  '&:hover': { bgcolor: 'background.level1' }
-                }}
-              >
-                Milestones ({goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length})
-              </Button>
-
-              {expandedMilestones.has(goal._id) && (
-                <Stack spacing={0.75} sx={{ mt: 1, maxHeight: 100, overflow: 'auto', px: 0.5 }}>
-                  {goal.milestones.map((milestone, idx) => (
-                    <Box
-                      key={idx}
-                      title={goal.status === 'completed' || isQuarterClosed ? 'Milestones are locked' : undefined}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        py: 0.75,
-                        px: 1,
-                        borderRadius: 'sm',
-                        cursor: goal.status === 'completed' || isQuarterClosed ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s',
-                        opacity: goal.status === 'completed' || isQuarterClosed ? 0.65 : 1,
-                        '&:hover': goal.status === 'completed' || isQuarterClosed ? {} : { bgcolor: 'background.level1' }
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (isQuarterClosed) return
-                        handleToggleMilestone(goal, idx)
-                      }}
-                    >
-                      {/* Checkbox — shows lock icon overlay when goal is completed */}
-                      <Box sx={{ position: 'relative', flexShrink: 0 }}>
-                        <Box
-                          sx={{
-                            width: 14,
-                            height: 14,
-                            border: `1.5px solid ${area?.color || 'var(--joy-palette-danger-solidBg)'}`,
-                            borderRadius: '2px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: milestone.completed ? area?.color || 'var(--joy-palette-danger-solidBg)' : 'transparent',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          {milestone.completed && (
-                            <Box
-                              component='svg'
-                              width='8'
-                              height='8'
-                              viewBox='0 0 24 24'
-                              fill='none'
-                              stroke='white'
-                              strokeWidth='4'
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                            >
-                              <polyline points='20 6 9 17 4 12' />
-                            </Box>
-                          )}
-                        </Box>
-                        {/* Lock badge — only visible when goal is completed or locked */}
-                        {(goal.status === 'completed' || isQuarterClosed) && (
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              bottom: -3,
-                              right: -4,
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              bgcolor: 'background.surface',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <Box
-                              component='svg'
-                              width='6'
-                              height='6'
-                              viewBox='0 0 24 24'
-                              fill='none'
-                              stroke='currentColor'
-                              strokeWidth='2.5'
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              sx={{ color: 'text.tertiary' }}
-                            >
-                              <rect x='3' y='11' width='18' height='11' rx='2' ry='2' />
-                              <path d='M7 11V7a5 5 0 0 1 10 0v4' />
-                            </Box>
-                          </Box>
-                        )}
-                      </Box>
-                      <Typography
-                        level='body-xs'
-                        sx={{
-                          flex: 1,
-                          textDecoration: milestone.completed ? 'line-through' : 'none',
-                          color: milestone.completed ? 'text.tertiary' : 'text.primary',
-                          fontSize: '0.7rem',
-                          lineHeight: 1.4,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {milestone.title}
-                      </Typography>
-                      {milestone.due_date &&
-                        !milestone.completed &&
-                        (() => {
-                          const due = new Date(milestone.due_date + 'T00:00:00')
-                          const now = new Date()
-                          const overdue = due < now
-                          const label = due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-                          return (
-                            <Box
-                              sx={{
-                                flexShrink: 0,
-                                px: 0.75,
-                                py: 0.25,
-                                borderRadius: 'sm',
-                                bgcolor: overdue ? 'danger.softBg' : 'primary.softBg',
-                                border: '1px solid',
-                                borderColor: overdue ? 'danger.outlinedBorder' : 'primary.outlinedBorder',
-                                fontSize: '0.6rem',
-                                fontWeight: 600,
-                                color: overdue ? 'danger.plainColor' : 'primary.plainColor',
-                                whiteSpace: 'nowrap',
-                                lineHeight: 1.4
-                              }}
-                            >
-                              🗓 {label}
-                            </Box>
-                          )
-                        })()}
-                    </Box>
-                  ))}
-                </Stack>
-              )}
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Render Goal Row (List View) - Section 6.2 Compliance
-  const renderGoalRowList = (goal) => (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        py: 1.5,
-        px: 2,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        minHeight: 56,
-        '&:hover': {
-          bgcolor: 'background.level1'
-        }
-      }}
-    >
-      {/* Status Indicator */}
-      <Box
-        onClick={() => {
-          if (!isQuarterClosed) handleStatusChange(goal)
-        }}
-        sx={{
-          cursor: isQuarterClosed ? 'default' : 'pointer',
-          flexShrink: 0
-        }}
-      >
-        <Box
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1,
-            py: 0.5,
-            borderRadius: 'sm',
-            border: '1px solid',
-            borderColor: `${getStatusConfig(goal.status).color}.outlinedBorder`,
-            color: `${getStatusConfig(goal.status).color}.solidBg`,
-            fontWeight: 600,
-            fontSize: '0.7rem',
-            minWidth: 90,
-            justifyContent: 'center'
-          }}
-        >
-          <span>{getStatusConfig(goal.status).icon}</span>
-          <span>{getStatusConfig(goal.status).label}</span>
-        </Box>
-      </Box>
-
-      {/* Title */}
-      <Typography level='title-sm' sx={{ flex: 1, minWidth: 0 }}>
-        {goal.title}
-      </Typography>
-
-      {/* Progress */}
-      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1, width: 120 }}>
-        <Box
-          sx={{
-            flex: 1,
-            height: 6,
-            bgcolor: 'background.level2',
-            borderRadius: 'sm',
-            overflow: 'hidden'
-          }}
-        >
-          <Box
-            sx={{
-              width: `${calculateProgress(goal)}%`,
-              height: '100%',
-              bgcolor: area?.color || 'primary.solidBg',
-              transition: 'width 0.3s ease'
-            }}
-          />
-        </Box>
-        <Typography level='body-xs' sx={{ minWidth: 40, textAlign: 'right' }}>
-          {calculateProgress(goal)}%
-        </Typography>
-      </Box>
-
-      {/* Milestones Count */}
-      {goal.milestones && goal.milestones.length > 0 && (
-        <Typography level='body-xs' sx={{ display: { xs: 'none', sm: 'block' }, width: 80, color: 'text.secondary' }}>
-          {goal.milestones.filter((m) => m.completed).length}/{goal.milestones.length} done
-        </Typography>
-      )}
-
-      {/* Actions */}
-      {!isQuarterClosed && (
-        <Stack direction='row' spacing={0.5}>
-          <IconButton size='sm' variant='plain' onClick={() => handleEditGoal(goal)}>
-            <EditIcon fontSize='small' />
-          </IconButton>
-          <IconButton size='sm' variant='plain' color='danger' onClick={() => handleDeleteGoal(goal)}>
-            <DeleteIcon fontSize='small' />
-          </IconButton>
-        </Stack>
-      )}
-    </Box>
-  )
-
   if (loading) {
     return (
       <Container maxWidth='xl' sx={{ py: 4 }}>
@@ -920,23 +491,21 @@ const FocusAreaView = () => {
 
   return (
     <Container maxWidth='xl' sx={{ py: 4, pb: 10 }}>
-      {/* Premium Back Navigation Row */}
-      <Box sx={{ mb: 2 }}>
-        <IconButton
-          variant='plain'
+      {/* Breadcrumb Navigation */}
+      <Breadcrumbs size='sm' separator='›' sx={{ mb: 2, px: 0 }}>
+        <Link
+          component={RouterLink}
+          to={`/annual-planning${qSuffix}`}
+          underline='hover'
           color='neutral'
-          onClick={() => navigate('/annual-planning')}
-          size='sm'
-          sx={{
-            ml: -1, // Pull slightly left to optically align the arrow stem with the layout grid
-            borderRadius: '50%',
-            transition: 'all 0.2s',
-            '&:hover': { bgcolor: 'background.level1', transform: 'translateX(-4px)' } // Slide left on hover
-          }}
+          sx={{ fontSize: 'sm', color: 'text.tertiary', '&:hover': { color: 'text.secondary' } }}
         >
-          <ArrowBackIcon />
-        </IconButton>
-      </Box>
+          {t('annualPlanning.breadcrumb.root')}
+        </Link>
+        <Typography level='body-sm' fontWeight={700} sx={{ color: 'text.primary' }}>
+          {area.name}
+        </Typography>
+      </Breadcrumbs>
 
       {/* Header Area */}
       <Box
@@ -954,15 +523,15 @@ const FocusAreaView = () => {
             width: { xs: 56, md: 64 }, // Scaled down to match text block height exactly
             height: { xs: 56, md: 64 },
             borderRadius: 'xl',
-            bgcolor: area.color ? `${area.color}15` : 'background.level1',
+            bgcolor: area.color ? alpha(area.color, 0.08) : 'background.level1',
             border: '1px solid',
-            borderColor: area.color ? `${area.color}30` : 'divider',
+            borderColor: area.color ? alpha(area.color, 0.18) : 'divider',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: { xs: '2rem', md: '2.5rem' },
             flexShrink: 0,
-            boxShadow: area.color ? `0 4px 24px ${area.color}20` : 'sm'
+            boxShadow: area.color ? `0 4px 24px ${alpha(area.color, 0.12)}` : 'sm'
           }}
         >
           {area.icon}
@@ -1052,7 +621,7 @@ const FocusAreaView = () => {
           </Alert>
         ) : !isQuarterClosed ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography level='title-sm' sx={{ color: 'primary.solidHoverBg' }}>
+            <Typography level='title-sm' sx={{ color: 'primary.plainColor' }}>
               🚀 <b>{getDaysLeftInQuarter(quarterFilter)} days left</b> to crush your Q{quarterFilter} goals!
             </Typography>
           </Box>
@@ -1197,7 +766,7 @@ const FocusAreaView = () => {
                 <CardContent>
                   <Stack direction='row' justifyContent='space-between' alignItems='center'>
                     <Box>
-                      <Typography level='body-xs' fontWeight={700} textColor='primary.solidHoverBg' letterSpacing='1px' mb={0.5}>
+                      <Typography level='body-xs' fontWeight={700} textColor='primary.plainColor' letterSpacing='1px' mb={0.5}>
                         YEARLY OBJECTIVE
                       </Typography>
                       <Typography level='h4' fontWeight={600}>
@@ -1228,7 +797,23 @@ const FocusAreaView = () => {
                   <Grid container spacing={2}>
                     {(goalsByParent[objective._id] || []).map((goal) => (
                       <Grid key={goal._id} xs={12} md={6}>
-                        {renderGoalCardGrid(goal)}
+                        <GoalCardGrid
+                          goal={goal}
+                          area={area}
+                          isQuarterClosed={isQuarterClosed}
+                          expandedMilestones={expandedMilestones}
+                          expandedGoals={expandedGoals}
+                          goalActivities={goalActivities}
+                          handleStatusChange={handleStatusChange}
+                          handleEditGoal={handleEditGoal}
+                          handleDeleteGoal={handleDeleteGoal}
+                          handleToggleMilestones={handleToggleMilestones}
+                          handleToggleMilestone={handleToggleMilestone}
+                          handleToggleExpand={handleToggleExpand}
+                          calculateProgress={calculateProgress}
+                          getStatusConfig={getStatusConfig}
+                          getHealthStatus={getHealthStatus}
+                        />
                       </Grid>
                     ))}
 
@@ -1251,7 +836,25 @@ const FocusAreaView = () => {
                   <Box>
                     <Stack spacing={0}>
                       {(goalsByParent[objective._id] || []).map((goal) => (
-                        <Box key={goal._id}>{renderGoalRowList(goal)}</Box>
+                        <Box key={goal._id}>
+                          <GoalRowList
+                            goal={goal}
+                            area={area}
+                            isQuarterClosed={isQuarterClosed}
+                            expandedMilestones={expandedMilestones}
+                            expandedGoals={expandedGoals}
+                            goalActivities={goalActivities}
+                            handleStatusChange={handleStatusChange}
+                            handleEditGoal={handleEditGoal}
+                            handleDeleteGoal={handleDeleteGoal}
+                            handleToggleMilestones={handleToggleMilestones}
+                            handleToggleMilestone={handleToggleMilestone}
+                            handleToggleExpand={handleToggleExpand}
+                            calculateProgress={calculateProgress}
+                            getStatusConfig={getStatusConfig}
+                            getHealthStatus={getHealthStatus}
+                          />
+                        </Box>
                       ))}
                     </Stack>
                     {!isQuarterClosed && (
@@ -1282,7 +885,23 @@ const FocusAreaView = () => {
                 <Grid container spacing={2}>
                   {goalsByParent['orphan'].map((goal) => (
                     <Grid key={goal._id} xs={12} md={6}>
-                      {renderGoalCardGrid(goal)}
+                      <GoalCardGrid
+                        goal={goal}
+                        area={area}
+                        isQuarterClosed={isQuarterClosed}
+                        expandedMilestones={expandedMilestones}
+                        expandedGoals={expandedGoals}
+                        goalActivities={goalActivities}
+                        handleStatusChange={handleStatusChange}
+                        handleEditGoal={handleEditGoal}
+                        handleDeleteGoal={handleDeleteGoal}
+                        handleToggleMilestones={handleToggleMilestones}
+                        handleToggleMilestone={handleToggleMilestone}
+                        handleToggleExpand={handleToggleExpand}
+                        calculateProgress={calculateProgress}
+                        getStatusConfig={getStatusConfig}
+                        getHealthStatus={getHealthStatus}
+                      />
                     </Grid>
                   ))}
                 </Grid>
@@ -1290,7 +909,25 @@ const FocusAreaView = () => {
                 /* List View */
                 <Stack spacing={0}>
                   {goalsByParent['orphan'].map((goal) => (
-                    <Box key={goal._id}>{renderGoalRowList(goal)}</Box>
+                    <Box key={goal._id}>
+                      <GoalRowList
+                        goal={goal}
+                        area={area}
+                        isQuarterClosed={isQuarterClosed}
+                        expandedMilestones={expandedMilestones}
+                        expandedGoals={expandedGoals}
+                        goalActivities={goalActivities}
+                        handleStatusChange={handleStatusChange}
+                        handleEditGoal={handleEditGoal}
+                        handleDeleteGoal={handleDeleteGoal}
+                        handleToggleMilestones={handleToggleMilestones}
+                        handleToggleMilestone={handleToggleMilestone}
+                        handleToggleExpand={handleToggleExpand}
+                        calculateProgress={calculateProgress}
+                        getStatusConfig={getStatusConfig}
+                        getHealthStatus={getHealthStatus}
+                      />
+                    </Box>
                   ))}
                 </Stack>
               )}
@@ -1316,9 +953,23 @@ const FocusAreaView = () => {
           priorities={priorities}
           onEdit={handleEditPriority}
           onDelete={handleDeletePriority}
+          onToggleActive={handleToggleActive}
           emptyMessage='No priorities linked to this area yet.'
         />
       </Box>
+
+      <PriorityDialog
+        open={showPriorityDialog}
+        onClose={handleClosePriorityDialog}
+        annualPlanId={plan?._id}
+        focusAreas={allAreas}
+        existingPriorities={allPriorities}
+        editingPriority={editingPriority}
+        onSuccess={() => {
+          fetchData()
+          handleClosePriorityDialog()
+        }}
+      />
 
       <GoalDialog
         open={dialogOpen}
