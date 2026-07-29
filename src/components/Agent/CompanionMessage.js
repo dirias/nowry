@@ -35,6 +35,10 @@ const CompanionMessage = ({ message, isLoading, onDismiss, onTellMeMore }) => {
             variant='outlined'
             sx={{
               width: { xs: 240, sm: 280 },
+              // Second-layer clamp — the StudyPet.js wrapper already limits this to
+              // calc(100vw - 48px), but guard here too in case CompanionMessage is
+              // ever rendered outside that wrapper.
+              maxWidth: 'calc(100vw - 48px)',
               borderRadius: 'xl',
               boxShadow: 'lg',
               bgcolor: 'background.surface',

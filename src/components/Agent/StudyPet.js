@@ -1070,8 +1070,11 @@ const StudyPet = () => {
                 exit={{ opacity: 0, y: 16, scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 style={{
-                  width: 380,
-                  height: 580,
+                  // Viewport-relative clamp — prevents the panel itself from overflowing
+                  // narrow viewports (<428px) while preserving the 380x580 default on
+                  // larger screens. Keeps the existing 24px edge margins (48px total).
+                  width: 'min(380px, calc(100vw - 48px))',
+                  height: 'min(580px, calc(100vh - 48px))',
                   borderRadius: 20,
                   background: 'var(--joy-palette-background-surface)',
                   border: '1px solid var(--joy-palette-divider)',
@@ -1596,9 +1599,21 @@ const StudyPet = () => {
             )}
           </AnimatePresence>
 
-          {/* Floating companion message — above orb */}
+          {/* Floating companion message — above orb.
+              Anchors to the same edge the pet is docked to (left during an active
+              study session, right otherwise) so it never renders off the opposite
+              edge, plus a viewport-relative maxWidth as a collision safety net. */}
           {(companionMessage || companionIsLoading) && (
-            <div style={{ position: 'absolute', bottom: '100%', right: 0, marginBottom: 12, zIndex: 1 }}>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                ...(isInStudySession ? { left: 0, right: 'auto' } : { right: 0, left: 'auto' }),
+                marginBottom: 12,
+                maxWidth: 'calc(100vw - 48px)',
+                zIndex: 1
+              }}
+            >
               <CompanionMessage
                 message={companionMessage?.message ?? ''}
                 isLoading={companionIsLoading}
