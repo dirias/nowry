@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -65,7 +65,6 @@ export default function ManageContent({
   onDeleteCard,
   onAddCard,
   onStudy,
-  onPreview,
   searchQuery,
   totalCards = 0,
   hasMore = false,
@@ -113,16 +112,6 @@ export default function ManageContent({
 
   const handleClosePreview = () => {
     setPreviewState((prev) => ({ ...prev, open: false }))
-  }
-
-  const handlePreviewDeck = (deck) => {
-    const deckCards = getCardsForDeck(deck._id)
-    setPreviewState({
-      open: true,
-      title: deck.name,
-      cards: deckCards,
-      initialIndex: 0
-    })
   }
 
   const handlePreviewCard = (card) => {
@@ -174,37 +163,41 @@ export default function ManageContent({
     return deck?.name || '—'
   }
 
-  const getCardsForDeck = (deckId) => {
-    return cards.filter((card) => card.deck_id === deckId || card.deck_id?._id === deckId)
-  }
-
   // Filter decks
-  const filteredDecks = decks.filter((deck) => {
-    const query = searchQuery.toLowerCase()
+  const filteredDecks = useMemo(
+    () =>
+      decks.filter((deck) => {
+        const query = searchQuery.toLowerCase()
 
-    // Split by comma for OR condition
-    const orGroups = query.split(',')
+        // Split by comma for OR condition
+        const orGroups = query.split(',')
 
-    // Check if matches ANY of the comma-separated groups
-    const matchesSearch = orGroups.some((group) => {
-      const terms = group.trim().split(/\s+/).filter(Boolean)
-      if (terms.length === 0) return false // Ignore empty groups
+        // Check if matches ANY of the comma-separated groups
+        const matchesSearch = orGroups.some((group) => {
+          const terms = group.trim().split(/\s+/).filter(Boolean)
+          if (terms.length === 0) return false // Ignore empty groups
 
-      // Check if ALL terms in this group match (Name OR Tags)
-      return terms.every((term) => deck.name.toLowerCase().includes(term) || deck.tags?.some((tag) => tag.toLowerCase().includes(term)))
-    })
+          // Check if ALL terms in this group match (Name OR Tags)
+          return terms.every((term) => deck.name.toLowerCase().includes(term) || deck.tags?.some((tag) => tag.toLowerCase().includes(term)))
+        })
 
-    const deckType = deck.deck_type || 'flashcard'
-    const matchesType = filterType === 'all' || deckType === filterType
-    return (searchQuery.trim() === '' || matchesSearch) && matchesType
-  })
+        const deckType = deck.deck_type || 'flashcard'
+        const matchesType = filterType === 'all' || deckType === filterType
+        return (searchQuery.trim() === '' || matchesSearch) && matchesType
+      }),
+    [decks, searchQuery, filterType]
+  )
 
   // Cards are filtered server-side (search + tags via useCardData).
   // Only apply the local card-type filter on what the API returned.
-  const filteredCards = cards.filter((card) => {
-    const cardType = card.card_type || 'flashcard'
-    return filterType === 'all' || cardType === filterType
-  })
+  const filteredCards = useMemo(
+    () =>
+      cards.filter((card) => {
+        const cardType = card.card_type || 'flashcard'
+        return filterType === 'all' || cardType === filterType
+      }),
+    [cards, filterType]
+  )
 
   const filters = [
     { key: 'all', label: t('cards.manage_content.filters.all'), color: 'neutral' },
@@ -618,8 +611,6 @@ export default function ManageContent({
                     cardCount={cardCount}
                     gradient={gradient}
                     getDeckIcon={getDeckIcon}
-                    handlePreviewDeck={handlePreviewDeck}
-                    onPreview={onPreview}
                     onEditDeck={onEditDeck}
                     onDeleteDeck={onDeleteDeck}
                     onStudy={onStudy}
@@ -643,7 +634,7 @@ export default function ManageContent({
                   <React.Fragment key={deck._id}>
                     <Card
                       variant='outlined'
-                      onClick={() => handlePreviewDeck(deck)}
+                      onClick={() => onStudy?.(deck)}
                       sx={{
                         transition: 'all 0.15s',
                         cursor: 'pointer',
@@ -695,7 +686,7 @@ export default function ManageContent({
                                 color='success'
                                 variant='soft'
                                 startDecorator={<Public sx={{ fontSize: 12 }} />}
-                                sx={{ fontSize: '0.65rem', py: 0.25, px: 0.75, height: 'auto', flexShrink: 0 }}
+                                sx={{ py: 0.25, px: 0.75, height: 'auto', flexShrink: 0 }}
                               >
                                 {t('publish.status.public')}
                               </Chip>
@@ -712,7 +703,6 @@ export default function ManageContent({
                           variant='soft'
                           color={deckColor}
                           sx={{
-                            fontSize: '0.65rem',
                             height: 20,
                             px: 1,
                             fontWeight: 600,
@@ -795,9 +785,6 @@ export default function ManageContent({
                                 {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
                               </MenuItem>
                               <ListDivider />
-                              <MenuItem onClick={() => onPreview?.(deck)}>
-                                <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
-                              </MenuItem>
                               <MenuItem onClick={() => onAddCard(deck)}>
                                 <Add sx={{ fontSize: 16 }} /> {t('cards.deck.addCard')}
                               </MenuItem>
@@ -864,7 +851,7 @@ export default function ManageContent({
                     sx={{
                       transition: 'all 0.2s',
                       cursor: 'pointer',
-                      p: 2,
+                      p: 1.5,
                       '&:hover': {
                         boxShadow: 'sm',
                         borderColor: `${cardColor}.outlinedBorder`,
@@ -956,7 +943,7 @@ export default function ManageContent({
           )}
 
           {filteredCards.length === 0 && (
-            <Box sx={{ p: 6, textAlign: 'center' }}>
+            <Box sx={{ p: 4, textAlign: 'center' }}>
               <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
                 {t('cards.manage_content.empty.cards.title')}
               </Typography>
@@ -1002,8 +989,6 @@ function DeckGridCard({
   cardCount,
   gradient,
   getDeckIcon,
-  handlePreviewDeck,
-  onPreview,
   onEditDeck,
   onDeleteDeck,
   onStudy,
@@ -1066,7 +1051,7 @@ function DeckGridCard({
         onTouchEnd={handleReset}
         onTouchCancel={handleReset}
         sx={{
-          p: 1.5,
+          p: 1,
           width: '100%',
           maxWidth: 240,
           minHeight: 220,
@@ -1108,7 +1093,7 @@ function DeckGridCard({
         {/* Preview Area - Fixed Height */}
         <Box
           sx={{ mb: 1.5, height: 90, borderRadius: 'sm', overflow: 'hidden', position: 'relative', zIndex: 1 }}
-          onClick={() => handlePreviewDeck(deck)}
+          onClick={() => onStudy?.(deck)}
         >
           {deck.image_url ? (
             <img
@@ -1139,7 +1124,7 @@ function DeckGridCard({
 
         {/* Header Row - Title + Actions */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1, gap: 1, zIndex: 1 }}>
-          <Box sx={{ flex: 1, minWidth: 0 }} onClick={() => handlePreviewDeck(deck)}>
+          <Box sx={{ flex: 1, minWidth: 0 }} onClick={() => onStudy?.(deck)}>
             <Typography
               level='title-md'
               sx={{
@@ -1158,7 +1143,7 @@ function DeckGridCard({
                 color='success'
                 variant='soft'
                 startDecorator={<Public sx={{ fontSize: 12 }} />}
-                sx={{ fontSize: '0.65rem', py: 0.25, px: 0.75, height: 'auto', mt: 0.5 }}
+                sx={{ py: 0.25, px: 0.75, height: 'auto', mt: 0.5 }}
               >
                 {t('publish.status.public')}
               </Chip>
@@ -1193,9 +1178,6 @@ function DeckGridCard({
                 {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
               </MenuItem>
               <ListDivider />
-              <MenuItem onClick={() => onPreview?.(deck)}>
-                <Visibility sx={{ fontSize: 16 }} /> {t('cards.preview')}
-              </MenuItem>
               <MenuItem onClick={() => onDeckSettings?.(deck)}>
                 <Settings sx={{ fontSize: 16 }} /> {t('deckSettings.menuItem')}
               </MenuItem>
@@ -1234,7 +1216,7 @@ function DeckGridCard({
         {/* Metadata Row */}
         <Box
           sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, zIndex: 1 }}
-          onClick={() => handlePreviewDeck(deck)}
+          onClick={() => onStudy?.(deck)}
         >
           <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
             {t('cards.manage_content.cardCount', { count: cardCount })}
@@ -1254,7 +1236,7 @@ function DeckGridCard({
           </Stack>
         </Box>
 
-        <Box sx={{ flex: 1, zIndex: 1 }} onClick={() => handlePreviewDeck(deck)} />
+        <Box sx={{ flex: 1, zIndex: 1 }} onClick={() => onStudy?.(deck)} />
 
         {/* Action Button */}
         <Box sx={{ zIndex: 2, position: 'relative' }}>

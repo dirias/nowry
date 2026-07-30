@@ -125,9 +125,7 @@ describe('Phase 25 GOAL-04: Activities accordion (D-09/D-10/D-11)', () => {
     })
     render(<GoalCardGrid {...props} />)
     expect(screen.getByText('Morning run')).toBeInTheDocument()
-    expect(
-      screen.getByText(/annualPlanning\.activity\.frequencies\.daily:\{"defaultValue":"daily"\}/)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/annualPlanning\.activity\.frequencies\.daily:\{"defaultValue":"daily"\}/)).toBeInTheDocument()
   })
 
   it('Test 11: expanded + empty activities array renders the noActivities message', () => {

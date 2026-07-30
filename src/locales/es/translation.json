@@ -133,6 +133,22 @@
       "ariaLabel": "Estudiar {{name}}",
       "dueSoon": "en {{hours}}h",
       "new": "Nuevo"
+    },
+    "modePicker": {
+      "title": "Choose how to study",
+      "study": {
+        "label": "Study",
+        "description": "Review cards due today with spaced repetition",
+        "disabledHint": "Nothing due right now"
+      },
+      "browse": {
+        "label": "Browse",
+        "description": "Look through every card — no grading, no schedule changes"
+      },
+      "cram": {
+        "label": "Cram",
+        "description": "Review every card in this deck, regardless of due date"
+      }
     }
   },
   "auth": {
@@ -837,10 +853,26 @@
       "allCaughtUp": "¡Al día!",
       "noDue": "No hay tarjetas pendientes por ahora.",
       "goBack": "Volver",
+      "mode": {
+        "study": "Study",
+        "browse": "Browse",
+        "cram": "Cram"
+      },
+      "emptyDeck": {
+        "title": "No cards yet",
+        "body": "Add cards to this deck to browse or cram them here."
+      },
+      "error": "Couldn't load cards. Check your connection and try again.",
+      "enterFullscreen": "Pantalla completa",
+      "exitFullscreen": "Salir de pantalla completa",
       "complete": {
         "title": "¡Sesión completa!",
         "body": "Revisaste {{count}} tarjetas. ¡Buen trabajo!",
-        "backToLibrary": "Volver a la biblioteca"
+        "backToLibrary": "Volver a la biblioteca",
+        "cardsReviewed": "tarjetas revisadas",
+        "needsAttentionLabel": "necesitan más práctica",
+        "topCardCallout": "Tarjeta que necesita más atención: {{card}}",
+        "perfectSession": "¡Sesión perfecta! Todas las tarjetas se sintieron sólidas."
       },
       "card": "Tarjeta {{current}} de {{total}}",
       "syncing": "Sincronizando {{count}} revisión...",

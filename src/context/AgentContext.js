@@ -103,6 +103,7 @@ const initialState = {
   interventionFrequency: 'balanced',
   focusModeEnabled: false,
   isInStudySession: false,
+  isStudySessionFullscreen: false,
   interventionTypes: {
     wrong_answer: true,
     session_summary: true,
@@ -142,7 +143,6 @@ function agentReducer(state, action) {
         animationRegenPending: action.payload.animation_regen_pending ?? false,
         interventionFrequency: action.payload.agent_intervention_frequency ?? 'balanced',
         focusModeEnabled: action.payload.agent_focus_mode ?? false,
-        isInStudySession: false,
         interventionTypes: {
           wrong_answer: action.payload.agent_intervention_wrong_answer ?? true,
           session_summary: action.payload.agent_intervention_session_summary ?? true,
@@ -220,6 +220,8 @@ function agentReducer(state, action) {
       }
     case 'SET_STUDY_SESSION':
       return { ...state, isInStudySession: action.payload }
+    case 'SET_STUDY_SESSION_FULLSCREEN':
+      return { ...state, isStudySessionFullscreen: action.payload }
     case 'AVATAR_GENERATING':
       return { ...state, avatarGenerating: true, avatarError: null }
 
@@ -604,6 +606,11 @@ export const AgentProvider = ({ children }) => {
     dispatch({ type: 'SET_STUDY_SESSION', payload: val })
   }, [])
 
+  /** Signal whether the active study session is currently in fullscreen mode. */
+  const setStudySessionFullscreen = useCallback((val) => {
+    dispatch({ type: 'SET_STUDY_SESSION_FULLSCREEN', payload: val })
+  }, [])
+
   const open = useCallback(() => dispatch({ type: 'OPEN' }), [])
   const close = useCallback(() => dispatch({ type: 'CLOSE' }), [])
   const toggle = useCallback(() => dispatch({ type: 'TOGGLE' }), [])
@@ -641,6 +648,7 @@ export const AgentProvider = ({ children }) => {
         openChatFromCompanion,
         resetCompanionSession,
         setStudySession,
+        setStudySessionFullscreen,
         clearQuizConfig,
         showDeckSelectorAction,
         hideDeckSelectorAction

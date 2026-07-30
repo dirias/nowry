@@ -140,6 +140,22 @@
       "dueSoon": "dans {{hours}}h",
       "new": "Nouveau"
     },
+    "modePicker": {
+      "title": "Choose how to study",
+      "study": {
+        "label": "Study",
+        "description": "Review cards due today with spaced repetition",
+        "disabledHint": "Nothing due right now"
+      },
+      "browse": {
+        "label": "Browse",
+        "description": "Look through every card — no grading, no schedule changes"
+      },
+      "cram": {
+        "label": "Cram",
+        "description": "Review every card in this deck, regardless of due date"
+      }
+    },
     "dates": {
       "today": "Aujourd'hui",
       "yesterday": "Hier",
@@ -1472,6 +1488,20 @@
       "proceedCount": "Proceed ({{count}})",
       "confirmSave": "Confirm & Save",
       "saveError": "Failed to save cards. Please try again."
+    },
+    "session": {
+      "mode": {
+        "study": "Study",
+        "browse": "Browse",
+        "cram": "Cram"
+      },
+      "emptyDeck": {
+        "title": "No cards yet",
+        "body": "Add cards to this deck to browse or cram them here."
+      },
+      "error": "Couldn't load cards. Check your connection and try again.",
+      "enterFullscreen": "Activer le plein écran",
+      "exitFullscreen": "Quitter le plein écran"
     }
   },
   "books": {

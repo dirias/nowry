@@ -173,12 +173,30 @@ export default function TTSControls({
   }
 
   // ── Auto-play effect ───────────────────────────────────────────────────────
+  // Intentional dep-array choices:
+  //   • `isPlaying` is excluded — including it caused the effect to re-run
+  //     every time speech ended (setIsPlaying(false)), immediately re-triggering
+  //     playback and creating an infinite play loop.
+  //   • `handlePlay` is excluded — it is a useCallback on [text, rate]; including
+  //     it caused the effect to fire TWICE per card change (once for `text`, once
+  //     for the new handlePlay reference), producing double-play.
+  //   • Cleanup cancels any in-progress speech before starting the next one,
+  //     preventing overlap when the user advances cards mid-utterance.
   useEffect(() => {
     // Auto‑play is only allowed after a user interaction (required on iOS/Android)
-    if (autoPlay && text && !isPlaying && allVoices.length > 0 && userInitiated) {
-      handlePlay()
+    if (!autoPlay || !text || allVoices.length === 0 || !userInitiated) return
+    ttsService.speak(text, {
+      rate,
+      onStart: () => setIsPlaying(true),
+      onEnd: () => setIsPlaying(false),
+      onError: () => setIsPlaying(false)
+    })
+    return () => {
+      ttsService.stop()
+      setIsPlaying(false)
     }
-  }, [text, autoPlay, allVoices.length, userInitiated, handlePlay, isPlaying])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, autoPlay, allVoices.length, userInitiated, rate])
 
   const handleLanguageChange = (event, langBase) => {
     if (!langBase) return
@@ -284,7 +302,7 @@ export default function TTSControls({
             color='primary'
             onClick={isPlaying ? handlePause : handlePlay}
             disabled={!text}
-            sx={{ borderRadius: '50%', boxShadow: 'sm' }}
+            sx={{ borderRadius: '50%', boxShadow: 'sm', minHeight: { xs: 44, md: 32 }, minWidth: { xs: 44, md: 32 } }}
           >
             {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
           </IconButton>
@@ -297,7 +315,7 @@ export default function TTSControls({
             variant='soft'
             color='neutral'
             onClick={() => setSettingsOpen(!isSettingsOpen)}
-            sx={{ borderRadius: '50%' }}
+            sx={{ borderRadius: '50%', minHeight: { xs: 44, md: 32 }, minWidth: { xs: 44, md: 32 } }}
           >
             <SettingsIcon />
           </IconButton>
@@ -325,7 +343,13 @@ export default function TTSControls({
           >
             <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
               <Typography level='title-sm'>Voice Settings</Typography>
-              <IconButton size='sm' variant='plain' color='neutral' onClick={() => setSettingsOpen(false)}>
+              <IconButton
+                size='sm'
+                variant='plain'
+                color='neutral'
+                onClick={() => setSettingsOpen(false)}
+                sx={{ minHeight: { xs: 44, md: 32 }, minWidth: { xs: 44, md: 32 } }}
+              >
                 <CloseIcon fontSize='small' />
               </IconButton>
             </Stack>

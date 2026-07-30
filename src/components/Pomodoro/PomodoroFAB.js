@@ -2,6 +2,7 @@ import React from 'react'
 import { IconButton, Tooltip, Box } from '@mui/joy'
 import { Timer } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
+import { Z_NAV } from '../../constants/zIndex'
 
 /**
  * Floating Action Button for Pomodoro Timer
@@ -34,7 +35,7 @@ const PomodoroFAB = () => {
           height: 56,
           borderRadius: '50%',
           boxShadow: 'lg',
-          zIndex: 1100,
+          zIndex: Z_NAV,
           transition: 'all 0.2s ease',
           '&:hover': {
             transform: 'scale(1.05)',

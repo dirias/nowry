@@ -5,12 +5,12 @@ import { Container, Snackbar } from '@mui/joy'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import CreateDeckModal from './CreateDeckModal'
 import CreateCardModal from './CreateCardModal'
-import CardPreviewModal from './CardPreviewModal'
 import ManageContent from './ManageContent'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import ImportDeckModal from './ImportDeckModal'
 import DeckSettingsModal from '../Study/DeckSettingsModal'
 import DeckPublishSheet from '../Study/DeckPublishSheet'
+import StudyModePickerModal from '../Study/StudyModePickerModal'
 import { decksService, cardsService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
@@ -38,14 +38,9 @@ export default function CardHome({ onDeckChange } = {}) {
   const [selectedTags, setSelectedTags] = useState([])
   const [availableTags, setAvailableTags] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [previewState, setPreviewState] = useState({
-    open: false,
-    title: '',
-    cards: [],
-    initialIndex: 0
-  })
   const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null })
   const [publishSheetState, setPublishSheetState] = useState({ open: false, deckId: null, deck: null })
+  const [modePickerState, setModePickerState] = useState({ open: false, deck: null })
 
   // Stats
   const [stats, setStats] = useState({
@@ -110,21 +105,7 @@ export default function CardHome({ onDeckChange } = {}) {
   }, [cardsLoading, statsLoading, decksLoading, fetchData])
 
   const handleStudy = (deck) => {
-    navigate(`/study/${deck._id}`)
-  }
-
-  const handlePreview = (deck) => {
-    const deckCards = cards.filter((card) => card.deck_id === deck._id || card.deck_id?._id === deck._id)
-    setPreviewState({
-      open: true,
-      title: deck.name,
-      cards: deckCards,
-      initialIndex: 0
-    })
-  }
-
-  const handleClosePreview = () => {
-    setPreviewState((prev) => ({ ...prev, open: false }))
+    setModePickerState({ open: true, deck })
   }
 
   const handleCardSaved = () => {
@@ -199,7 +180,6 @@ export default function CardHome({ onDeckChange } = {}) {
         loading={loading}
         searchQuery={searchQuery}
         onStudy={handleStudy}
-        onPreview={handlePreview}
         onEditDeck={handleEditDeck}
         onDeleteDeck={handleDeleteDeck}
         onEditCard={handleEditCard}
@@ -263,17 +243,6 @@ export default function CardHome({ onDeckChange } = {}) {
         />
       )}
 
-      {previewState.open && (
-        <CardPreviewModal
-          open={previewState.open}
-          onClose={handleClosePreview}
-          title={previewState.title}
-          cards={previewState.cards}
-          initialIndex={previewState.initialIndex}
-          decks={decks}
-        />
-      )}
-
       {/* Delete Deck Confirmation Modal */}
       {deletingDeck && (
         <DeleteConfirmationModal
@@ -315,6 +284,16 @@ export default function CardHome({ onDeckChange } = {}) {
         onSaved={() => {
           reloadDecks()
           onDeckChange?.()
+        }}
+      />
+
+      <StudyModePickerModal
+        open={modePickerState.open}
+        onClose={() => setModePickerState({ open: false, deck: null })}
+        deck={modePickerState.deck || {}}
+        onSelectMode={(mode) => {
+          navigate(`/study/${modePickerState.deck._id}?mode=${mode}`)
+          setModePickerState({ open: false, deck: null })
         }}
       />
 

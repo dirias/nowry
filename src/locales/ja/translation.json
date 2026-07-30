@@ -131,6 +131,22 @@
       "ariaLabel": "{{name}}を学習",
       "dueSoon": "{{hours}}時間後",
       "new": "新規"
+    },
+    "modePicker": {
+      "title": "Choose how to study",
+      "study": {
+        "label": "Study",
+        "description": "Review cards due today with spaced repetition",
+        "disabledHint": "Nothing due right now"
+      },
+      "browse": {
+        "label": "Browse",
+        "description": "Look through every card — no grading, no schedule changes"
+      },
+      "cram": {
+        "label": "Cram",
+        "description": "Review every card in this deck, regardless of due date"
+      }
     }
   },
   "auth": {
@@ -1436,6 +1452,20 @@
       "proceedCount": "Proceed ({{count}})",
       "confirmSave": "Confirm & Save",
       "saveError": "Failed to save cards. Please try again."
+    },
+    "session": {
+      "mode": {
+        "study": "Study",
+        "browse": "Browse",
+        "cram": "Cram"
+      },
+      "emptyDeck": {
+        "title": "No cards yet",
+        "body": "Add cards to this deck to browse or cram them here."
+      },
+      "error": "Couldn't load cards. Check your connection and try again.",
+      "enterFullscreen": "全画面表示にする",
+      "exitFullscreen": "全画面表示を終了する"
     }
   },
   "subscription": {

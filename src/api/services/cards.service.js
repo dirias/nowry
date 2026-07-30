@@ -110,9 +110,12 @@ export const cardsService = {
    * Review a card with SM-2 grading
    * @param {string} id - Card ID
    * @param {string} grade - Grade: 'again', 'hard', 'good', or 'easy'
+   * @param {string} [mode='study'] - Active session mode: 'study', 'browse', or 'cram'.
+   *   Only 'study' may grade/mutate the SM-2 schedule server-side; browse/cram are
+   *   rejected with 403 (defense-in-depth, D-06).
    */
-  async review(id, grade) {
-    const { data } = await apiClient.post(`/study-cards/${id}/review?grade=${grade}`)
+  async review(id, grade, mode = 'study') {
+    const { data } = await apiClient.post(`/study-cards/${id}/review?grade=${grade}&mode=${mode}`)
     return data
   },
 
@@ -123,6 +126,17 @@ export const cardsService = {
    */
   async getDueCards(deckId) {
     const params = new URLSearchParams({ deck_id: deckId, due_only: 'true', limit: 500 })
+    const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
+    return data.cards || []
+  },
+
+  /**
+   * Get all cards for a deck regardless of due date (Browse/Cram modes)
+   * @param {string} deckId - Deck ID to fetch all cards for
+   * @returns {Promise<Array>} Array of every study card in the deck
+   */
+  async getAllCards(deckId) {
+    const params = new URLSearchParams({ deck_id: deckId, due_only: 'false', limit: 500 })
     const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
     return data.cards || []
   },

@@ -41,12 +41,7 @@ jest.mock('../GoalCardGrid', () => () => null)
 jest.mock('../GoalRowList', () => () => null)
 jest.mock('../../Common/DeleteConfirmationModal', () => () => null)
 
-import {
-  getHealthStatus,
-  calculateTimeElapsedPercentage,
-  calculateProgress,
-  getCurrentQuarter
-} from '../FocusAreaView'
+import { getHealthStatus, calculateTimeElapsedPercentage, calculateProgress, getCurrentQuarter } from '../FocusAreaView'
 
 // 2026-07-20 falls in Q3 — getCurrentQuarter() returns 3 for these tests.
 const FIXED_NOW = new Date('2026-07-20T12:00:00')
@@ -73,10 +68,7 @@ describe('getHealthStatus (D-02)', () => {
   test('returns "on_track" when progress equals the time-elapsed percentage', () => {
     const currentQuarter = getCurrentQuarter()
     expect(currentQuarter).toBe(3)
-    const elapsed = calculateTimeElapsedPercentage(
-      { type: 'quarterly', quarter: currentQuarter },
-      currentQuarter
-    )
+    const elapsed = calculateTimeElapsedPercentage({ type: 'quarterly', quarter: currentQuarter }, currentQuarter)
     const goal = {
       status: 'in_progress',
       type: 'quarterly',
@@ -90,10 +82,7 @@ describe('getHealthStatus (D-02)', () => {
   // Behavior 3: progress 10 points below time-elapsed% → at_risk
   test('returns "at_risk" when progress is 10 points behind time elapsed', () => {
     const currentQuarter = getCurrentQuarter()
-    const elapsed = calculateTimeElapsedPercentage(
-      { type: 'quarterly', quarter: currentQuarter },
-      currentQuarter
-    )
+    const elapsed = calculateTimeElapsedPercentage({ type: 'quarterly', quarter: currentQuarter }, currentQuarter)
     const goal = {
       status: 'in_progress',
       type: 'quarterly',
@@ -107,10 +96,7 @@ describe('getHealthStatus (D-02)', () => {
   // Behavior 4: progress 30 points below time-elapsed% → behind
   test('returns "behind" when progress is 30 points behind time elapsed', () => {
     const currentQuarter = getCurrentQuarter()
-    const elapsed = calculateTimeElapsedPercentage(
-      { type: 'quarterly', quarter: currentQuarter },
-      currentQuarter
-    )
+    const elapsed = calculateTimeElapsedPercentage({ type: 'quarterly', quarter: currentQuarter }, currentQuarter)
     const goal = {
       status: 'in_progress',
       type: 'quarterly',
@@ -126,23 +112,13 @@ describe('calculateTimeElapsedPercentage (D-03)', () => {
   // Behavior 5: a future quarter has not started yet → 0
   test('returns 0 for a quarterly goal in a future quarter', () => {
     const currentQuarter = getCurrentQuarter()
-    expect(
-      calculateTimeElapsedPercentage(
-        { type: 'quarterly', quarter: currentQuarter + 1 },
-        currentQuarter
-      )
-    ).toBe(0)
+    expect(calculateTimeElapsedPercentage({ type: 'quarterly', quarter: currentQuarter + 1 }, currentQuarter)).toBe(0)
   })
 
   // Behavior 6: a past quarter has fully elapsed → 100
   test('returns 100 for a quarterly goal in a past quarter', () => {
     const currentQuarter = getCurrentQuarter()
-    expect(
-      calculateTimeElapsedPercentage(
-        { type: 'quarterly', quarter: currentQuarter - 1 },
-        currentQuarter
-      )
-    ).toBe(100)
+    expect(calculateTimeElapsedPercentage({ type: 'quarterly', quarter: currentQuarter - 1 }, currentQuarter)).toBe(100)
   })
 
   // Behavior 7 (Pitfall 3 regression guard): a yearly goal in January must be

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Container,
@@ -34,12 +34,11 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
-import { decksService } from '../../api/services'
 import { agentService } from '../../api/services/agent.service'
 import { usePet } from '../../context/AgentContext'
 import CardHome from '../Cards/CardHome'
-import CardPreviewModal from '../Cards/CardPreviewModal'
 import DeckSettingsModal from './DeckSettingsModal'
+import StudyModePickerModal from './StudyModePickerModal'
 import RecentSessions from './RecentSessions'
 
 export default function StudyCenter() {
@@ -55,7 +54,7 @@ export default function StudyCenter() {
     streak: 0
   })
 
-  const [previewState, setPreviewState] = useState({ open: false, title: '', cards: [], initialIndex: 0 })
+  const [modePickerState, setModePickerState] = useState({ open: false, deck: null })
   const [settingsState, setSettingsState] = useState({ open: false, deckId: null })
   const [settingsEverSaved, setSettingsEverSaved] = useState(false)
 
@@ -254,18 +253,23 @@ export default function StudyCenter() {
     return deck?.hours_until_due ?? null
   }
 
-  const decksNeedingReview = decks
-    .filter((d) => (d.due_cards || 0) > 0 || (d.new_cards || 0) > 0)
-    .sort((a, b) => {
-      // Prioritize due cards first, then new cards
-      const aTotal = (a.due_cards || 0) + (a.new_cards || 0)
-      const bTotal = (b.due_cards || 0) + (b.new_cards || 0)
-      return bTotal - aTotal
-    })
+  const decksNeedingReview = useMemo(
+    () =>
+      decks
+        .filter((d) => (d.due_cards || 0) > 0 || (d.new_cards || 0) > 0)
+        .sort((a, b) => {
+          // Prioritize due cards first, then new cards
+          const aTotal = (a.due_cards || 0) + (a.new_cards || 0)
+          const bTotal = (b.due_cards || 0) + (b.new_cards || 0)
+          return bTotal - aTotal
+        }),
+    [decks]
+  )
 
-  const nonDueDecks = decks
-    .filter((d) => (d.due_cards || 0) === 0 && (d.new_cards || 0) === 0)
-    .sort((a, b) => (b.mastery || 0) - (a.mastery || 0))
+  const nonDueDecks = useMemo(
+    () => decks.filter((d) => (d.due_cards || 0) === 0 && (d.new_cards || 0) === 0).sort((a, b) => (b.mastery || 0) - (a.mastery || 0)),
+    [decks]
+  )
 
   const showYourDecks = !loading && nonDueDecks.length >= 1
 
@@ -287,7 +291,7 @@ export default function StudyCenter() {
         justifyContent='flex-end'
         alignItems={{ xs: 'center', sm: 'flex-end' }}
         spacing={{ xs: 2, md: 3 }}
-        sx={{ mb: { xs: 2.5, md: 4 }, mt: { xs: 1, md: 2 } }}
+        sx={{ mb: { xs: 3, md: 4 }, mt: { xs: 1, md: 2 } }}
       >
         {/* Minimalist Inline Stats */}
         <Stack
@@ -492,12 +496,12 @@ export default function StudyCenter() {
                 {t('study.sections.needingReview')}
               </Typography>
 
-              <Grid container spacing={2} sx={{ mb: { xs: 4, md: 6 } }}>
+              <Grid container spacing={2} sx={{ mb: { xs: 3, md: 4 } }}>
                 {decksNeedingReview.map((deck) => {
-                  const dueCount = getDueCardsForDeck(deck._id)
-                  const mastery = getMasteryForDeck(deck._id)
-                  const lastStudied = getLastStudiedForDeck(deck._id)
-                  const newCards = getNewCardsForDeck(deck._id)
+                  const dueCount = deck.due_cards || 0
+                  const mastery = deck.mastery || 0
+                  const lastStudied = deck.last_studied ? new Date(deck.last_studied) : null
+                  const newCards = deck.new_cards || 0
                   const isAllNew = deck.total_cards > 0 && deck.total_cards === (deck.new_cards || 0)
 
                   let accentColor = 'primary'
@@ -515,7 +519,7 @@ export default function StudyCenter() {
                     <Grid xs={12} sm={6} lg={4} key={deck._id}>
                       <Card
                         variant='outlined'
-                        onClick={() => navigate(`/study/${deck._id}`)}
+                        onClick={() => setModePickerState({ open: true, deck })}
                         sx={{
                           cursor: 'pointer',
                           height: '100%',
@@ -665,7 +669,7 @@ export default function StudyCenter() {
                 }}
               >
                 {nonDueDecks.map((deck) => {
-                  const mastery = getMasteryForDeck(deck._id)
+                  const mastery = deck.mastery || 0
                   const dueSoon = isDeckDueSoon(deck._id)
                   const hours = getHoursUntilDue(deck._id)
                   const isAllNew = deck.total_cards > 0 && deck.total_cards === (deck.new_cards || 0)
@@ -685,22 +689,7 @@ export default function StudyCenter() {
                       key={deck._id}
                       role='button'
                       aria-label={t('study.deckPill.ariaLabel', { name: deck.name })}
-                      onClick={async () => {
-                        // Only navigate directly to study for decks never studied before (fresh import/creation).
-                        // Partially or fully studied decks open the preview modal instead.
-                        const neverStudied = !deck.last_studied && (deck.new_cards || 0) > 0
-                        if (neverStudied) {
-                          navigate(`/study/${deck._id}`)
-                          return
-                        }
-                        setPreviewState({ open: true, title: deck.name, cards: [], initialIndex: 0 })
-                        try {
-                          const result = await decksService.getCards(deck._id, 0, 200)
-                          setPreviewState((prev) => ({ ...prev, cards: result.items || [] }))
-                        } catch {
-                          // preview stays with empty cards
-                        }
-                      }}
+                      onClick={() => setModePickerState({ open: true, deck })}
                       sx={{
                         position: 'relative',
                         width: 140,
@@ -822,8 +811,7 @@ export default function StudyCenter() {
                             level='body-xs'
                             sx={{
                               color: isToday ? 'primary.plainColor' : 'text.tertiary',
-                              fontWeight: isToday ? 700 : 400,
-                              fontSize: '0.6rem'
+                              fontWeight: isToday ? 700 : 400
                             }}
                           >
                             {day.day}
@@ -890,19 +878,21 @@ export default function StudyCenter() {
         </TabPanel>
       </Tabs>
 
-      <CardPreviewModal
-        open={previewState.open}
-        onClose={() => setPreviewState((prev) => ({ ...prev, open: false }))}
-        title={previewState.title}
-        cards={previewState.cards}
-        initialIndex={previewState.initialIndex}
-      />
-
       <DeckSettingsModal
         open={settingsState.open}
         onClose={() => setSettingsState({ open: false, deckId: null })}
         deckId={settingsState.deckId}
         onSaved={reloadDecks}
+      />
+
+      <StudyModePickerModal
+        open={modePickerState.open}
+        onClose={() => setModePickerState({ open: false, deck: null })}
+        deck={modePickerState.deck || {}}
+        onSelectMode={(mode) => {
+          navigate(`/study/${modePickerState.deck._id}?mode=${mode}`)
+          setModePickerState({ open: false, deck: null })
+        }}
       />
     </Container>
   )

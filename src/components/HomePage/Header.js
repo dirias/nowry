@@ -46,6 +46,7 @@ import {
 } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
 import { usePet } from '../../context/AgentContext'
+import { Z_NAV } from '../../constants/zIndex'
 import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 import { useTranslation } from 'react-i18next'
@@ -110,7 +111,8 @@ const Header = () => {
   const displayName = user?.full_name || user?.username || user?.email?.split('@')[0] || ''
   const resolvedAvatarUrl = user?.avatar_url || user?.photo_url || user?.avatar || undefined
   const { t } = useTranslation()
-  const { petName } = usePet()
+  const { petName, isInStudySession } = usePet()
+  const { mode, setMode } = useColorScheme()
 
   // Bug report state
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
@@ -149,10 +151,16 @@ const Header = () => {
     }
   }, [mobileMenuOpen])
 
-  // Attach swipe listeners to body on mobile
+  // Attach swipe listeners to body on mobile.
+  // Disabled during active study sessions — StudySession.js owns all swipe
+  // gestures on that screen (card advance / flip / voice settings). Without
+  // this guard, a left-swipe on a card would simultaneously advance the card
+  // AND open this drawer, because body listeners fire for every touch event
+  // on the page regardless of the target element.
   React.useEffect(() => {
     const isMobile = window.innerWidth < 900 // md breakpoint
     if (!isMobile) return
+    if (isInStudySession) return
 
     document.body.addEventListener('touchstart', handleTouchStart)
     document.body.addEventListener('touchmove', handleTouchMove)
@@ -163,7 +171,7 @@ const Header = () => {
       document.body.removeEventListener('touchmove', handleTouchMove)
       document.body.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [mobileMenuOpen, handleTouchEnd, handleTouchMove, handleTouchStart])
+  }, [mobileMenuOpen, handleTouchEnd, handleTouchMove, handleTouchStart, isInStudySession])
 
   // Pomodoro
   const { timeLeft, isActive: isTimerActive, showWidget, setShowWidget, settings } = usePomodoro()
@@ -215,7 +223,7 @@ const Header = () => {
           alignItems: 'center',
           px: { xs: 2, md: 4 },
           py: 1.5,
-          zIndex: 1100,
+          zIndex: Z_NAV,
           flexShrink: 0,
           backdropFilter: 'blur(12px)',
           backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.solidHoverBg : theme.palette.primary.solidBg,
@@ -300,6 +308,24 @@ const Header = () => {
 
           {user ? (
             <>
+              {/* Theme toggle — desktop only, authenticated users */}
+              <Tooltip title={t('common.toggleTheme')} placement='bottom'>
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+                  aria-label={t('common.toggleTheme')}
+                  sx={{
+                    display: { xs: 'none', md: 'flex' },
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' },
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                  }}
+                >
+                  {mode === 'dark' ? <Brightness7 fontSize='small' /> : <Brightness4 fontSize='small' />}
+                </IconButton>
+              </Tooltip>
+
               <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                 <Dropdown>
                   <MenuButton

@@ -23,6 +23,7 @@ import './styles/FullCalendar.css'
 import Header from './components/HomePage/Header'
 import PaymentFailureBanner from './components/Subscription/PaymentFailureBanner'
 import Footer from './components/HomePage/Footer'
+import DevBugReportButton from './components/Dev/DevBugReportButton'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PomodoroProvider } from './context/PomodoroContext'
 import { NotificationProvider } from './context/NotificationContext'
@@ -70,6 +71,9 @@ const SubscriptionPage = lazy(() => import('./components/Subscription/Subscripti
 const CalendarPage = lazy(() => import('./components/Calendar/CalendarPage'))
 const SheetsListPage = lazy(() => import('./components/Sheets/SheetsListPage'))
 const SheetsEditor = lazy(() => import('./components/Sheets/SheetsEditor'))
+
+/** Routes where the Footer should remain visible even for authenticated users */
+const PUBLIC_MARKETING_ROUTES = ['/about', '/contact', '/privacy', '/terms']
 
 /** Full-page loading fallback shown while lazy chunks download */
 const PageLoader = () => (
@@ -388,7 +392,9 @@ const AppContent = () => {
         </ErrorBoundary>
       </main>
 
-      {!location.pathname.startsWith('/book/') && <Footer />}
+      {(!isAuthenticated || PUBLIC_MARKETING_ROUTES.includes(location.pathname)) && <Footer />}
+
+      <DevBugReportButton />
 
       <Suspense fallback={null}>
         <PomodoroWidget />

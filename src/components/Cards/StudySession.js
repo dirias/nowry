@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePet } from '../../context/AgentContext'
 import {
@@ -14,9 +14,10 @@ import {
   IconButton,
   Radio,
   RadioGroup,
-  Skeleton
+  Skeleton,
+  Chip
 } from '@mui/joy'
-import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit } from '@mui/icons-material'
+import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, SwipeLeft, SwipeRight, SwipeVertical } from '@mui/icons-material'
 import { cardsService, decksService } from '../../api/services'
 import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
@@ -25,6 +26,7 @@ import { apiCache } from '../../api/utils/cache'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
+import { Z_FULLSCREEN } from '../../constants/zIndex'
 
 // Initialize Mermaid
 mermaid.initialize({
@@ -33,11 +35,164 @@ mermaid.initialize({
   securityLevel: 'loose'
 })
 
+// PERF-01 (D-05/D-06, RESEARCH.md Pattern 1 / Pitfall 2): these three were
+// previously `const X = () => (...)` defined INSIDE StudySession()'s render
+// body — a fresh function reference every render, which React treats as a
+// new component TYPE each time, tearing down and remounting the entire
+// subtree rather than merely re-rendering it. Hoisted to module scope and
+// wrapped in React.memo so React can skip reconciling them when their props
+// are unchanged. All values they previously closed over are now explicit
+// props — critical per D-06/D-07: `onGrade` (StudySession's memoized
+// `handleGrade`) must keep changing identity whenever `cards`/`currentIndex`
+// change, or this memoized child would hold a stale grading closure (locked
+// by the "rapid grading race guard" test in StudySession.test.js).
+const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSyncCount, t }) {
+  return (
+    <Box
+      sx={{ width: '100%', position: 'relative', zIndex: 20 }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Show pending sync indicator */}
+      {pendingSyncCount > 0 && (
+        <Box sx={{ mb: 1.5, textAlign: 'center' }}>
+          <Typography level='body-xs' sx={{ color: 'warning.plainColor', opacity: 0.7 }}>
+            {t('cards.session.syncing', { count: pendingSyncCount })}
+          </Typography>
+        </Box>
+      )}
+
+      <Stack direction='row' spacing={{ xs: 0.75, md: 1.5 }} sx={{ mt: { xs: 2, md: 3 }, width: '100%' }} justifyContent='center'>
+        <Button
+          variant='outlined'
+          color='danger'
+          onClick={() => onGrade('again')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.5 },
+            minHeight: { xs: 44, md: 36 },
+            fontSize: { xs: 'xs', md: 'sm' },
+            fontWeight: 600,
+            '&:hover': { bgcolor: 'danger.softBg' }
+          }}
+        >
+          {t('cards.session.grading.again')}
+        </Button>
+        <Button
+          variant='soft'
+          color='warning'
+          onClick={() => onGrade('hard')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.5 },
+            minHeight: { xs: 44, md: 36 },
+            fontSize: { xs: 'xs', md: 'sm' },
+            fontWeight: 600
+          }}
+        >
+          {t('cards.session.grading.hard')}
+        </Button>
+        <Button
+          variant='soft'
+          color='success'
+          onClick={() => onGrade('good')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.5 },
+            minHeight: { xs: 44, md: 36 },
+            fontSize: { xs: 'xs', md: 'sm' },
+            fontWeight: 600
+          }}
+        >
+          {t('cards.session.grading.good')}
+        </Button>
+        <Button
+          variant='solid'
+          color='primary'
+          onClick={() => onGrade('easy')}
+          sx={{
+            flex: 1,
+            py: { xs: 1, md: 1.5 },
+            minHeight: { xs: 44, md: 36 },
+            fontSize: { xs: 'xs', md: 'sm' },
+            fontWeight: 600
+          }}
+        >
+          {t('cards.session.grading.easy')}
+        </Button>
+      </Stack>
+    </Box>
+  )
+})
+
+// Pinned footer sibling (progress counter + GradingButtons), rendered universally in
+// both fullscreen and non-fullscreen modes (RESEARCH.md Open Question 1 / Assumption A2).
+const SessionFooter = React.memo(function SessionFooter({
+  showGrading = true,
+  mode,
+  modeChipColor,
+  currentIndex,
+  cardsLength,
+  onGrade,
+  pendingSyncCount,
+  t
+}) {
+  return (
+    <Box data-testid='session-footer' sx={{ width: '100%' }}>
+      <Stack direction='row' spacing={1} alignItems='center' justifyContent='center' sx={{ mb: 1 }}>
+        <Chip size='sm' variant='soft' color={modeChipColor}>
+          {t(`cards.session.mode.${mode}`)}
+        </Chip>
+        <Typography level='body-xs' sx={{ textAlign: 'center', color: 'text.tertiary' }}>
+          {t('cards.session.card', { current: currentIndex + 1, total: cardsLength })}
+        </Typography>
+      </Stack>
+      {showGrading && <GradingButtons onGrade={onGrade} pendingSyncCount={pendingSyncCount} t={t} />}
+    </Box>
+  )
+})
+
+// Icon-only, first-card-only swipe-gesture affordance (D-08/D-09). Purely
+// decorative — aria-hidden + pointerEvents:'none' guarantee it can never
+// intercept touch/tap input; no text, no t() calls, no new i18n keys. No
+// props needed — fully static/decorative.
+const SwipeHint = React.memo(function SwipeHint() {
+  return (
+    <Box
+      data-testid='swipe-hint'
+      aria-hidden='true'
+      sx={{
+        display: { xs: 'flex', md: 'none' },
+        position: 'absolute',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        left: 0,
+        right: 0,
+        justifyContent: 'space-between',
+        px: 2,
+        pointerEvents: 'none',
+        zIndex: 15,
+        opacity: 0.5
+      }}
+    >
+      <SwipeLeft sx={{ color: 'text.tertiary' }} />
+      <SwipeVertical sx={{ color: 'text.tertiary' }} />
+      <SwipeRight sx={{ color: 'text.tertiary' }} />
+    </Box>
+  )
+})
+
 export default function StudySession() {
   const { deckId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const mermaidRef = useRef(null)
+  const [searchParams] = useSearchParams()
+  const mode = searchParams.get('mode') || 'study'
+  const isReadOnlyMode = mode === 'browse' || mode === 'cram'
+  const modeChipColor = { study: 'neutral', browse: 'primary', cram: 'warning' }[mode]
 
   const [cards, setCards] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -52,6 +207,14 @@ export default function StudySession() {
   const [reviewQueue, setReviewQueue] = useState([])
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
   const [isPressing, setIsPressing] = useState(false)
+  // Mobile-only, first-card-only swipe-gesture affordance (D-08/D-09).
+  const [showSwipeHint, setShowSwipeHint] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  // MODE-06/D-06: computed once (in the sessionComplete effect below) and
+  // shared by BOTH the on-screen summary stat and the session_summary
+  // intervention payload — no second sort lives in the render.
+  const [needsAttentionCount, setNeedsAttentionCount] = useState(0)
+  const [mostAttentionCardFront, setMostAttentionCardFront] = useState(null)
 
   const handleCardMouseMove = React.useCallback((e) => {
     if (!e.currentTarget) return
@@ -81,7 +244,7 @@ export default function StudySession() {
     [_handleVoiceSettingsChange, isFlipped, deckId, currentCardDeckId]
   )
 
-  const { setViewContext, queueIntervention, resetCompanionSession, setStudySession } = usePet()
+  const { setViewContext, queueIntervention, resetCompanionSession, setStudySession, setStudySessionFullscreen } = usePet()
 
   const buildStudyContext = React.useCallback(
     (cardIdx, flipped) => {
@@ -97,21 +260,35 @@ export default function StudySession() {
         isFlipped: flipped,
         front: card.title || '',
         back: flipped ? card.content || '' : null,
-        isDailyReview: deckId === 'daily-review'
+        isDailyReview: deckId === 'daily-review',
+        mode
       }
     },
-    [cards, deckId]
+    [cards, deckId, mode]
   )
 
   // Signal to AgentContext that a study session is active
   useEffect(() => {
     setStudySession(true)
-    return () => setStudySession(false)
-  }, [setStudySession])
+    return () => {
+      setStudySession(false)
+      setStudySessionFullscreen(false)
+    }
+  }, [setStudySession, setStudySessionFullscreen])
+
+  // Mirror isFullscreen to context so the globally-mounted Pet can bump its z-index
+  useEffect(() => {
+    setStudySessionFullscreen(isFullscreen)
+  }, [isFullscreen, setStudySessionFullscreen])
 
   // Companion intervention tracking
   const interventionFiredCardIds = useRef(new Set())
   const wrongCountPerCardId = useRef({})
+  // Tie-break support for the "most attention needed" callout: tracks how many
+  // of each card's needs-attention grades were specifically 'again' (a full
+  // miss) rather than 'hard' (recalled with difficulty). Only used to break
+  // ties in wrongCountPerCardId — never changes the total count itself (D-05).
+  const againCountPerCardId = useRef({})
   const interventionTimerRef = useRef(null)
 
   // Session history tracking
@@ -130,10 +307,13 @@ export default function StudySession() {
   const fetchDeckCards = React.useCallback(async () => {
     try {
       setLoading(true)
+      setLoadError(false)
       let reviewCards = []
 
       if (deckId === 'daily-review') {
         reviewCards = await cardsService.getDailyReviewCards()
+      } else if (isReadOnlyMode) {
+        reviewCards = await cardsService.getAllCards(deckId)
       } else {
         reviewCards = await cardsService.getDueCards(deckId)
       }
@@ -146,14 +326,17 @@ export default function StudySession() {
         setCards(processed)
       } else {
         setCards([])
-        setSessionComplete(true)
+        if (mode === 'study') {
+          setSessionComplete(true)
+        }
       }
     } catch (error) {
       console.error('Error fetching cards:', error)
+      setLoadError(true)
     } finally {
       setLoading(false)
     }
-  }, [deckId])
+  }, [deckId, isReadOnlyMode, mode])
 
   useEffect(() => {
     if (cardsLoading) return
@@ -188,7 +371,7 @@ export default function StudySession() {
         }
 
         try {
-          await cardsService.review(review.cardId, review.grade)
+          await cardsService.review(review.cardId, review.grade, review.mode)
           // Success! Remove from queue
           setReviewQueue((prev) => prev.filter((r) => r !== review))
           console.log('Successfully synced queued review:', review.cardId)
@@ -230,17 +413,41 @@ export default function StudySession() {
     setViewContext(null)
 
     const wrongCounts = wrongCountPerCardId.current
-    const mostMissedEntry = Object.entries(wrongCounts).sort((a, b) => b[1] - a[1])[0]
+    const againCounts = againCountPerCardId.current
+    // Primary: highest needs-attention count wins. Tie-break: prefer whichever
+    // tied card has more 'again' grades (a full miss is more concerning than
+    // 'hard', which is recalled-with-difficulty) — not just first-encountered.
+    // Any remaining tie (equal count AND equal again-count) falls through to
+    // Array.sort's stable-sort guarantee, i.e. first-encountered wins, same as
+    // before. Single computed source, so the Pet's session_summary payload
+    // (D-06) automatically inherits the same tie-break — no divergent sort.
+    const mostMissedEntry = Object.entries(wrongCounts).sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1]
+      return (againCounts[b[0]] || 0) - (againCounts[a[0]] || 0)
+    })[0]
     const mostMissedCardId = mostMissedEntry?.[0] ?? null
     const totalWrong = Object.values(wrongCounts).reduce((acc, n) => acc + n, 0)
+    const mostMissedCardFront = mostMissedCardId ? (cards.find((c) => (c._id || c.id) === mostMissedCardId)?.title ?? null) : null
 
-    queueIntervention({
-      type: 'session_summary',
-      session_total_cards: cards.length,
-      session_wrong_count: totalWrong,
-      most_missed_card_id: mostMissedCardId,
-      most_missed_card_front: mostMissedCardId ? (cards.find((c) => (c._id || c.id) === mostMissedCardId)?.title ?? null) : null
-    })
+    // Single computed source for both the on-screen stat (render below) and
+    // the session_summary payload (D-06) — no divergent second sort.
+    setNeedsAttentionCount(totalWrong)
+    setMostAttentionCardFront(mostMissedCardFront)
+
+    // Guard on cards.length > 0 — an empty/all-caught-up deck lands here with
+    // sessionComplete=true but no actual session occurred, so no session_summary
+    // should fire (review finding WR-01: previously reached the Pet with
+    // session_total_cards: 0, misreported as "1 cards" by the backend's now-fixed
+    // falsy-zero fallback).
+    if (mode === 'study' && cards.length > 0) {
+      queueIntervention({
+        type: 'session_summary',
+        session_total_cards: cards.length,
+        session_wrong_count: totalWrong,
+        most_missed_card_id: mostMissedCardId,
+        most_missed_card_front: mostMissedCardFront
+      })
+    }
 
     // LOG SESSION HISTORY — fire-and-forget, never blocks the UI
     if (gradedCards.current.length > 0) {
@@ -259,7 +466,7 @@ export default function StudySession() {
           // Non-fatal — history logging never interrupts the study experience
         })
     }
-  }, [sessionComplete, setViewContext, queueIntervention, cards, deckId])
+  }, [sessionComplete, setViewContext, queueIntervention, cards, deckId, mode])
 
   const handleFlip = React.useCallback(() => {
     setIsFlipped((prev) => !prev)
@@ -270,9 +477,27 @@ export default function StudySession() {
     setShowExplanation(true)
   }, [])
 
+  // PERF-02 (D-07) rapid-grading race guard: a synchronous mirror of
+  // cards/currentIndex, refreshed every render (line below) AND mutated
+  // directly — synchronously — by handleNext/handleGrade themselves. React
+  // state updates (setCards/setCurrentIndex) only become visible to a new
+  // closure once React actually commits and re-renders; two clicks
+  // dispatched within the SAME synchronous batch (e.g. a genuine rapid
+  // double-click, or the StudySession.test.js "rapid grading race guard"
+  // test's single act() block) never see a commit in between, so reading
+  // `cards`/`currentIndex` directly would let the second click re-grade the
+  // SAME stale card (or, combined with handleNext's own stale read, advance
+  // currentIndex twice and crash with an out-of-bounds cards[currentIndex]
+  // read). Reading/advancing through this ref instead closes that window.
+  const latestStateRef = useRef({ cards, currentIndex })
+  latestStateRef.current = { cards, currentIndex }
+
   const handleNext = React.useCallback(() => {
-    if (currentIndex < cards.length - 1) {
-      setCurrentIndex((prev) => prev + 1)
+    const { currentIndex: latestIndex } = latestStateRef.current
+    if (latestIndex < cards.length - 1) {
+      const nextIndex = latestIndex + 1
+      latestStateRef.current = { ...latestStateRef.current, currentIndex: nextIndex }
+      setCurrentIndex(nextIndex)
       setIsFlipped(false)
       setSelectedAnswer(null)
       setShowExplanation(false)
@@ -284,7 +509,12 @@ export default function StudySession() {
 
   const handleGrade = React.useCallback(
     async (grade) => {
-      const currentCard = cards[currentIndex]
+      const { cards: latestCards, currentIndex: latestIndex } = latestStateRef.current
+      const currentCard = latestCards[latestIndex]
+      // Defensive guard: a same-tick extra click after the session has
+      // already advanced past the last card (e.g. a third rapid click) has
+      // nothing left to grade — no-op rather than crash.
+      if (!currentCard) return
       const cardId = currentCard._id || currentCard.id
 
       // OPTIMISTIC UPDATE: Calculate SM-2 locally for instant feedback
@@ -330,8 +560,12 @@ export default function StudySession() {
         repetitions: newRepetitions
       }
 
-      const updatedCards = [...cards]
-      updatedCards[currentIndex] = optimisticUpdate
+      const updatedCards = [...latestCards]
+      updatedCards[latestIndex] = optimisticUpdate
+      // Advance the synchronous source of truth immediately (currentIndex
+      // is intentionally left for handleNext to advance below, mirroring
+      // its existing branching logic) — see latestStateRef comment above.
+      latestStateRef.current = { cards: updatedCards, currentIndex: latestIndex }
       setCards(updatedCards)
 
       // Move to next card IMMEDIATELY
@@ -346,10 +580,22 @@ export default function StudySession() {
         evaluation: gradeToEval[grade] ?? 'incorrect'
       })
 
+      // NEEDS-ATTENTION TRACKING: Again and Hard both count toward the
+      // broadened needs-attention total shown on the summary screen (D-05).
+      // This conditional is intentionally SEPARATE from the Again-only
+      // real-time nudge below (Pitfall 1) — Hard must never schedule a
+      // wrong_answer intervention.
+      if (grade === 'again' || grade === 'hard') {
+        const attentionCardId = currentCard._id || currentCard.id
+        wrongCountPerCardId.current[attentionCardId] = (wrongCountPerCardId.current[attentionCardId] || 0) + 1
+        if (grade === 'again') {
+          againCountPerCardId.current[attentionCardId] = (againCountPerCardId.current[attentionCardId] || 0) + 1
+        }
+      }
+
       // COMPANION INTERVENTION: trigger a delayed nudge for 'again' grade
       if (grade === 'again') {
         const wrongCardId = currentCard._id || currentCard.id
-        wrongCountPerCardId.current[wrongCardId] = (wrongCountPerCardId.current[wrongCardId] || 0) + 1
 
         if (!interventionFiredCardIds.current.has(wrongCardId)) {
           interventionFiredCardIds.current.add(wrongCardId)
@@ -364,7 +610,7 @@ export default function StudySession() {
               card_back: currentCard.content || currentCard.back || '',
               card_notes: currentCard.notes || null,
               card_type: currentCard.card_type || 'basic',
-              session_card_index: currentIndex + 1,
+              session_card_index: latestIndex + 1,
               session_total_cards: cards.length
             })
           }, delay)
@@ -373,11 +619,16 @@ export default function StudySession() {
 
       // BACKGROUND SYNC: Send to backend (fire-and-forget)
       try {
-        const response = await cardsService.review(cardId, grade)
+        const response = await cardsService.review(cardId, grade, mode)
 
-        // If backend returns different values, update silently
+        // If backend returns different values, update silently.
+        // Re-read cards from latestStateRef (not the `cards` closure captured
+        // when this handleGrade call started) — by the time this await
+        // resolves, further rapid grades may have already advanced
+        // latestStateRef.current.cards, and spreading the stale `cards`
+        // closure here would silently revert those newer optimistic updates.
         if (response && response.sm2_data) {
-          const syncedCards = [...cards]
+          const syncedCards = [...latestStateRef.current.cards]
           const cardIndex = syncedCards.findIndex((c) => (c._id || c.id) === cardId)
 
           if (cardIndex !== -1) {
@@ -389,6 +640,7 @@ export default function StudySession() {
               interval: response.sm2_data.interval,
               repetitions: response.sm2_data.repetitions
             }
+            latestStateRef.current = { ...latestStateRef.current, cards: syncedCards }
             setCards(syncedCards)
           }
         }
@@ -401,6 +653,7 @@ export default function StudySession() {
           {
             cardId,
             grade,
+            mode,
             timestamp: Date.now(),
             retryCount: 0
           }
@@ -410,12 +663,22 @@ export default function StudySession() {
         console.warn('Review queued for retry:', cardId, grade)
       }
     },
-    [cards, currentIndex, handleNext]
+    [cards, currentIndex, handleNext, mode]
   )
 
   const handlePrev = React.useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1)
+    // Mirrors handleNext's latestStateRef guard (PERF-02 D-07): reading the
+    // `currentIndex` closure directly would let two rapid clicks dispatched
+    // in the same synchronous batch both pass the `> 0` guard against the
+    // same stale value, then both apply a functional setCurrentIndex
+    // decrement — driving currentIndex to -1 and crashing on the next
+    // cards[currentIndex] read. Guarding and advancing through the ref
+    // instead closes that window.
+    const { currentIndex: latestIndex } = latestStateRef.current
+    if (latestIndex > 0) {
+      const prevIndex = latestIndex - 1
+      latestStateRef.current = { ...latestStateRef.current, currentIndex: prevIndex }
+      setCurrentIndex(prevIndex)
       setIsFlipped(false)
       setSelectedAnswer(null)
       setShowExplanation(false)
@@ -451,16 +714,24 @@ export default function StudySession() {
       const isLeftSwipe = distanceX > minSwipeDistance
       const isRightSwipe = distanceX < -minSwipeDistance
 
-      if (isLeftSwipe) handleNext()
-      if (isRightSwipe) handlePrev()
+      if (isLeftSwipe) {
+        setShowSwipeHint(false)
+        handleNext()
+      }
+      if (isRightSwipe) {
+        setShowSwipeHint(false)
+        handlePrev()
+      }
     } else {
       const isUpSwipe = distanceY > minSwipeDistance
       const isDownSwipe = distanceY < -minSwipeDistance
 
       if (isUpSwipe) {
+        setShowSwipeHint(false)
         handleFlip()
       }
       if (isDownSwipe) {
+        setShowSwipeHint(false)
         setShowVoiceSettings(true)
       }
     }
@@ -482,17 +753,25 @@ export default function StudySession() {
     )
   }
 
-  if (cards.length === 0) {
+  if (loadError || cards.length === 0) {
+    const emptyTitleKey = loadError
+      ? 'cards.session.error'
+      : mode === 'study'
+        ? 'cards.session.allCaughtUp'
+        : 'cards.session.emptyDeck.title'
+    const emptyBodyKey = mode === 'study' ? 'cards.session.noDue' : 'cards.session.emptyDeck.body'
     return (
       <Container maxWidth='md' sx={{ py: 4 }}>
         <Card sx={{ textAlign: 'center', py: 6, borderRadius: 'xl', boxShadow: 'sm' }}>
           <CardContent>
             <Typography level='h4' sx={{ mb: 2 }}>
-              {t('cards.session.allCaughtUp')}
+              {t(emptyTitleKey)}
             </Typography>
-            <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
-              {t('cards.session.noDue')}
-            </Typography>
+            {!loadError && (
+              <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
+                {t(emptyBodyKey)}
+              </Typography>
+            )}
             <Button onClick={() => navigate('/study')}>{t('cards.session.goBack')}</Button>
           </CardContent>
         </Card>
@@ -532,7 +811,38 @@ export default function StudySession() {
                   {t('cards.session.complete.cardsReviewed')}
                 </Typography>
               </Stack>
+              {needsAttentionCount > 0 && (
+                <Stack alignItems='center'>
+                  <Typography level='h2' fontWeight={700} sx={{ color: 'warning.plainColor' }}>
+                    {needsAttentionCount}
+                  </Typography>
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                    {t('cards.session.complete.needsAttentionLabel')}
+                  </Typography>
+                </Stack>
+              )}
             </Stack>
+            {needsAttentionCount > 0 && (
+              <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+                <Typography
+                  level='body-sm'
+                  sx={{
+                    color: 'text.secondary',
+                    display: '-webkit-box',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 2,
+                    overflow: 'hidden'
+                  }}
+                >
+                  {t('cards.session.complete.topCardCallout', { card: mostAttentionCardFront })}
+                </Typography>
+              </Box>
+            )}
+            {needsAttentionCount === 0 && (
+              <Typography level='body-sm' fontWeight={600} sx={{ color: 'success.plainColor', textAlign: 'center', mt: 2 }}>
+                {t('cards.session.complete.perfectSession')}
+              </Typography>
+            )}
           </Box>
 
           {/* Text + CTA */}
@@ -557,81 +867,6 @@ export default function StudySession() {
   const isQuiz = currentCard.card_type === 'quiz'
   const isVisual = currentCard.card_type === 'visual'
 
-  const GradingButtons = () => (
-    <Box
-      sx={{ width: '100%', position: 'relative', zIndex: 20 }}
-      onMouseDown={(e) => e.stopPropagation()}
-      onMouseUp={(e) => e.stopPropagation()}
-      onTouchStart={(e) => e.stopPropagation()}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Show pending sync indicator */}
-      {reviewQueue.length > 0 && (
-        <Box sx={{ mb: 1.5, textAlign: 'center' }}>
-          <Typography level='body-xs' sx={{ color: 'warning.plainColor', opacity: 0.7, fontSize: '0.7rem' }}>
-            {t('cards.session.syncing', { count: reviewQueue.length })}
-          </Typography>
-        </Box>
-      )}
-
-      <Stack direction='row' spacing={{ xs: 0.75, md: 1.5 }} sx={{ mt: { xs: 2, md: 3 }, width: '100%' }} justifyContent='center'>
-        <Button
-          variant='outlined'
-          color='danger'
-          onClick={() => handleGrade('again')}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            fontSize: { xs: '0.75rem', md: '0.875rem' },
-            fontWeight: 600,
-            '&:hover': { bgcolor: 'danger.softBg' }
-          }}
-        >
-          {t('cards.session.grading.again')}
-        </Button>
-        <Button
-          variant='soft'
-          color='warning'
-          onClick={() => handleGrade('hard')}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            fontSize: { xs: '0.75rem', md: '0.875rem' },
-            fontWeight: 600
-          }}
-        >
-          {t('cards.session.grading.hard')}
-        </Button>
-        <Button
-          variant='soft'
-          color='success'
-          onClick={() => handleGrade('good')}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            fontSize: { xs: '0.75rem', md: '0.875rem' },
-            fontWeight: 600
-          }}
-        >
-          {t('cards.session.grading.good')}
-        </Button>
-        <Button
-          variant='solid'
-          color='primary'
-          onClick={() => handleGrade('easy')}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            fontSize: { xs: '0.75rem', md: '0.875rem' },
-            fontWeight: 600
-          }}
-        >
-          {t('cards.session.grading.easy')}
-        </Button>
-      </Stack>
-    </Box>
-  )
-
   return (
     <Container
       maxWidth={isFullscreen ? false : 'xl'}
@@ -646,7 +881,13 @@ export default function StudySession() {
       {/* Header - Hide in Fullscreen */}
       {!isFullscreen && (
         <Stack direction='row' alignItems='center' spacing={2} sx={{ mb: 2 }}>
-          <IconButton onClick={() => navigate('/study')} variant='plain' color='neutral'>
+          <IconButton
+            onClick={() => navigate('/study')}
+            variant='plain'
+            color='neutral'
+            aria-label={t('cards.session.goBack')}
+            sx={{ minHeight: { xs: 44, md: 36 }, minWidth: { xs: 44, md: 36 } }}
+          >
             <ArrowBack />
           </IconButton>
           <Box sx={{ flex: 1 }}>
@@ -691,6 +932,7 @@ export default function StudySession() {
 
         {/* Card Container */}
         <Box
+          data-testid='session-card'
           sx={{
             flex: 1,
             width: '100%',
@@ -700,8 +942,9 @@ export default function StudySession() {
             left: isFullscreen ? 0 : 'auto',
             right: isFullscreen ? 0 : 'auto',
             bottom: isFullscreen ? 0 : 'auto',
-            height: isFullscreen ? '100vh' : 'auto',
-            zIndex: isFullscreen ? 1300 : 1,
+            height: isFullscreen ? '100dvh' : 'auto',
+            overflow: isFullscreen ? 'hidden' : 'visible',
+            zIndex: isFullscreen ? Z_FULLSCREEN : 1,
             bgcolor: 'background.body', // Ensure background prevents see-through
             display: isFullscreen ? 'flex' : 'block',
             flexDirection: 'column',
@@ -716,18 +959,24 @@ export default function StudySession() {
             variant='plain'
             color='neutral'
             onClick={handleFullscreenToggle}
+            aria-label={isFullscreen ? t('cards.session.exitFullscreen') : t('cards.session.enterFullscreen')}
             sx={{
               display: { xs: 'inline-flex', md: 'none' },
               position: 'absolute',
               top: 16,
               left: 16,
               zIndex: 20,
+              minHeight: { xs: 44, md: 36 },
+              minWidth: { xs: 44, md: 36 },
               bgcolor: isFullscreen ? 'background.level2' : 'transparent',
               '&:hover': { bgcolor: isFullscreen ? 'background.level3' : 'background.level1' }
             }}
           >
             {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
           </IconButton>
+
+          {/* Mobile-only swipe-gesture hint, first card only */}
+          {currentIndex === 0 && showSwipeHint && <SwipeHint />}
 
           {/* Embedded TTS Controls */}
           <TTSControls
@@ -743,11 +992,13 @@ export default function StudySession() {
             <Card
               variant={isFullscreen ? 'plain' : 'outlined'}
               sx={{
-                minHeight: isFullscreen ? '100vh' : 500,
+                height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
                 borderRadius: isFullscreen ? 0 : 'xl',
                 boxShadow: isFullscreen ? 'none' : 'sm',
                 position: 'relative',
-                overflow: { xs: 'auto', md: 'hidden' }, // prevent glare spilling, but allow scroll
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
                 transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
                 transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
               }}
@@ -777,7 +1028,10 @@ export default function StudySession() {
                   }}
                 />
               )}
-              <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8, height: '100%', overflowY: 'auto' }}>
+              <Box
+                data-testid='session-scroll'
+                sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
+              >
                 <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                   {t('cards.session.labels.quiz')}
                 </Typography>
@@ -821,40 +1075,49 @@ export default function StudySession() {
                   </Stack>
                 </RadioGroup>
 
-                {showExplanation && (
-                  <>
-                    {currentCard.explanation && (
-                      <Box
-                        sx={{
-                          mt: 3,
-                          p: 2,
-                          bgcolor: 'primary.softBg',
-                          borderRadius: 'md',
-                          borderLeft: '4px solid',
-                          borderColor: 'primary.outlinedBorder'
-                        }}
-                      >
-                        <Typography level='title-sm' color='primary' sx={{ mb: 1 }}>
-                          {t('cards.session.labels.explanation')}
-                        </Typography>
-                        <Typography level='body-sm'>{currentCard.explanation}</Typography>
-                      </Box>
-                    )}
-                    <GradingButtons />
-                  </>
+                {showExplanation && currentCard.explanation && (
+                  <Box
+                    sx={{
+                      mt: 3,
+                      p: 2,
+                      bgcolor: 'primary.softBg',
+                      borderRadius: 'md',
+                      borderLeft: '4px solid',
+                      borderColor: 'primary.outlinedBorder'
+                    }}
+                  >
+                    <Typography level='title-sm' color='primary' sx={{ mb: 1 }}>
+                      {t('cards.session.labels.explanation')}
+                    </Typography>
+                    <Typography level='body-sm'>{currentCard.explanation}</Typography>
+                  </Box>
                 )}
-              </CardContent>
+              </Box>
+              <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
+                <SessionFooter
+                  showGrading={!isReadOnlyMode && showExplanation}
+                  mode={mode}
+                  modeChipColor={modeChipColor}
+                  currentIndex={currentIndex}
+                  cardsLength={cards.length}
+                  onGrade={handleGrade}
+                  pendingSyncCount={reviewQueue.length}
+                  t={t}
+                />
+              </Box>
             </Card>
           ) : isVisual ? (
             // Visual Card
             <Card
               variant={isFullscreen ? 'plain' : 'outlined'}
               sx={{
-                minHeight: isFullscreen ? '100vh' : 500,
+                height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
                 borderRadius: isFullscreen ? 0 : 'xl',
                 boxShadow: isFullscreen ? 'none' : 'sm',
                 position: 'relative',
-                overflow: { xs: 'auto', md: 'hidden' },
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
                 transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
                 transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
               }}
@@ -884,7 +1147,10 @@ export default function StudySession() {
                   }}
                 />
               )}
-              <CardContent sx={{ p: isFullscreen ? 4 : 4, pt: 8, height: '100%', overflowY: 'auto' }}>
+              <Box
+                data-testid='session-scroll'
+                sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
+              >
                 <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
                   {t('cards.session.labels.visual')}
                 </Typography>
@@ -916,8 +1182,19 @@ export default function StudySession() {
                     </Typography>
                   </Box>
                 )}
-                <GradingButtons />
-              </CardContent>
+              </Box>
+              <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
+                <SessionFooter
+                  showGrading={!isReadOnlyMode}
+                  mode={mode}
+                  modeChipColor={modeChipColor}
+                  currentIndex={currentIndex}
+                  cardsLength={cards.length}
+                  onGrade={handleGrade}
+                  pendingSyncCount={reviewQueue.length}
+                  t={t}
+                />
+              </Box>
             </Card>
           ) : (
             // Flashcard — true 3D flip
@@ -925,7 +1202,7 @@ export default function StudySession() {
               sx={{
                 perspective: '1200px',
                 width: '100%',
-                minHeight: isFullscreen ? '100vh' : 500,
+                height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
                 position: 'relative'
               }}
               onMouseMove={handleCardMouseMove}
@@ -935,7 +1212,7 @@ export default function StudySession() {
                 sx={{
                   position: 'relative',
                   width: '100%',
-                  minHeight: isFullscreen ? '100vh' : 500,
+                  height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
                   transformStyle: 'preserve-3d',
                   transition: 'transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1)',
                   transform: `rotateY(${isFlipped ? 180 : 0}deg) scale3d(${isPressing && !isFullscreen ? 0.98 : 1}, ${isPressing && !isFullscreen ? 0.98 : 1}, 1)`,
@@ -956,7 +1233,7 @@ export default function StudySession() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    minHeight: isFullscreen ? '100vh' : 500,
+                    height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
                     borderRadius: isFullscreen ? 0 : 'xl',
                     boxShadow: isFullscreen ? 'none' : 'sm',
                     backfaceVisibility: 'hidden',
@@ -993,8 +1270,7 @@ export default function StudySession() {
                       textAlign: 'center',
                       height: '100%',
                       cursor: 'pointer',
-                      p: { xs: 3, md: 6 },
-                      pt: { xs: 6, md: 8 }
+                      p: { xs: 3, md: 4 }
                     }}
                   >
                     <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
@@ -1017,13 +1293,14 @@ export default function StudySession() {
                 {/* Back face */}
                 <Card
                   variant={isFullscreen ? 'plain' : 'outlined'}
+                  onClick={handleFlip}
                   sx={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    minHeight: isFullscreen ? '100vh' : 500,
+                    height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
                     borderRadius: isFullscreen ? 0 : 'xl',
                     boxShadow: isFullscreen ? 'none' : 'sm',
                     transform: 'rotateY(180deg)',
@@ -1032,7 +1309,10 @@ export default function StudySession() {
                     // Critical: only receive pointer events when this face is visible
                     pointerEvents: isFlipped ? 'auto' : 'none',
                     borderColor: 'primary.outlinedBorder',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    cursor: 'pointer'
                   }}
                 >
                   {!isFullscreen && (
@@ -1051,18 +1331,20 @@ export default function StudySession() {
                       }}
                     />
                   )}
-                  <CardContent
-                    onClick={handleFlip}
+                  {/* Explicit overflowY:auto + minHeight:0 — this face previously had NO overflow
+                      handling at all on its CardContent (RESEARCH.md Pitfall B) */}
+                  <Box
+                    data-testid='session-scroll'
                     sx={{
+                      flex: '1 1 auto',
+                      minHeight: 0,
+                      overflowY: 'auto',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'center',
                       alignItems: 'center',
                       textAlign: 'center',
-                      height: '100%',
-                      cursor: 'pointer',
-                      p: { xs: 3, md: 6 },
-                      pt: { xs: 6, md: 8 }
+                      p: { xs: 3, md: 4 }
                     }}
                   >
                     <Typography
@@ -1071,8 +1353,7 @@ export default function StudySession() {
                         mb: { xs: 1.5, md: 2 },
                         color: 'success.plainColor',
                         fontWeight: 600,
-                        letterSpacing: '0.5px',
-                        fontSize: { xs: '0.65rem', md: '0.7rem' }
+                        letterSpacing: '0.5px'
                       }}
                     >
                       {t('cards.session.labels.answer')}
@@ -1093,8 +1374,19 @@ export default function StudySession() {
                     >
                       {currentCard.content}
                     </Typography>
-                    <GradingButtons />
-                  </CardContent>
+                  </Box>
+                  <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
+                    <SessionFooter
+                      showGrading={!isReadOnlyMode}
+                      mode={mode}
+                      modeChipColor={modeChipColor}
+                      currentIndex={currentIndex}
+                      cardsLength={cards.length}
+                      onGrade={handleGrade}
+                      pendingSyncCount={reviewQueue.length}
+                      t={t}
+                    />
+                  </Box>
                 </Card>
               </Box>
             </Box>

@@ -24,6 +24,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '../../utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
+import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '../../constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
 import CompanionMessage from './CompanionMessage'
 import QuizModeHeader from './QuizModeHeader'
@@ -418,7 +419,9 @@ const StudyPet = () => {
     showDeckSelector,
     clearQuizConfig,
     showDeckSelectorAction,
-    hideDeckSelectorAction
+    hideDeckSelectorAction,
+    isInStudySession,
+    isStudySessionFullscreen
   } = usePet()
 
   const { t, i18n } = useTranslation()
@@ -875,8 +878,11 @@ const StudyPet = () => {
   const roamPosRef = useRef({ x: 0, y: 0 })
   // Track drag base so roaming stays within visible viewport
   const dragBaseRef = useRef({ x: 0, y: 0 })
-  // Dynamic z-index — lowered when pet is near the top to slip behind the nav header
-  const [petZIndex, setPetZIndex] = useState(9999)
+  // Centralized z-index (PET-02, D-13) — derived each render, no local state.
+  // Bumps above the fullscreen study overlay only while docked AND that session
+  // is in fullscreen mode (D-07); rests at Z_PET_RESTING everywhere else.
+  const isFullscreenBump = isInStudySession && isStudySessionFullscreen
+  const computedZIndex = isFullscreenBump ? Z_PET_FULLSCREEN : Z_PET_RESTING
 
   /** Pick a random roam target that keeps the pet inside the viewport. */
   const getRandomRoamTarget = () => {
@@ -916,10 +922,9 @@ const StudyPet = () => {
   }
 
   useEffect(() => {
-    if (!isRoamingEnabled || isOpen) {
+    if (!isRoamingEnabled || isOpen || isInStudySession) {
       roamActiveRef.current = false
       roamControls.stop()
-      setPetZIndex(9999)
       // Smoothly return to resting position
       roamControls.start({
         x: 0,
@@ -937,10 +942,6 @@ const StudyPet = () => {
         const prev = roamPosRef.current
         const target = getRandomRoamTarget()
         roamPosRef.current = target
-
-        // Adjust z-index: hide behind the nav bar (zIndex 1100) when near the top
-        const nearTop = target.y < -(window.innerHeight * 0.5)
-        setPetZIndex(nearTop ? 800 : 9999)
 
         // Random movement speed — slower for longer distances
         const dx = Math.abs(target.x - prev.x)
@@ -983,7 +984,7 @@ const StudyPet = () => {
       roamControls.stop()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRoamingEnabled, isOpen])
+  }, [isRoamingEnabled, isOpen, isInStudySession])
 
   // Auto-scroll chat to bottom on new messages or quiz messages
   useEffect(() => {
@@ -1031,7 +1032,7 @@ const StudyPet = () => {
             style={{
               position: 'fixed',
               inset: 0,
-              zIndex: petZIndex - 1,
+              zIndex: computedZIndex - 1,
               background: 'transparent'
             }}
           />,
@@ -1043,11 +1044,11 @@ const StudyPet = () => {
           style={{
             position: 'fixed',
             bottom: 24,
-            right: 24,
-            zIndex: petZIndex,
+            ...(isInStudySession ? { left: 24 } : { right: 24 }),
+            zIndex: computedZIndex,
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-end',
+            alignItems: isInStudySession ? 'flex-start' : 'flex-end',
             gap: 12,
             fontFamily: 'Inter, sans-serif'
           }}
