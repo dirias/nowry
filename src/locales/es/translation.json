@@ -2275,6 +2275,21 @@
     }
   },
   "aiMagic": {
+    "streaming": {
+      "progress": "{{count}} de {{total}} tarjetas generadas",
+      "retry": "Reintentar",
+      "retryAria": "Reintentar la generación de tarjetas",
+      "emptyTitle": "No se generaron tarjetas",
+      "emptyBody": "La IA no pudo crear tarjetas a partir de este texto. Inténtalo de nuevo o selecciona otro fragmento."
+    },
+    "errors": {
+      "quota": "Has alcanzado tu límite de generación con IA. Inténtalo de nuevo más tarde.",
+      "malformed": "La IA devolvió una respuesta inesperada. Inténtalo de nuevo.",
+      "pipeline": "La generación de tarjetas falló. Inténtalo de nuevo.",
+      "timeout": "La generación de tarjetas tardó demasiado. Inténtalo de nuevo.",
+      "stalled": "La conexión se interrumpió. Comprueba tu red e inténtalo de nuevo.",
+      "generic": "Algo salió mal al generar las tarjetas. Inténtalo de nuevo."
+    },
     "expandWithAI": "Expand with AI",
     "expanding": "Expanding...",
     "expandError": "Couldn't expand text. Please try again.",

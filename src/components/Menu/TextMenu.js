@@ -274,7 +274,7 @@ const TextMenu = forwardRef(
             <Divider orientation='vertical' sx={{ mx: 0.5 }} />
 
             {/* Create Card — primary action, always visible */}
-            <Tooltip title={t('editor.ai.createCardHint', 'Generate a study card from this selection')} variant='soft' size='sm'>
+            <Tooltip title={t('editor.ai.createCardHint', 'Generate study cards from this selection')} variant='soft' size='sm'>
               <IconButton
                 size='sm'
                 variant='soft'

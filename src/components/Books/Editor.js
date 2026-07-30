@@ -65,6 +65,10 @@ import EditorErrorBoundary from '../Editor/EditorErrorBoundary'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
 import { EXTRACT_VOCABULARY_PROMPT } from '../../constants/prompts'
 
+// Backend wire-contract limit for POST /card/generate/stream sampleText.
+// Over-limit selections are clipped client-side — never send an over-limit body.
+const MAX_CARD_GEN_INPUT_CHARS = 20000
+
 const toPx = (val) => {
   if (typeof val === 'number') return val
   if (typeof val === 'string' && val.endsWith('mm')) return parseFloat(val) * 3.7795
@@ -220,6 +224,17 @@ export default function Editor({
   const [showDiagramPanel, setShowDiagramPanel] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const [cards, setCards] = useState([])
+  // SSE card generation stream state
+  const cardStreamAbortRef = useRef(null)
+  const lastCardGenParamsRef = useRef(null)
+  const [isCardStreaming, setIsCardStreaming] = useState(false)
+  const [cardStreamError, setCardStreamError] = useState(null) // null | { code }
+  // null = adaptive "auto" mode with no total known yet; number = known/requested total
+  const [expectedCardCount, setExpectedCardCount] = useState(0)
+  // Metadata from the SSE `done` event: { cap, truncated, mode } — null while streaming
+  const [generationMeta, setGenerationMeta] = useState(null)
+  // True when the selection exceeded MAX_CARD_GEN_INPUT_CHARS and was clipped
+  const [inputWasTruncated, setInputWasTruncated] = useState(false)
   const [questionnaireData, setQuestionnaireData] = useState([])
   const [error, setError] = useState(null)
   const [isLimitError, setIsLimitError] = useState(false)
@@ -464,15 +479,120 @@ export default function Editor({
     [book, onDiagramInserted, t]
   )
 
+  /**
+   * Start (or restart) an SSE card-generation stream.
+   * The modal opens immediately; cards arrive incrementally via onCard.
+   * @param {string} text - Selection text (clipped here if over the wire limit)
+   * @param {'auto'|number} countMode - 'auto' lets the backend pick the count
+   * @param {string|null} prompt - Optional custom generation prompt
+   * @param {string[]} excludeTitles - Titles to exclude ("Generate more" flow)
+   */
+  const startCardGeneration = useCallback(
+    (text, countMode, prompt = null, excludeTitles = []) => {
+      // Abort any in-flight stream before starting a new one
+      cardStreamAbortRef.current?.abort()
+      const controller = new AbortController()
+      cardStreamAbortRef.current = controller
+
+      // Never send an over-limit body — clip at the last whitespace before the cap
+      let clippedText = text
+      let wasClipped = false
+      if (text.length > MAX_CARD_GEN_INPUT_CHARS) {
+        const head = text.slice(0, MAX_CARD_GEN_INPUT_CHARS)
+        const lastWhitespace = /\s\S*$/.exec(head)
+        clippedText = (lastWhitespace ? head.slice(0, lastWhitespace.index) : head).trimEnd()
+        wasClipped = true
+      }
+
+      lastCardGenParamsRef.current = { text: clippedText, countMode, prompt, excludeTitles }
+
+      setInputWasTruncated(wasClipped)
+      setCards([])
+      setCardStreamError(null)
+      setGenerationMeta(null)
+      // null = auto mode: total unknown until the first card event arrives
+      setExpectedCardCount(countMode === 'auto' ? null : countMode)
+      setIsCardStreaming(true)
+      setShowStudyCard(true) // Modal opens BEFORE the first event arrives
+
+      cardsService.generateStream(clippedText, countMode, prompt, {
+        signal: controller.signal,
+        excludeTitles,
+        onCard: (e) => {
+          setCards((prev) => [...prev, e.card])
+          setExpectedCardCount(e.total)
+        },
+        onDone: (e) => {
+          setGenerationMeta({ cap: e?.cap, truncated: Boolean(e?.truncated), mode: e?.mode })
+          setIsCardStreaming(false)
+        },
+        onError: (e) => {
+          setIsCardStreaming(false)
+          if (e.status === 403) {
+            // Plan limit reached — same behavior as the legacy catch block
+            setShowStudyCard(false)
+            setIsLimitError(true)
+            setError(t('subscription.errors.upgradeToUse'))
+          } else {
+            setCardStreamError({ code: e.code })
+          }
+        }
+      })
+    },
+    [t]
+  )
+
+  // Re-run the last generation with the same params (error/empty retry) —
+  // preserves auto mode (sampleNumber: null) and any excludeTitles
+  const handleCardStreamRetry = useCallback(() => {
+    const params = lastCardGenParamsRef.current
+    if (params) {
+      startCardGeneration(params.text, params.countMode, params.prompt, params.excludeTitles)
+    }
+  }, [startCardGeneration])
+
+  // Regenerate with a user-picked count mode ('auto' or fixed int) — same text/prompt
+  const handleGenerateAgainWithCount = useCallback(
+    (countMode) => {
+      const params = lastCardGenParamsRef.current
+      if (params) {
+        startCardGeneration(params.text, countMode, params.prompt)
+      }
+    },
+    [startCardGeneration]
+  )
+
+  // "Generate more": re-run excluding titles already generated (previous
+  // excludeTitles merged with the current batch, capped per wire contract)
+  const handleGenerateMore = useCallback(() => {
+    const params = lastCardGenParamsRef.current
+    if (!params) return
+    const excludeTitles = [...new Set([...(params.excludeTitles || []), ...cards.map((c) => c?.title).filter(Boolean)])]
+      .map((title) => title.slice(0, 200))
+      .slice(0, 50)
+    startCardGeneration(params.text, params.countMode, params.prompt, excludeTitles)
+  }, [cards, startCardGeneration])
+
+  const handleCardModalCancel = useCallback(() => {
+    cardStreamAbortRef.current?.abort()
+    setIsCardStreaming(false)
+    setShowStudyCard(false)
+  }, [])
+
+  // Abort any in-flight card stream on unmount
+  useEffect(() => {
+    return () => {
+      cardStreamAbortRef.current?.abort()
+    }
+  }, [])
+
   const handleOptionClick = useCallback(
     async (option, overrideText) => {
       const textToProcess = overrideText || selectedText
       setError(null)
       try {
         if (option === 'create_study_card' && textToProcess) {
-          const response = await cardsService.generate(textToProcess, 2)
-          setCards(response)
-          setShowStudyCard(true)
+          startCardGeneration(textToProcess, 'auto')
         } else if (option === 'create_questionnaire' && textToProcess) {
           const response = await quizzesService.generate(textToProcess, 5, 'Medium')
           setQuestionnaireData(response)
@@ -480,9 +600,7 @@ export default function Editor({
         } else if (option === 'create_visual_content' && textToProcess) {
           setShowVisualizer(true)
         } else if (option === 'extract_vocabulary' && textToProcess) {
-          const response = await cardsService.generate(textToProcess, 50, EXTRACT_VOCABULARY_PROMPT)
-          setCards(response)
-          setShowStudyCard(true)
+          startCardGeneration(textToProcess, 'auto', EXTRACT_VOCABULARY_PROMPT)
         } else if (option === 'expand_with_ai' && textToProcess) {
           setIsExpandingText(true)
           try {
@@ -539,7 +657,7 @@ export default function Editor({
         }
       }
     },
-    [selectedText, t, book]
+    [selectedText, t, book, startCardGeneration]
   )
 
   const fixedWidth = `${toPx(PAGE_SIZES[pageSize]?.width || '210mm')}px`
@@ -708,7 +826,21 @@ export default function Editor({
               />
             }
           >
-            {showStudyCard && <StudyCard cards={cards} book={book} onCancel={() => setShowStudyCard(false)} />}
+            {showStudyCard && (
+              <StudyCard
+                cards={cards}
+                book={book}
+                onCancel={handleCardModalCancel}
+                isStreaming={isCardStreaming}
+                streamError={cardStreamError}
+                expectedTotal={expectedCardCount}
+                onRetry={handleCardStreamRetry}
+                onGenerateAgain={handleGenerateAgainWithCount}
+                onGenerateMore={handleGenerateMore}
+                generationMeta={generationMeta}
+                inputWasTruncated={inputWasTruncated}
+              />
+            )}
             {showQuestionnaire && <QuestionnaireModal questions={questionnaireData} onCancel={() => setShowQuestionnaire(false)} />}
             {showVisualizer && <VisualizerModal open={showVisualizer} onClose={() => setShowVisualizer(false)} text={selectedText} />}
           </React.Suspense>

@@ -18,6 +18,7 @@ export const ENDPOINTS = {
   },
   studyCards: {
     generate: '/card/generate',
+    generateStream: '/card/generate/stream',
     all: '/study-cards',
     create: '/study-cards',
     update: (id) => `/study-cards/${id}`,

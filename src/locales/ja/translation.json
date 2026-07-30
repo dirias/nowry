@@ -1599,6 +1599,21 @@
     }
   },
   "aiMagic": {
+    "streaming": {
+      "progress": "{{total}}枚中{{count}}枚のカードを生成しました",
+      "retry": "再試行",
+      "retryAria": "カード生成を再試行",
+      "emptyTitle": "カードが生成されませんでした",
+      "emptyBody": "AIはこのテキストからカードを作成できませんでした。もう一度試すか、別の箇所を選択してください。"
+    },
+    "errors": {
+      "quota": "AI生成の上限に達しました。しばらくしてからもう一度お試しください。",
+      "malformed": "AIから予期しない応答が返されました。もう一度お試しください。",
+      "pipeline": "カードの生成に失敗しました。もう一度お試しください。",
+      "timeout": "カードの生成に時間がかかりすぎました。もう一度お試しください。",
+      "stalled": "接続が停止しました。ネットワークを確認してもう一度お試しください。",
+      "generic": "カードの生成中に問題が発生しました。もう一度お試しください。"
+    },
     "expandWithAI": "Expand with AI",
     "expanding": "Expanding...",
     "expandError": "Couldn't expand text. Please try again.",

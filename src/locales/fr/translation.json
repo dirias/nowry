@@ -1658,6 +1658,21 @@
     }
   },
   "aiMagic": {
+    "streaming": {
+      "progress": "{{count}} carte(s) sur {{total}} générée(s)",
+      "retry": "Réessayer",
+      "retryAria": "Réessayer la génération de cartes",
+      "emptyTitle": "Aucune carte générée",
+      "emptyBody": "L'IA n'a pas pu créer de cartes à partir de ce texte. Réessayez ou sélectionnez un autre passage."
+    },
+    "errors": {
+      "quota": "Vous avez atteint votre limite de génération IA. Veuillez réessayer plus tard.",
+      "malformed": "L'IA a renvoyé une réponse inattendue. Veuillez réessayer.",
+      "pipeline": "La génération de cartes a échoué. Veuillez réessayer.",
+      "timeout": "La génération de cartes a pris trop de temps. Veuillez réessayer.",
+      "stalled": "La connexion s'est interrompue. Vérifiez votre réseau et réessayez.",
+      "generic": "Une erreur s'est produite lors de la génération des cartes. Veuillez réessayer."
+    },
     "expandWithAI": "Expand with AI",
     "expanding": "Expanding...",
     "expandError": "Couldn't expand text. Please try again.",

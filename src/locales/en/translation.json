@@ -2475,6 +2475,21 @@
     }
   },
   "aiMagic": {
+    "streaming": {
+      "progress": "{{count}} of {{total}} cards generated",
+      "retry": "Retry",
+      "retryAria": "Retry card generation",
+      "emptyTitle": "No cards generated",
+      "emptyBody": "The AI couldn't create cards from this text. Try again or select a different passage."
+    },
+    "errors": {
+      "quota": "You've reached your AI generation limit. Please try again later.",
+      "malformed": "The AI returned an unexpected response. Please try again.",
+      "pipeline": "Card generation failed. Please try again.",
+      "timeout": "Card generation took too long. Please try again.",
+      "stalled": "The connection stalled. Check your network and try again.",
+      "generic": "Something went wrong while generating cards. Please try again."
+    },
     "expandWithAI": "Expand with AI",
     "expanding": "Expanding...",
     "expandError": "Couldn't expand text. Please try again.",

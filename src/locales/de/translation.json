@@ -1635,6 +1635,21 @@
     }
   },
   "aiMagic": {
+    "streaming": {
+      "progress": "{{count}} von {{total}} Karten erstellt",
+      "retry": "Erneut versuchen",
+      "retryAria": "Kartenerstellung erneut versuchen",
+      "emptyTitle": "Keine Karten erstellt",
+      "emptyBody": "Die KI konnte aus diesem Text keine Karten erstellen. Bitte versuchen Sie es erneut oder wählen Sie einen anderen Abschnitt."
+    },
+    "errors": {
+      "quota": "Sie haben Ihr KI-Generierungslimit erreicht. Bitte versuchen Sie es später erneut.",
+      "malformed": "Die KI hat eine unerwartete Antwort geliefert. Bitte versuchen Sie es erneut.",
+      "pipeline": "Die Kartenerstellung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "timeout": "Die Kartenerstellung hat zu lange gedauert. Bitte versuchen Sie es erneut.",
+      "stalled": "Die Verbindung wurde unterbrochen. Bitte prüfen Sie Ihr Netzwerk und versuchen Sie es erneut.",
+      "generic": "Beim Erstellen der Karten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    },
     "expandWithAI": "Expand with AI",
     "expanding": "Expanding...",
     "expandError": "Couldn't expand text. Please try again.",

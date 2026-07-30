@@ -1,4 +1,5 @@
 import axios from 'axios'
+import * as Sentry from '@sentry/react'
 import { auth } from '../../config/firebase.config'
 
 // Get base URL from environment or use default
@@ -58,11 +59,45 @@ const notifyUser = (message, severity = 'error') => {
 }
 
 /**
+ * Report an API failure to Sentry with request metadata only.
+ * Components catch these errors locally, so Sentry never sees them as
+ * uncaught exceptions — this is the single, DRY capture point.
+ * Never attaches request/response bodies (may contain user content).
+ */
+const captureApiError = (error) => {
+  // Intentional cancellations (user navigated away, aborted request) are not errors
+  if (axios.isCancel(error) || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+    return
+  }
+  // No-op when Sentry is not initialized (REACT_APP_SENTRY_DSN unset)
+  if (!Sentry.getClient?.()) {
+    return
+  }
+  Sentry.captureException(error, {
+    contexts: {
+      api: {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        timeout: error.config?.timeout
+      }
+    },
+    tags: {
+      api_error: true,
+      status_code: error.response?.status ?? 'network_or_timeout'
+    }
+  })
+}
+
+/**
  * Response interceptor — Handles global error cases
  */
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Report every API failure to Sentry (handled or not) — single capture point
+    captureApiError(error)
+
     // Classify the failing URL once — used by multiple error handlers below
     const errorUrl = error.config?.url || ''
     // Endpoints that manage their own error/loading UI — global toasts would duplicate feedback
