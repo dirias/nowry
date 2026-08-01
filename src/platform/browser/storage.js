@@ -1,19 +1,21 @@
 /**
- * Browser storage adapter.
+ * Browser storage adapters.
  *
- * Centralizes direct Web Storage access so application and API logic do not
- * depend on browser globals. Native clients can provide a different adapter
- * (for example SecureStore for secrets) behind the same call sites later.
+ * Centralize direct Web Storage access so application and API logic do not
+ * depend on browser globals. Native clients can provide different adapters
+ * (for example Firebase-supported persistence and SecureStore for secrets)
+ * behind equivalent boundaries later.
  */
 const getLocalStorage = () => (typeof window !== 'undefined' ? window.localStorage : null)
+const getSessionStorage = () => (typeof window !== 'undefined' ? window.sessionStorage : null)
 
-export const browserStorage = {
+const createStorageAdapter = (getStorage) => ({
   getItem(key) {
-    return getLocalStorage()?.getItem(key) ?? null
+    return getStorage()?.getItem(key) ?? null
   },
 
   setItem(key, value) {
-    const storage = getLocalStorage()
+    const storage = getStorage()
     if (!storage) return
 
     if (value === null || value === undefined) {
@@ -25,9 +27,12 @@ export const browserStorage = {
   },
 
   removeItem(key) {
-    getLocalStorage()?.removeItem(key)
+    getStorage()?.removeItem(key)
   }
-}
+})
+
+export const browserStorage = createStorageAdapter(getLocalStorage)
+export const browserSessionStorage = createStorageAdapter(getSessionStorage)
 
 export const AUTH_STORAGE_KEYS = Object.freeze({
   firebaseToken: 'firebase_token',
