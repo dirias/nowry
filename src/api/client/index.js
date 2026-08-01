@@ -1,6 +1,9 @@
 import axios from 'axios'
 import * as Sentry from '@sentry/react'
 import { auth } from '../../config/firebase.config'
+import { authStorage } from '../../platform/browser/storage'
+import { emitAppEvent } from '../../platform/browser/events'
+import { getCurrentLocation, redirectTo } from '../../platform/browser/navigation'
 
 // Get base URL from environment or use default
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
@@ -31,12 +34,12 @@ apiClient.interceptors.request.use(
         // only when it is close to expiry (Firebase SDK internal threshold).
         const token = await firebaseUser.getIdToken(false)
         config.headers.Authorization = `Bearer ${token}`
-        // Keep localStorage in sync for any code that still reads it directly
-        localStorage.setItem('firebase_token', token)
+        // Keep browser auth storage in sync for legacy code that still reads it directly.
+        authStorage.setToken(token)
       }
     } catch {
-      // If we can't get a token, fall back to the cached localStorage value
-      const cached = localStorage.getItem('firebase_token')
+      // If Firebase cannot provide a token, fall back to the browser adapter.
+      const cached = authStorage.getToken()
       if (cached && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${cached}`
       }
@@ -50,12 +53,12 @@ apiClient.interceptors.request.use(
 )
 
 /**
- * Dispatch a user-visible notification via a custom DOM event.
- * NotificationContext listens to this so the interceptor stays
+ * Dispatch a user-visible notification through the platform event boundary.
+ * NotificationContext subscribes to this event so the interceptor stays
  * framework-agnostic (no React imports needed here).
  */
 const notifyUser = (message, severity = 'error') => {
-  window.dispatchEvent(new CustomEvent('api:notify', { detail: { message, severity } }))
+  emitAppEvent('api:notify', { message, severity })
 }
 
 /**
@@ -124,19 +127,18 @@ apiClient.interceptors.response.use(
 
       console.warn('Unauthorized: Token expired or invalid. Logging out...')
 
-      // Clear all authentication data
-      localStorage.removeItem('firebase_token')
-      localStorage.removeItem('firebase_user')
+      // Clear all authentication data through the platform storage boundary.
+      authStorage.clear()
 
-      // Dispatch a custom event that AuthContext can listen to
-      window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+      // Dispatch an application event that AuthContext can listen to.
+      emitAppEvent('auth:unauthorized')
 
-      // Only redirect if not already on auth pages
-      const currentPath = window.location.pathname
+      // Only redirect if not already on auth pages.
+      const { pathname, search } = getCurrentLocation()
       const authPaths = ['/login', '/register', '/forgot-password', '/resetPassword']
-      if (!authPaths.includes(currentPath)) {
-        const returnUrl = encodeURIComponent(currentPath + window.location.search)
-        window.location.href = `/login?returnUrl=${returnUrl}`
+      if (!authPaths.includes(pathname)) {
+        const returnUrl = encodeURIComponent(pathname + search)
+        redirectTo(`/login?returnUrl=${returnUrl}`)
       }
     }
 
