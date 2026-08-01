@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { Snackbar, Alert } from '@mui/joy'
+import { subscribeAppEvent } from '../platform/browser/events'
 
 const NotificationContext = createContext(null)
 
 /**
  * NotificationProvider
- * Listens to the global 'api:notify' CustomEvent dispatched by the API client
- * interceptor (which can't import React context directly) and shows a Joy UI Snackbar.
+ * Subscribes to the platform-level 'api:notify' event emitted by the API
+ * interceptor (which cannot import React context directly) and shows a Joy UI Snackbar.
  */
 export const NotificationProvider = ({ children }) => {
   const [notification, setNotification] = useState(null) // { message, severity }
@@ -15,14 +16,11 @@ export const NotificationProvider = ({ children }) => {
     setNotification({ message, severity })
   }, [])
 
-  // Listen for events dispatched by the API interceptor
   useEffect(() => {
-    const handleApiNotify = (e) => {
-      const { message, severity } = e.detail || {}
+    return subscribeAppEvent('api:notify', (detail) => {
+      const { message, severity } = detail || {}
       if (message) showNotification(message, severity)
-    }
-    window.addEventListener('api:notify', handleApiNotify)
-    return () => window.removeEventListener('api:notify', handleApiNotify)
+    })
   }, [showNotification])
 
   const handleClose = () => setNotification(null)
