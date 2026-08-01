@@ -1,13 +1,21 @@
-import { AUTH_STORAGE_KEYS, authStorage, browserStorage } from './storage'
+import { AUTH_STORAGE_KEYS, authStorage, browserSessionStorage, browserStorage } from './storage'
 
-describe('browser storage adapter', () => {
+describe('browser storage adapters', () => {
   beforeEach(() => {
     window.localStorage.clear()
+    window.sessionStorage.clear()
   })
 
-  it('reads and writes generic values', () => {
+  it('reads and writes local values', () => {
     browserStorage.setItem('example', 'value')
     expect(browserStorage.getItem('example')).toBe('value')
+  })
+
+  it('reads and writes session values independently', () => {
+    browserSessionStorage.setItem('example', 'session-value')
+
+    expect(browserSessionStorage.getItem('example')).toBe('session-value')
+    expect(browserStorage.getItem('example')).toBeNull()
   })
 
   it('removes values when null or undefined is assigned', () => {
