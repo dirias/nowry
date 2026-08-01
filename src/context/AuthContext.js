@@ -4,6 +4,9 @@ import { auth } from '../config/firebase.config'
 import { apiClient } from '../api/client'
 import { authService } from '../api/services'
 import { apiCache } from '../api/utils/cache'
+import { authStorage } from '../platform/browser/storage'
+import { subscribeAppEvent } from '../platform/browser/events'
+import { redirectTo } from '../platform/browser/navigation'
 import i18n from '../i18n'
 
 const AuthContext = createContext(null)
@@ -40,7 +43,7 @@ export const AuthProvider = ({ children }) => {
    * Gate ALL API calls on Firebase auth state resolution.
    *
    * onAuthStateChanged fires once immediately when the SDK has finished
-   * restoring the previous session from IndexedDB.  Until that fires:
+   * restoring the previous session from IndexedDB. Until that fires:
    *   - auth.currentUser is null
    *   - we must NOT call /users/me (would 401 with no token)
    *
@@ -50,30 +53,26 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Firebase session is confirmed — now safe to fetch backend profile
         await checkUser()
       } else {
-        // No Firebase session at all (new visit or after logout)
         setUser(null)
         setLoading(false)
       }
     })
 
-    // Cleanup listener on unmount
     return () => unsubscribe()
   }, [])
 
-  // Listen for unauthorized events fired by the API interceptor
+  // Listen for unauthorized events fired by the API interceptor through the
+  // platform event boundary instead of subscribing to DOM events directly.
   useEffect(() => {
-    const handleUnauthorized = () => {
+    return subscribeAppEvent('auth:unauthorized', () => {
       setUser(null)
-    }
-    window.addEventListener('auth:unauthorized', handleUnauthorized)
-    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized)
+    })
   }, [])
 
   // Token refresh interval — redundant now that interceptor uses getIdToken(false),
-  // kept as a safety net for long-running sessions (every 30 min)
+  // kept as a safety net for long-running sessions (every 30 min).
   useEffect(() => {
     const interval = setInterval(
       async () => {
@@ -86,8 +85,8 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
           console.error('[AuthContext] Token refresh failed:', error)
           setUser(null)
-          localStorage.removeItem('firebase_token')
-          window.location.href = '/login'
+          authStorage.clear()
+          redirectTo('/login')
         } finally {
           refreshingRef.current = false
         }
@@ -100,8 +99,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const result = await authService.login(credentials.email, credentials.password)
-    // onAuthStateChanged will fire automatically after login and call checkUser()
-    // We still call it explicitly here so the UI updates immediately without waiting
+    // onAuthStateChanged will fire automatically after login and call checkUser().
+    // We still call it explicitly here so the UI updates immediately without waiting.
     await checkUser()
     return result
   }
@@ -113,7 +112,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout failed', error)
     } finally {
       // Clear ALL cached API data so the next user never sees stale data
-      // from the previous session (tasks, plans, books, etc.)
+      // from the previous session (tasks, plans, books, etc.).
       apiCache.clear()
       setUser(null)
     }
