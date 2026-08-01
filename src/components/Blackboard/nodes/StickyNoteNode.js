@@ -1,19 +1,22 @@
 import React, { memo, useState, useRef, useCallback } from 'react'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
 import { Box, IconButton, Tooltip } from '@mui/joy'
+import { useTheme, useColorScheme } from '@mui/joy/styles'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 
-// 8 colors mapped to Nowry palette — each adapts to dark/light mode
+// 8 sticky note color ids — actual bg/border/text values live in the theme
+// under theme.vars.palette.stickyNote.<id> (see theme/colorSchemeGenerator.js),
+// so every swatch adapts automatically between light and dark mode.
 export const STICKY_COLORS = [
-  { id: 'yellow', bg: '#fef3c7', border: '#f59e0b', text: '#78350f' },
-  { id: 'green', bg: '#d1fae5', border: '#10b981', text: '#064e3b' },
-  { id: 'blue', bg: '#dbeafe', border: '#3b82f6', text: '#1e3a8a' },
-  { id: 'purple', bg: '#ede9fe', border: '#8b5cf6', text: '#4c1d95' },
-  { id: 'pink', bg: '#fce7f3', border: '#ec4899', text: '#831843' },
-  { id: 'teal', bg: '#ccfbf1', border: '#14b8a6', text: '#134e4a' },
-  { id: 'red', bg: '#fee2e2', border: '#ef4444', text: '#7f1d1d' },
-  { id: 'slate', bg: '#f1f5f9', border: '#64748b', text: '#0f172a' }
+  { id: 'yellow' },
+  { id: 'green' },
+  { id: 'blue' },
+  { id: 'purple' },
+  { id: 'pink' },
+  { id: 'teal' },
+  { id: 'red' },
+  { id: 'slate' }
 ]
 
 const StickyNoteNode = memo(({ data, selected }) => {
@@ -23,7 +26,17 @@ const StickyNoteNode = memo(({ data, selected }) => {
   const [showColorPicker, setShowColorPicker] = useState(false)
   const titleRef = useRef(null)
 
-  const color = STICKY_COLORS.find((c) => c.id === data.color) || STICKY_COLORS[0]
+  const theme = useTheme()
+  const { mode } = useColorScheme()
+  const isDark = mode === 'dark'
+
+  const colorId = (STICKY_COLORS.find((c) => c.id === data.color) || STICKY_COLORS[0]).id
+  // CSS-var backed values — safe to use directly (bgcolor/color/borderColor), react
+  // to theme/mode changes automatically via CSS custom properties.
+  const color = theme.vars.palette.stickyNote[colorId]
+  // Literal (non-var) hex for the active mode — needed anywhere we concatenate an
+  // alpha suffix (e.g. `${hex}44`), since `var(--x)44` is not valid CSS.
+  const colorLiteral = theme.colorSchemes[isDark ? 'dark' : 'light'].palette.stickyNote[colorId]
 
   const commitEdit = useCallback(() => {
     setEditing(false)
@@ -55,9 +68,9 @@ const StickyNoteNode = memo(({ data, selected }) => {
           minWidth: 200,
           minHeight: 140,
           bgcolor: color.bg,
-          border: `2px solid ${selected ? color.border : color.border + '99'}`,
+          border: `2px solid ${selected ? colorLiteral.border : colorLiteral.border + '99'}`,
           borderRadius: '12px 12px 12px 2px',
-          boxShadow: selected ? `0 8px 32px ${color.border}44, 0 2px 8px rgba(0,0,0,0.15)` : '0 4px 16px rgba(0,0,0,0.12)',
+          boxShadow: selected ? `0 8px 32px ${colorLiteral.border}44, ${theme.vars.shadow.md}` : theme.vars.shadow.sm,
           p: 1.5,
           transition: 'box-shadow 0.2s, border-color 0.2s',
           cursor: 'grab',
@@ -70,7 +83,7 @@ const StickyNoteNode = memo(({ data, selected }) => {
             right: -1,
             width: 20,
             height: 20,
-            background: `linear-gradient(225deg, ${color.border}33 50%, transparent 50%)`,
+            background: `linear-gradient(225deg, ${colorLiteral.border}33 50%, transparent 50%)`,
             borderRadius: '0 0 12px 0'
           }
         }}
@@ -98,7 +111,8 @@ const StickyNoteNode = memo(({ data, selected }) => {
                 borderRadius: '50%',
                 bgcolor: color.border,
                 cursor: 'pointer',
-                border: '1.5px solid rgba(0,0,0,0.15)',
+                border: '1.5px solid',
+                borderColor: 'divider',
                 transition: 'transform 0.15s',
                 '&:hover': { transform: 'scale(1.3)' }
               }}
@@ -135,9 +149,16 @@ const StickyNoteNode = memo(({ data, selected }) => {
                       width: 16,
                       height: 16,
                       borderRadius: '50%',
-                      bgcolor: c.border,
+                      bgcolor: theme.vars.palette.stickyNote[c.id].border,
                       cursor: 'pointer',
-                      border: data.color === c.id ? '2px solid #000' : '1px solid rgba(0,0,0,0.1)',
+                      border: data.color === c.id ? '2px solid' : '1px solid',
+                      // background.surface (not neutral.solidBg) — neutral.solidBg resolves to a
+                      // fixed mid-gray in both modes, which nearly matches the "slate" swatch tone
+                      // and would make the selection ring disappear on that swatch specifically.
+                      // background.surface sits at the opposite extreme of lightness from every
+                      // swatch color in both modes (near-white on light, near-black on dark),
+                      // guaranteeing contrast against all 8 swatches either way.
+                      borderColor: data.color === c.id ? 'background.surface' : 'divider',
                       transition: 'transform 0.1s',
                       '&:hover': { transform: 'scale(1.25)' }
                     }}
@@ -237,7 +258,7 @@ const StickyNoteNode = memo(({ data, selected }) => {
               <IconButton
                 size='sm'
                 variant='solid'
-                sx={{ '--IconButton-size': '22px', bgcolor: color.border, color: '#fff', borderRadius: 'sm' }}
+                sx={{ '--IconButton-size': '22px', bgcolor: color.border, color: 'primary.solidColor', borderRadius: 'sm' }}
                 onClick={(e) => {
                   e.stopPropagation()
                   startEdit()
@@ -250,7 +271,7 @@ const StickyNoteNode = memo(({ data, selected }) => {
               <IconButton
                 size='sm'
                 variant='solid'
-                sx={{ '--IconButton-size': '22px', bgcolor: '#ef4444', color: '#fff', borderRadius: 'sm' }}
+                sx={{ '--IconButton-size': '22px', bgcolor: 'danger.solidBg', color: 'danger.solidColor', borderRadius: 'sm' }}
                 onClick={(e) => {
                   e.stopPropagation()
                   data.onDelete?.()

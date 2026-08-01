@@ -119,6 +119,10 @@ export default function EditorHome() {
   const [content, setContent] = useState('')
   const [pageSize, setPageSize] = useState('a5')
 
+  // TTS language — lifted here so it's shared between the desktop sidebar and the
+  // mobile Drawer instance of ContentNavigator (previously each held its own disconnected state).
+  const [ttsLanguage, setTtsLanguage] = useState('en-US')
+
   // Wrapped setPageSize with logging
   const handlePageSizeChange = (newSize) => {
     console.log('📐 Page size changing from', pageSize, 'to', newSize)
@@ -922,6 +926,8 @@ export default function EditorHome() {
               editorInstanceRef={editorRef}
               bookId={book?._id}
               tier={tier}
+              ttsLanguage={ttsLanguage}
+              onTtsLanguageChange={setTtsLanguage}
             />
           </Box>
 
@@ -934,6 +940,8 @@ export default function EditorHome() {
                 editorInstanceRef={editorRef}
                 bookId={book?._id}
                 tier={tier}
+                ttsLanguage={ttsLanguage}
+                onTtsLanguageChange={setTtsLanguage}
               />
             </Box>
           </Drawer>
@@ -973,6 +981,7 @@ export default function EditorHome() {
               illustrationCount={illustrationCount}
               onDiagramInserted={handleDiagramInserted}
               tier={tier}
+              ttsLanguage={ttsLanguage}
             />
           </Box>
 

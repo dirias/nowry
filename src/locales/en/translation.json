@@ -887,6 +887,10 @@
       "desc": "All notes and connections will be permanently removed.",
       "confirm": "Clear everything"
     },
+    "canvasError": {
+      "message": "Could not load this board. Try again.",
+      "retry": "Retry board"
+    },
     "boardListSelector": {
       "title": "My Boards",
       "subtitle": "Select a board to open or create a new one",
@@ -2493,6 +2497,30 @@
     "expandWithAI": "Expand with AI",
     "expanding": "Expanding...",
     "expandError": "Couldn't expand text. Please try again.",
+    "questionnaireModal": {
+      "title": "Generated Questionnaire",
+      "subtitle": "Select questions to save.",
+      "saveTitle": "Save Quiz to Deck",
+      "saveSubtitle": "Choose a deck to store these interactive questions.",
+      "includeInDeck": "Include in Deck",
+      "explanation": "Explanation",
+      "emptyQuestions": "No questions were generated. Try again with more content.",
+      "emptyOptions": "No answer options were generated for this question.",
+      "selectDeck": "Select Deck",
+      "selectDeckPlaceholder": "Choose a deck...",
+      "loadingDecks": "Loading decks...",
+      "noQuizDecks": "No quiz decks yet — create one below.",
+      "or": "OR",
+      "createDeck": "Create New Deck",
+      "newDeckName": "New Deck Name",
+      "create": "Create",
+      "cancel": "Cancel",
+      "proceed": "Proceed to Save ({{n}})",
+      "confirmSave": "Confirm & Save",
+      "noExplanation": "No explanation provided.",
+      "createDeckError": "Couldn't create the deck. Please try again.",
+      "saveError": "Couldn't save these questions. Please try again."
+    },
     "generateFromBook": {
       "label": "Generate Cards from Book",
       "labelQuiz": "Generate Quiz from Book",
@@ -2547,6 +2575,10 @@
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
       "playSection": "Play section: {{title}}",
+      "playSelectionTooltip": "Listen",
+      "playSelectionAriaLabel": "Play selected text",
+      "stopSelectionTooltip": "Stop",
+      "stopSelectionAriaLabel": "Stop audio playback",
       "fullBook": "Full book",
       "fullBookHint": "Read the entire book",
       "sectionPickerTitle": "Choose a section",

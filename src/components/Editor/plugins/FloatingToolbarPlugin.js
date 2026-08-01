@@ -7,10 +7,20 @@ import { $createCodeNode } from '@lexical/code'
 import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list'
 import { $createCalloutNode } from '../../../nodes/CalloutNode'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import TextMenu from '../../Menu/TextMenu'
+import { ttsService } from '../../../api/services/tts.ai.service'
 
-export default function FloatingToolbarPlugin({ onOptionClick, illustrationCount = 0, tier = 'free' }) {
+export default function FloatingToolbarPlugin({
+  onOptionClick,
+  illustrationCount = 0,
+  tier = 'free',
+  ttsLanguage = 'en-US',
+  bookId,
+  onTtsError
+}) {
   const [editor] = useLexicalComposerContext()
+  const { t } = useTranslation()
   const [showMenu, setShowMenu] = useState(false)
   const [isEditingLink, setIsEditingLink] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
@@ -18,6 +28,55 @@ export default function FloatingToolbarPlugin({ onOptionClick, illustrationCount
   const [selectedText, setSelectedText] = useState('')
   const [currentBlockType, setCurrentBlockType] = useState('paragraph')
   const menuRef = useRef(null)
+
+  // TTS state — play selected text via the mic icon in the floating toolbar
+  const [ttsState, setTtsState] = useState('idle') // 'idle' | 'loading' | 'playing'
+  const audioRef = useRef(null)
+  const blobUrlRef = useRef(null)
+
+  const stopTts = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current)
+      blobUrlRef.current = null
+    }
+    setTtsState('idle')
+  }, [])
+
+  const handleTtsEnded = useCallback(() => {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current)
+      blobUrlRef.current = null
+    }
+    setTtsState('idle')
+  }, [])
+
+  const handleMicClick = useCallback(async () => {
+    if (ttsState !== 'idle') {
+      stopTts()
+      return
+    }
+
+    setTtsState('loading')
+    try {
+      const blobUrl = await ttsService.generate(bookId, selectedText, ttsLanguage)
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current)
+      }
+      blobUrlRef.current = blobUrl
+      if (audioRef.current) {
+        audioRef.current.src = blobUrl
+        await audioRef.current.play()
+      }
+      setTtsState('playing')
+    } catch {
+      setTtsState('idle')
+      onTtsError?.(t('aiMagic.tts.error'))
+    }
+  }, [ttsState, stopTts, bookId, selectedText, ttsLanguage, onTtsError, t])
 
   const updateToolbar = useCallback(() => {
     // If we are editing a link, don't let selection changes hide the menu
@@ -53,6 +112,12 @@ export default function FloatingToolbarPlugin({ onOptionClick, illustrationCount
         italic: selection.hasFormat('italic'),
         underline: selection.hasFormat('underline')
       })
+
+      // A genuinely new selection (not just a re-fire of the same one) cancels any
+      // in-flight/playing TTS audio rather than queuing or auto-playing the new text.
+      if (ttsState !== 'idle' && nativeSelection.toString() !== selectedText) {
+        stopTts()
+      }
       setSelectedText(nativeSelection.toString())
 
       // Detect block type from anchor node
@@ -78,9 +143,12 @@ export default function FloatingToolbarPlugin({ onOptionClick, illustrationCount
 
       setShowMenu(true)
     } else {
+      // Keep the toolbar pinned at its last known position while audio is playing,
+      // even if the native selection collapses.
+      if (ttsState !== 'idle') return
       setShowMenu(false)
     }
-  }, [editor, isEditingLink])
+  }, [editor, isEditingLink, ttsState, selectedText, stopTts])
 
   const onBlockTypeChange = useCallback(
     (blockType) => {
@@ -153,6 +221,8 @@ export default function FloatingToolbarPlugin({ onOptionClick, illustrationCount
       if (menuRef.current && !menuRef.current.contains(target)) {
         setIsEditingLink(false)
         setShowMenu(false)
+        // Don't leave audio playing invisibly after the toolbar that controls it has closed.
+        if (ttsState !== 'idle') stopTts()
       }
     }
 
@@ -163,26 +233,31 @@ export default function FloatingToolbarPlugin({ onOptionClick, illustrationCount
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showMenu, isEditingLink])
+  }, [showMenu, isEditingLink, ttsState, stopTts])
 
   if (!showMenu) return null
 
   return createPortal(
-    <TextMenu
-      ref={menuRef}
-      onOptionClick={(opt) => {
-        onOptionClick(opt, selectedText)
-        setShowMenu(false)
-      }}
-      onLinkEdit={(editing) => {
-        setIsEditingLink(editing)
-      }}
-      activeFormats={activeFormats}
-      currentBlockType={currentBlockType}
-      onBlockTypeChange={onBlockTypeChange}
-      illustrationCount={illustrationCount}
-      style={{ top: position.top, left: position.left }}
-    />,
+    <>
+      <TextMenu
+        ref={menuRef}
+        onOptionClick={(opt) => {
+          onOptionClick(opt, selectedText)
+          setShowMenu(false)
+        }}
+        onLinkEdit={(editing) => {
+          setIsEditingLink(editing)
+        }}
+        activeFormats={activeFormats}
+        currentBlockType={currentBlockType}
+        onBlockTypeChange={onBlockTypeChange}
+        illustrationCount={illustrationCount}
+        style={{ top: position.top, left: position.left }}
+        ttsState={ttsState}
+        onMicClick={handleMicClick}
+      />
+      <audio ref={audioRef} style={{ display: 'none' }} onEnded={handleTtsEnded} />
+    </>,
     document.body
   )
 }

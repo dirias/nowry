@@ -249,6 +249,40 @@ export function generateColorScheme(primaryColor) {
 }
 
 /**
+ * Sticky-note tag palette (Blackboard feature)
+ *
+ * Fixed, recognizable "note color" swatches — independent of the user's chosen
+ * primary theme color, same reasoning as why success/warning/danger are already
+ * independent of primary above. Light values are the original hardcoded hex
+ * literals preserved exactly (no visual change). Dark values are generated with
+ * hslToHex() using the same hue/saturation family as each light swatch, tuned for
+ * dark-surface contrast (subdued tinted bg, brighter border accent, light legible text) —
+ * mirroring the lightness curve already used for success/warning/danger dark variants above.
+ */
+export const STICKY_PALETTE = {
+  light: {
+    yellow: { bg: '#fef3c7', border: '#f59e0b', text: '#78350f' },
+    green: { bg: '#d1fae5', border: '#10b981', text: '#064e3b' },
+    blue: { bg: '#dbeafe', border: '#3b82f6', text: '#1e3a8a' },
+    purple: { bg: '#ede9fe', border: '#8b5cf6', text: '#4c1d95' },
+    pink: { bg: '#fce7f3', border: '#ec4899', text: '#831843' },
+    teal: { bg: '#ccfbf1', border: '#14b8a6', text: '#134e4a' },
+    red: { bg: '#fee2e2', border: '#ef4444', text: '#7f1d1d' },
+    slate: { bg: '#f1f5f9', border: '#64748b', text: '#0f172a' }
+  },
+  dark: {
+    yellow: { bg: hslToHex(38, 38, 14), border: hslToHex(38, 88, 55), text: hslToHex(38, 90, 75) },
+    green: { bg: hslToHex(158, 32, 14), border: hslToHex(158, 55, 48), text: hslToHex(158, 65, 72) },
+    blue: { bg: hslToHex(217, 38, 15), border: hslToHex(217, 75, 60), text: hslToHex(217, 90, 80) },
+    purple: { bg: hslToHex(258, 36, 16), border: hslToHex(258, 70, 65), text: hslToHex(258, 85, 82) },
+    pink: { bg: hslToHex(330, 34, 15), border: hslToHex(330, 70, 62), text: hslToHex(330, 80, 82) },
+    teal: { bg: hslToHex(173, 32, 14), border: hslToHex(173, 55, 48), text: hslToHex(173, 65, 72) },
+    red: { bg: hslToHex(0, 36, 15), border: hslToHex(0, 65, 55), text: hslToHex(0, 80, 80) },
+    slate: { bg: hslToHex(215, 16, 18), border: hslToHex(215, 15, 58), text: hslToHex(215, 20, 85) }
+  }
+}
+
+/**
  * Get color name suggestion based on hue
  */
 export function getColorName(hex) {

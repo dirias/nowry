@@ -16,8 +16,8 @@ import {
   Snackbar
 } from '@mui/joy'
 import { Clock, BookOpen } from 'lucide-react'
-import MicRoundedIcon from '@mui/icons-material/MicRounded'
-import PauseRoundedIcon from '@mui/icons-material/PauseRounded'
+import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded'
+import StopRoundedIcon from '@mui/icons-material/StopRounded'
 import { useTranslation } from 'react-i18next'
 import { ttsService } from '../../api/services/tts.ai.service'
 import { $getRoot } from 'lexical'
@@ -30,7 +30,15 @@ import { useSubscriptionContext } from '../../context/SubscriptionContext'
  * Following DESIGN_GUIDELINES.md
  */
 
-export default function ContentNavigator({ toc = [], readingTime = 0, editorInstanceRef, bookId, tier }) {
+export default function ContentNavigator({
+  toc = [],
+  readingTime = 0,
+  editorInstanceRef,
+  bookId,
+  tier,
+  ttsLanguage = 'en-US',
+  onTtsLanguageChange
+}) {
   const { t } = useTranslation()
   const { openUpgradeModal } = useSubscriptionContext()
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -39,7 +47,6 @@ export default function ContentNavigator({ toc = [], readingTime = 0, editorInst
   // TTS state
   const [playingId, setPlayingId] = useState(null)
   const [loadingId, setLoadingId] = useState(null)
-  const [ttsLanguage, setTtsLanguage] = useState('en-US')
   const [ttsError, setTtsError] = useState(null)
   const audioRef = useRef(null)
   const blobUrlRef = useRef(null)
@@ -283,7 +290,7 @@ export default function ContentNavigator({ toc = [], readingTime = 0, editorInst
               variant='soft'
               color='neutral'
               value={ttsLanguage}
-              onChange={(_, v) => setTtsLanguage(v)}
+              onChange={(_, v) => onTtsLanguageChange?.(v)}
               aria-label={t('aiMagic.tts.languageAriaLabel')}
               sx={{
                 ml: 'auto',
@@ -418,9 +425,9 @@ export default function ContentNavigator({ toc = [], readingTime = 0, editorInst
                       {isLoading ? (
                         <CircularProgress size='sm' sx={{ '--CircularProgress-size': '14px' }} />
                       ) : isPlaying ? (
-                        <PauseRoundedIcon sx={{ fontSize: 14 }} />
+                        <StopRoundedIcon sx={{ fontSize: 14 }} />
                       ) : (
-                        <MicRoundedIcon sx={{ fontSize: 14 }} />
+                        <VolumeUpRoundedIcon sx={{ fontSize: 14 }} />
                       )}
                     </IconButton>
                   )}

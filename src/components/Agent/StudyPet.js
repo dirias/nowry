@@ -32,6 +32,7 @@ import QuizQuestionBubble from './QuizQuestionBubble'
 import QuizFeedbackBubble from './QuizFeedbackBubble'
 import DeckSelector from './DeckSelector'
 import QuizSummaryCard from './QuizSummaryCard'
+import PetMarkdown from './PetMarkdown'
 import { quizService } from '../../api/services/quizService'
 
 // ---------------------------------------------------------------------------
@@ -352,7 +353,7 @@ const MessageBubble = ({ role, content, speciesColor }) => {
           wordBreak: 'break-word'
         }}
       >
-        {content}
+        {isUser ? content : <PetMarkdown content={content} />}
       </div>
     </motion.div>
   )

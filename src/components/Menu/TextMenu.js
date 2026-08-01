@@ -16,7 +16,8 @@ import {
   MenuItem,
   Tooltip,
   Input,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/joy'
 import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded'
 import LockIcon from '@mui/icons-material/Lock'
@@ -43,7 +44,9 @@ import {
   Info,
   Lightbulb,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  Square,
+  Volume2
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSubscription } from '../../hooks/useSubscription'
@@ -58,7 +61,9 @@ const TextMenu = forwardRef(
       onLinkEdit,
       currentBlockType = 'paragraph',
       onBlockTypeChange,
-      illustrationCount = 0 // from EditorHome → Editor → FloatingToolbarPlugin (book-specific data)
+      illustrationCount = 0, // from EditorHome → Editor → FloatingToolbarPlugin (book-specific data)
+      ttsState = 'idle',
+      onMicClick
     },
     ref
   ) => {
@@ -267,6 +272,48 @@ const TextMenu = forwardRef(
               <Tooltip title={t('editor.format.link', 'Link')} variant='soft' size='sm'>
                 <IconButton size='sm' variant='plain' color='neutral' onClick={toggleLink}>
                   <LinkIcon size={16} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                title={ttsState === 'idle' ? t('aiMagic.tts.playSelectionTooltip') : t('aiMagic.tts.stopSelectionTooltip')}
+                variant='soft'
+                size='sm'
+              >
+                <IconButton
+                  size='sm'
+                  variant={ttsState === 'playing' ? 'soft' : 'plain'}
+                  color={ttsState === 'playing' ? 'primary' : 'neutral'}
+                  disabled={ttsState === 'loading'}
+                  onClick={() => {
+                    if (tier === 'free') {
+                      openUpgradeModal(t('upgrade.headlines.tts'))
+                      return
+                    }
+                    onMicClick?.()
+                  }}
+                  aria-label={
+                    ttsState === 'idle'
+                      ? t('aiMagic.tts.playSelectionAriaLabel')
+                      : ttsState === 'loading'
+                        ? t('aiMagic.tts.loadingAriaLabel')
+                        : t('aiMagic.tts.stopSelectionAriaLabel')
+                  }
+                  sx={{
+                    '&:focus-visible': {
+                      outline: '2px solid',
+                      outlineColor: 'primary.outlinedBorder',
+                      outlineOffset: '2px'
+                    }
+                  }}
+                >
+                  {ttsState === 'loading' ? (
+                    <CircularProgress size='sm' sx={{ '--CircularProgress-size': '16px' }} />
+                  ) : ttsState === 'playing' ? (
+                    <Square size={16} />
+                  ) : (
+                    <Volume2 size={16} />
+                  )}
                 </IconButton>
               </Tooltip>
             </Stack>

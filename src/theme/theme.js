@@ -1,4 +1,5 @@
 import { extendTheme } from '@mui/joy/styles'
+import { STICKY_PALETTE } from './colorSchemeGenerator'
 
 const primaryMain = '#2a6971'
 const primaryHover = '#245a63'
@@ -43,7 +44,8 @@ const theme = extendTheme({
           primary: '#1c1c1c',
           secondary: '#444',
           tertiary: '#777'
-        }
+        },
+        stickyNote: STICKY_PALETTE.light
       }
     },
     dark: {
@@ -68,7 +70,8 @@ const theme = extendTheme({
           primary: '#e6edf3',
           secondary: '#9ba9b4',
           tertiary: '#7d8590'
-        }
+        },
+        stickyNote: STICKY_PALETTE.dark
       }
     }
   }

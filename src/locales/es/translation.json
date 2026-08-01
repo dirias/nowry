@@ -2347,6 +2347,10 @@
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
       "playSection": "Reproducir sección: {{title}}",
+      "playSelectionTooltip": "Listen",
+      "playSelectionAriaLabel": "Play selected text",
+      "stopSelectionTooltip": "Stop",
+      "stopSelectionAriaLabel": "Stop audio playback",
       "fullBook": "Full book",
       "fullBookHint": "Read the entire book",
       "sectionPickerTitle": "Choose a section",
@@ -2417,6 +2421,10 @@
       "title": "Clear board?",
       "desc": "All notes and connections will be permanently removed.",
       "confirm": "Clear everything"
+    },
+    "canvasError": {
+      "message": "Could not load this board. Try again.",
+      "retry": "Retry board"
     },
     "boardListSelector": {
       "title": "My Boards",

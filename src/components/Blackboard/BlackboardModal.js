@@ -11,7 +11,7 @@ import {
   ReactFlowProvider
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { Box, Modal, ModalDialog, Typography, IconButton, Tooltip, CircularProgress } from '@mui/joy'
+import { Box, Button, Modal, ModalDialog, Typography, IconButton, Tooltip, CircularProgress } from '@mui/joy'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { useTranslation } from 'react-i18next'
 import StickyNoteNode from './nodes/StickyNoteNode'
@@ -54,38 +54,70 @@ function BlackboardCanvas({
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const autosaveTimer = useRef(null)
   const viewportRef = useRef({ x: 0, y: 0, zoom: 1 })
+  const activeBoardIdRef = useRef(activeBoardId)
 
-  // ── Cleanup autosave timer on unmount ─────────────────────────────────
+  // Keep the board id readable at timer-FIRE time rather than schedule time.
+  // Without this, a save scheduled while board A was active still fires with the
+  // stale A id after the user switches to board B — while `nodes`/`edges` already
+  // hold B's freshly-loaded content — silently overwriting board A's document.
+  // Mirrors the `contentRef` idiom in `src/hooks/useAutoSave.js`.
   useEffect(() => {
-    return () => clearTimeout(autosaveTimer.current)
-  }, [])
+    activeBoardIdRef.current = activeBoardId
+  }, [activeBoardId])
+
+  // Same ref idiom applied to the board content, so a save can be performed
+  // without going through the React scheduler. This matters on unmount: React
+  // does not run functional state updaters on an already-unmounted fiber, so
+  // reading `nodes`/`edges` via `setNodes(current => ...)` in a cleanup would
+  // silently no-op and drop the pending edit.
+  const nodesRef = useRef(nodes)
+  const edgesRef = useRef(edges)
+  useEffect(() => {
+    nodesRef.current = nodes
+  }, [nodes])
+  useEffect(() => {
+    edgesRef.current = edges
+  }, [edges])
 
   // ── Auto-save (debounced 1.5s) ────────────────────────────────────────
+  // Performs the save immediately, reading the LIVE board id / nodes / edges
+  // at call time. Stable across renders — it closes over refs only.
+  const flushSave = useCallback(() => {
+    autosaveTimer.current = null
+    // Strip non-serializable callbacks before sending to backend
+    const serializableNodes = nodesRef.current.map((n) => ({
+      ...n,
+      data: Object.fromEntries(Object.entries(n.data).filter(([k]) => typeof n.data[k] !== 'function'))
+    }))
+    blackboardService
+      .saveBoard(activeBoardIdRef.current, {
+        nodes: serializableNodes,
+        edges: edgesRef.current,
+        viewport: viewportRef.current
+      })
+      .catch(console.error)
+  }, [])
+
   const scheduleSave = useCallback(() => {
     clearTimeout(autosaveTimer.current)
-    autosaveTimer.current = setTimeout(() => {
-      setNodes((currentNodes) => {
-        setEdges((currentEdges) => {
-          // Strip non-serializable callbacks before sending to backend
-          const serializableNodes = currentNodes.map((n) => ({
-            ...n,
-            data: Object.fromEntries(Object.entries(n.data).filter(([k]) => typeof n.data[k] !== 'function'))
-          }))
-          blackboardService
-            .saveBoard(activeBoardId, {
-              nodes: serializableNodes,
-              edges: currentEdges,
-              viewport: viewportRef.current
-            })
-            .catch(console.error)
-          return currentEdges
-        })
-        return currentNodes
-      })
-    }, AUTOSAVE_DELAY)
-  }, [activeBoardId, setNodes, setEdges])
+    autosaveTimer.current = setTimeout(flushSave, AUTOSAVE_DELAY)
+  }, [flushSave])
+
+  // ── Flush (not cancel) a pending autosave on unmount ───────────────────
+  // Cancelling here would silently discard any edit made in the last 1.5s
+  // before the modal closed. Only flush when a save was actually pending —
+  // `flushSave` nulls the timer handle once it runs.
+  useEffect(() => {
+    return () => {
+      if (autosaveTimer.current) {
+        clearTimeout(autosaveTimer.current)
+        flushSave()
+      }
+    }
+  }, [flushSave])
 
   // ── Node CRUD helpers ─────────────────────────────────────────────────
   const updateNodeData = useCallback(
@@ -132,10 +164,16 @@ function BlackboardCanvas({
     [updateNodeData, deleteNode]
   )
 
-  // ── Load board when activeBoardId changes ─────────────────────────────
-  useEffect(() => {
+  // ── Load board (shared by the load effect and the Error-state retry) ──
+  // A failed load must surface as a visible Error state — swallowing it left the
+  // user staring at an empty canvas with no hint that anything went wrong.
+  // `error` holds the translation KEY, not the resolved string: `t` is a fresh
+  // identity on every render, so translating here would make `loadBoard` unstable
+  // and re-fire the load effect in a loop. Resolved at render time instead.
+  const loadBoard = useCallback(() => {
     if (!activeBoardId) return
     setLoading(true)
+    setError(null)
     blackboardService
       .getBoard(activeBoardId)
       .then((board) => {
@@ -145,9 +183,14 @@ function BlackboardCanvas({
         setEdges(board.edges || [])
         if (board.viewport) viewportRef.current = board.viewport
       })
-      .catch(() => {})
+      .catch(() => setError('blackboard.canvasError.message'))
       .finally(() => setLoading(false))
   }, [activeBoardId, rehydrateNode, setEdges, setNodes])
+
+  // ── Load board when activeBoardId changes ─────────────────────────────
+  useEffect(() => {
+    loadBoard()
+  }, [loadBoard])
 
   // ── Edge connect ──────────────────────────────────────────────────────
   const onConnect = useCallback(
@@ -222,6 +265,20 @@ function BlackboardCanvas({
     return (
       <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress size='sm' />
+      </Box>
+    )
+  }
+
+  // ── Error state — mirrors BoardListSelector's error branch ────────────
+  if (error) {
+    return (
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
+        <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
+          {t(error)}
+        </Typography>
+        <Button size='sm' variant='outlined' color='neutral' onClick={loadBoard}>
+          {t('blackboard.canvasError.retry')}
+        </Button>
       </Box>
     )
   }
@@ -321,6 +378,10 @@ function BlackboardCanvas({
     </Box>
   )
 }
+
+// Named export so the canvas can be unit-tested without the outer modal's
+// board-resolution effect (see __tests__/BlackboardModal.test.js).
+export { BlackboardCanvas }
 
 // ── Main exported modal ────────────────────────────────────────────────────
 export default function BlackboardModal({ open, onClose }) {

@@ -3,7 +3,7 @@ import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import CssBaseline from '@mui/joy/CssBaseline'
 import GlobalStyles from '@mui/joy/GlobalStyles'
 
-import { generateColorScheme } from './colorSchemeGenerator'
+import { generateColorScheme, STICKY_PALETTE } from './colorSchemeGenerator'
 import baseTheme from './theme'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
@@ -53,7 +53,8 @@ export const DynamicThemeProvider = ({ children }) => {
             danger: colorScheme.light.danger,
             neutral: colorScheme.light.neutral,
             background: colorScheme.light.background,
-            text: colorScheme.light.text
+            text: colorScheme.light.text,
+            stickyNote: STICKY_PALETTE.light
           }
         },
         dark: {
@@ -64,7 +65,8 @@ export const DynamicThemeProvider = ({ children }) => {
             warning: colorScheme.dark.warning,
             danger: colorScheme.dark.danger,
             background: colorScheme.dark.background,
-            text: colorScheme.dark.text
+            text: colorScheme.dark.text,
+            stickyNote: STICKY_PALETTE.dark
           }
         }
       }

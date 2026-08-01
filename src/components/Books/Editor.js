@@ -208,7 +208,8 @@ export default function Editor({
   onEditorReady,
   illustrationCount = 0,
   onDiagramInserted, // called after successful diagram insert to update parent count
-  tier = 'free'
+  tier = 'free',
+  ttsLanguage = 'en-US'
 }) {
   const theme = useTheme()
   const menuRef = useRef()
@@ -798,6 +799,9 @@ export default function Editor({
             }}
             illustrationCount={illustrationCount}
             tier={tier}
+            ttsLanguage={ttsLanguage}
+            bookId={book?._id}
+            onTtsError={(msg) => setError(msg)}
           />
 
           {/* Overlays (Lazy Loaded) */}

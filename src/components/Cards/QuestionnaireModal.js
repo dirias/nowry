@@ -28,10 +28,20 @@ import {
   Switch
 } from '@mui/joy'
 import { CheckCircle, AlertCircle, HelpCircle, ChevronDown, Circle, XCircle, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { decksService, cardsService } from '../../api/services'
 import { useDeckData } from '../../hooks/useDeckData'
 
+/**
+ * Normalise one API question onto the shape this modal renders.
+ * The backend guarantees `question` / `options` / `answer` / `explanation`,
+ * but a partial or legacy payload must never render a bare empty option list.
+ */
+const getOptions = (question) =>
+  Array.isArray(question?.options) ? question.options.filter((opt) => typeof opt === 'string' && opt.trim().length > 0) : []
+
 export default function QuestionnaireModal({ questions = [], onCancel }) {
+  const { t } = useTranslation()
   const [step, setStep] = useState('select_questions') // 'select_questions' | 'select_deck'
   // Store user selection for each question index: { 0: "Option A", 1: "Option C" }
   const [userAnswers, setUserAnswers] = useState({})
@@ -44,24 +54,24 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
   const [isCreatingDeck, setIsCreatingDeck] = useState(false)
   const [saving, setSaving] = useState(false)
   const [loadingDecks, setLoadingDecks] = useState(false)
+  const [error, setError] = useState(null)
 
   const { decks: cacheDecks, loading: hookDecksLoading, reload: reloadDecks } = useDeckData()
 
-  const loadDecks = async () => {
-    try {
+  const safeQuestions = Array.isArray(questions) ? questions : []
+
+  // Hydrate the quiz-deck list from the shared deck cache. Without this the
+  // "Save to deck" step renders an empty Select and saving is impossible.
+  useEffect(() => {
+    if (hookDecksLoading) {
       setLoadingDecks(true)
-      if (hookDecksLoading) return
-      const data = cacheDecks || []
-      // Filter for QUIZ decks
-      const quizDecks = data.filter((d) => d.deck_type === 'quiz')
-      setDecks(quizDecks)
-      if (quizDecks.length > 0) setSelectedDeckId(quizDecks[0]._id)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoadingDecks(false)
+      return
     }
-  }
+    setLoadingDecks(false)
+    const quizDecks = (cacheDecks || []).filter((d) => d.deck_type === 'quiz')
+    setDecks(quizDecks)
+    setSelectedDeckId((current) => current || (quizDecks.length > 0 ? quizDecks[0]._id : ''))
+  }, [cacheDecks, hookDecksLoading])
 
   const handleSelectOption = (questionIndex, option) => {
     // Prevent changing answer after selection (optional, but good for "quiz" mode)
@@ -78,6 +88,7 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
     if (!newDeckName.trim()) return
     try {
       setLoadingDecks(true)
+      setError(null)
       const newDeck = await decksService.create({
         name: newDeckName,
         description: 'Created from Quiz',
@@ -88,8 +99,9 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
       setNewDeckName('')
       setIsCreatingDeck(false)
       reloadDecks()
-    } catch (error) {
-      console.error('Error creating deck:', error)
+    } catch (err) {
+      console.error('Error creating deck:', err)
+      setError(t('aiMagic.questionnaireModal.createDeckError', "Couldn't create the deck. Please try again."))
     } finally {
       setLoadingDecks(false)
     }
@@ -99,25 +111,27 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
     if (!selectedDeckId) return
     try {
       setSaving(true)
-      const questionsToSave = selectedQuestions.map((idx) => questions[idx])
+      setError(null)
+      const questionsToSave = selectedQuestions.map((idx) => safeQuestions[idx])
 
       await Promise.all(
         questionsToSave.map((q) =>
           cardsService.create({
             title: q.question,
-            content: q.explanation || 'No explanation provided.', // Fallback content
+            content: q.explanation || t('aiMagic.questionnaireModal.noExplanation', 'No explanation provided.'),
             deck_id: selectedDeckId,
             tags: ['quiz'],
             card_type: 'quiz', // New Type
-            options: q.options,
+            options: getOptions(q),
             correct_answer: q.answer,
             explanation: q.explanation
           })
         )
       )
       onCancel()
-    } catch (error) {
-      console.error('Error saving quiz cards:', error)
+    } catch (err) {
+      console.error('Error saving quiz cards:', err)
+      setError(t('aiMagic.questionnaireModal.saveError', "Couldn't save these questions. Please try again."))
     } finally {
       setSaving(false)
     }
@@ -142,19 +156,36 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
       >
         <ModalClose />
         <Typography level='h4' fontWeight='bold' sx={{ mb: 1 }}>
-          {step === 'select_questions' ? 'Generated Questionnaire' : 'Save Quiz to Deck'}
+          {step === 'select_questions'
+            ? t('aiMagic.questionnaireModal.title', 'Generated Questionnaire')
+            : t('aiMagic.questionnaireModal.saveTitle', 'Save Quiz to Deck')}
         </Typography>
-        <Typography level='body-sm' color='neutral' sx={{ mb: 3 }}>
-          {step === 'select_questions' ? 'Select questions to save.' : 'Choose a deck to store these interactive questions.'}
+        <Typography level='body-sm' sx={{ mb: 3, color: 'text.secondary' }}>
+          {step === 'select_questions'
+            ? t('aiMagic.questionnaireModal.subtitle', 'Select questions to save.')
+            : t('aiMagic.questionnaireModal.saveSubtitle', 'Choose a deck to store these interactive questions.')}
         </Typography>
 
-        {step === 'select_questions' && (
+        {error && (
+          <Typography level='body-sm' startDecorator={<AlertCircle size={16} />} sx={{ mb: 2, color: 'danger.plainColor' }} role='alert'>
+            {error}
+          </Typography>
+        )}
+
+        {step === 'select_questions' && safeQuestions.length === 0 && (
+          <Typography level='body-sm' sx={{ py: 4, textAlign: 'center', color: 'text.tertiary' }}>
+            {t('aiMagic.questionnaireModal.emptyQuestions', 'No questions were generated. Try again with more content.')}
+          </Typography>
+        )}
+
+        {step === 'select_questions' && safeQuestions.length > 0 && (
           <Stack spacing={3}>
-            {questions.map((q, idx) => {
+            {safeQuestions.map((q, idx) => {
               const userAnswer = userAnswers[idx]
               const isAnswered = !!userAnswer
               const isCorrect = isAnswered && userAnswer === q.answer
               const isSelectedForSave = selectedQuestions.includes(idx)
+              const options = getOptions(q)
 
               return (
                 <Card
@@ -178,7 +209,8 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
                       </Typography>
                     </Stack>
                     <Switch
-                      label='Include in Deck'
+                      label={t('aiMagic.questionnaireModal.includeInDeck', 'Include in Deck')}
+                      slotProps={{ input: { 'aria-label': t('aiMagic.questionnaireModal.includeInDeck', 'Include in Deck') } }}
                       variant='soft'
                       color='primary'
                       checked={isSelectedForSave}
@@ -188,49 +220,55 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
 
                   <Divider sx={{ mb: 1.5 }} />
 
-                  <List size='sm' sx={{ gap: 1 }}>
-                    {q.options?.map((opt, i) => {
-                      const isSelected = userAnswer === opt
-                      const isTheCorrectAnswer = opt === q.answer
+                  {options.length === 0 ? (
+                    <Typography level='body-sm' startDecorator={<AlertCircle size={14} />} sx={{ py: 1, color: 'text.tertiary' }}>
+                      {t('aiMagic.questionnaireModal.emptyOptions', 'No answer options were generated for this question.')}
+                    </Typography>
+                  ) : (
+                    <List size='sm' sx={{ gap: 1 }}>
+                      {options.map((opt, i) => {
+                        const isSelected = userAnswer === opt
+                        const isTheCorrectAnswer = opt === q.answer
 
-                      let color = 'neutral'
-                      let variant = 'plain'
-                      let icon = <Circle size={14} />
+                        let color = 'neutral'
+                        let variant = 'plain'
+                        let icon = <Circle size={14} />
 
-                      if (isAnswered) {
-                        if (isTheCorrectAnswer) {
-                          color = 'success'
-                          variant = 'soft'
-                          icon = <CheckCircle size={14} />
-                        } else if (isSelected) {
-                          color = 'danger'
-                          variant = 'soft'
-                          icon = <XCircle size={14} />
-                        } else {
-                          icon = <Circle size={14} style={{ opacity: 0.3 }} />
+                        if (isAnswered) {
+                          if (isTheCorrectAnswer) {
+                            color = 'success'
+                            variant = 'soft'
+                            icon = <CheckCircle size={14} />
+                          } else if (isSelected) {
+                            color = 'danger'
+                            variant = 'soft'
+                            icon = <XCircle size={14} />
+                          } else {
+                            icon = <Circle size={14} style={{ opacity: 0.3 }} />
+                          }
                         }
-                      }
 
-                      return (
-                        <ListItem key={i}>
-                          <ListItemButton
-                            role={undefined}
-                            selected={isSelected}
-                            color={color}
-                            variant={variant}
-                            onClick={() => handleSelectOption(idx, opt)}
-                            sx={{
-                              borderRadius: 'sm',
-                              border: isSelected || (isAnswered && isTheCorrectAnswer) ? '1px solid' : 'none'
-                            }}
-                          >
-                            <ListItemDecorator>{icon}</ListItemDecorator>
-                            {opt}
-                          </ListItemButton>
-                        </ListItem>
-                      )
-                    })}
-                  </List>
+                        return (
+                          <ListItem key={i}>
+                            <ListItemButton
+                              role={undefined}
+                              selected={isSelected}
+                              color={color}
+                              variant={variant}
+                              onClick={() => handleSelectOption(idx, opt)}
+                              sx={{
+                                borderRadius: 'sm',
+                                border: isSelected || (isAnswered && isTheCorrectAnswer) ? '1px solid' : 'none'
+                              }}
+                            >
+                              <ListItemDecorator>{icon}</ListItemDecorator>
+                              {opt}
+                            </ListItemButton>
+                          </ListItem>
+                        )
+                      })}
+                    </List>
+                  )}
 
                   {isAnswered && q.explanation && (
                     <Box sx={{ mt: 2, animation: 'fadeIn 0.3s ease-in' }}>
@@ -239,7 +277,7 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
                         fontWeight='bold'
                         sx={{ mb: 0.5, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 1 }}
                       >
-                        <HelpCircle size={14} /> Explanation
+                        <HelpCircle size={14} /> {t('aiMagic.questionnaireModal.explanation', 'Explanation')}
                       </Typography>
                       <Typography
                         level='body-sm'
@@ -264,33 +302,60 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
         {step === 'select_deck' && (
           <Stack spacing={3} sx={{ mt: 2, minHeight: 200, px: 2 }}>
             <FormControl>
-              <FormLabel>Select Deck</FormLabel>
-              <Select value={selectedDeckId} onChange={(_, val) => setSelectedDeckId(val)} placeholder='Choose a deck...'>
+              <FormLabel>{t('aiMagic.questionnaireModal.selectDeck', 'Select Deck')}</FormLabel>
+              <Select
+                value={selectedDeckId}
+                onChange={(_, val) => setSelectedDeckId(val)}
+                disabled={loadingDecks}
+                placeholder={
+                  loadingDecks
+                    ? t('aiMagic.questionnaireModal.loadingDecks', 'Loading decks...')
+                    : t('aiMagic.questionnaireModal.selectDeckPlaceholder', 'Choose a deck...')
+                }
+                slotProps={{ button: { 'aria-label': t('aiMagic.questionnaireModal.selectDeck', 'Select Deck') } }}
+              >
                 {decks.map((deck) => (
                   <Option key={deck._id} value={deck._id}>
                     {deck.name}
                   </Option>
                 ))}
               </Select>
+              {!loadingDecks && decks.length === 0 && (
+                <Typography level='body-xs' sx={{ mt: 1, color: 'text.tertiary' }}>
+                  {t('aiMagic.questionnaireModal.noQuizDecks', 'No quiz decks yet — create one below.')}
+                </Typography>
+              )}
             </FormControl>
 
-            <Divider>OR</Divider>
+            <Divider>{t('aiMagic.questionnaireModal.or', 'OR')}</Divider>
 
             <Box
               sx={{ p: 2, border: '1px dashed', borderColor: 'neutral.outlinedBorder', borderRadius: 'md', bgcolor: 'background.level1' }}
             >
               {!isCreatingDeck ? (
-                <Button variant='plain' startDecorator={<Plus />} onClick={() => setIsCreatingDeck(true)} fullWidth>
-                  Create New Deck
+                <Button
+                  variant='plain'
+                  startDecorator={<Plus />}
+                  onClick={() => setIsCreatingDeck(true)}
+                  fullWidth
+                  aria-label={t('aiMagic.questionnaireModal.createDeck', 'Create New Deck')}
+                >
+                  {t('aiMagic.questionnaireModal.createDeck', 'Create New Deck')}
                 </Button>
               ) : (
                 <Stack spacing={2} direction='row'>
-                  <Input placeholder='New Deck Name' value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} fullWidth />
-                  <Button onClick={handleCreateDeck} loading={loadingDecks}>
-                    Create
+                  <Input
+                    placeholder={t('aiMagic.questionnaireModal.newDeckName', 'New Deck Name')}
+                    aria-label={t('aiMagic.questionnaireModal.newDeckName', 'New Deck Name')}
+                    value={newDeckName}
+                    onChange={(e) => setNewDeckName(e.target.value)}
+                    fullWidth
+                  />
+                  <Button onClick={handleCreateDeck} loading={loadingDecks} disabled={!newDeckName.trim()}>
+                    {t('aiMagic.questionnaireModal.create', 'Create')}
                   </Button>
                   <Button variant='plain' color='neutral' onClick={() => setIsCreatingDeck(false)}>
-                    Cancel
+                    {t('aiMagic.questionnaireModal.cancel', 'Cancel')}
                   </Button>
                 </Stack>
               )}
@@ -300,15 +365,15 @@ export default function QuestionnaireModal({ questions = [], onCancel }) {
 
         <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant='soft' color='neutral' onClick={onCancel}>
-            Cancel
+            {t('aiMagic.questionnaireModal.cancel', 'Cancel')}
           </Button>
           {step === 'select_questions' ? (
             <Button onClick={() => setStep('select_deck')} disabled={selectedQuestions.length === 0}>
-              Proceed to Save ({selectedQuestions.length})
+              {t('aiMagic.questionnaireModal.proceed', 'Proceed to Save ({{n}})', { n: selectedQuestions.length })}
             </Button>
           ) : (
             <Button color='success' onClick={handleSaveToDeck} loading={saving} disabled={!selectedDeckId}>
-              Confirm & Save
+              {t('aiMagic.questionnaireModal.confirmSave', 'Confirm & Save')}
             </Button>
           )}
         </Box>
