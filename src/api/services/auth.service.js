@@ -9,14 +9,19 @@ import {
 } from 'firebase/auth'
 import { auth } from '../../config/firebase.config'
 import { apiClient } from '../client'
+import { authStorage, browserSessionStorage } from '../../platform/browser/storage'
+import { redirectTo } from '../../platform/browser/navigation'
 
 /**
- * Auth Service with Firebase Authentication
- * Handles authentication and session operations
+ * Auth Service with Firebase Authentication.
+ * Handles authentication and session operations for the web client.
+ *
+ * Browser-specific persistence/navigation are accessed through platform
+ * adapters so the underlying auth flow can be split cleanly for native later.
  */
 export const authService = {
   /**
-   * Register a new user with Firebase and sync to backend
+   * Register a new user with Firebase and sync to backend.
    * @param {string} email
    * @param {string} password
    * @param {string} username
@@ -24,17 +29,13 @@ export const authService = {
    */
   async register(email, password, username) {
     try {
-      // Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
 
-      // Update display name
       await updateProfile(user, { displayName: username })
 
-      // Get Firebase ID token
       const idToken = await user.getIdToken()
 
-      // Sync user to backend MongoDB
       const { data } = await apiClient.post(
         '/auth/register',
         {
@@ -65,23 +66,20 @@ export const authService = {
   },
 
   /**
-   * Log in a user with Firebase
+   * Log in a user with Firebase.
    * @param {string} email
    * @param {string} password
    * @returns {Promise<Object>} User session data
    */
   async login(email, password) {
     try {
-      // Sign in with Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
 
-      // Get Firebase ID token
       const idToken = await user.getIdToken()
 
-      // Sync/verify user with backend
       const { data } = await apiClient.post(
-        '/auth/login', // Use new Firebase auth endpoint
+        '/auth/login',
         {
           firebase_uid: user.uid,
           email: user.email
@@ -93,8 +91,9 @@ export const authService = {
         }
       )
 
-      // Store token in localStorage for API calls
-      localStorage.setItem('firebase_token', idToken)
+      // Compatibility cache for existing web code. Firebase remains the source
+      // of truth and API requests request a fresh/cached ID token from Firebase.
+      authStorage.setToken(idToken)
 
       return {
         user: {
@@ -113,7 +112,8 @@ export const authService = {
   },
 
   /**
-   * Sign in with Google OAuth
+   * Sign in with Google OAuth for the web client.
+   * Native OAuth will use a native provider flow rather than signInWithPopup.
    * @returns {Promise<Object>} User session data
    */
   async loginWithGoogle() {
@@ -122,10 +122,8 @@ export const authService = {
       const userCredential = await signInWithPopup(auth, provider)
       const user = userCredential.user
 
-      // Get Firebase ID token
       const idToken = await user.getIdToken()
 
-      // Sync/create user in backend
       const { data } = await apiClient.post(
         '/auth/register',
         {
@@ -141,7 +139,7 @@ export const authService = {
         }
       )
 
-      localStorage.setItem('firebase_token', idToken)
+      authStorage.setToken(idToken)
 
       return {
         user: {
@@ -159,15 +157,13 @@ export const authService = {
     }
   },
 
-  /**
-   * Log out the current user
-   */
+  /** Log out the current user. */
   async logout() {
     try {
       await signOut(auth)
-      localStorage.removeItem('firebase_token')
-      sessionStorage.removeItem('onboarding_skipped')
-      window.location.href = '/login'
+      authStorage.clear()
+      browserSessionStorage.removeItem('onboarding_skipped')
+      redirectTo('/login')
     } catch (error) {
       console.error('Logout error:', error)
       throw error
@@ -175,7 +171,7 @@ export const authService = {
   },
 
   /**
-   * Send password reset email
+   * Send password reset email.
    * @param {string} email
    * @param {string} langCode - Optional language code (e.g., 'es', 'fr')
    */
@@ -190,16 +186,13 @@ export const authService = {
     }
   },
 
-  /**
-   * Get current Firebase user
-   * @returns {Object|null} Current user or null
-   */
+  /** @returns {Object|null} Current Firebase user or null. */
   getCurrentUser() {
     return auth.currentUser
   },
 
   /**
-   * Get current Firebase ID token
+   * Get current Firebase ID token.
    * @param {boolean} forceRefresh - Force token refresh
    * @returns {Promise<string>} ID token
    */
@@ -212,7 +205,7 @@ export const authService = {
   },
 
   /**
-   * Refresh the Firebase ID token and update localStorage
+   * Refresh the Firebase ID token and update the web compatibility cache.
    * @returns {Promise<string>} New ID token
    */
   async refreshToken() {
@@ -222,11 +215,8 @@ export const authService = {
         throw new Error('No user logged in')
       }
 
-      // Force refresh the token
       const newToken = await user.getIdToken(true)
-
-      // Update localStorage
-      localStorage.setItem('firebase_token', newToken)
+      authStorage.setToken(newToken)
 
       console.log('[AuthService] Token refreshed successfully')
       return newToken
@@ -237,7 +227,7 @@ export const authService = {
   },
 
   /**
-   * Check if current token is expired or about to expire
+   * Check if current token is expired or about to expire.
    * @returns {Promise<boolean>} True if token needs refresh
    */
   async isTokenExpired() {
@@ -245,16 +235,12 @@ export const authService = {
       const user = auth.currentUser
       if (!user) return true
 
-      // Get token result with expiration time
       const tokenResult = await user.getIdTokenResult()
       const expirationTime = new Date(tokenResult.expirationTime).getTime()
       const currentTime = Date.now()
 
-      // Check if token expires in less than 5 minutes
       const fiveMinutes = 5 * 60 * 1000
-      const isExpiringSoon = expirationTime - currentTime < fiveMinutes
-
-      return isExpiringSoon
+      return expirationTime - currentTime < fiveMinutes
     } catch (error) {
       console.error('[AuthService] Error checking token expiration:', error)
       return true
