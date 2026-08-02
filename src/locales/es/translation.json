@@ -13,8 +13,9 @@
     "logout": "Cerrar Sesión",
     "pomodoro": "Temporizador Pomodoro",
     "toggleTheme": "Cambiar tema",
+    "language": "Idioma",
     "studyBuddy": "Compañero de Estudio",
-    "moreActions": "More actions",
+    "moreActions": "Más acciones",
     "retry": "Retry"
   },
   "news": {
@@ -688,6 +689,7 @@
     }
   },
   "books": {
+    "autosave": "Guardado automático",
     "editor": {
       "titlePlaceholder": "Ingresa el título del libro...",
       "contentPlaceholder": "Empieza a escribir...",
@@ -1444,6 +1446,17 @@
     "saved": "Guardado"
   },
   "editor": {
+    "header": {
+      "bookTitle": "Título del libro",
+      "openNavigator": "Abrir contenido",
+      "saveNow": "Guardar ahora",
+      "enableAutosave": "Activar guardado automático",
+      "disableAutosave": "Desactivar guardado automático",
+      "lockEditing": "Bloquear edición",
+      "unlockEditing": "Desbloquear edición",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar"
+    },
     "slashCommands": {
       "menuLabel": "Comandos de formato",
       "hint": "↑↓ para navegar, ↵ para seleccionar, esc para cerrar",
@@ -1527,6 +1540,7 @@
     }
   },
   "public": {
+    "publishInstant": "Compartir con la comunidad",
     "publish": "Publicar",
     "unpublish": "Retirar",
     "published": "Publicado",

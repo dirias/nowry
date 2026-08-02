@@ -66,22 +66,29 @@ const HeaderUtils = ({ variant = 'header' }) => {
   ]
 
   const isDrawer = variant === 'drawer'
+  const focusSx = {
+    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+  }
   const colorSx = isDrawer
     ? {
         color: 'text.secondary',
-        '&:hover': { bgcolor: 'background.level2', color: 'text.primary' }
+        '&:hover': { bgcolor: 'background.level2', color: 'text.primary' },
+        ...focusSx
       }
     : {
         color: 'rgba(255, 255, 255, 0.9)',
-        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' },
+        ...focusSx
       }
 
   return (
     <Stack direction='row' spacing={0.5} alignItems='center'>
       <Dropdown>
-        <MenuButton variant='plain' size='sm' sx={{ minWidth: 'unset', px: 1, ...colorSx }}>
-          {(languages.find((l) => l.code === i18n.language) || languages[0]).label}
-        </MenuButton>
+        <Tooltip title={t('common.language')} placement={isDrawer ? 'top' : 'bottom'}>
+          <MenuButton variant='plain' size='sm' aria-label={t('common.language')} sx={{ minWidth: 'unset', px: 1, ...colorSx }}>
+            {(languages.find((l) => l.code === i18n.language) || languages[0]).label}
+          </MenuButton>
+        </Tooltip>
         <Menu size='sm' sx={{ zIndex: 99999, minWidth: 100 }}>
           {languages.map((lang) => (
             <MenuItem key={lang.code} onClick={() => i18n.changeLanguage(lang.code)} selected={i18n.language === lang.code}>
@@ -90,15 +97,17 @@ const HeaderUtils = ({ variant = 'header' }) => {
           ))}
         </Menu>
       </Dropdown>
-      <IconButton
-        variant='plain'
-        size='sm'
-        onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}
-        sx={colorSx}
-        aria-label={t('common.toggleTheme')}
-      >
-        {mode === 'dark' ? <Brightness7 fontSize='small' /> : <Brightness4 fontSize='small' />}
-      </IconButton>
+      <Tooltip title={t('common.toggleTheme')} placement={isDrawer ? 'top' : 'bottom'}>
+        <IconButton
+          variant='plain'
+          size='sm'
+          onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+          sx={colorSx}
+          aria-label={t('common.toggleTheme')}
+        >
+          {mode === 'dark' ? <Brightness7 fontSize='small' /> : <Brightness4 fontSize='small' />}
+        </IconButton>
+      </Tooltip>
     </Stack>
   )
 }

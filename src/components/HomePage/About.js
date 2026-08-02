@@ -49,7 +49,10 @@ const About = () => {
   return (
     <Sheet
       sx={{
-        minHeight: '100vh',
+        // Fill the remaining space inside the app's flex column — never exceed it.
+        // `minHeight: '100vh'` here would stack on top of the header + footer and
+        // force a scrollbar even when the content is short.
+        flex: 1,
         backgroundColor: isDark ? 'background.level2' : 'background.body'
       }}
     >

@@ -9,6 +9,7 @@ import {
   Input,
   Textarea,
   Chip,
+  ChipDelete,
   Stack,
   IconButton,
   Modal,
@@ -99,9 +100,8 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
     }
   }
 
-  const handleRemoveTag = (index) => {
-    const updatedTags = tags.filter((_, i) => i !== index)
-    setTags(updatedTags)
+  const handleRemoveTag = (tagToRemove) => {
+    setTags((prev) => prev.filter((tag) => tag !== tagToRemove))
   }
 
   const handlePublish = async (metadata) => {
@@ -282,7 +282,7 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel sx={{ fontSize: '0.875rem', mb: 0.75 }}>Tags</FormLabel>
+                  <FormLabel sx={{ fontSize: '0.875rem', mb: 0.75 }}>{t('books.tagsLabel')}</FormLabel>
                   <Box
                     sx={{
                       p: 1.25,
@@ -301,14 +301,17 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                     }}
                   >
                     <Stack direction='row' flexWrap='wrap' spacing={0.75} sx={{ mb: tags.length > 0 ? 1 : 0 }}>
-                      {tags.map((tag, index) => (
+                      {tags.map((tag) => (
                         <Chip
-                          key={index}
+                          key={tag}
                           variant='soft'
                           color='primary'
                           size='sm'
-                          endDecorator={<CloseIcon sx={{ fontSize: 14 }} />}
-                          onDelete={() => handleRemoveTag(index)}
+                          endDecorator={
+                            <ChipDelete variant='plain' aria-label={t('books.removeTag', { tag })} onDelete={() => handleRemoveTag(tag)}>
+                              <CloseIcon sx={{ fontSize: 14 }} />
+                            </ChipDelete>
+                          }
                         >
                           {tag}
                         </Chip>
@@ -316,7 +319,7 @@ const BookEditor = ({ book, refreshBooks, onCancel }) => {
                     </Stack>
                     <Input
                       variant='plain'
-                      placeholder='Type tag and press Enter...'
+                      placeholder={t('books.tagInputPlaceholder')}
                       value={newTag}
                       size='sm'
                       onChange={(e) => setNewTag(e.target.value)}

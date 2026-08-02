@@ -19,7 +19,14 @@ import {
   Snackbar,
   LinearProgress,
   Chip,
-  Alert
+  Alert,
+  Dropdown,
+  Menu,
+  MenuButton,
+  MenuItem,
+  ListDivider,
+  ListItemDecorator,
+  CircularProgress
 } from '@mui/joy'
 import LockIcon from '@mui/icons-material/Lock'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
@@ -30,13 +37,37 @@ import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { LexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import Toolbar from './Toolbar'
 import { useAutoSave, SAVE_STATUS } from '../../hooks/useAutoSave'
-import { Menu as MenuIcon } from 'lucide-react'
+import { Menu as MenuIcon, MoreVertical } from 'lucide-react'
 import PublicIcon from '@mui/icons-material/Public'
 import PublicOffIcon from '@mui/icons-material/PublicOff'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import { useTranslation } from 'react-i18next'
 import MobileBottomActionStrip from '../Editor/plugins/MobileBottomActionStrip'
 import { usePet } from '../../context/AgentContext'
+
+// Explicit keyboard focus ring — never rely on the browser default.
+const focusRingSx = {
+  '&:focus-visible': {
+    outline: '2px solid',
+    outlineOffset: '2px',
+    outlineColor: 'primary.outlinedBorder'
+  }
+}
+
+// Header icon buttons: 44px touch target on mobile, compact on desktop.
+const headerIconButtonSx = {
+  borderRadius: 'md',
+  flexShrink: 0,
+  minWidth: { xs: 44, md: 32 },
+  minHeight: { xs: 44, md: 32 },
+  ...focusRingSx
+}
+
+// Actions with long labels only fit inline once the viewport is wide.
+// Below `lg` they live in the header overflow menu instead.
+const wideOnlySx = { display: { xs: 'none', lg: 'inline-flex' } }
+const desktopOnlySx = { display: { xs: 'none', md: 'inline-flex' } }
+const compactOnlySx = { display: { xs: 'inline-flex', md: 'none' } }
 
 export default function EditorHome() {
   const { id } = useParams()
@@ -237,6 +268,16 @@ export default function EditorHome() {
     }
   }
 
+  // Single entry point for the card action — used by both the inline button and
+  // the overflow menu, so the tier gate behaves identically everywhere.
+  const handleGenerateCardsAction = () => {
+    if (isPlusLocked) {
+      openUpgradeModal(t('upgrade.headlines.generateFromBook'))
+      return
+    }
+    handleGenerateCards()
+  }
+
   const handleGenerateQuiz = async () => {
     setIsGeneratingQuiz(true)
     setGenerateQuizError(null)
@@ -260,6 +301,14 @@ export default function EditorHome() {
     } finally {
       setIsGeneratingQuiz(false)
     }
+  }
+
+  const handleGenerateQuizAction = () => {
+    if (isPlusLocked) {
+      openUpgradeModal(t('upgrade.headlines.generateQuizFromBook'))
+      return
+    }
+    handleGenerateQuiz()
   }
 
   // Manual save always uses the latest content ref to avoid stale React state
@@ -617,6 +666,17 @@ export default function EditorHome() {
     console.log('Image uploaded. User must save manually.')
   }
 
+  // Derived header labels — every one of them is also used as an aria-label,
+  // so they must always come from t().
+  const isPublished = !!book?.is_public
+  const publishLabel = isPublished
+    ? t('public.unpublish', { defaultValue: 'Unpublish' })
+    : t('public.publishInstant', { defaultValue: 'Share with community' })
+  const handlePublishToggle = () => (isPublished ? setConfirmUnpublishOpen(true) : handlePublish())
+  const autosaveLabel = autoSaveEnabled ? t('editor.header.disableAutosave') : t('editor.header.enableAutosave')
+  const lockLabel = isLocked ? t('editor.header.unlockEditing') : t('editor.header.lockEditing')
+  const isGeneratingAny = isGeneratingCards || isGeneratingQuiz
+
   return (
     <>
       {/* Notifications */}
@@ -670,206 +730,308 @@ export default function EditorHome() {
             flexShrink: 0
           }}
         >
-          {/* Row 1: Book Info */}
-          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ height: 50, px: { xs: 2, md: 3 } }}>
-            <Stack direction='row' alignItems='center' spacing={2} sx={{ flexGrow: 1 }}>
+          {/* Row 1: Book Info + actions.
+              Mobile-first: the row never wraps and never scrolls — long-labelled
+              actions collapse to icon buttons and then into the overflow menu. */}
+          <Stack
+            direction='row'
+            alignItems='center'
+            justifyContent='space-between'
+            sx={{ height: 50, px: { xs: 1, md: 3 }, gap: 1, minWidth: 0 }}
+          >
+            {/* Left: navigator, title, save status. minWidth:0 lets the title shrink
+                instead of pushing the action cluster off-screen. */}
+            <Stack direction='row' alignItems='center' sx={{ flex: 1, minWidth: 0, gap: { xs: 0.5, md: 2 } }}>
               {/* Mobile Menu Button */}
-              <IconButton
-                variant='plain'
-                color='neutral'
-                onClick={() => setShowMobileSidebar(true)}
-                sx={{ display: { xs: 'inline-flex', md: 'none' }, mr: 1 }}
-              >
-                <MenuIcon />
-              </IconButton>
+              <Tooltip title={t('editor.header.openNavigator')} variant='soft' size='sm'>
+                <IconButton
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  onClick={() => setShowMobileSidebar(true)}
+                  aria-label={t('editor.header.openNavigator')}
+                  sx={{ ...headerIconButtonSx, ...compactOnlySx }}
+                >
+                  <MenuIcon size={18} />
+                </IconButton>
+              </Tooltip>
 
               <Input
                 value={bookName}
                 onChange={(e) => setBookName(e.target.value)}
                 disabled={isLocked}
                 variant='plain'
+                aria-label={t('editor.header.bookTitle')}
                 sx={{
                   fontSize: 'lg',
                   fontWeight: 'bold',
                   bgcolor: 'transparent',
                   '&:hover': { bgcolor: isLocked ? 'transparent' : 'background.level1' },
                   px: 1,
-                  width: '100%',
-                  maxWidth: { xs: 150, md: 400 },
-                  textOverflow: 'ellipsis',
-                  '&.Mui-disabled': { color: 'text.primary' }
+                  flex: 1,
+                  minWidth: 0,
+                  maxWidth: { xs: 'none', md: 400 },
+                  '& input': { textOverflow: 'ellipsis' },
+                  '&.Mui-disabled': { color: 'text.primary' },
+                  ...focusRingSx
                 }}
               />
               <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', md: 'block' } }} />
-              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+              <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
                 <StatusBadge />
               </Box>
               {saveError && (
-                <Typography level='body-xs' color='danger' sx={{ display: { xs: 'none', sm: 'block' } }}>
+                <Typography level='body-xs' color='danger' sx={{ display: { xs: 'none', lg: 'block' } }}>
                   {saveError}
                 </Typography>
               )}
             </Stack>
 
-            <Stack direction='row' spacing={1.5} alignItems='center'>
-              {/* Publish/Unpublish Button - One Click! */}
-              {book?.is_public ? (
-                <Tooltip title={t('public.unpublish', { defaultValue: 'Unpublish' })}>
-                  <Button
-                    variant='soft'
-                    color='success'
-                    onClick={() => setConfirmUnpublishOpen(true)}
-                    size='sm'
-                    startDecorator={<PublicIcon />}
-                    loading={isProcessing}
-                  >
-                    {t('public.published', { defaultValue: 'Published' })}
-                  </Button>
-                </Tooltip>
-              ) : (
-                <Tooltip title={t('public.publishInstant', { defaultValue: 'Share with community' })}>
-                  <Button
-                    variant='outlined'
-                    color='primary'
-                    onClick={handlePublish}
-                    size='sm'
-                    startDecorator={<PublicIcon />}
-                    loading={isProcessing}
-                  >
-                    {t('public.publish', { defaultValue: 'Publish' })}
-                  </Button>
-                </Tooltip>
-              )}
+            <Stack direction='row' alignItems='center' sx={{ flexShrink: 0, gap: { xs: 0.5, md: 1.5 } }}>
+              {/* Publish/Unpublish — icon-only on mobile so it stays one tap away */}
+              <Tooltip title={publishLabel} variant='soft' size='sm'>
+                <IconButton
+                  variant={isPublished ? 'soft' : 'outlined'}
+                  color={isPublished ? 'success' : 'primary'}
+                  onClick={handlePublishToggle}
+                  size='sm'
+                  loading={isProcessing}
+                  aria-label={publishLabel}
+                  sx={{ ...headerIconButtonSx, ...compactOnlySx }}
+                >
+                  {isPublished ? <PublicIcon sx={{ fontSize: 18 }} /> : <PublicOffIcon sx={{ fontSize: 18 }} />}
+                </IconButton>
+              </Tooltip>
 
-              <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
+              <Tooltip title={publishLabel} variant='soft' size='sm'>
+                <Button
+                  variant={isPublished ? 'soft' : 'outlined'}
+                  color={isPublished ? 'success' : 'primary'}
+                  onClick={handlePublishToggle}
+                  size='sm'
+                  startDecorator={<PublicIcon />}
+                  loading={isProcessing}
+                  sx={{ ...desktopOnlySx, whiteSpace: 'nowrap', ...focusRingSx }}
+                >
+                  {isPublished ? t('public.published', { defaultValue: 'Published' }) : t('public.publish', { defaultValue: 'Publish' })}
+                </Button>
+              </Tooltip>
+
+              <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', md: 'block' } }} />
 
               {/* Zoom Controls */}
-              <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+              <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', md: 'flex' } }}>
                 <IconButton
                   size='sm'
                   variant='plain'
                   onClick={() => setZoom((prev) => Math.max(0.25, prev - 0.25))}
                   disabled={zoom <= 0.25}
+                  aria-label={t('editor.header.zoomOut')}
+                  sx={focusRingSx}
                 >
                   <Minus size={14} />
                 </IconButton>
                 <Typography level='body-xs' sx={{ minWidth: 40, textAlign: 'center' }}>
                   {Math.round(zoom * 100)}%
                 </Typography>
-                <IconButton size='sm' variant='plain' onClick={() => setZoom((prev) => Math.min(2.0, prev + 0.25))} disabled={zoom >= 2.0}>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  onClick={() => setZoom((prev) => Math.min(2.0, prev + 0.25))}
+                  disabled={zoom >= 2.0}
+                  aria-label={t('editor.header.zoomIn')}
+                  sx={focusRingSx}
+                >
                   <Plus size={14} />
                 </IconButton>
               </Stack>
-              <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', sm: 'block' } }} />
+              <Divider orientation='vertical' sx={{ height: 20, display: { xs: 'none', lg: 'block' } }} />
 
-              {/* Generate Cards from Book — Plus+ only */}
+              {/* Generate Cards from Book — Plus+ only. Inline from lg, in the overflow menu below. */}
               <Tooltip title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''} variant='soft' size='sm'>
-                <span>
-                  {isPlusLocked ? (
-                    <Button
-                      size='sm'
-                      variant='outlined'
-                      color='neutral'
-                      disabled
-                      startDecorator={<LockIcon sx={{ fontSize: 16 }} />}
-                      onClick={() => openUpgradeModal(t('upgrade.headlines.generateFromBook'))}
-                      aria-label={t('aiMagic.generateFromBook.lockedAriaLabel')}
-                    >
-                      {t('aiMagic.generateFromBook.label')}
-                      <Chip size='sm' color='warning' variant='soft' sx={{ ml: 1 }}>
-                        {t('plans.plus')}
-                      </Chip>
-                    </Button>
-                  ) : (
-                    <Button
-                      size='sm'
-                      variant='soft'
-                      color='primary'
-                      startDecorator={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
-                      onClick={handleGenerateCards}
-                      loading={isGeneratingCards}
-                      loadingPosition='start'
-                      sx={{ minWidth: 160 }}
-                      aria-label={t('aiMagic.generateFromBook.ariaLabel')}
-                    >
-                      {isGeneratingCards ? t('aiMagic.generateFromBook.generating') : t('aiMagic.generateFromBook.label')}
-                    </Button>
-                  )}
-                </span>
+                <Box component='span' sx={wideOnlySx}>
+                  <Button
+                    size='sm'
+                    variant={isPlusLocked ? 'outlined' : 'soft'}
+                    color={isPlusLocked ? 'neutral' : 'primary'}
+                    startDecorator={isPlusLocked ? <LockIcon sx={{ fontSize: 16 }} /> : <AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
+                    endDecorator={
+                      isPlusLocked ? (
+                        <Chip size='sm' color='warning' variant='soft'>
+                          {t('plans.plus')}
+                        </Chip>
+                      ) : null
+                    }
+                    onClick={handleGenerateCardsAction}
+                    loading={isGeneratingCards}
+                    loadingPosition='start'
+                    sx={{ minWidth: 160, whiteSpace: 'nowrap', ...focusRingSx }}
+                    aria-label={isPlusLocked ? t('aiMagic.generateFromBook.lockedAriaLabel') : t('aiMagic.generateFromBook.ariaLabel')}
+                  >
+                    {isGeneratingCards ? t('aiMagic.generateFromBook.generating') : t('aiMagic.generateFromBook.label')}
+                  </Button>
+                </Box>
               </Tooltip>
 
-              {/* Generate Quiz from Book — Plus+ only */}
+              {/* Generate Quiz from Book — Plus+ only. Inline from lg, in the overflow menu below. */}
               <Tooltip title={isPlusLocked ? t('aiMagic.generateFromBook.lockedTooltip') : ''} variant='soft' size='sm'>
-                <span>
-                  {isPlusLocked ? (
-                    <Button
-                      size='sm'
-                      variant='outlined'
-                      color='neutral'
-                      disabled
-                      startDecorator={<LockIcon sx={{ fontSize: 16 }} />}
-                      onClick={() => openUpgradeModal(t('upgrade.headlines.generateQuizFromBook'))}
-                      aria-label={t('aiMagic.generateFromBook.lockedAriaLabelQuiz')}
-                    >
-                      {t('aiMagic.generateFromBook.labelQuiz')}
-                      <Chip size='sm' color='warning' variant='soft' sx={{ ml: 1 }}>
-                        {t('plans.plus')}
-                      </Chip>
-                    </Button>
-                  ) : (
-                    <Button
-                      size='sm'
-                      variant='soft'
-                      color='primary'
-                      startDecorator={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
-                      onClick={handleGenerateQuiz}
-                      loading={isGeneratingQuiz}
-                      loadingPosition='start'
-                      sx={{ minWidth: 160 }}
-                      aria-label={t('aiMagic.generateFromBook.ariaLabelQuiz')}
-                    >
-                      {isGeneratingQuiz ? t('aiMagic.generateFromBook.generatingQuiz') : t('aiMagic.generateFromBook.labelQuiz')}
-                    </Button>
-                  )}
-                </span>
+                <Box component='span' sx={wideOnlySx}>
+                  <Button
+                    size='sm'
+                    variant={isPlusLocked ? 'outlined' : 'soft'}
+                    color={isPlusLocked ? 'neutral' : 'primary'}
+                    startDecorator={isPlusLocked ? <LockIcon sx={{ fontSize: 16 }} /> : <AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
+                    endDecorator={
+                      isPlusLocked ? (
+                        <Chip size='sm' color='warning' variant='soft'>
+                          {t('plans.plus')}
+                        </Chip>
+                      ) : null
+                    }
+                    onClick={handleGenerateQuizAction}
+                    loading={isGeneratingQuiz}
+                    loadingPosition='start'
+                    sx={{ minWidth: 160, whiteSpace: 'nowrap', ...focusRingSx }}
+                    aria-label={
+                      isPlusLocked ? t('aiMagic.generateFromBook.lockedAriaLabelQuiz') : t('aiMagic.generateFromBook.ariaLabelQuiz')
+                    }
+                  >
+                    {isGeneratingQuiz ? t('aiMagic.generateFromBook.generatingQuiz') : t('aiMagic.generateFromBook.labelQuiz')}
+                  </Button>
+                </Box>
               </Tooltip>
 
-              {/* AI generation hint — visible only while generating */}
-              {(isGeneratingCards || isGeneratingQuiz) && (
-                <Typography level='body-xs' sx={{ color: 'text.tertiary', alignSelf: 'center' }}>
+              {/* AI generation hint — only where there is room for it */}
+              {isGeneratingAny && (
+                <Typography level='body-xs' sx={{ color: 'text.tertiary', display: { xs: 'none', xl: 'block' }, whiteSpace: 'nowrap' }}>
                   {t('aiMagic.generateFromBook.generatingHint')}
                 </Typography>
               )}
 
-              <Button
-                variant={autoSaveEnabled ? 'soft' : 'plain'}
-                color={autoSaveEnabled ? 'primary' : 'neutral'}
-                onClick={handleToggleAutoSave}
-                size='sm'
-                startDecorator={<Timer size={14} />}
-                sx={{ fontSize: 'xs', fontWeight: 500 }}
-              >
-                {t('books.autosave', { defaultValue: 'Autosave' })}
-              </Button>
+              {/* Autosave — a preference, not a frequent action: below md it lives
+                  in the overflow menu so the mobile bar stays at three controls. */}
+              <Tooltip title={autosaveLabel} variant='soft' size='sm'>
+                <Button
+                  variant={autoSaveEnabled ? 'soft' : 'plain'}
+                  color={autoSaveEnabled ? 'primary' : 'neutral'}
+                  onClick={handleToggleAutoSave}
+                  size='sm'
+                  startDecorator={<Timer size={14} />}
+                  aria-pressed={autoSaveEnabled}
+                  sx={{ ...desktopOnlySx, fontSize: 'xs', fontWeight: 500, whiteSpace: 'nowrap', ...focusRingSx }}
+                >
+                  {t('books.autosave', { defaultValue: 'Autosave' })}
+                </Button>
+              </Tooltip>
 
-              <IconButton variant='outlined' color='neutral' onClick={handleManualSave} size='sm' sx={{ borderRadius: 'md' }}>
-                <Save size={16} />
-              </IconButton>
+              <Tooltip title={t('editor.header.saveNow')} variant='soft' size='sm'>
+                <IconButton
+                  variant='outlined'
+                  color='neutral'
+                  onClick={handleManualSave}
+                  size='sm'
+                  aria-label={t('editor.header.saveNow')}
+                  sx={headerIconButtonSx}
+                >
+                  <Save size={16} />
+                </IconButton>
+              </Tooltip>
 
-              <IconButton
-                variant='outlined'
-                color='neutral'
-                onClick={() => setIsLocked(!isLocked)}
-                size='sm'
-                sx={{
-                  borderRadius: 'md',
-                  bgcolor: isLocked ? 'background.level1' : 'transparent',
-                  '&:hover': { bgcolor: 'background.level2' },
-                  display: { xs: 'none', md: 'flex' }
-                }}
-              >
-                {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
-              </IconButton>
+              <Tooltip title={lockLabel} variant='soft' size='sm'>
+                <IconButton
+                  variant='outlined'
+                  color='neutral'
+                  onClick={() => setIsLocked(!isLocked)}
+                  size='sm'
+                  aria-label={lockLabel}
+                  aria-pressed={isLocked}
+                  sx={{
+                    ...headerIconButtonSx,
+                    ...desktopOnlySx,
+                    bgcolor: isLocked ? 'background.level1' : 'transparent',
+                    '&:hover': { bgcolor: 'background.level2' }
+                  }}
+                >
+                  {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
+                </IconButton>
+              </Tooltip>
+
+              {/* Overflow menu — holds the long-labelled actions below lg */}
+              <Dropdown>
+                <Tooltip title={t('common.moreActions')} variant='soft' size='sm'>
+                  <MenuButton
+                    slots={{ root: IconButton }}
+                    slotProps={{
+                      root: {
+                        variant: 'plain',
+                        color: 'neutral',
+                        size: 'sm',
+                        'aria-label': t('common.moreActions'),
+                        sx: { ...headerIconButtonSx, display: { xs: 'inline-flex', lg: 'none' } }
+                      }
+                    }}
+                  >
+                    {isGeneratingAny ? <CircularProgress size='sm' /> : <MoreVertical size={18} />}
+                  </MenuButton>
+                </Tooltip>
+                <Menu placement='bottom-end' size='sm' sx={{ minWidth: 240, zIndex: 1300 }}>
+                  <MenuItem onClick={handleGenerateCardsAction} disabled={isGeneratingCards}>
+                    <ListItemDecorator>
+                      {isGeneratingCards ? (
+                        <CircularProgress size='sm' />
+                      ) : isPlusLocked ? (
+                        <LockIcon sx={{ fontSize: 18 }} />
+                      ) : (
+                        <AutoAwesomeRoundedIcon sx={{ fontSize: 18, color: 'primary.plainColor' }} />
+                      )}
+                    </ListItemDecorator>
+                    {isGeneratingCards ? t('aiMagic.generateFromBook.generating') : t('aiMagic.generateFromBook.label')}
+                    {isPlusLocked && (
+                      <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
+                        {t('plans.plus')}
+                      </Chip>
+                    )}
+                  </MenuItem>
+
+                  <MenuItem onClick={handleGenerateQuizAction} disabled={isGeneratingQuiz}>
+                    <ListItemDecorator>
+                      {isGeneratingQuiz ? (
+                        <CircularProgress size='sm' />
+                      ) : isPlusLocked ? (
+                        <LockIcon sx={{ fontSize: 18 }} />
+                      ) : (
+                        <AutoAwesomeRoundedIcon sx={{ fontSize: 18, color: 'primary.plainColor' }} />
+                      )}
+                    </ListItemDecorator>
+                    {isGeneratingQuiz ? t('aiMagic.generateFromBook.generatingQuiz') : t('aiMagic.generateFromBook.labelQuiz')}
+                    {isPlusLocked && (
+                      <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
+                        {t('plans.plus')}
+                      </Chip>
+                    )}
+                  </MenuItem>
+
+                  {/* Autosave toggle — only below md, where it has no inline button */}
+                  <ListDivider sx={{ display: { xs: 'block', md: 'none' } }} />
+                  <MenuItem
+                    onClick={handleToggleAutoSave}
+                    selected={autoSaveEnabled}
+                    aria-label={autosaveLabel}
+                    sx={{ display: { xs: 'flex', md: 'none' } }}
+                  >
+                    <ListItemDecorator>{autoSaveEnabled ? <Check size={18} /> : <Timer size={18} />}</ListItemDecorator>
+                    {t('books.autosave', { defaultValue: 'Autosave' })}
+                  </MenuItem>
+
+                  {isGeneratingAny && (
+                    <MenuItem disabled sx={{ whiteSpace: 'normal' }}>
+                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                        {t('aiMagic.generateFromBook.generatingHint')}
+                      </Typography>
+                    </MenuItem>
+                  )}
+                </Menu>
+              </Dropdown>
             </Stack>
           </Stack>
 

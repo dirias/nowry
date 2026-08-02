@@ -12,8 +12,9 @@
     "logout": "ログアウト",
     "pomodoro": "ポモドーロタイマー",
     "toggleTheme": "テーマを切り替える",
+    "language": "言語",
     "studyBuddy": "学習パートナー",
-    "moreActions": "More actions",
+    "moreActions": "その他の操作",
     "retry": "Retry"
   },
   "news": {
@@ -432,6 +433,7 @@
     }
   },
   "books": {
+    "autosave": "自動保存",
     "emptySubtitle": "新しいブックを作成するか、ドキュメントをインポートして始めましょう",
     "noResults": "\"{{term}}\" に一致するブックは見つかりませんでした",
     "noMatches": "\"{{query}}\" に一致するブックはありません",
@@ -1592,7 +1594,24 @@
       "illustrations": "Unlock unlimited diagrams with Plus"
     }
   },
+  "public": {
+    "publish": "公開",
+    "published": "公開中",
+    "unpublish": "公開を取り消す",
+    "publishInstant": "コミュニティと共有"
+  },
   "editor": {
+    "header": {
+      "bookTitle": "本のタイトル",
+      "openNavigator": "目次を開く",
+      "saveNow": "今すぐ保存",
+      "enableAutosave": "自動保存を有効にする",
+      "disableAutosave": "自動保存を無効にする",
+      "lockEditing": "編集をロック",
+      "unlockEditing": "編集のロックを解除",
+      "zoomIn": "拡大",
+      "zoomOut": "縮小"
+    },
     "ai": {
       "expand": "Expand with AI",
       "generateDiagram": "Generate Diagram"

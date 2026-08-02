@@ -5,7 +5,6 @@ import { Box, CircularProgress } from '@mui/joy'
 
 import './styles/App.css'
 import './styles/Landing.css'
-import './styles/Footer.css'
 import './styles/Login.css'
 import './styles/Messages.css'
 import './styles/SideMenu.css'
@@ -75,6 +74,12 @@ const SheetsEditor = lazy(() => import('./components/Sheets/SheetsEditor'))
 /** Routes where the Footer should remain visible even for authenticated users */
 const PUBLIC_MARKETING_ROUTES = ['/about', '/contact', '/privacy', '/terms']
 
+/**
+ * Min-height for the document-flow layout. `100dvh` tracks mobile browser-chrome
+ * collapse without jank; `100vh` is the fallback for browsers without `dvh` support.
+ */
+const DOCUMENT_FLOW_MIN_HEIGHT = typeof window !== 'undefined' && window.CSS?.supports?.('min-height', '100dvh') ? '100dvh' : '100vh'
+
 /** Full-page loading fallback shown while lazy chunks download */
 const PageLoader = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -96,8 +101,24 @@ const AppContent = () => {
   }, [loading, isAuthenticated, user, location.pathname, navigate])
 
   const isEditor = location.pathname.startsWith('/book/') && location.pathname !== '/books'
-  // Public marketing pages use natural document scroll (no viewport prison)
-  const isPublicPage = !isAuthenticated && ['/', '/about', '/contact'].includes(location.pathname)
+
+  // Immersive reader routes own the whole viewport and run their own internal scroll
+  // container (the book editor, and the public book reader with its scroll-progress bar).
+  // They keep the fixed shell even for guests, and never show the Footer.
+  const isImmersiveRoute = isEditor || location.pathname.startsWith('/public/books/')
+
+  const isMarketingRoute = PUBLIC_MARKETING_ROUTES.includes(location.pathname)
+
+  // The fixed app shell (100vh + `overflow: hidden`, with <main> scrolling internally)
+  // applies ONLY to authenticated app routes and immersive readers. Everything else —
+  // every guest route plus the authenticated marketing pages — uses natural document
+  // flow so <Footer /> sits at the END of the document instead of being structurally
+  // pinned to the bottom of the viewport.
+  const isAppShellLayout = isImmersiveRoute || (isAuthenticated && !isMarketingRoute)
+
+  // The Footer belongs to document-flow pages only — in the fixed shell it would render
+  // outside the scroll container and stay permanently glued to the viewport.
+  const showFooter = !isAppShellLayout
 
   // While Firebase is restoring the session, show a neutral full-screen spinner.
   // This prevents the flash of the logged-out header/landing page
@@ -110,7 +131,7 @@ const AppContent = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        ...(isPublicPage ? { minHeight: '100vh' } : { height: '100vh', overflow: 'hidden' })
+        ...(isAppShellLayout ? { height: '100vh', overflow: 'hidden' } : { minHeight: DOCUMENT_FLOW_MIN_HEIGHT })
       }}
     >
       <PaymentFailureBanner />
@@ -121,7 +142,7 @@ const AppContent = () => {
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
-          ...(isPublicPage ? {} : { overflowY: isEditor ? 'hidden' : 'auto', overflowX: 'hidden' })
+          ...(isAppShellLayout ? { overflowY: isEditor ? 'hidden' : 'auto', overflowX: 'hidden' } : {})
         }}
       >
         <ErrorBoundary>
@@ -392,7 +413,7 @@ const AppContent = () => {
         </ErrorBoundary>
       </main>
 
-      {(!isAuthenticated || PUBLIC_MARKETING_ROUTES.includes(location.pathname)) && <Footer />}
+      {showFooter && <Footer />}
 
       <DevBugReportButton />
 

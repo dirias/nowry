@@ -13,8 +13,9 @@
     "close": "Fermer",
     "pomodoro": "Minuteur Pomodoro",
     "toggleTheme": "Changer le thème",
+    "language": "Langue",
     "studyBuddy": "Compagnon d'étude",
-    "moreActions": "More actions",
+    "moreActions": "Plus d'actions",
     "retry": "Retry"
   },
   "news": {
@@ -1505,6 +1506,7 @@
     }
   },
   "books": {
+    "autosave": "Enregistrement auto",
     "editor": {
       "titlePlaceholder": "Entrez le titre du livre...",
       "contentPlaceholder": "Commencez à écrire...",
@@ -1651,7 +1653,24 @@
       "illustrations": "Unlock unlimited diagrams with Plus"
     }
   },
+  "public": {
+    "publish": "Publier",
+    "published": "Publié",
+    "unpublish": "Dépublier",
+    "publishInstant": "Partager avec la communauté"
+  },
   "editor": {
+    "header": {
+      "bookTitle": "Titre du livre",
+      "openNavigator": "Ouvrir le sommaire",
+      "saveNow": "Enregistrer maintenant",
+      "enableAutosave": "Activer l'enregistrement automatique",
+      "disableAutosave": "Désactiver l'enregistrement automatique",
+      "lockEditing": "Verrouiller l'édition",
+      "unlockEditing": "Déverrouiller l'édition",
+      "zoomIn": "Zoom avant",
+      "zoomOut": "Zoom arrière"
+    },
     "ai": {
       "expand": "Expand with AI",
       "generateDiagram": "Generate Diagram"

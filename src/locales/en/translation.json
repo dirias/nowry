@@ -25,6 +25,7 @@
       "recoveryNotice": "Data can be recovered within 30 days by contacting support"
     },
     "toggleTheme": "Toggle theme",
+    "language": "Language",
     "studyBuddy": "Study Buddy",
     "moreActions": "More actions",
     "retry": "Retry"
@@ -952,6 +953,7 @@
     }
   },
   "books": {
+    "autosave": "Autosave",
     "editor": {
       "titlePlaceholder": "Enter book title...",
       "contentPlaceholder": "Start writing...",
@@ -964,6 +966,9 @@
     "subtitle": "Your personal collection",
     "create": "Create Book",
     "totalBooks": "Total Books",
+    "tagsLabel": "Tags",
+    "tagInputPlaceholder": "Type tag and press Enter...",
+    "removeTag": "Remove tag {{tag}}",
     "updatedWeek": "Updated This Week",
     "totalPages": "Total Pages",
     "searchPlaceholder": "Search by title, author, or ISBN...",
@@ -1687,6 +1692,17 @@
     }
   },
   "editor": {
+    "header": {
+      "bookTitle": "Book title",
+      "openNavigator": "Open contents",
+      "saveNow": "Save now",
+      "enableAutosave": "Enable autosave",
+      "disableAutosave": "Disable autosave",
+      "lockEditing": "Lock editing",
+      "unlockEditing": "Unlock editing",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
     "slashCommands": {
       "menuLabel": "Formatting commands",
       "hint": "↑↓ to navigate, ↵ to select, esc to dismiss",
@@ -1758,6 +1774,7 @@
     }
   },
   "public": {
+    "publishInstant": "Share with community",
     "publish": "Publish",
     "unpublish": "Unpublish",
     "published": "Published",

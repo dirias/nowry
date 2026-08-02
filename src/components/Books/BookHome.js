@@ -89,7 +89,8 @@ export default function BookHome() {
       const matchesSearch =
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (book.author && book.author.toLowerCase().includes(searchTerm.toLowerCase()))
-      const matchesTags = selectedTags.length === 0 || selectedTags.every((tag) => book.tags?.includes(tag))
+      // OR semantics: a book matches if it carries ANY of the selected tags.
+      const matchesTags = selectedTags.length === 0 || selectedTags.some((tag) => book.tags?.includes(tag))
       return matchesSearch && matchesTags
     })
   }, [allBooks, searchTerm, selectedTags])
