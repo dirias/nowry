@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getSelection, $isRangeSelection, $createParagraphNode, COMMAND_PRIORITY_LOW, SELECTION_CHANGE_COMMAND } from 'lexical'
 import { $setBlocksType } from '@lexical/selection'
@@ -11,28 +11,70 @@ import { useTranslation } from 'react-i18next'
 import TextMenu from '../../Menu/TextMenu'
 import { ttsService } from '../../../api/services/tts.ai.service'
 
+// A stray drag across a single space should not pop a full toolbar.
+const MIN_SELECTION_CHARS = 2
+
+// Reading mode reads the native selection on a debounce rather than reacting to
+// Lexical updates — see updateToolbarFromNativeSelection below.
+const SELECTION_DEBOUNCE_MS = 120
+
+// Held formatting shortcuts must not stack blocked-edit hints.
+const BLOCKED_EDIT_THROTTLE_MS = 4000
+
+// Vertical gap between the selection rect and the floating toolbar.
+const TOOLBAR_OFFSET_PX = 50
+
+// Joy UI's `md` breakpoint. Below it the reading surface is a fixed bottom bar,
+// because iOS Safari / Android Chrome draw their own callout over the selection.
+const COMPACT_MEDIA_QUERY = '(max-width: 899.98px)'
+
+const BLOCKED_SHORTCUT_KEYS = ['b', 'i', 'u', 'k']
+
 export default function FloatingToolbarPlugin({
   onOptionClick,
   illustrationCount = 0,
-  tier = 'free',
   ttsLanguage = 'en-US',
   bookId,
-  onTtsError
+  onError,
+  mode = 'edit',
+  onBlockedEdit,
+  onSelectionSurfaceChange
 }) {
   const [editor] = useLexicalComposerContext()
   const { t } = useTranslation()
   const [showMenu, setShowMenu] = useState(false)
   const [isEditingLink, setIsEditingLink] = useState(false)
+  // `anchor` is the measured selection geometry; `position` is the resolved
+  // top/left once the menu's real width is known (see the layout effect).
+  const [anchor, setAnchor] = useState({ top: 0, centerX: 0 })
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const [activeFormats, setActiveFormats] = useState({ bold: false, italic: false, underline: false })
   const [selectedText, setSelectedText] = useState('')
   const [currentBlockType, setCurrentBlockType] = useState('paragraph')
   const menuRef = useRef(null)
 
-  // TTS state — play selected text via the mic icon in the floating toolbar
+  const isReading = mode !== 'edit'
+
+  // TTS state — play selected text via the speaker icon in the toolbar
   const [ttsState, setTtsState] = useState('idle') // 'idle' | 'loading' | 'playing'
   const audioRef = useRef(null)
   const blobUrlRef = useRef(null)
+
+  const [isCompact, setIsCompact] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia ? window.matchMedia(COMPACT_MEDIA_QUERY).matches : false
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined
+    const mq = window.matchMedia(COMPACT_MEDIA_QUERY)
+    const handler = (event) => setIsCompact(event.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // Editing mode always uses the floating toolbar (unchanged). Only the reading
+  // surface switches to a bottom bar on small viewports.
+  const layout = isReading && isCompact ? 'bar' : 'floating'
 
   const stopTts = useCallback(() => {
     if (audioRef.current) {
@@ -74,19 +116,17 @@ export default function FloatingToolbarPlugin({
       setTtsState('playing')
     } catch {
       setTtsState('idle')
-      onTtsError?.(t('aiMagic.tts.error'))
+      onError?.(t('aiMagic.tts.error'))
     }
-  }, [ttsState, stopTts, bookId, selectedText, ttsLanguage, onTtsError, t])
+  }, [ttsState, stopTts, bookId, selectedText, ttsLanguage, onError, t])
 
+  /**
+   * Editing mode — Lexical-driven selection path. Unchanged apart from the
+   * trivial-selection guard and the centering fix (both apply to all modes).
+   */
   const updateToolbar = useCallback(() => {
     // If we are editing a link, don't let selection changes hide the menu
     if (isEditingLink) return
-
-    // Hide toolbar if editor is in read-only mode
-    if (!editor.isEditable()) {
-      setShowMenu(false)
-      return
-    }
 
     const selection = $getSelection()
     const nativeSelection = window.getSelection()
@@ -96,17 +136,16 @@ export default function FloatingToolbarPlugin({
       $isRangeSelection(selection) &&
       nativeSelection &&
       !nativeSelection.isCollapsed &&
+      nativeSelection.toString().trim().length >= MIN_SELECTION_CHARS &&
       rootElement &&
       rootElement.contains(nativeSelection.anchorNode)
     ) {
       const domRange = nativeSelection.getRangeAt(0)
       const rect = domRange.getBoundingClientRect()
 
-      // Calculate position (centered above selection)
-      const top = rect.top - 50 // 50px above selection
-      const left = rect.left + rect.width / 2 - 110 // Half of menu width approx
-
-      setPosition({ top, left })
+      // Only the anchor point is known here — the true left depends on the
+      // menu's rendered width, resolved in the layout effect below.
+      setAnchor({ top: rect.top - TOOLBAR_OFFSET_PX, centerX: rect.left + rect.width / 2 })
       setActiveFormats({
         bold: selection.hasFormat('bold'),
         italic: selection.hasFormat('italic'),
@@ -150,6 +189,50 @@ export default function FloatingToolbarPlugin({
     }
   }, [editor, isEditingLink, ttsState, selectedText, stopTts])
 
+  /**
+   * Reading mode — native-selection path.
+   *
+   * With `editor.setEditable(false)` the ContentEditable becomes
+   * contenteditable="false" and Lexical stops reconciling DOM selection into a
+   * RangeSelection: `$getSelection()` returns null or stale state, so
+   * `$isRangeSelection` in the editing path above can never pass. Everything
+   * here is therefore derived from `window.getSelection()` instead.
+   *
+   * `activeFormats` and `currentBlockType` are deliberately not computed — they
+   * only drive controls that reading mode does not render.
+   */
+  const updateToolbarFromNativeSelection = useCallback(() => {
+    if (isEditingLink) return
+
+    const nativeSelection = window.getSelection()
+    const rootElement = editor.getRootElement()
+    const text = nativeSelection ? nativeSelection.toString() : ''
+
+    const hasUsableSelection =
+      nativeSelection &&
+      nativeSelection.rangeCount > 0 &&
+      !nativeSelection.isCollapsed &&
+      text.trim().length >= MIN_SELECTION_CHARS &&
+      rootElement &&
+      rootElement.contains(nativeSelection.anchorNode)
+
+    if (!hasUsableSelection) {
+      // Same pinned-while-playing rule as editing mode.
+      if (ttsState !== 'idle') return
+      setShowMenu(false)
+      return
+    }
+
+    const rect = nativeSelection.getRangeAt(0).getBoundingClientRect()
+    setAnchor({ top: rect.top - TOOLBAR_OFFSET_PX, centerX: rect.left + rect.width / 2 })
+
+    if (ttsState !== 'idle' && text !== selectedText) {
+      stopTts()
+    }
+    setSelectedText(text)
+    setShowMenu(true)
+  }, [editor, isEditingLink, ttsState, selectedText, stopTts])
+
   const onBlockTypeChange = useCallback(
     (blockType) => {
       if (blockType === 'bullet') {
@@ -188,15 +271,18 @@ export default function FloatingToolbarPlugin({
     [editor]
   )
 
+  // ── Editing mode: Lexical-driven triggers ──────────────────────────────────
   useEffect(() => {
+    if (isReading) return undefined
     return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         updateToolbar()
       })
     })
-  }, [editor, updateToolbar])
+  }, [editor, updateToolbar, isReading])
 
   useEffect(() => {
+    if (isReading) return undefined
     return editor.registerCommand(
       SELECTION_CHANGE_COMMAND,
       () => {
@@ -205,7 +291,74 @@ export default function FloatingToolbarPlugin({
       },
       COMMAND_PRIORITY_LOW
     )
-  }, [editor, updateToolbar])
+  }, [editor, updateToolbar, isReading])
+
+  // ── Reading mode: native `selectionchange`, debounced ──────────────────────
+  // Also covers keyboard-driven (Shift+Arrow) selections — the surface is never
+  // gated on pointer events.
+  useEffect(() => {
+    if (!isReading) return undefined
+    let timer = null
+    const handleSelectionChange = () => {
+      clearTimeout(timer)
+      timer = setTimeout(updateToolbarFromNativeSelection, SELECTION_DEBOUNCE_MS)
+    }
+    document.addEventListener('selectionchange', handleSelectionChange)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('selectionchange', handleSelectionChange)
+    }
+  }, [isReading, updateToolbarFromNativeSelection])
+
+  // Horizontal centering needs the menu's real width — the reading toolbar is
+  // ~3 controls narrower than the editing one, so a fixed offset is visibly off.
+  useLayoutEffect(() => {
+    if (!showMenu || layout === 'bar') return
+    const width = menuRef.current?.offsetWidth ?? 0
+    const next = { top: anchor.top, left: anchor.centerX - width / 2 }
+    setPosition((prev) => (prev.top === next.top && prev.left === next.left ? prev : next))
+  }, [showMenu, anchor, layout])
+
+  // Let the host page react to the surface (mobile FAB offset, coach mark).
+  useEffect(() => {
+    onSelectionSurfaceChange?.({ visible: showMenu, layout })
+  }, [showMenu, layout, onSelectionSurfaceChange])
+
+  /**
+   * ⌘/Ctrl + B/I/U/K while the document is locked → explain, don't silently no-op.
+   *
+   * NOTE: this deliberately does NOT use Lexical's KEY_DOWN_COMMAND. Lexical
+   * only dispatches root-element key events when `editor.isEditable()` is true
+   * (`addRootElementEvents` in lexical gates every function-type handler on it),
+   * and a contenteditable="false" root is not focusable anyway, so the keydown
+   * never reaches it. Listening on `document` and scoping to selections inside
+   * the editor root is the same remedy already applied to selection detection.
+   */
+  const lastBlockedEditRef = useRef(0)
+  useEffect(() => {
+    if (!isReading) return undefined
+    const handleKeyDown = (event) => {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return
+      const key = event.key?.toLowerCase()
+      if (!BLOCKED_SHORTCUT_KEYS.includes(key)) return
+
+      const rootElement = editor.getRootElement()
+      if (!rootElement) return
+      const nativeSelection = window.getSelection()
+      const isInsideEditor =
+        (nativeSelection?.anchorNode && rootElement.contains(nativeSelection.anchorNode)) ||
+        (document.activeElement && rootElement.contains(document.activeElement))
+      if (!isInsideEditor) return
+
+      event.preventDefault()
+      const now = Date.now()
+      if (now - lastBlockedEditRef.current < BLOCKED_EDIT_THROTTLE_MS) return
+      lastBlockedEditRef.current = now
+      onBlockedEdit?.(mode)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [editor, isReading, mode, onBlockedEdit])
 
   // Handle click outside to close the menu, especially during link editing.
   // Must not close when clicking inside a Joy UI Menu portal (role="menu" / role="menuitem")
@@ -213,6 +366,7 @@ export default function FloatingToolbarPlugin({
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target
+      if (!target?.closest) return
 
       // Ignore clicks that land inside any open [role="menu"] popup — these are
       // Dropdown menu portals (Turn into / AI actions) attached to this toolbar.
@@ -228,10 +382,12 @@ export default function FloatingToolbarPlugin({
 
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('touchstart', handleClickOutside, { passive: true })
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
     }
   }, [showMenu, isEditingLink, ttsState, stopTts])
 
@@ -255,6 +411,10 @@ export default function FloatingToolbarPlugin({
         style={{ top: position.top, left: position.left }}
         ttsState={ttsState}
         onMicClick={handleMicClick}
+        mode={mode}
+        layout={layout}
+        selectedText={selectedText}
+        onError={onError}
       />
       <audio ref={audioRef} style={{ display: 'none' }} onEnded={handleTtsEnded} />
     </>,

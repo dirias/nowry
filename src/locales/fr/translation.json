@@ -1660,6 +1660,21 @@
     "publishInstant": "Partager avec la communauté"
   },
   "editor": {
+    "mode": {
+      "enterReading": "Passer en lecture",
+      "enterEditing": "Passer en édition",
+      "hint": "Sélectionnez du texte pour l’écouter ou créer une carte",
+      "blockedHint": "Passez en édition pour modifier ce texte",
+      "blockedGuest": "Dupliquez ce livre pour le modifier",
+      "signInToUse": "Connectez-vous pour créer des cartes à partir de ce livre",
+      "toolbarAriaLabel": "Actions sur la sélection"
+    },
+    "actions": {
+      "copy": "Copier",
+      "copyAriaLabel": "Copier le texte sélectionné",
+      "copied": "Copié",
+      "copyFailed": "Impossible de copier. Veuillez réessayer."
+    },
     "header": {
       "bookTitle": "Titre du livre",
       "openNavigator": "Ouvrir le sommaire",
@@ -1670,6 +1685,16 @@
       "unlockEditing": "Déverrouiller l'édition",
       "zoomIn": "Zoom avant",
       "zoomOut": "Zoom arrière"
+    },
+    "slashCommands": {
+      "math": "Maths",
+      "mathDesc": "Insérer une formule mathématique"
+    },
+    "math": {
+      "sourcePlaceholder": "Saisir du LaTeX...",
+      "editAriaLabel": "Modifier la formule mathématique",
+      "deleteAriaLabel": "Supprimer la formule mathématique",
+      "invalidLatex": "Syntaxe LaTeX invalide"
     },
     "ai": {
       "expand": "Expand with AI",
@@ -1747,6 +1772,7 @@
       "languageAriaLabel": "Select TTS language",
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
+      "truncatedHint": "Les longues sélections sont raccourcies pour l’audio",
       "playSelectionTooltip": "Listen",
       "playSelectionAriaLabel": "Play selected text",
       "stopSelectionTooltip": "Stop",

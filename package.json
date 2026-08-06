@@ -44,6 +44,7 @@
     "framer-motion": "^12.38.0",
     "i18next": "^23.7.16",
     "i18next-browser-languagedetector": "^7.2.0",
+    "katex": "^0.16.11",
     "keen-slider": "^6.8.6",
     "lexical": "^0.31.2",
     "lucide-react": "^0.396.0",

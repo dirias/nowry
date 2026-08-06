@@ -41,8 +41,10 @@ import TrailingParagraphPlugin from '../Editor/plugins/TrailingParagraphPlugin'
 import ImageUploadPlugin from '../Editor/plugins/ImageUploadPlugin'
 import CodePastePlugin from '../Editor/plugins/CodePastePlugin'
 import ExitListPlugin from '../Editor/plugins/ExitListPlugin'
+import MathPlugin from '../Editor/plugins/MathPlugin'
 import { HorizontalRuleNode } from '../../nodes/HorizontalRuleNode'
 import { ImageNode } from '../../nodes/ImageNode'
+import { MathNode } from '../../nodes/MathNode'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { CodeNode, $createCodeNode } from '@lexical/code'
@@ -52,7 +54,9 @@ import { ColumnContainerNode, ColumnNode } from '../../nodes/ColumnNodes'
 import { CalloutNode } from '../../nodes/CalloutNode'
 
 // UI Components
-import TextMenu from '../Menu/TextMenu'
+// `writesToDocument` is the shared Reading Mode classification rule — an action is
+// available in reading mode iff its handler never writes to the open Lexical document.
+import { writesToDocument } from '../Menu/TextMenu'
 // Heavy UI Components (Lazy Loaded for performance)
 const StudyCard = React.lazy(() => import('../Cards/GeneratedCards'))
 const QuestionnaireModal = React.lazy(() => import('../Cards/QuestionnaireModal'))
@@ -157,11 +161,11 @@ function FocusReportPlugin({ onFocus }) {
   return null
 }
 
-function EditorEditablePlugin({ isReadOnly }) {
+function EditorEditablePlugin({ mode }) {
   const [editor] = useLexicalComposerContext()
   useEffect(() => {
-    editor.setEditable(!isReadOnly)
-  }, [editor, isReadOnly])
+    editor.setEditable(mode === 'edit')
+  }, [editor, mode])
   return null
 }
 
@@ -204,12 +208,20 @@ export default function Editor({
   onReadingStatsChange,
   pageSize = 'a4',
   pageZoom = 1.0,
-  isReadOnly = false,
+  // 'edit'       — owner, editing unlocked (full toolbar)
+  // 'read'       — owner, editing locked (read-only actions only)
+  // 'read-guest' — public reader on someone else's book
+  // A string union rather than two booleans: `isReadOnly={false} isGuest={true}`
+  // is an expressible nonsense state; `mode` makes it unrepresentable.
+  mode = 'edit',
   onEditorReady,
   illustrationCount = 0,
   onDiagramInserted, // called after successful diagram insert to update parent count
-  tier = 'free',
-  ttsLanguage = 'en-US'
+  // NOTE: no `tier` prop — TextMenu reads the tier from useSubscription() directly.
+  ttsLanguage = 'en-US',
+  onRequestEditMode, // 'read': the blocked-edit snackbar's "Edit" action
+  onRequestFork, // 'read-guest': the blocked-edit snackbar's "Fork" action
+  onSelectionSurfaceChange // ({ visible, layout }) — drives the parent's FAB offset + coach mark
 }) {
   const theme = useTheme()
   const menuRef = useRef()
@@ -239,6 +251,8 @@ export default function Editor({
   const [questionnaireData, setQuestionnaireData] = useState([])
   const [error, setError] = useState(null)
   const [isLimitError, setIsLimitError] = useState(false)
+  // True while the "you can't edit in reading mode" hint is showing.
+  const [blockedEditOpen, setBlockedEditOpen] = useState(false)
   const [isExpandingText, setIsExpandingText] = useState(false)
   const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 900 : false))
   const navigate = useNavigate()
@@ -354,7 +368,8 @@ export default function Editor({
         TableNode,
         TableCellNode,
         TableRowNode,
-        CalloutNode
+        CalloutNode,
+        MathNode
       ],
       editorState: (editor) => {
         // Support both JSON (new) and HTML (legacy) formats
@@ -590,6 +605,9 @@ export default function Editor({
   const handleOptionClick = useCallback(
     async (option, overrideText) => {
       const textToProcess = overrideText || selectedText
+      // Second line of defense behind TextMenu's render guard: a document-writing
+      // action must never run while the document is not editable.
+      if (mode !== 'edit' && writesToDocument(option)) return
       setError(null)
       try {
         if (option === 'create_study_card' && textToProcess) {
@@ -658,8 +676,12 @@ export default function Editor({
         }
       }
     },
-    [selectedText, t, book, startCardGeneration]
+    [selectedText, t, book, startCardGeneration, mode]
   )
+
+  // Fired by FloatingToolbarPlugin when a formatting shortcut (⌘/Ctrl + B/I/U/K)
+  // is pressed while the document is locked. Already throttled upstream.
+  const handleBlockedEdit = useCallback(() => setBlockedEditOpen(true), [])
 
   const fixedWidth = `${toPx(PAGE_SIZES[pageSize]?.width || '210mm')}px`
   const fixedHeight = `${toPx(PAGE_SIZES[pageSize]?.height || '297mm')}px`
@@ -711,6 +733,44 @@ export default function Editor({
           >
             {error}
           </Alert>
+        </Snackbar>
+
+        {/* Blocked edit in reading mode — responds to a user action, so polite, not an alert. */}
+        <Snackbar
+          open={blockedEditOpen}
+          autoHideDuration={4000}
+          onClose={() => setBlockedEditOpen(false)}
+          color='neutral'
+          variant='soft'
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          aria-live='polite'
+          endDecorator={
+            mode === 'read-guest' ? (
+              <Button
+                size='sm'
+                variant='soft'
+                onClick={() => {
+                  setBlockedEditOpen(false)
+                  onRequestFork?.()
+                }}
+              >
+                {t('public.fork')}
+              </Button>
+            ) : (
+              <Button
+                size='sm'
+                variant='soft'
+                onClick={() => {
+                  setBlockedEditOpen(false)
+                  onRequestEditMode?.()
+                }}
+              >
+                {t('editor.mobile.editMode')}
+              </Button>
+            )
+          }
+        >
+          {mode === 'read-guest' ? t('editor.mode.blockedGuest') : t('editor.mode.blockedHint')}
         </Snackbar>
 
         <LexicalComposer initialConfig={editorConfig}>
@@ -772,7 +832,7 @@ export default function Editor({
           {/* Plugins */}
           <EditorRefPlugin editorRef={editorInstanceRef} onEditorReady={onEditorReady} />
           <FocusReportPlugin onFocus={onFocus} />
-          <EditorEditablePlugin isReadOnly={isReadOnly} />
+          <EditorEditablePlugin mode={mode} />
           <EditorSyncPlugin onContentChange={setInternalContent} />
           <ImageUploadPlugin bookId={book?._id} onUploadComplete={onImageUpload} onUploadError={(msg) => setError(msg)} />
           <CodePastePlugin />
@@ -781,6 +841,7 @@ export default function Editor({
           <RegisterListPlugin />
           <RegisterHorizontalRulePlugin />
           <SlashCommandPlugin />
+          <MathPlugin />
           <ExitListPlugin />
           <TabIndentationPlugin />
           <LinkPlugin />
@@ -798,10 +859,12 @@ export default function Editor({
               handleOptionClick(opt, text)
             }}
             illustrationCount={illustrationCount}
-            tier={tier}
             ttsLanguage={ttsLanguage}
             bookId={book?._id}
-            onTtsError={(msg) => setError(msg)}
+            mode={mode}
+            onBlockedEdit={handleBlockedEdit}
+            onSelectionSurfaceChange={onSelectionSurfaceChange}
+            onError={(msg) => setError(msg)}
           />
 
           {/* Overlays (Lazy Loaded) */}

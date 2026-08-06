@@ -1446,6 +1446,21 @@
     "saved": "Guardado"
   },
   "editor": {
+    "mode": {
+      "enterReading": "Cambiar a lectura",
+      "enterEditing": "Cambiar a edición",
+      "hint": "Selecciona cualquier texto para escucharlo o crear una tarjeta",
+      "blockedHint": "Cambia a edición para modificar este texto",
+      "blockedGuest": "Bifurca este libro para editarlo",
+      "signInToUse": "Inicia sesión para crear tarjetas de este libro",
+      "toolbarAriaLabel": "Acciones de selección"
+    },
+    "actions": {
+      "copy": "Copiar",
+      "copyAriaLabel": "Copiar el texto seleccionado",
+      "copied": "Copiado",
+      "copyFailed": "No se pudo copiar. Inténtalo de nuevo."
+    },
     "header": {
       "bookTitle": "Título del libro",
       "openNavigator": "Abrir contenido",
@@ -1491,7 +1506,9 @@
       "video": "Video",
       "videoDesc": "Insertar YouTube o Vimeo",
       "link": "Enlace",
-      "linkDesc": "Agregar un hipervínculo"
+      "linkDesc": "Agregar un hipervínculo",
+      "math": "Matemáticas",
+      "mathDesc": "Insertar una fórmula matemática"
     },
     "format": {
       "bold": "Negrita",
@@ -1537,6 +1554,12 @@
       "doneEditing": "Listo",
       "insertBlock": "Insertar bloque",
       "formatActions": "Formato"
+    },
+    "math": {
+      "sourcePlaceholder": "Ingresa LaTeX...",
+      "editAriaLabel": "Editar fórmula matemática",
+      "deleteAriaLabel": "Eliminar fórmula matemática",
+      "invalidLatex": "Sintaxis LaTeX no válida"
     }
   },
   "public": {
@@ -2361,6 +2384,7 @@
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
       "playSection": "Reproducir sección: {{title}}",
+      "truncatedHint": "Las selecciones largas se acortan para el audio",
       "playSelectionTooltip": "Listen",
       "playSelectionAriaLabel": "Play selected text",
       "stopSelectionTooltip": "Stop",

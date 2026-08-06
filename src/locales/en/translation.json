@@ -1692,6 +1692,21 @@
     }
   },
   "editor": {
+    "mode": {
+      "enterReading": "Switch to reading",
+      "enterEditing": "Switch to editing",
+      "hint": "Select any text to listen or make a card",
+      "blockedHint": "Switch to editing to change this text",
+      "blockedGuest": "Fork this book to edit it",
+      "signInToUse": "Sign in to make cards from this book",
+      "toolbarAriaLabel": "Selection actions"
+    },
+    "actions": {
+      "copy": "Copy",
+      "copyAriaLabel": "Copy selected text",
+      "copied": "Copied",
+      "copyFailed": "Couldn't copy. Please try again."
+    },
     "header": {
       "bookTitle": "Book title",
       "openNavigator": "Open contents",
@@ -1725,7 +1740,21 @@
       "table": "Table",
       "tableDesc": "Insert a table",
       "divider": "Divider",
-      "dividerDesc": "Horizontal line"
+      "dividerDesc": "Horizontal line",
+      "note": "Note",
+      "noteDesc": "Add an info callout",
+      "tip": "Tip",
+      "tipDesc": "Add a success tip",
+      "warning": "Warning",
+      "warningDesc": "Add a warning callout",
+      "columns": "2 Columns",
+      "columnsDesc": "Side-by-side layout",
+      "video": "Video",
+      "videoDesc": "Embed YouTube or Vimeo",
+      "link": "Link",
+      "linkDesc": "Add a hyperlink",
+      "math": "Math",
+      "mathDesc": "Insert a math formula"
     },
     "format": {
       "bold": "Bold",
@@ -1771,6 +1800,12 @@
       "doneEditing": "Done",
       "insertBlock": "Insert block",
       "formatActions": "Format"
+    },
+    "math": {
+      "sourcePlaceholder": "Enter LaTeX...",
+      "editAriaLabel": "Edit math formula",
+      "deleteAriaLabel": "Delete math formula",
+      "invalidLatex": "Invalid LaTeX syntax"
     }
   },
   "public": {
@@ -2592,6 +2627,7 @@
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
       "playSection": "Play section: {{title}}",
+      "truncatedHint": "Long selections are shortened for audio",
       "playSelectionTooltip": "Listen",
       "playSelectionAriaLabel": "Play selected text",
       "stopSelectionTooltip": "Stop",

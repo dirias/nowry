@@ -36,10 +36,12 @@ import {
   Lightbulb,
   Columns,
   Video,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Sigma
 } from 'lucide-react'
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '../../plugin/RegisterHorizontalRulePlugin'
 import { INSERT_TABLE_COMMAND } from './plugins/TablePlugin'
+import { INSERT_MATH_COMMAND } from './plugins/MathPlugin'
 import { $createCalloutNode } from '../../nodes/CalloutNode'
 import { $createColumnContainerNode, $createColumnNode } from '../../nodes/ColumnNodes'
 import { TOGGLE_LINK_COMMAND } from '@lexical/link'
@@ -201,6 +203,16 @@ export default function SlashCommandPlugin() {
       aliases: ['table', 'grid'],
       execute: (editor) => {
         editor.dispatchCommand(INSERT_TABLE_COMMAND, { columns: 2, rows: 2 })
+      }
+    },
+    {
+      key: 'math',
+      label: t('editor.slashCommands.math', 'Math'),
+      description: t('editor.slashCommands.mathDesc', 'Insert a math formula'),
+      icon: Sigma,
+      aliases: ['math', 'latex', 'formula', 'equation'],
+      execute: (editor) => {
+        editor.dispatchCommand(INSERT_MATH_COMMAND, undefined)
       }
     },
     {

@@ -32,12 +32,18 @@ import {
   Visibility as ViewIcon,
   Person as PersonIcon
 } from '@mui/icons-material'
+import { Close as CloseIcon } from '@mui/icons-material'
 import { publicContentService } from '../api/services'
 import { useAuth } from '../context/AuthContext'
 import ReportModal from '../components/Public/ReportModal'
 import ContentRenderer from '../components/Public/ContentRenderer'
 import Editor from '../components/Books/Editor'
 import { extractTableOfContents, calculateReadingStats } from '../utils/lexicalHelpers'
+
+// One-time Reading Mode coach mark — same storage key as EditorHome, so a
+// visitor who has already seen it in their own book never sees it again here.
+const READING_MODE_HINT_KEY = 'nowry.readingModeHintSeen'
+const READING_MODE_HINT_MS = 6000
 
 const PublicView = () => {
   const { t } = useTranslation()
@@ -114,6 +120,24 @@ const PublicView = () => {
     if (!content?.full_content || type !== 'books') return null
     return calculateReadingStats(content.full_content)
   }, [content, type])
+
+  // ── Reading Mode selection surface ─────────────────────────────────────────
+  const [showReadingHint, setShowReadingHint] = useState(false)
+
+  const handleSelectionSurfaceChange = useCallback(({ visible }) => {
+    // First selection teaches the feature; the coach mark has done its job.
+    if (visible) setShowReadingHint(false)
+  }, [])
+
+  // This visitor may be seeing Nowry for the first time — same one-time hint.
+  useEffect(() => {
+    if (loading || type !== 'books' || !content) return undefined
+    if (localStorage.getItem(READING_MODE_HINT_KEY)) return undefined
+    localStorage.setItem(READING_MODE_HINT_KEY, '1')
+    setShowReadingHint(true)
+    const timer = setTimeout(() => setShowReadingHint(false), READING_MODE_HINT_MS)
+    return () => clearTimeout(timer)
+  }, [loading, type, content])
 
   const handleLike = async () => {
     if (!isAuthenticated) {
@@ -769,7 +793,9 @@ const PublicView = () => {
                   initialContent={content.full_content}
                   book={content}
                   onSave={() => {}}
-                  isReadOnly={true}
+                  mode='read-guest'
+                  onRequestFork={handleFork}
+                  onSelectionSurfaceChange={handleSelectionSurfaceChange}
                   pageSize={content.page_size || 'a4'}
                   pageZoom={1.0}
                 />
@@ -802,6 +828,45 @@ const PublicView = () => {
             </Box>
           </Box>
           {/* end scrollable body */}
+
+          {/* One-time Reading Mode coach mark */}
+          {showReadingHint && (
+            <Sheet
+              variant='soft'
+              color='neutral'
+              role='status'
+              aria-live='polite'
+              onClick={() => setShowReadingHint(false)}
+              sx={{
+                position: 'fixed',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                bottom: { xs: 156, md: 24 },
+                zIndex: 200,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                px: 2,
+                py: 1.5,
+                borderRadius: 'lg',
+                boxShadow: 'md',
+                cursor: 'pointer',
+                maxWidth: 'calc(100% - 32px)'
+              }}
+            >
+              <Typography level='body-sm'>{t('editor.mode.hint')}</Typography>
+              <IconButton
+                size='sm'
+                variant='plain'
+                color='neutral'
+                aria-label={t('common.close')}
+                onClick={() => setShowReadingHint(false)}
+                sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+              >
+                <CloseIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Sheet>
+          )}
 
           {/* Mobile TOC chip */}
           {isMobile && tableOfContents.length > 0 && (

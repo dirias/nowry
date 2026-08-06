@@ -16,6 +16,7 @@ import './styles/LexicalEditor.css'
 import './styles/AnnualPlanning.css'
 
 import 'keen-slider/keen-slider.min.css'
+import 'katex/dist/katex.min.css'
 import './styles/FullCalendar.css'
 
 // ── Eagerly loaded: always needed, tiny, or above-the-fold ──────────

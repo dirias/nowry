@@ -1,5 +1,6 @@
 {
   "common": {
+    "close": "閉じる",
     "loading": "読み込み中...",
     "error": "エラー",
     "save": "保存",
@@ -1601,6 +1602,21 @@
     "publishInstant": "コミュニティと共有"
   },
   "editor": {
+    "mode": {
+      "enterReading": "読書モードに切り替える",
+      "enterEditing": "編集モードに切り替える",
+      "hint": "テキストを選択すると、読み上げやカード作成ができます",
+      "blockedHint": "このテキストを変更するには編集モードに切り替えてください",
+      "blockedGuest": "編集するにはこの本をフォークしてください",
+      "signInToUse": "この本からカードを作成するにはログインしてください",
+      "toolbarAriaLabel": "選択範囲の操作"
+    },
+    "actions": {
+      "copy": "コピー",
+      "copyAriaLabel": "選択したテキストをコピー",
+      "copied": "コピーしました",
+      "copyFailed": "コピーできませんでした。もう一度お試しください。"
+    },
     "header": {
       "bookTitle": "本のタイトル",
       "openNavigator": "目次を開く",
@@ -1611,6 +1627,16 @@
       "unlockEditing": "編集のロックを解除",
       "zoomIn": "拡大",
       "zoomOut": "縮小"
+    },
+    "slashCommands": {
+      "math": "数式",
+      "mathDesc": "数式を挿入"
+    },
+    "math": {
+      "sourcePlaceholder": "LaTeXを入力...",
+      "editAriaLabel": "数式を編集",
+      "deleteAriaLabel": "数式を削除",
+      "invalidLatex": "LaTeXの構文が無効です"
     },
     "ai": {
       "expand": "Expand with AI",
@@ -1688,6 +1714,7 @@
       "languageAriaLabel": "Select TTS language",
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
+      "truncatedHint": "長い選択範囲は音声用に短縮されます",
       "playSelectionTooltip": "Listen",
       "playSelectionAriaLabel": "Play selected text",
       "stopSelectionTooltip": "Stop",

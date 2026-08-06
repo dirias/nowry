@@ -1,5 +1,6 @@
 {
   "common": {
+    "close": "Schließen",
     "loading": "Laden...",
     "error": "Fehler",
     "save": "Speichern",
@@ -1637,6 +1638,21 @@
     "publishInstant": "Mit der Community teilen"
   },
   "editor": {
+    "mode": {
+      "enterReading": "Zum Lesen wechseln",
+      "enterEditing": "Zum Bearbeiten wechseln",
+      "hint": "Text markieren, um ihn anzuhören oder eine Karte zu erstellen",
+      "blockedHint": "Zum Bearbeiten wechseln, um diesen Text zu ändern",
+      "blockedGuest": "Dupliziere dieses Buch, um es zu bearbeiten",
+      "signInToUse": "Melde dich an, um Karten aus diesem Buch zu erstellen",
+      "toolbarAriaLabel": "Aktionen für die Auswahl"
+    },
+    "actions": {
+      "copy": "Kopieren",
+      "copyAriaLabel": "Markierten Text kopieren",
+      "copied": "Kopiert",
+      "copyFailed": "Kopieren nicht möglich. Bitte versuche es erneut."
+    },
     "header": {
       "bookTitle": "Buchtitel",
       "openNavigator": "Inhalt öffnen",
@@ -1647,6 +1663,16 @@
       "unlockEditing": "Bearbeitung entsperren",
       "zoomIn": "Vergrößern",
       "zoomOut": "Verkleinern"
+    },
+    "slashCommands": {
+      "math": "Mathe",
+      "mathDesc": "Eine mathematische Formel einfügen"
+    },
+    "math": {
+      "sourcePlaceholder": "LaTeX eingeben...",
+      "editAriaLabel": "Mathematische Formel bearbeiten",
+      "deleteAriaLabel": "Mathematische Formel löschen",
+      "invalidLatex": "Ungültige LaTeX-Syntax"
     },
     "ai": {
       "expand": "Expand with AI",
@@ -1724,6 +1750,7 @@
       "languageAriaLabel": "Select TTS language",
       "loading": "Generating audio...",
       "error": "Couldn't generate audio. Please try again.",
+      "truncatedHint": "Lange Auswahlen werden für die Audioausgabe gekürzt",
       "playSelectionTooltip": "Listen",
       "playSelectionAriaLabel": "Play selected text",
       "stopSelectionTooltip": "Stop",

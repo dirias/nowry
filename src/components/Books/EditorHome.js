@@ -3,7 +3,7 @@ import Editor from './Editor'
 import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
-import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer, PencilLine } from 'lucide-react'
+import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer, PencilLine, X } from 'lucide-react'
 import { booksService, publicContentService, cardsService, quizService } from '../../api/services'
 import {
   Box,
@@ -53,6 +53,10 @@ const focusRingSx = {
     outlineColor: 'primary.outlinedBorder'
   }
 }
+
+// One-time Reading Mode coach mark — shown once per browser, ever.
+const READING_MODE_HINT_KEY = 'nowry.readingModeHintSeen'
+const READING_MODE_HINT_MS = 6000
 
 // Header icon buttons: 44px touch target on mobile, compact on desktop.
 const headerIconButtonSx = {
@@ -585,6 +589,30 @@ export default function EditorHome() {
     setReadingStats({ wordCount: stats.wordCount || 0, readingTime: stats.readingTime || 0 })
   }, [])
 
+  // ── Reading Mode selection surface ─────────────────────────────────────────
+  // The mobile reading bar is a fixed bottom bar; the FAB has to step up over it.
+  const [readingBarVisible, setReadingBarVisible] = useState(false)
+  const [showReadingHint, setShowReadingHint] = useState(false)
+
+  const handleSelectionSurfaceChange = useCallback(({ visible, layout }) => {
+    setReadingBarVisible(visible && layout === 'bar')
+    // First selection teaches the feature; the coach mark has done its job.
+    if (visible) setShowReadingHint(false)
+  }, [])
+
+  const handleRequestEditMode = useCallback(() => setIsLocked(false), [])
+
+  // One-time coach mark: shown the first time a book is opened in reading mode,
+  // dismissed on click, on the first text selection, or after 6s — never returns.
+  useEffect(() => {
+    if (!isLocked || loading) return undefined
+    if (localStorage.getItem(READING_MODE_HINT_KEY)) return undefined
+    localStorage.setItem(READING_MODE_HINT_KEY, '1')
+    setShowReadingHint(true)
+    const timer = setTimeout(() => setShowReadingHint(false), READING_MODE_HINT_MS)
+    return () => clearTimeout(timer)
+  }, [isLocked, loading])
+
   // Pages data comes from pagination plugin; no placeholders to avoid stale counts
 
   const handleScrollToPage = (index) => {
@@ -674,7 +702,9 @@ export default function EditorHome() {
     : t('public.publishInstant', { defaultValue: 'Share with community' })
   const handlePublishToggle = () => (isPublished ? setConfirmUnpublishOpen(true) : handlePublish())
   const autosaveLabel = autoSaveEnabled ? t('editor.header.disableAutosave') : t('editor.header.enableAutosave')
-  const lockLabel = isLocked ? t('editor.header.unlockEditing') : t('editor.header.lockEditing')
+  // The glyphs (Lock/Unlock, PencilLine/Check) were fine — the words weren't.
+  // Label the destination, not the mechanism.
+  const lockLabel = isLocked ? t('editor.mode.enterEditing') : t('editor.mode.enterReading')
   const isGeneratingAny = isGeneratingCards || isGeneratingQuiz
 
   return (
@@ -1134,7 +1164,9 @@ export default function EditorHome() {
               onImageUpload={handleImageUpload}
               pageSize={pageSize}
               pageZoom={zoom}
-              isReadOnly={isLocked}
+              mode={isLocked ? 'read' : 'edit'}
+              onRequestEditMode={handleRequestEditMode}
+              onSelectionSurfaceChange={handleSelectionSurfaceChange}
               onFocus={setFocusedEditor}
               onPageCountChange={handlePageUpdate}
               onTOCChange={setTocData}
@@ -1142,7 +1174,6 @@ export default function EditorHome() {
               onEditorReady={handleEditorReady}
               illustrationCount={illustrationCount}
               onDiagramInserted={handleDiagramInserted}
-              tier={tier}
               ttsLanguage={ttsLanguage}
             />
           </Box>
@@ -1182,36 +1213,75 @@ export default function EditorHome() {
           )}
         </Box>
 
-        {/* Mobile FAB — edit/done toggle, replaces Lock button on mobile */}
+        {/* One-time Reading Mode coach mark */}
+        {showReadingHint && (
+          <Sheet
+            variant='soft'
+            color='neutral'
+            role='status'
+            aria-live='polite'
+            onClick={() => setShowReadingHint(false)}
+            sx={{
+              position: 'fixed',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              bottom: { xs: 156, md: 24 },
+              zIndex: 200,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 2,
+              py: 1.5,
+              borderRadius: 'lg',
+              boxShadow: 'md',
+              cursor: 'pointer',
+              maxWidth: 'calc(100% - 32px)'
+            }}
+          >
+            <Typography level='body-sm'>{t('editor.mode.hint')}</Typography>
+            <IconButton
+              size='sm'
+              variant='plain'
+              color='neutral'
+              aria-label={t('common.close')}
+              onClick={() => setShowReadingHint(false)}
+              sx={focusRingSx}
+            >
+              <X size={16} />
+            </IconButton>
+          </Sheet>
+        )}
+
+        {/* Mobile FAB — edit/done toggle, replaces Lock button on mobile.
+            Steps up over the reading bar so "I selected text, now let me edit it"
+            stays reachable. */}
         {isMobile && !loading && (
           <Box
             sx={{
               position: 'fixed',
-              bottom: 90,
+              bottom: readingBarVisible ? 'calc(56px + env(safe-area-inset-bottom) + 16px)' : 90,
               right: 20,
               zIndex: 200,
-              display: { xs: 'flex', md: 'none' }
+              display: { xs: 'flex', md: 'none' },
+              transition: 'bottom 0.2s ease'
             }}
           >
-            <Tooltip
-              title={isLocked ? t('editor.mobile.editMode', 'Edit') : t('editor.mobile.doneEditing', 'Done')}
-              placement='left'
-              variant='soft'
-              size='sm'
-            >
+            <Tooltip title={lockLabel} placement='left' variant='soft' size='sm'>
               <IconButton
                 size='lg'
                 variant='soft'
                 color={isLocked ? 'neutral' : 'primary'}
                 onClick={() => setIsLocked(!isLocked)}
-                aria-label={isLocked ? t('editor.mobile.editMode', 'Edit') : t('editor.mobile.doneEditing', 'Done')}
+                aria-label={lockLabel}
+                aria-pressed={isLocked}
                 sx={{
                   borderRadius: '50%',
                   width: 56,
                   height: 56,
                   boxShadow: 'md',
                   opacity: isLocked ? 0.72 : 1,
-                  transition: 'opacity 0.2s ease, background-color 0.2s ease'
+                  transition: 'opacity 0.2s ease, background-color 0.2s ease',
+                  ...focusRingSx
                 }}
               >
                 {isLocked ? <PencilLine size={22} /> : <Check size={22} />}
@@ -1220,7 +1290,10 @@ export default function EditorHome() {
           </Box>
         )}
 
-        {/* Mobile bottom action strip — appears in edit mode above keyboard */}
+        {/* Mobile bottom action strip — appears in edit mode above keyboard.
+            Cannot collide with the reading-mode selection bar: this renders only
+            when !isLocked, the reading bar only when locked. Mutually exclusive
+            by construction. */}
         {isMobile && !isLocked && focusedEditor && <MobileBottomActionStrip editor={focusedEditor} />}
       </Box>
 
