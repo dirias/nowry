@@ -1562,6 +1562,49 @@
       "invalidLatex": "Sintaxis LaTeX no válida"
     }
   },
+  "comments": {
+    "addNote": "Añadir nota",
+    "drawerTitle": "Notas",
+    "openDrawerAriaLabel": "Abrir notas",
+    "previousNoteAriaLabel": "Nota anterior",
+    "nextNoteAriaLabel": "Nota siguiente",
+    "threadTitle": "Nota",
+    "threadAriaLabel": "Hilo de la nota",
+    "orphanedTitle": "Nota (texto no encontrado)",
+    "orphanedExplain": "El texto al que estaba vinculada esta nota ya no se encuentra. Aún puedes eliminarla.",
+    "editAriaLabel": "Editar nota",
+    "composerPlaceholder": "Añade una nota…",
+    "composerAriaLabel": "Nueva nota",
+    "composerTextareaAriaLabel": "Texto de la nota",
+    "deleteConfirm": "¿Eliminar esta nota? Esta acción no se puede deshacer.",
+    "deleteConfirmAction": "Sí, eliminar",
+    "emptyBodyPreview": "(nota vacía)",
+    "emptyHint": "Selecciona texto y elige \"Añadir nota\" para dejar un comentario.",
+    "emptyTitle": "Aún no hay notas",
+    "errors": {
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "loadFailed": "No se pudieron cargar las notas.",
+      "notAuthor": "No tienes permiso para editar esta nota.",
+      "notFound": "Esta nota ya no existe.",
+      "invalidBody": "El texto de la nota no es válido.",
+      "selectionLost": "Selecciona el texto que quieres anotar y vuelve a elegir “Añadir nota”."
+    },
+    "noteAriaLabel": "Nota: {{preview}}",
+    "orphanedNoteAriaLabel": "Nota sin anclaje: {{preview}}",
+    "deleteAriaLabel": "Eliminar nota",
+    "resolveAriaLabel": "Marcar la nota como resuelta",
+    "unresolveAriaLabel": "Reabrir la nota",
+    "resolvedLabel": "Resuelta",
+    "moreNotes": "{{count}} más",
+    "moreNotesAriaLabel": "Mostrar {{count}} notas más abajo",
+    "unanchoredGroupTitle": "Notas sin anclaje ({{count}})",
+    "time": {
+      "justNow": "Ahora mismo",
+      "minutesAgo": "hace {{count}} min",
+      "hoursAgo": "hace {{count}} h",
+      "daysAgo": "hace {{count}} d"
+    }
+  },
   "public": {
     "publishInstant": "Compartir con la comunidad",
     "publish": "Publicar",
@@ -2392,6 +2435,9 @@
       "fullBook": "Full book",
       "fullBookHint": "Read the entire book",
       "sectionPickerTitle": "Choose a section",
+      "autoDetectLabel": "Auto-detect language",
+      "autoDetectAriaLabel": "Automatically detect and play mixed-language text in each segment's own language",
+      "segmentError": "Couldn't detect languages automatically. Please try again.",
       "languages": {
         "en": "English",
         "es": "Spanish",
@@ -2614,5 +2660,9 @@
       "columns": "Columns",
       "noResults": "No sheets match \"{{term}}\""
     }
+  },
+  "tts": {
+    "autoDetect": "Auto-detect language",
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
   }
 }

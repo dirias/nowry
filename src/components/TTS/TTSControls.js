@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Box, IconButton, Select, Option, Stack, Tooltip, Slider, Typography, Switch } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+import { Box, IconButton, Select, Option, Stack, Tooltip, Slider, Typography, Switch, CircularProgress } from '@mui/joy'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import PauseIcon from '@mui/icons-material/Pause'
 import ttsService from '../../utils/tts.service'
 import SettingsIcon from '@mui/icons-material/Settings'
 import CloseIcon from '@mui/icons-material/Close'
+import { useSegmentedSpeech } from '../../hooks/useSegmentedSpeech'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -97,12 +99,17 @@ export default function TTSControls({
   voiceSettings,
   onVoiceSettingsChange
 }) {
+  const { t } = useTranslation()
+  const { getSegments, speakSegments } = useSegmentedSpeech()
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [allVoices, setAllVoices] = useState([]) // raw list from Web Speech API
   const [selectedLang, setSelectedLang] = useState(null) // e.g. "ja"
   const [selectedVoice, setSelectedVoice] = useState(null) // actual SpeechSynthesisVoice
   const [rate, setRate] = useState(1.0)
   const [autoPlay, setAutoPlay] = useState(false)
+  const [mode, setMode] = useState('auto') // 'auto' | 'manual' — auto-detect language per segment (ADR-001)
+  const [isSegmenting, setIsSegmenting] = useState(false) // true while getSegments() is in flight on a cache miss
   const [internalShowSettings, setInternalShowSettings] = useState(false)
   // Tracks whether the user has ever initiated playback – required for auto‑play on mobile browsers
   const [userInitiated, setUserInitiated] = useState(false)
@@ -121,6 +128,17 @@ export default function TTSControls({
     const cleanup = ttsService.onVoicesReady(handleVoices)
     return cleanup
   }, [])
+
+  // ── Sync auto/manual mode from saved settings ──────────────────────────────
+  // Independent of allVoices (unlike the effect below) so the toggle reflects
+  // the saved mode immediately, without waiting for voices to load. Uses the
+  // same backward-compat derivation rule as normalizeSide() in
+  // useVoiceSettings.js in case voiceSettings arrives un-normalized here.
+  useEffect(() => {
+    if (!voiceSettings) return
+    const targetLang = voiceSettings.voiceLang || voiceSettings.voice_lang || null
+    setMode(voiceSettings.mode || (targetLang ? 'manual' : 'auto'))
+  }, [voiceSettings])
 
   // ── Apply saved settings whenever voices or settings change ───────────────
   // Uses language code as the canonical key, so the correct voice is found
@@ -155,17 +173,32 @@ export default function TTSControls({
   }, [voiceSettings, allVoices, selectedVoice, onVoiceSettingsChange])
 
   // ── Handlers ───────────────────────────────────────────────────────────────
-  const handlePlay = React.useCallback(() => {
+  const handlePlay = React.useCallback(async () => {
     if (!text) return
     // Mark that the user has initiated playback – this satisfies the user‑gesture requirement on mobile
     setUserInitiated(true)
-    ttsService.speak(text, {
+
+    const playbackCallbacks = {
       rate,
       onStart: () => setIsPlaying(true),
       onEnd: () => setIsPlaying(false),
       onError: () => setIsPlaying(false)
-    })
-  }, [text, rate])
+    }
+
+    if (mode === 'auto') {
+      setIsSegmenting(true)
+      const segments = await getSegments(text)
+      setIsSegmenting(false)
+      if (segments) {
+        speakSegments(segments, playbackCallbacks)
+        return
+      }
+      // getSegments() failed (offline/rate-limited/backend error) — silent
+      // fallback to the existing single-utterance path below, no error UI.
+    }
+
+    ttsService.speak(text, playbackCallbacks)
+  }, [text, rate, mode, getSegments, speakSegments])
 
   const handlePause = () => {
     ttsService.pause()
@@ -231,6 +264,14 @@ export default function TTSControls({
     }
   }
 
+  const handleAutoDetectChange = (e) => {
+    const newVal = e.target.checked ? 'auto' : 'manual'
+    setMode(newVal)
+    if (onVoiceSettingsChange) {
+      onVoiceSettingsChange({ voiceName: selectedVoice?.name, voiceLang: selectedVoice?.lang, rate, pitch: 1.0, autoPlay, mode: newVal })
+    }
+  }
+
   // ── Click outside ──────────────────────────────────────────────────────────
   const settingsRef = React.useRef(null)
   useEffect(() => {
@@ -253,24 +294,34 @@ export default function TTSControls({
   if (settingsOnly) {
     return (
       <Stack spacing={2}>
-        {/* Language selector */}
-        <Box>
-          <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
-            Language
+        {/* Auto-detect language toggle -- visible in both modes, this is how you switch INTO manual mode */}
+        <Stack direction='row' justifyContent='space-between' alignItems='center'>
+          <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+            {t('tts.autoDetect')}
           </Typography>
-          <Select
-            size='sm'
-            value={selectedLang ?? null}
-            onChange={handleLanguageChange}
-            placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
-          >
-            {languageOptions.map((opt) => (
-              <Option key={opt.langBase} value={opt.langBase}>
-                {opt.label}
-              </Option>
-            ))}
-          </Select>
-        </Box>
+          <Switch size='sm' checked={mode === 'auto'} onChange={handleAutoDetectChange} aria-label={t('tts.autoDetectAriaLabel')} />
+        </Stack>
+
+        {/* Language selector -- manual mode only */}
+        {mode === 'manual' && (
+          <Box>
+            <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+              Language
+            </Typography>
+            <Select
+              size='sm'
+              value={selectedLang ?? null}
+              onChange={handleLanguageChange}
+              placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
+            >
+              {languageOptions.map((opt) => (
+                <Option key={opt.langBase} value={opt.langBase}>
+                  {opt.label}
+                </Option>
+              ))}
+            </Select>
+          </Box>
+        )}
 
         {/* Speed slider */}
         <Box>
@@ -301,10 +352,16 @@ export default function TTSControls({
             variant='solid'
             color='primary'
             onClick={isPlaying ? handlePause : handlePlay}
-            disabled={!text}
+            disabled={!text || isSegmenting}
             sx={{ borderRadius: '50%', boxShadow: 'sm', minHeight: { xs: 44, md: 32 }, minWidth: { xs: 44, md: 32 } }}
           >
-            {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+            {isSegmenting ? (
+              <CircularProgress size='sm' sx={{ '--CircularProgress-size': '18px' }} />
+            ) : isPlaying ? (
+              <PauseIcon />
+            ) : (
+              <PlayArrowIcon />
+            )}
           </IconButton>
         </Tooltip>
 
@@ -355,23 +412,33 @@ export default function TTSControls({
             </Stack>
 
             <Stack spacing={2}>
-              <Box>
-                <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
-                  Language
+              {/* Auto-detect language toggle -- visible in both modes, this is how you switch INTO manual mode */}
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+                  {t('tts.autoDetect')}
                 </Typography>
-                <Select
-                  size='sm'
-                  value={selectedLang ?? null}
-                  onChange={handleLanguageChange}
-                  placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
-                >
-                  {languageOptions.map((opt) => (
-                    <Option key={opt.langBase} value={opt.langBase}>
-                      {opt.label}
-                    </Option>
-                  ))}
-                </Select>
-              </Box>
+                <Switch size='sm' checked={mode === 'auto'} onChange={handleAutoDetectChange} aria-label={t('tts.autoDetectAriaLabel')} />
+              </Stack>
+
+              {mode === 'manual' && (
+                <Box>
+                  <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+                    Language
+                  </Typography>
+                  <Select
+                    size='sm'
+                    value={selectedLang ?? null}
+                    onChange={handleLanguageChange}
+                    placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
+                  >
+                    {languageOptions.map((opt) => (
+                      <Option key={opt.langBase} value={opt.langBase}>
+                        {opt.label}
+                      </Option>
+                    ))}
+                  </Select>
+                </Box>
+              )}
 
               <Box>
                 <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>

@@ -17,12 +17,25 @@ import { useDeckData } from './useDeckData'
 
 // ─── Normalization helpers ────────────────────────────────────────────────────
 
-/** Read a voice_settings side (front/back) from whatever format the backend returns. */
-function normalizeSide(raw) {
-  if (!raw) return { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
+/**
+ * Read a voice_settings side (front/back) from whatever format the backend returns.
+ *
+ * Default-mode derivation (ADR-002 — supersedes ADR-001's backward-compat clause):
+ * auto-detect is the default for ALL decks, including ones that already have a
+ * saved voice_lang/voice_name from before this feature existed. A stored
+ * voice_lang/voice_name no longer implies `mode: 'manual'` — only an EXPLICIT,
+ * previously-persisted `mode: 'manual'` (the user interacted with the toggle
+ * post-launch and chose manual) keeps a deck on manual. The old voice_lang/
+ * voice_name values are never cleared here — they stay available so switching
+ * a deck to Manual mode still restores the exact prior voice.
+ */
+export function normalizeSide(raw) {
+  if (!raw) return { mode: 'auto', voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
+  const voiceLang = raw.voiceLang || raw.voice_lang || null
   return {
+    mode: raw.mode || 'auto',
     voiceName: raw.voiceName || raw.voice_name || raw.voice || null,
-    voiceLang: raw.voiceLang || raw.voice_lang || null, // BCP-47 code, e.g. "ja-JP"
+    voiceLang, // BCP-47 code, e.g. "ja-JP"
     rate: raw.rate ?? 1.0,
     pitch: raw.pitch ?? 1.0,
     autoPlay: raw.autoPlay ?? raw.auto_play ?? false
@@ -30,8 +43,9 @@ function normalizeSide(raw) {
 }
 
 /** Convert camelCase side object to canonical snake_case for the backend. */
-function serializeSide(side) {
+export function serializeSide(side) {
   return {
+    mode: side.mode ?? 'auto',
     voice_name: side.voiceName || null,
     voice_lang: side.voiceLang || null, // persisted so any device can match by language
     rate: side.rate ?? 1.0,
@@ -41,8 +55,8 @@ function serializeSide(side) {
 }
 
 const DEFAULT_SETTINGS = {
-  front: { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false },
-  back: { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
+  front: { mode: 'auto', voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false },
+  back: { mode: 'auto', voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────

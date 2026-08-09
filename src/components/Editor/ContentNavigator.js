@@ -13,7 +13,9 @@ import {
   CircularProgress,
   Select,
   Option,
-  Snackbar
+  Snackbar,
+  Switch,
+  Tooltip
 } from '@mui/joy'
 import { Clock, BookOpen } from 'lucide-react'
 import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded'
@@ -37,7 +39,9 @@ export default function ContentNavigator({
   bookId,
   tier,
   ttsLanguage = 'en-US',
-  onTtsLanguageChange
+  onTtsLanguageChange,
+  ttsAutoDetect = true,
+  onTtsAutoDetectChange
 }) {
   const { t } = useTranslation()
   const { openUpgradeModal } = useSubscriptionContext()
@@ -212,7 +216,7 @@ export default function ContentNavigator({
 
       setLoadingId(headingId)
       try {
-        const blobUrl = await ttsService.generate(bookId, text, ttsLanguage)
+        const blobUrl = await ttsService.generate(bookId, text, ttsLanguage, { autoDetect: ttsAutoDetect })
         blobUrlRef.current = blobUrl
         audioRef.current.src = blobUrl
         await audioRef.current.play()
@@ -223,7 +227,7 @@ export default function ContentNavigator({
         setLoadingId(null)
       }
     },
-    [playingId, tier, bookId, ttsLanguage, extractSectionContent, openUpgradeModal, t]
+    [playingId, tier, bookId, ttsLanguage, ttsAutoDetect, extractSectionContent, openUpgradeModal, t]
   )
 
   const hasTts = !!(editorInstanceRef && bookId)
@@ -238,6 +242,11 @@ export default function ContentNavigator({
         overflowY: 'auto',
         overflowX: 'hidden',
         bgcolor: 'background.surface',
+        // Hairline scrollbar. Note `bgcolor`, not `background`: MUI's sx resolver
+        // only maps palette tokens for `bgcolor`/`backgroundColor`, so the previous
+        // `background: 'divider'` was silently dropped and the thumb rendered
+        // transparent. `bgcolor` resolves to var(--joy-palette-divider) and is
+        // correct in both colour schemes.
         '&::-webkit-scrollbar': {
           width: '4px'
         },
@@ -245,8 +254,11 @@ export default function ContentNavigator({
           background: 'transparent'
         },
         '&::-webkit-scrollbar-thumb': {
-          background: 'divider',
+          bgcolor: 'divider',
           borderRadius: '8px'
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          bgcolor: 'text.tertiary'
         }
       }}
     >
@@ -285,33 +297,47 @@ export default function ContentNavigator({
             {toc.length} sections
           </Chip>
           {hasTts && tier === 'pro' && (
-            <Select
-              size='sm'
-              variant='soft'
-              color='neutral'
-              value={ttsLanguage}
-              onChange={(_, v) => onTtsLanguageChange?.(v)}
-              aria-label={t('aiMagic.tts.languageAriaLabel')}
-              sx={{
-                ml: 'auto',
-                minWidth: 0,
-                fontSize: 'xs',
-                fontWeight: 500,
-                bgcolor: 'background.level1',
-                color: 'text.secondary',
-                border: 'none',
-                boxShadow: 'none',
-                '--Select-indicatorColor': 'var(--joy-palette-text-secondary)'
-              }}
-            >
-              <Option value='en-US'>EN</Option>
-              <Option value='es-ES'>ES</Option>
-              <Option value='fr-FR'>FR</Option>
-              <Option value='de-DE'>DE</Option>
-              <Option value='ja-JP'>JA</Option>
-              <Option value='pt-BR'>PT</Option>
-              <Option value='zh-CN'>ZH</Option>
-            </Select>
+            <Stack direction='row' alignItems='center' spacing={0.5} sx={{ ml: 'auto' }}>
+              {/* Auto/Manual toggle (ADR-002) — auto-detect is the default; the manual
+                  Select below only appears once the user explicitly switches it off. */}
+              <Tooltip title={t('aiMagic.tts.autoDetectLabel')} variant='soft' size='sm'>
+                <Switch
+                  size='sm'
+                  checked={ttsAutoDetect}
+                  onChange={(e) => onTtsAutoDetectChange?.(e.target.checked)}
+                  aria-label={t('aiMagic.tts.autoDetectAriaLabel')}
+                  sx={{ '--Switch-trackWidth': '28px', '--Switch-trackHeight': '16px' }}
+                />
+              </Tooltip>
+              {!ttsAutoDetect && (
+                <Select
+                  size='sm'
+                  variant='soft'
+                  color='neutral'
+                  value={ttsLanguage}
+                  onChange={(_, v) => onTtsLanguageChange?.(v)}
+                  aria-label={t('aiMagic.tts.languageAriaLabel')}
+                  sx={{
+                    minWidth: 0,
+                    fontSize: 'xs',
+                    fontWeight: 500,
+                    bgcolor: 'background.level1',
+                    color: 'text.secondary',
+                    border: 'none',
+                    boxShadow: 'none',
+                    '--Select-indicatorColor': 'var(--joy-palette-text-secondary)'
+                  }}
+                >
+                  <Option value='en-US'>EN</Option>
+                  <Option value='es-ES'>ES</Option>
+                  <Option value='fr-FR'>FR</Option>
+                  <Option value='de-DE'>DE</Option>
+                  <Option value='ja-JP'>JA</Option>
+                  <Option value='pt-BR'>PT</Option>
+                  <Option value='zh-CN'>ZH</Option>
+                </Select>
+              )}
+            </Stack>
           )}
         </Stack>
 

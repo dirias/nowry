@@ -14,6 +14,7 @@ import {
   Option,
   Snackbar,
   Stack,
+  Switch,
   Tooltip,
   Typography
 } from '@mui/joy'
@@ -44,6 +45,7 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
 
   const [ttsState, setTtsState] = useState('idle') // 'idle' | 'loading' | 'playing' | 'paused'
   const [ttsLanguage, setTtsLanguage] = useState('en-US')
+  const [autoDetect, setAutoDetect] = useState(true) // Pro-only (ADR-002) — default ON; never rendered/sent for Plus/Free
   const [ttsPickerOpen, setTtsPickerOpen] = useState(false)
   const [ttsSections, setTtsSections] = useState([])
   const [ttsError, setTtsError] = useState(null)
@@ -88,7 +90,12 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
       setTtsPickerOpen(false)
       try {
         const text = sectionTitle || getFullBookText(editorInstanceRef)
-        const blobUrl = await ttsService.generate(bookId, text, ttsLanguage)
+        // autoDetect state only ever flips true via the Pro-only toggle
+        // below, but gate on tier here too so a stale toggle value could
+        // never reach the backend for a non-Pro caller.
+        const blobUrl = await ttsService.generate(bookId, text, ttsLanguage, {
+          autoDetect: tier === 'pro' && autoDetect
+        })
         if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
         blobUrlRef.current = blobUrl
         audioRef.current.src = blobUrl
@@ -96,10 +103,14 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
         setTtsState('playing')
       } catch (e) {
         setTtsState('idle')
-        setTtsError(t('aiMagic.tts.error'))
+        // ADR-001: a segmentation-specific backend failure is distinguished
+        // by a `segmentation_failed:`-prefixed `detail` string; anything
+        // else (including non-auto-detect failures) keeps the generic message.
+        const isSegmentationFailure = typeof e?.ttsDetail === 'string' && e.ttsDetail.startsWith('segmentation_failed:')
+        setTtsError(isSegmentationFailure ? t('aiMagic.tts.segmentError') : t('aiMagic.tts.error'))
       }
     },
-    [bookId, ttsLanguage, editorInstanceRef, t]
+    [bookId, ttsLanguage, autoDetect, tier, editorInstanceRef, t]
   )
 
   const handleTTSPlayClick = () => {
@@ -179,24 +190,42 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
   // Plus/Pro tier — full TTS controls
   return (
     <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', md: 'flex' } }}>
-      {/* Pro language selector */}
+      {/* Pro language selector + auto-detect toggle (ADR-001, Pro-only) */}
       {tier === 'pro' && (
         <Stack direction='row' alignItems='center' spacing={0.5} sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <Select
-            size='sm'
-            value={ttsLanguage}
-            onChange={(_, val) => setTtsLanguage(val)}
-            aria-label={t('aiMagic.tts.languageAriaLabel')}
-            sx={{ minWidth: 100 }}
-          >
-            <Option value='en-US'>{t('aiMagic.tts.languages.en')}</Option>
-            <Option value='es-ES'>{t('aiMagic.tts.languages.es')}</Option>
-            <Option value='fr-FR'>{t('aiMagic.tts.languages.fr')}</Option>
-            <Option value='de-DE'>{t('aiMagic.tts.languages.de')}</Option>
-            <Option value='ja-JP'>{t('aiMagic.tts.languages.ja')}</Option>
-            <Option value='pt-BR'>{t('aiMagic.tts.languages.pt')}</Option>
-            <Option value='zh-CN'>{t('aiMagic.tts.languages.zh')}</Option>
-          </Select>
+          <Tooltip title={t('aiMagic.tts.autoDetectLabel')} variant='soft' size='sm'>
+            <Stack direction='row' alignItems='center' spacing={0.5}>
+              <Typography level='body-xs' sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                {t('aiMagic.tts.autoDetectLabel')}
+              </Typography>
+              <Switch
+                size='sm'
+                checked={autoDetect}
+                onChange={(e) => setAutoDetect(e.target.checked)}
+                aria-label={t('aiMagic.tts.autoDetectAriaLabel')}
+              />
+            </Stack>
+          </Tooltip>
+          {/* Manual language Select is irrelevant once auto-detect segments
+              per-language itself — hide it rather than let it contradict
+              the toggle (matches the Auto/Manual relationship in TTSControls.js). */}
+          {!autoDetect && (
+            <Select
+              size='sm'
+              value={ttsLanguage}
+              onChange={(_, val) => setTtsLanguage(val)}
+              aria-label={t('aiMagic.tts.languageAriaLabel')}
+              sx={{ minWidth: 100 }}
+            >
+              <Option value='en-US'>{t('aiMagic.tts.languages.en')}</Option>
+              <Option value='es-ES'>{t('aiMagic.tts.languages.es')}</Option>
+              <Option value='fr-FR'>{t('aiMagic.tts.languages.fr')}</Option>
+              <Option value='de-DE'>{t('aiMagic.tts.languages.de')}</Option>
+              <Option value='ja-JP'>{t('aiMagic.tts.languages.ja')}</Option>
+              <Option value='pt-BR'>{t('aiMagic.tts.languages.pt')}</Option>
+              <Option value='zh-CN'>{t('aiMagic.tts.languages.zh')}</Option>
+            </Select>
+          )}
           <Divider orientation='vertical' sx={{ height: 20 }} />
         </Stack>
       )}

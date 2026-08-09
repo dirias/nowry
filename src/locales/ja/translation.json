@@ -1722,6 +1722,9 @@
       "fullBook": "Full book",
       "fullBookHint": "Read the entire book",
       "sectionPickerTitle": "Choose a section",
+      "autoDetectLabel": "Auto-detect language",
+      "autoDetectAriaLabel": "Automatically detect and play mixed-language text in each segment's own language",
+      "segmentError": "Couldn't detect languages automatically. Please try again.",
       "languages": {
         "en": "English",
         "es": "Spanish",
@@ -1950,5 +1953,9 @@
       "columns": "Columns",
       "noResults": "No sheets match \"{{term}}\""
     }
+  },
+  "tts": {
+    "autoDetect": "Auto-detect language",
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
   }
 }

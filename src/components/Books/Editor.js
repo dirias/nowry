@@ -64,6 +64,7 @@ const VisualizerModal = React.lazy(() => import('../Cards/VisualizerModal'))
 import { booksService, cardsService, quizzesService, illustrationsService } from '../../api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
 import FloatingToolbarPlugin from '../Editor/plugins/FloatingToolbarPlugin'
+import CommentAnchorPlugin from '../Editor/plugins/CommentAnchorPlugin'
 import LinkPreviewPlugin from '../Editor/plugins/LinkPreviewPlugin'
 import EditorErrorBoundary from '../Editor/EditorErrorBoundary'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
@@ -219,14 +220,23 @@ export default function Editor({
   onDiagramInserted, // called after successful diagram insert to update parent count
   // NOTE: no `tier` prop — TextMenu reads the tier from useSubscription() directly.
   ttsLanguage = 'en-US',
+  ttsAutoDetect = true,
   onRequestEditMode, // 'read': the blocked-edit snackbar's "Edit" action
   onRequestFork, // 'read-guest': the blocked-edit snackbar's "Fork" action
-  onSelectionSurfaceChange // ({ visible, layout }) — drives the parent's FAB offset + coach mark
+  onSelectionSurfaceChange, // ({ visible, layout }) — drives the parent's FAB offset + coach mark
+  // Comments — lifted to EditorHome.js (useComments) so the same list is shared
+  // by CommentMarginRail. Editor.js itself stays resourceType-agnostic; it just
+  // forwards these through to CommentAnchorPlugin.
+  comments,
+  onCreateComment,
+  onAnchorPositionsChange,
+  onAnchorStatusesChange
 }) {
   const theme = useTheme()
   const menuRef = useRef()
   const containerRef = useRef()
   const editorInstanceRef = useRef(null)
+  const commentAnchorPluginRef = useRef(null)
   // Saves the Lexical node key of the block to insert a diagram after.
   // Captured on "Generate Diagram" click — before the modal opens and steals focus,
   // which would clear the editor selection and lose the insertion point.
@@ -610,7 +620,16 @@ export default function Editor({
       if (mode !== 'edit' && writesToDocument(option)) return
       setError(null)
       try {
-        if (option === 'create_study_card' && textToProcess) {
+        if (option === 'add_comment' && textToProcess) {
+          // CommentAnchorPlugin re-reads window.getSelection() itself, synchronously,
+          // in this same click handler — before the composer opens and steals focus.
+          // Same timing guarantee generate_diagram below relies on for its anchor capture.
+          // That guarantee depends on TextMenu's `keepSelection` pointerdown guard; if it
+          // ever regresses the capture returns false, and we surface it rather than
+          // no-op silently (which is indistinguishable from a dead button).
+          const captured = commentAnchorPluginRef.current?.openComposerForSelection()
+          if (!captured) setError(t('comments.errors.selectionLost'))
+        } else if (option === 'create_study_card' && textToProcess) {
           startCardGeneration(textToProcess, 'auto')
         } else if (option === 'create_questionnaire' && textToProcess) {
           const response = await quizzesService.generate(textToProcess, 5, 'Medium')
@@ -860,10 +879,20 @@ export default function Editor({
             }}
             illustrationCount={illustrationCount}
             ttsLanguage={ttsLanguage}
+            ttsAutoDetect={ttsAutoDetect}
             bookId={book?._id}
             mode={mode}
             onBlockedEdit={handleBlockedEdit}
             onSelectionSurfaceChange={onSelectionSurfaceChange}
+            onError={(msg) => setError(msg)}
+          />
+
+          <CommentAnchorPlugin
+            ref={commentAnchorPluginRef}
+            comments={comments}
+            onCreateComment={onCreateComment}
+            onAnchorPositionsChange={onAnchorPositionsChange}
+            onAnchorStatusesChange={onAnchorStatusesChange}
             onError={(msg) => setError(msg)}
           />
 

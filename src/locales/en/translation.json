@@ -1808,6 +1808,49 @@
       "invalidLatex": "Invalid LaTeX syntax"
     }
   },
+  "comments": {
+    "addNote": "Add note",
+    "drawerTitle": "Notes",
+    "openDrawerAriaLabel": "Open notes",
+    "previousNoteAriaLabel": "Previous note",
+    "nextNoteAriaLabel": "Next note",
+    "threadTitle": "Note",
+    "threadAriaLabel": "Note thread",
+    "orphanedTitle": "Note (text not found)",
+    "orphanedExplain": "The text this note was attached to can no longer be found. You can still delete it.",
+    "editAriaLabel": "Edit note",
+    "composerPlaceholder": "Add a note…",
+    "composerAriaLabel": "New note",
+    "composerTextareaAriaLabel": "Note text",
+    "deleteConfirm": "Delete this note? This can't be undone.",
+    "deleteConfirmAction": "Yes, delete",
+    "emptyBodyPreview": "(empty note)",
+    "emptyHint": "Select text and choose \"Add note\" to leave a comment.",
+    "emptyTitle": "No notes yet",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "loadFailed": "Couldn't load notes.",
+      "notAuthor": "You don't have permission to edit this note.",
+      "notFound": "This note no longer exists.",
+      "invalidBody": "Note text is invalid.",
+      "selectionLost": "Select the text you want to annotate, then choose “Add note” again."
+    },
+    "noteAriaLabel": "Note: {{preview}}",
+    "orphanedNoteAriaLabel": "Unanchored note: {{preview}}",
+    "deleteAriaLabel": "Delete note",
+    "resolveAriaLabel": "Mark note as resolved",
+    "unresolveAriaLabel": "Reopen note",
+    "resolvedLabel": "Resolved",
+    "moreNotes": "{{count}} more",
+    "moreNotesAriaLabel": "Show {{count}} more notes below",
+    "unanchoredGroupTitle": "Unanchored notes ({{count}})",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
+    }
+  },
   "public": {
     "publishInstant": "Share with community",
     "publish": "Publish",
@@ -2635,6 +2678,9 @@
       "fullBook": "Full book",
       "fullBookHint": "Read the entire book",
       "sectionPickerTitle": "Choose a section",
+      "autoDetectLabel": "Auto-detect language",
+      "autoDetectAriaLabel": "Automatically detect and play mixed-language text in each segment's own language",
+      "segmentError": "Couldn't detect languages automatically. Please try again.",
       "languages": {
         "en": "English",
         "es": "Spanish",
@@ -2825,5 +2871,9 @@
       "columns": "Columns",
       "noResults": "No sheets match \"{{term}}\""
     }
+  },
+  "tts": {
+    "autoDetect": "Auto-detect language",
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
   }
 }

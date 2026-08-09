@@ -48,7 +48,8 @@ import {
   ChevronDown,
   Square,
   Volume2,
-  Copy
+  Copy,
+  MessageSquarePlus
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSubscription } from '../../hooks/useSubscription'
@@ -76,6 +77,7 @@ export const ACTION_WRITES = {
   create_questionnaire: 'external',
   create_visual_content: 'external', // opens VisualizerModal → cardsService.create({ card_type: 'visual' })
   extract_vocabulary: 'external',
+  add_comment: 'external', // opens CommentComposer → commentsService.create(), never touches the document
   // Toolbar controls (sibling const to the aiOptions `writes` fields)
   create_study_card: 'external',
   tts: 'external',
@@ -169,6 +171,17 @@ const TextMenu = forwardRef(
 
     // Taps/clicks on a control must not blur the document and collapse the
     // selection before onClick runs — the handler would receive empty text.
+    //
+    // This is NOT reading-mode-only. Most actions read the `selectedText` prop
+    // (a React snapshot taken from the *Lexical* selection, which survives a
+    // DOM blur), so they tolerate a collapsed native selection. But two actions
+    // re-read `window.getSelection()` live inside their click handler — Copy,
+    // and `add_comment` (CommentAnchorPlugin.openComposerForSelection captures
+    // the DOM Range there to build the comment anchor). For those, a pointerdown
+    // that reaches the browser collapses the selection before onClick fires and
+    // the action silently no-ops. Hence the AI menu keeps this guard in every
+    // mode. Verified: without it `getSelection().isCollapsed === true` by the
+    // time the MenuItem's onClick runs; with it the Range survives intact.
     const keepSelection = (event) => event.preventDefault()
 
     // Mobile bar sticks above the soft keyboard / collapsing browser chrome.
@@ -221,6 +234,12 @@ const TextMenu = forwardRef(
     const isDiagramLocked = tier === 'free' && illustrationCount >= 2
 
     const aiOptions = [
+      {
+        label: t('comments.addNote'),
+        value: 'add_comment',
+        icon: <MessageSquarePlus size={15} />,
+        writes: ACTION_WRITES.add_comment
+      },
       {
         label: t('editor.ai.expand', 'Expand with AI'),
         value: 'expand_with_ai',
@@ -376,7 +395,7 @@ const TextMenu = forwardRef(
             variant='plain'
             color='neutral'
             aria-label={t('editor.ai.more', 'More AI actions')}
-            onPointerDown={isReading ? keepSelection : undefined}
+            onPointerDown={keepSelection}
             sx={{ minWidth: 28, px: 0.5, ...(isReading ? focusRingSx : {}) }}
           >
             <Sparkles size={15} />
@@ -396,7 +415,7 @@ const TextMenu = forwardRef(
           {visibleAiOptions.map((option) => (
             <MenuItem
               key={option.value}
-              onPointerDown={isReading ? keepSelection : undefined}
+              onPointerDown={keepSelection}
               onClick={() => (option.locked ? openUpgradeModal(t('upgrade.headlines.illustrations')) : onOptionClick(option.value))}
             >
               <Box component='span' sx={{ display: 'flex', color: option.locked ? 'text.secondary' : 'primary.plainColor' }}>

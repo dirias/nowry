@@ -34,6 +34,7 @@ export default function FloatingToolbarPlugin({
   onOptionClick,
   illustrationCount = 0,
   ttsLanguage = 'en-US',
+  ttsAutoDetect = true,
   bookId,
   onError,
   mode = 'edit',
@@ -104,7 +105,7 @@ export default function FloatingToolbarPlugin({
 
     setTtsState('loading')
     try {
-      const blobUrl = await ttsService.generate(bookId, selectedText, ttsLanguage)
+      const blobUrl = await ttsService.generate(bookId, selectedText, ttsLanguage, { autoDetect: ttsAutoDetect })
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current)
       }
@@ -118,7 +119,7 @@ export default function FloatingToolbarPlugin({
       setTtsState('idle')
       onError?.(t('aiMagic.tts.error'))
     }
-  }, [ttsState, stopTts, bookId, selectedText, ttsLanguage, onError, t])
+  }, [ttsState, stopTts, bookId, selectedText, ttsLanguage, ttsAutoDetect, onError, t])
 
   /**
    * Editing mode — Lexical-driven selection path. Unchanged apart from the

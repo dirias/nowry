@@ -29,6 +29,9 @@ export const ENDPOINTS = {
   quiz: {
     generateFromBook: '/v1/assistant/quiz/generate-from-book'
   },
+  tts: {
+    segment: () => '/v1/tts/segment'
+  },
   decks: {
     all: '/decks',
     create: '/decks',
@@ -88,5 +91,11 @@ export const ENDPOINTS = {
   },
   goalAI: {
     analyze: '/goal-ai/analyze'
+  },
+  comments: {
+    list: '/v1/comments',
+    create: '/v1/comments',
+    update: (id) => `/v1/comments/${id}`,
+    delete: (id) => `/v1/comments/${id}`
   }
 }

@@ -3,7 +3,26 @@ import Editor from './Editor'
 import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import { useParams, useLocation } from 'react-router-dom'
-import { Save, Check, Loader2, CloudOff, AlertTriangle, Minus, Plus, Lock, Unlock, Timer, PencilLine, X } from 'lucide-react'
+import {
+  Save,
+  Check,
+  Loader2,
+  CloudOff,
+  AlertTriangle,
+  Minus,
+  Plus,
+  Lock,
+  Unlock,
+  Timer,
+  PencilLine,
+  X,
+  MessageSquare,
+  ChevronUp,
+  ChevronDown
+} from 'lucide-react'
+import CommentMarginRail from './Comments/CommentMarginRail'
+import CommentMobileDrawer from './Comments/CommentMobileDrawer'
+import { useComments } from '../../hooks/useComments'
 import { booksService, publicContentService, cardsService, quizService } from '../../api/services'
 import {
   Box,
@@ -82,6 +101,14 @@ export default function EditorHome() {
   const { openUpgradeModal } = useSubscriptionContext()
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
+  const [showCommentsDrawer, setShowCommentsDrawer] = useState(false)
+  // Reported by CommentAnchorPlugin (inside Editor.js's LexicalComposer) — lifted here
+  // so CommentMarginRail, a flex sibling of Editor rather than a child, can consume it.
+  const [anchorPositions, setAnchorPositions] = useState([])
+  // commentId -> 'resolved' | 'orphaned', recomputed live against the document —
+  // never persisted, just mirrored down to CommentMarginRail for bubble variant.
+  const [anchorStatuses, setAnchorStatuses] = useState({})
+  const commentRailRef = useRef(null)
 
   // book might be stale from location state if we just navigated
   const [book, setBook] = useState(location.state?.book || null)
@@ -89,6 +116,21 @@ export default function EditorHome() {
 
   // Success/Error Snackbar state
   const [snackbar, setSnackbar] = useState({ open: false, message: '', color: 'success' })
+
+  // Comments — lifted here (rather than owned inside Editor.js) so the same list
+  // feeds both the in-document highlight/anchor plugin and comment creation.
+  // CommentMarginRail keeps its own separate useComments instance (it owns
+  // read/update/delete for the popover); mutations there report through
+  // `onCommentsRailChanged` below so this instance — and therefore the
+  // in-document highlights — stay in sync without a shared store.
+  const handleCommentsError = useCallback((message) => setSnackbar({ open: true, message, color: 'danger' }), [])
+  const {
+    comments,
+    create: createComment,
+    refetch: refetchComments
+  } = useComments('book', book?._id, {
+    onError: (err) => handleCommentsError(err?.response?.data?.detail || t('comments.errors.generic'))
+  })
   const [confirmUnpublishOpen, setConfirmUnpublishOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -157,6 +199,9 @@ export default function EditorHome() {
   // TTS language — lifted here so it's shared between the desktop sidebar and the
   // mobile Drawer instance of ContentNavigator (previously each held its own disconnected state).
   const [ttsLanguage, setTtsLanguage] = useState('en-US')
+  // Auto-detect is the default per ADR-002 — manual language selection is an override,
+  // shared the same way as ttsLanguage above across ContentNavigator and Editor/FloatingToolbarPlugin.
+  const [ttsAutoDetect, setTtsAutoDetect] = useState(true)
 
   // Wrapped setPageSize with logging
   const handlePageSizeChange = (newSize) => {
@@ -954,6 +999,47 @@ export default function EditorHome() {
                 </Button>
               </Tooltip>
 
+              {/* Comments — mobile opens the drawer; desktop gets Previous/Next-note
+                  cycling for the margin rail (keyboard-reachable via focusRingSx). */}
+              <Tooltip title={t('comments.openDrawerAriaLabel')} variant='soft' size='sm'>
+                <IconButton
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  onClick={() => setShowCommentsDrawer(true)}
+                  aria-label={t('comments.openDrawerAriaLabel')}
+                  sx={{ ...headerIconButtonSx, ...compactOnlySx }}
+                >
+                  <MessageSquare size={16} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title={t('comments.previousNoteAriaLabel')} variant='soft' size='sm'>
+                <IconButton
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  onClick={() => commentRailRef.current?.goToPrevious()}
+                  aria-label={t('comments.previousNoteAriaLabel')}
+                  sx={{ ...headerIconButtonSx, ...desktopOnlySx }}
+                >
+                  <ChevronUp size={16} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title={t('comments.nextNoteAriaLabel')} variant='soft' size='sm'>
+                <IconButton
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  onClick={() => commentRailRef.current?.goToNext()}
+                  aria-label={t('comments.nextNoteAriaLabel')}
+                  sx={{ ...headerIconButtonSx, ...desktopOnlySx }}
+                >
+                  <ChevronDown size={16} />
+                </IconButton>
+              </Tooltip>
+
               <Tooltip title={t('editor.header.saveNow')} variant='soft' size='sm'>
                 <IconButton
                   variant='outlined'
@@ -1120,6 +1206,8 @@ export default function EditorHome() {
               tier={tier}
               ttsLanguage={ttsLanguage}
               onTtsLanguageChange={setTtsLanguage}
+              ttsAutoDetect={ttsAutoDetect}
+              onTtsAutoDetectChange={setTtsAutoDetect}
             />
           </Box>
 
@@ -1134,9 +1222,21 @@ export default function EditorHome() {
                 tier={tier}
                 ttsLanguage={ttsLanguage}
                 onTtsLanguageChange={setTtsLanguage}
+                ttsAutoDetect={ttsAutoDetect}
+                onTtsAutoDetectChange={setTtsAutoDetect}
               />
             </Box>
           </Drawer>
+
+          {/* 💬 Comments (Mobile Drawer) */}
+          <CommentMobileDrawer
+            open={showCommentsDrawer}
+            onClose={() => setShowCommentsDrawer(false)}
+            resourceType='book'
+            resourceId={book?._id}
+            onError={handleCommentsError}
+            onCommentsChanged={refetchComments}
+          />
 
           {/* 📄 Editor Workspace */}
           <Box
@@ -1153,7 +1253,27 @@ export default function EditorHome() {
               flexDirection: 'column',
               alignItems: 'center',
               gap: { xs: 3, md: 6 },
-              scrollBehavior: 'smooth'
+              scrollBehavior: 'smooth',
+              // Hairline scrollbar, matching the Table of Contents panel
+              // (ContentNavigator) and the comment margin rail on either side.
+              // `bgcolor` — not `background` — is the form MUI's sx resolver maps
+              // to a palette token; `background` is emitted verbatim and dropped.
+              '&::-webkit-scrollbar': {
+                width: '4px'
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent'
+              },
+              '&::-webkit-scrollbar-thumb': {
+                bgcolor: 'divider',
+                borderRadius: '8px'
+              },
+              // `text.tertiary`, not `neutral.outlinedBorder`: in dark mode the
+              // latter is #32383E — identical to this container's own
+              // `background.level2`, which would make the hovered thumb vanish.
+              '&::-webkit-scrollbar-thumb:hover': {
+                bgcolor: 'text.tertiary'
+              }
             }}
           >
             <Editor
@@ -1175,8 +1295,24 @@ export default function EditorHome() {
               illustrationCount={illustrationCount}
               onDiagramInserted={handleDiagramInserted}
               ttsLanguage={ttsLanguage}
+              ttsAutoDetect={ttsAutoDetect}
+              comments={comments}
+              onCreateComment={createComment}
+              onAnchorPositionsChange={setAnchorPositions}
+              onAnchorStatusesChange={setAnchorStatuses}
             />
           </Box>
+
+          {/* 💬 Comment margin rail (Desktop) — flex sibling of the scroll container */}
+          <CommentMarginRail
+            ref={commentRailRef}
+            resourceType='book'
+            resourceId={book?._id}
+            anchorPositions={anchorPositions}
+            anchorStatuses={anchorStatuses}
+            onError={handleCommentsError}
+            onCommentsChanged={refetchComments}
+          />
 
           {/* Floating word count badge */}
           {readingStats.wordCount > 0 && (
