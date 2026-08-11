@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import { Box, Typography, Stack, IconButton, Tooltip, Button, Modal, ModalDialog, DialogTitle, DialogContent, Chip } from '@mui/joy'
 import {
@@ -53,6 +53,13 @@ const SortablePriorityRow = ({ priorityId, isCompleted, children }) => {
  * - Minimalistic design
  * - Consistent spacing and colors
  * - Clear visual hierarchy
+ *
+ * `filterable` opts a surface into the "active by default" behaviour: completed
+ * and inactive priorities are noise on overview surfaces, so they are hidden on
+ * first render behind an Active/All segmented toggle (client-side only — the
+ * parent still fetches and owns the full list). AllPrioritiesPage deliberately
+ * does NOT use it: that page is the dedicated full view with explicit
+ * active / inactive / completed sections.
  */
 const PriorityList = ({
   priorities = [],
@@ -62,12 +69,25 @@ const PriorityList = ({
   draggable = false,
   showEditButton = true,
   showDeleteButton = true,
-  emptyMessage = null
+  emptyMessage = null,
+  filterable = false,
+  maxVisible = null
 }) => {
   const { t } = useTranslation()
   const [deletingPriority, setDeletingPriority] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showAll, setShowAll] = useState(false)
   const resolvedEmptyMessage = emptyMessage || t('annualPlanning.priority.noGoals')
+
+  // "Active" mirrors AllPrioritiesPage's split exactly (is_active && !is_completed)
+  // so both surfaces agree on what counts as active — including legacy documents
+  // where is_active is absent, which already render as Inactive below.
+  const activePriorities = useMemo(() => priorities.filter((p) => !p.is_completed && p.is_active), [priorities])
+  const hiddenCount = priorities.length - activePriorities.length
+  // Only surface the toggle when it would actually change something (§11 progressive disclosure).
+  const showFilterToggle = filterable && hiddenCount > 0
+  const filteredPriorities = filterable && !showAll ? activePriorities : priorities
+  const visiblePriorities = maxVisible ? filteredPriorities.slice(0, maxVisible) : filteredPriorities
   const entityType = deletingPriority?.linked_entity_type || 'routine'
   const entityTypeCapitalized = entityType.charAt(0).toUpperCase() + entityType.slice(1)
 
@@ -95,6 +115,54 @@ const PriorityList = ({
     setDeletingPriority(null)
   }
 
+  // Segmented Active/All control — sits above the list, right-aligned, so it
+  // never competes with the section heading owned by the parent surface.
+  const filterToggle = showFilterToggle && (
+    <Box
+      role='group'
+      aria-label={t('annualPlanning.priority.filterLabel')}
+      sx={{
+        display: 'inline-flex',
+        gap: 0.5,
+        p: 0.5,
+        borderRadius: 'xl',
+        bgcolor: 'background.level1',
+        alignSelf: 'flex-end'
+      }}
+    >
+      {[
+        { value: false, label: t('annualPlanning.priority.filterActive') },
+        { value: true, label: t('annualPlanning.priority.filterAll', { count: priorities.length }) }
+      ].map((option) => {
+        const isSelected = showAll === option.value
+        return (
+          <Button
+            key={String(option.value)}
+            size='sm'
+            variant='plain'
+            color='neutral'
+            aria-pressed={isSelected}
+            onClick={() => setShowAll(option.value)}
+            sx={{
+              minHeight: 28,
+              px: 1.5,
+              borderRadius: 'xl',
+              fontWeight: isSelected ? 600 : 500,
+              color: isSelected ? 'text.primary' : 'text.secondary',
+              bgcolor: isSelected ? 'background.surface' : 'transparent',
+              boxShadow: isSelected ? 'sm' : 'none',
+              '&:hover': { bgcolor: isSelected ? 'background.surface' : 'background.level2' },
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+            }}
+          >
+            {option.label}
+          </Button>
+        )
+      })}
+    </Box>
+  )
+
+  // True empty — the parent surface has no priorities at all.
   if (priorities.length === 0) {
     return (
       <Typography level='body-sm' textColor='text.tertiary' sx={{ fontStyle: 'italic' }}>
@@ -103,10 +171,39 @@ const PriorityList = ({
     )
   }
 
+  // Filtered empty — priorities exist but every one of them is done or inactive.
+  // Distinct copy from the true-empty case (§13.2) and points at the toggle.
+  if (visiblePriorities.length === 0) {
+    return (
+      <Stack spacing={1} sx={{ alignItems: 'stretch' }}>
+        {filterToggle}
+        <Box sx={{ py: 6, textAlign: 'center' }}>
+          <FlagOutlinedIcon sx={{ fontSize: 48, color: 'text.tertiary', opacity: 0.5, mb: 2 }} />
+          <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
+            {t('annualPlanning.priority.noActivePriorities')}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+            {t('annualPlanning.priority.activeEmptyBody')}
+          </Typography>
+          <Button
+            size='sm'
+            variant='soft'
+            color='neutral'
+            onClick={() => setShowAll(true)}
+            sx={{ mt: 2, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+          >
+            {t('annualPlanning.priority.showAll', { count: priorities.length })}
+          </Button>
+        </Box>
+      </Stack>
+    )
+  }
+
   return (
     <>
-      <Stack spacing={1}>
-        {priorities.map((priority) => {
+      <Stack spacing={1} sx={{ alignItems: 'stretch' }}>
+        {filterToggle}
+        {visiblePriorities.map((priority) => {
           const isCompleted = !!priority.is_completed
           const isInactive = !priority.is_active
 

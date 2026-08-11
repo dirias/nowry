@@ -730,8 +730,12 @@ const AnnualPlanningHome = () => {
           ))}
         </Stack>
       ) : (
+        /* Active-only by default (done/inactive rows are noise on the overview);
+           the cap is applied after filtering so the 5 slots go to active work. */
         <PriorityList
-          priorities={priorities.slice(0, 5)}
+          priorities={priorities}
+          filterable
+          maxVisible={5}
           onEdit={handleEditPriority}
           onDelete={handleDeletePriority}
           onToggleActive={handleToggleActive}

@@ -951,10 +951,11 @@ const FocusAreaView = () => {
 
         <PriorityList
           priorities={priorities}
+          filterable
           onEdit={handleEditPriority}
           onDelete={handleDeletePriority}
           onToggleActive={handleToggleActive}
-          emptyMessage='No priorities linked to this area yet.'
+          emptyMessage={t('annualPlanning.priority.noGoals')}
         />
       </Box>
 
