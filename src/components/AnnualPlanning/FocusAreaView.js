@@ -53,54 +53,24 @@ import CloseQuarterModal from './CloseQuarterModal'
 import GoalCardGrid from './GoalCardGrid'
 import GoalRowList from './GoalRowList'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
+import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter, getGoalState } from './goalDerivation'
 
-// --- Module-level pure helpers (GOAL-01 computation engine, D-02/D-03/D-04) ---
-// Exported for direct unit testing without rendering the component.
+// --- GOAL-01 computation engine ---
+// The implementations moved to ./goalDerivation.js (ADR-003 / UX-CONTRACT §5.1):
+// a page component is the wrong home for the feature's pure math, and
+// GoalsTabView.js was importing utilities from this sibling page. The original
+// names are re-exported so every existing caller keeps resolving.
+export { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter }
 
-export const getCurrentQuarter = () => {
-  const month = new Date().getMonth() + 1
-  return Math.ceil(month / 3)
-}
-
-export const calculateProgress = (goal) => {
-  if (goal.milestones && goal.milestones.length > 0) {
-    const completedCount = goal.milestones.filter((m) => m.completed).length
-    return Math.round((completedCount / goal.milestones.length) * 100)
-  }
-  return goal.progress || 0
-}
-
-export const calculateTimeElapsedPercentage = (goal, currentQuarter) => {
-  const year = new Date().getFullYear()
-  const today = new Date()
-  if (goal.type === 'yearly') {
-    const yearStart = new Date(year, 0, 1)
-    const yearEnd = new Date(year + 1, 0, 1)
-    const totalDays = (yearEnd - yearStart) / 86400000
-    const daysElapsed = Math.min(Math.max((today - yearStart) / 86400000, 0), totalDays)
-    return Math.round((daysElapsed / totalDays) * 100)
-  }
-  // quarterly
-  const goalQuarter = goal.quarter || currentQuarter
-  if (goalQuarter < currentQuarter) return 100 // that quarter has already fully elapsed
-  if (goalQuarter > currentQuarter) return 0 // that quarter has not started yet
-  const quarterStartMonth = (goalQuarter - 1) * 3
-  const quarterStart = new Date(year, quarterStartMonth, 1)
-  const quarterEnd = new Date(year, quarterStartMonth + 3, 1)
-  const totalDays = (quarterEnd - quarterStart) / 86400000
-  const daysElapsed = Math.min(Math.max((today - quarterStart) / 86400000, 0), totalDays)
-  return Math.round((daysElapsed / totalDays) * 100)
-}
-
+/**
+ * @deprecated Superseded by goalDerivation.getGoalState, which adds the
+ * `not_started` state. Kept as a thin adapter so callers written against the
+ * four-state vocabulary (and the HEALTH_STATUS_MAP copies that still consume it)
+ * keep their exact legacy output until those call sites are retired.
+ */
 export const getHealthStatus = (goal) => {
-  if (goal.status === 'completed') return 'completed'
-  const quarter = getCurrentQuarter()
-  const timeElapsed = calculateTimeElapsedPercentage(goal, quarter)
-  const progress = calculateProgress(goal)
-  const gap = timeElapsed - progress
-  if (gap <= 0) return 'on_track'
-  if (gap <= 25) return 'at_risk'
-  return 'behind'
+  const state = getGoalState(goal)
+  return state === 'not_started' ? 'on_track' : state
 }
 
 const FocusAreaView = () => {
