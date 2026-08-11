@@ -796,7 +796,7 @@
       "ariaLabel": "Annual Planning sections",
       "goalsEmptyTitle": "No goals yet",
       "goalsEmptyBody": "Add goals inside a focus area to see them here.",
-      "errorLoading": "Couldn't load this tab. Please try again.",
+      "errorLoading": "プランを読み込めませんでした。もう一度お試しください。",
       "gridView": "グリッド表示",
       "listView": "リスト表示",
       "reportsEmptyTitle": "No reports yet",
@@ -822,7 +822,9 @@
           "title": "3の力",
           "message": "研究によると、一度にすべてを改善しようとするよりも、3つの主要な生活分野に集中する方が大きな成功につながります。今年の3つの分野を定義しましょう。"
         },
-        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"]
+        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"],
+        "saveError": "重点分野を保存できませんでした。もう一度お試しください。",
+        "colorSwatchLabel": "{{color}}のテーマを選択"
       },
       "examples": ["キャリア成長", "健康と活力", "経済的自由", "人間関係", "創造的な活動", "学習とスキル"]
     },
@@ -853,7 +855,11 @@
       "dragHandle": "ドラッグして並べ替え",
       "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
       "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
+      "emptyTitle": "優先事項はまだありません",
+      "emptyBody": "優先事項とは、今年もっとも大切な数少ないことです。3〜5 個で十分です。",
+      "emptyCta": "優先事項を追加",
+      "addPriority": "優先事項を追加"
     },
     "goal": {
       "add": "目標を追加",
@@ -1007,12 +1013,13 @@
       "noPrioritiesAdded": "まだ優先事項が追加されていません",
       "viewAllPriorities": "{{count}}件の優先事項をすべて表示 →",
       "reviewNow": "今すぐレビュー",
-      "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
-      "quarterEndsToday": "Quarter {{quarter}} ends today",
-      "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
-      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
-      "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
-      "routineCompletion": "完了"
+      "quarterEndedOn": "第{{quarter}}四半期は {{date}} に終了しました",
+      "quarterEndsToday": "第{{quarter}}四半期は本日終了します",
+      "quarterEndingIn": "第{{quarter}}四半期はあと {{count}} 日で終了します",
+      "quarterEndingIn_other": "第{{quarter}}四半期はあと {{count}} 日で終了します",
+      "routineCompletion": "完了",
+      "allYear": "通年",
+      "quarterEndingIn_one": "第{{quarter}}四半期はあと {{count}} 日で終了します"
     },
     "quarterReport": {
       "report": "Report",
@@ -1047,6 +1054,52 @@
       "updateFailed": "{{type}}の更新に失敗しました",
       "deleteFailed": "{{type}}の削除に失敗しました",
       "focusAreaLimit": "重点分野は3つまでです。追加するには1つ削除してください。"
+    },
+    "header": {
+      "progress": "{{percent}}% 完了",
+      "goalsRatio": "{{total}} 件中 {{completed}} 件の目標",
+      "prioritiesCount_one": "{{count}} 件の優先事項",
+      "prioritiesCount_other": "{{count}} 件の優先事項",
+      "routineRatio": "{{total}} 件中 {{completed}} 件のルーティン",
+      "renamePlan": "プランの名前を変更",
+      "quarterLabel": "四半期",
+      "moreActions": "その他のプラン操作",
+      "addFirstGoal": "最初の目標を追加",
+      "deletePlan": "プランを削除",
+      "deletePlanTitle": "このプランを削除しますか？",
+      "deletePlanBody": "「{{title}}」と、その重点分野・目標・四半期レポートがすべて削除されます。元に戻せません。"
+    },
+    "goals": {
+      "scopeQuarter": "Q{{quarter}} · {{count}} 件の目標",
+      "scopeAll": "通年 · {{count}} 件の目標",
+      "quarterEmptyTitle": "Q{{quarter}} の予定はありません",
+      "quarterEmptyBody": "他の四半期に目標があります。",
+      "quarterEmptyCta": "通年を表示",
+      "scopeQuarter_one": "Q{{quarter}} · {{count}} 件の目標",
+      "scopeQuarter_other": "Q{{quarter}} · {{count}} 件の目標",
+      "scopeAll_one": "通年 · {{count}} 件の目標",
+      "scopeAll_other": "通年 · {{count}} 件の目標"
+    },
+    "reports": {
+      "emptyTitle": "最初のレポートは四半期の締めで公開されます",
+      "emptyBody": "四半期を締めると、Nowry が目標・進捗・成果を振り返り用のレポートにまとめます。",
+      "emptyCtaReady": "Q{{quarter}} を振り返る",
+      "emptyCountdown_one": "Q{{quarter}} はあと {{count}} 日で終了します",
+      "emptyCountdown_other": "Q{{quarter}} はあと {{count}} 日で終了します",
+      "historyTitle": "締めた四半期",
+      "goalsAchieved": "達成した目標",
+      "progress": "進捗",
+      "snapshots": "スナップショット ({{count}})"
+    },
+    "overview": {
+      "focusAreasTitle": "重点分野",
+      "prioritiesTitle": "年間コミットメント",
+      "prioritiesManage": "管理",
+      "prioritiesEmptyTitle": "優先事項はまだありません",
+      "prioritiesEmptyBody": "今年もっとも大切なことをいくつか挙げましょう。3〜5 個で十分です。",
+      "prioritiesEmptyCta": "優先事項を追加",
+      "areaGoalCount_one": "{{count}} 件の目標",
+      "areaGoalCount_other": "{{count}} 件の目標"
     }
   },
   "deckSettings": {
@@ -1445,21 +1498,39 @@
   },
   "cards": {
     "generatedCards": {
-      "titleSelectCards": "New Study Cards",
-      "titleAddToDeck": "Add to Deck",
-      "subtitleSelectCards": "Select the cards you want to add to your study deck.",
-      "subtitleAddToDeck": "Choose a deck to save your cards to.",
-      "generateAgainTooltip": "Generate again",
-      "selectDeckLabel": "Select Deck",
-      "chooseDeckPlaceholder": "Choose a deck...",
-      "orDivider": "OR",
-      "createNewDeck": "Create New Deck",
-      "newDeckNamePlaceholder": "New Deck Name",
-      "createButton": "Create",
-      "cancelButton": "Cancel",
-      "proceedCount": "Proceed ({{count}})",
-      "confirmSave": "Confirm & Save",
-      "saveError": "Failed to save cards. Please try again."
+      "titleSelectCards": "新しい学習カード",
+      "titleAddToDeck": "デッキに追加",
+      "subtitleSelectCards": "学習デッキに追加したいカードを選択してください。",
+      "subtitleAddToDeck": "カードを保存するデッキを選んでください。",
+      "generateAgainTooltip": "再生成",
+      "cancelButton": "キャンセル",
+      "proceedCount": "次へ ({{count}})",
+      "confirmSave": "確認して保存",
+      "saveError": "カードの保存に失敗しました。もう一度お試しください。",
+      "selectAll": "すべて選択",
+      "selectAllAria": "すべてのカードを選択",
+      "selectedCount": "{{total}}件中{{count}}件選択"
+    },
+    "saveToDeck": {
+      "selectDeckLabel": "デッキを選択",
+      "chooseDeckPlaceholder": "デッキを選んでください...",
+      "orDivider": "または",
+      "createNewDeck": "新しいデッキを作成",
+      "namePlaceholder": "新しいデッキ名",
+      "createButton": "作成",
+      "cancelButton": "キャンセル",
+      "batchTagsLabel": "タグ",
+      "tagsLoadError": "既存のタグを読み込めませんでした。カスタムタグは引き続き追加できます。",
+      "noExistingTags": "タグはまだありません。",
+      "tagsHelperText": "タグは後でカードを見つけやすくするためのものです。上のデッキ名とは関係ありません。",
+      "addTagPlaceholder": "タグを追加...",
+      "addTagAria": "タグを追加",
+      "emptyFlashcard": "最初のカードデッキを作成しましょう",
+      "emptyFlashcardBody": "デッキを作成して、このカードを保存・復習しましょう。",
+      "emptyQuiz": "最初のクイズデッキを作成しましょう",
+      "emptyQuizBody": "デッキを作成して、この問題を保存・復習しましょう。",
+      "emptyVisual": "最初のビジュアルデッキを作成しましょう",
+      "emptyVisualBody": "デッキを作成して、この図を保存・復習しましょう。"
     },
     "session": {
       "mode": {
@@ -1651,6 +1722,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{total}}枚中{{count}}枚のカードを生成しました",
+      "progressAuto": "{{count}}枚のカードを生成しました...",
+      "generating": "カードを生成中...",
       "retry": "再試行",
       "retryAria": "カード生成を再試行",
       "emptyTitle": "カードが生成されませんでした",
@@ -1760,6 +1833,32 @@
         "er": "ER Diagram"
       }
     }
+  },
+  "aiVisualizer": {
+    "title": "AIビジュアライザー",
+    "subtitle": "学習内容から図を生成します。",
+    "closeAria": "閉じる",
+    "vizTypeLabel": "図の種類",
+    "vizTypeAria": "図の種類を選択",
+    "vizType": {
+      "mindmap": "マインドマップ",
+      "flowchart": "フローチャート",
+      "sequence": "シーケンス図",
+      "timeline": "タイムライン"
+    },
+    "generateButton": "生成",
+    "generateAria": "図を生成",
+    "generating": "図を生成中...",
+    "explanationLabel": "説明",
+    "diagramErrorTitle": "図のエラー",
+    "diagramErrorBody": "図を表示できませんでした。生成された構文が無効な可能性があります。もう一度お試しください。",
+    "saveButton": "保存",
+    "saveAria": "図をデッキに保存",
+    "cancelButton": "キャンセル",
+    "emptyTitle": "まだ図がありません",
+    "emptyBody": "図の種類を選び、内容から生成してください。",
+    "titleField": "タイトル",
+    "titlePrefix": "ビジュアル"
   },
   "accountSettings": {
     "plan": {

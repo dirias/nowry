@@ -10,6 +10,13 @@ const TABS = [
   { key: 'reports', path: '/annual-planning/reports', labelKey: 'annualPlanning.tabs.reports' }
 ]
 
+/**
+ * Appends the active quarter scope to any Annual Planning link so the scope
+ * survives navigation into detail routes (`/area/:id`, `/priorities`) as well as
+ * between tabs. Exported so the focus-area cards and priority links share one rule.
+ */
+export const withQuarter = (path, q) => (q && q !== 'All' ? `${path}?q=${q}` : path)
+
 const AnnualPlanningTabBar = () => {
   const { t } = useTranslation()
   const location = useLocation()
@@ -21,18 +28,10 @@ const AnnualPlanningTabBar = () => {
 
   const activeTabIndex = TABS.findIndex((tab) => tab.path === location.pathname)
 
+  // No sticky/border/margin here: PlanScopeBar (Zone B) owns the sticky container
+  // this bar is embedded in, so a second sticky context would fight it.
   return (
-    <Box
-      sx={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 2,
-        bgcolor: 'background.body',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        mb: 4
-      }}
-    >
+    <Box>
       {/* Desktop Tab Bar (md and up) */}
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
         <Tabs
@@ -52,8 +51,6 @@ const AnnualPlanningTabBar = () => {
               borderRadius: 0,
               bgcolor: 'transparent',
               display: 'flex',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
               width: '100%',
               mx: 0,
               [`& .${tabClasses.root}`]: {
@@ -89,9 +86,12 @@ const AnnualPlanningTabBar = () => {
 
       {/* Mobile Segmented Control (xs/sm) */}
       <Box
+        role='tablist'
+        aria-label={t('annualPlanning.tabs.ariaLabel')}
         sx={{
           display: { xs: 'flex', md: 'none' },
           p: 0.5,
+          mb: 0.75,
           borderRadius: 'xl',
           bgcolor: 'background.level1',
           overflow: 'hidden'
@@ -102,8 +102,19 @@ const AnnualPlanningTabBar = () => {
           return (
             <Box
               key={tab.key}
+              role='tab'
+              tabIndex={0}
+              aria-selected={isActive}
+              aria-label={t(tab.labelKey)}
               onClick={() => navigate(`${tab.path}${qSuffix}`)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  navigate(`${tab.path}${qSuffix}`)
+                }
+              }}
               sx={{
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' },
                 flex: 1,
                 minHeight: 44,
                 py: 1,

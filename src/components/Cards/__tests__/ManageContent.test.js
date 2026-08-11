@@ -102,6 +102,36 @@ describe('ManageContent filtering behavior (unchanged by the useMemo fix)', () =
   })
 })
 
+describe('ManageContent card chip rendering (deck chip vs. tag chip)', () => {
+  // Regression test: a saved card's deck-name chip and its tag chips
+  // previously rendered with identical Chip styling (size='sm'
+  // variant='outlined', no color, no prefix on tags) in the Cards list row —
+  // easy to mistake the deck-name chip for a tag. Tag chips now render with
+  // a leading '#' (matching the existing StudyCard.js grid-card pattern) and
+  // soft/neutral styling so they read as distinct chips from the deck chip.
+  it('renders the tag chip with a "#" prefix, distinct from the plain deck-name chip', () => {
+    const props = {
+      ...defaultProps,
+      decks: [makeDeck({ _id: 'd1', name: 'TestTAg' })],
+      cards: [makeCard({ _id: 'c1', deck_id: 'd1', tags: ['language'] })],
+      totalCards: 1
+    }
+    render(<ManageContent {...props} />)
+
+    // Switch to the Cards tab, where individual card rows (with the
+    // deck-name chip and tag chips) are rendered.
+    fireEvent.click(screen.getByRole('tab', { name: /view cards/i }))
+
+    // The deck-name chip renders the bare deck name...
+    expect(screen.getByText('TestTAg')).toBeInTheDocument()
+    // ...while the tag chip is rendered with a '#' prefix, so it can never
+    // be visually confused with the deck-name chip even when a deck happens
+    // to be named after what the user intended as a tag.
+    expect(screen.getByText('#language')).toBeInTheDocument()
+    expect(screen.queryByText('language')).not.toBeInTheDocument()
+  })
+})
+
 describe('ManageContent render-count evidence (D-03)', () => {
   it('records Profiler commits while typing in the search input', () => {
     // BEFORE baseline: captured against the current un-memoized code (Task 1).

@@ -13,11 +13,6 @@ import {
   Divider,
   Tooltip,
   CircularProgress,
-  Select,
-  Option,
-  Input,
-  FormControl,
-  FormLabel,
   Chip,
   Alert,
   Skeleton,
@@ -25,14 +20,16 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  IconButton
+  IconButton,
+  Checkbox
 } from '@mui/joy'
-import { BookOpen, RefreshCw, Layers, Plus, X } from 'lucide-react'
+import { BookOpen, RefreshCw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { decksService, cardsService } from '../../api/services'
-import { useDeckData } from '../../hooks/useDeckData'
+import { cardsService } from '../../api/services'
+import { useSaveToDeck } from '../../hooks/useSaveToDeck'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
 // UpgradePrompt is rendered centrally in SubscriptionProvider — no local import needed
 
 // Mirror of the backend wire-contract sampleText cap (used only for user-facing copy)
@@ -61,14 +58,6 @@ export default function GeneratedCards({
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
   const [selectedCards, setSelectedCards] = useState([])
   const [loading, setLoading] = useState(false)
-  // WR-02: separate loading state for deck creation, distinct from regenerate loading
-  const [createLoading, setCreateLoading] = useState(false)
-
-  // Deck selection state
-  const [decks, setDecks] = useState([])
-  const [selectedDeckId, setSelectedDeckId] = useState('')
-  const [newDeckName, setNewDeckName] = useState('')
-  const [isCreatingDeck, setIsCreatingDeck] = useState(false)
   const [saving, setSaving] = useState(false)
   // WR-03: error state for save failures
   const [saveError, setSaveError] = useState(null)
@@ -77,35 +66,18 @@ export default function GeneratedCards({
   // Dismissal for the input-clip disclosure; reset when a new stream starts
   const [inputClipDismissed, setInputClipDismissed] = useState(false)
 
+  const saveToDeck = useSaveToDeck('flashcard')
+
   useEffect(() => {
     if (isStreaming) setInputClipDismissed(false)
   }, [isStreaming])
 
-  const { decks: cacheDecks, loading: hookDecksLoading, reload: reloadDecks } = useDeckData()
-
-  const loadDecks = React.useCallback(async () => {
-    try {
-      if (hookDecksLoading) return
-      const data = cacheDecks || []
-      // Filter Flashcard decks (explicit 'flashcard' or missing type for legacy)
-      const flashcardDecks = data.filter((d) => d.deck_type === 'flashcard' || !d.deck_type)
-      setDecks(flashcardDecks)
-      if (flashcardDecks.length > 0) {
-        setSelectedDeckId(flashcardDecks[0]._id)
-      }
-    } catch (error) {
-      console.error('Error loading decks:', error)
-    }
-  }, [hookDecksLoading, cacheDecks])
-
-  useEffect(() => {
-    if (step === 'select_deck') {
-      loadDecks()
-    }
-  }, [step, loadDecks])
-
   const toggleCardSelection = (index) => {
     setSelectedCards((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]))
+  }
+
+  const handleToggleSelectAll = () => {
+    setSelectedCards(selectedCards.length === cards.length ? [] : cards.map((_, i) => i))
   }
 
   // Map terminal SSE error codes to i18n messages — raw backend messages are never shown
@@ -155,34 +127,12 @@ export default function GeneratedCards({
     setStep('select_deck')
   }
 
-  // WR-02: uses createLoading (not shared loading) so create and regenerate spinners are independent
-  const handleCreateDeck = async () => {
-    if (!newDeckName.trim()) return
-    setCreateLoading(true)
-    try {
-      const newDeck = await decksService.create({
-        name: newDeckName,
-        description: 'Created from generated cards',
-        deck_type: 'flashcard',
-        image_url: book?.cover_image || null
-      })
-      setDecks([...decks, newDeck])
-      setSelectedDeckId(newDeck._id) // Auto-select new deck
-      setNewDeckName('')
-      setIsCreatingDeck(false)
-      reloadDecks()
-    } catch (error) {
-      console.error('Error creating deck:', error)
-    } finally {
-      setCreateLoading(false)
-    }
-  }
-
   // WR-03: surface save errors to the user via saveError state.
   // Sequential inserts (not Promise.all) so a mid-sequence plan-limit 403
   // stops cleanly with an accurate saved count — modal stays open,
   // selections preserved, backend remains the authority on the limit.
   const handleSaveCards = async () => {
+    const { selectedDeckId, allTags } = saveToDeck
     if (!selectedDeckId) return
     setSaveError(null)
     setPartialSave(null)
@@ -196,7 +146,7 @@ export default function GeneratedCards({
             title: card.title,
             content: card.content,
             deck_id: selectedDeckId,
-            tags: ['generated']
+            tags: allTags
           })
           saved += 1
         } catch (error) {
@@ -287,14 +237,34 @@ export default function GeneratedCards({
                 </Menu>
               </Dropdown>
 
+              {/* Select All control — never disabled during streaming; user can select what's arrived so far */}
+              <Stack direction='row' alignItems='center' spacing={1.5} sx={{ mb: 2 }}>
+                <Checkbox
+                  size='sm'
+                  checked={selectedCards.length === cards.length && cards.length > 0}
+                  indeterminate={selectedCards.length > 0 && selectedCards.length < cards.length}
+                  onChange={handleToggleSelectAll}
+                  disabled={cards.length === 0}
+                  label={t('cards.generatedCards.selectAll')}
+                  slotProps={{ input: { 'aria-label': t('cards.generatedCards.selectAllAria') } }}
+                />
+                {selectedCards.length > 0 && (
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                    {t('cards.generatedCards.selectedCount', { count: selectedCards.length, total: cards.length })}
+                  </Typography>
+                )}
+              </Stack>
+
               {/* Streaming progress row — indeterminate copy until the total is known (auto mode) */}
               {isStreaming && (
                 <Stack direction='row' spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
                   <CircularProgress size='sm' />
                   <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                    {expectedTotal == null
-                      ? t('aiMagic.streaming.progressAuto', { count: cards.length })
-                      : t('aiMagic.streaming.progress', { count: cards.length, total: expectedTotal })}
+                    {cards.length === 0
+                      ? t('aiMagic.streaming.generating')
+                      : expectedTotal == null
+                        ? t('aiMagic.streaming.progressAuto', { count: cards.length })
+                        : t('aiMagic.streaming.progress', { count: cards.length, total: expectedTotal })}
                   </Typography>
                 </Stack>
               )}
@@ -498,49 +468,7 @@ export default function GeneratedCards({
           )}
 
           {step === 'select_deck' && (
-            <Stack spacing={3} sx={{ minHeight: 200, px: 2 }}>
-              <FormControl>
-                <FormLabel>{t('cards.generatedCards.selectDeckLabel')}</FormLabel>
-                <Select
-                  value={selectedDeckId}
-                  onChange={(_, val) => setSelectedDeckId(val)}
-                  placeholder={t('cards.generatedCards.chooseDeckPlaceholder')}
-                >
-                  {decks.map((deck) => (
-                    <Option key={deck._id} value={deck._id}>
-                      {deck.name}
-                    </Option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Divider>{t('cards.generatedCards.orDivider')}</Divider>
-
-              <Box
-                sx={{ p: 2, border: '1px dashed', borderColor: 'neutral.outlinedBorder', borderRadius: 'md', bgcolor: 'background.level1' }}
-              >
-                {!isCreatingDeck ? (
-                  <Button variant='plain' startDecorator={<Plus />} onClick={() => setIsCreatingDeck(true)} fullWidth>
-                    {t('cards.generatedCards.createNewDeck')}
-                  </Button>
-                ) : (
-                  <Stack spacing={2} direction='row'>
-                    <Input
-                      placeholder={t('cards.generatedCards.newDeckNamePlaceholder')}
-                      value={newDeckName}
-                      onChange={(e) => setNewDeckName(e.target.value)}
-                      fullWidth
-                    />
-                    <Button onClick={handleCreateDeck} loading={createLoading}>
-                      {t('cards.generatedCards.createButton')}
-                    </Button>
-                    <Button variant='plain' color='neutral' onClick={() => setIsCreatingDeck(false)}>
-                      {t('cards.generatedCards.cancelButton')}
-                    </Button>
-                  </Stack>
-                )}
-              </Box>
-            </Stack>
+            <SaveToDeckStep deckType='flashcard' saveToDeck={saveToDeck} createDeckDescriptionDefault={book?.title} />
           )}
         </Box>
 
@@ -589,7 +517,7 @@ export default function GeneratedCards({
                 {t('cards.generatedCards.proceedCount', { count: selectedCards.length })}
               </Button>
             ) : (
-              <Button variant='solid' color='success' onClick={handleSaveCards} loading={saving} disabled={!selectedDeckId}>
+              <Button variant='solid' color='success' onClick={handleSaveCards} loading={saving} disabled={!saveToDeck.selectedDeckId}>
                 {t('cards.generatedCards.confirmSave')}
               </Button>
             )}

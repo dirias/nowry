@@ -405,71 +405,6 @@ export const AgentProvider = ({ children }) => {
       })
   }, [state.initialized, state.proactiveNudgingEnabled, state.knowledgeAccessEnabled])
 
-  /**
-   * Send a message to the Study Buddy.
-   * Automatically includes the current view context as grounding.
-   * @param {string} message
-   * @param {string|null} context - Overrides viewContext for this message only.
-   */
-  const sendMessage = useCallback(async (message, context = null) => {
-    if (!message.trim()) return
-
-    dispatch({ type: 'USER_MESSAGE', payload: message })
-
-    // Use explicit context override, or fall back to the current view context
-    const effectiveContext = context || viewContextRef.current
-
-    try {
-      const response = await agentService.chat(message, historyRef.current, effectiveContext, i18n.language)
-      dispatch({ type: 'AGENT_REPLY', payload: response })
-      if (response.level_up && response.new_level > 0 && response.new_stage > 0) {
-        dispatch({ type: 'LEVEL_UP', payload: { newLevel: response.new_level, newStage: response.new_stage } })
-        if (response.avatar_regen_pending) {
-          dispatch({ type: 'SET_AVATAR_REGEN_PENDING' })
-          if (avatarUrlRef.current) {
-            // User already has a portrait — silently regenerate for the new evolution stage
-            generateAvatar('evolution')
-          }
-          // No existing portrait → user still needs to generate their first one manually
-          dispatch({ type: 'SET_ANIMATION_REGEN_PENDING' })
-          if (animationUrlRef.current) {
-            // User already has an animation — silently regenerate for the new evolution stage
-            generateAnimation('evolution')
-          }
-        }
-      }
-    } catch (err) {
-      const detail = err?.response?.data?.detail || 'agent.errors.resting'
-      dispatch({ type: 'REPLY_ERROR', payload: detail })
-    }
-  }, [])
-
-  /**
-   * Set the current view context.
-   * Called by individual pages/components to give the agent structured grounding.
-   * Example: setViewContext({ page: 'study_session', deckId: '...', cardIndex: 1, ... })
-   * @param {Object|null} context - Structured screen context object, or null to clear.
-   *   Known shapes:
-   *   - StudyCardContext: { page, deckId, deckName, cardIndex, totalCards, cardType, isFlipped, front, back, isDailyReview }
-   *   - BookPageContext: { page, bookId, bookTitle, chapterIndex, ... }
-   */
-  const setViewContext = useCallback((context) => dispatch({ type: 'SET_VIEW_CONTEXT', payload: context }), [])
-
-  /** Clear the pending nudge after it has been displayed. */
-  const clearNudge = useCallback(() => dispatch({ type: 'CLEAR_NUDGE' }), [])
-
-  /**
-   * Update agent preferences in local state (after a settings save).
-   * @param {{ knowledgeAccessEnabled?: boolean, proactiveNudgingEnabled?: boolean }} prefs
-   */
-  const updateAgentPrefs = useCallback((prefs) => dispatch({ type: 'UPDATE_AGENT_PREFS', payload: prefs }), [])
-
-  const updatePetCustomization = useCallback(({ petName, petSpecies, petColor }) => {
-    dispatch({ type: 'UPDATE_PET_CUSTOMIZATION', payload: { petName, petSpecies, petColor } })
-  }, [])
-
-  const levelUpClear = useCallback(() => dispatch({ type: 'LEVEL_UP_CLEAR' }), [])
-
   const generateAvatar = useCallback(async (trigger = 'manual') => {
     dispatch({ type: 'AVATAR_GENERATING' })
     try {
@@ -510,56 +445,121 @@ export const AgentProvider = ({ children }) => {
   }, [])
 
   /**
+   * Send a message to the Study Buddy.
+   * Automatically includes the current view context as grounding.
+   * @param {string} message
+   * @param {string|null} context - Overrides viewContext for this message only.
+   */
+  const sendMessage = useCallback(
+    async (message, context = null) => {
+      if (!message.trim()) return
+
+      dispatch({ type: 'USER_MESSAGE', payload: message })
+
+      // Use explicit context override, or fall back to the current view context
+      const effectiveContext = context || viewContextRef.current
+
+      try {
+        const response = await agentService.chat(message, historyRef.current, effectiveContext, i18n.language)
+        dispatch({ type: 'AGENT_REPLY', payload: response })
+        if (response.level_up && response.new_level > 0 && response.new_stage > 0) {
+          dispatch({ type: 'LEVEL_UP', payload: { newLevel: response.new_level, newStage: response.new_stage } })
+          if (response.avatar_regen_pending) {
+            dispatch({ type: 'SET_AVATAR_REGEN_PENDING' })
+            if (avatarUrlRef.current) {
+              // User already has a portrait — silently regenerate for the new evolution stage
+              generateAvatar('evolution')
+            }
+            // No existing portrait → user still needs to generate their first one manually
+            dispatch({ type: 'SET_ANIMATION_REGEN_PENDING' })
+            if (animationUrlRef.current) {
+              // User already has an animation — silently regenerate for the new evolution stage
+              generateAnimation('evolution')
+            }
+          }
+        }
+      } catch (err) {
+        const detail = err?.response?.data?.detail || 'agent.errors.resting'
+        dispatch({ type: 'REPLY_ERROR', payload: detail })
+      }
+    },
+    [generateAnimation, generateAvatar, i18n.language]
+  )
+
+  /**
+   * Set the current view context.
+   * Called by individual pages/components to give the agent structured grounding.
+   * Example: setViewContext({ page: 'study_session', deckId: '...', cardIndex: 1, ... })
+   * @param {Object|null} context - Structured screen context object, or null to clear.
+   *   Known shapes:
+   *   - StudyCardContext: { page, deckId, deckName, cardIndex, totalCards, cardType, isFlipped, front, back, isDailyReview }
+   *   - BookPageContext: { page, bookId, bookTitle, chapterIndex, ... }
+   */
+  const setViewContext = useCallback((context) => dispatch({ type: 'SET_VIEW_CONTEXT', payload: context }), [])
+
+  /** Clear the pending nudge after it has been displayed. */
+  const clearNudge = useCallback(() => dispatch({ type: 'CLEAR_NUDGE' }), [])
+
+  /**
+   * Update agent preferences in local state (after a settings save).
+   * @param {{ knowledgeAccessEnabled?: boolean, proactiveNudgingEnabled?: boolean }} prefs
+   */
+  const updateAgentPrefs = useCallback((prefs) => dispatch({ type: 'UPDATE_AGENT_PREFS', payload: prefs }), [])
+
+  const updatePetCustomization = useCallback(({ petName, petSpecies, petColor }) => {
+    dispatch({ type: 'UPDATE_PET_CUSTOMIZATION', payload: { petName, petSpecies, petColor } })
+  }, [])
+
+  const levelUpClear = useCallback(() => dispatch({ type: 'LEVEL_UP_CLEAR' }), [])
+
+  /**
    * Queue a proactive companion intervention.
    * Respects the per-session cap (2 interventions max) and the silent window
    * applied after the user dismisses a message.
    * @param {{ type: string, card_id?: string, [key: string]: any }} event
    */
-  const queueIntervention = useCallback(
-    async (event) => {
-      const {
-        companionInterventionCount,
-        companionSilentUntil,
-        interventionFrequency,
-        focusModeEnabled,
-        isInStudySession,
-        interventionTypes
-      } = stateRef.current
+  const queueIntervention = useCallback(async (event) => {
+    const {
+      companionInterventionCount,
+      companionSilentUntil,
+      interventionFrequency,
+      focusModeEnabled,
+      isInStudySession,
+      interventionTypes
+    } = stateRef.current
 
-      // Gate 1: type enabled?
-      const typeKey = event.type // 'wrong_answer', 'session_summary', etc.
-      if (interventionTypes && !interventionTypes[typeKey]) return
+    // Gate 1: type enabled?
+    const typeKey = event.type // 'wrong_answer', 'session_summary', etc.
+    if (interventionTypes && !interventionTypes[typeKey]) return
 
-      // Gate 2: focus mode blocks in-session types
-      const IN_SESSION_TYPES = ['wrong_answer']
-      if (focusModeEnabled && isInStudySession && IN_SESSION_TYPES.includes(typeKey)) return
+    // Gate 2: focus mode blocks in-session types
+    const IN_SESSION_TYPES = ['wrong_answer']
+    if (focusModeEnabled && isInStudySession && IN_SESSION_TYPES.includes(typeKey)) return
 
-      // Gate 3: per-session cap
-      const CAPS = { conservative: 1, balanced: 2, frequent: 4 }
-      const cap = CAPS[interventionFrequency] ?? 2
-      if (companionInterventionCount >= cap) return
+    // Gate 3: per-session cap
+    const CAPS = { conservative: 1, balanced: 2, frequent: 4 }
+    const cap = CAPS[interventionFrequency] ?? 2
+    if (companionInterventionCount >= cap) return
 
-      // Gate 4: silence window (wrong_answer only)
-      if (typeKey === 'wrong_answer' && companionSilentUntil && Date.now() < companionSilentUntil) return
+    // Gate 4: silence window (wrong_answer only)
+    if (typeKey === 'wrong_answer' && companionSilentUntil && Date.now() < companionSilentUntil) return
 
-      dispatch({ type: 'COMPANION_LOADING' })
+    dispatch({ type: 'COMPANION_LOADING' })
 
-      // 12-second timeout — LLM can be slow; if it exceeds this, dismiss silently
-      const timeoutId = setTimeout(() => {
-        dispatch({ type: 'COMPANION_DISMISS' })
-      }, 12000)
+    // 12-second timeout — LLM can be slow; if it exceeds this, dismiss silently
+    const timeoutId = setTimeout(() => {
+      dispatch({ type: 'COMPANION_DISMISS' })
+    }, 12000)
 
-      try {
-        const result = await agentService.postIntervention(event)
-        clearTimeout(timeoutId)
-        dispatch({ type: 'COMPANION_SUCCESS', payload: result })
-      } catch {
-        clearTimeout(timeoutId)
-        dispatch({ type: 'COMPANION_DISMISS' })
-      }
-    },
-    [user]
-  )
+    try {
+      const result = await agentService.postIntervention(event)
+      clearTimeout(timeoutId)
+      dispatch({ type: 'COMPANION_SUCCESS', payload: result })
+    } catch {
+      clearTimeout(timeoutId)
+      dispatch({ type: 'COMPANION_DISMISS' })
+    }
+  }, [])
 
   /**
    * Queue a pre-session companion intervention.

@@ -30,6 +30,12 @@ export const annualPlanningService = {
     _bustPlanCache()
     return data
   },
+  /** Soft-deletes the plan; the backend cascades to focus areas, goals and reports. */
+  async deleteAnnualPlan(id) {
+    const { data } = await apiClient.delete(ENDPOINTS.annualPlan.delete(id))
+    _bustPlanCache()
+    return data
+  },
   async closeQuarter(payload) {
     // payload: { year, quarter, annual_plan_id, migrated_goals }
     const { data } = await apiClient.post(`${ENDPOINTS.annualPlan.base}/close-quarter`, payload)
@@ -48,14 +54,17 @@ export const annualPlanningService = {
   },
   async createFocusArea(focusArea) {
     const { data } = await apiClient.post(ENDPOINTS.focusAreas.create, focusArea)
+    _bustPlanCache()
     return data
   },
   async updateFocusArea(id, update) {
     const { data } = await apiClient.put(ENDPOINTS.focusAreas.update(id), update)
+    _bustPlanCache()
     return data
   },
   async deleteFocusArea(id) {
     const { data } = await apiClient.delete(ENDPOINTS.focusAreas.delete(id))
+    _bustPlanCache()
     return data
   },
 

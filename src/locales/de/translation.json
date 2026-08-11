@@ -783,7 +783,7 @@
       "ariaLabel": "Annual Planning sections",
       "goalsEmptyTitle": "No goals yet",
       "goalsEmptyBody": "Add goals inside a focus area to see them here.",
-      "errorLoading": "Couldn't load this tab. Please try again.",
+      "errorLoading": "Dein Plan konnte nicht geladen werden. Bitte versuche es erneut.",
       "gridView": "Rasteransicht",
       "listView": "Listenansicht",
       "reportsEmptyTitle": "No reports yet",
@@ -813,7 +813,9 @@
           "Seien Sie spezifisch, was am wichtigsten ist",
           "Wählen Sie Bereiche, die Ihren Werten entsprechen",
           "Denken Sie an ein Gleichgewicht zwischen verschiedenen Lebensbereichen"
-        ]
+        ],
+        "saveError": "Ihre Fokusbereiche konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+        "colorSwatchLabel": "Farbe {{color}} auswählen"
       },
       "examples": [
         "Karrierewachstum",
@@ -851,7 +853,11 @@
       "dragHandle": "Zum Neuordnen ziehen",
       "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
       "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
+      "emptyTitle": "Noch keine Prioritäten",
+      "emptyBody": "Prioritäten sind die wenigen Dinge, die dieses Jahr am wichtigsten sind. Drei bis fünf genügen.",
+      "emptyCta": "Priorität hinzufügen",
+      "addPriority": "Priorität hinzufügen"
     },
     "goal": {
       "add": "Ziel Hinzufügen",
@@ -997,12 +1003,14 @@
       "yearlyPriorities": "Jahresprioritäten",
       "noPrioritiesAdded": "Noch keine Prioritäten hinzugefügt",
       "viewAllPriorities": "Alle {{count}} Prioritäten anzeigen →",
-      "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
-      "quarterEndsToday": "Quarter {{quarter}} ends today",
-      "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
-      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
-      "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
-      "routineCompletion": "erledigt"
+      "quarterEndedOn": "Quartal {{quarter}} endete am {{date}}",
+      "quarterEndsToday": "Quartal {{quarter}} endet heute",
+      "quarterEndingIn": "Quartal {{quarter}} endet in {{count}} Tag",
+      "quarterEndingIn_other": "Quartal {{quarter}} endet in {{count}} Tagen",
+      "routineCompletion": "erledigt",
+      "allYear": "Ganzes Jahr",
+      "reviewNow": "Jetzt überprüfen",
+      "quarterEndingIn_one": "Quartal {{quarter}} endet in {{count}} Tag"
     },
     "quarterReport": {
       "report": "Report",
@@ -1037,6 +1045,52 @@
       "updateFailed": "Aktualisieren von {{type}} fehlgeschlagen",
       "deleteFailed": "Löschen von {{type}} fehlgeschlagen",
       "focusAreaLimit": "Sie können nur 3 Fokusbereiche haben. Löschen Sie einen, um einen anderen hinzuzufügen."
+    },
+    "header": {
+      "progress": "{{percent}}% abgeschlossen",
+      "goalsRatio": "{{completed}} von {{total}} Zielen",
+      "prioritiesCount_one": "{{count}} Priorität",
+      "prioritiesCount_other": "{{count}} Prioritäten",
+      "routineRatio": "{{completed}} von {{total}} Routine-Elementen",
+      "renamePlan": "Plan umbenennen",
+      "quarterLabel": "Quartal",
+      "moreActions": "Weitere Planaktionen",
+      "addFirstGoal": "Erstes Ziel hinzufügen",
+      "deletePlan": "Plan löschen",
+      "deletePlanTitle": "Diesen Plan löschen?",
+      "deletePlanBody": "Dadurch werden „{{title}}“ sowie alle Schwerpunkte, Ziele und Quartalsberichte gelöscht. Das kann nicht rückgängig gemacht werden."
+    },
+    "goals": {
+      "scopeQuarter": "Q{{quarter}} · {{count}} Ziele",
+      "scopeAll": "Ganzes Jahr · {{count}} Ziele",
+      "quarterEmptyTitle": "Nichts für Q{{quarter}} geplant",
+      "quarterEmptyBody": "Du hast Ziele in anderen Quartalen.",
+      "quarterEmptyCta": "Ganzes Jahr anzeigen",
+      "scopeQuarter_one": "Q{{quarter}} · {{count}} Ziel",
+      "scopeQuarter_other": "Q{{quarter}} · {{count}} Ziele",
+      "scopeAll_one": "Ganzes Jahr · {{count}} Ziel",
+      "scopeAll_other": "Ganzes Jahr · {{count}} Ziele"
+    },
+    "reports": {
+      "emptyTitle": "Dein erster Bericht erscheint beim Quartalsabschluss",
+      "emptyBody": "Schließe ein Quartal ab und Nowry macht aus deinen Zielen, Fortschritten und Erfolgen einen Bericht, auf den du zurückblicken kannst.",
+      "emptyCtaReady": "Q{{quarter}} überprüfen",
+      "emptyCountdown_one": "Q{{quarter}} endet in {{count}} Tag",
+      "emptyCountdown_other": "Q{{quarter}} endet in {{count}} Tagen",
+      "historyTitle": "Abgeschlossene Quartale",
+      "goalsAchieved": "Erreichte Ziele",
+      "progress": "Fortschritt",
+      "snapshots": "Momentaufnahmen ({{count}})"
+    },
+    "overview": {
+      "focusAreasTitle": "Schwerpunkte",
+      "prioritiesTitle": "Jahresvorsätze",
+      "prioritiesManage": "Verwalten",
+      "prioritiesEmptyTitle": "Noch keine Prioritäten",
+      "prioritiesEmptyBody": "Benenne die wenigen Dinge, die dieses Jahr am wichtigsten sind. Drei bis fünf genügen.",
+      "prioritiesEmptyCta": "Priorität hinzufügen",
+      "areaGoalCount_one": "{{count}} Ziel",
+      "areaGoalCount_other": "{{count}} Ziele"
     }
   },
   "deckSettings": {
@@ -1457,21 +1511,39 @@
       "explanationPlaceholder": "Zusätzliche Erklärung..."
     },
     "generatedCards": {
-      "titleSelectCards": "New Study Cards",
-      "titleAddToDeck": "Add to Deck",
-      "subtitleSelectCards": "Select the cards you want to add to your study deck.",
-      "subtitleAddToDeck": "Choose a deck to save your cards to.",
-      "generateAgainTooltip": "Generate again",
-      "selectDeckLabel": "Select Deck",
-      "chooseDeckPlaceholder": "Choose a deck...",
-      "orDivider": "OR",
-      "createNewDeck": "Create New Deck",
-      "newDeckNamePlaceholder": "New Deck Name",
-      "createButton": "Create",
-      "cancelButton": "Cancel",
-      "proceedCount": "Proceed ({{count}})",
-      "confirmSave": "Confirm & Save",
-      "saveError": "Failed to save cards. Please try again."
+      "titleSelectCards": "Neue Lernkarten",
+      "titleAddToDeck": "Zum Stapel hinzufügen",
+      "subtitleSelectCards": "Wähle die Karten aus, die du deinem Lernstapel hinzufügen möchtest.",
+      "subtitleAddToDeck": "Wähle einen Stapel, um deine Karten zu speichern.",
+      "generateAgainTooltip": "Erneut generieren",
+      "cancelButton": "Abbrechen",
+      "proceedCount": "Weiter ({{count}})",
+      "confirmSave": "Bestätigen & speichern",
+      "saveError": "Karten konnten nicht gespeichert werden. Bitte versuche es erneut.",
+      "selectAll": "Alle auswählen",
+      "selectAllAria": "Alle Karten auswählen",
+      "selectedCount": "{{count}} von {{total}} ausgewählt"
+    },
+    "saveToDeck": {
+      "selectDeckLabel": "Stapel auswählen",
+      "chooseDeckPlaceholder": "Stapel wählen...",
+      "orDivider": "ODER",
+      "createNewDeck": "Neuen Stapel erstellen",
+      "namePlaceholder": "Name des neuen Stapels",
+      "createButton": "Erstellen",
+      "cancelButton": "Abbrechen",
+      "batchTagsLabel": "Tags",
+      "tagsLoadError": "Vorhandene Tags konnten nicht geladen werden. Du kannst weiterhin eigene Tags hinzufügen.",
+      "noExistingTags": "Noch keine Tags vorhanden.",
+      "tagsHelperText": "Tags helfen dir später beim Wiederfinden von Karten – sie haben nichts mit dem Deck-Namen oben zu tun.",
+      "addTagPlaceholder": "Tag hinzufügen...",
+      "addTagAria": "Tag hinzufügen",
+      "emptyFlashcard": "Erstelle deinen ersten Karten-Stapel",
+      "emptyFlashcardBody": "Erstelle einen Stapel, um diese Karten zu speichern und zu wiederholen.",
+      "emptyQuiz": "Erstelle deinen ersten Quiz-Stapel",
+      "emptyQuizBody": "Erstelle einen Stapel, um diese Fragen zu speichern und zu wiederholen.",
+      "emptyVisual": "Erstelle deinen ersten visuellen Stapel",
+      "emptyVisualBody": "Erstelle einen Stapel, um diese Diagramme zu speichern und zu wiederholen."
     },
     "session": {
       "mode": {
@@ -1687,6 +1759,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{count}} von {{total}} Karten erstellt",
+      "progressAuto": "{{count}} Karten erstellt...",
+      "generating": "Karten werden erstellt...",
       "retry": "Erneut versuchen",
       "retryAria": "Kartenerstellung erneut versuchen",
       "emptyTitle": "Keine Karten erstellt",
@@ -1796,6 +1870,32 @@
         "er": "ER Diagram"
       }
     }
+  },
+  "aiVisualizer": {
+    "title": "KI-Visualisierer",
+    "subtitle": "Erstelle Diagramme aus deinem Lerninhalt.",
+    "closeAria": "Schließen",
+    "vizTypeLabel": "Diagrammtyp",
+    "vizTypeAria": "Diagrammtyp auswählen",
+    "vizType": {
+      "mindmap": "Mindmap",
+      "flowchart": "Flussdiagramm",
+      "sequence": "Sequenzdiagramm",
+      "timeline": "Zeitleiste"
+    },
+    "generateButton": "Generieren",
+    "generateAria": "Diagramm generieren",
+    "generating": "Diagramm wird erstellt...",
+    "explanationLabel": "Erklärung",
+    "diagramErrorTitle": "Diagrammfehler",
+    "diagramErrorBody": "Diagramm konnte nicht gerendert werden. Die generierte Syntax könnte ungültig sein. Bitte versuche es erneut.",
+    "saveButton": "Speichern",
+    "saveAria": "Diagramm im Stapel speichern",
+    "cancelButton": "Abbrechen",
+    "emptyTitle": "Noch kein Diagramm",
+    "emptyBody": "Wähle einen Diagrammtyp und generiere eines aus deinem Inhalt.",
+    "titleField": "Titel",
+    "titlePrefix": "Visuell"
   },
   "accountSettings": {
     "plan": {

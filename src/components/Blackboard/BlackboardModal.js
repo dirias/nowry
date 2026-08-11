@@ -423,7 +423,7 @@ export default function BlackboardModal({ open, onClose }) {
         setActiveBoardId(BOARD_ID)
       })
       .finally(() => setBoardsLoading(false))
-  }, [open])
+  }, [open, t])
 
   const handleSelectBoard = (board) => {
     setActiveBoardId(board.id)

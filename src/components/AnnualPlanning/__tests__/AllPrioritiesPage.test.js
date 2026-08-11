@@ -4,9 +4,18 @@
  * toggle + revert-on-error, drag-end reorder scoped to active-only ids.
  * Task 2: Show/Hide inactive toggle visibility + 3-section render (covered by
  * the same DOM assertions since the split/toggle state drives what renders).
+ *
+ * FE-AP-6 update: AllPrioritiesPage is now a child route of AnnualPlanningLayout
+ * and reads plan data from useOutletContext() instead of calling useAnnualPlan.
+ * These tests therefore mount it under a real router whose parent route supplies
+ * the context, rather than mocking the hook. The `priorities`/`setPriorities` pair
+ * lives in the harness because the layout owns that state now — the optimistic
+ * flip and the revert-on-rejection still exercise exactly the same transitions,
+ * they just round-trip through outlet context instead of local component state.
  */
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -30,20 +39,9 @@ jest.mock('../../../api/services', () => ({
   }
 }))
 
-jest.mock('../../../hooks/useAnnualPlan', () => ({
-  useAnnualPlan: jest.fn()
-}))
-
-jest.mock('../../../context/AuthContext', () => ({
-  useAuth: () => ({ user: { uid: 'test-user' } })
-}))
-
-// PriorityDialog and AnnualPlanningTabBar are pre-existing, unchanged
-// components out of scope for this plan (PriorityDialog pulls in
-// tasksService via a direct submodule import that bypasses the barrel
-// mock above; AnnualPlanningTabBar needs a Router context). Stub both.
+// PriorityDialog pulls in tasksService via a direct submodule import that
+// bypasses the barrel mock above. Out of scope for this plan — stub it.
 jest.mock('../PriorityDialog', () => () => null)
-jest.mock('../AnnualPlanningTabBar', () => () => null)
 
 let capturedOnDragEnd = null
 jest.mock('@dnd-kit/core', () => ({
@@ -80,7 +78,6 @@ jest.mock('@dnd-kit/sortable', () => ({
   })
 }))
 
-const { useAnnualPlan } = require('../../../hooks/useAnnualPlan')
 const { annualPlanningService } = require('../../../api/services')
 const AllPrioritiesPage = require('../AllPrioritiesPage').default
 
@@ -99,17 +96,26 @@ const basePriorities = [
   makePriority({ _id: 'completed1', title: 'Completed One', is_active: true, is_completed: true })
 ]
 
-const mockHook = (overrides = {}) => {
-  useAnnualPlan.mockReturnValue({
-    plan: { _id: 'plan1' },
-    areas: [],
-    priorities: basePriorities,
-    loading: false,
-    error: null,
-    reload: jest.fn(),
-    ...overrides
-  })
+/**
+ * Stands in for AnnualPlanningLayout: owns the priorities state and hands it to
+ * the tab through <Outlet context={...} />, which is exactly how the real shell
+ * feeds this component.
+ */
+const ContextProvider = ({ initialPriorities, plan, reload }) => {
+  const [priorities, setPriorities] = React.useState(initialPriorities)
+  return <Outlet context={{ plan, areas: [], priorities, setPriorities, loading: false, error: null, reload }} />
 }
+
+const renderPage = ({ priorities = basePriorities, plan = { _id: 'plan1' }, reload = jest.fn() } = {}) =>
+  render(
+    <MemoryRouter initialEntries={['/annual-planning/priorities']}>
+      <Routes>
+        <Route path='/annual-planning' element={<ContextProvider initialPriorities={priorities} plan={plan} reload={reload} />}>
+          <Route path='priorities' element={<AllPrioritiesPage />} />
+        </Route>
+      </Routes>
+    </MemoryRouter>
+  )
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -118,8 +124,7 @@ beforeEach(() => {
 
 describe('Phase 24 PRI-01/PRI-03: active/inactive/completed split + inactive toggle', () => {
   it('Test 1: active priorities render immediately, inactive is hidden behind the toggle, completed renders inline', () => {
-    mockHook()
-    render(<AllPrioritiesPage />)
+    renderPage()
 
     expect(screen.getByText('Active One')).toBeInTheDocument()
     expect(screen.getByText('Active Two')).toBeInTheDocument()
@@ -129,8 +134,7 @@ describe('Phase 24 PRI-01/PRI-03: active/inactive/completed split + inactive tog
   })
 
   it('clicking Show inactive (N) reveals the inactive section and flips the label to Hide inactive', () => {
-    mockHook()
-    render(<AllPrioritiesPage />)
+    renderPage()
 
     fireEvent.click(screen.getByText('annualPlanning.priority.showInactive:1'))
 
@@ -144,10 +148,9 @@ describe('Phase 24 PRI-01/PRI-03: active/inactive/completed split + inactive tog
   })
 
   it('the toggle is not rendered when there are no inactive priorities', () => {
-    mockHook({
+    renderPage({
       priorities: [makePriority({ _id: 'active1', title: 'Active One', is_active: true, is_completed: false })]
     })
-    render(<AllPrioritiesPage />)
 
     expect(screen.queryByText(/showInactive/)).not.toBeInTheDocument()
   })
@@ -155,11 +158,10 @@ describe('Phase 24 PRI-01/PRI-03: active/inactive/completed split + inactive tog
 
 describe('Phase 24 PRI-01 (D-04): optimistic is_active toggle', () => {
   it('Test 2: clicking the flag icon flips local is_active immediately (the row leaves the active section) and calls updatePriority', async () => {
-    mockHook({
+    annualPlanningService.updatePriority.mockResolvedValue({})
+    renderPage({
       priorities: [makePriority({ _id: 'active1', title: 'Active One', is_active: true, is_completed: false })]
     })
-    annualPlanningService.updatePriority.mockResolvedValue({})
-    render(<AllPrioritiesPage />)
 
     fireEvent.click(screen.getByLabelText('annualPlanning.priority.markInactive'))
 
@@ -173,11 +175,10 @@ describe('Phase 24 PRI-01 (D-04): optimistic is_active toggle', () => {
   })
 
   it('Test 3: reverts local is_active when updatePriority rejects, restoring the priority to the active section', async () => {
-    mockHook({
+    annualPlanningService.updatePriority.mockRejectedValue(new Error('network error'))
+    renderPage({
       priorities: [makePriority({ _id: 'active1', title: 'Active One', is_active: true, is_completed: false })]
     })
-    annualPlanningService.updatePriority.mockRejectedValue(new Error('network error'))
-    render(<AllPrioritiesPage />)
 
     fireEvent.click(screen.getByLabelText('annualPlanning.priority.markInactive'))
     expect(screen.queryByLabelText('annualPlanning.priority.markInactive')).not.toBeInTheDocument()
@@ -189,9 +190,8 @@ describe('Phase 24 PRI-01 (D-04): optimistic is_active toggle', () => {
 
 describe('Phase 24 PRI-04 (D-07, D-08): drag-to-reorder active priorities only', () => {
   it('Test 4: dragging an active priority calls reorderPriorities with only active, non-completed ids in the new order', async () => {
-    mockHook()
     annualPlanningService.reorderPriorities.mockResolvedValue({})
-    render(<AllPrioritiesPage />)
+    renderPage()
 
     expect(capturedOnDragEnd).toBeInstanceOf(Function)
     await capturedOnDragEnd({ active: { id: 'active2' }, over: { id: 'active1' } })
@@ -200,8 +200,7 @@ describe('Phase 24 PRI-04 (D-07, D-08): drag-to-reorder active priorities only',
   })
 
   it('does not call reorderPriorities when dropped in the same position', async () => {
-    mockHook()
-    render(<AllPrioritiesPage />)
+    renderPage()
 
     await capturedOnDragEnd({ active: { id: 'active1' }, over: { id: 'active1' } })
 

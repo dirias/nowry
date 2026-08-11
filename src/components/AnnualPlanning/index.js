@@ -1,4 +1,5 @@
-export { default as AnnualPlanningHome } from './AnnualPlanningHome'
+export { default as AnnualPlanningLayout } from './AnnualPlanningLayout'
+export { default as OverviewTabView } from './OverviewTabView'
 export { default as FocusAreaSetup } from './FocusAreaSetup'
 export { default as GoalDialog } from './GoalDialog'
 export { default as FocusAreaView } from './FocusAreaView'

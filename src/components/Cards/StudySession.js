@@ -505,7 +505,7 @@ export default function StudySession() {
     } else {
       setSessionComplete(true)
     }
-  }, [currentIndex, cards.length])
+  }, [cards.length])
 
   const handleGrade = React.useCallback(
     async (grade) => {
@@ -663,7 +663,7 @@ export default function StudySession() {
         console.warn('Review queued for retry:', cardId, grade)
       }
     },
-    [cards, currentIndex, handleNext, mode]
+    [cards, handleNext, mode, queueIntervention]
   )
 
   const handlePrev = React.useCallback(() => {
@@ -684,7 +684,7 @@ export default function StudySession() {
       setShowExplanation(false)
       setMermaidSvg('')
     }
-  }, [currentIndex])
+  }, [])
 
   const handleFullscreenToggle = React.useCallback(() => {
     setIsFullscreen((prev) => !prev)

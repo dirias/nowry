@@ -55,7 +55,8 @@ const News = lazy(() => import('./pages/News'))
 const PublicBrowse = lazy(() => import('./pages/PublicBrowse'))
 const PublicView = lazy(() => import('./pages/PublicView'))
 const MyLikes = lazy(() => import('./pages/MyLikes'))
-const AnnualPlanningHome = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.AnnualPlanningHome })))
+const AnnualPlanningLayout = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.AnnualPlanningLayout })))
+const OverviewTabView = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.OverviewTabView })))
 const StudyHistory = lazy(() => import('./components/Study/StudyHistory'))
 const FocusAreaSetup = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.FocusAreaSetup })))
 const FocusAreaView = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.FocusAreaView })))
@@ -305,14 +306,25 @@ const AppContent = () => {
                   </ProtectedRoute>
                 }
               />
+              {/* Annual Planning shell — AnnualPlanningLayout owns the single
+                  useAnnualPlan call, the persistent header and the tab bar; all four
+                  tabs below are its children and read data via Outlet context.
+                  Priorities is a child rather than a sibling so it inherits the same
+                  header as every other tab — as a sibling it rendered bare, which is
+                  the inconsistency this whole shell exists to remove. */}
               <Route
                 path='/annual-planning'
                 element={
                   <ProtectedRoute>
-                    <AnnualPlanningHome />
+                    <AnnualPlanningLayout />
                   </ProtectedRoute>
                 }
-              />
+              >
+                <Route index element={<OverviewTabView />} />
+                <Route path='goals' element={<GoalsTabView />} />
+                <Route path='priorities' element={<AllPrioritiesPage />} />
+                <Route path='reports' element={<ReportsTabView />} />
+              </Route>
               <Route
                 path='/annual-planning/setup'
                 element={
@@ -334,30 +346,6 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     <DailyRoutinePlanner />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path='/annual-planning/priorities'
-                element={
-                  <ProtectedRoute>
-                    <AllPrioritiesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path='/annual-planning/goals'
-                element={
-                  <ProtectedRoute>
-                    <GoalsTabView />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path='/annual-planning/reports'
-                element={
-                  <ProtectedRoute>
-                    <ReportsTabView />
                   </ProtectedRoute>
                 }
               />

@@ -1,51 +1,45 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, Typography, Stack, Box, Grid, LinearProgress, Skeleton, Divider } from '@mui/joy'
-import { CheckCircle as CheckCircleIcon, Timeline as TimelineIcon, EmojiEvents as EmojiEventsIcon } from '@mui/icons-material'
-import { annualPlanningService } from '../../api/services'
+import { CheckCircle as CheckCircleIcon, EmojiEvents as EmojiEventsIcon } from '@mui/icons-material'
 
-const QuarterReportsView = ({ planId }) => {
-  const [reports, setReports] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchReports = async () => {
-      if (!planId) return
-      try {
-        const data = await annualPlanningService.getQuarterReports(planId)
-        setReports(data)
-      } catch (error) {
-        console.error('Failed to fetch quarter reports', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchReports()
-  }, [planId])
-
-  if (!loading && reports.length === 0) return null
-
-  const getGoalProgress = (g) => {
-    if (g.status === 'completed') return 100
-    if (g.milestones?.length > 0) {
-      const done = g.milestones.filter((m) => m.completed).length
-      return Math.round((done / g.milestones.length) * 100)
-    }
-    return g.progress || 0
+const getGoalProgress = (g) => {
+  if (g.status === 'completed') return 100
+  if (g.milestones?.length > 0) {
+    const done = g.milestones.filter((m) => m.completed).length
+    return Math.round((done / g.milestones.length) * 100)
   }
+  return g.progress || 0
+}
 
-  const calculateProgress = (goals) => {
-    if (!goals || goals.length === 0) return 0
-    let sum = 0
-    goals.forEach((g) => {
-      sum += getGoalProgress(g)
-    })
-    return Math.round(sum / goals.length)
-  }
+const calculateProgress = (goals) => {
+  if (!goals || goals.length === 0) return 0
+  let sum = 0
+  goals.forEach((g) => {
+    sum += getGoalProgress(g)
+  })
+  return Math.round(sum / goals.length)
+}
+
+/**
+ * QuarterReportsView — pure list renderer for closed-quarter reports.
+ *
+ * It used to `return null` when there were no reports and to fetch its own data,
+ * which is why the Reports tab rendered a blank screen for every user who had not
+ * closed a quarter yet. Empty-state ownership now sits with the parent
+ * (ReportsTabView), which knows the quarter scope and whether closing is available.
+ *
+ * @param {Array}  reports          Reports to render, already ordered by the parent.
+ * @param {boolean} loading         Renders per-card skeletons instead of the list.
+ * @param {number} [highlightQuarter] Quarter to outline as the current scope.
+ */
+const QuarterReportsView = ({ reports = [], loading = false, highlightQuarter = null }) => {
+  const { t } = useTranslation()
 
   return (
     <Box sx={{ mt: 4 }}>
       <Typography level='h4' sx={{ mb: 2 }}>
-        Past Quarters History
+        {t('annualPlanning.reports.historyTitle')}
       </Typography>
 
       {loading && (
@@ -62,13 +56,22 @@ const QuarterReportsView = ({ planId }) => {
         <Grid container spacing={2}>
           {reports.map((report) => {
             const actualProgress = report.progress_percentage || calculateProgress(report.goals_summary)
+            const isScoped = highlightQuarter != null && report.quarter === Number(highlightQuarter)
 
             return (
               <Grid key={report._id} xs={12} md={6}>
-                <Card variant='outlined' sx={{ p: 2, bgcolor: 'background.surface' }}>
+                <Card
+                  variant='outlined'
+                  sx={{
+                    p: 2,
+                    bgcolor: 'background.surface',
+                    borderColor: isScoped ? 'primary.outlinedBorder' : 'divider'
+                  }}
+                >
                   <Stack direction='row' justifyContent='space-between' alignItems='center' mb={2}>
                     <Typography level='title-lg' sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <EmojiEventsIcon sx={{ color: 'warning.plainColor' }} />Q{report.quarter} {report.year} Report
+                      <EmojiEventsIcon sx={{ color: 'warning.plainColor' }} />Q{report.quarter} {report.year}{' '}
+                      {t('annualPlanning.quarterReport.report')}
                     </Typography>
                     <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                       {new Date(report.created_at).toLocaleDateString()}
@@ -79,16 +82,16 @@ const QuarterReportsView = ({ planId }) => {
 
                   <Stack direction='row' spacing={2} sx={{ mt: 2 }}>
                     <Box sx={{ flex: 1 }}>
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary', textTransform: 'uppercase', mb: 0.5 }}>
-                        Goals Achieved
+                      <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 0.5 }}>
+                        {t('annualPlanning.reports.goalsAchieved')}
                       </Typography>
                       <Typography level='title-md'>
                         {report.completed_goals} / {report.total_goals}
                       </Typography>
                     </Box>
                     <Box sx={{ flex: 1 }}>
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary', textTransform: 'uppercase', mb: 0.5 }}>
-                        Total Progress
+                      <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 0.5 }}>
+                        {t('annualPlanning.reports.progress')}
                       </Typography>
                       <Typography level='title-md'>{actualProgress}%</Typography>
                     </Box>
@@ -97,7 +100,7 @@ const QuarterReportsView = ({ planId }) => {
 
                   <Box sx={{ mt: 2 }}>
                     <Typography level='title-sm' sx={{ mb: 1 }}>
-                      Snapshots ({report.goals_summary?.length || 0})
+                      {t('annualPlanning.reports.snapshots', { count: report.goals_summary?.length || 0 })}
                     </Typography>
                     <Stack spacing={1} sx={{ maxHeight: 200, overflowY: 'auto', pr: 1 }}>
                       {report.goals_summary?.map((g) => (
@@ -131,17 +134,13 @@ const QuarterReportsView = ({ planId }) => {
                     <Box sx={{ mt: 3 }}>
                       <Divider sx={{ mb: 2 }} />
                       <Typography level='title-sm' sx={{ mb: 1.5 }}>
-                        Quarterly Reflections
+                        {t('annualPlanning.quarterReport.reflections')}
                       </Typography>
                       <Stack spacing={1.5}>
                         {report.reflections.biggest_wins && (
                           <Box sx={{ p: 1.5, bgcolor: 'success.softBg', borderRadius: 'md' }}>
-                            <Typography
-                              level='body-xs'
-                              fontWeight={700}
-                              sx={{ color: 'success.plainColor', textTransform: 'uppercase', mb: 0.5 }}
-                            >
-                              Biggest Wins
+                            <Typography level='body-xs' fontWeight={700} sx={{ color: 'success.plainColor', mb: 0.5 }}>
+                              {t('annualPlanning.quarterReport.biggestWins')}
                             </Typography>
                             <Typography level='body-sm' sx={{ color: 'text.primary' }}>
                               {report.reflections.biggest_wins}
@@ -150,12 +149,8 @@ const QuarterReportsView = ({ planId }) => {
                         )}
                         {report.reflections.biggest_challenges && (
                           <Box sx={{ p: 1.5, bgcolor: 'danger.softBg', borderRadius: 'md' }}>
-                            <Typography
-                              level='body-xs'
-                              fontWeight={700}
-                              sx={{ color: 'danger.plainColor', textTransform: 'uppercase', mb: 0.5 }}
-                            >
-                              Biggest Challenges
+                            <Typography level='body-xs' fontWeight={700} sx={{ color: 'danger.plainColor', mb: 0.5 }}>
+                              {t('annualPlanning.quarterReport.challenges')}
                             </Typography>
                             <Typography level='body-sm' sx={{ color: 'text.primary' }}>
                               {report.reflections.biggest_challenges}
@@ -164,12 +159,8 @@ const QuarterReportsView = ({ planId }) => {
                         )}
                         {report.reflections.next_quarter_focus && (
                           <Box sx={{ p: 1.5, bgcolor: 'primary.softBg', borderRadius: 'md' }}>
-                            <Typography
-                              level='body-xs'
-                              fontWeight={700}
-                              sx={{ color: 'primary.plainColor', textTransform: 'uppercase', mb: 0.5 }}
-                            >
-                              Next Quarter Focus
+                            <Typography level='body-xs' fontWeight={700} sx={{ color: 'primary.plainColor', mb: 0.5 }}>
+                              {t('annualPlanning.quarterReport.nextFocus')}
                             </Typography>
                             <Typography level='body-sm' sx={{ color: 'text.primary' }}>
                               {report.reflections.next_quarter_focus}
@@ -189,6 +180,4 @@ const QuarterReportsView = ({ planId }) => {
   )
 }
 
-// Needed imported Divider above, adding it via manual replace pattern won't be easily, so I'll just use raw HTML or import if it fails.
-// Just realized I didn't import Divider, fixing next.
 export default QuarterReportsView

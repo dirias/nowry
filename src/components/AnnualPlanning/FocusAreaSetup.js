@@ -17,12 +17,15 @@ import {
   FormControl,
   FormLabel,
   Textarea,
-  IconButton
+  IconButton,
+  Skeleton,
+  Tooltip
 } from '@mui/joy'
 import { ArrowForward as ArrowForwardIcon, ArrowBack as ArrowBackIcon, Check as CheckIcon } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { useNotification } from '../../context/NotificationContext'
 
 const ICONS = ['⭐', '💼', '💪', '💰', '❤️', '🎨', '📚', '🌱', '✈️', '🏠']
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6']
@@ -30,10 +33,12 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 const FocusAreaSetup = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { showNotification } = useNotification()
   const [activeStep, setActiveStep] = useState(0)
   const [planId, setPlanId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   const [areas, setAreas] = useState([
     { name: '', description: '', icon: '⭐', color: COLORS[0] },
@@ -118,23 +123,28 @@ const FocusAreaSetup = () => {
   const updateArea = handleAreaChange
 
   const handleSubmit = async () => {
-    if (!planId) return
+    // Guard against double-submit (e.g. a slow first request + an impatient
+    // second click) racing two full create loops against the 3-area backend limit.
+    if (!planId || submitting) return
 
+    setSubmitting(true)
     try {
       // Always save exactly 3 areas
+      const savedAreas = []
       for (let i = 0; i < REQUIRED_AREAS_COUNT; i++) {
         if (areas[i]._id) {
           // Update existing area
-          await annualPlanningService.updateFocusArea(areas[i]._id, {
+          const updated = await annualPlanningService.updateFocusArea(areas[i]._id, {
             name: areas[i].name,
             description: areas[i].description,
             icon: areas[i].icon,
             color: areas[i].color,
             order: i + 1
           })
+          savedAreas.push(updated)
         } else {
           // Create new area (only if one doesn't exist yet)
-          await annualPlanningService.createFocusArea({
+          const created = await annualPlanningService.createFocusArea({
             annual_plan_id: planId,
             name: areas[i].name,
             description: areas[i].description,
@@ -142,17 +152,25 @@ const FocusAreaSetup = () => {
             color: areas[i].color,
             order: i + 1
           })
+          savedAreas.push(created)
         }
       }
+
+      // Track the IDs we just created so a retry after a partial failure
+      // updates instead of re-creating (and tripping the 3-area limit).
+      setAreas((prev) => prev.map((area, i) => (savedAreas[i] ? { ...area, _id: savedAreas[i]._id || area._id } : area)))
 
       navigate('/annual-planning')
     } catch (error) {
       console.error('Failed to save focus areas:', error)
+      showNotification(t('annualPlanning.focusArea.setup.saveError'), 'error')
+    } finally {
+      setSubmitting(false)
     }
   }
 
   const renderIntro = () => (
-    <Box sx={{ textAlign: 'center', maxWidth: 600, mx: 'auto', mt: 4 }}>
+    <Box sx={{ textAlign: 'center', maxWidth: 700, mx: 'auto', mt: 4 }}>
       <Typography level='h3' sx={{ mb: 2 }}>
         {isEditMode ? t('annualPlanning.focusArea.setup.intro.editTitle') : t('annualPlanning.focusArea.setup.intro.title')}
       </Typography>
@@ -180,7 +198,7 @@ const FocusAreaSetup = () => {
   )
 
   const renderAreaStep = (index) => (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 700, mx: 'auto', mt: 4 }}>
       <Typography level='body-sm' sx={{ mb: 1 }}>
         {t('annualPlanning.focusArea.setup.areaOf', { current: index + 1, total: 3 })}
       </Typography>
@@ -225,20 +243,27 @@ const FocusAreaSetup = () => {
           <FormLabel sx={{ mb: 1.5 }}>{t('annualPlanning.focusArea.setup.colorTheme')}</FormLabel>
           <Stack direction='row' spacing={1}>
             {COLORS.map((color) => (
-              <IconButton
-                key={color}
-                onClick={() => updateArea(index, 'color', color)}
-                sx={{
-                  bgcolor: color,
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  transform: areas[index].color === color ? 'scale(1.2)' : 'none',
-                  border: areas[index].color === color ? '2px solid' : 'none',
-                  borderColor: areas[index].color === color ? 'text.primary' : 'transparent',
-                  '&:hover': { bgcolor: color }
-                }}
-              />
+              <Tooltip key={color} title={t('annualPlanning.focusArea.setup.colorSwatchLabel', { color })}>
+                <IconButton
+                  aria-label={t('annualPlanning.focusArea.setup.colorSwatchLabel', { color })}
+                  onClick={() => updateArea(index, 'color', color)}
+                  sx={{
+                    bgcolor: color,
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    transform: areas[index].color === color ? 'scale(1.2)' : 'none',
+                    border: areas[index].color === color ? '2px solid' : 'none',
+                    borderColor: areas[index].color === color ? 'text.primary' : 'transparent',
+                    '&:hover': { bgcolor: color },
+                    '&:focus-visible': {
+                      outline: '2px solid',
+                      outlineColor: 'primary.outlinedBorder',
+                      outlineOffset: '2px'
+                    }
+                  }}
+                />
+              </Tooltip>
             ))}
           </Stack>
         </Box>
@@ -256,7 +281,7 @@ const FocusAreaSetup = () => {
   )
 
   const renderReview = () => (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 700, mx: 'auto', mt: 4 }}>
       <Typography level='h3' sx={{ mb: 4, textAlign: 'center' }}>
         {t('annualPlanning.focusArea.setup.reviewTitle', { year: new Date().getFullYear() })}
       </Typography>
@@ -279,10 +304,19 @@ const FocusAreaSetup = () => {
         ))}
       </Grid>
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 6 }}>
-        <Button variant='plain' onClick={handleBack}>
+        <Button variant='plain' onClick={handleBack} disabled={submitting}>
           {t('annualPlanning.focusArea.setup.buttons.back')}
         </Button>
-        <Button size='lg' startDecorator={<CheckIcon />} onClick={handleSubmit}>
+        <Button
+          size='lg'
+          startDecorator={<CheckIcon />}
+          onClick={handleSubmit}
+          loading={submitting}
+          disabled={submitting}
+          aria-label={
+            isEditMode ? t('annualPlanning.focusArea.setup.buttons.saveChanges') : t('annualPlanning.focusArea.setup.buttons.finalizePlan')
+          }
+        >
           {isEditMode ? t('annualPlanning.focusArea.setup.buttons.saveChanges') : t('annualPlanning.focusArea.setup.buttons.finalizePlan')}
         </Button>
       </Box>
@@ -290,17 +324,21 @@ const FocusAreaSetup = () => {
   )
 
   return (
-    <Container maxWidth='xl' sx={{ py: 4 }}>
+    <Container maxWidth='md' sx={{ py: 4 }}>
       {loading ? (
-        <Box sx={{ textAlign: 'center', mt: 8 }}>
-          <LinearProgress />
-          <Typography level='body-sm' sx={{ mt: 2 }}>
-            {t('annualPlanning.focusArea.setup.loading')}
-          </Typography>
+        <Box sx={{ maxWidth: 700, mx: 'auto' }}>
+          <Skeleton variant='rectangular' sx={{ mb: 4, borderRadius: 'sm' }} height={4} />
+          <Stack spacing={3} sx={{ mt: 4 }}>
+            <Skeleton variant='text' level='body-sm' width='30%' />
+            <Skeleton variant='text' level='h3' width='60%' />
+            <Skeleton variant='rectangular' sx={{ borderRadius: 'sm' }} height={40} />
+            <Skeleton variant='rectangular' sx={{ borderRadius: 'sm' }} height={96} />
+            <Skeleton variant='rectangular' sx={{ borderRadius: 'sm' }} height={40} width='50%' />
+          </Stack>
         </Box>
       ) : (
         <>
-          <LinearProgress determinate value={((activeStep + 1) / 5) * 100} thickness={4} sx={{ mb: 4, maxWidth: 800, mx: 'auto' }} />
+          <LinearProgress determinate value={((activeStep + 1) / 5) * 100} thickness={4} sx={{ mb: 4, maxWidth: 700, mx: 'auto' }} />
 
           {activeStep === 0 && renderIntro()}
           {activeStep === 1 && renderAreaStep(0)}

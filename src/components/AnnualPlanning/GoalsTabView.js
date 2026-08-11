@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -6,7 +7,6 @@ import {
   Stack,
   Skeleton,
   Button,
-  Container,
   Grid,
   IconButton,
   Tooltip,
@@ -17,15 +17,13 @@ import {
   List,
   ListItem
 } from '@mui/joy'
-import { GridView as GridViewIcon, ViewList as ListIcon } from '@mui/icons-material'
-import useAnnualPlan from '../../hooks/useAnnualPlan'
-import { useAuth } from '../../context/AuthContext'
+import { GridView as GridViewIcon, ViewList as ListIcon, FilterAltOff as FilterAltOffIcon } from '@mui/icons-material'
 import { annualPlanningService } from '../../api/services'
-import AnnualPlanningTabBar from './AnnualPlanningTabBar'
 import GoalCardGrid from './GoalCardGrid'
 import GoalRowList from './GoalRowList'
 import GoalDialog from './GoalDialog'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
+import EmptyState from './EmptyState'
 import { calculateProgress, getHealthStatus } from './FocusAreaView'
 
 /**
@@ -35,19 +33,32 @@ import { calculateProgress, getHealthStatus } from './FocusAreaView'
  * health-status chip, progress bar, milestones Stepper, Activities accordion)
  * is shared with FocusAreaView.js via GoalCardGrid/GoalRowList so both surfaces
  * stay visually consistent.
+ *
+ * Quarter scope: this view renders `quarterGoals` (the layout's ?q=-scoped,
+ * snapshot-aware goal set), never the raw year-wide list. Rendering every goal
+ * under a header that claims "Q3" was a live data-correctness bug, not polish.
  */
 const GoalsTabView = () => {
   const { t } = useTranslation()
-  const { user } = useAuth()
-  const year = new Date().getFullYear()
-  const { goals: allGoals, areas: allAreas, plan, quarterReports, loading, error, reload } = useAnnualPlan(year, user)
+  const {
+    goals: allYearGoals,
+    quarterGoals,
+    areas: allAreas,
+    plan,
+    quarterReports,
+    quarter,
+    setQuarter,
+    loading,
+    error,
+    reload
+  } = useOutletContext()
 
-  // Local mirror of the hook's goals so status/milestone toggles can update
+  // Local mirror of the scoped goals so status/milestone toggles can update
   // optimistically without waiting on a full reload (same pattern as FocusAreaView).
   const [goals, setGoals] = useState([])
   useEffect(() => {
-    setGoals(allGoals)
-  }, [allGoals])
+    setGoals(quarterGoals)
+  }, [quarterGoals])
 
   // View Mode (grid/list), persisted like FocusAreaView's toggle
   const [viewMode, setViewMode] = useState(localStorage.getItem('goals_view_mode') || 'grid')
@@ -211,7 +222,9 @@ const GoalsTabView = () => {
 
   // Yearly objectives across all areas — used by GoalDialog's "Link to Yearly
   // Objective" selector when editing a quarterly goal from this flat view.
-  const yearlyObjectives = goals.filter((g) => g.type === 'yearly' || (!g.type && !g.quarter))
+  // Sourced from the full-year list on purpose: a yearly objective must stay
+  // selectable even when the view is scoped down to a single quarter.
+  const yearlyObjectives = allYearGoals.filter((g) => g.type === 'yearly' || (!g.type && !g.quarter))
 
   const renderGoal = (goal) => {
     const area = getGoalArea(goal)
@@ -245,10 +258,14 @@ const GoalsTabView = () => {
     )
   }
 
-  return (
-    <Container maxWidth='xl' sx={{ py: { xs: 1, md: 1.5 } }}>
-      <AnnualPlanningTabBar />
+  // The layout renders the shared error + retry block above the outlet.
+  if (error && !loading) return null
 
+  const isQuarterScoped = quarter !== 'All'
+  const isFilteredEmpty = !loading && isQuarterScoped && goals.length === 0 && allYearGoals.length > 0
+
+  return (
+    <Box>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         justifyContent='space-between'
@@ -256,9 +273,17 @@ const GoalsTabView = () => {
         spacing={1.5}
         sx={{ mb: 3 }}
       >
-        <Typography level='h2' sx={{ fontWeight: 700 }}>
-          {t('annualPlanning.tabs.goals')}
-        </Typography>
+        <Box>
+          {/* Scope line — states in words what the quarter Select is doing to this list.
+              No view-identity heading here: the tab itself already says "Goals". */}
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+            <Skeleton loading={loading} variant='text' width='14ch'>
+              {isQuarterScoped
+                ? t('annualPlanning.goals.scopeQuarter', { quarter, count: goals.length })
+                : t('annualPlanning.goals.scopeAll', { count: goals.length })}
+            </Skeleton>
+          </Typography>
+        </Box>
 
         <Stack direction='row' spacing={0.5}>
           <Tooltip title={t('annualPlanning.tabs.gridView')}>
@@ -288,28 +313,29 @@ const GoalsTabView = () => {
         </Stack>
       </Stack>
 
-      {error && !loading && (
-        <Stack spacing={1} sx={{ mb: 3, alignItems: 'flex-start' }}>
-          <Typography level='body-sm' color='danger'>
-            {t('annualPlanning.tabs.errorLoading')}
-          </Typography>
-          <Button size='sm' variant='soft' onClick={reload}>
-            {t('common.retry')}
-          </Button>
-        </Stack>
-      )}
-
       {!error && (
         <Skeleton loading={loading}>
-          {!loading && goals.length === 0 ? (
-            <Box>
-              <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
-                {t('annualPlanning.tabs.goalsEmptyTitle')}
-              </Typography>
-              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                {t('annualPlanning.tabs.goalsEmptyBody')}
-              </Typography>
-            </Box>
+          {/* Filtered-empty is deliberately distinct from true-empty: the user has
+              goals, just not in this quarter, so the exit is a scope change — not
+              the "go create your first goal" copy, which would be a lie here. */}
+          {isFilteredEmpty ? (
+            <EmptyState
+              icon={<FilterAltOffIcon sx={{ fontSize: 48, color: 'text.tertiary', opacity: 0.5, mb: 2 }} />}
+              title={t('annualPlanning.goals.quarterEmptyTitle', { quarter })}
+              body={t('annualPlanning.goals.quarterEmptyBody')}
+              action={
+                <Button
+                  size='sm'
+                  variant='soft'
+                  onClick={() => setQuarter('All')}
+                  sx={{ mt: 2, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+                >
+                  {t('annualPlanning.goals.quarterEmptyCta')}
+                </Button>
+              }
+            />
+          ) : !loading && goals.length === 0 ? (
+            <EmptyState title={t('annualPlanning.tabs.goalsEmptyTitle')} body={t('annualPlanning.tabs.goalsEmptyBody')} />
           ) : viewMode === 'grid' ? (
             <Grid container spacing={2}>
               {goals.map(renderGoal)}
@@ -366,7 +392,7 @@ const GoalsTabView = () => {
           </DialogContent>
         </ModalDialog>
       </Modal>
-    </Container>
+    </Box>
   )
 }
 

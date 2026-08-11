@@ -32,7 +32,8 @@ import {
   Clear as ClearIcon,
   MenuBook as MenuBookIcon,
   GridView as GridViewIcon,
-  ViewList as ViewListIcon
+  ViewList as ViewListIcon,
+  PublicRounded as PublicRoundedIcon
 } from '@mui/icons-material'
 import { publicContentService } from '../api/services'
 import Book from '../components/Books/Book'
@@ -179,14 +180,33 @@ const PublicBrowse = () => {
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 4 } }}>
       {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography level='h3' sx={{ mb: 0.5, fontWeight: 600 }}>
+      <Stack direction='row' alignItems='center' sx={{ gap: 1.5, mb: 2 }}>
+        <PublicRoundedIcon
+          sx={{
+            // Matched to the h3 font-size (20/24px) rather than left larger: the glyph is a
+            // filled disc spanning 20 of its 24 viewBox units, so at 28px it rendered 23.3px
+            // tall against a 16.9px cap-height and read as a heavy blob.
+            fontSize: { xs: 20, md: 24 },
+            color: 'text.secondary',
+            opacity: 0.8
+          }}
+          aria-hidden='true'
+        />
+        <Typography
+          level='h3'
+          sx={{
+            fontWeight: 'xl',
+            // LexicalEditor.css targets bare `h3` with `margin: 1.2em 0 0.4em !important`, which
+            // survives a plain `my: 0`. The asymmetric margins (28.8px top vs 9.6px bottom) are
+            // part of this flex item's margin box, so `alignItems: center` was centering that box
+            // and pushing the glyphs 9.6px below the icon. Class specificity beats the element
+            // selector, so !important here is what actually zeroes it.
+            marginBlock: '0 !important'
+          }}
+        >
           {t('public.library')}
         </Typography>
-        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          {t('public.browse')}
-        </Typography>
-      </Box>
+      </Stack>
 
       {/* Search & Filters */}
       <Box sx={{ mb: 3 }}>

@@ -40,8 +40,15 @@ const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear
     next_quarter_focus: ''
   })
 
-  // Filter goals for the target quarter
-  const quarterGoals = goals.filter((g) => g.quarter === targetQuarter && g.year === targetYear)
+  // Filter goals for the target quarter.
+  // Memoised on purpose: a bare .filter() returns a new array every render, which
+  // cascades into a new `pendingGoals` from the useMemo below, which re-runs the
+  // migration-data useEffect, which setStates, which re-renders — an unbounded
+  // "Maximum update depth exceeded" loop for any quarter that has goals.
+  const quarterGoals = React.useMemo(
+    () => goals.filter((g) => g.quarter === targetQuarter && g.year === targetYear),
+    [goals, targetQuarter, targetYear]
+  )
 
   // Compute metrics
   const totalGoals = quarterGoals.length

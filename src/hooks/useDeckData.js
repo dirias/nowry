@@ -6,10 +6,11 @@ import { useAuth } from '../context/AuthContext'
 
 const CACHE_TTL = 60000 // 60 seconds
 
-export function useDeckData() {
+export function useDeckData(deckType) {
   const { user } = useAuth()
-  // Scope cache key to the logged-in user to prevent cross-account data leaks
-  const CACHE_KEY = user?.id ? `decks:all:${user.id}` : null
+  // Scope cache key to the logged-in user (and deck type) to prevent cross-account
+  // data leaks and to keep type-filtered results from colliding with unfiltered ones.
+  const CACHE_KEY = user?.id ? `decks:${deckType || 'all'}:${user.id}` : null
 
   // Pre-seed from cache so remounting shows data instantly
   const [decks, setDecks] = useState(() => (CACHE_KEY ? apiCache.peek(CACHE_KEY) : null) ?? [])
@@ -22,7 +23,7 @@ export function useDeckData() {
     if (!preloaded) setLoading(true)
     setError(null)
     try {
-      const data = await apiCache.get(CACHE_KEY, CACHE_TTL, () => decksService.getAll())
+      const data = await apiCache.get(CACHE_KEY, CACHE_TTL, () => decksService.getAll(deckType))
       if (!isCancelled()) {
         setDecks(data || [])
       }

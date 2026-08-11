@@ -805,7 +805,7 @@
       "ariaLabel": "Annual Planning sections",
       "goalsEmptyTitle": "No goals yet",
       "goalsEmptyBody": "Add goals inside a focus area to see them here.",
-      "errorLoading": "Couldn't load this tab. Please try again.",
+      "errorLoading": "Impossible de charger votre plan. Veuillez réessayer.",
       "gridView": "Vue grille",
       "listView": "Vue liste",
       "reportsEmptyTitle": "No reports yet",
@@ -835,7 +835,9 @@
           "Soyez précis sur ce qui compte le plus",
           "Choisissez des domaines alignés avec vos valeurs",
           "Pensez à l'équilibre entre les différents aspects de la vie"
-        ]
+        ],
+        "saveError": "Nous n'avons pas pu enregistrer vos domaines prioritaires. Veuillez réessayer.",
+        "colorSwatchLabel": "Sélectionner le thème {{color}}"
       },
       "examples": [
         "Croissance Professionnelle",
@@ -873,7 +875,11 @@
       "dragHandle": "Glisser pour réorganiser",
       "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
       "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
+      "emptyTitle": "Aucune priorité pour le moment",
+      "emptyBody": "Les priorités sont les quelques choses qui comptent le plus cette année. Trois à cinq suffisent.",
+      "emptyCta": "Ajouter une priorité",
+      "addPriority": "Ajouter une priorité"
     },
     "goal": {
       "add": "Ajouter un Objectif",
@@ -1019,12 +1025,14 @@
       "yearlyPriorities": "Priorités Annuelles",
       "noPrioritiesAdded": "Aucune priorité ajoutée pour le moment",
       "viewAllPriorities": "Voir les {{count}} priorités →",
-      "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
-      "quarterEndsToday": "Quarter {{quarter}} ends today",
-      "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
-      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
-      "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
-      "routineCompletion": "éléments terminés"
+      "quarterEndedOn": "Le trimestre {{quarter}} s'est terminé le {{date}}",
+      "quarterEndsToday": "Le trimestre {{quarter}} se termine aujourd’hui",
+      "quarterEndingIn": "Le trimestre {{quarter}} se termine dans {{count}} jour",
+      "quarterEndingIn_other": "Le trimestre {{quarter}} se termine dans {{count}} jours",
+      "routineCompletion": "éléments terminés",
+      "allYear": "Toute l'année",
+      "reviewNow": "Passer en revue",
+      "quarterEndingIn_one": "Le trimestre {{quarter}} se termine dans {{count}} jour"
     },
     "quarterReport": {
       "report": "Report",
@@ -1059,6 +1067,52 @@
       "updateFailed": "Échec de la mise à jour de {{type}}",
       "deleteFailed": "Échec de la suppression de {{type}}",
       "focusAreaLimit": "Vous ne pouvez avoir que 3 domaines prioritaires. Supprimez-en un pour en ajouter un autre."
+    },
+    "header": {
+      "progress": "{{percent}} % terminé",
+      "goalsRatio": "{{completed}} objectifs sur {{total}}",
+      "prioritiesCount_one": "{{count}} priorité",
+      "prioritiesCount_other": "{{count}} priorités",
+      "routineRatio": "{{completed}} éléments de routine sur {{total}}",
+      "renamePlan": "Renommer le plan",
+      "quarterLabel": "Trimestre",
+      "moreActions": "Plus d'actions sur le plan",
+      "addFirstGoal": "Ajoutez votre premier objectif",
+      "deletePlan": "Supprimer le plan",
+      "deletePlanTitle": "Supprimer ce plan ?",
+      "deletePlanBody": "Cela supprime « {{title}} » ainsi que ses domaines clés, ses objectifs et ses bilans trimestriels. Cette action est irréversible."
+    },
+    "goals": {
+      "scopeQuarter": "Q{{quarter}} · {{count}} objectifs",
+      "scopeAll": "Toute l'année · {{count}} objectifs",
+      "quarterEmptyTitle": "Rien de prévu pour le Q{{quarter}}",
+      "quarterEmptyBody": "Vous avez des objectifs dans d'autres trimestres.",
+      "quarterEmptyCta": "Voir toute l'année",
+      "scopeQuarter_one": "Q{{quarter}} · {{count}} objectif",
+      "scopeQuarter_other": "Q{{quarter}} · {{count}} objectifs",
+      "scopeAll_one": "Toute l'année · {{count}} objectif",
+      "scopeAll_other": "Toute l'année · {{count}} objectifs"
+    },
+    "reports": {
+      "emptyTitle": "Votre premier bilan arrive à la clôture du trimestre",
+      "emptyBody": "Clôturez un trimestre et Nowry transformera vos objectifs, votre progression et vos réussites en un bilan à relire.",
+      "emptyCtaReady": "Passer en revue le Q{{quarter}}",
+      "emptyCountdown_one": "Le Q{{quarter}} se clôture dans {{count}} jour",
+      "emptyCountdown_other": "Le Q{{quarter}} se clôture dans {{count}} jours",
+      "historyTitle": "Trimestres clôturés",
+      "goalsAchieved": "Objectifs atteints",
+      "progress": "Progression",
+      "snapshots": "Instantanés ({{count}})"
+    },
+    "overview": {
+      "focusAreasTitle": "Domaines clés",
+      "prioritiesTitle": "Engagements annuels",
+      "prioritiesManage": "Gérer",
+      "prioritiesEmptyTitle": "Aucune priorité pour le moment",
+      "prioritiesEmptyBody": "Nommez les quelques choses qui comptent le plus cette année. Trois à cinq suffisent.",
+      "prioritiesEmptyCta": "Ajouter une priorité",
+      "areaGoalCount_one": "{{count}} objectif",
+      "areaGoalCount_other": "{{count}} objectifs"
     }
   },
   "deckSettings": {
@@ -1479,21 +1533,39 @@
       "explanationPlaceholder": "Explication supplémentaire..."
     },
     "generatedCards": {
-      "titleSelectCards": "New Study Cards",
-      "titleAddToDeck": "Add to Deck",
-      "subtitleSelectCards": "Select the cards you want to add to your study deck.",
-      "subtitleAddToDeck": "Choose a deck to save your cards to.",
-      "generateAgainTooltip": "Generate again",
-      "selectDeckLabel": "Select Deck",
-      "chooseDeckPlaceholder": "Choose a deck...",
-      "orDivider": "OR",
-      "createNewDeck": "Create New Deck",
-      "newDeckNamePlaceholder": "New Deck Name",
-      "createButton": "Create",
-      "cancelButton": "Cancel",
-      "proceedCount": "Proceed ({{count}})",
-      "confirmSave": "Confirm & Save",
-      "saveError": "Failed to save cards. Please try again."
+      "titleSelectCards": "Nouvelles cartes d'étude",
+      "titleAddToDeck": "Ajouter au paquet",
+      "subtitleSelectCards": "Sélectionnez les cartes à ajouter à votre paquet d'étude.",
+      "subtitleAddToDeck": "Choisissez un paquet pour enregistrer vos cartes.",
+      "generateAgainTooltip": "Générer à nouveau",
+      "cancelButton": "Annuler",
+      "proceedCount": "Continuer ({{count}})",
+      "confirmSave": "Confirmer et enregistrer",
+      "saveError": "Échec de l'enregistrement des cartes. Veuillez réessayer.",
+      "selectAll": "Tout sélectionner",
+      "selectAllAria": "Sélectionner toutes les cartes",
+      "selectedCount": "{{count}} sur {{total}} sélectionnées"
+    },
+    "saveToDeck": {
+      "selectDeckLabel": "Sélectionner un paquet",
+      "chooseDeckPlaceholder": "Choisir un paquet...",
+      "orDivider": "OU",
+      "createNewDeck": "Créer un nouveau paquet",
+      "namePlaceholder": "Nom du nouveau paquet",
+      "createButton": "Créer",
+      "cancelButton": "Annuler",
+      "batchTagsLabel": "Tags",
+      "tagsLoadError": "Impossible de charger les tags existants. Vous pouvez toujours ajouter des tags personnalisés.",
+      "noExistingTags": "Aucun tag pour le moment.",
+      "tagsHelperText": "Les tags vous aident à retrouver des cartes plus tard, ils n'ont aucun lien avec le nom du paquet ci-dessus.",
+      "addTagPlaceholder": "Ajouter un tag...",
+      "addTagAria": "Ajouter un tag",
+      "emptyFlashcard": "Créez votre premier paquet de cartes",
+      "emptyFlashcardBody": "Créez un paquet pour commencer à enregistrer ces cartes et les réviser.",
+      "emptyQuiz": "Créez votre premier paquet de quiz",
+      "emptyQuizBody": "Créez un paquet pour commencer à enregistrer ces questions et les réviser.",
+      "emptyVisual": "Créez votre premier paquet visuel",
+      "emptyVisualBody": "Créez un paquet pour commencer à enregistrer ces diagrammes et les réviser."
     },
     "session": {
       "mode": {
@@ -1709,6 +1781,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{count}} carte(s) sur {{total}} générée(s)",
+      "progressAuto": "{{count}} carte(s) générée(s)...",
+      "generating": "Génération des cartes...",
       "retry": "Réessayer",
       "retryAria": "Réessayer la génération de cartes",
       "emptyTitle": "Aucune carte générée",
@@ -1818,6 +1892,32 @@
         "er": "ER Diagram"
       }
     }
+  },
+  "aiVisualizer": {
+    "title": "Visualiseur IA",
+    "subtitle": "Générez des diagrammes à partir de votre contenu d'étude.",
+    "closeAria": "Fermer",
+    "vizTypeLabel": "Type de diagramme",
+    "vizTypeAria": "Sélectionner le type de diagramme",
+    "vizType": {
+      "mindmap": "Carte mentale",
+      "flowchart": "Organigramme",
+      "sequence": "Diagramme de séquence",
+      "timeline": "Chronologie"
+    },
+    "generateButton": "Générer",
+    "generateAria": "Générer le diagramme",
+    "generating": "Génération du diagramme...",
+    "explanationLabel": "Explication",
+    "diagramErrorTitle": "Erreur du diagramme",
+    "diagramErrorBody": "Impossible d'afficher le diagramme. La syntaxe générée est peut-être invalide. Veuillez réessayer.",
+    "saveButton": "Enregistrer",
+    "saveAria": "Enregistrer le diagramme dans le paquet",
+    "cancelButton": "Annuler",
+    "emptyTitle": "Aucun diagramme pour le moment",
+    "emptyBody": "Choisissez un type de diagramme et générez-en un à partir de votre contenu.",
+    "titleField": "Titre",
+    "titlePrefix": "Visuel"
   },
   "accountSettings": {
     "plan": {

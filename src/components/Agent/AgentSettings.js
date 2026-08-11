@@ -403,7 +403,7 @@ export default function AgentSettings() {
       }
     }
     load()
-  }, [])
+  }, [effectiveTier])
 
   const save = useCallback(
     async (key, value) => {

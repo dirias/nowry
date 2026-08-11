@@ -904,8 +904,8 @@ export default function ManageContent({
                             {card.next_review ? new Date(card.next_review).toLocaleDateString() : t('cards.manage_content.reviewNew')}
                           </Chip>
                           {card.tags?.map((tag, idx) => (
-                            <Chip key={idx} size='sm' variant='outlined' sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
-                              {tag}
+                            <Chip key={idx} size='sm' variant='soft' color='neutral' sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
+                              #{tag}
                             </Chip>
                           ))}
                         </Stack>

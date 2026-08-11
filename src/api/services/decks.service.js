@@ -8,9 +8,13 @@ import { ENDPOINTS } from '../utils/endpoints'
 export const decksService = {
   /**
    * Get all decks for the current user
+   * @param {string} [type] - Optional deck type filter ('flashcard' | 'quiz' | 'visual').
+   *   Additive query param on an already-working endpoint — omitted entirely when falsy,
+   *   so existing no-arg callers are unaffected.
    */
-  async getAll() {
-    const { data } = await apiClient.get(ENDPOINTS.decks.all)
+  async getAll(type) {
+    const url = type ? `${ENDPOINTS.decks.all}?type=${encodeURIComponent(type)}` : ENDPOINTS.decks.all
+    const { data } = await apiClient.get(url)
     return data
   },
 

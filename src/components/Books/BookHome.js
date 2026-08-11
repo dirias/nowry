@@ -245,11 +245,11 @@ export default function BookHome() {
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 3, md: 5 } }}>
       {/* Glass Hero Header */}
-      <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
-        <Typography level='h2' fontWeight={800} sx={{ mb: 1, letterSpacing: '-0.02em' }}>
+      <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 } }}>
+        <Typography level='h3' fontWeight={800} sx={{ mt: 0, mb: 0.5, letterSpacing: '-0.02em' }}>
           {t('books.title')}
         </Typography>
-        <Typography level='body-md' sx={{ color: 'text.tertiary', mb: 4, maxWidth: 500, mx: 'auto' }}>
+        <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 3, maxWidth: 500, mx: 'auto' }}>
           {t('books.subtitle')}
         </Typography>
 
@@ -297,7 +297,11 @@ export default function BookHome() {
         <Stack spacing={3} sx={{ mb: 4 }}>
           <Stack direction='row' justifyContent='space-between' alignItems='center'>
             <Typography level='title-sm' fontWeight='lg' sx={{ color: 'text.secondary' }}>
-              📚 {allBooks.length} {t('books.totalBooks')}
+              <AutoStoriesIcon
+                sx={{ fontSize: 16, color: 'text.secondary', opacity: 0.5, mr: 0.5, verticalAlign: 'text-bottom' }}
+                aria-hidden='true'
+              />
+              {allBooks.length} {t('books.totalBooks')}
             </Typography>
 
             <Stack direction='row' spacing={0.5}>

@@ -45,7 +45,8 @@ export const ENDPOINTS = {
     get: '/annual-plan',
     full: '/annual-plan/full',
     create: '/annual-plan',
-    update: (id) => `/annual-plan/${id}`
+    update: (id) => `/annual-plan/${id}`,
+    delete: (id) => `/annual-plan/${id}`
   },
   focusAreas: {
     base: '/annual-plan/focus-areas',

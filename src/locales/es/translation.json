@@ -906,21 +906,39 @@
       "consequence2": "Si está publicado, se despublicará inmediatamente"
     },
     "generatedCards": {
-      "titleSelectCards": "New Study Cards",
-      "titleAddToDeck": "Add to Deck",
-      "subtitleSelectCards": "Select the cards you want to add to your study deck.",
-      "subtitleAddToDeck": "Choose a deck to save your cards to.",
-      "generateAgainTooltip": "Generate again",
-      "selectDeckLabel": "Select Deck",
-      "chooseDeckPlaceholder": "Choose a deck...",
-      "orDivider": "OR",
-      "createNewDeck": "Create New Deck",
-      "newDeckNamePlaceholder": "New Deck Name",
-      "createButton": "Create",
-      "cancelButton": "Cancel",
-      "proceedCount": "Proceed ({{count}})",
-      "confirmSave": "Confirm & Save",
-      "saveError": "Failed to save cards. Please try again."
+      "titleSelectCards": "Nuevas tarjetas de estudio",
+      "titleAddToDeck": "Añadir al mazo",
+      "subtitleSelectCards": "Selecciona las tarjetas que quieres añadir a tu mazo de estudio.",
+      "subtitleAddToDeck": "Elige un mazo para guardar tus tarjetas.",
+      "generateAgainTooltip": "Generar de nuevo",
+      "cancelButton": "Cancelar",
+      "proceedCount": "Continuar ({{count}})",
+      "confirmSave": "Confirmar y guardar",
+      "saveError": "No se pudieron guardar las tarjetas. Inténtalo de nuevo.",
+      "selectAll": "Seleccionar todo",
+      "selectAllAria": "Seleccionar todas las tarjetas",
+      "selectedCount": "{{count}} de {{total}} seleccionadas"
+    },
+    "saveToDeck": {
+      "selectDeckLabel": "Seleccionar mazo",
+      "chooseDeckPlaceholder": "Elige un mazo...",
+      "orDivider": "O",
+      "createNewDeck": "Crear nuevo mazo",
+      "namePlaceholder": "Nombre del nuevo mazo",
+      "createButton": "Crear",
+      "cancelButton": "Cancelar",
+      "batchTagsLabel": "Etiquetas",
+      "tagsLoadError": "No se pudieron cargar las etiquetas existentes. Aún puedes añadir etiquetas personalizadas.",
+      "noExistingTags": "Aún no hay etiquetas.",
+      "tagsHelperText": "Las etiquetas te ayudan a encontrar tarjetas después; no tienen relación con el nombre del mazo de arriba.",
+      "addTagPlaceholder": "Añadir una etiqueta...",
+      "addTagAria": "Añadir etiqueta",
+      "emptyFlashcard": "Crea tu primer mazo de tarjetas",
+      "emptyFlashcardBody": "Crea un mazo para empezar a guardar estas tarjetas y repasarlas.",
+      "emptyQuiz": "Crea tu primer mazo de cuestionarios",
+      "emptyQuizBody": "Crea un mazo para empezar a guardar estas preguntas y repasarlas.",
+      "emptyVisual": "Crea tu primer mazo visual",
+      "emptyVisualBody": "Crea un mazo para empezar a guardar estos diagramas y repasarlos."
     }
   },
   "filters": {
@@ -1088,7 +1106,7 @@
       "ariaLabel": "Annual Planning sections",
       "goalsEmptyTitle": "No goals yet",
       "goalsEmptyBody": "Add goals inside a focus area to see them here.",
-      "errorLoading": "Couldn't load this tab. Please try again.",
+      "errorLoading": "No se pudo cargar tu plan. Inténtalo de nuevo.",
       "gridView": "Vista de cuadrícula",
       "listView": "Vista de lista",
       "reportsEmptyTitle": "No reports yet",
@@ -1129,8 +1147,10 @@
         "descriptionLabel": "Descripción (Tu '¿Por qué?')",
         "descriptionPlaceholder": "¿Por qué es importante esta área para ti este año?",
         "colorTheme": "Tema de Color",
+        "colorSwatchLabel": "Seleccionar tema {{color}}",
         "reviewTitle": "Tu Plan para {{year}}",
         "loading": "Cargando tu plan...",
+        "saveError": "No pudimos guardar tus áreas de enfoque. Por favor, inténtalo de nuevo.",
         "buttons": {
           "back": "Atrás",
           "next": "Siguiente",
@@ -1178,7 +1198,11 @@
       "dragHandle": "Arrastrar para reordenar",
       "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
       "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
+      "emptyTitle": "Aún no hay prioridades",
+      "emptyBody": "Las prioridades son las pocas cosas que más importan este año. Con tres a cinco basta.",
+      "emptyCta": "Añadir una prioridad",
+      "addPriority": "Añadir prioridad"
     },
     "goal": {
       "add": "Agregar Objetivo",
@@ -1333,9 +1357,9 @@
       "overview": "Resumen de tus áreas de enfoque y objetivos",
       "dailyRoutineBtn": "Rutina Diaria",
       "editPlanBtn": "Editar Plan",
-      "totalProgress": "PROGRESO TOTAL",
-      "completedGoals": "OBJETIVOS COMPLETADOS",
-      "topPriorities": "PRINCIPALES PRIORIDADES",
+      "totalProgress": "completado",
+      "completedGoals": "objetivos completados",
+      "topPriorities": "Prioridades principales",
       "noPrioritiesSet": "Sin prioridades establecidas",
       "focusAreas": "Áreas de Enfoque",
       "yearlyPriorities": "Prioridades Anuales",
@@ -1343,12 +1367,14 @@
       "viewAllPriorities": "Ver las {{count}} prioridades →",
       "progress": "Progreso",
       "save": "Guardar",
-      "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
-      "quarterEndsToday": "Quarter {{quarter}} ends today",
-      "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
-      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
-      "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
-      "routineCompletion": "elementos completados"
+      "quarterEndedOn": "El trimestre {{quarter}} terminó el {{date}}",
+      "quarterEndsToday": "El trimestre {{quarter}} termina hoy",
+      "quarterEndingIn": "El trimestre {{quarter}} termina en {{count}} día",
+      "quarterEndingIn_other": "El trimestre {{quarter}} termina en {{count}} días",
+      "routineCompletion": "elementos completados",
+      "allYear": "Todo el año",
+      "reviewNow": "Revisar ahora",
+      "quarterEndingIn_one": "El trimestre {{quarter}} termina en {{count}} día"
     },
     "quarterReport": {
       "report": "Report",
@@ -1383,6 +1409,52 @@
       "updateFailed": "Error al actualizar {{type}}",
       "deleteFailed": "Error al eliminar {{type}}",
       "focusAreaLimit": "Solo puedes tener 3 áreas de enfoque. Elimina una para añadir otra."
+    },
+    "header": {
+      "progress": "{{percent}}% completado",
+      "goalsRatio": "{{completed}} de {{total}} objetivos",
+      "prioritiesCount_one": "{{count}} prioridad",
+      "prioritiesCount_other": "{{count}} prioridades",
+      "routineRatio": "{{completed}} de {{total}} elementos de rutina",
+      "renamePlan": "Renombrar plan",
+      "quarterLabel": "Trimestre",
+      "moreActions": "Más acciones del plan",
+      "addFirstGoal": "Añade tu primer objetivo",
+      "deletePlan": "Eliminar plan",
+      "deletePlanTitle": "¿Eliminar este plan?",
+      "deletePlanBody": "Esto elimina «{{title}}» junto con sus áreas de enfoque, objetivos e informes trimestrales. No se puede deshacer."
+    },
+    "goals": {
+      "scopeQuarter": "Q{{quarter}} · {{count}} objetivos",
+      "scopeAll": "Todo el año · {{count}} objetivos",
+      "quarterEmptyTitle": "Nada planificado para Q{{quarter}}",
+      "quarterEmptyBody": "Tienes objetivos en otros trimestres.",
+      "quarterEmptyCta": "Ver todo el año",
+      "scopeQuarter_one": "Q{{quarter}} · {{count}} objetivo",
+      "scopeQuarter_other": "Q{{quarter}} · {{count}} objetivos",
+      "scopeAll_one": "Todo el año · {{count}} objetivo",
+      "scopeAll_other": "Todo el año · {{count}} objetivos"
+    },
+    "reports": {
+      "emptyTitle": "Tu primer informe se desbloquea al cerrar el trimestre",
+      "emptyBody": "Cierra un trimestre y Nowry convertirá tus objetivos, tu progreso y tus logros en un informe que podrás revisar.",
+      "emptyCtaReady": "Revisar Q{{quarter}}",
+      "emptyCountdown_one": "Q{{quarter}} cierra en {{count}} día",
+      "emptyCountdown_other": "Q{{quarter}} cierra en {{count}} días",
+      "historyTitle": "Trimestres cerrados",
+      "goalsAchieved": "Objetivos logrados",
+      "progress": "Progreso",
+      "snapshots": "Instantáneas ({{count}})"
+    },
+    "overview": {
+      "focusAreasTitle": "Áreas de enfoque",
+      "prioritiesTitle": "Compromisos anuales",
+      "prioritiesManage": "Gestionar",
+      "prioritiesEmptyTitle": "Aún no hay prioridades",
+      "prioritiesEmptyBody": "Nombra las pocas cosas que más importan este año. Con tres a cinco basta.",
+      "prioritiesEmptyCta": "Añadir una prioridad",
+      "areaGoalCount_one": "{{count}} objetivo",
+      "areaGoalCount_other": "{{count}} objetivos"
     }
   },
   "focusBar": {
@@ -2362,6 +2434,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{count}} de {{total}} tarjetas generadas",
+      "progressAuto": "{{count}} tarjetas generadas...",
+      "generating": "Generando tarjetas...",
       "retry": "Reintentar",
       "retryAria": "Reintentar la generación de tarjetas",
       "emptyTitle": "No se generaron tarjetas",
@@ -2473,6 +2547,32 @@
         "er": "ER Diagram"
       }
     }
+  },
+  "aiVisualizer": {
+    "title": "Visualizador IA",
+    "subtitle": "Genera diagramas a partir de tu contenido de estudio.",
+    "closeAria": "Cerrar",
+    "vizTypeLabel": "Tipo de diagrama",
+    "vizTypeAria": "Seleccionar tipo de diagrama",
+    "vizType": {
+      "mindmap": "Mapa mental",
+      "flowchart": "Diagrama de flujo",
+      "sequence": "Diagrama de secuencia",
+      "timeline": "Línea de tiempo"
+    },
+    "generateButton": "Generar",
+    "generateAria": "Generar diagrama",
+    "generating": "Generando diagrama...",
+    "explanationLabel": "Explicación",
+    "diagramErrorTitle": "Error en el diagrama",
+    "diagramErrorBody": "No se pudo renderizar el diagrama. La sintaxis generada puede ser inválida. Inténtalo de nuevo.",
+    "saveButton": "Guardar",
+    "saveAria": "Guardar diagrama en el mazo",
+    "cancelButton": "Cancelar",
+    "emptyTitle": "Aún no hay diagrama",
+    "emptyBody": "Elige un tipo de diagrama y genera uno a partir de tu contenido.",
+    "titleField": "Título",
+    "titlePrefix": "Visual"
   },
   "accountSettings": {
     "plan": {

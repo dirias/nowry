@@ -1200,16 +1200,34 @@
       "subtitleSelectCards": "Select the cards you want to add to your study deck.",
       "subtitleAddToDeck": "Choose a deck to save your cards to.",
       "generateAgainTooltip": "Generate again",
+      "cancelButton": "Cancel",
+      "proceedCount": "Proceed ({{count}})",
+      "confirmSave": "Confirm & Save",
+      "saveError": "Failed to save cards. Please try again.",
+      "selectAll": "Select all",
+      "selectAllAria": "Select all cards",
+      "selectedCount": "{{count}} of {{total}} selected"
+    },
+    "saveToDeck": {
       "selectDeckLabel": "Select Deck",
       "chooseDeckPlaceholder": "Choose a deck...",
       "orDivider": "OR",
       "createNewDeck": "Create New Deck",
-      "newDeckNamePlaceholder": "New Deck Name",
+      "namePlaceholder": "New Deck Name",
       "createButton": "Create",
       "cancelButton": "Cancel",
-      "proceedCount": "Proceed ({{count}})",
-      "confirmSave": "Confirm & Save",
-      "saveError": "Failed to save cards. Please try again."
+      "batchTagsLabel": "Tags",
+      "tagsLoadError": "Couldn't load existing tags. You can still add custom tags.",
+      "noExistingTags": "No existing tags yet.",
+      "tagsHelperText": "Tags help you find cards later — they're separate from the deck name above.",
+      "addTagPlaceholder": "Add a tag...",
+      "addTagAria": "Add tag",
+      "emptyFlashcard": "Start your first flashcard deck",
+      "emptyFlashcardBody": "Create a deck to start saving these flashcards for review.",
+      "emptyQuiz": "Start your first quiz deck",
+      "emptyQuizBody": "Create a deck to start saving these questions for review.",
+      "emptyVisual": "Start your first visual deck",
+      "emptyVisualBody": "Create a deck to start saving these diagrams for review."
     }
   },
   "filters": {
@@ -1385,7 +1403,7 @@
       "ariaLabel": "Annual Planning sections",
       "goalsEmptyTitle": "No goals yet",
       "goalsEmptyBody": "Add goals inside a focus area to see them here.",
-      "errorLoading": "Couldn't load this tab. Please try again.",
+      "errorLoading": "Couldn't load your plan. Please try again.",
       "gridView": "Grid view",
       "listView": "List view",
       "reportsEmptyTitle": "No reports yet",
@@ -1426,8 +1444,10 @@
         "descriptionLabel": "Description (Your 'Why')",
         "descriptionPlaceholder": "Why is this area important to you this year?",
         "colorTheme": "Color Theme",
+        "colorSwatchLabel": "Select {{color}} theme",
         "reviewTitle": "Your Plan for {{year}}",
         "loading": "Loading your plan...",
+        "saveError": "We couldn't save your focus areas. Please try again.",
         "buttons": {
           "back": "Back",
           "next": "Next",
@@ -1468,7 +1488,11 @@
       "dragHandle": "Drag to reorder",
       "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
       "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location."
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
+      "emptyTitle": "No priorities yet",
+      "emptyBody": "Priorities are the few things that matter most this year. Three to five is plenty.",
+      "emptyCta": "Add a priority",
+      "addPriority": "Add priority"
     },
     "goal": {
       "add": "Add Goal",
@@ -1643,9 +1667,9 @@
       "overview": "Overview of your focus areas and goals",
       "dailyRoutineBtn": "Daily Routine",
       "editPlanBtn": "Edit Plan",
-      "totalProgress": "TOTAL PROGRESS",
-      "completedGoals": "COMPLETED GOALS",
-      "topPriorities": "TOP PRIORITIES",
+      "totalProgress": "complete",
+      "completedGoals": "goals complete",
+      "topPriorities": "Top priorities",
       "noPrioritiesSet": "No priorities set",
       "focusAreas": "Focus Areas",
       "yearlyPriorities": "Yearly Priorities",
@@ -1657,9 +1681,9 @@
       "quarterEndedOn": "Quarter {{quarter}} ended on {{date}}",
       "quarterEndsToday": "Quarter {{quarter}} ends today",
       "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
-      "quarterEndingIn_plural": "Quarter {{quarter}} ends in {{count}} days",
       "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
-      "routineCompletion": "items done"
+      "routineCompletion": "items done",
+      "allYear": "All year"
     },
     "quarterReport": {
       "report": "Report",
@@ -1694,6 +1718,52 @@
       "updateFailed": "Failed to update {{type}}",
       "deleteFailed": "Failed to delete {{type}}",
       "focusAreaLimit": "You can only have 3 focus areas. Delete one to add another."
+    },
+    "header": {
+      "progress": "{{percent}}% complete",
+      "goalsRatio": "{{completed}} of {{total}} goals",
+      "prioritiesCount_one": "{{count}} priority",
+      "prioritiesCount_other": "{{count}} priorities",
+      "routineRatio": "{{completed}} of {{total}} routine items",
+      "renamePlan": "Rename plan",
+      "quarterLabel": "Quarter",
+      "moreActions": "More plan actions",
+      "addFirstGoal": "Add your first goal",
+      "deletePlan": "Delete plan",
+      "deletePlanTitle": "Delete this plan?",
+      "deletePlanBody": "This deletes \"{{title}}\" along with its focus areas, goals and quarter reports. This cannot be undone."
+    },
+    "goals": {
+      "scopeQuarter": "Q{{quarter}} · {{count}} goals",
+      "scopeAll": "All year · {{count}} goals",
+      "quarterEmptyTitle": "Nothing planned for Q{{quarter}}",
+      "quarterEmptyBody": "You have goals in other quarters.",
+      "quarterEmptyCta": "View all year",
+      "scopeQuarter_one": "Q{{quarter}} · {{count}} goal",
+      "scopeQuarter_other": "Q{{quarter}} · {{count}} goals",
+      "scopeAll_one": "All year · {{count}} goal",
+      "scopeAll_other": "All year · {{count}} goals"
+    },
+    "reports": {
+      "emptyTitle": "Your first report unlocks at quarter close",
+      "emptyBody": "Close a quarter and Nowry turns your goals, progress, and wins into a report you can look back on.",
+      "emptyCtaReady": "Review Q{{quarter}}",
+      "emptyCountdown_one": "Q{{quarter}} closes in {{count}} day",
+      "emptyCountdown_other": "Q{{quarter}} closes in {{count}} days",
+      "historyTitle": "Closed Quarters",
+      "goalsAchieved": "Goals achieved",
+      "progress": "Progress",
+      "snapshots": "Snapshots ({{count}})"
+    },
+    "overview": {
+      "focusAreasTitle": "Focus Areas",
+      "prioritiesTitle": "Yearly Commitments",
+      "prioritiesManage": "Manage",
+      "prioritiesEmptyTitle": "No priorities yet",
+      "prioritiesEmptyBody": "Name the few things that matter most this year. Three to five is plenty.",
+      "prioritiesEmptyCta": "Add a priority",
+      "areaGoalCount_one": "{{count}} goal",
+      "areaGoalCount_other": "{{count}} goals"
     }
   },
   "editor": {
@@ -2581,6 +2651,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{count}} of {{total}} cards generated",
+      "progressAuto": "{{count}} cards generated...",
+      "generating": "Generating cards...",
       "retry": "Retry",
       "retryAria": "Retry card generation",
       "emptyTitle": "No cards generated",
@@ -2606,19 +2678,10 @@
       "explanation": "Explanation",
       "emptyQuestions": "No questions were generated. Try again with more content.",
       "emptyOptions": "No answer options were generated for this question.",
-      "selectDeck": "Select Deck",
-      "selectDeckPlaceholder": "Choose a deck...",
-      "loadingDecks": "Loading decks...",
-      "noQuizDecks": "No quiz decks yet — create one below.",
-      "or": "OR",
-      "createDeck": "Create New Deck",
-      "newDeckName": "New Deck Name",
-      "create": "Create",
       "cancel": "Cancel",
       "proceed": "Proceed to Save ({{n}})",
       "confirmSave": "Confirm & Save",
       "noExplanation": "No explanation provided.",
-      "createDeckError": "Couldn't create the deck. Please try again.",
       "saveError": "Couldn't save these questions. Please try again."
     },
     "generateFromBook": {
@@ -2716,6 +2779,32 @@
         "er": "ER Diagram"
       }
     }
+  },
+  "aiVisualizer": {
+    "title": "AI Visualizer",
+    "subtitle": "Generate diagrams from your study content.",
+    "closeAria": "Close",
+    "vizTypeLabel": "Diagram type",
+    "vizTypeAria": "Select diagram type",
+    "vizType": {
+      "mindmap": "Mind Map",
+      "flowchart": "Flowchart",
+      "sequence": "Sequence Diagram",
+      "timeline": "Timeline"
+    },
+    "generateButton": "Generate",
+    "generateAria": "Generate diagram",
+    "generating": "Generating diagram...",
+    "explanationLabel": "Explanation",
+    "diagramErrorTitle": "Diagram error",
+    "diagramErrorBody": "Unable to render diagram. The generated syntax may be invalid. Please try generating again.",
+    "saveButton": "Save",
+    "saveAria": "Save diagram to deck",
+    "cancelButton": "Cancel",
+    "emptyTitle": "No diagram yet",
+    "emptyBody": "Choose a diagram type and generate one from your content.",
+    "titleField": "Title",
+    "titlePrefix": "Visual"
   },
   "bugs": {
     "filters": {
