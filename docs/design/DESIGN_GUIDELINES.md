@@ -491,6 +491,10 @@ Always use the appropriate Joy UI level for the context — never override `font
 *   **Purpose:** Visual discovery, browsing, selection based on aesthetics or imagery.
 *   **Layout:**
     *   2-column responsive grid on mobile (`Grid xs={6}`)
+    *   **Scope:** this grid rule governs card and tile layouts only. **Form fields are always
+        single-column at `xs`, without exception** — a 2-column grid at 375px yields a ~163px
+        content column, which cannot hold an `Input size='lg'` with a translated label, nor a
+        44×44 touch target beside anything.
     *   3-4 column grid on tablet/desktop (`Grid sm={6} md={4} lg={3}`)
     *   Maximum card height: **30% of card width** (approximate 3:10 aspect ratio)
 *   **Card Design:**
@@ -966,6 +970,15 @@ function BookLibrary() {
 | **Standard Form** | `700px` | Multi-field forms with 4-6 sections |
 | **Complex Form** | `760px` | Multi-section forms with image previews, lists, nested content |
 | **Rich Content** | `800-900px` | Split-view modals, side-by-side comparisons |
+
+#### **`xs` Overrides the Table:**
+
+The widths above apply from `sm` up. At `xs` (<600px), **creation and edit surfaces are full-bleed
+sheets** — `Drawer anchor='bottom'`, `width: '100vw'`, `height: '100dvh'`, `borderRadius: 0`, no
+border — with a sticky footer outside the scroll region. Use `100dvh`, never `100vh`: `vh` does not
+shrink when the on-screen keyboard opens, which pushes the primary action underneath it.
+
+**Confirmation dialogs are exempt** and remain centred at every breakpoint.
 
 #### **Mobile-First Responsive Pattern:**
 
