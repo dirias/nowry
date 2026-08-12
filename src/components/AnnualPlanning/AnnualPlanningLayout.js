@@ -44,6 +44,10 @@ const AnnualPlanningLayout = () => {
     goals: hookGoals,
     priorities: hookPriorities,
     quarterReports: hookQuarterReports,
+    // GET /annual-plan/full already returns every activity for every goal in one
+    // bounded query. Not forwarding it here was the whole reason goal cards fired
+    // a GET /goals/{id}/activities on every expand.
+    activities: hookActivities,
     loading,
     error,
     reload
@@ -289,6 +293,7 @@ const AnnualPlanningLayout = () => {
       plan,
       areas,
       goals: hookGoals,
+      activities: hookActivities,
       priorities,
       setPriorities,
       quarterReports,
@@ -306,6 +311,7 @@ const AnnualPlanningLayout = () => {
       plan,
       areas,
       hookGoals,
+      hookActivities,
       priorities,
       quarterReports,
       loading,

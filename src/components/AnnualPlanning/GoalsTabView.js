@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
   Stack,
-  Skeleton,
   Button,
   Grid,
   IconButton,
@@ -15,28 +14,41 @@ import {
   DialogTitle,
   DialogContent,
   List,
-  ListItem
+  ListItem,
+  Skeleton,
+  Snackbar
 } from '@mui/joy'
 import { GridView as GridViewIcon, ViewList as ListIcon, FilterAltOff as FilterAltOffIcon } from '@mui/icons-material'
 import { annualPlanningService } from '../../api/services'
-import GoalCardGrid from './GoalCardGrid'
-import GoalRowList from './GoalRowList'
+import useGoalCardModel from '../../hooks/useGoalCardModel'
+import GoalCard from './GoalCard'
+import GoalRow from './GoalRow'
 import GoalDialog from './GoalDialog'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import EmptyState from './EmptyState'
-import { calculateProgress, getHealthStatus } from './FocusAreaView'
+import GoalCardSkeleton from './goal/GoalCardSkeleton'
+import GoalRowSkeleton from './goal/GoalRowSkeleton'
+import GoalDetailDrawer from './goal/GoalDetailDrawer'
+
+const focusRing = {
+  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+}
+
+const SKELETON_COUNT = { grid: 6, list: 8 }
 
 /**
- * GoalsTabView — flat, cross-area list of all goals (Phase 23 D-02).
- * Deliberately does NOT group goals under per-focus-area headers/cards — that
- * grouping is FocusAreaView.js's job. The per-goal rendering (lifecycle chip,
- * health-status chip, progress bar, milestones Stepper, Activities accordion)
- * is shared with FocusAreaView.js via GoalCardGrid/GoalRowList so both surfaces
- * stay visually consistent.
+ * GoalsTabView — flat, cross-area list of all goals.
  *
- * Quarter scope: this view renders `quarterGoals` (the layout's ?q=-scoped,
- * snapshot-aware goal set), never the raw year-wide list. Rendering every goal
- * under a header that claims "Q3" was a live data-correctness bug, not polish.
+ * Deliberately does NOT group goals under per-focus-area headers — that is
+ * FocusAreaView.js's job. Per-goal rendering is shared with FocusAreaView via
+ * GoalCard/GoalRow so both surfaces stay identical.
+ *
+ * Quarter scope: renders `quarterGoals` (the layout's ?q=-scoped, snapshot-aware
+ * goal set), never the raw year-wide list.
+ *
+ * Post-ADR-003 this container fetches nothing per goal. Activities arrive with
+ * the plan payload through the outlet context, so no card interaction can fire
+ * a request.
  */
 const GoalsTabView = () => {
   const { t } = useTranslation()
@@ -44,6 +56,7 @@ const GoalsTabView = () => {
     goals: allYearGoals,
     quarterGoals,
     areas: allAreas,
+    activities,
     plan,
     quarterReports,
     quarter,
@@ -54,70 +67,71 @@ const GoalsTabView = () => {
   } = useOutletContext()
 
   // Local mirror of the scoped goals so status/milestone toggles can update
-  // optimistically without waiting on a full reload (same pattern as FocusAreaView).
+  // optimistically without waiting on a full reload.
   const [goals, setGoals] = useState([])
   useEffect(() => {
     setGoals(quarterGoals)
   }, [quarterGoals])
 
-  // View Mode (grid/list), persisted like FocusAreaView's toggle
   const [viewMode, setViewMode] = useState(localStorage.getItem('goals_view_mode') || 'grid')
   const handleViewModeChange = (newMode) => {
     setViewMode(newMode)
     localStorage.setItem('goals_view_mode', newMode)
   }
 
-  // Expanded Activities State
-  const [expandedGoals, setExpandedGoals] = useState(new Set())
-  const [goalActivities, setGoalActivities] = useState({})
+  // Detail drawer
+  const [detailGoalId, setDetailGoalId] = useState(null)
+  // Resolved from the live list, not captured at open time, so the drawer
+  // reflects optimistic milestone toggles made from inside itself.
+  const detailGoal = goals.find((g) => g._id === detailGoalId) || null
 
-  // Expanded Milestones State
-  const [expandedMilestones, setExpandedMilestones] = useState(new Set())
-
-  // Edit/Delete Goal State
+  // Edit/Delete
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState(null)
+  const [dialogSection, setDialogSection] = useState(null)
   const [deletingGoal, setDeletingGoal] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
-  // Error Modal State (blocked completion — unfinished milestones)
+  // Blocked completion (unfinished milestones)
   const [errorModal, setErrorModal] = useState({ open: false, milestones: [] })
 
-  // Resolve each goal's parent focus area — GoalCardGrid/GoalRowList use it for
-  // the accent color, but this view never groups by it.
-  const getGoalArea = (goal) => allAreas.find((a) => a._id === goal.focus_area_id || a._id === goal.focus_area_id?._id)
+  // Failed writes used to reach console.error only — an unhandled Error state.
+  const [toast, setToast] = useState(null)
+  const [pendingGoalId, setPendingGoalId] = useState(null)
 
-  // A goal's quarter can be closed independently of any other goal's — there is
-  // no single active quarter here (unlike FocusAreaView, which is scoped to one
-  // quarter at a time). Yearly objectives are never quarter-locked.
-  const isGoalQuarterClosed = (goal) => {
-    if (!goal.quarter) return false
-    return quarterReports.some((r) => r.quarter === goal.quarter && r.year === plan?.year)
-  }
+  const getGoalArea = useCallback(
+    (goal) => allAreas.find((a) => a._id === goal.focus_area_id || a._id === goal.focus_area_id?._id),
+    [allAreas]
+  )
 
-  const getStatusConfig = (status) => {
-    const configs = {
-      not_started: { label: t('annualPlanning.goal.status.notStarted'), color: 'neutral', icon: '⭕' },
-      in_progress: { label: t('annualPlanning.goal.status.inProgress'), color: 'warning', icon: '🔄' },
-      completed: { label: t('annualPlanning.goal.status.completed'), color: 'success', icon: '✓' }
-    }
-    return configs[status] || configs.not_started
-  }
+  const detailModel = useGoalCardModel(detailGoal, {
+    area: detailGoal ? getGoalArea(detailGoal) : null,
+    activities,
+    quarterReports,
+    planYear: plan?.year
+  })
 
   const handleEditGoal = (goal) => {
     setSelectedGoal(goal)
+    setDialogSection(null)
     setDialogOpen(true)
   }
 
-  const handleDeleteGoal = (goal) => {
-    setDeletingGoal(goal)
+  // Ladder rung 5 — open the form already scrolled to Key Results.
+  const handleAddMilestone = (goal) => {
+    setSelectedGoal(goal)
+    setDialogSection('milestones')
+    setDialogOpen(true)
   }
+
+  const handleDeleteGoal = (goal) => setDeletingGoal(goal)
 
   const confirmDeleteGoal = async () => {
     if (!deletingGoal) return
     setDeleteLoading(true)
     try {
       await annualPlanningService.deleteGoal(deletingGoal._id)
+      setDetailGoalId(null)
       reload()
     } finally {
       setDeleteLoading(false)
@@ -125,11 +139,16 @@ const GoalsTabView = () => {
     }
   }
 
-  const handleStatusChange = async (goal) => {
-    const statusCycle = { not_started: 'in_progress', in_progress: 'completed', completed: 'not_started' }
-    const newStatus = statusCycle[goal.status] || 'in_progress'
+  /**
+   * Explicit status write. Replaces the click-cycle: the caller always names the
+   * target status, so a completed goal can no longer be silently reopened by one
+   * extra click.
+   */
+  const handleStatusChange = async (goal, newStatus) => {
+    if (!newStatus || newStatus === goal.status) return
 
-    // Validate: cannot mark as completed if there are uncompleted milestones
+    // Completion guard — preserved exactly, now covering both the drawer's
+    // Select and the overflow menu's "Mark complete".
     if (newStatus === 'completed' && goal.milestones && goal.milestones.length > 0) {
       const uncompletedMilestones = goal.milestones.filter((m) => !m.completed)
       if (uncompletedMilestones.length > 0) {
@@ -138,25 +157,17 @@ const GoalsTabView = () => {
       }
     }
 
-    // Optimistic update — instant UI response, no reload needed
     setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: newStatus } : g)))
+    setPendingGoalId(goal._id)
 
     try {
       await annualPlanningService.updateGoal(goal._id, { ...goal, status: newStatus })
     } catch (err) {
-      console.error('Failed to update status:', err)
       setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: goal.status } : g)))
+      setToast('annualPlanning.goal.statusUpdateError')
+    } finally {
+      setPendingGoalId(null)
     }
-  }
-
-  const handleToggleMilestones = (goalId) => {
-    const newExpanded = new Set(expandedMilestones)
-    if (newExpanded.has(goalId)) {
-      newExpanded.delete(goalId)
-    } else {
-      newExpanded.add(goalId)
-    }
-    setExpandedMilestones(newExpanded)
   }
 
   const handleToggleMilestone = async (goal, milestoneIndex) => {
@@ -169,100 +180,80 @@ const GoalsTabView = () => {
     }
 
     setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, milestones: updatedMilestones } : g)))
+    setPendingGoalId(goal._id)
 
     try {
       await annualPlanningService.updateGoal(goal._id, { ...goal, milestones: updatedMilestones })
     } catch (err) {
-      console.error('Failed to update milestone:', err)
       setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, milestones: goal.milestones } : g)))
+      setToast('annualPlanning.goal.milestoneUpdateError')
+    } finally {
+      setPendingGoalId(null)
     }
   }
 
-  const handleToggleExpand = async (goalId) => {
-    const newExpanded = new Set(expandedGoals)
-
-    if (newExpanded.has(goalId)) {
-      newExpanded.delete(goalId)
-    } else {
-      newExpanded.add(goalId)
-      if (!goalActivities[goalId]) {
-        try {
-          const activities = await annualPlanningService.getActivities(goalId)
-          setGoalActivities((prev) => ({ ...prev, [goalId]: activities }))
-        } catch (err) {
-          console.error('Failed to load goal activities', err)
-          // null sentinel = fetch failed (distinct from undefined = not yet
-          // fetched, [] = fetched empty) so the Activities accordion renders
-          // its error state instead of an infinite Skeleton.
-          setGoalActivities((prev) => ({ ...prev, [goalId]: null }))
-        }
-      }
-    }
-    setExpandedGoals(newExpanded)
-  }
-
-  const handleGoalSuccess = async () => {
-    await reload()
-    // Refresh activities for any currently expanded goals to stay consistent
-    const expandedIds = Array.from(expandedGoals)
-    if (expandedIds.length > 0) {
-      try {
-        const promises = expandedIds.map((id) => annualPlanningService.getActivities(id))
-        const results = await Promise.all(promises)
-        const newCache = { ...goalActivities }
-        results.forEach((activities, index) => {
-          newCache[expandedIds[index]] = activities
-        })
-        setGoalActivities(newCache)
-      } catch (err) {
-        console.error('Failed to refresh expanded activities', err)
-      }
-    }
-  }
-
-  // Yearly objectives across all areas — used by GoalDialog's "Link to Yearly
-  // Objective" selector when editing a quarterly goal from this flat view.
-  // Sourced from the full-year list on purpose: a yearly objective must stay
-  // selectable even when the view is scoped down to a single quarter.
+  // Yearly objectives across all areas — sourced from the full-year list on
+  // purpose: a yearly objective must stay selectable even when the view is
+  // scoped to a single quarter.
   const yearlyObjectives = allYearGoals.filter((g) => g.type === 'yearly' || (!g.type && !g.quarter))
 
-  const renderGoal = (goal) => {
-    const area = getGoalArea(goal)
-    const isQuarterClosed = isGoalQuarterClosed(goal)
-    const sharedProps = {
-      goal,
-      area,
-      isQuarterClosed,
-      expandedMilestones,
-      expandedGoals,
-      goalActivities,
-      handleStatusChange,
-      handleEditGoal,
-      handleDeleteGoal,
-      handleToggleMilestones,
-      handleToggleMilestone,
-      handleToggleExpand,
-      calculateProgress,
-      getStatusConfig,
-      getHealthStatus
-    }
-
-    return viewMode === 'grid' ? (
-      <Grid key={goal._id} xs={12} md={6}>
-        <GoalCardGrid {...sharedProps} />
-      </Grid>
-    ) : (
-      <Box key={goal._id}>
-        <GoalRowList {...sharedProps} />
-      </Box>
-    )
-  }
+  const goalProps = (goal) => ({
+    goal,
+    area: getGoalArea(goal),
+    activities,
+    quarterReports,
+    planYear: plan?.year,
+    busy: pendingGoalId === goal._id,
+    onOpenDetail: (g) => setDetailGoalId(g._id),
+    onEdit: handleEditGoal,
+    onDelete: handleDeleteGoal,
+    onStatusChange: handleStatusChange,
+    onToggleMilestone: handleToggleMilestone,
+    onAddMilestone: handleAddMilestone,
+    onComplete: (g) => handleStatusChange(g, 'completed')
+  })
 
   // The layout renders the shared error + retry block above the outlet.
   if (error && !loading) return null
 
   const isQuarterScoped = quarter !== 'All'
   const isFilteredEmpty = !loading && isQuarterScoped && goals.length === 0 && allYearGoals.length > 0
+
+  const renderSkeletons = () =>
+    viewMode === 'grid' ? (
+      <Grid container spacing={2}>
+        {Array.from({ length: SKELETON_COUNT.grid }).map((_, i) => (
+          <Grid key={i} xs={12} sm={6} md={6} lg={4}>
+            <GoalCardSkeleton />
+          </Grid>
+        ))}
+      </Grid>
+    ) : (
+      <Stack spacing={0}>
+        {Array.from({ length: SKELETON_COUNT.list }).map((_, i) => (
+          <GoalRowSkeleton key={i} />
+        ))}
+      </Stack>
+    )
+
+  const renderGoals = () =>
+    viewMode === 'grid' ? (
+      <Grid container spacing={2}>
+        {goals.map((goal) => (
+          // 3 columns at lg: 5 goals lay out 3+2 instead of 2+2+1, which is what
+          // removes the orphan card without a filler hack.
+          <Grid key={goal._id} xs={12} sm={6} md={6} lg={4}>
+            <GoalCard {...goalProps(goal)} />
+          </Grid>
+        ))}
+      </Grid>
+    ) : (
+      <Stack spacing={0}>
+        {goals.map((goal) => (
+          <GoalRow key={goal._id} {...goalProps(goal)} />
+        ))}
+      </Stack>
+    )
 
   return (
     <Box>
@@ -274,8 +265,7 @@ const GoalsTabView = () => {
         sx={{ mb: 3 }}
       >
         <Box>
-          {/* Scope line — states in words what the quarter Select is doing to this list.
-              No view-identity heading here: the tab itself already says "Goals". */}
+          {/* Scope line — states in words what the quarter Select is doing to this list. */}
           <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
             <Skeleton loading={loading} variant='text' width='14ch'>
               {isQuarterScoped
@@ -293,7 +283,7 @@ const GoalsTabView = () => {
               color={viewMode === 'grid' ? 'primary' : 'neutral'}
               aria-label={t('annualPlanning.tabs.gridView')}
               onClick={() => handleViewModeChange('grid')}
-              sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+              sx={focusRing}
             >
               <GridViewIcon />
             </IconButton>
@@ -305,7 +295,7 @@ const GoalsTabView = () => {
               color={viewMode === 'list' ? 'primary' : 'neutral'}
               aria-label={t('annualPlanning.tabs.listView')}
               onClick={() => handleViewModeChange('list')}
-              sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+              sx={focusRing}
             >
               <ListIcon />
             </IconButton>
@@ -313,45 +303,49 @@ const GoalsTabView = () => {
         </Stack>
       </Stack>
 
-      {!error && (
-        <Skeleton loading={loading}>
-          {/* Filtered-empty is deliberately distinct from true-empty: the user has
-              goals, just not in this quarter, so the exit is a scope change — not
-              the "go create your first goal" copy, which would be a lie here. */}
-          {isFilteredEmpty ? (
-            <EmptyState
-              icon={<FilterAltOffIcon sx={{ fontSize: 48, color: 'text.tertiary', opacity: 0.5, mb: 2 }} />}
-              title={t('annualPlanning.goals.quarterEmptyTitle', { quarter })}
-              body={t('annualPlanning.goals.quarterEmptyBody')}
-              action={
-                <Button
-                  size='sm'
-                  variant='soft'
-                  onClick={() => setQuarter('All')}
-                  sx={{ mt: 2, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
-                >
-                  {t('annualPlanning.goals.quarterEmptyCta')}
-                </Button>
-              }
-            />
-          ) : !loading && goals.length === 0 ? (
-            <EmptyState title={t('annualPlanning.tabs.goalsEmptyTitle')} body={t('annualPlanning.tabs.goalsEmptyBody')} />
-          ) : viewMode === 'grid' ? (
-            <Grid container spacing={2}>
-              {goals.map(renderGoal)}
-            </Grid>
-          ) : (
-            <Stack spacing={0}>{goals.map(renderGoal)}</Stack>
-          )}
-        </Skeleton>
-      )}
+      {/* Loading renders placeholders inside the real grid rather than gating the
+          whole region, so the layout the user is waiting for stays visible. */}
+      {!error &&
+        (loading ? (
+          renderSkeletons()
+        ) : isFilteredEmpty ? (
+          // Filtered-empty is deliberately distinct from true-empty: the user has
+          // goals, just not in this quarter, so the exit is a scope change — not
+          // the "go create your first goal" copy, which would be a lie here.
+          <EmptyState
+            icon={<FilterAltOffIcon sx={{ fontSize: 48, color: 'text.tertiary', opacity: 0.5, mb: 2 }} />}
+            title={t('annualPlanning.goals.quarterEmptyTitle', { quarter })}
+            body={t('annualPlanning.goals.quarterEmptyBody')}
+            action={
+              <Button size='sm' variant='soft' onClick={() => setQuarter('All')} sx={{ mt: 2, ...focusRing }}>
+                {t('annualPlanning.goals.quarterEmptyCta')}
+              </Button>
+            }
+          />
+        ) : goals.length === 0 ? (
+          <EmptyState title={t('annualPlanning.tabs.goalsEmptyTitle')} body={t('annualPlanning.tabs.goalsEmptyBody')} />
+        ) : (
+          renderGoals()
+        ))}
+
+      <GoalDetailDrawer
+        open={Boolean(detailGoal)}
+        goal={detailGoal}
+        model={detailModel}
+        onClose={() => setDetailGoalId(null)}
+        onEdit={handleEditGoal}
+        onDelete={handleDeleteGoal}
+        onStatusChange={handleStatusChange}
+        onToggleMilestone={handleToggleMilestone}
+      />
 
       <GoalDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         goal={selectedGoal}
-        onSuccess={handleGoalSuccess}
+        onSuccess={reload}
         yearlyObjectives={yearlyObjectives}
+        initialSection={dialogSection}
       />
 
       <DeleteConfirmationModal
@@ -364,17 +358,8 @@ const GoalsTabView = () => {
       />
 
       <Modal open={errorModal.open} onClose={() => setErrorModal({ open: false, milestones: [] })}>
-        <ModalDialog
-          variant='outlined'
-          color='danger'
-          sx={{
-            maxWidth: 500,
-            borderRadius: 'lg',
-            p: 3,
-            boxShadow: 'lg'
-          }}
-        >
-          <DialogTitle sx={{ fontSize: '1.25rem', fontWeight: 700 }}>{t('annualPlanning.goal.completionBlockedTitle')}</DialogTitle>
+        <ModalDialog variant='outlined' color='danger' sx={{ maxWidth: 500, borderRadius: 'lg', p: 3, boxShadow: 'lg' }}>
+          <DialogTitle>{t('annualPlanning.goal.completionBlockedTitle')}</DialogTitle>
           <DialogContent>
             <Typography level='body-sm' sx={{ mb: 2, color: 'text.secondary' }}>
               {t('annualPlanning.goal.completionBlockedBody')}
@@ -386,12 +371,29 @@ const GoalsTabView = () => {
                 </ListItem>
               ))}
             </List>
-            <Button variant='solid' color='danger' onClick={() => setErrorModal({ open: false, milestones: [] })} sx={{ mt: 2 }} fullWidth>
+            <Button
+              variant='solid'
+              color='danger'
+              onClick={() => setErrorModal({ open: false, milestones: [] })}
+              sx={{ mt: 2, ...focusRing }}
+              fullWidth
+            >
               {t('common.close')}
             </Button>
           </DialogContent>
         </ModalDialog>
       </Modal>
+
+      <Snackbar
+        open={Boolean(toast)}
+        onClose={() => setToast(null)}
+        autoHideDuration={4000}
+        color='danger'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {toast ? t(toast) : ''}
+      </Snackbar>
     </Box>
   )
 }

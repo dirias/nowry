@@ -30,6 +30,10 @@ import {
  */
 const useGoalCardModel = (goal, { area = null, activities = null, quarterReports = null, planYear = null } = {}) =>
   useMemo(() => {
+    // Null-safe so a container can call this unconditionally for whichever goal
+    // its detail drawer currently holds, including none.
+    if (!goal) return null
+
     const state = getGoalState(goal)
     const goalActivities = filterGoalActivities(activities, goal?._id)
 
