@@ -36,6 +36,7 @@ import GridViewIcon from '@mui/icons-material/GridView'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 
 export default function BookHome() {
   const { books: allBooks, loading, error: fetchError, reload: fetchBooks } = useBooks()
@@ -73,7 +74,7 @@ export default function BookHome() {
 
   useEffect(() => {
     if (fetchError) {
-      setErrorMessage(t('books.errorFetch', 'Error fetching books'))
+      setErrorMessage(t('books.errorFetch'))
       setShowError(true)
     }
   }, [fetchError, t])
@@ -131,12 +132,12 @@ export default function BookHome() {
         setUploading(false)
       } catch (error) {
         console.error('Error getting preview:', error)
-        setErrorMessage(error.response?.data?.detail || 'Error al procesar el archivo. Por favor, inténtalo de nuevo.')
+        setErrorMessage(error.response?.data?.detail || t('books.errorImport'))
         setShowError(true)
         setUploading(false)
       }
     },
-    [user?.username]
+    [user?.username, t]
   )
 
   const handleConfirmImport = useCallback(
@@ -361,7 +362,7 @@ export default function BookHome() {
                     '&:hover': { bgcolor: 'background.level1' }
                   }}
                 >
-                  Clear Search
+                  {t('books.clearFilters')}
                 </Chip>
               )}
               {availableTags.map((tag) => {
@@ -389,7 +390,7 @@ export default function BookHome() {
                             color: 'primary.solidColor',
                             border: '1px solid',
                             borderColor: 'primary.solidBg',
-                            boxShadow: `0 4px 10px rgba(0,0,0,0.1)`,
+                            boxShadow: 'sm',
                             '&:hover': { filter: 'brightness(0.9)' }
                           }
                         : {
@@ -575,11 +576,12 @@ export default function BookHome() {
                   >
                     {!book.cover_image && <MenuBookIcon sx={{ fontSize: 20, color: 'common.white', opacity: 0.8 }} />}
                     {book.cover_image && (
-                      <img
+                      <Box
+                        component='img'
                         src={book.cover_image}
                         alt={book.title}
                         loading='lazy'
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+                        sx={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
                       />
                     )}
                   </Box>
@@ -590,7 +592,7 @@ export default function BookHome() {
                       {book.title}
                     </Typography>
                     <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                      {book.author || 'Unknown Author'}
+                      {book.author || t('books.unknownAuthor')}
                     </Typography>
                   </Box>
 
@@ -611,7 +613,7 @@ export default function BookHome() {
 
                   {/* Page Count (hide on mobile) */}
                   <Typography level='body-xs' sx={{ display: { xs: 'none', sm: 'block' }, width: 80, color: 'text.tertiary' }}>
-                    {book.page_count ? `${book.page_count} pages` : ''}
+                    {book.page_count ? t('books.pageCount', { count: book.page_count }) : ''}
                   </Typography>
 
                   {/* Actions */}
@@ -655,10 +657,10 @@ export default function BookHome() {
         <ModalDialog
           variant='outlined'
           sx={{
-            width: { xs: '90%', sm: 450 },
+            width: { xs: 'calc(100% - 32px)', sm: 450 },
             maxWidth: 450,
             borderRadius: { xs: 'lg', md: 'xl' },
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+            boxShadow: 'lg',
             p: 0
           }}
         >
@@ -673,25 +675,12 @@ export default function BookHome() {
               textAlign: 'center'
             }}
           >
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                bgcolor: 'success.softBg',
-                color: 'success.solidBg',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mx: 'auto',
-                mb: 1.5,
-                fontSize: 24
-              }}
-            >
-              🎉
-            </Box>
+            {/* An emoji in a 48px circle was decoration carrying no fact, and
+                emoji-as-content is a house-rule violation besides. The icon
+                says "succeeded" on its own; the circle around it said nothing. */}
+            <CheckCircleRoundedIcon aria-hidden='true' sx={{ fontSize: 40, color: 'success.plainColor', mb: 1 }} />
             <Typography level='title-lg' sx={{ fontWeight: 700 }}>
-              Import Successful
+              {t('books.importSuccessTitle')}
             </Typography>
           </Box>
 
@@ -724,7 +713,7 @@ export default function BookHome() {
                   size='lg'
                   fullWidth
                 >
-                  Open Book
+                  {t('books.openBook')}
                 </Button>
               )}
 
@@ -738,7 +727,7 @@ export default function BookHome() {
                 size='lg'
                 fullWidth
               >
-                Continue to Library
+                {t('books.continueToLibrary')}
               </Button>
             </Stack>
           </Box>
@@ -747,7 +736,7 @@ export default function BookHome() {
 
       {showError && (
         <ErrorWindow
-          title='Error'
+          title={t('common.error')}
           error_msg={errorMessage}
           onClose={() => {
             setShowError(false)
