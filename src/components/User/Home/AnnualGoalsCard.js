@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, LinearProgress, Button, Stack, CircularProgress, Sheet } from '@mui/joy'
+import { Box, Typography, LinearProgress, Button, Stack, Sheet, Skeleton } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import { Target, TrendingUp } from 'lucide-react'
 import { annualPlanningService } from '../../../api/services'
+import { GOAL_STATE_COLOR, getGoalProgress, getGoalState } from '../../AnnualPlanning/goalDerivation'
+
+const SKELETON_ROWS = 4
 
 /**
- * AnnualGoalsCard - Shows top annual goals with progress
+ * AnnualGoalsCard — the Home surface's view of the top annual goals.
  *
- * Following DESIGN_GUIDELINES.md:
- * - Minimalistic design
- * - Visual progress indicators
- * - Clear action (View Full Plan)
- * - Theme-aware colors
+ * Repointed at the shared derivation core (ADR-003 / FE-7). It previously
+ * computed progress from `goal.activities[].completed` — a field that exists on
+ * neither the Goal nor the Activity model — so it returned 0 for every goal and
+ * painted every one `danger`, contradicting the Goals tab. Progress and colour
+ * now come from exactly the same functions the Goals tab uses, so the two
+ * surfaces cannot disagree.
  */
 const AnnualGoalsCard = () => {
   const { t } = useTranslation()
@@ -25,18 +29,17 @@ const AnnualGoalsCard = () => {
       setLoading(true)
       const data = await annualPlanningService.getGoals()
 
-      // Sort by progress (show goals needing attention first)
+      // Lowest progress first: the goals needing attention lead.
       const sortedGoals = data
-        .map((goal) => ({
-          ...goal,
-          progress: calculateProgress(goal)
-        }))
-        .sort((a, b) => a.progress - b.progress) // Lowest progress first
-        .slice(0, 4) // Top 4 goals
+        .map((goal) => ({ goal, progress: getGoalProgress(goal), state: getGoalState(goal) }))
+        .sort((a, b) => a.progress.percent - b.progress.percent)
+        .slice(0, 4)
 
       setGoals(sortedGoals)
     } catch (error) {
-      console.error('Error fetching goals:', error)
+      // A fetch failure lands on the same empty state as "no goals yet" rather
+      // than a console-only dead end: the card still offers a way forward.
+      setGoals([])
     } finally {
       setLoading(false)
     }
@@ -46,35 +49,7 @@ const AnnualGoalsCard = () => {
     fetchGoals()
   }, [fetchGoals])
 
-  const calculateProgress = (goal) => {
-    if (!goal.activities || goal.activities.length === 0) return 0
-    const completed = goal.activities.filter((a) => a.completed).length
-    return Math.round((completed / goal.activities.length) * 100)
-  }
-
-  const getProgressColor = (progress) => {
-    if (progress >= 70) return 'success'
-    if (progress >= 40) return 'warning'
-    return 'danger'
-  }
-
-  if (loading) {
-    return (
-      <Sheet
-        variant='outlined'
-        sx={{
-          p: 3,
-          borderRadius: 'lg',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: 240
-        }}
-      >
-        <CircularProgress size='sm' />
-      </Sheet>
-    )
-  }
+  const renderRow = (key, content) => <Box key={key}>{content}</Box>
 
   return (
     <Sheet
@@ -86,58 +61,86 @@ const AnnualGoalsCard = () => {
         display: 'flex',
         flexDirection: 'column',
         transition: 'all 0.2s ease',
-        '&:hover': {
-          boxShadow: 'md',
-          transform: 'translateY(-2px)'
-        }
+        '&:hover': { boxShadow: 'md', transform: 'translateY(-2px)' },
+        '@media (prefers-reduced-motion: reduce)': { transition: 'none', '&:hover': { transform: 'none' } }
       }}
     >
-      {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
         <Target size={24} strokeWidth={2} />
-        <Typography level='title-lg' fontWeight={600}>
-          {t('dashboard.annualGoals.title', 'Annual Goals')}
-        </Typography>
+        <Typography level='title-lg'>{t('dashboard.annualGoals.title')}</Typography>
       </Box>
 
-      {/* Goals List */}
-      {goals.length === 0 ? (
+      {/* Loading keeps the card's real structure on screen — per-row Skeletons,
+          never a spinner standing in for the whole card. */}
+      {loading ? (
+        <Stack spacing={2.5} sx={{ flex: 1 }} aria-busy='true' aria-label={t('dashboard.annualGoals.loadingAria')}>
+          {Array.from({ length: SKELETON_ROWS }).map((_, index) =>
+            renderRow(
+              index,
+              <>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Skeleton variant='text' level='body-sm' width='60%' />
+                  <Skeleton variant='text' level='body-xs' width='2.5rem' />
+                </Box>
+                <Skeleton variant='rectangular' height={6} sx={{ borderRadius: 'sm' }} />
+              </>
+            )
+          )}
+        </Stack>
+      ) : goals.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 4, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 2 }}>
-            {t('dashboard.annualGoals.noGoals', 'No goals set yet')}
+            {t('dashboard.annualGoals.noGoals')}
           </Typography>
-          <Button size='sm' variant='soft' onClick={() => navigate('/annual-planning')}>
-            {t('dashboard.annualGoals.createGoal', 'Create Your First Goal')}
+          <Button
+            size='sm'
+            variant='soft'
+            onClick={() => navigate('/annual-planning')}
+            sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+          >
+            {t('dashboard.annualGoals.createGoal')}
           </Button>
         </Box>
       ) : (
         <>
           <Stack spacing={2.5} sx={{ flex: 1 }}>
-            {goals.map((goal) => (
+            {goals.map(({ goal, progress, state }) => (
               <Box key={goal._id || goal.id}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.primary' }}>
-                    {goal.category}
+                  {/* goal.title, not goal.category — the Goal model has no
+                      `category` field, so that rendered nothing. */}
+                  <Typography
+                    level='body-sm'
+                    sx={{ color: 'text.primary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {goal.title}
                   </Typography>
-                  <Typography level='body-xs' fontWeight={600} sx={{ color: `${getProgressColor(goal.progress)}.600` }}>
-                    {goal.progress}%
+                  <Typography level='body-xs' sx={{ color: 'text.secondary', flexShrink: 0, ml: 1 }}>
+                    {t('annualPlanning.goal.percentComplete', { percent: progress.percent })}
                   </Typography>
                 </Box>
                 <LinearProgress
                   determinate
-                  value={goal.progress}
-                  color={getProgressColor(goal.progress)}
-                  sx={{
-                    height: 6,
-                    borderRadius: 'sm',
-                    bgcolor: 'background.level1'
-                  }}
+                  value={progress.percent}
+                  variant='soft'
+                  color={GOAL_STATE_COLOR[state]}
+                  thickness={6}
+                  aria-label={t('annualPlanning.goal.progress')}
+                  aria-valuetext={
+                    progress.isMilestoneBased
+                      ? t('annualPlanning.goal.milestoneCount', {
+                          completed: progress.completed,
+                          total: progress.total,
+                          count: progress.total
+                        })
+                      : t('annualPlanning.goal.percentComplete', { percent: progress.percent })
+                  }
+                  sx={{ bgcolor: 'background.level2', borderRadius: 'sm' }}
                 />
               </Box>
             ))}
           </Stack>
 
-          {/* View Full Plan Button */}
           <Button
             variant='plain'
             endDecorator={<TrendingUp size={16} />}
@@ -145,10 +148,10 @@ const AnnualGoalsCard = () => {
             sx={{
               mt: 3,
               justifyContent: 'center',
-              fontWeight: 600
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
             }}
           >
-            {t('dashboard.annualGoals.viewFullPlan', 'View Full Plan')}
+            {t('dashboard.annualGoals.viewFullPlan')}
           </Button>
         </>
       )}
