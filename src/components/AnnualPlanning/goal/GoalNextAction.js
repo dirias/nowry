@@ -15,6 +15,18 @@ const aboveOverlay = {
   minHeight: { xs: 44, md: 'auto' }
 }
 
+// The ladder is a *one-line* contract (§3.1). German and Spanish run roughly
+// 30% longer than the English source, which wraps rungs 4 and 5 onto a second
+// line and pushes the progress bar down by a row on some cards but not others.
+// Clamp every rung to one line and ellipsise instead.
+const oneLine = {
+  display: 'block',
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap'
+}
+
 // A goal's window is only a nudge inside this many days. Beyond it, a countdown
 // is noise rather than a prompt.
 const NUDGE_WINDOW_DAYS = 30
@@ -57,7 +69,9 @@ const GoalNextAction = ({
   if (state === 'completed') {
     return (
       <Typography level='body-sm' startDecorator={<CheckCircleIcon fontSize='small' />} sx={{ color: 'success.plainColor', minWidth: 0 }}>
-        {t('annualPlanning.goal.next.completed')}
+        <Box component='span' sx={oneLine}>
+          {t('annualPlanning.goal.next.completed')}
+        </Box>
       </Typography>
     )
   }
@@ -73,12 +87,29 @@ const GoalNextAction = ({
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
         <Tooltip title={lockedTooltip} size='sm' placement='top'>
-          <Box component='span' sx={{ display: 'inline-flex', ...aboveOverlay, alignItems: 'center' }}>
+          <Box
+            component='span'
+            // 44x44 on touch: minHeight alone left a 16px-wide target.
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: { xs: 44, md: 'auto' },
+              ...aboveOverlay
+            }}
+          >
             <Checkbox
               size='sm'
               checked={false}
               disabled={disabled}
-              aria-label={t('annualPlanning.goal.next.toggleAria', { title: next.milestone.title })}
+              // Via slotProps, not the top-level prop: Joy puts a bare
+              // `aria-label` on the Checkbox's root <span>, leaving the <input>
+              // that actually carries role=checkbox without an accessible name.
+              // A screen reader would announce "checkbox, unchecked" and nothing
+              // about which milestone it ticks.
+              slotProps={{
+                input: { 'aria-label': t('annualPlanning.goal.next.toggleAria', { title: next.milestone.title }) }
+              }}
               onChange={() => onToggleMilestone?.(next.index)}
               sx={focusRing}
             />
@@ -113,9 +144,11 @@ const GoalNextAction = ({
   if (hasMilestones) {
     return (
       <Tooltip title={lockedTooltip} size='sm' placement='top'>
-        <Box component='span' sx={{ display: 'inline-flex', ...aboveOverlay }}>
-          <Button variant='plain' size='sm' disabled={disabled} onClick={() => onComplete?.()} sx={{ px: 0.5, ...focusRing }}>
-            {t('annualPlanning.goal.next.readyToComplete')}
+        <Box component='span' sx={{ display: 'flex', justifyContent: 'flex-start', minWidth: 0, maxWidth: '100%', ...aboveOverlay }}>
+          <Button variant='plain' size='sm' disabled={disabled} onClick={() => onComplete?.()} sx={{ px: 0.5, minWidth: 0, ...focusRing }}>
+            <Box component='span' sx={oneLine}>
+              {t('annualPlanning.goal.next.readyToComplete')}
+            </Box>
           </Button>
         </Box>
       </Tooltip>
@@ -126,16 +159,18 @@ const GoalNextAction = ({
   // the next trigger.
   return (
     <Tooltip title={lockedTooltip} size='sm' placement='top'>
-      <Box component='span' sx={{ display: 'inline-flex', ...aboveOverlay }}>
+      <Box component='span' sx={{ display: 'flex', justifyContent: 'flex-start', minWidth: 0, maxWidth: '100%', ...aboveOverlay }}>
         <Button
           variant='plain'
           size='sm'
           disabled={disabled}
           startDecorator={<AddIcon />}
           onClick={() => onAddMilestone?.()}
-          sx={{ px: 0.5, ...focusRing }}
+          sx={{ px: 0.5, minWidth: 0, ...focusRing }}
         >
-          {t('annualPlanning.goal.next.addMilestone')}
+          <Box component='span' sx={oneLine}>
+            {t('annualPlanning.goal.next.addMilestone')}
+          </Box>
         </Button>
       </Box>
     </Tooltip>

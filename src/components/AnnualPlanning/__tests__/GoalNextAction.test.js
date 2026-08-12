@@ -88,6 +88,15 @@ describe('rung 2/3 — the one-tap action', () => {
     expect(screen.getByLabelText('annualPlanning.goal.next.toggleAria:{"title":"Draft the spec"}')).toBeInTheDocument()
   })
 
+  it('puts that name on the input itself, not on a wrapper span', () => {
+    // Joy forwards a bare `aria-label` prop to the Checkbox root <span>, which
+    // leaves the <input> carrying role=checkbox nameless to a screen reader.
+    // getByLabelText would still pass by walking ancestors, so assert the
+    // element directly.
+    render(<GoalNextAction state='on_track' next={nextMilestone} hasMilestones />)
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-label', 'annualPlanning.goal.next.toggleAria:{"title":"Draft the spec"}')
+  })
+
   it('renders the checkbox unchecked — it is an action, not a state mirror', () => {
     render(<GoalNextAction state='on_track' next={nextMilestone} hasMilestones />)
     expect(screen.getByRole('checkbox')).not.toBeChecked()
