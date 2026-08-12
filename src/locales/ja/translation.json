@@ -2123,5 +2123,22 @@
   "tts": {
     "autoDetect": "Auto-detect language",
     "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+  },
+  "form": {
+    "saveAndNext": "保存して次へ",
+    "saveAndClose": "保存して閉じる",
+    "addedCount_one": "{{count}} 件追加しました",
+    "addedCount_other": "{{count}} 件追加しました",
+    "detailRailAria": "任意の詳細を追加",
+    "saveErrorTitle": "保存できませんでした",
+    "requiredField": "この項目は必須です",
+    "tagsLabel": "タグ",
+    "tagAddAria": "タグを追加",
+    "tagRemoveAria": "{{tag}} を削除",
+    "tagPlaceholder": "タグを入力して Enter キーを押してください",
+    "deckLabel": "デッキ",
+    "deckPlaceholder": "デッキを選択",
+    "deckNone": "デッキなし",
+    "deckEmpty": "デッキはまだありません。"
   }
 }

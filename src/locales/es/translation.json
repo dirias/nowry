@@ -2839,5 +2839,22 @@
   "tts": {
     "autoDetect": "Auto-detect language",
     "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+  },
+  "form": {
+    "saveAndNext": "Guardar y siguiente",
+    "saveAndClose": "Guardar y cerrar",
+    "addedCount_one": "{{count}} añadido",
+    "addedCount_other": "{{count}} añadidos",
+    "detailRailAria": "Añadir detalles opcionales",
+    "saveErrorTitle": "No se pudo guardar",
+    "requiredField": "Este campo es obligatorio",
+    "tagsLabel": "Etiquetas",
+    "tagAddAria": "Añadir etiqueta",
+    "tagRemoveAria": "Quitar {{tag}}",
+    "tagPlaceholder": "Escribe una etiqueta y pulsa Enter",
+    "deckLabel": "Mazo",
+    "deckPlaceholder": "Elige un mazo",
+    "deckNone": "Sin mazo",
+    "deckEmpty": "Todavía no tienes ningún mazo."
   }
 }

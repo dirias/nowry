@@ -2166,5 +2166,22 @@
   "tts": {
     "autoDetect": "Auto-detect language",
     "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+  },
+  "form": {
+    "saveAndNext": "Speichern & weiter",
+    "saveAndClose": "Speichern & schließen",
+    "addedCount_one": "{{count}} hinzugefügt",
+    "addedCount_other": "{{count}} hinzugefügt",
+    "detailRailAria": "Optionale Details hinzufügen",
+    "saveErrorTitle": "Speichern fehlgeschlagen",
+    "requiredField": "Dieses Feld ist erforderlich",
+    "tagsLabel": "Tags",
+    "tagAddAria": "Tag hinzufügen",
+    "tagRemoveAria": "{{tag}} entfernen",
+    "tagPlaceholder": "Tag eingeben und Enter drücken",
+    "deckLabel": "Deck",
+    "deckPlaceholder": "Deck auswählen",
+    "deckNone": "Kein Deck",
+    "deckEmpty": "Du hast noch keine Decks."
   }
 }

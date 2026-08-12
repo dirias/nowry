@@ -2188,5 +2188,22 @@
   "tts": {
     "autoDetect": "Auto-detect language",
     "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+  },
+  "form": {
+    "saveAndNext": "Enregistrer et suivant",
+    "saveAndClose": "Enregistrer et fermer",
+    "addedCount_one": "{{count}} ajouté",
+    "addedCount_other": "{{count}} ajoutés",
+    "detailRailAria": "Ajouter des détails facultatifs",
+    "saveErrorTitle": "Impossible d'enregistrer",
+    "requiredField": "Ce champ est obligatoire",
+    "tagsLabel": "Étiquettes",
+    "tagAddAria": "Ajouter une étiquette",
+    "tagRemoveAria": "Supprimer {{tag}}",
+    "tagPlaceholder": "Saisissez une étiquette et appuyez sur Entrée",
+    "deckLabel": "Paquet",
+    "deckPlaceholder": "Choisir un paquet",
+    "deckNone": "Aucun paquet",
+    "deckEmpty": "Vous n'avez pas encore de paquet."
   }
 }

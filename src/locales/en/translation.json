@@ -3021,5 +3021,22 @@
   "tts": {
     "autoDetect": "Auto-detect language",
     "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+  },
+  "form": {
+    "saveAndNext": "Save & next",
+    "saveAndClose": "Save & close",
+    "addedCount_one": "{{count}} added",
+    "addedCount_other": "{{count}} added",
+    "detailRailAria": "Add optional details",
+    "saveErrorTitle": "Couldn't save",
+    "requiredField": "This field is required",
+    "tagsLabel": "Tags",
+    "tagAddAria": "Add tag",
+    "tagRemoveAria": "Remove {{tag}}",
+    "tagPlaceholder": "Add a tag and press Enter",
+    "deckLabel": "Deck",
+    "deckPlaceholder": "Choose a deck",
+    "deckNone": "No deck",
+    "deckEmpty": "You don't have any decks yet."
   }
 }
