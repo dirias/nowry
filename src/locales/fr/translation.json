@@ -1589,22 +1589,58 @@
       "descriptionPlaceholder": "Description (optionnelle)"
     },
     "quiz": {
-      "editTitle": "Modifier la question du quiz",
-      "createTitle": "Créer une question de quiz",
+      "editTitle": "Modifier la carte de quiz",
+      "createTitle": "Nouvelle carte de quiz",
       "questionPlaceholder": "Quelle est la capitale de la France ?",
       "optionPlaceholder": "Option {{number}}",
       "explanationPlaceholder": "Expliquez pourquoi c'est la bonne réponse...",
       "tagsPlaceholder": "géographie, capitales, france",
-      "deckPlaceholder": "Sélectionner un paquet (optionnel)"
+      "deckPlaceholder": "Sélectionner un paquet (optionnel)",
+      "questionLabel": "Question",
+      "optionsLabel": "Options de réponse",
+      "optionsAria": "Options de réponse — sélectionnez la bonne",
+      "addOption": "Ajouter une option",
+      "correctAria": "Marquer l'option {{number}} comme correcte",
+      "removeOptionAria": "Supprimer l'option {{number}}",
+      "questionRequired": "Ajoutez une question pour enregistrer cette carte",
+      "needTwoOptions": "Ajoutez au moins deux options de réponse",
+      "needCorrectAnswer": "Choisissez quelle option est correcte",
+      "optionRemoved": "Option supprimée",
+      "undoRemove": "Annuler",
+      "addExplanation": "Ajouter une explication",
+      "explanationLabel": "Explication"
     },
     "flashcard": {
       "frontPlaceholder": "Quelle est la capitale de la France ?",
       "backPlaceholder": "Paris",
       "tagsPlaceholder": "Ajouter des tags...",
-      "deckPlaceholder": "Assigner à un paquet (optionnel)"
+      "deckPlaceholder": "Assigner à un paquet (optionnel)",
+      "createTitle": "Nouvelle carte",
+      "editTitle": "Modifier la carte",
+      "frontLabel": "Recto",
+      "backLabel": "Verso",
+      "frontRequired": "Ajoutez une question pour enregistrer cette carte",
+      "backRequired": "Ajoutez une réponse pour enregistrer cette carte"
     },
     "visual": {
-      "explanationPlaceholder": "Explication supplémentaire..."
+      "explanationPlaceholder": "Explication supplémentaire...",
+      "createTitle": "Nouvelle carte visuelle",
+      "editTitle": "Modifier la carte visuelle",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "Flux d'apprentissage automatique",
+      "titleRequired": "Nommez votre diagramme pour l'enregistrer",
+      "codeLabel": "Code du diagramme",
+      "codeRequired": "Ajoutez du code de diagramme pour enregistrer cette carte",
+      "codePlaceholder": "graph TD\n  A[Start] --> B[End]",
+      "syntaxError": "Ce diagramme ne peut pas encore être affiché",
+      "previewEmpty": "Votre diagramme apparaît ici au fil de la saisie",
+      "tabCode": "Code",
+      "tabPreview": "Aperçu",
+      "previewOkAria": "Aperçu — le diagramme s'affiche",
+      "previewErrorAria": "Aperçu — le diagramme contient une erreur de syntaxe",
+      "mermaidLink": "Référence de la syntaxe Mermaid",
+      "addDescription": "Ajouter une description",
+      "descriptionLabel": "Description"
     },
     "generatedCards": {
       "titleSelectCards": "Nouvelles cartes d'étude",
@@ -1654,6 +1690,16 @@
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Activer le plein écran",
       "exitFullscreen": "Quitter le plein écran"
+    },
+    "common": {
+      "addTags": "Ajouter des étiquettes",
+      "chooseDeck": "Choisir un paquet",
+      "typeFlashcard": "Carte",
+      "typeQuiz": "Quiz",
+      "typeVisual": "Visuel",
+      "typeSelectorAria": "Type de carte",
+      "switchTypeWarning": "Changer de type de carte supprimera ce que vous avez écrit pour ce type.",
+      "switchTypeConfirm": "Changer quand même"
     }
   },
   "books": {

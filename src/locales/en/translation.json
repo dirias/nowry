@@ -1006,30 +1006,64 @@
       "descriptionPlaceholder": "Description (optional)"
     },
     "quiz": {
-      "editTitle": "Edit Quiz Question",
-      "createTitle": "Create Quiz Question",
+      "editTitle": "Edit quiz card",
+      "createTitle": "New quiz card",
       "questionPlaceholder": "What is the capital of France?",
       "optionPlaceholder": "Option {{number}}",
       "explanationPlaceholder": "Explain why this is the correct answer...",
       "tagsPlaceholder": "geography, capitals, france",
       "deckPlaceholder": "Select a deck (optional)",
       "saveChanges": "Save Changes",
-      "createButton": "Create Quiz Question"
+      "createButton": "Create Quiz Question",
+      "questionLabel": "Question",
+      "optionsLabel": "Answer options",
+      "optionsAria": "Answer options — select the correct one",
+      "addOption": "Add option",
+      "correctAria": "Mark option {{number}} as correct",
+      "removeOptionAria": "Remove option {{number}}",
+      "questionRequired": "Add a question to save this card",
+      "needTwoOptions": "Add at least two answer options",
+      "needCorrectAnswer": "Choose which option is correct",
+      "optionRemoved": "Option removed",
+      "undoRemove": "Undo",
+      "addExplanation": "Add an explanation",
+      "explanationLabel": "Explanation"
     },
     "flashcard": {
       "frontPlaceholder": "What is the capital of France?",
       "backPlaceholder": "Paris",
       "tagsPlaceholder": "Add tags...",
-      "deckPlaceholder": "Assign to deck (optional)"
+      "deckPlaceholder": "Assign to deck (optional)",
+      "createTitle": "New flashcard",
+      "editTitle": "Edit flashcard",
+      "frontLabel": "Front",
+      "backLabel": "Back",
+      "frontRequired": "Add a question to save this card",
+      "backRequired": "Add an answer to save this card"
     },
     "visual": {
       "explanationPlaceholder": "Additional explanation...",
-      "editTitle": "Edit Visual Diagram",
-      "createTitle": "Create Visual Diagram",
+      "editTitle": "Edit visual card",
+      "createTitle": "New visual card",
       "saveChanges": "Save Changes",
       "chipLabel": "Visual",
       "diagramTitleLabel": "Diagram Title",
-      "deckPlaceholder": "Select a deck (optional)"
+      "deckPlaceholder": "Select a deck (optional)",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Machine learning workflow",
+      "titleRequired": "Name your diagram to save it",
+      "codeLabel": "Diagram code",
+      "codeRequired": "Add diagram code to save this card",
+      "codePlaceholder": "graph TD\n  A[Start] --> B[End]",
+      "syntaxError": "This diagram can't be rendered yet",
+      "previewEmpty": "Your diagram appears here as you type",
+      "tabCode": "Code",
+      "tabPreview": "Preview",
+      "previewOkAria": "Preview — diagram renders",
+      "previewErrorAria": "Preview — diagram has a syntax error",
+      "mermaidLink": "Mermaid syntax reference",
+      "addDescription": "Add a description",
+      "descriptionLabel": "Description"
     },
     "dueToday": "Due Today",
     "studyStreak": "Study Streak",
@@ -1229,6 +1263,16 @@
       "emptyQuizBody": "Create a deck to start saving these questions for review.",
       "emptyVisual": "Start your first visual deck",
       "emptyVisualBody": "Create a deck to start saving these diagrams for review."
+    },
+    "common": {
+      "addTags": "Add tags",
+      "chooseDeck": "Choose a deck",
+      "typeFlashcard": "Flashcard",
+      "typeQuiz": "Quiz",
+      "typeVisual": "Visual",
+      "typeSelectorAria": "Card type",
+      "switchTypeWarning": "Switching card type will discard what you've written for this type.",
+      "switchTypeConfirm": "Switch anyway"
     }
   },
   "filters": {

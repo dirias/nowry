@@ -1567,22 +1567,58 @@
       "descriptionPlaceholder": "Beschreibung (optional)"
     },
     "quiz": {
-      "editTitle": "Quizfrage bearbeiten",
-      "createTitle": "Quizfrage erstellen",
+      "editTitle": "Quizkarte bearbeiten",
+      "createTitle": "Neue Quizkarte",
       "questionPlaceholder": "Was ist die Hauptstadt von Frankreich?",
       "optionPlaceholder": "Option {{number}}",
       "explanationPlaceholder": "Erkläre, warum dies die richtige Antwort ist...",
       "tagsPlaceholder": "geografie, hauptstädte, frankreich",
-      "deckPlaceholder": "Stapel auswählen (optional)"
+      "deckPlaceholder": "Stapel auswählen (optional)",
+      "questionLabel": "Frage",
+      "optionsLabel": "Antwortoptionen",
+      "optionsAria": "Antwortoptionen – wähle die richtige aus",
+      "addOption": "Option hinzufügen",
+      "correctAria": "Option {{number}} als richtig markieren",
+      "removeOptionAria": "Option {{number}} entfernen",
+      "questionRequired": "Gib eine Frage ein, um diese Karte zu speichern",
+      "needTwoOptions": "Füge mindestens zwei Antwortoptionen hinzu",
+      "needCorrectAnswer": "Wähle aus, welche Option richtig ist",
+      "optionRemoved": "Option entfernt",
+      "undoRemove": "Rückgängig",
+      "addExplanation": "Erklärung hinzufügen",
+      "explanationLabel": "Erklärung"
     },
     "flashcard": {
       "frontPlaceholder": "Was ist die Hauptstadt von Frankreich?",
       "backPlaceholder": "Paris",
       "tagsPlaceholder": "Tags hinzufügen...",
-      "deckPlaceholder": "Einem Stapel zuweisen (optional)"
+      "deckPlaceholder": "Einem Stapel zuweisen (optional)",
+      "createTitle": "Neue Lernkarte",
+      "editTitle": "Lernkarte bearbeiten",
+      "frontLabel": "Vorderseite",
+      "backLabel": "Rückseite",
+      "frontRequired": "Gib eine Frage ein, um diese Karte zu speichern",
+      "backRequired": "Gib eine Antwort ein, um diese Karte zu speichern"
     },
     "visual": {
-      "explanationPlaceholder": "Zusätzliche Erklärung..."
+      "explanationPlaceholder": "Zusätzliche Erklärung...",
+      "createTitle": "Neue visuelle Karte",
+      "editTitle": "Visuelle Karte bearbeiten",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "Machine-Learning-Workflow",
+      "titleRequired": "Benenne dein Diagramm, um es zu speichern",
+      "codeLabel": "Diagrammcode",
+      "codeRequired": "Gib Diagrammcode ein, um diese Karte zu speichern",
+      "codePlaceholder": "graph TD\n  A[Start] --> B[End]",
+      "syntaxError": "Dieses Diagramm kann noch nicht dargestellt werden",
+      "previewEmpty": "Dein Diagramm erscheint hier beim Tippen",
+      "tabCode": "Code",
+      "tabPreview": "Vorschau",
+      "previewOkAria": "Vorschau – Diagramm wird dargestellt",
+      "previewErrorAria": "Vorschau – Diagramm hat einen Syntaxfehler",
+      "mermaidLink": "Mermaid-Syntaxreferenz",
+      "addDescription": "Beschreibung hinzufügen",
+      "descriptionLabel": "Beschreibung"
     },
     "generatedCards": {
       "titleSelectCards": "Neue Lernkarten",
@@ -1632,6 +1668,16 @@
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Vollbild aktivieren",
       "exitFullscreen": "Vollbild beenden"
+    },
+    "common": {
+      "addTags": "Tags hinzufügen",
+      "chooseDeck": "Deck wählen",
+      "typeFlashcard": "Lernkarte",
+      "typeQuiz": "Quiz",
+      "typeVisual": "Visuell",
+      "typeSelectorAria": "Kartentyp",
+      "switchTypeWarning": "Beim Wechsel des Kartentyps geht verloren, was du für diesen Typ geschrieben hast.",
+      "switchTypeConfirm": "Trotzdem wechseln"
     }
   },
   "books": {

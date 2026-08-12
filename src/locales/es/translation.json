@@ -741,22 +741,58 @@
       "descriptionPlaceholder": "Descripción (opcional)"
     },
     "quiz": {
-      "editTitle": "Editar pregunta de prueba",
-      "createTitle": "Crear pregunta de prueba",
+      "editTitle": "Editar tarjeta de cuestionario",
+      "createTitle": "Nueva tarjeta de cuestionario",
       "questionPlaceholder": "¿Cuál es la capital de Francia?",
       "optionPlaceholder": "Opción {{number}}",
       "explanationPlaceholder": "Explica por qué esta es la respuesta correcta...",
       "tagsPlaceholder": "geografía, capitales, francia",
-      "deckPlaceholder": "Selecciona un mazo (opcional)"
+      "deckPlaceholder": "Selecciona un mazo (opcional)",
+      "questionLabel": "Pregunta",
+      "optionsLabel": "Opciones de respuesta",
+      "optionsAria": "Opciones de respuesta: selecciona la correcta",
+      "addOption": "Añadir opción",
+      "correctAria": "Marcar la opción {{number}} como correcta",
+      "removeOptionAria": "Eliminar la opción {{number}}",
+      "questionRequired": "Añade una pregunta para guardar esta tarjeta",
+      "needTwoOptions": "Añade al menos dos opciones de respuesta",
+      "needCorrectAnswer": "Elige cuál es la opción correcta",
+      "optionRemoved": "Opción eliminada",
+      "undoRemove": "Deshacer",
+      "addExplanation": "Añadir una explicación",
+      "explanationLabel": "Explicación"
     },
     "flashcard": {
       "frontPlaceholder": "¿Cuál es la capital de Francia?",
       "backPlaceholder": "París",
       "tagsPlaceholder": "Añadir etiquetas...",
-      "deckPlaceholder": "Asignar a mazo (opcional)"
+      "deckPlaceholder": "Asignar a mazo (opcional)",
+      "createTitle": "Nueva tarjeta",
+      "editTitle": "Editar tarjeta",
+      "frontLabel": "Anverso",
+      "backLabel": "Reverso",
+      "frontRequired": "Añade una pregunta para guardar esta tarjeta",
+      "backRequired": "Añade una respuesta para guardar esta tarjeta"
     },
     "visual": {
-      "explanationPlaceholder": "Explicación adicional..."
+      "explanationPlaceholder": "Explicación adicional...",
+      "createTitle": "Nueva tarjeta visual",
+      "editTitle": "Editar tarjeta visual",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Flujo de aprendizaje automático",
+      "titleRequired": "Ponle nombre a tu diagrama para guardarlo",
+      "codeLabel": "Código del diagrama",
+      "codeRequired": "Añade código de diagrama para guardar esta tarjeta",
+      "codePlaceholder": "graph TD\n  A[Start] --> B[End]",
+      "syntaxError": "Este diagrama aún no se puede representar",
+      "previewEmpty": "Tu diagrama aparece aquí mientras escribes",
+      "tabCode": "Código",
+      "tabPreview": "Vista previa",
+      "previewOkAria": "Vista previa: el diagrama se representa",
+      "previewErrorAria": "Vista previa: el diagrama tiene un error de sintaxis",
+      "mermaidLink": "Referencia de sintaxis de Mermaid",
+      "addDescription": "Añadir una descripción",
+      "descriptionLabel": "Descripción"
     },
     "dueToday": "Para hoy",
     "studyStreak": "Racha (días)",
@@ -946,6 +982,16 @@
       "emptyQuizBody": "Crea un mazo para empezar a guardar estas preguntas y repasarlas.",
       "emptyVisual": "Crea tu primer mazo visual",
       "emptyVisualBody": "Crea un mazo para empezar a guardar estos diagramas y repasarlos."
+    },
+    "common": {
+      "addTags": "Añadir etiquetas",
+      "chooseDeck": "Elegir un mazo",
+      "typeFlashcard": "Tarjeta",
+      "typeQuiz": "Cuestionario",
+      "typeVisual": "Visual",
+      "typeSelectorAria": "Tipo de tarjeta",
+      "switchTypeWarning": "Cambiar el tipo de tarjeta descartará lo que has escrito para este tipo.",
+      "switchTypeConfirm": "Cambiar de todos modos"
     }
   },
   "filters": {
