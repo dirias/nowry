@@ -1594,8 +1594,6 @@
       "questionPlaceholder": "Quelle est la capitale de la France ?",
       "optionPlaceholder": "Option {{number}}",
       "explanationPlaceholder": "Expliquez pourquoi c'est la bonne réponse...",
-      "tagsPlaceholder": "géographie, capitales, france",
-      "deckPlaceholder": "Sélectionner un paquet (optionnel)",
       "questionLabel": "Question",
       "optionsLabel": "Options de réponse",
       "optionsAria": "Options de réponse — sélectionnez la bonne",
@@ -1613,8 +1611,6 @@
     "flashcard": {
       "frontPlaceholder": "Quelle est la capitale de la France ?",
       "backPlaceholder": "Paris",
-      "tagsPlaceholder": "Ajouter des tags...",
-      "deckPlaceholder": "Assigner à un paquet (optionnel)",
       "createTitle": "Nouvelle carte",
       "editTitle": "Modifier la carte",
       "frontLabel": "Recto",

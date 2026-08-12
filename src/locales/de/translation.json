@@ -1572,8 +1572,6 @@
       "questionPlaceholder": "Was ist die Hauptstadt von Frankreich?",
       "optionPlaceholder": "Option {{number}}",
       "explanationPlaceholder": "Erkläre, warum dies die richtige Antwort ist...",
-      "tagsPlaceholder": "geografie, hauptstädte, frankreich",
-      "deckPlaceholder": "Stapel auswählen (optional)",
       "questionLabel": "Frage",
       "optionsLabel": "Antwortoptionen",
       "optionsAria": "Antwortoptionen – wähle die richtige aus",
@@ -1591,8 +1589,6 @@
     "flashcard": {
       "frontPlaceholder": "Was ist die Hauptstadt von Frankreich?",
       "backPlaceholder": "Paris",
-      "tagsPlaceholder": "Tags hinzufügen...",
-      "deckPlaceholder": "Einem Stapel zuweisen (optional)",
       "createTitle": "Neue Lernkarte",
       "editTitle": "Lernkarte bearbeiten",
       "frontLabel": "Vorderseite",

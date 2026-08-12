@@ -746,8 +746,6 @@
       "questionPlaceholder": "¿Cuál es la capital de Francia?",
       "optionPlaceholder": "Opción {{number}}",
       "explanationPlaceholder": "Explica por qué esta es la respuesta correcta...",
-      "tagsPlaceholder": "geografía, capitales, francia",
-      "deckPlaceholder": "Selecciona un mazo (opcional)",
       "questionLabel": "Pregunta",
       "optionsLabel": "Opciones de respuesta",
       "optionsAria": "Opciones de respuesta: selecciona la correcta",
@@ -765,8 +763,6 @@
     "flashcard": {
       "frontPlaceholder": "¿Cuál es la capital de Francia?",
       "backPlaceholder": "París",
-      "tagsPlaceholder": "Añadir etiquetas...",
-      "deckPlaceholder": "Asignar a mazo (opcional)",
       "createTitle": "Nueva tarjeta",
       "editTitle": "Editar tarjeta",
       "frontLabel": "Anverso",

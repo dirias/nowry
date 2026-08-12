@@ -96,19 +96,26 @@ describe('cards.* card-authoring keys', () => {
     expect(missing).toEqual([])
   })
 
-  it('leaves no key the English bundle carries and a translation does not, apart from the ones §11.3 retires', () => {
-    // The retired set still ships in the three modals this ticket has not yet
-    // deleted; the group-set equality assertion lands with their removal.
-    const retiring = new Set(['tagsPlaceholder', 'deckPlaceholder', 'saveChanges', 'createButton', 'chipLabel', 'diagramTitleLabel'])
+  it('carries exactly the same key set in every locale', () => {
     GROUPS.forEach((group) => {
-      const expected = Object.keys(en.cards[group])
-        .filter((key) => !retiring.has(key))
-        .sort()
+      const expected = Object.keys(en.cards[group]).sort()
       NON_ENGLISH.forEach((name) => {
-        const actual = Object.keys(LOCALES[name].cards[group])
-          .filter((key) => !retiring.has(key))
-          .sort()
-        expect({ name, group, keys: actual }).toEqual({ name, group, keys: expected })
+        expect({ name, group, keys: Object.keys(LOCALES[name].cards[group]).sort() }).toEqual({ name, group, keys: expected })
+      })
+    })
+  })
+
+  it('has retired the keys the shared form.* namespace and the cut chrome superseded', () => {
+    // Verified by grep to have no consumer before removal, per §11.3's method.
+    const retired = {
+      flashcard: ['tagsPlaceholder', 'deckPlaceholder'],
+      quiz: ['tagsPlaceholder', 'deckPlaceholder', 'saveChanges', 'createButton'],
+      visual: ['chipLabel', 'diagramTitleLabel', 'saveChanges', 'deckPlaceholder']
+    }
+    Object.entries(LOCALES).forEach(([name, bundle]) => {
+      Object.entries(retired).forEach(([group, keys]) => {
+        const survivors = keys.filter((key) => bundle.cards[group][key] !== undefined)
+        expect({ name, group, survivors }).toEqual({ name, group, survivors: [] })
       })
     })
   })
