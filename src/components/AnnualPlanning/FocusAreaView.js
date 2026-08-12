@@ -27,7 +27,8 @@ import {
   Tooltip,
   Alert,
   Breadcrumbs,
-  Link
+  Link,
+  Snackbar
 } from '@mui/joy'
 import {
   Add as AddIcon,
@@ -50,9 +51,11 @@ import GoalDialog from './GoalDialog'
 import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
 import CloseQuarterModal from './CloseQuarterModal'
-import GoalCardGrid from './GoalCardGrid'
-import GoalRowList from './GoalRowList'
+import GoalCard from './GoalCard'
+import GoalRow from './GoalRow'
+import GoalDetailDrawer from './goal/GoalDetailDrawer'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
+import useGoalCardModel from '../../hooks/useGoalCardModel'
 import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter, getGoalState } from './goalDerivation'
 
 // --- GOAL-01 computation engine ---
@@ -83,6 +86,7 @@ const FocusAreaView = () => {
     goals: allGoals,
     priorities: allPriorities,
     areas: allAreas,
+    activities,
     loading: hookLoading,
     reload
   } = useAnnualPlan(new Date().getFullYear(), user)
@@ -98,12 +102,14 @@ const FocusAreaView = () => {
   const [showPriorityDialog, setShowPriorityDialog] = useState(false)
   const [editingPriority, setEditingPriority] = useState(null)
 
-  // Expanded Activities State
-  const [expandedGoals, setExpandedGoals] = useState(new Set())
-  const [goalActivities, setGoalActivities] = useState({}) // Cache: { goalId: [activities] }
+  // Detail drawer. Replaces the per-goal expansion Sets and the activity cache:
+  // there is nothing to expand in place any more, and activities arrive with the
+  // plan payload rather than one fetch per goal.
+  const [detailGoalId, setDetailGoalId] = useState(null)
 
-  // Expanded Milestones State
-  const [expandedMilestones, setExpandedMilestones] = useState(new Set())
+  // Failed writes used to reach console.error only — an unhandled Error state.
+  const [toast, setToast] = useState(null)
+  const [pendingGoalId, setPendingGoalId] = useState(null)
 
   // Error Modal State
   const [errorModal, setErrorModal] = useState({ open: false, message: '', milestones: [] })
@@ -176,9 +182,12 @@ const FocusAreaView = () => {
     }
   }
 
-  const handleStatusChange = async (goal) => {
-    const statusCycle = { not_started: 'in_progress', in_progress: 'completed', completed: 'not_started' }
-    const newStatus = statusCycle[goal.status] || 'in_progress'
+  /**
+   * Explicit status write. The click-cycle this replaces let a completed goal be
+   * silently reopened with one extra click, and was unreachable by keyboard.
+   */
+  const handleStatusChange = async (goal, newStatus) => {
+    if (!newStatus || newStatus === goal.status) return
 
     // Validate: Cannot mark as completed if there are uncompleted milestones
     if (newStatus === 'completed' && goal.milestones && goal.milestones.length > 0) {
@@ -203,6 +212,7 @@ const FocusAreaView = () => {
 
     // Optimistic update — instant UI response, no hook reload needed
     setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: newStatus } : g)))
+    setPendingGoalId(goal._id)
 
     // Cascade to linked priorities optimistically:
     // completing a goal archives its priorities; un-completing reactivates them.
@@ -223,7 +233,6 @@ const FocusAreaView = () => {
       // Cache is busted by the service. Optimistic state is already correct,
       // so no need to reload — just let the next navigation get fresh data.
     } catch (error) {
-      console.error('Failed to update status:', error)
       // Revert both optimistic updates to their exact original values
       setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: goal.status } : g)))
       setPriorities((prev) =>
@@ -232,51 +241,10 @@ const FocusAreaView = () => {
           return original ? { ...p, ...original } : p
         })
       )
+      setToast('annualPlanning.goal.statusUpdateError')
+    } finally {
+      setPendingGoalId(null)
     }
-  }
-
-  const getStatusConfig = (status) => {
-    const configs = {
-      not_started: { label: t('annualPlanning.goal.status.notStarted'), color: 'neutral', icon: '⭕' },
-      in_progress: { label: t('annualPlanning.goal.status.inProgress'), color: 'warning', icon: '🔄' },
-      completed: { label: t('annualPlanning.goal.status.completed'), color: 'success', icon: '✓' }
-    }
-    return configs[status] || configs.not_started
-  }
-
-  const handleToggleExpand = async (goalId) => {
-    const newExpanded = new Set(expandedGoals)
-
-    if (newExpanded.has(goalId)) {
-      newExpanded.delete(goalId)
-    } else {
-      newExpanded.add(goalId)
-      // Fetch if not in cache or if we want to refresh on open (for now cache-first)
-      if (!goalActivities[goalId]) {
-        try {
-          const activities = await annualPlanningService.getActivities(goalId)
-          setGoalActivities((prev) => ({ ...prev, [goalId]: activities }))
-        } catch (error) {
-          console.error('Failed to load goal activities', error)
-          // Error sentinel: null = fetch failed (distinct from undefined = not
-          // yet fetched and [] = fetched, empty) so the Activities accordion in
-          // GoalCardGrid/GoalRowList can render its error state instead of an
-          // infinite Skeleton.
-          setGoalActivities((prev) => ({ ...prev, [goalId]: null }))
-        }
-      }
-    }
-    setExpandedGoals(newExpanded)
-  }
-
-  const handleToggleMilestones = (goalId) => {
-    const newExpanded = new Set(expandedMilestones)
-    if (newExpanded.has(goalId)) {
-      newExpanded.delete(goalId)
-    } else {
-      newExpanded.add(goalId)
-    }
-    setExpandedMilestones(newExpanded)
   }
 
   const handleToggleMilestone = async (goal, milestoneIndex) => {
@@ -292,6 +260,7 @@ const FocusAreaView = () => {
 
     // Optimistic update — instant UI response, no hook reload needed
     setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, milestones: updatedMilestones } : g)))
+    setPendingGoalId(goal._id)
 
     try {
       await annualPlanningService.updateGoal(goal._id, {
@@ -300,30 +269,18 @@ const FocusAreaView = () => {
       })
       // Cache is busted by the service. Optimistic state is already correct.
     } catch (error) {
-      console.error('Failed to update milestone:', error)
       // Revert optimistic update on failure
       setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, milestones: goal.milestones } : g)))
+      setToast('annualPlanning.goal.milestoneUpdateError')
+    } finally {
+      setPendingGoalId(null)
     }
   }
 
+  // A plan reload brings activities back with it, so there is no per-goal
+  // refresh loop to run any more.
   const handleGoalSuccess = async () => {
     await fetchData()
-    // Refresh activities for any currently expanded goals to ensure consistency
-    // We could just refresh the one that was edited, but simple iteration is fine for MVP
-    const expandedIds = Array.from(expandedGoals)
-    if (expandedIds.length > 0) {
-      try {
-        const promises = expandedIds.map((id) => annualPlanningService.getActivities(id))
-        const results = await Promise.all(promises)
-        const newCache = { ...goalActivities }
-        results.forEach((activities, index) => {
-          newCache[expandedIds[index]] = activities
-        })
-        setGoalActivities(newCache)
-      } catch (error) {
-        console.error('Failed to refresh expanded activities', error)
-      }
-    }
   }
 
   const handleDeletePriority = () => {
@@ -400,6 +357,42 @@ const FocusAreaView = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return Math.max(0, diffDays)
   }
+
+  // --- Goal rendering (converged with GoalsTabView, ADR-003 §6) ---
+  // Both surfaces render the same GoalCard/GoalRow over the same view model, so
+  // a goal looks and behaves identically here and on the Goals tab.
+  const detailGoal = goals.find((g) => g._id === detailGoalId) || null
+  const detailModel = useGoalCardModel(detailGoal, { area, activities, quarterReports, planYear: plan?.year })
+
+  const handleAddMilestone = (goal) => {
+    setSelectedGoal(goal)
+    setDialogOpen(true)
+  }
+
+  const goalProps = (goal) => ({
+    goal,
+    area,
+    activities,
+    quarterReports,
+    planYear: plan?.year,
+    busy: pendingGoalId === goal._id,
+    onOpenDetail: (g) => setDetailGoalId(g._id),
+    onEdit: handleEditGoal,
+    onDelete: handleDeleteGoal,
+    onStatusChange: handleStatusChange,
+    onToggleMilestone: handleToggleMilestone,
+    onAddMilestone: handleAddMilestone,
+    onComplete: (g) => handleStatusChange(g, 'completed')
+  })
+
+  const renderGoalGrid = (list) =>
+    list.map((goal) => (
+      <Grid key={goal._id} xs={12} sm={6} md={6} lg={4}>
+        <GoalCard {...goalProps(goal)} />
+      </Grid>
+    ))
+
+  const renderGoalRows = (list) => list.map((goal) => <GoalRow key={goal._id} {...goalProps(goal)} />)
 
   // Split Goals into Objectives and Quarterly Goals
   const yearlyObjectives = goals.filter((g) => g.type === 'yearly' || (!g.type && !g.quarter))
@@ -765,27 +758,7 @@ const FocusAreaView = () => {
                 {viewMode === 'grid' ? (
                   /* Grid View */
                   <Grid container spacing={2}>
-                    {(goalsByParent[objective._id] || []).map((goal) => (
-                      <Grid key={goal._id} xs={12} md={6}>
-                        <GoalCardGrid
-                          goal={goal}
-                          area={area}
-                          isQuarterClosed={isQuarterClosed}
-                          expandedMilestones={expandedMilestones}
-                          expandedGoals={expandedGoals}
-                          goalActivities={goalActivities}
-                          handleStatusChange={handleStatusChange}
-                          handleEditGoal={handleEditGoal}
-                          handleDeleteGoal={handleDeleteGoal}
-                          handleToggleMilestones={handleToggleMilestones}
-                          handleToggleMilestone={handleToggleMilestone}
-                          handleToggleExpand={handleToggleExpand}
-                          calculateProgress={calculateProgress}
-                          getStatusConfig={getStatusConfig}
-                          getHealthStatus={getHealthStatus}
-                        />
-                      </Grid>
-                    ))}
+                    {renderGoalGrid(goalsByParent[objective._id] || [])}
 
                     {/* Add Child Button */}
                     {!isQuarterClosed && (
@@ -804,29 +777,7 @@ const FocusAreaView = () => {
                 ) : (
                   /* List View */
                   <Box>
-                    <Stack spacing={0}>
-                      {(goalsByParent[objective._id] || []).map((goal) => (
-                        <Box key={goal._id}>
-                          <GoalRowList
-                            goal={goal}
-                            area={area}
-                            isQuarterClosed={isQuarterClosed}
-                            expandedMilestones={expandedMilestones}
-                            expandedGoals={expandedGoals}
-                            goalActivities={goalActivities}
-                            handleStatusChange={handleStatusChange}
-                            handleEditGoal={handleEditGoal}
-                            handleDeleteGoal={handleDeleteGoal}
-                            handleToggleMilestones={handleToggleMilestones}
-                            handleToggleMilestone={handleToggleMilestone}
-                            handleToggleExpand={handleToggleExpand}
-                            calculateProgress={calculateProgress}
-                            getStatusConfig={getStatusConfig}
-                            getHealthStatus={getHealthStatus}
-                          />
-                        </Box>
-                      ))}
-                    </Stack>
+                    <Stack spacing={0}>{renderGoalRows(goalsByParent[objective._id] || [])}</Stack>
                     {!isQuarterClosed && (
                       <Button
                         variant='plain'
@@ -853,53 +804,11 @@ const FocusAreaView = () => {
               {viewMode === 'grid' ? (
                 /* Grid View */
                 <Grid container spacing={2}>
-                  {goalsByParent['orphan'].map((goal) => (
-                    <Grid key={goal._id} xs={12} md={6}>
-                      <GoalCardGrid
-                        goal={goal}
-                        area={area}
-                        isQuarterClosed={isQuarterClosed}
-                        expandedMilestones={expandedMilestones}
-                        expandedGoals={expandedGoals}
-                        goalActivities={goalActivities}
-                        handleStatusChange={handleStatusChange}
-                        handleEditGoal={handleEditGoal}
-                        handleDeleteGoal={handleDeleteGoal}
-                        handleToggleMilestones={handleToggleMilestones}
-                        handleToggleMilestone={handleToggleMilestone}
-                        handleToggleExpand={handleToggleExpand}
-                        calculateProgress={calculateProgress}
-                        getStatusConfig={getStatusConfig}
-                        getHealthStatus={getHealthStatus}
-                      />
-                    </Grid>
-                  ))}
+                  {renderGoalGrid(goalsByParent['orphan'])}
                 </Grid>
               ) : (
                 /* List View */
-                <Stack spacing={0}>
-                  {goalsByParent['orphan'].map((goal) => (
-                    <Box key={goal._id}>
-                      <GoalRowList
-                        goal={goal}
-                        area={area}
-                        isQuarterClosed={isQuarterClosed}
-                        expandedMilestones={expandedMilestones}
-                        expandedGoals={expandedGoals}
-                        goalActivities={goalActivities}
-                        handleStatusChange={handleStatusChange}
-                        handleEditGoal={handleEditGoal}
-                        handleDeleteGoal={handleDeleteGoal}
-                        handleToggleMilestones={handleToggleMilestones}
-                        handleToggleMilestone={handleToggleMilestone}
-                        handleToggleExpand={handleToggleExpand}
-                        calculateProgress={calculateProgress}
-                        getStatusConfig={getStatusConfig}
-                        getHealthStatus={getHealthStatus}
-                      />
-                    </Box>
-                  ))}
-                </Stack>
+                <Stack spacing={0}>{renderGoalRows(goalsByParent['orphan'])}</Stack>
               )}
             </Box>
           )}
@@ -940,6 +849,17 @@ const FocusAreaView = () => {
           fetchData()
           handleClosePriorityDialog()
         }}
+      />
+
+      <GoalDetailDrawer
+        open={Boolean(detailGoal)}
+        goal={detailGoal}
+        model={detailModel}
+        onClose={() => setDetailGoalId(null)}
+        onEdit={handleEditGoal}
+        onDelete={handleDeleteGoal}
+        onStatusChange={handleStatusChange}
+        onToggleMilestone={handleToggleMilestone}
       />
 
       <GoalDialog
@@ -1014,6 +934,17 @@ const FocusAreaView = () => {
           goals={allGoals}
         />
       )}
+
+      <Snackbar
+        open={Boolean(toast)}
+        onClose={() => setToast(null)}
+        autoHideDuration={4000}
+        color='danger'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {toast ? t(toast) : ''}
+      </Snackbar>
     </Container>
   )
 }
