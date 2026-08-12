@@ -109,7 +109,22 @@ const REQUIRED_KEYS = [
   'annualPlanning.goal.timeframeQ2',
   'annualPlanning.goal.timeframeQ3',
   'annualPlanning.goal.timeframeQ4',
-  'annualPlanning.goal.saveError'
+  'annualPlanning.goal.saveError',
+  // Pre-existing form keys that were missing from de/es/fr and silently fell
+  // back to English inside the redesigned dialog. Guarded so they cannot lapse.
+  'annualPlanning.goal.titlePlaceholder',
+  'annualPlanning.goal.descriptionPlaceholder',
+  'annualPlanning.goal.editSubtitle',
+  'annualPlanning.goal.keyResultsTitle',
+  'annualPlanning.goal.linkToObjective',
+  'annualPlanning.goal.timeframeQuestion',
+  'annualPlanning.goal.saveGoal',
+  'annualPlanning.goal.updateGoal',
+  'annualPlanning.goal.targetDate',
+  'annualPlanning.goal.imageUrl',
+  'annualPlanning.goal.title',
+  'annualPlanning.goal.add',
+  'common.cancel'
 ]
 
 /** §9.4 — keys whose UI no longer exists. */
@@ -196,7 +211,15 @@ describe('no English left behind in the translated locales', () => {
     'annualPlanning.goal.parentFallback',
     'annualPlanning.goal.parentPlaceholder',
     'annualPlanning.goal.noMilestones',
-    'annualPlanning.goal.milestonePlaceholder'
+    'annualPlanning.goal.milestonePlaceholder',
+    'annualPlanning.goal.titlePlaceholder',
+    'annualPlanning.goal.descriptionPlaceholder',
+    'annualPlanning.goal.editSubtitle',
+    'annualPlanning.goal.keyResultsTitle',
+    'annualPlanning.goal.linkToObjective',
+    'annualPlanning.goal.timeframeQuestion',
+    'annualPlanning.goal.saveGoal',
+    'annualPlanning.goal.updateGoal'
   ]
 
   it.each(['de', 'es', 'fr', 'ja'])('%s translates them rather than echoing en', (locale) => {
