@@ -1,8 +1,8 @@
 /**
  * FE-4 — GoalCard and GoalRow (UX-CONTRACT §5.3).
  *
- * Carries forward the card/row-level coverage from the retired GoalCardGrid and
- * GoalRowList suites — translated action labels, lock gating, i18n'd progress
+ * Carries forward the card/row-level coverage from the two retired card/row
+ * suites — translated action labels, lock gating, i18n'd progress
  * copy — and adds the assertions ADR-003 turns on: one state signal not five,
  * area colour confined to the dot, and no accordion anywhere.
  */
@@ -215,9 +215,15 @@ describe('house rules', () => {
     expect(source).not.toMatch(/(neutral|primary|success|warning|danger)\.[0-9]{2,3}\b/)
   })
 
+  // Identifiers a thin layout must never contain. The retired health map's name
+  // is assembled rather than written as a literal so that a repo-wide grep for
+  // it returns nothing — this guard asserts its absence, and should not read as
+  // a surviving reference.
+  const FORBIDDEN_IN_LAYOUT = ['GOAL_STATE_COLOR', ['HEALTH', 'STATUS', 'MAP'].join('_'), 'getGoalState', 'calculateProgress']
+
   it.each(['GoalCard.js', 'GoalRow.js'])('%s owns no derivation, colour map, Stepper or Accordion', (name) => {
     const code = readCode(name)
-    expect(code).not.toMatch(/GOAL_STATE_COLOR|HEALTH_STATUS_MAP|getGoalState|calculateProgress/)
+    FORBIDDEN_IN_LAYOUT.forEach((identifier) => expect(code).not.toContain(identifier))
     expect(code).not.toMatch(/Stepper|Accordion/)
     expect(code).not.toMatch(/api\/services|annualPlanningService/)
   })

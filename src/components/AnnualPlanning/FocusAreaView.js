@@ -56,7 +56,7 @@ import GoalRow from './GoalRow'
 import GoalDetailDrawer from './goal/GoalDetailDrawer'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import useGoalCardModel from '../../hooks/useGoalCardModel'
-import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter, getGoalState } from './goalDerivation'
+import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter } from './goalDerivation'
 
 // --- GOAL-01 computation engine ---
 // The implementations moved to ./goalDerivation.js (ADR-003 / UX-CONTRACT §5.1):
@@ -64,17 +64,6 @@ import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter, g
 // GoalsTabView.js was importing utilities from this sibling page. The original
 // names are re-exported so every existing caller keeps resolving.
 export { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter }
-
-/**
- * @deprecated Superseded by goalDerivation.getGoalState, which adds the
- * `not_started` state. Kept as a thin adapter so callers written against the
- * four-state vocabulary (and the HEALTH_STATUS_MAP copies that still consume it)
- * keep their exact legacy output until those call sites are retired.
- */
-export const getHealthStatus = (goal) => {
-  const state = getGoalState(goal)
-  return state === 'not_started' ? 'on_track' : state
-}
 
 const FocusAreaView = () => {
   const { id } = useParams()

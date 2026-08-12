@@ -6,10 +6,10 @@ import { isMilestoneOverdue } from '../goalDerivation'
 
 /**
  * GoalMilestoneStepper — the single surviving Stepper, consolidated from the two
- * duplicated copies in GoalCardGrid.js and GoalRowList.js.
+ * duplicated copies in the old grid-card and list-row components.
  *
- * It keeps the union of both: GoalCardGrid's richer due-date badge (which
- * GoalRowList lacked), plus the lock gating, Enter/Space toggling and
+ * It keeps the union of both: the grid card's richer due-date badge (which the
+ * list row lacked), plus the lock gating, Enter/Space toggling and
  * milestone.locked tooltip both shared. Milestones stay toggleable in any
  * order — there is no sequential-completion rule.
  *

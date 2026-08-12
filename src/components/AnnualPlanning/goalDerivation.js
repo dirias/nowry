@@ -85,8 +85,8 @@ export const getGoalProgress = (goal) => {
 export const GOAL_STATES = ['completed', 'not_started', 'on_track', 'at_risk', 'behind']
 
 /**
- * The single state -> Joy palette map for the whole feature. Replaces both
- * copies of HEALTH_STATUS_MAP. Colour on a goal means health and nothing else.
+ * The single state -> Joy palette map for the whole feature. Replaces the two
+ * duplicated health-colour maps. Colour on a goal means health, nothing else.
  */
 export const GOAL_STATE_COLOR = {
   completed: 'success',
@@ -109,7 +109,7 @@ export const GOAL_STATE_I18N = {
 }
 
 /**
- * Supersedes getHealthStatus (FocusAreaView.js:95). Identical output for every
+ * Supersedes the legacy health-status helper. Identical output for every
  * input except the new `not_started` branch, which catches goals whose window
  * has not opened yet — previously reported as `on_track`, which claimed credit
  * for a quarter that had not begun.

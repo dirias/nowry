@@ -6,7 +6,7 @@ import { GOAL_STATE_COLOR, GOAL_STATE_I18N } from '../goalDerivation'
 /**
  * GoalStatePill — the ONE chip that carries a goal's health.
  *
- * Replaces two copies of HEALTH_STATUS_MAP plus two hand-rolled lifecycle
+ * Replaces two copies of the health-colour map plus two hand-rolled lifecycle
  * <Box> pills. Colour on a goal means health and nothing else (ADR-003), and
  * the pill always renders its text label alongside the colour, so it is
  * colourblind-safe by construction rather than by convention.

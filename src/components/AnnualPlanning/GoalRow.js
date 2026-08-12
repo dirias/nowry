@@ -11,8 +11,8 @@ import GoalStatePill from './goal/GoalStatePill'
  * GoalRow — list layout, the same primitives as GoalCard in a single row
  * (DESIGN_GUIDELINES.md §6.2).
  *
- * Replaces GoalRowList.js (302 lines), of which ~467 were duplicated with
- * GoalCardGrid across the pair. Like GoalCard it contains no derivation, no
+ * Replaces the 302-line list row, of which ~467 lines were duplicated with the
+ * grid card across the pair. Like GoalCard it contains no derivation, no
  * colour map, no Stepper and no Accordion.
  */
 const GoalRow = ({

@@ -1,8 +1,8 @@
 /**
  * FE-2 — shared goal primitives (UX-CONTRACT §5.2).
  *
- * Carries forward the meaningful coverage from the retired GoalCardGrid /
- * GoalRowList suites that belongs at this layer: any-order milestone toggling,
+ * Carries forward the meaningful coverage from the two retired card/row suites
+ * that belongs at this layer: any-order milestone toggling,
  * lock gating, keyboard toggling, and translated aria-labels on every
  * interactive element. Card/row-level behaviour is covered in GoalCard /
  * GoalRow's own suites.

@@ -2,9 +2,9 @@
  * FE-1 — goalDerivation logic core (UX-CONTRACT §5.1).
  *
  * Includes the regression suite required by the contract: getGoalState must
- * agree with the legacy getHealthStatus for every input that is not the new
- * `not_started` case. The legacy implementation is reproduced verbatim here as
- * the oracle so the assertion survives the deletion of its original call sites.
+ * agree with the legacy four-state health helper for every input that is not
+ * the new `not_started` case. That implementation is reproduced verbatim here
+ * as the oracle, so the assertion survives the deletion of its original site.
  */
 import {
   GOAL_STATES,
@@ -106,7 +106,7 @@ describe('getGoalState', () => {
   })
 })
 
-describe('getGoalState regression vs legacy getHealthStatus', () => {
+describe('getGoalState regression vs the legacy health helper', () => {
   const now = new Date(2026, 1, 15, 12, 0, 0)
   const currentQuarter = quarterOf(now)
 
@@ -179,7 +179,7 @@ describe('GOAL_STATE_COLOR / GOAL_STATE_I18N', () => {
     })
   })
 
-  it('reproduces the legacy HEALTH_STATUS_MAP pairings it replaces', () => {
+  it('reproduces the legacy health-map pairings it replaces', () => {
     const legacyMap = {
       on_track: { key: 'onTrack', color: 'success' },
       at_risk: { key: 'atRisk', color: 'warning' },

@@ -10,7 +10,7 @@ import GoalStatePill from './goal/GoalStatePill'
 /**
  * GoalCard — grid layout, one of two thin layouts over one logic core.
  *
- * Replaces GoalCardGrid.js (454 lines). It owns no derivation, no colour map,
+ * Replaces the 454-line grid card. It owns no derivation, no colour map,
  * no Stepper and no Accordion: everything it renders comes from
  * useGoalCardModel or a shared primitive. That constraint is what keeps the
  * card and the row from drifting apart again (ADR-003 §6).

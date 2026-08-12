@@ -1,6 +1,6 @@
 /**
  * Phase 25 Plan 04 — FocusAreaView pure-function tests (GOAL-01, D-02/D-03).
- * Behaviors 1-7: getHealthStatus completed short-circuit + on_track/at_risk/
+ * Behaviors 1-7: goal-state completed short-circuit + on_track/at_risk/
  * behind thresholds, calculateTimeElapsedPercentage past/future-quarter and
  * yearly full-year handling (Pitfall 3 regression guard).
  *
@@ -37,11 +37,12 @@ jest.mock('../GoalDialog', () => () => null)
 jest.mock('../PriorityDialog', () => () => null)
 jest.mock('../PriorityList', () => () => null)
 jest.mock('../CloseQuarterModal', () => () => null)
-jest.mock('../GoalCardGrid', () => () => null)
-jest.mock('../GoalRowList', () => () => null)
+jest.mock('../GoalCard', () => () => null)
+jest.mock('../GoalRow', () => () => null)
 jest.mock('../../Common/DeleteConfirmationModal', () => () => null)
 
-import { getHealthStatus, calculateTimeElapsedPercentage, calculateProgress, getCurrentQuarter } from '../FocusAreaView'
+import { calculateTimeElapsedPercentage, calculateProgress, getCurrentQuarter } from '../FocusAreaView'
+import { getGoalState } from '../goalDerivation'
 
 // 2026-07-20 falls in Q3 — getCurrentQuarter() returns 3 for these tests.
 const FIXED_NOW = new Date('2026-07-20T12:00:00')
@@ -58,10 +59,10 @@ afterAll(() => {
   jest.useRealTimers()
 })
 
-describe('getHealthStatus (D-02)', () => {
+describe('getGoalState (D-02, via goalDerivation)', () => {
   // Behavior 1: completed status short-circuits regardless of progress/time
   test('returns "completed" for a completed goal regardless of low progress', () => {
-    expect(getHealthStatus({ status: 'completed', progress: 10 })).toBe('completed')
+    expect(getGoalState({ status: 'completed', progress: 10 })).toBe('completed')
   })
 
   // Behavior 2: progress exactly equal to time-elapsed% → on_track
@@ -76,7 +77,7 @@ describe('getHealthStatus (D-02)', () => {
       milestones: [],
       progress: elapsed
     }
-    expect(getHealthStatus(goal)).toBe('on_track')
+    expect(getGoalState(goal)).toBe('on_track')
   })
 
   // Behavior 3: progress 10 points below time-elapsed% → at_risk
@@ -90,7 +91,7 @@ describe('getHealthStatus (D-02)', () => {
       milestones: [],
       progress: elapsed - 10
     }
-    expect(getHealthStatus(goal)).toBe('at_risk')
+    expect(getGoalState(goal)).toBe('at_risk')
   })
 
   // Behavior 4: progress 30 points below time-elapsed% → behind
@@ -104,7 +105,7 @@ describe('getHealthStatus (D-02)', () => {
       milestones: [],
       progress: elapsed - 30
     }
-    expect(getHealthStatus(goal)).toBe('behind')
+    expect(getGoalState(goal)).toBe('behind')
   })
 })
 

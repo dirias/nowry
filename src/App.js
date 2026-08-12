@@ -13,7 +13,6 @@ import './styles/Book.css'
 import './styles/TextMenu.css'
 import './styles/Card.css'
 import './styles/LexicalEditor.css'
-import './styles/AnnualPlanning.css'
 
 import 'keen-slider/keen-slider.min.css'
 import 'katex/dist/katex.min.css'
