@@ -86,6 +86,7 @@ const FocusAreaView = () => {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState(null)
+  const [dialogSection, setDialogSection] = useState(null)
   const [deletingGoal, setDeletingGoal] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showPriorityDialog, setShowPriorityDialog] = useState(false)
@@ -147,11 +148,13 @@ const FocusAreaView = () => {
 
   const handleAddGoal = () => {
     setSelectedGoal(null)
+    setDialogSection(null)
     setDialogOpen(true)
   }
 
   const handleEditGoal = (goal) => {
     setSelectedGoal(goal)
+    setDialogSection(null)
     setDialogOpen(true)
   }
 
@@ -353,8 +356,12 @@ const FocusAreaView = () => {
   const detailGoal = goals.find((g) => g._id === detailGoalId) || null
   const detailModel = useGoalCardModel(detailGoal, { area, activities, quarterReports, planYear: plan?.year })
 
+  // Ladder rung 5 — open the form already scrolled to Key Results.
+  // Mirrors GoalsTabView.handleAddMilestone; without the section the prompt is
+  // inert on this page (the defect FE-5 introduced).
   const handleAddMilestone = (goal) => {
     setSelectedGoal(goal)
+    setDialogSection('milestones')
     setDialogOpen(true)
   }
 
@@ -422,11 +429,13 @@ const FocusAreaView = () => {
     } else {
       setSelectedGoal({ type: 'yearly' })
     }
+    setDialogSection(null)
     setDialogOpen(true)
   }
 
   const handleAddChildGoal = (parentId) => {
     setSelectedGoal({ type: 'quarterly', quarter: quarterFilter, parent_id: parentId })
+    setDialogSection(null)
     setDialogOpen(true)
   }
 
@@ -859,6 +868,7 @@ const FocusAreaView = () => {
         goal={selectedGoal}
         onSuccess={handleGoalSuccess}
         yearlyObjectives={yearlyObjectives} // Pass for parent selection
+        initialSection={dialogSection}
       />
 
       {/* Error Modal */}
