@@ -617,6 +617,13 @@
       "study": "Lernen",
       "moreDecks": "Und {{count}} weiteres Deck mit Karten",
       "moreDecks_other": "Und {{count}} weitere Decks mit Karten"
+    },
+    "annualGoals": {
+      "title": "Jahresziele",
+      "noGoals": "Noch keine Ziele festgelegt",
+      "createGoal": "Erstelle dein erstes Ziel",
+      "viewFullPlan": "Gesamten Plan ansehen",
+      "loadingAria": "Jahresziele werden geladen"
     }
   },
   "motivation": {
@@ -878,11 +885,11 @@
         "onTrack": "Im Zeitplan",
         "atRisk": "Gefährdet",
         "behind": "Im Rückstand",
-        "completed": "Abgeschlossen"
+        "completed": "Abgeschlossen",
+        "notStarted": "Nicht begonnen"
       },
       "activities": "Aktivitäten",
-      "noActivities": "Keine verknüpften Aktivitäten",
-      "percentComplete": "{{percent}}% Abgeschlossen",
+      "percentComplete": "{{percent}}% abgeschlossen",
       "activitiesError": "Fehler beim Laden der Aktivitäten",
       "completionBlockedTitle": "Ziel kann nicht als abgeschlossen markiert werden",
       "completionBlockedBody": "Bitte zuerst diese Meilensteine abschließen:",
@@ -897,7 +904,36 @@
       "smartHelper": "Machen Sie es SMART: Spezifisch, Messbar, Erreichbar, Relevant, Zeitgebunden",
       "activitiesCount": "{{count}} Aktivität",
       "activitiesCount_plural": "{{count}} Aktivitäten",
-      "viewBoard": "Als Board Anzeigen"
+      "viewBoard": "Als Board Anzeigen",
+      "next": {
+        "completed": "Abgeschlossen",
+        "label": "Als Nächstes: {{title}}",
+        "overdue": "Überfällig: {{title}}",
+        "readyToComplete": "Alle Meilensteine erledigt – als abgeschlossen markieren",
+        "addMilestone": "Meilenstein hinzufügen, um den Fortschritt zu verfolgen",
+        "toggleAria": "Meilenstein {{title}} als erledigt markieren"
+      },
+      "milestoneCount_one": "{{completed}} von {{total}} Meilenstein",
+      "milestoneCount_other": "{{completed}} von {{total}} Meilensteinen",
+      "daysLeftShort_one": "noch {{count}} T",
+      "daysLeftShort_other": "noch {{count}} T",
+      "moreActions": "Weitere Aktionen für {{title}}",
+      "openDetail": "{{title}} öffnen",
+      "markComplete": "Als abgeschlossen markieren",
+      "reopen": "Ziel wieder öffnen",
+      "lockedAction": "Dieses Quartal ist abgeschlossen",
+      "detail": {
+        "milestones": "Meilensteine",
+        "lifecycleLabel": "Status",
+        "noDescription": "Keine Beschreibung"
+      },
+      "statusUpdateError": "Dieses Ziel konnte nicht aktualisiert werden. Bitte erneut versuchen.",
+      "milestoneUpdateError": "Dieser Meilenstein konnte nicht aktualisiert werden. Bitte erneut versuchen.",
+      "noMilestones": "Noch keine Meilensteine. Füge oben deinen ersten Meilenstein hinzu.",
+      "deleteConfirm": {
+        "title": "Ziel löschen",
+        "description": "Dieses Ziel und alle seine Meilensteine werden dauerhaft entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+      }
     },
     "activity": {
       "title": "Aktivitäten & Gewohnheiten",
@@ -927,7 +963,6 @@
       "toggleActive": "Aktiv Umschalten"
     },
     "milestone": {
-      "label": "Meilensteine ({{completed}}/{{total}})",
       "locked": "Meilensteine sind gesperrt"
     },
     "closeQuarter": {
@@ -1069,7 +1104,8 @@
       "scopeQuarter_one": "Q{{quarter}} · {{count}} Ziel",
       "scopeQuarter_other": "Q{{quarter}} · {{count}} Ziele",
       "scopeAll_one": "Ganzes Jahr · {{count}} Ziel",
-      "scopeAll_other": "Ganzes Jahr · {{count}} Ziele"
+      "scopeAll_other": "Ganzes Jahr · {{count}} Ziele",
+      "loadingAria": "Ziele werden geladen"
     },
     "reports": {
       "emptyTitle": "Dein erster Bericht erscheint beim Quartalsabschluss",

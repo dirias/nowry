@@ -622,6 +622,13 @@
       "study": "Estudiar",
       "moreDecks": "Y {{count}} deck más con tarjetas pendientes",
       "moreDecks_other": "Y {{count}} decks más con tarjetas pendientes"
+    },
+    "annualGoals": {
+      "title": "Objetivos anuales",
+      "noGoals": "Aún no has definido objetivos",
+      "createGoal": "Crea tu primer objetivo",
+      "viewFullPlan": "Ver plan completo",
+      "loadingAria": "Cargando objetivos anuales"
     }
   },
   "motivation": {
@@ -1227,11 +1234,11 @@
         "onTrack": "En Buen Camino",
         "atRisk": "En Riesgo",
         "behind": "Retrasado",
-        "completed": "Completado"
+        "completed": "Completado",
+        "notStarted": "Sin empezar"
       },
       "activities": "Actividades",
-      "noActivities": "Sin actividades vinculadas",
-      "percentComplete": "{{percent}}% Completado",
+      "percentComplete": "{{percent}}% completado",
       "activitiesError": "Error al cargar las actividades",
       "completionBlockedTitle": "No se puede marcar el objetivo como completado",
       "completionBlockedBody": "Completa primero estos hitos:",
@@ -1246,7 +1253,32 @@
       "smartHelper": "Hazlo SMART: Específico, Medible, Alcanzable, Relevante, Temporal",
       "activitiesCount": "{{count}} actividad",
       "activitiesCount_plural": "{{count}} actividades",
-      "viewBoard": "Ver como Tablero"
+      "viewBoard": "Ver como Tablero",
+      "next": {
+        "completed": "Completado",
+        "label": "Siguiente: {{title}}",
+        "overdue": "Atrasado: {{title}}",
+        "readyToComplete": "Todos los hitos completados: márcalo como completado",
+        "addMilestone": "Añade un hito para seguir el progreso",
+        "toggleAria": "Marcar el hito {{title}} como hecho"
+      },
+      "milestoneCount_one": "{{completed}} de {{total}} hito",
+      "milestoneCount_other": "{{completed}} de {{total}} hitos",
+      "daysLeftShort_one": "queda {{count}} d",
+      "daysLeftShort_other": "quedan {{count}} d",
+      "moreActions": "Más acciones para {{title}}",
+      "openDetail": "Abrir {{title}}",
+      "markComplete": "Marcar como completado",
+      "reopen": "Reabrir objetivo",
+      "lockedAction": "Este trimestre está cerrado",
+      "detail": {
+        "milestones": "Hitos",
+        "lifecycleLabel": "Estado",
+        "noDescription": "Sin descripción"
+      },
+      "statusUpdateError": "No se pudo actualizar este objetivo. Inténtalo de nuevo.",
+      "milestoneUpdateError": "No se pudo actualizar ese hito. Inténtalo de nuevo.",
+      "noMilestones": "Aún no hay hitos. Añade tu primer hito arriba."
     },
     "activity": {
       "title": "Actividades y Hábitos",
@@ -1276,7 +1308,6 @@
       "toggleActive": "Alternar Activo"
     },
     "milestone": {
-      "label": "Hitos ({{completed}}/{{total}})",
       "locked": "Los hitos están bloqueados"
     },
     "closeQuarter": {
@@ -1433,7 +1464,8 @@
       "scopeQuarter_one": "Q{{quarter}} · {{count}} objetivo",
       "scopeQuarter_other": "Q{{quarter}} · {{count}} objetivos",
       "scopeAll_one": "Todo el año · {{count}} objetivo",
-      "scopeAll_other": "Todo el año · {{count}} objetivos"
+      "scopeAll_other": "Todo el año · {{count}} objetivos",
+      "loadingAria": "Cargando objetivos"
     },
     "reports": {
       "emptyTitle": "Tu primer informe se desbloquea al cerrar el trimestre",

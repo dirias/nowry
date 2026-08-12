@@ -624,6 +624,13 @@
       "study": "学習する",
       "moreDecks": "他 {{count}} デッキに保留中のカードがあります",
       "moreDecks_other": "他 {{count}} デッキに保留中のカードがあります"
+    },
+    "annualGoals": {
+      "title": "年間目標",
+      "noGoals": "まだ目標が設定されていません",
+      "createGoal": "最初の目標を作成",
+      "viewFullPlan": "プラン全体を見る",
+      "loadingAria": "年間目標を読み込み中"
     }
   },
   "motivation": {
@@ -880,10 +887,10 @@
         "onTrack": "順調",
         "atRisk": "要注意",
         "behind": "遅延",
-        "completed": "完了"
+        "completed": "完了",
+        "notStarted": "未着手"
       },
       "activities": "アクティビティ",
-      "noActivities": "リンクされたアクティビティはありません",
       "percentComplete": "{{percent}}% 完了",
       "activitiesError": "アクティビティの読み込みに失敗しました",
       "completionBlockedTitle": "目標を完了としてマークできません",
@@ -914,7 +921,35 @@
       "titlePlaceholder": "何を達成したいですか？",
       "descriptionPlaceholder": "この目標の詳細を追加...",
       "milestonePlaceholder": "マイルストーンのタイトル...",
-      "habitPlaceholder": "定期的に何をしますか？"
+      "habitPlaceholder": "定期的に何をしますか？",
+      "next": {
+        "completed": "完了",
+        "label": "次: {{title}}",
+        "overdue": "期限超過: {{title}}",
+        "readyToComplete": "すべてのマイルストーンが完了 — 目標を完了にする",
+        "addMilestone": "マイルストーンを追加して進捗を記録",
+        "toggleAria": "マイルストーン「{{title}}」を完了にする"
+      },
+      "milestoneCount_one": "{{total}}件中{{completed}}件のマイルストーン",
+      "milestoneCount_other": "{{total}}件中{{completed}}件のマイルストーン",
+      "daysLeftShort_one": "残り{{count}}日",
+      "daysLeftShort_other": "残り{{count}}日",
+      "moreActions": "「{{title}}」のその他の操作",
+      "openDetail": "「{{title}}」を開く",
+      "markComplete": "完了にする",
+      "reopen": "目標を再開する",
+      "lockedAction": "この四半期は締め切られています",
+      "detail": {
+        "milestones": "マイルストーン",
+        "lifecycleLabel": "ステータス",
+        "noDescription": "説明なし"
+      },
+      "statusUpdateError": "この目標を更新できませんでした。もう一度お試しください。",
+      "milestoneUpdateError": "そのマイルストーンを更新できませんでした。もう一度お試しください。",
+      "deleteConfirm": {
+        "title": "目標を削除",
+        "description": "この目標とすべてのマイルストーンが完全に削除されます。この操作は取り消せません。"
+      }
     },
     "activity": {
       "title": "活動＆習慣",
@@ -944,7 +979,6 @@
       "toggleActive": "有効/無効を切り替え"
     },
     "milestone": {
-      "label": "マイルストーン ({{completed}}/{{total}})",
       "locked": "マイルストーンはロックされています"
     },
     "dailyRoutine": {
@@ -1078,7 +1112,8 @@
       "scopeQuarter_one": "Q{{quarter}} · {{count}} 件の目標",
       "scopeQuarter_other": "Q{{quarter}} · {{count}} 件の目標",
       "scopeAll_one": "通年 · {{count}} 件の目標",
-      "scopeAll_other": "通年 · {{count}} 件の目標"
+      "scopeAll_other": "通年 · {{count}} 件の目標",
+      "loadingAria": "目標を読み込み中"
     },
     "reports": {
       "emptyTitle": "最初のレポートは四半期の締めで公開されます",

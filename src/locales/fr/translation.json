@@ -639,6 +639,13 @@
       "study": "Étudier",
       "moreDecks": "Et {{count}} autre deck avec des cartes",
       "moreDecks_other": "Et {{count}} autres decks avec des cartes"
+    },
+    "annualGoals": {
+      "title": "Objectifs annuels",
+      "noGoals": "Aucun objectif défini pour l’instant",
+      "createGoal": "Créez votre premier objectif",
+      "viewFullPlan": "Voir le plan complet",
+      "loadingAria": "Chargement des objectifs annuels"
     }
   },
   "motivation": {
@@ -900,11 +907,11 @@
         "onTrack": "Dans les Temps",
         "atRisk": "À Risque",
         "behind": "En Retard",
-        "completed": "Terminé"
+        "completed": "Terminé",
+        "notStarted": "Non démarré"
       },
       "activities": "Activités",
-      "noActivities": "Aucune activité liée",
-      "percentComplete": "{{percent}}% Terminé",
+      "percentComplete": "{{percent}}% terminé",
       "activitiesError": "Erreur de chargement des activités",
       "completionBlockedTitle": "Impossible de marquer l'objectif comme terminé",
       "completionBlockedBody": "Veuillez d'abord terminer ces jalons :",
@@ -919,7 +926,36 @@
       "smartHelper": "Rendez-le SMART : Spécifique, Mesurable, Atteignable, Pertinent, Temporel",
       "activitiesCount": "{{count}} activité",
       "activitiesCount_plural": "{{count}} activités",
-      "viewBoard": "Voir en Tableau"
+      "viewBoard": "Voir en Tableau",
+      "next": {
+        "completed": "Terminé",
+        "label": "Suivant : {{title}}",
+        "overdue": "En retard : {{title}}",
+        "readyToComplete": "Tous les jalons sont faits — marquez-le comme terminé",
+        "addMilestone": "Ajoutez un jalon pour suivre la progression",
+        "toggleAria": "Marquer le jalon {{title}} comme fait"
+      },
+      "milestoneCount_one": "{{completed}} jalon sur {{total}}",
+      "milestoneCount_other": "{{completed}} jalons sur {{total}}",
+      "daysLeftShort_one": "{{count}} j restant",
+      "daysLeftShort_other": "{{count}} j restants",
+      "moreActions": "Plus d’actions pour {{title}}",
+      "openDetail": "Ouvrir {{title}}",
+      "markComplete": "Marquer comme terminé",
+      "reopen": "Rouvrir l’objectif",
+      "lockedAction": "Ce trimestre est clôturé",
+      "detail": {
+        "milestones": "Jalons",
+        "lifecycleLabel": "Statut",
+        "noDescription": "Aucune description"
+      },
+      "statusUpdateError": "Impossible de mettre à jour cet objectif. Veuillez réessayer.",
+      "milestoneUpdateError": "Impossible de mettre à jour ce jalon. Veuillez réessayer.",
+      "noMilestones": "Pas encore de jalons. Ajoutez votre premier jalon ci-dessus.",
+      "deleteConfirm": {
+        "title": "Supprimer l’objectif",
+        "description": "Cet objectif et tous ses jalons seront définitivement supprimés. Cette action est irréversible."
+      }
     },
     "activity": {
       "title": "Activités & Habitudes",
@@ -949,7 +985,6 @@
       "toggleActive": "Activer/Désactiver"
     },
     "milestone": {
-      "label": "Jalons ({{completed}}/{{total}})",
       "locked": "Les jalons sont verrouillés"
     },
     "closeQuarter": {
@@ -1091,7 +1126,8 @@
       "scopeQuarter_one": "Q{{quarter}} · {{count}} objectif",
       "scopeQuarter_other": "Q{{quarter}} · {{count}} objectifs",
       "scopeAll_one": "Toute l'année · {{count}} objectif",
-      "scopeAll_other": "Toute l'année · {{count}} objectifs"
+      "scopeAll_other": "Toute l'année · {{count}} objectifs",
+      "loadingAria": "Chargement des objectifs"
     },
     "reports": {
       "emptyTitle": "Votre premier bilan arrive à la clôture du trimestre",

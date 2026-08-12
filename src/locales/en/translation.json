@@ -754,7 +754,8 @@
       "title": "Annual Goals",
       "noGoals": "No goals set yet",
       "createGoal": "Create Your First Goal",
-      "viewFullPlan": "View Full Plan"
+      "viewFullPlan": "View Full Plan",
+      "loadingAria": "Loading annual goals"
     },
     "priorities": {
       "title": "Today's Priorities",
@@ -1517,11 +1518,11 @@
         "onTrack": "On Track",
         "atRisk": "At Risk",
         "behind": "Behind",
-        "completed": "Completed"
+        "completed": "Completed",
+        "notStarted": "Not started"
       },
       "activities": "Activities",
-      "noActivities": "No linked activities",
-      "percentComplete": "{{percent}}% Complete",
+      "percentComplete": "{{percent}}% complete",
       "activitiesError": "Failed to load activities",
       "completionBlockedTitle": "Cannot mark goal as completed",
       "completionBlockedBody": "Please complete these milestones first:",
@@ -1551,7 +1552,31 @@
       "titlePlaceholder": "What do you want to achieve?",
       "descriptionPlaceholder": "Add details about this goal...",
       "milestonePlaceholder": "Milestone title...",
-      "habitPlaceholder": "What will you do regularly?"
+      "habitPlaceholder": "What will you do regularly?",
+      "next": {
+        "completed": "Completed",
+        "label": "Next: {{title}}",
+        "overdue": "Overdue: {{title}}",
+        "readyToComplete": "All milestones done — mark it complete",
+        "addMilestone": "Add a milestone to track progress",
+        "toggleAria": "Mark milestone {{title}} as done"
+      },
+      "milestoneCount_one": "{{completed}} of {{total}} milestone",
+      "milestoneCount_other": "{{completed}} of {{total}} milestones",
+      "daysLeftShort_one": "{{count}}d left",
+      "daysLeftShort_other": "{{count}}d left",
+      "moreActions": "More actions for {{title}}",
+      "openDetail": "Open {{title}}",
+      "markComplete": "Mark complete",
+      "reopen": "Reopen goal",
+      "lockedAction": "This quarter is closed",
+      "detail": {
+        "milestones": "Milestones",
+        "lifecycleLabel": "Status",
+        "noDescription": "No description"
+      },
+      "statusUpdateError": "Couldn't update this goal. Please try again.",
+      "milestoneUpdateError": "Couldn't update that milestone. Please try again."
     },
     "activity": {
       "title": "Activities & Habits",
@@ -1581,7 +1606,6 @@
       "toggleActive": "Toggle Active"
     },
     "milestone": {
-      "label": "Milestones ({{completed}}/{{total}})",
       "locked": "Milestones are locked"
     },
     "closeQuarter": {
@@ -1742,7 +1766,8 @@
       "scopeQuarter_one": "Q{{quarter}} · {{count}} goal",
       "scopeQuarter_other": "Q{{quarter}} · {{count}} goals",
       "scopeAll_one": "All year · {{count}} goal",
-      "scopeAll_other": "All year · {{count}} goals"
+      "scopeAll_other": "All year · {{count}} goals",
+      "loadingAria": "Loading goals"
     },
     "reports": {
       "emptyTitle": "Your first report unlocks at quarter close",
