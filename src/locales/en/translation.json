@@ -1147,16 +1147,12 @@
     },
     "create": {
       "newTitle": "New deck",
-      "editTitle": "Edit deck",
       "fields": {
         "name": "Deck name",
         "namePlaceholder": "E.g., Japanese Vocabulary",
         "description": "Description",
-        "descriptionPlaceholder": "What is this deck about?",
-        "imageUrl": "Image URL (optional)",
-        "tags": "Tags (comma separated)"
+        "descriptionPlaceholder": "What is this deck about?"
       },
-      "save": "Save deck",
       "create": "Create deck",
       "nameRequired": "Name your deck to create it",
       "addDescription": "Add a description",

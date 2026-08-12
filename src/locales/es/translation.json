@@ -877,16 +877,12 @@
     },
     "create": {
       "newTitle": "Nuevo mazo",
-      "editTitle": "Editar mazo",
       "fields": {
         "name": "Nombre del mazo",
         "namePlaceholder": "Ej., Vocabulario japonés",
         "description": "Descripción",
-        "descriptionPlaceholder": "¿De qué trata este mazo?",
-        "imageUrl": "URL de imagen (opcional)",
-        "tags": "Etiquetas (separadas por coma)"
+        "descriptionPlaceholder": "¿De qué trata este mazo?"
       },
-      "save": "Guardar mazo",
       "create": "Crear mazo",
       "nameRequired": "Ponle un nombre al mazo para crearlo",
       "addDescription": "Añadir una descripción",

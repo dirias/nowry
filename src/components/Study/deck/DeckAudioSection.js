@@ -41,7 +41,7 @@ const DeckAudioSection = ({ loading, side, onSideChange, voiceSettings, voices, 
           <Radio
             key={option}
             value={option}
-            label={t(`common.${option}`)}
+            label={t(`deckSettings.audio.${option}`)}
             size='sm'
             variant={side === option ? 'soft' : 'plain'}
             color={side === option ? 'primary' : 'neutral'}

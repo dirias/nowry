@@ -208,11 +208,11 @@ describe('the audio side toggle', () => {
     await goTo('audio')
 
     const group = screen.getByRole('radiogroup', { name: 'deckSettings.audio.sideAria' })
-    const back = within(group).getByRole('radio', { name: 'common.back' })
+    const back = within(group).getByRole('radio', { name: 'deckSettings.audio.back' })
 
     back.focus()
     expect(back).toHaveFocus()
-    expect(screen.queryByRole('button', { name: 'common.back' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'deckSettings.audio.back' })).not.toBeInTheDocument()
   })
 
   it('switches sides from the keyboard, which it could not do at all before', async () => {
@@ -220,7 +220,7 @@ describe('the audio side toggle', () => {
     await goTo('audio')
 
     const group = screen.getByRole('radiogroup', { name: 'deckSettings.audio.sideAria' })
-    const back = within(group).getByRole('radio', { name: 'common.back' })
+    const back = within(group).getByRole('radio', { name: 'deckSettings.audio.back' })
     await act(async () => {
       fireEvent.click(back)
     })
@@ -233,7 +233,9 @@ describe('the audio side toggle', () => {
     await goTo('audio')
     await act(async () => {
       fireEvent.click(
-        within(screen.getByRole('radiogroup', { name: 'deckSettings.audio.sideAria' })).getByRole('radio', { name: 'common.back' })
+        within(screen.getByRole('radiogroup', { name: 'deckSettings.audio.sideAria' })).getByRole('radio', {
+          name: 'deckSettings.audio.back'
+        })
       )
     })
     await act(async () => {
