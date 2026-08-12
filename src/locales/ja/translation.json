@@ -1170,7 +1170,8 @@
     "nav": {
       "study": "学習",
       "audio": "音声",
-      "publishing": "公開"
+      "publishing": "公開",
+      "identity": "詳細"
     },
     "study": {
       "paceMode": "学習ペース",
@@ -1208,7 +1209,12 @@
     "saving": "保存中...",
     "saved": "保存済み",
     "saveFailed": "この変更は保存されませんでした",
-    "retry": "再試行"
+    "retry": "再試行",
+    "identity": {
+      "name": "デッキ名",
+      "description": "説明",
+      "image": "カバー画像"
+    }
   },
   "legal": {
     "privacy": {

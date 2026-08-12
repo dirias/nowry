@@ -2171,7 +2171,8 @@
     "nav": {
       "study": "Study",
       "audio": "Audio",
-      "publishing": "Publishing"
+      "publishing": "Publishing",
+      "identity": "Details"
     },
     "study": {
       "paceMode": "Study Pace",
@@ -2209,7 +2210,12 @@
     "saving": "Saving...",
     "saved": "Saved",
     "saveFailed": "That change wasn't saved",
-    "retry": "Try again"
+    "retry": "Try again",
+    "identity": {
+      "name": "Deck name",
+      "description": "Description",
+      "image": "Cover image"
+    }
   },
   "publish": {
     "openSheet": "Share to community",

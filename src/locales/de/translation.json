@@ -1173,7 +1173,8 @@
     "nav": {
       "study": "Lernen",
       "audio": "Audio",
-      "publishing": "Veröffentlichen"
+      "publishing": "Veröffentlichen",
+      "identity": "Details"
     },
     "study": {
       "paceMode": "Lerntempo",
@@ -1211,7 +1212,12 @@
     "saving": "Speichern...",
     "saved": "Gespeichert",
     "saveFailed": "Diese Änderung wurde nicht gespeichert",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "identity": {
+      "name": "Stapelname",
+      "description": "Beschreibung",
+      "image": "Titelbild"
+    }
   },
   "legal": {
     "privacy": {

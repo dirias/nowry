@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Chip, Skeleton, Stack, Typography } from '@mui/joy'
-import { GraphicEq, MenuBook, Public } from '@mui/icons-material'
+import { GraphicEq, MenuBook, Public, Tune } from '@mui/icons-material'
 
 import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import FormSheet from '../Common/Form/FormSheet'
 import useIsMobile from '../../hooks/useIsMobile'
 import useDeckSettings from '../../hooks/useDeckSettings'
 import DeckAudioSection from './deck/DeckAudioSection'
+import DeckIdentitySection from './deck/DeckIdentitySection'
 import DeckPublishSheet from './DeckPublishSheet'
 import DeckPublishingSection from './deck/DeckPublishingSection'
 import DeckSettingsNav from './deck/DeckSettingsNav'
@@ -34,16 +35,17 @@ import { getDeckAccent } from './deck/deckAccent'
  * debounce, one timer per service method (§11.1).
  */
 const SECTIONS = [
+  { key: 'identity', Icon: Tune },
   { key: 'study', Icon: MenuBook },
   { key: 'audio', Icon: GraphicEq },
   { key: 'publishing', Icon: Public }
 ]
 
-export default function DeckSettingsModal({ open, onClose, deckId, onSaved }) {
+export default function DeckSettingsModal({ open, onClose, deckId, onSaved, initialSection = 'study' }) {
   const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [publishOpen, setPublishOpen] = useState(false)
-  const settings = useDeckSettings({ open, deckId, onSaved, onClose })
+  const settings = useDeckSettings({ open, deckId, initialSection, onSaved, onClose })
 
   const { loading, deck, activeSection } = settings
   const { color: accent, Icon: AccentIcon } = getDeckAccent(deck?.deck_type)
@@ -104,6 +106,15 @@ export default function DeckSettingsModal({ open, onClose, deckId, onSaved }) {
           />
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
+            {activeSection === 'identity' && (
+              <DeckIdentitySection
+                loading={loading}
+                identity={settings.identity}
+                errorKey={settings.identityError}
+                onChange={settings.setIdentityField}
+              />
+            )}
+
             {activeSection === 'study' && <DeckStudySection loading={loading} config={settings.config} onChange={settings.saveConfig} />}
 
             {activeSection === 'audio' && (

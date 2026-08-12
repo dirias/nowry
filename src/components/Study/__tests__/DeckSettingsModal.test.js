@@ -25,10 +25,12 @@ jest.mock('react-i18next', () => ({
 const mockGetById = jest.fn()
 const mockUpdateSettings = jest.fn()
 const mockGetSettings = jest.fn()
+const mockUpdate = jest.fn()
 jest.mock('../../../api/services', () => ({
   decksService: {
     getById: (...args) => mockGetById(...args),
     updateSettings: (...args) => mockUpdateSettings(...args),
+    update: (...args) => mockUpdate(...args),
     getSettings: (...args) => mockGetSettings(...args)
   }
 }))
@@ -93,6 +95,7 @@ beforeEach(() => {
   setViewport(false)
   mockGetById.mockReset().mockResolvedValue(DECK)
   mockUpdateSettings.mockReset().mockResolvedValue({})
+  mockUpdate.mockReset().mockResolvedValue({})
   mockGetSettings.mockReset().mockResolvedValue({ is_public: true, published_at: '2026-01-02' })
 })
 
@@ -295,5 +298,94 @@ describe('loading', () => {
     await act(async () => {
       resolve(DECK)
     })
+  })
+})
+
+describe('the Identity section — deck editing has one home now', () => {
+  const openIdentity = async () => {
+    await renderModal({ initialSection: 'identity' })
+  }
+
+  const nameField = () => screen.getByRole('textbox', { name: /deckSettings.identity.name/ })
+
+  it('opens on the section the caller asked for, so an edit entry point lands on the fields', async () => {
+    await openIdentity()
+    expect(nameField()).toHaveValue('Japanese')
+  })
+
+  it('autosaves the rename through the deck update endpoint, not the settings one', async () => {
+    await openIdentity()
+    fireEvent.change(nameField(), { target: { value: 'Japanese N5' } })
+    await settle()
+
+    expect(mockUpdate).toHaveBeenCalledWith('deck-1', {
+      name: 'Japanese N5',
+      description: '',
+      image_url: null,
+      tags: []
+    })
+    expect(mockUpdateSettings).not.toHaveBeenCalled()
+  })
+
+  it('suppresses the autosave on an empty name, explains why, and fires no request', async () => {
+    await openIdentity()
+    fireEvent.change(nameField(), { target: { value: '' } })
+    await settle()
+
+    expect(mockUpdate).not.toHaveBeenCalled()
+    expect(screen.getByText('cards.create.nameRequired')).toBeInTheDocument()
+  })
+
+  it('clears the complaint and resumes saving once there is a name again', async () => {
+    await openIdentity()
+    fireEvent.change(nameField(), { target: { value: '' } })
+    await settle()
+    fireEvent.change(nameField(), { target: { value: 'Kanji' } })
+    await settle()
+
+    expect(screen.queryByText('cards.create.nameRequired')).not.toBeInTheDocument()
+    expect(mockUpdate).toHaveBeenCalledWith('deck-1', expect.objectContaining({ name: 'Kanji' }))
+  })
+})
+
+describe('the two debounce channels', () => {
+  /**
+   * The hazard the ruling created: two service methods autosaving from one
+   * modal. With a single shared timer, a rename and a pace change made inside
+   * the same 600ms window cancel each other and exactly one of them silently
+   * does not persist — with no Save button to make the loss visible.
+   */
+  it('does not let a rename cancel a pace change made in the same window', async () => {
+    await renderModal({ initialSection: 'identity' })
+    fireEvent.change(screen.getByRole('textbox', { name: /deckSettings.identity.name/ }), { target: { value: 'Renamed' } })
+
+    await goTo('study')
+    await act(async () => {
+      jest.advanceTimersByTime(200)
+      fireEvent.click(screen.getByRole('radio', { name: 'deckSettings.pace.intensive' }))
+    })
+    await settle()
+
+    expect(mockUpdate).toHaveBeenCalledWith('deck-1', expect.objectContaining({ name: 'Renamed' }))
+    expect(mockUpdateSettings).toHaveBeenCalledWith('deck-1', {
+      config: { pace_mode: 'intensive', new_per_day: 40, max_reviews_per_day: 200 }
+    })
+  })
+
+  it('does not let a pace change cancel a rename made in the same window', async () => {
+    await renderModal({ initialSection: 'study' })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('radio', { name: 'deckSettings.pace.relaxed' }))
+    })
+
+    await goTo('identity')
+    await act(async () => {
+      jest.advanceTimersByTime(200)
+      fireEvent.change(screen.getByRole('textbox', { name: /deckSettings.identity.name/ }), { target: { value: 'Renamed' } })
+    })
+    await settle()
+
+    expect(mockUpdateSettings).toHaveBeenCalledTimes(1)
+    expect(mockUpdate).toHaveBeenCalledTimes(1)
   })
 })

@@ -1609,7 +1609,8 @@
     "nav": {
       "study": "Estudio",
       "audio": "Audio",
-      "publishing": "Publicación"
+      "publishing": "Publicación",
+      "identity": "Detalles"
     },
     "study": {
       "paceMode": "Ritmo de estudio",
@@ -1647,7 +1648,12 @@
     "saving": "Guardando...",
     "saved": "Guardado",
     "saveFailed": "Ese cambio no se guardó",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "identity": {
+      "name": "Nombre del mazo",
+      "description": "Descripción",
+      "image": "Imagen de portada"
+    }
   },
   "editor": {
     "mode": {

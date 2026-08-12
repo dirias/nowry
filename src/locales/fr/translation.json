@@ -1195,7 +1195,8 @@
     "nav": {
       "study": "Étude",
       "audio": "Audio",
-      "publishing": "Publication"
+      "publishing": "Publication",
+      "identity": "Détails"
     },
     "study": {
       "paceMode": "Rythme d'étude",
@@ -1233,7 +1234,12 @@
     "saving": "Enregistrement...",
     "saved": "Enregistré",
     "saveFailed": "Cette modification n'a pas été enregistrée",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "identity": {
+      "name": "Nom du paquet",
+      "description": "Description",
+      "image": "Image de couverture"
+    }
   },
   "legal": {
     "privacy": {

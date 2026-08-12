@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Container, Snackbar } from '@mui/joy'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
-import CreateDeckModal from './CreateDeckModal'
 import DeckCreateSheet from './DeckCreateSheet'
 import CreateCardModal from './CreateCardModal'
 import ManageContent from './ManageContent'
@@ -30,7 +29,6 @@ export default function CardHome({ onDeckChange } = {}) {
   const [showCreateDeck, setShowCreateDeck] = useState(false)
   const [showImportDeck, setShowImportDeck] = useState(false)
   const [showCreateCard, setShowCreateCard] = useState(false)
-  const [editingDeck, setEditingDeck] = useState(null)
   const [editingCard, setEditingCard] = useState(null)
   const [deletingDeck, setDeletingDeck] = useState(null)
   const [deletingCard, setDeletingCard] = useState(null)
@@ -39,7 +37,7 @@ export default function CardHome({ onDeckChange } = {}) {
   const [selectedTags, setSelectedTags] = useState([])
   const [availableTags, setAvailableTags] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null })
+  const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null, section: 'study' })
   const [publishSheetState, setPublishSheetState] = useState({ open: false, deckId: null, deck: null })
   const [modePickerState, setModePickerState] = useState({ open: false, deck: null })
 
@@ -120,8 +118,12 @@ export default function CardHome({ onDeckChange } = {}) {
     fetchData()
   }
 
+  // Editing a deck is editing a deck, whichever field it is. It used to open a
+  // different modal from the one holding the same deck's pace and voice
+  // settings, with no route between them; both now land in settings, on the
+  // section the user asked for.
   const handleEditDeck = (deck) => {
-    setEditingDeck(deck)
+    setDeckSettingsState({ open: true, deckId: deck._id, section: 'identity' })
   }
 
   const handleDeleteDeck = async (deck) => {
@@ -200,7 +202,7 @@ export default function CardHome({ onDeckChange } = {}) {
           setShowCreateCard(true)
         }}
         onNewDeck={() => setShowCreateDeck(true)}
-        onDeckSettings={(deck) => setDeckSettingsState({ open: true, deckId: deck._id })}
+        onDeckSettings={(deck) => setDeckSettingsState({ open: true, deckId: deck._id, section: 'study' })}
         onPublishDeck={handlePublishDeck}
       />
 
@@ -218,10 +220,6 @@ export default function CardHome({ onDeckChange } = {}) {
             setShowCreateCard(true)
           }}
         />
-      )}
-
-      {editingDeck && (
-        <CreateDeckModal open={!!editingDeck} onClose={() => setEditingDeck(null)} onSaved={handleDeckSaved} initialData={editingDeck} />
       )}
 
       {showImportDeck && (
@@ -287,8 +285,9 @@ export default function CardHome({ onDeckChange } = {}) {
 
       <DeckSettingsModal
         open={deckSettingsState.open}
-        onClose={() => setDeckSettingsState({ open: false, deckId: null })}
+        onClose={() => setDeckSettingsState({ open: false, deckId: null, section: 'study' })}
         deckId={deckSettingsState.deckId}
+        initialSection={deckSettingsState.section}
         onSaved={() => {
           reloadDecks()
           onDeckChange?.()
