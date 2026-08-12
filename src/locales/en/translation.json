@@ -1545,7 +1545,6 @@
       "basicInfo": "Basic Information",
       "keyResultsTitle": "Key Results & Milestones",
       "timelineVisual": "Timeline & Visual",
-      "habits": "Habits",
       "noMilestones": "No milestones yet",
       "titleRequired": "Give your goal a name to save it",
       "detailRailAria": "Add optional details",
@@ -1581,7 +1580,6 @@
       "titlePlaceholder": "What do you want to achieve?",
       "descriptionPlaceholder": "Add details about this goal...",
       "milestonePlaceholder": "Milestone title...",
-      "habitPlaceholder": "What will you do regularly?",
       "next": {
         "completed": "Completed",
         "label": "Next: {{title}}",

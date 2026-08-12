@@ -914,7 +914,6 @@
       "basicInfo": "基本情報",
       "keyResultsTitle": "主要な結果とマイルストーン",
       "timelineVisual": "タイムラインとビジュアル",
-      "habits": "習慣",
       "noMilestones": "マイルストーンはまだありません",
       "titleRequired": "保存するには目標名を入力してください",
       "detailRailAria": "任意の詳細を追加",
@@ -950,7 +949,6 @@
       "titlePlaceholder": "何を達成したいですか？",
       "descriptionPlaceholder": "この目標の詳細を追加...",
       "milestonePlaceholder": "マイルストーンのタイトル...",
-      "habitPlaceholder": "定期的に何をしますか？",
       "next": {
         "completed": "完了",
         "label": "次: {{title}}",

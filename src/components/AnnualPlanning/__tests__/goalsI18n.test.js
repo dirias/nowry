@@ -77,11 +77,49 @@ const REQUIRED_KEYS = [
   'dashboard.annualGoals.createGoal',
   'dashboard.annualGoals.viewFullPlan',
   'common.close',
-  'common.retry'
+  'common.retry',
+  // goal-form-redesign §13.1 — the title-first form
+  'annualPlanning.goal.titleRequired',
+  'annualPlanning.goal.detailRailAria',
+  'annualPlanning.goal.addMilestones',
+  'annualPlanning.goal.addDescription',
+  'annualPlanning.goal.addTargetDate',
+  'annualPlanning.goal.addImage',
+  'annualPlanning.goal.changeTimeframe',
+  'annualPlanning.goal.keyResultsHelper',
+  'annualPlanning.goal.addMilestoneButton',
+  'annualPlanning.goal.milestoneToggleAria',
+  'annualPlanning.goal.milestoneTitleAria',
+  'annualPlanning.goal.milestoneDueDateAria',
+  'annualPlanning.goal.milestoneClearDateAria',
+  'annualPlanning.goal.milestoneDeleteAria',
+  'annualPlanning.goal.milestoneNoDate',
+  'annualPlanning.goal.milestoneNumber',
+  'annualPlanning.goal.milestonePlaceholder',
+  'annualPlanning.goal.imageHelper',
+  'annualPlanning.goal.imageUrlPlaceholder',
+  'annualPlanning.goal.imagePreviewAlt',
+  'annualPlanning.goal.imagePreviewError',
+  'annualPlanning.goal.scopeQuarterly',
+  'annualPlanning.goal.scopeYearly',
+  'annualPlanning.goal.parentFallback',
+  'annualPlanning.goal.parentPlaceholder',
+  'annualPlanning.goal.timeframeYearly',
+  'annualPlanning.goal.timeframeQ1',
+  'annualPlanning.goal.timeframeQ2',
+  'annualPlanning.goal.timeframeQ3',
+  'annualPlanning.goal.timeframeQ4',
+  'annualPlanning.goal.saveError'
 ]
 
 /** §9.4 — keys whose UI no longer exists. */
-const RETIRED_KEYS = ['annualPlanning.milestone.label', 'annualPlanning.goal.noActivities']
+const RETIRED_KEYS = [
+  'annualPlanning.milestone.label',
+  'annualPlanning.goal.noActivities',
+  // goal-form-redesign §13.3 — habit authoring left the goal form
+  'annualPlanning.goal.habits',
+  'annualPlanning.goal.habitPlaceholder'
+]
 
 describe.each(LOCALES)('%s locale', (locale) => {
   it('resolves every key the goal surfaces use', () => {
@@ -110,7 +148,14 @@ describe.each(LOCALES)('%s locale', (locale) => {
       'annualPlanning.goal.milestoneCount_other': ['{{completed}}', '{{total}}'],
       'annualPlanning.goal.daysLeftShort_one': ['{{count}}'],
       'annualPlanning.goal.daysLeftShort_other': ['{{count}}'],
-      'annualPlanning.goal.percentComplete': ['{{percent}}']
+      'annualPlanning.goal.percentComplete': ['{{percent}}'],
+      'annualPlanning.goal.milestoneToggleAria': ['{{title}}'],
+      'annualPlanning.goal.milestoneTitleAria': ['{{index}}'],
+      'annualPlanning.goal.milestoneDueDateAria': ['{{title}}'],
+      'annualPlanning.goal.milestoneClearDateAria': ['{{title}}'],
+      'annualPlanning.goal.milestoneDeleteAria': ['{{title}}'],
+      'annualPlanning.goal.milestoneNumber': ['{{index}}'],
+      'annualPlanning.goal.scopeQuarterly': ['{{quarter}}']
     }
     Object.entries(placeholders).forEach(([key, tokens]) => {
       const value = get(translations[locale], key)
@@ -136,7 +181,22 @@ describe('no English left behind in the translated locales', () => {
     'annualPlanning.goal.milestoneUpdateError',
     'annualPlanning.goals.loadingAria',
     'dashboard.annualGoals.noGoals',
-    'dashboard.annualGoals.viewFullPlan'
+    'dashboard.annualGoals.viewFullPlan',
+    'annualPlanning.goal.titleRequired',
+    'annualPlanning.goal.detailRailAria',
+    'annualPlanning.goal.addMilestones',
+    'annualPlanning.goal.addDescription',
+    'annualPlanning.goal.addTargetDate',
+    'annualPlanning.goal.addImage',
+    'annualPlanning.goal.changeTimeframe',
+    'annualPlanning.goal.keyResultsHelper',
+    'annualPlanning.goal.imageHelper',
+    'annualPlanning.goal.imagePreviewAlt',
+    'annualPlanning.goal.imagePreviewError',
+    'annualPlanning.goal.parentFallback',
+    'annualPlanning.goal.parentPlaceholder',
+    'annualPlanning.goal.noMilestones',
+    'annualPlanning.goal.milestonePlaceholder'
   ]
 
   it.each(['de', 'es', 'fr', 'ja'])('%s translates them rather than echoing en', (locale) => {
@@ -152,5 +212,29 @@ describe('§9.3 copy fix — percentComplete is sentence case', () => {
 
   it.each(LOCALES)('%s carries the fixed string', (locale) => {
     expect(get(translations[locale], 'annualPlanning.goal.percentComplete')).not.toMatch(/% Complete/)
+  })
+})
+
+/**
+ * ADR-004 §6 — habit authoring left the goal form and nowhere else. These keys
+ * belong to surfaces the cut must not reach: the CAL-03 Calendar filter chip and
+ * the goal detail drawer's activities section. A future cleanup pass that greps
+ * for "habit" and deletes matches would break both.
+ */
+describe('the habits cut stayed inside the goal form', () => {
+  it.each(LOCALES)('%s keeps the drawer activity keys', (locale) => {
+    expect(get(translations[locale], 'annualPlanning.goal.activities')).toBeDefined()
+    expect(get(translations[locale], 'annualPlanning.goal.activitiesError')).toBeDefined()
+  })
+
+  it('keeps the CAL-03 Calendar habits filter chip label', () => {
+    expect(get(translations.en, 'calendarModal.filters.habits')).toBeDefined()
+  })
+
+  it('drops the emoji from the timeframe options (§13.4 wins over §8.5)', () => {
+    LOCALES.forEach((locale) => {
+      const yearly = get(translations[locale], 'annualPlanning.goal.timeframeYearly')
+      expect(`${locale}: ${yearly}`).not.toMatch(/\p{Extended_Pictographic}/u)
+    })
   })
 })
