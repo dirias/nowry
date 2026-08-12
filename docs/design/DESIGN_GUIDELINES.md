@@ -1164,7 +1164,7 @@ Every CRUD modal MUST follow this consistent structure:
 #### **Select/Dropdown:**
 *   **Size:** `size='lg'` for consistency with inputs
 *   **Placeholder:** Clear call-to-action ("Select a category...", "Choose timeframe...")
-*   **Icons/Emoji:** Use emojis in options for visual hierarchy (e.g., "📅 All Year", "Q1")
+*   **Icons:** Use a Joy/MUI icon in options for visual hierarchy (e.g. `<CalendarTodayIcon/>` beside "All year"). **No emoji** — §13.4 governs: Joy renders a `Select` trigger as a `<button>`, so a selected option's emoji lands inside button content.
 
 ### 8.6 Image Preview Pattern
 
