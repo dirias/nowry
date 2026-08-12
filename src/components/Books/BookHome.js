@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { booksService } from '../../api/services'
 import { WarningWindow, SuccessWindow, Error as ErrorWindow } from '../Messages'
 import BookEditor from './BookEditor'
+import BookCreateSheet from './BookCreateSheet'
 import { useAuth } from '../../context/AuthContext'
 import useBooks from '../../hooks/useBooks'
 import Book from './Book'
@@ -48,6 +49,7 @@ export default function BookHome() {
   const [showError, setShowError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [bookToDelete, setBookToDelete] = useState(null)
+  const [showCreate, setShowCreate] = useState(false)
   const [showEditor, setShowEditor] = useState(false)
   const [bookToEdit, setBookToEdit] = useState(null)
   const [uploading, setUploading] = useState(false)
@@ -99,24 +101,16 @@ export default function BookHome() {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }, [])
 
-  const handleCreateBook = useCallback(async () => {
-    try {
-      const newBook = await booksService.create({
-        title: `New book ${allBooks.length}`,
-        author: user?.username || 'Unknown',
-        isbn: 'Sin ISBN'
-      })
-      navigate(`/book/${newBook._id}`, { state: { book: newBook } })
-    } catch (error) {
-      console.error('Error creating book:', error)
-      let msg = error.response?.data?.detail || t('subscription.errors.genericCreate')
-      if (error.response?.status === 403) {
-        msg = t('subscription.errors.bookLimit')
-      }
-      setErrorMessage(msg)
-      setShowError(true)
-    }
-  }, [allBooks.length, user?.username, navigate, t])
+  /**
+   * Both entry points open the same sheet — the header button and the
+   * empty-state button. Rewiring one and not the other would ship two different
+   * creation behaviours from two controls that look like the same action.
+   *
+   * Everything this used to do lives in BookCreateSheet now, including the 403
+   * plan-limit case, which renders inside the sheet with an upgrade action
+   * instead of as a separate ErrorWindow over the library.
+   */
+  const openCreate = useCallback(() => setShowCreate(true), [])
 
   const onDrop = useCallback(
     async (acceptedFiles) => {
@@ -268,7 +262,7 @@ export default function BookHome() {
                       <CloseIcon />
                     </IconButton>
                   )}
-                  <Button size='sm' variant='solid' color='primary' onClick={handleCreateBook} sx={{ borderRadius: 'md', fontWeight: 600 }}>
+                  <Button size='sm' variant='solid' color='primary' onClick={openCreate} sx={{ borderRadius: 'md', fontWeight: 600 }}>
                     {t('books.create')}
                   </Button>
                 </Stack>
@@ -285,7 +279,7 @@ export default function BookHome() {
               }}
             />
           ) : (
-            <Button size='lg' onClick={handleCreateBook} startDecorator={<AddIcon />} sx={{ borderRadius: 'lg', px: 4, boxShadow: 'sm' }}>
+            <Button size='lg' onClick={openCreate} startDecorator={<AddIcon />} sx={{ borderRadius: 'lg', px: 4, boxShadow: 'sm' }}>
               {t('books.create')}
             </Button>
           )}
@@ -767,6 +761,8 @@ export default function BookHome() {
           <BookEditor book={bookToEdit} refreshBooks={fetchBooks} onCancel={() => setShowEditor(false)} />
         </Box>
       )}
+
+      <BookCreateSheet open={showCreate} onClose={() => setShowCreate(false)} />
 
       <ImportPreviewModal
         open={showPreview}
