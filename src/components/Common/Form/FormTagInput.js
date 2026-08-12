@@ -44,7 +44,11 @@ const FormTagInput = React.forwardRef(
       [value, onChange]
     )
 
-    useImperativeHandle(ref, () => ({ commitPending: () => commit(pendingRef.current) }), [commit])
+    // `pendingTag()` alongside `commitPending()` because committing is a state
+    // update: a submit handler that commits and then reads `values` from its own
+    // closure still reads the list from before the commit, and drops the tag it
+    // just rescued. The payload builder reads the pending text directly.
+    useImperativeHandle(ref, () => ({ commitPending: () => commit(pendingRef.current), pendingTag: () => pendingRef.current }), [commit])
 
     return (
       <FormFieldFrame labelKey={labelKey} helperKey={helperKey}>

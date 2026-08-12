@@ -1667,6 +1667,26 @@
       "typeSelectorAria": "カードの種類",
       "switchTypeWarning": "カードの種類を変更すると、この種類で入力した内容は破棄されます。",
       "switchTypeConfirm": "変更する"
+    },
+    "create": {
+      "newTitle": "新しいデッキ",
+      "create": "デッキを作成",
+      "fields": {
+        "name": "デッキ名",
+        "namePlaceholder": "例: 日本語の語彙",
+        "description": "説明",
+        "descriptionPlaceholder": "このデッキは何についてですか？"
+      },
+      "nameRequired": "デッキ名を入力すると作成できます",
+      "addDescription": "説明を追加",
+      "addTags": "タグを追加",
+      "addImage": "画像を追加",
+      "addCards": "カードを追加",
+      "done": "完了",
+      "createdTitle": "デッキを作成しました",
+      "imagePlaceholder": "画像のリンクを貼り付け",
+      "imagePreviewAlt": "デッキ画像のプレビュー",
+      "imagePreviewError": "この画像を読み込めませんでした"
     }
   },
   "subscription": {

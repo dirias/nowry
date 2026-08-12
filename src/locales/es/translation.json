@@ -887,7 +887,17 @@
         "tags": "Etiquetas (separadas por coma)"
       },
       "save": "Guardar mazo",
-      "create": "Crear mazo"
+      "create": "Crear mazo",
+      "nameRequired": "Ponle un nombre al mazo para crearlo",
+      "addDescription": "Añadir una descripción",
+      "addTags": "Añadir etiquetas",
+      "addImage": "Añadir una imagen",
+      "addCards": "Añadir tarjetas",
+      "done": "Listo",
+      "createdTitle": "Mazo creado",
+      "imagePlaceholder": "Pega el enlace de una imagen",
+      "imagePreviewAlt": "Vista previa de la imagen del mazo",
+      "imagePreviewError": "No se pudo cargar esa imagen"
     },
     "session": {
       "loading": "Cargando sesión de estudio...",

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Container, Snackbar } from '@mui/joy'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import CreateDeckModal from './CreateDeckModal'
+import DeckCreateSheet from './DeckCreateSheet'
 import CreateCardModal from './CreateCardModal'
 import ManageContent from './ManageContent'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
@@ -121,7 +122,6 @@ export default function CardHome({ onDeckChange } = {}) {
 
   const handleEditDeck = (deck) => {
     setEditingDeck(deck)
-    setShowCreateDeck(true)
   }
 
   const handleDeleteDeck = async (deck) => {
@@ -206,15 +206,22 @@ export default function CardHome({ onDeckChange } = {}) {
 
       {/* Modals */}
       {showCreateDeck && (
-        <CreateDeckModal
+        <DeckCreateSheet
           open={showCreateDeck}
-          onClose={() => {
-            setShowCreateDeck(false)
-            setEditingDeck(null)
-          }}
+          onClose={() => setShowCreateDeck(false)}
           onSaved={handleDeckSaved}
-          initialData={editingDeck}
+          // A deck's value moment is its first card, so creation continues
+          // into card authoring pre-targeted to the deck it just made.
+          onAddCards={(deck) => {
+            setShowCreateDeck(false)
+            setEditingCard({ deck_id: deck._id })
+            setShowCreateCard(true)
+          }}
         />
+      )}
+
+      {editingDeck && (
+        <CreateDeckModal open={!!editingDeck} onClose={() => setEditingDeck(null)} onSaved={handleDeckSaved} initialData={editingDeck} />
       )}
 
       {showImportDeck && (

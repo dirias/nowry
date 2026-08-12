@@ -1696,6 +1696,26 @@
       "typeSelectorAria": "Type de carte",
       "switchTypeWarning": "Changer de type de carte supprimera ce que vous avez écrit pour ce type.",
       "switchTypeConfirm": "Changer quand même"
+    },
+    "create": {
+      "newTitle": "Nouveau paquet",
+      "create": "Créer le paquet",
+      "fields": {
+        "name": "Nom du paquet",
+        "namePlaceholder": "Ex. : vocabulaire japonais",
+        "description": "Description",
+        "descriptionPlaceholder": "De quoi parle ce paquet ?"
+      },
+      "nameRequired": "Nommez le paquet pour le créer",
+      "addDescription": "Ajouter une description",
+      "addTags": "Ajouter des étiquettes",
+      "addImage": "Ajouter une image",
+      "addCards": "Ajouter des cartes",
+      "done": "Terminé",
+      "createdTitle": "Paquet créé",
+      "imagePlaceholder": "Collez le lien d'une image",
+      "imagePreviewAlt": "Aperçu de l'image du paquet",
+      "imagePreviewError": "Cette image n'a pas pu être chargée"
     }
   },
   "books": {

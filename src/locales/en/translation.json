@@ -1157,7 +1157,17 @@
         "tags": "Tags (comma separated)"
       },
       "save": "Save deck",
-      "create": "Create deck"
+      "create": "Create deck",
+      "nameRequired": "Name your deck to create it",
+      "addDescription": "Add a description",
+      "addTags": "Add tags",
+      "addImage": "Add an image",
+      "addCards": "Add cards",
+      "done": "Done",
+      "createdTitle": "Deck created",
+      "imagePlaceholder": "Paste an image link",
+      "imagePreviewAlt": "Deck image preview",
+      "imagePreviewError": "That image couldn't be loaded"
     },
     "previewModal": {
       "cardOf": "{{current}} / {{total}}",

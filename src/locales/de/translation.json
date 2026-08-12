@@ -1674,6 +1674,26 @@
       "typeSelectorAria": "Kartentyp",
       "switchTypeWarning": "Beim Wechsel des Kartentyps geht verloren, was du für diesen Typ geschrieben hast.",
       "switchTypeConfirm": "Trotzdem wechseln"
+    },
+    "create": {
+      "newTitle": "Neuer Stapel",
+      "create": "Stapel erstellen",
+      "fields": {
+        "name": "Stapelname",
+        "namePlaceholder": "z. B. Japanischer Wortschatz",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Worum geht es in diesem Stapel?"
+      },
+      "nameRequired": "Gib dem Stapel einen Namen, um ihn zu erstellen",
+      "addDescription": "Beschreibung hinzufügen",
+      "addTags": "Schlagwörter hinzufügen",
+      "addImage": "Bild hinzufügen",
+      "addCards": "Karten hinzufügen",
+      "done": "Fertig",
+      "createdTitle": "Stapel erstellt",
+      "imagePlaceholder": "Bildlink einfügen",
+      "imagePreviewAlt": "Vorschau des Stapelbilds",
+      "imagePreviewError": "Dieses Bild konnte nicht geladen werden"
     }
   },
   "books": {
