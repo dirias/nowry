@@ -945,6 +945,7 @@
       "milestoneClearDateAria": "Fälligkeitsdatum für {{title}} entfernen",
       "milestoneDeleteAria": "{{title}} löschen",
       "milestoneNoDate": "Datum",
+      "milestoneNumber": "Meilenstein {{index}}",
       "milestonePlaceholder": "Titel des Meilensteins ...",
       "imageHelper": "Eine visuelle Erinnerung, wenn sie dir hilft",
       "imageUrlPlaceholder": "https://beispiel.de/bild.jpg",

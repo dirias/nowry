@@ -1294,6 +1294,7 @@
       "milestoneClearDateAria": "Quitar la fecha límite de {{title}}",
       "milestoneDeleteAria": "Eliminar {{title}}",
       "milestoneNoDate": "Fecha",
+      "milestoneNumber": "Hito {{index}}",
       "milestonePlaceholder": "Título del hito...",
       "imageHelper": "Un recordatorio visual, si te ayuda",
       "imageUrlPlaceholder": "https://ejemplo.com/imagen.jpg",

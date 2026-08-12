@@ -931,6 +931,7 @@
       "milestoneClearDateAria": "{{title}} の期日を削除",
       "milestoneDeleteAria": "{{title}} を削除",
       "milestoneNoDate": "日付",
+      "milestoneNumber": "マイルストーン {{index}}",
       "imageHelper": "役に立つなら、視覚的なリマインダーを",
       "imageUrlPlaceholder": "https://example.com/image.jpg",
       "imagePreviewAlt": "目標画像のプレビュー",

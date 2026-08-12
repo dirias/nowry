@@ -1562,6 +1562,7 @@
       "milestoneClearDateAria": "Clear the due date for {{title}}",
       "milestoneDeleteAria": "Delete {{title}}",
       "milestoneNoDate": "Date",
+      "milestoneNumber": "Milestone {{index}}",
       "imageHelper": "A visual reminder, if it helps",
       "imageUrlPlaceholder": "https://example.com/image.jpg",
       "imagePreviewAlt": "Goal image preview",

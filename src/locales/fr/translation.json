@@ -967,6 +967,7 @@
       "milestoneClearDateAria": "Supprimer l'échéance de {{title}}",
       "milestoneDeleteAria": "Supprimer {{title}}",
       "milestoneNoDate": "Date",
+      "milestoneNumber": "Jalon {{index}}",
       "milestonePlaceholder": "Titre du jalon...",
       "imageHelper": "Un rappel visuel, si cela vous aide",
       "imageUrlPlaceholder": "https://exemple.com/image.jpg",
