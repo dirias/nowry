@@ -17,6 +17,8 @@
 import React from 'react'
 import { render, screen, within } from '@testing-library/react'
 
+import { cssFor, injectedCss } from '../__testHelpers__/cssRules'
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k, i18n: { language: 'en' } })
 }))
@@ -34,40 +36,6 @@ const setViewport = (mobile) => {
     removeEventListener: () => {},
     dispatchEvent: () => false
   })
-}
-
-/**
- * Emotion inserts `sx` through the CSSOM rather than as style-tag text, so the
- * rules are only readable via document.styleSheets. This is the only way to
- * assert a declaration jsdom's computed style drops — an unknown `dvh` unit or
- * an `env()` call — and those are exactly the two this shell turns on.
- * Whitespace after the colon is normalised so assertions read as written.
- */
-const injectedCss = () => {
-  let css = ''
-  Array.from(document.styleSheets).forEach((sheet) => {
-    try {
-      css += Array.from(sheet.cssRules)
-        .map((rule) => rule.cssText)
-        .join('\n')
-    } catch (error) {
-      /* a cross-origin sheet cannot be read; there are none in jsdom */
-    }
-  })
-  return css.replace(/:\s+/g, ':')
-}
-
-/**
- * Emotion's rules accumulate in the document for the whole file, so a global
- * search can pass on a rule an earlier test left behind. Scope to the classes
- * actually on the node under test.
- */
-const cssFor = (node) => {
-  const selectors = Array.from(node.classList).map((name) => `.${name}`)
-  return injectedCss()
-    .split('\n')
-    .filter((rule) => selectors.some((selector) => rule.includes(selector)))
-    .join('\n')
 }
 
 const renderSheet = (props = {}) =>
