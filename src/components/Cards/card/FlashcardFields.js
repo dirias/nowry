@@ -51,6 +51,7 @@ const FlashcardFields = ({ values, setField, errors, revealed, availableChips, o
       onReveal={onReveal}
       decks={decks}
       tagInputRef={tagInputRef}
+      refFor={refFor}
     />
   </Stack>
 )

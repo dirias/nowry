@@ -131,6 +131,7 @@ const VisualCardFields = ({ values, setField, errors, revealed, availableChips, 
         onReveal={onReveal}
         decks={decks}
         tagInputRef={tagInputRef}
+        refFor={refFor}
       />
     </Stack>
   )

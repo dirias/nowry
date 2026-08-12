@@ -60,6 +60,7 @@ const QuizCardFields = ({ values, setField, errors, revealed, availableChips, on
       onReveal={onReveal}
       decks={decks}
       tagInputRef={tagInputRef}
+      refFor={refFor}
     />
   </Stack>
 )

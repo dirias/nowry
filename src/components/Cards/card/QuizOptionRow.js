@@ -39,7 +39,8 @@ const QuizOptionRow = ({ index, value, onChange, onEnter, onRemove, removable, i
         value={value}
         onChange={(event) => onChange(index, event.target.value)}
         onKeyDown={(event) => {
-          if (event.key !== 'Enter') return
+          // Cmd/Ctrl+Enter belongs to the sheet's save binding, not to this row.
+          if (event.key !== 'Enter' || event.metaKey || event.ctrlKey) return
           // Enter adds the next option. It must never reach a submit handler:
           // there is no <form> here precisely so a half-composed card cannot be
           // saved from a field the user is still filling (§5.9).

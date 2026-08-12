@@ -108,9 +108,10 @@ export default function CardHome({ onDeckChange } = {}) {
     setModePickerState({ open: true, deck })
   }
 
+  // Closing is the sheet's decision, not this one's: `Save & next` reports a
+  // saved card and stays open for the next one. Closing here would end the
+  // authoring loop on its first iteration.
   const handleCardSaved = () => {
-    setShowCreateCard(false)
-    setEditingCard(null)
     reloadCards() // Force a fresh fetch so the new/edited card appears
   }
 
