@@ -16,7 +16,7 @@ import { focusRing } from './goalStyles'
  *
  * Owns no array logic: every mutation goes out through onChange/onDelete.
  */
-const GoalMilestoneEditorRow = ({ milestone, index, onChange, onDelete, onEnter, inputRef }) => {
+const GoalMilestoneEditorRow = ({ milestone, index, onChange, onDelete, onEnter, inputRef, autoFocus = false }) => {
   const { t } = useTranslation()
 
   // A brand-new row has no title, and "Delete " with nothing after it is not an
@@ -57,6 +57,10 @@ const GoalMilestoneEditorRow = ({ milestone, index, onChange, onDelete, onEnter,
             }
           }}
           placeholder={t('annualPlanning.goal.milestonePlaceholder')}
+          // Declarative rather than a post-mount .focus() call: Joy's Modal runs
+          // a focus trap on open that re-claims focus from any timeout we
+          // schedule, but honours autoFocus on an element inside the trap.
+          autoFocus={autoFocus}
           slotProps={{ input: { ref: inputRef, 'aria-label': t('annualPlanning.goal.milestoneTitleAria', { index: index + 1 }) } }}
           sx={{
             textDecoration: milestone.completed ? 'line-through' : 'none',

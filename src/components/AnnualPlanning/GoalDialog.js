@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, DialogContent, DialogTitle, FormControl, FormLabel, Input, Modal, ModalDialog, Stack, Textarea, Typography } from '@mui/joy'
+import { Box, Button, DialogContent, FormControl, FormLabel, Input, Modal, ModalDialog, Stack, Textarea } from '@mui/joy'
 
 import useGoalForm from '../../hooks/useGoalForm'
 import GoalDetailRail from './goal/GoalDetailRail'
+import GoalDialogHeader from './goal/GoalDialogHeader'
 import GoalImageField from './goal/GoalImageField'
 import GoalMilestoneEditor from './goal/GoalMilestoneEditor'
 import GoalSaveErrorAlert from './goal/GoalSaveErrorAlert'
@@ -23,15 +24,13 @@ const scrollBehavior = () => (window.matchMedia?.('(prefers-reduced-motion: redu
  * GoalDetailRail offers the optional groups on demand — and at rest it is a
  * scope chip, one field, a row of offers and two buttons.
  *
- * Recurring-habit authoring left this form and nowhere else (ADR-004 §6). Its
- * streak was never writable after creation, so the form was asking users to
- * fill a loop the product cannot close. Everything that reads or schedules
- * them is untouched.
+ * Recurring-habit authoring left this form and nowhere else (ADR-004 §6): its
+ * streak was never writable after creation, so the form asked users to fill a
+ * loop the product cannot close. Everything reading them is untouched.
  *
- * @param initialSection null | 'milestones' — 'milestones' opens the form ready
- *   to work: the group is revealed on mount, a blank row is seeded, the section
- *   scrolls into view and the cursor lands in that row. This is what keeps the
- *   goal card's next-action rung 5 working against a form that opens collapsed.
+ * @param initialSection null | 'milestones' — reveals the group on mount, seeds
+ *   a blank row, scrolls to it and lands the cursor in it. This is what keeps
+ *   the card's next-action rung 5 working against a form that opens collapsed.
  */
 const GoalDialog = ({ open, onClose, focusAreaId, onSuccess, goal = null, yearlyObjectives = [], initialSection = null }) => {
   const { t } = useTranslation()
@@ -95,24 +94,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, onSuccess, goal = null, yearly
           borderColor: 'divider'
         }}
       >
-        <Box
-          sx={{
-            px: { xs: 2, sm: 3, md: 4 },
-            py: { xs: 2, md: 3 },
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.level1'
-          }}
-        >
-          <DialogTitle level='h4' sx={{ m: 0 }}>
-            {isEdit ? t('annualPlanning.goal.edit') : t('annualPlanning.goal.add')}
-          </DialogTitle>
-          {isEdit && (
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-              {t('annualPlanning.goal.editSubtitle')}
-            </Typography>
-          )}
-        </Box>
+        <GoalDialogHeader isEdit={isEdit} />
 
         <DialogContent sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, md: 3 } }}>
           <Stack spacing={2.5}>
@@ -125,12 +107,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, onSuccess, goal = null, yearly
             )}
 
             {form.showTimeframeSelect && (
-              <GoalTimeframeFields
-                formData={formData}
-                setField={setField}
-                yearlyObjectives={yearlyObjectives}
-                selectRef={timeframeRef}
-              />
+              <GoalTimeframeFields formData={formData} setField={setField} yearlyObjectives={yearlyObjectives} selectRef={timeframeRef} />
             )}
 
             <GoalTitleField
@@ -144,7 +121,12 @@ const GoalDialog = ({ open, onClose, focusAreaId, onSuccess, goal = null, yearly
             <GoalDetailRail available={form.availableChips} onReveal={form.reveal} />
 
             {revealed.has('milestones') && (
-              <GoalMilestoneEditor milestones={form.milestones} onChange={form.setMilestones} keyResultsRef={keyResultsRef} />
+              <GoalMilestoneEditor
+                milestones={form.milestones}
+                onChange={form.setMilestones}
+                keyResultsRef={keyResultsRef}
+                autoFocusFirstRow={form.autoFocusTarget === 'firstMilestone'}
+              />
             )}
 
             {revealed.has('description') && (

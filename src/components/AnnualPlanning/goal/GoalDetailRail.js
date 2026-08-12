@@ -36,11 +36,7 @@ const GoalDetailRail = ({ available = [], onReveal }) => {
   if (available.length === 0) return null
 
   return (
-    <Box
-      role='group'
-      aria-label={t('annualPlanning.goal.detailRailAria')}
-      sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}
-    >
+    <Box role='group' aria-label={t('annualPlanning.goal.detailRailAria')} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
       {available.map((group) => (
         <Button
           key={group}

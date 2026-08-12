@@ -13,7 +13,7 @@ import { focusRing } from './goalStyles'
  * array and receives whole replacements, so there is one source of truth and
  * no per-row persistence — nothing here writes to the API.
  */
-const GoalMilestoneEditor = ({ milestones, onChange, keyResultsRef }) => {
+const GoalMilestoneEditor = ({ milestones, onChange, keyResultsRef, autoFocusFirstRow = false }) => {
   const { t } = useTranslation()
   const inputRefs = useRef([])
   const addButtonRef = useRef(null)
@@ -85,6 +85,7 @@ const GoalMilestoneEditor = ({ milestones, onChange, keyResultsRef }) => {
             onDelete={deleteMilestone}
             onEnter={addMilestone}
             inputRef={(el) => (inputRefs.current[index] = el)}
+            autoFocus={autoFocusFirstRow && index === 0}
           />
         ))}
 

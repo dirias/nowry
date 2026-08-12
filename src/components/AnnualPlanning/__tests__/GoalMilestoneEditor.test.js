@@ -23,9 +23,9 @@ const GoalMilestoneEditor = require('../goal/GoalMilestoneEditor').default
 const ms = (over = {}) => ({ title: '', completed: false, due_date: '', ...over })
 
 /** Renders the editor as a controlled component the way GoalDialog does. */
-const Harness = ({ initial = [] }) => {
+const Harness = ({ initial = [], autoFocusFirstRow = false }) => {
   const [milestones, setMilestones] = React.useState(initial)
-  return <GoalMilestoneEditor milestones={milestones} onChange={setMilestones} />
+  return <GoalMilestoneEditor milestones={milestones} onChange={setMilestones} autoFocusFirstRow={autoFocusFirstRow} />
 }
 
 const renderEditor = (initial) => render(<Harness initial={initial} />)
@@ -143,6 +143,24 @@ describe('GoalMilestoneEditor — array behaviour', () => {
     renderEditor([ms({ title: 'A' })])
     fireEvent.click(screen.getByRole('checkbox'))
     expect(screen.getByRole('checkbox')).toBeChecked()
+  })
+
+  /**
+   * Browser-only regression. The seeded row used to be focused by a 50ms
+   * timeout, which jsdom honoured but a real browser did not: Joy's Modal runs
+   * a focus trap on open that re-claimed focus afterwards, landing the cursor
+   * on the dialog container instead of the row. autoFocus is declarative and
+   * the trap respects it. Asserting focus *without advancing timers* is what
+   * distinguishes the two mechanisms — the timeout path cannot pass this.
+   */
+  it('focuses the first row via autoFocus, not a deferred focus() call', () => {
+    render(<Harness initial={[ms()]} autoFocusFirstRow />)
+    expect(document.activeElement).toBe(titleInputs()[0])
+  })
+
+  it('leaves focus alone when autoFocusFirstRow is not set', () => {
+    render(<Harness initial={[ms({ title: 'A' })]} />)
+    expect(document.activeElement).not.toBe(titleInputs()[0])
   })
 
   it('renders the section heading and helper from t()', () => {
