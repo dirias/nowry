@@ -1739,7 +1739,47 @@
     },
     "import": {
       "titlePlaceholder": "Entrez le titre du livre..."
-    }
+    },
+    "untitled": "Livre sans titre",
+    "createTitle": "Nouveau livre",
+    "createAction": "Créer et écrire",
+    "setAuthor": "Indiquer un auteur",
+    "authorLabel": "Auteur",
+    "authorPlaceholder": "Qui l'a écrit ?",
+    "createFailed": "Impossible de créer votre livre",
+    "editTitle": "Modifier le livre",
+    "titleLabel": "Titre",
+    "titleRequired": "Nommez votre livre pour l'enregistrer",
+    "changeCover": "Changer la couverture",
+    "addTags": "Ajouter des étiquettes",
+    "addSummary": "Ajouter un résumé",
+    "coverColorLabel": "Couleur de la couverture",
+    "coverImageLabel": "Image de couverture",
+    "coverImageAlt": "Aperçu de la couverture",
+    "coverImageError": "Cette image n'a pas pu être chargée",
+    "customColor": "Choisir une couleur personnalisée",
+    "summaryLabel": "Résumé",
+    "saveFailed": "Impossible d'enregistrer vos modifications",
+    "publishFailed": "Impossible de publier votre livre",
+    "unpublishFailed": "Impossible de dépublier votre livre",
+    "importSuccessTitle": "Importation terminée",
+    "openBook": "Ouvrir le livre",
+    "continueToLibrary": "Retour à la bibliothèque",
+    "clearFilters": "Effacer les filtres",
+    "errorFetch": "Erreur lors du chargement des livres",
+    "pageCount_one": "{{count}} page",
+    "pageCount_other": "{{count}} pages",
+    "coverColors": {
+      "blue": "Bleu",
+      "red": "Rouge",
+      "green": "Vert",
+      "orange": "Orange",
+      "purple": "Violet",
+      "pink": "Rose",
+      "black": "Noir",
+      "grey": "Gris"
+    },
+    "coverImagePlaceholder": "https://example.com/image.jpg"
   },
   "reports": {
     "modal": {
