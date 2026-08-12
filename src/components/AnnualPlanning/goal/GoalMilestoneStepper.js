@@ -1,8 +1,10 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Step, StepIndicator, Stepper, Tooltip, Typography } from '@mui/joy'
-import { CalendarToday as CalendarTodayIcon, Check as CheckIcon } from '@mui/icons-material'
+import { Check as CheckIcon } from '@mui/icons-material'
 import { isMilestoneOverdue } from '../goalDerivation'
+import MilestoneDueDateBadge from './MilestoneDueDateBadge'
+import { focusRing } from './goalStyles'
 
 /**
  * GoalMilestoneStepper — the single surviving Stepper, consolidated from the two
@@ -18,7 +20,7 @@ import { isMilestoneOverdue } from '../goalDerivation'
  * lives on the card; the rest live here.
  */
 const GoalMilestoneStepper = ({ goal, locked = false, onToggle }) => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const milestones = goal?.milestones || []
 
   if (milestones.length === 0) {
@@ -71,11 +73,7 @@ const GoalMilestoneStepper = ({ goal, locked = false, onToggle }) => {
                   cursor: locked ? 'not-allowed' : 'pointer',
                   opacity: locked ? 0.65 : 1,
                   '&:hover': locked ? {} : { bgcolor: 'background.level1' },
-                  '&:focus-visible': {
-                    outline: '2px solid',
-                    outlineColor: 'primary.outlinedBorder',
-                    outlineOffset: '2px'
-                  }
+                  ...focusRing
                 }}
               >
                 <Typography
@@ -93,33 +91,7 @@ const GoalMilestoneStepper = ({ goal, locked = false, onToggle }) => {
                 >
                   {milestone.title}
                 </Typography>
-                {milestone.due_date && !milestone.completed && (
-                  <Typography
-                    level='body-xs'
-                    startDecorator={<CalendarTodayIcon fontSize='inherit' />}
-                    sx={{
-                      flexShrink: 0,
-                      px: 0.75,
-                      py: 0.25,
-                      borderRadius: 'sm',
-                      bgcolor: overdue ? 'danger.softBg' : 'primary.softBg',
-                      border: '1px solid',
-                      borderColor: overdue ? 'danger.outlinedBorder' : 'primary.outlinedBorder',
-                      fontWeight: 600,
-                      color: overdue ? 'danger.plainColor' : 'primary.plainColor',
-                      whiteSpace: 'nowrap',
-                      // Format against the app's active language, not the browser's:
-                      // `undefined` renders "30 jun." inside an otherwise-English drawer
-                      // whenever the two disagree.
-                      '--Typography-gap': '0.25rem'
-                    }}
-                  >
-                    {new Date(`${milestone.due_date}T00:00:00`).toLocaleDateString(i18n.language, {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </Typography>
-                )}
+                {!milestone.completed && <MilestoneDueDateBadge dueDate={milestone.due_date} overdue={overdue} />}
               </Box>
             </Tooltip>
           </Step>

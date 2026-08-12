@@ -8,10 +8,7 @@ import {
   CheckCircleOutline as CheckCircleOutlineIcon,
   RestartAlt as RestartAltIcon
 } from '@mui/icons-material'
-
-const focusRing = {
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
-}
+import { focusRing } from './goalStyles'
 
 // 44x44 on touch, compact on pointer devices.
 const touchTarget = { minWidth: { xs: 44, md: 32 }, minHeight: { xs: 44, md: 32 } }

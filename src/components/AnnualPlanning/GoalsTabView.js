@@ -29,10 +29,7 @@ import EmptyState from './EmptyState'
 import GoalCardSkeleton from './goal/GoalCardSkeleton'
 import GoalRowSkeleton from './goal/GoalRowSkeleton'
 import GoalDetailDrawer from './goal/GoalDetailDrawer'
-
-const focusRing = {
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
-}
+import { focusRing } from './goal/goalStyles'
 
 const SKELETON_COUNT = { grid: 6, list: 8 }
 

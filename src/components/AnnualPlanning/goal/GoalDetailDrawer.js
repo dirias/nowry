@@ -21,10 +21,7 @@ import GoalActivityList from './GoalActivityList'
 import GoalMilestoneStepper from './GoalMilestoneStepper'
 import GoalProgressBar from './GoalProgressBar'
 import GoalStatePill from './GoalStatePill'
-
-const focusRing = {
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
-}
+import { focusRing } from './goalStyles'
 
 const LIFECYCLE_OPTIONS = [
   { value: 'not_started', labelKey: 'annualPlanning.goal.status.notStarted' },

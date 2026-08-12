@@ -2,10 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Checkbox, Tooltip, Typography } from '@mui/joy'
 import { Add as AddIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material'
-
-const focusRing = {
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
-}
+import { focusRing, oneLine } from './goalStyles'
 
 // Sits above the Card's <Link overlay> so it stays independently clickable and
 // focusable; 44x44 on touch.
@@ -15,17 +12,8 @@ const aboveOverlay = {
   minHeight: { xs: 44, md: 'auto' }
 }
 
-// The ladder is a *one-line* contract (§3.1). German and Spanish run roughly
-// 30% longer than the English source, which wraps rungs 4 and 5 onto a second
-// line and pushes the progress bar down by a row on some cards but not others.
-// Clamp every rung to one line and ellipsise instead.
-const oneLine = {
-  display: 'block',
-  minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
-}
+// `oneLine` is imported from ./goalStyles — the ladder is a *one-line* contract
+// (§3.1) and the clamp is shared with the milestone editor's row titles.
 
 // A goal's window is only a nudge inside this many days. Beyond it, a countdown
 // is noise rather than a prompt.
