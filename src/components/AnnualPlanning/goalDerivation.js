@@ -197,6 +197,13 @@ export const filterGoalActivities = (activities, goalId) => {
   return (activities || []).filter((activity) => activity?.goal_id === goalId)
 }
 
+/**
+ * An empty editable milestone row. Shared so the goal form's "Add", its Enter
+ * handler and the initialSection seeding all produce the identical shape —
+ * a mismatch here shows up as a milestone that silently fails to save.
+ */
+export const blankMilestone = () => ({ title: '', completed: false, due_date: '' })
+
 export default {
   getCurrentQuarter,
   calculateProgress,
@@ -207,6 +214,7 @@ export default {
   getGoalDeadline,
   isMilestoneOverdue,
   filterGoalActivities,
+  blankMilestone,
   GOAL_STATES,
   GOAL_STATE_COLOR,
   GOAL_STATE_I18N

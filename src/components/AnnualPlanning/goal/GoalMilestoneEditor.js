@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/joy'
 import { Add as AddIcon } from '@mui/icons-material'
 import GoalMilestoneEditorRow from './GoalMilestoneEditorRow'
+import { blankMilestone } from '../goalDerivation'
 import { focusRing } from './goalStyles'
-
-export const blankMilestone = () => ({ title: '', completed: false, due_date: '' })
 
 /**
  * The milestone group of the goal form: heading, helper, Add, rows, empty state.
