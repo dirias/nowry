@@ -24,7 +24,19 @@ import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
 
-const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, goal = null, yearlyObjectives = [] }) => {
+const GoalDialog = ({
+  open,
+  onClose,
+  focusAreaId,
+  priorities = [],
+  onSuccess,
+  goal = null,
+  yearlyObjectives = [],
+  // Which section to land on when the dialog opens. 'milestones' scrolls to Key
+  // Results — used by the goal card's "Add a milestone to track progress" rung,
+  // which would otherwise drop the user at the top of a four-section form.
+  initialSection = null
+}) => {
   const { t } = useTranslation()
   const [formData, setFormData] = useState({
     title: '',
@@ -43,6 +55,17 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
   const [milestones, setMilestones] = useState([])
   const milestoneRefs = useRef([])
   const dateInputRefs = useRef([])
+  const keyResultsRef = useRef(null)
+
+  // Land on the requested section. The dialog's content mounts with the Modal,
+  // so the scroll is deferred a frame to let layout settle.
+  useEffect(() => {
+    if (!open || initialSection !== 'milestones') return
+    const timer = setTimeout(() => {
+      keyResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [open, initialSection])
 
   // Auto-focus new milestone
   useEffect(() => {
@@ -363,7 +386,7 @@ const GoalDialog = ({ open, onClose, focusAreaId, priorities = [], onSuccess, go
             <Divider />
 
             {/* Section: Key Results & Milestones */}
-            <Box>
+            <Box ref={keyResultsRef}>
               <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
                 <Box>
                   <Typography level='title-md' sx={{ fontWeight: 700, color: 'text.primary' }}>
