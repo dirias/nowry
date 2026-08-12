@@ -1197,7 +1197,10 @@
       "voice": "Stimme",
       "systemDefault": "Systemstandard",
       "rate": "Geschwindigkeit",
-      "pitch": "Tonhöhe"
+      "pitch": "Tonhöhe",
+      "sideAria": "Kartenseite",
+      "rateAria": "Sprechgeschwindigkeit: {{value}}-fache Normalgeschwindigkeit",
+      "pitchAria": "Tonhöhe: {{value}}"
     },
     "publish": {
       "title": "Stapel öffentlich machen",
@@ -1206,7 +1209,9 @@
       "publishedOn": "Veröffentlicht am {{date}}"
     },
     "saving": "Speichern...",
-    "saved": "Gespeichert"
+    "saved": "Gespeichert",
+    "saveFailed": "Diese Änderung wurde nicht gespeichert",
+    "retry": "Erneut versuchen"
   },
   "legal": {
     "privacy": {

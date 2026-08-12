@@ -1,579 +1,139 @@
-import React, { useState, useEffect, useRef } from 'react'
-import {
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Stack,
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  RadioGroup,
-  Radio,
-  Input,
-  Slider,
-  Select,
-  Option,
-  Switch,
-  Textarea,
-  Sheet,
-  Chip,
-  Button,
-  CircularProgress,
-  Skeleton,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  tabClasses
-} from '@mui/joy'
-import { MenuBook, GraphicEq, Public, Style, Quiz as QuizIcon, AccountTree, Check } from '@mui/icons-material'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { decksService } from '../../api/services'
-import DeckPublishSheet from './DeckPublishSheet'
+import { Box, Chip, Skeleton, Stack, Typography } from '@mui/joy'
+import { GraphicEq, MenuBook, Public } from '@mui/icons-material'
 
+import FormErrorBanner from '../Common/Form/FormErrorBanner'
+import FormSheet from '../Common/Form/FormSheet'
+import useIsMobile from '../../hooks/useIsMobile'
+import useDeckSettings from '../../hooks/useDeckSettings'
+import DeckAudioSection from './deck/DeckAudioSection'
+import DeckPublishSheet from './DeckPublishSheet'
+import DeckPublishingSection from './deck/DeckPublishingSection'
+import DeckSettingsNav from './deck/DeckSettingsNav'
+import DeckStudySection from './deck/DeckStudySection'
+import { getDeckAccent } from './deck/deckAccent'
+
+/**
+ * Deck settings — Variant E, the partial adopter (UX-CONTRACT §3, DECKS.md §3).
+ *
+ * It takes the shell, the state core, the error surface, the density doctrine
+ * and the accessibility baseline. It takes neither the disclosure rail nor the
+ * title-first shape, and that is stated rather than worked around: nothing here
+ * is required, every setting already holds a value, and there is no creation
+ * moment to protect.
+ *
+ * What the shell buys it: `100dvh` at `xs` instead of `maxHeight: '85vh'`
+ * reserving 85% of the viewport for three short fields, a full-bleed sheet
+ * instead of a centred dialog Joy pads inward at the breakpoint with the least
+ * room, and a footer outside the scroll region — which is also the first place
+ * the autosave result has ever been visible at `xs`, since the shipped
+ * indicator lived in a nav list that renders only from `sm` up.
+ *
+ * There is no Save button and there should not be. The state core owns the
+ * debounce, one timer per service method (§11.1).
+ */
 const SECTIONS = [
   { key: 'study', Icon: MenuBook },
   { key: 'audio', Icon: GraphicEq },
   { key: 'publishing', Icon: Public }
 ]
 
-const PACE_DEFAULTS = {
-  relaxed: { new_per_day: 10, max_reviews_per_day: 50 },
-  balanced: { new_per_day: 20, max_reviews_per_day: 100 },
-  intensive: { new_per_day: 40, max_reviews_per_day: 200 }
-}
-
-const DEFAULT_CONFIG = { pace_mode: 'balanced', new_per_day: 20, max_reviews_per_day: 100 }
-const DEFAULT_VOICE_SIDE = { voice_name: null, voice_lang: null, rate: 1.0, pitch: 1.0, auto_play: false }
-const DEFAULT_VOICE_SETTINGS = { front: { ...DEFAULT_VOICE_SIDE }, back: { ...DEFAULT_VOICE_SIDE } }
-
-function getDeckAccent(deckType) {
-  if (deckType === 'quiz') return { color: 'warning', Icon: QuizIcon }
-  if (deckType === 'visual') return { color: 'success', Icon: AccountTree }
-  return { color: 'primary', Icon: Style }
-}
-
 export default function DeckSettingsModal({ open, onClose, deckId, onSaved }) {
   const { t } = useTranslation()
+  const isMobile = useIsMobile()
+  const [publishOpen, setPublishOpen] = useState(false)
+  const settings = useDeckSettings({ open, deckId, onSaved, onClose })
 
-  const [loading, setLoading] = useState(false)
-  const [deck, setDeck] = useState(null)
-  const [config, setConfig] = useState(DEFAULT_CONFIG)
-  const [voiceSettings, setVoiceSettings] = useState(DEFAULT_VOICE_SETTINGS)
-  const [availableVoices, setAvailableVoices] = useState([])
-  const [activeSection, setActiveSection] = useState('study')
-  const [audioSide, setAudioSide] = useState('front')
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [savedSection, setSavedSection] = useState(null)
-  const [publishSheetOpen, setPublishSheetOpen] = useState(false)
+  const { loading, deck, activeSection } = settings
+  const { color: accent, Icon: AccentIcon } = getDeckAccent(deck?.deck_type)
 
-  const debounceTimer = useRef(null)
-  const savedOnceRef = useRef(false)
-
-  // Load voices
-  useEffect(() => {
-    const loadVoices = () => {
-      const voices = window.speechSynthesis?.getVoices() || []
-      setAvailableVoices(voices)
-    }
-    loadVoices()
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = loadVoices
-    }
-    return () => {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = null
-      }
-    }
-  }, [])
-
-  // Load deck data when opened
-  useEffect(() => {
-    if (!open || !deckId) return
-    let cancelled = false
-    setLoading(true)
-    setActiveSection('study')
-    decksService
-      .getById(deckId)
-      .then((data) => {
-        if (cancelled) return
-        setDeck(data)
-        setConfig(data.config || { ...DEFAULT_CONFIG })
-        setVoiceSettings(
-          data.voice_settings || {
-            front: { ...DEFAULT_VOICE_SIDE },
-            back: { ...DEFAULT_VOICE_SIDE }
-          }
-        )
-      })
-      .catch(console.error)
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [open, deckId])
-
-  const debouncedSave = (payload) => {
-    clearTimeout(debounceTimer.current)
-    debounceTimer.current = setTimeout(async () => {
-      try {
-        setSaving(true)
-        await decksService.updateSettings(deckId, payload)
-        savedOnceRef.current = true
-        setSaved(true)
-        setTimeout(() => setSaved(false), 1500)
-      } catch (e) {
-        console.error('Settings save failed', e)
-      } finally {
-        setSaving(false)
-      }
-    }, 600)
-  }
-
-  const handleClose = () => {
-    clearTimeout(debounceTimer.current)
-    if (savedOnceRef.current || saved) {
-      onSaved?.()
-    }
-    // Reset state
-    setDeck(null)
-    setConfig(DEFAULT_CONFIG)
-    setVoiceSettings(DEFAULT_VOICE_SETTINGS)
-    setSaving(false)
-    setSaved(false)
-    setSavedSection(null)
-    savedOnceRef.current = false
-    onClose()
-  }
-
-  const { color: accentColor, Icon: DeckTypeIcon } = deck ? getDeckAccent(deck.deck_type) : { color: 'primary', Icon: Style }
+  const statusKey = (settings.savingSection && 'deckSettings.saving') || (settings.savedSection && 'deckSettings.saved') || null
 
   return (
     <>
-      <Modal open={open} onClose={handleClose}>
-        <ModalDialog
-          size='lg'
-          layout='center'
-          sx={{
-            width: { xs: '100%', sm: 580 },
-            maxHeight: '85vh',
-            p: 0,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
-          <ModalClose sx={{ zIndex: 10 }} />
-
-          {/* Header */}
-          <Box
-            sx={{
-              px: 3,
-              pt: 2.5,
-              pb: 2,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              flexShrink: 0
-            }}
-          >
-            <Stack direction='row' alignItems='center' gap={1.5}>
-              {loading ? (
-                <Skeleton variant='text' width={200} height={24} />
-              ) : (
-                <>
-                  <Box
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 'md',
-                      bgcolor: `${accentColor}.softBg`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}
-                  >
-                    <DeckTypeIcon sx={{ fontSize: 16, color: `${accentColor}.plainColor` }} />
-                  </Box>
-                  <Box>
-                    <Typography level='title-md' fontWeight={700}>
-                      {deck?.name}
-                    </Typography>
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                      {deck ? t(`study.types.${deck.deck_type}s`) : null}
-                    </Typography>
-                  </Box>
-                </>
-              )}
-            </Stack>
-          </Box>
-
-          {/* Body */}
-          <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ flex: 1, overflow: 'hidden' }}>
-            {/* Left Nav — desktop only */}
-            <Box
-              sx={{
-                width: 152,
-                flexShrink: 0,
-                borderRight: '1px solid',
-                borderColor: 'divider',
-                p: 1.5,
-                display: { xs: 'none', sm: 'flex' },
-                flexDirection: 'column'
-              }}
+      <FormSheet
+        // NN/g: do not stack bottom sheets. At `xs` the publish sheet replaces
+        // this one; from `sm` up a centred dialog over a centred dialog is a
+        // conventional desktop pattern and the stack is left alone (§4.4).
+        open={open && !(isMobile && publishOpen)}
+        onClose={settings.close}
+        titleText={loading ? <Skeleton loading variant='text' width={180} /> : deck?.name}
+        width='simple'
+        headerAccessory={
+          !loading &&
+          deck && (
+            // Colour, icon and text for one fact, kept deliberately (§6.4).
+            <Chip
+              size='sm'
+              variant='soft'
+              color={accent}
+              startDecorator={<AccentIcon sx={{ fontSize: 14 }} />}
+              sx={{ flexShrink: 0, alignSelf: 'center' }}
             >
-              <List size='sm' sx={{ gap: 0.25 }}>
-                {SECTIONS.map(({ key, Icon }) => (
-                  <ListItem key={key} disablePadding>
-                    <ListItemButton
-                      selected={activeSection === key}
-                      onClick={() => setActiveSection(key)}
-                      sx={{ borderRadius: 'sm', gap: 1 }}
-                    >
-                      <Icon sx={{ fontSize: 16 }} />
-                      <Typography level='body-sm' sx={{ flex: 1 }}>
-                        {t(`deckSettings.nav.${key}`)}
-                      </Typography>
-                      {saving && activeSection === key && savedSection === key && (
-                        <CircularProgress size='sm' sx={{ '--CircularProgress-size': '14px' }} />
-                      )}
-                      {saved && savedSection === key && <Check sx={{ fontSize: 14, color: 'success.plainColor' }} />}
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
+              {t(`study.types.${deck.deck_type}s`)}
+            </Chip>
+          )
+        }
+        banner={
+          settings.saveError ? (
+            // With no Save button the user has no reason to suspect a failure,
+            // so the retry has to be offered rather than implied.
+            <FormErrorBanner
+              titleKey='deckSettings.saveFailed'
+              detailText={settings.saveError}
+              action={{ labelKey: 'deckSettings.retry', onClick: settings.retry }}
+            />
+          ) : null
+        }
+        footer={
+          // Always mounted, empty at rest: a live region added at the moment
+          // its content appears is a live region screen readers do not announce.
+          <Typography level='body-xs' aria-live='polite' sx={{ color: 'text.tertiary', minHeight: '1rem' }}>
+            {statusKey ? t(statusKey) : ''}
+          </Typography>
+        }
+      >
+        <Stack direction={{ xs: 'column', sm: 'row' }} gap={{ xs: 2, sm: 3 }}>
+          <DeckSettingsNav
+            sections={SECTIONS}
+            active={activeSection}
+            onChange={settings.setActiveSection}
+            savingSection={settings.savingSection}
+            savedSection={settings.savedSection}
+          />
 
-            {/* Right Content */}
-            <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3 } }}>
-              {/* xs only: horizontal tabs */}
-              <Tabs
-                value={activeSection}
-                onChange={(_, val) => setActiveSection(val)}
-                sx={{ display: { xs: 'block', sm: 'none' }, mb: 2, bgcolor: 'transparent' }}
-              >
-                <TabList
-                  disableUnderline
-                  sx={{
-                    bgcolor: 'background.level1',
-                    borderRadius: 'xl',
-                    p: 0.5,
-                    gap: 0.5,
-                    [`& .${tabClasses.root}`]: {
-                      borderRadius: 'lg',
-                      fontWeight: 500,
-                      fontSize: '0.75rem'
-                    },
-                    [`& .${tabClasses.root}[aria-selected="true"]`]: {
-                      bgcolor: 'background.surface',
-                      boxShadow: 'sm'
-                    }
-                  }}
-                >
-                  {SECTIONS.map(({ key }) => (
-                    <Tab key={key} disableIndicator value={key}>
-                      {t(`deckSettings.nav.${key}`)}
-                    </Tab>
-                  ))}
-                </TabList>
-              </Tabs>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {activeSection === 'study' && <DeckStudySection loading={loading} config={settings.config} onChange={settings.saveConfig} />}
 
-              {/* Study Section */}
-              {activeSection === 'study' && (
-                <Stack gap={3}>
-                  <FormControl>
-                    <FormLabel>{t('deckSettings.study.paceMode')}</FormLabel>
-                    {loading ? (
-                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                    ) : (
-                      <>
-                        <RadioGroup
-                          orientation='horizontal'
-                          value={config.pace_mode}
-                          onChange={(e) => {
-                            const mode = e.target.value
-                            const newConfig = { ...config, pace_mode: mode, ...PACE_DEFAULTS[mode] }
-                            setConfig(newConfig)
-                            debouncedSave({ config: newConfig })
-                            setSavedSection('study')
-                          }}
-                          sx={{ gap: 2, flexWrap: 'wrap' }}
-                        >
-                          <Radio value='relaxed' label={t('deckSettings.pace.relaxed')} size='sm' />
-                          <Radio value='balanced' label={t('deckSettings.pace.balanced')} size='sm' />
-                          <Radio value='intensive' label={t('deckSettings.pace.intensive')} size='sm' />
-                        </RadioGroup>
-                        <FormHelperText>{t(`deckSettings.pace.${config.pace_mode}Hint`)}</FormHelperText>
-                      </>
-                    )}
-                  </FormControl>
+            {activeSection === 'audio' && (
+              <DeckAudioSection
+                loading={loading}
+                side={settings.audioSide}
+                onSideChange={settings.setAudioSide}
+                voiceSettings={settings.voiceSettings}
+                voices={settings.availableVoices}
+                onChange={settings.saveVoice}
+              />
+            )}
 
-                  <FormControl>
-                    <FormLabel>{t('deckSettings.study.newPerDay')}</FormLabel>
-                    {loading ? (
-                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                    ) : (
-                      <Input
-                        type='number'
-                        size='sm'
-                        value={config.new_per_day ?? 20}
-                        slotProps={{ input: { min: 1, max: 500 } }}
-                        endDecorator={
-                          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                            {t('deckSettings.study.cardsPerDay')}
-                          </Typography>
-                        }
-                        onChange={(e) => {
-                          const val = Math.max(1, Math.min(500, parseInt(e.target.value) || 1))
-                          const newConfig = { ...config, new_per_day: val }
-                          setConfig(newConfig)
-                          debouncedSave({ config: newConfig })
-                          setSavedSection('study')
-                        }}
-                      />
-                    )}
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('deckSettings.study.maxReviews')}</FormLabel>
-                    {loading ? (
-                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                    ) : (
-                      <Input
-                        type='number'
-                        size='sm'
-                        value={config.max_reviews_per_day ?? 100}
-                        slotProps={{ input: { min: 1, max: 1000 } }}
-                        endDecorator={
-                          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                            {t('deckSettings.study.reviewsPerDay')}
-                          </Typography>
-                        }
-                        onChange={(e) => {
-                          const val = Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))
-                          const newConfig = { ...config, max_reviews_per_day: val }
-                          setConfig(newConfig)
-                          debouncedSave({ config: newConfig })
-                          setSavedSection('study')
-                        }}
-                      />
-                    )}
-                  </FormControl>
-                </Stack>
-              )}
-
-              {/* Audio Section */}
-              {activeSection === 'audio' && (
-                <Stack gap={2.5}>
-                  {/* Front / Back toggle */}
-                  <Stack direction='row' gap={0.5} sx={{ alignSelf: 'flex-start' }}>
-                    {['front', 'back'].map((side) => (
-                      <Box
-                        key={side}
-                        role='button'
-                        aria-pressed={audioSide === side}
-                        onClick={() => setAudioSide(side)}
-                        sx={{
-                          px: 1.5,
-                          py: 0.5,
-                          borderRadius: 'sm',
-                          cursor: 'pointer',
-                          bgcolor: audioSide === side ? 'primary.softBg' : 'transparent',
-                          color: audioSide === side ? 'primary.plainColor' : 'text.tertiary',
-                          fontWeight: audioSide === side ? 700 : 400,
-                          fontSize: '0.8rem',
-                          transition: 'all 0.15s',
-                          border: '1px solid',
-                          borderColor: audioSide === side ? 'primary.outlinedBorder' : 'transparent',
-                          '&:hover': { color: 'text.primary' }
-                        }}
-                      >
-                        {t(`common.${side}`)}
-                      </Box>
-                    ))}
-                  </Stack>
-
-                  {/* Autoplay */}
-                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                    <Typography level='body-sm' fontWeight={500}>
-                      {t('deckSettings.audio.autoplay')}
-                    </Typography>
-                    {loading ? (
-                      <Skeleton variant='rectangular' width={32} height={18} sx={{ borderRadius: 'sm' }} />
-                    ) : (
-                      <Switch
-                        size='sm'
-                        checked={voiceSettings[audioSide]?.auto_play ?? false}
-                        onChange={(e) => {
-                          const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], auto_play: e.target.checked } }
-                          setVoiceSettings(updated)
-                          debouncedSave({ voice_settings: updated })
-                          setSavedSection('audio')
-                        }}
-                      />
-                    )}
-                  </Stack>
-
-                  {/* Voice */}
-                  <FormControl>
-                    <FormLabel>{t('deckSettings.audio.voice')}</FormLabel>
-                    {loading ? (
-                      <Skeleton variant='rectangular' height={32} sx={{ borderRadius: 'sm' }} />
-                    ) : (
-                      <Select
-                        size='sm'
-                        value={voiceSettings[audioSide]?.voice_name || ''}
-                        placeholder={t('deckSettings.audio.systemDefault')}
-                        onChange={(_, val) => {
-                          const selectedVoice = availableVoices.find((v) => v.name === val)
-                          const updated = {
-                            ...voiceSettings,
-                            [audioSide]: { ...voiceSettings[audioSide], voice_name: val || null, voice_lang: selectedVoice?.lang || null }
-                          }
-                          setVoiceSettings(updated)
-                          debouncedSave({ voice_settings: updated })
-                          setSavedSection('audio')
-                        }}
-                      >
-                        <Option value=''>{t('deckSettings.audio.systemDefault')}</Option>
-                        {availableVoices.map((v) => (
-                          <Option key={v.name} value={v.name}>
-                            {v.name} ({v.lang})
-                          </Option>
-                        ))}
-                      </Select>
-                    )}
-                  </FormControl>
-
-                  {/* Speed + Pitch side by side */}
-                  <Stack direction='row' gap={2}>
-                    <FormControl sx={{ flex: 1 }}>
-                      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
-                        <FormLabel sx={{ mb: 0 }}>{t('deckSettings.audio.rate')}</FormLabel>
-                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                          {voiceSettings[audioSide]?.rate ?? 1.0}x
-                        </Typography>
-                      </Stack>
-                      {loading ? (
-                        <Skeleton variant='rectangular' height={20} sx={{ borderRadius: 'sm' }} />
-                      ) : (
-                        <Slider
-                          size='sm'
-                          min={0.5}
-                          max={2}
-                          step={0.1}
-                          value={voiceSettings[audioSide]?.rate ?? 1.0}
-                          onChange={(_, val) => {
-                            const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], rate: val } }
-                            setVoiceSettings(updated)
-                            debouncedSave({ voice_settings: updated })
-                            setSavedSection('audio')
-                          }}
-                        />
-                      )}
-                    </FormControl>
-
-                    <FormControl sx={{ flex: 1 }}>
-                      <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
-                        <FormLabel sx={{ mb: 0 }}>{t('deckSettings.audio.pitch')}</FormLabel>
-                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                          {voiceSettings[audioSide]?.pitch ?? 1.0}x
-                        </Typography>
-                      </Stack>
-                      {loading ? (
-                        <Skeleton variant='rectangular' height={20} sx={{ borderRadius: 'sm' }} />
-                      ) : (
-                        <Slider
-                          size='sm'
-                          min={0}
-                          max={2}
-                          step={0.1}
-                          value={voiceSettings[audioSide]?.pitch ?? 1.0}
-                          onChange={(_, val) => {
-                            const updated = { ...voiceSettings, [audioSide]: { ...voiceSettings[audioSide], pitch: val } }
-                            setVoiceSettings(updated)
-                            debouncedSave({ voice_settings: updated })
-                            setSavedSection('audio')
-                          }}
-                        />
-                      )}
-                    </FormControl>
-                  </Stack>
-                </Stack>
-              )}
-
-              {/* Publishing Section */}
-              {activeSection === 'publishing' && (
-                <Stack gap={2}>
-                  <Sheet variant='outlined' sx={{ borderRadius: 'md', p: 2 }}>
-                    <Stack direction='row' justifyContent='space-between' alignItems='center' gap={2}>
-                      <Box>
-                        <Typography level='title-sm' fontWeight={600}>
-                          {t(deck?.is_public ? 'publish.status.public' : 'publish.status.private')}
-                        </Typography>
-                        <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-                          {deck?.is_public && deck?.published_at
-                            ? t('deckSettings.publish.publishedOn', {
-                                date: new Date(deck.published_at).toLocaleDateString()
-                              })
-                            : t('publish.notYetPublished')}
-                        </Typography>
-                      </Box>
-                      <Chip size='sm' color={deck?.is_public ? 'success' : 'neutral'} variant='soft'>
-                        {t(deck?.is_public ? 'publish.status.public' : 'publish.status.private')}
-                      </Chip>
-                    </Stack>
-                  </Sheet>
-
-                  <Button
-                    variant='outlined'
-                    color='primary'
-                    size='sm'
-                    startDecorator={<Public sx={{ fontSize: 16 }} />}
-                    onClick={() => setPublishSheetOpen(true)}
-                    aria-label={t(deck?.is_public ? 'publish.manageButton' : 'publish.publishButton')}
-                    sx={{
-                      alignSelf: 'flex-start',
-                      '&:focus-visible': {
-                        outline: '2px solid',
-                        outlineColor: 'primary.outlinedBorder',
-                        outlineOffset: '3px'
-                      }
-                    }}
-                  >
-                    {t(deck?.is_public ? 'publish.manageButton' : 'publish.publishButton')}
-                  </Button>
-                </Stack>
-              )}
-            </Box>
-          </Stack>
-        </ModalDialog>
-      </Modal>
+            {activeSection === 'publishing' && (
+              <DeckPublishingSection loading={loading} deck={deck} onManage={() => setPublishOpen(true)} />
+            )}
+          </Box>
+        </Stack>
+      </FormSheet>
 
       <DeckPublishSheet
-        open={publishSheetOpen}
-        onClose={() => setPublishSheetOpen(false)}
+        open={publishOpen}
+        onClose={() => setPublishOpen(false)}
         deckId={deckId}
         deck={deck}
         onPublished={() => {
-          setPublishSheetOpen(false)
-          if (onSaved) onSaved()
-          if (deckId) {
-            decksService
-              .getSettings(deckId)
-              .then((data) => {
-                if (data) setDeck((prev) => ({ ...prev, is_public: data.is_public, published_at: data.published_at }))
-              })
-              .catch(() => {})
-          }
+          setPublishOpen(false)
+          settings.markSaved()
+          onSaved?.()
+          settings.refreshPublishState()
         }}
       />
     </>

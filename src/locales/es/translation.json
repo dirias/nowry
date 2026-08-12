@@ -1633,7 +1633,10 @@
       "voice": "Voz",
       "systemDefault": "Por defecto del sistema",
       "rate": "Velocidad",
-      "pitch": "Tono"
+      "pitch": "Tono",
+      "sideAria": "Cara de la tarjeta",
+      "rateAria": "Velocidad de voz: {{value}} veces la normal",
+      "pitchAria": "Tono: {{value}}"
     },
     "publish": {
       "title": "Hacer público el mazo",
@@ -1642,7 +1645,9 @@
       "publishedOn": "Publicado el {{date}}"
     },
     "saving": "Guardando...",
-    "saved": "Guardado"
+    "saved": "Guardado",
+    "saveFailed": "Ese cambio no se guardó",
+    "retry": "Reintentar"
   },
   "editor": {
     "mode": {

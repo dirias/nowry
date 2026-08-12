@@ -1194,7 +1194,10 @@
       "voice": "音声",
       "systemDefault": "システム既定",
       "rate": "速度",
-      "pitch": "ピッチ"
+      "pitch": "ピッチ",
+      "sideAria": "カードの面",
+      "rateAria": "読み上げ速度: 通常の{{value}}倍",
+      "pitchAria": "音の高さ: {{value}}"
     },
     "publish": {
       "title": "デッキを公開する",
@@ -1203,7 +1206,9 @@
       "publishedOn": "{{date}}に公開"
     },
     "saving": "保存中...",
-    "saved": "保存済み"
+    "saved": "保存済み",
+    "saveFailed": "この変更は保存されませんでした",
+    "retry": "再試行"
   },
   "legal": {
     "privacy": {

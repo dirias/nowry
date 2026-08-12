@@ -37,6 +37,10 @@ const FormSheet = ({
   onClose,
   titleKey,
   titleValues,
+  // For a sheet whose heading is the object's own name rather than copy —
+  // deck settings is titled by the deck. A node, not a string, so a surface
+  // that fetches on open can put its Skeleton where the name will land.
+  titleText = null,
   subtitleKey = null,
   width = 'standard',
   footer = null,
@@ -68,7 +72,7 @@ const FormSheet = ({
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography id={titleId} level='h4' sx={{ m: 0 }}>
-            {t(titleKey, titleValues)}
+            {titleText || (titleKey ? t(titleKey, titleValues) : null)}
           </Typography>
           {subtitleKey && (
             <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>

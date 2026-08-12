@@ -2195,7 +2195,10 @@
       "voice": "Voice",
       "systemDefault": "System default",
       "rate": "Speed",
-      "pitch": "Pitch"
+      "pitch": "Pitch",
+      "sideAria": "Preview side",
+      "rateAria": "Speech rate: {{value}} times normal speed",
+      "pitchAria": "Pitch: {{value}}"
     },
     "publish": {
       "title": "Make deck public",
@@ -2204,7 +2207,9 @@
       "publishedOn": "Published on {{date}}"
     },
     "saving": "Saving...",
-    "saved": "Saved"
+    "saved": "Saved",
+    "saveFailed": "That change wasn't saved",
+    "retry": "Try again"
   },
   "publish": {
     "openSheet": "Share to community",
