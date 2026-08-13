@@ -18,6 +18,8 @@ import React from 'react'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
+import { injectedCss } from '../../Common/Form/__testHelpers__/cssRules'
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, options) => {
@@ -429,5 +431,53 @@ describe('visual, through the shipped path', () => {
     await saveAndNext()
 
     expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ diagram_code: 'not a diagram', card_type: 'visual' }))
+  })
+})
+
+/**
+ * The blank-sheet regression.
+ *
+ * `CardTypeSelector` passed Joy's `overlay` to its `Radio`s. `overlay` sets the
+ * Radio root to `position: initial`, so the action — `position: absolute`,
+ * `z-index: 1`, and when checked an opaque `background.surface` — resolved its
+ * containing block against the nearest *positioned* ancestor. Inside FormSheet
+ * that is the ModalDialog, so the checked segment painted a full-sheet
+ * rectangle over the header, every field and the footer. Measured in Chrome:
+ * a 197x44 segment whose action was 700x624.
+ *
+ * Every assertion above this line still passed while that shipped, because the
+ * form was entirely in the DOM and entirely invisible. jsdom has no layout and
+ * cannot see the overlap, so what is pinned instead is the cause it cannot
+ * miss: which element establishes the containing block for that paint.
+ */
+describe('the checked segment does not paint over the sheet', () => {
+  /** The generated rule for one emotion class, so this cannot match a neighbour's. */
+  const ruleFor = (node, suffix) => {
+    const generated = Array.from(node.classList).find((name) => name.startsWith('css-') && name.endsWith(suffix))
+    return injectedCss()
+      .split('\n')
+      .filter((rule) => rule.startsWith(`.${generated} `) || rule.startsWith(`.${generated}{`))
+      .join('\n')
+  }
+
+  const checkedSegment = () => {
+    renderModal()
+    const selector = screen.getByRole('radiogroup', { name: 'cards.common.typeSelectorAria' })
+    const root = within(selector).getByRole('radio', { checked: true }).closest('.MuiRadio-root')
+    return { root, action: root.querySelector('.MuiRadio-action') }
+  }
+
+  it('paints it from an absolutely positioned action', () => {
+    const { action } = checkedSegment()
+    expect(ruleFor(action, '-JoyRadio-action')).toMatch(/position:absolute/)
+  })
+
+  it('contains that action in the segment, not in the ModalDialog', () => {
+    const { root } = checkedSegment()
+    const rule = ruleFor(root, '-JoyRadio-root')
+
+    // `position: initial` here is the bug: the action escapes to the sheet.
+    expect(rule).toMatch(/position:relative/)
+    expect(rule).not.toMatch(/position:initial/)
   })
 })

@@ -22,6 +22,15 @@ import { CARD_TYPES, specFor } from './cardTypes'
  * on top of controls that are already keyboard-operable and already announce
  * as a set. The visible label is the accessible name, so there is no
  * competing aria-label to drift from it.
+ *
+ * Deliberately NOT `overlay`. Joy's `overlay` drops `position: relative` from
+ * the Radio root so the action escapes to the nearest positioned ancestor —
+ * the pattern for a radio that covers a Card. Inside FormSheet that ancestor
+ * is the ModalDialog, so the checked segment's `background.surface` painted an
+ * opaque 700x624 sheet at `z-index: 1` over the whole form: header, fields and
+ * footer all still in the DOM and all behind it. Without `overlay` the action
+ * is inset against the Radio's own root, which already spans label and all —
+ * the same hit area and focus ring, sized to the segment.
  */
 const CardTypeSelector = ({ value, onChange }) => {
   const { t } = useTranslation()
@@ -39,7 +48,6 @@ const CardTypeSelector = ({ value, onChange }) => {
           key={type}
           value={type}
           disableIcon
-          overlay
           label={t(specFor(type).nameKey)}
           slotProps={{
             action: ({ checked }) => ({
