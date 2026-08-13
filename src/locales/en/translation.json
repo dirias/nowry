@@ -421,6 +421,19 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Onboarding",
+      "retry": "Try again",
+      "error": {
+        "title": "We couldn't load your setup",
+        "body": "Something went wrong while loading your onboarding. Any choices you already saved are safe."
+      },
+      "screenName": {
+        "welcome": "Welcome",
+        "personalization": "Personalization",
+        "firstDeck": "Your first deck"
+      }
+    },
     "welcome": {
       "title": "Welcome to Nowry!",
       "subtitle": "Let's personalize your learning experience in just a few steps",

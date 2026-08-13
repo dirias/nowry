@@ -294,6 +294,19 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "初期設定",
+      "retry": "再試行",
+      "error": {
+        "title": "設定を読み込めませんでした",
+        "body": "初期設定の読み込み中に問題が発生しました。保存済みの選択はそのまま残っています。"
+      },
+      "screenName": {
+        "welcome": "ようこそ",
+        "personalization": "パーソナライズ",
+        "firstDeck": "最初のデッキ"
+      }
+    },
     "welcome": {
       "title": "Nowryへようこそ！",
       "subtitle": "いくつかのステップで学習体験をパーソナライズしましょう",

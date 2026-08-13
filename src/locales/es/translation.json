@@ -295,6 +295,19 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Configuración inicial",
+      "retry": "Reintentar",
+      "error": {
+        "title": "No pudimos cargar tu configuración",
+        "body": "Algo salió mal al cargar tu configuración inicial. Las opciones que ya guardaste están a salvo."
+      },
+      "screenName": {
+        "welcome": "Bienvenida",
+        "personalization": "Personalización",
+        "firstDeck": "Tu primer mazo"
+      }
+    },
     "welcome": {
       "title": "¡Bienvenido a Nowry!",
       "subtitle": "Personalicemos tu experiencia de aprendizaje en unos pocos pasos",

@@ -316,6 +316,19 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Configuration initiale",
+      "retry": "Réessayer",
+      "error": {
+        "title": "Impossible de charger votre configuration",
+        "body": "Un problème est survenu pendant le chargement de votre configuration. Les choix déjà enregistrés sont intacts."
+      },
+      "screenName": {
+        "welcome": "Bienvenue",
+        "personalization": "Personnalisation",
+        "firstDeck": "Votre premier deck"
+      }
+    },
     "welcome": {
       "title": "Bienvenue sur Nowry !",
       "subtitle": "Personnalisons votre expérience d'apprentissage en quelques étapes",

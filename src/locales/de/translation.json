@@ -294,6 +294,19 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Einrichtung",
+      "retry": "Erneut versuchen",
+      "error": {
+        "title": "Deine Einrichtung konnte nicht geladen werden",
+        "body": "Beim Laden deiner Einrichtung ist etwas schiefgelaufen. Bereits gespeicherte Angaben bleiben erhalten."
+      },
+      "screenName": {
+        "welcome": "Willkommen",
+        "personalization": "Personalisierung",
+        "firstDeck": "Dein erstes Deck"
+      }
+    },
     "welcome": {
       "title": "Willkommen bei Nowry!",
       "subtitle": "Lass uns dein Lernerlebnis in wenigen Schritten personalisieren",
