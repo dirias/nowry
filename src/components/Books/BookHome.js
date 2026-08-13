@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { booksService } from '../../api/services'
 import { WarningWindow, SuccessWindow, Error as ErrorWindow } from '../Messages'
-import BookEditor from './BookEditor'
+import BookEditSheet from './BookEditSheet'
 import BookCreateSheet from './BookCreateSheet'
 import { useAuth } from '../../context/AuthContext'
 import useBooks from '../../hooks/useBooks'
@@ -745,11 +745,7 @@ export default function BookHome() {
         />
       )}
 
-      {showEditor && bookToEdit && (
-        <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1300, bgcolor: 'background.surface' }}>
-          <BookEditor book={bookToEdit} refreshBooks={fetchBooks} onCancel={() => setShowEditor(false)} />
-        </Box>
-      )}
+      {showEditor && bookToEdit && <BookEditSheet book={bookToEdit} onSaved={fetchBooks} onClose={() => setShowEditor(false)} />}
 
       <BookCreateSheet open={showCreate} onClose={() => setShowCreate(false)} />
 
