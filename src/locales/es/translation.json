@@ -309,14 +309,41 @@
       }
     },
     "welcome": {
-      "title": "¡Bienvenido a Nowry!",
-      "subtitle": "Personalicemos tu experiencia de aprendizaje en unos pocos pasos",
-      "quick": "Rápido y Fácil",
-      "quickDesc": "Toma menos de 2 minutos",
-      "tailored": "Adaptado para Ti",
-      "tailoredDesc": "Personalizado a tu estilo de aprendizaje",
-      "changeable": "Siempre Cambiable",
-      "changeableDesc": "Puedes actualizar estos ajustes en cualquier momento"
+      "title": "Te damos la bienvenida a Nowry",
+      "lead": "Tres pasos: cuéntale a Nowry qué quieres aprender y termina con un mazo de estudio ya en tu biblioteca.",
+      "support": "Nada de esta pantalla es obligatorio. Los dos ajustes de abajo son opcionales.",
+      "begin": "Empezar",
+      "postpone": "Ahora no",
+      "language": {
+        "label": "Idioma"
+      },
+      "accent": {
+        "label": "Color de acento",
+        "hint": "Se usa en toda la aplicación. El modo claro u oscuro sigue al de tu dispositivo.",
+        "selected": "Acento: {{name}}",
+        "custom": "Color personalizado",
+        "names": {
+          "oceanTeal": "Verde azulado océano",
+          "skyBlue": "Azul cielo",
+          "royalPurple": "Púrpura real",
+          "rosePink": "Rosa",
+          "crimsonRed": "Rojo carmesí",
+          "sunsetOrange": "Naranja atardecer",
+          "forestGreen": "Verde bosque",
+          "earthBrown": "Marrón tierra"
+        }
+      },
+      "save": {
+        "saving": "Guardando…",
+        "saved": "Guardado",
+        "unsaved": "Sin guardar",
+        "retry": "Reintentar"
+      },
+      "postponeError": {
+        "title": "No pudimos guardar eso",
+        "body": "Sigues aquí y no se registró nada."
+      },
+      "loadError": "No pudimos cargar tus ajustes guardados."
     },
     "language": {
       "title": "Elige tu Idioma",
@@ -375,6 +402,11 @@
     },
     "error": {
       "saveFailed": "Something went wrong. Please try again."
+    },
+    "failure": {
+      "network": "Parece que no tienes conexión. Compruébala e inténtalo de nuevo.",
+      "rejected": "Ese valor no se aceptó. Elige otro.",
+      "unknown": "Algo salió mal por nuestra parte."
     }
   },
   "taxonomy": {

@@ -330,14 +330,41 @@
       }
     },
     "welcome": {
-      "title": "Bienvenue sur Nowry !",
-      "subtitle": "Personnalisons votre expérience d'apprentissage en quelques étapes",
-      "quick": "Rapide et Facile",
-      "quickDesc": "Prend moins de 2 minutes",
-      "tailored": "Adapté pour Vous",
-      "tailoredDesc": "Personnalisé selon votre style d'apprentissage",
-      "changeable": "Toujours Modifiable",
-      "changeableDesc": "Vous pouvez mettre à jour ces paramètres à tout moment"
+      "title": "Bienvenue sur Nowry",
+      "lead": "Trois étapes : dites à Nowry ce que vous voulez apprendre, et repartez avec un deck déjà dans votre bibliothèque.",
+      "support": "Rien n'est obligatoire sur cet écran. Les deux réglages ci-dessous sont facultatifs.",
+      "begin": "Commencer",
+      "postpone": "Pas maintenant",
+      "language": {
+        "label": "Langue"
+      },
+      "accent": {
+        "label": "Couleur d'accent",
+        "hint": "Utilisée dans toute l'application. Le mode clair ou sombre suit votre appareil.",
+        "selected": "Accent : {{name}}",
+        "custom": "Couleur personnalisée",
+        "names": {
+          "oceanTeal": "Bleu-vert océan",
+          "skyBlue": "Bleu ciel",
+          "royalPurple": "Violet royal",
+          "rosePink": "Rose",
+          "crimsonRed": "Rouge cramoisi",
+          "sunsetOrange": "Orange couchant",
+          "forestGreen": "Vert forêt",
+          "earthBrown": "Brun terre"
+        }
+      },
+      "save": {
+        "saving": "Enregistrement…",
+        "saved": "Enregistré",
+        "unsaved": "Non enregistré",
+        "retry": "Réessayer"
+      },
+      "postponeError": {
+        "title": "Nous n'avons pas pu enregistrer",
+        "body": "Vous êtes toujours ici et rien n'a été enregistré."
+      },
+      "loadError": "Impossible de charger vos réglages enregistrés."
     },
     "language": {
       "title": "Choisissez votre Langue",
@@ -396,6 +423,11 @@
     },
     "error": {
       "saveFailed": "Something went wrong. Please try again."
+    },
+    "failure": {
+      "network": "Vous semblez hors ligne. Vérifiez votre connexion et réessayez.",
+      "rejected": "Cette valeur a été refusée. Choisissez-en une autre.",
+      "unknown": "Un problème est survenu de notre côté."
     }
   },
   "taxonomy": {

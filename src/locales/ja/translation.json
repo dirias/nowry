@@ -308,14 +308,41 @@
       }
     },
     "welcome": {
-      "title": "Nowryへようこそ！",
-      "subtitle": "いくつかのステップで学習体験をパーソナライズしましょう",
-      "quick": "簡単＆迅速",
-      "quickDesc": "2分以内で完了します",
-      "tailored": "あなたに最適化",
-      "tailoredDesc": "学習スタイルに合わせてカスタマイズ",
-      "changeable": "いつでも変更可能",
-      "changeableDesc": "設定はいつでも更新できます"
+      "title": "Nowry へようこそ",
+      "lead": "3 ステップです。学びたいことを Nowry に伝えると、最後には学習デッキがライブラリに入っています。",
+      "support": "この画面で必須の入力はありません。下の 2 つの設定は任意です。",
+      "begin": "はじめる",
+      "postpone": "あとで",
+      "language": {
+        "label": "言語"
+      },
+      "accent": {
+        "label": "アクセントカラー",
+        "hint": "Nowry 全体で使われます。ライトとダークはお使いの端末に従います。",
+        "selected": "アクセント: {{name}}",
+        "custom": "カスタムカラー",
+        "names": {
+          "oceanTeal": "オーシャンティール",
+          "skyBlue": "スカイブルー",
+          "royalPurple": "ロイヤルパープル",
+          "rosePink": "ローズピンク",
+          "crimsonRed": "クリムゾンレッド",
+          "sunsetOrange": "サンセットオレンジ",
+          "forestGreen": "フォレストグリーン",
+          "earthBrown": "アースブラウン"
+        }
+      },
+      "save": {
+        "saving": "保存しています…",
+        "saved": "保存しました",
+        "unsaved": "未保存",
+        "retry": "再試行"
+      },
+      "postponeError": {
+        "title": "保存できませんでした",
+        "body": "この画面のままです。何も記録されていません。"
+      },
+      "loadError": "保存された設定を読み込めませんでした。"
     },
     "language": {
       "title": "言語を選択",
@@ -374,6 +401,11 @@
     },
     "error": {
       "saveFailed": "Something went wrong. Please try again."
+    },
+    "failure": {
+      "network": "オフラインのようです。接続を確認してもう一度お試しください。",
+      "rejected": "この値は受け付けられませんでした。別の値を選んでください。",
+      "unknown": "こちら側で問題が発生しました。"
     }
   },
   "taxonomy": {

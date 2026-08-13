@@ -435,14 +435,41 @@
       }
     },
     "welcome": {
-      "title": "Welcome to Nowry!",
-      "subtitle": "Let's personalize your learning experience in just a few steps",
-      "quick": "Quick & Easy",
-      "quickDesc": "Takes less than 2 minutes",
-      "tailored": "Tailored for You",
-      "tailoredDesc": "Customized to your learning style",
-      "changeable": "Always Changeable",
-      "changeableDesc": "You can update these settings anytime"
+      "title": "Welcome to Nowry",
+      "lead": "Three steps: tell Nowry what you want to learn, and finish with a study deck already in your library.",
+      "support": "Nothing on this screen is required. The two settings below are optional.",
+      "begin": "Get Started",
+      "postpone": "Not Right Now",
+      "language": {
+        "label": "Language"
+      },
+      "accent": {
+        "label": "Accent color",
+        "hint": "Used across Nowry. Light and dark follow your device.",
+        "selected": "Accent: {{name}}",
+        "custom": "Custom color",
+        "names": {
+          "oceanTeal": "Ocean teal",
+          "skyBlue": "Sky blue",
+          "royalPurple": "Royal purple",
+          "rosePink": "Rose pink",
+          "crimsonRed": "Crimson red",
+          "sunsetOrange": "Sunset orange",
+          "forestGreen": "Forest green",
+          "earthBrown": "Earth brown"
+        }
+      },
+      "save": {
+        "saving": "Saving…",
+        "saved": "Saved",
+        "unsaved": "Not saved",
+        "retry": "Retry"
+      },
+      "postponeError": {
+        "title": "We couldn't save that",
+        "body": "You're still here, and nothing was recorded."
+      },
+      "loadError": "We couldn't load your saved settings."
     },
     "language": {
       "title": "Choose Your Language",
@@ -501,6 +528,11 @@
     },
     "error": {
       "saveFailed": "Something went wrong. Please try again."
+    },
+    "failure": {
+      "network": "You appear to be offline. Check your connection and try again.",
+      "rejected": "That value wasn't accepted. Please choose another.",
+      "unknown": "Something went wrong on our end."
     }
   },
   "taxonomy": {

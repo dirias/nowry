@@ -308,14 +308,41 @@
       }
     },
     "welcome": {
-      "title": "Willkommen bei Nowry!",
-      "subtitle": "Lass uns dein Lernerlebnis in wenigen Schritten personalisieren",
-      "quick": "Schnell & Einfach",
-      "quickDesc": "Dauert weniger als 2 Minuten",
-      "tailored": "Maßgeschneidert für dich",
-      "tailoredDesc": "Angepasst an deinen Lernstil",
-      "changeable": "Jederzeit änderbar",
-      "changeableDesc": "Du kannst diese Einstellungen jederzeit aktualisieren"
+      "title": "Willkommen bei Nowry",
+      "lead": "Drei Schritte: Sag Nowry, was du lernen möchtest – am Ende liegt ein Lerndeck in deiner Bibliothek.",
+      "support": "Auf diesem Bildschirm ist nichts verpflichtend. Die beiden Einstellungen unten sind optional.",
+      "begin": "Loslegen",
+      "postpone": "Jetzt nicht",
+      "language": {
+        "label": "Sprache"
+      },
+      "accent": {
+        "label": "Akzentfarbe",
+        "hint": "Wird überall in Nowry verwendet. Hell oder dunkel richtet sich nach deinem Gerät.",
+        "selected": "Akzent: {{name}}",
+        "custom": "Eigene Farbe",
+        "names": {
+          "oceanTeal": "Ozeanblaugrün",
+          "skyBlue": "Himmelblau",
+          "royalPurple": "Königsviolett",
+          "rosePink": "Rosé",
+          "crimsonRed": "Karmesinrot",
+          "sunsetOrange": "Sonnenuntergangsorange",
+          "forestGreen": "Waldgrün",
+          "earthBrown": "Erdbraun"
+        }
+      },
+      "save": {
+        "saving": "Wird gespeichert…",
+        "saved": "Gespeichert",
+        "unsaved": "Nicht gespeichert",
+        "retry": "Erneut versuchen"
+      },
+      "postponeError": {
+        "title": "Das konnten wir nicht speichern",
+        "body": "Du bist noch hier, und es wurde nichts festgehalten."
+      },
+      "loadError": "Deine gespeicherten Einstellungen konnten nicht geladen werden."
     },
     "language": {
       "title": "Wähle deine Sprache",
@@ -374,6 +401,11 @@
     },
     "error": {
       "saveFailed": "Something went wrong. Please try again."
+    },
+    "failure": {
+      "network": "Du scheinst offline zu sein. Prüfe deine Verbindung und versuche es erneut.",
+      "rejected": "Dieser Wert wurde abgelehnt. Bitte wähle einen anderen.",
+      "unknown": "Bei uns ist etwas schiefgelaufen."
     }
   },
   "taxonomy": {
