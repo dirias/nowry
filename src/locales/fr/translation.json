@@ -366,6 +366,29 @@
       },
       "loadError": "Impossible de charger vos réglages enregistrés."
     },
+    "personalization": {
+      "title": "Que voulez-vous apprendre ?",
+      "lead": "Choisissez jusqu'à 5 sujets et un objectif d'étude. Le premier sujet choisi est celui que Nowry utilise pour trouver votre premier deck.",
+      "continue": "Choisir Votre Premier Deck",
+      "skip": "Passer Pour L'instant",
+      "skipHint": "Rien n'est encore sélectionné. Passer vous ramène à l'accueil, et vous pourrez le configurer plus tard.",
+      "validation": {
+        "title": "Pas encore prêt",
+        "missingInterests": "Choisissez au moins un sujet pour continuer.",
+        "tooManyInterests": "Vous avez {{count}} sujets sélectionnés. Retirez-en {{excess}} pour continuer avec {{max}} au maximum.",
+        "missingGoal": "Choisissez un objectif d'étude pour continuer."
+      },
+      "saveError": {
+        "title": "Vos choix ne sont pas encore enregistrés",
+        "body": "Ils sont toujours à l'écran et rien n'a été perdu. Réessayez celui signalé ci-dessous, puis continuez."
+      },
+      "advanceError": {
+        "title": "Nous n'avons pas pu continuer",
+        "body": "Vos sujets et votre objectif sont enregistrés. Vous êtes toujours sur cet écran."
+      },
+      "loadError": "Nous n'avons pas pu charger vos choix enregistrés.",
+      "loading": "Chargement de vos choix enregistrés"
+    },
     "language": {
       "title": "Choisissez votre Langue",
       "subtitle": "Sélectionnez votre langue préférée pour l'interface"

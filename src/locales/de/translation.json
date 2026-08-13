@@ -344,6 +344,29 @@
       },
       "loadError": "Deine gespeicherten Einstellungen konnten nicht geladen werden."
     },
+    "personalization": {
+      "title": "Was möchtest du lernen?",
+      "lead": "Wähle bis zu 5 Themen und ein Lernziel. Das zuerst gewählte Thema nutzt Nowry, um dein erstes Deck zu finden.",
+      "continue": "Erstes Deck Auswählen",
+      "skip": "Vorerst Überspringen",
+      "skipHint": "Noch nichts ausgewählt. Beim Überspringen geht es zur Startseite, und du kannst das später einrichten.",
+      "validation": {
+        "title": "Noch nicht bereit",
+        "missingInterests": "Wähle mindestens ein Thema, um fortzufahren.",
+        "tooManyInterests": "Du hast {{count}} Themen ausgewählt. Entferne {{excess}}, um mit höchstens {{max}} fortzufahren.",
+        "missingGoal": "Wähle ein Lernziel, um fortzufahren."
+      },
+      "saveError": {
+        "title": "Deine Auswahl ist noch nicht gespeichert",
+        "body": "Sie ist weiterhin sichtbar und nichts ging verloren. Versuche die unten markierte Auswahl erneut und fahre dann fort."
+      },
+      "advanceError": {
+        "title": "Wir konnten nicht fortfahren",
+        "body": "Deine Themen und dein Ziel sind gespeichert. Du bist weiterhin auf diesem Bildschirm."
+      },
+      "loadError": "Wir konnten deine gespeicherte Auswahl nicht laden.",
+      "loading": "Deine gespeicherte Auswahl wird geladen"
+    },
     "language": {
       "title": "Wähle deine Sprache",
       "subtitle": "Wähle deine bevorzugte Sprache für die Benutzeroberfläche"

@@ -345,6 +345,29 @@
       },
       "loadError": "No pudimos cargar tus ajustes guardados."
     },
+    "personalization": {
+      "title": "¿Qué quieres aprender?",
+      "lead": "Elige hasta 5 temas y un objetivo de estudio. El primer tema que elijas es el que Nowry usa para encontrar tu primer mazo.",
+      "continue": "Elegir Tu Primer Mazo",
+      "skip": "Omitir Por Ahora",
+      "skipHint": "Aún no has elegido nada. Al omitir volverás al inicio y podrás configurarlo más tarde.",
+      "validation": {
+        "title": "Todavía no está listo",
+        "missingInterests": "Elige al menos un tema para continuar.",
+        "tooManyInterests": "Tienes {{count}} temas seleccionados. Quita {{excess}} para continuar con {{max}} o menos.",
+        "missingGoal": "Elige un objetivo de estudio para continuar."
+      },
+      "saveError": {
+        "title": "Tus elecciones aún no están guardadas",
+        "body": "Siguen en pantalla y no se ha perdido nada. Reintenta la que aparece marcada abajo y luego continúa."
+      },
+      "advanceError": {
+        "title": "No pudimos continuar",
+        "body": "Tus temas y tu objetivo están guardados. Sigues en esta pantalla."
+      },
+      "loadError": "No pudimos cargar tus elecciones guardadas.",
+      "loading": "Cargando tus elecciones guardadas"
+    },
     "language": {
       "title": "Elige tu Idioma",
       "subtitle": "Selecciona tu idioma preferido para la interfaz"

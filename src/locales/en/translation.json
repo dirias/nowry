@@ -471,6 +471,29 @@
       },
       "loadError": "We couldn't load your saved settings."
     },
+    "personalization": {
+      "title": "What do you want to learn?",
+      "lead": "Pick up to 5 topics and one study goal. The first topic you pick is the one Nowry uses to find your first deck.",
+      "continue": "Choose Your First Deck",
+      "skip": "Skip for Now",
+      "skipHint": "Nothing selected yet. Skipping takes you Home, and you can set this up later.",
+      "validation": {
+        "title": "Not ready yet",
+        "missingInterests": "Pick at least one topic to continue.",
+        "tooManyInterests": "You have {{count}} topics selected. Remove {{excess}} to continue with {{max}} or fewer.",
+        "missingGoal": "Choose one study goal to continue."
+      },
+      "saveError": {
+        "title": "Your choices aren't saved yet",
+        "body": "They're still on screen and nothing was lost. Retry the one marked below, then continue."
+      },
+      "advanceError": {
+        "title": "We couldn't continue",
+        "body": "Your topics and goal are saved. You're still on this screen."
+      },
+      "loadError": "We couldn't load your saved choices.",
+      "loading": "Loading your saved choices"
+    },
     "language": {
       "title": "Choose Your Language",
       "subtitle": "Select your preferred language for the interface"
