@@ -345,46 +345,13 @@
       "subtitle": "We'll curate your home feed around these.",
       "groupLabel": "Interest selection",
       "selected": "Sélectionné : {{count}} sujet",
-      "selected_plural": "Sélectionnés : {{count}} sujets",
-      "items": {
-        "ai": "AI & Machine Learning",
-        "technology": "Technology",
-        "science": "Science",
-        "mathematics": "Mathematics",
-        "history": "History",
-        "languages": "Languages",
-        "literature": "Literature",
-        "art": "Art & Creativity",
-        "music": "Music",
-        "business": "Business",
-        "health": "Health & Fitness",
-        "philosophy": "Philosophy",
-        "design": "Design",
-        "psychology": "Psychology"
-      }
+      "selected_plural": "Sélectionnés : {{count}} sujets"
     },
     "learning": {
       "title": "Style d'Apprentissage et Objectifs",
       "subtitle": "Aidez-nous à adapter votre expérience",
       "styleTitle": "Comment apprenez-vous le mieux ?",
-      "goalTitle": "Quel est votre objectif principal ?",
-      "styles": {
-        "visual": "Visuel",
-        "visualDesc": "J'apprends mieux avec des images et des diagrammes",
-        "auditory": "Auditif",
-        "auditoryDesc": "Je préfère écouter et discuter",
-        "reading": "Lecture/Écriture",
-        "readingDesc": "J'apprends par le texte et les notes",
-        "kinesthetic": "Kinesthésique",
-        "kinestheticDesc": "J'apprends en faisant et en pratiquant"
-      },
-      "goals": {
-        "general": "Culture Générale",
-        "academic": "Réussite Scolaire",
-        "career": "Développement Professionnel",
-        "language": "Apprentissage des Langues",
-        "hobby": "Intérêt Personnel"
-      }
+      "goalTitle": "Quel est votre objectif principal ?"
     },
     "steps": "Étape {{current}} sur {{total}}",
     "complete": "{{percent}}% Terminé",
@@ -406,17 +373,7 @@
     },
     "focus": {
       "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this.",
-      "topics": {
-        "technology": "Technology",
-        "science": "Science",
-        "history": "History",
-        "languages": "Languages",
-        "art": "Art",
-        "mathematics": "Mathematics",
-        "literature": "Literature",
-        "business": "Business"
-      }
+      "subtitle": "Choose one topic and a goal. You can always change this."
     },
     "ready": {
       "title": "You're all set, {{name}}.",
@@ -426,6 +383,31 @@
     },
     "error": {
       "saveFailed": "Something went wrong. Please try again."
+    }
+  },
+  "taxonomy": {
+    "topics": {
+      "artificial_intelligence": "AI & Machine Learning",
+      "technology": "Technology",
+      "science": "Science",
+      "mathematics": "Mathematics",
+      "history": "History",
+      "languages": "Languages",
+      "literature": "Literature",
+      "art": "Art & Creativity",
+      "music": "Music",
+      "business": "Business",
+      "health": "Health & Fitness",
+      "philosophy": "Philosophy",
+      "design": "Design",
+      "psychology": "Psychology"
+    },
+    "goals": {
+      "general": "Culture Générale",
+      "academic": "Réussite Scolaire",
+      "career": "Développement Professionnel",
+      "language": "Apprentissage des Langues",
+      "hobby": "Intérêt Personnel"
     }
   },
   "tasks": {

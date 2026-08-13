@@ -450,46 +450,13 @@
       "subtitle": "We'll curate your home feed around these.",
       "groupLabel": "Interest selection",
       "selected": "Selected: {{count}} topic",
-      "selected_plural": "Selected: {{count}} topics",
-      "items": {
-        "ai": "AI & Machine Learning",
-        "technology": "Technology",
-        "science": "Science",
-        "mathematics": "Mathematics",
-        "history": "History",
-        "languages": "Languages",
-        "literature": "Literature",
-        "art": "Art & Creativity",
-        "music": "Music",
-        "business": "Business",
-        "health": "Health & Fitness",
-        "philosophy": "Philosophy",
-        "design": "Design",
-        "psychology": "Psychology"
-      }
+      "selected_plural": "Selected: {{count}} topics"
     },
     "learning": {
       "title": "Learning Style & Goals",
       "subtitle": "Help us tailor your experience",
       "styleTitle": "How do you learn best?",
-      "goalTitle": "What's your main goal?",
-      "styles": {
-        "visual": "Visual",
-        "visualDesc": "I learn best with images and diagrams",
-        "auditory": "Auditory",
-        "auditoryDesc": "I prefer listening and discussions",
-        "reading": "Reading/Writing",
-        "readingDesc": "I learn through text and notes",
-        "kinesthetic": "Kinesthetic",
-        "kinestheticDesc": "I learn by doing and practicing"
-      },
-      "goals": {
-        "general": "General Knowledge",
-        "academic": "Academic Success",
-        "career": "Career Development",
-        "language": "Language Learning",
-        "hobby": "Personal Interest"
-      }
+      "goalTitle": "What's your main goal?"
     },
     "steps": "Step {{current}} of {{total}}",
     "complete": "{{percent}}% Complete",
@@ -511,17 +478,7 @@
     },
     "focus": {
       "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this.",
-      "topics": {
-        "technology": "Technology",
-        "science": "Science",
-        "history": "History",
-        "languages": "Languages",
-        "art": "Art",
-        "mathematics": "Mathematics",
-        "literature": "Literature",
-        "business": "Business"
-      }
+      "subtitle": "Choose one topic and a goal. You can always change this."
     },
     "ready": {
       "title": "You're all set, {{name}}.",
@@ -531,6 +488,31 @@
     },
     "error": {
       "saveFailed": "Something went wrong. Please try again."
+    }
+  },
+  "taxonomy": {
+    "topics": {
+      "artificial_intelligence": "AI & Machine Learning",
+      "technology": "Technology",
+      "science": "Science",
+      "mathematics": "Mathematics",
+      "history": "History",
+      "languages": "Languages",
+      "literature": "Literature",
+      "art": "Art & Creativity",
+      "music": "Music",
+      "business": "Business",
+      "health": "Health & Fitness",
+      "philosophy": "Philosophy",
+      "design": "Design",
+      "psychology": "Psychology"
+    },
+    "goals": {
+      "general": "General Knowledge",
+      "academic": "Academic Success",
+      "career": "Career Development",
+      "language": "Language Learning",
+      "hobby": "Personal Interest"
     }
   },
   "tasks": {

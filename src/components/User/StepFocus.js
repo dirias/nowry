@@ -1,6 +1,17 @@
 import React from 'react'
 import { Box, Typography, Card, CardContent, Chip, Stack } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+import { TOPICS, STUDY_GOALS } from '../../constants/learningTaxonomy'
+
+/**
+ * This step has always shown a curated 8-topic grid rather than the full
+ * taxonomy — the values below select from TOPICS, they do not redefine it.
+ * Keeping the subset preserves the existing layout; the labels, icons and
+ * wire values all still come from the single source of truth.
+ */
+const FOCUS_TOPIC_VALUES = ['technology', 'science', 'history', 'languages', 'art', 'mathematics', 'literature', 'business']
+
+const FOCUS_TOPICS = FOCUS_TOPIC_VALUES.map((value) => TOPICS.find((topic) => topic.value === value))
 
 /**
  * StepFocus — Step 3
@@ -16,25 +27,6 @@ import { useTranslation } from 'react-i18next'
  */
 const StepFocus = ({ topic, goal, onChangeTopic, onChangeGoal, themeColor, headingRef }) => {
   const { t } = useTranslation()
-
-  const availableTopics = [
-    { value: 'technology', label: t('onboarding.focus.topics.technology'), icon: '💻' },
-    { value: 'science', label: t('onboarding.focus.topics.science'), icon: '🔬' },
-    { value: 'history', label: t('onboarding.focus.topics.history'), icon: '📜' },
-    { value: 'languages', label: t('onboarding.focus.topics.languages'), icon: '🌐' },
-    { value: 'art', label: t('onboarding.focus.topics.art'), icon: '🎨' },
-    { value: 'mathematics', label: t('onboarding.focus.topics.mathematics'), icon: '📐' },
-    { value: 'literature', label: t('onboarding.focus.topics.literature'), icon: '📚' },
-    { value: 'business', label: t('onboarding.focus.topics.business'), icon: '💼' }
-  ]
-
-  const studyGoals = [
-    { value: 'general', label: t('onboarding.learning.goals.general') },
-    { value: 'academic', label: t('onboarding.learning.goals.academic') },
-    { value: 'career', label: t('onboarding.learning.goals.career') },
-    { value: 'language', label: t('onboarding.learning.goals.language') },
-    { value: 'hobby', label: t('onboarding.learning.goals.hobby') }
-  ]
 
   return (
     <Box>
@@ -63,7 +55,7 @@ const StepFocus = ({ topic, goal, onChangeTopic, onChangeGoal, themeColor, headi
           mb: 3
         }}
       >
-        {availableTopics.map((item) => {
+        {FOCUS_TOPICS.map((item) => {
           const isSelected = topic === item.value
           return (
             <Card
@@ -99,7 +91,7 @@ const StepFocus = ({ topic, goal, onChangeTopic, onChangeGoal, themeColor, headi
               <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, p: 1.5, textAlign: 'center' }}>
                 <Typography sx={{ fontSize: 24, lineHeight: 1 }}>{item.icon}</Typography>
                 <Typography level='body-sm' fontWeight={isSelected ? 600 : 400}>
-                  {item.label}
+                  {t(item.i18nKey)}
                 </Typography>
               </CardContent>
             </Card>
@@ -109,7 +101,7 @@ const StepFocus = ({ topic, goal, onChangeTopic, onChangeGoal, themeColor, headi
 
       {/* Goal chips */}
       <Stack direction='row' flexWrap='wrap' gap={1}>
-        {studyGoals.map((g) => {
+        {STUDY_GOALS.map((g) => {
           const isSelected = goal === g.value
           return (
             <Chip
@@ -135,7 +127,7 @@ const StepFocus = ({ topic, goal, onChangeTopic, onChangeGoal, themeColor, headi
                 }
               }}
             >
-              {g.label}
+              {t(g.i18nKey)}
             </Chip>
           )
         })}

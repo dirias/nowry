@@ -69,6 +69,7 @@ import { usePet } from '../../../context/AgentContext'
 import { auth } from '../../../config/firebase.config'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
+import { TOPICS } from '../../../constants/learningTaxonomy'
 
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 const SECTION_IDS = [
@@ -503,7 +504,6 @@ export default function AccountSettings() {
 
   // ── Derived ──────────────────────────────────────────────────────────────────
   const passwordStrength = getPasswordStrength(newPassword)
-  const availableInterests = ['Technology', 'Science', 'History', 'Languages', 'Art', 'Mathematics', 'Literature', 'Music']
 
   return (
     <Container maxWidth='lg' sx={{ pt: { xs: 2, md: 4 }, pb: { xs: 8, md: 12 }, px: { xs: 1.5, md: 3 } }}>
@@ -767,26 +767,30 @@ export default function AccountSettings() {
                     {t('settings.general.interestsDesc')}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {availableInterests.map((interest) => (
-                      <Chip
-                        key={interest}
-                        size='sm'
-                        variant={preferences.interests.includes(interest) ? 'soft' : 'plain'}
-                        color={preferences.interests.includes(interest) ? 'primary' : 'neutral'}
-                        onClick={() => toggleInterest(interest)}
-                        sx={{
-                          cursor: 'pointer',
-                          '&:active': { transform: 'scale(0.95)' },
-                          '&:focus-visible': {
-                            outline: '2px solid',
-                            outlineColor: 'primary.outlinedBorder',
-                            outlineOffset: '2px'
-                          }
-                        }}
-                      >
-                        {t(`onboarding.interests.items.${interest}`, interest)}
-                      </Chip>
-                    ))}
+                    {TOPICS.map((topic) => {
+                      const isSelected = preferences.interests.includes(topic.value)
+                      return (
+                        <Chip
+                          key={topic.value}
+                          size='sm'
+                          variant={isSelected ? 'soft' : 'plain'}
+                          color={isSelected ? 'primary' : 'neutral'}
+                          onClick={() => toggleInterest(topic.value)}
+                          aria-pressed={isSelected}
+                          sx={{
+                            cursor: 'pointer',
+                            '&:active': { transform: 'scale(0.95)' },
+                            '&:focus-visible': {
+                              outline: '2px solid',
+                              outlineColor: 'primary.outlinedBorder',
+                              outlineOffset: '2px'
+                            }
+                          }}
+                        >
+                          {t(topic.i18nKey)}
+                        </Chip>
+                      )
+                    })}
                   </Box>
                 </Box>
               </Stack>
