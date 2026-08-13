@@ -81,12 +81,20 @@ export const userService = {
   },
 
   /**
-   * Update general preferences (interests, theme, language)
-   * @param {Object} preferences
-   * @param {string[]} preferences.interests
-   * @param {string} preferences.theme_color
-   * @param {string} preferences.language
-   * @returns {Promise<Object>}
+   * Update general preferences (interests, theme, language, study goal).
+   *
+   * The route is a Pydantic v2 partial update driven by `model_fields_set`, so a
+   * body carrying a single key touches only that key — this is what progressive
+   * onboarding persistence relies on (`useProgressivePreferences`, FR-036). The
+   * response echoes the full preferences document, including the `primary_topic`
+   * the server derives from `interests[0]`; only that echo counts as confirmed.
+   *
+   * @param {Object} preferences - Partial body; send only the fields to change
+   * @param {string[]} [preferences.interests] - Ordered canonical topics, max 5
+   * @param {string} [preferences.theme_color]
+   * @param {string} [preferences.language]
+   * @param {string} [preferences.study_goal]
+   * @returns {Promise<Object>} Echoed `GeneralPreferencesResponse`
    */
   async updateGeneralPreferences(preferences) {
     const { data } = await apiClient.put('/users/preferences/general', preferences)
