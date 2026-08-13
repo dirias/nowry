@@ -513,6 +513,22 @@
       "career": "Career Development",
       "language": "Language Learning",
       "hobby": "Personal Interest"
+    },
+    "selector": {
+      "topics": {
+        "label": "Your topics",
+        "hint": "Pick 1 to {{max}} topics. The first one you pick becomes your primary topic.",
+        "counter": "{{selected}} of {{max}} selected",
+        "primaryStatus": "Primary topic: {{topic}}",
+        "limitReached": "You have reached the limit of {{max}} topics. Remove one to choose another.",
+        "srSelected": "Selected, position {{position}} of {{total}}",
+        "srPrimary": "Selected, primary topic, position {{position}} of {{total}}",
+        "srBlocked": "Not available, limit of {{max}} topics reached"
+      },
+      "goals": {
+        "label": "Study goal",
+        "hint": "Choose the one that fits you best."
+      }
     }
   },
   "tasks": {

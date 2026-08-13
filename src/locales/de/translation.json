@@ -386,6 +386,22 @@
       "career": "Berufliche Entwicklung",
       "language": "Sprachenlernen",
       "hobby": "Persönliches Interesse"
+    },
+    "selector": {
+      "topics": {
+        "label": "Deine Themen",
+        "hint": "Wähle 1 bis {{max}} Themen. Das zuerst gewählte Thema wird dein Hauptthema.",
+        "counter": "{{selected}} von {{max}} ausgewählt",
+        "primaryStatus": "Hauptthema: {{topic}}",
+        "limitReached": "Du hast das Limit von {{max}} Themen erreicht. Entferne eines, um ein anderes zu wählen.",
+        "srSelected": "Ausgewählt, Position {{position}} von {{total}}",
+        "srPrimary": "Ausgewählt, Hauptthema, Position {{position}} von {{total}}",
+        "srBlocked": "Nicht verfügbar, Limit von {{max}} Themen erreicht"
+      },
+      "goals": {
+        "label": "Lernziel",
+        "hint": "Wähle das Ziel, das am besten passt."
+      }
     }
   },
   "tasks": {

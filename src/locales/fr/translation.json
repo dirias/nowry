@@ -408,6 +408,22 @@
       "career": "Développement Professionnel",
       "language": "Apprentissage des Langues",
       "hobby": "Intérêt Personnel"
+    },
+    "selector": {
+      "topics": {
+        "label": "Vos sujets",
+        "hint": "Choisissez de 1 à {{max}} sujets. Le premier choisi devient votre sujet principal.",
+        "counter": "{{selected}} sur {{max}} sélectionnés",
+        "primaryStatus": "Sujet principal : {{topic}}",
+        "limitReached": "Vous avez atteint la limite de {{max}} sujets. Retirez-en un pour en choisir un autre.",
+        "srSelected": "Sélectionné, position {{position}} sur {{total}}",
+        "srPrimary": "Sélectionné, sujet principal, position {{position}} sur {{total}}",
+        "srBlocked": "Non disponible, limite de {{max}} sujets atteinte"
+      },
+      "goals": {
+        "label": "Objectif d'étude",
+        "hint": "Choisissez celui qui vous correspond le mieux."
+      }
     }
   },
   "tasks": {
