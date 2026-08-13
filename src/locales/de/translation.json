@@ -1757,7 +1757,9 @@
       "black": "Schwarz",
       "grey": "Grau"
     },
-    "coverImagePlaceholder": "https://example.com/image.jpg"
+    "coverImagePlaceholder": "https://example.com/image.jpg",
+    "errorImport": "Fehler beim Verarbeiten der Datei. Bitte versuche es erneut.",
+    "unknownAuthor": "Unbekannter Autor"
   },
   "reports": {
     "modal": {

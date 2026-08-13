@@ -478,7 +478,15 @@
       "black": "黒",
       "grey": "グレー"
     },
-    "coverImagePlaceholder": "https://example.com/image.jpg"
+    "coverImagePlaceholder": "https://example.com/image.jpg",
+    "errorImport": "ファイルの処理中にエラーが発生しました。もう一度お試しください。",
+    "unknownAuthor": "著者不明",
+    "editor": {
+      "titlePlaceholder": "本のタイトルを入力…",
+      "contentPlaceholder": "書き始めましょう…",
+      "notesPlaceholder": "メモを追加…",
+      "summaryPlaceholder": "概要を追加…"
+    }
   },
   "sidemenu": {
     "dashboard": "ダッシュボード",

@@ -27,10 +27,21 @@ const BookCoverSwatch = ({ hex, nameKey, selected }) => {
       value={hex}
       // The circle would sit beside the swatch saying the same thing twice.
       disableIcon
+      // `overlay` stretches the action over the whole swatch, so the hit area
+      // and the focus ring are the 44px square the user sees rather than the
+      // hidden icon's box.
+      overlay
       variant='plain'
       slotProps={{
         input: { 'aria-label': t(nameKey) },
-        action: { sx: { borderRadius: 'sm', ...focusRing } }
+        // Joy marks the action, not the input, so the ring hangs off its class
+        // rather than off `:focus-visible` on an element that never focuses.
+        action: {
+          sx: {
+            borderRadius: 'sm',
+            '&.Joy-focusVisible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+          }
+        }
       }}
       label={
         <Box
