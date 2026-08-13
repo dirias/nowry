@@ -31,7 +31,8 @@ const generateHabitOccurrences = (act, year, areaColor, areaName, events) => {
   const end = new Date(year, 11, 31, 0, 0, 0, 0)
 
   if (act.frequency === 'daily') {
-    for (let d = new Date(start); d <= end; ) {
+    const d = new Date(start)
+    while (d <= end) {
       const snapshot = new Date(d) // immutable copy — capture before advancing d
       events.push({
         id: `activity-${act._id || act.id}-${snapshot.getTime()}`,
@@ -47,7 +48,8 @@ const generateHabitOccurrences = (act, year, areaColor, areaName, events) => {
     }
   } else if (act.frequency === 'weekly' || act.frequency === 'custom') {
     const daysAllowed = act.days_of_week || [] // 0=Mon, 6=Sun
-    for (let d = new Date(start); d <= end; ) {
+    const d = new Date(start)
+    while (d <= end) {
       const snapshot = new Date(d) // immutable copy — capture before advancing d
       const jsDay = snapshot.getDay() // 0=Sun, 1=Mon
       const backendDay = (jsDay + 6) % 7 // shift to 0=Mon, 6=Sun
