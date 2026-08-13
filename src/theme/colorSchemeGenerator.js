@@ -96,6 +96,127 @@ function hslToHex(h, s, l) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
 
+/** Text extremes used as candidates for foreground-on-accent decisions */
+const WHITE = '#ffffff'
+const BLACK = '#000000'
+
+/** Minimum contrast ratio for normal-size text — WCAG 2.1 AA (SC 1.4.3) */
+const AA_TEXT_CONTRAST = 4.5
+
+/**
+ * Parse a hex color into 8-bit RGB channels.
+ * Accepts `#abc`, `#aabbcc` (with or without `#`). Returns null when unparseable.
+ */
+function hexToRGB(hex) {
+  let value = String(hex ?? '')
+    .trim()
+    .replace(/^#/, '')
+
+  if (value.length === 3) {
+    value = value
+      .split('')
+      .map((channel) => channel + channel)
+      .join('')
+  }
+
+  if (!/^[0-9a-f]{6}$/i.test(value)) return null
+
+  return {
+    r: parseInt(value.substring(0, 2), 16),
+    g: parseInt(value.substring(2, 4), 16),
+    b: parseInt(value.substring(4, 6), 16)
+  }
+}
+
+/**
+ * WCAG 2.x relative luminance of a color (0 = black, 1 = white).
+ * sRGB channels are linearised, then weighted 0.2126 / 0.7152 / 0.0722.
+ * Unparseable input falls back to black so theme generation can never throw.
+ */
+export function relativeLuminance(hex) {
+  const rgb = hexToRGB(hex)
+  if (!rgb) return 0
+
+  const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((channel) => {
+    const c = channel / 255
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  })
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/**
+ * WCAG contrast ratio between two colors: (L1 + 0.05) / (L2 + 0.05).
+ * Ranges from 1 (identical) to 21 (black vs white). Order-independent.
+ */
+export function contrastRatio(hexA, hexB) {
+  const a = relativeLuminance(hexA)
+  const b = relativeLuminance(hexB)
+
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+}
+
+/** Worst (lowest) contrast a foreground reaches across every background it can sit on */
+function worstContrast(foreground, backgrounds) {
+  return backgrounds.reduce((lowest, background) => Math.min(lowest, contrastRatio(foreground, background)), Infinity)
+}
+
+/**
+ * Text color (white or black) that maximises contrast against a background,
+ * reaching AA (4.5:1) whenever either extreme can.
+ *
+ * Derived from the resting background of the slot it labels. Hover/active
+ * backgrounds are deliberately not folded in: Joy UI exposes a single text
+ * color per variant, and a hover shade can sit on the other side of the
+ * luminance midpoint — optimising for the transient state would cost contrast
+ * on the state the user actually reads.
+ */
+export function readableTextOn(backgroundHex) {
+  const whiteRatio = contrastRatio(WHITE, backgroundHex)
+  const blackRatio = contrastRatio(BLACK, backgroundHex)
+  const best = Math.max(whiteRatio, blackRatio)
+
+  if (best < AA_TEXT_CONTRAST && process.env.NODE_ENV !== 'production') {
+    // Surfaced rather than swallowed: mid-luminance backgrounds cannot reach AA
+    // with either extreme, so the palette ships the best available and says so.
+    console.warn(
+      `[colorSchemeGenerator] No text color reaches ${AA_TEXT_CONTRAST}:1 on ${backgroundHex} — using best available (${best.toFixed(2)}:1)`
+    )
+  }
+
+  return whiteRatio >= blackRatio ? WHITE : BLACK
+}
+
+/**
+ * Keep an accent-tinted foreground legible without discarding its identity:
+ * hue and saturation are preserved, only lightness is nudged — and only when
+ * the color already fails. Compliant colors are returned byte-identical, so
+ * accessible palettes keep their exact current look.
+ *
+ * Scans outwards from the original lightness and returns the nearest passing
+ * shade; if no shade reaches the target, returns the highest-contrast one.
+ */
+function ensureReadable(foreground, backgrounds, minRatio = AA_TEXT_CONTRAST) {
+  if (worstContrast(foreground, backgrounds) >= minRatio) return foreground
+
+  const hsl = hexToHSL(foreground)
+  let best = { hex: foreground, ratio: worstContrast(foreground, backgrounds) }
+
+  for (let step = 1; step <= 100; step++) {
+    for (const lightness of [hsl.l - step, hsl.l + step]) {
+      if (lightness < 0 || lightness > 100) continue
+
+      const candidate = hslToHex(hsl.h, hsl.s, lightness)
+      const ratio = worstContrast(candidate, backgrounds)
+
+      if (ratio >= minRatio) return candidate
+      if (ratio > best.ratio) best = { hex: candidate, ratio }
+    }
+  }
+
+  return best.hex
+}
+
 /**
  * Generate shades and tints of a color
  */
@@ -140,6 +261,129 @@ function generateAccentColors(primaryHex) {
   return { success, warning, danger }
 }
 
+/** Page surfaces a plain-variant accent text can sit on, per mode */
+const LIGHT_BACKGROUND = { body: '#ffffff', surface: '#f9f9f9', popup: '#ffffff' }
+const DARK_BACKGROUND = { body: '#0d1117', surface: '#161b22', popup: '#1e242c' }
+
+/**
+ * Build one semantic color group (success / warning / danger).
+ * `solidColor` is derived from the solid backgrounds it actually renders on,
+ * and `softColor` is nudged until it is legible on its own `softBg`.
+ */
+function buildSemanticGroup({ solidBg, solidHoverBg, softBg, softColor }) {
+  return {
+    solidBg,
+    solidHoverBg,
+    solidColor: readableTextOn(solidBg),
+    softBg,
+    softColor: ensureReadable(softColor, [softBg])
+  }
+}
+
+/**
+ * Light-mode palette. Every foreground is derived from the background it sits
+ * on, so an accent of any lightness (including near-black or near-white) still
+ * produces readable text.
+ */
+function buildLightScheme(primaryColor, variations, accents) {
+  const pageSurfaces = [LIGHT_BACKGROUND.body, LIGHT_BACKGROUND.surface]
+  const softBg = variations.veryLight
+
+  return {
+    primary: {
+      plainColor: ensureReadable(primaryColor, pageSurfaces),
+      plainHoverBg: variations.lightest,
+      plainActiveBg: variations.lighter,
+      solidBg: primaryColor,
+      solidHoverBg: variations.darker,
+      solidActiveBg: variations.darkest,
+      solidColor: readableTextOn(primaryColor),
+      softBg,
+      softHoverBg: variations.lightest,
+      softActiveBg: variations.lighter,
+      softColor: ensureReadable(primaryColor, [softBg]),
+      outlinedBorder: variations.lighter,
+      outlinedHoverBg: variations.lightest
+    },
+    success: buildSemanticGroup({
+      solidBg: accents.success,
+      solidHoverBg: hslToHex(150, 65, 40),
+      softBg: hslToHex(150, 50, 95),
+      softColor: hslToHex(150, 70, 35)
+    }),
+    warning: buildSemanticGroup({
+      solidBg: accents.warning,
+      solidHoverBg: hslToHex(45, 95, 45),
+      softBg: hslToHex(45, 90, 95),
+      softColor: hslToHex(45, 95, 40)
+    }),
+    danger: buildSemanticGroup({
+      solidBg: accents.danger,
+      solidHoverBg: hslToHex(0, 70, 45),
+      softBg: hslToHex(0, 65, 95),
+      softColor: hslToHex(0, 75, 45)
+    }),
+    neutral: {
+      plainHoverBg: 'rgba(0, 0, 0, 0.04)'
+    },
+    background: { ...LIGHT_BACKGROUND },
+    text: {
+      primary: '#1c1c1c',
+      secondary: '#444',
+      tertiary: '#777'
+    }
+  }
+}
+
+/**
+ * Dark-mode palette. Same contrast derivation as light mode, against the dark
+ * surfaces — the accent keeps its hue, only its lightness is corrected.
+ */
+function buildDarkScheme(primaryColor, variations, primaryHSL) {
+  const pageSurfaces = [DARK_BACKGROUND.body, DARK_BACKGROUND.surface]
+  const softBg = hslToHex(primaryHSL.h, primaryHSL.s - 10, 12)
+  const plainCandidate = hslToHex(primaryHSL.h, Math.min(primaryHSL.s + 25, 100), Math.min(primaryHSL.l + 30, 75))
+  const softCandidate = hslToHex(primaryHSL.h, Math.min(primaryHSL.s + 30, 100), 75)
+
+  return {
+    primary: {
+      plainColor: ensureReadable(plainCandidate, pageSurfaces),
+      plainHoverBg: hslToHex(primaryHSL.h, primaryHSL.s, 15),
+      solidBg: variations.darkest,
+      solidHoverBg: variations.darker,
+      solidActiveBg: primaryColor,
+      solidColor: readableTextOn(variations.darkest),
+      softBg,
+      softHoverBg: hslToHex(primaryHSL.h, primaryHSL.s, 15),
+      softColor: ensureReadable(softCandidate, [softBg])
+    },
+    success: buildSemanticGroup({
+      solidBg: hslToHex(150, 55, 40),
+      solidHoverBg: hslToHex(150, 60, 45),
+      softBg: hslToHex(150, 30, 12),
+      softColor: hslToHex(150, 70, 65)
+    }),
+    warning: buildSemanticGroup({
+      solidBg: hslToHex(45, 85, 50),
+      solidHoverBg: hslToHex(45, 90, 55),
+      softBg: hslToHex(45, 40, 12),
+      softColor: hslToHex(45, 95, 70)
+    }),
+    danger: buildSemanticGroup({
+      solidBg: hslToHex(0, 65, 50),
+      solidHoverBg: hslToHex(0, 70, 55),
+      softBg: hslToHex(0, 35, 12),
+      softColor: hslToHex(0, 75, 70)
+    }),
+    background: { ...DARK_BACKGROUND },
+    text: {
+      primary: '#e6edf3',
+      secondary: '#9ba9b4',
+      tertiary: '#7d8590'
+    }
+  }
+}
+
 /**
  * Generate a complete, professional color scheme from a primary color
  * Returns a theme-compatible palette for both light and dark modes
@@ -150,101 +394,8 @@ export function generateColorScheme(primaryColor) {
   const primaryHSL = hexToHSL(primaryColor)
 
   return {
-    light: {
-      primary: {
-        plainColor: primaryColor,
-        plainHoverBg: variations.lightest,
-        plainActiveBg: variations.lighter,
-        solidBg: primaryColor,
-        solidHoverBg: variations.darker,
-        solidActiveBg: variations.darkest,
-        solidColor: '#fff',
-        softBg: variations.veryLight,
-        softHoverBg: variations.lightest,
-        softActiveBg: variations.lighter,
-        softColor: primaryColor,
-        outlinedBorder: variations.lighter,
-        outlinedHoverBg: variations.lightest
-      },
-      success: {
-        solidBg: accents.success,
-        solidHoverBg: hslToHex(150, 65, 40),
-        solidColor: '#fff',
-        softBg: hslToHex(150, 50, 95),
-        softColor: hslToHex(150, 70, 35)
-      },
-      warning: {
-        solidBg: accents.warning,
-        solidHoverBg: hslToHex(45, 95, 45),
-        solidColor: '#000',
-        softBg: hslToHex(45, 90, 95),
-        softColor: hslToHex(45, 95, 40)
-      },
-      danger: {
-        solidBg: accents.danger,
-        solidHoverBg: hslToHex(0, 70, 45),
-        solidColor: '#fff',
-        softBg: hslToHex(0, 65, 95),
-        softColor: hslToHex(0, 75, 45)
-      },
-      neutral: {
-        plainHoverBg: 'rgba(0, 0, 0, 0.04)'
-      },
-      background: {
-        body: '#ffffff',
-        surface: '#f9f9f9',
-        popup: '#ffffff'
-      },
-      text: {
-        primary: '#1c1c1c',
-        secondary: '#444',
-        tertiary: '#777'
-      }
-    },
-    dark: {
-      primary: {
-        plainColor: hslToHex(primaryHSL.h, Math.min(primaryHSL.s + 25, 100), Math.min(primaryHSL.l + 30, 75)),
-        plainHoverBg: hslToHex(primaryHSL.h, primaryHSL.s, 15),
-        solidBg: variations.darkest,
-        solidHoverBg: variations.darker,
-        solidActiveBg: primaryColor,
-        solidColor: '#fff',
-        softBg: hslToHex(primaryHSL.h, primaryHSL.s - 10, 12),
-        softHoverBg: hslToHex(primaryHSL.h, primaryHSL.s, 15),
-        softColor: hslToHex(primaryHSL.h, Math.min(primaryHSL.s + 30, 100), 75)
-      },
-      success: {
-        solidBg: hslToHex(150, 55, 40),
-        solidHoverBg: hslToHex(150, 60, 45),
-        solidColor: '#fff',
-        softBg: hslToHex(150, 30, 12),
-        softColor: hslToHex(150, 70, 65)
-      },
-      warning: {
-        solidBg: hslToHex(45, 85, 50),
-        solidHoverBg: hslToHex(45, 90, 55),
-        solidColor: '#000',
-        softBg: hslToHex(45, 40, 12),
-        softColor: hslToHex(45, 95, 70)
-      },
-      danger: {
-        solidBg: hslToHex(0, 65, 50),
-        solidHoverBg: hslToHex(0, 70, 55),
-        solidColor: '#fff',
-        softBg: hslToHex(0, 35, 12),
-        softColor: hslToHex(0, 75, 70)
-      },
-      background: {
-        body: '#0d1117',
-        surface: '#161b22',
-        popup: '#1e242c'
-      },
-      text: {
-        primary: '#e6edf3',
-        secondary: '#9ba9b4',
-        tertiary: '#7d8590'
-      }
-    }
+    light: buildLightScheme(primaryColor, variations, accents),
+    dark: buildDarkScheme(primaryColor, variations, primaryHSL)
   }
 }
 
@@ -302,6 +453,10 @@ export function getColorName(hex) {
 
 /**
  * Generate color scheme presets for onboarding
+ *
+ * `contrastText` is the readable foreground for a swatch painted in the literal
+ * preset color — consumers drawing their own swatch (checkmark, label) use it
+ * instead of assuming white.
  */
 export function getColorPresets() {
   return [
@@ -313,5 +468,5 @@ export function getColorPresets() {
     { color: '#ff9800', label: 'Sunset Orange' },
     { color: '#4caf50', label: 'Forest Green' },
     { color: '#795548', label: 'Earth Brown' }
-  ]
+  ].map((preset) => ({ ...preset, contrastText: readableTextOn(preset.color) }))
 }
