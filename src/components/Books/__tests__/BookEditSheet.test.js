@@ -19,6 +19,8 @@
 import React from 'react'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 
+import { injectedCss } from '../../Common/Form/__testHelpers__/cssRules'
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, options) => {
@@ -257,5 +259,67 @@ describe('publishing', () => {
     const alert = screen.getByRole('alert')
     expect(within(alert).getByText('books.unpublishFailed')).toBeInTheDocument()
     expect(within(alert).getByText('Still public')).toBeInTheDocument()
+  })
+})
+
+/**
+ * The inert-sheet regression.
+ *
+ * `BookCoverSwatch` passed Joy's `overlay` to its `Radio`s. `overlay` sets the
+ * Radio root to `position: initial`, so the action — `position: absolute`, inset
+ * to its containing block, `z-index: 1` — resolved that block against the
+ * nearest *positioned* ancestor rather than its own swatch. Inside FormSheet
+ * that ancestor is the sheet, so all eight actions became one stack of
+ * full-sheet rectangles over the entire form.
+ *
+ * Unlike the card-sheet version of this defect the actions carry no background,
+ * so nothing looked wrong — the sheet was simply inert. Measured in Chrome
+ * before the fix: eight 1280x900 actions over a 1280x900 sheet, and
+ * `elementFromPoint` at the centre of Close, the title input, every rail chip,
+ * Publish, Cancel and Save returned `INPUT.MuiRadio-input`. Clicking Save chose
+ * a cover colour.
+ *
+ * Every assertion above this line passed while that shipped, because the form
+ * was entirely in the DOM and entirely reachable *to the tests*. jsdom has no
+ * layout and no hit-testing, so what is pinned instead is the cause it cannot
+ * miss: which element establishes the containing block for those actions.
+ */
+describe('the cover swatches do not cover the sheet', () => {
+  /** The generated rule for one emotion class, so this cannot match a neighbour's. */
+  const ruleFor = (node, suffix) => {
+    const generated = Array.from(node.classList).find((name) => name.startsWith('css-') && name.endsWith(suffix))
+    return injectedCss()
+      .split('\n')
+      .filter((rule) => rule.startsWith(`.${generated} `) || rule.startsWith(`.${generated}{`))
+      .join('\n')
+  }
+
+  const swatchRoots = () => {
+    // A book carrying a cover image opens the group at mount (S3).
+    renderSheet({ cover_image: 'https://example.com/cover.png' })
+    const group = screen.getByRole('radiogroup', { name: 'books.coverColorLabel' })
+    return within(group)
+      .getAllByRole('radio')
+      .map((input) => input.closest('.MuiRadio-root'))
+  }
+
+  it('positions every action absolutely — checked and unchecked alike', () => {
+    swatchRoots().forEach((root) => {
+      expect(ruleFor(root.querySelector('.MuiRadio-action'), '-JoyRadio-action')).toMatch(/position:absolute/)
+    })
+  })
+
+  it('contains all eight in their own swatch, not in the sheet', () => {
+    const roots = swatchRoots()
+    expect(roots).toHaveLength(8)
+
+    roots.forEach((root) => {
+      const rule = ruleFor(root, '-JoyRadio-root')
+
+      // `position: initial` here is the bug: the action escapes to the sheet
+      // and swallows every control on it.
+      expect(rule).toMatch(/position:relative/)
+      expect(rule).not.toMatch(/position:initial/)
+    })
   })
 })

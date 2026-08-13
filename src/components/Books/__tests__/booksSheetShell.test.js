@@ -167,7 +167,16 @@ describe('touch targets', () => {
     })
 
     const action = screen.getByRole('radio', { name: 'books.coverColors.blue' }).closest('.MuiRadio-action')
-    expect(cssFor(action)).toContain('outline-color:var(--joy-palette-primary-outlinedBorder')
+    const css = cssFor(action)
+    expect(css).toContain('outline-color:var(--joy-palette-primary-outlinedBorder')
+
+    // ...and that the rule can actually select something. This assertion used
+    // to stop at the declaration above, which passed for months while the rule
+    // was keyed to `Joy-focusVisible` — a class Joy never emits. Reading a
+    // declaration out of Emotion says nothing about whether it ever applies.
+    const ringRule = css.split('\n').find((rule) => rule.includes('--joy-palette-primary-outlinedBorder'))
+    expect(ringRule).toContain('.Mui-focusVisible')
+    expect(css).not.toContain('Joy-focusVisible')
   })
 
   it('gives the create sheet actions a 44px target', () => {

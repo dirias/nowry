@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Box, Radio } from '@mui/joy'
 import { Check as CheckIcon } from '@mui/icons-material'
 
-import { focusRing } from '../../Common/Form/formStyles'
-
 /**
  * One cover colour, as a real radio.
  *
@@ -18,6 +16,26 @@ import { focusRing } from '../../Common/Form/formStyles'
  * The colour is not the only signal. A selected swatch carries an outline and a
  * check mark, and its name is announced — which matters most to the users a
  * bare colour tells nothing.
+ *
+ * Deliberately NOT `overlay`, and the comment that used to justify it here had
+ * the mechanism backwards. Joy's `overlay` sets the Radio root to
+ * `position: initial`, which does not stretch the action over the swatch — it
+ * makes the action, which is `position: absolute` inset to its containing
+ * block, resolve that block against the nearest *positioned* ancestor instead.
+ * Inside FormSheet that is the sheet itself, so all eight actions became one
+ * stacked 1280x900 rectangle over the entire form. They carry no background, so
+ * nothing looked wrong; the sheet was simply inert. Measured in Chrome before
+ * the fix, `elementFromPoint` at the centre of Close, the title input, every
+ * rail chip, Publish, Cancel and Save returned `INPUT.MuiRadio-input`, and
+ * clicking Save chose a cover colour.
+ *
+ * Without `overlay` the root is `position: relative` and the action insets to
+ * it. That costs nothing here: the root is `display: inline-flex`, the action
+ * is out of flow and `disableIcon` makes the radio slot `display: contents`, so
+ * the root's only in-flow child is the label — it is already exactly the
+ * 44/36px square below, and the action is now exactly that square too. The
+ * focus ring is strictly better placed, not worse: `overlay` had been drawing
+ * it around the whole sheet.
  */
 const BookCoverSwatch = ({ hex, nameKey, selected }) => {
   const { t } = useTranslation()
@@ -27,19 +45,29 @@ const BookCoverSwatch = ({ hex, nameKey, selected }) => {
       value={hex}
       // The circle would sit beside the swatch saying the same thing twice.
       disableIcon
-      // `overlay` stretches the action over the whole swatch, so the hit area
-      // and the focus ring are the 44px square the user sees rather than the
-      // hidden icon's box.
-      overlay
       variant='plain'
       slotProps={{
         input: { 'aria-label': t(nameKey) },
         // Joy marks the action, not the input, so the ring hangs off its class
         // rather than off `:focus-visible` on an element that never focuses.
+        //
+        // The selector is `Mui-focusVisible`. This rule used to say
+        // `Joy-focusVisible`, which is not a class Joy emits — so it matched
+        // nothing and the house colour never applied; what the user actually
+        // saw was Joy's own `theme.focus.selector` default underneath it. The
+        // shell test asserted the declaration and passed the whole time,
+        // because reading a rule out of Emotion says nothing about whether the
+        // rule ever selects an element. The class and the native pseudo-class
+        // are both listed, matching Joy's own `theme.focus.selector`, so this
+        // holds whichever route marks the slot.
         action: {
           sx: {
             borderRadius: 'sm',
-            '&.Joy-focusVisible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+            '&.Mui-focusVisible, &:focus-visible': {
+              outline: '2px solid',
+              outlineColor: 'primary.outlinedBorder',
+              outlineOffset: '2px'
+            }
           }
         }
       }}
