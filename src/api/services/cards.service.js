@@ -100,6 +100,31 @@ export const cardsService = {
   },
 
   /**
+   * Onboarding's explicit AI fallback (FR-032, FR-033).
+   *
+   * This is the *same* `/card/generate` endpoint with no onboarding semantics
+   * added: it returns no activation block and writes no journey state. It
+   * exists as a named adapter so the invariant is impossible to misread — the
+   * only thing that activates onboarding is a verified curated deck fork
+   * (ADR-006).
+   *
+   * Two rules bind every caller:
+   * - Invoke it only from an explicit user action. It must never fire when the
+   *   empty state opens or when a curated-deck load finishes with no results.
+   * - Never treat a successful generation as onboarding completion. It stays
+   *   incomplete, and once measurement ships it counts as fallback usage.
+   *
+   * @param {string} topicContext - Confirmed primary topic used as the
+   *   user-visible source text for generation
+   * @param {number} [cardCount=10] - Number of cards to request
+   * @param {string|null} [prompt=null] - Optional custom generation prompt
+   * @returns {Promise<Array>} Generated cards — never a journey state
+   */
+  async generateOnboardingFallback(topicContext, cardCount = 10, prompt = null) {
+    return cardsService.generate(topicContext, cardCount, prompt)
+  },
+
+  /**
    * Generate study cards via the SSE streaming endpoint.
    * Cards are delivered incrementally through callbacks; terminal events
    * are `done` (success) and `error` (failure). Uses fetch (not Axios)

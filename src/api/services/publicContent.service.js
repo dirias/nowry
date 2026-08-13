@@ -1,6 +1,12 @@
 import { apiClient } from '../client'
 
 /**
+ * Onboarding First Deck shows at most three curated options (FR-024).
+ * Exported so the screen and this adapter cannot drift apart.
+ */
+export const OFFICIAL_DECK_PAGE_SIZE = 3
+
+/**
  * Public Content Service
  * Handles all public content sharing API operations
  */
@@ -43,6 +49,73 @@ export const publicContentService = {
 
     const { data } = await apiClient.get(`/public/decks?${params}`)
     return data
+  },
+
+  /**
+   * Browse the editorially approved official decks for one canonical topic
+   * (ADR-004, FR-024).
+   *
+   * `official=true` and `sort_by=curated` travel together — the server rejects
+   * `curated` without `official` with a `400`, and orders the page by ascending
+   * editorial rank then stable deck id, never by popularity. `is_official` on
+   * each item is server-derived and must be read, never assumed.
+   *
+   * An empty `items` with `total: 0` is a *successful* result meaning the topic
+   * has no curated coverage yet. It is the expected state for most topics at
+   * launch and must be rendered as empty, never as an error (NFR-018).
+   *
+   * @param {Object} options
+   * @param {string} [options.category] - Canonical taxonomy topic (`deckCategory`)
+   * @param {number} [options.page=1]
+   * @param {number} [options.pageSize=3]
+   * @returns {Promise<{items: Array, total: number, page: number, page_size: number, total_pages: number}>}
+   */
+  async browseOfficialDecks({ category, page = 1, pageSize = OFFICIAL_DECK_PAGE_SIZE } = {}) {
+    const params = new URLSearchParams()
+    if (category) params.append('category', category)
+    params.append('official', 'true')
+    params.append('sort_by', 'curated')
+    params.append('page', String(page))
+    params.append('page_size', String(pageSize))
+
+    const { data } = await apiClient.get(`/public/decks?${params}`)
+    return data
+  },
+
+  /**
+   * Fork a curated deck as the onboarding activation step (ADR-005, ADR-006).
+   *
+   * Unlike {@link publicContentService.forkDeck} this returns the whole
+   * envelope, because the caller needs three separate facts:
+   *
+   * - `forkedDeck` — the private copy to navigate to.
+   * - `created` — `false` marks an idempotent replay of a fork this user
+   *   already owns. It is a success, not a duplicate attempt.
+   * - `onboarding` — the *server's* activation verdict. It is present on the
+   *   first completion **and on every replay**, so a client that lost the first
+   *   response learns it is activated simply by repeating the request. This is
+   *   the only trustworthy source of activation (FR-006); reaching a screen or
+   *   generating cards with AI never activates.
+   *
+   * The idempotency key only correlates retries for diagnostics — uniqueness
+   * rests on the server's durable `(deck, user)` key, so a lost or regenerated
+   * key still cannot produce a second deck (NFR-017). Pass the *same* key for
+   * every retry of one user-selected fork.
+   *
+   * @param {string} id - Source (public) deck ID
+   * @param {string} [idempotencyKey] - UUID generated once per selected action
+   * @returns {Promise<{created: boolean, forkedDeck: Object|null, onboarding: {status: string, activated_at: string}|null}>}
+   */
+  async forkDeckForOnboarding(id, idempotencyKey) {
+    const config = idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {}
+
+    const { data } = await apiClient.post(`/public/decks/${id}/fork`, { context: 'onboarding' }, config)
+
+    return {
+      created: Boolean(data?.created),
+      forkedDeck: data?.forked_deck ?? null,
+      onboarding: data?.onboarding ?? null
+    }
   },
 
   /**
