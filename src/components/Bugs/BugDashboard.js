@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -20,6 +21,7 @@ import { Bug, Filter, TrendingUp } from 'lucide-react'
 import { bugsService } from '../../api/services/bugs.service'
 
 export default function BugDashboard() {
+  const { t } = useTranslation()
   const [bugs, setBugs] = useState([])
   const [stats, setStats] = useState(null)
   const [filters, setFilters] = useState({
@@ -31,11 +33,7 @@ export default function BugDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [filters])
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -48,7 +46,11 @@ export default function BugDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleStatusChange = async (bugId, newStatus) => {
     try {
@@ -64,7 +66,7 @@ export default function BugDashboard() {
       {/* Header */}
       <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 3 }}>
         <Bug size={32} color='#f97316' />
-        <Typography level='h2'>Bug Dashboard</Typography>
+        <Typography level='h3'>Bug Dashboard</Typography>
         <Chip size='sm' color='warning'>
           Developer
         </Chip>
@@ -93,12 +95,12 @@ export default function BugDashboard() {
         <Stack direction='row' alignItems='center' spacing={2}>
           <Filter size={20} />
           <Select
-            placeholder='All Status'
+            placeholder={t('bugs.filters.allStatus')}
             value={filters.status}
             onChange={(e, value) => setFilters({ ...filters, status: value || '' })}
             sx={{ minWidth: 150 }}
           >
-            <Option value=''>All Status</Option>
+            <Option value=''>{t('bugs.filters.allStatus')}</Option>
             <Option value='open'>Open</Option>
             <Option value='in-progress'>In Progress</Option>
             <Option value='resolved'>Resolved</Option>
@@ -106,12 +108,12 @@ export default function BugDashboard() {
           </Select>
 
           <Select
-            placeholder='All Severity'
+            placeholder={t('bugs.filters.allSeverity')}
             value={filters.severity}
             onChange={(e, value) => setFilters({ ...filters, severity: value || '' })}
             sx={{ minWidth: 150 }}
           >
-            <Option value=''>All Severity</Option>
+            <Option value=''>{t('bugs.filters.allSeverity')}</Option>
             <Option value='critical'>Critical</Option>
             <Option value='high'>High</Option>
             <Option value='medium'>Medium</Option>
@@ -119,12 +121,12 @@ export default function BugDashboard() {
           </Select>
 
           <Select
-            placeholder='All Categories'
+            placeholder={t('bugs.filters.allCategories')}
             value={filters.category}
             onChange={(e, value) => setFilters({ ...filters, category: value || '' })}
             sx={{ minWidth: 150 }}
           >
-            <Option value=''>All Categories</Option>
+            <Option value=''>{t('bugs.filters.allCategories')}</Option>
             <Option value='ui'>UI/Design</Option>
             <Option value='functionality'>Functionality</Option>
             <Option value='performance'>Performance</Option>
@@ -148,7 +150,7 @@ export default function BugDashboard() {
         <Sheet variant='soft' sx={{ p: 4, textAlign: 'center', borderRadius: 'sm' }}>
           <Bug size={48} style={{ opacity: 0.3, marginBottom: 8 }} />
           <Typography level='body-lg'>No bugs found</Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
             Try adjusting your filters or wait for users to report bugs
           </Typography>
         </Sheet>
@@ -174,13 +176,13 @@ export default function BugDashboard() {
                       sx={{
                         cursor: 'pointer',
                         fontWeight: 500,
-                        '&:hover': { textDecoration: 'underline', color: 'primary.500' }
+                        '&:hover': { textDecoration: 'underline', color: 'primary.plainColor' }
                       }}
                       onClick={() => setSelectedBug(bug)}
                     >
                       {bug.title}
                     </Typography>
-                    <Typography level='body-xs' sx={{ color: 'neutral.500', mt: 0.5 }}>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                       {bug.description.substring(0, 80)}
                       {bug.description.length > 80 && '...'}
                     </Typography>
@@ -338,7 +340,7 @@ function BugDetailModal({ bug, onClose, onStatusChange, onRefresh }) {
                 <Typography level='body-sm'>
                   {bug.browser_info.name} {bug.browser_info.version} • {bug.browser_info.os} • {bug.browser_info.screen_resolution}
                 </Typography>
-                <Typography level='body-xs' sx={{ color: 'neutral.500', mt: 0.5 }}>
+                <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
                   URL: {bug.url}
                 </Typography>
               </Box>
@@ -382,7 +384,7 @@ function BugDetailModal({ bug, onClose, onStatusChange, onRefresh }) {
 
             {/* Metadata */}
             <Box sx={{ p: 2, bgcolor: 'background.level1', borderRadius: 'sm' }}>
-              <Typography level='body-xs' sx={{ color: 'neutral.500' }}>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                 Created: {new Date(bug.created_at).toLocaleString()} • Updated: {new Date(bug.updated_at).toLocaleString()}
                 {bug.resolved_at && ` • Resolved: ${new Date(bug.resolved_at).toLocaleString()}`}
               </Typography>

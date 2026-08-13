@@ -194,3 +194,6 @@ yarn-error.log*
 DEBUG_*.md
 *_FIXES.md
 *.local.md
+
+# Claude Code — personal settings only (CLAUDE.md and .claude/agents/ ARE committed)
+.claude/settings.local.json

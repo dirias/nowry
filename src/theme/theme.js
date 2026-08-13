@@ -1,4 +1,5 @@
 import { extendTheme } from '@mui/joy/styles'
+import { STICKY_PALETTE } from './colorSchemeGenerator'
 
 const primaryMain = '#2a6971'
 const primaryHover = '#245a63'
@@ -43,7 +44,8 @@ const theme = extendTheme({
           primary: '#1c1c1c',
           secondary: '#444',
           tertiary: '#777'
-        }
+        },
+        stickyNote: STICKY_PALETTE.light
       }
     },
     dark: {
@@ -51,9 +53,9 @@ const theme = extendTheme({
         primary: {
           plainColor: '#88c9d1',
           plainHoverBg: '#1c444a',
-          solidBg: '#1e4c54',
-          solidHoverBg: '#245a63',
-          solidActiveBg: '#347f8a',
+          solidBg: '#3a9dac',
+          solidHoverBg: '#2d8a97',
+          solidActiveBg: '#257d8a',
           solidColor: '#fff',
           softBg: '#17393d',
           softHoverBg: '#1c444a',
@@ -68,12 +70,11 @@ const theme = extendTheme({
           primary: '#e6edf3',
           secondary: '#9ba9b4',
           tertiary: '#7d8590'
-        }
+        },
+        stickyNote: STICKY_PALETTE.dark
       }
     }
-  },
-  // 🔥 This stops MUI Joy from merging its built-in blue palette
-  shouldSkipGeneratingVar: (keys) => keys[0] === 'colorSchemes'
+  }
 })
 
 export default theme

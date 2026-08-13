@@ -1,8 +1,9 @@
 import React, { createContext, useState, useEffect, useContext, useMemo } from 'react'
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import CssBaseline from '@mui/joy/CssBaseline'
+import GlobalStyles from '@mui/joy/GlobalStyles'
 
-import { generateColorScheme } from './colorSchemeGenerator'
+import { generateColorScheme, STICKY_PALETTE } from './colorSchemeGenerator'
 import baseTheme from './theme'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
@@ -20,19 +21,18 @@ export const DynamicThemeProvider = ({ children }) => {
   const { user } = useAuth()
   const { i18n } = useTranslation()
 
-  // Update theme when user changes
+  // Update theme when user changes.
+  // Preferences are stored under preferences.general.* in the backend.
   useEffect(() => {
-    if (user?.preferences) {
-      // Set theme color
-      if (user.preferences.theme_color) {
-        setThemeColor(user.preferences.theme_color)
-      }
+    const general = user?.preferences?.general
+    if (!general) return
 
-      // Set language
-      if (user.preferences.language && i18n.language !== user.preferences.language) {
-        console.log('🌐 Setting language to:', user.preferences.language)
-        i18n.changeLanguage(user.preferences.language)
-      }
+    if (general.theme_color) {
+      setThemeColor(general.theme_color)
+    }
+
+    if (general.language && i18n.language !== general.language) {
+      i18n.changeLanguage(general.language)
     }
   }, [user, i18n])
 
@@ -53,7 +53,8 @@ export const DynamicThemeProvider = ({ children }) => {
             danger: colorScheme.light.danger,
             neutral: colorScheme.light.neutral,
             background: colorScheme.light.background,
-            text: colorScheme.light.text
+            text: colorScheme.light.text,
+            stickyNote: STICKY_PALETTE.light
           }
         },
         dark: {
@@ -64,7 +65,8 @@ export const DynamicThemeProvider = ({ children }) => {
             warning: colorScheme.dark.warning,
             danger: colorScheme.dark.danger,
             background: colorScheme.dark.background,
-            text: colorScheme.dark.text
+            text: colorScheme.dark.text,
+            stickyNote: STICKY_PALETTE.dark
           }
         }
       }
@@ -84,6 +86,18 @@ export const DynamicThemeProvider = ({ children }) => {
     <ThemePreferencesContext.Provider value={contextValue}>
       <CssVarsProvider theme={dynamicTheme} defaultMode='system' disableNestedContext>
         <CssBaseline />
+        <GlobalStyles
+          styles={{
+            body: {
+              backgroundColor: 'var(--joy-palette-background-body)',
+              backgroundImage: `radial-gradient(circle at 10% 20%, rgba(var(--joy-palette-primary-mainChannel) / 0.06), transparent 30%), 
+                                radial-gradient(circle at 90% 80%, rgba(var(--joy-palette-primary-mainChannel) / 0.06), transparent 30%)`,
+              backgroundAttachment: 'fixed',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover'
+            }
+          }}
+        />
         {children}
       </CssVarsProvider>
     </ThemePreferencesContext.Provider>

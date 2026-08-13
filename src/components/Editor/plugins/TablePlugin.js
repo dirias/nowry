@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getSelection, $insertNodes, createCommand } from 'lexical'
-import { TableNode, TableCellNode, TableRowNode } from '@lexical/table'
+import { $getSelection, $insertNodes, $createParagraphNode, createCommand } from 'lexical'
+import { $createTableNode, $createTableRowNode, $createTableCellNode } from '@lexical/table'
 import { useEffect } from 'react'
 
 // Command that can be imported and triggered from the toolbar
@@ -15,11 +15,15 @@ export default function TablePlugin() {
       INSERT_TABLE_COMMAND,
       (payload) => {
         editor.update(() => {
-          const table = new TableNode()
-          for (let i = 0; i < 3; i++) {
-            const row = new TableRowNode()
-            for (let j = 0; j < 3; j++) {
-              const cell = new TableCellNode()
+          const rows = payload?.rows || 2
+          const columns = payload?.columns || 2
+
+          const table = $createTableNode()
+          for (let i = 0; i < rows; i++) {
+            const row = $createTableRowNode()
+            for (let j = 0; j < columns; j++) {
+              const cell = $createTableCellNode(0)
+              cell.append($createParagraphNode())
               row.append(cell)
             }
             table.append(row)
@@ -27,7 +31,19 @@ export default function TablePlugin() {
 
           const selection = $getSelection()
           if (selection) {
-            $insertNodes([table])
+            // Insert table and a paragraph after it for continued editing
+            const paragraph = $createParagraphNode()
+            $insertNodes([table, paragraph])
+
+            // Move cursor to the first cell
+            setTimeout(() => {
+              editor.update(() => {
+                const firstCell = table.getFirstChild()?.getFirstChild()
+                if (firstCell) {
+                  firstCell.selectStart()
+                }
+              })
+            }, 0)
           }
         })
         return true

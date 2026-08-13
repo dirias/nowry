@@ -4,12 +4,19 @@
     "error": "Error",
     "save": "Guardar",
     "cancel": "Cancelar",
+    "close": "Cerrar",
     "edit": "Editar",
     "delete": "Eliminar",
     "search": "Buscar",
     "settings": "Configuración",
     "profile": "Perfil",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "pomodoro": "Temporizador Pomodoro",
+    "toggleTheme": "Cambiar tema",
+    "language": "Idioma",
+    "studyBuddy": "Compañero de Estudio",
+    "moreActions": "Más acciones",
+    "retry": "Retry"
   },
   "news": {
     "title": "Últimas Noticias",
@@ -25,27 +32,80 @@
       "entertainment": "Entretenimiento",
       "politics": "Política",
       "sports": "Deportes"
-    }
+    },
+    "favorites": "Favoritos",
+    "noFavorites": "Sin favoritos aún",
+    "noFavoritesHint": "Haz clic en el ícono de estrella de cualquier artículo para agregarlo a tus favoritos.",
+    "adjustInterests": "Ajusta tus intereses en Configuración para ver noticias personalizadas.",
+    "setInterests": "Establece tus intereses en Configuración para ver artículos personalizados."
   },
   "header": {
     "study": "Estudio",
     "cards": "Tarjetas",
     "books": "Libros",
-    "settings": "Ajustes"
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "settings": "Ajustes",
+    "getStarted": "Comenzar",
+    "drawer": {
+      "menu": "Menú"
+    },
+    "profileMenu": {
+      "open": "Abrir menú de perfil",
+      "viewProfile": "Ver perfil",
+      "tier": {
+        "free": "Gratis",
+        "pro": "Pro"
+      }
+    }
   },
   "footer": {
-    "rights": "Todos los derechos reservados."
+    "rights": "Todos los derechos reservados.",
+    "brand": {
+      "tagline": "La manera más inteligente de aprender."
+    },
+    "links": {
+      "title": "Producto",
+      "browse": "Explorar",
+      "about": "Acerca de",
+      "planner": "Planificador Anual"
+    },
+    "support": {
+      "title": "Soporte",
+      "email": "support@nowry.app",
+      "contact": "Contáctanos"
+    },
+    "social": {
+      "title": "Síguenos",
+      "tiktok": "Síguenos en TikTok",
+      "facebook": "Síguenos en Facebook",
+      "instagram": "Síguenos en Instagram",
+      "x": "Síguenos en X"
+    },
+    "theme": {
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "copyright": "© {{year}} Nowry. Todos los derechos reservados.",
+    "toggleTheme": "Cambiar tema",
+    "language": "Idioma",
+    "bugReport": "Reportar error"
+  },
+  "routes": {
+    "terms": "/terminos",
+    "privacy": "/privacidad"
   },
   "study": {
     "title": "Centro de Estudio",
     "subtitle": "Tu centro de aprendizaje personalizado",
     "stats": {
-      "dueToday": "Para hoy",
-      "reviewedToday": "Estudiadas hoy",
-      "dayStreak": "Racha (días)",
-      "totalCards": "Total Tarjetas"
+      "dueToday": "Pendientes",
+      "reviewedToday": "Estudiadas",
+      "dayStreak": "Racha",
+      "totalCards": "Total"
     },
     "byType": "Estudiar por Tipo",
+    "swipeHint": "Desliza para navegar",
     "types": {
       "flashcards": "Tarjetas de Memoria",
       "flashcardsDesc": "Estilo clásico para memorización rápida",
@@ -57,9 +117,40 @@
     },
     "startReview": "Comienza tu Repaso Diario",
     "reviewMsg": "Tienes {{count}} tarjetas listas para repasar",
-    "startStudying": "Empezar a Estudiar →",
+    "startStudying": "Empezar a Estudiar",
     "viewAll": "Ver todos los {{count}} mazos →",
-    "due": "para hoy"
+    "due": "para hoy",
+    "allReviewed": "Todo revisado",
+    "empty": {
+      "streakLabel": "Racha de {{count}} día(s)",
+      "allDone": "Todo al día",
+      "weeklyCards": "{{count}} revisada(s) hoy",
+      "streakZeroLabel": "Comienza tu racha hoy"
+    },
+    "sections": {
+      "yourDecks": "Tus mazos"
+    },
+    "deckPill": {
+      "ariaLabel": "Estudiar {{name}}",
+      "dueSoon": "en {{hours}}h",
+      "new": "Nuevo"
+    },
+    "modePicker": {
+      "title": "Choose how to study",
+      "study": {
+        "label": "Study",
+        "description": "Review cards due today with spaced repetition",
+        "disabledHint": "Nothing due right now"
+      },
+      "browse": {
+        "label": "Browse",
+        "description": "Look through every card — no grading, no schedule changes"
+      },
+      "cram": {
+        "label": "Cram",
+        "description": "Review every card in this deck, regardless of due date"
+      }
+    }
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",
@@ -69,6 +160,8 @@
     "email": "Correo electrónico",
     "password": "Contraseña",
     "username": "Nombre de usuario",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "usernamePlaceholder": "juanlopez",
     "confirmPassword": "Confirmar Contraseña",
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "signIn": "Iniciar Sesión",
@@ -76,6 +169,7 @@
     "orContinueWith": "o continuar con",
     "signInGoogle": "Iniciar sesión con Google",
     "signInFacebook": "Iniciar sesión con Facebook",
+    "byContinuing": "Al continuar, aceptas nuestros",
     "noAccount": "¿No tienes una cuenta?",
     "createOne": "Crea una",
     "hasAccount": "¿Ya tienes una cuenta?",
@@ -91,8 +185,17 @@
     },
     "errors": {
       "loginFailed": "Fallo al iniciar sesión. Verifique sus credenciales.",
+      "unableToSignIn": "No se puede iniciar sesión",
+      "invalidCredentials": "Email o contraseña incorrectos. Por favor verifica e intenta de nuevo.",
+      "accountDisabled": "Esta cuenta ha sido deshabilitada. Por favor contacta soporte para asistencia.",
+      "tooManyAttempts": "Demasiados intentos fallidos. Por favor intenta de nuevo en unos minutos.",
+      "networkError": "Fallo de conexión de red. Por favor verifica tu internet e intenta de nuevo.",
+      "googleCancelled": "Inicio de sesión cancelado. Por favor intenta de nuevo si deseas continuar.",
+      "popupBlocked": "La ventana de inicio de sesión fue bloqueada. Por favor permite las ventanas emergentes para este sitio.",
+      "accountExistsDifferent": "Ya existe una cuenta con este email usando un método de inicio de sesión diferente.",
       "usernameRequired": "El nombre de usuario es obligatorio",
       "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "Por favor ingresa una dirección de correo válida",
       "passwordRequired": "La contraseña es obligatoria",
       "passwordLength": "La contraseña debe tener al menos 8 caracteres",
       "passwordMismatch": "Las contraseñas no coinciden",
@@ -130,6 +233,67 @@
       }
     }
   },
+  "landing": {
+    "hero": {
+      "title": "Aprende Mejor,\nNo Más Duro",
+      "subtitle": "La app de estudio todo en uno con libros inteligentes, tarjetas con IA y repetición espaciada — para quienes se toman el aprendizaje en serio.",
+      "ctaPrimary": "Empezar Gratis",
+      "ctaSecondary": "Explorar funciones"
+    },
+    "howItWorks": {
+      "title": "Cómo funciona Nowry",
+      "subtitle": "De cero a estudiar en tres pasos",
+      "step1": {
+        "title": "Construye tu biblioteca",
+        "desc": "Agrega libros, escribe notas y crea mazos de tarjetas con tu propio material"
+      },
+      "step2": {
+        "title": "Estudia con ciencia",
+        "desc": "Nuestro motor de repetición espaciada programa cada repaso en el momento justo"
+      },
+      "step3": {
+        "title": "Planifica y registra",
+        "desc": "Establece metas anuales y conéctalas a lo que estudias cada día"
+      }
+    },
+    "features": {
+      "title": "Todo lo que Necesitas para Destacar",
+      "subtitle": "Funciones poderosas diseñadas para hacer el aprendizaje agradable y efectivo",
+      "smartBooks": {
+        "title": "Libros Inteligentes",
+        "desc": "Escribe notas, resalta párrafos y genera tarjetas de cualquier pasaje con un toque"
+      },
+      "aiPowered": {
+        "title": "Impulsado por IA",
+        "desc": "La IA sugiere tarjetas a partir de tus resaltados y se adapta a tus áreas débiles"
+      },
+      "spacedRepetition": {
+        "title": "Repetición Espaciada",
+        "desc": "Califica cada tarjeta como Fácil, Bien, Difícil o Fallida — el algoritmo hace el resto"
+      },
+      "trackProgress": {
+        "title": "Seguimiento del Progreso",
+        "desc": "Ve tus rachas, tasa de dominio y tiempo de estudio de un vistazo"
+      }
+    },
+    "cta": {
+      "title": "Sé parte desde el principio",
+      "subtitle": "Nowry está en acceso anticipado. Únete ahora y ayuda a dar forma al producto.",
+      "primary": "Empieza gratis hoy",
+      "social": "Síguenos"
+    },
+    "social": {
+      "title": "Comienza a Aprender Hoy",
+      "subtitle": "Únete a Nowry y descubre una mejor manera de aprender con herramientas modernas diseñadas para tu éxito",
+      "benefits": {
+        "1": "Crea libros y tarjetas de memoria ilimitados",
+        "2": "Accede desde cualquier dispositivo, en cualquier lugar",
+        "3": "Rastrea tu progreso con análisis",
+        "4": "Únete a grupos de estudio y colabora"
+      },
+      "cta": "Empezar Ahora"
+    }
+  },
   "onboarding": {
     "welcome": {
       "title": "¡Bienvenido a Nowry!",
@@ -156,23 +320,26 @@
       "customLabel": "Color Personalizado"
     },
     "interests": {
-      "title": "¿Qué te Interesa?",
-      "subtitle": "Selecciona temas sobre los que te gustaría ver contenido",
+      "title": "What topics interest you?",
+      "subtitle": "We'll curate your home feed around these.",
+      "groupLabel": "Interest selection",
       "selected": "Seleccionado: {{count}} tema",
       "selected_plural": "Seleccionados: {{count}} temas",
       "items": {
-        "Technology": "Tecnología",
-        "Science": "Ciencia",
-        "History": "Historia",
-        "Languages": "Idiomas",
-        "Art": "Arte",
-        "Mathematics": "Matemáticas",
-        "Literature": "Literatura",
-        "Music": "Música",
-        "Business": "Negocios",
-        "Health": "Salud",
-        "Philosophy": "Filosofía",
-        "Psychology": "Psicología"
+        "ai": "AI & Machine Learning",
+        "technology": "Technology",
+        "science": "Science",
+        "mathematics": "Mathematics",
+        "history": "History",
+        "languages": "Languages",
+        "literature": "Literature",
+        "art": "Art & Creativity",
+        "music": "Music",
+        "business": "Business",
+        "health": "Health & Fitness",
+        "philosophy": "Philosophy",
+        "design": "Design",
+        "psychology": "Psychology"
       }
     },
     "learning": {
@@ -203,7 +370,42 @@
     "next": "Siguiente",
     "back": "Atrás",
     "finish": "Finalizar Configuración",
-    "skip": "Saltar por ahora"
+    "skip": "Saltar por ahora",
+    "progressLabel": "Onboarding progress",
+    "defer": "Set up later in settings",
+    "identity": {
+      "title": "Elige tu idioma.",
+      "subtitle": "Selecciona el idioma que prefieras."
+    },
+    "appearance": {
+      "title": "Make it yours.",
+      "subtitle": "Light or dark. Pick a color you'll see every day.",
+      "colorLabel": "Select {{name}}",
+      "colorGroupLabel": "Accent color selection"
+    },
+    "focus": {
+      "title": "What are you here to learn?",
+      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "topics": {
+        "technology": "Technology",
+        "science": "Science",
+        "history": "History",
+        "languages": "Languages",
+        "art": "Art",
+        "mathematics": "Mathematics",
+        "literature": "Literature",
+        "business": "Business"
+      }
+    },
+    "ready": {
+      "title": "You're all set, {{name}}.",
+      "titleNoName": "You're all set.",
+      "subtitle": "Your personalized study space is ready.",
+      "cta": "Enter Nowry"
+    },
+    "error": {
+      "saveFailed": "Something went wrong. Please try again."
+    }
   },
   "tasks": {
     "title": "Tareas",
@@ -213,9 +415,24 @@
       "completed": "Completadas",
       "pending": "Pendientes"
     },
+    "lists": {
+      "all": "Todas",
+      "general": "General",
+      "addList": "Nueva lista",
+      "listPlaceholder": "Nombre de lista..."
+    },
     "empty": "No hay tareas. ¡Escribe para añadir una!",
     "noMatch": "Ninguna tarea coincide con tus filtros",
-    "addTooltip": "Añadir \"{{title}}\""
+    "emptyTitle": "Aún no hay tareas",
+    "emptySubtitle": "Empieza a organizar tu día añadiendo tu primera tarea.",
+    "emptyCta": "Añadir una tarea",
+    "noMatchTitle": "Sin tareas coincidentes",
+    "addToListPlaceholder": "Añadir a {{list}}...",
+    "addTooltip": "Añadir \"{{title}}\"",
+    "progress": {
+      "label": "{{done}} de {{total}} completadas",
+      "noTasks": "Aún no hay tareas"
+    }
   },
   "sidemenu": {
     "dashboard": "Panel",
@@ -248,55 +465,142 @@
       "totalCards": "Total de Tarjetas",
       "booksCreated": "Libros Creados",
       "studyStreak": "Racha de Estudio",
-      "days": "días"
+      "days": "Racha"
     }
   },
   "settings": {
-    "title": "Configuración de Cuenta",
-    "subtitle": "Gestiona tus preferencias, seguridad y cuenta",
+    "quiz": {
+      "question_count": "Preguntas por quiz con IA"
+    },
+    "title": "Configuración",
+    "subtitle": "Administra tu cuenta y preferencias",
+    "nav": {
+      "account": "Cuenta",
+      "appearance": "Apariencia",
+      "productivity": "Productividad",
+      "notifications": "Notificaciones",
+      "agent": "Compañero de estudio",
+      "security": "Seguridad",
+      "danger": "Zona de peligro",
+      "jump": "Navegar a sección",
+      "jumpTo": "Ir a"
+    },
+    "account": {
+      "title": "Cuenta",
+      "fullName": "Nombre de visualización",
+      "emailManaged": "El correo electrónico está gestionado por tu proveedor de autenticación",
+      "editPhoto": "Cambiar foto"
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "mode": "Tema",
+      "modeDesc": "Elige el modo claro u oscuro",
+      "language": "Idioma",
+      "accentColor": "Color de acento",
+      "accentColorDesc": "Personaliza el color de acento de la aplicación",
+      "interests": "Intereses"
+    },
     "general": {
       "title": "Preferencias Generales",
       "appearance": "Apariencia",
-      "appearanceDesc": "Cambiar entre modo Claro y Oscuro",
+      "appearanceDesc": "Cambia entre modo Claro y Oscuro",
       "language": "Idioma",
       "themeColor": "Color del Tema",
-      "themeColorDesc": "Selecciona tu color de acento preferido. Esto actualizará todo el tema.",
+      "themeColorDesc": "Selecciona tu color de acento. Esto actualizará todo el tema.",
       "interests": "Intereses",
-      "interestsDesc": "Selecciona temas para ver noticias y contenido de enfoque"
+      "interestsDesc": "Selecciona temas para ver noticias y contenido"
+    },
+    "productivity": {
+      "title": "Productividad",
+      "enableTimer": "Activar temporizador Pomodoro",
+      "enableTimerDesc": "Mostrar temporizador en el encabezado y activar el widget flotante",
+      "focusDuration": "Duración de concentración (minutos)",
+      "shortBreak": "Descanso corto (minutos)",
+      "longBreak": "Descanso largo (minutos)",
+      "recommendedMinutes": "Recomendado: {{count}}",
+      "autoStart": "Inicio automático",
+      "autoStartDesc": "Iniciar automáticamente la siguiente sesión"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "emailDigest": "Resumen por correo",
+      "emailDigestDesc": "Recibe un resumen diario de tu actividad",
+      "studyReminders": "Recordatorios de estudio",
+      "studyRemindersDesc": "Recibe notificaciones cuando haya tarjetas para revisar",
+      "newsUpdates": "Actualizaciones",
+      "newsUpdatesDesc": "Recibe novedades sobre funciones",
+      "marketing": "Correos de marketing",
+      "marketingDesc": "Recibe ofertas promocionales",
+      "comingSoon": "Notificaciones próximamente",
+      "comingSoonDesc": "Estamos trabajando en notificaciones inteligentes para tus sesiones de estudio"
     },
     "security": {
       "title": "Seguridad",
-      "changePassword": "Cambiar Contraseña",
-      "currentPassword": "Contraseña Actual",
-      "newPassword": "Nueva Contraseña",
-      "confirmPassword": "Confirmar Nueva Contraseña",
-      "updatePassword": "Actualizar Contraseña",
-      "twoFactor": "Autenticación de Dos Factores",
-      "twoFactorDesc": "Añade una capa extra de seguridad a tu cuenta",
+      "changePassword": "Cambiar contraseña",
+      "changePasswordCta": "Cambiar contraseña",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "updatePassword": "Actualizar",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+      "passwordTooWeak": "La contraseña es demasiado débil",
+      "wrongPassword": "La contraseña actual es incorrecta",
+      "reauthRequired": "Introduce tu contraseña actual para continuar",
+      "passwordChangeFailed": "Error al actualizar la contraseña. Inténtalo de nuevo.",
+      "passwordChanged": "Contraseña actualizada correctamente",
+      "save": "Actualizar contraseña",
+      "twoFactor": "Autenticación de dos factores",
+      "twoFactorDesc": "Añade una capa extra de seguridad",
+      "comingSoon": "Próximamente",
       "enable2FA": "Activar 2FA",
       "disable2FA": "Desactivar",
-      "success2FA": "¡2FA Activado! Códigos de respaldo:",
-      "disabled2FA": "2FA desactivado exitosamente"
-    },
-    "notifications": {
-      "title": "Preferencias de Notificación",
-      "emailDigest": "Resumen por Email",
-      "emailDigestDesc": "Recibe un resumen diario de tu actividad",
-      "studyReminders": "Recordatorios de Estudio",
-      "studyRemindersDesc": "Recibe notificaciones cuando las tarjetas deban repasarse",
-      "newsUpdates": "Actualizaciones",
-      "newsUpdatesDesc": "Recibe noticias sobre nuevas funciones",
-      "marketing": "Emails de Marketing",
-      "marketingDesc": "Recibe ofertas promocionales y consejos"
+      "success2FA": "2FA activado. Códigos de respaldo:",
+      "disabled2FA": "2FA desactivado correctamente"
     },
     "danger": {
-      "title": "Zona de Peligro",
-      "deleteAccount": "Eliminar Cuenta",
-      "deleteDesc": "Eliminar permanentemente tu cuenta y todos los datos asociados",
+      "title": "Zona de peligro",
+      "deleteAccount": "Eliminar cuenta",
+      "deleteDesc": "Elimina permanentemente tu cuenta y todos los datos. Esta acción es irreversible.",
       "confirmTitle": "¿Estás absolutamente seguro?",
-      "confirmDesc": "Esta acción no se puede deshacer. Todos tus datos serán eliminados permanentemente.",
+      "confirmDesc": "Esta acción es irreversible. Todos tus datos serán eliminados.",
       "confirmBtn": "Sí, Eliminar Mi Cuenta",
-      "cancelBtn": "Cancelar"
+      "cancelBtn": "Cancelar",
+      "modal": {
+        "title": "Eliminar Cuenta",
+        "description": "Esto eliminará permanentemente tu cuenta y todos los datos asociados",
+        "confirm": "Eliminar Mi Cuenta",
+        "consequence1": "Todos los libros y notas serán eliminados",
+        "consequence2": "Todos los mazos de tarjetas serán eliminados",
+        "consequence3": "Todos los datos de planificación anual serán eliminados",
+        "consequence4": "El contenido público será despublicado inmediatamente"
+      }
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteButton": "Delete account",
+      "exportTitle": "Export Your Data",
+      "exportDescription": "Download a copy of all your data including books, decks, cards, tasks, and plans.",
+      "exportButton": "Export data"
+    },
+    "deleteAccount": {
+      "title": "Delete your account",
+      "message": "This will permanently delete your account and all associated data (books, decks, cards, plans, goals). Your data will be retained for 30 days before final removal.",
+      "emailLabel": "Confirm your email address",
+      "emailPlaceholder": "Enter your email to confirm",
+      "emailRequired": "Email address is required to confirm deletion",
+      "emailMismatch": "Email address does not match. Please try again.",
+      "confirmDisabled": "Enter email to confirm",
+      "confirmEnabled": "Delete permanently",
+      "recoveryNotice": "Your data can be recovered within 30 days by contacting support. After 30 days, it will be permanently deleted."
+    },
+    "exportData": {
+      "error": "Failed to export data. Please try again."
+    },
+    "errors": {
+      "loadFailed": "No se pudieron cargar los ajustes. Actualiza e inténtalo de nuevo.",
+      "networkError": "Error de red. Comprueba tu conexión."
     }
   },
   "dashboard": {
@@ -305,6 +609,11 @@
     "dailyFocus": {
       "allCaughtUp": "🎉 ¡Todo al día!",
       "noDueCards": "No tienes tarjetas pendientes. ¡Buen trabajo!",
+      "cardDue": "tarjeta pendiente",
+      "cardsDue": "tarjetas pendientes",
+      "readyToReview": "Listas para repasar",
+      "reviewCount": "Repasar {{count}} tarjeta",
+      "reviewCount_plural": "Repasar {{count}} tarjetas",
       "reviewToday": "📚 Hoy podrías repasar",
       "cardsPending": "{{count}} tarjeta pendiente",
       "cardsPending_other": "{{count}} tarjetas pendientes",
@@ -313,6 +622,13 @@
       "study": "Estudiar",
       "moreDecks": "Y {{count}} deck más con tarjetas pendientes",
       "moreDecks_other": "Y {{count}} decks más con tarjetas pendientes"
+    },
+    "annualGoals": {
+      "title": "Objetivos anuales",
+      "noGoals": "Aún no has definido objetivos",
+      "createGoal": "Crea tu primer objetivo",
+      "viewFullPlan": "Ver plan completo",
+      "loadingAria": "Cargando objetivos anuales"
     }
   },
   "motivation": {
@@ -346,12 +662,52 @@
       "flashcard": "Tarjeta"
     }
   },
+  "calendarModal": {
+    "title": "Calendario",
+    "tooltip": "Abrir calendario",
+    "filters": {
+      "all": "Todos",
+      "tasks": "Tareas",
+      "goals": "Objetivos",
+      "priorities": "Prioridades",
+      "activities": "Actividades"
+    },
+    "noEvents": "No hay eventos para este día",
+    "today": "Hoy",
+    "loading": "Cargando...",
+    "addEvent": "Agregar evento",
+    "editEvent": "Editar evento",
+    "form": {
+      "selectType": "Tipo de evento",
+      "title": "Título",
+      "date": "Fecha",
+      "description": "Descripción",
+      "focusArea": "Área de enfoque",
+      "goal": "Objetivo",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saveError": "Error al guardar. Intenta de nuevo.",
+      "types": {
+        "task": "Tarea",
+        "priority": "Prioridad",
+        "goal": "Objetivo",
+        "activity": "Actividad"
+      }
+    }
+  },
   "books": {
+    "autosave": "Guardado automático",
+    "editor": {
+      "titlePlaceholder": "Ingresa el título del libro...",
+      "contentPlaceholder": "Empieza a escribir...",
+      "notesPlaceholder": "Agregar notas...",
+      "summaryPlaceholder": "Agregar resumen..."
+    },
+    "import": "Importar",
     "title": "Libros",
     "library": "Biblioteca de libros",
     "subtitle": "Tu colección personal",
     "create": "Crear Libro",
-    "import": "Importar",
     "totalBooks": "Total Libros",
     "updatedWeek": "Actualizados esta semana",
     "totalPages": "Total Páginas",
@@ -371,13 +727,109 @@
     "successDelete": "Libro eliminado exitosamente",
     "successImport": "¡{{count}} libro importado exitosamente! {{pages}} páginas totales.",
     "successImport_plural": "¡{{count}} libros importados exitosamente! {{pages}} páginas totales.",
-    "errorImport": "Error al procesar el archivo. Por favor inténtalo de nuevo."
+    "errorImport": "Error al procesar el archivo. Por favor inténtalo de nuevo.",
+    "untitled": "Libro sin título",
+    "createTitle": "Nuevo libro",
+    "createAction": "Crear y escribir",
+    "setAuthor": "Indicar un autor",
+    "authorLabel": "Autor",
+    "authorPlaceholder": "¿Quién lo escribió?",
+    "createFailed": "No se pudo crear tu libro",
+    "editTitle": "Editar libro",
+    "titleLabel": "Título",
+    "titleRequired": "Ponle nombre a tu libro para guardarlo",
+    "changeCover": "Cambiar la portada",
+    "addTags": "Añadir etiquetas",
+    "addSummary": "Añadir un resumen",
+    "coverColorLabel": "Color de la portada",
+    "coverImageLabel": "Imagen de la portada",
+    "coverImageAlt": "Vista previa de la portada",
+    "coverImageError": "No se pudo cargar esa imagen",
+    "customColor": "Elegir un color personalizado",
+    "summaryLabel": "Resumen",
+    "saveFailed": "No se pudieron guardar tus cambios",
+    "publishFailed": "No se pudo publicar tu libro",
+    "unpublishFailed": "No se pudo despublicar tu libro",
+    "importSuccessTitle": "Importación completada",
+    "openBook": "Abrir libro",
+    "continueToLibrary": "Volver a la biblioteca",
+    "clearFilters": "Quitar filtros",
+    "errorFetch": "Error al cargar los libros",
+    "pageCount_one": "{{count}} página",
+    "pageCount_other": "{{count}} páginas",
+    "coverColors": {
+      "blue": "Azul",
+      "red": "Rojo",
+      "green": "Verde",
+      "orange": "Naranja",
+      "purple": "Morado",
+      "pink": "Rosa",
+      "black": "Negro",
+      "grey": "Gris"
+    },
+    "coverImagePlaceholder": "https://example.com/image.jpg"
   },
   "cards": {
     "title": "Biblioteca de Mazos",
     "subtitle": "Gestiona tus tarjetas, cuestionarios y material visual",
     "studyCenter": "Centro de Estudio",
     "newDeck": "Nuevo Mazo",
+    "newCard": "Nueva Tarjeta",
+    "import": {
+      "label": "Importar mazo",
+      "deckNamePlaceholder": "Nombre del mazo",
+      "descriptionPlaceholder": "Descripción (opcional)"
+    },
+    "quiz": {
+      "editTitle": "Editar tarjeta de cuestionario",
+      "createTitle": "Nueva tarjeta de cuestionario",
+      "questionPlaceholder": "¿Cuál es la capital de Francia?",
+      "optionPlaceholder": "Opción {{number}}",
+      "explanationPlaceholder": "Explica por qué esta es la respuesta correcta...",
+      "questionLabel": "Pregunta",
+      "optionsLabel": "Opciones de respuesta",
+      "optionsAria": "Opciones de respuesta: selecciona la correcta",
+      "addOption": "Añadir opción",
+      "correctAria": "Marcar la opción {{number}} como correcta",
+      "removeOptionAria": "Eliminar la opción {{number}}",
+      "questionRequired": "Añade una pregunta para guardar esta tarjeta",
+      "needTwoOptions": "Añade al menos dos opciones de respuesta",
+      "needCorrectAnswer": "Elige cuál es la opción correcta",
+      "optionRemoved": "Opción eliminada",
+      "undoRemove": "Deshacer",
+      "addExplanation": "Añadir una explicación",
+      "explanationLabel": "Explicación"
+    },
+    "flashcard": {
+      "frontPlaceholder": "¿Cuál es la capital de Francia?",
+      "backPlaceholder": "París",
+      "createTitle": "Nueva tarjeta",
+      "editTitle": "Editar tarjeta",
+      "frontLabel": "Anverso",
+      "backLabel": "Reverso",
+      "frontRequired": "Añade una pregunta para guardar esta tarjeta",
+      "backRequired": "Añade una respuesta para guardar esta tarjeta"
+    },
+    "visual": {
+      "explanationPlaceholder": "Explicación adicional...",
+      "createTitle": "Nueva tarjeta visual",
+      "editTitle": "Editar tarjeta visual",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Flujo de aprendizaje automático",
+      "titleRequired": "Ponle nombre a tu diagrama para guardarlo",
+      "codeLabel": "Código del diagrama",
+      "codeRequired": "Añade código de diagrama para guardar esta tarjeta",
+      "codePlaceholder": "graph TD\n  A[Start] --> B[End]",
+      "syntaxError": "Este diagrama aún no se puede representar",
+      "previewEmpty": "Tu diagrama aparece aquí mientras escribes",
+      "tabCode": "Código",
+      "tabPreview": "Vista previa",
+      "previewOkAria": "Vista previa: el diagrama se representa",
+      "previewErrorAria": "Vista previa: el diagrama tiene un error de sintaxis",
+      "mermaidLink": "Referencia de sintaxis de Mermaid",
+      "addDescription": "Añadir una descripción",
+      "descriptionLabel": "Descripción"
+    },
     "dueToday": "Para hoy",
     "studyStreak": "Racha (días)",
     "totalCards": "Total Tarjetas",
@@ -392,7 +844,207 @@
     "deckCount_plural": "{{count}} mazos",
     "loading": "Cargando...",
     "confirmDeleteDeck": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
-    "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?"
+    "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?",
+    "deleteCardError": "Error al eliminar la tarjeta. Inténtalo de nuevo.",
+    "studyDue": "Estudiar ({{count}})",
+    "studyNew": "Aprender ({{count}} nuevas)",
+    "preview": "Vista previa",
+    "noCardsYet": "Sin tarjetas aún",
+    "dueLabel": "{{count}} pendiente",
+    "typeLabels": {
+      "card": "Tarjeta",
+      "cards": "Tarjetas",
+      "question": "Pregunta",
+      "questions": "Preguntas",
+      "diagram": "Diagrama",
+      "diagrams": "Diagramas"
+    },
+    "manage_content": {
+      "title": "Gestor de contenido",
+      "deckCount": "{{decks}} mazos · {{cards}} tarjetas en total",
+      "tabs": {
+        "decks": "Mazos ({{count}})",
+        "cards": "Tarjetas ({{count}})"
+      },
+      "search": {
+        "decks": "Buscar mazos...",
+        "cards": "Buscar tarjetas...",
+        "placeholder": "Buscar mazos y tarjetas..."
+      },
+      "aria": {
+        "search": "Buscar contenido",
+        "gridView": "Vista de cuadrícula",
+        "listView": "Vista de lista"
+      },
+      "filters": {
+        "all": "Todos",
+        "flashcards": "Tarjetas",
+        "quizzes": "Cuestionarios",
+        "visual": "Visual"
+      },
+      "cardCount": "{{count}} tarjeta",
+      "cardCount_plural": "{{count}} tarjetas",
+      "noContent": "Sin contenido",
+      "untitled": "Tarjeta sin título",
+      "reviewNew": "Nueva",
+      "diagramPreview": "Diagrama ({{type}})",
+      "nextReview": {
+        "dueNow": "¡Pendiente ahora!",
+        "lessThanHour": "En menos de 1 hora",
+        "inHours": "En {{count}} hora",
+        "inHours_plural": "En {{count}} horas",
+        "tomorrow": "Mañana",
+        "inDays": "En {{count}} días"
+      },
+      "empty": {
+        "decks": {
+          "title": "No se encontraron mazos",
+          "filter": "Intenta ajustar tus filtros",
+          "start": "Crea tu primer mazo para empezar"
+        },
+        "cards": {
+          "title": "No se encontraron tarjetas",
+          "filter": "Intenta ajustar tus filtros",
+          "start": "Crea tarjetas en tus mazos para empezar"
+        }
+      }
+    },
+    "deck": {
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "addCard": "Agregar tarjeta",
+      "preview": "Vista previa"
+    },
+    "create": {
+      "newTitle": "Nuevo mazo",
+      "fields": {
+        "name": "Nombre del mazo",
+        "namePlaceholder": "Ej., Vocabulario japonés",
+        "description": "Descripción",
+        "descriptionPlaceholder": "¿De qué trata este mazo?"
+      },
+      "create": "Crear mazo",
+      "nameRequired": "Ponle un nombre al mazo para crearlo",
+      "addDescription": "Añadir una descripción",
+      "addTags": "Añadir etiquetas",
+      "addImage": "Añadir una imagen",
+      "addCards": "Añadir tarjetas",
+      "done": "Listo",
+      "createdTitle": "Mazo creado",
+      "imagePlaceholder": "Pega el enlace de una imagen",
+      "imagePreviewAlt": "Vista previa de la imagen del mazo",
+      "imagePreviewError": "No se pudo cargar esa imagen"
+    },
+    "session": {
+      "loading": "Cargando sesión de estudio...",
+      "allCaughtUp": "¡Al día!",
+      "noDue": "No hay tarjetas pendientes por ahora.",
+      "goBack": "Volver",
+      "mode": {
+        "study": "Study",
+        "browse": "Browse",
+        "cram": "Cram"
+      },
+      "emptyDeck": {
+        "title": "No cards yet",
+        "body": "Add cards to this deck to browse or cram them here."
+      },
+      "error": "Couldn't load cards. Check your connection and try again.",
+      "enterFullscreen": "Pantalla completa",
+      "exitFullscreen": "Salir de pantalla completa",
+      "complete": {
+        "title": "¡Sesión completa!",
+        "body": "Revisaste {{count}} tarjetas. ¡Buen trabajo!",
+        "backToLibrary": "Volver a la biblioteca",
+        "cardsReviewed": "tarjetas revisadas",
+        "needsAttentionLabel": "necesitan más práctica",
+        "topCardCallout": "Tarjeta que necesita más atención: {{card}}",
+        "perfectSession": "¡Sesión perfecta! Todas las tarjetas se sintieron sólidas."
+      },
+      "card": "Tarjeta {{current}} de {{total}}",
+      "syncing": "Sincronizando {{count}} revisión...",
+      "syncing_plural": "Sincronizando {{count}} revisiones...",
+      "labels": {
+        "question": "Pregunta",
+        "answer": "Respuesta",
+        "quiz": "Pregunta de cuestionario",
+        "visual": "Diagrama visual",
+        "explanation": "Explicación"
+      },
+      "hints": {
+        "tapFlip": "Toca para voltear · Desliza para saltar",
+        "clickFlip": "Haz clic para voltear"
+      },
+      "grading": {
+        "again": "De nuevo",
+        "hard": "Difícil",
+        "good": "Bien",
+        "easy": "Fácil"
+      }
+    },
+    "deleteModal": {
+      "title": "Eliminar mazo",
+      "description": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
+      "confirm": "Eliminar mazo",
+      "consequence1": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence1_plural": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence2": "Si está publicado, se despublicará inmediatamente"
+    },
+    "generatedCards": {
+      "titleSelectCards": "Nuevas tarjetas de estudio",
+      "titleAddToDeck": "Añadir al mazo",
+      "subtitleSelectCards": "Selecciona las tarjetas que quieres añadir a tu mazo de estudio.",
+      "subtitleAddToDeck": "Elige un mazo para guardar tus tarjetas.",
+      "generateAgainTooltip": "Generar de nuevo",
+      "cancelButton": "Cancelar",
+      "proceedCount": "Continuar ({{count}})",
+      "confirmSave": "Confirmar y guardar",
+      "saveError": "No se pudieron guardar las tarjetas. Inténtalo de nuevo.",
+      "selectAll": "Seleccionar todo",
+      "selectAllAria": "Seleccionar todas las tarjetas",
+      "selectedCount": "{{count}} de {{total}} seleccionadas"
+    },
+    "saveToDeck": {
+      "selectDeckLabel": "Seleccionar mazo",
+      "chooseDeckPlaceholder": "Elige un mazo...",
+      "orDivider": "O",
+      "createNewDeck": "Crear nuevo mazo",
+      "namePlaceholder": "Nombre del nuevo mazo",
+      "createButton": "Crear",
+      "cancelButton": "Cancelar",
+      "batchTagsLabel": "Etiquetas",
+      "tagsLoadError": "No se pudieron cargar las etiquetas existentes. Aún puedes añadir etiquetas personalizadas.",
+      "noExistingTags": "Aún no hay etiquetas.",
+      "tagsHelperText": "Las etiquetas te ayudan a encontrar tarjetas después; no tienen relación con el nombre del mazo de arriba.",
+      "addTagPlaceholder": "Añadir una etiqueta...",
+      "addTagAria": "Añadir etiqueta",
+      "emptyFlashcard": "Crea tu primer mazo de tarjetas",
+      "emptyFlashcardBody": "Crea un mazo para empezar a guardar estas tarjetas y repasarlas.",
+      "emptyQuiz": "Crea tu primer mazo de cuestionarios",
+      "emptyQuizBody": "Crea un mazo para empezar a guardar estas preguntas y repasarlas.",
+      "emptyVisual": "Crea tu primer mazo visual",
+      "emptyVisualBody": "Crea un mazo para empezar a guardar estos diagramas y repasarlos."
+    },
+    "common": {
+      "addTags": "Añadir etiquetas",
+      "chooseDeck": "Elegir un mazo",
+      "typeFlashcard": "Tarjeta",
+      "typeQuiz": "Cuestionario",
+      "typeVisual": "Visual",
+      "typeSelectorAria": "Tipo de tarjeta",
+      "switchTypeWarning": "Cambiar el tipo de tarjeta descartará lo que has escrito para este tipo.",
+      "switchTypeConfirm": "Cambiar de todos modos"
+    }
+  },
+  "filters": {
+    "toggle": "Alternar filtros",
+    "type": "Tipo",
+    "tags": "Etiquetas",
+    "clearAll": "Borrar todo",
+    "remove": {
+      "type": "Eliminar filtro de tipo",
+      "tag": "Eliminar filtro de etiqueta {{tag}}"
+    }
   },
   "subscription": {
     "upgrade": "Mejorar Plan",
@@ -404,6 +1056,1905 @@
       "upgradeToUse": "Mejora tu plan para usar funciones de IA.",
       "genericCreate": "Error al crear el elemento. Inténtalo de nuevo.",
       "upgradeAdvice": "Por favor mejora tu plan en Configuración."
+    },
+    "title": "Subscription & Billing",
+    "currentPlan": "Current Plan",
+    "nextBillingDate": "Next billing date",
+    "noBillingDate": "—",
+    "manageBilling": "Manage billing in Stripe",
+    "downgrade": "Downgrade plan",
+    "aiUsage": {
+      "title": "Monthly AI Usage",
+      "meter": "{{used}} / {{limit}} this month",
+      "reset": "Resets on {{date}}",
+      "empty": "No AI usage this month"
+    },
+    "tier": {
+      "free": "Free",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "status": {
+      "active": "Active",
+      "past_due": "Payment Past Due",
+      "canceled": "Canceled"
+    },
+    "page": {
+      "upgraded": {
+        "title": "Welcome to {{plan}}!",
+        "message": "Your upgrade is active. Start exploring new features.",
+        "cta": "Get started"
+      }
+    },
+    "error": {
+      "portalFailed": "Could not open billing portal. Please try again.",
+      "loadFailed": "Unable to load subscription. Please try again."
+    },
+    "downgradeModal": {
+      "title": "Downgrade to Free?",
+      "message": "You'll lose access to paid features. Existing content remains but creation of Pro-only content is blocked.",
+      "confirm": "Downgrade",
+      "cancel": "Keep current plan"
+    },
+    "upgradeProcessing": {
+      "title": "Upgrade in Progress",
+      "message": "Your payment was received. Your plan will update within a few minutes — please refresh the page shortly."
     }
+  },
+  "about": {
+    "title": "Acerca de Nowry",
+    "subtitle": "Estamos en una misión para hacer el aprendizaje accesible, efectivo y agradable para todos a través de tecnología innovadora y métodos basados en evidencia.",
+    "mission": {
+      "title": "Nuestra Misión",
+      "desc": "Empoderar a estudiantes de todo el mundo con herramientas inteligentes que se adaptan a su estilo de aprendizaje único, haciendo que la adquisición de conocimiento sea más rápida, más eficiente y más agradable que nunca."
+    },
+    "vision": {
+      "title": "Nuestra Visión",
+      "desc": "Un mundo donde cada persona tenga acceso a experiencias de aprendizaje personalizadas e impulsadas por IA que desbloqueen todo su potencial. Imaginamos una educación que se adapte a ti, no al revés."
+    },
+    "values": {
+      "title": "Nuestros Valores Fundamentales",
+      "subtitle": "Los principios que guían todo lo que hacemos",
+      "innovation": {
+        "title": "Innovación",
+        "desc": "Evolucionamos constantemente nuestra plataforma con técnicas de aprendizaje de vanguardia e IA"
+      },
+      "community": {
+        "title": "Comunidad",
+        "desc": "Construyendo un entorno de apoyo donde los estudiantes se ayudan mutuamente a tener éxito"
+      },
+      "trust": {
+        "title": "Confianza",
+        "desc": "Tus datos y privacidad son nuestras principales prioridades, siempre seguros y protegidos"
+      },
+      "support": {
+        "title": "Soporte",
+        "desc": "Dedicados a ayudarte a alcanzar tus objetivos de aprendizaje con asistencia receptiva"
+      }
+    },
+    "cta": {
+      "title": "¿Listo para Comenzar?",
+      "subtitle": "Comienza tu viaje de aprendizaje con Nowry hoy. ¡Crea tu cuenta gratuita ahora!",
+      "primary": "Empezar Gratis",
+      "secondary": "Contáctanos"
+    }
+  },
+  "contact": {
+    "emailPlaceholder": "tu@ejemplo.com",
+    "title": "Ponte en Contacto",
+    "subtitle": "¿Tienes preguntas? Nos encantaría saber de ti. Envíanos un mensaje y te responderemos lo antes posible.",
+    "info": {
+      "email": {
+        "title": "Envíanos un Email",
+        "desc": "Normalmente respondemos en 24 horas"
+      },
+      "phone": {
+        "title": "Llámanos",
+        "desc": "Lun-Vie, 9AM-6PM EST"
+      },
+      "visit": {
+        "title": "Visítanos",
+        "desc": "San Francisco, CA 94102"
+      }
+    },
+    "form": {
+      "title": "Envíanos un Mensaje",
+      "success": "¡Gracias! Tu mensaje ha sido enviado exitosamente. Te responderemos pronto.",
+      "name": "Tu Nombre",
+      "namePlaceholder": "Juan Pérez",
+      "email": "Correo Electrónico",
+      "subject": "Asunto",
+      "subjectPlaceholder": "¿Cómo podemos ayudarte?",
+      "message": "Mensaje",
+      "messagePlaceholder": "Cuéntanos más sobre tu pregunta o comentario...",
+      "send": "Enviar Mensaje"
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "q1": "¿Cómo empiezo?",
+      "a1": "Simplemente crea una cuenta gratuita y comienza a explorar nuestras funciones. ¡No se requiere tarjeta de crédito!",
+      "q2": "¿Nowry es realmente gratis?",
+      "a2": "¡Sí! Nuestras funciones principales son completamente gratuitas. También ofrecemos planes premium con funciones avanzadas.",
+      "q3": "¿Puedo importar mis tarjetas existentes?",
+      "a3": "¡Absolutamente! Admitimos la importación de varios formatos, incluidos CSV, Anki y Quizlet.",
+      "q4": "¿Ofrecen descuentos para estudiantes?",
+      "a4": "Sí, ofrecemos precios especiales para estudiantes verificados. Contáctanos para más detalles."
+    }
+  },
+  "annualPlanning": {
+    "title": "Planificación",
+    "subtitle": "Concéntrate en lo que más importa este año",
+    "myPlan": "Mi Plan 2026",
+    "empty": "Comienza tu año enfocado definiendo tus 3 áreas principales",
+    "stats": {
+      "totalGoals": "Total de Objetivos",
+      "inProgress": "En Progreso",
+      "completed": "Completado",
+      "completionRate": "Tasa de Finalización",
+      "priorities": "Prioridades"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "goals": "Goals",
+      "priorities": "Priorities",
+      "reports": "Reports",
+      "ariaLabel": "Annual Planning sections",
+      "goalsEmptyTitle": "No goals yet",
+      "goalsEmptyBody": "Add goals inside a focus area to see them here.",
+      "errorLoading": "No se pudo cargar tu plan. Inténtalo de nuevo.",
+      "gridView": "Vista de cuadrícula",
+      "listView": "Vista de lista",
+      "reportsEmptyTitle": "No reports yet",
+      "reportsEmptyBody": "Close a quarter to see its report here."
+    },
+    "breadcrumb": {
+      "root": "Annual Planning"
+    },
+    "focusArea": {
+      "title": "Áreas de Enfoque",
+      "subtitle": "Elige 3 áreas principales para enfocarte este año",
+      "limit": "Puedes tener un máximo de 3 áreas de enfoque",
+      "limitReached": "Límite de áreas de enfoque alcanzado (3/3)",
+      "add": "Agregar Área de Enfoque",
+      "edit": "Editar Área",
+      "delete": "Eliminar Área",
+      "name": "Nombre del Área",
+      "description": "¿Qué quieres lograr aquí?",
+      "selectIcon": "Seleccionar Ícono",
+      "selectColor": "Seleccionar Color",
+      "setup": {
+        "intro": {
+          "title": "El Poder de 3",
+          "editTitle": "Editar Tus Áreas de Enfoque",
+          "message": "La investigación muestra que enfocarse en 3 áreas clave lleva a mayor éxito que intentar mejorar todo a la vez. Definamos tus 3 áreas para este año.",
+          "editMessage": "Revisa y actualiza tus áreas de enfoque. Realiza cambios en nombres, descripciones, íconos o colores para reflejar mejor tus prioridades actuales."
+        },
+        "tips": [
+          "Sé específico sobre lo que más importa",
+          "Elige áreas que se alineen con tus valores",
+          "Piensa en el equilibrio entre diferentes dominios de la vida"
+        ],
+        "tipsLabel": "Consejos:",
+        "areaOf": "Área de Enfoque {{current}} de {{total}}",
+        "defineArea": "Definir Área de Enfoque {{number}}",
+        "nameLabel": "Nombre",
+        "namePlaceholder": "ej. Salud y Bienestar",
+        "descriptionLabel": "Descripción (Tu '¿Por qué?')",
+        "descriptionPlaceholder": "¿Por qué es importante esta área para ti este año?",
+        "colorTheme": "Tema de Color",
+        "colorSwatchLabel": "Seleccionar tema {{color}}",
+        "reviewTitle": "Tu Plan para {{year}}",
+        "loading": "Cargando tu plan...",
+        "saveError": "No pudimos guardar tus áreas de enfoque. Por favor, inténtalo de nuevo.",
+        "buttons": {
+          "back": "Atrás",
+          "next": "Siguiente",
+          "review": "Revisar",
+          "reviewEdit": "Revisar y Editar",
+          "letsStart": "¡Empecemos!",
+          "edit": "Editar",
+          "saveChanges": "Guardar Cambios",
+          "finalizePlan": "Finalizar Plan"
+        }
+      },
+      "examples": [
+        "Crecimiento Profesional",
+        "Salud y Vitalidad",
+        "Libertad Financiera",
+        "Relaciones",
+        "Proyectos Creativos",
+        "Aprendizaje y Habilidades"
+      ]
+    },
+    "priority": {
+      "title": "Prioridades Anuales",
+      "add": "Agregar Prioridad",
+      "edit": "Editar Prioridad",
+      "delete": "Eliminar Prioridad",
+      "name": "Prioridad",
+      "deadline": "Fecha Objetivo",
+      "linkedTo": "Vinculado a {{area}}",
+      "noGoals": "Sin objetivos vinculados aún",
+      "noActivePriorities": "Sin prioridades activas",
+      "filterActive": "Activas",
+      "filterAll": "Todas ({{count}})",
+      "filterLabel": "Filtrar prioridades por estado",
+      "activeEmptyBody": "Las prioridades completadas e inactivas están ocultas.",
+      "showAll": "Mostrar todas ({{count}})",
+      "completedSection": "Completadas",
+      "done": "Done",
+      "inactive": "Inactiva",
+      "activeIcon": "Activa",
+      "inactiveIcon": "Inactiva",
+      "activate": "Activar",
+      "markInactive": "Marcar como inactiva",
+      "showInactive": "Mostrar inactivas ({{count}})",
+      "hideInactive": "Ocultar inactivas",
+      "dragHandle": "Arrastrar para reordenar",
+      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
+      "linkedToEntity": "This priority is linked to a {{entityType}}",
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
+      "emptyTitle": "Aún no hay prioridades",
+      "emptyBody": "Las prioridades son las pocas cosas que más importan este año. Con tres a cinco basta.",
+      "emptyCta": "Añadir una prioridad",
+      "addPriority": "Añadir prioridad"
+    },
+    "goal": {
+      "add": "Agregar Objetivo",
+      "edit": "Editar Objetivo",
+      "delete": "Eliminar Objetivo",
+      "deleteConfirm": {
+        "title": "Eliminar objetivo",
+        "description": "Este objetivo y todos sus hitos se eliminarán permanentemente. Esta acción no se puede deshacer."
+      },
+      "title": "Título del Objetivo",
+      "description": "Descripción",
+      "focusArea": "Área de Enfoque",
+      "linkToPriority": "Vincular a Prioridad (opcional)",
+      "targetDate": "Fecha Objetivo",
+      "progress": "Progreso",
+      "status": {
+        "notStarted": "No Iniciado",
+        "inProgress": "En Progreso",
+        "completed": "Completado"
+      },
+      "healthStatus": {
+        "onTrack": "En Buen Camino",
+        "atRisk": "En Riesgo",
+        "behind": "Retrasado",
+        "completed": "Completado",
+        "notStarted": "Sin empezar"
+      },
+      "activities": "Actividades",
+      "percentComplete": "{{percent}}% completado",
+      "activitiesError": "Error al cargar las actividades",
+      "completionBlockedTitle": "No se puede marcar el objetivo como completado",
+      "completionBlockedBody": "Completa primero estos hitos:",
+      "image": "Inspiración Visual (opcional)",
+      "imageUrl": "URL de la Imagen",
+      "generateImage": "Generar con IA",
+      "uploadImage": "Subir Imagen",
+      "daysLeft": "Queda {{count}} día",
+      "daysLeft_plural": "Quedan {{count}} días",
+      "overdue": "Vencido",
+      "noDeadline": "Sin fecha objetivo",
+      "smartHelper": "Hazlo SMART: Específico, Medible, Alcanzable, Relevante, Temporal",
+      "activitiesCount": "{{count}} actividad",
+      "activitiesCount_plural": "{{count}} actividades",
+      "viewBoard": "Ver como Tablero",
+      "next": {
+        "completed": "Completado",
+        "label": "Siguiente: {{title}}",
+        "overdue": "Atrasado: {{title}}",
+        "readyToComplete": "Todos los hitos completados: márcalo como completado",
+        "addMilestone": "Añade un hito para seguir el progreso",
+        "toggleAria": "Marcar el hito {{title}} como hecho"
+      },
+      "milestoneCount_one": "{{completed}} de {{total}} hito",
+      "milestoneCount_other": "{{completed}} de {{total}} hitos",
+      "daysLeftShort_one": "queda {{count}} d",
+      "daysLeftShort_other": "quedan {{count}} d",
+      "moreActions": "Más acciones para {{title}}",
+      "openDetail": "Abrir {{title}}",
+      "markComplete": "Marcar como completado",
+      "reopen": "Reabrir objetivo",
+      "lockedAction": "Este trimestre está cerrado",
+      "detail": {
+        "milestones": "Hitos",
+        "lifecycleLabel": "Estado",
+        "noDescription": "Sin descripción"
+      },
+      "statusUpdateError": "No se pudo actualizar este objetivo. Inténtalo de nuevo.",
+      "milestoneUpdateError": "No se pudo actualizar ese hito. Inténtalo de nuevo.",
+      "noMilestones": "Aún no hay hitos",
+      "titlePlaceholder": "¿Qué quieres lograr?",
+      "descriptionPlaceholder": "Añade detalles sobre este objetivo...",
+      "editSubtitle": "Actualiza los detalles de tu objetivo",
+      "keyResultsTitle": "Resultados clave e hitos",
+      "linkToObjective": "Vincular a un objetivo anual (opcional)",
+      "timeframeQuestion": "¿Cuándo quieres lograrlo?",
+      "saveGoal": "Guardar objetivo",
+      "updateGoal": "Actualizar objetivo",
+      "titleRequired": "Ponle un nombre a tu objetivo para guardarlo",
+      "detailRailAria": "Añadir detalles opcionales",
+      "addMilestones": "Añadir hitos",
+      "addDescription": "Añadir una descripción",
+      "addTargetDate": "Fijar una fecha objetivo",
+      "addImage": "Añadir una imagen",
+      "changeTimeframe": "Cambiar el periodo",
+      "keyResultsHelper": "Divide tu objetivo en pasos medibles",
+      "addMilestoneButton": "Añadir",
+      "milestoneToggleAria": "Marcar {{title}} como hecho",
+      "milestoneTitleAria": "Título del hito {{index}}",
+      "milestoneDueDateAria": "Fijar una fecha límite para {{title}}",
+      "milestoneClearDateAria": "Quitar la fecha límite de {{title}}",
+      "milestoneDeleteAria": "Eliminar {{title}}",
+      "milestoneNoDate": "Fecha",
+      "milestoneNumber": "Hito {{index}}",
+      "milestonePlaceholder": "Título del hito...",
+      "imageHelper": "Un recordatorio visual, si te ayuda",
+      "imageUrlPlaceholder": "https://ejemplo.com/imagen.jpg",
+      "imagePreviewAlt": "Vista previa de la imagen del objetivo",
+      "imagePreviewError": "No se pudo cargar esa imagen",
+      "scopeQuarterly": "Objetivo del T{{quarter}}",
+      "scopeYearly": "Objetivo anual",
+      "parentFallback": "Objetivo principal",
+      "parentPlaceholder": "Selecciona un objetivo principal...",
+      "timeframeYearly": "Todo el año (objetivo anual)",
+      "timeframeQ1": "T1 (ene – mar)",
+      "timeframeQ2": "T2 (abr – jun)",
+      "timeframeQ3": "T3 (jul – sep)",
+      "timeframeQ4": "T4 (oct – dic)",
+      "saveError": "No se pudo guardar este objetivo."
+    },
+    "activity": {
+      "title": "Actividades y Hábitos",
+      "add": "Agregar Actividad",
+      "edit": "Editar Actividad",
+      "delete": "Eliminar Actividad",
+      "name": "Nombre de la Actividad",
+      "description": "Descripción",
+      "frequency": "Frecuencia",
+      "timeOfDay": "Momento del Día",
+      "duration": "Duración (minutos)",
+      "linkedGoal": "Vinculado al Objetivo",
+      "frequencies": {
+        "daily": "Diario",
+        "weekly": "Semanal",
+        "custom": "Personalizado"
+      },
+      "timeSlots": {
+        "morning": "Mañana",
+        "afternoon": "Tarde",
+        "evening": "Noche",
+        "anytime": "Cualquier momento"
+      },
+      "todaysTasks": "Actividades de Hoy",
+      "noActivities": "No hay actividades aún. Agrega acciones diarias/semanales para lograr tus objetivos.",
+      "markComplete": "Marcar Completado",
+      "toggleActive": "Alternar Activo"
+    },
+    "milestone": {
+      "locked": "Los hitos están bloqueados"
+    },
+    "closeQuarter": {
+      "achievementsPlaceholder": "Lista lo que lograste este trimestre...",
+      "challengesPlaceholder": "Describe los desafíos que enfrentaste...",
+      "lessonsPlaceholder": "¿Qué aprendiste?"
+    },
+    "priorityDialog": {
+      "searchPlaceholder": "Selecciona objetivo, tarea o rutina..."
+    },
+    "dailyRoutine": {
+      "title": "Planificador de Rutina Diaria",
+      "subtitle": "Diseña tu día ideal para lograr tus objetivos",
+      "morning": "Rutina Mañanera",
+      "afternoon": "Rutina de Tarde",
+      "evening": "Rutina Nocturna",
+      "addBlock": "Agregar Bloque de Tiempo",
+      "addItemPlaceholder": "Agregar elemento...",
+      "goalActivities": "ACTIVIDADES DEL OBJETIVO",
+      "routineItems": "ELEMENTOS DE RUTINA",
+      "saving": "Guardando cambios...",
+      "swipeHint": "Desliza para navegar",
+      "templates": {
+        "title": "Comenzar con una Plantilla",
+        "weekday": "Horario Laboral",
+        "weekend": "Horario de Fin de Semana",
+        "earlyBird": "Madrugador",
+        "nightOwl": "Nocturno",
+        "blank": "Comenzar desde Cero"
+      },
+      "distribution": "Distribución del Tiempo en Áreas de Enfoque",
+      "balanced": "Equilibrado",
+      "lopsided": "Un área está recibiendo la mayor parte de tu tiempo",
+      "dragActivities": "Arrastra actividades de tus objetivos a los bloques de tiempo",
+      "saveTemplate": "Guardar como Plantilla",
+      "morningEmptyTitle": "Empieza tu mañana bien.",
+      "afternoonEmptyTitle": "Domina tu tarde.",
+      "eveningEmptyTitle": "Termina el día con intención.",
+      "emptySubtitle": "Configura tu rutina diaria para mantenerte en curso cada día.",
+      "emptyCta": "Configurar rutina",
+      "goalPrefix": "Goal: {{title}}",
+      "toggleItem": "Marcar como hecho hoy",
+      "noItems": "Aún no hay elementos de rutina configurados",
+      "deleteItem": "Eliminar elemento",
+      "addItem": "Agregar elemento",
+      "editRoutine": "Editar rutina"
+    },
+    "progress": {
+      "title": "Panel de Progreso",
+      "overview": "Resumen del Año",
+      "breakdown": "Desglose por Área",
+      "goalProgress": "Progreso de Objetivos",
+      "activityStreak": "Racha de Actividades",
+      "upcomingDeadlines": "Próximos Vencimientos",
+      "insights": "Insights",
+      "noDeadlines": "No hay vencimientos próximos",
+      "suggestions": {
+        "noProgress": "No has actualizado {{area}} en {{days}} días",
+        "balanced": "¡Genial! Estás progresando en todas las áreas",
+        "nearDeadline": "{{goal}} vence en {{days}} días"
+      }
+    },
+    "actions": {
+      "setFocusAreas": "Configurar Áreas",
+      "addGoal": "Agregar Objetivo",
+      "viewRoutine": "Ver Rutina Diaria",
+      "seeAllGoals": "Ver Todos los Objetivos",
+      "editPlan": "Editar Título",
+      "exportPlan": "Exportar Plan"
+    },
+    "home": {
+      "startJourney": "Comienza tu Viaje de {{year}}",
+      "startDescription": "Crea tu plan anual para establecer metas, seguir el progreso y  alcanzar tus sueños este año.",
+      "createPlan": "Crear Mi Plan Anual",
+      "defineFocusAreas": "Define tus Áreas de Enfoque",
+      "focusAreasDescription": "Las áreas de enfoque son los pilares clave de tu vida que quieres mejorar este año. Ejemplos: Salud, Carrera, Relaciones, Crecimiento Personal, Finanzas.",
+      "addFocusAreas": "Agregar Áreas de Enfoque",
+      "overview": "Resumen de tus áreas de enfoque y objetivos",
+      "dailyRoutineBtn": "Rutina Diaria",
+      "editPlanBtn": "Editar Plan",
+      "totalProgress": "completado",
+      "completedGoals": "objetivos completados",
+      "topPriorities": "Prioridades principales",
+      "noPrioritiesSet": "Sin prioridades establecidas",
+      "focusAreas": "Áreas de Enfoque",
+      "yearlyPriorities": "Prioridades Anuales",
+      "noPrioritiesAdded": "Aún no se han agregado prioridades",
+      "viewAllPriorities": "Ver las {{count}} prioridades →",
+      "progress": "Progreso",
+      "save": "Guardar",
+      "quarterEndedOn": "El trimestre {{quarter}} terminó el {{date}}",
+      "quarterEndsToday": "El trimestre {{quarter}} termina hoy",
+      "quarterEndingIn": "El trimestre {{quarter}} termina en {{count}} día",
+      "quarterEndingIn_other": "El trimestre {{quarter}} termina en {{count}} días",
+      "routineCompletion": "elementos completados",
+      "allYear": "Todo el año",
+      "reviewNow": "Revisar ahora",
+      "quarterEndingIn_one": "El trimestre {{quarter}} termina en {{count}} día"
+    },
+    "quarterReport": {
+      "report": "Report",
+      "preview": "Preview",
+      "unassignedArea": "Unassigned",
+      "noneRecorded": "None recorded",
+      "reflections": "Quarterly Reflections",
+      "biggestWins": "Biggest Wins",
+      "challenges": "Challenges",
+      "nextFocus": "Next Focus",
+      "goalsAchieved": "Goals Achieved",
+      "milestonesCompleted": "Milestones Completed",
+      "totalProgress": "Total Progress",
+      "insights": "Quarterly Insights",
+      "routineConsistency": "Routine Consistency",
+      "activeDays": "Active {{count}} day this quarter",
+      "activeDays_plural": "Active {{count}} days this quarter",
+      "activeDays_other": "Active {{count}} days this quarter",
+      "booksFinished": "Books Finished ({{count}})",
+      "breakdownByFocusArea": "Breakdown by Focus Area",
+      "migratedCount": "Migrated {{count}}x",
+      "migratedCount_plural": "Migrated {{count}}x",
+      "migratedCount_other": "Migrated {{count}}x",
+      "due": "Due",
+      "migrateToNextQuarter": "Migrate to Next Quarter"
+    },
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este {{type}}? Esta acción no se puede deshacer.",
+    "celebration": "🎉 ¡Objetivo Completado! ¡Estás haciendo un progreso increíble!",
+    "errors": {
+      "loadFailed": "Error al cargar el plan anual",
+      "createFailed": "Error al crear {{type}}",
+      "updateFailed": "Error al actualizar {{type}}",
+      "deleteFailed": "Error al eliminar {{type}}",
+      "focusAreaLimit": "Solo puedes tener 3 áreas de enfoque. Elimina una para añadir otra."
+    },
+    "header": {
+      "progress": "{{percent}}% completado",
+      "goalsRatio": "{{completed}} de {{total}} objetivos",
+      "prioritiesCount_one": "{{count}} prioridad",
+      "prioritiesCount_other": "{{count}} prioridades",
+      "routineRatio": "{{completed}} de {{total}} elementos de rutina",
+      "renamePlan": "Renombrar plan",
+      "quarterLabel": "Trimestre",
+      "moreActions": "Más acciones del plan",
+      "addFirstGoal": "Añade tu primer objetivo",
+      "deletePlan": "Eliminar plan",
+      "deletePlanTitle": "¿Eliminar este plan?",
+      "deletePlanBody": "Esto elimina «{{title}}» junto con sus áreas de enfoque, objetivos e informes trimestrales. No se puede deshacer."
+    },
+    "goals": {
+      "scopeQuarter": "Q{{quarter}} · {{count}} objetivos",
+      "scopeAll": "Todo el año · {{count}} objetivos",
+      "quarterEmptyTitle": "Nada planificado para Q{{quarter}}",
+      "quarterEmptyBody": "Tienes objetivos en otros trimestres.",
+      "quarterEmptyCta": "Ver todo el año",
+      "scopeQuarter_one": "Q{{quarter}} · {{count}} objetivo",
+      "scopeQuarter_other": "Q{{quarter}} · {{count}} objetivos",
+      "scopeAll_one": "Todo el año · {{count}} objetivo",
+      "scopeAll_other": "Todo el año · {{count}} objetivos",
+      "loadingAria": "Cargando objetivos"
+    },
+    "reports": {
+      "emptyTitle": "Tu primer informe se desbloquea al cerrar el trimestre",
+      "emptyBody": "Cierra un trimestre y Nowry convertirá tus objetivos, tu progreso y tus logros en un informe que podrás revisar.",
+      "emptyCtaReady": "Revisar Q{{quarter}}",
+      "emptyCountdown_one": "Q{{quarter}} cierra en {{count}} día",
+      "emptyCountdown_other": "Q{{quarter}} cierra en {{count}} días",
+      "historyTitle": "Trimestres cerrados",
+      "goalsAchieved": "Objetivos logrados",
+      "progress": "Progreso",
+      "snapshots": "Instantáneas ({{count}})"
+    },
+    "overview": {
+      "focusAreasTitle": "Áreas de enfoque",
+      "prioritiesTitle": "Compromisos anuales",
+      "prioritiesManage": "Gestionar",
+      "prioritiesEmptyTitle": "Aún no hay prioridades",
+      "prioritiesEmptyBody": "Nombra las pocas cosas que más importan este año. Con tres a cinco basta.",
+      "prioritiesEmptyCta": "Añadir una prioridad",
+      "areaGoalCount_one": "{{count}} objetivo",
+      "areaGoalCount_other": "{{count}} objetivos"
+    }
+  },
+  "focusBar": {
+    "modal": {
+      "title": "Seleccionar Prioridades",
+      "description": "Elige hasta 4 prioridades para mostrar en tu página principal",
+      "noPriorities": "No se encontraron prioridades",
+      "createPriorities": "Crear Prioridades",
+      "cancel": "Cancelar",
+      "save": "Guardar Selección"
+    },
+    "entity": {
+      "goal": "Objetivo",
+      "task": "Tarea",
+      "routine": "Rutina"
+    },
+    "overdue": "Atrasado",
+    "daysLeft": "{{count}} días restantes",
+    "noDeadline": "Sin fecha límite",
+    "overdueBy": "{{count}} días de retraso",
+    "daysRemaining": "{{count}} días restantes",
+    "noDeadlineEntity": "{{entity}} • Sin fecha límite",
+    "choosePrioritiesTooltip": "Elegir prioridades para mostrar",
+    "noPrioritiesYet": "Aún no hay prioridades",
+    "createPriority": "Crear Prioridad"
+  },
+  "deckSettings": {
+    "menuItem": "Configuración",
+    "openAria": "Abrir configuración de {{name}}",
+    "nav": {
+      "study": "Estudio",
+      "audio": "Audio",
+      "publishing": "Publicación",
+      "identity": "Detalles"
+    },
+    "study": {
+      "paceMode": "Ritmo de estudio",
+      "newPerDay": "Tarjetas nuevas por día",
+      "maxReviews": "Máx. repasos por día",
+      "cardsPerDay": "tarjetas / día",
+      "reviewsPerDay": "repasos / día"
+    },
+    "pace": {
+      "relaxed": "Relajado",
+      "balanced": "Equilibrado",
+      "intensive": "Intensivo",
+      "relaxedHint": "Ideal para aprendizaje casual o mazos grandes",
+      "balancedHint": "Recomendado para la mayoría",
+      "intensiveHint": "Para preparación de exámenes"
+    },
+    "audio": {
+      "front": "Frente",
+      "back": "Reverso",
+      "autoplay": "Reproducción automática",
+      "voice": "Voz",
+      "systemDefault": "Por defecto del sistema",
+      "rate": "Velocidad",
+      "pitch": "Tono",
+      "sideAria": "Cara de la tarjeta",
+      "rateAria": "Velocidad de voz: {{value}} veces la normal",
+      "pitchAria": "Tono: {{value}}"
+    },
+    "publish": {
+      "title": "Hacer público el mazo",
+      "description": "Cualquier persona con el enlace puede ver y copiar este mazo",
+      "publicDescription": "Descripción pública",
+      "publishedOn": "Publicado el {{date}}"
+    },
+    "saving": "Guardando...",
+    "saved": "Guardado",
+    "saveFailed": "Ese cambio no se guardó",
+    "retry": "Reintentar",
+    "identity": {
+      "name": "Nombre del mazo",
+      "description": "Descripción",
+      "image": "Imagen de portada"
+    }
+  },
+  "editor": {
+    "mode": {
+      "enterReading": "Cambiar a lectura",
+      "enterEditing": "Cambiar a edición",
+      "hint": "Selecciona cualquier texto para escucharlo o crear una tarjeta",
+      "blockedHint": "Cambia a edición para modificar este texto",
+      "blockedGuest": "Bifurca este libro para editarlo",
+      "signInToUse": "Inicia sesión para crear tarjetas de este libro",
+      "toolbarAriaLabel": "Acciones de selección"
+    },
+    "actions": {
+      "copy": "Copiar",
+      "copyAriaLabel": "Copiar el texto seleccionado",
+      "copied": "Copiado",
+      "copyFailed": "No se pudo copiar. Inténtalo de nuevo."
+    },
+    "header": {
+      "bookTitle": "Título del libro",
+      "openNavigator": "Abrir contenido",
+      "saveNow": "Guardar ahora",
+      "enableAutosave": "Activar guardado automático",
+      "disableAutosave": "Desactivar guardado automático",
+      "lockEditing": "Bloquear edición",
+      "unlockEditing": "Desbloquear edición",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar"
+    },
+    "slashCommands": {
+      "menuLabel": "Comandos de formato",
+      "hint": "↑↓ para navegar, ↵ para seleccionar, esc para cerrar",
+      "paragraph": "Texto",
+      "paragraphDesc": "Párrafo de texto normal",
+      "heading1": "Encabezado 1",
+      "heading1Desc": "Encabezado de sección grande",
+      "heading2": "Encabezado 2",
+      "heading2Desc": "Encabezado de sección mediano",
+      "heading3": "Encabezado 3",
+      "heading3Desc": "Encabezado de sección pequeño",
+      "bulletList": "Lista de viñetas",
+      "bulletListDesc": "Lista desordenada",
+      "numberedList": "Lista numerada",
+      "numberedListDesc": "Lista ordenada",
+      "quote": "Cita",
+      "quoteDesc": "Cita en bloque",
+      "codeBlock": "Bloque de código",
+      "codeBlockDesc": "Código con resaltado de sintaxis",
+      "table": "Tabla",
+      "tableDesc": "Insertar una tabla",
+      "divider": "Divisor",
+      "dividerDesc": "Línea horizontal",
+      "note": "Nota",
+      "noteDesc": "Agregar un aviso informativo",
+      "tip": "Sugerencia",
+      "tipDesc": "Agregar un consejo útil",
+      "warning": "Advertencia",
+      "warningDesc": "Agregar una advertencia",
+      "columns": "2 Columnas",
+      "columnsDesc": "Diseño en paralelo",
+      "video": "Video",
+      "videoDesc": "Insertar YouTube o Vimeo",
+      "link": "Enlace",
+      "linkDesc": "Agregar un hipervínculo",
+      "math": "Matemáticas",
+      "mathDesc": "Insertar una fórmula matemática"
+    },
+    "format": {
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "underline": "Subrayado",
+      "link": "Enlace",
+      "linkPlaceholder": "Pega o escribe un enlace…",
+      "turnInto": "Convertir en"
+    },
+    "blockTypes": {
+      "paragraph": "Texto",
+      "h1": "Encabezado 1",
+      "h2": "Encabezado 2",
+      "h3": "Encabezado 3",
+      "bullet": "Lista de viñetas",
+      "number": "Lista numerada",
+      "quote": "Cita",
+      "code": "Bloque de código",
+      "note": "Nota informativa",
+      "tip": "Sugerencia",
+      "warning": "Advertencia",
+      "mixed": "Mixto"
+    },
+    "ai": {
+      "card": "Tarjeta",
+      "createCardHint": "Generar una tarjeta de estudio a partir de esta selección",
+      "more": "Más acciones de IA",
+      "questionnaire": "Cuestionario",
+      "visual": "Imaginar escena",
+      "vocabulary": "Extraer vocabulario",
+      "expand": "Expand with AI",
+      "generateDiagram": "Generate Diagram"
+    },
+    "table": {
+      "addRowBelow": "Agregar fila abajo",
+      "addColumnRight": "Agregar columna a la derecha",
+      "deleteRow": "Eliminar fila",
+      "deleteColumn": "Eliminar columna",
+      "deleteTable": "Eliminar tabla"
+    },
+    "mobile": {
+      "editMode": "Editar",
+      "doneEditing": "Listo",
+      "insertBlock": "Insertar bloque",
+      "formatActions": "Formato"
+    },
+    "math": {
+      "sourcePlaceholder": "Ingresa LaTeX...",
+      "editAriaLabel": "Editar fórmula matemática",
+      "deleteAriaLabel": "Eliminar fórmula matemática",
+      "invalidLatex": "Sintaxis LaTeX no válida"
+    }
+  },
+  "comments": {
+    "addNote": "Añadir nota",
+    "drawerTitle": "Notas",
+    "openDrawerAriaLabel": "Abrir notas",
+    "previousNoteAriaLabel": "Nota anterior",
+    "nextNoteAriaLabel": "Nota siguiente",
+    "threadTitle": "Nota",
+    "threadAriaLabel": "Hilo de la nota",
+    "orphanedTitle": "Nota (texto no encontrado)",
+    "orphanedExplain": "El texto al que estaba vinculada esta nota ya no se encuentra. Aún puedes eliminarla.",
+    "editAriaLabel": "Editar nota",
+    "composerPlaceholder": "Añade una nota…",
+    "composerAriaLabel": "Nueva nota",
+    "composerTextareaAriaLabel": "Texto de la nota",
+    "deleteConfirm": "¿Eliminar esta nota? Esta acción no se puede deshacer.",
+    "deleteConfirmAction": "Sí, eliminar",
+    "emptyBodyPreview": "(nota vacía)",
+    "emptyHint": "Selecciona texto y elige \"Añadir nota\" para dejar un comentario.",
+    "emptyTitle": "Aún no hay notas",
+    "errors": {
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "loadFailed": "No se pudieron cargar las notas.",
+      "notAuthor": "No tienes permiso para editar esta nota.",
+      "notFound": "Esta nota ya no existe.",
+      "invalidBody": "El texto de la nota no es válido.",
+      "selectionLost": "Selecciona el texto que quieres anotar y vuelve a elegir “Añadir nota”."
+    },
+    "noteAriaLabel": "Nota: {{preview}}",
+    "orphanedNoteAriaLabel": "Nota sin anclaje: {{preview}}",
+    "deleteAriaLabel": "Eliminar nota",
+    "resolveAriaLabel": "Marcar la nota como resuelta",
+    "unresolveAriaLabel": "Reabrir la nota",
+    "resolvedLabel": "Resuelta",
+    "moreNotes": "{{count}} más",
+    "moreNotesAriaLabel": "Mostrar {{count}} notas más abajo",
+    "unanchoredGroupTitle": "Notas sin anclaje ({{count}})",
+    "time": {
+      "justNow": "Ahora mismo",
+      "minutesAgo": "hace {{count}} min",
+      "hoursAgo": "hace {{count}} h",
+      "daysAgo": "hace {{count}} d"
+    }
+  },
+  "public": {
+    "publishInstant": "Compartir con la comunidad",
+    "publish": "Publicar",
+    "unpublish": "Retirar",
+    "published": "Publicado",
+    "browse": "Explorar",
+    "library": "Biblioteca pública",
+    "myLikes": "Mis favoritos",
+    "likes": "me gusta",
+    "views": "vistas",
+    "forks": "bifurcaciones",
+    "fork": "Bifurcar biblioteca",
+    "forkConfirm": "Esto creará una copia privada en tu biblioteca. ¿Continuar?",
+    "forkSuccess": "¡Bifurcado con éxito!",
+    "likeSuccess": "Añadido a tus favoritos",
+    "unlikeSuccess": "Eliminado de tus favoritos",
+    "report": "Reportar",
+    "reported": "Reportado",
+    "reportSuccess": "Gracias. Revisaremos este reporte.",
+    "category": "Categoría",
+    "tags": "Etiquetas",
+    "difficulty": "Dificultad",
+    "language": "Idioma",
+    "license": "Licencia",
+    "originalContent": "Este es mi contenido original",
+    "publishSuccess": "¡Publicado con éxito!",
+    "unpublishSuccess": "¡Retirado con éxito!",
+    "noResults": "No se encontró contenido público",
+    "tryFilters": "Intenta ajustar tus filtros",
+    "searchPlaceholder": "Buscar contenido público...",
+    "sortBy": "Ordenar por",
+    "filterBy": "Filtrar",
+    "clearFilters": "Limpiar filtros",
+    "showingResults": "Mostrando {{count}} resultados",
+    "loadMore": "Cargar más",
+    "by": "de",
+    "books": "Libros",
+    "decks": "Mazos",
+    "all": "Todos",
+    "categories": {
+      "science": "Ciencia",
+      "math": "Matemáticas",
+      "languages": "Idiomas",
+      "history": "Historia",
+      "literature": "Literatura",
+      "technology": "Tecnología",
+      "art": "Arte",
+      "music": "Música",
+      "business": "Negocios",
+      "health": "Salud",
+      "design": "Diseño",
+      "programming": "Programación",
+      "technical": "Técnico",
+      "documentation": "Documentación",
+      "planning": "Planificación",
+      "features": "Características",
+      "deployment": "Despliegue"
+    },
+    "difficultyLevels": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "licenses": {
+      "all_rights": "Todos los derechos reservados",
+      "cc_by": "CC BY (Atribución)",
+      "cc_by_sa": "CC BY-SA (Compartir igual)",
+      "cc0": "CC0 (Dominio público)"
+    },
+    "sortOptions": {
+      "recent": "Más reciente",
+      "popular": "Más popular",
+      "mostLiked": "Más valorado",
+      "mostForked": "Más bifurcado"
+    },
+    "reportReasons": {
+      "copyright": "Infracción de derechos de autor",
+      "inappropriate": "Contenido inapropiado",
+      "spam": "Spam o baja calidad",
+      "misinformation": "Información incorrecta",
+      "other": "Otro"
+    },
+    "publishModal": {
+      "title": "Publicar en la biblioteca pública",
+      "description": "Comparte tu contenido con la comunidad",
+      "categoryRequired": "La categoría es obligatoria",
+      "tagsRequired": "Se requiere al menos una etiqueta",
+      "addTag": "Añadir etiqueta",
+      "submit": "Publicar ahora"
+    },
+    "reportModal": {
+      "title": "Reportar contenido",
+      "description": "Ayúdanos a mantener la comunidad segura",
+      "reason": "Motivo del reporte",
+      "details": "Detalles adicionales (opcional)",
+      "submit": "Enviar reporte"
+    },
+    "noLikes": "Aún no has valorado ningún contenido",
+    "exploreContent": "Explorar contenido público",
+    "signUpFree": "Regístrate gratis",
+    "backToBrowse": "Volver a explorar",
+    "endCTAAuth": "Bifurca este libro a tu biblioteca para editarlo y hacerlo tuyo",
+    "endCTAGuest": "Escrito con Nowry · Empieza tu propio libro gratis",
+    "startWriting": "Empieza a escribir",
+    "like": "Me gusta",
+    "liked": "Valorado",
+    "unlike": "Quitar me gusta",
+    "forkToLibrary": "Bifurcar a mi biblioteca",
+    "loadingMore": "Cargando más...",
+    "unknownAuthor": "Autor desconocido",
+    "contentNotFound": "Contenido no encontrado",
+    "byAuthor": "de {{name}}",
+    "ofTotal": "de {{total}}",
+    "cards": "tarjetas",
+    "forkedFrom": "Bifurcado de \"{{title}}\" por {{author}}",
+    "forkBadge": "Bifurcación",
+    "forkOwnContent": "Este es tu propio mazo — duplícalo desde tu biblioteca.",
+    "alreadyForked": "Ya bifurcaste esto — llevándote a tu copia..."
+  },
+  "publish": {
+    "openSheet": "Compartir con la comunidad",
+    "confirm": "Publicar mazo",
+    "unpublish": "Retirar de la comunidad",
+    "manageButton": "Gestionar publicación",
+    "publishButton": "Publicar en la comunidad",
+    "success": "Mazo publicado — los estudiantes ya pueden descubrirlo",
+    "notYetPublished": "Aún no publicado",
+    "firstTimeHint": "Tu mazo aparecerá en la sección Explorar de la comunidad para que otros puedan descubrirlo y bifurcarlo.",
+    "alreadyPublished": "Publicado el {{date}}",
+    "sheetSubtitle": "Compartir con la comunidad Nowry",
+    "status": {
+      "public": "Publicado",
+      "private": "Privado"
+    },
+    "error": {
+      "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
+      "alreadyPublished": "Este mazo ya está publicado.",
+      "notOwner": "Solo puedes publicar mazos que te pertenecen."
+    },
+    "form": {
+      "description": "Descripción",
+      "descriptionHint": "Ayuda a los estudiantes a entender qué cubre este mazo.",
+      "tags": "Etiquetas",
+      "tagsPlaceholder": "biología, células, examen AP",
+      "tagsHint": "Separadas por comas. Ayuda a los estudiantes a encontrar tu mazo.",
+      "difficulty": "Dificultad",
+      "language": "Idioma"
+    },
+    "difficulty": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "forkedFrom": {
+      "label": "Atribución (inmutable)",
+      "value": "Fork de \"{{title}}\" por {{author}}",
+      "immutableNote": "Esta atribución es permanente y se mostrará públicamente."
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Política de Privacidad",
+      "lastUpdated": "Última actualización: {{date}}",
+      "intro": {
+        "title": "1. Introducción",
+        "content": "Bienvenido a Nowry. Respetamos su privacidad y estamos comprometidos a proteger sus datos personales. Esta Política de Privacidad le informa sobre cómo cuidamos sus datos personales cuando visita nuestro sitio web y le informa sobre sus derechos de privacidad y cómo la ley le protege."
+      },
+      "dataCollect": {
+        "title": "2. Datos que Recopilamos",
+        "content": "Podemos recopilar, utilizar, almacenar y transferir diferentes tipos de datos personales sobre usted, incluidos:",
+        "items": {
+          "identity": "<strong>Datos de Identidad:</strong> Nombre de usuario o identificador similar.",
+          "contact": "<strong>Datos de Contacto:</strong> Dirección de correo electrónico.",
+          "technical": "<strong>Datos Técnicos:</strong> Tipo y versión del navegador, configuración de la zona horaria y ubicación.",
+          "usage": "<strong>Datos de Uso:</strong> Información sobre cómo utiliza nuestro sitio web, incluido su progreso de aprendizaje y el contenido generado por IA."
+        }
+      },
+      "usage": {
+        "title": "3. Cómo Utilizamos sus Datos",
+        "content": "Utilizamos sus datos principalmente para proporcionar y mejorar nuestros servicios educativos. Esto incluye:",
+        "items": [
+          "Facilitar la creación de su cuenta y el proceso de inicio de sesión a través de Firebase Authentication.",
+          "Personalizar su experiencia de aprendizaje utilizando algoritmos de IA.",
+          "Mejorar nuestro sitio web, servicios y experiencia de usuario.",
+          "Enviar correos electrónicos periódicos sobre su cuenta u otros productos y servicios."
+        ]
+      },
+      "ai": {
+        "title": "4. IA y Procesamiento de Datos",
+        "content": "Nowry utiliza inteligencia artificial para generar materiales de aprendizaje y proporcionar información. Cualquier contenido que proporcione puede ser procesado por nuestros modelos de IA para mejorar sus resultados de aprendizaje. No utilizamos sus datos de identidad personal para entrenar modelos de IA públicos."
+      },
+      "security": {
+        "title": "5. Seguridad de los Datos",
+        "content": "Hemos implementado medidas de seguridad adecuadas para evitar que sus datos personales se pierdan, utilicen o consulten accidentalmente de forma no autorizada. Utilizamos los protocolos de seguridad estándar de la industria de Firebase para la autenticación y el almacenamiento de datos."
+      },
+      "rights": {
+        "title": "6. Sus Derechos Legales",
+        "content": "En determinadas circunstancias, tiene derechos bajo las leyes de protección de datos en relación con sus datos personales, incluido el derecho a solicitar el acceso, la corrección, la eliminación o la restricción de sus datos personales."
+      },
+      "contact": {
+        "title": "7. Contacto",
+        "content": "Si tiene alguna pregunta sobre esta Política de Privacidad, póngase en contacto con nosotros en:",
+        "email": "Correo electrónico: support@nowry.app"
+      }
+    },
+    "terms": {
+      "title": "Términos de Servicio",
+      "lastUpdated": "Última actualización: {{date}}",
+      "acceptance": {
+        "title": "1. Aceptación de los Términos",
+        "content": "Al acceder o utilizar Nowry, usted acepta estar sujeto a estos Términos de Servicio. Si no está de acuerdo con alguna parte de estos términos, no podrá utilizar nuestros servicios."
+      },
+      "service": {
+        "title": "2. Descripción del Servicio",
+        "content": "Nowry proporciona una plataforma educativa impulsada por IA, que incluye, entre otros, resúmenes de libros, generación de tarjetas de memoria y herramientas de seguimiento del aprendizaje. Nos reservamos el derecho de modificar o interrumpir cualquier parte del servicio en cualquier momento."
+      },
+      "accounts": {
+        "title": "3. Cuentas de Usuario",
+        "content": "Para utilizar determinadas funciones, debe crear una cuenta. Usted es responsable de mantener la confidencialidad de sus credenciales de cuenta y de todas las actividades que ocurran bajo su cuenta. Debe notificarnos inmediatamente cualquier uso no autorizado de su cuenta."
+      },
+      "content": {
+        "title": "4. Contenido del Usuario y Generación por IA",
+        "content1": "Usted conserva la propiedad de cualquier contenido que cargue. Sin embargo, al usar Nowry, nos otorga una licencia para procesar su contenido con el fin de proporcionar y mejorar el servicio, incluido el uso de modelos de IA.",
+        "content2": "El contenido generado por IA se proporciona con fines educativos. Si bien nos esforzamos por lograr la precisión, Nowry no garantiza la corrección de los materiales generados por IA."
+      },
+      "conduct": {
+        "title": "5. Conducta Prohibida",
+        "content": "Usted acepta no:",
+        "items": [
+          "Intentar realizar ingeniería inversa en nuestros modelos de IA o plataforma.",
+          "Utilizar el servicio para fines ilegales.",
+          "Cargar código malicioso o contenido que viole los derechos de propiedad intelectual.",
+          "Interferir con la seguridad o el funcionamiento del servicio."
+        ]
+      },
+      "liability": {
+        "title": "6. Limitación de Responsabilidad",
+        "content": "Nowry no será responsable de ningún daño indirecto, incidental, especial, consecuente o punitivo que resulte de su uso o incapacidad de usar el servicio."
+      },
+      "termination": {
+        "title": "7. Terminación",
+        "content": "Nos reservamos el derecho de rescindir o suspender su cuenta a nuestra entera discreción, sin previo aviso, por una conducta que creamos que viola estos Términos de Servicio o que sea perjudicial para otros usuarios o nuestros intereses comerciales."
+      },
+      "changes": {
+        "title": "8. Cambios en los Términos",
+        "content": "Podemos actualizar estos Términos de Servicio de vez en cuando. Su uso continuado del servicio después de cualquier cambio constituye la aceptación de los nuevos términos."
+      },
+      "contact": {
+        "title": "9. Información de Contacto",
+        "content": "Para cualquier pregunta relacionada con estos Términos, póngase en contacto con nosotros en:",
+        "email": "Correo electrónico: support@nowry.app"
+      }
+    }
+  },
+  "home": {
+    "setupBanner": {
+      "message": "Tu perfil no está completo todavía.",
+      "cta": "Completar configuración",
+      "dismiss": "Descartar"
+    }
+  },
+  "pet": {
+    "stage": {
+      "1": {
+        "name": "Destello"
+      },
+      "2": {
+        "name": "Sprite"
+      },
+      "3": {
+        "name": "Explorador"
+      },
+      "4": {
+        "name": "Sabio"
+      },
+      "5": {
+        "name": "Oráculo"
+      },
+      "6": {
+        "name": "Luminario"
+      }
+    },
+    "levelUp": {
+      "reached": "Llegaste al nivel {{level}}",
+      "dismiss": "Toca para cerrar"
+    }
+  },
+  "quiz": {
+    "mode_label": "Modo Quiz",
+    "exit_aria": "Salir del modo quiz",
+    "select_deck": "¿Qué mazo quieres practicar?",
+    "select_deck_aria": "Seleccionar mazo {{name}} para el quiz",
+    "due": "pendientes",
+    "input_placeholder": "Escribe tu respuesta...",
+    "no_decks": "Aún no tienes mazos. Crea uno para empezar a practicar.",
+    "go_to_study": "Ir al centro de estudio",
+    "type": {
+      "definition": "Definición",
+      "contextual": "Contextual",
+      "comparison": "Comparar",
+      "fill_in": "Completar",
+      "open_recall": "Recuerdo libre",
+      "fill_in_blank": "Completa el espacio",
+      "multiple_choice": "Opción múltiple",
+      "short_answer": "Respuesta corta"
+    },
+    "hint_label": "Pista",
+    "answer_label": "Respuesta",
+    "next_card": "Siguiente →",
+    "next_card_aria": "Ir a la siguiente tarjeta",
+    "see_results": "Ver resultados",
+    "summary_title": "Sesión completada",
+    "weak_cards_label": "Tarjetas a repasar",
+    "review_weak": "Repasar tarjetas débiles",
+    "review_weak_aria": "Iniciar sesión de repaso para tarjetas débiles",
+    "done": "Listo",
+    "done_aria": "Cerrar resumen del quiz",
+    "confirm_exit_prompt": "¿Seguro que quieres salir del quiz?",
+    "confirm_exit_yes": "Salir del quiz",
+    "confirm_exit_no": "Seguir",
+    "choose_deck_title": "Elige un mazo",
+    "choose_deck_subtitle": "Selecciona lo que quieres practicar",
+    "new": "nuevo",
+    "error_loading_decks": "No se pudieron cargar los mazos. Inténtalo de nuevo.",
+    "error_starting": "No se pudo iniciar el quiz. Inténtalo de nuevo.",
+    "error_submitting": "No se pudo enviar tu respuesta. Inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "skip_card": "Saltar esta tarjeta",
+    "ai": {
+      "starting": "Generando tu quiz de {{topic}}…",
+      "error": "No se pudo iniciar el quiz. ¿Intentarlo de nuevo?"
+    },
+    "mode": {
+      "ai": "Quiz con IA"
+    },
+    "topic_label": "Tema: {{topic}}",
+    "summary": {
+      "view_history": "Ver historial"
+    }
+  },
+  "sessions": {
+    "title": "Sesiones recientes",
+    "totalCount": "{{count}} en total",
+    "aiQuiz": "Quiz con IA",
+    "deckQuiz": "Quiz de baraja",
+    "cardCount": "{{count}} tarjetas",
+    "viewAll": "Ver {{count}} sesiones más",
+    "showLess": "Ver menos",
+    "expandAria": "Expandir detalles de la sesión",
+    "collapseAria": "Colapsar detalles de la sesión",
+    "noCardDetail": "Sin detalle de tarjetas disponible.",
+    "cardRef": "Tarjeta #{{id}}",
+    "unknownTopic": "Tema desconocido",
+    "srsReview": "Repaso de tarjetas",
+    "empty": "Aún no hay sesiones. Completa una sesión de estudio o quiz para ver tu historial aquí.",
+    "viewHistory": "Ver historial",
+    "emptyHint": "Completa una sesión de estudio para verla aquí",
+    "loadMore": "Cargar {{count}} más"
+  },
+  "agent": {
+    "aria": {
+      "openBuddy": "Abrir compañero de estudio",
+      "closeBuddy": "Cerrar compañero de estudio",
+      "sendMessage": "Enviar mensaje"
+    },
+    "messagesRemaining": "messages this month",
+    "persistentMemory": "Memory on",
+    "sessionOnly": "Session-only memory",
+    "chat": {
+      "empty": {
+        "title": "Start chatting",
+        "body": "Ask me anything about your studies"
+      },
+      "error": {
+        "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
+      },
+      "upgradePlan": "Upgrade plan"
+    },
+    "personality": {
+      "error": {
+        "blocked": "That personality description was flagged. Try different wording.",
+        "failed": "Personality generation failed. Please try again."
+      },
+      "success": "Personality updated"
+    },
+    "upgrade": {
+      "persistentMemory": "Unlock persistent memory with Plus",
+      "customPersonality": "Custom personality requires Plus or Pro",
+      "morePersonality": "Unlock more personality generations with Pro",
+      "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    },
+    "errors": {
+      "resting": "El compañero de estudio está descansando. Inténtalo de nuevo en un momento.",
+      "settingsLoadFailed": "No se pudieron cargar tus ajustes. Mostrando valores predeterminados.",
+      "quizStartFailed": "No se pudo iniciar el quiz. Por favor, inténtalo de nuevo.",
+      "quizAnswerFailed": "Algo salió mal al evaluar tu respuesta. La sesión se ha reiniciado — puedes empezar un nuevo quiz.",
+      "quizRetry": "Intentar de nuevo",
+      "quizRetryAria": "Reintentar iniciar el quiz"
+    },
+    "quiz": {
+      "preparing": "Preparando tu quiz sobre {{topic}}…",
+      "thisTopic": "este tema",
+      "emptyTopic": "No pude generar preguntas para ese tema.",
+      "tryDifferentTopic": "Intenta reformular o elegir un tema más amplio."
+    },
+    "quizOffer": {
+      "prompt": "¿Quieres que te haga un quiz sobre {{topic}}?",
+      "accept": "Sí, hazme el quiz",
+      "acceptAria": "Iniciar un quiz sobre {{topic}}",
+      "decline": "No, gracias",
+      "declineAria": "Descartar sugerencia de quiz",
+      "declined": "Vale, avísame si cambias de opinión."
+    },
+    "defaultName": "Compañero de estudio",
+    "settingsSubtitle": "Configura el comportamiento y la personalidad de tu compañero",
+    "welcomeMessage": "¡Hola! 👋 Soy {{petName}}.",
+    "welcomePrompt": "{{name}}, pregúntame cualquier cosa, o dime qué estás estudiando hoy.",
+    "welcomePromptNoName": "Pregúntame cualquier cosa, o dime qué estás estudiando hoy.",
+    "headerStatus": "Nv{{level}} · {{tier}} · {{remaining}} chispas restantes",
+    "headerStatusUnlimited": "Nv{{level}} · {{tier}} · ilimitado",
+    "inputPlaceholder": "Pregúntame cualquier cosa...",
+    "inputAriaLabel": "Escribe un mensaje a tu compañero de estudio",
+    "limitReachedPlaceholder": "Límite mensual alcanzado — mejora tu plan para más chispas",
+    "tabs": {
+      "personality": "Personalidad",
+      "companion": "Compañero",
+      "interventions": "Intervenciones"
+    },
+    "settings": {
+      "backToSettings": "Volver a ajustes",
+      "levelLabel": "Nivel {{level}}",
+      "xpToNextLevel": "{{count}} XP para el siguiente nivel",
+      "sparks": "chispas",
+      "previewMessage": "¿Qué debería estudiar hoy?",
+      "personality": {
+        "replyLength": {
+          "title": "Longitud de respuesta",
+          "desc": "Controla cuánto escribe tu compañero por respuesta."
+        },
+        "tone": {
+          "title": "Personalidad y tono",
+          "desc": "Elige cómo debe comunicarse tu compañero contigo."
+        },
+        "knowledge": {
+          "title": "Acceso al conocimiento",
+          "desc": "Permite que tu compañero lea tu biblioteca, mazos y metas para darte consejos más inteligentes. Tus datos",
+          "descBold": "nunca se envían externamente",
+          "descSuffix": "— solo se usan para generar tu respuesta.",
+          "libraryToggleLabel": "Permitir acceso a mi biblioteca y mazos",
+          "libraryToggleDesc": "Activa el pipeline de recuperación RAG (solo lectura).",
+          "nudgesLabel": "Recordatorios proactivos de estudio",
+          "nudgesDesc": "Te saluda en el panel con un recordatorio si tienes tarjetas pendientes.",
+          "nudgesRequires": " Requiere Acceso al conocimiento.",
+          "unlockAlert": "Activa el Acceso al conocimiento para desbloquear respuestas más inteligentes y recordatorios proactivos.",
+          "roamingLabel": "Compañero itinerante",
+          "roamingDesc": "Tu compañero deambula por la pantalla entre los elementos mientras estudias."
+        },
+        "saved": "Guardado",
+        "regenerate": "Regenerate Personality",
+        "regenerateButton": "Regenerate",
+        "used": "used this month",
+        "upgrade": "Unlock more personality generations with Pro",
+        "customPersonalityLocked": "Custom personality requires Plus or Pro",
+        "resetDate": "Resets {{date}}",
+        "generating": "Generating personality...",
+        "preview": {
+          "title": "Vista previa en vivo",
+          "caption": "La vista previa se actualiza al cambiar los ajustes.",
+          "captionSave": "Los cambios se guardan automáticamente."
+        },
+        "conciseness": {
+          "concise": {
+            "label": "Conciso",
+            "description": "1–2 oraciones. Directo al grano.",
+            "preview": "You have 8 cards due. Start your session!"
+          },
+          "balanced": {
+            "label": "Equilibrado",
+            "description": "Respuestas completas sin relleno.",
+            "preview": "You have 8 due cards spread across 2 decks. I'd suggest starting with 'Organic Chemistry' since it has the most overdue items. Head to your Study Session when you're ready!"
+          },
+          "detailed": {
+            "label": "Detallado",
+            "description": "Explicaciones exhaustivas con ejemplos.",
+            "preview": "Great question! You have 8 cards due today across 2 decks:\n• Organic Chemistry — 5 due, 2 new\n• Linear Algebra — 3 due\n\nI'd recommend tackling Organic Chemistry first since those cards are the most overdue and you're at 62% mastery there. Your study streak is at 4 days — don't break it! 🔥"
+          }
+        },
+        "toneOptions": {
+          "friendly": {
+            "label": "Amigable",
+            "description": "Cálido, alentador y conversacional.",
+            "preview": "You're doing great! Let's keep that momentum going. Hit your study session! ✨"
+          },
+          "professional": {
+            "label": "Profesional",
+            "description": "Preciso, académico, sin rodeos.",
+            "preview": "You have 8 items due for review. Completing them will improve retention by reinforcing spaced repetition intervals."
+          },
+          "strict": {
+            "label": "Estricto",
+            "description": "Orientado a la responsabilidad. Sin elogios vacíos.",
+            "preview": "8 cards overdue. That's falling behind. Get into your session now — every day you skip increases relearning time."
+          },
+          "socratic": {
+            "label": "Socrático",
+            "description": "Responde preguntas con preguntas orientadoras.",
+            "preview": "Before I tell you, what do you think happens to a memory trace when you skip a review? Think about what spaced repetition is designed to prevent."
+          }
+        }
+      },
+      "interventions": {
+        "requiresNudging": "Activa los recordatorios proactivos en la pestaña Personalidad para configurar las intervenciones.",
+        "saveError": "No se pudo guardar. Por favor, inténtalo de nuevo.",
+        "frequency": {
+          "sectionTitle": "Frecuencia de intervención",
+          "sectionDesc": "Con qué frecuencia tu compañero te interrumpe con mensajes.",
+          "conservative": "Conservador",
+          "conservativeDesc": "Como máximo 1 mensaje por sesión. Ventana de silencio de 20 minutos tras cerrar.",
+          "balanced": "Equilibrado",
+          "balancedDesc": "Como máximo 2 mensajes por sesión. Ventana de silencio de 10 minutos tras cerrar.",
+          "frequent": "Frecuente",
+          "frequentDesc": "Como máximo 4 mensajes por sesión. Ventana de silencio de 3 minutos tras cerrar."
+        },
+        "focusMode": {
+          "title": "Modo enfoque",
+          "label": "Permanecer en silencio durante las sesiones de estudio",
+          "desc": "Suprime los mensajes de respuesta incorrecta mientras estudias activamente. Los resúmenes de sesión siguen apareciendo al final."
+        },
+        "types": {
+          "sectionTitle": "Tipos de mensajes",
+          "sectionDesc": "Desactiva tipos específicos de mensajes de tu compañero.",
+          "wrongAnswer": "Momentos de enseñanza",
+          "wrongAnswerDesc": "Una breve explicación después de responder incorrectamente una tarjeta.",
+          "sessionSummary": "Resúmenes de sesión",
+          "sessionSummaryDesc": "Un mensaje de diagnóstico al final de cada sesión de estudio.",
+          "preSession": "Orientación previa a la sesión",
+          "preSessionDesc": "Una breve orientación antes de que comience una sesión de estudio.",
+          "reEngagement": "Recordatorios de reenganche",
+          "reEngagementDesc": "Un mensaje cuando se han acumulado tarjetas en tus mazos.",
+          "streakMilestone": "Hitos de racha",
+          "streakMilestoneDesc": "Un mensaje cuando alcanzas 7, 14, 30, 60 o 100 días consecutivos de estudio."
+        }
+      }
+    },
+    "avatar": {
+      "generateError": "Algo salió mal. Por favor, inténtalo de nuevo.",
+      "rateLimitError": "Límite mensual de retratos alcanzado.",
+      "freeTierError": "Actualiza a Plus para generar retratos.",
+      "missingSpeciesError": "Primero elige una especie de compañero.",
+      "portraitAlt": "Tu retrato de compañero",
+      "regenPendingTitle": "¡Tu compañero ha evolucionado!",
+      "regenPendingDesc": "Genera su nuevo retrato para ver su forma desarrollada.",
+      "regenPendingAction": "Generar nuevo retrato"
+    },
+    "companion": {
+      "nameTitle": "Nombra a tu compañero",
+      "nameDescription": "Dale a tu compañero de estudio un nombre que te guste.",
+      "nameLabel": "Nombre del compañero",
+      "namePlaceholder": "Ej. Búho, Nova, Chispa...",
+      "nameAriaLabel": "Nombre de tu compañero",
+      "speciesTitle": "Elige una especie",
+      "speciesDescription": "La especie de tu compañero da forma a su personalidad.",
+      "suggestedLabel": "Sugerido según tus intereses",
+      "colorTitle": "Color de acento",
+      "colorDescription": "Define el color del brillo del orbe de tu compañero.",
+      "colorAriaLabel": "Seleccionar color {{color}}",
+      "previewLabel": "Vista previa",
+      "previewCaption": "Se actualiza con tus cambios",
+      "saveError": "No se pudo guardar. Por favor, inténtalo de nuevo.",
+      "avatarTitle": "Retrato IA",
+      "avatarDescription": "Genera un retrato IA único de tu compañero basado en tu perfil.",
+      "avatarLockedTitle": "Retrato IA",
+      "avatarLockedDescription": "Obtén un retrato generado por IA único de tu compañero.",
+      "avatarGenerating": "Creando tu compañero...",
+      "generateAvatar": "Generar tu compañero",
+      "generateAvatarAriaLabel": "Generar retrato IA de tu compañero",
+      "regenerate": "Regenerar",
+      "regenerating": "Regenerando...",
+      "regenerateAriaLabel": "Regenerar retrato del compañero",
+      "generationsRemaining": "{{count}} restantes este mes",
+      "upgradePlus": "Actualizar a Plus",
+      "upgradePlusAriaLabel": "Actualiza a Plus para desbloquear retratos IA",
+      "species": {
+        "owl": "Búho",
+        "fox": "Zorro",
+        "cat": "Gato",
+        "dragon": "Dragón",
+        "robot": "Robot",
+        "star": "Estrella",
+        "phoenix": "Fénix",
+        "crystal": "Cristal",
+        "leaf": "Hoja",
+        "music": "Nota"
+      },
+      "colors": {
+        "ocean": "Océano",
+        "violet": "Violeta",
+        "mint": "Menta",
+        "gold": "Dorado",
+        "rose": "Rosa",
+        "coral": "Coral",
+        "sky": "Cielo",
+        "ember": "Brasa"
+      },
+      "dismiss": "Cerrar",
+      "tellMeMore": "Saber más",
+      "interventions": {
+        "preSessionFraming": {
+          "noStruggle": "{{deckName}} tiene {{dueCount}} tarjetas pendientes. Esta es una sesión enfocada.",
+          "withStruggle": "{{deckName}} tiene {{dueCount}} tarjetas pendientes. En la última sesión, {{strugglePattern}} te costó — vale la pena repasarlo hoy."
+        },
+        "reEngagement": {
+          "withDue": "{{totalDue}} tarjetas se han acumulado en tus mazos. {{topDeckName}} tiene la mayor cantidad con {{topDeckDue}} — es un buen punto de partida.",
+          "noDue": "Hoy no tienes tarjetas pendientes, pero vale la pena repasar {{topDeckName}} para mantener la retención."
+        },
+        "streakMilestone": {
+          "day7": "Siete días consecutivos de repaso es donde la investigación sobre formación de hábitos sitúa el primer ancla duradera.",
+          "day14": "Dos semanas de repaso diario produce ganancias medibles en la retención a largo plazo según estudios de repetición espaciada.",
+          "day30": "Treinta días de repaso constante sitúa este material en la categoría de memoria duradera a largo plazo.",
+          "day60": "Sesenta días de repaso ininterrumpido es un resultado que la mayoría de los estudiantes nunca alcanzan.",
+          "day100": "Cien días. La investigación sobre la durabilidad de los hábitos deja de distinguir en este punto — esto es simplemente parte de quién eres ahora."
+        }
+      }
+    }
+  },
+  "reports": {
+    "modal": {
+      "contextPlaceholder": "Por favor, proporciona más contexto..."
+    }
+  },
+  "bugs": {
+    "filters": {
+      "allStatus": "Todos los estados",
+      "allSeverity": "Toda la gravedad",
+      "allCategories": "Todas las categorías"
+    },
+    "modal": {
+      "title": "Reportar un error",
+      "titleField": "Título del error",
+      "titlePlaceholder": "Ej., El editor falla al pegar contenido extenso",
+      "description": "Descripción",
+      "descPlaceholder": "Describe con detalle lo que ocurrió...",
+      "steps": "Pasos para reproducir",
+      "stepsPlaceholder": "1. Ir a...\n2. Hacer clic en...\n3. Ver el error",
+      "severity": "Gravedad",
+      "category": "Categoría",
+      "screenshots": "Capturas de pantalla",
+      "screenshotsHint": "{{count}}/3 capturas · Las imágenes se comprimen automáticamente",
+      "uploadBtn": "Subir captura",
+      "maxReached": "Máximo alcanzado",
+      "submit": "Enviar reporte",
+      "submitting": "Enviando...",
+      "successMsg": "Reporte enviado. ¡Gracias!",
+      "errorMsg": "No se pudo enviar el reporte. Inténtalo de nuevo.",
+      "removeScreenshot": "Eliminar captura"
+    },
+    "severity": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "category": {
+      "ui": "UI / Diseño",
+      "performance": "Rendimiento",
+      "functionality": "Funcionalidad",
+      "data": "Datos / Contenido",
+      "other": "Otro"
+    }
+  },
+  "plans": {
+    "plus": "Plus",
+    "pro": "Pro",
+    "title": "Choose Your Plan",
+    "subtitle": "Unlock AI features that match your learning style",
+    "currentPlan": "Your current plan",
+    "billingToggle": {
+      "label": "Billing period:",
+      "monthly": "Monthly",
+      "annual": "Annual (Save 17%)"
+    },
+    "cta": {
+      "upgradeToPlus": "Upgrade to Plus",
+      "upgradeToPro": "Upgrade to Pro",
+      "switchToPro": "Switch to Pro",
+      "getStarted": "Get started"
+    },
+    "features": {
+      "cardGeneration": "Generate cards from text",
+      "cardGenerationFree": "Up to 2 cards",
+      "cardGenerationPlus": "Book-level analysis (20 cards)",
+      "cardGenerationPro": "Full deck AI redesign",
+      "bookExpansion": "Expand selected text with AI",
+      "bookExpansionFree": "Character limited",
+      "bookExpansionPlus": "Soft limit",
+      "bookExpansionPro": "Unlimited",
+      "quizGeneration": "Generate quiz questions",
+      "quizGenerationFree": "Up to 5 questions",
+      "quizGenerationPlus": "Book-level (20 questions)",
+      "quizGenerationPro": "Full deck AI redesign",
+      "aiUsage": "Monthly AI generations",
+      "aiUsageFree": "0 (view only)",
+      "aiUsagePlus": "100 / month",
+      "aiUsagePro": "Unlimited",
+      "studyCards": "Flashcard study sessions",
+      "studyCardsAll": "Unlimited",
+      "books": "Smart Books",
+      "booksAll": "Unlimited",
+      "support": "Support",
+      "supportFree": "Community",
+      "supportPlus": "Email support",
+      "supportPro": "Priority support"
+    },
+    "error": {
+      "checkoutFailed": "Could not start checkout. Please try again."
+    }
+  },
+  "billing": {
+    "paymentFailed": {
+      "title": "Payment failed",
+      "message": "Your payment method failed. Update it by {{date}} to keep access.",
+      "cta": "Update payment method"
+    }
+  },
+  "upgrade": {
+    "welcome": {
+      "title": "Welcome to {{plan}}!",
+      "message": "Your upgrade is active. Start exploring new features.",
+      "cta": "Get started"
+    },
+    "modelBadge": "Powered by Llama 3.3 (free)",
+    "inlineCtaText": "These results were generated with the free model — upgrade to Pro for smarter AI.",
+    "inlineCtaDismiss": "Dismiss",
+    "modal": {
+      "title": "Unlock Premium AI",
+      "description": "Upgrade to Plus or Pro for smarter AI models and faster generations.",
+      "feature1": "Pro uses Gemini Pro — 10x better at complex topics",
+      "feature2": "Unlimited generations — no monthly limits",
+      "feature3": "Access to personalized AI companion",
+      "cta": "View Plans & Upgrade"
+    },
+    "headlines": {
+      "generateFromBook": "Unlock book-wide AI card generation with Plus",
+      "generateQuizFromBook": "Unlock book-wide quiz generation with Plus",
+      "analyzeDeck": "Unlock AI deck analysis with Pro",
+      "tts": "Hear your book read aloud with Plus",
+      "illustrations": "Unlock unlimited diagrams with Plus"
+    }
+  },
+  "aiMagic": {
+    "streaming": {
+      "progress": "{{count}} de {{total}} tarjetas generadas",
+      "progressAuto": "{{count}} tarjetas generadas...",
+      "generating": "Generando tarjetas...",
+      "retry": "Reintentar",
+      "retryAria": "Reintentar la generación de tarjetas",
+      "emptyTitle": "No se generaron tarjetas",
+      "emptyBody": "La IA no pudo crear tarjetas a partir de este texto. Inténtalo de nuevo o selecciona otro fragmento."
+    },
+    "errors": {
+      "quota": "Has alcanzado tu límite de generación con IA. Inténtalo de nuevo más tarde.",
+      "malformed": "La IA devolvió una respuesta inesperada. Inténtalo de nuevo.",
+      "pipeline": "La generación de tarjetas falló. Inténtalo de nuevo.",
+      "timeout": "La generación de tarjetas tardó demasiado. Inténtalo de nuevo.",
+      "stalled": "La conexión se interrumpió. Comprueba tu red e inténtalo de nuevo.",
+      "generic": "Algo salió mal al generar las tarjetas. Inténtalo de nuevo."
+    },
+    "expandWithAI": "Expand with AI",
+    "expanding": "Expanding...",
+    "expandError": "Couldn't expand text. Please try again.",
+    "generateFromBook": {
+      "label": "Generate Cards from Book",
+      "labelQuiz": "Generate Quiz from Book",
+      "ariaLabel": "Generate flashcards from full book content",
+      "lockedAriaLabel": "Generate Cards from Book — available with Plus",
+      "ariaLabelQuiz": "Generate quiz questions from full book content",
+      "lockedAriaLabelQuiz": "Generate Quiz from Book — available with Plus",
+      "lockedTooltip": "Available with Plus — upgrade to unlock",
+      "loading": "Analyzing book content...",
+      "generating": "Generating cards…",
+      "generatingQuiz": "Generating quiz…",
+      "generatingHint": "AI is working — this may take up to a minute",
+      "error": "Couldn't generate from book. Please try again.",
+      "errorQuiz": "Couldn't generate quiz from book. Please try again.",
+      "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento."
+    },
+    "analyzeDeck": {
+      "label": "Analyze Deck",
+      "ariaLabel": "Run AI deck analysis",
+      "lockedAriaLabel": "Analyze Deck — available with Pro",
+      "lockedTooltip": "Available with Pro — upgrade to unlock",
+      "loading": "Analyzing your deck...",
+      "error": "Deck analysis failed. Please try again.",
+      "emptyResult": "No issues found in this deck",
+      "emptyResultBody": "Your deck looks well-structured.",
+      "sections": {
+        "duplicates": "Potential Duplicates",
+        "gaps": "Topic Gaps",
+        "rewrites": "Rewrite Suggestions"
+      },
+      "actions": {
+        "accept": "Accept",
+        "skip": "Skip",
+        "acceptAll": "Accept All",
+        "acceptError": "Couldn't apply suggestion. Please try again."
+      }
+    },
+    "tts": {
+      "label": "Listen",
+      "playTooltip": "Listen to this book",
+      "playAriaLabel": "Play book audio",
+      "loadingAriaLabel": "Generating audio...",
+      "pauseTooltip": "Pause",
+      "pauseAriaLabel": "Pause audio playback",
+      "resumeTooltip": "Resume",
+      "resumeAriaLabel": "Resume audio playback",
+      "stopTooltip": "Stop",
+      "stopAriaLabel": "Stop audio playback",
+      "lockedTooltip": "Available with Plus — upgrade to unlock",
+      "lockedAriaLabel": "Listen to book — available with Plus",
+      "languageAriaLabel": "Select TTS language",
+      "loading": "Generating audio...",
+      "error": "Couldn't generate audio. Please try again.",
+      "playSection": "Reproducir sección: {{title}}",
+      "truncatedHint": "Las selecciones largas se acortan para el audio",
+      "playSelectionTooltip": "Listen",
+      "playSelectionAriaLabel": "Play selected text",
+      "stopSelectionTooltip": "Stop",
+      "stopSelectionAriaLabel": "Stop audio playback",
+      "fullBook": "Full book",
+      "fullBookHint": "Read the entire book",
+      "sectionPickerTitle": "Choose a section",
+      "autoDetectLabel": "Auto-detect language",
+      "autoDetectAriaLabel": "Automatically detect and play mixed-language text in each segment's own language",
+      "segmentError": "Couldn't detect languages automatically. Please try again.",
+      "languages": {
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "ja": "Japanese",
+        "pt": "Portuguese",
+        "zh": "Chinese"
+      }
+    },
+    "diagram": {
+      "panelTitle": "Generate Diagram",
+      "loading": "Generating diagram...",
+      "error": "Couldn't generate diagram. Please try again.",
+      "regenerate": "Regenerate",
+      "regenerateAriaLabel": "Regenerate diagram",
+      "insert": "Insert into Book",
+      "insertAriaLabel": "Insert diagram into book at cursor",
+      "explanation": "Explanation",
+      "typeAriaLabel": "Select diagram type",
+      "renderError": "Unable to render diagram. The syntax may be invalid. Try regenerating.",
+      "lockedTooltip": "Unlock unlimited diagrams with Plus",
+      "types": {
+        "auto": "Auto",
+        "mindmap": "Mind Map",
+        "flowchart": "Flowchart",
+        "sequence": "Sequence Diagram",
+        "er": "ER Diagram"
+      }
+    }
+  },
+  "aiVisualizer": {
+    "title": "Visualizador IA",
+    "subtitle": "Genera diagramas a partir de tu contenido de estudio.",
+    "closeAria": "Cerrar",
+    "vizTypeLabel": "Tipo de diagrama",
+    "vizTypeAria": "Seleccionar tipo de diagrama",
+    "vizType": {
+      "mindmap": "Mapa mental",
+      "flowchart": "Diagrama de flujo",
+      "sequence": "Diagrama de secuencia",
+      "timeline": "Línea de tiempo"
+    },
+    "generateButton": "Generar",
+    "generateAria": "Generar diagrama",
+    "generating": "Generando diagrama...",
+    "explanationLabel": "Explicación",
+    "diagramErrorTitle": "Error en el diagrama",
+    "diagramErrorBody": "No se pudo renderizar el diagrama. La sintaxis generada puede ser inválida. Inténtalo de nuevo.",
+    "saveButton": "Guardar",
+    "saveAria": "Guardar diagrama en el mazo",
+    "cancelButton": "Cancelar",
+    "emptyTitle": "Aún no hay diagrama",
+    "emptyBody": "Elige un tipo de diagrama y genera uno a partir de tu contenido.",
+    "titleField": "Título",
+    "titlePrefix": "Visual"
+  },
+  "accountSettings": {
+    "plan": {
+      "title": "Plan & Billing",
+      "current": "You are on the {{plan}} plan",
+      "upgrade": "View plans & upgrade",
+      "manage": "Manage subscription"
+    }
+  },
+  "blackboard": {
+    "title": "Blackboard",
+    "defaultBoardName": "My Blackboard",
+    "subtitle": "Brainstorm freely — auto-saved",
+    "tooltip": "Open Blackboard",
+    "toolbar": {
+      "sticky": "Sticky",
+      "addSticky": "Add sticky note",
+      "addGoal": "Add a goal",
+      "addPriority": "Add a priority",
+      "addTask": "Add a task",
+      "clear": "Clear board",
+      "myBoards": "My Boards",
+      "loadingBoard": "Opening your board…"
+    },
+    "picker": {
+      "title": {
+        "goal": "Select a goal",
+        "priority": "Select a priority",
+        "task": "Select a task"
+      },
+      "search": "Search...",
+      "empty": "Nothing found"
+    },
+    "clear": {
+      "title": "Clear board?",
+      "desc": "All notes and connections will be permanently removed.",
+      "confirm": "Clear everything"
+    },
+    "canvasError": {
+      "message": "Could not load this board. Try again.",
+      "retry": "Retry board"
+    },
+    "boardListSelector": {
+      "title": "My Boards",
+      "subtitle": "Select a board to open or create a new one",
+      "newBoard": "New board",
+      "newBoardPlaceholder": "Board name",
+      "ownedBoards": "Your Boards",
+      "sharedBoards": "Shared with You",
+      "empty": {
+        "title": "No boards yet",
+        "body": "Create your first board to get started"
+      },
+      "error": "Could not load boards. Try again.",
+      "sharedWith": "Shared by {{name}}"
+    },
+    "upgrade": {
+      "share": "Share boards with Plus or Pro",
+      "multiBoard": "Unlock unlimited boards with Pro"
+    },
+    "boards": {
+      "newBoard": "New board"
+    },
+    "share": {
+      "title": "Share this board",
+      "inviteLabel": "Invite by email",
+      "inviteSubtitle": "They will see this board in their board list",
+      "sendInvite": "Send invite",
+      "empty": {
+        "title": "Not shared yet",
+        "body": "Invite someone by their email address"
+      },
+      "error": {
+        "notFound": "User not found. Check the email address.",
+        "alreadyInvited": "This user already has access.",
+        "notOwner": "Only the board owner can share this board"
+      }
+    }
+  },
+  "calendarPage": {
+    "title": "Calendar",
+    "addEvent": "Add event",
+    "views": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
+    "timeBlock": "New time block",
+    "error": "Couldn't load your calendar. Check your connection and try again.",
+    "showHabits": "Habits",
+    "showHabitsAriaLabel": "Toggle habit events on calendar",
+    "moreFilters": "More filters",
+    "lessFilters": "Less filters",
+    "moreFiltersAriaLabel": "Show more calendar filters",
+    "presets": {
+      "goalsOnly": "Goals only",
+      "goalsOnlyAriaLabel": "Show goals and milestones only",
+      "today": "Today",
+      "todayAriaLabel": "Reset filters for today",
+      "thisWeek": "This week",
+      "thisWeekAriaLabel": "Reset filters for this week"
+    },
+    "filters": {
+      "allAreas": "All areas",
+      "allAreasAriaLabel": "Show all focus areas",
+      "areaAriaLabel": "Filter by {{name}}",
+      "allTypes": "All types",
+      "allTypesAriaLabel": "Show all event types",
+      "typeGoal": "Goals",
+      "typeTask": "Tasks",
+      "typePriority": "Priorities",
+      "typeMilestone": "Milestones",
+      "typeGoalAriaLabel": "Filter by goals",
+      "typeTaskAriaLabel": "Filter by tasks",
+      "typePriorityAriaLabel": "Filter by priorities",
+      "typeMilestoneAriaLabel": "Filter by milestones",
+      "noAreas": "No focus areas",
+      "noAreasBody": "Add a focus area in Annual Planning to filter the calendar"
+    }
+  },
+  "goalAi": {
+    "buttonLabel": "AI Assist",
+    "panelTitle": "AI Goal Analysis",
+    "refresh": "Refresh analysis",
+    "loading": "Analyzing your annual plan with AI...",
+    "error": "Failed to analyze goals. Please try again.",
+    "noPlan": "No annual plan found for this year. Create a plan to unlock AI analysis.",
+    "upgradeHeadline": "Unlock AI Goal Analysis with Pro",
+    "sections": {
+      "suggestions": "Quarterly Suggestions",
+      "conflicts": "Conflicts Detected",
+      "archiving": "Archiving Recommendations"
+    },
+    "empty": {
+      "suggestions": "No suggestions available.",
+      "conflicts": "No conflicts detected.",
+      "archiving": "No stale goals to archive."
+    }
+  },
+  "sheets": {
+    "title": "My Sheets",
+    "newSheet": "New sheet",
+    "untitled": "Untitled Sheet",
+    "search": "Search sheets…",
+    "error": "Couldn't load your sheets. Refresh the page to try again.",
+    "view": {
+      "grid": "Switch to grid view",
+      "list": "Switch to list view"
+    },
+    "empty": {
+      "title": "No sheets yet",
+      "body": "Create a spreadsheet to track finances, plans, or anything you like."
+    },
+    "create": {
+      "title": "New sheet",
+      "template": "Template",
+      "confirm": "Create sheet",
+      "nameLabel": "Name",
+      "templateLabel": "Template",
+      "error": "Failed to create sheet. Please try again."
+    },
+    "templates": {
+      "blank": "Blank",
+      "budgetTracker": "Budget Tracker",
+      "expenseLog": "Expense Log"
+    },
+    "editor": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "filter": "Filter rows…",
+      "error": "Couldn't load this sheet. Go back to your sheets and try again.",
+      "backToSheets": "Back to sheets",
+      "filterReadOnly": "Read-only while filtering",
+      "titleInput": "Sheet name"
+    },
+    "delete": {
+      "title": "Delete sheet?",
+      "body": "This sheet will be moved to trash and deleted after 30 days.",
+      "confirm": "Delete \"{{title}}\"?"
+    },
+    "list": {
+      "title": "My Sheets",
+      "emptyTitle": "No sheets yet",
+      "emptySubtitle": "Create a spreadsheet to track finances, plans, or anything you like.",
+      "new": "New Sheet",
+      "search": "Search sheets…",
+      "errorFetch": "Couldn’t load your sheets. Refresh the page to try again.",
+      "gridView": "Grid view",
+      "listView": "List view",
+      "columns": "Columns",
+      "noResults": "No sheets match \"{{term}}\""
+    }
+  },
+  "tts": {
+    "autoDetect": "Auto-detect language",
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+  },
+  "form": {
+    "saveAndNext": "Guardar y siguiente",
+    "saveAndClose": "Guardar y cerrar",
+    "addedCount_one": "{{count}} añadido",
+    "addedCount_other": "{{count}} añadidos",
+    "detailRailAria": "Añadir detalles opcionales",
+    "saveErrorTitle": "No se pudo guardar",
+    "requiredField": "Este campo es obligatorio",
+    "tagsLabel": "Etiquetas",
+    "tagAddAria": "Añadir etiqueta",
+    "tagRemoveAria": "Quitar {{tag}}",
+    "tagPlaceholder": "Escribe una etiqueta y pulsa Enter",
+    "deckLabel": "Mazo",
+    "deckPlaceholder": "Elige un mazo",
+    "deckNone": "Sin mazo",
+    "deckEmpty": "Todavía no tienes ningún mazo."
   }
 }

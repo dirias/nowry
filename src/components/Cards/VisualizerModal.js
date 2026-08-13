@@ -1,24 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Typography,
-  Button,
-  Box,
-  Select,
-  Option,
-  Stack,
-  CircularProgress,
-  FormControl,
-  FormLabel,
-  Input,
-  Alert
-} from '@mui/joy'
+import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option, Stack, CircularProgress, Alert } from '@mui/joy'
 import mermaid from 'mermaid'
-import { visualizerService, decksService, cardsService } from '../../api/services'
+import DOMPurify from 'dompurify'
+import { visualizerService, cardsService } from '../../api/services'
+import { useSaveToDeck } from '../../hooks/useSaveToDeck'
+import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
 
 mermaid.initialize({
   startOnLoad: false,
@@ -27,8 +15,10 @@ mermaid.initialize({
   fontFamily: 'Inter, sans-serif'
 })
 
-// ... MermaidChart component is unchanged ...
+const VIZ_TYPES = ['mindmap', 'flowchart', 'sequence', 'timeline']
+
 const MermaidChart = ({ code }) => {
+  const { t } = useTranslation()
   const ref = useRef(null)
   const [svg, setSvg] = useState('')
   const [error, setError] = useState(null)
@@ -47,73 +37,42 @@ const MermaidChart = ({ code }) => {
         })
         .catch((e) => {
           console.error('Mermaid render error:', e)
-          setError('Unable to render diagram. The generated syntax may be invalid. Please try generating again.')
+          setError(true)
         })
     }
   }, [code])
 
   if (error) {
     return (
-      <Box
-        sx={{
-          p: 4,
-          textAlign: 'center',
-          color: 'danger.plainColor',
-          bgcolor: 'danger.softBg',
-          borderRadius: 'md'
-        }}
-      >
+      <Box sx={{ p: 4, textAlign: 'center', color: 'danger.plainColor', bgcolor: 'danger.softBg', borderRadius: 'md' }}>
         <Typography level='title-md' sx={{ mb: 1 }}>
-          ⚠️ Diagram Error
+          {t('aiVisualizer.diagramErrorTitle')}
         </Typography>
-        <Typography level='body-sm'>{error}</Typography>
+        <Typography level='body-sm'>{t('aiVisualizer.diagramErrorBody')}</Typography>
       </Box>
     )
   }
 
-  return <div ref={ref} dangerouslySetInnerHTML={{ __html: svg }} style={{ width: '100%', overflow: 'auto', textAlign: 'center' }} />
+  return (
+    <div
+      ref={ref}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg) }}
+      style={{ width: '100%', overflow: 'auto', textAlign: 'center' }}
+    />
+  )
 }
 
 export default function VisualizerModal({ open, onClose, text }) {
   const [vizType, setVizType] = useState('mindmap')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null) // { mermaid_code, explanation }
-  const [decks, setDecks] = useState([])
-  const [selectedDeckId, setSelectedDeckId] = useState('')
   const [saving, setSaving] = useState(false)
-  const [isCreatingDeck, setIsCreatingDeck] = useState(false)
-  const [newDeckName, setNewDeckName] = useState('')
-  const [loadingDecks, setLoadingDecks] = useState(false)
   const [error, setError] = useState('')
   const [isLimitError, setIsLimitError] = useState(false)
   const navigate = useNavigate()
   const { t } = useTranslation()
 
-  const handleCreateDeck = async () => {
-    if (!newDeckName) return
-    setLoadingDecks(true)
-    setError('')
-    try {
-      const newDeck = await decksService.create({ name: newDeckName, deck_type: 'visual' })
-      setDecks([...decks, newDeck])
-      setSelectedDeckId(newDeck._id)
-      setIsCreatingDeck(false)
-      setNewDeckName('')
-    } catch (e) {
-      console.error(e)
-      const status = e.response?.status
-      const msg = e.response?.data?.detail || t('subscription.errors.genericCreate')
-
-      if (status === 403) {
-        setIsLimitError(true)
-        setError(t('subscription.errors.limitReached'))
-      } else {
-        setError(msg)
-      }
-    } finally {
-      setLoadingDecks(false)
-    }
-  }
+  const saveToDeck = useSaveToDeck('visual')
 
   const handleGenerate = async () => {
     if (!text) return
@@ -137,30 +96,31 @@ export default function VisualizerModal({ open, onClose, text }) {
     }
   }
 
-  // Fetch decks and reset state
+  // Reset transient state whenever the modal opens
   useEffect(() => {
     if (open) {
       setError('')
       setIsLimitError(false)
       setResult(null)
-      setSelectedDeckId('')
-      decksService.getAll().then(setDecks).catch(console.error)
     }
   }, [open])
 
   const handleSave = async () => {
+    const { selectedDeckId, allTags } = saveToDeck
     if (!selectedDeckId || !result) return
     setSaving(true)
     setError('')
     try {
       await cardsService.create({
         deck_id: selectedDeckId,
-        title: `Visual: ${vizType.charAt(0).toUpperCase() + vizType.slice(1)}`,
+        title: `${t('aiVisualizer.titlePrefix')}: ${t(`aiVisualizer.vizType.${vizType}`)}`,
         content: result.explanation,
         card_type: 'visual',
         diagram_code: result.mermaid_code,
-        diagram_type: vizType
+        diagram_type: vizType,
+        tags: allTags
       })
+      saveToDeck.reload()
       onClose()
     } catch (e) {
       console.error(e)
@@ -180,123 +140,145 @@ export default function VisualizerModal({ open, onClose, text }) {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <ModalDialog layout='center' size='lg' sx={{ width: '90%', maxWidth: 1000, maxHeight: '90vh', overflow: 'auto', p: 3 }}>
-        <ModalClose />
-        <Typography level='h4' fontWeight='bold'>
-          AI Visualizer
-        </Typography>
-        <Typography level='body-sm' color='neutral' sx={{ mb: 2 }}>
-          Generate diagrams from your study content.
-        </Typography>
+      <ModalDialog
+        size='lg'
+        layout='center'
+        sx={{
+          borderRadius: 'xl',
+          boxShadow: 'lg',
+          width: { xs: '95%', sm: '85%', md: '75%', lg: '900px' },
+          maxHeight: '90vh',
+          p: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <ModalClose aria-label={t('aiVisualizer.closeAria')} sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }} />
 
-        {error && (
-          <Alert
-            color='danger'
-            sx={{ mb: 2 }}
-            endDecorator={
-              isLimitError && (
-                <Button size='sm' variant='soft' color='danger' onClick={() => navigate('/profile')}>
-                  {t('subscription.upgrade')}
-                </Button>
-              )
-            }
-          >
-            {error}
-          </Alert>
-        )}
+        {/* Elevated header */}
+        <Box sx={{ p: 3, pb: 2, bgcolor: 'background.level1', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ pr: 6 }}>
+            <Typography level='h4' sx={{ fontWeight: 'bold' }}>
+              {t('aiVisualizer.title')}
+            </Typography>
+            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+              {t('aiVisualizer.subtitle')}
+            </Typography>
+          </Box>
+        </Box>
 
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems='center'>
-          <Select value={vizType} onChange={(_, v) => setVizType(v)} sx={{ minWidth: 160 }}>
-            <Option value='mindmap'>🧠 Mind Map</Option>
-            <Option value='flowchart'>🔀 Flowchart</Option>
-            <Option value='sequence'>⏱️ Sequence Diagram</Option>
-            <Option value='timeline'>📅 Timeline</Option>
-          </Select>
-          <Button onClick={handleGenerate} loading={loading} color='primary' startDecorator='✨'>
-            Generate
-          </Button>
+        {/* Scrollable content */}
+        <Box sx={{ p: 3, overflowY: 'auto', flexGrow: 1 }}>
+          {error && (
+            <Alert
+              color='danger'
+              variant='soft'
+              sx={{ mb: 2 }}
+              endDecorator={
+                isLimitError && (
+                  <Button size='sm' variant='soft' color='danger' onClick={() => navigate('/profile')}>
+                    {t('subscription.upgrade')}
+                  </Button>
+                )
+              }
+            >
+              {error}
+            </Alert>
+          )}
+
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems={{ xs: 'stretch', md: 'center' }}>
+            <Select
+              value={vizType}
+              onChange={(_, v) => setVizType(v)}
+              sx={{ minWidth: 180 }}
+              aria-label={t('aiVisualizer.vizTypeAria')}
+              slotProps={{ button: { 'aria-label': t('aiVisualizer.vizTypeAria') } }}
+            >
+              {VIZ_TYPES.map((type) => (
+                <Option key={type} value={type}>
+                  {t(`aiVisualizer.vizType.${type}`)}
+                </Option>
+              ))}
+            </Select>
+            <Button onClick={handleGenerate} loading={loading} color='primary' disabled={!text} aria-label={t('aiVisualizer.generateAria')}>
+              {t('aiVisualizer.generateButton')}
+            </Button>
+          </Stack>
+
+          {loading && (
+            <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
+              <CircularProgress size='lg' />
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {t('aiVisualizer.generating')}
+              </Typography>
+            </Stack>
+          )}
+
+          {!loading && !result && (
+            <Box sx={{ py: 8, textAlign: 'center' }}>
+              <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
+                {t('aiVisualizer.emptyTitle')}
+              </Typography>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {t('aiVisualizer.emptyBody')}
+              </Typography>
+            </Box>
+          )}
 
           {result && !loading && (
-            <>
-              <Box sx={{ flexGrow: 1 }} />
-              {!isCreatingDeck ? (
-                <Stack direction='row' spacing={1} alignItems='center'>
-                  <Select
-                    placeholder='Select Deck...'
-                    value={selectedDeckId}
-                    onChange={(_, v) => setSelectedDeckId(v)}
-                    sx={{ minWidth: 200 }}
-                  >
-                    {decks
-                      .filter((d) => d.deck_type === 'visual')
-                      .map((deck) => (
-                        <Option key={deck._id} value={deck._id}>
-                          {deck.name}
-                        </Option>
-                      ))}
-                  </Select>
-                  <Button variant='plain' size='sm' onClick={() => setIsCreatingDeck(true)}>
-                    +
-                  </Button>
-                  <Button color='success' onClick={handleSave} disabled={!selectedDeckId} loading={saving} startDecorator='💾'>
-                    Save
-                  </Button>
-                </Stack>
-              ) : (
-                <Stack direction='row' spacing={1} alignItems='center'>
-                  <Input
-                    placeholder='New Deck Name'
-                    value={newDeckName}
-                    onChange={(e) => setNewDeckName(e.target.value)}
-                    sx={{ width: 180 }}
-                  />
-                  <Button size='sm' onClick={handleCreateDeck} loading={loadingDecks}>
-                    Create
-                  </Button>
-                  <Button size='sm' variant='plain' color='neutral' onClick={() => setIsCreatingDeck(false)}>
-                    X
-                  </Button>
-                </Stack>
-              )}
-            </>
+            <Stack spacing={3} sx={{ animation: 'fadeIn 0.3s ease-in' }}>
+              <Box
+                sx={{
+                  p: 3,
+                  border: '1px solid',
+                  borderColor: 'neutral.outlinedBorder',
+                  borderRadius: 'lg',
+                  bgcolor: 'background.body',
+                  minHeight: 300,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  boxShadow: 'sm'
+                }}
+              >
+                <MermaidChart code={result.mermaid_code} />
+              </Box>
+
+              <Box sx={{ bgcolor: 'primary.softBg', p: 2, borderRadius: 'md', borderLeft: '4px solid', borderColor: 'primary.solidBg' }}>
+                <Typography level='title-sm' sx={{ color: 'primary.plainColor' }}>
+                  {t('aiVisualizer.explanationLabel')}
+                </Typography>
+                <Typography level='body-sm' sx={{ mt: 0.5 }}>
+                  {result.explanation}
+                </Typography>
+              </Box>
+
+              <SaveToDeckStep deckType='visual' saveToDeck={saveToDeck} />
+            </Stack>
           )}
-        </Stack>
+        </Box>
 
-        {loading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress size='lg' />
-          </Box>
-        )}
-
-        {result && !loading && (
-          <Stack spacing={2} sx={{ animation: 'fadeIn 0.3s ease-in' }}>
-            <Box
-              sx={{
-                p: 3,
-                border: '1px solid',
-                borderColor: 'neutral.outlinedBorder',
-                borderRadius: 'lg',
-                bgcolor: 'background.body',
-                minHeight: 300,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                boxShadow: 'sm'
-              }}
-            >
-              <MermaidChart code={result.mermaid_code} />
-            </Box>
-
-            <Box sx={{ bgcolor: 'primary.50', p: 2, borderRadius: 'md', borderLeft: '4px solid', borderColor: 'primary.500' }}>
-              <Typography level='title-sm' color='primary'>
-                Explanation
-              </Typography>
-              <Typography level='body-sm' sx={{ mt: 0.5 }}>
-                {result.explanation}
-              </Typography>
-            </Box>
+        {/* Sticky footer */}
+        <Box sx={{ p: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.surface' }}>
+          <Stack direction='row' justifyContent='flex-end' spacing={1}>
+            <Button variant='soft' color='neutral' onClick={onClose}>
+              {t('aiVisualizer.cancelButton')}
+            </Button>
+            {result && (
+              <Button
+                variant='solid'
+                color='success'
+                onClick={handleSave}
+                disabled={!saveToDeck.selectedDeckId}
+                loading={saving}
+                aria-label={t('aiVisualizer.saveAria')}
+              >
+                {t('aiVisualizer.saveButton')}
+              </Button>
+            )}
           </Stack>
-        )}
+        </Box>
       </ModalDialog>
     </Modal>
   )

@@ -12,7 +12,13 @@
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!--
+      crossorigin="use-credentials" makes the browser send cookies with the
+      manifest request. Required on Vercel deployments that have Deployment
+      Protection (SSO) enabled — without it the request is anonymous and gets
+      redirected to vercel.com/sso-api, which fails CORS.
+    -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" crossorigin="use-credentials" />
   <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -23,6 +29,17 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>Nowry - AI Study Companion</title>
+  <!-- Font Awesome: loaded statically here so icons never flash;
+       the app no longer injects this via a useEffect CDN call -->
+  <link
+    rel="preload"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    as="style"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  </noscript>
 </head>
 
 <body>

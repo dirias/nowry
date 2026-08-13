@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getSelection, $isRangeSelection, $createParagraphNode } from 'lexical'
+import { $getSelection, $isRangeSelection, $createParagraphNode, $isElementNode } from 'lexical'
 import { $createHeadingNode, $createQuoteNode, $isHeadingNode, $isQuoteNode } from '@lexical/rich-text'
 import { $isListNode, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND, ListNode } from '@lexical/list'
+import { $isTableCellNode } from '@lexical/table'
 import { $setBlocksType } from '@lexical/selection'
 import { Select, Option } from '@mui/joy'
 import { Type, Heading1, Heading2, Heading3, List, ListOrdered, Quote } from 'lucide-react'
@@ -25,7 +26,23 @@ const BlockFormatDropdown = () => {
     const selection = $getSelection()
     if ($isRangeSelection(selection)) {
       const anchorNode = selection.anchor.getNode()
-      let element = anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElementOrThrow()
+
+      // Check if we're in a table cell - if so, skip formatting dropdown
+      let parent = $isElementNode(anchorNode) ? anchorNode : anchorNode.getParent()
+      if (parent && $isTableCellNode(parent)) {
+        setBlockType('paragraph')
+        return
+      }
+
+      // Try to get top-level element, but handle table cells gracefully
+      let element
+      try {
+        element = anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElementOrThrow()
+      } catch (e) {
+        // If we can't get top-level element (e.g., inside table), default to paragraph
+        setBlockType('paragraph')
+        return
+      }
 
       const elementKey = element.getKey()
       const elementDOM = editor.getElementByKey(elementKey)

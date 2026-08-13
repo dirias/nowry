@@ -1,29 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Card, CardContent, Stack, Chip, CircularProgress } from '@mui/joy'
-import { cardsService } from '../../../api/services'
+import { Box, Typography, Card, CardContent, Stack, Chip, Skeleton } from '@mui/joy'
+import { useStatistics } from '../../../hooks/useStatistics'
 
 export default function StudyCalendar() {
   const { t } = useTranslation()
-  const [recentPerformance, setRecentPerformance] = useState([])
-  const [streak, setStreak] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const { statistics, loading } = useStatistics()
 
-  useEffect(() => {
-    fetchStatistics()
-  }, [])
-
-  const fetchStatistics = async () => {
-    try {
-      const stats = await cardsService.getStatistics()
-      setRecentPerformance(stats.recent_performance || [])
-      setStreak(stats.summary?.current_streak || 0)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching statistics:', error)
-      setLoading(false)
-    }
-  }
+  const recentPerformance = statistics?.recent_performance || []
+  const streak = statistics?.summary?.current_streak || 0
 
   const getScoreColor = (score) => {
     if (score >= 8) return 'success'
@@ -47,8 +32,13 @@ export default function StudyCalendar() {
   if (loading) {
     return (
       <Card variant='outlined' sx={{ height: '100%' }}>
-        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 350 }}>
-          <CircularProgress />
+        <CardContent sx={{ p: 3 }}>
+          <Skeleton variant='text' level='title-lg' width='50%' sx={{ mb: 3 }} />
+          <Stack spacing={2}>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} variant='rectangular' height={52} sx={{ borderRadius: 'sm' }} />
+            ))}
+          </Stack>
         </CardContent>
       </Card>
     )
@@ -64,7 +54,7 @@ export default function StudyCalendar() {
         <Box sx={{ maxHeight: 400, overflowY: 'auto', mb: 2 }}>
           <Stack spacing={2}>
             {recentPerformance.length === 0 ? (
-              <Typography level='body-sm' sx={{ color: 'neutral.500', textAlign: 'center', py: 3 }}>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center', py: 3 }}>
                 {t('calendar.noActivity')}
               </Typography>
             ) : (
@@ -96,7 +86,7 @@ export default function StudyCalendar() {
                           {typeInfo.icon} {typeInfo.label}
                         </Chip>
                       </Stack>
-                      <Typography level='body-xs' sx={{ color: 'neutral.600' }}>
+                      <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                         {item.card_title}
                       </Typography>
                     </Box>

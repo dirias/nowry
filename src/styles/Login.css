@@ -64,7 +64,3 @@ button {
   margin: 10px 0;
   font-weight: bold;
 }
-
-span {
-  background-color: var(--joy-palette-background-surface);
-}

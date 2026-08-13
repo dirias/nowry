@@ -30,7 +30,22 @@ const InsertDropdown = () => {
   }
 
   const insertTable = () => {
-    editor.dispatchCommand(INSERT_TABLE_COMMAND, { columns: 3, rows: 3 })
+    const rows = prompt('Number of rows:', '3')
+    const columns = prompt('Number of columns:', '3')
+
+    if (rows && columns) {
+      const numRows = parseInt(rows, 10)
+      const numCols = parseInt(columns, 10)
+
+      if (numRows > 0 && numCols > 0 && numRows <= 20 && numCols <= 10) {
+        editor.dispatchCommand(INSERT_TABLE_COMMAND, {
+          columns: numCols,
+          rows: numRows
+        })
+      } else {
+        alert('Please enter valid numbers (max 20 rows × 10 columns)')
+      }
+    }
   }
 
   const insertLine = () => {

@@ -14,7 +14,7 @@ export default function LastCardsAdded({ cards = [], onEdit, onDelete }) {
           backgroundColor: '#f1fbfb'
         }}
       >
-        <Typography level='body-md' sx={{ color: 'neutral.500' }}>
+        <Typography level='body-md' sx={{ color: 'text.tertiary' }}>
           No hay tarjetas recientes.
         </Typography>
       </Sheet>

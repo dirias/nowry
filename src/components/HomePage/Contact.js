@@ -15,7 +15,7 @@ import {
   FormLabel,
   Alert
 } from '@mui/joy'
-import { useColorScheme } from '@mui/joy/styles'
+import { useTranslation } from 'react-i18next'
 import {
   EmailRounded,
   LocationOnRounded,
@@ -29,8 +29,7 @@ import {
 } from '@mui/icons-material'
 
 const Contact = () => {
-  const { mode } = useColorScheme()
-  const isDark = mode === 'dark'
+  const { t } = useTranslation()
 
   const [formData, setFormData] = useState({
     name: '',
@@ -44,50 +43,50 @@ const Contact = () => {
   const contactInfo = [
     {
       icon: <EmailRounded />,
-      title: 'Email Us',
+      title: t('contact.info.email.title'),
       content: 'support@nowry.com',
-      description: 'We typically respond within 24 hours',
+      description: t('contact.info.email.desc'),
       color: 'primary'
     },
     {
       icon: <PhoneRounded />,
-      title: 'Call Us',
+      title: t('contact.info.phone.title'),
       content: '+1 (555) 123-4567',
-      description: 'Mon-Fri, 9AM-6PM EST',
+      description: t('contact.info.phone.desc'),
       color: 'success'
     },
     {
       icon: <LocationOnRounded />,
-      title: 'Visit Us',
+      title: t('contact.info.visit.title'),
       content: '123 Learning Street',
-      description: 'San Francisco, CA 94102',
+      description: t('contact.info.visit.desc'),
       color: 'warning'
     }
   ]
 
   const socialLinks = [
-    { icon: <X />, label: 'Twitter', url: '#', color: '#1DA1F2' },
-    { icon: <Facebook />, label: 'Facebook', url: '#', color: '#1877F2' },
-    { icon: <LinkedIn />, label: 'LinkedIn', url: '#', color: '#0A66C2' },
-    { icon: <Instagram />, label: 'Instagram', url: '#', color: '#E4405F' }
+    { icon: <X />, label: 'Twitter', url: '#' },
+    { icon: <Facebook />, label: 'Facebook', url: '#' },
+    { icon: <LinkedIn />, label: 'LinkedIn', url: '#' },
+    { icon: <Instagram />, label: 'Instagram', url: '#' }
   ]
 
   const faqs = [
     {
-      question: 'How do I get started?',
-      answer: 'Simply create a free account and start exploring our features. No credit card required!'
+      question: t('contact.faq.q1'),
+      answer: t('contact.faq.a1')
     },
     {
-      question: 'Is Nowry really free?',
-      answer: 'Yes! Our core features are completely free. We also offer premium plans with advanced features.'
+      question: t('contact.faq.q2'),
+      answer: t('contact.faq.a2')
     },
     {
-      question: 'Can I import my existing flashcards?',
-      answer: 'Absolutely! We support importing from various formats including CSV, Anki, and Quizlet.'
+      question: t('contact.faq.q3'),
+      answer: t('contact.faq.a3')
     },
     {
-      question: 'Do you offer student discounts?',
-      answer: 'Yes! Students with a valid .edu email get 50% off all premium plans.'
+      question: t('contact.faq.q4'),
+      answer: t('contact.faq.a4')
     }
   ]
 
@@ -114,8 +113,11 @@ const Contact = () => {
   return (
     <Sheet
       sx={{
-        minHeight: '100vh',
-        backgroundColor: isDark ? 'neutral.900' : 'background.body'
+        // Fill the remaining space inside the app's flex column — never exceed it.
+        // `minHeight: '100vh'` here would stack on top of the header + footer and
+        // force a scrollbar even when the content is short.
+        flex: 1,
+        bgcolor: 'background.body'
       }}
     >
       <Container maxWidth='lg'>
@@ -135,10 +137,10 @@ const Contact = () => {
               letterSpacing: -2,
               lineHeight: 1.1,
               mb: 3,
-              color: isDark ? 'primary.300' : 'primary.700'
+              color: 'primary.plainColor'
             }}
           >
-            Get in Touch
+            {t('contact.title')}
           </Typography>
           <Typography
             level='body-lg'
@@ -150,7 +152,7 @@ const Contact = () => {
               mb: 2
             }}
           >
-            Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
+            {t('contact.subtitle')}
           </Typography>
         </Box>
 
@@ -209,28 +211,34 @@ const Contact = () => {
           <Grid xs={12} md={7}>
             <Card variant='outlined' sx={{ p: 4 }}>
               <Typography level='h3' fontWeight={700} mb={3}>
-                Send us a Message
+                {t('contact.form.title')}
               </Typography>
 
               {submitted && (
                 <Alert color='success' variant='soft' sx={{ mb: 3 }} startDecorator={<CheckCircleRounded />}>
-                  Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.
+                  {t('contact.form.success')}
                 </Alert>
               )}
 
               <form onSubmit={handleSubmit}>
                 <Stack spacing={2.5}>
                   <FormControl required>
-                    <FormLabel>Your Name</FormLabel>
-                    <Input name='name' placeholder='John Doe' value={formData.name} onChange={handleChange} size='lg' />
+                    <FormLabel>{t('contact.form.name')}</FormLabel>
+                    <Input
+                      name='name'
+                      placeholder={t('contact.form.namePlaceholder')}
+                      value={formData.name}
+                      onChange={handleChange}
+                      size='lg'
+                    />
                   </FormControl>
 
                   <FormControl required>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>{t('contact.form.email')}</FormLabel>
                     <Input
                       type='email'
                       name='email'
-                      placeholder='you@example.com'
+                      placeholder={t('contact.emailPlaceholder')}
                       value={formData.email}
                       onChange={handleChange}
                       size='lg'
@@ -238,15 +246,21 @@ const Contact = () => {
                   </FormControl>
 
                   <FormControl required>
-                    <FormLabel>Subject</FormLabel>
-                    <Input name='subject' placeholder='How can we help?' value={formData.subject} onChange={handleChange} size='lg' />
+                    <FormLabel>{t('contact.form.subject')}</FormLabel>
+                    <Input
+                      name='subject'
+                      placeholder={t('contact.form.subjectPlaceholder')}
+                      value={formData.subject}
+                      onChange={handleChange}
+                      size='lg'
+                    />
                   </FormControl>
 
                   <FormControl required>
-                    <FormLabel>Message</FormLabel>
+                    <FormLabel>{t('contact.form.message')}</FormLabel>
                     <Textarea
                       name='message'
-                      placeholder='Tell us more about your question or feedback...'
+                      placeholder={t('contact.form.messagePlaceholder')}
                       value={formData.message}
                       onChange={handleChange}
                       minRows={6}
@@ -267,7 +281,7 @@ const Contact = () => {
                       }
                     }}
                   >
-                    Send Message
+                    {t('contact.form.send')}
                   </Button>
                 </Stack>
               </form>
@@ -278,7 +292,7 @@ const Contact = () => {
           <Grid xs={12} md={5}>
             <Box>
               <Typography level='h3' fontWeight={700} mb={3}>
-                Frequently Asked
+                {t('contact.faq.title')}
               </Typography>
 
               <Stack spacing={2}>
@@ -297,7 +311,7 @@ const Contact = () => {
               {/* Social Links */}
               <Box sx={{ mt: 4 }}>
                 <Typography level='title-md' fontWeight={600} mb={2}>
-                  Follow Us
+                  {t('contact.followUs')}
                 </Typography>
                 <Stack direction='row' spacing={1.5}>
                   {socialLinks.map((social, index) => (
@@ -314,15 +328,15 @@ const Contact = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: isDark ? 'neutral.800' : 'neutral.100',
+                        bgcolor: 'background.level1',
                         color: 'text.primary',
                         transition: 'all 0.2s ease',
                         textDecoration: 'none',
                         '&:hover': {
-                          backgroundColor: social.color,
-                          color: 'white',
+                          bgcolor: 'primary.solidBg',
+                          color: 'primary.solidColor',
                           transform: 'translateY(-3px)',
-                          boxShadow: `0 8px 20px ${social.color}40`
+                          boxShadow: 'md'
                         }
                       }}
                     >
@@ -344,21 +358,19 @@ const Contact = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: isDark
-                ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)'
-                : 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)'
+              bgcolor: 'background.level1'
             }}
           >
             <Stack spacing={2} alignItems='center'>
-              <LocationOnRounded sx={{ fontSize: 60, color: 'primary.500' }} />
+              <LocationOnRounded sx={{ fontSize: 60, color: 'primary.plainColor' }} />
               <Typography level='h4' fontWeight={600}>
-                Our Location
+                {t('contact.location.title')}
               </Typography>
               <Typography level='body-md' sx={{ color: 'text.secondary' }}>
                 123 Learning Street, San Francisco, CA 94102
               </Typography>
               <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                Interactive map coming soon
+                {t('contact.location.subtitle')}
               </Typography>
             </Stack>
           </Card>
@@ -368,12 +380,12 @@ const Contact = () => {
         <Box sx={{ pb: 12 }}>
           <Card variant='soft' color='primary' sx={{ p: 4, textAlign: 'center' }}>
             <Typography level='h4' fontWeight={700} mb={3}>
-              Business Hours
+              {t('contact.hours.title')}
             </Typography>
             <Grid container spacing={2} sx={{ maxWidth: 600, mx: 'auto' }}>
               <Grid xs={6}>
                 <Typography level='body-md' fontWeight={600}>
-                  Monday - Friday
+                  {t('contact.hours.weekdays')}
                 </Typography>
                 <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                   9:00 AM - 6:00 PM EST
@@ -381,7 +393,7 @@ const Contact = () => {
               </Grid>
               <Grid xs={6}>
                 <Typography level='body-md' fontWeight={600}>
-                  Saturday - Sunday
+                  {t('contact.hours.weekends')}
                 </Typography>
                 <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                   10:00 AM - 4:00 PM EST

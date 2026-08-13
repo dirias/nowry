@@ -1,5 +1,6 @@
 {
   "common": {
+    "close": "閉じる",
     "loading": "読み込み中...",
     "error": "エラー",
     "save": "保存",
@@ -9,7 +10,13 @@
     "search": "検索",
     "settings": "設定",
     "profile": "プロフィール",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "pomodoro": "ポモドーロタイマー",
+    "toggleTheme": "テーマを切り替える",
+    "language": "言語",
+    "studyBuddy": "学習パートナー",
+    "moreActions": "その他の操作",
+    "retry": "Retry"
   },
   "news": {
     "title": "最新ニュース",
@@ -25,25 +32,77 @@
       "entertainment": "エンターテイメント",
       "politics": "政治",
       "sports": "スポーツ"
-    }
+    },
+    "favorites": "お気に入り",
+    "noFavorites": "まだお気に入りがありません",
+    "noFavoritesHint": "記事の星アイコンをクリックするとお気に入りに追加できます。",
+    "adjustInterests": "設定で興味を調整して、パーソナライズされたニュースを表示してください。",
+    "setInterests": "設定で興味を登録して、パーソナライズされた記事を表示してください。"
   },
   "header": {
     "study": "学習",
     "cards": "カード",
     "books": "ブック",
-    "settings": "設定"
+    "about": "概要",
+    "contact": "お問い合わせ",
+    "settings": "設定",
+    "getStarted": "始める",
+    "drawer": {
+      "menu": "メニュー"
+    },
+    "profileMenu": {
+      "open": "プロフィールメニューを開く",
+      "viewProfile": "プロフィールを見る",
+      "tier": {
+        "free": "無料",
+        "pro": "Pro"
+      }
+    }
   },
   "footer": {
-    "rights": "無断転載を禁じます。"
+    "rights": "無断転載を禁じます。",
+    "brand": {
+      "tagline": "よりスマートな学習方法。"
+    },
+    "links": {
+      "title": "プロダクト",
+      "browse": "ブラウズ",
+      "about": "Nowry について",
+      "planner": "年間プランナー"
+    },
+    "support": {
+      "title": "サポート",
+      "email": "support@nowry.app",
+      "contact": "お問い合わせ"
+    },
+    "social": {
+      "title": "フォローする",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "x": "X (Twitter)"
+    },
+    "theme": {
+      "light": "ライト",
+      "dark": "ダーク"
+    },
+    "copyright": "© {{year}} Nowry. 無断転載を禁じます。",
+    "toggleTheme": "テーマを切り替え",
+    "language": "言語",
+    "bugReport": "バグを報告"
+  },
+  "routes": {
+    "terms": "/規約",
+    "privacy": "/プライバシー"
   },
   "study": {
     "title": "学習センター",
     "subtitle": "あなただけの学習ハブ",
     "stats": {
-      "dueToday": "今日の課題",
-      "reviewedToday": "今日の復習",
-      "dayStreak": "連続日数",
-      "totalCards": "カード総数"
+      "dueToday": "課題",
+      "reviewedToday": "復習済",
+      "dayStreak": "連続",
+      "totalCards": "合計"
     },
     "byType": "タイプ別学習",
     "types": {
@@ -57,9 +116,40 @@
     },
     "startReview": "毎日の復習を始める",
     "reviewMsg": "復習が必要なカードが{{count}}枚あります",
-    "startStudying": "学習を始める →",
+    "startStudying": "学習を始める",
     "viewAll": "全{{count}}デッキを表示 →",
-    "due": "期限"
+    "due": "期限",
+    "allReviewed": "すべて復習済み",
+    "empty": {
+      "streakLabel": "{{count}}日連続",
+      "allDone": "全て完了",
+      "weeklyCards": "今日{{count}}枚復習済み",
+      "streakZeroLabel": "今日から連続記録を始めよう"
+    },
+    "sections": {
+      "yourDecks": "あなたのデッキ"
+    },
+    "deckPill": {
+      "ariaLabel": "{{name}}を学習",
+      "dueSoon": "{{hours}}時間後",
+      "new": "新規"
+    },
+    "modePicker": {
+      "title": "Choose how to study",
+      "study": {
+        "label": "Study",
+        "description": "Review cards due today with spaced repetition",
+        "disabledHint": "Nothing due right now"
+      },
+      "browse": {
+        "label": "Browse",
+        "description": "Look through every card — no grading, no schedule changes"
+      },
+      "cram": {
+        "label": "Cram",
+        "description": "Review every card in this deck, regardless of due date"
+      }
+    }
   },
   "auth": {
     "welcomeBack": "おかえりなさい",
@@ -69,14 +159,17 @@
     "email": "メールアドレス",
     "password": "パスワード",
     "username": "ユーザー名",
+    "emailPlaceholder": "あなた@例.com",
+    "usernamePlaceholder": "yamadataro",
     "confirmPassword": "パスワード確認",
     "forgotPassword": "パスワードをお忘れですか？",
     "signIn": "サインイン",
     "signUp": "アカウント作成",
     "orContinueWith": "または以下で続行",
     "signInGoogle": "Googleでサインイン",
-    "signInFacebook": "Facebookでサインイン",
-    "noAccount": "アカウントをお持ちでないですか？",
+    "signInFacebook": "Facebookでログイン",
+    "byContinuing": "続行することにより、以下に同意したことになります：",
+    "noAccount": "アカウントをお持ちでない場合",
     "createOne": "作成する",
     "hasAccount": "すでにアカウントをお持ちですか？",
     "signInLink": "サインイン",
@@ -91,8 +184,17 @@
     },
     "errors": {
       "loginFailed": "ログインに失敗しました。認証情報を確認してください。",
+      "unableToSignIn": "サインインできません",
+      "invalidCredentials": "メールアドレスまたはパスワードが正しくありません。確認してもう一度お試しください。",
+      "accountDisabled": "このアカウントは無効化されています。サポートにお問い合わせください。",
+      "tooManyAttempts": "試行回数が多すぎます。数分後にもう一度お試しください。",
+      "networkError": "ネットワーク接続に失敗しました。インターネット接続を確認してもう一度お試しください。",
+      "googleCancelled": "サインインがキャンセルされました。続行する場合はもう一度お試しください。",
+      "popupBlocked": "サインインポップアップがブロックされました。このサイトのポップアップを許可してください。",
+      "accountExistsDifferent": "このメールアドレスは既に別のサインイン方法で使用されています。",
       "usernameRequired": "ユーザー名は必須です",
       "emailRequired": "メールアドレスは必須です",
+      "emailInvalid": "有効なメールアドレスを入力してください",
       "passwordRequired": "パスワードは必須です",
       "passwordLength": "パスワードは8文字以上である必要があります",
       "passwordMismatch": "パスワードが一致しません",
@@ -130,6 +232,67 @@
       }
     }
   },
+  "landing": {
+    "hero": {
+      "title": "より良く学ぶ、\nより難しくではなく",
+      "subtitle": "スマートブック、AI フラッシュカード、間隔反復を備えたオールインワン学習アプリ — 本気で学びたい人のために。",
+      "ctaPrimary": "無料で始める",
+      "ctaSecondary": "機能を見る"
+    },
+    "howItWorks": {
+      "title": "Nowry の使い方",
+      "subtitle": "3 ステップでゼロから学習へ",
+      "step1": {
+        "title": "ライブラリを構築",
+        "desc": "本を追加し、ノートを書き、自分のコンテンツからフラッシュカードデッキを作成する"
+      },
+      "step2": {
+        "title": "科学的に学ぶ",
+        "desc": "間隔反復エンジンが最適なタイミングで復習をスケジュールする"
+      },
+      "step3": {
+        "title": "計画と追跡",
+        "desc": "年間目標を設定し、毎日の学習と結びつける"
+      }
+    },
+    "features": {
+      "title": "成功に必要なすべて",
+      "subtitle": "学習を楽しく効果的にする強力な機能",
+      "smartBooks": {
+        "title": "スマートブック",
+        "desc": "ノートを書き、パッセージをハイライトし、任意の段落から1タップでフラッシュカードを生成"
+      },
+      "aiPowered": {
+        "title": "AI搭載",
+        "desc": "AI がブックのハイライトからカードを提案し、苦手な分野に適応する"
+      },
+      "spacedRepetition": {
+        "title": "間隔反復",
+        "desc": "各カードを「簡単」「普通」「難しい」「不正解」で評価 — アルゴリズムがあとはすべて処理"
+      },
+      "trackProgress": {
+        "title": "進捗を追跡",
+        "desc": "復習の連続記録、カードの習熟率、学習時間を一目で確認"
+      }
+    },
+    "cta": {
+      "title": "早期参加者になろう",
+      "subtitle": "Nowry は早期アクセス中です。今すぐ参加してプロダクトを一緒に作りましょう。",
+      "primary": "今すぐ無料で始める",
+      "social": "フォローする"
+    },
+    "social": {
+      "title": "今日から学習を始めましょう",
+      "subtitle": "Nowryに参加して、成功のために設計された最新ツールで、より良い学習方法を発見しましょう",
+      "benefits": {
+        "1": "無制限のブックとフラッシュカードを作成",
+        "2": "どこからでも、どのデバイスからでもアクセス",
+        "3": "分析で進捗を追跡",
+        "4": "学習グループに参加して協力"
+      },
+      "cta": "今すぐ始める"
+    }
+  },
   "onboarding": {
     "welcome": {
       "title": "Nowryへようこそ！",
@@ -156,23 +319,26 @@
       "customLabel": "カスタムカラー"
     },
     "interests": {
-      "title": "興味のあることは？",
-      "subtitle": "コンテンツを見たいトピックを選択してください",
+      "title": "What topics interest you?",
+      "subtitle": "We'll curate your home feed around these.",
+      "groupLabel": "Interest selection",
       "selected": "選択中: {{count}}トピック",
       "selected_plural": "選択中: {{count}}トピック",
       "items": {
-        "Technology": "テクノロジー",
-        "Science": "科学",
-        "History": "歴史",
-        "Languages": "言語",
-        "Art": "芸術",
-        "Mathematics": "数学",
-        "Literature": "文学",
-        "Music": "音楽",
-        "Business": "ビジネス",
-        "Health": "健康",
-        "Philosophy": "哲学",
-        "Psychology": "心理学"
+        "ai": "AI & Machine Learning",
+        "technology": "Technology",
+        "science": "Science",
+        "mathematics": "Mathematics",
+        "history": "History",
+        "languages": "Languages",
+        "literature": "Literature",
+        "art": "Art & Creativity",
+        "music": "Music",
+        "business": "Business",
+        "health": "Health & Fitness",
+        "philosophy": "Philosophy",
+        "design": "Design",
+        "psychology": "Psychology"
       }
     },
     "learning": {
@@ -203,7 +369,42 @@
     "next": "次へ",
     "back": "戻る",
     "finish": "セットアップ完了",
-    "skip": "今はスキップ"
+    "skip": "今はスキップ",
+    "progressLabel": "Onboarding progress",
+    "defer": "Set up later in settings",
+    "identity": {
+      "title": "言語を選んでください。",
+      "subtitle": "お好みの言語を選択してください。"
+    },
+    "appearance": {
+      "title": "Make it yours.",
+      "subtitle": "Light or dark. Pick a color you'll see every day.",
+      "colorLabel": "Select {{name}}",
+      "colorGroupLabel": "Accent color selection"
+    },
+    "focus": {
+      "title": "What are you here to learn?",
+      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "topics": {
+        "technology": "Technology",
+        "science": "Science",
+        "history": "History",
+        "languages": "Languages",
+        "art": "Art",
+        "mathematics": "Mathematics",
+        "literature": "Literature",
+        "business": "Business"
+      }
+    },
+    "ready": {
+      "title": "You're all set, {{name}}.",
+      "titleNoName": "You're all set.",
+      "subtitle": "Your personalized study space is ready.",
+      "cta": "Enter Nowry"
+    },
+    "error": {
+      "saveFailed": "Something went wrong. Please try again."
+    }
   },
   "tasks": {
     "title": "タスク",
@@ -213,9 +414,79 @@
       "completed": "完了",
       "pending": "未完了"
     },
+    "lists": {
+      "all": "すべて",
+      "general": "一般",
+      "addList": "新しいリスト",
+      "listPlaceholder": "リスト名..."
+    },
     "empty": "タスクはまだありません。入力して追加しましょう！",
     "noMatch": "フィルターに一致するタスクはありません",
-    "addTooltip": "\"{{title}}\" を追加"
+    "emptyTitle": "タスクはまだありません",
+    "emptySubtitle": "最初のタスクを追加して、今日の予定を整理しましょう。",
+    "emptyCta": "タスクを追加",
+    "noMatchTitle": "一致するタスクはありません",
+    "addToListPlaceholder": "{{list}} に追加...",
+    "addTooltip": "\"{{title}}\" を追加",
+    "progress": {
+      "label": "{{total}} 件中 {{done}} 件完了",
+      "noTasks": "タスクはまだありません"
+    }
+  },
+  "books": {
+    "autosave": "自動保存",
+    "emptySubtitle": "新しいブックを作成するか、ドキュメントをインポートして始めましょう",
+    "noResults": "\"{{term}}\" に一致するブックは見つかりませんでした",
+    "noMatches": "\"{{query}}\" に一致するブックはありません",
+    "addTooltip": "\"{{title}}\" を追加",
+    "untitled": "無題の本",
+    "createTitle": "新しい本",
+    "createAction": "作成して書く",
+    "setAuthor": "著者を設定",
+    "authorLabel": "著者",
+    "authorPlaceholder": "誰が書きましたか？",
+    "createFailed": "本を作成できませんでした",
+    "editTitle": "本を編集",
+    "titleLabel": "タイトル",
+    "titleRequired": "保存するには本に名前を付けてください",
+    "changeCover": "表紙を変更",
+    "addTags": "タグを追加",
+    "addSummary": "概要を追加",
+    "coverColorLabel": "表紙の色",
+    "coverImageLabel": "表紙の画像",
+    "coverImageAlt": "表紙のプレビュー",
+    "coverImageError": "この画像を読み込めませんでした",
+    "customColor": "カスタム色を選択",
+    "summaryLabel": "概要",
+    "saveFailed": "変更を保存できませんでした",
+    "publishFailed": "本を公開できませんでした",
+    "unpublishFailed": "本の公開を解除できませんでした",
+    "importSuccessTitle": "インポート完了",
+    "openBook": "本を開く",
+    "continueToLibrary": "ライブラリに戻る",
+    "clearFilters": "フィルターをクリア",
+    "errorFetch": "本の読み込みエラー",
+    "pageCount_one": "{{count}} ページ",
+    "pageCount_other": "{{count}} ページ",
+    "coverColors": {
+      "blue": "青",
+      "red": "赤",
+      "green": "緑",
+      "orange": "オレンジ",
+      "purple": "紫",
+      "pink": "ピンク",
+      "black": "黒",
+      "grey": "グレー"
+    },
+    "coverImagePlaceholder": "https://example.com/image.jpg",
+    "errorImport": "ファイルの処理中にエラーが発生しました。もう一度お試しください。",
+    "unknownAuthor": "著者不明",
+    "editor": {
+      "titlePlaceholder": "本のタイトルを入力…",
+      "contentPlaceholder": "書き始めましょう…",
+      "notesPlaceholder": "メモを追加…",
+      "summaryPlaceholder": "概要を追加…"
+    }
   },
   "sidemenu": {
     "dashboard": "ダッシュボード",
@@ -248,12 +519,48 @@
       "totalCards": "総カード数",
       "booksCreated": "作成したブック",
       "studyStreak": "学習ストリーク",
-      "days": "日"
+      "days": "連続"
     }
   },
   "settings": {
-    "title": "アカウント設定",
-    "subtitle": "設定、セキュリティ、アカウントの管理",
+    "title": "設定",
+    "subtitle": "アカウントと設定の管理",
+    "nav": {
+      "account": "アカウント",
+      "appearance": "外観",
+      "productivity": "生産性",
+      "notifications": "通知",
+      "security": "セキュリティ",
+      "danger": "危険エリア",
+      "jump": "セクションに移動",
+      "jumpTo": "ジャンプ"
+    },
+    "account": {
+      "title": "アカウント",
+      "fullName": "表示名",
+      "emailManaged": "メールは認証プロバイダーによって管理されています",
+      "editPhoto": "写真を変更"
+    },
+    "appearance": {
+      "title": "外観",
+      "mode": "テーマ",
+      "modeDesc": "ライトモードまたはダークモードを選択",
+      "language": "言語",
+      "accentColor": "アクセントカラー",
+      "accentColorDesc": "アプリのアクセントカラーをカスタマイズ",
+      "interests": "興味・関心"
+    },
+    "productivity": {
+      "title": "生産性",
+      "enableTimer": "ポモドーロタイマーを有効にする",
+      "enableTimerDesc": "ヘッダーにタイマーを表示し、フローティングウィジェットを有効にする",
+      "focusDuration": "集中時間（分）",
+      "shortBreak": "短い休憩（分）",
+      "longBreak": "長い休憩（分）",
+      "recommendedMinutes": "推奨：{{count}}",
+      "autoStart": "自動開始",
+      "autoStartDesc": "次のセッションを自動的に開始する"
+    },
     "general": {
       "title": "一般設定",
       "appearance": "外観",
@@ -266,20 +573,30 @@
     },
     "security": {
       "title": "セキュリティ",
-      "changePassword": "パスワード変更",
+      "changePassword": "パスワードを変更",
+      "changePasswordCta": "パスワードを変更",
       "currentPassword": "現在のパスワード",
       "newPassword": "新しいパスワード",
       "confirmPassword": "新しいパスワード（確認）",
       "updatePassword": "パスワードを更新",
+      "passwordMismatch": "パスワードが一致しません",
+      "passwordTooShort": "パスワードは8文字以上必要です",
+      "passwordTooWeak": "パスワードが弱すぎます",
+      "wrongPassword": "現在のパスワードが正しくありません",
+      "reauthRequired": "続行するには現在のパスワードを入力してください",
+      "passwordChangeFailed": "パスワードの更新に失敗しました。もう一度お試しください。",
+      "passwordChanged": "パスワードが正常に更新されました",
+      "save": "パスワードを更新",
       "twoFactor": "2要素認証",
       "twoFactorDesc": "アカウントにセキュリティレイヤーを追加",
+      "comingSoon": "近日公開",
       "enable2FA": "2FAを有効化",
       "disable2FA": "無効化",
       "success2FA": "2FAが有効になりました！バックアップコード：",
       "disabled2FA": "2FAが正常に無効化されました"
     },
     "notifications": {
-      "title": "通知設定",
+      "title": "通知",
       "emailDigest": "メールダイジェスト",
       "emailDigestDesc": "学習活動の毎日のサマリーを受け取る",
       "studyReminders": "学習リマインダー",
@@ -287,16 +604,53 @@
       "newsUpdates": "ニュース更新",
       "newsUpdatesDesc": "新機能や改善に関する更新を受け取る",
       "marketing": "マーケティングメール",
-      "marketingDesc": "プロモーションオファーやヒントを受け取る"
+      "marketingDesc": "プロモーションオファーやヒントを受け取る",
+      "comingSoon": "通知機能は近日公開",
+      "comingSoonDesc": "学習セッション向けのスマート通知を開発中です"
     },
     "danger": {
       "title": "危険エリア",
-      "deleteAccount": "アカウント削除",
-      "deleteDesc": "アカウントと関連データを完全に削除します",
+      "deleteAccount": "アカウントを削除",
+      "deleteDesc": "アカウントとすべてのデータを完全に削除します。この操作は取り消せません。",
       "confirmTitle": "本当に削除しますか？",
       "confirmDesc": "この操作は取り消せません。ブック、カード、進捗を含むすべてのデータが完全に削除されます。",
       "confirmBtn": "はい、アカウントを削除します",
-      "cancelBtn": "キャンセル"
+      "cancelBtn": "キャンセル",
+      "modal": {
+        "title": "アカウント削除",
+        "description": "アカウントと関連するすべてのデータが完全に削除されます",
+        "confirm": "アカウントを削除",
+        "consequence1": "すべてのブックとメモが削除されます",
+        "consequence2": "すべてのカードデッキが削除されます",
+        "consequence3": "すべての年間計画データが削除されます",
+        "consequence4": "公開コンテンツはすぐに非公開になります"
+      }
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteButton": "Delete account",
+      "exportTitle": "Export Your Data",
+      "exportDescription": "Download a copy of all your data including books, decks, cards, tasks, and plans.",
+      "exportButton": "Export data"
+    },
+    "deleteAccount": {
+      "title": "Delete your account",
+      "message": "This will permanently delete your account and all associated data (books, decks, cards, plans, goals). Your data will be retained for 30 days before final removal.",
+      "emailLabel": "Confirm your email address",
+      "emailPlaceholder": "Enter your email to confirm",
+      "emailRequired": "Email address is required to confirm deletion",
+      "emailMismatch": "Email address does not match. Please try again.",
+      "confirmDisabled": "Enter email to confirm",
+      "confirmEnabled": "Delete permanently",
+      "recoveryNotice": "Your data can be recovered within 30 days by contacting support. After 30 days, it will be permanently deleted."
+    },
+    "exportData": {
+      "error": "Failed to export data. Please try again."
+    },
+    "errors": {
+      "loadFailed": "設定を読み込めませんでした。ページを更新して再試行してください。",
+      "networkError": "ネットワークエラーです。接続を確認してください。"
     }
   },
   "dashboard": {
@@ -305,6 +659,11 @@
     "dailyFocus": {
       "allCaughtUp": "🎉 すべて完了！",
       "noDueCards": "復習が必要なカードはありません。素晴らしい！",
+      "cardDue": "枚のカードが復習待ち",
+      "cardsDue": "枚のカードが復習待ち",
+      "readyToReview": "復習の準備完了",
+      "reviewCount": "{{count}}枚を復習",
+      "reviewCount_plural": "{{count}}枚を復習",
       "reviewToday": "📚 今日の復習",
       "cardsPending": "{{count}}枚のカード保留中",
       "cardsPending_other": "{{count}}枚のカード保留中",
@@ -313,6 +672,13 @@
       "study": "学習する",
       "moreDecks": "他 {{count}} デッキに保留中のカードがあります",
       "moreDecks_other": "他 {{count}} デッキに保留中のカードがあります"
+    },
+    "annualGoals": {
+      "title": "年間目標",
+      "noGoals": "まだ目標が設定されていません",
+      "createGoal": "最初の目標を作成",
+      "viewFullPlan": "プラン全体を見る",
+      "loadingAria": "年間目標を読み込み中"
     }
   },
   "motivation": {
@@ -345,5 +711,1574 @@
       "book": "ブック",
       "flashcard": "カード"
     }
+  },
+  "calendarModal": {
+    "title": "カレンダー",
+    "tooltip": "カレンダーを開く",
+    "filters": {
+      "all": "すべて",
+      "tasks": "タスク",
+      "goals": "目標",
+      "priorities": "優先事項",
+      "activities": "活動"
+    },
+    "noEvents": "この日のイベントはありません",
+    "today": "今日",
+    "loading": "読み込み中...",
+    "addEvent": "イベントを追加",
+    "editEvent": "イベントを編集",
+    "form": {
+      "selectType": "イベントの種類",
+      "title": "タイトル",
+      "date": "日付",
+      "description": "説明",
+      "focusArea": "フォーカスエリア",
+      "goal": "目標",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "saveError": "保存に失敗しました。もう一度お試しください。",
+      "types": {
+        "task": "タスク",
+        "priority": "優先事項",
+        "goal": "目標",
+        "milestone": "マイルストーン",
+        "activity": "習慣"
+      },
+      "habitScheduleNote": "習慣のスケジュール（頻度・曜日）は年間計画で設定します。",
+      "habitEditNote": "ここではタイトルのみ編集できます。スケジュールの変更は年間計画で行ってください。",
+      "dueDateOptional": "期日（任意）",
+      "isKeyResult": "キー結果",
+      "milestoneEditNote": "マイルストーンは年間計画で編集してください。",
+      "noActiveGoals": "アクティブな目標がありません。まず年間計画で目標を作成してください。"
+    }
+  },
+  "about": {
+    "title": "Nowryについて",
+    "subtitle": "私たちは革新的なテクノロジーとエビデンスベースの手法を通じて、すべての人にとって学習をアクセスしやすく、効果的で楽しいものにすることを使命としています。",
+    "mission": {
+      "title": "ミッション",
+      "desc": "世界中の学習者に、個々の学習スタイルに適応するインテリジェントなツールを提供し、知識の習得をこれまで以上に速く、効率的で、楽しいものにすること。"
+    },
+    "vision": {
+      "title": "ビジョン",
+      "desc": "すべての人が、その潜在能力を解き放つパーソナライズされたAI駆動の学習体験にアクセスできる世界。逆ではなく、あなたに適応する教育を想像しています。"
+    },
+    "values": {
+      "title": "コアバリュー",
+      "subtitle": "私たちのすべての行動を導く原則",
+      "innovation": {
+        "title": "革新",
+        "desc": "最先端の学習技術とAIでプラットフォームを常に進化させています"
+      },
+      "community": {
+        "title": "コミュニティ",
+        "desc": "学習者が互いに成功を支援する支援的な環境を構築"
+      },
+      "trust": {
+        "title": "信頼",
+        "desc": "あなたのデータとプライバシーは常に安全で保護されており、私たちの最優先事項です"
+      },
+      "support": {
+        "title": "サポート",
+        "desc": "迅速な支援で学習目標の達成をサポート"
+      }
+    },
+    "cta": {
+      "title": "始める準備はできましたか？",
+      "subtitle": "今日からNowryで学習の旅を始めましょう。今すぐ無料アカウントを作成！",
+      "primary": "無料で始める",
+      "secondary": "お問い合わせ"
+    }
+  },
+  "contact": {
+    "title": "お問い合わせ",
+    "subtitle": "ご質問がありますか？ぜひお聞かせください。メッセージをお送りいただければ、できるだけ早く返信いたします。",
+    "info": {
+      "email": {
+        "title": "メールでお問い合わせ",
+        "desc": "通常24時間以内に返信します"
+      },
+      "phone": {
+        "title": "お電話でお問い合わせ",
+        "desc": "月～金、午前9時～午後6時（EST）"
+      },
+      "visit": {
+        "title": "ご来訪",
+        "desc": "サンフランシスコ、CA 94102"
+      }
+    },
+    "form": {
+      "title": "メッセージを送信",
+      "success": "ありがとうございます！メッセージが正常に送信されました。すぐに返信いたします。",
+      "name": "お名前",
+      "namePlaceholder": "山田太郎",
+      "email": "メールアドレス",
+      "subject": "件名",
+      "subjectPlaceholder": "どのようにお手伝いできますか？",
+      "message": "メッセージ",
+      "messagePlaceholder": "ご質問やフィードバックについて詳しくお聞かせください...",
+      "send": "メッセージを送信"
+    },
+    "faq": {
+      "title": "よくある質問",
+      "q1": "どうやって始めますか？",
+      "a1": "無料アカウントを作成して、機能を探索し始めてください。クレジットカードは不要です！",
+      "q2": "Nowryは本当に無料ですか？",
+      "a2": "はい！コア機能は完全に無料です。高度な機能を備えたプレミアムプランも提供しています。",
+      "q3": "既存のフラッシュカードをインポートできますか？",
+      "a3": "もちろん！CSV、Anki、Quizletなど、さまざまな形式からのインポートをサポートしています。",
+      "q4": "学生割引はありますか？",
+      "a4": "はい、確認済みの学生向けに特別価格を提供しています。詳細についてはお問い合わせください。"
+    }
+  },
+  "annualPlanning": {
+    "title": "年間計画",
+    "subtitle": "今年最も重要なことに集中しましょう",
+    "myPlan": "私の2026年プラン",
+    "empty": "3つの主要な重点分野を定義して、集中した1年を始めましょう",
+    "stats": {
+      "totalGoals": "合計目標数",
+      "inProgress": "進行中",
+      "completed": "完了",
+      "completionRate": "完了率",
+      "priorities": "優先事項"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "goals": "Goals",
+      "priorities": "Priorities",
+      "reports": "Reports",
+      "ariaLabel": "Annual Planning sections",
+      "goalsEmptyTitle": "No goals yet",
+      "goalsEmptyBody": "Add goals inside a focus area to see them here.",
+      "errorLoading": "プランを読み込めませんでした。もう一度お試しください。",
+      "gridView": "グリッド表示",
+      "listView": "リスト表示",
+      "reportsEmptyTitle": "No reports yet",
+      "reportsEmptyBody": "Close a quarter to see its report here."
+    },
+    "breadcrumb": {
+      "root": "Annual Planning"
+    },
+    "focusArea": {
+      "title": "重点分野",
+      "subtitle": "今年集中する3つの主要な分野を選択してください",
+      "limit": "重点分野は最大3つまでです",
+      "limitReached": "重点分野の上限に達しました (3/3)",
+      "add": "重点分野を追加",
+      "edit": "分野を編集",
+      "delete": "分野を削除",
+      "name": "分野名",
+      "description": "ここで何を達成したいですか？",
+      "selectIcon": "アイコンを選択",
+      "selectColor": "色を選択",
+      "setup": {
+        "intro": {
+          "title": "3の力",
+          "message": "研究によると、一度にすべてを改善しようとするよりも、3つの主要な生活分野に集中する方が大きな成功につながります。今年の3つの分野を定義しましょう。"
+        },
+        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"],
+        "saveError": "重点分野を保存できませんでした。もう一度お試しください。",
+        "colorSwatchLabel": "{{color}}のテーマを選択"
+      },
+      "examples": ["キャリア成長", "健康と活力", "経済的自由", "人間関係", "創造的な活動", "学習とスキル"]
+    },
+    "priority": {
+      "title": "年間優先事項",
+      "add": "優先事項を追加",
+      "edit": "優先事項を編集",
+      "delete": "優先事項を削除",
+      "name": "優先事項",
+      "deadline": "目標日",
+      "linkedTo": "{{area}}に関連",
+      "noGoals": "まだ目標がリンクされていません",
+      "noActivePriorities": "アクティブな優先事項はありません",
+      "filterActive": "アクティブ",
+      "filterAll": "すべて ({{count}})",
+      "filterLabel": "優先事項をステータスで絞り込む",
+      "activeEmptyBody": "完了済みと非アクティブの優先事項は非表示です。",
+      "showAll": "すべて表示 ({{count}})",
+      "completedSection": "完了済み",
+      "done": "Done",
+      "inactive": "非アクティブ",
+      "activeIcon": "アクティブ",
+      "inactiveIcon": "非アクティブ",
+      "activate": "有効にする",
+      "markInactive": "非アクティブにする",
+      "showInactive": "非アクティブを表示 ({{count}})",
+      "hideInactive": "非アクティブを非表示",
+      "dragHandle": "ドラッグして並べ替え",
+      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
+      "linkedToEntity": "This priority is linked to a {{entityType}}",
+      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
+      "emptyTitle": "優先事項はまだありません",
+      "emptyBody": "優先事項とは、今年もっとも大切な数少ないことです。3〜5 個で十分です。",
+      "emptyCta": "優先事項を追加",
+      "addPriority": "優先事項を追加"
+    },
+    "goal": {
+      "add": "目標を追加",
+      "edit": "目標を編集",
+      "delete": "目標を削除",
+      "title": "目標タイトル",
+      "description": "説明",
+      "focusArea": "重点分野",
+      "linkToPriority": "優先事項にリンク (オプション)",
+      "targetDate": "目標日",
+      "progress": "進捗",
+      "status": {
+        "notStarted": "未着手",
+        "inProgress": "進行中",
+        "completed": "完了"
+      },
+      "healthStatus": {
+        "onTrack": "順調",
+        "atRisk": "要注意",
+        "behind": "遅延",
+        "completed": "完了",
+        "notStarted": "未着手"
+      },
+      "activities": "アクティビティ",
+      "percentComplete": "{{percent}}% 完了",
+      "activitiesError": "アクティビティの読み込みに失敗しました",
+      "completionBlockedTitle": "目標を完了としてマークできません",
+      "completionBlockedBody": "先に次のマイルストーンを完了してください:",
+      "image": "ビジュアルインスピレーション (オプション)",
+      "imageUrl": "画像URL",
+      "generateImage": "AIで生成",
+      "uploadImage": "画像をアップロード",
+      "daysLeft": "残り{{count}}日",
+      "daysLeft_plural": "残り{{count}}日",
+      "overdue": "期限切れ",
+      "noDeadline": "目標日なし",
+      "smartHelper": "SMARTにする：具体的、測定可能、達成可能、関連性、期限付き",
+      "activitiesCount": "{{count}} アクティビティ",
+      "activitiesCount_plural": "{{count}} アクティビティ",
+      "viewBoard": "ボードとして表示",
+      "editSubtitle": "目標の詳細を更新",
+      "timeframe": "期間設定",
+      "timeframeQuestion": "いつまでに達成したいですか？",
+      "linkToObjective": "年間目標にリンク (オプション)",
+      "basicInfo": "基本情報",
+      "keyResultsTitle": "主要な結果とマイルストーン",
+      "timelineVisual": "タイムラインとビジュアル",
+      "noMilestones": "マイルストーンはまだありません",
+      "titleRequired": "保存するには目標名を入力してください",
+      "detailRailAria": "任意の詳細を追加",
+      "addMilestones": "マイルストーンを追加",
+      "addDescription": "説明を追加",
+      "addTargetDate": "目標日を設定",
+      "addImage": "画像を追加",
+      "changeTimeframe": "期間を変更",
+      "keyResultsHelper": "目標を測定可能なステップに分解しましょう",
+      "addMilestoneButton": "追加",
+      "milestoneToggleAria": "{{title}} を完了にする",
+      "milestoneTitleAria": "マイルストーン {{index}} のタイトル",
+      "milestoneDueDateAria": "{{title}} の期日を設定",
+      "milestoneClearDateAria": "{{title}} の期日を削除",
+      "milestoneDeleteAria": "{{title}} を削除",
+      "milestoneNoDate": "日付",
+      "milestoneNumber": "マイルストーン {{index}}",
+      "imageHelper": "役に立つなら、視覚的なリマインダーを",
+      "imageUrlPlaceholder": "https://example.com/image.jpg",
+      "imagePreviewAlt": "目標画像のプレビュー",
+      "imagePreviewError": "この画像を読み込めませんでした",
+      "scopeQuarterly": "第{{quarter}}四半期の目標",
+      "scopeYearly": "年間目標",
+      "parentFallback": "親目標",
+      "parentPlaceholder": "親目標を選択...",
+      "timeframeYearly": "通年（年間目標）",
+      "timeframeQ1": "第1四半期（1〜3月）",
+      "timeframeQ2": "第2四半期（4〜6月）",
+      "timeframeQ3": "第3四半期（7〜9月）",
+      "timeframeQ4": "第4四半期（10〜12月）",
+      "saveGoal": "目標を保存",
+      "updateGoal": "目標を更新",
+      "titlePlaceholder": "何を達成したいですか？",
+      "descriptionPlaceholder": "この目標の詳細を追加...",
+      "milestonePlaceholder": "マイルストーンのタイトル...",
+      "next": {
+        "completed": "完了",
+        "label": "次: {{title}}",
+        "overdue": "期限超過: {{title}}",
+        "readyToComplete": "すべてのマイルストーンが完了 — 目標を完了にする",
+        "addMilestone": "マイルストーンを追加して進捗を記録",
+        "toggleAria": "マイルストーン「{{title}}」を完了にする"
+      },
+      "milestoneCount_one": "{{total}}件中{{completed}}件のマイルストーン",
+      "milestoneCount_other": "{{total}}件中{{completed}}件のマイルストーン",
+      "daysLeftShort_one": "残り{{count}}日",
+      "daysLeftShort_other": "残り{{count}}日",
+      "moreActions": "「{{title}}」のその他の操作",
+      "openDetail": "「{{title}}」を開く",
+      "markComplete": "完了にする",
+      "reopen": "目標を再開する",
+      "lockedAction": "この四半期は締め切られています",
+      "detail": {
+        "milestones": "マイルストーン",
+        "lifecycleLabel": "ステータス",
+        "noDescription": "説明なし"
+      },
+      "statusUpdateError": "この目標を更新できませんでした。もう一度お試しください。",
+      "milestoneUpdateError": "そのマイルストーンを更新できませんでした。もう一度お試しください。",
+      "deleteConfirm": {
+        "title": "目標を削除",
+        "description": "この目標とすべてのマイルストーンが完全に削除されます。この操作は取り消せません。"
+      },
+      "saveError": "この目標を保存できませんでした。"
+    },
+    "activity": {
+      "title": "活動＆習慣",
+      "add": "活動を追加",
+      "edit": "活動を編集",
+      "delete": "活動を削除",
+      "name": "活動名",
+      "description": "説明",
+      "frequency": "頻度",
+      "timeOfDay": "時間帯",
+      "duration": "期間 (分)",
+      "linkedGoal": "リンクされた目標",
+      "frequencies": {
+        "daily": "毎日",
+        "weekly": "毎週",
+        "custom": "カスタム"
+      },
+      "timeSlots": {
+        "morning": "朝",
+        "afternoon": "午後",
+        "evening": "夜",
+        "anytime": "いつでも"
+      },
+      "todaysTasks": "今日の活動",
+      "noActivities": "活動はまだありません。目標を達成するために、毎日/毎週のアクションを追加してください。",
+      "markComplete": "完了としてマーク",
+      "toggleActive": "有効/無効を切り替え"
+    },
+    "milestone": {
+      "locked": "マイルストーンはロックされています"
+    },
+    "dailyRoutine": {
+      "title": "日課プランナー",
+      "subtitle": "目標を達成するための理想的な一日をデザインしましょう",
+      "morning": "朝のルーチン",
+      "afternoon": "午後のルーチン",
+      "evening": "夜のルーチン",
+      "addBlock": "タイムブロックを追加",
+      "templates": {
+        "title": "テンプレートから開始",
+        "weekday": "平日スケジュール",
+        "weekend": "週末スケジュール",
+        "earlyBird": "早起き",
+        "nightOwl": "夜型",
+        "blank": "ゼロから開始"
+      },
+      "distribution": "重点分野別時間配分",
+      "balanced": "バランス良好",
+      "lopsided": "1つの分野に時間が偏っています",
+      "dragActivities": "活動を目標からタイムスロットにドラッグしてください",
+      "saveTemplate": "テンプレートとして保存",
+      "morningEmptyTitle": "朝を上手くスタートしよう。",
+      "afternoonEmptyTitle": "午後を自分のものに。",
+      "eveningEmptyTitle": "意図を持って一日を締めくくろう。",
+      "emptySubtitle": "毎日のルーティンを設定して、常に軌道に乗り続けましょう。",
+      "emptyCta": "ルーティンを設定",
+      "addItemPlaceholder": "アイテムを追加...",
+      "goalActivities": "目標アクティビティ",
+      "routineItems": "ルーチンアイテム",
+      "saving": "保存中...",
+      "swipeHint": "スワイプしてナビゲート",
+      "goalPrefix": "Goal: {{title}}",
+      "toggleItem": "今日完了としてマークする",
+      "noItems": "まだルーティン項目が設定されていません",
+      "deleteItem": "項目を削除",
+      "addItem": "項目を追加",
+      "editRoutine": "ルーティンを編集"
+    },
+    "progress": {
+      "title": "進捗ダッシュボード",
+      "overview": "年間概要",
+      "breakdown": "分野別内訳",
+      "goalProgress": "目標進捗",
+      "activityStreak": "活動ストリーク",
+      "upcomingDeadlines": "今後の締め切り",
+      "insights": "インサイト",
+      "noDeadlines": "今後の締め切りはありません",
+      "suggestions": {
+        "noProgress": "{{days}}日間、{{area}}を更新していません",
+        "balanced": "素晴らしい！すべての分野で進歩しています",
+        "nearDeadline": "{{goal}}の期限が{{days}}日後に迫っています"
+      }
+    },
+    "actions": {
+      "setFocusAreas": "分野を設定",
+      "addGoal": "目標を追加",
+      "viewRoutine": "日課を表示",
+      "seeAllGoals": "全目標を表示",
+      "editPlan": "タイトルを編集",
+      "exportPlan": "プランをエクスポート"
+    },
+    "home": {
+      "dailyRoutineBtn": "日課",
+      "yearlyPriorities": "年間優先事項",
+      "noPrioritiesAdded": "まだ優先事項が追加されていません",
+      "viewAllPriorities": "{{count}}件の優先事項をすべて表示 →",
+      "reviewNow": "今すぐレビュー",
+      "quarterEndedOn": "第{{quarter}}四半期は {{date}} に終了しました",
+      "quarterEndsToday": "第{{quarter}}四半期は本日終了します",
+      "quarterEndingIn": "第{{quarter}}四半期はあと {{count}} 日で終了します",
+      "quarterEndingIn_other": "第{{quarter}}四半期はあと {{count}} 日で終了します",
+      "routineCompletion": "完了",
+      "allYear": "通年",
+      "quarterEndingIn_one": "第{{quarter}}四半期はあと {{count}} 日で終了します"
+    },
+    "quarterReport": {
+      "report": "Report",
+      "preview": "Preview",
+      "unassignedArea": "Unassigned",
+      "noneRecorded": "None recorded",
+      "reflections": "Quarterly Reflections",
+      "biggestWins": "Biggest Wins",
+      "challenges": "Challenges",
+      "nextFocus": "Next Focus",
+      "goalsAchieved": "Goals Achieved",
+      "milestonesCompleted": "Milestones Completed",
+      "totalProgress": "Total Progress",
+      "insights": "Quarterly Insights",
+      "routineConsistency": "Routine Consistency",
+      "activeDays": "Active {{count}} day this quarter",
+      "activeDays_plural": "Active {{count}} days this quarter",
+      "activeDays_other": "Active {{count}} days this quarter",
+      "booksFinished": "Books Finished ({{count}})",
+      "breakdownByFocusArea": "Breakdown by Focus Area",
+      "migratedCount": "Migrated {{count}}x",
+      "migratedCount_plural": "Migrated {{count}}x",
+      "migratedCount_other": "Migrated {{count}}x",
+      "due": "Due",
+      "migrateToNextQuarter": "Migrate to Next Quarter"
+    },
+    "deleteConfirm": "この{{type}}を削除してもよろしいですか？この操作は元に戻せません。",
+    "celebration": "🎉 目標達成！素晴らしい進歩です！",
+    "errors": {
+      "loadFailed": "年間計画の読み込みに失敗しました",
+      "createFailed": "{{type}}の作成に失敗しました",
+      "updateFailed": "{{type}}の更新に失敗しました",
+      "deleteFailed": "{{type}}の削除に失敗しました",
+      "focusAreaLimit": "重点分野は3つまでです。追加するには1つ削除してください。"
+    },
+    "header": {
+      "progress": "{{percent}}% 完了",
+      "goalsRatio": "{{total}} 件中 {{completed}} 件の目標",
+      "prioritiesCount_one": "{{count}} 件の優先事項",
+      "prioritiesCount_other": "{{count}} 件の優先事項",
+      "routineRatio": "{{total}} 件中 {{completed}} 件のルーティン",
+      "renamePlan": "プランの名前を変更",
+      "quarterLabel": "四半期",
+      "moreActions": "その他のプラン操作",
+      "addFirstGoal": "最初の目標を追加",
+      "deletePlan": "プランを削除",
+      "deletePlanTitle": "このプランを削除しますか？",
+      "deletePlanBody": "「{{title}}」と、その重点分野・目標・四半期レポートがすべて削除されます。元に戻せません。"
+    },
+    "goals": {
+      "scopeQuarter": "Q{{quarter}} · {{count}} 件の目標",
+      "scopeAll": "通年 · {{count}} 件の目標",
+      "quarterEmptyTitle": "Q{{quarter}} の予定はありません",
+      "quarterEmptyBody": "他の四半期に目標があります。",
+      "quarterEmptyCta": "通年を表示",
+      "scopeQuarter_one": "Q{{quarter}} · {{count}} 件の目標",
+      "scopeQuarter_other": "Q{{quarter}} · {{count}} 件の目標",
+      "scopeAll_one": "通年 · {{count}} 件の目標",
+      "scopeAll_other": "通年 · {{count}} 件の目標",
+      "loadingAria": "目標を読み込み中"
+    },
+    "reports": {
+      "emptyTitle": "最初のレポートは四半期の締めで公開されます",
+      "emptyBody": "四半期を締めると、Nowry が目標・進捗・成果を振り返り用のレポートにまとめます。",
+      "emptyCtaReady": "Q{{quarter}} を振り返る",
+      "emptyCountdown_one": "Q{{quarter}} はあと {{count}} 日で終了します",
+      "emptyCountdown_other": "Q{{quarter}} はあと {{count}} 日で終了します",
+      "historyTitle": "締めた四半期",
+      "goalsAchieved": "達成した目標",
+      "progress": "進捗",
+      "snapshots": "スナップショット ({{count}})"
+    },
+    "overview": {
+      "focusAreasTitle": "重点分野",
+      "prioritiesTitle": "年間コミットメント",
+      "prioritiesManage": "管理",
+      "prioritiesEmptyTitle": "優先事項はまだありません",
+      "prioritiesEmptyBody": "今年もっとも大切なことをいくつか挙げましょう。3〜5 個で十分です。",
+      "prioritiesEmptyCta": "優先事項を追加",
+      "areaGoalCount_one": "{{count}} 件の目標",
+      "areaGoalCount_other": "{{count}} 件の目標"
+    }
+  },
+  "deckSettings": {
+    "menuItem": "設定",
+    "openAria": "{{name}}の設定を開く",
+    "nav": {
+      "study": "学習",
+      "audio": "音声",
+      "publishing": "公開",
+      "identity": "詳細"
+    },
+    "study": {
+      "paceMode": "学習ペース",
+      "newPerDay": "1日の新規カード数",
+      "maxReviews": "1日の最大復習数",
+      "cardsPerDay": "枚 / 日",
+      "reviewsPerDay": "回 / 日"
+    },
+    "pace": {
+      "relaxed": "のんびり",
+      "balanced": "バランス",
+      "intensive": "集中",
+      "relaxedHint": "大きなデッキや気軽な学習に最適",
+      "balancedHint": "ほとんどの学習者に推奨",
+      "intensiveHint": "試験対策や短期集中に"
+    },
+    "audio": {
+      "front": "表面",
+      "back": "裏面",
+      "autoplay": "自動再生",
+      "voice": "音声",
+      "systemDefault": "システム既定",
+      "rate": "速度",
+      "pitch": "ピッチ",
+      "sideAria": "カードの面",
+      "rateAria": "読み上げ速度: 通常の{{value}}倍",
+      "pitchAria": "音の高さ: {{value}}"
+    },
+    "publish": {
+      "title": "デッキを公開する",
+      "description": "リンクを知っている人は誰でも閲覧・フォークできます",
+      "publicDescription": "公開説明",
+      "publishedOn": "{{date}}に公開"
+    },
+    "saving": "保存中...",
+    "saved": "保存済み",
+    "saveFailed": "この変更は保存されませんでした",
+    "retry": "再試行",
+    "identity": {
+      "name": "デッキ名",
+      "description": "説明",
+      "image": "カバー画像"
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "プライバシーポリシー",
+      "lastUpdated": "最終更新日: {{date}}",
+      "intro": {
+        "title": "1. はじめに",
+        "content": "Nowryへようこそ。当社はお客様のプライバシーを尊重し、個人データの保護に努めています。このプライバシーポリシーは、お客様が当社のウェブサイトを訪問した際の個人データの取り扱いについて説明し、お客様のプライバシー権および法律による保護についてお知らせするものです。"
+      },
+      "dataCollect": {
+        "title": "2. 収集するデータ",
+        "content": "当社は、以下を含む、お客様に関するさまざまな種類の個人データを収集、使用、保存、転送する場合があります。",
+        "items": {
+          "identity": "<strong>身元データ：</strong> ユーザー名または同様の識別子。",
+          "contact": "<strong>連絡先データ：</strong> メールアドレス。",
+          "technical": "<strong>技術データ：</strong> ブラウザの種類とバージョン、タイムゾーンの設定、および場所。",
+          "usage": "<strong>利用データ：</strong> 学習の進捗状況やAI生成コンテンツを含む、当社のウェブサイトの利用方法に関する情報。"
+        }
+      },
+      "usage": {
+        "title": "3. データの利用方法",
+        "content": "当社は、主に教育サービスの提供および改善のためにデータを利用します。これには以下が含まれます。",
+        "items": [
+          "Firebase Authenticationを介したアカウント作成およびログインプロセスの促進。",
+          "AIアルゴリズムを使用した学習体験のパーソナライズ。",
+          "ウェブサイト、サービス、およびユーザー体験の向上。",
+          "アカウントや他の製品・サービスに関する定期的なメールの送信。"
+        ]
+      },
+      "ai": {
+        "title": "4. AIとデータ処理",
+        "content": "Nowryは、学習教材の生成やインサイトの提供に人工知能を使用しています。提供されたコンテンツは、学習成果を向上させるために当社のAIモデルによって処理される場合があります。当社は、公開AIモデルのトレーニングに個人の身元データを使用することはありません。"
+      },
+      "security": {
+        "title": "5. データのセキュリティ",
+        "content": "当社は、個人データが誤って紛失、使用、または不正な方法でアクセスされることを防ぐために、適切なセキュリティ対策を講じています。認証およびデータ保存には、Firebaseの業界標準のセキュリティプロトコルを使用しています。"
+      },
+      "rights": {
+        "title": "6. 法的権利",
+        "content": "特定の状況下において、お客様は個人データに関してデータ保護法に基づく権利（アクセス、訂正、消去、または制限の要求など）を有しています。"
+      },
+      "contact": {
+        "title": "7. お問い合わせ",
+        "content": "このプライバシーポリシーに関するご質問がある場合は、以下までご連絡ください。",
+        "email": "メールアドレス: support@nowry.app"
+      }
+    },
+    "terms": {
+      "title": "利用規約",
+      "lastUpdated": "最終更新日: {{date}}",
+      "acceptance": {
+        "title": "1. 規約への同意",
+        "content": "Nowryにアクセスまたは利用することで、お客様はこれらの利用規約に拘束されることに同意したものとみなされます。規約のいずれかの部分に同意しない場合は、当社のサービスを利用することはできません。"
+      },
+      "service": {
+        "title": "2. サービスの説明",
+        "content": "Nowryは、書籍の要約、フラッシュカードの生成、学習追跡ツールなどを含むがこれらに限定されない、AIを活用した教育プラットフォームを提供します。当社は、いつでもサービスの任意の部分を変更または中止する権利を留保します。"
+      },
+      "accounts": {
+        "title": "3. ユーザーアカウント",
+        "content": "特定の機能を利用するには、アカウントを作成する必要があります。アカウントの認証情報の機密性を維持すること、およびアカウントの下で行われるすべての活動については、お客様が責任を負うものとします。アカウントの不正利用に気付いた場合は、直ちに当社に通知してください。"
+      },
+      "content": {
+        "title": "4. ユーザーコンテンツとAI生成",
+        "content1": "アップロードしたコンテンツの所有権はお客様に帰属します。ただし、Nowryを利用することで、お客様はAIモデルの使用を含む、サービスの提供および改善の目的でコンテンツを処理するライセンスを当社に付与するものとします。",
+        "content2": "AI生成コンテンツは教育目的で提供されます。正確を期しておりますが、NowryはAI生成教材の正確性を保証するものではありません。"
+      },
+      "conduct": {
+        "title": "5. 禁止事項",
+        "content": "お客様は以下を行わないことに同意するものとします。",
+        "items": [
+          "当社のAIモデルまたはプラットフォームのリバースエンジニアリングの試み。",
+          "違法な目的でのサービスの利用。",
+          "悪意のあるコード、または知的財産権を侵害するコンテンツのアップロード。",
+          "サービスのセキュリティまたは運営への干渉。"
+        ]
+      },
+      "liability": {
+        "title": "6. 責任の制限",
+        "content": "Nowryは、サービスの使用または使用不能から生じる間接的、付随的、特別、結果的、または懲罰的な損害について、一切の責任を負わないものとします。"
+      },
+      "termination": {
+        "title": "7. 終了",
+        "content": "当社は、当社の固有の裁量により、これらの利用規約に違反している、または他のユーザーや当社のビジネス利益に有害であると思われる行為について、通知なしにアカウントを終了または一時停止する権利を留保します。"
+      },
+      "changes": {
+        "title": "8. 規約の変更",
+        "content": "当社は、随時これらの利用規約を更新する場合があります。変更後に継続してサービスを利用することは、新しい規約に同意したものとみなされます。"
+      },
+      "contact": {
+        "title": "9. お問い合わせ情報",
+        "content": "これらの規約に関するご質問は、以下までご連絡ください。",
+        "email": "メールアドレス: support@nowry.app"
+      }
+    }
+  },
+  "home": {
+    "setupBanner": {
+      "message": "プロフィールの設定がまだ完了していません。",
+      "cta": "セットアップを完了する",
+      "dismiss": "閉じる"
+    }
+  },
+  "pet": {
+    "stage": {
+      "1": {
+        "name": "光の粒"
+      },
+      "2": {
+        "name": "精霊"
+      },
+      "3": {
+        "name": "探索者"
+      },
+      "4": {
+        "name": "賢者"
+      },
+      "5": {
+        "name": "神託"
+      },
+      "6": {
+        "name": "光輝"
+      }
+    },
+    "levelUp": {
+      "reached": "レベル{{level}}に到達しました",
+      "dismiss": "タップして閉じる"
+    }
+  },
+  "agent": {
+    "defaultName": "学習の友",
+    "welcomeMessage": "こんにちは！👋 私は{{petName}}です。",
+    "tabs": {
+      "personality": "個性",
+      "companion": "コンパニオン",
+      "interventions": "介入"
+    },
+    "settings": {
+      "interventions": {
+        "requiresNudging": "介入を設定するには、「個性」タブでプロアクティブなリマインダーを有効にしてください。",
+        "saveError": "保存できませんでした。もう一度お試しください。",
+        "frequency": {
+          "sectionTitle": "介入頻度",
+          "sectionDesc": "コンパニオンがメッセージで割り込む頻度。",
+          "conservative": "控えめ",
+          "conservativeDesc": "セッションあたり最大1件。閉じた後20分間の静寂ウィンドウ。",
+          "balanced": "バランス",
+          "balancedDesc": "セッションあたり最大2件。閉じた後10分間の静寂ウィンドウ。",
+          "frequent": "頻繁",
+          "frequentDesc": "セッションあたり最大4件。閉じた後3分間の静寂ウィンドウ。"
+        },
+        "focusMode": {
+          "title": "集中モード",
+          "label": "学習セッション中は静かにする",
+          "desc": "アクティブに学習中は不正解メッセージを抑制します。セッション終了時にはサマリーが表示されます。"
+        },
+        "types": {
+          "sectionTitle": "メッセージの種類",
+          "sectionDesc": "コンパニオンから特定の種類のメッセージをオフにする。",
+          "wrongAnswer": "学習のきっかけ",
+          "wrongAnswerDesc": "カードに不正解した後の簡単な解説。",
+          "sessionSummary": "セッションサマリー",
+          "sessionSummaryDesc": "各学習セッション終了時の診断メッセージ。",
+          "preSession": "セッション前の説明",
+          "preSessionDesc": "学習セッション開始前の簡単な案内。",
+          "reEngagement": "再参加リマインダー",
+          "reEngagementDesc": "デッキにカードが積み上がっているときのメッセージ。",
+          "streakMilestone": "ストリークのマイルストーン",
+          "streakMilestoneDesc": "連続学習日数が7、14、30、60、100日に達したときのメッセージ。"
+        }
+      },
+      "personality": {
+        "replyLength": {
+          "title": "返答の長さ",
+          "desc": "パートナーが1回の返答で書く量を調整します。"
+        },
+        "tone": {
+          "title": "キャラクターとトーン",
+          "desc": "パートナーとのコミュニケーションスタイルを選んでください。"
+        },
+        "knowledge": {
+          "title": "ナレッジアクセス",
+          "desc": "パートナーがライブラリ・デッキ・目標を読み取り、より的確なアドバイスを提供できるようにします。データは外部に送信されません。",
+          "libraryToggleLabel": "ライブラリとデッキへのアクセスを許可",
+          "libraryToggleDesc": "RAG検索パイプラインを有効にします（読み取り専用）。",
+          "nudgesLabel": "プロアクティブな学習リマインダー",
+          "nudgesDesc": "復習カードがある場合、ダッシュボードでお知らせします。",
+          "nudgesRequires": " ナレッジアクセスが必要です。",
+          "unlockAlert": "ナレッジアクセスを有効にして、より賢い回答とリマインダーをアンロックしましょう。",
+          "roamingLabel": "徘徊するパートナー",
+          "roamingDesc": "学習中、パートナーが画面を自由に動き回ります。"
+        },
+        "saved": "保存しました",
+        "regenerate": "Regenerate Personality",
+        "regenerateButton": "Regenerate",
+        "used": "used this month",
+        "upgrade": "Unlock more personality generations with Pro",
+        "customPersonalityLocked": "Custom personality requires Plus or Pro",
+        "resetDate": "Resets {{date}}",
+        "generating": "Generating personality...",
+        "preview": {
+          "title": "ライブプレビュー",
+          "caption": "設定を変えるとリアルタイムで更新されます。",
+          "captionSave": "変更は自動的に保存されます。"
+        },
+        "conciseness": {
+          "concise": {
+            "label": "簡潔",
+            "description": "1〜2文。要点だけ。"
+          },
+          "balanced": {
+            "label": "バランス",
+            "description": "余分なく、完結した回答。"
+          },
+          "detailed": {
+            "label": "詳細",
+            "description": "例を交えた丁寧な説明。"
+          }
+        },
+        "toneOptions": {
+          "friendly": {
+            "label": "フレンドリー",
+            "description": "温かく、励ましのある会話スタイル。"
+          },
+          "professional": {
+            "label": "プロフェッショナル",
+            "description": "正確で学術的、余分なし。"
+          },
+          "strict": {
+            "label": "厳格",
+            "description": "責任重視。空虚な称賛なし。"
+          },
+          "socratic": {
+            "label": "ソクラテス式",
+            "description": "質問には問いで返し、考えさせる。"
+          }
+        }
+      }
+    },
+    "avatar": {
+      "generateError": "問題が発生しました。もう一度お試しください。",
+      "rateLimitError": "今月の肖像生成上限に達しました。",
+      "freeTierError": "肖像を生成するにはPlusにアップグレードしてください。",
+      "missingSpeciesError": "まずコンパニオンの種族を選んでください。",
+      "portraitAlt": "コンパニオンの肖像",
+      "regenPendingTitle": "コンパニオンが進化しました！",
+      "regenPendingDesc": "新しい肖像を生成して、成長した姿を見てみましょう。",
+      "regenPendingAction": "新しい肖像を生成"
+    },
+    "companion": {
+      "nameTitle": "コンパニオンに名前をつける",
+      "nameDescription": "学習コンパニオンにぴったりの名前をつけましょう。",
+      "nameLabel": "コンパニオン名",
+      "namePlaceholder": "例：フクロウ、ノヴァ、スパーク...",
+      "nameAriaLabel": "コンパニオンの名前",
+      "speciesTitle": "種族を選ぶ",
+      "speciesDescription": "コンパニオンの種族が個性を形作ります。",
+      "suggestedLabel": "興味に基づいた提案",
+      "colorTitle": "アクセントカラー",
+      "colorDescription": "コンパニオンのオーブの光の色を設定します。",
+      "colorAriaLabel": "{{color}}を選択",
+      "previewLabel": "ライブプレビュー",
+      "previewCaption": "変更に合わせてリアルタイムで更新されます",
+      "saveError": "保存できませんでした。もう一度お試しください。",
+      "avatarTitle": "AIポートレート",
+      "avatarDescription": "プロフィールに基づいてコンパニオンのユニークなAIポートレートを生成します。",
+      "avatarLockedTitle": "AIポートレート",
+      "avatarLockedDescription": "コンパニオンのユニークなAI生成ポートレートを取得しましょう。",
+      "avatarGenerating": "コンパニオンを作成中...",
+      "generateAvatar": "コンパニオンを生成する",
+      "generateAvatarAriaLabel": "コンパニオンのAIポートレートを生成",
+      "regenerate": "再生成",
+      "regenerating": "再生成中...",
+      "regenerateAriaLabel": "コンパニオンのポートレートを再生成",
+      "generationsRemaining": "今月残り{{count}}回",
+      "upgradePlus": "Plusにアップグレード",
+      "upgradePlusAriaLabel": "AIポートレートを解放するにはPlusにアップグレード",
+      "species": {
+        "owl": "フクロウ",
+        "fox": "キツネ",
+        "cat": "ネコ",
+        "dragon": "ドラゴン",
+        "robot": "ロボット",
+        "star": "スター",
+        "phoenix": "フェニックス",
+        "crystal": "クリスタル",
+        "leaf": "リーフ",
+        "music": "ノート"
+      },
+      "colors": {
+        "ocean": "オーシャン",
+        "violet": "バイオレット",
+        "mint": "ミント",
+        "gold": "ゴールド",
+        "rose": "ローズ",
+        "coral": "コーラル",
+        "sky": "スカイ",
+        "ember": "エンバー"
+      },
+      "dismiss": "閉じる",
+      "tellMeMore": "詳しく見る",
+      "interventions": {
+        "preSessionFraming": {
+          "noStruggle": "{{deckName}}には{{dueCount}}枚の復習カードがあります。集中したセッションにしましょう。",
+          "withStruggle": "{{deckName}}には{{dueCount}}枚の復習カードがあります。前回のセッションでは{{strugglePattern}}が難しかったようです — 今日は丁寧に読み返しましょう。"
+        },
+        "reEngagement": {
+          "withDue": "{{totalDue}}枚のカードがデッキに積み重なっています。{{topDeckName}}が最も多く{{topDeckDue}}枚あります — ここから始めるとよいでしょう。",
+          "noDue": "今日は復習カードがありませんが、記憶の定着を保つために{{topDeckName}}を一通り見ておくことをおすすめします。"
+        },
+        "streakMilestone": {
+          "day7": "7日連続の復習は、習慣形成の研究が最初の定着ポイントと位置づける段階です。",
+          "day14": "2週間の毎日の復習は、間隔反復の研究によると長期記憶の定着に測定可能な改善をもたらします。",
+          "day30": "30日間の継続的な復習は、この内容を耐久性のある長期記憶の領域に移行させます。",
+          "day60": "60日間の途切れのない復習は、ほとんどの学習者が到達しない結果です。",
+          "day100": "100日間。この時点では習慣の持続性に関する研究も区別をやめます — これはもう単純にあなたの一部です。"
+        }
+      }
+    },
+    "settingsSubtitle": "パートナーの動作とキャラクターを設定する",
+    "headerStatus": "Lv{{level}} · {{tier}} · 残り{{remaining}}スパーク",
+    "headerStatusUnlimited": "Lv{{level}} · {{tier}} · 無制限",
+    "welcomePrompt": "{{name}}、何でも聞いてください。今日の学習内容を教えてくれてもOK。",
+    "welcomePromptNoName": "何でも聞いてください。今日の学習内容を教えてくれてもOK。",
+    "inputPlaceholder": "何でも聞いてみて...",
+    "inputAriaLabel": "学習パートナーにメッセージを送る",
+    "limitReachedPlaceholder": "月間上限に達しました — プランをアップグレード",
+    "messagesRemaining": "messages this month",
+    "persistentMemory": "Memory on",
+    "sessionOnly": "Session-only memory",
+    "chat": {
+      "empty": {
+        "title": "Start chatting",
+        "body": "Ask me anything about your studies"
+      },
+      "error": {
+        "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
+      },
+      "upgradePlan": "Upgrade plan"
+    },
+    "personality": {
+      "error": {
+        "blocked": "That personality description was flagged. Try different wording.",
+        "failed": "Personality generation failed. Please try again."
+      },
+      "success": "Personality updated"
+    },
+    "upgrade": {
+      "persistentMemory": "Unlock persistent memory with Plus",
+      "customPersonality": "Custom personality requires Plus or Pro",
+      "morePersonality": "Unlock more personality generations with Pro",
+      "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    }
+  },
+  "cards": {
+    "generatedCards": {
+      "titleSelectCards": "新しい学習カード",
+      "titleAddToDeck": "デッキに追加",
+      "subtitleSelectCards": "学習デッキに追加したいカードを選択してください。",
+      "subtitleAddToDeck": "カードを保存するデッキを選んでください。",
+      "generateAgainTooltip": "再生成",
+      "cancelButton": "キャンセル",
+      "proceedCount": "次へ ({{count}})",
+      "confirmSave": "確認して保存",
+      "saveError": "カードの保存に失敗しました。もう一度お試しください。",
+      "selectAll": "すべて選択",
+      "selectAllAria": "すべてのカードを選択",
+      "selectedCount": "{{total}}件中{{count}}件選択"
+    },
+    "saveToDeck": {
+      "selectDeckLabel": "デッキを選択",
+      "chooseDeckPlaceholder": "デッキを選んでください...",
+      "orDivider": "または",
+      "createNewDeck": "新しいデッキを作成",
+      "namePlaceholder": "新しいデッキ名",
+      "createButton": "作成",
+      "cancelButton": "キャンセル",
+      "batchTagsLabel": "タグ",
+      "tagsLoadError": "既存のタグを読み込めませんでした。カスタムタグは引き続き追加できます。",
+      "noExistingTags": "タグはまだありません。",
+      "tagsHelperText": "タグは後でカードを見つけやすくするためのものです。上のデッキ名とは関係ありません。",
+      "addTagPlaceholder": "タグを追加...",
+      "addTagAria": "タグを追加",
+      "emptyFlashcard": "最初のカードデッキを作成しましょう",
+      "emptyFlashcardBody": "デッキを作成して、このカードを保存・復習しましょう。",
+      "emptyQuiz": "最初のクイズデッキを作成しましょう",
+      "emptyQuizBody": "デッキを作成して、この問題を保存・復習しましょう。",
+      "emptyVisual": "最初のビジュアルデッキを作成しましょう",
+      "emptyVisualBody": "デッキを作成して、この図を保存・復習しましょう。"
+    },
+    "session": {
+      "mode": {
+        "study": "Study",
+        "browse": "Browse",
+        "cram": "Cram"
+      },
+      "emptyDeck": {
+        "title": "No cards yet",
+        "body": "Add cards to this deck to browse or cram them here."
+      },
+      "error": "Couldn't load cards. Check your connection and try again.",
+      "enterFullscreen": "全画面表示にする",
+      "exitFullscreen": "全画面表示を終了する"
+    },
+    "flashcard": {
+      "createTitle": "新しいフラッシュカード",
+      "editTitle": "フラッシュカードを編集",
+      "frontLabel": "表",
+      "backLabel": "裏",
+      "frontRequired": "このカードを保存するには質問を入力してください",
+      "backRequired": "このカードを保存するには答えを入力してください",
+      "frontPlaceholder": "フランスの首都はどこですか？",
+      "backPlaceholder": "パリ"
+    },
+    "quiz": {
+      "createTitle": "新しいクイズカード",
+      "editTitle": "クイズカードを編集",
+      "questionLabel": "質問",
+      "optionsLabel": "選択肢",
+      "optionsAria": "選択肢 — 正解を選んでください",
+      "addOption": "選択肢を追加",
+      "correctAria": "選択肢 {{number}} を正解にする",
+      "removeOptionAria": "選択肢 {{number}} を削除",
+      "questionRequired": "このカードを保存するには質問を入力してください",
+      "needTwoOptions": "選択肢を2つ以上追加してください",
+      "needCorrectAnswer": "どの選択肢が正解か選んでください",
+      "optionRemoved": "選択肢を削除しました",
+      "undoRemove": "元に戻す",
+      "addExplanation": "解説を追加",
+      "explanationLabel": "解説",
+      "questionPlaceholder": "フランスの首都はどこですか？",
+      "optionPlaceholder": "選択肢 {{number}}",
+      "explanationPlaceholder": "なぜこれが正解なのかを説明してください..."
+    },
+    "visual": {
+      "createTitle": "新しいビジュアルカード",
+      "editTitle": "ビジュアルカードを編集",
+      "titleLabel": "タイトル",
+      "titlePlaceholder": "機械学習ワークフロー",
+      "titleRequired": "保存するには図に名前を付けてください",
+      "codeLabel": "図のコード",
+      "codeRequired": "このカードを保存するには図のコードを入力してください",
+      "codePlaceholder": "graph TD\n  A[Start] --> B[End]",
+      "syntaxError": "この図はまだ表示できません",
+      "previewEmpty": "入力すると図がここに表示されます",
+      "tabCode": "コード",
+      "tabPreview": "プレビュー",
+      "previewOkAria": "プレビュー — 図は正しく表示されます",
+      "previewErrorAria": "プレビュー — 図に構文エラーがあります",
+      "mermaidLink": "Mermaid 構文リファレンス",
+      "addDescription": "説明を追加",
+      "descriptionLabel": "説明",
+      "explanationPlaceholder": "補足説明..."
+    },
+    "common": {
+      "addTags": "タグを追加",
+      "chooseDeck": "デッキを選択",
+      "typeFlashcard": "フラッシュカード",
+      "typeQuiz": "クイズ",
+      "typeVisual": "ビジュアル",
+      "typeSelectorAria": "カードの種類",
+      "switchTypeWarning": "カードの種類を変更すると、この種類で入力した内容は破棄されます。",
+      "switchTypeConfirm": "変更する"
+    },
+    "create": {
+      "newTitle": "新しいデッキ",
+      "create": "デッキを作成",
+      "fields": {
+        "name": "デッキ名",
+        "namePlaceholder": "例: 日本語の語彙",
+        "description": "説明",
+        "descriptionPlaceholder": "このデッキは何についてですか？"
+      },
+      "nameRequired": "デッキ名を入力すると作成できます",
+      "addDescription": "説明を追加",
+      "addTags": "タグを追加",
+      "addImage": "画像を追加",
+      "addCards": "カードを追加",
+      "done": "完了",
+      "createdTitle": "デッキを作成しました",
+      "imagePlaceholder": "画像のリンクを貼り付け",
+      "imagePreviewAlt": "デッキ画像のプレビュー",
+      "imagePreviewError": "この画像を読み込めませんでした"
+    }
+  },
+  "subscription": {
+    "title": "Subscription & Billing",
+    "currentPlan": "Current Plan",
+    "nextBillingDate": "Next billing date",
+    "noBillingDate": "—",
+    "manageBilling": "Manage billing in Stripe",
+    "downgrade": "Downgrade plan",
+    "aiUsage": {
+      "title": "Monthly AI Usage",
+      "meter": "{{used}} / {{limit}} this month",
+      "reset": "Resets on {{date}}",
+      "empty": "No AI usage this month"
+    },
+    "tier": {
+      "free": "Free",
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "status": {
+      "active": "Active",
+      "past_due": "Payment Past Due",
+      "canceled": "Canceled"
+    },
+    "page": {
+      "upgraded": {
+        "title": "Welcome to {{plan}}!",
+        "message": "Your upgrade is active. Start exploring new features.",
+        "cta": "Get started"
+      }
+    },
+    "error": {
+      "portalFailed": "Could not open billing portal. Please try again.",
+      "loadFailed": "Unable to load subscription. Please try again."
+    },
+    "downgradeModal": {
+      "title": "Downgrade to Free?",
+      "message": "You'll lose access to paid features. Existing content remains but creation of Pro-only content is blocked.",
+      "confirm": "Downgrade",
+      "cancel": "Keep current plan"
+    },
+    "upgradeProcessing": {
+      "title": "Upgrade in Progress",
+      "message": "Your payment was received. Your plan will update within a few minutes — please refresh the page shortly."
+    }
+  },
+  "plans": {
+    "plus": "Plus",
+    "pro": "Pro",
+    "title": "Choose Your Plan",
+    "subtitle": "Unlock AI features that match your learning style",
+    "currentPlan": "Your current plan",
+    "billingToggle": {
+      "label": "Billing period:",
+      "monthly": "Monthly",
+      "annual": "Annual (Save 17%)"
+    },
+    "cta": {
+      "upgradeToPlus": "Upgrade to Plus",
+      "upgradeToPro": "Upgrade to Pro",
+      "switchToPro": "Switch to Pro",
+      "getStarted": "Get started"
+    },
+    "features": {
+      "cardGeneration": "Generate cards from text",
+      "cardGenerationFree": "Up to 2 cards",
+      "cardGenerationPlus": "Book-level analysis (20 cards)",
+      "cardGenerationPro": "Full deck AI redesign",
+      "bookExpansion": "Expand selected text with AI",
+      "bookExpansionFree": "Character limited",
+      "bookExpansionPlus": "Soft limit",
+      "bookExpansionPro": "Unlimited",
+      "quizGeneration": "Generate quiz questions",
+      "quizGenerationFree": "Up to 5 questions",
+      "quizGenerationPlus": "Book-level (20 questions)",
+      "quizGenerationPro": "Full deck AI redesign",
+      "aiUsage": "Monthly AI generations",
+      "aiUsageFree": "0 (view only)",
+      "aiUsagePlus": "100 / month",
+      "aiUsagePro": "Unlimited",
+      "studyCards": "Flashcard study sessions",
+      "studyCardsAll": "Unlimited",
+      "books": "Smart Books",
+      "booksAll": "Unlimited",
+      "support": "Support",
+      "supportFree": "Community",
+      "supportPlus": "Email support",
+      "supportPro": "Priority support"
+    },
+    "error": {
+      "checkoutFailed": "Could not start checkout. Please try again."
+    }
+  },
+  "billing": {
+    "paymentFailed": {
+      "title": "Payment failed",
+      "message": "Your payment method failed. Update it by {{date}} to keep access.",
+      "cta": "Update payment method"
+    }
+  },
+  "upgrade": {
+    "welcome": {
+      "title": "Welcome to {{plan}}!",
+      "message": "Your upgrade is active. Start exploring new features.",
+      "cta": "Get started"
+    },
+    "modelBadge": "Powered by Llama 3.3 (free)",
+    "inlineCtaText": "These results were generated with the free model — upgrade to Pro for smarter AI.",
+    "inlineCtaDismiss": "Dismiss",
+    "modal": {
+      "title": "Unlock Premium AI",
+      "description": "Upgrade to Plus or Pro for smarter AI models and faster generations.",
+      "feature1": "Pro uses Gemini Pro — 10x better at complex topics",
+      "feature2": "Unlimited generations — no monthly limits",
+      "feature3": "Access to personalized AI companion",
+      "cta": "View Plans & Upgrade"
+    },
+    "headlines": {
+      "generateFromBook": "Unlock book-wide AI card generation with Plus",
+      "generateQuizFromBook": "Unlock book-wide quiz generation with Plus",
+      "analyzeDeck": "Unlock AI deck analysis with Pro",
+      "tts": "Hear your book read aloud with Plus",
+      "illustrations": "Unlock unlimited diagrams with Plus"
+    }
+  },
+  "public": {
+    "publish": "公開",
+    "published": "公開中",
+    "unpublish": "公開を取り消す",
+    "publishInstant": "コミュニティと共有"
+  },
+  "editor": {
+    "mode": {
+      "enterReading": "読書モードに切り替える",
+      "enterEditing": "編集モードに切り替える",
+      "hint": "テキストを選択すると、読み上げやカード作成ができます",
+      "blockedHint": "このテキストを変更するには編集モードに切り替えてください",
+      "blockedGuest": "編集するにはこの本をフォークしてください",
+      "signInToUse": "この本からカードを作成するにはログインしてください",
+      "toolbarAriaLabel": "選択範囲の操作"
+    },
+    "actions": {
+      "copy": "コピー",
+      "copyAriaLabel": "選択したテキストをコピー",
+      "copied": "コピーしました",
+      "copyFailed": "コピーできませんでした。もう一度お試しください。"
+    },
+    "header": {
+      "bookTitle": "本のタイトル",
+      "openNavigator": "目次を開く",
+      "saveNow": "今すぐ保存",
+      "enableAutosave": "自動保存を有効にする",
+      "disableAutosave": "自動保存を無効にする",
+      "lockEditing": "編集をロック",
+      "unlockEditing": "編集のロックを解除",
+      "zoomIn": "拡大",
+      "zoomOut": "縮小"
+    },
+    "slashCommands": {
+      "math": "数式",
+      "mathDesc": "数式を挿入"
+    },
+    "math": {
+      "sourcePlaceholder": "LaTeXを入力...",
+      "editAriaLabel": "数式を編集",
+      "deleteAriaLabel": "数式を削除",
+      "invalidLatex": "LaTeXの構文が無効です"
+    },
+    "ai": {
+      "expand": "Expand with AI",
+      "generateDiagram": "Generate Diagram"
+    }
+  },
+  "aiMagic": {
+    "streaming": {
+      "progress": "{{total}}枚中{{count}}枚のカードを生成しました",
+      "progressAuto": "{{count}}枚のカードを生成しました...",
+      "generating": "カードを生成中...",
+      "retry": "再試行",
+      "retryAria": "カード生成を再試行",
+      "emptyTitle": "カードが生成されませんでした",
+      "emptyBody": "AIはこのテキストからカードを作成できませんでした。もう一度試すか、別の箇所を選択してください。"
+    },
+    "errors": {
+      "quota": "AI生成の上限に達しました。しばらくしてからもう一度お試しください。",
+      "malformed": "AIから予期しない応答が返されました。もう一度お試しください。",
+      "pipeline": "カードの生成に失敗しました。もう一度お試しください。",
+      "timeout": "カードの生成に時間がかかりすぎました。もう一度お試しください。",
+      "stalled": "接続が停止しました。ネットワークを確認してもう一度お試しください。",
+      "generic": "カードの生成中に問題が発生しました。もう一度お試しください。"
+    },
+    "expandWithAI": "Expand with AI",
+    "expanding": "Expanding...",
+    "expandError": "Couldn't expand text. Please try again.",
+    "generateFromBook": {
+      "label": "Generate Cards from Book",
+      "labelQuiz": "Generate Quiz from Book",
+      "ariaLabel": "Generate flashcards from full book content",
+      "lockedAriaLabel": "Generate Cards from Book — available with Plus",
+      "ariaLabelQuiz": "Generate quiz questions from full book content",
+      "lockedAriaLabelQuiz": "Generate Quiz from Book — available with Plus",
+      "lockedTooltip": "Available with Plus — upgrade to unlock",
+      "loading": "Analyzing book content...",
+      "generating": "Generating cards…",
+      "generatingQuiz": "Generating quiz…",
+      "generatingHint": "AI is working — this may take up to a minute",
+      "error": "Couldn't generate from book. Please try again.",
+      "errorQuiz": "Couldn't generate quiz from book. Please try again."
+    },
+    "analyzeDeck": {
+      "label": "Analyze Deck",
+      "ariaLabel": "Run AI deck analysis",
+      "lockedAriaLabel": "Analyze Deck — available with Pro",
+      "lockedTooltip": "Available with Pro — upgrade to unlock",
+      "loading": "Analyzing your deck...",
+      "error": "Deck analysis failed. Please try again.",
+      "emptyResult": "No issues found in this deck",
+      "emptyResultBody": "Your deck looks well-structured.",
+      "sections": {
+        "duplicates": "Potential Duplicates",
+        "gaps": "Topic Gaps",
+        "rewrites": "Rewrite Suggestions"
+      },
+      "actions": {
+        "accept": "Accept",
+        "skip": "Skip",
+        "acceptAll": "Accept All",
+        "acceptError": "Couldn't apply suggestion. Please try again."
+      }
+    },
+    "tts": {
+      "label": "Listen",
+      "playTooltip": "Listen to this book",
+      "playAriaLabel": "Play book audio",
+      "loadingAriaLabel": "Generating audio...",
+      "pauseTooltip": "Pause",
+      "pauseAriaLabel": "Pause audio playback",
+      "resumeTooltip": "Resume",
+      "resumeAriaLabel": "Resume audio playback",
+      "stopTooltip": "Stop",
+      "stopAriaLabel": "Stop audio playback",
+      "lockedTooltip": "Available with Plus — upgrade to unlock",
+      "lockedAriaLabel": "Listen to book — available with Plus",
+      "languageAriaLabel": "Select TTS language",
+      "loading": "Generating audio...",
+      "error": "Couldn't generate audio. Please try again.",
+      "truncatedHint": "長い選択範囲は音声用に短縮されます",
+      "playSelectionTooltip": "Listen",
+      "playSelectionAriaLabel": "Play selected text",
+      "stopSelectionTooltip": "Stop",
+      "stopSelectionAriaLabel": "Stop audio playback",
+      "fullBook": "Full book",
+      "fullBookHint": "Read the entire book",
+      "sectionPickerTitle": "Choose a section",
+      "autoDetectLabel": "Auto-detect language",
+      "autoDetectAriaLabel": "Automatically detect and play mixed-language text in each segment's own language",
+      "segmentError": "Couldn't detect languages automatically. Please try again.",
+      "languages": {
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "ja": "Japanese",
+        "pt": "Portuguese",
+        "zh": "Chinese"
+      }
+    },
+    "diagram": {
+      "panelTitle": "Generate Diagram",
+      "loading": "Generating diagram...",
+      "error": "Couldn't generate diagram. Please try again.",
+      "regenerate": "Regenerate",
+      "regenerateAriaLabel": "Regenerate diagram",
+      "insert": "Insert into Book",
+      "insertAriaLabel": "Insert diagram into book at cursor",
+      "explanation": "Explanation",
+      "typeAriaLabel": "Select diagram type",
+      "renderError": "Unable to render diagram. The syntax may be invalid. Try regenerating.",
+      "lockedTooltip": "Unlock unlimited diagrams with Plus",
+      "types": {
+        "auto": "Auto",
+        "mindmap": "Mind Map",
+        "flowchart": "Flowchart",
+        "sequence": "Sequence Diagram",
+        "er": "ER Diagram"
+      }
+    }
+  },
+  "aiVisualizer": {
+    "title": "AIビジュアライザー",
+    "subtitle": "学習内容から図を生成します。",
+    "closeAria": "閉じる",
+    "vizTypeLabel": "図の種類",
+    "vizTypeAria": "図の種類を選択",
+    "vizType": {
+      "mindmap": "マインドマップ",
+      "flowchart": "フローチャート",
+      "sequence": "シーケンス図",
+      "timeline": "タイムライン"
+    },
+    "generateButton": "生成",
+    "generateAria": "図を生成",
+    "generating": "図を生成中...",
+    "explanationLabel": "説明",
+    "diagramErrorTitle": "図のエラー",
+    "diagramErrorBody": "図を表示できませんでした。生成された構文が無効な可能性があります。もう一度お試しください。",
+    "saveButton": "保存",
+    "saveAria": "図をデッキに保存",
+    "cancelButton": "キャンセル",
+    "emptyTitle": "まだ図がありません",
+    "emptyBody": "図の種類を選び、内容から生成してください。",
+    "titleField": "タイトル",
+    "titlePrefix": "ビジュアル"
+  },
+  "accountSettings": {
+    "plan": {
+      "title": "Plan & Billing",
+      "current": "You are on the {{plan}} plan",
+      "upgrade": "View plans & upgrade",
+      "manage": "Manage subscription"
+    }
+  },
+  "blackboard": {
+    "title": "Blackboard",
+    "defaultBoardName": "My Blackboard",
+    "subtitle": "Brainstorm freely — auto-saved",
+    "tooltip": "Open Blackboard",
+    "toolbar": {
+      "sticky": "Sticky",
+      "addSticky": "Add sticky note",
+      "addGoal": "Add a goal",
+      "addPriority": "Add a priority",
+      "addTask": "Add a task",
+      "clear": "Clear board",
+      "myBoards": "My Boards",
+      "loadingBoard": "Opening your board…"
+    },
+    "picker": {
+      "title": {
+        "goal": "Select a goal",
+        "priority": "Select a priority",
+        "task": "Select a task"
+      },
+      "search": "Search...",
+      "empty": "Nothing found"
+    },
+    "clear": {
+      "title": "Clear board?",
+      "desc": "All notes and connections will be permanently removed.",
+      "confirm": "Clear everything"
+    },
+    "canvasError": {
+      "message": "Could not load this board. Try again.",
+      "retry": "Retry board"
+    },
+    "boardListSelector": {
+      "title": "My Boards",
+      "subtitle": "Select a board to open or create a new one",
+      "newBoard": "New board",
+      "newBoardPlaceholder": "Board name",
+      "ownedBoards": "Your Boards",
+      "sharedBoards": "Shared with You",
+      "empty": {
+        "title": "No boards yet",
+        "body": "Create your first board to get started"
+      },
+      "error": "Could not load boards. Try again.",
+      "sharedWith": "Shared by {{name}}"
+    },
+    "upgrade": {
+      "share": "Share boards with Plus or Pro",
+      "multiBoard": "Unlock unlimited boards with Pro"
+    },
+    "boards": {
+      "newBoard": "New board"
+    },
+    "share": {
+      "title": "Share this board",
+      "inviteLabel": "Invite by email",
+      "inviteSubtitle": "They will see this board in their board list",
+      "sendInvite": "Send invite",
+      "empty": {
+        "title": "Not shared yet",
+        "body": "Invite someone by their email address"
+      },
+      "error": {
+        "notFound": "User not found. Check the email address.",
+        "alreadyInvited": "This user already has access.",
+        "notOwner": "Only the board owner can share this board"
+      }
+    }
+  },
+  "calendarPage": {
+    "title": "Calendar",
+    "addEvent": "Add event",
+    "views": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
+    "timeBlock": "New time block",
+    "error": "Couldn't load your calendar. Check your connection and try again.",
+    "showHabits": "Habits",
+    "showHabitsAriaLabel": "Toggle habit events on calendar",
+    "moreFilters": "More filters",
+    "lessFilters": "Less filters",
+    "moreFiltersAriaLabel": "Show more calendar filters",
+    "presets": {
+      "goalsOnly": "Goals only",
+      "goalsOnlyAriaLabel": "Show goals and milestones only",
+      "today": "Today",
+      "todayAriaLabel": "Reset filters for today",
+      "thisWeek": "This week",
+      "thisWeekAriaLabel": "Reset filters for this week"
+    },
+    "filters": {
+      "allAreas": "All areas",
+      "allAreasAriaLabel": "Show all focus areas",
+      "areaAriaLabel": "Filter by {{name}}",
+      "allTypes": "All types",
+      "allTypesAriaLabel": "Show all event types",
+      "typeGoal": "Goals",
+      "typeTask": "Tasks",
+      "typePriority": "Priorities",
+      "typeMilestone": "Milestones",
+      "typeGoalAriaLabel": "Filter by goals",
+      "typeTaskAriaLabel": "Filter by tasks",
+      "typePriorityAriaLabel": "Filter by priorities",
+      "typeMilestoneAriaLabel": "Filter by milestones",
+      "noAreas": "No focus areas",
+      "noAreasBody": "Add a focus area in Annual Planning to filter the calendar"
+    },
+    "empty": {
+      "week": {
+        "title": "No events this week",
+        "body": "Add an event or check another week"
+      }
+    }
+  },
+  "goalAi": {
+    "buttonLabel": "AI Assist",
+    "panelTitle": "AI Goal Analysis",
+    "refresh": "Refresh analysis",
+    "loading": "Analyzing your annual plan with AI...",
+    "error": "Failed to analyze goals. Please try again.",
+    "noPlan": "No annual plan found for this year. Create a plan to unlock AI analysis.",
+    "upgradeHeadline": "Unlock AI Goal Analysis with Pro",
+    "sections": {
+      "suggestions": "Quarterly Suggestions",
+      "conflicts": "Conflicts Detected",
+      "archiving": "Archiving Recommendations"
+    },
+    "empty": {
+      "suggestions": "No suggestions available.",
+      "conflicts": "No conflicts detected.",
+      "archiving": "No stale goals to archive."
+    }
+  },
+  "sheets": {
+    "title": "My Sheets",
+    "newSheet": "New sheet",
+    "untitled": "Untitled Sheet",
+    "search": "Search sheets…",
+    "error": "Couldn't load your sheets. Refresh the page to try again.",
+    "view": {
+      "grid": "Switch to grid view",
+      "list": "Switch to list view"
+    },
+    "empty": {
+      "title": "No sheets yet",
+      "body": "Create a spreadsheet to track finances, plans, or anything you like."
+    },
+    "create": {
+      "title": "New sheet",
+      "template": "Template",
+      "confirm": "Create sheet",
+      "nameLabel": "Name",
+      "templateLabel": "Template",
+      "error": "Failed to create sheet. Please try again."
+    },
+    "templates": {
+      "blank": "Blank",
+      "budgetTracker": "Budget Tracker",
+      "expenseLog": "Expense Log"
+    },
+    "editor": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "filter": "Filter rows…",
+      "error": "Couldn't load this sheet. Go back to your sheets and try again.",
+      "backToSheets": "Back to sheets",
+      "filterReadOnly": "Read-only while filtering",
+      "titleInput": "Sheet name"
+    },
+    "delete": {
+      "title": "Delete sheet?",
+      "body": "This sheet will be moved to trash and deleted after 30 days.",
+      "confirm": "Delete \"{{title}}\"?"
+    },
+    "list": {
+      "title": "My Sheets",
+      "emptyTitle": "No sheets yet",
+      "emptySubtitle": "Create a spreadsheet to track finances, plans, or anything you like.",
+      "new": "New Sheet",
+      "search": "Search sheets…",
+      "errorFetch": "Couldn’t load your sheets. Refresh the page to try again.",
+      "gridView": "Grid view",
+      "listView": "List view",
+      "columns": "Columns",
+      "noResults": "No sheets match \"{{term}}\""
+    }
+  },
+  "tts": {
+    "autoDetect": "Auto-detect language",
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+  },
+  "form": {
+    "saveAndNext": "保存して次へ",
+    "saveAndClose": "保存して閉じる",
+    "addedCount_one": "{{count}} 件追加しました",
+    "addedCount_other": "{{count}} 件追加しました",
+    "detailRailAria": "任意の詳細を追加",
+    "saveErrorTitle": "保存できませんでした",
+    "requiredField": "この項目は必須です",
+    "tagsLabel": "タグ",
+    "tagAddAria": "タグを追加",
+    "tagRemoveAria": "{{tag}} を削除",
+    "tagPlaceholder": "タグを入力して Enter キーを押してください",
+    "deckLabel": "デッキ",
+    "deckPlaceholder": "デッキを選択",
+    "deckNone": "デッキなし",
+    "deckEmpty": "デッキはまだありません。"
   }
 }

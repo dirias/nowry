@@ -64,19 +64,20 @@ textarea {
 }
 
 /* COMPREHENSIVE FIX: Remove all backgrounds from icons and their wrappers */
-/* Target all possible icon container elements */
-button *,
-a *,
-[role='button'] * {
+/* Target icon container elements — but NOT checkbox internals or Joy UI chip internals */
+/* MuiChip-action is a button child that carries the chip's variant fill — must not be transparent */
+button *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']),
+a *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']),
+[role='button'] *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']) {
   background-color: transparent !important;
 }
 
-/* Specific targeting for Joy UI components */
+/* Specific targeting for Joy UI components — exclude checkbox and chip internals */
+/* MuiChip-root is excluded: Joy UI renders the solid variant background on .MuiChip-action
+   (a child button), so stripping child backgrounds breaks solid chip fills entirely */
 .MuiButton-root *,
 .MuiIconButton-root *,
-.MuiChip-root *,
-[class*='MuiButton'] *,
-[class*='MuiChip'] * {
+[class*='MuiButton'] * {
   background-color: transparent !important;
 }
 
@@ -84,6 +85,15 @@ a *,
 svg,
 svg * {
   background-color: transparent !important;
+}
+
+/* Mermaid diagram SVGs must NOT have background-color stripped from their
+   internal elements — Mermaid sets node fill colors inline and the above rule
+   would clobber them, making node backgrounds (and text contrast) disappear.
+   Override the rule for any SVG that is a direct child of a mermaid container. */
+.mermaid-diagram-host svg,
+.mermaid-diagram-host svg * {
+  background-color: unset;
 }
 
 /* Target Material-UI icon components */

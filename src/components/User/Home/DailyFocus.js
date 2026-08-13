@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button, CircularProgress, Stack } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
-import { cardsService, decksService } from '../../../api/services'
+import { useCardData } from '../../../hooks/useCardData'
+import { useDeckData } from '../../../hooks/useDeckData'
 
 const DailyFocus = () => {
   const navigate = useNavigate()
@@ -10,14 +11,12 @@ const DailyFocus = () => {
   const [decksDue, setDecksDue] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchDueDecks()
-  }, [])
+  const { cards: cardsData, loading: cardsLoading } = useCardData()
+  const { decks: decksData, loading: decksLoading } = useDeckData()
 
-  const fetchDueDecks = async () => {
+  const fetchDueDecks = React.useCallback(async () => {
     try {
       setLoading(true)
-      const [cardsData, decksData] = await Promise.all([cardsService.getAll(), decksService.getAll()])
 
       // Filter cards that are due today
       const now = new Date()
@@ -52,7 +51,12 @@ const DailyFocus = () => {
       console.error('Error fetching due decks:', error)
       setLoading(false)
     }
-  }
+  }, [cardsData, decksData])
+
+  useEffect(() => {
+    if (cardsLoading || decksLoading) return
+    fetchDueDecks()
+  }, [cardsLoading, decksLoading, fetchDueDecks])
 
   const handleStudy = (deckId) => {
     navigate(`/study/${deckId}`)
@@ -89,7 +93,7 @@ const DailyFocus = () => {
         <Typography level='title-lg' sx={{ mb: 1 }}>
           {t('dashboard.dailyFocus.allCaughtUp')}
         </Typography>
-        <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
           {t('dashboard.dailyFocus.noDueCards')}
         </Typography>
       </Box>
@@ -119,7 +123,7 @@ const DailyFocus = () => {
         }}
       >
         <Box>
-          <Typography level='body-sm' sx={{ color: 'primary.700', fontWeight: '500', mb: 0.5 }}>
+          <Typography level='body-sm' sx={{ color: 'primary.solidHoverBg', fontWeight: '500', mb: 0.5 }}>
             {t('dashboard.dailyFocus.reviewToday')}
           </Typography>
           <Typography level='title-md' sx={{ fontWeight: 'bold' }}>
@@ -160,7 +164,7 @@ const DailyFocus = () => {
             </Box>
           ))}
           {decksDue.length > 4 && (
-            <Typography level='body-xs' sx={{ textAlign: 'center', color: 'neutral.500', mt: 1 }}>
+            <Typography level='body-xs' sx={{ textAlign: 'center', color: 'text.tertiary', mt: 1 }}>
               {t('dashboard.dailyFocus.moreDecks', { count: decksDue.length - 4 })}
             </Typography>
           )}

@@ -1,25 +1,20 @@
 import React, { useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Box, Typography, Input, Button, Divider, Link, FormControl, FormLabel, Alert, LinearProgress, Stack, IconButton } from '@mui/joy'
 import {
-  Box,
-  Typography,
-  Input,
-  Button,
-  Divider,
-  Sheet,
-  useColorScheme,
-  Link,
-  FormControl,
-  FormLabel,
-  Alert,
-  LinearProgress,
-  Stack,
-  IconButton
-} from '@mui/joy'
-import { EmailRounded, LockRounded, VisibilityRounded, VisibilityOffRounded, LoginRounded, Google, Facebook } from '@mui/icons-material'
+  EmailRounded,
+  LockRounded,
+  VisibilityRounded,
+  VisibilityOffRounded,
+  Google,
+  AutoStoriesRounded,
+  PsychologyRounded,
+  SpeedRounded
+} from '@mui/icons-material'
 
 import { useAuth } from '../../context/AuthContext'
+import { authService } from '../../api/services/auth.service'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -28,8 +23,6 @@ const Login = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const { mode } = useColorScheme()
-  const isDark = mode === 'dark'
   const { t } = useTranslation()
   const { login } = useAuth()
 
@@ -39,226 +32,280 @@ const Login = () => {
     setLoading(true)
 
     try {
-      // Use login from AuthContext (which handles cookie)
-      await login({ email, password })
+      // Use Firebase Authentication
+      await authService.login(email, password)
 
-      // Navigate to home
-      // Context will update 'user' state via checkUser()
-      navigate('/')
+      // Firebase auth service already handles token storage
+      // Reload to update auth state and navigate to home
+      window.location.href = '/'
     } catch (error) {
-      console.error('Login error:', error.response?.data)
-      const detail = error.response?.data?.detail
+      console.error('Login error:', error)
 
-      if (Array.isArray(detail)) {
-        const errorMsg = detail
-          .map((err) => {
-            const field = err.loc[err.loc.length - 1]
-            return `${field}: ${err.msg}`
-          })
-          .join(', ')
-        setError(errorMsg)
-      } else {
-        setError(detail || error.message || t('auth.errors.loginFailed'))
+      // Parse Firebase error codes for user-friendly messages
+      let errorMessage = t('auth.errors.loginFailed')
+
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/wrong-password':
+          case 'auth/user-not-found':
+            errorMessage = t('auth.errors.invalidCredentials')
+            break
+          case 'auth/invalid-email':
+            errorMessage = t('auth.errors.emailInvalid')
+            break
+          case 'auth/user-disabled':
+            errorMessage = t('auth.errors.accountDisabled')
+            break
+          case 'auth/too-many-requests':
+            errorMessage = t('auth.errors.tooManyAttempts')
+            break
+          case 'auth/network-request-failed':
+            errorMessage = t('auth.errors.networkError')
+            break
+          default:
+            errorMessage = error.message || t('auth.errors.loginFailed')
+        }
+      } else if (error.message) {
+        errorMessage = error.message
       }
+
+      setError(errorMessage)
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setError('')
+    setLoading(true)
+
+    try {
+      // Use Firebase Google OAuth
+      const response = await authService.loginWithGoogle()
+
+      // Check if user needs onboarding (wizard not completed)
+      if (response && response.backendUser && response.backendUser.wizard_completed === false) {
+        window.location.href = '/onboarding'
+      } else {
+        // Reload to update auth state
+        window.location.href = '/'
+      }
+    } catch (error) {
+      console.error('Google login error:', error)
+
+      // Parse Google login errors
+      let errorMessage = t('auth.errors.loginFailed')
+
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = t('auth.errors.googleCancelled')
+            break
+          case 'auth/popup-blocked':
+            errorMessage = t('auth.errors.popupBlocked')
+            break
+          case 'auth/account-exists-with-different-credential':
+            errorMessage = t('auth.errors.accountExistsDifferent')
+            break
+          case 'auth/network-request-failed':
+            errorMessage = t('auth.errors.networkError')
+            break
+          default:
+            errorMessage = error.message || t('auth.errors.loginFailed')
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      setError(errorMessage)
       setLoading(false)
     }
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: isDark ? 'neutral.900' : 'neutral.50',
-        px: 2,
-        transition: 'background 0.3s ease'
-      }}
-    >
-      <Sheet
-        variant='outlined'
-        sx={{
-          p: 5,
-          borderRadius: 'xl',
-          width: '100%',
-          maxWidth: 440,
-          boxShadow: 'xl',
-          backgroundColor: isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          border: 'none',
-          transform: 'translateY(0)',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-          }
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography
-            level='h2'
-            sx={{
-              fontWeight: 700,
-              mb: 1,
-              color: isDark ? 'primary.300' : 'primary.700'
-            }}
-          >
-            {t('auth.welcomeBack')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-            {t('auth.signInSubtitle')}
-          </Typography>
+    <>
+      {/* Full-height split layout */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
+        {/* LEFT PANEL — teal brand (desktop only) */}
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            flex: '0 0 42%',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            px: 7,
+            py: 6,
+            bgcolor: 'primary.solidBg',
+            gap: 5
+          }}
+        >
+          <Box>
+            <Typography level='h2' sx={{ color: 'white', fontWeight: 800, lineHeight: 1.2, mb: 2 }}>
+              {t('landing.hero.title')}
+            </Typography>
+            <Typography level='body-md' sx={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.7 }}>
+              {t('landing.hero.subtitle')}
+            </Typography>
+          </Box>
+
+          <Stack spacing={2}>
+            {[
+              { icon: <AutoStoriesRounded sx={{ fontSize: 18 }} />, label: t('landing.features.smartBooks.title') },
+              { icon: <PsychologyRounded sx={{ fontSize: 18 }} />, label: t('landing.features.aiPowered.title') },
+              { icon: <SpeedRounded sx={{ fontSize: 18 }} />, label: t('landing.features.spacedRepetition.title') }
+            ].map((f) => (
+              <Stack key={f.label} direction='row' spacing={1.5} alignItems='center'>
+                <Box sx={{ color: 'rgba(255,255,255,0.6)', display: 'flex' }}>{f.icon}</Box>
+                <Typography level='body-sm' sx={{ color: 'rgba(255,255,255,0.85)' }}>
+                  {f.label}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
         </Box>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert color='danger' variant='soft' sx={{ mb: 3, animation: 'fadeIn 0.3s ease' }} onClose={() => setError('')}>
-            {error}
-          </Alert>
-        )}
-
-        {/* Login Form */}
-        <form onSubmit={handleLogin}>
-          <Stack spacing={2.5}>
-            {/* Email Field */}
-            <FormControl>
-              <FormLabel>{t('auth.email')}</FormLabel>
-              <Input
-                type='email'
-                placeholder='you@example.com'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                startDecorator={<EmailRounded />}
-                size='lg'
-                required
-                sx={{
-                  '--Input-focusedThickness': '0.25rem',
-                  transition: 'all 0.2s ease'
-                }}
-              />
-            </FormControl>
-
-            {/* Password Field */}
-            <FormControl>
-              <FormLabel>{t('auth.password')}</FormLabel>
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                placeholder='••••••••'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                startDecorator={<LockRounded />}
-                endDecorator={
-                  <IconButton variant='plain' color='neutral' onClick={() => setShowPassword(!showPassword)} sx={{ mr: -1 }}>
-                    {showPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
-                  </IconButton>
-                }
-                size='lg'
-                required
-                sx={{
-                  '--Input-focusedThickness': '0.25rem',
-                  transition: 'all 0.2s ease'
-                }}
-              />
-            </FormControl>
-
-            {/* Forgot Password Link */}
-            <Box sx={{ textAlign: 'right' }}>
-              <Link component={RouterLink} to='/resetPassword' level='body-sm' sx={{ transition: 'color 0.2s ease' }}>
-                {t('auth.forgotPassword')}
-              </Link>
+        {/* RIGHT PANEL — form */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'background.surface',
+            px: { xs: 3, sm: 6, md: 8 },
+            py: { xs: 4, md: 6 },
+            overflowY: 'auto'
+          }}
+        >
+          <Box sx={{ width: '100%', maxWidth: 400 }}>
+            {/* Header */}
+            <Box sx={{ mb: 4 }}>
+              <Typography level='h2' sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                {t('auth.welcomeBack')}
+              </Typography>
+              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                {t('auth.signInSubtitle')}
+              </Typography>
             </Box>
 
-            {/* Login Button */}
-            <Button
-              type='submit'
-              size='lg'
-              fullWidth
-              loading={loading}
-              startDecorator={!loading && <LoginRounded />}
-              sx={{
-                mt: 3,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: 'lg'
-                },
-                '&:active': {
-                  transform: 'translateY(0)'
-                }
-              }}
-            >
-              {t('auth.signIn')}
-            </Button>
-          </Stack>
-        </form>
+            {/* Error Alert */}
+            {error && (
+              <Alert color='danger' variant='soft' sx={{ mb: 3 }}>
+                <Box>
+                  <Typography level='body-sm' sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {t('auth.errors.unableToSignIn')}
+                  </Typography>
+                  <Typography level='body-sm' sx={{ opacity: 0.9 }}>
+                    {error}
+                  </Typography>
+                </Box>
+              </Alert>
+            )}
 
-        {/* Divider */}
-        <Divider sx={{ my: 3 }}>
-          <Typography level='body-sm' sx={{ color: 'neutral.500' }}>
-            {t('auth.orContinueWith')}
-          </Typography>
-        </Divider>
+            {/* Login Form */}
+            <form onSubmit={handleLogin}>
+              <Stack spacing={2.5}>
+                <FormControl>
+                  <FormLabel>{t('auth.email')}</FormLabel>
+                  <Input
+                    type='email'
+                    placeholder={t('auth.emailPlaceholder')}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    startDecorator={<EmailRounded />}
+                    size='lg'
+                    required
+                  />
+                </FormControl>
 
-        {/* Social Login */}
-        <Stack spacing={1.5}>
-          <Button
-            variant='outlined'
-            color='neutral'
-            size='lg'
-            fullWidth
-            startDecorator={<Google />}
-            sx={{
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                borderColor: '#EA4335',
-                backgroundColor: 'rgba(234, 67, 53, 0.08)'
-              }
-            }}
-          >
-            {t('auth.signInGoogle')}
-          </Button>
+                <FormControl>
+                  <FormLabel>{t('auth.password')}</FormLabel>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder='••••••••'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    startDecorator={<LockRounded />}
+                    endDecorator={
+                      <IconButton variant='plain' color='neutral' onClick={() => setShowPassword(!showPassword)} sx={{ mr: -1 }}>
+                        {showPassword ? <VisibilityOffRounded /> : <VisibilityRounded />}
+                      </IconButton>
+                    }
+                    size='lg'
+                    required
+                  />
+                </FormControl>
 
-          <Button
-            variant='outlined'
-            color='neutral'
-            size='lg'
-            fullWidth
-            startDecorator={<Facebook />}
-            sx={{
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                borderColor: '#1877F2',
-                backgroundColor: 'rgba(24, 119, 242, 0.08)'
-              }
-            }}
-          >
-            {t('auth.signInFacebook')}
-          </Button>
-        </Stack>
+                <Box sx={{ textAlign: 'right' }}>
+                  <Link
+                    component={RouterLink}
+                    to='/resetPassword'
+                    level='body-sm'
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+                  >
+                    {t('auth.forgotPassword')}
+                  </Link>
+                </Box>
 
-        {/* Register Link */}
-        <Typography level='body-sm' textAlign='center' sx={{ mt: 3 }}>
-          {t('auth.noAccount')}{' '}
-          <Link component={RouterLink} to='/register' fontWeight={600} color='primary'>
-            {t('auth.createOne')}
-          </Link>
-        </Typography>
-      </Sheet>
+                <Button type='submit' size='lg' fullWidth loading={loading} sx={{ '&:hover': { boxShadow: 'md' } }}>
+                  {t('auth.signIn')}
+                </Button>
+              </Stack>
+            </form>
 
-      {/* Loading Bar */}
-      {loading && (
-        <LinearProgress
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 10000
-          }}
-        />
-      )}
-    </Box>
+            <Divider sx={{ my: 3 }}>
+              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+                {t('auth.orContinueWith')}
+              </Typography>
+            </Divider>
+
+            <Stack spacing={1.5}>
+              <Button
+                variant='outlined'
+                color='neutral'
+                size='lg'
+                fullWidth
+                startDecorator={<Google sx={{ color: '#4285F4' }} />}
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                sx={{
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    borderColor: 'primary.outlinedBorder',
+                    backgroundColor: 'primary.softBg',
+                    boxShadow: 'sm',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+              >
+                {t('auth.signInGoogle')}
+              </Button>
+            </Stack>
+
+            <Typography level='body-xs' textAlign='center' sx={{ mt: 2, color: 'text.tertiary', lineHeight: 1.5 }}>
+              {t('auth.byContinuing')}{' '}
+              <Link component={RouterLink} to={t('routes.terms')} sx={{ fontWeight: 500 }}>
+                {t('auth.termsOfService')}
+              </Link>{' '}
+              {t('auth.and')}{' '}
+              <Link component={RouterLink} to={t('routes.privacy')} sx={{ fontWeight: 500 }}>
+                {t('auth.privacyPolicy')}
+              </Link>
+            </Typography>
+
+            <Typography level='body-sm' textAlign='center' sx={{ mt: 3, color: 'text.secondary' }}>
+              {t('auth.noAccount')}{' '}
+              <Link component={RouterLink} to='/register' fontWeight={600} sx={{ color: 'primary.plainColor' }}>
+                {t('auth.createOne')}
+              </Link>
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {loading && <LinearProgress sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10000 }} />}
+    </>
   )
 }
 

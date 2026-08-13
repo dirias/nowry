@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getRoot, createCommand } from 'lexical'
+import { $getSelection, $isRangeSelection, $createParagraphNode, createCommand, COMMAND_PRIORITY_LOW } from 'lexical'
 import { $createHorizontalRuleNode } from '../nodes/HorizontalRuleNode'
 
 // ✅ Export the command here to avoid circular dependencies
@@ -16,12 +16,40 @@ export default function RegisterHorizontalRulePlugin() {
       INSERT_HORIZONTAL_RULE_COMMAND,
       () => {
         editor.update(() => {
-          const node = $createHorizontalRuleNode()
-          $getRoot().append(node)
+          const selection = $getSelection()
+
+          if (!$isRangeSelection(selection)) {
+            return
+          }
+
+          const hrNode = $createHorizontalRuleNode()
+
+          // Get the currently selected node
+          const anchorNode = selection.anchor.getNode()
+
+          // Get the top-level element (could be paragraph, heading, etc.)
+          let topLevelNode = anchorNode
+
+          // Navigate up to find the top-level element
+          while (
+            topLevelNode.getParent() !== null &&
+            topLevelNode.getParent().getType() !== 'root' &&
+            topLevelNode.getParent().getType() !== 'page'
+          ) {
+            topLevelNode = topLevelNode.getParent()
+          }
+
+          // Insert the HR after the current block
+          topLevelNode.insertAfter(hrNode)
+
+          // Create a new paragraph after the HR and move selection there
+          const newParagraph = $createParagraphNode()
+          hrNode.insertAfter(newParagraph)
+          newParagraph.select()
         })
         return true
       },
-      0
+      COMMAND_PRIORITY_LOW
     )
   }, [editor])
 

@@ -1,166 +1,464 @@
-import React, { useState, useEffect } from 'react'
-import { Box, IconButton, Select, Option, Stack, Tooltip, Slider, Typography } from '@mui/joy'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Box, IconButton, Select, Option, Stack, Tooltip, Slider, Typography, Switch, CircularProgress } from '@mui/joy'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import PauseIcon from '@mui/icons-material/Pause'
-import StopIcon from '@mui/icons-material/Stop'
-import VolumeUpIcon from '@mui/icons-material/VolumeUp'
-import SpeedIcon from '@mui/icons-material/Speed'
 import ttsService from '../../utils/tts.service'
+import SettingsIcon from '@mui/icons-material/Settings'
+import CloseIcon from '@mui/icons-material/Close'
+import { useSegmentedSpeech } from '../../hooks/useSegmentedSpeech'
 
-export default function TTSControls({ text, compact = false }) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [voices, setVoices] = useState([])
-  const [selectedVoice, setSelectedVoice] = useState(null)
-  const [rate, setRate] = useState(1.0)
-  const [volume, setVolume] = useState(1.0)
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    // Load voices
-    const loadVoices = () => {
-      const availableVoices = ttsService.getVoices()
-      setVoices(availableVoices)
-      if (availableVoices.length > 0) {
-        setSelectedVoice(availableVoices[0])
+/**
+ * Given the raw voices list from the Web Speech API, build a deduplicated
+ * list of languages sorted alphabetically. Each entry has:
+ *   { langCode, label, bestVoice }
+ *
+ * bestVoice is the highest-quality voice available for that language on
+ * this device (preferring Google > Enhanced > Premium > first available).
+ */
+function buildLanguageOptions(voices) {
+  const seen = new Map() // langBase → entry
+
+  for (const voice of voices) {
+    // Normalize lang code: some Android voices use underscore ("ja_JP")
+    const lang = voice.lang.replace(/_/g, '-')
+    const langBase = lang.split('-')[0].toLowerCase() // "ja", "en", "de"
+
+    if (!seen.has(langBase)) {
+      // Get a human-readable language name via Intl.DisplayNames
+      let label = langBase
+      try {
+        label = new Intl.DisplayNames([navigator.language || 'en'], { type: 'language' }).of(langBase) || langBase
+      } catch (_) {
+        label = langBase
+      }
+
+      seen.set(langBase, { langCode: lang, langBase, label, bestVoice: voice })
+    } else {
+      // Prefer higher-quality voice for the same language
+      const entry = seen.get(langBase)
+      const isCurrentBetter = voice.name.includes('Google') || voice.name.includes('Enhanced') || voice.name.includes('Premium')
+      const currentIsBetter =
+        entry.bestVoice.name.includes('Google') || entry.bestVoice.name.includes('Enhanced') || entry.bestVoice.name.includes('Premium')
+      if (isCurrentBetter && !currentIsBetter) {
+        seen.get(langBase).bestVoice = voice
       }
     }
+  }
 
-    // Initial load
-    loadVoices()
+  return Array.from(seen.values()).sort((a, b) => a.label.localeCompare(b.label))
+}
 
-    // Chrome loads voices async
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = loadVoices
+/**
+ * Find the best available voice for a given target language or voice name.
+ * Priority:
+ *   1. Exact language code match (e.g. "ja-JP" or "ja")
+ *   2. Any voice whose lang starts with the target base
+ *   3. Look up the target name in ALL system voices to derive its language
+ */
+function resolveVoice(voices, { targetLang, targetName }) {
+  // 1. Language code match (primary — works cross-device)
+  if (targetLang) {
+    const base = targetLang.split('-')[0].toLowerCase()
+    // Prefer best quality for that language
+    const candidates = voices.filter((v) => v.lang.replace(/_/g, '-').split('-')[0].toLowerCase() === base)
+    if (candidates.length > 0) {
+      return candidates.find((v) => v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium')) || candidates[0]
     }
+  }
+
+  // 2. Exact name match (same device, backward compat)
+  if (targetName) {
+    const exact = voices.find((v) => v.name === targetName)
+    if (exact) return exact
+  }
+
+  // 3. Derive language from the saved name via system voices
+  if (targetName) {
+    const allSystem = ttsService.getVoices()
+    const original = allSystem.find((v) => v.name === targetName)
+    if (original) {
+      const base = original.lang.split('-')[0].toLowerCase()
+      return voices.find((v) => v.lang.replace(/_/g, '-').split('-')[0].toLowerCase() === base) || null
+    }
+  }
+
+  return null
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function TTSControls({
+  text,
+  compact = false,
+  settingsOnly = false,
+  settingsOpen,
+  onSettingsChange,
+  voiceSettings,
+  onVoiceSettingsChange
+}) {
+  const { t } = useTranslation()
+  const { getSegments, speakSegments } = useSegmentedSpeech()
+
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [allVoices, setAllVoices] = useState([]) // raw list from Web Speech API
+  const [selectedLang, setSelectedLang] = useState(null) // e.g. "ja"
+  const [selectedVoice, setSelectedVoice] = useState(null) // actual SpeechSynthesisVoice
+  const [rate, setRate] = useState(1.0)
+  const [autoPlay, setAutoPlay] = useState(false)
+  const [mode, setMode] = useState('auto') // 'auto' | 'manual' — auto-detect language per segment (ADR-001)
+  const [isSegmenting, setIsSegmenting] = useState(false) // true while getSegments() is in flight on a cache miss
+  const [internalShowSettings, setInternalShowSettings] = useState(false)
+  // Tracks whether the user has ever initiated playback – required for auto‑play on mobile browsers
+  const [userInitiated, setUserInitiated] = useState(false)
+
+  const isSettingsOpen = settingsOpen !== undefined ? settingsOpen : internalShowSettings
+  const setSettingsOpen = onSettingsChange || setInternalShowSettings
+
+  // ── Language options derived from available voices ─────────────────────────
+  // Each device contributes whatever TTS voices are installed; we normalize them
+  // into a clean language list that is identical in structure across all devices.
+  const languageOptions = useMemo(() => buildLanguageOptions(allVoices), [allVoices])
+
+  // ── Load voices ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const handleVoices = (voices) => setAllVoices(voices)
+    const cleanup = ttsService.onVoicesReady(handleVoices)
+    return cleanup
   }, [])
 
-  const handlePlay = () => {
-    if (!text) return
+  // ── Sync auto/manual mode from saved settings ──────────────────────────────
+  // Independent of allVoices (unlike the effect below) so the toggle reflects
+  // the saved mode immediately, without waiting for voices to load. Uses the
+  // same backward-compat derivation rule as normalizeSide() in
+  // useVoiceSettings.js in case voiceSettings arrives un-normalized here.
+  useEffect(() => {
+    if (!voiceSettings) return
+    const targetLang = voiceSettings.voiceLang || voiceSettings.voice_lang || null
+    setMode(voiceSettings.mode || (targetLang ? 'manual' : 'auto'))
+  }, [voiceSettings])
 
-    ttsService.speak(text, {
+  // ── Apply saved settings whenever voices or settings change ───────────────
+  // Uses language code as the canonical key, so the correct voice is found
+  // regardless of which TTS engine or device is in use.
+  useEffect(() => {
+    if (!allVoices.length) return
+
+    if (voiceSettings) {
+      const targetLang = voiceSettings.voiceLang || voiceSettings.voice_lang || null
+      const targetName = voiceSettings.voiceName || voiceSettings.voice_name || null
+
+      const matched = resolveVoice(allVoices, { targetLang, targetName })
+      if (matched) {
+        const langBase = matched.lang.replace(/_/g, '-').split('-')[0].toLowerCase()
+        setSelectedLang(langBase)
+        setSelectedVoice(matched)
+        ttsService.setVoice(matched)
+      }
+
+      if (voiceSettings.rate !== undefined) setRate(voiceSettings.rate)
+      if (voiceSettings.autoPlay !== undefined) setAutoPlay(voiceSettings.autoPlay)
+      else if (voiceSettings.auto_play !== undefined) setAutoPlay(voiceSettings.auto_play)
+    } else if (!selectedVoice) {
+      // No settings saved — default to first English voice
+      const def = resolveVoice(allVoices, { targetLang: 'en', targetName: null })
+      if (def) {
+        setSelectedLang('en')
+        setSelectedVoice(def)
+        ttsService.setVoice(def)
+      }
+    }
+  }, [voiceSettings, allVoices, selectedVoice, onVoiceSettingsChange])
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const handlePlay = React.useCallback(async () => {
+    if (!text) return
+    // Mark that the user has initiated playback – this satisfies the user‑gesture requirement on mobile
+    setUserInitiated(true)
+
+    const playbackCallbacks = {
       rate,
-      volume,
       onStart: () => setIsPlaying(true),
       onEnd: () => setIsPlaying(false),
       onError: () => setIsPlaying(false)
-    })
-  }
+    }
+
+    if (mode === 'auto') {
+      setIsSegmenting(true)
+      const segments = await getSegments(text)
+      setIsSegmenting(false)
+      if (segments) {
+        speakSegments(segments, playbackCallbacks)
+        return
+      }
+      // getSegments() failed (offline/rate-limited/backend error) — silent
+      // fallback to the existing single-utterance path below, no error UI.
+    }
+
+    ttsService.speak(text, playbackCallbacks)
+  }, [text, rate, mode, getSegments, speakSegments])
 
   const handlePause = () => {
     ttsService.pause()
     setIsPlaying(false)
   }
 
-  const handleStop = () => {
-    ttsService.stop()
-    setIsPlaying(false)
-  }
+  // ── Auto-play effect ───────────────────────────────────────────────────────
+  // Intentional dep-array choices:
+  //   • `isPlaying` is excluded — including it caused the effect to re-run
+  //     every time speech ended (setIsPlaying(false)), immediately re-triggering
+  //     playback and creating an infinite play loop.
+  //   • `handlePlay` is excluded — it is a useCallback on [text, rate]; including
+  //     it caused the effect to fire TWICE per card change (once for `text`, once
+  //     for the new handlePlay reference), producing double-play.
+  //   • Cleanup cancels any in-progress speech before starting the next one,
+  //     preventing overlap when the user advances cards mid-utterance.
+  useEffect(() => {
+    // Auto‑play is only allowed after a user interaction (required on iOS/Android)
+    if (!autoPlay || !text || allVoices.length === 0 || !userInitiated) return
+    ttsService.speak(text, {
+      rate,
+      onStart: () => setIsPlaying(true),
+      onEnd: () => setIsPlaying(false),
+      onError: () => setIsPlaying(false)
+    })
+    return () => {
+      ttsService.stop()
+      setIsPlaying(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, autoPlay, allVoices.length, userInitiated, rate])
 
-  const handleVoiceChange = (event, value) => {
-    const voice = voices.find((v) => v.name === value)
-    if (voice) {
-      setSelectedVoice(voice)
-      ttsService.setVoice(voice)
+  const handleLanguageChange = (event, langBase) => {
+    if (!langBase) return
+    const entry = languageOptions.find((o) => o.langBase === langBase)
+    if (!entry) return
+
+    const voice = entry.bestVoice
+    setSelectedLang(langBase)
+    setSelectedVoice(voice)
+    ttsService.setVoice(voice)
+
+    // Save lang code + name so both can be used for matching on any future device
+    if (onVoiceSettingsChange) {
+      onVoiceSettingsChange({ voiceName: voice.name, voiceLang: voice.lang, rate, pitch: 1.0, autoPlay })
     }
   }
 
-  if (compact) {
+  const handleRateChange = (e, val) => {
+    setRate(val)
+    if (onVoiceSettingsChange) {
+      onVoiceSettingsChange({ voiceName: selectedVoice?.name, voiceLang: selectedVoice?.lang, rate: val, pitch: 1.0, autoPlay })
+    }
+  }
+
+  const handleAutoPlayChange = (e) => {
+    const newVal = e.target.checked
+    setAutoPlay(newVal)
+    // Enabling auto‑play is a user gesture, so mark interaction
+    if (newVal) setUserInitiated(true)
+    if (onVoiceSettingsChange) {
+      onVoiceSettingsChange({ voiceName: selectedVoice?.name, voiceLang: selectedVoice?.lang, rate, pitch: 1.0, autoPlay: newVal })
+    }
+  }
+
+  const handleAutoDetectChange = (e) => {
+    const newVal = e.target.checked ? 'auto' : 'manual'
+    setMode(newVal)
+    if (onVoiceSettingsChange) {
+      onVoiceSettingsChange({ voiceName: selectedVoice?.name, voiceLang: selectedVoice?.lang, rate, pitch: 1.0, autoPlay, mode: newVal })
+    }
+  }
+
+  // ── Click outside ──────────────────────────────────────────────────────────
+  const settingsRef = React.useRef(null)
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isPortalClick =
+        event.target.closest('[role="presentation"]') ||
+        event.target.closest('[role="listbox"]') ||
+        event.target.closest('.MuiPopover-root') ||
+        event.target.closest('[data-mui-portal]')
+      if (isPortalClick) return
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setSettingsOpen(false)
+      }
+    }
+    if (isSettingsOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isSettingsOpen, setSettingsOpen])
+
+  // ── Settings-only render (used by CardPreviewModal to show panel without floating buttons) ──
+  if (settingsOnly) {
     return (
-      <Tooltip title='Read Aloud'>
-        <IconButton size='sm' variant='soft' onClick={isPlaying ? handlePause : handlePlay} disabled={!text}>
-          {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-        </IconButton>
-      </Tooltip>
+      <Stack spacing={2}>
+        {/* Auto-detect language toggle -- visible in both modes, this is how you switch INTO manual mode */}
+        <Stack direction='row' justifyContent='space-between' alignItems='center'>
+          <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+            {t('tts.autoDetect')}
+          </Typography>
+          <Switch size='sm' checked={mode === 'auto'} onChange={handleAutoDetectChange} aria-label={t('tts.autoDetectAriaLabel')} />
+        </Stack>
+
+        {/* Language selector -- manual mode only */}
+        {mode === 'manual' && (
+          <Box>
+            <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+              Language
+            </Typography>
+            <Select
+              size='sm'
+              value={selectedLang ?? null}
+              onChange={handleLanguageChange}
+              placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
+            >
+              {languageOptions.map((opt) => (
+                <Option key={opt.langBase} value={opt.langBase}>
+                  {opt.label}
+                </Option>
+              ))}
+            </Select>
+          </Box>
+        )}
+
+        {/* Speed slider */}
+        <Box>
+          <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+            Speed: {rate}x
+          </Typography>
+          <Slider value={rate} onChange={handleRateChange} min={0.5} max={2.0} step={0.1} size='sm' />
+        </Box>
+
+        {/* Auto-play toggle */}
+        <Stack direction='row' justifyContent='space-between' alignItems='center'>
+          <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+            Auto-Play
+          </Typography>
+          <Switch size='sm' checked={autoPlay} onChange={handleAutoPlayChange} />
+        </Stack>
+      </Stack>
     )
   }
 
-  return (
-    <Box sx={{ p: 2, bgcolor: 'background.level1', borderRadius: 'md' }}>
-      <Typography level='title-sm' sx={{ mb: 2, fontWeight: 600 }}>
-        🔊 Text-to-Speech
-      </Typography>
-
-      <Stack spacing={2}>
-        {/* Playback Controls */}
-        <Stack direction='row' spacing={1} alignItems='center'>
+  // ── Compact render (floating over a card) ─────────────────────────────────
+  if (compact) {
+    return (
+      <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10, display: 'flex', gap: 1 }}>
+        <Tooltip title={isPlaying ? 'Pause' : 'Listen'}>
           <IconButton
-            color={isPlaying ? 'warning' : 'primary'}
+            size='sm'
+            variant='solid'
+            color='primary'
             onClick={isPlaying ? handlePause : handlePlay}
-            disabled={!text}
-            size='lg'
+            disabled={!text || isSegmenting}
+            sx={{ borderRadius: '50%', boxShadow: 'sm', minHeight: { xs: 44, md: 32 }, minWidth: { xs: 44, md: 32 } }}
+          >
+            {isSegmenting ? (
+              <CircularProgress size='sm' sx={{ '--CircularProgress-size': '18px' }} />
+            ) : isPlaying ? (
+              <PauseIcon />
+            ) : (
+              <PlayArrowIcon />
+            )}
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title='Voice Settings'>
+          <IconButton
+            size='sm'
+            onMouseDown={(e) => e.stopPropagation()}
             variant='soft'
+            color='neutral'
+            onClick={() => setSettingsOpen(!isSettingsOpen)}
+            sx={{ borderRadius: '50%', minHeight: { xs: 44, md: 32 }, minWidth: { xs: 44, md: 32 } }}
           >
-            {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+            <SettingsIcon />
           </IconButton>
-          <IconButton onClick={handleStop} disabled={!isPlaying} size='lg' variant='soft' color='neutral'>
-            <StopIcon />
-          </IconButton>
-        </Stack>
+        </Tooltip>
 
-        {/* Voice Selection */}
-        <Box>
-          <Typography
-            level='body-xs'
-            sx={{ mb: 0.5, color: 'neutral.600', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}
+        {isSettingsOpen && (
+          <Box
+            ref={settingsRef}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            sx={{
+              position: 'absolute',
+              top: 40,
+              right: 0,
+              width: 280,
+              p: 2,
+              bgcolor: 'background.surface',
+              borderRadius: 'md',
+              boxShadow: 'lg',
+              border: '1px solid',
+              borderColor: 'neutral.outlinedBorder',
+              zIndex: 20
+            }}
           >
-            Voice
-          </Typography>
-          <Select size='sm' value={selectedVoice?.name || ''} onChange={handleVoiceChange} placeholder='Select Voice'>
-            {voices.map((voice) => (
-              <Option key={voice.name} value={voice.name}>
-                {voice.name.split(' ')[0]} ({voice.lang.split('-')[0].toUpperCase()})
-              </Option>
-            ))}
-          </Select>
-        </Box>
+            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
+              <Typography level='title-sm'>Voice Settings</Typography>
+              <IconButton
+                size='sm'
+                variant='plain'
+                color='neutral'
+                onClick={() => setSettingsOpen(false)}
+                sx={{ minHeight: { xs: 44, md: 32 }, minWidth: { xs: 44, md: 32 } }}
+              >
+                <CloseIcon fontSize='small' />
+              </IconButton>
+            </Stack>
 
-        {/* Speed Control */}
-        <Box>
-          <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
-            <Typography level='body-xs' sx={{ color: 'neutral.600', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Speed
-            </Typography>
-            <Typography level='body-xs' sx={{ color: 'primary.600', fontWeight: 700 }}>
-              {rate.toFixed(1)}x
-            </Typography>
-          </Stack>
-          <Slider
-            value={rate}
-            onChange={(e, val) => setRate(val)}
-            min={0.5}
-            max={2.0}
-            step={0.1}
-            marks={[
-              { value: 0.5, label: '0.5x' },
-              { value: 1.0, label: '1x' },
-              { value: 2.0, label: '2x' }
-            ]}
-          />
-        </Box>
+            <Stack spacing={2}>
+              {/* Auto-detect language toggle -- visible in both modes, this is how you switch INTO manual mode */}
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+                  {t('tts.autoDetect')}
+                </Typography>
+                <Switch size='sm' checked={mode === 'auto'} onChange={handleAutoDetectChange} aria-label={t('tts.autoDetectAriaLabel')} />
+              </Stack>
 
-        {/* Volume Control */}
-        <Box>
-          <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 0.5 }}>
-            <Typography level='body-xs' sx={{ color: 'neutral.600', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Volume
-            </Typography>
-            <Typography level='body-xs' sx={{ color: 'primary.600', fontWeight: 700 }}>
-              {Math.round(volume * 100)}%
-            </Typography>
-          </Stack>
-          <Slider
-            value={volume}
-            onChange={(e, val) => setVolume(val)}
-            min={0}
-            max={1}
-            step={0.1}
-            marks={[
-              { value: 0, label: '0%' },
-              { value: 0.5, label: '50%' },
-              { value: 1, label: '100%' }
-            ]}
-          />
-        </Box>
-      </Stack>
-    </Box>
-  )
+              {mode === 'manual' && (
+                <Box>
+                  <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+                    Language
+                  </Typography>
+                  <Select
+                    size='sm'
+                    value={selectedLang ?? null}
+                    onChange={handleLanguageChange}
+                    placeholder={languageOptions.length === 0 ? 'Loading\u2026' : 'Select Language'}
+                  >
+                    {languageOptions.map((opt) => (
+                      <Option key={opt.langBase} value={opt.langBase}>
+                        {opt.label}
+                      </Option>
+                    ))}
+                  </Select>
+                </Box>
+              )}
+
+              <Box>
+                <Typography level='body-xs' sx={{ mb: 0.5, fontWeight: 600 }}>
+                  Speed: {rate}x
+                </Typography>
+                <Slider value={rate} onChange={handleRateChange} min={0.5} max={2.0} step={0.1} size='sm' />
+              </Box>
+
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+                  Auto-Play
+                </Typography>
+                <Switch size='sm' checked={autoPlay} onChange={handleAutoPlayChange} />
+              </Stack>
+            </Stack>
+          </Box>
+        )}
+      </Box>
+    )
+  }
+
+  return null
 }

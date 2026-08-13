@@ -51,16 +51,23 @@ export const booksService = {
    * @param {string} updates.coverImage - Cover image URL
    * @param {string} updates.summary - Book summary
    * @param {Array} updates.tags - Book tags
+   * @param {boolean} updates.auto_save_enabled - Auto-save preference
    * @returns {Promise<Object>} Updated book
    */
-  async update(id, { title, coverColor, coverImage, summary, tags }) {
-    const { data } = await apiClient.put(ENDPOINTS.books.update(id), {
-      title,
-      cover_color: coverColor, // Convert camelCase to snake_case for backend
-      cover_image: coverImage,
-      summary,
-      tags
-    })
+  async update(id, { title, coverColor, coverImage, summary, tags, full_content, page_size, auto_save_enabled }) {
+    const payload = {}
+
+    // Only include fields that are defined
+    if (title !== undefined) payload.title = title
+    if (coverColor !== undefined) payload.cover_color = coverColor
+    if (coverImage !== undefined) payload.cover_image = coverImage
+    if (summary !== undefined) payload.summary = summary
+    if (tags !== undefined) payload.tags = tags
+    if (full_content !== undefined) payload.full_content = full_content
+    if (page_size !== undefined) payload.page_size = page_size
+    if (auto_save_enabled !== undefined) payload.auto_save_enabled = auto_save_enabled
+
+    const { data } = await apiClient.put(ENDPOINTS.books.update(id), payload)
     return data
   },
 
@@ -91,13 +98,34 @@ export const booksService = {
    * @param {File} file - File to import
    * @param {string} username - Current user's username
    * @param {boolean} preview - If true, returns preview for validation
+   * @param {string} title - Optional override title
    * @returns {Promise<Object>} Created book with pages or preview data
    */
-  async importFile(file, username, preview = false) {
+  /**
+   * Expand selected text using AI (all tiers; model quality varies by tier)
+   * @param {string} bookId - Book ID (ownership verification)
+   * @param {string} selectedText - Text to expand
+   * @param {string} [instruction] - Optional custom instruction
+   * @returns {Promise<{expanded_text: string}>}
+   */
+  async aiExpand(bookId, selectedText, instruction = '') {
+    const { data } = await apiClient.post(
+      ENDPOINTS.books.aiExpand(bookId),
+      {
+        selected_text: selectedText,
+        ...(instruction ? { instruction } : {})
+      },
+      { timeout: 120000 }
+    )
+    return data
+  },
+
+  async importFile(file, username, preview = false, title = null) {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('username', username)
     formData.append('preview', preview.toString())
+    if (title) formData.append('title', title)
 
     const { data } = await apiClient.post('/book/import', formData, {
       headers: {

@@ -1,194 +1,89 @@
 # Nowry Documentation
 
-Welcome to the Nowry documentation! This guide will help you navigate all available documentation.
+Welcome to the Nowry documentation! This directory contains all documentation for the Nowry learning platform.
 
-## 📚 Documentation Structure
+## 📂 Documentation Structure
 
-```
-docs/
-├── deploy/          Deployment & hosting guides
-├── design/          Design system & UI guidelines
-├── features/        Feature implementation docs
-├── planning/        Project planning & roadmaps
-└── technical/       Technical implementation details
-```
+### Design (`/design`)
+Design system and UI/UX guidelines:
+- `DESIGN_GUIDELINES.md` - Complete design system
+- `COLOR_SYSTEM.md` - Dynamic color generation
 
----
+### Features (`/features`)
+Feature documentation and implementation guides:
+- Annual Planning system
+- Bug Reporting system
+- Study System implementation
+- Text-to-Speech features
+- Multi-column layouts
+- Slash commands
 
-## 🚀 Deployment Documentation
+### Technical (`/technical`)
+Technical architecture and implementation:
+- API refactoring
+- Content-first architecture
+- Pagination redesign
+- User management
+- Development standards
+- Import alignment
 
-📁 **Location**: [`docs/deploy/`](./deploy/)
+### Deploy (`/deploy`)
+Deployment and infrastructure:
+- Deployment guides
+- Infrastructure documentation
+- Environment variables
+- Quick deploy scripts
 
-Start here to deploy Nowry to production or local environment.
+### Planning (`/planning`)
+Product planning and roadmaps:
+- Subscription system plans
+- Landing page enhancements
+- Auth and onboarding
 
-| Document | Description | For |
-|----------|-------------|-----|
-| [**Deployment Index**](./deploy/DEPLOYMENT_README.md) | Main deployment documentation hub | Everyone |
-| [**Quick Deploy**](./deploy/QUICK_DEPLOY.md) | 30-minute deployment guide | First-time deployers |
-| [**Full Deployment Guide**](./deploy/DEPLOYMENT_GUIDE.md) | Comprehensive deployment instructions | Detailed setup |
-| [**Environment Variables**](./deploy/ENVIRONMENT_VARIABLES.md) | Complete env var reference | Configuration |
-| [**Infrastructure**](./deploy/INFRASTRUCTURE.md) | Scaling & advanced infrastructure | Production scaling |
+### Tasks (`/tasks`)
+Task tracking and roadmaps:
+- Implementation roadmap
+- Documentation organization
 
-**Quick Start**: [Deploy in 30 minutes](./deploy/QUICK_DEPLOY.md) | [Full Guide](./deploy/DEPLOYMENT_GUIDE.md)
-
----
-
-## 🎨 Design Documentation
-
-📁 **Location**: [`docs/design/`](./design/)
-
-Design system, color palette, and UI/UX guidelines.
-
-| Document | Description |
-|----------|-------------|
-| [**Color System**](./design/COLOR_SYSTEM.md) | Complete color palette & usage guidelines |
-| [**Design Guidelines**](./design/DESIGN_GUIDELINES.md) | UI/UX design principles & components |
-
-**For**: Designers, frontend developers
-
----
-
-## ✨ Feature Documentation
-
-📁 **Location**: [`docs/features/`](./features/)
-
-Implementation details for major features.
-
-| Document | Description | Status |
-|----------|-------------|--------|
-| [**Multi-Column Editor**](./features/MULTI_COLUMN_IMPLEMENTATION.md) | Multi-column layout implementation | ✅ Implemented |
-| [**Study System**](./features/STUDY_SYSTEM_IMPLEMENTATION.md) | AI-powered study cards & quizzes | ✅ Implemented |
-| [**TTS Study Center**](./features/TTS_STUDY_CENTER.md) | Text-to-speech integration | ✅ Implemented |
-
-**For**: Developers implementing or extending features
+### Components (`/components`)
+UI component documentation:
+- Component usage guides
+- Public access points
+- Modal patterns
 
 ---
 
-## 📋 Planning Documentation
+## 🚀 Quick Start
 
-📁 **Location**: [`docs/planning/`](./planning/)
+### For Designers
+Start with [Design Guidelines](./design/DESIGN_GUIDELINES.md) and [Color System](./design/COLOR_SYSTEM.md).
 
-Product roadmaps, feature planning, and enhancement proposals.
+### For Developers
+- [Development Standards](./technical/DEVELOPMENT_STANDARDS.md)
+- [API Refactor Guide](./technical/API_REFACTOR_COMPLETE.md)
+- [Content-First Architecture](./technical/CONTENT_FIRST_ARCHITECTURE.md)
 
-| Document | Description | Status |
-|----------|-------------|--------|
-| [**Subscription System**](./planning/SUBSCRIPTION_SYSTEM_PLAN.md) | Payment & subscription architecture | 📝 Planned |
-| [**Auth & Onboarding**](./planning/AUTH_ONBOARDING_ENHANCEMENT.md) | Authentication flow improvements | 📝 Planned |
-| [**Landing Pages**](./planning/LANDING_PAGES_ENHANCEMENT.md) | Marketing page enhancements | 📝 Planned |
+### For Deployment
+- [Deployment Guide](./deploy/DEPLOYMENT_GUIDE.md)
+- [Quick Deploy](./deploy/QUICK_DEPLOY.md)
+- [Environment Setup](./deploy/ENVIRONMENT_VARIABLES.md)
 
-**For**: Product managers, stakeholders, developers planning new features
-
----
-
-## 🔧 Technical Documentation
-
-📁 **Location**: [`docs/technical/`](./technical/)
-
-API documentation, refactors, and technical implementation details.
-
-| Document | Description | Status |
-|----------|-------------|--------|
-| [**API Refactor Plan**](./technical/API_REFACTOR_PLAN.md) | Backend API restructuring | ✅ Complete |
-| [**API Refactor Complete**](./technical/API_REFACTOR_COMPLETE.md) | Refactor summary & results | ✅ Complete |
-| [**User Management API**](./technical/USER_MANAGEMENT_API.md) | User management endpoints | 📖 Reference |
-
-**For**: Backend developers, API consumers
+### For Features
+Browse the [features](./features/) directory for specific feature documentation.
 
 ---
 
-## 🗂️ Quick Navigation
+## 📝 Contributing
 
-### By Role
-
-#### 👨‍💻 **Developers (New to Project)**
-1. Start: [Quick Deploy](./deploy/QUICK_DEPLOY.md)
-2. Read: [Design Guidelines](./design/DESIGN_GUIDELINES.md)
-3. Review: [Feature Docs](./features/)
-
-#### 🎨 **UI/UX Designers**
-1. [Color System](./design/COLOR_SYSTEM.md)
-2. [Design Guidelines](./design/DESIGN_GUIDELINES.md)
-
-#### 🚀 **DevOps/Infrastructure**
-1. [Deployment Guide](./deploy/DEPLOYMENT_GUIDE.md)
-2. [Infrastructure Scaling](./deploy/INFRASTRUCTURE.md)
-3. [Environment Variables](./deploy/ENVIRONMENT_VARIABLES.md)
-
-#### 📊 **Product Managers**
-1. [Planning Docs](./planning/)
-2. [Feature Implementations](./features/)
-
-#### 🔌 **API Developers**
-1. [User Management API](./technical/USER_MANAGEMENT_API.md)
-2. [API Refactor Docs](./technical/)
+When adding new documentation:
+1. Choose the appropriate directory
+2. Use descriptive ALL_CAPS_SNAKE_CASE.md filenames
+3. Include a clear title and table of contents
+4. Update this README with a link
 
 ---
 
-## 📖 Documentation Standards
+## 🔗 External Resources
 
-### Writing Guidelines
-
-- **Markdown**: All docs use GitHub-flavored Markdown
-- **Code blocks**: Include language identifiers
-- **Links**: Use relative paths within docs
-- **Images**: Store in `docs/assets/` (if needed)
-- **Updates**: Include "Last Updated" date
-
-### File Naming
-
-- `SCREAMING_SNAKE_CASE.md` for technical docs
-- Descriptive names (e.g., `DEPLOYMENT_GUIDE.md`)
-- Avoid abbreviations unless widely known
-
----
-
-## 🔄 Contributing to Documentation
-
-### Adding New Documentation
-
-1. Choose appropriate directory (`deploy/`, `design/`, `features/`, `planning/`, `technical/`)
-2. Create file following naming conventions
-3. Update this index (README.md)
-4. Update any cross-references in related docs
-
-### Updating Documentation
-
-- Keep docs in sync with code changes
-- Update "Last Updated" dates
-- Fix broken links
-- Improve clarity based on user feedback
-
----
-
-## 🆘 Need Help?
-
-- **Can't find what you need?** Check the directory structure above
-- **Documentation outdated?** Please create an issue
-- **Want to contribute?** See contributing guidelines
-
----
-
-## 📎 External Resources
-
-- [React Documentation](https://react.dev/)
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [MongoDB Documentation](https://www.mongodb.com/docs/)
-- [Lexical Editor](https://lexical.dev/)
-
----
-
-**Last Updated:** December 30, 2024
-
----
-
-## Quick Links Summary
-
-| I want to... | Go to |
-|--------------|-------|
-| Deploy the app | [Quick Deploy](./deploy/QUICK_DEPLOY.md) |
-| Understand colors/design | [Design System](./design/COLOR_SYSTEM.md) |
-| Learn about a feature | [Features](./features/) |
-| See future plans | [Planning](./planning/) |
-| Access API docs | [Technical](./technical/) |
-| Scale infrastructure | [Infrastructure](./deploy/INFRASTRUCTURE.md) |
-| Configure environment | [Env Variables](./deploy/ENVIRONMENT_VARIABLES.md) |
+- [API Documentation](../../Nowry-API/docs/README.md)
+- [GitHub Repository](https://github.com/your-org/nowry)

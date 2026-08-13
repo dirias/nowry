@@ -1,50 +1,45 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  Container,
-  Stack,
-  Typography,
-  Box,
-  Input,
-  Chip,
-  Button,
-  Select,
-  Option,
-  IconButton,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  Card,
-  CardContent,
-  Grid,
-  Divider
-} from '@mui/joy'
-import { Search, Add, GridView, ViewList, FilterList, TrendingUp, School, Download, MoreVert } from '@mui/icons-material'
-import DecksView from './DecksView'
-import CreateDeckModal from './CreateDeckModal'
+import { Container, Snackbar } from '@mui/joy'
+import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
+import DeckCreateSheet from './DeckCreateSheet'
 import CreateCardModal from './CreateCardModal'
 import ManageContent from './ManageContent'
+import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
+import ImportDeckModal from './ImportDeckModal'
+import DeckSettingsModal from '../Study/DeckSettingsModal'
+import DeckPublishSheet from '../Study/DeckPublishSheet'
+import StudyModePickerModal from '../Study/StudyModePickerModal'
 import { decksService, cardsService } from '../../api/services'
+import { useCardData } from '../../hooks/useCardData'
+import { useStatistics } from '../../hooks/useStatistics'
+import { useDeckData } from '../../hooks/useDeckData'
+import { apiCache } from '../../api/utils/cache'
 
-export default function CardHome() {
+export default function CardHome({ onDeckChange } = {}) {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
   // State
-  const [activeTab, setActiveTab] = useState(0)
   const [decks, setDecks] = useState([])
   const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterType, setFilterType] = useState('all')
-  const [sortBy, setSortBy] = useState('recent')
-  const [viewMode, setViewMode] = useState('grid')
   const [showCreateDeck, setShowCreateDeck] = useState(false)
+  const [showImportDeck, setShowImportDeck] = useState(false)
   const [showCreateCard, setShowCreateCard] = useState(false)
-  const [editingDeck, setEditingDeck] = useState(null)
   const [editingCard, setEditingCard] = useState(null)
+  const [deletingDeck, setDeletingDeck] = useState(null)
+  const [deletingCard, setDeletingCard] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [errorSnackbar, setErrorSnackbar] = useState(null)
+  const [selectedTags, setSelectedTags] = useState([])
+  const [availableTags, setAvailableTags] = useState([])
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null, section: 'study' })
+  const [publishSheetState, setPublishSheetState] = useState({ open: false, deckId: null, deck: null })
+  const [modePickerState, setModePickerState] = useState({ open: false, deck: null })
 
   // Stats
   const [stats, setStats] = useState({
@@ -53,35 +48,47 @@ export default function CardHome() {
     totalCards: 0
   })
 
+  // Debounce search so we don't fire an API call on every keystroke
   useEffect(() => {
-    fetchData()
-  }, [])
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 400)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-  const fetchData = async () => {
+  const {
+    cards: hookCards,
+    total: hookTotal,
+    hasMore: hookHasMore,
+    loading: cardsLoading,
+    reload: reloadCards,
+    fetchMore: reloadFetchMore
+  } = useCardData(selectedTags, debouncedSearch)
+  const { statistics: hookStats, loading: statsLoading } = useStatistics()
+  const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
+
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true)
-      const [decksData, cardsData, statisticsData] = await Promise.all([
-        decksService.getAll(),
-        cardsService.getAll(),
-        cardsService.getStatistics()
-      ])
+      const decksData = hookDecks || []
 
-      setDecks(decksData)
-      setCards(cardsData)
-
-      // Use real stats from API - API returns data in summary object
-      const summary = statisticsData.summary || {}
-      const now = new Date()
-      const dueCards = cardsData.filter((card) => {
-        if (!card.next_review) return true
-        const nextReview = new Date(card.next_review)
-        return nextReview <= now
+      const decksWithDueCount = decksData.map((deck) => {
+        return {
+          ...deck,
+          due_cards: deck.due_cards || 0,
+          total_cards: deck.total_cards || 0,
+          has_cards: (deck.total_cards || 0) > 0
+        }
       })
 
+      setDecks(decksWithDueCount)
+      setCards(hookCards)
+
+      // Use global stats (already accurate from backend)
+      const summary = hookStats?.summary || {}
+
       setStats({
-        dueToday: dueCards.length,
+        dueToday: summary.due_today || 0,
         streak: summary.current_streak || 0,
-        totalCards: summary.total_cards || cardsData.length
+        totalCards: summary.total_cards || 0
       })
 
       setLoading(false)
@@ -89,38 +96,59 @@ export default function CardHome() {
       console.error('Error fetching data:', error)
       setLoading(false)
     }
-  }
+  }, [hookDecks, hookCards, hookStats])
+
+  useEffect(() => {
+    if (cardsLoading || statsLoading || decksLoading) return
+    fetchData()
+  }, [cardsLoading, statsLoading, decksLoading, fetchData])
 
   const handleStudy = (deck) => {
-    navigate(`/study/${deck._id}`)
+    setModePickerState({ open: true, deck })
+  }
+
+  // Closing is the sheet's decision, not this one's: `Save & next` reports a
+  // saved card and stays open for the next one. Closing here would end the
+  // authoring loop on its first iteration.
+  const handleCardSaved = () => {
+    reloadCards() // Force a fresh fetch so the new/edited card appears
   }
 
   const handleDeckSaved = () => {
     fetchData()
-    setShowCreateDeck(false)
-    setEditingDeck(null)
   }
 
-  const handleCardSaved = () => {
-    fetchData()
-    setShowCreateCard(false)
-    setEditingCard(null)
-  }
-
+  // Editing a deck is editing a deck, whichever field it is. It used to open a
+  // different modal from the one holding the same deck's pace and voice
+  // settings, with no route between them; both now land in settings, on the
+  // section the user asked for.
   const handleEditDeck = (deck) => {
-    setEditingDeck(deck)
-    setShowCreateDeck(true)
+    setDeckSettingsState({ open: true, deckId: deck._id, section: 'identity' })
   }
 
   const handleDeleteDeck = async (deck) => {
-    if (window.confirm(t('cards.confirmDeleteDeck', { name: deck.name }))) {
-      try {
-        await decksService.delete(deck._id)
-        fetchData()
-      } catch (error) {
-        console.error('Error deleting deck:', error)
-      }
+    setDeletingDeck(deck)
+  }
+
+  const confirmDeleteDeck = async () => {
+    if (!deletingDeck) return
+
+    try {
+      setDeleteLoading(true)
+      await decksService.delete(deletingDeck._id)
+      setDeletingDeck(null)
+      setDeleteLoading(false)
+      reloadDecks()
+      fetchData()
+    } catch (error) {
+      console.error('Error deleting deck:', error)
+      setErrorSnackbar(error.response?.data?.detail || t('cards.deleteCardError'))
+      setDeleteLoading(false)
     }
+  }
+
+  const handlePublishDeck = (deck) => {
+    setPublishSheetState({ open: true, deckId: deck._id, deck })
   }
 
   const handleEditCard = (card) => {
@@ -128,241 +156,83 @@ export default function CardHome() {
     setShowCreateCard(true)
   }
 
-  const handleDeleteCard = async (card) => {
-    if (window.confirm(t('cards.confirmDeleteCard'))) {
-      try {
-        await cardsService.delete(card._id)
-        fetchData()
-      } catch (error) {
-        console.error('Error deleting card:', error)
-      }
-    }
+  const handleDeleteCard = (card) => {
+    setDeletingCard(card)
   }
 
-  // Filter and sort decks
-  const getFilteredDecks = () => {
-    let filtered = decks
-
-    // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter((d) => d.deck_type === filterType)
+  const confirmDeleteCard = async () => {
+    if (!deletingCard) return
+    try {
+      setCards(cards.filter((c) => c._id !== deletingCard._id))
+      setDeletingCard(null)
+      reloadCards() // Background cache update
+    } catch (error) {
+      console.error('Error deleting card:', error)
+      setErrorSnackbar(t('cards.deleteCardError'))
     }
-
-    // Filter by search
-    if (searchQuery) {
-      filtered = filtered.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    }
-
-    // Sort
-    switch (sortBy) {
-      case 'name':
-        filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name))
-        break
-      case 'cards':
-        filtered = [...filtered].sort((a, b) => (b.total_cards || 0) - (a.total_cards || 0))
-        break
-      case 'recent':
-      default:
-        filtered = [...filtered].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-        break
-    }
-
-    return filtered
   }
-
-  const filteredDecks = getFilteredDecks()
 
   return (
-    <Container maxWidth='xl' sx={{ py: 4 }}>
-      {/* Header */}
-      <Stack spacing={4} sx={{ mb: 4 }}>
-        {/* Title Row */}
-        {/* Title Row */}
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          justifyContent='space-between'
-          alignItems={{ xs: 'center', md: 'center' }}
-          spacing={2}
-          sx={{ width: '100%' }}
-        >
-          {/* Left: Title */}
-          <Typography level='h2' fontWeight={600}>
-            {t('cards.title')}
-          </Typography>
+    <Container maxWidth='xl' sx={{ py: 0 }}>
+      <ManageContent
+        decks={decks}
+        cards={cards}
+        totalCards={hookTotal}
+        hasMore={hookHasMore}
+        onLoadMore={reloadFetchMore}
+        loading={loading}
+        searchQuery={searchQuery}
+        onStudy={handleStudy}
+        onEditDeck={handleEditDeck}
+        onDeleteDeck={handleDeleteDeck}
+        onEditCard={handleEditCard}
+        onDeleteCard={handleDeleteCard}
+        onAddCard={(deck) => {
+          setEditingCard({ deck_id: deck._id })
+          setShowCreateCard(true)
+        }}
+        availableTags={availableTags}
+        selectedTags={selectedTags}
+        onTagToggle={(tag) => setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))}
+        onClearTags={() => setSelectedTags([])}
+        onSearchChange={setSearchQuery}
+        onImport={() => setShowImportDeck(true)}
+        onNewCard={() => {
+          setEditingCard(null)
+          setShowCreateCard(true)
+        }}
+        onNewDeck={() => setShowCreateDeck(true)}
+        onDeckSettings={(deck) => setDeckSettingsState({ open: true, deckId: deck._id, section: 'study' })}
+        onPublishDeck={handlePublishDeck}
+      />
 
-          {/* Center: Subtitle */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', flex: 1 }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {t('cards.subtitle')}
-              {stats.streak > 0 && (
-                <Typography component='span' level='body-xs' sx={{ color: 'warning.plainColor' }}>
-                  • 🔥 {stats.streak} {t('profile.stats.days')}
-                </Typography>
-              )}
-            </Typography>
-          </Box>
-
-          {/* Mobile Only Subtitle (stacked) */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, width: '100%', justifyContent: 'center' }}>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
-              {t('cards.subtitle')}
-            </Typography>
-          </Box>
-
-          {/* Right: Buttons */}
-          <Stack direction='row' spacing={1}>
-            <Button startDecorator={<TrendingUp />} onClick={() => navigate('/study')} variant='solid' color='primary' size='lg'>
-              {t('cards.studyCenter')}
-            </Button>
-            <Button startDecorator={<Add />} onClick={() => setShowCreateDeck(true)} variant='soft' color='primary' size='lg'>
-              {t('cards.newDeck')}
-            </Button>
-          </Stack>
-        </Stack>
-
-        {/* Stats Dashboard */}
-        <Grid container spacing={2}>
-          <Grid xs={12} sm={6}>
-            <Card variant='soft' color='danger'>
-              <CardContent>
-                <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                  <Box>
-                    <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
-                      {t('cards.dueToday')}
-                    </Typography>
-                    <Typography level='h2' sx={{ color: 'danger.solidBg' }}>
-                      {stats.dueToday}
-                    </Typography>
-                  </Box>
-                  <School sx={{ fontSize: 40, opacity: 0.5, color: 'danger.solidBg' }} />
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid xs={12} sm={6}>
-            <Card variant='soft' color='neutral'>
-              <CardContent>
-                <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                  <Box>
-                    <Typography level='body-sm' sx={{ color: 'neutral.plainColor' }}>
-                      {t('cards.totalCards')}
-                    </Typography>
-                    <Typography level='h2' sx={{ color: 'neutral.solidBg' }}>
-                      {stats.totalCards}
-                    </Typography>
-                  </Box>
-                  <GridView sx={{ fontSize: 40, opacity: 0.5, color: 'neutral.solidBg' }} />
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Stack>
-
-      {/* Tabs */}
-      <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)} sx={{ mb: 3 }}>
-        <TabList>
-          <Tab>{t('cards.browse')}</Tab>
-          <Tab>{t('cards.manage')}</Tab>
-        </TabList>
-      </Tabs>
-
-      {/* Browse Tab */}
-      {activeTab === 0 && (
-        <>
-          {/* Toolbar */}
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems='center'>
-            {/* Search */}
-            <Input
-              placeholder={t('cards.search')}
-              startDecorator={<Search />}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ flex: 1, minWidth: 200 }}
-            />
-
-            {/* Filter by Type */}
-            <Select value={filterType} onChange={(e, val) => setFilterType(val)} startDecorator={<FilterList />} sx={{ minWidth: 150 }}>
-              <Option value='all'>{t('cards.allTypes')}</Option>
-              <Option value='flashcard'>{t('study.types.flashcards')}</Option>
-              <Option value='quiz'>{t('study.types.quizzes')}</Option>
-              <Option value='visual'>{t('study.types.visual')}</Option>
-            </Select>
-
-            {/* Sort */}
-            <Select value={sortBy} onChange={(e, val) => setSortBy(val)} sx={{ minWidth: 150 }}>
-              <Option value='recent'>{t('cards.recent')}</Option>
-              <Option value='name'>{t('cards.name')}</Option>
-              <Option value='cards'>{t('cards.cardCount')}</Option>
-            </Select>
-
-            {/* View Mode */}
-            <Stack direction='row' spacing={0.5}>
-              <IconButton variant={viewMode === 'grid' ? 'solid' : 'outlined'} color='neutral' onClick={() => setViewMode('grid')}>
-                <GridView />
-              </IconButton>
-              <IconButton variant={viewMode === 'list' ? 'solid' : 'outlined'} color='neutral' onClick={() => setViewMode('list')}>
-                <ViewList />
-              </IconButton>
-            </Stack>
-          </Stack>
-
-          {/* Deck Count & Type Filter Chips */}
-          <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
-            <Typography level='body-sm' sx={{ color: 'neutral.600' }}>
-              {t('cards.deckCount_plural', { count: filteredDecks.length })}
-            </Typography>
-            {filterType !== 'all' && (
-              <Chip size='sm' variant='soft' endDecorator={<span onClick={() => setFilterType('all')}>×</span>}>
-                {filterType}
-              </Chip>
-            )}
-          </Stack>
-
-          <Divider sx={{ mb: 3 }} />
-
-          {/* Decks Grid/List */}
-          {loading ? (
-            <Typography>{t('cards.loading')}</Typography>
-          ) : (
-            <DecksView
-              decks={filteredDecks}
-              onStudy={handleStudy}
-              onEdit={handleEditDeck}
-              onDelete={handleDeleteDeck}
-              viewMode={viewMode}
-            />
-          )}
-        </>
-      )}
-
-      {/* Manage Tab */}
-      {activeTab === 1 && (
-        <ManageContent
-          decks={decks}
-          cards={cards}
-          onEditDeck={handleEditDeck}
-          onDeleteDeck={handleDeleteDeck}
-          onEditCard={handleEditCard}
-          onDeleteCard={handleDeleteCard}
-          onAddCard={(deck) => {
-            // Set the deck context for the new card
+      {/* Modals */}
+      {showCreateDeck && (
+        <DeckCreateSheet
+          open={showCreateDeck}
+          onClose={() => setShowCreateDeck(false)}
+          onSaved={handleDeckSaved}
+          // A deck's value moment is its first card, so creation continues
+          // into card authoring pre-targeted to the deck it just made.
+          onAddCards={(deck) => {
+            setShowCreateDeck(false)
             setEditingCard({ deck_id: deck._id })
             setShowCreateCard(true)
           }}
         />
       )}
 
-      {/* Modals */}
-      {showCreateDeck && (
-        <CreateDeckModal
-          open={showCreateDeck}
-          onClose={() => {
-            setShowCreateDeck(false)
-            setEditingDeck(null)
+      {showImportDeck && (
+        <ImportDeckModal
+          open={showImportDeck}
+          onClose={() => setShowImportDeck(false)}
+          onImported={() => {
+            reloadDecks()
+            reloadCards()
+            apiCache.invalidate('cards:statistics')
+            onDeckChange?.()
+            setShowImportDeck(false)
           }}
-          onSaved={handleDeckSaved}
-          initialData={editingDeck}
         />
       )}
 
@@ -378,6 +248,84 @@ export default function CardHome() {
           card={editingCard}
         />
       )}
+
+      {/* Delete Deck Confirmation Modal */}
+      {deletingDeck && (
+        <DeleteConfirmationModal
+          open={!!deletingDeck}
+          onClose={() => setDeletingDeck(null)}
+          onConfirm={confirmDeleteDeck}
+          title={t('cards.deleteModal.title')}
+          description={t('cards.deleteModal.description', { name: deletingDeck.name })}
+          confirmText={t('cards.deleteModal.confirm')}
+          loading={deleteLoading}
+          consequences={[
+            {
+              text: t('cards.deleteModal.consequence1', { count: deletingDeck.total_cards || 0 }),
+              icon: <StyleRoundedIcon fontSize='small' />
+            },
+            {
+              text: t('cards.deleteModal.consequence2')
+            }
+          ]}
+        />
+      )}
+
+      {/* Delete Card Confirmation Modal */}
+      {deletingCard && (
+        <DeleteConfirmationModal
+          open={!!deletingCard}
+          onClose={() => setDeletingCard(null)}
+          onConfirm={confirmDeleteCard}
+          title={t('cards.deck.delete')}
+          description={t('cards.confirmDeleteCard')}
+          confirmText={t('cards.deck.delete')}
+        />
+      )}
+
+      <DeckSettingsModal
+        open={deckSettingsState.open}
+        onClose={() => setDeckSettingsState({ open: false, deckId: null, section: 'study' })}
+        deckId={deckSettingsState.deckId}
+        initialSection={deckSettingsState.section}
+        onSaved={() => {
+          reloadDecks()
+          onDeckChange?.()
+        }}
+      />
+
+      <StudyModePickerModal
+        open={modePickerState.open}
+        onClose={() => setModePickerState({ open: false, deck: null })}
+        deck={modePickerState.deck || {}}
+        onSelectMode={(mode) => {
+          navigate(`/study/${modePickerState.deck._id}?mode=${mode}`)
+          setModePickerState({ open: false, deck: null })
+        }}
+      />
+
+      <DeckPublishSheet
+        open={publishSheetState.open}
+        onClose={() => setPublishSheetState({ open: false, deckId: null, deck: null })}
+        deckId={publishSheetState.deckId}
+        deck={publishSheetState.deck}
+        onPublished={() => {
+          setPublishSheetState({ open: false, deckId: null, deck: null })
+          reloadDecks()
+        }}
+      />
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!errorSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setErrorSnackbar(null)}
+        color='danger'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {errorSnackbar}
+      </Snackbar>
     </Container>
   )
 }

@@ -44,16 +44,18 @@ export const userService = {
   },
 
   /**
-   * Change user password
-   * @param {Object} passwordData
-   * @param {string} passwordData.current_password
-   * @param {string} passwordData.new_password
-   * @returns {Promise<Object>}
+   * Patch user profile (partial update)
+   * @param {Object} profileData
+   * @param {string} [profileData.full_name]
+   * @returns {Promise<Object>} Updated profile
    */
-  async changePassword(passwordData) {
-    const { data } = await apiClient.put('/users/password', passwordData)
+  async patchProfile(profileData) {
+    const { data } = await apiClient.patch('/users/profile', profileData)
     return data
   },
+
+  // changePassword has been removed — password changes are now handled
+  // client-side via Firebase (EmailAuthProvider + updatePassword).
 
   /**
    * Update notification preferences
@@ -70,6 +72,15 @@ export const userService = {
   },
 
   /**
+   * Get current user's general preferences
+   * @returns {Promise<Object>} Current preferences including agent settings
+   */
+  async getGeneralPreferences() {
+    const { data } = await apiClient.get('/users/preferences/general')
+    return data
+  },
+
+  /**
    * Update general preferences (interests, theme, language)
    * @param {Object} preferences
    * @param {string[]} preferences.interests
@@ -79,6 +90,15 @@ export const userService = {
    */
   async updateGeneralPreferences(preferences) {
     const { data } = await apiClient.put('/users/preferences/general', preferences)
+    return data
+  },
+
+  /**
+   * Complete onboarding wizard
+   * @returns {Promise<Object>}
+   */
+  async completeWizard() {
+    const { data } = await apiClient.post('/users/complete-wizard')
     return data
   },
 
@@ -107,5 +127,17 @@ export const userService = {
   async deleteAccount() {
     const { data } = await apiClient.delete('/users/account')
     return data
+  },
+
+  /**
+   * Export all user data as a downloadable JSON file.
+   * The server responds with Content-Disposition: attachment.
+   * @returns {Promise<Blob>} JSON blob for download
+   */
+  async exportData() {
+    const response = await apiClient.get('/users/export', {
+      responseType: 'blob'
+    })
+    return response.data
   }
 }

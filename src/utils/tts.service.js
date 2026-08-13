@@ -11,12 +11,46 @@ class TTSService {
     this.selectedVoice = null
     this.selectedLanguage = 'en-US'
     this.isPlaying = false
+    this._voiceListeners = []
 
     // Load voices when they become available
     if (this.synth) {
       this.loadVoices()
-      // Chrome loads voices asynchronously
-      this.synth.onvoiceschanged = () => this.loadVoices()
+      // Chrome/Android loads voices asynchronously via this event
+      this.synth.onvoiceschanged = () => {
+        this.loadVoices()
+        // Notify all registered components that voices are now available
+        this._voiceListeners.forEach((cb) => cb(this.voices))
+      }
+
+      // iOS Safari & some mobile browsers never fire onvoiceschanged.
+      // Poll until voices are available (max ~3 seconds).
+      if (this.voices.length === 0) {
+        let attempts = 0
+        const poll = setInterval(() => {
+          this.loadVoices()
+          attempts++
+          if (this.voices.length > 0 || attempts >= 30) {
+            clearInterval(poll)
+            if (this.voices.length > 0) {
+              this._voiceListeners.forEach((cb) => cb(this.voices))
+            }
+          }
+        }, 100)
+      }
+    }
+  }
+
+  onVoicesReady(callback) {
+    if (this.voices.length > 0) {
+      // Voices already loaded — call immediately
+      callback(this.voices)
+    } else {
+      this._voiceListeners.push(callback)
+    }
+    // Return cleanup function
+    return () => {
+      this._voiceListeners = this._voiceListeners.filter((cb) => cb !== callback)
     }
   }
 
@@ -25,7 +59,12 @@ class TTSService {
 
     // Auto-select first voice if none selected
     if (!this.selectedVoice && this.voices.length > 0) {
-      this.selectedVoice = this.voices.find((v) => v.lang === this.selectedLanguage) || this.voices[0]
+      // Prioritize "Google" or "Enhanced" voices for better quality
+      const preferredVoice = this.voices.find(
+        (v) => v.lang === this.selectedLanguage && (v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium'))
+      )
+
+      this.selectedVoice = preferredVoice || this.voices.find((v) => v.lang === this.selectedLanguage) || this.voices[0]
     }
   }
 
@@ -61,42 +100,58 @@ class TTSService {
       return
     }
 
-    // Stop any ongoing speech
+    // Cancel any ongoing speech first. Chrome fires onerror('interrupted') on
+    // the previous utterance when cancel() is called — that is expected, not a bug.
+    // Mark the utterance as intentionally cancelled so the error handler stays quiet.
+    if (this.utterance) {
+      this.utterance._cancelled = true
+    }
     this.stop()
 
-    // Create new utterance
-    this.utterance = new SpeechSynthesisUtterance(text)
+    // Chrome bug: calling speak() synchronously right after cancel() silently
+    // drops the new utterance on some versions. A minimal 50ms delay lets the
+    // engine flush before we enqueue the new one.
+    const doSpeak = () => {
+      const utterance = new SpeechSynthesisUtterance(text)
+      this.utterance = utterance
 
-    // Apply voice
-    if (this.selectedVoice) {
-      this.utterance.voice = this.selectedVoice
+      if (this.selectedVoice) {
+        utterance.voice = this.selectedVoice
+      }
+
+      utterance.lang = options.lang || this.selectedLanguage
+      utterance.rate = options.rate || 1.0
+      utterance.pitch = options.pitch || 1.0
+      utterance.volume = options.volume || 1.0
+
+      utterance.onstart = () => {
+        this.isPlaying = true
+        if (options.onStart) options.onStart()
+      }
+
+      utterance.onend = () => {
+        this.isPlaying = false
+        if (options.onEnd) options.onEnd()
+      }
+
+      utterance.onerror = (error) => {
+        // 'interrupted' fires whenever cancel() is called on a speaking utterance.
+        // Since we always cancel before a new speak(), this is expected — suppress it.
+        if (error.error === 'interrupted' || utterance._cancelled) return
+        this.isPlaying = false
+        console.error('TTS Error:', error)
+        if (options.onError) options.onError(error)
+      }
+
+      this.synth.speak(utterance)
     }
 
-    // Apply options
-    this.utterance.lang = options.lang || this.selectedLanguage
-    this.utterance.rate = options.rate || 1.0
-    this.utterance.pitch = options.pitch || 1.0
-    this.utterance.volume = options.volume || 1.0
-
-    // Event handlers
-    this.utterance.onstart = () => {
-      this.isPlaying = true
-      if (options.onStart) options.onStart()
+    // Only delay if the engine was actively speaking/pending
+    if (this.synth.speaking || this.synth.pending) {
+      setTimeout(doSpeak, 50)
+    } else {
+      doSpeak()
     }
-
-    this.utterance.onend = () => {
-      this.isPlaying = false
-      if (options.onEnd) options.onEnd()
-    }
-
-    this.utterance.onerror = (error) => {
-      this.isPlaying = false
-      console.error('TTS Error:', error)
-      if (options.onError) options.onError(error)
-    }
-
-    // Speak
-    this.synth.speak(this.utterance)
   }
 
   pause() {

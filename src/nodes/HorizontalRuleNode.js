@@ -1,6 +1,6 @@
-import { ElementNode } from 'lexical'
+import { DecoratorNode } from 'lexical'
 
-export class HorizontalRuleNode extends ElementNode {
+export class HorizontalRuleNode extends DecoratorNode {
   static getType() {
     return 'horizontalrule'
   }
@@ -11,6 +11,10 @@ export class HorizontalRuleNode extends ElementNode {
 
   createDOM() {
     const dom = document.createElement('hr')
+    dom.style.border = 'none'
+    dom.style.borderTop = '1px solid'
+    dom.style.borderColor = 'var(--joy-palette-neutral-outlinedBorder)'
+    dom.style.margin = '16px 0'
     return dom
   }
 
@@ -19,7 +23,7 @@ export class HorizontalRuleNode extends ElementNode {
   }
 
   static importJSON() {
-    return new HorizontalRuleNode()
+    return $createHorizontalRuleNode()
   }
 
   exportJSON() {
@@ -29,8 +33,21 @@ export class HorizontalRuleNode extends ElementNode {
     }
   }
 
+  // DecoratorNode requires this method
+  decorate() {
+    return null
+  }
+
   isInline() {
     return false
+  }
+
+  isIsolated() {
+    return true
+  }
+
+  isKeyboardSelectable() {
+    return true
   }
 }
 

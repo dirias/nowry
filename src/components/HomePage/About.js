@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, Typography, Button, Sheet, Stack, Card, CardContent, Container, Grid, Avatar } from '@mui/joy'
 import { useColorScheme } from '@mui/joy/styles'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   RocketLaunchRounded,
   VisibilityRounded,
@@ -16,30 +17,31 @@ import {
 const About = () => {
   const { mode } = useColorScheme()
   const isDark = mode === 'dark'
+  const { t } = useTranslation()
 
   const values = [
     {
       icon: <LightbulbRounded />,
-      title: 'Innovation',
-      description: 'We constantly evolve our platform with cutting-edge learning techniques and AI',
+      title: t('about.values.innovation.title'),
+      description: t('about.values.innovation.desc'),
       color: 'warning'
     },
     {
       icon: <PeopleRounded />,
-      title: 'Community',
-      description: 'Building a supportive environment where learners help each other succeed',
+      title: t('about.values.community.title'),
+      description: t('about.values.community.desc'),
       color: 'primary'
     },
     {
       icon: <SecurityRounded />,
-      title: 'Trust',
-      description: 'Your data and privacy are our top priorities, always secure and protected',
+      title: t('about.values.trust.title'),
+      description: t('about.values.trust.desc'),
       color: 'success'
     },
     {
       icon: <SupportAgentRounded />,
-      title: 'Support',
-      description: 'Dedicated to helping you achieve your learning goals with responsive assistance',
+      title: t('about.values.support.title'),
+      description: t('about.values.support.desc'),
       color: 'danger'
     }
   ]
@@ -47,8 +49,11 @@ const About = () => {
   return (
     <Sheet
       sx={{
-        minHeight: '100vh',
-        backgroundColor: isDark ? 'neutral.900' : 'background.body'
+        // Fill the remaining space inside the app's flex column — never exceed it.
+        // `minHeight: '100vh'` here would stack on top of the header + footer and
+        // force a scrollbar even when the content is short.
+        flex: 1,
+        backgroundColor: isDark ? 'background.level2' : 'background.body'
       }}
     >
       <Container maxWidth='lg'>
@@ -68,10 +73,10 @@ const About = () => {
               letterSpacing: -2,
               lineHeight: 1.1,
               mb: 3,
-              color: isDark ? 'primary.300' : 'primary.700'
+              color: 'primary.plainColor'
             }}
           >
-            About Nowry
+            {t('about.title')}
           </Typography>
           <Typography
             level='body-lg'
@@ -83,8 +88,7 @@ const About = () => {
               mb: 4
             }}
           >
-            We&apos;re on a mission to make learning accessible, effective, and enjoyable for everyone through innovative technology and
-            evidence-based methods.
+            {t('about.subtitle')}
           </Typography>
         </Box>
 
@@ -104,13 +108,12 @@ const About = () => {
                 }
               }}
             >
-              <RocketLaunchRounded sx={{ fontSize: 48, color: 'primary.500', mb: 2 }} />
+              <RocketLaunchRounded sx={{ fontSize: 48, color: 'primary.solidBg', mb: 2 }} />
               <Typography level='h3' fontWeight={700} mb={2}>
-                Our Mission
+                {t('about.mission.title')}
               </Typography>
               <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-                To empower learners worldwide with intelligent tools that adapt to their unique learning style, making knowledge acquisition
-                faster, more efficient, and more enjoyable than ever before.
+                {t('about.mission.desc')}
               </Typography>
             </Card>
           </Grid>
@@ -128,13 +131,12 @@ const About = () => {
                 }
               }}
             >
-              <VisibilityRounded sx={{ fontSize: 48, color: 'success.500', mb: 2 }} />
+              <VisibilityRounded sx={{ fontSize: 48, color: 'success.plainColor', mb: 2 }} />
               <Typography level='h3' fontWeight={700} mb={2}>
-                Our Vision
+                {t('about.vision.title')}
               </Typography>
               <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-                A world where every person has access to personalized, AI-powered learning experiences that unlock their full potential. We
-                envision education that adapts to you, not the other way around.
+                {t('about.vision.desc')}
               </Typography>
             </Card>
           </Grid>
@@ -143,10 +145,10 @@ const About = () => {
         {/* Core Values */}
         <Box sx={{ mb: 12 }}>
           <Typography level='h2' textAlign='center' fontWeight={700} sx={{ mb: 2, fontSize: { xs: '2rem', md: '2.5rem' } }}>
-            Our Core Values
+            {t('about.values.title')}
           </Typography>
           <Typography level='body-lg' textAlign='center' sx={{ color: 'text.secondary', mb: 6, maxWidth: 600, mx: 'auto' }}>
-            The principles that guide everything we do
+            {t('about.values.subtitle')}
           </Typography>
 
           <Grid container spacing={3}>
@@ -204,12 +206,12 @@ const About = () => {
               p: 6
             }}
           >
-            <FavoriteBorder sx={{ fontSize: 60, color: 'primary.500', mb: 2 }} />
+            <FavoriteBorder sx={{ fontSize: 60, color: 'primary.solidBg', mb: 2 }} />
             <Typography level='h3' fontWeight={700} mb={2}>
-              Ready to Get Started?
+              {t('about.cta.title')}
             </Typography>
             <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 600, mx: 'auto', mb: 4 }}>
-              Start your learning journey with Nowry today. Create your free account now!
+              {t('about.cta.subtitle')}
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'center' }}>
               <Button
@@ -224,10 +226,10 @@ const About = () => {
                   }
                 }}
               >
-                Get Started Free
+                {t('about.cta.primary')}
               </Button>
               <Button component={Link} to='/contact' size='lg' variant='outlined' color='neutral'>
-                Contact Us
+                {t('about.cta.secondary')}
               </Button>
             </Stack>
           </Card>
