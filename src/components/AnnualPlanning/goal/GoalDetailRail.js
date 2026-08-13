@@ -1,23 +1,17 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { Box, Button } from '@mui/joy'
-import { Add as AddIcon, Tune as TuneIcon } from '@mui/icons-material'
-import { focusRing } from './goalStyles'
+import { Tune as TuneIcon } from '@mui/icons-material'
+
+import FormDisclosureRail from '../../Common/Form/FormDisclosureRail'
 
 /**
- * GoalDetailRail — the progressive-disclosure mechanism for the goal form.
+ * GoalDetailRail — the goal form's chip labels and icons, over the shared rail.
  *
- * A single wrapping row of named chips under the title. Each states its own
- * payload, reveals only its own group, and removes itself on use, so a user who
- * fills everything in ends with zero disclosure chrome on screen.
- *
- * Chosen over an accordion deliberately: ADR-003 removed accordions from the
- * goal card for gatewaying content behind unlabelled chevrons, and an accordion
- * header is permanent chrome whether or not it is ever opened. A chip reading
- * "Add an image" cannot promise hidden content and fail to deliver it — there
- * is nothing behind it, it is a creation offer.
- *
- * Pure and stateless: the parent owns the revealed set.
+ * `FormDisclosureRail` is a parameterization of what this file used to be: the
+ * label map and the icon ternary were the only goal-specific things in it, and
+ * both are props now. Keeping this adapter means the goal form still names its
+ * own groups while there is exactly one rail implementation in the app — two
+ * would drift on the first fix, which is the failure mode the form system
+ * exists to prevent (UX-CONTRACT §7.1).
  */
 const CHIP_LABELS = {
   milestones: 'annualPlanning.goal.addMilestones',
@@ -29,34 +23,16 @@ const CHIP_LABELS = {
   timeframe: 'annualPlanning.goal.changeTimeframe'
 }
 
-const GoalDetailRail = ({ available = [], onReveal }) => {
-  const { t } = useTranslation()
+const CHIP_ICONS = { timeframe: TuneIcon }
 
-  // No empty container and no residual margin once everything is revealed.
-  if (available.length === 0) return null
-
-  return (
-    <Box role='group' aria-label={t('annualPlanning.goal.detailRailAria')} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-      {available.map((group) => (
-        <Button
-          key={group}
-          size='sm'
-          variant='soft'
-          color='neutral'
-          onClick={() => onReveal(group)}
-          startDecorator={group === 'timeframe' ? <TuneIcon sx={{ fontSize: 14 }} /> : <AddIcon sx={{ fontSize: 14 }} />}
-          sx={{
-            fontWeight: 500,
-            // The visible label is the accessible name; no redundant aria-label.
-            minHeight: { xs: 44, sm: 32 },
-            ...focusRing
-          }}
-        >
-          {t(CHIP_LABELS[group])}
-        </Button>
-      ))}
-    </Box>
-  )
-}
+const GoalDetailRail = ({ available = [], onReveal }) => (
+  <FormDisclosureRail
+    available={available}
+    labels={CHIP_LABELS}
+    icons={CHIP_ICONS}
+    onReveal={onReveal}
+    ariaLabelKey='annualPlanning.goal.detailRailAria'
+  />
+)
 
 export default GoalDetailRail
