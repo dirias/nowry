@@ -239,7 +239,16 @@ describe('relocated helpers', () => {
   it('describeApiError flattens both FastAPI detail shapes', () => {
     expect(describeApiError({ response: { data: { detail: 'plain' } } })).toBe('plain')
     expect(
-      describeApiError({ response: { data: { detail: [{ loc: ['body', 'a'], msg: 'x' }, { loc: ['body', 'b'], msg: 'y' }] } } })
+      describeApiError({
+        response: {
+          data: {
+            detail: [
+              { loc: ['body', 'a'], msg: 'x' },
+              { loc: ['body', 'b'], msg: 'y' }
+            ]
+          }
+        }
+      })
     ).toBe('a: x · b: y')
     expect(describeApiError({ message: 'Network Error' })).toBe('Network Error')
   })

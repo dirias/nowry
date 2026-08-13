@@ -971,7 +971,8 @@
       "deleteConfirm": {
         "title": "Ziel löschen",
         "description": "Dieses Ziel und alle seine Meilensteine werden dauerhaft entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
-      }
+      },
+      "saveError": "Dieses Ziel konnte nicht gespeichert werden."
     },
     "activity": {
       "title": "Aktivitäten & Gewohnheiten",

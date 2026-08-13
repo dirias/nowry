@@ -993,7 +993,8 @@
       "deleteConfirm": {
         "title": "Supprimer l’objectif",
         "description": "Cet objectif et tous ses jalons seront définitivement supprimés. Cette action est irréversible."
-      }
+      },
+      "saveError": "Impossible d'enregistrer cet objectif."
     },
     "activity": {
       "title": "Activités & Habitudes",

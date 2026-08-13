@@ -1404,7 +1404,8 @@
       "timeframeQ1": "T1 (ene – mar)",
       "timeframeQ2": "T2 (abr – jun)",
       "timeframeQ3": "T3 (jul – sep)",
-      "timeframeQ4": "T4 (oct – dic)"
+      "timeframeQ4": "T4 (oct – dic)",
+      "saveError": "No se pudo guardar este objetivo."
     },
     "activity": {
       "title": "Actividades y Hábitos",

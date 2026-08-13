@@ -29,10 +29,7 @@ const open = (props = {}) =>
 // Joy's Modal runs a recurring interval, so runAllTimers never terminates.
 // Advancing past the longest deferred effect (the 100ms scroll) is enough.
 const runTimers = () => act(() => void jest.advanceTimersByTime(250))
-const chipNames = () =>
-  screen
-    .getByRole('group', { name: 'annualPlanning.goal.detailRailAria' })
-    .querySelectorAll('button')
+const chipNames = () => screen.getByRole('group', { name: 'annualPlanning.goal.detailRailAria' }).querySelectorAll('button')
 const textboxes = () => screen.queryAllByRole('textbox')
 
 beforeEach(() => {
@@ -192,9 +189,7 @@ describe('save', () => {
   it('creates a goal from a title alone — two interactions', async () => {
     const onSuccess = jest.fn()
     const onClose = jest.fn()
-    render(
-      <GoalDialog open onClose={onClose} focusAreaId='area-1' onSuccess={onSuccess} goal={QUARTERLY_CONTEXT} />
-    )
+    render(<GoalDialog open onClose={onClose} focusAreaId='area-1' onSuccess={onSuccess} goal={QUARTERLY_CONTEXT} />)
 
     fireEvent.change(screen.getByPlaceholderText('annualPlanning.goal.titlePlaceholder'), {
       target: { value: 'Increase muscle mass' }

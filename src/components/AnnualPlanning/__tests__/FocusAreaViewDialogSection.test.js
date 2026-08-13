@@ -41,16 +41,19 @@ jest.mock('../GoalDialog', () => (props) => {
 
 // GoalCard is replaced by the two ladder affordances under test, so the test
 // drives the same callbacks the real card invokes.
-jest.mock('../GoalCard', () => ({ goal, onAddMilestone, onEdit }) => (
-  <div>
-    <button type='button' onClick={() => onAddMilestone(goal)}>
-      add-milestone-{goal._id}
-    </button>
-    <button type='button' onClick={() => onEdit(goal)}>
-      edit-{goal._id}
-    </button>
-  </div>
-))
+jest.mock('../GoalCard', () => {
+  const MockGoalCard = ({ goal, onAddMilestone, onEdit }) => (
+    <div>
+      <button type='button' onClick={() => onAddMilestone(goal)}>
+        add-milestone-{goal._id}
+      </button>
+      <button type='button' onClick={() => onEdit(goal)}>
+        edit-{goal._id}
+      </button>
+    </div>
+  )
+  return MockGoalCard
+})
 
 jest.mock('../GoalRow', () => () => null)
 jest.mock('../PriorityDialog', () => () => null)
