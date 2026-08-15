@@ -39,15 +39,7 @@ import { optionBase, selectedOption, unselectedOption, blockedOption, visuallyHi
  */
 const EMPTY = []
 
-const TopicSelector = ({
-  value = EMPTY,
-  onChange,
-  maxTopics = MAX_TOPICS,
-  disabled = false,
-  label,
-  hint,
-  onLimitReached
-}) => {
+const TopicSelector = ({ value = EMPTY, onChange, maxTopics = MAX_TOPICS, disabled = false, label, hint, onLimitReached }) => {
   const { t } = useTranslation()
   const baseId = useId()
   const labelId = `${baseId}-label`
@@ -86,12 +78,7 @@ const TopicSelector = ({
         {hint ?? t('taxonomy.selector.topics.hint', { max: maxTopics })}
       </Typography>
 
-      <Box
-        role='group'
-        aria-labelledby={labelId}
-        aria-describedby={hintId}
-        sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}
-      >
+      <Box role='group' aria-labelledby={labelId} aria-describedby={hintId} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
         {TOPICS.map((topic) => {
           const position = selected.indexOf(topic.value) + 1
           const isSelected = position > 0
@@ -110,9 +97,11 @@ const TopicSelector = ({
               aria-describedby={isBlocked ? limitId : undefined}
               onClick={() => toggle(topic.value)}
               startDecorator={
-                isSelected
-                  ? <CheckCircleRoundedIcon sx={{ fontSize: 18, color: 'text.primary' }} />
-                  : <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 18, color: 'text.tertiary' }} />
+                isSelected ? (
+                  <CheckCircleRoundedIcon sx={{ fontSize: 18, color: 'text.primary' }} />
+                ) : (
+                  <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 18, color: 'text.tertiary' }} />
+                )
               }
               endDecorator={isSelected ? <OrdinalBadge position={position} isPrimary={isPrimary} /> : null}
               sx={(theme) => ({
@@ -124,9 +113,9 @@ const TopicSelector = ({
               <Box component='span' sx={visuallyHidden}>
                 {isSelected
                   ? t(isPrimary ? 'taxonomy.selector.topics.srPrimary' : 'taxonomy.selector.topics.srSelected', {
-                    position,
-                    total: selected.length
-                  })
+                      position,
+                      total: selected.length
+                    })
                   : isBlocked
                     ? t('taxonomy.selector.topics.srBlocked', { max: maxTopics })
                     : ''}
@@ -192,10 +181,7 @@ const OrdinalBadge = ({ position, isPrimary }) => (
       bgcolor: isPrimary ? 'text.primary' : 'transparent'
     }}
   >
-    <Typography
-      level='body-xs'
-      sx={{ fontWeight: 600, lineHeight: 1, color: isPrimary ? 'background.surface' : 'text.primary' }}
-    >
+    <Typography level='body-xs' sx={{ fontWeight: 600, lineHeight: 1, color: isPrimary ? 'background.surface' : 'text.primary' }}>
       {position}
     </Typography>
   </Box>

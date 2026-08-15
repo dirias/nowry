@@ -31,14 +31,7 @@ import { optionBase, selectedOption, unselectedOption, overlayFocusRing } from '
  * @param {string}                 [props.label]      Group label; defaults to the shared localized string.
  * @param {string}                 [props.hint]       Guidance under the label; defaults to the shared localized string.
  */
-const StudyGoalSelector = ({
-  value = null,
-  onChange,
-  disabled = false,
-  name = 'study-goal',
-  label,
-  hint
-}) => {
+const StudyGoalSelector = ({ value = null, onChange, disabled = false, name = 'study-goal', label, hint }) => {
   const { t } = useTranslation()
   const baseId = useId()
   const labelId = `${baseId}-label`
