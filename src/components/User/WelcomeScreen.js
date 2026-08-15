@@ -162,7 +162,7 @@ const FieldSaveState = ({ id, state, onRetry }) => {
     <Box id={id} role='status' aria-live='polite' sx={{ minWidth: 0 }}>
       {state.isSaving && (
         <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          {t('onboarding.welcome.save.saving')}
+          {t('onboarding.save.saving')}
         </Typography>
       )}
 
@@ -171,7 +171,7 @@ const FieldSaveState = ({ id, state, onRetry }) => {
           <ErrorOutlineRounded sx={{ fontSize: 16, mt: '2px', color: 'danger.plainColor', flexShrink: 0 }} />
           <Box sx={{ minWidth: 0 }}>
             <Typography level='body-xs' sx={{ color: 'danger.plainColor', fontWeight: 600 }}>
-              {t('onboarding.welcome.save.unsaved')}
+              {t('onboarding.save.unsaved')}
             </Typography>
             <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
               {t(failureKey(state.error))}
@@ -179,7 +179,7 @@ const FieldSaveState = ({ id, state, onRetry }) => {
           </Box>
           {state.canRetry && (
             <Button size='sm' variant='plain' color='danger' onClick={onRetry} sx={{ ...touchTarget, ...focusRing, flexShrink: 0 }}>
-              {t('onboarding.welcome.save.retry')}
+              {t('onboarding.save.retry')}
             </Button>
           )}
         </Stack>
@@ -189,7 +189,7 @@ const FieldSaveState = ({ id, state, onRetry }) => {
         <Stack direction='row' spacing={0.5} alignItems='center'>
           <CheckCircleRounded sx={{ fontSize: 16, color: 'success.plainColor', flexShrink: 0 }} />
           <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-            {t('onboarding.welcome.save.saved')}
+            {t('onboarding.save.saved')}
           </Typography>
         </Stack>
       )}
@@ -337,7 +337,7 @@ const WelcomeScreen = ({ shell, journey, preferences, onNext, onExit }) => {
     <FormErrorBanner
       titleKey='onboarding.welcome.postponeError.title'
       detailText={`${t('onboarding.welcome.postponeError.body')} ${t(failureKey(postponeError))}`}
-      action={postponeError.recoverable ? { labelKey: 'onboarding.welcome.save.retry', onClick: handlePostpone } : null}
+      action={postponeError.recoverable ? { labelKey: 'onboarding.save.retry', onClick: handlePostpone } : null}
     />
   ) : null
 
@@ -443,7 +443,7 @@ const WelcomeScreen = ({ shell, journey, preferences, onNext, onExit }) => {
               {t('onboarding.welcome.loadError')}
             </Typography>
             <Button size='sm' variant='plain' color='neutral' onClick={() => preferences.reload()} sx={{ ...touchTarget, ...focusRing }}>
-              {t('onboarding.welcome.save.retry')}
+              {t('onboarding.save.retry')}
             </Button>
           </Stack>
         )}

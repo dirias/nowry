@@ -459,17 +459,17 @@
           "earthBrown": "Earth brown"
         }
       },
-      "save": {
-        "saving": "Saving…",
-        "saved": "Saved",
-        "unsaved": "Not saved",
-        "retry": "Retry"
-      },
       "postponeError": {
         "title": "We couldn't save that",
         "body": "You're still here, and nothing was recorded."
       },
       "loadError": "We couldn't load your saved settings."
+    },
+    "save": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "unsaved": "Not saved",
+      "retry": "Retry"
     },
     "personalization": {
       "title": "What do you want to learn?",
@@ -592,7 +592,8 @@
       "subtitle": "We'll curate your home feed around these.",
       "groupLabel": "Interest selection",
       "selected": "Selected: {{count}} topic",
-      "selected_plural": "Selected: {{count}} topics"
+      "selected_one": "Selected: {{count}} topic",
+      "selected_other": "Selected: {{count}} topics"
     },
     "learning": {
       "title": "Learning Style & Goals",
@@ -913,15 +914,17 @@
       "cardsDue": "cards due",
       "readyToReview": "Ready to review",
       "reviewCount": "Review {{count}} card",
-      "reviewCount_plural": "Review {{count}} cards",
+      "reviewCount_one": "Review {{count}} card",
+      "reviewCount_other": "Review {{count}} cards",
       "reviewToday": "📚 Review Today",
       "cardsPending": "{{count}} card pending",
       "cardsPending_other": "{{count}} cards pending",
-      "cardsPending_plural": "{{count}} cards pending",
+      "cardsPending_one": "{{count}} card pending",
       "start": "Let's Go!",
       "study": "Study",
       "moreDecks": "And {{count}} more deck with pending cards",
-      "moreDecks_other": "And {{count}} more decks with pending cards"
+      "moreDecks_other": "And {{count}} more decks with pending cards",
+      "moreDecks_one": "And {{count}} more deck with pending cards"
     },
     "annualGoals": {
       "title": "Annual Goals",
@@ -978,6 +981,7 @@
     "noActivity": "No activity yet. Start studying to see your progress!",
     "streak": "🔥 Current streak: {{count}} day",
     "streak_other": "🔥 Current streak: {{count}} days",
+    "streak_one": "🔥 Current streak: {{count}} day",
     "types": {
       "quiz": "Quiz",
       "visual": "Visual",
@@ -1134,7 +1138,9 @@
       "notesPlaceholder": "Add notes...",
       "summaryPlaceholder": "Add summary..."
     },
-    "import": "Import",
+    "import": {
+      "titlePlaceholder": "Enter the book title..."
+    },
     "title": "Books",
     "library": "Deck Library",
     "subtitle": "Your personal collection",
@@ -1161,7 +1167,8 @@
     "successCreate": "Book created successfully",
     "successDelete": "Book deleted successfully",
     "successImport": "{{count}} book imported successfully! {{pages}} total pages.",
-    "successImport_plural": "{{count}} books imported successfully! {{pages}} total pages.",
+    "successImport_one": "{{count}} book imported successfully! {{pages}} total pages.",
+    "successImport_other": "{{count}} books imported successfully! {{pages}} total pages.",
     "errorImport": "Error processing file. Please try again.",
     "tableOfContents": "Table of Contents",
     "noHeadings": "No headings yet",
@@ -1279,7 +1286,8 @@
     "name": "Name",
     "cardCount": "Card Count",
     "deckCount": "{{count}} deck",
-    "deckCount_plural": "{{count}} decks",
+    "deckCount_one": "{{count}} deck",
+    "deckCount_other": "{{count}} decks",
     "loading": "Loading...",
     "confirmDeleteDeck": "Are you sure you want to delete \"{{name}}\"?",
     "confirmDeleteCard": "Are you sure you want to delete this card?",
@@ -1326,7 +1334,8 @@
         "visual": "Visual"
       },
       "cardCount": "{{count}} card",
-      "cardCount_plural": "{{count}} cards",
+      "cardCount_one": "{{count}} card",
+      "cardCount_other": "{{count}} cards",
       "noContent": "No content",
       "untitled": "Untitled card",
       "reviewNew": "New",
@@ -1335,7 +1344,8 @@
         "dueNow": "Due now!",
         "lessThanHour": "In less than 1 hour",
         "inHours": "In {{count}} hour",
-        "inHours_plural": "In {{count}} hours",
+        "inHours_one": "In {{count}} hour",
+        "inHours_other": "In {{count}} hours",
         "tomorrow": "Tomorrow",
         "inDays": "In {{count}} days"
       },
@@ -1411,7 +1421,8 @@
       },
       "card": "Card {{current}} of {{total}}",
       "syncing": "Syncing {{count}} review...",
-      "syncing_plural": "Syncing {{count}} reviews...",
+      "syncing_one": "Syncing {{count}} review...",
+      "syncing_other": "Syncing {{count}} reviews...",
       "labels": {
         "question": "Question",
         "answer": "Answer",
@@ -1435,7 +1446,8 @@
       "description": "Are you sure you want to delete \"{{name}}\"?",
       "confirm": "Delete Deck",
       "consequence1": "All {{count}} flashcards in this deck will be deleted",
-      "consequence1_plural": "All {{count}} flashcards in this deck will be deleted",
+      "consequence1_one": "All {{count}} flashcards in this deck will be deleted",
+      "consequence1_other": "All {{count}} flashcards in this deck will be deleted",
       "consequence2": "If published, it will be unpublished immediately"
     },
     "generatedCards": {
@@ -1784,12 +1796,14 @@
       "generateImage": "Generate with AI",
       "uploadImage": "Upload Image",
       "daysLeft": "{{count}} day left",
-      "daysLeft_plural": "{{count}} days left",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
       "overdue": "Overdue",
       "noDeadline": "No target date",
       "smartHelper": "Make it SMART: Specific, Measurable, Achievable, Relevant, Time-bound",
       "activitiesCount": "{{count}} activity",
-      "activitiesCount_plural": "{{count}} activities",
+      "activitiesCount_one": "{{count}} activity",
+      "activitiesCount_other": "{{count}} activities",
       "viewBoard": "View as Visual Board",
       "editSubtitle": "Update your goal details",
       "timeframe": "Timeframe",
@@ -1987,6 +2001,7 @@
       "quarterEndsToday": "Quarter {{quarter}} ends today",
       "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
       "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
+      "quarterEndingIn_one": "Quarter {{quarter}} ends in {{count}} day",
       "routineCompletion": "items done",
       "allYear": "All year"
     },
@@ -2005,13 +2020,13 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
+      "activeDays_one": "Active {{count}} day this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
+      "migratedCount_one": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
     },

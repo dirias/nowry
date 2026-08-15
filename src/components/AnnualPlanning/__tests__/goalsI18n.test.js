@@ -15,6 +15,22 @@ const translations = LOCALES.reduce((acc, locale) => {
 
 const get = (tree, dotted) => dotted.split('.').reduce((node, key) => (node == null ? node : node[key]), tree)
 
+/**
+ * A locale only owes the plural forms its own CLDR rules can select. Japanese
+ * has a single `other` category, so `_one` is not a gap there — it is a key
+ * i18next can never reach. ONB-015 dropped those from the `ja` bundle; the rule
+ * itself lives in `src/locales/__tests__/localeCoverage.test.js`.
+ */
+const PLURAL_CATEGORIES = LOCALES.reduce((acc, locale) => {
+  acc[locale] = new Set(new Intl.PluralRules(locale).resolvedOptions().pluralCategories)
+  return acc
+}, {})
+
+const owes = (locale, key) => {
+  const suffix = /_(zero|one|two|few|many|other)$/.exec(key)
+  return !suffix || PLURAL_CATEGORIES[locale].has(suffix[1])
+}
+
 /** Every key the redesigned goal surfaces resolve at runtime. */
 const REQUIRED_KEYS = [
   // §9.1 — new
@@ -138,12 +154,12 @@ const RETIRED_KEYS = [
 
 describe.each(LOCALES)('%s locale', (locale) => {
   it('resolves every key the goal surfaces use', () => {
-    const missing = REQUIRED_KEYS.filter((key) => get(translations[locale], key) === undefined)
+    const missing = REQUIRED_KEYS.filter((key) => owes(locale, key) && get(translations[locale], key) === undefined)
     expect(missing).toEqual([])
   })
 
   it('has no empty string standing in for a translation', () => {
-    const blank = REQUIRED_KEYS.filter((key) => String(get(translations[locale], key) ?? '').trim() === '')
+    const blank = REQUIRED_KEYS.filter((key) => owes(locale, key) && String(get(translations[locale], key) ?? '').trim() === '')
     expect(blank).toEqual([])
   })
 
@@ -172,10 +188,12 @@ describe.each(LOCALES)('%s locale', (locale) => {
       'annualPlanning.goal.milestoneNumber': ['{{index}}'],
       'annualPlanning.goal.scopeQuarterly': ['{{quarter}}']
     }
-    Object.entries(placeholders).forEach(([key, tokens]) => {
-      const value = get(translations[locale], key)
-      tokens.forEach((token) => expect(`${locale} ${key}: ${value}`).toContain(token))
-    })
+    Object.entries(placeholders)
+      .filter(([key]) => owes(locale, key))
+      .forEach(([key, tokens]) => {
+        const value = get(translations[locale], key)
+        tokens.forEach((token) => expect(`${locale} ${key}: ${value}`).toContain(token))
+      })
   })
 })
 

@@ -43,7 +43,8 @@ const setup = (props = {}) => {
 }
 
 const group = () => screen.getByRole('group', { name: en.taxonomy.selector.topics.label })
-const optionFor = (value) => within(group()).getByRole('button', { name: new RegExp(`^${labelOf(value).replace(/[.*+?^${}()|[\]\\&]/g, '\\$&')}`) })
+const optionFor = (value) =>
+  within(group()).getByRole('button', { name: new RegExp(`^${labelOf(value).replace(/[.*+?^${}()|[\]\\&]/g, '\\$&')}`) })
 
 describe('TopicSelector — the taxonomy it renders', () => {
   it('renders exactly the 14 canonical topics, in canonical order, as toggle buttons', () => {
@@ -177,9 +178,7 @@ describe('TopicSelector — accessible naming', () => {
     setup()
 
     expect(group()).toHaveAccessibleName(en.taxonomy.selector.topics.label)
-    expect(group()).toHaveAccessibleDescription(
-      `Pick 1 to ${MAX_TOPICS} topics. The first one you pick becomes your primary topic.`
-    )
+    expect(group()).toHaveAccessibleDescription(`Pick 1 to ${MAX_TOPICS} topics. The first one you pick becomes your primary topic.`)
   })
 
   it('lets a caller override the label without touching the taxonomy', () => {

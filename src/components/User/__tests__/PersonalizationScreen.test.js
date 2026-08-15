@@ -306,7 +306,7 @@ describe('what gates First Deck (FR-037, FR-040)', () => {
     expect(screen.getByRole('radio', { name: taxonomy.goals.career })).toBeChecked()
 
     journey.recordPoint.mockClear()
-    fireEvent.click(screen.getByRole('button', { name: en.onboarding.welcome.save.retry }))
+    fireEvent.click(screen.getByRole('button', { name: en.onboarding.save.retry }))
     await waitFor(() => expect(journey.recordPoint).toHaveBeenCalledWith('first_deck'))
   })
 
@@ -317,7 +317,7 @@ describe('what gates First Deck (FR-037, FR-040)', () => {
     preferences = buildPreferences({ interests: ['technology'], studyGoal: 'career' })
     renderScreen()
 
-    expect(screen.getByRole('alert')).not.toHaveTextContent(en.onboarding.welcome.save.retry)
+    expect(screen.getByRole('alert')).not.toHaveTextContent(en.onboarding.save.retry)
   })
 
   it('does not claim the route’s own personalization point as its failure', () => {
@@ -343,11 +343,11 @@ describe('a failed preference save (FR-039, FR-049)', () => {
     })
     renderScreen()
 
-    expect(screen.getByText(en.onboarding.welcome.save.unsaved)).toBeInTheDocument()
+    expect(screen.getByText(en.onboarding.save.unsaved)).toBeInTheDocument()
     expect(screen.getByText(en.onboarding.failure.network)).toBeInTheDocument()
-    expect(screen.queryByText(en.onboarding.welcome.save.saved)).toBeNull()
+    expect(screen.queryByText(en.onboarding.save.saved)).toBeNull()
 
-    fireEvent.click(screen.getAllByRole('button', { name: en.onboarding.welcome.save.retry })[0])
+    fireEvent.click(screen.getAllByRole('button', { name: en.onboarding.save.retry })[0])
     expect(preferences.retryField).toHaveBeenCalledWith('interests')
   })
 
@@ -377,7 +377,7 @@ describe('a failed preference save (FR-039, FR-049)', () => {
     expect(alert).toHaveTextContent(copy.saveError.title)
     expect(topicChip(taxonomy.topics.technology)).toHaveAttribute('aria-pressed', 'true')
 
-    fireEvent.click(screen.getAllByRole('button', { name: en.onboarding.welcome.save.retry }).pop())
+    fireEvent.click(screen.getAllByRole('button', { name: en.onboarding.save.retry }).pop())
     expect(preferences.retryUnsaved).toHaveBeenCalled()
     expect(journey.recordPoint).not.toHaveBeenCalled()
 

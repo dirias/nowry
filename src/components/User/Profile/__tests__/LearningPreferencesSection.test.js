@@ -275,9 +275,9 @@ describe('a failed save is never presented as saved', () => {
   it('labels the field unsaved, names the reason, and keeps the selection visible', () => {
     setup({ interests: ['science', 'art'], fields: failed })
 
-    expect(screen.getByText(en.onboarding.welcome.save.unsaved)).toBeInTheDocument()
+    expect(screen.getByText(en.onboarding.save.unsaved)).toBeInTheDocument()
     expect(screen.getByText(en.onboarding.failure.network)).toBeInTheDocument()
-    expect(screen.queryByText(en.onboarding.welcome.save.saved)).toBeNull()
+    expect(screen.queryByText(en.onboarding.save.saved)).toBeNull()
     expect(topicOption('science')).toHaveAttribute('aria-pressed', 'true')
   })
 
@@ -288,7 +288,7 @@ describe('a failed save is never presented as saved', () => {
       confirmed: { interests: ['music'], study_goal: null, primary_topic: 'music' }
     })
 
-    fireEvent.click(screen.getByRole('button', { name: en.onboarding.welcome.save.retry }))
+    fireEvent.click(screen.getByRole('button', { name: en.onboarding.save.retry }))
     expect(retryField).toHaveBeenCalledWith('interests')
 
     fireEvent.click(screen.getByRole('button', { name: copy.discardTopics }))
@@ -299,7 +299,7 @@ describe('a failed save is never presented as saved', () => {
     setup({ interests: ['science'], fields: { interests: idleField({ phase: 'pending', isSaving: true, isConfirmed: false }) } })
 
     expect(screen.queryByRole('button', { name: copy.discardTopics })).toBeNull()
-    expect(screen.getByText(en.onboarding.welcome.save.saving)).toBeInTheDocument()
+    expect(screen.getByText(en.onboarding.save.saving)).toBeInTheDocument()
   })
 })
 

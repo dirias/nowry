@@ -16,7 +16,7 @@
     "language": "言語",
     "studyBuddy": "学習パートナー",
     "moreActions": "その他の操作",
-    "retry": "Retry"
+    "retry": "再試行"
   },
   "news": {
     "title": "最新ニュース",
@@ -332,17 +332,17 @@
           "earthBrown": "アースブラウン"
         }
       },
-      "save": {
-        "saving": "保存しています…",
-        "saved": "保存しました",
-        "unsaved": "未保存",
-        "retry": "再試行"
-      },
       "postponeError": {
         "title": "保存できませんでした",
         "body": "この画面のままです。何も記録されていません。"
       },
       "loadError": "保存された設定を読み込めませんでした。"
+    },
+    "save": {
+      "saving": "保存しています…",
+      "saved": "保存しました",
+      "unsaved": "未保存",
+      "retry": "再試行"
     },
     "personalization": {
       "title": "何を学びたいですか？",
@@ -382,7 +382,7 @@
       },
       "card": {
         "outcomeLabel": "学べること",
-        "publisher": "提供： {{publisher}}",
+        "publisher": "提供：{{publisher}}",
         "count_other": "カード{{count}}枚",
         "add": "ライブラリに追加",
         "retry": "もう一度試す",
@@ -458,11 +458,11 @@
       "customLabel": "カスタムカラー"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
+      "title": "どんなトピックに興味がありますか？",
+      "subtitle": "選んだトピックに合わせてホームを整えます。",
+      "groupLabel": "興味の選択",
       "selected": "選択中: {{count}}トピック",
-      "selected_plural": "選択中: {{count}}トピック"
+      "selected_other": "選択中: {{count}}トピック"
     },
     "learning": {
       "title": "学習スタイルと目標",
@@ -476,30 +476,30 @@
     "back": "戻る",
     "finish": "セットアップ完了",
     "skip": "今はスキップ",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
+    "progressLabel": "初期設定の進捗",
+    "defer": "後で設定から行う",
     "identity": {
       "title": "言語を選んでください。",
       "subtitle": "お好みの言語を選択してください。"
     },
     "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
+      "title": "あなた好みに。",
+      "subtitle": "ライトかダークか。毎日目にする色を選びましょう。",
+      "colorLabel": "{{name}}を選択",
+      "colorGroupLabel": "アクセントカラーの選択"
     },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this."
+      "title": "何を学びたいですか？",
+      "subtitle": "トピックと目標を1つずつ選んでください。あとからいつでも変更できます。"
     },
     "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
+      "title": "準備完了です、{{name}}さん。",
+      "titleNoName": "準備完了です。",
+      "subtitle": "あなた専用の学習スペースが整いました。",
+      "cta": "Nowryを開く"
     },
     "error": {
-      "saveFailed": "Something went wrong. Please try again."
+      "saveFailed": "問題が発生しました。もう一度お試しください。"
     },
     "failure": {
       "network": "オフラインのようです。接続を確認してもう一度お試しください。",
@@ -509,20 +509,20 @@
   },
   "taxonomy": {
     "topics": {
-      "artificial_intelligence": "AI & Machine Learning",
-      "technology": "Technology",
-      "science": "Science",
-      "mathematics": "Mathematics",
-      "history": "History",
-      "languages": "Languages",
-      "literature": "Literature",
-      "art": "Art & Creativity",
-      "music": "Music",
-      "business": "Business",
-      "health": "Health & Fitness",
-      "philosophy": "Philosophy",
-      "design": "Design",
-      "psychology": "Psychology"
+      "artificial_intelligence": "AI・機械学習",
+      "technology": "テクノロジー",
+      "science": "科学",
+      "mathematics": "数学",
+      "history": "歴史",
+      "languages": "語学",
+      "literature": "文学",
+      "art": "アート・創造性",
+      "music": "音楽",
+      "business": "ビジネス",
+      "health": "健康・フィットネス",
+      "philosophy": "哲学",
+      "design": "デザイン",
+      "psychology": "心理学"
     },
     "goals": {
       "general": "一般教養",
@@ -580,7 +580,6 @@
     "emptySubtitle": "新しいブックを作成するか、ドキュメントをインポートして始めましょう",
     "noResults": "\"{{term}}\" に一致するブックは見つかりませんでした",
     "noMatches": "\"{{query}}\" に一致するブックはありません",
-    "addTooltip": "\"{{title}}\" を追加",
     "untitled": "無題の本",
     "createTitle": "新しい本",
     "createAction": "作成して書く",
@@ -608,7 +607,6 @@
     "continueToLibrary": "ライブラリに戻る",
     "clearFilters": "フィルターをクリア",
     "errorFetch": "本の読み込みエラー",
-    "pageCount_one": "{{count}} ページ",
     "pageCount_other": "{{count}} ページ",
     "coverColors": {
       "blue": "青",
@@ -628,6 +626,9 @@
       "contentPlaceholder": "書き始めましょう…",
       "notesPlaceholder": "メモを追加…",
       "summaryPlaceholder": "概要を追加…"
+    },
+    "import": {
+      "titlePlaceholder": "書籍のタイトルを入力..."
     }
   },
   "sidemenu": {
@@ -699,9 +700,7 @@
       "loading": "トピックと学習目標を読み込んでいます…",
       "loadError": "保存されたトピックと学習目標を読み込めませんでした。",
       "range": {
-        "tooFew_one": "トピックは{{count}}件以上残してください。変更は保存されていません。",
         "tooFew_other": "トピックは{{count}}件以上残してください。変更は保存されていません。",
-        "tooMany_one": "トピックは最大{{count}}件です。追加する前に1つ削除してください。",
         "tooMany_other": "トピックは最大{{count}}件です。追加する前に1つ削除してください。"
       },
       "order": {
@@ -833,11 +832,10 @@
       "cardsDue": "枚のカードが復習待ち",
       "readyToReview": "復習の準備完了",
       "reviewCount": "{{count}}枚を復習",
-      "reviewCount_plural": "{{count}}枚を復習",
+      "reviewCount_other": "{{count}}枚を復習",
       "reviewToday": "📚 今日の復習",
       "cardsPending": "{{count}}枚のカード保留中",
       "cardsPending_other": "{{count}}枚のカード保留中",
-      "cardsPending_plural": "{{count}}枚のカード保留中",
       "start": "始める！",
       "study": "学習する",
       "moreDecks": "他 {{count}} デッキに保留中のカードがあります",
@@ -1118,12 +1116,12 @@
       "generateImage": "AIで生成",
       "uploadImage": "画像をアップロード",
       "daysLeft": "残り{{count}}日",
-      "daysLeft_plural": "残り{{count}}日",
+      "daysLeft_other": "残り{{count}}日",
       "overdue": "期限切れ",
       "noDeadline": "目標日なし",
       "smartHelper": "SMARTにする：具体的、測定可能、達成可能、関連性、期限付き",
       "activitiesCount": "{{count}} アクティビティ",
-      "activitiesCount_plural": "{{count}} アクティビティ",
+      "activitiesCount_other": "{{count}} アクティビティ",
       "viewBoard": "ボードとして表示",
       "editSubtitle": "目標の詳細を更新",
       "timeframe": "期間設定",
@@ -1175,9 +1173,7 @@
         "addMilestone": "マイルストーンを追加して進捗を記録",
         "toggleAria": "マイルストーン「{{title}}」を完了にする"
       },
-      "milestoneCount_one": "{{total}}件中{{completed}}件のマイルストーン",
       "milestoneCount_other": "{{total}}件中{{completed}}件のマイルストーン",
-      "daysLeftShort_one": "残り{{count}}日",
       "daysLeftShort_other": "残り{{count}}日",
       "moreActions": "「{{title}}」のその他の操作",
       "openDetail": "「{{title}}」を開く",
@@ -1298,8 +1294,7 @@
       "quarterEndingIn": "第{{quarter}}四半期はあと {{count}} 日で終了します",
       "quarterEndingIn_other": "第{{quarter}}四半期はあと {{count}} 日で終了します",
       "routineCompletion": "完了",
-      "allYear": "通年",
-      "quarterEndingIn_one": "第{{quarter}}四半期はあと {{count}} 日で終了します"
+      "allYear": "通年"
     },
     "quarterReport": {
       "report": "Report",
@@ -1316,12 +1311,10 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
@@ -1338,7 +1331,6 @@
     "header": {
       "progress": "{{percent}}% 完了",
       "goalsRatio": "{{total}} 件中 {{completed}} 件の目標",
-      "prioritiesCount_one": "{{count}} 件の優先事項",
       "prioritiesCount_other": "{{count}} 件の優先事項",
       "routineRatio": "{{total}} 件中 {{completed}} 件のルーティン",
       "renamePlan": "プランの名前を変更",
@@ -1355,9 +1347,7 @@
       "quarterEmptyTitle": "Q{{quarter}} の予定はありません",
       "quarterEmptyBody": "他の四半期に目標があります。",
       "quarterEmptyCta": "通年を表示",
-      "scopeQuarter_one": "Q{{quarter}} · {{count}} 件の目標",
       "scopeQuarter_other": "Q{{quarter}} · {{count}} 件の目標",
-      "scopeAll_one": "通年 · {{count}} 件の目標",
       "scopeAll_other": "通年 · {{count}} 件の目標",
       "loadingAria": "目標を読み込み中"
     },
@@ -1365,7 +1355,6 @@
       "emptyTitle": "最初のレポートは四半期の締めで公開されます",
       "emptyBody": "四半期を締めると、Nowry が目標・進捗・成果を振り返り用のレポートにまとめます。",
       "emptyCtaReady": "Q{{quarter}} を振り返る",
-      "emptyCountdown_one": "Q{{quarter}} はあと {{count}} 日で終了します",
       "emptyCountdown_other": "Q{{quarter}} はあと {{count}} 日で終了します",
       "historyTitle": "締めた四半期",
       "goalsAchieved": "達成した目標",
@@ -1379,7 +1368,6 @@
       "prioritiesEmptyTitle": "優先事項はまだありません",
       "prioritiesEmptyBody": "今年もっとも大切なことをいくつか挙げましょう。3〜5 個で十分です。",
       "prioritiesEmptyCta": "優先事項を追加",
-      "areaGoalCount_one": "{{count}} 件の目標",
       "areaGoalCount_other": "{{count}} 件の目標"
     }
   },
@@ -2442,7 +2430,6 @@
   "form": {
     "saveAndNext": "保存して次へ",
     "saveAndClose": "保存して閉じる",
-    "addedCount_one": "{{count}} 件追加しました",
     "addedCount_other": "{{count}} 件追加しました",
     "detailRailAria": "任意の詳細を追加",
     "saveErrorTitle": "保存できませんでした",

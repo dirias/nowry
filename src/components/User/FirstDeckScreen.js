@@ -276,7 +276,7 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
     <FormErrorBanner
       titleKey='onboarding.firstDeck.activationError.title'
       detailText={t('onboarding.firstDeck.activationError.body')}
-      action={{ labelKey: 'onboarding.welcome.save.retry', onClick: handleRetryFork }}
+      action={{ labelKey: 'onboarding.save.retry', onClick: handleRetryFork }}
     />
   ) : forkError ? (
     <FormErrorBanner
@@ -285,13 +285,13 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
       // Retry only where repeating the request is genuinely the fix. A
       // `source_not_official` deck can never activate, so offering a retry
       // would be an invitation to fail again identically.
-      action={forkError.recoverable ? { labelKey: 'onboarding.welcome.save.retry', onClick: handleRetryFork } : null}
+      action={forkError.recoverable ? { labelKey: 'onboarding.save.retry', onClick: handleRetryFork } : null}
     />
   ) : fallbackState?.phase === ACTION_PHASE.ERROR ? (
     <FormErrorBanner
       titleKey='onboarding.firstDeck.fallback.error.title'
       detailText={`${t('onboarding.firstDeck.fallback.error.body')} ${t(failureKey(fallbackState.error))}`}
-      action={fallbackState.error?.recoverable ? { labelKey: 'onboarding.welcome.save.retry', onClick: handleRequestAi } : null}
+      action={fallbackState.error?.recoverable ? { labelKey: 'onboarding.save.retry', onClick: handleRequestAi } : null}
     />
   ) : null
 

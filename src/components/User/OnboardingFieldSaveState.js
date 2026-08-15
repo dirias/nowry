@@ -27,10 +27,10 @@ import { focusRing, touchTarget } from '../Common/Form/formStyles'
  * one that gets `role='alert'`. Every state pairs an icon with text, so none of
  * them is carried by colour alone (NFR-004).
  *
- * The key path is `onboarding.welcome.save.*`, inherited from ONB-009 rather
- * than duplicated into a second namespace with identical strings. It reads
- * oddly on this screen; the rename belongs with the pass that also switches
- * `WelcomeScreen` over to this module, which was off-limits here.
+ * The key path is `onboarding.save.*`. It was `onboarding.welcome.save.*` until
+ * ONB-015: inherited from ONB-009, the screen-scoped prefix became a lie the
+ * moment Personalization, First Deck and Account Settings rendered the same four
+ * strings. One vocabulary, one namespace — renamed everywhere in a single pass.
  *
  * @param {object}   props
  * @param {string}   [props.id]      Optional id, for callers that reference it from `aria-describedby`.
@@ -46,7 +46,7 @@ const OnboardingFieldSaveState = ({ id, state, onRetry, sx }) => {
     <Box id={id} role='status' aria-live='polite' sx={{ minWidth: 0, ...sx }}>
       {state?.isSaving && (
         <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          {t('onboarding.welcome.save.saving')}
+          {t('onboarding.save.saving')}
         </Typography>
       )}
 
@@ -55,7 +55,7 @@ const OnboardingFieldSaveState = ({ id, state, onRetry, sx }) => {
           <ErrorOutlineRounded sx={{ fontSize: 16, mt: '2px', color: 'danger.plainColor', flexShrink: 0 }} />
           <Box sx={{ minWidth: 0 }}>
             <Typography level='body-xs' sx={{ color: 'danger.plainColor', fontWeight: 600 }}>
-              {t('onboarding.welcome.save.unsaved')}
+              {t('onboarding.save.unsaved')}
             </Typography>
             <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
               {t(failureKey(state?.error))}
@@ -63,7 +63,7 @@ const OnboardingFieldSaveState = ({ id, state, onRetry, sx }) => {
           </Box>
           {state?.canRetry && (
             <Button size='sm' variant='plain' color='danger' onClick={onRetry} sx={{ ...touchTarget, ...focusRing, flexShrink: 0 }}>
-              {t('onboarding.welcome.save.retry')}
+              {t('onboarding.save.retry')}
             </Button>
           )}
         </Stack>
@@ -73,7 +73,7 @@ const OnboardingFieldSaveState = ({ id, state, onRetry, sx }) => {
         <Stack direction='row' spacing={0.5} alignItems='center'>
           <CheckCircleRounded sx={{ fontSize: 16, color: 'success.plainColor', flexShrink: 0 }} />
           <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-            {t('onboarding.welcome.save.saved')}
+            {t('onboarding.save.saved')}
           </Typography>
         </Stack>
       )}

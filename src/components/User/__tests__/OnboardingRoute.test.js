@@ -474,11 +474,11 @@ describe('personalization', () => {
 
     clickTopic('Science')
     // The selection stays on screen and is honestly labelled unsaved (FR-040).
-    expect(await screen.findByText(t('onboarding.welcome.save.unsaved'))).toBeInTheDocument()
+    expect(await screen.findByText(t('onboarding.save.unsaved'))).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Science/ })).toHaveAttribute('aria-pressed', 'true')
     expect(server.preferences.interests).toEqual([])
 
-    fireEvent.click(screen.getByRole('button', { name: t('onboarding.welcome.save.retry') }))
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.save.retry') }))
     await waitFor(() => expect(server.preferences.interests).toEqual(['science']))
   })
 

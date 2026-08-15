@@ -16,7 +16,7 @@
     "language": "Langue",
     "studyBuddy": "Compagnon d'étude",
     "moreActions": "Plus d'actions",
-    "retry": "Retry"
+    "retry": "Réessayer"
   },
   "news": {
     "title": "Dernières Actualités",
@@ -354,23 +354,23 @@
           "earthBrown": "Brun terre"
         }
       },
-      "save": {
-        "saving": "Enregistrement…",
-        "saved": "Enregistré",
-        "unsaved": "Non enregistré",
-        "retry": "Réessayer"
-      },
       "postponeError": {
         "title": "Nous n'avons pas pu enregistrer",
         "body": "Vous êtes toujours ici et rien n'a été enregistré."
       },
       "loadError": "Impossible de charger vos réglages enregistrés."
     },
+    "save": {
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "unsaved": "Non enregistré",
+      "retry": "Réessayer"
+    },
     "personalization": {
       "title": "Que voulez-vous apprendre ?",
       "lead": "Choisissez jusqu'à 5 sujets et un objectif d'étude. Le premier sujet choisi est celui que Nowry utilise pour trouver votre premier deck.",
-      "continue": "Choisir Votre Premier Deck",
-      "skip": "Passer Pour L'instant",
+      "continue": "Choisir votre premier deck",
+      "skip": "Passer pour l'instant",
       "skipHint": "Rien n'est encore sélectionné. Passer vous ramène à l'accueil, et vous pourrez le configurer plus tard.",
       "validation": {
         "title": "Pas encore prêt",
@@ -408,7 +408,7 @@
         "publisher": "Publié par {{publisher}}",
         "count_one": "{{count}} carte",
         "count_other": "{{count}} cartes",
-        "add": "Ajouter à Ma Bibliothèque",
+        "add": "Ajouter à ma bibliothèque",
         "retry": "Réessayer",
         "selected": "Sélectionné"
       },
@@ -443,7 +443,7 @@
       "missingTopic": {
         "title": "Choisissez d'abord un sujet",
         "body": "Nowry cherche votre premier paquet à partir du premier sujet que vous choisissez.",
-        "action": "Choisir des Sujets"
+        "action": "Choisir des sujets"
       },
       "forkError": {
         "title": "Le paquet n'a pas été ajouté",
@@ -462,10 +462,10 @@
         "title": "Il est dans votre bibliothèque",
         "body": "{{name}} vous attend quand vous voulez.",
         "bodyNoName": "Votre paquet vous attend quand vous voulez.",
-        "open": "Ouvrir Mon Paquet",
+        "open": "Ouvrir mon paquet",
         "later": "Pas maintenant"
       },
-      "finish": "Terminer pour l'Instant",
+      "finish": "Terminer pour l'instant",
       "finishHint": "Vos sujets et votre objectif sont enregistrés. Vous pouvez ajouter un paquet quand vous voulez."
     },
     "language": {
@@ -483,11 +483,12 @@
       "customLabel": "Couleur Personnalisée"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
+      "title": "Quels sujets vous intéressent ?",
+      "subtitle": "Nous adapterons votre accueil à ces sujets.",
+      "groupLabel": "Sélection des centres d'intérêt",
       "selected": "Sélectionné : {{count}} sujet",
-      "selected_plural": "Sélectionnés : {{count}} sujets"
+      "selected_one": "Sélectionné : {{count}} sujet",
+      "selected_other": "Sélectionnés : {{count}} sujets"
     },
     "learning": {
       "title": "Style d'Apprentissage et Objectifs",
@@ -501,30 +502,30 @@
     "back": "Retour",
     "finish": "Terminer la configuration",
     "skip": "Passer pour l'instant",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
+    "progressLabel": "Progression de la configuration",
+    "defer": "Configurer plus tard dans les paramètres",
     "identity": {
       "title": "Choisissez votre langue.",
       "subtitle": "Sélectionnez la langue qui vous convient."
     },
     "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
+      "title": "À votre image.",
+      "subtitle": "Clair ou sombre. Choisissez une couleur que vous verrez chaque jour.",
+      "colorLabel": "Sélectionner {{name}}",
+      "colorGroupLabel": "Choix de la couleur d'accent"
     },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this."
+      "title": "Que venez-vous apprendre ?",
+      "subtitle": "Choisissez un thème et un objectif. Vous pourrez toujours les modifier."
     },
     "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
+      "title": "Tout est prêt, {{name}}.",
+      "titleNoName": "Tout est prêt.",
+      "subtitle": "Votre espace d'étude personnalisé est prêt.",
+      "cta": "Entrer dans Nowry"
     },
     "error": {
-      "saveFailed": "Something went wrong. Please try again."
+      "saveFailed": "Une erreur est survenue. Réessayez."
     },
     "failure": {
       "network": "Vous semblez hors ligne. Vérifiez votre connexion et réessayez.",
@@ -534,27 +535,27 @@
   },
   "taxonomy": {
     "topics": {
-      "artificial_intelligence": "AI & Machine Learning",
-      "technology": "Technology",
-      "science": "Science",
-      "mathematics": "Mathematics",
-      "history": "History",
-      "languages": "Languages",
-      "literature": "Literature",
-      "art": "Art & Creativity",
-      "music": "Music",
+      "artificial_intelligence": "IA et apprentissage automatique",
+      "technology": "Technologie",
+      "science": "Sciences",
+      "mathematics": "Mathématiques",
+      "history": "Histoire",
+      "languages": "Langues",
+      "literature": "Littérature",
+      "art": "Art et créativité",
+      "music": "Musique",
       "business": "Business",
-      "health": "Health & Fitness",
-      "philosophy": "Philosophy",
+      "health": "Santé et forme physique",
+      "philosophy": "Philosophie",
       "design": "Design",
-      "psychology": "Psychology"
+      "psychology": "Psychologie"
     },
     "goals": {
-      "general": "Culture Générale",
-      "academic": "Réussite Scolaire",
-      "career": "Développement Professionnel",
-      "language": "Apprentissage des Langues",
-      "hobby": "Intérêt Personnel"
+      "general": "Culture générale",
+      "academic": "Réussite scolaire",
+      "career": "Développement professionnel",
+      "language": "Apprentissage des langues",
+      "hobby": "Intérêt personnel"
     },
     "selector": {
       "topics": {
@@ -803,15 +804,17 @@
       "cardsDue": "cartes à réviser",
       "readyToReview": "Prêtes à réviser",
       "reviewCount": "Réviser {{count}} carte",
-      "reviewCount_plural": "Réviser {{count}} cartes",
+      "reviewCount_one": "Réviser {{count}} carte",
+      "reviewCount_other": "Réviser {{count}} cartes",
       "reviewToday": "📚 À réviser aujourd'hui",
       "cardsPending": "{{count}} carte en attente",
       "cardsPending_other": "{{count}} cartes en attente",
-      "cardsPending_plural": "{{count}} cartes en attente",
+      "cardsPending_one": "{{count}} carte en attente",
       "start": "C'est Parti !",
       "study": "Étudier",
       "moreDecks": "Et {{count}} autre deck avec des cartes",
-      "moreDecks_other": "Et {{count}} autres decks avec des cartes"
+      "moreDecks_other": "Et {{count}} autres decks avec des cartes",
+      "moreDecks_one": "Et {{count}} autre deck avec des cartes"
     },
     "annualGoals": {
       "title": "Objectifs annuels",
@@ -845,6 +848,7 @@
     "noActivity": "Pas encore d'activité. Commencez à étudier !",
     "streak": "🔥 Série actuelle : {{count}} jour",
     "streak_other": "🔥 Série actuelle : {{count}} jours",
+    "streak_one": "🔥 Série actuelle : {{count}} jour",
     "types": {
       "quiz": "Quiz",
       "visual": "Visuel",
@@ -1093,12 +1097,14 @@
       "generateImage": "Générer avec l'IA",
       "uploadImage": "Téléverser une Image",
       "daysLeft": "Il reste {{count}} jour",
-      "daysLeft_plural": "Il reste {{count}} jours",
+      "daysLeft_one": "Il reste {{count}} jour",
+      "daysLeft_other": "Il reste {{count}} jours",
       "overdue": "En Retard",
       "noDeadline": "Pas de date cible",
       "smartHelper": "Rendez-le SMART : Spécifique, Mesurable, Atteignable, Pertinent, Temporel",
       "activitiesCount": "{{count}} activité",
-      "activitiesCount_plural": "{{count}} activités",
+      "activitiesCount_one": "{{count}} activité",
+      "activitiesCount_other": "{{count}} activités",
       "viewBoard": "Voir en Tableau",
       "next": {
         "completed": "Terminé",
@@ -1296,13 +1302,13 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
+      "activeDays_one": "Active {{count}} day this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
+      "migratedCount_one": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
     },

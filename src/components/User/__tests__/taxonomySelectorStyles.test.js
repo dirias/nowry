@@ -8,14 +8,7 @@
  * (NFR-006, WCAG 2.5.5). A future "tidy-up" that adds `noWrap` or shrinks the
  * min-height breaks a requirement, not a preference — so it breaks a test.
  */
-import {
-  optionBase,
-  selectedOption,
-  unselectedOption,
-  blockedOption,
-  overlayFocusRing,
-  visuallyHidden
-} from '../taxonomySelectorStyles'
+import { optionBase, selectedOption, unselectedOption, blockedOption, overlayFocusRing, visuallyHidden } from '../taxonomySelectorStyles'
 import { focusRing, touchTarget } from '../../Common/Form/formStyles'
 
 describe('taxonomySelectorStyles — enlarged and wrapped text', () => {

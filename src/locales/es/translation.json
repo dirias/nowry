@@ -16,7 +16,7 @@
     "language": "Idioma",
     "studyBuddy": "Compañero de Estudio",
     "moreActions": "Más acciones",
-    "retry": "Retry"
+    "retry": "Reintentar"
   },
   "news": {
     "title": "Últimas Noticias",
@@ -333,23 +333,23 @@
           "earthBrown": "Marrón tierra"
         }
       },
-      "save": {
-        "saving": "Guardando…",
-        "saved": "Guardado",
-        "unsaved": "Sin guardar",
-        "retry": "Reintentar"
-      },
       "postponeError": {
         "title": "No pudimos guardar eso",
         "body": "Sigues aquí y no se registró nada."
       },
       "loadError": "No pudimos cargar tus ajustes guardados."
     },
+    "save": {
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "unsaved": "Sin guardar",
+      "retry": "Reintentar"
+    },
     "personalization": {
       "title": "¿Qué quieres aprender?",
       "lead": "Elige hasta 5 temas y un objetivo de estudio. El primer tema que elijas es el que Nowry usa para encontrar tu primer mazo.",
-      "continue": "Elegir Tu Primer Mazo",
-      "skip": "Omitir Por Ahora",
+      "continue": "Elegir tu primer mazo",
+      "skip": "Omitir por ahora",
       "skipHint": "Aún no has elegido nada. Al omitir volverás al inicio y podrás configurarlo más tarde.",
       "validation": {
         "title": "Todavía no está listo",
@@ -387,7 +387,7 @@
         "publisher": "Publicado por {{publisher}}",
         "count_one": "{{count}} tarjeta",
         "count_other": "{{count}} tarjetas",
-        "add": "Añadir a Mi Biblioteca",
+        "add": "Añadir a mi biblioteca",
         "retry": "Reintentar",
         "selected": "Seleccionado"
       },
@@ -422,7 +422,7 @@
       "missingTopic": {
         "title": "Elige un tema primero",
         "body": "Nowry busca tu primer mazo a partir del primer tema que elijas.",
-        "action": "Elegir Temas"
+        "action": "Elegir temas"
       },
       "forkError": {
         "title": "El mazo no se añadió",
@@ -441,10 +441,10 @@
         "title": "Ya está en tu biblioteca",
         "body": "{{name}} te espera cuando quieras.",
         "bodyNoName": "Tu mazo te espera cuando quieras.",
-        "open": "Abrir Mi Mazo",
+        "open": "Abrir mi mazo",
         "later": "Ahora no"
       },
-      "finish": "Terminar por Ahora",
+      "finish": "Terminar por ahora",
       "finishHint": "Tus temas y tu objetivo están guardados. Puedes añadir un mazo cuando quieras."
     },
     "language": {
@@ -462,11 +462,12 @@
       "customLabel": "Color Personalizado"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
+      "title": "¿Qué temas te interesan?",
+      "subtitle": "Personalizaremos tu inicio a partir de ellos.",
+      "groupLabel": "Selección de intereses",
       "selected": "Seleccionado: {{count}} tema",
-      "selected_plural": "Seleccionados: {{count}} temas"
+      "selected_one": "Seleccionado: {{count}} tema",
+      "selected_other": "Seleccionados: {{count}} temas"
     },
     "learning": {
       "title": "Estilo de Aprendizaje y Metas",
@@ -480,30 +481,30 @@
     "back": "Atrás",
     "finish": "Finalizar Configuración",
     "skip": "Saltar por ahora",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
+    "progressLabel": "Progreso de la configuración",
+    "defer": "Configurarlo más tarde en ajustes",
     "identity": {
       "title": "Elige tu idioma.",
       "subtitle": "Selecciona el idioma que prefieras."
     },
     "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
+      "title": "Hazlo tuyo.",
+      "subtitle": "Claro u oscuro. Elige un color que verás cada día.",
+      "colorLabel": "Seleccionar {{name}}",
+      "colorGroupLabel": "Selección del color de acento"
     },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this."
+      "title": "¿Qué quieres aprender?",
+      "subtitle": "Elige un tema y un objetivo. Siempre puedes cambiarlo."
     },
     "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
+      "title": "Todo listo, {{name}}.",
+      "titleNoName": "Todo listo.",
+      "subtitle": "Tu espacio de estudio personalizado ya está listo.",
+      "cta": "Entrar en Nowry"
     },
     "error": {
-      "saveFailed": "Something went wrong. Please try again."
+      "saveFailed": "Algo salió mal. Inténtalo de nuevo."
     },
     "failure": {
       "network": "Parece que no tienes conexión. Compruébala e inténtalo de nuevo.",
@@ -513,27 +514,27 @@
   },
   "taxonomy": {
     "topics": {
-      "artificial_intelligence": "AI & Machine Learning",
-      "technology": "Technology",
-      "science": "Science",
-      "mathematics": "Mathematics",
-      "history": "History",
-      "languages": "Languages",
-      "literature": "Literature",
-      "art": "Art & Creativity",
-      "music": "Music",
-      "business": "Business",
-      "health": "Health & Fitness",
-      "philosophy": "Philosophy",
-      "design": "Design",
-      "psychology": "Psychology"
+      "artificial_intelligence": "IA y aprendizaje automático",
+      "technology": "Tecnología",
+      "science": "Ciencias",
+      "mathematics": "Matemáticas",
+      "history": "Historia",
+      "languages": "Idiomas",
+      "literature": "Literatura",
+      "art": "Arte y creatividad",
+      "music": "Música",
+      "business": "Negocios",
+      "health": "Salud y forma física",
+      "philosophy": "Filosofía",
+      "design": "Diseño",
+      "psychology": "Psicología"
     },
     "goals": {
-      "general": "Conocimiento General",
-      "academic": "Éxito Académico",
-      "career": "Desarrollo Profesional",
-      "language": "Aprendizaje de Idiomas",
-      "hobby": "Interés Personal"
+      "general": "Conocimiento general",
+      "academic": "Éxito académico",
+      "career": "Desarrollo profesional",
+      "language": "Aprendizaje de idiomas",
+      "hobby": "Interés personal"
     },
     "selector": {
       "topics": {
@@ -786,15 +787,17 @@
       "cardsDue": "tarjetas pendientes",
       "readyToReview": "Listas para repasar",
       "reviewCount": "Repasar {{count}} tarjeta",
-      "reviewCount_plural": "Repasar {{count}} tarjetas",
+      "reviewCount_one": "Repasar {{count}} tarjeta",
+      "reviewCount_other": "Repasar {{count}} tarjetas",
       "reviewToday": "📚 Hoy podrías repasar",
       "cardsPending": "{{count}} tarjeta pendiente",
       "cardsPending_other": "{{count}} tarjetas pendientes",
-      "cardsPending_plural": "{{count}} tarjetas pendientes",
+      "cardsPending_one": "{{count}} tarjeta pendiente",
       "start": "¡Vamos!",
       "study": "Estudiar",
       "moreDecks": "Y {{count}} deck más con tarjetas pendientes",
-      "moreDecks_other": "Y {{count}} decks más con tarjetas pendientes"
+      "moreDecks_other": "Y {{count}} decks más con tarjetas pendientes",
+      "moreDecks_one": "Y {{count}} deck más con tarjetas pendientes"
     },
     "annualGoals": {
       "title": "Objetivos anuales",
@@ -828,6 +831,7 @@
     "noActivity": "Aún no hay actividad. ¡Empieza a estudiar para ver tu progreso!",
     "streak": "🔥 Racha actual: {{count}} día",
     "streak_other": "🔥 Racha actual: {{count}} días",
+    "streak_one": "🔥 Racha actual: {{count}} día",
     "types": {
       "quiz": "Cuestionario",
       "visual": "Visual",
@@ -876,7 +880,9 @@
       "notesPlaceholder": "Agregar notas...",
       "summaryPlaceholder": "Agregar resumen..."
     },
-    "import": "Importar",
+    "import": {
+      "titlePlaceholder": "Escribe el título del libro..."
+    },
     "title": "Libros",
     "library": "Biblioteca de libros",
     "subtitle": "Tu colección personal",
@@ -899,7 +905,8 @@
     "successCreate": "Libro creado exitosamente",
     "successDelete": "Libro eliminado exitosamente",
     "successImport": "¡{{count}} libro importado exitosamente! {{pages}} páginas totales.",
-    "successImport_plural": "¡{{count}} libros importados exitosamente! {{pages}} páginas totales.",
+    "successImport_one": "¡{{count}} libro importado exitosamente! {{pages}} páginas totales.",
+    "successImport_other": "¡{{count}} libros importados exitosamente! {{pages}} páginas totales.",
     "errorImport": "Error al procesar el archivo. Por favor inténtalo de nuevo.",
     "untitled": "Libro sin título",
     "createTitle": "Nuevo libro",
@@ -1014,7 +1021,8 @@
     "name": "Nombre",
     "cardCount": "Conteo de Tarjetas",
     "deckCount": "{{count}} mazo",
-    "deckCount_plural": "{{count}} mazos",
+    "deckCount_one": "{{count}} mazo",
+    "deckCount_other": "{{count}} mazos",
     "loading": "Cargando...",
     "confirmDeleteDeck": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
     "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?",
@@ -1056,7 +1064,8 @@
         "visual": "Visual"
       },
       "cardCount": "{{count}} tarjeta",
-      "cardCount_plural": "{{count}} tarjetas",
+      "cardCount_one": "{{count}} tarjeta",
+      "cardCount_other": "{{count}} tarjetas",
       "noContent": "Sin contenido",
       "untitled": "Tarjeta sin título",
       "reviewNew": "Nueva",
@@ -1065,7 +1074,8 @@
         "dueNow": "¡Pendiente ahora!",
         "lessThanHour": "En menos de 1 hora",
         "inHours": "En {{count}} hora",
-        "inHours_plural": "En {{count}} horas",
+        "inHours_one": "En {{count}} hora",
+        "inHours_other": "En {{count}} horas",
         "tomorrow": "Mañana",
         "inDays": "En {{count}} días"
       },
@@ -1136,7 +1146,8 @@
       },
       "card": "Tarjeta {{current}} de {{total}}",
       "syncing": "Sincronizando {{count}} revisión...",
-      "syncing_plural": "Sincronizando {{count}} revisiones...",
+      "syncing_one": "Sincronizando {{count}} revisión...",
+      "syncing_other": "Sincronizando {{count}} revisiones...",
       "labels": {
         "question": "Pregunta",
         "answer": "Respuesta",
@@ -1160,7 +1171,8 @@
       "description": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
       "confirm": "Eliminar mazo",
       "consequence1": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
-      "consequence1_plural": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence1_one": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence1_other": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
       "consequence2": "Si está publicado, se despublicará inmediatamente"
     },
     "generatedCards": {
@@ -1508,12 +1520,14 @@
       "generateImage": "Generar con IA",
       "uploadImage": "Subir Imagen",
       "daysLeft": "Queda {{count}} día",
-      "daysLeft_plural": "Quedan {{count}} días",
+      "daysLeft_one": "Queda {{count}} día",
+      "daysLeft_other": "Quedan {{count}} días",
       "overdue": "Vencido",
       "noDeadline": "Sin fecha objetivo",
       "smartHelper": "Hazlo SMART: Específico, Medible, Alcanzable, Relevante, Temporal",
       "activitiesCount": "{{count}} actividad",
-      "activitiesCount_plural": "{{count}} actividades",
+      "activitiesCount_one": "{{count}} actividad",
+      "activitiesCount_other": "{{count}} actividades",
       "viewBoard": "Ver como Tablero",
       "next": {
         "completed": "Completado",
@@ -1722,13 +1736,13 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
+      "activeDays_one": "Active {{count}} day this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
+      "migratedCount_one": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
     },

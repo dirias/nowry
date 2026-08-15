@@ -301,13 +301,13 @@ const PersonalizationScreen = ({ shell, journey, preferences, onNext, onExit }) 
     <FormErrorBanner
       titleKey='onboarding.personalization.advanceError.title'
       detailText={`${t('onboarding.personalization.advanceError.body')} ${t(failureKey(pointError))}`}
-      action={pointError.recoverable ? { labelKey: 'onboarding.welcome.save.retry', onClick: advance } : null}
+      action={pointError.recoverable ? { labelKey: 'onboarding.save.retry', onClick: advance } : null}
     />
   ) : saveBlocked ? (
     <FormErrorBanner
       titleKey='onboarding.personalization.saveError.title'
       detailText={t('onboarding.personalization.saveError.body')}
-      action={saveRetryable ? { labelKey: 'onboarding.welcome.save.retry', onClick: handleRetrySaves } : null}
+      action={saveRetryable ? { labelKey: 'onboarding.save.retry', onClick: handleRetrySaves } : null}
     />
   ) : validationIssue ? (
     <FormErrorBanner
@@ -408,7 +408,7 @@ const PersonalizationScreen = ({ shell, journey, preferences, onNext, onExit }) 
             {t('onboarding.personalization.loadError')}
           </Typography>
           <Button size='sm' variant='plain' color='neutral' onClick={() => preferences.reload()} sx={{ ...touchTarget, ...focusRing }}>
-            {t('onboarding.welcome.save.retry')}
+            {t('onboarding.save.retry')}
           </Button>
         </Stack>
       )}

@@ -52,6 +52,7 @@ import { getColorPresets } from '../../../theme/colorSchemeGenerator'
 import en from '../../../locales/en/translation.json'
 
 const welcome = en.onboarding.welcome
+const save = en.onboarding.save
 const PRESETS = getColorPresets()
 
 const idleField = (overrides = {}) => ({
@@ -220,8 +221,8 @@ describe('honest save state (FR-039, FR-040)', () => {
     preferences.fields.theme_color = idleField({ phase: 'pending', isSaving: true, isConfirmed: false })
     renderScreen()
 
-    expect(screen.getByText(welcome.save.saving)).toBeInTheDocument()
-    expect(screen.queryByText(welcome.save.saved)).toBeNull()
+    expect(screen.getByText(save.saving)).toBeInTheDocument()
+    expect(screen.queryByText(save.saved)).toBeNull()
   })
 
   it('names the field that did not save, keeps the visible choice, and offers a retry', () => {
@@ -234,13 +235,13 @@ describe('honest save state (FR-039, FR-040)', () => {
     })
     renderScreen()
 
-    expect(screen.getByText(welcome.save.unsaved)).toBeInTheDocument()
+    expect(screen.getByText(save.unsaved)).toBeInTheDocument()
     expect(screen.getByText(en.onboarding.failure.network)).toBeInTheDocument()
-    expect(screen.queryByText(welcome.save.saved)).toBeNull()
+    expect(screen.queryByText(save.saved)).toBeNull()
     // The choice is still on screen — a failed save must not roll the UI back.
     expect(screen.getByRole('radio', { name: welcome.accent.names.rosePink })).toBeChecked()
 
-    fireEvent.click(screen.getAllByRole('button', { name: welcome.save.retry })[0])
+    fireEvent.click(screen.getAllByRole('button', { name: save.retry })[0])
     expect(preferences.retryField).toHaveBeenCalledWith('theme_color')
   })
 
@@ -248,7 +249,7 @@ describe('honest save state (FR-039, FR-040)', () => {
     preferences.fields.language = idleField({ phase: 'succeeded', justSaved: true })
     renderScreen()
 
-    expect(screen.getByText(welcome.save.saved)).toBeInTheDocument()
+    expect(screen.getByText(save.saved)).toBeInTheDocument()
   })
 
   it('reports a failed confirmed read without blocking the screen (FR-046)', () => {
@@ -300,7 +301,7 @@ describe('acknowledged postponement (FR-041, FR-047, FR-049)', () => {
   it('offers a retry for a recoverable failure and none for a terminal one', () => {
     journey.postponeState = { phase: 'error', error: { code: 'unknown_error', recoverable: true } }
     const { rerender } = renderScreen()
-    expect(screen.getByRole('alert')).toHaveTextContent(welcome.save.retry)
+    expect(screen.getByRole('alert')).toHaveTextContent(save.retry)
 
     journey = buildJourney({ postponeState: { phase: 'error', error: { code: 'invalid_action', recoverable: false } } })
     rerender(
@@ -312,7 +313,7 @@ describe('acknowledged postponement (FR-041, FR-047, FR-049)', () => {
         onExit={onExit}
       />
     )
-    expect(screen.getByRole('alert')).not.toHaveTextContent(welcome.save.retry)
+    expect(screen.getByRole('alert')).not.toHaveTextContent(save.retry)
   })
 
   it('disables only what a pending postponement makes incompatible', () => {

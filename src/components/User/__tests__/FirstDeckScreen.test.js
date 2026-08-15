@@ -283,7 +283,7 @@ describe('forking', () => {
     expect(card.getByRole('button', { name: copy.card.retry })).toBeInTheDocument()
 
     expect(screen.getByRole('alert')).toHaveTextContent(copy.forkError.title)
-    fireEvent.click(screen.getByRole('button', { name: en.onboarding.welcome.save.retry }))
+    fireEvent.click(screen.getByRole('button', { name: en.onboarding.save.retry }))
     // `retryFork` reuses the deck and its stable idempotency key, so the replay
     // cannot produce a second visible deck (ADR-005, NFR-017).
     expect(journey.retryFork).toHaveBeenCalled()
@@ -369,7 +369,7 @@ describe('activation', () => {
     expect(banner).not.toHaveTextContent(copy.forkError.title)
     expect(banner).not.toHaveTextContent(copy.forkError.body)
 
-    fireEvent.click(within(banner).getByRole('button', { name: en.onboarding.welcome.save.retry }))
+    fireEvent.click(within(banner).getByRole('button', { name: en.onboarding.save.retry }))
     expect(journey.retryFork).toHaveBeenCalled()
   })
 })
@@ -401,9 +401,7 @@ describe('AI fallback and finish for now', () => {
     renderScreen()
 
     expect(screen.getByText(copy.fallback.success.title)).toBeInTheDocument()
-    expect(
-      screen.getByText(fill(copy.fallback.success.body_other, { count: 3, topic: en.taxonomy.topics.science }))
-    ).toBeInTheDocument()
+    expect(screen.getByText(fill(copy.fallback.success.body_other, { count: 3, topic: en.taxonomy.topics.science }))).toBeInTheDocument()
     // Nothing that belongs to activation: no success panel, no open-deck action.
     expect(screen.queryByText(copy.success.title)).toBeNull()
     expect(screen.queryByRole('button', { name: copy.success.open })).toBeNull()
@@ -415,7 +413,7 @@ describe('AI fallback and finish for now', () => {
     renderScreen()
 
     expect(screen.getByRole('alert')).toHaveTextContent(copy.fallback.error.title)
-    fireEvent.click(screen.getByRole('button', { name: en.onboarding.welcome.save.retry }))
+    fireEvent.click(screen.getByRole('button', { name: en.onboarding.save.retry }))
     expect(journey.requestAiFallback).toHaveBeenCalled()
   })
 
