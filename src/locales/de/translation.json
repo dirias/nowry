@@ -618,6 +618,7 @@
     "nav": {
       "account": "Konto",
       "appearance": "Erscheinungsbild",
+      "learning": "Lernen",
       "productivity": "Produktivität",
       "notifications": "Benachrichtigungen",
       "security": "Sicherheit",
@@ -639,6 +640,33 @@
       "accentColor": "Akzentfarbe",
       "accentColorDesc": "Passe die Akzentfarbe der App an",
       "interests": "Interessen"
+    },
+    "learning": {
+      "title": "Lernen",
+      "lead": "Deine Themen bestimmen deinen Nachrichten-Feed und die Vorschläge deines Study Buddy. Das erste Thema ist dein Hauptthema.",
+      "loading": "Deine Themen und dein Lernziel werden geladen…",
+      "loadError": "Deine gespeicherten Themen und dein Lernziel konnten nicht geladen werden.",
+      "range": {
+        "tooFew_one": "Behalte mindestens {{count}} Thema. Es wurde nichts geändert.",
+        "tooFew_other": "Behalte mindestens {{count}} Themen. Es wurde nichts geändert.",
+        "tooMany_one": "Du kannst höchstens {{count}} Thema behalten. Entferne eins, bevor du ein weiteres hinzufügst.",
+        "tooMany_other": "Du kannst höchstens {{count}} Themen behalten. Entferne eins, bevor du ein weiteres hinzufügst."
+      },
+      "order": {
+        "label": "Reihenfolge der Themen",
+        "hint": "Das erste Thema ist dein Hauptthema. Ändere die Reihenfolge mit den Pfeilen.",
+        "primary": "Hauptthema",
+        "moveEarlier": "Nach oben verschieben",
+        "moveLater": "Nach unten verschieben",
+        "moveEarlierFor": "{{topic}} nach oben verschieben. Aktuell Position {{position}} von {{total}}.",
+        "moveLaterFor": "{{topic}} nach unten verschieben. Aktuell Position {{position}} von {{total}}.",
+        "moved": "{{topic}} auf Position {{position}} von {{total}} verschoben.",
+        "alreadyFirst": "{{topic}} steht bereits an erster Stelle.",
+        "alreadyLast": "{{topic}} steht bereits an letzter Stelle."
+      },
+      "discard": "Änderungen verwerfen",
+      "discardTopics": "Nicht gespeicherte Themenänderungen verwerfen",
+      "discardGoal": "Nicht gespeicherte Änderung des Lernziels verwerfen"
     },
     "productivity": {
       "title": "Produktivität",

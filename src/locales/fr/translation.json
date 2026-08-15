@@ -640,6 +640,7 @@
     "nav": {
       "account": "Compte",
       "appearance": "Apparence",
+      "learning": "Apprentissage",
       "productivity": "Productivité",
       "notifications": "Notifications",
       "security": "Sécurité",
@@ -661,6 +662,33 @@
       "accentColor": "Couleur d'accent",
       "accentColorDesc": "Personnalisez la couleur d'accent de l'application",
       "interests": "Centres d'intérêt"
+    },
+    "learning": {
+      "title": "Apprentissage",
+      "lead": "Vos thèmes déterminent votre fil d'actualité et les suggestions de votre compagnon d'étude. Le premier thème est votre thème principal.",
+      "loading": "Chargement de vos thèmes et de votre objectif d'étude…",
+      "loadError": "Impossible de charger vos thèmes et votre objectif enregistrés.",
+      "range": {
+        "tooFew_one": "Gardez au moins {{count}} thème. Rien n'a été modifié.",
+        "tooFew_other": "Gardez au moins {{count}} thèmes. Rien n'a été modifié.",
+        "tooMany_one": "Vous pouvez garder {{count}} thème au maximum. Retirez-en un avant d'en ajouter un autre.",
+        "tooMany_other": "Vous pouvez garder {{count}} thèmes au maximum. Retirez-en un avant d'en ajouter un autre."
+      },
+      "order": {
+        "label": "Ordre des thèmes",
+        "hint": "Le premier thème est votre thème principal. Utilisez les flèches pour changer l'ordre.",
+        "primary": "Thème principal",
+        "moveEarlier": "Déplacer vers le haut",
+        "moveLater": "Déplacer vers le bas",
+        "moveEarlierFor": "Déplacer {{topic}} vers le haut. Actuellement en position {{position}} sur {{total}}.",
+        "moveLaterFor": "Déplacer {{topic}} vers le bas. Actuellement en position {{position}} sur {{total}}.",
+        "moved": "{{topic}} déplacé en position {{position}} sur {{total}}.",
+        "alreadyFirst": "{{topic}} est déjà en première position.",
+        "alreadyLast": "{{topic}} est déjà en dernière position."
+      },
+      "discard": "Annuler les modifications",
+      "discardTopics": "Annuler les modifications de thèmes non enregistrées",
+      "discardGoal": "Annuler le changement d'objectif d'étude non enregistré"
     },
     "productivity": {
       "title": "Productivité",

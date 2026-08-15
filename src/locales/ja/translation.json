@@ -670,6 +670,7 @@
     "nav": {
       "account": "アカウント",
       "appearance": "外観",
+      "learning": "学習",
       "productivity": "生産性",
       "notifications": "通知",
       "security": "セキュリティ",
@@ -691,6 +692,33 @@
       "accentColor": "アクセントカラー",
       "accentColorDesc": "アプリのアクセントカラーをカスタマイズ",
       "interests": "興味・関心"
+    },
+    "learning": {
+      "title": "学習",
+      "lead": "選んだトピックがニュースフィードとスタディバディの提案を決めます。最初のトピックがメイントピックです。",
+      "loading": "トピックと学習目標を読み込んでいます…",
+      "loadError": "保存されたトピックと学習目標を読み込めませんでした。",
+      "range": {
+        "tooFew_one": "トピックは{{count}}件以上残してください。変更は保存されていません。",
+        "tooFew_other": "トピックは{{count}}件以上残してください。変更は保存されていません。",
+        "tooMany_one": "トピックは最大{{count}}件です。追加する前に1つ削除してください。",
+        "tooMany_other": "トピックは最大{{count}}件です。追加する前に1つ削除してください。"
+      },
+      "order": {
+        "label": "トピックの順序",
+        "hint": "最初のトピックがメイントピックです。矢印で順序を変更できます。",
+        "primary": "メイントピック",
+        "moveEarlier": "前へ移動",
+        "moveLater": "後ろへ移動",
+        "moveEarlierFor": "{{topic}}を前へ移動します。現在は{{total}}件中{{position}}番目です。",
+        "moveLaterFor": "{{topic}}を後ろへ移動します。現在は{{total}}件中{{position}}番目です。",
+        "moved": "{{topic}}を{{total}}件中{{position}}番目に移動しました。",
+        "alreadyFirst": "{{topic}}はすでに先頭です。",
+        "alreadyLast": "{{topic}}はすでに最後です。"
+      },
+      "discard": "変更を破棄",
+      "discardTopics": "保存されていないトピックの変更を破棄",
+      "discardGoal": "保存されていない学習目標の変更を破棄"
     },
     "productivity": {
       "title": "生産性",

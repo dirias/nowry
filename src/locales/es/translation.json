@@ -622,6 +622,7 @@
     "nav": {
       "account": "Cuenta",
       "appearance": "Apariencia",
+      "learning": "Aprendizaje",
       "productivity": "Productividad",
       "notifications": "Notificaciones",
       "agent": "Compañero de estudio",
@@ -654,6 +655,33 @@
       "themeColorDesc": "Selecciona tu color de acento. Esto actualizará todo el tema.",
       "interests": "Intereses",
       "interestsDesc": "Selecciona temas para ver noticias y contenido"
+    },
+    "learning": {
+      "title": "Aprendizaje",
+      "lead": "Tus temas definen tu feed de noticias y lo que te sugiere tu compañero de estudio. El primer tema es el principal.",
+      "loading": "Cargando tus temas y tu objetivo de estudio…",
+      "loadError": "No pudimos cargar tus temas ni tu objetivo guardados.",
+      "range": {
+        "tooFew_one": "Conserva al menos {{count}} tema. No se cambió nada.",
+        "tooFew_other": "Conserva al menos {{count}} temas. No se cambió nada.",
+        "tooMany_one": "Puedes conservar {{count}} tema como máximo. Quita uno antes de añadir otro.",
+        "tooMany_other": "Puedes conservar {{count}} temas como máximo. Quita uno antes de añadir otro."
+      },
+      "order": {
+        "label": "Orden de los temas",
+        "hint": "El primer tema es el principal. Usa las flechas para cambiar el orden.",
+        "primary": "Tema principal",
+        "moveEarlier": "Mover antes",
+        "moveLater": "Mover después",
+        "moveEarlierFor": "Mover {{topic}} antes. Ahora en la posición {{position}} de {{total}}.",
+        "moveLaterFor": "Mover {{topic}} después. Ahora en la posición {{position}} de {{total}}.",
+        "moved": "{{topic}} se movió a la posición {{position}} de {{total}}.",
+        "alreadyFirst": "{{topic}} ya está en el primer lugar.",
+        "alreadyLast": "{{topic}} ya está en el último lugar."
+      },
+      "discard": "Descartar cambios",
+      "discardTopics": "Descartar los cambios de temas sin guardar",
+      "discardGoal": "Descartar el cambio de objetivo de estudio sin guardar"
     },
     "productivity": {
       "title": "Productividad",

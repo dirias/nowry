@@ -748,6 +748,7 @@
     "nav": {
       "account": "Account",
       "appearance": "Appearance",
+      "learning": "Learning",
       "productivity": "Productivity",
       "notifications": "Notifications",
       "agent": "Study Buddy",
@@ -781,6 +782,33 @@
       "themeColorDesc": "Select your accent color. This will update the entire theme.",
       "interests": "Interests",
       "interestsDesc": "Select topics to see news and content"
+    },
+    "learning": {
+      "title": "Learning",
+      "lead": "Your topics shape your news feed and what your study buddy suggests. The first topic is your primary one.",
+      "loading": "Loading your topics and study goal…",
+      "loadError": "We couldn't load your saved topics and study goal.",
+      "range": {
+        "tooFew_one": "Keep at least {{count}} topic. Nothing was changed.",
+        "tooFew_other": "Keep at least {{count}} topics. Nothing was changed.",
+        "tooMany_one": "You can keep {{count}} topic at most. Remove one before adding another.",
+        "tooMany_other": "You can keep {{count}} topics at most. Remove one before adding another."
+      },
+      "order": {
+        "label": "Topic order",
+        "hint": "The first topic is your primary one. Use the arrows to change the order.",
+        "primary": "Primary topic",
+        "moveEarlier": "Move earlier",
+        "moveLater": "Move later",
+        "moveEarlierFor": "Move {{topic}} earlier. Currently position {{position}} of {{total}}.",
+        "moveLaterFor": "Move {{topic}} later. Currently position {{position}} of {{total}}.",
+        "moved": "{{topic}} moved to position {{position}} of {{total}}.",
+        "alreadyFirst": "{{topic}} is already first.",
+        "alreadyLast": "{{topic}} is already last."
+      },
+      "discard": "Discard changes",
+      "discardTopics": "Discard unsaved topic changes",
+      "discardGoal": "Discard unsaved study goal change"
     },
     "productivity": {
       "title": "Productivity",
