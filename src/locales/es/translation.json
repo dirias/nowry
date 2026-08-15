@@ -2252,10 +2252,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Tu perfil no está completo todavía.",
-      "cta": "Completar configuración",
-      "dismiss": "Descartar"
+    "onboardingReentry": {
+      "title": "Termina de configurar Nowry",
+      "body": "Elige tus temas y Nowry te buscará un primer mazo de estudio.",
+      "cta": "Continuar configuración",
+      "dismiss": "Ocultar por ahora",
+      "dismissed": "Recordatorio de configuración oculto.",
+      "error": {
+        "title": "No pudimos comprobar tu configuración"
+      }
     }
   },
   "pet": {

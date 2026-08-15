@@ -1483,10 +1483,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Votre configuration de profil n'est pas encore terminée.",
-      "cta": "Terminer la configuration",
-      "dismiss": "Ignorer"
+    "onboardingReentry": {
+      "title": "Terminez la configuration de Nowry",
+      "body": "Choisissez vos sujets et Nowry vous trouvera un premier paquet de révision.",
+      "cta": "Continuer la configuration",
+      "dismiss": "Masquer pour l'instant",
+      "dismissed": "Rappel de configuration masqué.",
+      "error": {
+        "title": "Impossible de vérifier votre configuration"
+      }
     }
   },
   "pet": {

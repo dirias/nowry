@@ -1503,10 +1503,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "プロフィールの設定がまだ完了していません。",
-      "cta": "セットアップを完了する",
-      "dismiss": "閉じる"
+    "onboardingReentry": {
+      "title": "Nowry の設定を完了しましょう",
+      "body": "トピックを選ぶと、Nowry が最初の学習デッキを見つけます。",
+      "cta": "設定を続ける",
+      "dismiss": "今は非表示にする",
+      "dismissed": "設定のお知らせを非表示にしました。",
+      "error": {
+        "title": "設定を確認できませんでした"
+      }
     }
   },
   "pet": {

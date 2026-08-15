@@ -166,7 +166,9 @@ export const authService = {
     try {
       await signOut(auth)
       localStorage.removeItem('firebase_token')
-      sessionStorage.removeItem('onboarding_skipped')
+      // No `onboarding_skipped` cleanup: nothing reads that flag any more. Whether
+      // onboarding is offered again is the server's answer now (ONB-012, ADR-007),
+      // so there is no local suppression state left for logout to reset.
       window.location.href = '/login'
     } catch (error) {
       console.error('Logout error:', error)

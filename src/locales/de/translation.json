@@ -1461,10 +1461,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Dein Profil ist noch nicht vollständig eingerichtet.",
-      "cta": "Einrichtung abschließen",
-      "dismiss": "Schließen"
+    "onboardingReentry": {
+      "title": "Richte Nowry fertig ein",
+      "body": "Wähle deine Themen aus, und Nowry findet dir ein erstes Lern-Deck.",
+      "cta": "Einrichtung fortsetzen",
+      "dismiss": "Vorerst ausblenden",
+      "dismissed": "Einrichtungshinweis ausgeblendet.",
+      "error": {
+        "title": "Deine Einrichtung konnte nicht geprüft werden"
+      }
     }
   },
   "pet": {

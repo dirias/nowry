@@ -117,7 +117,9 @@ const Register = () => {
 
         setRegistrationSuccess(true)
 
-        // Redirect to onboarding wizard after 1.5 seconds
+        // The explicit initial post-auth navigation ADR-007 keeps: a brand-new
+        // account starts in onboarding once. Nothing sends them back afterwards —
+        // ONB-012 removed the global redirect, so leaving is now genuinely leaving.
         setTimeout(() => {
           navigate('/onboarding')
         }, 1500)
@@ -140,8 +142,8 @@ const Register = () => {
       // Use Firebase Google OAuth
       const response = await authService.loginWithGoogle()
 
-      // Redirection: First time Google users go to onboarding, existing ones to home
-      // In register page, we naturally assume success leads to onboarding
+      // Same explicit one-time navigation as Login's Google path (ADR-007):
+      // first-time Google users start in onboarding, everybody else goes Home.
       if (response && response.backendUser && response.backendUser.wizard_completed === false) {
         window.location.href = '/onboarding'
       } else {

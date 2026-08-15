@@ -2535,10 +2535,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Your profile setup isn't complete yet.",
-      "cta": "Finish setup",
-      "dismiss": "Dismiss"
+    "onboardingReentry": {
+      "title": "Finish setting up Nowry",
+      "body": "Pick your topics and Nowry will find you a first study deck.",
+      "cta": "Continue Setup",
+      "dismiss": "Hide this for now",
+      "dismissed": "Setup reminder hidden.",
+      "error": {
+        "title": "We couldn't check your setup"
+      }
     }
   },
   "pet": {

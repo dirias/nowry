@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Grid, Typography, Container, Button, IconButton, Tooltip, Skeleton, Stack } from '@mui/joy'
+import { Box, Grid, Typography, Container, IconButton, Tooltip, Skeleton } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded'
-import CloseRounded from '@mui/icons-material/CloseRounded'
 import FocusBar from './FocusBar'
+import OnboardingReentry from './OnboardingReentry'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import WeeklyProgress from './WeeklyProgress'
@@ -23,12 +23,6 @@ function Home() {
   const navigate = useNavigate()
   const [studyStats, setStudyStats] = useState({ dueCount: 0, loading: true })
   const [blackboardOpen, setBlackboardOpen] = useState(false)
-  const [bannerDismissed, setBannerDismissed] = useState(() => sessionStorage.getItem('setup_banner_dismissed') === 'true')
-
-  const handleDismissBanner = () => {
-    sessionStorage.setItem('setup_banner_dismissed', 'true')
-    setBannerDismissed(true)
-  }
 
   const motivationPhrase = useMemo(() => {
     const phrases = t('motivation.phrases', { returnObjects: true })
@@ -49,54 +43,15 @@ function Home() {
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 3 } }}>
-      {/* Setup completion banner — only for users who skipped the wizard */}
-      {!user?.wizard_completed && !bannerDismissed && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 2,
-            px: 2.5,
-            py: 1.5,
-            mb: { xs: 2, md: 3 },
-            borderRadius: 'lg',
-            bgcolor: 'background.level1',
-            border: '1px solid',
-            borderColor: 'divider',
-            flexWrap: 'wrap'
-          }}
-        >
-          <Stack direction='row' spacing={1.5} alignItems='center'>
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: 'warning.400',
-                flexShrink: 0
-              }}
-            />
-            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              {t('home.setupBanner.message')}
-            </Typography>
-          </Stack>
-          <Stack direction='row' spacing={1} alignItems='center'>
-            <Button
-              size='sm'
-              variant='solid'
-              onClick={() => navigate('/onboarding')}
-              aria-label={t('home.setupBanner.cta')}
-              sx={{ fontSize: '0.75rem', px: 2 }}
-            >
-              {t('home.setupBanner.cta')}
-            </Button>
-            <IconButton size='sm' variant='plain' color='neutral' onClick={handleDismissBanner} aria-label={t('home.setupBanner.dismiss')}>
-              <CloseRounded fontSize='small' />
-            </IconButton>
-          </Stack>
-        </Box>
-      )}
+      {/*
+        Onboarding re-entry (ONB-012, ADR-007). Server-governed: it appears only
+        when `GET /users/onboarding` says the journey is incomplete and the
+        24-hour grace period has passed. It renders nothing while that read is in
+        flight, so everything below is never waiting on it, and it never opens
+        onboarding by itself. The old `wizard_completed` banner it replaced asked
+        the client to decide, and answered on a stale local flag.
+      */}
+      <OnboardingReentry />
 
       {/* Header - Welcome + Study Status */}
       <Box
