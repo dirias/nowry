@@ -51,7 +51,9 @@ describe('journey adapters', () => {
 
     const state = await userService.getOnboardingState()
 
-    expect(apiClient.get).toHaveBeenCalledWith('/users/onboarding')
+    // ONB-014 added `suppressErrorToast`: onboarding renders its own
+    // differentiated error state, so the client's generic toast is opted out of.
+    expect(apiClient.get).toHaveBeenCalledWith('/users/onboarding', { suppressErrorToast: true })
     // show_reentry and resume_screen are server-derived: passed through, never recomputed.
     expect(state).toEqual(JOURNEY_SNAPSHOT)
   })
@@ -61,10 +63,11 @@ describe('journey adapters', () => {
 
     await userService.recordOnboardingPoint('first_deck')
 
-    expect(apiClient.patch).toHaveBeenCalledWith('/users/onboarding', {
-      action: 'record_point',
-      point: 'first_deck'
-    })
+    expect(apiClient.patch).toHaveBeenCalledWith(
+      '/users/onboarding',
+      { action: 'record_point', point: 'first_deck' },
+      { suppressErrorToast: true }
+    )
   })
 
   it('postpones without a point — a postpone carrying one is a 400 invalid_action', async () => {
@@ -132,7 +135,7 @@ describe('onboarding fork adapter', () => {
     expect(apiClient.post).toHaveBeenCalledWith(
       '/public/decks/deck-id/fork',
       { context: 'onboarding' },
-      { headers: { 'Idempotency-Key': 'a3f1c0de-0000-4000-8000-000000000001' } }
+      { suppressErrorToast: true, headers: { 'Idempotency-Key': 'a3f1c0de-0000-4000-8000-000000000001' } }
     )
   })
 

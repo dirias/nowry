@@ -1,6 +1,17 @@
 import { apiClient } from '../client'
 
 /**
+ * Opt out of the client's global error toast (ONB-014).
+ *
+ * Every caller of these three journey routes and of the general-preferences
+ * route — onboarding's screens and Account Settings — renders its own
+ * differentiated, translated error state with a retry attached to the exact
+ * field or action that failed. The generic toast would duplicate that, and on
+ * `activation_failed` it would contradict it outright: the deck *was* added.
+ */
+const ONBOARDING_OWNS_ITS_ERRORS = { suppressErrorToast: true }
+
+/**
  * User Service
  * Handles user profile, settings, and account management
  */
@@ -76,7 +87,7 @@ export const userService = {
    * @returns {Promise<Object>} Current preferences including agent settings
    */
   async getGeneralPreferences() {
-    const { data } = await apiClient.get('/users/preferences/general')
+    const { data } = await apiClient.get('/users/preferences/general', ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 
@@ -97,7 +108,7 @@ export const userService = {
    * @returns {Promise<Object>} Echoed `GeneralPreferencesResponse`
    */
   async updateGeneralPreferences(preferences) {
-    const { data } = await apiClient.put('/users/preferences/general', preferences)
+    const { data } = await apiClient.put('/users/preferences/general', preferences, ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 
@@ -133,7 +144,7 @@ export const userService = {
    * }>} Journey snapshot
    */
   async getOnboardingState() {
-    const { data } = await apiClient.get('/users/onboarding')
+    const { data } = await apiClient.get('/users/onboarding', ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 
@@ -149,10 +160,7 @@ export const userService = {
    * @returns {Promise<Object>} Refreshed journey snapshot
    */
   async recordOnboardingPoint(point) {
-    const { data } = await apiClient.patch('/users/onboarding', {
-      action: 'record_point',
-      point
-    })
+    const { data } = await apiClient.patch('/users/onboarding', { action: 'record_point', point }, ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 
@@ -164,7 +172,7 @@ export const userService = {
    * @returns {Promise<Object>} Refreshed journey snapshot
    */
   async postponeOnboarding() {
-    const { data } = await apiClient.patch('/users/onboarding', { action: 'postpone' })
+    const { data } = await apiClient.patch('/users/onboarding', { action: 'postpone' }, ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 

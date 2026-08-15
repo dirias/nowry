@@ -39,7 +39,7 @@ const Contact = lazy(() => import('./components/HomePage/Contact'))
 const Login = lazy(() => import('./components/User/Login'))
 const Register = lazy(() => import('./components/User/Register'))
 const ResetPassword = lazy(() => import('./components/User/ResetPassword'))
-const OnboardingWizard = lazy(() => import('./components/User/OnboardingWizard'))
+const OnboardingRoute = lazy(() => import('./components/User/OnboardingRoute'))
 const Home = lazy(() => import('./components/User/Home/Home'))
 const EditorHome = lazy(() => import('./components/Books/EditorHome'))
 const BookHome = lazy(() => import('./components/Books/BookHome'))
@@ -308,14 +308,19 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     {/*
-                      This bounce points *out* of onboarding, not into it, so it is not
-                      the guard ADR-007 removed: it restricts nobody's navigation and
-                      only stops an already-activated user from re-entering a one-time
-                      journey. It stays until ONB-014 swaps in `OnboardingRoute`, which
-                      owns the same redirect off server journey state instead of the
-                      legacy flag.
+                      ONB-014 — the `user?.wizard_completed ? <Navigate to='/'/>` bounce
+                      that used to sit here is gone, and nothing replaces it at this
+                      level. `OnboardingRoute` owns the identical redirect, but resolves
+                      it from `GET /users/onboarding` — live server state, which already
+                      normalizes a legacy `wizard_completed=true` user to activated
+                      (ONB-001) — instead of the `user` snapshot AuthContext cached at
+                      sign-in and never refreshes after a fork. Two redirect authorities
+                      where the outer one reads a stale client flag is precisely what
+                      ADR-007 means by server-governed, and it would have overridden the
+                      FR-028 success panel the moment anyone called `checkUser()` after
+                      activation.
                     */}
-                    {user?.wizard_completed ? <Navigate to='/' replace /> : <OnboardingWizard />}
+                    <OnboardingRoute />
                   </ProtectedRoute>
                 }
               />

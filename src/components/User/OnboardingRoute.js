@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Stack, Typography } from '@mui/joy'
+import { Button, Stack, Typography } from '@mui/joy'
 
 import useOnboardingJourney, { JOURNEY_PHASE } from '../../hooks/useOnboardingJourney'
 import useProgressivePreferences from '../../hooks/useProgressivePreferences'
 import { focusRing } from '../Common/Form/formStyles'
+import FirstDeckScreen from './FirstDeckScreen'
 import OnboardingPageShell from './OnboardingPageShell'
+import PersonalizationScreen from './PersonalizationScreen'
+import WelcomeScreen from './WelcomeScreen'
 import {
   ONBOARDING_SCREEN,
   TOTAL_ONBOARDING_SCREENS,
@@ -64,54 +67,19 @@ const shouldRecordPersonalization = (lastMeaningfulPoint) =>
   lastMeaningfulPoint !== ONBOARDING_SCREEN.PERSONALIZATION && lastMeaningfulPoint !== ONBOARDING_SCREEN.FIRST_DECK
 
 /**
- * What each screen is called and what its forward action does, until the real
- * screens land. `advance` is `'next'` on the first two and `'exit'` on the last,
- * because First Deck has no fourth screen to go to — exiting there is the
- * finish-for-now path (FR-035), and it claims no completion.
+ * The three screens, in order (ONB-014 wiring). Each one receives the identical
+ * `screenProps` contract built below and renders `OnboardingPageShell` itself,
+ * so the chrome is the same on all three while the title, footer and banner
+ * belong to whichever screen is showing.
+ *
+ * There is no fourth entry, and First Deck has no `onNext`: exiting there is the
+ * finish-for-now path (FR-035), which claims no completion. Activation arrives
+ * from the fork response alone (ADR-006), never from reaching the end.
  */
-const PLACEHOLDER_SCREENS = {
-  [ONBOARDING_SCREEN.WELCOME]: {
-    titleKey: 'onboarding.shell.screenName.welcome',
-    actionKey: 'onboarding.next',
-    advance: 'next'
-  },
-  [ONBOARDING_SCREEN.PERSONALIZATION]: {
-    titleKey: 'onboarding.shell.screenName.personalization',
-    actionKey: 'onboarding.next',
-    advance: 'next'
-  },
-  [ONBOARDING_SCREEN.FIRST_DECK]: {
-    titleKey: 'onboarding.shell.screenName.firstDeck',
-    actionKey: 'onboarding.finish',
-    advance: 'exit'
-  }
-}
-
-/**
- * Stand-in for a screen that has not been built yet — ONB-009, ONB-010 and
- * ONB-011 replace these with real content. It renders `OnboardingPageShell`
- * exactly as the real screens will, from the same `shell` props, so the chrome,
- * the focus movement and the sibling footer are exercised end to end before any
- * screen content exists. Extra props from the screen contract are accepted and
- * ignored rather than forwarded, so nothing leaks into the DOM.
- */
-const PlaceholderScreen = ({ shell, titleKey, actionKey, onAdvance }) => {
-  const { t } = useTranslation()
-  return (
-    <OnboardingPageShell
-      {...shell}
-      title={t(titleKey)}
-      footer={
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onAdvance} variant='solid' color='primary' sx={{ minHeight: 44, ...focusRing }}>
-            {t(actionKey)}
-          </Button>
-        </Box>
-      }
-    >
-      {null}
-    </OnboardingPageShell>
-  )
+const SCREEN_COMPONENTS = {
+  [ONBOARDING_SCREEN.WELCOME]: WelcomeScreen,
+  [ONBOARDING_SCREEN.PERSONALIZATION]: PersonalizationScreen,
+  [ONBOARDING_SCREEN.FIRST_DECK]: FirstDeckScreen
 }
 
 const OnboardingRoute = () => {
@@ -194,22 +162,15 @@ const OnboardingRoute = () => {
     onBack: previousScreen(screen) ? goBack : null
   }
 
-  const placeholder = PLACEHOLDER_SCREENS[screen]
-  if (!placeholder) return null
+  const Screen = SCREEN_COMPONENTS[screen]
+  if (!Screen) return null
 
   // The contract ONB-009/010/011 receive. `journey` and `preferences` are the
   // single instances described above; `onNext`/`onBack` move within the journey
   // and touch nothing else; `onExit` leaves it without claiming completion.
   const screenProps = { shell, journey, preferences, onNext: goNext, onBack: goBack, onExit: exitToHome }
 
-  return (
-    <PlaceholderScreen
-      {...screenProps}
-      titleKey={placeholder.titleKey}
-      actionKey={placeholder.actionKey}
-      onAdvance={placeholder.advance === 'exit' ? exitToHome : goNext}
-    />
-  )
+  return <Screen {...screenProps} />
 }
 
 export default OnboardingRoute

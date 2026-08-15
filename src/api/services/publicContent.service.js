@@ -7,6 +7,15 @@ import { apiClient } from '../client'
 export const OFFICIAL_DECK_PAGE_SIZE = 3
 
 /**
+ * Opt out of the client's global error toast for the two onboarding adapters
+ * below (ONB-014). First Deck already distinguishes a browse failure from an
+ * empty shelf, and gives `activation_failed` its own non-alarming copy because
+ * the deck really is in the library — a generic red toast beside either one
+ * destroys that distinction. Ordinary browse and library forks are untouched.
+ */
+const ONBOARDING_OWNS_ITS_ERRORS = { suppressErrorToast: true }
+
+/**
  * Public Content Service
  * Handles all public content sharing API operations
  */
@@ -78,7 +87,7 @@ export const publicContentService = {
     params.append('page', String(page))
     params.append('page_size', String(pageSize))
 
-    const { data } = await apiClient.get(`/public/decks?${params}`)
+    const { data } = await apiClient.get(`/public/decks?${params}`, ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 
@@ -107,7 +116,9 @@ export const publicContentService = {
    * @returns {Promise<{created: boolean, forkedDeck: Object|null, onboarding: {status: string, activated_at: string}|null}>}
    */
   async forkDeckForOnboarding(id, idempotencyKey) {
-    const config = idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {}
+    const config = idempotencyKey
+      ? { ...ONBOARDING_OWNS_ITS_ERRORS, headers: { 'Idempotency-Key': idempotencyKey } }
+      : { ...ONBOARDING_OWNS_ITS_ERRORS }
 
     const { data } = await apiClient.post(`/public/decks/${id}/fork`, { context: 'onboarding' }, config)
 
@@ -243,23 +254,32 @@ export const publicContentService = {
   },
 
   /**
-   * Fork a book
+   * Fork a book into the user's library.
+   *
+   * Idempotent on `(book, user)` (ADR-005). Re-forking replays the copy the
+   * user already owns as `200 { created: false }` rather than the historical
+   * `409 already_forked`, which ONB-014 removed so books and decks answer the
+   * same client action the same way. Read `created` — never a `409` — to tell a
+   * fresh fork from a replay.
+   *
    * @param {string} id - Book ID
-   * @returns {Promise<Object>} Forked book
+   * @returns {Promise<{created: boolean, content: Object|null}>}
    */
   async forkBook(id) {
     const { data } = await apiClient.post(`/public/books/${id}/fork`)
-    return data.forked_book
+    return { created: Boolean(data?.created), content: data?.forked_book ?? null }
   },
 
   /**
-   * Fork a deck
+   * Fork a deck into the user's library. Same idempotent contract as
+   * {@link forkBook}; see its note on `created`.
+   *
    * @param {string} id - Deck ID
-   * @returns {Promise<Object>} Forked deck
+   * @returns {Promise<{created: boolean, content: Object|null}>}
    */
   async forkDeck(id) {
     const { data } = await apiClient.post(`/public/decks/${id}/fork`)
-    return data.forked_deck
+    return { created: Boolean(data?.created), content: data?.forked_deck ?? null }
   },
 
   /**

@@ -184,7 +184,7 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
 
   const browsePhase = browseState?.phase ?? BROWSE_PHASE.IDLE
   const forkPhase = forkState?.phase ?? ACTION_PHASE.IDLE
-  const forkError = forkPhase === ACTION_PHASE.ERROR ? forkState?.error ?? null : null
+  const forkError = forkPhase === ACTION_PHASE.ERROR ? (forkState?.error ?? null) : null
 
   /**
    * The deck exists; the activation write does not. Two routes reach it: the
@@ -339,17 +339,10 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
       </Stack>
     )
 
-  const subtitle =
-    view === FIRST_DECK_VIEW.OPTIONS || view === FIRST_DECK_VIEW.LOADING ? t('onboarding.firstDeck.lead') : null
+  const subtitle = view === FIRST_DECK_VIEW.OPTIONS || view === FIRST_DECK_VIEW.LOADING ? t('onboarding.firstDeck.lead') : null
 
   return (
-    <OnboardingPageShell
-      {...shell}
-      title={t('onboarding.firstDeck.title')}
-      subtitle={subtitle}
-      banner={banner}
-      footer={footer}
-    >
+    <OnboardingPageShell {...shell} title={t('onboarding.firstDeck.title')} subtitle={subtitle} banner={banner} footer={footer}>
       <Typography level='body-xs' role='status' sx={visuallyHidden}>
         {statusText}
       </Typography>

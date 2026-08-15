@@ -44,9 +44,7 @@ const OfficialMark = ({ publisher, sx }) => {
 
   // No publisher, no attribution — an invented "Nowry" here would be the client
   // asserting provenance the server did not send (NFR-018).
-  const accessibleName = publisher
-    ? t('onboarding.firstDeck.official.accessible', { publisher })
-    : t('onboarding.firstDeck.official.label')
+  const accessibleName = publisher ? t('onboarding.firstDeck.official.accessible', { publisher }) : t('onboarding.firstDeck.official.label')
 
   return (
     <Box

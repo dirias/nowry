@@ -187,13 +187,29 @@ const PublicView = () => {
     setActionLoading(true)
     try {
       const forkService = type === 'books' ? publicContentService.forkBook : publicContentService.forkDeck
-      const forked = await forkService(id)
-      showMessage('success', t('public.forkSuccess'))
+      /*
+       * ONB-014 — a repeat fork is a success, not an error.
+       *
+       * Forking is idempotent on the durable `(type, source, user)` key
+       * (ADR-005): re-forking replays the copy the user already owns as
+       * `200 { created: false }`. This used to be read from a `409
+       * already_forked`, which ONB-003 removed for decks and ONB-014 removed
+       * for books — so the branch is gone and `created` is the single signal
+       * for both types. Never reintroduce a `409` reading here; a lost
+       * response and an unwanted duplicate are indistinguishable to a
+       * retrying client, which is the whole reason the server stopped
+       * reporting one as a conflict.
+       */
+      const { created, content: forked } = await forkService(id)
+      showMessage(created ? 'success' : 'info', t(created ? 'public.forkSuccess' : 'public.alreadyForked'))
 
-      // Navigate to forked content after 1 second
-      setTimeout(() => {
-        navigate(type === 'books' ? `/book/${forked._id}` : `/study`)
-      }, 1000)
+      // Navigate to the copy — the fresh one or the one that was already there.
+      setTimeout(
+        () => {
+          navigate(type === 'books' ? `/book/${forked?._id}` : `/study`)
+        },
+        created ? 1000 : 1500
+      )
     } catch (error) {
       console.error('Error forking content:', error)
       const status = error.response?.status
@@ -201,15 +217,6 @@ const PublicView = () => {
 
       if (status === 400 && detail === 'cannot_fork_own_content') {
         showMessage('warning', t('public.forkOwnContent'))
-        return
-      }
-
-      if (status === 409 && detail?.code === 'already_forked') {
-        const existingId = detail.forked_content_id
-        showMessage('info', t('public.alreadyForked'))
-        setTimeout(() => {
-          navigate(type === 'books' ? `/book/${existingId}` : `/study`)
-        }, 1500)
         return
       }
 

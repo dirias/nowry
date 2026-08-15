@@ -87,14 +87,18 @@ export const cardsService = {
    * @param {string} prompt - Optional custom prompt for generation
    * @returns {Promise<Array>} Array of generated study cards
    */
-  async generate(sampleText, sampleNumber, prompt = null) {
+  async generate(sampleText, sampleNumber, prompt = null, config = {}) {
     const generationPrompt = prompt || process.env.REACT_APP_CARD_GENERATION_PROMPT || DEFAULT_CARD_GEN_PROMPT
 
-    const { data } = await apiClient.post(ENDPOINTS.studyCards.generate, {
-      prompt: generationPrompt,
-      sampleText,
-      sampleNumber
-    })
+    const { data } = await apiClient.post(
+      ENDPOINTS.studyCards.generate,
+      {
+        prompt: generationPrompt,
+        sampleText,
+        sampleNumber
+      },
+      config
+    )
 
     return data
   },
@@ -121,7 +125,10 @@ export const cardsService = {
    * @returns {Promise<Array>} Generated cards — never a journey state
    */
   async generateOnboardingFallback(topicContext, cardCount = 10, prompt = null) {
-    return cardsService.generate(topicContext, cardCount, prompt)
+    // ONB-014: the empty state renders its own translated fallback error with a
+    // retry, so the client's generic error toast is opted out of here — and only
+    // here. Every other `generate` caller keeps it.
+    return cardsService.generate(topicContext, cardCount, prompt, { suppressErrorToast: true })
   },
 
   /**
