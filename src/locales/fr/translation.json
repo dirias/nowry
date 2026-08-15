@@ -389,6 +389,85 @@
       "loadError": "Nous n'avons pas pu charger vos choix enregistrés.",
       "loading": "Chargement de vos choix enregistrés"
     },
+    "firstDeck": {
+      "title": "Votre premier paquet",
+      "lead": "Ajoutez-en un à votre bibliothèque et vous pourrez étudier tout de suite.",
+      "status": {
+        "loading": "Recherche de paquets officiels.",
+        "ready_one": "{{count}} paquet officiel trouvé.",
+        "ready_other": "{{count}} paquets officiels trouvés.",
+        "empty": "Pas encore de paquets officiels pour {{topic}}.",
+        "added": "Paquet ajouté à votre bibliothèque."
+      },
+      "official": {
+        "label": "Paquet officiel",
+        "accessible": "Paquet officiel publié par {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "Ce que vous allez apprendre",
+        "publisher": "Publié par {{publisher}}",
+        "count_one": "{{count}} carte",
+        "count_other": "{{count}} cartes",
+        "add": "Ajouter à Ma Bibliothèque",
+        "retry": "Réessayer",
+        "selected": "Sélectionné"
+      },
+      "empty": {
+        "title": "Pas encore de paquets officiels pour {{topic}}",
+        "body": "Nowry publie ses paquets officiels sujet par sujet, et {{topic}} n'est pas encore couvert. Vos sujets et votre objectif sont enregistrés.",
+        "fallbackTitle": "En générer un avec l'IA",
+        "fallbackBody": "Un paquet généré par l'IA n'est pas relu par Nowry et ne termine pas votre configuration, mais vous pouvez l'essayer maintenant.",
+        "fallbackAction": "Générer avec l'IA"
+      },
+      "fallback": {
+        "pending": "Génération des cartes…",
+        "success": {
+          "title": "Votre demande est bien passée",
+          "body_one": "Nowry a généré {{count}} carte sur {{topic}}. Rien n'a été ajouté à votre bibliothèque : votre configuration reste ouverte et vous pouvez revenir quand vous voulez.",
+          "body_other": "Nowry a généré {{count}} cartes sur {{topic}}. Rien n'a été ajouté à votre bibliothèque : votre configuration reste ouverte et vous pouvez revenir quand vous voulez.",
+          "bodyNoCount": "Nowry a traité votre demande. Rien n'a été ajouté à votre bibliothèque : votre configuration reste ouverte et vous pouvez revenir quand vous voulez."
+        },
+        "error": {
+          "title": "La demande d'IA n'a pas abouti",
+          "body": "Rien n'a été généré et rien n'a changé."
+        }
+      },
+      "browseError": {
+        "title": "Impossible de charger les paquets",
+        "body": "Vos sujets et votre objectif sont enregistrés. Réessayez, ou terminez pour l'instant et revenez plus tard."
+      },
+      "preferencesError": {
+        "title": "Impossible de charger vos sujets",
+        "body": "Nowry en a besoin avant de pouvoir chercher un paquet."
+      },
+      "missingTopic": {
+        "title": "Choisissez d'abord un sujet",
+        "body": "Nowry cherche votre premier paquet à partir du premier sujet que vous choisissez.",
+        "action": "Choisir des Sujets"
+      },
+      "forkError": {
+        "title": "Le paquet n'a pas été ajouté",
+        "body": "Rien n'a été ajouté à votre bibliothèque et ce paquet reste sélectionné.",
+        "inProgress": "L'ajout est encore en cours. Patientez un instant puis réessayez.",
+        "copyFailed": "La copie du paquet ne s'est pas terminée.",
+        "notOfficial": "Ce paquet ne fait pas partie de la collection officielle de Nowry.",
+        "ownContent": "Ce paquet vous appartient déjà.",
+        "notFound": "Ce paquet n'est plus disponible."
+      },
+      "activationError": {
+        "title": "Votre paquet est dans votre bibliothèque",
+        "body": "Le paquet et ses cartes ont bien été ajoutés. Seule la dernière étape de la configuration n'a pas abouti, et réessayer la termine sans ajouter de seconde copie."
+      },
+      "success": {
+        "title": "Il est dans votre bibliothèque",
+        "body": "{{name}} vous attend quand vous voulez.",
+        "bodyNoName": "Votre paquet vous attend quand vous voulez.",
+        "open": "Ouvrir Mon Paquet",
+        "later": "Pas maintenant"
+      },
+      "finish": "Terminer pour l'Instant",
+      "finishHint": "Vos sujets et votre objectif sont enregistrés. Vous pouvez ajouter un paquet quand vous voulez."
+    },
     "language": {
       "title": "Choisissez votre Langue",
       "subtitle": "Sélectionnez votre langue préférée pour l'interface"

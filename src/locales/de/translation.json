@@ -367,6 +367,85 @@
       "loadError": "Wir konnten deine gespeicherte Auswahl nicht laden.",
       "loading": "Deine gespeicherte Auswahl wird geladen"
     },
+    "firstDeck": {
+      "title": "Dein erstes Deck",
+      "lead": "Füge eines deiner Bibliothek hinzu und du kannst sofort lernen.",
+      "status": {
+        "loading": "Offizielle Decks werden gesucht.",
+        "ready_one": "{{count}} offizielles Deck gefunden.",
+        "ready_other": "{{count}} offizielle Decks gefunden.",
+        "empty": "Noch keine offiziellen Decks für {{topic}}.",
+        "added": "Deck zu deiner Bibliothek hinzugefügt."
+      },
+      "official": {
+        "label": "Offizielles Deck",
+        "accessible": "Offizielles Deck, veröffentlicht von {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "Was du lernen wirst",
+        "publisher": "Veröffentlicht von {{publisher}}",
+        "count_one": "{{count}} Karte",
+        "count_other": "{{count}} Karten",
+        "add": "Zu Meiner Bibliothek Hinzufügen",
+        "retry": "Erneut Versuchen",
+        "selected": "Ausgewählt"
+      },
+      "empty": {
+        "title": "Noch keine offiziellen Decks für {{topic}}",
+        "body": "Nowry veröffentlicht offizielle Decks Thema für Thema, und {{topic}} ist noch nicht dabei. Deine Themen und dein Ziel sind gespeichert.",
+        "fallbackTitle": "Stattdessen eines mit KI erstellen",
+        "fallbackBody": "Ein KI-Deck wird von Nowry nicht geprüft und schließt deine Einrichtung nicht ab, aber du kannst es jetzt ausprobieren.",
+        "fallbackAction": "Mit KI erstellen"
+      },
+      "fallback": {
+        "pending": "Karten werden erstellt…",
+        "success": {
+          "title": "Deine Anfrage ist angekommen",
+          "body_one": "Nowry hat {{count}} Karte zu {{topic}} erstellt. Deiner Bibliothek wurde nichts hinzugefügt, deine Einrichtung bleibt also offen und du kannst jederzeit zurückkommen.",
+          "body_other": "Nowry hat {{count}} Karten zu {{topic}} erstellt. Deiner Bibliothek wurde nichts hinzugefügt, deine Einrichtung bleibt also offen und du kannst jederzeit zurückkommen.",
+          "bodyNoCount": "Nowry hat deine Anfrage bearbeitet. Deiner Bibliothek wurde nichts hinzugefügt, deine Einrichtung bleibt also offen und du kannst jederzeit zurückkommen."
+        },
+        "error": {
+          "title": "Die KI-Anfrage ist nicht durchgegangen",
+          "body": "Es wurde nichts erstellt und nichts verändert."
+        }
+      },
+      "browseError": {
+        "title": "Die Decks konnten nicht geladen werden",
+        "body": "Deine Themen und dein Ziel sind gespeichert. Versuche es erneut oder beende vorerst und komm später zurück."
+      },
+      "preferencesError": {
+        "title": "Deine Themen konnten nicht geladen werden",
+        "body": "Nowry braucht sie, bevor nach einem Deck gesucht werden kann."
+      },
+      "missingTopic": {
+        "title": "Wähle zuerst ein Thema",
+        "body": "Nowry sucht dein erstes Deck anhand des ersten Themas, das du wählst.",
+        "action": "Themen Wählen"
+      },
+      "forkError": {
+        "title": "Das Deck wurde nicht hinzugefügt",
+        "body": "Deiner Bibliothek wurde nichts hinzugefügt, und dieses Deck bleibt ausgewählt.",
+        "inProgress": "Es wird noch hinzugefügt. Warte einen Moment und versuche es erneut.",
+        "copyFailed": "Das Kopieren des Decks wurde nicht abgeschlossen.",
+        "notOfficial": "Dieses Deck gehört nicht zur offiziellen Sammlung von Nowry.",
+        "ownContent": "Dieses Deck gehört dir bereits.",
+        "notFound": "Dieses Deck ist nicht mehr verfügbar."
+      },
+      "activationError": {
+        "title": "Dein Deck ist in deiner Bibliothek",
+        "body": "Das Deck und seine Karten wurden hinzugefügt. Nur der letzte Schritt der Einrichtung wurde nicht abgeschlossen, und ein erneuter Versuch schließt ihn ab, ohne eine zweite Kopie anzulegen."
+      },
+      "success": {
+        "title": "Es ist in deiner Bibliothek",
+        "body": "{{name}} ist bereit, wann immer du es bist.",
+        "bodyNoName": "Dein Deck ist bereit, wann immer du es bist.",
+        "open": "Mein Deck Öffnen",
+        "later": "Jetzt nicht"
+      },
+      "finish": "Vorerst Beenden",
+      "finishHint": "Deine Themen und dein Ziel sind gespeichert. Du kannst jederzeit ein Deck hinzufügen."
+    },
     "language": {
       "title": "Wähle deine Sprache",
       "subtitle": "Wähle deine bevorzugte Sprache für die Benutzeroberfläche"

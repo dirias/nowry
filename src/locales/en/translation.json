@@ -494,6 +494,85 @@
       "loadError": "We couldn't load your saved choices.",
       "loading": "Loading your saved choices"
     },
+    "firstDeck": {
+      "title": "Your first deck",
+      "lead": "Add one to your library and you can start studying right away.",
+      "status": {
+        "loading": "Looking for official decks.",
+        "ready_one": "{{count}} official deck found.",
+        "ready_other": "{{count}} official decks found.",
+        "empty": "No official decks yet for {{topic}}.",
+        "added": "Deck added to your library."
+      },
+      "official": {
+        "label": "Official deck",
+        "accessible": "Official deck published by {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "What you'll learn",
+        "publisher": "Published by {{publisher}}",
+        "count_one": "{{count}} card",
+        "count_other": "{{count}} cards",
+        "add": "Add to My Library",
+        "retry": "Try Again",
+        "selected": "Selected"
+      },
+      "empty": {
+        "title": "No official {{topic}} decks yet",
+        "body": "Nowry publishes official decks topic by topic, and {{topic}} isn't covered yet. Your topics and goal are saved.",
+        "fallbackTitle": "Generate one with AI instead",
+        "fallbackBody": "An AI deck isn't reviewed by Nowry and doesn't finish your setup, but you can try one now.",
+        "fallbackAction": "Generate with AI"
+      },
+      "fallback": {
+        "pending": "Generating cards…",
+        "success": {
+          "title": "Your request went through",
+          "body_one": "Nowry generated {{count}} card for {{topic}}. Nothing was added to your library, so your setup stays open and you can come back any time.",
+          "body_other": "Nowry generated {{count}} cards for {{topic}}. Nothing was added to your library, so your setup stays open and you can come back any time.",
+          "bodyNoCount": "Nowry finished your request. Nothing was added to your library, so your setup stays open and you can come back any time."
+        },
+        "error": {
+          "title": "The AI request didn't go through",
+          "body": "Nothing was generated and nothing changed."
+        }
+      },
+      "browseError": {
+        "title": "We couldn't load the decks",
+        "body": "Your topics and goal are saved. Try again, or finish for now and come back later."
+      },
+      "preferencesError": {
+        "title": "We couldn't load your topics",
+        "body": "Nowry needs them before it can look for a deck."
+      },
+      "missingTopic": {
+        "title": "Pick a topic first",
+        "body": "Nowry looks for your first deck using the first topic you choose.",
+        "action": "Choose Topics"
+      },
+      "forkError": {
+        "title": "The deck wasn't added",
+        "body": "Nothing was added to your library, and this deck is still selected.",
+        "inProgress": "It's still being added. Give it a moment and try again.",
+        "copyFailed": "Copying the deck didn't finish.",
+        "notOfficial": "This deck isn't part of Nowry's official collection.",
+        "ownContent": "You already own this deck.",
+        "notFound": "This deck is no longer available."
+      },
+      "activationError": {
+        "title": "Your deck is in your library",
+        "body": "The deck and its cards were added. Only the last step of setup didn't finish, and trying again completes it without adding a second copy."
+      },
+      "success": {
+        "title": "It's in your library",
+        "body": "{{name}} is ready whenever you are.",
+        "bodyNoName": "Your deck is ready whenever you are.",
+        "open": "Open Your Deck",
+        "later": "Not Now"
+      },
+      "finish": "Finish for Now",
+      "finishHint": "Your topics and goal are saved. You can add a deck any time."
+    },
     "language": {
       "title": "Choose Your Language",
       "subtitle": "Select your preferred language for the interface"

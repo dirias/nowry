@@ -368,6 +368,85 @@
       "loadError": "No pudimos cargar tus elecciones guardadas.",
       "loading": "Cargando tus elecciones guardadas"
     },
+    "firstDeck": {
+      "title": "Tu primer mazo",
+      "lead": "Añade uno a tu biblioteca y podrás empezar a estudiar de inmediato.",
+      "status": {
+        "loading": "Buscando mazos oficiales.",
+        "ready_one": "{{count}} mazo oficial encontrado.",
+        "ready_other": "{{count}} mazos oficiales encontrados.",
+        "empty": "Todavía no hay mazos oficiales de {{topic}}.",
+        "added": "Mazo añadido a tu biblioteca."
+      },
+      "official": {
+        "label": "Mazo oficial",
+        "accessible": "Mazo oficial publicado por {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "Lo que vas a aprender",
+        "publisher": "Publicado por {{publisher}}",
+        "count_one": "{{count}} tarjeta",
+        "count_other": "{{count}} tarjetas",
+        "add": "Añadir a Mi Biblioteca",
+        "retry": "Reintentar",
+        "selected": "Seleccionado"
+      },
+      "empty": {
+        "title": "Todavía no hay mazos oficiales de {{topic}}",
+        "body": "Nowry publica los mazos oficiales tema a tema, y {{topic}} aún no está cubierto. Tus temas y tu objetivo están guardados.",
+        "fallbackTitle": "Generar uno con IA",
+        "fallbackBody": "Un mazo generado con IA no pasa por la revisión de Nowry y no completa tu configuración, pero puedes probarlo ahora.",
+        "fallbackAction": "Generar con IA"
+      },
+      "fallback": {
+        "pending": "Generando tarjetas…",
+        "success": {
+          "title": "Tu solicitud se envió",
+          "body_one": "Nowry generó {{count}} tarjeta sobre {{topic}}. No se añadió nada a tu biblioteca, así que tu configuración sigue abierta y puedes volver cuando quieras.",
+          "body_other": "Nowry generó {{count}} tarjetas sobre {{topic}}. No se añadió nada a tu biblioteca, así que tu configuración sigue abierta y puedes volver cuando quieras.",
+          "bodyNoCount": "Nowry completó tu solicitud. No se añadió nada a tu biblioteca, así que tu configuración sigue abierta y puedes volver cuando quieras."
+        },
+        "error": {
+          "title": "La solicitud de IA no se completó",
+          "body": "No se generó nada y nada cambió."
+        }
+      },
+      "browseError": {
+        "title": "No pudimos cargar los mazos",
+        "body": "Tus temas y tu objetivo están guardados. Inténtalo de nuevo o termina por ahora y vuelve más tarde."
+      },
+      "preferencesError": {
+        "title": "No pudimos cargar tus temas",
+        "body": "Nowry los necesita antes de poder buscar un mazo."
+      },
+      "missingTopic": {
+        "title": "Elige un tema primero",
+        "body": "Nowry busca tu primer mazo a partir del primer tema que elijas.",
+        "action": "Elegir Temas"
+      },
+      "forkError": {
+        "title": "El mazo no se añadió",
+        "body": "No se añadió nada a tu biblioteca y este mazo sigue seleccionado.",
+        "inProgress": "Todavía se está añadiendo. Espera un momento e inténtalo de nuevo.",
+        "copyFailed": "La copia del mazo no terminó.",
+        "notOfficial": "Este mazo no forma parte de la colección oficial de Nowry.",
+        "ownContent": "Este mazo ya es tuyo.",
+        "notFound": "Este mazo ya no está disponible."
+      },
+      "activationError": {
+        "title": "Tu mazo está en tu biblioteca",
+        "body": "El mazo y sus tarjetas se añadieron. Solo faltó el último paso de la configuración, y al reintentar se completa sin añadir una segunda copia."
+      },
+      "success": {
+        "title": "Ya está en tu biblioteca",
+        "body": "{{name}} te espera cuando quieras.",
+        "bodyNoName": "Tu mazo te espera cuando quieras.",
+        "open": "Abrir Mi Mazo",
+        "later": "Ahora no"
+      },
+      "finish": "Terminar por Ahora",
+      "finishHint": "Tus temas y tu objetivo están guardados. Puedes añadir un mazo cuando quieras."
+    },
     "language": {
       "title": "Elige tu Idioma",
       "subtitle": "Selecciona tu idioma preferido para la interfaz"
