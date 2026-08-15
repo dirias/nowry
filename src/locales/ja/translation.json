@@ -458,9 +458,6 @@
       "customLabel": "カスタムカラー"
     },
     "interests": {
-      "title": "どんなトピックに興味がありますか？",
-      "subtitle": "選んだトピックに合わせてホームを整えます。",
-      "groupLabel": "興味の選択",
       "selected": "選択中: {{count}}トピック",
       "selected_other": "選択中: {{count}}トピック"
     },
@@ -476,30 +473,12 @@
     "back": "戻る",
     "finish": "セットアップ完了",
     "skip": "今はスキップ",
-    "progressLabel": "初期設定の進捗",
-    "defer": "後で設定から行う",
     "identity": {
       "title": "言語を選んでください。",
       "subtitle": "お好みの言語を選択してください。"
     },
-    "appearance": {
-      "title": "あなた好みに。",
-      "subtitle": "ライトかダークか。毎日目にする色を選びましょう。",
-      "colorLabel": "{{name}}を選択",
-      "colorGroupLabel": "アクセントカラーの選択"
-    },
     "focus": {
-      "title": "何を学びたいですか？",
-      "subtitle": "トピックと目標を1つずつ選んでください。あとからいつでも変更できます。"
-    },
-    "ready": {
-      "title": "準備完了です、{{name}}さん。",
-      "titleNoName": "準備完了です。",
-      "subtitle": "あなた専用の学習スペースが整いました。",
-      "cta": "Nowryを開く"
-    },
-    "error": {
-      "saveFailed": "問題が発生しました。もう一度お試しください。"
+      "title": "何を学びたいですか？"
     },
     "failure": {
       "network": "オフラインのようです。接続を確認してもう一度お試しください。",

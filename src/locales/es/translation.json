@@ -462,9 +462,6 @@
       "customLabel": "Color Personalizado"
     },
     "interests": {
-      "title": "¿Qué temas te interesan?",
-      "subtitle": "Personalizaremos tu inicio a partir de ellos.",
-      "groupLabel": "Selección de intereses",
       "selected": "Seleccionado: {{count}} tema",
       "selected_one": "Seleccionado: {{count}} tema",
       "selected_other": "Seleccionados: {{count}} temas"
@@ -481,30 +478,12 @@
     "back": "Atrás",
     "finish": "Finalizar Configuración",
     "skip": "Saltar por ahora",
-    "progressLabel": "Progreso de la configuración",
-    "defer": "Configurarlo más tarde en ajustes",
     "identity": {
       "title": "Elige tu idioma.",
       "subtitle": "Selecciona el idioma que prefieras."
     },
-    "appearance": {
-      "title": "Hazlo tuyo.",
-      "subtitle": "Claro u oscuro. Elige un color que verás cada día.",
-      "colorLabel": "Seleccionar {{name}}",
-      "colorGroupLabel": "Selección del color de acento"
-    },
     "focus": {
-      "title": "¿Qué quieres aprender?",
-      "subtitle": "Elige un tema y un objetivo. Siempre puedes cambiarlo."
-    },
-    "ready": {
-      "title": "Todo listo, {{name}}.",
-      "titleNoName": "Todo listo.",
-      "subtitle": "Tu espacio de estudio personalizado ya está listo.",
-      "cta": "Entrar en Nowry"
-    },
-    "error": {
-      "saveFailed": "Algo salió mal. Inténtalo de nuevo."
+      "title": "¿Qué quieres aprender?"
     },
     "failure": {
       "network": "Parece que no tienes conexión. Compruébala e inténtalo de nuevo.",

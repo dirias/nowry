@@ -483,9 +483,6 @@
       "customLabel": "Couleur Personnalisée"
     },
     "interests": {
-      "title": "Quels sujets vous intéressent ?",
-      "subtitle": "Nous adapterons votre accueil à ces sujets.",
-      "groupLabel": "Sélection des centres d'intérêt",
       "selected": "Sélectionné : {{count}} sujet",
       "selected_one": "Sélectionné : {{count}} sujet",
       "selected_other": "Sélectionnés : {{count}} sujets"
@@ -502,30 +499,12 @@
     "back": "Retour",
     "finish": "Terminer la configuration",
     "skip": "Passer pour l'instant",
-    "progressLabel": "Progression de la configuration",
-    "defer": "Configurer plus tard dans les paramètres",
     "identity": {
       "title": "Choisissez votre langue.",
       "subtitle": "Sélectionnez la langue qui vous convient."
     },
-    "appearance": {
-      "title": "À votre image.",
-      "subtitle": "Clair ou sombre. Choisissez une couleur que vous verrez chaque jour.",
-      "colorLabel": "Sélectionner {{name}}",
-      "colorGroupLabel": "Choix de la couleur d'accent"
-    },
     "focus": {
-      "title": "Que venez-vous apprendre ?",
-      "subtitle": "Choisissez un thème et un objectif. Vous pourrez toujours les modifier."
-    },
-    "ready": {
-      "title": "Tout est prêt, {{name}}.",
-      "titleNoName": "Tout est prêt.",
-      "subtitle": "Votre espace d'étude personnalisé est prêt.",
-      "cta": "Entrer dans Nowry"
-    },
-    "error": {
-      "saveFailed": "Une erreur est survenue. Réessayez."
+      "title": "Que venez-vous apprendre ?"
     },
     "failure": {
       "network": "Vous semblez hors ligne. Vérifiez votre connexion et réessayez.",

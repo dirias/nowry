@@ -588,9 +588,6 @@
       "customLabel": "Custom Color"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
       "selected": "Selected: {{count}} topic",
       "selected_one": "Selected: {{count}} topic",
       "selected_other": "Selected: {{count}} topics"
@@ -607,30 +604,12 @@
     "back": "Back",
     "finish": "Finish Setup",
     "skip": "Skip for now",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
     "identity": {
       "title": "Choose your language.",
       "subtitle": "Pick the language that feels right."
     },
-    "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
-    },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this."
-    },
-    "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
-    },
-    "error": {
-      "saveFailed": "Something went wrong. Please try again."
+      "title": "What are you here to learn?"
     },
     "failure": {
       "network": "You appear to be offline. Check your connection and try again.",

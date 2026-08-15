@@ -461,9 +461,6 @@
       "customLabel": "Benutzerdefinierte Farbe"
     },
     "interests": {
-      "title": "Welche Themen interessieren dich?",
-      "subtitle": "Danach richten wir deine Startseite darauf aus.",
-      "groupLabel": "Auswahl der Interessen",
       "selected": "Ausgewählt: {{count}} Thema",
       "selected_one": "Ausgewählt: {{count}} Thema",
       "selected_other": "Ausgewählt: {{count}} Themen"
@@ -480,30 +477,12 @@
     "back": "Zurück",
     "finish": "Einrichtung abschließen",
     "skip": "Vorerst überspringen",
-    "progressLabel": "Fortschritt der Einrichtung",
-    "defer": "Später in den Einstellungen einrichten",
     "identity": {
       "title": "Wähle deine Sprache.",
       "subtitle": "Wähle die Sprache, die sich richtig anfühlt."
     },
-    "appearance": {
-      "title": "Ganz nach deinem Geschmack.",
-      "subtitle": "Hell oder dunkel. Wähle eine Farbe, die du jeden Tag siehst.",
-      "colorLabel": "{{name}} auswählen",
-      "colorGroupLabel": "Auswahl der Akzentfarbe"
-    },
     "focus": {
-      "title": "Was möchtest du lernen?",
-      "subtitle": "Wähle ein Thema und ein Ziel. Du kannst das jederzeit ändern."
-    },
-    "ready": {
-      "title": "Alles bereit, {{name}}.",
-      "titleNoName": "Alles bereit.",
-      "subtitle": "Dein persönlicher Lernbereich steht bereit.",
-      "cta": "Nowry öffnen"
-    },
-    "error": {
-      "saveFailed": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+      "title": "Was möchtest du lernen?"
     },
     "failure": {
       "network": "Du scheinst offline zu sein. Prüfe deine Verbindung und versuche es erneut.",
