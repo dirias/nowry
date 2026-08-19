@@ -1,4 +1,4 @@
-import { TOUCH_TARGET } from '../../../theme/tokens'
+import { TOUCH_TARGET, FONT_WEIGHT } from '../../../theme/tokens'
 
 /**
  * Shared `sx` fragments for every form surface in the app.
@@ -31,7 +31,10 @@ export const oneLine = {
 // Every form label in the system. The goal pass set `fontWeight: 600` inline at
 // six call sites; a label weight repeated per-field is a constant wearing a
 // prop. The field wrappers (§5.4) apply this so surfaces never restate it.
-export const formLabel = { fontWeight: 600 }
+// Sourced from FONT_WEIGHT.lg (600) rather than the literal, now that
+// tokens.js is the app's single source of truth for the weight scale — this
+// file routes every other surface through it, so it should too.
+export const formLabel = { fontWeight: FONT_WEIGHT.lg }
 
 // The horizontal rhythm shared by a sheet's header, body, banner and footer.
 // Declared once so the four regions cannot drift out of alignment — the defect

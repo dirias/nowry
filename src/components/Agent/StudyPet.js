@@ -308,7 +308,7 @@ export const PetOrb = ({
           right: -4,
           background: activeColor,
           color: 'var(--joy-palette-common-white)',
-          fontSize: 9,
+          fontSize: 12,
           fontWeight: 700,
           lineHeight: 1,
           padding: '2px 5px',
@@ -1131,7 +1131,7 @@ const StudyPet = () => {
                                 alignItems: 'center',
                                 padding: '1px 6px',
                                 borderRadius: 10,
-                                fontSize: 10,
+                                fontSize: 12,
                                 fontWeight: 600,
                                 background: 'var(--joy-palette-success-softBg)',
                                 color: 'var(--joy-palette-success-plainColor)',
@@ -1143,7 +1143,7 @@ const StudyPet = () => {
                             </span>
                           )}
                         </div>
-                        <div style={{ color: resolvedColor, fontSize: 11, fontWeight: 500, opacity: 0.9 }}>
+                        <div style={{ color: resolvedColor, fontSize: 12, fontWeight: 500, opacity: 0.9 }}>
                           {messagesLimit === -1
                             ? t('agent.headerStatusUnlimited', {
                                 level,
@@ -1380,7 +1380,7 @@ const StudyPet = () => {
                                 borderRadius: 20,
                                 color: 'var(--joy-palette-text-secondary)',
                                 cursor: 'pointer',
-                                fontSize: 11,
+                                fontSize: 12,
                                 padding: '4px 12px',
                                 fontFamily: 'Inter, sans-serif'
                               }}
@@ -1475,7 +1475,7 @@ const StudyPet = () => {
                             : messageLimitReached
                               ? 'var(--joy-palette-danger-plainColor)'
                               : 'var(--joy-palette-text-tertiary)',
-                        fontSize: 11,
+                        fontSize: 12,
                         fontFamily: 'Inter, sans-serif'
                       }}
                       aria-live='polite'
@@ -1510,7 +1510,7 @@ const StudyPet = () => {
                             borderRadius: 6,
                             color: 'var(--joy-palette-danger-solidColor)',
                             cursor: 'pointer',
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: 600,
                             padding: '4px 10px',
                             fontFamily: 'Inter, sans-serif',

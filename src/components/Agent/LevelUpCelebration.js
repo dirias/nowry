@@ -94,7 +94,7 @@ const LevelUpCelebration = ({ levelUpData, stage, onDismiss }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.55 }}
-          style={{ margin: 0, fontSize: 11, color: 'rgba(164, 69, 255, 0.9)', fontWeight: 500 }}
+          style={{ margin: 0, fontSize: 12, color: 'rgba(164, 69, 255, 0.9)', fontWeight: 500 }}
         >
           {t('pet.levelUp.reached', { level: levelUpData.newLevel })}
         </motion.p>
@@ -103,7 +103,7 @@ const LevelUpCelebration = ({ levelUpData, stage, onDismiss }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          style={{ margin: '4px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}
+          style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}
         >
           {t('pet.levelUp.dismiss')}
         </motion.p>

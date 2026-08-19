@@ -758,7 +758,7 @@ const SideMenu = () => {
                 variant='plain'
                 color='neutral'
                 onClick={() => handleSelectList('all')}
-                sx={{ cursor: 'pointer', flexShrink: 0, fontSize: '0.72rem', ...(activeList === 'all' ? activeChipSx : inactiveChipSx) }}
+                sx={{ cursor: 'pointer', flexShrink: 0, ...(activeList === 'all' ? activeChipSx : inactiveChipSx) }}
               >
                 {t('tasks.lists.all')}
               </Chip>
@@ -777,7 +777,6 @@ const SideMenu = () => {
                   sx={{
                     cursor: 'pointer',
                     flexShrink: 0,
-                    fontSize: '0.72rem',
                     ...(activeList === list.id ? activeChipSx : inactiveChipSx)
                   }}
                 >
@@ -798,7 +797,7 @@ const SideMenu = () => {
                   }}
                   onBlur={handleConfirmAddList}
                   slotProps={{ input: { ref: newListInputRef } }}
-                  sx={{ width: 110, flexShrink: 0, fontSize: '0.72rem', '--Input-minHeight': '24px', py: 0 }}
+                  sx={{ width: 110, flexShrink: 0, '--Input-minHeight': '24px', py: 0 }}
                 />
               ) : (
                 <Tooltip title={t('tasks.lists.addList')} size='sm'>

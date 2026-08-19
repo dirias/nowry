@@ -990,7 +990,7 @@ export default function AgentSettings() {
                       <Typography sx={{ color: 'text.primary', fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>
                         {petName || t('agent.defaultName')}
                       </Typography>
-                      <Typography sx={{ color: 'primary.plainColor', fontSize: 10, fontWeight: 500 }}>
+                      <Typography sx={{ color: 'primary.plainColor', fontSize: 'xs', fontWeight: 500 }}>
                         {TONE_OPTIONS(t).find((o) => o.key === tone)?.label ?? tone} ·{' '}
                         {CONCISENESS_OPTIONS(t).find((o) => o.key === conciseness)?.label ?? conciseness}
                       </Typography>
