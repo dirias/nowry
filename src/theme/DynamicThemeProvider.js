@@ -16,6 +16,60 @@ export const ThemePreferencesContext = createContext({
 
 export const useThemePreferences = () => useContext(ThemePreferencesContext)
 
+/**
+ * Build the finished Joy theme for one theme colour.
+ *
+ * Exported and pure so the merge can be asserted on directly. The specific
+ * regression this guards is a token scale — fontSize, radius, a custom
+ * typography level — surviving `theme.js` but being dropped or flattened here,
+ * which renders identically until someone changes the theme colour.
+ *
+ * This is the app's ONLY `extendTheme` call site; `theme.js` exports a plain
+ * object precisely so that nothing is extended twice.
+ *
+ * Each colorScheme spreads its own base entry before overriding `palette`.
+ * Today only `palette` exists there, so this is behaviourally identical — the
+ * point is that a future `shadowRing` / `shadowChannel` / `shadowOpacity` added
+ * to `theme.js` would otherwise be dropped on the floor here without a single
+ * error to show for it.
+ */
+export const buildDynamicTheme = (themeColor) => {
+  const colorScheme = generateColorScheme(themeColor)
+
+  return extendTheme({
+    ...themeConfig,
+    colorSchemes: {
+      light: {
+        ...themeConfig.colorSchemes.light,
+        palette: {
+          ...themeConfig.colorSchemes.light.palette,
+          primary: colorScheme.light.primary,
+          success: colorScheme.light.success,
+          warning: colorScheme.light.warning,
+          danger: colorScheme.light.danger,
+          neutral: colorScheme.light.neutral,
+          background: colorScheme.light.background,
+          text: colorScheme.light.text,
+          stickyNote: STICKY_PALETTE.light
+        }
+      },
+      dark: {
+        ...themeConfig.colorSchemes.dark,
+        palette: {
+          ...themeConfig.colorSchemes.dark.palette,
+          primary: colorScheme.dark.primary,
+          success: colorScheme.dark.success,
+          warning: colorScheme.dark.warning,
+          danger: colorScheme.dark.danger,
+          background: colorScheme.dark.background,
+          text: colorScheme.dark.text,
+          stickyNote: STICKY_PALETTE.dark
+        }
+      }
+    }
+  })
+}
+
 export const DynamicThemeProvider = ({ children }) => {
   const [themeColor, setThemeColor] = useState('#2a6971')
   const { user } = useAuth()
@@ -37,52 +91,7 @@ export const DynamicThemeProvider = ({ children }) => {
   }, [user, i18n])
 
   // Generate dynamic theme based on color
-  const dynamicTheme = useMemo(() => {
-    const colorScheme = generateColorScheme(themeColor)
-
-    // Merge dynamic palette with the base theme config.
-    //
-    // This is the app's ONLY `extendTheme` call site — `theme.js` exports a
-    // plain object precisely so that nothing is extended twice.
-    //
-    // Each colorScheme spreads its own base entry before overriding `palette`.
-    // Today only `palette` exists there, so this is behaviourally identical —
-    // the point is that a future `shadowRing` / `shadowChannel` /
-    // `shadowOpacity` added to `theme.js` would otherwise be dropped on the
-    // floor here without a single error to show for it.
-    return extendTheme({
-      ...themeConfig,
-      colorSchemes: {
-        light: {
-          ...themeConfig.colorSchemes.light,
-          palette: {
-            ...themeConfig.colorSchemes.light.palette,
-            primary: colorScheme.light.primary,
-            success: colorScheme.light.success,
-            warning: colorScheme.light.warning,
-            danger: colorScheme.light.danger,
-            neutral: colorScheme.light.neutral,
-            background: colorScheme.light.background,
-            text: colorScheme.light.text,
-            stickyNote: STICKY_PALETTE.light
-          }
-        },
-        dark: {
-          ...themeConfig.colorSchemes.dark,
-          palette: {
-            ...themeConfig.colorSchemes.dark.palette,
-            primary: colorScheme.dark.primary,
-            success: colorScheme.dark.success,
-            warning: colorScheme.dark.warning,
-            danger: colorScheme.dark.danger,
-            background: colorScheme.dark.background,
-            text: colorScheme.dark.text,
-            stickyNote: STICKY_PALETTE.dark
-          }
-        }
-      }
-    })
-  }, [themeColor])
+  const dynamicTheme = useMemo(() => buildDynamicTheme(themeColor), [themeColor])
 
   // Context value
   const contextValue = useMemo(
