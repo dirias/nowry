@@ -17,6 +17,26 @@ export const ThemePreferencesContext = createContext({
 export const useThemePreferences = () => useContext(ThemePreferencesContext)
 
 /**
+ * Font smoothing — a single switch, deliberately not buried in the styles object.
+ *
+ * Joy's CssBaseline sets `WebkitFontSmoothing: 'antialiased'` and
+ * `MozOsxFontSmoothing: 'grayscale'` on `html` unconditionally. Both are a
+ * 2010s workaround: they force greyscale antialiasing and, on macOS, render
+ * text noticeably lighter than the browser default. Current guidance is that
+ * they degrade rendering rather than improve it.
+ *
+ * That mattered here because three effects were stacking in the same
+ * direction — Inter renders lighter and wider than SF Pro, `antialiased`
+ * lightens it further, and dark mode on #0d1117 is where thin text degrades
+ * worst. Nobody had seen them separated.
+ *
+ * 'auto' restores the browser default (subpixel antialiasing on macOS/Windows).
+ * Set this to 'antialiased' to restore Joy's behaviour — that one edit is the
+ * whole revert, and the MozOsx value follows from it.
+ */
+const FONT_SMOOTHING = 'auto'
+
+/**
  * Build the finished Joy theme for one theme colour.
  *
  * Exported and pure so the merge can be asserted on directly. The specific
@@ -108,6 +128,13 @@ export const DynamicThemeProvider = ({ children }) => {
         <CssBaseline />
         <GlobalStyles
           styles={{
+            // Overrides Joy's CssBaseline, which sets these on `html`
+            // unconditionally. This GlobalStyles renders after <CssBaseline />,
+            // so at equal specificity it is injected later and wins.
+            html: {
+              WebkitFontSmoothing: FONT_SMOOTHING,
+              MozOsxFontSmoothing: FONT_SMOOTHING === 'antialiased' ? 'grayscale' : 'auto'
+            },
             // Safety net for the iOS auto-zoom bug class, scoped to phone
             // widths. Any text field rendered below 16px makes iOS Safari zoom
             // the whole page on focus and never zoom back out. One `size='sm'`
