@@ -29,6 +29,36 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>Nowry - AI Study Companion</title>
+  <!--
+      Inter — self-hosted, on the critical path.
+
+      No Google Fonts link anywhere in this app: no third-party request, no
+      render-blocking external stylesheet, and GDPR-clean for EU users.
+
+      The @font-face is hand-written here rather than imported from
+      @fontsource-variable/inter, because a JS-imported stylesheet is emitted
+      with a content-hashed filename that this file cannot name in a preload —
+      and Inter is on the first paint of every screen, so it must be preloaded.
+      The .woff2 is copied into public/fonts/ from the fontsource package.
+
+      Exactly ONE file: the latin variable-weight roman. No italic (synthesised
+      obliques are acceptable at our usage), and no Literata — that one is lazy,
+      imported by the reading surfaces themselves.
+
+      `unicode-range` is deliberately omitted. We ship a ja locale, and normal
+      per-glyph fallback is what should serve it: CJK simply misses in this file
+      and resolves down the stack to the platform face.
+    -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="%PUBLIC_URL%/fonts/inter-latin-wght-normal.woff2" />
+  <style>
+    @font-face {
+      font-family: 'Inter Variable';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 100 900;
+      src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+    }
+  </style>
   <!-- Font Awesome: loaded statically here so icons never flash;
        the app no longer injects this via a useEffect CDN call -->
   <link

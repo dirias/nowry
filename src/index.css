@@ -1,14 +1,25 @@
+/* Typography lives in the theme, not here.
+ *
+ * The `body { font-family }` and `code { font-family }` rules that used to sit
+ * in this file were removed. Both competed with CssBaseline's
+ * `var(--joy-fontFamily-body)` / `var(--joy-fontFamily-code)` at equal
+ * specificity, so the winner depended on whether Emotion or CRA's stylesheet
+ * was injected last — source-order luck, differing between dev and build.
+ *
+ * The deletion is safe because FONT_FAMILY.fallback (tokens.js) is a
+ * functionally identical stack. The old rule additionally listed Oxygen,
+ * Ubuntu, Cantarell, Fira Sans and Droid Sans; no target device reaches those
+ * before matching an earlier entry, so their absence is unobservable. Before
+ * Inter finishes loading, rendering is unchanged.
+ *
+ * -webkit-font-smoothing: antialiased and -moz-osx-font-smoothing: grayscale
+ * were removed with them. Inter already renders wider and lighter than SF Pro;
+ * those two lighten it further and the effects stack, which lands hardest on
+ * dark backgrounds. Evaluate the new face without them before considering
+ * adding either back.
+ */
 body {
   margin: 0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 /* === Fixes for Background Artifacts & Conflicts === */
