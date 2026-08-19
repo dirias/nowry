@@ -16,7 +16,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useAnimation, useDragControls } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { usePet } from '../../context/AgentContext'
@@ -884,6 +884,8 @@ const StudyPet = () => {
   // is in fullscreen mode (D-07); rests at Z_PET_RESTING everywhere else.
   const isFullscreenBump = isInStudySession && isStudySessionFullscreen
   const computedZIndex = isFullscreenBump ? Z_PET_FULLSCREEN : Z_PET_RESTING
+  const location = useLocation()
+  const isOnboardingRoute = location.pathname === '/register' || location.pathname.startsWith('/onboarding')
 
   /** Pick a random roam target that keeps the pet inside the viewport. */
   const getRandomRoamTarget = () => {
@@ -923,7 +925,7 @@ const StudyPet = () => {
   }
 
   useEffect(() => {
-    if (!isRoamingEnabled || isOpen || isInStudySession) {
+    if (!isRoamingEnabled || isOpen || isInStudySession || isOnboardingRoute) {
       roamActiveRef.current = false
       roamControls.stop()
       // Smoothly return to resting position
@@ -985,7 +987,7 @@ const StudyPet = () => {
       roamControls.stop()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRoamingEnabled, isOpen, isInStudySession])
+  }, [isRoamingEnabled, isOpen, isInStudySession, isOnboardingRoute])
 
   // Auto-scroll chat to bottom on new messages or quiz messages
   useEffect(() => {
