@@ -1,4 +1,5 @@
 import { STICKY_PALETTE } from './colorSchemeGenerator'
+import { FONT_FAMILY, FONT_SIZE, FONT_WEIGHT, LETTER_SPACING, LINE_HEIGHT, RADIUS, SPACING_BASE } from './tokens'
 
 const primaryMain = '#2a6971'
 const primaryHover = '#245a63'
@@ -22,6 +23,80 @@ const yellowHover = '#ffdb4d'
  * `extendTheme` call site in the app.
  */
 const themeConfig = {
+  // ---------------------------------------------------------------------
+  // Scales. Every value comes from tokens.js — nothing is spelled out here.
+  // ---------------------------------------------------------------------
+  fontFamily: FONT_FAMILY,
+  fontSize: FONT_SIZE,
+  fontWeight: FONT_WEIGHT,
+  lineHeight: LINE_HEIGHT,
+  radius: RADIUS,
+
+  // Explicit, and identical to Joy's default — that is the point. Written
+  // down, a future move to a 4px base is a visible edit; left implicit, it
+  // silently halves every gap across ~600 uses with nothing to catch it.
+  spacing: SPACING_BASE,
+
+  /**
+   * The typography block does exactly three things. Joy deep-merges levels, so
+   * every property not named here (fontSize, fontWeight, lineHeight, color)
+   * keeps its existing value and no current call site changes behaviour.
+   *
+   * 1. Letter spacing per level. Joy applies a blanket -0.025em to h1–h4,
+   *    tuned for its default stack; Inter's narrower sidebearings make that
+   *    look cramped, so headings take -0.02em / -0.01em and everything else is
+   *    explicitly 0.
+   *
+   * 2. `fontVariantNumeric: 'tabular-nums'` on h1–h4 and display-* ONLY.
+   *    Headline numerals are where digit jitter is visible; proportional
+   *    figures read better in prose, so this is not applied globally. Counters
+   *    and timers inside components opt in via the `tabularNums` fragment in
+   *    formStyles.js.
+   *
+   *    It is `fontVariantNumeric` and NOT `font-feature-settings: 'tnum'` on
+   *    purpose: the standard property degrades correctly across the font-load
+   *    window, whereas font-feature-settings does not and would make numbers
+   *    reflow the moment Inter swaps in — precisely the jitter being fixed.
+   *
+   * 3. Declares `display-lg` and `display-md`. Joy resolves `level` against
+   *    `theme.typography[key]`, so arbitrary keys work in JS with no TS
+   *    augmentation needed.
+   */
+  typography: {
+    h1: { letterSpacing: LETTER_SPACING.display, fontVariantNumeric: 'tabular-nums' },
+    h2: { letterSpacing: LETTER_SPACING.display, fontVariantNumeric: 'tabular-nums' },
+    h3: { letterSpacing: LETTER_SPACING.heading, fontVariantNumeric: 'tabular-nums' },
+    h4: { letterSpacing: LETTER_SPACING.heading, fontVariantNumeric: 'tabular-nums' },
+
+    'title-lg': { letterSpacing: LETTER_SPACING.normal },
+    'title-md': { letterSpacing: LETTER_SPACING.normal },
+    'title-sm': { letterSpacing: LETTER_SPACING.normal },
+    'body-lg': { letterSpacing: LETTER_SPACING.normal },
+    'body-md': { letterSpacing: LETTER_SPACING.normal },
+    'body-sm': { letterSpacing: LETTER_SPACING.normal },
+    'body-xs': { letterSpacing: LETTER_SPACING.normal },
+
+    // New levels — above h1, for hero and marketing surfaces only.
+    'display-lg': {
+      fontFamily: 'var(--joy-fontFamily-display)',
+      fontSize: 'var(--joy-fontSize-xl6)',
+      fontWeight: 'var(--joy-fontWeight-xl)',
+      lineHeight: 'var(--joy-lineHeight-xs)',
+      letterSpacing: LETTER_SPACING.display,
+      fontVariantNumeric: 'tabular-nums',
+      color: 'var(--joy-palette-text-primary)'
+    },
+    'display-md': {
+      fontFamily: 'var(--joy-fontFamily-display)',
+      fontSize: 'var(--joy-fontSize-xl5)',
+      fontWeight: 'var(--joy-fontWeight-xl)',
+      lineHeight: 'var(--joy-lineHeight-xs)',
+      letterSpacing: LETTER_SPACING.display,
+      fontVariantNumeric: 'tabular-nums',
+      color: 'var(--joy-palette-text-primary)'
+    }
+  },
+
   colorSchemes: {
     light: {
       palette: {
