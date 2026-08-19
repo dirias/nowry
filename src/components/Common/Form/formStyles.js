@@ -1,3 +1,5 @@
+import { TOUCH_TARGET } from '../../../theme/tokens'
+
 /**
  * Shared `sx` fragments for every form surface in the app.
  *
@@ -36,7 +38,31 @@ export const formLabel = { fontWeight: 600 }
 // is invisible until a banner appears and its left edge misses the body's.
 export const sheetInlinePadding = { xs: 2, sm: 3, md: 4 }
 
-// ≥44px at `xs` per WCAG 2.5.5 / UX-CONTRACT §4.7; the compact `sm`+ size is
-// the pointer-device affordance. Shared by rail chips, tag chips and row
-// controls so "touch target" means one number, not five.
-export const touchTarget = { minHeight: { xs: 44, sm: 32 } }
+// ≥44px at `xs` per WCAG 2.5.5; the number itself now comes from
+// `TOUCH_TARGET` in theme/tokens.js so the minimum is stated once for the whole
+// app rather than hand-typed here and at 26 other sites. The compact `sm`+ size
+// is the pointer-device affordance and stays local — it is a layout choice, not
+// an accessibility minimum. Shared by rail chips, tag chips and row controls so
+// "touch target" means one number, not five.
+export const touchTarget = { minHeight: { xs: TOUCH_TARGET, sm: 32 } }
+
+// Fixed-width digits, for values that update in place: streaks, counters,
+// review intervals, timers. Without it, a countdown re-lays out on every tick
+// as digit widths change and the surrounding row twitches.
+//
+// The theme already applies this to h1–h4 and display-*, where headline numbers
+// live. This fragment is the opt-in for everything below heading level, which
+// is deliberately left proportional because proportional figures read better in
+// prose.
+export const tabularNums = { fontVariantNumeric: 'tabular-nums' }
+
+// The reading serif's ONLY entry point. `fontFamily: 'reading'` resolves to
+// FONT_FAMILY.reading (Literata) and `lineHeight: 'xl'` (1.66667) gives
+// long-form prose the extra leading it wants.
+//
+// Apply this to long-form prose only — book pages, editor preview, card
+// front/back — and never below 1rem, and never to UI chrome. A serif at 14px on
+// a low-DPI Android reads worse than Inter, and that is the specific way this
+// choice fails. The three surfaces that may use it are also the three that
+// import the font (see Books/Page, Books/Editor, Cards/StudySession).
+export const readingSurface = { fontFamily: 'reading', lineHeight: 'xl' }
