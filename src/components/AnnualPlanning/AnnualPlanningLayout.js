@@ -334,6 +334,14 @@ const AnnualPlanningLayout = () => {
     return (
       <Container maxWidth='xl' sx={{ py: { xs: 4, md: 8 }, textAlign: 'center' }}>
         <Box sx={{ mb: 3 }}>
+          {/* NOT migrated to a theme fontSize token — flagged back to the coordinator
+              rather than decided here (Wave B, Part 2). 60->80px exceeds the scale
+              entirely: display-lg (xl6) tops out at 64px, so the nearest token would
+              clip 16px off the desktop size of what is likely a deliberately oversized
+              empty-state hero icon. Extending the scale to cover it is a token-scale
+              change, above this ticket's authority. Left as a raw responsive override
+              until someone with the design context decides whether to accept the 16px
+              loss, add a token, or leave it exempt permanently. */}
           <TimelineIcon sx={{ fontSize: { xs: 60, md: 80 }, color: 'primary.plainColor', mb: 1.5 }} />
           <Typography level='h2' sx={{ mb: 1.5 }}>
             {t('annualPlanning.home.startJourney', { year })}

@@ -346,8 +346,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                           sx={{
                             color: 'text.primary',
                             wordBreak: 'break-word',
-                            whiteSpace: 'pre-wrap',
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                            whiteSpace: 'pre-wrap'
                           }}
                         >
                           {currentCard.question || currentCard.title || t('cards.manage_content.untitled')}
@@ -393,8 +392,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                           sx={{
                             color: 'primary.plainColor',
                             wordBreak: 'break-word',
-                            whiteSpace: 'pre-wrap',
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                            whiteSpace: 'pre-wrap'
                           }}
                         >
                           {currentCard.answer || currentCard.content || t('cards.manage_content.noContent')}
@@ -457,7 +455,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
             startDecorator={<ArrowBack sx={{ fontSize: 18 }} />}
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            sx={{ minWidth: { xs: 88, sm: 100 }, fontSize: { xs: '0.85rem', sm: '0.875rem' } }}
+            sx={{ minWidth: { xs: 88, sm: 100 }, fontSize: 'sm' }}
           >
             {t('common.back')}
           </Button>
@@ -496,7 +494,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
             endDecorator={<ArrowForward sx={{ fontSize: 18 }} />}
             onClick={handleNext}
             disabled={currentIndex === cards.length - 1}
-            sx={{ minWidth: { xs: 88, sm: 100 }, fontSize: { xs: '0.85rem', sm: '0.875rem' } }}
+            sx={{ minWidth: { xs: 88, sm: 100 }, fontSize: 'sm' }}
           >
             {t('cards.setup.next', { defaultValue: 'Next' })}
           </Button>

@@ -130,9 +130,9 @@ const Contact = () => {
           }}
         >
           <Typography
-            level='h1'
+            level='display-lg'
+            component='h1'
             sx={{
-              fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' },
               fontWeight: 800,
               letterSpacing: -2,
               lineHeight: 1.1,
@@ -148,7 +148,6 @@ const Contact = () => {
               maxWidth: 700,
               mx: 'auto',
               color: 'text.secondary',
-              fontSize: { xs: '1rem', md: '1.25rem' },
               mb: 2
             }}
           >

@@ -67,7 +67,7 @@ function Home() {
         {/* Left: Welcome Message + Calendar Icon */}
         <Box sx={{ flex: 1, minWidth: { xs: 200, md: 250 }, display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
+            <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2 }}>
               {t('dashboard.welcome', { name: username })}
             </Typography>
             <Typography
@@ -75,7 +75,9 @@ function Home() {
               sx={{
                 color: 'text.secondary',
                 fontWeight: 'normal',
-                fontSize: { xs: '0.75rem', md: '0.875rem' }
+                // Static xs (12), below body-sm's own 14px default: a secondary
+                // motivational caption beneath the welcome message, mobile-first.
+                fontSize: 'xs'
               }}
             >
               {motivationPhrase}
@@ -172,6 +174,14 @@ function Home() {
           </Box>
         ) : (
           <Box sx={{ textAlign: 'right' }}>
+            {/* NOT migrated to h3's fluid clamp (Wave B, Part 2) — documented exception.
+                This message fills the same row as its sibling branch above (the
+                "N due" chip), which is a compact 32px pill with ~13px text. Growing
+                this to h3 (20->24px fluid) would make the empty-state branch visibly
+                larger than the has-cards branch it replaces, which reads as an
+                inconsistency introduced by this migration rather than fixed by it.
+                Left at its original static values pending a look from someone who can
+                see both branches rendered side by side — not migrated. */}
             <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2, fontSize: { xs: '1rem', md: '1.5rem' } }}>
               {t('dashboard.dailyFocus.allCaughtUp')}
             </Typography>
@@ -180,7 +190,6 @@ function Home() {
               sx={{
                 color: 'text.secondary',
                 fontWeight: 'normal',
-                fontSize: { xs: '0.7rem', md: '0.875rem' },
                 pt: 0.5,
                 pb: 0.5,
                 borderBottom: '1px solid',

@@ -691,7 +691,7 @@ const SideMenu = () => {
                     variant='plain'
                     color='neutral'
                     onClick={() => setStatusFilter(f)}
-                    sx={{ cursor: 'pointer', fontSize: '0.7rem', px: 1, ...(statusFilter === f ? activeChipSx : inactiveChipSx) }}
+                    sx={{ cursor: 'pointer', px: 1, ...(statusFilter === f ? activeChipSx : inactiveChipSx) }}
                   >
                     {t(`tasks.filter.${f}`)}
                   </Chip>

@@ -250,7 +250,10 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
                 sx={{
                   color: 'white',
                   mb: 0.5,
-                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  // Static sm (14), well below h4's own 20px default: this is an
+                  // overlay title on a compact public-content thumbnail card, not
+                  // a section heading — h4 is kept only for its bold weight.
+                  fontSize: 'sm',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   display: '-webkit-box',

@@ -190,7 +190,6 @@ const FocusBar = () => {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               fontWeight: 600,
-              fontSize: { xs: '0.7rem', md: '0.75rem' },
               flex: 1,
               minWidth: 0
             }}
@@ -473,13 +472,12 @@ const FocusBar = () => {
                       }
                     }}
                   >
-                    <Typography sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, lineHeight: 1 }}>{area.icon || '🎯'}</Typography>
+                    <Typography sx={{ fontSize: 'sm', lineHeight: 1 }}>{area.icon || '🎯'}</Typography>
                     <Typography
                       level='body-xs'
                       sx={{
                         fontWeight: 700,
-                        color: 'text.primary',
-                        fontSize: { xs: '0.7rem', md: '0.75rem' }
+                        color: 'text.primary'
                       }}
                     >
                       {progress}%

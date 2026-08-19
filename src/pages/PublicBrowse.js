@@ -183,10 +183,11 @@ const PublicBrowse = () => {
       <Stack direction='row' alignItems='center' sx={{ gap: 1.5, mb: 2 }}>
         <PublicRoundedIcon
           sx={{
-            // Matched to the h3 font-size (20/24px) rather than left larger: the glyph is a
-            // filled disc spanning 20 of its 24 viewBox units, so at 28px it rendered 23.3px
-            // tall against a 16.9px cap-height and read as a heavy blob.
-            fontSize: { xs: 20, md: 24 },
+            // Matched to the h3 font-size (the theme's xl2 token, 20->24px fluid)
+            // rather than left larger: the glyph is a filled disc spanning 20 of
+            // its 24 viewBox units, so at 28px it rendered 23.3px tall against a
+            // 16.9px cap-height and read as a heavy blob.
+            fontSize: 'xl2',
             color: 'text.secondary',
             opacity: 0.8
           }}

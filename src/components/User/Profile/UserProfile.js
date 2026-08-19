@@ -179,7 +179,7 @@ export default function UserProfile() {
     <Container maxWidth='lg' sx={{ py: { xs: 2, md: 4 } }}>
       {/* Header */}
       <Box sx={{ mb: { xs: 2, md: 3 } }}>
-        <Typography level='h3' fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.5rem', md: '2rem' } }}>
+        <Typography level='h2' fontWeight={700} sx={{ mb: 0.5 }}>
           {t('profile.title')}
         </Typography>
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
@@ -199,7 +199,7 @@ export default function UserProfile() {
                   sx={{
                     width: { xs: 100, md: 120 },
                     height: { xs: 100, md: 120 },
-                    fontSize: { xs: '2.5rem', md: '3rem' },
+                    fontSize: 'xl5',
                     bgcolor: 'primary.solidBg'
                   }}
                 >
@@ -226,7 +226,7 @@ export default function UserProfile() {
               </Box>
 
               {/* Name & Username */}
-              <Typography level='h4' fontWeight={600} sx={{ mb: 0.5, fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
+              <Typography level='h4' fontWeight={600} sx={{ mb: 0.5 }}>
                 {userData.fullName || userData.username}
               </Typography>
               <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
@@ -365,7 +365,7 @@ export default function UserProfile() {
             <CardContent sx={{ p: { xs: 3, md: 4 } }}>
               {/* Header with Edit Button */}
               <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 3 }}>
-                <Typography level='h4' fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' } }}>
+                <Typography level='h4' fontWeight={600}>
                   {t('profile.subtitle')}
                 </Typography>
 

@@ -319,7 +319,6 @@ const PublicView = () => {
               sx={{
                 mb: 2,
                 fontWeight: 700,
-                fontSize: { xs: '2rem', md: '2.5rem' },
                 letterSpacing: '-0.03em',
                 lineHeight: 1.2
               }}
@@ -781,7 +780,7 @@ const PublicView = () => {
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
-                                fontSize: heading.level === 1 ? '0.8125rem' : heading.level === 3 ? '0.6875rem' : '0.75rem'
+                                fontSize: heading.level === 1 ? '0.8125rem' : '0.75rem'
                               }}
                             >
                               {heading.text}

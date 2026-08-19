@@ -86,7 +86,7 @@ export default function ImportPreviewModal({ open, onClose, previewData, onConfi
             bgcolor: 'background.level1'
           }}
         >
-          <Typography level='h4' sx={{ m: 0, fontWeight: 700, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
+          <Typography level='h3' sx={{ m: 0, fontWeight: 700 }}>
             📄 Import Preview & Validation
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>

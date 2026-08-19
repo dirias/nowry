@@ -89,7 +89,10 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            // Static sm (14), not the xs mobile-first default: these four are the
+            // session's primary CTAs (again/hard/good/easy), not secondary or
+            // metadata text, so legibility on the main action row won out.
+            fontSize: 'sm',
             fontWeight: 600,
             '&:hover': { bgcolor: 'danger.softBg' }
           }}
@@ -104,7 +107,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            fontSize: 'sm',
             fontWeight: 600
           }}
         >
@@ -118,7 +121,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            fontSize: 'sm',
             fontWeight: 600
           }}
         >
@@ -132,7 +135,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            fontSize: 'sm',
             fontWeight: 600
           }}
         >

@@ -299,12 +299,12 @@ export default function NewsCarousel() {
         {/* Tab Header */}
         <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: { xs: 1.5, md: 2 }, px: { xs: 1, md: 0 } }}>
           <TabList>
-            <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
-              <TrendingUp sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
+            <Tab sx={{ fontSize: 'xs', py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
+              <TrendingUp sx={{ mr: { xs: 0.5, md: 1 }, fontSize: 'md' }} />
               {t('news.title')}
             </Tab>
-            <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
-              <Star sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
+            <Tab sx={{ fontSize: 'xs', py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
+              <Star sx={{ mr: { xs: 0.5, md: 1 }, fontSize: 'md' }} />
               {t('news.favorites')} {favoriteNews.length > 0 && `(${favoriteNews.length})`}
             </Tab>
           </TabList>
@@ -703,7 +703,10 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
           sx={{
             mb: { xs: 1, md: 1.5 },
             fontWeight: 600,
-            fontSize: { xs: '0.875rem', md: '1rem' },
+            // Static sm (14), below title-md's own 16px default: this is a news
+            // card title inside a compact carousel tile, not a standalone card
+            // heading, so the smaller mobile-first value was kept at all widths.
+            fontSize: 'sm',
             color: 'text.primary',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
@@ -720,7 +723,9 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
           level='body-sm'
           sx={{
             color: 'text.secondary',
-            fontSize: { xs: '0.75rem', md: '0.875rem' },
+            // Static xs (12), below body-sm's own 14px default: this is the news
+            // card's clamped excerpt line, secondary to the title above it.
+            fontSize: 'xs',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: { xs: 2, md: 3 },
@@ -758,7 +763,7 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
               </Chip>
             )}
             <Box sx={{ flex: 1 }} />
-            <OpenInNew sx={{ fontSize: { xs: 14, md: 16 }, color: 'primary.plainColor' }} />
+            <OpenInNew sx={{ fontSize: 'sm', color: 'primary.plainColor' }} />
           </Stack>
         )}
       </CardContent>
