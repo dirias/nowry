@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from './App'
-import { CssVarsProvider, CssBaseline } from '@mui/joy'
 import './index.css'
 import './i18n' // Initialize i18n
 
@@ -53,10 +52,21 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <Sentry.ErrorBoundary showDialog>
-      <CssVarsProvider defaultMode='system' disableTransitionOnChange>
-        <CssBaseline />
-        <App />
-      </CssVarsProvider>
+      {/*
+        No CssVarsProvider / CssBaseline here on purpose.
+
+        This file used to mount a second CssVarsProvider (carrying Joy's DEFAULT
+        theme) around <App />, while DynamicThemeProvider mounts its own with
+        `disableNestedContext`. Both wrote the same Joy CSS variables to :root,
+        so which one won depended on Emotion's style-injection order — and that
+        order differs between `npm start` and a production build. The default
+        theme is also where `--joy-fontFamily-body: "Inter", …` was silently
+        coming from, ahead of any font we actually ship.
+
+        DynamicThemeProvider (App.js) wraps every route including the landing
+        page, so it is the single provider and the single CssBaseline.
+      */}
+      <App />
     </Sentry.ErrorBoundary>
   </React.StrictMode>
 )

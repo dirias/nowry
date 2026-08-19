@@ -4,7 +4,7 @@ import CssBaseline from '@mui/joy/CssBaseline'
 import GlobalStyles from '@mui/joy/GlobalStyles'
 
 import { generateColorScheme, STICKY_PALETTE } from './colorSchemeGenerator'
-import baseTheme from './theme'
+import themeConfig from './theme'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
@@ -40,13 +40,23 @@ export const DynamicThemeProvider = ({ children }) => {
   const dynamicTheme = useMemo(() => {
     const colorScheme = generateColorScheme(themeColor)
 
-    // Merge dynamic palette with base theme
+    // Merge dynamic palette with the base theme config.
+    //
+    // This is the app's ONLY `extendTheme` call site — `theme.js` exports a
+    // plain object precisely so that nothing is extended twice.
+    //
+    // Each colorScheme spreads its own base entry before overriding `palette`.
+    // Today only `palette` exists there, so this is behaviourally identical —
+    // the point is that a future `shadowRing` / `shadowChannel` /
+    // `shadowOpacity` added to `theme.js` would otherwise be dropped on the
+    // floor here without a single error to show for it.
     return extendTheme({
-      ...baseTheme,
+      ...themeConfig,
       colorSchemes: {
         light: {
+          ...themeConfig.colorSchemes.light,
           palette: {
-            ...baseTheme.colorSchemes.light.palette,
+            ...themeConfig.colorSchemes.light.palette,
             primary: colorScheme.light.primary,
             success: colorScheme.light.success,
             warning: colorScheme.light.warning,
@@ -58,8 +68,9 @@ export const DynamicThemeProvider = ({ children }) => {
           }
         },
         dark: {
+          ...themeConfig.colorSchemes.dark,
           palette: {
-            ...baseTheme.colorSchemes.dark.palette,
+            ...themeConfig.colorSchemes.dark.palette,
             primary: colorScheme.dark.primary,
             success: colorScheme.dark.success,
             warning: colorScheme.dark.warning,

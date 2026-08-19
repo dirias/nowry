@@ -1,4 +1,3 @@
-import { extendTheme } from '@mui/joy/styles'
 import { STICKY_PALETTE } from './colorSchemeGenerator'
 
 const primaryMain = '#2a6971'
@@ -8,7 +7,21 @@ const primaryActive = '#1e4c54'
 const yellowAccent = '#ffcc00'
 const yellowHover = '#ffdb4d'
 
-const theme = extendTheme({
+/**
+ * The base theme CONFIG — a plain object, deliberately NOT passed through
+ * `extendTheme` here.
+ *
+ * `DynamicThemeProvider` spreads this object and calls `extendTheme` on the
+ * result. When this file also called `extendTheme`, an already-extended theme
+ * (carrying generated `vars`, `getCssVar`, `cssVarPrefix`, `generateCssVars`
+ * and `unstable_sx`) was fed straight back in and extended a second time. That
+ * is survivable while the config is palette-only, but it is exactly how you get
+ * doubled or stale `var(var(--joy-…))` references once typography scales land.
+ *
+ * There is one importer (`DynamicThemeProvider`), and it is now the only
+ * `extendTheme` call site in the app.
+ */
+const themeConfig = {
   colorSchemes: {
     light: {
       palette: {
@@ -75,6 +88,6 @@ const theme = extendTheme({
       }
     }
   }
-})
+}
 
-export default theme
+export default themeConfig
