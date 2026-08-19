@@ -40,6 +40,7 @@ import CardHome from '../Cards/CardHome'
 import DeckSettingsModal from './DeckSettingsModal'
 import StudyModePickerModal from './StudyModePickerModal'
 import RecentSessions from './RecentSessions'
+import { touchTarget } from '../Common/Form/formStyles'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
@@ -578,7 +579,7 @@ export default function StudyCenter() {
                                     transition: 'opacity 0.2s',
                                     borderRadius: 'sm',
                                     minWidth: 28,
-                                    minHeight: 28,
+                                    ...touchTarget,
                                     '&:focus-visible': {
                                       opacity: 1,
                                       outline: '2px solid',

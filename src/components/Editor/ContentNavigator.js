@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { ttsService } from '../../api/services/tts.ai.service'
 import { $getRoot } from 'lexical'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import { touchTarget } from '../Common/Form/formStyles'
 
 /**
  * ContentNavigator - Minimalistic left sidebar TOC
@@ -439,7 +440,7 @@ export default function ContentNavigator({
                         opacity: isLoading || isPlaying ? 1 : 0,
                         transition: 'opacity 0.15s',
                         minWidth: 28,
-                        minHeight: 28,
+                        ...touchTarget,
                         flexShrink: 0,
                         '&:focus-visible': {
                           outline: '2px solid',

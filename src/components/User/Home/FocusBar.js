@@ -6,6 +6,7 @@ import { apiCache } from '../../../api/utils/cache'
 import useAnnualPlan from '../../../hooks/useAnnualPlan'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useTranslation } from 'react-i18next'
+import { touchTarget } from '../../Common/Form/formStyles'
 
 /**
  * FocusBar - Horizontal strip showing goals + priorities at a glance
@@ -564,7 +565,7 @@ const FocusBar = () => {
               variant='soft'
               color='primary'
               sx={{
-                minHeight: 28,
+                ...touchTarget,
                 fontSize: '0.75rem',
                 px: 1.5
               }}

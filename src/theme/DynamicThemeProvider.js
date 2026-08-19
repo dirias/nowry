@@ -99,6 +99,15 @@ export const DynamicThemeProvider = ({ children }) => {
         <CssBaseline />
         <GlobalStyles
           styles={{
+            // Safety net for the iOS auto-zoom bug class, scoped to phone
+            // widths. Any text field rendered below 16px makes iOS Safari zoom
+            // the whole page on focus and never zoom back out. One `size='sm'`
+            // Input slipping through a review is all it takes, so rather than
+            // policing every call site forever, the minimum is enforced here.
+            // Costs nothing on desktop, and makes the bug unreachable.
+            '@media (max-width: 599.95px)': {
+              'input, textarea': { fontSize: '1rem' }
+            },
             body: {
               backgroundColor: 'var(--joy-palette-background-body)',
               backgroundImage: `radial-gradient(circle at 10% 20%, rgba(var(--joy-palette-primary-mainChannel) / 0.06), transparent 30%), 
