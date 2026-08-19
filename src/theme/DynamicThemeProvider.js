@@ -114,8 +114,20 @@ export const DynamicThemeProvider = ({ children }) => {
             // Input slipping through a review is all it takes, so rather than
             // policing every call site forever, the minimum is enforced here.
             // Costs nothing on desktop, and makes the bug unreachable.
+            //
+            // `!important` is load-bearing, not laziness. Joy renders the inner
+            // <input> with `font-size: inherit` from a single-class rule
+            // (.css-…-JoyInput-input), which outranks a bare `input` element
+            // selector — so without it this rule silently loses the cascade on
+            // exactly the Joy fields it exists to protect, and the net is a
+            // placebo. Measured: a plain <input> picked it up while a Joy Input
+            // ignored it entirely.
+            //
+            // The trade is that every mobile text field normalises to 16px,
+            // including ones deliberately set larger. That is the intended
+            // behaviour for a floor: below 600px, field text is 16px.
             '@media (max-width: 599.95px)': {
-              'input, textarea': { fontSize: '1rem' }
+              'input, textarea': { fontSize: '1rem !important' }
             },
             body: {
               backgroundColor: 'var(--joy-palette-background-body)',
