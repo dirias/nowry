@@ -14,11 +14,18 @@
  *   4. success requires the server's activation — and the two outcomes that
  *      merely *look* like failures, `created: false` and `activation_failed`,
  *      are not shown as one (FR-006, FR-028, ADR-005, ADR-006);
- *   5. nothing starts the AI fallback except a press, and its confirmation
- *      never implies the journey finished (FR-032, FR-033, FR-035).
+ *   5. nothing starts the AI fallback except a press, the cards it produces are
+ *      handed to the real save flow rather than counted and dropped, and no
+ *      part of that ever implies the journey finished (FR-031, FR-032, FR-033).
+ *
+ * A sixth claim was added after a signed-in pass found two defects the mocked
+ * suite could not see: pressing "Generate with AI" produced a sentence and
+ * discarded the cards, and "Finish for Now" navigated without recording a
+ * postponement, so Home asked the user to finish setting up immediately. Both
+ * are now asserted directly — §6 and §7 below.
  *
  * The card and the empty state are *not* mocked. The official mark and the
- * "nothing was added to your library" sentence are the product here.
+ * copy about what did and did not reach the library are the product here.
  */
 jest.mock('react-i18next', () => {
   const bundle = require('../../../locales/en/translation.json')
@@ -56,10 +63,32 @@ jest.mock('../../../hooks/useProgressivePreferences', () => ({
   default: jest.fn()
 }))
 
-import React from 'react'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+/**
+ * The review modal is doubled, not reimplemented. What this screen owes is the
+ * *handoff* — that the real cards arrive, that saving and dismissing are told
+ * apart, that regenerating goes back through the one fallback entry point — and
+ * the double makes each of those a press. `GeneratedCards`' own save behaviour
+ * is covered where it lives, in `components/Cards/__tests__/GeneratedCards`.
+ */
+const mockReviewProps = []
+jest.mock('../../Cards/GeneratedCards', () => ({
+  __esModule: true,
+  default: (props) => {
+    const react = require('react')
+    mockReviewProps.push(props)
+    return react.createElement('div', { 'data-testid': 'review-modal' }, [
+      react.createElement('span', { key: 'count', 'data-testid': 'review-card-count' }, props.cards.length),
+      react.createElement('button', { key: 'save', onClick: () => props.onSaved?.(props.cards.length) }, 'save-generated'),
+      react.createElement('button', { key: 'again', onClick: () => props.onGenerateAgain?.('auto') }, 'regenerate-auto'),
+      react.createElement('button', { key: 'close', onClick: props.onCancel }, 'close-review')
+    ])
+  }
+}))
 
-import FirstDeckScreen, { forkFailureKey, generatedCardCount } from '../FirstDeckScreen'
+import React from 'react'
+import { act, render, screen, fireEvent, within } from '@testing-library/react'
+
+import FirstDeckScreen, { forkFailureKey, generatedCardCount, generatedCardList } from '../FirstDeckScreen'
 import en from '../../../locales/en/translation.json'
 
 const copy = en.onboarding.firstDeck
@@ -77,16 +106,19 @@ const officialDeck = (overrides = {}) => ({
   ...overrides
 })
 
-const buildJourney = ({ browse = {}, fork = {}, fallback = {}, ...overrides } = {}) => ({
+const buildJourney = ({ browse = {}, fork = {}, fallback = {}, postponeState: postponeOverrides = {}, ...overrides } = {}) => ({
   isActivated: false,
   browseState: { phase: 'ready', category: 'science', items: [officialDeck()], total: 1, error: null, ...browse },
   forkState: { phase: 'idle', deckId: null, forkedDeck: null, created: false, error: null, ...fork },
   fallbackState: { phase: 'idle', cards: null, error: null, ...fallback },
+  postponeState: { phase: 'idle', error: null, ...postponeOverrides },
   loadOfficialDecks: jest.fn(),
   retryOfficialDecks: jest.fn(),
   forkOfficialDeck: jest.fn(),
   retryFork: jest.fn(),
-  requestAiFallback: jest.fn(),
+  requestAiFallback: jest.fn().mockResolvedValue({ ok: true, cards: [] }),
+  // The server writes the timestamp; the screen only awaits it (FR-042).
+  postpone: jest.fn().mockResolvedValue({ ok: true }),
   ...overrides
 })
 
@@ -113,16 +145,27 @@ let onExit
 const renderScreen = () =>
   render(<FirstDeckScreen shell={shell} journey={journey} preferences={preferences} onBack={onBack} onExit={onExit} />)
 
+/** Press a control whose handler awaits the network, and settle the state update. */
+const press = async (element) => {
+  await act(async () => {
+    fireEvent.click(element)
+  })
+}
+
 /** The card whose title contains this text, located through its Joy Card root. */
 const cardFor = (name) => screen.getByText(new RegExp(name)).closest('.MuiCard-root')
 
 beforeEach(() => {
   mockNavigate.mockClear()
+  mockReviewProps.length = 0
   onBack = jest.fn()
   onExit = jest.fn()
   journey = buildJourney()
   preferences = buildPreferences()
 })
+
+/** The props the review modal was last handed. */
+const lastReview = () => mockReviewProps[mockReviewProps.length - 1]
 
 // ── 1. The request, and what a card shows ────────────────────────────────────
 
@@ -387,11 +430,11 @@ describe('AI fallback and finish for now', () => {
     expect(screen.getByRole('button', { name: copy.empty.fallbackAction })).toBeInTheDocument()
   })
 
-  it('runs only on an explicit press', () => {
+  it('runs only on an explicit press', async () => {
     journey = emptyJourney()
     renderScreen()
 
-    fireEvent.click(screen.getByRole('button', { name: copy.empty.fallbackAction }))
+    await press(screen.getByRole('button', { name: copy.empty.fallbackAction }))
     expect(journey.requestAiFallback).toHaveBeenCalledTimes(1)
     expect(journey.requestAiFallback).toHaveBeenCalledWith(en.taxonomy.topics.science)
   })
@@ -408,12 +451,12 @@ describe('AI fallback and finish for now', () => {
     expect(screen.getByRole('button', { name: copy.finish })).toBeInTheDocument()
   })
 
-  it('reports a failed generation with a retry and no state change', () => {
+  it('reports a failed generation with a retry and no state change', async () => {
     journey = emptyJourney({ fallback: { phase: 'error', cards: null, error: { code: 'network_error', recoverable: true } } })
     renderScreen()
 
     expect(screen.getByRole('alert')).toHaveTextContent(copy.fallback.error.title)
-    fireEvent.click(screen.getByRole('button', { name: en.onboarding.save.retry }))
+    await press(screen.getByRole('button', { name: en.onboarding.save.retry }))
     expect(journey.requestAiFallback).toHaveBeenCalled()
   })
 
@@ -423,18 +466,183 @@ describe('AI fallback and finish for now', () => {
     // An unrecognised envelope selects the countless copy rather than a guess.
     expect(generatedCardCount({ status: 'ok' })).toBeNull()
     expect(generatedCardCount(null)).toBeNull()
+
+    expect(generatedCardList([{ title: 'a' }])).toEqual([{ title: 'a' }])
+    expect(generatedCardList({ cards: [{ title: 'b' }] })).toEqual([{ title: 'b' }])
+    expect(generatedCardList({ status: 'ok' })).toBeNull()
+  })
+})
+
+// ── 6. The generated cards go somewhere ──────────────────────────────────────
+
+/**
+ * The defect this section exists for: `requestAiFallback` succeeded, the cards
+ * were stored on `fallbackState`, and the only thing that ever read them was
+ * `generatedCardCount` — a number for a sentence. FR-031 offers the user an
+ * AI-generated deck; they received prose. The architecture's answer is to route
+ * the cards into the existing generation flow, and that is what is asserted
+ * here: the real card objects reach the real review component, saving them is
+ * distinguishable from dismissing them, and none of it activates anything.
+ */
+describe('the AI fallback hands its cards to the save flow', () => {
+  const twoCards = [
+    { title: 'Mitosis', content: 'Cell division producing two identical nuclei.' },
+    { title: 'Osmosis', content: 'Solvent movement across a semipermeable membrane.' }
+  ]
+
+  const generatingJourney = (cards = twoCards) =>
+    buildJourney({
+      browse: { phase: 'empty', items: [], total: 0 },
+      requestAiFallback: jest.fn().mockResolvedValue({ ok: true, cards })
+    })
+
+  const generateThen = async (cards = twoCards) => {
+    journey = generatingJourney(cards)
+    const view = renderScreen()
+    await press(screen.getByRole('button', { name: copy.empty.fallbackAction }))
+    // The hook's state is what the screen renders from, so mirror the resolved
+    // result the way the real hook would before re-rendering.
+    journey = { ...journey, fallbackState: { phase: 'succeeded', cards, error: null } }
+    view.rerender(<FirstDeckScreen shell={shell} journey={journey} preferences={preferences} onBack={onBack} onExit={onExit} />)
+    return view
+  }
+
+  it('opens the review flow with the cards that were actually generated', async () => {
+    await generateThen()
+
+    expect(screen.getByTestId('review-modal')).toBeInTheDocument()
+    // Not a count — the card objects themselves, which is the whole defect.
+    expect(lastReview().cards).toEqual(twoCards)
+    expect(screen.getByTestId('review-card-count')).toHaveTextContent('2')
   })
 
-  it('finishes for now without claiming completion', () => {
+  it('does not open the review flow when generation failed', async () => {
+    journey = buildJourney({
+      browse: { phase: 'empty', items: [], total: 0 },
+      requestAiFallback: jest.fn().mockResolvedValue({ ok: false, error: { code: 'network_error', recoverable: true } })
+    })
+    renderScreen()
+
+    await press(screen.getByRole('button', { name: copy.empty.fallbackAction }))
+    expect(screen.queryByTestId('review-modal')).toBeNull()
+  })
+
+  it('keeps dismissed cards reachable instead of discarding them', async () => {
+    await generateThen()
+
+    await press(screen.getByText('close-review'))
+    expect(screen.queryByTestId('review-modal')).toBeNull()
+
+    // The cards still exist, and the screen still offers a way back to them.
+    await press(screen.getByRole('button', { name: copy.fallback.success.review }))
+    expect(screen.getByTestId('review-modal')).toBeInTheDocument()
+    expect(lastReview().cards).toEqual(twoCards)
+  })
+
+  it('tells the user the cards reached the library once they are saved', async () => {
+    await generateThen()
+
+    await press(screen.getByText('save-generated'))
+    await press(screen.getByText('close-review'))
+
+    expect(screen.getByText(copy.fallback.saved.title)).toBeInTheDocument()
+    expect(screen.getByText(copy.fallback.saved.body)).toBeInTheDocument()
+    // The stale claim this replaces said the opposite of what had happened.
+    expect(screen.queryByText(fill(copy.fallback.success.body_other, { count: 2, topic: en.taxonomy.topics.science }))).toBeNull()
+  })
+
+  it('never activates onboarding by saving an AI deck (FR-033, A4)', async () => {
+    await generateThen()
+    await press(screen.getByText('save-generated'))
+    await press(screen.getByText('close-review'))
+
+    // An AI deck is not a curated fork. Everything that belongs to activation
+    // must still be absent, and nothing may have been forked to get here.
+    expect(screen.queryByText(copy.success.title)).toBeNull()
+    expect(screen.queryByRole('button', { name: copy.success.open })).toBeNull()
+    expect(journey.forkOfficialDeck).not.toHaveBeenCalled()
+    expect(journey.retryFork).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: copy.finish })).toBeInTheDocument()
+  })
+
+  it('routes regeneration back through the single fallback entry point', async () => {
+    await generateThen()
+
+    await press(screen.getByText('regenerate-auto'))
+    // `'auto'` is the server-decided count, which the endpoint spells `null`.
+    expect(journey.requestAiFallback).toHaveBeenLastCalledWith(en.taxonomy.topics.science, null)
+  })
+
+  it('does not surface the fallback error twice while the review is open', async () => {
+    const view = await generateThen()
+    journey = { ...journey, fallbackState: { phase: 'error', cards: null, error: { code: 'network_error', recoverable: true } } }
+    view.rerender(<FirstDeckScreen shell={shell} journey={journey} preferences={preferences} onBack={onBack} onExit={onExit} />)
+
+    // The modal owns the message while it covers the screen; a banner behind an
+    // overlay is a message nobody reads.
+    expect(screen.queryByText(copy.fallback.error.title)).toBeNull()
+    expect(lastReview().streamError).toEqual({ code: 'network_error', recoverable: true })
+  })
+})
+
+// ── 7. Finishing for now is a postponement ───────────────────────────────────
+
+/**
+ * The second defect from the signed-in pass. `show_reentry` is server-derived
+ * as `incomplete AND (postponed_at is null OR now - postponed_at >= 24h)`, and
+ * "Finish for Now" navigated without writing `postponed_at` — so the grace
+ * period never started and Home asked the user to finish setting up the instant
+ * they arrived. Welcome's "Not Right Now" always did this correctly; this is the
+ * same contract, on the screen that needed it just as much.
+ */
+describe('finish for now', () => {
+  const emptyJourney = (extra = {}) => buildJourney({ browse: { phase: 'empty', items: [], total: 0 }, ...extra })
+
+  it('records the postponement before it navigates', async () => {
     journey = emptyJourney()
     renderScreen()
 
     expect(screen.getByText(copy.finishHint)).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: copy.finish }))
+    await press(screen.getByRole('button', { name: copy.finish }))
+
+    expect(journey.postpone).toHaveBeenCalledTimes(1)
     expect(onExit).toHaveBeenCalled()
-    // Exiting writes nothing: preferences are already saved and re-entry
-    // eligibility is the server's to decide (FR-035).
+    // Still not completion: no fork, no generation, no activation claim.
     expect(journey.forkOfficialDeck).not.toHaveBeenCalled()
     expect(journey.requestAiFallback).not.toHaveBeenCalled()
+  })
+
+  it('keeps the user here when the postponement was not written', async () => {
+    journey = emptyJourney({ postpone: jest.fn().mockResolvedValue({ ok: false, error: { code: 'network_error', recoverable: true } }) })
+    renderScreen()
+
+    await press(screen.getByRole('button', { name: copy.finish }))
+    // Navigating anyway would promise a 24-hour grace period the server never
+    // recorded — the user would land on Home and be asked to finish setup.
+    expect(onExit).not.toHaveBeenCalled()
+  })
+
+  it('reports a failed postponement with a retry', async () => {
+    journey = emptyJourney({
+      postponeState: { phase: 'error', error: { code: 'network_error', recoverable: true } }
+    })
+    renderScreen()
+
+    expect(screen.getByRole('alert')).toHaveTextContent(copy.finishError.title)
+    await press(within(screen.getByRole('alert')).getByRole('button', { name: en.onboarding.save.retry }))
+    expect(journey.postpone).toHaveBeenCalled()
+  })
+
+  it('exits without a postponement once the user is activated', async () => {
+    journey = buildJourney({
+      fork: { phase: 'succeeded', deckId: 'deck-1', forkedDeck: { _id: 'private-1', name: 'Forked' }, created: true, error: null },
+      isActivated: true
+    })
+    renderScreen()
+
+    await press(screen.getByRole('button', { name: copy.success.later }))
+    // An activated user has no re-entry card for a grace period to hold back.
+    expect(journey.postpone).not.toHaveBeenCalled()
+    expect(onExit).toHaveBeenCalled()
   })
 })

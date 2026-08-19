@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/joy'
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded'
 import CollectionsBookmarkRounded from '@mui/icons-material/CollectionsBookmarkRounded'
+import RateReviewRounded from '@mui/icons-material/RateReviewRounded'
 
 import { ACTION_PHASE } from '../../hooks/useOnboardingJourney'
 import { focusRing } from '../Common/Form/formStyles'
@@ -41,22 +42,39 @@ import { focusRing } from '../Common/Form/formStyles'
  * which must never displace curated content. Nothing fires on mount (FR-032):
  * the only route to `requestAiFallback` is this button's `onClick`.
  *
- * THE CONFIRMATION MUST NOT SOUND LIKE COMPLETION
+ * THE CARDS GO SOMEWHERE, AND IT IS STILL NOT COMPLETION
  *
- * FR-033: the request is confirmed, and onboarding stays incomplete. The
- * endpoint returns generated cards, not a saved library deck, and activation is
- * owned solely by a verified official fork (ADR-006). So the success copy states
- * three things and no more — the request went through, nothing was added to the
- * library, the journey is still open. No checkmark-and-confetti, no "you're all
- * set", no navigation that would imply a deck exists somewhere.
+ * The endpoint returns generated cards, not a saved library deck. This state
+ * used to report their *number* and discard them, which FR-031 does not survive:
+ * the user was offered an AI deck and received a sentence. The cards are now
+ * handed to the app's existing review-and-save modal, so the confirmation here
+ * has two stages and both are literally true — before saving, cards exist and
+ * are waiting to be picked; after saving, they are in the library as an ordinary
+ * user deck.
+ *
+ * Neither stage claims completion (FR-033). Activation is owned solely by a
+ * verified official fork (ADR-006), so an AI deck leaves the journey open and
+ * the copy says so at both stages. No checkmark-and-confetti, no "you're all
+ * set", no navigation that would imply the setup finished.
  *
  * @param {object}   props
  * @param {string}   props.topicLabel   The user's primary topic, already localized.
  * @param {object}   props.fallbackState `journey.fallbackState`.
  * @param {Function} props.onRequestAi  Explicit user request — the only caller.
+ * @param {Function} [props.onReviewGenerated] Reopen the review modal for cards
+ *   that were generated and then dismissed without saving.
+ * @param {boolean}  [props.hasSavedGenerated] Whether any generated card reached
+ *   the library. Selects which of the two truthful confirmations is shown.
  * @param {number|null} [props.generatedCount] Cards the request produced, when countable.
  */
-const FirstDeckEmptyState = ({ topicLabel, fallbackState, onRequestAi, generatedCount = null }) => {
+const FirstDeckEmptyState = ({
+  topicLabel,
+  fallbackState,
+  onRequestAi,
+  onReviewGenerated,
+  hasSavedGenerated = false,
+  generatedCount = null
+}) => {
   const { t } = useTranslation()
 
   const phase = fallbackState?.phase ?? ACTION_PHASE.IDLE
@@ -111,7 +129,18 @@ const FirstDeckEmptyState = ({ topicLabel, fallbackState, onRequestAi, generated
               </Typography>
             )}
 
-            {hasGenerated && (
+            {hasSavedGenerated && (
+              <Box>
+                <Typography level='body-sm' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                  {t('onboarding.firstDeck.fallback.saved.title')}
+                </Typography>
+                <Typography level='body-sm' sx={{ color: 'text.secondary', mt: 0.25 }}>
+                  {t('onboarding.firstDeck.fallback.saved.body')}
+                </Typography>
+              </Box>
+            )}
+
+            {hasGenerated && !hasSavedGenerated && (
               <Box>
                 <Typography level='body-sm' sx={{ color: 'text.primary', fontWeight: 600 }}>
                   {t('onboarding.firstDeck.fallback.success.title')}
@@ -121,6 +150,20 @@ const FirstDeckEmptyState = ({ topicLabel, fallbackState, onRequestAi, generated
                     ? t('onboarding.firstDeck.fallback.success.bodyNoCount')
                     : t('onboarding.firstDeck.fallback.success.body', { count: generatedCount, topic: topicLabel })}
                 </Typography>
+                {/* The cards outlive a dismissed modal. Without this they would
+                    be generated, closed and gone — which is the defect. */}
+                <Box sx={{ display: 'flex', mt: 1.5 }}>
+                  <Button
+                    onClick={onReviewGenerated}
+                    size='sm'
+                    variant='soft'
+                    color='primary'
+                    startDecorator={<RateReviewRounded sx={{ fontSize: 14 }} />}
+                    sx={{ minHeight: 44, height: 'auto', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'center', ...focusRing }}
+                  >
+                    {t('onboarding.firstDeck.fallback.success.review')}
+                  </Button>
+                </Box>
               </Box>
             )}
           </Box>

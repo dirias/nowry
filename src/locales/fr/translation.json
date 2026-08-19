@@ -422,10 +422,15 @@
       "fallback": {
         "pending": "Génération des cartes…",
         "success": {
-          "title": "Votre demande est bien passée",
-          "body_one": "Nowry a généré {{count}} carte sur {{topic}}. Rien n'a été ajouté à votre bibliothèque : votre configuration reste ouverte et vous pouvez revenir quand vous voulez.",
-          "body_other": "Nowry a généré {{count}} cartes sur {{topic}}. Rien n'a été ajouté à votre bibliothèque : votre configuration reste ouverte et vous pouvez revenir quand vous voulez.",
-          "bodyNoCount": "Nowry a traité votre demande. Rien n'a été ajouté à votre bibliothèque : votre configuration reste ouverte et vous pouvez revenir quand vous voulez."
+          "title": "Vos cartes sont prêtes",
+          "body_one": "Nowry a généré {{count}} carte sur {{topic}}. Choisissez celles que vous voulez et enregistrez-les dans un paquet : un paquet généré par l'IA n'est pas officiel, votre configuration reste donc ouverte.",
+          "body_other": "Nowry a généré {{count}} cartes sur {{topic}}. Choisissez celles que vous voulez et enregistrez-les dans un paquet : un paquet généré par l'IA n'est pas officiel, votre configuration reste donc ouverte.",
+          "bodyNoCount": "Nowry a terminé la génération. Choisissez les cartes que vous voulez et enregistrez-les dans un paquet : un paquet généré par l'IA n'est pas officiel, votre configuration reste donc ouverte.",
+          "review": "Revoir les cartes"
+        },
+        "saved": {
+          "title": "Vos cartes sont dans votre bibliothèque",
+          "body": "Nowry ne relit pas les cartes générées par l'IA : elles ne terminent donc pas votre configuration. Vous pouvez ajouter un paquet officiel quand vous voulez."
         },
         "error": {
           "title": "La demande d'IA n'a pas abouti",
@@ -466,7 +471,11 @@
         "later": "Pas maintenant"
       },
       "finish": "Terminer pour l'instant",
-      "finishHint": "Vos sujets et votre objectif sont enregistrés. Vous pouvez ajouter un paquet quand vous voulez."
+      "finishHint": "Vos sujets et votre objectif sont enregistrés. Vous pouvez ajouter un paquet quand vous voulez.",
+      "finishError": {
+        "title": "Nous n'avons pas pu terminer",
+        "body": "Vous êtes toujours à cette étape et rien n'a été enregistré."
+      }
     },
     "language": {
       "title": "Choisissez votre Langue",

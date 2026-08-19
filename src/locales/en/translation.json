@@ -527,10 +527,15 @@
       "fallback": {
         "pending": "Generating cards…",
         "success": {
-          "title": "Your request went through",
-          "body_one": "Nowry generated {{count}} card for {{topic}}. Nothing was added to your library, so your setup stays open and you can come back any time.",
-          "body_other": "Nowry generated {{count}} cards for {{topic}}. Nothing was added to your library, so your setup stays open and you can come back any time.",
-          "bodyNoCount": "Nowry finished your request. Nothing was added to your library, so your setup stays open and you can come back any time."
+          "title": "Your cards are ready",
+          "body_one": "Nowry generated {{count}} card for {{topic}}. Pick the ones you want and save them to a deck — an AI deck isn't official, so your setup stays open.",
+          "body_other": "Nowry generated {{count}} cards for {{topic}}. Pick the ones you want and save them to a deck — an AI deck isn't official, so your setup stays open.",
+          "bodyNoCount": "Nowry finished generating. Pick the cards you want and save them to a deck — an AI deck isn't official, so your setup stays open.",
+          "review": "Review Cards"
+        },
+        "saved": {
+          "title": "Your cards are in your library",
+          "body": "Nowry doesn't review AI cards, so they don't finish your setup. You can add an official deck any time."
         },
         "error": {
           "title": "The AI request didn't go through",
@@ -571,7 +576,11 @@
         "later": "Not Now"
       },
       "finish": "Finish for Now",
-      "finishHint": "Your topics and goal are saved. You can add a deck any time."
+      "finishHint": "Your topics and goal are saved. You can add a deck any time.",
+      "finishError": {
+        "title": "We couldn't finish that",
+        "body": "You're still on this step, and nothing was recorded."
+      }
     },
     "language": {
       "title": "Choose Your Language",

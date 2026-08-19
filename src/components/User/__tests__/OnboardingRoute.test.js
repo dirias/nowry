@@ -50,6 +50,29 @@ jest.mock('../../../theme/DynamicThemeProvider', () => ({
   useThemePreferences: () => ({ themeColor: '#2a6971', setThemeColor: mockSetThemeColor })
 }))
 
+/**
+ * The second mock below the components, and the boundary it draws is the point.
+ *
+ * `GeneratedCards` is the app's *existing* generation workflow, not onboarding's:
+ * it reaches the deck list, the tag pool and `SubscriptionProvider`, none of
+ * which this route mounts. What onboarding owes is the handoff — that the cards
+ * the fallback generated arrive there rather than being counted into a sentence
+ * and dropped — so the double records its props and exposes save and dismiss as
+ * presses. Its own save behaviour is covered in `Cards/__tests__/GeneratedCards`.
+ */
+const mockReviewProps = []
+jest.mock('../../Cards/GeneratedCards', () => ({
+  __esModule: true,
+  default: (props) => {
+    const react = require('react')
+    mockReviewProps.push(props)
+    return react.createElement('div', { 'data-testid': 'review-modal' }, [
+      react.createElement('button', { key: 'save', onClick: () => props.onSaved?.(props.cards.length) }, 'save-generated'),
+      react.createElement('button', { key: 'close', onClick: props.onCancel }, 'close-review')
+    ])
+  }
+}))
+
 // The ONLY mock below the components. Everything between this and the DOM is
 // production code.
 jest.mock('../../../api/client', () => ({
@@ -212,7 +235,15 @@ const createServer = () => {
     }
 
     if (url === '/card/generate') {
-      return { data: [{ front: 'What is a cell?', back: 'The basic unit of life.' }] }
+      // `title`/`content`, which is what `GeneratedCard` actually declares. The
+      // `front`/`back` this fixture used belongs to a different model
+      // (`GeneratedCardPair`) and passed only while nothing read the cards.
+      return {
+        data: [
+          { title: 'What is a cell?', content: 'The basic unit of life.' },
+          { title: 'What is a nucleus?', content: 'The organelle holding a cell’s DNA.' }
+        ]
+      }
     }
     throw fail(404, 'not_found')
   })
@@ -268,8 +299,12 @@ const completePersonalization = async () => {
 beforeEach(() => {
   jest.clearAllMocks()
   window.sessionStorage.clear()
+  mockReviewProps.length = 0
   server = createServer()
 })
+
+/** The props the review modal was last handed. */
+const lastReview = () => mockReviewProps[mockReviewProps.length - 1]
 
 // ── Entry and resumption (FR-037, FR-038, ADR-003) ───────────────────────────
 
@@ -553,6 +588,41 @@ describe('first deck when nothing is curated yet', () => {
     expect(screen.queryByRole('button', { name: t('onboarding.firstDeck.success.open') })).toBeNull()
   })
 
+  /**
+   * The defect a mocked screen could not see: the request succeeded, the cards
+   * came back, and nothing rendered, reviewed or saved them. The user was
+   * offered an AI deck (FR-031) and received a sentence about a number.
+   */
+  it('hands the generated cards to the existing save flow (FR-031)', async () => {
+    renderJourney()
+    await screen.findByText('No official Science decks yet')
+
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.firstDeck.empty.fallbackAction') }))
+    expect(await screen.findByTestId('review-modal')).toBeInTheDocument()
+
+    // The cards the server actually returned, not a count derived from them.
+    const generated = server.calls.length && lastReview().cards
+    expect(generated.length).toBeGreaterThan(0)
+    expect(generated[0]).toHaveProperty('title')
+  })
+
+  it('saving an AI deck changes the copy and still does not activate (FR-033, A4)', async () => {
+    renderJourney()
+    await screen.findByText('No official Science decks yet')
+
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.firstDeck.empty.fallbackAction') }))
+    await screen.findByTestId('review-modal')
+
+    fireEvent.click(screen.getByText('save-generated'))
+    fireEvent.click(screen.getByText('close-review'))
+
+    expect(await screen.findByText(t('onboarding.firstDeck.fallback.saved.title'))).toBeInTheDocument()
+    // An AI deck is not a curated fork. Nothing forked, nothing activated.
+    expect(server.journey.status).toBe('incomplete')
+    expect(urlsCalled().filter((url) => url.includes('/fork'))).toEqual([])
+    expect(screen.queryByText(t('onboarding.firstDeck.success.title'))).toBeNull()
+  })
+
   it('reports a failed generation honestly and leaves everything unchanged (FR-034)', async () => {
     server.failOnce('POST /card/generate', server.fail(500, { code: 'server_error', message: 'nope' }))
 
@@ -578,6 +648,44 @@ describe('first deck when nothing is curated yet', () => {
     expect(server.journey.status).toBe('incomplete')
     expect(server.preferences.interests).toEqual(['science'])
     expect(server.preferences.study_goal).toBe('academic')
+  })
+
+  /**
+   * The second signed-in defect. `show_reentry` is derived server-side as
+   * `incomplete AND (postponed_at is null OR now - postponed_at >= 24h)`, and
+   * finishing here wrote nothing — so the grace period never started and Home
+   * asked the user to finish setting up the moment they landed on it.
+   */
+  it('finishing for now starts the 24-hour grace period (FR-042)', async () => {
+    renderJourney()
+    await screen.findByText('No official Science decks yet')
+
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.firstDeck.finish') }))
+
+    await waitFor(() => expect(screen.getByText(HOME_MARKER)).toBeInTheDocument())
+    expect(server.journey.postponed_at).not.toBeNull()
+    expect(server.calls).toContainEqual({ method: 'PATCH', url: '/users/onboarding', body: { action: 'postpone' } })
+    // `postpone` is monotonic: it backfills the point only when nothing later
+    // was recorded, so the user still resumes at First Deck rather than Welcome.
+    expect(server.journey.last_meaningful_point).toBe('first_deck')
+    expect(server.journey.resume_screen).toBe('first_deck')
+  })
+
+  it('keeps the user on First Deck when the postponement write fails', async () => {
+    server.failOnce('PATCH /users/onboarding', server.fail(500, { code: 'server_error', message: 'nope' }))
+
+    renderJourney()
+    await screen.findByText('No official Science decks yet')
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.firstDeck.finish') }))
+
+    expect(await screen.findByText(t('onboarding.firstDeck.finishError.title'))).toBeInTheDocument()
+    // Leaving anyway would promise a grace period the server never recorded.
+    expect(screen.queryByText(HOME_MARKER)).toBeNull()
+    expect(server.journey.postponed_at).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.save.retry') }))
+    await waitFor(() => expect(screen.getByText(HOME_MARKER)).toBeInTheDocument())
+    expect(server.journey.postponed_at).not.toBeNull()
   })
 })
 

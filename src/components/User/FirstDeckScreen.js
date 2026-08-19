@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/joy'
@@ -57,6 +57,29 @@ import { visuallyHidden } from './taxonomySelectorStyles'
  *   safe, and its retry is a replay under the same idempotency key, which
  *   completes the activation without copying a second deck (NFR-017).
  *
+ * THE AI FALLBACK HANDS OFF; IT DOES NOT ACTIVATE
+ *
+ * A successful generation returns *cards*, not a library deck, so this screen
+ * routes them into the app's existing generation workflow — `GeneratedCards`,
+ * the same review-select-save modal the Books flow uses — instead of counting
+ * them into a sentence and dropping them (architecture, "Explicit AI fallback").
+ * Saving those cards creates an ordinary user deck and writes **no** onboarding
+ * state: `status` stays `incomplete`, no success panel appears, no open-deck
+ * action appears, and re-entry stays available. Activation has exactly one
+ * source and it is a verified official fork (FR-033, A4, ADR-006).
+ *
+ * FINISHING FOR NOW IS A POSTPONEMENT
+ *
+ * "Finish for Now" records the postponement before it navigates, exactly as
+ * Welcome's "Not Right Now" does. Leaving without one left `postponed_at` null,
+ * so the server's 24-hour grace period never started and Home asked the user to
+ * finish setting up the moment they arrived (FR-042). `postpone` is monotonic —
+ * it only backfills `last_meaningful_point` when nothing later was recorded, and
+ * `first_deck` is already recorded by the time this button exists — so the
+ * resume point survives. The navigation waits for the server's own timestamp; a
+ * failure keeps the user here with a retry rather than claiming a grace period
+ * that was never written.
+ *
  * WHAT THE USER BROWSES FOR
  *
  * `preferences.confirmedPrimaryTopic` — the primary topic the *server* derived
@@ -71,6 +94,17 @@ import { visuallyHidden } from './taxonomySelectorStyles'
  * @param {Function} props.onBack      Return to Personalization.
  * @param {Function} props.onExit      Finish for now — leaves without claiming completion.
  */
+
+/**
+ * The review modal, deferred.
+ *
+ * It reaches the deck list, the tag pool, the subscription context and the card
+ * service behind them — a dependency graph that has no business loading on the
+ * first screen a new account renders, for a path A4 makes the fallback and most
+ * users never take. Deferring it also keeps this screen's own module graph
+ * unchanged for everything except the press that opens it.
+ */
+const GeneratedCards = lazy(() => import('../Cards/GeneratedCards'))
 
 /** The views this screen can be in. Exactly one is true at a time. */
 export const FIRST_DECK_VIEW = {
@@ -110,17 +144,27 @@ const deckCategoryFor = (topic) => TOPICS.find((entry) => entry.value === topic)
 const topicLabelKeyFor = (topic) => TOPICS.find((entry) => entry.value === topic)?.i18nKey ?? null
 
 /**
- * How many cards the fallback produced, when that is knowable.
+ * The cards the fallback produced, when the envelope is one we recognise.
  *
- * `/card/generate` is an existing endpoint this screen does not own, so its
- * envelope is read defensively and a shape we do not recognise yields `null` —
- * which selects a countless confirmation rather than an invented number.
+ * `/card/generate` is an existing endpoint this screen does not own — it
+ * currently answers with a bare list — so both shapes it has ever used are
+ * accepted and anything else yields `null` rather than a guess.
+ *
+ * @param   {unknown}      result `fallbackState.cards`
+ * @returns {Array|null}          The card list, or null for an unknown shape
  */
-export const generatedCardCount = (result) => {
-  if (Array.isArray(result)) return result.length
-  if (Array.isArray(result?.cards)) return result.cards.length
+export const generatedCardList = (result) => {
+  if (Array.isArray(result)) return result
+  if (Array.isArray(result?.cards)) return result.cards
   return null
 }
+
+/**
+ * How many cards the fallback produced, when that is knowable. A shape we do
+ * not recognise yields `null`, which selects a countless confirmation rather
+ * than an invented number.
+ */
+export const generatedCardCount = (result) => generatedCardList(result)?.length ?? null
 
 /**
  * A load that failed, stated plainly and with the retry attached.
@@ -155,7 +199,22 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
   const browseState = journey?.browseState ?? null
   const forkState = journey?.forkState ?? null
   const fallbackState = journey?.fallbackState ?? null
+  const postponeState = journey?.postponeState ?? null
   const isActivated = journey?.isActivated === true
+
+  /**
+   * The review modal is opened by the generation call resolving `ok`, and by the
+   * "Review cards" button — never by an effect watching `fallbackState`. Cards
+   * that were generated and then dismissed stay reachable rather than lost.
+   */
+  const [isReviewOpen, setReviewOpen] = useState(false)
+
+  /**
+   * Whether any generated card reached the library. A boolean, not a count: the
+   * accurate number lives in the modal, and a partial save would make a number
+   * out here wrong in the one direction that matters.
+   */
+  const [hasSavedGenerated, setHasSavedGenerated] = useState(false)
 
   // The server's derived primary topic (FR-024). Never `preferences.values`.
   const primaryTopic = preferences?.confirmedPrimaryTopic ?? null
@@ -208,6 +267,11 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
     return FIRST_DECK_VIEW.LOADING
   }, [browsePhase, category, forkPhase, isActivated, isReadingPreferences, readPhase])
 
+  const isRequestingAi = fallbackState?.phase === ACTION_PHASE.PENDING
+  // `[]` and not null: the modal reads `cards.length`, and a pending regenerate
+  // legitimately has none yet.
+  const reviewCards = useMemo(() => generatedCardList(fallbackState?.cards) ?? [], [fallbackState])
+
   const decks = Array.isArray(browseState?.items) ? browseState.items : []
   const forkedDeck = forkState?.forkedDeck ?? null
   const selectedDeckId = forkState?.deckId ?? null
@@ -227,14 +291,58 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
   }, [journey])
 
   /**
-   * FR-032: the fallback has exactly one trigger, and this is it. Nothing calls
-   * it from an effect, from the empty state's mount, or from the browse
-   * settling — the requirement is about what *cannot* happen, so the only
-   * caller is a button's `onClick`.
+   * FR-032: generation has exactly one trigger, and this is it. Nothing calls it
+   * from an effect, from the empty state's mount, or from the browse settling —
+   * the requirement is about what *cannot* happen, so the only callers are a
+   * button's `onClick` and the regenerate menu inside the review modal, which is
+   * also a press.
+   *
+   * Opening the review is a consequence of the *awaited result*, not of a phase
+   * an effect noticed, so a generation the user never asked for cannot open it.
    */
-  const handleRequestAi = useCallback(() => {
-    journey?.requestAiFallback?.(topicLabel)
+  const handleRequestAi = useCallback(async () => {
+    // A fresh batch supersedes the last one, so the "already saved" confirmation
+    // must not survive into it and describe cards that no longer exist here.
+    setHasSavedGenerated(false)
+    const result = await journey?.requestAiFallback?.(topicLabel)
+    if (result?.ok) setReviewOpen(true)
   }, [journey, topicLabel])
+
+  /**
+   * `GeneratedCards`' own regenerate menu. `'auto'` means "let the server decide
+   * the count", which the endpoint expresses as a null `sampleNumber` — passing
+   * `undefined` would silently take the adapter's default of 10 instead.
+   */
+  const handleRegenerateAi = useCallback(
+    async (countMode) => {
+      setHasSavedGenerated(false)
+      await journey?.requestAiFallback?.(topicLabel, countMode === 'auto' ? null : countMode)
+    },
+    [journey, topicLabel]
+  )
+
+  const handleReviewGenerated = useCallback(() => setReviewOpen(true), [])
+  const handleCloseReview = useCallback(() => setReviewOpen(false), [])
+
+  /**
+   * Cards reached the library. This is a deck the user made, not a curated fork,
+   * so nothing here touches activation — only the confirmation copy changes,
+   * from "pick the ones you want" to "they're saved, and setup is still open".
+   */
+  const handleGeneratedSaved = useCallback(() => setHasSavedGenerated(true), [])
+
+  /**
+   * FR-041/FR-042 by way of the defect this screen shipped with: leaving without
+   * a postponement left `postponed_at` null, so Home's re-entry card was due
+   * immediately. `postpone()` resolves only once the server has written its own
+   * timestamp and `onExit` is reached only on `ok`, so the user never lands Home
+   * believing in a grace period that was never recorded — the same contract
+   * `WelcomeScreen.handlePostpone` keeps.
+   */
+  const handleFinishForNow = useCallback(async () => {
+    const result = await journey?.postpone?.()
+    if (result?.ok) onExit()
+  }, [journey, onExit])
 
   /**
    * FR-028's "action to open the added deck". `/study/:deckId` is the existing
@@ -266,13 +374,26 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
     }
   }, [decks.length, t, topicLabel, view])
 
+  const isPostponing = postponeState?.phase === ACTION_PHASE.PENDING
+  const postponeError = postponeState?.phase === ACTION_PHASE.ERROR ? (postponeState.error ?? null) : null
+
   /**
    * The banner slot, in the order the user was most recently stopped.
    *
-   * The activation case is checked first and deliberately does not say the fork
-   * failed, because it did not — see the module note.
+   * A failed postponement comes first because it is the one that stopped the
+   * user *leaving*, and it is always the most recent thing they pressed. The
+   * activation case is next and deliberately does not say the fork failed,
+   * because it did not — see the module note. The fallback error is suppressed
+   * while the review modal is open: the modal renders its own, and a banner the
+   * overlay hides is a message nobody reads.
    */
-  const banner = isActivationFailure ? (
+  const banner = postponeError ? (
+    <FormErrorBanner
+      titleKey='onboarding.firstDeck.finishError.title'
+      detailText={`${t('onboarding.firstDeck.finishError.body')} ${t(failureKey(postponeError))}`}
+      action={postponeError.recoverable ? { labelKey: 'onboarding.save.retry', onClick: handleFinishForNow } : null}
+    />
+  ) : isActivationFailure ? (
     <FormErrorBanner
       titleKey='onboarding.firstDeck.activationError.title'
       detailText={t('onboarding.firstDeck.activationError.body')}
@@ -287,7 +408,7 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
       // would be an invitation to fail again identically.
       action={forkError.recoverable ? { labelKey: 'onboarding.save.retry', onClick: handleRetryFork } : null}
     />
-  ) : fallbackState?.phase === ACTION_PHASE.ERROR ? (
+  ) : fallbackState?.phase === ACTION_PHASE.ERROR && !isReviewOpen ? (
     <FormErrorBanner
       titleKey='onboarding.firstDeck.fallback.error.title'
       detailText={`${t('onboarding.firstDeck.fallback.error.body')} ${t(failureKey(fallbackState.error))}`}
@@ -305,6 +426,9 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
   const footer =
     view === FIRST_DECK_VIEW.SUCCESS ? (
       <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} sx={{ justifyContent: 'space-between' }}>
+        {/* No postponement here: this user is activated, so there is no re-entry
+            card for a grace period to hold back and the PATCH would only earn a
+            409. Leaving later is an ordinary exit. */}
         <Button onClick={onExit} variant='plain' color='neutral' sx={{ minHeight: 44, ...focusRing }}>
           {t('onboarding.firstDeck.success.later')}
         </Button>
@@ -328,7 +452,8 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
-            onClick={onExit}
+            onClick={handleFinishForNow}
+            loading={isPostponing}
             variant={view === FIRST_DECK_VIEW.EMPTY ? 'solid' : 'outlined'}
             color={view === FIRST_DECK_VIEW.EMPTY ? 'primary' : 'neutral'}
             sx={{ minHeight: 44, height: 'auto', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'center', ...focusRing }}
@@ -378,6 +503,8 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
           topicLabel={topicLabel}
           fallbackState={fallbackState}
           onRequestAi={handleRequestAi}
+          onReviewGenerated={handleReviewGenerated}
+          hasSavedGenerated={hasSavedGenerated}
           generatedCount={generatedCardCount(fallbackState?.cards)}
         />
       )}
@@ -432,6 +559,36 @@ const FirstDeckScreen = ({ shell, journey, preferences, onBack, onExit }) => {
               : t('onboarding.firstDeck.success.bodyNoName')}
           </Typography>
         </Box>
+      )}
+
+      {/*
+        The existing generation workflow, reused rather than reimplemented: the
+        same select-then-choose-a-deck modal the Books flow opens, given the
+        cards the fallback returned. Saving here creates an ordinary user deck —
+        no fork, no `onboarding` block, no activation — which is exactly what the
+        architecture means by not equating card generation with a library deck.
+
+        `isStreaming` carries the regenerate round-trip so the modal shows
+        progress instead of momentarily reading as "generated nothing", and the
+        fallback's own error is handed over so a regenerate that fails is
+        reported inside the overlay the user is looking at.
+      */}
+      {isReviewOpen && (
+        // `fallback={null}`: the modal's own chrome is what the user is waiting
+        // for, and a spinner in the page body underneath it would appear in the
+        // wrong place entirely.
+        <Suspense fallback={null}>
+          <GeneratedCards
+            cards={reviewCards}
+            isStreaming={isRequestingAi}
+            streamError={fallbackState?.phase === ACTION_PHASE.ERROR ? (fallbackState.error ?? null) : null}
+            newDeckNameDefault={topicLabel}
+            onGenerateAgain={handleRegenerateAi}
+            onRetry={handleRequestAi}
+            onSaved={handleGeneratedSaved}
+            onCancel={handleCloseReview}
+          />
+        </Suspense>
       )}
     </OnboardingPageShell>
   )

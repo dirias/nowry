@@ -400,10 +400,15 @@
       "fallback": {
         "pending": "Karten werden erstellt…",
         "success": {
-          "title": "Deine Anfrage ist angekommen",
-          "body_one": "Nowry hat {{count}} Karte zu {{topic}} erstellt. Deiner Bibliothek wurde nichts hinzugefügt, deine Einrichtung bleibt also offen und du kannst jederzeit zurückkommen.",
-          "body_other": "Nowry hat {{count}} Karten zu {{topic}} erstellt. Deiner Bibliothek wurde nichts hinzugefügt, deine Einrichtung bleibt also offen und du kannst jederzeit zurückkommen.",
-          "bodyNoCount": "Nowry hat deine Anfrage bearbeitet. Deiner Bibliothek wurde nichts hinzugefügt, deine Einrichtung bleibt also offen und du kannst jederzeit zurückkommen."
+          "title": "Deine Karten sind fertig",
+          "body_one": "Nowry hat {{count}} Karte zu {{topic}} erstellt. Wähle die Karten aus, die du behalten möchtest, und speichere sie in einem Deck – ein KI-Deck ist nicht offiziell, deine Einrichtung bleibt also offen.",
+          "body_other": "Nowry hat {{count}} Karten zu {{topic}} erstellt. Wähle die Karten aus, die du behalten möchtest, und speichere sie in einem Deck – ein KI-Deck ist nicht offiziell, deine Einrichtung bleibt also offen.",
+          "bodyNoCount": "Nowry ist mit dem Erstellen fertig. Wähle die Karten aus, die du behalten möchtest, und speichere sie in einem Deck – ein KI-Deck ist nicht offiziell, deine Einrichtung bleibt also offen.",
+          "review": "Karten prüfen"
+        },
+        "saved": {
+          "title": "Deine Karten sind in deiner Bibliothek",
+          "body": "Nowry prüft KI-Karten nicht, deshalb schließen sie deine Einrichtung nicht ab. Du kannst jederzeit ein offizielles Deck hinzufügen."
         },
         "error": {
           "title": "Die KI-Anfrage ist nicht durchgegangen",
@@ -444,7 +449,11 @@
         "later": "Jetzt nicht"
       },
       "finish": "Vorerst beenden",
-      "finishHint": "Deine Themen und dein Ziel sind gespeichert. Du kannst jederzeit ein Deck hinzufügen."
+      "finishHint": "Deine Themen und dein Ziel sind gespeichert. Du kannst jederzeit ein Deck hinzufügen.",
+      "finishError": {
+        "title": "Das konnten wir nicht abschließen",
+        "body": "Du bist noch in diesem Schritt, und es wurde nichts festgehalten."
+      }
     },
     "language": {
       "title": "Wähle deine Sprache",

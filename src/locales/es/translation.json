@@ -401,10 +401,15 @@
       "fallback": {
         "pending": "Generando tarjetas…",
         "success": {
-          "title": "Tu solicitud se envió",
-          "body_one": "Nowry generó {{count}} tarjeta sobre {{topic}}. No se añadió nada a tu biblioteca, así que tu configuración sigue abierta y puedes volver cuando quieras.",
-          "body_other": "Nowry generó {{count}} tarjetas sobre {{topic}}. No se añadió nada a tu biblioteca, así que tu configuración sigue abierta y puedes volver cuando quieras.",
-          "bodyNoCount": "Nowry completó tu solicitud. No se añadió nada a tu biblioteca, así que tu configuración sigue abierta y puedes volver cuando quieras."
+          "title": "Tus tarjetas están listas",
+          "body_one": "Nowry generó {{count}} tarjeta sobre {{topic}}. Elige las que quieras y guárdalas en un mazo: un mazo generado con IA no es oficial, así que tu configuración sigue abierta.",
+          "body_other": "Nowry generó {{count}} tarjetas sobre {{topic}}. Elige las que quieras y guárdalas en un mazo: un mazo generado con IA no es oficial, así que tu configuración sigue abierta.",
+          "bodyNoCount": "Nowry terminó de generar. Elige las tarjetas que quieras y guárdalas en un mazo: un mazo generado con IA no es oficial, así que tu configuración sigue abierta.",
+          "review": "Revisar tarjetas"
+        },
+        "saved": {
+          "title": "Tus tarjetas están en tu biblioteca",
+          "body": "Nowry no revisa las tarjetas generadas con IA, así que no completan tu configuración. Puedes añadir un mazo oficial cuando quieras."
         },
         "error": {
           "title": "La solicitud de IA no se completó",
@@ -445,7 +450,11 @@
         "later": "Ahora no"
       },
       "finish": "Terminar por ahora",
-      "finishHint": "Tus temas y tu objetivo están guardados. Puedes añadir un mazo cuando quieras."
+      "finishHint": "Tus temas y tu objetivo están guardados. Puedes añadir un mazo cuando quieras.",
+      "finishError": {
+        "title": "No pudimos terminar eso",
+        "body": "Sigues en este paso y no se registró nada."
+      }
     },
     "language": {
       "title": "Elige tu Idioma",
