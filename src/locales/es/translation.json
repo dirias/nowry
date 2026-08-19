@@ -145,10 +145,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     }
   },
@@ -1107,18 +1103,28 @@
       "imagePreviewError": "No se pudo cargar esa imagen"
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "Filtrar por etiqueta",
+        "ariaLabel": "Filtrar tarjetas por etiqueta",
+        "noOptions": "No hay etiquetas en este mazo",
+        "clear": "Quitar filtros de etiquetas",
+        "showing": "Mostrando {{shown}} de {{total}}",
+        "empty": {
+          "title": "Ninguna tarjeta coincide con estas etiquetas",
+          "body": "Quita una etiqueta o borra el filtro para volver a ver tarjetas."
+        }
+      },
       "loading": "Cargando sesión de estudio...",
       "allCaughtUp": "¡Al día!",
       "noDue": "No hay tarjetas pendientes por ahora.",
       "goBack": "Volver",
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Pantalla completa",

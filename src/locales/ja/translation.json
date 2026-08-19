@@ -144,10 +144,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     }
   },
@@ -1806,14 +1802,24 @@
       "emptyVisualBody": "デッキを作成して、この図を保存・復習しましょう。"
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "タグで絞り込む",
+        "ariaLabel": "カードをタグで絞り込む",
+        "noOptions": "このデッキにタグはありません",
+        "clear": "タグフィルターを解除",
+        "showing": "{{total}} 件中 {{shown}} 件を表示",
+        "empty": {
+          "title": "このタグに一致するカードはありません",
+          "body": "タグを外すか、フィルターを解除するとカードが再び表示されます。"
+        }
+      },
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "全画面表示にする",

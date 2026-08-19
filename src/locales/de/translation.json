@@ -144,10 +144,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     }
   },
@@ -1836,14 +1832,24 @@
       "emptyVisualBody": "Erstelle einen Stapel, um diese Diagramme zu speichern und zu wiederholen."
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "Nach Tag filtern",
+        "ariaLabel": "Karten nach Tag filtern",
+        "noOptions": "Keine Tags in diesem Stapel",
+        "clear": "Tag-Filter zurücksetzen",
+        "showing": "{{shown}} von {{total}} werden angezeigt",
+        "empty": {
+          "title": "Keine Karten passen zu diesen Tags",
+          "body": "Tag entfernen oder Filter zurücksetzen, um wieder Karten zu sehen."
+        }
+      },
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Vollbild aktivieren",

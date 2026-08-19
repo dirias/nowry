@@ -159,10 +159,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     },
     "dates": {
@@ -1382,18 +1378,28 @@
       "description": "Description"
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "Filter by tag",
+        "ariaLabel": "Filter cards by tag",
+        "noOptions": "No tags in this deck",
+        "clear": "Clear tag filters",
+        "showing": "Showing {{shown}} of {{total}}",
+        "empty": {
+          "title": "No cards match these tags",
+          "body": "Remove a tag or clear the filter to see cards again."
+        }
+      },
       "loading": "Loading study session...",
       "allCaughtUp": "All caught up!",
       "noDue": "No cards are due for review right now.",
       "goBack": "Go back",
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Enter fullscreen",

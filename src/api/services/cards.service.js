@@ -390,8 +390,8 @@ export const cardsService = {
    * Review a card with SM-2 grading
    * @param {string} id - Card ID
    * @param {string} grade - Grade: 'again', 'hard', 'good', or 'easy'
-   * @param {string} [mode='study'] - Active session mode: 'study', 'browse', or 'cram'.
-   *   Only 'study' may grade/mutate the SM-2 schedule server-side; browse/cram are
+   * @param {string} [mode='study'] - Active session mode: 'study' or 'browse'.
+   *   Only 'study' may grade/mutate the SM-2 schedule server-side; browse is
    *   rejected with 403 (defense-in-depth, D-06).
    */
   async review(id, grade, mode = 'study') {
@@ -411,7 +411,7 @@ export const cardsService = {
   },
 
   /**
-   * Get all cards for a deck regardless of due date (Browse/Cram modes)
+   * Get all cards for a deck regardless of due date (Browse mode)
    * @param {string} deckId - Deck ID to fetch all cards for
    * @returns {Promise<Array>} Array of every study card in the deck
    */

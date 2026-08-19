@@ -5,8 +5,8 @@
  * groups un-skipped by their owning implementation plans — touch target -> 27-02,
  * session footer -> 27-03, swipe hint -> 27-04.
  *
- * Phase 30 Plan 02 — Wave 0 additions for MODE-02/03/04/05 (mode-aware fetch
- * dispatch, grading suppression, mode chip, Cram fetch). These new describe
+ * Phase 30 Plan 02 — Wave 0 additions for MODE-02/03/04 (mode-aware fetch
+ * dispatch, grading suppression, mode chip). These new describe
  * blocks are intentionally RED until 30-04 makes StudySession mode-aware.
  */
 import React from 'react'
@@ -19,11 +19,34 @@ import { act } from 'react-dom/test-utils'
 // reset idiom already used for the cardsService mocks in this file).
 let mockSearchParams = new URLSearchParams()
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ deckId: 'deck-1' }),
-  useNavigate: () => jest.fn(),
-  useSearchParams: () => [mockSearchParams]
-}))
+// Phase 34: useSearchParams is now called TWICE per render — once by
+// StudySession (for `mode`) and once by useBrowseTagFilter (for `tags`) — and
+// the second caller WRITES. The previous read-only `[mockSearchParams]` shape
+// returned an undefined setter, so this mock now backs each call site with real
+// React state and mirrors every write back into the module-level
+// `mockSearchParams` so assertions can inspect the resulting URL.
+//
+// Each call site gets its own useState (both live in StudySession's hook list),
+// which is fine: only the tag filter ever writes, and only it needs to observe
+// its own writes. `mode` is immutable for a session's lifetime.
+jest.mock('react-router-dom', () => {
+  const ReactModule = require('react')
+  return {
+    useParams: () => ({ deckId: 'deck-1' }),
+    useNavigate: () => jest.fn(),
+    useSearchParams: () => {
+      const [params, setParams] = ReactModule.useState(() => mockSearchParams)
+      const setter = ReactModule.useCallback((updater) => {
+        setParams((prev) => {
+          const next = typeof updater === 'function' ? updater(new URLSearchParams(prev)) : new URLSearchParams(updater)
+          mockSearchParams = next
+          return next
+        })
+      }, [])
+      return [params, setter]
+    }
+  }
+})
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) })
@@ -59,7 +82,7 @@ jest.mock('../../../api/services', () => ({
   cardsService: {
     getDailyReviewCards: jest.fn(),
     getDueCards: jest.fn(),
-    getAllCards: jest.fn(), // Phase 30 — Browse/Cram fetch
+    getAllCards: jest.fn(), // Phase 30 — Browse fetch
     review: jest.fn().mockResolvedValue({})
   },
   decksService: {}
@@ -148,7 +171,7 @@ function renderSession(overrides = {}) {
   return render(<StudySession />)
 }
 
-// Phase 30 — reset the mode query-param mock between tests so a `mode=browse`/`mode=cram`
+// Phase 30 — reset the mode query-param mock between tests so a `mode=browse`
 // set in one test never leaks into the next (default `mode=study` behavior).
 // Phase 31 — also clear the stable AgentContext mock refs' call history.
 beforeEach(() => {
@@ -300,20 +323,13 @@ describe('browse mode', () => {
   })
 })
 
-// MODE-03/MODE-05 (D-06). Un-skipped by 30-04.
-// Browse and Cram must structurally never invoke cardsService.review — no
+// MODE-03 (D-06). Un-skipped by 30-04.
+// Browse must structurally never invoke cardsService.review — no
 // GradingButtons are mounted, so the grading path is unreachable. This test
 // documents/locks that invariant rather than exercising a client-side guard.
 describe('review call guarantee', () => {
   it('never calls review in browse mode', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
-    renderSession()
-    await screen.findByTestId('session-footer')
-    expect(cardsService.review).not.toHaveBeenCalled()
-  })
-
-  it('never calls review in cram mode', async () => {
-    mockSearchParams = new URLSearchParams('mode=cram')
     renderSession()
     await screen.findByTestId('session-footer')
     expect(cardsService.review).not.toHaveBeenCalled()
@@ -335,17 +351,6 @@ describe('mode chip', () => {
     renderSession()
     const footer = await screen.findByTestId('session-footer')
     expect(within(footer).getByText('cards.session.mode.study')).toBeInTheDocument()
-  })
-})
-
-// MODE-05 (D-09). Un-skipped by 30-04.
-// Cram fetches all cards regardless of due date — same fetch path as Browse.
-describe('cram mode fetch', () => {
-  it('fetches all cards via getAllCards for the current deck', async () => {
-    mockSearchParams = new URLSearchParams('mode=cram')
-    renderSession()
-    await screen.findByTestId('session-footer')
-    expect(cardsService.getAllCards).toHaveBeenCalledWith('deck-1')
   })
 })
 
@@ -441,7 +446,7 @@ describe('wrong_answer nudge stays again-only', () => {
 // buildStudyContext() must include a literal `mode` field the Smart Pet's
 // ambient context can read — not a camelCase alias like isReadOnlyMode.
 describe('mode-aware context', () => {
-  it.each(['study', 'browse', 'cram'])('includes mode=%s in the object passed to setViewContext', async (mode) => {
+  it.each(['study', 'browse'])('includes mode=%s in the object passed to setViewContext', async (mode) => {
     mockSearchParams = mode === 'study' ? new URLSearchParams() : new URLSearchParams(`mode=${mode}`)
     renderSession()
     await screen.findByTestId('session-footer')
@@ -594,5 +599,211 @@ describe('rapid prev-nav race guard', () => {
     // the next cards[currentIndex] read. Post-fix, it clamps at index 0 and
     // the first card's content renders without throwing.
     expect(await screen.findByText('What is 2+2?')).toBeInTheDocument()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Browse-mode inline tag filter.
+//
+// The invariant under test throughout: the filter is a VIEW over the loaded
+// deck and exists only in Browse. Study mode must be untouched — no control,
+// no selection, and `visibleCards === cards` by reference so the SM-2 queue
+// cannot be reordered or shrunk, not even via a hand-crafted URL.
+// ---------------------------------------------------------------------------
+
+const TAG_INPUT_LABEL = 'cards.session.tagFilter.ariaLabel'
+
+/** Three flashcards: tc1 = verbs, tc2 = nouns, tc3 = both. */
+const makeTaggedCards = () => [
+  { _id: 'tc1', id: 'tc1', title: 'Alpha Q', content: 'Alpha A', tags: ['verbs'] },
+  { _id: 'tc2', id: 'tc2', title: 'Beta Q', content: 'Beta A', tags: ['nouns'] },
+  { _id: 'tc3', id: 'tc3', title: 'Gamma Q', content: 'Gamma A', tags: ['verbs', 'nouns'] }
+]
+
+/**
+ * The desktop Next-card IconButton carries no aria-label (icon only), and the
+ * same ArrowForward icon appears nowhere else — but the aria-label exclusion is
+ * kept to mirror clickPreviousCard() above and stay robust if one is added.
+ */
+function clickNextCard() {
+  const button = screen
+    .getAllByTestId('ArrowForwardIcon')
+    .map((icon) => icon.closest('button'))
+    .find((btn) => btn && !btn.hasAttribute('aria-label'))
+  fireEvent.click(button)
+}
+
+/** Opens the combobox and picks `tag` from the listbox. */
+async function selectTag(tag) {
+  const input = await screen.findByLabelText(TAG_INPUT_LABEL)
+  fireEvent.mouseDown(input)
+  const option = await screen.findByRole('option', { name: new RegExp(`^${tag}`) })
+  fireEvent.click(option)
+}
+
+/**
+ * The most recent non-null payload handed to the Pet. buildStudyContext is the
+ * only observable signal for `isFlipped` in jsdom — both flashcard faces are
+ * always mounted (the flip is a CSS transform), so DOM presence proves nothing.
+ */
+const lastViewContext = () =>
+  mockSetViewContext.mock.calls
+    .map(([payload]) => payload)
+    .filter(Boolean)
+    .pop()
+
+describe('browse tag filter — visibility', () => {
+  it('never renders in study mode, even with a hand-crafted ?tags= on the URL', async () => {
+    mockSearchParams = new URLSearchParams('mode=study&tags=verbs')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByTestId('session-footer')
+
+    expect(screen.queryByLabelText(TAG_INPUT_LABEL)).not.toBeInTheDocument()
+    // And the queue is intact — all three cards, unfiltered.
+    expect(screen.getAllByText(/cards\.session\.card.*"total":3/).length).toBeGreaterThan(0)
+  })
+
+  it('renders in browse mode on a deck that has tags', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeTaggedCards() })
+
+    expect(await screen.findByLabelText(TAG_INPUT_LABEL)).toBeInTheDocument()
+  })
+
+  it('does not render on a browse deck with no tags at all', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeCards() })
+    await screen.findByTestId('session-footer')
+
+    expect(screen.queryByLabelText(TAG_INPUT_LABEL)).not.toBeInTheDocument()
+  })
+
+  it('does not render in fullscreen', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByLabelText(TAG_INPUT_LABEL)
+
+    fireEvent.click(screen.getByLabelText('cards.session.enterFullscreen'))
+
+    expect(screen.queryByLabelText(TAG_INPUT_LABEL)).not.toBeInTheDocument()
+  })
+})
+
+describe('browse tag filter — progress totals', () => {
+  it('counts against the FILTERED total in both the header and the session footer', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&tags=verbs')
+    renderSession({ cards: makeTaggedCards() })
+
+    const footer = await screen.findByTestId('session-footer')
+    // tc1 + tc3 match 'verbs' — 2, not the deck's 3.
+    expect(within(footer).getByText(/cards\.session\.card.*"total":2/)).toBeInTheDocument()
+    expect(screen.getAllByText(/cards\.session\.card.*"total":2/).length).toBeGreaterThan(1)
+  })
+
+  it('reports the filtered total to the AI companion, not the deck total', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&tags=verbs')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByTestId('session-footer')
+
+    expect(lastViewContext()).toMatchObject({ totalCards: 2, cardIndex: 1 })
+  })
+})
+
+describe('browse tag filter — position handling', () => {
+  it('keeps the user on the same card, with flip state untouched, when the card survives the filter', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByLabelText(TAG_INPUT_LABEL)
+
+    clickNextCard() // -> tc2
+    clickNextCard() // -> tc3 (tagged verbs + nouns, so it survives 'nouns')
+    fireEvent.click(await screen.findByText('Gamma Q')) // flip it
+    expect(lastViewContext()).toMatchObject({ isFlipped: true, cardIndex: 3 })
+
+    await selectTag('nouns') // visible becomes [tc2, tc3]
+
+    // Re-anchored onto tc3 at its NEW index (2 of 2) — and still flipped: the
+    // card on screen never changed, so re-hiding the answer would be a
+    // regression, not a reset.
+    expect(lastViewContext()).toMatchObject({ isFlipped: true, cardIndex: 2, totalCards: 2 })
+    expect(screen.getAllByText(/cards\.session\.card.*"current":2.*"total":2/).length).toBeGreaterThan(0)
+  })
+
+  it('falls back to the first card with flip state cleared when the anchored card is filtered out', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByLabelText(TAG_INPUT_LABEL)
+
+    fireEvent.click(await screen.findByText('Alpha Q')) // flip tc1 (verbs only)
+    expect(lastViewContext()).toMatchObject({ isFlipped: true, cardIndex: 1 })
+
+    await selectTag('nouns') // tc1 drops out; visible becomes [tc2, tc3]
+
+    expect(lastViewContext()).toMatchObject({ isFlipped: false, cardIndex: 1, totalCards: 2 })
+    expect(screen.getByText('Beta Q')).toBeInTheDocument()
+  })
+
+  it('never completes the session as a side effect of filtering', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByLabelText(TAG_INPUT_LABEL)
+
+    await selectTag('nouns')
+
+    expect(screen.queryByText('cards.session.complete.cardsReviewed')).not.toBeInTheDocument()
+    expect(await screen.findByTestId('session-footer')).toBeInTheDocument()
+  })
+})
+
+describe('browse tag filter — filtered-empty state', () => {
+  /**
+   * The only fixture that reaches this branch. countTags() normalises tag
+   * whitespace so `' verbs '` and `'verbs'` tally as one filter entry, while
+   * filterCardsByTags() compares raw values — so a deck whose ONLY spelling is
+   * the padded one advertises a `verbs` filter that matches nothing.
+   *
+   * That asymmetry is exactly what this state is for: an active filter with an
+   * empty result, which must never look like an empty deck and must never be a
+   * dead end. (Normalising tags at write time would close the gap upstream —
+   * out of scope here, and the empty state would still be the correct catch.)
+   */
+  const paddedTagCards = () => [
+    { _id: 'pt1', id: 'pt1', title: 'Padded Q', content: 'Padded A', tags: [' verbs '] },
+    { _id: 'pt2', id: 'pt2', title: 'Other Q', content: 'Other A', tags: ['nouns'] }
+  ]
+
+  it('renders inside the session layout, keeping the combobox mounted so the filter is undoable', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&tags=verbs')
+    renderSession({ cards: paddedTagCards() })
+
+    expect(await screen.findByTestId('tag-filter-empty')).toBeInTheDocument()
+    expect(screen.getByText('cards.session.tagFilter.empty.title')).toBeInTheDocument()
+    expect(screen.getByText('cards.session.tagFilter.empty.body')).toBeInTheDocument()
+    // The escape hatch: the control that caused this is still on screen.
+    expect(screen.getByLabelText(TAG_INPUT_LABEL)).toBeInTheDocument()
+  })
+
+  it('is distinct from the empty-deck state and hides the card chrome', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&tags=verbs')
+    renderSession({ cards: paddedTagCards() })
+    await screen.findByTestId('tag-filter-empty')
+
+    expect(screen.queryByText('cards.session.emptyDeck.title')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-footer')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-card')).not.toBeInTheDocument()
+    expect(screen.queryByText(/cards\.session\.card/)).not.toBeInTheDocument()
+  })
+
+  it('restores the deck through its clear affordance', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&tags=verbs')
+    renderSession({ cards: paddedTagCards() })
+
+    const emptyState = await screen.findByTestId('tag-filter-empty')
+    fireEvent.click(within(emptyState).getByLabelText('cards.session.tagFilter.clear'))
+
+    expect(screen.queryByTestId('tag-filter-empty')).not.toBeInTheDocument()
+    expect(await screen.findByText('Padded Q')).toBeInTheDocument()
+    expect(mockSearchParams.has('tags')).toBe(false)
+    expect(mockSearchParams.get('mode')).toBe('browse')
   })
 })
