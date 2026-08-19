@@ -421,7 +421,7 @@ const Header = () => {
                         </Typography>
                         {user?.subscription?.tier && user.subscription.tier !== 'free' && (
                           <Box sx={{ mt: 0.25 }}>
-                            <Chip size='sm' variant='soft' color='primary' sx={{ fontSize: '0.625rem', height: 18 }}>
+                            <Chip size='sm' variant='soft' color='primary'>
                               {t(`header.profileMenu.tier.${user.subscription.tier}`)}
                             </Chip>
                           </Box>

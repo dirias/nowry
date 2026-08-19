@@ -46,6 +46,15 @@ export const sheetInlinePadding = { xs: 2, sm: 3, md: 4 }
 // "touch target" means one number, not five.
 export const touchTarget = { minHeight: { xs: TOUCH_TARGET, sm: 32 } }
 
+// The two-dimensional version, for square controls — icon buttons, menu
+// buttons, canvas handles. WCAG 2.5.5 is a 44x44 AREA, so a control that is
+// 44px tall and 28px wide still fails it; `touchTarget` alone only ever fixed
+// half the box. Use this wherever the control has no text to give it width.
+export const touchTargetBox = {
+  minWidth: { xs: TOUCH_TARGET, sm: 32 },
+  minHeight: { xs: TOUCH_TARGET, sm: 32 }
+}
+
 // Fixed-width digits, for values that update in place: streaks, counters,
 // review intervals, timers. Without it, a countdown re-lays out on every tick
 // as digit widths change and the surrounding row twitches.

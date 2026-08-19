@@ -572,7 +572,7 @@ const PublicView = () => {
                       {card.tags && card.tags.length > 0 && (
                         <Stack direction='row' spacing={0.5} sx={{ mt: 1.5, flexWrap: 'wrap', gap: 0.5 }}>
                           {card.tags.slice(0, 3).map((tag) => (
-                            <Chip key={tag} size='sm' variant='soft' sx={{ fontSize: '0.65rem' }}>
+                            <Chip key={tag} size='sm' variant='soft'>
                               {tag}
                             </Chip>
                           ))}

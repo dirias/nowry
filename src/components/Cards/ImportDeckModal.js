@@ -342,7 +342,7 @@ export default function ImportDeckModal({ open, onClose, onImported }) {
                     {card.tags?.length > 0 && (
                       <Stack direction='row' spacing={0.5} sx={{ mt: 1, flexWrap: 'wrap' }}>
                         {card.tags.map((tag, ti) => (
-                          <Chip key={ti} size='sm' variant='soft' color='neutral' sx={{ fontSize: '0.65rem' }}>
+                          <Chip key={ti} size='sm' variant='soft' color='neutral'>
                             {tag}
                           </Chip>
                         ))}

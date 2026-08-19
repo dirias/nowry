@@ -384,7 +384,7 @@ export default function ManageContent({
               size='sm'
               variant='solid'
               color='primary'
-              sx={{ position: 'absolute', top: -6, right: -6, minWidth: 16, height: 16, fontSize: '0.65rem', p: 0, pointerEvents: 'none' }}
+              sx={{ position: 'absolute', top: -8, right: -8, minWidth: 20, height: 20, p: 0, pointerEvents: 'none' }}
             >
               {activeFilterCount}
             </Chip>

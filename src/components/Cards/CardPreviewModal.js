@@ -171,7 +171,7 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
                 })}
               </Typography>
               {currentCard?.card_type && currentCard.card_type !== 'flashcard' && (
-                <Chip size='sm' variant='soft' color='neutral' sx={{ fontSize: '0.6rem', height: 16, px: 0.5 }}>
+                <Chip size='sm' variant='soft' color='neutral' sx={{ px: 0.5 }}>
                   {currentCard.card_type}
                 </Chip>
               )}

@@ -114,7 +114,7 @@ export default function StudyCard({ card, onEdit, onDelete }) {
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
           {Array.isArray(card.tags) &&
             card.tags.slice(0, 2).map((tag, idx) => (
-              <Chip key={idx} size='sm' variant='soft' color='neutral' sx={{ fontSize: '10px' }}>
+              <Chip key={idx} size='sm' variant='soft' color='neutral'>
                 #{tag}
               </Chip>
             ))}

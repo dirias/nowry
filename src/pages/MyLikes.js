@@ -238,8 +238,7 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
                 sx={{
                   position: 'absolute',
                   top: 8,
-                  left: 8,
-                  fontSize: '0.625rem'
+                  left: 8
                 }}
               >
                 {item.content_type === 'book' ? t('public.books') : t('public.decks')}
@@ -306,8 +305,7 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
                       size='sm'
                       sx={{
                         bgcolor: 'rgba(255,255,255,0.2)',
-                        color: 'white',
-                        fontSize: '0.625rem'
+                        color: 'white'
                       }}
                     >
                       {tag}
@@ -318,8 +316,7 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
                       size='sm'
                       sx={{
                         bgcolor: 'rgba(255,255,255,0.2)',
-                        color: 'white',
-                        fontSize: '0.625rem'
+                        color: 'white'
                       }}
                     >
                       +{item.public_metadata.tags.length - 2}

@@ -132,7 +132,7 @@ const PomodoroWidget = () => {
               onClick={() => changeMode('work')}
               sx={{ minWidth: 32, height: 32 }}
             >
-              <Box sx={{ fontSize: '10px', fontWeight: 'bold' }}>F</Box>
+              <Box sx={{ fontSize: 'xs', fontWeight: 'bold' }}>F</Box>
             </IconButton>
             <IconButton
               size='sm'
@@ -141,7 +141,7 @@ const PomodoroWidget = () => {
               onClick={() => changeMode('shortBreak')}
               sx={{ minWidth: 32, height: 32 }}
             >
-              <Box sx={{ fontSize: '10px', fontWeight: 'bold' }}>S</Box>
+              <Box sx={{ fontSize: 'xs', fontWeight: 'bold' }}>S</Box>
             </IconButton>
             <IconButton
               size='sm'
@@ -150,7 +150,7 @@ const PomodoroWidget = () => {
               onClick={() => changeMode('longBreak')}
               sx={{ minWidth: 32, height: 32 }}
             >
-              <Box sx={{ fontSize: '10px', fontWeight: 'bold' }}>L</Box>
+              <Box sx={{ fontSize: 'xs', fontWeight: 'bold' }}>L</Box>
             </IconButton>
           </Stack>
 

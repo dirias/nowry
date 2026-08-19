@@ -285,7 +285,6 @@ const CalendarModal = ({ open, onClose }) => {
                     sx={{
                       textAlign: 'center',
                       color: 'text.tertiary',
-                      fontSize: '0.65rem',
                       fontWeight: 600,
                       py: 0.25
                     }}
@@ -473,16 +472,11 @@ const CalendarModal = ({ open, onClose }) => {
 
                         {/* Chips + edit button */}
                         <Stack direction='row' spacing={0.5} alignItems='center' flexShrink={0}>
-                          <Chip size='sm' variant='soft' sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20, px: 0.75 }}>
+                          <Chip size='sm' variant='soft' sx={{ fontWeight: 600, px: 0.75 }}>
                             {t(TYPE_META[ev.type]?.i18nKey || ev.type)}
                           </Chip>
                           {ev.status && ev.status !== 'active' && ev.status !== 'pending' && (
-                            <Chip
-                              size='sm'
-                              variant='soft'
-                              color={statusColor(ev.status)}
-                              sx={{ height: 20, fontSize: '0.65rem', px: 0.75 }}
-                            >
+                            <Chip size='sm' variant='soft' color={statusColor(ev.status)} sx={{ px: 0.75 }}>
                               {ev.status}
                             </Chip>
                           )}
@@ -498,8 +492,6 @@ const CalendarModal = ({ open, onClose }) => {
                                   variant='soft'
                                   color='neutral'
                                   sx={{
-                                    height: 20,
-                                    fontSize: '0.65rem',
                                     px: 0.75,
                                     maxWidth: 90,
                                     overflow: 'hidden',

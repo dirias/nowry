@@ -6,7 +6,7 @@ import { apiCache } from '../../../api/utils/cache'
 import useAnnualPlan from '../../../hooks/useAnnualPlan'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useTranslation } from 'react-i18next'
-import { touchTarget } from '../../Common/Form/formStyles'
+import { touchTarget, touchTargetBox } from '../../Common/Form/formStyles'
 
 /**
  * FocusBar - Horizontal strip showing goals + priorities at a glance
@@ -200,7 +200,6 @@ const FocusBar = () => {
           <Typography
             level='body-xs'
             sx={{
-              fontSize: { xs: '0.625rem', md: '0.65rem' },
               color: hasDeadline ? (isOverdue ? 'danger.solidColor' : isUrgent ? 'warning.solidColor' : 'text.tertiary') : 'text.tertiary',
               fontWeight: 700,
               flexShrink: 0
@@ -395,8 +394,7 @@ const FocusBar = () => {
                           level='body-xs'
                           sx={{
                             fontWeight: 600,
-                            color: 'text.tertiary',
-                            fontSize: '0.65rem'
+                            color: 'text.tertiary'
                           }}
                         >
                           {entityLabel === 'Goal' ? '🎯' : entityLabel === 'Task' ? '📋' : '⏰'}
@@ -532,9 +530,7 @@ const FocusBar = () => {
               variant='plain'
               color='neutral'
               sx={{
-                minWidth: 28,
-                width: 28,
-                height: 28,
+                ...touchTargetBox,
                 borderRadius: 'sm',
                 border: '1px solid',
                 borderColor: 'divider',

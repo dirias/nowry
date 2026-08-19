@@ -909,7 +909,7 @@ export default function AccountSettings() {
                     {agentKnowledgeAccess && (
                       <>
                         &nbsp;
-                        <Chip size='sm' variant='soft' color='success' sx={{ fontSize: '0.6rem', height: 16, py: 0 }}>
+                        <Chip size='sm' variant='soft' color='success'>
                           Knowledge On
                         </Chip>
                       </>

@@ -161,9 +161,7 @@ export default function Book({ book, handleBookClick = () => {}, onEdit, onDelet
                     bgcolor: 'rgba(0,0,0,0.4)',
                     backdropFilter: 'blur(4px)',
                     color: 'common.white',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    fontSize: '10px',
-                    height: 20
+                    border: '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
                   {tag}

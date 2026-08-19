@@ -310,7 +310,7 @@ export default function NewsCarousel() {
           </TabList>
 
           {userPreferences?.language && (
-            <Chip variant='soft' color='primary' size='sm' sx={{ fontSize: { xs: '0.65rem', md: '0.75rem' }, height: { xs: 20, md: 24 } }}>
+            <Chip variant='soft' color='primary' size='sm'>
               {userPreferences.language.toUpperCase()}
             </Chip>
           )}
@@ -750,9 +750,6 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
                 color='primary'
                 size='sm'
                 sx={{
-                  fontSize: { xs: '0.6rem', md: '0.65rem' },
-                  height: { xs: '18px', md: '20px' },
-                  minHeight: { xs: '18px', md: '20px' },
                   px: { xs: 0.75, md: 1 },
                   py: 0
                 }}

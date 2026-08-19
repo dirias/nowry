@@ -601,7 +601,7 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                             variant='soft'
                             color='neutral'
                             startDecorator={<ForkIcon sx={{ fontSize: 11 }} />}
-                            sx={{ fontSize: '0.65rem', height: 'auto', py: 0.25 }}
+                            sx={{ height: 'auto', py: 0.25 }}
                           >
                             {t('public.forkBadge')}
                           </Chip>
@@ -696,7 +696,7 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                   variant='soft'
                   color='neutral'
                   startDecorator={<ForkIcon sx={{ fontSize: 11 }} />}
-                  sx={{ fontSize: '0.65rem', height: 'auto', py: 0.25 }}
+                  sx={{ height: 'auto', py: 0.25 }}
                 >
                   {t('public.forkBadge')}
                 </Chip>

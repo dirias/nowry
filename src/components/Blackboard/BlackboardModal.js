@@ -515,14 +515,14 @@ export default function BlackboardModal({ open, onClose }) {
                     border: '1px solid',
                     borderColor: 'divider',
                     borderRadius: 'xs',
-                    fontSize: '0.6rem',
+                    fontSize: 'xs',
                     color: 'text.secondary',
                     fontWeight: 600
                   }}
                 >
                   {key}
                 </Box>
-                <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.6rem' }}>
+                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                   {label}
                 </Typography>
               </Box>

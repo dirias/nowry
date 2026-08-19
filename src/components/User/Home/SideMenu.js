@@ -892,8 +892,7 @@ const SideMenu = () => {
                           color: 'text.tertiary',
                           fontWeight: 600,
                           textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          fontSize: '0.62rem'
+                          letterSpacing: '0.06em'
                         }}
                       >
                         {group.label}
