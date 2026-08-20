@@ -115,7 +115,9 @@ export default function CardHome({ onDeckChange } = {}) {
   }
 
   const handleDeckSaved = () => {
-    fetchData()
+    reloadDecks() // Invalidate the shared apiCache entry so decks:* re-fetches
+    fetchData() // Re-derive local state now; the useDeckData effect also re-runs once hookDecks updates
+    onDeckChange?.() // Tell StudyCenter's own useDeckData instance to refresh too
   }
 
   // Editing a deck is editing a deck, whichever field it is. It used to open a
