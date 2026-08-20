@@ -99,6 +99,19 @@ jest.mock('../../../hooks/useCardData', () => ({
   useCardData: () => ({ cards: [], loading: false, reload: jest.fn() })
 }))
 
+// CACHE-004: StudySession now invalidates the React Query 'cards' cache
+// directly (via useAuth()'s userId) on unmount, replacing the old
+// apiCache.invalidate('cards:all') call — mirrors the established
+// AuthContext-mocking idiom used by every other test whose component
+// imports useAuth (e.g. FocusAreaViewDialogSection.test.js,
+// AnnualPlanningLayout.test.js), needed because the real AuthContext module
+// pulls in src/i18n.js, which errors outside the app's real entry point.
+jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user' } }) }))
+
+jest.mock('../../../api/queryClient', () => ({
+  queryClient: { invalidateQueries: jest.fn() }
+}))
+
 jest.mock('../../../hooks/useVoiceSettings', () => {
   const benignSide = { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
   return {

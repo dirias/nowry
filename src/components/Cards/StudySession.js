@@ -39,6 +39,8 @@ import { useBrowseTagFilter } from '../../hooks/useBrowseTagFilter'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import BrowseTagFilter from './BrowseTagFilter'
 import { apiCache } from '../../api/utils/cache'
+import { queryClient } from '../../api/queryClient'
+import { useAuth } from '../../context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
@@ -207,6 +209,8 @@ export default function StudySession() {
   const { deckId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const userId = user?.id ?? null
   const mermaidRef = useRef(null)
   const [searchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'study'
@@ -382,13 +386,17 @@ export default function StudySession() {
   useEffect(() => {
     return () => {
       apiCache.invalidate('cards:statistics')
-      apiCache.invalidate('cards:all')
+      // useCardData (CACHE-004) no longer reads 'cards:all' from apiCache —
+      // invalidate its React Query cache entry instead so DailyFocus,
+      // WeeklyStatsCard, and CardHome's Content Library pick up this
+      // session's review results (next_review, etc.) immediately.
+      if (userId) queryClient.invalidateQueries({ queryKey: ['cards', userId] })
       apiCache.invalidate('decks:all')
       setViewContext(null)
       resetCompanionSession()
       if (interventionTimerRef.current) clearTimeout(interventionTimerRef.current)
     }
-  }, [setViewContext, resetCompanionSession])
+  }, [userId, setViewContext, resetCompanionSession])
 
   // Retry failed reviews in background
   useEffect(() => {
