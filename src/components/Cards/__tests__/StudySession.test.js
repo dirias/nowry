@@ -123,17 +123,6 @@ jest.mock('../../../hooks/useVoiceSettings', () => {
   }
 })
 
-jest.mock('../../../api/utils/cache', () => ({
-  apiCache: {
-    get: jest.fn(),
-    set: jest.fn(),
-    clear: jest.fn(),
-    invalidate: jest.fn(),
-    invalidatePrefix: jest.fn(),
-    peek: jest.fn(() => null)
-  }
-}))
-
 jest.mock('mermaid', () => ({
   __esModule: true,
   default: {

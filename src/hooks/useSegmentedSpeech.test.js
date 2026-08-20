@@ -6,14 +6,14 @@
  * Study Cards TTS is free/offline-capable today and must never gain a
  * user-visible loading gate or error state from the new network boundary.
  *
- * Cache-hit behavior is verified against the real apiCache module (not a
+ * Cache-hit behavior is verified against the real React Query client (not a
  * mock) since the "one network call per unique text, ever" guarantee is the
  * entire point of the client-side cache in ADR-001.
  */
 
 import { renderHook } from '@testing-library/react'
 import { useSegmentedSpeech } from './useSegmentedSpeech'
-import { apiCache } from '../api/utils/cache'
+import { queryClient } from '../api/queryClient'
 
 const mockSegmentText = jest.fn()
 jest.mock('../api/services/tts.ai.service', () => ({
@@ -28,7 +28,7 @@ jest.mock('../utils/tts.service', () => ({
 
 describe('useSegmentedSpeech: getSegments', () => {
   beforeEach(() => {
-    apiCache.clear()
+    queryClient.clear()
     mockSegmentText.mockReset()
     mockSpeak.mockReset()
   })
