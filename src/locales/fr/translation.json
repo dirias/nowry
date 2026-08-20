@@ -2495,6 +2495,7 @@
     "tagAddAria": "Ajouter une étiquette",
     "tagRemoveAria": "Supprimer {{tag}}",
     "tagPlaceholder": "Saisissez une étiquette et appuyez sur Entrée",
+    "tagNoSuggestions": "Aucune étiquette correspondante",
     "deckLabel": "Paquet",
     "deckPlaceholder": "Choisir un paquet",
     "deckNone": "Aucun paquet",

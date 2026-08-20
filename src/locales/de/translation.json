@@ -2473,6 +2473,7 @@
     "tagAddAria": "Tag hinzufügen",
     "tagRemoveAria": "{{tag}} entfernen",
     "tagPlaceholder": "Tag eingeben und Enter drücken",
+    "tagNoSuggestions": "Keine passenden Tags",
     "deckLabel": "Deck",
     "deckPlaceholder": "Deck auswählen",
     "deckNone": "Kein Deck",

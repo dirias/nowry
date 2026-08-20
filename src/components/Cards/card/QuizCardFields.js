@@ -17,7 +17,7 @@ import QuizOptionList from './QuizOptionList'
  * designated". Two names means each clears when the user fixes *that* thing,
  * and each has its own focus target (§8.3).
  */
-const QuizCardFields = ({ values, setField, errors, revealed, availableChips, onReveal, decks, refFor, tagInputRef }) => (
+const QuizCardFields = ({ values, setField, errors, revealed, availableChips, onReveal, decks, refFor, tagInputRef, tagSuggestions }) => (
   <Stack spacing={2.5}>
     <FormTextArea
       labelKey='cards.quiz.questionLabel'
@@ -60,6 +60,7 @@ const QuizCardFields = ({ values, setField, errors, revealed, availableChips, on
       onReveal={onReveal}
       decks={decks}
       tagInputRef={tagInputRef}
+      tagSuggestions={tagSuggestions}
       refFor={refFor}
     />
   </Stack>

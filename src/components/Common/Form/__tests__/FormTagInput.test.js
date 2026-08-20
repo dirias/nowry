@@ -18,7 +18,7 @@ jest.mock('react-i18next', () => ({
 
 const FormTagInput = require('../FormTagInput').default
 
-const input = () => screen.getByRole('textbox')
+const input = () => screen.getByRole('combobox')
 const type = (text) => fireEvent.change(input(), { target: { value: text } })
 const pressEnter = () => fireEvent.keyDown(input(), { key: 'Enter' })
 
@@ -145,6 +145,53 @@ describe('FormTagInput', () => {
       render(<FormTagInput ref={ref} value={[]} onChange={onChange} />)
       ref.current.commitPending()
       expect(onChange).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('suggestions', () => {
+    it('offers a matching existing tag as a selectable option, case-insensitively', () => {
+      renderTags({ suggestions: ['Test', 'Testing', 'Other'] })
+      type('test')
+      expect(screen.getByRole('option', { name: 'Test' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'Testing' })).toBeInTheDocument()
+      expect(screen.queryByRole('option', { name: 'Other' })).not.toBeInTheDocument()
+    })
+
+    it('commits the suggestion exactly as it already exists when it is clicked', () => {
+      const onChange = jest.fn()
+      renderTags({ suggestions: ['Test'], onChange })
+      type('test')
+      fireEvent.click(screen.getByRole('option', { name: 'Test' }))
+      // The existing "Test" wins, not a second, differently-cased "test".
+      expect(onChange).toHaveBeenCalledWith(['Test'])
+    })
+
+    it('clears the input once a suggestion is committed, same as free typing', () => {
+      renderTags({ suggestions: ['Test'] })
+      type('test')
+      fireEvent.click(screen.getByRole('option', { name: 'Test' }))
+      expect(input()).toHaveValue('')
+    })
+
+    it('never offers a tag already on this card, so there is nothing to duplicate', () => {
+      renderTags({ value: ['Test'], suggestions: ['Test', 'Other'] })
+      type('t')
+      expect(screen.queryByRole('option', { name: 'Test' })).not.toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'Other' })).toBeInTheDocument()
+    })
+
+    it('still creates a brand-new tag on Enter when nothing in the pool matches', () => {
+      const onChange = jest.fn()
+      renderTags({ suggestions: ['Test'], onChange })
+      type('brand-new')
+      pressEnter()
+      expect(onChange).toHaveBeenCalledWith(['brand-new'])
+    })
+
+    it('offers no options at all when the caller has no suggestion pool', () => {
+      renderTags({ suggestions: [] })
+      type('anything')
+      expect(screen.queryAllByRole('option')).toHaveLength(0)
     })
   })
 

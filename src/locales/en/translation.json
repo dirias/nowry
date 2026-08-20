@@ -3313,6 +3313,7 @@
     "tagAddAria": "Add tag",
     "tagRemoveAria": "Remove {{tag}}",
     "tagPlaceholder": "Add a tag and press Enter",
+    "tagNoSuggestions": "No matching tags",
     "deckLabel": "Deck",
     "deckPlaceholder": "Choose a deck",
     "deckNone": "No deck",

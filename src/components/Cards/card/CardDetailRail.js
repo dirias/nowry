@@ -16,14 +16,24 @@ import { RAIL_LABELS } from './cardTypes'
  * this, in the body, so the chip row stays last: a revealed group is content,
  * and content outranks an offer.
  */
-const CardDetailRail = ({ values, setField, revealed, availableChips, onReveal, decks, tagInputRef, refFor = () => undefined }) => (
+const CardDetailRail = ({
+  values,
+  setField,
+  revealed,
+  availableChips,
+  onReveal,
+  decks,
+  tagInputRef,
+  tagSuggestions = [],
+  refFor = () => undefined
+}) => (
   <>
     {/* Wrapped so the chip that revealed the group has somewhere to send
         focus: the chip unmounts on use, and the group's own first control is
         whatever the primitive happens to render. */}
     {revealed.has('tags') && (
       <Box ref={refFor('tags')}>
-        <FormTagInput ref={tagInputRef} value={values.tags} onChange={(tags) => setField('tags', tags)} />
+        <FormTagInput ref={tagInputRef} value={values.tags} onChange={(tags) => setField('tags', tags)} suggestions={tagSuggestions} />
       </Box>
     )}
 

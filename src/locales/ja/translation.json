@@ -2432,6 +2432,7 @@
     "tagAddAria": "タグを追加",
     "tagRemoveAria": "{{tag}} を削除",
     "tagPlaceholder": "タグを入力して Enter キーを押してください",
+    "tagNoSuggestions": "一致するタグがありません",
     "deckLabel": "デッキ",
     "deckPlaceholder": "デッキを選択",
     "deckNone": "デッキなし",

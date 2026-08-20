@@ -47,7 +47,7 @@ const StatusDot = ({ status }) =>
     />
   )
 
-const VisualCardFields = ({ values, setField, errors, revealed, availableChips, onReveal, decks, refFor, tagInputRef }) => {
+const VisualCardFields = ({ values, setField, errors, revealed, availableChips, onReveal, decks, refFor, tagInputRef, tagSuggestions }) => {
   const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [tab, setTab] = useState('code')
@@ -131,6 +131,7 @@ const VisualCardFields = ({ values, setField, errors, revealed, availableChips, 
         onReveal={onReveal}
         decks={decks}
         tagInputRef={tagInputRef}
+        tagSuggestions={tagSuggestions}
         refFor={refFor}
       />
     </Stack>

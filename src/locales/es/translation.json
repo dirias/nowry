@@ -3138,6 +3138,7 @@
     "tagAddAria": "Añadir etiqueta",
     "tagRemoveAria": "Quitar {{tag}}",
     "tagPlaceholder": "Escribe una etiqueta y pulsa Enter",
+    "tagNoSuggestions": "No hay etiquetas coincidentes",
     "deckLabel": "Mazo",
     "deckPlaceholder": "Elige un mazo",
     "deckNone": "Sin mazo",

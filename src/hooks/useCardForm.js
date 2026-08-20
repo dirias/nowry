@@ -51,6 +51,12 @@ const useCardForm = ({ open, card = null, onSaved, onClose }) => {
   // right for tags and deck and wrong for a discarded explanation.
   const [suppressedGroups, setSuppressedGroups] = useState(() => new Set())
   const [limitReached, setLimitReached] = useState(false)
+  // The tag field's suggestion pool — every tag this user has ever used, so
+  // typing "test" surfaces the existing "Test" instead of inviting a
+  // near-duplicate. Fetched once per time the sheet opens rather than kept
+  // live: a suggestion list going stale mid-edit is harmless, and re-fetching
+  // on every keystroke is not.
+  const [tagSuggestions, setTagSuggestions] = useState([])
 
   const spec = specFor(cardType)
   const entity = card && (card._id || card.id) ? card : null
@@ -126,6 +132,26 @@ const useCardForm = ({ open, card = null, onSaved, onClose }) => {
     // belongs to the first required field.
     if (!openState.current.isEdit && openState.current.presetDeckId) coreReveal('deck')
   }, [open, coreReveal])
+
+  // A suggestion list is a nicety, not a dependency of the save path — a
+  // failed fetch just leaves the field behaving exactly as it did before this
+  // existed (free typing, no dropdown), so it is swallowed rather than surfaced
+  // through `saveError`.
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    cardsService
+      .getTags()
+      .then((tags) => {
+        if (!cancelled) setTagSuggestions((tags || []).map((entry) => entry.tag))
+      })
+      .catch((error) => {
+        console.error('[useCardForm] Error loading tag suggestions:', error)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open])
 
   const revealed = useMemo(
     () => new Set([...core.revealed].filter((group) => !suppressedGroups.has(group))),
@@ -229,6 +255,7 @@ const useCardForm = ({ open, card = null, onSaved, onClose }) => {
     limitReached,
     refFor,
     tagInputRef,
+    tagSuggestions,
     saveAndClose,
     saveAndNext,
     primaryAction

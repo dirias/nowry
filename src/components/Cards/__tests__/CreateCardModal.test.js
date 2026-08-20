@@ -33,10 +33,12 @@ jest.mock('react-i18next', () => ({
 
 const mockCreate = jest.fn()
 const mockUpdate = jest.fn()
+const mockGetTags = jest.fn()
 jest.mock('../../../api/services', () => ({
   cardsService: {
     create: (...args) => mockCreate(...args),
-    update: (...args) => mockUpdate(...args)
+    update: (...args) => mockUpdate(...args),
+    getTags: (...args) => mockGetTags(...args)
   }
 }))
 
@@ -83,6 +85,12 @@ const renderModal = (props = {}) => {
 const front = () => screen.getByRole('textbox', { name: /cards.flashcard.frontLabel/ })
 const back = () => screen.getByRole('textbox', { name: /cards.flashcard.backLabel/ })
 const chip = (name) => screen.getByRole('button', { name })
+// The deck `Select` and the tag `Autocomplete` both expose `role="combobox"`
+// once their groups are revealed together, so `getByRole('combobox')` alone
+// is ambiguous from that point on. The tag one always carries the
+// `form.tagAddAria` label; the deck one never does — that is the one stable
+// way to tell them apart regardless of which deck name is currently showing.
+const deckTrigger = () => screen.getAllByRole('combobox').find((el) => el.getAttribute('aria-label') !== 'form.tagAddAria')
 const clickAsync = async (button) => {
   await act(async () => {
     fireEvent.click(button)
@@ -94,6 +102,7 @@ beforeEach(() => {
   setViewport(false)
   mockCreate.mockReset().mockResolvedValue({ _id: 'card-1' })
   mockUpdate.mockReset().mockResolvedValue({ _id: 'card-1' })
+  mockGetTags.mockReset().mockResolvedValue([])
 })
 
 describe('CreateCardModal — add mode', () => {
@@ -154,7 +163,7 @@ describe('the authoring loop', () => {
     await clickAsync(await screen.findByRole('option', { name: 'Japanese' }))
 
     await clickAsync(chip('cards.common.addTags'))
-    const tagInput = screen.getByRole('textbox', { name: 'form.tagAddAria' })
+    const tagInput = screen.getByRole('combobox', { name: 'form.tagAddAria' })
     fireEvent.change(tagInput, { target: { value: 'geography' } })
     fireEvent.keyDown(tagInput, { key: 'Enter' })
 
@@ -162,7 +171,7 @@ describe('the authoring loop', () => {
 
     expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ deck_id: 'deck-1', tags: ['geography'] }))
     // Still on screen for the next card, not re-chosen.
-    expect(screen.getByRole('combobox')).toHaveTextContent('Japanese')
+    expect(deckTrigger()).toHaveTextContent('Japanese')
     expect(screen.getByText('geography')).toBeInTheDocument()
   })
 
@@ -321,7 +330,7 @@ describe('edit mode', () => {
   it('opens showing the content the card already holds, never hiding writing', () => {
     renderModal({ card: CARD })
     expect(screen.getByText('geo')).toBeInTheDocument()
-    expect(screen.getByRole('combobox')).toHaveTextContent('Chemistry')
+    expect(deckTrigger()).toHaveTextContent('Chemistry')
     expect(screen.queryByRole('button', { name: 'cards.common.addTags' })).not.toBeInTheDocument()
   })
 
