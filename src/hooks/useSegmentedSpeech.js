@@ -15,7 +15,7 @@
 
 import { ttsService as ttsAiService } from '../api/services/tts.ai.service'
 import ttsService from '../utils/tts.service'
-import { apiCache } from '../api/utils/cache'
+import { queryClient } from '../api/queryClient'
 
 const SEGMENTS_TTL_MS = 24 * 60 * 60 * 1000 // ~24h — segmentation is deterministic per text
 
@@ -40,10 +40,17 @@ export function useSegmentedSpeech() {
   const getSegments = async (text) => {
     if (!text) return null
 
-    const key = `ttsSegments:${fnv1aHash(text)}`
-
     try {
-      const segments = await apiCache.get(key, SEGMENTS_TTL_MS, () => ttsAiService.segmentText(text))
+      const segments = await queryClient.fetchQuery({
+        queryKey: ['ttsSegments', fnv1aHash(text)],
+        queryFn: () => ttsAiService.segmentText(text),
+        staleTime: SEGMENTS_TTL_MS,
+        // Disable the client's default retry (1) here — a segmentation
+        // failure must degrade silently and fast (single attempt), matching
+        // the old apiCache-backed behavior, not add a retry round-trip
+        // before falling back to plain single-utterance TTS.
+        retry: false
+      })
       return segments && segments.length > 0 ? segments : null
     } catch (err) {
       // Silent degrade — the caller falls back to plain ttsService.speak().
