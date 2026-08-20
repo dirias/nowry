@@ -1,6 +1,11 @@
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
 import { apiCache } from '../utils/cache'
+import { queryClient } from '../queryClient'
+import { userService } from './user.service'
+
+// Matches useAnnualPlan's old apiCache-backed PROFILE_TTL (CACHE-005).
+const PROFILE_TTL = 60000 // 60s
 
 /** Bust all caches that depend on the annual plan or calendar after any mutation */
 const _bustPlanCache = () => {
@@ -8,6 +13,14 @@ const _bustPlanCache = () => {
   apiCache.invalidate(`annualPlanFull:${year}`)
   apiCache.invalidatePrefix('calendar:')
   apiCache.invalidatePrefix('activities:')
+  // React Query side (ADR-008 / CACHE-005): useAnnualPlan reads the primary +
+  // fallback plan data through the ['annualPlan', userId, year] query key.
+  // Invalidate the whole 'annualPlan' resource (all users/years) rather than
+  // just the current year, matching the broad same-resource invalidation
+  // useDeckData/useBooks/useStatistics already use for their reload() — the
+  // service layer has no userId to scope to, and every current caller of
+  // useAnnualPlan only ever queries the current year anyway.
+  queryClient.invalidateQueries({ queryKey: ['annualPlan'] })
 }
 
 export const annualPlanningService = {
@@ -20,6 +33,26 @@ export const annualPlanningService = {
   async getFullAnnualPlan(year) {
     const { data } = await apiClient.get(ENDPOINTS.annualPlan.full, { params: { year } })
     return data
+  },
+  /**
+   * Cached wrapper around userService.getProfile(), used by useAnnualPlan to derive
+   * preferredPriorityIds without a duplicate /users/profile round-trip.
+   *
+   * Deliberately stays on the `apiCache` singleton under the 'annual:profile' key
+   * (CACHE-005 scope boundary, see docs/decisions.md ADR-008): PomodoroContext.js reads
+   * this same key directly via `apiCache.get` and FocusBar.js invalidates it directly via
+   * `apiCache.invalidate('annual:profile')` — migrating it to React Query would require
+   * updating both of those call sites too, which is out of scope for the useAnnualPlan
+   * migration.
+   *
+   * @param {object|null} [preloadedUser] - Optional user object from AuthContext. When
+   *   provided, seeds the cache so the real /users/profile request is skipped.
+   */
+  async getCachedProfile(preloadedUser = null) {
+    if (preloadedUser) {
+      apiCache.get('annual:profile', PROFILE_TTL, () => Promise.resolve(preloadedUser))
+    }
+    return apiCache.get('annual:profile', PROFILE_TTL, () => userService.getProfile().catch(() => null))
   },
   async createAnnualPlan(planData) {
     const { data } = await apiClient.post(ENDPOINTS.annualPlan.create, planData)
