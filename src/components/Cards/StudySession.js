@@ -385,7 +385,11 @@ export default function StudySession() {
   // Invalidate cache when leaving study session; reset companion state
   useEffect(() => {
     return () => {
-      apiCache.invalidate('cards:statistics')
+      // useStatistics (CACHE-005) no longer reads 'cards:statistics' from
+      // apiCache — invalidate its React Query cache entry instead so
+      // WeeklyProgress and StudyCalendar pick up this session's updated
+      // stats immediately.
+      if (userId) queryClient.invalidateQueries({ queryKey: ['statistics', userId] })
       // useCardData (CACHE-004) no longer reads 'cards:all' from apiCache —
       // invalidate its React Query cache entry instead so DailyFocus,
       // WeeklyStatsCard, and CardHome's Content Library pick up this

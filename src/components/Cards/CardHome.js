@@ -15,7 +15,6 @@ import { decksService, cardsService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
-import { apiCache } from '../../api/utils/cache'
 
 export default function CardHome() {
   const navigate = useNavigate()
@@ -62,7 +61,7 @@ export default function CardHome() {
     reload: reloadCards,
     fetchMore: reloadFetchMore
   } = useCardData(selectedTags, debouncedSearch)
-  const { statistics: hookStats, loading: statsLoading } = useStatistics()
+  const { statistics: hookStats, loading: statsLoading, reload: reloadStatistics } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
   const fetchData = React.useCallback(async () => {
@@ -233,7 +232,7 @@ export default function CardHome() {
           onImported={() => {
             reloadDecks()
             reloadCards()
-            apiCache.invalidate('cards:statistics')
+            reloadStatistics()
             setShowImportDeck(false)
           }}
         />
