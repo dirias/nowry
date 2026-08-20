@@ -479,7 +479,7 @@ This is `fontVariantNumeric`, not `font-feature-settings: 'tnum'`, on purpose. T
         ```
     *   **Typography Scaling:**
         - **Number (Hero):** `{ xs: '1.5rem', md: '2rem' }` (24-32px) — Large but not oversized
-        - **Label:** `0.625rem` (10px) at 70% opacity — Whisper-quiet, de-emphasized
+        - **Label:** `0.75rem` (12px) at 70% opacity — Whisper-quiet, de-emphasized
         - **Line Height:** `lineHeight: 1` for numbers (tight, compact)
     *   **Icon Treatment:**
         - **Size:** 16px (small, not dominant)
@@ -993,10 +993,10 @@ function BookLibrary() {
 
     #### Stat Label Rules (same section)
     - **Never** apply `opacity` directly to a Typography that uses a semantic color token (`text.tertiary`, `text.secondary`). The token already encodes the correct contrast.
-    - **Never** hardcode `fontSize` on `body-xs` — it's already `0.625rem` by definition.
+    - **Never** hardcode `fontSize` on `body-xs` — it's already `0.75rem` by definition.
     ```javascript
     // ❌ Double-dims the label below readable contrast
-    <Typography level='body-xs' sx={{ color: 'text.tertiary', opacity: 0.6, fontSize: '0.625rem' }}>
+    <Typography level='body-xs' sx={{ color: 'text.tertiary', opacity: 0.6, fontSize: '0.75rem' }}>
 
     // ✅ Correct
     <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
