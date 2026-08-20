@@ -1,5 +1,12 @@
 # Nowry Design and UI/UX Guidelines
 
+> **Numbers in §3 and §4 describe `src/theme/tokens.js`.** That file — not this
+> document — is the single source of truth for spacing, radius, font size,
+> font weight, line height, and letter spacing. If this doc and the runtime
+> ever disagree, the runtime is right and this doc is a bug: file it. The
+> tables below drifted a full step out of date once already, silently, before
+> this note existed; it is the actual fix for why that happened.
+
 ## 1. Core Philosophy: "Refined Minimalism"
 *   **Less is More:** Every element must have a purpose. Remove redundant labels, borders, or containers that do not add functionality.
 *   **Content-First:** The UI should recede, allowing the user's content (books, notes, profile) to be the focal point.
@@ -47,6 +54,8 @@ Always prefer the **right column** tokens — they adapt automatically to light/
 
 ### 3.1 Spacing Scale (4px Base Grid)
 
+This table is the promoted form of `SPACING_SCALE` in `tokens.js`. `theme.spacing` is `8` explicitly (matching Joy's default) so a future change here is a deliberate edit, not an accidental halving of every gap in the app.
+
 Joy UI `sx` spacing units map to `theme.spacing()` where `1 unit = 8px` by default. However, Nowry uses fractional units to target a 4px base grid:
 
 | sx Value | Pixel Size | Usage |
@@ -71,6 +80,7 @@ Joy UI `sx` spacing units map to `theme.spacing()` where `1 unit = 8px` by defau
 | Filter bar (chips row) | `gap` | `1` (8px) | `sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}` |
 | Page vertical padding | `py` | `4` (32px) default | `<Container sx={{ py: 4 }}>` |
 | Form field to form field | `spacing` | `2` | Inside `<Stack spacing={2}>` |
+| Interactive control (buttons, icon buttons, chips) | `minHeight` (`touchTarget`) or `minWidth`+`minHeight` (`touchTargetBox`) | `{ xs: 44, sm: 32 }` on both axes the fragment covers | ≥44px per WCAG 2.5.5 at `xs`, relaxing to 32px at `sm`+ for pointer devices. The `44` is `TOUCH_TARGET` from `tokens.js`, so the minimum is stated once for the whole app. Two fragments exist in `formStyles.js` because WCAG 2.5.5 is a two-dimensional area check: `touchTarget` polices height only — correct for text-bearing controls, whose label already supplies width — while `touchTargetBox` polices both height and width, for square controls with no label to lean on (icon buttons, menu buttons, canvas handles). Reach for `touchTarget` first; reach for `touchTargetBox` when the control has no text. |
 
 ### 3.3 Mobile Spacing Adjustments
 
@@ -110,27 +120,53 @@ sx={{ p: { xs: 2, md: 3 } }}  // 16px → 24px
     *   **Padding:** Default vertical padding is `py: 4` (32px).
     *   *Implementation:* `<Container maxWidth='xl' sx={{ py: 4 }}>`
 
----
+**Two-stop `{ xs, md }` is the default** for every spacing prop above — it covers the phone-to-desktop jump for the overwhelming majority of layouts, and a third stop is complexity that usually isn't earning its keep. Reach for a three-stop `{ xs, sm, md }` only in named cases:
+*   A grid's column count changes at `sm` (e.g., 1 → 2 → 3 columns), so the gap needs its own mid-step to avoid a lopsided jump.
+*   Modal width, per §8.11 — three or four stops is the documented pattern there, not an exception to relearn.
+*   The `xs` and `md` values differ by more than 2 spacing steps (e.g., `py: { xs: 1, md: 4 }`) — a jump that size usually reads better broken into two smaller ones.
+
+**Typography does not use breakpoints — see §4.** Font size is a fluid `clamp()` driven by viewport width, not a responsive `sx` object; a `fontSize: { xs, md }` object on a `Typography` is the exact anti-pattern §4 exists to stop.
+
+### 3.4 Radius
+
+Five of Joy's own values, kept verbatim, plus one addition:
+
+| Token | Value | Notes |
+|---|---|---|
+| `radius.xs` | 2px | |
+| `radius.sm` | 6px | **Not 8px.** An earlier version of this document assumed `sm` was 8px, and some code shipped off-scale as a result — 6px is what Joy actually ships and what `tokens.js` now states explicitly. |
+| `radius.md` | 8px | |
+| `radius.lg` | 12px | |
+| `radius.xl` | 16px | |
+| `radius.full` | 9999px | **New.** Fully-rounded pills and circles — chips, avatars, progress bars. Joy shipped no such token; four components were already writing `borderRadius: 'full'` against nothing, which emitted invalid CSS and rendered them square in production. Adding the token repaired all four where they stood. |
+
+The five original steps are a deliberate non-change: regridding `xs` 2→4 or `sm` 6→8 would be a taste edit with a wide blast radius (hundreds of correct call sites already use them) and no defect behind it. Use `borderRadius: 'sm'` etc. — never a raw pixel value; see §4's rule for why raw values are forbidden and how the same reasoning applies beyond typography.
 
 ## 4. Typography
 
 ### 4.1 Semantic Level Usage Table
 
-Always use the appropriate Joy UI level for the context — never override `fontSize` when the right level exists:
+**Never set `fontSize` to a raw value. Never set `fontWeight` to a raw number. The `level` carries both and scales itself.**
 
-| Level | Default Size | Weight | Primary Use Case | Mobile Adjustment |
-|---|---|---|---|---|
-| `h1` | 2rem (32px) | 700 | Page hero title — one per page maximum | `fontSize: { xs: '1.5rem', md: '2rem' }` |
-| `h2` | 1.75rem (28px) | 700 | Top section heading, major dashboard panel heading | `fontSize: { xs: '1.25rem', md: '1.75rem' }` |
-| `h3` | 1.5rem (24px) | 700 | Sub-section heading, modal completion screen | `fontSize: { xs: '1.125rem', md: '1.5rem' }` |
-| `h4` | 1.25rem (20px) | 700 | Card heading, dialog heading, drawer title | `fontSize: { xs: '1rem', md: '1.25rem' }` |
-| `title-lg` | 1.125rem (18px) | 600 | Modal title, panel header, prominent label | no override needed |
-| `title-md` | 1rem (16px) | 600 | Card title, section heading, list item heading, empty state heading | no override needed |
-| `title-sm` | 0.875rem (14px) | 600 | Chip label, badge text, compact card title, sub-item label | no override needed |
-| `body-lg` | 1rem (16px) | 400 | Long-form reading text, book content, primary paragraph | no override needed |
-| `body-md` | 0.875rem (14px) | 400 | Standard body copy, form input text, description text | no override needed |
-| `body-sm` | 0.75rem (12px) | 400 | Secondary info, field labels, captions, filter tag labels | no override needed |
-| `body-xs` | 0.625rem (10px) | 400 | Timestamps, metadata, micro-labels, helper text below inputs | no override needed |
+| Level | Token (`fontSize.*`) | Value @360px | Value @1200px | Weight | Use case |
+|---|---|---|---|---|---|
+| `display-lg` | `xl6` | 40px | 64px | `xl` (700) | Marketing/landing hero, one per page. Requires `component='h1'` alongside `level` — see §4.1.3. |
+| `display-md` | `xl5` | 36px | 48px | `xl` (700) | Secondary hero, large standalone stat. Same `component=` requirement as `display-lg`. |
+| `h1` | `xl4` | 28px | 36px | `xl` (700) | Page hero title — one per page maximum |
+| `h2` | `xl3` | 24px | 30px | `xl` (700) | Top section heading, major dashboard panel heading |
+| `h3` | `xl2` | 20px | 24px | `lg` (600) | Sub-section heading, modal completion screen |
+| `h4` | `xl` | 20px | 20px (static) | `lg` (600) | Card heading, dialog heading, drawer title |
+| `title-lg` | `lg` | 18px | 18px (static) | `lg` (600) | Modal title, panel header, prominent label |
+| `title-md` | `md` | 16px | 16px (static) | `md` (500) | Card title, section heading, list item heading, empty state heading |
+| `title-sm` | `sm` | 14px | 14px (static) | `md` (500) | Chip label, badge text, compact card title, sub-item label |
+| `body-lg` | `lg` | 18px | 18px (static) | *unset — inherits 400* | Long-form reading text, book content, primary paragraph |
+| `body-md` | `md` | 16px | 16px (static) | *unset — inherits 400* | Standard body copy, form input text, description text |
+| `body-sm` | `sm` | 14px | 14px (static) | *unset — inherits 400* | Secondary info, field labels, captions, filter tag labels |
+| `body-xs` | `xs` | 12px | 12px (static) | `md` (500) | Timestamps, metadata, micro-labels, helper text below inputs |
+
+`h4` and every row below it are marked **static** because they are — `xs` through `xl` do not scale with viewport width, on purpose (§4.1.1 explains why). Only `xl2` and above (`h3` through `display-lg`) are fluid `clamp()` values, and the two "value" columns for those rows are the clamp's floor and ceiling, not two arbitrary breakpoint snapshots.
+
+The three body rows with *unset* weight aren't wired to the weight scale at all — Joy simply doesn't set a `fontWeight` for body text, so it renders at the browser's inherited normal (400), which happens to equal `FONT_WEIGHT.sm` numerically but isn't sourced from it. `body-xs` is the one body-level exception: Joy sets it to `md` (500) explicitly, which is why timestamps and captions read slightly bolder than a paragraph at the same size.
 
 ### Quick-Decision Rules
 
@@ -145,9 +181,71 @@ Always use the appropriate Joy UI level for the context — never override `font
 | Modal title | `title-lg` (standard) or `h4` (complex form) |
 | Chip / filter pill text | `title-sm` |
 
+#### 4.1.1 How the scale works
+
+The pipeline is `tokens.js` → `theme.js` → CSS custom property → `level`. `tokens.js` declares the raw `FONT_SIZE` scale; `theme.js` spreads it onto `theme.fontSize`; Joy's `extendTheme` turns every entry into a `--joy-fontSize-*` variable; Joy's own typography defaults (unless a level is overridden in `theme.js`, which only `h1`–`h4` and the two `display-*` levels are, and only for letter-spacing, numeral variant, or — for `display-*` — the whole level) resolve `fontSize: var(--joy-fontSize-xl4)` and so on for each level. Setting `level='h1'` is the only step a component ever takes; everything above it is the theme's job.
+
+The fluid tokens (`xl2`–`xl6`) are `clamp(min, intercept + slope·vw, max)`, anchored at two viewports: 360px (a small phone — below it, the clamp holds at `min`) and 1200px (a laptop — above it, it holds at `max`). The derivation, so the next token is computed rather than guessed:
+
+```
+range     = (1200 − 360) / 16              = 52.5rem
+slopeVw   = (maxRem − minRem) / range × 100     → the vw coefficient
+intercept = minRem − (maxRem − minRem) / range × (360 / 16)
+```
+
+Worked example, `xl4` (28px → 36px, i.e. 1.75rem → 2.25rem):
+
+```
+slopeVw   = (2.25 − 1.75) / 52.5 × 100 = 0.952…  → 0.95vw
+intercept = 1.75 − (0.5 / 52.5) × 22.5 = 1.535…  → 1.536rem
+⇒ clamp(1.75rem, 1.536rem + 0.95vw, 2.25rem)
+```
+
+The middle term is always `rem + vw`, **never** bare `vw`. A bare-`vw` clamp ignores the root font size entirely, so a user who has zoomed their browser text to 200% gets no increase at all — a direct WCAG 1.4.4 failure. This was verified by hand during the token foundation work: setting the root font size to 32px (the 200%-zoom equivalent) and re-measuring every fluid token showed each one scale up correctly, because the `rem` term scales with the root while the `vw` term keeps tracking viewport width.
+
+A caution worth carrying forward: a token resolving correctly in isolation does not guarantee it renders correctly on the page. A global, unscoped CSS rule elsewhere in the app once overrode every `h1`/`h2`/`h3` in production with `!important`, silently, for long enough that nobody noticed the fluid scale above had no visible effect outside one screen. If a font-size change doesn't show up where you expect it, check for competing global CSS before assuming the token is wrong.
+
+#### 4.1.2 Mobile floors
+
+Two floors, for two different reasons:
+
+*   **12px legibility floor.** `body-xs` (`FONT_SIZE.xs`, also exported as `MIN_FONT_SIZE`) is the smallest size permitted anywhere in the app, on any surface, at any width. A theme test asserts every static size and every fluid clamp's minimum sits at or above it.
+*   **16px iOS input-zoom floor.** `Input size='sm'` resolves to `FONT_SIZE.sm` (14px). Below 16px, iOS Safari auto-zooms the entire page on focus of that field and does not zoom back out on blur — which is why **`Input size='sm'` (and `Textarea size='sm'`) are banned on real text-entry fields; use `size='md'` or larger.** `Select size='sm'` is exempt from this ban: a `Select` renders as a button-triggered listbox, not a text field, so it never receives the keyboard focus that triggers the zoom. As a backstop for the cases that slip through review, `DynamicThemeProvider`'s `GlobalStyles` forces `input`/`textarea` to 16px below 600px width regardless of the component's own size prop.
+
+**DR-4: never shrink body text to make content fit on mobile.** If it doesn't fit, reduce content, change the layout, or truncate (§7.2 / §7.3) — `body-xs` (12px) is a floor, not a starting point. This is the rule that stops the next density crunch from reproducing the sub-12px sites this project cleaned up: nearly every one of them existed because someone needed a few more pixels of horizontal room and reached for a smaller font instead of a smaller layout.
+
+#### 4.1.3 Font families
+
+| Token | Face | Notes |
+|---|---|---|
+| `fontFamily.body` | Inter Variable | Self-hosted, preloaded, one `.woff2` file — no Google Fonts link anywhere in the app. |
+| `fontFamily.display` | Inter Variable | Deliberately the same face as `body` today. It's a separate token so a distinct display face can be introduced later by editing one line, instead of hunting every heading in the app. |
+| `fontFamily.reading` | Literata Variable | Lazy-loaded — imported only by the reading surfaces themselves (book pages, editor preview, card front/back), never on the critical path. Applied exclusively via the `readingSurface` fragment in `formStyles.js`. |
+| `fontFamily.code` | Source Code Pro (monospace stack) | Unchanged. |
+
+`reading` is scoped hard: long-form prose only, and never below `1rem`. A serif rendered below 1rem on a low-DPI Android reads worse than Inter would at the same size — the softer strokes that make Literata pleasant at reading size become mush at caption size. Never apply it to UI chrome (buttons, labels, chips) even inside a reading surface.
+
+The two `display-*` levels need one thing the table above doesn't show: **an explicit `component='h1'` (or another real heading tag) alongside `level`.** Joy's `Typography` only auto-maps `h1`–`h4` to real DOM heading tags; any other `level` — including `display-lg` and `display-md` — renders as a `<span>` by default. `<Typography level='display-lg'>` alone therefore silently drops the page's `<h1>`, which cost a full migration wave to discover. Always pair it: `<Typography level='display-lg' component='h1'>`.
+
+#### 4.1.4 Numerals
+
+`h1`–`h4` and both `display-*` levels carry `fontVariantNumeric: 'tabular-nums'` by default, so headline digits don't jitter in width as they change. Below heading level, numbers are proportional by default — proportional figures read better in prose — and opt into fixed-width digits explicitly via the `tabularNums` fragment in `formStyles.js`, wherever digits tick in place: streaks, timers, review counts, countdowns.
+
+This is `fontVariantNumeric`, not `font-feature-settings: 'tnum'`, on purpose. The standard property degrades correctly across the font-load window (before Inter finishes loading, numerals stay whatever width the fallback face gives them, then settle); `font-feature-settings` does not degrade the same way and would make numbers visibly reflow the moment Inter swaps in — the exact digit-jitter this property exists to prevent.
+
 ### 4.2 Typography Hierarchy
 *   *Headings:* Bold/Semi-bold, short, and punchy.
 *   *Body:* Readable contrast — NOT pure black (`text.secondary` is often better for detail text).
+*   **Letter spacing:** four tokens, applied inside `theme.js`'s typography block — never set inline.
+
+    | Token | Value | Applies to |
+    |---|---|---|
+    | `display` | `-0.02em` | `h1`, `h2`, `display-md`, `display-lg` |
+    | `heading` | `-0.01em` | `h3`, `h4` |
+    | `normal` | `0` | every `title-*` and `body-*` level |
+    | `wide` | `0.04em` | ALL-CAPS badges only — see §4.4 |
+
+    Joy's own default is a blanket `-0.025em` on `h1`–`h4`, tuned for its default font stack; Inter's narrower sidebearings make that read cramped, so headings use the corrected `-0.02em` / `-0.01em` values above instead.
 *   **Text Backgrounds:**
     *   **NEVER apply `backgroundColor` directly to text elements** (Typography, heading tags, span, etc.).
     *   *Incorrect:* `<Typography sx={{ backgroundColor: 'primary.main' }}>Text</Typography>`
@@ -168,7 +266,7 @@ Always use the appropriate Joy UI level for the context — never override `font
     *   **When to use:** Page titles, section headings, primary navigation, major button labels
     *   **Examples:** "Account Settings", "Study Center", "Create New Account"
 *   **ALL CAPS:**
-    *   **When to use:** Only UI badges/abbreviations ("NEW", "BETA", "API")
+    *   **When to use:** Only UI badges/abbreviations ("NEW", "BETA", "API"), and only with the `wide` letter-spacing token (§4.2) — tight tracking on all-caps text reads as cramped rather than confident.
     *   ❌ **NEVER for form labels** — using `textTransform: 'uppercase'` on `<FormLabel>` or helper `<Typography>` is forbidden. Sentence case always.
     *   ```javascript
         // ❌ Forbidden
@@ -181,7 +279,7 @@ Always use the appropriate Joy UI level for the context — never override `font
         ```
         ✅ Sentence case: empty states, form labels, helper text, placeholders, descriptions
         ✅ Title Case: page titles, nav items, major buttons
-        ✅ ALL CAPS (sparingly): "NEW" badge, "API KEY" technical label
+        ✅ ALL CAPS (sparingly): "NEW" badge, "API KEY" technical label — with `letterSpacing: 'wide'`
         ❌ NEVER ALL CAPS: form field labels, body copy, error messages
         ```
 
@@ -944,7 +1042,7 @@ function BookLibrary() {
 ### 7.3 Mobile Stats Layout
 *   **Horizontal Row:** When displaying high-level statistics (counts, percentages) on mobile, use a **single horizontal row** (Grid `xs={4}` or `xs={6}`) instead of stacking vertical cards.
     *   **Why:** Stacking consumes too much vertical space, pushing content off-screen.
-    *   **Hide Elements:** Hide secondary elements (like progress bars or labels) on mobile if space is tight, showing only the key metric.
+    *   **Hide Elements — the named alternative to shrinking type:** When space is tight, hide a secondary element (a progress bar, a label, a decorator icon) and show only the key metric. This is the layout-side counterpart to DR-4 (§4.1.2): the fix for content that doesn't fit is to remove or restructure content, never to drop the font size below its floor. Reach for this before reaching for `fontSize`.
 ### 7.4 Horizontal Headers
 *   **Avoid Center Stacking:** For clear hierarchical headers (e.g., entity titles like "Health", "Reading"), use a **Left-Aligned Horizontal Row** layout (Icon + Text side-by-side) instead of stacking them vertically in the center.
     *   *Why:* Vertical stacking wastes space and breaks the natural "reading flow" (left-to-right).
