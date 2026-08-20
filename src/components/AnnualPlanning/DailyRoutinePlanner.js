@@ -29,9 +29,10 @@ import {
 } from '@mui/icons-material'
 
 import { annualPlanningService } from '../../api/services'
-import { apiCache } from '../../api/utils/cache'
-import { ROUTINE_CACHE_KEY, todayKey } from '../../api/utils/routineCache'
+import { queryClient } from '../../api/queryClient'
+import { todayKey } from '../../api/utils/routineCache'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { useAuth } from '../../context/AuthContext'
 
 const DailyRoutinePlanner = () => {
   const { t } = useTranslation()
@@ -50,6 +51,17 @@ const DailyRoutinePlanner = () => {
   const [editValue, setEditValue] = useState('')
 
   const { plan, areas: cacheAreas, goals: cacheGoals, loading: hookLoading } = useAnnualPlan()
+  const { user } = useAuth()
+  const userId = user?.id ?? null
+  // Kept in sync with SideMenu.js/AnnualPlanningLayout.js's useDailyRoutine() reads
+  // (CACHE-007 / ADR-008) — this component still reads the routine directly (its
+  // migration/persist logic below needs the raw fetched payload), so it invalidates
+  // the shared ['dailyRoutine', userId] query key on every mutation instead of
+  // reading through the hook itself.
+  const invalidateRoutineCache = React.useCallback(() => {
+    if (!userId) return
+    queryClient.invalidateQueries({ queryKey: ['dailyRoutine', userId] })
+  }, [userId])
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -101,7 +113,7 @@ const DailyRoutinePlanner = () => {
 
       if (routineUpdated || completionsUpdated) {
         await annualPlanningService.updateDailyRoutine(migrationRoutine)
-        apiCache.invalidate(ROUTINE_CACHE_KEY) // keep SideMenu.js/AnnualPlanningHome.js in sync
+        invalidateRoutineCache() // keep SideMenu.js/AnnualPlanningLayout.js in sync
         setRoutine(migrationRoutine)
       } else {
         setRoutine(routineData)
@@ -133,7 +145,7 @@ const DailyRoutinePlanner = () => {
     } finally {
       setLoading(false)
     }
-  }, [plan, cacheAreas, cacheGoals])
+  }, [plan, cacheAreas, cacheGoals, invalidateRoutineCache])
 
   useEffect(() => {
     if (hookLoading) return
@@ -144,7 +156,7 @@ const DailyRoutinePlanner = () => {
     try {
       setSaving(true)
       await annualPlanningService.updateDailyRoutine(updatedRoutine)
-      apiCache.invalidate(ROUTINE_CACHE_KEY) // keep SideMenu.js/AnnualPlanningHome.js in sync
+      invalidateRoutineCache() // keep SideMenu.js/AnnualPlanningLayout.js in sync
     } catch (error) {
       console.error('Failed to save', error)
     } finally {
@@ -164,7 +176,7 @@ const DailyRoutinePlanner = () => {
       .map(([k]) => k)
     annualPlanningService
       .updateRoutineCompletions(todayKey(), activeKeys)
-      .then(() => apiCache.invalidate(ROUTINE_CACHE_KEY))
+      .then(() => invalidateRoutineCache())
       .catch((err) => {
         console.error('Failed to save routine completion:', err)
         setRoutineCompletions(previous) // revert optimistic update on failure

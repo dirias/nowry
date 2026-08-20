@@ -1,19 +1,17 @@
 /**
- * Shared constants for the `dailyRoutine` apiCache entry.
+ * Shared `daily_completions` date-key helper.
  *
- * DailyRoutinePlanner.js, SideMenu.js, and AnnualPlanningHome.js all read/write
- * the same `apiCache` entry so that a mutation on any of the three surfaces
- * keeps the others in sync (see 26-REVIEW.md CR-01/WR-07). Previously the cache
- * key, TTL, and todayKey() helper were independently redefined in each file —
- * an implicit, unenforced contract that could silently desync if one copy
- * drifted. Import from here instead of redefining locally.
+ * DailyRoutinePlanner.js, SideMenu.js, and AnnualPlanningLayout.js all key today's
+ * routine completions by this date string. Previously this file also exported
+ * `ROUTINE_CACHE_KEY`/`ROUTINE_TTL` for the shared `apiCache` entry the three
+ * files read/invalidated directly — that cache entry has been replaced by
+ * `hooks/useDailyRoutine.js` (React Query, CACHE-007 / ADR-008), so those two
+ * constants were removed. `todayKey()` is unrelated to caching (it's a plain
+ * date-formatting helper for the `daily_completions` map) and stays.
  *
  * Usage:
- *   import { ROUTINE_CACHE_KEY, ROUTINE_TTL, todayKey } from '../../api/utils/routineCache'
+ *   import { todayKey } from '../../api/utils/routineCache'
  */
-
-export const ROUTINE_CACHE_KEY = 'dailyRoutine'
-export const ROUTINE_TTL = 2 * 60000 // 2 minutes
 
 // Today's date as 'YYYY-MM-DD' — used as the key in daily_completions
 export const todayKey = () => new Date().toISOString().slice(0, 10)

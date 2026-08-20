@@ -8,8 +8,8 @@ import useAnnualPlan from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
-import { apiCache } from '../../api/utils/cache'
-import { ROUTINE_CACHE_KEY, ROUTINE_TTL, todayKey } from '../../api/utils/routineCache'
+import { useDailyRoutine } from '../../hooks/useDailyRoutine'
+import { todayKey } from '../../api/utils/routineCache'
 import goalAIService from '../../api/services/goalAI.service'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import CloseQuarterModal from './CloseQuarterModal'
@@ -172,28 +172,22 @@ const AnnualPlanningLayout = () => {
     })
   }, [loading, hookPlan, hookAreas, hookGoals, hookPriorities, hookQuarterReports, selectedQuarter, year])
 
-  // RTN-03/D-09: fetch daily routine data via the same apiCache entry SideMenu.js uses,
-  // so a toggle in either surface keeps this header's count fresh.
+  // RTN-03/D-09: read daily routine data via the same useDailyRoutine() query key
+  // SideMenu.js uses, so a toggle in either surface keeps this header's count fresh.
+  const { routine: routineData, error: routineError } = useDailyRoutine()
   useEffect(() => {
-    if (loading) return
-    let cancelled = false
-    apiCache
-      .get(ROUTINE_CACHE_KEY, ROUTINE_TTL, () => annualPlanningService.getDailyRoutine())
-      .then((routine) => {
-        if (cancelled) return
-        const total =
-          (routine?.morning_routine?.length || 0) + (routine?.afternoon_routine?.length || 0) + (routine?.evening_routine?.length || 0)
-        const completedToday = (routine?.daily_completions?.[todayKey()] || []).length
-        setRoutineStats({ total, completedToday })
-      })
-      .catch((err) => {
-        console.error('Failed to load daily routine stats:', err)
-        // fail safe: leave routineStats at { total: 0, completedToday: 0 } so the chip stays hidden
-      })
-    return () => {
-      cancelled = true
+    if (!routineData) return
+    const total =
+      (routineData.morning_routine?.length || 0) + (routineData.afternoon_routine?.length || 0) + (routineData.evening_routine?.length || 0)
+    const completedToday = (routineData.daily_completions?.[todayKey()] || []).length
+    setRoutineStats({ total, completedToday })
+  }, [routineData])
+  useEffect(() => {
+    if (routineError) {
+      console.error('Failed to load daily routine stats:', routineError)
+      // fail safe: leave routineStats at { total: 0, completedToday: 0 } so the chip stays hidden
     }
-  }, [loading])
+  }, [routineError])
 
   // Redirect to setup if loaded but no focus areas exist yet
   useEffect(() => {

@@ -12,7 +12,6 @@ import path from 'path'
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useOutletContext } from 'react-router-dom'
-import { apiCache } from '../../../api/utils/cache'
 
 // Interpolating stub so assertions can see the values passed to t(), not just the key.
 jest.mock('react-i18next', () => ({
@@ -26,14 +25,20 @@ jest.mock('react-i18next', () => ({
   })
 }))
 
-const mockGetDailyRoutine = jest.fn()
-
 jest.mock('../../../api/services', () => ({
   annualPlanningService: {
-    getDailyRoutine: (...args) => mockGetDailyRoutine(...args),
     updateAnnualPlan: jest.fn(),
     createAnnualPlan: jest.fn()
   }
+}))
+
+// AnnualPlanningLayout now reads the daily routine through useDailyRoutine()
+// (CACHE-007 / ADR-008) rather than apiCache — mocked at the hook boundary like
+// useAnnualPlan below, since real useQuery would need a QueryClientProvider this
+// test doesn't set up.
+let mockRoutineData = null
+jest.mock('../../../hooks/useDailyRoutine', () => ({
+  useDailyRoutine: () => ({ routine: mockRoutineData, loading: false, error: null, invalidate: jest.fn(), refetch: jest.fn() })
 }))
 
 const YEAR = new Date().getFullYear()
@@ -63,7 +68,10 @@ jest.mock('../../../hooks/useAnnualPlan', () => ({
   default: () => mockAnnualPlanState
 }))
 
-jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { uid: 'test-user' } }) }))
+// NOTE: real useAuth()-backed hooks (e.g. useDailyRoutine, prior to being mocked
+// above) derive their query-key userId from `user.id`, not `user.uid` — kept as
+// `id` here to match that convention (see hooks/useDailyRoutine.js).
+jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user', uid: 'test-user' } }) }))
 jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 jest.mock('../../../api/services/goalAI.service', () => ({ analyzeGoals: jest.fn() }))
@@ -98,37 +106,35 @@ const renderLayout = (initialEntry = '/annual-planning') =>
 
 beforeEach(() => {
   jest.clearAllMocks()
-  // apiCache is a module-level singleton shared across test files — the routine TTL
-  // would otherwise serve a stale response from a prior test.
-  apiCache.clear()
+  mockRoutineData = null
 })
 
 describe('RTN-03 / D-07 / D-08: daily routine chip in the persistent header', () => {
-  it('shows completedToday / total once getDailyRoutine resolves', async () => {
-    mockGetDailyRoutine.mockResolvedValue({
+  it('shows completedToday / total once the routine query resolves', async () => {
+    mockRoutineData = {
       morning_routine: [{ id: 'a' }, { id: 'b' }],
       afternoon_routine: [{ id: 'c' }],
       evening_routine: [],
       daily_completions: { [new Date().toISOString().slice(0, 10)]: ['a'] }
-    })
+    }
     renderLayout()
     await waitFor(() => expect(screen.getByText('annualPlanning.header.routineRatio(completed=1,total=3)')).toBeInTheDocument())
   })
 
   it('renders no chip when the routine has zero items', async () => {
-    mockGetDailyRoutine.mockResolvedValue({ morning_routine: [], afternoon_routine: [], evening_routine: [], daily_completions: {} })
+    mockRoutineData = { morning_routine: [], afternoon_routine: [], evening_routine: [], daily_completions: {} }
     renderLayout()
-    await waitFor(() => expect(mockGetDailyRoutine).toHaveBeenCalled())
+    await screen.findByText('My Plan')
     expect(screen.queryByText(/annualPlanning\.header\.routineRatio/)).not.toBeInTheDocument()
   })
 
   it('links the chip to /annual-planning/daily-routine', async () => {
-    mockGetDailyRoutine.mockResolvedValue({
+    mockRoutineData = {
       morning_routine: [{ id: 'a' }],
       afternoon_routine: [],
       evening_routine: [],
       daily_completions: {}
-    })
+    }
     renderLayout()
     const label = await screen.findByText(/annualPlanning\.header\.routineRatio/)
     // The chip's link lives in Joy's `action` slot, which renders as an overlay
@@ -141,7 +147,7 @@ describe('RTN-03 / D-07 / D-08: daily routine chip in the persistent header', ()
 
 describe('FE-AP-1: one hook call, shared quarter scope', () => {
   beforeEach(() => {
-    mockGetDailyRoutine.mockResolvedValue({ morning_routine: [], afternoon_routine: [], evening_routine: [], daily_completions: {} })
+    mockRoutineData = { morning_routine: [], afternoon_routine: [], evening_routine: [], daily_completions: {} }
   })
 
   it('leaves the layout as the only useAnnualPlan caller among the tab views', () => {

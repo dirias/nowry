@@ -5,18 +5,15 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { apiCache } from '../../../../api/utils/cache'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key })
 }))
 
-const mockGetDailyRoutine = jest.fn()
 const mockUpdateRoutineCompletions = jest.fn()
 
 jest.mock('../../../../api/services', () => ({
   annualPlanningService: {
-    getDailyRoutine: (...args) => mockGetDailyRoutine(...args),
     updateRoutineCompletions: (...args) => mockUpdateRoutineCompletions(...args)
   },
   tasksService: {
@@ -29,6 +26,23 @@ jest.mock('../../../../api/services', () => ({
 
 jest.mock('../../../../hooks/useTaskData', () => ({
   useTaskData: () => ({ tasks: [], loading: false, reload: jest.fn() })
+}))
+
+// SideMenu now reads the daily routine through useDailyRoutine() (CACHE-007 /
+// ADR-008) rather than apiCache — mocked here the same way useTaskData is above,
+// following this file's existing "mock hooks at the module boundary" convention
+// (real useQuery would need a QueryClientProvider this test doesn't set up).
+let mockRoutineData = null
+const mockInvalidateRoutine = jest.fn()
+const mockRefetchRoutine = jest.fn()
+jest.mock('../../../../hooks/useDailyRoutine', () => ({
+  useDailyRoutine: () => ({
+    routine: mockRoutineData,
+    loading: false,
+    error: null,
+    invalidate: mockInvalidateRoutine,
+    refetch: mockRefetchRoutine
+  })
 }))
 
 jest.mock('../../../Task/SortableTask', () => () => null)
@@ -74,7 +88,7 @@ beforeEach(() => {
   }
   global.Date = FixedDate
 
-  apiCache.clear()
+  mockRoutineData = null
   jest.clearAllMocks()
   mockUpdateRoutineCompletions.mockResolvedValue({ ok: true })
 })
@@ -85,12 +99,12 @@ afterEach(() => {
 
 describe('D-05: toggleRoutineItem id-based', () => {
   it('Test 1: clicking a routine item calls updateRoutineCompletions with the item id, not an index key', async () => {
-    mockGetDailyRoutine.mockResolvedValue({
+    mockRoutineData = {
       morning_routine: [{ id: 'item-1', title: 'Drink water' }],
       afternoon_routine: [],
       evening_routine: [],
       daily_completions: {}
-    })
+    }
     render(
       <MemoryRouter>
         <SideMenu />
@@ -103,12 +117,12 @@ describe('D-05: toggleRoutineItem id-based', () => {
 
   it('Test 2: seeded completion state (backend-provided id key) renders the item as already checked', async () => {
     const todayStr = new Date().toISOString().slice(0, 10)
-    mockGetDailyRoutine.mockResolvedValue({
+    mockRoutineData = {
       morning_routine: [{ id: 'item-1', title: 'Drink water' }],
       afternoon_routine: [],
       evening_routine: [],
       daily_completions: { [todayStr]: ['item-1'] }
-    })
+    }
     render(
       <MemoryRouter>
         <SideMenu />
