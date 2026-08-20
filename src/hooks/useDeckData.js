@@ -1,57 +1,46 @@
-/* eslint-disable */
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { decksService } from '../api/services'
-import { apiCache } from '../api/utils/cache'
+import { queryClient } from '../api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
-const CACHE_TTL = 60000 // 60 seconds
+// Matches the old apiCache TTL for this resource (see api/queryClient.js's
+// query-key convention doc, which documents 60000ms as useDeckData's
+// per-resource override of the shared default staleTime).
+const DECKS_STALE_TIME = 60000 // 60 seconds
 
+/**
+ * useDeckData — React Query-backed deck list (ADR-008 / CACHE-003).
+ *
+ * Replaces the old hand-rolled `apiCache`-backed version. Because every
+ * `useDeckData()` instance subscribes to the same `queryClient` cache entry
+ * for a given key, invalidating that key from ANY component (via `reload()`
+ * here, or directly via `queryClient.invalidateQueries`) re-renders every
+ * other mounted component reading it too — this is what keeps StudyCenter's
+ * Dashboard tab and CardHome's Content Library tab in sync without manual
+ * `onDeckChange`/prop-threading between them.
+ */
 export function useDeckData(deckType) {
   const { user } = useAuth()
-  // Scope cache key to the logged-in user (and deck type) to prevent cross-account
-  // data leaks and to keep type-filtered results from colliding with unfiltered ones.
-  const CACHE_KEY = user?.id ? `decks:${deckType || 'all'}:${user.id}` : null
+  const userId = user?.id ?? null
 
-  // Pre-seed from cache so remounting shows data instantly
-  const [decks, setDecks] = useState(() => (CACHE_KEY ? apiCache.peek(CACHE_KEY) : null) ?? [])
-  const [loading, setLoading] = useState(() => !CACHE_KEY || apiCache.peek(CACHE_KEY) === null)
-  const [error, setError] = useState(null)
-
-  const load = async (isCancelled = () => false) => {
-    if (!CACHE_KEY) return
-    const preloaded = apiCache.peek(CACHE_KEY)
-    if (!preloaded) setLoading(true)
-    setError(null)
-    try {
-      const data = await apiCache.get(CACHE_KEY, CACHE_TTL, () => decksService.getAll(deckType))
-      if (!isCancelled()) {
-        setDecks(data || [])
-      }
-    } catch (err) {
-      if (!isCancelled()) {
-        console.error('[useDeckData] Error:', err)
-        setError(err)
-      }
-    } finally {
-      if (!isCancelled()) {
-        setLoading(false)
-      }
-    }
-  }
-
-  useEffect(() => {
-    let cancelled = false
-    load(() => cancelled)
-    return () => {
-      cancelled = true
-    }
-  }, [CACHE_KEY])
+  const { data, isLoading, error } = useQuery({
+    // Scoped by user (and deck type) to prevent cross-account data leaks and
+    // to keep type-filtered results from colliding with unfiltered ones —
+    // see the query-key convention documented in `api/queryClient.js`.
+    queryKey: ['decks', userId, deckType || 'all'],
+    queryFn: () => decksService.getAll(deckType),
+    enabled: !!userId,
+    staleTime: DECKS_STALE_TIME
+  })
 
   const reload = async () => {
-    if (!CACHE_KEY) return
-    apiCache.invalidate(CACHE_KEY)
-    await load()
+    if (!userId) return
+    // Invalidate every deckType variant for this user (not just the one this
+    // instance was called with) so every subscribed useDeckData instance —
+    // regardless of deckType — refetches. Matches the old
+    // apiCache.invalidatePrefix-style broad scope this hook relied on.
+    await queryClient.invalidateQueries({ queryKey: ['decks', userId] })
   }
 
-  return { decks, loading, error, reload }
+  return { decks: data ?? [], loading: isLoading, error: error ?? null, reload }
 }

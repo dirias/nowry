@@ -873,7 +873,7 @@ export default function StudyCenter() {
 
         <TabPanel value={1} sx={{ p: 0 }}>
           <Box sx={{ mt: -2 }}>
-            <CardHome onDeckChange={reloadDecks} />
+            <CardHome />
           </Box>
         </TabPanel>
       </Tabs>

@@ -17,7 +17,7 @@ import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
 import { apiCache } from '../../api/utils/cache'
 
-export default function CardHome({ onDeckChange } = {}) {
+export default function CardHome() {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
@@ -115,9 +115,11 @@ export default function CardHome({ onDeckChange } = {}) {
   }
 
   const handleDeckSaved = () => {
-    reloadDecks() // Invalidate the shared apiCache entry so decks:* re-fetches
+    // Invalidates the shared React Query cache entry, which every mounted
+    // useDeckData() instance (including StudyCenter's Dashboard tab) is
+    // subscribed to — no manual cross-component notification needed (ADR-008).
+    reloadDecks()
     fetchData() // Re-derive local state now; the useDeckData effect also re-runs once hookDecks updates
-    onDeckChange?.() // Tell StudyCenter's own useDeckData instance to refresh too
   }
 
   // Editing a deck is editing a deck, whichever field it is. It used to open a
@@ -232,7 +234,6 @@ export default function CardHome({ onDeckChange } = {}) {
             reloadDecks()
             reloadCards()
             apiCache.invalidate('cards:statistics')
-            onDeckChange?.()
             setShowImportDeck(false)
           }}
         />
@@ -290,10 +291,7 @@ export default function CardHome({ onDeckChange } = {}) {
         onClose={() => setDeckSettingsState({ open: false, deckId: null, section: 'study' })}
         deckId={deckSettingsState.deckId}
         initialSection={deckSettingsState.section}
-        onSaved={() => {
-          reloadDecks()
-          onDeckChange?.()
-        }}
+        onSaved={reloadDecks}
       />
 
       <StudyModePickerModal
