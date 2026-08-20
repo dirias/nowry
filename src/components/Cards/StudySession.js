@@ -38,7 +38,6 @@ import { useCardData } from '../../hooks/useCardData'
 import { useBrowseTagFilter } from '../../hooks/useBrowseTagFilter'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import BrowseTagFilter from './BrowseTagFilter'
-import { apiCache } from '../../api/utils/cache'
 import { queryClient } from '../../api/queryClient'
 import { useAuth } from '../../context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
@@ -395,7 +394,6 @@ export default function StudySession() {
       // WeeklyStatsCard, and CardHome's Content Library pick up this
       // session's review results (next_review, etc.) immediately.
       if (userId) queryClient.invalidateQueries({ queryKey: ['cards', userId] })
-      apiCache.invalidate('decks:all')
       setViewContext(null)
       resetCompanionSession()
       if (interventionTimerRef.current) clearTimeout(interventionTimerRef.current)
