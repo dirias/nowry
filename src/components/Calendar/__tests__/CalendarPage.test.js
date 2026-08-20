@@ -53,6 +53,12 @@ jest.mock('../../../api/services', () => ({
   annualPlanningService: { updatePriority: jest.fn(), updateGoal: jest.fn() }
 }))
 jest.mock('../EventFormModal', () => () => null)
+// CalendarPage now reads userId from useAuth() to scope the ['calendarEvents', userId,
+// year] React Query key (CACHE-008 / ADR-008) — mocked here since this test has no
+// AuthProvider wrapping it, following the convention from DailyRoutinePlanner.test.js.
+jest.mock('../../../context/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'test-user' } })
+}))
 
 // Default mock return value for existing Phase 15 tests
 beforeEach(() => {

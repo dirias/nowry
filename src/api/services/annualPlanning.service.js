@@ -1,6 +1,5 @@
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
-import { apiCache } from '../utils/cache'
 import { queryClient } from '../queryClient'
 import { userService } from './user.service'
 import { auth } from '../../config/firebase.config'
@@ -11,18 +10,123 @@ const PROFILE_TTL = 60000 // 60s
 
 /** Bust all caches that depend on the annual plan or calendar after any mutation */
 const _bustPlanCache = () => {
-  const year = new Date().getFullYear()
-  apiCache.invalidate(`annualPlanFull:${year}`)
-  apiCache.invalidatePrefix('calendar:')
-  apiCache.invalidatePrefix('activities:')
-  // React Query side (ADR-008 / CACHE-005): useAnnualPlan reads the primary +
-  // fallback plan data through the ['annualPlan', userId, year] query key.
-  // Invalidate the whole 'annualPlan' resource (all users/years) rather than
-  // just the current year, matching the broad same-resource invalidation
-  // useDeckData/useBooks/useStatistics already use for their reload() — the
-  // service layer has no userId to scope to, and every current caller of
-  // useAnnualPlan only ever queries the current year anyway.
+  // React Query side (ADR-008 / CACHE-005 / CACHE-008): useAnnualPlan reads the
+  // primary + fallback plan data through the ['annualPlan', userId, year] query
+  // key, and calendarService.getAllEvents() reads both ['calendarEvents', userId,
+  // year] (its own aggregated result) and ['annualPlan', userId, year] itself (the
+  // shared nested read — see fetchAnnualPlanData below). Invalidate both whole
+  // resources (all users/years) rather than just the current year, matching the
+  // broad same-resource invalidation useDeckData/useBooks/useStatistics already
+  // use for their reload() — the service layer has no userId to scope to, and
+  // every current caller only ever queries the current year anyway. A plan/goal/
+  // activity change can add/move/remove calendar events (e.g. a goal's
+  // target_date changing), which is why 'calendarEvents' is invalidated here too.
   queryClient.invalidateQueries({ queryKey: ['annualPlan'] })
+  queryClient.invalidateQueries({ queryKey: ['calendarEvents'] })
+}
+
+function calcAreaProgress(goals) {
+  if (!goals || goals.length === 0) return 0
+  const total = goals.reduce((sum, g) => {
+    if (g.milestones?.length > 0) {
+      const done = g.milestones.filter((m) => m.completed).length
+      return sum + (done / g.milestones.length) * 100
+    }
+    return sum + (g.progress || 0)
+  }, 0)
+  return Math.round(total / goals.length)
+}
+
+export const EMPTY_PLAN_DATA = {
+  plan: null,
+  focusAreas: [],
+  goals: [],
+  activities: [],
+  priorities: [],
+  quarterReports: []
+}
+
+/** Enrich focus areas with their goals + computed progress (primary /full path). */
+function buildFullPlanData(full) {
+  const areasArr = Array.isArray(full.focus_areas) ? full.focus_areas : []
+  const allGoalsList = Array.isArray(full.goals) ? full.goals : []
+  const activities = Array.isArray(full.activities) ? full.activities : []
+  const priorities = Array.isArray(full.priorities) ? full.priorities : []
+  const quarterReports = Array.isArray(full.quarter_reports) ? full.quarter_reports : []
+
+  const allGoals = []
+  const focusAreas = areasArr.map((area) => {
+    const areaId = area._id || area.id
+    const areaGoals = allGoalsList
+      .filter((g) => g.focus_area_id === areaId || g.focus_area_id?._id === areaId)
+      .map((g) => ({ ...g, focus_area_id: areaId }))
+    areaGoals.forEach((g) => allGoals.push(g))
+    return { ...area, progress: calcAreaProgress(areaGoals), goals: areaGoals }
+  })
+
+  return { plan: full.plan, focusAreas, goals: allGoals, activities, priorities, quarterReports }
+}
+
+/** Legacy 3-level waterfall, used when /annual-plan/full isn't deployed yet (405). */
+async function fetchLegacyPlanData(year) {
+  let fetchedPlan
+  try {
+    fetchedPlan = await annualPlanningService.getAnnualPlan(year)
+  } catch (err) {
+    // A 404 from the legacy getAnnualPlan means no plan exists — not an error.
+    if (err?.response?.status === 404) return EMPTY_PLAN_DATA
+    throw err
+  }
+
+  if (!fetchedPlan?._id) return EMPTY_PLAN_DATA
+
+  const [fetchedAreas, fetchedPriorities] = await Promise.all([
+    annualPlanningService.getFocusAreas(fetchedPlan._id),
+    annualPlanningService.getPriorities(fetchedPlan._id)
+  ])
+
+  const areasArr = Array.isArray(fetchedAreas) ? fetchedAreas : []
+  const priorities = Array.isArray(fetchedPriorities) ? fetchedPriorities : []
+
+  const goalResults = await Promise.allSettled(areasArr.map((area) => annualPlanningService.getGoals(area._id)))
+
+  const allGoals = []
+  const focusAreas = areasArr.map((area, i) => {
+    const areaGoals = goalResults[i].status === 'fulfilled' ? goalResults[i].value || [] : []
+    areaGoals.forEach((g) => allGoals.push({ ...g, focus_area_id: area._id || area.id }))
+    return { ...area, progress: calcAreaProgress(areaGoals), goals: areaGoals }
+  })
+
+  // The legacy path never fetched activities or quarter reports — matches the
+  // old hook's behavior of leaving those at their initial empty state here.
+  return { plan: fetchedPlan, focusAreas, goals: allGoals, activities: [], priorities, quarterReports: [] }
+}
+
+/**
+ * Fetch + normalize a year's full annual plan.
+ *
+ * Shared by useAnnualPlan.js (queryKey ['annualPlan', userId, year]) and
+ * calendarService.getAllEvents() (CACHE-008 / ADR-008), which reads through the
+ * SAME query key so a calendar open after visiting the planning page is a real
+ * cache hit, not a duplicate fetch. Both must use this exact function as their
+ * queryFn — a re-implementation would silently drift and break that sharing.
+ *
+ * Primary path: single GET /annual-plan/full request returns plan + focus_areas +
+ * priorities + all goals in one round-trip. Falls back to a 3-level waterfall
+ * (fetchLegacyPlanData) if /full returns 405 (endpoint not yet deployed). A 404
+ * from either path means "no plan exists for this year" — a clean empty state.
+ */
+export async function fetchAnnualPlanData(year) {
+  try {
+    const full = await annualPlanningService.getFullAnnualPlan(year)
+    return buildFullPlanData(full)
+  } catch (err) {
+    // A 404 from /full means no plan exists for this year — clean empty state, not an error.
+    if (err?.response?.status === 404) return EMPTY_PLAN_DATA
+    // A 405 means /full endpoint not yet deployed — fall back to the legacy multi-request path.
+    if (err?.response?.status === 405) return fetchLegacyPlanData(year)
+    throw err
+  }
 }
 
 export const annualPlanningService = {

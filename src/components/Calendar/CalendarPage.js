@@ -25,6 +25,7 @@ import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded'
 import { calendarService } from '../../api/services/calendar.service'
 import { tasksService, annualPlanningService } from '../../api/services'
 import { useCalendarFilters } from '../../hooks/useCalendarFilters'
+import { useAuth } from '../../context/AuthContext'
 import EventFormModal from './EventFormModal'
 
 // Strip type prefix from compound event ID (e.g. 'task-abc123' → 'abc123')
@@ -54,6 +55,11 @@ const EVENT_ICON_MAP = {
 
 const CalendarPage = () => {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  // CACHE-008 / ADR-008: calendarService.getAllEvents()/invalidateCache() read/write
+  // through the ['calendarEvents', userId, ...] React Query key — scoped by the
+  // backend user id, same convention as every other migrated hook/service.
+  const userId = user?.id ?? null
   const calendarRef = useRef(null)
   const isMobile = useIsMobile()
   const [formOpen, setFormOpen] = useState(false)
@@ -98,7 +104,7 @@ const CalendarPage = () => {
           try {
             setCalendarError(null)
             // Phase 16 D-01: destructure { events, focusAreas } from getAllEvents()
-            const { events: allEvents, focusAreas: loadedAreas } = await calendarService.getAllEvents()
+            const { events: allEvents, focusAreas: loadedAreas } = await calendarService.getAllEvents(userId)
             setFocusAreas(loadedAreas)
 
             // Phase 16 D-13: three-step filter (in exact order)
@@ -141,43 +147,46 @@ const CalendarPage = () => {
       }
     ],
     // D-14: focusAreas NOT in deps (would cause infinite refetch loop — Pitfall 1)
-    [filters.habitsEnabled, filters.activeTypes, filters.activeAreaIds]
+    [filters.habitsEnabled, filters.activeTypes, filters.activeAreaIds, userId]
   )
 
   // CAL-03: Drag-and-drop rescheduling
-  const handleEventDrop = useCallback(async (info) => {
-    const { event, revert } = info
-    const newDate = event.start
-    const dateStr = newDate.toISOString().split('T')[0]
-    const rawId = stripTypePrefix(event.id)
-    const type = event.extendedProps.type
+  const handleEventDrop = useCallback(
+    async (info) => {
+      const { event, revert } = info
+      const newDate = event.start
+      const dateStr = newDate.toISOString().split('T')[0]
+      const rawId = stripTypePrefix(event.id)
+      const type = event.extendedProps.type
 
-    try {
-      switch (type) {
-        case 'task':
-          await tasksService.update(rawId, { deadline: dateStr })
-          break
-        case 'priority':
-          await annualPlanningService.updatePriority(rawId, { deadline: dateStr })
-          break
-        case 'goal':
-          await annualPlanningService.updateGoal(rawId, { target_date: dateStr })
-          break
-        case 'milestone':
-        case 'activity':
-          // Milestones are sub-objects; activities are recurring — DnD not applicable
-          revert()
-          return
-        default:
-          revert()
-          return
+      try {
+        switch (type) {
+          case 'task':
+            await tasksService.update(rawId, { deadline: dateStr })
+            break
+          case 'priority':
+            await annualPlanningService.updatePriority(rawId, { deadline: dateStr })
+            break
+          case 'goal':
+            await annualPlanningService.updateGoal(rawId, { target_date: dateStr })
+            break
+          case 'milestone':
+          case 'activity':
+            // Milestones are sub-objects; activities are recurring — DnD not applicable
+            revert()
+            return
+          default:
+            revert()
+            return
+        }
+        calendarService.invalidateCache(userId)
+      } catch (err) {
+        revert()
+        setCalendarError(err)
       }
-      calendarService.invalidateCache()
-    } catch (err) {
-      revert()
-      setCalendarError(err)
-    }
-  }, [])
+    },
+    [userId]
+  )
 
   // CAL-02: Time-block creation — click+drag on day/week view
   const handleSelect = useCallback((selectionInfo) => {
@@ -211,9 +220,9 @@ const CalendarPage = () => {
 
   const handleFormSuccess = useCallback(() => {
     setFormOpen(false)
-    calendarService.invalidateCache()
+    calendarService.invalidateCache(userId)
     calendarRef.current?.getApi().refetchEvents()
-  }, [])
+  }, [userId])
 
   const handleAddEvent = useCallback(() => {
     setEditingEvent(null)

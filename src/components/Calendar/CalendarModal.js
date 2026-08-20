@@ -8,6 +8,7 @@ import TodayRoundedIcon from '@mui/icons-material/TodayRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import { calendarService } from '../../api/services/calendar.service'
+import { useAuth } from '../../context/AuthContext'
 import EventFormModal from './EventFormModal'
 
 // ─── Type Metadata ──────────────────────────────────────────────────────────
@@ -40,6 +41,11 @@ const getListLabelMap = () => {
 // ─── Component ───────────────────────────────────────────────────────────────
 const CalendarModal = ({ open, onClose }) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  // CACHE-008 / ADR-008: getAllEvents() reads through the ['calendarEvents', userId,
+  // year] React Query key — scoped by the backend user id, same convention as every
+  // other migrated hook/service (see api/queryClient.js).
+  const userId = user?.id ?? null
   const today = new Date()
 
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
@@ -59,14 +65,14 @@ const CalendarModal = ({ open, onClose }) => {
     if (!open) return
     setLoading(true)
     try {
-      const data = await calendarService.getAllEvents()
+      const data = await calendarService.getAllEvents(userId)
       setEvents(data)
     } catch (e) {
       console.error('[CalendarModal] Failed to load events', e)
     } finally {
       setLoading(false)
     }
-  }, [open])
+  }, [open, userId])
 
   useEffect(() => {
     loadEvents()
