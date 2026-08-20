@@ -1,5 +1,8 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { queryClient } from './api/queryClient'
 import { DynamicThemeProvider } from './theme/DynamicThemeProvider'
 import { Box, CircularProgress } from '@mui/joy'
 
@@ -436,21 +439,24 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <PomodoroProvider>
-        <DynamicThemeProvider>
-          <NotificationProvider>
-            <AgentProvider>
-              <Router>
-                <SubscriptionProvider>
-                  <AppContent />
-                </SubscriptionProvider>
-              </Router>
-            </AgentProvider>
-          </NotificationProvider>
-        </DynamicThemeProvider>
-      </PomodoroProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <PomodoroProvider>
+          <DynamicThemeProvider>
+            <NotificationProvider>
+              <AgentProvider>
+                <Router>
+                  <SubscriptionProvider>
+                    <AppContent />
+                  </SubscriptionProvider>
+                </Router>
+              </AgentProvider>
+            </NotificationProvider>
+          </DynamicThemeProvider>
+        </PomodoroProvider>
+      </AuthProvider>
+      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   )
 }
 
