@@ -3,8 +3,10 @@ import { ENDPOINTS } from '../utils/endpoints'
 import { apiCache } from '../utils/cache'
 import { queryClient } from '../queryClient'
 import { userService } from './user.service'
+import { auth } from '../../config/firebase.config'
 
-// Matches useAnnualPlan's old apiCache-backed PROFILE_TTL (CACHE-005).
+// Matches useAnnualPlan's old apiCache-backed PROFILE_TTL (CACHE-005), now used as
+// the React Query staleTime for the 'profile' key (CACHE-007).
 const PROFILE_TTL = 60000 // 60s
 
 /** Bust all caches that depend on the annual plan or calendar after any mutation */
@@ -38,21 +40,33 @@ export const annualPlanningService = {
    * Cached wrapper around userService.getProfile(), used by useAnnualPlan to derive
    * preferredPriorityIds without a duplicate /users/profile round-trip.
    *
-   * Deliberately stays on the `apiCache` singleton under the 'annual:profile' key
-   * (CACHE-005 scope boundary, see docs/decisions.md ADR-008): PomodoroContext.js reads
-   * this same key directly via `apiCache.get` and FocusBar.js invalidates it directly via
-   * `apiCache.invalidate('annual:profile')` — migrating it to React Query would require
-   * updating both of those call sites too, which is out of scope for the useAnnualPlan
-   * migration.
+   * Migrated to React Query (CACHE-007 / ADR-008) via `queryClient.fetchQuery` rather
+   * than `useQuery`: this is a plain, non-component function invoked imperatively from
+   * useAnnualPlan.js's effect, not a hook itself — same pattern as useSegmentedSpeech's
+   * migration to `queryClient.fetchQuery` (CACHE-005).
+   *
+   * Query key is `['profile', firebaseUid]`, using `auth.currentUser?.uid` rather than
+   * the backend `user.id` the other 7 migrated hooks key off of: this function has no
+   * reliable access to the backend user object, since most `useAnnualPlan()` call sites
+   * (FocusBar.js, WeeklyStatsCard.js, DailyRoutinePlanner.js, etc.) don't pass
+   * `preloadedUser`. `auth.currentUser` is a synchronous Firebase SDK global available
+   * outside React, unlike AuthContext's `user`. `useUserProfile.js` (PomodoroContext.js)
+   * and FocusBar.js's invalidation both key off this same `auth.currentUser?.uid` so all
+   * three stay in sync under one query key.
    *
    * @param {object|null} [preloadedUser] - Optional user object from AuthContext. When
    *   provided, seeds the cache so the real /users/profile request is skipped.
    */
   async getCachedProfile(preloadedUser = null) {
+    const userId = auth.currentUser?.uid ?? null
     if (preloadedUser) {
-      apiCache.get('annual:profile', PROFILE_TTL, () => Promise.resolve(preloadedUser))
+      queryClient.setQueryData(['profile', userId], preloadedUser)
     }
-    return apiCache.get('annual:profile', PROFILE_TTL, () => userService.getProfile().catch(() => null))
+    return queryClient.fetchQuery({
+      queryKey: ['profile', userId],
+      queryFn: () => userService.getProfile().catch(() => null),
+      staleTime: PROFILE_TTL
+    })
   },
   async createAnnualPlan(planData) {
     const { data } = await apiClient.post(ENDPOINTS.annualPlan.create, planData)

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Box, Typography, Tooltip, IconButton, Modal, ModalDialog, ModalClose, Stack, Checkbox, Button, Divider, Skeleton } from '@mui/joy'
 import { Link as RouterLink } from 'react-router-dom'
 import { userService } from '../../../api/services'
-import { apiCache } from '../../../api/utils/cache'
+import { queryClient } from '../../../api/queryClient'
+import { auth } from '../../../config/firebase.config'
 import useAnnualPlan from '../../../hooks/useAnnualPlan'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useTranslation } from 'react-i18next'
@@ -70,8 +71,11 @@ const FocusBar = () => {
     try {
       setSaving(true)
       await userService.updateGeneralPreferences({ homepage_priority_ids: priorityIds })
-      // Invalidate the profile cache so the next hook load picks up the new preference
-      apiCache.invalidate('annual:profile')
+      // Invalidate the profile query so the next hook load picks up the new preference.
+      // Keyed off auth.currentUser?.uid — see annualPlanning.service.js's
+      // getCachedProfile() docstring for why the 'profile' query key uses the Firebase
+      // uid rather than the backend user.id (CACHE-007 / ADR-008).
+      queryClient.invalidateQueries({ queryKey: ['profile', auth.currentUser?.uid ?? null] })
     } catch (error) {
       console.error('Error saving preferences:', error)
     } finally {
