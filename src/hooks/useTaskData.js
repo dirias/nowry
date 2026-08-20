@@ -1,58 +1,44 @@
-/* eslint-disable */
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { tasksService } from '../api/services'
-import { apiCache } from '../api/utils/cache'
+import { queryClient } from '../api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
-const CACHE_TTL = 30000 // 30 seconds
+// Matches the old apiCache TTL for this resource (see api/queryClient.js's
+// query-key convention doc — 30000ms was this hook's CACHE_TTL under the old
+// apiCache-backed implementation).
+const TASKS_STALE_TIME = 30000 // 30 seconds
 
+/**
+ * useTaskData — React Query-backed tasksService.getAll() (ADR-008 / CACHE-005).
+ *
+ * Replaces the old hand-rolled `apiCache`-backed version. Because every
+ * `useTaskData()` instance subscribes to the same `queryClient` cache entry
+ * for a given key, invalidating that key from ANY component (via `reload()`
+ * here, or directly via `queryClient.invalidateQueries`) re-renders every
+ * other mounted component reading it too — unlike the old apiCache-backed
+ * version, whose invalidation was silent to already-mounted subscribers.
+ *
+ * Invalidate after a mutation (create/update/delete/toggle a task):
+ *   import { queryClient } from '../api/queryClient'
+ *   queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+ */
 export function useTaskData() {
   const { user } = useAuth()
-  // Scope cache key to the logged-in user so sessions never bleed across accounts
-  const CACHE_KEY = user?.id ? `tasks:all:${user.id}` : null
+  const userId = user?.id ?? null
 
-  // Pre-seed from cache so remounting home shows data instantly
-  const [tasks, setTasks] = useState(() => (CACHE_KEY ? apiCache.peek(CACHE_KEY) : null) ?? [])
-  const [loading, setLoading] = useState(() => !CACHE_KEY || apiCache.peek(CACHE_KEY) === null)
-  const [error, setError] = useState(null)
-
-  const load = async (isCancelled = () => false) => {
-    // No user yet — don't fetch
-    if (!CACHE_KEY) return
-    const preloaded = apiCache.peek(CACHE_KEY)
-    if (!preloaded) setLoading(true)
-    setError(null)
-    try {
-      const data = await apiCache.get(CACHE_KEY, CACHE_TTL, () => tasksService.getAll())
-      if (!isCancelled()) {
-        setTasks(data || [])
-      }
-    } catch (err) {
-      if (!isCancelled()) {
-        console.error('[useTaskData] Error:', err)
-        setError(err)
-      }
-    } finally {
-      if (!isCancelled()) {
-        setLoading(false)
-      }
-    }
-  }
-
-  useEffect(() => {
-    let cancelled = false
-    load(() => cancelled)
-    return () => {
-      cancelled = true
-    }
-    // Re-fetch when the logged-in user changes
-  }, [CACHE_KEY])
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['tasks', userId],
+    queryFn: () => tasksService.getAll(),
+    enabled: !!userId,
+    staleTime: TASKS_STALE_TIME
+  })
 
   const reload = async () => {
-    if (!CACHE_KEY) return
-    apiCache.invalidate(CACHE_KEY)
-    await load()
+    if (!userId) return
+    await queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
   }
 
-  return { tasks, loading, error, reload }
+  return { tasks: data ?? [], loading: isLoading, error: error ?? null, reload }
 }
+
+export default useTaskData
