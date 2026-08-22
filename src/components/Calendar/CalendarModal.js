@@ -65,8 +65,8 @@ const CalendarModal = ({ open, onClose }) => {
     if (!open) return
     setLoading(true)
     try {
-      const data = await calendarService.getAllEvents(userId)
-      setEvents(data)
+      const { events: allEvents } = await calendarService.getAllEvents(userId)
+      setEvents(allEvents)
     } catch (e) {
       console.error('[CalendarModal] Failed to load events', e)
     } finally {
