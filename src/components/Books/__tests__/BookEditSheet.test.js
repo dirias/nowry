@@ -186,7 +186,7 @@ describe('saving', () => {
   it('rescues a tag typed but never Entered — the behaviour worth keeping', async () => {
     renderSheet()
     await clickAsync(screen.getByRole('button', { name: 'books.addTags' }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'form.tagAddAria' }), { target: { value: 'stoicism' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'form.tagAddAria' }), { target: { value: 'stoicism' } })
 
     await save()
 

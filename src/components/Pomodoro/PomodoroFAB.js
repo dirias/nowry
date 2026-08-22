@@ -60,7 +60,7 @@ const PomodoroFAB = () => {
           {isActive && (
             <Box
               sx={{
-                fontSize: '0.625rem',
+                fontSize: 'xs',
                 fontFamily: 'monospace',
                 fontWeight: 700,
                 lineHeight: 1,

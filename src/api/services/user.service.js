@@ -1,6 +1,17 @@
 import { apiClient } from '../client'
 
 /**
+ * Opt out of the client's global error toast (ONB-014).
+ *
+ * Every caller of these three journey routes and of the general-preferences
+ * route — onboarding's screens and Account Settings — renders its own
+ * differentiated, translated error state with a retry attached to the exact
+ * field or action that failed. The generic toast would duplicate that, and on
+ * `activation_failed` it would contradict it outright: the deck *was* added.
+ */
+const ONBOARDING_OWNS_ITS_ERRORS = { suppressErrorToast: true }
+
+/**
  * User Service
  * Handles user profile, settings, and account management
  */
@@ -76,29 +87,92 @@ export const userService = {
    * @returns {Promise<Object>} Current preferences including agent settings
    */
   async getGeneralPreferences() {
-    const { data } = await apiClient.get('/users/preferences/general')
+    const { data } = await apiClient.get('/users/preferences/general', ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 
   /**
-   * Update general preferences (interests, theme, language)
-   * @param {Object} preferences
-   * @param {string[]} preferences.interests
-   * @param {string} preferences.theme_color
-   * @param {string} preferences.language
-   * @returns {Promise<Object>}
+   * Update general preferences (interests, theme, language, study goal).
+   *
+   * The route is a Pydantic v2 partial update driven by `model_fields_set`, so a
+   * body carrying a single key touches only that key — this is what progressive
+   * onboarding persistence relies on (`useProgressivePreferences`, FR-036). The
+   * response echoes the full preferences document, including the `primary_topic`
+   * the server derives from `interests[0]`; only that echo counts as confirmed.
+   *
+   * @param {Object} preferences - Partial body; send only the fields to change
+   * @param {string[]} [preferences.interests] - Ordered canonical topics, max 5
+   * @param {string} [preferences.theme_color]
+   * @param {string} [preferences.language]
+   * @param {string} [preferences.study_goal]
+   * @returns {Promise<Object>} Echoed `GeneralPreferencesResponse`
    */
   async updateGeneralPreferences(preferences) {
-    const { data } = await apiClient.put('/users/preferences/general', preferences)
+    const { data } = await apiClient.put('/users/preferences/general', preferences, ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 
   /**
    * Complete onboarding wizard
+   *
+   * @deprecated Legacy wizard only. The redesigned onboarding never calls this:
+   * activation is owned exclusively by the onboarding-context deck fork
+   * (ADR-006), which is the only path that can prove a curated deck was copied.
    * @returns {Promise<Object>}
    */
   async completeWizard() {
     const { data } = await apiClient.post('/users/complete-wizard')
+    return data
+  },
+
+  /**
+   * Read the server-authoritative onboarding journey (ADR-003, FR-037/FR-038).
+   *
+   * `show_reentry` and `resume_screen` are *derived by the server* — the client
+   * must never recompute them from `postponed_at` or a local clock, which is
+   * the whole reason the 24-hour grace period is truthful. An activated user
+   * receives `resume_screen: null`.
+   *
+   * @returns {Promise<{
+   *   status: 'incomplete'|'activated',
+   *   last_meaningful_point: 'welcome'|'personalization'|'first_deck',
+   *   postponed_at: string|null,
+   *   activated_at: string|null,
+   *   updated_at: string,
+   *   show_reentry: boolean,
+   *   resume_screen: 'welcome'|'personalization'|'first_deck'|null
+   * }>} Journey snapshot
+   */
+  async getOnboardingState() {
+    const { data } = await apiClient.get('/users/onboarding', ONBOARDING_OWNS_ITS_ERRORS)
+    return data
+  },
+
+  /**
+   * Record a meaningful journey point so the user can resume there.
+   *
+   * The route accepts exactly one action per call and only `personalization`
+   * or `first_deck` are recordable — Welcome is the server default. Progress is
+   * monotonic server-side, so replaying an earlier point never regresses the
+   * resume screen. This action can never activate onboarding.
+   *
+   * @param {'personalization'|'first_deck'} point - Meaningful point reached
+   * @returns {Promise<Object>} Refreshed journey snapshot
+   */
+  async recordOnboardingPoint(point) {
+    const { data } = await apiClient.patch('/users/onboarding', { action: 'record_point', point }, ONBOARDING_OWNS_ITS_ERRORS)
+    return data
+  },
+
+  /**
+   * Postpone onboarding. The server writes `postponed_at` with its own UTC
+   * clock and keeps any later meaningful point already recorded, so a user who
+   * resumed further and then postponed still returns to that later screen.
+   *
+   * @returns {Promise<Object>} Refreshed journey snapshot
+   */
+  async postponeOnboarding() {
+    const { data } = await apiClient.patch('/users/onboarding', { action: 'postpone' }, ONBOARDING_OWNS_ITS_ERRORS)
     return data
   },
 

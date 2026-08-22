@@ -8,6 +8,7 @@ import TodayRoundedIcon from '@mui/icons-material/TodayRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import { calendarService } from '../../api/services/calendar.service'
+import { useAuth } from '../../context/AuthContext'
 import EventFormModal from './EventFormModal'
 
 // ─── Type Metadata ──────────────────────────────────────────────────────────
@@ -40,6 +41,11 @@ const getListLabelMap = () => {
 // ─── Component ───────────────────────────────────────────────────────────────
 const CalendarModal = ({ open, onClose }) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  // CACHE-008 / ADR-008: getAllEvents() reads through the ['calendarEvents', userId,
+  // year] React Query key — scoped by the backend user id, same convention as every
+  // other migrated hook/service (see api/queryClient.js).
+  const userId = user?.id ?? null
   const today = new Date()
 
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
@@ -59,14 +65,14 @@ const CalendarModal = ({ open, onClose }) => {
     if (!open) return
     setLoading(true)
     try {
-      const data = await calendarService.getAllEvents()
-      setEvents(data)
+      const { events: allEvents } = await calendarService.getAllEvents(userId)
+      setEvents(allEvents)
     } catch (e) {
       console.error('[CalendarModal] Failed to load events', e)
     } finally {
       setLoading(false)
     }
-  }, [open])
+  }, [open, userId])
 
   useEffect(() => {
     loadEvents()
@@ -285,7 +291,6 @@ const CalendarModal = ({ open, onClose }) => {
                     sx={{
                       textAlign: 'center',
                       color: 'text.tertiary',
-                      fontSize: '0.65rem',
                       fontWeight: 600,
                       py: 0.25
                     }}
@@ -473,16 +478,11 @@ const CalendarModal = ({ open, onClose }) => {
 
                         {/* Chips + edit button */}
                         <Stack direction='row' spacing={0.5} alignItems='center' flexShrink={0}>
-                          <Chip size='sm' variant='soft' sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20, px: 0.75 }}>
+                          <Chip size='sm' variant='soft' sx={{ fontWeight: 600, px: 0.75 }}>
                             {t(TYPE_META[ev.type]?.i18nKey || ev.type)}
                           </Chip>
                           {ev.status && ev.status !== 'active' && ev.status !== 'pending' && (
-                            <Chip
-                              size='sm'
-                              variant='soft'
-                              color={statusColor(ev.status)}
-                              sx={{ height: 20, fontSize: '0.65rem', px: 0.75 }}
-                            >
+                            <Chip size='sm' variant='soft' color={statusColor(ev.status)} sx={{ px: 0.75 }}>
                               {ev.status}
                             </Chip>
                           )}
@@ -498,8 +498,6 @@ const CalendarModal = ({ open, onClose }) => {
                                   variant='soft'
                                   color='neutral'
                                   sx={{
-                                    height: 20,
-                                    fontSize: '0.65rem',
                                     px: 0.75,
                                     maxWidth: 90,
                                     overflow: 'hidden',

@@ -1,3 +1,5 @@
+import { TOUCH_TARGET, FONT_WEIGHT } from '../../../theme/tokens'
+
 /**
  * Shared `sx` fragments for every form surface in the app.
  *
@@ -29,14 +31,50 @@ export const oneLine = {
 // Every form label in the system. The goal pass set `fontWeight: 600` inline at
 // six call sites; a label weight repeated per-field is a constant wearing a
 // prop. The field wrappers (§5.4) apply this so surfaces never restate it.
-export const formLabel = { fontWeight: 600 }
+// Sourced from FONT_WEIGHT.lg (600) rather than the literal, now that
+// tokens.js is the app's single source of truth for the weight scale — this
+// file routes every other surface through it, so it should too.
+export const formLabel = { fontWeight: FONT_WEIGHT.lg }
 
 // The horizontal rhythm shared by a sheet's header, body, banner and footer.
 // Declared once so the four regions cannot drift out of alignment — the defect
 // is invisible until a banner appears and its left edge misses the body's.
 export const sheetInlinePadding = { xs: 2, sm: 3, md: 4 }
 
-// ≥44px at `xs` per WCAG 2.5.5 / UX-CONTRACT §4.7; the compact `sm`+ size is
-// the pointer-device affordance. Shared by rail chips, tag chips and row
-// controls so "touch target" means one number, not five.
-export const touchTarget = { minHeight: { xs: 44, sm: 32 } }
+// ≥44px at `xs` per WCAG 2.5.5; the number itself now comes from
+// `TOUCH_TARGET` in theme/tokens.js so the minimum is stated once for the whole
+// app rather than hand-typed here and at 26 other sites. The compact `sm`+ size
+// is the pointer-device affordance and stays local — it is a layout choice, not
+// an accessibility minimum. Shared by rail chips, tag chips and row controls so
+// "touch target" means one number, not five.
+export const touchTarget = { minHeight: { xs: TOUCH_TARGET, sm: 32 } }
+
+// The two-dimensional version, for square controls — icon buttons, menu
+// buttons, canvas handles. WCAG 2.5.5 is a 44x44 AREA, so a control that is
+// 44px tall and 28px wide still fails it; `touchTarget` alone only ever fixed
+// half the box. Use this wherever the control has no text to give it width.
+export const touchTargetBox = {
+  minWidth: { xs: TOUCH_TARGET, sm: 32 },
+  minHeight: { xs: TOUCH_TARGET, sm: 32 }
+}
+
+// Fixed-width digits, for values that update in place: streaks, counters,
+// review intervals, timers. Without it, a countdown re-lays out on every tick
+// as digit widths change and the surrounding row twitches.
+//
+// The theme already applies this to h1–h4 and display-*, where headline numbers
+// live. This fragment is the opt-in for everything below heading level, which
+// is deliberately left proportional because proportional figures read better in
+// prose.
+export const tabularNums = { fontVariantNumeric: 'tabular-nums' }
+
+// The reading serif's ONLY entry point. `fontFamily: 'reading'` resolves to
+// FONT_FAMILY.reading (Literata) and `lineHeight: 'xl'` (1.66667) gives
+// long-form prose the extra leading it wants.
+//
+// Apply this to long-form prose only — book pages, editor preview, card
+// front/back — and never below 1rem, and never to UI chrome. A serif at 14px on
+// a low-DPI Android reads worse than Inter, and that is the specific way this
+// choice fails. The three surfaces that may use it are also the three that
+// import the font (see Books/Page, Books/Editor, Cards/StudySession).
+export const readingSurface = { fontFamily: 'reading', lineHeight: 'xl' }

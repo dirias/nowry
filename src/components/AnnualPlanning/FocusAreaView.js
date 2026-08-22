@@ -44,7 +44,6 @@ import {
 import { alpha } from '@mui/system'
 
 import { annualPlanningService } from '../../api/services'
-import { apiCache } from '../../api/utils/cache'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 import GoalDialog from './GoalDialog'
@@ -490,7 +489,10 @@ const FocusAreaView = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: { xs: '2rem', md: '2.5rem' },
+            // Matches the h1 title beside it (theme's xl4 token, 28->36px
+            // fluid) — see the comment on the Text Area title below; kept in
+            // lockstep on purpose, not a coincidence of two identical literals.
+            fontSize: 'xl4',
             flexShrink: 0,
             boxShadow: area.color ? `0 4px 24px ${alpha(area.color, 0.12)}` : 'sm'
           }}
@@ -501,8 +503,11 @@ const FocusAreaView = () => {
         {/* Text Area */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Typography
+            // Page/section heading (the focus area's name), not a hero stat —
+            // h1 is the fit. Sized to match the icon container to its left
+            // (see `fontSize: 'xl4'` there), which is why both were literal
+            // duplicates before this token existed.
             level='h1'
-            fontSize={{ xs: '2rem', md: '2.5rem' }}
             fontWeight={800}
             sx={{ letterSpacing: '-0.02em', mb: 0, lineHeight: 1.1 }}
           >

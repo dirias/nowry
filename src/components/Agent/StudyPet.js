@@ -16,7 +16,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useAnimation, useDragControls } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { usePet } from '../../context/AgentContext'
@@ -308,7 +308,7 @@ export const PetOrb = ({
           right: -4,
           background: activeColor,
           color: 'var(--joy-palette-common-white)',
-          fontSize: 9,
+          fontSize: 12,
           fontWeight: 700,
           lineHeight: 1,
           padding: '2px 5px',
@@ -884,6 +884,8 @@ const StudyPet = () => {
   // is in fullscreen mode (D-07); rests at Z_PET_RESTING everywhere else.
   const isFullscreenBump = isInStudySession && isStudySessionFullscreen
   const computedZIndex = isFullscreenBump ? Z_PET_FULLSCREEN : Z_PET_RESTING
+  const location = useLocation()
+  const isOnboardingRoute = location.pathname === '/register' || location.pathname.startsWith('/onboarding')
 
   /** Pick a random roam target that keeps the pet inside the viewport. */
   const getRandomRoamTarget = () => {
@@ -923,7 +925,7 @@ const StudyPet = () => {
   }
 
   useEffect(() => {
-    if (!isRoamingEnabled || isOpen || isInStudySession) {
+    if (!isRoamingEnabled || isOpen || isInStudySession || isOnboardingRoute) {
       roamActiveRef.current = false
       roamControls.stop()
       // Smoothly return to resting position
@@ -985,7 +987,7 @@ const StudyPet = () => {
       roamControls.stop()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRoamingEnabled, isOpen, isInStudySession])
+  }, [isRoamingEnabled, isOpen, isInStudySession, isOnboardingRoute])
 
   // Auto-scroll chat to bottom on new messages or quiz messages
   useEffect(() => {
@@ -1129,7 +1131,7 @@ const StudyPet = () => {
                                 alignItems: 'center',
                                 padding: '1px 6px',
                                 borderRadius: 10,
-                                fontSize: 10,
+                                fontSize: 12,
                                 fontWeight: 600,
                                 background: 'var(--joy-palette-success-softBg)',
                                 color: 'var(--joy-palette-success-plainColor)',
@@ -1141,7 +1143,7 @@ const StudyPet = () => {
                             </span>
                           )}
                         </div>
-                        <div style={{ color: resolvedColor, fontSize: 11, fontWeight: 500, opacity: 0.9 }}>
+                        <div style={{ color: resolvedColor, fontSize: 12, fontWeight: 500, opacity: 0.9 }}>
                           {messagesLimit === -1
                             ? t('agent.headerStatusUnlimited', {
                                 level,
@@ -1378,7 +1380,7 @@ const StudyPet = () => {
                                 borderRadius: 20,
                                 color: 'var(--joy-palette-text-secondary)',
                                 cursor: 'pointer',
-                                fontSize: 11,
+                                fontSize: 12,
                                 padding: '4px 12px',
                                 fontFamily: 'Inter, sans-serif'
                               }}
@@ -1473,7 +1475,7 @@ const StudyPet = () => {
                             : messageLimitReached
                               ? 'var(--joy-palette-danger-plainColor)'
                               : 'var(--joy-palette-text-tertiary)',
-                        fontSize: 11,
+                        fontSize: 12,
                         fontFamily: 'Inter, sans-serif'
                       }}
                       aria-live='polite'
@@ -1508,7 +1510,7 @@ const StudyPet = () => {
                             borderRadius: 6,
                             color: 'var(--joy-palette-danger-solidColor)',
                             cursor: 'pointer',
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: 600,
                             padding: '4px 10px',
                             fontFamily: 'Inter, sans-serif',

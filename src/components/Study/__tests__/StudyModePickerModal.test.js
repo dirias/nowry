@@ -20,22 +20,29 @@ jest.mock('react-i18next', () => ({
 const StudyModePickerModal = require('../StudyModePickerModal').default
 
 describe('StudyModePickerModal', () => {
-  it('renders Study/Browse/Cram buttons with the correct translated labels', () => {
+  it('renders only Study/Browse buttons with the correct translated labels (Cram is removed)', () => {
     render(<StudyModePickerModal open onClose={jest.fn()} deck={{ _id: 'd1', due_cards: 3 }} onSelectMode={jest.fn()} />)
     expect(screen.getByText('study.modePicker.study.label')).toBeInTheDocument()
     expect(screen.getByText('study.modePicker.browse.label')).toBeInTheDocument()
-    expect(screen.getByText('study.modePicker.cram.label')).toBeInTheDocument()
+    expect(screen.queryByText('study.modePicker.cram.label')).not.toBeInTheDocument()
   })
 
-  it('disables the Study option and shows the disabled hint when the deck has 0 due cards (D-04)', () => {
-    render(<StudyModePickerModal open onClose={jest.fn()} deck={{ _id: 'd1', due_cards: 0 }} onSelectMode={jest.fn()} />)
+  it('disables the Study option and shows the disabled hint when the deck has 0 due AND 0 new cards (D-04)', () => {
+    render(<StudyModePickerModal open onClose={jest.fn()} deck={{ _id: 'd1', due_cards: 0, new_cards: 0 }} onSelectMode={jest.fn()} />)
     const studyButton = screen.getByText('study.modePicker.study.label').closest('button')
     expect(studyButton).toBeDisabled()
     expect(screen.getByText('study.modePicker.study.disabledHint')).toBeInTheDocument()
   })
 
   it('enables the Study option and hides the disabled hint when the deck has due cards', () => {
-    render(<StudyModePickerModal open onClose={jest.fn()} deck={{ _id: 'd1', due_cards: 3 }} onSelectMode={jest.fn()} />)
+    render(<StudyModePickerModal open onClose={jest.fn()} deck={{ _id: 'd1', due_cards: 3, new_cards: 0 }} onSelectMode={jest.fn()} />)
+    const studyButton = screen.getByText('study.modePicker.study.label').closest('button')
+    expect(studyButton).not.toBeDisabled()
+    expect(screen.queryByText('study.modePicker.study.disabledHint')).not.toBeInTheDocument()
+  })
+
+  it('enables the Study option when the deck has 0 due cards but has new cards available', () => {
+    render(<StudyModePickerModal open onClose={jest.fn()} deck={{ _id: 'd1', due_cards: 0, new_cards: 6 }} onSelectMode={jest.fn()} />)
     const studyButton = screen.getByText('study.modePicker.study.label').closest('button')
     expect(studyButton).not.toBeDisabled()
     expect(screen.queryByText('study.modePicker.study.disabledHint')).not.toBeInTheDocument()
@@ -50,8 +57,5 @@ describe('StudyModePickerModal', () => {
 
     fireEvent.click(screen.getByText('study.modePicker.browse.label'))
     expect(onSelectMode).toHaveBeenCalledWith('browse')
-
-    fireEvent.click(screen.getByText('study.modePicker.cram.label'))
-    expect(onSelectMode).toHaveBeenCalledWith('cram')
   })
 })

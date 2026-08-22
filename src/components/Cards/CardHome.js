@@ -15,9 +15,8 @@ import { decksService, cardsService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
-import { apiCache } from '../../api/utils/cache'
 
-export default function CardHome({ onDeckChange } = {}) {
+export default function CardHome() {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
@@ -62,7 +61,7 @@ export default function CardHome({ onDeckChange } = {}) {
     reload: reloadCards,
     fetchMore: reloadFetchMore
   } = useCardData(selectedTags, debouncedSearch)
-  const { statistics: hookStats, loading: statsLoading } = useStatistics()
+  const { statistics: hookStats, loading: statsLoading, reload: reloadStatistics } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
   const fetchData = React.useCallback(async () => {
@@ -115,7 +114,11 @@ export default function CardHome({ onDeckChange } = {}) {
   }
 
   const handleDeckSaved = () => {
-    fetchData()
+    // Invalidates the shared React Query cache entry, which every mounted
+    // useDeckData() instance (including StudyCenter's Dashboard tab) is
+    // subscribed to — no manual cross-component notification needed (ADR-008).
+    reloadDecks()
+    fetchData() // Re-derive local state now; the useDeckData effect also re-runs once hookDecks updates
   }
 
   // Editing a deck is editing a deck, whichever field it is. It used to open a
@@ -229,8 +232,7 @@ export default function CardHome({ onDeckChange } = {}) {
           onImported={() => {
             reloadDecks()
             reloadCards()
-            apiCache.invalidate('cards:statistics')
-            onDeckChange?.()
+            reloadStatistics()
             setShowImportDeck(false)
           }}
         />
@@ -288,10 +290,7 @@ export default function CardHome({ onDeckChange } = {}) {
         onClose={() => setDeckSettingsState({ open: false, deckId: null, section: 'study' })}
         deckId={deckSettingsState.deckId}
         initialSection={deckSettingsState.section}
-        onSaved={() => {
-          reloadDecks()
-          onDeckChange?.()
-        }}
+        onSaved={reloadDecks}
       />
 
       <StudyModePickerModal

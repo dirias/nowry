@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
-import { userService } from '../api/services'
-import { apiCache } from '../api/utils/cache'
-import { useAuth } from './AuthContext'
+import { useUserProfile } from '../hooks/useUserProfile'
 import { playPomodoroNotification, showBrowserNotification } from '../utils/pomodoroSound'
 
 const PomodoroContext = createContext()
@@ -12,7 +10,7 @@ export const usePomodoro = () => {
 }
 
 export const PomodoroProvider = ({ children }) => {
-  const { user } = useAuth()
+  const { profile } = useUserProfile()
 
   // Settings (Defaults)
   const [settings, setSettings] = useState({
@@ -89,30 +87,21 @@ export const PomodoroProvider = ({ children }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave))
   }, [mode, showWidget, isActive, endTime, timeLeft])
 
-  // Load user preferences
+  // Load user preferences — useUserProfile() shares the same 'profile' React Query
+  // cache entry as annualPlanning.service.js's getCachedProfile() (used by
+  // useAnnualPlan), so this doesn't fire a duplicate /users/profile network request
+  // when that query is already warm.
   useEffect(() => {
-    const fetchPreferences = async () => {
-      if (user) {
-        try {
-          // Use the shared cache key so we reuse data already fetched by useAnnualPlan
-          // instead of firing a duplicate /users/profile network request.
-          const profile = await apiCache.get('annual:profile', 60 * 1000, () => userService.getProfile().catch(() => null))
-          if (profile?.preferences) {
-            setSettings({
-              work: profile.preferences.pomodoro_work_minutes || 25,
-              shortBreak: profile.preferences.pomodoro_short_break_minutes || 5,
-              longBreak: profile.preferences.pomodoro_long_break_minutes || 15,
-              autoStart: profile.preferences.pomodoro_auto_start || false,
-              enabled: profile.preferences.pomodoro_enabled || false
-            })
-          }
-        } catch (error) {
-          console.error('Failed to load pomodoro preferences', error)
-        }
-      }
+    if (profile?.preferences) {
+      setSettings({
+        work: profile.preferences.pomodoro_work_minutes || 25,
+        shortBreak: profile.preferences.pomodoro_short_break_minutes || 5,
+        longBreak: profile.preferences.pomodoro_long_break_minutes || 15,
+        autoStart: profile.preferences.pomodoro_auto_start || false,
+        enabled: profile.preferences.pomodoro_enabled || false
+      })
     }
-    fetchPreferences()
-  }, [user])
+  }, [profile])
 
   const handleTimerComplete = useCallback(() => {
     clearInterval(timerRef.current)

@@ -16,23 +16,31 @@ jest.mock('./tasks.service', () => ({
   }
 }))
 
+// fetchAnnualPlanData is the shared queryFn calendar.service.js and useAnnualPlan.js
+// both read through under the ['annualPlan', userId, year] key (CACHE-008 / ADR-008).
+// Mocked directly (rather than the raw getFullAnnualPlan it wraps) so these tests feed
+// it its own normalized output shape: { plan, focusAreas, goals, activities, priorities,
+// quarterReports } — see annualPlanning.service.js for the transform.
 jest.mock('./annualPlanning.service', () => ({
   annualPlanningService: {
     getFullAnnualPlan: jest.fn()
-  }
+  },
+  fetchAnnualPlanData: jest.fn()
 }))
 
-jest.mock('../utils/cache', () => ({
-  apiCache: {
-    // Pass-through cache: just calls the factory function directly
-    get: jest.fn((_key, _ttl, factory) => factory()),
-    invalidatePrefix: jest.fn()
+// Pass-through queryClient: fetchQuery just calls the factory directly, mirroring the
+// old apiCache.get pass-through mock — these tests exercise the transform logic, not
+// React Query's caching semantics.
+jest.mock('../queryClient', () => ({
+  queryClient: {
+    fetchQuery: jest.fn(({ queryFn }) => queryFn()),
+    invalidateQueries: jest.fn()
   }
 }))
 
 describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
   const { tasksService } = require('./tasks.service')
-  const { annualPlanningService } = require('./annualPlanning.service')
+  const { fetchAnnualPlanData } = require('./annualPlanning.service')
 
   const mockFocusArea = { _id: 'area-001', name: 'Learning', color: '#10b981' }
   const mockGoal = {
@@ -57,18 +65,23 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
     status: 'active'
   }
 
-  const { apiCache } = require('../utils/cache')
+  const { queryClient } = require('../queryClient')
 
   beforeEach(() => {
-    // Re-apply pass-through cache mock on each test (clearAllMocks resets implementations)
-    apiCache.get.mockImplementation((_key, _ttl, factory) => factory())
+    // Re-apply pass-through queryClient mock on each test (CRA resets mock
+    // implementations before every test, same reason the old apiCache.get mock
+    // was re-applied here too).
+    queryClient.fetchQuery.mockImplementation(({ queryFn }) => queryFn())
     tasksService.getAll.mockResolvedValue([mockTask])
-    annualPlanningService.getFullAnnualPlan.mockResolvedValue({
+    // fetchAnnualPlanData returns its already-normalized shape (see
+    // annualPlanning.service.js) — focusAreas/goals/activities, not raw focus_areas.
+    fetchAnnualPlanData.mockResolvedValue({
       plan: {},
       priorities: [mockPriority],
-      focus_areas: [mockFocusArea],
+      focusAreas: [mockFocusArea],
       goals: [mockGoal],
-      activities: []
+      activities: [],
+      quarterReports: []
     })
   })
 
@@ -78,7 +91,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 
   it('getAllEvents() resolves to an object with both events array and focusAreas array (not a bare array)', async () => {
     const { calendarService } = require('./calendar.service')
-    const result = await calendarService.getAllEvents()
+    const result = await calendarService.getAllEvents('user-1')
 
     expect(result).not.toBeNull()
     expect(typeof result).toBe('object')
@@ -89,7 +102,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 
   it('goal events have a focusAreaId string property matching the goal focus_area_id', async () => {
     const { calendarService } = require('./calendar.service')
-    const { events } = await calendarService.getAllEvents()
+    const { events } = await calendarService.getAllEvents('user-1')
 
     const goalEvent = events.find((e) => e.type === 'goal')
     expect(goalEvent).toBeDefined()
@@ -98,7 +111,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 
   it('milestone events have a focusAreaId property that matches the parent goal focus_area_id', async () => {
     const { calendarService } = require('./calendar.service')
-    const { events } = await calendarService.getAllEvents()
+    const { events } = await calendarService.getAllEvents('user-1')
 
     const milestoneEvent = events.find((e) => e.type === 'milestone')
     expect(milestoneEvent).toBeDefined()
@@ -107,7 +120,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 
   it('task events have focusAreaId: null', async () => {
     const { calendarService } = require('./calendar.service')
-    const { events } = await calendarService.getAllEvents()
+    const { events } = await calendarService.getAllEvents('user-1')
 
     const taskEvent = events.find((e) => e.type === 'task')
     expect(taskEvent).toBeDefined()
@@ -116,7 +129,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 
   it('priority events have focusAreaId: null', async () => {
     const { calendarService } = require('./calendar.service')
-    const { events } = await calendarService.getAllEvents()
+    const { events } = await calendarService.getAllEvents('user-1')
 
     const priorityEvent = events.find((e) => e.type === 'priority')
     expect(priorityEvent).toBeDefined()
@@ -125,7 +138,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 
   it('focusAreas array contains objects with { id, name, color } shape', async () => {
     const { calendarService } = require('./calendar.service')
-    const { focusAreas } = await calendarService.getAllEvents()
+    const { focusAreas } = await calendarService.getAllEvents('user-1')
 
     expect(focusAreas.length).toBeGreaterThanOrEqual(1)
     const area = focusAreas[0]
@@ -142,8 +155,7 @@ describe('Phase 16 FLT-01: getAllEvents return shape and focusAreaId', () => {
 
 describe('calendarService — CAL-02: isKeyResult in milestone extendedProps', () => {
   const { tasksService } = require('./tasks.service')
-  const { annualPlanningService } = require('./annualPlanning.service')
-  const { apiCache } = require('../utils/cache')
+  const { fetchAnnualPlanData } = require('./annualPlanning.service')
 
   // Base goal used across CAL-02 tests; milestones overridden per-test as needed
   const baseGoal = {
@@ -154,8 +166,10 @@ describe('calendarService — CAL-02: isKeyResult in milestone extendedProps', (
     status: 'active'
   }
 
+  const { queryClient } = require('../queryClient')
+
   beforeEach(() => {
-    apiCache.get.mockImplementation((_key, _ttl, factory) => factory())
+    queryClient.fetchQuery.mockImplementation(({ queryFn }) => queryFn())
     tasksService.getAll.mockResolvedValue([])
   })
 
@@ -164,50 +178,53 @@ describe('calendarService — CAL-02: isKeyResult in milestone extendedProps', (
   })
 
   it('milestone event sets isKeyResult: true when ms.is_key_result is true', async () => {
-    annualPlanningService.getFullAnnualPlan.mockResolvedValue({
+    fetchAnnualPlanData.mockResolvedValue({
       plan: {},
       priorities: [],
-      focus_areas: [],
+      focusAreas: [],
       goals: [{ ...baseGoal, milestones: [{ title: 'KR milestone', due_date: '2026-06-01', is_key_result: true, completed: false }] }],
-      activities: []
+      activities: [],
+      quarterReports: []
     })
 
     const { calendarService } = require('./calendar.service')
-    const { events } = await calendarService.getAllEvents()
+    const { events } = await calendarService.getAllEvents('user-1')
     const ms = events.find((e) => e.type === 'milestone')
     expect(ms).toBeDefined()
     expect(ms.isKeyResult).toBe(true)
   })
 
   it('milestone event sets isKeyResult: false when ms.is_key_result is false', async () => {
-    annualPlanningService.getFullAnnualPlan.mockResolvedValue({
+    fetchAnnualPlanData.mockResolvedValue({
       plan: {},
       priorities: [],
-      focus_areas: [],
+      focusAreas: [],
       goals: [
         { ...baseGoal, milestones: [{ title: 'Regular milestone', due_date: '2026-06-01', is_key_result: false, completed: false }] }
       ],
-      activities: []
+      activities: [],
+      quarterReports: []
     })
 
     const { calendarService } = require('./calendar.service')
-    const { events } = await calendarService.getAllEvents()
+    const { events } = await calendarService.getAllEvents('user-1')
     const ms = events.find((e) => e.type === 'milestone')
     expect(ms).toBeDefined()
     expect(ms.isKeyResult).toBe(false)
   })
 
   it('milestone event sets isKeyResult: false when ms.is_key_result is undefined (pre-field legacy doc)', async () => {
-    annualPlanningService.getFullAnnualPlan.mockResolvedValue({
+    fetchAnnualPlanData.mockResolvedValue({
       plan: {},
       priorities: [],
-      focus_areas: [],
+      focusAreas: [],
       goals: [{ ...baseGoal, milestones: [{ title: 'Legacy milestone', due_date: '2026-06-01', completed: false }] }],
-      activities: []
+      activities: [],
+      quarterReports: []
     })
 
     const { calendarService } = require('./calendar.service')
-    const { events } = await calendarService.getAllEvents()
+    const { events } = await calendarService.getAllEvents('user-1')
     const ms = events.find((e) => e.type === 'milestone')
     expect(ms).toBeDefined()
     expect(ms.isKeyResult).toBe(false)

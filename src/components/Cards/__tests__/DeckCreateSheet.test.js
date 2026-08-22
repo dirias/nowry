@@ -117,7 +117,7 @@ describe('the disclosure rail', () => {
     renderSheet()
     await clickAsync(screen.getByRole('button', { name: 'cards.create.addTags' }))
 
-    const tagInput = screen.getByRole('textbox', { name: 'form.tagAddAria' })
+    const tagInput = screen.getByRole('combobox', { name: 'form.tagAddAria' })
     fireEvent.change(tagInput, { target: { value: 'japanese' } })
     fireEvent.keyDown(tagInput, { key: 'Enter' })
 
@@ -152,7 +152,7 @@ describe('creating', () => {
     renderSheet()
     fireEvent.change(nameField(), { target: { value: 'Japanese' } })
     await clickAsync(screen.getByRole('button', { name: 'cards.create.addTags' }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'form.tagAddAria' }), { target: { value: 'kanji' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'form.tagAddAria' }), { target: { value: 'kanji' } })
 
     await createDeck()
 
@@ -211,7 +211,7 @@ describe('validation', () => {
     renderSheet()
     await createDeck()
     await clickAsync(screen.getByRole('button', { name: 'cards.create.addTags' }))
-    screen.getByRole('textbox', { name: 'form.tagAddAria' }).focus()
+    screen.getByRole('combobox', { name: 'form.tagAddAria' }).focus()
 
     await createDeck()
     await waitFor(() => expect(nameField()).toHaveFocus())

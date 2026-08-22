@@ -159,10 +159,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     },
     "dates": {
@@ -421,15 +417,166 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Onboarding",
+      "retry": "Try again",
+      "error": {
+        "title": "We couldn't load your setup",
+        "body": "Something went wrong while loading your onboarding. Any choices you already saved are safe."
+      },
+      "screenName": {
+        "welcome": "Welcome",
+        "personalization": "Personalization",
+        "firstDeck": "Your first deck"
+      }
+    },
     "welcome": {
-      "title": "Welcome to Nowry!",
-      "subtitle": "Let's personalize your learning experience in just a few steps",
-      "quick": "Quick & Easy",
-      "quickDesc": "Takes less than 2 minutes",
-      "tailored": "Tailored for You",
-      "tailoredDesc": "Customized to your learning style",
-      "changeable": "Always Changeable",
-      "changeableDesc": "You can update these settings anytime"
+      "title": "Welcome to Nowry",
+      "lead": "Three steps: tell Nowry what you want to learn, and finish with a study deck already in your library.",
+      "support": "Nothing on this screen is required. The two settings below are optional.",
+      "begin": "Get Started",
+      "postpone": "Not Right Now",
+      "language": {
+        "label": "Language"
+      },
+      "accent": {
+        "label": "Accent color",
+        "hint": "Used across Nowry. Light and dark follow your device.",
+        "selected": "Accent: {{name}}",
+        "custom": "Custom color",
+        "names": {
+          "oceanTeal": "Ocean teal",
+          "skyBlue": "Sky blue",
+          "royalPurple": "Royal purple",
+          "rosePink": "Rose pink",
+          "crimsonRed": "Crimson red",
+          "sunsetOrange": "Sunset orange",
+          "forestGreen": "Forest green",
+          "earthBrown": "Earth brown"
+        }
+      },
+      "postponeError": {
+        "title": "We couldn't save that",
+        "body": "You're still here, and nothing was recorded."
+      },
+      "loadError": "We couldn't load your saved settings."
+    },
+    "save": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "unsaved": "Not saved",
+      "retry": "Retry"
+    },
+    "personalization": {
+      "title": "What do you want to learn?",
+      "lead": "Pick up to 5 topics and one study goal. The first topic you pick is the one Nowry uses to find your first deck.",
+      "continue": "Choose Your First Deck",
+      "skip": "Skip for Now",
+      "skipHint": "Nothing selected yet. Skipping takes you Home, and you can set this up later.",
+      "validation": {
+        "title": "Not ready yet",
+        "missingInterests": "Pick at least one topic to continue.",
+        "tooManyInterests": "You have {{count}} topics selected. Remove {{excess}} to continue with {{max}} or fewer.",
+        "missingGoal": "Choose one study goal to continue."
+      },
+      "saveError": {
+        "title": "Your choices aren't saved yet",
+        "body": "They're still on screen and nothing was lost. Retry the one marked below, then continue."
+      },
+      "advanceError": {
+        "title": "We couldn't continue",
+        "body": "Your topics and goal are saved. You're still on this screen."
+      },
+      "loadError": "We couldn't load your saved choices.",
+      "loading": "Loading your saved choices"
+    },
+    "firstDeck": {
+      "title": "Your first deck",
+      "lead": "Add one to your library and you can start studying right away.",
+      "status": {
+        "loading": "Looking for official decks.",
+        "ready_one": "{{count}} official deck found.",
+        "ready_other": "{{count}} official decks found.",
+        "empty": "No official decks yet for {{topic}}.",
+        "added": "Deck added to your library."
+      },
+      "official": {
+        "label": "Official deck",
+        "accessible": "Official deck published by {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "What you'll learn",
+        "publisher": "Published by {{publisher}}",
+        "count_one": "{{count}} card",
+        "count_other": "{{count}} cards",
+        "add": "Add to My Library",
+        "retry": "Try Again",
+        "selected": "Selected"
+      },
+      "empty": {
+        "title": "No official {{topic}} decks yet",
+        "body": "Nowry publishes official decks topic by topic, and {{topic}} isn't covered yet. Your topics and goal are saved.",
+        "fallbackTitle": "Generate one with AI instead",
+        "fallbackBody": "An AI deck isn't reviewed by Nowry and doesn't finish your setup, but you can try one now.",
+        "fallbackAction": "Generate with AI"
+      },
+      "fallback": {
+        "pending": "Generating cards…",
+        "success": {
+          "title": "Your cards are ready",
+          "body_one": "Nowry generated {{count}} card for {{topic}}. Pick the ones you want and save them to a deck — an AI deck isn't official, so your setup stays open.",
+          "body_other": "Nowry generated {{count}} cards for {{topic}}. Pick the ones you want and save them to a deck — an AI deck isn't official, so your setup stays open.",
+          "bodyNoCount": "Nowry finished generating. Pick the cards you want and save them to a deck — an AI deck isn't official, so your setup stays open.",
+          "review": "Review Cards"
+        },
+        "saved": {
+          "title": "Your cards are in your library",
+          "body": "Nowry doesn't review AI cards, so they don't finish your setup. You can add an official deck any time."
+        },
+        "error": {
+          "title": "The AI request didn't go through",
+          "body": "Nothing was generated and nothing changed."
+        }
+      },
+      "browseError": {
+        "title": "We couldn't load the decks",
+        "body": "Your topics and goal are saved. Try again, or finish for now and come back later."
+      },
+      "preferencesError": {
+        "title": "We couldn't load your topics",
+        "body": "Nowry needs them before it can look for a deck."
+      },
+      "missingTopic": {
+        "title": "Pick a topic first",
+        "body": "Nowry looks for your first deck using the first topic you choose.",
+        "action": "Choose Topics"
+      },
+      "forkError": {
+        "title": "The deck wasn't added",
+        "body": "Nothing was added to your library, and this deck is still selected.",
+        "inProgress": "It's still being added. Give it a moment and try again.",
+        "copyFailed": "Copying the deck didn't finish.",
+        "notOfficial": "This deck isn't part of Nowry's official collection.",
+        "ownContent": "You already own this deck.",
+        "notFound": "This deck is no longer available."
+      },
+      "activationError": {
+        "title": "Your deck is in your library",
+        "body": "The deck and its cards were added. Only the last step of setup didn't finish, and trying again completes it without adding a second copy."
+      },
+      "success": {
+        "title": "It's in your library",
+        "body": "{{name}} is ready whenever you are.",
+        "bodyNoName": "Your deck is ready whenever you are.",
+        "open": "Open Your Deck",
+        "later": "Not Now"
+      },
+      "finish": "Finish for Now",
+      "finishHint": "Your topics and goal are saved. You can add a deck any time.",
+      "finishError": {
+        "title": "We couldn't finish that",
+        "body": "You're still on this step, and nothing was recorded."
+      }
     },
     "language": {
       "title": "Choose Your Language",
@@ -446,50 +593,15 @@
       "customLabel": "Custom Color"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
       "selected": "Selected: {{count}} topic",
-      "selected_plural": "Selected: {{count}} topics",
-      "items": {
-        "ai": "AI & Machine Learning",
-        "technology": "Technology",
-        "science": "Science",
-        "mathematics": "Mathematics",
-        "history": "History",
-        "languages": "Languages",
-        "literature": "Literature",
-        "art": "Art & Creativity",
-        "music": "Music",
-        "business": "Business",
-        "health": "Health & Fitness",
-        "philosophy": "Philosophy",
-        "design": "Design",
-        "psychology": "Psychology"
-      }
+      "selected_one": "Selected: {{count}} topic",
+      "selected_other": "Selected: {{count}} topics"
     },
     "learning": {
       "title": "Learning Style & Goals",
       "subtitle": "Help us tailor your experience",
       "styleTitle": "How do you learn best?",
-      "goalTitle": "What's your main goal?",
-      "styles": {
-        "visual": "Visual",
-        "visualDesc": "I learn best with images and diagrams",
-        "auditory": "Auditory",
-        "auditoryDesc": "I prefer listening and discussions",
-        "reading": "Reading/Writing",
-        "readingDesc": "I learn through text and notes",
-        "kinesthetic": "Kinesthetic",
-        "kinestheticDesc": "I learn by doing and practicing"
-      },
-      "goals": {
-        "general": "General Knowledge",
-        "academic": "Academic Success",
-        "career": "Career Development",
-        "language": "Language Learning",
-        "hobby": "Personal Interest"
-      }
+      "goalTitle": "What's your main goal?"
     },
     "steps": "Step {{current}} of {{total}}",
     "complete": "{{percent}}% Complete",
@@ -497,40 +609,58 @@
     "back": "Back",
     "finish": "Finish Setup",
     "skip": "Skip for now",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
     "identity": {
       "title": "Choose your language.",
       "subtitle": "Pick the language that feels right."
     },
-    "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
-    },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "title": "What are you here to learn?"
+    },
+    "failure": {
+      "network": "You appear to be offline. Check your connection and try again.",
+      "rejected": "That value wasn't accepted. Please choose another.",
+      "unknown": "Something went wrong on our end."
+    }
+  },
+  "taxonomy": {
+    "topics": {
+      "artificial_intelligence": "AI & Machine Learning",
+      "technology": "Technology",
+      "science": "Science",
+      "mathematics": "Mathematics",
+      "history": "History",
+      "languages": "Languages",
+      "literature": "Literature",
+      "art": "Art & Creativity",
+      "music": "Music",
+      "business": "Business",
+      "health": "Health & Fitness",
+      "philosophy": "Philosophy",
+      "design": "Design",
+      "psychology": "Psychology"
+    },
+    "goals": {
+      "general": "General Knowledge",
+      "academic": "Academic Success",
+      "career": "Career Development",
+      "language": "Language Learning",
+      "hobby": "Personal Interest"
+    },
+    "selector": {
       "topics": {
-        "technology": "Technology",
-        "science": "Science",
-        "history": "History",
-        "languages": "Languages",
-        "art": "Art",
-        "mathematics": "Mathematics",
-        "literature": "Literature",
-        "business": "Business"
+        "label": "Your topics",
+        "hint": "Pick 1 to {{max}} topics. The first one you pick becomes your primary topic.",
+        "counter": "{{selected}} of {{max}} selected",
+        "primaryStatus": "Primary topic: {{topic}}",
+        "limitReached": "You have reached the limit of {{max}} topics. Remove one to choose another.",
+        "srSelected": "Selected, position {{position}} of {{total}}",
+        "srPrimary": "Selected, primary topic, position {{position}} of {{total}}",
+        "srBlocked": "Not available, limit of {{max}} topics reached"
+      },
+      "goals": {
+        "label": "Study goal",
+        "hint": "Choose the one that fits you best."
       }
-    },
-    "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
-    },
-    "error": {
-      "saveFailed": "Something went wrong. Please try again."
     }
   },
   "tasks": {
@@ -603,6 +733,7 @@
     "nav": {
       "account": "Account",
       "appearance": "Appearance",
+      "learning": "Learning",
       "productivity": "Productivity",
       "notifications": "Notifications",
       "agent": "Study Buddy",
@@ -636,6 +767,33 @@
       "themeColorDesc": "Select your accent color. This will update the entire theme.",
       "interests": "Interests",
       "interestsDesc": "Select topics to see news and content"
+    },
+    "learning": {
+      "title": "Learning",
+      "lead": "Your topics shape your news feed and what your study buddy suggests. The first topic is your primary one.",
+      "loading": "Loading your topics and study goal…",
+      "loadError": "We couldn't load your saved topics and study goal.",
+      "range": {
+        "tooFew_one": "Keep at least {{count}} topic. Nothing was changed.",
+        "tooFew_other": "Keep at least {{count}} topics. Nothing was changed.",
+        "tooMany_one": "You can keep {{count}} topic at most. Remove one before adding another.",
+        "tooMany_other": "You can keep {{count}} topics at most. Remove one before adding another."
+      },
+      "order": {
+        "label": "Topic order",
+        "hint": "The first topic is your primary one. Use the arrows to change the order.",
+        "primary": "Primary topic",
+        "moveEarlier": "Move earlier",
+        "moveLater": "Move later",
+        "moveEarlierFor": "Move {{topic}} earlier. Currently position {{position}} of {{total}}.",
+        "moveLaterFor": "Move {{topic}} later. Currently position {{position}} of {{total}}.",
+        "moved": "{{topic}} moved to position {{position}} of {{total}}.",
+        "alreadyFirst": "{{topic}} is already first.",
+        "alreadyLast": "{{topic}} is already last."
+      },
+      "discard": "Discard changes",
+      "discardTopics": "Discard unsaved topic changes",
+      "discardGoal": "Discard unsaved study goal change"
     },
     "productivity": {
       "title": "Productivity",
@@ -740,15 +898,17 @@
       "cardsDue": "cards due",
       "readyToReview": "Ready to review",
       "reviewCount": "Review {{count}} card",
-      "reviewCount_plural": "Review {{count}} cards",
+      "reviewCount_one": "Review {{count}} card",
+      "reviewCount_other": "Review {{count}} cards",
       "reviewToday": "📚 Review Today",
       "cardsPending": "{{count}} card pending",
       "cardsPending_other": "{{count}} cards pending",
-      "cardsPending_plural": "{{count}} cards pending",
+      "cardsPending_one": "{{count}} card pending",
       "start": "Let's Go!",
       "study": "Study",
       "moreDecks": "And {{count}} more deck with pending cards",
-      "moreDecks_other": "And {{count}} more decks with pending cards"
+      "moreDecks_other": "And {{count}} more decks with pending cards",
+      "moreDecks_one": "And {{count}} more deck with pending cards"
     },
     "annualGoals": {
       "title": "Annual Goals",
@@ -805,6 +965,7 @@
     "noActivity": "No activity yet. Start studying to see your progress!",
     "streak": "🔥 Current streak: {{count}} day",
     "streak_other": "🔥 Current streak: {{count}} days",
+    "streak_one": "🔥 Current streak: {{count}} day",
     "types": {
       "quiz": "Quiz",
       "visual": "Visual",
@@ -961,7 +1122,9 @@
       "notesPlaceholder": "Add notes...",
       "summaryPlaceholder": "Add summary..."
     },
-    "import": "Import",
+    "import": {
+      "titlePlaceholder": "Enter the book title..."
+    },
     "title": "Books",
     "library": "Deck Library",
     "subtitle": "Your personal collection",
@@ -988,7 +1151,8 @@
     "successCreate": "Book created successfully",
     "successDelete": "Book deleted successfully",
     "successImport": "{{count}} book imported successfully! {{pages}} total pages.",
-    "successImport_plural": "{{count}} books imported successfully! {{pages}} total pages.",
+    "successImport_one": "{{count}} book imported successfully! {{pages}} total pages.",
+    "successImport_other": "{{count}} books imported successfully! {{pages}} total pages.",
     "errorImport": "Error processing file. Please try again.",
     "tableOfContents": "Table of Contents",
     "noHeadings": "No headings yet",
@@ -1106,7 +1270,8 @@
     "name": "Name",
     "cardCount": "Card Count",
     "deckCount": "{{count}} deck",
-    "deckCount_plural": "{{count}} decks",
+    "deckCount_one": "{{count}} deck",
+    "deckCount_other": "{{count}} decks",
     "loading": "Loading...",
     "confirmDeleteDeck": "Are you sure you want to delete \"{{name}}\"?",
     "confirmDeleteCard": "Are you sure you want to delete this card?",
@@ -1153,7 +1318,8 @@
         "visual": "Visual"
       },
       "cardCount": "{{count}} card",
-      "cardCount_plural": "{{count}} cards",
+      "cardCount_one": "{{count}} card",
+      "cardCount_other": "{{count}} cards",
       "noContent": "No content",
       "untitled": "Untitled card",
       "reviewNew": "New",
@@ -1162,7 +1328,8 @@
         "dueNow": "Due now!",
         "lessThanHour": "In less than 1 hour",
         "inHours": "In {{count}} hour",
-        "inHours_plural": "In {{count}} hours",
+        "inHours_one": "In {{count}} hour",
+        "inHours_other": "In {{count}} hours",
         "tomorrow": "Tomorrow",
         "inDays": "In {{count}} days"
       },
@@ -1211,18 +1378,28 @@
       "description": "Description"
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "Filter by tag",
+        "ariaLabel": "Filter cards by tag",
+        "noOptions": "No tags in this deck",
+        "clear": "Clear tag filters",
+        "showing": "Showing {{shown}} of {{total}}",
+        "empty": {
+          "title": "No cards match these tags",
+          "body": "Remove a tag or clear the filter to see cards again."
+        }
+      },
       "loading": "Loading study session...",
       "allCaughtUp": "All caught up!",
       "noDue": "No cards are due for review right now.",
       "goBack": "Go back",
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Enter fullscreen",
@@ -1238,7 +1415,8 @@
       },
       "card": "Card {{current}} of {{total}}",
       "syncing": "Syncing {{count}} review...",
-      "syncing_plural": "Syncing {{count}} reviews...",
+      "syncing_one": "Syncing {{count}} review...",
+      "syncing_other": "Syncing {{count}} reviews...",
       "labels": {
         "question": "Question",
         "answer": "Answer",
@@ -1262,7 +1440,8 @@
       "description": "Are you sure you want to delete \"{{name}}\"?",
       "confirm": "Delete Deck",
       "consequence1": "All {{count}} flashcards in this deck will be deleted",
-      "consequence1_plural": "All {{count}} flashcards in this deck will be deleted",
+      "consequence1_one": "All {{count}} flashcards in this deck will be deleted",
+      "consequence1_other": "All {{count}} flashcards in this deck will be deleted",
       "consequence2": "If published, it will be unpublished immediately"
     },
     "generatedCards": {
@@ -1611,12 +1790,14 @@
       "generateImage": "Generate with AI",
       "uploadImage": "Upload Image",
       "daysLeft": "{{count}} day left",
-      "daysLeft_plural": "{{count}} days left",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
       "overdue": "Overdue",
       "noDeadline": "No target date",
       "smartHelper": "Make it SMART: Specific, Measurable, Achievable, Relevant, Time-bound",
       "activitiesCount": "{{count}} activity",
-      "activitiesCount_plural": "{{count}} activities",
+      "activitiesCount_one": "{{count}} activity",
+      "activitiesCount_other": "{{count}} activities",
       "viewBoard": "View as Visual Board",
       "editSubtitle": "Update your goal details",
       "timeframe": "Timeframe",
@@ -1814,6 +1995,7 @@
       "quarterEndsToday": "Quarter {{quarter}} ends today",
       "quarterEndingIn": "Quarter {{quarter}} ends in {{count}} day",
       "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
+      "quarterEndingIn_one": "Quarter {{quarter}} ends in {{count}} day",
       "routineCompletion": "items done",
       "allYear": "All year"
     },
@@ -1832,13 +2014,13 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
+      "activeDays_one": "Active {{count}} day this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
+      "migratedCount_one": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
     },
@@ -2390,10 +2572,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Your profile setup isn't complete yet.",
-      "cta": "Finish setup",
-      "dismiss": "Dismiss"
+    "onboardingReentry": {
+      "title": "Finish setting up Nowry",
+      "body": "Pick your topics and Nowry will find you a first study deck.",
+      "cta": "Continue Setup",
+      "dismiss": "Hide this for now",
+      "dismissed": "Setup reminder hidden.",
+      "error": {
+        "title": "We couldn't check your setup"
+      }
     }
   },
   "pet": {
@@ -3126,6 +3313,7 @@
     "tagAddAria": "Add tag",
     "tagRemoveAria": "Remove {{tag}}",
     "tagPlaceholder": "Add a tag and press Enter",
+    "tagNoSuggestions": "No matching tags",
     "deckLabel": "Deck",
     "deckPlaceholder": "Choose a deck",
     "deckNone": "No deck",

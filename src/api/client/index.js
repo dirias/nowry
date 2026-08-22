@@ -107,8 +107,28 @@ apiClient.interceptors.response.use(
       errorUrl.includes('generate-from-book') ||
       errorUrl.includes('goal-ai')
 
-    // Handle request timeout — suppress for AI generation endpoints
-    if (!isAiGenerationEndpoint && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
+    /*
+     * ONB-014 — per-request opt-out, set by callers that render a differentiated
+     * error state of their own.
+     *
+     * The onboarding journey is the reason this exists. Its screens map server
+     * codes to specific, translated copy: a failed preference write is "Not
+     * saved" with a retry pinned to that field, and `activation_failed` is
+     * titled "Your deck is in your library" precisely because the deck *was*
+     * added. A generic red "A server error occurred" toast fired beside either
+     * one duplicates the first and flatly contradicts the second, which is what
+     * FR-049 and NFR-018 forbid. Observed in the browser on a 500 from the fork
+     * route, where both appeared at once.
+     *
+     * Opt-in rather than URL-matched so shared endpoints keep their global toast
+     * for every other caller: `PUT /users/preferences/general` is silent when
+     * onboarding and Account Settings call it, and unchanged everywhere else.
+     */
+    const ownsItsErrorUi = error.config?.suppressErrorToast === true
+    const suppressGlobalToast = isAiGenerationEndpoint || ownsItsErrorUi
+
+    // Handle request timeout — suppress for endpoints that surface their own error UI
+    if (!suppressGlobalToast && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
       notifyUser('Request timed out. Please check your connection and try again.', 'warning')
     }
 
@@ -140,8 +160,8 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle forbidden (403) — suppress for AI generation endpoints that open their own upgrade modal
-    if (error.response?.status === 403 && !isAiGenerationEndpoint) {
+    // Handle forbidden (403) — suppress for endpoints that open their own upgrade modal or error state
+    if (error.response?.status === 403 && !suppressGlobalToast) {
       console.error('Forbidden: Insufficient permissions')
       notifyUser('You do not have permission to perform this action.', 'warning')
     }
@@ -155,8 +175,8 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle server errors (5xx) — suppress for AI generation endpoints that surface their own error UI
-    if (error.response?.status >= 500 && !isAiGenerationEndpoint) {
+    // Handle server errors (5xx) — suppress for endpoints that surface their own error UI
+    if (error.response?.status >= 500 && !suppressGlobalToast) {
       console.error('Server error:', error.response?.status)
       notifyUser('A server error occurred. Please try again later.', 'error')
     }

@@ -438,7 +438,7 @@ export default function BlackboardToolbar({
                       {entity.title || entity.name}
                     </Typography>
                     {(entity.status || entity.areaName) && (
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.65rem' }}>
+                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                         {[entity.status?.replace('_', ' '), entity.areaName].filter(Boolean).join(' · ')}
                       </Typography>
                     )}

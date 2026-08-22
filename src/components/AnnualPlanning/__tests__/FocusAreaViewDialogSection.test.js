@@ -18,7 +18,6 @@ jest.mock('../../../api/services', () => ({
     getQuarterReports: jest.fn(() => Promise.resolve([]))
   }
 }))
-jest.mock('../../../api/utils/cache', () => ({ apiCache: { clear: jest.fn() } }))
 jest.mock('../../../hooks/useAnnualPlan', () => ({ useAnnualPlan: jest.fn() }))
 jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { uid: 'u1' } }) }))
 jest.mock('../../../hooks/useGoalCardModel', () => () => ({}))

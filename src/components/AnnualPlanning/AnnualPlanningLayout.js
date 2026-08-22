@@ -8,8 +8,8 @@ import useAnnualPlan from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
-import { apiCache } from '../../api/utils/cache'
-import { ROUTINE_CACHE_KEY, ROUTINE_TTL, todayKey } from '../../api/utils/routineCache'
+import { useDailyRoutine } from '../../hooks/useDailyRoutine'
+import { todayKey } from '../../api/utils/routineCache'
 import goalAIService from '../../api/services/goalAI.service'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import CloseQuarterModal from './CloseQuarterModal'
@@ -172,28 +172,22 @@ const AnnualPlanningLayout = () => {
     })
   }, [loading, hookPlan, hookAreas, hookGoals, hookPriorities, hookQuarterReports, selectedQuarter, year])
 
-  // RTN-03/D-09: fetch daily routine data via the same apiCache entry SideMenu.js uses,
-  // so a toggle in either surface keeps this header's count fresh.
+  // RTN-03/D-09: read daily routine data via the same useDailyRoutine() query key
+  // SideMenu.js uses, so a toggle in either surface keeps this header's count fresh.
+  const { routine: routineData, error: routineError } = useDailyRoutine()
   useEffect(() => {
-    if (loading) return
-    let cancelled = false
-    apiCache
-      .get(ROUTINE_CACHE_KEY, ROUTINE_TTL, () => annualPlanningService.getDailyRoutine())
-      .then((routine) => {
-        if (cancelled) return
-        const total =
-          (routine?.morning_routine?.length || 0) + (routine?.afternoon_routine?.length || 0) + (routine?.evening_routine?.length || 0)
-        const completedToday = (routine?.daily_completions?.[todayKey()] || []).length
-        setRoutineStats({ total, completedToday })
-      })
-      .catch((err) => {
-        console.error('Failed to load daily routine stats:', err)
-        // fail safe: leave routineStats at { total: 0, completedToday: 0 } so the chip stays hidden
-      })
-    return () => {
-      cancelled = true
+    if (!routineData) return
+    const total =
+      (routineData.morning_routine?.length || 0) + (routineData.afternoon_routine?.length || 0) + (routineData.evening_routine?.length || 0)
+    const completedToday = (routineData.daily_completions?.[todayKey()] || []).length
+    setRoutineStats({ total, completedToday })
+  }, [routineData])
+  useEffect(() => {
+    if (routineError) {
+      console.error('Failed to load daily routine stats:', routineError)
+      // fail safe: leave routineStats at { total: 0, completedToday: 0 } so the chip stays hidden
     }
-  }, [loading])
+  }, [routineError])
 
   // Redirect to setup if loaded but no focus areas exist yet
   useEffect(() => {
@@ -334,6 +328,14 @@ const AnnualPlanningLayout = () => {
     return (
       <Container maxWidth='xl' sx={{ py: { xs: 4, md: 8 }, textAlign: 'center' }}>
         <Box sx={{ mb: 3 }}>
+          {/* NOT migrated to a theme fontSize token — flagged back to the coordinator
+              rather than decided here (Wave B, Part 2). 60->80px exceeds the scale
+              entirely: display-lg (xl6) tops out at 64px, so the nearest token would
+              clip 16px off the desktop size of what is likely a deliberately oversized
+              empty-state hero icon. Extending the scale to cover it is a token-scale
+              change, above this ticket's authority. Left as a raw responsive override
+              until someone with the design context decides whether to accept the 16px
+              loss, add a token, or leave it exempt permanently. */}
           <TimelineIcon sx={{ fontSize: { xs: 60, md: 80 }, color: 'primary.plainColor', mb: 1.5 }} />
           <Typography level='h2' sx={{ mb: 1.5 }}>
             {t('annualPlanning.home.startJourney', { year })}

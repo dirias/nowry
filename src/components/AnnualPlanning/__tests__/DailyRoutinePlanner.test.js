@@ -40,6 +40,13 @@ jest.mock('../../../hooks/useAnnualPlan', () => ({
   useAnnualPlan: () => mockAnnualPlanState
 }))
 
+// DailyRoutinePlanner now invalidates the shared ['dailyRoutine', userId] React
+// Query key (CACHE-007 / ADR-008) after every mutation, which needs a userId from
+// useAuth() — mocked here since this test has no AuthProvider wrapping it.
+jest.mock('../../../context/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'test-user' } })
+}))
+
 const DailyRoutinePlanner = require('../DailyRoutinePlanner').default
 
 // A 36-char UUID-shaped id (matches crypto.randomUUID() length). D-04's migration

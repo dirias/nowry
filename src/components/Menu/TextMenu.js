@@ -55,6 +55,7 @@ import { useTranslation } from 'react-i18next'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { useAuth } from '../../context/AuthContext'
+import { touchTargetBox } from '../Common/Form/formStyles'
 
 /**
  * Reading Mode action classification.
@@ -396,7 +397,7 @@ const TextMenu = forwardRef(
             color='neutral'
             aria-label={t('editor.ai.more', 'More AI actions')}
             onPointerDown={keepSelection}
-            sx={{ minWidth: 28, px: 0.5, ...(isReading ? focusRingSx : {}) }}
+            sx={{ ...touchTargetBox, px: 0.5, ...(isReading ? focusRingSx : {}) }}
           >
             <Sparkles size={15} />
           </MenuButton>
@@ -423,7 +424,7 @@ const TextMenu = forwardRef(
               </Box>
               <Box sx={{ ml: 1 }}>{option.label}</Box>
               {option.locked && (
-                <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto', fontSize: '0.65rem' }}>
+                <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
                   {t('plans.plus')}
                 </Chip>
               )}

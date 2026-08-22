@@ -12,7 +12,6 @@
 
 import { useState, useEffect } from 'react'
 import { decksService } from '../api/services'
-import { apiCache } from '../api/utils/cache'
 import { useDeckData } from './useDeckData'
 
 // ─── Normalization helpers ────────────────────────────────────────────────────

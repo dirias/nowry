@@ -20,6 +20,22 @@ import ja from '../../../locales/ja/translation.json'
 const LOCALES = { en, de, es, fr, ja }
 const NON_ENGLISH = ['de', 'es', 'fr', 'ja']
 
+/**
+ * A locale only owes the plural forms its own CLDR rules can select. Japanese
+ * has a single `other` category, so `pageCount_one` is not a gap there — it is
+ * a key i18next can never reach. ONB-015 dropped it; the rule itself lives in
+ * `src/locales/__tests__/localeCoverage.test.js`.
+ */
+const PLURAL_CATEGORIES = Object.keys(LOCALES).reduce((acc, name) => {
+  acc[name] = new Set(new Intl.PluralRules(name).resolvedOptions().pluralCategories)
+  return acc
+}, {})
+
+const owes = (name, key) => {
+  const suffix = /_(zero|one|two|few|many|other)$/.exec(key)
+  return !suffix || PLURAL_CATEGORIES[name].has(suffix[1])
+}
+
 /** Every key BookCreateSheet, BookEditSheet and the cover field resolve. */
 const FORM_KEYS = [
   'untitled',
@@ -67,7 +83,7 @@ const ALL = [...FORM_KEYS, ...LIBRARY_KEYS]
 describe('the books form namespace', () => {
   it('resolves every key the surfaces ask for, in every locale', () => {
     Object.entries(LOCALES).forEach(([name, bundle]) => {
-      const missing = ALL.filter((key) => typeof bundle.books?.[key] !== 'string' || !bundle.books[key].trim())
+      const missing = ALL.filter((key) => owes(name, key) && (typeof bundle.books?.[key] !== 'string' || !bundle.books[key].trim()))
       expect({ locale: name, missing }).toEqual({ locale: name, missing: [] })
     })
   })
@@ -91,18 +107,22 @@ describe('the books form namespace', () => {
     // write "{{count}} page(s)" with the same two words English does.
     const legitimatelyShared = { coverImagePlaceholder: NON_ENGLISH, pageCount_one: ['fr'], pageCount_other: ['fr'] }
     NON_ENGLISH.forEach((name) => {
-      const copied = ALL.filter((key) => !legitimatelyShared[key]?.includes(name) && LOCALES[name].books[key] === en.books[key])
+      const copied = ALL.filter(
+        (key) => owes(name, key) && !legitimatelyShared[key]?.includes(name) && LOCALES[name].books[key] === en.books[key]
+      )
       expect({ locale: name, copied }).toEqual({ locale: name, copied: [] })
     })
   })
 
   it('uses i18next v4 plural suffixes for the page count', () => {
     Object.entries(LOCALES).forEach(([name, bundle]) => {
-      expect({ locale: name, one: bundle.books.pageCount_one, other: bundle.books.pageCount_other }).toEqual({
+      expect({ locale: name, other: bundle.books.pageCount_other }).toEqual({
         locale: name,
-        one: expect.stringContaining('{{count}}'),
         other: expect.stringContaining('{{count}}')
       })
+      if (owes(name, 'pageCount_one')) {
+        expect({ locale: name, one: bundle.books.pageCount_one }).toEqual({ locale: name, one: expect.stringContaining('{{count}}') })
+      }
     })
   })
 

@@ -33,8 +33,8 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { tasksService, annualPlanningService } from '../../../api/services'
 import { useTaskData } from '../../../hooks/useTaskData'
-import { apiCache } from '../../../api/utils/cache'
-import { ROUTINE_CACHE_KEY, ROUTINE_TTL, todayKey } from '../../../api/utils/routineCache'
+import { useDailyRoutine } from '../../../hooks/useDailyRoutine'
+import { todayKey } from '../../../api/utils/routineCache'
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 const LISTS_KEY = 'nowry_task_lists'
@@ -85,9 +85,6 @@ const SideMenu = () => {
   const [tasks, setTasks] = React.useState([])
   const [search, setSearch] = React.useState('')
   const [statusFilter, setStatusFilter] = React.useState('pending')
-  const [loading, setLoading] = React.useState(true)
-  const [error, setError] = React.useState(false)
-  const [routine, setRoutine] = React.useState(null)
   // Keys: item.id -> true when checked (D-05: migrated from index-based keys to stay
   // consistent with DailyRoutinePlanner.js, which uses the same id-based format).
   // Sourced from backend (cross-device sync) — seeding logic below is key-format-agnostic.
@@ -115,33 +112,38 @@ const SideMenu = () => {
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor))
 
   const { tasks: tasksData, loading: tasksLoading, reload: reloadTasks } = useTaskData()
+  const {
+    routine,
+    loading: routineLoading,
+    error: routineError,
+    invalidate: invalidateRoutine,
+    refetch: refetchRoutine
+  } = useDailyRoutine()
 
-  const loadData = React.useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(false)
-      const routineData = await apiCache.get(ROUTINE_CACHE_KEY, ROUTINE_TTL, () => annualPlanningService.getDailyRoutine())
-      setTasks(tasksData)
-      setRoutine(routineData)
-      // Seed completion state from backend (cross-device sync + midnight reset via date key)
-      const today = todayKey()
-      const backendCompletions = routineData?.daily_completions?.[today] || []
-      // Convert array of keys to object map { "morning_0": true, ... }
-      const completionMap = Object.fromEntries(backendCompletions.map((k) => [k, true]))
-      setRoutineCompletions(completionMap)
-    } catch (err) {
-      console.error('Error loading data:', err)
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [tasksData])
+  const loading = tasksLoading || routineLoading
+  const error = !!routineError
 
-  // Load data when tasks are ready
+  // Mirror the task list from the shared hook into local state — tasks below are
+  // mutated optimistically (add/remove/toggle/reorder) ahead of their own reload.
+  // Compares by content (not tasksData's array identity) before seeding: useTaskData()
+  // falls back to `data ?? []`, a fresh array reference on every render while the query
+  // has no data yet (unauthenticated/loading), which would otherwise re-run this effect
+  // and re-render forever.
+  const tasksDataJson = JSON.stringify(tasksData)
   React.useEffect(() => {
-    if (tasksLoading) return
-    loadData()
-  }, [tasksLoading, loadData])
+    setTasks(JSON.parse(tasksDataJson))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasksDataJson])
+
+  // Seed completion state from backend (cross-device sync + midnight reset via date key)
+  React.useEffect(() => {
+    if (!routine) return
+    const today = todayKey()
+    const backendCompletions = routine?.daily_completions?.[today] || []
+    // Convert array of keys to object map { "morning_0": true, ... }
+    const completionMap = Object.fromEntries(backendCompletions.map((k) => [k, true]))
+    setRoutineCompletions(completionMap)
+  }, [routine])
 
   // Focus new list input when shown
   React.useEffect(() => {
@@ -293,7 +295,7 @@ const SideMenu = () => {
       .map(([k]) => k)
     annualPlanningService
       .updateRoutineCompletions(todayKey(), activeKeys)
-      .then(() => apiCache.invalidate(ROUTINE_CACHE_KEY))
+      .then(() => invalidateRoutine())
       .catch((err) => {
         console.error('Failed to save routine completion:', err)
         setRoutineCompletions(previous)
@@ -340,7 +342,7 @@ const SideMenu = () => {
           <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
             {t('annualPlanning.tabs.errorLoading')}
           </Typography>
-          <Button size='sm' variant='soft' onClick={loadData} aria-label={t('common.retry')}>
+          <Button size='sm' variant='soft' onClick={() => refetchRoutine()} aria-label={t('common.retry')}>
             {t('common.retry')}
           </Button>
         </Box>
@@ -691,7 +693,7 @@ const SideMenu = () => {
                     variant='plain'
                     color='neutral'
                     onClick={() => setStatusFilter(f)}
-                    sx={{ cursor: 'pointer', fontSize: '0.7rem', px: 1, ...(statusFilter === f ? activeChipSx : inactiveChipSx) }}
+                    sx={{ cursor: 'pointer', px: 1, ...(statusFilter === f ? activeChipSx : inactiveChipSx) }}
                   >
                     {t(`tasks.filter.${f}`)}
                   </Chip>
@@ -758,7 +760,7 @@ const SideMenu = () => {
                 variant='plain'
                 color='neutral'
                 onClick={() => handleSelectList('all')}
-                sx={{ cursor: 'pointer', flexShrink: 0, fontSize: '0.72rem', ...(activeList === 'all' ? activeChipSx : inactiveChipSx) }}
+                sx={{ cursor: 'pointer', flexShrink: 0, ...(activeList === 'all' ? activeChipSx : inactiveChipSx) }}
               >
                 {t('tasks.lists.all')}
               </Chip>
@@ -777,7 +779,6 @@ const SideMenu = () => {
                   sx={{
                     cursor: 'pointer',
                     flexShrink: 0,
-                    fontSize: '0.72rem',
                     ...(activeList === list.id ? activeChipSx : inactiveChipSx)
                   }}
                 >
@@ -798,7 +799,7 @@ const SideMenu = () => {
                   }}
                   onBlur={handleConfirmAddList}
                   slotProps={{ input: { ref: newListInputRef } }}
-                  sx={{ width: 110, flexShrink: 0, fontSize: '0.72rem', '--Input-minHeight': '24px', py: 0 }}
+                  sx={{ width: 110, flexShrink: 0, '--Input-minHeight': '24px', py: 0 }}
                 />
               ) : (
                 <Tooltip title={t('tasks.lists.addList')} size='sm'>
@@ -892,8 +893,7 @@ const SideMenu = () => {
                           color: 'text.tertiary',
                           fontWeight: 600,
                           textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          fontSize: '0.62rem'
+                          letterSpacing: '0.06em'
                         }}
                       >
                         {group.label}

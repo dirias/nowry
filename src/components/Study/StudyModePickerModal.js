@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 export default function StudyModePickerModal({ open, onClose, deck, onSelectMode }) {
   const { t } = useTranslation()
-  const studyDisabled = deck.due_cards === 0
+  const studyDisabled = deck.due_cards === 0 && deck.new_cards === 0
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -30,14 +30,19 @@ export default function StudyModePickerModal({ open, onClose, deck, onSelectMode
             {t('study.modePicker.study.description')}
           </Typography>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <Button size='md' variant='outlined' color='neutral' fullWidth onClick={() => onSelectMode('browse')}>
-              {t('study.modePicker.browse.label')}
-            </Button>
-            <Button size='md' variant='outlined' color='neutral' fullWidth onClick={() => onSelectMode('cram')}>
-              {t('study.modePicker.cram.label')}
-            </Button>
-          </Stack>
+          <Button
+            size='md'
+            variant='outlined'
+            color='neutral'
+            fullWidth
+            aria-label={t('study.modePicker.browse.label')}
+            onClick={() => onSelectMode('browse')}
+          >
+            {t('study.modePicker.browse.label')}
+          </Button>
+          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
+            {t('study.modePicker.browse.description')}
+          </Typography>
         </Stack>
       </ModalDialog>
     </Modal>

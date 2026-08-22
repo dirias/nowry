@@ -1,68 +1,51 @@
+import { useQuery } from '@tanstack/react-query'
+import { cardsService } from '../api/services'
+import { queryClient } from '../api/queryClient'
+import { useAuth } from '../context/AuthContext'
+
+// Matches the old apiCache TTL for this resource (see api/queryClient.js's
+// query-key convention doc — 60000ms was this hook's CACHE_TTL under the old
+// apiCache-backed implementation).
+const STATISTICS_STALE_TIME = 60000 // 60 seconds
+
 /**
- * useStatistics — Shared hook for cardsService.getStatistics()
+ * useStatistics — React Query-backed cardsService.getStatistics() (ADR-008 / CACHE-005).
  *
  * Problem it solves:
  *   WeeklyProgress and StudyCalendar both call getStatistics() independently
  *   on the same Home page → 2 identical API calls for the same data.
  *
  * Solution:
- *   Cache the result for 60 seconds using the existing apiCache. The second
- *   component to mount gets the cached value immediately without a round-trip.
+ *   Every useStatistics() instance subscribes to the same `queryClient`
+ *   cache entry for a given key, so the second component to mount gets the
+ *   cached value immediately without a round-trip, and invalidating that key
+ *   from ANY component (via `reload()` here, or directly via
+ *   `queryClient.invalidateQueries`) re-renders every other mounted
+ *   component reading it too — unlike the old apiCache-backed version, whose
+ *   invalidation was silent to already-mounted subscribers.
  *
- * Invalidate after a study session completes:
- *   import { apiCache } from '../api/utils/cache'
- *   apiCache.invalidate(`cards:statistics:${user.id}`)
+ * Invalidate after a mutation (e.g. a study session completes, a deck is
+ * imported):
+ *   import { queryClient } from '../api/queryClient'
+ *   queryClient.invalidateQueries({ queryKey: ['statistics', userId] })
  */
-
-import { useState, useEffect } from 'react'
-import { cardsService } from '../api/services'
-import { apiCache } from '../api/utils/cache'
-import { useAuth } from '../context/AuthContext'
-
-const CACHE_TTL = 60000 // 60 seconds
-
 export function useStatistics() {
   const { user } = useAuth()
-  // Scope cache key to the logged-in user to prevent cross-account data leaks
-  const CACHE_KEY = user?.id ? `cards:statistics:${user.id}` : null
+  const userId = user?.id ?? null
 
-  const [statistics, setStatistics] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['statistics', userId],
+    queryFn: () => cardsService.getStatistics(),
+    enabled: !!userId,
+    staleTime: STATISTICS_STALE_TIME
+  })
 
-  useEffect(() => {
-    if (!CACHE_KEY) return
-    let cancelled = false
-
-    apiCache
-      .get(CACHE_KEY, CACHE_TTL, () => cardsService.getStatistics())
-      .then((data) => {
-        if (!cancelled) {
-          setStatistics(data)
-          setLoading(false)
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          console.error('[useStatistics] Error:', err)
-          setError(err)
-          setLoading(false)
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [CACHE_KEY])
-
-  const reload = () => {
-    if (!CACHE_KEY) return
-    apiCache.invalidate(CACHE_KEY)
-    apiCache
-      .get(CACHE_KEY, CACHE_TTL, () => cardsService.getStatistics())
-      .then((data) => setStatistics(data))
-      .catch((err) => console.error('[useStatistics] Reload error:', err))
+  const reload = async () => {
+    if (!userId) return
+    await queryClient.invalidateQueries({ queryKey: ['statistics', userId] })
   }
 
-  return { statistics, loading, error, reload }
+  return { statistics: data ?? null, loading: isLoading, error: error ?? null, reload }
 }
+
+export default useStatistics

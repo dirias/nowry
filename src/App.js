@@ -1,5 +1,8 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react'
-import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import React, { Suspense, lazy } from 'react'
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { queryClient } from './api/queryClient'
 import { DynamicThemeProvider } from './theme/DynamicThemeProvider'
 import { Box, CircularProgress } from '@mui/joy'
 
@@ -39,7 +42,7 @@ const Contact = lazy(() => import('./components/HomePage/Contact'))
 const Login = lazy(() => import('./components/User/Login'))
 const Register = lazy(() => import('./components/User/Register'))
 const ResetPassword = lazy(() => import('./components/User/ResetPassword'))
-const OnboardingWizard = lazy(() => import('./components/User/OnboardingWizard'))
+const OnboardingRoute = lazy(() => import('./components/User/OnboardingRoute'))
 const Home = lazy(() => import('./components/User/Home/Home'))
 const EditorHome = lazy(() => import('./components/Books/EditorHome'))
 const BookHome = lazy(() => import('./components/Books/BookHome'))
@@ -88,18 +91,25 @@ const PageLoader = () => (
   </Box>
 )
 
+/*
+ * ONB-012 / ADR-007 — there is deliberately no onboarding redirect here.
+ *
+ * This component used to run an effect that pushed every authenticated user
+ * whose `wizard_completed` was false to `/onboarding` on every navigation,
+ * escapable only by a `sessionStorage.onboarding_skipped` flag the wizard set
+ * on skip. That made an incomplete profile a restriction on the whole product
+ * and moved the "should we ask again?" decision onto a device-local flag that
+ * one cleared tab reset.
+ *
+ * FR-044 forbids it: onboarding must never auto-open, block Home, or prevent
+ * use of any other area. Re-entry is now an in-flow surface on Home that
+ * appears only when the server's journey state says so (`OnboardingReentry`),
+ * and the only navigations left to `/onboarding` are explicit ones the user
+ * caused: registering, a first Google sign-in, and pressing that surface.
+ */
 const AppContent = () => {
   const { isAuthenticated, user, loading } = useAuth()
-  const navigate = useNavigate()
   const location = useLocation()
-
-  useEffect(() => {
-    // Redirect to onboarding if user is authenticated but wizard is not completed
-    const skipped = sessionStorage.getItem('onboarding_skipped')
-    if (!loading && isAuthenticated && user && !user.wizard_completed && !skipped && location.pathname !== '/onboarding') {
-      navigate('/onboarding')
-    }
-  }, [loading, isAuthenticated, user, location.pathname, navigate])
 
   const isEditor = location.pathname.startsWith('/book/') && location.pathname !== '/books'
 
@@ -300,8 +310,20 @@ const AppContent = () => {
                 path='/onboarding'
                 element={
                   <ProtectedRoute>
-                    {/* Wizard is a one-time experience — completed users go straight to home */}
-                    {user?.wizard_completed ? <Navigate to='/' replace /> : <OnboardingWizard />}
+                    {/*
+                      ONB-014 — the `user?.wizard_completed ? <Navigate to='/'/>` bounce
+                      that used to sit here is gone, and nothing replaces it at this
+                      level. `OnboardingRoute` owns the identical redirect, but resolves
+                      it from `GET /users/onboarding` — live server state, which already
+                      normalizes a legacy `wizard_completed=true` user to activated
+                      (ONB-001) — instead of the `user` snapshot AuthContext cached at
+                      sign-in and never refreshes after a fork. Two redirect authorities
+                      where the outer one reads a stale client flag is precisely what
+                      ADR-007 means by server-governed, and it would have overridden the
+                      FR-028 success panel the moment anyone called `checkUser()` after
+                      activation.
+                    */}
+                    <OnboardingRoute />
                   </ProtectedRoute>
                 }
               />
@@ -417,21 +439,24 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <PomodoroProvider>
-        <DynamicThemeProvider>
-          <NotificationProvider>
-            <AgentProvider>
-              <Router>
-                <SubscriptionProvider>
-                  <AppContent />
-                </SubscriptionProvider>
-              </Router>
-            </AgentProvider>
-          </NotificationProvider>
-        </DynamicThemeProvider>
-      </PomodoroProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <PomodoroProvider>
+          <DynamicThemeProvider>
+            <NotificationProvider>
+              <AgentProvider>
+                <Router>
+                  <SubscriptionProvider>
+                    <AppContent />
+                  </SubscriptionProvider>
+                </Router>
+              </AgentProvider>
+            </NotificationProvider>
+          </DynamicThemeProvider>
+        </PomodoroProvider>
+      </AuthProvider>
+      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   )
 }
 

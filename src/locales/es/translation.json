@@ -16,7 +16,7 @@
     "language": "Idioma",
     "studyBuddy": "Compañero de Estudio",
     "moreActions": "Más acciones",
-    "retry": "Retry"
+    "retry": "Reintentar"
   },
   "news": {
     "title": "Últimas Noticias",
@@ -145,10 +145,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     }
   },
@@ -295,15 +291,166 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Configuración inicial",
+      "retry": "Reintentar",
+      "error": {
+        "title": "No pudimos cargar tu configuración",
+        "body": "Algo salió mal al cargar tu configuración inicial. Las opciones que ya guardaste están a salvo."
+      },
+      "screenName": {
+        "welcome": "Bienvenida",
+        "personalization": "Personalización",
+        "firstDeck": "Tu primer mazo"
+      }
+    },
     "welcome": {
-      "title": "¡Bienvenido a Nowry!",
-      "subtitle": "Personalicemos tu experiencia de aprendizaje en unos pocos pasos",
-      "quick": "Rápido y Fácil",
-      "quickDesc": "Toma menos de 2 minutos",
-      "tailored": "Adaptado para Ti",
-      "tailoredDesc": "Personalizado a tu estilo de aprendizaje",
-      "changeable": "Siempre Cambiable",
-      "changeableDesc": "Puedes actualizar estos ajustes en cualquier momento"
+      "title": "Te damos la bienvenida a Nowry",
+      "lead": "Tres pasos: cuéntale a Nowry qué quieres aprender y termina con un mazo de estudio ya en tu biblioteca.",
+      "support": "Nada de esta pantalla es obligatorio. Los dos ajustes de abajo son opcionales.",
+      "begin": "Empezar",
+      "postpone": "Ahora no",
+      "language": {
+        "label": "Idioma"
+      },
+      "accent": {
+        "label": "Color de acento",
+        "hint": "Se usa en toda la aplicación. El modo claro u oscuro sigue al de tu dispositivo.",
+        "selected": "Acento: {{name}}",
+        "custom": "Color personalizado",
+        "names": {
+          "oceanTeal": "Verde azulado océano",
+          "skyBlue": "Azul cielo",
+          "royalPurple": "Púrpura real",
+          "rosePink": "Rosa",
+          "crimsonRed": "Rojo carmesí",
+          "sunsetOrange": "Naranja atardecer",
+          "forestGreen": "Verde bosque",
+          "earthBrown": "Marrón tierra"
+        }
+      },
+      "postponeError": {
+        "title": "No pudimos guardar eso",
+        "body": "Sigues aquí y no se registró nada."
+      },
+      "loadError": "No pudimos cargar tus ajustes guardados."
+    },
+    "save": {
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "unsaved": "Sin guardar",
+      "retry": "Reintentar"
+    },
+    "personalization": {
+      "title": "¿Qué quieres aprender?",
+      "lead": "Elige hasta 5 temas y un objetivo de estudio. El primer tema que elijas es el que Nowry usa para encontrar tu primer mazo.",
+      "continue": "Elegir tu primer mazo",
+      "skip": "Omitir por ahora",
+      "skipHint": "Aún no has elegido nada. Al omitir volverás al inicio y podrás configurarlo más tarde.",
+      "validation": {
+        "title": "Todavía no está listo",
+        "missingInterests": "Elige al menos un tema para continuar.",
+        "tooManyInterests": "Tienes {{count}} temas seleccionados. Quita {{excess}} para continuar con {{max}} o menos.",
+        "missingGoal": "Elige un objetivo de estudio para continuar."
+      },
+      "saveError": {
+        "title": "Tus elecciones aún no están guardadas",
+        "body": "Siguen en pantalla y no se ha perdido nada. Reintenta la que aparece marcada abajo y luego continúa."
+      },
+      "advanceError": {
+        "title": "No pudimos continuar",
+        "body": "Tus temas y tu objetivo están guardados. Sigues en esta pantalla."
+      },
+      "loadError": "No pudimos cargar tus elecciones guardadas.",
+      "loading": "Cargando tus elecciones guardadas"
+    },
+    "firstDeck": {
+      "title": "Tu primer mazo",
+      "lead": "Añade uno a tu biblioteca y podrás empezar a estudiar de inmediato.",
+      "status": {
+        "loading": "Buscando mazos oficiales.",
+        "ready_one": "{{count}} mazo oficial encontrado.",
+        "ready_other": "{{count}} mazos oficiales encontrados.",
+        "empty": "Todavía no hay mazos oficiales de {{topic}}.",
+        "added": "Mazo añadido a tu biblioteca."
+      },
+      "official": {
+        "label": "Mazo oficial",
+        "accessible": "Mazo oficial publicado por {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "Lo que vas a aprender",
+        "publisher": "Publicado por {{publisher}}",
+        "count_one": "{{count}} tarjeta",
+        "count_other": "{{count}} tarjetas",
+        "add": "Añadir a mi biblioteca",
+        "retry": "Reintentar",
+        "selected": "Seleccionado"
+      },
+      "empty": {
+        "title": "Todavía no hay mazos oficiales de {{topic}}",
+        "body": "Nowry publica los mazos oficiales tema a tema, y {{topic}} aún no está cubierto. Tus temas y tu objetivo están guardados.",
+        "fallbackTitle": "Generar uno con IA",
+        "fallbackBody": "Un mazo generado con IA no pasa por la revisión de Nowry y no completa tu configuración, pero puedes probarlo ahora.",
+        "fallbackAction": "Generar con IA"
+      },
+      "fallback": {
+        "pending": "Generando tarjetas…",
+        "success": {
+          "title": "Tus tarjetas están listas",
+          "body_one": "Nowry generó {{count}} tarjeta sobre {{topic}}. Elige las que quieras y guárdalas en un mazo: un mazo generado con IA no es oficial, así que tu configuración sigue abierta.",
+          "body_other": "Nowry generó {{count}} tarjetas sobre {{topic}}. Elige las que quieras y guárdalas en un mazo: un mazo generado con IA no es oficial, así que tu configuración sigue abierta.",
+          "bodyNoCount": "Nowry terminó de generar. Elige las tarjetas que quieras y guárdalas en un mazo: un mazo generado con IA no es oficial, así que tu configuración sigue abierta.",
+          "review": "Revisar tarjetas"
+        },
+        "saved": {
+          "title": "Tus tarjetas están en tu biblioteca",
+          "body": "Nowry no revisa las tarjetas generadas con IA, así que no completan tu configuración. Puedes añadir un mazo oficial cuando quieras."
+        },
+        "error": {
+          "title": "La solicitud de IA no se completó",
+          "body": "No se generó nada y nada cambió."
+        }
+      },
+      "browseError": {
+        "title": "No pudimos cargar los mazos",
+        "body": "Tus temas y tu objetivo están guardados. Inténtalo de nuevo o termina por ahora y vuelve más tarde."
+      },
+      "preferencesError": {
+        "title": "No pudimos cargar tus temas",
+        "body": "Nowry los necesita antes de poder buscar un mazo."
+      },
+      "missingTopic": {
+        "title": "Elige un tema primero",
+        "body": "Nowry busca tu primer mazo a partir del primer tema que elijas.",
+        "action": "Elegir temas"
+      },
+      "forkError": {
+        "title": "El mazo no se añadió",
+        "body": "No se añadió nada a tu biblioteca y este mazo sigue seleccionado.",
+        "inProgress": "Todavía se está añadiendo. Espera un momento e inténtalo de nuevo.",
+        "copyFailed": "La copia del mazo no terminó.",
+        "notOfficial": "Este mazo no forma parte de la colección oficial de Nowry.",
+        "ownContent": "Este mazo ya es tuyo.",
+        "notFound": "Este mazo ya no está disponible."
+      },
+      "activationError": {
+        "title": "Tu mazo está en tu biblioteca",
+        "body": "El mazo y sus tarjetas se añadieron. Solo faltó el último paso de la configuración, y al reintentar se completa sin añadir una segunda copia."
+      },
+      "success": {
+        "title": "Ya está en tu biblioteca",
+        "body": "{{name}} te espera cuando quieras.",
+        "bodyNoName": "Tu mazo te espera cuando quieras.",
+        "open": "Abrir mi mazo",
+        "later": "Ahora no"
+      },
+      "finish": "Terminar por ahora",
+      "finishHint": "Tus temas y tu objetivo están guardados. Puedes añadir un mazo cuando quieras.",
+      "finishError": {
+        "title": "No pudimos terminar eso",
+        "body": "Sigues en este paso y no se registró nada."
+      }
     },
     "language": {
       "title": "Elige tu Idioma",
@@ -320,50 +467,15 @@
       "customLabel": "Color Personalizado"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
       "selected": "Seleccionado: {{count}} tema",
-      "selected_plural": "Seleccionados: {{count}} temas",
-      "items": {
-        "ai": "AI & Machine Learning",
-        "technology": "Technology",
-        "science": "Science",
-        "mathematics": "Mathematics",
-        "history": "History",
-        "languages": "Languages",
-        "literature": "Literature",
-        "art": "Art & Creativity",
-        "music": "Music",
-        "business": "Business",
-        "health": "Health & Fitness",
-        "philosophy": "Philosophy",
-        "design": "Design",
-        "psychology": "Psychology"
-      }
+      "selected_one": "Seleccionado: {{count}} tema",
+      "selected_other": "Seleccionados: {{count}} temas"
     },
     "learning": {
       "title": "Estilo de Aprendizaje y Metas",
       "subtitle": "Ayúdanos a adaptar tu experiencia",
       "styleTitle": "¿Cómo aprendes mejor?",
-      "goalTitle": "¿Cuál es tu meta principal?",
-      "styles": {
-        "visual": "Visual",
-        "visualDesc": "Aprendo mejor con imágenes y diagramas",
-        "auditory": "Auditivo",
-        "auditoryDesc": "Prefiero escuchar y discutir",
-        "reading": "Lectura/Escritura",
-        "readingDesc": "Aprendo a través de texto y notas",
-        "kinesthetic": "Cinestésico",
-        "kinestheticDesc": "Aprendo haciendo y practicando"
-      },
-      "goals": {
-        "general": "Conocimiento General",
-        "academic": "Éxito Académico",
-        "career": "Desarrollo Profesional",
-        "language": "Aprendizaje de Idiomas",
-        "hobby": "Interés Personal"
-      }
+      "goalTitle": "¿Cuál es tu meta principal?"
     },
     "steps": "Paso {{current}} de {{total}}",
     "complete": "{{percent}}% Completado",
@@ -371,40 +483,58 @@
     "back": "Atrás",
     "finish": "Finalizar Configuración",
     "skip": "Saltar por ahora",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
     "identity": {
       "title": "Elige tu idioma.",
       "subtitle": "Selecciona el idioma que prefieras."
     },
-    "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
-    },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "title": "¿Qué quieres aprender?"
+    },
+    "failure": {
+      "network": "Parece que no tienes conexión. Compruébala e inténtalo de nuevo.",
+      "rejected": "Ese valor no se aceptó. Elige otro.",
+      "unknown": "Algo salió mal por nuestra parte."
+    }
+  },
+  "taxonomy": {
+    "topics": {
+      "artificial_intelligence": "IA y aprendizaje automático",
+      "technology": "Tecnología",
+      "science": "Ciencias",
+      "mathematics": "Matemáticas",
+      "history": "Historia",
+      "languages": "Idiomas",
+      "literature": "Literatura",
+      "art": "Arte y creatividad",
+      "music": "Música",
+      "business": "Negocios",
+      "health": "Salud y forma física",
+      "philosophy": "Filosofía",
+      "design": "Diseño",
+      "psychology": "Psicología"
+    },
+    "goals": {
+      "general": "Conocimiento general",
+      "academic": "Éxito académico",
+      "career": "Desarrollo profesional",
+      "language": "Aprendizaje de idiomas",
+      "hobby": "Interés personal"
+    },
+    "selector": {
       "topics": {
-        "technology": "Technology",
-        "science": "Science",
-        "history": "History",
-        "languages": "Languages",
-        "art": "Art",
-        "mathematics": "Mathematics",
-        "literature": "Literature",
-        "business": "Business"
+        "label": "Tus temas",
+        "hint": "Elige entre 1 y {{max}} temas. El primero que elijas será tu tema principal.",
+        "counter": "{{selected}} de {{max}} seleccionados",
+        "primaryStatus": "Tema principal: {{topic}}",
+        "limitReached": "Has alcanzado el límite de {{max}} temas. Quita uno para elegir otro.",
+        "srSelected": "Seleccionado, posición {{position}} de {{total}}",
+        "srPrimary": "Seleccionado, tema principal, posición {{position}} de {{total}}",
+        "srBlocked": "No disponible, límite de {{max}} temas alcanzado"
+      },
+      "goals": {
+        "label": "Objetivo de estudio",
+        "hint": "Elige el que mejor te describa."
       }
-    },
-    "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
-    },
-    "error": {
-      "saveFailed": "Something went wrong. Please try again."
     }
   },
   "tasks": {
@@ -477,6 +607,7 @@
     "nav": {
       "account": "Cuenta",
       "appearance": "Apariencia",
+      "learning": "Aprendizaje",
       "productivity": "Productividad",
       "notifications": "Notificaciones",
       "agent": "Compañero de estudio",
@@ -509,6 +640,33 @@
       "themeColorDesc": "Selecciona tu color de acento. Esto actualizará todo el tema.",
       "interests": "Intereses",
       "interestsDesc": "Selecciona temas para ver noticias y contenido"
+    },
+    "learning": {
+      "title": "Aprendizaje",
+      "lead": "Tus temas definen tu feed de noticias y lo que te sugiere tu compañero de estudio. El primer tema es el principal.",
+      "loading": "Cargando tus temas y tu objetivo de estudio…",
+      "loadError": "No pudimos cargar tus temas ni tu objetivo guardados.",
+      "range": {
+        "tooFew_one": "Conserva al menos {{count}} tema. No se cambió nada.",
+        "tooFew_other": "Conserva al menos {{count}} temas. No se cambió nada.",
+        "tooMany_one": "Puedes conservar {{count}} tema como máximo. Quita uno antes de añadir otro.",
+        "tooMany_other": "Puedes conservar {{count}} temas como máximo. Quita uno antes de añadir otro."
+      },
+      "order": {
+        "label": "Orden de los temas",
+        "hint": "El primer tema es el principal. Usa las flechas para cambiar el orden.",
+        "primary": "Tema principal",
+        "moveEarlier": "Mover antes",
+        "moveLater": "Mover después",
+        "moveEarlierFor": "Mover {{topic}} antes. Ahora en la posición {{position}} de {{total}}.",
+        "moveLaterFor": "Mover {{topic}} después. Ahora en la posición {{position}} de {{total}}.",
+        "moved": "{{topic}} se movió a la posición {{position}} de {{total}}.",
+        "alreadyFirst": "{{topic}} ya está en el primer lugar.",
+        "alreadyLast": "{{topic}} ya está en el último lugar."
+      },
+      "discard": "Descartar cambios",
+      "discardTopics": "Descartar los cambios de temas sin guardar",
+      "discardGoal": "Descartar el cambio de objetivo de estudio sin guardar"
     },
     "productivity": {
       "title": "Productividad",
@@ -613,15 +771,17 @@
       "cardsDue": "tarjetas pendientes",
       "readyToReview": "Listas para repasar",
       "reviewCount": "Repasar {{count}} tarjeta",
-      "reviewCount_plural": "Repasar {{count}} tarjetas",
+      "reviewCount_one": "Repasar {{count}} tarjeta",
+      "reviewCount_other": "Repasar {{count}} tarjetas",
       "reviewToday": "📚 Hoy podrías repasar",
       "cardsPending": "{{count}} tarjeta pendiente",
       "cardsPending_other": "{{count}} tarjetas pendientes",
-      "cardsPending_plural": "{{count}} tarjetas pendientes",
+      "cardsPending_one": "{{count}} tarjeta pendiente",
       "start": "¡Vamos!",
       "study": "Estudiar",
       "moreDecks": "Y {{count}} deck más con tarjetas pendientes",
-      "moreDecks_other": "Y {{count}} decks más con tarjetas pendientes"
+      "moreDecks_other": "Y {{count}} decks más con tarjetas pendientes",
+      "moreDecks_one": "Y {{count}} deck más con tarjetas pendientes"
     },
     "annualGoals": {
       "title": "Objetivos anuales",
@@ -655,6 +815,7 @@
     "noActivity": "Aún no hay actividad. ¡Empieza a estudiar para ver tu progreso!",
     "streak": "🔥 Racha actual: {{count}} día",
     "streak_other": "🔥 Racha actual: {{count}} días",
+    "streak_one": "🔥 Racha actual: {{count}} día",
     "types": {
       "quiz": "Cuestionario",
       "visual": "Visual",
@@ -703,7 +864,9 @@
       "notesPlaceholder": "Agregar notas...",
       "summaryPlaceholder": "Agregar resumen..."
     },
-    "import": "Importar",
+    "import": {
+      "titlePlaceholder": "Escribe el título del libro..."
+    },
     "title": "Libros",
     "library": "Biblioteca de libros",
     "subtitle": "Tu colección personal",
@@ -726,7 +889,8 @@
     "successCreate": "Libro creado exitosamente",
     "successDelete": "Libro eliminado exitosamente",
     "successImport": "¡{{count}} libro importado exitosamente! {{pages}} páginas totales.",
-    "successImport_plural": "¡{{count}} libros importados exitosamente! {{pages}} páginas totales.",
+    "successImport_one": "¡{{count}} libro importado exitosamente! {{pages}} páginas totales.",
+    "successImport_other": "¡{{count}} libros importados exitosamente! {{pages}} páginas totales.",
     "errorImport": "Error al procesar el archivo. Por favor inténtalo de nuevo.",
     "untitled": "Libro sin título",
     "createTitle": "Nuevo libro",
@@ -841,7 +1005,8 @@
     "name": "Nombre",
     "cardCount": "Conteo de Tarjetas",
     "deckCount": "{{count}} mazo",
-    "deckCount_plural": "{{count}} mazos",
+    "deckCount_one": "{{count}} mazo",
+    "deckCount_other": "{{count}} mazos",
     "loading": "Cargando...",
     "confirmDeleteDeck": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
     "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?",
@@ -883,7 +1048,8 @@
         "visual": "Visual"
       },
       "cardCount": "{{count}} tarjeta",
-      "cardCount_plural": "{{count}} tarjetas",
+      "cardCount_one": "{{count}} tarjeta",
+      "cardCount_other": "{{count}} tarjetas",
       "noContent": "Sin contenido",
       "untitled": "Tarjeta sin título",
       "reviewNew": "Nueva",
@@ -892,7 +1058,8 @@
         "dueNow": "¡Pendiente ahora!",
         "lessThanHour": "En menos de 1 hora",
         "inHours": "En {{count}} hora",
-        "inHours_plural": "En {{count}} horas",
+        "inHours_one": "En {{count}} hora",
+        "inHours_other": "En {{count}} horas",
         "tomorrow": "Mañana",
         "inDays": "En {{count}} días"
       },
@@ -936,18 +1103,28 @@
       "imagePreviewError": "No se pudo cargar esa imagen"
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "Filtrar por etiqueta",
+        "ariaLabel": "Filtrar tarjetas por etiqueta",
+        "noOptions": "No hay etiquetas en este mazo",
+        "clear": "Quitar filtros de etiquetas",
+        "showing": "Mostrando {{shown}} de {{total}}",
+        "empty": {
+          "title": "Ninguna tarjeta coincide con estas etiquetas",
+          "body": "Quita una etiqueta o borra el filtro para volver a ver tarjetas."
+        }
+      },
       "loading": "Cargando sesión de estudio...",
       "allCaughtUp": "¡Al día!",
       "noDue": "No hay tarjetas pendientes por ahora.",
       "goBack": "Volver",
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Pantalla completa",
@@ -963,7 +1140,8 @@
       },
       "card": "Tarjeta {{current}} de {{total}}",
       "syncing": "Sincronizando {{count}} revisión...",
-      "syncing_plural": "Sincronizando {{count}} revisiones...",
+      "syncing_one": "Sincronizando {{count}} revisión...",
+      "syncing_other": "Sincronizando {{count}} revisiones...",
       "labels": {
         "question": "Pregunta",
         "answer": "Respuesta",
@@ -987,7 +1165,8 @@
       "description": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
       "confirm": "Eliminar mazo",
       "consequence1": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
-      "consequence1_plural": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence1_one": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
+      "consequence1_other": "Todas las {{count}} tarjetas de este mazo serán eliminadas",
       "consequence2": "Si está publicado, se despublicará inmediatamente"
     },
     "generatedCards": {
@@ -1335,12 +1514,14 @@
       "generateImage": "Generar con IA",
       "uploadImage": "Subir Imagen",
       "daysLeft": "Queda {{count}} día",
-      "daysLeft_plural": "Quedan {{count}} días",
+      "daysLeft_one": "Queda {{count}} día",
+      "daysLeft_other": "Quedan {{count}} días",
       "overdue": "Vencido",
       "noDeadline": "Sin fecha objetivo",
       "smartHelper": "Hazlo SMART: Específico, Medible, Alcanzable, Relevante, Temporal",
       "activitiesCount": "{{count}} actividad",
-      "activitiesCount_plural": "{{count}} actividades",
+      "activitiesCount_one": "{{count}} actividad",
+      "activitiesCount_other": "{{count}} actividades",
       "viewBoard": "Ver como Tablero",
       "next": {
         "completed": "Completado",
@@ -1549,13 +1730,13 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
+      "activeDays_one": "Active {{count}} day this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
+      "migratedCount_one": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
     },
@@ -2107,10 +2288,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Tu perfil no está completo todavía.",
-      "cta": "Completar configuración",
-      "dismiss": "Descartar"
+    "onboardingReentry": {
+      "title": "Termina de configurar Nowry",
+      "body": "Elige tus temas y Nowry te buscará un primer mazo de estudio.",
+      "cta": "Continuar configuración",
+      "dismiss": "Ocultar por ahora",
+      "dismissed": "Recordatorio de configuración oculto.",
+      "error": {
+        "title": "No pudimos comprobar tu configuración"
+      }
     }
   },
   "pet": {
@@ -2952,6 +3138,7 @@
     "tagAddAria": "Añadir etiqueta",
     "tagRemoveAria": "Quitar {{tag}}",
     "tagPlaceholder": "Escribe una etiqueta y pulsa Enter",
+    "tagNoSuggestions": "No hay etiquetas coincidentes",
     "deckLabel": "Mazo",
     "deckPlaceholder": "Elige un mazo",
     "deckNone": "Sin mazo",

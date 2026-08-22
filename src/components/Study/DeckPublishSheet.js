@@ -211,7 +211,11 @@ export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublis
             {/* Tags */}
             <FormControl>
               <FormLabel>{t('publish.form.tags')}</FormLabel>
-              <Input size='sm' value={tags} onChange={(e) => setTags(e.target.value)} placeholder={t('publish.form.tagsPlaceholder')} />
+              {/* size='md' (16px), not 'sm' (14px): iOS Safari auto-zooms the page
+                  on focus of any text field below 16px. The Select controls in
+                  this same form stay 'sm' — a listbox is not a text field and
+                  does not trigger the zoom. */}
+              <Input size='md' value={tags} onChange={(e) => setTags(e.target.value)} placeholder={t('publish.form.tagsPlaceholder')} />
               <FormHelperText>{t('publish.form.tagsHint')}</FormHelperText>
             </FormControl>
 

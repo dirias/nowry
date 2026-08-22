@@ -109,19 +109,6 @@
     background: var(--joy-palette-background-surface);
     transition: none;
   }
-
-  .editor-heading-h1,
-  h1 {
-    font-size: 1.75rem !important;
-  }
-  .editor-heading-h2,
-  h2 {
-    font-size: 1.375rem !important;
-  }
-  .editor-heading-h3,
-  h3 {
-    font-size: 1.125rem !important;
-  }
 }
 
 .editor-placeholder {
@@ -183,9 +170,32 @@
   text-decoration: line-through;
 }
 
-/* ====== Headings - Following DESIGN_GUIDELINES.md ====== */
+/* ====== Headings - Following DESIGN_GUIDELINES.md ======
+   Scoped to `.editor-content` (the class Lexical's ContentEditable actually
+   mounts on — see Books/Editor.js:828; `.editor-root` is defined elsewhere in
+   this file but never applied in JSX, so it is not the real ancestor).
+
+   Before this fix, the bare `h1`/`h2`/`h3` half of each selector matched
+   every heading-level Typography in the app, not just editor content —
+   Joy's Typography renders level='h1'/'h2'/'h3' as real <h1>/<h2>/<h3> tags,
+   and every property here carries `!important`, so it silently overrode
+   the theme (color, weight, line-height, letter-spacing, margin — not just
+   font-size) on every dashboard, modal, and marketing page in the app. See
+   the Wave B commit (d05c1be) for how this was found: the fluid font-size
+   tokens for h1-h3 were correct in source and invisible everywhere this file
+   won.
+
+   `.editor-heading-h1` etc. are untouched — those were already scoped by
+   class. Only the bare tag half changes.
+
+   This file also had TWO competing `@media (max-width: 899px)` heading
+   blocks (one here, a near-duplicate a few dozen lines up before this pass)
+   silently fighting via source order even inside the editor scope — the one
+   below (already flagged "Mobile: Scale headings") is the block that was
+   actually winning in production; the other has been deleted rather than
+   left as a second, losing rule for the same selector. */
 .editor-heading-h1,
-h1 {
+.editor-content h1 {
   font-size: 2.5rem !important; /* 40px - Very prominent */
   font-weight: 700 !important;
   line-height: 1.2 !important;
@@ -196,7 +206,7 @@ h1 {
 }
 
 .editor-heading-h2,
-h2 {
+.editor-content h2 {
   font-size: 2rem !important; /* 32px - Clear sections */
   font-weight: 600 !important;
   line-height: 1.3 !important;
@@ -207,7 +217,7 @@ h2 {
 }
 
 .editor-heading-h3,
-h3 {
+.editor-content h3 {
   font-size: 1.5rem !important; /* 24px - Subsections */
   font-weight: 600 !important;
   line-height: 1.4 !important;
@@ -219,15 +229,15 @@ h3 {
 /* Mobile: Scale headings */
 @media (max-width: 899px) {
   .editor-heading-h1,
-  h1 {
+  .editor-content h1 {
     font-size: 2rem !important;
   }
   .editor-heading-h2,
-  h2 {
+  .editor-content h2 {
     font-size: 1.5rem !important;
   }
   .editor-heading-h3,
-  h3 {
+  .editor-content h3 {
     font-size: 1.25rem !important;
   }
 }
@@ -680,19 +690,19 @@ ol.editor-list-ol {
   }
 
   .editor-heading-h1,
-  h1 {
+  .editor-content h1 {
     font-size: 24pt !important;
     page-break-after: avoid;
   }
 
   .editor-heading-h2,
-  h2 {
+  .editor-content h2 {
     font-size: 18pt !important;
     page-break-after: avoid;
   }
 
   .editor-heading-h3,
-  h3 {
+  .editor-content h3 {
     font-size: 14pt !important;
     page-break-after: avoid;
   }

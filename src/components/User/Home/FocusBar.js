@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { Box, Typography, Tooltip, IconButton, Modal, ModalDialog, ModalClose, Stack, Checkbox, Button, Divider, Skeleton } from '@mui/joy'
 import { Link as RouterLink } from 'react-router-dom'
 import { userService } from '../../../api/services'
-import { apiCache } from '../../../api/utils/cache'
+import { queryClient } from '../../../api/queryClient'
+import { auth } from '../../../config/firebase.config'
 import useAnnualPlan from '../../../hooks/useAnnualPlan'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useTranslation } from 'react-i18next'
+import { touchTarget, touchTargetBox } from '../../Common/Form/formStyles'
 
 /**
  * FocusBar - Horizontal strip showing goals + priorities at a glance
@@ -69,8 +71,11 @@ const FocusBar = () => {
     try {
       setSaving(true)
       await userService.updateGeneralPreferences({ homepage_priority_ids: priorityIds })
-      // Invalidate the profile cache so the next hook load picks up the new preference
-      apiCache.invalidate('annual:profile')
+      // Invalidate the profile query so the next hook load picks up the new preference.
+      // Keyed off auth.currentUser?.uid — see annualPlanning.service.js's
+      // getCachedProfile() docstring for why the 'profile' query key uses the Firebase
+      // uid rather than the backend user.id (CACHE-007 / ADR-008).
+      queryClient.invalidateQueries({ queryKey: ['profile', auth.currentUser?.uid ?? null] })
     } catch (error) {
       console.error('Error saving preferences:', error)
     } finally {
@@ -189,7 +194,6 @@ const FocusBar = () => {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               fontWeight: 600,
-              fontSize: { xs: '0.7rem', md: '0.75rem' },
               flex: 1,
               minWidth: 0
             }}
@@ -199,7 +203,6 @@ const FocusBar = () => {
           <Typography
             level='body-xs'
             sx={{
-              fontSize: { xs: '0.625rem', md: '0.65rem' },
               color: hasDeadline ? (isOverdue ? 'danger.solidColor' : isUrgent ? 'warning.solidColor' : 'text.tertiary') : 'text.tertiary',
               fontWeight: 700,
               flexShrink: 0
@@ -394,8 +397,7 @@ const FocusBar = () => {
                           level='body-xs'
                           sx={{
                             fontWeight: 600,
-                            color: 'text.tertiary',
-                            fontSize: '0.65rem'
+                            color: 'text.tertiary'
                           }}
                         >
                           {entityLabel === 'Goal' ? '🎯' : entityLabel === 'Task' ? '📋' : '⏰'}
@@ -474,13 +476,12 @@ const FocusBar = () => {
                       }
                     }}
                   >
-                    <Typography sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, lineHeight: 1 }}>{area.icon || '🎯'}</Typography>
+                    <Typography sx={{ fontSize: 'sm', lineHeight: 1 }}>{area.icon || '🎯'}</Typography>
                     <Typography
                       level='body-xs'
                       sx={{
                         fontWeight: 700,
-                        color: 'text.primary',
-                        fontSize: { xs: '0.7rem', md: '0.75rem' }
+                        color: 'text.primary'
                       }}
                     >
                       {progress}%
@@ -531,9 +532,7 @@ const FocusBar = () => {
               variant='plain'
               color='neutral'
               sx={{
-                minWidth: 28,
-                width: 28,
-                height: 28,
+                ...touchTargetBox,
                 borderRadius: 'sm',
                 border: '1px solid',
                 borderColor: 'divider',
@@ -564,7 +563,7 @@ const FocusBar = () => {
               variant='soft'
               color='primary'
               sx={{
-                minHeight: 28,
+                ...touchTarget,
                 fontSize: '0.75rem',
                 px: 1.5
               }}

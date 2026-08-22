@@ -16,7 +16,7 @@
     "language": "言語",
     "studyBuddy": "学習パートナー",
     "moreActions": "その他の操作",
-    "retry": "Retry"
+    "retry": "再試行"
   },
   "news": {
     "title": "最新ニュース",
@@ -144,10 +144,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     }
   },
@@ -294,15 +290,163 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "初期設定",
+      "retry": "再試行",
+      "error": {
+        "title": "設定を読み込めませんでした",
+        "body": "初期設定の読み込み中に問題が発生しました。保存済みの選択はそのまま残っています。"
+      },
+      "screenName": {
+        "welcome": "ようこそ",
+        "personalization": "パーソナライズ",
+        "firstDeck": "最初のデッキ"
+      }
+    },
     "welcome": {
-      "title": "Nowryへようこそ！",
-      "subtitle": "いくつかのステップで学習体験をパーソナライズしましょう",
-      "quick": "簡単＆迅速",
-      "quickDesc": "2分以内で完了します",
-      "tailored": "あなたに最適化",
-      "tailoredDesc": "学習スタイルに合わせてカスタマイズ",
-      "changeable": "いつでも変更可能",
-      "changeableDesc": "設定はいつでも更新できます"
+      "title": "Nowry へようこそ",
+      "lead": "3 ステップです。学びたいことを Nowry に伝えると、最後には学習デッキがライブラリに入っています。",
+      "support": "この画面で必須の入力はありません。下の 2 つの設定は任意です。",
+      "begin": "はじめる",
+      "postpone": "あとで",
+      "language": {
+        "label": "言語"
+      },
+      "accent": {
+        "label": "アクセントカラー",
+        "hint": "Nowry 全体で使われます。ライトとダークはお使いの端末に従います。",
+        "selected": "アクセント: {{name}}",
+        "custom": "カスタムカラー",
+        "names": {
+          "oceanTeal": "オーシャンティール",
+          "skyBlue": "スカイブルー",
+          "royalPurple": "ロイヤルパープル",
+          "rosePink": "ローズピンク",
+          "crimsonRed": "クリムゾンレッド",
+          "sunsetOrange": "サンセットオレンジ",
+          "forestGreen": "フォレストグリーン",
+          "earthBrown": "アースブラウン"
+        }
+      },
+      "postponeError": {
+        "title": "保存できませんでした",
+        "body": "この画面のままです。何も記録されていません。"
+      },
+      "loadError": "保存された設定を読み込めませんでした。"
+    },
+    "save": {
+      "saving": "保存しています…",
+      "saved": "保存しました",
+      "unsaved": "未保存",
+      "retry": "再試行"
+    },
+    "personalization": {
+      "title": "何を学びたいですか？",
+      "lead": "トピックを最大5つと、学習目標を1つ選んでください。最初に選んだトピックをもとに、Nowry が最初のデッキを探します。",
+      "continue": "最初のデッキを選ぶ",
+      "skip": "今はスキップ",
+      "skipHint": "まだ何も選ばれていません。スキップするとホームに戻り、後から設定できます。",
+      "validation": {
+        "title": "まだ準備ができていません",
+        "missingInterests": "続けるには、トピックを1つ以上選んでください。",
+        "tooManyInterests": "トピックが {{count}} 件選ばれています。{{max}} 件以下にするため、{{excess}} 件外してください。",
+        "missingGoal": "続けるには、学習目標を1つ選んでください。"
+      },
+      "saveError": {
+        "title": "選択内容はまだ保存されていません",
+        "body": "画面には残っており、失われたものはありません。下に表示された項目を再試行してから続けてください。"
+      },
+      "advanceError": {
+        "title": "続行できませんでした",
+        "body": "トピックと目標は保存されています。この画面のままです。"
+      },
+      "loadError": "保存された選択内容を読み込めませんでした。",
+      "loading": "保存された選択内容を読み込んでいます"
+    },
+    "firstDeck": {
+      "title": "最初のデッキ",
+      "lead": "ライブラリに追加すれば、すぐに学習を始められます。",
+      "status": {
+        "loading": "公式デッキを探しています。",
+        "ready_other": "公式デッキが{{count}}件見つかりました。",
+        "empty": "{{topic}}の公式デッキはまだありません。",
+        "added": "デッキをライブラリに追加しました。"
+      },
+      "official": {
+        "label": "公式デッキ",
+        "accessible": "{{publisher}}が公開した公式デッキ"
+      },
+      "card": {
+        "outcomeLabel": "学べること",
+        "publisher": "提供：{{publisher}}",
+        "count_other": "カード{{count}}枚",
+        "add": "ライブラリに追加",
+        "retry": "もう一度試す",
+        "selected": "選択中"
+      },
+      "empty": {
+        "title": "{{topic}}の公式デッキはまだありません",
+        "body": "Nowryはトピックごとに公式デッキを公開していて、{{topic}}はまだ対象になっていません。選んだトピックと目標は保存されています。",
+        "fallbackTitle": "代わりにAIで作成する",
+        "fallbackBody": "AIで作ったデッキはNowryの審査を受けておらず、初期設定は完了しませんが、今すぐ試すことはできます。",
+        "fallbackAction": "AIで作成"
+      },
+      "fallback": {
+        "pending": "カードを作成しています…",
+        "success": {
+          "title": "カードの準備ができました",
+          "body_other": "Nowryが{{topic}}のカードを{{count}}枚作成しました。残したいカードを選んでデッキに保存してください。AIのデッキは公式ではないため、初期設定は開いたままです。",
+          "bodyNoCount": "Nowryがカードの作成を終えました。残したいカードを選んでデッキに保存してください。AIのデッキは公式ではないため、初期設定は開いたままです。",
+          "review": "カードを確認"
+        },
+        "saved": {
+          "title": "カードがライブラリに保存されました",
+          "body": "NowryはAIのカードを審査しないため、初期設定は完了しません。公式デッキはいつでも追加できます。"
+        },
+        "error": {
+          "title": "AIのリクエストは完了しませんでした",
+          "body": "何も作成されず、何も変わっていません。"
+        }
+      },
+      "browseError": {
+        "title": "デッキを読み込めませんでした",
+        "body": "選んだトピックと目標は保存されています。もう一度試すか、いったん終了して後で戻ってきてください。"
+      },
+      "preferencesError": {
+        "title": "トピックを読み込めませんでした",
+        "body": "デッキを探すには、まずトピックが必要です。"
+      },
+      "missingTopic": {
+        "title": "まずトピックを選んでください",
+        "body": "Nowryは最初に選んだトピックをもとに、最初のデッキを探します。",
+        "action": "トピックを選ぶ"
+      },
+      "forkError": {
+        "title": "デッキを追加できませんでした",
+        "body": "ライブラリには何も追加されておらず、このデッキは選択されたままです。",
+        "inProgress": "まだ追加処理中です。少し待ってからもう一度試してください。",
+        "copyFailed": "デッキのコピーが完了しませんでした。",
+        "notOfficial": "このデッキはNowryの公式コレクションではありません。",
+        "ownContent": "このデッキはすでにあなたのものです。",
+        "notFound": "このデッキは現在利用できません。"
+      },
+      "activationError": {
+        "title": "デッキはライブラリにあります",
+        "body": "デッキとカードは追加済みです。初期設定の最後の手順だけが完了しませんでした。もう一度試せば、コピーが二重になることなく完了します。"
+      },
+      "success": {
+        "title": "ライブラリに追加しました",
+        "body": "{{name}}はいつでも学習できます。",
+        "bodyNoName": "デッキはいつでも学習できます。",
+        "open": "デッキを開く",
+        "later": "あとで"
+      },
+      "finish": "いったん終了",
+      "finishHint": "選んだトピックと目標は保存されています。デッキはいつでも追加できます。",
+      "finishError": {
+        "title": "完了できませんでした",
+        "body": "この手順のままで、何も記録されていません。"
+      }
     },
     "language": {
       "title": "言語を選択",
@@ -319,50 +463,14 @@
       "customLabel": "カスタムカラー"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
       "selected": "選択中: {{count}}トピック",
-      "selected_plural": "選択中: {{count}}トピック",
-      "items": {
-        "ai": "AI & Machine Learning",
-        "technology": "Technology",
-        "science": "Science",
-        "mathematics": "Mathematics",
-        "history": "History",
-        "languages": "Languages",
-        "literature": "Literature",
-        "art": "Art & Creativity",
-        "music": "Music",
-        "business": "Business",
-        "health": "Health & Fitness",
-        "philosophy": "Philosophy",
-        "design": "Design",
-        "psychology": "Psychology"
-      }
+      "selected_other": "選択中: {{count}}トピック"
     },
     "learning": {
       "title": "学習スタイルと目標",
       "subtitle": "体験を最適化するために教えてください",
       "styleTitle": "どのような学習方法が得意ですか？",
-      "goalTitle": "主な目標は何ですか？",
-      "styles": {
-        "visual": "視覚的",
-        "visualDesc": "画像や図解で学ぶのが得意",
-        "auditory": "聴覚的",
-        "auditoryDesc": "聞いたり議論したりするのが得意",
-        "reading": "読み書き",
-        "readingDesc": "テキストやノートで学ぶのが得意",
-        "kinesthetic": "体験的",
-        "kinestheticDesc": "実践や演習で学ぶのが得意"
-      },
-      "goals": {
-        "general": "一般教養",
-        "academic": "学業成績",
-        "career": "キャリアアップ",
-        "language": "語学学習",
-        "hobby": "個人の趣味"
-      }
+      "goalTitle": "主な目標は何ですか？"
     },
     "steps": "ステップ {{current}} / {{total}}",
     "complete": "{{percent}}% 完了",
@@ -370,40 +478,58 @@
     "back": "戻る",
     "finish": "セットアップ完了",
     "skip": "今はスキップ",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
     "identity": {
       "title": "言語を選んでください。",
       "subtitle": "お好みの言語を選択してください。"
     },
-    "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
-    },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "title": "何を学びたいですか？"
+    },
+    "failure": {
+      "network": "オフラインのようです。接続を確認してもう一度お試しください。",
+      "rejected": "この値は受け付けられませんでした。別の値を選んでください。",
+      "unknown": "こちら側で問題が発生しました。"
+    }
+  },
+  "taxonomy": {
+    "topics": {
+      "artificial_intelligence": "AI・機械学習",
+      "technology": "テクノロジー",
+      "science": "科学",
+      "mathematics": "数学",
+      "history": "歴史",
+      "languages": "語学",
+      "literature": "文学",
+      "art": "アート・創造性",
+      "music": "音楽",
+      "business": "ビジネス",
+      "health": "健康・フィットネス",
+      "philosophy": "哲学",
+      "design": "デザイン",
+      "psychology": "心理学"
+    },
+    "goals": {
+      "general": "一般教養",
+      "academic": "学業成績",
+      "career": "キャリアアップ",
+      "language": "語学学習",
+      "hobby": "個人の趣味"
+    },
+    "selector": {
       "topics": {
-        "technology": "Technology",
-        "science": "Science",
-        "history": "History",
-        "languages": "Languages",
-        "art": "Art",
-        "mathematics": "Mathematics",
-        "literature": "Literature",
-        "business": "Business"
+        "label": "あなたのトピック",
+        "hint": "トピックを1〜{{max}}個選んでください。最初に選んだトピックがメイントピックになります。",
+        "counter": "{{max}}件中{{selected}}件を選択中",
+        "primaryStatus": "メイントピック: {{topic}}",
+        "limitReached": "トピックの上限{{max}}件に達しました。別のトピックを選ぶには1つ解除してください。",
+        "srSelected": "選択済み、{{total}}件中{{position}}番目",
+        "srPrimary": "選択済み、メイントピック、{{total}}件中{{position}}番目",
+        "srBlocked": "選択できません。トピックの上限{{max}}件に達しています"
+      },
+      "goals": {
+        "label": "学習目標",
+        "hint": "最も当てはまるものを選んでください。"
       }
-    },
-    "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
-    },
-    "error": {
-      "saveFailed": "Something went wrong. Please try again."
     }
   },
   "tasks": {
@@ -438,7 +564,6 @@
     "emptySubtitle": "新しいブックを作成するか、ドキュメントをインポートして始めましょう",
     "noResults": "\"{{term}}\" に一致するブックは見つかりませんでした",
     "noMatches": "\"{{query}}\" に一致するブックはありません",
-    "addTooltip": "\"{{title}}\" を追加",
     "untitled": "無題の本",
     "createTitle": "新しい本",
     "createAction": "作成して書く",
@@ -466,7 +591,6 @@
     "continueToLibrary": "ライブラリに戻る",
     "clearFilters": "フィルターをクリア",
     "errorFetch": "本の読み込みエラー",
-    "pageCount_one": "{{count}} ページ",
     "pageCount_other": "{{count}} ページ",
     "coverColors": {
       "blue": "青",
@@ -486,6 +610,9 @@
       "contentPlaceholder": "書き始めましょう…",
       "notesPlaceholder": "メモを追加…",
       "summaryPlaceholder": "概要を追加…"
+    },
+    "import": {
+      "titlePlaceholder": "書籍のタイトルを入力..."
     }
   },
   "sidemenu": {
@@ -528,6 +655,7 @@
     "nav": {
       "account": "アカウント",
       "appearance": "外観",
+      "learning": "学習",
       "productivity": "生産性",
       "notifications": "通知",
       "security": "セキュリティ",
@@ -549,6 +677,31 @@
       "accentColor": "アクセントカラー",
       "accentColorDesc": "アプリのアクセントカラーをカスタマイズ",
       "interests": "興味・関心"
+    },
+    "learning": {
+      "title": "学習",
+      "lead": "選んだトピックがニュースフィードとスタディバディの提案を決めます。最初のトピックがメイントピックです。",
+      "loading": "トピックと学習目標を読み込んでいます…",
+      "loadError": "保存されたトピックと学習目標を読み込めませんでした。",
+      "range": {
+        "tooFew_other": "トピックは{{count}}件以上残してください。変更は保存されていません。",
+        "tooMany_other": "トピックは最大{{count}}件です。追加する前に1つ削除してください。"
+      },
+      "order": {
+        "label": "トピックの順序",
+        "hint": "最初のトピックがメイントピックです。矢印で順序を変更できます。",
+        "primary": "メイントピック",
+        "moveEarlier": "前へ移動",
+        "moveLater": "後ろへ移動",
+        "moveEarlierFor": "{{topic}}を前へ移動します。現在は{{total}}件中{{position}}番目です。",
+        "moveLaterFor": "{{topic}}を後ろへ移動します。現在は{{total}}件中{{position}}番目です。",
+        "moved": "{{topic}}を{{total}}件中{{position}}番目に移動しました。",
+        "alreadyFirst": "{{topic}}はすでに先頭です。",
+        "alreadyLast": "{{topic}}はすでに最後です。"
+      },
+      "discard": "変更を破棄",
+      "discardTopics": "保存されていないトピックの変更を破棄",
+      "discardGoal": "保存されていない学習目標の変更を破棄"
     },
     "productivity": {
       "title": "生産性",
@@ -663,11 +816,10 @@
       "cardsDue": "枚のカードが復習待ち",
       "readyToReview": "復習の準備完了",
       "reviewCount": "{{count}}枚を復習",
-      "reviewCount_plural": "{{count}}枚を復習",
+      "reviewCount_other": "{{count}}枚を復習",
       "reviewToday": "📚 今日の復習",
       "cardsPending": "{{count}}枚のカード保留中",
       "cardsPending_other": "{{count}}枚のカード保留中",
-      "cardsPending_plural": "{{count}}枚のカード保留中",
       "start": "始める！",
       "study": "学習する",
       "moreDecks": "他 {{count}} デッキに保留中のカードがあります",
@@ -948,12 +1100,12 @@
       "generateImage": "AIで生成",
       "uploadImage": "画像をアップロード",
       "daysLeft": "残り{{count}}日",
-      "daysLeft_plural": "残り{{count}}日",
+      "daysLeft_other": "残り{{count}}日",
       "overdue": "期限切れ",
       "noDeadline": "目標日なし",
       "smartHelper": "SMARTにする：具体的、測定可能、達成可能、関連性、期限付き",
       "activitiesCount": "{{count}} アクティビティ",
-      "activitiesCount_plural": "{{count}} アクティビティ",
+      "activitiesCount_other": "{{count}} アクティビティ",
       "viewBoard": "ボードとして表示",
       "editSubtitle": "目標の詳細を更新",
       "timeframe": "期間設定",
@@ -1005,9 +1157,7 @@
         "addMilestone": "マイルストーンを追加して進捗を記録",
         "toggleAria": "マイルストーン「{{title}}」を完了にする"
       },
-      "milestoneCount_one": "{{total}}件中{{completed}}件のマイルストーン",
       "milestoneCount_other": "{{total}}件中{{completed}}件のマイルストーン",
-      "daysLeftShort_one": "残り{{count}}日",
       "daysLeftShort_other": "残り{{count}}日",
       "moreActions": "「{{title}}」のその他の操作",
       "openDetail": "「{{title}}」を開く",
@@ -1128,8 +1278,7 @@
       "quarterEndingIn": "第{{quarter}}四半期はあと {{count}} 日で終了します",
       "quarterEndingIn_other": "第{{quarter}}四半期はあと {{count}} 日で終了します",
       "routineCompletion": "完了",
-      "allYear": "通年",
-      "quarterEndingIn_one": "第{{quarter}}四半期はあと {{count}} 日で終了します"
+      "allYear": "通年"
     },
     "quarterReport": {
       "report": "Report",
@@ -1146,12 +1295,10 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
@@ -1168,7 +1315,6 @@
     "header": {
       "progress": "{{percent}}% 完了",
       "goalsRatio": "{{total}} 件中 {{completed}} 件の目標",
-      "prioritiesCount_one": "{{count}} 件の優先事項",
       "prioritiesCount_other": "{{count}} 件の優先事項",
       "routineRatio": "{{total}} 件中 {{completed}} 件のルーティン",
       "renamePlan": "プランの名前を変更",
@@ -1185,9 +1331,7 @@
       "quarterEmptyTitle": "Q{{quarter}} の予定はありません",
       "quarterEmptyBody": "他の四半期に目標があります。",
       "quarterEmptyCta": "通年を表示",
-      "scopeQuarter_one": "Q{{quarter}} · {{count}} 件の目標",
       "scopeQuarter_other": "Q{{quarter}} · {{count}} 件の目標",
-      "scopeAll_one": "通年 · {{count}} 件の目標",
       "scopeAll_other": "通年 · {{count}} 件の目標",
       "loadingAria": "目標を読み込み中"
     },
@@ -1195,7 +1339,6 @@
       "emptyTitle": "最初のレポートは四半期の締めで公開されます",
       "emptyBody": "四半期を締めると、Nowry が目標・進捗・成果を振り返り用のレポートにまとめます。",
       "emptyCtaReady": "Q{{quarter}} を振り返る",
-      "emptyCountdown_one": "Q{{quarter}} はあと {{count}} 日で終了します",
       "emptyCountdown_other": "Q{{quarter}} はあと {{count}} 日で終了します",
       "historyTitle": "締めた四半期",
       "goalsAchieved": "達成した目標",
@@ -1209,7 +1352,6 @@
       "prioritiesEmptyTitle": "優先事項はまだありません",
       "prioritiesEmptyBody": "今年もっとも大切なことをいくつか挙げましょう。3〜5 個で十分です。",
       "prioritiesEmptyCta": "優先事項を追加",
-      "areaGoalCount_one": "{{count}} 件の目標",
       "areaGoalCount_other": "{{count}} 件の目標"
     }
   },
@@ -1361,10 +1503,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "プロフィールの設定がまだ完了していません。",
-      "cta": "セットアップを完了する",
-      "dismiss": "閉じる"
+    "onboardingReentry": {
+      "title": "Nowry の設定を完了しましょう",
+      "body": "トピックを選ぶと、Nowry が最初の学習デッキを見つけます。",
+      "cta": "設定を続ける",
+      "dismiss": "今は非表示にする",
+      "dismissed": "設定のお知らせを非表示にしました。",
+      "error": {
+        "title": "設定を確認できませんでした"
+      }
     }
   },
   "pet": {
@@ -1655,14 +1802,24 @@
       "emptyVisualBody": "デッキを作成して、この図を保存・復習しましょう。"
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "タグで絞り込む",
+        "ariaLabel": "カードをタグで絞り込む",
+        "noOptions": "このデッキにタグはありません",
+        "clear": "タグフィルターを解除",
+        "showing": "{{total}} 件中 {{shown}} 件を表示",
+        "empty": {
+          "title": "このタグに一致するカードはありません",
+          "body": "タグを外すか、フィルターを解除するとカードが再び表示されます。"
+        }
+      },
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "全画面表示にする",
@@ -2267,7 +2424,6 @@
   "form": {
     "saveAndNext": "保存して次へ",
     "saveAndClose": "保存して閉じる",
-    "addedCount_one": "{{count}} 件追加しました",
     "addedCount_other": "{{count}} 件追加しました",
     "detailRailAria": "任意の詳細を追加",
     "saveErrorTitle": "保存できませんでした",
@@ -2276,6 +2432,7 @@
     "tagAddAria": "タグを追加",
     "tagRemoveAria": "{{tag}} を削除",
     "tagPlaceholder": "タグを入力して Enter キーを押してください",
+    "tagNoSuggestions": "一致するタグがありません",
     "deckLabel": "デッキ",
     "deckPlaceholder": "デッキを選択",
     "deckNone": "デッキなし",

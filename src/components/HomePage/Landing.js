@@ -104,9 +104,9 @@ const Landing = () => {
         >
           <Stack spacing={3} sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' }, maxWidth: 600 }}>
             <Typography
-              level='h1'
+              level='display-lg'
+              component='h1'
               sx={{
-                fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
                 fontWeight: 800,
                 letterSpacing: { xs: -1, md: -2 },
                 lineHeight: 1.1,
@@ -115,7 +115,7 @@ const Landing = () => {
             >
               <span style={{ whiteSpace: 'pre-line' }}>{t('landing.hero.title')}</span>
             </Typography>
-            <Typography level='body-lg' sx={{ color: 'text.secondary', fontSize: { xs: '1rem', md: '1.25rem' } }}>
+            <Typography level='body-lg' sx={{ color: 'text.secondary' }}>
               {t('landing.hero.subtitle')}
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
@@ -174,7 +174,7 @@ const Landing = () => {
 
         {/* HOW IT WORKS */}
         <Box sx={{ py: { xs: 4, md: 6 }, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography level='h2' fontWeight={700} sx={{ mb: 1, fontSize: { xs: '1.75rem', md: '2.25rem' }, color: 'text.primary' }}>
+          <Typography level='h1' fontWeight={700} sx={{ mb: 1, color: 'text.primary' }}>
             {t('landing.howItWorks.title')}
           </Typography>
           <Typography level='body-lg' sx={{ color: 'text.secondary', mb: 6, maxWidth: 500 }}>
@@ -189,7 +189,7 @@ const Landing = () => {
 
         {/* FEATURES */}
         <Box sx={{ py: { xs: 4, md: 6 }, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography level='h2' fontWeight={700} sx={{ mb: 1, fontSize: { xs: '1.5rem', md: '2rem' }, color: 'text.primary' }}>
+          <Typography level='h2' fontWeight={700} sx={{ mb: 1, color: 'text.primary' }}>
             {t('landing.features.title')}
           </Typography>
           <Typography level='body-md' sx={{ color: 'text.secondary', mb: 4, maxWidth: 600 }}>
@@ -206,7 +206,7 @@ const Landing = () => {
 
         {/* CTA */}
         <Box sx={{ py: { xs: 4, md: 6 }, textAlign: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography level='h2' fontWeight={700} sx={{ mb: 2, fontSize: { xs: '1.75rem', md: '2.25rem' }, color: 'text.primary' }}>
+          <Typography level='h1' fontWeight={700} sx={{ mb: 2, color: 'text.primary' }}>
             {t('landing.cta.title')}
           </Typography>
           <Typography level='body-lg' sx={{ color: 'text.secondary', mb: 4, maxWidth: 500, mx: 'auto' }}>

@@ -220,7 +220,7 @@ const StickyNoteNode = memo(({ data, selected }) => {
               border: 'none',
               outline: 'none',
               resize: 'none',
-              fontSize: '0.72rem',
+              fontSize: '0.75rem',
               color: color.text,
               opacity: 0.8,
               fontFamily: 'inherit',
@@ -232,7 +232,7 @@ const StickyNoteNode = memo(({ data, selected }) => {
           <Box
             onDoubleClick={startEdit}
             sx={{
-              fontSize: '0.72rem',
+              fontSize: 'xs',
               color: color.text,
               opacity: 0.75,
               lineHeight: 1.5,

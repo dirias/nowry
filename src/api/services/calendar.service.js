@@ -1,6 +1,6 @@
 import { tasksService } from './tasks.service'
-import { annualPlanningService } from './annualPlanning.service'
-import { apiCache } from '../utils/cache'
+import { fetchAnnualPlanData } from './annualPlanning.service'
+import { queryClient } from '../queryClient'
 
 /**
  * Parse a date value as LOCAL time.
@@ -82,15 +82,7 @@ const generateHabitOccurrences = (act, year, areaColor, areaName, events) => {
   }
 }
 
-/**
- * Calendar Service
- * Aggregates all user assets with deadline/date fields into a
- * normalized format for the calendar modal.
- *
- * Performance: all independent API calls are made in PARALLEL using
- * Promise.allSettled so a single failure doesn't block the rest.
- */
-const PLAN_TTL = 5 * 60000 // 5 minutes — shared with useAnnualPlan
+const PLAN_TTL = 5 * 60000 // 5 minutes — shared with useAnnualPlan's PLAN_STALE_TIME
 const CALENDAR_TTL = 2 * 60000 // 2 minutes — calendar result cache
 
 /**
@@ -99,137 +91,153 @@ const CALENDAR_TTL = 2 * 60000 // 2 minutes — calendar result cache
  * normalized format for the calendar modal.
  *
  * Performance strategy:
- *  1. Use /annual-plan/full (same cache key as useAnnualPlan) to collapse
- *     the plan→areas→goals waterfall into a single request
+ *  1. Use /annual-plan/full (via fetchAnnualPlanData, the SAME React Query key
+ *     + queryFn useAnnualPlan.js uses) to collapse the plan→areas→goals
+ *     waterfall into a single request
  *  2. Run tasks + full-plan fetch in parallel
  *  3. Run all activity fetches in parallel after the full plan resolves
  *  4. Cache the final events array so reopening the modal is instant
+ *
+ * React Query migration (CACHE-008 / ADR-008): replaces the old apiCache
+ * singleton. `getAllEvents` and `invalidateCache` both take a `userId` param
+ * (the caller's `useAuth().user?.id`) rather than resolving it internally —
+ * this is a plain service function, not a hook or component, so it has no
+ * direct access to AuthContext.
  */
 export const calendarService = {
-  async getAllEvents() {
+  /** @param {string|null} userId - Caller's backend user id (useAuth().user?.id ?? null) */
+  async getAllEvents(userId) {
     const year = new Date().getFullYear()
-    const cacheKey = `calendar:events:${year}`
 
-    return apiCache.get(cacheKey, CALENDAR_TTL, async () => {
-      const events = []
-      let areaMap = {} // D-01: populated from focus_areas; used to build focusAreas array
+    return queryClient.fetchQuery({
+      queryKey: ['calendarEvents', userId, year],
+      queryFn: async () => {
+        const events = []
+        let areaMap = {} // D-01: populated from focusAreas; used to build focusAreas array
 
-      // ── Tier 1: tasks + full annual plan IN PARALLEL ────────────────────
-      const [tasksResult, fullPlanResult] = await Promise.allSettled([
-        tasksService.getAll(),
-        // Use the same cache key as useAnnualPlan so if the planning page
-        // was visited first, this is a free cache hit (zero network request)
-        apiCache.get(`annualPlanFull:${year}`, PLAN_TTL, () => annualPlanningService.getFullAnnualPlan(year))
-      ])
+        // ── Tier 1: tasks + full annual plan IN PARALLEL ────────────────────
+        const [tasksResult, fullPlanResult] = await Promise.allSettled([
+          tasksService.getAll(),
+          // Same query key + queryFn useAnnualPlan.js uses for ['annualPlan', userId,
+          // year] — if the planning page was visited first, this is a real cache hit
+          // (zero network request), not a duplicate fetch (CACHE-008).
+          queryClient.fetchQuery({
+            queryKey: ['annualPlan', userId, year],
+            queryFn: () => fetchAnnualPlanData(year),
+            staleTime: PLAN_TTL
+          })
+        ])
 
-      // ── 1. Tasks ─────────────────────────────────────────────────────────
-      if (tasksResult.status === 'fulfilled') {
-        tasksResult.value.forEach((task) => {
-          if (task.deadline) {
-            events.push({
-              id: `task-${task._id || task.id}`,
-              title: task.title,
-              date: parseLocalDate(task.deadline),
-              type: 'task',
-              color: '#6366f1',
-              status: task.is_completed ? 'completed' : 'pending',
-              category: task.category || null,
-              focusAreaId: null // D-02: tasks have no focus area
-            })
-          }
-        })
-      } else {
-        console.warn('[CalendarService] Could not load tasks:', tasksResult.reason)
-      }
-
-      // ── 2. Annual plan: priorities, goals, activities ────────────────────
-      if (fullPlanResult.status === 'fulfilled') {
-        const { plan, priorities = [], focus_areas = [] } = fullPlanResult.value
-
-        // Priorities
-        priorities.forEach((p) => {
-          if (p.deadline || p.target_date) {
-            events.push({
-              id: `priority-${p._id}`,
-              title: p.title || p.name,
-              date: parseLocalDate(p.deadline || p.target_date),
-              type: 'priority',
-              color: '#f59e0b',
-              status: p.status || 'active',
-              focusAreaId: null // D-02: priorities have no focus area
-            })
-          }
-        })
-
-        // Build a lookup map: focus_area_id → { color, name }
-        // The /full endpoint returns goals as a TOP-LEVEL array (not nested
-        // under each focus_area), so we need to map colors by ID.
-        // Assigned to outer areaMap so focusAreas can be extracted after all event pushes (D-01)
-        areaMap = Object.fromEntries(focus_areas.map((area) => [area._id, { color: area.color || '#10b981', name: area.name }]))
-
-        // Goals — use top-level `goals` array from API response
-        const topLevelGoals = fullPlanResult.value.goals || []
-        const topLevelActivities = fullPlanResult.value.activities || []
-
-        topLevelGoals.forEach((goal) => {
-          const area = areaMap[goal.focus_area_id] || { color: '#10b981', name: '' }
-          const areaColor = area.color
-          const areaName = area.name
-
-          if (goal.target_date || goal.deadline) {
-            events.push({
-              id: `goal-${goal._id}`,
-              title: goal.title,
-              date: parseLocalDate(goal.target_date || goal.deadline),
-              type: 'goal',
-              color: areaColor,
-              status: goal.status || 'not_started',
-              areaName,
-              focusAreaId: goal.focus_area_id || null // D-02
-            })
-          }
-
-          // Milestone events — push milestones that have a due_date set
-          // idx is raw array index (forEach, not filter().forEach()) — stable across completions
-          ;(goal.milestones || []).forEach((ms, idx) => {
-            if (ms.due_date && !ms.completed) {
+        // ── 1. Tasks ─────────────────────────────────────────────────────────
+        if (tasksResult.status === 'fulfilled') {
+          tasksResult.value.forEach((task) => {
+            if (task.deadline) {
               events.push({
-                id: `milestone-${goal._id}-${idx}`,
-                title: ms.title,
-                date: parseLocalDate(ms.due_date),
-                type: 'milestone',
-                color: areaColor,
-                status: 'pending',
-                areaName,
-                goalTitle: goal.title,
-                isKeyResult: !!ms.is_key_result,
-                focusAreaId: goal.focus_area_id || null // D-02: milestones inherit from parent goal
+                id: `task-${task._id || task.id}`,
+                title: task.title,
+                date: parseLocalDate(task.deadline),
+                type: 'task',
+                color: '#6366f1',
+                status: task.is_completed ? 'completed' : 'pending',
+                category: task.category || null,
+                focusAreaId: null // D-02: tasks have no focus area
               })
             }
           })
-        })
+        } else {
+          console.warn('[CalendarService] Could not load tasks:', tasksResult.reason)
+        }
 
-        // Activities are returned from /full directly
-        topLevelActivities.forEach((act) => {
-          const area = areaMap[act.focus_area_id] || { color: '#10b981', name: '' }
-          generateHabitOccurrences(act, year, area.color, area.name, events)
-        })
-      } else {
-        console.warn('[CalendarService] Could not load annual plan:', fullPlanResult.reason)
-      }
+        // ── 2. Annual plan: priorities, goals, activities ────────────────────
+        if (fullPlanResult.status === 'fulfilled') {
+          // fetchAnnualPlanData's normalized shape (see annualPlanning.service.js):
+          // focusAreas/goals/activities/priorities, goal.focus_area_id already
+          // normalized to the plain area id string (not raw `focus_areas`/snake_case).
+          const { priorities = [], focusAreas: planFocusAreas = [], goals = [], activities = [] } = fullPlanResult.value
 
-      // D-01: extract focusAreas from areaMap built earlier in this function
-      const focusAreas = Object.entries(areaMap).map(([id, { color, name }]) => ({ id, name, color }))
+          // Priorities
+          priorities.forEach((p) => {
+            if (p.deadline || p.target_date) {
+              events.push({
+                id: `priority-${p._id}`,
+                title: p.title || p.name,
+                date: parseLocalDate(p.deadline || p.target_date),
+                type: 'priority',
+                color: '#f59e0b',
+                status: p.status || 'active',
+                focusAreaId: null // D-02: priorities have no focus area
+              })
+            }
+          })
 
-      return { events, focusAreas }
+          // Build a lookup map: focus_area_id → { color, name }
+          // Assigned to outer areaMap so focusAreas can be extracted after all event pushes (D-01)
+          areaMap = Object.fromEntries(
+            planFocusAreas.map((area) => [area._id || area.id, { color: area.color || '#10b981', name: area.name }])
+          )
+
+          goals.forEach((goal) => {
+            const area = areaMap[goal.focus_area_id] || { color: '#10b981', name: '' }
+            const areaColor = area.color
+            const areaName = area.name
+
+            if (goal.target_date || goal.deadline) {
+              events.push({
+                id: `goal-${goal._id}`,
+                title: goal.title,
+                date: parseLocalDate(goal.target_date || goal.deadline),
+                type: 'goal',
+                color: areaColor,
+                status: goal.status || 'not_started',
+                areaName,
+                focusAreaId: goal.focus_area_id || null // D-02
+              })
+            }
+
+            // Milestone events — push milestones that have a due_date set
+            // idx is raw array index (forEach, not filter().forEach()) — stable across completions
+            ;(goal.milestones || []).forEach((ms, idx) => {
+              if (ms.due_date && !ms.completed) {
+                events.push({
+                  id: `milestone-${goal._id}-${idx}`,
+                  title: ms.title,
+                  date: parseLocalDate(ms.due_date),
+                  type: 'milestone',
+                  color: areaColor,
+                  status: 'pending',
+                  areaName,
+                  goalTitle: goal.title,
+                  isKeyResult: !!ms.is_key_result,
+                  focusAreaId: goal.focus_area_id || null // D-02: milestones inherit from parent goal
+                })
+              }
+            })
+          })
+
+          // Activities are returned from /full directly
+          activities.forEach((act) => {
+            const area = areaMap[act.focus_area_id] || { color: '#10b981', name: '' }
+            generateHabitOccurrences(act, year, area.color, area.name, events)
+          })
+        } else {
+          console.warn('[CalendarService] Could not load annual plan:', fullPlanResult.reason)
+        }
+
+        // D-01: extract focusAreas from areaMap built earlier in this function
+        const focusAreas = Object.entries(areaMap).map(([id, { color, name }]) => ({ id, name, color }))
+
+        return { events, focusAreas }
+      },
+      staleTime: CALENDAR_TTL
     })
   },
 
   /**
-   * Flush all cached calendar-events entries for any year.
+   * Flush all cached calendar-events entries for every year, for one user.
    * Called after event create or drag-and-drop to force a fresh fetch.
+   * @param {string|null} userId - Caller's backend user id (useAuth().user?.id ?? null)
    */
-  invalidateCache() {
-    apiCache.invalidatePrefix('calendar:events:')
+  invalidateCache(userId) {
+    queryClient.invalidateQueries({ queryKey: ['calendarEvents', userId] })
   }
 }

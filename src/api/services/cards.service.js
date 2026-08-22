@@ -87,16 +87,48 @@ export const cardsService = {
    * @param {string} prompt - Optional custom prompt for generation
    * @returns {Promise<Array>} Array of generated study cards
    */
-  async generate(sampleText, sampleNumber, prompt = null) {
+  async generate(sampleText, sampleNumber, prompt = null, config = {}) {
     const generationPrompt = prompt || process.env.REACT_APP_CARD_GENERATION_PROMPT || DEFAULT_CARD_GEN_PROMPT
 
-    const { data } = await apiClient.post(ENDPOINTS.studyCards.generate, {
-      prompt: generationPrompt,
-      sampleText,
-      sampleNumber
-    })
+    const { data } = await apiClient.post(
+      ENDPOINTS.studyCards.generate,
+      {
+        prompt: generationPrompt,
+        sampleText,
+        sampleNumber
+      },
+      config
+    )
 
     return data
+  },
+
+  /**
+   * Onboarding's explicit AI fallback (FR-032, FR-033).
+   *
+   * This is the *same* `/card/generate` endpoint with no onboarding semantics
+   * added: it returns no activation block and writes no journey state. It
+   * exists as a named adapter so the invariant is impossible to misread — the
+   * only thing that activates onboarding is a verified curated deck fork
+   * (ADR-006).
+   *
+   * Two rules bind every caller:
+   * - Invoke it only from an explicit user action. It must never fire when the
+   *   empty state opens or when a curated-deck load finishes with no results.
+   * - Never treat a successful generation as onboarding completion. It stays
+   *   incomplete, and once measurement ships it counts as fallback usage.
+   *
+   * @param {string} topicContext - Confirmed primary topic used as the
+   *   user-visible source text for generation
+   * @param {number} [cardCount=10] - Number of cards to request
+   * @param {string|null} [prompt=null] - Optional custom generation prompt
+   * @returns {Promise<Array>} Generated cards — never a journey state
+   */
+  async generateOnboardingFallback(topicContext, cardCount = 10, prompt = null) {
+    // ONB-014: the empty state renders its own translated fallback error with a
+    // retry, so the client's generic error toast is opted out of here — and only
+    // here. Every other `generate` caller keeps it.
+    return cardsService.generate(topicContext, cardCount, prompt, { suppressErrorToast: true })
   },
 
   /**
@@ -358,8 +390,8 @@ export const cardsService = {
    * Review a card with SM-2 grading
    * @param {string} id - Card ID
    * @param {string} grade - Grade: 'again', 'hard', 'good', or 'easy'
-   * @param {string} [mode='study'] - Active session mode: 'study', 'browse', or 'cram'.
-   *   Only 'study' may grade/mutate the SM-2 schedule server-side; browse/cram are
+   * @param {string} [mode='study'] - Active session mode: 'study' or 'browse'.
+   *   Only 'study' may grade/mutate the SM-2 schedule server-side; browse is
    *   rejected with 403 (defense-in-depth, D-06).
    */
   async review(id, grade, mode = 'study') {
@@ -379,7 +411,7 @@ export const cardsService = {
   },
 
   /**
-   * Get all cards for a deck regardless of due date (Browse/Cram modes)
+   * Get all cards for a deck regardless of due date (Browse mode)
    * @param {string} deckId - Deck ID to fetch all cards for
    * @returns {Promise<Array>} Array of every study card in the deck
    */

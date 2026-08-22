@@ -91,7 +91,7 @@ describe('FlashcardFields', () => {
   describe('disclosure', () => {
     it('renders the tag input once its group is revealed, and drops its chip', () => {
       renderBody({ revealed: new Set(['tags']), availableChips: ['deck'] })
-      expect(screen.getByRole('textbox', { name: 'form.tagAddAria' })).toBeInTheDocument()
+      expect(screen.getByRole('combobox', { name: 'form.tagAddAria' })).toBeInTheDocument()
       const rail = screen.getByRole('group', { name: 'form.detailRailAria' })
       expect(
         within(rail)

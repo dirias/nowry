@@ -1,13 +1,13 @@
-import React, { useCallback, useImperativeHandle, useRef, useState } from 'react'
+import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Chip, ChipDelete, Input, Stack } from '@mui/joy'
+import { Autocomplete, AutocompleteOption, Box, Chip, ChipDelete, Stack } from '@mui/joy'
 import { Close as CloseIcon } from '@mui/icons-material'
 
 import FormFieldFrame from './FormFieldFrame'
 import { focusRing, touchTarget } from './formStyles'
 
 /**
- * FormTagInput — tags as removable chips.
+ * FormTagInput — tags as removable chips, typed with existing-tag suggestions.
  *
  * Four surfaces store tags as `string[]` and four collect them as a
  * comma-separated string, which means the user cannot see what they have
@@ -26,9 +26,22 @@ import { focusRing, touchTarget } from './formStyles'
  * `commitPending()` is exposed by ref because the submit path has to flush the
  * typed-but-not-entered tag *before* it builds the payload, and blur alone is
  * not reliable — a tap on Save on iOS does not always blur first.
+ *
+ * `suggestions` (optional, `string[]`) is the caller's tag pool — the entry
+ * row becomes a single-value, `freeSolo` `Autocomplete` instead of a plain
+ * `Input` the moment it is non-empty, so "test" and "Test" don't quietly
+ * become two different tags: an existing one shows up as a click-to-select
+ * option instead of inviting a retyped near-duplicate. Callers with no pool
+ * (or that haven't fetched one) get exactly the old plain-input behaviour —
+ * the prop defaults to `[]`, which renders no dropdown at all. Selection
+ * commits through the same `commit()` free-solo typing already used, so the
+ * chip list, dedupe and imperative handle are unaffected either way.
  */
 const FormTagInput = React.forwardRef(
-  ({ value = [], onChange, labelKey = 'form.tagsLabel', placeholderKey = 'form.tagPlaceholder', helperKey = null }, ref) => {
+  (
+    { value = [], onChange, labelKey = 'form.tagsLabel', placeholderKey = 'form.tagPlaceholder', helperKey = null, suggestions = [] },
+    ref
+  ) => {
     const { t } = useTranslation()
     const [pending, setPending] = useState('')
     const pendingRef = useRef('')
@@ -36,7 +49,7 @@ const FormTagInput = React.forwardRef(
 
     const commit = useCallback(
       (raw) => {
-        const tag = raw.trim()
+        const tag = (raw || '').trim()
         setPending('')
         if (!tag || value.includes(tag)) return
         onChange([...value, tag])
@@ -50,10 +63,24 @@ const FormTagInput = React.forwardRef(
     // just rescued. The payload builder reads the pending text directly.
     useImperativeHandle(ref, () => ({ commitPending: () => commit(pendingRef.current), pendingTag: () => pendingRef.current }), [commit])
 
+    // Tags already on this card never reappear as a suggestion for it — that
+    // offer would just be a slower way to trigger the exact-duplicate refusal
+    // `commit()` already does above.
+    const selectedLower = useMemo(() => new Set(value.map((tag) => tag.toLowerCase())), [value])
+    const options = useMemo(() => suggestions.filter((tag) => !selectedLower.has(tag.toLowerCase())), [suggestions, selectedLower])
+
     return (
       <FormFieldFrame labelKey={labelKey} helperKey={helperKey}>
         {({ describedBy }) => (
           <Box
+            // Enter never reaches anything above this box: the capture phase
+            // runs before Autocomplete's own bubble-phase Enter handler, so it
+            // cannot interfere with option-selection or free-solo creation —
+            // it only stops Enter's native default (§5.9), which the internal
+            // handler itself skips for a single-value freeSolo field.
+            onKeyDownCapture={(event) => {
+              if (event.key === 'Enter') event.preventDefault()
+            }}
             sx={{
               p: 1,
               border: '1px solid',
@@ -93,22 +120,55 @@ const FormTagInput = React.forwardRef(
               </Stack>
             )}
 
-            <Input
+            <Autocomplete
               variant='plain'
               size='sm'
-              value={pending}
-              placeholder={t(placeholderKey)}
-              onChange={(event) => setPending(event.target.value)}
-              onBlur={() => commit(pending)}
-              onKeyDown={(event) => {
-                if (event.key !== 'Enter') return
-                // Enter adds a tag; it must never reach a submit handler and
-                // save a half-composed object (§5.9).
-                event.preventDefault()
-                commit(pending)
+              freeSolo
+              disableClearable
+              forcePopupIcon={false}
+              options={options}
+              inputValue={pending}
+              // `reset` is Autocomplete re-syncing the input from its own
+              // (uncontrolled) `value` after a selection — always to text we
+              // just cleared via `commit()`. Applying it would silently put
+              // the just-added tag straight back in the box.
+              onInputChange={(event, newInputValue, reason) => {
+                if (reason === 'reset') return
+                setPending(newInputValue)
               }}
-              slotProps={{ input: { 'aria-label': t('form.tagAddAria'), 'aria-describedby': describedBy } }}
-              sx={{ p: 0, flex: 1, bgcolor: 'transparent', '--Input-focusedThickness': '0px', ...focusRing }}
+              // Fires identically for a clicked/Enter-selected suggestion and
+              // for free-solo Enter on unmatched text — one path for both, so
+              // "select the existing tag" and "type a new one" both land on
+              // the same `commit()` the imperative handle and blur already use.
+              onChange={(event, newValue) => {
+                if (typeof newValue === 'string') commit(newValue)
+              }}
+              onBlur={() => commit(pendingRef.current)}
+              placeholder={t(placeholderKey)}
+              noOptionsText={t('form.tagNoSuggestions')}
+              renderOption={(optionProps, option) => {
+                const { key, ...rest } = optionProps
+                return (
+                  <AutocompleteOption key={key ?? option} {...rest}>
+                    {option}
+                  </AutocompleteOption>
+                )
+              }}
+              slotProps={{
+                // The ring lives on the native input's own sx, not the root's —
+                // it is the input that actually receives keyboard focus, and
+                // `:focus-visible` only matches the element that has it.
+                input: { 'aria-label': t('form.tagAddAria'), 'aria-describedby': describedBy, sx: focusRing },
+                listbox: { sx: { zIndex: 'modal' } }
+              }}
+              sx={{
+                p: 0,
+                flex: 1,
+                border: 'none',
+                boxShadow: 'none',
+                bgcolor: 'transparent',
+                '--Input-focusedThickness': '0px'
+              }}
             />
           </Box>
         )}

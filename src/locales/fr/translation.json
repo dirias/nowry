@@ -16,7 +16,7 @@
     "language": "Langue",
     "studyBuddy": "Compagnon d'étude",
     "moreActions": "Plus d'actions",
-    "retry": "Retry"
+    "retry": "Réessayer"
   },
   "news": {
     "title": "Dernières Actualités",
@@ -151,10 +151,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     },
     "dates": {
@@ -316,15 +312,166 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Configuration initiale",
+      "retry": "Réessayer",
+      "error": {
+        "title": "Impossible de charger votre configuration",
+        "body": "Un problème est survenu pendant le chargement de votre configuration. Les choix déjà enregistrés sont intacts."
+      },
+      "screenName": {
+        "welcome": "Bienvenue",
+        "personalization": "Personnalisation",
+        "firstDeck": "Votre premier deck"
+      }
+    },
     "welcome": {
-      "title": "Bienvenue sur Nowry !",
-      "subtitle": "Personnalisons votre expérience d'apprentissage en quelques étapes",
-      "quick": "Rapide et Facile",
-      "quickDesc": "Prend moins de 2 minutes",
-      "tailored": "Adapté pour Vous",
-      "tailoredDesc": "Personnalisé selon votre style d'apprentissage",
-      "changeable": "Toujours Modifiable",
-      "changeableDesc": "Vous pouvez mettre à jour ces paramètres à tout moment"
+      "title": "Bienvenue sur Nowry",
+      "lead": "Trois étapes : dites à Nowry ce que vous voulez apprendre, et repartez avec un deck déjà dans votre bibliothèque.",
+      "support": "Rien n'est obligatoire sur cet écran. Les deux réglages ci-dessous sont facultatifs.",
+      "begin": "Commencer",
+      "postpone": "Pas maintenant",
+      "language": {
+        "label": "Langue"
+      },
+      "accent": {
+        "label": "Couleur d'accent",
+        "hint": "Utilisée dans toute l'application. Le mode clair ou sombre suit votre appareil.",
+        "selected": "Accent : {{name}}",
+        "custom": "Couleur personnalisée",
+        "names": {
+          "oceanTeal": "Bleu-vert océan",
+          "skyBlue": "Bleu ciel",
+          "royalPurple": "Violet royal",
+          "rosePink": "Rose",
+          "crimsonRed": "Rouge cramoisi",
+          "sunsetOrange": "Orange couchant",
+          "forestGreen": "Vert forêt",
+          "earthBrown": "Brun terre"
+        }
+      },
+      "postponeError": {
+        "title": "Nous n'avons pas pu enregistrer",
+        "body": "Vous êtes toujours ici et rien n'a été enregistré."
+      },
+      "loadError": "Impossible de charger vos réglages enregistrés."
+    },
+    "save": {
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "unsaved": "Non enregistré",
+      "retry": "Réessayer"
+    },
+    "personalization": {
+      "title": "Que voulez-vous apprendre ?",
+      "lead": "Choisissez jusqu'à 5 sujets et un objectif d'étude. Le premier sujet choisi est celui que Nowry utilise pour trouver votre premier deck.",
+      "continue": "Choisir votre premier deck",
+      "skip": "Passer pour l'instant",
+      "skipHint": "Rien n'est encore sélectionné. Passer vous ramène à l'accueil, et vous pourrez le configurer plus tard.",
+      "validation": {
+        "title": "Pas encore prêt",
+        "missingInterests": "Choisissez au moins un sujet pour continuer.",
+        "tooManyInterests": "Vous avez {{count}} sujets sélectionnés. Retirez-en {{excess}} pour continuer avec {{max}} au maximum.",
+        "missingGoal": "Choisissez un objectif d'étude pour continuer."
+      },
+      "saveError": {
+        "title": "Vos choix ne sont pas encore enregistrés",
+        "body": "Ils sont toujours à l'écran et rien n'a été perdu. Réessayez celui signalé ci-dessous, puis continuez."
+      },
+      "advanceError": {
+        "title": "Nous n'avons pas pu continuer",
+        "body": "Vos sujets et votre objectif sont enregistrés. Vous êtes toujours sur cet écran."
+      },
+      "loadError": "Nous n'avons pas pu charger vos choix enregistrés.",
+      "loading": "Chargement de vos choix enregistrés"
+    },
+    "firstDeck": {
+      "title": "Votre premier paquet",
+      "lead": "Ajoutez-en un à votre bibliothèque et vous pourrez étudier tout de suite.",
+      "status": {
+        "loading": "Recherche de paquets officiels.",
+        "ready_one": "{{count}} paquet officiel trouvé.",
+        "ready_other": "{{count}} paquets officiels trouvés.",
+        "empty": "Pas encore de paquets officiels pour {{topic}}.",
+        "added": "Paquet ajouté à votre bibliothèque."
+      },
+      "official": {
+        "label": "Paquet officiel",
+        "accessible": "Paquet officiel publié par {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "Ce que vous allez apprendre",
+        "publisher": "Publié par {{publisher}}",
+        "count_one": "{{count}} carte",
+        "count_other": "{{count}} cartes",
+        "add": "Ajouter à ma bibliothèque",
+        "retry": "Réessayer",
+        "selected": "Sélectionné"
+      },
+      "empty": {
+        "title": "Pas encore de paquets officiels pour {{topic}}",
+        "body": "Nowry publie ses paquets officiels sujet par sujet, et {{topic}} n'est pas encore couvert. Vos sujets et votre objectif sont enregistrés.",
+        "fallbackTitle": "En générer un avec l'IA",
+        "fallbackBody": "Un paquet généré par l'IA n'est pas relu par Nowry et ne termine pas votre configuration, mais vous pouvez l'essayer maintenant.",
+        "fallbackAction": "Générer avec l'IA"
+      },
+      "fallback": {
+        "pending": "Génération des cartes…",
+        "success": {
+          "title": "Vos cartes sont prêtes",
+          "body_one": "Nowry a généré {{count}} carte sur {{topic}}. Choisissez celles que vous voulez et enregistrez-les dans un paquet : un paquet généré par l'IA n'est pas officiel, votre configuration reste donc ouverte.",
+          "body_other": "Nowry a généré {{count}} cartes sur {{topic}}. Choisissez celles que vous voulez et enregistrez-les dans un paquet : un paquet généré par l'IA n'est pas officiel, votre configuration reste donc ouverte.",
+          "bodyNoCount": "Nowry a terminé la génération. Choisissez les cartes que vous voulez et enregistrez-les dans un paquet : un paquet généré par l'IA n'est pas officiel, votre configuration reste donc ouverte.",
+          "review": "Revoir les cartes"
+        },
+        "saved": {
+          "title": "Vos cartes sont dans votre bibliothèque",
+          "body": "Nowry ne relit pas les cartes générées par l'IA : elles ne terminent donc pas votre configuration. Vous pouvez ajouter un paquet officiel quand vous voulez."
+        },
+        "error": {
+          "title": "La demande d'IA n'a pas abouti",
+          "body": "Rien n'a été généré et rien n'a changé."
+        }
+      },
+      "browseError": {
+        "title": "Impossible de charger les paquets",
+        "body": "Vos sujets et votre objectif sont enregistrés. Réessayez, ou terminez pour l'instant et revenez plus tard."
+      },
+      "preferencesError": {
+        "title": "Impossible de charger vos sujets",
+        "body": "Nowry en a besoin avant de pouvoir chercher un paquet."
+      },
+      "missingTopic": {
+        "title": "Choisissez d'abord un sujet",
+        "body": "Nowry cherche votre premier paquet à partir du premier sujet que vous choisissez.",
+        "action": "Choisir des sujets"
+      },
+      "forkError": {
+        "title": "Le paquet n'a pas été ajouté",
+        "body": "Rien n'a été ajouté à votre bibliothèque et ce paquet reste sélectionné.",
+        "inProgress": "L'ajout est encore en cours. Patientez un instant puis réessayez.",
+        "copyFailed": "La copie du paquet ne s'est pas terminée.",
+        "notOfficial": "Ce paquet ne fait pas partie de la collection officielle de Nowry.",
+        "ownContent": "Ce paquet vous appartient déjà.",
+        "notFound": "Ce paquet n'est plus disponible."
+      },
+      "activationError": {
+        "title": "Votre paquet est dans votre bibliothèque",
+        "body": "Le paquet et ses cartes ont bien été ajoutés. Seule la dernière étape de la configuration n'a pas abouti, et réessayer la termine sans ajouter de seconde copie."
+      },
+      "success": {
+        "title": "Il est dans votre bibliothèque",
+        "body": "{{name}} vous attend quand vous voulez.",
+        "bodyNoName": "Votre paquet vous attend quand vous voulez.",
+        "open": "Ouvrir mon paquet",
+        "later": "Pas maintenant"
+      },
+      "finish": "Terminer pour l'instant",
+      "finishHint": "Vos sujets et votre objectif sont enregistrés. Vous pouvez ajouter un paquet quand vous voulez.",
+      "finishError": {
+        "title": "Nous n'avons pas pu terminer",
+        "body": "Vous êtes toujours à cette étape et rien n'a été enregistré."
+      }
     },
     "language": {
       "title": "Choisissez votre Langue",
@@ -341,50 +488,15 @@
       "customLabel": "Couleur Personnalisée"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
       "selected": "Sélectionné : {{count}} sujet",
-      "selected_plural": "Sélectionnés : {{count}} sujets",
-      "items": {
-        "ai": "AI & Machine Learning",
-        "technology": "Technology",
-        "science": "Science",
-        "mathematics": "Mathematics",
-        "history": "History",
-        "languages": "Languages",
-        "literature": "Literature",
-        "art": "Art & Creativity",
-        "music": "Music",
-        "business": "Business",
-        "health": "Health & Fitness",
-        "philosophy": "Philosophy",
-        "design": "Design",
-        "psychology": "Psychology"
-      }
+      "selected_one": "Sélectionné : {{count}} sujet",
+      "selected_other": "Sélectionnés : {{count}} sujets"
     },
     "learning": {
       "title": "Style d'Apprentissage et Objectifs",
       "subtitle": "Aidez-nous à adapter votre expérience",
       "styleTitle": "Comment apprenez-vous le mieux ?",
-      "goalTitle": "Quel est votre objectif principal ?",
-      "styles": {
-        "visual": "Visuel",
-        "visualDesc": "J'apprends mieux avec des images et des diagrammes",
-        "auditory": "Auditif",
-        "auditoryDesc": "Je préfère écouter et discuter",
-        "reading": "Lecture/Écriture",
-        "readingDesc": "J'apprends par le texte et les notes",
-        "kinesthetic": "Kinesthésique",
-        "kinestheticDesc": "J'apprends en faisant et en pratiquant"
-      },
-      "goals": {
-        "general": "Culture Générale",
-        "academic": "Réussite Scolaire",
-        "career": "Développement Professionnel",
-        "language": "Apprentissage des Langues",
-        "hobby": "Intérêt Personnel"
-      }
+      "goalTitle": "Quel est votre objectif principal ?"
     },
     "steps": "Étape {{current}} sur {{total}}",
     "complete": "{{percent}}% Terminé",
@@ -392,40 +504,58 @@
     "back": "Retour",
     "finish": "Terminer la configuration",
     "skip": "Passer pour l'instant",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
     "identity": {
       "title": "Choisissez votre langue.",
       "subtitle": "Sélectionnez la langue qui vous convient."
     },
-    "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
-    },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "title": "Que venez-vous apprendre ?"
+    },
+    "failure": {
+      "network": "Vous semblez hors ligne. Vérifiez votre connexion et réessayez.",
+      "rejected": "Cette valeur a été refusée. Choisissez-en une autre.",
+      "unknown": "Un problème est survenu de notre côté."
+    }
+  },
+  "taxonomy": {
+    "topics": {
+      "artificial_intelligence": "IA et apprentissage automatique",
+      "technology": "Technologie",
+      "science": "Sciences",
+      "mathematics": "Mathématiques",
+      "history": "Histoire",
+      "languages": "Langues",
+      "literature": "Littérature",
+      "art": "Art et créativité",
+      "music": "Musique",
+      "business": "Business",
+      "health": "Santé et forme physique",
+      "philosophy": "Philosophie",
+      "design": "Design",
+      "psychology": "Psychologie"
+    },
+    "goals": {
+      "general": "Culture générale",
+      "academic": "Réussite scolaire",
+      "career": "Développement professionnel",
+      "language": "Apprentissage des langues",
+      "hobby": "Intérêt personnel"
+    },
+    "selector": {
       "topics": {
-        "technology": "Technology",
-        "science": "Science",
-        "history": "History",
-        "languages": "Languages",
-        "art": "Art",
-        "mathematics": "Mathematics",
-        "literature": "Literature",
-        "business": "Business"
+        "label": "Vos sujets",
+        "hint": "Choisissez de 1 à {{max}} sujets. Le premier choisi devient votre sujet principal.",
+        "counter": "{{selected}} sur {{max}} sélectionnés",
+        "primaryStatus": "Sujet principal : {{topic}}",
+        "limitReached": "Vous avez atteint la limite de {{max}} sujets. Retirez-en un pour en choisir un autre.",
+        "srSelected": "Sélectionné, position {{position}} sur {{total}}",
+        "srPrimary": "Sélectionné, sujet principal, position {{position}} sur {{total}}",
+        "srBlocked": "Non disponible, limite de {{max}} sujets atteinte"
+      },
+      "goals": {
+        "label": "Objectif d'étude",
+        "hint": "Choisissez celui qui vous correspond le mieux."
       }
-    },
-    "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
-    },
-    "error": {
-      "saveFailed": "Something went wrong. Please try again."
     }
   },
   "tasks": {
@@ -495,6 +625,7 @@
     "nav": {
       "account": "Compte",
       "appearance": "Apparence",
+      "learning": "Apprentissage",
       "productivity": "Productivité",
       "notifications": "Notifications",
       "security": "Sécurité",
@@ -516,6 +647,33 @@
       "accentColor": "Couleur d'accent",
       "accentColorDesc": "Personnalisez la couleur d'accent de l'application",
       "interests": "Centres d'intérêt"
+    },
+    "learning": {
+      "title": "Apprentissage",
+      "lead": "Vos thèmes déterminent votre fil d'actualité et les suggestions de votre compagnon d'étude. Le premier thème est votre thème principal.",
+      "loading": "Chargement de vos thèmes et de votre objectif d'étude…",
+      "loadError": "Impossible de charger vos thèmes et votre objectif enregistrés.",
+      "range": {
+        "tooFew_one": "Gardez au moins {{count}} thème. Rien n'a été modifié.",
+        "tooFew_other": "Gardez au moins {{count}} thèmes. Rien n'a été modifié.",
+        "tooMany_one": "Vous pouvez garder {{count}} thème au maximum. Retirez-en un avant d'en ajouter un autre.",
+        "tooMany_other": "Vous pouvez garder {{count}} thèmes au maximum. Retirez-en un avant d'en ajouter un autre."
+      },
+      "order": {
+        "label": "Ordre des thèmes",
+        "hint": "Le premier thème est votre thème principal. Utilisez les flèches pour changer l'ordre.",
+        "primary": "Thème principal",
+        "moveEarlier": "Déplacer vers le haut",
+        "moveLater": "Déplacer vers le bas",
+        "moveEarlierFor": "Déplacer {{topic}} vers le haut. Actuellement en position {{position}} sur {{total}}.",
+        "moveLaterFor": "Déplacer {{topic}} vers le bas. Actuellement en position {{position}} sur {{total}}.",
+        "moved": "{{topic}} déplacé en position {{position}} sur {{total}}.",
+        "alreadyFirst": "{{topic}} est déjà en première position.",
+        "alreadyLast": "{{topic}} est déjà en dernière position."
+      },
+      "discard": "Annuler les modifications",
+      "discardTopics": "Annuler les modifications de thèmes non enregistrées",
+      "discardGoal": "Annuler le changement d'objectif d'étude non enregistré"
     },
     "productivity": {
       "title": "Productivité",
@@ -630,15 +788,17 @@
       "cardsDue": "cartes à réviser",
       "readyToReview": "Prêtes à réviser",
       "reviewCount": "Réviser {{count}} carte",
-      "reviewCount_plural": "Réviser {{count}} cartes",
+      "reviewCount_one": "Réviser {{count}} carte",
+      "reviewCount_other": "Réviser {{count}} cartes",
       "reviewToday": "📚 À réviser aujourd'hui",
       "cardsPending": "{{count}} carte en attente",
       "cardsPending_other": "{{count}} cartes en attente",
-      "cardsPending_plural": "{{count}} cartes en attente",
+      "cardsPending_one": "{{count}} carte en attente",
       "start": "C'est Parti !",
       "study": "Étudier",
       "moreDecks": "Et {{count}} autre deck avec des cartes",
-      "moreDecks_other": "Et {{count}} autres decks avec des cartes"
+      "moreDecks_other": "Et {{count}} autres decks avec des cartes",
+      "moreDecks_one": "Et {{count}} autre deck avec des cartes"
     },
     "annualGoals": {
       "title": "Objectifs annuels",
@@ -672,6 +832,7 @@
     "noActivity": "Pas encore d'activité. Commencez à étudier !",
     "streak": "🔥 Série actuelle : {{count}} jour",
     "streak_other": "🔥 Série actuelle : {{count}} jours",
+    "streak_one": "🔥 Série actuelle : {{count}} jour",
     "types": {
       "quiz": "Quiz",
       "visual": "Visuel",
@@ -920,12 +1081,14 @@
       "generateImage": "Générer avec l'IA",
       "uploadImage": "Téléverser une Image",
       "daysLeft": "Il reste {{count}} jour",
-      "daysLeft_plural": "Il reste {{count}} jours",
+      "daysLeft_one": "Il reste {{count}} jour",
+      "daysLeft_other": "Il reste {{count}} jours",
       "overdue": "En Retard",
       "noDeadline": "Pas de date cible",
       "smartHelper": "Rendez-le SMART : Spécifique, Mesurable, Atteignable, Pertinent, Temporel",
       "activitiesCount": "{{count}} activité",
-      "activitiesCount_plural": "{{count}} activités",
+      "activitiesCount_one": "{{count}} activité",
+      "activitiesCount_other": "{{count}} activités",
       "viewBoard": "Voir en Tableau",
       "next": {
         "completed": "Terminé",
@@ -1123,13 +1286,13 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
+      "activeDays_one": "Active {{count}} day this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
+      "migratedCount_one": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
     },
@@ -1338,10 +1501,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Votre configuration de profil n'est pas encore terminée.",
-      "cta": "Terminer la configuration",
-      "dismiss": "Ignorer"
+    "onboardingReentry": {
+      "title": "Terminez la configuration de Nowry",
+      "body": "Choisissez vos sujets et Nowry vous trouvera un premier paquet de révision.",
+      "cta": "Continuer la configuration",
+      "dismiss": "Masquer pour l'instant",
+      "dismissed": "Rappel de configuration masqué.",
+      "error": {
+        "title": "Impossible de vérifier votre configuration"
+      }
     }
   },
   "pet": {
@@ -1686,14 +1854,24 @@
       "emptyVisualBody": "Créez un paquet pour commencer à enregistrer ces diagrammes et les réviser."
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "Filtrer par étiquette",
+        "ariaLabel": "Filtrer les cartes par étiquette",
+        "noOptions": "Aucune étiquette dans ce paquet",
+        "clear": "Effacer les filtres d'étiquettes",
+        "showing": "Affichage de {{shown}} sur {{total}}",
+        "empty": {
+          "title": "Aucune carte ne correspond à ces étiquettes",
+          "body": "Retirez une étiquette ou effacez le filtre pour revoir les cartes."
+        }
+      },
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Activer le plein écran",
@@ -2317,6 +2495,7 @@
     "tagAddAria": "Ajouter une étiquette",
     "tagRemoveAria": "Supprimer {{tag}}",
     "tagPlaceholder": "Saisissez une étiquette et appuyez sur Entrée",
+    "tagNoSuggestions": "Aucune étiquette correspondante",
     "deckLabel": "Paquet",
     "deckPlaceholder": "Choisir un paquet",
     "deckNone": "Aucun paquet",

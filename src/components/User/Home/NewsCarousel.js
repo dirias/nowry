@@ -6,60 +6,9 @@ import { ArrowBackIosNew, ArrowForwardIos, TrendingUp, OpenInNew, Star, StarBord
 import { userService } from '../../../api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
+import { getNewsCategory, DEFAULT_NEWS_CATEGORY } from '../../../constants/learningTaxonomy'
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
-
-// Map user interests to categories (multilingual support)
-const INTEREST_TO_CATEGORY = {
-  // English
-  technology: 'technology',
-  science: 'science',
-  business: 'business',
-  health: 'health',
-  art: 'entertainment',
-  music: 'entertainment',
-  literature: 'entertainment',
-  books: 'entertainment',
-  film: 'entertainment',
-  marketing: 'business',
-  social: 'general',
-  politics: 'politics',
-
-  // Spanish
-  tecnología: 'technology',
-  ciencia: 'science',
-  negocios: 'business',
-  salud: 'health',
-  arte: 'entertainment',
-  música: 'entertainment',
-  literatura: 'entertainment',
-  libros: 'entertainment',
-  cine: 'entertainment',
-
-  política: 'politics'
-}
-
-const getCategoryFromInterest = (interest) => {
-  if (!interest) return 'general'
-
-  // Normalize interest: lowercase, remove special chars if needed
-  const normalized = interest.toLowerCase().trim()
-
-  // Direct match
-  if (INTEREST_TO_CATEGORY[normalized]) {
-    return INTEREST_TO_CATEGORY[normalized]
-  }
-
-  // Partial match check (e.g. "tech" -> "technology")
-  const entries = Object.entries(INTEREST_TO_CATEGORY)
-  for (const [key, value] of entries) {
-    if (normalized.includes(key) || key.includes(normalized)) {
-      return value
-    }
-  }
-
-  return 'general'
-}
 
 import { useAuth } from '../../../context/AuthContext'
 
@@ -230,18 +179,12 @@ export default function NewsCarousel() {
         const userInterests = userPreferences?.interests || []
 
         // Get ALL categories from ALL interests
-        const categories =
-          userInterests.length > 0
-            ? userInterests
-                .map((interest) => {
-                  const category = getCategoryFromInterest(interest)
-                  return category
-                })
-                .filter((cat) => cat !== 'general')
-            : []
+        // Several topics share a feed (AI and technology both map to 'technology'),
+        // so dedupe to avoid firing the same request twice.
+        const categories = [...new Set(userInterests.map(getNewsCategory))].filter((cat) => cat !== DEFAULT_NEWS_CATEGORY)
 
         // If no specific categories, use general
-        const finalCategories = categories.length > 0 ? categories : ['general']
+        const finalCategories = categories.length > 0 ? categories : [DEFAULT_NEWS_CATEGORY]
         setActiveCategory(finalCategories.join(', ')) // Update active categories for display
 
         // Fetch from ALL categories in parallel
@@ -356,18 +299,18 @@ export default function NewsCarousel() {
         {/* Tab Header */}
         <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: { xs: 1.5, md: 2 }, px: { xs: 1, md: 0 } }}>
           <TabList>
-            <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
-              <TrendingUp sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
+            <Tab sx={{ fontSize: 'xs', py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
+              <TrendingUp sx={{ mr: { xs: 0.5, md: 1 }, fontSize: 'md' }} />
               {t('news.title')}
             </Tab>
-            <Tab sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
-              <Star sx={{ mr: { xs: 0.5, md: 1 }, fontSize: { xs: 16, md: 20 } }} />
+            <Tab sx={{ fontSize: 'xs', py: { xs: 0.5, md: 1 }, px: { xs: 1, md: 2 } }}>
+              <Star sx={{ mr: { xs: 0.5, md: 1 }, fontSize: 'md' }} />
               {t('news.favorites')} {favoriteNews.length > 0 && `(${favoriteNews.length})`}
             </Tab>
           </TabList>
 
           {userPreferences?.language && (
-            <Chip variant='soft' color='primary' size='sm' sx={{ fontSize: { xs: '0.65rem', md: '0.75rem' }, height: { xs: 20, md: 24 } }}>
+            <Chip variant='soft' color='primary' size='sm'>
               {userPreferences.language.toUpperCase()}
             </Chip>
           )}
@@ -760,7 +703,10 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
           sx={{
             mb: { xs: 1, md: 1.5 },
             fontWeight: 600,
-            fontSize: { xs: '0.875rem', md: '1rem' },
+            // Static sm (14), below title-md's own 16px default: this is a news
+            // card title inside a compact carousel tile, not a standalone card
+            // heading, so the smaller mobile-first value was kept at all widths.
+            fontSize: 'sm',
             color: 'text.primary',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
@@ -777,7 +723,9 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
           level='body-sm'
           sx={{
             color: 'text.secondary',
-            fontSize: { xs: '0.75rem', md: '0.875rem' },
+            // Static xs (12), below body-sm's own 14px default: this is the news
+            // card's clamped excerpt line, secondary to the title above it.
+            fontSize: 'xs',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: { xs: 2, md: 3 },
@@ -807,9 +755,6 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
                 color='primary'
                 size='sm'
                 sx={{
-                  fontSize: { xs: '0.6rem', md: '0.65rem' },
-                  height: { xs: '18px', md: '20px' },
-                  minHeight: { xs: '18px', md: '20px' },
                   px: { xs: 0.75, md: 1 },
                   py: 0
                 }}
@@ -818,7 +763,7 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
               </Chip>
             )}
             <Box sx={{ flex: 1 }} />
-            <OpenInNew sx={{ fontSize: { xs: 14, md: 16 }, color: 'primary.plainColor' }} />
+            <OpenInNew sx={{ fontSize: 'sm', color: 'primary.plainColor' }} />
           </Stack>
         )}
       </CardContent>

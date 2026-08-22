@@ -69,11 +69,13 @@ import { usePet } from '../../../context/AgentContext'
 import { auth } from '../../../config/firebase.config'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
+import LearningPreferencesSection from './LearningPreferencesSection'
 
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 const SECTION_IDS = [
   'section-account',
   'section-appearance',
+  'section-learning',
   'section-productivity',
   'section-notifications',
   'section-agent',
@@ -203,8 +205,10 @@ export default function AccountSettings() {
   const [fullNameSaved, setFullNameSaved] = useState(false)
 
   // ── Preferences ─────────────────────────────────────────────────────────────
+  // Interests and the study goal are deliberately absent: they belong to
+  // `LearningPreferencesSection`, which owns their ordering, their 1–5 range and
+  // their per-field save state through `useProgressivePreferences` (ONB-013).
   const [preferences, setPreferences] = useState({
-    interests: [],
     theme_color: ctxThemeColor,
     language: 'en',
     pomodoro_work_minutes: 25,
@@ -280,7 +284,6 @@ export default function AccountSettings() {
         const pomodoro = profile.preferences.pomodoro || {}
         const agent = profile.preferences.agent || {}
         const prefs = {
-          interests: general.interests || [],
           theme_color: general.theme_color || ctxThemeColor,
           language: general.language || 'en',
           pomodoro_work_minutes: pomodoro.work_minutes ?? general.pomodoro_work_minutes ?? 25,
@@ -325,21 +328,18 @@ export default function AccountSettings() {
 
   // ── Handlers — Preferences ───────────────────────────────────────────────────
   const handlePreferenceUpdate = async (key, value) => {
-    const updated = { ...preferences, [key]: value }
-    setPreferences(updated)
+    setPreferences((prev) => ({ ...prev, [key]: value }))
     if (key === 'theme_color') setThemeColor(value)
     if (key === 'language') i18n.changeLanguage(value)
     try {
-      await userService.updateGeneralPreferences(updated)
+      // Only the key that changed. The route is a Pydantic partial update driven
+      // by `model_fields_set`, and sending this component's whole snapshot would
+      // write back a stale `interests` array — silently undoing an ordering the
+      // Learning section had just saved through its own queue.
+      await userService.updateGeneralPreferences({ [key]: value })
     } catch {
       // silent — the optimistic update stays; UX remains responsive
     }
-  }
-
-  const toggleInterest = (interest) => {
-    const curr = preferences.interests
-    const next = curr.includes(interest) ? curr.filter((i) => i !== interest) : [...curr, interest]
-    handlePreferenceUpdate('interests', next)
   }
 
   // ── Handlers — Agent Settings ────────────────────────────────────────────────
@@ -503,7 +503,6 @@ export default function AccountSettings() {
 
   // ── Derived ──────────────────────────────────────────────────────────────────
   const passwordStrength = getPasswordStrength(newPassword)
-  const availableInterests = ['Technology', 'Science', 'History', 'Languages', 'Art', 'Mathematics', 'Literature', 'Music']
 
   return (
     <Container maxWidth='lg' sx={{ pt: { xs: 2, md: 4 }, pb: { xs: 8, md: 12 }, px: { xs: 1.5, md: 3 } }}>
@@ -755,45 +754,24 @@ export default function AccountSettings() {
                     </Typography>
                   </Stack>
                 </Box>
-
-                <Divider />
-
-                {/* Interests */}
-                <Box>
-                  <Typography level='title-sm' sx={{ mb: 0.5 }}>
-                    {t('settings.appearance.interests')}
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 1.5 }}>
-                    {t('settings.general.interestsDesc')}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {availableInterests.map((interest) => (
-                      <Chip
-                        key={interest}
-                        size='sm'
-                        variant={preferences.interests.includes(interest) ? 'soft' : 'plain'}
-                        color={preferences.interests.includes(interest) ? 'primary' : 'neutral'}
-                        onClick={() => toggleInterest(interest)}
-                        sx={{
-                          cursor: 'pointer',
-                          '&:active': { transform: 'scale(0.95)' },
-                          '&:focus-visible': {
-                            outline: '2px solid',
-                            outlineColor: 'primary.outlinedBorder',
-                            outlineOffset: '2px'
-                          }
-                        }}
-                      >
-                        {t(`onboarding.interests.items.${interest}`, interest)}
-                      </Chip>
-                    ))}
-                  </Box>
-                </Box>
               </Stack>
             </SectionBlock>
             <Divider />
 
-            {/* ── Section 3: Productivity ────────────────────────────────────────── */}
+            {/* ── Section 3: Learning ────────────────────────────────────────────── */}
+            {/*
+              Interests used to live inside Appearance, alongside the accent
+              colour, as eight hand-listed Title-Case chips. They are not an
+              appearance preference: the ordered topics choose the news feed and
+              the study buddy's persona, and the first one is the primary topic.
+              They now share the onboarding selectors verbatim (ONB-013).
+            */}
+            <SectionBlock id='section-learning' title={t('settings.learning.title')} loading={pageLoading}>
+              <LearningPreferencesSection />
+            </SectionBlock>
+            <Divider />
+
+            {/* ── Section 4: Productivity ────────────────────────────────────────── */}
             <SectionBlock id='section-productivity' title={t('settings.productivity.title')} loading={pageLoading}>
               <Stack spacing={3}>
                 <Stack direction='row' justifyContent='space-between' alignItems='center'>
@@ -887,7 +865,7 @@ export default function AccountSettings() {
             </SectionBlock>
             <Divider />
 
-            {/* ── Section 4: Notifications ───────────────────────────────────────── */}
+            {/* ── Section 5: Notifications ───────────────────────────────────────── */}
             <SectionBlock id='section-notifications' title={t('settings.notifications.title')} loading={pageLoading}>
               <Box
                 sx={{
@@ -931,7 +909,7 @@ export default function AccountSettings() {
                     {agentKnowledgeAccess && (
                       <>
                         &nbsp;
-                        <Chip size='sm' variant='soft' color='success' sx={{ fontSize: '0.6rem', height: 16, py: 0 }}>
+                        <Chip size='sm' variant='soft' color='success'>
                           Knowledge On
                         </Chip>
                       </>
@@ -979,7 +957,7 @@ export default function AccountSettings() {
             </SectionBlock>
             <Divider />
 
-            {/* ── Section 5: Security ────────────────────────────────────────────── */}
+            {/* ── Section 6: Security ────────────────────────────────────────────── */}
             <SectionBlock id='section-security' title={t('settings.security.title')} loading={pageLoading}>
               <Stack spacing={3}>
                 {/* Success / error alerts */}
@@ -1099,7 +1077,7 @@ export default function AccountSettings() {
             </SectionBlock>
             <Divider />
 
-            {/* ── Section 6: Danger Zone ─────────────────────────────────────────── */}
+            {/* ── Section 7: Danger Zone ─────────────────────────────────────────── */}
             <Box id='section-danger' sx={{ scrollMarginTop: 88, py: 4 }}>
               <Typography level='h4' sx={{ mb: 1, fontWeight: 700, color: 'danger.solidBg' }}>
                 {t('settings.dangerZone.title')}

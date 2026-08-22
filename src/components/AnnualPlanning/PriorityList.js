@@ -12,6 +12,7 @@ import {
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { annualPlanningService } from '../../api/services'
+import { touchTarget } from '../Common/Form/formStyles'
 
 /**
  * SortablePriorityRow
@@ -144,7 +145,7 @@ const PriorityList = ({
             aria-pressed={isSelected}
             onClick={() => setShowAll(option.value)}
             sx={{
-              minHeight: 28,
+              ...touchTarget,
               px: 1.5,
               borderRadius: 'xl',
               fontWeight: isSelected ? 600 : 500,

@@ -15,7 +15,7 @@ import CardDetailRail from './CardDetailRail'
  * Typography reimplementing FormLabel, and were inconsistent besides: the two
  * required fields got labels and the two optional ones got none.
  */
-const FlashcardFields = ({ values, setField, errors, revealed, availableChips, onReveal, decks, refFor, tagInputRef }) => (
+const FlashcardFields = ({ values, setField, errors, revealed, availableChips, onReveal, decks, refFor, tagInputRef, tagSuggestions }) => (
   <Stack spacing={2.5}>
     <FormTextArea
       labelKey='cards.flashcard.frontLabel'
@@ -51,6 +51,7 @@ const FlashcardFields = ({ values, setField, errors, revealed, availableChips, o
       onReveal={onReveal}
       decks={decks}
       tagInputRef={tagInputRef}
+      tagSuggestions={tagSuggestions}
       refFor={refFor}
     />
   </Stack>

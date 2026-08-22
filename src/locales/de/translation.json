@@ -16,7 +16,7 @@
     "language": "Sprache",
     "studyBuddy": "Lernbegleiter",
     "moreActions": "Weitere Aktionen",
-    "retry": "Retry"
+    "retry": "Erneut versuchen"
   },
   "news": {
     "title": "Aktuelle Nachrichten",
@@ -144,10 +144,6 @@
       "browse": {
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
-      },
-      "cram": {
-        "label": "Cram",
-        "description": "Review every card in this deck, regardless of due date"
       }
     }
   },
@@ -294,15 +290,166 @@
     }
   },
   "onboarding": {
+    "shell": {
+      "regionLabel": "Einrichtung",
+      "retry": "Erneut versuchen",
+      "error": {
+        "title": "Deine Einrichtung konnte nicht geladen werden",
+        "body": "Beim Laden deiner Einrichtung ist etwas schiefgelaufen. Bereits gespeicherte Angaben bleiben erhalten."
+      },
+      "screenName": {
+        "welcome": "Willkommen",
+        "personalization": "Personalisierung",
+        "firstDeck": "Dein erstes Deck"
+      }
+    },
     "welcome": {
-      "title": "Willkommen bei Nowry!",
-      "subtitle": "Lass uns dein Lernerlebnis in wenigen Schritten personalisieren",
-      "quick": "Schnell & Einfach",
-      "quickDesc": "Dauert weniger als 2 Minuten",
-      "tailored": "Maßgeschneidert für dich",
-      "tailoredDesc": "Angepasst an deinen Lernstil",
-      "changeable": "Jederzeit änderbar",
-      "changeableDesc": "Du kannst diese Einstellungen jederzeit aktualisieren"
+      "title": "Willkommen bei Nowry",
+      "lead": "Drei Schritte: Sag Nowry, was du lernen möchtest – am Ende liegt ein Lerndeck in deiner Bibliothek.",
+      "support": "Auf diesem Bildschirm ist nichts verpflichtend. Die beiden Einstellungen unten sind optional.",
+      "begin": "Loslegen",
+      "postpone": "Jetzt nicht",
+      "language": {
+        "label": "Sprache"
+      },
+      "accent": {
+        "label": "Akzentfarbe",
+        "hint": "Wird überall in Nowry verwendet. Hell oder dunkel richtet sich nach deinem Gerät.",
+        "selected": "Akzent: {{name}}",
+        "custom": "Eigene Farbe",
+        "names": {
+          "oceanTeal": "Ozeanblaugrün",
+          "skyBlue": "Himmelblau",
+          "royalPurple": "Königsviolett",
+          "rosePink": "Rosé",
+          "crimsonRed": "Karmesinrot",
+          "sunsetOrange": "Sonnenuntergangsorange",
+          "forestGreen": "Waldgrün",
+          "earthBrown": "Erdbraun"
+        }
+      },
+      "postponeError": {
+        "title": "Das konnten wir nicht speichern",
+        "body": "Du bist noch hier, und es wurde nichts festgehalten."
+      },
+      "loadError": "Deine gespeicherten Einstellungen konnten nicht geladen werden."
+    },
+    "save": {
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert",
+      "unsaved": "Nicht gespeichert",
+      "retry": "Erneut versuchen"
+    },
+    "personalization": {
+      "title": "Was möchtest du lernen?",
+      "lead": "Wähle bis zu 5 Themen und ein Lernziel. Das zuerst gewählte Thema nutzt Nowry, um dein erstes Deck zu finden.",
+      "continue": "Erstes Deck auswählen",
+      "skip": "Vorerst überspringen",
+      "skipHint": "Noch nichts ausgewählt. Beim Überspringen geht es zur Startseite, und du kannst das später einrichten.",
+      "validation": {
+        "title": "Noch nicht bereit",
+        "missingInterests": "Wähle mindestens ein Thema, um fortzufahren.",
+        "tooManyInterests": "Du hast {{count}} Themen ausgewählt. Entferne {{excess}}, um mit höchstens {{max}} fortzufahren.",
+        "missingGoal": "Wähle ein Lernziel, um fortzufahren."
+      },
+      "saveError": {
+        "title": "Deine Auswahl ist noch nicht gespeichert",
+        "body": "Sie ist weiterhin sichtbar und nichts ging verloren. Versuche die unten markierte Auswahl erneut und fahre dann fort."
+      },
+      "advanceError": {
+        "title": "Wir konnten nicht fortfahren",
+        "body": "Deine Themen und dein Ziel sind gespeichert. Du bist weiterhin auf diesem Bildschirm."
+      },
+      "loadError": "Wir konnten deine gespeicherte Auswahl nicht laden.",
+      "loading": "Deine gespeicherte Auswahl wird geladen"
+    },
+    "firstDeck": {
+      "title": "Dein erstes Deck",
+      "lead": "Füge eines deiner Bibliothek hinzu und du kannst sofort lernen.",
+      "status": {
+        "loading": "Offizielle Decks werden gesucht.",
+        "ready_one": "{{count}} offizielles Deck gefunden.",
+        "ready_other": "{{count}} offizielle Decks gefunden.",
+        "empty": "Noch keine offiziellen Decks für {{topic}}.",
+        "added": "Deck zu deiner Bibliothek hinzugefügt."
+      },
+      "official": {
+        "label": "Offizielles Deck",
+        "accessible": "Offizielles Deck, veröffentlicht von {{publisher}}"
+      },
+      "card": {
+        "outcomeLabel": "Was du lernen wirst",
+        "publisher": "Veröffentlicht von {{publisher}}",
+        "count_one": "{{count}} Karte",
+        "count_other": "{{count}} Karten",
+        "add": "Zu meiner Bibliothek hinzufügen",
+        "retry": "Erneut versuchen",
+        "selected": "Ausgewählt"
+      },
+      "empty": {
+        "title": "Noch keine offiziellen Decks für {{topic}}",
+        "body": "Nowry veröffentlicht offizielle Decks Thema für Thema, und {{topic}} ist noch nicht dabei. Deine Themen und dein Ziel sind gespeichert.",
+        "fallbackTitle": "Stattdessen eines mit KI erstellen",
+        "fallbackBody": "Ein KI-Deck wird von Nowry nicht geprüft und schließt deine Einrichtung nicht ab, aber du kannst es jetzt ausprobieren.",
+        "fallbackAction": "Mit KI erstellen"
+      },
+      "fallback": {
+        "pending": "Karten werden erstellt…",
+        "success": {
+          "title": "Deine Karten sind fertig",
+          "body_one": "Nowry hat {{count}} Karte zu {{topic}} erstellt. Wähle die Karten aus, die du behalten möchtest, und speichere sie in einem Deck – ein KI-Deck ist nicht offiziell, deine Einrichtung bleibt also offen.",
+          "body_other": "Nowry hat {{count}} Karten zu {{topic}} erstellt. Wähle die Karten aus, die du behalten möchtest, und speichere sie in einem Deck – ein KI-Deck ist nicht offiziell, deine Einrichtung bleibt also offen.",
+          "bodyNoCount": "Nowry ist mit dem Erstellen fertig. Wähle die Karten aus, die du behalten möchtest, und speichere sie in einem Deck – ein KI-Deck ist nicht offiziell, deine Einrichtung bleibt also offen.",
+          "review": "Karten prüfen"
+        },
+        "saved": {
+          "title": "Deine Karten sind in deiner Bibliothek",
+          "body": "Nowry prüft KI-Karten nicht, deshalb schließen sie deine Einrichtung nicht ab. Du kannst jederzeit ein offizielles Deck hinzufügen."
+        },
+        "error": {
+          "title": "Die KI-Anfrage ist nicht durchgegangen",
+          "body": "Es wurde nichts erstellt und nichts verändert."
+        }
+      },
+      "browseError": {
+        "title": "Die Decks konnten nicht geladen werden",
+        "body": "Deine Themen und dein Ziel sind gespeichert. Versuche es erneut oder beende vorerst und komm später zurück."
+      },
+      "preferencesError": {
+        "title": "Deine Themen konnten nicht geladen werden",
+        "body": "Nowry braucht sie, bevor nach einem Deck gesucht werden kann."
+      },
+      "missingTopic": {
+        "title": "Wähle zuerst ein Thema",
+        "body": "Nowry sucht dein erstes Deck anhand des ersten Themas, das du wählst.",
+        "action": "Themen wählen"
+      },
+      "forkError": {
+        "title": "Das Deck wurde nicht hinzugefügt",
+        "body": "Deiner Bibliothek wurde nichts hinzugefügt, und dieses Deck bleibt ausgewählt.",
+        "inProgress": "Es wird noch hinzugefügt. Warte einen Moment und versuche es erneut.",
+        "copyFailed": "Das Kopieren des Decks wurde nicht abgeschlossen.",
+        "notOfficial": "Dieses Deck gehört nicht zur offiziellen Sammlung von Nowry.",
+        "ownContent": "Dieses Deck gehört dir bereits.",
+        "notFound": "Dieses Deck ist nicht mehr verfügbar."
+      },
+      "activationError": {
+        "title": "Dein Deck ist in deiner Bibliothek",
+        "body": "Das Deck und seine Karten wurden hinzugefügt. Nur der letzte Schritt der Einrichtung wurde nicht abgeschlossen, und ein erneuter Versuch schließt ihn ab, ohne eine zweite Kopie anzulegen."
+      },
+      "success": {
+        "title": "Es ist in deiner Bibliothek",
+        "body": "{{name}} ist bereit, wann immer du es bist.",
+        "bodyNoName": "Dein Deck ist bereit, wann immer du es bist.",
+        "open": "Mein Deck öffnen",
+        "later": "Jetzt nicht"
+      },
+      "finish": "Vorerst beenden",
+      "finishHint": "Deine Themen und dein Ziel sind gespeichert. Du kannst jederzeit ein Deck hinzufügen.",
+      "finishError": {
+        "title": "Das konnten wir nicht abschließen",
+        "body": "Du bist noch in diesem Schritt, und es wurde nichts festgehalten."
+      }
     },
     "language": {
       "title": "Wähle deine Sprache",
@@ -319,50 +466,15 @@
       "customLabel": "Benutzerdefinierte Farbe"
     },
     "interests": {
-      "title": "What topics interest you?",
-      "subtitle": "We'll curate your home feed around these.",
-      "groupLabel": "Interest selection",
       "selected": "Ausgewählt: {{count}} Thema",
-      "selected_plural": "Ausgewählt: {{count}} Themen",
-      "items": {
-        "ai": "AI & Machine Learning",
-        "technology": "Technology",
-        "science": "Science",
-        "mathematics": "Mathematics",
-        "history": "History",
-        "languages": "Languages",
-        "literature": "Literature",
-        "art": "Art & Creativity",
-        "music": "Music",
-        "business": "Business",
-        "health": "Health & Fitness",
-        "philosophy": "Philosophy",
-        "design": "Design",
-        "psychology": "Psychology"
-      }
+      "selected_one": "Ausgewählt: {{count}} Thema",
+      "selected_other": "Ausgewählt: {{count}} Themen"
     },
     "learning": {
       "title": "Lernstil & Ziele",
       "subtitle": "Hilf uns, dein Erlebnis anzupassen",
       "styleTitle": "Wie lernst du am besten?",
-      "goalTitle": "Was ist dein Hauptziel?",
-      "styles": {
-        "visual": "Visuell",
-        "visualDesc": "Ich lerne am besten mit Bildern und Diagrammen",
-        "auditory": "Auditiv",
-        "auditoryDesc": "Ich bevorzuge Zuhören und Diskussionen",
-        "reading": "Lesen/Schreiben",
-        "readingDesc": "Ich lerne durch Text und Notizen",
-        "kinesthetic": "Kinästhetisch",
-        "kinestheticDesc": "Ich lerne durch Tun und Üben"
-      },
-      "goals": {
-        "general": "Allgemeinwissen",
-        "academic": "Akademischer Erfolg",
-        "career": "Berufliche Entwicklung",
-        "language": "Sprachenlernen",
-        "hobby": "Persönliches Interesse"
-      }
+      "goalTitle": "Was ist dein Hauptziel?"
     },
     "steps": "Schritt {{current}} von {{total}}",
     "complete": "{{percent}}% Abgeschlossen",
@@ -370,40 +482,58 @@
     "back": "Zurück",
     "finish": "Einrichtung abschließen",
     "skip": "Vorerst überspringen",
-    "progressLabel": "Onboarding progress",
-    "defer": "Set up later in settings",
     "identity": {
       "title": "Wähle deine Sprache.",
       "subtitle": "Wähle die Sprache, die sich richtig anfühlt."
     },
-    "appearance": {
-      "title": "Make it yours.",
-      "subtitle": "Light or dark. Pick a color you'll see every day.",
-      "colorLabel": "Select {{name}}",
-      "colorGroupLabel": "Accent color selection"
-    },
     "focus": {
-      "title": "What are you here to learn?",
-      "subtitle": "Choose one topic and a goal. You can always change this.",
+      "title": "Was möchtest du lernen?"
+    },
+    "failure": {
+      "network": "Du scheinst offline zu sein. Prüfe deine Verbindung und versuche es erneut.",
+      "rejected": "Dieser Wert wurde abgelehnt. Bitte wähle einen anderen.",
+      "unknown": "Bei uns ist etwas schiefgelaufen."
+    }
+  },
+  "taxonomy": {
+    "topics": {
+      "artificial_intelligence": "KI & maschinelles Lernen",
+      "technology": "Technologie",
+      "science": "Wissenschaft",
+      "mathematics": "Mathematik",
+      "history": "Geschichte",
+      "languages": "Sprachen",
+      "literature": "Literatur",
+      "art": "Kunst & Kreativität",
+      "music": "Musik",
+      "business": "Wirtschaft",
+      "health": "Gesundheit & Fitness",
+      "philosophy": "Philosophie",
+      "design": "Design",
+      "psychology": "Psychologie"
+    },
+    "goals": {
+      "general": "Allgemeinwissen",
+      "academic": "Akademischer Erfolg",
+      "career": "Berufliche Entwicklung",
+      "language": "Sprachenlernen",
+      "hobby": "Persönliches Interesse"
+    },
+    "selector": {
       "topics": {
-        "technology": "Technology",
-        "science": "Science",
-        "history": "History",
-        "languages": "Languages",
-        "art": "Art",
-        "mathematics": "Mathematics",
-        "literature": "Literature",
-        "business": "Business"
+        "label": "Deine Themen",
+        "hint": "Wähle 1 bis {{max}} Themen. Das zuerst gewählte Thema wird dein Hauptthema.",
+        "counter": "{{selected}} von {{max}} ausgewählt",
+        "primaryStatus": "Hauptthema: {{topic}}",
+        "limitReached": "Du hast das Limit von {{max}} Themen erreicht. Entferne eines, um ein anderes zu wählen.",
+        "srSelected": "Ausgewählt, Position {{position}} von {{total}}",
+        "srPrimary": "Ausgewählt, Hauptthema, Position {{position}} von {{total}}",
+        "srBlocked": "Nicht verfügbar, Limit von {{max}} Themen erreicht"
+      },
+      "goals": {
+        "label": "Lernziel",
+        "hint": "Wähle das Ziel, das am besten passt."
       }
-    },
-    "ready": {
-      "title": "You're all set, {{name}}.",
-      "titleNoName": "You're all set.",
-      "subtitle": "Your personalized study space is ready.",
-      "cta": "Enter Nowry"
-    },
-    "error": {
-      "saveFailed": "Something went wrong. Please try again."
     }
   },
   "tasks": {
@@ -473,6 +603,7 @@
     "nav": {
       "account": "Konto",
       "appearance": "Erscheinungsbild",
+      "learning": "Lernen",
       "productivity": "Produktivität",
       "notifications": "Benachrichtigungen",
       "security": "Sicherheit",
@@ -494,6 +625,33 @@
       "accentColor": "Akzentfarbe",
       "accentColorDesc": "Passe die Akzentfarbe der App an",
       "interests": "Interessen"
+    },
+    "learning": {
+      "title": "Lernen",
+      "lead": "Deine Themen bestimmen deinen Nachrichten-Feed und die Vorschläge deines Study Buddy. Das erste Thema ist dein Hauptthema.",
+      "loading": "Deine Themen und dein Lernziel werden geladen…",
+      "loadError": "Deine gespeicherten Themen und dein Lernziel konnten nicht geladen werden.",
+      "range": {
+        "tooFew_one": "Behalte mindestens {{count}} Thema. Es wurde nichts geändert.",
+        "tooFew_other": "Behalte mindestens {{count}} Themen. Es wurde nichts geändert.",
+        "tooMany_one": "Du kannst höchstens {{count}} Thema behalten. Entferne eins, bevor du ein weiteres hinzufügst.",
+        "tooMany_other": "Du kannst höchstens {{count}} Themen behalten. Entferne eins, bevor du ein weiteres hinzufügst."
+      },
+      "order": {
+        "label": "Reihenfolge der Themen",
+        "hint": "Das erste Thema ist dein Hauptthema. Ändere die Reihenfolge mit den Pfeilen.",
+        "primary": "Hauptthema",
+        "moveEarlier": "Nach oben verschieben",
+        "moveLater": "Nach unten verschieben",
+        "moveEarlierFor": "{{topic}} nach oben verschieben. Aktuell Position {{position}} von {{total}}.",
+        "moveLaterFor": "{{topic}} nach unten verschieben. Aktuell Position {{position}} von {{total}}.",
+        "moved": "{{topic}} auf Position {{position}} von {{total}} verschoben.",
+        "alreadyFirst": "{{topic}} steht bereits an erster Stelle.",
+        "alreadyLast": "{{topic}} steht bereits an letzter Stelle."
+      },
+      "discard": "Änderungen verwerfen",
+      "discardTopics": "Nicht gespeicherte Themenänderungen verwerfen",
+      "discardGoal": "Nicht gespeicherte Änderung des Lernziels verwerfen"
     },
     "productivity": {
       "title": "Produktivität",
@@ -608,15 +766,17 @@
       "cardsDue": "Karten fällig",
       "readyToReview": "Bereit zum Wiederholen",
       "reviewCount": "{{count}} Karte wiederholen",
-      "reviewCount_plural": "{{count}} Karten wiederholen",
+      "reviewCount_one": "{{count}} Karte wiederholen",
+      "reviewCount_other": "{{count}} Karten wiederholen",
       "reviewToday": "📚 Heute wiederholen",
       "cardsPending": "{{count}} Karte ausstehend",
       "cardsPending_other": "{{count}} Karten ausstehend",
-      "cardsPending_plural": "{{count}} Karten ausstehend",
+      "cardsPending_one": "{{count}} Karte ausstehend",
       "start": "Los geht's!",
       "study": "Lernen",
       "moreDecks": "Und {{count}} weiteres Deck mit Karten",
-      "moreDecks_other": "Und {{count}} weitere Decks mit Karten"
+      "moreDecks_other": "Und {{count}} weitere Decks mit Karten",
+      "moreDecks_one": "Und {{count}} weiteres Deck mit Karten"
     },
     "annualGoals": {
       "title": "Jahresziele",
@@ -650,6 +810,7 @@
     "noActivity": "Noch keine Aktivität. Fang an zu lernen!",
     "streak": "🔥 Aktuelle Serie: {{count}} Tag",
     "streak_other": "🔥 Aktuelle Serie: {{count}} Tage",
+    "streak_one": "🔥 Aktuelle Serie: {{count}} Tag",
     "types": {
       "quiz": "Quiz",
       "visual": "Visuell",
@@ -898,12 +1059,14 @@
       "generateImage": "Mit KI Generieren",
       "uploadImage": "Bild Hochladen",
       "daysLeft": "Noch {{count}} Tag",
-      "daysLeft_plural": "Noch {{count}} Tage",
+      "daysLeft_one": "Noch {{count}} Tag",
+      "daysLeft_other": "Noch {{count}} Tage",
       "overdue": "Überfällig",
       "noDeadline": "Kein Zieldatum",
       "smartHelper": "Machen Sie es SMART: Spezifisch, Messbar, Erreichbar, Relevant, Zeitgebunden",
       "activitiesCount": "{{count}} Aktivität",
-      "activitiesCount_plural": "{{count}} Aktivitäten",
+      "activitiesCount_one": "{{count}} Aktivität",
+      "activitiesCount_other": "{{count}} Aktivitäten",
       "viewBoard": "Als Board Anzeigen",
       "next": {
         "completed": "Abgeschlossen",
@@ -1101,13 +1264,13 @@
       "insights": "Quarterly Insights",
       "routineConsistency": "Routine Consistency",
       "activeDays": "Active {{count}} day this quarter",
-      "activeDays_plural": "Active {{count}} days this quarter",
       "activeDays_other": "Active {{count}} days this quarter",
+      "activeDays_one": "Active {{count}} day this quarter",
       "booksFinished": "Books Finished ({{count}})",
       "breakdownByFocusArea": "Breakdown by Focus Area",
       "migratedCount": "Migrated {{count}}x",
-      "migratedCount_plural": "Migrated {{count}}x",
       "migratedCount_other": "Migrated {{count}}x",
+      "migratedCount_one": "Migrated {{count}}x",
       "due": "Due",
       "migrateToNextQuarter": "Migrate to Next Quarter"
     },
@@ -1316,10 +1479,15 @@
     }
   },
   "home": {
-    "setupBanner": {
-      "message": "Dein Profil ist noch nicht vollständig eingerichtet.",
-      "cta": "Einrichtung abschließen",
-      "dismiss": "Schließen"
+    "onboardingReentry": {
+      "title": "Richte Nowry fertig ein",
+      "body": "Wähle deine Themen aus, und Nowry findet dir ein erstes Lern-Deck.",
+      "cta": "Einrichtung fortsetzen",
+      "dismiss": "Vorerst ausblenden",
+      "dismissed": "Einrichtungshinweis ausgeblendet.",
+      "error": {
+        "title": "Deine Einrichtung konnte nicht geprüft werden"
+      }
     }
   },
   "pet": {
@@ -1664,14 +1832,24 @@
       "emptyVisualBody": "Erstelle einen Stapel, um diese Diagramme zu speichern und zu wiederholen."
     },
     "session": {
+      "tagFilter": {
+        "placeholder": "Nach Tag filtern",
+        "ariaLabel": "Karten nach Tag filtern",
+        "noOptions": "Keine Tags in diesem Stapel",
+        "clear": "Tag-Filter zurücksetzen",
+        "showing": "{{shown}} von {{total}} werden angezeigt",
+        "empty": {
+          "title": "Keine Karten passen zu diesen Tags",
+          "body": "Tag entfernen oder Filter zurücksetzen, um wieder Karten zu sehen."
+        }
+      },
       "mode": {
         "study": "Study",
-        "browse": "Browse",
-        "cram": "Cram"
+        "browse": "Browse"
       },
       "emptyDeck": {
         "title": "No cards yet",
-        "body": "Add cards to this deck to browse or cram them here."
+        "body": "Add cards to this deck to browse them here."
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Vollbild aktivieren",
@@ -2295,6 +2473,7 @@
     "tagAddAria": "Tag hinzufügen",
     "tagRemoveAria": "{{tag}} entfernen",
     "tagPlaceholder": "Tag eingeben und Enter drücken",
+    "tagNoSuggestions": "Keine passenden Tags",
     "deckLabel": "Deck",
     "deckPlaceholder": "Deck auswählen",
     "deckNone": "Kein Deck",

@@ -66,9 +66,9 @@ const About = () => {
           }}
         >
           <Typography
-            level='h1'
+            level='display-lg'
+            component='h1'
             sx={{
-              fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' },
               fontWeight: 800,
               letterSpacing: -2,
               lineHeight: 1.1,
@@ -84,7 +84,6 @@ const About = () => {
               maxWidth: 700,
               mx: 'auto',
               color: 'text.secondary',
-              fontSize: { xs: '1rem', md: '1.25rem' },
               mb: 4
             }}
           >
@@ -144,7 +143,11 @@ const About = () => {
 
         {/* Core Values */}
         <Box sx={{ mb: 12 }}>
-          <Typography level='h2' textAlign='center' fontWeight={700} sx={{ mb: 2, fontSize: { xs: '2rem', md: '2.5rem' } }}>
+          {/* Section heading, not a hero — h1 is the fit despite the level name
+            (it is styled larger than the page's own hero, which lives in
+            display-lg above; see DESIGN_GUIDELINES's level table for why
+            display-* and h1 are visually distinct from their DOM semantics). */}
+          <Typography level='h1' textAlign='center' fontWeight={700} sx={{ mb: 2 }}>
             {t('about.values.title')}
           </Typography>
           <Typography level='body-lg' textAlign='center' sx={{ color: 'text.secondary', mb: 6, maxWidth: 600, mx: 'auto' }}>

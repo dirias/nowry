@@ -268,7 +268,7 @@ export default function ManageContent({
             }}
           >
             <Tab disableIndicator aria-label={t('cards.manage_content.aria.decks', 'View Decks')}>
-              <Typography level='title-sm' sx={{ fontWeight: 700, color: 'inherit', fontSize: { xs: '0.85rem', sm: '0.9rem' } }}>
+              <Typography level='title-sm' sx={{ fontWeight: 700, color: 'inherit' }}>
                 {t('cards.manage_content.tabs.decksOnly', 'Decks')}
               </Typography>
               <Chip
@@ -281,7 +281,7 @@ export default function ManageContent({
               </Chip>
             </Tab>
             <Tab disableIndicator aria-label={t('cards.manage_content.aria.cards', 'View Cards')}>
-              <Typography level='title-sm' sx={{ fontWeight: 700, color: 'inherit', fontSize: { xs: '0.85rem', sm: '0.9rem' } }}>
+              <Typography level='title-sm' sx={{ fontWeight: 700, color: 'inherit' }}>
                 {t('cards.manage_content.tabs.cardsOnly', 'Cards')}
               </Typography>
               <Chip
@@ -384,7 +384,7 @@ export default function ManageContent({
               size='sm'
               variant='solid'
               color='primary'
-              sx={{ position: 'absolute', top: -6, right: -6, minWidth: 16, height: 16, fontSize: '0.65rem', p: 0, pointerEvents: 'none' }}
+              sx={{ position: 'absolute', top: -8, right: -8, minWidth: 20, height: 20, p: 0, pointerEvents: 'none' }}
             >
               {activeFilterCount}
             </Chip>

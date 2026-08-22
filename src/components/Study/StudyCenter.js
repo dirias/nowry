@@ -40,6 +40,7 @@ import CardHome from '../Cards/CardHome'
 import DeckSettingsModal from './DeckSettingsModal'
 import StudyModePickerModal from './StudyModePickerModal'
 import RecentSessions from './RecentSessions'
+import { touchTargetBox } from '../Common/Form/formStyles'
 
 export default function StudyCenter() {
   const navigate = useNavigate()
@@ -577,8 +578,7 @@ export default function StudyCenter() {
                                     opacity: { xs: 1, md: 0 },
                                     transition: 'opacity 0.2s',
                                     borderRadius: 'sm',
-                                    minWidth: 28,
-                                    minHeight: 28,
+                                    ...touchTargetBox,
                                     '&:focus-visible': {
                                       opacity: 1,
                                       outline: '2px solid',
@@ -873,7 +873,7 @@ export default function StudyCenter() {
 
         <TabPanel value={1} sx={{ p: 0 }}>
           <Box sx={{ mt: -2 }}>
-            <CardHome onDeckChange={reloadDecks} />
+            <CardHome />
           </Box>
         </TabPanel>
       </Tabs>

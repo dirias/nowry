@@ -1,3 +1,7 @@
+import QuizIcon from '@mui/icons-material/Quiz'
+import StyleIcon from '@mui/icons-material/Style'
+import ImageIcon from '@mui/icons-material/Image'
+
 import { extractDeckId, parseTagInput } from '../../Common/Form/formUtils'
 
 /**
@@ -28,6 +32,24 @@ export const RAIL_LABELS = {
 }
 
 export const CARD_TYPES = ['flashcard', 'quiz', 'visual']
+
+/**
+ * Icon + accent color per type, colocated with the spec table below so a
+ * fourth card type only ever needs one new entry. This is the exact mapping
+ * `StudyCard.js` already paints on the cards this modal creates (§2.1 —
+ * semantic tokens only, no shade tokens like `warning.400`); reusing it here
+ * means the picker and the card it produces teach one visual vocabulary,
+ * not two.
+ */
+const CARD_TYPE_ICONS = {
+  flashcard: { icon: StyleIcon, accentColor: 'primary.plainColor' },
+  quiz: { icon: QuizIcon, accentColor: 'warning.plainColor' },
+  visual: { icon: ImageIcon, accentColor: 'success.plainColor' }
+}
+
+export const iconFor = (cardType) => (CARD_TYPE_ICONS[cardType] || CARD_TYPE_ICONS.flashcard).icon
+
+export const accentColorFor = (cardType) => (CARD_TYPE_ICONS[cardType] || CARD_TYPE_ICONS.flashcard).accentColor
 
 /** One shape across all three, so switching type keeps the fields they share (§4.4). */
 export const emptyCardValues = (deckId = '') => ({

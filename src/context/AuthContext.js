@@ -3,7 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../config/firebase.config'
 import { apiClient } from '../api/client'
 import { authService } from '../api/services'
-import { apiCache } from '../api/utils/cache'
+import { queryClient } from '../api/queryClient'
 import i18n from '../i18n'
 
 const AuthContext = createContext(null)
@@ -113,8 +113,9 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout failed', error)
     } finally {
       // Clear ALL cached API data so the next user never sees stale data
-      // from the previous session (tasks, plans, books, etc.)
-      apiCache.clear()
+      // from the previous session (tasks, plans, books, etc.) — every hook
+      // reads through React Query now (ADR-008), so this is the single wipe.
+      queryClient.clear()
       setUser(null)
     }
   }

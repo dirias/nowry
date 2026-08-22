@@ -137,7 +137,11 @@ const PlanIdentityBlock = ({
                 aria-label={t('annualPlanning.header.renamePlan')}
                 onChange={(e) => onEditTitleChange(e.target.value)}
                 sx={{
-                  fontSize: { xs: '1.5rem', md: '1.75rem' },
+                  // Must track the h2 title it temporarily replaces while
+                  // editing (see the Typography level='h2' below) — same
+                  // fluid range, sourced from the same theme token, so the
+                  // two can never drift out of sync.
+                  fontSize: 'xl3',
                   fontWeight: 800,
                   fontFamily: 'inherit',
                   color: 'text.primary',
@@ -170,7 +174,7 @@ const PlanIdentityBlock = ({
                 level='h2'
                 fontWeight={800}
                 startDecorator={<TimelineIcon sx={{ color: 'primary.plainColor', fontSize: 22 }} />}
-                sx={{ letterSpacing: '-0.02em', fontSize: { xs: '1.5rem', md: '1.75rem' }, lineHeight: 1.2, m: 0, minWidth: 0 }}
+                sx={{ letterSpacing: '-0.02em', lineHeight: 1.2, m: 0, minWidth: 0 }}
               >
                 <Skeleton loading={loading} variant='text' width='12ch'>
                   {plan?.title || `${t('annualPlanning.title')} ${plan?.year || ''}`}

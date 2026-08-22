@@ -83,7 +83,11 @@ const Login = () => {
       // Use Firebase Google OAuth
       const response = await authService.loginWithGoogle()
 
-      // Check if user needs onboarding (wizard not completed)
+      // A first Google sign-in is one of the two explicit initial navigations to
+      // onboarding that ADR-007 preserves — it happens once, at account creation,
+      // and is not the global redirect ONB-012 removed. An incomplete user signing
+      // in later with email lands on Home like everybody else, and is invited back
+      // only if the server's journey state says so.
       if (response && response.backendUser && response.backendUser.wizard_completed === false) {
         window.location.href = '/onboarding'
       } else {

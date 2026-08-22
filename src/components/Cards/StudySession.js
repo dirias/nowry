@@ -1,3 +1,16 @@
+// Literata — the reading serif, loaded lazily and NOT on the critical path.
+//
+// Importing it here rather than globally means the ~90% of sessions that never
+// open a reading surface never pay for it. The @font-face declarations carry
+// unicode-range subsets, so the browser fetches a .woff2 only once a glyph is
+// actually rendered in the face — which happens exactly when a surface opts in
+// through the `readingSurface` fragment (Common/Form/formStyles.js).
+//
+// Scope is hard: long-form prose only, never below 1rem, and never UI chrome.
+// A serif at 14px on a low-DPI Android reads worse than Inter, and that is the
+// specific way this choice fails.
+import '@fontsource-variable/literata'
+
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -15,14 +28,18 @@ import {
   Radio,
   RadioGroup,
   Skeleton,
+  Sheet,
   Chip
 } from '@mui/joy'
 import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, SwipeLeft, SwipeRight, SwipeVertical } from '@mui/icons-material'
 import { cardsService, decksService } from '../../api/services'
 import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
+import { useBrowseTagFilter } from '../../hooks/useBrowseTagFilter'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
-import { apiCache } from '../../api/utils/cache'
+import BrowseTagFilter from './BrowseTagFilter'
+import { queryClient } from '../../api/queryClient'
+import { useAuth } from '../../context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
@@ -73,7 +90,10 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            // Static sm (14), not the xs mobile-first default: these four are the
+            // session's primary CTAs (again/hard/good/easy), not secondary or
+            // metadata text, so legibility on the main action row won out.
+            fontSize: 'sm',
             fontWeight: 600,
             '&:hover': { bgcolor: 'danger.softBg' }
           }}
@@ -88,7 +108,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            fontSize: 'sm',
             fontWeight: 600
           }}
         >
@@ -102,7 +122,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            fontSize: 'sm',
             fontWeight: 600
           }}
         >
@@ -116,7 +136,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
-            fontSize: { xs: 'xs', md: 'sm' },
+            fontSize: 'sm',
             fontWeight: 600
           }}
         >
@@ -188,11 +208,13 @@ export default function StudySession() {
   const { deckId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const userId = user?.id ?? null
   const mermaidRef = useRef(null)
   const [searchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'study'
-  const isReadOnlyMode = mode === 'browse' || mode === 'cram'
-  const modeChipColor = { study: 'neutral', browse: 'primary', cram: 'warning' }[mode]
+  const isReadOnlyMode = mode === 'browse'
+  const modeChipColor = { study: 'neutral', browse: 'primary' }[mode]
 
   const [cards, setCards] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -216,6 +238,19 @@ export default function StudySession() {
   const [needsAttentionCount, setNeedsAttentionCount] = useState(0)
   const [mostAttentionCardFront, setMostAttentionCardFront] = useState(null)
 
+  // Browse-only inline tag filter. `enabled: isReadOnlyMode` is the whole
+  // safety story: in study mode the hook returns no tags, no selection, and
+  // `visibleCards === cards` BY REFERENCE, so the SM-2 queue is structurally
+  // unfilterable — a crafted `?mode=study&tags=x` URL changes nothing.
+  //
+  // Everything below reads `visibleCards` instead of `cards`, with two
+  // deliberate exceptions, both marked at their site: the deck-empty gate and
+  // handleGrade's setCards mutation source, which must stay the FULL array.
+  const { availableTags, selectedTags, visibleCards, setTags, clearTags, isFiltering } = useBrowseTagFilter({
+    cards,
+    enabled: isReadOnlyMode
+  })
+
   const handleCardMouseMove = React.useCallback((e) => {
     if (!e.currentTarget) return
     const rect = e.currentTarget.getBoundingClientRect()
@@ -232,7 +267,7 @@ export default function StudySession() {
   const { voiceSettings, getSettingsForDeck, handleVoiceSettingsChange: _handleVoiceSettingsChange } = useVoiceSettings(deckId)
 
   // In daily-review mode, voice settings come from the per-card deck lookup
-  const currentCardDeckId = cards[currentIndex]?.deck_id?._id || cards[currentIndex]?.deck_id
+  const currentCardDeckId = visibleCards[currentIndex]?.deck_id?._id || visibleCards[currentIndex]?.deck_id
   const activeVoiceSettings = deckId === 'daily-review' && currentCardDeckId ? getSettingsForDeck(currentCardDeckId) : voiceSettings
 
   const handleVoiceSettingsChange = React.useCallback(
@@ -248,14 +283,17 @@ export default function StudySession() {
 
   const buildStudyContext = React.useCallback(
     (cardIdx, flipped) => {
-      const card = cards[cardIdx]
+      const card = visibleCards[cardIdx]
       if (!card) return null
       return {
         page: 'study_session',
         deckId: deckId === 'daily-review' ? card.deck_id?._id || card.deck_id || null : deckId,
         deckName: card.deck_id?.name || card.deck_id?.title || null,
         cardIndex: cardIdx + 1,
-        totalCards: cards.length,
+        // Must be the FILTERED total: this feeds the AI companion's context,
+        // and a mismatch makes the pet announce "card 3 of 20" while the
+        // screen reads "3 of 7".
+        totalCards: visibleCards.length,
         cardType: card.card_type || 'basic',
         isFlipped: flipped,
         front: card.title || '',
@@ -264,7 +302,7 @@ export default function StudySession() {
         mode
       }
     },
-    [cards, deckId, mode]
+    [visibleCards, deckId, mode]
   )
 
   // Signal to AgentContext that a study session is active
@@ -346,14 +384,21 @@ export default function StudySession() {
   // Invalidate cache when leaving study session; reset companion state
   useEffect(() => {
     return () => {
-      apiCache.invalidate('cards:statistics')
-      apiCache.invalidate('cards:all')
-      apiCache.invalidate('decks:all')
+      // useStatistics (CACHE-005) no longer reads 'cards:statistics' from
+      // apiCache — invalidate its React Query cache entry instead so
+      // WeeklyProgress and StudyCalendar pick up this session's updated
+      // stats immediately.
+      if (userId) queryClient.invalidateQueries({ queryKey: ['statistics', userId] })
+      // useCardData (CACHE-004) no longer reads 'cards:all' from apiCache —
+      // invalidate its React Query cache entry instead so DailyFocus,
+      // WeeklyStatsCard, and CardHome's Content Library pick up this
+      // session's review results (next_review, etc.) immediately.
+      if (userId) queryClient.invalidateQueries({ queryKey: ['cards', userId] })
       setViewContext(null)
       resetCompanionSession()
       if (interventionTimerRef.current) clearTimeout(interventionTimerRef.current)
     }
-  }, [setViewContext, resetCompanionSession])
+  }, [userId, setViewContext, resetCompanionSession])
 
   // Retry failed reviews in background
   useEffect(() => {
@@ -390,7 +435,7 @@ export default function StudySession() {
 
   useEffect(() => {
     // Render Mermaid diagram for visual cards
-    const currentCard = cards[currentIndex]
+    const currentCard = visibleCards[currentIndex]
     if (currentCard?.card_type === 'visual' && currentCard.diagram_code && mermaidRef.current) {
       const id = `mermaid-${Date.now()}`
       mermaid
@@ -398,14 +443,18 @@ export default function StudySession() {
         .then((result) => setMermaidSvg(result.svg))
         .catch((err) => console.error('Mermaid render error:', err))
     }
-  }, [currentIndex, cards])
+  }, [currentIndex, visibleCards])
 
   // Inject structured screen context into the Study Pet on card change and flip
   useEffect(() => {
-    if (!cards || cards.length === 0) return
+    if (!visibleCards || visibleCards.length === 0) return
     const ctx = buildStudyContext(currentIndex, isFlipped)
-    setViewContext(ctx)
-  }, [currentIndex, isFlipped, cards, buildStudyContext, setViewContext])
+    // Null only during the single frame where a filter change has shrunk
+    // visibleCards but the re-anchor effect below has not corrected
+    // currentIndex yet — publishing that as "no context" would blank the pet
+    // mid-session. It re-publishes on the corrected index one render later.
+    if (ctx) setViewContext(ctx)
+  }, [currentIndex, isFlipped, visibleCards, buildStudyContext, setViewContext])
 
   // Clear pet context when session is complete + fire session_summary intervention
   useEffect(() => {
@@ -427,7 +476,7 @@ export default function StudySession() {
     })[0]
     const mostMissedCardId = mostMissedEntry?.[0] ?? null
     const totalWrong = Object.values(wrongCounts).reduce((acc, n) => acc + n, 0)
-    const mostMissedCardFront = mostMissedCardId ? (cards.find((c) => (c._id || c.id) === mostMissedCardId)?.title ?? null) : null
+    const mostMissedCardFront = mostMissedCardId ? (visibleCards.find((c) => (c._id || c.id) === mostMissedCardId)?.title ?? null) : null
 
     // Single computed source for both the on-screen stat (render below) and
     // the session_summary payload (D-06) — no divergent second sort.
@@ -439,10 +488,10 @@ export default function StudySession() {
     // should fire (review finding WR-01: previously reached the Pet with
     // session_total_cards: 0, misreported as "1 cards" by the backend's now-fixed
     // falsy-zero fallback).
-    if (mode === 'study' && cards.length > 0) {
+    if (mode === 'study' && visibleCards.length > 0) {
       queueIntervention({
         type: 'session_summary',
-        session_total_cards: cards.length,
+        session_total_cards: visibleCards.length,
         session_wrong_count: totalWrong,
         most_missed_card_id: mostMissedCardId,
         most_missed_card_front: mostMissedCardFront
@@ -451,7 +500,7 @@ export default function StudySession() {
 
     // LOG SESSION HISTORY — fire-and-forget, never blocks the UI
     if (gradedCards.current.length > 0) {
-      const firstCard = cards[0]
+      const firstCard = visibleCards[0]
       const deckIdValue = deckId === 'daily-review' ? null : deckId
       const deckNameValue = deckId === 'daily-review' ? 'Daily Review' : firstCard?.deck_id?.name || firstCard?.deck_id?.title || null
 
@@ -466,7 +515,7 @@ export default function StudySession() {
           // Non-fatal — history logging never interrupts the study experience
         })
     }
-  }, [sessionComplete, setViewContext, queueIntervention, cards, deckId, mode])
+  }, [sessionComplete, setViewContext, queueIntervention, visibleCards, deckId, mode])
 
   const handleFlip = React.useCallback(() => {
     setIsFlipped((prev) => !prev)
@@ -489,12 +538,63 @@ export default function StudySession() {
   // SAME stale card (or, combined with handleNext's own stale read, advance
   // currentIndex twice and crash with an out-of-bounds cards[currentIndex]
   // read). Reading/advancing through this ref instead closes that window.
-  const latestStateRef = useRef({ cards, currentIndex })
-  latestStateRef.current = { cards, currentIndex }
+  //
+  // Mirrors `visibleCards` (NOT `cards`) because every index in this component
+  // — including the one handleGrade reads — addresses the visible list. In
+  // study mode the two are the same reference, so handleGrade's `setCards`
+  // mutation source is unchanged; grading is unreachable in browse mode (no
+  // GradingButtons are mounted), so a filtered array can never be written back
+  // over the full deck.
+  const latestStateRef = useRef({ cards: visibleCards, currentIndex })
+  latestStateRef.current = { cards: visibleCards, currentIndex }
+
+  // The card the user is actually looking at, tracked by id so a filter change
+  // can put them back on it rather than dumping them at the top of a reshuffled
+  // list. Updated below by the same effect that consumes it.
+  const anchorCardIdRef = useRef(null)
+  const filterSignatureRef = useRef(selectedTags.join(','))
+
+  useEffect(() => {
+    const signature = selectedTags.join(',')
+
+    if (signature === filterSignatureRef.current) {
+      // Ordinary navigation — just keep the anchor pointed at what is on screen.
+      const card = visibleCards[currentIndex]
+      if (card) anchorCardIdRef.current = card._id || card.id
+      return
+    }
+
+    filterSignatureRef.current = signature
+    const next = visibleCards.findIndex((c) => (c._id || c.id) === anchorCardIdRef.current)
+
+    if (next >= 0) {
+      // The anchored card survived the filter change. Deliberately DO NOT touch
+      // isFlipped: the card on screen did not change, so re-hiding an answer
+      // the user is mid-read on would punish them for touching the filter.
+      setCurrentIndex(next)
+      latestStateRef.current = { cards: visibleCards, currentIndex: next }
+    } else {
+      // The anchored card was filtered out — this IS a card change, so the
+      // per-card view state resets with it.
+      setCurrentIndex(0)
+      setIsFlipped(false)
+      setSelectedAnswer(null)
+      setShowExplanation(false)
+      setMermaidSvg('')
+      latestStateRef.current = { cards: visibleCards, currentIndex: 0 }
+      const anchor = visibleCards[0]
+      anchorCardIdRef.current = anchor ? anchor._id || anchor.id : null
+    }
+    // Both branches write latestStateRef synchronously so the PERF-02/D-07
+    // double-click race guard can never serve the pre-filter index.
+    //
+    // Note what is NOT here: setSessionComplete. A filter narrowing to zero
+    // cards is an empty RESULT, never a finished session.
+  }, [selectedTags, visibleCards, currentIndex])
 
   const handleNext = React.useCallback(() => {
     const { currentIndex: latestIndex } = latestStateRef.current
-    if (latestIndex < cards.length - 1) {
+    if (latestIndex < visibleCards.length - 1) {
       const nextIndex = latestIndex + 1
       latestStateRef.current = { ...latestStateRef.current, currentIndex: nextIndex }
       setCurrentIndex(nextIndex)
@@ -505,7 +605,7 @@ export default function StudySession() {
     } else {
       setSessionComplete(true)
     }
-  }, [cards.length])
+  }, [visibleCards.length])
 
   const handleGrade = React.useCallback(
     async (grade) => {
@@ -663,6 +763,9 @@ export default function StudySession() {
         console.warn('Review queued for retry:', cardId, grade)
       }
     },
+    // `cards` stays in this dep list on purpose — it is the setCards mutation
+    // SOURCE, not a read source (every read goes through latestStateRef above),
+    // and it must remain the full deck.
     [cards, handleNext, mode, queueIntervention]
   )
 
@@ -748,11 +851,18 @@ export default function StudySession() {
             <Skeleton variant='rectangular' height={4} sx={{ borderRadius: 'sm' }} />
           </Box>
         </Stack>
+        {/* Reserve the filter row's height so it does not shove the card down
+            the moment tags resolve. The control itself cannot render yet —
+            the tags are literally unknown until the deck arrives. */}
+        {isReadOnlyMode && <Skeleton variant='rectangular' height={36} sx={{ borderRadius: 'sm', mb: 2 }} />}
         <Skeleton variant='rectangular' sx={{ flex: 1, borderRadius: 'xl', minHeight: 500 }} />
       </Container>
     )
   }
 
+  // Deck-empty / load-error gate reads the FULL deck on purpose: "this deck has
+  // no cards" and "your filter matched nothing" are different problems with
+  // different exits, and the second is handled inside the session layout below.
   if (loadError || cards.length === 0) {
     const emptyTitleKey = loadError
       ? 'cards.session.error'
@@ -862,10 +972,22 @@ export default function StudySession() {
     )
   }
 
-  const currentCard = cards[currentIndex]
-  const progress = ((currentIndex + 1) / cards.length) * 100
-  const isQuiz = currentCard.card_type === 'quiz'
-  const isVisual = currentCard.card_type === 'visual'
+  // An active filter that matches nothing renders INSIDE the session layout —
+  // never as a full-page replacement. Unmounting the header and the combobox
+  // would strand the user with no way to undo the filter that emptied the
+  // screen: a hard dead end.
+  const isFilteredEmpty = isFiltering && visibleCards.length === 0
+  // Narrowing the filter shrinks `visibleCards` one render BEFORE the
+  // re-anchor effect can correct `currentIndex`, so the committed index can
+  // briefly point past the end of the new list. Clamping here is what keeps
+  // that single frame from reading `undefined.title` and crashing the session.
+  // Falls back to 0 — the same landing spot the effect uses when the anchored
+  // card is gone — so the transient frame never contradicts where we end up.
+  const safeIndex = currentIndex < visibleCards.length ? currentIndex : 0
+  const currentCard = visibleCards[safeIndex]
+  const progress = visibleCards.length > 0 ? ((safeIndex + 1) / visibleCards.length) * 100 : 0
+  const isQuiz = currentCard?.card_type === 'quiz'
+  const isVisual = currentCard?.card_type === 'visual'
 
   return (
     <Container
@@ -891,521 +1013,566 @@ export default function StudySession() {
             <ArrowBack />
           </IconButton>
           <Box sx={{ flex: 1 }}>
-            <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 600, mb: 0.5 }}>
-              {t('cards.session.card', { current: currentIndex + 1, total: cards.length })}
-            </Typography>
-            <LinearProgress
-              determinate
-              value={progress}
-              color='primary'
-              sx={{
-                borderRadius: 'full',
-                bgcolor: 'background.level2',
-                height: 6,
-                boxShadow: 'none'
-              }}
-            />
+            {!isFilteredEmpty && (
+              <>
+                <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 600, mb: 0.5 }}>
+                  {t('cards.session.card', { current: safeIndex + 1, total: visibleCards.length })}
+                </Typography>
+                <LinearProgress
+                  determinate
+                  value={progress}
+                  color='primary'
+                  sx={{
+                    borderRadius: 'full',
+                    bgcolor: 'background.level2',
+                    height: 6,
+                    boxShadow: 'none'
+                  }}
+                />
+              </>
+            )}
           </Box>
         </Stack>
       )}
 
-      {/* Main Study Area */}
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={isFullscreen ? 0 : 4}
-        alignItems={isFullscreen ? 'center' : 'flex-start'}
-        justifyContent='center'
-        sx={{ flex: 1 }}
-      >
-        {/* Previous Button (Desktop) - Hide in Fullscreen/Mobile usually */}
-        {!isFullscreen && (
-          <IconButton
-            variant='plain'
-            color='neutral'
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-            sx={{ display: { xs: 'none', md: 'flex' }, mt: 20 }}
-          >
-            <ArrowBack fontSize='large' />
-          </IconButton>
-        )}
+      {/* Browse-only inline tag filter. Hidden in fullscreen (which is a
+          distraction-free reading surface) and on decks with no tags at all —
+          §11 progressive disclosure: a control with nothing to control is noise.
+          Stays mounted through the filtered-empty state below, which is the
+          user's only way back out of it. */}
+      {isReadOnlyMode && !isFullscreen && availableTags.length > 0 && (
+        <BrowseTagFilter
+          availableTags={availableTags}
+          selectedTags={selectedTags}
+          onChange={setTags}
+          shown={visibleCards.length}
+          total={cards.length}
+          t={t}
+        />
+      )}
 
-        {/* Card Container */}
-        <Box
-          data-testid='session-card'
-          sx={{
-            flex: 1,
-            width: '100%',
-            maxWidth: isFullscreen ? '100%' : 800,
-            position: isFullscreen ? 'fixed' : 'relative',
-            top: isFullscreen ? 0 : 'auto',
-            left: isFullscreen ? 0 : 'auto',
-            right: isFullscreen ? 0 : 'auto',
-            bottom: isFullscreen ? 0 : 'auto',
-            height: isFullscreen ? '100dvh' : 'auto',
-            overflow: isFullscreen ? 'hidden' : 'visible',
-            zIndex: isFullscreen ? Z_FULLSCREEN : 1,
-            bgcolor: 'background.body', // Ensure background prevents see-through
-            display: isFullscreen ? 'flex' : 'block',
-            flexDirection: 'column',
-            justifyContent: 'center'
-          }}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
-          {/* Fullscreen Toggle (Top-Left) */}
-          <IconButton
+      {isFilteredEmpty ? (
+        <Sheet data-testid='tag-filter-empty' variant='soft' color='neutral' sx={{ borderRadius: 'xl', p: 4, textAlign: 'center' }}>
+          <Typography level='title-md' sx={{ mb: 0.5 }}>
+            {t('cards.session.tagFilter.empty.title')}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            {t('cards.session.tagFilter.empty.body')}
+          </Typography>
+          <Button
             variant='plain'
-            color='neutral'
-            onClick={handleFullscreenToggle}
-            aria-label={isFullscreen ? t('cards.session.exitFullscreen') : t('cards.session.enterFullscreen')}
+            size='sm'
+            onClick={clearTags}
+            aria-label={t('cards.session.tagFilter.clear')}
             sx={{
-              display: { xs: 'inline-flex', md: 'none' },
-              position: 'absolute',
-              top: 16,
-              left: 16,
-              zIndex: 20,
-              minHeight: { xs: 44, md: 36 },
-              minWidth: { xs: 44, md: 36 },
-              bgcolor: isFullscreen ? 'background.level2' : 'transparent',
-              '&:hover': { bgcolor: isFullscreen ? 'background.level3' : 'background.level1' }
+              mt: 2,
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
             }}
           >
-            {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
-          </IconButton>
-
-          {/* Mobile-only swipe-gesture hint, first card only */}
-          {currentIndex === 0 && showSwipeHint && <SwipeHint />}
-
-          {/* Embedded TTS Controls */}
-          <TTSControls
-            compact
-            settingsOpen={showVoiceSettings}
-            onSettingsChange={setShowVoiceSettings}
-            voiceSettings={isFlipped ? activeVoiceSettings.back : activeVoiceSettings.front}
-            onVoiceSettingsChange={handleVoiceSettingsChange}
-            text={isQuiz ? `${currentCard.title}. ${currentCard.options?.join(', ')}` : isFlipped ? currentCard.content : currentCard.title}
-          />
-          {isQuiz ? (
-            // Quiz Card
-            <Card
-              variant={isFullscreen ? 'plain' : 'outlined'}
-              sx={{
-                height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
-                borderRadius: isFullscreen ? 0 : 'xl',
-                boxShadow: isFullscreen ? 'none' : 'sm',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
-                transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
-              }}
-              onMouseMove={handleCardMouseMove}
-              onMouseLeave={handleCardMouseLeave}
-              onMouseDown={() => setIsPressing(true)}
-              onMouseUp={() => setIsPressing(false)}
-              onTouchStart={() => setIsPressing(true)}
-              onTouchEnd={() => setIsPressing(false)}
-              onTouchCancel={() => setIsPressing(false)}
+            {t('cards.session.tagFilter.clear')}
+          </Button>
+        </Sheet>
+      ) : (
+        /* Main Study Area */
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={isFullscreen ? 0 : 4}
+          alignItems={isFullscreen ? 'center' : 'flex-start'}
+          justifyContent='center'
+          sx={{ flex: 1 }}
+        >
+          {/* Previous Button (Desktop) - Hide in Fullscreen/Mobile usually */}
+          {!isFullscreen && (
+            <IconButton
+              variant='plain'
+              color='neutral'
+              onClick={handlePrev}
+              disabled={safeIndex === 0}
+              sx={{ display: { xs: 'none', md: 'flex' }, mt: 20 }}
             >
-              {!isFullscreen && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    pointerEvents: 'none',
-                    zIndex: 10,
-                    opacity: glare.opacity,
-                    transition: 'opacity 0.3s ease',
-                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
-                    mixBlendMode: 'overlay',
-                    display: { xs: 'none', md: 'block' } // Glare is mouse-only
-                  }}
-                />
-              )}
-              <Box
-                data-testid='session-scroll'
-                sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
-              >
-                <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
-                  {t('cards.session.labels.quiz')}
-                </Typography>
-                <Typography level='h3' sx={{ mb: 4, fontWeight: 600 }}>
-                  {currentCard.title}
-                </Typography>
+              <ArrowBack fontSize='large' />
+            </IconButton>
+          )}
 
-                <RadioGroup value={selectedAnswer} onChange={(e) => handleQuizAnswer(e.target.value)}>
-                  <Stack spacing={2}>
-                    {currentCard.options?.map((option, idx) => (
-                      <Card
-                        key={idx}
-                        variant={selectedAnswer === option ? 'solid' : 'outlined'}
-                        color={
-                          showExplanation
-                            ? option === currentCard.correct_answer
-                              ? 'success'
-                              : option === selectedAnswer
-                                ? 'danger'
-                                : 'neutral'
-                            : selectedAnswer === option
-                              ? 'primary'
-                              : 'neutral'
-                        }
-                        sx={{
-                          cursor: showExplanation ? 'default' : 'pointer',
-                          transition: 'all 0.2s',
-                          '&:hover': !showExplanation
-                            ? { transform: 'translateY(-2px)', boxShadow: 'md', borderColor: 'primary.outlinedBorder' }
-                            : {}
-                        }}
-                        onClick={() => !showExplanation && handleQuizAnswer(option)}
-                      >
-                        <CardContent sx={{ p: 1.5 }}>
-                          <Typography level='body-md' fontWeight={selectedAnswer === option ? 600 : 400}>
-                            {option}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </Stack>
-                </RadioGroup>
-
-                {showExplanation && currentCard.explanation && (
-                  <Box
-                    sx={{
-                      mt: 3,
-                      p: 2,
-                      bgcolor: 'primary.softBg',
-                      borderRadius: 'md',
-                      borderLeft: '4px solid',
-                      borderColor: 'primary.outlinedBorder'
-                    }}
-                  >
-                    <Typography level='title-sm' color='primary' sx={{ mb: 1 }}>
-                      {t('cards.session.labels.explanation')}
-                    </Typography>
-                    <Typography level='body-sm'>{currentCard.explanation}</Typography>
-                  </Box>
-                )}
-              </Box>
-              <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
-                <SessionFooter
-                  showGrading={!isReadOnlyMode && showExplanation}
-                  mode={mode}
-                  modeChipColor={modeChipColor}
-                  currentIndex={currentIndex}
-                  cardsLength={cards.length}
-                  onGrade={handleGrade}
-                  pendingSyncCount={reviewQueue.length}
-                  t={t}
-                />
-              </Box>
-            </Card>
-          ) : isVisual ? (
-            // Visual Card
-            <Card
-              variant={isFullscreen ? 'plain' : 'outlined'}
+          {/* Card Container */}
+          <Box
+            data-testid='session-card'
+            sx={{
+              flex: 1,
+              width: '100%',
+              maxWidth: isFullscreen ? '100%' : 800,
+              position: isFullscreen ? 'fixed' : 'relative',
+              top: isFullscreen ? 0 : 'auto',
+              left: isFullscreen ? 0 : 'auto',
+              right: isFullscreen ? 0 : 'auto',
+              bottom: isFullscreen ? 0 : 'auto',
+              height: isFullscreen ? '100dvh' : 'auto',
+              overflow: isFullscreen ? 'hidden' : 'visible',
+              zIndex: isFullscreen ? Z_FULLSCREEN : 1,
+              bgcolor: 'background.body', // Ensure background prevents see-through
+              display: isFullscreen ? 'flex' : 'block',
+              flexDirection: 'column',
+              justifyContent: 'center'
+            }}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {/* Fullscreen Toggle (Top-Left) */}
+            <IconButton
+              variant='plain'
+              color='neutral'
+              onClick={handleFullscreenToggle}
+              aria-label={isFullscreen ? t('cards.session.exitFullscreen') : t('cards.session.enterFullscreen')}
               sx={{
-                height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
-                borderRadius: isFullscreen ? 0 : 'xl',
-                boxShadow: isFullscreen ? 'none' : 'sm',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
-                transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
+                display: { xs: 'inline-flex', md: 'none' },
+                position: 'absolute',
+                top: 16,
+                left: 16,
+                zIndex: 20,
+                minHeight: { xs: 44, md: 36 },
+                minWidth: { xs: 44, md: 36 },
+                bgcolor: isFullscreen ? 'background.level2' : 'transparent',
+                '&:hover': { bgcolor: isFullscreen ? 'background.level3' : 'background.level1' }
               }}
-              onMouseMove={handleCardMouseMove}
-              onMouseLeave={handleCardMouseLeave}
-              onMouseDown={() => setIsPressing(true)}
-              onMouseUp={() => setIsPressing(false)}
-              onTouchStart={() => setIsPressing(true)}
-              onTouchEnd={() => setIsPressing(false)}
-              onTouchCancel={() => setIsPressing(false)}
             >
-              {!isFullscreen && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    pointerEvents: 'none',
-                    zIndex: 10,
-                    opacity: glare.opacity,
-                    transition: 'opacity 0.3s ease',
-                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
-                    mixBlendMode: 'overlay',
-                    display: { xs: 'none', md: 'block' }
-                  }}
-                />
-              )}
-              <Box
-                data-testid='session-scroll'
-                sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
-              >
-                <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
-                  {t('cards.session.labels.visual')}
-                </Typography>
-                <Typography level='h3' sx={{ mb: 3, fontWeight: 600 }}>
-                  {currentCard.title}
-                </Typography>
+              {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
+            </IconButton>
 
-                <Box
-                  ref={mermaidRef}
-                  sx={{
-                    p: 4,
-                    border: '1px dashed',
-                    borderColor: 'neutral.outlinedBorder',
-                    borderRadius: 'lg',
-                    bgcolor: 'background.body',
-                    minHeight: 300,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    overflow: 'auto'
-                  }}
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mermaidSvg) }}
-                />
+            {/* Mobile-only swipe-gesture hint, first card only */}
+            {safeIndex === 0 && showSwipeHint && <SwipeHint />}
 
-                {currentCard.content && (
-                  <Box sx={{ mt: 3, p: 2, bgcolor: 'background.level1', borderRadius: 'md' }}>
-                    <Typography level='body-sm' textColor='text.secondary'>
-                      {currentCard.content}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-              <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
-                <SessionFooter
-                  showGrading={!isReadOnlyMode}
-                  mode={mode}
-                  modeChipColor={modeChipColor}
-                  currentIndex={currentIndex}
-                  cardsLength={cards.length}
-                  onGrade={handleGrade}
-                  pendingSyncCount={reviewQueue.length}
-                  t={t}
-                />
-              </Box>
-            </Card>
-          ) : (
-            // Flashcard — true 3D flip
-            <Box
-              sx={{
-                perspective: '1200px',
-                width: '100%',
-                height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
-                position: 'relative'
-              }}
-              onMouseMove={handleCardMouseMove}
-              onMouseLeave={handleCardMouseLeave}
-            >
-              <Box
+            {/* Embedded TTS Controls */}
+            <TTSControls
+              compact
+              settingsOpen={showVoiceSettings}
+              onSettingsChange={setShowVoiceSettings}
+              voiceSettings={isFlipped ? activeVoiceSettings.back : activeVoiceSettings.front}
+              onVoiceSettingsChange={handleVoiceSettingsChange}
+              text={
+                isQuiz ? `${currentCard.title}. ${currentCard.options?.join(', ')}` : isFlipped ? currentCard.content : currentCard.title
+              }
+            />
+            {isQuiz ? (
+              // Quiz Card
+              <Card
+                variant={isFullscreen ? 'plain' : 'outlined'}
                 sx={{
-                  position: 'relative',
-                  width: '100%',
                   height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
-                  transformStyle: 'preserve-3d',
-                  transition: 'transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1)',
-                  transform: `rotateY(${isFlipped ? 180 : 0}deg) scale3d(${isPressing && !isFullscreen ? 0.98 : 1}, ${isPressing && !isFullscreen ? 0.98 : 1}, 1)`,
-                  cursor: 'pointer'
+                  borderRadius: isFullscreen ? 0 : 'xl',
+                  boxShadow: isFullscreen ? 'none' : 'sm',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
+                  transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
                 }}
+                onMouseMove={handleCardMouseMove}
+                onMouseLeave={handleCardMouseLeave}
                 onMouseDown={() => setIsPressing(true)}
                 onMouseUp={() => setIsPressing(false)}
                 onTouchStart={() => setIsPressing(true)}
                 onTouchEnd={() => setIsPressing(false)}
                 onTouchCancel={() => setIsPressing(false)}
               >
-                {/* Front face */}
-                <Card
-                  variant={isFullscreen ? 'plain' : 'outlined'}
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
-                    borderRadius: isFullscreen ? 0 : 'xl',
-                    boxShadow: isFullscreen ? 'none' : 'sm',
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                    // Critical: prevent hidden front face from blocking grade buttons
-                    pointerEvents: isFlipped ? 'none' : 'auto',
-                    overflow: 'hidden',
-                    '&:hover': { boxShadow: isFullscreen ? 'none' : 'md', borderColor: 'primary.outlinedBorder' }
-                  }}
+                {!isFullscreen && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                      opacity: glare.opacity,
+                      transition: 'opacity 0.3s ease',
+                      background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                      mixBlendMode: 'overlay',
+                      display: { xs: 'none', md: 'block' } // Glare is mouse-only
+                    }}
+                  />
+                )}
+                <Box
+                  data-testid='session-scroll'
+                  sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
                 >
-                  {!isFullscreen && (
+                  <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                    {t('cards.session.labels.quiz')}
+                  </Typography>
+                  <Typography level='h3' sx={{ mb: 4, fontWeight: 600 }}>
+                    {currentCard.title}
+                  </Typography>
+
+                  <RadioGroup value={selectedAnswer} onChange={(e) => handleQuizAnswer(e.target.value)}>
+                    <Stack spacing={2}>
+                      {currentCard.options?.map((option, idx) => (
+                        <Card
+                          key={idx}
+                          variant={selectedAnswer === option ? 'solid' : 'outlined'}
+                          color={
+                            showExplanation
+                              ? option === currentCard.correct_answer
+                                ? 'success'
+                                : option === selectedAnswer
+                                  ? 'danger'
+                                  : 'neutral'
+                              : selectedAnswer === option
+                                ? 'primary'
+                                : 'neutral'
+                          }
+                          sx={{
+                            cursor: showExplanation ? 'default' : 'pointer',
+                            transition: 'all 0.2s',
+                            '&:hover': !showExplanation
+                              ? { transform: 'translateY(-2px)', boxShadow: 'md', borderColor: 'primary.outlinedBorder' }
+                              : {}
+                          }}
+                          onClick={() => !showExplanation && handleQuizAnswer(option)}
+                        >
+                          <CardContent sx={{ p: 1.5 }}>
+                            <Typography level='body-md' fontWeight={selectedAnswer === option ? 600 : 400}>
+                              {option}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </Stack>
+                  </RadioGroup>
+
+                  {showExplanation && currentCard.explanation && (
                     <Box
                       sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        pointerEvents: 'none',
-                        zIndex: 10,
-                        borderRadius: 'inherit',
-                        opacity: glare.opacity,
-                        transition: 'opacity 0.3s ease',
-                        background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
-                        mixBlendMode: 'overlay',
-                        display: { xs: 'none', md: 'block' }
+                        mt: 3,
+                        p: 2,
+                        bgcolor: 'primary.softBg',
+                        borderRadius: 'md',
+                        borderLeft: '4px solid',
+                        borderColor: 'primary.outlinedBorder'
                       }}
-                    />
+                    >
+                      <Typography level='title-sm' color='primary' sx={{ mb: 1 }}>
+                        {t('cards.session.labels.explanation')}
+                      </Typography>
+                      <Typography level='body-sm'>{currentCard.explanation}</Typography>
+                    </Box>
                   )}
-                  <CardContent
-                    onClick={handleFlip}
+                </Box>
+                <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
+                  <SessionFooter
+                    showGrading={!isReadOnlyMode && showExplanation}
+                    mode={mode}
+                    modeChipColor={modeChipColor}
+                    currentIndex={safeIndex}
+                    cardsLength={visibleCards.length}
+                    onGrade={handleGrade}
+                    pendingSyncCount={reviewQueue.length}
+                    t={t}
+                  />
+                </Box>
+              </Card>
+            ) : isVisual ? (
+              // Visual Card
+              <Card
+                variant={isFullscreen ? 'plain' : 'outlined'}
+                sx={{
+                  height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
+                  borderRadius: isFullscreen ? 0 : 'xl',
+                  boxShadow: isFullscreen ? 'none' : 'sm',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27)',
+                  transform: isPressing && !isFullscreen ? 'scale3d(0.98, 0.98, 0.98)' : 'scale3d(1, 1, 1)'
+                }}
+                onMouseMove={handleCardMouseMove}
+                onMouseLeave={handleCardMouseLeave}
+                onMouseDown={() => setIsPressing(true)}
+                onMouseUp={() => setIsPressing(false)}
+                onTouchStart={() => setIsPressing(true)}
+                onTouchEnd={() => setIsPressing(false)}
+                onTouchCancel={() => setIsPressing(false)}
+              >
+                {!isFullscreen && (
+                  <Box
                     sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                      opacity: glare.opacity,
+                      transition: 'opacity 0.3s ease',
+                      background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                      mixBlendMode: 'overlay',
+                      display: { xs: 'none', md: 'block' }
+                    }}
+                  />
+                )}
+                <Box
+                  data-testid='session-scroll'
+                  sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
+                >
+                  <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                    {t('cards.session.labels.visual')}
+                  </Typography>
+                  <Typography level='h3' sx={{ mb: 3, fontWeight: 600 }}>
+                    {currentCard.title}
+                  </Typography>
+
+                  <Box
+                    ref={mermaidRef}
+                    sx={{
+                      p: 4,
+                      border: '1px dashed',
+                      borderColor: 'neutral.outlinedBorder',
+                      borderRadius: 'lg',
+                      bgcolor: 'background.body',
+                      minHeight: 300,
                       display: 'flex',
-                      flexDirection: 'column',
                       justifyContent: 'center',
                       alignItems: 'center',
-                      textAlign: 'center',
-                      height: '100%',
-                      cursor: 'pointer',
-                      p: { xs: 3, md: 4 }
+                      overflow: 'auto'
                     }}
-                  >
-                    <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
-                      {t('cards.session.labels.question')}
-                    </Typography>
-                    <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600, whiteSpace: 'pre-wrap' }}>
-                      {currentCard.title}
-                    </Typography>
-                    <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'text.tertiary' }}>
-                      <Box component='span' sx={{ display: { xs: 'inline', md: 'none' } }}>
-                        {t('cards.session.hints.tapFlip')}
-                      </Box>
-                      <Box component='span' sx={{ display: { xs: 'none', md: 'inline' } }}>
-                        {t('cards.session.hints.clickFlip')}
-                      </Box>
-                    </Typography>
-                  </CardContent>
-                </Card>
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mermaidSvg) }}
+                  />
 
-                {/* Back face */}
-                <Card
-                  variant={isFullscreen ? 'plain' : 'outlined'}
-                  onClick={handleFlip}
+                  {currentCard.content && (
+                    <Box sx={{ mt: 3, p: 2, bgcolor: 'background.level1', borderRadius: 'md' }}>
+                      <Typography level='body-sm' textColor='text.secondary'>
+                        {currentCard.content}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+                <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
+                  <SessionFooter
+                    showGrading={!isReadOnlyMode}
+                    mode={mode}
+                    modeChipColor={modeChipColor}
+                    currentIndex={safeIndex}
+                    cardsLength={visibleCards.length}
+                    onGrade={handleGrade}
+                    pendingSyncCount={reviewQueue.length}
+                    t={t}
+                  />
+                </Box>
+              </Card>
+            ) : (
+              // Flashcard — true 3D flip
+              <Box
+                sx={{
+                  perspective: '1200px',
+                  width: '100%',
+                  height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
+                  position: 'relative'
+                }}
+                onMouseMove={handleCardMouseMove}
+                onMouseLeave={handleCardMouseLeave}
+              >
+                <Box
                   sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
+                    position: 'relative',
+                    width: '100%',
                     height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
-                    borderRadius: isFullscreen ? 0 : 'xl',
-                    boxShadow: isFullscreen ? 'none' : 'sm',
-                    transform: 'rotateY(180deg)',
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                    // Critical: only receive pointer events when this face is visible
-                    pointerEvents: isFlipped ? 'auto' : 'none',
-                    borderColor: 'primary.outlinedBorder',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
+                    transformStyle: 'preserve-3d',
+                    transition: 'transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1)',
+                    transform: `rotateY(${isFlipped ? 180 : 0}deg) scale3d(${isPressing && !isFullscreen ? 0.98 : 1}, ${isPressing && !isFullscreen ? 0.98 : 1}, 1)`,
                     cursor: 'pointer'
                   }}
+                  onMouseDown={() => setIsPressing(true)}
+                  onMouseUp={() => setIsPressing(false)}
+                  onTouchStart={() => setIsPressing(true)}
+                  onTouchEnd={() => setIsPressing(false)}
+                  onTouchCancel={() => setIsPressing(false)}
                 >
-                  {!isFullscreen && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        pointerEvents: 'none',
-                        zIndex: 10,
-                        borderRadius: 'inherit',
-                        opacity: glare.opacity,
-                        transition: 'opacity 0.3s ease',
-                        background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
-                        mixBlendMode: 'overlay',
-                        display: { xs: 'none', md: 'block' }
-                      }}
-                    />
-                  )}
-                  {/* Explicit overflowY:auto + minHeight:0 — this face previously had NO overflow
-                      handling at all on its CardContent (RESEARCH.md Pitfall B) */}
-                  <Box
-                    data-testid='session-scroll'
+                  {/* Front face */}
+                  <Card
+                    variant={isFullscreen ? 'plain' : 'outlined'}
                     sx={{
-                      flex: '1 1 auto',
-                      minHeight: 0,
-                      overflowY: 'auto',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      textAlign: 'center',
-                      p: { xs: 3, md: 4 }
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
+                      borderRadius: isFullscreen ? 0 : 'xl',
+                      boxShadow: isFullscreen ? 'none' : 'sm',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      // Critical: prevent hidden front face from blocking grade buttons
+                      pointerEvents: isFlipped ? 'none' : 'auto',
+                      overflow: 'hidden',
+                      '&:hover': { boxShadow: isFullscreen ? 'none' : 'md', borderColor: 'primary.outlinedBorder' }
                     }}
                   >
-                    <Typography
-                      level='body-xs'
+                    {!isFullscreen && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          pointerEvents: 'none',
+                          zIndex: 10,
+                          borderRadius: 'inherit',
+                          opacity: glare.opacity,
+                          transition: 'opacity 0.3s ease',
+                          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                          mixBlendMode: 'overlay',
+                          display: { xs: 'none', md: 'block' }
+                        }}
+                      />
+                    )}
+                    <CardContent
+                      onClick={handleFlip}
                       sx={{
-                        mb: { xs: 1.5, md: 2 },
-                        color: 'success.plainColor',
-                        fontWeight: 600,
-                        letterSpacing: '0.5px'
-                      }}
-                    >
-                      {t('cards.session.labels.answer')}
-                    </Typography>
-                    <Typography
-                      level={currentCard.content?.length > 100 ? 'body-lg' : 'h3'}
-                      sx={{
-                        wordBreak: 'break-word',
-                        whiteSpace: 'pre-wrap',
-                        fontWeight: currentCard.content?.length > 100 ? 400 : 500,
-                        fontSize: currentCard.content?.length > 100 ? { xs: '1rem', md: '1.125rem' } : { xs: '1.5rem', md: '2rem' },
-                        lineHeight: currentCard.content?.length > 100 ? 1.6 : 1.3,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
                         textAlign: 'center',
-                        width: '100%',
-                        maxWidth: { xs: '100%', md: 600 },
-                        color: 'text.primary'
+                        height: '100%',
+                        cursor: 'pointer',
+                        p: { xs: 3, md: 4 }
                       }}
                     >
-                      {currentCard.content}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
-                    <SessionFooter
-                      showGrading={!isReadOnlyMode}
-                      mode={mode}
-                      modeChipColor={modeChipColor}
-                      currentIndex={currentIndex}
-                      cardsLength={cards.length}
-                      onGrade={handleGrade}
-                      pendingSyncCount={reviewQueue.length}
-                      t={t}
-                    />
-                  </Box>
-                </Card>
-              </Box>
-            </Box>
-          )}
-        </Box>
+                      <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                        {t('cards.session.labels.question')}
+                      </Typography>
+                      <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600, whiteSpace: 'pre-wrap' }}>
+                        {currentCard.title}
+                      </Typography>
+                      <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'text.tertiary' }}>
+                        <Box component='span' sx={{ display: { xs: 'inline', md: 'none' } }}>
+                          {t('cards.session.hints.tapFlip')}
+                        </Box>
+                        <Box component='span' sx={{ display: { xs: 'none', md: 'inline' } }}>
+                          {t('cards.session.hints.clickFlip')}
+                        </Box>
+                      </Typography>
+                    </CardContent>
+                  </Card>
 
-        {/* Next Button (Desktop) - Hide in Fullscreen */}
-        {!isFullscreen && (
-          <IconButton
-            variant='plain'
-            color='neutral'
-            onClick={handleNext}
-            disabled={currentIndex === cards.length - 1}
-            sx={{ display: { xs: 'none', md: 'flex' }, mt: 20 }}
-          >
-            <ArrowForward fontSize='large' />
-          </IconButton>
-        )}
-      </Stack>
+                  {/* Back face */}
+                  <Card
+                    variant={isFullscreen ? 'plain' : 'outlined'}
+                    onClick={handleFlip}
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: isFullscreen ? '100dvh' : { xs: 'min(560px, calc(100dvh - 96px))', md: 500 },
+                      borderRadius: isFullscreen ? 0 : 'xl',
+                      boxShadow: isFullscreen ? 'none' : 'sm',
+                      transform: 'rotateY(180deg)',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      // Critical: only receive pointer events when this face is visible
+                      pointerEvents: isFlipped ? 'auto' : 'none',
+                      borderColor: 'primary.outlinedBorder',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {!isFullscreen && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          pointerEvents: 'none',
+                          zIndex: 10,
+                          borderRadius: 'inherit',
+                          opacity: glare.opacity,
+                          transition: 'opacity 0.3s ease',
+                          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, var(--joy-palette-neutral-softBg) 0%, transparent 60%)`,
+                          mixBlendMode: 'overlay',
+                          display: { xs: 'none', md: 'block' }
+                        }}
+                      />
+                    )}
+                    {/* Explicit overflowY:auto + minHeight:0 — this face previously had NO overflow
+                      handling at all on its CardContent (RESEARCH.md Pitfall B) */}
+                    <Box
+                      data-testid='session-scroll'
+                      sx={{
+                        flex: '1 1 auto',
+                        minHeight: 0,
+                        overflowY: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                        p: { xs: 3, md: 4 }
+                      }}
+                    >
+                      <Typography
+                        level='body-xs'
+                        sx={{
+                          mb: { xs: 1.5, md: 2 },
+                          color: 'success.plainColor',
+                          fontWeight: 600,
+                          letterSpacing: '0.5px'
+                        }}
+                      >
+                        {t('cards.session.labels.answer')}
+                      </Typography>
+                      <Typography
+                        level={currentCard.content?.length > 100 ? 'body-lg' : 'h3'}
+                        sx={{
+                          wordBreak: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                          fontWeight: currentCard.content?.length > 100 ? 400 : 500,
+                          fontSize: currentCard.content?.length > 100 ? { xs: '1rem', md: '1.125rem' } : { xs: '1.5rem', md: '2rem' },
+                          lineHeight: currentCard.content?.length > 100 ? 1.6 : 1.3,
+                          textAlign: 'center',
+                          width: '100%',
+                          maxWidth: { xs: '100%', md: 600 },
+                          color: 'text.primary'
+                        }}
+                      >
+                        {currentCard.content}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ flex: '0 0 auto', px: { xs: 3, md: 4 }, pb: { xs: 3, md: 4 } }}>
+                      <SessionFooter
+                        showGrading={!isReadOnlyMode}
+                        mode={mode}
+                        modeChipColor={modeChipColor}
+                        currentIndex={safeIndex}
+                        cardsLength={visibleCards.length}
+                        onGrade={handleGrade}
+                        pendingSyncCount={reviewQueue.length}
+                        t={t}
+                      />
+                    </Box>
+                  </Card>
+                </Box>
+              </Box>
+            )}
+          </Box>
+
+          {/* Next Button (Desktop) - Hide in Fullscreen */}
+          {!isFullscreen && (
+            <IconButton
+              variant='plain'
+              color='neutral'
+              onClick={handleNext}
+              disabled={safeIndex === visibleCards.length - 1}
+              sx={{ display: { xs: 'none', md: 'flex' }, mt: 20 }}
+            >
+              <ArrowForward fontSize='large' />
+            </IconButton>
+          )}
+        </Stack>
+      )}
     </Container>
   )
 }

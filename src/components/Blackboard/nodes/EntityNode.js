@@ -57,6 +57,24 @@ const EntityNode = memo(({ data, selected }) => {
       <Handle type='target' position={Position.Top} style={{ opacity: 0, width: 8, height: 8 }} />
       <Handle type='source' position={Position.Bottom} style={{ opacity: 0, width: 8, height: 8 }} />
 
+      {/*
+        Type sizing note — read before reintroducing a sub-12px fontSize here.
+
+        These are @xyflow/react nodes on a zoomable canvas, so the tempting
+        argument is that canvas text scales with zoom and a 0.6rem value is not
+        really 9.6px to the user. That argument does not hold for this board:
+        BlackboardModal mounts ReactFlow with `defaultViewport` initialised to
+        `{ x: 0, y: 0, zoom: 1 }` and no `fitView`, so the canvas opens at 1:1
+        and 0.6rem was a literal 9.6px on screen until the user manually zoomed.
+
+        The overrides are therefore gone and these render at the theme floor
+        (body-xs = 12px). If the board ever gains a fitView or a default zoom
+        above 1, this is worth re-deriving — but derive it, do not assume it.
+
+        Note also that `Blackboard/nodes/**` is excluded from the
+        no-restricted-syntax lint rule (raw @xyflow `style` objects), so nothing
+        will flag a regression here automatically.
+      */}
       {/* Type chip */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
         <Icon sx={{ fontSize: 14, color: palette.plainColor }} />
@@ -66,8 +84,6 @@ const EntityNode = memo(({ data, selected }) => {
             bgcolor: literal.plainColor + '22',
             color: palette.plainColor,
             fontWeight: 700,
-            fontSize: '0.6rem',
-            height: 18,
             px: 0.75
           }}
         >
@@ -117,7 +133,7 @@ const EntityNode = memo(({ data, selected }) => {
             bgcolor: 'background.level1'
           }}
         >
-          <Typography level='body-xs' sx={{ fontSize: '0.6rem', color: palette.plainColor, opacity: 0.8, textTransform: 'capitalize' }}>
+          <Typography level='body-xs' sx={{ color: palette.plainColor, opacity: 0.8, textTransform: 'capitalize' }}>
             {data.status?.replace('_', ' ')}
           </Typography>
         </Box>
@@ -125,7 +141,7 @@ const EntityNode = memo(({ data, selected }) => {
 
       {/* Area name */}
       {data.areaName && (
-        <Typography level='body-xs' sx={{ mt: 0.5, fontSize: '0.6rem', color: palette.plainColor, opacity: 0.6 }}>
+        <Typography level='body-xs' sx={{ mt: 0.5, color: palette.plainColor, opacity: 0.6 }}>
           {data.areaName}
         </Typography>
       )}

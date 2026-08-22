@@ -38,10 +38,23 @@ const MAX_INPUT_CHARS = 20000
 // Fixed count options offered in the regenerate menu (besides 'auto')
 const REGENERATE_COUNT_OPTIONS = [3, 5, 10, 20]
 
+/**
+ * @param {object}   props
+ * @param {Array}    props.cards               Generated cards, `{title, content}`.
+ * @param {object}   [props.book]              Source book, when the cards came from one.
+ * @param {string}   [props.newDeckNameDefault] Pre-fill for the inline create-deck name.
+ *   Defaults to the book's title, which is where every pre-existing caller got it.
+ * @param {Function} [props.onSaved]           Called with the number of cards actually
+ *   written, once a save attempt has persisted at least one. Distinct from `onCancel`,
+ *   which fires for a dismissal *and* after a full save — a caller that needs to know
+ *   whether anything reached the library cannot tell those two apart otherwise.
+ */
 export default function GeneratedCards({
   cards = [],
   book,
+  newDeckNameDefault,
   onCancel,
+  onSaved,
   onGenerateAgain,
   onGenerateMore,
   isStreaming = false,
@@ -152,11 +165,15 @@ export default function GeneratedCards({
         } catch (error) {
           if (error?.response?.status === 403) {
             setPartialSave({ saved, total: cardsToSave.length })
+            // Some cards did reach the library. A caller told nothing happened
+            // would then contradict what the user can see in their decks.
+            if (saved > 0) onSaved?.(saved)
             return
           }
           throw error
         }
       }
+      onSaved?.(saved)
       onCancel() // Close modal on full success
     } catch (error) {
       console.error('Error saving cards:', error)
@@ -180,7 +197,11 @@ export default function GeneratedCards({
           borderRadius: 'xl',
           boxShadow: 'lg',
           maxHeight: '85vh',
-          minWidth: 600,
+          // `minWidth` beats `maxWidth` in CSS, so a flat 600 forced a 375px
+          // viewport to scroll sideways. Onboarding's AI fallback is the first
+          // caller that is mobile-first, and every other caller gains from it.
+          width: { xs: 'calc(100% - 2rem)', sm: 'auto' },
+          minWidth: { xs: 0, sm: 600 },
           p: 0, // Remove default padding to control layout manually
           overflow: 'hidden', // Prevent dialog itself from scrolling
           display: 'flex',
@@ -468,7 +489,7 @@ export default function GeneratedCards({
           )}
 
           {step === 'select_deck' && (
-            <SaveToDeckStep deckType='flashcard' saveToDeck={saveToDeck} createDeckDescriptionDefault={book?.title} />
+            <SaveToDeckStep deckType='flashcard' saveToDeck={saveToDeck} createDeckDescriptionDefault={newDeckNameDefault ?? book?.title} />
           )}
         </Box>
 

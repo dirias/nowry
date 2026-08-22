@@ -102,6 +102,7 @@ export default function CreateCardModal({ open, onClose, onCardSaved, decks = []
           decks={decks}
           refFor={form.refFor}
           tagInputRef={form.tagInputRef}
+          tagSuggestions={form.tagSuggestions}
         />
       </Stack>
     </FormSheet>
