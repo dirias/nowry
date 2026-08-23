@@ -117,7 +117,7 @@ const Header = () => {
   const location = useLocation()
   const { user, logout: contextLogout } = useAuth()
   const isLoggedIn = !!user
-  const displayName = user?.full_name || user?.username || user?.email?.split('@')[0] || ''
+  const displayName = user?.username || user?.email?.split('@')[0] || ''
   const resolvedAvatarUrl = user?.avatar_url || user?.photo_url || user?.avatar || undefined
   const { t } = useTranslation()
   const { petName, isInStudySession } = usePet()

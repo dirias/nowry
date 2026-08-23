@@ -281,6 +281,8 @@ export default function AgentSettings() {
     knowledgeAccessEnabled,
     proactiveNudgingEnabled,
     isRoamingEnabled,
+    isActive: isPetActive,
+    setPetActive,
     petName: ctxPetName,
     petSpecies: ctxPetSpecies,
     petColor: ctxPetColor,
@@ -480,6 +482,14 @@ export default function AgentSettings() {
   const handleRoaming = (val) => {
     setRoamingEnabled(val)
     save('agent_roaming_enabled', val)
+  }
+  const handlePetActive = async (val) => {
+    setSaving('pet_active')
+    setSaved(null)
+    await setPetActive(val)
+    setSaved('pet_active')
+    setSaving(null)
+    setTimeout(() => setSaved(null), 2000)
   }
   const handleQuizQuestionCount = (val) => {
     setQuizQuestionCount(val)
@@ -781,6 +791,30 @@ export default function AgentSettings() {
                         {t('agent.settings.personality.knowledge.unlockAlert')}
                       </Alert>
                     )}
+
+                    {/* Study buddy activation toggle */}
+                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                      <Box sx={{ flex: 1, pr: 2 }}>
+                        <Stack direction='row' spacing={1} alignItems='center'>
+                          <Typography level='title-sm'>{t('agent.settings.activation.label')}</Typography>
+                          <PetsRounded sx={{ fontSize: 14, color: 'text.tertiary' }} />
+                        </Stack>
+                        <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                          {t('agent.settings.activation.description')}
+                        </Typography>
+                      </Box>
+                      <Stack direction='row' spacing={1} alignItems='center'>
+                        <SaveStatus field='pet_active' />
+                        <Switch
+                          id='agent-pet-active-toggle'
+                          aria-label={t('agent.settings.activation.ariaLabel')}
+                          checked={isPetActive}
+                          onChange={(e) => handlePetActive(e.target.checked)}
+                          disabled={saving === 'pet_active'}
+                          color={isPetActive ? 'primary' : 'neutral'}
+                        />
+                      </Stack>
+                    </Stack>
 
                     {/* Roaming toggle */}
                     <Stack direction='row' justifyContent='space-between' alignItems='center'>

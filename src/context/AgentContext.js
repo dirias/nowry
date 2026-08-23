@@ -19,11 +19,20 @@ import React, { createContext, useCallback, useContext, useEffect, useReducer, u
 import { useTranslation } from 'react-i18next'
 import { useAuth } from './AuthContext'
 import { agentService } from '../api/services/agent.service'
+import petService from '../api/services/petService'
 
 // ---------------------------------------------------------------------------
 // State shape
 // ---------------------------------------------------------------------------
 const initialState = {
+  /** Whether the pet is mounted/visible at all — default-off for new accounts until reveal */
+  isActive: false,
+  /** Whether the contextual first-reveal has already happened for this account */
+  hasBeenRevealed: false,
+  /** True immediately after the first-reveal fires, triggers the celebration overlay */
+  justRevealed: false,
+  /** { pet_active, pet_revealed, already_revealed, cardsReviewed } while celebrating, null otherwise */
+  revealData: null,
   /** Whether the chat panel is open */
   isOpen: false,
   /** Current animation/emotion state of the pet avatar */
@@ -121,6 +130,8 @@ function agentReducer(state, action) {
     case 'INIT':
       return {
         ...state,
+        isActive: action.payload.pet_active ?? true,
+        hasBeenRevealed: action.payload.pet_revealed ?? true,
         mood: action.payload.mood,
         level: action.payload.level,
         xp: action.payload.current_xp ?? 0,
@@ -280,6 +291,18 @@ function agentReducer(state, action) {
       }
     case 'LEVEL_UP_CLEAR':
       return { ...state, justLeveledUp: false, levelUpData: null }
+    case 'SET_PET_ACTIVE':
+      return { ...state, isActive: action.payload }
+    case 'PET_REVEALED':
+      return {
+        ...state,
+        isActive: true,
+        hasBeenRevealed: true,
+        justRevealed: true,
+        revealData: action.payload
+      }
+    case 'PET_REVEAL_CLEAR':
+      return { ...state, justRevealed: false, revealData: null }
     case 'COMPANION_LOADING':
       return { ...state, companionIsLoading: true, companionMessage: null }
     case 'COMPANION_SUCCESS':
@@ -363,7 +386,7 @@ export const AgentProvider = ({ children }) => {
           payload: {
             mood: 'idle',
             level: 1,
-            preferred_name: user.full_name || user.username || 'there',
+            preferred_name: user.username || 'there',
             tier: user.subscription?.tier || 'free',
             messages_used: 0,
             messages_limit: 50,
@@ -513,6 +536,39 @@ export const AgentProvider = ({ children }) => {
   const levelUpClear = useCallback(() => dispatch({ type: 'LEVEL_UP_CLEAR' }), [])
 
   /**
+   * Toggle whether the pet is mounted/visible at all.
+   * Optimistic — flips local state immediately, rolls back if the write fails.
+   * @param {boolean} active
+   */
+  const setPetActive = useCallback(async (active) => {
+    const previous = stateRef.current.isActive
+    dispatch({ type: 'SET_PET_ACTIVE', payload: active })
+    try {
+      await petService.updatePetPreferences({ pet_active: active })
+    } catch {
+      // Revert on failure
+      dispatch({ type: 'SET_PET_ACTIVE', payload: previous })
+    }
+  }, [])
+
+  /**
+   * Fire the pet's contextual first-reveal. Idempotent on the backend — call
+   * once, first time only (guarded by hasBeenRevealed at the call site).
+   * Non-fatal on failure: no error UI, it simply retries next session.
+   * @param {number} [cardsReviewed] - Cards reviewed in the session that triggered the reveal, for the celebration copy.
+   */
+  const revealPet = useCallback(async (cardsReviewed = 0) => {
+    try {
+      const data = await agentService.revealPet()
+      dispatch({ type: 'PET_REVEALED', payload: { ...data, cardsReviewed } })
+    } catch {
+      // Non-fatal — will simply retry next session
+    }
+  }, [])
+
+  const petRevealClear = useCallback(() => dispatch({ type: 'PET_REVEAL_CLEAR' }), [])
+
+  /**
    * Queue a proactive companion intervention.
    * Respects the per-session cap (2 interventions max) and the silent window
    * applied after the user dismisses a message.
@@ -635,6 +691,9 @@ export const AgentProvider = ({ children }) => {
         updateAgentPrefs,
         updatePetCustomization,
         levelUpClear,
+        setPetActive,
+        revealPet,
+        petRevealClear,
         generateAvatar,
         clearAvatarUrl,
         generateAnimation,

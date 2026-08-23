@@ -387,9 +387,9 @@
       "empty": {
         "title": "{{topic}}の公式デッキはまだありません",
         "body": "Nowryはトピックごとに公式デッキを公開していて、{{topic}}はまだ対象になっていません。選んだトピックと目標は保存されています。",
-        "fallbackTitle": "代わりにAIで作成する",
-        "fallbackBody": "AIで作ったデッキはNowryの審査を受けておらず、初期設定は完了しませんが、今すぐ試すことはできます。",
-        "fallbackAction": "AIで作成"
+        "fallbackTitle": "代わりにAIで下書きを作成する",
+        "fallbackBody": "AIの下書きはNowryの審査を受けておらず、初期設定は完了しませんが、今すぐ下書きから始めて自分で仕上げることができます。",
+        "fallbackAction": "AIで下書きを作成"
       },
       "fallback": {
         "pending": "カードを作成しています…",
@@ -665,7 +665,9 @@
     },
     "account": {
       "title": "アカウント",
-      "fullName": "表示名",
+      "username": "ユーザー名",
+      "usernameInvalid": "ユーザー名は3〜30文字で、英数字・アンダースコア・ハイフンのみ使用できます。",
+      "usernameTaken": "そのユーザー名はすでに使用されています",
       "emailManaged": "メールは認証プロバイダーによって管理されています",
       "editPhoto": "写真を変更"
     },
@@ -1538,6 +1540,11 @@
     "levelUp": {
       "reached": "レベル{{level}}に到達しました",
       "dismiss": "タップして閉じる"
+    },
+    "reveal": {
+      "title": "スタディバディに挨拶しよう",
+      "subtitle_other": "{{count}}枚のカードを復習しましたね — これからもここでサポートします。",
+      "dismiss": "タップして続ける"
     }
   },
   "agent": {
@@ -1549,6 +1556,11 @@
       "interventions": "介入"
     },
     "settings": {
+      "activation": {
+        "label": "スタディバディ",
+        "description": "Nowryを使っている間、スタディバディを画面上に表示します。",
+        "ariaLabel": "スタディバディを表示"
+      },
       "interventions": {
         "requiresNudging": "介入を設定するには、「個性」タブでプロアクティブなリマインダーを有効にしてください。",
         "saveError": "保存できませんでした。もう一度お試しください。",

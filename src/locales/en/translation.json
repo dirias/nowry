@@ -516,9 +516,9 @@
       "empty": {
         "title": "No official {{topic}} decks yet",
         "body": "Nowry publishes official decks topic by topic, and {{topic}} isn't covered yet. Your topics and goal are saved.",
-        "fallbackTitle": "Generate one with AI instead",
-        "fallbackBody": "An AI deck isn't reviewed by Nowry and doesn't finish your setup, but you can try one now.",
-        "fallbackAction": "Generate with AI"
+        "fallbackTitle": "Draft one with AI instead",
+        "fallbackBody": "AI drafts aren't reviewed by Nowry and won't finish your setup, but you can start from one now and refine it yourself.",
+        "fallbackAction": "Draft with AI"
       },
       "fallback": {
         "pending": "Generating cards…",
@@ -745,7 +745,9 @@
     },
     "account": {
       "title": "Account",
-      "fullName": "Display name",
+      "username": "Username",
+      "usernameInvalid": "Username must be 3–30 characters and contain only letters, numbers, underscores, or hyphens.",
+      "usernameTaken": "That username is already taken",
       "emailManaged": "Email is managed by your authentication provider",
       "editPhoto": "Change photo"
     },
@@ -2607,6 +2609,12 @@
     "levelUp": {
       "reached": "You reached level {{level}}",
       "dismiss": "Tap to dismiss"
+    },
+    "reveal": {
+      "title": "Say hello to your study companion",
+      "subtitle_one": "You just reviewed {{count}} card — I'll be here to help you keep going.",
+      "subtitle_other": "You just reviewed {{count}} cards — I'll be here to help you keep going.",
+      "dismiss": "Tap anywhere to continue"
     }
   },
   "quiz": {
@@ -2756,6 +2764,11 @@
       "xpToNextLevel": "{{count}} XP to next level",
       "sparks": "sparks",
       "previewMessage": "What should I study today?",
+      "activation": {
+        "label": "Study buddy",
+        "description": "Show your study buddy floating on screen while you use Nowry.",
+        "ariaLabel": "Show study buddy"
+      },
       "personality": {
         "replyLength": {
           "title": "Reply Length",

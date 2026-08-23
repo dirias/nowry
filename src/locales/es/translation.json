@@ -390,9 +390,9 @@
       "empty": {
         "title": "Todavía no hay mazos oficiales de {{topic}}",
         "body": "Nowry publica los mazos oficiales tema a tema, y {{topic}} aún no está cubierto. Tus temas y tu objetivo están guardados.",
-        "fallbackTitle": "Generar uno con IA",
-        "fallbackBody": "Un mazo generado con IA no pasa por la revisión de Nowry y no completa tu configuración, pero puedes probarlo ahora.",
-        "fallbackAction": "Generar con IA"
+        "fallbackTitle": "Generar un borrador con IA",
+        "fallbackBody": "Un borrador con IA no pasa por la revisión de Nowry y no completa tu configuración, pero puedes empezar con uno ahora y perfeccionarlo tú mismo.",
+        "fallbackAction": "Generar borrador con IA"
       },
       "fallback": {
         "pending": "Generando tarjetas…",
@@ -618,7 +618,9 @@
     },
     "account": {
       "title": "Cuenta",
-      "fullName": "Nombre de visualización",
+      "username": "Nombre de usuario",
+      "usernameInvalid": "El nombre de usuario debe tener entre 3 y 30 caracteres y contener solo letras, números, guiones bajos o guiones.",
+      "usernameTaken": "Ese nombre de usuario ya está en uso",
       "emailManaged": "El correo electrónico está gestionado por tu proveedor de autenticación",
       "editPhoto": "Cambiar foto"
     },
@@ -2323,6 +2325,12 @@
     "levelUp": {
       "reached": "Llegaste al nivel {{level}}",
       "dismiss": "Toca para cerrar"
+    },
+    "reveal": {
+      "title": "Saluda a tu compañero de estudio",
+      "subtitle_one": "Acabas de repasar {{count}} tarjeta — estaré aquí para ayudarte a seguir adelante.",
+      "subtitle_other": "Acabas de repasar {{count}} tarjetas — estaré aquí para ayudarte a seguir adelante.",
+      "dismiss": "Toca en cualquier lugar para continuar"
     }
   },
   "quiz": {
@@ -2472,6 +2480,11 @@
       "xpToNextLevel": "{{count}} XP para el siguiente nivel",
       "sparks": "chispas",
       "previewMessage": "¿Qué debería estudiar hoy?",
+      "activation": {
+        "label": "Compañero de estudio",
+        "description": "Muestra a tu compañero de estudio flotando en la pantalla mientras usas Nowry.",
+        "ariaLabel": "Mostrar compañero de estudio"
+      },
       "personality": {
         "replyLength": {
           "title": "Longitud de respuesta",

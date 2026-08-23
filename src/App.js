@@ -29,7 +29,7 @@ import DevBugReportButton from './components/Dev/DevBugReportButton'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PomodoroProvider } from './context/PomodoroContext'
 import { NotificationProvider } from './context/NotificationContext'
-import { AgentProvider } from './context/AgentContext'
+import { AgentProvider, usePet } from './context/AgentContext'
 import { SubscriptionProvider } from './context/SubscriptionContext'
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/Common/ErrorBoundary'
@@ -109,6 +109,7 @@ const PageLoader = () => (
  */
 const AppContent = () => {
   const { isAuthenticated, user, loading } = useAuth()
+  const { isActive: isPetActive } = usePet()
   const location = useLocation()
 
   const isEditor = location.pathname.startsWith('/book/') && location.pathname !== '/books'
@@ -431,8 +432,10 @@ const AppContent = () => {
         <PomodoroWidget />
       </Suspense>
 
-      {/* Study Buddy — always mounted for authenticated users; portal renders above all content */}
-      <StudyPet />
+      {/* Study Buddy — mounted only once active; default-off for new accounts until the
+          contextual first-reveal fires (see StudySession's sessionComplete effect).
+          Portal renders above all content when mounted. */}
+      {isPetActive && <StudyPet />}
     </div>
   )
 }
