@@ -1,4 +1,4 @@
-/* AuthForm.css */
+/* Auth views (Login/Register/ResetPassword) — scoped under .auth-view, must not leak globally */
 
 .auth-container {
   width: 30%;
@@ -11,16 +11,16 @@
   text-align: center;
 }
 
-h2 {
+.auth-view h2 {
   text-align: center;
 }
 
-form {
+.auth-view form {
   display: flex;
   flex-direction: column;
 }
 
-input {
+.auth-view input {
   width: 100%;
   padding: 10px 0 10px 10px;
   border: 1px solid var(--joy-palette-neutral-outlinedBorder);
@@ -28,12 +28,12 @@ input {
   margin: 10px 0;
 }
 
-input::placeholder {
+.auth-view input::placeholder {
   /* Add padding-left for the placeholder text */
   padding-left: 10px;
 }
 
-button {
+.auth-view button {
   padding: 10px;
   border: none;
   border-radius: 5px;
