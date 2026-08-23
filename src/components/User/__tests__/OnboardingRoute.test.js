@@ -90,7 +90,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
-import OnboardingRoute from '../OnboardingRoute'
+import OnboardingRoute, { ONBOARDING_TEASER_SEEN_KEY } from '../OnboardingRoute'
 import { apiClient } from '../../../api/client'
 import en from '../../../locales/en/translation.json'
 
@@ -299,6 +299,13 @@ const completePersonalization = async () => {
 beforeEach(() => {
   jest.clearAllMocks()
   window.sessionStorage.clear()
+  window.localStorage.clear()
+  // This suite is about the server-resolved journey (ONB-014), not the
+  // client-side-only pre-onboarding teaser gate — that gate has its own
+  // coverage in `OnboardingTeaser.test.js` and in the "pre-onboarding teaser
+  // gate" block below. Marking it seen here keeps every other test entering
+  // straight at the resolved screen, exactly as before the teaser existed.
+  window.localStorage.setItem(ONBOARDING_TEASER_SEEN_KEY, '1')
   mockReviewProps.length = 0
   server = createServer()
 })
@@ -847,5 +854,75 @@ describe('invariants', () => {
       const value = window.sessionStorage.getItem(key)
       expect(value).not.toMatch(/activated|incomplete|resume_screen|postponed_at/)
     })
+  })
+})
+
+// ── The pre-onboarding teaser gate (client-side-only, ahead of the journey) ──
+
+describe('pre-onboarding teaser gate', () => {
+  const teaserCardTitle = (key) => t(`onboarding.teaser.cards.${key}.title`)
+  const teaserDotLabel = (key) => t('onboarding.teaser.dotLabel').replace('{{title}}', teaserCardTitle(key))
+  const teaserRegion = () => screen.getByRole('region', { name: t('onboarding.teaser.regionLabel') })
+
+  beforeEach(() => {
+    // The parent suite's `beforeEach` marks the teaser seen so every other
+    // test in this file can assert on the resolved journey directly. These
+    // tests are about the gate itself, so they start from a clean flag.
+    window.localStorage.removeItem(ONBOARDING_TEASER_SEEN_KEY)
+  })
+
+  it('shows the teaser ahead of Welcome on a first visit', async () => {
+    renderJourney()
+
+    expect(teaserRegion()).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: t('onboarding.welcome.title') })).toBeNull()
+    // No journey call is required to decide this — it is a pure client gate.
+    expect(screen.getByRole('button', { name: t('onboarding.teaser.skip') })).toBeInTheDocument()
+  })
+
+  it('Skip sets the seen flag and proceeds to the resolved screen underneath', async () => {
+    renderJourney()
+    teaserRegion()
+
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.teaser.skip') }))
+
+    await atScreen(t('onboarding.welcome.title'))
+    expect(window.localStorage.getItem(ONBOARDING_TEASER_SEEN_KEY)).toBe('1')
+  })
+
+  it('hides Skip and offers Get Started on the last card, which also proceeds', async () => {
+    renderJourney()
+    teaserRegion()
+
+    // Jump straight to the last card via its dot rather than clicking through.
+    fireEvent.click(screen.getByRole('button', { name: teaserDotLabel('annualPlanning') }))
+
+    expect(screen.queryByRole('button', { name: t('onboarding.teaser.skip') })).toBeNull()
+    const getStarted = screen.getByRole('button', { name: t('onboarding.teaser.getStarted') })
+
+    fireEvent.click(getStarted)
+
+    await atScreen(t('onboarding.welcome.title'))
+    expect(window.localStorage.getItem(ONBOARDING_TEASER_SEEN_KEY)).toBe('1')
+  })
+
+  it('skips straight to the resolved screen for a user who already saw the teaser', async () => {
+    window.localStorage.setItem(ONBOARDING_TEASER_SEEN_KEY, '1')
+
+    renderJourney()
+
+    await atScreen(t('onboarding.welcome.title'))
+    expect(screen.queryByRole('region', { name: t('onboarding.teaser.regionLabel') })).toBeNull()
+  })
+
+  it('still resolves an already-activated user Home once the teaser is dismissed', async () => {
+    server.journey = { ...server.journey, status: 'activated', activated_at: '2026-08-14T00:00:00Z', resume_screen: null }
+
+    renderJourney()
+    teaserRegion()
+
+    fireEvent.click(screen.getByRole('button', { name: t('onboarding.teaser.skip') }))
+
+    await waitFor(() => expect(screen.getByText(HOME_MARKER)).toBeInTheDocument())
   })
 })

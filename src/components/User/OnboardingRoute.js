@@ -8,6 +8,7 @@ import useProgressivePreferences from '../../hooks/useProgressivePreferences'
 import { focusRing } from '../Common/Form/formStyles'
 import FirstDeckScreen from './FirstDeckScreen'
 import OnboardingPageShell from './OnboardingPageShell'
+import OnboardingTeaser from './OnboardingTeaser'
 import PersonalizationScreen from './PersonalizationScreen'
 import WelcomeScreen from './WelcomeScreen'
 import {
@@ -82,6 +83,29 @@ const SCREEN_COMPONENTS = {
   [ONBOARDING_SCREEN.FIRST_DECK]: FirstDeckScreen
 }
 
+/**
+ * The pre-onboarding "feature teaser" gate (see `OnboardingTeaser`).
+ *
+ * This is a `localStorage` flag, not a server field, and that is deliberate:
+ * the teaser is a client-side-only pre-step, invisible to the three-screen
+ * journey above and to everything `useOnboardingJourney` tracks. The key
+ * follows `Study/StudyCenter.js`'s check-before-show precedent — read once at
+ * mount, written only on Skip or Get Started — so an abandoned tab (closed
+ * mid-swipe) shows the teaser again next time rather than being permanently
+ * suppressed by a flag nothing ever confirmed.
+ */
+export const ONBOARDING_TEASER_SEEN_KEY = 'nowry_onboarding_teaser_seen'
+
+const hasSeenTeaser = () => {
+  try {
+    return window.localStorage.getItem(ONBOARDING_TEASER_SEEN_KEY) === '1'
+  } catch {
+    // Storage blocked (private mode, quota) — never let that be the reason a
+    // first-time user is stuck on a screen that cannot render.
+    return true
+  }
+}
+
 const OnboardingRoute = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -89,6 +113,9 @@ const OnboardingRoute = () => {
   const journey = useOnboardingJourney()
   const preferences = useProgressivePreferences()
 
+  // Read once; the value cannot legitimately change out from under a mounted
+  // route (nothing else writes this key), so a lazy initializer is enough.
+  const [teaserSeen, setTeaserSeen] = useState(hasSeenTeaser)
   const [screen, setScreen] = useState(null)
   const resolvedRef = useRef(false)
   const recordedPersonalizationRef = useRef(false)
@@ -131,6 +158,24 @@ const OnboardingRoute = () => {
   const exitToHome = useCallback(() => {
     navigate('/', { replace: true })
   }, [navigate])
+
+  const completeTeaser = useCallback(() => {
+    try {
+      window.localStorage.setItem(ONBOARDING_TEASER_SEEN_KEY, '1')
+    } catch {
+      // Best-effort only; falling through still lets this visit proceed.
+    }
+    setTeaserSeen(true)
+  }, [])
+
+  // The teaser renders ahead of everything below — it needs no journey data,
+  // so it does not wait on `journeyPhase` and does not delay it either; the
+  // journey and preference reads that `useOnboardingJourney`/
+  // `useProgressivePreferences` kicked off above are already in flight and
+  // will have landed, or be about to, by the time this returns control here.
+  if (!teaserSeen) {
+    return <OnboardingTeaser onComplete={completeTeaser} />
+  }
 
   const isLoading = journeyPhase === JOURNEY_PHASE.IDLE || journeyPhase === JOURNEY_PHASE.LOADING
 

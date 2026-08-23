@@ -489,6 +489,42 @@
       "network": "オフラインのようです。接続を確認してもう一度お試しください。",
       "rejected": "この値は受け付けられませんでした。別の値を選んでください。",
       "unknown": "こちら側で問題が発生しました。"
+    },
+    "teaser": {
+      "regionLabel": "Nowryでできること",
+      "skip": "スキップ",
+      "previous": "前へ",
+      "next": "次へ",
+      "getStarted": "始める",
+      "imagePlaceholder": "プレビューは準備中です",
+      "dotLabel": "{{title}}に移動",
+      "progress": "{{total}}枚中{{current}}枚目: {{title}}",
+      "cards": {
+        "smartBooks": {
+          "title": "スマートブック",
+          "description": "ノートやPDFをAIガイド付きの読書で構造化された本に変換します。"
+        },
+        "studyCards": {
+          "title": "スタディカード",
+          "description": "自分の理解度に合わせて調整される暗記カードで復習できます。"
+        },
+        "quizzes": {
+          "title": "クイズ",
+          "description": "自分の教材から生成されたクイズで理解度を確認できます。"
+        },
+        "diagrams": {
+          "title": "ダイアグラム",
+          "description": "AIが生成する概念マップでアイデアのつながりを可視化します。"
+        },
+        "smartpet": {
+          "title": "スマートペット",
+          "description": "学習の継続を一緒に喜んでくれる相棒を育てましょう。"
+        },
+        "annualPlanning": {
+          "title": "年間プランニング",
+          "description": "年間目標を設定し、達成できるマイルストーンに分割します。"
+        }
+      }
     }
   },
   "taxonomy": {

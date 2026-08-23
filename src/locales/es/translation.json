@@ -494,6 +494,42 @@
       "network": "Parece que no tienes conexión. Compruébala e inténtalo de nuevo.",
       "rejected": "Ese valor no se aceptó. Elige otro.",
       "unknown": "Algo salió mal por nuestra parte."
+    },
+    "teaser": {
+      "regionLabel": "Lo que Nowry puede hacer",
+      "skip": "Omitir",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "getStarted": "Comenzar",
+      "imagePlaceholder": "Vista previa próximamente",
+      "dotLabel": "Ir a {{title}}",
+      "progress": "Diapositiva {{current}} de {{total}}: {{title}}",
+      "cards": {
+        "smartBooks": {
+          "title": "Libros inteligentes",
+          "description": "Convierte tus apuntes y PDF en libros estructurados con lectura guiada por IA."
+        },
+        "studyCards": {
+          "title": "Tarjetas de estudio",
+          "description": "Repasa con tarjetas que se adaptan a lo que ya sabes."
+        },
+        "quizzes": {
+          "title": "Cuestionarios",
+          "description": "Ponte a prueba con cuestionarios generados a partir de tu propio material."
+        },
+        "diagrams": {
+          "title": "Diagramas",
+          "description": "Descubre cómo se conectan las ideas con mapas conceptuales generados por IA."
+        },
+        "smartpet": {
+          "title": "Mascota inteligente",
+          "description": "Haz crecer un compañero que celebra cada racha de estudio."
+        },
+        "annualPlanning": {
+          "title": "Planificación anual",
+          "description": "Fija metas anuales y divídelas en hitos que sí puedes cumplir."
+        }
+      }
     }
   },
   "taxonomy": {

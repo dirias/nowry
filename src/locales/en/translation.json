@@ -620,6 +620,42 @@
       "network": "You appear to be offline. Check your connection and try again.",
       "rejected": "That value wasn't accepted. Please choose another.",
       "unknown": "Something went wrong on our end."
+    },
+    "teaser": {
+      "regionLabel": "What Nowry can do",
+      "skip": "Skip",
+      "previous": "Previous",
+      "next": "Next",
+      "getStarted": "Get Started",
+      "imagePlaceholder": "Preview image coming soon",
+      "dotLabel": "Go to {{title}}",
+      "progress": "Slide {{current}} of {{total}}: {{title}}",
+      "cards": {
+        "smartBooks": {
+          "title": "Smart Books",
+          "description": "Turn notes and PDFs into structured books with AI-guided reading."
+        },
+        "studyCards": {
+          "title": "Study Cards",
+          "description": "Review flashcards that adapt to what you already know."
+        },
+        "quizzes": {
+          "title": "Quizzes",
+          "description": "Test yourself with quizzes generated from your own material."
+        },
+        "diagrams": {
+          "title": "Diagrams",
+          "description": "See how ideas connect with AI-generated concept maps."
+        },
+        "smartpet": {
+          "title": "Smartpet",
+          "description": "Grow a companion that celebrates every study streak."
+        },
+        "annualPlanning": {
+          "title": "Annual Planning",
+          "description": "Set yearly goals and break them into milestones you can hit."
+        }
+      }
     }
   },
   "taxonomy": {
