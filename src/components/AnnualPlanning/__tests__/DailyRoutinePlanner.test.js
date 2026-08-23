@@ -14,26 +14,28 @@ jest.mock('react-router-dom', () => ({
 const mockGetDailyRoutine = jest.fn()
 const mockUpdateDailyRoutine = jest.fn()
 const mockUpdateRoutineCompletions = jest.fn()
-const mockGetActivities = jest.fn()
 
 jest.mock('../../../api/services', () => ({
   annualPlanningService: {
     getDailyRoutine: (...args) => mockGetDailyRoutine(...args),
     updateDailyRoutine: (...args) => mockUpdateDailyRoutine(...args),
-    updateRoutineCompletions: (...args) => mockUpdateRoutineCompletions(...args),
-    getActivities: (...args) => mockGetActivities(...args)
+    updateRoutineCompletions: (...args) => mockUpdateRoutineCompletions(...args)
   }
 }))
 
 // Stable object/array references (not a fresh literal per call): DailyRoutinePlanner's
-// fetchData useCallback depends on [plan, cacheAreas, cacheGoals] from this hook. A mock
-// that returns a new object/array on every render would change those references every
-// render, regenerating fetchData every time and re-triggering its useEffect in an
-// infinite loop (component never settles out of the loading/Skeleton state).
+// fetchData useCallback depends on [plan, cacheAreas, cacheGoals, cacheActivities] from
+// this hook. A mock that returns a new object/array on every render would change those
+// references every render, regenerating fetchData every time and re-triggering its
+// useEffect in an infinite loop (component never settles out of the loading/Skeleton
+// state). `activities` now comes straight from useAnnualPlan() (single /annual-plan/full
+// request) instead of a per-goal annualPlanningService.getActivities() fetch — see
+// DailyRoutinePlanner's N+1 fix. Tests seed it here rather than via a service mock.
 const mockAnnualPlanState = {
   plan: { _id: 'plan1' },
   areas: [{ _id: 'area1', color: '#4a90d9' }],
   goals: [{ _id: 'g1', focus_area_id: 'area1', title: 'Read more' }],
+  activities: [],
   loading: false
 }
 jest.mock('../../../hooks/useAnnualPlan', () => ({
@@ -65,7 +67,7 @@ const baseRoutine = (overrides = {}) => ({
 
 beforeEach(() => {
   jest.clearAllMocks()
-  mockGetActivities.mockResolvedValue([])
+  mockAnnualPlanState.activities = []
   mockUpdateDailyRoutine.mockResolvedValue({})
   mockUpdateRoutineCompletions.mockResolvedValue({ ok: true })
 })
@@ -116,7 +118,10 @@ describe('D-04: migration index to id', () => {
 
 describe('RTN-02: Goal Activities and Routine Items render separately', () => {
   it('Test 4: renders distinct Goal Activities and Routine Items headers, checkbox only under Routine Items', async () => {
-    mockGetActivities.mockResolvedValue([{ _id: 'a1', title: 'Read', time_of_day: 'morning', goalTitle: 'Read more' }])
+    // Raw activity shape as returned by /annual-plan/full — goalTitle/areaColor are
+    // attached client-side by DailyRoutinePlanner from cacheGoals/cacheAreas, not
+    // present on the source record.
+    mockAnnualPlanState.activities = [{ _id: 'a1', title: 'Read', time_of_day: 'morning', goal_id: 'g1' }]
     mockGetDailyRoutine.mockResolvedValue(baseRoutine())
     render(<DailyRoutinePlanner />)
     await waitFor(() => expect(screen.getAllByText('annualPlanning.dailyRoutine.goalActivities').length).toBeGreaterThan(0))
