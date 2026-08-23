@@ -279,7 +279,15 @@ export default function StudySession() {
     [_handleVoiceSettingsChange, isFlipped, deckId, currentCardDeckId]
   )
 
-  const { setViewContext, queueIntervention, resetCompanionSession, setStudySession, setStudySessionFullscreen } = usePet()
+  const {
+    setViewContext,
+    queueIntervention,
+    resetCompanionSession,
+    setStudySession,
+    setStudySessionFullscreen,
+    revealPet,
+    hasBeenRevealed
+  } = usePet()
 
   const buildStudyContext = React.useCallback(
     (cardIdx, flipped) => {
@@ -496,6 +504,13 @@ export default function StudySession() {
         most_missed_card_id: mostMissedCardId,
         most_missed_card_front: mostMissedCardFront
       })
+
+      // Contextual first-reveal — fires once, the first time a new account
+      // completes a real study session with graded cards. Non-fatal on
+      // failure (see revealPet in AgentContext), so no guard needed here.
+      if (!hasBeenRevealed) {
+        revealPet(gradedCards.current.length)
+      }
     }
 
     // LOG SESSION HISTORY — fire-and-forget, never blocks the UI
@@ -515,7 +530,7 @@ export default function StudySession() {
           // Non-fatal — history logging never interrupts the study experience
         })
     }
-  }, [sessionComplete, setViewContext, queueIntervention, visibleCards, deckId, mode])
+  }, [sessionComplete, setViewContext, queueIntervention, visibleCards, deckId, mode, revealPet, hasBeenRevealed])
 
   const handleFlip = React.useCallback(() => {
     setIsFlipped((prev) => !prev)

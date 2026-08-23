@@ -31,8 +31,12 @@ export const authService = {
       // Update display name
       await updateProfile(user, { displayName: username })
 
-      // Get Firebase ID token
-      const idToken = await user.getIdToken()
+      // Get Firebase ID token — force a refresh so the token carries the
+      // displayName claim we just set via updateProfile(); an unforced
+      // getIdToken() can return the stale pre-update token, which has no
+      // `name` claim and causes the backend to fall back to an
+      // email-derived username instead of the one the user typed.
+      const idToken = await user.getIdToken(true)
 
       // Sync user to backend MongoDB
       const { data } = await apiClient.post(

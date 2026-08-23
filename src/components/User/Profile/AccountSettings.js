@@ -70,6 +70,7 @@ import { auth } from '../../../config/firebase.config'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
 import LearningPreferencesSection from './LearningPreferencesSection'
+import { getUsernameValidationError } from '../../../utils/usernameValidation'
 
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 const SECTION_IDS = [
@@ -199,10 +200,13 @@ export default function AccountSettings() {
   const [pageError, setPageError] = useState(null)
 
   // ── Account ─────────────────────────────────────────────────────────────────
-  const [fullName, setFullName] = useState('')
-  const [loadedFullName, setLoadedFullName] = useState('')
-  const [fullNameSaving, setFullNameSaving] = useState(false)
-  const [fullNameSaved, setFullNameSaved] = useState(false)
+  // "Username" is the single identity field now — the separate "Display name"
+  // concept was retired; username is unique and shown/editable everywhere.
+  const [username, setUsername] = useState('')
+  const [loadedUsername, setLoadedUsername] = useState('')
+  const [usernameSaving, setUsernameSaving] = useState(false)
+  const [usernameSaved, setUsernameSaved] = useState(false)
+  const [usernameError, setUsernameError] = useState(null)
 
   // ── Preferences ─────────────────────────────────────────────────────────────
   // Interests and the study goal are deliberately absent: they belong to
@@ -265,9 +269,9 @@ export default function AccountSettings() {
     try {
       const profile = await userService.getProfile()
 
-      if (profile.full_name) {
-        setFullName(profile.full_name)
-        setLoadedFullName(profile.full_name)
+      if (profile.username) {
+        setUsername(profile.username)
+        setLoadedUsername(profile.username)
       }
 
       if (profile.notification_preferences) {
@@ -311,18 +315,33 @@ export default function AccountSettings() {
   }, [])
 
   // ── Handlers — Account ───────────────────────────────────────────────────────
-  const handleSaveFullName = async () => {
-    if (!fullName.trim() || fullName === loadedFullName) return
-    setFullNameSaving(true)
+  const handleSaveUsername = async () => {
+    const trimmed = username.trim()
+    if (!trimmed || trimmed === loadedUsername) return
+
+    const validationError = getUsernameValidationError(trimmed, t)
+    if (validationError) {
+      setUsernameError(validationError)
+      return
+    }
+
+    setUsernameSaving(true)
+    setUsernameError(null)
     try {
-      await userService.patchProfile({ full_name: fullName.trim() })
-      setLoadedFullName(fullName.trim())
-      setFullNameSaved(true)
-      setTimeout(() => setFullNameSaved(false), 2000)
-    } catch {
-      setFullName(loadedFullName)
+      await userService.patchProfile({ username: trimmed })
+      setLoadedUsername(trimmed)
+      setUsernameSaved(true)
+      setTimeout(() => setUsernameSaved(false), 2000)
+    } catch (err) {
+      // Leave the typed value in place (unlike a silent revert) so the error
+      // below is legible against what the user actually entered.
+      if (err?.response?.status === 409) {
+        setUsernameError(t('settings.account.usernameTaken'))
+      } else {
+        setUsernameError(t('settings.errors.networkError'))
+      }
     } finally {
-      setFullNameSaving(false)
+      setUsernameSaving(false)
     }
   }
 
@@ -601,10 +620,10 @@ export default function AccountSettings() {
                 {/* Avatar (read-only) */}
                 <Stack direction='row' spacing={2} alignItems='center'>
                   <Avatar src={user?.avatar_url} size='lg' sx={{ width: 64, height: 64 }}>
-                    {(loadedFullName || user?.email || '?')[0].toUpperCase()}
+                    {(loadedUsername || user?.email || '?')[0].toUpperCase()}
                   </Avatar>
                   <Box>
-                    <Typography level='title-sm'>{loadedFullName || user?.email}</Typography>
+                    <Typography level='title-sm'>{loadedUsername || user?.email}</Typography>
                     <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                       {user?.email}
                     </Typography>
@@ -613,26 +632,29 @@ export default function AccountSettings() {
 
                 <Divider />
 
-                {/* Full name */}
-                <FormControl>
-                  <FormLabel>{t('settings.account.fullName')}</FormLabel>
+                {/* Username — the single identity field, shown and editable everywhere */}
+                <FormControl error={!!usernameError}>
+                  <FormLabel>{t('settings.account.username')}</FormLabel>
                   <Input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSaveFullName()}
-                    placeholder={t('settings.account.fullName')}
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value)
+                      if (usernameError) setUsernameError(null)
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveUsername()}
+                    placeholder={t('settings.account.username')}
                     endDecorator={
-                      fullNameSaving ? (
+                      usernameSaving ? (
                         <CircularProgress size='sm' />
-                      ) : fullNameSaved ? (
+                      ) : usernameSaved ? (
                         <CheckRounded sx={{ color: 'success.plainColor', fontSize: 18 }} />
-                      ) : fullName !== loadedFullName ? (
+                      ) : username !== loadedUsername ? (
                         <Tooltip title={t('common.save')}>
                           <IconButton
                             size='sm'
                             variant='plain'
                             color='primary'
-                            onClick={handleSaveFullName}
+                            onClick={handleSaveUsername}
                             aria-label={t('common.save')}
                             sx={{
                               '&:focus-visible': {
@@ -648,6 +670,7 @@ export default function AccountSettings() {
                       ) : null
                     }
                   />
+                  {usernameError && <FormHelperText>{usernameError}</FormHelperText>}
                 </FormControl>
 
                 {/* Email (locked) */}

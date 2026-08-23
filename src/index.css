@@ -66,7 +66,22 @@ mark {
   background-color: transparent;
 }
 
-/* Remove Bootstrap generic button/input overrides if they leak */
+/* Native form-control background reset.
+ *
+ * This rule is NOT a Bootstrap defence — it used to say so, but Bootstrap has
+ * never been a dependency of this project (no `bootstrap` or `react-bootstrap`
+ * in package.json, none in node_modules, no import anywhere in src/). What it
+ * actually neutralises is the user-agent default: `buttonface` on <button> and
+ * `field` on the text inputs. The codebase renders plenty of raw <button> and
+ * <textarea> (StudyPet, the Blackboard nodes) and Box component='button'
+ * (GoalCard, MilestoneDueDateBadge), and those UA fills would otherwise show
+ * through wherever a component styles only borders and padding.
+ *
+ * It carries no !important and is a type selector (0,0,1), so any Emotion `sx`
+ * class (0,1,0) or inline style still wins. It cannot silently defeat a
+ * component's own styling, which is what separates it from the two rules
+ * deleted below.
+ */
 button,
 input,
 select,
@@ -74,23 +89,36 @@ textarea {
   background-color: transparent;
 }
 
-/* COMPREHENSIVE FIX: Remove all backgrounds from icons and their wrappers */
-/* Target icon container elements — but NOT checkbox internals or Joy UI chip internals */
-/* MuiChip-action is a button child that carries the chip's variant fill — must not be transparent */
-button *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']),
-a *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']),
-[role='button'] *:not([class*='MuiCheckbox']):not([class*='checkbox']):not([class*='MuiChip']) {
-  background-color: transparent !important;
-}
-
-/* Specific targeting for Joy UI components — exclude checkbox and chip internals */
-/* MuiChip-root is excluded: Joy UI renders the solid variant background on .MuiChip-action
-   (a child button), so stripping child backgrounds breaks solid chip fills entirely */
-.MuiButton-root *,
-.MuiIconButton-root *,
-[class*='MuiButton'] * {
-  background-color: transparent !important;
-}
+/* DELETED: the blanket descendant background reset.
+ *
+ * Two rules used to sit here:
+ *
+ *   button *, a *, [role='button'] *      { background-color: transparent !important }
+ *   .MuiButton-root *, .MuiIconButton-root *, [class*='MuiButton'] *  { …same… }
+ *
+ * Their stated purpose was "remove all backgrounds from icons and their
+ * wrappers". That purpose is served in full by the `svg, svg *` and
+ * `.MuiSvgIcon-root, .MuiSvgIcon-root *` rules below, which target icons
+ * directly instead of every descendant of every button, link and
+ * [role='button'] in the app.
+ *
+ * The breadth was the bug. Because they matched by position rather than by
+ * what the element is, and because they used !important, a correct
+ * `sx={{ bgcolor: 'primary.softBg' }}` on anything nested inside a button
+ * silently did nothing — no warning, no error, no override possible at any
+ * specificity. Measured before removal: an Avatar inside an IconButton, a
+ * Badge dot inside a Button, and a Skeleton inside a Button all computed to
+ * rgba(0, 0, 0, 0) despite explicit background styling. A stripped Skeleton is
+ * invisible, since a Skeleton *is* its background.
+ *
+ * The damage was already visible in the file's own history. The :not() escape
+ * list had been extended twice — once for MuiCheckbox, once for MuiChip —
+ * each time because the rule had broken a real shipping component (Joy renders
+ * a chip's variant fill on .MuiChip-action, a child <button>). The
+ * OnboardingTeaser progress dots had to be re-expressed as an ::after
+ * pseudo-element purely to escape the selector. Every future component
+ * nesting a filled element inside a button would have joined that list.
+ */
 
 /* Target SVG icons specifically */
 svg,

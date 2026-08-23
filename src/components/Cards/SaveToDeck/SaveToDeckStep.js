@@ -120,10 +120,6 @@ export default function SaveToDeckStep({ deckType, saveToDeck, createDeckDescrip
             {t('cards.saveToDeck.createNewDeck')}
           </Button>
         </Box>
-      ) : decks.length === 1 ? (
-        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          {t('cards.saveToDeck.savingToDeck', { deckName: decks[0].name })}
-        </Typography>
       ) : (
         <FormControl>
           <FormLabel>{t('cards.saveToDeck.selectDeckLabel')}</FormLabel>

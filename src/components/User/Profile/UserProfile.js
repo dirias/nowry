@@ -15,11 +15,14 @@ import {
   Textarea,
   FormControl,
   FormLabel,
-  IconButton
+  FormHelperText,
+  IconButton,
+  Snackbar
 } from '@mui/joy'
-import { Edit, Save, Cancel, CameraAlt, AccountCircle, Email, CalendarToday, Star } from '@mui/icons-material'
+import { Edit, Save, Cancel, CameraAlt, AccountCircle, Email, CalendarToday } from '@mui/icons-material'
 import { userService } from '../../../api/services'
 import { useAuth } from '../../../context/AuthContext'
+import { getUsernameValidationError } from '../../../utils/usernameValidation'
 
 export default function UserProfile() {
   const [isEditing, setIsEditing] = useState(false)
@@ -32,7 +35,6 @@ export default function UserProfile() {
   const [userData, setUserData] = useState({
     username: user?.username || '',
     email: '',
-    fullName: '',
     bio: '',
     avatarUrl: '',
     createdAt: new Date().toISOString(),
@@ -48,6 +50,8 @@ export default function UserProfile() {
   })
 
   const [editData, setEditData] = useState({ ...userData })
+  const [usernameError, setUsernameError] = useState(null)
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', color: 'danger' })
 
   useEffect(() => {
     fetchUserProfile()
@@ -62,7 +66,6 @@ export default function UserProfile() {
       const profileData = {
         username: response.username,
         email: response.email,
-        fullName: response.full_name || '',
         bio: response.bio || '',
         avatarUrl: response.avatar_url || '',
         createdAt: response.created_at,
@@ -89,8 +92,16 @@ export default function UserProfile() {
   }
 
   const handleSave = async () => {
+    const trimmedUsername = editData.username.trim()
+    const validationError = getUsernameValidationError(trimmedUsername, t)
+    if (validationError) {
+      setUsernameError(validationError)
+      return
+    }
+
     try {
       setLoading(true)
+      setUsernameError(null)
 
       // Handle avatar upload
       if (avatarFile) {
@@ -98,19 +109,26 @@ export default function UserProfile() {
         editData.avatarUrl = avatarResponse.avatar_url
       }
 
-      // Update profile
-      await userService.updateProfile({
-        full_name: editData.fullName,
+      // Update profile — username and bio are the only fields this page
+      // (still) owns; `PATCH /users/profile` is the single endpoint both
+      // this page and Account Settings use for username, so uniqueness
+      // conflicts (409) come back the same way in both places.
+      await userService.patchProfile({
+        username: trimmedUsername,
         bio: editData.bio
       })
 
-      setUserData(editData)
+      setUserData({ ...editData, username: trimmedUsername })
       setAvatarFile(null)
       setIsEditing(false)
-      setLoading(false)
     } catch (error) {
       console.error('Error saving profile:', error)
-      alert('Failed to save profile. Please try again.')
+      if (error?.response?.status === 409) {
+        setUsernameError(t('settings.account.usernameTaken'))
+      } else {
+        setSnackbar({ open: true, message: t('settings.errors.networkError'), color: 'danger' })
+      }
+    } finally {
       setLoading(false)
     }
   }
@@ -118,6 +136,7 @@ export default function UserProfile() {
   const handleCancel = () => {
     setEditData({ ...userData })
     setAvatarFile(null)
+    setUsernameError(null)
     setIsEditing(false)
   }
 
@@ -203,7 +222,7 @@ export default function UserProfile() {
                     bgcolor: 'primary.solidBg'
                   }}
                 >
-                  {editData.fullName ? editData.fullName.charAt(0).toUpperCase() : editData.username.charAt(0).toUpperCase()}
+                  {editData.username ? editData.username.charAt(0).toUpperCase() : '?'}
                 </Avatar>
 
                 {isEditing && (
@@ -225,11 +244,8 @@ export default function UserProfile() {
                 )}
               </Box>
 
-              {/* Name & Username */}
-              <Typography level='h4' fontWeight={600} sx={{ mb: 0.5 }}>
-                {userData.fullName || userData.username}
-              </Typography>
-              <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
+              {/* Username */}
+              <Typography level='h4' fontWeight={600} sx={{ mb: 2 }}>
                 @{userData.username}
               </Typography>
 
@@ -386,37 +402,28 @@ export default function UserProfile() {
               </Stack>
 
               <Stack spacing={3}>
-                {/* Full Name */}
-                <FormControl>
-                  <FormLabel>{t('profile.fullName')}</FormLabel>
+                {/* Username — the single editable identity field (PATCH /users/profile) */}
+                <FormControl error={!!usernameError}>
+                  <FormLabel>{t('settings.account.username')}</FormLabel>
                   {isEditing ? (
                     <Input
-                      value={editData.fullName}
-                      onChange={(e) => setEditData({ ...editData, fullName: e.target.value })}
-                      placeholder={t('profile.fullName')}
+                      value={editData.username}
+                      onChange={(e) => {
+                        setEditData({ ...editData, username: e.target.value })
+                        if (usernameError) setUsernameError(null)
+                      }}
+                      placeholder={t('settings.account.username')}
+                      startDecorator={<AccountCircle sx={{ color: 'text.secondary' }} />}
                       size='lg'
+                      aria-label={t('settings.account.username')}
                     />
                   ) : (
-                    <Typography level='body-lg'>
-                      {userData.fullName || (
-                        <Typography component='span' sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
-                          {t('profile.notSet')}
-                        </Typography>
-                      )}
-                    </Typography>
+                    <Stack direction='row' spacing={1} alignItems='center'>
+                      <AccountCircle sx={{ color: 'text.secondary' }} />
+                      <Typography level='body-lg'>@{userData.username}</Typography>
+                    </Stack>
                   )}
-                </FormControl>
-
-                {/* Username */}
-                <FormControl>
-                  <FormLabel>{t('profile.username')}</FormLabel>
-                  <Stack direction='row' spacing={1} alignItems='center'>
-                    <AccountCircle sx={{ color: 'text.secondary' }} />
-                    <Typography level='body-lg'>@{userData.username}</Typography>
-                    <Chip size='sm' variant='outlined' color='neutral'>
-                      Cannot be changed
-                    </Chip>
-                  </Stack>
+                  {usernameError && <FormHelperText>{usernameError}</FormHelperText>}
                 </FormControl>
 
                 {/* Email */}
@@ -457,6 +464,16 @@ export default function UserProfile() {
           </Card>
         </Grid>
       </Grid>
+
+      <Snackbar
+        open={snackbar.open}
+        variant='soft'
+        color={snackbar.color}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      >
+        {snackbar.message}
+      </Snackbar>
     </Container>
   )
 }

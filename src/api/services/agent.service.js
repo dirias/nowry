@@ -111,5 +111,15 @@ export const agentService = {
       pet_species: petSpecies || 'owl'
     })
     return data // { personality_text, generations_used, generations_limit, reset_date }
+  },
+
+  /**
+   * Fire the pet's contextual first-reveal. Idempotent — safe to call more than
+   * once; the backend just reports `already_revealed: true` after the first time.
+   * @returns {Promise<{ pet_active: boolean, pet_revealed: boolean, already_revealed: boolean }>}
+   */
+  revealPet: async () => {
+    const { data } = await apiClient.post('/agent/pet/reveal')
+    return data
   }
 }

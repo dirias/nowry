@@ -57,7 +57,7 @@ export const userService = {
   /**
    * Patch user profile (partial update)
    * @param {Object} profileData
-   * @param {string} [profileData.full_name]
+   * @param {string} [profileData.username] - Unique username; also the display name (FE consolidated "Display name" into "Username")
    * @returns {Promise<Object>} Updated profile
    */
   async patchProfile(profileData) {

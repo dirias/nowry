@@ -129,7 +129,7 @@ const Login = () => {
   return (
     <>
       {/* Full-height split layout */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
+      <Box className='auth-view' sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
         {/* LEFT PANEL — teal brand (desktop only) */}
         <Box
           sx={{

@@ -17,8 +17,7 @@ import { useDeckData } from '../../../hooks/useDeckData'
 
 function Home() {
   const { user } = useAuth()
-  // Prefer the friendly name set in onboarding, fall back to login username
-  const username = user?.full_name || user?.username
+  const username = user?.username
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [studyStats, setStudyStats] = useState({ dueCount: 0, loading: true })

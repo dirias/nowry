@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material'
 import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../api/services/auth.service'
+import { getUsernameValidationError } from '../../utils/usernameValidation'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -95,7 +96,15 @@ const Register = () => {
     const newErrors = {}
 
     // Validation
-    if (!formData.username) newErrors.username = t('auth.errors.usernameRequired')
+    if (!formData.username) {
+      newErrors.username = t('auth.errors.usernameRequired')
+    } else {
+      // Client-side mirror of the backend's format rule (min_length=3,
+      // max_length=30, pattern=^[a-zA-Z0-9_-]+$ on POST /auth/register). The
+      // 422 branch below is the authoritative fallback if this drifts.
+      const usernameFormatError = getUsernameValidationError(formData.username, t)
+      if (usernameFormatError) newErrors.username = usernameFormatError
+    }
     if (!formData.email) newErrors.email = t('auth.errors.emailRequired')
     if (!formData.password) newErrors.password = t('auth.errors.passwordRequired')
     if (formData.password.length < 8) newErrors.password = t('auth.errors.passwordLength')
@@ -109,6 +118,18 @@ const Register = () => {
     if (Object.keys(newErrors).length === 0) {
       setLoading(true)
       try {
+        // PublicOnlyRoute (wrapping this route) redirects to `/` the instant
+        // `isAuthenticated` flips true, which happens inside Firebase's
+        // onAuthStateChanged listener — often before this function's own
+        // continuation below even runs. Racing it with a plain `navigate('/onboarding')`
+        // after the fact always lost: the guard's redirect to `/` fired first,
+        // flashing Home for the rest of the delay before the stale timer below
+        // finally dragged the user into onboarding. Setting `returnUrl` here,
+        // before the account is created, makes PublicOnlyRoute itself land the
+        // user on `/onboarding` the moment it reacts — no second navigator to
+        // race against.
+        navigate('/register?returnUrl=%2Fonboarding', { replace: true })
+
         // 1. Create user in Firebase Auth & sync to MongoDB
         await authService.register(formData.email, formData.password, formData.username)
 
@@ -120,12 +141,29 @@ const Register = () => {
         // The explicit initial post-auth navigation ADR-007 keeps: a brand-new
         // account starts in onboarding once. Nothing sends them back afterwards —
         // ONB-012 removed the global redirect, so leaving is now genuinely leaving.
+        // PublicOnlyRoute's returnUrl redirect (set above) handles the normal
+        // case immediately; this is only a safety net in case that guard is
+        // ever slow to react.
         setTimeout(() => {
           navigate('/onboarding')
         }, 1500)
       } catch (error) {
         console.error('Registration error:', error)
-        newErrors.serverError = error.message || t('auth.errors.serverError')
+
+        // The server is the source of truth on username format — the check
+        // above is UX sugar and could drift from the backend's rule. A 422
+        // whose Pydantic error list names `username` means the backend
+        // rejected the value; surface it on the field itself instead of the
+        // generic banner, matching how the client-side format error reads.
+        const detail = error.response?.data?.detail
+        const usernameFormatRejected =
+          error.response?.status === 422 && Array.isArray(detail) && detail.some((item) => (item?.loc || []).includes('username'))
+
+        if (usernameFormatRejected) {
+          newErrors.username = t('settings.account.usernameInvalid')
+        } else {
+          newErrors.serverError = error.message || t('auth.errors.serverError')
+        }
         setErrors(newErrors)
         setLoading(false)
       }
@@ -183,7 +221,7 @@ const Register = () => {
 
   if (registrationSuccess) {
     return (
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', px: 3 }}>
+      <Box className='auth-view' sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', px: 3 }}>
         <Box sx={{ textAlign: 'center', maxWidth: 360 }}>
           <CheckCircleRounded sx={{ fontSize: 72, color: 'success.plainColor', mb: 2 }} />
           <Typography level='h3' fontWeight={700} mb={1}>
@@ -203,7 +241,7 @@ const Register = () => {
 
   return (
     <>
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
+      <Box className='auth-view' sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
         {/* LEFT PANEL — teal brand (desktop only) */}
         <Box
           sx={{

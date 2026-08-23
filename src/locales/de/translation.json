@@ -389,9 +389,9 @@
       "empty": {
         "title": "Noch keine offiziellen Decks für {{topic}}",
         "body": "Nowry veröffentlicht offizielle Decks Thema für Thema, und {{topic}} ist noch nicht dabei. Deine Themen und dein Ziel sind gespeichert.",
-        "fallbackTitle": "Stattdessen eines mit KI erstellen",
-        "fallbackBody": "Ein KI-Deck wird von Nowry nicht geprüft und schließt deine Einrichtung nicht ab, aber du kannst es jetzt ausprobieren.",
-        "fallbackAction": "Mit KI erstellen"
+        "fallbackTitle": "Stattdessen einen Entwurf mit KI erstellen",
+        "fallbackBody": "Ein KI-Entwurf wird von Nowry nicht geprüft und schließt deine Einrichtung nicht ab, aber du kannst jetzt damit starten und ihn selbst weiter verfeinern.",
+        "fallbackAction": "Entwurf mit KI erstellen"
       },
       "fallback": {
         "pending": "Karten werden erstellt…",
@@ -493,6 +493,42 @@
       "network": "Du scheinst offline zu sein. Prüfe deine Verbindung und versuche es erneut.",
       "rejected": "Dieser Wert wurde abgelehnt. Bitte wähle einen anderen.",
       "unknown": "Bei uns ist etwas schiefgelaufen."
+    },
+    "teaser": {
+      "regionLabel": "Was Nowry kann",
+      "skip": "Überspringen",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "getStarted": "Loslegen",
+      "imagePlaceholder": "Vorschau folgt in Kürze",
+      "dotLabel": "Zu {{title}} wechseln",
+      "progress": "Folie {{current}} von {{total}}: {{title}}",
+      "cards": {
+        "smartBooks": {
+          "title": "Intelligente Bücher",
+          "description": "Verwandle Notizen und PDFs mit KI-gestütztem Lesen in strukturierte Bücher."
+        },
+        "studyCards": {
+          "title": "Lernkarten",
+          "description": "Wiederhole mit Karteikarten, die sich deinem Wissen anpassen."
+        },
+        "quizzes": {
+          "title": "Quiz",
+          "description": "Teste dich mit Quiz, die aus deinem eigenen Material erstellt werden."
+        },
+        "diagrams": {
+          "title": "Diagramme",
+          "description": "Erkenne Zusammenhänge zwischen Ideen mit KI-generierten Konzeptkarten."
+        },
+        "smartpet": {
+          "title": "Intelligentes Haustier",
+          "description": "Lass einen Begleiter wachsen, der jede Lernserie feiert."
+        },
+        "annualPlanning": {
+          "title": "Jahresplanung",
+          "description": "Setze Jahresziele und teile sie in Meilensteine, die du wirklich erreichst."
+        }
+      }
     }
   },
   "taxonomy": {
@@ -613,7 +649,9 @@
     },
     "account": {
       "title": "Konto",
-      "fullName": "Anzeigename",
+      "username": "Benutzername",
+      "usernameInvalid": "Der Benutzername muss 3–30 Zeichen lang sein und darf nur Buchstaben, Zahlen, Unterstriche oder Bindestriche enthalten.",
+      "usernameTaken": "Dieser Benutzername ist bereits vergeben",
       "emailManaged": "Die E-Mail wird von deinem Authentifizierungsanbieter verwaltet",
       "editPhoto": "Foto ändern"
     },
@@ -1514,6 +1552,12 @@
     "levelUp": {
       "reached": "Du hast Level {{level}} erreicht",
       "dismiss": "Tippen zum Schließen"
+    },
+    "reveal": {
+      "title": "Sag Hallo zu deinem Lernbegleiter",
+      "subtitle_one": "Du hast gerade {{count}} Karte wiederholt — ich bin hier, um dir weiterzuhelfen.",
+      "subtitle_other": "Du hast gerade {{count}} Karten wiederholt — ich bin hier, um dir weiterzuhelfen.",
+      "dismiss": "Zum Fortfahren irgendwo tippen"
     }
   },
   "agent": {
@@ -1525,6 +1569,11 @@
       "interventions": "Eingriffe"
     },
     "settings": {
+      "activation": {
+        "label": "Lernbegleiter",
+        "description": "Zeige deinen Lernbegleiter schwebend auf dem Bildschirm, während du Nowry nutzt.",
+        "ariaLabel": "Lernbegleiter anzeigen"
+      },
       "interventions": {
         "requiresNudging": "Aktiviere proaktive Erinnerungen im Tab 'Persönlichkeit', um Eingriffe zu konfigurieren.",
         "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",

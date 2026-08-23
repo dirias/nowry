@@ -26,6 +26,7 @@ import { resolveColor } from '../../utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '../../constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
+import PetRevealCelebration from './PetRevealCelebration'
 import CompanionMessage from './CompanionMessage'
 import QuizModeHeader from './QuizModeHeader'
 import QuizQuestionBubble from './QuizQuestionBubble'
@@ -392,6 +393,9 @@ const StudyPet = () => {
     justLeveledUp,
     levelUpData,
     levelUpClear,
+    justRevealed,
+    revealData,
+    petRevealClear,
     preferredName,
     tier,
     history,
@@ -1060,6 +1064,18 @@ const StudyPet = () => {
           <AnimatePresence>
             {justLeveledUp && levelUpData && (
               <LevelUpCelebration key='level-up' levelUpData={levelUpData} stage={stage} onDismiss={levelUpClear} />
+            )}
+          </AnimatePresence>
+
+          {/* Pet contextual first-reveal celebration */}
+          <AnimatePresence>
+            {justRevealed && (
+              <PetRevealCelebration
+                key='pet-reveal'
+                species={petSpecies}
+                cardsReviewed={revealData?.cardsReviewed}
+                onDismiss={petRevealClear}
+              />
             )}
           </AnimatePresence>
 

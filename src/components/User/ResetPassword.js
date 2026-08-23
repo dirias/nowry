@@ -48,7 +48,7 @@ const ResetPassword = () => {
 
   if (isSubmitted) {
     return (
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', px: 3 }}>
+      <Box className='auth-view' sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', px: 3 }}>
         <Box sx={{ textAlign: 'center', maxWidth: 360 }}>
           <CheckCircleRounded sx={{ fontSize: 72, color: 'success.plainColor', mb: 2 }} />
           <Typography level='h3' fontWeight={700} mb={1}>
@@ -67,7 +67,7 @@ const ResetPassword = () => {
 
   return (
     <>
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
+      <Box className='auth-view' sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
         {/* LEFT PANEL — teal brand (desktop only) */}
         <Box
           sx={{

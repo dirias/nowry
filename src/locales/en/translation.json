@@ -516,9 +516,9 @@
       "empty": {
         "title": "No official {{topic}} decks yet",
         "body": "Nowry publishes official decks topic by topic, and {{topic}} isn't covered yet. Your topics and goal are saved.",
-        "fallbackTitle": "Generate one with AI instead",
-        "fallbackBody": "An AI deck isn't reviewed by Nowry and doesn't finish your setup, but you can try one now.",
-        "fallbackAction": "Generate with AI"
+        "fallbackTitle": "Draft one with AI instead",
+        "fallbackBody": "AI drafts aren't reviewed by Nowry and won't finish your setup, but you can start from one now and refine it yourself.",
+        "fallbackAction": "Draft with AI"
       },
       "fallback": {
         "pending": "Generating cards…",
@@ -620,6 +620,42 @@
       "network": "You appear to be offline. Check your connection and try again.",
       "rejected": "That value wasn't accepted. Please choose another.",
       "unknown": "Something went wrong on our end."
+    },
+    "teaser": {
+      "regionLabel": "What Nowry can do",
+      "skip": "Skip",
+      "previous": "Previous",
+      "next": "Next",
+      "getStarted": "Get Started",
+      "imagePlaceholder": "Preview image coming soon",
+      "dotLabel": "Go to {{title}}",
+      "progress": "Slide {{current}} of {{total}}: {{title}}",
+      "cards": {
+        "smartBooks": {
+          "title": "Smart Books",
+          "description": "Turn notes and PDFs into structured books with AI-guided reading."
+        },
+        "studyCards": {
+          "title": "Study Cards",
+          "description": "Review flashcards that adapt to what you already know."
+        },
+        "quizzes": {
+          "title": "Quizzes",
+          "description": "Test yourself with quizzes generated from your own material."
+        },
+        "diagrams": {
+          "title": "Diagrams",
+          "description": "See how ideas connect with AI-generated concept maps."
+        },
+        "smartpet": {
+          "title": "Smartpet",
+          "description": "Grow a companion that celebrates every study streak."
+        },
+        "annualPlanning": {
+          "title": "Annual Planning",
+          "description": "Set yearly goals and break them into milestones you can hit."
+        }
+      }
     }
   },
   "taxonomy": {
@@ -745,7 +781,9 @@
     },
     "account": {
       "title": "Account",
-      "fullName": "Display name",
+      "username": "Username",
+      "usernameInvalid": "Username must be 3–30 characters and contain only letters, numbers, underscores, or hyphens.",
+      "usernameTaken": "That username is already taken",
       "emailManaged": "Email is managed by your authentication provider",
       "editPhoto": "Change photo"
     },
@@ -2607,6 +2645,12 @@
     "levelUp": {
       "reached": "You reached level {{level}}",
       "dismiss": "Tap to dismiss"
+    },
+    "reveal": {
+      "title": "Say hello to your study companion",
+      "subtitle_one": "You just reviewed {{count}} card — I'll be here to help you keep going.",
+      "subtitle_other": "You just reviewed {{count}} cards — I'll be here to help you keep going.",
+      "dismiss": "Tap anywhere to continue"
     }
   },
   "quiz": {
@@ -2756,6 +2800,11 @@
       "xpToNextLevel": "{{count}} XP to next level",
       "sparks": "sparks",
       "previewMessage": "What should I study today?",
+      "activation": {
+        "label": "Study buddy",
+        "description": "Show your study buddy floating on screen while you use Nowry.",
+        "ariaLabel": "Show study buddy"
+      },
       "personality": {
         "replyLength": {
           "title": "Reply Length",

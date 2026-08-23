@@ -50,7 +50,7 @@ const DailyRoutinePlanner = () => {
   const [editingItem, setEditingItem] = useState(null) // { section, id }
   const [editValue, setEditValue] = useState('')
 
-  const { plan, areas: cacheAreas, goals: cacheGoals, loading: hookLoading } = useAnnualPlan()
+  const { plan, areas: cacheAreas, goals: cacheGoals, activities: cacheActivities, loading: hookLoading } = useAnnualPlan()
   const { user } = useAuth()
   const userId = user?.id ?? null
   // Kept in sync with SideMenu.js/AnnualPlanningLayout.js's useDailyRoutine() reads
@@ -122,21 +122,24 @@ const DailyRoutinePlanner = () => {
       // Seed today's checkbox state from the (possibly migrated) completions map
       setRoutineCompletions(Object.fromEntries((migrationRoutine.daily_completions?.[today] || []).map((id) => [id, true])))
 
-      // Fetch all goals -> activities using cache
-      let allActivities = []
-      if (cacheAreas && cacheGoals) {
-        for (const area of cacheAreas) {
-          const areaGoals = cacheGoals.filter((g) => g.focus_area_id === area._id || g.focus_area_id?._id === area._id)
-          for (const goal of areaGoals) {
-            const acts = await annualPlanningService.getActivities(goal._id)
-            // Attach goal info/color
-            acts.forEach((a) => {
-              a.goalTitle = goal.title
-              a.areaColor = area.color
-            })
-            allActivities = [...allActivities, ...acts]
-          }
-        }
+      // Enrich activities already fetched by useAnnualPlan() (single /annual-plan/full
+      // request) in-memory instead of re-fetching them one goal at a time — see
+      // DailyRoutinePlanner N+1 fix (CACHE-009-style): the old code awaited
+      // annualPlanningService.getActivities(goal._id) inside a nested loop, firing one
+      // XHR (+ CORS preflight) per goal.
+      const allActivities = []
+      if (cacheActivities && cacheGoals && cacheAreas) {
+        cacheActivities.forEach((activity) => {
+          const goal = cacheGoals.find((g) => g._id === activity.goal_id || g._id === activity.goal_id?._id)
+          if (!goal) return // soft-deleted goal edge case — skip rather than crash
+          const area = cacheAreas.find((a) => a._id === goal.focus_area_id || a._id === goal.focus_area_id?._id)
+          allActivities.push({
+            ...activity,
+            time_of_day: activity.time_of_day || 'anytime',
+            goalTitle: goal.title,
+            areaColor: area?.color
+          })
+        })
       }
       setActivities(allActivities)
     } catch (err) {
@@ -145,7 +148,7 @@ const DailyRoutinePlanner = () => {
     } finally {
       setLoading(false)
     }
-  }, [plan, cacheAreas, cacheGoals, invalidateRoutineCache])
+  }, [plan, cacheAreas, cacheGoals, cacheActivities, invalidateRoutineCache])
 
   useEffect(() => {
     if (hookLoading) return

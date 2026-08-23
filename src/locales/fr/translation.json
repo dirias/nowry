@@ -411,9 +411,9 @@
       "empty": {
         "title": "Pas encore de paquets officiels pour {{topic}}",
         "body": "Nowry publie ses paquets officiels sujet par sujet, et {{topic}} n'est pas encore couvert. Vos sujets et votre objectif sont enregistrés.",
-        "fallbackTitle": "En générer un avec l'IA",
-        "fallbackBody": "Un paquet généré par l'IA n'est pas relu par Nowry et ne termine pas votre configuration, mais vous pouvez l'essayer maintenant.",
-        "fallbackAction": "Générer avec l'IA"
+        "fallbackTitle": "En générer une ébauche avec l'IA",
+        "fallbackBody": "Une ébauche générée par l'IA n'est pas relue par Nowry et ne termine pas votre configuration, mais vous pouvez en démarrer une maintenant et l'affiner vous-même.",
+        "fallbackAction": "Créer une ébauche avec l'IA"
       },
       "fallback": {
         "pending": "Génération des cartes…",
@@ -515,6 +515,42 @@
       "network": "Vous semblez hors ligne. Vérifiez votre connexion et réessayez.",
       "rejected": "Cette valeur a été refusée. Choisissez-en une autre.",
       "unknown": "Un problème est survenu de notre côté."
+    },
+    "teaser": {
+      "regionLabel": "Ce que Nowry peut faire",
+      "skip": "Passer",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "getStarted": "Commencer",
+      "imagePlaceholder": "Aperçu bientôt disponible",
+      "dotLabel": "Aller à {{title}}",
+      "progress": "Diapositive {{current}} sur {{total}} : {{title}}",
+      "cards": {
+        "smartBooks": {
+          "title": "Livres intelligents",
+          "description": "Transformez vos notes et PDF en livres structurés grâce à une lecture guidée par l'IA."
+        },
+        "studyCards": {
+          "title": "Cartes d'étude",
+          "description": "Révisez avec des cartes qui s’adaptent à ce que vous savez déjà."
+        },
+        "quizzes": {
+          "title": "Quiz",
+          "description": "Testez-vous avec des quiz générés à partir de votre propre contenu."
+        },
+        "diagrams": {
+          "title": "Diagrammes",
+          "description": "Découvrez comment les idées se relient grâce à des cartes conceptuelles générées par l'IA."
+        },
+        "smartpet": {
+          "title": "Compagnon intelligent",
+          "description": "Faites grandir un compagnon qui célèbre chaque série d'étude."
+        },
+        "annualPlanning": {
+          "title": "Planification annuelle",
+          "description": "Fixez des objectifs annuels et divisez-les en étapes réellement atteignables."
+        }
+      }
     }
   },
   "taxonomy": {
@@ -635,7 +671,9 @@
     },
     "account": {
       "title": "Compte",
-      "fullName": "Nom d'affichage",
+      "username": "Nom d'utilisateur",
+      "usernameInvalid": "Le nom d'utilisateur doit comporter entre 3 et 30 caractères et ne contenir que des lettres, des chiffres, des tirets bas ou des traits d'union.",
+      "usernameTaken": "Ce nom d'utilisateur est déjà pris",
       "emailManaged": "L'email est géré par votre fournisseur d'authentification",
       "editPhoto": "Changer la photo"
     },
@@ -1536,6 +1574,12 @@
     "levelUp": {
       "reached": "Vous avez atteint le niveau {{level}}",
       "dismiss": "Appuyer pour fermer"
+    },
+    "reveal": {
+      "title": "Dites bonjour à votre compagnon d'étude",
+      "subtitle_one": "Vous venez de revoir {{count}} carte — je serai là pour vous aider à continuer.",
+      "subtitle_other": "Vous venez de revoir {{count}} cartes — je serai là pour vous aider à continuer.",
+      "dismiss": "Appuyez n'importe où pour continuer"
     }
   },
   "agent": {
@@ -1547,6 +1591,11 @@
       "interventions": "Interventions"
     },
     "settings": {
+      "activation": {
+        "label": "Compagnon d'étude",
+        "description": "Affiche votre compagnon d'étude flottant à l'écran pendant que vous utilisez Nowry.",
+        "ariaLabel": "Afficher le compagnon d'étude"
+      },
       "interventions": {
         "requiresNudging": "Activez les rappels proactifs dans l'onglet Personnalité pour configurer les interventions.",
         "saveError": "Impossible de sauvegarder. Veuillez réessayer.",
