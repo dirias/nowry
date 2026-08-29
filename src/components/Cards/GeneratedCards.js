@@ -20,12 +20,12 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  IconButton,
-  Checkbox
+  IconButton
 } from '@mui/joy'
 import { BookOpen, RefreshCw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cardsService } from '../../api/services'
+import useCardCuration from '../../hooks/useCardCuration'
 import { useSaveToDeck } from '../../hooks/useSaveToDeck'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
@@ -69,7 +69,6 @@ export default function GeneratedCards({
   const { upgradeDismissed, dismissUpgrade, isUpgradeModalOpen, openUpgradeModal, closeUpgradeModal } = useSubscriptionContext()
 
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
-  const [selectedCards, setSelectedCards] = useState([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   // WR-03: error state for save failures
@@ -81,17 +80,13 @@ export default function GeneratedCards({
 
   const saveToDeck = useSaveToDeck('flashcard')
 
+  // CURATE-001: cards arrive kept, and curation is keyed by card rather than by
+  // array position, so a card streaming in cannot move anybody else's state.
+  const curation = useCardCuration(cards)
+
   useEffect(() => {
     if (isStreaming) setInputClipDismissed(false)
   }, [isStreaming])
-
-  const toggleCardSelection = (index) => {
-    setSelectedCards((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]))
-  }
-
-  const handleToggleSelectAll = () => {
-    setSelectedCards(selectedCards.length === cards.length ? [] : cards.map((_, i) => i))
-  }
 
   // Map terminal SSE error codes to i18n messages — raw backend messages are never shown
   const streamErrorMessage = (code) => {
@@ -121,17 +116,18 @@ export default function GeneratedCards({
       setLoading(true)
       await onGenerateAgain?.(countMode)
       setStep('select_cards')
-      setSelectedCards([])
+      // Curation resets itself: the replacement batch is not an append of the
+      // old one, so `useCardCuration` rebuilds its entries from scratch.
       setPartialSave(null)
     } finally {
       setLoading(false)
     }
   }
 
-  // "Generate more": parent re-runs the stream excluding current card titles
+  // "Generate more": parent re-runs the stream excluding current card titles and
+  // appends the result, so curation of the cards already on screen is left alone.
   const handleGenerateMore = () => {
     setStep('select_cards')
-    setSelectedCards([])
     setPartialSave(null)
     onGenerateMore?.()
   }
@@ -150,7 +146,9 @@ export default function GeneratedCards({
     setSaveError(null)
     setPartialSave(null)
     setSaving(true)
-    const cardsToSave = selectedCards.map((index) => cards[index])
+    // The entry's working text, not the incoming prop — from CURATE-003 onward
+    // these differ whenever the user has edited a card.
+    const cardsToSave = curation.keptEntries
     let saved = 0
     try {
       for (const card of cardsToSave) {
@@ -186,7 +184,7 @@ export default function GeneratedCards({
   // Plan-limit disclosure: only when the limit is known client-side.
   // Non-finite limit → no chip; the backend 403 remains the authority.
   const remainingPlanCards = Number.isFinite(flashcardLimit) ? Math.max(flashcardLimit - flashcardCount, 0) : null
-  const showPlanRemaining = remainingPlanCards !== null && selectedCards.length > remainingPlanCards
+  const showPlanRemaining = remainingPlanCards !== null && curation.keptCount > remainingPlanCards
 
   return (
     <Modal open onClose={onCancel}>
@@ -258,22 +256,32 @@ export default function GeneratedCards({
                 </Menu>
               </Dropdown>
 
-              {/* Select All control — never disabled during streaming; user can select what's arrived so far */}
-              <Stack direction='row' alignItems='center' spacing={1.5} sx={{ mb: 2 }}>
-                <Checkbox
-                  size='sm'
-                  checked={selectedCards.length === cards.length && cards.length > 0}
-                  indeterminate={selectedCards.length > 0 && selectedCards.length < cards.length}
-                  onChange={handleToggleSelectAll}
-                  disabled={cards.length === 0}
-                  label={t('cards.generatedCards.selectAll')}
-                  slotProps={{ input: { 'aria-label': t('cards.generatedCards.selectAllAria') } }}
-                />
-                {selectedCards.length > 0 && (
+              {/* Kept count and the bulk control — never disabled during streaming, so
+                  what has already arrived stays curatable while the rest lands. */}
+              <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 2 }}>
+                <Typography level='body-sm' sx={{ fontWeight: 'md' }}>
+                  {t('cards.generatedCards.keptCount', { count: curation.keptCount })}
+                </Typography>
+                {curation.discardedCount > 0 && (
                   <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {t('cards.generatedCards.selectedCount', { count: selectedCards.length, total: cards.length })}
+                    {t('cards.generatedCards.discardedCount', { count: curation.discardedCount })}
                   </Typography>
                 )}
+                {/* One control in two directions: a separate "restore all" would sit
+                    disabled almost permanently. */}
+                <Button
+                  size='sm'
+                  variant='plain'
+                  color='primary'
+                  onClick={curation.toggleAllKept}
+                  disabled={curation.entries.length === 0}
+                  sx={{
+                    ml: 'auto',
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 }
+                  }}
+                >
+                  {t(curation.keptCount === 0 ? 'cards.generatedCards.restoreAll' : 'cards.generatedCards.discardAll')}
+                </Button>
               </Stack>
 
               {/* Streaming progress row — indeterminate copy until the total is known (auto mode) */}
@@ -360,19 +368,26 @@ export default function GeneratedCards({
                 </Stack>
               ) : (
                 <Stack direction='row' flexWrap='wrap' gap={2} justifyContent='center' sx={{ minHeight: 200 }}>
-                  {cards.map((card, index) => {
-                    const isSelected = selectedCards.includes(index)
+                  {curation.entries.map((entry) => {
+                    const { kept } = entry
                     return (
                       <Card
-                        key={index}
-                        onClick={() => toggleCardSelection(index)}
+                        key={entry.id}
+                        // CURATE-002 moves discarding onto an explicit control and
+                        // frees this click for the in-place editor; until then the
+                        // card body keeps the click it has always had.
+                        onClick={() => curation.setKept(entry.id, !kept)}
                         variant='outlined'
                         sx={{
                           width: 260,
                           minHeight: 180,
                           display: 'flex',
-                          bgcolor: isSelected ? 'primary.softBg' : 'background.body',
-                          borderColor: isSelected ? 'primary.solidBg' : 'neutral.outlinedBorder',
+                          bgcolor: 'background.body',
+                          borderColor: 'neutral.outlinedBorder',
+                          borderStyle: kept ? 'solid' : 'dashed',
+                          // Discarded cards stay in place rather than leaving the
+                          // grid, so the batch never reflows under the user's cursor.
+                          opacity: kept ? 1 : 0.5,
                           cursor: 'pointer',
                           transition: 'all 0.2s',
                           '&:hover': { transform: 'translateY(-2px)', boxShadow: 'sm' },
@@ -393,14 +408,18 @@ export default function GeneratedCards({
                         }}
                       >
                         <CardOverflow sx={{ px: 2, pt: 2 }}>
-                          <Typography level='title-md' startDecorator={<BookOpen size={16} />}>
-                            {card.title}
+                          <Typography
+                            level='title-md'
+                            startDecorator={<BookOpen size={16} />}
+                            sx={{ textDecoration: kept ? 'none' : 'line-through' }}
+                          >
+                            {entry.title}
                           </Typography>
                         </CardOverflow>
                         <Divider />
                         <CardContent>
                           <Typography level='body-sm' color='neutral'>
-                            {card.content}
+                            {entry.content}
                           </Typography>
                         </CardContent>
                       </Card>
@@ -534,8 +553,8 @@ export default function GeneratedCards({
               {t('cards.generatedCards.cancelButton')}
             </Button>
             {step === 'select_cards' ? (
-              <Button variant='solid' color='primary' onClick={handleProceedToDeck} disabled={selectedCards.length === 0 || isStreaming}>
-                {t('cards.generatedCards.proceedCount', { count: selectedCards.length })}
+              <Button variant='solid' color='primary' onClick={handleProceedToDeck} disabled={curation.keptCount === 0 || isStreaming}>
+                {t('cards.generatedCards.continueCount', { count: curation.keptCount })}
               </Button>
             ) : (
               <Button variant='solid' color='success' onClick={handleSaveCards} loading={saving} disabled={!saveToDeck.selectedDeckId}>

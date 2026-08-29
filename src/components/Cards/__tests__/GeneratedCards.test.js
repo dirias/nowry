@@ -77,10 +77,14 @@ const renderModal = async (props = {}) => {
   return view
 }
 
-/** Select every card, advance to the deck step and confirm the save. */
+/**
+ * Advance to the deck step and confirm the save.
+ *
+ * CURATE-001 inverted the model: cards arrive kept, so there is nothing to
+ * select first and the primary action is enabled on open.
+ */
 const saveEverything = async () => {
-  fireEvent.click(screen.getByLabelText('cards.generatedCards.selectAllAria'))
-  fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.proceedCount:${CARDS.length}` }))
+  fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` }))
   await act(async () => {
     fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.confirmSave' }))
   })
@@ -114,7 +118,7 @@ describe('reporting what reached the library', () => {
     await saveEverything()
 
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith(1))
-    // The modal stays open on a partial save — the selection is preserved.
+    // The modal stays open on a partial save — curation is preserved.
     expect(onCancel).not.toHaveBeenCalled()
   })
 
@@ -153,8 +157,7 @@ describe('the create-deck name pre-fill', () => {
   it('prefers an explicit default over the source book title', async () => {
     await renderModal({ book: { title: 'Campbell Biology' }, newDeckNameDefault: 'Science' })
 
-    fireEvent.click(screen.getByLabelText('cards.generatedCards.selectAllAria'))
-    fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.proceedCount:${CARDS.length}` }))
+    fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` }))
     fireEvent.click(screen.getByRole('button', { name: 'cards.saveToDeck.createNewDeck' }))
 
     // Onboarding's fallback has no book; the topic is the only sensible name.
@@ -164,8 +167,7 @@ describe('the create-deck name pre-fill', () => {
   it('still falls back to the book title for the callers that pass one', async () => {
     await renderModal({ book: { title: 'Campbell Biology' } })
 
-    fireEvent.click(screen.getByLabelText('cards.generatedCards.selectAllAria'))
-    fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.proceedCount:${CARDS.length}` }))
+    fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` }))
     fireEvent.click(screen.getByRole('button', { name: 'cards.saveToDeck.createNewDeck' }))
 
     await waitFor(() => expect(screen.getByLabelText('cards.saveToDeck.namePlaceholder')).toHaveValue('Campbell Biology'))

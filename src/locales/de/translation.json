@@ -1873,16 +1873,20 @@
     "generatedCards": {
       "titleSelectCards": "Neue Lernkarten",
       "titleAddToDeck": "Zum Stapel hinzufügen",
-      "subtitleSelectCards": "Wähle die Karten aus, die du deinem Lernstapel hinzufügen möchtest.",
+      "subtitleSelectCards": "Prüfe deine Karten, bevor du sie einem Stapel hinzufügst.",
       "subtitleAddToDeck": "Wähle einen Stapel, um deine Karten zu speichern.",
       "generateAgainTooltip": "Erneut generieren",
       "cancelButton": "Abbrechen",
-      "proceedCount": "Weiter ({{count}})",
+      "continueCount_one": "Weiter · {{count}} Karte",
+      "continueCount_other": "Weiter · {{count}} Karten",
       "confirmSave": "Bestätigen & speichern",
       "saveError": "Karten konnten nicht gespeichert werden. Bitte versuche es erneut.",
-      "selectAll": "Alle auswählen",
-      "selectAllAria": "Alle Karten auswählen",
-      "selectedCount": "{{count}} von {{total}} ausgewählt"
+      "keptCount_one": "{{count}} Karte behalten",
+      "keptCount_other": "{{count}} Karten behalten",
+      "discardedCount_one": "{{count}} verworfen",
+      "discardedCount_other": "{{count}} verworfen",
+      "discardAll": "Alle verwerfen",
+      "restoreAll": "Alle wiederherstellen"
     },
     "saveToDeck": {
       "selectDeckLabel": "Stapel auswählen",

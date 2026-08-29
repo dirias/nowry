@@ -1850,16 +1850,20 @@
     "generatedCards": {
       "titleSelectCards": "新しい学習カード",
       "titleAddToDeck": "デッキに追加",
-      "subtitleSelectCards": "学習デッキに追加したいカードを選択してください。",
+      "subtitleSelectCards": "デッキに追加する前にカードを確認してください。",
       "subtitleAddToDeck": "カードを保存するデッキを選んでください。",
       "generateAgainTooltip": "再生成",
       "cancelButton": "キャンセル",
-      "proceedCount": "次へ ({{count}})",
+      "continueCount_one": "次へ · {{count}}枚",
+      "continueCount_other": "次へ · {{count}}枚",
       "confirmSave": "確認して保存",
       "saveError": "カードの保存に失敗しました。もう一度お試しください。",
-      "selectAll": "すべて選択",
-      "selectAllAria": "すべてのカードを選択",
-      "selectedCount": "{{total}}件中{{count}}件選択"
+      "keptCount_one": "{{count}}枚を保持",
+      "keptCount_other": "{{count}}枚を保持",
+      "discardedCount_one": "{{count}}枚を除外",
+      "discardedCount_other": "{{count}}枚を除外",
+      "discardAll": "すべて除外",
+      "restoreAll": "すべて戻す"
     },
     "saveToDeck": {
       "selectDeckLabel": "デッキを選択",

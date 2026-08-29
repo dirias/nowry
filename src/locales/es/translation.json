@@ -1227,16 +1227,20 @@
     "generatedCards": {
       "titleSelectCards": "Nuevas tarjetas de estudio",
       "titleAddToDeck": "Añadir al mazo",
-      "subtitleSelectCards": "Selecciona las tarjetas que quieres añadir a tu mazo de estudio.",
+      "subtitleSelectCards": "Revisa tus tarjetas antes de añadirlas a un mazo.",
       "subtitleAddToDeck": "Elige un mazo para guardar tus tarjetas.",
       "generateAgainTooltip": "Generar de nuevo",
       "cancelButton": "Cancelar",
-      "proceedCount": "Continuar ({{count}})",
+      "continueCount_one": "Continuar · {{count}} tarjeta",
+      "continueCount_other": "Continuar · {{count}} tarjetas",
       "confirmSave": "Confirmar y guardar",
       "saveError": "No se pudieron guardar las tarjetas. Inténtalo de nuevo.",
-      "selectAll": "Seleccionar todo",
-      "selectAllAria": "Seleccionar todas las tarjetas",
-      "selectedCount": "{{count}} de {{total}} seleccionadas"
+      "keptCount_one": "{{count}} tarjeta conservada",
+      "keptCount_other": "{{count}} tarjetas conservadas",
+      "discardedCount_one": "{{count}} descartada",
+      "discardedCount_other": "{{count}} descartadas",
+      "discardAll": "Descartar todo",
+      "restoreAll": "Restaurar todo"
     },
     "saveToDeck": {
       "selectDeckLabel": "Seleccionar mazo",

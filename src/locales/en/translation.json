@@ -1500,16 +1500,20 @@
     "generatedCards": {
       "titleSelectCards": "New Study Cards",
       "titleAddToDeck": "Add to Deck",
-      "subtitleSelectCards": "Select the cards you want to add to your study deck.",
+      "subtitleSelectCards": "Review your cards before adding them to a deck.",
       "subtitleAddToDeck": "Choose a deck to save your cards to.",
       "generateAgainTooltip": "Generate again",
       "cancelButton": "Cancel",
-      "proceedCount": "Proceed ({{count}})",
+      "continueCount_one": "Continue · {{count}} card",
+      "continueCount_other": "Continue · {{count}} cards",
       "confirmSave": "Confirm & Save",
       "saveError": "Failed to save cards. Please try again.",
-      "selectAll": "Select all",
-      "selectAllAria": "Select all cards",
-      "selectedCount": "{{count}} of {{total}} selected"
+      "keptCount_one": "{{count}} card kept",
+      "keptCount_other": "{{count}} cards kept",
+      "discardedCount_one": "{{count}} discarded",
+      "discardedCount_other": "{{count}} discarded",
+      "discardAll": "Discard all",
+      "restoreAll": "Restore all"
     },
     "saveToDeck": {
       "selectDeckLabel": "Select Deck",

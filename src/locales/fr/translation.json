@@ -1895,16 +1895,20 @@
     "generatedCards": {
       "titleSelectCards": "Nouvelles cartes d'étude",
       "titleAddToDeck": "Ajouter au paquet",
-      "subtitleSelectCards": "Sélectionnez les cartes à ajouter à votre paquet d'étude.",
+      "subtitleSelectCards": "Vérifiez vos cartes avant de les ajouter à un paquet.",
       "subtitleAddToDeck": "Choisissez un paquet pour enregistrer vos cartes.",
       "generateAgainTooltip": "Générer à nouveau",
       "cancelButton": "Annuler",
-      "proceedCount": "Continuer ({{count}})",
+      "continueCount_one": "Continuer · {{count}} carte",
+      "continueCount_other": "Continuer · {{count}} cartes",
       "confirmSave": "Confirmer et enregistrer",
       "saveError": "Échec de l'enregistrement des cartes. Veuillez réessayer.",
-      "selectAll": "Tout sélectionner",
-      "selectAllAria": "Sélectionner toutes les cartes",
-      "selectedCount": "{{count}} sur {{total}} sélectionnées"
+      "keptCount_one": "{{count}} carte conservée",
+      "keptCount_other": "{{count}} cartes conservées",
+      "discardedCount_one": "{{count}} écartée",
+      "discardedCount_other": "{{count}} écartées",
+      "discardAll": "Tout écarter",
+      "restoreAll": "Tout restaurer"
     },
     "saveToDeck": {
       "selectDeckLabel": "Sélectionner un paquet",
