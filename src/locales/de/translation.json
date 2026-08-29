@@ -864,7 +864,8 @@
       "tasks": "Aufgaben",
       "goals": "Ziele",
       "priorities": "Prioritäten",
-      "activities": "Aktivitäten"
+      "activities": "Gewohnheiten",
+      "habits": "Gewohnheiten"
     },
     "noEvents": "Keine Ereignisse für diesen Tag",
     "today": "Heute",
@@ -885,8 +886,9 @@
         "task": "Aufgabe",
         "priority": "Priorität",
         "goal": "Ziel",
-        "activity": "Aktivität"
-      }
+        "activity": "Gewohnheit"
+      },
+      "noActiveGoals": "Keine aktiven Ziele. Erstelle zuerst ein Ziel in der Jahresplanung."
     }
   },
   "about": {

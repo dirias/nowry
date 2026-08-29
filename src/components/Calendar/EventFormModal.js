@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Modal,
@@ -23,6 +23,7 @@ import {
 import { tasksService } from '../../api/services/tasks.service'
 import { annualPlanningService } from '../../api/services/annualPlanning.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { calculateProgress } from '../AnnualPlanning/goalDerivation'
 import { focusRing, touchTarget } from '../Common/Form/formStyles'
 
 /**
@@ -43,6 +44,19 @@ const TYPE_PALETTES = {
 }
 
 const TYPES = ['task', 'priority', 'goal', 'activity']
+
+/**
+ * A finished goal, by the definition the rest of the app already uses (see
+ * AnnualPlanningLayout and CloseQuarterModal): an explicit `completed` status,
+ * or progress at 100%. `calculateProgress` is the shared pure helper in
+ * goalDerivation, so this stays in step with every other goal surface rather
+ * than inventing a third rule.
+ *
+ * Habits attach to a goal, and FocusAreaView already locks a completed goal's
+ * milestones to avoid a finished goal growing unfinished children. Offering
+ * completed goals here walked around that guard.
+ */
+const isGoalCompleted = (goal) => goal?.status === 'completed' || (goal ? calculateProgress(goal) : 0) === 100
 
 /**
  * These chips are a selection control, so they answer to the same geometry as
@@ -129,13 +143,15 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const needsContext = !isEdit && (type === 'priority' || type === 'goal' || type === 'activity')
   const annualPlanId = cachedPlan?._id
   const focusAreas = cachedAreas || []
-  const allGoals = cachedGoals || []
+  const allGoals = useMemo(() => cachedGoals || [], [cachedGoals])
   const contextLoading = hookLoading
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const activeType = isEdit ? event?.type || 'task' : type
   const needsFocusArea = !isEdit && type === 'goal'
   const needsGoal = !isEdit && type === 'activity'
+  // Only goals that can still take new habits reach the picker.
+  const activeGoals = useMemo(() => allGoals.filter((g) => !isGoalCompleted(g)), [allGoals])
   const needsDescription = activeType === 'priority'
 
   // Determine if save should be blocked
@@ -363,9 +379,13 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                   <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
                     <CircularProgress size='sm' />
                   </Box>
+                ) : activeGoals.length === 0 ? (
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    {t('calendarModal.form.noActiveGoals')}
+                  </Typography>
                 ) : (
                   <Select value={goalId} onChange={(_, v) => setGoalId(v)} placeholder={t('calendarModal.form.goal')}>
-                    {allGoals.map((g) => (
+                    {activeGoals.map((g) => (
                       <Option key={g._id} value={g._id}>
                         {g.title}
                       </Option>

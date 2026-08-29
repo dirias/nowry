@@ -869,7 +869,8 @@
       "tasks": "Tareas",
       "goals": "Objetivos",
       "priorities": "Prioridades",
-      "activities": "Actividades"
+      "activities": "Hábitos",
+      "habits": "Hábitos"
     },
     "noEvents": "No hay eventos para este día",
     "today": "Hoy",
@@ -890,8 +891,9 @@
         "task": "Tarea",
         "priority": "Prioridad",
         "goal": "Objetivo",
-        "activity": "Actividad"
-      }
+        "activity": "Hábito"
+      },
+      "noActiveGoals": "No hay objetivos activos. Crea primero un objetivo en Planificación anual."
     }
   },
   "books": {
