@@ -1858,6 +1858,7 @@
       "continueCount_other": "次へ · {{count}}枚",
       "confirmSave": "確認して保存",
       "saveError": "カードの保存に失敗しました。もう一度お試しください。",
+      "gridAria": "生成されたカード",
       "keptCount_one": "{{count}}枚を保持",
       "keptCount_other": "{{count}}枚を保持",
       "discardedCount_one": "{{count}}枚を除外",

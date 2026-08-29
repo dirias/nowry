@@ -21,7 +21,7 @@ import { focusRing } from '../Common/Form/formStyles'
  * Nothing here touches the API. Curation is local until the deck step, which
  * remains the only writer (PRD A4).
  */
-export default function GeneratedCardEditor({ entry, autoFocusField = 'title', onChangeField, onDone, onCancel, onDiscard }) {
+export default function GeneratedCardEditor({ entry, autoFocusField = 'title', onChangeField, onDone, onDoneNext, onCancel, onDiscard }) {
   const { t } = useTranslation()
 
   // The text as it stood when the editor opened. A ref, not state: it must not
@@ -29,11 +29,19 @@ export default function GeneratedCardEditor({ entry, autoFocusField = 'title', o
   const openedWith = useRef({ title: entry.title, content: entry.content })
 
   const handleKeyDown = (event) => {
-    if (event.key !== 'Escape') return
-    // The dialog above us closes on Escape. Without this, cancelling an edit
-    // would throw away the entire batch — every card, not just this one.
-    event.stopPropagation()
-    onCancel(openedWith.current)
+    if (event.key === 'Escape') {
+      // The dialog above us closes on Escape. Without this, cancelling an edit
+      // would throw away the entire batch — every card, not just this one.
+      event.stopPropagation()
+      onCancel(openedWith.current)
+      return
+    }
+    // Commit and carry straight on to the next card, so working through a batch
+    // never needs the pointer (CURATE-005).
+    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault()
+      onDoneNext()
+    }
   }
 
   return (

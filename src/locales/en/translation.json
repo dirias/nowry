@@ -1508,6 +1508,7 @@
       "continueCount_other": "Continue · {{count}} cards",
       "confirmSave": "Confirm & Save",
       "saveError": "Failed to save cards. Please try again.",
+      "gridAria": "Generated cards",
       "keptCount_one": "{{count}} card kept",
       "keptCount_other": "{{count}} cards kept",
       "discardedCount_one": "{{count}} discarded",

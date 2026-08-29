@@ -1881,6 +1881,7 @@
       "continueCount_other": "Weiter · {{count}} Karten",
       "confirmSave": "Bestätigen & speichern",
       "saveError": "Karten konnten nicht gespeichert werden. Bitte versuche es erneut.",
+      "gridAria": "Generierte Karten",
       "keptCount_one": "{{count}} Karte behalten",
       "keptCount_other": "{{count}} Karten behalten",
       "discardedCount_one": "{{count}} verworfen",

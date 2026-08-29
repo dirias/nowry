@@ -1903,6 +1903,7 @@
       "continueCount_other": "Continuer · {{count}} cartes",
       "confirmSave": "Confirmer et enregistrer",
       "saveError": "Échec de l'enregistrement des cartes. Veuillez réessayer.",
+      "gridAria": "Cartes générées",
       "keptCount_one": "{{count}} carte conservée",
       "keptCount_other": "{{count}} cartes conservées",
       "discardedCount_one": "{{count}} écartée",

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Box, Button, Card, CardContent, CardOverflow, Chip, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/joy'
 import { BookOpen, Pencil, RotateCcw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -46,7 +46,7 @@ const actionCluster = {
   '@media (prefers-reduced-motion: reduce)': { transition: 'none' }
 }
 
-function DiscardedStrip({ entry, onRestore }) {
+function DiscardedStrip({ entry, onRestore, undoRef }) {
   const { t } = useTranslation()
 
   return (
@@ -72,6 +72,7 @@ function DiscardedStrip({ entry, onRestore }) {
         variant='plain'
         color='primary'
         onClick={onRestore}
+        ref={undoRef}
         startDecorator={<RotateCcw size={14} />}
         aria-label={t('cards.generatedCards.restoreCardAria', { title: entry.title })}
         sx={{ flexShrink: 0, ...focusRing }}
@@ -89,15 +90,36 @@ export default function GeneratedCard({
   onEdit,
   onChangeField,
   onDoneEditing,
+  onDoneEditingNext,
   onCancelEditing,
   onDiscard,
   onRestore,
-  onRevert
+  onRevert,
+  focusRequest = null,
+  onFocusApplied
 }) {
   const { t } = useTranslation()
   const edited = isEdited(entry)
 
-  if (!entry.kept) return <DiscardedStrip entry={entry} onRestore={onRestore} />
+  const editRef = useRef(null)
+  const undoRef = useRef(null)
+
+  /**
+   * Put focus back somewhere real after a curation action (CURATE-005).
+   *
+   * Discarding a card unmounts the button that was just pressed and replaces it
+   * with the undo strip; restoring does the reverse. Without this, focus drops
+   * to `<body>` every time, and a keyboard user has to tab in from the top of
+   * the dialog again after every single decision.
+   */
+  useEffect(() => {
+    if (!focusRequest) return
+    const target = focusRequest === 'undo' ? undoRef.current : editRef.current
+    target?.focus()
+    onFocusApplied?.()
+  }, [focusRequest, onFocusApplied])
+
+  if (!entry.kept) return <DiscardedStrip entry={entry} onRestore={onRestore} undoRef={undoRef} />
 
   if (isEditing) {
     return (
@@ -117,6 +139,7 @@ export default function GeneratedCard({
           autoFocusField={editingField}
           onChangeField={onChangeField}
           onDone={onDoneEditing}
+          onDoneNext={onDoneEditingNext}
           onCancel={onCancelEditing}
           onDiscard={onDiscard}
         />
@@ -127,6 +150,8 @@ export default function GeneratedCard({
   return (
     <Card
       variant='outlined'
+      role='group'
+      aria-label={entry.title}
       sx={{
         position: 'relative',
         minHeight: 180,
@@ -165,6 +190,7 @@ export default function GeneratedCard({
             variant='plain'
             color='neutral'
             onClick={() => onEdit('title')}
+            ref={editRef}
             aria-label={t('cards.generatedCards.editCardAria', { title: entry.title })}
             sx={focusRing}
           >

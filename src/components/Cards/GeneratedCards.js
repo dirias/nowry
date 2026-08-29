@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import {
   Box,
   Modal,
@@ -74,6 +74,9 @@ export default function GeneratedCards({
   // Which card is open in the in-place editor, and which half the caret landed
   // in. UI state, not curation state: the text itself lives in `curation`.
   const [editing, setEditing] = useState(null) // { id, field } | null
+  // Where focus should land after a curation action unmounts the control that
+  // triggered it: { id, control: 'edit' | 'undo' } | null.
+  const [focusRequest, setFocusRequest] = useState(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   // WR-03: error state for save failures
@@ -140,6 +143,25 @@ export default function GeneratedCards({
 
   const handleProceedToDeck = () => {
     setStep('select_deck')
+  }
+
+  const clearFocusRequest = useCallback(() => setFocusRequest(null), [])
+
+  const closeEditor = (id) => {
+    setEditing(null)
+    setFocusRequest({ id, control: 'edit' })
+  }
+
+  /**
+   * Commit this card and open the next kept one, so a batch can be worked
+   * through end to end without reaching for the pointer. The last card has
+   * nowhere to go, so it simply closes.
+   */
+  const editNextAfter = (id) => {
+    const kept = curation.keptEntries
+    const next = kept[kept.findIndex((entry) => entry.id === id) + 1]
+    if (!next) return closeEditor(id)
+    setEditing({ id: next.id, field: 'title' })
   }
 
   // WR-03: surface save errors to the user via saveError state.
@@ -212,7 +234,10 @@ export default function GeneratedCards({
           flexDirection: 'column'
         }}
       >
-        <ModalClose sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }} />
+        {/* Joy's ModalClose ships no accessible name of its own, so a screen
+            reader announced this as bare "button". Pre-existing; fixed here
+            because CURATE-005 owns the naming pass over this dialog. */}
+        <ModalClose aria-label={t('common.close')} sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }} />
 
         {/* Fixed Header */}
         <Box sx={{ p: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
@@ -375,6 +400,8 @@ export default function GeneratedCards({
                 // would be forced to the full height of its row. `alignItems: start`
                 // is what lets it actually be short while keeping its slot.
                 <Box
+                  role='group'
+                  aria-label={t('cards.generatedCards.gridAria')}
                   sx={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(238px, 1fr))',
@@ -391,17 +418,24 @@ export default function GeneratedCards({
                       editingField={editing?.field}
                       onEdit={(field) => setEditing({ id: entry.id, field })}
                       onChangeField={(field, value) => curation.setField(entry.id, field, value)}
-                      onDoneEditing={() => setEditing(null)}
+                      onDoneEditing={() => closeEditor(entry.id)}
+                      onDoneEditingNext={() => editNextAfter(entry.id)}
                       onCancelEditing={(openedWith) => {
                         curation.setFields(entry.id, openedWith)
-                        setEditing(null)
+                        closeEditor(entry.id)
                       }}
                       onDiscard={() => {
                         curation.setKept(entry.id, false)
                         setEditing(null)
+                        setFocusRequest({ id: entry.id, control: 'undo' })
                       }}
-                      onRestore={() => curation.setKept(entry.id, true)}
+                      onRestore={() => {
+                        curation.setKept(entry.id, true)
+                        setFocusRequest({ id: entry.id, control: 'edit' })
+                      }}
                       onRevert={() => curation.revert(entry.id)}
+                      focusRequest={focusRequest?.id === entry.id ? focusRequest.control : null}
+                      onFocusApplied={clearFocusRequest}
                     />
                   ))}
 

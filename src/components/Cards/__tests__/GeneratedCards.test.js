@@ -298,6 +298,68 @@ describe('marking an edited card', () => {
   })
 })
 
+describe('keyboard reach and focus', () => {
+  const editButtons = () => screen.getAllByLabelText('cards.generatedCards.editCardAria')
+
+  it('moves focus to the undo control when a card is discarded, and back on restore', async () => {
+    await renderModal()
+
+    // Discarding unmounts the button that was just pressed. Without a handover,
+    // focus lands on <body> and the user tabs in from the top of the dialog
+    // again after every single decision.
+    fireEvent.click(screen.getAllByLabelText('cards.generatedCards.discardCardAria')[0])
+    expect(screen.getByLabelText('cards.generatedCards.restoreCardAria')).toHaveFocus()
+    expect(document.body).not.toHaveFocus()
+
+    fireEvent.click(screen.getByLabelText('cards.generatedCards.restoreCardAria'))
+    expect(editButtons()[0]).toHaveFocus()
+  })
+
+  it('returns focus to the card after an edit is committed', async () => {
+    await renderModal()
+
+    fireEvent.click(editButtons()[0])
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+
+    expect(editButtons()[0]).toHaveFocus()
+  })
+
+  it('returns focus to the card after an edit is cancelled', async () => {
+    await renderModal()
+
+    fireEvent.click(editButtons()[0])
+    fireEvent.keyDown(screen.getByLabelText('cards.flashcard.backLabel'), { key: 'Escape' })
+
+    expect(editButtons()[0]).toHaveFocus()
+  })
+
+  it('commits and opens the next card on Cmd+Enter, and closes on the last one', async () => {
+    await renderModal()
+
+    fireEvent.click(editButtons()[0])
+    fireEvent.change(screen.getByLabelText('cards.flashcard.backLabel'), { target: { value: 'first edit' } })
+    fireEvent.keyDown(screen.getByLabelText('cards.flashcard.backLabel'), { key: 'Enter', metaKey: true })
+
+    // The first card is committed and the second is now open.
+    expect(screen.getByText('first edit')).toBeInTheDocument()
+    expect(screen.getByLabelText('cards.flashcard.frontLabel')).toHaveValue(CARDS[1].title)
+
+    // Nowhere left to go: the editor closes rather than trapping the user.
+    fireEvent.keyDown(screen.getByLabelText('cards.flashcard.backLabel'), { key: 'Enter', ctrlKey: true })
+    expect(screen.queryByLabelText('cards.flashcard.frontLabel')).not.toBeInTheDocument()
+  })
+
+  it('gives every control an accessible name', async () => {
+    await renderModal()
+
+    // A button whose name is its own i18n key is a button with a name; one with
+    // no name at all is what this guards against.
+    screen.getAllByRole('button').forEach((button) => {
+      expect(button).toHaveAccessibleName()
+    })
+  })
+})
+
 describe('the create-deck name pre-fill', () => {
   it('prefers an explicit default over the source book title', async () => {
     await renderModal({ book: { title: 'Campbell Biology' }, newDeckNameDefault: 'Science' })

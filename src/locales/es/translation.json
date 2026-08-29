@@ -1235,6 +1235,7 @@
       "continueCount_other": "Continuar · {{count}} tarjetas",
       "confirmSave": "Confirmar y guardar",
       "saveError": "No se pudieron guardar las tarjetas. Inténtalo de nuevo.",
+      "gridAria": "Tarjetas generadas",
       "keptCount_one": "{{count}} tarjeta conservada",
       "keptCount_other": "{{count}} tarjetas conservadas",
       "discardedCount_one": "{{count}} descartada",
