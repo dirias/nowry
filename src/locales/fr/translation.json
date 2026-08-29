@@ -1898,6 +1898,12 @@
       "subtitleSelectCards": "Vérifiez vos cartes avant de les ajouter à un paquet.",
       "subtitleAddToDeck": "Choisissez un paquet pour enregistrer vos cartes.",
       "generateAgainTooltip": "Générer à nouveau",
+      "regenerate": {
+        "menuAria": "Générer de nouveau avec un autre nombre de cartes",
+        "auto": "Automatique",
+        "fixed_one": "{{count}} carte",
+        "fixed_other": "{{count}} cartes"
+      },
       "cancelButton": "Annuler",
       "continueCount_one": "Continuer · {{count}} carte",
       "continueCount_other": "Continuer · {{count}} cartes",
@@ -1908,6 +1914,11 @@
       "keptCount_other": "{{count}} cartes conservées",
       "discardedCount_one": "{{count}} écartée",
       "discardedCount_other": "{{count}} écartées",
+      "incompleteCount_one": "{{count}} carte a besoin d’un recto et d’un verso",
+      "incompleteCount_other": "{{count}} cartes ont besoin d’un recto et d’un verso",
+      "planRemaining_one": "Il ne vous reste que {{count}} carte sur votre forfait",
+      "planRemaining_other": "Il ne vous reste que {{count}} cartes sur votre forfait",
+      "partialSave": "{{saved}} cartes sur {{total}} ont été enregistrées avant d’atteindre la limite de votre forfait.",
       "discardAll": "Tout écarter",
       "restoreAll": "Tout restaurer",
       "editCard": "Modifier la carte",
@@ -2245,7 +2256,12 @@
       "retry": "Réessayer",
       "retryAria": "Réessayer la génération de cartes",
       "emptyTitle": "Aucune carte générée",
-      "emptyBody": "L'IA n'a pas pu créer de cartes à partir de ce texte. Réessayez ou sélectionnez un autre passage."
+      "emptyBody": "L'IA n'a pas pu créer de cartes à partir de ce texte. Réessayez ou sélectionnez un autre passage.",
+      "inputTruncated": "Votre sélection dépassait {{max}} caractères ; seule la première partie a été utilisée.",
+      "cappedNotice_one": "Arrêt à {{count}} carte pour le moment.",
+      "cappedNotice_other": "Arrêt à {{count}} cartes pour le moment.",
+      "generateMore": "Générer plus",
+      "generateMoreAria": "Générer plus de cartes à partir de ce texte"
     },
     "errors": {
       "quota": "Vous avez atteint votre limite de génération IA. Veuillez réessayer plus tard.",

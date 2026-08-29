@@ -1853,6 +1853,12 @@
       "subtitleSelectCards": "デッキに追加する前にカードを確認してください。",
       "subtitleAddToDeck": "カードを保存するデッキを選んでください。",
       "generateAgainTooltip": "再生成",
+      "regenerate": {
+        "menuAria": "枚数を変えて再生成",
+        "auto": "自動",
+        "fixed_one": "{{count}}枚",
+        "fixed_other": "{{count}}枚"
+      },
       "cancelButton": "キャンセル",
       "continueCount_one": "次へ · {{count}}枚",
       "continueCount_other": "次へ · {{count}}枚",
@@ -1863,6 +1869,11 @@
       "keptCount_other": "{{count}}枚を保持",
       "discardedCount_one": "{{count}}枚を除外",
       "discardedCount_other": "{{count}}枚を除外",
+      "incompleteCount_one": "{{count}}枚に表面と裏面が必要です",
+      "incompleteCount_other": "{{count}}枚に表面と裏面が必要です",
+      "planRemaining_one": "プランの残りは{{count}}枚です",
+      "planRemaining_other": "プランの残りは{{count}}枚です",
+      "partialSave": "プランの上限に達する前に{{total}}枚中{{saved}}枚を保存しました。",
       "discardAll": "すべて除外",
       "restoreAll": "すべて戻す",
       "editCard": "カードを編集",
@@ -2183,7 +2194,12 @@
       "retry": "再試行",
       "retryAria": "カード生成を再試行",
       "emptyTitle": "カードが生成されませんでした",
-      "emptyBody": "AIはこのテキストからカードを作成できませんでした。もう一度試すか、別の箇所を選択してください。"
+      "emptyBody": "AIはこのテキストからカードを作成できませんでした。もう一度試すか、別の箇所を選択してください。",
+      "inputTruncated": "選択した範囲が{{max}}文字を超えたため、先頭部分のみを使用しました。",
+      "cappedNotice_one": "今回は{{count}}枚で停止しました。",
+      "cappedNotice_other": "今回は{{count}}枚で停止しました。",
+      "generateMore": "さらに生成",
+      "generateMoreAria": "このテキストからさらにカードを生成"
     },
     "errors": {
       "quota": "AI生成の上限に達しました。しばらくしてからもう一度お試しください。",

@@ -4,7 +4,7 @@ import { BookOpen, Pencil, RotateCcw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import GeneratedCardEditor from './GeneratedCardEditor'
-import { isEdited } from '../../hooks/useCardCuration'
+import { isEdited, isIncomplete } from '../../hooks/useCardCuration'
 import { focusRing, oneLine } from '../Common/Form/formStyles'
 
 /**
@@ -65,7 +65,7 @@ function DiscardedStrip({ entry, onRestore, undoRef }) {
       }}
     >
       <Typography level='body-sm' sx={{ ...oneLine, flex: 1, color: 'text.tertiary', textDecoration: 'line-through' }}>
-        {entry.title}
+        {entry.title.trim() || entry.original.title}
       </Typography>
       <Button
         size='sm'
@@ -100,6 +100,7 @@ export default function GeneratedCard({
 }) {
   const { t } = useTranslation()
   const edited = isEdited(entry)
+  const incomplete = isIncomplete(entry)
 
   const editRef = useRef(null)
   const undoRef = useRef(null)
@@ -151,13 +152,13 @@ export default function GeneratedCard({
     <Card
       variant='outlined'
       role='group'
-      aria-label={entry.title}
+      aria-label={entry.title || t('cards.flashcard.frontRequired')}
       sx={{
         position: 'relative',
         minHeight: 180,
         display: 'flex',
         bgcolor: 'background.body',
-        borderColor: 'neutral.outlinedBorder',
+        borderColor: incomplete ? 'danger.outlinedBorder' : 'neutral.outlinedBorder',
         transition: 'border-color 0.2s, box-shadow 0.2s',
         '&:hover': { boxShadow: 'sm' },
         // `focus-within` matters as much as hover: the cluster holds the only
@@ -212,14 +213,20 @@ export default function GeneratedCard({
       </Box>
 
       <CardOverflow sx={{ px: 2, pt: 2, cursor: 'text' }} onClick={() => onEdit('title')}>
-        <Typography level='title-md' startDecorator={<BookOpen size={16} />} sx={{ pr: TITLE_GUTTER }}>
-          {entry.title}
+        <Typography
+          level='title-md'
+          startDecorator={<BookOpen size={16} />}
+          sx={{ pr: TITLE_GUTTER, color: entry.title.trim() ? undefined : 'danger.plainColor' }}
+        >
+          {/* The missing half says which half it is and how to fix it, rather
+              than leaving a blank space and a disabled button downstairs. */}
+          {entry.title.trim() ? entry.title : t('cards.flashcard.frontRequired')}
         </Typography>
       </CardOverflow>
       <Divider />
       <CardContent sx={{ cursor: 'text' }} onClick={() => onEdit('content')}>
-        <Typography level='body-sm' color='neutral'>
-          {entry.content}
+        <Typography level='body-sm' sx={{ color: entry.content.trim() ? 'text.secondary' : 'danger.plainColor' }}>
+          {entry.content.trim() ? entry.content : t('cards.flashcard.backRequired')}
         </Typography>
       </CardContent>
 

@@ -62,6 +62,14 @@ export const entryFrom = (card, id) => {
  */
 export const isEdited = (entry) => entry.title !== entry.original.title || entry.content !== entry.original.content
 
+/**
+ * A card the user has emptied one half of (CURATE-006).
+ *
+ * Whitespace counts as empty, because a card whose back is a single space is
+ * exactly as useless in a study session as one whose back is nothing.
+ */
+export const isIncomplete = (entry) => !entry.title.trim() || !entry.content.trim()
+
 /** Whether `next` extends `prev` rather than replacing it. */
 const isAppendOf = (prev, next) => next.length >= prev.length && prev.every((card, i) => card === next[i])
 
@@ -158,10 +166,18 @@ export default function useCardCuration(cards) {
 
   const keptEntries = useMemo(() => entries.filter((entry) => entry.kept), [entries])
 
+  // What the save path actually writes. Kept and incomplete are separate ideas:
+  // an emptied card is still one the user means to keep, so it stays in the
+  // grid asking to be fixed rather than being silently dropped.
+  const validKeptEntries = useMemo(() => keptEntries.filter((entry) => !isIncomplete(entry)), [keptEntries])
+
   return {
     entries,
     keptEntries,
+    validKeptEntries,
     keptCount: keptEntries.length,
+    validKeptCount: validKeptEntries.length,
+    incompleteCount: keptEntries.length - validKeptEntries.length,
     discardedCount: entries.length - keptEntries.length,
     setKept,
     setField,

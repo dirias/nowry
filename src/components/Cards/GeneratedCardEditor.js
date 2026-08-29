@@ -51,6 +51,7 @@ export default function GeneratedCardEditor({ entry, autoFocusField = 'title', o
         placeholderKey='cards.flashcard.frontPlaceholder'
         value={entry.title}
         onChange={(value) => onChangeField('title', value)}
+        errorKey={entry.title.trim() ? null : 'cards.flashcard.frontRequired'}
         minRows={2}
         // Declarative rather than a post-mount .focus(): the dialog runs a focus
         // trap that re-claims focus from anything scheduled on a timeout, but
@@ -63,6 +64,7 @@ export default function GeneratedCardEditor({ entry, autoFocusField = 'title', o
         placeholderKey='cards.flashcard.backPlaceholder'
         value={entry.content}
         onChange={(value) => onChangeField('content', value)}
+        errorKey={entry.content.trim() ? null : 'cards.flashcard.backRequired'}
         minRows={3}
         autoFocus={autoFocusField === 'content'}
       />

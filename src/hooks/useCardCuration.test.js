@@ -13,7 +13,7 @@
  */
 import { act, renderHook } from '@testing-library/react'
 
-import useCardCuration, { entryFrom, isEdited, syncEntries } from './useCardCuration'
+import useCardCuration, { entryFrom, isEdited, isIncomplete, syncEntries } from './useCardCuration'
 
 const card = (title) => ({ title, content: `${title} — back` })
 
@@ -119,6 +119,16 @@ describe('isEdited — derived, never a flag', () => {
   })
 })
 
+describe('isIncomplete', () => {
+  const entry = () => syncEntries(EMPTY, [A]).entries[0]
+
+  it('treats a whitespace-only half as empty', () => {
+    expect(isIncomplete(entry())).toBe(false)
+    expect(isIncomplete({ ...entry(), content: '   ' })).toBe(true)
+    expect(isIncomplete({ ...entry(), title: '' })).toBe(true)
+  })
+})
+
 describe('useCardCuration', () => {
   it('opens with every card kept', () => {
     const { result } = renderHook(() => useCardCuration([A, B]))
@@ -172,6 +182,20 @@ describe('useCardCuration', () => {
 
     expect(result.current.entries[0].content).toBe('rewritten')
     expect(isEdited(result.current.entries[0])).toBe(true)
+  })
+
+  it('keeps an emptied card kept but out of what will be written', () => {
+    const { result } = renderHook(() => useCardCuration([A, B]))
+    const { id } = result.current.entries[0]
+
+    act(() => result.current.setField(id, 'content', ''))
+
+    // Kept and complete are separate ideas: the user still means to keep this
+    // card, so it stays in the grid asking to be fixed rather than vanishing.
+    expect(result.current.keptCount).toBe(2)
+    expect(result.current.validKeptCount).toBe(1)
+    expect(result.current.incompleteCount).toBe(1)
+    expect(result.current.validKeptEntries.map((entry) => entry.id)).toEqual([result.current.entries[1].id])
   })
 
   it('carries curation across a re-render with an equivalent array', () => {

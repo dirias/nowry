@@ -1503,6 +1503,12 @@
       "subtitleSelectCards": "Review your cards before adding them to a deck.",
       "subtitleAddToDeck": "Choose a deck to save your cards to.",
       "generateAgainTooltip": "Generate again",
+      "regenerate": {
+        "menuAria": "Generate again with a different number of cards",
+        "auto": "Automatic",
+        "fixed_one": "{{count}} card",
+        "fixed_other": "{{count}} cards"
+      },
       "cancelButton": "Cancel",
       "continueCount_one": "Continue · {{count}} card",
       "continueCount_other": "Continue · {{count}} cards",
@@ -1513,6 +1519,11 @@
       "keptCount_other": "{{count}} cards kept",
       "discardedCount_one": "{{count}} discarded",
       "discardedCount_other": "{{count}} discarded",
+      "incompleteCount_one": "{{count}} card needs a front and a back",
+      "incompleteCount_other": "{{count}} cards need a front and a back",
+      "planRemaining_one": "Only {{count}} card left on your plan",
+      "planRemaining_other": "Only {{count}} cards left on your plan",
+      "partialSave": "Saved {{saved}} of {{total}} cards before you reached your plan limit.",
       "discardAll": "Discard all",
       "restoreAll": "Restore all",
       "editCard": "Edit card",
@@ -3084,7 +3095,12 @@
       "retry": "Retry",
       "retryAria": "Retry card generation",
       "emptyTitle": "No cards generated",
-      "emptyBody": "The AI couldn't create cards from this text. Try again or select a different passage."
+      "emptyBody": "The AI couldn't create cards from this text. Try again or select a different passage.",
+      "inputTruncated": "Your selection was longer than {{max}} characters, so only the first part was used.",
+      "cappedNotice_one": "Stopped at {{count}} card for now.",
+      "cappedNotice_other": "Stopped at {{count}} cards for now.",
+      "generateMore": "Generate more",
+      "generateMoreAria": "Generate more cards from this text"
     },
     "errors": {
       "quota": "You've reached your AI generation limit. Please try again later.",

@@ -174,9 +174,10 @@ export default function GeneratedCards({
     setSaveError(null)
     setPartialSave(null)
     setSaving(true)
-    // The entry's working text, not the incoming prop — from CURATE-003 onward
-    // these differ whenever the user has edited a card.
-    const cardsToSave = curation.keptEntries
+    // The entry's working text, not the incoming prop — these differ whenever
+    // the user has edited a card. Incomplete cards are excluded rather than
+    // written with a blank side (CURATE-006).
+    const cardsToSave = curation.validKeptEntries
     let saved = 0
     try {
       for (const card of cardsToSave) {
@@ -212,7 +213,7 @@ export default function GeneratedCards({
   // Plan-limit disclosure: only when the limit is known client-side.
   // Non-finite limit → no chip; the backend 403 remains the authority.
   const remainingPlanCards = Number.isFinite(flashcardLimit) ? Math.max(flashcardLimit - flashcardCount, 0) : null
-  const showPlanRemaining = remainingPlanCards !== null && curation.keptCount > remainingPlanCards
+  const showPlanRemaining = remainingPlanCards !== null && curation.validKeptCount > remainingPlanCards
 
   return (
     <Modal open onClose={onCancel}>
@@ -557,6 +558,14 @@ export default function GeneratedCards({
           )}
           <Stack direction='row' justifyContent='flex-end' alignItems='center' spacing={1}>
             {/* Plan-limit heads-up — informational only; Proceed stays enabled (backend 403 is authority) */}
+            {/* Incomplete cards are not an error the user made in passing — they
+                emptied a field and have not filled it back in yet. Say how many
+                rather than leaving a disabled button with no explanation. */}
+            {step === 'select_cards' && curation.incompleteCount > 0 && (
+              <Chip color='warning' variant='soft' size='sm' sx={{ mr: 'auto' }}>
+                {t('cards.generatedCards.incompleteCount', { count: curation.incompleteCount })}
+              </Chip>
+            )}
             {step === 'select_cards' && showPlanRemaining && (
               <Chip color='warning' variant='soft' size='sm' sx={{ mr: 'auto' }}>
                 {t('cards.generatedCards.planRemaining', { count: remainingPlanCards })}
@@ -566,8 +575,8 @@ export default function GeneratedCards({
               {t('cards.generatedCards.cancelButton')}
             </Button>
             {step === 'select_cards' ? (
-              <Button variant='solid' color='primary' onClick={handleProceedToDeck} disabled={curation.keptCount === 0 || isStreaming}>
-                {t('cards.generatedCards.continueCount', { count: curation.keptCount })}
+              <Button variant='solid' color='primary' onClick={handleProceedToDeck} disabled={curation.validKeptCount === 0 || isStreaming}>
+                {t('cards.generatedCards.continueCount', { count: curation.validKeptCount })}
               </Button>
             ) : (
               <Button variant='solid' color='success' onClick={handleSaveCards} loading={saving} disabled={!saveToDeck.selectedDeckId}>

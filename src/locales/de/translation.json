@@ -1876,6 +1876,12 @@
       "subtitleSelectCards": "Prüfe deine Karten, bevor du sie einem Stapel hinzufügst.",
       "subtitleAddToDeck": "Wähle einen Stapel, um deine Karten zu speichern.",
       "generateAgainTooltip": "Erneut generieren",
+      "regenerate": {
+        "menuAria": "Erneut mit einer anderen Kartenanzahl generieren",
+        "auto": "Automatisch",
+        "fixed_one": "{{count}} Karte",
+        "fixed_other": "{{count}} Karten"
+      },
       "cancelButton": "Abbrechen",
       "continueCount_one": "Weiter · {{count}} Karte",
       "continueCount_other": "Weiter · {{count}} Karten",
@@ -1886,6 +1892,11 @@
       "keptCount_other": "{{count}} Karten behalten",
       "discardedCount_one": "{{count}} verworfen",
       "discardedCount_other": "{{count}} verworfen",
+      "incompleteCount_one": "{{count}} Karte braucht Vorder- und Rückseite",
+      "incompleteCount_other": "{{count}} Karten brauchen Vorder- und Rückseite",
+      "planRemaining_one": "Nur noch {{count}} Karte in deinem Tarif",
+      "planRemaining_other": "Nur noch {{count}} Karten in deinem Tarif",
+      "partialSave": "{{saved}} von {{total}} Karten wurden gespeichert, bevor dein Tariflimit erreicht war.",
       "discardAll": "Alle verwerfen",
       "restoreAll": "Alle wiederherstellen",
       "editCard": "Karte bearbeiten",
@@ -2223,7 +2234,12 @@
       "retry": "Erneut versuchen",
       "retryAria": "Kartenerstellung erneut versuchen",
       "emptyTitle": "Keine Karten erstellt",
-      "emptyBody": "Die KI konnte aus diesem Text keine Karten erstellen. Bitte versuchen Sie es erneut oder wählen Sie einen anderen Abschnitt."
+      "emptyBody": "Die KI konnte aus diesem Text keine Karten erstellen. Bitte versuchen Sie es erneut oder wählen Sie einen anderen Abschnitt.",
+      "inputTruncated": "Deine Auswahl war länger als {{max}} Zeichen, daher wurde nur der erste Teil verwendet.",
+      "cappedNotice_one": "Vorerst bei {{count}} Karte gestoppt.",
+      "cappedNotice_other": "Vorerst bei {{count}} Karten gestoppt.",
+      "generateMore": "Mehr generieren",
+      "generateMoreAria": "Mehr Karten aus diesem Text generieren"
     },
     "errors": {
       "quota": "Sie haben Ihr KI-Generierungslimit erreicht. Bitte versuchen Sie es später erneut.",

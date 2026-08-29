@@ -360,6 +360,54 @@ describe('keyboard reach and focus', () => {
   })
 })
 
+describe('an emptied card', () => {
+  const openFirstEditor = () => fireEvent.click(screen.getAllByLabelText('cards.generatedCards.editCardAria')[0])
+
+  const emptyTheBack = () => {
+    openFirstEditor()
+    fireEvent.change(screen.getByLabelText('cards.flashcard.backLabel'), { target: { value: '   ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+  }
+
+  it('drops out of the count, says so, and is never written', async () => {
+    await renderModal()
+    emptyTheBack()
+
+    // Whitespace is empty: a card whose back is a single space is as useless in
+    // a study session as one whose back is nothing.
+    expect(screen.getByText('cards.generatedCards.incompleteCount:1')).toBeInTheDocument()
+    expect(screen.getByText('cards.flashcard.backRequired')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.continueCount:1' }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.confirmSave' }))
+    })
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(1))
+    expect(mockCreate).toHaveBeenCalledTimes(1)
+    expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ title: CARDS[1].title }))
+  })
+
+  it('rejoins the count once the missing half is filled in', async () => {
+    await renderModal()
+    emptyTheBack()
+
+    openFirstEditor()
+    fireEvent.change(screen.getByLabelText('cards.flashcard.backLabel'), { target: { value: 'filled back in' } })
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+
+    expect(screen.queryByText('cards.generatedCards.incompleteCount:1')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` })).toBeEnabled()
+  })
+
+  it('disables the primary action when nothing kept is complete', async () => {
+    await renderModal({ cards: [CARDS[0]] })
+    emptyTheBack()
+
+    expect(screen.getByRole('button', { name: 'cards.generatedCards.continueCount:0' })).toBeDisabled()
+  })
+})
+
 describe('the create-deck name pre-fill', () => {
   it('prefers an explicit default over the source book title', async () => {
     await renderModal({ book: { title: 'Campbell Biology' }, newDeckNameDefault: 'Science' })

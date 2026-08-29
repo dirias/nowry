@@ -1230,6 +1230,12 @@
       "subtitleSelectCards": "Revisa tus tarjetas antes de añadirlas a un mazo.",
       "subtitleAddToDeck": "Elige un mazo para guardar tus tarjetas.",
       "generateAgainTooltip": "Generar de nuevo",
+      "regenerate": {
+        "menuAria": "Generar de nuevo con otra cantidad de tarjetas",
+        "auto": "Automática",
+        "fixed_one": "{{count}} tarjeta",
+        "fixed_other": "{{count}} tarjetas"
+      },
       "cancelButton": "Cancelar",
       "continueCount_one": "Continuar · {{count}} tarjeta",
       "continueCount_other": "Continuar · {{count}} tarjetas",
@@ -1240,6 +1246,11 @@
       "keptCount_other": "{{count}} tarjetas conservadas",
       "discardedCount_one": "{{count}} descartada",
       "discardedCount_other": "{{count}} descartadas",
+      "incompleteCount_one": "{{count}} tarjeta necesita anverso y reverso",
+      "incompleteCount_other": "{{count}} tarjetas necesitan anverso y reverso",
+      "planRemaining_one": "Solo te queda {{count}} tarjeta en tu plan",
+      "planRemaining_other": "Solo te quedan {{count}} tarjetas en tu plan",
+      "partialSave": "Se guardaron {{saved}} de {{total}} tarjetas antes de alcanzar el límite de tu plan.",
       "discardAll": "Descartar todo",
       "restoreAll": "Restaurar todo",
       "editCard": "Editar tarjeta",
@@ -2887,7 +2898,12 @@
       "retry": "Reintentar",
       "retryAria": "Reintentar la generación de tarjetas",
       "emptyTitle": "No se generaron tarjetas",
-      "emptyBody": "La IA no pudo crear tarjetas a partir de este texto. Inténtalo de nuevo o selecciona otro fragmento."
+      "emptyBody": "La IA no pudo crear tarjetas a partir de este texto. Inténtalo de nuevo o selecciona otro fragmento.",
+      "inputTruncated": "Tu selección superaba los {{max}} caracteres, así que solo se usó la primera parte.",
+      "cappedNotice_one": "Por ahora se detuvo en {{count}} tarjeta.",
+      "cappedNotice_other": "Por ahora se detuvo en {{count}} tarjetas.",
+      "generateMore": "Generar más",
+      "generateMoreAria": "Generar más tarjetas a partir de este texto"
     },
     "errors": {
       "quota": "Has alcanzado tu límite de generación con IA. Inténtalo de nuevo más tarde.",
