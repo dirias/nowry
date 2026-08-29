@@ -1908,7 +1908,11 @@
       "discardedCount_one": "{{count}} écartée",
       "discardedCount_other": "{{count}} écartées",
       "discardAll": "Tout écarter",
-      "restoreAll": "Tout restaurer"
+      "restoreAll": "Tout restaurer",
+      "discardCard": "Écarter la carte",
+      "discardCardAria": "Écarter {{title}}",
+      "restoreCardAria": "Restaurer {{title}}",
+      "undo": "Annuler"
     },
     "saveToDeck": {
       "selectDeckLabel": "Sélectionner un paquet",

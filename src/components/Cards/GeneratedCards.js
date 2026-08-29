@@ -22,13 +22,15 @@ import {
   MenuItem,
   IconButton
 } from '@mui/joy'
-import { BookOpen, RefreshCw, X } from 'lucide-react'
+import { RefreshCw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cardsService } from '../../api/services'
+import { focusRing } from '../Common/Form/formStyles'
 import useCardCuration from '../../hooks/useCardCuration'
 import { useSaveToDeck } from '../../hooks/useSaveToDeck'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import GeneratedCard from './GeneratedCard'
 import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
 // UpgradePrompt is rendered centrally in SubscriptionProvider — no local import needed
 
@@ -275,10 +277,7 @@ export default function GeneratedCards({
                   color='primary'
                   onClick={curation.toggleAllKept}
                   disabled={curation.entries.length === 0}
-                  sx={{
-                    ml: 'auto',
-                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 }
-                  }}
+                  sx={{ ml: 'auto', ...focusRing }}
                 >
                   {t(curation.keptCount === 0 ? 'cards.generatedCards.restoreAll' : 'cards.generatedCards.discardAll')}
                 </Button>
@@ -367,68 +366,31 @@ export default function GeneratedCards({
                   )}
                 </Stack>
               ) : (
-                <Stack direction='row' flexWrap='wrap' gap={2} justifyContent='center' sx={{ minHeight: 200 }}>
-                  {curation.entries.map((entry) => {
-                    const { kept } = entry
-                    return (
-                      <Card
-                        key={entry.id}
-                        // CURATE-002 moves discarding onto an explicit control and
-                        // frees this click for the in-place editor; until then the
-                        // card body keeps the click it has always had.
-                        onClick={() => curation.setKept(entry.id, !kept)}
-                        variant='outlined'
-                        sx={{
-                          width: 260,
-                          minHeight: 180,
-                          display: 'flex',
-                          bgcolor: 'background.body',
-                          borderColor: 'neutral.outlinedBorder',
-                          borderStyle: kept ? 'solid' : 'dashed',
-                          // Discarded cards stay in place rather than leaving the
-                          // grid, so the batch never reflows under the user's cursor.
-                          opacity: kept ? 1 : 0.5,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          '&:hover': { transform: 'translateY(-2px)', boxShadow: 'sm' },
-                          // Fade-in for incrementally streamed cards
-                          '@keyframes gcCardIn': {
-                            from: { opacity: 0, transform: 'translateY(4px)' },
-                            to: { opacity: 1, transform: 'translateY(0)' }
-                          },
-                          '@keyframes gcCardInFade': {
-                            from: { opacity: 0 },
-                            to: { opacity: 1 }
-                          },
-                          animation: 'gcCardIn 200ms ease-out',
-                          '@media (prefers-reduced-motion: reduce)': {
-                            // No transform for reduced-motion users — opacity only
-                            animation: 'gcCardInFade 200ms ease-out'
-                          }
-                        }}
-                      >
-                        <CardOverflow sx={{ px: 2, pt: 2 }}>
-                          <Typography
-                            level='title-md'
-                            startDecorator={<BookOpen size={16} />}
-                            sx={{ textDecoration: kept ? 'none' : 'line-through' }}
-                          >
-                            {entry.title}
-                          </Typography>
-                        </CardOverflow>
-                        <Divider />
-                        <CardContent>
-                          <Typography level='body-sm' color='neutral'>
-                            {entry.content}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
+                // A grid rather than a wrapping row: a discarded card collapses to a
+                // short strip, and under `flexWrap` with stretched items that strip
+                // would be forced to the full height of its row. `alignItems: start`
+                // is what lets it actually be short while keeping its slot.
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(238px, 1fr))',
+                    gap: 2,
+                    alignItems: 'start',
+                    minHeight: 200
+                  }}
+                >
+                  {curation.entries.map((entry) => (
+                    <GeneratedCard
+                      key={entry.id}
+                      entry={entry}
+                      onDiscard={() => curation.setKept(entry.id, false)}
+                      onRestore={() => curation.setKept(entry.id, true)}
+                    />
+                  ))}
 
                   {/* ONE skeleton card for the next incoming card while streaming */}
                   {isStreaming && (
-                    <Card variant='outlined' sx={{ width: 260, minHeight: 180, display: 'flex' }} aria-hidden='true'>
+                    <Card variant='outlined' sx={{ minHeight: 180, display: 'flex' }} aria-hidden='true'>
                       <CardOverflow sx={{ px: 2, pt: 2 }}>
                         <Skeleton variant='text' level='title-md' width='60%' />
                       </CardOverflow>
@@ -446,7 +408,7 @@ export default function GeneratedCards({
                       color='danger'
                       variant='soft'
                       size='sm'
-                      sx={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}
+                      sx={{ gridColumn: '1 / -1', justifyContent: 'space-between', alignItems: 'center' }}
                       endDecorator={
                         onRetry && (
                           <Button
@@ -465,7 +427,7 @@ export default function GeneratedCards({
                       {streamErrorMessage(streamError.code)}
                     </Alert>
                   )}
-                </Stack>
+                </Box>
               )}
 
               {/* ── Free tier: model badge ─────────────────────────────────── */}

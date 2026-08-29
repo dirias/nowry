@@ -153,6 +153,48 @@ describe('reporting what reached the library', () => {
   })
 })
 
+describe('discarding a card', () => {
+  it('drops it from the count and from the save, and puts it back on undo', async () => {
+    await renderModal()
+
+    // Two cards arrive kept, so the primary action opens at the full count.
+    expect(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` })).toBeEnabled()
+
+    fireEvent.click(screen.getAllByLabelText('cards.generatedCards.discardCardAria')[0])
+    expect(screen.getByRole('button', { name: 'cards.generatedCards.continueCount:1' })).toBeEnabled()
+
+    // The discarded card collapses in place rather than leaving the grid, so its
+    // undo affordance is still there to be found.
+    fireEvent.click(screen.getByLabelText('cards.generatedCards.restoreCardAria'))
+    expect(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` })).toBeEnabled()
+  })
+
+  it('saves only what is still kept', async () => {
+    await renderModal()
+
+    fireEvent.click(screen.getAllByLabelText('cards.generatedCards.discardCardAria')[0])
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.continueCount:1' }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.confirmSave' }))
+    })
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(1))
+    expect(mockCreate).toHaveBeenCalledTimes(1)
+    expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ title: CARDS[1].title }))
+  })
+
+  it('disables the primary action once everything has been discarded', async () => {
+    await renderModal()
+
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.discardAll' }))
+
+    expect(screen.getByRole('button', { name: 'cards.generatedCards.continueCount:0' })).toBeDisabled()
+    // The same control turns around and offers everything back.
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.restoreAll' }))
+    expect(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` })).toBeEnabled()
+  })
+})
+
 describe('the create-deck name pre-fill', () => {
   it('prefers an explicit default over the source book title', async () => {
     await renderModal({ book: { title: 'Campbell Biology' }, newDeckNameDefault: 'Science' })

@@ -1240,7 +1240,11 @@
       "discardedCount_one": "{{count}} descartada",
       "discardedCount_other": "{{count}} descartadas",
       "discardAll": "Descartar todo",
-      "restoreAll": "Restaurar todo"
+      "restoreAll": "Restaurar todo",
+      "discardCard": "Descartar tarjeta",
+      "discardCardAria": "Descartar {{title}}",
+      "restoreCardAria": "Restaurar {{title}}",
+      "undo": "Deshacer"
     },
     "saveToDeck": {
       "selectDeckLabel": "Seleccionar mazo",

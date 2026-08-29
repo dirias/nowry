@@ -1513,7 +1513,11 @@
       "discardedCount_one": "{{count}} discarded",
       "discardedCount_other": "{{count}} discarded",
       "discardAll": "Discard all",
-      "restoreAll": "Restore all"
+      "restoreAll": "Restore all",
+      "discardCard": "Discard card",
+      "discardCardAria": "Discard {{title}}",
+      "restoreCardAria": "Restore {{title}}",
+      "undo": "Undo"
     },
     "saveToDeck": {
       "selectDeckLabel": "Select Deck",

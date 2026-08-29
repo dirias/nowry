@@ -1886,7 +1886,11 @@
       "discardedCount_one": "{{count}} verworfen",
       "discardedCount_other": "{{count}} verworfen",
       "discardAll": "Alle verwerfen",
-      "restoreAll": "Alle wiederherstellen"
+      "restoreAll": "Alle wiederherstellen",
+      "discardCard": "Karte verwerfen",
+      "discardCardAria": "{{title}} verwerfen",
+      "restoreCardAria": "{{title}} wiederherstellen",
+      "undo": "Rückgängig"
     },
     "saveToDeck": {
       "selectDeckLabel": "Stapel auswählen",

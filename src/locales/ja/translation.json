@@ -1863,7 +1863,11 @@
       "discardedCount_one": "{{count}}枚を除外",
       "discardedCount_other": "{{count}}枚を除外",
       "discardAll": "すべて除外",
-      "restoreAll": "すべて戻す"
+      "restoreAll": "すべて戻す",
+      "discardCard": "カードを除外",
+      "discardCardAria": "{{title}}を除外",
+      "restoreCardAria": "{{title}}を戻す",
+      "undo": "元に戻す"
     },
     "saveToDeck": {
       "selectDeckLabel": "デッキを選択",
