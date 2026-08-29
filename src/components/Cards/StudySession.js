@@ -368,7 +368,8 @@ export default function StudySession() {
     hasBeenRevealed,
     awardSessionXp,
     applyReviewXp,
-    flushPendingLevelUp
+    flushPendingLevelUp,
+    cheer
   } = usePet()
 
   const buildStudyContext = React.useCallback(
@@ -875,6 +876,11 @@ export default function StudySession() {
         }
       }
 
+      // The pet perks up for a moment on a card the user actually recalled.
+      // Fired here rather than after the review request so the reaction is
+      // instant — it is a response to the person, not to the server.
+      if (grade === 'good' || grade === 'easy') cheer()
+
       // BACKGROUND SYNC: Send to backend (fire-and-forget)
       try {
         const response = await cardsService.review(cardId, grade, mode)
@@ -933,7 +939,7 @@ export default function StudySession() {
     // `cards` stays in this dep list on purpose — it is the setCards mutation
     // SOURCE, not a read source (every read goes through latestStateRef above),
     // and it must remain the full deck.
-    [cards, handleNext, mode, queueIntervention, applyReviewXp]
+    [cards, handleNext, mode, queueIntervention, applyReviewXp, cheer]
   )
 
   const handlePrev = React.useCallback(() => {

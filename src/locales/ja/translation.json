@@ -1795,7 +1795,9 @@
       "journeyReachedOn": "{{date}} に到達",
       "journeyLocked_other": "あと {{count}} XP",
       "journeyNext": "次へ",
-      "journeyError": "進化の歩みを読み込めませんでした。"
+      "journeyError": "進化の歩みを読み込めませんでした。",
+      "journeyTogether_other": "{{count}} 日いっしょに学んできました。",
+      "journeySince": "— {{date}} から。"
     },
     "settingsSubtitle": "パートナーの動作とキャラクターを設定する",
     "headerStatus": "Lv{{level}} · {{tier}} · 残り{{remaining}}スパーク",

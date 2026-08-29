@@ -2722,7 +2722,10 @@
       "journeyLocked_one": "A {{count}} XP",
       "journeyLocked_other": "A {{count}} XP",
       "journeyNext": "Siguiente",
-      "journeyError": "No se pudo cargar el viaje en este momento."
+      "journeyError": "No se pudo cargar el viaje en este momento.",
+      "journeyTogether_one": "Habéis estudiado juntos {{count}} día.",
+      "journeyTogether_other": "Habéis estudiado juntos {{count}} días.",
+      "journeySince": "— juntos desde {{date}}."
     }
   },
   "reports": {

@@ -3038,7 +3038,10 @@
       "journeyLocked_one": "{{count}} XP away",
       "journeyLocked_other": "{{count}} XP away",
       "journeyNext": "Next",
-      "journeyError": "Couldn't load the journey right now."
+      "journeyError": "Couldn't load the journey right now.",
+      "journeyTogether_one": "You've studied together for {{count}} day.",
+      "journeyTogether_other": "You've studied together for {{count}} days.",
+      "journeySince": "— together since {{date}}."
     }
   },
   "reports": {

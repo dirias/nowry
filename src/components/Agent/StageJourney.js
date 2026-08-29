@@ -118,6 +118,10 @@ const StageJourney = ({ petSpecies, petColor }) => {
   // The first unreached stage is the one worth pointing at.
   const nextStage = journey?.stages?.find((s) => !s.reached)?.stage ?? null
 
+  const sinceDate = journey?.companion_since
+    ? new Date(journey.companion_since).toLocaleDateString(i18n.language, { year: 'numeric', month: 'long' })
+    : null
+
   return (
     <Box>
       <Typography level='title-md' fontWeight={700} mb={0.5}>
@@ -126,6 +130,20 @@ const StageJourney = ({ petSpecies, petColor }) => {
       <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
         {t('agent.companion.journeyDescription')}
       </Typography>
+
+      {/* Shared history. A companion that can point at something you did
+          together is a different object from a progress bar with a face. */}
+      {!loading && !error && journey?.days_studied > 0 && (
+        <Typography level='body-sm' sx={{ color: 'text.primary', mb: 2 }}>
+          {t('agent.companion.journeyTogether', { count: journey.days_studied })}
+          {sinceDate && (
+            <Typography component='span' level='body-sm' sx={{ color: 'text.tertiary' }}>
+              {' '}
+              {t('agent.companion.journeySince', { date: sinceDate })}
+            </Typography>
+          )}
+        </Typography>
+      )}
 
       {error && (
         <Alert variant='soft' color='neutral' size='sm'>

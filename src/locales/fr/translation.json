@@ -1785,7 +1785,10 @@
       "journeyLocked_one": "Encore {{count}} XP",
       "journeyLocked_other": "Encore {{count}} XP",
       "journeyNext": "Suivante",
-      "journeyError": "Impossible de charger le parcours pour le moment."
+      "journeyError": "Impossible de charger le parcours pour le moment.",
+      "journeyTogether_one": "Vous avez étudié ensemble pendant {{count}} jour.",
+      "journeyTogether_other": "Vous avez étudié ensemble pendant {{count}} jours.",
+      "journeySince": "— ensemble depuis {{date}}."
     },
     "settingsSubtitle": "Configurez le comportement et la personnalité de votre compagnon",
     "headerStatus": "Nv{{level}} · {{tier}} · {{remaining}} étincelles restantes",

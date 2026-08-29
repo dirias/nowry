@@ -71,6 +71,7 @@ const mockRevealPet = jest.fn()
 const mockAwardSessionXp = jest.fn()
 const mockApplyReviewXp = jest.fn()
 const mockFlushPendingLevelUp = jest.fn()
+const mockCheer = jest.fn()
 
 jest.mock('../../../context/AgentContext', () => ({
   usePet: () => ({
@@ -86,7 +87,8 @@ jest.mock('../../../context/AgentContext', () => ({
     hasBeenRevealed: false,
     awardSessionXp: mockAwardSessionXp,
     applyReviewXp: mockApplyReviewXp,
-    flushPendingLevelUp: mockFlushPendingLevelUp
+    flushPendingLevelUp: mockFlushPendingLevelUp,
+    cheer: mockCheer
   })
 }))
 
@@ -205,6 +207,7 @@ beforeEach(() => {
   mockAwardSessionXp.mockClear()
   mockApplyReviewXp.mockClear()
   mockFlushPendingLevelUp.mockClear()
+  mockCheer.mockClear()
 })
 
 afterEach(() => {
@@ -494,6 +497,22 @@ describe('session completion XP', () => {
 
     expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
     expect(mockRevealPet).toHaveBeenCalledTimes(1)
+  })
+
+  it('cheers the pet on a recalled card, and stays quiet on a missed one', async () => {
+    // The pet previously spoke ONLY on wrong answers, which made it a critic
+    // rather than a companion. Good/easy should perk it up; again should not.
+    const cards = [
+      { _id: 'c1', id: 'c1', title: 'Cheer 1', content: 'A' },
+      { _id: 'c2', id: 'c2', title: 'Cheer 2', content: 'B' }
+    ]
+    renderSession({ cards })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.again'))
+    expect(mockCheer).not.toHaveBeenCalled()
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    expect(mockCheer).toHaveBeenCalledTimes(1)
   })
 
   it('awards nothing for a deck with no cards to study', async () => {

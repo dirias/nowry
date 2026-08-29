@@ -653,6 +653,33 @@ export const AgentProvider = ({ children }) => {
   const levelUpClear = useCallback(() => dispatch({ type: 'LEVEL_UP_CLEAR' }), [])
 
   /**
+   * A brief, local cheer — the pet visibly perks up for a moment.
+   *
+   * Deliberately client-only: no request, no tokens, no message. The pet
+   * previously spoke only when the user got something WRONG, which is the
+   * wrong emotional shape for a companion — it made the pet a critic. This is
+   * the cheap half of the fix: acknowledge the small wins silently and often,
+   * and save actual words for when they carry weight.
+   */
+  const cheerTimerRef = useRef(null)
+  const restingMoodRef = useRef(null)
+  const cheer = useCallback(() => {
+    // Remember what the pet was feeling before the first cheer of a burst, so
+    // a run of correct answers reverts to 'tired'/'idle' rather than to the
+    // 'happy' an earlier cheer had just set.
+    if (restingMoodRef.current === null) restingMoodRef.current = stateRef.current.mood
+    dispatch({ type: 'SET_MOOD', payload: 'happy' })
+
+    clearTimeout(cheerTimerRef.current)
+    cheerTimerRef.current = setTimeout(() => {
+      dispatch({ type: 'SET_MOOD', payload: restingMoodRef.current ?? 'idle' })
+      restingMoodRef.current = null
+    }, 1500)
+  }, [])
+
+  useEffect(() => () => clearTimeout(cheerTimerRef.current), [])
+
+  /**
    * Fold a card review's XP block into pet state. Called per graded card, so
    * the orb's progress ring advances while the user studies rather than only
    * after they leave the session.
@@ -822,6 +849,7 @@ export const AgentProvider = ({ children }) => {
         awardSessionXp,
         applyReviewXp,
         flushPendingLevelUp,
+        cheer,
         setPetActive,
         revealPet,
         petRevealClear,

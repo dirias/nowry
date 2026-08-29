@@ -1763,7 +1763,10 @@
       "journeyLocked_one": "Noch {{count}} XP",
       "journeyLocked_other": "Noch {{count}} XP",
       "journeyNext": "Als Nächstes",
-      "journeyError": "Der Entwicklungsweg konnte gerade nicht geladen werden."
+      "journeyError": "Der Entwicklungsweg konnte gerade nicht geladen werden.",
+      "journeyTogether_one": "Ihr habt {{count}} Tag zusammen gelernt.",
+      "journeyTogether_other": "Ihr habt {{count}} Tage zusammen gelernt.",
+      "journeySince": "— zusammen seit {{date}}."
     },
     "settingsSubtitle": "Verhalten und Persönlichkeit deines Begleiters konfigurieren",
     "headerStatus": "Lv{{level}} · {{tier}} · {{remaining}} Funken übrig",

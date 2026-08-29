@@ -70,6 +70,36 @@ export const FORM_BORDER_RADIUS = {
 }
 
 // ---------------------------------------------------------------------------
+// Mood presentation — how a feeling reads from across the room.
+//
+// Mood was computed correctly on the server and then spent entirely on one
+// swapped emoji, which is invisible at 60px. It now drives colour, pace and
+// movement, so a resting companion is recognisable without reading anything.
+//
+// `tired` is deliberately *restful*, not unwell: desaturated, dim, slow and
+// nearly still. The pet is waiting for you, not reproaching you for leaving.
+// Guilt is what makes people delete study apps, so nothing here decays,
+// sickens or scolds — the pet simply rests until you come back.
+// ---------------------------------------------------------------------------
+export const MOOD_PRESENTATION = {
+  idle: { saturate: 1.0, brightness: 1.0, speedScale: 1.0, driftY: 6, glow: 1.0 },
+  happy: { saturate: 1.18, brightness: 1.08, speedScale: 0.72, driftY: 9, glow: 1.25 },
+  thinking: { saturate: 0.95, brightness: 1.0, speedScale: 1.15, driftY: 4, glow: 0.9 },
+  tired: { saturate: 0.42, brightness: 0.82, speedScale: 1.9, driftY: 2, glow: 0.55 },
+  speaking: { saturate: 1.08, brightness: 1.04, speedScale: 0.85, driftY: 7, glow: 1.1 }
+}
+
+/**
+ * Scale a two-digit hex alpha by a multiplier, clamped to a valid byte.
+ * The orb's glows are built by appending hex alpha to a 6-digit colour, so a
+ * mood's glow strength has to be expressed in the same form.
+ */
+export const alphaHex = (base, multiplier) =>
+  Math.max(0, Math.min(255, Math.round(base * multiplier)))
+    .toString(16)
+    .padStart(2, '0')
+
+// ---------------------------------------------------------------------------
 // Species configuration — emoji set per species × mood
 // ---------------------------------------------------------------------------
 const SPECIES_CONFIG = {
@@ -334,14 +364,20 @@ export const PetOrb = ({
 
   const speciesMotion = SPECIES_MOTION[species] ?? null
 
+  const feeling = MOOD_PRESENTATION[mood] ?? MOOD_PRESENTATION.idle
+  const moodDuration = config.pulseDuration * feeling.speedScale
+  const glow = (base) => `${activeColor}${alphaHex(base, feeling.glow)}`
+
   const floatAnimation = isCelebrating
     ? {
         y: 0,
-        boxShadow: [`0 8px 32px ${activeColor}55`, `0 16px 48px ${activeColor}88`, `0 8px 32px ${activeColor}55`]
+        boxShadow: [`0 8px 32px ${glow(0x55)}`, `0 16px 48px ${glow(0x88)}`, `0 8px 32px ${glow(0x55)}`]
       }
     : {
-        y: [0, -6, 0],
-        boxShadow: [`0 8px 32px ${activeColor}55`, `0 16px 48px ${activeColor}88`, `0 8px 32px ${activeColor}55`]
+        // Mood sets how far and how fast the pet drifts. A tired companion
+        // barely moves; a happy one bounces higher and quicker.
+        y: reduceMotion ? 0 : [0, -feeling.driftY, 0],
+        boxShadow: [`0 8px 32px ${glow(0x55)}`, `0 16px 48px ${glow(0x88)}`, `0 8px 32px ${glow(0x55)}`]
       }
 
   const orbStyle = {
@@ -355,6 +391,11 @@ export const PetOrb = ({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: Math.round(config.sizePx * 0.43),
+    // Mood as colour: a tired companion is visibly washed out, a happy one
+    // richer than usual. Transitioned so the change reads as a shift in
+    // feeling rather than a repaint.
+    filter: `saturate(${feeling.saturate}) brightness(${feeling.brightness})`,
+    transition: 'filter 0.8s ease',
     position: 'relative',
     // Clips the portrait to the orb's silhouette. Anything that must extend
     // BEYOND the orb (rings, marks, motes, the level badge) is therefore a
@@ -487,8 +528,8 @@ export const PetOrb = ({
   )
 
   const floatTransition = {
-    y: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' },
-    boxShadow: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' }
+    y: { repeat: Infinity, duration: moodDuration, ease: 'easeInOut' },
+    boxShadow: { repeat: Infinity, duration: moodDuration, ease: 'easeInOut' }
   }
 
   if (preview) {
