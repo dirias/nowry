@@ -92,6 +92,12 @@ const initialState = {
   /** Pet customization — name and species. Colour follows the theme accent. */
   petName: null,
   petSpecies: null,
+  /**
+   * True until the user has a portrait of their own — i.e. they are still with
+   * Nowry, the shipped default companion. Free users never generate, so they
+   * stay with Nowry by design.
+   */
+  isDefaultCompanion: true,
   /** AI-generated avatar portrait */
   avatarUrl: null,
   avatarStage: null,
@@ -155,6 +161,7 @@ function agentReducer(state, action) {
         proactiveNudgingEnabled: action.payload.proactive_nudging_enabled ?? false,
         isRoamingEnabled: action.payload.agent_roaming_enabled ?? true,
         petName: action.payload.pet_name ?? null,
+        isDefaultCompanion: action.payload.is_default_companion ?? true,
         petSpecies: action.payload.pet_species ?? null,
         avatarUrl: action.payload.avatar_url ?? null,
         avatarStage: action.payload.avatar_stage ?? null,

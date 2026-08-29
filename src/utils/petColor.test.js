@@ -104,9 +104,26 @@ describe('resolveColor', () => {
 })
 
 describe('suggestFromInterests', () => {
-  it('matches an interest to its species', () => {
-    expect(suggestFromInterests(['Programming'])).toEqual({ species: 'robot' })
-    expect(suggestFromInterests(['Astronomy'])).toEqual({ species: 'star' })
+  it('maps a taxonomy topic to its species', () => {
+    expect(suggestFromInterests(['technology'])).toEqual({ species: 'robot' })
+    expect(suggestFromInterests(['science'])).toEqual({ species: 'star' })
+    expect(suggestFromInterests(['music'])).toEqual({ species: 'music' })
+  })
+
+  // Regression: the lookup used keyword substrings, so "art" matched inside
+  // "artificial_intelligence" and every AI learner was quietly given a cat.
+  it('does not confuse artificial_intelligence with art', () => {
+    expect(suggestFromInterests(['artificial_intelligence'])).toEqual({ species: 'robot' })
+    expect(suggestFromInterests(['art'])).toEqual({ species: 'cat' })
+  })
+
+  it('lets the highest-ranked topic decide', () => {
+    expect(suggestFromInterests(['music', 'technology'])).toEqual({ species: 'music' })
+    expect(suggestFromInterests(['technology', 'music'])).toEqual({ species: 'robot' })
+  })
+
+  it('skips an unrecognised topic rather than giving up on the rest', () => {
+    expect(suggestFromInterests(['underwater_basket_weaving', 'music'])).toEqual({ species: 'music' })
   })
 
   it('defaults to the owl when nothing matches or nothing is given', () => {

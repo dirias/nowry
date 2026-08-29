@@ -23,6 +23,7 @@ import { usePet } from '../../context/AgentContext'
 import { useAuth } from '../../context/AuthContext'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '../../utils/petColor'
+import { nowryArtFor } from './nowryArt'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '../../constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
@@ -344,7 +345,8 @@ export const PetOrb = ({
   avatarUrl,
   onAvatarError,
   isGenerating,
-  levelProgress
+  levelProgress,
+  isDefaultCompanion
 }) => {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion()
@@ -357,6 +359,11 @@ export const PetOrb = ({
   }
 
   const config = STAGE_CONFIG[stage] ?? STAGE_CONFIG[1]
+
+  // Nowry — the shipped default companion — stands in wherever the user has
+  // not generated a portrait of their own. Bundled, so it is always present:
+  // no wait, no failure, and free users get real art rather than an emoji.
+  const portraitUrl = avatarUrl || (isDefaultCompanion ? nowryArtFor(stage) : null)
 
   const displayEmoji =
     species && SPECIES_CONFIG[species] ? (SPECIES_CONFIG[species][mood] ?? SPECIES_CONFIG[species].idle) : (moodEmoji[mood] ?? config.emoji)
@@ -465,7 +472,7 @@ export const PetOrb = ({
   const innerContent = (
     <>
       {/* Shimmer while generating */}
-      {isGenerating && !avatarUrl && (
+      {isGenerating && !portraitUrl && (
         <motion.div
           animate={{ opacity: [0.3, 0.7, 0.3] }}
           transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
@@ -483,10 +490,12 @@ export const PetOrb = ({
       )}
 
       <AnimatePresence mode='wait'>
-        {avatarUrl ? (
-          // Outer div: fade-in/scale on mount, fade-out on exit
+        {portraitUrl ? (
+          // Outer div: fade-in/scale on mount, fade-out on exit.
+          // Keyed on the URL so a stage change cross-fades Nowry's forms
+          // rather than swapping the image inside a held element.
           <motion.div
-            key='portrait'
+            key={portraitUrl}
             initial={{ opacity: 0, scale: 0.88 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.88 }}
@@ -496,7 +505,7 @@ export const PetOrb = ({
             {/* Inner div: species locomotion — loops forever, independent of mount transition */}
             <motion.div animate={speciesMotion?.animate} transition={speciesMotion?.transition} style={{ width: '100%', height: '100%' }}>
               <img
-                src={avatarUrl}
+                src={portraitUrl}
                 alt=''
                 aria-hidden='true'
                 onError={() => {
@@ -672,6 +681,7 @@ const StudyPet = () => {
     clearError,
     petName,
     petSpecies,
+    isDefaultCompanion,
     levelProgress,
     avatarUrl,
     avatarGenerating,
@@ -1939,6 +1949,7 @@ const StudyPet = () => {
                   species={petSpecies}
                   dominantColor={resolvedColor}
                   levelProgress={levelProgress}
+                  isDefaultCompanion={isDefaultCompanion}
                   avatarUrl={avatarUrl}
                   onAvatarError={clearAvatarUrl}
                   isGenerating={avatarGenerating}

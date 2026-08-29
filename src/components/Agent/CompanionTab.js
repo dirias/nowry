@@ -1,9 +1,14 @@
 /**
  * CompanionTab — Pet customization form for AgentSettings.
  *
- * Provides three sections:
+ * Provides:
  *   1. Name — free-text input (max 20 chars), saved on blur.
- *   2. Species — grid of selectable species cards, saved on selection.
+ *   2. Evolution journey — every form, earned and still ahead.
+ *   3. AI portrait / animation generation (Plus and Pro).
+ *
+ * Species is deliberately NOT here. It is an input to avatar generation, not
+ * a user-facing choice — the emoji that used to represent it were a stand-in
+ * for art the product now ships (see nowryArt.js).
  *
  * All API calls are handled by the parent (AgentSettings) via callbacks.
  * This component is purely presentational.
@@ -32,19 +37,6 @@ import StageJourney from './StageJourney'
 // ---------------------------------------------------------------------------
 // Static catalog data
 // ---------------------------------------------------------------------------
-
-const SPECIES_CATALOG = [
-  { slug: 'owl', emoji: '🦉' },
-  { slug: 'fox', emoji: '🦊' },
-  { slug: 'cat', emoji: '🐱' },
-  { slug: 'dragon', emoji: '🐉' },
-  { slug: 'robot', emoji: '🤖' },
-  { slug: 'star', emoji: '⭐' },
-  { slug: 'phoenix', emoji: '🔥' },
-  { slug: 'crystal', emoji: '💎' },
-  { slug: 'leaf', emoji: '🌿' },
-  { slug: 'music', emoji: '🎵' }
-]
 
 // ---------------------------------------------------------------------------
 // Generation stage constants
@@ -107,11 +99,7 @@ const useGenerationStatus = (isGenerating, stages, expectedTotalSeconds) => {
 const CompanionTab = ({
   petName,
   setPetName,
-  petSpecies,
-  onSpeciesSelect,
   onNameBlur,
-  suggestedSpecies,
-  hasSuggestion,
   error,
   tier,
   avatarUrl,
@@ -167,46 +155,9 @@ const CompanionTab = ({
       <Divider />
 
       {/* ── Section: Evolution journey ─────────────────────────────────────── */}
-      <StageJourney petSpecies={petSpecies} />
+      <StageJourney />
 
       <Divider />
-
-      {/* ── Section: Species ───────────────────────────────────────────────── */}
-      <Box>
-        <Typography level='title-md' fontWeight={700} mb={0.5}>
-          {t('agent.companion.speciesTitle')}
-        </Typography>
-        <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 1.5 }}>
-          {t('agent.companion.speciesDescription')}
-        </Typography>
-        {hasSuggestion && petSpecies === suggestedSpecies && (
-          <Alert variant='soft' color='neutral' size='sm' sx={{ mb: 1.5 }}>
-            {t('agent.companion.suggestedLabel')}
-          </Alert>
-        )}
-        <Grid container spacing={1.5}>
-          {SPECIES_CATALOG.map(({ slug, emoji }) => (
-            <Grid key={slug} xs={6} sm={4}>
-              <Card
-                variant={petSpecies === slug ? 'solid' : 'outlined'}
-                color={petSpecies === slug ? 'primary' : 'neutral'}
-                onClick={() => onSpeciesSelect(slug)}
-                sx={{
-                  cursor: 'pointer',
-                  transition: 'all 0.18s ease',
-                  '&:hover': { transform: 'translateY(-2px)', boxShadow: 'md' },
-                  alignItems: 'center',
-                  py: 1.5,
-                  userSelect: 'none'
-                }}
-              >
-                <Typography sx={{ fontSize: 28, lineHeight: 1 }}>{emoji}</Typography>
-                <Typography level='body-sm'>{t(`agent.companion.species.${slug}`)}</Typography>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
 
       <Divider />
 

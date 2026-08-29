@@ -168,20 +168,27 @@ export function resolveColor(accentColor, stage) {
 }
 
 // ---------------------------------------------------------------------------
-// Interest → species + color suggestion
+// Primary topic → species (a generation input, never shown to the user)
 // ---------------------------------------------------------------------------
-const INTEREST_MAP = [
-  { keywords: ['technology', 'computer', 'engineering', 'programming', 'software', 'math', 'mathematics'], species: 'robot' },
-  { keywords: ['music', 'audio', 'performance', 'sound', 'instrument'], species: 'music' },
-  { keywords: ['art', 'design', 'culture', 'writing', 'creative'], species: 'cat' },
-  { keywords: ['science', 'physics', 'astronomy', 'space'], species: 'star' },
-  { keywords: ['medicine', 'biology', 'health', 'wellness', 'medical'], species: 'phoenix' },
-  { keywords: ['nature', 'ecology', 'agriculture', 'environment', 'environmental'], species: 'leaf' },
-  { keywords: ['chemistry', 'geology', 'materials'], species: 'crystal' },
-  { keywords: ['gaming', 'mythology', 'fantasy', 'game'], species: 'dragon' },
-  { keywords: ['humanities', 'literature', 'history', 'academic'], species: 'owl' },
-  { keywords: ['psychology', 'philosophy', 'social', 'sociology'], species: 'fox' }
-]
+// Exact taxonomy values, not keyword substrings. The substring form matched
+// "art" inside "artificial_intelligence", so every AI & Machine Learning
+// learner was quietly assigned a cat.
+const SPECIES_BY_TOPIC = {
+  artificial_intelligence: 'robot',
+  technology: 'robot',
+  mathematics: 'crystal',
+  science: 'star',
+  health: 'phoenix',
+  music: 'music',
+  art: 'cat',
+  design: 'cat',
+  literature: 'owl',
+  history: 'owl',
+  languages: 'owl',
+  business: 'dragon',
+  philosophy: 'fox',
+  psychology: 'fox'
+}
 
 /**
  * Suggest a species based on user interests.
@@ -194,11 +201,10 @@ const INTEREST_MAP = [
  */
 export function suggestFromInterests(interests = []) {
   if (!interests || interests.length === 0) return { species: 'owl' }
-  const lower = interests.map((i) => i.toLowerCase())
-  for (const rule of INTEREST_MAP) {
-    if (rule.keywords.some((k) => lower.some((i) => i.includes(k)))) {
-      return { species: rule.species }
-    }
+  // Ranked: the first topic that maps wins, so the primary topic decides.
+  for (const interest of interests) {
+    const species = SPECIES_BY_TOPIC[String(interest).trim().toLowerCase()]
+    if (species) return { species }
   }
   return { species: 'owl' }
 }

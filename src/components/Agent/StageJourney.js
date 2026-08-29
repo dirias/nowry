@@ -22,11 +22,12 @@ import { agentService } from '../../api/services/agent.service'
 import { resolveColor } from '../../utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { PetOrb } from './StudyPet'
+import { nowryArtFor, LOCKED_SILHOUETTE_FILTER } from './nowryArt'
 
 const STAGE_COUNT = 6
 
 /** One rung of the ladder. */
-const StageCard = ({ entry, isNext, petSpecies, accentColor, t, locale }) => {
+const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, t, locale }) => {
   const { stage, reached, reached_at: reachedAt, xp_remaining: xpRemaining, level_required: levelRequired } = entry
 
   const reachedDate = reachedAt ? new Date(reachedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) : null
@@ -54,21 +55,27 @@ const StageCard = ({ entry, isNext, petSpecies, accentColor, t, locale }) => {
           justifyContent: 'center',
           minHeight: 92,
           width: '100%',
-          // Locked forms are shown, not hidden — that is the whole point — but
-          // desaturated and dimmed so "not yet yours" reads instantly.
-          filter: reached ? 'none' : 'grayscale(0.85)',
-          opacity: reached ? 1 : 0.45
+          // Locked forms are shown, not hidden — that is the whole point.
+          // A flat silhouette rather than greyscale: greyscale on illustrated
+          // art reads as "disabled", while a solid fill reads as "locked but
+          // real" and preserves the outline, so Oracle's spread wing and
+          // Luminary's crown still tell those rungs apart at a glance.
+          filter: reached ? 'none' : isDefaultCompanion ? LOCKED_SILHOUETTE_FILTER : 'grayscale(0.85)',
+          opacity: reached || isDefaultCompanion ? 1 : 0.45
         }}
       >
-        <PetOrb
-          mood='idle'
-          level={levelRequired}
-          stage={stage}
-          species={petSpecies}
-          dominantColor={resolveColor(accentColor, stage)}
-          isCelebrating={false}
-          preview
-        />
+        {isDefaultCompanion ? (
+          <Box component='img' src={nowryArtFor(stage)} alt='' sx={{ width: 84, height: 84, objectFit: 'contain', display: 'block' }} />
+        ) : (
+          <PetOrb
+            mood='idle'
+            level={levelRequired}
+            stage={stage}
+            dominantColor={resolveColor(accentColor, stage)}
+            isCelebrating={false}
+            preview
+          />
+        )}
       </Box>
 
       <Typography level='title-sm' sx={{ color: reached ? 'text.primary' : 'text.tertiary', textAlign: 'center' }}>
@@ -94,7 +101,7 @@ const StageCard = ({ entry, isNext, petSpecies, accentColor, t, locale }) => {
   )
 }
 
-const StageJourney = ({ petSpecies }) => {
+const StageJourney = () => {
   const { t, i18n } = useTranslation()
   const { themeColor } = useThemePreferences()
   const [journey, setJourney] = useState(null)
@@ -172,8 +179,8 @@ const StageJourney = ({ petSpecies }) => {
                   key={entry.stage}
                   entry={entry}
                   isNext={entry.stage === nextStage}
-                  petSpecies={petSpecies}
                   accentColor={themeColor}
+                  isDefaultCompanion={journey?.is_default_companion ?? true}
                   t={t}
                   locale={i18n.language}
                 />
