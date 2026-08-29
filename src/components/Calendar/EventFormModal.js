@@ -24,12 +24,21 @@ import { tasksService } from '../../api/services/tasks.service'
 import { annualPlanningService } from '../../api/services/annualPlanning.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 
-// Type color map (must match CalendarModal TYPE_META)
-const TYPE_COLORS = {
-  task: 'var(--joy-palette-primary-solidBg)',
-  priority: 'var(--joy-palette-warning-solidBg)',
-  goal: 'var(--joy-palette-success-solidBg)',
-  activity: 'var(--joy-palette-primary-softColor)'
+/**
+ * Joy palette names per type — not painted values. `variant='solid'` then pairs
+ * each background with its `solidColor` foreground, which `colorSchemeGenerator`
+ * derives from luminance, so the selected chip stays legible against whichever
+ * accent the user picked. Hardcoding `common.white` over a hand-painted
+ * `bgcolor` was the same unverified pairing that shipped as a bug on the accent
+ * swatches (see User/WelcomeScreen.js).
+ *
+ * Must match CalendarModal TYPE_META (which adds `milestone`).
+ */
+const TYPE_PALETTES = {
+  task: 'primary',
+  priority: 'warning',
+  goal: 'success',
+  activity: 'neutral'
 }
 
 const TYPES = ['task', 'priority', 'goal', 'activity']
@@ -264,12 +273,11 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                       key={typeKey}
                       size='sm'
                       variant={type === typeKey ? 'solid' : 'outlined'}
+                      color={type === typeKey ? TYPE_PALETTES[typeKey] : 'neutral'}
                       onClick={() => setType(typeKey)}
                       sx={{
                         cursor: 'pointer',
-                        bgcolor: type === typeKey ? TYPE_COLORS[typeKey] : 'transparent',
-                        borderColor: TYPE_COLORS[typeKey],
-                        color: type === typeKey ? 'common.white' : 'text.secondary',
+                        ...(type === typeKey ? { color: `${TYPE_PALETTES[typeKey]}.solidColor` } : { bgcolor: 'background.level1' }),
                         transition: 'all 0.15s',
                         '&:hover': { opacity: 0.85 }
                       }}

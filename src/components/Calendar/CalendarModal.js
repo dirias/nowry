@@ -12,12 +12,28 @@ import { useAuth } from '../../context/AuthContext'
 import EventFormModal from './EventFormModal'
 
 // ─── Type Metadata ──────────────────────────────────────────────────────────
+/**
+ * `palette` is a Joy color name, never a painted value. Paired with
+ * `variant='solid'`, Joy supplies the matching `solidColor` foreground, which
+ * `colorSchemeGenerator` derives from the background's luminance — so the chip
+ * stays legible against whichever accent the user picked, in both schemes. The
+ * previous map painted `bgcolor` by hand and hardcoded `common.white` on top of
+ * it, the same unverified pairing that shipped as a bug on the accent swatches
+ * (see User/WelcomeScreen.js). It also used `softColor`/`plainColor` as
+ * backgrounds; those are foreground tokens and have no paired foreground.
+ *
+ * `goal` and `milestone` deliberately share `success`: Joy ships five palettes
+ * and `danger` would read as an error here. The chip's label carries the
+ * distinction — identity never rests on hue alone.
+ *
+ * Must match EventFormModal TYPE_PALETTES.
+ */
 const TYPE_META = {
-  task: { color: 'var(--joy-palette-primary-solidBg)', i18nKey: 'calendarModal.filters.tasks' },
-  priority: { color: 'var(--joy-palette-warning-solidBg)', i18nKey: 'calendarModal.filters.priorities' },
-  goal: { color: 'var(--joy-palette-success-solidBg)', i18nKey: 'calendarModal.filters.goals' },
-  milestone: { color: 'var(--joy-palette-success-plainColor)', i18nKey: 'calendarModal.filters.milestones' },
-  activity: { color: 'var(--joy-palette-primary-softColor)', i18nKey: 'calendarModal.filters.habits' }
+  task: { palette: 'primary', i18nKey: 'calendarModal.filters.tasks' },
+  priority: { palette: 'warning', i18nKey: 'calendarModal.filters.priorities' },
+  goal: { palette: 'success', i18nKey: 'calendarModal.filters.goals' },
+  milestone: { palette: 'success', i18nKey: 'calendarModal.filters.milestones' },
+  activity: { palette: 'neutral', i18nKey: 'calendarModal.filters.habits' }
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -202,12 +218,11 @@ const CalendarModal = ({ open, onClose }) => {
                     key={type}
                     size='sm'
                     variant={isActive ? 'solid' : 'outlined'}
+                    color={isActive ? meta.palette : 'neutral'}
                     onClick={() => toggleFilter(type)}
                     sx={{
                       cursor: 'pointer',
-                      bgcolor: isActive ? meta.color : 'transparent',
-                      borderColor: meta.color,
-                      color: isActive ? 'common.white' : 'text.secondary',
+                      ...(isActive ? { color: `${meta.palette}.solidColor` } : { bgcolor: 'background.level1' }),
                       transition: 'all 0.15s',
                       // Larger touch target on mobile
                       minHeight: { xs: 32, sm: 'auto' },
