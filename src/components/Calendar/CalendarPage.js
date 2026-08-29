@@ -26,6 +26,8 @@ import { calendarService } from '../../api/services/calendar.service'
 import { tasksService, annualPlanningService } from '../../api/services'
 import { useCalendarFilters } from '../../hooks/useCalendarFilters'
 import { useAuth } from '../../context/AuthContext'
+import { readableTextOn } from '../../theme/colorSchemeGenerator'
+import { focusRing, touchTarget } from '../Common/Form/formStyles'
 import EventFormModal from './EventFormModal'
 
 // Strip type prefix from compound event ID (e.g. 'task-abc123' → 'abc123')
@@ -53,6 +55,18 @@ const EVENT_ICON_MAP = {
   activity: RepeatRoundedIcon
 }
 
+/**
+ * The filter row mixes component types on purpose — the three presets are
+ * actions (D-09), "Habits" is a toggle and "More filters" is a disclosure — but
+ * Joy sizes `Chip` and `Button` independently, so `size='sm'` alone left the two
+ * chips ~24px tall beside ~32px buttons in a single row. Sharing `touchTarget`
+ * makes the row one height by construction, and lifts all five to the ≥44px
+ * that DESIGN_GUIDELINES §3.2 requires at `xs` (WCAG 2.5.5) — which none of them
+ * met before. `focusRing` comes along because Joy resets the browser default and
+ * these had no focus-visible style of their own.
+ */
+const filterControl = { ...focusRing, ...touchTarget }
+
 const CalendarPage = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -76,7 +90,7 @@ const CalendarPage = () => {
 
   // CAL-01/CAL-02: Custom event rendering — icon + title for all event types
   const eventContent = useCallback((eventInfo) => {
-    const { type, isKeyResult } = eventInfo.event.extendedProps
+    const { type, isKeyResult, textColor } = eventInfo.event.extendedProps
 
     let IconComponent
     if (type === 'milestone') {
@@ -85,10 +99,17 @@ const CalendarPage = () => {
       IconComponent = EVENT_ICON_MAP[type] ?? AdjustOutlinedIcon
     }
 
+    // The pill is painted in an arbitrary focus-area colour, so its label cannot
+    // inherit `text.primary`: that token only knows about the page surface, and
+    // against a saturated fill it lands anywhere between 1.94:1 and 4.65:1.
+    // Measured on the four seeded colours, every one of them failed AA in dark
+    // mode (amber reached 1.94:1). `readableTextOn` derives the foreground from
+    // the fill it will actually sit on, which is the same fix `WelcomeScreen.js`
+    // documents for hardcoding white on a preset swatch.
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, overflow: 'hidden', color: textColor }}>
         <IconComponent sx={{ fontSize: 14, flexShrink: 0 }} />
-        <Typography level='body-xs' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <Typography level='body-xs' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
           {eventInfo.event.title}
         </Typography>
       </Box>
@@ -121,23 +142,32 @@ const CalendarPage = () => {
             })
 
             successCallback(
-              filtered.map((ev) => ({
-                id: ev.id,
-                title: ev.title,
-                start: ev.date,
-                allDay: true,
-                backgroundColor: ev.color,
-                borderColor: ev.color,
-                extendedProps: {
-                  type: ev.type,
-                  status: ev.status,
-                  category: ev.category,
-                  areaName: ev.areaName,
-                  goalTitle: ev.goalTitle,
-                  isKeyResult: ev.isKeyResult, // CAL-02: from calendar.service.js
-                  focusAreaId: ev.focusAreaId // D-02: for area filter (Pitfall 4 prevention)
+              filtered.map((ev) => {
+                // Derived once here rather than in eventContent: FullCalendar's
+                // own chrome (list-view text, the "+2 more" popover) reads
+                // `textColor` off the event, so deriving it in the renderer
+                // alone would leave those surfaces on the inherited colour.
+                const textColor = readableTextOn(ev.color)
+                return {
+                  id: ev.id,
+                  title: ev.title,
+                  start: ev.date,
+                  allDay: true,
+                  backgroundColor: ev.color,
+                  borderColor: ev.color,
+                  textColor,
+                  extendedProps: {
+                    type: ev.type,
+                    status: ev.status,
+                    category: ev.category,
+                    areaName: ev.areaName,
+                    goalTitle: ev.goalTitle,
+                    isKeyResult: ev.isKeyResult, // CAL-02: from calendar.service.js
+                    focusAreaId: ev.focusAreaId, // D-02: for area filter (Pitfall 4 prevention)
+                    textColor // read back by eventContent, which renders Joy nodes
+                  }
                 }
-              }))
+              })
             )
           } catch (err) {
             setCalendarError(err)
@@ -298,7 +328,10 @@ const CalendarPage = () => {
             size='sm'
             variant={filters.habitsEnabled ? 'solid' : 'outlined'}
             color={filters.habitsEnabled ? 'primary' : 'neutral'}
-            sx={filters.habitsEnabled ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' }}
+            sx={{
+              ...filterControl,
+              ...(filters.habitsEnabled ? { color: 'primary.solidColor' } : { bgcolor: 'background.level1' })
+            }}
             onClick={() => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))}
             aria-label={t('calendarPage.showHabitsAriaLabel')}
             aria-pressed={filters.habitsEnabled}
@@ -311,6 +344,7 @@ const CalendarPage = () => {
             variant={activePreset === 'goals_only' ? 'solid' : 'outlined'}
             color={activePreset === 'goals_only' ? 'primary' : 'neutral'}
             size='sm'
+            sx={filterControl}
             onClick={() => applyPreset('goals_only')}
             aria-label={t('calendarPage.presets.goalsOnlyAriaLabel')}
             aria-pressed={activePreset === 'goals_only'}
@@ -321,6 +355,7 @@ const CalendarPage = () => {
             variant={activePreset === 'today' ? 'solid' : 'outlined'}
             color={activePreset === 'today' ? 'primary' : 'neutral'}
             size='sm'
+            sx={filterControl}
             onClick={() => {
               applyPreset('today')
               calendarRef.current?.getApi().today()
@@ -334,6 +369,7 @@ const CalendarPage = () => {
             variant={activePreset === 'this_week' ? 'solid' : 'outlined'}
             color={activePreset === 'this_week' ? 'primary' : 'neutral'}
             size='sm'
+            sx={filterControl}
             onClick={() => {
               applyPreset('this_week')
               const api = calendarRef.current?.getApi()
@@ -351,7 +387,7 @@ const CalendarPage = () => {
             size='sm'
             variant='outlined'
             color='neutral'
-            sx={{ bgcolor: 'background.level1' }}
+            sx={{ ...filterControl, bgcolor: 'background.level1' }}
             onClick={() => setFiltersExpanded((prev) => !prev)}
             aria-label={t('calendarPage.moreFiltersAriaLabel')}
             aria-expanded={filtersExpanded}

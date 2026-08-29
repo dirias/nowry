@@ -23,6 +23,7 @@ import {
 import { tasksService } from '../../api/services/tasks.service'
 import { annualPlanningService } from '../../api/services/annualPlanning.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { focusRing, touchTarget } from '../Common/Form/formStyles'
 
 // Type color map (must match CalendarModal TYPE_META)
 const TYPE_COLORS = {
@@ -33,6 +34,14 @@ const TYPE_COLORS = {
 }
 
 const TYPES = ['task', 'priority', 'goal', 'activity']
+
+/**
+ * These chips are a selection control, so they answer to the same geometry as
+ * every other one in the app: `size='sm'` alone left them ~24px tall, visibly
+ * shorter than the buttons around them and short of the ≥44px DESIGN_GUIDELINES
+ * §3.2 requires at `xs` (WCAG 2.5.5). Matches `filterControl` in CalendarPage.
+ */
+const typeChip = { ...focusRing, ...touchTarget, cursor: 'pointer', transition: 'all 0.15s' }
 
 /**
  * Formats a Date (or existing date string) to a YYYY-MM-DD value
@@ -265,12 +274,12 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                       size='sm'
                       variant={type === typeKey ? 'solid' : 'outlined'}
                       onClick={() => setType(typeKey)}
+                      aria-pressed={type === typeKey}
                       sx={{
-                        cursor: 'pointer',
+                        ...typeChip,
                         bgcolor: type === typeKey ? TYPE_COLORS[typeKey] : 'transparent',
                         borderColor: TYPE_COLORS[typeKey],
                         color: type === typeKey ? 'common.white' : 'text.secondary',
-                        transition: 'all 0.15s',
                         '&:hover': { opacity: 0.85 }
                       }}
                     >

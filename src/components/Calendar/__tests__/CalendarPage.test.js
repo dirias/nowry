@@ -391,3 +391,61 @@ describe('Phase 16 FLT-01/02/03: filter bar', () => {
     }
   })
 })
+
+// ─── Event pill contrast ────────────────────────────────────────────────────
+
+// Exercises the real `readableTextOn` against the real colours
+// `calendar.service.js` emits, rather than mirroring either one. Mirroring the
+// formula here would let the production helper change underneath these
+// assertions and still pass, which is the failure mode the test exists to stop.
+const { readableTextOn, contrastRatio } = require('../../../theme/colorSchemeGenerator')
+
+// The four fallbacks hardcoded in calendar.service.js. A user-defined
+// focus-area colour replaces these, so they are the floor, not the whole space.
+const SEEDED_EVENT_COLORS = {
+  'task/priority fallback red': '#ef4444',
+  'goal fallback green': '#10b981',
+  'priority indigo': '#6366f1',
+  amber: '#f59e0b'
+}
+
+// WCAG 2.2 AA for normal-size text. The pill label is `body-xs`, so the 3:1
+// large-text allowance does not apply to it.
+const AA_NORMAL_TEXT = 4.5
+
+describe('CalendarPage — event pill label contrast (WCAG 2.2 AA)', () => {
+  // Regression guard. Before this, `eventContent` rendered a Typography with no
+  // colour, so the label inherited `text.primary` — a token that only knows
+  // about the page surface, not the arbitrary focus-area fill behind it.
+  // Measured then: every one of these failed AA in dark mode (#F0F4F8 on amber
+  // reached 1.94:1), and indigo also failed in light mode at 3.91:1.
+  const INHERITED_LIGHT = '#171A1C'
+  const INHERITED_DARK = '#F0F4F8'
+
+  Object.entries(SEEDED_EVENT_COLORS).forEach(([name, background]) => {
+    it(`derives an AA-passing label colour for ${name} (${background})`, () => {
+      const derived = readableTextOn(background)
+      expect(contrastRatio(derived, background)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT)
+    })
+  })
+
+  it('beats the inherited text.primary it replaced, in whichever mode that token failed', () => {
+    const failures = Object.values(SEEDED_EVENT_COLORS).filter((background) => {
+      const worstInherited = Math.min(contrastRatio(INHERITED_LIGHT, background), contrastRatio(INHERITED_DARK, background))
+      return worstInherited < AA_NORMAL_TEXT
+    })
+
+    // All four fail in at least one mode — if this ever drops to zero the
+    // fixture has drifted and the regression guard below is no longer guarding.
+    expect(failures).toHaveLength(4)
+
+    failures.forEach((background) => {
+      expect(contrastRatio(readableTextOn(background), background)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT)
+    })
+  })
+
+  it('never throws on a malformed focus-area colour from the database', () => {
+    expect(() => readableTextOn(undefined)).not.toThrow()
+    expect(() => readableTextOn('not-a-colour')).not.toThrow()
+  })
+})
