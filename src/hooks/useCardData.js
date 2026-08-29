@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { cardsService } from '../api/services'
 import { queryClient } from '../api/queryClient'
@@ -63,11 +64,21 @@ export function useCardData(selectedTags = [], search = '') {
   // no manual pre-seed-from-cache step is needed the way the old
   // `apiCache.peek()` call was, and it applies uniformly to every filter
   // combination rather than only the unfiltered key.
-  const pages = data?.pages ?? []
-  const cards = pages.flatMap((page) => page.cards)
-  const lastPage = pages[pages.length - 1]
-  const total = lastPage?.total ?? 0
-  const hasMore = lastPage?.has_more ?? false
+  // `data` is only referentially stable across renders when React Query
+  // hasn't refetched — deriving `cards` with a fresh `flatMap` on every
+  // render (regardless of whether `data` changed) breaks that stability and
+  // was feeding a new array reference into every consumer's effect deps on
+  // every render, causing "Maximum update depth exceeded" loops downstream
+  // (e.g. CardHome.js's fetchData `useCallback`).
+  const { cards, total, hasMore } = useMemo(() => {
+    const pages = data?.pages ?? []
+    const lastPage = pages[pages.length - 1]
+    return {
+      cards: pages.flatMap((page) => page.cards),
+      total: lastPage?.total ?? 0,
+      hasMore: lastPage?.has_more ?? false
+    }
+  }, [data])
 
   const reload = async () => {
     if (!userId) return

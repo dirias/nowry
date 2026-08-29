@@ -1470,7 +1470,8 @@
         "again": "Again",
         "hard": "Hard",
         "good": "Good",
-        "easy": "Easy"
+        "easy": "Easy",
+        "alreadyAnswered": "Already graded"
       }
     },
     "deleteModal": {

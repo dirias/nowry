@@ -23,6 +23,7 @@ import {
 import { tasksService } from '../../api/services/tasks.service'
 import { annualPlanningService } from '../../api/services/annualPlanning.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { focusRing, touchTarget } from '../Common/Form/formStyles'
 
 /**
  * Joy palette names per type — not painted values. `variant='solid'` then pairs
@@ -42,6 +43,14 @@ const TYPE_PALETTES = {
 }
 
 const TYPES = ['task', 'priority', 'goal', 'activity']
+
+/**
+ * These chips are a selection control, so they answer to the same geometry as
+ * every other one in the app: `size='sm'` alone left them ~24px tall, visibly
+ * shorter than the buttons around them and short of the ≥44px DESIGN_GUIDELINES
+ * §3.2 requires at `xs` (WCAG 2.5.5). Matches `filterControl` in CalendarPage.
+ */
+const typeChip = { ...focusRing, ...touchTarget, cursor: 'pointer', transition: 'all 0.15s' }
 
 /**
  * Formats a Date (or existing date string) to a YYYY-MM-DD value
@@ -275,10 +284,10 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
                       variant={type === typeKey ? 'solid' : 'outlined'}
                       color={type === typeKey ? TYPE_PALETTES[typeKey] : 'neutral'}
                       onClick={() => setType(typeKey)}
+                      aria-pressed={type === typeKey}
                       sx={{
-                        cursor: 'pointer',
+                        ...typeChip,
                         ...(type === typeKey ? { color: `${TYPE_PALETTES[typeKey]}.solidColor` } : { bgcolor: 'background.level1' }),
-                        transition: 'all 0.15s',
                         '&:hover': { opacity: 0.85 }
                       }}
                     >

@@ -63,7 +63,17 @@ mermaid.initialize({
 // `handleGrade`) must keep changing identity whenever `cards`/`currentIndex`
 // change, or this memoized child would hold a stale grading closure (locked
 // by the "rapid grading race guard" test in StudySession.test.js).
-const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSyncCount, t }) {
+// Shared "this is the previously-given grade" affordance — an outlined ring
+// plus a small check icon, applied on top of each button's own variant/color
+// so re-grading stays a plain, unlocked click (D-0 UI-only fix: no logic
+// change, purely visual).
+const selectedGradeSx = {
+  outline: '2px solid',
+  outlineColor: 'primary.outlinedBorder',
+  outlineOffset: '2px'
+}
+
+const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSyncCount, previousGrade, t }) {
   return (
     <Box
       sx={{ width: '100%', position: 'relative', zIndex: 20 }}
@@ -81,11 +91,25 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
         </Box>
       )}
 
+      {/* Re-grade affordance: this card already has a grade this session
+          (via back-nav) — say so, rather than letting the identical-looking
+          grading row silently re-fire. */}
+      {previousGrade && (
+        <Stack direction='row' spacing={0.5} alignItems='center' justifyContent='center' sx={{ mb: 1 }}>
+          <CheckCircle sx={{ fontSize: 14, color: 'text.tertiary' }} />
+          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+            {t('cards.session.grading.alreadyAnswered')}
+          </Typography>
+        </Stack>
+      )}
+
       <Stack direction='row' spacing={{ xs: 0.75, md: 1.5 }} sx={{ mt: { xs: 2, md: 3 }, width: '100%' }} justifyContent='center'>
         <Button
           variant='outlined'
           color='danger'
           onClick={() => onGrade('again')}
+          aria-pressed={previousGrade === 'again'}
+          startDecorator={previousGrade === 'again' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
@@ -95,7 +119,8 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             // metadata text, so legibility on the main action row won out.
             fontSize: 'sm',
             fontWeight: 600,
-            '&:hover': { bgcolor: 'danger.softBg' }
+            '&:hover': { bgcolor: 'danger.softBg' },
+            ...(previousGrade === 'again' ? selectedGradeSx : {})
           }}
         >
           {t('cards.session.grading.again')}
@@ -104,12 +129,15 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           variant='soft'
           color='warning'
           onClick={() => onGrade('hard')}
+          aria-pressed={previousGrade === 'hard'}
+          startDecorator={previousGrade === 'hard' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600
+            fontWeight: 600,
+            ...(previousGrade === 'hard' ? selectedGradeSx : {})
           }}
         >
           {t('cards.session.grading.hard')}
@@ -118,12 +146,15 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           variant='soft'
           color='success'
           onClick={() => onGrade('good')}
+          aria-pressed={previousGrade === 'good'}
+          startDecorator={previousGrade === 'good' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600
+            fontWeight: 600,
+            ...(previousGrade === 'good' ? selectedGradeSx : {})
           }}
         >
           {t('cards.session.grading.good')}
@@ -132,12 +163,15 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           variant='solid'
           color='primary'
           onClick={() => onGrade('easy')}
+          aria-pressed={previousGrade === 'easy'}
+          startDecorator={previousGrade === 'easy' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600
+            fontWeight: 600,
+            ...(previousGrade === 'easy' ? selectedGradeSx : {})
           }}
         >
           {t('cards.session.grading.easy')}
@@ -157,6 +191,7 @@ const SessionFooter = React.memo(function SessionFooter({
   cardsLength,
   onGrade,
   pendingSyncCount,
+  previousGrade,
   t
 }) {
   return (
@@ -169,7 +204,7 @@ const SessionFooter = React.memo(function SessionFooter({
           {t('cards.session.card', { current: currentIndex + 1, total: cardsLength })}
         </Typography>
       </Stack>
-      {showGrading && <GradingButtons onGrade={onGrade} pendingSyncCount={pendingSyncCount} t={t} />}
+      {showGrading && <GradingButtons onGrade={onGrade} pendingSyncCount={pendingSyncCount} previousGrade={previousGrade} t={t} />}
     </Box>
   )
 })
@@ -330,6 +365,21 @@ export default function StudySession() {
   // Companion intervention tracking
   const interventionFiredCardIds = useRef(new Set())
   const wrongCountPerCardId = useRef({})
+  // Re-grade affordance: last grade given to each card THIS session, keyed by
+  // card id. Back-nav (handlePrev) deliberately re-lands the user on a graded
+  // card with the same clickable GradingButtons — re-grading is intentional
+  // (it's what feeds MODE-06's needs-attention stat), but with no visual
+  // difference it reads as a bug. This ref lets the render below highlight
+  // the previously-picked button so re-grading is an obvious, deliberate
+  // action instead of a silent trap. Overwritten (not appended) on every
+  // grade, so it always reflects the LAST grade for that card, matching the
+  // same "last write wins" semantics wrongCountPerCardId's per-card counters
+  // use. A ref, not state — read at render time the same way latestStateRef
+  // is (see PERF-02/D-07 note above): it only changes inside handleGrade,
+  // which is always followed by a state update (handleNext's setCurrentIndex
+  // or setSessionComplete) that triggers the re-render this value needs to be
+  // visible in.
+  const gradesByCardId = useRef({})
   // Tie-break support for the "most attention needed" callout: tracks how many
   // of each card's needs-attention grades were specifically 'again' (a full
   // miss) rather than 'hard' (recalled with difficulty). Only used to break
@@ -631,6 +681,10 @@ export default function StudySession() {
       // nothing left to grade — no-op rather than crash.
       if (!currentCard) return
       const cardId = currentCard._id || currentCard.id
+
+      // Record/overwrite this card's last grade for this session — powers the
+      // "already graded" affordance rendered below (see gradesByCardId above).
+      gradesByCardId.current[cardId] = grade
 
       // OPTIMISTIC UPDATE: Calculate SM-2 locally for instant feedback
       const currentEaseFactor = currentCard.ease_factor || 2.5
@@ -1000,6 +1054,10 @@ export default function StudySession() {
   // card is gone — so the transient frame never contradicts where we end up.
   const safeIndex = currentIndex < visibleCards.length ? currentIndex : 0
   const currentCard = visibleCards[safeIndex]
+  // Null unless this exact card was already graded this session (via
+  // handleGrade above) — drives the re-grade affordance in SessionFooter.
+  const currentCardId = currentCard?._id || currentCard?.id
+  const previousGrade = currentCardId ? (gradesByCardId.current[currentCardId] ?? null) : null
   const progress = visibleCards.length > 0 ? ((safeIndex + 1) / visibleCards.length) * 100 : 0
   const isQuiz = currentCard?.card_type === 'quiz'
   const isVisual = currentCard?.card_type === 'visual'
@@ -1283,6 +1341,7 @@ export default function StudySession() {
                     cardsLength={visibleCards.length}
                     onGrade={handleGrade}
                     pendingSyncCount={reviewQueue.length}
+                    previousGrade={previousGrade}
                     t={t}
                   />
                 </Box>
@@ -1373,6 +1432,7 @@ export default function StudySession() {
                     cardsLength={visibleCards.length}
                     onGrade={handleGrade}
                     pendingSyncCount={reviewQueue.length}
+                    previousGrade={previousGrade}
                     t={t}
                   />
                 </Box>
@@ -1565,6 +1625,7 @@ export default function StudySession() {
                         cardsLength={visibleCards.length}
                         onGrade={handleGrade}
                         pendingSyncCount={reviewQueue.length}
+                        previousGrade={previousGrade}
                         t={t}
                       />
                     </Box>

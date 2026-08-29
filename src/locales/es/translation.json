@@ -1195,7 +1195,8 @@
         "again": "De nuevo",
         "hard": "Difícil",
         "good": "Bien",
-        "easy": "Fácil"
+        "easy": "Fácil",
+        "alreadyAnswered": "Ya calificada"
       }
     },
     "deleteModal": {
