@@ -23,6 +23,7 @@ import { usePet } from '../../context/AgentContext'
 import { useAuth } from '../../context/AuthContext'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '../../utils/petColor'
+import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '../../constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
 import PetRevealCelebration from './PetRevealCelebration'
@@ -671,7 +672,6 @@ const StudyPet = () => {
     clearError,
     petName,
     petSpecies,
-    petColor,
     levelProgress,
     avatarUrl,
     avatarGenerating,
@@ -695,11 +695,13 @@ const StudyPet = () => {
   const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuth()
   const { openUpgradeModal } = useSubscriptionContext()
+  const { themeColor } = useThemePreferences()
   const navigate = useNavigate()
-  // The pet's own identity colour: hue from the user's choice, saturation and
-  // lightness from the evolution stage. Deliberately NOT the global theme
-  // accent — the companion should look like theirs, not like the app chrome.
-  const resolvedColor = resolveColor(petColor, stage)
+  // The pet's identity colour: hue from the accent the user actually chose,
+  // saturation and lightness from the evolution stage. Note this is NOT the
+  // raw theme colour the orb once used — that ignored the stage entirely, so
+  // all six forms rendered identically. The stage ramp is what survives.
+  const resolvedColor = resolveColor(themeColor, stage)
 
   const [input, setInput] = useState('')
   // Tier enforcement state

@@ -1,8 +1,13 @@
 /**
  * petColor.js — Pet orb color resolution utilities
  *
- * Resolves a user-chosen color slug + evolution stage into a 6-digit hex
+ * Resolves the user's accent colour + evolution stage into a 6-digit hex
  * string suitable for the PetOrb gradient and box-shadow.
+ *
+ * The input is the user's chosen theme colour (`preferences.general.theme_color`),
+ * not the former `pet_color` slug. That slug had no picker anywhere in the UI,
+ * so it was null for effectively every user — which is why every generated pet
+ * came out violet. One colour system now, and it is the one users actually set.
  *
  * Hex (not rgba) is the required output format: every consumer appends a
  * two-digit hex alpha suffix to the resolved value (`${color}55`) to build
@@ -15,16 +20,8 @@
 // ---------------------------------------------------------------------------
 // Color map — slug → hex (source of truth for all pet colors)
 // ---------------------------------------------------------------------------
-export const PET_COLOR_MAP = {
-  ocean: '#4facfe',
-  violet: '#a855f7',
-  mint: '#34d399',
-  gold: '#fbbf24',
-  rose: '#f472b6',
-  coral: '#fb7185',
-  sky: '#38bdf8',
-  ember: '#f97316'
-}
+/** Accepts '#rrggbb' or 'rrggbb', case-insensitive. */
+const HEX_RE = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i
 
 // ---------------------------------------------------------------------------
 // Stage intensity — how the pet's colour matures as it evolves.
@@ -142,16 +139,16 @@ function hslToHex({ h, s, l }) {
 /**
  * Resolve a color slug + evolution stage into a concrete 6-digit hex string.
  *
- * The slug fixes the hue (the pet's identity, chosen by the user); the stage
+ * The accent fixes the hue (the pet's identity, chosen by the user); the stage
  * shifts saturation and lightness (the pet's maturity, earned through study).
  *
- * @param {string|null} colorSlug - One of the PET_COLOR_MAP keys, or null for the stage default.
- * @param {number} stage          - Evolution stage (1–6).
- * @returns {string}              - A 6-digit hex string, e.g. '#a855f7'.
+ * @param {string|null} accentColor - The user's theme colour hex, or null for the stage default.
+ * @param {number} stage            - Evolution stage (1–6).
+ * @returns {string}                - A 6-digit hex string, e.g. '#a855f7'.
  */
-export function resolveColor(colorSlug, stage) {
+export function resolveColor(accentColor, stage) {
   const safeStage = STAGE_DOMINANT[stage] ? stage : 1
-  const baseHex = PET_COLOR_MAP[colorSlug] ?? STAGE_DOMINANT[safeStage]
+  const baseHex = HEX_RE.test(accentColor ?? '') ? accentColor : STAGE_DOMINANT[safeStage]
   const rgb = hexToRgb(baseHex)
   if (!rgb) return STAGE_DOMINANT[1]
 
@@ -174,31 +171,34 @@ export function resolveColor(colorSlug, stage) {
 // Interest → species + color suggestion
 // ---------------------------------------------------------------------------
 const INTEREST_MAP = [
-  { keywords: ['technology', 'computer', 'engineering', 'programming', 'software', 'math', 'mathematics'], species: 'robot', color: 'sky' },
-  { keywords: ['music', 'audio', 'performance', 'sound', 'instrument'], species: 'music', color: 'violet' },
-  { keywords: ['art', 'design', 'culture', 'writing', 'creative'], species: 'cat', color: 'rose' },
-  { keywords: ['science', 'physics', 'astronomy', 'space'], species: 'star', color: 'ocean' },
-  { keywords: ['medicine', 'biology', 'health', 'wellness', 'medical'], species: 'phoenix', color: 'mint' },
-  { keywords: ['nature', 'ecology', 'agriculture', 'environment', 'environmental'], species: 'leaf', color: 'mint' },
-  { keywords: ['chemistry', 'geology', 'materials'], species: 'crystal', color: 'ember' },
-  { keywords: ['gaming', 'mythology', 'fantasy', 'game'], species: 'dragon', color: 'ember' },
-  { keywords: ['humanities', 'literature', 'history', 'academic'], species: 'owl', color: 'gold' },
-  { keywords: ['psychology', 'philosophy', 'social', 'sociology'], species: 'fox', color: 'coral' }
+  { keywords: ['technology', 'computer', 'engineering', 'programming', 'software', 'math', 'mathematics'], species: 'robot' },
+  { keywords: ['music', 'audio', 'performance', 'sound', 'instrument'], species: 'music' },
+  { keywords: ['art', 'design', 'culture', 'writing', 'creative'], species: 'cat' },
+  { keywords: ['science', 'physics', 'astronomy', 'space'], species: 'star' },
+  { keywords: ['medicine', 'biology', 'health', 'wellness', 'medical'], species: 'phoenix' },
+  { keywords: ['nature', 'ecology', 'agriculture', 'environment', 'environmental'], species: 'leaf' },
+  { keywords: ['chemistry', 'geology', 'materials'], species: 'crystal' },
+  { keywords: ['gaming', 'mythology', 'fantasy', 'game'], species: 'dragon' },
+  { keywords: ['humanities', 'literature', 'history', 'academic'], species: 'owl' },
+  { keywords: ['psychology', 'philosophy', 'social', 'sociology'], species: 'fox' }
 ]
 
 /**
- * Suggest a species and color based on user interests.
+ * Suggest a species based on user interests.
+ *
+ * No longer suggests a colour: the companion's colour follows the user's own
+ * theme accent, so there is nothing left to guess.
  *
  * @param {string[]} interests - Array of interest strings from user profile.
- * @returns {{ species: string, color: string }}
+ * @returns {{ species: string }}
  */
 export function suggestFromInterests(interests = []) {
-  if (!interests || interests.length === 0) return { species: 'owl', color: 'violet' }
+  if (!interests || interests.length === 0) return { species: 'owl' }
   const lower = interests.map((i) => i.toLowerCase())
   for (const rule of INTEREST_MAP) {
     if (rule.keywords.some((k) => lower.some((i) => i.includes(k)))) {
-      return { species: rule.species, color: rule.color }
+      return { species: rule.species }
     }
   }
-  return { species: 'owl', color: 'violet' }
+  return { species: 'owl' }
 }

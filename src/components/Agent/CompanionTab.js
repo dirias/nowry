@@ -4,7 +4,6 @@
  * Provides three sections:
  *   1. Name — free-text input (max 20 chars), saved on blur.
  *   2. Species — grid of selectable species cards, saved on selection.
- *   3. Color — row of color swatches, saved on selection.
  *
  * All API calls are handled by the parent (AgentSettings) via callbacks.
  * This component is purely presentational.
@@ -109,7 +108,6 @@ const CompanionTab = ({
   petName,
   setPetName,
   petSpecies,
-  petColor,
   onSpeciesSelect,
   onNameBlur,
   suggestedSpecies,
@@ -169,7 +167,7 @@ const CompanionTab = ({
       <Divider />
 
       {/* ── Section: Evolution journey ─────────────────────────────────────── */}
-      <StageJourney petSpecies={petSpecies} petColor={petColor} />
+      <StageJourney petSpecies={petSpecies} />
 
       <Divider />
 

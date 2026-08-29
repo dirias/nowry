@@ -89,10 +89,9 @@ const initialState = {
    * Sent as grounding on every chat message.
    */
   viewContext: null,
-  /** Pet customization — name, species slug, color slug */
+  /** Pet customization — name and species. Colour follows the theme accent. */
   petName: null,
   petSpecies: null,
-  petColor: null,
   /** AI-generated avatar portrait */
   avatarUrl: null,
   avatarStage: null,
@@ -157,7 +156,6 @@ function agentReducer(state, action) {
         isRoamingEnabled: action.payload.agent_roaming_enabled ?? true,
         petName: action.payload.pet_name ?? null,
         petSpecies: action.payload.pet_species ?? null,
-        petColor: action.payload.pet_color ?? null,
         avatarUrl: action.payload.avatar_url ?? null,
         avatarStage: action.payload.avatar_stage ?? null,
         avatarRegenPending: action.payload.avatar_regen_pending ?? false,
@@ -360,8 +358,7 @@ function agentReducer(state, action) {
       return {
         ...state,
         petName: action.payload.petName !== undefined ? action.payload.petName : state.petName,
-        petSpecies: action.payload.petSpecies !== undefined ? action.payload.petSpecies : state.petSpecies,
-        petColor: action.payload.petColor !== undefined ? action.payload.petColor : state.petColor
+        petSpecies: action.payload.petSpecies !== undefined ? action.payload.petSpecies : state.petSpecies
       }
     default:
       return state
@@ -646,8 +643,8 @@ export const AgentProvider = ({ children }) => {
    */
   const updateAgentPrefs = useCallback((prefs) => dispatch({ type: 'UPDATE_AGENT_PREFS', payload: prefs }), [])
 
-  const updatePetCustomization = useCallback(({ petName, petSpecies, petColor }) => {
-    dispatch({ type: 'UPDATE_PET_CUSTOMIZATION', payload: { petName, petSpecies, petColor } })
+  const updatePetCustomization = useCallback(({ petName, petSpecies }) => {
+    dispatch({ type: 'UPDATE_PET_CUSTOMIZATION', payload: { petName, petSpecies } })
   }, [])
 
   const levelUpClear = useCallback(() => dispatch({ type: 'LEVEL_UP_CLEAR' }), [])

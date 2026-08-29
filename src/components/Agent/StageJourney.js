@@ -20,12 +20,13 @@ import { Alert, Box, Chip, Skeleton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { agentService } from '../../api/services/agent.service'
 import { resolveColor } from '../../utils/petColor'
+import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { PetOrb } from './StudyPet'
 
 const STAGE_COUNT = 6
 
 /** One rung of the ladder. */
-const StageCard = ({ entry, isNext, petSpecies, petColor, t, locale }) => {
+const StageCard = ({ entry, isNext, petSpecies, accentColor, t, locale }) => {
   const { stage, reached, reached_at: reachedAt, xp_remaining: xpRemaining, level_required: levelRequired } = entry
 
   const reachedDate = reachedAt ? new Date(reachedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) : null
@@ -64,7 +65,7 @@ const StageCard = ({ entry, isNext, petSpecies, petColor, t, locale }) => {
           level={levelRequired}
           stage={stage}
           species={petSpecies}
-          dominantColor={resolveColor(petColor, stage)}
+          dominantColor={resolveColor(accentColor, stage)}
           isCelebrating={false}
           preview
         />
@@ -93,8 +94,9 @@ const StageCard = ({ entry, isNext, petSpecies, petColor, t, locale }) => {
   )
 }
 
-const StageJourney = ({ petSpecies, petColor }) => {
+const StageJourney = ({ petSpecies }) => {
   const { t, i18n } = useTranslation()
+  const { themeColor } = useThemePreferences()
   const [journey, setJourney] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -171,7 +173,7 @@ const StageJourney = ({ petSpecies, petColor }) => {
                   entry={entry}
                   isNext={entry.stage === nextStage}
                   petSpecies={petSpecies}
-                  petColor={petColor}
+                  accentColor={themeColor}
                   t={t}
                   locale={i18n.language}
                 />

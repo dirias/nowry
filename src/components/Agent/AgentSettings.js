@@ -285,7 +285,6 @@ export default function AgentSettings() {
     setPetActive,
     petName: ctxPetName,
     petSpecies: ctxPetSpecies,
-    petColor: ctxPetColor,
     updatePetCustomization,
     tier,
     avatarUrl,
@@ -349,7 +348,6 @@ export default function AgentSettings() {
   const [activeTab, setActiveTab] = useState('personality')
   const [petName, setPetName] = useState('')
   const [petSpecies, setPetSpecies] = useState(null)
-  const [petColor, setPetColor] = useState(null)
   const [petError, setPetError] = useState(false)
   const [hasSuggestion, setHasSuggestion] = useState(false)
   const [suggestedSpecies, setSuggestedSpecies] = useState(null)
@@ -396,13 +394,11 @@ export default function AgentSettings() {
         const pref = await petService.getPetPreferences()
         setPetName(pref.pet_name || '')
         setPetSpecies(pref.pet_species || null)
-        setPetColor(pref.pet_color || null)
         // Auto-suggest only if no existing customization and interests are available
         if (!pref.pet_species && interests.length > 0) {
           const suggestion = suggestFromInterests(interests)
           setSuggestedSpecies(suggestion.species)
           setPetSpecies(suggestion.species)
-          setPetColor(suggestion.color)
           setHasSuggestion(true)
         }
       } catch (_) {
@@ -521,7 +517,7 @@ export default function AgentSettings() {
   const handleNameBlur = async () => {
     try {
       const result = await petService.updatePetPreferences({ pet_name: petName || null })
-      updatePetCustomization({ petName: result.pet_name, petSpecies, petColor })
+      updatePetCustomization({ petName: result.pet_name, petSpecies })
     } catch (_) {
       setPetError(true)
       setTimeout(() => setPetError(false), 4000)
@@ -533,7 +529,7 @@ export default function AgentSettings() {
     setPetSpecies(next)
     try {
       const result = await petService.updatePetPreferences({ pet_species: next })
-      updatePetCustomization({ petName, petSpecies: result.pet_species, petColor })
+      updatePetCustomization({ petName, petSpecies: result.pet_species })
     } catch (_) {
       setPetSpecies(petSpecies)
       setPetError(true)
@@ -1061,7 +1057,6 @@ export default function AgentSettings() {
                 petName={petName}
                 setPetName={setPetName}
                 petSpecies={petSpecies}
-                petColor={petColor}
                 onSpeciesSelect={handleSpeciesSelect}
                 onNameBlur={handleNameBlur}
                 suggestedSpecies={suggestedSpecies}
