@@ -8,13 +8,15 @@ import React from 'react'
 import { Box, Sheet, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { usePet } from '../../context/AgentContext'
-import { useThemePreferences } from '../../theme/DynamicThemeProvider'
+import { resolveColor } from '../../utils/petColor'
 import { PetOrb } from './StudyPet'
 
 const OrbPreviewPanel = ({ petSpecies, petColor, petName, avatarUrl }) => {
   const { t } = useTranslation()
   const { stage, level } = usePet()
-  const { themeColor } = useThemePreferences()
+  // Resolve from the *pending* petColor prop, not context, so the preview
+  // updates the moment a swatch is picked rather than after the save round-trip.
+  const resolvedColor = resolveColor(petColor, stage)
 
   return (
     <Box sx={{ position: 'sticky', top: 24 }}>
@@ -46,7 +48,7 @@ const OrbPreviewPanel = ({ petSpecies, petColor, petName, avatarUrl }) => {
             level={level}
             stage={stage}
             species={petSpecies}
-            dominantColor={themeColor}
+            dominantColor={resolvedColor}
             isCelebrating={false}
             preview={true}
             avatarUrl={avatarUrl}

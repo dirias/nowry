@@ -23,7 +23,6 @@ import { usePet } from '../../context/AgentContext'
 import { useAuth } from '../../context/AuthContext'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '../../utils/petColor'
-import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '../../constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
 import PetRevealCelebration from './PetRevealCelebration'
@@ -39,13 +38,15 @@ import { quizService } from '../../api/services/quizService'
 // ---------------------------------------------------------------------------
 // Stage configuration — drives orb size, color, aura rings, and animation speed
 // ---------------------------------------------------------------------------
+// dominantColor is the no-custom-colour fallback and must stay a 6-digit hex:
+// PetOrb appends hex alpha suffixes to it (`${activeColor}55`) to build glows.
 const STAGE_CONFIG = {
-  1: { sizePx: 56, dominantColor: 'rgba(100, 180, 255, 0.85)', emoji: '✨', ringCount: 0, pulseDuration: 2.8 },
-  2: { sizePx: 60, dominantColor: 'rgba(120, 220, 170, 0.88)', emoji: '🌟', ringCount: 0, pulseDuration: 2.2 },
-  3: { sizePx: 64, dominantColor: 'rgba(164, 69, 255, 0.90)', emoji: '🔮', ringCount: 1, pulseDuration: 2.2 },
-  4: { sizePx: 68, dominantColor: 'rgba(255, 190, 60, 0.90)', emoji: '🌙', ringCount: 2, pulseDuration: 2.0 },
-  5: { sizePx: 72, dominantColor: 'rgba(220, 100, 255, 0.95)', emoji: '🌌', ringCount: 3, pulseDuration: 1.8 },
-  6: { sizePx: 80, dominantColor: 'rgba(255, 230, 80, 1.00)', emoji: '☀️', ringCount: 3, pulseDuration: 1.6 }
+  1: { sizePx: 56, dominantColor: '#64b4ff', emoji: '✨', ringCount: 0, pulseDuration: 2.8 },
+  2: { sizePx: 60, dominantColor: '#78dcaa', emoji: '🌟', ringCount: 0, pulseDuration: 2.2 },
+  3: { sizePx: 64, dominantColor: '#a445ff', emoji: '🔮', ringCount: 1, pulseDuration: 2.2 },
+  4: { sizePx: 68, dominantColor: '#ffbe3c', emoji: '🌙', ringCount: 2, pulseDuration: 2.0 },
+  5: { sizePx: 72, dominantColor: '#dc64ff', emoji: '🌌', ringCount: 3, pulseDuration: 1.8 },
+  6: { sizePx: 80, dominantColor: '#ffe650', emoji: '☀️', ringCount: 3, pulseDuration: 1.6 }
 }
 
 // ---------------------------------------------------------------------------
@@ -432,9 +433,11 @@ const StudyPet = () => {
   const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuth()
   const { openUpgradeModal } = useSubscriptionContext()
-  const { themeColor } = useThemePreferences()
   const navigate = useNavigate()
-  const resolvedColor = themeColor
+  // The pet's own identity colour: hue from the user's choice, saturation and
+  // lightness from the evolution stage. Deliberately NOT the global theme
+  // accent — the companion should look like theirs, not like the app chrome.
+  const resolvedColor = resolveColor(petColor, stage)
   const [input, setInput] = useState('')
   // Tier enforcement state
   const messagesUsedThisMonth = messagesUsed
@@ -1669,7 +1672,7 @@ const StudyPet = () => {
                   isCelebrating={justLeveledUp}
                   onClick={open}
                   species={petSpecies}
-                  dominantColor={themeColor}
+                  dominantColor={resolvedColor}
                   avatarUrl={avatarUrl}
                   onAvatarError={clearAvatarUrl}
                   isGenerating={avatarGenerating}
