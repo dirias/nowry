@@ -19,16 +19,26 @@ jest.mock('../../../api/services/agent.service', () => ({
   agentService: { getJourney: jest.fn() }
 }))
 
-// The real provider pulls in src/i18n.js, which errors outside the app entry.
+// Both real modules pull in src/i18n.js, which errors outside the app entry.
 jest.mock('../../../theme/DynamicThemeProvider', () => ({
   useThemePreferences: () => ({ themeColor: '#2a6971' })
+}))
+
+let mockAvatarUrl = null
+jest.mock('../../../context/AgentContext', () => ({
+  usePet: () => ({ avatarUrl: mockAvatarUrl })
 }))
 
 // PetOrb drags in framer-motion, the pet context and the whole StudyPet tree.
 // This suite is about the ladder's logic, not the orb's rendering — which has
 // its own coverage in stageSilhouette.test.js.
 jest.mock('../StudyPet', () => ({
-  PetOrb: ({ stage }) => <div data-testid={`orb-stage-${stage}`} />
+  PetOrb: ({ stage, avatarUrl, blankFace }) => (
+    <div data-testid={`orb-stage-${stage}`}>
+      <span data-testid={`orb-avatar-${stage}`}>{avatarUrl || 'none'}</span>
+      <span data-testid={`orb-blank-${stage}`}>{String(Boolean(blankFace))}</span>
+    </div>
+  )
 }))
 
 const { agentService } = require('../../../api/services/agent.service')
@@ -54,7 +64,10 @@ const journey = (reachedThrough, over = {}, isDefault = false) => ({
   )
 })
 
-beforeEach(() => jest.clearAllMocks())
+beforeEach(() => {
+  jest.clearAllMocks()
+  mockAvatarUrl = null
+})
 
 describe('StageJourney', () => {
   it('names every stage permanently, reached or not', async () => {
@@ -95,6 +108,29 @@ describe('StageJourney', () => {
 
     expect(await screen.findByTestId('orb-stage-1')).toBeInTheDocument()
     expect(container.querySelectorAll('img')).toHaveLength(0)
+  })
+
+  // A paying user's own portrait was never passed into the ladder, so their
+  // journey showed a placeholder emoji at every rung — the personalised
+  // experience looked poorer than the free one.
+  it('shows the user’s own portrait on the rungs they have reached', async () => {
+    mockAvatarUrl = 'https://example.com/my-pet.png'
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+
+    await screen.findByTestId('orb-stage-1')
+    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('https://example.com/my-pet.png')
+    expect(screen.getByTestId('orb-avatar-2')).toHaveTextContent('https://example.com/my-pet.png')
+  })
+
+  it('does not put the portrait on a form the user has not reached', async () => {
+    mockAvatarUrl = 'https://example.com/my-pet.png'
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+
+    await screen.findByTestId('orb-stage-3')
+    expect(screen.getByTestId('orb-avatar-3')).toHaveTextContent('none')
+    expect(screen.getByTestId('orb-blank-3')).toHaveTextContent('true')
   })
 
   it('marks exactly one stage as next — the first unreached one', async () => {

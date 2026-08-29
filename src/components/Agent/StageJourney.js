@@ -18,6 +18,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Alert, Box, Chip, Skeleton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+import { usePet } from '../../context/AgentContext'
 import { agentService } from '../../api/services/agent.service'
 import { resolveColor } from '../../utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
@@ -27,7 +28,7 @@ import { nowryArtFor, LOCKED_SILHOUETTE_FILTER } from './nowryArt'
 const STAGE_COUNT = 6
 
 /** One rung of the ladder. */
-const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, t, locale }) => {
+const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, t, locale }) => {
   const { stage, reached, reached_at: reachedAt, xp_remaining: xpRemaining, level_required: levelRequired } = entry
 
   const reachedDate = reachedAt ? new Date(reachedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) : null
@@ -74,6 +75,11 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, t, locale }
             dominantColor={resolveColor(accentColor, stage)}
             isCelebrating={false}
             preview
+            // A rung the user has reached shows their actual companion. This
+            // was simply never passed, so a paying user with a generated
+            // portrait saw an emoji everywhere in their own journey.
+            avatarUrl={reached ? avatarUrl : null}
+            blankFace={!reached}
           />
         )}
       </Box>
@@ -104,6 +110,7 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, t, locale }
 const StageJourney = () => {
   const { t, i18n } = useTranslation()
   const { themeColor } = useThemePreferences()
+  const { avatarUrl } = usePet()
   const [journey, setJourney] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -181,6 +188,7 @@ const StageJourney = () => {
                   isNext={entry.stage === nextStage}
                   accentColor={themeColor}
                   isDefaultCompanion={journey?.is_default_companion ?? true}
+                  avatarUrl={avatarUrl}
                   t={t}
                   locale={i18n.language}
                 />

@@ -346,7 +346,8 @@ export const PetOrb = ({
   onAvatarError,
   isGenerating,
   levelProgress,
-  isDefaultCompanion
+  isDefaultCompanion,
+  blankFace
 }) => {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion()
@@ -365,8 +366,14 @@ export const PetOrb = ({
   // no wait, no failure, and free users get real art rather than an emoji.
   const portraitUrl = avatarUrl || (isDefaultCompanion ? nowryArtFor(stage) : null)
 
-  const displayEmoji =
-    species && SPECIES_CONFIG[species] ? (SPECIES_CONFIG[species][mood] ?? SPECIES_CONFIG[species].idle) : (moodEmoji[mood] ?? config.emoji)
+  // A locked rung shows the FORM without a face: the stage's silhouette,
+  // rings and mark, but no emoji standing in for a creature the user has not
+  // become. An emoji there reads as a placeholder rather than as a promise.
+  const displayEmoji = blankFace
+    ? null
+    : species && SPECIES_CONFIG[species]
+      ? (SPECIES_CONFIG[species][mood] ?? SPECIES_CONFIG[species].idle)
+      : (moodEmoji[mood] ?? config.emoji)
 
   const activeColor = dominantColorOverride ?? config.dominantColor
 
