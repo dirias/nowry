@@ -17,7 +17,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion, useAnimation, useDragControls } from 'framer-motion'
+import { AnimatePresence, motion, useAnimation, useDragControls, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { usePet } from '../../context/AgentContext'
 import { useAuth } from '../../context/AuthContext'
@@ -40,13 +40,33 @@ import { quizService } from '../../api/services/quizService'
 // ---------------------------------------------------------------------------
 // dominantColor is the no-custom-colour fallback and must stay a 6-digit hex:
 // PetOrb appends hex alpha suffixes to it (`${activeColor}55`) to build glows.
-const STAGE_CONFIG = {
-  1: { sizePx: 56, dominantColor: '#64b4ff', emoji: '✨', ringCount: 0, pulseDuration: 2.8 },
-  2: { sizePx: 60, dominantColor: '#78dcaa', emoji: '🌟', ringCount: 0, pulseDuration: 2.2 },
-  3: { sizePx: 64, dominantColor: '#a445ff', emoji: '🔮', ringCount: 1, pulseDuration: 2.2 },
-  4: { sizePx: 68, dominantColor: '#ffbe3c', emoji: '🌙', ringCount: 2, pulseDuration: 2.0 },
-  5: { sizePx: 72, dominantColor: '#dc64ff', emoji: '🌌', ringCount: 3, pulseDuration: 1.8 },
-  6: { sizePx: 80, dominantColor: '#ffe650', emoji: '☀️', ringCount: 3, pulseDuration: 1.6 }
+//
+// Each stage must be told apart at a glance, at 56–80px, without a portrait.
+// Size alone cannot do that — 24px spread over six stages is invisible in
+// isolation, and nobody sees two stages side by side. So every consecutive
+// pair differs by at least one *structural* feature:
+//
+//   form   'egg' | 'round'   — the silhouette itself
+//   mark   null | 'crest' | 'halo' | 'crown'   — an earned adornment
+//   rings  0–3                — aura rings
+//   orbit  0–5                — orbiting motes
+//
+// All four are procedural, so a free-tier pet evolves visibly without ever
+// touching the Plus-gated AI portrait.
+export const STAGE_CONFIG = {
+  1: { sizePx: 56, dominantColor: '#64b4ff', emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0 },
+  2: { sizePx: 60, dominantColor: '#78dcaa', emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0 },
+  3: { sizePx: 64, dominantColor: '#a445ff', emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0 },
+  4: { sizePx: 68, dominantColor: '#ffbe3c', emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0 },
+  5: { sizePx: 72, dominantColor: '#dc64ff', emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3 },
+  6: { sizePx: 80, dominantColor: '#ffe650', emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5 }
+}
+
+// The egg's asymmetry is what sells stage 1 as "not yet formed"; every later
+// stage is a true circle.
+export const FORM_BORDER_RADIUS = {
+  egg: '50% 50% 48% 48% / 56% 56% 44% 44%',
+  round: '50%'
 }
 
 // ---------------------------------------------------------------------------
@@ -121,6 +141,110 @@ const SPECIES_MOTION = {
 // Sub-components
 // ---------------------------------------------------------------------------
 
+/**
+ * The adornment a pet earns at stages 3, 4 and 6 — a crest, then a halo, then
+ * a crown. Purely decorative: the orb's own aria-label already names the pet,
+ * so this is hidden from assistive tech.
+ *
+ * Drawn as SVG rather than CSS shapes so the strokes stay crisp at every
+ * stage's size and scale with the orb instead of being pinned to pixels.
+ */
+const StageMark = ({ mark, size, color }) => {
+  if (!mark) return null
+
+  // Sits above the orb, horizontally centred, scaled to the orb it crowns.
+  const width = Math.round(size * 0.62)
+  const height = Math.round(size * 0.34)
+  const wrapperStyle = {
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    bottom: `${Math.round(size * 0.82)}px`,
+    width,
+    height,
+    pointerEvents: 'none',
+    zIndex: 2
+  }
+
+  const shapes = {
+    // Two swept ear-tips — the first hint of a creature with a head.
+    crest: (
+      <svg viewBox='0 0 40 22' width={width} height={height} fill='none' aria-hidden='true'>
+        <path d='M11 21 C 8 13, 9 6, 14 2 C 16 8, 17 15, 16 21' fill={color} opacity='0.9' />
+        <path d='M29 21 C 32 13, 31 6, 26 2 C 24 8, 23 15, 24 21' fill={color} opacity='0.9' />
+      </svg>
+    ),
+    // A floating ring — the classic shorthand for "wise", and legible at 20px.
+    halo: (
+      <svg viewBox='0 0 40 22' width={width} height={height} fill='none' aria-hidden='true'>
+        <ellipse cx='20' cy='13' rx='15' ry='5' stroke={color} strokeWidth='2.5' opacity='0.95' />
+      </svg>
+    ),
+    // Radiating points. Deliberately the only mark that breaks the silhouette
+    // outward, so the final stage reads as an arrival.
+    crown: (
+      <svg viewBox='0 0 40 22' width={width} height={height} fill='none' aria-hidden='true'>
+        <path d='M6 21 L6 8 L13 14 L20 3 L27 14 L34 8 L34 21 Z' fill={color} opacity='0.95' />
+        <circle cx='20' cy='2' r='2' fill={color} />
+      </svg>
+    )
+  }
+
+  return <span style={wrapperStyle}>{shapes[mark] ?? null}</span>
+}
+
+/**
+ * Motes orbiting the orb at stages 5 and 6. Rendered as a single rotating
+ * layer with the dots pinned around its edge, so one transform animates all
+ * of them. Honours prefers-reduced-motion by holding the ring still.
+ */
+const OrbitLayer = ({ count, size, color, reduceMotion }) => {
+  if (!count) return null
+
+  const diameter = size + 26
+  const dotSize = Math.max(3, Math.round(size * 0.055))
+
+  return (
+    <motion.span
+      animate={reduceMotion ? undefined : { rotate: 360 }}
+      transition={reduceMotion ? undefined : { repeat: Infinity, duration: 9, ease: 'linear' }}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        width: diameter,
+        height: diameter,
+        marginTop: -diameter / 2,
+        marginLeft: -diameter / 2,
+        pointerEvents: 'none',
+        zIndex: 0
+      }}
+    >
+      {Array.from({ length: count }).map((_, i) => {
+        const angle = (360 / count) * i
+        return (
+          <span
+            key={i}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: dotSize,
+              height: dotSize,
+              marginTop: -dotSize / 2,
+              marginLeft: -dotSize / 2,
+              borderRadius: '50%',
+              background: color,
+              boxShadow: `0 0 ${dotSize * 2}px ${color}`,
+              transform: `rotate(${angle}deg) translateY(-${diameter / 2}px)`
+            }}
+          />
+        )
+      })}
+    </motion.span>
+  )
+}
+
 /** The animated orb that represents the pet in collapsed state */
 export const PetOrb = ({
   mood,
@@ -136,6 +260,7 @@ export const PetOrb = ({
   isGenerating
 }) => {
   const { t } = useTranslation()
+  const reduceMotion = useReducedMotion()
   const moodEmoji = {
     idle: '🔮',
     happy: '✨',
@@ -166,7 +291,7 @@ export const PetOrb = ({
   const orbStyle = {
     width: config.sizePx,
     height: config.sizePx,
-    borderRadius: '50%',
+    borderRadius: FORM_BORDER_RADIUS[config.form] ?? FORM_BORDER_RADIUS.round,
     border: 'none',
     cursor: preview ? 'default' : 'pointer',
     background: `radial-gradient(circle at 35% 35%, ${activeColor}, var(--joy-palette-background-body, #0c0818))`,
@@ -175,31 +300,67 @@ export const PetOrb = ({
     justifyContent: 'center',
     fontSize: Math.round(config.sizePx * 0.43),
     position: 'relative',
+    // Clips the portrait to the orb's silhouette. Anything that must extend
+    // BEYOND the orb (rings, marks, motes, the level badge) is therefore a
+    // sibling in the wrapper below, never a child of this element.
     overflow: 'hidden',
     outline: 'none'
   }
 
+  // The wrapper is the positioning context for every decoration. It is sized
+  // to the orb and lets its children overflow, so the pieces that used to be
+  // silently clipped away now actually paint.
+  const wrapperStyle = {
+    position: 'relative',
+    width: config.sizePx,
+    height: config.sizePx,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0
+  }
+
   const auraRings =
     config.ringCount > 0
-      ? Array.from({ length: config.ringCount }).map((_, i) => (
-          <motion.span
-            key={i}
-            animate={{ opacity: [0.15, 0.45, 0.15], scale: [0.97, 1.03, 0.97] }}
-            transition={{ repeat: Infinity, duration: config.pulseDuration, delay: i * (config.pulseDuration / config.ringCount) }}
-            style={{
-              position: 'absolute',
-              width: config.sizePx + 12 + i * 10,
-              height: config.sizePx + 12 + i * 10,
-              borderRadius: '50%',
-              border: `1px solid ${activeColor}`,
-              top: -(6 + i * 5),
-              left: -(6 + i * 5),
-              pointerEvents: 'none',
-              zIndex: -1
-            }}
-          />
-        ))
+      ? Array.from({ length: config.ringCount }).map((_, i) => {
+          const ringSize = config.sizePx + 12 + i * 10
+          return (
+            <motion.span
+              key={i}
+              animate={reduceMotion ? undefined : { opacity: [0.15, 0.45, 0.15], scale: [0.97, 1.03, 0.97] }}
+              transition={
+                reduceMotion
+                  ? undefined
+                  : { repeat: Infinity, duration: config.pulseDuration, delay: i * (config.pulseDuration / config.ringCount) }
+              }
+              style={{
+                position: 'absolute',
+                width: ringSize,
+                height: ringSize,
+                // Centred on the wrapper rather than offset from a corner, so
+                // the rings stay concentric at every stage size.
+                top: '50%',
+                left: '50%',
+                marginTop: -ringSize / 2,
+                marginLeft: -ringSize / 2,
+                borderRadius: '50%',
+                border: `1px solid ${activeColor}`,
+                opacity: reduceMotion ? 0.3 : undefined,
+                pointerEvents: 'none',
+                zIndex: 0
+              }}
+            />
+          )
+        })
       : null
+
+  const decorations = (
+    <>
+      {auraRings}
+      <OrbitLayer count={config.orbitCount} size={config.sizePx} color={activeColor} reduceMotion={reduceMotion} />
+      <StageMark mark={config.mark} size={config.sizePx} color={activeColor} />
+    </>
+  )
 
   /** Inner content: portrait image (with species locomotion), shimmer, or emoji fallback */
   const innerContent = (
@@ -268,45 +429,46 @@ export const PetOrb = ({
     </>
   )
 
+  const floatTransition = {
+    y: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' },
+    boxShadow: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' }
+  }
+
   if (preview) {
     return (
-      <motion.div
-        animate={floatAnimation}
-        transition={{
-          y: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' },
-          boxShadow: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' }
-        }}
-        style={orbStyle}
-      >
-        {auraRings}
-        {innerContent}
-      </motion.div>
+      <span style={wrapperStyle}>
+        {decorations}
+        <motion.div animate={floatAnimation} transition={floatTransition} style={orbStyle}>
+          {innerContent}
+        </motion.div>
+      </span>
     )
   }
 
   return (
-    <motion.button
-      id='study-pet-orb'
-      aria-label={t('agent.aria.openBuddy')}
-      onClick={onClick}
-      whileHover={{ scale: 1.12 }}
-      whileTap={{ scale: 0.95 }}
-      animate={floatAnimation}
-      transition={{
-        y: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' },
-        boxShadow: { repeat: Infinity, duration: config.pulseDuration, ease: 'easeInOut' }
-      }}
-      style={orbStyle}
-    >
-      {auraRings}
+    <span style={wrapperStyle}>
+      {decorations}
 
-      {innerContent}
+      <motion.button
+        id='study-pet-orb'
+        aria-label={t('agent.aria.openBuddy')}
+        onClick={onClick}
+        whileHover={{ scale: 1.12 }}
+        whileTap={{ scale: 0.95 }}
+        animate={floatAnimation}
+        transition={floatTransition}
+        style={orbStyle}
+      >
+        {innerContent}
+      </motion.button>
 
-      {/* Level badge */}
+      {/* Level badge — a sibling of the orb, not a child: the orb clips its
+          overflow to keep the portrait circular, which used to cut this off.
+          Anchored bottom-right because every stage mark occupies the top. */}
       <span
         style={{
           position: 'absolute',
-          top: -4,
+          bottom: -4,
           right: -4,
           background: activeColor,
           color: 'var(--joy-palette-common-white)',
@@ -317,12 +479,13 @@ export const PetOrb = ({
           borderRadius: 8,
           fontFamily: 'Inter, sans-serif',
           letterSpacing: '0.03em',
+          pointerEvents: 'none',
           zIndex: 3
         }}
       >
         Lv{level}
       </span>
-    </motion.button>
+    </span>
   )
 }
 
