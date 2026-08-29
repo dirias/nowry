@@ -6,9 +6,9 @@
  *   2. Evolution journey — every form, earned and still ahead.
  *   3. AI portrait / animation generation (Plus and Pro).
  *
- * Species is deliberately NOT here. It is an input to avatar generation, not
- * a user-facing choice — the emoji that used to represent it were a stand-in
- * for art the product now ships (see nowryArt.js).
+ * Species appears for paid tiers only, and only as an input to portrait
+ * generation — it is not the pet's face. Free users are with Nowry, who is an
+ * owl by definition, so the control would do nothing for them.
  *
  * All API calls are handled by the parent (AgentSettings) via callbacks.
  * This component is purely presentational.
@@ -96,9 +96,15 @@ const useGenerationStatus = (isGenerating, stages, expectedTotalSeconds) => {
 // Component
 // ---------------------------------------------------------------------------
 
+const SPECIES_SLUGS = ['owl', 'fox', 'cat', 'dragon', 'robot', 'star', 'phoenix', 'crystal', 'leaf', 'music']
+
 const CompanionTab = ({
   petName,
   setPetName,
+  petSpecies,
+  onSpeciesSelect,
+  suggestedSpecies,
+  hasSuggestion,
   onNameBlur,
   error,
   tier,
@@ -159,7 +165,69 @@ const CompanionTab = ({
 
       <Divider />
 
-      <Divider />
+      {/* ── Section: Species (paid only — a generation input) ───────────────
+          Species shapes the portrait the model draws; it is not the pet's
+          face. Free users are with Nowry, who is an owl by definition, so
+          the choice would do nothing for them and is hidden.
+
+          Deliberately labels rather than emoji: the old emoji grid implied
+          the glyph WAS the companion, which is exactly what the shipped
+          artwork replaced. */}
+      {tier !== 'free' && (
+        <>
+          <Box>
+            <Typography level='title-md' fontWeight={700} mb={0.5}>
+              {t('agent.companion.speciesTitle')}
+            </Typography>
+            <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 1.5 }}>
+              {t('agent.companion.speciesDescription')}
+            </Typography>
+            {hasSuggestion && petSpecies === suggestedSpecies && (
+              <Alert variant='soft' color='neutral' size='sm' sx={{ mb: 1.5 }}>
+                {t('agent.companion.suggestedLabel')}
+              </Alert>
+            )}
+            <Grid container spacing={1.5}>
+              {SPECIES_SLUGS.map((slug) => {
+                const selected = petSpecies === slug
+                return (
+                  <Grid key={slug} xs={6} sm={4} md={3}>
+                    <Card
+                      variant={selected ? 'solid' : 'outlined'}
+                      color={selected ? 'primary' : 'neutral'}
+                      onClick={() => onSpeciesSelect(slug)}
+                      role='radio'
+                      aria-checked={selected}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onSpeciesSelect(slug)
+                        }
+                      }}
+                      aria-label={t('agent.companion.species.' + slug)}
+                      sx={{
+                        cursor: 'pointer',
+                        transition: 'all 0.18s ease',
+                        alignItems: 'center',
+                        py: 1.25,
+                        userSelect: 'none',
+                        '&:hover': { transform: 'translateY(-2px)', boxShadow: 'md' }
+                      }}
+                    >
+                      <Typography level='body-sm' fontWeight={selected ? 'lg' : 'md'}>
+                        {t('agent.companion.species.' + slug)}
+                      </Typography>
+                    </Card>
+                  </Grid>
+                )
+              })}
+            </Grid>
+          </Box>
+
+          <Divider />
+        </>
+      )}
 
       {/* ── Section: AI Portrait ───────────────────────────────────────────── */}
       <Box>

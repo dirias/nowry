@@ -2949,7 +2949,7 @@
       "namePlaceholder": "e.g. Hoot, Nova, Spark...",
       "nameAriaLabel": "Name your companion",
       "speciesTitle": "Choose a species",
-      "speciesDescription": "Your companion's species shapes its personality.",
+      "speciesDescription": "Species guides the portrait we generate for your companion.",
       "suggestedLabel": "Suggested based on your interests",
       "colorTitle": "Accent color",
       "colorDescription": "Sets the glow color of your companion's orb.",

@@ -1727,7 +1727,7 @@
       "namePlaceholder": "例：フクロウ、ノヴァ、スパーク...",
       "nameAriaLabel": "コンパニオンの名前",
       "speciesTitle": "種族を選ぶ",
-      "speciesDescription": "コンパニオンの種族が個性を形作ります。",
+      "speciesDescription": "種族は、生成される相棒の姿を左右します。",
       "suggestedLabel": "興味に基づいた提案",
       "colorTitle": "アクセントカラー",
       "colorDescription": "コンパニオンのオーブの光の色を設定します。",

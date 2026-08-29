@@ -1056,6 +1056,10 @@ export default function AgentSettings() {
               <CompanionTab
                 petName={petName}
                 setPetName={setPetName}
+                petSpecies={petSpecies}
+                onSpeciesSelect={handleSpeciesSelect}
+                suggestedSpecies={suggestedSpecies}
+                hasSuggestion={hasSuggestion}
                 onNameBlur={handleNameBlur}
                 error={petError}
                 tier={tier}

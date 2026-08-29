@@ -1716,7 +1716,7 @@
       "namePlaceholder": "Ex. Hibou, Nova, Étincelle...",
       "nameAriaLabel": "Nommez votre compagnon",
       "speciesTitle": "Choisissez une espèce",
-      "speciesDescription": "L'espèce de votre compagnon façonne sa personnalité.",
+      "speciesDescription": "L'espèce oriente le portrait que nous générons pour votre compagnon.",
       "suggestedLabel": "Suggestion basée sur vos centres d'intérêt",
       "colorTitle": "Couleur d'accent",
       "colorDescription": "Définit la couleur du halo de l'orbe de votre compagnon.",

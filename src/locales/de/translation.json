@@ -1694,7 +1694,7 @@
       "namePlaceholder": "z.B. Eule, Nova, Funke...",
       "nameAriaLabel": "Name deines Begleiters",
       "speciesTitle": "Wähle eine Spezies",
-      "speciesDescription": "Die Spezies deines Begleiters prägt seine Persönlichkeit.",
+      "speciesDescription": "Die Art bestimmt, wie das generierte Porträt deines Begleiters aussieht.",
       "suggestedLabel": "Vorschlag basierend auf deinen Interessen",
       "colorTitle": "Akzentfarbe",
       "colorDescription": "Legt die Leuchtfarbe des Orbs deines Begleiters fest.",
