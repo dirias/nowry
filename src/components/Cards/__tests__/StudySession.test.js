@@ -68,6 +68,7 @@ const mockResetCompanionSession = jest.fn()
 const mockSetStudySession = jest.fn()
 const mockSetStudySessionFullscreen = jest.fn()
 const mockRevealPet = jest.fn()
+const mockAwardSessionXp = jest.fn()
 
 jest.mock('../../../context/AgentContext', () => ({
   usePet: () => ({
@@ -76,11 +77,12 @@ jest.mock('../../../context/AgentContext', () => ({
     resetCompanionSession: mockResetCompanionSession,
     setStudySession: mockSetStudySession,
     setStudySessionFullscreen: mockSetStudySessionFullscreen,
-    // Both are read by StudySession's session-complete effect; omitting them
-    // made every test that finishes a session die on `revealPet is not a
-    // function` before it could assert anything.
+    // All three are read by StudySession's session-complete effect; omitting
+    // any of them makes every test that finishes a session die on
+    // `<name> is not a function` before it can assert anything.
     revealPet: mockRevealPet,
-    hasBeenRevealed: false
+    hasBeenRevealed: false,
+    awardSessionXp: mockAwardSessionXp
   })
 }))
 
@@ -190,6 +192,7 @@ beforeEach(() => {
   mockSetStudySession.mockClear()
   mockSetStudySessionFullscreen.mockClear()
   mockRevealPet.mockClear()
+  mockAwardSessionXp.mockClear()
 })
 
 afterEach(() => {
@@ -369,6 +372,51 @@ describe('mode chip', () => {
 // are turned GREEN by 31-03 (StudySession.js) — see 31-01-PLAN.md for the
 // full spec this scaffold is authored against.
 // ---------------------------------------------------------------------------
+
+// PET-003. Session-completion XP and the once-per-day streak bonus were
+// implemented on the backend but had no caller at all, so neither was ever
+// awarded. These lock the wiring in place.
+describe('session completion XP', () => {
+  it('awards session XP with the graded card count and the deck studied', async () => {
+    const cards = [
+      { _id: 'x1', id: 'x1', title: 'XP 1', content: 'A' },
+      { _id: 'x2', id: 'x2', title: 'XP 2', content: 'B' }
+    ]
+    renderSession({ cards })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+
+    await screen.findByText('cards.session.complete.cardsReviewed')
+    expect(mockAwardSessionXp).toHaveBeenCalledWith(2, 'deck-1')
+  })
+
+  it('awards once per completed session, not once per graded card', async () => {
+    const cards = [
+      { _id: 'y1', id: 'y1', title: 'XP 1', content: 'A' },
+      { _id: 'y2', id: 'y2', title: 'XP 2', content: 'B' },
+      { _id: 'y3', id: 'y3', title: 'XP 3', content: 'C' }
+    ]
+    renderSession({ cards })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.again'))
+    fireEvent.click(await screen.findByText('cards.session.grading.hard'))
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+
+    await screen.findByText('cards.session.complete.cardsReviewed')
+    expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
+  })
+
+  it('awards nothing for a deck with no cards to study', async () => {
+    // An all-caught-up deck still reaches sessionComplete, so without the
+    // graded-cards guard a user could farm the daily bonus by repeatedly
+    // opening and closing an empty deck.
+    renderSession({ cards: [] })
+
+    await screen.findByText('cards.session.allCaughtUp')
+    expect(mockAwardSessionXp).not.toHaveBeenCalled()
+  })
+})
 
 // MODE-06 (D-05). Un-skipped by 31-03.
 // Today only 'again' grades increment wrongCountPerCardId; this proves 'hard'

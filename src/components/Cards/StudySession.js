@@ -321,7 +321,8 @@ export default function StudySession() {
     setStudySession,
     setStudySessionFullscreen,
     revealPet,
-    hasBeenRevealed
+    hasBeenRevealed,
+    awardSessionXp
   } = usePet()
 
   const buildStudyContext = React.useCallback(
@@ -561,6 +562,14 @@ export default function StudySession() {
       if (!hasBeenRevealed) {
         revealPet(gradedCards.current.length)
       }
+
+      // Session-completion XP + the once-per-day streak bonus. Guarded on
+      // actually-graded cards so an all-caught-up deck (which still lands here
+      // with sessionComplete=true) cannot farm the bonus by opening and
+      // closing. Fire-and-forget inside AgentContext — XP never gates the UI.
+      if (gradedCards.current.length > 0) {
+        awardSessionXp(gradedCards.current.length, deckId)
+      }
     }
 
     // LOG SESSION HISTORY — fire-and-forget, never blocks the UI
@@ -580,7 +589,7 @@ export default function StudySession() {
           // Non-fatal — history logging never interrupts the study experience
         })
     }
-  }, [sessionComplete, setViewContext, queueIntervention, visibleCards, deckId, mode, revealPet, hasBeenRevealed])
+  }, [sessionComplete, setViewContext, queueIntervention, visibleCards, deckId, mode, revealPet, hasBeenRevealed, awardSessionXp])
 
   const handleFlip = React.useCallback(() => {
     setIsFlipped((prev) => !prev)

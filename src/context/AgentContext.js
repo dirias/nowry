@@ -473,6 +473,37 @@ export const AgentProvider = ({ children }) => {
    * @param {string} message
    * @param {string|null} context - Overrides viewContext for this message only.
    */
+  /**
+   * Apply the level-up half of any XP-granting response.
+   *
+   * Every endpoint that grants XP (chat, session, streak) returns the same
+   * level_up/new_level/new_stage/avatar_regen_pending shape, so this stays the
+   * single place that decides what a level-up does to the UI.
+   *
+   * @param {{ level_up?: boolean, new_level?: number, new_stage?: number, avatar_regen_pending?: boolean }} response
+   */
+  const applyXpResult = useCallback(
+    (response) => {
+      if (!response?.level_up || !(response.new_level > 0) || !(response.new_stage > 0)) return
+
+      dispatch({ type: 'LEVEL_UP', payload: { newLevel: response.new_level, newStage: response.new_stage } })
+      if (!response.avatar_regen_pending) return
+
+      dispatch({ type: 'SET_AVATAR_REGEN_PENDING' })
+      if (avatarUrlRef.current) {
+        // User already has a portrait — silently regenerate for the new evolution stage
+        generateAvatar('evolution')
+      }
+      // No existing portrait → user still needs to generate their first one manually
+      dispatch({ type: 'SET_ANIMATION_REGEN_PENDING' })
+      if (animationUrlRef.current) {
+        // User already has an animation — silently regenerate for the new evolution stage
+        generateAnimation('evolution')
+      }
+    },
+    [generateAnimation, generateAvatar]
+  )
+
   const sendMessage = useCallback(
     async (message, context = null) => {
       if (!message.trim()) return
@@ -485,28 +516,50 @@ export const AgentProvider = ({ children }) => {
       try {
         const response = await agentService.chat(message, historyRef.current, effectiveContext, i18n.language)
         dispatch({ type: 'AGENT_REPLY', payload: response })
-        if (response.level_up && response.new_level > 0 && response.new_stage > 0) {
-          dispatch({ type: 'LEVEL_UP', payload: { newLevel: response.new_level, newStage: response.new_stage } })
-          if (response.avatar_regen_pending) {
-            dispatch({ type: 'SET_AVATAR_REGEN_PENDING' })
-            if (avatarUrlRef.current) {
-              // User already has a portrait — silently regenerate for the new evolution stage
-              generateAvatar('evolution')
-            }
-            // No existing portrait → user still needs to generate their first one manually
-            dispatch({ type: 'SET_ANIMATION_REGEN_PENDING' })
-            if (animationUrlRef.current) {
-              // User already has an animation — silently regenerate for the new evolution stage
-              generateAnimation('evolution')
-            }
-          }
-        }
+        applyXpResult(response)
       } catch (err) {
         const detail = err?.response?.data?.detail || 'agent.errors.resting'
         dispatch({ type: 'REPLY_ERROR', payload: detail })
       }
     },
-    [generateAnimation, generateAvatar, i18n.language]
+    [applyXpResult, i18n.language]
+  )
+
+  /**
+   * Award end-of-session XP plus the once-per-day streak bonus.
+   *
+   * Both are fire-and-forget: XP is a reward, never a gate, so a failure here
+   * must never surface an error over the user's session summary. The streak
+   * call is idempotent server-side (one award per calendar day), which is why
+   * it can safely ride along on every completed session rather than needing
+   * its own "first activity today" tracking on the client.
+   *
+   * @param {number} cardsReviewed - Cards graded this session.
+   * @param {string} deckId - The deck studied, or 'daily-review'.
+   */
+  const awardSessionXp = useCallback(
+    async (cardsReviewed, deckId) => {
+      // Reject rather than round up: a zero-card session must not earn the
+      // daily bonus. Clamp only the upper bound, which the backend caps at 500.
+      const cards = Math.floor(cardsReviewed)
+      if (!Number.isFinite(cards) || cards < 1 || !deckId) return
+
+      const results = await Promise.allSettled([agentService.awardSessionXp(Math.min(500, cards), deckId), agentService.awardStreakXp()])
+      const granted = results.filter((result) => result.status === 'fulfilled').map((result) => result.value)
+
+      // Both grants can report a level-up, and they resolve in either order.
+      // Applying each in turn would let the lower level win and show a stale
+      // number, so collapse to the highest — that's the true final state.
+      const highest = granted.reduce((best, current) => (!best || current?.new_level > best.new_level ? current : best), null)
+      if (!highest) return
+
+      applyXpResult({
+        ...highest,
+        level_up: granted.some((result) => result.level_up),
+        avatar_regen_pending: granted.some((result) => result.avatar_regen_pending)
+      })
+    },
+    [applyXpResult]
   )
 
   /**
@@ -691,6 +744,7 @@ export const AgentProvider = ({ children }) => {
         updateAgentPrefs,
         updatePetCustomization,
         levelUpClear,
+        awardSessionXp,
         setPetActive,
         revealPet,
         petRevealClear,

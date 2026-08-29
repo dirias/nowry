@@ -121,5 +121,30 @@ export const agentService = {
   revealPet: async () => {
     const { data } = await apiClient.post('/agent/pet/reveal')
     return data
+  },
+
+  /**
+   * Award XP for completing a study session.
+   * @param {number} cardsReviewed - Cards graded this session. Backend accepts 1–500.
+   * @param {string} deckId - The deck studied, or 'daily-review'.
+   * @returns {Promise<{ xp_awarded: number, level_up: boolean, new_level: number, new_stage: number }>}
+   */
+  awardSessionXp: async (cardsReviewed, deckId) => {
+    const { data } = await apiClient.post('/agent/xp/session', {
+      cards_reviewed: cardsReviewed,
+      deck_id: deckId
+    })
+    return data
+  },
+
+  /**
+   * Award the once-per-day streak bonus. Idempotent — the backend records the
+   * award date and returns `xp_awarded: 0` for any later call the same day, so
+   * this is safe to fire on every completed session.
+   * @returns {Promise<{ xp_awarded: number, level_up: boolean, new_level: number, new_stage: number }>}
+   */
+  awardStreakXp: async () => {
+    const { data } = await apiClient.post('/agent/xp/streak')
+    return data
   }
 }
