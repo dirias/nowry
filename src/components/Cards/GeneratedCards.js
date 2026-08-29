@@ -401,6 +401,7 @@ export default function GeneratedCards({
                         setEditing(null)
                       }}
                       onRestore={() => curation.setKept(entry.id, true)}
+                      onRevert={() => curation.revert(entry.id)}
                     />
                   ))}
 

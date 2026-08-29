@@ -266,6 +266,38 @@ describe('editing a card in place', () => {
   })
 })
 
+describe('marking an edited card', () => {
+  const openFirstEditor = () => fireEvent.click(screen.getAllByLabelText('cards.generatedCards.editCardAria')[0])
+
+  it('marks the card, and reverting restores the generated text', async () => {
+    await renderModal()
+    expect(screen.queryByText('cards.generatedCards.editedBadge')).not.toBeInTheDocument()
+
+    openFirstEditor()
+    fireEvent.change(screen.getByLabelText('cards.flashcard.backLabel'), { target: { value: 'rewritten' } })
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+
+    expect(screen.getByText('cards.generatedCards.editedBadge')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.revertCardAria' }))
+
+    expect(screen.queryByText('cards.generatedCards.editedBadge')).not.toBeInTheDocument()
+    expect(screen.getByText(CARDS[0].content)).toBeInTheDocument()
+  })
+
+  it('drops the marking when the card is typed back to the generated wording', async () => {
+    await renderModal()
+    openFirstEditor()
+
+    const back = () => screen.getByLabelText('cards.flashcard.backLabel')
+    fireEvent.change(back(), { target: { value: 'rewritten' } })
+    fireEvent.change(back(), { target: { value: CARDS[0].content } })
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+
+    expect(screen.queryByText('cards.generatedCards.editedBadge')).not.toBeInTheDocument()
+  })
+})
+
 describe('the create-deck name pre-fill', () => {
   it('prefers an explicit default over the source book title', async () => {
     await renderModal({ book: { title: 'Campbell Biology' }, newDeckNameDefault: 'Science' })

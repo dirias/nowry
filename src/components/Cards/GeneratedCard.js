@@ -1,9 +1,10 @@
 import React from 'react'
-import { Box, Button, Card, CardContent, CardOverflow, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/joy'
+import { Box, Button, Card, CardContent, CardOverflow, Chip, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/joy'
 import { BookOpen, Pencil, RotateCcw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import GeneratedCardEditor from './GeneratedCardEditor'
+import { isEdited } from '../../hooks/useCardCuration'
 import { focusRing, oneLine } from '../Common/Form/formStyles'
 
 /**
@@ -90,9 +91,11 @@ export default function GeneratedCard({
   onDoneEditing,
   onCancelEditing,
   onDiscard,
-  onRestore
+  onRestore,
+  onRevert
 }) {
   const { t } = useTranslation()
+  const edited = isEdited(entry)
 
   if (!entry.kept) return <DiscardedStrip entry={entry} onRestore={onRestore} />
 
@@ -193,6 +196,26 @@ export default function GeneratedCard({
           {entry.content}
         </Typography>
       </CardContent>
+
+      {/* Visible reversibility is what makes people willing to edit an AI result
+          at all: without it, changing a generated card feels like destroying it. */}
+      {edited && (
+        <Stack direction='row' spacing={1} alignItems='center' sx={{ px: 2, pb: 1.5 }}>
+          <Chip size='sm' variant='soft' color='primary'>
+            {t('cards.generatedCards.editedBadge')}
+          </Chip>
+          <Button
+            size='sm'
+            variant='plain'
+            color='neutral'
+            onClick={onRevert}
+            aria-label={t('cards.generatedCards.revertCardAria', { title: entry.original.title })}
+            sx={focusRing}
+          >
+            {t('cards.generatedCards.revertCard')}
+          </Button>
+        </Stack>
+      )}
     </Card>
   )
 }

@@ -13,7 +13,7 @@
  */
 import { act, renderHook } from '@testing-library/react'
 
-import useCardCuration, { entryFrom, syncEntries } from './useCardCuration'
+import useCardCuration, { entryFrom, isEdited, syncEntries } from './useCardCuration'
 
 const card = (title) => ({ title, content: `${title} — back` })
 
@@ -102,6 +102,23 @@ describe('syncEntries — append vs reset', () => {
   })
 })
 
+describe('isEdited — derived, never a flag', () => {
+  const entry = () => syncEntries(EMPTY, [A]).entries[0]
+
+  it('is false for an untouched card and true once either half changes', () => {
+    expect(isEdited(entry())).toBe(false)
+    expect(isEdited({ ...entry(), title: 'Meiosis' })).toBe(true)
+    expect(isEdited({ ...entry(), content: 'something else' })).toBe(true)
+  })
+
+  it('clears itself when the card is typed back to the generated wording', () => {
+    // The reason this is a comparison and not a `wasEdited` flag: a flag would
+    // stay raised here and offer a revert that does nothing.
+    const edited = { ...entry(), content: 'something else' }
+    expect(isEdited({ ...edited, content: A.content })).toBe(false)
+  })
+})
+
 describe('useCardCuration', () => {
   it('opens with every card kept', () => {
     const { result } = renderHook(() => useCardCuration([A, B]))
@@ -131,6 +148,30 @@ describe('useCardCuration', () => {
 
     act(() => result.current.toggleAllKept())
     expect(result.current.keptCount).toBe(2)
+  })
+
+  it('reverts a card to exactly what the generator produced', () => {
+    const { result } = renderHook(() => useCardCuration([A, B]))
+    const { id } = result.current.entries[0]
+
+    act(() => result.current.setField(id, 'content', 'rewritten'))
+    expect(isEdited(result.current.entries[0])).toBe(true)
+
+    act(() => result.current.revert(id))
+    expect(result.current.entries[0]).toMatchObject({ title: A.title, content: A.content })
+    expect(isEdited(result.current.entries[0])).toBe(false)
+  })
+
+  it('keeps an edit through a discard and a restore', () => {
+    const { result } = renderHook(() => useCardCuration([A, B]))
+    const { id } = result.current.entries[0]
+
+    act(() => result.current.setField(id, 'content', 'rewritten'))
+    act(() => result.current.setKept(id, false))
+    act(() => result.current.setKept(id, true))
+
+    expect(result.current.entries[0].content).toBe('rewritten')
+    expect(isEdited(result.current.entries[0])).toBe(true)
   })
 
   it('carries curation across a re-render with an equivalent array', () => {

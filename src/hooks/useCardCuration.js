@@ -52,6 +52,16 @@ export const entryFrom = (card, id) => {
   return { id, ...fields, original: fields, kept: true }
 }
 
+/**
+ * Whether the user has changed this card since it was generated (CURATE-004).
+ *
+ * Derived by comparison, never stored as a "was edited" flag. A flag would stay
+ * raised after the user typed a card back to its generated wording by hand, and
+ * would then offer a revert that does nothing — the marking has to be able to
+ * clear itself.
+ */
+export const isEdited = (entry) => entry.title !== entry.original.title || entry.content !== entry.original.content
+
 /** Whether `next` extends `prev` rather than replacing it. */
 const isAppendOf = (prev, next) => next.length >= prev.length && prev.every((card, i) => card === next[i])
 
@@ -125,6 +135,19 @@ export default function useCardCuration(cards) {
     }))
   }, [])
 
+  /**
+   * Put a card back to exactly what the generator produced (CURATE-004).
+   *
+   * `original` is written once, when the entry is created, so this stays
+   * available for as long as the dialog is open — no regeneration, no network.
+   */
+  const revert = useCallback((id) => {
+    setState((prev) => ({
+      ...prev,
+      entries: prev.entries.map((entry) => (entry.id === id ? { ...entry, ...entry.original } : entry))
+    }))
+  }, [])
+
   /** Both fields at once — how cancelling an edit puts the card back. */
   const setFields = useCallback((id, fields) => {
     setState((prev) => ({
@@ -143,6 +166,7 @@ export default function useCardCuration(cards) {
     setKept,
     setField,
     setFields,
+    revert,
     /**
      * One control, two directions: it discards everything while anything is
      * kept, and restores everything once nothing is. A separate "restore all"
