@@ -324,8 +324,13 @@ export default function AgentSettings() {
   const [agentLevel, setAgentLevel] = useState(1)
   const [messagesUsed, setMessagesUsed] = useState(0)
   const [messagesLimit, setMessagesLimit] = useState(50)
-  const [currentXp, setCurrentXp] = useState(0)
   const [xpForNextLevel, setXpForNextLevel] = useState(50)
+  // 0–1 toward the next level, from the server. The bar previously derived
+  // its own percentage as current_xp / (current_xp + xp_for_next_level), which
+  // measures against TOTAL xp rather than the current level's span — so it sat
+  // near-full at every level (80% at the exact moment level 3 begins) and
+  // barely moved. See _level_progress() in agent.py.
+  const [levelProgress, setLevelProgress] = useState(0)
 
   // PersonalityGenerationCounter state
   const [generationsUsed, setGenerationsUsed] = useState(0)
@@ -373,8 +378,8 @@ export default function AgentSettings() {
         setAgentLevel(state.level)
         setMessagesUsed(state.messages_used)
         setMessagesLimit(state.messages_limit)
-        setCurrentXp(state.current_xp ?? 0)
         setXpForNextLevel(state.xp_for_next_level ?? 50)
+        setLevelProgress(state.level_progress ?? 0)
         // Load personality generation counter
         setGenerationsUsed(state.personality_generations_used || 0)
         setGenerationsLimit(state.personality_generation_limit || (effectiveTier === 'pro' ? 3 : 1))
@@ -639,7 +644,7 @@ export default function AgentSettings() {
             <Box
               sx={{
                 height: '100%',
-                width: `${Math.min(100, Math.round((currentXp / (currentXp + xpForNextLevel)) * 100))}%`,
+                width: `${Math.min(100, Math.max(0, Math.round(levelProgress * 100)))}%`,
                 bgcolor: 'primary.solidBg',
                 borderRadius: 2,
                 transition: 'width 0.6s ease'
