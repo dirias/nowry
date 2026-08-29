@@ -508,9 +508,15 @@ export const AgentProvider = ({ children }) => {
    * single place that decides what a level-up does to the UI.
    *
    * @param {{ level_up?: boolean, new_level?: number, new_stage?: number, avatar_regen_pending?: boolean }} response
+   * @param {{ defer?: boolean }} [options] - Force deferral on or off. Defaults
+   *   to deferring whenever a study session is mounted. End-of-session grants
+   *   must pass `defer: false`: `isInStudySession` stays true until the
+   *   component unmounts, so the summary screen is still "in session" and a
+   *   deferred level-up there would be banked after the flush already ran, and
+   *   never shown.
    */
   const applyXpResult = useCallback(
-    (response) => {
+    (response, options = {}) => {
       if (!response) return
 
       // Progress first, and unconditionally: the ring should advance on every
@@ -532,9 +538,10 @@ export const AgentProvider = ({ children }) => {
 
       // Bank the celebration while the user is mid-session; StudySession
       // flushes it once they reach the summary.
+      const defer = options.defer ?? stateRef.current.isInStudySession
       dispatch({
         type: 'LEVEL_UP',
-        payload: { newLevel: response.new_level, newStage: response.new_stage, defer: stateRef.current.isInStudySession }
+        payload: { newLevel: response.new_level, newStage: response.new_stage, defer }
       })
       if (!response.avatar_regen_pending) return
 
@@ -602,11 +609,19 @@ export const AgentProvider = ({ children }) => {
       const highest = granted.reduce((best, current) => (!best || current?.new_level > best.new_level ? current : best), null)
       if (!highest) return
 
-      applyXpResult({
-        ...highest,
-        level_up: granted.some((result) => result.level_up),
-        avatar_regen_pending: granted.some((result) => result.avatar_regen_pending)
-      })
+      // defer:false is essential here. This resolves *after* StudySession has
+      // already called flushPendingLevelUp(), and isInStudySession is still
+      // true on the summary screen (it only clears on unmount) — so deferring
+      // would bank this level-up behind a flush that has already run and the
+      // celebration would never appear.
+      applyXpResult(
+        {
+          ...highest,
+          level_up: granted.some((result) => result.level_up),
+          avatar_regen_pending: granted.some((result) => result.avatar_regen_pending)
+        },
+        { defer: false }
+      )
     },
     [applyXpResult]
   )

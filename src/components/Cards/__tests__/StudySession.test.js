@@ -455,6 +455,47 @@ describe('session completion XP', () => {
     expect(mockApplyReviewXp).not.toHaveBeenCalled()
   })
 
+  // Regression guard, found by driving a real session in the browser: one
+  // 29-card session credited the +15 session bonus twice. The effect's
+  // `!sessionComplete` guard does not make its side effects one-shot, because
+  // `visibleCards` is in the dependency list — any change to that array's
+  // identity after completion re-runs the whole block.
+  it('awards the session bonus once even if the effect re-runs after completion', async () => {
+    const cards = [
+      { _id: 'z1', id: 'z1', title: 'Once 1', content: 'A' },
+      { _id: 'z2', id: 'z2', title: 'Once 2', content: 'B' }
+    ]
+    // The real trigger is the background review sync: handleGrade awaits
+    // cardsService.review and then calls setCards(syncedCards). On the LAST
+    // card that resolves after sessionComplete flips, giving `cards` — and so
+    // `visibleCards` — a new identity, which re-runs the effect.
+    let releaseLastReview
+    const lastReview = new Promise((resolve) => {
+      releaseLastReview = () =>
+        resolve({
+          sm2_data: { last_reviewed: 'x', next_review: 'y', ease_factor: 2.5, interval: 1, repetitions: 1 },
+          xp: { xp_awarded: 2, level_up: false, new_level: 3, new_stage: 2, current_xp: 120, xp_for_next_level: 30, level_progress: 0.4 }
+        })
+    })
+    renderSession({ cards })
+    cardsService.review.mockReturnValueOnce(Promise.resolve({})).mockReturnValueOnce(lastReview)
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    await screen.findByText('cards.session.complete.cardsReviewed')
+
+    expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
+
+    // Now let the last review land, mutating cards after completion.
+    await act(async () => {
+      releaseLastReview()
+      await lastReview
+    })
+
+    expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
+    expect(mockRevealPet).toHaveBeenCalledTimes(1)
+  })
+
   it('awards nothing for a deck with no cards to study', async () => {
     // An all-caught-up deck still reaches sessionComplete, so without the
     // graded-cards guard a user could farm the daily bonus by repeatedly

@@ -437,6 +437,9 @@ export default function StudySession() {
   // Session history tracking
   const sessionStartTime = useRef(new Date())
   const gradedCards = useRef([]) // accumulates { cardId, cardTitle, grade, evaluation } per card
+  // Guards the session-complete block against re-running when visibleCards'
+  // identity changes after completion. See that effect for the full reasoning.
+  const sessionCompleteHandledRef = useRef(false)
 
   // Swipe state
   const touchStart = useRef(null)
@@ -563,8 +566,23 @@ export default function StudySession() {
 
   // Clear pet context when session is complete + fire session_summary intervention
   useEffect(() => {
-    if (!sessionComplete) return
+    if (!sessionComplete) {
+      sessionCompleteHandledRef.current = false
+      return
+    }
     setViewContext(null)
+
+    // Everything below is a one-shot side effect: XP award, the session_summary
+    // nudge, the first-reveal, history logging. The `!sessionComplete` guard
+    // alone does not make them one-shot — `visibleCards` is in this effect's
+    // dependency list, so any change to that array's identity AFTER completion
+    // re-runs the whole block. That was already double-firing the summary nudge
+    // and reveal; once PET-003 added the XP grant it started handing out a
+    // second session bonus too (observed live: one 29-card session credited
+    // +15 twice). The ref makes the block fire exactly once per session and
+    // resets when a new one begins.
+    if (sessionCompleteHandledRef.current) return
+    sessionCompleteHandledRef.current = true
 
     const wrongCounts = wrongCountPerCardId.current
     const againCounts = againCountPerCardId.current

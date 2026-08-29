@@ -27,7 +27,9 @@ jest.mock('../../api/services/agent.service', () => ({
   agentService: {
     getState: jest.fn(),
     getNudge: jest.fn(),
-    chat: jest.fn()
+    chat: jest.fn(),
+    awardSessionXp: jest.fn(),
+    awardStreakXp: jest.fn()
   }
 }))
 
@@ -172,5 +174,90 @@ describe('INIT does not clobber study-session flags (WR-01 regression)', () => {
     })
 
     expect(capturedCtx.isStudySessionFullscreen).toBe(true)
+  })
+})
+
+describe('level-up deferral (PET-004)', () => {
+  const renderCtx = () => {
+    let ctx
+    render(
+      <AgentProvider>
+        <TestConsumer
+          onRender={(c) => {
+            ctx = c
+          }}
+        />
+      </AgentProvider>
+    )
+    return () => ctx
+  }
+
+  const grant = (over = {}) => ({
+    xp_awarded: 2,
+    level_up: true,
+    new_level: 4,
+    new_stage: 2,
+    current_xp: 225,
+    xp_for_next_level: 175,
+    level_progress: 0,
+    ...over
+  })
+
+  test('a mid-session level-up is banked, not shown', async () => {
+    const get = renderCtx()
+    await act(async () => get().setStudySession(true))
+    await act(async () => get().applyReviewXp(grant()))
+
+    expect(get().justLeveledUp).toBe(false)
+    // The pet still advances immediately, so it looks evolved when the
+    // celebration finally plays.
+    expect(get().level).toBe(4)
+    expect(get().stage).toBe(2)
+  })
+
+  test('flushing releases the banked level-up', async () => {
+    const get = renderCtx()
+    await act(async () => get().setStudySession(true))
+    await act(async () => get().applyReviewXp(grant()))
+    await act(async () => get().flushPendingLevelUp())
+
+    expect(get().justLeveledUp).toBe(true)
+    expect(get().levelUpData).toEqual({ newLevel: 4, newStage: 2 })
+  })
+
+  test('outside a session a level-up shows immediately', async () => {
+    const get = renderCtx()
+    await act(async () => get().applyReviewXp(grant()))
+    expect(get().justLeveledUp).toBe(true)
+  })
+
+  // Regression guard. isInStudySession only clears on StudySession's UNMOUNT,
+  // so the summary screen is still "in session". awardSessionXp resolves after
+  // StudySession has already called flushPendingLevelUp() — deferring there
+  // would bank the level-up behind a flush that already ran, and the
+  // celebration would never appear at all.
+  test('an end-of-session level-up shows even though the session is still mounted', async () => {
+    agentService.awardSessionXp.mockResolvedValue(grant({ xp_awarded: 15 }))
+    agentService.awardStreakXp.mockResolvedValue(grant({ xp_awarded: 15 }))
+
+    const get = renderCtx()
+    await act(async () => get().setStudySession(true))
+    // Mirrors StudySession's real ordering: flush first, grants resolve after.
+    await act(async () => get().flushPendingLevelUp())
+    await act(async () => {
+      await get().awardSessionXp(10, 'deck-1')
+    })
+
+    expect(get().justLeveledUp).toBe(true)
+    expect(get().levelUpData).toEqual({ newLevel: 4, newStage: 2 })
+  })
+
+  test('progress advances on a grant that crosses no level', async () => {
+    const get = renderCtx()
+    await act(async () => get().applyReviewXp(grant({ level_up: false, current_xp: 155, level_progress: 0.44 })))
+
+    expect(get().justLeveledUp).toBe(false)
+    expect(get().xp).toBe(155)
+    expect(get().levelProgress).toBe(0.44)
   })
 })
