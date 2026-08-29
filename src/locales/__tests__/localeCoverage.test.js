@@ -114,9 +114,10 @@ const XP_GAINED = ['cards.session.xpGained_one', 'cards.session.xpGained_other']
 
 const IDENTICAL_BY_DESIGN = {
   es: [...XP_GAINED],
-  // "Business" and "Design" are the words French and German actually use.
-  fr: ['taxonomy.topics.business', 'taxonomy.topics.design', ...XP_GAINED],
-  de: ['taxonomy.topics.design', ...XP_GAINED],
+  // "Business" and "Design" are the words French and German actually use — in
+  // the taxonomy chip and in the news-category chip that renders the same word.
+  fr: ['taxonomy.topics.business', 'taxonomy.topics.design', 'news.categories.design', ...XP_GAINED],
+  de: ['taxonomy.topics.design', 'news.categories.design', ...XP_GAINED],
   ja: ['cards.session.xpGained_other']
 }
 

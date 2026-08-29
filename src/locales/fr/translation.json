@@ -31,13 +31,25 @@
       "health": "Santé",
       "entertainment": "Divertissement",
       "politics": "Politique",
-      "sports": "Sports"
+      "sports": "Sports",
+      "mathematics": "Mathématiques",
+      "history": "Histoire",
+      "languages": "Langues",
+      "philosophy": "Philosophie",
+      "design": "Design",
+      "psychology": "Psychologie"
     },
     "favorites": "Favoris",
     "noFavorites": "Aucun favori pour l'instant",
     "noFavoritesHint": "Cliquez sur l'étoile d'un article pour l'ajouter à vos favoris.",
     "adjustInterests": "Ajustez vos intérêts dans les paramètres pour voir des actualités personnalisées.",
-    "setInterests": "Définissez vos intérêts dans les paramètres pour voir des articles personnalisés."
+    "setInterests": "Définissez vos intérêts dans les paramètres pour voir des articles personnalisés.",
+    "loadError": "Impossible de charger les actualités",
+    "loadErrorHint": "Le service d'actualités ne répond pas pour le moment. Réessayez dans un instant.",
+    "previousArticle": "Article précédent",
+    "nextArticle": "Article suivant",
+    "addFavorite": "Ajouter aux favoris",
+    "removeFavorite": "Retirer des favoris"
   },
   "header": {
     "study": "Études",

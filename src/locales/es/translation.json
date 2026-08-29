@@ -31,13 +31,25 @@
       "health": "Salud",
       "entertainment": "Entretenimiento",
       "politics": "Política",
-      "sports": "Deportes"
+      "sports": "Deportes",
+      "mathematics": "Matemáticas",
+      "history": "Historia",
+      "languages": "Idiomas",
+      "philosophy": "Filosofía",
+      "design": "Diseño",
+      "psychology": "Psicología"
     },
     "favorites": "Favoritos",
     "noFavorites": "Sin favoritos aún",
     "noFavoritesHint": "Haz clic en el ícono de estrella de cualquier artículo para agregarlo a tus favoritos.",
     "adjustInterests": "Ajusta tus intereses en Configuración para ver noticias personalizadas.",
-    "setInterests": "Establece tus intereses en Configuración para ver artículos personalizados."
+    "setInterests": "Establece tus intereses en Configuración para ver artículos personalizados.",
+    "loadError": "No se pudieron cargar las noticias",
+    "loadErrorHint": "El servicio de noticias no responde en este momento. Inténtalo de nuevo en unos instantes.",
+    "previousArticle": "Artículo anterior",
+    "nextArticle": "Artículo siguiente",
+    "addFavorite": "Añadir a favoritos",
+    "removeFavorite": "Quitar de favoritos"
   },
   "header": {
     "study": "Estudio",

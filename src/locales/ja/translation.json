@@ -31,13 +31,25 @@
       "health": "健康",
       "entertainment": "エンターテイメント",
       "politics": "政治",
-      "sports": "スポーツ"
+      "sports": "スポーツ",
+      "mathematics": "数学",
+      "history": "歴史",
+      "languages": "語学",
+      "philosophy": "哲学",
+      "design": "デザイン",
+      "psychology": "心理学"
     },
     "favorites": "お気に入り",
     "noFavorites": "まだお気に入りがありません",
     "noFavoritesHint": "記事の星アイコンをクリックするとお気に入りに追加できます。",
     "adjustInterests": "設定で興味を調整して、パーソナライズされたニュースを表示してください。",
-    "setInterests": "設定で興味を登録して、パーソナライズされた記事を表示してください。"
+    "setInterests": "設定で興味を登録して、パーソナライズされた記事を表示してください。",
+    "loadError": "ニュースを読み込めませんでした",
+    "loadErrorHint": "ニュースサービスが応答していません。しばらくしてからもう一度お試しください。",
+    "previousArticle": "前の記事",
+    "nextArticle": "次の記事",
+    "addFavorite": "お気に入りに追加",
+    "removeFavorite": "お気に入りから削除"
   },
   "header": {
     "study": "学習",

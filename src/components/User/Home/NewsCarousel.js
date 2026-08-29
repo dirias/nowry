@@ -1,29 +1,49 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { apiClient } from '../../../api/client'
-import { Card, CardContent, Typography, AspectRatio, Box, Chip, IconButton, Skeleton, Stack, Tabs, TabList, Tab, TabPanel } from '@mui/joy'
+import React, { useEffect, useState } from 'react'
+import {
+  Card,
+  CardContent,
+  Typography,
+  AspectRatio,
+  Box,
+  Chip,
+  IconButton,
+  Skeleton,
+  Stack,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  Button
+} from '@mui/joy'
 import { useKeenSlider } from 'keen-slider/react'
-import { ArrowBackIosNew, ArrowForwardIos, TrendingUp, OpenInNew, Star, StarBorder } from '@mui/icons-material'
+import { ArrowBackIosNew, ArrowForwardIos, TrendingUp, OpenInNew, Star, StarBorder, Refresh, ErrorOutline } from '@mui/icons-material'
 import { userService } from '../../../api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
-import { getNewsCategory, DEFAULT_NEWS_CATEGORY } from '../../../constants/learningTaxonomy'
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
-
 import { useAuth } from '../../../context/AuthContext'
+import { useNews } from '../../../hooks/useNews'
 
 export default function NewsCarousel() {
   const { t } = useTranslation()
-  const [news, setNews] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [activeCategory, setActiveCategory] = useState('general')
+  const { user } = useAuth()
+
+  // Read language/interests straight off the auth user rather than mirroring
+  // them into local state first. The old mirror meant one render pass where
+  // preferences were "not loaded yet", during which a throwaway `general`
+  // request was fired that could land after — and overwrite — the real one.
+  const preferences = user?.preferences?.general
+  const { articles: news, loading, error, refetch } = useNews(preferences?.language, preferences?.interests)
+
   const [currentSlide, setCurrentSlide] = useState(0)
 
-  const { user } = useAuth()
-  const [userPreferences, setUserPreferences] = useState(null)
+  // Favourites stay in local state so a star toggle can render optimistically.
+  // AuthContext does not re-fetch /users/me after the PATCH, so this remains
+  // authoritative until the next profile load replaces it.
+  const [favoriteNews, setFavoriteNews] = useState(preferences?.favorite_news ?? [])
+  useEffect(() => {
+    setFavoriteNews(preferences?.favorite_news ?? [])
+  }, [preferences?.favorite_news])
 
-  // Get favorite articles from user preferences (not filtered from news)
-  const favoriteNews = userPreferences?.favorite_news || []
   const favoriteUrls = favoriteNews.map((article) => article.url)
 
   // Filter regular news (exclude favorited ones)
@@ -32,8 +52,8 @@ export default function NewsCarousel() {
   // Toggle favorite - persist full article to user preferences
   const toggleFavorite = async (article) => {
     const isFavorite = favoriteUrls.includes(article.url)
-    // Snapshot current prefs for rollback on error
-    const prevPreferences = userPreferences
+    // Snapshot for rollback on error
+    const previousFavorites = favoriteNews
 
     const newFavoriteNews = isFavorite
       ? favoriteNews.filter((fav) => fav.url !== article.url)
@@ -49,19 +69,16 @@ export default function NewsCarousel() {
         ]
 
     // Optimistic update for immediate UI feedback
-    setUserPreferences((prev) => ({
-      ...prev,
-      favorite_news: newFavoriteNews
-    }))
+    setFavoriteNews(newFavoriteNews)
 
     try {
       await userService.updateGeneralPreferences({
         favorite_news: newFavoriteNews
       })
-    } catch (error) {
-      console.error('Failed to update favorite:', error)
+    } catch (err) {
+      console.error('Failed to update favorite:', err)
       // Revert optimistic update on error
-      setUserPreferences(prevPreferences)
+      setFavoriteNews(previousFavorites)
     }
   }
 
@@ -102,15 +119,16 @@ export default function NewsCarousel() {
     }
   })
 
-  const fetchedRef = React.useRef(false)
-
-  // Update slider when news changes
+  // Re-sync the slider when the rendered slide count changes. Keyed on the
+  // length rather than the array, because `regularNews` is derived and so is a
+  // fresh reference on every render — using it directly would re-run this on
+  // each render and fight with `slideChanged`'s setState.
+  const regularNewsCount = regularNews.length
   useEffect(() => {
-    // ... (keep existing slider update logic) ...
-    if (instanceRef.current && news.length > 0) {
+    if (instanceRef.current && regularNewsCount > 0) {
       setTimeout(() => {
         instanceRef.current?.update({
-          loop: news.length > 3,
+          loop: regularNewsCount > 3,
           slides: {
             perView: 'auto',
             spacing: 16
@@ -126,112 +144,7 @@ export default function NewsCarousel() {
         })
       }, 100)
     }
-  }, [news, instanceRef])
-
-  // Refs that track the last-synced language and interests so we can detect
-  // real feed-affecting changes without comparing the entire preferences object
-  // (which would include favorite_news and incorrectly trigger a cache flush).
-  const lastLangRef = useRef(null)
-  const lastInterestsRef = useRef(null)
-
-  // Sync preferences from AuthContext and selectively clear the news cache
-  // only when the fields that affect the feed (language, interests) change.
-  useEffect(() => {
-    if (!user?.preferences?.general) return
-
-    const general = user.preferences.general
-    const newLang = general.language ?? null
-    const newInterests = JSON.stringify(general.interests ?? [])
-
-    const feedChanged =
-      lastLangRef.current !== null && // skip on first mount
-      (lastLangRef.current !== newLang || lastInterestsRef.current !== newInterests)
-
-    if (feedChanged) {
-      // Fire-and-forget: failure is non-critical; the cache will expire naturally
-      apiClient.delete('/news/cache/clear').catch(() => {})
-    }
-
-    lastLangRef.current = newLang
-    lastInterestsRef.current = newInterests
-
-    setUserPreferences(general)
-  }, [user])
-
-  // Reset fetch ref when preferences change to allow re-fetching
-  const prefInterests = JSON.stringify(userPreferences?.interests)
-  useEffect(() => {
-    fetchedRef.current = false
-  }, [userPreferences?.language, prefInterests])
-
-  // Fetch news from backend
-  useEffect(() => {
-    const fetchNews = async () => {
-      // Prevent double fetching in StrictMode
-      if (fetchedRef.current) return
-      fetchedRef.current = true
-
-      try {
-        setLoading(true)
-
-        // Get user language and categories
-        const userLang = userPreferences?.language || 'en'
-        const userInterests = userPreferences?.interests || []
-
-        // Get ALL categories from ALL interests
-        // Several topics share a feed (AI and technology both map to 'technology'),
-        // so dedupe to avoid firing the same request twice.
-        const categories = [...new Set(userInterests.map(getNewsCategory))].filter((cat) => cat !== DEFAULT_NEWS_CATEGORY)
-
-        // If no specific categories, use general
-        const finalCategories = categories.length > 0 ? categories : [DEFAULT_NEWS_CATEGORY]
-        setActiveCategory(finalCategories.join(', ')) // Update active categories for display
-
-        // Fetch from ALL categories in parallel
-        // Fetch from ALL categories in parallel
-        const promises = finalCategories.map((category) =>
-          apiClient
-            .get(`/news/${userLang}/${category}`)
-            .then((res) => {
-              const data = res.data
-              // Tag each article with its category
-              if (data.status === 'success' && data.articles) {
-                return data.articles.map((article) => ({
-                  ...article,
-                  category: category // Add category to each article
-                }))
-              }
-              return []
-            })
-            .catch((err) => {
-              // Handle non-200 responses (including 404)
-              console.warn(`Failed to fetch ${category} news:`, err.message)
-              return []
-            })
-        )
-
-        const results = await Promise.all(promises)
-
-        // Combine all articles from all categories
-        const allArticles = results.flatMap((articles) => articles)
-
-        // Remove duplicates based on URL
-        const uniqueArticles = allArticles.filter((article, index, self) => index === self.findIndex((a) => a.url === article.url))
-
-        // Shuffle to mix categories
-        const shuffled = uniqueArticles.sort(() => Math.random() - 0.5)
-
-        setNews(shuffled.slice(0, 15)) // Show up to 15 articles
-      } catch (error) {
-        console.error('News fetch error:', error)
-        setNews([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchNews()
-  }, [userPreferences?.language, prefInterests, userPreferences?.interests])
+  }, [regularNewsCount, instanceRef])
 
   const placeholderCount = 3
 
@@ -276,8 +189,56 @@ export default function NewsCarousel() {
         {t('news.noArticles')}
       </Typography>
       <Typography level='body-sm' sx={{ color: 'text.secondary', maxWidth: 400 }}>
-        {userPreferences?.interests?.length > 0 ? t('news.adjustInterests') : t('news.setInterests')}
+        {preferences?.interests?.length > 0 ? t('news.adjustInterests') : t('news.setInterests')}
       </Typography>
+    </Box>
+  )
+
+  // Error State — distinct from Empty so "the feed is down" never reads as
+  // "your interests matched nothing", and offers a way back without a reload.
+  const ErrorState = () => (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 8,
+        px: 4,
+        textAlign: 'center',
+        minHeight: 300
+      }}
+    >
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          backgroundColor: 'danger.softBg',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 3
+        }}
+      >
+        <ErrorOutline sx={{ fontSize: 40, color: 'danger.plainColor' }} />
+      </Box>
+      <Typography level='h4' sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
+        {t('news.loadError')}
+      </Typography>
+      <Typography level='body-sm' sx={{ color: 'text.secondary', maxWidth: 400, mb: 2 }}>
+        {t('news.loadErrorHint')}
+      </Typography>
+      <Button
+        variant='soft'
+        color='neutral'
+        size='sm'
+        startDecorator={<Refresh />}
+        onClick={() => refetch()}
+        aria-label={t('common.retry')}
+      >
+        {t('common.retry')}
+      </Button>
     </Box>
   )
 
@@ -309,17 +270,19 @@ export default function NewsCarousel() {
             </Tab>
           </TabList>
 
-          {userPreferences?.language && (
+          {preferences?.language && (
             <Chip variant='soft' color='primary' size='sm'>
-              {userPreferences.language.toUpperCase()}
+              {preferences.language.toUpperCase()}
             </Chip>
           )}
         </Stack>
 
         {/* Latest News Tab */}
         <TabPanel value={0} sx={{ p: 0 }}>
-          {/* Show Empty State if no loading and no news */}
-          {!loading && regularNews.length === 0 ? (
+          {/* Error takes precedence, then empty, then the carousel itself */}
+          {!loading && error ? (
+            <ErrorState />
+          ) : !loading && regularNews.length === 0 ? (
             <EmptyState />
           ) : (
             <>
@@ -340,7 +303,7 @@ export default function NewsCarousel() {
                   }}
                 >
                   {(() => {
-                    const itemsToRender = loading ? Array.from({ length: placeholderCount }) : news
+                    const itemsToRender = loading ? Array.from({ length: placeholderCount }) : regularNews
                     return itemsToRender.map((article, index) => (
                       <Box
                         key={loading ? `skeleton-${index}` : article?.url || index}
@@ -366,12 +329,13 @@ export default function NewsCarousel() {
                 </Box>
 
                 {/* Navigation Arrows */}
-                {!loading && news.length > 1 && instanceRef.current && (
+                {!loading && regularNews.length > 1 && instanceRef.current && (
                   <>
                     <IconButton
                       variant='solid'
                       color='neutral'
                       size='sm'
+                      aria-label={t('news.previousArticle')}
                       onClick={(e) => {
                         e.stopPropagation()
                         instanceRef.current?.prev()
@@ -401,6 +365,7 @@ export default function NewsCarousel() {
                       variant='solid'
                       color='neutral'
                       size='sm'
+                      aria-label={t('news.nextArticle')}
                       onClick={(e) => {
                         e.stopPropagation()
                         instanceRef.current?.next()
@@ -430,11 +395,11 @@ export default function NewsCarousel() {
               </Box>
 
               {/* Pagination Dots */}
-              {!loading && news.length > 0 && instanceRef.current && (
+              {!loading && regularNews.length > 0 && instanceRef.current && (
                 <Stack direction='row' justifyContent='center' spacing={1} sx={{ mt: 3 }}>
-                  {Array.from({ length: Math.min(news.length, 7) }).map((_, idx) => {
+                  {Array.from({ length: Math.min(regularNews.length, 7) }).map((_, idx) => {
                     // Smart pagination: show first, current, and last on mobile
-                    const shouldShow = news.length <= 7 || idx < 2 || idx === currentSlide || idx >= news.length - 2
+                    const shouldShow = regularNews.length <= 7 || idx < 2 || idx === currentSlide || idx >= regularNews.length - 2
                     if (!shouldShow) return null
 
                     return (
@@ -509,7 +474,7 @@ export default function NewsCarousel() {
                     justifyContent: favoriteNews.length === 1 ? 'center' : 'flex-start'
                   }}
                 >
-                  {favoriteNews.map((article, index) => (
+                  {favoriteNews.map((article) => (
                     <Box
                       key={article.url}
                       className='keen-slider__slide'
@@ -541,6 +506,7 @@ export default function NewsCarousel() {
                       variant='solid'
                       color='neutral'
                       size='sm'
+                      aria-label={t('news.previousArticle')}
                       onClick={(e) => {
                         e.stopPropagation()
                         favoritesInstanceRef.current?.prev()
@@ -570,6 +536,7 @@ export default function NewsCarousel() {
                       variant='solid'
                       color='neutral'
                       size='sm'
+                      aria-label={t('news.nextArticle')}
                       onClick={(e) => {
                         e.stopPropagation()
                         favoritesInstanceRef.current?.next()
@@ -669,6 +636,7 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
             variant='solid'
             color={isFavorite ? 'warning' : 'neutral'}
             size='sm'
+            aria-label={isFavorite ? t('news.removeFavorite') : t('news.addFavorite')}
             onClick={(e) => {
               e.stopPropagation()
               onToggleFavorite()
@@ -741,7 +709,10 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
               <Skeleton width='70%' />
             </>
           ) : (
-            article.description
+            // Google News feeds carry no real summary — their entry text is
+            // just the headline again, which the API now returns as empty
+            // rather than as a hardcoded English call to action.
+            article.description || t('news.readMore')
           )}
         </Typography>
 
@@ -768,42 +739,5 @@ const NewsCard = ({ article, loading, t, isFavorite, onToggleFavorite }) => {
         )}
       </CardContent>
     </Card>
-  )
-}
-
-// Favorites Carousel Component
-const FavoritesCarousel = ({ favorites, toggleFavorite, t }) => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: 2,
-        overflowX: 'auto',
-        px: { xs: 2, md: 8 },
-        pb: 2,
-        '&::-webkit-scrollbar': {
-          height: 6
-        },
-        '&::-webkit-scrollbar-track': {
-          background: 'transparent'
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: 'neutral.outlinedBorder',
-          borderRadius: 'sm'
-        }
-      }}
-    >
-      {favorites.map((article) => (
-        <Box
-          key={article.url}
-          sx={{
-            minWidth: { xs: '280px', sm: '320px' },
-            width: { xs: '280px', sm: '320px' }
-          }}
-        >
-          <NewsCard article={article} loading={false} t={t} isFavorite={true} onToggleFavorite={() => toggleFavorite(article)} />
-        </Box>
-      ))}
-    </Box>
   )
 }

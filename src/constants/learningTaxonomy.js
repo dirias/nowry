@@ -18,7 +18,9 @@
  * @property {string} value        Canonical wire value — persisted and sent to the API.
  * @property {string} i18nKey      Translation key; resolves in all five locales.
  * @property {string} icon         Emoji shown on the selection chips.
- * @property {string} newsCategory NewsAPI category backing the home feed.
+ * @property {string} newsCategory RSS feed category backing the home feed; every
+ *                                 value resolves in `Nowry-API/app/routers/news.py`'s
+ *                                 NEWS_FEEDS for all supported languages.
  * @property {string} deckCategory Category passed to `GET /public/decks?category=`.
  */
 
@@ -49,21 +51,21 @@ export const TOPICS = [
     value: 'mathematics',
     i18nKey: 'taxonomy.topics.mathematics',
     icon: '📐',
-    newsCategory: 'general',
+    newsCategory: 'mathematics',
     deckCategory: 'mathematics'
   },
   {
     value: 'history',
     i18nKey: 'taxonomy.topics.history',
     icon: '📜',
-    newsCategory: 'general',
+    newsCategory: 'history',
     deckCategory: 'history'
   },
   {
     value: 'languages',
     i18nKey: 'taxonomy.topics.languages',
     icon: '🌐',
-    newsCategory: 'general',
+    newsCategory: 'languages',
     deckCategory: 'languages'
   },
   {
@@ -105,21 +107,21 @@ export const TOPICS = [
     value: 'philosophy',
     i18nKey: 'taxonomy.topics.philosophy',
     icon: '🧠',
-    newsCategory: 'general',
+    newsCategory: 'philosophy',
     deckCategory: 'philosophy'
   },
   {
     value: 'design',
     i18nKey: 'taxonomy.topics.design',
     icon: '✏️',
-    newsCategory: 'general',
+    newsCategory: 'design',
     deckCategory: 'design'
   },
   {
     value: 'psychology',
     i18nKey: 'taxonomy.topics.psychology',
     icon: '💭',
-    newsCategory: 'general',
+    newsCategory: 'psychology',
     deckCategory: 'psychology'
   }
 ]

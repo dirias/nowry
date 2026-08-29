@@ -43,13 +43,25 @@
       "health": "Health",
       "entertainment": "Entertainment",
       "politics": "Politics",
-      "sports": "Sports"
+      "sports": "Sports",
+      "mathematics": "Mathematics",
+      "history": "History",
+      "languages": "Languages",
+      "philosophy": "Philosophy",
+      "design": "Design",
+      "psychology": "Psychology"
     },
     "favorites": "Favorites",
     "noFavorites": "No Favorites Yet",
     "noFavoritesHint": "Click the star icon on any news article to add it to your favorites.",
     "adjustInterests": "Try adjusting your interests in Settings to see personalized news.",
-    "setInterests": "Set your interests in Settings to see personalized news articles."
+    "setInterests": "Set your interests in Settings to see personalized news articles.",
+    "loadError": "Couldn't load the news",
+    "loadErrorHint": "The news service isn't responding right now. Try again in a moment.",
+    "previousArticle": "Previous article",
+    "nextArticle": "Next article",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites"
   },
   "header": {
     "study": "Study",

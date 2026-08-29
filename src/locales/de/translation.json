@@ -31,13 +31,25 @@
       "health": "Gesundheit",
       "entertainment": "Unterhaltung",
       "politics": "Politik",
-      "sports": "Sport"
+      "sports": "Sport",
+      "mathematics": "Mathematik",
+      "history": "Geschichte",
+      "languages": "Sprachen",
+      "philosophy": "Philosophie",
+      "design": "Design",
+      "psychology": "Psychologie"
     },
     "favorites": "Favoriten",
     "noFavorites": "Noch keine Favoriten",
     "noFavoritesHint": "Klicke auf das Stern-Symbol eines Artikels, um ihn zu deinen Favoriten hinzuzufügen.",
     "adjustInterests": "Passe deine Interessen in den Einstellungen an, um personalisierte Nachrichten zu sehen.",
-    "setInterests": "Lege deine Interessen in den Einstellungen fest, um personalisierte Artikel zu sehen."
+    "setInterests": "Lege deine Interessen in den Einstellungen fest, um personalisierte Artikel zu sehen.",
+    "loadError": "Nachrichten konnten nicht geladen werden",
+    "loadErrorHint": "Der Nachrichtendienst antwortet gerade nicht. Bitte versuche es gleich noch einmal.",
+    "previousArticle": "Vorheriger Artikel",
+    "nextArticle": "Nächster Artikel",
+    "addFavorite": "Zu Favoriten hinzufügen",
+    "removeFavorite": "Aus Favoriten entfernen"
   },
   "header": {
     "study": "Lernen",
