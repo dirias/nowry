@@ -28,6 +28,7 @@ import {
   Typography
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+import StageJourney from './StageJourney'
 
 // ---------------------------------------------------------------------------
 // Static catalog data
@@ -108,6 +109,7 @@ const CompanionTab = ({
   petName,
   setPetName,
   petSpecies,
+  petColor,
   onSpeciesSelect,
   onNameBlur,
   suggestedSpecies,
@@ -163,6 +165,11 @@ const CompanionTab = ({
           </FormHelperText>
         </FormControl>
       </Box>
+
+      <Divider />
+
+      {/* ── Section: Evolution journey ─────────────────────────────────────── */}
+      <StageJourney petSpecies={petSpecies} petColor={petColor} />
 
       <Divider />
 

@@ -1061,6 +1061,7 @@ export default function AgentSettings() {
                 petName={petName}
                 setPetName={setPetName}
                 petSpecies={petSpecies}
+                petColor={petColor}
                 onSpeciesSelect={handleSpeciesSelect}
                 onNameBlur={handleNameBlur}
                 suggestedSpecies={suggestedSpecies}

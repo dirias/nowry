@@ -146,5 +146,18 @@ export const agentService = {
   awardStreakXp: async () => {
     const { data } = await apiClient.post('/agent/xp/streak')
     return data
+  },
+
+  /**
+   * Fetch the pet's full evolution arc — every form it has been and will become.
+   * `reached_at` is null for stages passed before evolution history was recorded,
+   * so callers must render an undated stage rather than assume a date.
+   * @returns {Promise<{ current_stage: number, current_level: number, current_xp: number,
+   *   stages: Array<{ stage: number, level_required: number, xp_required: number,
+   *   reached: boolean, reached_at: string|null, xp_remaining: number|null }> }>}
+   */
+  getJourney: async () => {
+    const { data } = await apiClient.get('/agent/journey')
+    return data
   }
 }

@@ -2714,7 +2714,15 @@
           "day60": "Sesenta días de repaso ininterrumpido es un resultado que la mayoría de los estudiantes nunca alcanzan.",
           "day100": "Cien días. La investigación sobre la durabilidad de los hábitos deja de distinguir en este punto — esto es simplemente parte de quién eres ahora."
         }
-      }
+      },
+      "journeyTitle": "Viaje de evolución",
+      "journeyDescription": "Todas las formas que ha tenido tu compañero, y las que aún están por llegar.",
+      "journeyReached": "Alcanzada",
+      "journeyReachedOn": "Alcanzada el {{date}}",
+      "journeyLocked_one": "A {{count}} XP",
+      "journeyLocked_other": "A {{count}} XP",
+      "journeyNext": "Siguiente",
+      "journeyError": "No se pudo cargar el viaje en este momento."
     }
   },
   "reports": {

@@ -1788,7 +1788,14 @@
           "day60": "60日間の途切れのない復習は、ほとんどの学習者が到達しない結果です。",
           "day100": "100日間。この時点では習慣の持続性に関する研究も区別をやめます — これはもう単純にあなたの一部です。"
         }
-      }
+      },
+      "journeyTitle": "進化の歩み",
+      "journeyDescription": "相棒がこれまでに見せた姿と、これから出会う姿。",
+      "journeyReached": "到達済み",
+      "journeyReachedOn": "{{date}} に到達",
+      "journeyLocked_other": "あと {{count}} XP",
+      "journeyNext": "次へ",
+      "journeyError": "進化の歩みを読み込めませんでした。"
     },
     "settingsSubtitle": "パートナーの動作とキャラクターを設定する",
     "headerStatus": "Lv{{level}} · {{tier}} · 残り{{remaining}}スパーク",

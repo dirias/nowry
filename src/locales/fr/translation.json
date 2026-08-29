@@ -1777,7 +1777,15 @@
           "day60": "Soixante jours de révision ininterrompue est un résultat que la plupart des apprenants n'atteignent jamais.",
           "day100": "Cent jours. La recherche sur la durabilité des habitudes cesse de faire des distinctions à ce stade — c'est simplement qui vous êtes maintenant."
         }
-      }
+      },
+      "journeyTitle": "Parcours d'évolution",
+      "journeyDescription": "Toutes les formes qu'a prises votre compagnon, et celles encore à venir.",
+      "journeyReached": "Atteinte",
+      "journeyReachedOn": "Atteinte le {{date}}",
+      "journeyLocked_one": "Encore {{count}} XP",
+      "journeyLocked_other": "Encore {{count}} XP",
+      "journeyNext": "Suivante",
+      "journeyError": "Impossible de charger le parcours pour le moment."
     },
     "settingsSubtitle": "Configurez le comportement et la personnalité de votre compagnon",
     "headerStatus": "Nv{{level}} · {{tier}} · {{remaining}} étincelles restantes",

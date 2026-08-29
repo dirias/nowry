@@ -1755,7 +1755,15 @@
           "day60": "Sechzig Tage ununterbrochener Wiederholung ist ein Ergebnis, das die meisten Lernenden nie erreichen.",
           "day100": "Einhundert Tage. Die Forschung zur Gewohnheitsstabilität hört an diesem Punkt auf zu unterscheiden — das ist jetzt einfach ein Teil von dir."
         }
-      }
+      },
+      "journeyTitle": "Entwicklungsweg",
+      "journeyDescription": "Alle Formen, die dein Begleiter angenommen hat – und die noch kommen.",
+      "journeyReached": "Erreicht",
+      "journeyReachedOn": "Erreicht am {{date}}",
+      "journeyLocked_one": "Noch {{count}} XP",
+      "journeyLocked_other": "Noch {{count}} XP",
+      "journeyNext": "Als Nächstes",
+      "journeyError": "Der Entwicklungsweg konnte gerade nicht geladen werden."
     },
     "settingsSubtitle": "Verhalten und Persönlichkeit deines Begleiters konfigurieren",
     "headerStatus": "Lv{{level}} · {{tier}} · {{remaining}} Funken übrig",

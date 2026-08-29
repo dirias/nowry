@@ -3030,7 +3030,15 @@
           "day60": "Sixty days of unbroken review is a result most learners never reach.",
           "day100": "One hundred days. The research on habit durability stops distinguishing at this point — this is simply part of who you are now."
         }
-      }
+      },
+      "journeyTitle": "Evolution journey",
+      "journeyDescription": "Every form your companion has taken, and the ones still ahead.",
+      "journeyReached": "Reached",
+      "journeyReachedOn": "Reached {{date}}",
+      "journeyLocked_one": "{{count}} XP away",
+      "journeyLocked_other": "{{count}} XP away",
+      "journeyNext": "Next",
+      "journeyError": "Couldn't load the journey right now."
     }
   },
   "reports": {
