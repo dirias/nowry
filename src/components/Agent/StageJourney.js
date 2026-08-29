@@ -29,7 +29,12 @@ const STAGE_COUNT = 6
 
 /** One rung of the ladder. */
 const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, t, locale }) => {
-  const { stage, reached, reached_at: reachedAt, xp_remaining: xpRemaining, level_required: levelRequired } = entry
+  const { stage, reached, reached_at: reachedAt, xp_remaining: xpRemaining, level_required: levelRequired, art_url: artUrl } = entry
+
+  // Art for THIS form if it exists — including a look-ahead form generated
+  // before it was reached. Falls back to the worn portrait for older accounts
+  // whose per-stage art predates stage_avatars.
+  const formArt = artUrl || (reached ? avatarUrl : null)
 
   const reachedDate = reachedAt ? new Date(reachedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) : null
 
@@ -61,8 +66,8 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
           // art reads as "disabled", while a solid fill reads as "locked but
           // real" and preserves the outline, so Oracle's spread wing and
           // Luminary's crown still tell those rungs apart at a glance.
-          filter: reached ? 'none' : isDefaultCompanion ? LOCKED_SILHOUETTE_FILTER : 'grayscale(0.85)',
-          opacity: reached || isDefaultCompanion ? 1 : 0.45
+          filter: reached ? 'none' : isDefaultCompanion || formArt ? LOCKED_SILHOUETTE_FILTER : 'grayscale(0.85)',
+          opacity: reached || isDefaultCompanion || formArt ? 1 : 0.45
         }}
       >
         {isDefaultCompanion ? (
@@ -78,8 +83,9 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
             // A rung the user has reached shows their actual companion. This
             // was simply never passed, so a paying user with a generated
             // portrait saw an emoji everywhere in their own journey.
-            avatarUrl={reached ? avatarUrl : null}
-            blankFace={!reached}
+            avatarUrl={formArt}
+            // Only faceless when there is genuinely no art for this form.
+            blankFace={!formArt}
           />
         )}
       </Box>
@@ -110,7 +116,7 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
 const StageJourney = () => {
   const { t, i18n } = useTranslation()
   const { themeColor } = useThemePreferences()
-  const { avatarUrl } = usePet()
+  const { avatarUrl, generateNextStageArt } = usePet()
   const [journey, setJourney] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -132,7 +138,16 @@ const StageJourney = () => {
   }, [load])
 
   // The first unreached stage is the one worth pointing at.
-  const nextStage = journey?.stages?.find((s) => !s.reached)?.stage ?? null
+  const nextEntry = journey?.stages?.find((s) => !s.reached) ?? null
+  const nextStage = nextEntry?.stage ?? null
+
+  // If the form ahead has no art yet, quietly commission it — but only for a
+  // personalised companion. Nowry's whole arc ships with the app, so asking a
+  // model for it would be spending money on art we already have.
+  useEffect(() => {
+    if (!journey || journey.is_default_companion) return
+    if (nextEntry && !nextEntry.art_url) generateNextStageArt()
+  }, [journey, nextEntry, generateNextStageArt])
 
   const sinceDate = journey?.companion_since
     ? new Date(journey.companion_since).toLocaleDateString(i18n.language, { year: 'numeric', month: 'long' })

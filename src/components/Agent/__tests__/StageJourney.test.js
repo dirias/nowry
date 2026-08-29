@@ -25,8 +25,9 @@ jest.mock('../../../theme/DynamicThemeProvider', () => ({
 }))
 
 let mockAvatarUrl = null
+const mockGenerateNextStageArt = jest.fn()
 jest.mock('../../../context/AgentContext', () => ({
-  usePet: () => ({ avatarUrl: mockAvatarUrl })
+  usePet: () => ({ avatarUrl: mockAvatarUrl, generateNextStageArt: mockGenerateNextStageArt })
 }))
 
 // PetOrb drags in framer-motion, the pet context and the whole StudyPet tree.
@@ -67,6 +68,48 @@ const journey = (reachedThrough, over = {}, isDefault = false) => ({
 beforeEach(() => {
   jest.clearAllMocks()
   mockAvatarUrl = null
+})
+
+// The look-ahead exists so a locked rung shows the REAL next form rather than
+// a placeholder. It must never fire for Nowry, whose whole arc ships with the
+// app — asking a model for art we already have is just spending money.
+describe('StageJourney — look-ahead art', () => {
+  const withArt = (j, stage, url) => {
+    j.stages[stage - 1].art_url = url
+    return j
+  }
+
+  // waitFor, not a bare assertion: useEffect is a passive effect and flushes
+  // after findBy*'s MutationObserver tick, so asserting immediately races it.
+  it('commissions the next form when it has no art yet', async () => {
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+    await waitFor(() => expect(mockGenerateNextStageArt).toHaveBeenCalled())
+  })
+
+  it('does not commission anything once the next form already has art', async () => {
+    agentService.getJourney.mockResolvedValue(withArt(journey(2, {}, false), 3, 'https://x/s3.png'))
+    render(<StageJourney />)
+    await screen.findByTestId('orb-stage-3')
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalled())
+    expect(mockGenerateNextStageArt).not.toHaveBeenCalled()
+  })
+
+  it('never commissions art for the default companion', async () => {
+    agentService.getJourney.mockResolvedValue(journey(2, {}, true))
+    render(<StageJourney />)
+    await screen.findByText('pet.stage.1.name')
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalled())
+    expect(mockGenerateNextStageArt).not.toHaveBeenCalled()
+  })
+
+  it('shows a look-ahead form as art, not as a faceless placeholder', async () => {
+    agentService.getJourney.mockResolvedValue(withArt(journey(2, {}, false), 3, 'https://x/s3.png'))
+    render(<StageJourney />)
+    await screen.findByTestId('orb-stage-3')
+    expect(screen.getByTestId('orb-avatar-3')).toHaveTextContent('https://x/s3.png')
+    expect(screen.getByTestId('orb-blank-3')).toHaveTextContent('false')
+  })
 })
 
 describe('StageJourney', () => {

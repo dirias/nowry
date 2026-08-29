@@ -480,6 +480,29 @@ export const AgentProvider = ({ children }) => {
 
   const clearAvatarUrl = useCallback(() => dispatch({ type: 'AVATAR_URL_FAILED' }), [])
 
+  /**
+   * Quietly generate the form the user has NOT reached yet, so the locked rung
+   * on their journey is the real shape they are working toward rather than a
+   * placeholder — and unlocking it becomes a reveal instead of a swap.
+   *
+   * Deliberately silent and best-effort: this is decoration the user did not
+   * ask for, so it must never surface an error, never block, and never spend
+   * their monthly generation quota (the backend exempts this trigger and
+   * no-ops with 409 once that form exists, which makes it safe to call
+   * whenever the journey notices a gap).
+   */
+  const lookAheadRef = useRef(false)
+  const generateNextStageArt = useCallback(async () => {
+    if (lookAheadRef.current) return
+    lookAheadRef.current = true
+    try {
+      await agentService.generateAvatar('next_stage')
+    } catch {
+      // Already generated, arc complete, quota-free path unavailable, or the
+      // model is down. None of those are the user's problem.
+    }
+  }, [])
+
   const generateAnimation = useCallback(async (trigger = 'manual') => {
     dispatch({ type: 'ANIMATION_GENERATING' })
     try {
@@ -858,6 +881,7 @@ export const AgentProvider = ({ children }) => {
         revealPet,
         petRevealClear,
         generateAvatar,
+        generateNextStageArt,
         clearAvatarUrl,
         generateAnimation,
         animationUrl: state.animationUrl,
