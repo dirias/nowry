@@ -74,7 +74,15 @@ const renderModal = async (props = {}) => {
   await act(async () => {
     view = render(<GeneratedCards cards={CARDS} onCancel={onCancel} onSaved={onSaved} {...props} />)
   })
-  return view
+  return {
+    ...view,
+    /** Hand the dialog a new `cards` prop, the way a stream or a regenerate does. */
+    withCards: async (cards) => {
+      await act(async () => {
+        view.rerender(<GeneratedCards cards={cards} onCancel={onCancel} onSaved={onSaved} {...props} />)
+      })
+    }
+  }
 }
 
 /**
@@ -83,8 +91,8 @@ const renderModal = async (props = {}) => {
  * CURATE-001 inverted the model: cards arrive kept, so there is nothing to
  * select first and the primary action is enabled on open.
  */
-const saveEverything = async () => {
-  fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` }))
+const saveEverything = async (count = CARDS.length) => {
+  fireEvent.click(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${count}` }))
   await act(async () => {
     fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.confirmSave' }))
   })
@@ -405,6 +413,73 @@ describe('an emptied card', () => {
     emptyTheBack()
 
     expect(screen.getByRole('button', { name: 'cards.generatedCards.continueCount:0' })).toBeDisabled()
+  })
+})
+
+describe('curation against a moving card list', () => {
+  const THIRD = { title: 'Diffusion', content: 'Movement down a concentration gradient.' }
+
+  const openEditor = (index) => fireEvent.click(screen.getAllByLabelText('cards.generatedCards.editCardAria')[index])
+
+  const editBackOfFirst = (text) => {
+    openEditor(0)
+    fireEvent.change(screen.getByLabelText('cards.flashcard.backLabel'), { target: { value: text } })
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+  }
+
+  it('keeps an edit and a discard when another card arrives', async () => {
+    const { withCards } = await renderModal()
+
+    editBackOfFirst('edited before the next card landed')
+    fireEvent.click(screen.getAllByLabelText('cards.generatedCards.discardCardAria')[1])
+
+    // The spread keeps the original card objects, which is exactly what a
+    // streaming append or "Generate more" produces. Under the old index-keyed
+    // model this is where an edit would reattach itself to the wrong card.
+    await withCards([...CARDS, THIRD])
+
+    expect(screen.getByText('edited before the next card landed')).toBeInTheDocument()
+    expect(screen.getByLabelText('cards.generatedCards.restoreCardAria')).toBeInTheDocument()
+    expect(screen.getByText(THIRD.content)).toBeInTheDocument()
+    // Three cards, one of them discarded.
+    expect(screen.getByRole('button', { name: 'cards.generatedCards.continueCount:2' })).toBeEnabled()
+  })
+
+  it('writes the surviving edit to the right card after an append', async () => {
+    const { withCards } = await renderModal()
+
+    editBackOfFirst('still mine')
+    await withCards([...CARDS, THIRD])
+    await saveEverything(3)
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(3))
+    expect(mockCreate).toHaveBeenNthCalledWith(1, expect.objectContaining({ title: CARDS[0].title, content: 'still mine' }))
+    expect(mockCreate).toHaveBeenNthCalledWith(3, expect.objectContaining({ title: THIRD.title }))
+  })
+
+  it('drops curation when the batch is regenerated rather than extended', async () => {
+    const { withCards } = await renderModal()
+
+    editBackOfFirst('belongs to the old batch')
+    fireEvent.click(screen.getAllByLabelText('cards.generatedCards.discardCardAria')[1])
+
+    // "Generate again" hands back freshly parsed objects, so nothing matches.
+    await withCards([{ ...CARDS[0] }, { ...CARDS[1] }])
+
+    expect(screen.queryByText('belongs to the old batch')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('cards.generatedCards.restoreCardAria')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: `cards.generatedCards.continueCount:${CARDS.length}` })).toBeEnabled()
+  })
+
+  it('keeps an edit through a discard and a restore', async () => {
+    await renderModal()
+
+    editBackOfFirst('survives the round trip')
+    fireEvent.click(screen.getAllByLabelText('cards.generatedCards.discardCardAria')[0])
+    fireEvent.click(screen.getByLabelText('cards.generatedCards.restoreCardAria'))
+
+    expect(screen.getByText('survives the round trip')).toBeInTheDocument()
+    expect(screen.getByText('cards.generatedCards.editedBadge')).toBeInTheDocument()
   })
 })
 
