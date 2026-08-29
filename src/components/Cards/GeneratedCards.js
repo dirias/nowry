@@ -71,6 +71,9 @@ export default function GeneratedCards({
   const { upgradeDismissed, dismissUpgrade, isUpgradeModalOpen, openUpgradeModal, closeUpgradeModal } = useSubscriptionContext()
 
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
+  // Which card is open in the in-place editor, and which half the caret landed
+  // in. UI state, not curation state: the text itself lives in `curation`.
+  const [editing, setEditing] = useState(null) // { id, field } | null
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   // WR-03: error state for save failures
@@ -118,6 +121,7 @@ export default function GeneratedCards({
       setLoading(true)
       await onGenerateAgain?.(countMode)
       setStep('select_cards')
+      setEditing(null)
       // Curation resets itself: the replacement batch is not an append of the
       // old one, so `useCardCuration` rebuilds its entries from scratch.
       setPartialSave(null)
@@ -383,7 +387,19 @@ export default function GeneratedCards({
                     <GeneratedCard
                       key={entry.id}
                       entry={entry}
-                      onDiscard={() => curation.setKept(entry.id, false)}
+                      isEditing={editing?.id === entry.id}
+                      editingField={editing?.field}
+                      onEdit={(field) => setEditing({ id: entry.id, field })}
+                      onChangeField={(field, value) => curation.setField(entry.id, field, value)}
+                      onDoneEditing={() => setEditing(null)}
+                      onCancelEditing={(openedWith) => {
+                        curation.setFields(entry.id, openedWith)
+                        setEditing(null)
+                      }}
+                      onDiscard={() => {
+                        curation.setKept(entry.id, false)
+                        setEditing(null)
+                      }}
                       onRestore={() => curation.setKept(entry.id, true)}
                     />
                   ))}

@@ -1,8 +1,9 @@
 import React from 'react'
 import { Box, Button, Card, CardContent, CardOverflow, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/joy'
-import { BookOpen, RotateCcw, X } from 'lucide-react'
+import { BookOpen, Pencil, RotateCcw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import GeneratedCardEditor from './GeneratedCardEditor'
 import { focusRing, oneLine } from '../Common/Form/formStyles'
 
 /**
@@ -15,18 +16,23 @@ import { focusRing, oneLine } from '../Common/Form/formStyles'
  * like four small decisions, not like the grid fighting back (PRD A3).
  *
  * Discarding also moves off the card body and onto an explicit control here,
- * which is what frees the body click for the in-place editor in CURATE-003 —
+ * which is what freed the body click for the in-place editor (CURATE-003) —
  * the whole card was previously one selection target, so there was no click
- * left to spend (PRD E3).
+ * left to spend (PRD E3). Clicking a half of the card opens the editor with the
+ * caret in that half; the pencil in the cluster is the same door, reachable
+ * without a pointer.
  */
 
 // Room reserved for the action cluster so the title never runs underneath it.
 // Reserved permanently rather than only while the cluster is visible: a title
 // that reflows the moment the pointer arrives reads as a rendering bug.
-const TITLE_GUTTER = 5
+// Two 32px controls plus their gap, rounded up to the 8px spacing scale.
+const TITLE_GUTTER = 9
 
 const actionCluster = {
   position: 'absolute',
+  display: 'flex',
+  gap: 0.25,
   top: 8,
   right: 8,
   zIndex: 1,
@@ -75,10 +81,45 @@ function DiscardedStrip({ entry, onRestore }) {
   )
 }
 
-export default function GeneratedCard({ entry, onDiscard, onRestore }) {
+export default function GeneratedCard({
+  entry,
+  isEditing = false,
+  editingField = 'title',
+  onEdit,
+  onChangeField,
+  onDoneEditing,
+  onCancelEditing,
+  onDiscard,
+  onRestore
+}) {
   const { t } = useTranslation()
 
   if (!entry.kept) return <DiscardedStrip entry={entry} onRestore={onRestore} />
+
+  if (isEditing) {
+    return (
+      <Card
+        variant='outlined'
+        sx={{
+          // The editor takes the whole row. A 238px column is enough to read a
+          // generated card and nowhere near enough to rewrite one in.
+          gridColumn: '1 / -1',
+          p: 0,
+          borderColor: 'primary.outlinedBorder',
+          boxShadow: 'sm'
+        }}
+      >
+        <GeneratedCardEditor
+          entry={entry}
+          autoFocusField={editingField}
+          onChangeField={onChangeField}
+          onDone={onDoneEditing}
+          onCancel={onCancelEditing}
+          onDiscard={onDiscard}
+        />
+      </Card>
+    )
+  }
 
   return (
     <Card
@@ -112,6 +153,21 @@ export default function GeneratedCard({ entry, onDiscard, onRestore }) {
       }}
     >
       <Box className='gc-card-actions' sx={actionCluster}>
+        {/* The card body opens the same editor, but it is still a plain div with
+            no role until CURATE-005 — without this button, editing would be
+            pointer-only at this commit. */}
+        <Tooltip title={t('cards.generatedCards.editCard')} variant='soft' size='sm'>
+          <IconButton
+            size='sm'
+            variant='plain'
+            color='neutral'
+            onClick={() => onEdit('title')}
+            aria-label={t('cards.generatedCards.editCardAria', { title: entry.title })}
+            sx={focusRing}
+          >
+            <Pencil size={15} />
+          </IconButton>
+        </Tooltip>
         <Tooltip title={t('cards.generatedCards.discardCard')} variant='soft' size='sm'>
           <IconButton
             size='sm'
@@ -126,13 +182,13 @@ export default function GeneratedCard({ entry, onDiscard, onRestore }) {
         </Tooltip>
       </Box>
 
-      <CardOverflow sx={{ px: 2, pt: 2 }}>
+      <CardOverflow sx={{ px: 2, pt: 2, cursor: 'text' }} onClick={() => onEdit('title')}>
         <Typography level='title-md' startDecorator={<BookOpen size={16} />} sx={{ pr: TITLE_GUTTER }}>
           {entry.title}
         </Typography>
       </CardOverflow>
       <Divider />
-      <CardContent>
+      <CardContent sx={{ cursor: 'text' }} onClick={() => onEdit('content')}>
         <Typography level='body-sm' color='neutral'>
           {entry.content}
         </Typography>

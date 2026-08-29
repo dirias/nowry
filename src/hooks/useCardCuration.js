@@ -109,6 +109,30 @@ export default function useCardCuration(cards) {
     setState((prev) => ({ ...prev, entries: prev.entries.map((entry) => ({ ...entry, kept })) }))
   }, [])
 
+  /**
+   * Write one field of one card (CURATE-003).
+   *
+   * The editor writes through on every keystroke rather than holding a private
+   * draft it hands back on commit. One source of truth is what lets the edited
+   * marking (CURATE-004) and the incomplete-card check (CURATE-006) both read
+   * the same text the save path will write, instead of each guessing at text
+   * still trapped inside a child component.
+   */
+  const setField = useCallback((id, field, value) => {
+    setState((prev) => ({
+      ...prev,
+      entries: prev.entries.map((entry) => (entry.id === id ? { ...entry, [field]: value } : entry))
+    }))
+  }, [])
+
+  /** Both fields at once — how cancelling an edit puts the card back. */
+  const setFields = useCallback((id, fields) => {
+    setState((prev) => ({
+      ...prev,
+      entries: prev.entries.map((entry) => (entry.id === id ? { ...entry, ...fields } : entry))
+    }))
+  }, [])
+
   const keptEntries = useMemo(() => entries.filter((entry) => entry.kept), [entries])
 
   return {
@@ -117,6 +141,8 @@ export default function useCardCuration(cards) {
     keptCount: keptEntries.length,
     discardedCount: entries.length - keptEntries.length,
     setKept,
+    setField,
+    setFields,
     /**
      * One control, two directions: it discards everything while anything is
      * kept, and restores everything once nothing is. A separate "restore all"

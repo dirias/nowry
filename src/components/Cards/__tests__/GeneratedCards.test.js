@@ -195,6 +195,77 @@ describe('discarding a card', () => {
   })
 })
 
+describe('editing a card in place', () => {
+  /** Open the first card's editor through the cluster control. */
+  const openFirstEditor = () => fireEvent.click(screen.getAllByLabelText('cards.generatedCards.editCardAria')[0])
+
+  const frontField = () => screen.getByLabelText('cards.flashcard.frontLabel')
+  const backField = () => screen.getByLabelText('cards.flashcard.backLabel')
+
+  it('opens both halves in place and commits the new text', async () => {
+    await renderModal()
+    openFirstEditor()
+
+    expect(frontField()).toHaveValue(CARDS[0].title)
+    expect(backField()).toHaveValue(CARDS[0].content)
+
+    fireEvent.change(backField(), { target: { value: 'Two identical nuclei.' } })
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+
+    // Back to display form, showing the edit.
+    expect(screen.queryByLabelText('cards.flashcard.backLabel')).not.toBeInTheDocument()
+    expect(screen.getByText('Two identical nuclei.')).toBeInTheDocument()
+  })
+
+  it('puts the text back when the edit is cancelled', async () => {
+    await renderModal()
+    openFirstEditor()
+
+    fireEvent.change(backField(), { target: { value: 'scratch' } })
+    fireEvent.click(screen.getByRole('button', { name: 'common.cancel' }))
+
+    expect(screen.getByText(CARDS[0].content)).toBeInTheDocument()
+    expect(screen.queryByText('scratch')).not.toBeInTheDocument()
+  })
+
+  it('cancels the edit on Escape without closing the dialog', async () => {
+    await renderModal()
+    openFirstEditor()
+
+    fireEvent.change(backField(), { target: { value: 'scratch' } })
+    fireEvent.keyDown(backField(), { key: 'Escape' })
+
+    // The dialog above closes on Escape too. Cancelling one card must not throw
+    // away the whole batch.
+    expect(onCancel).not.toHaveBeenCalled()
+    expect(screen.getByText(CARDS[0].content)).toBeInTheDocument()
+  })
+
+  it("keeps the first card's changes when the user moves straight to another", async () => {
+    await renderModal()
+    openFirstEditor()
+    fireEvent.change(backField(), { target: { value: 'Committed by moving on.' } })
+
+    fireEvent.click(screen.getAllByLabelText('cards.generatedCards.editCardAria')[0])
+
+    expect(screen.getByText('Committed by moving on.')).toBeInTheDocument()
+  })
+
+  it('writes the edited text, and touches no API while curating', async () => {
+    await renderModal()
+    openFirstEditor()
+    fireEvent.change(frontField(), { target: { value: 'Mitosis (edited)' } })
+    fireEvent.click(screen.getByRole('button', { name: 'cards.generatedCards.doneEditing' }))
+
+    expect(mockCreate).not.toHaveBeenCalled()
+
+    await saveEverything()
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(CARDS.length))
+    expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ title: 'Mitosis (edited)' }))
+  })
+})
+
 describe('the create-deck name pre-fill', () => {
   it('prefers an explicit default over the source book title', async () => {
     await renderModal({ book: { title: 'Campbell Biology' }, newDeckNameDefault: 'Science' })
