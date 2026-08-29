@@ -67,6 +67,7 @@ const mockSetViewContext = jest.fn()
 const mockResetCompanionSession = jest.fn()
 const mockSetStudySession = jest.fn()
 const mockSetStudySessionFullscreen = jest.fn()
+const mockRevealPet = jest.fn()
 
 jest.mock('../../../context/AgentContext', () => ({
   usePet: () => ({
@@ -74,7 +75,12 @@ jest.mock('../../../context/AgentContext', () => ({
     queueIntervention: mockQueueIntervention,
     resetCompanionSession: mockResetCompanionSession,
     setStudySession: mockSetStudySession,
-    setStudySessionFullscreen: mockSetStudySessionFullscreen
+    setStudySessionFullscreen: mockSetStudySessionFullscreen,
+    // Both are read by StudySession's session-complete effect; omitting them
+    // made every test that finishes a session die on `revealPet is not a
+    // function` before it could assert anything.
+    revealPet: mockRevealPet,
+    hasBeenRevealed: false
   })
 }))
 
@@ -183,6 +189,7 @@ beforeEach(() => {
   mockResetCompanionSession.mockClear()
   mockSetStudySession.mockClear()
   mockSetStudySessionFullscreen.mockClear()
+  mockRevealPet.mockClear()
 })
 
 afterEach(() => {
@@ -501,6 +508,51 @@ async function completeSessionWithMixedResults() {
   fireEvent.click(await screen.findByText('cards.session.grading.good')) // Gamma -> good, session complete
   await screen.findByText('cards.session.complete.cardsReviewed')
 }
+
+// Answer-spoiler regression. The flashcard is one 3D-rotated container holding a
+// static front face and a static back face; grading batches setCurrentIndex +
+// setIsFlipped(false) into a single commit. The back face therefore re-renders
+// with the NEXT card's answer instantly, while `transform` takes 0.55s to rotate
+// away from it — so for ~250ms the incoming card's answer is fully legible before
+// its question appears, destroying the recall test. The fix keys the container by
+// card id so a card change REMOUNTS it (a fresh node starts at rotateY(0) and CSS
+// transitions never fire on first paint) instead of animating it.
+describe('answer spoiler on card advance', () => {
+  it('remounts the flip container on grade, so no rotate-back can reveal the next answer', async () => {
+    renderSession({ cards: makeCards() })
+
+    // Flip card 1 face-up, the state the bug requires.
+    fireEvent.click(await screen.findByText('What is 2+2?'))
+    // `sx` compiles to an emotion class, so the transform lives in the cascade,
+    // not in element.style — read it through getComputedStyle.
+    const beforeNode = screen.getByTestId('flip-container')
+    expect(getComputedStyle(beforeNode).transform).toContain('rotateY(180deg)')
+
+    fireEvent.click(screen.getByText('cards.session.grading.good'))
+
+    // Card 2 is now showing...
+    expect(await screen.findByText('Capital of France?')).toBeInTheDocument()
+    const afterNode = screen.getByTestId('flip-container')
+    // ...on a DIFFERENT DOM node. Node identity IS the assertion: a reused node
+    // would carry the 180deg->0deg transition, and card 2's answer ('Paris') is
+    // already painted on the back face that transition rotates through.
+    expect(afterNode).not.toBe(beforeNode)
+    expect(getComputedStyle(afterNode).transform).toContain('rotateY(0deg)')
+  })
+
+  it('keeps the same node for a manual flip, so click-to-flip still animates', async () => {
+    renderSession({ cards: makeCards() })
+
+    const node = await screen.findByTestId('flip-container')
+    expect(getComputedStyle(node).transform).toContain('rotateY(0deg)')
+
+    fireEvent.click(screen.getByText('What is 2+2?'))
+
+    // Same card => same key => same node => the transform transition runs.
+    expect(screen.getByTestId('flip-container')).toBe(node)
+    expect(getComputedStyle(node).transform).toContain('rotateY(180deg)')
+  })
+})
 
 // MODE-06/D-07. Un-skipped by 31-03.
 describe('session summary — needs attention', () => {

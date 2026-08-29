@@ -1449,7 +1449,21 @@ export default function StudySession() {
                 onMouseMove={handleCardMouseMove}
                 onMouseLeave={handleCardMouseLeave}
               >
+                {/* SPOILER GUARD: keyed by card id, so advancing to a new card REMOUNTS
+                  this container instead of transitioning it. Without the key, grading a
+                  flipped card batches setCurrentIndex + setIsFlipped(false) into one
+                  commit: the back face re-renders with the NEXT card's answer instantly,
+                  while `transform` needs 0.55s to rotate away from it — leaving the next
+                  answer legible for ~250ms before its question appears. A freshly mounted
+                  node starts at rotateY(0) and CSS transitions never fire on first paint,
+                  so the new card simply appears face-up. Keying by id, NOT by index, is
+                  deliberate: the filter re-anchor effect above moves currentIndex while
+                  keeping the SAME card flipped on screen, and an index key would remount
+                  it and yank the answer the user is mid-read on. Manual click-to-flip is
+                  untouched — the key is stable within a card, so it still animates. */}
                 <Box
+                  key={currentCardId ?? safeIndex}
+                  data-testid='flip-container'
                   sx={{
                     position: 'relative',
                     width: '100%',
