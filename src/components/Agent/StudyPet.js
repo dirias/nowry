@@ -245,6 +245,61 @@ const OrbitLayer = ({ count, size, color, reduceMotion }) => {
   )
 }
 
+/**
+ * A ring tracing the orb's edge, filled by progress toward the next level.
+ *
+ * This is the goal-gradient surface: `Lv7` alone tells you where you are, but
+ * never that you are close. Ambient and always-on, so it costs no extra screen
+ * space and never interrupts.
+ *
+ * Renders nothing until progress is actually known — an empty ring on first
+ * paint would read as "you have earned nothing", which is usually false.
+ */
+const ProgressRing = ({ progress, size, color }) => {
+  if (progress == null) return null
+
+  const stroke = 2.5
+  const inset = 5 // clears the orb's own edge so the ring reads as separate
+  const diameter = size + inset * 2
+  const radius = (diameter - stroke) / 2
+  const circumference = 2 * Math.PI * radius
+  const clamped = Math.min(1, Math.max(0, progress))
+
+  return (
+    <svg
+      width={diameter}
+      height={diameter}
+      aria-hidden='true'
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -diameter / 2,
+        marginLeft: -diameter / 2,
+        pointerEvents: 'none',
+        // -90° so the fill starts at 12 o'clock rather than 3 o'clock.
+        transform: 'rotate(-90deg)',
+        zIndex: 1
+      }}
+    >
+      <circle cx={diameter / 2} cy={diameter / 2} r={radius} fill='none' stroke={color} strokeWidth={stroke} opacity='0.16' />
+      <motion.circle
+        cx={diameter / 2}
+        cy={diameter / 2}
+        r={radius}
+        fill='none'
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap='round'
+        strokeDasharray={circumference}
+        initial={false}
+        animate={{ strokeDashoffset: circumference * (1 - clamped) }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      />
+    </svg>
+  )
+}
+
 /** The animated orb that represents the pet in collapsed state */
 export const PetOrb = ({
   mood,
@@ -257,7 +312,8 @@ export const PetOrb = ({
   preview,
   avatarUrl,
   onAvatarError,
-  isGenerating
+  isGenerating,
+  levelProgress
 }) => {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion()
@@ -357,6 +413,7 @@ export const PetOrb = ({
   const decorations = (
     <>
       {auraRings}
+      <ProgressRing progress={levelProgress} size={config.sizePx} color={activeColor} />
       <OrbitLayer count={config.orbitCount} size={config.sizePx} color={activeColor} reduceMotion={reduceMotion} />
       <StageMark mark={config.mark} size={config.sizePx} color={activeColor} />
     </>
@@ -574,6 +631,7 @@ const StudyPet = () => {
     petName,
     petSpecies,
     petColor,
+    levelProgress,
     avatarUrl,
     avatarGenerating,
     avatarRegenPending,
@@ -601,6 +659,7 @@ const StudyPet = () => {
   // lightness from the evolution stage. Deliberately NOT the global theme
   // accent — the companion should look like theirs, not like the app chrome.
   const resolvedColor = resolveColor(petColor, stage)
+
   const [input, setInput] = useState('')
   // Tier enforcement state
   const messagesUsedThisMonth = messagesUsed
@@ -1836,6 +1895,7 @@ const StudyPet = () => {
                   onClick={open}
                   species={petSpecies}
                   dominantColor={resolvedColor}
+                  levelProgress={levelProgress}
                   avatarUrl={avatarUrl}
                   onAvatarError={clearAvatarUrl}
                   isGenerating={avatarGenerating}

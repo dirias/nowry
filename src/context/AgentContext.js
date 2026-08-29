@@ -43,10 +43,20 @@ const initialState = {
   xp: 0,
   /** Visual evolution stage (1–6) */
   stage: 1,
+  /** XP still needed to reach the next level, shown in Settings */
+  xpForNextLevel: null,
+  /** 0–1 fraction toward the next level, computed server-side. null until known. */
+  levelProgress: null,
   /** True immediately after a level-up, triggers the celebration overlay */
   justLeveledUp: false,
   /** { newLevel: N, newStage: N } while celebrating, null otherwise */
   levelUpData: null,
+  /**
+   * A level-up earned mid-session, banked until the session summary.
+   * Interrupting someone mid-recall to congratulate them costs more than it
+   * gives; the reward lands better when they have already stopped.
+   */
+  pendingLevelUp: null,
   /** The user's preferred name (from onboarding) */
   preferredName: '',
   /** Subscription tier */
@@ -135,6 +145,8 @@ function agentReducer(state, action) {
         mood: action.payload.mood,
         level: action.payload.level,
         xp: action.payload.current_xp ?? 0,
+        xpForNextLevel: action.payload.xp_for_next_level ?? null,
+        levelProgress: action.payload.level_progress ?? null,
         stage: action.payload.current_stage ?? 1,
         preferredName: action.payload.preferred_name,
         tier: action.payload.tier,
@@ -281,14 +293,29 @@ function agentReducer(state, action) {
     case 'SET_ANIMATION_REGEN_PENDING':
       return { ...state, animationRegenPending: true }
 
-    case 'LEVEL_UP':
+    case 'XP_PROGRESS':
+      // Progress only. Never touches justLeveledUp — a level-up is dispatched
+      // separately so it can be banked while the user is mid-session.
       return {
         ...state,
-        level: action.payload.newLevel,
-        stage: action.payload.newStage,
-        justLeveledUp: true,
-        levelUpData: { newLevel: action.payload.newLevel, newStage: action.payload.newStage }
+        xp: action.payload.xp ?? state.xp,
+        level: action.payload.level ?? state.level,
+        stage: action.payload.stage ?? state.stage,
+        xpForNextLevel: action.payload.xpForNextLevel ?? state.xpForNextLevel,
+        levelProgress: action.payload.levelProgress ?? state.levelProgress
       }
+
+    case 'LEVEL_UP': {
+      const data = { newLevel: action.payload.newLevel, newStage: action.payload.newStage }
+      // The stage/level advance immediately either way — the pet should
+      // already look evolved when the celebration finally plays.
+      const advanced = { ...state, level: data.newLevel, stage: data.newStage }
+      return action.payload.defer ? { ...advanced, pendingLevelUp: data } : { ...advanced, justLeveledUp: true, levelUpData: data }
+    }
+    case 'LEVEL_UP_FLUSH':
+      // Promote a banked level-up once the user is out of the session.
+      if (!state.pendingLevelUp) return state
+      return { ...state, justLeveledUp: true, levelUpData: state.pendingLevelUp, pendingLevelUp: null }
     case 'LEVEL_UP_CLEAR':
       return { ...state, justLeveledUp: false, levelUpData: null }
     case 'SET_PET_ACTIVE':
@@ -484,9 +511,31 @@ export const AgentProvider = ({ children }) => {
    */
   const applyXpResult = useCallback(
     (response) => {
-      if (!response?.level_up || !(response.new_level > 0) || !(response.new_stage > 0)) return
+      if (!response) return
 
-      dispatch({ type: 'LEVEL_UP', payload: { newLevel: response.new_level, newStage: response.new_stage } })
+      // Progress first, and unconditionally: the ring should advance on every
+      // grant, not only on the rare one that happens to cross a level.
+      if (Number.isFinite(response.current_xp)) {
+        dispatch({
+          type: 'XP_PROGRESS',
+          payload: {
+            xp: response.current_xp,
+            xpForNextLevel: response.xp_for_next_level,
+            levelProgress: response.level_progress,
+            level: response.new_level > 0 ? response.new_level : undefined,
+            stage: response.new_stage > 0 ? response.new_stage : undefined
+          }
+        })
+      }
+
+      if (!response.level_up || !(response.new_level > 0) || !(response.new_stage > 0)) return
+
+      // Bank the celebration while the user is mid-session; StudySession
+      // flushes it once they reach the summary.
+      dispatch({
+        type: 'LEVEL_UP',
+        payload: { newLevel: response.new_level, newStage: response.new_stage, defer: stateRef.current.isInStudySession }
+      })
       if (!response.avatar_regen_pending) return
 
       dispatch({ type: 'SET_AVATAR_REGEN_PENDING' })
@@ -587,6 +636,17 @@ export const AgentProvider = ({ children }) => {
   }, [])
 
   const levelUpClear = useCallback(() => dispatch({ type: 'LEVEL_UP_CLEAR' }), [])
+
+  /**
+   * Fold a card review's XP block into pet state. Called per graded card, so
+   * the orb's progress ring advances while the user studies rather than only
+   * after they leave the session.
+   * @param {Object|null} xp - The `xp` block from POST /study-cards/{id}/review.
+   */
+  const applyReviewXp = useCallback((xp) => applyXpResult(xp), [applyXpResult])
+
+  /** Release a level-up that was banked during a study session. */
+  const flushPendingLevelUp = useCallback(() => dispatch({ type: 'LEVEL_UP_FLUSH' }), [])
 
   /**
    * Toggle whether the pet is mounted/visible at all.
@@ -745,6 +805,8 @@ export const AgentProvider = ({ children }) => {
         updatePetCustomization,
         levelUpClear,
         awardSessionXp,
+        applyReviewXp,
+        flushPendingLevelUp,
         setPetActive,
         revealPet,
         petRevealClear,

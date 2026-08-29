@@ -1926,7 +1926,9 @@
       },
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "Activer le plein écran",
-      "exitFullscreen": "Quitter le plein écran"
+      "exitFullscreen": "Quitter le plein écran",
+      "xpGained_one": "+{{count}} XP",
+      "xpGained_other": "+{{count}} XP"
     },
     "common": {
       "addTags": "Ajouter des étiquettes",

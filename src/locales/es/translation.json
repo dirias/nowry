@@ -1199,7 +1199,9 @@
         "good": "Bien",
         "easy": "Fácil",
         "alreadyAnswered": "Ya calificada"
-      }
+      },
+      "xpGained_one": "+{{count}} XP",
+      "xpGained_other": "+{{count}} XP"
     },
     "deleteModal": {
       "title": "Eliminar mazo",

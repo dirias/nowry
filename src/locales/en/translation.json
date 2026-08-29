@@ -1472,7 +1472,9 @@
         "good": "Good",
         "easy": "Easy",
         "alreadyAnswered": "Already graded"
-      }
+      },
+      "xpGained_one": "+{{count}} XP",
+      "xpGained_other": "+{{count}} XP"
     },
     "deleteModal": {
       "title": "Delete Deck",
@@ -1758,7 +1760,14 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
+      "examples": [
+        "Career Growth",
+        "Health & Vitality",
+        "Financial Freedom",
+        "Relationships",
+        "Creative Pursuits",
+        "Learning & Skills"
+      ]
     },
     "priority": {
       "title": "Yearly Priorities",

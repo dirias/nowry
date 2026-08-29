@@ -14,6 +14,7 @@ import '@fontsource-variable/literata'
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { AnimatePresence, motion } from 'framer-motion'
 import { usePet } from '../../context/AgentContext'
 import {
   Container,
@@ -183,6 +184,44 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
 
 // Pinned footer sibling (progress counter + GradingButtons), rendered universally in
 // both fullscreen and non-fullscreen modes (RESEARCH.md Open Question 1 / Assumption A2).
+/**
+ * A brief "+N XP" that rises and fades after a graded card.
+ *
+ * Deliberately small, fast and non-blocking: it acknowledges the reward at the
+ * moment it is earned without taking a turn in the interaction. Grading XP was
+ * previously granted server-side and never surfaced anywhere, so the most
+ * common way to earn was also the only way you were never told about.
+ *
+ * `pointerEvents: none` guarantees it can never intercept a grading tap.
+ */
+const XpFloater = React.memo(function XpFloater({ floater, t }) {
+  return (
+    <AnimatePresence>
+      {floater && (
+        <motion.div
+          key={floater.id}
+          initial={{ opacity: 0, y: 6, scale: 0.9 }}
+          animate={{ opacity: [0, 1, 1, 0], y: -18, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5, times: [0, 0.15, 0.6, 1], ease: 'easeOut' }}
+          style={{
+            position: 'absolute',
+            top: -14,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            pointerEvents: 'none',
+            zIndex: 2
+          }}
+        >
+          <Typography level='body-xs' fontWeight='lg' sx={{ color: 'success.plainColor', whiteSpace: 'nowrap' }}>
+            {t('cards.session.xpGained', { count: floater.amount })}
+          </Typography>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+})
+
 const SessionFooter = React.memo(function SessionFooter({
   showGrading = true,
   mode,
@@ -192,10 +231,12 @@ const SessionFooter = React.memo(function SessionFooter({
   onGrade,
   pendingSyncCount,
   previousGrade,
+  xpFloater,
   t
 }) {
   return (
-    <Box data-testid='session-footer' sx={{ width: '100%' }}>
+    <Box data-testid='session-footer' sx={{ width: '100%', position: 'relative' }}>
+      <XpFloater floater={xpFloater} t={t} />
       <Stack direction='row' spacing={1} alignItems='center' justifyContent='center' sx={{ mb: 1 }}>
         <Chip size='sm' variant='soft' color={modeChipColor}>
           {t(`cards.session.mode.${mode}`)}
@@ -271,6 +312,9 @@ export default function StudySession() {
   // shared by BOTH the on-screen summary stat and the session_summary
   // intervention payload — no second sort lives in the render.
   const [needsAttentionCount, setNeedsAttentionCount] = useState(0)
+  // Transient "+N XP" acknowledgement after a graded card. Keyed by timestamp
+  // so consecutive grades restart the animation instead of merging into one.
+  const [xpFloater, setXpFloater] = useState(null)
   const [mostAttentionCardFront, setMostAttentionCardFront] = useState(null)
 
   // Browse-only inline tag filter. `enabled: isReadOnlyMode` is the whole
@@ -322,7 +366,9 @@ export default function StudySession() {
     setStudySessionFullscreen,
     revealPet,
     hasBeenRevealed,
-    awardSessionXp
+    awardSessionXp,
+    applyReviewXp,
+    flushPendingLevelUp
   } = usePet()
 
   const buildStudyContext = React.useCallback(
@@ -570,6 +616,11 @@ export default function StudySession() {
       if (gradedCards.current.length > 0) {
         awardSessionXp(gradedCards.current.length, deckId)
       }
+
+      // Release any level-up banked mid-session. The user has stopped
+      // recalling and is looking at their summary — this is the moment the
+      // celebration is a reward rather than an interruption.
+      flushPendingLevelUp()
     }
 
     // LOG SESSION HISTORY — fire-and-forget, never blocks the UI
@@ -589,7 +640,18 @@ export default function StudySession() {
           // Non-fatal — history logging never interrupts the study experience
         })
     }
-  }, [sessionComplete, setViewContext, queueIntervention, visibleCards, deckId, mode, revealPet, hasBeenRevealed, awardSessionXp])
+  }, [
+    sessionComplete,
+    setViewContext,
+    queueIntervention,
+    visibleCards,
+    deckId,
+    mode,
+    revealPet,
+    hasBeenRevealed,
+    awardSessionXp,
+    flushPendingLevelUp
+  ])
 
   const handleFlip = React.useCallback(() => {
     setIsFlipped((prev) => !prev)
@@ -822,6 +884,15 @@ export default function StudySession() {
             setCards(syncedCards)
           }
         }
+
+        // Fold this card's XP into the pet: advances the orb's progress ring
+        // as the user studies. Any level-up crossed here is banked by
+        // AgentContext and released at the session summary, so the
+        // celebration never interrupts a card the user is mid-way through.
+        if (response && response.xp) {
+          applyReviewXp(response.xp)
+          setXpFloater({ id: Date.now(), amount: response.xp.xp_awarded })
+        }
       } catch (error) {
         console.error('Error syncing review to backend:', error)
 
@@ -844,7 +915,7 @@ export default function StudySession() {
     // `cards` stays in this dep list on purpose — it is the setCards mutation
     // SOURCE, not a read source (every read goes through latestStateRef above),
     // and it must remain the full deck.
-    [cards, handleNext, mode, queueIntervention]
+    [cards, handleNext, mode, queueIntervention, applyReviewXp]
   )
 
   const handlePrev = React.useCallback(() => {
@@ -1351,6 +1422,7 @@ export default function StudySession() {
                     onGrade={handleGrade}
                     pendingSyncCount={reviewQueue.length}
                     previousGrade={previousGrade}
+                    xpFloater={xpFloater}
                     t={t}
                   />
                 </Box>
@@ -1442,6 +1514,7 @@ export default function StudySession() {
                     onGrade={handleGrade}
                     pendingSyncCount={reviewQueue.length}
                     previousGrade={previousGrade}
+                    xpFloater={xpFloater}
                     t={t}
                   />
                 </Box>
@@ -1649,6 +1722,7 @@ export default function StudySession() {
                         onGrade={handleGrade}
                         pendingSyncCount={reviewQueue.length}
                         previousGrade={previousGrade}
+                        xpFloater={xpFloater}
                         t={t}
                       />
                     </Box>

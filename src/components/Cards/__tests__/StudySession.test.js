@@ -10,7 +10,7 @@
  * blocks are intentionally RED until 30-04 makes StudySession mode-aware.
  */
 import React from 'react'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react'
 import { act } from 'react-dom/test-utils'
 
 // Phase 30: module-level mutable var so individual tests can control the
@@ -69,6 +69,8 @@ const mockSetStudySession = jest.fn()
 const mockSetStudySessionFullscreen = jest.fn()
 const mockRevealPet = jest.fn()
 const mockAwardSessionXp = jest.fn()
+const mockApplyReviewXp = jest.fn()
+const mockFlushPendingLevelUp = jest.fn()
 
 jest.mock('../../../context/AgentContext', () => ({
   usePet: () => ({
@@ -77,12 +79,14 @@ jest.mock('../../../context/AgentContext', () => ({
     resetCompanionSession: mockResetCompanionSession,
     setStudySession: mockSetStudySession,
     setStudySessionFullscreen: mockSetStudySessionFullscreen,
-    // All three are read by StudySession's session-complete effect; omitting
-    // any of them makes every test that finishes a session die on
-    // `<name> is not a function` before it can assert anything.
+    // These are read by StudySession's session-complete effect and its grade
+    // handler; omitting any of them makes every test that finishes a session
+    // die on `<name> is not a function` before it can assert anything.
     revealPet: mockRevealPet,
     hasBeenRevealed: false,
-    awardSessionXp: mockAwardSessionXp
+    awardSessionXp: mockAwardSessionXp,
+    applyReviewXp: mockApplyReviewXp,
+    flushPendingLevelUp: mockFlushPendingLevelUp
   })
 }))
 
@@ -175,7 +179,13 @@ function renderSession(overrides = {}) {
   // `sessionComplete` (which awaits cardsService.review and chains
   // studySessionsService.log(...).catch(...)), so both must be re-armed here
   // on every render, matching the cardsService re-arm pattern above.
-  cardsService.review.mockResolvedValue({})
+  // Default: a review that grants XP without crossing a level. Tests that care
+  // about the XP block override this with their own mockResolvedValue.
+  cardsService.review.mockResolvedValue(
+    overrides.reviewResponse ?? {
+      xp: { xp_awarded: 2, level_up: false, new_level: 3, new_stage: 2, current_xp: 120, xp_for_next_level: 30, level_progress: 0.4 }
+    }
+  )
   studySessionsService.log.mockResolvedValue({})
   studySessionsService.list.mockResolvedValue({ sessions: [], total: 0 })
   return render(<StudySession />)
@@ -193,6 +203,8 @@ beforeEach(() => {
   mockSetStudySessionFullscreen.mockClear()
   mockRevealPet.mockClear()
   mockAwardSessionXp.mockClear()
+  mockApplyReviewXp.mockClear()
+  mockFlushPendingLevelUp.mockClear()
 })
 
 afterEach(() => {
@@ -405,6 +417,42 @@ describe('session completion XP', () => {
 
     await screen.findByText('cards.session.complete.cardsReviewed')
     expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
+  })
+
+  it('feeds each graded card’s XP block to the pet, so the ring advances mid-session', async () => {
+    const cards = [
+      { _id: 'p1', id: 'p1', title: 'XP 1', content: 'A' },
+      { _id: 'p2', id: 'p2', title: 'XP 2', content: 'B' }
+    ]
+    renderSession({ cards })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    await screen.findByText('cards.session.grading.good')
+
+    await waitFor(() => expect(mockApplyReviewXp).toHaveBeenCalled())
+    expect(mockApplyReviewXp).toHaveBeenCalledWith(expect.objectContaining({ xp_awarded: 2, level_progress: 0.4 }))
+  })
+
+  it('releases a banked level-up once the summary is on screen', async () => {
+    const cards = [{ _id: 'q1', id: 'q1', title: 'Only', content: 'A' }]
+    renderSession({ cards })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+
+    await screen.findByText('cards.session.complete.cardsReviewed')
+    expect(mockFlushPendingLevelUp).toHaveBeenCalled()
+  })
+
+  it('survives a review response that carries no XP block', async () => {
+    // grant_xp is fire-and-forget server-side: a failure there returns the
+    // review without an xp block rather than failing the whole request.
+    const cards = [{ _id: 'r1', id: 'r1', title: 'Only', content: 'A' }]
+    renderSession({ cards, reviewResponse: { message: 'Card reviewed successfully' } })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+
+    await screen.findByText('cards.session.complete.cardsReviewed')
+    expect(mockApplyReviewXp).not.toHaveBeenCalled()
   })
 
   it('awards nothing for a deck with no cards to study', async () => {

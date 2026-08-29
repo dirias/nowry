@@ -108,12 +108,16 @@ const STRICT_KEYS = EN_KEYS.filter(isStrict)
  * list is the only escape hatch from the "difference" rule, so an unexplained
  * entry here is how the next `taxonomy.topics` gets through.
  */
+// "+{{count}} XP" is a numeral beside an abbreviation every one of these
+// locales uses verbatim. It is identical by design, not debt to pay down.
+const XP_GAINED = ['cards.session.xpGained_one', 'cards.session.xpGained_other']
+
 const IDENTICAL_BY_DESIGN = {
-  es: [],
+  es: [...XP_GAINED],
   // "Business" and "Design" are the words French and German actually use.
-  fr: ['taxonomy.topics.business', 'taxonomy.topics.design'],
-  de: ['taxonomy.topics.design'],
-  ja: []
+  fr: ['taxonomy.topics.business', 'taxonomy.topics.design', ...XP_GAINED],
+  de: ['taxonomy.topics.design', ...XP_GAINED],
+  ja: ['cards.session.xpGained_other']
 }
 
 /**
