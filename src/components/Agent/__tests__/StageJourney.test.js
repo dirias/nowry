@@ -156,14 +156,38 @@ describe('StageJourney', () => {
   // A paying user's own portrait was never passed into the ladder, so their
   // journey showed a placeholder emoji at every rung — the personalised
   // experience looked poorer than the free one.
-  it('shows the user’s own portrait on the rungs they have reached', async () => {
+  // The worn portrait belongs to the CURRENT stage only. It used to be painted
+  // onto every reached rung, so a user who generated at Sprite saw the same
+  // picture on Wisp — claiming their companion looked like that before it
+  // existed. A form passed before they ever generated has no portrait and
+  // never will.
+  it('shows the worn portrait on the current stage', async () => {
+    mockAvatarUrl = 'https://example.com/my-pet.png'
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+
+    await screen.findByTestId('orb-stage-2')
+    expect(screen.getByTestId('orb-avatar-2')).toHaveTextContent('https://example.com/my-pet.png')
+  })
+
+  it('never puts the current portrait on a form the user passed before generating', async () => {
     mockAvatarUrl = 'https://example.com/my-pet.png'
     agentService.getJourney.mockResolvedValue(journey(2, {}, false))
     render(<StageJourney />)
 
     await screen.findByTestId('orb-stage-1')
-    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('https://example.com/my-pet.png')
-    expect(screen.getByTestId('orb-avatar-2')).toHaveTextContent('https://example.com/my-pet.png')
+    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('none')
+  })
+
+  it('prefers a stage’s own recorded art over the worn portrait', async () => {
+    mockAvatarUrl = 'https://example.com/my-pet.png'
+    const j = journey(2, {}, false)
+    j.stages[0].art_url = 'https://example.com/wisp.png'
+    agentService.getJourney.mockResolvedValue(j)
+    render(<StageJourney />)
+
+    await screen.findByTestId('orb-stage-1')
+    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('https://example.com/wisp.png')
   })
 
   it('does not put the portrait on a form the user has not reached', async () => {

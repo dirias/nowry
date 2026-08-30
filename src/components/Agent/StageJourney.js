@@ -28,13 +28,22 @@ import { nowryArtFor, LOCKED_SILHOUETTE_FILTER } from './nowryArt'
 const STAGE_COUNT = 6
 
 /** One rung of the ladder. */
-const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, t, locale }) => {
+const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, currentStage, t, locale }) => {
   const { stage, reached, reached_at: reachedAt, xp_remaining: xpRemaining, level_required: levelRequired, art_url: artUrl } = entry
 
-  // Art for THIS form if it exists — including a look-ahead form generated
-  // before it was reached. Falls back to the worn portrait for older accounts
-  // whose per-stage art predates stage_avatars.
-  const formArt = artUrl || (reached ? avatarUrl : null)
+  // Art for THIS form, and only this form.
+  //
+  // The fallback used to be `reached ? avatarUrl : null`, which painted the
+  // CURRENT portrait onto every earlier rung — so a user who generated at
+  // Sprite saw the same picture on Wisp too, claiming their companion looked
+  // like that before it existed. A form the user passed before they ever
+  // generated has no portrait and never will; it shows the procedural shape
+  // instead, which is the truth.
+  //
+  // The one legitimate fallback is the current stage: for accounts that
+  // generated before per-stage storage existed, the worn portrait genuinely
+  // IS this stage's form.
+  const formArt = artUrl || (stage === currentStage ? avatarUrl : null)
 
   const reachedDate = reachedAt ? new Date(reachedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) : null
 
@@ -66,6 +75,8 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
           // art reads as "disabled", while a solid fill reads as "locked but
           // real" and preserves the outline, so Oracle's spread wing and
           // Luminary's crown still tell those rungs apart at a glance.
+          // Reached forms are always full colour, portrait or not — they
+          // happened. Only unreached forms are silhouetted.
           filter: reached ? 'none' : isDefaultCompanion || formArt ? LOCKED_SILHOUETTE_FILTER : 'grayscale(0.85)',
           opacity: reached || isDefaultCompanion || formArt ? 1 : 0.45
         }}
@@ -204,6 +215,7 @@ const StageJourney = () => {
                   accentColor={themeColor}
                   isDefaultCompanion={journey?.is_default_companion ?? true}
                   avatarUrl={avatarUrl}
+                  currentStage={journey?.current_stage}
                   t={t}
                   locale={i18n.language}
                 />
