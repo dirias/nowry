@@ -503,3 +503,39 @@ describe('the create-deck name pre-fill', () => {
     await waitFor(() => expect(screen.getByLabelText('cards.saveToDeck.namePlaceholder')).toHaveValue('Campbell Biology'))
   })
 })
+
+/**
+ * GEN-001. The prop defaulted to `0` while the branch that selects indeterminate
+ * copy tested `expectedTotal == null` — a test `0` fails. Both callers that omit
+ * the prop therefore counted against a total of zero, and `FirstDeckScreen` also
+ * passes `isStreaming`, so onboarding's first generation read "3 of 0 cards
+ * generated" while it worked.
+ */
+describe('the streaming progress line', () => {
+  it('does not count against a total when the caller omits one', async () => {
+    await renderModal({ isStreaming: true })
+
+    expect(screen.getByText(`aiMagic.streaming.progressAuto:${CARDS.length}`)).toBeInTheDocument()
+    expect(screen.queryByText(`aiMagic.streaming.progress:${CARDS.length}`)).not.toBeInTheDocument()
+  })
+
+  it('does not count against a total of zero when a caller passes one', async () => {
+    // `Editor` held `expectedCardCount` at 0 before its first stream; any caller
+    // can still hand over a not-yet-known total as 0 rather than null.
+    await renderModal({ isStreaming: true, expectedTotal: 0 })
+
+    expect(screen.getByText(`aiMagic.streaming.progressAuto:${CARDS.length}`)).toBeInTheDocument()
+  })
+
+  it('counts against a real total when one is known', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 12 })
+
+    expect(screen.getByText(`aiMagic.streaming.progress:${CARDS.length}`)).toBeInTheDocument()
+  })
+
+  it('shows the opening copy before any card has arrived', async () => {
+    await renderModal({ cards: [], isStreaming: true })
+
+    expect(screen.getByText('aiMagic.streaming.generating')).toBeInTheDocument()
+  })
+})

@@ -61,7 +61,7 @@ export default function GeneratedCards({
   onGenerateMore,
   isStreaming = false,
   streamError = null,
-  expectedTotal = 0,
+  expectedTotal = null,
   onRetry,
   generationMeta = null,
   inputWasTruncated = false
@@ -313,14 +313,16 @@ export default function GeneratedCards({
                 </Button>
               </Stack>
 
-              {/* Streaming progress row — indeterminate copy until the total is known (auto mode) */}
+              {/* Streaming progress row — indeterminate copy until the total is known. Auto mode
+                  reports `null`, and a caller that omits the prop entirely gets the same treatment:
+                  counting against a total of zero would read as "3 of 0 cards generated". */}
               {isStreaming && (
                 <Stack direction='row' spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
                   <CircularProgress size='sm' />
                   <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                     {cards.length === 0
                       ? t('aiMagic.streaming.generating')
-                      : expectedTotal == null
+                      : !expectedTotal
                         ? t('aiMagic.streaming.progressAuto', { count: cards.length })
                         : t('aiMagic.streaming.progress', { count: cards.length, total: expectedTotal })}
                   </Typography>

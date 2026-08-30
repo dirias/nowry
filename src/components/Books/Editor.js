@@ -266,7 +266,7 @@ export default function Editor({
   const [isCardStreaming, setIsCardStreaming] = useState(false)
   const [cardStreamError, setCardStreamError] = useState(null) // null | { code }
   // null = adaptive "auto" mode with no total known yet; number = known/requested total
-  const [expectedCardCount, setExpectedCardCount] = useState(0)
+  const [expectedCardCount, setExpectedCardCount] = useState(null)
   // Metadata from the SSE `done` event: { cap, truncated, mode } — null while streaming
   const [generationMeta, setGenerationMeta] = useState(null)
   // True when the selection exceeded MAX_CARD_GEN_INPUT_CHARS and was clipped
