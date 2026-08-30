@@ -13,9 +13,9 @@ const NO_TAGS = Object.freeze([])
 /**
  * Client-side filters for a Browse-mode study session: tags, and the user's mark.
  *
- * Named for tags because that is the dimension it shipped with; it now carries
- * two. They are independent of each other and compose with AND — a marked card
- * tagged `verbs` is what `?marked=1&tags=verbs` shows.
+ * The two dimensions are independent of each other and compose with AND — a
+ * marked card tagged `verbs` is what `?marked=1&tags=verbs` shows. Adding a
+ * third belongs here too, provided it preserves the identity guarantee below.
  *
  * The whole feature is a view over the already-loaded `cards` array — no
  * network, no service layer, nothing that can fail. A malformed `?tags=`
@@ -38,7 +38,7 @@ const NO_TAGS = Object.freeze([])
  *
  * @param {{ cards: Array<object>, enabled: boolean }} params
  */
-export function useBrowseTagFilter({ cards, enabled }) {
+export function useBrowseFilters({ cards, enabled }) {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const availableTags = useMemo(() => (enabled ? countTags(cards) : NO_TAGS), [enabled, cards])
@@ -175,4 +175,4 @@ export function useBrowseTagFilter({ cards, enabled }) {
   }
 }
 
-export default useBrowseTagFilter
+export default useBrowseFilters

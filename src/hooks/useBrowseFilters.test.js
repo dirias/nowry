@@ -2,7 +2,7 @@ import React from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { MemoryRouter, useSearchParams } from 'react-router-dom'
 
-import { useBrowseTagFilter } from './useBrowseTagFilter'
+import { useBrowseFilters } from './useBrowseFilters'
 
 const card = (id, tags, markedAt = null) => ({
   _id: id,
@@ -28,13 +28,13 @@ function renderFilter({ url = '/study/deck-1', cards = CARDS, enabled = true } =
   return renderHook(
     () => {
       const [searchParams] = useSearchParams()
-      return { filter: useBrowseTagFilter({ cards, enabled }), searchParams }
+      return { filter: useBrowseFilters({ cards, enabled }), searchParams }
     },
     { wrapper }
   )
 }
 
-describe('useBrowseTagFilter — disabled (study mode)', () => {
+describe('useBrowseFilters — disabled (study mode)', () => {
   it('reports no tags and hands back the IDENTICAL cards reference even when ?tags= is populated', () => {
     const { result } = renderFilter({ url: '/study/deck-1?mode=study&tags=verbs', enabled: false })
 
@@ -46,7 +46,7 @@ describe('useBrowseTagFilter — disabled (study mode)', () => {
   })
 })
 
-describe('useBrowseTagFilter — enabled (browse mode)', () => {
+describe('useBrowseFilters — enabled (browse mode)', () => {
   it('exposes the deck tag tally', () => {
     const { result } = renderFilter({ url: '/study/deck-1?mode=browse' })
 
@@ -138,7 +138,7 @@ describe('useBrowseTagFilter — enabled (browse mode)', () => {
  * composition, URL round-tripping, and the identity guarantee that both
  * dimensions share.
  */
-describe('useBrowseTagFilter — the mark dimension, disabled (study mode)', () => {
+describe('useBrowseFilters — the mark dimension, disabled (study mode)', () => {
   it('ignores ?marked=1 entirely and hands back the IDENTICAL cards reference', () => {
     const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1', enabled: false })
 
@@ -156,7 +156,7 @@ describe('useBrowseTagFilter — the mark dimension, disabled (study mode)', () 
   })
 })
 
-describe('useBrowseTagFilter — the mark dimension, enabled (browse mode)', () => {
+describe('useBrowseFilters — the mark dimension, enabled (browse mode)', () => {
   it('narrows to marked cards on ?marked=1', () => {
     const { result } = renderFilter({ url: '/study/deck-1?mode=browse&marked=1' })
 

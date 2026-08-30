@@ -476,8 +476,16 @@ export default function ManageContent({
                 variant={filterType === key ? 'solid' : 'soft'}
                 color={filterType === key ? color : 'neutral'}
                 onClick={() => setFilterType(key)}
-                sx={{ cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }}
-                aria-pressed={filterType === key}
+                sx={{ cursor: 'pointer' }}
+                slotProps={{
+                  // Joy puts the clickable element in the `action` slot; the Chip
+                  // root is a plain div, where `aria-pressed` describes nothing
+                  // a user can operate (DEBT-006).
+                  action: {
+                    'aria-pressed': filterType === key,
+                    sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                  }
+                }}
               >
                 {label}
               </Chip>
@@ -530,8 +538,13 @@ export default function ManageContent({
                   variant={selectedTags.length === 0 ? 'solid' : 'soft'}
                   color={selectedTags.length === 0 ? 'primary' : 'neutral'}
                   onClick={onClearTags}
-                  sx={{ cursor: 'pointer', fontWeight: 600, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }}
-                  aria-pressed={selectedTags.length === 0}
+                  sx={{ cursor: 'pointer', fontWeight: 'lg' }}
+                  slotProps={{
+                    action: {
+                      'aria-pressed': selectedTags.length === 0,
+                      sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                    }
+                  }}
                 >
                   {t('cards.tags.all')}
                 </Chip>
@@ -547,8 +560,13 @@ export default function ManageContent({
                         {count}
                       </Typography>
                     }
-                    sx={{ cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }}
-                    aria-pressed={selectedTags.includes(tag)}
+                    sx={{ cursor: 'pointer' }}
+                    slotProps={{
+                      action: {
+                        'aria-pressed': selectedTags.includes(tag),
+                        sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                      }
+                    }}
                   >
                     {tag}
                   </Chip>

@@ -20,7 +20,7 @@ import { act } from 'react-dom/test-utils'
 let mockSearchParams = new URLSearchParams()
 
 // Phase 34: useSearchParams is now called TWICE per render — once by
-// StudySession (for `mode`) and once by useBrowseTagFilter (for `tags`) — and
+// StudySession (for `mode`) and once by useBrowseFilters (for `tags`) — and
 // the second caller WRITES. The previous read-only `[mockSearchParams]` shape
 // returned an undefined setter, so this mock now backs each call site with real
 // React state and mirrors every write back into the module-level

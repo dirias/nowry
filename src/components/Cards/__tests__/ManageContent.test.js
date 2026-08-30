@@ -239,3 +239,45 @@ describe('MARK-005 — the marked filter', () => {
     expect(onMarkedOnlyToggle).not.toHaveBeenCalled()
   })
 })
+
+/**
+ * DEBT-006 — toggle state must live on something a user can operate.
+ *
+ * Joy's `Chip` renders its clickable element in the `action` slot; the root is
+ * a plain `div`. `aria-pressed` on that root describes nothing operable, and —
+ * the part that actually bites — a click dispatched at it never reaches the
+ * handler. The mark chip hit exactly this during MARK-005: the label resolved,
+ * the test looked right, and nothing happened.
+ */
+describe('DEBT-006 — filter chips expose their state on the control, not the wrapper', () => {
+  const pressedElements = () => Array.from(document.querySelectorAll('[aria-pressed]'))
+
+  it('puts aria-pressed on a real button for every filter chip', () => {
+    renderManageContent({
+      markedOnly: true,
+      selectedTags: ['language'],
+      availableTags: [{ tag: 'language', count: 1 }]
+    })
+    openCardsFilterPanel()
+
+    const pressed = pressedElements()
+    expect(pressed.length).toBeGreaterThan(0)
+
+    for (const element of pressed) {
+      // A div carrying aria-pressed is the defect; every one must be operable.
+      expect(element.tagName.toLowerCase()).toBe('button')
+    }
+  })
+
+  it('reports a type-filter click, proving the handler is reachable', () => {
+    renderManageContent()
+    openCardsFilterPanel()
+
+    // Joy's action button is an overlay sibling of the label, named through
+    // `aria-labelledby` — so the label text is not itself the click target.
+    fireEvent.click(screen.getByRole('button', { name: 'cards.manage_content.filters.quizzes' }))
+
+    // Selecting a type narrows the active filters, which surfaces clear-all.
+    expect(screen.getAllByText('filters.clearAll').length).toBeGreaterThan(0)
+  })
+})

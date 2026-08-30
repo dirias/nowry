@@ -36,7 +36,7 @@ import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, Swipe
 import { cardsService, decksService } from '../../api/services'
 import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
-import { useBrowseTagFilter } from '../../hooks/useBrowseTagFilter'
+import { useBrowseFilters } from '../../hooks/useBrowseFilters'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import BrowseTagFilter from './BrowseTagFilter'
 import MarkToggle from './MarkToggle'
@@ -327,7 +327,7 @@ export default function StudySession() {
   // deliberate exceptions, both marked at their site: the deck-empty gate and
   // handleGrade's setCards mutation source, which must stay the FULL array.
   const { availableTags, selectedTags, markedOnly, markedCount, visibleCards, setTags, clearFilters, toggleMarkedOnly, isFiltering } =
-    useBrowseTagFilter({
+    useBrowseFilters({
       cards,
       enabled: isReadOnlyMode
     })
