@@ -1157,7 +1157,12 @@
       "title": "Review generated cards",
       "selectedNodes": "From {{count}} selected nodes",
       "confirmDeck": "Choose target deck",
-      "success": "{{count}} cards added to {{deckName}}"
+      "success": "{{count}} cards added to {{deckName}}",
+      "stages": {
+        "s0": "Reading your notes...",
+        "s1": "Finding the ideas worth keeping...",
+        "s2": "Turning them into cards..."
+      }
     },
     "shareModal": {
       "sent": "Invitation sent!",
@@ -3148,7 +3153,12 @@
       "generatingHint": "AI is working — this may take up to a minute",
       "error": "Couldn't generate from book. Please try again.",
       "errorQuiz": "Couldn't generate quiz from book. Please try again.",
-      "errorAiService": "AI service is temporarily unavailable. Please try again in a moment."
+      "errorAiService": "AI service is temporarily unavailable. Please try again in a moment.",
+      "stages": {
+        "s0": "Reading your book...",
+        "s1": "Picking out what matters...",
+        "s2": "Writing it up..."
+      }
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
@@ -3169,6 +3179,11 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      },
+      "stages": {
+        "s0": "Reading your deck...",
+        "s1": "Comparing your cards...",
+        "s2": "Writing up what it found..."
       }
     },
     "tts": {
@@ -3227,6 +3242,11 @@
         "flowchart": "Flowchart",
         "sequence": "Sequence Diagram",
         "er": "ER Diagram"
+      },
+      "stages": {
+        "s0": "Reading the passage...",
+        "s1": "Mapping the relationships...",
+        "s2": "Drawing it out..."
       }
     }
   },
@@ -3254,7 +3274,12 @@
     "emptyTitle": "No diagram yet",
     "emptyBody": "Choose a diagram type and generate one from your content.",
     "titleField": "Title",
-    "titlePrefix": "Visual"
+    "titlePrefix": "Visual",
+    "stages": {
+      "s0": "Reading your text...",
+      "s1": "Choosing a structure...",
+      "s2": "Drawing the diagram..."
+    }
   },
   "bugs": {
     "filters": {
@@ -3360,6 +3385,11 @@
       "suggestions": "No suggestions available.",
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
+    },
+    "stages": {
+      "s0": "Reading your plan...",
+      "s1": "Looking for patterns...",
+      "s2": "Writing your analysis..."
     }
   },
   "sheets": {

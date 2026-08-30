@@ -2271,7 +2271,12 @@
       "generatingQuiz": "Generating quiz…",
       "generatingHint": "AI is working — this may take up to a minute",
       "error": "Couldn't generate from book. Please try again.",
-      "errorQuiz": "Couldn't generate quiz from book. Please try again."
+      "errorQuiz": "Couldn't generate quiz from book. Please try again.",
+      "stages": {
+        "s0": "Dein Buch wird gelesen...",
+        "s1": "Das Wesentliche wird ausgewählt...",
+        "s2": "Das Ergebnis wird verfasst..."
+      }
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
@@ -2292,6 +2297,11 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      },
+      "stages": {
+        "s0": "Dein Stapel wird gelesen...",
+        "s1": "Deine Karten werden verglichen...",
+        "s2": "Die Ergebnisse werden zusammengefasst..."
       }
     },
     "tts": {
@@ -2349,6 +2359,11 @@
         "flowchart": "Flowchart",
         "sequence": "Sequence Diagram",
         "er": "ER Diagram"
+      },
+      "stages": {
+        "s0": "Der Abschnitt wird gelesen...",
+        "s1": "Die Zusammenhänge werden erfasst...",
+        "s2": "Es wird gezeichnet..."
       }
     }
   },
@@ -2376,7 +2391,12 @@
     "emptyTitle": "Noch kein Diagramm",
     "emptyBody": "Wähle einen Diagrammtyp und generiere eines aus deinem Inhalt.",
     "titleField": "Titel",
-    "titlePrefix": "Visuell"
+    "titlePrefix": "Visuell",
+    "stages": {
+      "s0": "Dein Text wird gelesen...",
+      "s1": "Eine Struktur wird gewählt...",
+      "s2": "Das Diagramm wird gezeichnet..."
+    }
   },
   "accountSettings": {
     "plan": {
@@ -2454,6 +2474,13 @@
         "alreadyInvited": "This user already has access.",
         "notOwner": "Only the board owner can share this board"
       }
+    },
+    "convertToCardsModal": {
+      "stages": {
+        "s0": "Deine Notizen werden gelesen...",
+        "s1": "Die wichtigen Ideen werden gesucht...",
+        "s2": "Sie werden in Karten umgewandelt..."
+      }
     }
   },
   "calendarPage": {
@@ -2514,6 +2541,11 @@
       "suggestions": "No suggestions available.",
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
+    },
+    "stages": {
+      "s0": "Dein Plan wird gelesen...",
+      "s1": "Nach Mustern wird gesucht...",
+      "s2": "Deine Analyse wird verfasst..."
     }
   },
   "sheets": {

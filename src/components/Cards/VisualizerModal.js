@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option, Stack, CircularProgress, Alert } from '@mui/joy'
+import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option, Stack, Alert } from '@mui/joy'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
 import { visualizerService, cardsService } from '../../api/services'
 import { useSaveToDeck } from '../../hooks/useSaveToDeck'
 import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
 
 mermaid.initialize({
   startOnLoad: false,
@@ -62,6 +64,16 @@ const MermaidChart = ({ code }) => {
   )
 }
 
+// Per-surface narration (PRD A5). Generic copy would be worse than the spinner it
+// replaces: being specific about the work is the whole value of the line.
+const VISUALIZER_STAGES = [
+  { after: 0, icon: '📖', msgKey: 'aiVisualizer.stages.s0' },
+  { after: 6, icon: '🔍', msgKey: 'aiVisualizer.stages.s1' },
+  { after: 14, icon: '✍️', msgKey: 'aiVisualizer.stages.s2' }
+]
+
+const VISUALIZER_ESTIMATED_MS = 20000
+
 export default function VisualizerModal({ open, onClose, text }) {
   const [vizType, setVizType] = useState('mindmap')
   const [loading, setLoading] = useState(false)
@@ -73,6 +85,13 @@ export default function VisualizerModal({ open, onClose, text }) {
   const { t } = useTranslation()
 
   const saveToDeck = useSaveToDeck('visual')
+
+  const progress = useGenerationProgress({
+    active: loading,
+    failed: Boolean(error),
+    estimatedMs: VISUALIZER_ESTIMATED_MS,
+    stages: VISUALIZER_STAGES
+  })
 
   const handleGenerate = async () => {
     if (!text) return
@@ -206,13 +225,10 @@ export default function VisualizerModal({ open, onClose, text }) {
             </Button>
           </Stack>
 
-          {loading && (
-            <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
-              <CircularProgress size='lg' />
-              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                {t('aiVisualizer.generating')}
-              </Typography>
-            </Stack>
+          {progress.visible && (
+            <Box sx={{ py: 8, px: { xs: 0, sm: 4 } }}>
+              <GenerationProgress progress={progress} label={t('aiVisualizer.generating')} />
+            </Box>
           )}
 
           {!loading && !result && (

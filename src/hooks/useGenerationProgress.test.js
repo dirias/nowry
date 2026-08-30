@@ -104,7 +104,10 @@ describe('useGenerationProgress', () => {
   beforeEach(() => jest.useFakeTimers())
   afterEach(() => jest.useRealTimers())
 
-  const advance = (ms) => act(() => { jest.advanceTimersByTime(ms) })
+  const advance = (ms) =>
+    act(() => {
+      jest.advanceTimersByTime(ms)
+    })
 
   it('shows nothing at all while idle', () => {
     const { result } = renderHook(() => useGenerationProgress({ active: false, estimatedMs: 10000 }))

@@ -2936,7 +2936,12 @@
       "generatingHint": "AI is working — this may take up to a minute",
       "error": "Couldn't generate from book. Please try again.",
       "errorQuiz": "Couldn't generate quiz from book. Please try again.",
-      "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento."
+      "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento.",
+      "stages": {
+        "s0": "Leyendo tu libro...",
+        "s1": "Seleccionando lo importante...",
+        "s2": "Redactando el resultado..."
+      }
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
@@ -2957,6 +2962,11 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      },
+      "stages": {
+        "s0": "Leyendo tu mazo...",
+        "s1": "Comparando tus tarjetas...",
+        "s2": "Resumiendo los hallazgos..."
       }
     },
     "tts": {
@@ -3015,6 +3025,11 @@
         "flowchart": "Flowchart",
         "sequence": "Sequence Diagram",
         "er": "ER Diagram"
+      },
+      "stages": {
+        "s0": "Leyendo el fragmento...",
+        "s1": "Trazando las relaciones...",
+        "s2": "Dibujándolo..."
       }
     }
   },
@@ -3042,7 +3057,12 @@
     "emptyTitle": "Aún no hay diagrama",
     "emptyBody": "Elige un tipo de diagrama y genera uno a partir de tu contenido.",
     "titleField": "Título",
-    "titlePrefix": "Visual"
+    "titlePrefix": "Visual",
+    "stages": {
+      "s0": "Leyendo tu texto...",
+      "s1": "Eligiendo una estructura...",
+      "s2": "Dibujando el diagrama..."
+    }
   },
   "accountSettings": {
     "plan": {
@@ -3120,6 +3140,13 @@
         "alreadyInvited": "This user already has access.",
         "notOwner": "Only the board owner can share this board"
       }
+    },
+    "convertToCardsModal": {
+      "stages": {
+        "s0": "Leyendo tus notas...",
+        "s1": "Buscando las ideas que vale la pena guardar...",
+        "s2": "Convirtiéndolas en tarjetas..."
+      }
     }
   },
   "calendarPage": {
@@ -3180,6 +3207,11 @@
       "suggestions": "No suggestions available.",
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
+    },
+    "stages": {
+      "s0": "Leyendo tu plan...",
+      "s1": "Buscando patrones...",
+      "s2": "Redactando tu análisis..."
     }
   },
   "sheets": {

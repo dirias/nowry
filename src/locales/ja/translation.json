@@ -2231,7 +2231,12 @@
       "generatingQuiz": "Generating quiz…",
       "generatingHint": "AI is working — this may take up to a minute",
       "error": "Couldn't generate from book. Please try again.",
-      "errorQuiz": "Couldn't generate quiz from book. Please try again."
+      "errorQuiz": "Couldn't generate quiz from book. Please try again.",
+      "stages": {
+        "s0": "本を読んでいます...",
+        "s1": "重要な内容を選んでいます...",
+        "s2": "結果をまとめています..."
+      }
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
@@ -2252,6 +2257,11 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      },
+      "stages": {
+        "s0": "デッキを読んでいます...",
+        "s1": "カードを比較しています...",
+        "s2": "結果をまとめています..."
       }
     },
     "tts": {
@@ -2309,6 +2319,11 @@
         "flowchart": "Flowchart",
         "sequence": "Sequence Diagram",
         "er": "ER Diagram"
+      },
+      "stages": {
+        "s0": "文章を読んでいます...",
+        "s1": "関係を整理しています...",
+        "s2": "図にしています..."
       }
     }
   },
@@ -2336,7 +2351,12 @@
     "emptyTitle": "まだ図がありません",
     "emptyBody": "図の種類を選び、内容から生成してください。",
     "titleField": "タイトル",
-    "titlePrefix": "ビジュアル"
+    "titlePrefix": "ビジュアル",
+    "stages": {
+      "s0": "テキストを読んでいます...",
+      "s1": "構造を選んでいます...",
+      "s2": "図を描いています..."
+    }
   },
   "accountSettings": {
     "plan": {
@@ -2414,6 +2434,13 @@
         "alreadyInvited": "This user already has access.",
         "notOwner": "Only the board owner can share this board"
       }
+    },
+    "convertToCardsModal": {
+      "stages": {
+        "s0": "ノートを読んでいます...",
+        "s1": "残すべき考えを探しています...",
+        "s2": "カードに変換しています..."
+      }
     }
   },
   "calendarPage": {
@@ -2480,6 +2507,11 @@
       "suggestions": "No suggestions available.",
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
+    },
+    "stages": {
+      "s0": "プランを読んでいます...",
+      "s1": "パターンを探しています...",
+      "s2": "分析をまとめています..."
     }
   },
   "sheets": {

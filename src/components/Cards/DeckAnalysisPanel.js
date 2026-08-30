@@ -7,7 +7,6 @@ import Button from '@mui/joy/Button'
 import Card from '@mui/joy/Card'
 import Alert from '@mui/joy/Alert'
 import Divider from '@mui/joy/Divider'
-import CircularProgress from '@mui/joy/CircularProgress'
 import Snackbar from '@mui/joy/Snackbar'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { cardsService } from '../../api/services'
@@ -15,6 +14,19 @@ import { apiClient } from '../../api/client'
 import { ENDPOINTS } from '../../api/utils/endpoints'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
+
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
+
+// Per-surface narration (PRD A5). Generic copy would be worse than the spinner it
+// replaces: being specific about the work is the whole value of the line.
+const DECK_ANALYSIS_STAGES = [
+  { after: 0, icon: '📖', msgKey: 'aiMagic.analyzeDeck.stages.s0' },
+  { after: 10, icon: '🔍', msgKey: 'aiMagic.analyzeDeck.stages.s1' },
+  { after: 22, icon: '✍️', msgKey: 'aiMagic.analyzeDeck.stages.s2' }
+]
+
+const DECK_ANALYSIS_ESTIMATED_MS = 30000
 
 export default function DeckAnalysisPanel({ deckId, onClose }) {
   const { t } = useTranslation()
@@ -25,6 +37,13 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
   const [error, setError] = useState(null)
   const [analysis, setAnalysis] = useState(null)
   const [acceptError, setAcceptError] = useState(null)
+
+  const progress = useGenerationProgress({
+    active: loading,
+    failed: Boolean(error),
+    estimatedMs: DECK_ANALYSIS_ESTIMATED_MS,
+    stages: DECK_ANALYSIS_STAGES
+  })
 
   // Local copies of suggestion lists for optimistic UI updates
   const [duplicates, setDuplicates] = useState([])
@@ -92,14 +111,11 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
   const isEmpty = analysis && !duplicates.length && !gaps.length && !rewrites.length
 
   // Loading state
-  if (loading) {
+  if (progress.visible) {
     return (
-      <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
-        <CircularProgress size='md' />
-        <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-          {t('aiMagic.analyzeDeck.loading')}
-        </Typography>
-      </Stack>
+      <Box sx={{ py: 8, px: { xs: 2, sm: 3 } }}>
+        <GenerationProgress progress={progress} label={t('aiMagic.analyzeDeck.loading')} />
+      </Box>
     )
   }
 
