@@ -539,3 +539,59 @@ describe('the streaming progress line', () => {
     expect(screen.getByText('aiMagic.streaming.generating')).toBeInTheDocument()
   })
 })
+
+/**
+ * GEN-003. The stream delivers cards one at a time and the dialog knew how many
+ * were coming, but it drew a single skeleton — so a twelve-card generation looked
+ * identical at card one and card eleven. The placeholders are the progress here;
+ * the bar is the frame around them.
+ */
+describe('the streaming placeholders', () => {
+  const pending = () => screen.queryAllByTestId('pending-card')
+
+  it('draws one placeholder per card still expected', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 5 })
+
+    // Two of five have arrived.
+    expect(pending()).toHaveLength(3)
+  })
+
+  it('caps them, so a large generation is not a wall of grey', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 40 })
+
+    expect(pending()).toHaveLength(6)
+  })
+
+  it('keeps a single placeholder when the total is unknown', async () => {
+    // Auto mode has nothing to subtract from — one placeholder still says
+    // "something else is coming", which is all that is actually known.
+    await renderModal({ isStreaming: true })
+
+    expect(pending()).toHaveLength(1)
+  })
+
+  it('draws none once every expected card has arrived', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: CARDS.length })
+
+    expect(pending()).toHaveLength(0)
+  })
+
+  it('clears them when the stream ends', async () => {
+    await renderModal({ isStreaming: false, expectedTotal: 5 })
+
+    expect(pending()).toHaveLength(0)
+  })
+
+  it('shows a progress bar carrying the real count', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 4 })
+
+    const bar = screen.getByRole('progressbar', { name: 'aiMagic.streaming.generating' })
+    expect(bar).toHaveAttribute('aria-valuenow', '50')
+  })
+
+  it('shows no progress bar when nothing is streaming', async () => {
+    await renderModal()
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+  })
+})
