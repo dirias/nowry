@@ -300,7 +300,6 @@ export default function StudySession() {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showExplanation, setShowExplanation] = useState(false)
   const [mermaidSvg, setMermaidSvg] = useState('')
-  const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [reviewQueue, setReviewQueue] = useState([])
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
@@ -999,16 +998,15 @@ export default function StudySession() {
         handlePrev()
       }
     } else {
+      // Only an upward swipe is a gesture here. A downward swipe used to open
+      // the voice-settings panel, but on mobile it was indistinguishable from
+      // an ordinary scroll (and from pull-to-refresh), so it fired by accident.
+      // The panel keeps its own gear button in TTSControls' compact toolbar.
       const isUpSwipe = distanceY > minSwipeDistance
-      const isDownSwipe = distanceY < -minSwipeDistance
 
       if (isUpSwipe) {
         setShowSwipeHint(false)
         handleFlip()
-      }
-      if (isDownSwipe) {
-        setShowSwipeHint(false)
-        setShowVoiceSettings(true)
       }
     }
   }, [handleNext, handlePrev, handleFlip])
@@ -1322,8 +1320,6 @@ export default function StudySession() {
             {/* Embedded TTS Controls */}
             <TTSControls
               compact
-              settingsOpen={showVoiceSettings}
-              onSettingsChange={setShowVoiceSettings}
               voiceSettings={isFlipped ? activeVoiceSettings.back : activeVoiceSettings.front}
               onVoiceSettingsChange={handleVoiceSettingsChange}
               text={
