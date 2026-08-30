@@ -52,6 +52,7 @@ import {
   Lock as LockIcon,
   Psychology as PsychologyIcon
 } from '@mui/icons-material'
+import { patchCardInCache } from '../../api/cardCache'
 import CardPreviewModal from './CardPreviewModal'
 import MarkToggle from './MarkToggle'
 import DeckAnalysisPanel from './DeckAnalysisPanel'
@@ -103,16 +104,13 @@ export default function ManageContent({
   const [filterOpen, setFilterOpen] = useState(false)
 
   /*
-   * Marks the user has toggled since `cards` was last fetched, keyed by card id.
-   * `cards` is a prop owned by the parent's data hook, so a row (or the preview
-   * modal on top of it) cannot write back into it — this overlay is what lets
-   * the list behind the modal reflect a new mark without a refetch. It is
-   * cleared naturally on the next load, when the server's value arrives.
+   * `cards` is a prop owned by the parent's data hook, so neither a row nor the
+   * preview modal above it can write back into this list directly. They report
+   * the change into the React Query cache instead, which re-renders every
+   * subscriber — the rows, the modal, and any other view of the same cards.
    */
-  const [markOverrides, setMarkOverrides] = useState({})
-
   const handleMarkChange = useCallback((cardId, markedAt) => {
-    setMarkOverrides((prev) => ({ ...prev, [cardId]: markedAt }))
+    patchCardInCache(cardId, { marked_at: markedAt })
   }, [])
 
   const handleViewChange = (mode) => {
@@ -210,16 +208,11 @@ export default function ManageContent({
   // Only apply the local card-type filter on what the API returned.
   const filteredCards = useMemo(
     () =>
-      cards
-        .filter((card) => {
-          const cardType = card.card_type || 'flashcard'
-          return filterType === 'all' || cardType === filterType
-        })
-        .map((card) => {
-          const id = card._id || card.id
-          return id in markOverrides ? { ...card, marked_at: markOverrides[id] } : card
-        }),
-    [cards, filterType, markOverrides]
+      cards.filter((card) => {
+        const cardType = card.card_type || 'flashcard'
+        return filterType === 'all' || cardType === filterType
+      }),
+    [cards, filterType]
   )
 
   const filters = [
