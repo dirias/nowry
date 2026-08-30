@@ -4,9 +4,19 @@ import { MemoryRouter, useSearchParams } from 'react-router-dom'
 
 import { useBrowseTagFilter } from './useBrowseTagFilter'
 
-const card = (id, tags) => ({ _id: id, id, title: id, ...(tags === undefined ? {} : { tags }) })
+const card = (id, tags, markedAt = null) => ({
+  _id: id,
+  id,
+  title: id,
+  marked_at: markedAt,
+  ...(tags === undefined ? {} : { tags })
+})
 
-const CARDS = [card('c1', ['verbs']), card('c2', ['nouns']), card('c3', ['verbs', 'nouns']), card('c4')]
+const MARKED_AT = '2026-08-30T10:00:00'
+
+// c1 and c4 are marked; c1 also carries a tag, so the two dimensions can be
+// shown to compose rather than merely coexist.
+const CARDS = [card('c1', ['verbs'], MARKED_AT), card('c2', ['nouns']), card('c3', ['verbs', 'nouns']), card('c4', undefined, MARKED_AT)]
 
 /**
  * Renders the hook under a real router at `initialUrl`, and also surfaces the
@@ -117,5 +127,115 @@ describe('useBrowseTagFilter — enabled (browse mode)', () => {
 
     expect(result.current.searchParams.get('tags')).toBe('verbs,nouns')
     expect(result.current.filter.visibleCards.map((entry) => entry.id)).toEqual(['c1', 'c2', 'c3'])
+  })
+})
+
+/**
+ * MARK-003 — the mark as a second dimension.
+ *
+ * The first block is the one that matters: the mark must be as unable to reach
+ * the SM-2 queue as the tag filter already is (ADR-010). The rest pin
+ * composition, URL round-tripping, and the identity guarantee that both
+ * dimensions share.
+ */
+describe('useBrowseTagFilter — the mark dimension, disabled (study mode)', () => {
+  it('ignores ?marked=1 entirely and hands back the IDENTICAL cards reference', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1', enabled: false })
+
+    expect(result.current.filter.markedOnly).toBe(false)
+    expect(result.current.filter.isFiltering).toBe(false)
+    // toBe — a crafted URL must not shrink what the scheduler chose.
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+  })
+
+  it('ignores ?marked=1 combined with ?tags=, which is the same attack twice', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1&tags=verbs', enabled: false })
+
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+    expect(result.current.filter.markedCount).toBe(0)
+  })
+})
+
+describe('useBrowseTagFilter — the mark dimension, enabled (browse mode)', () => {
+  it('narrows to marked cards on ?marked=1', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse&marked=1' })
+
+    expect(result.current.filter.markedOnly).toBe(true)
+    expect(result.current.filter.isFiltering).toBe(true)
+    expect(result.current.filter.visibleCards.map((entry) => entry.id)).toEqual(['c1', 'c4'])
+  })
+
+  it('reports how many cards are marked before any filter narrows them', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse' })
+
+    // Counted over the whole deck, not the visible subset — this is what tells
+    // "nothing is marked" apart from "this combination matched nothing".
+    expect(result.current.filter.markedCount).toBe(2)
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+  })
+
+  it('composes with tags using AND', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse&marked=1&tags=verbs' })
+
+    // c1 is both marked and tagged; c3 is tagged but unmarked; c4 is marked but untagged.
+    expect(result.current.filter.visibleCards.map((entry) => entry.id)).toEqual(['c1'])
+  })
+
+  it('treats any value other than 1 as off', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse&marked=true' })
+
+    expect(result.current.filter.markedOnly).toBe(false)
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+  })
+
+  it('keeps the identical cards reference when neither dimension is active', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse' })
+
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+  })
+
+  it('setMarkedOnly writes and clears the param without disturbing mode or tags', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse&tags=verbs' })
+
+    act(() => result.current.filter.setMarkedOnly(true))
+    expect(result.current.searchParams.get('marked')).toBe('1')
+    expect(result.current.searchParams.get('mode')).toBe('browse')
+    expect(result.current.searchParams.get('tags')).toBe('verbs')
+
+    act(() => result.current.filter.setMarkedOnly(false))
+    expect(result.current.searchParams.has('marked')).toBe(false)
+    expect(result.current.searchParams.get('tags')).toBe('verbs')
+  })
+
+  it('toggleMarkedOnly flips the dimension on then off', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse' })
+
+    act(() => result.current.filter.toggleMarkedOnly())
+    expect(result.current.filter.markedOnly).toBe(true)
+
+    act(() => result.current.filter.toggleMarkedOnly())
+    expect(result.current.filter.markedOnly).toBe(false)
+    expect(result.current.searchParams.has('marked')).toBe(false)
+  })
+
+  it('clearFilters drops both dimensions and restores the identical reference', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse&marked=1&tags=verbs' })
+
+    act(() => result.current.filter.clearFilters())
+
+    expect(result.current.searchParams.has('marked')).toBe(false)
+    expect(result.current.searchParams.has('tags')).toBe(false)
+    expect(result.current.searchParams.get('mode')).toBe('browse')
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+  })
+
+  it('does not push a history entry per filter change', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=browse' })
+
+    act(() => result.current.filter.setMarkedOnly(true))
+
+    // replace, not push — the way out of the session must stay one click away.
+    expect(result.current.searchParams.get('mode')).toBe('browse')
+    expect(result.current.filter.markedOnly).toBe(true)
   })
 })
