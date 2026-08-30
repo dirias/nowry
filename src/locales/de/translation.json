@@ -2006,7 +2006,12 @@
     },
     "mark": {
       "mark": "Für später markieren",
-      "unmark": "Markierung entfernen"
+      "unmark": "Markierung entfernen",
+      "filter": {
+        "label": "Nur markierte",
+        "showMarked": "Nur markierte Karten anzeigen",
+        "showAll": "Alle Karten anzeigen"
+      }
     }
   },
   "books": {
@@ -2641,5 +2646,8 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s vergangen"
+  },
+  "filters": {
+    "marked": "Markiert"
   }
 }

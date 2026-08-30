@@ -2028,7 +2028,12 @@
     },
     "mark": {
       "mark": "Marquer pour plus tard",
-      "unmark": "Retirer la marque"
+      "unmark": "Retirer la marque",
+      "filter": {
+        "label": "Marquées uniquement",
+        "showMarked": "Afficher uniquement les cartes marquées",
+        "showAll": "Afficher toutes les cartes"
+      }
     }
   },
   "books": {
@@ -2663,5 +2668,8 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s écoulées"
+  },
+  "filters": {
+    "marked": "Marquées"
   }
 }

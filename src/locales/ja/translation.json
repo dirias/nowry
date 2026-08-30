@@ -2032,7 +2032,12 @@
     },
     "mark": {
       "mark": "後で見直す",
-      "unmark": "マークを外す"
+      "unmark": "マークを外す",
+      "filter": {
+        "label": "マークのみ",
+        "showMarked": "マークしたカードだけを表示",
+        "showAll": "すべてのカードを表示"
+      }
     }
   },
   "subscription": {
@@ -2606,5 +2611,8 @@
   },
   "generation": {
     "elapsedSeconds": "経過 {{seconds}} 秒"
+  },
+  "filters": {
+    "marked": "マーク済み"
   }
 }

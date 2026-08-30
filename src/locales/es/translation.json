@@ -1308,7 +1308,12 @@
     },
     "mark": {
       "mark": "Marcar para después",
-      "unmark": "Quitar marca"
+      "unmark": "Quitar marca",
+      "filter": {
+        "label": "Solo marcadas",
+        "showMarked": "Mostrar solo las tarjetas marcadas",
+        "showAll": "Mostrar todas las tarjetas"
+      }
     }
   },
   "filters": {
@@ -1319,7 +1324,8 @@
     "remove": {
       "type": "Eliminar filtro de tipo",
       "tag": "Eliminar filtro de etiqueta {{tag}}"
-    }
+    },
+    "marked": "Marcadas"
   },
   "subscription": {
     "upgrade": "Mejorar Plan",

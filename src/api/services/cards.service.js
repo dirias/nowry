@@ -344,11 +344,13 @@ export const cardsService = {
    * @param {number} limit - Number of cards to fetch
    * @param {string[]} tags - Optional tag filters (OR logic on backend)
    * @param {string} search - Optional search query (server-side, title/content/tags/deck)
+   * @param {boolean} markedOnly - Restrict to cards the user has marked (ADR-010)
    */
-  async getAll(skip = 0, limit = 50, tags = [], search = '') {
+  async getAll(skip = 0, limit = 50, tags = [], search = '', markedOnly = false) {
     const params = new URLSearchParams({ skip, limit })
     tags.forEach((t) => params.append('tags', t))
     if (search) params.append('search', search)
+    if (markedOnly) params.append('marked_only', 'true')
     const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
     return data
   },

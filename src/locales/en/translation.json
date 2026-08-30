@@ -1586,7 +1586,12 @@
     },
     "mark": {
       "mark": "Mark for later",
-      "unmark": "Remove mark"
+      "unmark": "Remove mark",
+      "filter": {
+        "label": "Marked only",
+        "showMarked": "Show only marked cards",
+        "showAll": "Show all cards"
+      }
     }
   },
   "filters": {
@@ -1597,7 +1602,8 @@
     "remove": {
       "type": "Remove type filter",
       "tag": "Remove {{tag}} tag filter"
-    }
+    },
+    "marked": "Marked"
   },
   "subscription": {
     "upgrade": "Upgrade",

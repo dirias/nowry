@@ -144,3 +144,98 @@ describe('ManageContent render-count evidence (D-03)', () => {
     expect(commits.length).toBeGreaterThan(0)
   })
 })
+
+/*
+ * MARK-005 — the marked filter in the Content Library.
+ *
+ * The filter itself is server-side (MARK-001) and the query lives in CardHome,
+ * so what is pinned here is the wiring: that the chip reports its state, that
+ * it counts as an active filter, and that clearing filters clears it too — the
+ * last of which had four duplicated implementations before this task
+ * consolidated them onto one `clearAllFilters`.
+ */
+const MARK_CHIP_ON = 'cards.mark.filter.showMarked'
+const MARK_CHIP_OFF = 'cards.mark.filter.showAll'
+
+const renderManageContent = (overrides = {}) => render(<ManageContent {...defaultProps} {...overrides} />)
+
+/** The Cards view, with the filter panel open — where the mark chip lives. */
+const openCardsFilterPanel = () => {
+  // The Cards tab passes a defaultValue to t(), which this file's i18n mock
+  // renders as `key:"default"` — hence the regex rather than an exact match.
+  fireEvent.click(screen.getByLabelText(/cards\.manage_content\.aria\.cards/))
+  fireEvent.click(screen.getByLabelText('filters.toggle'))
+}
+
+describe('MARK-005 — the marked filter', () => {
+  it('offers the filter on the Cards view even when nothing is marked yet', () => {
+    renderManageContent()
+    openCardsFilterPanel()
+
+    // The panel is the only place this can be discovered, so it is shown
+    // unconditionally rather than gated on a mark already existing.
+    expect(screen.getByLabelText(MARK_CHIP_ON)).toBeInTheDocument()
+  })
+
+  it('reports its state as a toggle', () => {
+    renderManageContent({ markedOnly: true })
+    openCardsFilterPanel()
+
+    expect(screen.getByLabelText(MARK_CHIP_OFF)).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('reports the toggle to its owner rather than filtering locally', () => {
+    const onMarkedOnlyToggle = jest.fn()
+    renderManageContent({ onMarkedOnlyToggle })
+    openCardsFilterPanel()
+
+    fireEvent.click(screen.getByLabelText(MARK_CHIP_ON))
+
+    expect(onMarkedOnlyToggle).toHaveBeenCalled()
+  })
+
+  it('counts as an active filter', () => {
+    // The clear-all affordance renders only when activeFilterCount > 0, so its
+    // presence with no tags and no type filter is the count itself.
+    renderManageContent({ markedOnly: true })
+    openCardsFilterPanel()
+
+    expect(screen.getAllByText('filters.clearAll').length).toBeGreaterThan(0)
+  })
+
+  it('is not counted when it is off', () => {
+    renderManageContent({ markedOnly: false })
+    openCardsFilterPanel()
+
+    expect(screen.queryByText('filters.clearAll')).not.toBeInTheDocument()
+  })
+
+  it('is cleared by clear-all, along with the other dimensions', () => {
+    const onClearTags = jest.fn()
+    const onMarkedOnlyToggle = jest.fn()
+    renderManageContent({ markedOnly: true, onClearTags, onMarkedOnlyToggle })
+    openCardsFilterPanel()
+
+    fireEvent.click(screen.getAllByText('filters.clearAll')[0])
+
+    expect(onClearTags).toHaveBeenCalled()
+    expect(onMarkedOnlyToggle).toHaveBeenCalled()
+  })
+
+  it('clear-all does not switch the mark filter ON when it was already off', () => {
+    const onMarkedOnlyToggle = jest.fn()
+    renderManageContent({
+      markedOnly: false,
+      selectedTags: ['language'],
+      availableTags: [{ tag: 'language', count: 1 }],
+      onMarkedOnlyToggle
+    })
+    openCardsFilterPanel()
+
+    fireEvent.click(screen.getAllByText('filters.clearAll')[0])
+
+    // Toggling an inactive dimension would turn the filter on, which is the
+    // opposite of clearing — the reason clearAllFilters guards on `markedOnly`.
+    expect(onMarkedOnlyToggle).not.toHaveBeenCalled()
+  })
+})

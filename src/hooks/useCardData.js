@@ -14,8 +14,8 @@ const PAGE_SIZE = 50
 // set of tags in a different order (or re-deriving the array on every
 // render) still hashes to the same cache entry — mirrors the old
 // apiCache-backed buildCacheKey()'s `[...tags].sort()`.
-function buildFilterKey(tags, search) {
-  return { tags: [...tags].sort(), search: search || '' }
+function buildFilterKey(tags, search, markedOnly) {
+  return { tags: [...tags].sort(), search: search || '', markedOnly: Boolean(markedOnly) }
 }
 
 /**
@@ -38,18 +38,22 @@ function buildFilterKey(tags, search) {
  * `{ cards, total, hasMore, loading, error, reload, fetchMore }` shape they
  * had before this migration.
  */
-export function useCardData(selectedTags = [], search = '') {
+export function useCardData(selectedTags = [], search = '', markedOnly = false) {
   const { user } = useAuth()
   const userId = user?.id ?? null
 
-  const filter = buildFilterKey(selectedTags, search)
+  // `markedOnly` is part of the key, not a post-filter: the server owns this
+  // predicate (MARK-001), and a marked-only list is a genuinely different
+  // result set rather than a subset of the loaded page — filtering client-side
+  // would silently under-report anything past the first page.
+  const filter = buildFilterKey(selectedTags, search, markedOnly)
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     // Scoped by user (and the tag/search filter combo) so filtered variants
     // don't collide with the unfiltered list or with another account's data —
     // see the query-key convention documented in `api/queryClient.js`.
     queryKey: ['cards', userId, filter],
-    queryFn: ({ pageParam = 0 }) => cardsService.getAll(pageParam, PAGE_SIZE, selectedTags, search),
+    queryFn: ({ pageParam = 0 }) => cardsService.getAll(pageParam, PAGE_SIZE, selectedTags, search, markedOnly),
     // Next page's offset is simply how many cards have been loaded so far;
     // returning undefined (when the server says there's no more) is what
     // React Query reads as "no next page" for `hasNextPage`.

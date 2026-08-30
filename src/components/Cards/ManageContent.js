@@ -43,6 +43,8 @@ import {
   GridView,
   ViewList,
   FilterAlt,
+  Bookmark,
+  BookmarkBorder,
   FileUpload,
   Settings,
   CloudUpload,
@@ -74,6 +76,8 @@ export default function ManageContent({
   selectedTags = [],
   onTagToggle,
   onClearTags,
+  markedOnly = false,
+  onMarkedOnlyToggle,
   onSearchChange,
   onImport,
   onNewCard,
@@ -225,7 +229,19 @@ export default function ManageContent({
     { key: 'visual', label: t('cards.manage_content.filters.visual'), color: 'success' }
   ]
 
-  const activeFilterCount = (filterType !== 'all' ? 1 : 0) + selectedTags.length
+  const activeFilterCount = (filterType !== 'all' ? 1 : 0) + selectedTags.length + (markedOnly ? 1 : 0)
+
+  /*
+   * One clear-all, used by all four "clear filters" affordances (the panel
+   * button, the active-filter strip, and the two empty states). They were four
+   * copies of the same two lines, which is precisely how a new dimension ends
+   * up cleared by three of them and not the fourth.
+   */
+  const clearAllFilters = useCallback(() => {
+    setFilterType('all')
+    onClearTags?.()
+    if (markedOnly) onMarkedOnlyToggle?.()
+  }, [markedOnly, onClearTags, onMarkedOnlyToggle])
 
   return (
     <Box>
@@ -467,11 +483,44 @@ export default function ManageContent({
               </Chip>
             ))}
           </Stack>
+          {activeView === 1 && (
+            <>
+              <Typography
+                level='body-xs'
+                sx={{ color: 'text.secondary', mt: 2, mb: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}
+              >
+                {t('filters.marked')}
+              </Typography>
+              <Stack direction='row' flexWrap='wrap' gap={1}>
+                <Chip
+                  size='sm'
+                  variant={markedOnly ? 'solid' : 'soft'}
+                  color='neutral'
+                  onClick={onMarkedOnlyToggle}
+                  startDecorator={markedOnly ? <Bookmark fontSize='small' /> : <BookmarkBorder fontSize='small' />}
+                  sx={{ cursor: 'pointer' }}
+                  slotProps={{
+                    // Joy renders the clickable element in the `action` slot, so
+                    // the toggle semantics belong there — the Chip root is a
+                    // plain div, where `aria-pressed` means nothing and a click
+                    // never reaches the handler.
+                    action: {
+                      'aria-pressed': markedOnly,
+                      'aria-label': markedOnly ? t('cards.mark.filter.showAll') : t('cards.mark.filter.showMarked'),
+                      sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                    }
+                  }}
+                >
+                  {t('cards.mark.filter.label')}
+                </Chip>
+              </Stack>
+            </>
+          )}
           {activeView === 1 && availableTags.length > 0 && (
             <>
               <Typography
                 level='body-xs'
-                sx={{ color: 'text.secondary', mb: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}
+                sx={{ color: 'text.secondary', mt: 2, mb: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}
               >
                 {t('filters.tags')}
               </Typography>
@@ -508,16 +557,7 @@ export default function ManageContent({
             </>
           )}
           {activeFilterCount > 0 && (
-            <Button
-              variant='plain'
-              color='danger'
-              size='sm'
-              sx={{ mt: 1.5, px: 0 }}
-              onClick={() => {
-                setFilterType('all')
-                onClearTags?.()
-              }}
-            >
+            <Button variant='plain' color='danger' size='sm' sx={{ mt: 1.5, px: 0 }} onClick={clearAllFilters}>
               {t('filters.clearAll')}
             </Button>
           )}
@@ -549,16 +589,7 @@ export default function ManageContent({
             </Chip>
           ))}
           {activeFilterCount >= 2 && (
-            <Button
-              variant='plain'
-              size='sm'
-              color='neutral'
-              sx={{ px: 0.5 }}
-              onClick={() => {
-                setFilterType('all')
-                onClearTags?.()
-              }}
-            >
+            <Button variant='plain' size='sm' color='neutral' sx={{ px: 0.5 }} onClick={clearAllFilters}>
               {t('filters.clearAll')}
             </Button>
           )}
@@ -585,16 +616,7 @@ export default function ManageContent({
                   : t('cards.manage_content.empty.decks.start')}
               </Typography>
               {activeFilterCount > 0 && (
-                <Button
-                  variant='plain'
-                  size='sm'
-                  color='primary'
-                  sx={{ mt: 1 }}
-                  onClick={() => {
-                    setFilterType('all')
-                    onClearTags?.()
-                  }}
-                >
+                <Button variant='plain' size='sm' color='primary' sx={{ mt: 1 }} onClick={clearAllFilters}>
                   {t('filters.clearAll')}
                 </Button>
               )}
@@ -973,16 +995,7 @@ export default function ManageContent({
                   : t('cards.manage_content.empty.cards.start')}
               </Typography>
               {activeFilterCount > 0 && (
-                <Button
-                  variant='plain'
-                  size='sm'
-                  color='primary'
-                  sx={{ mt: 1 }}
-                  onClick={() => {
-                    setFilterType('all')
-                    onClearTags?.()
-                  }}
-                >
+                <Button variant='plain' size='sm' color='primary' sx={{ mt: 1 }} onClick={clearAllFilters}>
                   {t('filters.clearAll')}
                 </Button>
               )}

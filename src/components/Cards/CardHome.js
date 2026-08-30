@@ -34,6 +34,10 @@ export default function CardHome() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [errorSnackbar, setErrorSnackbar] = useState(null)
   const [selectedTags, setSelectedTags] = useState([])
+  // The mark filter is server-side (MARK-001), so it lives here beside the other
+  // query inputs rather than inside ManageContent — that component receives
+  // `cards` as a prop and cannot re-run the query itself.
+  const [markedOnly, setMarkedOnly] = useState(false)
   const [availableTags, setAvailableTags] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null, section: 'study' })
@@ -60,7 +64,7 @@ export default function CardHome() {
     loading: cardsLoading,
     reload: reloadCards,
     fetchMore: reloadFetchMore
-  } = useCardData(selectedTags, debouncedSearch)
+  } = useCardData(selectedTags, debouncedSearch, markedOnly)
   const { statistics: hookStats, loading: statsLoading, reload: reloadStatistics } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
@@ -198,6 +202,8 @@ export default function CardHome() {
         selectedTags={selectedTags}
         onTagToggle={(tag) => setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))}
         onClearTags={() => setSelectedTags([])}
+        markedOnly={markedOnly}
+        onMarkedOnlyToggle={() => setMarkedOnly((prev) => !prev)}
         onSearchChange={setSearchQuery}
         onImport={() => setShowImportDeck(true)}
         onNewCard={() => {
