@@ -1937,7 +1937,18 @@
       "error": "Couldn't load cards. Check your connection and try again.",
       "enterFullscreen": "全画面表示にする",
       "exitFullscreen": "全画面表示を終了する",
-      "xpGained_other": "+{{count}} XP"
+      "xpGained_other": "+{{count}} XP",
+      "markFilter": {
+        "label": "マーク済み ({{count}})",
+        "showMarked": "マークしたカードだけを表示",
+        "showAll": "すべてのカードを表示",
+        "showing": "{{total}} 件中 {{shown}} 件を表示",
+        "clear": "マークの絞り込みを解除",
+        "empty": {
+          "title": "まだマークがありません",
+          "body": "学習中にカードをマークすると、ここに集まります。"
+        }
+      }
     },
     "flashcard": {
       "createTitle": "新しいフラッシュカード",

@@ -1491,7 +1491,18 @@
         "alreadyAnswered": "Already graded"
       },
       "xpGained_one": "+{{count}} XP",
-      "xpGained_other": "+{{count}} XP"
+      "xpGained_other": "+{{count}} XP",
+      "markFilter": {
+        "label": "Marked ({{count}})",
+        "showMarked": "Show only marked cards",
+        "showAll": "Show all cards",
+        "showing": "Showing {{shown}} of {{total}}",
+        "clear": "Clear the marked filter",
+        "empty": {
+          "title": "Nothing marked yet",
+          "body": "Mark a card while you study and it will be waiting here."
+        }
+      }
     },
     "deleteModal": {
       "title": "Delete Deck",

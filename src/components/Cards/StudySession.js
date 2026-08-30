@@ -40,6 +40,7 @@ import { useBrowseTagFilter } from '../../hooks/useBrowseTagFilter'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import BrowseTagFilter from './BrowseTagFilter'
 import MarkToggle from './MarkToggle'
+import BrowseMarkFilter from './BrowseMarkFilter'
 import { queryClient } from '../../api/queryClient'
 import { useAuth } from '../../context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
@@ -325,10 +326,11 @@ export default function StudySession() {
   // Everything below reads `visibleCards` instead of `cards`, with two
   // deliberate exceptions, both marked at their site: the deck-empty gate and
   // handleGrade's setCards mutation source, which must stay the FULL array.
-  const { availableTags, selectedTags, visibleCards, setTags, clearTags, isFiltering } = useBrowseTagFilter({
-    cards,
-    enabled: isReadOnlyMode
-  })
+  const { availableTags, selectedTags, markedOnly, markedCount, visibleCards, setTags, clearFilters, toggleMarkedOnly, isFiltering } =
+    useBrowseTagFilter({
+      cards,
+      enabled: isReadOnlyMode
+    })
 
   const handleCardMouseMove = React.useCallback((e) => {
     if (!e.currentTarget) return
@@ -710,9 +712,29 @@ export default function StudySession() {
   const filterSignatureRef = useRef(selectedTags.join(','))
 
   useEffect(() => {
-    const signature = selectedTags.join(',')
+    const signature = `${selectedTags.join(',')}|${markedOnly ? 'marked' : ''}`
 
     if (signature === filterSignatureRef.current) {
+      /*
+       * The list can now shrink with the filter UNCHANGED: unmarking the card
+       * on screen while the mark filter is active removes it from
+       * `visibleCards`. Landing past the end would fall through to `safeIndex`,
+       * which clamps to 0 and dumps the user at the top of the deck — the one
+       * thing MARK-004 must not do. Hold them at the new last card instead.
+       */
+      if (visibleCards.length > 0 && currentIndex >= visibleCards.length) {
+        const lastIndex = visibleCards.length - 1
+        setCurrentIndex(lastIndex)
+        setIsFlipped(false)
+        setSelectedAnswer(null)
+        setShowExplanation(false)
+        setMermaidSvg('')
+        latestStateRef.current = { cards: visibleCards, currentIndex: lastIndex }
+        const tail = visibleCards[lastIndex]
+        anchorCardIdRef.current = tail ? tail._id || tail.id : null
+        return
+      }
+
       // Ordinary navigation — just keep the anchor pointed at what is on screen.
       const card = visibleCards[currentIndex]
       if (card) anchorCardIdRef.current = card._id || card.id
@@ -745,7 +767,7 @@ export default function StudySession() {
     //
     // Note what is NOT here: setSessionComplete. A filter narrowing to zero
     // cards is an empty RESULT, never a finished session.
-  }, [selectedTags, visibleCards, currentIndex])
+  }, [selectedTags, markedOnly, visibleCards, currentIndex])
 
   const handleNext = React.useCallback(() => {
     const { currentIndex: latestIndex } = latestStateRef.current
@@ -1178,6 +1200,14 @@ export default function StudySession() {
   // would strand the user with no way to undo the filter that emptied the
   // screen: a hard dead end.
   const isFilteredEmpty = isFiltering && visibleCards.length === 0
+  /*
+   * Which filter to explain when nothing matched. The mark takes precedence
+   * because its empty state has something to teach ("mark a card and it will be
+   * here") where the tag one only suggests removing a tag. Clearing is
+   * all-or-nothing either way — `clearFilters` drops both, which is the only
+   * behaviour that reliably gets the user out.
+   */
+  const emptyFilterPrefix = markedOnly ? 'cards.session.markFilter' : 'cards.session.tagFilter'
   // Narrowing the filter shrinks `visibleCards` one render BEFORE the
   // re-anchor effect can correct `currentIndex`, so the committed index can
   // briefly point past the end of the new list. Clamping here is what keeps
@@ -1245,6 +1275,21 @@ export default function StudySession() {
         </Stack>
       )}
 
+      {/* Browse-only mark filter. Appears once the deck has something marked —
+          or while the filter is on, so the control that switched it on is also
+          the one that switches it off. Independent of the tag filter below: a
+          deck can have marks and no tags, or the reverse. */}
+      {isReadOnlyMode && !isFullscreen && (markedCount > 0 || markedOnly) && (
+        <BrowseMarkFilter
+          markedOnly={markedOnly}
+          markedCount={markedCount}
+          shown={visibleCards.length}
+          total={cards.length}
+          onToggle={toggleMarkedOnly}
+          t={t}
+        />
+      )}
+
       {/* Browse-only inline tag filter. Hidden in fullscreen (which is a
           distraction-free reading surface) and on decks with no tags at all —
           §11 progressive disclosure: a control with nothing to control is noise.
@@ -1264,22 +1309,22 @@ export default function StudySession() {
       {isFilteredEmpty ? (
         <Sheet data-testid='tag-filter-empty' variant='soft' color='neutral' sx={{ borderRadius: 'xl', p: 4, textAlign: 'center' }}>
           <Typography level='title-md' sx={{ mb: 0.5 }}>
-            {t('cards.session.tagFilter.empty.title')}
+            {t(`${emptyFilterPrefix}.empty.title`)}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('cards.session.tagFilter.empty.body')}
+            {t(`${emptyFilterPrefix}.empty.body`)}
           </Typography>
           <Button
             variant='plain'
             size='sm'
-            onClick={clearTags}
-            aria-label={t('cards.session.tagFilter.clear')}
+            onClick={clearFilters}
+            aria-label={t(`${emptyFilterPrefix}.clear`)}
             sx={{
               mt: 2,
               '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
             }}
           >
-            {t('cards.session.tagFilter.clear')}
+            {t(`${emptyFilterPrefix}.clear`)}
           </Button>
         </Sheet>
       ) : (

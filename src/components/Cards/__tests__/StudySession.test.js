@@ -1020,3 +1020,180 @@ describe('browse tag filter — filtered-empty state', () => {
     expect(mockSearchParams.get('mode')).toBe('browse')
   })
 })
+
+/*
+ * MARK-004 — the mark filter in a Browse session.
+ *
+ * The first block is the ADR-010 one: the mark must be as unable to reach the
+ * SM-2 queue from the UI as it already is inside the hook. The rest pin the
+ * behaviours that make a marked drill survivable — that unmarking the card you
+ * are looking at does not throw you somewhere unrelated, and that an empty
+ * result explains itself instead of showing a blank session.
+ */
+const MARK_CHIP_ON = 'cards.session.markFilter.showMarked'
+const MARK_CHIP_OFF = 'cards.session.markFilter.showAll'
+const MARKED_AT = '2026-08-30T10:00:00'
+
+/** Three flashcards, two of them marked (mc1, mc3). */
+const makeMarkedCards = () => [
+  { _id: 'mc1', id: 'mc1', title: 'Alpha Q', content: 'Alpha A', marked_at: MARKED_AT },
+  { _id: 'mc2', id: 'mc2', title: 'Beta Q', content: 'Beta A', marked_at: null },
+  { _id: 'mc3', id: 'mc3', title: 'Gamma Q', content: 'Gamma A', marked_at: MARKED_AT }
+]
+
+const markChip = () => screen.queryByLabelText(MARK_CHIP_ON) || screen.queryByLabelText(MARK_CHIP_OFF)
+
+describe('browse mark filter — visibility', () => {
+  it('never renders in study mode, even with a hand-crafted ?marked=1 on the URL', async () => {
+    mockSearchParams = new URLSearchParams('mode=study&marked=1')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByTestId('session-footer')
+
+    expect(markChip()).not.toBeInTheDocument()
+    // And the queue is intact — all three cards, not the two marked ones.
+    expect(screen.getAllByText(/cards\.session\.card.*"total":3/).length).toBeGreaterThan(0)
+  })
+
+  it('renders in browse mode on a deck that has marks', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeMarkedCards() })
+
+    expect(await screen.findByLabelText(MARK_CHIP_ON)).toBeInTheDocument()
+  })
+
+  it('does not render on a browse deck with nothing marked', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeCards() })
+    await screen.findByTestId('session-footer')
+
+    expect(markChip()).not.toBeInTheDocument()
+  })
+
+  it('renders while the filter is on even if nothing is marked, so it can be switched off', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1')
+    renderSession({ cards: makeCards() })
+
+    expect(await screen.findByLabelText(MARK_CHIP_OFF)).toBeInTheDocument()
+  })
+
+  it('does not render in fullscreen', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByLabelText(MARK_CHIP_ON)
+
+    fireEvent.click(screen.getByLabelText('cards.session.enterFullscreen'))
+
+    expect(markChip()).not.toBeInTheDocument()
+  })
+})
+
+describe('browse mark filter — scope', () => {
+  it('narrows the session to marked cards and counts against that total', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1')
+    renderSession({ cards: makeMarkedCards() })
+
+    const footer = await screen.findByTestId('session-footer')
+    // mc1 + mc3 are marked — 2, not the deck's 3.
+    expect(within(footer).getByText(/cards\.session\.card.*"total":2/)).toBeInTheDocument()
+  })
+
+  it('composes with the tag filter rather than replacing it', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1&tags=verbs')
+    renderSession({
+      cards: [
+        { _id: 'x1', id: 'x1', title: 'Both', content: 'A', tags: ['verbs'], marked_at: MARKED_AT },
+        { _id: 'x2', id: 'x2', title: 'Tag only', content: 'B', tags: ['verbs'], marked_at: null },
+        { _id: 'x3', id: 'x3', title: 'Mark only', content: 'C', tags: ['nouns'], marked_at: MARKED_AT }
+      ]
+    })
+
+    const footer = await screen.findByTestId('session-footer')
+    expect(within(footer).getByText(/cards\.session\.card.*"total":1/)).toBeInTheDocument()
+  })
+
+  it('offers no grading controls, consistent with browse mode', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByTestId('session-footer')
+
+    expect(screen.queryByText('cards.session.grading.again')).not.toBeInTheDocument()
+    expect(screen.queryByText('cards.session.grading.hard')).not.toBeInTheDocument()
+  })
+
+  it('toggling the chip switches the filter on and off', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeMarkedCards() })
+
+    fireEvent.click(await screen.findByLabelText(MARK_CHIP_ON))
+    expect(mockSearchParams.get('marked')).toBe('1')
+
+    fireEvent.click(await screen.findByLabelText(MARK_CHIP_OFF))
+    expect(mockSearchParams.has('marked')).toBe(false)
+  })
+})
+
+describe('browse mark filter — the list shrinking underneath the user', () => {
+  it('holds the user at the last card when the one they were on is unmarked away', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByTestId('session-footer')
+
+    clickNextCard() // -> mc3, the last of the two marked cards
+    expect(lastViewContext()).toMatchObject({ cardIndex: 2, totalCards: 2 })
+
+    // Unmark it from the header. The list shrinks to one WITHOUT the filter
+    // signature changing, which used to clamp the index to 0 and dump the user
+    // back at the top of the deck.
+    cardsService.unmark.mockResolvedValue({ _id: 'mc3', marked_at: null })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mark-toggle'))
+    })
+
+    await waitFor(() => expect(lastViewContext()).toMatchObject({ totalCards: 1 }))
+    expect(lastViewContext()).toMatchObject({ cardIndex: 1 })
+    expect(screen.queryByTestId('tag-filter-empty')).not.toBeInTheDocument()
+  })
+
+  it('shows an empty RESULT, not a finished session, when the last marked card is cleared', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1')
+    renderSession({
+      cards: [{ _id: 'only', id: 'only', title: 'Solo Q', content: 'Solo A', marked_at: MARKED_AT }]
+    })
+    await screen.findByTestId('session-footer')
+
+    cardsService.unmark.mockResolvedValue({ _id: 'only', marked_at: null })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mark-toggle'))
+    })
+
+    // A filter narrowing to zero is an empty result, never a completed session —
+    // the invariant the re-anchor effect's own comment states.
+    expect(await screen.findByTestId('tag-filter-empty')).toBeInTheDocument()
+    expect(screen.queryByText('cards.session.complete.title')).not.toBeInTheDocument()
+  })
+})
+
+describe('browse mark filter — the empty state', () => {
+  it('teaches the gesture rather than suggesting a retry', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1')
+    renderSession({ cards: makeCards() })
+
+    const empty = await screen.findByTestId('tag-filter-empty')
+    expect(within(empty).getByText('cards.session.markFilter.empty.title')).toBeInTheDocument()
+    expect(within(empty).getByText('cards.session.markFilter.empty.body')).toBeInTheDocument()
+    // Not the tag copy, which would tell the user to remove a tag they never set.
+    expect(screen.queryByText('cards.session.tagFilter.empty.title')).not.toBeInTheDocument()
+  })
+
+  it('clears both dimensions from the empty state, not just the one that emptied it', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1&tags=verbs')
+    renderSession({ cards: makeTaggedCards() })
+
+    const empty = await screen.findByTestId('tag-filter-empty')
+    fireEvent.click(within(empty).getByLabelText('cards.session.markFilter.clear'))
+
+    expect(mockSearchParams.has('marked')).toBe(false)
+    expect(mockSearchParams.has('tags')).toBe(false)
+    expect(screen.queryByTestId('tag-filter-empty')).not.toBeInTheDocument()
+  })
+})

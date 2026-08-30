@@ -1961,7 +1961,18 @@
       "enterFullscreen": "Vollbild aktivieren",
       "exitFullscreen": "Vollbild beenden",
       "xpGained_one": "+{{count}} XP",
-      "xpGained_other": "+{{count}} XP"
+      "xpGained_other": "+{{count}} XP",
+      "markFilter": {
+        "label": "Markiert ({{count}})",
+        "showMarked": "Nur markierte Karten anzeigen",
+        "showAll": "Alle Karten anzeigen",
+        "showing": "{{shown}} von {{total}} werden angezeigt",
+        "clear": "Markierungsfilter entfernen",
+        "empty": {
+          "title": "Noch nichts markiert",
+          "body": "Markiere eine Karte beim Lernen, dann wartet sie hier auf dich."
+        }
+      }
     },
     "common": {
       "addTags": "Tags hinzufügen",

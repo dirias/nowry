@@ -1213,7 +1213,18 @@
         "alreadyAnswered": "Ya calificada"
       },
       "xpGained_one": "+{{count}} XP",
-      "xpGained_other": "+{{count}} XP"
+      "xpGained_other": "+{{count}} XP",
+      "markFilter": {
+        "label": "Marcadas ({{count}})",
+        "showMarked": "Mostrar solo las tarjetas marcadas",
+        "showAll": "Mostrar todas las tarjetas",
+        "showing": "Mostrando {{shown}} de {{total}}",
+        "clear": "Quitar el filtro de marcadas",
+        "empty": {
+          "title": "Aún no hay nada marcado",
+          "body": "Marca una tarjeta mientras estudias y la encontrarás aquí."
+        }
+      }
     },
     "deleteModal": {
       "title": "Eliminar mazo",
