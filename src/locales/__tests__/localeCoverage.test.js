@@ -124,6 +124,7 @@ const IDENTICAL_BY_DESIGN = {
     'news.categories.design',
     'agent.companion.portraitsTitle',
     'agent.companion.portraitOption',
+    'agent.companion.portraitsForStage',
     ...XP_GAINED
   ],
   de: ['taxonomy.topics.design', 'news.categories.design', ...XP_GAINED],

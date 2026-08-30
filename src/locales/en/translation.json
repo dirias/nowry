@@ -3083,7 +3083,8 @@
       "portraitsTitle": "Portraits",
       "portraitsDescription": "Every portrait you've generated for this form. Pick the one your companion wears.",
       "portraitWorn": "Worn",
-      "portraitOption": "Portrait {{index}}"
+      "portraitOption": "Portrait {{index}}",
+      "portraitsForStage": "Portraits — {{stage}}"
     }
   },
   "reports": {

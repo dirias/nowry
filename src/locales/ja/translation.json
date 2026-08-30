@@ -1813,7 +1813,8 @@
       "portraitsTitle": "ポートレート",
       "portraitsDescription": "この姿のために生成したすべてのポートレート。相棒がまとうものを選べます。",
       "portraitWorn": "着用中",
-      "portraitOption": "ポートレート {{index}}"
+      "portraitOption": "ポートレート {{index}}",
+      "portraitsForStage": "ポートレート — {{stage}}"
     },
     "settingsSubtitle": "パートナーの動作とキャラクターを設定する",
     "headerStatus": "Lv{{level}} · {{tier}} · 残り{{remaining}}スパーク",

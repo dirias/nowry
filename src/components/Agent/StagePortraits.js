@@ -23,7 +23,7 @@ import React from 'react'
 import { Box, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-const StagePortraits = ({ portraits, wornUrl, stage, onWear, disabled }) => {
+const StagePortraits = ({ portraits, wornUrl, stage, stageName, onWear, disabled }) => {
   const { t } = useTranslation()
 
   if (!portraits || portraits.length < 2) return null
@@ -31,7 +31,7 @@ const StagePortraits = ({ portraits, wornUrl, stage, onWear, disabled }) => {
   return (
     <Box>
       <Typography level='title-md' fontWeight={700} mb={0.5}>
-        {t('agent.companion.portraitsTitle')}
+        {stageName ? t('agent.companion.portraitsForStage', { stage: stageName }) : t('agent.companion.portraitsTitle')}
       </Typography>
       <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
         {t('agent.companion.portraitsDescription')}

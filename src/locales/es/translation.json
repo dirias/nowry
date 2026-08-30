@@ -2767,7 +2767,8 @@
       "portraitsTitle": "Retratos",
       "portraitsDescription": "Todos los retratos que has generado para esta forma. Elige el que lleva tu compañero.",
       "portraitWorn": "En uso",
-      "portraitOption": "Retrato {{index}}"
+      "portraitOption": "Retrato {{index}}",
+      "portraitsForStage": "Retratos — {{stage}}"
     }
   },
   "reports": {

@@ -29,7 +29,7 @@ import StagePortraits from './StagePortraits'
 const STAGE_COUNT = 6
 
 /** One rung of the ladder. */
-const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, currentStage, t, locale }) => {
+const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, currentStage, isOpen, onOpen, t, locale }) => {
   const { stage, reached, reached_at: reachedAt, xp_remaining: xpRemaining, level_required: levelRequired, art_url: artUrl } = entry
 
   // Art for THIS form, and only this form.
@@ -48,8 +48,27 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
 
   const reachedDate = reachedAt ? new Date(reachedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) : null
 
+  // Only worth opening when this form has more than one portrait to choose
+  // between; otherwise the card is inert and should not pretend otherwise.
+  const selectable = reached && (entry.portraits?.length ?? 0) > 1
+
   return (
     <Box
+      onClick={selectable ? () => onOpen(stage) : undefined}
+      onKeyDown={
+        selectable
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onOpen(stage)
+              }
+            }
+          : undefined
+      }
+      role={selectable ? 'button' : undefined}
+      tabIndex={selectable ? 0 : undefined}
+      aria-expanded={selectable ? isOpen : undefined}
+      aria-label={selectable ? t('agent.companion.portraitsForStage', { stage: t(`pet.stage.${stage}.name`) }) : undefined}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -57,10 +76,13 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
         gap: 1,
         p: 2,
         borderRadius: 'lg',
+        cursor: selectable ? 'pointer' : 'default',
         bgcolor: isNext ? 'primary.softBg' : 'background.level1',
         border: '1px solid',
-        borderColor: isNext ? 'primary.outlinedBorder' : 'transparent',
-        transition: 'background-color 0.2s ease'
+        borderColor: isOpen ? 'primary.solidBg' : isNext ? 'primary.outlinedBorder' : 'transparent',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease',
+        '&:hover': selectable ? { transform: 'translateY(-2px)' } : undefined,
+        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: 2 }
       }}
     >
       <Box
@@ -130,6 +152,10 @@ const StageJourney = () => {
   const { themeColor } = useThemePreferences()
   const { avatarUrl, generateNextStageArt, wearPortrait } = usePet()
   const [journey, setJourney] = useState(null)
+  // Which form's portraits are on show. Defaults to the current one; any
+  // reached form with more than one portrait can be inspected, so nothing the
+  // user paid for is stored-but-unreachable.
+  const [openStage, setOpenStage] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -170,6 +196,10 @@ const StageJourney = () => {
       })
     }
   }, [journey, nextEntry, generateNextStageArt, load])
+
+  // The form whose portraits are on show: the one the user opened, else the
+  // current one.
+  const shownStage = journey?.stages?.find((s) => s.stage === (openStage ?? journey?.current_stage)) ?? null
 
   const sinceDate = journey?.companion_since
     ? new Date(journey.companion_since).toLocaleDateString(i18n.language, { year: 'numeric', month: 'long' })
@@ -227,6 +257,8 @@ const StageJourney = () => {
                   isDefaultCompanion={journey?.is_default_companion ?? true}
                   avatarUrl={avatarUrl}
                   currentStage={journey?.current_stage}
+                  isOpen={(openStage ?? journey?.current_stage) === entry.stage}
+                  onOpen={setOpenStage}
                   t={t}
                   locale={i18n.language}
                 />
@@ -234,15 +266,21 @@ const StageJourney = () => {
         </Box>
       )}
 
-      {/* Choosing among portraits already generated for the CURRENT form.
-          Scoped to the current stage on purpose: wearing an earlier form at a
-          later stage would make the evolution arc cosmetic. */}
-      {!loading && !error && !journey?.is_default_companion && (
+      {/* Portraits for whichever reached form is open — the current one by
+          default. Every form the user generated for is inspectable, so
+          nothing they paid for is stored but unreachable.
+
+          Choosing for a PAST form changes only how that rung is remembered;
+          the companion's actual appearance always comes from its current
+          form. Letting an earlier form be worn now would make the whole
+          evolution arc cosmetic. */}
+      {!loading && !error && !journey?.is_default_companion && shownStage && (
         <Box sx={{ mt: 3 }}>
           <StagePortraits
-            stage={journey?.current_stage}
-            portraits={journey?.stages?.find((s) => s.stage === journey.current_stage)?.portraits}
-            wornUrl={avatarUrl}
+            stage={shownStage.stage}
+            stageName={t(`pet.stage.${shownStage.stage}.name`)}
+            portraits={shownStage.portraits}
+            wornUrl={shownStage.art_url}
             onWear={async (stage, url) => {
               const ok = await wearPortrait(stage, url)
               if (ok) load()

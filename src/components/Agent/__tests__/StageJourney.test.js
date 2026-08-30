@@ -6,7 +6,7 @@
  *  - the next form is shown, named, with its distance — the anticipation hook
  */
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -279,5 +279,49 @@ describe('StageJourney', () => {
 
     expect(await screen.findByText('agent.companion.journeyError')).toBeInTheDocument()
     await waitFor(() => expect(screen.queryByTestId('orb-stage-1')).not.toBeInTheDocument())
+  })
+})
+
+// PET-015: portraits generated at EARLIER stages were stored, returned by the
+// API and selectable by the backend, but the UI only ever rendered a picker
+// for the current stage — so a user at Sage who generated three Scouts could
+// see exactly one of them. Kept, but unreachable.
+describe('StageJourney — reaching earlier forms’ portraits', () => {
+  const withPortraits = (reachedThrough, perStage) => {
+    const j = journey(reachedThrough, {}, false)
+    for (const [stage, urls] of Object.entries(perStage)) {
+      j.stages[Number(stage) - 1].portraits = urls
+      j.stages[Number(stage) - 1].art_url = urls[0]
+    }
+    return j
+  }
+
+  it('opens an earlier form that has more than one portrait', async () => {
+    agentService.getJourney.mockResolvedValue(withPortraits(3, { 1: ['https://x/w1.png', 'https://x/w2.png'], 3: ['https://x/s1.png'] }))
+    render(<StageJourney />)
+
+    const card = await screen.findByLabelText('agent.companion.portraitsForStage:{"stage":"pet.stage.1.name"}')
+    fireEvent.click(card)
+
+    // The picker follows the opened form, not the current one.
+    expect(
+      await screen.findByText('agent.companion.portraitsForStage:{"stage":"pet.stage.1.name"}', { selector: 'h2,h3,p,div' })
+    ).toBeTruthy()
+  })
+
+  it('does not make a form openable when there is nothing to choose', async () => {
+    agentService.getJourney.mockResolvedValue(withPortraits(3, { 1: ['https://x/only.png'] }))
+    render(<StageJourney />)
+    await screen.findByText('pet.stage.1.name')
+
+    expect(screen.queryByLabelText('agent.companion.portraitsForStage:{"stage":"pet.stage.1.name"}')).toBeNull()
+  })
+
+  it('never makes an unreached form openable', async () => {
+    agentService.getJourney.mockResolvedValue(withPortraits(2, { 5: ['https://x/a.png', 'https://x/b.png'] }))
+    render(<StageJourney />)
+    await screen.findByText('pet.stage.5.name')
+
+    expect(screen.queryByLabelText('agent.companion.portraitsForStage:{"stage":"pet.stage.5.name"}')).toBeNull()
   })
 })

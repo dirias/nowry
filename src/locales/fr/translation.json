@@ -1804,7 +1804,8 @@
       "portraitsTitle": "Portraits",
       "portraitsDescription": "Tous les portraits que vous avez générés pour cette forme. Choisissez celui que porte votre compagnon.",
       "portraitWorn": "Porté",
-      "portraitOption": "Portrait {{index}}"
+      "portraitOption": "Portrait {{index}}",
+      "portraitsForStage": "Portraits — {{stage}}"
     },
     "settingsSubtitle": "Configurez le comportement et la personnalité de votre compagnon",
     "headerStatus": "Nv{{level}} · {{tier}} · {{remaining}} étincelles restantes",
