@@ -2708,6 +2708,7 @@
       "generateAvatarAriaLabel": "Generar retrato IA de tu compañero",
       "regenerate": "Regenerar",
       "regenerating": "Regenerando...",
+      "animationGenerating": "Animando a tu compañero...",
       "regenerateAriaLabel": "Regenerar retrato del compañero",
       "generationsRemaining": "{{count}} restantes este mes",
       "upgradePlus": "Actualizar a Plus",

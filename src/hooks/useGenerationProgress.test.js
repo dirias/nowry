@@ -32,20 +32,31 @@ describe('easedValue — the curve that replaced the 95% ceiling', () => {
 
   it('keeps advancing past the budget instead of stalling', () => {
     // The predecessor (`Math.min(95, elapsed / budget * 100)`) returned 95 for
-    // every one of these. A 180s animation budget that ran 300s froze for two
+    // all three of these. A 180s animation budget that ran 300s froze for two
     // minutes; that is the defect being fixed.
     const atBudget = easedValue(10000, 10000)
     const atDouble = easedValue(20000, 10000)
     const atTriple = easedValue(30000, 10000)
-    const atTenfold = easedValue(100000, 10000)
 
     expect(atDouble).toBeGreaterThan(atBudget)
     expect(atTriple).toBeGreaterThan(atDouble)
-    expect(atTenfold).toBeGreaterThan(atTriple)
+  })
+
+  it('saturates only far beyond any real run', () => {
+    // The ceiling is a ceiling, so there is a point past which it too stops
+    // moving — but it sits at 2.86 budgets with one percent of track left, not
+    // at 95% with a twentieth of the bar unused. In the app's own terms: 3m20s
+    // for the 70s avatar budget, 8m35s for the 180s animation one, 71s for the
+    // 25s card stream. All are past anything a real generation takes.
+    expect(easedValue(28000, 10000)).toBeLessThan(99)
+    expect(easedValue(29000, 10000)).toBe(99)
   })
 
   it('never claims to be finished, however long it runs', () => {
-    expect(easedValue(10 ** 9, 10000)).toBeLessThan(100)
+    // Not merely below 100: below it once rounded, because Joy rounds for
+    // `aria-valuenow` and a screen reader hearing "100%" mid-run is the same
+    // false claim as a full bar.
+    expect(Math.round(easedValue(10 ** 9, 10000))).toBeLessThan(100)
   })
 
   it('falls back to the default budget when handed a nonsense one', () => {

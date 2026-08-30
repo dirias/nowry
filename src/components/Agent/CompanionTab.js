@@ -13,25 +13,11 @@
  * All API calls are handled by the parent (AgentSettings) via callbacks.
  * This component is purely presentational.
  */
-import React, { useEffect, useRef, useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  Chip,
-  CircularProgress,
-  Divider,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Grid,
-  Input,
-  LinearProgress,
-  Stack,
-  Typography
-} from '@mui/joy'
+import React from 'react'
+import { Alert, Box, Button, Card, Chip, Divider, FormControl, FormHelperText, FormLabel, Grid, Input, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
 import StageJourney from './StageJourney'
 
 // ---------------------------------------------------------------------------
@@ -57,40 +43,11 @@ const ANIMATION_STAGES = [
   { after: 240, icon: '✨', msgKey: 'agent.companion.animStage4' }
 ]
 
-// ---------------------------------------------------------------------------
-// useGenerationStatus hook
-// ---------------------------------------------------------------------------
-
-/**
- * Cycles through timed stage messages while isGenerating is true.
- * Returns { icon, msgKey, elapsedSeconds, progressPct }
- */
-const useGenerationStatus = (isGenerating, stages, expectedTotalSeconds) => {
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const startRef = useRef(null)
-
-  useEffect(() => {
-    if (!isGenerating) {
-      setElapsedSeconds(0)
-      startRef.current = null
-      return
-    }
-    startRef.current = Date.now()
-    const interval = setInterval(() => {
-      setElapsedSeconds(Math.floor((Date.now() - startRef.current) / 1000))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [isGenerating])
-
-  let stageIdx = 0
-  for (let i = 0; i < stages.length; i++) {
-    if (elapsedSeconds >= stages[i].after) stageIdx = i
-  }
-
-  const progressPct = Math.min(95, (elapsedSeconds / expectedTotalSeconds) * 100)
-
-  return { ...stages[stageIdx], elapsedSeconds, progressPct }
-}
+// Budgets for the two waits, in milliseconds. Both are hand-set from observed
+// runs (PRD non-goal: no telemetry-derived pacing in v1). They are the point at
+// which the bar reads 80% — not a deadline, and overrunning one is not an error.
+const AVATAR_ESTIMATED_MS = 70000
+const ANIMATION_ESTIMATED_MS = 180000
 
 // ---------------------------------------------------------------------------
 // Component
@@ -120,8 +77,22 @@ const CompanionTab = ({
 }) => {
   const { t } = useTranslation()
 
-  const avatarStatus = useGenerationStatus(avatarGenerating, AVATAR_STAGES, 70)
-  const animStatus = useGenerationStatus(animationGenerating, ANIMATION_STAGES, 180)
+  // GEN-004. This component grew the app's only real progress indicator and kept
+  // it to itself; it now reads the shared one. The visible behaviour is the same
+  // apart from the stall: the private version capped at 95% and stopped moving
+  // there, so an animation that outran its 180s budget looked hung.
+  const avatarStatus = useGenerationProgress({
+    active: avatarGenerating,
+    failed: Boolean(avatarError),
+    estimatedMs: AVATAR_ESTIMATED_MS,
+    stages: AVATAR_STAGES
+  })
+  const animStatus = useGenerationProgress({
+    active: animationGenerating,
+    failed: Boolean(animationError),
+    estimatedMs: ANIMATION_ESTIMATED_MS,
+    stages: ANIMATION_STAGES
+  })
 
   return (
     <Stack spacing={4}>
@@ -284,19 +255,10 @@ const CompanionTab = ({
               {t('agent.companion.avatarDescription')}
             </Typography>
 
-            {avatarGenerating ? (
-              <Stack spacing={1.5} py={1}>
-                <Stack direction='row' spacing={1.5} alignItems='center' justifyContent='center'>
-                  <CircularProgress size='sm' />
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {avatarStatus.icon} {t(avatarStatus.msgKey)}
-                  </Typography>
-                </Stack>
-                <LinearProgress determinate value={avatarStatus.progressPct} sx={{ borderRadius: 'sm' }} />
-                <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
-                  {t('agent.companion.elapsedSeconds', { seconds: avatarStatus.elapsedSeconds })}
-                </Typography>
-              </Stack>
+            {avatarStatus.visible ? (
+              <Box py={1}>
+                <GenerationProgress progress={avatarStatus} label={t('agent.companion.avatarGenerating')} />
+              </Box>
             ) : (
               <Button
                 variant='solid'
@@ -360,15 +322,7 @@ const CompanionTab = ({
               )}
             </Stack>
 
-            {avatarGenerating && (
-              <Stack spacing={1} sx={{ width: '100%' }}>
-                <LinearProgress determinate value={avatarStatus.progressPct} sx={{ borderRadius: 'sm' }} />
-                <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
-                  {avatarStatus.icon} {t(avatarStatus.msgKey)} ·{' '}
-                  {t('agent.companion.elapsedSeconds', { seconds: avatarStatus.elapsedSeconds })}
-                </Typography>
-              </Stack>
-            )}
+            <GenerationProgress progress={avatarStatus} label={t('agent.companion.regenerating')} sx={{ width: '100%' }} />
 
             {avatarError && (
               <Alert variant='soft' color='danger' size='sm' sx={{ width: '100%' }}>
@@ -424,19 +378,10 @@ const CompanionTab = ({
               </Button>
             )}
 
-            {animationGenerating && (
-              <Stack spacing={1.5} py={1}>
-                <Stack direction='row' spacing={1.5} alignItems='center' justifyContent='center'>
-                  <CircularProgress size='sm' />
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {animStatus.icon} {t(animStatus.msgKey)}
-                  </Typography>
-                </Stack>
-                <LinearProgress determinate value={animStatus.progressPct} sx={{ borderRadius: 'sm' }} />
-                <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
-                  {t('agent.companion.elapsedSeconds', { seconds: animStatus.elapsedSeconds })}
-                </Typography>
-              </Stack>
+            {animStatus.visible && (
+              <Box py={1} sx={{ width: '100%' }}>
+                <GenerationProgress progress={animStatus} label={t('agent.companion.animationGenerating')} />
+              </Box>
             )}
 
             {!!animationUrl && !animationGenerating && !avatarUrl?.startsWith('data:') && (

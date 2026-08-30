@@ -1756,6 +1756,7 @@
       "generateAvatarAriaLabel": "コンパニオンのAIポートレートを生成",
       "regenerate": "再生成",
       "regenerating": "再生成中...",
+      "animationGenerating": "コンパニオンをアニメーション化しています...",
       "regenerateAriaLabel": "コンパニオンのポートレートを再生成",
       "generationsRemaining": "今月残り{{count}}回",
       "upgradePlus": "Plusにアップグレード",

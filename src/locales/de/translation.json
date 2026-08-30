@@ -1723,6 +1723,7 @@
       "generateAvatarAriaLabel": "KI-Porträt deines Begleiters generieren",
       "regenerate": "Regenerieren",
       "regenerating": "Wird regeneriert...",
+      "animationGenerating": "Dein Begleiter wird animiert...",
       "regenerateAriaLabel": "Begleiter-Porträt regenerieren",
       "generationsRemaining": "{{count}} übrig diesen Monat",
       "upgradePlus": "Auf Plus upgraden",

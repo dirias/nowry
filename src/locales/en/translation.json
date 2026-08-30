@@ -3023,6 +3023,7 @@
       "animationReady": "Animation ready",
       "regenerateAnimation": "Regenerate",
       "regenerateAnimationAriaLabel": "Regenerate companion animation",
+      "animationGenerating": "Animating your companion...",
       "animStage0": "Studying how your companion moves...",
       "animStage1": "Bringing them to life...",
       "animStage2": "Smoothing the loop...",

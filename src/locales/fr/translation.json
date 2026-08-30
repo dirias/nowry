@@ -1745,6 +1745,7 @@
       "generateAvatarAriaLabel": "Générer un portrait IA de votre compagnon",
       "regenerate": "Régénérer",
       "regenerating": "Régénération...",
+      "animationGenerating": "Animation de votre compagnon...",
       "regenerateAriaLabel": "Régénérer le portrait du compagnon",
       "generationsRemaining": "{{count}} restant(s) ce mois",
       "upgradePlus": "Passer à Plus",

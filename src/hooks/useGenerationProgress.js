@@ -31,18 +31,26 @@ const VALUE_AT_BUDGET = 0.8
 
 const TAU_DIVISOR = -Math.log(1 - VALUE_AT_BUDGET)
 
-/** Highest value estimated mode may show. Only a completion reaches 100. */
-const CEILING = 99.9
+/**
+ * Highest value estimated mode may show. Only a completion reaches 100.
+ *
+ * 99 rather than 99.9 because Joy rounds for `aria-valuenow`
+ * (`LinearProgress.js:211`), so 99.9 is announced as "100%" while the work is
+ * still running — the same false claim this ceiling exists to prevent, moved
+ * from the bar to the screen reader.
+ */
+const CEILING = 99
 
 /**
  * Estimated-mode value: `100 * (1 - e^(-t/τ))`.
  *
  * The predecessor of this function was `Math.min(95, elapsed / budget * 100)`
- * (`CompanionTab.js:90`), which hits its ceiling at the budget and then sits
+ * (`CompanionTab.js:90`), which hits its ceiling *at* the budget and then sits
  * there — a companion animation budgets 180s, so a 300s run showed a frozen bar
- * for two minutes and read as a hang. This curve has no ceiling below 100: it
- * reads 80% at the budget, 96% at twice it, 99.2% at three times it, and keeps
- * moving for as long as the work does without ever claiming to be finished.
+ * for two minutes and read as a hang. This curve reads 80% at the budget, 96% at
+ * twice it, and 98.9% at 2.8 times it, where `CEILING` takes over. It is still
+ * bounded, but it decelerates rather than stopping, and it runs out of track a
+ * long way past any real generation instead of during a slow one.
  */
 export const easedValue = (elapsedMs, estimatedMs = DEFAULT_ESTIMATED_MS) => {
   if (!(elapsedMs > 0)) return 0
@@ -51,9 +59,10 @@ export const easedValue = (elapsedMs, estimatedMs = DEFAULT_ESTIMATED_MS) => {
   // The curve approaches 100 without reaching it in exact arithmetic, but
   // `Math.exp` underflows to zero around 745 tau, and 100 is a claim this mode
   // is not entitled to make. `CEILING` enforces in float what the curve
-  // guarantees on paper. It is not the 95% stall it replaced: at 99.9 there is
-  // no perceptible track left to move through, whereas 95 left a twentieth of
-  // the bar visibly unused for minutes.
+  // guarantees on paper. It is not the 95% stall it replaced: reaching it takes
+  // 2.86 budgets and leaves a single percent of track — 3m20s for the 70s avatar
+  // budget, 8m35s for the 180s animation one — where 95 left a twentieth of the
+  // bar visibly unused for minutes.
   return Math.min(CEILING, 100 * (1 - Math.exp(-elapsedMs / tau)))
 }
 
