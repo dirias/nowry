@@ -25,7 +25,7 @@ jest.mock('../../../theme/DynamicThemeProvider', () => ({
 }))
 
 let mockAvatarUrl = null
-const mockGenerateNextStageArt = jest.fn()
+const mockGenerateNextStageArt = jest.fn().mockResolvedValue(false)
 jest.mock('../../../context/AgentContext', () => ({
   usePet: () => ({ avatarUrl: mockAvatarUrl, generateNextStageArt: mockGenerateNextStageArt })
 }))
@@ -68,6 +68,9 @@ const journey = (reachedThrough, over = {}, isDefault = false) => ({
 beforeEach(() => {
   jest.clearAllMocks()
   mockAvatarUrl = null
+  // Resolves to false by default: the component awaits this and reloads only
+  // when something was actually generated.
+  mockGenerateNextStageArt.mockResolvedValue(false)
 })
 
 // The look-ahead exists so a locked rung shows the REAL next form rather than
@@ -101,6 +104,34 @@ describe('StageJourney — look-ahead art', () => {
     await screen.findByText('pet.stage.1.name')
     await waitFor(() => expect(agentService.getJourney).toHaveBeenCalled())
     expect(mockGenerateNextStageArt).not.toHaveBeenCalled()
+  })
+
+  // Both generating a portrait and reaching a stage change what every rung
+  // should show. Without a refetch the ladder stayed stale until a full page
+  // reload, which is what made a freshly generated avatar appear to need one.
+  it('re-fetches the ladder when the worn portrait changes', async () => {
+    agentService.getJourney.mockResolvedValue(withArt(journey(2, {}, false), 3, 'https://x/s3.png'))
+    const { rerender } = render(<StageJourney />)
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalledTimes(1))
+
+    mockAvatarUrl = 'https://example.com/freshly-generated.png'
+    rerender(<StageJourney />)
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalledTimes(2))
+  })
+
+  it('re-fetches once a look-ahead form has actually been generated', async () => {
+    mockGenerateNextStageArt.mockResolvedValue(true)
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalledTimes(2))
+  })
+
+  it('does not re-fetch when the look-ahead generated nothing', async () => {
+    mockGenerateNextStageArt.mockResolvedValue(false)
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+    await waitFor(() => expect(mockGenerateNextStageArt).toHaveBeenCalled())
+    expect(agentService.getJourney).toHaveBeenCalledTimes(1)
   })
 
   it('shows a look-ahead form as art, not as a faceless placeholder', async () => {

@@ -257,6 +257,10 @@ function agentReducer(state, action) {
       return {
         ...state,
         avatarGenerating: false,
+        // Generating a portrait is precisely the moment the user stops being
+        // on the default companion. Without this the journey keeps rendering
+        // Nowry until the next full page load re-fetches /agent/me.
+        isDefaultCompanion: false,
         avatarUrl: action.payload.avatar_url,
         avatarStage: action.payload.avatar_stage,
         avatarRegenPending: false,
@@ -493,13 +497,15 @@ export const AgentProvider = ({ children }) => {
    */
   const lookAheadRef = useRef(false)
   const generateNextStageArt = useCallback(async () => {
-    if (lookAheadRef.current) return
+    if (lookAheadRef.current) return false
     lookAheadRef.current = true
     try {
       await agentService.generateAvatar('next_stage')
+      return true
     } catch {
       // Already generated, arc complete, quota-free path unavailable, or the
       // model is down. None of those are the user's problem.
+      return false
     }
   }, [])
 

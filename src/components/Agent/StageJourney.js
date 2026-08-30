@@ -144,9 +144,13 @@ const StageJourney = () => {
     }
   }, [])
 
+  // Re-fetches whenever the worn portrait changes, not only on mount. Both
+  // generating a portrait and reaching a new stage change what every rung
+  // should show, and without this the ladder stayed stale until a full page
+  // reload — which is what made a freshly generated avatar seem to need one.
   useEffect(() => {
     load()
-  }, [load])
+  }, [load, avatarUrl])
 
   // The first unreached stage is the one worth pointing at.
   const nextEntry = journey?.stages?.find((s) => !s.reached) ?? null
@@ -157,8 +161,14 @@ const StageJourney = () => {
   // model for it would be spending money on art we already have.
   useEffect(() => {
     if (!journey || journey.is_default_companion) return
-    if (nextEntry && !nextEntry.art_url) generateNextStageArt()
-  }, [journey, nextEntry, generateNextStageArt])
+    if (nextEntry && !nextEntry.art_url) {
+      // Reload once it lands so the new form appears without a refresh. It
+      // resolves to false when nothing was generated, so this cannot loop.
+      generateNextStageArt().then((generated) => {
+        if (generated) load()
+      })
+    }
+  }, [journey, nextEntry, generateNextStageArt, load])
 
   const sinceDate = journey?.companion_since
     ? new Date(journey.companion_since).toLocaleDateString(i18n.language, { year: 'numeric', month: 'long' })
