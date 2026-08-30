@@ -9,8 +9,15 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '../../../constants/zIndex'
 
+// StudyPet calls useLocation as well as useNavigate — it suppresses the pet on
+// the registration/onboarding routes. The mock provided only useNavigate, so
+// every render in this file threw and all 8 tests failed; the suite has been
+// dead rather than merely incomplete. `mock`-prefixed so individual tests can
+// drive the route (Jest's documented exception for jest.mock factories).
+let mockPathname = '/'
 jest.mock('react-router-dom', () => ({
-  useNavigate: () => jest.fn()
+  useNavigate: () => jest.fn(),
+  useLocation: () => ({ pathname: mockPathname, search: '', hash: '', state: null, key: 'test' })
 }))
 
 jest.mock('react-i18next', () => ({
@@ -70,7 +77,6 @@ const basePetState = {
   clearError: jest.fn(),
   petName: 'Buddy',
   petSpecies: 'cat',
-  petColor: 'blue',
   avatarUrl: null,
   avatarGenerating: false,
   avatarRegenPending: false,
@@ -88,10 +94,39 @@ const basePetState = {
   hideDeckSelectorAction: jest.fn(),
   // Fields consumed by this plan (D-01/D-04/D-07/D-12/D-13)
   isInStudySession: false,
-  isStudySessionFullscreen: false
+  isStudySessionFullscreen: false,
+  // PET-001..008. This surface must mirror StudyPet's destructure exactly: a
+  // field missing here reads as undefined, which silently disables the branch
+  // it guards rather than failing — which is how the default-companion path
+  // went uncovered.
+  xp: 0,
+  xpForNextLevel: null,
+  levelProgress: null,
+  isDefaultCompanion: false,
+  justRevealed: false,
+  revealData: null,
+  petRevealClear: jest.fn(),
+  animationUrl: null,
+  animationGenerating: false,
+  animationRegenPending: false,
+  generateAnimation: jest.fn(),
+  resetCompanionSession: jest.fn(),
+  setViewContext: jest.fn(),
+  setStudySession: jest.fn(),
+  setStudySessionFullscreen: jest.fn(),
+  queueIntervention: jest.fn(),
+  cheer: jest.fn(),
+  applyReviewXp: jest.fn(),
+  flushPendingLevelUp: jest.fn(),
+  awardSessionXp: jest.fn()
 }
 
+/** The orb itself — portal-rendered to document.body. */
+const orb = () => document.getElementById('study-pet-orb')
+const withPet = (over) => mockUsePet.mockReturnValue({ ...basePetState, ...over })
+
 beforeEach(() => {
+  mockPathname = '/'
   mockUsePet.mockReset()
   mockUsePet.mockReturnValue({ ...basePetState })
 })
@@ -177,5 +212,108 @@ describe('drag stays enabled during study session (D-12, locked)', () => {
     mockUsePet.mockReturnValue({ ...basePetState, isInStudySession: true })
     render(<StudyPet />)
     expect(await screen.findByLabelText('agent.aria.openBuddy')).toBeInTheDocument()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// PET-001..008 — what the orb actually renders
+//
+// The suite above only ever covered docking and z-index. Everything the
+// evolution work added went untested because this file threw on every render
+// for a missing useLocation mock, so nothing here could have caught a
+// regression in it.
+// ---------------------------------------------------------------------------
+
+describe('StudyPet — evolution stage rendering', () => {
+  it('grows the orb as the pet evolves', () => {
+    withPet({ stage: 1 })
+    const { unmount } = render(<StudyPet />)
+    const small = orb().style.width
+    unmount()
+
+    withPet({ stage: 6 })
+    render(<StudyPet />)
+    expect(parseInt(orb().style.width, 10)).toBeGreaterThan(parseInt(small, 10))
+  })
+
+  it('gives the first stage the egg silhouette and later stages a circle', () => {
+    withPet({ stage: 1 })
+    const { unmount } = render(<StudyPet />)
+    expect(orb().style.borderRadius).not.toBe('50%')
+    unmount()
+
+    withPet({ stage: 4 })
+    render(<StudyPet />)
+    expect(orb().style.borderRadius).toBe('50%')
+  })
+})
+
+describe('StudyPet — the default companion', () => {
+  it('shows Nowry when the user has not personalised a pet', () => {
+    withPet({ isDefaultCompanion: true, avatarUrl: null })
+    render(<StudyPet />)
+    expect(orb().querySelector('img')).toBeTruthy()
+  })
+
+  it('prefers the user’s own portrait over Nowry', () => {
+    withPet({ isDefaultCompanion: true, avatarUrl: 'https://example.com/mine.png' })
+    render(<StudyPet />)
+    expect(orb().querySelector('img').getAttribute('src')).toBe('https://example.com/mine.png')
+  })
+
+  it('falls back to an emoji only when there is no art at all', () => {
+    withPet({ isDefaultCompanion: false, avatarUrl: null })
+    render(<StudyPet />)
+    expect(orb().querySelector('img')).toBeNull()
+    expect(orb().textContent).not.toBe('')
+  })
+})
+
+describe('StudyPet — progress ring', () => {
+  it('renders nothing until progress is actually known', () => {
+    // An empty ring on first paint reads as "you have earned nothing", which
+    // is usually false.
+    withPet({ levelProgress: null })
+    render(<StudyPet />)
+    expect(orb().parentElement.querySelector('svg circle')).toBeNull()
+  })
+
+  it('draws the ring once progress is known', () => {
+    withPet({ levelProgress: 0.42 })
+    render(<StudyPet />)
+    expect(orb().parentElement.querySelectorAll('svg circle').length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('StudyPet — mood is legible', () => {
+  it('renders a tired pet visibly duller than a happy one', () => {
+    withPet({ mood: 'happy' })
+    const { unmount } = render(<StudyPet />)
+    const happy = orb().style.filter
+    unmount()
+
+    withPet({ mood: 'tired' })
+    render(<StudyPet />)
+    const tired = orb().style.filter
+
+    expect(happy).toMatch(/saturate/)
+    expect(tired).not.toBe(happy)
+    const sat = (f) => parseFloat(f.match(/saturate\(([\d.]+)\)/)[1])
+    expect(sat(tired)).toBeLessThan(sat(happy))
+  })
+})
+
+describe('StudyPet — onboarding routes', () => {
+  // The route check gates ROAMING, not rendering: the pet is parked at rest
+  // rather than removed. Worth pinning, because "suppressed on onboarding" is
+  // easy to read as "hidden" — I assumed exactly that and was wrong.
+  //
+  // The gate itself acts through framer-motion's animation controls, which
+  // cannot be observed without mocking the whole module; that mock broke every
+  // other test in this file, so it is deliberately not attempted here.
+  it.each(['/register', '/onboarding', '/onboarding/topics', '/study'])('keeps the pet mounted on %s', (path) => {
+    mockPathname = path
+    render(<StudyPet />)
+    expect(orb()).toBeTruthy()
   })
 })
