@@ -268,6 +268,9 @@ function agentReducer(state, action) {
         avatarError: null
       }
 
+    case 'AVATAR_WORN':
+      return { ...state, avatarUrl: action.payload, isDefaultCompanion: false }
+
     case 'AVATAR_GENERATE_ERROR':
       return { ...state, avatarGenerating: false, avatarError: action.payload }
 
@@ -720,6 +723,25 @@ export const AgentProvider = ({ children }) => {
    */
   const applyReviewXp = useCallback((xp) => applyXpResult(xp), [applyXpResult])
 
+  /**
+   * Wear one of the portraits already generated for a stage.
+   *
+   * Optimistic on the orb: the user picked it, so it should appear instantly
+   * rather than after a round-trip. The server is authoritative about whether
+   * the portrait belongs to them, and a rejection reverts.
+   */
+  const wearPortrait = useCallback(async (stage, portraitUrl) => {
+    const previous = stateRef.current.avatarUrl
+    dispatch({ type: 'AVATAR_WORN', payload: portraitUrl })
+    try {
+      await agentService.wearPortrait(stage, portraitUrl)
+      return true
+    } catch {
+      dispatch({ type: 'AVATAR_WORN', payload: previous })
+      return false
+    }
+  }, [])
+
   /** Release a level-up that was banked during a study session. */
   const flushPendingLevelUp = useCallback(() => dispatch({ type: 'LEVEL_UP_FLUSH' }), [])
 
@@ -882,6 +904,7 @@ export const AgentProvider = ({ children }) => {
         awardSessionXp,
         applyReviewXp,
         flushPendingLevelUp,
+        wearPortrait,
         cheer,
         setPetActive,
         revealPet,

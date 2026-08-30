@@ -2763,7 +2763,11 @@
       "journeyError": "No se pudo cargar el viaje en este momento.",
       "journeyTogether_one": "Habéis estudiado juntos {{count}} día.",
       "journeyTogether_other": "Habéis estudiado juntos {{count}} días.",
-      "journeySince": "— juntos desde {{date}}."
+      "journeySince": "— juntos desde {{date}}.",
+      "portraitsTitle": "Retratos",
+      "portraitsDescription": "Todos los retratos que has generado para esta forma. Elige el que lleva tu compañero.",
+      "portraitWorn": "En uso",
+      "portraitOption": "Retrato {{index}}"
     }
   },
   "reports": {

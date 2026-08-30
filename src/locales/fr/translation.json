@@ -1800,7 +1800,11 @@
       "journeyError": "Impossible de charger le parcours pour le moment.",
       "journeyTogether_one": "Vous avez étudié ensemble pendant {{count}} jour.",
       "journeyTogether_other": "Vous avez étudié ensemble pendant {{count}} jours.",
-      "journeySince": "— ensemble depuis {{date}}."
+      "journeySince": "— ensemble depuis {{date}}.",
+      "portraitsTitle": "Portraits",
+      "portraitsDescription": "Tous les portraits que vous avez générés pour cette forme. Choisissez celui que porte votre compagnon.",
+      "portraitWorn": "Porté",
+      "portraitOption": "Portrait {{index}}"
     },
     "settingsSubtitle": "Configurez le comportement et la personnalité de votre compagnon",
     "headerStatus": "Nv{{level}} · {{tier}} · {{remaining}} étincelles restantes",

@@ -159,5 +159,18 @@ export const agentService = {
   getJourney: async () => {
     const { data } = await apiClient.get('/agent/journey')
     return data
+  },
+
+  /**
+   * Choose which of a stage's already-generated portraits the companion wears.
+   * Generates nothing and costs nothing — the point is being able to change
+   * your mind about a form you already paid for.
+   * @param {number} stage
+   * @param {string} portraitUrl - Must be one this user generated for that stage.
+   * @returns {Promise<{ stage: number, avatar_url: string }>}
+   */
+  wearPortrait: async (stage, portraitUrl) => {
+    const { data } = await apiClient.put('/agent/pet/portrait', { stage, portrait_url: portraitUrl })
+    return data
   }
 }

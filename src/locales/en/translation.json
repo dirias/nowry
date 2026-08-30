@@ -3079,7 +3079,11 @@
       "journeyError": "Couldn't load the journey right now.",
       "journeyTogether_one": "You've studied together for {{count}} day.",
       "journeyTogether_other": "You've studied together for {{count}} days.",
-      "journeySince": "— together since {{date}}."
+      "journeySince": "— together since {{date}}.",
+      "portraitsTitle": "Portraits",
+      "portraitsDescription": "Every portrait you've generated for this form. Pick the one your companion wears.",
+      "portraitWorn": "Worn",
+      "portraitOption": "Portrait {{index}}"
     }
   },
   "reports": {

@@ -24,6 +24,7 @@ import { resolveColor } from '../../utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { PetOrb } from './StudyPet'
 import { nowryArtFor, LOCKED_SILHOUETTE_FILTER } from './nowryArt'
+import StagePortraits from './StagePortraits'
 
 const STAGE_COUNT = 6
 
@@ -127,7 +128,7 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
 const StageJourney = () => {
   const { t, i18n } = useTranslation()
   const { themeColor } = useThemePreferences()
-  const { avatarUrl, generateNextStageArt } = usePet()
+  const { avatarUrl, generateNextStageArt, wearPortrait } = usePet()
   const [journey, setJourney] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -230,6 +231,23 @@ const StageJourney = () => {
                   locale={i18n.language}
                 />
               ))}
+        </Box>
+      )}
+
+      {/* Choosing among portraits already generated for the CURRENT form.
+          Scoped to the current stage on purpose: wearing an earlier form at a
+          later stage would make the evolution arc cosmetic. */}
+      {!loading && !error && !journey?.is_default_companion && (
+        <Box sx={{ mt: 3 }}>
+          <StagePortraits
+            stage={journey?.current_stage}
+            portraits={journey?.stages?.find((s) => s.stage === journey.current_stage)?.portraits}
+            wornUrl={avatarUrl}
+            onWear={async (stage, url) => {
+              const ok = await wearPortrait(stage, url)
+              if (ok) load()
+            }}
+          />
         </Box>
       )}
     </Box>

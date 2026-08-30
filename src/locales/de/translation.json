@@ -1778,7 +1778,11 @@
       "journeyError": "Der Entwicklungsweg konnte gerade nicht geladen werden.",
       "journeyTogether_one": "Ihr habt {{count}} Tag zusammen gelernt.",
       "journeyTogether_other": "Ihr habt {{count}} Tage zusammen gelernt.",
-      "journeySince": "— zusammen seit {{date}}."
+      "journeySince": "— zusammen seit {{date}}.",
+      "portraitsTitle": "Porträts",
+      "portraitsDescription": "Alle Porträts, die du für diese Form erzeugt hast. Wähle, welches dein Begleiter trägt.",
+      "portraitWorn": "Getragen",
+      "portraitOption": "Porträt {{index}}"
     },
     "settingsSubtitle": "Verhalten und Persönlichkeit deines Begleiters konfigurieren",
     "headerStatus": "Lv{{level}} · {{tier}} · {{remaining}} Funken übrig",
