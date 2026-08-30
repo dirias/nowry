@@ -2590,5 +2590,8 @@
     "deckPlaceholder": "Deck auswählen",
     "deckNone": "Kein Deck",
     "deckEmpty": "Du hast noch keine Decks."
+  },
+  "generation": {
+    "elapsedSeconds": "{{seconds}} s vergangen"
   }
 }

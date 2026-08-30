@@ -2555,5 +2555,8 @@
     "deckPlaceholder": "デッキを選択",
     "deckNone": "デッキなし",
     "deckEmpty": "デッキはまだありません。"
+  },
+  "generation": {
+    "elapsedSeconds": "経過 {{seconds}} 秒"
   }
 }

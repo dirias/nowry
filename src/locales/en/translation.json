@@ -3436,5 +3436,8 @@
     "deckPlaceholder": "Choose a deck",
     "deckNone": "No deck",
     "deckEmpty": "You don't have any decks yet."
+  },
+  "generation": {
+    "elapsedSeconds": "{{seconds}}s elapsed"
   }
 }

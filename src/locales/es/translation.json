@@ -3256,5 +3256,8 @@
     "deckPlaceholder": "Elige un mazo",
     "deckNone": "Sin mazo",
     "deckEmpty": "Todavía no tienes ningún mazo."
+  },
+  "generation": {
+    "elapsedSeconds": "{{seconds}} s transcurridos"
   }
 }
