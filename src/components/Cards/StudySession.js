@@ -39,6 +39,7 @@ import { useCardData } from '../../hooks/useCardData'
 import { useBrowseTagFilter } from '../../hooks/useBrowseTagFilter'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import BrowseTagFilter from './BrowseTagFilter'
+import MarkToggle from './MarkToggle'
 import { queryClient } from '../../api/queryClient'
 import { useAuth } from '../../context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
@@ -961,6 +962,35 @@ export default function StudySession() {
     }
   }, [])
 
+  /*
+   * Keep the session's copy of the card in step with the mark.
+   *
+   * Without this the mark would look like it fell off: MarkToggle re-reads the
+   * card whenever the identity changes, so stepping away from card 3 and back
+   * would show a stale, unmarked card.
+   *
+   * Patches the full `cards` state, never `latestStateRef`. That ref mirrors
+   * `visibleCards`, which in Browse mode is a *filtered subset* — writing it
+   * back would drop every card the tag filter is hiding, which is the exact
+   * invariant the comment at the ref's declaration protects. Grading gets away
+   * with assigning from the ref only because grading is unreachable in Browse;
+   * marking is reachable in both modes. The ref re-derives from `cards` on the
+   * next render, so it self-corrects.
+   *
+   * Nothing about SM-2 is touched. This is a display-state patch of one field
+   * the scheduler never reads (ADR-010).
+   */
+  const handleMarkChange = React.useCallback((cardId, markedAt) => {
+    setCards((prev) => {
+      const index = prev.findIndex((c) => (c._id || c.id) === cardId)
+      if (index === -1) return prev
+
+      const next = [...prev]
+      next[index] = { ...next[index], marked_at: markedAt }
+      return next
+    })
+  }, [])
+
   const handleFullscreenToggle = React.useCallback(() => {
     setIsFullscreen((prev) => !prev)
   }, [])
@@ -1207,6 +1237,11 @@ export default function StudySession() {
               </>
             )}
           </Box>
+          {/* The mark lives here rather than in the grading row: that row is the
+              session's four primary CTAs, and a fifth control in it both dilutes
+              them and implies the mark is a grade. Hidden in fullscreen along
+              with the rest of the header chrome. */}
+          {currentCard && <MarkToggle card={currentCard} onMarkChange={handleMarkChange} size='md' />}
         </Stack>
       )}
 

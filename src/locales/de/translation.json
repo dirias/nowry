@@ -1992,6 +1992,10 @@
       "imagePlaceholder": "Bildlink einfügen",
       "imagePreviewAlt": "Vorschau des Stapelbilds",
       "imagePreviewError": "Dieses Bild konnte nicht geladen werden"
+    },
+    "mark": {
+      "mark": "Für später markieren",
+      "unmark": "Markierung entfernen"
     }
   },
   "books": {

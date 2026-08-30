@@ -387,6 +387,31 @@ export const cardsService = {
   },
 
   /**
+   * Flag a card the user wants to come back to.
+   *
+   * Deliberately NOT `update()`: that route is the one that can move a card's
+   * SM-2 schedule, and the mark is a separate axis that must never travel on it
+   * (ADR-010). The server refuses `marked_at` on PATCH for the same reason.
+   * @param {string} id - Card ID
+   * @returns {Promise<object>} The updated card, carrying its new `marked_at`
+   */
+  async mark(id) {
+    const { data } = await apiClient.put(ENDPOINTS.studyCards.mark(id))
+    return data
+  },
+
+  /**
+   * Clear a card's mark. Nothing in the app clears a mark on the user's behalf,
+   * so this is the only way one goes away.
+   * @param {string} id - Card ID
+   * @returns {Promise<object>} The updated card, with `marked_at` null
+   */
+  async unmark(id) {
+    const { data } = await apiClient.delete(ENDPOINTS.studyCards.mark(id))
+    return data
+  },
+
+  /**
    * Review a card with SM-2 grading
    * @param {string} id - Card ID
    * @param {string} grade - Grade: 'again', 'hard', 'good', or 'easy'

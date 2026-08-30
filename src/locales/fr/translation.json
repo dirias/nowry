@@ -2014,6 +2014,10 @@
       "imagePlaceholder": "Collez le lien d'une image",
       "imagePreviewAlt": "Aperçu de l'image du paquet",
       "imagePreviewError": "Cette image n'a pas pu être chargée"
+    },
+    "mark": {
+      "mark": "Marquer pour plus tard",
+      "unmark": "Retirer la marque"
     }
   },
   "books": {

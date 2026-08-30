@@ -1572,6 +1572,10 @@
       "typeSelectorAria": "Card type",
       "switchTypeWarning": "Switching card type will discard what you've written for this type.",
       "switchTypeConfirm": "Switch anyway"
+    },
+    "mark": {
+      "mark": "Mark for later",
+      "unmark": "Remove mark"
     }
   },
   "filters": {

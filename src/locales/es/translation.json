@@ -1294,6 +1294,10 @@
       "typeSelectorAria": "Tipo de tarjeta",
       "switchTypeWarning": "Cambiar el tipo de tarjeta descartará lo que has escrito para este tipo.",
       "switchTypeConfirm": "Cambiar de todos modos"
+    },
+    "mark": {
+      "mark": "Marcar para después",
+      "unmark": "Quitar marca"
     }
   },
   "filters": {

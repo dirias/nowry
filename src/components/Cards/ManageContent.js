@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useCallback, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -51,6 +51,7 @@ import {
   Psychology as PsychologyIcon
 } from '@mui/icons-material'
 import CardPreviewModal from './CardPreviewModal'
+import MarkToggle from './MarkToggle'
 import DeckAnalysisPanel from './DeckAnalysisPanel'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
@@ -96,6 +97,19 @@ export default function ManageContent({
     return localStorage.getItem('nowry_deck_view_mode') || 'grid'
   })
   const [filterOpen, setFilterOpen] = useState(false)
+
+  /*
+   * Marks the user has toggled since `cards` was last fetched, keyed by card id.
+   * `cards` is a prop owned by the parent's data hook, so a row (or the preview
+   * modal on top of it) cannot write back into it — this overlay is what lets
+   * the list behind the modal reflect a new mark without a refetch. It is
+   * cleared naturally on the next load, when the server's value arrives.
+   */
+  const [markOverrides, setMarkOverrides] = useState({})
+
+  const handleMarkChange = useCallback((cardId, markedAt) => {
+    setMarkOverrides((prev) => ({ ...prev, [cardId]: markedAt }))
+  }, [])
 
   const handleViewChange = (mode) => {
     setViewMode(mode)
@@ -192,11 +206,16 @@ export default function ManageContent({
   // Only apply the local card-type filter on what the API returned.
   const filteredCards = useMemo(
     () =>
-      cards.filter((card) => {
-        const cardType = card.card_type || 'flashcard'
-        return filterType === 'all' || cardType === filterType
-      }),
-    [cards, filterType]
+      cards
+        .filter((card) => {
+          const cardType = card.card_type || 'flashcard'
+          return filterType === 'all' || cardType === filterType
+        })
+        .map((card) => {
+          const id = card._id || card.id
+          return id in markOverrides ? { ...card, marked_at: markOverrides[id] } : card
+        }),
+    [cards, filterType, markOverrides]
   )
 
   const filters = [
@@ -913,6 +932,7 @@ export default function ManageContent({
 
                       {/* Actions */}
                       <Stack direction='row' spacing={0.5} onClick={(e) => e.stopPropagation()}>
+                        <MarkToggle card={card} onMarkChange={handleMarkChange} />
                         <Tooltip title={t('cards.deck.preview')}>
                           <IconButton size='sm' variant='plain' color='primary' onClick={() => handlePreviewCard(card)}>
                             <Visibility />
@@ -978,6 +998,7 @@ export default function ManageContent({
         cards={previewState.cards}
         initialIndex={previewState.initialIndex}
         decks={decks}
+        onMarkChange={handleMarkChange}
       />
     </Box>
   )

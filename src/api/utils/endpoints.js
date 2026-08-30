@@ -23,6 +23,7 @@ export const ENDPOINTS = {
     create: '/study-cards',
     update: (id) => `/study-cards/${id}`,
     delete: (id) => `/study-cards/${id}`,
+    mark: (id) => `/study-cards/${id}/mark`,
     generateFromBook: '/card/generate-from-book',
     analyzeDeck: '/card/analyze-deck'
   },

@@ -97,7 +97,10 @@ jest.mock('../../../api/services', () => ({
     getDailyReviewCards: jest.fn(),
     getDueCards: jest.fn(),
     getAllCards: jest.fn(), // Phase 30 — Browse fetch
-    review: jest.fn().mockResolvedValue({})
+    review: jest.fn().mockResolvedValue({}),
+    // MARK-002 — the header's MarkToggle reaches for these on click.
+    mark: jest.fn().mockResolvedValue({}),
+    unmark: jest.fn().mockResolvedValue({})
   },
   decksService: {}
 }))

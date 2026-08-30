@@ -4,6 +4,8 @@ import { Modal, ModalDialog, ModalClose, Typography, Box, Button, Stack, Card, C
 import { ArrowBack, ArrowForward, Flip, PlayArrow, Settings } from '@mui/icons-material'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
+
+import MarkToggle from './MarkToggle'
 import ttsService from '../../utils/tts.service'
 import TTSControls from '../TTS/TTSControls'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
@@ -15,7 +17,7 @@ mermaid.initialize({
   securityLevel: 'loose'
 })
 
-export default function CardPreviewModal({ open, onClose, title, cards = [], initialIndex = 0, decks = [] }) {
+export default function CardPreviewModal({ open, onClose, title, cards = [], initialIndex = 0, decks = [], onMarkChange }) {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [isFlipped, setIsFlipped] = useState(false)
@@ -177,6 +179,9 @@ export default function CardPreviewModal({ open, onClose, title, cards = [], ini
               )}
             </Stack>
           </Box>
+
+          {/* Mark — the user's own axis on this card, not a playback control */}
+          {currentCard && <MarkToggle card={currentCard} onMarkChange={onMarkChange} sx={{ flexShrink: 0 }} />}
 
           {/* ▶ Play — modal-level audio control, belongs in the header chrome */}
           {currentCard && (

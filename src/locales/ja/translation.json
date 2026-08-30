@@ -2018,6 +2018,10 @@
       "imagePlaceholder": "画像のリンクを貼り付け",
       "imagePreviewAlt": "デッキ画像のプレビュー",
       "imagePreviewError": "この画像を読み込めませんでした"
+    },
+    "mark": {
+      "mark": "後で見直す",
+      "unmark": "マークを外す"
     }
   },
   "subscription": {
