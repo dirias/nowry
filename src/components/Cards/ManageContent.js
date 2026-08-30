@@ -273,7 +273,7 @@ export default function ManageContent({
               borderColor: 'divider',
               [`& .${tabClasses.root}`]: {
                 minWidth: { xs: 80, sm: 120, md: 140 },
-                fontWeight: 600,
+                fontWeight: 'lg',
                 color: 'text.secondary',
                 py: 1,
                 px: 2,
@@ -303,27 +303,27 @@ export default function ManageContent({
             }}
           >
             <Tab disableIndicator aria-label={t('cards.manage_content.aria.decks', 'View Decks')}>
-              <Typography level='title-sm' sx={{ fontWeight: 700, color: 'inherit' }}>
+              <Typography level='title-sm' sx={{ fontWeight: 'xl', color: 'inherit' }}>
                 {t('cards.manage_content.tabs.decksOnly', 'Decks')}
               </Typography>
               <Chip
                 size='sm'
                 variant={activeView === 0 ? 'solid' : 'soft'}
                 color={activeView === 0 ? 'primary' : 'neutral'}
-                sx={{ borderRadius: 'xl', fontWeight: 700, fontSize: '0.7rem', px: 1, height: 20 }}
+                sx={{ borderRadius: 'xl', fontWeight: 'xl', fontSize: 'xs', px: 1, height: 20 }}
               >
                 {decks.length}
               </Chip>
             </Tab>
             <Tab disableIndicator aria-label={t('cards.manage_content.aria.cards', 'View Cards')}>
-              <Typography level='title-sm' sx={{ fontWeight: 700, color: 'inherit' }}>
+              <Typography level='title-sm' sx={{ fontWeight: 'xl', color: 'inherit' }}>
                 {t('cards.manage_content.tabs.cardsOnly', 'Cards')}
               </Typography>
               <Chip
                 size='sm'
                 variant={activeView === 1 ? 'solid' : 'soft'}
                 color={activeView === 1 ? 'primary' : 'neutral'}
-                sx={{ borderRadius: 'xl', fontWeight: 700, fontSize: '0.7rem', px: 1, height: 20 }}
+                sx={{ borderRadius: 'xl', fontWeight: 'xl', fontSize: 'xs', px: 1, height: 20 }}
               >
                 {totalCards || cards.length}
               </Chip>
@@ -355,8 +355,8 @@ export default function ManageContent({
             aria-label={t('cards.newCard')}
             sx={{
               borderRadius: 'lg',
-              fontWeight: 600,
-              fontSize: '0.8rem',
+              fontWeight: 'lg',
+              fontSize: 'xs',
               px: 1.5,
               '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' }
             }}
@@ -371,8 +371,8 @@ export default function ManageContent({
             aria-label={t('cards.newDeck')}
             sx={{
               borderRadius: 'lg',
-              fontWeight: 600,
-              fontSize: '0.8rem',
+              fontWeight: 'lg',
+              fontSize: 'xs',
               px: 1.5,
               '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' }
             }}
@@ -464,7 +464,7 @@ export default function ManageContent({
         <Sheet variant='soft' sx={{ borderRadius: 'lg', p: 2, mb: 2, bgcolor: 'background.level1' }}>
           <Typography
             level='body-xs'
-            sx={{ color: 'text.secondary', mb: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}
+            sx={{ color: 'text.secondary', mb: 1, fontWeight: 'lg', textTransform: 'uppercase', letterSpacing: '0.08em' }}
           >
             {t('filters.type')}
           </Typography>
@@ -495,7 +495,7 @@ export default function ManageContent({
             <>
               <Typography
                 level='body-xs'
-                sx={{ color: 'text.secondary', mt: 2, mb: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}
+                sx={{ color: 'text.secondary', mt: 2, mb: 1, fontWeight: 'lg', textTransform: 'uppercase', letterSpacing: '0.08em' }}
               >
                 {t('filters.marked')}
               </Typography>
@@ -528,7 +528,7 @@ export default function ManageContent({
             <>
               <Typography
                 level='body-xs'
-                sx={{ color: 'text.secondary', mt: 2, mb: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}
+                sx={{ color: 'text.secondary', mt: 2, mb: 1, fontWeight: 'lg', textTransform: 'uppercase', letterSpacing: '0.08em' }}
               >
                 {t('filters.tags')}
               </Typography>
@@ -731,7 +731,7 @@ export default function ManageContent({
                             <Typography
                               level='title-sm'
                               sx={{
-                                fontWeight: 600,
+                                fontWeight: 'lg',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap'
@@ -744,14 +744,14 @@ export default function ManageContent({
                                 size='sm'
                                 color='success'
                                 variant='soft'
-                                startDecorator={<Public sx={{ fontSize: 12 }} />}
+                                startDecorator={<Public sx={{ fontSize: 'xs' }} />}
                                 sx={{ py: 0.25, px: 0.75, height: 'auto', flexShrink: 0 }}
                               >
                                 {t('publish.status.public')}
                               </Chip>
                             )}
                           </Stack>
-                          <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
+                          <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: 'xs' }}>
                             {t('cards.manage_content.cardCount', { count: cardCount })}
                           </Typography>
                         </Box>
@@ -764,7 +764,7 @@ export default function ManageContent({
                           sx={{
                             height: 20,
                             px: 1,
-                            fontWeight: 600,
+                            fontWeight: 'lg',
                             flexShrink: 0,
                             display: { xs: 'none', sm: 'flex' }
                           }}
@@ -780,8 +780,8 @@ export default function ManageContent({
                               variant={deck.due_cards > 0 || deck.new_cards > 0 ? 'solid' : 'soft'}
                               color={deck.due_cards > 0 ? 'primary' : deck.new_cards > 0 ? 'success' : 'neutral'}
                               onClick={() => onStudy?.(deck)}
-                              startDecorator={<School sx={{ fontSize: 16 }} />}
-                              sx={{ fontSize: '0.75rem', fontWeight: 600, px: 1.5, display: { xs: 'none', sm: 'flex' } }}
+                              startDecorator={<School sx={{ fontSize: 'md' }} />}
+                              sx={{ fontSize: 'xs', fontWeight: 'lg', px: 1.5, display: { xs: 'none', sm: 'flex' } }}
                             >
                               {(deck.due_cards || 0) + (deck.new_cards || 0) > 0
                                 ? t('cards.studyTotal', { count: (deck.due_cards || 0) + (deck.new_cards || 0) })
@@ -797,7 +797,7 @@ export default function ManageContent({
                               onClick={() => onStudy?.(deck)}
                               sx={{ display: { xs: 'flex', sm: 'none' } }}
                             >
-                              <School sx={{ fontSize: 16 }} />
+                              <School sx={{ fontSize: 'md' }} />
                             </IconButton>
                           )}
 
@@ -809,7 +809,7 @@ export default function ManageContent({
                               onClick={() => onAddCard(deck)}
                               sx={{ minWidth: 32, minHeight: 32, display: { xs: 'none', sm: 'flex' } }}
                             >
-                              <Add sx={{ fontSize: 16 }} />
+                              <Add sx={{ fontSize: 'md' }} />
                             </IconButton>
                           </Tooltip>
 
@@ -825,7 +825,7 @@ export default function ManageContent({
                                 }
                               }}
                             >
-                              <MoreVert sx={{ fontSize: 16 }} />
+                              <MoreVert sx={{ fontSize: 'md' }} />
                             </MenuButton>
                             <Menu placement='bottom-end' size='sm'>
                               <MenuItem
@@ -836,28 +836,28 @@ export default function ManageContent({
                               >
                                 <ListItemDecorator>
                                   {deck.is_public ? (
-                                    <Public sx={{ fontSize: 18, color: 'success.plainColor' }} />
+                                    <Public sx={{ fontSize: 'lg', color: 'success.plainColor' }} />
                                   ) : (
-                                    <CloudUpload sx={{ fontSize: 18 }} />
+                                    <CloudUpload sx={{ fontSize: 'lg' }} />
                                   )}
                                 </ListItemDecorator>
                                 {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
                               </MenuItem>
                               <ListDivider />
                               <MenuItem onClick={() => onAddCard(deck)}>
-                                <Add sx={{ fontSize: 16 }} /> {t('cards.deck.addCard')}
+                                <Add sx={{ fontSize: 'md' }} /> {t('cards.deck.addCard')}
                               </MenuItem>
                               <MenuItem onClick={() => onDeckSettings?.(deck)}>
-                                <Settings sx={{ fontSize: 16 }} /> {t('deckSettings.menuItem')}
+                                <Settings sx={{ fontSize: 'md' }} /> {t('deckSettings.menuItem')}
                               </MenuItem>
                               <MenuItem onClick={() => onEditDeck(deck)}>
-                                <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
+                                <Edit sx={{ fontSize: 'md' }} /> {t('cards.deck.edit')}
                               </MenuItem>
                               {/* Analyze Deck — Pro only */}
                               {tier === 'pro' ? (
                                 <MenuItem onClick={() => handleAnalyzeDeck(deck._id)} aria-label={t('aiMagic.analyzeDeck.ariaLabel')}>
                                   <ListItemDecorator>
-                                    <PsychologyIcon sx={{ fontSize: 16 }} />
+                                    <PsychologyIcon sx={{ fontSize: 'md' }} />
                                   </ListItemDecorator>
                                   {t('aiMagic.analyzeDeck.label')}
                                 </MenuItem>
@@ -867,7 +867,7 @@ export default function ManageContent({
                                   aria-label={t('aiMagic.analyzeDeck.lockedAriaLabel')}
                                 >
                                   <ListItemDecorator>
-                                    <LockIcon sx={{ fontSize: 16 }} />
+                                    <LockIcon sx={{ fontSize: 'md' }} />
                                   </ListItemDecorator>
                                   {t('aiMagic.analyzeDeck.label')}
                                   <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
@@ -876,7 +876,7 @@ export default function ManageContent({
                                 </MenuItem>
                               )}
                               <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
-                                <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
+                                <Delete sx={{ fontSize: 'md' }} /> {t('cards.deck.delete')}
                               </MenuItem>
                             </Menu>
                           </Dropdown>
@@ -947,7 +947,7 @@ export default function ManageContent({
                         </Typography>
 
                         <Stack direction='row' spacing={1} sx={{ mt: 1.5 }} flexWrap='wrap'>
-                          <Chip size='sm' variant='soft' color={cardColor} sx={{ fontWeight: 600 }}>
+                          <Chip size='sm' variant='soft' color={cardColor} sx={{ fontWeight: 'lg' }}>
                             {getCardTypeLabel(card.card_type)}
                           </Chip>
                           <Chip size='sm' variant='outlined' startDecorator='📚'>
@@ -1180,7 +1180,7 @@ function DeckGridCard({
             <Typography
               level='title-md'
               sx={{
-                fontWeight: 600,
+                fontWeight: 'lg',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -1194,7 +1194,7 @@ function DeckGridCard({
                 size='sm'
                 color='success'
                 variant='soft'
-                startDecorator={<Public sx={{ fontSize: 12 }} />}
+                startDecorator={<Public sx={{ fontSize: 'xs' }} />}
                 sx={{ py: 0.25, px: 0.75, height: 'auto', mt: 0.5 }}
               >
                 {t('publish.status.public')}
@@ -1215,7 +1215,7 @@ function DeckGridCard({
                 }
               }}
             >
-              <MoreVert sx={{ fontSize: 16 }} />
+              <MoreVert sx={{ fontSize: 'md' }} />
             </MenuButton>
             <Menu placement='bottom-end' size='sm'>
               <MenuItem
@@ -1225,22 +1225,26 @@ function DeckGridCard({
                 }}
               >
                 <ListItemDecorator>
-                  {deck.is_public ? <Public sx={{ fontSize: 18, color: 'success.plainColor' }} /> : <CloudUpload sx={{ fontSize: 18 }} />}
+                  {deck.is_public ? (
+                    <Public sx={{ fontSize: 'lg', color: 'success.plainColor' }} />
+                  ) : (
+                    <CloudUpload sx={{ fontSize: 'lg' }} />
+                  )}
                 </ListItemDecorator>
                 {t(deck.is_public ? 'publish.manageButton' : 'publish.publishButton')}
               </MenuItem>
               <ListDivider />
               <MenuItem onClick={() => onDeckSettings?.(deck)}>
-                <Settings sx={{ fontSize: 16 }} /> {t('deckSettings.menuItem')}
+                <Settings sx={{ fontSize: 'md' }} /> {t('deckSettings.menuItem')}
               </MenuItem>
               <MenuItem onClick={() => onEditDeck(deck)}>
-                <Edit sx={{ fontSize: 16 }} /> {t('cards.deck.edit')}
+                <Edit sx={{ fontSize: 'md' }} /> {t('cards.deck.edit')}
               </MenuItem>
               {/* Analyze Deck — Pro only */}
               {tier === 'pro' ? (
                 <MenuItem onClick={() => onAnalyzeDeck(deck._id)} aria-label={t('aiMagic.analyzeDeck.ariaLabel')}>
                   <ListItemDecorator>
-                    <PsychologyIcon sx={{ fontSize: 16 }} />
+                    <PsychologyIcon sx={{ fontSize: 'md' }} />
                   </ListItemDecorator>
                   {t('aiMagic.analyzeDeck.label')}
                 </MenuItem>
@@ -1250,7 +1254,7 @@ function DeckGridCard({
                   aria-label={t('aiMagic.analyzeDeck.lockedAriaLabel')}
                 >
                   <ListItemDecorator>
-                    <LockIcon sx={{ fontSize: 16 }} />
+                    <LockIcon sx={{ fontSize: 'md' }} />
                   </ListItemDecorator>
                   {t('aiMagic.analyzeDeck.label')}
                   <Chip size='sm' color='warning' variant='soft' sx={{ ml: 'auto' }}>
@@ -1259,7 +1263,7 @@ function DeckGridCard({
                 </MenuItem>
               )}
               <MenuItem onClick={() => onDeleteDeck(deck)} color='danger'>
-                <Delete sx={{ fontSize: 16 }} /> {t('cards.deck.delete')}
+                <Delete sx={{ fontSize: 'md' }} /> {t('cards.deck.delete')}
               </MenuItem>
             </Menu>
           </Dropdown>
@@ -1276,12 +1280,12 @@ function DeckGridCard({
 
           <Stack direction='row' spacing={1} alignItems='center'>
             {deck.due_cards > 0 && (
-              <Typography level='body-xs' sx={{ color: 'primary.plainColor', fontWeight: 600 }}>
+              <Typography level='body-xs' sx={{ color: 'primary.plainColor', fontWeight: 'lg' }}>
                 {t('study.dueCount', { count: deck.due_cards })}
               </Typography>
             )}
             {deck.new_cards > 0 && (
-              <Typography level='body-xs' sx={{ color: 'success.plainColor', fontWeight: 600 }}>
+              <Typography level='body-xs' sx={{ color: 'success.plainColor', fontWeight: 'lg' }}>
                 {t('study.deck.newCount', { count: deck.new_cards })}
               </Typography>
             )}
@@ -1293,7 +1297,7 @@ function DeckGridCard({
         {/* Action Button */}
         <Box sx={{ zIndex: 2, position: 'relative' }}>
           {!deck.has_cards ? (
-            <Button size='sm' variant='outlined' color='neutral' disabled fullWidth sx={{ fontSize: '0.75rem', py: 0.75 }}>
+            <Button size='sm' variant='outlined' color='neutral' disabled fullWidth sx={{ fontSize: 'xs', py: 0.75 }}>
               {t('cards.noCardsYet', 'Empty')}
             </Button>
           ) : (deck.due_cards || 0) + (deck.new_cards || 0) > 0 ? (
@@ -1305,9 +1309,9 @@ function DeckGridCard({
                 e.stopPropagation()
                 onStudy?.(deck)
               }}
-              startDecorator={<School sx={{ fontSize: 14 }} />}
+              startDecorator={<School sx={{ fontSize: 'sm' }} />}
               fullWidth
-              sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
+              sx={{ fontSize: 'xs', py: 0.75, fontWeight: 'lg' }}
             >
               {t('cards.studyTotal', { count: (deck.due_cards || 0) + (deck.new_cards || 0) })}
             </Button>
@@ -1320,9 +1324,9 @@ function DeckGridCard({
                 e.stopPropagation()
                 onStudy?.(deck)
               }}
-              startDecorator={<School sx={{ fontSize: 14 }} />}
+              startDecorator={<School sx={{ fontSize: 'sm' }} />}
               fullWidth
-              sx={{ fontSize: '0.75rem', py: 0.75, fontWeight: 600 }}
+              sx={{ fontSize: 'xs', py: 0.75, fontWeight: 'lg' }}
             >
               {t('cards.review', 'Review')}
             </Button>

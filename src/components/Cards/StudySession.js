@@ -99,7 +99,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           grading row silently re-fire. */}
       {previousGrade && (
         <Stack direction='row' spacing={0.5} alignItems='center' justifyContent='center' sx={{ mb: 1 }}>
-          <CheckCircle sx={{ fontSize: 14, color: 'text.tertiary' }} />
+          <CheckCircle sx={{ fontSize: 'sm', color: 'text.tertiary' }} />
           <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
             {t('cards.session.grading.alreadyAnswered')}
           </Typography>
@@ -112,7 +112,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='danger'
           onClick={() => onGrade('again')}
           aria-pressed={previousGrade === 'again'}
-          startDecorator={previousGrade === 'again' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'again' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
@@ -121,7 +121,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             // session's primary CTAs (again/hard/good/easy), not secondary or
             // metadata text, so legibility on the main action row won out.
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             '&:hover': { bgcolor: 'danger.softBg' },
             ...(previousGrade === 'again' ? selectedGradeSx : {})
           }}
@@ -133,13 +133,13 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='warning'
           onClick={() => onGrade('hard')}
           aria-pressed={previousGrade === 'hard'}
-          startDecorator={previousGrade === 'hard' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'hard' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             ...(previousGrade === 'hard' ? selectedGradeSx : {})
           }}
         >
@@ -150,13 +150,13 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='success'
           onClick={() => onGrade('good')}
           aria-pressed={previousGrade === 'good'}
-          startDecorator={previousGrade === 'good' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'good' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             ...(previousGrade === 'good' ? selectedGradeSx : {})
           }}
         >
@@ -167,13 +167,13 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='primary'
           onClick={() => onGrade('easy')}
           aria-pressed={previousGrade === 'easy'}
-          startDecorator={previousGrade === 'easy' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'easy' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             ...(previousGrade === 'easy' ? selectedGradeSx : {})
           }}
         >
@@ -1122,14 +1122,14 @@ export default function StudySession() {
               sx={{
                 width: 80,
                 height: 80,
-                borderRadius: '50%',
+                borderRadius: 'full',
                 bgcolor: 'success.softBg',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
             >
-              <CheckCircle sx={{ fontSize: 44, color: 'success.plainColor' }} />
+              <CheckCircle sx={{ fontSize: 'xl5', color: 'success.plainColor' }} />
             </Box>
           </Box>
 
@@ -1250,7 +1250,7 @@ export default function StudySession() {
           <Box sx={{ flex: 1 }}>
             {!isFilteredEmpty && (
               <>
-                <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 600, mb: 0.5 }}>
+                <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 'lg', mb: 0.5 }}>
                   {t('cards.session.card', { current: safeIndex + 1, total: visibleCards.length })}
                 </Typography>
                 <LinearProgress
@@ -1451,10 +1451,10 @@ export default function StudySession() {
                   data-testid='session-scroll'
                   sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
                 >
-                  <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                  <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                     {t('cards.session.labels.quiz')}
                   </Typography>
-                  <Typography level='h3' sx={{ mb: 4, fontWeight: 600 }}>
+                  <Typography level='h3' sx={{ mb: 4, fontWeight: 'lg' }}>
                     {currentCard.title}
                   </Typography>
 
@@ -1572,10 +1572,10 @@ export default function StudySession() {
                   data-testid='session-scroll'
                   sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
                 >
-                  <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                  <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                     {t('cards.session.labels.visual')}
                   </Typography>
-                  <Typography level='h3' sx={{ mb: 3, fontWeight: 600 }}>
+                  <Typography level='h3' sx={{ mb: 3, fontWeight: 'lg' }}>
                     {currentCard.title}
                   </Typography>
 
@@ -1710,10 +1710,10 @@ export default function StudySession() {
                         p: { xs: 3, md: 4 }
                       }}
                     >
-                      <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                      <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                         {t('cards.session.labels.question')}
                       </Typography>
-                      <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600, whiteSpace: 'pre-wrap' }}>
+                      <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 'lg', whiteSpace: 'pre-wrap' }}>
                         {currentCard.title}
                       </Typography>
                       <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'text.tertiary' }}>
@@ -1789,7 +1789,7 @@ export default function StudySession() {
                         sx={{
                           mb: { xs: 1.5, md: 2 },
                           color: 'success.plainColor',
-                          fontWeight: 600,
+                          fontWeight: 'lg',
                           letterSpacing: '0.5px'
                         }}
                       >
