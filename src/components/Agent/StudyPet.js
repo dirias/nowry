@@ -720,6 +720,11 @@ const StudyPet = () => {
   // all six forms rendered identically. The stage ramp is what survives.
   const resolvedColor = resolveColor(themeColor, stage)
 
+  // What the companion looks like right now: the user's own portrait, else
+  // Nowry's art for the current stage. The chat panel used to ignore both and
+  // render the species emoji, so a user with a generated pet saw a leaf.
+  const panelPortraitUrl = avatarUrl || (isDefaultCompanion ? nowryArtFor(stage) : null)
+
   const [input, setInput] = useState('')
   // Tier enforcement state
   const messagesUsedThisMonth = messagesUsed
@@ -1410,15 +1415,34 @@ const StudyPet = () => {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: 20 }}>
-                        {petSpecies && SPECIES_CONFIG[petSpecies]
-                          ? (SPECIES_CONFIG[petSpecies][mood] ?? SPECIES_CONFIG[petSpecies].idle)
-                          : mood === 'tired'
-                            ? '😴'
-                            : mood === 'happy'
-                              ? '✨'
-                              : '🔮'}
-                      </span>
+                      {/* The companion's own face, not a species glyph. The
+                          emoji stays only as a last resort for an account with
+                          no portrait and no default art. */}
+                      {panelPortraitUrl ? (
+                        <img
+                          src={panelPortraitUrl}
+                          alt=''
+                          aria-hidden='true'
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            display: 'block',
+                            boxShadow: `0 0 0 2px ${resolvedColor}55`
+                          }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: 20 }}>
+                          {petSpecies && SPECIES_CONFIG[petSpecies]
+                            ? (SPECIES_CONFIG[petSpecies][mood] ?? SPECIES_CONFIG[petSpecies].idle)
+                            : mood === 'tired'
+                              ? '😴'
+                              : mood === 'happy'
+                                ? '✨'
+                                : '🔮'}
+                        </span>
+                      )}
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ color: 'var(--joy-palette-text-primary)', fontSize: 14, fontWeight: 600, lineHeight: 1.2 }}>
@@ -1499,8 +1523,10 @@ const StudyPet = () => {
                       animate={{ opacity: 1, y: 0 }}
                       style={{ textAlign: 'center', padding: '24px 12px 12px' }}
                     >
-                      {/* Avatar: portrait image if available, species emoji fallback, then stage emoji */}
-                      {avatarUrl ? (
+                      {/* Avatar: the companion's portrait — the user's own, or
+                          Nowry's for a default companion. Emoji is the last
+                          resort, not the second one. */}
+                      {panelPortraitUrl ? (
                         <div
                           style={{
                             width: 80,
@@ -1512,7 +1538,7 @@ const StudyPet = () => {
                           }}
                         >
                           <img
-                            src={avatarUrl}
+                            src={panelPortraitUrl}
                             alt=''
                             aria-hidden='true'
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}

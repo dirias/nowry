@@ -317,3 +317,36 @@ describe('StudyPet — onboarding routes', () => {
     expect(orb()).toBeTruthy()
   })
 })
+
+// PET-016: the chat panel rendered SPECIES_CONFIG[species] regardless of what
+// the companion actually looks like, so a user whose pet is a generated cat
+// saw a leaf emoji next to its name.
+describe('StudyPet — the chat panel shows the companion', () => {
+  // jsdom does not implement scrollIntoView, which the panel calls on open.
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn()
+  })
+
+  const openPanel = (over) => {
+    withPet({ isOpen: true, ...over })
+    render(<StudyPet />)
+  }
+
+  const panelImages = () => Array.from(document.body.querySelectorAll('img')).map((img) => img.getAttribute('src'))
+
+  it('shows the user’s own portrait beside its name', () => {
+    openPanel({ avatarUrl: 'https://example.com/luna.png', petSpecies: 'leaf' })
+    expect(panelImages()).toContain('https://example.com/luna.png')
+  })
+
+  it('shows Nowry for a default companion rather than a species emoji', () => {
+    openPanel({ avatarUrl: null, isDefaultCompanion: true, petSpecies: 'leaf' })
+    expect(panelImages().length).toBeGreaterThan(0)
+  })
+
+  it('falls back to an emoji only when there is no portrait at all', () => {
+    openPanel({ avatarUrl: null, isDefaultCompanion: false, petSpecies: 'leaf' })
+    expect(panelImages()).toHaveLength(0)
+    expect(document.body.textContent).toContain('🌿')
+  })
+})
