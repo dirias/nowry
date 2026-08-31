@@ -2074,3 +2074,88 @@ Never rely solely on `auto-fill` grids if they risk collapsing into a single ful
 Cards representing key core objects (like Books) should react dynamically to user input coordinates.
 *   **Desktop (Hover):** Capture `onMouseMove` to calculate the cursor's coordinates relative to the card's center. Apply a CSS `perspective(1000px) rotateX(...) rotateY(...)` transform (max ~12 degrees) and overlay a dynamic radial gradient glare (`mixBlendMode: 'overlay'`) that tracks the cursor.
 *   **Mobile (Touch):** Capture `onTouchStart` and `onTouchMove`. Tilt the card sharply towards the thumb but also apply a slight scale-down (`scale3d(0.97, 0.97, 0.97)`) to simulate the card physically depressing into the glass screen under pressure. Always supply `onTouchCancel` and `onTouchEnd` to reset the tilt.
+
+---
+
+## 15. Control Shape & Material (Toolbar Grammar)
+
+The rules a row of controls has to obey to read as one composition instead of scattered furniture.
+Written after the Study Session header redesign (ADR-011), where a first pass got all of this wrong
+in a way that was easy to feel and hard to name.
+
+### 15.1 The material ladder
+
+Four grounds, four meanings. Nothing else is needed to explain a toolbar, and reaching for a border
+or a tint before exhausting these is the usual cause of a noisy one.
+
+| Ground | Token | Means |
+|---|---|---|
+| Page | `background.body` | The page itself. **Nothing interactive sits directly on it.** |
+| Control | `background.level1` | This is pressable. |
+| Engaged | `background.level2` | This is currently on (`aria-pressed='true'`, an active filter, a set toggle). |
+| Content | `background.surface` | Content — cards, sheets, the thing the controls act on. |
+
+Two consequences worth stating, because both were violated before they were written down:
+
+*   **A control at rest still gets a ground.** `variant='plain'` with no ground and a `text.tertiary`
+    glyph is not minimalism, it is invisibility — that is precisely how the session's mark control
+    went undiscovered for a whole feature cycle. Minimal means *no border and no tint*, not *no
+    material*.
+*   **Hover changes the label, not the ground.** The ground is spoken for by state. If hover also
+    moved it, hover would impersonate "on". Lift `text.secondary` → `text.primary` instead.
+
+### 15.2 Shape carries role, not emphasis
+
+When several controls share a row, the eye reads *same shape → same class of thing*. So shape must
+be assigned by **what a control acts on**, never by how important it is:
+
+| Class | Acts on | Treatment |
+|---|---|---|
+| Navigation | the route | No ground, no border. It acts on nothing visible, so it gets no material. |
+| View controls | the list / the view | **One container**, segmented by a 1px `divider` hairline. Same job ⇒ one object. |
+| Content action | the item on screen | Its own object on the same `level1` material — of the bar, but not of the group. |
+
+Two or more filters over the same list are **one segmented object**, not two adjacent chips. Two
+chips say "we are peers with no relationship"; a container with a hairline says "we are the same
+kind of control", which is the sentence the user actually needs. Giving a content action the same
+shape as the view controls is the error this table exists to prevent — it tells the eye they are
+peers, and then the layout offers no explanation of why they are not.
+
+### 15.3 `radius.full` is a progress radius, not a control radius
+
+Controls use the rectangle family — `sm` (6px), `md` (8px), `lg` (12px) — matching whatever they sit
+beside. Never `full`.
+
+This is not taste; it is what the codebase already is. Every `borderRadius: 'full'` call site in the
+app is a progress bar (`StudySession`, `ImportDeckModal` ×2, `QuarterReportDetail`), and §14.2
+already requires "squarcle" 12px for filter pills rather than true lozenges. A fully-rounded control
+therefore reads as foreign the moment it lands: it belongs to a shape family with exactly one member,
+and that member is not a control.
+
+Pills also have a structural cost independent of taste — a lozenge is a self-contained island. It
+shares no edge with anything, so a row of them cannot align to anything, which is what §15.4 needs.
+
+### 15.4 A toolbar aligns to the content it governs
+
+*   Every control's outer edge lands on the **same two vertical rules as the content below it** —
+    the card's left and right edges. A control floating on neither rule is the thing that reads as
+    unbalanced.
+*   **Do not leave a lone object in the middle of a row.** Anchor it to a rule, or stretch the
+    object between both (a full-width segmented bar is the usual mobile answer, and it aligns with
+    the content's edges for free).
+*   **Progress belongs on an edge, not in the row.** A `LinearProgress` stretched across a wide
+    container is texture, not information. Give it 3px and put it *under* the control row, spanning
+    exactly the content width, where it also does the job of the divider that would otherwise sit
+    there. Full width is wrong for a floating bar and right for a rule — the distinction is whether
+    the element is an object or an edge.
+
+### 15.5 State is a ground, never a hue, wherever grading is on screen
+
+`danger` / `warning` / `success` / `primary` are Again / Hard / Good / Easy in any study surface
+(ADR-010). A control tinted with one of them there says "you graded this card", whatever it is
+actually for. On those surfaces state is carried by the **ground** (`level1` → `level2`), the
+**icon fill** (outline → filled) and the **label** ("Mark" → "Marked") — three signals, none of
+them a hue, and the label alone already satisfies the accessible name.
+
+The general rule behind it: a semantic colour that is load-bearing somewhere on a screen cannot be
+borrowed for anything else on that screen.
