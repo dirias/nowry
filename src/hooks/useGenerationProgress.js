@@ -108,6 +108,9 @@ export const stageAt = (stages, elapsedSeconds) => {
  * @param {Array}   [options.stages]      `[{ after: seconds, icon, msgKey }]`, per surface.
  * @param {string}  [options.surface]     Stable key for learned pacing (GEN-006). Omitting it keeps
  *   the constant forever, which is the right choice for a surface with no stable identity.
+ * @param {number}  [options.startedAt]   Epoch ms the run actually began (GEN-007). Supply it when
+ *   the work outlives the component — the hook otherwise measures from mount, and a surface
+ *   reopened mid-run would restart a minute-old generation at zero.
  * @returns {{
  *   visible: boolean, value: number, mode: 'counted'|'estimated',
  *   stage: object|null, elapsedSeconds: number, isSettling: boolean
@@ -120,7 +123,8 @@ export default function useGenerationProgress({
   total,
   estimatedMs = DEFAULT_ESTIMATED_MS,
   stages = [],
-  surface
+  surface,
+  startedAt
 } = {}) {
   const [tick, setTick] = useState(0)
   const [isSettling, setIsSettling] = useState(false)
@@ -143,7 +147,11 @@ export default function useGenerationProgress({
   // run started was free to move the bar backwards.
   if (active && !runningRef.current) {
     runningRef.current = true
-    startRef.current = Date.now()
+    // GEN-007. Mount is only the start of the run when nobody knows better. The
+    // owner of the work does: `AgentContext` holds the avatar and animation
+    // promises above the routes, so those runs outlive the screen that started
+    // them and mount is merely when the user came back to look.
+    startRef.current = Number.isFinite(startedAt) ? startedAt : Date.now()
     ceilingRef.current = 0
     budgetRef.current = surface ? budgetFor(surface, estimatedMs) : estimatedMs
   } else if (!active && runningRef.current) {
@@ -152,6 +160,10 @@ export default function useGenerationProgress({
 
   useEffect(() => {
     if (!active) return undefined
+    // Publish once immediately: a run resumed mid-flight already has elapsed time
+    // to show, and waiting a second for the first interval would flash a zeroed
+    // bar at exactly the moment GEN-007 exists to avoid.
+    setTick(Date.now())
     const id = setInterval(() => setTick(Date.now()), 1000)
     return () => clearInterval(id)
   }, [active])

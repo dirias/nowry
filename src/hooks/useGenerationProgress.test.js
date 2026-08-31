@@ -294,3 +294,81 @@ describe('useGenerationProgress — learned pacing', () => {
     expect(result.current.value).toBe(beforeWrite)
   })
 })
+
+/**
+ * GEN-007 — a run that outlives the screen that started it.
+ *
+ * `AgentContext` holds the avatar and animation promises above the routes, so
+ * navigating away never stopped the work — only the indicator restarted, because
+ * it measured from mount. These pin the difference.
+ */
+describe('useGenerationProgress — resuming a run in flight', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    window.localStorage.clear()
+  })
+  afterEach(() => jest.useRealTimers())
+
+  const STAGES = [
+    { after: 0, msgKey: 'first' },
+    { after: 10, msgKey: 'second' },
+    { after: 30, msgKey: 'third' }
+  ]
+
+  it('measures from when the run began, not from when the screen reopened', () => {
+    const startedAt = Date.now() - 60000
+
+    const { result } = renderHook(() => useGenerationProgress({ active: true, startedAt, estimatedMs: 70000 }))
+
+    expect(result.current.elapsedSeconds).toBe(60)
+  })
+
+  it('narrates the stage the run has really reached', () => {
+    // Mount-relative timing would have re-opened at 'first' and walked the user
+    // back through narration they already saw.
+    const startedAt = Date.now() - 45000
+
+    const { result } = renderHook(() => useGenerationProgress({ active: true, startedAt, estimatedMs: 70000, stages: STAGES }))
+
+    expect(result.current.stage.msgKey).toBe('third')
+  })
+
+  it('resumes at the value the run had reached, not at zero', () => {
+    const fresh = renderHook(() => useGenerationProgress({ active: true, estimatedMs: 70000 }))
+    const resumed = renderHook(() => useGenerationProgress({ active: true, startedAt: Date.now() - 60000, estimatedMs: 70000 }))
+
+    expect(fresh.result.current.value).toBe(0)
+    expect(resumed.result.current.value).toBeGreaterThan(50)
+  })
+
+  it('leaves a caller that passes no startedAt exactly as it was', () => {
+    const { result } = renderHook(() => useGenerationProgress({ active: true, estimatedMs: 70000 }))
+
+    expect(result.current.elapsedSeconds).toBe(0)
+    expect(result.current.value).toBe(0)
+  })
+
+  it('ignores a startedAt that is not a timestamp', () => {
+    const { result } = renderHook(() => useGenerationProgress({ active: true, startedAt: null, estimatedMs: 70000 }))
+
+    expect(result.current.elapsedSeconds).toBe(0)
+  })
+
+  it('still refuses to go backwards across a resume', () => {
+    const { result, rerender } = renderHook((props) => useGenerationProgress(props), {
+      initialProps: { active: true, startedAt: Date.now() - 60000, estimatedMs: 70000 }
+    })
+    const resumedAt = result.current.value
+
+    advanceOneSecond()
+    rerender({ active: true, startedAt: Date.now() - 60000, estimatedMs: 70000 })
+
+    expect(result.current.value).toBeGreaterThanOrEqual(resumedAt)
+  })
+})
+
+function advanceOneSecond() {
+  act(() => {
+    jest.advanceTimersByTime(1000)
+  })
+}

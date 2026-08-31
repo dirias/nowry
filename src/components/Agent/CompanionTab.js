@@ -67,11 +67,13 @@ const CompanionTab = ({
   tier,
   avatarUrl,
   avatarGenerating,
+  avatarStartedAt,
   avatarError,
   generationsRemaining,
   onGenerateAvatar,
   animationUrl,
   animationGenerating,
+  animationStartedAt,
   animationError,
   onGenerateAnimation
 }) => {
@@ -86,14 +88,16 @@ const CompanionTab = ({
     failed: Boolean(avatarError),
     estimatedMs: AVATAR_ESTIMATED_MS,
     stages: AVATAR_STAGES,
-    surface: 'avatar'
+    surface: 'avatar',
+    startedAt: avatarStartedAt
   })
   const animStatus = useGenerationProgress({
     active: animationGenerating,
     failed: Boolean(animationError),
     estimatedMs: ANIMATION_ESTIMATED_MS,
     stages: ANIMATION_STAGES,
-    surface: 'animation'
+    surface: 'animation',
+    startedAt: animationStartedAt
   })
 
   return (

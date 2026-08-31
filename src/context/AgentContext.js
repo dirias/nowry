@@ -104,6 +104,15 @@ const initialState = {
   avatarRegenPending: false,
   avatarGenerating: false,
   avatarError: null,
+  /**
+   * Epoch ms the in-flight portrait run began, or null (GEN-007).
+   *
+   * This provider sits above the routes (`App.js:450`), so a generation started
+   * on the companion tab keeps running after the user navigates away. Only the
+   * *indicator* used to restart, because it measured from mount. The run's own
+   * start time lives here, with the promise it belongs to.
+   */
+  avatarStartedAt: null,
   generationsRemaining: null,
   /** AI-generated looping animation */
   animationUrl: null,
@@ -111,6 +120,8 @@ const initialState = {
   animationRegenPending: false,
   animationGenerating: false,
   animationError: null,
+  /** Epoch ms the in-flight animation run began, or null (GEN-007). */
+  animationStartedAt: null,
   /** Proactive companion intervention */
   companionMessage: null, // { type, message, card_id? } | null
   companionIsLoading: false,
@@ -251,7 +262,7 @@ function agentReducer(state, action) {
     case 'SET_STUDY_SESSION_FULLSCREEN':
       return { ...state, isStudySessionFullscreen: action.payload }
     case 'AVATAR_GENERATING':
-      return { ...state, avatarGenerating: true, avatarError: null }
+      return { ...state, avatarGenerating: true, avatarError: null, avatarStartedAt: Date.now() }
 
     case 'AVATAR_GENERATED':
       return {
@@ -265,14 +276,15 @@ function agentReducer(state, action) {
         avatarStage: action.payload.avatar_stage,
         avatarRegenPending: false,
         generationsRemaining: action.payload.generations_remaining,
-        avatarError: null
+        avatarError: null,
+        avatarStartedAt: null
       }
 
     case 'AVATAR_WORN':
       return { ...state, avatarUrl: action.payload, isDefaultCompanion: false }
 
     case 'AVATAR_GENERATE_ERROR':
-      return { ...state, avatarGenerating: false, avatarError: action.payload }
+      return { ...state, avatarGenerating: false, avatarError: action.payload, avatarStartedAt: null }
 
     case 'AVATAR_CLEAR_ERROR':
       return { ...state, avatarError: null }
@@ -284,7 +296,7 @@ function agentReducer(state, action) {
       return { ...state, avatarRegenPending: true }
 
     case 'ANIMATION_GENERATING':
-      return { ...state, animationGenerating: true, animationError: null }
+      return { ...state, animationGenerating: true, animationError: null, animationStartedAt: Date.now() }
 
     case 'ANIMATION_GENERATED':
       return {
@@ -293,11 +305,12 @@ function agentReducer(state, action) {
         animationUrl: action.payload.animation_url,
         animationStage: action.payload.avatar_stage,
         animationRegenPending: false,
-        animationError: null
+        animationError: null,
+        animationStartedAt: null
       }
 
     case 'ANIMATION_GENERATE_ERROR':
-      return { ...state, animationGenerating: false, animationError: action.payload }
+      return { ...state, animationGenerating: false, animationError: action.payload, animationStartedAt: null }
 
     case 'ANIMATION_CLEAR_ERROR':
       return { ...state, animationError: null }
