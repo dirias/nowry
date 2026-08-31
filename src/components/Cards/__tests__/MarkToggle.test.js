@@ -164,3 +164,61 @@ describe('following the card', () => {
     expect(toggle()).toHaveAttribute('aria-pressed', 'true')
   })
 })
+
+/**
+ * HDR-001 — the labelled appearance.
+ *
+ * The icon form is the default and is asserted throughout the suite above; what
+ * is pinned here is that the labelled form is the SAME control with a different
+ * presentation, and that its accessible name comes from its visible text rather
+ * than from an aria-label that would contradict it.
+ */
+describe('the labelled appearance', () => {
+  it('says what it is, and says what it became', async () => {
+    render(<MarkToggle card={UNMARKED} appearance='labelled' />)
+    expect(toggle()).toHaveTextContent('cards.mark.action')
+
+    fireEvent.click(toggle())
+
+    await waitFor(() => expect(toggle()).toHaveTextContent('cards.mark.actionOn'))
+    expect(toggle()).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('lets its visible text be its accessible name', () => {
+    // WCAG 2.5.3: an aria-label of "Remove mark" beside a visible "Marked"
+    // would be a name that does not contain its own label. aria-pressed is
+    // what carries the state instead.
+    render(<MarkToggle card={MARKED} appearance='labelled' />)
+
+    expect(toggle()).not.toHaveAttribute('aria-label')
+    expect(toggle()).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('leaves the icon form\'s name exactly where it was', () => {
+    render(<MarkToggle card={MARKED} />)
+    expect(toggle()).toHaveAttribute('aria-label', 'cards.mark.unmark')
+  })
+
+  it('writes through the same path as the icon form', async () => {
+    const onMarkChange = jest.fn()
+    render(<MarkToggle card={MARKED} appearance='labelled' onMarkChange={onMarkChange} />)
+
+    fireEvent.click(toggle())
+
+    await waitFor(() => expect(cardsService.unmark).toHaveBeenCalledWith('card-2'))
+    expect(cardsService.mark).not.toHaveBeenCalled()
+    await waitFor(() => expect(onMarkChange).toHaveBeenCalledWith('card-2', null))
+  })
+
+  it('puts itself back when the request fails', async () => {
+    cardsService.mark.mockRejectedValue(new Error('network'))
+
+    render(<MarkToggle card={UNMARKED} appearance='labelled' />)
+    fireEvent.click(toggle())
+
+    // Note the exact matcher: 'cards.mark.actionOn' CONTAINS 'cards.mark.action',
+    // so a substring assertion here would pass while still marked.
+    await waitFor(() => expect(toggle()).toHaveAttribute('aria-pressed', 'false'))
+    expect(toggle()).toHaveTextContent(/^cards\.mark\.action$/)
+  })
+})

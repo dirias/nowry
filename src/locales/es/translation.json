@@ -1309,6 +1309,8 @@
     "mark": {
       "mark": "Marcar para después",
       "unmark": "Quitar marca",
+      "action": "Marcar",
+      "actionOn": "Marcada",
       "filter": {
         "label": "Solo marcadas",
         "showMarked": "Mostrar solo las tarjetas marcadas",

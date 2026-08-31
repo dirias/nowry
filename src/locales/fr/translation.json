@@ -2029,6 +2029,8 @@
     "mark": {
       "mark": "Marquer pour plus tard",
       "unmark": "Retirer la marque",
+      "action": "Marquer",
+      "actionOn": "Marquée",
       "filter": {
         "label": "Marquées uniquement",
         "showMarked": "Afficher uniquement les cartes marquées",

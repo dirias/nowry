@@ -2033,6 +2033,8 @@
     "mark": {
       "mark": "後で見直す",
       "unmark": "マークを外す",
+      "action": "マーク",
+      "actionOn": "マーク済み",
       "filter": {
         "label": "マークのみ",
         "showMarked": "マークしたカードだけを表示",

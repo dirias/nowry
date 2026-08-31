@@ -1587,6 +1587,8 @@
     "mark": {
       "mark": "Mark for later",
       "unmark": "Remove mark",
+      "action": "Mark",
+      "actionOn": "Marked",
       "filter": {
         "label": "Marked only",
         "showMarked": "Show only marked cards",

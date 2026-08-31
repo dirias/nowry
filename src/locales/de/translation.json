@@ -2007,6 +2007,8 @@
     "mark": {
       "mark": "Für später markieren",
       "unmark": "Markierung entfernen",
+      "action": "Merken",
+      "actionOn": "Gemerkt",
       "filter": {
         "label": "Nur markierte",
         "showMarked": "Nur markierte Karten anzeigen",

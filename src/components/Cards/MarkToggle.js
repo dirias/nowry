@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { IconButton, Tooltip } from '@mui/joy'
+import { Button, IconButton, Tooltip } from '@mui/joy'
 import { Bookmark, BookmarkBorder } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
@@ -40,15 +40,31 @@ const FOCUS_RING = {
  * left to the API client's own interceptor, which already reports failures
  * globally — a second local message would just duplicate it.
  *
+ * **Two appearances, one behaviour.** `'icon'` is the default and is what the
+ * library rows and the preview modal want: a glyph in a dense list, named by
+ * its `aria-label`, explained by its tooltip. `'labelled'` is for the session
+ * header, where the control has room to say what it is — an unnamed glyph out
+ * at the edge of a wide row is how this feature went undiscovered for a whole
+ * cycle (ADR-011). Only the presentation differs; the write path, the
+ * optimism, the rollback and `aria-pressed` are shared.
+ *
+ * The labelled form deliberately sets NO `aria-label`. Its visible text is its
+ * accessible name, because keeping "Remove mark" as the name beside a visible
+ * "Marked" would fail WCAG 2.5.3 (Label in Name) — the name has to contain the
+ * label. `aria-pressed` already carries the state that the longer name was
+ * there to convey, and the tooltip is dropped for the same reason: it would
+ * only repeat what is already on screen.
+ *
  * @param {{
  *   card: object,
  *   onMarkChange?: (cardId: string, markedAt: string | null) => void,
  *   size?: 'sm' | 'md' | 'lg',
  *   variant?: string,
+ *   appearance?: 'icon' | 'labelled',
  *   sx?: object
  * }} props
  */
-export default function MarkToggle({ card, onMarkChange, size = 'sm', variant = 'plain', sx }) {
+export default function MarkToggle({ card, onMarkChange, size = 'sm', variant = 'plain', appearance = 'icon', sx }) {
   const { t } = useTranslation()
 
   const cardId = card?._id || card?.id
@@ -93,6 +109,51 @@ export default function MarkToggle({ card, onMarkChange, size = 'sm', variant = 
   if (!cardId) return null
 
   const label = marked ? t('cards.mark.unmark') : t('cards.mark.mark')
+
+  if (appearance === 'labelled') {
+    /*
+     * Ground, glyph fill and label carry the state — never a hue. Joy's four
+     * semantic colours are Again/Hard/Good/Easy on this exact screen, so a
+     * tinted mark would read as a grade (ADR-010, DESIGN_GUIDELINES §15.5).
+     *
+     * The hover moves the LABEL and leaves the ground where it is: the ground
+     * means "on", and a hover that borrowed it would impersonate the state
+     * (§15.1). Both hover grounds are therefore pinned to the resting one via
+     * Joy's own variant variables rather than an `&:hover` override, which
+     * would otherwise lose to Joy's specificity.
+     */
+    const ground = marked ? 'background.level2' : 'background.level1'
+    const groundVar = marked ? 'var(--joy-palette-background-level2)' : 'var(--joy-palette-background-level1)'
+
+    return (
+      <Button
+        size={size}
+        variant='plain'
+        color='neutral'
+        onClick={handleToggle}
+        aria-pressed={marked}
+        data-testid='mark-toggle'
+        startDecorator={marked ? <Bookmark fontSize='small' /> : <BookmarkBorder fontSize='small' />}
+        sx={{
+          borderRadius: 'md',
+          // WCAG 2.5.5 at xs, relaxing for pointer devices — the text supplies
+          // the width, so this is the height-only `touchTarget` case.
+          minHeight: { xs: 44, sm: 36 },
+          px: 1.5,
+          fontWeight: 'lg',
+          bgcolor: ground,
+          color: marked ? 'text.primary' : 'text.secondary',
+          '--variant-plainHoverBg': groundVar,
+          '--variant-plainActiveBg': groundVar,
+          '&:hover': { color: 'text.primary' },
+          ...FOCUS_RING,
+          ...sx
+        }}
+      >
+        {marked ? t('cards.mark.actionOn') : t('cards.mark.action')}
+      </Button>
+    )
+  }
 
   return (
     <Tooltip title={label} variant='soft'>
