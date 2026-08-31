@@ -1157,7 +1157,12 @@
       "title": "Review generated cards",
       "selectedNodes": "From {{count}} selected nodes",
       "confirmDeck": "Choose target deck",
-      "success": "{{count}} cards added to {{deckName}}"
+      "success": "{{count}} cards added to {{deckName}}",
+      "stages": {
+        "s0": "Reading your notes...",
+        "s1": "Finding the ideas worth keeping...",
+        "s2": "Turning them into cards..."
+      }
     },
     "shareModal": {
       "sent": "Invitation sent!",
@@ -1429,8 +1434,6 @@
     },
     "session": {
       "tagFilter": {
-        "placeholder": "Filter by tag",
-        "ariaLabel": "Filter cards by tag",
         "noOptions": "No tags in this deck",
         "clear": "Clear tag filters",
         "showing": "Showing {{shown}} of {{total}}",
@@ -1486,7 +1489,21 @@
         "alreadyAnswered": "Already graded"
       },
       "xpGained_one": "+{{count}} XP",
-      "xpGained_other": "+{{count}} XP"
+      "xpGained_other": "+{{count}} XP",
+      "filters": {
+        "tags": "Tags",
+        "tagsSelected": "Tags · {{count}}",
+        "searchTags": "Search tags"
+      },
+      "markFilter": {
+        "label": "Marked ({{count}})",
+        "showing": "Showing {{shown}} of {{total}}",
+        "clear": "Clear the marked filter",
+        "empty": {
+          "title": "Nothing marked yet",
+          "body": "Mark a card while you study and it will be waiting here."
+        }
+      }
     },
     "deleteModal": {
       "title": "Delete Deck",
@@ -1567,6 +1584,17 @@
       "typeSelectorAria": "Card type",
       "switchTypeWarning": "Switching card type will discard what you've written for this type.",
       "switchTypeConfirm": "Switch anyway"
+    },
+    "mark": {
+      "mark": "Mark for later",
+      "unmark": "Remove mark",
+      "action": "Mark",
+      "actionOn": "Marked",
+      "filter": {
+        "label": "Marked only",
+        "showMarked": "Show only marked cards",
+        "showAll": "Show all cards"
+      }
     }
   },
   "filters": {
@@ -1577,7 +1605,8 @@
     "remove": {
       "type": "Remove type filter",
       "tag": "Remove {{tag}} tag filter"
-    }
+    },
+    "marked": "Marked"
   },
   "subscription": {
     "upgrade": "Upgrade",
@@ -3023,6 +3052,7 @@
       "animationReady": "Animation ready",
       "regenerateAnimation": "Regenerate",
       "regenerateAnimationAriaLabel": "Regenerate companion animation",
+      "animationGenerating": "Animating your companion...",
       "animStage0": "Studying how your companion moves...",
       "animStage1": "Bringing them to life...",
       "animStage2": "Smoothing the loop...",
@@ -3079,7 +3109,12 @@
       "journeyError": "Couldn't load the journey right now.",
       "journeyTogether_one": "You've studied together for {{count}} day.",
       "journeyTogether_other": "You've studied together for {{count}} days.",
-      "journeySince": "— together since {{date}}."
+      "journeySince": "— together since {{date}}.",
+      "portraitsTitle": "Portraits",
+      "portraitsDescription": "Every portrait you've generated for this form. Pick the one your companion wears.",
+      "portraitWorn": "Worn",
+      "portraitOption": "Portrait {{index}}",
+      "portraitsForStage": "Portraits — {{stage}}"
     }
   },
   "reports": {
@@ -3142,7 +3177,12 @@
       "generatingHint": "AI is working — this may take up to a minute",
       "error": "Couldn't generate from book. Please try again.",
       "errorQuiz": "Couldn't generate quiz from book. Please try again.",
-      "errorAiService": "AI service is temporarily unavailable. Please try again in a moment."
+      "errorAiService": "AI service is temporarily unavailable. Please try again in a moment.",
+      "stages": {
+        "s0": "Reading your book...",
+        "s1": "Picking out what matters...",
+        "s2": "Writing it up..."
+      }
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
@@ -3163,6 +3203,11 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      },
+      "stages": {
+        "s0": "Reading your deck...",
+        "s1": "Comparing your cards...",
+        "s2": "Writing up what it found..."
       }
     },
     "tts": {
@@ -3221,6 +3266,11 @@
         "flowchart": "Flowchart",
         "sequence": "Sequence Diagram",
         "er": "ER Diagram"
+      },
+      "stages": {
+        "s0": "Reading the passage...",
+        "s1": "Mapping the relationships...",
+        "s2": "Drawing it out..."
       }
     }
   },
@@ -3248,7 +3298,12 @@
     "emptyTitle": "No diagram yet",
     "emptyBody": "Choose a diagram type and generate one from your content.",
     "titleField": "Title",
-    "titlePrefix": "Visual"
+    "titlePrefix": "Visual",
+    "stages": {
+      "s0": "Reading your text...",
+      "s1": "Choosing a structure...",
+      "s2": "Drawing the diagram..."
+    }
   },
   "bugs": {
     "filters": {
@@ -3354,6 +3409,11 @@
       "suggestions": "No suggestions available.",
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
+    },
+    "stages": {
+      "s0": "Reading your plan...",
+      "s1": "Looking for patterns...",
+      "s2": "Writing your analysis..."
     }
   },
   "sheets": {
@@ -3431,5 +3491,8 @@
     "deckPlaceholder": "Choose a deck",
     "deckNone": "No deck",
     "deckEmpty": "You don't have any decks yet."
+  },
+  "generation": {
+    "elapsedSeconds": "{{seconds}}s elapsed"
   }
 }

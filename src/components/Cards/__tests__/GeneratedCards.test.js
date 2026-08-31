@@ -503,3 +503,95 @@ describe('the create-deck name pre-fill', () => {
     await waitFor(() => expect(screen.getByLabelText('cards.saveToDeck.namePlaceholder')).toHaveValue('Campbell Biology'))
   })
 })
+
+/**
+ * GEN-001. The prop defaulted to `0` while the branch that selects indeterminate
+ * copy tested `expectedTotal == null` — a test `0` fails. Both callers that omit
+ * the prop therefore counted against a total of zero, and `FirstDeckScreen` also
+ * passes `isStreaming`, so onboarding's first generation read "3 of 0 cards
+ * generated" while it worked.
+ */
+describe('the streaming progress line', () => {
+  it('does not count against a total when the caller omits one', async () => {
+    await renderModal({ isStreaming: true })
+
+    expect(screen.getByText(`aiMagic.streaming.progressAuto:${CARDS.length}`)).toBeInTheDocument()
+    expect(screen.queryByText(`aiMagic.streaming.progress:${CARDS.length}`)).not.toBeInTheDocument()
+  })
+
+  it('does not count against a total of zero when a caller passes one', async () => {
+    // `Editor` held `expectedCardCount` at 0 before its first stream; any caller
+    // can still hand over a not-yet-known total as 0 rather than null.
+    await renderModal({ isStreaming: true, expectedTotal: 0 })
+
+    expect(screen.getByText(`aiMagic.streaming.progressAuto:${CARDS.length}`)).toBeInTheDocument()
+  })
+
+  it('counts against a real total when one is known', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 12 })
+
+    expect(screen.getByText(`aiMagic.streaming.progress:${CARDS.length}`)).toBeInTheDocument()
+  })
+
+  it('shows the opening copy before any card has arrived', async () => {
+    await renderModal({ cards: [], isStreaming: true })
+
+    expect(screen.getByText('aiMagic.streaming.generating')).toBeInTheDocument()
+  })
+})
+
+/**
+ * GEN-003. The stream delivers cards one at a time and the dialog knew how many
+ * were coming, but it drew a single skeleton — so a twelve-card generation looked
+ * identical at card one and card eleven. The placeholders are the progress here;
+ * the bar is the frame around them.
+ */
+describe('the streaming placeholders', () => {
+  const pending = () => screen.queryAllByTestId('pending-card')
+
+  it('draws one placeholder per card still expected', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 5 })
+
+    // Two of five have arrived.
+    expect(pending()).toHaveLength(3)
+  })
+
+  it('caps them, so a large generation is not a wall of grey', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 40 })
+
+    expect(pending()).toHaveLength(6)
+  })
+
+  it('keeps a single placeholder when the total is unknown', async () => {
+    // Auto mode has nothing to subtract from — one placeholder still says
+    // "something else is coming", which is all that is actually known.
+    await renderModal({ isStreaming: true })
+
+    expect(pending()).toHaveLength(1)
+  })
+
+  it('draws none once every expected card has arrived', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: CARDS.length })
+
+    expect(pending()).toHaveLength(0)
+  })
+
+  it('clears them when the stream ends', async () => {
+    await renderModal({ isStreaming: false, expectedTotal: 5 })
+
+    expect(pending()).toHaveLength(0)
+  })
+
+  it('shows a progress bar carrying the real count', async () => {
+    await renderModal({ isStreaming: true, expectedTotal: 4 })
+
+    const bar = screen.getByRole('progressbar', { name: 'aiMagic.streaming.generating' })
+    expect(bar).toHaveAttribute('aria-valuenow', '50')
+  })
+
+  it('shows no progress bar when nothing is streaming', async () => {
+    await renderModal()
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+  })
+})

@@ -344,11 +344,13 @@ export const cardsService = {
    * @param {number} limit - Number of cards to fetch
    * @param {string[]} tags - Optional tag filters (OR logic on backend)
    * @param {string} search - Optional search query (server-side, title/content/tags/deck)
+   * @param {boolean} markedOnly - Restrict to cards the user has marked (ADR-010)
    */
-  async getAll(skip = 0, limit = 50, tags = [], search = '') {
+  async getAll(skip = 0, limit = 50, tags = [], search = '', markedOnly = false) {
     const params = new URLSearchParams({ skip, limit })
     tags.forEach((t) => params.append('tags', t))
     if (search) params.append('search', search)
+    if (markedOnly) params.append('marked_only', 'true')
     const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
     return data
   },
@@ -383,6 +385,31 @@ export const cardsService = {
    */
   async delete(id) {
     const { data } = await apiClient.delete(ENDPOINTS.studyCards.delete(id))
+    return data
+  },
+
+  /**
+   * Flag a card the user wants to come back to.
+   *
+   * Deliberately NOT `update()`: that route is the one that can move a card's
+   * SM-2 schedule, and the mark is a separate axis that must never travel on it
+   * (ADR-010). The server refuses `marked_at` on PATCH for the same reason.
+   * @param {string} id - Card ID
+   * @returns {Promise<object>} The updated card, carrying its new `marked_at`
+   */
+  async mark(id) {
+    const { data } = await apiClient.put(ENDPOINTS.studyCards.mark(id))
+    return data
+  },
+
+  /**
+   * Clear a card's mark. Nothing in the app clears a mark on the user's behalf,
+   * so this is the only way one goes away.
+   * @param {string} id - Card ID
+   * @returns {Promise<object>} The updated card, with `marked_at` null
+   */
+  async unmark(id) {
+    const { data } = await apiClient.delete(ENDPOINTS.studyCards.mark(id))
     return data
   },
 

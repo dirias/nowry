@@ -7,7 +7,7 @@
  * change anything is worse than not offering it.
  */
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { act, render, screen, fireEvent } from '@testing-library/react'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) })
@@ -21,30 +21,31 @@ jest.mock('../StageJourney', () => {
 
 const CompanionTab = require('../CompanionTab').default
 
-const renderTab = (props = {}) =>
-  render(
-    <CompanionTab
-      petName='Nowry'
-      setPetName={jest.fn()}
-      petSpecies='owl'
-      onSpeciesSelect={jest.fn()}
-      onNameBlur={jest.fn()}
-      suggestedSpecies={null}
-      hasSuggestion={false}
-      error={null}
-      tier='pro'
-      avatarUrl={null}
-      avatarGenerating={false}
-      avatarError={null}
-      generationsRemaining={3}
-      onGenerateAvatar={jest.fn()}
-      animationUrl={null}
-      animationGenerating={false}
-      animationError={null}
-      onGenerateAnimation={jest.fn()}
-      {...props}
-    />
-  )
+const tabElement = (props = {}) => (
+  <CompanionTab
+    petName='Nowry'
+    setPetName={jest.fn()}
+    petSpecies='owl'
+    onSpeciesSelect={jest.fn()}
+    onNameBlur={jest.fn()}
+    suggestedSpecies={null}
+    hasSuggestion={false}
+    error={null}
+    tier='pro'
+    avatarUrl={null}
+    avatarGenerating={false}
+    avatarError={null}
+    generationsRemaining={3}
+    onGenerateAvatar={jest.fn()}
+    animationUrl={null}
+    animationGenerating={false}
+    animationError={null}
+    onGenerateAnimation={jest.fn()}
+    {...props}
+  />
+)
+
+const renderTab = (props = {}) => render(tabElement(props))
 
 const speciesCards = () => screen.queryAllByRole('radio')
 
@@ -94,5 +95,76 @@ describe('CompanionTab — species control', () => {
     for (const card of speciesCards()) {
       expect(card.textContent).not.toMatch(/\p{Extended_Pictographic}/u)
     }
+  })
+})
+
+/**
+ * GEN-004 — this component grew the app's only real progress indicator and kept
+ * it private. It now reads the shared one, and these pin the behaviour that had
+ * no test at all while it lived here: the stage copy the user reads, and the
+ * stall that the shared hook fixes.
+ */
+describe('CompanionTab — generation progress', () => {
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => jest.useRealTimers())
+
+  const advance = (ms) =>
+    act(() => {
+      jest.advanceTimersByTime(ms)
+    })
+  const barValue = (name) => Number(screen.getByRole('progressbar', { name }).getAttribute('aria-valuenow'))
+
+  // The animation section only exists once a portrait does.
+  const PORTRAIT = 'https://example.test/pet.png'
+  const AVATAR_LABEL = 'agent.companion.avatarGenerating'
+  const ANIMATION_LABEL = 'agent.companion.animationGenerating'
+
+  it('shows no progress bar while nothing is generating', () => {
+    renderTab()
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+  })
+
+  it('narrates the avatar generation and advances its stages', () => {
+    renderTab({ avatarGenerating: true })
+
+    expect(screen.getByText(/agent\.companion\.avatarStage0/)).toBeInTheDocument()
+
+    advance(9000)
+    expect(screen.getByText(/agent\.companion\.avatarStage1/)).toBeInTheDocument()
+
+    advance(20000)
+    expect(screen.getByText(/agent\.companion\.avatarStage2/)).toBeInTheDocument()
+  })
+
+  it('keeps advancing after a generation outruns its budget', () => {
+    // The private hook capped at 95 and stopped. The animation budget is 180s,
+    // so a 300s run — which happens — showed a frozen bar for two minutes.
+    renderTab({ animationGenerating: true, avatarUrl: PORTRAIT })
+
+    advance(180000)
+    const atBudget = barValue(ANIMATION_LABEL)
+
+    advance(180000)
+    expect(barValue(ANIMATION_LABEL)).toBeGreaterThan(atBudget)
+  })
+
+  it('never claims a generation is finished while it is still running', () => {
+    renderTab({ animationGenerating: true, avatarUrl: PORTRAIT })
+
+    advance(3600000)
+    expect(barValue(ANIMATION_LABEL)).toBeLessThan(100)
+  })
+
+  it('holds no finished bar after a failed generation', () => {
+    // A full bar after a failure would claim a success that did not happen.
+    const { rerender } = renderTab({ avatarGenerating: true })
+    advance(5000)
+
+    act(() => {
+      rerender(tabElement({ avatarGenerating: false, avatarError: 'agent.avatar.generateError' }))
+    })
+
+    expect(screen.queryByRole('progressbar', { name: AVATAR_LABEL })).not.toBeInTheDocument()
   })
 })

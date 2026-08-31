@@ -36,9 +36,11 @@ import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, Swipe
 import { cardsService, decksService } from '../../api/services'
 import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
-import { useBrowseTagFilter } from '../../hooks/useBrowseTagFilter'
+import { useBrowseFilters } from '../../hooks/useBrowseFilters'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
-import BrowseTagFilter from './BrowseTagFilter'
+import BrowseFilterBar from './BrowseFilterBar'
+import { tabularNums } from '../Common/Form/formStyles'
+import MarkToggle from './MarkToggle'
 import { queryClient } from '../../api/queryClient'
 import { useAuth } from '../../context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
@@ -97,7 +99,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           grading row silently re-fire. */}
       {previousGrade && (
         <Stack direction='row' spacing={0.5} alignItems='center' justifyContent='center' sx={{ mb: 1 }}>
-          <CheckCircle sx={{ fontSize: 14, color: 'text.tertiary' }} />
+          <CheckCircle sx={{ fontSize: 'sm', color: 'text.tertiary' }} />
           <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
             {t('cards.session.grading.alreadyAnswered')}
           </Typography>
@@ -110,7 +112,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='danger'
           onClick={() => onGrade('again')}
           aria-pressed={previousGrade === 'again'}
-          startDecorator={previousGrade === 'again' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'again' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
@@ -119,7 +121,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             // session's primary CTAs (again/hard/good/easy), not secondary or
             // metadata text, so legibility on the main action row won out.
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             '&:hover': { bgcolor: 'danger.softBg' },
             ...(previousGrade === 'again' ? selectedGradeSx : {})
           }}
@@ -131,13 +133,13 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='warning'
           onClick={() => onGrade('hard')}
           aria-pressed={previousGrade === 'hard'}
-          startDecorator={previousGrade === 'hard' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'hard' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             ...(previousGrade === 'hard' ? selectedGradeSx : {})
           }}
         >
@@ -148,13 +150,13 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='success'
           onClick={() => onGrade('good')}
           aria-pressed={previousGrade === 'good'}
-          startDecorator={previousGrade === 'good' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'good' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             ...(previousGrade === 'good' ? selectedGradeSx : {})
           }}
         >
@@ -165,13 +167,13 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           color='primary'
           onClick={() => onGrade('easy')}
           aria-pressed={previousGrade === 'easy'}
-          startDecorator={previousGrade === 'easy' ? <CheckCircle sx={{ fontSize: 14 }} /> : undefined}
+          startDecorator={previousGrade === 'easy' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
           sx={{
             flex: 1,
             py: { xs: 1, md: 1.5 },
             minHeight: { xs: 44, md: 36 },
             fontSize: 'sm',
-            fontWeight: 600,
+            fontWeight: 'lg',
             ...(previousGrade === 'easy' ? selectedGradeSx : {})
           }}
         >
@@ -300,7 +302,6 @@ export default function StudySession() {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showExplanation, setShowExplanation] = useState(false)
   const [mermaidSvg, setMermaidSvg] = useState('')
-  const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [reviewQueue, setReviewQueue] = useState([])
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
@@ -325,10 +326,11 @@ export default function StudySession() {
   // Everything below reads `visibleCards` instead of `cards`, with two
   // deliberate exceptions, both marked at their site: the deck-empty gate and
   // handleGrade's setCards mutation source, which must stay the FULL array.
-  const { availableTags, selectedTags, visibleCards, setTags, clearTags, isFiltering } = useBrowseTagFilter({
-    cards,
-    enabled: isReadOnlyMode
-  })
+  const { availableTags, selectedTags, markedOnly, markedCount, visibleCards, setTags, clearFilters, toggleMarkedOnly, isFiltering } =
+    useBrowseFilters({
+      cards,
+      enabled: isReadOnlyMode
+    })
 
   const handleCardMouseMove = React.useCallback((e) => {
     if (!e.currentTarget) return
@@ -710,9 +712,29 @@ export default function StudySession() {
   const filterSignatureRef = useRef(selectedTags.join(','))
 
   useEffect(() => {
-    const signature = selectedTags.join(',')
+    const signature = `${selectedTags.join(',')}|${markedOnly ? 'marked' : ''}`
 
     if (signature === filterSignatureRef.current) {
+      /*
+       * The list can now shrink with the filter UNCHANGED: unmarking the card
+       * on screen while the mark filter is active removes it from
+       * `visibleCards`. Landing past the end would fall through to `safeIndex`,
+       * which clamps to 0 and dumps the user at the top of the deck — the one
+       * thing MARK-004 must not do. Hold them at the new last card instead.
+       */
+      if (visibleCards.length > 0 && currentIndex >= visibleCards.length) {
+        const lastIndex = visibleCards.length - 1
+        setCurrentIndex(lastIndex)
+        setIsFlipped(false)
+        setSelectedAnswer(null)
+        setShowExplanation(false)
+        setMermaidSvg('')
+        latestStateRef.current = { cards: visibleCards, currentIndex: lastIndex }
+        const tail = visibleCards[lastIndex]
+        anchorCardIdRef.current = tail ? tail._id || tail.id : null
+        return
+      }
+
       // Ordinary navigation — just keep the anchor pointed at what is on screen.
       const card = visibleCards[currentIndex]
       if (card) anchorCardIdRef.current = card._id || card.id
@@ -745,7 +767,7 @@ export default function StudySession() {
     //
     // Note what is NOT here: setSessionComplete. A filter narrowing to zero
     // cards is an empty RESULT, never a finished session.
-  }, [selectedTags, visibleCards, currentIndex])
+  }, [selectedTags, markedOnly, visibleCards, currentIndex])
 
   const handleNext = React.useCallback(() => {
     const { currentIndex: latestIndex } = latestStateRef.current
@@ -962,6 +984,35 @@ export default function StudySession() {
     }
   }, [])
 
+  /*
+   * Keep the session's copy of the card in step with the mark.
+   *
+   * Without this the mark would look like it fell off: MarkToggle re-reads the
+   * card whenever the identity changes, so stepping away from card 3 and back
+   * would show a stale, unmarked card.
+   *
+   * Patches the full `cards` state, never `latestStateRef`. That ref mirrors
+   * `visibleCards`, which in Browse mode is a *filtered subset* — writing it
+   * back would drop every card the tag filter is hiding, which is the exact
+   * invariant the comment at the ref's declaration protects. Grading gets away
+   * with assigning from the ref only because grading is unreachable in Browse;
+   * marking is reachable in both modes. The ref re-derives from `cards` on the
+   * next render, so it self-corrects.
+   *
+   * Nothing about SM-2 is touched. This is a display-state patch of one field
+   * the scheduler never reads (ADR-010).
+   */
+  const handleMarkChange = React.useCallback((cardId, markedAt) => {
+    setCards((prev) => {
+      const index = prev.findIndex((c) => (c._id || c.id) === cardId)
+      if (index === -1) return prev
+
+      const next = [...prev]
+      next[index] = { ...next[index], marked_at: markedAt }
+      return next
+    })
+  }, [])
+
   const handleFullscreenToggle = React.useCallback(() => {
     setIsFullscreen((prev) => !prev)
   }, [])
@@ -999,16 +1050,15 @@ export default function StudySession() {
         handlePrev()
       }
     } else {
+      // Only an upward swipe is a gesture here. A downward swipe used to open
+      // the voice-settings panel, but on mobile it was indistinguishable from
+      // an ordinary scroll (and from pull-to-refresh), so it fired by accident.
+      // The panel keeps its own gear button in TTSControls' compact toolbar.
       const isUpSwipe = distanceY > minSwipeDistance
-      const isDownSwipe = distanceY < -minSwipeDistance
 
       if (isUpSwipe) {
         setShowSwipeHint(false)
         handleFlip()
-      }
-      if (isDownSwipe) {
-        setShowSwipeHint(false)
-        setShowVoiceSettings(true)
       }
     }
   }, [handleNext, handlePrev, handleFlip])
@@ -1072,14 +1122,14 @@ export default function StudySession() {
               sx={{
                 width: 80,
                 height: 80,
-                borderRadius: '50%',
+                borderRadius: 'full',
                 bgcolor: 'success.softBg',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
             >
-              <CheckCircle sx={{ fontSize: 44, color: 'success.plainColor' }} />
+              <CheckCircle sx={{ fontSize: 'xl5', color: 'success.plainColor' }} />
             </Box>
           </Box>
 
@@ -1150,6 +1200,14 @@ export default function StudySession() {
   // would strand the user with no way to undo the filter that emptied the
   // screen: a hard dead end.
   const isFilteredEmpty = isFiltering && visibleCards.length === 0
+  /*
+   * Which filter to explain when nothing matched. The mark takes precedence
+   * because its empty state has something to teach ("mark a card and it will be
+   * here") where the tag one only suggests removing a tag. Clearing is
+   * all-or-nothing either way — `clearFilters` drops both, which is the only
+   * behaviour that reliably gets the user out.
+   */
+  const emptyFilterPrefix = markedOnly ? 'cards.session.markFilter' : 'cards.session.tagFilter'
   // Narrowing the filter shrinks `visibleCards` one render BEFORE the
   // re-anchor effect can correct `currentIndex`, so the committed index can
   // briefly point past the end of the new list. Clamping here is what keeps
@@ -1178,75 +1236,131 @@ export default function StudySession() {
       }}
     >
       {/* Header - Hide in Fullscreen */}
+      {/* The session header: ONE control row, closed by a progress seam.
+          ADR-011 — it was three rows of three different control languages, and
+          the mark was an unnamed glyph at the far end of the widest of them.
+
+          The grid is what puts every outer edge on the card's two vertical
+          rules (§15.4). At `xs` the filters drop to their own row and stretch
+          between those rules, so nothing is left floating mid-row; from `sm`
+          they sit inline, pushed right by the 1fr column that separates them
+          from the count. ONE `BrowseFilterBar` either way — rendering a second
+          copy for the other breakpoint would duplicate its search state and
+          its test id. */}
       {!isFullscreen && (
-        <Stack direction='row' alignItems='center' spacing={2} sx={{ mb: 2 }}>
-          <IconButton
-            onClick={() => navigate('/study')}
-            variant='plain'
-            color='neutral'
-            aria-label={t('cards.session.goBack')}
-            sx={{ minHeight: { xs: 44, md: 36 }, minWidth: { xs: 44, md: 36 } }}
+        <Box sx={{ mb: 3 }}>
+          <Box
+            data-testid='session-header-row'
+            sx={{
+              display: 'grid',
+              alignItems: 'center',
+              columnGap: { xs: 1, sm: 1.5 },
+              rowGap: 1.5,
+              // Study mode has no filters, so it must not reserve their row —
+              // an empty grid row still spends the rowGap above it.
+              gridTemplateColumns: isReadOnlyMode ? { xs: 'auto 1fr auto', sm: 'auto auto 1fr auto' } : 'auto 1fr auto',
+              gridTemplateAreas: isReadOnlyMode
+                ? {
+                    xs: '"back count mark" "filters filters filters"',
+                    sm: '"back count filters mark"'
+                  }
+                : '"back count mark"'
+            }}
           >
-            <ArrowBack />
-          </IconButton>
-          <Box sx={{ flex: 1 }}>
-            {!isFilteredEmpty && (
-              <>
-                <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 600, mb: 0.5 }}>
-                  {t('cards.session.card', { current: safeIndex + 1, total: visibleCards.length })}
-                </Typography>
-                <LinearProgress
-                  determinate
-                  value={progress}
-                  color='primary'
-                  sx={{
-                    borderRadius: 'full',
-                    bgcolor: 'background.level2',
-                    height: 6,
-                    boxShadow: 'none'
-                  }}
+            <IconButton
+              onClick={() => navigate('/study')}
+              variant='plain'
+              color='neutral'
+              aria-label={t('cards.session.goBack')}
+              sx={{ gridArea: 'back', minHeight: { xs: 44, md: 36 }, minWidth: { xs: 44, md: 36 }, ml: { xs: -1, sm: 0 } }}
+            >
+              <ArrowBack />
+            </IconButton>
+
+            {/* The row's title, not a caption on a hairline: the count reads as
+                the header now that the bar underneath is an edge. */}
+            <Typography level='title-sm' sx={{ gridArea: 'count', color: 'text.primary', whiteSpace: 'nowrap', ...tabularNums }}>
+              {!isFilteredEmpty && t('cards.session.card', { current: safeIndex + 1, total: visibleCards.length })}
+            </Typography>
+
+            {/* Browse-only view filters (HDR-002). The bar decides for itself
+                which segments have anything to control (§11), so the only gate
+                here is the one that matters — Browse, and not fullscreen, which
+                is a distraction-free reading surface. Stays mounted through the
+                filtered-empty state below, which is the user's only way back
+                out of it. */}
+            {isReadOnlyMode && (
+              <Box sx={{ gridArea: 'filters', justifySelf: { xs: 'stretch', sm: 'end' }, minWidth: 0 }}>
+                <BrowseFilterBar
+                  availableTags={availableTags}
+                  selectedTags={selectedTags}
+                  onTagsChange={setTags}
+                  markedOnly={markedOnly}
+                  markedCount={markedCount}
+                  onToggleMarked={toggleMarkedOnly}
+                  shown={visibleCards.length}
+                  total={cards.length}
+                  t={t}
                 />
-              </>
+              </Box>
+            )}
+
+            {/* The mark lives here rather than in the grading row: that row is
+                the session's four primary CTAs, and a fifth control in it both
+                dilutes them and implies the mark is a grade. Labelled, because
+                an unnamed glyph is how it went undiscovered — and its right
+                edge lands on the same rule as the card's own controls. */}
+            {currentCard && (
+              <MarkToggle
+                card={currentCard}
+                onMarkChange={handleMarkChange}
+                appearance='labelled'
+                sx={{ gridArea: 'mark', justifySelf: 'end' }}
+              />
             )}
           </Box>
-        </Stack>
-      )}
 
-      {/* Browse-only inline tag filter. Hidden in fullscreen (which is a
-          distraction-free reading surface) and on decks with no tags at all —
-          §11 progressive disclosure: a control with nothing to control is noise.
-          Stays mounted through the filtered-empty state below, which is the
-          user's only way back out of it. */}
-      {isReadOnlyMode && !isFullscreen && availableTags.length > 0 && (
-        <BrowseTagFilter
-          availableTags={availableTags}
-          selectedTags={selectedTags}
-          onChange={setTags}
-          shown={visibleCards.length}
-          total={cards.length}
-          t={t}
-        />
+          {/* Progress as an EDGE, not an object (§15.4). Stretched across the
+              container as a 6px bar it was texture; at 3px directly under the
+              row it reads as progress and does the job of the divider that
+              used to sit there. */}
+          {!isFilteredEmpty && (
+            <LinearProgress
+              determinate
+              value={progress}
+              color='primary'
+              data-testid='session-progress'
+              sx={{
+                mt: 2,
+                borderRadius: 'xs',
+                bgcolor: 'background.level2',
+                boxShadow: 'none',
+                '--LinearProgress-thickness': '3px'
+              }}
+            />
+          )}
+        </Box>
       )}
 
       {isFilteredEmpty ? (
         <Sheet data-testid='tag-filter-empty' variant='soft' color='neutral' sx={{ borderRadius: 'xl', p: 4, textAlign: 'center' }}>
           <Typography level='title-md' sx={{ mb: 0.5 }}>
-            {t('cards.session.tagFilter.empty.title')}
+            {t(`${emptyFilterPrefix}.empty.title`)}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('cards.session.tagFilter.empty.body')}
+            {t(`${emptyFilterPrefix}.empty.body`)}
           </Typography>
           <Button
             variant='plain'
             size='sm'
-            onClick={clearTags}
-            aria-label={t('cards.session.tagFilter.clear')}
+            onClick={clearFilters}
+            aria-label={t(`${emptyFilterPrefix}.clear`)}
             sx={{
               mt: 2,
               '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
             }}
           >
-            {t('cards.session.tagFilter.clear')}
+            {t(`${emptyFilterPrefix}.clear`)}
           </Button>
         </Sheet>
       ) : (
@@ -1322,8 +1436,6 @@ export default function StudySession() {
             {/* Embedded TTS Controls */}
             <TTSControls
               compact
-              settingsOpen={showVoiceSettings}
-              onSettingsChange={setShowVoiceSettings}
               voiceSettings={isFlipped ? activeVoiceSettings.back : activeVoiceSettings.front}
               onVoiceSettingsChange={handleVoiceSettingsChange}
               text={
@@ -1375,10 +1487,10 @@ export default function StudySession() {
                   data-testid='session-scroll'
                   sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
                 >
-                  <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                  <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                     {t('cards.session.labels.quiz')}
                   </Typography>
-                  <Typography level='h3' sx={{ mb: 4, fontWeight: 600 }}>
+                  <Typography level='h3' sx={{ mb: 4, fontWeight: 'lg' }}>
                     {currentCard.title}
                   </Typography>
 
@@ -1496,10 +1608,10 @@ export default function StudySession() {
                   data-testid='session-scroll'
                   sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
                 >
-                  <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                  <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                     {t('cards.session.labels.visual')}
                   </Typography>
-                  <Typography level='h3' sx={{ mb: 3, fontWeight: 600 }}>
+                  <Typography level='h3' sx={{ mb: 3, fontWeight: 'lg' }}>
                     {currentCard.title}
                   </Typography>
 
@@ -1634,10 +1746,10 @@ export default function StudySession() {
                         p: { xs: 3, md: 4 }
                       }}
                     >
-                      <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 700, letterSpacing: '0.5px' }}>
+                      <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                         {t('cards.session.labels.question')}
                       </Typography>
-                      <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 600, whiteSpace: 'pre-wrap' }}>
+                      <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 'lg', whiteSpace: 'pre-wrap' }}>
                         {currentCard.title}
                       </Typography>
                       <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'text.tertiary' }}>
@@ -1713,7 +1825,7 @@ export default function StudySession() {
                         sx={{
                           mb: { xs: 1.5, md: 2 },
                           color: 'success.plainColor',
-                          fontWeight: 600,
+                          fontWeight: 'lg',
                           letterSpacing: '0.5px'
                         }}
                       >

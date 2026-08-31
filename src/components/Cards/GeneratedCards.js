@@ -30,12 +30,22 @@ import useCardCuration from '../../hooks/useCardCuration'
 import { useSaveToDeck } from '../../hooks/useSaveToDeck'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
 import GeneratedCard from './GeneratedCard'
 import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
 // UpgradePrompt is rendered centrally in SubscriptionProvider — no local import needed
 
 // Mirror of the backend wire-contract sampleText cap (used only for user-facing copy)
 const MAX_INPUT_CHARS = 20000
+
+// Pacing for the bar while a stream runs without a known total. Card generation
+// is the fastest wait in the app; this only has to be the right order of magnitude.
+const STREAM_ESTIMATED_MS = 25000
+
+// Upper bound on placeholder cards. A twenty-card generation showing twenty
+// skeletons is a wall of grey, not a preview of what is coming.
+const MAX_PENDING_SKELETONS = 6
 
 // Fixed count options offered in the regenerate menu (besides 'auto')
 const REGENERATE_COUNT_OPTIONS = [3, 5, 10, 20]
@@ -61,7 +71,7 @@ export default function GeneratedCards({
   onGenerateMore,
   isStreaming = false,
   streamError = null,
-  expectedTotal = 0,
+  expectedTotal = null,
   onRetry,
   generationMeta = null,
   inputWasTruncated = false
@@ -91,6 +101,22 @@ export default function GeneratedCards({
   // CURATE-001: cards arrive kept, and curation is keyed by card rather than by
   // array position, so a card streaming in cannot move anybody else's state.
   const curation = useCardCuration(cards)
+
+  // GEN-003. The stream already knows how many cards are coming, so this is the
+  // one surface in the app that can show measured progress rather than paced.
+  const progress = useGenerationProgress({
+    active: isStreaming,
+    failed: Boolean(streamError),
+    current: cards.length,
+    total: expectedTotal,
+    estimatedMs: STREAM_ESTIMATED_MS,
+    surface: 'cardStream'
+  })
+
+  // Placeholders for the cards still expected, so the list fills as they land
+  // instead of jumping. Auto mode has no total to subtract from, so it keeps the
+  // single "something is coming" placeholder it has always shown.
+  const pendingSkeletons = expectedTotal ? Math.max(0, Math.min(expectedTotal - cards.length, MAX_PENDING_SKELETONS)) : 1
 
   useEffect(() => {
     if (isStreaming) setInputClipDismissed(false)
@@ -313,19 +339,24 @@ export default function GeneratedCards({
                 </Button>
               </Stack>
 
-              {/* Streaming progress row — indeterminate copy until the total is known (auto mode) */}
-              {isStreaming && (
-                <Stack direction='row' spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
-                  <CircularProgress size='sm' />
-                  <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                    {cards.length === 0
-                      ? t('aiMagic.streaming.generating')
-                      : expectedTotal == null
-                        ? t('aiMagic.streaming.progressAuto', { count: cards.length })
-                        : t('aiMagic.streaming.progress', { count: cards.length, total: expectedTotal })}
-                  </Typography>
-                </Stack>
-              )}
+              {/* Streaming progress — the count is the detail, so the indeterminate copy still
+                  applies until a total is known. Auto mode reports `null`, and a caller that omits
+                  the prop gets the same treatment: counting against a total of zero would read as
+                  "3 of 0 cards generated" (GEN-001). No elapsed counter — this wait is measured in
+                  seconds, and a ticking clock on it is noise. */}
+              <GenerationProgress
+                progress={progress}
+                label={t('aiMagic.streaming.generating')}
+                showElapsed={false}
+                sx={{ mb: 2 }}
+                detail={
+                  cards.length === 0
+                    ? null
+                    : !expectedTotal
+                      ? t('aiMagic.streaming.progressAuto', { count: cards.length })
+                      : t('aiMagic.streaming.progress', { count: cards.length, total: expectedTotal })
+                }
+              />
 
               {/* Input-clip disclosure — selection exceeded the wire limit and was clipped */}
               {inputWasTruncated && !inputClipDismissed && (
@@ -440,19 +471,26 @@ export default function GeneratedCards({
                     />
                   ))}
 
-                  {/* ONE skeleton card for the next incoming card while streaming */}
-                  {isStreaming && (
-                    <Card variant='outlined' sx={{ minHeight: 180, display: 'flex' }} aria-hidden='true'>
-                      <CardOverflow sx={{ px: 2, pt: 2 }}>
-                        <Skeleton variant='text' level='title-md' width='60%' />
-                      </CardOverflow>
-                      <Divider />
-                      <CardContent>
-                        <Skeleton variant='text' level='body-md' width='100%' />
-                        <Skeleton variant='text' level='body-md' width='80%' />
-                      </CardContent>
-                    </Card>
-                  )}
+                  {/* One placeholder per card still expected, so the list fills as they arrive */}
+                  {isStreaming &&
+                    Array.from({ length: pendingSkeletons }, (_, index) => (
+                      <Card
+                        key={`pending-${index}`}
+                        variant='outlined'
+                        sx={{ minHeight: 180, display: 'flex' }}
+                        aria-hidden='true'
+                        data-testid='pending-card'
+                      >
+                        <CardOverflow sx={{ px: 2, pt: 2 }}>
+                          <Skeleton variant='text' level='title-md' width='60%' />
+                        </CardOverflow>
+                        <Divider />
+                        <CardContent>
+                          <Skeleton variant='text' level='body-md' width='100%' />
+                          <Skeleton variant='text' level='body-md' width='80%' />
+                        </CardContent>
+                      </Card>
+                    ))}
 
                   {/* Terminal error — replaces the skeleton; received cards stay selectable */}
                   {!isStreaming && streamError && (

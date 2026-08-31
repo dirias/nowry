@@ -6,7 +6,7 @@
  *  - the next form is shown, named, with its distance — the anticipation hook
  */
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -25,7 +25,7 @@ jest.mock('../../../theme/DynamicThemeProvider', () => ({
 }))
 
 let mockAvatarUrl = null
-const mockGenerateNextStageArt = jest.fn()
+const mockGenerateNextStageArt = jest.fn().mockResolvedValue(false)
 jest.mock('../../../context/AgentContext', () => ({
   usePet: () => ({ avatarUrl: mockAvatarUrl, generateNextStageArt: mockGenerateNextStageArt })
 }))
@@ -68,6 +68,9 @@ const journey = (reachedThrough, over = {}, isDefault = false) => ({
 beforeEach(() => {
   jest.clearAllMocks()
   mockAvatarUrl = null
+  // Resolves to false by default: the component awaits this and reloads only
+  // when something was actually generated.
+  mockGenerateNextStageArt.mockResolvedValue(false)
 })
 
 // The look-ahead exists so a locked rung shows the REAL next form rather than
@@ -101,6 +104,34 @@ describe('StageJourney — look-ahead art', () => {
     await screen.findByText('pet.stage.1.name')
     await waitFor(() => expect(agentService.getJourney).toHaveBeenCalled())
     expect(mockGenerateNextStageArt).not.toHaveBeenCalled()
+  })
+
+  // Both generating a portrait and reaching a stage change what every rung
+  // should show. Without a refetch the ladder stayed stale until a full page
+  // reload, which is what made a freshly generated avatar appear to need one.
+  it('re-fetches the ladder when the worn portrait changes', async () => {
+    agentService.getJourney.mockResolvedValue(withArt(journey(2, {}, false), 3, 'https://x/s3.png'))
+    const { rerender } = render(<StageJourney />)
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalledTimes(1))
+
+    mockAvatarUrl = 'https://example.com/freshly-generated.png'
+    rerender(<StageJourney />)
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalledTimes(2))
+  })
+
+  it('re-fetches once a look-ahead form has actually been generated', async () => {
+    mockGenerateNextStageArt.mockResolvedValue(true)
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+    await waitFor(() => expect(agentService.getJourney).toHaveBeenCalledTimes(2))
+  })
+
+  it('does not re-fetch when the look-ahead generated nothing', async () => {
+    mockGenerateNextStageArt.mockResolvedValue(false)
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+    await waitFor(() => expect(mockGenerateNextStageArt).toHaveBeenCalled())
+    expect(agentService.getJourney).toHaveBeenCalledTimes(1)
   })
 
   it('shows a look-ahead form as art, not as a faceless placeholder', async () => {
@@ -156,14 +187,38 @@ describe('StageJourney', () => {
   // A paying user's own portrait was never passed into the ladder, so their
   // journey showed a placeholder emoji at every rung — the personalised
   // experience looked poorer than the free one.
-  it('shows the user’s own portrait on the rungs they have reached', async () => {
+  // The worn portrait belongs to the CURRENT stage only. It used to be painted
+  // onto every reached rung, so a user who generated at Sprite saw the same
+  // picture on Wisp — claiming their companion looked like that before it
+  // existed. A form passed before they ever generated has no portrait and
+  // never will.
+  it('shows the worn portrait on the current stage', async () => {
+    mockAvatarUrl = 'https://example.com/my-pet.png'
+    agentService.getJourney.mockResolvedValue(journey(2, {}, false))
+    render(<StageJourney />)
+
+    await screen.findByTestId('orb-stage-2')
+    expect(screen.getByTestId('orb-avatar-2')).toHaveTextContent('https://example.com/my-pet.png')
+  })
+
+  it('never puts the current portrait on a form the user passed before generating', async () => {
     mockAvatarUrl = 'https://example.com/my-pet.png'
     agentService.getJourney.mockResolvedValue(journey(2, {}, false))
     render(<StageJourney />)
 
     await screen.findByTestId('orb-stage-1')
-    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('https://example.com/my-pet.png')
-    expect(screen.getByTestId('orb-avatar-2')).toHaveTextContent('https://example.com/my-pet.png')
+    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('none')
+  })
+
+  it('prefers a stage’s own recorded art over the worn portrait', async () => {
+    mockAvatarUrl = 'https://example.com/my-pet.png'
+    const j = journey(2, {}, false)
+    j.stages[0].art_url = 'https://example.com/wisp.png'
+    agentService.getJourney.mockResolvedValue(j)
+    render(<StageJourney />)
+
+    await screen.findByTestId('orb-stage-1')
+    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('https://example.com/wisp.png')
   })
 
   it('does not put the portrait on a form the user has not reached', async () => {
@@ -224,5 +279,49 @@ describe('StageJourney', () => {
 
     expect(await screen.findByText('agent.companion.journeyError')).toBeInTheDocument()
     await waitFor(() => expect(screen.queryByTestId('orb-stage-1')).not.toBeInTheDocument())
+  })
+})
+
+// PET-015: portraits generated at EARLIER stages were stored, returned by the
+// API and selectable by the backend, but the UI only ever rendered a picker
+// for the current stage — so a user at Sage who generated three Scouts could
+// see exactly one of them. Kept, but unreachable.
+describe('StageJourney — reaching earlier forms’ portraits', () => {
+  const withPortraits = (reachedThrough, perStage) => {
+    const j = journey(reachedThrough, {}, false)
+    for (const [stage, urls] of Object.entries(perStage)) {
+      j.stages[Number(stage) - 1].portraits = urls
+      j.stages[Number(stage) - 1].art_url = urls[0]
+    }
+    return j
+  }
+
+  it('opens an earlier form that has more than one portrait', async () => {
+    agentService.getJourney.mockResolvedValue(withPortraits(3, { 1: ['https://x/w1.png', 'https://x/w2.png'], 3: ['https://x/s1.png'] }))
+    render(<StageJourney />)
+
+    const card = await screen.findByLabelText('agent.companion.portraitsForStage:{"stage":"pet.stage.1.name"}')
+    fireEvent.click(card)
+
+    // The picker follows the opened form, not the current one.
+    expect(
+      await screen.findByText('agent.companion.portraitsForStage:{"stage":"pet.stage.1.name"}', { selector: 'h2,h3,p,div' })
+    ).toBeTruthy()
+  })
+
+  it('does not make a form openable when there is nothing to choose', async () => {
+    agentService.getJourney.mockResolvedValue(withPortraits(3, { 1: ['https://x/only.png'] }))
+    render(<StageJourney />)
+    await screen.findByText('pet.stage.1.name')
+
+    expect(screen.queryByLabelText('agent.companion.portraitsForStage:{"stage":"pet.stage.1.name"}')).toBeNull()
+  })
+
+  it('never makes an unreached form openable', async () => {
+    agentService.getJourney.mockResolvedValue(withPortraits(2, { 5: ['https://x/a.png', 'https://x/b.png'] }))
+    render(<StageJourney />)
+    await screen.findByText('pet.stage.5.name')
+
+    expect(screen.queryByLabelText('agent.companion.portraitsForStage:{"stage":"pet.stage.5.name"}')).toBeNull()
   })
 })

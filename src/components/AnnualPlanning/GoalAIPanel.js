@@ -5,7 +5,6 @@ import Stack from '@mui/joy/Stack'
 import Typography from '@mui/joy/Typography'
 import Button from '@mui/joy/Button'
 import Alert from '@mui/joy/Alert'
-import CircularProgress from '@mui/joy/CircularProgress'
 import AccordionGroup from '@mui/joy/AccordionGroup'
 import Accordion from '@mui/joy/Accordion'
 import AccordionSummary from '@mui/joy/AccordionSummary'
@@ -29,8 +28,30 @@ import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
  *   noPlan     — boolean (404 from backend — neutral info, not error)
  *   onRefresh  — () => void
  */
+
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
+
+// Per-surface narration (PRD A5). Generic copy would be worse than the spinner it
+// replaces: being specific about the work is the whole value of the line.
+const GOAL_AI_STAGES = [
+  { after: 0, icon: '📖', msgKey: 'goalAi.stages.s0' },
+  { after: 7, icon: '🔍', msgKey: 'goalAi.stages.s1' },
+  { after: 15, icon: '✍️', msgKey: 'goalAi.stages.s2' }
+]
+
+const GOAL_AI_ESTIMATED_MS = 20000
+
 const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
   const { t } = useTranslation()
+
+  const progress = useGenerationProgress({
+    active: loading,
+    failed: Boolean(error),
+    estimatedMs: GOAL_AI_ESTIMATED_MS,
+    stages: GOAL_AI_STAGES,
+    surface: 'goalAnalysis'
+  })
 
   return (
     <Box
@@ -61,13 +82,10 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
       </Stack>
 
       {/* Loading state */}
-      {loading && (
-        <Stack alignItems='center' spacing={1} sx={{ py: 3 }}>
-          <CircularProgress size='md' />
-          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-            {t('goalAi.loading')}
-          </Typography>
-        </Stack>
+      {progress.visible && (
+        <Box sx={{ py: 3 }}>
+          <GenerationProgress progress={progress} label={t('goalAi.loading')} />
+        </Box>
       )}
 
       {/* No annual plan — neutral info (not error) */}

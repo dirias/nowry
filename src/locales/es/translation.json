@@ -1156,8 +1156,6 @@
     },
     "session": {
       "tagFilter": {
-        "placeholder": "Filtrar por etiqueta",
-        "ariaLabel": "Filtrar tarjetas por etiqueta",
         "noOptions": "No hay etiquetas en este mazo",
         "clear": "Quitar filtros de etiquetas",
         "showing": "Mostrando {{shown}} de {{total}}",
@@ -1213,7 +1211,21 @@
         "alreadyAnswered": "Ya calificada"
       },
       "xpGained_one": "+{{count}} XP",
-      "xpGained_other": "+{{count}} XP"
+      "xpGained_other": "+{{count}} XP",
+      "filters": {
+        "tags": "Etiquetas",
+        "tagsSelected": "Etiquetas · {{count}}",
+        "searchTags": "Buscar etiquetas"
+      },
+      "markFilter": {
+        "label": "Marcadas ({{count}})",
+        "showing": "Mostrando {{shown}} de {{total}}",
+        "clear": "Quitar el filtro de marcadas",
+        "empty": {
+          "title": "Aún no hay nada marcado",
+          "body": "Marca una tarjeta mientras estudias y la encontrarás aquí."
+        }
+      }
     },
     "deleteModal": {
       "title": "Eliminar mazo",
@@ -1294,6 +1306,17 @@
       "typeSelectorAria": "Tipo de tarjeta",
       "switchTypeWarning": "Cambiar el tipo de tarjeta descartará lo que has escrito para este tipo.",
       "switchTypeConfirm": "Cambiar de todos modos"
+    },
+    "mark": {
+      "mark": "Marcar para después",
+      "unmark": "Quitar marca",
+      "action": "Marcar",
+      "actionOn": "Marcada",
+      "filter": {
+        "label": "Solo marcadas",
+        "showMarked": "Mostrar solo las tarjetas marcadas",
+        "showAll": "Mostrar todas las tarjetas"
+      }
     }
   },
   "filters": {
@@ -1304,7 +1327,8 @@
     "remove": {
       "type": "Eliminar filtro de tipo",
       "tag": "Eliminar filtro de etiqueta {{tag}}"
-    }
+    },
+    "marked": "Marcadas"
   },
   "subscription": {
     "upgrade": "Mejorar Plan",
@@ -2708,6 +2732,7 @@
       "generateAvatarAriaLabel": "Generar retrato IA de tu compañero",
       "regenerate": "Regenerar",
       "regenerating": "Regenerando...",
+      "animationGenerating": "Animando a tu compañero...",
       "regenerateAriaLabel": "Regenerar retrato del compañero",
       "generationsRemaining": "{{count}} restantes este mes",
       "upgradePlus": "Actualizar a Plus",
@@ -2763,7 +2788,12 @@
       "journeyError": "No se pudo cargar el viaje en este momento.",
       "journeyTogether_one": "Habéis estudiado juntos {{count}} día.",
       "journeyTogether_other": "Habéis estudiado juntos {{count}} días.",
-      "journeySince": "— juntos desde {{date}}."
+      "journeySince": "— juntos desde {{date}}.",
+      "portraitsTitle": "Retratos",
+      "portraitsDescription": "Todos los retratos que has generado para esta forma. Elige el que lleva tu compañero.",
+      "portraitWorn": "En uso",
+      "portraitOption": "Retrato {{index}}",
+      "portraitsForStage": "Retratos — {{stage}}"
     }
   },
   "reports": {
@@ -2930,7 +2960,12 @@
       "generatingHint": "AI is working — this may take up to a minute",
       "error": "Couldn't generate from book. Please try again.",
       "errorQuiz": "Couldn't generate quiz from book. Please try again.",
-      "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento."
+      "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento.",
+      "stages": {
+        "s0": "Leyendo tu libro...",
+        "s1": "Seleccionando lo importante...",
+        "s2": "Redactando el resultado..."
+      }
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
@@ -2951,6 +2986,11 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      },
+      "stages": {
+        "s0": "Leyendo tu mazo...",
+        "s1": "Comparando tus tarjetas...",
+        "s2": "Resumiendo los hallazgos..."
       }
     },
     "tts": {
@@ -3009,6 +3049,11 @@
         "flowchart": "Flowchart",
         "sequence": "Sequence Diagram",
         "er": "ER Diagram"
+      },
+      "stages": {
+        "s0": "Leyendo el fragmento...",
+        "s1": "Trazando las relaciones...",
+        "s2": "Dibujándolo..."
       }
     }
   },
@@ -3036,7 +3081,12 @@
     "emptyTitle": "Aún no hay diagrama",
     "emptyBody": "Elige un tipo de diagrama y genera uno a partir de tu contenido.",
     "titleField": "Título",
-    "titlePrefix": "Visual"
+    "titlePrefix": "Visual",
+    "stages": {
+      "s0": "Leyendo tu texto...",
+      "s1": "Eligiendo una estructura...",
+      "s2": "Dibujando el diagrama..."
+    }
   },
   "accountSettings": {
     "plan": {
@@ -3114,6 +3164,13 @@
         "alreadyInvited": "This user already has access.",
         "notOwner": "Only the board owner can share this board"
       }
+    },
+    "convertToCardsModal": {
+      "stages": {
+        "s0": "Leyendo tus notas...",
+        "s1": "Buscando las ideas que vale la pena guardar...",
+        "s2": "Convirtiéndolas en tarjetas..."
+      }
     }
   },
   "calendarPage": {
@@ -3174,6 +3231,11 @@
       "suggestions": "No suggestions available.",
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
+    },
+    "stages": {
+      "s0": "Leyendo tu plan...",
+      "s1": "Buscando patrones...",
+      "s2": "Redactando tu análisis..."
     }
   },
   "sheets": {
@@ -3251,5 +3313,8 @@
     "deckPlaceholder": "Elige un mazo",
     "deckNone": "Sin mazo",
     "deckEmpty": "Todavía no tienes ningún mazo."
+  },
+  "generation": {
+    "elapsedSeconds": "{{seconds}} s transcurridos"
   }
 }

@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Box, Button, Card, CircularProgress, Divider, Modal, ModalDialog, ModalClose, Snackbar, Stack, Typography } from '@mui/joy'
+import { Alert, Box, Button, Card, Divider, Modal, ModalDialog, ModalClose, Snackbar, Stack, Typography } from '@mui/joy'
 import DeckSelector from '../Agent/DeckSelector'
 import { blackboardService } from '../../api/services/blackboard.service'
 import { cardsService } from '../../api/services/cards.service'
 import { decksService } from '../../api/services/decks.service'
+
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
+
+// Per-surface narration (PRD A5). Generic copy would be worse than the spinner it
+// replaces: being specific about the work is the whole value of the line.
+const CONVERT_STAGES = [
+  { after: 0, icon: '📖', msgKey: 'blackboard.convertToCardsModal.stages.s0' },
+  { after: 8, icon: '🔍', msgKey: 'blackboard.convertToCardsModal.stages.s1' },
+  { after: 18, icon: '✍️', msgKey: 'blackboard.convertToCardsModal.stages.s2' }
+]
+
+const CONVERT_ESTIMATED_MS = 25000
 
 export default function ConvertToCardsModal({ open, onClose, boardId, selectedNodes }) {
   const { t } = useTranslation()
@@ -24,6 +37,14 @@ export default function ConvertToCardsModal({ open, onClose, boardId, selectedNo
   // Add to deck state
   const [adding, setAdding] = useState(false)
   const [snackbar, setSnackbar] = useState(null)
+
+  const progress = useGenerationProgress({
+    active: loading,
+    failed: Boolean(error),
+    estimatedMs: CONVERT_ESTIMATED_MS,
+    stages: CONVERT_STAGES,
+    surface: 'blackboardCards'
+  })
 
   // Fetch decks once when modal opens
   useEffect(() => {
@@ -125,12 +146,9 @@ export default function ConvertToCardsModal({ open, onClose, boardId, selectedNo
           {/* Content */}
           <Box sx={{ px: 3, py: 2, maxHeight: '60vh', overflowY: 'auto' }}>
             {/* Loading state */}
-            {loading && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 1.5 }}>
-                <CircularProgress size='md' aria-label={t('blackboard.toolbar.convertingCards')} />
-                <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                  {t('blackboard.toolbar.convertingCards')}
-                </Typography>
+            {progress.visible && (
+              <Box sx={{ py: 4 }}>
+                <GenerationProgress progress={progress} label={t('blackboard.toolbar.convertingCards')} />
               </Box>
             )}
 

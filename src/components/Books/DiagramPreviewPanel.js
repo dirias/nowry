@@ -1,12 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option, Stack, CircularProgress, Alert } from '@mui/joy'
+import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option, Stack, Alert } from '@mui/joy'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { illustrationsService } from '../../api/services/illustrations.service'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import MermaidRenderer from './MermaidRenderer'
+
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
+
+// Per-surface narration (PRD A5). Generic copy would be worse than the spinner it
+// replaces: being specific about the work is the whole value of the line.
+const DIAGRAM_STAGES = [
+  { after: 0, icon: '📖', msgKey: 'aiMagic.diagram.stages.s0' },
+  { after: 8, icon: '🔍', msgKey: 'aiMagic.diagram.stages.s1' },
+  { after: 18, icon: '✍️', msgKey: 'aiMagic.diagram.stages.s2' }
+]
+
+const DIAGRAM_ESTIMATED_MS = 25000
 
 export default function DiagramPreviewPanel({ open, onClose, selectedText, bookId, onInsert }) {
   const { t } = useTranslation()
@@ -16,6 +29,14 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
   const [explanation, setExplanation] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  const progress = useGenerationProgress({
+    active: isLoading,
+    failed: Boolean(error),
+    estimatedMs: DIAGRAM_ESTIMATED_MS,
+    stages: DIAGRAM_STAGES,
+    surface: 'diagram'
+  })
 
   const handleGenerate = useCallback(async () => {
     if (!selectedText || !bookId) return
@@ -112,13 +133,10 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
 
         {/* Content */}
         <Box sx={{ overflowY: 'auto', bgcolor: 'background.surface' }}>
-          {isLoading && (
-            <Stack alignItems='center' justifyContent='center' sx={{ py: 8 }} spacing={2}>
-              <CircularProgress size='md' />
-              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                {t('aiMagic.diagram.loading')}
-              </Typography>
-            </Stack>
+          {progress.visible && (
+            <Box sx={{ py: 8, px: { xs: 2, sm: 3, md: 4 } }}>
+              <GenerationProgress progress={progress} label={t('aiMagic.diagram.loading')} />
+            </Box>
           )}
           {error && !isLoading && (
             <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, md: 3 } }}>

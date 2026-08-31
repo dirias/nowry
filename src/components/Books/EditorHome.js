@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import Editor from './Editor'
 import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
+import useGenerationProgress from '../../hooks/useGenerationProgress'
+import GenerationProgress from '../Common/GenerationProgress'
 import { useParams, useLocation } from 'react-router-dom'
 import {
   Save,
@@ -63,6 +65,14 @@ import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import { useTranslation } from 'react-i18next'
 import MobileBottomActionStrip from '../Editor/plugins/MobileBottomActionStrip'
 import { usePet } from '../../context/AgentContext'
+
+const BOOK_GENERATION_STAGES = [
+  { after: 0, icon: '📖', msgKey: 'aiMagic.generateFromBook.stages.s0' },
+  { after: 12, icon: '🔍', msgKey: 'aiMagic.generateFromBook.stages.s1' },
+  { after: 30, icon: '✍️', msgKey: 'aiMagic.generateFromBook.stages.s2' }
+]
+
+const BOOK_GENERATION_ESTIMATED_MS = 45000
 
 // Explicit keyboard focus ring — never rely on the browser default.
 const focusRingSx = {
@@ -145,6 +155,16 @@ export default function EditorHome() {
 
   // Generate Quiz from Book state
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false)
+
+  // Per-surface narration (PRD A5). Cards and quiz read the same book and take
+  // roughly the same time, so one set of stages covers both. Declared here rather
+  // than beside `isGeneratingAny` further down, which sits after an early return.
+  const bookGeneration = useGenerationProgress({
+    active: isGeneratingCards || isGeneratingQuiz,
+    estimatedMs: BOOK_GENERATION_ESTIMATED_MS,
+    stages: BOOK_GENERATION_STAGES,
+    surface: 'bookGeneration'
+  })
   const [generatedQuizQuestions, setGeneratedQuizQuestions] = useState([])
   const [showGeneratedQuiz, setShowGeneratedQuiz] = useState(false)
   const [generateQuizError, setGenerateQuizError] = useState(null)
@@ -1152,6 +1172,14 @@ export default function EditorHome() {
           </Stack>
 
           <Divider />
+
+          {/* AI generation progress — a strip under the toolbar, because the wait
+              happens before any result modal exists to host it */}
+          {bookGeneration.visible && (
+            <Box sx={{ px: { xs: 2, md: 3 }, py: 1 }}>
+              <GenerationProgress progress={bookGeneration} label={t('aiMagic.generateFromBook.generatingHint')} />
+            </Box>
+          )}
 
           {/* Row 2: Formatting Ribbon - Only show when unlocked */}
           {!isLocked && (

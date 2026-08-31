@@ -291,11 +291,13 @@ export default function AgentSettings() {
     avatarStage,
     avatarRegenPending,
     avatarGenerating,
+    avatarStartedAt,
     avatarError,
     generationsRemaining,
     generateAvatar,
     animationUrl,
     animationGenerating,
+    animationStartedAt,
     animationError,
     generateAnimation
   } = usePet()
@@ -1066,11 +1068,13 @@ export default function AgentSettings() {
                 avatarUrl={avatarUrl}
                 avatarStage={avatarStage}
                 avatarGenerating={avatarGenerating}
+                avatarStartedAt={avatarStartedAt}
                 avatarError={avatarError}
                 generationsRemaining={generationsRemaining}
                 onGenerateAvatar={generateAvatar}
                 animationUrl={animationUrl}
                 animationGenerating={animationGenerating}
+                animationStartedAt={animationStartedAt}
                 animationError={animationError}
                 onGenerateAnimation={generateAnimation}
               />

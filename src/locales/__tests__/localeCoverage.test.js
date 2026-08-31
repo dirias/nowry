@@ -116,8 +116,27 @@ const IDENTICAL_BY_DESIGN = {
   es: [...XP_GAINED],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
-  fr: ['taxonomy.topics.business', 'taxonomy.topics.design', 'news.categories.design', ...XP_GAINED],
-  de: ['taxonomy.topics.design', 'news.categories.design', ...XP_GAINED],
+  // "Portrait(s)" is the French word, so both the heading and the numbered
+  // option label land on English by coincidence rather than by neglect.
+  fr: [
+    'taxonomy.topics.business',
+    'taxonomy.topics.design',
+    'news.categories.design',
+    'agent.companion.portraitsTitle',
+    'agent.companion.portraitOption',
+    'agent.companion.portraitsForStage',
+    ...XP_GAINED
+  ],
+  // "Tag" is the word German actually uses for a content tag — the bundle has
+  // said "Nach Tag filtern" since the tag filter shipped — so the segment label
+  // and its counted form land on English by agreement, not by neglect.
+  de: [
+    'taxonomy.topics.design',
+    'news.categories.design',
+    'cards.session.filters.tags',
+    'cards.session.filters.tagsSelected',
+    ...XP_GAINED
+  ],
   ja: ['cards.session.xpGained_other']
 }
 

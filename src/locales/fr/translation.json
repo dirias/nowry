@@ -1745,6 +1745,7 @@
       "generateAvatarAriaLabel": "Générer un portrait IA de votre compagnon",
       "regenerate": "Régénérer",
       "regenerating": "Régénération...",
+      "animationGenerating": "Animation de votre compagnon...",
       "regenerateAriaLabel": "Régénérer le portrait du compagnon",
       "generationsRemaining": "{{count}} restant(s) ce mois",
       "upgradePlus": "Passer à Plus",
@@ -1800,7 +1801,12 @@
       "journeyError": "Impossible de charger le parcours pour le moment.",
       "journeyTogether_one": "Vous avez étudié ensemble pendant {{count}} jour.",
       "journeyTogether_other": "Vous avez étudié ensemble pendant {{count}} jours.",
-      "journeySince": "— ensemble depuis {{date}}."
+      "journeySince": "— ensemble depuis {{date}}.",
+      "portraitsTitle": "Portraits",
+      "portraitsDescription": "Tous les portraits que vous avez générés pour cette forme. Choisissez celui que porte votre compagnon.",
+      "portraitWorn": "Porté",
+      "portraitOption": "Portrait {{index}}",
+      "portraitsForStage": "Portraits — {{stage}}"
     },
     "settingsSubtitle": "Configurez le comportement et la personnalité de votre compagnon",
     "headerStatus": "Nv{{level}} · {{tier}} · {{remaining}} étincelles restantes",
@@ -1955,8 +1961,6 @@
     },
     "session": {
       "tagFilter": {
-        "placeholder": "Filtrer par étiquette",
-        "ariaLabel": "Filtrer les cartes par étiquette",
         "noOptions": "Aucune étiquette dans ce paquet",
         "clear": "Effacer les filtres d'étiquettes",
         "showing": "Affichage de {{shown}} sur {{total}}",
@@ -1977,7 +1981,21 @@
       "enterFullscreen": "Activer le plein écran",
       "exitFullscreen": "Quitter le plein écran",
       "xpGained_one": "+{{count}} XP",
-      "xpGained_other": "+{{count}} XP"
+      "xpGained_other": "+{{count}} XP",
+      "filters": {
+        "tags": "Étiquettes",
+        "tagsSelected": "Étiquettes · {{count}}",
+        "searchTags": "Rechercher une étiquette"
+      },
+      "markFilter": {
+        "label": "Marquées ({{count}})",
+        "showing": "Affichage de {{shown}} sur {{total}}",
+        "clear": "Retirer le filtre des cartes marquées",
+        "empty": {
+          "title": "Rien de marqué pour l'instant",
+          "body": "Marquez une carte pendant que vous révisez et vous la retrouverez ici."
+        }
+      }
     },
     "common": {
       "addTags": "Ajouter des étiquettes",
@@ -2008,6 +2026,17 @@
       "imagePlaceholder": "Collez le lien d'une image",
       "imagePreviewAlt": "Aperçu de l'image du paquet",
       "imagePreviewError": "Cette image n'a pas pu être chargée"
+    },
+    "mark": {
+      "mark": "Marquer pour plus tard",
+      "unmark": "Retirer la marque",
+      "action": "Marquer",
+      "actionOn": "Marquée",
+      "filter": {
+        "label": "Marquées uniquement",
+        "showMarked": "Afficher uniquement les cartes marquées",
+        "showAll": "Afficher toutes les cartes"
+      }
     }
   },
   "books": {
@@ -2287,7 +2316,12 @@
       "generatingQuiz": "Generating quiz…",
       "generatingHint": "AI is working — this may take up to a minute",
       "error": "Couldn't generate from book. Please try again.",
-      "errorQuiz": "Couldn't generate quiz from book. Please try again."
+      "errorQuiz": "Couldn't generate quiz from book. Please try again.",
+      "stages": {
+        "s0": "Lecture de votre livre...",
+        "s1": "Sélection de l'essentiel...",
+        "s2": "Rédaction du résultat..."
+      }
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
@@ -2308,6 +2342,11 @@
         "skip": "Skip",
         "acceptAll": "Accept All",
         "acceptError": "Couldn't apply suggestion. Please try again."
+      },
+      "stages": {
+        "s0": "Lecture de votre paquet...",
+        "s1": "Comparaison de vos cartes...",
+        "s2": "Synthèse des résultats..."
       }
     },
     "tts": {
@@ -2365,6 +2404,11 @@
         "flowchart": "Flowchart",
         "sequence": "Sequence Diagram",
         "er": "ER Diagram"
+      },
+      "stages": {
+        "s0": "Lecture du passage...",
+        "s1": "Cartographie des relations...",
+        "s2": "Tracé du schéma..."
       }
     }
   },
@@ -2392,7 +2436,12 @@
     "emptyTitle": "Aucun diagramme pour le moment",
     "emptyBody": "Choisissez un type de diagramme et générez-en un à partir de votre contenu.",
     "titleField": "Titre",
-    "titlePrefix": "Visuel"
+    "titlePrefix": "Visuel",
+    "stages": {
+      "s0": "Lecture de votre texte...",
+      "s1": "Choix d'une structure...",
+      "s2": "Dessin du diagramme..."
+    }
   },
   "accountSettings": {
     "plan": {
@@ -2470,6 +2519,13 @@
         "alreadyInvited": "This user already has access.",
         "notOwner": "Only the board owner can share this board"
       }
+    },
+    "convertToCardsModal": {
+      "stages": {
+        "s0": "Lecture de vos notes...",
+        "s1": "Repérage des idées à garder...",
+        "s2": "Conversion en cartes..."
+      }
     }
   },
   "calendarPage": {
@@ -2530,6 +2586,11 @@
       "suggestions": "No suggestions available.",
       "conflicts": "No conflicts detected.",
       "archiving": "No stale goals to archive."
+    },
+    "stages": {
+      "s0": "Lecture de votre plan...",
+      "s1": "Recherche de tendances...",
+      "s2": "Rédaction de votre analyse..."
     }
   },
   "sheets": {
@@ -2607,5 +2668,11 @@
     "deckPlaceholder": "Choisir un paquet",
     "deckNone": "Aucun paquet",
     "deckEmpty": "Vous n'avez pas encore de paquet."
+  },
+  "generation": {
+    "elapsedSeconds": "{{seconds}} s écoulées"
+  },
+  "filters": {
+    "marked": "Marquées"
   }
 }

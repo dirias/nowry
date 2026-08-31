@@ -65,3 +65,41 @@ export function filterCardsByTags(cards, selectedTags) {
 
   return cards.filter((card) => Array.isArray(card?.tags) && card.tags.some((tag) => selectedTags.includes(tag)))
 }
+
+/**
+ * Narrow `cards` to the ones the user has marked.
+ *
+ * The mark is the user's own axis and has nothing to do with SM-2 (ADR-010) —
+ * this reads `marked_at` and nothing else, and is only ever reached from Browse
+ * mode, where reviews are refused anyway.
+ *
+ * HARD REQUIREMENT, identical to `filterCardsByTags`: with the filter off this
+ * returns the SAME ARRAY REFERENCE it was given. The two compose, so if either
+ * one copied defensively the no-filter identity guarantee would be lost for
+ * both — and with it the "study mode is byte-for-byte unchanged" invariant.
+ *
+ * @param {Array<object>} cards
+ * @param {boolean} markedOnly
+ * @returns {Array<object>}
+ */
+export function filterCardsByMark(cards, markedOnly) {
+  if (!Array.isArray(cards)) return cards
+  if (!markedOnly) return cards
+
+  return cards.filter((card) => Boolean(card?.marked_at))
+}
+
+/**
+ * How many of `cards` the user has marked. Drives the filter's own label and
+ * lets a caller tell "nothing is marked in this deck" apart from "the filter
+ * combination matched nothing", which are different empty states with different
+ * things to say.
+ *
+ * @param {Array<object>} cards
+ * @returns {number}
+ */
+export function countMarked(cards) {
+  if (!Array.isArray(cards)) return 0
+
+  return cards.reduce((total, card) => (card?.marked_at ? total + 1 : total), 0)
+}

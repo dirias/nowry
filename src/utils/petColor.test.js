@@ -132,7 +132,7 @@ describe('suggestFromInterests', () => {
     expect(suggestFromInterests(['underwater basket weaving'])).toEqual({ species: 'owl' })
   })
 
-  it('never suggests a colour — that follows the user\'s own theme accent now', () => {
+  it("never suggests a colour — that follows the user's own theme accent now", () => {
     for (const interests of [[], ['music'], ['history'], ['chemistry'], ['psychology']]) {
       expect(suggestFromInterests(interests)).not.toHaveProperty('color')
     }
