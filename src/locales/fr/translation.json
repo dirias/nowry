@@ -1961,8 +1961,6 @@
     },
     "session": {
       "tagFilter": {
-        "placeholder": "Filtrer par étiquette",
-        "ariaLabel": "Filtrer les cartes par étiquette",
         "noOptions": "Aucune étiquette dans ce paquet",
         "clear": "Effacer les filtres d'étiquettes",
         "showing": "Affichage de {{shown}} sur {{total}}",
@@ -1984,10 +1982,13 @@
       "exitFullscreen": "Quitter le plein écran",
       "xpGained_one": "+{{count}} XP",
       "xpGained_other": "+{{count}} XP",
+      "filters": {
+        "tags": "Étiquettes",
+        "tagsSelected": "Étiquettes · {{count}}",
+        "searchTags": "Rechercher une étiquette"
+      },
       "markFilter": {
         "label": "Marquées ({{count}})",
-        "showMarked": "Afficher uniquement les cartes marquées",
-        "showAll": "Afficher toutes les cartes",
         "showing": "Affichage de {{shown}} sur {{total}}",
         "clear": "Retirer le filtre des cartes marquées",
         "empty": {

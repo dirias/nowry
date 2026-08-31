@@ -38,9 +38,8 @@ import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
 import { useBrowseFilters } from '../../hooks/useBrowseFilters'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
-import BrowseTagFilter from './BrowseTagFilter'
+import BrowseFilterBar from './BrowseFilterBar'
 import MarkToggle from './MarkToggle'
-import BrowseMarkFilter from './BrowseMarkFilter'
 import { queryClient } from '../../api/queryClient'
 import { useAuth } from '../../context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
@@ -1275,35 +1274,28 @@ export default function StudySession() {
         </Stack>
       )}
 
-      {/* Browse-only mark filter. Appears once the deck has something marked —
-          or while the filter is on, so the control that switched it on is also
-          the one that switches it off. Independent of the tag filter below: a
-          deck can have marks and no tags, or the reverse. */}
-      {isReadOnlyMode && !isFullscreen && (markedCount > 0 || markedOnly) && (
-        <BrowseMarkFilter
-          markedOnly={markedOnly}
-          markedCount={markedCount}
-          shown={visibleCards.length}
-          total={cards.length}
-          onToggle={toggleMarkedOnly}
-          t={t}
-        />
-      )}
-
-      {/* Browse-only inline tag filter. Hidden in fullscreen (which is a
-          distraction-free reading surface) and on decks with no tags at all —
-          §11 progressive disclosure: a control with nothing to control is noise.
-          Stays mounted through the filtered-empty state below, which is the
-          user's only way back out of it. */}
-      {isReadOnlyMode && !isFullscreen && availableTags.length > 0 && (
-        <BrowseTagFilter
-          availableTags={availableTags}
-          selectedTags={selectedTags}
-          onChange={setTags}
-          shown={visibleCards.length}
-          total={cards.length}
-          t={t}
-        />
+      {/* Browse-only view filters, as ONE segmented control (ADR-011). They were
+          two components on two rows, which said they were unrelated: the mark's
+          payoff sat two rows from the control that produces it, and neither was
+          found. The bar decides for itself which segments have anything to
+          control (§11), so the only gate left here is the one that matters —
+          Browse, and not fullscreen, which is a distraction-free reading
+          surface. Stays mounted through the filtered-empty state below, which
+          is the user's only way back out of it. */}
+      {isReadOnlyMode && !isFullscreen && (
+        <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' }, mb: 2 }}>
+          <BrowseFilterBar
+            availableTags={availableTags}
+            selectedTags={selectedTags}
+            onTagsChange={setTags}
+            markedOnly={markedOnly}
+            markedCount={markedCount}
+            onToggleMarked={toggleMarkedOnly}
+            shown={visibleCards.length}
+            total={cards.length}
+            t={t}
+          />
+        </Box>
       )}
 
       {isFilteredEmpty ? (

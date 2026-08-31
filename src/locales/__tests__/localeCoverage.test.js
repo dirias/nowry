@@ -127,7 +127,16 @@ const IDENTICAL_BY_DESIGN = {
     'agent.companion.portraitsForStage',
     ...XP_GAINED
   ],
-  de: ['taxonomy.topics.design', 'news.categories.design', ...XP_GAINED],
+  // "Tag" is the word German actually uses for a content tag — the bundle has
+  // said "Nach Tag filtern" since the tag filter shipped — so the segment label
+  // and its counted form land on English by agreement, not by neglect.
+  de: [
+    'taxonomy.topics.design',
+    'news.categories.design',
+    'cards.session.filters.tags',
+    'cards.session.filters.tagsSelected',
+    ...XP_GAINED
+  ],
   ja: ['cards.session.xpGained_other']
 }
 

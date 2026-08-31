@@ -1156,8 +1156,6 @@
     },
     "session": {
       "tagFilter": {
-        "placeholder": "Filtrar por etiqueta",
-        "ariaLabel": "Filtrar tarjetas por etiqueta",
         "noOptions": "No hay etiquetas en este mazo",
         "clear": "Quitar filtros de etiquetas",
         "showing": "Mostrando {{shown}} de {{total}}",
@@ -1214,10 +1212,13 @@
       },
       "xpGained_one": "+{{count}} XP",
       "xpGained_other": "+{{count}} XP",
+      "filters": {
+        "tags": "Etiquetas",
+        "tagsSelected": "Etiquetas · {{count}}",
+        "searchTags": "Buscar etiquetas"
+      },
       "markFilter": {
         "label": "Marcadas ({{count}})",
-        "showMarked": "Mostrar solo las tarjetas marcadas",
-        "showAll": "Mostrar todas las tarjetas",
         "showing": "Mostrando {{shown}} de {{total}}",
         "clear": "Quitar el filtro de marcadas",
         "empty": {

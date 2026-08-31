@@ -1939,8 +1939,6 @@
     },
     "session": {
       "tagFilter": {
-        "placeholder": "Nach Tag filtern",
-        "ariaLabel": "Karten nach Tag filtern",
         "noOptions": "Keine Tags in diesem Stapel",
         "clear": "Tag-Filter zurücksetzen",
         "showing": "{{shown}} von {{total}} werden angezeigt",
@@ -1962,10 +1960,13 @@
       "exitFullscreen": "Vollbild beenden",
       "xpGained_one": "+{{count}} XP",
       "xpGained_other": "+{{count}} XP",
+      "filters": {
+        "tags": "Tags",
+        "tagsSelected": "Tags · {{count}}",
+        "searchTags": "Tags suchen"
+      },
       "markFilter": {
         "label": "Markiert ({{count}})",
-        "showMarked": "Nur markierte Karten anzeigen",
-        "showAll": "Alle Karten anzeigen",
         "showing": "{{shown}} von {{total}} werden angezeigt",
         "clear": "Markierungsfilter entfernen",
         "empty": {

@@ -1434,8 +1434,6 @@
     },
     "session": {
       "tagFilter": {
-        "placeholder": "Filter by tag",
-        "ariaLabel": "Filter cards by tag",
         "noOptions": "No tags in this deck",
         "clear": "Clear tag filters",
         "showing": "Showing {{shown}} of {{total}}",
@@ -1492,10 +1490,13 @@
       },
       "xpGained_one": "+{{count}} XP",
       "xpGained_other": "+{{count}} XP",
+      "filters": {
+        "tags": "Tags",
+        "tagsSelected": "Tags · {{count}}",
+        "searchTags": "Search tags"
+      },
       "markFilter": {
         "label": "Marked ({{count}})",
-        "showMarked": "Show only marked cards",
-        "showAll": "Show all cards",
         "showing": "Showing {{shown}} of {{total}}",
         "clear": "Clear the marked filter",
         "empty": {

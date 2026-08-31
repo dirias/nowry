@@ -824,7 +824,15 @@ describe('rapid prev-nav race guard', () => {
 // cannot be reordered or shrunk, not even via a hand-crafted URL.
 // ---------------------------------------------------------------------------
 
-const TAG_INPUT_LABEL = 'cards.session.tagFilter.ariaLabel'
+/**
+ * HDR-002 — the two filters are one segmented bar now, so the selectors change
+ * shape: the tag dimension is a menu-opening segment rather than a combobox,
+ * and the mark dimension is a pressed-state segment rather than a chip named
+ * after its action. The invariants under test are unchanged.
+ */
+const TAGS_SEGMENT = /^cards\.session\.filters\.tags/
+const tagsSegment = () => screen.queryByRole('button', { name: TAGS_SEGMENT })
+const findTagsSegment = () => screen.findByRole('button', { name: TAGS_SEGMENT })
 
 /** Three flashcards: tc1 = verbs, tc2 = nouns, tc3 = both. */
 const makeTaggedCards = () => [
@@ -846,11 +854,14 @@ function clickNextCard() {
   fireEvent.click(button)
 }
 
-/** Opens the combobox and picks `tag` from the listbox. */
+/**
+ * Opens the Tags segment's menu and picks `tag`. `menuitemcheckbox` is the
+ * correct role for a multi-select filter menu — each row carries its own
+ * checked state rather than dismissing the menu on choice.
+ */
 async function selectTag(tag) {
-  const input = await screen.findByLabelText(TAG_INPUT_LABEL)
-  fireEvent.mouseDown(input)
-  const option = await screen.findByRole('option', { name: new RegExp(`^${tag}`) })
+  fireEvent.click(await findTagsSegment())
+  const option = await screen.findByRole('menuitemcheckbox', { name: new RegExp(`^${tag}`) })
   fireEvent.click(option)
 }
 
@@ -871,7 +882,7 @@ describe('browse tag filter — visibility', () => {
     renderSession({ cards: makeTaggedCards() })
     await screen.findByTestId('session-footer')
 
-    expect(screen.queryByLabelText(TAG_INPUT_LABEL)).not.toBeInTheDocument()
+    expect(tagsSegment()).not.toBeInTheDocument()
     // And the queue is intact — all three cards, unfiltered.
     expect(screen.getAllByText(/cards\.session\.card.*"total":3/).length).toBeGreaterThan(0)
   })
@@ -880,7 +891,7 @@ describe('browse tag filter — visibility', () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeTaggedCards() })
 
-    expect(await screen.findByLabelText(TAG_INPUT_LABEL)).toBeInTheDocument()
+    expect(await findTagsSegment()).toBeInTheDocument()
   })
 
   it('does not render on a browse deck with no tags at all', async () => {
@@ -888,17 +899,17 @@ describe('browse tag filter — visibility', () => {
     renderSession({ cards: makeCards() })
     await screen.findByTestId('session-footer')
 
-    expect(screen.queryByLabelText(TAG_INPUT_LABEL)).not.toBeInTheDocument()
+    expect(tagsSegment()).not.toBeInTheDocument()
   })
 
   it('does not render in fullscreen', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeTaggedCards() })
-    await screen.findByLabelText(TAG_INPUT_LABEL)
+    await findTagsSegment()
 
     fireEvent.click(screen.getByLabelText('cards.session.enterFullscreen'))
 
-    expect(screen.queryByLabelText(TAG_INPUT_LABEL)).not.toBeInTheDocument()
+    expect(tagsSegment()).not.toBeInTheDocument()
   })
 })
 
@@ -926,7 +937,7 @@ describe('browse tag filter — position handling', () => {
   it('keeps the user on the same card, with flip state untouched, when the card survives the filter', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeTaggedCards() })
-    await screen.findByLabelText(TAG_INPUT_LABEL)
+    await findTagsSegment()
 
     clickNextCard() // -> tc2
     clickNextCard() // -> tc3 (tagged verbs + nouns, so it survives 'nouns')
@@ -945,7 +956,7 @@ describe('browse tag filter — position handling', () => {
   it('falls back to the first card with flip state cleared when the anchored card is filtered out', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeTaggedCards() })
-    await screen.findByLabelText(TAG_INPUT_LABEL)
+    await findTagsSegment()
 
     fireEvent.click(await screen.findByText('Alpha Q')) // flip tc1 (verbs only)
     expect(lastViewContext()).toMatchObject({ isFlipped: true, cardIndex: 1 })
@@ -959,7 +970,7 @@ describe('browse tag filter — position handling', () => {
   it('never completes the session as a side effect of filtering', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeTaggedCards() })
-    await screen.findByLabelText(TAG_INPUT_LABEL)
+    await findTagsSegment()
 
     await selectTag('nouns')
 
@@ -985,7 +996,7 @@ describe('browse tag filter — filtered-empty state', () => {
     { _id: 'pt2', id: 'pt2', title: 'Other Q', content: 'Other A', tags: ['nouns'] }
   ]
 
-  it('renders inside the session layout, keeping the combobox mounted so the filter is undoable', async () => {
+  it('renders inside the session layout, keeping the filter bar mounted so the filter is undoable', async () => {
     mockSearchParams = new URLSearchParams('mode=browse&tags=verbs')
     renderSession({ cards: paddedTagCards() })
 
@@ -993,7 +1004,7 @@ describe('browse tag filter — filtered-empty state', () => {
     expect(screen.getByText('cards.session.tagFilter.empty.title')).toBeInTheDocument()
     expect(screen.getByText('cards.session.tagFilter.empty.body')).toBeInTheDocument()
     // The escape hatch: the control that caused this is still on screen.
-    expect(screen.getByLabelText(TAG_INPUT_LABEL)).toBeInTheDocument()
+    expect(tagsSegment()).toBeInTheDocument()
   })
 
   it('is distinct from the empty-deck state and hides the card chrome', async () => {
@@ -1030,8 +1041,6 @@ describe('browse tag filter — filtered-empty state', () => {
  * are looking at does not throw you somewhere unrelated, and that an empty
  * result explains itself instead of showing a blank session.
  */
-const MARK_CHIP_ON = 'cards.session.markFilter.showMarked'
-const MARK_CHIP_OFF = 'cards.session.markFilter.showAll'
 const MARKED_AT = '2026-08-30T10:00:00'
 
 /** Three flashcards, two of them marked (mc1, mc3). */
@@ -1041,7 +1050,13 @@ const makeMarkedCards = () => [
   { _id: 'mc3', id: 'mc3', title: 'Gamma Q', content: 'Gamma A', marked_at: MARKED_AT }
 ]
 
-const markChip = () => screen.queryByLabelText(MARK_CHIP_ON) || screen.queryByLabelText(MARK_CHIP_OFF)
+/**
+ * The marked segment names itself after what it IS, not what clicking it does —
+ * `aria-pressed` carries the direction. An accessible name that does not
+ * contain its own visible label would fail WCAG 2.5.3 (ADR-011).
+ */
+const markChip = () => screen.queryByTestId('marked-filter-segment')
+const findMarkChip = () => screen.findByTestId('marked-filter-segment')
 
 describe('browse mark filter — visibility', () => {
   it('never renders in study mode, even with a hand-crafted ?marked=1 on the URL', async () => {
@@ -1058,7 +1073,7 @@ describe('browse mark filter — visibility', () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeMarkedCards() })
 
-    expect(await screen.findByLabelText(MARK_CHIP_ON)).toBeInTheDocument()
+    expect(await findMarkChip()).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('does not render on a browse deck with nothing marked', async () => {
@@ -1073,13 +1088,13 @@ describe('browse mark filter — visibility', () => {
     mockSearchParams = new URLSearchParams('mode=browse&marked=1')
     renderSession({ cards: makeCards() })
 
-    expect(await screen.findByLabelText(MARK_CHIP_OFF)).toBeInTheDocument()
+    expect(await findMarkChip()).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('does not render in fullscreen', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeMarkedCards() })
-    await screen.findByLabelText(MARK_CHIP_ON)
+    await findMarkChip()
 
     fireEvent.click(screen.getByLabelText('cards.session.enterFullscreen'))
 
@@ -1120,14 +1135,14 @@ describe('browse mark filter — scope', () => {
     expect(screen.queryByText('cards.session.grading.hard')).not.toBeInTheDocument()
   })
 
-  it('toggling the chip switches the filter on and off', async () => {
+  it('toggling the segment switches the filter on and off', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeMarkedCards() })
 
-    fireEvent.click(await screen.findByLabelText(MARK_CHIP_ON))
+    fireEvent.click(await findMarkChip())
     expect(mockSearchParams.get('marked')).toBe('1')
 
-    fireEvent.click(await screen.findByLabelText(MARK_CHIP_OFF))
+    fireEvent.click(await findMarkChip())
     expect(mockSearchParams.has('marked')).toBe(false)
   })
 })
