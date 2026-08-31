@@ -1212,3 +1212,80 @@ describe('browse mark filter — the empty state', () => {
     expect(screen.queryByTestId('tag-filter-empty')).not.toBeInTheDocument()
   })
 })
+
+/*
+ * HDR-003 — the header as one row closed by a progress seam.
+ *
+ * Structure, not pixels. What is pinned is that the four things that used to be
+ * spread over three rows now share one container, that progress is an edge
+ * beneath it rather than an object inside it, and that the whole assembly still
+ * disappears in fullscreen. ADR-011.
+ */
+describe('session header — one row', () => {
+  const headerRow = () => screen.queryByTestId('session-header-row')
+
+  it('puts the count, the filters and the mark in one container', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByTestId('session-footer')
+
+    const row = headerRow()
+    expect(within(row).getByText(/cards\.session\.card/)).toBeInTheDocument()
+    expect(within(row).getByTestId('browse-filter-bar')).toBeInTheDocument()
+    expect(within(row).getByTestId('mark-toggle')).toBeInTheDocument()
+    expect(within(row).getByLabelText('cards.session.goBack')).toBeInTheDocument()
+  })
+
+  it('names the mark instead of leaving it an unlabelled glyph', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByTestId('session-footer')
+
+    // The whole point of HDR-001 reaching this surface: visible text, and no
+    // aria-label to contradict it (WCAG 2.5.3).
+    expect(screen.getByTestId('mark-toggle')).toHaveTextContent('cards.mark.action')
+    expect(screen.getByTestId('mark-toggle')).not.toHaveAttribute('aria-label')
+  })
+
+  it('renders progress as a seam under the row, not inside it', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeMarkedCards() })
+
+    const seam = await screen.findByTestId('session-progress')
+    expect(seam).toBeInTheDocument()
+    expect(within(headerRow()).queryByTestId('session-progress')).not.toBeInTheDocument()
+  })
+
+  it('drops the seam in the filtered-empty state, where there is no position to report', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse&marked=1')
+    renderSession({ cards: makeCards() })
+    await screen.findByTestId('tag-filter-empty')
+
+    expect(screen.queryByTestId('session-progress')).not.toBeInTheDocument()
+    // The row itself stays: it carries the filter bar, which is the way out.
+    expect(within(headerRow()).getByTestId('browse-filter-bar')).toBeInTheDocument()
+  })
+
+  it('takes the whole row away in fullscreen, mark and filters included', async () => {
+    mockSearchParams = new URLSearchParams('mode=browse')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByTestId('session-header-row')
+
+    fireEvent.click(screen.getByLabelText('cards.session.enterFullscreen'))
+
+    expect(headerRow()).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-progress')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('browse-filter-bar')).not.toBeInTheDocument()
+  })
+
+  it('renders the row without any filter segments in study mode', async () => {
+    mockSearchParams = new URLSearchParams('mode=study')
+    renderSession({ cards: makeMarkedCards() })
+    await screen.findByTestId('session-footer')
+
+    expect(within(headerRow()).getByText(/cards\.session\.card/)).toBeInTheDocument()
+    expect(screen.queryByTestId('browse-filter-bar')).not.toBeInTheDocument()
+    // The mark is not a filter — it acts on the card, so it survives study mode.
+    expect(within(headerRow()).getByTestId('mark-toggle')).toBeInTheDocument()
+  })
+})

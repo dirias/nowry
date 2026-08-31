@@ -39,6 +39,7 @@ import { useCardData } from '../../hooks/useCardData'
 import { useBrowseFilters } from '../../hooks/useBrowseFilters'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import BrowseFilterBar from './BrowseFilterBar'
+import { tabularNums } from '../Common/Form/formStyles'
 import MarkToggle from './MarkToggle'
 import { queryClient } from '../../api/queryClient'
 import { useAuth } from '../../context/AuthContext'
@@ -1235,66 +1236,109 @@ export default function StudySession() {
       }}
     >
       {/* Header - Hide in Fullscreen */}
+      {/* The session header: ONE control row, closed by a progress seam.
+          ADR-011 — it was three rows of three different control languages, and
+          the mark was an unnamed glyph at the far end of the widest of them.
+
+          The grid is what puts every outer edge on the card's two vertical
+          rules (§15.4). At `xs` the filters drop to their own row and stretch
+          between those rules, so nothing is left floating mid-row; from `sm`
+          they sit inline, pushed right by the 1fr column that separates them
+          from the count. ONE `BrowseFilterBar` either way — rendering a second
+          copy for the other breakpoint would duplicate its search state and
+          its test id. */}
       {!isFullscreen && (
-        <Stack direction='row' alignItems='center' spacing={2} sx={{ mb: 2 }}>
-          <IconButton
-            onClick={() => navigate('/study')}
-            variant='plain'
-            color='neutral'
-            aria-label={t('cards.session.goBack')}
-            sx={{ minHeight: { xs: 44, md: 36 }, minWidth: { xs: 44, md: 36 } }}
+        <Box sx={{ mb: 3 }}>
+          <Box
+            data-testid='session-header-row'
+            sx={{
+              display: 'grid',
+              alignItems: 'center',
+              columnGap: { xs: 1, sm: 1.5 },
+              rowGap: 1.5,
+              // Study mode has no filters, so it must not reserve their row —
+              // an empty grid row still spends the rowGap above it.
+              gridTemplateColumns: isReadOnlyMode ? { xs: 'auto 1fr auto', sm: 'auto auto 1fr auto' } : 'auto 1fr auto',
+              gridTemplateAreas: isReadOnlyMode
+                ? {
+                    xs: '"back count mark" "filters filters filters"',
+                    sm: '"back count filters mark"'
+                  }
+                : '"back count mark"'
+            }}
           >
-            <ArrowBack />
-          </IconButton>
-          <Box sx={{ flex: 1 }}>
-            {!isFilteredEmpty && (
-              <>
-                <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 'lg', mb: 0.5 }}>
-                  {t('cards.session.card', { current: safeIndex + 1, total: visibleCards.length })}
-                </Typography>
-                <LinearProgress
-                  determinate
-                  value={progress}
-                  color='primary'
-                  sx={{
-                    borderRadius: 'full',
-                    bgcolor: 'background.level2',
-                    height: 6,
-                    boxShadow: 'none'
-                  }}
+            <IconButton
+              onClick={() => navigate('/study')}
+              variant='plain'
+              color='neutral'
+              aria-label={t('cards.session.goBack')}
+              sx={{ gridArea: 'back', minHeight: { xs: 44, md: 36 }, minWidth: { xs: 44, md: 36 }, ml: { xs: -1, sm: 0 } }}
+            >
+              <ArrowBack />
+            </IconButton>
+
+            {/* The row's title, not a caption on a hairline: the count reads as
+                the header now that the bar underneath is an edge. */}
+            <Typography level='title-sm' sx={{ gridArea: 'count', color: 'text.primary', whiteSpace: 'nowrap', ...tabularNums }}>
+              {!isFilteredEmpty && t('cards.session.card', { current: safeIndex + 1, total: visibleCards.length })}
+            </Typography>
+
+            {/* Browse-only view filters (HDR-002). The bar decides for itself
+                which segments have anything to control (§11), so the only gate
+                here is the one that matters — Browse, and not fullscreen, which
+                is a distraction-free reading surface. Stays mounted through the
+                filtered-empty state below, which is the user's only way back
+                out of it. */}
+            {isReadOnlyMode && (
+              <Box sx={{ gridArea: 'filters', justifySelf: { xs: 'stretch', sm: 'end' }, minWidth: 0 }}>
+                <BrowseFilterBar
+                  availableTags={availableTags}
+                  selectedTags={selectedTags}
+                  onTagsChange={setTags}
+                  markedOnly={markedOnly}
+                  markedCount={markedCount}
+                  onToggleMarked={toggleMarkedOnly}
+                  shown={visibleCards.length}
+                  total={cards.length}
+                  t={t}
                 />
-              </>
+              </Box>
+            )}
+
+            {/* The mark lives here rather than in the grading row: that row is
+                the session's four primary CTAs, and a fifth control in it both
+                dilutes them and implies the mark is a grade. Labelled, because
+                an unnamed glyph is how it went undiscovered — and its right
+                edge lands on the same rule as the card's own controls. */}
+            {currentCard && (
+              <MarkToggle
+                card={currentCard}
+                onMarkChange={handleMarkChange}
+                appearance='labelled'
+                sx={{ gridArea: 'mark', justifySelf: 'end' }}
+              />
             )}
           </Box>
-          {/* The mark lives here rather than in the grading row: that row is the
-              session's four primary CTAs, and a fifth control in it both dilutes
-              them and implies the mark is a grade. Hidden in fullscreen along
-              with the rest of the header chrome. */}
-          {currentCard && <MarkToggle card={currentCard} onMarkChange={handleMarkChange} size='md' />}
-        </Stack>
-      )}
 
-      {/* Browse-only view filters, as ONE segmented control (ADR-011). They were
-          two components on two rows, which said they were unrelated: the mark's
-          payoff sat two rows from the control that produces it, and neither was
-          found. The bar decides for itself which segments have anything to
-          control (§11), so the only gate left here is the one that matters —
-          Browse, and not fullscreen, which is a distraction-free reading
-          surface. Stays mounted through the filtered-empty state below, which
-          is the user's only way back out of it. */}
-      {isReadOnlyMode && !isFullscreen && (
-        <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' }, mb: 2 }}>
-          <BrowseFilterBar
-            availableTags={availableTags}
-            selectedTags={selectedTags}
-            onTagsChange={setTags}
-            markedOnly={markedOnly}
-            markedCount={markedCount}
-            onToggleMarked={toggleMarkedOnly}
-            shown={visibleCards.length}
-            total={cards.length}
-            t={t}
-          />
+          {/* Progress as an EDGE, not an object (§15.4). Stretched across the
+              container as a 6px bar it was texture; at 3px directly under the
+              row it reads as progress and does the job of the divider that
+              used to sit there. */}
+          {!isFilteredEmpty && (
+            <LinearProgress
+              determinate
+              value={progress}
+              color='primary'
+              data-testid='session-progress'
+              sx={{
+                mt: 2,
+                borderRadius: 'xs',
+                bgcolor: 'background.level2',
+                boxShadow: 'none',
+                '--LinearProgress-thickness': '3px'
+              }}
+            />
+          )}
         </Box>
       )}
 
