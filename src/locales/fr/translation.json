@@ -2237,7 +2237,8 @@
     "add": "Ajouter",
     "added": "Ajouté",
     "newBadge": "Nouveau",
-    "showingOf": "Affichage de {{count}} sur {{total}}"
+    "showingOf": "Affichage de {{count}} sur {{total}}",
+    "searchIn": "Rechercher dans {{set}}…"
   },
   "editor": {
     "mode": {

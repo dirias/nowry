@@ -78,3 +78,64 @@ export const tabularNums = { fontVariantNumeric: 'tabular-nums' }
 // choice fails. The three surfaces that may use it are also the three that
 // import the font (see Books/Page, Books/Editor, Cards/StudySession).
 export const readingSurface = { fontFamily: 'reading', lineHeight: 'xl' }
+
+/**
+ * The container of a segmented control — two or more controls of the SAME class
+ * fused into one object, split by a hairline (DESIGN_GUIDELINES §15.2).
+ *
+ * The rule it exists to serve: the eye reads *same shape ⇒ same class of
+ * thing*, so filters over one list belong in one container rather than beside
+ * each other as loose chips. Two chips assert no relationship; a container with
+ * a divider says "these are the same kind of control" without a word of copy.
+ *
+ * Lives here rather than in either of its call sites because it now governs two
+ * unrelated surfaces — the study session's Browse filters and the Public
+ * Library's toolbar — and a grammar that drifts between surfaces is exactly the
+ * defect `focusRing` moved here to prevent.
+ */
+export const segmentedGroup = {
+  display: 'flex',
+  alignItems: 'stretch',
+  borderRadius: 'md',
+  borderColor: 'divider',
+  bgcolor: 'background.level1',
+  overflow: 'hidden'
+}
+
+/**
+ * One segment of a {@link segmentedGroup}.
+ *
+ * State is a GROUND, never a hue (§15.5): `background.level2` means engaged, so
+ * hover moves the label and leaves the ground alone — a hover that borrowed the
+ * ground would impersonate the state. The hover grounds are pinned through
+ * Joy's own variant variables rather than an `&:hover` override, which loses to
+ * Joy's specificity.
+ *
+ * `radius.xs` rather than a raw 0: the container clips with `overflow: hidden`,
+ * so the segments only need to stop being pills, and a raw radius is forbidden
+ * by lint.
+ *
+ * @param {boolean} active - whether this segment is engaged
+ * @param {boolean} first - whether it is the first, and so needs no divider
+ */
+export const segment = (active, first) => ({
+  borderRadius: 'xs',
+  borderLeft: first ? 0 : '1px solid',
+  borderColor: 'divider',
+  minHeight: { xs: TOUCH_TARGET, sm: 36 },
+  px: 1.5,
+  fontSize: 'sm',
+  fontWeight: 'md',
+  whiteSpace: 'nowrap',
+  bgcolor: active ? 'background.level2' : 'transparent',
+  color: active ? 'text.primary' : 'text.secondary',
+  '--variant-plainHoverBg': active ? 'var(--joy-palette-background-level2)' : 'transparent',
+  '--variant-plainActiveBg': active ? 'var(--joy-palette-background-level2)' : 'transparent',
+  '&:hover': { color: 'text.primary' },
+  ...focusRing,
+  // The ring is INSET here, and only here. The group clips with
+  // `overflow: hidden`, so the shared +2 offset would be cropped away on every
+  // segment — a focus indicator that exists in the stylesheet and not on the
+  // screen. Same colour, same width; only the offset changes.
+  '&:focus-visible': { ...focusRing['&:focus-visible'], outlineOffset: '-2px' }
+})

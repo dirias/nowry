@@ -2257,7 +2257,8 @@
     "forkedFrom": "Bifurcado de \"{{title}}\" por {{author}}",
     "forkBadge": "Bifurcación",
     "forkOwnContent": "Este es tu propio mazo — duplícalo desde tu biblioteca.",
-    "alreadyForked": "Ya bifurcaste esto — llevándote a tu copia..."
+    "alreadyForked": "Ya bifurcaste esto — llevándote a tu copia...",
+    "searchIn": "Buscar en {{set}}…"
   },
   "publish": {
     "openSheet": "Compartir con la comunidad",

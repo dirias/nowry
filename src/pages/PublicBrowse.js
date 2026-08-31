@@ -21,10 +21,15 @@ import {
   IconButton,
   Skeleton,
   Avatar,
-  Tooltip
+  Sheet,
+  Dropdown,
+  Menu,
+  MenuButton,
+  MenuItem
 } from '@mui/joy'
 import {
   Search as SearchIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
   Visibility as ViewIcon,
   Favorite as FavoriteIcon,
   CallSplit as ForkIcon,
@@ -37,7 +42,7 @@ import {
   ViewList as ViewListIcon,
   PublicRounded as PublicRoundedIcon
 } from '@mui/icons-material'
-import { tabularNums } from '../components/Common/Form/formStyles'
+import { focusRing, segment, segmentedGroup, tabularNums } from '../components/Common/Form/formStyles'
 import { publicContentService } from '../api/services'
 import Book from '../components/Books/Book'
 
@@ -210,110 +215,6 @@ const PublicBrowse = () => {
         </Typography>
       </Stack>
 
-      {/* Search & Filters */}
-      <Box sx={{ mb: 3 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
-          {/* Search */}
-          <Input
-            placeholder={t('public.searchPlaceholder')}
-            value={filters.search}
-            onChange={(e) => handleSearch(e.target.value)}
-            startDecorator={<SearchIcon />}
-            sx={{ flex: 1 }}
-            size='md'
-          />
-
-          {/* View Toggle */}
-          <Stack direction='row' spacing={0.5}>
-            <Tooltip title={t('public.gridView', { defaultValue: 'Grid view' })} size='sm' variant='soft' placement='bottom'>
-              <IconButton
-                size='sm'
-                variant={viewMode === 'grid' ? 'solid' : 'plain'}
-                onClick={() => handleViewChange('grid')}
-                aria-label={t('public.gridView', { defaultValue: 'Grid view' })}
-                sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }}
-              >
-                <GridViewIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={t('public.listView', { defaultValue: 'List view' })} size='sm' variant='soft' placement='bottom'>
-              <IconButton
-                size='sm'
-                variant={viewMode === 'list' ? 'solid' : 'plain'}
-                onClick={() => handleViewChange('list')}
-                aria-label={t('public.listView', { defaultValue: 'List view' })}
-                sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }}
-              >
-                <ViewListIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-
-          {/* Sort */}
-          <Select value={filters.sort_by} onChange={(e, value) => handleFilterChange('sort_by', value)} size='md' sx={{ minWidth: 150 }}>
-            {SORT_OPTIONS.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {t(`public.${option.label}`)}
-              </Option>
-            ))}
-          </Select>
-
-          {/* Filter Toggle */}
-          <Tooltip title={t('public.filterBy')} size='sm' variant='soft' placement='bottom'>
-            <IconButton
-              variant='outlined'
-              onClick={() => setShowFilters(!showFilters)}
-              size='sm'
-              aria-label={t('public.filterBy')}
-              sx={{
-                '&:hover': { bgcolor: 'background.level1' },
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
-              }}
-            >
-              <FilterIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-
-        {/* Expandable Filters */}
-        {showFilters && (
-          <Box
-            sx={{
-              p: 2,
-              bgcolor: 'background.level1',
-              borderRadius: 'sm',
-              border: '1px solid',
-              borderColor: 'divider'
-            }}
-          >
-            <Stack spacing={2}>
-              <Box>
-                <Typography level='body-sm' sx={{ mb: 1, fontWeight: 600 }}>
-                  {t('public.category')}
-                </Typography>
-                <Select
-                  value={filters.category}
-                  onChange={(e, value) => handleFilterChange('category', value)}
-                  placeholder={t('public.all')}
-                  size='sm'
-                >
-                  <Option value=''>{t('public.all')}</Option>
-                  {CATEGORIES.map((cat) => (
-                    <Option key={cat} value={cat}>
-                      {t(`public.categories.${cat}`)}
-                    </Option>
-                  ))}
-                </Select>
-              </Box>
-
-              <Button variant='plain' size='sm' startDecorator={<ClearIcon />} onClick={clearFilters} sx={{ alignSelf: 'flex-start' }}>
-                {t('public.clearFilters')}
-              </Button>
-            </Stack>
-          </Box>
-        )}
-      </Box>
-
       {/* Tabs */}
       <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
         <TabList>
@@ -340,6 +241,136 @@ const PublicBrowse = () => {
             )}
           </Tab>
         </TabList>
+
+        {/* The controls act on the set the tabs select, so they sit BELOW the
+            tabs. Shipped the other way round, the page asked you to sort and
+            filter a set you had not chosen yet.
+
+            Two segmented objects on the shared §15 grammar: sort and Filters
+            are one (both narrow the list), the view toggle is another (it
+            changes presentation, not content). Search stays a bare input —
+            it is data entry, not a toggle. */}
+        <Box sx={{ mt: 2.5, mb: 1 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
+            <Input
+              placeholder={t('public.searchIn', { set: activeTab === 0 ? t('public.books') : t('public.decks') })}
+              value={filters.search}
+              onChange={(e) => handleSearch(e.target.value)}
+              startDecorator={<SearchIcon />}
+              sx={{ flex: 1 }}
+              size='md'
+              slotProps={{ input: { 'aria-label': t('public.searchPlaceholder'), sx: focusRing } }}
+            />
+
+            <Stack direction='row' spacing={1.5}>
+              <Sheet variant='outlined' sx={segmentedGroup}>
+                <Dropdown>
+                  <MenuButton
+                    variant='plain'
+                    color='neutral'
+                    endDecorator={<KeyboardArrowDownIcon sx={{ fontSize: 'md', opacity: 0.65 }} />}
+                    sx={segment(false, true)}
+                  >
+                    {t(`public.${(SORT_OPTIONS.find((o) => o.value === filters.sort_by) || SORT_OPTIONS[0]).label}`)}
+                  </MenuButton>
+                  <Menu placement='bottom-end' sx={{ minWidth: 190, borderRadius: 'md', p: 0.5 }}>
+                    {SORT_OPTIONS.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        role='menuitemradio'
+                        aria-checked={filters.sort_by === option.value}
+                        onClick={() => handleFilterChange('sort_by', option.value)}
+                        sx={{ borderRadius: 'sm', ...focusRing }}
+                      >
+                        <Typography
+                          level='body-sm'
+                          sx={{
+                            color: filters.sort_by === option.value ? 'text.primary' : 'text.secondary',
+                            fontWeight: filters.sort_by === option.value ? 'lg' : 'md'
+                          }}
+                        >
+                          {t(`public.${option.label}`)}
+                        </Typography>
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </Dropdown>
+
+                <Button
+                  variant='plain'
+                  color='neutral'
+                  onClick={() => setShowFilters(!showFilters)}
+                  aria-pressed={showFilters}
+                  startDecorator={<FilterIcon sx={{ fontSize: 'md' }} />}
+                  sx={segment(showFilters, false)}
+                >
+                  {t('public.filterBy')}
+                </Button>
+              </Sheet>
+
+              <Sheet variant='outlined' sx={segmentedGroup}>
+                <IconButton
+                  variant='plain'
+                  color='neutral'
+                  onClick={() => handleViewChange('list')}
+                  aria-pressed={viewMode === 'list'}
+                  aria-label={t('public.listView', { defaultValue: 'List view' })}
+                  sx={{ ...segment(viewMode === 'list', true), minWidth: { xs: 44, sm: 40 } }}
+                >
+                  <ViewListIcon sx={{ fontSize: 'lg' }} />
+                </IconButton>
+                <IconButton
+                  variant='plain'
+                  color='neutral'
+                  onClick={() => handleViewChange('grid')}
+                  aria-pressed={viewMode === 'grid'}
+                  aria-label={t('public.gridView', { defaultValue: 'Grid view' })}
+                  sx={{ ...segment(viewMode === 'grid', false), minWidth: { xs: 44, sm: 40 } }}
+                >
+                  <GridViewIcon sx={{ fontSize: 'lg' }} />
+                </IconButton>
+              </Sheet>
+            </Stack>
+          </Stack>
+
+          {/* Expandable Filters */}
+          {showFilters && (
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: 'background.level1',
+                borderRadius: 'sm',
+                border: '1px solid',
+                borderColor: 'divider'
+              }}
+            >
+              <Stack spacing={2}>
+                <Box>
+                  <Typography level='body-sm' sx={{ mb: 1, fontWeight: 600 }}>
+                    {t('public.category')}
+                  </Typography>
+                  <Select
+                    value={filters.category}
+                    onChange={(e, value) => handleFilterChange('category', value)}
+                    placeholder={t('public.all')}
+                    size='sm'
+                  >
+                    <Option value=''>{t('public.all')}</Option>
+                    {CATEGORIES.map((cat) => (
+                      <Option key={cat} value={cat}>
+                        {t(`public.categories.${cat}`)}
+                      </Option>
+                    ))}
+                  </Select>
+                </Box>
+
+                <Button variant='plain' size='sm' startDecorator={<ClearIcon />} onClick={clearFilters} sx={{ alignSelf: 'flex-start' }}>
+                  {t('public.clearFilters')}
+                </Button>
+              </Stack>
+            </Box>
+          )}
+        </Box>
 
         <TabPanel value={0} sx={{ p: 0, pt: 3 }}>
           <ContentGrid items={items} loading={loading} onItemClick={handleItemClick} contentType='book' viewMode={viewMode} />

@@ -2,49 +2,10 @@ import React from 'react'
 import { Box, Button, Dropdown, Input, Menu, MenuButton, MenuItem, Sheet, Typography } from '@mui/joy'
 import { Bookmark, BookmarkBorder, KeyboardArrowDown, LocalOfferOutlined, Search } from '@mui/icons-material'
 
-/**
- * Explicit keyboard focus ring — Joy's default outline is swallowed by the
- * container's own border (CLAUDE.md accessibility rule).
- */
-const FOCUS_RING = {
-  '&:focus-visible': {
-    outline: '2px solid',
-    outlineColor: 'primary.solidBg',
-    outlineOffset: '-2px'
-  }
-}
+import { focusRing, segment, segmentedGroup } from '../Common/Form/formStyles'
 
 /** Above this many tags, picking from a flat list stops being picking. */
 const SEARCH_THRESHOLD = 8
-
-/**
- * One segment of the bar. Ground carries state and nothing else does:
- * `background.level2` means "engaged", so hover moves the LABEL and leaves the
- * ground alone — otherwise hover would impersonate the state
- * (DESIGN_GUIDELINES §15.1). Joy's own variant variables are used rather than
- * an `&:hover` override, which loses to Joy's specificity.
- */
-const segmentSx = (active, first) => ({
-  // `xs` (2px) rather than a raw 0: the container clips with overflow hidden,
-  // so the segments only need to stop being pills. A raw radius is forbidden
-  // by lint, and 2px of notch against the container ground is imperceptible.
-  borderRadius: 'xs',
-  borderLeft: first ? 0 : '1px solid',
-  borderColor: 'divider',
-  // WCAG 2.5.5 at xs, relaxing for pointer devices. The label supplies the
-  // width, so this is the height-only `touchTarget` case.
-  minHeight: { xs: 44, sm: 36 },
-  px: 1.5,
-  fontSize: 'sm',
-  fontWeight: 'md',
-  whiteSpace: 'nowrap',
-  bgcolor: active ? 'background.level2' : 'transparent',
-  color: active ? 'text.primary' : 'text.secondary',
-  '--variant-plainHoverBg': active ? 'var(--joy-palette-background-level2)' : 'transparent',
-  '--variant-plainActiveBg': active ? 'var(--joy-palette-background-level2)' : 'transparent',
-  '&:hover': { color: 'text.primary' },
-  ...FOCUS_RING
-})
 
 /**
  * The Browse session's view filters, as one segmented control.
@@ -130,19 +91,7 @@ const BrowseFilterBar = React.memo(function BrowseFilterBar({
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-      <Sheet
-        variant='outlined'
-        data-testid='browse-filter-bar'
-        sx={{
-          display: 'flex',
-          alignItems: 'stretch',
-          width: { xs: '100%', sm: 'auto' },
-          borderRadius: 'md',
-          borderColor: 'divider',
-          bgcolor: 'background.level1',
-          overflow: 'hidden'
-        }}
-      >
+      <Sheet variant='outlined' data-testid='browse-filter-bar' sx={{ ...segmentedGroup, width: { xs: '100%', sm: 'auto' } }}>
         {hasTags && (
           <Dropdown>
             <MenuButton
@@ -150,7 +99,7 @@ const BrowseFilterBar = React.memo(function BrowseFilterBar({
               color='neutral'
               startDecorator={<LocalOfferOutlined fontSize='small' />}
               endDecorator={<KeyboardArrowDown fontSize='small' sx={{ opacity: 0.65 }} />}
-              sx={{ ...segmentSx(selectedTags.length > 0, true), flex: { xs: 1, sm: 'none' } }}
+              sx={{ ...segment(selectedTags.length > 0, true), flex: { xs: 1, sm: 'none' } }}
             >
               {tagsLabel}
             </MenuButton>
@@ -188,7 +137,7 @@ const BrowseFilterBar = React.memo(function BrowseFilterBar({
                     role='menuitemcheckbox'
                     aria-checked={selected}
                     onClick={() => toggleTag(tag)}
-                    sx={{ borderRadius: 'sm', ...FOCUS_RING }}
+                    sx={{ borderRadius: 'sm', ...focusRing }}
                   >
                     <Typography
                       level='body-sm'
@@ -210,7 +159,7 @@ const BrowseFilterBar = React.memo(function BrowseFilterBar({
               )}
 
               {selectedTags.length > 0 && (
-                <MenuItem onClick={() => onTagsChange([])} sx={{ borderRadius: 'sm', mt: 0.5, ...FOCUS_RING }}>
+                <MenuItem onClick={() => onTagsChange([])} sx={{ borderRadius: 'sm', mt: 0.5, ...focusRing }}>
                   <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('cards.session.tagFilter.clear')}
                   </Typography>
@@ -228,7 +177,7 @@ const BrowseFilterBar = React.memo(function BrowseFilterBar({
             aria-pressed={markedOnly}
             data-testid='marked-filter-segment'
             startDecorator={markedOnly ? <Bookmark fontSize='small' /> : <BookmarkBorder fontSize='small' />}
-            sx={{ ...segmentSx(markedOnly, !hasTags), flex: { xs: 1, sm: 'none' } }}
+            sx={{ ...segment(markedOnly, !hasTags), flex: { xs: 1, sm: 'none' } }}
           >
             {t('cards.session.markFilter.label', { count: markedCount })}
           </Button>

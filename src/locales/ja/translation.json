@@ -2175,7 +2175,8 @@
     "add": "追加",
     "added": "追加済み",
     "newBadge": "新着",
-    "showingOf": "{{total}} 件中 {{count}} 件を表示"
+    "showingOf": "{{total}} 件中 {{count}} 件を表示",
+    "searchIn": "{{set}}を検索…"
   },
   "editor": {
     "mode": {

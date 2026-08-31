@@ -2475,7 +2475,8 @@
     "forkedFrom": "Forked from \"{{title}}\" by {{author}}",
     "forkBadge": "Fork",
     "forkOwnContent": "This is your own deck — duplicate it from your library instead.",
-    "alreadyForked": "You already forked this — taking you to your copy..."
+    "alreadyForked": "You already forked this — taking you to your copy...",
+    "searchIn": "Search in {{set}}…"
   },
   "focusBar": {
     "modal": {
