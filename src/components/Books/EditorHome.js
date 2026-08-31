@@ -162,7 +162,8 @@ export default function EditorHome() {
   const bookGeneration = useGenerationProgress({
     active: isGeneratingCards || isGeneratingQuiz,
     estimatedMs: BOOK_GENERATION_ESTIMATED_MS,
-    stages: BOOK_GENERATION_STAGES
+    stages: BOOK_GENERATION_STAGES,
+    surface: 'bookGeneration'
   })
   const [generatedQuizQuestions, setGeneratedQuizQuestions] = useState([])
   const [showGeneratedQuiz, setShowGeneratedQuiz] = useState(false)

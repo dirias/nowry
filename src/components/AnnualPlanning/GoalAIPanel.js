@@ -49,7 +49,8 @@ const GoalAIPanel = ({ analysis, loading, error, noPlan, onRefresh }) => {
     active: loading,
     failed: Boolean(error),
     estimatedMs: GOAL_AI_ESTIMATED_MS,
-    stages: GOAL_AI_STAGES
+    stages: GOAL_AI_STAGES,
+    surface: 'goalAnalysis'
   })
 
   return (

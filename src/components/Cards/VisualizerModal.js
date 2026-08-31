@@ -90,7 +90,8 @@ export default function VisualizerModal({ open, onClose, text }) {
     active: loading,
     failed: Boolean(error),
     estimatedMs: VISUALIZER_ESTIMATED_MS,
-    stages: VISUALIZER_STAGES
+    stages: VISUALIZER_STAGES,
+    surface: 'visualizer'
   })
 
   const handleGenerate = async () => {

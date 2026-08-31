@@ -13,6 +13,7 @@
 import { act, renderHook } from '@testing-library/react'
 
 import useGenerationProgress, { SETTLE_MS, countedValue, easedValue, stageAt } from './useGenerationProgress'
+import { recordDuration, samplesFor } from '../utils/generationBudget'
 
 const STAGES = [
   { after: 0, icon: '🎨', msgKey: 'first' },
@@ -213,5 +214,83 @@ describe('useGenerationProgress', () => {
     // regenerate would otherwise open at wherever the last one ended.
     expect(result.current.value).toBeLessThan(firstRun)
     expect(result.current.elapsedSeconds).toBe(0)
+  })
+})
+
+/**
+ * GEN-006 — the hook's half of learned pacing. The arithmetic lives in
+ * `generationBudget` and is tested there; what matters here is *which* runs get
+ * recorded, and that the budget is resolved once rather than re-read under a bar
+ * that is already moving along its curve.
+ */
+describe('useGenerationProgress — learned pacing', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    window.localStorage.clear()
+  })
+  afterEach(() => jest.useRealTimers())
+
+  const advance = (ms) => {
+    act(() => {
+      jest.advanceTimersByTime(ms)
+    })
+  }
+
+  it('records a completed run against its surface', () => {
+    const { rerender } = renderHook((props) => useGenerationProgress(props), {
+      initialProps: { active: true, surface: 'avatar', estimatedMs: 70000 }
+    })
+    advance(90000)
+    rerender({ active: false, surface: 'avatar', estimatedMs: 70000 })
+
+    expect(samplesFor('avatar')).toEqual([90000])
+  })
+
+  it('does not record a failed run', () => {
+    // It would measure how long the user waited for something that went wrong.
+    const { rerender } = renderHook((props) => useGenerationProgress(props), {
+      initialProps: { active: true, surface: 'avatar', estimatedMs: 70000 }
+    })
+    advance(90000)
+    rerender({ active: false, failed: true, surface: 'avatar', estimatedMs: 70000 })
+
+    expect(samplesFor('avatar')).toEqual([])
+  })
+
+  it('records nothing for a caller that names no surface', () => {
+    const { rerender } = renderHook((props) => useGenerationProgress(props), {
+      initialProps: { active: true, estimatedMs: 70000 }
+    })
+    advance(90000)
+    rerender({ active: false, estimatedMs: 70000 })
+
+    expect(samplesFor('avatar')).toEqual([])
+  })
+
+  it('paces the next run on what the last ones took', () => {
+    ;[140000, 150000, 145000].forEach((ms) => recordDuration('avatar', ms))
+
+    const learned = renderHook(() => useGenerationProgress({ active: true, surface: 'avatar', estimatedMs: 70000 }))
+    const constant = renderHook(() => useGenerationProgress({ active: true, estimatedMs: 70000 }))
+
+    advance(70000)
+
+    // At the shipped budget the constant-paced run reads 80%; the learned one
+    // knows this surface really takes ~145s and is only about half way.
+    expect(learned.result.current.value).toBeLessThan(constant.result.current.value)
+  })
+
+  it('holds the budget steady for the life of a run', () => {
+    const { result, rerender } = renderHook((props) => useGenerationProgress(props), {
+      initialProps: { active: true, surface: 'avatar', estimatedMs: 70000 }
+    })
+    advance(30000)
+    const beforeWrite = result.current.value
+
+    // Another surface finishing mid-run must not bend this bar's curve.
+    ;[600, 700, 650].forEach((ms) => recordDuration('avatar', ms))
+    rerender({ active: true, surface: 'avatar', estimatedMs: 70000 })
+
+    expect(result.current.value).toBe(beforeWrite)
   })
 })

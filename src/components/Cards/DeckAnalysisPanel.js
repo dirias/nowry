@@ -42,7 +42,8 @@ export default function DeckAnalysisPanel({ deckId, onClose }) {
     active: loading,
     failed: Boolean(error),
     estimatedMs: DECK_ANALYSIS_ESTIMATED_MS,
-    stages: DECK_ANALYSIS_STAGES
+    stages: DECK_ANALYSIS_STAGES,
+    surface: 'deckAnalysis'
   })
 
   // Local copies of suggestion lists for optimistic UI updates

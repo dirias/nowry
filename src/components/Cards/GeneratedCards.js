@@ -109,7 +109,8 @@ export default function GeneratedCards({
     failed: Boolean(streamError),
     current: cards.length,
     total: expectedTotal,
-    estimatedMs: STREAM_ESTIMATED_MS
+    estimatedMs: STREAM_ESTIMATED_MS,
+    surface: 'cardStream'
   })
 
   // Placeholders for the cards still expected, so the list fills as they land

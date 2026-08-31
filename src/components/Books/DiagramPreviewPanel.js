@@ -34,7 +34,8 @@ export default function DiagramPreviewPanel({ open, onClose, selectedText, bookI
     active: isLoading,
     failed: Boolean(error),
     estimatedMs: DIAGRAM_ESTIMATED_MS,
-    stages: DIAGRAM_STAGES
+    stages: DIAGRAM_STAGES,
+    surface: 'diagram'
   })
 
   const handleGenerate = useCallback(async () => {

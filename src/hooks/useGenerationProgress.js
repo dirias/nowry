@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { budgetFor, recordDuration } from '../utils/generationBudget'
+
 /**
  * GEN-002 — the one progress model behind every AI generation wait.
  *
@@ -101,8 +103,11 @@ export const stageAt = (stages, elapsedSeconds) => {
  *   happen.
  * @param {number}  [options.current]     Units completed, when they are knowable.
  * @param {number}  [options.total]       Units expected. With `current`, selects counted mode.
- * @param {number}  [options.estimatedMs] Budget for estimated mode. Per surface — see A5.
+ * @param {number}  [options.estimatedMs] Budget for estimated mode. Per surface — see A5. Treated
+ *   as the seed: with `surface` set, observed runs take over once there are any.
  * @param {Array}   [options.stages]      `[{ after: seconds, icon, msgKey }]`, per surface.
+ * @param {string}  [options.surface]     Stable key for learned pacing (GEN-006). Omitting it keeps
+ *   the constant forever, which is the right choice for a surface with no stable identity.
  * @returns {{
  *   visible: boolean, value: number, mode: 'counted'|'estimated',
  *   stage: object|null, elapsedSeconds: number, isSettling: boolean
@@ -114,7 +119,8 @@ export default function useGenerationProgress({
   current,
   total,
   estimatedMs = DEFAULT_ESTIMATED_MS,
-  stages = []
+  stages = [],
+  surface
 } = {}) {
   const [tick, setTick] = useState(0)
   const [isSettling, setIsSettling] = useState(false)
@@ -126,6 +132,11 @@ export default function useGenerationProgress({
   const startRef = useRef(null)
   const runningRef = useRef(false)
 
+  // Budget for the run in progress. Resolved once at its start and held: reading
+  // storage every render would be wasteful, and a budget that changed mid-run
+  // would bend the curve under a bar that is already moving along it.
+  const budgetRef = useRef(estimatedMs)
+
   // The rising edge is detected during render, not in an effect. An effect runs
   // *after* the render it belongs to, so resetting the ceiling there wiped the
   // value the same render had just recorded, and the first correction after a
@@ -134,6 +145,7 @@ export default function useGenerationProgress({
     runningRef.current = true
     startRef.current = Date.now()
     ceilingRef.current = 0
+    budgetRef.current = surface ? budgetFor(surface, estimatedMs) : estimatedMs
   } else if (!active && runningRef.current) {
     runningRef.current = false
   }
@@ -158,10 +170,14 @@ export default function useGenerationProgress({
 
     if (failed) return undefined
 
+    // A completed run is the only kind worth learning from: a failure or an
+    // abandonment measures how long the user waited before it went wrong.
+    if (surface && startRef.current) recordDuration(surface, Date.now() - startRef.current)
+
     setIsSettling(true)
     const id = setTimeout(() => setIsSettling(false), SETTLE_MS)
     return () => clearTimeout(id)
-  }, [active, failed])
+  }, [active, failed, surface])
 
   // A tick left over from a previous run predates this one's start, so the
   // subtraction goes negative and clamps to zero rather than inheriting it.
@@ -169,7 +185,7 @@ export default function useGenerationProgress({
 
   const counted = countedValue(current, total)
   const mode = counted === null ? 'estimated' : 'counted'
-  const raw = counted === null ? easedValue(elapsedMs, estimatedMs) : counted
+  const raw = counted === null ? easedValue(elapsedMs, budgetRef.current) : counted
 
   let value
   if (isSettling) {

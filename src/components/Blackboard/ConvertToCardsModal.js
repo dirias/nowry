@@ -42,7 +42,8 @@ export default function ConvertToCardsModal({ open, onClose, boardId, selectedNo
     active: loading,
     failed: Boolean(error),
     estimatedMs: CONVERT_ESTIMATED_MS,
-    stages: CONVERT_STAGES
+    stages: CONVERT_STAGES,
+    surface: 'blackboardCards'
   })
 
   // Fetch decks once when modal opens

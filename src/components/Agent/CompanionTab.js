@@ -85,13 +85,15 @@ const CompanionTab = ({
     active: avatarGenerating,
     failed: Boolean(avatarError),
     estimatedMs: AVATAR_ESTIMATED_MS,
-    stages: AVATAR_STAGES
+    stages: AVATAR_STAGES,
+    surface: 'avatar'
   })
   const animStatus = useGenerationProgress({
     active: animationGenerating,
     failed: Boolean(animationError),
     estimatedMs: ANIMATION_ESTIMATED_MS,
-    stages: ANIMATION_STAGES
+    stages: ANIMATION_STAGES,
+    surface: 'animation'
   })
 
   return (
