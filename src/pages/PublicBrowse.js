@@ -43,6 +43,7 @@ import {
   PublicRounded as PublicRoundedIcon
 } from '@mui/icons-material'
 import { focusRing, oneLine, segment, segmentedGroup, tabularNums, touchTarget } from '../components/Common/Form/formStyles'
+import { tabClasses } from '@mui/joy/Tab'
 import { publicContentService } from '../api/services'
 import Book from '../components/Books/Book'
 
@@ -222,8 +223,45 @@ const PublicBrowse = () => {
       </Stack>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
-        <TabList>
+      {/* `bgcolor: transparent` is load-bearing, not tidying. Joy paints Tabs
+          with `background.surface`, and since LIB-004 moved the toolbar inside
+          <Tabs> so the tabs precede the controls that act on them, that surface
+          became a slab behind the whole toolbar — a container the design never
+          asked for, and one that reads as a grouping that is not there.
+
+          The tab strip is a RULE with a marker on it, not a row of filled
+          boxes: Joy's selected Tab takes `background.level2`, which on this
+          page collides with the meaning §15.1 gives that ground everywhere else
+          (engaged), and would say the tab is a toggle like the ones below it. A
+          2px primary underline says "you are here" without borrowing it. */}
+      <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)} sx={{ bgcolor: 'transparent' }}>
+        <TabList
+          disableUnderline
+          sx={{
+            bgcolor: 'transparent',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            [`& .${tabClasses.root}`]: {
+              bgcolor: 'transparent',
+              borderRadius: 0,
+              borderBottom: '2px solid transparent',
+              mb: '-1px',
+              color: 'text.secondary',
+              '&:hover': { bgcolor: 'transparent', color: 'text.primary' },
+              [`&.${tabClasses.selected}`]: {
+                bgcolor: 'transparent',
+                color: 'text.primary',
+                fontWeight: 'lg',
+                // `plainColor`, not `solidBg`: the generator derives solidBg
+                // from the darkest variation of the user's accent, which on the
+                // dark page ground is all but invisible (measured at
+                // #153438 on #0d1117). `plainColor` is the one token corrected
+                // for legibility against the page in BOTH schemes.
+                borderBottomColor: 'primary.plainColor'
+              }
+            }
+          }}
+        >
           {/* The count belongs to the tab, not to a centred note under the
               list: the tab is what selects the set, so it is what should say
               how big the set is. Only the ACTIVE tab can carry one honestly —
