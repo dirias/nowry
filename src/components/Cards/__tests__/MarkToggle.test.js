@@ -194,7 +194,7 @@ describe('the labelled appearance', () => {
     expect(toggle()).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('leaves the icon form\'s name exactly where it was', () => {
+  it("leaves the icon form's name exactly where it was", () => {
     render(<MarkToggle card={MARKED} />)
     expect(toggle()).toHaveAttribute('aria-label', 'cards.mark.unmark')
   })
@@ -220,5 +220,29 @@ describe('the labelled appearance', () => {
     // so a substring assertion here would pass while still marked.
     await waitFor(() => expect(toggle()).toHaveAttribute('aria-pressed', 'false'))
     expect(toggle()).toHaveTextContent(/^cards\.mark\.action$/)
+  })
+})
+
+/**
+ * HDR-004 — the taxonomy guard, on the control ADR-010 is actually about.
+ *
+ * The mark records intent; the four semantic colours record difficulty. Tinting
+ * this control with one of them would say "you graded this card" on the one
+ * screen where those four words are already on the buttons below it. State is
+ * carried by the ground, the glyph fill and the label instead.
+ */
+describe('no grading colour reaches the mark', () => {
+  const GRADING = ['colorPrimary', 'colorSuccess', 'colorWarning', 'colorDanger']
+
+  it.each([
+    ['icon, unmarked', UNMARKED, 'icon'],
+    ['icon, marked', MARKED, 'icon'],
+    ['labelled, unmarked', UNMARKED, 'labelled'],
+    ['labelled, marked', MARKED, 'labelled']
+  ])('%s is neutral', (_name, card, appearance) => {
+    render(<MarkToggle card={card} appearance={appearance} />)
+
+    expect(toggle().className).toContain('colorNeutral')
+    GRADING.forEach((cls) => expect(toggle().className).not.toContain(cls))
   })
 })

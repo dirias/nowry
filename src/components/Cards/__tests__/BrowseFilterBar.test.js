@@ -210,3 +210,39 @@ describe('tag-heavy decks', () => {
     expect(screen.queryAllByRole('menuitemcheckbox')).toHaveLength(0)
   })
 })
+
+/**
+ * HDR-004 — the taxonomy guard.
+ *
+ * ADR-010 reserves danger / warning / success / primary for Again / Hard / Good
+ * / Easy. A tinted filter segment on a study surface says "you graded this
+ * card", whatever it is actually for, and the correct behaviour — nothing
+ * happening to the schedule — then reads as a bug.
+ *
+ * Joy stamps its colour choice onto the DOM as a `MuiButton-color*` class, so
+ * this asserts the decision itself rather than a hex value or a snapshot.
+ */
+describe('no grading colour reaches the filters', () => {
+  // Suffixes, not full class names: the tag segment is a MenuButton and the
+  // mark segment a Button, so Joy stamps `MuiMenuButton-color*` on one and
+  // `MuiButton-color*` on the other. The colour is the assertion, not the
+  // component that carries it.
+  const GRADING = ['colorPrimary', 'colorSuccess', 'colorWarning', 'colorDanger']
+
+  it.each([
+    ['the tag segment', () => tagsSegment()],
+    ['the mark segment', () => markSegment()]
+  ])('%s is neutral', (_name, get) => {
+    setup({ selectedTags: ['verbs'], markedOnly: true })
+    const el = get()
+
+    expect(el.className).toContain('colorNeutral')
+    GRADING.forEach((cls) => expect(el.className).not.toContain(cls))
+  })
+
+  it('stays neutral in the engaged state too, where a tint would be most tempting', () => {
+    setup({ markedOnly: true })
+    expect(markSegment().className).toContain('colorNeutral')
+    GRADING.forEach((cls) => expect(markSegment().className).not.toContain(cls))
+  })
+})

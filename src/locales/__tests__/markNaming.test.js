@@ -24,8 +24,12 @@ import ja from '../ja/translation.json'
 
 const BUNDLES = { en, es, fr, de, ja }
 
-/** Every key path this feature owns. */
-const MARK_PATHS = ['cards.mark', 'cards.session.markFilter', 'filters.marked']
+/**
+ * Every key path this feature owns. `cards.session.filters` joined the list in
+ * HDR-002, when the two filter rows became one segmented bar and the segment
+ * labels became strings of this feature's own.
+ */
+const MARK_PATHS = ['cards.mark', 'cards.session.markFilter', 'cards.session.filters', 'filters.marked']
 
 /** How each language says "hard"/"difficult", lowercased for comparison. */
 const FORBIDDEN = {
@@ -64,5 +68,26 @@ describe('the mark is never named after difficulty', () => {
 
   it('still lets the SM-2 grade call itself hard, which is the point of the distinction', () => {
     expect(en.cards.session.grading.hard.toLowerCase()).toContain('hard')
+  })
+})
+
+/**
+ * HDR-001 — the labelled mark's visible text IS its accessible name.
+ *
+ * That is what makes this a naming guard rather than a copy check: with no
+ * aria-label to fall back on (WCAG 2.5.3 — a name must contain its own visible
+ * label), a bundle that ships an empty or duplicated pair leaves the control
+ * unnamed or unable to report which state it is in, in that language only.
+ */
+describe('the labelled mark names both of its states, in every locale', () => {
+  it.each(Object.keys(BUNDLES))('%s', (locale) => {
+    const mark = resolve(BUNDLES[locale], 'cards.mark')
+
+    expect(typeof mark.action).toBe('string')
+    expect(typeof mark.actionOn).toBe('string')
+    expect(mark.action.trim()).not.toBe('')
+    expect(mark.actionOn.trim()).not.toBe('')
+    // Identical labels would render a toggle that never appears to change.
+    expect(mark.action).not.toBe(mark.actionOn)
   })
 })
