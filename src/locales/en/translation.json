@@ -2476,7 +2476,12 @@
     "forkBadge": "Fork",
     "forkOwnContent": "This is your own deck — duplicate it from your library instead.",
     "alreadyForked": "You already forked this — taking you to your copy...",
-    "searchIn": "Search in {{set}}…"
+    "searchIn": "Search in {{set}}…",
+    "sparse": {
+      "title": "Share something you have made",
+      "body": "The library grows from the books and decks people publish.",
+      "cta": "Publish from your library"
+    }
   },
   "focusBar": {
     "modal": {

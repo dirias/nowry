@@ -2258,7 +2258,12 @@
     "forkBadge": "Bifurcación",
     "forkOwnContent": "Este es tu propio mazo — duplícalo desde tu biblioteca.",
     "alreadyForked": "Ya bifurcaste esto — llevándote a tu copia...",
-    "searchIn": "Buscar en {{set}}…"
+    "searchIn": "Buscar en {{set}}…",
+    "sparse": {
+      "title": "Comparte algo que hayas creado",
+      "body": "La biblioteca crece con los libros y mazos que la gente publica.",
+      "cta": "Publicar desde tu biblioteca"
+    }
   },
   "publish": {
     "openSheet": "Compartir con la comunidad",

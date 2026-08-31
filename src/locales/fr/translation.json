@@ -2238,7 +2238,12 @@
     "added": "Ajouté",
     "newBadge": "Nouveau",
     "showingOf": "Affichage de {{count}} sur {{total}}",
-    "searchIn": "Rechercher dans {{set}}…"
+    "searchIn": "Rechercher dans {{set}}…",
+    "sparse": {
+      "title": "Partagez quelque chose que vous avez créé",
+      "body": "La bibliothèque grandit grâce aux livres et paquets que chacun publie.",
+      "cta": "Publier depuis votre bibliothèque"
+    }
   },
   "editor": {
     "mode": {

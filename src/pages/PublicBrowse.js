@@ -42,7 +42,7 @@ import {
   ViewList as ViewListIcon,
   PublicRounded as PublicRoundedIcon
 } from '@mui/icons-material'
-import { focusRing, segment, segmentedGroup, tabularNums } from '../components/Common/Form/formStyles'
+import { focusRing, oneLine, segment, segmentedGroup, tabularNums, touchTarget } from '../components/Common/Form/formStyles'
 import { publicContentService } from '../api/services'
 import Book from '../components/Books/Book'
 
@@ -178,6 +178,12 @@ const PublicBrowse = () => {
   const handleLoadMore = () => {
     // Update filters to load more items
     setFilters({ ...filters, skip: filters.skip + filters.limit })
+  }
+
+  // Publishing happens from the user's own library — there is no standalone
+  // publish page — so the invitation sends them where the action lives.
+  const handlePublish = () => {
+    navigate(activeTab === 0 ? '/books' : '/study')
   }
 
   const handleItemClick = (item) => {
@@ -373,7 +379,14 @@ const PublicBrowse = () => {
         </Box>
 
         <TabPanel value={0} sx={{ p: 0, pt: 3 }}>
-          <ContentGrid items={items} loading={loading} onItemClick={handleItemClick} contentType='book' viewMode={viewMode} />
+          <ContentGrid
+            items={items}
+            loading={loading}
+            onItemClick={handleItemClick}
+            onPublish={handlePublish}
+            contentType='book'
+            viewMode={viewMode}
+          />
         </TabPanel>
 
         <TabPanel value={1} sx={{ p: 0, pt: 3 }}>
@@ -381,6 +394,7 @@ const PublicBrowse = () => {
             items={items}
             loading={loading}
             onItemClick={handleItemClick}
+            onPublish={handlePublish}
             contentType='deck'
             deckCards={deckCards}
             viewMode={viewMode}
@@ -482,6 +496,114 @@ const evidenceFor = (item) => {
     isNew: views === 0 && likes === 0 && forks === 0 && daysSince(item?.published_at || item?.created_at) <= NEW_WINDOW_DAYS
   }
 }
+
+/**
+ * At or below this many visible results, the list stops being a list.
+ *
+ * A table with one row in it reads as a dead product rather than a young one:
+ * a search bar, a sort menu, two tabs, a header and a footer count wrapped
+ * around a single item is chrome outnumbering content roughly six to one. The
+ * threshold is the VISIBLE count, not the catalogue size, so a filter that
+ * narrows to two gets the same treatment as a library that only has two.
+ */
+const SPARSE_THRESHOLD = 3
+
+/**
+ * One item, shown properly: the cover at a size that can sell it, the
+ * description the list view has no room for, and the same evidence rules and
+ * acquire action every other surface uses.
+ */
+const FeatureCard = ({ item, contentType, onItemClick, t }) => {
+  const isBook = contentType === 'book'
+  return (
+    <Card
+      variant='outlined'
+      onClick={() => onItemClick(item)}
+      sx={{ p: 0, overflow: 'hidden', cursor: 'pointer', borderRadius: 'lg', '&:hover': { borderColor: 'primary.outlinedBorder' } }}
+    >
+      <Box
+        sx={{
+          height: 168,
+          bgcolor: item.cover_color || item.color || 'primary.solidBg',
+          backgroundImage: item.cover_image ? `url(${item.cover_image})` : item.image_url ? `url(${item.image_url})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        {!item.cover_image && !item.image_url && (
+          <MenuBookIcon sx={{ fontSize: 'xl4', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />
+        )}
+      </Box>
+
+      <CardContent sx={{ p: 2, gap: 1 }}>
+        <Typography level='title-sm' sx={{ fontWeight: 'lg' }}>
+          {isBook ? item.title : item.name}
+        </Typography>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+          {item.author_name || t('public.unknownAuthor')}
+        </Typography>
+        {item.description && (
+          <Typography
+            level='body-sm'
+            sx={{
+              color: 'text.tertiary',
+              ...oneLine,
+              whiteSpace: 'normal',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical'
+            }}
+          >
+            {item.description}
+          </Typography>
+        )}
+        <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mt: 0.5, gap: 1, flexWrap: 'wrap' }}>
+          <Evidence item={item} t={t} />
+          <Box onClick={(event) => event.stopPropagation()}>
+            <AddToLibrary item={item} contentType={contentType} t={t} />
+          </Box>
+        </Stack>
+      </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * The other half of the sparse state, and the honest form of a growth loop: a
+ * visitor who finds nothing to take is the best moment to ask them to give.
+ * They already came looking, and declining costs them nothing.
+ *
+ * It routes to the user's own library, which is where publishing actually
+ * happens — there is no standalone publish page to send them to.
+ */
+const PublishInvitation = ({ onPublish, t }) => (
+  <Card
+    variant='outlined'
+    sx={{
+      borderRadius: 'lg',
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      gap: 1.5,
+      p: 3,
+      bgcolor: 'background.level1'
+    }}
+  >
+    <Typography level='title-sm' sx={{ fontWeight: 'lg' }}>
+      {t('public.sparse.title')}
+    </Typography>
+    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+      {t('public.sparse.body')}
+    </Typography>
+    <Button variant='solid' color='primary' size='sm' onClick={onPublish} sx={{ borderRadius: 'md', ...touchTarget, ...focusRing }}>
+      {t('public.sparse.cta')}
+    </Button>
+  </Card>
+)
 
 /**
  * Take a public item into your own library — the action this surface exists for
@@ -609,7 +731,7 @@ const Evidence = ({ item, t }) => {
 }
 
 // ContentGrid Component
-const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {}, viewMode = 'grid' }) => {
+const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deckCards = {}, viewMode = 'grid' }) => {
   const { t } = useTranslation()
 
   if (loading) {
@@ -627,20 +749,54 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
   const isBook = contentType === 'book'
 
   // GRID VIEW
+  // A thin result set stops pretending to be a table (LIB-005). This runs
+  // BEFORE the view-mode branch on purpose: at two or three items, list vs grid
+  // is not a meaningful choice, and the sparse layout is the better answer to
+  // both. The empty case is handled by the caller's `public.noResults`.
+  if (items.length > 0 && items.length <= SPARSE_THRESHOLD) {
+    return (
+      <Box
+        data-testid='sparse-library'
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(3, minmax(0, 1fr))' },
+          gap: { xs: 2, md: 3 }
+        }}
+      >
+        {items.map((item) => (
+          <FeatureCard key={item._id} item={item} contentType={contentType} onItemClick={onItemClick} t={t} />
+        ))}
+        {onPublish && <PublishInvitation onPublish={onPublish} t={t} />}
+      </Box>
+    )
+  }
+
   if (viewMode === 'grid') {
     return (
       <Grid container spacing={2} sx={{ justifyContent: { xs: 'center', sm: 'flex-start' } }}>
         {items.map((item) => (
           <Grid key={item._id} xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
             {isBook ? (
-              // Reuse Book.js component for consistency
-              <Book
-                book={{
-                  ...item,
-                  author: item.author_name // Map author_name to author for Book component
-                }}
-                handleBookClick={onItemClick}
-              />
+              // Reuse Book.js component for consistency. It is the same card the
+              // user's own library renders, so it knows nothing about public
+              // metadata — the evidence and the acquire action are added
+              // underneath rather than pushed into a component shared with a
+              // surface that has neither.
+              <Box sx={{ width: '100%', maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Book
+                  book={{
+                    ...item,
+                    author: item.author_name // Map author_name to author for Book component
+                  }}
+                  handleBookClick={onItemClick}
+                />
+                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ gap: 1, flexWrap: 'wrap' }}>
+                  <Evidence item={item} t={t} />
+                  <Box onClick={(event) => event.stopPropagation()}>
+                    <AddToLibrary item={item} contentType={contentType} t={t} />
+                  </Box>
+                </Stack>
+              </Box>
             ) : (
               // ✨ PREMIUM DECK DESIGN - Shows actual card previews
               <Card
