@@ -31,10 +31,13 @@ import {
   FilterList as FilterIcon,
   Clear as ClearIcon,
   MenuBook as MenuBookIcon,
+  Add as AddIcon,
+  Check as CheckIcon,
   GridView as GridViewIcon,
   ViewList as ViewListIcon,
   PublicRounded as PublicRoundedIcon
 } from '@mui/icons-material'
+import { tabularNums } from '../components/Common/Form/formStyles'
 import { publicContentService } from '../api/services'
 import Book from '../components/Books/Book'
 
@@ -314,8 +317,28 @@ const PublicBrowse = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
         <TabList>
-          <Tab>{t('public.books')}</Tab>
-          <Tab>{t('public.decks')}</Tab>
+          {/* The count belongs to the tab, not to a centred note under the
+              list: the tab is what selects the set, so it is what should say
+              how big the set is. Only the ACTIVE tab can carry one honestly —
+              the browse endpoints return `total` for the set they were asked
+              about, and fetching the other tab's count would be a second
+              request for a number nobody has asked to see yet. */}
+          <Tab>
+            {t('public.books')}
+            {activeTab === 0 && !loading && (
+              <Typography level='body-xs' sx={{ ml: 0.75, color: 'text.tertiary', ...tabularNums }}>
+                {total}
+              </Typography>
+            )}
+          </Tab>
+          <Tab>
+            {t('public.decks')}
+            {activeTab === 1 && !loading && (
+              <Typography level='body-xs' sx={{ ml: 0.75, color: 'text.tertiary', ...tabularNums }}>
+                {total}
+              </Typography>
+            )}
+          </Tab>
         </TabList>
 
         <TabPanel value={0} sx={{ p: 0, pt: 3 }}>
@@ -334,18 +357,21 @@ const PublicBrowse = () => {
         </TabPanel>
       </Tabs>
 
-      {/* Results Info & Load More */}
-      {!loading && items.length > 0 && (
+      {/* Load more, and the only count that still earns its space.
+          `public.showingResults` used to render here unconditionally and said
+          "Showing 1 results" — it had no plural forms. Rather than give a
+          redundant line better grammar, the line is gone: the tab above states
+          the total, so a progress count is worth showing only while some of it
+          is still unloaded, where it pairs with the button that loads it. */}
+      {!loading && items.length > 0 && items.length < total && (
         <Box sx={{ mt: 3, textAlign: 'center' }}>
-          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
-            {t('public.showingResults', { count: items.length })} {total > items.length && t('public.ofTotal', { total })}
+          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2, ...tabularNums }}>
+            {t('public.showingOf', { count: items.length, total })}
           </Typography>
 
-          {items.length < total && (
-            <Button variant='outlined' onClick={handleLoadMore} size='sm' loading={loadingMore} disabled={loadingMore}>
-              {t('public.loadMore')}
-            </Button>
-          )}
+          <Button variant='outlined' onClick={handleLoadMore} size='sm' loading={loadingMore} disabled={loadingMore}>
+            {t('public.loadMore')}
+          </Button>
         </Box>
       )}
 
@@ -370,6 +396,184 @@ const PublicBrowse = () => {
         </Box>
       )}
     </Container>
+  )
+}
+
+/**
+ * How long a thing gets to be new. Long enough that a weekend publish is still
+ * marked on Monday; short enough that the chip keeps meaning something.
+ */
+const NEW_WINDOW_DAYS = 30
+
+/** Whole days since an ISO timestamp; Infinity when there isn't one. */
+const daysSince = (iso) => {
+  if (!iso) return Infinity
+  const then = new Date(iso).getTime()
+  if (Number.isNaN(then)) return Infinity
+  return (Date.now() - then) / 86400000
+}
+
+/**
+ * What a public item is allowed to claim about itself.
+ *
+ * The rule this exists to enforce (ADR-012): **a metric renders only above
+ * zero.** A zero is not a small number, it is the absence of evidence, and the
+ * shipped design rendered all three unconditionally — so on a young catalogue
+ * every row led with `0 likes, 0 forks`, in the row's heaviest slot, as an
+ * argument against the thing it was selling.
+ *
+ * Silence is the honest report for an item nobody has reacted to yet. An item
+ * that is ALSO recent gets `isNew` instead, which is a reason to look rather
+ * than a verdict — but only for a while, or the chip would be on everything and
+ * would mean nothing.
+ *
+ * `"Other"` is treated as no category at all, because that is what it is: the
+ * option people pick when none of the seventeen real ones fit. It does not earn
+ * the row's second-strongest position.
+ */
+const evidenceFor = (item) => {
+  const meta = item?.public_metadata || {}
+  const views = Number(meta.views) || 0
+  const likes = Number(meta.likes) || 0
+  const forks = Number(meta.forks) || 0
+  const raw = typeof meta.category === 'string' ? meta.category.trim() : ''
+  const uncategorised = !raw || raw.toLowerCase() === 'other'
+
+  return {
+    views,
+    likes,
+    forks,
+    showViews: views > 0,
+    showLikes: likes > 0,
+    showForks: forks > 0,
+    category: raw,
+    showCategory: !uncategorised,
+    isNew: views === 0 && likes === 0 && forks === 0 && daysSince(item?.published_at || item?.created_at) <= NEW_WINDOW_DAYS
+  }
+}
+
+/**
+ * Take a public item into your own library — the action this surface exists for
+ * and has never had.
+ *
+ * **Always visible, never hover-revealed.** Hover does not exist on touch, and
+ * hiding the conversion behind a pointer state hides the conversion (ADR-012).
+ *
+ * **Plain weight, on purpose.** A bordered button on every row is four
+ * identical boxes marching down the page for what is, relative to the item, a
+ * secondary element — the row itself is the primary target. The label and the
+ * glyph name it; the ground arrives only on hover and press (§15.1). Pinned
+ * `minWidth` so the right rule does not shift when "Add" becomes "Added".
+ *
+ * **Optimistic, with rollback,** exactly as `MarkToggle`: the label flips
+ * first, and reverts if the request fails. No local toast — the API client's
+ * interceptor already reports failures globally.
+ *
+ * `stopPropagation` because the row is itself a navigation target; without it
+ * adding an item would also open it.
+ *
+ * KNOWN GAP (LIB-007): the browse endpoints do not say whether the viewer
+ * already owns a fork, so "Added" is a confirmation of what just happened
+ * rather than a persisted state, and it resets on reload. Pressing again is
+ * harmless — `forkBook`/`forkDeck` are idempotent and answer an already-owned
+ * item with `created: false` rather than an error, which is exactly why a
+ * row-level button is safe here at all.
+ */
+const AddToLibrary = ({ item, contentType, t }) => {
+  const id = item?._id || item?.id
+  const [added, setAdded] = useState(false)
+  const [pending, setPending] = useState(false)
+
+  const handleAdd = useCallback(
+    async (event) => {
+      event.stopPropagation()
+      if (!id || pending || added) return
+
+      setAdded(true)
+      setPending(true)
+      try {
+        const fork = contentType === 'book' ? publicContentService.forkBook : publicContentService.forkDeck
+        // `created: false` means the user already owns it. That is a success:
+        // the library ends up holding the thing, which is what was asked for.
+        await fork(id)
+      } catch (error) {
+        setAdded(false)
+      } finally {
+        setPending(false)
+      }
+    },
+    [id, pending, added, contentType]
+  )
+
+  if (!id) return null
+
+  return (
+    <Button
+      size='sm'
+      variant='plain'
+      color={added ? 'primary' : 'neutral'}
+      onClick={handleAdd}
+      disabled={pending}
+      data-testid='add-to-library'
+      startDecorator={added ? <CheckIcon sx={{ fontSize: 'lg' }} /> : <AddIcon sx={{ fontSize: 'lg' }} />}
+      sx={{
+        borderRadius: 'md',
+        // WCAG 2.5.5 at xs, relaxing for pointer devices; the label supplies
+        // the width, so this is the height-only `touchTarget` case.
+        minHeight: { xs: 44, sm: 36 },
+        // Pinned so the right rule holds when the label changes length.
+        minWidth: { xs: 92, sm: 96 },
+        px: 1.5,
+        fontWeight: 'lg',
+        color: added ? 'primary.plainColor' : 'text.secondary',
+        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
+      }}
+    >
+      {added ? t('public.added') : t('public.add')}
+    </Button>
+  )
+}
+
+/**
+ * The evidence cluster, shared by the list row and the grid card so the rules
+ * above are applied in exactly one place.
+ *
+ * Deliberately monochrome. The shipped version painted likes `danger.solidBg`
+ * and forks `success.solidBg` — two of the four colours ADR-010 reserves for
+ * Again / Hard / Good / Easy. §15.5: a semantic colour that is load-bearing
+ * anywhere cannot be borrowed for decoration.
+ */
+const Evidence = ({ item, t }) => {
+  const e = evidenceFor(item)
+  const metric = (Icon, value, label) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }} aria-label={label}>
+      <Icon sx={{ fontSize: 'md', color: 'text.tertiary' }} aria-hidden='true' />
+      <Typography level='body-sm' sx={{ color: 'text.secondary', ...tabularNums }}>
+        {value}
+      </Typography>
+    </Box>
+  )
+
+  return (
+    <Stack direction='row' spacing={1.5} alignItems='center' sx={{ flexWrap: 'wrap', gap: 1 }}>
+      {e.showLikes && metric(FavoriteIcon, e.likes, t('public.likes'))}
+      {e.showForks && metric(ForkIcon, e.forks, t('public.forks'))}
+      {e.showViews && !e.showLikes && !e.showForks && metric(ViewIcon, e.views, t('public.views'))}
+
+      {e.isNew && (
+        <Chip size='sm' variant='soft' color='neutral' sx={{ borderRadius: 'sm', fontWeight: 'lg' }}>
+          {t('public.newBadge')}
+        </Chip>
+      )}
+
+      {e.showCategory && (
+        <Chip size='sm' variant='soft' color='neutral' sx={{ borderRadius: 'sm' }}>
+          {t(`public.categories.${e.category.toLowerCase()}`, {
+            defaultValue: e.category.charAt(0).toUpperCase() + e.category.slice(1)
+          })}
+        </Chip>
+      )}
+    </Stack>
   )
 }
 
@@ -608,25 +812,19 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                       </Stack>
                     </Box>
 
-                    {/* Stats */}
-                    <Stack direction='row' spacing={2} sx={{ mt: 1.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <ViewIcon sx={{ fontSize: 14, color: 'text.tertiary', opacity: 0.6 }} />
-                        <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 500, bgcolor: 'transparent' }}>
-                          {item.public_metadata?.views || 0}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <FavoriteIcon sx={{ fontSize: 14, color: 'danger.solidBg', opacity: 0.7 }} />
-                        <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 500, bgcolor: 'transparent' }}>
-                          {item.public_metadata?.likes || 0}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <ForkIcon sx={{ fontSize: 14, color: 'success.solidBg', opacity: 0.7 }} />
-                        <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 500, bgcolor: 'transparent' }}>
-                          {item.public_metadata?.forks || 0}
-                        </Typography>
+                    {/* Evidence and the acquire action, on the same rules the
+                        list row uses — one implementation, so the two views can
+                        never disagree about when a metric is worth showing. */}
+                    <Stack
+                      direction='row'
+                      alignItems='center'
+                      justifyContent='space-between'
+                      spacing={1}
+                      sx={{ mt: 1.5, gap: 1, flexWrap: 'wrap' }}
+                    >
+                      <Evidence item={item} t={t} />
+                      <Box onClick={(event) => event.stopPropagation()}>
+                        <AddToLibrary item={item} contentType={contentType} t={t} />
                       </Box>
                     </Stack>
                   </Box>
@@ -640,32 +838,43 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
   }
 
   // LIST VIEW
+  //
+  // Four columns on fixed rules — cover, identity, evidence, action — and only
+  // the identity column flexes, so a long title absorbs the slack instead of
+  // leaving a hole in the middle of the row (§15.4). The shipped version was
+  // flex-based with a `minWidth: 200` stats block, which on a wide screen left
+  // roughly 900px of nothing between the author and the first number.
   return (
     <Stack spacing={0}>
       {items.map((item) => (
         <Box
           key={item._id}
           onClick={() => onItemClick(item)}
+          data-testid='public-row'
           sx={{
-            display: 'flex',
+            display: 'grid',
             alignItems: 'center',
-            gap: 2,
+            columnGap: { xs: 1.5, md: 2.5 },
+            rowGap: 1,
+            gridTemplateColumns: { xs: 'auto 1fr auto', md: 'auto 1fr auto auto' },
+            gridTemplateAreas: {
+              xs: '"cover identity action" "cover evidence evidence"',
+              md: '"cover identity evidence action"'
+            },
             py: 1.5,
             px: 2,
             borderBottom: '1px solid',
             borderColor: 'divider',
             cursor: 'pointer',
-            transition: 'all 0.2s',
-            '&:hover': {
-              bgcolor: 'background.level1'
-            }
+            transition: 'background 140ms ease',
+            '&:hover': { bgcolor: 'background.level1' }
           }}
         >
-          {/* Icon/Cover */}
           <Box
             sx={{
-              width: 40,
-              height: isBook ? 56 : 40,
+              gridArea: 'cover',
+              width: { xs: 46, md: 52 },
+              height: isBook ? { xs: 62, md: 70 } : { xs: 46, md: 52 },
               borderRadius: 'sm',
               overflow: 'hidden',
               flexShrink: 0,
@@ -680,13 +889,12 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
               borderColor: 'divider'
             }}
           >
-            {!item.cover_image && <MenuBookIcon sx={{ fontSize: 20, color: 'common.white', opacity: 0.8 }} />}
+            {!item.cover_image && <MenuBookIcon sx={{ fontSize: 'lg', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />}
           </Box>
 
-          {/* Title & Author */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Stack direction='row' spacing={0.75} alignItems='center' sx={{ flexWrap: 'wrap', gap: 0.5, mb: 0.25 }}>
-              <Typography level='title-sm' sx={{ fontWeight: 600, bgcolor: 'transparent' }}>
+          <Box sx={{ gridArea: 'identity', minWidth: 0 }}>
+            <Stack direction='row' spacing={0.75} alignItems='center' sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+              <Typography level='title-sm' sx={{ fontWeight: 'lg' }} noWrap>
                 {isBook ? item.title : item.name}
               </Typography>
               {item?.forked_from && (
@@ -694,48 +902,26 @@ const ContentGrid = ({ items, loading, onItemClick, contentType, deckCards = {},
                   size='sm'
                   variant='soft'
                   color='neutral'
-                  startDecorator={<ForkIcon sx={{ fontSize: 11 }} />}
-                  sx={{ height: 'auto', py: 0.25 }}
+                  startDecorator={<ForkIcon sx={{ fontSize: 'sm' }} />}
+                  sx={{ borderRadius: 'sm' }}
                 >
                   {t('public.forkBadge')}
                 </Chip>
               )}
             </Stack>
-            <Typography level='body-xs' sx={{ color: 'text.secondary', bgcolor: 'transparent' }}>
+            <Typography level='body-sm' sx={{ color: 'text.secondary' }} noWrap>
               {item.author_name || t('public.unknownAuthor')}
             </Typography>
           </Box>
 
-          {/* Stats (hide on mobile) */}
-          <Stack direction='row' spacing={2} sx={{ display: { xs: 'none', md: 'flex' }, minWidth: 200 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ViewIcon sx={{ fontSize: 14, color: 'text.tertiary', opacity: 0.6 }} />
-              <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 500, bgcolor: 'transparent' }}>
-                {item.public_metadata?.views || 0}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <FavoriteIcon sx={{ fontSize: 14, color: 'danger.solidBg', opacity: 0.7 }} />
-              <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 500, bgcolor: 'transparent' }}>
-                {item.public_metadata?.likes || 0}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ForkIcon sx={{ fontSize: 14, color: 'success.solidBg', opacity: 0.7 }} />
-              <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 500, bgcolor: 'transparent' }}>
-                {item.public_metadata?.forks || 0}
-              </Typography>
-            </Box>
-          </Stack>
+          {/* Often empty, by design — see `evidenceFor`. */}
+          <Box sx={{ gridArea: 'evidence', justifySelf: { xs: 'start', md: 'end' } }}>
+            <Evidence item={item} t={t} />
+          </Box>
 
-          {/* Category/Type (hide on mobile) */}
-          {item.public_metadata?.category && (
-            <Chip size='sm' variant='soft' sx={{ display: { xs: 'none', sm: 'flex' } }}>
-              {t(`public.categories.${item.public_metadata.category.toLowerCase()}`, {
-                defaultValue: item.public_metadata.category.charAt(0).toUpperCase() + item.public_metadata.category.slice(1)
-              })}
-            </Chip>
-          )}
+          <Box sx={{ gridArea: 'action', justifySelf: 'end' }} onClick={(event) => event.stopPropagation()}>
+            <AddToLibrary item={item} contentType={contentType} t={t} />
+          </Box>
         </Box>
       ))}
     </Stack>

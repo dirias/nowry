@@ -2233,7 +2233,11 @@
     "publish": "Publier",
     "published": "Publié",
     "unpublish": "Dépublier",
-    "publishInstant": "Partager avec la communauté"
+    "publishInstant": "Partager avec la communauté",
+    "add": "Ajouter",
+    "added": "Ajouté",
+    "newBadge": "Nouveau",
+    "showingOf": "Affichage de {{count}} sur {{total}}"
   },
   "editor": {
     "mode": {

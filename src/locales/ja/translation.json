@@ -2171,7 +2171,11 @@
     "publish": "公開",
     "published": "公開中",
     "unpublish": "公開を取り消す",
-    "publishInstant": "コミュニティと共有"
+    "publishInstant": "コミュニティと共有",
+    "add": "追加",
+    "added": "追加済み",
+    "newBadge": "新着",
+    "showingOf": "{{total}} 件中 {{count}} 件を表示"
   },
   "editor": {
     "mode": {

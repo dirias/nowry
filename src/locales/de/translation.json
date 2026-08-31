@@ -2211,7 +2211,11 @@
     "publish": "Veröffentlichen",
     "published": "Veröffentlicht",
     "unpublish": "Veröffentlichung aufheben",
-    "publishInstant": "Mit der Community teilen"
+    "publishInstant": "Mit der Community teilen",
+    "add": "Hinzufügen",
+    "added": "Hinzugefügt",
+    "newBadge": "Neu",
+    "showingOf": "{{count}} von {{total}} werden angezeigt"
   },
   "editor": {
     "mode": {
