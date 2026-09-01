@@ -395,7 +395,7 @@ export default function StudyCenter() {
               },
               '&:focus-visible': {
                 outline: '2px solid',
-                outlineColor: 'primary.solidBg',
+                outlineColor: 'primary.outlinedBorder',
                 outlineOffset: '3px'
               }
             }}
@@ -444,7 +444,7 @@ export default function StudyCenter() {
               bgcolor: 'transparent',
               color: 'primary.plainColor',
               fontWeight: 800,
-              borderBottomColor: 'primary.solidBg'
+              borderBottomColor: 'primary.plainColor'
             }
           }}
         >

@@ -82,7 +82,7 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
         borderColor: isOpen ? 'primary.solidBg' : isNext ? 'primary.outlinedBorder' : 'transparent',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
         '&:hover': selectable ? { transform: 'translateY(-2px)' } : undefined,
-        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: 2 }
+        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 }
       }}
     >
       <Box

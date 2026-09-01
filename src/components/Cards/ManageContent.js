@@ -283,7 +283,7 @@ export default function ManageContent({
                 },
                 '&:focus-visible': {
                   outline: '2px solid',
-                  outlineColor: 'primary.solidBg',
+                  outlineColor: 'primary.outlinedBorder',
                   outlineOffset: '-2px'
                 },
                 boxShadow: 'none'
@@ -334,7 +334,7 @@ export default function ManageContent({
               onClick={onImport}
               aria-label={t('cards.import.label')}
               sx={{
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
               }}
             >
               <FileUpload fontSize='small' />
@@ -351,7 +351,7 @@ export default function ManageContent({
               fontWeight: 'lg',
               fontSize: 'xs',
               px: 1.5,
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' }
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
             }}
           >
             {t('cards.newCard')}
@@ -367,7 +367,7 @@ export default function ManageContent({
               fontWeight: 'lg',
               fontSize: 'xs',
               px: 1.5,
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' }
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
             }}
           >
             {t('cards.newDeck')}
@@ -402,7 +402,7 @@ export default function ManageContent({
             sx={{
               borderRadius: 'lg',
               minWidth: 40,
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
             }}
           >
             <FilterAlt />
@@ -428,7 +428,7 @@ export default function ManageContent({
               sx={{
                 borderRadius: 'md',
                 transition: 'all 0.2s',
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
               }}
               aria-label={t('cards.manage_content.aria.gridView')}
             >
@@ -442,7 +442,7 @@ export default function ManageContent({
               sx={{
                 borderRadius: 'md',
                 transition: 'all 0.2s',
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
               }}
               aria-label={t('cards.manage_content.aria.listView')}
             >
@@ -476,7 +476,7 @@ export default function ManageContent({
                   // a user can operate (DEBT-006).
                   action: {
                     'aria-pressed': filterType === key,
-                    sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                    sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }
                   }
                 }}
               >
@@ -508,7 +508,7 @@ export default function ManageContent({
                     action: {
                       'aria-pressed': markedOnly,
                       'aria-label': markedOnly ? t('cards.mark.filter.showAll') : t('cards.mark.filter.showMarked'),
-                      sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                      sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }
                     }
                   }}
                 >
@@ -535,7 +535,7 @@ export default function ManageContent({
                   slotProps={{
                     action: {
                       'aria-pressed': selectedTags.length === 0,
-                      sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                      sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }
                     }
                   }}
                 >
@@ -557,7 +557,7 @@ export default function ManageContent({
                     slotProps={{
                       action: {
                         'aria-pressed': selectedTags.includes(tag),
-                        sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }
+                        sx: { '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }
                       }
                     }}
                   >

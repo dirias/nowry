@@ -1357,7 +1357,7 @@ export default function StudySession() {
             aria-label={t(`${emptyFilterPrefix}.clear`)}
             sx={{
               mt: 2,
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
             }}
           >
             {t(`${emptyFilterPrefix}.clear`)}

@@ -154,7 +154,7 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
                       '&:hover': { bgcolor: 'background.level1' },
                       '&:focus-visible': {
                         outline: '2px solid',
-                        outlineColor: 'primary.solidBg',
+                        outlineColor: 'primary.outlinedBorder',
                         outlineOffset: '2px'
                       }
                     }}
@@ -193,7 +193,7 @@ export default function BoardListSelector({ open, onClose, onSelectBoard }) {
                       '&:hover': { bgcolor: 'background.level1' },
                       '&:focus-visible': {
                         outline: '2px solid',
-                        outlineColor: 'primary.solidBg',
+                        outlineColor: 'primary.outlinedBorder',
                         outlineOffset: '2px'
                       }
                     }}

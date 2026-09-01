@@ -717,7 +717,7 @@ const AddToLibrary = ({ item, contentType, t }) => {
         px: 1.5,
         fontWeight: 'lg',
         color: added ? 'primary.plainColor' : 'text.secondary',
-        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
+        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
       }}
     >
       {added ? t('public.added') : t('public.add')}

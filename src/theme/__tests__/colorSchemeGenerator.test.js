@@ -132,3 +132,60 @@ describe('getColorPresets', () => {
     }
   })
 })
+
+/**
+ * A11Y-001 — thin accent lines must clear the non-text contrast floor.
+ *
+ * WCAG 2.2 §1.4.11 puts focus indicators, selected-state markers and control
+ * boundaries at 3:1 against what they sit on. This codebase draws its focus
+ * rings with `primary.outlinedBorder`, and the dark scheme did not define it at
+ * all — so Joy's default filled the gap with a blue at 1.97:1, and every focus
+ * ring in the app was both off-brand and effectively unrenderable in dark mode.
+ *
+ * The guard is per-accent rather than on one colour: the palette is generated
+ * from whatever the user picks, so a hue that fails is a hue away, not a
+ * regression someone has to write.
+ */
+describe('thin accent lines clear the non-text contrast floor', () => {
+  const NON_TEXT_FLOOR = 3
+
+  const relativeLuminance = (hex) => {
+    const n = parseInt(hex.replace('#', ''), 16)
+    const channels = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+      const c = v / 255
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+  }
+
+  const contrast = (a, b) => {
+    const [x, y] = [relativeLuminance(a), relativeLuminance(b)]
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
+  }
+
+  // Spread across the wheel, plus the app's own default, plus two colours whose
+  // mid-lightness form is naturally weak against a dark ground.
+  const ACCENTS = ['#2a6971', '#0b6bcb', '#c0392b', '#7a5cc4', '#1e8e5a', '#d8a24a', '#111111', '#f5f5f5']
+
+  it.each(ACCENTS)('dark outlinedBorder is legible on both page grounds for %s', (accent) => {
+    const { dark } = generateColorScheme(accent)
+    const grounds = [dark.background.body, dark.background.surface]
+
+    grounds.forEach((ground) => {
+      expect(contrast(dark.primary.outlinedBorder, ground)).toBeGreaterThanOrEqual(NON_TEXT_FLOOR)
+    })
+  })
+
+  it.each(ACCENTS)('dark outlinedBorder keeps the accent hue rather than falling back for %s', (accent) => {
+    const { dark } = generateColorScheme(accent)
+
+    // The bug was a MISSING key, so the shape of the fix is that it exists.
+    expect(dark.primary.outlinedBorder).toMatch(/^#[0-9a-f]{6}$/i)
+    expect(dark.primary.outlinedBorder).not.toBe('#12467B')
+  })
+
+  it('leaves the light scheme untouched, since it already defined its own border', () => {
+    const { light } = generateColorScheme('#2a6971')
+    expect(light.primary.outlinedBorder).toBeDefined()
+  })
+})

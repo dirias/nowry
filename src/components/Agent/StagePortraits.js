@@ -68,7 +68,7 @@ const StagePortraits = ({ portraits, wornUrl, stage, stageName, onWear, disabled
                 opacity: disabled ? 0.5 : 1,
                 transition: 'border-color 0.18s ease, transform 0.18s ease',
                 '&:hover': disabled || worn ? undefined : { transform: 'translateY(-2px)' },
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: 2 }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 }
               }}
             >
               <Box component='img' src={url} alt='' sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
