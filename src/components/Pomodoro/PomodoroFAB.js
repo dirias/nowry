@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { IconButton, Tooltip, Box } from '@mui/joy'
 import { Timer } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
@@ -10,6 +11,7 @@ import { Z_NAV } from '../../constants/zIndex'
  * Following DESIGN_GUIDELINES.md for FAB pattern
  */
 const PomodoroFAB = () => {
+  const { t } = useTranslation()
   const { showWidget, setShowWidget, settings, isActive, timeLeft } = usePomodoro()
 
   // Don't show FAB if pomodoro is disabled or widget is already open
@@ -22,10 +24,11 @@ const PomodoroFAB = () => {
   }
 
   return (
-    <Tooltip title='Pomodoro Timer' placement='left' size='sm'>
+    <Tooltip title={t('common.pomodoro')} placement='left' size='sm'>
       <IconButton
         variant='solid'
         color='primary'
+        aria-label={t('pomodoro.open')}
         onClick={() => setShowWidget(true)}
         sx={{
           position: 'fixed',

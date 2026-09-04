@@ -2662,5 +2662,25 @@
   },
   "filters": {
     "marked": "Markiert"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "Pomodoro-Timer",
+      "workDone": "Fokus-Sitzung abgeschlossen. Zeit für eine Pause.",
+      "breakDone": "Pause vorbei. Bereit, dich zu konzentrieren?"
+    },
+    "modes": {
+      "work": "Fokus",
+      "shortBreak": "Kurze Pause",
+      "longBreak": "Lange Pause"
+    },
+    "open": "Pomodoro-Timer öffnen",
+    "close": "Timer schließen",
+    "testSound": "Benachrichtigungston testen",
+    "start": "Starten",
+    "pause": "Pausieren",
+    "reset": "Zurücksetzen",
+    "skip": "Zur nächsten Sitzung springen",
+    "sessionsToday": "{{count}} von {{total}} Fokus-Sitzungen bis zur langen Pause"
   }
 }

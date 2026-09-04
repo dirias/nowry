@@ -1827,14 +1827,7 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": [
-        "Career Growth",
-        "Health & Vitality",
-        "Financial Freedom",
-        "Relationships",
-        "Creative Pursuits",
-        "Learning & Skills"
-      ]
+      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
     },
     "priority": {
       "title": "Yearly Priorities",
@@ -3502,5 +3495,25 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}}s elapsed"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "Pomodoro Timer",
+      "workDone": "Focus session complete. Time for a break.",
+      "breakDone": "Break over. Ready to focus?"
+    },
+    "modes": {
+      "work": "Focus",
+      "shortBreak": "Short break",
+      "longBreak": "Long break"
+    },
+    "open": "Open Pomodoro timer",
+    "close": "Close timer",
+    "testSound": "Test notification sound",
+    "start": "Start",
+    "pause": "Pause",
+    "reset": "Reset",
+    "skip": "Skip to next session",
+    "sessionsToday": "{{count}} of {{total}} focus sessions before a long break"
   }
 }

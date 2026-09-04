@@ -125,6 +125,8 @@ const IDENTICAL_BY_DESIGN = {
     'agent.companion.portraitsTitle',
     'agent.companion.portraitOption',
     'agent.companion.portraitsForStage',
+    // "Pause" is the French word for the timer's pause control.
+    'pomodoro.pause',
     ...XP_GAINED
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has

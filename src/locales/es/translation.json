@@ -3324,5 +3324,25 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s transcurridos"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "Temporizador Pomodoro",
+      "workDone": "Sesión de enfoque completada. Hora de un descanso.",
+      "breakDone": "Descanso terminado. ¿Listo para concentrarte?"
+    },
+    "modes": {
+      "work": "Enfoque",
+      "shortBreak": "Descanso corto",
+      "longBreak": "Descanso largo"
+    },
+    "open": "Abrir temporizador Pomodoro",
+    "close": "Cerrar temporizador",
+    "testSound": "Probar sonido de notificación",
+    "start": "Iniciar",
+    "pause": "Pausar",
+    "reset": "Reiniciar",
+    "skip": "Saltar a la siguiente sesión",
+    "sessionsToday": "{{count}} de {{total}} sesiones de enfoque antes de un descanso largo"
   }
 }

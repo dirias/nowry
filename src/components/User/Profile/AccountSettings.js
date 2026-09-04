@@ -67,6 +67,7 @@ import DeleteConfirmationModal from '../../Common/DeleteConfirmationModal'
 import { useAuth } from '../../../context/AuthContext'
 import { usePet } from '../../../context/AgentContext'
 import { auth } from '../../../config/firebase.config'
+import { useQueryClient } from '@tanstack/react-query'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
 import LearningPreferencesSection from './LearningPreferencesSection'
@@ -261,6 +262,7 @@ export default function AccountSettings() {
   // ── Sidebar / drawer ─────────────────────────────────────────────────────────
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [activeSection, setActiveSection] = useActiveSection(SECTION_IDS)
+  const queryClient = useQueryClient()
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
   const fetchProfile = async () => {
@@ -356,6 +358,10 @@ export default function AccountSettings() {
       // write back a stale `interests` array — silently undoing an ordering the
       // Learning section had just saved through its own queue.
       await userService.updateGeneralPreferences({ [key]: value })
+      // PomodoroContext reads these through the shared 'profile' query (keyed by
+      // Firebase uid — see useUserProfile.js); refresh it so the timer follows
+      // the new setting without a reload.
+      queryClient.invalidateQueries({ queryKey: ['profile', auth.currentUser?.uid ?? null] })
     } catch {
       // silent — the optimistic update stays; UX remains responsive
     }

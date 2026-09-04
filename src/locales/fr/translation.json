@@ -2684,5 +2684,25 @@
   },
   "filters": {
     "marked": "Marquées"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "Minuteur Pomodoro",
+      "workDone": "Session de concentration terminée. C'est l'heure de la pause.",
+      "breakDone": "Pause terminée. Prêt à vous concentrer ?"
+    },
+    "modes": {
+      "work": "Concentration",
+      "shortBreak": "Pause courte",
+      "longBreak": "Pause longue"
+    },
+    "open": "Ouvrir le minuteur Pomodoro",
+    "close": "Fermer le minuteur",
+    "testSound": "Tester le son de notification",
+    "start": "Démarrer",
+    "pause": "Pause",
+    "reset": "Réinitialiser",
+    "skip": "Passer à la session suivante",
+    "sessionsToday": "{{count}} sur {{total}} sessions de concentration avant une pause longue"
   }
 }

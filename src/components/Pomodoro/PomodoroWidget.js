@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, IconButton, Stack, Sheet, Tooltip } from '@mui/joy'
 import { PlayArrowRounded, PauseRounded, RefreshRounded, CloseRounded, VolumeUpRounded } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
@@ -6,6 +7,7 @@ import { ClickAwayListener } from '@mui/base/ClickAwayListener'
 import { playPomodoroNotification } from '../../utils/pomodoroSound'
 
 const PomodoroWidget = () => {
+  const { t } = useTranslation()
   const { timeLeft, isActive, mode, showWidget, setShowWidget, toggleTimer, resetTimer, changeMode, settings } = usePomodoro()
 
   if (!showWidget || !settings.enabled) return null
@@ -54,11 +56,12 @@ const PomodoroWidget = () => {
       >
         {/* Header with Test Sound & Close */}
         <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ p: 1 }}>
-          <Tooltip title='Test notification sound' size='sm'>
+          <Tooltip title={t('pomodoro.testSound')} size='sm'>
             <IconButton
               size='sm'
               variant='plain'
               color='neutral'
+              aria-label={t('pomodoro.testSound')}
               onClick={playPomodoroNotification}
               sx={{
                 '--IconButton-size': '28px',
@@ -70,7 +73,14 @@ const PomodoroWidget = () => {
             </IconButton>
           </Tooltip>
 
-          <IconButton size='sm' variant='plain' color='neutral' onClick={() => setShowWidget(false)} sx={{ '--IconButton-size': '28px' }}>
+          <IconButton
+            size='sm'
+            variant='plain'
+            color='neutral'
+            aria-label={t('pomodoro.close')}
+            onClick={() => setShowWidget(false)}
+            sx={{ '--IconButton-size': '28px' }}
+          >
             <CloseRounded fontSize='small' />
           </IconButton>
         </Stack>
@@ -129,6 +139,8 @@ const PomodoroWidget = () => {
               size='sm'
               variant={mode === 'work' ? 'solid' : 'plain'}
               color='primary'
+              aria-label={t('pomodoro.modes.work')}
+              aria-pressed={mode === 'work'}
               onClick={() => changeMode('work')}
               sx={{ minWidth: 32, height: 32 }}
             >
@@ -138,6 +150,8 @@ const PomodoroWidget = () => {
               size='sm'
               variant={mode === 'shortBreak' ? 'solid' : 'plain'}
               color='success'
+              aria-label={t('pomodoro.modes.shortBreak')}
+              aria-pressed={mode === 'shortBreak'}
               onClick={() => changeMode('shortBreak')}
               sx={{ minWidth: 32, height: 32 }}
             >
@@ -147,6 +161,8 @@ const PomodoroWidget = () => {
               size='sm'
               variant={mode === 'longBreak' ? 'solid' : 'plain'}
               color='success'
+              aria-label={t('pomodoro.modes.longBreak')}
+              aria-pressed={mode === 'longBreak'}
               onClick={() => changeMode('longBreak')}
               sx={{ minWidth: 32, height: 32 }}
             >
@@ -159,13 +175,21 @@ const PomodoroWidget = () => {
 
           {/* Actions */}
           <Stack direction='row' spacing={1}>
-            <IconButton size='sm' variant='plain' color='neutral' onClick={resetTimer} sx={{ minWidth: 32, height: 32 }}>
+            <IconButton
+              size='sm'
+              variant='plain'
+              color='neutral'
+              aria-label={t('pomodoro.reset')}
+              onClick={resetTimer}
+              sx={{ minWidth: 32, height: 32 }}
+            >
               <RefreshRounded fontSize='small' />
             </IconButton>
             <IconButton
               size='md'
               variant='solid'
               color={mode === 'work' ? 'primary' : 'success'}
+              aria-label={isActive ? t('pomodoro.pause') : t('pomodoro.start')}
               onClick={toggleTimer}
               sx={{ borderRadius: '50%', minWidth: 40, height: 40 }}
             >

@@ -655,7 +655,7 @@ const Header = () => {
                         <ListItemDecorator>
                           <TimerRounded />
                         </ListItemDecorator>
-                        {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : t('common.pomodoro')}
+                        {isTimerActive ? `${t('common.pomodoro')} (${formatTime(timeLeft)})` : t('common.pomodoro')}
                       </ListItemButton>
                     </ListItem>
                   </>
