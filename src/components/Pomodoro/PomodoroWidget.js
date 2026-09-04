@@ -6,6 +6,7 @@ import { MODES, durationFor, nextModeAfter, usePomodoro } from '../../context/Po
 import { focusRing } from '../Common/Form/formStyles'
 import { Z_NAV } from '../../constants/zIndex'
 import { formatClock } from './formatClock'
+import { useTimerCorner } from './useTimerCorner'
 
 // 320px: the widest primary label ("Start break") plus the mode switch and the
 // secondary control fit on one row in English; longer locales wrap the primary
@@ -124,6 +125,7 @@ const PomodoroWidget = () => {
     changeMode,
     settings
   } = usePomodoro()
+  const corner = useTimerCorner({ width: WIDGET_WIDTH })
 
   if (!showWidget || !settings.enabled) return null
 
@@ -153,11 +155,7 @@ const PomodoroWidget = () => {
       role='region'
       aria-label={t('common.pomodoro')}
       sx={{
-        position: 'fixed',
-        right: 24,
-        bottom: 24,
-        width: WIDGET_WIDTH,
-        maxWidth: 'calc(100vw - 48px)',
+        ...corner,
         zIndex: Z_NAV,
         p: 2,
         display: 'flex',

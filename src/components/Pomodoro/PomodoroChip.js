@@ -6,6 +6,7 @@ import { usePomodoro } from '../../context/PomodoroContext'
 import { focusRing } from '../Common/Form/formStyles'
 import { Z_NAV } from '../../constants/zIndex'
 import { formatClock } from './formatClock'
+import { useTimerCorner } from './useTimerCorner'
 
 /**
  * The timer's collapsed state — a chip in the corner the widget opens from.
@@ -13,11 +14,13 @@ import { formatClock } from './formatClock'
  * It replaces the circular FAB (ADR-013): same rectangle family and the same
  * `level1` ground as the widget's own controls, and a running timer is shown
  * by a 3px progress edge rather than a pulsing halo. Rendered only when the
- * timer is enabled and the widget is closed.
+ * timer is enabled and the widget is closed, in the corner the Study Buddy is
+ * not in (useTimerCorner).
  */
 const PomodoroChip = () => {
   const { t } = useTranslation()
   const { showWidget, setShowWidget, settings, isActive, isPaused, timeLeft, progress } = usePomodoro()
+  const corner = useTimerCorner()
 
   if (!settings.enabled || showWidget) return null
 
@@ -31,9 +34,7 @@ const PomodoroChip = () => {
       onClick={() => setShowWidget(true)}
       startDecorator={<TimerOutlined fontSize='small' />}
       sx={{
-        position: 'fixed',
-        right: 24,
-        bottom: 24,
+        ...corner,
         zIndex: Z_NAV,
         overflow: 'hidden',
         minHeight: 36,

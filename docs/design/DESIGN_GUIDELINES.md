@@ -2181,3 +2181,8 @@ border, 320px wide, 24px from the corner. Inside it the ladder holds without exc
 *   **The primary label is text.** "Start break" must fit beside the switch and the secondary control
     in English; longer locales wrap the primary onto its own full-width line rather than clipping,
     which is why the control row is `flex-wrap` and the button has no glyph.
+*   **Two floating objects never share a corner.** The Study Buddy rests bottom-right and moves
+    bottom-left for a study session, so the timer takes the other corner (`useTimerCorner`): left by
+    default, right in a session, bottom-right when there is no pet. A phone has no second corner, so
+    there the open widget is a full-width sheet raised clear of the pet, and only the chip stays in
+    a corner.

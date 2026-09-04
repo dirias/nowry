@@ -22,6 +22,10 @@ jest.mock('../../../utils/pomodoroSound', () => ({
 }))
 
 let mockPomodoro
+let mockPet = { isActive: false, isInStudySession: false }
+let mockIsMobile = false
+jest.mock('../../../context/AgentContext', () => ({ usePet: () => mockPet }))
+jest.mock('../../../hooks/useIsMobile', () => ({ useIsMobile: () => mockIsMobile }))
 jest.mock('../../../context/PomodoroContext', () => {
   const actual = jest.requireActual('../../../context/PomodoroContext')
   return { ...actual, usePomodoro: () => mockPomodoro }
@@ -51,6 +55,8 @@ const base = () => ({
 
 beforeEach(() => {
   mockPomodoro = base()
+  mockPet = { isActive: false, isInStudySession: false }
+  mockIsMobile = false
 })
 
 describe('PomodoroWidget', () => {
@@ -121,6 +127,47 @@ describe('PomodoroWidget', () => {
     render(<PomodoroWidget />)
     fireEvent.click(screen.getByRole('button', { name: 'pomodoro.close' }))
     expect(mockPomodoro.setShowWidget).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('the corner the Study Buddy is not in', () => {
+  const widgetStyle = () => window.getComputedStyle(screen.getByRole('region', { name: 'common.pomodoro' }))
+  const chipStyle = () => window.getComputedStyle(screen.getByRole('button', { name: 'pomodoro.open' }))
+
+  it('sits bottom-right when there is no pet', () => {
+    render(<PomodoroWidget />)
+    expect(widgetStyle().right).toBe('24px')
+    expect(widgetStyle().left).toBe('')
+  })
+
+  it('moves bottom-left while the pet rests bottom-right, and back right during a study session', () => {
+    mockPet = { isActive: true, isInStudySession: false }
+    const { rerender } = render(<PomodoroWidget />)
+    expect(widgetStyle().left).toBe('24px')
+    mockPet = { isActive: true, isInStudySession: true }
+    rerender(<PomodoroWidget />)
+    expect(widgetStyle().right).toBe('24px')
+  })
+
+  it('the chip follows the same rule', () => {
+    mockPomodoro = { ...base(), showWidget: false }
+    mockPet = { isActive: true, isInStudySession: false }
+    render(<PomodoroChip />)
+    expect(chipStyle().left).toBe('24px')
+  })
+
+  it('on mobile the open widget is a full-width sheet raised above the pet; the chip stays in the corner', () => {
+    mockIsMobile = true
+    mockPet = { isActive: true, isInStudySession: false }
+    render(<PomodoroWidget />)
+    expect(widgetStyle().left).toBe('16px')
+    expect(widgetStyle().right).toBe('16px')
+    expect(widgetStyle().bottom).toBe('136px')
+
+    mockPomodoro = { ...base(), showWidget: false }
+    render(<PomodoroChip />)
+    expect(chipStyle().left).toBe('24px')
+    expect(chipStyle().bottom).toBe('24px')
   })
 })
 
