@@ -2624,17 +2624,31 @@
       "breakDone": "休憩終了。集中する準備はできましたか？"
     },
     "modes": {
+      "label": "セッションの種類",
       "work": "集中",
       "shortBreak": "短い休憩",
-      "longBreak": "長い休憩"
+      "longBreak": "長い休憩",
+      "short": {
+        "work": "集中",
+        "shortBreak": "短い",
+        "longBreak": "長い"
+      }
+    },
+    "status": {
+      "next": "次 · {{mode}}、{{minutes}}分",
+      "paused": "一時停止中 · {{minutes}}分経過",
+      "breakQueued": "集中 {{count}} / {{total}} 完了 · {{total}}回で長い休憩",
+      "longBreakEarned": "集中セッション{{total}}回完了 · この後サイクルがリセット"
     },
     "open": "ポモドーロタイマーを開く",
     "close": "タイマーを閉じる",
     "testSound": "通知音をテスト",
     "start": "開始",
+    "startBreak": "休憩を開始",
+    "resume": "再開",
     "pause": "一時停止",
     "reset": "リセット",
     "skip": "次のセッションへ",
-    "sessionsToday": "長い休憩まで {{count}} / {{total}} 集中セッション"
+    "cycleProgress": "長い休憩まで {{count}} / {{total}} 集中セッション"
   }
 }

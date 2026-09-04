@@ -9,7 +9,7 @@
  */
 
 // Global nav header + Pomodoro FAB. Currently hardcoded 1100 in
-// Header.js:218 and PomodoroFAB.js:37 (byte-for-byte duplicate, D-10).
+// Header.js:218 and PomodoroChip.js (byte-for-byte duplicate, D-10).
 export const Z_NAV = 1100
 
 // Smart Pet's resting/default tier outside of study-session fullscreen.

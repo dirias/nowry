@@ -3332,17 +3332,31 @@
       "breakDone": "Descanso terminado. ¿Listo para concentrarte?"
     },
     "modes": {
+      "label": "Tipo de sesión",
       "work": "Enfoque",
       "shortBreak": "Descanso corto",
-      "longBreak": "Descanso largo"
+      "longBreak": "Descanso largo",
+      "short": {
+        "work": "Enfoque",
+        "shortBreak": "Corto",
+        "longBreak": "Largo"
+      }
+    },
+    "status": {
+      "next": "Siguiente · {{mode}}, {{minutes}} min",
+      "paused": "En pausa · {{minutes}} min transcurridos",
+      "breakQueued": "Enfoque {{count}} de {{total}} completado · descanso largo tras {{total}}",
+      "longBreakEarned": "{{total}} sesiones de enfoque completadas · el ciclo se reinicia después"
     },
     "open": "Abrir temporizador Pomodoro",
     "close": "Cerrar temporizador",
     "testSound": "Probar sonido de notificación",
     "start": "Iniciar",
+    "startBreak": "Iniciar descanso",
+    "resume": "Reanudar",
     "pause": "Pausar",
     "reset": "Reiniciar",
     "skip": "Saltar a la siguiente sesión",
-    "sessionsToday": "{{count}} de {{total}} sesiones de enfoque antes de un descanso largo"
+    "cycleProgress": "{{count}} de {{total}} sesiones de enfoque antes de un descanso largo"
   }
 }

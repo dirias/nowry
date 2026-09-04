@@ -2670,17 +2670,31 @@
       "breakDone": "Pause vorbei. Bereit, dich zu konzentrieren?"
     },
     "modes": {
+      "label": "Sitzungsart",
       "work": "Fokus",
       "shortBreak": "Kurze Pause",
-      "longBreak": "Lange Pause"
+      "longBreak": "Lange Pause",
+      "short": {
+        "work": "Fokus",
+        "shortBreak": "Kurz",
+        "longBreak": "Lang"
+      }
+    },
+    "status": {
+      "next": "Als Nächstes · {{mode}}, {{minutes}} Min",
+      "paused": "Pausiert · {{minutes}} Min vergangen",
+      "breakQueued": "Fokus {{count}} von {{total}} geschafft · lange Pause nach {{total}}",
+      "longBreakEarned": "{{total}} Fokus-Sitzungen geschafft · danach beginnt der Zyklus neu"
     },
     "open": "Pomodoro-Timer öffnen",
     "close": "Timer schließen",
     "testSound": "Benachrichtigungston testen",
     "start": "Starten",
+    "startBreak": "Pause starten",
+    "resume": "Fortsetzen",
     "pause": "Pausieren",
     "reset": "Zurücksetzen",
     "skip": "Zur nächsten Sitzung springen",
-    "sessionsToday": "{{count}} von {{total}} Fokus-Sitzungen bis zur langen Pause"
+    "cycleProgress": "{{count}} von {{total}} Fokus-Sitzungen bis zur langen Pause"
   }
 }

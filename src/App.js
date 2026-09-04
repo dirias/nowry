@@ -67,6 +67,7 @@ const AllPrioritiesPage = lazy(() => import('./components/AnnualPlanning').then(
 const GoalsTabView = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.GoalsTabView })))
 const ReportsTabView = lazy(() => import('./components/AnnualPlanning').then((m) => ({ default: m.ReportsTabView })))
 const PomodoroWidget = lazy(() => import('./components/Pomodoro/PomodoroWidget'))
+const PomodoroChip = lazy(() => import('./components/Pomodoro/PomodoroChip'))
 const PrivacyPolicy = lazy(() => import('./components/HomePage/PrivacyPolicy'))
 const TermsOfService = lazy(() => import('./components/HomePage/TermsOfService'))
 const PlansPage = lazy(() => import('./components/Subscription/PlansPage'))
@@ -429,6 +430,7 @@ const AppContent = () => {
       <DevBugReportButton />
 
       <Suspense fallback={null}>
+        <PomodoroChip />
         <PomodoroWidget />
       </Suspense>
 

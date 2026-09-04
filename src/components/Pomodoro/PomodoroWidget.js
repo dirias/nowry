@@ -1,204 +1,237 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, IconButton, Stack, Sheet, Tooltip } from '@mui/joy'
-import { PlayArrowRounded, PauseRounded, RefreshRounded, CloseRounded, VolumeUpRounded } from '@mui/icons-material'
-import { usePomodoro } from '../../context/PomodoroContext'
-import { ClickAwayListener } from '@mui/base/ClickAwayListener'
-import { playPomodoroNotification } from '../../utils/pomodoroSound'
+import { Box, Button, IconButton, Sheet, Stack, Typography } from '@mui/joy'
+import { CloseRounded, RefreshRounded, SkipNextRounded } from '@mui/icons-material'
+import { MODES, durationFor, nextModeAfter, usePomodoro } from '../../context/PomodoroContext'
+import { focusRing } from '../Common/Form/formStyles'
+import { Z_NAV } from '../../constants/zIndex'
+import { formatClock } from './formatClock'
 
+// 320px: the widest primary label ("Start break") plus the mode switch and the
+// secondary control fit on one row in English; longer locales wrap the primary
+// onto its own full-width line rather than clipping.
+const WIDGET_WIDTH = 320
+const MODE_ORDER = [MODES.WORK, MODES.SHORT_BREAK, MODES.LONG_BREAK]
+
+/** A control at rest gets a ground; hover lifts the label, never the ground (DESIGN_GUIDELINES §15.1). */
+const groundedControl = {
+  bgcolor: 'background.level1',
+  color: 'text.secondary',
+  borderRadius: 'md',
+  '&:hover': { bgcolor: 'background.level1', color: 'text.primary' },
+  ...focusRing
+}
+
+/** How far through the four-focus cycle the user is, as the dots show it. */
+export const cycleProgress = (completedSessions, mode, total) => {
+  const inCycle = completedSessions % total
+  const earnedLongBreak = mode === MODES.LONG_BREAK && completedSessions > 0 && inCycle === 0
+  return earnedLongBreak ? total : inCycle
+}
+
+const SessionDots = ({ filled, total, mode, label }) => (
+  <Stack direction='row' spacing={0.5} alignItems='center' role='img' aria-label={label}>
+    {Array.from({ length: total }, (_, index) => {
+      const done = index < filled
+      const current = !done && index === filled && mode === MODES.WORK
+      return (
+        <Box
+          key={index}
+          sx={{
+            width: 6,
+            height: 6,
+            borderRadius: 'full',
+            bgcolor: done ? 'primary.solidBg' : 'background.level2',
+            ...(current && { bgcolor: 'transparent', boxShadow: 'inset 0 0 0 1.5px var(--joy-palette-primary-solidBg)' })
+          }}
+        />
+      )
+    })}
+  </Stack>
+)
+
+const ModeSwitch = ({ mode, onChange, t }) => (
+  <Box
+    role='group'
+    aria-label={t('pomodoro.modes.label')}
+    sx={{
+      display: 'flex',
+      alignItems: 'stretch',
+      flex: '1 1 128px',
+      height: 32,
+      p: '2px',
+      borderRadius: 'md',
+      bgcolor: 'background.level1'
+    }}
+  >
+    {MODE_ORDER.map((value, index) => {
+      const selected = value === mode
+      return (
+        <React.Fragment key={value}>
+          {index > 0 && <Box aria-hidden='true' sx={{ width: '1px', my: '6px', bgcolor: 'divider' }} />}
+          <Button
+            variant='plain'
+            color='neutral'
+            size='sm'
+            aria-pressed={selected}
+            onClick={() => onChange(value)}
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              minHeight: 0,
+              px: 0.5,
+              fontSize: 'xs',
+              fontWeight: selected ? 'lg' : 'md',
+              borderRadius: 'sm',
+              bgcolor: selected ? 'background.level2' : 'transparent',
+              color: selected ? 'text.primary' : 'text.secondary',
+              '&:hover': { bgcolor: selected ? 'background.level2' : 'transparent', color: 'text.primary' },
+              ...focusRing
+            }}
+          >
+            {t(`pomodoro.modes.short.${value}`)}
+          </Button>
+        </React.Fragment>
+      )
+    })}
+  </Box>
+)
+
+/**
+ * The floating Pomodoro widget (ADR-013).
+ *
+ * One object in every state: the mode label, the cycle dots, the status line
+ * and the button label carry the state — the shape never changes. The 3px
+ * progress bar is an edge, not an object: it spans the content width and does
+ * the divider's job between the time and the controls.
+ */
 const PomodoroWidget = () => {
   const { t } = useTranslation()
-  const { timeLeft, isActive, mode, showWidget, setShowWidget, toggleTimer, resetTimer, changeMode, settings } = usePomodoro()
+  const {
+    timeLeft,
+    totalSeconds,
+    progress,
+    isActive,
+    isPaused,
+    mode,
+    completedSessions,
+    sessionsBeforeLongBreak,
+    showWidget,
+    setShowWidget,
+    toggleTimer,
+    resetTimer,
+    skipSession,
+    changeMode,
+    settings
+  } = usePomodoro()
 
   if (!showWidget || !settings.enabled) return null
 
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60)
-    const s = seconds % 60
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  const isFocus = mode === MODES.WORK
+  const filled = cycleProgress(completedSessions, mode, sessionsBeforeLongBreak)
+  const modeLabel = (value) => t(`pomodoro.modes.${value}`)
+
+  const statusLine = () => {
+    if (isPaused) return t('pomodoro.status.paused', { minutes: Math.round((totalSeconds - timeLeft) / 60) })
+    if (isFocus) {
+      const next = nextModeAfter(mode, completedSessions + 1)
+      return t('pomodoro.status.next', { mode: modeLabel(next), minutes: durationFor(next, settings) / 60 })
+    }
+    if (isActive) return t('pomodoro.status.next', { mode: modeLabel(MODES.WORK), minutes: settings.work })
+    if (mode === MODES.LONG_BREAK) return t('pomodoro.status.longBreakEarned', { total: sessionsBeforeLongBreak })
+    return t('pomodoro.status.breakQueued', { count: filled, total: sessionsBeforeLongBreak })
   }
 
-  const getProgress = () => {
-    let total = settings.work * 60
-    if (mode === 'shortBreak') total = settings.shortBreak * 60
-    if (mode === 'longBreak') total = settings.longBreak * 60
-    if (total === 0) return 0
-    return ((total - timeLeft) / total) * 100
-  }
-
-  const getModeColor = () => {
-    if (mode === 'work') return 'primary.solidBg'
-    return 'success.solidBg'
+  const primaryLabel = () => {
+    if (isActive) return t('pomodoro.pause')
+    if (isPaused) return t('pomodoro.resume')
+    return isFocus ? t('pomodoro.start') : t('pomodoro.startBreak')
   }
 
   return (
-    <ClickAwayListener onClickAway={() => setShowWidget(false)}>
-      <Sheet
-        variant='outlined'
-        sx={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          width: 240,
-          zIndex: 1200,
-          borderRadius: 'md',
-          boxShadow: 'md',
-          bgcolor: 'background.surface',
-          border: '1px solid',
-          borderColor: 'divider',
-          overflow: 'hidden',
-          animation: 'slideIn 0.2s ease-out',
-          '@keyframes slideIn': {
-            from: { transform: 'translateY(8px)', opacity: 0 },
-            to: { transform: 'translateY(0)', opacity: 1 }
-          }
-        }}
-      >
-        {/* Header with Test Sound & Close */}
-        <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ p: 1 }}>
-          <Tooltip title={t('pomodoro.testSound')} size='sm'>
-            <IconButton
-              size='sm'
-              variant='plain'
-              color='neutral'
-              aria-label={t('pomodoro.testSound')}
-              onClick={playPomodoroNotification}
-              sx={{
-                '--IconButton-size': '28px',
-                opacity: 0.6,
-                '&:hover': { opacity: 1 }
-              }}
-            >
-              <VolumeUpRounded fontSize='small' />
-            </IconButton>
-          </Tooltip>
-
-          <IconButton
-            size='sm'
-            variant='plain'
-            color='neutral'
-            aria-label={t('pomodoro.close')}
-            onClick={() => setShowWidget(false)}
-            sx={{ '--IconButton-size': '28px' }}
-          >
-            <CloseRounded fontSize='small' />
-          </IconButton>
+    <Sheet
+      role='region'
+      aria-label={t('common.pomodoro')}
+      sx={{
+        position: 'fixed',
+        right: 24,
+        bottom: 24,
+        width: WIDGET_WIDTH,
+        maxWidth: 'calc(100vw - 48px)',
+        zIndex: Z_NAV,
+        p: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        borderRadius: 'lg',
+        boxShadow: 'lg',
+        bgcolor: 'background.surface'
+      }}
+    >
+      <Stack direction='row' justifyContent='space-between' alignItems='center'>
+        <Stack direction='row' alignItems='center' spacing={1.25}>
+          <Typography level='title-sm'>{modeLabel(mode)}</Typography>
+          <SessionDots
+            filled={filled}
+            total={sessionsBeforeLongBreak}
+            mode={mode}
+            label={t('pomodoro.cycleProgress', { count: filled, total: sessionsBeforeLongBreak })}
+          />
         </Stack>
-
-        {/* Timer Display */}
-        <Stack alignItems='center' spacing={1} sx={{ px: 3, pb: 2 }}>
-          <Typography
-            sx={{
-              fontFamily: 'monospace',
-              fontWeight: 600,
-              fontSize: '3rem',
-              lineHeight: 1,
-              letterSpacing: '-1px',
-              color: getModeColor()
-            }}
-          >
-            {formatTime(timeLeft)}
-          </Typography>
-
-          {/* Progress Indicator */}
-          <Box
-            sx={{
-              width: '100%',
-              height: 3,
-              bgcolor: 'background.level2',
-              borderRadius: 'xs',
-              overflow: 'hidden'
-            }}
-          >
-            <Box
-              sx={{
-                width: `${getProgress()}%`,
-                height: '100%',
-                bgcolor: getModeColor(),
-                transition: 'width 0.5s linear'
-              }}
-            />
-          </Box>
-        </Stack>
-
-        {/* Controls */}
-        <Stack
-          direction='row'
-          justifyContent='center'
-          spacing={1.5}
-          sx={{
-            p: 2,
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.level1'
-          }}
+        <IconButton
+          size='sm'
+          variant='plain'
+          color='neutral'
+          aria-label={t('pomodoro.close')}
+          onClick={() => setShowWidget(false)}
+          sx={{ '--IconButton-size': '28px', ...groundedControl, borderRadius: 'sm' }}
         >
-          {/* Mode Indicators */}
-          <Stack direction='row' spacing={0.5}>
-            <IconButton
-              size='sm'
-              variant={mode === 'work' ? 'solid' : 'plain'}
-              color='primary'
-              aria-label={t('pomodoro.modes.work')}
-              aria-pressed={mode === 'work'}
-              onClick={() => changeMode('work')}
-              sx={{ minWidth: 32, height: 32 }}
-            >
-              <Box sx={{ fontSize: 'xs', fontWeight: 'bold' }}>F</Box>
-            </IconButton>
-            <IconButton
-              size='sm'
-              variant={mode === 'shortBreak' ? 'solid' : 'plain'}
-              color='success'
-              aria-label={t('pomodoro.modes.shortBreak')}
-              aria-pressed={mode === 'shortBreak'}
-              onClick={() => changeMode('shortBreak')}
-              sx={{ minWidth: 32, height: 32 }}
-            >
-              <Box sx={{ fontSize: 'xs', fontWeight: 'bold' }}>S</Box>
-            </IconButton>
-            <IconButton
-              size='sm'
-              variant={mode === 'longBreak' ? 'solid' : 'plain'}
-              color='success'
-              aria-label={t('pomodoro.modes.longBreak')}
-              aria-pressed={mode === 'longBreak'}
-              onClick={() => changeMode('longBreak')}
-              sx={{ minWidth: 32, height: 32 }}
-            >
-              <Box sx={{ fontSize: 'xs', fontWeight: 'bold' }}>L</Box>
-            </IconButton>
-          </Stack>
+          <CloseRounded fontSize='small' />
+        </IconButton>
+      </Stack>
 
-          {/* Separator */}
-          <Box sx={{ width: 1, height: 32, bgcolor: 'divider' }} />
+      <Stack spacing={0.75}>
+        <Typography level='display-md' component='div' sx={{ fontWeight: 'lg', lineHeight: 1 }}>
+          {formatClock(timeLeft)}
+        </Typography>
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          {statusLine()}
+        </Typography>
+      </Stack>
 
-          {/* Actions */}
-          <Stack direction='row' spacing={1}>
-            <IconButton
-              size='sm'
-              variant='plain'
-              color='neutral'
-              aria-label={t('pomodoro.reset')}
-              onClick={resetTimer}
-              sx={{ minWidth: 32, height: 32 }}
-            >
-              <RefreshRounded fontSize='small' />
-            </IconButton>
-            <IconButton
-              size='md'
-              variant='solid'
-              color={mode === 'work' ? 'primary' : 'success'}
-              aria-label={isActive ? t('pomodoro.pause') : t('pomodoro.start')}
-              onClick={toggleTimer}
-              sx={{ borderRadius: '50%', minWidth: 40, height: 40 }}
-            >
-              {isActive ? <PauseRounded /> : <PlayArrowRounded />}
-            </IconButton>
-          </Stack>
-        </Stack>
-      </Sheet>
-    </ClickAwayListener>
+      <Box
+        role='progressbar'
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+        sx={{ height: 3, borderRadius: 'full', bgcolor: 'background.level2', overflow: 'hidden' }}
+      >
+        <Box sx={{ width: `${progress * 100}%`, height: '100%', bgcolor: 'primary.solidBg', transition: 'width 0.5s linear' }} />
+      </Box>
+
+      <Stack direction='row' alignItems='center' spacing={1} useFlexGap flexWrap='wrap'>
+        <ModeSwitch mode={mode} onChange={changeMode} t={t} />
+        <IconButton
+          size='sm'
+          variant='plain'
+          color='neutral'
+          aria-label={isFocus ? t('pomodoro.reset') : t('pomodoro.skip')}
+          onClick={isFocus ? resetTimer : skipSession}
+          sx={{ '--IconButton-size': '32px', ...groundedControl }}
+        >
+          {isFocus ? <RefreshRounded fontSize='small' /> : <SkipNextRounded fontSize='small' />}
+        </IconButton>
+        <Button
+          size='sm'
+          variant='solid'
+          color='primary'
+          onClick={toggleTimer}
+          sx={{ flex: '1 1 auto', minWidth: 96, minHeight: 32, px: 1.5, borderRadius: 'md', whiteSpace: 'nowrap', ...focusRing }}
+        >
+          {primaryLabel()}
+        </Button>
+      </Stack>
+    </Sheet>
   )
 }
 
