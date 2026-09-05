@@ -2181,6 +2181,9 @@ border, 320px wide, 24px from the corner. Inside it the ladder holds without exc
 *   **The primary label is text.** "Start break" must fit beside the switch and the secondary control
     in English; longer locales wrap the primary onto its own full-width line rather than clipping,
     which is why the control row is `flex-wrap` and the button has no glyph.
+*   **A floating panel minimises on a click outside, and the click lands.** Use a click-away
+    listener, never a backdrop: a backdrop makes the user click twice. Escape does the same. This
+    only holds because the collapsed form keeps the state visible — the chip carries the clock.
 *   **Two floating objects never share a corner.** The Study Buddy rests bottom-right and moves
     bottom-left for a study session, so the timer takes the other corner (`useTimerCorner`): left by
     default, right in a session, bottom-right when there is no pet. A phone has no second corner, so
