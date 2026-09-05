@@ -49,6 +49,7 @@ import { useAuth } from '../../context/AuthContext'
 import GoalDialog from './GoalDialog'
 import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
+import usePriorityStatus from '../../hooks/usePriorityStatus'
 import CloseQuarterModal from './CloseQuarterModal'
 import GoalCard from './GoalCard'
 import GoalRow from './GoalRow'
@@ -284,17 +285,8 @@ const FocusAreaView = () => {
     setShowPriorityDialog(true)
   }
 
-  const handleToggleActive = async (priority) => {
-    const originalIsActive = priority.is_active
-    const newIsActive = !originalIsActive
-    setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: newIsActive } : p)))
-    try {
-      await annualPlanningService.updatePriority(priority._id, { is_active: newIsActive })
-    } catch (error) {
-      console.error('Failed to toggle active state:', error)
-      setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: originalIsActive } : p)))
-    }
-  }
+  // Shared optimistic status toggles (ADR-015 point 6).
+  const { toggleActive, toggleComplete } = usePriorityStatus(setPriorities)
 
   const handleClosePriorityDialog = () => {
     setShowPriorityDialog(false)
@@ -836,7 +828,8 @@ const FocusAreaView = () => {
           filterable
           onEdit={handleEditPriority}
           onDelete={handleDeletePriority}
-          onToggleActive={handleToggleActive}
+          onToggleActive={toggleActive}
+          onToggleComplete={toggleComplete}
           emptyMessage={t('annualPlanning.priority.noGoals')}
         />
       </Box>

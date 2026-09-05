@@ -6,6 +6,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Add as AddIcon, Flag as FlagIcon } from '@mui/icons-material'
 import { annualPlanningService } from '../../api/services'
+import usePriorityStatus from '../../hooks/usePriorityStatus'
 import PriorityList from './PriorityList'
 import PriorityDialog from './PriorityDialog'
 import EmptyState from './EmptyState'
@@ -18,7 +19,7 @@ const focusRing = {
  * AllPrioritiesPage — the Priorities tab.
  *
  * This is the management surface for yearly commitments: add, edit, delete,
- * activate/deactivate and drag to reorder. Overview only shows a read-only recall
+ * complete, pause/resume and drag to reorder. Overview only shows a read-only recall
  * preview of the same data.
  *
  * It renders as a child of AnnualPlanningLayout, so it inherits the persistent
@@ -45,17 +46,9 @@ const AllPrioritiesPage = () => {
     [priorities]
   )
 
-  const handleToggleActive = async (priority) => {
-    const originalIsActive = priority.is_active
-    const newIsActive = !originalIsActive
-    setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: newIsActive } : p)))
-    try {
-      await annualPlanningService.updatePriority(priority._id, { is_active: newIsActive })
-    } catch (updateError) {
-      console.error('Failed to toggle active state:', updateError)
-      setPriorities((prev) => prev.map((p) => (p._id === priority._id ? { ...p, is_active: originalIsActive } : p)))
-    }
-  }
+  // Both status toggles are optimistic and shared with FocusAreaView and the
+  // Overview card (ADR-015 point 6).
+  const { toggleActive, toggleComplete } = usePriorityStatus(setPriorities)
 
   const handleDragEnd = async (event) => {
     const { active, over } = event
@@ -139,7 +132,8 @@ const AllPrioritiesPage = () => {
                 draggable
                 onEdit={handleEditPriority}
                 onDelete={handleDeletePriority}
-                onToggleActive={handleToggleActive}
+                onToggleActive={toggleActive}
+                onToggleComplete={toggleComplete}
                 emptyMessage={t('annualPlanning.priority.noActivePriorities')}
               />
             </SortableContext>
@@ -157,7 +151,8 @@ const AllPrioritiesPage = () => {
                   priorities={inactivePriorities}
                   onEdit={handleEditPriority}
                   onDelete={handleDeletePriority}
-                  onToggleActive={handleToggleActive}
+                  onToggleActive={toggleActive}
+                  onToggleComplete={toggleComplete}
                   emptyMessage={t('annualPlanning.priority.noGoals')}
                 />
               )}
@@ -172,7 +167,12 @@ const AllPrioritiesPage = () => {
               <Typography level='title-sm' sx={{ mb: 1, color: 'text.secondary' }}>
                 {t('annualPlanning.priority.completedSection')}
               </Typography>
-              <PriorityList priorities={completedPriorities} onEdit={handleEditPriority} onDelete={handleDeletePriority} />
+              <PriorityList
+                priorities={completedPriorities}
+                onEdit={handleEditPriority}
+                onDelete={handleDeletePriority}
+                onToggleComplete={toggleComplete}
+              />
             </Box>
           )}
         </Stack>

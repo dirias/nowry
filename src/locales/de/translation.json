@@ -1068,6 +1068,8 @@
       "inactiveIcon": "Inaktiv",
       "activate": "Aktivieren",
       "markInactive": "Als inaktiv markieren",
+      "markComplete": "Als erledigt markieren",
+      "markIncomplete": "Als unerledigt markieren",
       "showInactive": "Inaktive anzeigen ({{count}})",
       "hideInactive": "Inaktive ausblenden",
       "dragHandle": "Zum Neuordnen ziehen",

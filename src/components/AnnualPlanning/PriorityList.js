@@ -4,10 +4,13 @@ import { Box, Typography, Stack, IconButton, Tooltip, Button, Modal, ModalDialog
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Flag as FlagIcon,
   FlagOutlined as FlagOutlinedIcon,
   Warning as WarningIcon,
-  DragHandle as DragHandleIcon
+  DragHandle as DragHandleIcon,
+  CheckCircle as CheckCircleIcon,
+  RadioButtonUnchecked as RadioButtonUncheckedIcon,
+  PauseCircleOutline as PauseCircleOutlineIcon,
+  PlayCircleOutline as PlayCircleOutlineIcon
 } from '@mui/icons-material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -67,6 +70,7 @@ const PriorityList = ({
   onEdit,
   onDelete,
   onToggleActive = null,
+  onToggleComplete = null,
   draggable = false,
   showEditButton = true,
   showDeleteButton = true,
@@ -207,6 +211,13 @@ const PriorityList = ({
         {visiblePriorities.map((priority) => {
           const isCompleted = !!priority.is_completed
           const isInactive = !priority.is_active
+          const completeLabel = isCompleted ? t('annualPlanning.priority.markIncomplete') : t('annualPlanning.priority.markComplete')
+          const activeLabel = isInactive ? t('annualPlanning.priority.activate') : t('annualPlanning.priority.markInactive')
+          const completeGlyph = isCompleted ? (
+            <CheckCircleIcon sx={{ fontSize: 20, color: 'inherit' }} />
+          ) : (
+            <RadioButtonUncheckedIcon sx={{ fontSize: 20, color: 'inherit' }} />
+          )
 
           const rowContent = (
             <Box
@@ -230,56 +241,49 @@ const PriorityList = ({
                 }
               }}
             >
-              {/* Flag / Check Icon */}
-              {isCompleted ? (
-                <Box
-                  sx={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    bgcolor: 'success.softBg',
-                    color: 'success.plainColor',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                >
-                  <Box
-                    component='svg'
-                    width='10'
-                    height='10'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='3.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  >
-                    <polyline points='20 6 9 17 4 12' />
-                  </Box>
-                </Box>
-              ) : (
-                <Tooltip title={isInactive ? t('annualPlanning.priority.activate') : t('annualPlanning.priority.markInactive')} size='sm'>
+              {/* Leading slot: the completion control (ADR-015 point 1). The same
+                  two glyphs render static when the surface passes no handler, so
+                  the row's shape does not change between editable and read-only. */}
+              {onToggleComplete ? (
+                <Tooltip title={completeLabel} size='sm'>
                   <IconButton
                     size='sm'
                     variant='plain'
-                    color='neutral'
+                    color={isCompleted ? 'success' : 'neutral'}
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      onToggleActive?.(priority)
+                      onToggleComplete(priority)
                     }}
-                    aria-label={isInactive ? t('annualPlanning.priority.activate') : t('annualPlanning.priority.markInactive')}
-                    sx={{ minWidth: 44, minHeight: 44, borderRadius: 'sm', flexShrink: 0 }}
+                    aria-label={completeLabel}
+                    aria-pressed={isCompleted}
+                    sx={{
+                      minWidth: 44,
+                      minHeight: 44,
+                      borderRadius: 'sm',
+                      flexShrink: 0,
+                      color: isCompleted ? 'success.plainColor' : 'text.tertiary',
+                      '&:hover': { color: 'success.plainColor', bgcolor: 'success.softBg' }
+                    }}
                   >
-                    {isInactive ? (
-                      <FlagOutlinedIcon sx={{ fontSize: 18, color: 'text.tertiary' }} />
-                    ) : (
-                      <FlagIcon sx={{ fontSize: 18, color: 'warning.plainColor' }} />
-                    )}
+                    {completeGlyph}
                   </IconButton>
                 </Tooltip>
+              ) : (
+                <Box
+                  aria-hidden
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: isCompleted ? 'success.plainColor' : 'text.tertiary'
+                  }}
+                >
+                  {completeGlyph}
+                </Box>
               )}
 
               {/* Content */}
@@ -352,6 +356,38 @@ const PriorityList = ({
                     })}
                   </Typography>
                 </Box>
+              )}
+
+              {/* Pause / resume — the secondary status action (ADR-015 point 2).
+                  Never on a completed row: the two states are exclusive in the UI. */}
+              {onToggleActive && !isCompleted && (
+                <Tooltip title={activeLabel} size='sm'>
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onToggleActive(priority)
+                    }}
+                    aria-label={activeLabel}
+                    sx={{
+                      minWidth: 24,
+                      width: 24,
+                      height: 24,
+                      borderRadius: 'sm',
+                      flexShrink: 0,
+                      opacity: 0.6,
+                      '&:hover': {
+                        opacity: 1,
+                        bgcolor: 'background.level2'
+                      }
+                    }}
+                  >
+                    {isInactive ? <PlayCircleOutlineIcon sx={{ fontSize: 16 }} /> : <PauseCircleOutlineIcon sx={{ fontSize: 16 }} />}
+                  </IconButton>
+                </Tooltip>
               )}
 
               {/* Edit Button */}

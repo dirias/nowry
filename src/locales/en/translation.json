@@ -1853,6 +1853,8 @@
       "inactiveIcon": "Inactive",
       "activate": "Activate",
       "markInactive": "Mark inactive",
+      "markComplete": "Mark complete",
+      "markIncomplete": "Mark incomplete",
       "showInactive": "Show inactive ({{count}})",
       "hideInactive": "Hide inactive",
       "dragHandle": "Drag to reorder",

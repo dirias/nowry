@@ -207,3 +207,55 @@ describe('Phase 24 PRI-04 (D-07, D-08): drag-to-reorder active priorities only',
     expect(annualPlanningService.reorderPriorities).not.toHaveBeenCalled()
   })
 })
+
+describe('ADR-015 PRIO-001: optimistic is_completed toggle', () => {
+  it('Test 5: clicking the check on an active row moves it to the Completed section immediately and patches is_completed: true', async () => {
+    annualPlanningService.updatePriority.mockResolvedValue({})
+    renderPage()
+    // active1 + active2 are unfinished; completed1 is the only finished row
+    expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(2)
+    expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(1)
+
+    fireEvent.click(screen.getAllByLabelText('annualPlanning.priority.markComplete')[0])
+
+    expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(1)
+    expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(2)
+    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('active1', { is_completed: true }))
+  })
+
+  it('Test 6: reverts to the active section when updatePriority rejects', async () => {
+    annualPlanningService.updatePriority.mockRejectedValue(new Error('network error'))
+    renderPage()
+    fireEvent.click(screen.getAllByLabelText('annualPlanning.priority.markComplete')[0])
+    expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(2)
+
+    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalled())
+    await waitFor(() => expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(2))
+    expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(1)
+  })
+
+  it('Test 7: clicking the check on a completed row reverts it and patches is_completed: false', async () => {
+    annualPlanningService.updatePriority.mockResolvedValue({})
+    renderPage()
+    fireEvent.click(screen.getByLabelText('annualPlanning.priority.markIncomplete'))
+    expect(screen.queryByLabelText('annualPlanning.priority.markIncomplete')).not.toBeInTheDocument()
+    expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(3)
+    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('completed1', { is_completed: false }))
+  })
+
+  it('Test 8: completing never writes is_active — a paused row that is completed comes back paused when reverted', async () => {
+    annualPlanningService.updatePriority.mockResolvedValue({})
+    renderPage()
+    fireEvent.click(screen.getByText('annualPlanning.priority.showInactive:1'))
+    // inactive1 is the only row with a resume action
+    const inactiveRowCheck = screen.getAllByLabelText('annualPlanning.priority.markComplete')[2]
+    fireEvent.click(inactiveRowCheck)
+    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('inactive1', { is_completed: true }))
+    expect(annualPlanningService.updatePriority).not.toHaveBeenCalledWith(
+      'inactive1',
+      expect.objectContaining({ is_active: expect.anything() })
+    )
+    // the inactive toggle disappears because no unfinished inactive rows remain
+    expect(screen.queryByText('annualPlanning.priority.hideInactive')).not.toBeInTheDocument()
+  })
+})

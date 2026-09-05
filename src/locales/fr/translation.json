@@ -1090,6 +1090,8 @@
       "inactiveIcon": "Inactive",
       "activate": "Activer",
       "markInactive": "Marquer comme inactive",
+      "markComplete": "Marquer comme terminée",
+      "markIncomplete": "Marquer comme non terminée",
       "showInactive": "Afficher les inactives ({{count}})",
       "hideInactive": "Masquer les inactives",
       "dragHandle": "Glisser pour réorganiser",

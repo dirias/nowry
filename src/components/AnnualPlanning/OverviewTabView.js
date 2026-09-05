@@ -3,6 +3,7 @@ import { Link, useOutletContext } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button, Grid, Stack, Skeleton } from '@mui/joy'
 import { ArrowForward as ArrowForwardIcon, Flag as FlagIcon } from '@mui/icons-material'
+import usePriorityStatus from '../../hooks/usePriorityStatus'
 import PriorityList from './PriorityList'
 import FocusAreaCard from './FocusAreaCard'
 import EmptyState from './EmptyState'
@@ -15,16 +16,18 @@ const focusRing = {
 /**
  * OverviewTabView — the Annual Planning overview tab.
  *
- * Dashboard, not a management surface: it shows focus areas and a read-only recall
- * list of yearly commitments. Priorities CRUD (add, edit, delete, reorder, activate)
- * lives on the Priorities tab, so the two surfaces have genuinely different jobs
- * instead of being the same list rendered twice.
+ * Dashboard, not a management surface: it shows focus areas and a recall list of
+ * yearly commitments that can be ticked off, nothing more. Priorities CRUD (add,
+ * edit, delete, reorder, pause) lives on the Priorities tab, so the two surfaces
+ * have genuinely different jobs instead of being the same list rendered twice.
  *
  * Reads all plan data from the layout's outlet context — never calls useAnnualPlan.
  */
 const OverviewTabView = () => {
   const { t } = useTranslation()
-  const { areas, priorities, quarterGoals, quarter, loading, error } = useOutletContext()
+  const { areas, priorities, setPriorities, quarterGoals, quarter, loading, error } = useOutletContext()
+  // Completion is the one status change the dashboard offers (ADR-015 point 5).
+  const { toggleComplete } = usePriorityStatus(setPriorities)
 
   const prioritiesHref = withQuarter('/annual-planning/priorities', quarter)
 
@@ -118,7 +121,7 @@ const OverviewTabView = () => {
           }
         />
       ) : (
-        /* Read-only preview: no edit, no delete, no activate toggle, no drag.
+        /* Recall preview: no edit, no delete, no pause, no drag — only the check.
            Active-only by default — done/inactive rows are noise on a dashboard. */
         <PriorityList
           priorities={priorities}
@@ -127,6 +130,7 @@ const OverviewTabView = () => {
           showEditButton={false}
           showDeleteButton={false}
           onToggleActive={null}
+          onToggleComplete={toggleComplete}
         />
       )}
     </Box>

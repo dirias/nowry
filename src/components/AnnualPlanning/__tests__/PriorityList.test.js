@@ -94,3 +94,52 @@ describe('Phase 24 PRI-04: PriorityList draggable mode', () => {
     expect(screen.queryByLabelText('annualPlanning.priority.dragHandle')).not.toBeInTheDocument()
   })
 })
+
+describe('ADR-015 PRIO-001: completion control in the leading slot, pause in the trailing cluster', () => {
+  it('Test 8: an unfinished row renders a "Mark complete" control that calls onToggleComplete with the priority', () => {
+    const onToggleComplete = jest.fn()
+    render(<PriorityList priorities={[basePriority]} onToggleComplete={onToggleComplete} />)
+    const control = screen.getByLabelText('annualPlanning.priority.markComplete')
+    expect(control).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(control)
+    expect(onToggleComplete).toHaveBeenCalledTimes(1)
+    expect(onToggleComplete).toHaveBeenCalledWith(basePriority)
+  })
+
+  it('Test 9: a completed row renders a "Mark incomplete" control that reverts through the same handler', () => {
+    const priority = { ...basePriority, is_completed: true }
+    const onToggleComplete = jest.fn()
+    render(<PriorityList priorities={[priority]} onToggleComplete={onToggleComplete} />)
+    const control = screen.getByLabelText('annualPlanning.priority.markIncomplete')
+    expect(control).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(control)
+    expect(onToggleComplete).toHaveBeenCalledWith(priority)
+    expect(screen.queryByLabelText('annualPlanning.priority.markComplete')).not.toBeInTheDocument()
+  })
+
+  it('Test 10: with no onToggleComplete the leading slot is static — nothing there is labelled or clickable', () => {
+    render(<PriorityList priorities={[basePriority, { ...basePriority, _id: 'p2', is_completed: true }]} />)
+    expect(screen.queryByLabelText('annualPlanning.priority.markComplete')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('annualPlanning.priority.markIncomplete')).not.toBeInTheDocument()
+  })
+
+  it('Test 11: a completed row offers no pause/resume action even when onToggleActive is provided', () => {
+    const priority = { ...basePriority, is_completed: true, is_active: true }
+    render(<PriorityList priorities={[priority]} onToggleActive={jest.fn()} onToggleComplete={jest.fn()} />)
+    expect(screen.queryByLabelText('annualPlanning.priority.markInactive')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('annualPlanning.priority.activate')).not.toBeInTheDocument()
+  })
+
+  it('Test 12: an active, unfinished row renders the pause action and it calls onToggleActive', () => {
+    const onToggleActive = jest.fn()
+    render(<PriorityList priorities={[basePriority]} onToggleActive={onToggleActive} />)
+    fireEvent.click(screen.getByLabelText('annualPlanning.priority.markInactive'))
+    expect(onToggleActive).toHaveBeenCalledWith(basePriority)
+  })
+
+  it('Test 13: with no onToggleActive there is no pause action, so a read-only surface shows only the check', () => {
+    render(<PriorityList priorities={[basePriority]} onToggleComplete={jest.fn()} showEditButton={false} showDeleteButton={false} />)
+    expect(screen.queryByLabelText('annualPlanning.priority.markInactive')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button')).toHaveLength(1)
+  })
+})
