@@ -71,7 +71,7 @@ const AnnualPlanningTabBar = () => {
                 bgcolor: 'transparent',
                 color: 'primary.plainColor',
                 fontWeight: 700,
-                borderBottomColor: 'primary.solidBg'
+                borderBottomColor: 'primary.plainColor'
               }
             }}
           >

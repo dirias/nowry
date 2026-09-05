@@ -12,7 +12,7 @@ import { cardsService } from '../../api/services'
 const FOCUS_RING = {
   '&:focus-visible': {
     outline: '2px solid',
-    outlineColor: 'primary.solidBg',
+    outlineColor: 'primary.outlinedBorder',
     outlineOffset: '2px'
   }
 }

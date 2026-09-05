@@ -20,7 +20,7 @@ import { act } from 'react-dom/test-utils'
 let mockSearchParams = new URLSearchParams()
 
 // Phase 34: useSearchParams is now called TWICE per render — once by
-// StudySession (for `mode`) and once by useBrowseFilters (for `tags`) — and
+// StudySession (for `mode`) and once by useSessionFilters (for `tags`) — and
 // the second caller WRITES. The previous read-only `[mockSearchParams]` shape
 // returned an undefined setter, so this mock now backs each call site with real
 // React state and mirrors every write back into the module-level
@@ -877,16 +877,6 @@ const lastViewContext = () =>
     .pop()
 
 describe('browse tag filter — visibility', () => {
-  it('never renders in study mode, even with a hand-crafted ?tags= on the URL', async () => {
-    mockSearchParams = new URLSearchParams('mode=study&tags=verbs')
-    renderSession({ cards: makeTaggedCards() })
-    await screen.findByTestId('session-footer')
-
-    expect(tagsSegment()).not.toBeInTheDocument()
-    // And the queue is intact — all three cards, unfiltered.
-    expect(screen.getAllByText(/cards\.session\.card.*"total":3/).length).toBeGreaterThan(0)
-  })
-
   it('renders in browse mode on a deck that has tags', async () => {
     mockSearchParams = new URLSearchParams('mode=browse')
     renderSession({ cards: makeTaggedCards() })
@@ -1231,7 +1221,7 @@ describe('session header — one row', () => {
 
     const row = headerRow()
     expect(within(row).getByText(/cards\.session\.card/)).toBeInTheDocument()
-    expect(within(row).getByTestId('browse-filter-bar')).toBeInTheDocument()
+    expect(within(row).getByTestId('session-filter-bar')).toBeInTheDocument()
     expect(within(row).getByTestId('mark-toggle')).toBeInTheDocument()
     expect(within(row).getByLabelText('cards.session.goBack')).toBeInTheDocument()
   })
@@ -1263,7 +1253,7 @@ describe('session header — one row', () => {
 
     expect(screen.queryByTestId('session-progress')).not.toBeInTheDocument()
     // The row itself stays: it carries the filter bar, which is the way out.
-    expect(within(headerRow()).getByTestId('browse-filter-bar')).toBeInTheDocument()
+    expect(within(headerRow()).getByTestId('session-filter-bar')).toBeInTheDocument()
   })
 
   it('takes the whole row away in fullscreen, mark and filters included', async () => {
@@ -1275,17 +1265,122 @@ describe('session header — one row', () => {
 
     expect(headerRow()).not.toBeInTheDocument()
     expect(screen.queryByTestId('session-progress')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('browse-filter-bar')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-filter-bar')).not.toBeInTheDocument()
   })
 
-  it('renders the row without any filter segments in study mode', async () => {
+  it('renders the row without a filter bar in study mode when the deck has marks but no tags', async () => {
     mockSearchParams = new URLSearchParams('mode=study')
     renderSession({ cards: makeMarkedCards() })
     await screen.findByTestId('session-footer')
 
     expect(within(headerRow()).getByText(/cards\.session\.card/)).toBeInTheDocument()
-    expect(screen.queryByTestId('browse-filter-bar')).not.toBeInTheDocument()
+    // Marks alone give study mode nothing to filter by (ADR-010), and with no
+    // tags either there is no bar at all.
+    expect(screen.queryByTestId('session-filter-bar')).not.toBeInTheDocument()
     // The mark is not a filter — it acts on the card, so it survives study mode.
     expect(within(headerRow()).getByTestId('mark-toggle')).toBeInTheDocument()
+  })
+})
+
+/*
+ * ADR-014 — tags may narrow the SM-2 queue; the mark may not; and a filtered
+ * view can never be written back over the deck. Each guard here was checked to
+ * bite: revert the tag gate and the first two fail, revert the by-id write in
+ * handleGrade and the grading test fails, revert the completion count and the
+ * last two fail.
+ */
+const makeTaggedMarkedCards = () => makeTaggedCards().map((card, i) => ({ ...card, marked_at: i === 0 ? MARKED_AT : null }))
+
+describe('study mode tag filter (ADR-014)', () => {
+  it('renders the tag segment in study mode and honours ?tags= on the URL, in the server order', async () => {
+    mockSearchParams = new URLSearchParams('mode=study&tags=verbs')
+    renderSession({ cards: makeTaggedCards() })
+
+    expect(await findTagsSegment()).toBeInTheDocument()
+    // tc1 + tc3 carry 'verbs' — 2 of the 3 due cards, and tc1 first.
+    expect(screen.getAllByText(/cards\.session\.card.*"current":1,"total":2/).length).toBeGreaterThan(0)
+    expect(screen.getByText('Alpha Q')).toBeInTheDocument()
+  })
+
+  it('narrows the queue when a tag is picked from the segment', async () => {
+    mockSearchParams = new URLSearchParams('mode=study')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByTestId('session-footer')
+
+    await selectTag('nouns')
+
+    // tc2 + tc3 carry 'nouns'.
+    await waitFor(() => expect(screen.getAllByText(/cards\.session\.card.*"total":2/).length).toBeGreaterThan(0))
+    expect(mockSearchParams.get('tags')).toBe('nouns')
+    expect(mockSearchParams.get('mode')).toBe('study')
+  })
+
+  it('never renders the marked segment in study mode, even on a deck with marks and tags', async () => {
+    mockSearchParams = new URLSearchParams('mode=study&marked=1')
+    renderSession({ cards: makeTaggedMarkedCards() })
+
+    expect(await findTagsSegment()).toBeInTheDocument()
+    expect(markChip()).not.toBeInTheDocument()
+    // ?marked=1 changed nothing: all three due cards.
+    expect(screen.getAllByText(/cards\.session\.card.*"total":3/).length).toBeGreaterThan(0)
+  })
+
+  it('still grades, and keeps the hidden cards in the deck', async () => {
+    mockSearchParams = new URLSearchParams('mode=study&tags=verbs')
+    renderSession({
+      cards: makeTaggedCards(),
+      // sm2_data exercises the backend-sync write as well as the optimistic one.
+      reviewResponse: {
+        sm2_data: {
+          last_reviewed: '2026-09-05T10:00:00',
+          next_review: '2026-09-11T10:00:00',
+          ease_factor: 2.6,
+          interval: 6,
+          repetitions: 2
+        },
+        xp: { xp_awarded: 2, level_up: false, new_level: 3, new_stage: 2, current_xp: 120, xp_for_next_level: 30, level_progress: 0.4 }
+      }
+    })
+    await screen.findByTestId('session-footer')
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // tc1 -> good, advance to tc3
+    await waitFor(() => expect(cardsService.review).toHaveBeenCalledWith('tc1', 'good', 'study'))
+    expect(screen.getByText('Gamma Q')).toBeInTheDocument()
+
+    // Drop the filter: tc2, hidden while tc1 was graded, must still be there.
+    await selectTag('verbs')
+    await waitFor(() => expect(screen.getAllByText(/cards\.session\.card.*"total":3/).length).toBeGreaterThan(0))
+    // And the user is still on tc3, now at position 3 of 3.
+    expect(screen.getAllByText(/cards\.session\.card.*"current":3,"total":3/).length).toBeGreaterThan(0)
+  })
+
+  it('counts the filtered session on completion and says how many due cards were outside it', async () => {
+    mockSearchParams = new URLSearchParams('mode=study&tags=verbs')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByTestId('session-footer')
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // tc1
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // tc3 -> complete
+    await screen.findByText('cards.session.complete.cardsReviewed')
+
+    expect(screen.getByText('cards.session.complete.body:{"count":2}')).toBeInTheDocument()
+    expect(screen.getByTestId('complete-outside-filter')).toHaveTextContent('cards.session.complete.outsideFilter:{"count":1}')
+    // The session bonus and the summary fired once, for the two cards seen.
+    expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
+    expect(mockQueueIntervention).toHaveBeenCalledWith(expect.objectContaining({ type: 'session_summary', session_total_cards: 2 }))
+  })
+
+  it('says nothing about cards outside the filter when there is no filter', async () => {
+    mockSearchParams = new URLSearchParams('mode=study')
+    renderSession({ cards: makeTaggedCards() })
+    await screen.findByTestId('session-footer')
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    await screen.findByText('cards.session.complete.cardsReviewed')
+
+    expect(screen.getByText('cards.session.complete.body:{"count":3}')).toBeInTheDocument()
+    expect(screen.queryByTestId('complete-outside-filter')).not.toBeInTheDocument()
   })
 })

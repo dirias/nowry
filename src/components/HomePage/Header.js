@@ -45,6 +45,7 @@ import {
   AutoAwesomeRounded
 } from '@mui/icons-material'
 import { usePomodoro } from '../../context/PomodoroContext'
+import { formatClock } from '../Pomodoro/formatClock'
 import { usePet } from '../../context/AgentContext'
 import { Z_NAV } from '../../constants/zIndex'
 import { useColorScheme } from '@mui/joy/styles'
@@ -184,12 +185,6 @@ const Header = () => {
 
   // Pomodoro
   const { timeLeft, isActive: isTimerActive, showWidget, setShowWidget, settings } = usePomodoro()
-
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60)
-    const s = seconds % 60
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-  }
 
   const logout = async () => {
     await contextLogout()
@@ -470,7 +465,7 @@ const Header = () => {
                             <Typography level='body-sm'>{t('common.pomodoro')}</Typography>
                             {isTimerActive && (
                               <Typography level='body-xs' sx={{ color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' }}>
-                                {formatTime(timeLeft)}
+                                {formatClock(timeLeft)}
                               </Typography>
                             )}
                           </Stack>
@@ -655,7 +650,7 @@ const Header = () => {
                         <ListItemDecorator>
                           <TimerRounded />
                         </ListItemDecorator>
-                        {isTimerActive ? `Pomodoro (${formatTime(timeLeft)})` : t('common.pomodoro')}
+                        {isTimerActive ? `${t('common.pomodoro')} (${formatClock(timeLeft)})` : t('common.pomodoro')}
                       </ListItemButton>
                     </ListItem>
                   </>

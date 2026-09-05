@@ -173,7 +173,7 @@ export default function SaveToDeckStep({ deckType, saveToDeck, createDeckDescrip
                     {count}
                   </Typography>
                 }
-                sx={{ cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg' } }}
+                sx={{ cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }}
               >
                 {tag}
               </Chip>

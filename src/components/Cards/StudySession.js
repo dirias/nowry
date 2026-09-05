@@ -36,9 +36,9 @@ import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, Swipe
 import { cardsService, decksService } from '../../api/services'
 import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
-import { useBrowseFilters } from '../../hooks/useBrowseFilters'
+import { useSessionFilters } from '../../hooks/useSessionFilters'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
-import BrowseFilterBar from './BrowseFilterBar'
+import SessionFilterBar from './SessionFilterBar'
 import { tabularNums } from '../Common/Form/formStyles'
 import MarkToggle from './MarkToggle'
 import { queryClient } from '../../api/queryClient'
@@ -282,6 +282,28 @@ const SwipeHint = React.memo(function SwipeHint() {
   )
 })
 
+/**
+ * Replace one card in `list` by id, leaving every other element untouched.
+ *
+ * This is the ONLY way a card is written back into `cards`. Grading and the
+ * mark both patch through it, so no path can assign a filtered VIEW of the
+ * deck to the deck itself — which is what lets the tag filter coexist with
+ * grading in study mode (ADR-014). Returns `list` itself when the id is
+ * absent, so callers keep the identity guarantee for free.
+ *
+ * @param {Array<object>} list
+ * @param {string} cardId
+ * @param {object} patch
+ * @returns {Array<object>}
+ */
+function patchCardById(list, cardId, patch) {
+  const index = list.findIndex((c) => (c._id || c.id) === cardId)
+  if (index === -1) return list
+  const next = [...list]
+  next[index] = { ...next[index], ...patch }
+  return next
+}
+
 export default function StudySession() {
   const { deckId } = useParams()
   const navigate = useNavigate()
@@ -318,18 +340,24 @@ export default function StudySession() {
   const [xpFloater, setXpFloater] = useState(null)
   const [mostAttentionCardFront, setMostAttentionCardFront] = useState(null)
 
-  // Browse-only inline tag filter. `enabled: isReadOnlyMode` is the whole
-  // safety story: in study mode the hook returns no tags, no selection, and
-  // `visibleCards === cards` BY REFERENCE, so the SM-2 queue is structurally
-  // unfilterable — a crafted `?mode=study&tags=x` URL changes nothing.
+  // Inline view filters over the loaded card list. Two gates, one per
+  // dimension (ADR-014):
+  //   - tags are open in BOTH modes. In study mode they narrow the SM-2 queue
+  //     to a subset that keeps the server's order; they never reorder it.
+  //   - the mark is Browse-only. `markEnabled: isReadOnlyMode` is the whole of
+  //     ADR-010's read-side enforcement: a crafted `?mode=study&marked=1` URL
+  //     changes nothing, and no marked segment renders to set one.
+  // With nothing active, `visibleCards === cards` BY REFERENCE.
   //
-  // Everything below reads `visibleCards` instead of `cards`, with two
-  // deliberate exceptions, both marked at their site: the deck-empty gate and
-  // handleGrade's setCards mutation source, which must stay the FULL array.
+  // Everything below reads `visibleCards` instead of `cards`, with one
+  // deliberate exception, marked at its site: the deck-empty gate reads the
+  // FULL array. Nothing assigns an array back to `cards` — every write goes
+  // through `patchCardById`, so a filtered view can never overwrite the deck.
   const { availableTags, selectedTags, markedOnly, markedCount, visibleCards, setTags, clearFilters, toggleMarkedOnly, isFiltering } =
-    useBrowseFilters({
+    useSessionFilters({
       cards,
-      enabled: isReadOnlyMode
+      tagsEnabled: true,
+      markEnabled: isReadOnlyMode
     })
 
   const handleCardMouseMove = React.useCallback((e) => {
@@ -697,11 +725,11 @@ export default function StudySession() {
   // read). Reading/advancing through this ref instead closes that window.
   //
   // Mirrors `visibleCards` (NOT `cards`) because every index in this component
-  // — including the one handleGrade reads — addresses the visible list. In
-  // study mode the two are the same reference, so handleGrade's `setCards`
-  // mutation source is unchanged; grading is unreachable in browse mode (no
-  // GradingButtons are mounted), so a filtered array can never be written back
-  // over the full deck.
+  // — including the one handleGrade reads — addresses the visible list. It is
+  // a READ mirror only: handleGrade patches the graded card into `cards` by id
+  // (`patchCardById`) rather than assigning this list back, so a filtered view
+  // — which a study session can be under a tag filter (ADR-014) — is never
+  // written over the full deck.
   const latestStateRef = useRef({ cards: visibleCards, currentIndex })
   latestStateRef.current = { cards: visibleCards, currentIndex }
 
@@ -841,13 +869,16 @@ export default function StudySession() {
         repetitions: newRepetitions
       }
 
-      const updatedCards = [...latestCards]
-      updatedCards[latestIndex] = optimisticUpdate
+      const updatedVisible = [...latestCards]
+      updatedVisible[latestIndex] = optimisticUpdate
       // Advance the synchronous source of truth immediately (currentIndex
       // is intentionally left for handleNext to advance below, mirroring
       // its existing branching logic) — see latestStateRef comment above.
-      latestStateRef.current = { cards: updatedCards, currentIndex: latestIndex }
-      setCards(updatedCards)
+      latestStateRef.current = { cards: updatedVisible, currentIndex: latestIndex }
+      // Into the FULL deck by id, never the visible list by assignment: under
+      // a tag filter the two differ, and assigning would drop every hidden
+      // card (ADR-014).
+      setCards((prev) => patchCardById(prev, cardId, optimisticUpdate))
 
       // Move to next card IMMEDIATELY
       handleNext()
@@ -892,7 +923,7 @@ export default function StudySession() {
               card_notes: currentCard.notes || null,
               card_type: currentCard.card_type || 'basic',
               session_card_index: latestIndex + 1,
-              session_total_cards: cards.length
+              session_total_cards: latestCards.length
             })
           }, delay)
         }
@@ -914,21 +945,21 @@ export default function StudySession() {
         // latestStateRef.current.cards, and spreading the stale `cards`
         // closure here would silently revert those newer optimistic updates.
         if (response && response.sm2_data) {
-          const syncedCards = [...latestStateRef.current.cards]
-          const cardIndex = syncedCards.findIndex((c) => (c._id || c.id) === cardId)
-
-          if (cardIndex !== -1) {
-            syncedCards[cardIndex] = {
-              ...syncedCards[cardIndex],
-              last_reviewed: response.sm2_data.last_reviewed,
-              next_review: response.sm2_data.next_review,
-              ease_factor: response.sm2_data.ease_factor,
-              interval: response.sm2_data.interval,
-              repetitions: response.sm2_data.repetitions
-            }
-            latestStateRef.current = { ...latestStateRef.current, cards: syncedCards }
-            setCards(syncedCards)
+          const sm2Patch = {
+            last_reviewed: response.sm2_data.last_reviewed,
+            next_review: response.sm2_data.next_review,
+            ease_factor: response.sm2_data.ease_factor,
+            interval: response.sm2_data.interval,
+            repetitions: response.sm2_data.repetitions
           }
+          // Same discipline as the optimistic write: the mirror is patched so
+          // a rapid follow-up grade reads fresh SM-2 values, and the deck is
+          // patched by id so a filtered mirror is never assigned over it.
+          latestStateRef.current = {
+            ...latestStateRef.current,
+            cards: patchCardById(latestStateRef.current.cards, cardId, sm2Patch)
+          }
+          setCards((prev) => patchCardById(prev, cardId, sm2Patch))
         }
 
         // Fold this card's XP into the pet: advances the orb's progress ring
@@ -958,10 +989,10 @@ export default function StudySession() {
         console.warn('Review queued for retry:', cardId, grade)
       }
     },
-    // `cards` stays in this dep list on purpose — it is the setCards mutation
-    // SOURCE, not a read source (every read goes through latestStateRef above),
-    // and it must remain the full deck.
-    [cards, handleNext, mode, queueIntervention, applyReviewXp, cheer]
+    // No `cards` here: every read goes through latestStateRef and every write
+    // is a functional setCards patch, so the handler holds no closure over the
+    // deck that could go stale.
+    [handleNext, mode, queueIntervention, applyReviewXp, cheer]
   )
 
   const handlePrev = React.useCallback(() => {
@@ -991,26 +1022,16 @@ export default function StudySession() {
    * card whenever the identity changes, so stepping away from card 3 and back
    * would show a stale, unmarked card.
    *
-   * Patches the full `cards` state, never `latestStateRef`. That ref mirrors
-   * `visibleCards`, which in Browse mode is a *filtered subset* — writing it
-   * back would drop every card the tag filter is hiding, which is the exact
-   * invariant the comment at the ref's declaration protects. Grading gets away
-   * with assigning from the ref only because grading is unreachable in Browse;
-   * marking is reachable in both modes. The ref re-derives from `cards` on the
-   * next render, so it self-corrects.
+   * Patches the full `cards` state by id through `patchCardById`, exactly as
+   * grading does — never by assigning `latestStateRef`'s list, which mirrors a
+   * possibly filtered view and would drop every hidden card. The ref
+   * re-derives from `cards` on the next render, so it self-corrects.
    *
    * Nothing about SM-2 is touched. This is a display-state patch of one field
    * the scheduler never reads (ADR-010).
    */
   const handleMarkChange = React.useCallback((cardId, markedAt) => {
-    setCards((prev) => {
-      const index = prev.findIndex((c) => (c._id || c.id) === cardId)
-      if (index === -1) return prev
-
-      const next = [...prev]
-      next[index] = { ...next[index], marked_at: markedAt }
-      return next
-    })
+    setCards((prev) => patchCardById(prev, cardId, { marked_at: markedAt }))
   }, [])
 
   const handleFullscreenToggle = React.useCallback(() => {
@@ -1076,8 +1097,9 @@ export default function StudySession() {
         </Stack>
         {/* Reserve the filter row's height so it does not shove the card down
             the moment tags resolve. The control itself cannot render yet —
-            the tags are literally unknown until the deck arrives. */}
-        {isReadOnlyMode && <Skeleton variant='rectangular' height={36} sx={{ borderRadius: 'sm', mb: 2 }} />}
+            the tags are literally unknown until the deck arrives — and since
+            ADR-014 the row can appear in either mode. */}
+        <Skeleton variant='rectangular' height={36} sx={{ borderRadius: 'sm', mb: 2 }} />
         <Skeleton variant='rectangular' sx={{ flex: 1, borderRadius: 'xl', minHeight: 500 }} />
       </Container>
     )
@@ -1112,6 +1134,12 @@ export default function StudySession() {
     )
   }
 
+  // A filtered session that ends is finished for ITS cards, not the deck's.
+  // Count what was in the session, and say how many due cards the tag filter
+  // left out — "Session complete" must never read as "all caught up" (ADR-014).
+  // Graded cards stay in `cards`, so the difference is exactly the hidden ones.
+  const dueOutsideFilter = mode === 'study' && isFiltering ? cards.length - visibleCards.length : 0
+
   if (sessionComplete) {
     return (
       <Container maxWidth='sm' sx={{ py: 4 }}>
@@ -1138,7 +1166,7 @@ export default function StudySession() {
             <Stack direction='row' justifyContent='center' spacing={4}>
               <Stack alignItems='center'>
                 <Typography level='h2' fontWeight={700}>
-                  {cards.length}
+                  {visibleCards.length}
                 </Typography>
                 <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                   {t('cards.session.complete.cardsReviewed')}
@@ -1183,9 +1211,14 @@ export default function StudySession() {
             <Typography level='h3' fontWeight={700} sx={{ mb: 1 }}>
               {t('cards.session.complete.title')}
             </Typography>
-            <Typography level='body-md' sx={{ mb: 4, color: 'text.secondary' }}>
-              {t('cards.session.complete.body', { count: cards.length })}
+            <Typography level='body-md' sx={{ mb: dueOutsideFilter > 0 ? 1 : 4, color: 'text.secondary' }}>
+              {t('cards.session.complete.body', { count: visibleCards.length })}
             </Typography>
+            {dueOutsideFilter > 0 && (
+              <Typography level='body-sm' data-testid='complete-outside-filter' sx={{ mb: 4, color: 'text.tertiary' }}>
+                {t('cards.session.complete.outsideFilter', { count: dueOutsideFilter })}
+              </Typography>
+            )}
             <Button size='lg' variant='solid' color='primary' onClick={() => navigate('/study')}>
               {t('cards.session.complete.backToLibrary')}
             </Button>
@@ -1200,6 +1233,11 @@ export default function StudySession() {
   // would strand the user with no way to undo the filter that emptied the
   // screen: a hard dead end.
   const isFilteredEmpty = isFiltering && visibleCards.length === 0
+  // Does the filter bar have a segment to show? Mirrors SessionFilterBar's own
+  // gate so the header grid reserves the filters' row only when something will
+  // fill it. Tags count in either mode; the mark only ever counts in Browse,
+  // because the hook reports 0 marked outside it (ADR-010, ADR-014).
+  const hasFilters = availableTags.length > 0 || markedCount > 0 || markedOnly
   /*
    * Which filter to explain when nothing matched. The mark takes precedence
    * because its empty state has something to teach ("mark a card and it will be
@@ -1244,7 +1282,7 @@ export default function StudySession() {
           rules (§15.4). At `xs` the filters drop to their own row and stretch
           between those rules, so nothing is left floating mid-row; from `sm`
           they sit inline, pushed right by the 1fr column that separates them
-          from the count. ONE `BrowseFilterBar` either way — rendering a second
+          from the count. ONE `SessionFilterBar` either way — rendering a second
           copy for the other breakpoint would duplicate its search state and
           its test id. */}
       {!isFullscreen && (
@@ -1256,10 +1294,11 @@ export default function StudySession() {
               alignItems: 'center',
               columnGap: { xs: 1, sm: 1.5 },
               rowGap: 1.5,
-              // Study mode has no filters, so it must not reserve their row —
-              // an empty grid row still spends the rowGap above it.
-              gridTemplateColumns: isReadOnlyMode ? { xs: 'auto 1fr auto', sm: 'auto auto 1fr auto' } : 'auto 1fr auto',
-              gridTemplateAreas: isReadOnlyMode
+              // A session with nothing to filter must not reserve the filters'
+              // row — an empty grid row still spends the rowGap above it. The
+              // predicate mirrors the bar's own render gate, in either mode.
+              gridTemplateColumns: hasFilters ? { xs: 'auto 1fr auto', sm: 'auto auto 1fr auto' } : 'auto 1fr auto',
+              gridTemplateAreas: hasFilters
                 ? {
                     xs: '"back count mark" "filters filters filters"',
                     sm: '"back count filters mark"'
@@ -1283,15 +1322,15 @@ export default function StudySession() {
               {!isFilteredEmpty && t('cards.session.card', { current: safeIndex + 1, total: visibleCards.length })}
             </Typography>
 
-            {/* Browse-only view filters (HDR-002). The bar decides for itself
-                which segments have anything to control (§11), so the only gate
-                here is the one that matters — Browse, and not fullscreen, which
-                is a distraction-free reading surface. Stays mounted through the
-                filtered-empty state below, which is the user's only way back
-                out of it. */}
-            {isReadOnlyMode && (
+            {/* View filters (HDR-002, ADR-014). Tags in either mode; the mark
+                only in Browse, gated upstream in the hook rather than here. The
+                bar decides for itself which segments have anything to control
+                (§11); the whole row is hidden in fullscreen, a distraction-free
+                reading surface. Stays mounted through the filtered-empty state
+                below, which is the user's only way back out of it. */}
+            {hasFilters && (
               <Box sx={{ gridArea: 'filters', justifySelf: { xs: 'stretch', sm: 'end' }, minWidth: 0 }}>
-                <BrowseFilterBar
+                <SessionFilterBar
                   availableTags={availableTags}
                   selectedTags={selectedTags}
                   onTagsChange={setTags}
@@ -1357,7 +1396,7 @@ export default function StudySession() {
             aria-label={t(`${emptyFilterPrefix}.clear`)}
             sx={{
               mt: 2,
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.solidBg', outlineOffset: '2px' }
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
             }}
           >
             {t(`${emptyFilterPrefix}.clear`)}

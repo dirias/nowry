@@ -104,6 +104,18 @@ const BLACK = '#000000'
 const AA_TEXT_CONTRAST = 4.5
 
 /**
+ * WCAG 2.2 §1.4.11 Non-text Contrast. Focus indicators, selected-state markers
+ * and control boundaries are not text, and 3:1 is the floor they have to clear
+ * against whatever they sit on.
+ *
+ * It is a separate constant from AA_TEXT_CONTRAST because holding a hairline
+ * border to the 4.5:1 text floor would make every outlined control on the page
+ * shout, and holding text to 3:1 would make it unreadable. Two jobs, two
+ * numbers.
+ */
+const AA_NON_TEXT_CONTRAST = 3
+
+/**
  * Parse a hex color into 8-bit RGB channels.
  * Accepts `#abc`, `#aabbcc` (with or without `#`). Returns null when unparseable.
  */
@@ -345,10 +357,25 @@ function buildDarkScheme(primaryColor, variations, primaryHSL) {
   const plainCandidate = hslToHex(primaryHSL.h, Math.min(primaryHSL.s + 25, 100), Math.min(primaryHSL.l + 30, 75))
   const softCandidate = hslToHex(primaryHSL.h, Math.min(primaryHSL.s + 30, 100), 75)
 
+  /*
+   * The dark scheme used to omit `outlinedBorder` entirely, and Joy's default
+   * filled the gap with #12467B — a BLUE, at 1.97:1 against the page. Since
+   * this codebase draws its focus rings with that token, every focus indicator
+   * in the app was both off-brand and below the 3:1 non-text floor in dark
+   * mode: present in the stylesheet, invisible on the screen.
+   *
+   * A mid-lightness accent is the right starting point — dark enough to read as
+   * a border rather than a highlight — and `ensureReadable` moves it only if it
+   * fails, keeping the hue and saturation that make it recognisably the user's
+   * colour.
+   */
+  const borderCandidate = hslToHex(primaryHSL.h, primaryHSL.s, 45)
+
   return {
     primary: {
       plainColor: ensureReadable(plainCandidate, pageSurfaces),
       plainHoverBg: hslToHex(primaryHSL.h, primaryHSL.s, 15),
+      outlinedBorder: ensureReadable(borderCandidate, pageSurfaces, AA_NON_TEXT_CONTRAST),
       solidBg: variations.darkest,
       solidHoverBg: variations.darker,
       solidActiveBg: primaryColor,

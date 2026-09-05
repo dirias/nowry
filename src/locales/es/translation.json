@@ -1186,7 +1186,9 @@
         "cardsReviewed": "tarjetas revisadas",
         "needsAttentionLabel": "necesitan más práctica",
         "topCardCallout": "Tarjeta que necesita más atención: {{card}}",
-        "perfectSession": "¡Sesión perfecta! Todas las tarjetas se sintieron sólidas."
+        "perfectSession": "¡Sesión perfecta! Todas las tarjetas se sintieron sólidas.",
+        "outsideFilter_one": "{{count}} tarjeta pendiente más queda fuera de tu filtro de etiquetas.",
+        "outsideFilter_other": "{{count}} tarjetas pendientes más quedan fuera de tu filtro de etiquetas."
       },
       "card": "Tarjeta {{current}} de {{total}}",
       "syncing": "Sincronizando {{count}} revisión...",
@@ -2150,6 +2152,9 @@
     "views": "vistas",
     "forks": "bifurcaciones",
     "fork": "Bifurcar biblioteca",
+    "add": "Añadir",
+    "added": "Añadido",
+    "newBadge": "Nuevo",
     "forkConfirm": "Esto creará una copia privada en tu biblioteca. ¿Continuar?",
     "forkSuccess": "¡Bifurcado con éxito!",
     "likeSuccess": "Añadido a tus favoritos",
@@ -2171,7 +2176,7 @@
     "sortBy": "Ordenar por",
     "filterBy": "Filtrar",
     "clearFilters": "Limpiar filtros",
-    "showingResults": "Mostrando {{count}} resultados",
+    "showingOf": "Mostrando {{count}} de {{total}}",
     "loadMore": "Cargar más",
     "by": "de",
     "books": "Libros",
@@ -2250,12 +2255,17 @@
     "unknownAuthor": "Autor desconocido",
     "contentNotFound": "Contenido no encontrado",
     "byAuthor": "de {{name}}",
-    "ofTotal": "de {{total}}",
     "cards": "tarjetas",
     "forkedFrom": "Bifurcado de \"{{title}}\" por {{author}}",
     "forkBadge": "Bifurcación",
     "forkOwnContent": "Este es tu propio mazo — duplícalo desde tu biblioteca.",
-    "alreadyForked": "Ya bifurcaste esto — llevándote a tu copia..."
+    "alreadyForked": "Ya bifurcaste esto — llevándote a tu copia...",
+    "searchIn": "Buscar en {{set}}…",
+    "sparse": {
+      "title": "Comparte algo que hayas creado",
+      "body": "La biblioteca crece con los libros y mazos que la gente publica.",
+      "cta": "Publicar desde tu biblioteca"
+    }
   },
   "publish": {
     "openSheet": "Compartir con la comunidad",
@@ -3316,5 +3326,39 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s transcurridos"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "Temporizador Pomodoro",
+      "workDone": "Sesión de enfoque completada. Hora de un descanso.",
+      "breakDone": "Descanso terminado. ¿Listo para concentrarte?"
+    },
+    "modes": {
+      "label": "Tipo de sesión",
+      "work": "Enfoque",
+      "shortBreak": "Descanso corto",
+      "longBreak": "Descanso largo",
+      "short": {
+        "work": "Enfoque",
+        "shortBreak": "Corto",
+        "longBreak": "Largo"
+      }
+    },
+    "status": {
+      "next": "Siguiente · {{mode}}, {{minutes}} min",
+      "paused": "En pausa · {{minutes}} min transcurridos",
+      "breakQueued": "Enfoque {{count}} de {{total}} completado · descanso largo tras {{total}}",
+      "longBreakEarned": "{{total}} sesiones de enfoque completadas · el ciclo se reinicia después"
+    },
+    "open": "Abrir temporizador Pomodoro",
+    "close": "Cerrar temporizador",
+    "testSound": "Probar sonido de notificación",
+    "start": "Iniciar",
+    "startBreak": "Iniciar descanso",
+    "resume": "Reanudar",
+    "pause": "Pausar",
+    "reset": "Reiniciar",
+    "skip": "Saltar a la siguiente sesión",
+    "cycleProgress": "{{count}} de {{total}} sesiones de enfoque antes de un descanso largo"
   }
 }

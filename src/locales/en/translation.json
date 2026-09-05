@@ -1464,7 +1464,9 @@
         "cardsReviewed": "cards reviewed",
         "needsAttentionLabel": "need more practice",
         "topCardCallout": "Card needing the most attention: {{card}}",
-        "perfectSession": "Perfect session! Every card felt solid."
+        "perfectSession": "Perfect session! Every card felt solid.",
+        "outsideFilter_one": "{{count}} more due card sits outside your tag filter.",
+        "outsideFilter_other": "{{count}} more due cards sit outside your tag filter."
       },
       "card": "Card {{current}} of {{total}}",
       "syncing": "Syncing {{count}} review...",
@@ -1827,14 +1829,7 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": [
-        "Career Growth",
-        "Health & Vitality",
-        "Financial Freedom",
-        "Relationships",
-        "Creative Pursuits",
-        "Learning & Skills"
-      ]
+      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
     },
     "priority": {
       "title": "Yearly Priorities",
@@ -2368,6 +2363,9 @@
     "views": "views",
     "forks": "forks",
     "fork": "Fork to Library",
+    "add": "Add",
+    "added": "Added",
+    "newBadge": "New",
     "forkConfirm": "This will create a private copy in your library. Continue?",
     "forkSuccess": "Forked successfully!",
     "likeSuccess": "Added to your likes",
@@ -2389,7 +2387,7 @@
     "sortBy": "Sort by",
     "filterBy": "Filter",
     "clearFilters": "Clear filters",
-    "showingResults": "Showing {{count}} results",
+    "showingOf": "Showing {{count}} of {{total}}",
     "loadMore": "Load more",
     "by": "by",
     "books": "Books",
@@ -2468,12 +2466,17 @@
     "unknownAuthor": "Unknown author",
     "contentNotFound": "Content not found",
     "byAuthor": "by {{name}}",
-    "ofTotal": "of {{total}}",
     "cards": "cards",
     "forkedFrom": "Forked from \"{{title}}\" by {{author}}",
     "forkBadge": "Fork",
     "forkOwnContent": "This is your own deck — duplicate it from your library instead.",
-    "alreadyForked": "You already forked this — taking you to your copy..."
+    "alreadyForked": "You already forked this — taking you to your copy...",
+    "searchIn": "Search in {{set}}…",
+    "sparse": {
+      "title": "Share something you have made",
+      "body": "The library grows from the books and decks people publish.",
+      "cta": "Publish from your library"
+    }
   },
   "focusBar": {
     "modal": {
@@ -3494,5 +3497,39 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}}s elapsed"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "Pomodoro Timer",
+      "workDone": "Focus session complete. Time for a break.",
+      "breakDone": "Break over. Ready to focus?"
+    },
+    "modes": {
+      "label": "Session type",
+      "work": "Focus",
+      "shortBreak": "Short break",
+      "longBreak": "Long break",
+      "short": {
+        "work": "Focus",
+        "shortBreak": "Short",
+        "longBreak": "Long"
+      }
+    },
+    "status": {
+      "next": "Next · {{mode}}, {{minutes}} min",
+      "paused": "Paused · {{minutes}} min in",
+      "breakQueued": "Focus {{count}} of {{total}} done · long break after {{total}}",
+      "longBreakEarned": "{{total}} focus sessions done · cycle resets after"
+    },
+    "open": "Open Pomodoro timer",
+    "close": "Close timer",
+    "testSound": "Test notification sound",
+    "start": "Start",
+    "startBreak": "Start break",
+    "resume": "Resume",
+    "pause": "Pause",
+    "reset": "Reset",
+    "skip": "Skip to next session",
+    "cycleProgress": "{{count}} of {{total}} focus sessions before a long break"
   }
 }

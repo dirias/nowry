@@ -1080,22 +1080,11 @@
           "title": "3の力",
           "message": "研究によると、一度にすべてを改善しようとするよりも、3つの主要な生活分野に集中する方が大きな成功につながります。今年の3つの分野を定義しましょう。"
         },
-        "tips": [
-          "最も重要なことについて具体的に",
-          "自分の価値観に合った分野を選ぶ",
-          "さまざまな生活領域のバランスを考える"
-        ],
+        "tips": ["最も重要なことについて具体的に", "自分の価値観に合った分野を選ぶ", "さまざまな生活領域のバランスを考える"],
         "saveError": "重点分野を保存できませんでした。もう一度お試しください。",
         "colorSwatchLabel": "{{color}}のテーマを選択"
       },
-      "examples": [
-        "キャリア成長",
-        "健康と活力",
-        "経済的自由",
-        "人間関係",
-        "創造的な活動",
-        "学習とスキル"
-      ]
+      "examples": ["キャリア成長", "健康と活力", "経済的自由", "人間関係", "創造的な活動", "学習とスキル"]
     },
     "priority": {
       "title": "年間優先事項",
@@ -1915,6 +1904,9 @@
       "emptyVisualBody": "デッキを作成して、この図を保存・復習しましょう。"
     },
     "session": {
+      "complete": {
+        "outsideFilter_other": "タグフィルターの外に、復習待ちのカードがあと{{count}}枚あります。"
+      },
       "tagFilter": {
         "noOptions": "このデッキにタグはありません",
         "clear": "タグフィルターを解除",
@@ -2171,7 +2163,17 @@
     "publish": "公開",
     "published": "公開中",
     "unpublish": "公開を取り消す",
-    "publishInstant": "コミュニティと共有"
+    "publishInstant": "コミュニティと共有",
+    "add": "追加",
+    "added": "追加済み",
+    "newBadge": "新着",
+    "showingOf": "{{total}} 件中 {{count}} 件を表示",
+    "searchIn": "{{set}}を検索…",
+    "sparse": {
+      "title": "あなたが作ったものを共有しませんか",
+      "body": "ライブラリは、公開された本やデッキによって育ちます。",
+      "cta": "ライブラリから公開する"
+    }
   },
   "editor": {
     "mode": {
@@ -2617,5 +2619,39 @@
   },
   "filters": {
     "marked": "マーク済み"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "ポモドーロタイマー",
+      "workDone": "集中セッションが完了しました。休憩の時間です。",
+      "breakDone": "休憩終了。集中する準備はできましたか？"
+    },
+    "modes": {
+      "label": "セッションの種類",
+      "work": "集中",
+      "shortBreak": "短い休憩",
+      "longBreak": "長い休憩",
+      "short": {
+        "work": "集中",
+        "shortBreak": "短い",
+        "longBreak": "長い"
+      }
+    },
+    "status": {
+      "next": "次 · {{mode}}、{{minutes}}分",
+      "paused": "一時停止中 · {{minutes}}分経過",
+      "breakQueued": "集中 {{count}} / {{total}} 完了 · {{total}}回で長い休憩",
+      "longBreakEarned": "集中セッション{{total}}回完了 · この後サイクルがリセット"
+    },
+    "open": "ポモドーロタイマーを開く",
+    "close": "タイマーを閉じる",
+    "testSound": "通知音をテスト",
+    "start": "開始",
+    "startBreak": "休憩を開始",
+    "resume": "再開",
+    "pause": "一時停止",
+    "reset": "リセット",
+    "skip": "次のセッションへ",
+    "cycleProgress": "長い休憩まで {{count}} / {{total}} 集中セッション"
   }
 }

@@ -1973,6 +1973,10 @@
           "title": "Noch nichts markiert",
           "body": "Markiere eine Karte beim Lernen, dann wartet sie hier auf dich."
         }
+      },
+      "complete": {
+        "outsideFilter_one": "{{count}} weitere fällige Karte liegt außerhalb deines Tag-Filters.",
+        "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters."
       }
     },
     "common": {
@@ -2211,7 +2215,17 @@
     "publish": "Veröffentlichen",
     "published": "Veröffentlicht",
     "unpublish": "Veröffentlichung aufheben",
-    "publishInstant": "Mit der Community teilen"
+    "publishInstant": "Mit der Community teilen",
+    "add": "Hinzufügen",
+    "added": "Hinzugefügt",
+    "newBadge": "Neu",
+    "showingOf": "{{count}} von {{total}} werden angezeigt",
+    "searchIn": "In {{set}} suchen…",
+    "sparse": {
+      "title": "Teile etwas, das du erstellt hast",
+      "body": "Die Bibliothek wächst durch die Bücher und Stapel, die veröffentlicht werden.",
+      "cta": "Aus deiner Bibliothek veröffentlichen"
+    }
   },
   "editor": {
     "mode": {
@@ -2652,5 +2666,39 @@
   },
   "filters": {
     "marked": "Markiert"
+  },
+  "pomodoro": {
+    "notification": {
+      "title": "Pomodoro-Timer",
+      "workDone": "Fokus-Sitzung abgeschlossen. Zeit für eine Pause.",
+      "breakDone": "Pause vorbei. Bereit, dich zu konzentrieren?"
+    },
+    "modes": {
+      "label": "Sitzungsart",
+      "work": "Fokus",
+      "shortBreak": "Kurze Pause",
+      "longBreak": "Lange Pause",
+      "short": {
+        "work": "Fokus",
+        "shortBreak": "Kurz",
+        "longBreak": "Lang"
+      }
+    },
+    "status": {
+      "next": "Als Nächstes · {{mode}}, {{minutes}} Min",
+      "paused": "Pausiert · {{minutes}} Min vergangen",
+      "breakQueued": "Fokus {{count}} von {{total}} geschafft · lange Pause nach {{total}}",
+      "longBreakEarned": "{{total}} Fokus-Sitzungen geschafft · danach beginnt der Zyklus neu"
+    },
+    "open": "Pomodoro-Timer öffnen",
+    "close": "Timer schließen",
+    "testSound": "Benachrichtigungston testen",
+    "start": "Starten",
+    "startBreak": "Pause starten",
+    "resume": "Fortsetzen",
+    "pause": "Pausieren",
+    "reset": "Zurücksetzen",
+    "skip": "Zur nächsten Sitzung springen",
+    "cycleProgress": "{{count}} von {{total}} Fokus-Sitzungen bis zur langen Pause"
   }
 }

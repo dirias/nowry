@@ -2159,3 +2159,33 @@ them a hue, and the label alone already satisfies the accessible name.
 
 The general rule behind it: a semantic colour that is load-bearing somewhere on a screen cannot be
 borrowed for anything else on that screen.
+
+### 15.6 A floating widget obeys the same grammar (ADR-013)
+
+The Pomodoro widget is the reference case: a `surface` sheet at `radius.lg` with `shadow.lg` and no
+border, 320px wide, 24px from the corner. Inside it the ladder holds without exception —
+
+*   **Controls sit on `level1`; the engaged mode sits on `level2`.** The three session types are one
+    segmented object (§15.2), never three chips, and the current one is a ground, not a hue.
+*   **Progress is the edge between the time and the controls.** 3px, exactly content width, `full`
+    radius because it is progress (§15.3). It is also the divider — no hairline is drawn beside it.
+*   **Two rails.** The mode switch starts on the left rail; the close control and the primary action
+    end on the right one. Nothing floats in the middle.
+*   **One accent-filled control.** The primary action (Start / Pause / Resume / Start break) is the only
+    solid `primary` object. The time is `text.primary` at `display-md`, never the accent: on a study
+    surface, `success` is Easy and `primary` is a grade too (§15.5), so a break is *not* coloured
+    `success` — the label and the engaged segment say which session this is.
+*   **The collapsed state is a chip, not a FAB.** A 36px `level1` button at `radius.md` in the same
+    corner, carrying the clock and a 3px progress edge. A circle is a `full`-radius control (§15.3)
+    and its pulsing halo is decoration doing state's job.
+*   **The primary label is text.** "Start break" must fit beside the switch and the secondary control
+    in English; longer locales wrap the primary onto its own full-width line rather than clipping,
+    which is why the control row is `flex-wrap` and the button has no glyph.
+*   **A floating panel minimises on a click outside, and the click lands.** Use a click-away
+    listener, never a backdrop: a backdrop makes the user click twice. Escape does the same. This
+    only holds because the collapsed form keeps the state visible — the chip carries the clock.
+*   **Two floating objects never share a corner.** The Study Buddy rests bottom-right and moves
+    bottom-left for a study session, so the timer takes the other corner (`useTimerCorner`): left by
+    default, right in a session, bottom-right when there is no pet. A phone has no second corner, so
+    there the open widget is a full-width sheet raised clear of the pet, and only the chip stays in
+    a corner.
