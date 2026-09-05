@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, IconButton, Sheet, Stack, Typography } from '@mui/joy'
+import { ClickAwayListener } from '@mui/base/ClickAwayListener'
 import { CloseRounded, RefreshRounded, SkipNextRounded } from '@mui/icons-material'
 import { MODES, durationFor, nextModeAfter, usePomodoro } from '../../context/PomodoroContext'
 import { focusRing } from '../Common/Form/formStyles'
@@ -105,6 +106,11 @@ const ModeSwitch = ({ mode, onChange, t }) => (
  * and the button label carry the state — the shape never changes. The 3px
  * progress bar is an edge, not an object: it spans the content width and does
  * the divider's job between the time and the controls.
+ *
+ * A click outside or Escape minimises it to the chip — the timer keeps running
+ * and the chip carries the clock, so a stray click costs nothing. The
+ * click-away listener lets that click through to whatever was under it; a
+ * backdrop would swallow it.
  */
 const PomodoroWidget = () => {
   const { t } = useTranslation()
@@ -126,8 +132,18 @@ const PomodoroWidget = () => {
     settings
   } = usePomodoro()
   const corner = useTimerCorner({ width: WIDGET_WIDTH })
+  const open = showWidget && settings.enabled
 
-  if (!showWidget || !settings.enabled) return null
+  useEffect(() => {
+    if (!open) return undefined
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setShowWidget(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open, setShowWidget])
+
+  if (!open) return null
 
   const isFocus = mode === MODES.WORK
   const filled = cycleProgress(completedSessions, mode, sessionsBeforeLongBreak)
@@ -151,85 +167,87 @@ const PomodoroWidget = () => {
   }
 
   return (
-    <Sheet
-      role='region'
-      aria-label={t('common.pomodoro')}
-      sx={{
-        ...corner,
-        zIndex: Z_NAV,
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.5,
-        borderRadius: 'lg',
-        boxShadow: 'lg',
-        bgcolor: 'background.surface'
-      }}
-    >
-      <Stack direction='row' justifyContent='space-between' alignItems='center'>
-        <Stack direction='row' alignItems='center' spacing={1.25}>
-          <Typography level='title-sm'>{modeLabel(mode)}</Typography>
-          <SessionDots
-            filled={filled}
-            total={sessionsBeforeLongBreak}
-            mode={mode}
-            label={t('pomodoro.cycleProgress', { count: filled, total: sessionsBeforeLongBreak })}
-          />
-        </Stack>
-        <IconButton
-          size='sm'
-          variant='plain'
-          color='neutral'
-          aria-label={t('pomodoro.close')}
-          onClick={() => setShowWidget(false)}
-          sx={{ '--IconButton-size': '28px', ...groundedControl, borderRadius: 'sm' }}
-        >
-          <CloseRounded fontSize='small' />
-        </IconButton>
-      </Stack>
-
-      <Stack spacing={0.75}>
-        <Typography level='display-md' component='div' sx={{ fontWeight: 'lg', lineHeight: 1 }}>
-          {formatClock(timeLeft)}
-        </Typography>
-        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          {statusLine()}
-        </Typography>
-      </Stack>
-
-      <Box
-        role='progressbar'
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(progress * 100)}
-        sx={{ height: 3, borderRadius: 'full', bgcolor: 'background.level2', overflow: 'hidden' }}
+    <ClickAwayListener onClickAway={() => setShowWidget(false)}>
+      <Sheet
+        role='region'
+        aria-label={t('common.pomodoro')}
+        sx={{
+          ...corner,
+          zIndex: Z_NAV,
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.5,
+          borderRadius: 'lg',
+          boxShadow: 'lg',
+          bgcolor: 'background.surface'
+        }}
       >
-        <Box sx={{ width: `${progress * 100}%`, height: '100%', bgcolor: 'primary.solidBg', transition: 'width 0.5s linear' }} />
-      </Box>
+        <Stack direction='row' justifyContent='space-between' alignItems='center'>
+          <Stack direction='row' alignItems='center' spacing={1.25}>
+            <Typography level='title-sm'>{modeLabel(mode)}</Typography>
+            <SessionDots
+              filled={filled}
+              total={sessionsBeforeLongBreak}
+              mode={mode}
+              label={t('pomodoro.cycleProgress', { count: filled, total: sessionsBeforeLongBreak })}
+            />
+          </Stack>
+          <IconButton
+            size='sm'
+            variant='plain'
+            color='neutral'
+            aria-label={t('pomodoro.close')}
+            onClick={() => setShowWidget(false)}
+            sx={{ '--IconButton-size': '28px', ...groundedControl, borderRadius: 'sm' }}
+          >
+            <CloseRounded fontSize='small' />
+          </IconButton>
+        </Stack>
 
-      <Stack direction='row' alignItems='center' spacing={1} useFlexGap flexWrap='wrap'>
-        <ModeSwitch mode={mode} onChange={changeMode} t={t} />
-        <IconButton
-          size='sm'
-          variant='plain'
-          color='neutral'
-          aria-label={isFocus ? t('pomodoro.reset') : t('pomodoro.skip')}
-          onClick={isFocus ? resetTimer : skipSession}
-          sx={{ '--IconButton-size': '32px', ...groundedControl }}
+        <Stack spacing={0.75}>
+          <Typography level='display-md' component='div' sx={{ fontWeight: 'lg', lineHeight: 1 }}>
+            {formatClock(timeLeft)}
+          </Typography>
+          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+            {statusLine()}
+          </Typography>
+        </Stack>
+
+        <Box
+          role='progressbar'
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress * 100)}
+          sx={{ height: 3, borderRadius: 'full', bgcolor: 'background.level2', overflow: 'hidden' }}
         >
-          {isFocus ? <RefreshRounded fontSize='small' /> : <SkipNextRounded fontSize='small' />}
-        </IconButton>
-        <Button
-          size='sm'
-          variant='solid'
-          color='primary'
-          onClick={toggleTimer}
-          sx={{ flex: '1 1 auto', minWidth: 96, minHeight: 32, px: 1.5, borderRadius: 'md', whiteSpace: 'nowrap', ...focusRing }}
-        >
-          {primaryLabel()}
-        </Button>
-      </Stack>
-    </Sheet>
+          <Box sx={{ width: `${progress * 100}%`, height: '100%', bgcolor: 'primary.solidBg', transition: 'width 0.5s linear' }} />
+        </Box>
+
+        <Stack direction='row' alignItems='center' spacing={1} useFlexGap flexWrap='wrap'>
+          <ModeSwitch mode={mode} onChange={changeMode} t={t} />
+          <IconButton
+            size='sm'
+            variant='plain'
+            color='neutral'
+            aria-label={isFocus ? t('pomodoro.reset') : t('pomodoro.skip')}
+            onClick={isFocus ? resetTimer : skipSession}
+            sx={{ '--IconButton-size': '32px', ...groundedControl }}
+          >
+            {isFocus ? <RefreshRounded fontSize='small' /> : <SkipNextRounded fontSize='small' />}
+          </IconButton>
+          <Button
+            size='sm'
+            variant='solid'
+            color='primary'
+            onClick={toggleTimer}
+            sx={{ flex: '1 1 auto', minWidth: 96, minHeight: 32, px: 1.5, borderRadius: 'md', whiteSpace: 'nowrap', ...focusRing }}
+          >
+            {primaryLabel()}
+          </Button>
+        </Stack>
+      </Sheet>
+    </ClickAwayListener>
   )
 }
 

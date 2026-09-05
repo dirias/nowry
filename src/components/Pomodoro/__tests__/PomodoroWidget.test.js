@@ -6,7 +6,7 @@
  * react-i18next mock: `t` echoes the key, with options appended as JSON.
  */
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }),
@@ -126,6 +126,34 @@ describe('PomodoroWidget', () => {
   it('close hands the corner back to the chip', () => {
     render(<PomodoroWidget />)
     fireEvent.click(screen.getByRole('button', { name: 'pomodoro.close' }))
+    expect(mockPomodoro.setShowWidget).toHaveBeenCalledWith(false)
+  })
+
+  it('a click outside minimises it, and the click reaches what was under it', async () => {
+    const outside = document.createElement('button')
+    const onOutside = jest.fn()
+    outside.addEventListener('click', onOutside)
+    document.body.appendChild(outside)
+    render(<PomodoroWidget />)
+    // The listener ignores the click that opened the widget; it arms on the next tick.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    fireEvent.click(screen.getByText('25:00'))
+    expect(mockPomodoro.setShowWidget).not.toHaveBeenCalled()
+
+    fireEvent.click(outside)
+    expect(mockPomodoro.setShowWidget).toHaveBeenCalledWith(false)
+    expect(onOutside).toHaveBeenCalledTimes(1)
+    outside.remove()
+  })
+
+  it('Escape minimises it; other keys do not', () => {
+    render(<PomodoroWidget />)
+    fireEvent.keyDown(document, { key: 'Enter' })
+    expect(mockPomodoro.setShowWidget).not.toHaveBeenCalled()
+    fireEvent.keyDown(document, { key: 'Escape' })
     expect(mockPomodoro.setShowWidget).toHaveBeenCalledWith(false)
   })
 })
