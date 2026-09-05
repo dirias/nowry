@@ -1775,23 +1775,33 @@ export default function StudySession() {
                     <CardContent
                       onClick={handleFlip}
                       sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                        // Two rows: the question block takes the free space and
+                        // centres itself in it; the hint is its own row on the
+                        // bottom edge. The previous single flex column ALSO said
+                        // `justifyContent: 'center'`, but the hint carried
+                        // `mt: 'auto'`, and an auto margin beats justify-content:
+                        // it took all the free space and pinned the question to
+                        // the top while the back face (no hint) stayed centred.
+                        display: 'grid',
+                        gridTemplateRows: 'minmax(0, 1fr) auto',
                         textAlign: 'center',
                         height: '100%',
                         cursor: 'pointer',
                         p: { xs: 3, md: 4 }
                       }}
                     >
-                      <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
-                        {t('cards.session.labels.question')}
-                      </Typography>
-                      <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 'lg', whiteSpace: 'pre-wrap' }}>
-                        {currentCard.title}
-                      </Typography>
-                      <Typography level='body-sm' sx={{ mt: 'auto', pt: 4, color: 'text.tertiary' }}>
+                      <Box
+                        data-testid='card-front-body'
+                        sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 0 }}
+                      >
+                        <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
+                          {t('cards.session.labels.question')}
+                        </Typography>
+                        <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 'lg', whiteSpace: 'pre-wrap' }}>
+                          {currentCard.title}
+                        </Typography>
+                      </Box>
+                      <Typography level='body-sm' sx={{ pt: 4, color: 'text.tertiary' }}>
                         <Box component='span' sx={{ display: { xs: 'inline', md: 'none' } }}>
                           {t('cards.session.hints.tapFlip')}
                         </Box>
