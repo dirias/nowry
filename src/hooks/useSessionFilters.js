@@ -11,7 +11,7 @@ import { countMarked, countTags, filterCardsByMark, filterCardsByTags } from '..
 const NO_TAGS = Object.freeze([])
 
 /**
- * Client-side filters for a Browse-mode study session: tags, and the user's mark.
+ * Client-side filters for a study session: tags, and the user's mark.
  *
  * The two dimensions are independent of each other and compose with AND — a
  * marked card tagged `verbs` is what `?marked=1&tags=verbs` shows. Adding a
@@ -21,29 +21,34 @@ const NO_TAGS = Object.freeze([])
  * network, no service layer, nothing that can fail. A malformed `?tags=`
  * degrades to "no filter"; it never produces an error state.
  *
- * `enabled` is the safety switch, and it is deliberately absolute: when false
- * (i.e. anything other than Browse mode) this hook reports no tags, no
- * selection, no mark filter, and hands back the EXACT `cards` reference it was
- * given. That makes the SM-2 study queue structurally unfilterable — neither a
- * crafted `?mode=study&tags=verbs` NOR a `?mode=study&marked=1` can reorder or
- * shrink what the scheduler decided the user should review.
+ * Each dimension has ITS OWN gate, and each gate is absolute:
  *
- * That switch is the whole of ADR-010's enforcement on the read side: the mark
- * is a separate axis from SM-2, so it must be unable to reach the study queue
- * rather than merely trusted not to.
+ * - `tagsEnabled` — when false the hook reports no tags and no selection, so a
+ *   `?tags=` on the URL changes nothing. StudySession passes `true` in both
+ *   modes (ADR-014): tags may narrow the SM-2 queue, because narrowing keeps
+ *   the server's order and grading writes cards back by id, never by array.
+ * - `markEnabled` — when false the hook reports no mark filter and a marked
+ *   count of 0, so a `?marked=1` on the URL changes nothing. StudySession
+ *   passes `isReadOnlyMode`: the mark is Browse-only, and this flag is the
+ *   whole of ADR-010's enforcement on the read side. It is a separate flag
+ *   precisely so that enabling tags in study mode cannot carry the mark onto
+ *   the queue as a side effect.
+ *
+ * With both gates closed — or both open and nothing selected — the hook hands
+ * back the EXACT `cards` reference it was given.
  *
  * Owns its own `useSearchParams()`. React Router hands every caller in the same
  * router context the same live params object, so this coexists safely with
  * StudySession's existing call rather than needing the value threaded down.
  *
- * @param {{ cards: Array<object>, enabled: boolean }} params
+ * @param {{ cards: Array<object>, tagsEnabled: boolean, markEnabled: boolean }} params
  */
-export function useBrowseFilters({ cards, enabled }) {
+export function useSessionFilters({ cards, tagsEnabled, markEnabled }) {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const availableTags = useMemo(() => (enabled ? countTags(cards) : NO_TAGS), [enabled, cards])
+  const availableTags = useMemo(() => (tagsEnabled ? countTags(cards) : NO_TAGS), [tagsEnabled, cards])
 
-  const tagsParam = enabled ? searchParams.get('tags') : null
+  const tagsParam = tagsEnabled ? searchParams.get('tags') : null
 
   /**
    * Parsed selection: split on `,`, trim, drop empties, dedupe, then INTERSECT
@@ -53,7 +58,7 @@ export function useBrowseFilters({ cards, enabled }) {
    * cannot explain.
    */
   const selectedTags = useMemo(() => {
-    if (!enabled || !tagsParam) return NO_TAGS
+    if (!tagsEnabled || !tagsParam) return NO_TAGS
 
     const known = new Set(availableTags.map(({ tag }) => tag))
     const parsed = []
@@ -63,7 +68,7 @@ export function useBrowseFilters({ cards, enabled }) {
       parsed.push(tag)
     }
     return parsed.length > 0 ? parsed : NO_TAGS
-  }, [enabled, tagsParam, availableTags])
+  }, [tagsEnabled, tagsParam, availableTags])
 
   /**
    * The mark filter is a plain flag, not a value list: the mark itself is
@@ -71,10 +76,10 @@ export function useBrowseFilters({ cards, enabled }) {
    * param's absence) reads as off, which keeps a mangled URL degrading to "no
    * filter" exactly as a stale `?tags=` does.
    */
-  const markedOnly = enabled && searchParams.get('marked') === '1'
+  const markedOnly = markEnabled && searchParams.get('marked') === '1'
 
   /** How many of this deck's cards are marked, before any filter narrows them. */
-  const markedCount = useMemo(() => (enabled ? countMarked(cards) : 0), [enabled, cards])
+  const markedCount = useMemo(() => (markEnabled ? countMarked(cards) : 0), [markEnabled, cards])
 
   /*
    * Identity guarantee: with no tags selected AND no mark filter, both helpers
@@ -175,4 +180,4 @@ export function useBrowseFilters({ cards, enabled }) {
   }
 }
 
-export default useBrowseFilters
+export default useSessionFilters

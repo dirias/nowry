@@ -2,7 +2,7 @@ import React from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { MemoryRouter, useSearchParams } from 'react-router-dom'
 
-import { useBrowseFilters } from './useBrowseFilters'
+import { useSessionFilters } from './useSessionFilters'
 
 const card = (id, tags, markedAt = null) => ({
   _id: id,
@@ -23,20 +23,20 @@ const CARDS = [card('c1', ['verbs'], MARKED_AT), card('c2', ['nouns']), card('c3
  * live search params so tests can assert on what was actually written to the
  * URL (rather than trusting the hook's own view of it).
  */
-function renderFilter({ url = '/study/deck-1', cards = CARDS, enabled = true } = {}) {
+function renderFilter({ url = '/study/deck-1', cards = CARDS, tagsEnabled = true, markEnabled = true } = {}) {
   const wrapper = ({ children }) => <MemoryRouter initialEntries={[url]}>{children}</MemoryRouter>
   return renderHook(
     () => {
       const [searchParams] = useSearchParams()
-      return { filter: useBrowseFilters({ cards, enabled }), searchParams }
+      return { filter: useSessionFilters({ cards, tagsEnabled, markEnabled }), searchParams }
     },
     { wrapper }
   )
 }
 
-describe('useBrowseFilters — disabled (study mode)', () => {
+describe('useSessionFilters — both gates closed', () => {
   it('reports no tags and hands back the IDENTICAL cards reference even when ?tags= is populated', () => {
-    const { result } = renderFilter({ url: '/study/deck-1?mode=study&tags=verbs', enabled: false })
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&tags=verbs', tagsEnabled: false, markEnabled: false })
 
     expect(result.current.filter.availableTags).toEqual([])
     expect(result.current.filter.selectedTags).toEqual([])
@@ -46,7 +46,7 @@ describe('useBrowseFilters — disabled (study mode)', () => {
   })
 })
 
-describe('useBrowseFilters — enabled (browse mode)', () => {
+describe('useSessionFilters — the tag dimension, gate open', () => {
   it('exposes the deck tag tally', () => {
     const { result } = renderFilter({ url: '/study/deck-1?mode=browse' })
 
@@ -138,9 +138,47 @@ describe('useBrowseFilters — enabled (browse mode)', () => {
  * composition, URL round-tripping, and the identity guarantee that both
  * dimensions share.
  */
-describe('useBrowseFilters — the mark dimension, disabled (study mode)', () => {
+describe('useSessionFilters — the tag gate open, the mark gate closed (ADR-014 study mode)', () => {
+  it('narrows by ?tags= while ignoring ?marked=1 on the same URL', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&tags=verbs&marked=1', markEnabled: false })
+
+    // The tag dimension is live …
+    expect(result.current.filter.visibleCards.map((c) => c.id)).toEqual(['c1', 'c3'])
+    expect(result.current.filter.isFiltering).toBe(true)
+    // … and the mark dimension is not: no filter, no count, nothing to render.
+    expect(result.current.filter.markedOnly).toBe(false)
+    expect(result.current.filter.markedCount).toBe(0)
+  })
+
+  it('keeps the server order of the cards it keeps — it narrows, it never sorts', () => {
+    const reversed = [...CARDS].reverse()
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&tags=verbs', cards: reversed, markEnabled: false })
+
+    expect(result.current.filter.visibleCards.map((c) => c.id)).toEqual(['c3', 'c1'])
+  })
+
+  it('still hands back the IDENTICAL cards reference when no tag is selected', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1', markEnabled: false })
+
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+  })
+
+  it('toggleMarkedOnly cannot switch the mark on while its gate is closed', () => {
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study', markEnabled: false })
+
+    act(() => result.current.filter.toggleMarkedOnly())
+
+    // The URL took the write — the gate is on the READ side, which is what
+    // makes a hand-crafted URL and a stray click the same non-event.
+    expect(result.current.searchParams.get('marked')).toBe('1')
+    expect(result.current.filter.markedOnly).toBe(false)
+    expect(result.current.filter.visibleCards).toBe(CARDS)
+  })
+})
+
+describe('useSessionFilters — the mark dimension, gate closed (study mode)', () => {
   it('ignores ?marked=1 entirely and hands back the IDENTICAL cards reference', () => {
-    const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1', enabled: false })
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1', markEnabled: false })
 
     expect(result.current.filter.markedOnly).toBe(false)
     expect(result.current.filter.isFiltering).toBe(false)
@@ -149,14 +187,14 @@ describe('useBrowseFilters — the mark dimension, disabled (study mode)', () =>
   })
 
   it('ignores ?marked=1 combined with ?tags=, which is the same attack twice', () => {
-    const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1&tags=verbs', enabled: false })
+    const { result } = renderFilter({ url: '/study/deck-1?mode=study&marked=1&tags=verbs', tagsEnabled: false, markEnabled: false })
 
     expect(result.current.filter.visibleCards).toBe(CARDS)
     expect(result.current.filter.markedCount).toBe(0)
   })
 })
 
-describe('useBrowseFilters — the mark dimension, enabled (browse mode)', () => {
+describe('useSessionFilters — the mark dimension, gate open (browse mode)', () => {
   it('narrows to marked cards on ?marked=1', () => {
     const { result } = renderFilter({ url: '/study/deck-1?mode=browse&marked=1' })
 

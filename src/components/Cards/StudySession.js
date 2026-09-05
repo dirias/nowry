@@ -36,7 +36,7 @@ import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, Swipe
 import { cardsService, decksService } from '../../api/services'
 import { studySessionsService } from '../../api/services/studySessions.service'
 import { useCardData } from '../../hooks/useCardData'
-import { useBrowseFilters } from '../../hooks/useBrowseFilters'
+import { useSessionFilters } from '../../hooks/useSessionFilters'
 import { useVoiceSettings } from '../../hooks/useVoiceSettings'
 import BrowseFilterBar from './BrowseFilterBar'
 import { tabularNums } from '../Common/Form/formStyles'
@@ -327,9 +327,10 @@ export default function StudySession() {
   // deliberate exceptions, both marked at their site: the deck-empty gate and
   // handleGrade's setCards mutation source, which must stay the FULL array.
   const { availableTags, selectedTags, markedOnly, markedCount, visibleCards, setTags, clearFilters, toggleMarkedOnly, isFiltering } =
-    useBrowseFilters({
+    useSessionFilters({
       cards,
-      enabled: isReadOnlyMode
+      tagsEnabled: isReadOnlyMode,
+      markEnabled: isReadOnlyMode
     })
 
   const handleCardMouseMove = React.useCallback((e) => {
