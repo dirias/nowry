@@ -27,12 +27,12 @@ function isValidShape(parsed) {
   )
 }
 
-// applyPreset pure function used in FLT-03 tests (mirrors hook logic without useState)
+// applyPreset pure function used in FLT-03 tests (mirrors hook logic without useState).
+// `goals_only` is the one preset left: `today` / `this_week` were navigation that
+// also reset every filter, and ADR-016 gave the date to the toolbar's nav object.
 function applyPreset(name, currentFilters) {
   if (name === 'goals_only') {
     return { habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] }
-  } else if (name === 'today' || name === 'this_week') {
-    return { ...DEFAULT_FILTERS }
   }
   return currentFilters // no-op for unknown preset
 }
@@ -180,14 +180,10 @@ describe('FLT-03: applyPreset logic', () => {
     })
   })
 
-  it("'today' produces DEFAULT_FILTERS", () => {
-    const result = applyPreset('today', DEFAULT_FILTERS)
-    expect(result).toEqual(DEFAULT_FILTERS)
-  })
-
-  it("'this_week' produces DEFAULT_FILTERS", () => {
-    const result = applyPreset('this_week', DEFAULT_FILTERS)
-    expect(result).toEqual(DEFAULT_FILTERS)
+  it("'today' and 'this_week' are no longer presets — they leave the filters untouched (ADR-016)", () => {
+    const customState = { habitsEnabled: true, activeTypes: ['goal'], activeAreaIds: ['area-1'] }
+    expect(applyPreset('today', customState)).toBe(customState)
+    expect(applyPreset('this_week', customState)).toBe(customState)
   })
 
   it('unknown preset name is a no-op (returns current state unchanged)', () => {

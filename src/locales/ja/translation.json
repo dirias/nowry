@@ -2471,49 +2471,49 @@
     }
   },
   "calendarPage": {
-    "title": "Calendar",
-    "addEvent": "Add event",
-    "views": {
-      "month": "Month",
-      "week": "Week",
-      "day": "Day"
+    "title": "カレンダー",
+    "addEvent": "予定を追加",
+    "error": "カレンダーを読み込めませんでした。接続を確認してもう一度お試しください。",
+    "nav": {
+      "previous": "前へ",
+      "next": "次へ",
+      "today": "今日"
     },
-    "timeBlock": "New time block",
-    "error": "Couldn't load your calendar. Check your connection and try again.",
-    "showHabits": "Habits",
-    "showHabitsAriaLabel": "Toggle habit events on calendar",
-    "moreFilters": "More filters",
-    "lessFilters": "Less filters",
-    "moreFiltersAriaLabel": "Show more calendar filters",
-    "presets": {
-      "goalsOnly": "Goals only",
-      "goalsOnlyAriaLabel": "Show goals and milestones only",
-      "today": "Today",
-      "todayAriaLabel": "Reset filters for today",
-      "thisWeek": "This week",
-      "thisWeekAriaLabel": "Reset filters for this week"
+    "views": {
+      "month": "月",
+      "week": "週",
+      "agenda": "予定一覧"
     },
     "filters": {
-      "allAreas": "All areas",
-      "allAreasAriaLabel": "Show all focus areas",
-      "areaAriaLabel": "Filter by {{name}}",
-      "allTypes": "All types",
-      "allTypesAriaLabel": "Show all event types",
-      "typeGoal": "Goals",
-      "typeTask": "Tasks",
-      "typePriority": "Priorities",
-      "typeMilestone": "Milestones",
-      "typeGoalAriaLabel": "Filter by goals",
-      "typeTaskAriaLabel": "Filter by tasks",
-      "typePriorityAriaLabel": "Filter by priorities",
-      "typeMilestoneAriaLabel": "Filter by milestones",
-      "noAreas": "No focus areas",
-      "noAreasBody": "Add a focus area in Annual Planning to filter the calendar"
+      "habits": "習慣",
+      "types": "種類",
+      "typesSelected": "種類 · {{count}}",
+      "areas": "分野",
+      "areasSelected": "分野 · {{count}}",
+      "goalsOnly": "目標とマイルストーンのみ",
+      "showAllTypes": "すべての種類を表示",
+      "showAllAreas": "すべての分野を表示",
+      "areasHint": "タスクと優先事項には分野がなく、常に表示されます",
+      "typeGoal": "目標",
+      "typeTask": "タスク",
+      "typePriority": "優先事項",
+      "typeMilestone": "マイルストーン",
+      "noAreas": "重点分野がありません",
+      "noAreasBody": "年間計画で重点分野を追加すると、カレンダーを絞り込めます"
     },
-    "empty": {
-      "week": {
-        "title": "No events this week",
-        "body": "Add an event or check another week"
+    "agenda": {
+      "today": "今日",
+      "emptyToday": "今日の予定はありません。予定を追加するか、週の計画を立てましょう。",
+      "empty": {
+        "title": "{{month}}の予定はありません",
+        "body": "予定を追加するか、別の月を確認してください"
+      },
+      "type": {
+        "task": "タスク",
+        "priority": "優先事項",
+        "goal": "目標",
+        "milestone": "マイルストーン",
+        "activity": "習慣"
       }
     }
   },

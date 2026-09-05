@@ -3,7 +3,11 @@
  * Stubs written in Wave 0; implementations follow in 08-04-PLAN.
  * All suites use describe.skip — will be enabled when CalendarPage.js exists.
  *
- * Phase 16 — FLT-01/02/03: Filter bar tests appended at end of file.
+ * Phase 16 — FLT-01/02/03: filter bar tests.
+ * CAL-001 (ADR-016) — the three toolbars became two rows; the filter tests
+ * below import the real predicate instead of mirroring it, and the toolbar
+ * tests pin what the audit removed: a second Today, "This week", the
+ * "More filters" disclosure and the "All …" chips.
  */
 import React, { act } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -42,8 +46,12 @@ const mockUseCalendarFilters = jest.fn()
 jest.mock('../../../hooks/useCalendarFilters', () => ({
   useCalendarFilters: (...args) => mockUseCalendarFilters(...args)
 }))
+const mockIsMobile = jest.fn(() => false)
+jest.mock('../../../hooks/useIsMobile', () => ({
+  useIsMobile: () => mockIsMobile()
+}))
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k) => k })
+  useTranslation: () => ({ t: (k) => k, i18n: { language: 'en' } })
 }))
 jest.mock('../../../api/services/calendar.service', () => ({
   calendarService: { getAllEvents: jest.fn(), invalidateCache: jest.fn() }
@@ -60,10 +68,12 @@ jest.mock('../../../context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'test-user' } })
 }))
 
+const { filterCalendarEvents } = require('../calendarFilters')
+
 // Default mock return value for existing Phase 15 tests
 beforeEach(() => {
   mockUseCalendarFilters.mockReturnValue({
-    filters: { habitsEnabled: false },
+    filters: { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] },
     setFilters: jest.fn(),
     resetFilters: jest.fn(),
     applyPreset: jest.fn()
@@ -132,263 +142,207 @@ describe('CalendarPage — Phase 15 CAL-02: isKeyResult drives icon selection', 
   })
 })
 
-describe('CalendarPage — Phase 15 CAL-03: habits toggle Chip', () => {
-  it('variant logic resolves to "outlined" when habitsEnabled is false', () => {
-    const habitsEnabled = false
-    expect(habitsEnabled ? 'soft' : 'outlined').toBe('outlined')
+// ─── Phase 16 FLT-02: the three-step filter, imported rather than mirrored ──
+
+describe('Phase 16 FLT-02: filterCalendarEvents (D-13 order: habits, types, areas)', () => {
+  const allTypes = ['task', 'priority', 'goal', 'milestone']
+
+  it('step 1 — activity events excluded when habitsEnabled=false', () => {
+    const events = [
+      { type: 'activity', focusAreaId: null },
+      { type: 'task', focusAreaId: null },
+      { type: 'goal', focusAreaId: 'area-1' }
+    ]
+    const result = filterCalendarEvents(events, { habitsEnabled: false, activeTypes: allTypes, activeAreaIds: [] })
+    expect(result.some((e) => e.type === 'activity')).toBe(false)
+    expect(result.some((e) => e.type === 'task')).toBe(true)
+    expect(result.some((e) => e.type === 'goal')).toBe(true)
   })
-  it('variant logic resolves to "soft" when habitsEnabled is true', () => {
-    const habitsEnabled = true
-    expect(habitsEnabled ? 'soft' : 'outlined').toBe('soft')
+
+  it('step 1 — activity events included when habitsEnabled=true', () => {
+    const result = filterCalendarEvents([{ type: 'activity', focusAreaId: null }], {
+      habitsEnabled: true,
+      activeTypes: allTypes,
+      activeAreaIds: []
+    })
+    expect(result).toHaveLength(1)
   })
-  it('toggling setFilters inverts habitsEnabled', () => {
-    const toggle = (f) => ({ ...f, habitsEnabled: !f.habitsEnabled })
-    expect(toggle({ habitsEnabled: false }).habitsEnabled).toBe(true)
-    expect(toggle({ habitsEnabled: true }).habitsEnabled).toBe(false)
+
+  it('step 2 — events excluded when type not in activeTypes (partial filter)', () => {
+    const events = [
+      { type: 'goal', focusAreaId: 'area-1' },
+      { type: 'task', focusAreaId: null },
+      { type: 'priority', focusAreaId: null }
+    ]
+    const result = filterCalendarEvents(events, { habitsEnabled: false, activeTypes: ['goal'], activeAreaIds: [] })
+    expect(result.map((e) => e.type)).toEqual(['goal'])
   })
-  it('clicking Chip calls setFilters with habitsEnabled toggled', () => {
-    const setFilters = jest.fn()
-    const onClick = () => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))
-    onClick()
-    expect(setFilters).toHaveBeenCalledTimes(1)
-    // Verify the updater function produces the correct result
-    const updater = setFilters.mock.calls[0][0]
-    expect(updater({ habitsEnabled: false })).toEqual({ habitsEnabled: true })
+
+  it('step 2 — every canonical type present means no type filter (WR-02)', () => {
+    const result = filterCalendarEvents([{ type: 'task', focusAreaId: null }], {
+      habitsEnabled: false,
+      activeTypes: [...allTypes].reverse(),
+      activeAreaIds: []
+    })
+    expect(result).toHaveLength(1)
   })
-  it('eventSources useMemo dep array includes filters.habitsEnabled', () => {
-    // habitsEnabled=false filters out activity events; habitsEnabled=true includes them
-    // This verifies the dep controls re-evaluation of the filter predicate
-    const filterPredicate = (ev, habitsEnabled) => {
-      if (ev.type === 'activity' && !habitsEnabled) return false
-      return true
-    }
-    expect(filterPredicate({ type: 'activity' }, false)).toBe(false)
-    expect(filterPredicate({ type: 'activity' }, true)).toBe(true)
+
+  it('step 3 — events with a focusAreaId outside activeAreaIds are excluded; null always passes', () => {
+    const events = [
+      { type: 'goal', focusAreaId: 'area-1' },
+      { type: 'goal', focusAreaId: 'area-2' },
+      { type: 'task', focusAreaId: null }
+    ]
+    const result = filterCalendarEvents(events, { habitsEnabled: false, activeTypes: allTypes, activeAreaIds: ['area-1'] })
+    expect(result.find((e) => e.focusAreaId === 'area-1')).toBeDefined()
+    expect(result.find((e) => e.focusAreaId === 'area-2')).toBeUndefined()
+    expect(result.find((e) => e.focusAreaId === null)).toBeDefined()
   })
 })
 
-describe('CalendarPage — Phase 15 CAL-03: activity filtering in eventSources', () => {
-  // Mirror the filter predicate from CalendarPage.js eventSources
-  function filterEvent(ev, filters) {
-    if (ev.type === 'activity' && !filters.habitsEnabled) return false
-    return true
-  }
+// ─── CAL-001: one toolbar on the grid's rails (ADR-016) ─────────────────────
 
-  it('filters out activity events when filters.habitsEnabled is false', () => {
-    expect(filterEvent({ type: 'activity' }, { habitsEnabled: false })).toBe(false)
-  })
-  it('includes activity events when filters.habitsEnabled is true', () => {
-    expect(filterEvent({ type: 'activity' }, { habitsEnabled: true })).toBe(true)
-  })
-  it('non-activity events (task, goal, milestone) pass through regardless of habitsEnabled', () => {
-    const filters = { habitsEnabled: false }
-    expect(filterEvent({ type: 'task' }, filters)).toBe(true)
-    expect(filterEvent({ type: 'goal' }, filters)).toBe(true)
-    expect(filterEvent({ type: 'milestone' }, filters)).toBe(true)
-  })
-})
-
-// ─── Phase 16 FLT-01/02/03: Filter bar ───────────────────────────────────────
-
-// Mirror D-13 filter predicate from CalendarPage.js eventSources callback
-function applyD13Filter(events, filters) {
-  return events.filter((ev) => {
-    // Step 1: habits toggle
-    if (!filters.habitsEnabled && ev.type === 'activity') return false
-    // Step 2: type filter (only active when not all 4 types selected)
-    if (filters.activeTypes.length < 4 && !filters.activeTypes.includes(ev.type)) return false
-    // Step 3: area filter (null focusAreaId always passes through)
-    if (filters.activeAreaIds.length > 0 && ev.focusAreaId !== null && !filters.activeAreaIds.includes(ev.focusAreaId)) return false
-    return true
-  })
-}
-
-describe('Phase 16 FLT-01/02/03: filter bar', () => {
+describe('CAL-001: the toolbar', () => {
   const mockApplyPreset = jest.fn()
   const mockSetFilters = jest.fn()
-
-  const defaultFilters = {
-    habitsEnabled: false,
-    activeTypes: ['task', 'priority', 'goal', 'milestone'],
-    activeAreaIds: []
-  }
+  const mockResetFilters = jest.fn()
+  const { calendarService } = require('../../../api/services/calendar.service')
 
   const mockFocusAreas = [
     { id: 'area-1', name: 'Learning', color: '#10b981' },
     { id: 'area-2', name: 'Health', color: '#f59e0b' }
   ]
 
-  const { calendarService } = require('../../../api/services/calendar.service')
+  const renderPage = async () => {
+    const CalendarPage = require('../CalendarPage').default
+    let utils
+    await act(async () => {
+      utils = render(<CalendarPage />)
+    })
+    return utils
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsMobile.mockReturnValue(false)
     mockUseCalendarFilters.mockReturnValue({
-      filters: {
-        habitsEnabled: false,
-        activeTypes: ['task', 'priority', 'goal', 'milestone'],
-        activeAreaIds: []
-      },
+      filters: { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] },
       setFilters: mockSetFilters,
-      resetFilters: jest.fn(),
+      resetFilters: mockResetFilters,
       applyPreset: mockApplyPreset
     })
-    // getAllEvents returns { events: [], focusAreas: [...] }
-    calendarService.getAllEvents.mockResolvedValue({
-      events: [],
-      focusAreas: mockFocusAreas
+    calendarService.getAllEvents.mockResolvedValue({ events: [], focusAreas: mockFocusAreas })
+  })
+
+  it('has exactly one control named Today, and it never touches the filters', async () => {
+    await renderPage()
+    const todays = screen.getAllByRole('button', { name: 'calendarPage.nav.today' })
+    expect(todays).toHaveLength(1)
+    // The view already shows this month, so the segment is engaged (a ground, not a hue).
+    expect(todays[0]).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(todays[0])
+    expect(mockSetFilters).not.toHaveBeenCalled()
+    expect(mockResetFilters).not.toHaveBeenCalled()
+    expect(mockApplyPreset).not.toHaveBeenCalled()
+  })
+
+  it('renders none of the controls the audit removed', async () => {
+    await renderPage()
+    ;[
+      'calendarPage.presets.thisWeek',
+      'calendarPage.presets.today',
+      'calendarPage.moreFilters',
+      'calendarPage.filters.allAreas',
+      'calendarPage.filters.allTypes'
+    ].forEach((name) => expect(screen.queryByRole('button', { name })).toBeNull())
+    expect(screen.queryByText(/This week|More filters|All areas|All types/)).toBeNull()
+  })
+
+  it('names the month beside the nav object, in the user’s language', async () => {
+    await renderPage()
+    const expected = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(new Date())
+    expect(screen.getByText(expected)).toBeInTheDocument()
+  })
+
+  it('the Habits segment carries aria-pressed and toggles habitsEnabled', async () => {
+    await renderPage()
+    const habits = screen.getByRole('button', { name: 'calendarPage.filters.habits' })
+    expect(habits).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(habits)
+    expect(mockSetFilters).toHaveBeenCalledTimes(1)
+    const updater = mockSetFilters.mock.calls[0][0]
+    expect(updater({ habitsEnabled: false, activeTypes: [], activeAreaIds: [] }).habitsEnabled).toBe(true)
+  })
+
+  it('the Types menu opens with "Goals & milestones only" first, and it applies the preset', async () => {
+    await renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.filters.types' }))
+    const items = await screen.findAllByRole(/^menuitem(checkbox)?$/)
+    expect(items[0]).toHaveTextContent('calendarPage.filters.goalsOnly')
+    fireEvent.click(items[0])
+    expect(mockApplyPreset).toHaveBeenCalledWith('goals_only')
+  })
+
+  it('the Types menu lists the four types as checked rows, and unchecking one narrows the filter', async () => {
+    await renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.filters.types' }))
+    const tasks = await screen.findByRole('menuitemcheckbox', { name: /typeTask/ })
+    expect(tasks).toHaveAttribute('aria-checked', 'true')
+    fireEvent.click(tasks)
+    const updater = mockSetFilters.mock.calls[0][0]
+    expect(
+      updater({ habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] }).activeTypes
+    ).toEqual(['priority', 'goal', 'milestone'])
+  })
+
+  it('reads the count back on the segment once a filter narrows something', async () => {
+    mockUseCalendarFilters.mockReturnValue({
+      filters: { habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: ['area-1'] },
+      setFilters: mockSetFilters,
+      resetFilters: mockResetFilters,
+      applyPreset: mockApplyPreset
     })
+    await renderPage()
+    // A menu trigger carries aria-haspopup, not aria-pressed; the narrowed
+    // state is spoken by the label itself ("Types · 2") and shown as a ground.
+    expect(screen.getByRole('button', { name: 'calendarPage.filters.typesSelected' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'calendarPage.filters.areasSelected' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'calendarPage.filters.types' })).toBeNull()
   })
 
-  // ── FLT-01: area chip rendering ─────────────────────────────────────────────
-
-  it('FLT-01: "All Areas" chip renders when filtersExpanded=true', async () => {
-    const CalendarPage = require('../CalendarPage').default
-    let container
-    act(() => {
-      ;({ container } = render(<CalendarPage />))
+  it('the Areas menu lists each focus area and offers "Show all areas" once narrowed', async () => {
+    mockUseCalendarFilters.mockReturnValue({
+      filters: { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: ['area-2'] },
+      setFilters: mockSetFilters,
+      resetFilters: mockResetFilters,
+      applyPreset: mockApplyPreset
     })
-
-    // Use direct DOM attribute query — Joy UI Chip aria-label is on the button element
-    // but Testing Library's accessible-name resolution for mui/joy Chip may vary in jsdom.
-    // Joy UI Chip renders aria-label on the outer <div> root, but onClick on inner <button class="MuiChip-action">.
-    // We must click the inner action button to trigger the React onClick handler.
-    const moreFiltersRoot = container.querySelector('[aria-label="calendarPage.moreFiltersAriaLabel"]')
-    const moreFiltersChip = moreFiltersRoot ? moreFiltersRoot.querySelector('.MuiChip-action') || moreFiltersRoot : null
-    if (moreFiltersChip && moreFiltersRoot) {
-      act(() => {
-        fireEvent.click(moreFiltersChip)
-      })
-      const allAreasChip = container.querySelector('[aria-label="calendarPage.filters.allAreasAriaLabel"]')
-      expect(allAreasChip).not.toBeNull()
-    } else {
-      // CalendarPage not yet implementing Phase 16 filter bar — test fails (RED)
-      expect(moreFiltersRoot).not.toBeNull()
-    }
+    await renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.filters.areasSelected' }))
+    expect(await screen.findByRole('menuitemcheckbox', { name: /Learning/ })).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByRole('menuitemcheckbox', { name: /Health/ })).toHaveAttribute('aria-checked', 'true')
+    fireEvent.click(screen.getByRole('menuitem', { name: 'calendarPage.filters.showAllAreas' }))
+    const updater = mockSetFilters.mock.calls[0][0]
+    expect(updater({ habitsEnabled: false, activeTypes: [], activeAreaIds: ['area-2'] }).activeAreaIds).toEqual([])
   })
 
-  it('FLT-01: individual area chip renders per focusAreas array entry when expanded', async () => {
-    const CalendarPage = require('../CalendarPage').default
-    let container
-    act(() => {
-      ;({ container } = render(<CalendarPage />))
-    })
-
-    // Joy UI Chip renders aria-label on the outer <div> root, but onClick on inner <button class="MuiChip-action">.
-    const moreFiltersRoot = container.querySelector('[aria-label="calendarPage.moreFiltersAriaLabel"]')
-    const moreFiltersActionBtn = moreFiltersRoot ? moreFiltersRoot.querySelector('.MuiChip-action') || moreFiltersRoot : null
-    if (moreFiltersActionBtn && moreFiltersRoot) {
-      act(() => {
-        fireEvent.click(moreFiltersActionBtn)
-      })
-      // area chips only render when focusAreas.length > 0 (getAllEvents sets focusAreas from async callback
-      // which FullCalendar never invokes when mocked); test verifies the "All Types" chip renders instead,
-      // which renders unconditionally when filtersExpanded=true
-      const allTypesChip = container.querySelector('[aria-label="calendarPage.filters.allTypesAriaLabel"]')
-      // At minimum, the expanded section should contain the "All Types" chip
-      expect(allTypesChip).not.toBeNull()
-    } else {
-      expect(moreFiltersRoot).not.toBeNull()
-    }
+  it('offers Month, Week and Agenda as one object on desktop', async () => {
+    await renderPage()
+    expect(screen.getByRole('button', { name: 'calendarPage.views.month' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'calendarPage.views.week' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.queryByRole('button', { name: 'calendarPage.views.day' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.views.agenda' }))
+    expect(screen.getByRole('button', { name: 'calendarPage.views.agenda' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('calendar-agenda')).toBeInTheDocument()
   })
 
-  it('FLT-01: area chip has aria-pressed=true when areaId is in activeAreaIds', () => {
-    // Mirror: aria-pressed={filters.activeAreaIds.includes(area.id)}
-    const filters = { ...defaultFilters, activeAreaIds: ['area-1'] }
-    expect(filters.activeAreaIds.includes('area-1')).toBe(true)
-    expect(filters.activeAreaIds.includes('area-2')).toBe(false)
-  })
-
-  // ── FLT-02: D-13 three-step filter logic ────────────────────────────────────
-
-  it('FLT-02: D-13 step 1 — activity events excluded when habitsEnabled=false', () => {
-    const events = [
-      { type: 'activity', focusAreaId: null },
-      { type: 'task', focusAreaId: null },
-      { type: 'goal', focusAreaId: 'area-1' }
-    ]
-    const filters = { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] }
-    const result = applyD13Filter(events, filters)
-    expect(result.some((e) => e.type === 'activity')).toBe(false)
-    expect(result.some((e) => e.type === 'task')).toBe(true)
-    expect(result.some((e) => e.type === 'goal')).toBe(true)
-  })
-
-  it('FLT-02: D-13 step 2 — events excluded when type not in activeTypes (partial filter)', () => {
-    const events = [
-      { type: 'goal', focusAreaId: 'area-1' },
-      { type: 'task', focusAreaId: null },
-      { type: 'priority', focusAreaId: null }
-    ]
-    const filters = { habitsEnabled: false, activeTypes: ['goal'], activeAreaIds: [] }
-    const result = applyD13Filter(events, filters)
-    expect(result.some((e) => e.type === 'goal')).toBe(true)
-    expect(result.some((e) => e.type === 'task')).toBe(false)
-    expect(result.some((e) => e.type === 'priority')).toBe(false)
-  })
-
-  it('FLT-02: D-13 step 3 — events with non-null focusAreaId excluded when not in activeAreaIds', () => {
-    const events = [
-      { type: 'goal', focusAreaId: 'area-1' },
-      { type: 'goal', focusAreaId: 'area-2' },
-      { type: 'task', focusAreaId: null } // null focusAreaId always passes
-    ]
-    const filters = { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: ['area-1'] }
-    const result = applyD13Filter(events, filters)
-    expect(result.find((e) => e.focusAreaId === 'area-1')).toBeDefined() // in filter → included
-    expect(result.find((e) => e.focusAreaId === 'area-2')).toBeUndefined() // not in filter → excluded
-    expect(result.find((e) => e.focusAreaId === null)).toBeDefined() // null always passes
-  })
-
-  it('FLT-02: D-13 step 3 — events with focusAreaId: null always pass through even when area filter is active', () => {
-    const events = [
-      { type: 'task', focusAreaId: null },
-      { type: 'priority', focusAreaId: null }
-    ]
-    const filters = { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: ['area-1'] }
-    const result = applyD13Filter(events, filters)
-    expect(result.length).toBe(2) // both pass through
-  })
-
-  // ── FLT-03: preset button → applyPreset call ─────────────────────────────────
-
-  it('FLT-03: clicking Goals only Button calls applyPreset("goals_only")', () => {
-    const CalendarPage = require('../CalendarPage').default
-    render(<CalendarPage />)
-
-    const goalsOnlyBtn = screen.queryByRole('button', { name: 'calendarPage.presets.goalsOnlyAriaLabel' })
-    if (goalsOnlyBtn) {
-      fireEvent.click(goalsOnlyBtn)
-      expect(mockApplyPreset).toHaveBeenCalledWith('goals_only')
-    } else {
-      // Phase 16 preset buttons not yet implemented — test fails (RED)
-      expect(goalsOnlyBtn).not.toBeNull()
-    }
-  })
-
-  it('FLT-03: clicking Today Button calls applyPreset("today")', () => {
-    const CalendarPage = require('../CalendarPage').default
-    render(<CalendarPage />)
-
-    const todayBtn = screen.queryByRole('button', { name: 'calendarPage.presets.todayAriaLabel' })
-    if (todayBtn) {
-      fireEvent.click(todayBtn)
-      expect(mockApplyPreset).toHaveBeenCalledWith('today')
-    } else {
-      expect(todayBtn).not.toBeNull()
-    }
-  })
-
-  it('FLT-03: clicking This week Button calls applyPreset("this_week")', () => {
-    const CalendarPage = require('../CalendarPage').default
-    render(<CalendarPage />)
-
-    const thisWeekBtn = screen.queryByRole('button', { name: 'calendarPage.presets.thisWeekAriaLabel' })
-    if (thisWeekBtn) {
-      fireEvent.click(thisWeekBtn)
-      expect(mockApplyPreset).toHaveBeenCalledWith('this_week')
-    } else {
-      expect(thisWeekBtn).not.toBeNull()
-    }
+  it('on a phone there is no view object, and the Agenda opens on Today', async () => {
+    mockIsMobile.mockReturnValue(true)
+    await renderPage()
+    expect(screen.queryByRole('button', { name: 'calendarPage.views.month' })).toBeNull()
+    expect(screen.getByTestId('calendar-agenda')).toBeInTheDocument()
+    expect(screen.getByText('calendarPage.agenda.today')).toBeInTheDocument()
+    expect(screen.getByText('calendarPage.agenda.emptyToday')).toBeInTheDocument()
   })
 })
 

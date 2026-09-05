@@ -1,0 +1,181 @@
+import React from 'react'
+import { Box, Link, Sheet, Skeleton, Typography } from '@mui/joy'
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
+import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
+import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
+import StarRoundedIcon from '@mui/icons-material/StarRounded'
+import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
+
+import { readableTextOn } from '../../theme/colorSchemeGenerator'
+import { focusRing } from '../Common/Form/formStyles'
+import { formatDayLabel, formatDaySide, formatMonthTitle } from './agendaGroups'
+
+const TYPE_ICON = {
+  task: CheckCircleOutlinedIcon,
+  priority: FlagOutlinedIcon,
+  goal: AdjustOutlinedIcon,
+  milestone: DiamondOutlinedIcon,
+  activity: RepeatRoundedIcon
+}
+
+const eventIcon = (ev) => (ev.type === 'milestone' && ev.isKeyResult ? StarRoundedIcon : (TYPE_ICON[ev.type] ?? AdjustOutlinedIcon))
+
+const rowSx = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1.5,
+  minHeight: 52,
+  pl: 2,
+  pr: 1,
+  borderBottom: '1px solid',
+  borderColor: 'divider'
+}
+
+const GroupHeader = ({ group, language, t }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 1,
+      px: 2,
+      pt: 1.25,
+      pb: 0.75,
+      bgcolor: group.isToday ? 'primary.softBg' : 'background.level1',
+      borderBottom: '1px solid',
+      borderColor: 'divider'
+    }}
+  >
+    <Typography level='title-sm' sx={{ color: group.isToday ? 'primary.softColor' : 'text.primary' }}>
+      {group.isToday ? t('calendarPage.agenda.today') : formatDayLabel(group.date, language)}
+    </Typography>
+    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+      {formatDaySide(group.date, language, group.isToday)}
+    </Typography>
+  </Box>
+)
+
+const AgendaRow = ({ ev, onSelect, t }) => {
+  const Icon = eventIcon(ev)
+  const completed = ev.status === 'completed'
+  const typeLabel = t(`calendarPage.agenda.type.${ev.type}`)
+  return (
+    <Box sx={rowSx}>
+      {/* ev.color is the focus area's own colour — user data, not a token —
+          so the glyph colour is derived from the fill it sits on, as the
+          month pills already do. */}
+      <Box
+        aria-hidden='true'
+        sx={{
+          width: 28,
+          height: 28,
+          borderRadius: 'sm',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: ev.color,
+          color: readableTextOn(ev.color)
+        }}
+      >
+        <Icon sx={{ fontSize: 'md', color: 'inherit' }} />
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Link
+          component='button'
+          level='body-sm'
+          onClick={() => onSelect(ev)}
+          sx={{
+            display: 'block',
+            maxWidth: '100%',
+            textAlign: 'left',
+            color: 'text.primary',
+            fontWeight: 'md',
+            textDecoration: completed ? 'line-through' : 'none',
+            opacity: completed ? 0.6 : 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            ...focusRing
+          }}
+        >
+          {ev.title}
+        </Link>
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          {[ev.areaName, typeLabel].filter(Boolean).join(' · ')}
+        </Typography>
+      </Box>
+    </Box>
+  )
+}
+
+const SkeletonRow = () => (
+  <Box sx={rowSx}>
+    <Skeleton variant='rectangular' width={28} height={28} sx={{ borderRadius: 'sm', flexShrink: 0 }} />
+    <Box sx={{ flex: 1 }}>
+      <Skeleton variant='text' level='body-sm' width='55%' />
+      <Skeleton variant='text' level='body-xs' width='30%' />
+    </Box>
+  </Box>
+)
+
+/**
+ * The calendar's Agenda view — Nowry's own list rather than FullCalendar's
+ * (ADR-016, decision 5).
+ *
+ * One group per day of the cursor month that has something due; Today is
+ * always the first group of the current month, even when it only says
+ * "Nothing due today", so the page always opens on a "now". No "all-day"
+ * column: every event is all-day, and a column with one value is not a
+ * column. One 28px tile carries type (the glyph) and area (the fill), where
+ * the phone list used to spend a dot and a glyph on the same fact.
+ *
+ * States (§13): rows load as skeletons, never a page gate; a month with
+ * nothing in it uses the §13.2 empty pattern; errors are the page's Alert,
+ * above this surface.
+ */
+const CalendarAgenda = ({ groups, cursor, loading, language, onSelectEvent, t }) => {
+  const showSkeleton = loading && groups.every((group) => group.events.length === 0)
+  const monthEmpty = !loading && groups.length === 0
+
+  return (
+    <Sheet
+      variant='outlined'
+      data-testid='calendar-agenda'
+      sx={{ flex: 1, minHeight: { xs: 400, sm: 0 }, overflowY: 'auto', borderRadius: 'sm', bgcolor: 'background.surface' }}
+    >
+      {showSkeleton && [0, 1, 2].map((i) => <SkeletonRow key={i} />)}
+
+      {monthEmpty && (
+        <Box sx={{ py: 8, px: 2, textAlign: 'center' }}>
+          <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
+            {t('calendarPage.agenda.empty.title', { month: formatMonthTitle(cursor, language) })}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            {t('calendarPage.agenda.empty.body')}
+          </Typography>
+        </Box>
+      )}
+
+      {!showSkeleton &&
+        groups.map((group) => (
+          <React.Fragment key={group.date.getTime()}>
+            <GroupHeader group={group} language={language} t={t} />
+            {group.isToday && group.events.length === 0 && (
+              <Typography
+                level='body-sm'
+                sx={{ color: 'text.tertiary', px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}
+              >
+                {t('calendarPage.agenda.emptyToday')}
+              </Typography>
+            )}
+            {group.events.map((ev) => (
+              <AgendaRow key={ev.id} ev={ev} onSelect={onSelectEvent} t={t} />
+            ))}
+          </React.Fragment>
+        ))}
+    </Sheet>
+  )
+}
+
+export default CalendarAgenda

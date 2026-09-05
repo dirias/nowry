@@ -3186,44 +3186,50 @@
     }
   },
   "calendarPage": {
-    "title": "Calendar",
-    "addEvent": "Add event",
-    "views": {
-      "month": "Month",
-      "week": "Week",
-      "day": "Day"
+    "title": "Calendario",
+    "addEvent": "Añadir evento",
+    "error": "No se pudo cargar tu calendario. Revisa tu conexión e inténtalo de nuevo.",
+    "nav": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "today": "Hoy"
     },
-    "timeBlock": "New time block",
-    "error": "Couldn't load your calendar. Check your connection and try again.",
-    "showHabits": "Habits",
-    "showHabitsAriaLabel": "Toggle habit events on calendar",
-    "moreFilters": "More filters",
-    "lessFilters": "Less filters",
-    "moreFiltersAriaLabel": "Show more calendar filters",
-    "presets": {
-      "goalsOnly": "Goals only",
-      "goalsOnlyAriaLabel": "Show goals and milestones only",
-      "today": "Today",
-      "todayAriaLabel": "Reset filters for today",
-      "thisWeek": "This week",
-      "thisWeekAriaLabel": "Reset filters for this week"
+    "views": {
+      "month": "Mes",
+      "week": "Semana",
+      "agenda": "Agenda"
     },
     "filters": {
-      "allAreas": "All areas",
-      "allAreasAriaLabel": "Show all focus areas",
-      "areaAriaLabel": "Filter by {{name}}",
-      "allTypes": "All types",
-      "allTypesAriaLabel": "Show all event types",
-      "typeGoal": "Goals",
-      "typeTask": "Tasks",
-      "typePriority": "Priorities",
-      "typeMilestone": "Milestones",
-      "typeGoalAriaLabel": "Filter by goals",
-      "typeTaskAriaLabel": "Filter by tasks",
-      "typePriorityAriaLabel": "Filter by priorities",
-      "typeMilestoneAriaLabel": "Filter by milestones",
-      "noAreas": "No focus areas",
-      "noAreasBody": "Add a focus area in Annual Planning to filter the calendar"
+      "habits": "Hábitos",
+      "types": "Tipos",
+      "typesSelected": "Tipos · {{count}}",
+      "areas": "Áreas",
+      "areasSelected": "Áreas · {{count}}",
+      "goalsOnly": "Solo metas e hitos",
+      "showAllTypes": "Mostrar todos los tipos",
+      "showAllAreas": "Mostrar todas las áreas",
+      "areasHint": "Las tareas y prioridades no tienen área y siempre se muestran",
+      "typeGoal": "Metas",
+      "typeTask": "Tareas",
+      "typePriority": "Prioridades",
+      "typeMilestone": "Hitos",
+      "noAreas": "Sin áreas de enfoque",
+      "noAreasBody": "Añade un área de enfoque en Planificación anual para filtrar el calendario"
+    },
+    "agenda": {
+      "today": "Hoy",
+      "emptyToday": "Nada pendiente hoy: añade un evento o planifica la semana.",
+      "empty": {
+        "title": "Nada en {{month}}",
+        "body": "Añade un evento o revisa otro mes"
+      },
+      "type": {
+        "task": "Tarea",
+        "priority": "Prioridad",
+        "goal": "Meta",
+        "milestone": "Hito",
+        "activity": "Hábito"
+      }
     }
   },
   "goalAi": {

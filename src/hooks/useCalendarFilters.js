@@ -61,20 +61,15 @@ export function useCalendarFilters() {
     setFilters({ ...DEFAULT_FILTERS })
   }, [])
 
-  // D-06: applyPreset — filter-only; no FullCalendar view navigation (Phase 17)
-  const applyPreset = useCallback(
-    (name) => {
-      if (name === 'goals_only') {
-        setFilters({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
-      } else if (name === 'today' || name === 'this_week') {
-        // TODO Phase 17: navigate FullCalendar view to the target date range.
-        // For now, fall back to resetting filters (buttons are disabled in the UI).
-        resetFilters()
-      }
-      // unknown name → no-op (no else branch)
-    },
-    [resetFilters]
-  )
+  // D-06: applyPreset is filter-only. `goals_only` is the one preset left:
+  // `today` and `this_week` were navigation wearing a filter's clothes — each
+  // also reset every filter — and ADR-016 gave the date to the toolbar's nav
+  // object instead. An unknown name is a no-op.
+  const applyPreset = useCallback((name) => {
+    if (name === 'goals_only') {
+      setFilters({ habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] })
+    }
+  }, [])
 
   return { filters, setFilters, resetFilters, applyPreset }
 }

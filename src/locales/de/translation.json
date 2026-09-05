@@ -2523,44 +2523,50 @@
     }
   },
   "calendarPage": {
-    "title": "Calendar",
-    "addEvent": "Add event",
-    "views": {
-      "month": "Month",
-      "week": "Week",
-      "day": "Day"
+    "title": "Kalender",
+    "addEvent": "Termin hinzufügen",
+    "error": "Dein Kalender konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+    "nav": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "today": "Heute"
     },
-    "timeBlock": "New time block",
-    "error": "Couldn't load your calendar. Check your connection and try again.",
-    "showHabits": "Habits",
-    "showHabitsAriaLabel": "Toggle habit events on calendar",
-    "moreFilters": "More filters",
-    "lessFilters": "Less filters",
-    "moreFiltersAriaLabel": "Show more calendar filters",
-    "presets": {
-      "goalsOnly": "Goals only",
-      "goalsOnlyAriaLabel": "Show goals and milestones only",
-      "today": "Today",
-      "todayAriaLabel": "Reset filters for today",
-      "thisWeek": "This week",
-      "thisWeekAriaLabel": "Reset filters for this week"
+    "views": {
+      "month": "Monat",
+      "week": "Woche",
+      "agenda": "Agenda"
     },
     "filters": {
-      "allAreas": "All areas",
-      "allAreasAriaLabel": "Show all focus areas",
-      "areaAriaLabel": "Filter by {{name}}",
-      "allTypes": "All types",
-      "allTypesAriaLabel": "Show all event types",
-      "typeGoal": "Goals",
-      "typeTask": "Tasks",
-      "typePriority": "Priorities",
-      "typeMilestone": "Milestones",
-      "typeGoalAriaLabel": "Filter by goals",
-      "typeTaskAriaLabel": "Filter by tasks",
-      "typePriorityAriaLabel": "Filter by priorities",
-      "typeMilestoneAriaLabel": "Filter by milestones",
-      "noAreas": "No focus areas",
-      "noAreasBody": "Add a focus area in Annual Planning to filter the calendar"
+      "habits": "Gewohnheiten",
+      "types": "Typen",
+      "typesSelected": "Typen · {{count}}",
+      "areas": "Bereiche",
+      "areasSelected": "Bereiche · {{count}}",
+      "goalsOnly": "Nur Ziele und Meilensteine",
+      "showAllTypes": "Alle Typen anzeigen",
+      "showAllAreas": "Alle Bereiche anzeigen",
+      "areasHint": "Aufgaben und Prioritäten haben keinen Bereich und werden immer angezeigt",
+      "typeGoal": "Ziele",
+      "typeTask": "Aufgaben",
+      "typePriority": "Prioritäten",
+      "typeMilestone": "Meilensteine",
+      "noAreas": "Keine Fokusbereiche",
+      "noAreasBody": "Lege in der Jahresplanung einen Fokusbereich an, um den Kalender zu filtern"
+    },
+    "agenda": {
+      "today": "Heute",
+      "emptyToday": "Heute ist nichts fällig – füge einen Termin hinzu oder plane die Woche.",
+      "empty": {
+        "title": "Nichts im {{month}}",
+        "body": "Füge einen Termin hinzu oder sieh dir einen anderen Monat an"
+      },
+      "type": {
+        "task": "Aufgabe",
+        "priority": "Priorität",
+        "goal": "Ziel",
+        "milestone": "Meilenstein",
+        "activity": "Gewohnheit"
+      }
     }
   },
   "goalAi": {

@@ -113,7 +113,8 @@ const STRICT_KEYS = EN_KEYS.filter(isStrict)
 const XP_GAINED = ['cards.session.xpGained_one', 'cards.session.xpGained_other']
 
 const IDENTICAL_BY_DESIGN = {
-  es: [...XP_GAINED],
+  // "Agenda" is the Spanish word for the calendar's list view.
+  es: ['calendarPage.views.agenda', ...XP_GAINED],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
   // "Portrait(s)" is the French word, so both the heading and the numbered
@@ -129,6 +130,11 @@ const IDENTICAL_BY_DESIGN = {
     // says "Focus" for the focus session — the segment label keeps it.
     'pomodoro.pause',
     'pomodoro.modes.short.work',
+    // "Agenda" and "Types" are the French words for the calendar's list view and
+    // its type filter; the counted form "Types · 2" follows the label.
+    'calendarPage.views.agenda',
+    'calendarPage.filters.types',
+    'calendarPage.filters.typesSelected',
     ...XP_GAINED
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has
@@ -139,6 +145,8 @@ const IDENTICAL_BY_DESIGN = {
     'news.categories.design',
     'cards.session.filters.tags',
     'cards.session.filters.tagsSelected',
+    // "Agenda" is the German word for the calendar's list view as well.
+    'calendarPage.views.agenda',
     ...XP_GAINED
   ],
   ja: ['cards.session.xpGained_other']

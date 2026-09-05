@@ -2189,3 +2189,25 @@ border, 320px wide, 24px from the corner. Inside it the ladder holds without exc
     default, right in a session, bottom-right when there is no pet. A phone has no second corner, so
     there the open widget is a full-width sheet raised clear of the pet, and only the chip stays in
     a corner.
+
+### 15.7 A page toolbar is one row, and a readout is not a title (ADR-016)
+
+The calendar page is the reference case: three stacked toolbars became two rows, and every control
+on the page was audited for what it acts on before it was given a shape.
+
+*   **One name, one control.** Two controls that share a label must do the same thing, and a
+    navigation label never resets a filter. "Today" moves the date; nothing else on the page is
+    called Today, and nothing called "This week" exists when "Week" and "Today" already do.
+*   **The date is the nav object's readout.** It sits beside `[‹][›][Today]` on the left rail as
+    `title-lg` text, the way "1 of 8 · verbs" sits beside the study filter (§15.4). A title centred
+    between two groups is the lone mid-row object that rule forbids.
+*   **Filters are menus off their segments, and the label is the readout.** "Types" means no
+    filter; "Types · 2" means two chosen. There is no "All" chip — the absence of a filter is the
+    absence of a count. A disclosure that expands chips inline moves the content it governs, which a
+    toolbar must never do.
+*   **A view for all-day data has no hour axis.** When every event is `allDay`, a time grid is 24
+    empty rows under a one-line strip. Use the day-grid week and an agenda list; give the agenda a
+    "Today" group even when it is empty, so the page always opens on a now.
+*   **Shape is assigned by class, not by component.** Joy's `Chip` and `Button` are not classes;
+    "acts on the list" and "acts on the view" are. Two controls of one class in one row take one
+    shape — the segmented object — whatever they happen to be made of.
