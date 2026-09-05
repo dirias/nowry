@@ -1904,6 +1904,9 @@
       "emptyVisualBody": "デッキを作成して、この図を保存・復習しましょう。"
     },
     "session": {
+      "complete": {
+        "outsideFilter_other": "タグフィルターの外に、復習待ちのカードがあと{{count}}枚あります。"
+      },
       "tagFilter": {
         "noOptions": "このデッキにタグはありません",
         "clear": "タグフィルターを解除",

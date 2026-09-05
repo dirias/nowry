@@ -1995,6 +1995,10 @@
           "title": "Rien de marqué pour l'instant",
           "body": "Marquez une carte pendant que vous révisez et vous la retrouverez ici."
         }
+      },
+      "complete": {
+        "outsideFilter_one": "{{count}} autre carte à revoir se trouve hors de votre filtre par tag.",
+        "outsideFilter_other": "{{count}} autres cartes à revoir se trouvent hors de votre filtre par tag."
       }
     },
     "common": {

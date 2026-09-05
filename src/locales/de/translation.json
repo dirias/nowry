@@ -1973,6 +1973,10 @@
           "title": "Noch nichts markiert",
           "body": "Markiere eine Karte beim Lernen, dann wartet sie hier auf dich."
         }
+      },
+      "complete": {
+        "outsideFilter_one": "{{count}} weitere fällige Karte liegt außerhalb deines Tag-Filters.",
+        "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters."
       }
     },
     "common": {

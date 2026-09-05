@@ -1186,7 +1186,9 @@
         "cardsReviewed": "tarjetas revisadas",
         "needsAttentionLabel": "necesitan más práctica",
         "topCardCallout": "Tarjeta que necesita más atención: {{card}}",
-        "perfectSession": "¡Sesión perfecta! Todas las tarjetas se sintieron sólidas."
+        "perfectSession": "¡Sesión perfecta! Todas las tarjetas se sintieron sólidas.",
+        "outsideFilter_one": "{{count}} tarjeta pendiente más queda fuera de tu filtro de etiquetas.",
+        "outsideFilter_other": "{{count}} tarjetas pendientes más quedan fuera de tu filtro de etiquetas."
       },
       "card": "Tarjeta {{current}} de {{total}}",
       "syncing": "Sincronizando {{count}} revisión...",

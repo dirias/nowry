@@ -1,5 +1,5 @@
 /**
- * HDR-002 — the Browse session's view filters as one segmented control.
+ * HDR-002 — a study session's view filters as one segmented control.
  *
  * What is pinned here is the taxonomy, not the pixels: that a segment with
  * nothing to control does not exist (§11), that each segment names itself by
@@ -11,7 +11,7 @@
 import React from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 
-import BrowseFilterBar from '../BrowseFilterBar'
+import SessionFilterBar from '../SessionFilterBar'
 
 const t = (key, opts) => (opts ? `${key}:${JSON.stringify(opts)}` : key)
 
@@ -22,7 +22,7 @@ const TAGS = [
 
 const setup = (props = {}) =>
   render(
-    <BrowseFilterBar
+    <SessionFilterBar
       availableTags={TAGS}
       selectedTags={[]}
       onTagsChange={jest.fn()}
@@ -68,7 +68,7 @@ describe('progressive disclosure', () => {
     expect(screen.queryByText(/showing/)).not.toBeInTheDocument()
 
     rerender(
-      <BrowseFilterBar
+      <SessionFilterBar
         availableTags={TAGS}
         selectedTags={[]}
         onTagsChange={jest.fn()}
@@ -155,7 +155,7 @@ describe('the tag segment', () => {
     expect(screen.queryByText('cards.session.tagFilter.clear')).not.toBeInTheDocument()
 
     rerender(
-      <BrowseFilterBar
+      <SessionFilterBar
         availableTags={TAGS}
         selectedTags={['verbs']}
         onTagsChange={onTagsChange}

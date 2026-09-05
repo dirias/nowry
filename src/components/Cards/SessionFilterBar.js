@@ -8,7 +8,7 @@ import { focusRing, segment, segmentedGroup } from '../Common/Form/formStyles'
 const SEARCH_THRESHOLD = 8
 
 /**
- * The Browse session's view filters, as one segmented control.
+ * A study session's view filters, as one segmented control.
  *
  * **Why one object rather than two chips.** These two filters do the same job —
  * they narrow the loaded deck — and the eye reads *same shape ⇒ same class*. As
@@ -27,8 +27,11 @@ const SEARCH_THRESHOLD = 8
  *
  * **Progressive disclosure, unchanged (§11).** A segment with nothing to
  * control is not rendered: no tags on the deck, no Tags segment; nothing marked
- * and the filter off, no Marked segment. The parent renders this only in
- * Browse, so neither can reach the SM-2 queue (ADR-010).
+ * and the filter off, no Marked segment. The Tags segment can appear in either
+ * mode — ADR-014 lets tags narrow the SM-2 queue without reordering it. The
+ * Marked segment appears only in Browse, and that gate is upstream, not here:
+ * outside Browse the hook reports `markedCount` 0 and `markedOnly` false, so
+ * there is nothing for this component to render (ADR-010).
  *
  * MODULE SCOPE + React.memo, and `t` as a prop — see the PERF-01 comment at the
  * top of StudySession.js. Defined inside StudySession()'s body it would get a
@@ -52,7 +55,7 @@ const SEARCH_THRESHOLD = 8
  *   t: (key: string, options?: object) => string
  * }} props
  */
-const BrowseFilterBar = React.memo(function BrowseFilterBar({
+const SessionFilterBar = React.memo(function SessionFilterBar({
   availableTags,
   selectedTags,
   onTagsChange,
@@ -91,7 +94,7 @@ const BrowseFilterBar = React.memo(function BrowseFilterBar({
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-      <Sheet variant='outlined' data-testid='browse-filter-bar' sx={{ ...segmentedGroup, width: { xs: '100%', sm: 'auto' } }}>
+      <Sheet variant='outlined' data-testid='session-filter-bar' sx={{ ...segmentedGroup, width: { xs: '100%', sm: 'auto' } }}>
         {hasTags && (
           <Dropdown>
             <MenuButton
@@ -195,4 +198,4 @@ const BrowseFilterBar = React.memo(function BrowseFilterBar({
   )
 })
 
-export default BrowseFilterBar
+export default SessionFilterBar
