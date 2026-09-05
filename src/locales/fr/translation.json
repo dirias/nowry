@@ -2578,6 +2578,8 @@
     "agenda": {
       "today": "Aujourd’hui",
       "emptyToday": "Rien à faire aujourd’hui : ajoutez un événement ou planifiez la semaine.",
+      "markDone": "Marquer comme fait",
+      "markUndone": "Marquer comme non fait",
       "empty": {
         "title": "Rien en {{month}}",
         "body": "Ajoutez un événement ou consultez un autre mois"

@@ -3384,6 +3384,8 @@
     "agenda": {
       "today": "Today",
       "emptyToday": "Nothing due today — add an event or plan the week.",
+      "markDone": "Mark done",
+      "markUndone": "Mark not done",
       "empty": {
         "title": "Nothing in {{month}}",
         "body": "Add an event or check another month"

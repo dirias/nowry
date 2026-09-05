@@ -230,3 +230,38 @@ describe('calendarService — CAL-02: isKeyResult in milestone extendedProps', (
     expect(ms.isKeyResult).toBe(false)
   })
 })
+
+// ─── CAL-002: a finished priority reads as `completed` ───────────────────────
+
+describe('calendarService — CAL-002: priority completion surfaces as status', () => {
+  const { tasksService } = require('./tasks.service')
+  const { fetchAnnualPlanData } = require('./annualPlanning.service')
+  const { queryClient } = require('../queryClient')
+  const { calendarService } = require('./calendar.service')
+
+  const plan = (priorities) => ({ plan: {}, priorities, focusAreas: [], goals: [], activities: [], quarterReports: [] })
+
+  beforeEach(() => {
+    queryClient.fetchQuery.mockImplementation(({ queryFn }) => queryFn())
+    tasksService.getAll.mockResolvedValue([])
+  })
+
+  it('a priority with is_completed: true arrives as status "completed", the word tasks already use', async () => {
+    fetchAnnualPlanData.mockResolvedValue(
+      plan([{ _id: 'p1', title: 'Launch MVP', deadline: '2026-09-30', status: 'active', is_completed: true }])
+    )
+    const { events } = await calendarService.getAllEvents('user-1')
+    expect(events.find((e) => e.type === 'priority').status).toBe('completed')
+  })
+
+  it('an unfinished priority keeps whatever status the plan says, defaulting to "active"', async () => {
+    fetchAnnualPlanData.mockResolvedValue(
+      plan([
+        { _id: 'p1', title: 'A', deadline: '2026-09-30', status: 'active', is_completed: false },
+        { _id: 'p2', title: 'B', deadline: '2026-10-30' }
+      ])
+    )
+    const { events } = await calendarService.getAllEvents('user-1')
+    expect(events.filter((e) => e.type === 'priority').map((e) => e.status)).toEqual(['active', 'active'])
+  })
+})

@@ -3219,6 +3219,8 @@
     "agenda": {
       "today": "Hoy",
       "emptyToday": "Nada pendiente hoy: añade un evento o planifica la semana.",
+      "markDone": "Marcar como hecho",
+      "markUndone": "Marcar como no hecho",
       "empty": {
         "title": "Nada en {{month}}",
         "body": "Añade un evento o revisa otro mes"

@@ -180,6 +180,28 @@ const CalendarPage = () => {
     setFormOpen(true) // modal re-mounts cleanly via key prop (see EventFormModal below)
   }, [])
 
+  // CAL-002 / ADR-016 decision 6: a task or priority is finished from its
+  // agenda row. Optimistic-then-revert, as `usePriorityStatus` does: the list
+  // is patched first, the request follows, and a rejection restores the exact
+  // status the row had. Only `is_completed` is ever sent.
+  const toggleComplete = useCallback(
+    async (ev) => {
+      const next = ev.status !== 'completed'
+      const patch = (status) => setEvents((prev) => prev.map((item) => (item.id === ev.id ? { ...item, status } : item)))
+      patch(next ? 'completed' : ev.type === 'task' ? 'pending' : 'active')
+      try {
+        const rawId = stripTypePrefix(ev.id)
+        if (ev.type === 'task') await tasksService.update(rawId, { is_completed: next })
+        else await annualPlanningService.updatePriority(rawId, { is_completed: next })
+        calendarService.invalidateCache(userId)
+      } catch (err) {
+        patch(ev.status)
+        setCalendarError(err)
+      }
+    },
+    [userId]
+  )
+
   const handleEventClick = useCallback(
     (clickInfo) => {
       const ev = clickInfo.event
@@ -294,7 +316,15 @@ const CalendarPage = () => {
         )}
 
         {effectiveView === 'agenda' ? (
-          <CalendarAgenda groups={agendaGroups} cursor={cursor} loading={loading} language={language} onSelectEvent={openEditor} t={t} />
+          <CalendarAgenda
+            groups={agendaGroups}
+            cursor={cursor}
+            loading={loading}
+            language={language}
+            onSelectEvent={openEditor}
+            onToggleComplete={toggleComplete}
+            t={t}
+          />
         ) : (
           <Box sx={{ flex: 1, overflow: 'hidden', minHeight: { xs: 500, sm: 0 } }}>
             <FullCalendar

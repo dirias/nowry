@@ -1,5 +1,7 @@
 import React from 'react'
-import { Box, Link, Sheet, Skeleton, Typography } from '@mui/joy'
+import { Box, IconButton, Link, Sheet, Skeleton, Typography } from '@mui/joy'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
@@ -8,7 +10,7 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 
 import { readableTextOn } from '../../theme/colorSchemeGenerator'
-import { focusRing } from '../Common/Form/formStyles'
+import { focusRing, touchTargetBox } from '../Common/Form/formStyles'
 import { formatDayLabel, formatDaySide, formatMonthTitle } from './agendaGroups'
 
 const TYPE_ICON = {
@@ -55,10 +57,16 @@ const GroupHeader = ({ group, language, t }) => (
   </Box>
 )
 
-const AgendaRow = ({ ev, onSelect, t }) => {
+// The two types with a completion state of their own. Goals and milestones
+// finish through the plan; habits through the routine (ADR-016, decision 6).
+const TICKABLE = ['task', 'priority']
+
+const AgendaRow = ({ ev, onSelect, onToggleComplete, t }) => {
   const Icon = eventIcon(ev)
   const completed = ev.status === 'completed'
   const typeLabel = t(`calendarPage.agenda.type.${ev.type}`)
+  const tickable = Boolean(onToggleComplete) && TICKABLE.includes(ev.type)
+  const tickLabel = completed ? t('calendarPage.agenda.markUndone') : t('calendarPage.agenda.markDone')
   return (
     <Box sx={rowSx}>
       {/* ev.color is the focus area's own colour — user data, not a token —
@@ -105,6 +113,28 @@ const AgendaRow = ({ ev, onSelect, t }) => {
           {[ev.areaName, typeLabel].filter(Boolean).join(' · ')}
         </Typography>
       </Box>
+      {/* The app's completion idiom (PriorityList, Task): empty circle to
+          finish, filled success check to undo. `aria-pressed` carries the
+          state so a screen reader hears it as well as the action. */}
+      {tickable && (
+        <IconButton
+          size='sm'
+          variant='plain'
+          color={completed ? 'success' : 'neutral'}
+          onClick={() => onToggleComplete(ev)}
+          aria-label={tickLabel}
+          aria-pressed={completed}
+          sx={{
+            ...touchTargetBox,
+            borderRadius: 'sm',
+            flexShrink: 0,
+            color: completed ? 'success.plainColor' : 'text.tertiary',
+            ...focusRing
+          }}
+        >
+          {completed ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
+        </IconButton>
+      )}
     </Box>
   )
 }
@@ -134,7 +164,7 @@ const SkeletonRow = () => (
  * nothing in it uses the §13.2 empty pattern; errors are the page's Alert,
  * above this surface.
  */
-const CalendarAgenda = ({ groups, cursor, loading, language, onSelectEvent, t }) => {
+const CalendarAgenda = ({ groups, cursor, loading, language, onSelectEvent, onToggleComplete, t }) => {
   const showSkeleton = loading && groups.every((group) => group.events.length === 0)
   const monthEmpty = !loading && groups.length === 0
 
@@ -170,7 +200,7 @@ const CalendarAgenda = ({ groups, cursor, loading, language, onSelectEvent, t })
               </Typography>
             )}
             {group.events.map((ev) => (
-              <AgendaRow key={ev.id} ev={ev} onSelect={onSelectEvent} t={t} />
+              <AgendaRow key={ev.id} ev={ev} onSelect={onSelectEvent} onToggleComplete={onToggleComplete} t={t} />
             ))}
           </React.Fragment>
         ))}

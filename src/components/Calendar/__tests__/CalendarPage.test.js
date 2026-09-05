@@ -346,6 +346,84 @@ describe('CAL-001: the toolbar', () => {
   })
 })
 
+// ─── CAL-002: finishing a task or priority from its agenda row ──────────────
+
+describe('CAL-002: the agenda row check', () => {
+  const { calendarService } = require('../../../api/services/calendar.service')
+  const { tasksService, annualPlanningService } = require('../../../api/services')
+
+  const today = new Date()
+  const task = {
+    id: 'task-1',
+    type: 'task',
+    title: 'Finish Spanish deck',
+    status: 'pending',
+    color: '#6366f1',
+    date: today,
+    focusAreaId: null
+  }
+  const priority = {
+    id: 'priority-1',
+    type: 'priority',
+    title: 'Q3 review',
+    status: 'active',
+    color: '#f59e0b',
+    date: today,
+    focusAreaId: null
+  }
+
+  const renderPhone = async () => {
+    const CalendarPage = require('../CalendarPage').default
+    await act(async () => {
+      render(<CalendarPage />)
+    })
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsMobile.mockReturnValue(true)
+    mockUseCalendarFilters.mockReturnValue({
+      filters: { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] },
+      setFilters: jest.fn(),
+      resetFilters: jest.fn(),
+      applyPreset: jest.fn()
+    })
+    calendarService.getAllEvents.mockResolvedValue({ events: [task, priority], focusAreas: [] })
+  })
+
+  it('ticking a task sends only is_completed, and the row reads as done before the request resolves', async () => {
+    tasksService.update.mockReturnValue(new Promise(() => {})) // never resolves
+    await renderPhone()
+    const check = screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })[0]
+    fireEvent.click(check)
+    expect(tasksService.update).toHaveBeenCalledWith('1', { is_completed: true })
+    expect(screen.getByRole('button', { name: 'calendarPage.agenda.markUndone' })).toHaveAttribute('aria-pressed', 'true')
+    expect(annualPlanningService.updatePriority).not.toHaveBeenCalled()
+  })
+
+  it('ticking a priority goes through updatePriority with the bare id', async () => {
+    annualPlanningService.updatePriority.mockResolvedValue({})
+    await renderPhone()
+    const checks = screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })
+    await act(async () => {
+      fireEvent.click(checks[1])
+    })
+    expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('1', { is_completed: true })
+    expect(calendarService.invalidateCache).toHaveBeenCalledWith('test-user')
+  })
+
+  it('a rejected request puts the row back and raises the page alert', async () => {
+    tasksService.update.mockRejectedValue(new Error('offline'))
+    await renderPhone()
+    await act(async () => {
+      fireEvent.click(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })[0])
+    })
+    expect(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })).toHaveLength(2)
+    expect(screen.queryByRole('button', { name: 'calendarPage.agenda.markUndone' })).toBeNull()
+    expect(screen.getByRole('alert')).toHaveTextContent('calendarPage.error')
+  })
+})
+
 // ─── Event pill contrast ────────────────────────────────────────────────────
 
 // Exercises the real `readableTextOn` against the real colours

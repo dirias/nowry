@@ -2556,6 +2556,8 @@
     "agenda": {
       "today": "Heute",
       "emptyToday": "Heute ist nichts fällig – füge einen Termin hinzu oder plane die Woche.",
+      "markDone": "Als erledigt markieren",
+      "markUndone": "Als nicht erledigt markieren",
       "empty": {
         "title": "Nichts im {{month}}",
         "body": "Füge einen Termin hinzu oder sieh dir einen anderen Monat an"

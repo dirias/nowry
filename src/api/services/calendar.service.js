@@ -164,7 +164,10 @@ export const calendarService = {
                 date: parseLocalDate(p.deadline || p.target_date),
                 type: 'priority',
                 color: '#f59e0b',
-                status: p.status || 'active',
+                // A finished priority reads as `completed`, the same word tasks
+                // use, so the agenda has one rule for the two tickable types
+                // (ADR-016). Unfinished keeps whatever the plan says.
+                status: p.is_completed ? 'completed' : p.status || 'active',
                 focusAreaId: null // D-02: priorities have no focus area
               })
             }
