@@ -907,22 +907,49 @@
     "addEvent": "Ajouter un événement",
     "editEvent": "Modifier l'événement",
     "form": {
-      "selectType": "Type d'événement",
+      "selectType": "Qu’est-ce que c’est ?",
+      "addTitle": "Ajouter au calendrier",
       "title": "Titre",
       "date": "Date",
       "description": "Description",
-      "focusArea": "Domaine de focus",
+      "focusArea": "Domaine",
+      "focusAreaPlaceholder": "Choisissez un domaine…",
+      "noAreas": "Aucun domaine pour l’instant. Ajoutez-en un dans la planification annuelle pour classer l’objectif.",
       "goal": "Objectif",
-      "save": "Enregistrer",
+      "goalPlaceholder": "Choisissez l’objectif auquel il appartient…",
+      "goalHelper": "Seuls les objectifs encore ouverts sont listés.",
+      "noActiveGoals": "Aucun objectif ouvert auquel le rattacher. Créez un objectif dans la planification annuelle, ou ajoutez-le comme tâche.",
+      "noPlan": "Créez le plan de cette année dans la planification annuelle avant d’ajouter une priorité.",
+      "placeholder": {
+        "task": "Que faut-il faire ?",
+        "priority": "Qu’est-ce qui compte cette année ?",
+        "goal": "Vers quoi travaillez-vous ?",
+        "milestone": "Qu’est-ce qui marque la progression ?"
+      },
+      "addAction": {
+        "task": "Ajouter la tâche",
+        "priority": "Ajouter la priorité",
+        "goal": "Ajouter l’objectif",
+        "milestone": "Ajouter le jalon"
+      },
+      "saveChanges": "Enregistrer les modifications",
       "cancel": "Annuler",
-      "saveError": "Échec de l'enregistrement. Veuillez réessayer.",
+      "addDescription": "Ajouter une description",
+      "descriptionPlaceholder": "Pourquoi c’est important cette année…",
+      "markKeyResult": "Marquer comme résultat clé",
+      "keyResult": "Résultat clé",
+      "keyResultHelper": "Affiché avec une étoile, et compte comme l’étape mesurable de l’objectif.",
+      "titleRequired": "Donnez-lui un titre pour l’enregistrer.",
+      "saveErrorTitle": "Impossible d’enregistrer cet événement",
+      "saveError": "Vérifiez votre connexion et réessayez. Rien n’a été perdu.",
+      "milestoneReadOnly": "Les jalons se modifient depuis leur objectif dans la planification annuelle.",
       "types": {
         "task": "Tâche",
         "priority": "Priorité",
         "goal": "Objectif",
+        "milestone": "Jalon",
         "activity": "Habitude"
-      },
-      "noActiveGoals": "Aucun objectif actif. Créez d'abord un objectif dans Planification annuelle."
+      }
     }
   },
   "about": {

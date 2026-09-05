@@ -1,75 +1,55 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Modal,
-  ModalDialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
-  Box,
-  FormControl,
-  FormLabel,
-  Input,
-  Textarea,
-  Button,
-  Select,
-  Option,
-  CircularProgress,
-  Typography,
-  Divider,
-  Chip
-} from '@mui/joy'
+import { Box, Button, Checkbox, FormControl, FormHelperText, FormLabel, Option, Select, Sheet, Skeleton, Stack, Typography } from '@mui/joy'
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
+import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
+import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
+import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
+
 import { tasksService } from '../../api/services/tasks.service'
 import { annualPlanningService } from '../../api/services/annualPlanning.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { calculateProgress } from '../AnnualPlanning/goalDerivation'
-import { focusRing, touchTarget } from '../Common/Form/formStyles'
+import FormDisclosureRail from '../Common/Form/FormDisclosureRail'
+import FormErrorBanner from '../Common/Form/FormErrorBanner'
+import FormSheet from '../Common/Form/FormSheet'
+import FormTextArea from '../Common/Form/FormTextArea'
+import FormTextField from '../Common/Form/FormTextField'
+import { focusRing, formLabel, segment, segmentedGroup } from '../Common/Form/formStyles'
 
 /**
- * Joy palette names per type — not painted values. `variant='solid'` then pairs
- * each background with its `solidColor` foreground, which `colorSchemeGenerator`
- * derives from luminance, so the selected chip stays legible against whichever
- * accent the user picked. Hardcoding `common.white` over a hand-painted
- * `bgcolor` was the same unverified pairing that shipped as a bug on the accent
- * swatches (see User/WelcomeScreen.js).
- *
- * Must match CalendarModal TYPE_META (which adds `milestone`).
+ * The four things a calendar day can be given (ADR-017). Habit is not one of
+ * them: a habit is a schedule, and this form could only ever write a date —
+ * the shape `calendar.service.js` files under "legacy". Planning cut the same
+ * loop from the goal form in FE-A4. Milestone is: a dated step of a goal is
+ * exactly what a calendar day is for, and the calendar already draws them.
  */
-const TYPE_PALETTES = {
-  task: 'primary',
-  priority: 'warning',
-  goal: 'success',
-  activity: 'neutral'
+const TYPES = ['task', 'priority', 'goal', 'milestone']
+
+const TYPE_ICONS = {
+  task: CheckCircleOutlinedIcon,
+  priority: FlagOutlinedIcon,
+  goal: AdjustOutlinedIcon,
+  milestone: DiamondOutlinedIcon,
+  activity: RepeatRoundedIcon
 }
 
-const TYPES = ['task', 'priority', 'goal', 'activity']
+/** Optional groups per type, offered as rail chips that remove themselves on use. */
+const OPTIONAL_GROUPS = { priority: ['description'], milestone: ['keyResult'] }
+const RAIL_LABELS = { description: 'calendarModal.form.addDescription', keyResult: 'calendarModal.form.markKeyResult' }
 
 /**
  * A finished goal, by the definition the rest of the app already uses (see
  * AnnualPlanningLayout and CloseQuarterModal): an explicit `completed` status,
  * or progress at 100%. `calculateProgress` is the shared pure helper in
  * goalDerivation, so this stays in step with every other goal surface rather
- * than inventing a third rule.
- *
- * Habits attach to a goal, and FocusAreaView already locks a completed goal's
- * milestones to avoid a finished goal growing unfinished children. Offering
- * completed goals here walked around that guard.
+ * than inventing a third rule. FocusAreaView locks a completed goal's
+ * milestones; offering completed goals here would walk around that guard.
  */
 const isGoalCompleted = (goal) => goal?.status === 'completed' || (goal ? calculateProgress(goal) : 0) === 100
 
-/**
- * These chips are a selection control, so they answer to the same geometry as
- * every other one in the app: `size='sm'` alone left them ~24px tall, visibly
- * shorter than the buttons around them and short of the ≥44px DESIGN_GUIDELINES
- * §3.2 requires at `xs` (WCAG 2.5.5). Matches `filterControl` in CalendarPage.
- */
-const typeChip = { ...focusRing, ...touchTarget, cursor: 'pointer', transition: 'all 0.15s' }
-
-/**
- * Formats a Date (or existing date string) to a YYYY-MM-DD value
- * suitable for <input type="date">, always using local time.
- */
+/** YYYY-MM-DD for <input type="date">, always in local time. */
 const toInputDate = (d) => {
   if (!d) return ''
   const src =
@@ -86,106 +66,178 @@ const toInputDate = (d) => {
   return `${y}-${mo}-${day}`
 }
 
+/** The task list's label for a category id, from the same key SideMenu writes. */
+const taskListLabel = (category) => {
+  if (!category || category === 'general') return null
+  try {
+    const lists = JSON.parse(localStorage.getItem('nowry_task_lists') || '[]')
+    return lists.find((l) => l.id === category)?.label ?? category
+  } catch {
+    return category
+  }
+}
+
 /**
- * EventFormModal
- * Create or edit any calendar event type while respecting each asset's nature.
+ * "What is it?" — one segmented object, four segments of one class (§15.2).
+ * The engaged segment is a ground, never a hue: on a surface that also shows
+ * done and undone, a fill colour on a selection reads as a state (§15.5). The
+ * calendar's own glyph sits beside each label from `sm` up; at `xs` the four
+ * labels alone fit between the rules.
+ */
+const EventTypeObject = ({ value, onChange, t }) => (
+  <FormControl>
+    <FormLabel sx={formLabel}>{t('calendarModal.form.selectType')}</FormLabel>
+    <Sheet variant='outlined' role='group' aria-label={t('calendarModal.form.selectType')} sx={{ ...segmentedGroup, width: '100%' }}>
+      {TYPES.map((typeKey, index) => {
+        const Icon = TYPE_ICONS[typeKey]
+        return (
+          <Button
+            key={typeKey}
+            variant='plain'
+            color='neutral'
+            onClick={() => onChange(typeKey)}
+            aria-pressed={value === typeKey}
+            startDecorator={<Icon sx={{ fontSize: 'md', display: { xs: 'none', sm: 'block' } }} />}
+            sx={{ ...segment(value === typeKey, index === 0), flex: 1, px: 1 }}
+          >
+            {t(`calendarModal.form.types.${typeKey}`)}
+          </Button>
+        )
+      })}
+    </Sheet>
+  </FormControl>
+)
+
+/**
+ * The picker a type needs before it can be filed: a focus area for a goal, an
+ * open goal for a milestone. Never disabled and never a page gate — while the
+ * plan loads, only this control shows a skeleton and the title can be typed.
+ */
+const ContextPicker = ({ labelKey, placeholderKey, helperKey, emptyKey, loading, options, value, onChange, error, t }) => (
+  <FormControl required error={error}>
+    <FormLabel sx={formLabel}>{t(labelKey)}</FormLabel>
+    {loading ? (
+      <Skeleton variant='rectangular' height={48} sx={{ borderRadius: 'sm' }} />
+    ) : options.length === 0 ? (
+      <Typography level='body-sm' sx={{ color: 'text.secondary', px: 2, py: 1.5, borderRadius: 'md', bgcolor: 'background.level1' }}>
+        {t(emptyKey)}
+      </Typography>
+    ) : (
+      <Select size='lg' value={value} onChange={(_, v) => onChange(v ?? '')} placeholder={t(placeholderKey)} sx={focusRing}>
+        {options.map((option) => (
+          <Option key={option.id} value={option.id}>
+            {option.label}
+          </Option>
+        ))}
+      </Select>
+    )}
+    {error ? (
+      <FormHelperText>{t('form.requiredField')}</FormHelperText>
+    ) : (
+      helperKey && options.length > 0 && !loading && <FormHelperText>{t(helperKey)}</FormHelperText>
+    )}
+  </FormControl>
+)
+
+/**
+ * EventFormModal — create or edit any calendar event, on the shared sheet.
+ *
+ * Title-first, as the goal form is since FE-A4: the type object, then the
+ * title, then only what that type needs, then the date (prefilled from the day
+ * clicked). Optional groups are rail chips. The primary action is named after
+ * what it makes and is never disabled — an empty title fails loudly under the
+ * field, a missing picker under itself, a rejected request in the banner.
  *
  * Props:
- *   open        – boolean
- *   onClose     – () => void
- *   onSuccess   – () => void  (triggers event reload in CalendarModal)
- *   mode        – 'create' | 'edit'
- *   event       – existing normalized event (edit mode), null for create
- *   defaultDate – Date to pre-fill when creating
+ *   open, onClose, onSuccess – as before
+ *   mode  – 'create' | 'edit'
+ *   event – the normalised calendar event (edit), null for create
+ *   defaultDate – Date to prefill when creating
  */
 const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = null, defaultDate }) => {
   const { t } = useTranslation()
   const isEdit = mode === 'edit'
 
-  // ── Form state ────────────────────────────────────────────────────────────
   const [type, setType] = useState('task')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState('')
   const [focusAreaId, setFocusAreaId] = useState('')
   const [goalId, setGoalId] = useState('')
-
-  // Context for plan-based types
-  const { plan: cachedPlan, areas: cachedAreas, goals: cachedGoals, loading: hookLoading } = useAnnualPlan()
-
-  // Save state
+  const [keyResult, setKeyResult] = useState(false)
+  const [revealed, setRevealed] = useState([])
+  const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
+  const [saveError, setSaveError] = useState(null)
+  const titleRef = useRef(null)
 
-  // ── Populate / reset on open ──────────────────────────────────────────────
+  const { plan: cachedPlan, areas: cachedAreas, goals: cachedGoals, loading: contextLoading } = useAnnualPlan()
+
   useEffect(() => {
     if (!open) return
-    setError(null)
+    setErrors({})
+    setSaveError(null)
+    setRevealed([])
+    setKeyResult(false)
+    setFocusAreaId('')
+    setGoalId('')
+    setDescription(isEdit ? event?.description || '' : '')
     if (isEdit && event) {
       setType(event.type || 'task')
       setTitle(event.title || '')
-      setDescription(event.description || '')
       setDate(toInputDate(event.date))
-      setFocusAreaId('')
-      setGoalId('')
     } else {
       setType('task')
       setTitle('')
-      setDescription('')
       setDate(toInputDate(defaultDate || new Date()))
-      setFocusAreaId('')
-      setGoalId('')
     }
   }, [open, isEdit, event, defaultDate])
 
-  // ── Fetch annual plan context only when needed ────────────────────────────
-  // Only goal and activity creation need focus-area/goal selectors.
-  const needsContext = !isEdit && (type === 'priority' || type === 'goal' || type === 'activity')
-  const annualPlanId = cachedPlan?._id
-  const focusAreas = cachedAreas || []
-  const allGoals = useMemo(() => cachedGoals || [], [cachedGoals])
-  const contextLoading = hookLoading
-
-  // ── Derived ───────────────────────────────────────────────────────────────
   const activeType = isEdit ? event?.type || 'task' : type
+  const annualPlanId = cachedPlan?._id
+  const focusAreas = useMemo(() => (cachedAreas || []).map((a) => ({ id: a._id, label: a.name })), [cachedAreas])
+  // Only goals that can still take a new milestone reach the picker.
+  const openGoals = useMemo(
+    () => (cachedGoals || []).filter((g) => !isGoalCompleted(g)).map((g) => ({ id: g._id, label: g.title })),
+    [cachedGoals]
+  )
+
   const needsFocusArea = !isEdit && type === 'goal'
-  const needsGoal = !isEdit && type === 'activity'
-  // Only goals that can still take new habits reach the picker.
-  const activeGoals = useMemo(() => allGoals.filter((g) => !isGoalCompleted(g)), [allGoals])
-  const needsDescription = activeType === 'priority'
+  const needsGoal = !isEdit && type === 'milestone'
+  const railOffers = isEdit ? [] : (OPTIONAL_GROUPS[type] || []).filter((group) => !revealed.includes(group))
+  const milestoneReadOnly = isEdit && activeType === 'milestone'
 
-  // Determine if save should be blocked
-  const canSave = title.trim() && !(needsFocusArea && !focusAreaId) && !(needsGoal && !goalId) && !(type === 'priority' && !annualPlanId)
-
-  // ── Save handlers ─────────────────────────────────────────────────────────
-  const handleSave = async () => {
-    if (!canSave) return
-    setSaving(true)
-    setError(null)
-    try {
-      if (isEdit) {
-        await handleEdit()
-      } else {
-        await handleCreate()
-      }
-      onSuccess?.()
-      onClose()
-    } catch (err) {
-      console.error('[EventFormModal] Save failed:', err)
-      setError(t('calendarModal.form.saveError'))
-    } finally {
-      setSaving(false)
-    }
+  const changeType = (next) => {
+    setType(next)
+    setRevealed([])
+    setKeyResult(false)
+    setErrors({})
   }
 
-  const handleCreate = async () => {
+  const reveal = (group) => {
+    setRevealed((prev) => [...prev, group])
+    if (group === 'keyResult') setKeyResult(true)
+  }
+
+  // ── Validation: loud, never a disabled button ─────────────────────────────
+  const validate = () => {
+    const next = {}
+    if (!title.trim()) next.title = true
+    if (needsFocusArea && !focusAreaId) next.focusArea = true
+    if (needsGoal && !goalId) next.goal = true
+    setErrors(next)
+    if (next.title) titleRef.current?.focus()
+    return Object.keys(next).length === 0
+  }
+
+  const create = async () => {
+    const trimmed = title.trim()
     switch (type) {
       case 'task':
-        await tasksService.create({ title: title.trim(), deadline: date || null })
-        break
+        return tasksService.create({ title: trimmed, deadline: date || null })
       case 'priority':
-        await annualPlanningService.createPriority({
-          title: title.trim(),
+        return annualPlanningService.createPriority({
+          title: trimmed,
           description: description.trim() || '',
           deadline: date || null,
           annual_plan_id: annualPlanId,
@@ -193,260 +245,201 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
           linked_entity_id: null,
           linked_entity_type: null
         })
-        break
       case 'goal': {
-        // Derive quarter (1–4) and year from the target date so the goal appears
-        // in the correct quarter view in AnnualPlanningHome.
-        // Use T00:00:00 suffix to force local-time parsing (avoids UTC midnight rollback).
+        // Quarter and year come from the target date so the goal lands in the
+        // quarter view it belongs to. T00:00:00 forces local-time parsing.
         const targetDate = date ? new Date(`${date}T00:00:00`) : new Date()
-        const goalQuarter = Math.ceil((targetDate.getMonth() + 1) / 3)
-        const goalYear = targetDate.getFullYear()
-        await annualPlanningService.createGoal({
-          title: title.trim(),
+        return annualPlanningService.createGoal({
+          title: trimmed,
           target_date: date || null,
           focus_area_id: focusAreaId,
-          quarter: goalQuarter,
-          year: goalYear
+          quarter: Math.ceil((targetDate.getMonth() + 1) / 3),
+          year: targetDate.getFullYear()
         })
-        break
       }
-      case 'activity':
-        await annualPlanningService.createActivity(goalId, {
-          title: title.trim(),
-          due_date: date || null
-        })
-        break
+      case 'milestone':
+        return annualPlanningService.createMilestone(goalId, { title: trimmed, due_date: date || null, is_key_result: keyResult })
       default:
-        break
+        return null
     }
   }
 
-  const handleEdit = async () => {
-    // Strip type prefix from normalized ID (e.g. "task-abc123" → "abc123")
+  const update = async () => {
     const rawId = event?.id ? event.id.replace(/^[a-z]+-/, '') : null
     if (!rawId) throw new Error('Missing event ID')
-
-    switch (event?.type) {
+    const trimmed = title.trim()
+    switch (activeType) {
       case 'task':
-        await tasksService.update(rawId, { title: title.trim(), deadline: date || null })
-        break
+        return tasksService.update(rawId, { title: trimmed, deadline: date || null })
       case 'priority':
-        await annualPlanningService.updatePriority(rawId, {
-          title: title.trim(),
+        return annualPlanningService.updatePriority(rawId, {
+          title: trimmed,
           description: description.trim() || '',
           deadline: date || null
         })
-        break
       case 'goal':
-        await annualPlanningService.updateGoal(rawId, {
-          title: title.trim(),
-          target_date: date || null
-        })
-        break
+        return annualPlanningService.updateGoal(rawId, { title: trimmed, target_date: date || null })
       case 'activity':
-        await annualPlanningService.updateActivity(rawId, {
-          title: title.trim(),
-          due_date: date || null
-        })
-        break
+        return annualPlanningService.updateActivity(rawId, { title: trimmed, due_date: date || null })
       default:
-        break
+        return null
     }
   }
 
+  const submit = async () => {
+    if (saving || !validate()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await (isEdit ? update() : create())
+      onSuccess?.()
+      onClose()
+    } catch (err) {
+      console.error('[EventFormModal] Save failed:', err)
+      setSaveError(t('calendarModal.form.saveError'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onTitleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) submit()
+  }
+
+  // ── Edit subtitle: the fixed type and its context ─────────────────────────
+  const SubtitleIcon = TYPE_ICONS[activeType] ?? AdjustOutlinedIcon
+  const subtitle = isEdit ? (
+    <Box component='span' sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+      <SubtitleIcon sx={{ fontSize: 'sm' }} />
+      {[t(`calendarModal.form.types.${activeType}`), activeType === 'task' ? taskListLabel(event?.category) : null]
+        .filter(Boolean)
+        .join(' · ')}
+    </Box>
+  ) : null
+
+  const actionSx = { width: { xs: '100%', sm: 'auto' }, ...focusRing }
+  const footer = (
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', gap: 2 }}>
+      {/* Cancel stays enabled while saving so a stuck request is escapable. */}
+      <Button variant='plain' onClick={onClose} size='lg' sx={actionSx}>
+        {milestoneReadOnly ? t('common.close') : t('calendarModal.form.cancel')}
+      </Button>
+      {!milestoneReadOnly && (
+        <Button onClick={submit} loading={saving} size='lg' sx={actionSx}>
+          {isEdit ? t('calendarModal.form.saveChanges') : t(`calendarModal.form.addAction.${type}`)}
+        </Button>
+      )}
+    </Box>
+  )
+
   return (
-    <Modal open={open} onClose={!saving ? onClose : undefined}>
-      <ModalDialog
-        sx={{
-          width: { xs: '100vw', sm: 440 },
-          height: { xs: '100dvh', sm: 'auto' },
-          maxHeight: { xs: '100dvh', sm: '90vh' },
-          maxWidth: '100vw',
-          borderRadius: { xs: 0, sm: 'md' },
-          top: { xs: 0, sm: '50%' },
-          left: { xs: 0, sm: '50%' },
-          transform: { xs: 'none', sm: 'translate(-50%, -50%)' }
-        }}
-      >
-        {/* Title */}
-        <DialogTitle>
-          <Stack direction='row' alignItems='center' spacing={1}>
-            <Box
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                bgcolor: 'primary.solidBg',
-                flexShrink: 0
-              }}
-            />
-            <Typography level='title-md' fontWeight={600}>
-              {isEdit ? t('calendarModal.editEvent') : t('calendarModal.addEvent')}
-            </Typography>
-          </Stack>
-        </DialogTitle>
+    <FormSheet
+      open={open}
+      onClose={saving ? () => {} : onClose}
+      titleKey={isEdit ? 'calendarModal.editEvent' : 'calendarModal.form.addTitle'}
+      subtitleText={subtitle}
+      width='simple'
+      banner={saveError ? <FormErrorBanner titleKey='calendarModal.form.saveErrorTitle' detailText={saveError} /> : null}
+      footer={footer}
+    >
+      {milestoneReadOnly ? (
+        <Typography level='body-md' sx={{ color: 'text.secondary' }}>
+          {t('calendarModal.form.milestoneReadOnly')}
+        </Typography>
+      ) : (
+        <Stack spacing={2.5}>
+          {!isEdit && <EventTypeObject value={type} onChange={changeType} t={t} />}
 
-        <DialogContent sx={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <Stack spacing={2} sx={{ pt: 0.5 }}>
-            {/* ── Type selector (create only) ───────────────────────── */}
-            {!isEdit && (
-              <FormControl>
-                <FormLabel>{t('calendarModal.form.selectType')}</FormLabel>
-                <Stack direction='row' spacing={0.75} flexWrap='wrap' useFlexGap>
-                  {TYPES.map((typeKey) => (
-                    <Chip
-                      key={typeKey}
-                      size='sm'
-                      variant={type === typeKey ? 'solid' : 'outlined'}
-                      color={type === typeKey ? TYPE_PALETTES[typeKey] : 'neutral'}
-                      onClick={() => setType(typeKey)}
-                      aria-pressed={type === typeKey}
-                      sx={{
-                        ...typeChip,
-                        ...(type === typeKey ? { color: `${TYPE_PALETTES[typeKey]}.solidColor` } : { bgcolor: 'background.level1' }),
-                        '&:hover': { opacity: 0.85 }
-                      }}
-                    >
-                      {t(`calendarModal.form.types.${typeKey}`)}
-                    </Chip>
-                  ))}
-                </Stack>
-              </FormControl>
-            )}
-
-            {/* ── Edit mode: locked type badge ──────────────────────── */}
-            {isEdit && (
-              <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', flexWrap: 'wrap' }}>
-                <Chip
-                  size='sm'
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '0.7rem',
-                    border: 'none'
-                  }}
-                >
-                  {t(`calendarModal.form.types.${event?.type || 'task'}`)}
-                </Chip>
-                {event?.type === 'task' &&
-                  event?.category &&
-                  event?.category !== 'general' &&
-                  (() => {
-                    try {
-                      const raw = localStorage.getItem('nowry_task_lists')
-                      const lists = raw ? JSON.parse(raw) : []
-                      const match = lists.find((l) => l.id === event.category)
-                      const label = match ? match.label : event.category
-                      return (
-                        <Chip size='sm' variant='soft' color='neutral' sx={{ fontSize: '0.7rem', border: 'none' }}>
-                          {label}
-                        </Chip>
-                      )
-                    } catch {
-                      /* ignore */
-                      return null
-                    }
-                  })()}
-              </Box>
-            )}
-
-            <Divider />
-
-            {/* ── Focus area (goal creation) ────────────────────────── */}
-            {needsFocusArea && (
-              <FormControl required>
-                <FormLabel>{t('calendarModal.form.focusArea')}</FormLabel>
-                {contextLoading ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-                    <CircularProgress size='sm' />
-                  </Box>
-                ) : (
-                  <Select value={focusAreaId} onChange={(_, v) => setFocusAreaId(v)} placeholder={t('calendarModal.form.focusArea')}>
-                    {focusAreas.map((area) => (
-                      <Option key={area._id} value={area._id}>
-                        {area.name}
-                      </Option>
-                    ))}
-                  </Select>
-                )}
-              </FormControl>
-            )}
-
-            {/* ── Goal selector (activity creation) ────────────────── */}
-            {needsGoal && (
-              <FormControl required>
-                <FormLabel>{t('calendarModal.form.goal')}</FormLabel>
-                {contextLoading ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-                    <CircularProgress size='sm' />
-                  </Box>
-                ) : activeGoals.length === 0 ? (
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {t('calendarModal.form.noActiveGoals')}
-                  </Typography>
-                ) : (
-                  <Select value={goalId} onChange={(_, v) => setGoalId(v)} placeholder={t('calendarModal.form.goal')}>
-                    {activeGoals.map((g) => (
-                      <Option key={g._id} value={g._id}>
-                        {g.title}
-                      </Option>
-                    ))}
-                  </Select>
-                )}
-              </FormControl>
-            )}
-
-            {/* ── Title ────────────────────────────────────────────── */}
-            <FormControl required>
-              <FormLabel>{t('calendarModal.form.title')}</FormLabel>
-              <Input
-                autoFocus
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSave()}
-                placeholder={t(`calendarModal.form.types.${activeType}`)}
-              />
-            </FormControl>
-
-            {/* ── Description (priority only) ───────────────────────── */}
-            {needsDescription && (
-              <FormControl>
-                <FormLabel>{t('calendarModal.form.description')}</FormLabel>
-                <Textarea minRows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
-              </FormControl>
-            )}
-
-            {/* ── Date ─────────────────────────────────────────────── */}
-            <FormControl>
-              <FormLabel>{t('calendarModal.form.date')}</FormLabel>
-              <Input type='date' value={date} onChange={(e) => setDate(e.target.value)} />
-            </FormControl>
-
-            {/* ── Error ────────────────────────────────────────────── */}
-            {error && (
-              <Typography level='body-xs' color='danger'>
-                {error}
-              </Typography>
-            )}
-          </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ position: 'sticky', bottom: 0, bgcolor: 'background.surface', pt: 1 }}>
-          <Button variant='plain' color='neutral' onClick={onClose} disabled={saving}>
-            {t('calendarModal.form.cancel')}
-          </Button>
-          <Button
-            loading={saving}
-            disabled={!canSave}
-            onClick={handleSave}
-            sx={{
-              '&:disabled': { opacity: 0.5 }
+          <FormTextField
+            labelKey='calendarModal.form.title'
+            placeholderKey={isEdit ? null : `calendarModal.form.placeholder.${type}`}
+            errorKey={errors.title ? 'calendarModal.form.titleRequired' : null}
+            value={title}
+            onChange={(value) => {
+              setTitle(value)
+              if (errors.title && value.trim()) setErrors((prev) => ({ ...prev, title: false }))
             }}
-          >
-            {t('calendarModal.form.save')}
-          </Button>
-        </DialogActions>
-      </ModalDialog>
-    </Modal>
+            onKeyDown={onTitleKeyDown}
+            required
+            autoFocus
+            inputRef={titleRef}
+          />
+
+          {needsFocusArea && (
+            <ContextPicker
+              labelKey='calendarModal.form.focusArea'
+              placeholderKey='calendarModal.form.focusAreaPlaceholder'
+              emptyKey='calendarModal.form.noAreas'
+              loading={contextLoading}
+              options={focusAreas}
+              value={focusAreaId}
+              onChange={(v) => {
+                setFocusAreaId(v)
+                setErrors((prev) => ({ ...prev, focusArea: false }))
+              }}
+              error={Boolean(errors.focusArea)}
+              t={t}
+            />
+          )}
+
+          {needsGoal && (
+            <ContextPicker
+              labelKey='calendarModal.form.goal'
+              placeholderKey='calendarModal.form.goalPlaceholder'
+              helperKey='calendarModal.form.goalHelper'
+              emptyKey='calendarModal.form.noActiveGoals'
+              loading={contextLoading}
+              options={openGoals}
+              value={goalId}
+              onChange={(v) => {
+                setGoalId(v)
+                setErrors((prev) => ({ ...prev, goal: false }))
+              }}
+              error={Boolean(errors.goal)}
+              t={t}
+            />
+          )}
+
+          {!isEdit && type === 'priority' && !annualPlanId && !contextLoading && (
+            <Typography level='body-sm' sx={{ color: 'text.secondary', px: 2, py: 1.5, borderRadius: 'md', bgcolor: 'background.level1' }}>
+              {t('calendarModal.form.noPlan')}
+            </Typography>
+          )}
+
+          <FormTextField labelKey='calendarModal.form.date' type='date' value={date} onChange={setDate} />
+
+          {(revealed.includes('description') || (isEdit && activeType === 'priority')) && (
+            <FormTextArea
+              labelKey='calendarModal.form.description'
+              placeholderKey='calendarModal.form.descriptionPlaceholder'
+              value={description}
+              onChange={setDescription}
+              minRows={2}
+              autoFocus={!isEdit}
+            />
+          )}
+
+          {revealed.includes('keyResult') && (
+            <Checkbox
+              size='lg'
+              checked={keyResult}
+              onChange={(e) => setKeyResult(e.target.checked)}
+              label={
+                <Box>
+                  <Typography level='body-md'>{t('calendarModal.form.keyResult')}</Typography>
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                    {t('calendarModal.form.keyResultHelper')}
+                  </Typography>
+                </Box>
+              }
+              sx={{ alignItems: 'flex-start', ...focusRing }}
+            />
+          )}
+
+          <FormDisclosureRail available={railOffers} labels={RAIL_LABELS} onReveal={reveal} />
+        </Stack>
+      )}
+    </FormSheet>
   )
 }
 

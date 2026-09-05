@@ -931,28 +931,49 @@
     "addEvent": "イベントを追加",
     "editEvent": "イベントを編集",
     "form": {
-      "selectType": "イベントの種類",
+      "selectType": "何を追加しますか？",
+      "addTitle": "カレンダーに追加",
       "title": "タイトル",
       "date": "日付",
       "description": "説明",
-      "focusArea": "フォーカスエリア",
+      "focusArea": "重点分野",
+      "focusAreaPlaceholder": "重点分野を選択…",
+      "noAreas": "重点分野がまだありません。年間計画で追加すると目標を分類できます。",
       "goal": "目標",
-      "save": "保存",
+      "goalPlaceholder": "所属する目標を選択…",
+      "goalHelper": "進行中の目標のみ表示されます。",
+      "noActiveGoals": "追加できる進行中の目標がありません。年間計画で目標を作成するか、タスクとして追加してください。",
+      "noPlan": "優先事項を追加する前に、年間計画で今年の計画を作成してください。",
+      "placeholder": {
+        "task": "何をする必要がありますか？",
+        "priority": "今年大切なことは？",
+        "goal": "何に向かって取り組みますか？",
+        "milestone": "何が進捗の目印になりますか？"
+      },
+      "addAction": {
+        "task": "タスクを追加",
+        "priority": "優先事項を追加",
+        "goal": "目標を追加",
+        "milestone": "マイルストーンを追加"
+      },
+      "saveChanges": "変更を保存",
       "cancel": "キャンセル",
-      "saveError": "保存に失敗しました。もう一度お試しください。",
+      "addDescription": "説明を追加",
+      "descriptionPlaceholder": "今年それが大切な理由…",
+      "markKeyResult": "主要な成果としてマーク",
+      "keyResult": "主要な成果",
+      "keyResultHelper": "星付きで表示され、目標の測定可能なステップとして数えられます。",
+      "titleRequired": "保存するにはタイトルを入力してください。",
+      "saveErrorTitle": "この予定を保存できませんでした",
+      "saveError": "接続を確認してもう一度お試しください。入力内容は失われていません。",
+      "milestoneReadOnly": "マイルストーンは年間計画の目標から編集します。",
       "types": {
         "task": "タスク",
         "priority": "優先事項",
         "goal": "目標",
         "milestone": "マイルストーン",
         "activity": "習慣"
-      },
-      "habitScheduleNote": "習慣のスケジュール（頻度・曜日）は年間計画で設定します。",
-      "habitEditNote": "ここではタイトルのみ編集できます。スケジュールの変更は年間計画で行ってください。",
-      "dueDateOptional": "期日（任意）",
-      "isKeyResult": "キー結果",
-      "milestoneEditNote": "マイルストーンは年間計画で編集してください。",
-      "noActiveGoals": "アクティブな目標がありません。まず年間計画で目標を作成してください。"
+      }
     }
   },
   "about": {

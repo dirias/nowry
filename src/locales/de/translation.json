@@ -885,22 +885,49 @@
     "addEvent": "Ereignis hinzufügen",
     "editEvent": "Ereignis bearbeiten",
     "form": {
-      "selectType": "Ereignistyp",
+      "selectType": "Was ist es?",
+      "addTitle": "Zum Kalender hinzufügen",
       "title": "Titel",
       "date": "Datum",
       "description": "Beschreibung",
       "focusArea": "Fokusbereich",
+      "focusAreaPlaceholder": "Wähle einen Fokusbereich…",
+      "noAreas": "Noch keine Fokusbereiche. Lege in der Jahresplanung einen an, um das Ziel einzuordnen.",
       "goal": "Ziel",
-      "save": "Speichern",
+      "goalPlaceholder": "Wähle das Ziel, zu dem es gehört…",
+      "goalHelper": "Nur noch offene Ziele werden aufgeführt.",
+      "noActiveGoals": "Kein offenes Ziel, an das es angehängt werden kann. Lege in der Jahresplanung ein Ziel an oder füge es als Aufgabe hinzu.",
+      "noPlan": "Lege in der Jahresplanung zuerst den Plan für dieses Jahr an, bevor du eine Priorität hinzufügst.",
+      "placeholder": {
+        "task": "Was ist zu tun?",
+        "priority": "Was zählt dieses Jahr?",
+        "goal": "Worauf arbeitest du hin?",
+        "milestone": "Was markiert den Fortschritt?"
+      },
+      "addAction": {
+        "task": "Aufgabe hinzufügen",
+        "priority": "Priorität hinzufügen",
+        "goal": "Ziel hinzufügen",
+        "milestone": "Meilenstein hinzufügen"
+      },
+      "saveChanges": "Änderungen speichern",
       "cancel": "Abbrechen",
-      "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "addDescription": "Beschreibung hinzufügen",
+      "descriptionPlaceholder": "Warum es dieses Jahr zählt…",
+      "markKeyResult": "Als Schlüsselergebnis markieren",
+      "keyResult": "Schlüsselergebnis",
+      "keyResultHelper": "Wird mit einem Stern angezeigt und zählt als messbarer Schritt des Ziels.",
+      "titleRequired": "Gib einen Titel ein, um zu speichern.",
+      "saveErrorTitle": "Dieser Termin konnte nicht gespeichert werden",
+      "saveError": "Prüfe deine Verbindung und versuche es erneut. Nichts ist verloren gegangen.",
+      "milestoneReadOnly": "Meilensteine werden über ihr Ziel in der Jahresplanung bearbeitet.",
       "types": {
         "task": "Aufgabe",
         "priority": "Priorität",
         "goal": "Ziel",
+        "milestone": "Meilenstein",
         "activity": "Gewohnheit"
-      },
-      "noActiveGoals": "Keine aktiven Ziele. Erstelle zuerst ein Ziel in der Jahresplanung."
+      }
     }
   },
   "about": {

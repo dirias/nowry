@@ -890,22 +890,49 @@
     "addEvent": "Agregar evento",
     "editEvent": "Editar evento",
     "form": {
-      "selectType": "Tipo de evento",
+      "selectType": "¿Qué es?",
+      "addTitle": "Añadir al calendario",
       "title": "Título",
       "date": "Fecha",
       "description": "Descripción",
       "focusArea": "Área de enfoque",
-      "goal": "Objetivo",
-      "save": "Guardar",
+      "focusAreaPlaceholder": "Elige un área de enfoque…",
+      "noAreas": "Aún no hay áreas de enfoque. Añade una en Planificación anual para ubicar la meta.",
+      "goal": "Meta",
+      "goalPlaceholder": "Elige la meta a la que pertenece…",
+      "goalHelper": "Solo se muestran las metas que siguen abiertas.",
+      "noActiveGoals": "No hay metas abiertas a las que añadirlo. Crea una meta en Planificación anual o añádelo como tarea.",
+      "noPlan": "Crea el plan de este año en Planificación anual antes de añadir una prioridad.",
+      "placeholder": {
+        "task": "¿Qué hay que hacer?",
+        "priority": "¿Qué importa este año?",
+        "goal": "¿Hacia qué estás trabajando?",
+        "milestone": "¿Qué marca el avance?"
+      },
+      "addAction": {
+        "task": "Añadir tarea",
+        "priority": "Añadir prioridad",
+        "goal": "Añadir meta",
+        "milestone": "Añadir hito"
+      },
+      "saveChanges": "Guardar cambios",
       "cancel": "Cancelar",
-      "saveError": "Error al guardar. Intenta de nuevo.",
+      "addDescription": "Añadir una descripción",
+      "descriptionPlaceholder": "Por qué importa este año…",
+      "markKeyResult": "Marcar como resultado clave",
+      "keyResult": "Resultado clave",
+      "keyResultHelper": "Se muestra con una estrella y cuenta como el paso medible de la meta.",
+      "titleRequired": "Ponle un título para guardarlo.",
+      "saveErrorTitle": "No se pudo guardar este evento",
+      "saveError": "Revisa tu conexión e inténtalo de nuevo. No se perdió nada.",
+      "milestoneReadOnly": "Los hitos se editan desde su meta en Planificación anual.",
       "types": {
         "task": "Tarea",
         "priority": "Prioridad",
-        "goal": "Objetivo",
+        "goal": "Meta",
+        "milestone": "Hito",
         "activity": "Hábito"
-      },
-      "noActiveGoals": "No hay objetivos activos. Crea primero un objetivo en Planificación anual."
+      }
     }
   },
   "books": {

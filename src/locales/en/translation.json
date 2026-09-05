@@ -1042,28 +1042,49 @@
     "addEvent": "Add event",
     "editEvent": "Edit event",
     "form": {
-      "selectType": "Event type",
+      "selectType": "What is it?",
+      "addTitle": "Add to calendar",
       "title": "Title",
       "date": "Date",
       "description": "Description",
       "focusArea": "Focus area",
+      "focusAreaPlaceholder": "Choose a focus area…",
+      "noAreas": "No focus areas yet. Add one in Annual Planning to file a goal.",
       "goal": "Goal",
-      "save": "Save",
+      "goalPlaceholder": "Choose the goal it belongs to…",
+      "goalHelper": "Only goals that are still open are listed.",
+      "noActiveGoals": "No open goals to attach this to. Create a goal in Annual Planning, or add it as a task instead.",
+      "noPlan": "Create this year's plan in Annual Planning before adding a priority.",
+      "placeholder": {
+        "task": "What needs doing?",
+        "priority": "What matters this year?",
+        "goal": "What are you working toward?",
+        "milestone": "What marks the progress?"
+      },
+      "addAction": {
+        "task": "Add task",
+        "priority": "Add priority",
+        "goal": "Add goal",
+        "milestone": "Add milestone"
+      },
+      "saveChanges": "Save changes",
       "cancel": "Cancel",
-      "saveError": "Failed to save. Please try again.",
+      "addDescription": "Add a description",
+      "descriptionPlaceholder": "Why it matters this year…",
+      "markKeyResult": "Mark as key result",
+      "keyResult": "Key result",
+      "keyResultHelper": "Shows with a star, and counts as the goal's measurable step.",
+      "titleRequired": "Give it a title to save it.",
+      "saveErrorTitle": "Couldn't save this event",
+      "saveError": "Check your connection and try again. Nothing was lost.",
+      "milestoneReadOnly": "Milestones are edited from their goal in Annual Planning.",
       "types": {
         "task": "Task",
         "priority": "Priority",
         "goal": "Goal",
         "milestone": "Milestone",
         "activity": "Habit"
-      },
-      "habitScheduleNote": "Full habit schedule (frequency, days) is configured in Annual Planning.",
-      "habitEditNote": "Only the title can be edited here. Open Annual Planning to change the schedule.",
-      "dueDateOptional": "Due date (optional)",
-      "isKeyResult": "Key result",
-      "milestoneEditNote": "Edit milestones in Annual Planning.",
-      "noActiveGoals": "No active goals. Create a goal in Annual Planning first."
+      }
     }
   },
   "blackboard": {

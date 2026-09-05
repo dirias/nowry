@@ -135,6 +135,9 @@ const IDENTICAL_BY_DESIGN = {
     'calendarPage.views.agenda',
     'calendarPage.filters.types',
     'calendarPage.filters.typesSelected',
+    // "Date" and "Description" are the French words for the event form's fields.
+    'calendarModal.form.date',
+    'calendarModal.form.description',
     ...XP_GAINED
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has

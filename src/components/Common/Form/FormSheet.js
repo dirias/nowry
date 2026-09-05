@@ -42,6 +42,9 @@ const FormSheet = ({
   // that fetches on open can put its Skeleton where the name will land.
   titleText = null,
   subtitleKey = null,
+  // The subtitle's counterpart of `titleText`: a node for a subtitle that
+  // carries data and a glyph ("Task · Study list") rather than copy.
+  subtitleText = null,
   width = 'standard',
   footer = null,
   banner = null,
@@ -74,9 +77,9 @@ const FormSheet = ({
           <Typography id={titleId} level='h4' sx={{ m: 0 }}>
             {titleText || (titleKey ? t(titleKey, titleValues) : null)}
           </Typography>
-          {subtitleKey && (
+          {(subtitleText || subtitleKey) && (
             <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-              {t(subtitleKey)}
+              {subtitleText || t(subtitleKey)}
             </Typography>
           )}
         </Box>
