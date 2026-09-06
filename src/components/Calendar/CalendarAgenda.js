@@ -6,7 +6,6 @@ import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
-import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 
 import { readableTextOn } from '../../theme/colorSchemeGenerator'
@@ -21,7 +20,7 @@ const TYPE_ICON = {
   activity: RepeatRoundedIcon
 }
 
-const eventIcon = (ev) => (ev.type === 'milestone' && ev.isKeyResult ? StarRoundedIcon : (TYPE_ICON[ev.type] ?? AdjustOutlinedIcon))
+const eventIcon = (ev) => TYPE_ICON[ev.type] ?? AdjustOutlinedIcon
 
 const rowSx = {
   display: 'flex',

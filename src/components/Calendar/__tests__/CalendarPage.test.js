@@ -82,63 +82,28 @@ beforeEach(() => {
 
 // ─── Icon logic unit tests (pure logic, no render needed) ────────────────────
 
-// Mirror the EVENT_ICON_MAP and icon selection logic from CalendarPage.js
-// These tests verify the mapping behavior without rendering the full component
-const CheckCircleOutlinedIcon = 'CheckCircleOutlinedIcon'
-const FlagOutlinedIcon = 'FlagOutlinedIcon'
-const AdjustOutlinedIcon = 'AdjustOutlinedIcon'
-const DiamondOutlinedIcon = 'DiamondOutlinedIcon'
-const StarRoundedIcon = 'StarRoundedIcon'
-const RepeatRoundedIcon = 'RepeatRoundedIcon'
-
+// Mirrors EVENT_ICON_MAP in CalendarPage.js: one glyph per type. The star for a
+// "key result" milestone went in CAL-005 — every milestone is a measurable step
+// of its goal, so there was never a second kind to draw.
 const EVENT_ICON_MAP = {
-  task: CheckCircleOutlinedIcon,
-  priority: FlagOutlinedIcon,
-  goal: AdjustOutlinedIcon,
-  activity: RepeatRoundedIcon
+  task: 'CheckCircleOutlinedIcon',
+  priority: 'FlagOutlinedIcon',
+  goal: 'AdjustOutlinedIcon',
+  milestone: 'DiamondOutlinedIcon',
+  activity: 'RepeatRoundedIcon'
 }
+const resolveIcon = (type) => EVENT_ICON_MAP[type] ?? 'AdjustOutlinedIcon'
 
-// Mirrors the icon selection logic in CalendarPage.js eventContent callback
-function resolveIcon(type, isKeyResult) {
-  if (type === 'milestone') {
-    return isKeyResult ? StarRoundedIcon : DiamondOutlinedIcon
-  }
-  return EVENT_ICON_MAP[type] ?? AdjustOutlinedIcon
-}
-
-describe('CalendarPage — Phase 15 CAL-01: eventContent renders type-specific icons', () => {
-  it('eventContent renders CheckCircleOutlined icon for task type', () => {
-    expect(resolveIcon('task', false)).toBe(CheckCircleOutlinedIcon)
-  })
-  it('eventContent renders FlagOutlined icon for priority type', () => {
-    expect(resolveIcon('priority', false)).toBe(FlagOutlinedIcon)
-  })
-  it('eventContent renders AdjustOutlined icon for goal type', () => {
-    expect(resolveIcon('goal', false)).toBe(AdjustOutlinedIcon)
-  })
-  it('eventContent renders DiamondOutlined icon for milestone with isKeyResult=false', () => {
-    expect(resolveIcon('milestone', false)).toBe(DiamondOutlinedIcon)
-  })
-  it('eventContent renders StarRounded icon for milestone with isKeyResult=true', () => {
-    expect(resolveIcon('milestone', true)).toBe(StarRoundedIcon)
-  })
-  it('eventContent renders RepeatRounded icon for activity type', () => {
-    expect(resolveIcon('activity', false)).toBe(RepeatRoundedIcon)
-  })
-  it('eventContent renders AdjustOutlined fallback for unknown type', () => {
-    expect(resolveIcon('unknown', false)).toBe(AdjustOutlinedIcon)
-  })
-})
-
-describe('CalendarPage — Phase 15 CAL-02: isKeyResult drives icon selection', () => {
-  it('eventContent picks DiamondOutlined when extendedProps.isKeyResult is false', () => {
-    expect(resolveIcon('milestone', !!false)).toBe(DiamondOutlinedIcon)
-  })
-  it('eventContent picks StarRounded when extendedProps.isKeyResult is true', () => {
-    expect(resolveIcon('milestone', !!true)).toBe(StarRoundedIcon)
-  })
-  it('eventContent picks DiamondOutlined when extendedProps.isKeyResult is undefined (double-bang coerces to false)', () => {
-    expect(resolveIcon('milestone', !!undefined)).toBe(DiamondOutlinedIcon)
+describe('CalendarPage — one glyph per event type', () => {
+  it.each([
+    ['task', 'CheckCircleOutlinedIcon'],
+    ['priority', 'FlagOutlinedIcon'],
+    ['goal', 'AdjustOutlinedIcon'],
+    ['milestone', 'DiamondOutlinedIcon'],
+    ['activity', 'RepeatRoundedIcon'],
+    ['unknown', 'AdjustOutlinedIcon']
+  ])('draws %s with %s', (type, icon) => {
+    expect(resolveIcon(type)).toBe(icon)
   })
 })
 

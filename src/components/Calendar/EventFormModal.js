@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Checkbox, FormControl, FormHelperText, FormLabel, Option, Select, Sheet, Skeleton, Stack, Typography } from '@mui/joy'
+import { Box, Button, FormControl, FormHelperText, FormLabel, Option, Select, Sheet, Skeleton, Stack, Typography } from '@mui/joy'
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
@@ -37,8 +37,8 @@ const TYPE_ICONS = {
 }
 
 /** Optional groups per type, offered as rail chips that remove themselves on use. */
-const OPTIONAL_GROUPS = { priority: ['description'], milestone: ['keyResult'] }
-const RAIL_LABELS = { description: 'calendarModal.form.addDescription', keyResult: 'calendarModal.form.markKeyResult' }
+const OPTIONAL_GROUPS = { priority: ['description'] }
+const RAIL_LABELS = { description: 'calendarModal.form.addDescription' }
 
 /**
  * A finished goal, by the definition the rest of the app already uses (see
@@ -165,7 +165,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const [date, setDate] = useState('')
   const [focusAreaId, setFocusAreaId] = useState('')
   const [goalId, setGoalId] = useState('')
-  const [keyResult, setKeyResult] = useState(false)
   const [revealed, setRevealed] = useState([])
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
@@ -179,7 +178,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
     setErrors({})
     setSaveError(null)
     setRevealed([])
-    setKeyResult(isEdit ? Boolean(event?.isKeyResult) : false)
     setFocusAreaId('')
     setGoalId('')
     setDescription(isEdit ? event?.description || '' : '')
@@ -210,14 +208,10 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const changeType = (next) => {
     setType(next)
     setRevealed([])
-    setKeyResult(false)
     setErrors({})
   }
 
-  const reveal = (group) => {
-    setRevealed((prev) => [...prev, group])
-    if (group === 'keyResult') setKeyResult(true)
-  }
+  const reveal = (group) => setRevealed((prev) => [...prev, group])
 
   // ── Validation: loud, never a disabled button ─────────────────────────────
   const validate = () => {
@@ -258,7 +252,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
         })
       }
       case 'milestone':
-        return annualPlanningService.createMilestone(goalId, { title: trimmed, due_date: date || null, is_key_result: keyResult })
+        return annualPlanningService.createMilestone(goalId, { title: trimmed, due_date: date || null })
       default:
         return null
     }
@@ -285,11 +279,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
         // Addressed by the goal and the milestone's own id, not by the
         // index-based event id (CAL-004).
         if (!event?.goalId || !event?.milestoneId) throw new Error('Missing milestone address')
-        return annualPlanningService.updateMilestone(event.goalId, event.milestoneId, {
-          title: trimmed,
-          due_date: date || null,
-          is_key_result: keyResult
-        })
+        return annualPlanningService.updateMilestone(event.goalId, event.milestoneId, { title: trimmed, due_date: date || null })
       default:
         return null
     }
@@ -418,23 +408,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
             onChange={setDescription}
             minRows={2}
             autoFocus={!isEdit}
-          />
-        )}
-
-        {(revealed.includes('keyResult') || (isEdit && activeType === 'milestone')) && (
-          <Checkbox
-            size='lg'
-            checked={keyResult}
-            onChange={(e) => setKeyResult(e.target.checked)}
-            label={
-              <Box>
-                <Typography level='body-md'>{t('calendarModal.form.keyResult')}</Typography>
-                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                  {t('calendarModal.form.keyResultHelper')}
-                </Typography>
-              </Box>
-            }
-            sx={{ alignItems: 'flex-start', ...focusRing }}
           />
         )}
 

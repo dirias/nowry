@@ -15,7 +15,6 @@ import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
-import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 import { calendarService } from '../../api/services/calendar.service'
 import { tasksService, annualPlanningService } from '../../api/services'
@@ -30,11 +29,13 @@ import { filterCalendarEvents } from './calendarFilters'
 import { stripTypePrefix } from './eventId'
 import { addDays, addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, isSameDay, isSameMonth, startOfWeek } from './agendaGroups'
 
-// CAL-01: Icon map for eventContent — milestone handled separately via isKeyResult branch
+// One glyph per type. Every milestone is a measurable step of its goal, so
+// there is no second kind to draw (CAL-005).
 const EVENT_ICON_MAP = {
   task: CheckCircleOutlinedIcon,
   priority: FlagOutlinedIcon,
   goal: AdjustOutlinedIcon,
+  milestone: DiamondOutlinedIcon,
   activity: RepeatRoundedIcon
 }
 
@@ -124,13 +125,8 @@ const CalendarPage = () => {
 
   // CAL-01/CAL-02: Custom event rendering — icon + title for all event types
   const eventContent = useCallback((eventInfo) => {
-    const { type, isKeyResult, textColor } = eventInfo.event.extendedProps
-    let IconComponent
-    if (type === 'milestone') {
-      IconComponent = isKeyResult ? StarRoundedIcon : DiamondOutlinedIcon
-    } else {
-      IconComponent = EVENT_ICON_MAP[type] ?? AdjustOutlinedIcon
-    }
+    const { type, textColor } = eventInfo.event.extendedProps
+    const IconComponent = EVENT_ICON_MAP[type] ?? AdjustOutlinedIcon
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, overflow: 'hidden', color: textColor }}>
         <IconComponent sx={{ fontSize: 'sm', flexShrink: 0 }} />

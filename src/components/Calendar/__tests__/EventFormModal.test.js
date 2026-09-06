@@ -143,7 +143,7 @@ describe('CAL-003: what each type sends', () => {
     expect(onSuccess).toHaveBeenCalled()
   })
 
-  it('a milestone goes to its goal with the key-result flag once the chip is used', async () => {
+  it('a milestone goes to its goal with a title and the prefilled date', async () => {
     annualPlanningService.createMilestone.mockResolvedValue({})
     open({ defaultDate: new Date(2026, 8, 12) })
     fireEvent.click(segment('milestone'))
@@ -151,16 +151,11 @@ describe('CAL-003: what each type sends', () => {
     // Joy's Select opens a listbox; pick the goal through it.
     fireEvent.click(screen.getByRole('combobox'))
     fireEvent.click(await screen.findByRole('option', { name: 'Run a half marathon' }))
-    fireEvent.click(screen.getByRole('button', { name: 'calendarModal.form.markKeyResult' }))
-    expect(screen.getByRole('checkbox')).toBeChecked()
+    expect(screen.queryByRole('button', { name: 'calendarModal.form.markKeyResult' })).toBeNull()
     await act(async () => {
       fireEvent.click(primary('milestone'))
     })
-    expect(annualPlanningService.createMilestone).toHaveBeenCalledWith('g1', {
-      title: 'Week 4 long run',
-      due_date: '2026-09-12',
-      is_key_result: true
-    })
+    expect(annualPlanningService.createMilestone).toHaveBeenCalledWith('g1', { title: 'Week 4 long run', due_date: '2026-09-12' })
   })
 
   it('a priority offers its description as a rail chip, not a permanent field', () => {
@@ -194,21 +189,14 @@ describe('CAL-003: edit mode', () => {
         title: 'Week 4',
         date: new Date(2026, 8, 12),
         goalId: 'g1',
-        milestoneId: 'm1',
-        isKeyResult: true
+        milestoneId: 'm1'
       }
     })
-    expect(screen.getByRole('checkbox')).toBeChecked()
     fireEvent.change(screen.getByLabelText(/calendarModal.form.title/), { target: { value: 'Week 4 long run' } })
-    fireEvent.click(screen.getByRole('checkbox'))
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'calendarModal.form.saveChanges' }))
     })
-    expect(annualPlanningService.updateMilestone).toHaveBeenCalledWith('g1', 'm1', {
-      title: 'Week 4 long run',
-      due_date: '2026-09-12',
-      is_key_result: false
-    })
+    expect(annualPlanningService.updateMilestone).toHaveBeenCalledWith('g1', 'm1', { title: 'Week 4 long run', due_date: '2026-09-12' })
   })
 
   it('a milestone event that arrives without its address fails in the banner, not silently', async () => {

@@ -215,7 +215,6 @@ export const calendarService = {
                   // edit from the calendar actually sends (CAL-004).
                   goalId: goal._id,
                   milestoneId: ms.id ?? null,
-                  isKeyResult: !!ms.is_key_result,
                   focusAreaId: goal.focus_area_id || null // D-02: milestones inherit from parent goal
                 })
               }
