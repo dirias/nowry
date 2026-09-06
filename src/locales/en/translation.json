@@ -168,10 +168,21 @@
       "contentLibrary": "Content Library"
     },
     "deck": {
+      "study": "Study",
+      "browse": "Browse",
+      "browseAria": "Browse {{name}}",
+      "upToDate": "Up to date",
+      "dueIn": "Due in {{hours}}h",
       "mastery": "Mastery",
       "newCount": "{{count}} new"
     },
     "sections": {
+      "dueNow": "Due now",
+      "upToDate": "Up to date",
+      "recent": "Recent",
+      "showAll": "Show all {{count}}",
+      "decksReadout": "{{decks}} decks · {{cards}} cards",
+      "deckCount": "{{count}} decks",
       "needingReview": "Decks Needing Review",
       "weeklyMomentum": "Weekly Momentum",
       "weeklyMomentumSubtitle": "{{count}} cards this week",
@@ -2829,6 +2840,9 @@
     }
   },
   "sessions": {
+    "ofTotal": "{{shown}} of {{total}}",
+    "history": "History",
+    "scoreAria": "Score {{pct}} percent",
     "title": "Recent Sessions",
     "totalCount": "{{count}} total",
     "aiQuiz": "AI Quiz",

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Container, Typography, Box, Card, CardContent, Stack, Chip, Grid, Divider, Skeleton, Tooltip, IconButton } from '@mui/joy'
-import { Quiz as QuizIcon, Style, AccountTree, ArrowForward, Settings } from '@mui/icons-material'
+import { Container, Typography, Box, Button, Stack } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
@@ -9,12 +8,13 @@ import { useForecast } from '../../hooks/useForecast'
 import { agentService } from '../../api/services/agent.service'
 import { usePet } from '../../context/AgentContext'
 import CardHome from '../Cards/CardHome'
-import DeckSettingsModal from './DeckSettingsModal'
-import StudyModePickerModal from './StudyModePickerModal'
 import RecentSessions from './RecentSessions'
 import TodayObject from './TodayObject'
 import ViewSegment from './ViewSegment'
-import { touchTargetBox } from '../Common/Form/formStyles'
+import DeckRow from './DeckRow'
+import { readout } from '../Common/Form/formStyles'
+
+const UP_TO_DATE_PREVIEW = 3
 
 const VIEWS = ['dashboard', 'library']
 
@@ -31,9 +31,7 @@ export default function StudyCenter() {
     streak: 0
   })
 
-  const [modePickerState, setModePickerState] = useState({ open: false, deck: null })
-  const [settingsState, setSettingsState] = useState({ open: false, deckId: null })
-  const [settingsEverSaved, setSettingsEverSaved] = useState(false)
+  const [showAllUpToDate, setShowAllUpToDate] = useState(false)
 
   const { statistics: statisticsData, loading: statsLoading } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
@@ -179,40 +177,6 @@ export default function StudyCenter() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, statsLoading, statisticsData, decks])
 
-  const getDecksByType = (type) => {
-    return decks.filter((d) => d.deck_type === type)
-  }
-
-  const getDueCardsForDeck = (deckId) => {
-    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
-    return deck?.due_cards || 0
-  }
-
-  const getMasteryForDeck = (deckId) => {
-    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
-    return deck?.mastery || 0
-  }
-
-  const getNewCardsForDeck = (deckId) => {
-    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
-    return deck?.new_cards || 0
-  }
-
-  const getLastStudiedForDeck = (deckId) => {
-    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
-    return deck?.last_studied ? new Date(deck.last_studied) : null
-  }
-
-  const isDeckDueSoon = (deckId) => {
-    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
-    return deck?.is_due_soon || false
-  }
-
-  const getHoursUntilDue = (deckId) => {
-    const deck = decks.find((d) => d._id === deckId || d._id === deckId?._id)
-    return deck?.hours_until_due ?? null
-  }
-
   const decksNeedingReview = useMemo(
     () =>
       decks
@@ -231,7 +195,8 @@ export default function StudyCenter() {
     [decks]
   )
 
-  const showYourDecks = !loading && nonDueDecks.length >= 1
+  const openStudy = useCallback((deck) => navigate(`/study/${deck._id}?mode=study`), [navigate])
+  const openBrowse = useCallback((deck) => navigate(`/study/${deck._id}?mode=browse`), [navigate])
 
   const formatRelativeDate = (date) => {
     if (!date) return null
@@ -292,347 +257,84 @@ export default function StudyCenter() {
             onImport={() => navigate('/study?view=library&new=import')}
           />
 
-          {/* Zone 1 — Decks Needing Review / Attention */}
-          {decksNeedingReview.length > 0 && (
-            <>
-              <Typography level='title-lg' fontWeight={700} sx={{ mb: 2 }}>
-                {t('study.sections.needingReview')}
-              </Typography>
-
-              <Grid container spacing={2} sx={{ mb: { xs: 3, md: 4 } }}>
-                {decksNeedingReview.map((deck) => {
-                  const dueCount = deck.due_cards || 0
-                  const mastery = deck.mastery || 0
-                  const lastStudied = deck.last_studied ? new Date(deck.last_studied) : null
-                  const newCards = deck.new_cards || 0
-                  const isAllNew = deck.total_cards > 0 && deck.total_cards === (deck.new_cards || 0)
-
-                  let accentColor = 'primary'
-                  let IconComponent = Style
-                  if (deck.deck_type === 'quiz') {
-                    accentColor = 'warning'
-                    IconComponent = QuizIcon
-                  }
-                  if (deck.deck_type === 'visual') {
-                    accentColor = 'success'
-                    IconComponent = AccountTree
-                  }
-
-                  return (
-                    <Grid xs={12} sm={6} lg={4} key={deck._id}>
-                      <Card
-                        variant='outlined'
-                        onClick={() => setModePickerState({ open: true, deck })}
-                        sx={{
-                          cursor: 'pointer',
-                          height: '100%',
-                          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                          '&:hover': {
-                            boxShadow: 'md',
-                            transform: 'translateY(-2px)',
-                            borderColor: `${accentColor}.outlinedBorder`,
-                            '& .hover-arrow': { transform: 'translateX(4px)', opacity: 1 },
-                            '& .settings-btn': { opacity: 1 }
-                          }
-                        }}
-                      >
-                        <CardContent sx={{ p: 2.5, gap: 0 }}>
-                          {/* Header row */}
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <Box
-                                sx={{
-                                  width: 36,
-                                  height: 36,
-                                  borderRadius: 'md',
-                                  bgcolor: `${accentColor}.softBg`,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                              >
-                                <IconComponent sx={{ fontSize: 18, color: `${accentColor}.plainColor` }} />
-                              </Box>
-                              <Box>
-                                <Typography level='title-sm' fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                                  {deck.name}
-                                </Typography>
-                                {lastStudied && (
-                                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.25 }}>
-                                    {formatRelativeDate(lastStudied)}
-                                  </Typography>
-                                )}
-                              </Box>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <Tooltip title={t('deckSettings.menuItem')} size='sm'>
-                                <IconButton
-                                  size='sm'
-                                  variant='plain'
-                                  color='neutral'
-                                  className='settings-btn'
-                                  aria-label={t('deckSettings.openAria', { name: deck.name })}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setSettingsState({ open: true, deckId: deck._id })
-                                  }}
-                                  sx={{
-                                    opacity: { xs: 1, md: 0 },
-                                    transition: 'opacity 0.2s',
-                                    borderRadius: 'sm',
-                                    ...touchTargetBox,
-                                    '&:focus-visible': {
-                                      opacity: 1,
-                                      outline: '2px solid',
-                                      outlineColor: 'primary.outlinedBorder'
-                                    }
-                                  }}
-                                >
-                                  <Settings sx={{ fontSize: 15 }} />
-                                </IconButton>
-                              </Tooltip>
-                              <ArrowForward
-                                className='hover-arrow'
-                                sx={{ color: 'text.tertiary', fontSize: 18, opacity: 0.4, transition: 'all 0.25s ease' }}
-                              />
-                            </Box>
-                          </Box>
-
-                          {/* Mastery bar */}
-                          <Box sx={{ mb: 2 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
-                              <Typography level='body-xs' sx={{ color: 'text.tertiary', fontWeight: 600 }}>
-                                {t('study.deck.mastery')}
-                              </Typography>
-                              <Typography
-                                level='body-xs'
-                                fontWeight={700}
-                                sx={{ color: isAllNew ? 'text.tertiary' : `${accentColor}.plainColor` }}
-                              >
-                                {isAllNew ? t('study.deckPill.new') : `${mastery}%`}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ height: 4, borderRadius: 'sm', bgcolor: 'background.level2', overflow: 'hidden' }}>
-                              <Box
-                                sx={{
-                                  height: '100%',
-                                  width: isAllNew ? '100%' : `${mastery}%`,
-                                  borderRadius: 'sm',
-                                  bgcolor: isAllNew ? 'background.level3' : `${accentColor}.solidBg`,
-                                  transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-                                }}
-                              />
-                            </Box>
-                          </Box>
-
-                          {/* Footer stats */}
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Stack direction='row' spacing={1.5}>
-                              <Chip size='sm' color='danger' variant='soft'>
-                                {t('study.dueCount', { count: dueCount })}
-                              </Chip>
-                              {newCards > 0 && (
-                                <Chip size='sm' color='neutral' variant='soft'>
-                                  {t('study.deck.newCount', { count: newCards })}
-                                </Chip>
-                              )}
-                            </Stack>
-                            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                              {t(`study.types.${deck.deck_type}s`) || deck.deck_type}
-                            </Typography>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  )
-                })}
-              </Grid>
-            </>
-          )}
-
-          {/* Zone 1.5 — Your Decks (non-due, compact horizontal scroll) */}
-          {showYourDecks && (
-            <Box sx={{ mb: { xs: 4, md: 6 } }}>
-              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.tertiary', mb: 1.5 }}>
-                {decksNeedingReview.length > 0 ? t('study.sections.otherDecks', 'Other decks') : t('study.sections.yourDecks')}
-              </Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: 1.5,
-                  overflowX: 'auto',
-                  py: 1,
-                  scrollSnapType: 'x mandatory',
-                  WebkitOverflowScrolling: 'touch',
-                  '&::-webkit-scrollbar': { display: 'none' },
-                  scrollbarWidth: 'none',
-                  mx: { xs: -2, md: 0 },
-                  px: { xs: 2, md: 0 }
-                }}
-              >
-                {nonDueDecks.map((deck) => {
-                  const mastery = deck.mastery || 0
-                  const dueSoon = isDeckDueSoon(deck._id)
-                  const hours = getHoursUntilDue(deck._id)
-                  const isAllNew = deck.total_cards > 0 && deck.total_cards === (deck.new_cards || 0)
-                  let accentColor = 'primary'
-                  let IconComponent = Style
-                  if (deck.deck_type === 'quiz') {
-                    accentColor = 'warning'
-                    IconComponent = QuizIcon
-                  }
-                  if (deck.deck_type === 'visual') {
-                    accentColor = 'success'
-                    IconComponent = AccountTree
-                  }
-
-                  return (
-                    <Box
-                      key={deck._id}
-                      role='button'
-                      aria-label={t('study.deckPill.ariaLabel', { name: deck.name })}
-                      onClick={() => setModePickerState({ open: true, deck })}
-                      sx={{
-                        position: 'relative',
-                        width: 140,
-                        flexShrink: 0,
-                        scrollSnapAlign: 'start',
-                        cursor: 'pointer',
-                        borderRadius: 'lg',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        bgcolor: 'background.surface',
-                        p: 1.5,
-                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                        '&:hover': {
-                          borderColor: `${accentColor}.outlinedBorder`,
-                          transform: 'translateY(-1px)',
-                          boxShadow: 'sm'
-                        },
-                        '&:focus-visible': {
-                          outline: '2px solid',
-                          outlineColor: 'primary.outlinedBorder',
-                          outlineOffset: '2px'
-                        }
-                      }}
-                    >
-                      {/* Row 1: Icon + Name */}
-                      <Stack direction='row' spacing={0.75} alignItems='center' sx={{ mb: 1 }}>
-                        <Box
-                          sx={{
-                            width: 20,
-                            height: 20,
-                            borderRadius: 'sm',
-                            bgcolor: `${accentColor}.softBg`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}
-                        >
-                          <IconComponent sx={{ fontSize: 12, color: `${accentColor}.plainColor` }} />
-                        </Box>
-                        <Typography level='body-xs' fontWeight={700} noWrap sx={{ color: 'text.primary', flex: 1 }}>
-                          {deck.name}
-                        </Typography>
-                      </Stack>
-
-                      {/* Row 2: Mastery bar */}
-                      <Box sx={{ height: 3, borderRadius: 'sm', bgcolor: 'background.level2', overflow: 'hidden', mb: 0.75 }}>
-                        <Box
-                          sx={{
-                            height: '100%',
-                            width: isAllNew ? '100%' : `${mastery}%`,
-                            bgcolor: isAllNew ? 'background.level3' : `${accentColor}.solidBg`,
-                            borderRadius: 'sm',
-                            transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-                          }}
-                        />
-                      </Box>
-
-                      {/* Row 3: Mastery % + due soon hint */}
-                      <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                          {isAllNew ? t('study.deckPill.new') : `${mastery}%`}
-                        </Typography>
-                        {dueSoon && hours !== null && (
-                          <Typography level='body-xs' sx={{ color: 'warning.plainColor', fontWeight: 600 }}>
-                            {t('study.deckPill.dueSoon', { hours })}
-                          </Typography>
-                        )}
-                      </Stack>
-                    </Box>
-                  )
-                })}
-              </Box>
-            </Box>
-          )}
-
-          {/* Zone 3 — Session History */}
-          <RecentSessions />
-
-          {/* Zone 4 — Recent Performance (SM-2 card reviews) */}
-          {!statsLoading && statisticsData?.recent_performance?.length > 0 && (
+          {/* The lists: two groups of one row (PRD D3), Recent on the right at lg (D11) */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 1fr)' },
+              gap: { xs: 4, lg: 6 },
+              alignItems: 'start'
+            }}
+          >
             <Box>
-              <Typography level='title-lg' fontWeight={700} sx={{ mb: 2 }}>
-                {t('study.sections.recentPerformance')}
-              </Typography>
-              <Box>
-                <Stack divider={<Divider />}>
-                  {statisticsData.recent_performance.slice(0, 5).map((item, i) => {
-                    const scoreColor = item.score >= 8 ? 'success' : item.score >= 5 ? 'warning' : 'danger'
-                    return (
-                      <Box key={i} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 0, py: 1.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              flexShrink: 0,
-                              bgcolor: `${scoreColor}.solidBg`
-                            }}
-                          />
-                          <Box sx={{ minWidth: 0 }}>
-                            <Typography level='body-sm' fontWeight={600} noWrap>
-                              {item.card_title}
-                            </Typography>
-                            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                              {item.date}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Chip size='sm' color={scoreColor} variant='soft' sx={{ flexShrink: 0, ml: 2 }}>
-                          {item.score}/10
-                        </Chip>
-                      </Box>
-                    )
-                  })}
-                </Stack>
-              </Box>
+              {decksNeedingReview.length > 0 && (
+                <Box component='section' aria-labelledby='study-due-title' sx={{ mb: 4 }}>
+                  <Stack direction='row' spacing={1.25} alignItems='baseline' sx={{ mb: 1, minHeight: 28 }}>
+                    <Typography id='study-due-title' level='title-md'>
+                      {t('study.sections.dueNow')}
+                    </Typography>
+                    <Typography level='body-sm' sx={readout}>
+                      {t('study.sections.decksReadout', { decks: decksNeedingReview.length, cards: stats.dueToday + stats.newToday })}
+                    </Typography>
+                  </Stack>
+                  <Box sx={{ borderTop: '1px solid', borderColor: 'divider' }}>
+                    {decksNeedingReview.map((deck) => (
+                      <DeckRow
+                        key={deck._id}
+                        deck={deck}
+                        onStudy={openStudy}
+                        onBrowse={openBrowse}
+                        formatRelativeDate={formatRelativeDate}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {nonDueDecks.length > 0 && (
+                <Box component='section' aria-labelledby='study-uptodate-title'>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1, minHeight: 28 }}>
+                    <Stack direction='row' spacing={1.25} alignItems='baseline'>
+                      <Typography id='study-uptodate-title' level='title-md'>
+                        {t('study.sections.upToDate')}
+                      </Typography>
+                      <Typography level='body-sm' sx={readout}>
+                        {t('study.sections.deckCount', { count: nonDueDecks.length })}
+                      </Typography>
+                    </Stack>
+                    {nonDueDecks.length > UP_TO_DATE_PREVIEW && (
+                      <Button
+                        size='sm'
+                        variant='soft'
+                        color='neutral'
+                        onClick={() => setShowAllUpToDate((v) => !v)}
+                        aria-expanded={showAllUpToDate}
+                      >
+                        {showAllUpToDate ? t('sessions.showLess') : t('study.sections.showAll', { count: nonDueDecks.length })}
+                      </Button>
+                    )}
+                  </Box>
+                  <Box sx={{ borderTop: '1px solid', borderColor: 'divider' }}>
+                    {(showAllUpToDate ? nonDueDecks : nonDueDecks.slice(0, UP_TO_DATE_PREVIEW)).map((deck) => (
+                      <DeckRow
+                        key={deck._id}
+                        deck={deck}
+                        onStudy={openStudy}
+                        onBrowse={openBrowse}
+                        formatRelativeDate={formatRelativeDate}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
             </Box>
-          )}
+
+            <RecentSessions />
+          </Box>
         </>
       )}
 
       {view === 'library' && <CardHome />}
-
-      <DeckSettingsModal
-        open={settingsState.open}
-        onClose={() => setSettingsState({ open: false, deckId: null })}
-        deckId={settingsState.deckId}
-        onSaved={reloadDecks}
-      />
-
-      <StudyModePickerModal
-        open={modePickerState.open}
-        onClose={() => setModePickerState({ open: false, deck: null })}
-        deck={modePickerState.deck || {}}
-        onSelectMode={(mode) => {
-          navigate(`/study/${modePickerState.deck._id}?mode=${mode}`)
-          setModePickerState({ open: false, deck: null })
-        }}
-      />
     </Container>
   )
 }

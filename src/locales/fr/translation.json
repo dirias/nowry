@@ -1,4 +1,9 @@
 {
+  "sessions": {
+    "ofTotal": "{{shown}} sur {{total}}",
+    "history": "Historique",
+    "scoreAria": "Score {{pct}} pour cent"
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",
@@ -160,10 +165,21 @@
       "contentLibrary": "Bibliothèque"
     },
     "deck": {
+      "study": "Étudier",
+      "browse": "Parcourir",
+      "browseAria": "Parcourir {{name}}",
+      "upToDate": "À jour",
+      "dueIn": "Dans {{hours}} h",
       "mastery": "Maîtrise",
       "newCount": "{{count}} nouveau"
     },
     "sections": {
+      "dueNow": "À revoir",
+      "upToDate": "À jour",
+      "recent": "Récent",
+      "showAll": "Voir les {{count}}",
+      "decksReadout": "{{decks}} paquets · {{cards}} cartes",
+      "deckCount": "{{count}} paquets",
       "needingReview": "Decks à réviser",
       "weeklyMomentum": "Dynamique hebdomadaire",
       "weeklyMomentumSubtitle": "{{count}} cartes cette semaine",

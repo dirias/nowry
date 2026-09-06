@@ -108,6 +108,13 @@
     "privacy": "/privacidad"
   },
   "study": {
+    "deck": {
+      "study": "Estudiar",
+      "browse": "Explorar",
+      "browseAria": "Explorar {{name}}",
+      "upToDate": "Al día",
+      "dueIn": "En {{hours}} h"
+    },
     "views": {
       "dashboard": "Panel",
       "library": "Biblioteca"
@@ -162,6 +169,12 @@
       "streakZeroLabel": "Comienza tu racha hoy"
     },
     "sections": {
+      "dueNow": "Para hoy",
+      "upToDate": "Al día",
+      "recent": "Recientes",
+      "showAll": "Ver los {{count}}",
+      "decksReadout": "{{decks}} mazos · {{cards}} tarjetas",
+      "deckCount": "{{count}} mazos",
       "yourDecks": "Tus mazos"
     },
     "deckPill": {
@@ -2548,6 +2561,9 @@
     }
   },
   "sessions": {
+    "ofTotal": "{{shown}} de {{total}}",
+    "history": "Historial",
+    "scoreAria": "Puntuación {{pct}} por ciento",
     "title": "Sesiones recientes",
     "totalCount": "{{count}} en total",
     "aiQuiz": "Quiz con IA",

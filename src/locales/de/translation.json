@@ -1,4 +1,9 @@
 {
+  "sessions": {
+    "ofTotal": "{{shown}} von {{total}}",
+    "history": "Verlauf",
+    "scoreAria": "Ergebnis {{pct}} Prozent"
+  },
   "common": {
     "close": "Schließen",
     "loading": "Laden...",
@@ -108,6 +113,13 @@
     "privacy": "/datenschutz"
   },
   "study": {
+    "deck": {
+      "study": "Lernen",
+      "browse": "Durchsehen",
+      "browseAria": "{{name}} durchsehen",
+      "upToDate": "Auf dem Stand",
+      "dueIn": "In {{hours}} h fällig"
+    },
     "views": {
       "dashboard": "Übersicht",
       "library": "Bibliothek"
@@ -161,6 +173,12 @@
       "streakZeroLabel": "Starte deine Serie heute"
     },
     "sections": {
+      "dueNow": "Jetzt fällig",
+      "upToDate": "Auf dem Stand",
+      "recent": "Zuletzt",
+      "showAll": "Alle {{count}} zeigen",
+      "decksReadout": "{{decks}} Stapel · {{cards}} Karten",
+      "deckCount": "{{count}} Stapel",
       "yourDecks": "Deine Decks"
     },
     "deckPill": {

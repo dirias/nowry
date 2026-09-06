@@ -80,8 +80,6 @@ const mockPostIntervention = jest.fn()
 jest.mock('../../../api/services/agent.service', () => ({ agentService: { postIntervention: (...args) => mockPostIntervention(...args) } }))
 jest.mock('../../../context/AgentContext', () => ({ usePet: () => ({ queuePreSessionIntervention: jest.fn() }) }))
 jest.mock('../../Cards/CardHome', () => ({ __esModule: true, default: () => <div data-testid='card-home' /> }))
-jest.mock('../DeckSettingsModal', () => ({ __esModule: true, default: () => null }))
-jest.mock('../StudyModePickerModal', () => ({ __esModule: true, default: () => null }))
 jest.mock('../RecentSessions', () => ({ __esModule: true, default: () => null }))
 
 const StudyCenter = require('../StudyCenter').default
@@ -188,6 +186,46 @@ describe('the Today object (PRD D1, D9, D10)', () => {
     const bar = screen.getByRole('progressbar')
     await waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '4'))
     expect(bar).toHaveAttribute('aria-valuemax', '11')
+  })
+})
+
+describe('deck rows (PRD D3, D4, US-002)', () => {
+  it('lists due decks under "Due now" as rows whose Study opens the session directly, with no modal in between', async () => {
+    render(<StudyCenter />)
+    const row = (await screen.findByText('Due Deck')).closest('[data-testid="deck-row"]')
+    expect(row).toHaveTextContent('study.types.flashcards')
+    expect(row).toHaveTextContent('study.dueCount:{"count":5}')
+    expect(row).toHaveTextContent('study.deck.newCount:{"count":2}')
+    fireEvent.click(row.querySelector('button'))
+    expect(mockNavigate).toHaveBeenCalledWith('/study/d1?mode=study')
+  })
+
+  it('lists the rest under "Up to date" with Browse, and never a red chip or a raw type key', async () => {
+    mockDecks = [FIXTURE_DECKS[1], { ...FIXTURE_DECKS[1], _id: 'q1', name: 'Quiz Deck', deck_type: 'quiz' }]
+    render(<StudyCenter />)
+    const row = (await screen.findByText('Quiz Deck')).closest('[data-testid="deck-row"]')
+    expect(row).toHaveTextContent('study.types.quizzes')
+    expect(row).not.toHaveTextContent('study.types.quizs')
+    expect(row).toHaveTextContent('study.deck.upToDate')
+    fireEvent.click(row.querySelector('button'))
+    expect(mockNavigate).toHaveBeenCalledWith('/study/q1?mode=browse')
+    expect(document.querySelector('.MuiChip-root')).toBeNull()
+  })
+
+  it('draws an empty measure and "New" for a deck with nothing learned yet', async () => {
+    mockDecks = [{ ...FIXTURE_DECKS[0], _id: 'n1', name: 'Fresh Deck', due_cards: 0, new_cards: 20, total_cards: 20, mastery: 0 }]
+    render(<StudyCenter />)
+    const row = (await screen.findByText('Fresh Deck')).closest('[data-testid="deck-row"]')
+    expect(row).toHaveTextContent('study.deckPill.new')
+  })
+
+  it('shows three up-to-date decks and a "Show all N" secondary that expands the rest', async () => {
+    mockDecks = [1, 2, 3, 4, 5].map((i) => ({ ...FIXTURE_DECKS[1], _id: `u${i}`, name: `Up ${i}` }))
+    render(<StudyCenter />)
+    await screen.findByText('Up 1')
+    expect(screen.getAllByTestId('deck-row')).toHaveLength(3)
+    fireEvent.click(screen.getByText('study.sections.showAll:{"count":5}'))
+    expect(screen.getAllByTestId('deck-row')).toHaveLength(5)
   })
 })
 
