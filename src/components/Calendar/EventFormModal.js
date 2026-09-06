@@ -16,7 +16,7 @@ import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import FormSheet from '../Common/Form/FormSheet'
 import FormTextArea from '../Common/Form/FormTextArea'
 import FormTextField from '../Common/Form/FormTextField'
-import { focusRing, formLabel, keyButton, segment, segmentedGroup } from '../Common/Form/formStyles'
+import { focusRing, formLabel, segment, segmentedGroup } from '../Common/Form/formStyles'
 import { COMPLETABLE, completionPatch, stripTypePrefix } from './eventHelpers'
 
 /**
@@ -332,7 +332,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
       <Button variant='plain' onClick={onClose} size='lg' sx={actionSx}>
         {t('calendarModal.form.cancel')}
       </Button>
-      <Button onClick={submit} loading={saving} size='lg' sx={{ ...actionSx, ...keyButton('primary') }}>
+      <Button onClick={submit} loading={saving} size='lg' sx={actionSx}>
         {isEdit ? t('calendarModal.form.saveChanges') : t(`calendarModal.form.addAction.${type}`)}
       </Button>
     </Box>

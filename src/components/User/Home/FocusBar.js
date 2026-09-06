@@ -556,18 +556,7 @@ const FocusBar = () => {
             <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.75rem' }}>
               {t('focusBar.noPrioritiesYet')}
             </Typography>
-            <Button
-              component={RouterLink}
-              to='/annual-planning'
-              size='sm'
-              variant='soft'
-              color='primary'
-              sx={{
-                ...touchTarget,
-                fontSize: '0.75rem',
-                px: 1.5
-              }}
-            >
+            <Button component={RouterLink} to='/annual-planning' size='sm' variant='soft' color='primary' sx={touchTarget}>
               {t('focusBar.createPriority')}
             </Button>
           </Box>

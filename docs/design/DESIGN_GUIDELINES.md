@@ -1891,6 +1891,12 @@ Every empty state MUST follow this exact structure to maintain visual consistenc
 - Icon: 40-48px, optional, `opacity: 0.5`, `color: 'text.tertiary'`
 - Distinguish between **filter empty** ("No results — try adjusting your filters") and **true empty** ("Create your first deck")
 - Never show an empty state WITH a `CircularProgress` — wait for loading to finish first
+- **Inside a summary object (§15.10) the empty state is inline, not centred.** The object already
+  has a title row, so a centred block under it would be a title above a title. There, the empty
+  state is one `body-sm` sentence in the object's readout slot plus its actions on the right rail —
+  the one solid, and at most two secondaries that give a new user something to do this week
+  ("Create deck" · "Browse decks" · "Import"). §11 still holds: no zero counters, no measure, no
+  progress edge until there is data to draw them from.
 
 ---
 
@@ -2189,6 +2195,12 @@ border, 320px wide, 24px from the corner. Inside it the ladder holds without exc
     default, right in a session, bottom-right when there is no pet. A phone has no second corner, so
     there the open widget is a full-width sheet raised clear of the pet, and only the chip stays in
     a corner.
+*   **A message about content sits in the content's object, never over it (ADR-022).** The floating
+    companion carries presence only. When it has something to say about a deck, a due count or a
+    streak, the message renders inline under the readout of the object it is about — one row on
+    `level1` at radius `md`: the companion's 24px avatar, the sentence in `body-sm`, a tertiary
+    "Tell me more", a close. A bubble in the corner covers the very list the message points at,
+    and on a phone it covers the action too.
 
 ### 15.7 A page toolbar is one row, and a readout is not a title (ADR-016)
 
@@ -2234,8 +2246,9 @@ The calendar grid is the reference case: solid event bricks became a tile beside
 The full standard — geometry per size, variants, states, motion, segmented controls, composition,
 colour, code — is `docs/design/BUTTONS.md`. This section is the summary.
 
-The house button is a key you press. Use `keyButton(tone)` from `formStyles` on a solid or level1
-button and `keySegment(active)` after `segment()` on an engaged segment.
+The house button is a key you press. Since CAL-009 the theme draws it on every `Button` and
+`IconButton` (`src/theme/components.js`) and `segment()` carries the underline; nothing spreads
+`keyButton` or `keySegment` at a call site any more.
 
 *   **Mass, then travel.** A 2px edge under the button in the tone's darker shade; hover lifts it
     1px; active pushes it 2px down and the edge disappears. The button travels exactly the distance
@@ -2251,6 +2264,60 @@ button and `keySegment(active)` after `segment()` on an engaged segment.
     make more of them.
 
 
+### 15.10 The summary object (ADR-021)
+
+Every page whose job is "what should I do now" has exactly one summary object, and it is the only
+place the page's numbers and its one solid action live. The Study Center's Today sheet is the
+reference case; the Home page's stats box beside a pill is the case it replaces.
+
+*   **One surface, no border, no shadow.** `background.surface` at `radius.lg`, 20px × 24px of
+    padding. It is content, so it sits on the material ladder's content rung (§15.1) and never
+    lifts (ELEVATION.md §2).
+*   **Two rails inside it.** Left: a `title-lg` name ("Today"), a `body-sm` date or context beside
+    it, and under them one readout line — every number the page used to scatter, as one sentence
+    of readouts (§15.11). Right: a measure or strip if the page has one, and the actions — one
+    solid, the key (§15.9), with at most one secondary beside it.
+*   **Progress is its bottom edge.** 3px at `radius.full`, exactly the object's content width, with
+    a `body-xs` readout under it ("22 of 42 done today"). Not a ring, not a chart.
+*   **State is a line of copy, not a hue.** "12-day streak · study before midnight" and "Start your
+    streak today" are the same slot at different states. The object never tints for either.
+*   **Empty is the same object with nothing in it** — one sentence and its actions (§13.2). It is
+    never hidden and never replaced by a centred block, so a new user meets the page in the shape
+    they will use every day.
+*   **A message about the page sits inside it** (§15.6, ADR-022), under the edge, never in a
+    corner.
+
+### 15.11 Rows, readouts and measures (ADR-021)
+
+The list is one anatomy, and the numbers on a page are readouts. Fragments: `identityTile`,
+`listRow`, `readout`, `measureTrack` / `measureFill` in `formStyles`; `LIST_ROW_HEIGHT` in
+`tokens.js`.
+
+*   **One row, five parts, one order.** `identityTile` · name with a `body-xs` meta line · measure ·
+    readout · action. Decks, sessions, tags, groups, cards and agenda items all draw it; a grid
+    tile is the same five parts stacked into three lines (§15.8, "a view is an arrangement").
+    Nothing is added per surface — no hero image, no gradient, no second button.
+*   **The row is the target.** 56px at `xs`, 52px at `sm`+ (`LIST_ROW_HEIGHT`), so a list of
+    rows can be scanned (§6.2). Hover is a `level1` ground, never a lift or a shadow. Rows are
+    separated by a hairline, never bordered.
+*   **Identity is a 16px tile** in the item's colour at `radius.sm` (ADR-019). The colour tells
+    which kind of thing this is and covers nothing else — never the row, never a chip behind the
+    title.
+*   **Counts are readouts.** A count sits beside its label as `body-sm` tabular text on
+    `text.tertiary` — "Due now · 4 decks", "Decks 12", "Tags · 2" — and never inside a `Chip`. A
+    chip is the shape of a control; a count is not one. The one load-bearing number in a row (the
+    due count) lifts to `text.primary` at weight `md`; nothing else in the row competes with it.
+*   **A count is never a semantic colour.** "3 due" in `danger` reads as an error. Hue is spent on
+    identity (the tile) or on a grade (§15.5); a number is ink.
+*   **A measure is 64 × 3 with its percentage beside it.** The progress radius (`full`, §15.3), a
+    `level2` track, the item's identity colour as fill. An item with nothing learned yet draws an
+    empty track and the readout "New" — never a full grey bar.
+*   **A grade is text in its grade colour with a 36 × 3 bar**, never a chip: "92%" in `success`
+    beside its bar says the same thing with a quarter of the area (§15.8).
+*   **Actions on a row are secondaries of one shape.** "Study" and "Browse" both act on the item,
+    so both are `sm` keys on `level1` (§15.2, BUTTONS.md §3). The row's solid is never on the row;
+    it is on the summary object.
+
 ---
 
 ## 16. The standards, by document
@@ -2264,4 +2331,5 @@ and ships with the token, helper or lint rule that keeps it true. Read the one y
 | Buttons & segmented controls | `BUTTONS.md` (ADR-020) | `keyButton`, `keySegment`, `segment`, `segmentedGroup` in `formStyles` |
 | Motion | `MOTION.md` (DS-001) | `MOTION` in `tokens.js`; `--nowry-motion-*`; lint on literal durations |
 | Elevation & layering | `ELEVATION.md` (DS-001) | Joy's `shadow` scale; `Z_INDEX` via `theme.zIndex`; lint on numeric `zIndex` |
+| The summary object; rows, readouts & measures | §15.10–15.11 (ADR-021, DS-011) | `identityTile`, `listRow`, `readout`, `measureTrack`/`measureFill` in `formStyles`; `LIST_ROW_HEIGHT` in `tokens.js` |
 | Icons, accessibility, formatting, feedback, layout, navigation, brand, QA | DS-002 … DS-010 in `docs/tasks.md` | to come, in that order |

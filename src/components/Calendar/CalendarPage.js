@@ -15,7 +15,7 @@ import { calendarService } from '../../api/services/calendar.service'
 import { tasksService, annualPlanningService } from '../../api/services'
 import { useCalendarFilters } from '../../hooks/useCalendarFilters'
 import { useAuth } from '../../context/AuthContext'
-import { focusRing, keyButton, touchTarget } from '../Common/Form/formStyles'
+import { focusRing, touchTarget } from '../Common/Form/formStyles'
 import EventFormModal from './EventFormModal'
 import CalendarToolbar from './CalendarToolbar'
 import CalendarAgenda from './CalendarAgenda'
@@ -240,7 +240,7 @@ const CalendarPage = () => {
             startDecorator={<AddRoundedIcon />}
             size='sm'
             onClick={handleAddEvent}
-            sx={{ ...focusRing, ...touchTarget, ...keyButton('primary'), flexShrink: 0 }}
+            sx={{ ...focusRing, ...touchTarget, flexShrink: 0 }}
           >
             {t('calendarPage.addEvent')}
           </Button>

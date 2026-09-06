@@ -61,6 +61,54 @@ describe('the key (ADR-020)', () => {
     expect(keySegment(true)).toEqual({ boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-primary-solidBg)' })
     expect(keySegment(false)).toEqual({})
   })
+
+  it('carries the underline in segment() itself since CAL-009, so no call site needs keySegment', () => {
+    const { segment } = require('../formStyles')
+    expect(segment(true, true).boxShadow).toBe(keySegment(true).boxShadow)
+    expect(segment(false, true).boxShadow).toBeUndefined()
+  })
+})
+
+describe('rows, readouts and measures (§15.11, DS-011)', () => {
+  const { identityTile, listRow, readout, measureTrack, measureFill } = require('../formStyles')
+  const { LIST_ROW_HEIGHT } = require('../../../../theme/tokens')
+
+  it('draws identity on a 16px tile at radius sm that never shrinks, in whatever colour it is handed', () => {
+    expect(identityTile('primary.solidBg')).toEqual({
+      width: 16,
+      height: 16,
+      borderRadius: 'sm',
+      flexShrink: 0,
+      bgcolor: 'primary.solidBg'
+    })
+    expect(identityTile('#b45309', 28)).toMatchObject({ width: 28, height: 28, bgcolor: '#b45309' })
+  })
+
+  it('makes the row the target — 44px or more at xs — and pulls the hover ground out by exactly its own padding', () => {
+    expect(listRow.minHeight).toEqual({ xs: LIST_ROW_HEIGHT.xs, sm: LIST_ROW_HEIGHT.sm })
+    expect(LIST_ROW_HEIGHT.xs).toBeGreaterThanOrEqual(44)
+    expect(listRow.mx).toBe(-listRow.px)
+  })
+
+  it('hovers a row with a ground and nothing else — no lift, no shadow, and only the quick duration', () => {
+    expect(listRow['&:hover']).toEqual({ bgcolor: 'background.level1' })
+    expect(JSON.stringify(listRow)).not.toMatch(/boxShadow|transform|translate/)
+    expect(listRow.transition).toMatch(/^background-color 80ms/)
+  })
+
+  it('sets a readout in tabular figures on a tertiary, with no semantic colour', () => {
+    expect(readout).toEqual({ fontSize: 'sm', color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' })
+    expect(readout.color).not.toMatch(/danger|warning|success/)
+  })
+
+  it('keeps a measure 3px thin at the progress radius and clamps its fill to the track', () => {
+    expect(measureTrack).toMatchObject({ width: 64, height: 3, borderRadius: 'full', overflow: 'hidden' })
+    expect(measureFill(62).width).toBe('62%')
+    expect(measureFill(104).width).toBe('100%')
+    expect(measureFill(-1).width).toBe('0%')
+    expect(measureFill(undefined).width).toBe('0%')
+    expect(measureFill(40, 'warning.solidBg').bgcolor).toBe('warning.solidBg')
+  })
 })
 
 describe('goalStyles re-export (§7.4)', () => {

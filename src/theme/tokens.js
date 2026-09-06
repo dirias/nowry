@@ -253,6 +253,18 @@ export const TOUCH_TARGET = 44
 export const MIN_FONT_SIZE = '0.75rem'
 
 // ---------------------------------------------------------------------------
+// LIST_ROW_HEIGHT — the minimum height of a list row (DESIGN_GUIDELINES §15.11)
+// ---------------------------------------------------------------------------
+
+/**
+ * The row is the touch target: 56 at `xs` is TOUCH_TARGET plus 12px of
+ * breathing room for the two-line name; 52 at `sm`+ where a pointer needs
+ * less. Stated once so decks, sessions, tags and agenda rows scan at one
+ * rhythm — a list whose rows vary in height cannot be scanned (§6.2).
+ */
+export const LIST_ROW_HEIGHT = { xs: 56, sm: 52 }
+
+// ---------------------------------------------------------------------------
 // MOTION — three durations, two easings (docs/design/MOTION.md, DS-001)
 // ---------------------------------------------------------------------------
 

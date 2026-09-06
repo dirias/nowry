@@ -78,7 +78,6 @@ const CompanionMessage = ({ message, isLoading, onDismiss, onTellMeMore }) => {
                   size='sm'
                   onClick={onTellMeMore}
                   sx={{
-                    fontSize: '0.75rem',
                     color: 'text.secondary',
                     '&:focus-visible': {
                       outline: '2px solid',

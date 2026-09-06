@@ -5,7 +5,7 @@ import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import CheckRounded from '@mui/icons-material/CheckRounded'
 
-import { focusRing, keySegment, segment, segmentedGroup, tabularNums } from '../Common/Form/formStyles'
+import { focusRing, segment, segmentedGroup, tabularNums } from '../Common/Form/formStyles'
 import { ALL_TYPES, allTypesActive } from './calendarFilters'
 
 export const CALENDAR_VIEWS = ['month', 'week', 'agenda']
@@ -106,7 +106,7 @@ const CalendarToolbar = ({
           color='neutral'
           onClick={onToday}
           aria-pressed={showsToday}
-          sx={{ ...segment(showsToday, false), ...keySegment(showsToday) }}
+          sx={{ ...segment(showsToday, false) }}
         >
           {t('calendarPage.nav.today')}
         </Button>
@@ -124,7 +124,7 @@ const CalendarToolbar = ({
           color='neutral'
           onClick={() => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))}
           aria-pressed={filters.habitsEnabled}
-          sx={{ ...segment(filters.habitsEnabled, true), ...keySegment(filters.habitsEnabled), flex: { xs: 1, sm: 'none' } }}
+          sx={{ ...segment(filters.habitsEnabled, true), flex: { xs: 1, sm: 'none' } }}
         >
           {t('calendarPage.filters.habits')}
         </Button>
@@ -134,7 +134,7 @@ const CalendarToolbar = ({
             variant='plain'
             color='neutral'
             endDecorator={<KeyboardArrowDown fontSize='small' sx={{ opacity: 0.65 }} />}
-            sx={{ ...segment(typesNarrowed, false), ...keySegment(typesNarrowed), flex: { xs: 1, sm: 'none' } }}
+            sx={{ ...segment(typesNarrowed, false), flex: { xs: 1, sm: 'none' } }}
           >
             {typesLabel}
           </MenuButton>
@@ -172,7 +172,7 @@ const CalendarToolbar = ({
             variant='plain'
             color='neutral'
             endDecorator={<KeyboardArrowDown fontSize='small' sx={{ opacity: 0.65 }} />}
-            sx={{ ...segment(areasNarrowed, false), ...keySegment(areasNarrowed), flex: { xs: 1, sm: 'none' } }}
+            sx={{ ...segment(areasNarrowed, false), flex: { xs: 1, sm: 'none' } }}
           >
             {areasLabel}
           </MenuButton>
@@ -233,7 +233,7 @@ const CalendarToolbar = ({
               color='neutral'
               onClick={() => onViewChange(name)}
               aria-pressed={view === name}
-              sx={{ ...segment(view === name, index === 0), ...keySegment(view === name) }}
+              sx={{ ...segment(view === name, index === 0) }}
             >
               {t(`calendarPage.views.${name}`)}
             </Button>

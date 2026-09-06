@@ -3,8 +3,8 @@
 > The house button system, chosen on 2026-09-06 from three directions on the "Nowry Buttons"
 > canvas ("Boost"). Governing decision: `docs/decisions.md` ADR-020. Rules it builds on:
 > `DESIGN_GUIDELINES.md` §15 (toolbar grammar) and §15.9 (the key).
-> Status: applied to the calendar (CAL-008); becomes the theme's `JoyButton` override in CAL-009,
-> after which a bare `<Button>` anywhere is this button.
+> Status: theme-wide since CAL-009 (2026-09-06) — `src/theme/components.js` overrides `JoyButton` and
+> `JoyIconButton`, so a bare `<Button>` anywhere is this button. First applied to the calendar (CAL-008).
 
 ---
 
@@ -79,7 +79,7 @@ Two or more controls of one class over one list or view are **one object** (§15
 with `segmentedGroup` (radius `md`, `level1`, 1px `divider` hairlines) holding `segment(active,
 first)` buttons at 36px (44 at `xs`).
 
-- **Engaged = `level2` ground + a 2px accent underline** inside the segment (`keySegment(true)`).
+- **Engaged = `level2` ground + a 2px accent underline** inside the segment (`segment(true, …)` carries it since CAL-009).
   The underline is the key's edge turned inward; the ground is still the state.
 - A menu segment carries `aria-haspopup`/`aria-expanded` and its readout in the label
   ("Types · 2"); a toggle segment carries `aria-pressed`. A multi-select menu stays open while
@@ -111,7 +111,11 @@ first)` buttons at 36px (44 at `xs`).
 
 ## 8. In code
 
-**Today (CAL-008):** spread the fragments from `src/components/Common/Form/formStyles.js`.
+**Since CAL-009:** the theme owns it — a bare `<Button>` is the key with the geometry above, `segment()`
+carries the underline, and `variant='outlined'` renders as the borderless secondary. Nothing spreads
+`keyButton` or `keySegment`; both stay exported as the pinned definition the theme test compares against.
+
+**Before CAL-009 (CAL-008), for the record:** the fragments were spread at the calendar's call sites.
 
 ```jsx
 import { focusRing, keyButton, keySegment, segment, touchTarget } from '../Common/Form/formStyles'
@@ -121,9 +125,9 @@ import { focusRing, keyButton, keySegment, segment, touchTarget } from '../Commo
 <Button variant='plain' color='neutral' aria-pressed={on} sx={{ ...segment(on, first), ...keySegment(on) }}>Habits</Button>
 ```
 
-**After CAL-009:** the theme owns it. A bare `<Button>` is the key with the geometry above;
-`segment()` carries the underline; the spreads come out. Until then, do not add the fragments to
-surfaces outside the calendar — the theme step lands them everywhere at once.
+**Adding a button now:** write `<Button>` (primary), `<Button variant='soft' color='neutral'>` (secondary)
+or `<Button variant='plain'>` (tertiary) and nothing else; a per-site `borderRadius`, `fontSize`,
+`fontWeight` or `boxShadow` on a button is a lint-visible fight with the theme.
 
 ## 9. Do not
 

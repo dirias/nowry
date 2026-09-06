@@ -6,6 +6,7 @@ import { MOTION } from './tokens'
 
 import { generateColorScheme, STICKY_PALETTE } from './colorSchemeGenerator'
 import themeConfig from './theme'
+import { components } from './components'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
@@ -59,6 +60,8 @@ export const buildDynamicTheme = (themeColor) => {
 
   return extendTheme({
     ...themeConfig,
+    // CAL-009: the house button, theme-wide. See ./components.js.
+    components,
     colorSchemes: {
       light: {
         ...themeConfig.colorSchemes.light,

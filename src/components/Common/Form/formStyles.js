@@ -1,4 +1,4 @@
-import { TOUCH_TARGET, FONT_WEIGHT, MOTION } from '../../../theme/tokens'
+import { TOUCH_TARGET, LIST_ROW_HEIGHT, FONT_WEIGHT, MOTION } from '../../../theme/tokens'
 
 /**
  * Shared `sx` fragments for every form surface in the app.
@@ -129,6 +129,10 @@ export const segment = (active, first) => ({
   whiteSpace: 'nowrap',
   bgcolor: active ? 'background.level2' : 'transparent',
   color: active ? 'text.primary' : 'text.secondary',
+  // The key's edge turned inward (ADR-020, §15.9): an engaged segment carries
+  // a 2px accent underline on top of its level2 ground. Carried here since
+  // CAL-009, so no call site spreads `keySegment` any more.
+  ...(active ? { boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-primary-solidBg)' } : {}),
   '--variant-plainHoverBg': active ? 'var(--joy-palette-background-level2)' : 'transparent',
   '--variant-plainActiveBg': active ? 'var(--joy-palette-background-level2)' : 'transparent',
   '&:hover': { color: 'text.primary' },
@@ -153,8 +157,10 @@ export const segment = (active, first) => ({
  * The motion is `MOTION.duration.quick` (80ms) and 2px. Slower or further reads
  * as a toy; neither number is tuned per call site.
  *
- * Applied to the calendar first (CAL-008); the theme-wide `JoyButton` override
- * that retires the per-site spread is CAL-009.
+ * Applied to the calendar first (CAL-008). Since CAL-009 the theme's
+ * `JoyButton` override (`theme/components.js`) gives every button this edge
+ * and motion, so nothing spreads this any more; it stays as the single pinned
+ * definition of the edge that the theme test compares against.
  *
  * @param {'primary' | 'neutral'} tone - primary for the solid action, neutral
  *   for a level1 secondary
@@ -179,6 +185,111 @@ export const keyButton = (tone = 'primary') => {
  * The key's engaged segment: a 2px accent underline inside the segment, on top
  * of the level2 ground `segment()` already gives it. State stays a ground
  * (§15.5) — the underline is the same "edge" idea as {@link keyButton}, not a
- * tint. Spread after `segment(active, first)`.
+ * tint.
+ *
+ * Since CAL-009 `segment()` carries the underline itself, so this is kept only
+ * for the tests that pin the shape of the edge; spreading it after `segment()`
+ * is harmless and unnecessary.
  */
 export const keySegment = (active) => (active ? { boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-primary-solidBg)' } : {})
+
+// ---------------------------------------------------------------------------
+// Rows, readouts and measures (DESIGN_GUIDELINES §15.11, ADR-021, DS-011)
+// ---------------------------------------------------------------------------
+
+/**
+ * The tile that carries an item's identity colour (ADR-019, §15.8): 16px at
+ * radius `sm`. A label, not a fill — the hue keeps its full strength on a small
+ * area while the title beside it sits on the neutral surface, so every item
+ * gets the same text contrast in both schemes.
+ *
+ * `color` is whatever the item's identity is: a semantic token
+ * (`primary.solidBg` for a flashcard deck, `warning.solidBg` for a quiz) or
+ * user data (a focus area's own hex). The fragment never chooses a colour, only
+ * the area it may cover. `EventTypeTile` is this box with a glyph inside, and
+ * must keep the same radius and `flexShrink`, or a column of tiles stops
+ * lining up between the calendar and the study centre.
+ *
+ * @param {string} color - a semantic colour token or the item's own colour
+ * @param {number} [size=16] - 16 in a row; 28 where a glyph sits on it
+ */
+export const identityTile = (color, size = 16) => ({
+  width: size,
+  height: size,
+  borderRadius: 'sm',
+  flexShrink: 0,
+  bgcolor: color
+})
+
+/**
+ * One row of a list — a deck, a session, a tag, a group, a card (§15.11). Five
+ * parts in one order: tile · name with a meta line · measure · readout · action.
+ * Every list on the study centre draws the same row, and the library's grid
+ * tile is this row stacked; a view is an arrangement, not a new product
+ * (§15.8).
+ *
+ * The row IS the target — `LIST_ROW_HEIGHT` is 56 at `xs` and 52 at `sm`+ —
+ * and its 12px sides are pulled out by a matching negative margin, so the
+ * hover ground reaches past the text while the text still starts on the
+ * content's left rail (§15.4). Hover is a ground, `level1`, and nothing else:
+ * no lift and no shadow, because a row is content and the only depth on the
+ * page is the key's edge (ELEVATION.md §2). Rows are separated by the
+ * hairline of a `Stack` divider, never by a border of their own.
+ */
+export const listRow = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 2,
+  minHeight: { xs: LIST_ROW_HEIGHT.xs, sm: LIST_ROW_HEIGHT.sm },
+  px: 1.5,
+  mx: -1.5,
+  borderRadius: 'md',
+  transition: `background-color ${MOTION.duration.quick}ms ${MOTION.easing.standard}`,
+  '&:hover': { bgcolor: 'background.level1' },
+  ...focusRing
+}
+
+/**
+ * A number beside its label (§15.7, §15.11): "Due now · 4 decks", "Decks 12",
+ * "Tags · 2", "3 due · 5 new". `body-sm` on `text.tertiary` in tabular
+ * figures, so a count that ticks does not move its neighbours. The one number
+ * that asks something of the user — the due count — is lifted to
+ * `text.primary` at the call site; the fragment stays quiet.
+ *
+ * Never a `Chip`: a chip is a control's shape, and a count is not a control.
+ * Never a semantic colour: hue is spent on identity (the tile) or on a grade,
+ * and "3 due" in danger red reads as an error the user made (§15.5, §15.8).
+ */
+export const readout = { fontSize: 'sm', color: 'text.tertiary', ...tabularNums }
+
+/**
+ * The row-sized measure (§15.4, §15.11): a 64×3 track at radius `full` — the
+ * progress radius, the one place `full` is right (§15.3) — with its percentage
+ * as a {@link readout} beside it. Progress belongs on an edge, not in the row:
+ * a bar this thin reads as a rule, not as an object. The Today object's bottom
+ * edge is the same anatomy at content width; only the width changes.
+ */
+export const measureTrack = {
+  width: 64,
+  height: 3,
+  borderRadius: 'full',
+  bgcolor: 'background.level2',
+  overflow: 'hidden',
+  flexShrink: 0
+}
+
+/**
+ * The fill of a {@link measureTrack}. Clamped, so a stale `mastery` of 104 or
+ * a `-1` sentinel cannot draw outside the track. An all-new deck passes 0 and
+ * prints "New" as its readout — an empty track, not a full grey one, because a
+ * full bar for "nothing learned yet" is a lie the eye reads before the label.
+ *
+ * @param {number} pct - 0–100
+ * @param {string} [color='primary.solidBg'] - the identity colour of the item
+ */
+export const measureFill = (pct, color = 'primary.solidBg') => ({
+  width: `${Math.min(100, Math.max(0, Number(pct) || 0))}%`,
+  height: '100%',
+  borderRadius: 'full',
+  bgcolor: color
+})

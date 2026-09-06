@@ -259,11 +259,11 @@ export default function BookHome() {
               endDecorator={
                 <Stack direction='row' spacing={1} alignItems='center' sx={{ mr: 0.5 }}>
                   {searchTerm && (
-                    <IconButton size='sm' variant='plain' color='neutral' onClick={() => setSearchTerm('')} sx={{ borderRadius: '50%' }}>
+                    <IconButton size='sm' variant='plain' color='neutral' onClick={() => setSearchTerm('')}>
                       <CloseIcon />
                     </IconButton>
                   )}
-                  <Button size='sm' variant='solid' color='primary' onClick={openCreate} sx={{ borderRadius: 'md', fontWeight: 600 }}>
+                  <Button size='sm' variant='solid' color='primary' onClick={openCreate}>
                     {t('books.create')}
                   </Button>
                 </Stack>

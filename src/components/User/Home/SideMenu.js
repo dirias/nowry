@@ -377,7 +377,7 @@ const SideMenu = () => {
             variant='outlined'
             color='neutral'
             aria-label={t('annualPlanning.dailyRoutine.emptyCta')}
-            sx={{ mt: 0.5, fontSize: 'xs' }}
+            sx={{ mt: 0.5 }}
           >
             {t('annualPlanning.dailyRoutine.emptyCta')}
           </Button>
