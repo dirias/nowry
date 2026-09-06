@@ -126,3 +126,52 @@ describe('theme colour independence', () => {
     expect(rust.colorSchemes.light.palette.primary.solidBg).not.toBe(teal.colorSchemes.light.palette.primary.solidBg)
   })
 })
+
+// ─── DS-001: motion and layering ─────────────────────────────────────────────
+
+describe('MOTION (docs/design/MOTION.md)', () => {
+  const { MOTION } = require('../tokens')
+
+  it('has exactly three durations, in milliseconds, strictly ordered', () => {
+    const steps = Object.values(MOTION.duration)
+    expect(Object.keys(MOTION.duration)).toEqual(['quick', 'base', 'slow'])
+    steps.forEach((ms) => expect(typeof ms).toBe('number'))
+    expect(steps).toEqual([...steps].sort((a, b) => a - b))
+    expect(steps[0]).toBeGreaterThanOrEqual(80)
+    expect(steps[2]).toBeLessThanOrEqual(240)
+  })
+
+  it('has two easings, both cubic-bezier curves', () => {
+    expect(Object.keys(MOTION.easing)).toEqual(['standard', 'exit'])
+    Object.values(MOTION.easing).forEach((curve) => expect(curve).toMatch(/^cubic-bezier\(/))
+  })
+})
+
+describe('Z_INDEX (docs/design/ELEVATION.md)', () => {
+  const { Z_INDEX } = require('../tokens')
+
+  it("keeps Joy's six layers at Joy's values, so its Menu, Modal, Snackbar and Tooltip keep their order untold", () => {
+    expect(Z_INDEX).toMatchObject({ badge: 1, table: 10, popup: 1000, modal: 1300, snackbar: 1400, tooltip: 1500 })
+  })
+
+  it('adds floating — the widgets over the page — above sticky chrome and below any popup', () => {
+    expect(Z_INDEX.floating).toBeGreaterThan(Z_INDEX.table)
+    expect(Z_INDEX.floating).toBeLessThan(Z_INDEX.popup)
+  })
+
+  it('is strictly ordered as listed', () => {
+    const values = Object.values(Z_INDEX)
+    expect(values).toEqual([...values].sort((a, b) => a - b))
+    expect(new Set(values).size).toBe(values.length)
+  })
+})
+
+describe('the built theme carries the layer scale', () => {
+  it("resolves zIndex: 'floating' between table and popup, on Joy's own scale", () => {
+    const theme = buildDynamicTheme('#2a6971')
+    expect(theme.zIndex.floating).toBe(100)
+    expect(theme.zIndex.table).toBeLessThan(theme.zIndex.floating)
+    expect(theme.zIndex.floating).toBeLessThan(theme.zIndex.popup)
+    expect(theme.zIndex.tooltip).toBe(1500)
+  })
+})

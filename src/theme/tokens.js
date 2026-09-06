@@ -251,3 +251,49 @@ export const TOUCH_TARGET = 44
  * and every fluid clamp MINIMUM sits at or above this.
  */
 export const MIN_FONT_SIZE = '0.75rem'
+
+// ---------------------------------------------------------------------------
+// MOTION — three durations, two easings (docs/design/MOTION.md, DS-001)
+// ---------------------------------------------------------------------------
+
+/**
+ * Eight durations were in use before this scale existed (200ms ×85, 150 ×39,
+ * 300 ×22, then 100, 120, 180, 600 and the key's 80). Three steps cover every
+ * one of them: `quick` for state (hover, press, a segment engaging), `base` for
+ * presence (a menu, a chip, an optimistic row), `slow` for position (a sheet,
+ * a panel). Under 80ms is instant; over 240ms the user is watching, not using.
+ *
+ * Numbers, not strings, so a test can assert on them and a fragment can do
+ * arithmetic; `DynamicThemeProvider` publishes them as `--nowry-motion-*`.
+ */
+export const MOTION = {
+  duration: { quick: 80, base: 160, slow: 240 },
+  easing: {
+    standard: 'cubic-bezier(0.2, 0, 0, 1)', // enters and changes: fast start, soft landing
+    exit: 'cubic-bezier(0.4, 0, 1, 1)' //     only what leaves
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Z_INDEX — Joy's layer scale, plus the one layer the app adds (ELEVATION.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * Before this scale: 1, 2, 10, 20, 200, 1000, 9999 and 10000, with no rule —
+ * which is how a menu ends up under a sheet. Joy's own six names stay at
+ * Joy's values so its Menu, Modal, Snackbar and Tooltip keep their order
+ * without being told; `floating` is the app's addition for the widgets that
+ * live over the page (the Pomodoro timer, the Study Buddy, the Focus chip):
+ * above sticky table chrome, below any popup.
+ *
+ * Referenced by name — `sx={{ zIndex: 'floating' }}` — never by number.
+ */
+export const Z_INDEX = {
+  badge: 1,
+  table: 10,
+  floating: 100,
+  popup: 1000,
+  modal: 1300,
+  snackbar: 1400,
+  tooltip: 1500
+}

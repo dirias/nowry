@@ -23,6 +23,9 @@ npm run build      # production build
 
 **Always read before editing UI:** `docs/design/DESIGN_GUIDELINES.md`
 **Buttons and segmented controls:** `docs/design/BUTTONS.md` — the house button standard (ADR-020)
+**Motion:** `docs/design/MOTION.md` — three durations, two easings, reduced motion (DS-001)
+**Elevation and layering:** `docs/design/ELEVATION.md` — what a shadow means; layers by name, never by number (DS-001)
+**The index of all standards:** `docs/design/DESIGN_GUIDELINES.md` §16
 
 ### Non-negotiables
 1. Use **Joy UI `sx` props** only — no `style={{}}`, no raw CSS

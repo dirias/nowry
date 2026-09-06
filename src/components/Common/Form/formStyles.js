@@ -1,4 +1,4 @@
-import { TOUCH_TARGET, FONT_WEIGHT } from '../../../theme/tokens'
+import { TOUCH_TARGET, FONT_WEIGHT, MOTION } from '../../../theme/tokens'
 
 /**
  * Shared `sx` fragments for every form surface in the app.
@@ -150,8 +150,8 @@ export const segment = (active, first) => ({
  * whichever accent the user chose, darkened, so every preset gets the same
  * signature in both schemes.
  *
- * The motion is 80ms and 2px. Slower or further reads as a toy; this is the
- * one number in the fragment that must not be tuned per call site.
+ * The motion is `MOTION.duration.quick` (80ms) and 2px. Slower or further reads
+ * as a toy; neither number is tuned per call site.
  *
  * Applied to the calendar first (CAL-008); the theme-wide `JoyButton` override
  * that retires the per-site spread is CAL-009.
@@ -163,7 +163,9 @@ export const keyButton = (tone = 'primary') => {
   const edge = tone === 'primary' ? 'var(--joy-palette-primary-solidActiveBg)' : 'var(--joy-palette-neutral-outlinedBorder)'
   return {
     borderRadius: 'md',
-    transition: 'transform 80ms ease, box-shadow 80ms ease, background-color 80ms ease',
+    transition: ['transform', 'box-shadow', 'background-color']
+      .map((prop) => `${prop} ${MOTION.duration.quick}ms ${MOTION.easing.standard}`)
+      .join(', '),
     boxShadow: `0 2px 0 0 ${edge}`,
     '&:hover': { transform: 'translateY(-1px)', boxShadow: `0 3px 0 0 ${edge}` },
     '&:active': { transform: 'translateY(2px)', boxShadow: 'none' },

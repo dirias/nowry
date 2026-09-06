@@ -2249,3 +2249,19 @@ button and `keySegment(active)` after `segment()` on an engaged segment.
     inward.
 *   **One solid per surface still holds.** The key makes the primary action heavier; it does not
     make more of them.
+
+
+---
+
+## 16. The standards, by document
+
+The guidelines above are the shared grammar; each of these is the full standard for one part of it
+and ships with the token, helper or lint rule that keeps it true. Read the one you are touching.
+
+| Standard | Document | Enforced by |
+|---|---|---|
+| Colour | `COLOR_SYSTEM.md` | semantic tokens; `readableTextOn` |
+| Buttons & segmented controls | `BUTTONS.md` (ADR-020) | `keyButton`, `keySegment`, `segment`, `segmentedGroup` in `formStyles` |
+| Motion | `MOTION.md` (DS-001) | `MOTION` in `tokens.js`; `--nowry-motion-*`; lint on literal durations |
+| Elevation & layering | `ELEVATION.md` (DS-001) | Joy's `shadow` scale; `Z_INDEX` via `theme.zIndex`; lint on numeric `zIndex` |
+| Icons, accessibility, formatting, feedback, layout, navigation, brand, QA | DS-002 … DS-010 in `docs/tasks.md` | to come, in that order |

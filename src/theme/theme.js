@@ -1,5 +1,5 @@
 import { STICKY_PALETTE } from './colorSchemeGenerator'
-import { FONT_FAMILY, FONT_SIZE, FONT_WEIGHT, LETTER_SPACING, LINE_HEIGHT, RADIUS, SPACING_BASE } from './tokens'
+import { FONT_FAMILY, FONT_SIZE, FONT_WEIGHT, LETTER_SPACING, LINE_HEIGHT, RADIUS, SPACING_BASE, Z_INDEX } from './tokens'
 
 const primaryMain = '#2a6971'
 const primaryHover = '#245a63'
@@ -31,6 +31,10 @@ const themeConfig = {
   fontWeight: FONT_WEIGHT,
   lineHeight: LINE_HEIGHT,
   radius: RADIUS,
+
+  // Joy's six layers at Joy's values plus `floating`; `sx={{ zIndex: 'floating' }}`
+  // resolves through this scale (docs/design/ELEVATION.md).
+  zIndex: Z_INDEX,
 
   // Explicit, and identical to Joy's default — that is the point. Written
   // down, a future move to a 4px base is a visible edit; left implicit, it

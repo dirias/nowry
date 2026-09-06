@@ -57,6 +57,18 @@ module.exports = {
       {
         selector: "Property[key.name='borderRadius'][value.type='Literal']:not([value.value=/^(xs|sm|md|lg|xl|full|inherit)$/])",
         message: 'Raw borderRadius is forbidden. Use xs|sm|md|lg|xl|full.'
+      },
+      {
+        // DS-001: a layer is a name on the scale, never a number.
+        selector: "Property[key.name='zIndex'][value.type='Literal'][value.raw=/^-?[0-9]+$/]",
+        message:
+          'Raw zIndex is forbidden. Use a layer name: badge|table|floating|popup|modal|snackbar|tooltip. See docs/design/ELEVATION.md.'
+      },
+      {
+        // DS-001: a duration is a token, never a literal in a component.
+        selector: "Property[key.name='transition'][value.type='Literal'][value.value=/[0-9](ms|s)\\b/]",
+        message:
+          'Raw transition duration is forbidden. Use var(--nowry-motion-quick|base|slow) with var(--nowry-motion-standard|exit). See docs/design/MOTION.md.'
       }
     ]
   },

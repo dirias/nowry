@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext, useMemo } from '
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import CssBaseline from '@mui/joy/CssBaseline'
 import GlobalStyles from '@mui/joy/GlobalStyles'
+import { MOTION } from './tokens'
 
 import { generateColorScheme, STICKY_PALETTE } from './colorSchemeGenerator'
 import themeConfig from './theme'
@@ -128,6 +129,15 @@ export const DynamicThemeProvider = ({ children }) => {
         <CssBaseline />
         <GlobalStyles
           styles={{
+            // DS-001: the motion scale as CSS variables, so a transition reads
+            // the token by name and never repeats the number (MOTION.md §3).
+            ':root': {
+              '--nowry-motion-quick': `${MOTION.duration.quick}ms`,
+              '--nowry-motion-base': `${MOTION.duration.base}ms`,
+              '--nowry-motion-slow': `${MOTION.duration.slow}ms`,
+              '--nowry-motion-standard': MOTION.easing.standard,
+              '--nowry-motion-exit': MOTION.easing.exit
+            },
             // Overrides Joy's CssBaseline, which sets these on `html`
             // unconditionally. This GlobalStyles renders after <CssBaseline />,
             // so at equal specificity it is injected later and wins.
