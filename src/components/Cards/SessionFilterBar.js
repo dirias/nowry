@@ -139,7 +139,12 @@ const SessionFilterBar = React.memo(function SessionFilterBar({
                     // one Joy's keyboard handling already understands.
                     role='menuitemcheckbox'
                     aria-checked={selected}
-                    onClick={() => toggleTag(tag)}
+                    // Multi-select: the menu stays open while tags are ticked
+                    // (Base UI's documented escape hatch, see CalendarToolbar).
+                    onClick={(event) => {
+                      toggleTag(tag)
+                      event.defaultMuiPrevented = true
+                    }}
                     sx={{ borderRadius: 'sm', ...focusRing }}
                   >
                     <Typography

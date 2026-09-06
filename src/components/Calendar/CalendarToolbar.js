@@ -25,6 +25,17 @@ const itemSx = { borderRadius: 'sm', ...focusRing }
 // the 44px floor where a thumb needs it.
 const arrowSx = (first) => ({ ...segment(false, first), px: 0, minWidth: { xs: 44, sm: 40 } })
 
+/**
+ * A check row must not close the menu: narrowing to two types is two ticks, and
+ * a menu that shuts after each one makes the user reopen it for every choice.
+ * Base UI closes on any item click unless the handler marks the event as
+ * handled — this is its documented escape hatch, not a stopPropagation hack.
+ */
+const keepOpen = (handler) => (event) => {
+  handler()
+  event.defaultMuiPrevented = true
+}
+
 const CheckMark = () => <CheckRounded fontSize='small' sx={{ ml: 'auto', color: 'primary.plainColor' }} />
 
 /**
@@ -129,7 +140,7 @@ const CalendarToolbar = ({
             {TYPE_ROWS.map(({ key, labelKey }) => {
               const checked = filters.activeTypes.includes(key)
               return (
-                <MenuItem key={key} role='menuitemcheckbox' aria-checked={checked} onClick={() => toggleType(key)} sx={itemSx}>
+                <MenuItem key={key} role='menuitemcheckbox' aria-checked={checked} onClick={keepOpen(() => toggleType(key))} sx={itemSx}>
                   <Typography
                     level='body-sm'
                     sx={{ color: checked ? 'text.primary' : 'text.secondary', fontWeight: checked ? 'lg' : 'md' }}
@@ -171,7 +182,13 @@ const CalendarToolbar = ({
               focusAreas.map((area) => {
                 const checked = filters.activeAreaIds.includes(area.id)
                 return (
-                  <MenuItem key={area.id} role='menuitemcheckbox' aria-checked={checked} onClick={() => toggleArea(area.id)} sx={itemSx}>
+                  <MenuItem
+                    key={area.id}
+                    role='menuitemcheckbox'
+                    aria-checked={checked}
+                    onClick={keepOpen(() => toggleArea(area.id))}
+                    sx={itemSx}
+                  >
                     {/* area.color is user data, not a token — the same exception the event pills make */}
                     <Box sx={{ width: 10, height: 10, borderRadius: 'xs', bgcolor: area.color, flexShrink: 0 }} />
                     <Typography

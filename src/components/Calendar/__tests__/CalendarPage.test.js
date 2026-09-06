@@ -260,6 +260,16 @@ describe('CAL-001: the toolbar', () => {
     ).toEqual(['priority', 'goal', 'milestone'])
   })
 
+  it('keeps the Types menu open while rows are ticked, so two choices are two clicks, not four', async () => {
+    await renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.filters.types' }))
+    fireEvent.click(await screen.findByRole('menuitemcheckbox', { name: /typeTask/ }))
+    expect(screen.getByRole('menuitemcheckbox', { name: /typeGoal/ })).toBeInTheDocument()
+    // The preset row is a single action and does close the menu.
+    fireEvent.click(screen.getByRole('menuitem', { name: 'calendarPage.filters.goalsOnly' }))
+    expect(screen.queryByRole('menuitemcheckbox', { name: /typeGoal/ })).toBeNull()
+  })
+
   it('reads the count back on the segment once a filter narrows something', async () => {
     mockUseCalendarFilters.mockReturnValue({
       filters: { habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: ['area-1'] },
