@@ -14,8 +14,14 @@ const PAGE_SIZE = 50
 // set of tags in a different order (or re-deriving the array on every
 // render) still hashes to the same cache entry — mirrors the old
 // apiCache-backed buildCacheKey()'s `[...tags].sort()`.
-function buildFilterKey(tags, search, markedOnly, group) {
-  return { tags: [...tags].sort(), search: search || '', markedOnly: Boolean(markedOnly), group: group || null }
+function buildFilterKey(tags, search, markedOnly, group, untagged) {
+  return {
+    tags: [...tags].sort(),
+    search: search || '',
+    markedOnly: Boolean(markedOnly),
+    group: group || null,
+    untagged: Boolean(untagged)
+  }
 }
 
 /**
@@ -38,7 +44,7 @@ function buildFilterKey(tags, search, markedOnly, group) {
  * `{ cards, total, hasMore, loading, error, reload, fetchMore }` shape they
  * had before this migration.
  */
-export function useCardData(selectedTags = [], search = '', markedOnly = false, group = null) {
+export function useCardData(selectedTags = [], search = '', markedOnly = false, group = null, untagged = false) {
   const { user } = useAuth()
   const userId = user?.id ?? null
 
@@ -46,15 +52,16 @@ export function useCardData(selectedTags = [], search = '', markedOnly = false, 
   // predicate (MARK-001), and a marked-only list is a genuinely different
   // result set rather than a subset of the loaded page — filtering client-side
   // would silently under-report anything past the first page.
-  // `group` (STUDY-001) is a server-side narrowing like the mark: part of the key.
-  const filter = buildFilterKey(selectedTags, search, markedOnly, group)
+  // `group` (STUDY-001) and `untagged` (PRD D15) are server-side narrowings
+  // like the mark: part of the key.
+  const filter = buildFilterKey(selectedTags, search, markedOnly, group, untagged)
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     // Scoped by user (and the tag/search filter combo) so filtered variants
     // don't collide with the unfiltered list or with another account's data —
     // see the query-key convention documented in `api/queryClient.js`.
     queryKey: ['cards', userId, filter],
-    queryFn: ({ pageParam = 0 }) => cardsService.getAll(pageParam, PAGE_SIZE, selectedTags, search, markedOnly, group),
+    queryFn: ({ pageParam = 0 }) => cardsService.getAll(pageParam, PAGE_SIZE, selectedTags, search, markedOnly, group, untagged),
     // Next page's offset is simply how many cards have been loaded so far;
     // returning undefined (when the server says there's no more) is what
     // React Query reads as "no next page" for `hasNextPage`.

@@ -22,7 +22,7 @@
  * current `apiCache` key shape (see the string keys in `useDeckData.js` /
  * `useCardData.js`) as an array instead of a colon-joined string:
  *
- *   ['decks', userId, deckType]            // was `decks:${deckType}:${user.id}`
+ *   ['decks', userId, deckType, 'active']  // was `decks:${deckType}:${user.id}`; 'archived' is the archived list (ADR-023)
  *   ['decks', userId]                       // invalidates every deckType for a user
  *   ['cards', userId, { tags, search }]    // was `cards:filtered:t:...:s:...`
  *   ['cards', userId]                       // invalidates every filter/search variant

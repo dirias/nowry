@@ -345,14 +345,52 @@ export const cardsService = {
    * @param {boolean} markedOnly - Restrict to cards the user has marked (ADR-010)
    * @param {'marked'|'struggling'|null} group - A system group (STUDY-001); struggling
    *   cards come back with `last_grade` / `last_graded_at`
+   * @param {boolean} untagged - Cards whose `tags` is absent or empty (PRD D15, FR-009);
+   *   with `tags` the server returns the union
    */
-  async getAll(skip = 0, limit = 50, tags = [], search = '', markedOnly = false, group = null) {
+  async getAll(skip = 0, limit = 50, tags = [], search = '', markedOnly = false, group = null, untagged = false) {
     const params = new URLSearchParams({ skip, limit })
     tags.forEach((t) => params.append('tags', t))
     if (search) params.append('search', search)
     if (markedOnly) params.append('marked_only', 'true')
     if (group) params.append('group', group)
+    if (untagged) params.append('untagged', 'true')
     const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
+    return data
+  },
+
+  /**
+   * One verb over many cards (PRD FR-010, ADR-023). The server touches only
+   * the caller's own active cards and ignores unknown ids; the mark branch
+   * writes through the mark helper so `marked_at` keeps one owner (ADR-010).
+   * @param {{ ids: string[], action: 'move'|'tag'|'untag'|'mark'|'unmark'|'delete',
+   *   deckId?: string, tags?: string[] }} request
+   * @returns {Promise<{updated: number}>}
+   */
+  async bulk({ ids, action, deckId, tags }) {
+    const body = { ids, action }
+    if (deckId !== undefined) body.deck_id = deckId
+    if (tags !== undefined) body.tags = tags
+    const { data } = await apiClient.post('/study-cards/bulk', body)
+    return data
+  },
+
+  /**
+   * Rename a tag on every card (PRD FR-011). Renaming onto a tag that already
+   * exists is a merge — the same call, no second endpoint.
+   * @returns {Promise<{cards: number}>}
+   */
+  async renameTag(from, to) {
+    const { data } = await apiClient.post('/study-cards/tags/rename', { from, to })
+    return data
+  },
+
+  /**
+   * Pull a tag from every card (PRD FR-011).
+   * @returns {Promise<{cards: number}>}
+   */
+  async removeTag(tag) {
+    const { data } = await apiClient.post('/study-cards/tags/remove', { tag })
     return data
   },
 

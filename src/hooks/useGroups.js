@@ -12,10 +12,16 @@ export const GROUPS_STALE_TIME = 30000 // same as the card list it summarises
  * cards / decks / due / new under one counting rule, so a group's "Study · N"
  * is `due + new` and equals the session that opens (PRD US-006).
  *
- * `enabled` lets the caller defer the request until the Tags segment is first
- * engaged (PRD NFR performance). Key: ['groups', userId]; invalidated beside
- * ['cards', userId] when a review is graded or a card is marked.
+ * `enabled` lets the caller defer the request until the Cards or Tags segment
+ * is first engaged (PRD NFR performance). Key: ['groups', userId]; invalidated
+ * beside ['cards', userId] when a review is graded or a card is marked.
+ *
+ * `untagged` (PRD D15, FR-009) is the count of cards carrying no tag. It rides
+ * on this response and is never a row in the index: a housekeeping state, not
+ * a reason to study (ADR-023 point 1).
  */
+const NO_UNTAGGED = { cards: 0, due: 0, new: 0 }
+
 export function useGroups({ enabled = true } = {}) {
   const { user } = useAuth()
   const userId = user?.id ?? null
@@ -32,7 +38,7 @@ export function useGroups({ enabled = true } = {}) {
     await queryClient.invalidateQueries({ queryKey: ['groups', userId] })
   }
 
-  return { groups: data ?? null, loading: isLoading, error: error ?? null, reload }
+  return { groups: data ?? null, untagged: data?.untagged ?? NO_UNTAGGED, loading: isLoading, error: error ?? null, reload }
 }
 
 export default useGroups

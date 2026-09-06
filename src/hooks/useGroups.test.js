@@ -35,6 +35,17 @@ it('returns the system groups and the tags from one request, keyed by user', asy
   expect(client.getQueryCache().findAll({ queryKey: ['groups', 'user-1'] })).toHaveLength(1)
 })
 
+it('exposes the untagged count from the response, and zeros before it arrives (PRD D15)', async () => {
+  const payload = { system: [], tags: [], untagged: { cards: 85, due: 6, new: 12 } }
+  mockGet.mockResolvedValue({ data: payload })
+  const { wrapper } = makeWrapper()
+
+  const { result } = renderHook(() => useGroups(), { wrapper })
+  expect(result.current.untagged).toEqual({ cards: 0, due: 0, new: 0 })
+  await waitFor(() => expect(result.current.loading).toBe(false))
+  expect(result.current.untagged).toEqual({ cards: 85, due: 6, new: 12 })
+})
+
 it('does not fetch until the caller enables it — the Tags segment, not the page, pays for the index', async () => {
   mockGet.mockResolvedValue({ data: { system: [], tags: [] } })
   const { wrapper } = makeWrapper()

@@ -18,8 +18,12 @@ const DECKS_STALE_TIME = 60000 // 60 seconds
  * other mounted component reading it too — this is what keeps StudyCenter's
  * Dashboard tab and CardHome's Content Library tab in sync without manual
  * `onDeckChange`/prop-threading between them.
+ *
+ * `archived: true` reads the archived decks (PRD D18, ADR-023) on their own
+ * key, so the dashboard — which calls this with no options — never sees them;
+ * `reload()` from either side invalidates both.
  */
-export function useDeckData(deckType) {
+export function useDeckData(deckType, { archived = false } = {}) {
   const { user } = useAuth()
   const userId = user?.id ?? null
 
@@ -27,8 +31,8 @@ export function useDeckData(deckType) {
     // Scoped by user (and deck type) to prevent cross-account data leaks and
     // to keep type-filtered results from colliding with unfiltered ones —
     // see the query-key convention documented in `api/queryClient.js`.
-    queryKey: ['decks', userId, deckType || 'all'],
-    queryFn: () => decksService.getAll(deckType),
+    queryKey: ['decks', userId, deckType || 'all', archived ? 'archived' : 'active'],
+    queryFn: () => decksService.getAll(deckType, { archived }),
     enabled: !!userId,
     staleTime: DECKS_STALE_TIME
   })

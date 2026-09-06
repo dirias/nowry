@@ -11,10 +11,34 @@ export const decksService = {
    * @param {string} [type] - Optional deck type filter ('flashcard' | 'quiz' | 'visual').
    *   Additive query param on an already-working endpoint — omitted entirely when falsy,
    *   so existing no-arg callers are unaffected.
+   * @param {{ archived?: boolean }} [options] - `archived: true` lists the archived decks
+   *   instead of the active ones (PRD D18, FR-012); the default list never includes them.
    */
-  async getAll(type) {
-    const url = type ? `${ENDPOINTS.decks.all}?type=${encodeURIComponent(type)}` : ENDPOINTS.decks.all
-    const { data } = await apiClient.get(url)
+  async getAll(type, { archived = false } = {}) {
+    const params = new URLSearchParams()
+    if (type) params.append('type', type)
+    if (archived) params.append('archived', 'true')
+    const query = params.toString()
+    const { data } = await apiClient.get(query ? `${ENDPOINTS.decks.all}?${query}` : ENDPOINTS.decks.all)
+    return data
+  },
+
+  /**
+   * Archive a deck (PRD D18, ADR-023): out of Today, the forecast and every
+   * count, history kept. No confirm on the client — Restore undoes it.
+   * @returns {Promise<object>} The deck with `archived_at` set
+   */
+  async archive(id) {
+    const { data } = await apiClient.post(`/decks/${id}/archive`)
+    return data
+  },
+
+  /**
+   * Restore an archived deck: clears the state and nothing else.
+   * @returns {Promise<object>} The deck with `archived_at` cleared
+   */
+  async restore(id) {
+    const { data } = await apiClient.post(`/decks/${id}/restore`)
     return data
   },
 
