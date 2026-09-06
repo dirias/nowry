@@ -20,6 +20,7 @@ jest.mock('react-i18next', () => ({
 jest.mock('../CardPreviewModal', () => ({ __esModule: true, default: () => null }))
 jest.mock('../DeckAnalysisPanel', () => ({ __esModule: true, default: () => null }))
 jest.mock('../MarkToggle', () => ({ __esModule: true, default: () => <button type='button'>mark</button> }))
+jest.mock('../TagsView', () => ({ __esModule: true, default: () => <div data-testid='tags-view' /> }))
 jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 
@@ -87,6 +88,7 @@ describe('the toolbar (PRD D5)', () => {
     const tabs = within(screen.getByTestId('library-tab')).getAllByRole('button')
     expect(tabs[0]).toHaveTextContent('cards.manage_content.tabs.decksOnly2')
     expect(tabs[0]).toHaveAttribute('aria-pressed', 'true')
+    expect(tabs[2]).toHaveTextContent('cards.manage_content.tabs.tagsOnly3')
     expect(screen.getByRole('textbox', { name: 'cards.manage_content.aria.search' })).toBeInTheDocument()
     const filters = screen.getByTestId('library-filters')
     expect(within(filters).getByText('filters.type')).toBeInTheDocument()
@@ -131,6 +133,16 @@ describe('the toolbar (PRD D5)', () => {
     expect(item).toHaveTextContent('3')
     fireEvent.click(item)
     expect(props.onTagToggle).toHaveBeenCalledWith('language')
+  })
+})
+
+describe('the Tags view (PRD D6)', () => {
+  it('is the third segment; it mounts the groups index and hides the list filters and the layout toggle', () => {
+    mockSearch = new URLSearchParams('tab=tags')
+    render(<ManageContent {...defaultProps()} />)
+    expect(screen.getByTestId('tags-view')).toBeInTheDocument()
+    expect(screen.queryByTestId('library-filters')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('library-view')).not.toBeInTheDocument()
   })
 })
 

@@ -1,4 +1,29 @@
 {
+  "groups": {
+    "title": "Groupes",
+    "readout": "{{system}} + {{tags}} étiquettes",
+    "struggling": "Difficiles",
+    "marked": "Marquées",
+    "strugglingMeta": "Notées « encore » ou « difficile » ces {{days}} derniers jours",
+    "markedMeta": "Cartes marquées pour y revenir",
+    "cardsDecks": "{{cards}} cartes · {{decks}} paquets",
+    "detailReadout": "{{cards}} cartes dans {{decks}} paquets",
+    "nothingYet": "Rien pour l’instant",
+    "upToDate": "À jour",
+    "study": "Étudier · {{count}}",
+    "browse": "Parcourir",
+    "back": "Groupes",
+    "decks": "Paquets",
+    "cards": "Cartes",
+    "showMore": "Voir {{count}} de plus",
+    "lastGrade": "Dernière note : {{grade}}",
+    "gradeAgain": "encore",
+    "gradeHard": "difficile",
+    "emptyTags": "Pas encore d’étiquettes. Étiquetez une carte pour la regrouper entre paquets.",
+    "emptyGroup": "Rien dans ce groupe pour l’instant.",
+    "selectAria": "Ouvrir le groupe {{name}}",
+    "searchPlaceholder": "Rechercher des étiquettes…"
+  },
   "sessions": {
     "ofTotal": "{{shown}} sur {{total}}",
     "history": "Historique",
@@ -1917,6 +1942,7 @@
         "cardActions": "Plus d’actions pour {{title}}"
       },
       "tabs": {
+        "tagsOnly": "Étiquettes",
         "decksOnly": "Paquets",
         "cardsOnly": "Cartes"
       }

@@ -1,4 +1,29 @@
 {
+  "groups": {
+    "title": "Grupos",
+    "readout": "{{system}} + {{tags}} etiquetas",
+    "struggling": "Difíciles",
+    "marked": "Marcadas",
+    "strugglingMeta": "Calificadas otra vez o difícil en los últimos {{days}} días",
+    "markedMeta": "Tarjetas que marcaste para volver",
+    "cardsDecks": "{{cards}} tarjetas · {{decks}} mazos",
+    "detailReadout": "{{cards}} tarjetas en {{decks}} mazos",
+    "nothingYet": "Nada aún",
+    "upToDate": "Al día",
+    "study": "Estudiar · {{count}}",
+    "browse": "Explorar",
+    "back": "Grupos",
+    "decks": "Mazos",
+    "cards": "Tarjetas",
+    "showMore": "Ver {{count}} más",
+    "lastGrade": "Última calificación: {{grade}}",
+    "gradeAgain": "otra vez",
+    "gradeHard": "difícil",
+    "emptyTags": "Aún no hay etiquetas. Etiqueta una tarjeta para agruparla entre mazos.",
+    "emptyGroup": "Todavía no hay nada en este grupo.",
+    "selectAria": "Abrir el grupo {{name}}",
+    "searchPlaceholder": "Buscar etiquetas…"
+  },
   "common": {
     "loadMore": "Cargar más",
     "loading": "Cargando...",
@@ -1141,6 +1166,7 @@
       "title": "Gestor de contenido",
       "deckCount": "{{decks}} mazos · {{cards}} tarjetas en total",
       "tabs": {
+        "tagsOnly": "Etiquetas",
         "decksOnly": "Mazos",
         "cardsOnly": "Tarjetas",
         "decks": "Mazos ({{count}})",

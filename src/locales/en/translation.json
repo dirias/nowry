@@ -1,4 +1,29 @@
 {
+  "groups": {
+    "title": "Groups",
+    "readout": "{{system}} + {{tags}} tags",
+    "struggling": "Struggling",
+    "marked": "Marked",
+    "strugglingMeta": "Graded again or hard in the last {{days}} days",
+    "markedMeta": "Cards you marked to come back to",
+    "cardsDecks": "{{cards}} cards · {{decks}} decks",
+    "detailReadout": "{{cards}} cards across {{decks}} decks",
+    "nothingYet": "Nothing yet",
+    "upToDate": "Up to date",
+    "study": "Study · {{count}}",
+    "browse": "Browse",
+    "back": "Groups",
+    "decks": "Decks",
+    "cards": "Cards",
+    "showMore": "Show {{count}} more",
+    "lastGrade": "Last grade {{grade}}",
+    "gradeAgain": "again",
+    "gradeHard": "hard",
+    "emptyTags": "No tags yet. Tag a card to group it across decks.",
+    "emptyGroup": "Nothing in this group yet.",
+    "selectAria": "Open the {{name}} group",
+    "searchPlaceholder": "Search tags…"
+  },
   "common": {
     "loadMore": "Load more",
     "loading": "Loading...",
@@ -1406,6 +1431,7 @@
       "title": "Content manager",
       "deckCount": "{{decks}} decks · {{cards}} total cards",
       "tabs": {
+        "tagsOnly": "Tags",
         "decksOnly": "Decks",
         "cardsOnly": "Cards",
         "decks": "Decks ({{count}})",

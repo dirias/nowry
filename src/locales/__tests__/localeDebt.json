@@ -3345,7 +3345,8 @@
       "upgrade.welcome.cta",
       "upgrade.welcome.message",
       "upgrade.welcome.title",
-      "filters.tagsReadout"
+      "filters.tagsReadout",
+      "cards.manage_content.tabs.tagsOnly"
     ],
     "ja": [
       "accountSettings.plan.current",

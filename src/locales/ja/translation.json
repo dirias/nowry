@@ -1,4 +1,29 @@
 {
+  "groups": {
+    "title": "グループ",
+    "readout": "{{system}} + {{tags}} タグ",
+    "struggling": "苦手",
+    "marked": "マーク済み",
+    "strugglingMeta": "過去{{days}}日間に「もう一度」または「難しい」と評価",
+    "markedMeta": "あとで戻るためにマークしたカード",
+    "cardsDecks": "{{cards}}枚 · {{decks}}デッキ",
+    "detailReadout": "{{decks}}デッキの{{cards}}枚",
+    "nothingYet": "まだありません",
+    "upToDate": "最新の状態",
+    "study": "学習 · {{count}}",
+    "browse": "閲覧",
+    "back": "グループ",
+    "decks": "デッキ",
+    "cards": "カード",
+    "showMore": "さらに{{count}}枚表示",
+    "lastGrade": "最後の評価: {{grade}}",
+    "gradeAgain": "もう一度",
+    "gradeHard": "難しい",
+    "emptyTags": "まだタグがありません。カードにタグを付けるとデッキをまたいでまとめられます。",
+    "emptyGroup": "このグループにはまだ何もありません。",
+    "selectAria": "{{name}} グループを開く",
+    "searchPlaceholder": "タグを検索…"
+  },
   "sessions": {
     "ofTotal": "{{total}} 件中 {{shown}} 件",
     "history": "履歴",
@@ -1911,6 +1936,7 @@
         "cardActions": "{{title}} のその他の操作"
       },
       "tabs": {
+        "tagsOnly": "タグ",
         "decksOnly": "デッキ",
         "cardsOnly": "カード"
       }

@@ -13,7 +13,7 @@ import FileUploadRounded from '@mui/icons-material/FileUploadRounded'
 import { focusRing, segment, segmentedGroup, tabularNums } from '../Common/Form/formStyles'
 import ViewSegment from '../Study/ViewSegment'
 
-export const LIBRARY_TABS = ['decks', 'cards']
+export const LIBRARY_TABS = ['decks', 'cards', 'tags']
 export const TYPE_FILTERS = [
   { key: 'flashcard', labelKey: 'cards.manage_content.filters.flashcards' },
   { key: 'quiz', labelKey: 'cards.manage_content.filters.quizzes' },
@@ -42,6 +42,7 @@ export default function LibraryToolbar({
   onTab,
   decksCount,
   cardsCount,
+  tagsCount,
   search,
   onSearch,
   filterType,
@@ -72,7 +73,8 @@ export default function LibraryToolbar({
         onChange={onTab}
         options={[
           { value: 'decks', label: t('cards.manage_content.tabs.decksOnly'), readout: decksCount },
-          { value: 'cards', label: t('cards.manage_content.tabs.cardsOnly'), readout: cardsCount }
+          { value: 'cards', label: t('cards.manage_content.tabs.cardsOnly'), readout: cardsCount },
+          { value: 'tags', label: t('cards.manage_content.tabs.tagsOnly'), readout: tagsCount }
         ]}
       />
 
@@ -80,7 +82,7 @@ export default function LibraryToolbar({
         size='md'
         value={search}
         onChange={(event) => onSearch?.(event.target.value)}
-        placeholder={t('cards.manage_content.search.placeholder')}
+        placeholder={t(tab === 'tags' ? 'groups.searchPlaceholder' : 'cards.manage_content.search.placeholder')}
         aria-label={t('cards.manage_content.aria.search')}
         startDecorator={<SearchRounded sx={{ color: 'text.tertiary' }} />}
         variant='soft'
@@ -96,79 +98,41 @@ export default function LibraryToolbar({
         }}
       />
 
-      <Sheet variant='outlined' data-testid='library-filters' sx={{ ...segmentedGroup, width: { xs: '100%', sm: 'auto' } }}>
-        <Dropdown>
-          <MenuButton
-            variant='plain'
-            color='neutral'
-            aria-label={t('filters.typeMenuAria')}
-            endDecorator={<KeyboardArrowDown fontSize='small' sx={{ opacity: 0.65 }} />}
-            sx={{ ...segment(typeActive, true), flex: { xs: 1, sm: 'none' }, ...tabularNums }}
-          >
-            {typeActive ? t('filters.typeReadout', { count: 1 }) : t('filters.type')}
-          </MenuButton>
-          <Menu placement='bottom-start' sx={menuSx}>
-            {TYPE_FILTERS.map(({ key, labelKey }) => {
-              const checked = filterType === key
-              return (
-                <MenuItem
-                  key={key}
-                  role='menuitemradio'
-                  aria-checked={checked}
-                  onClick={() => onFilterType(checked ? 'all' : key)}
-                  sx={itemSx}
-                >
-                  <Typography
-                    level='body-sm'
-                    sx={{ color: checked ? 'text.primary' : 'text.secondary', fontWeight: checked ? 'lg' : 'md' }}
-                  >
-                    {t(labelKey)}
-                  </Typography>
-                  {checked && <CheckMark />}
-                </MenuItem>
-              )
-            })}
-            {typeActive && (
-              <MenuItem onClick={() => onFilterType('all')} sx={{ ...itemSx, mt: 0.5 }}>
-                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                  {t('filters.clear')}
-                </Typography>
-              </MenuItem>
-            )}
-          </Menu>
-        </Dropdown>
-
-        {showTags && (
+      {tab !== 'tags' && (
+        <Sheet variant='outlined' data-testid='library-filters' sx={{ ...segmentedGroup, width: { xs: '100%', sm: 'auto' } }}>
           <Dropdown>
             <MenuButton
               variant='plain'
               color='neutral'
-              aria-label={t('cards.tags.filterBy')}
+              aria-label={t('filters.typeMenuAria')}
               endDecorator={<KeyboardArrowDown fontSize='small' sx={{ opacity: 0.65 }} />}
-              sx={{ ...segment(tagsActive, false), flex: { xs: 1, sm: 'none' }, ...tabularNums }}
+              sx={{ ...segment(typeActive, true), flex: { xs: 1, sm: 'none' }, ...tabularNums }}
             >
-              {tagsActive ? t('filters.tagsReadout', { count: selectedTags.length }) : t('filters.tags')}
+              {typeActive ? t('filters.typeReadout', { count: 1 }) : t('filters.type')}
             </MenuButton>
             <Menu placement='bottom-start' sx={menuSx}>
-              {availableTags.map(({ tag, count }) => {
-                const checked = selectedTags.includes(tag)
+              {TYPE_FILTERS.map(({ key, labelKey }) => {
+                const checked = filterType === key
                 return (
-                  <MenuItem key={tag} role='menuitemcheckbox' aria-checked={checked} onClick={keepOpen(() => onTagToggle(tag))} sx={itemSx}>
+                  <MenuItem
+                    key={key}
+                    role='menuitemradio'
+                    aria-checked={checked}
+                    onClick={() => onFilterType(checked ? 'all' : key)}
+                    sx={itemSx}
+                  >
                     <Typography
                       level='body-sm'
                       sx={{ color: checked ? 'text.primary' : 'text.secondary', fontWeight: checked ? 'lg' : 'md' }}
                     >
-                      {tag}
-                    </Typography>
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary', ml: 1, ...tabularNums }}>
-                      {count}
+                      {t(labelKey)}
                     </Typography>
                     {checked && <CheckMark />}
                   </MenuItem>
                 )
               })}
-              {tagsActive && (
-                <MenuItem onClick={onClearTags} sx={{ ...itemSx, mt: 0.5 }}>
+              {typeActive && (
+                <MenuItem onClick={() => onFilterType('all')} sx={{ ...itemSx, mt: 0.5 }}>
                   <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                     {t('filters.clear')}
                   </Typography>
@@ -176,21 +140,67 @@ export default function LibraryToolbar({
               )}
             </Menu>
           </Dropdown>
-        )}
 
-        {tab === 'cards' && (
-          <Button
-            variant='plain'
-            color='neutral'
-            aria-pressed={markedOnly}
-            aria-label={markedOnly ? t('cards.mark.filter.showAll') : t('cards.mark.filter.showMarked')}
-            onClick={onMarkedOnlyToggle}
-            sx={{ ...segment(markedOnly, !showTags), flex: { xs: 1, sm: 'none' } }}
-          >
-            {t('filters.marked')}
-          </Button>
-        )}
-      </Sheet>
+          {showTags && (
+            <Dropdown>
+              <MenuButton
+                variant='plain'
+                color='neutral'
+                aria-label={t('cards.tags.filterBy')}
+                endDecorator={<KeyboardArrowDown fontSize='small' sx={{ opacity: 0.65 }} />}
+                sx={{ ...segment(tagsActive, false), flex: { xs: 1, sm: 'none' }, ...tabularNums }}
+              >
+                {tagsActive ? t('filters.tagsReadout', { count: selectedTags.length }) : t('filters.tags')}
+              </MenuButton>
+              <Menu placement='bottom-start' sx={menuSx}>
+                {availableTags.map(({ tag, count }) => {
+                  const checked = selectedTags.includes(tag)
+                  return (
+                    <MenuItem
+                      key={tag}
+                      role='menuitemcheckbox'
+                      aria-checked={checked}
+                      onClick={keepOpen(() => onTagToggle(tag))}
+                      sx={itemSx}
+                    >
+                      <Typography
+                        level='body-sm'
+                        sx={{ color: checked ? 'text.primary' : 'text.secondary', fontWeight: checked ? 'lg' : 'md' }}
+                      >
+                        {tag}
+                      </Typography>
+                      <Typography level='body-xs' sx={{ color: 'text.tertiary', ml: 1, ...tabularNums }}>
+                        {count}
+                      </Typography>
+                      {checked && <CheckMark />}
+                    </MenuItem>
+                  )
+                })}
+                {tagsActive && (
+                  <MenuItem onClick={onClearTags} sx={{ ...itemSx, mt: 0.5 }}>
+                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                      {t('filters.clear')}
+                    </Typography>
+                  </MenuItem>
+                )}
+              </Menu>
+            </Dropdown>
+          )}
+
+          {tab === 'cards' && (
+            <Button
+              variant='plain'
+              color='neutral'
+              aria-pressed={markedOnly}
+              aria-label={markedOnly ? t('cards.mark.filter.showAll') : t('cards.mark.filter.showMarked')}
+              onClick={onMarkedOnlyToggle}
+              sx={{ ...segment(markedOnly, !showTags), flex: { xs: 1, sm: 'none' } }}
+            >
+              {t('filters.marked')}
+            </Button>
+          )}
+        </Sheet>
+      )}
 
       <Box
         sx={{

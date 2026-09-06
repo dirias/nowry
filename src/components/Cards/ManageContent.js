@@ -9,6 +9,7 @@ import DeckActionsMenu from './DeckActionsMenu'
 import DeckTile from './DeckTile'
 import CardRow from './CardRow'
 import LibraryToolbar, { LIBRARY_TABS } from './LibraryToolbar'
+import TagsView from './TagsView'
 import DeckRow from '../Study/DeckRow'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
@@ -63,6 +64,7 @@ export default function ManageContent({
       const params = new URLSearchParams(searchParams)
       if (next === 'decks') params.delete('tab')
       else params.set('tab', next)
+      if (next !== 'tags') params.delete('group')
       setSearchParams(params, { replace: true })
     },
     [searchParams, setSearchParams]
@@ -163,6 +165,7 @@ export default function ManageContent({
         onTab={setTab}
         decksCount={decks.length}
         cardsCount={totalCards || cards.length}
+        tagsCount={availableTags.length + 2}
         search={searchQuery}
         onSearch={onSearchChange}
         filterType={filterType}
@@ -275,6 +278,16 @@ export default function ManageContent({
             </>
           )}
         </Box>
+      )}
+
+      {tab === 'tags' && (
+        <TagsView
+          decks={decks}
+          search={searchQuery}
+          onEditCard={onEditCard}
+          onDeleteCard={onDeleteCard}
+          onPreviewCards={(list, index) => setPreviewState({ open: true, cards: list, initialIndex: index !== -1 ? index : 0 })}
+        />
       )}
 
       <CardPreviewModal

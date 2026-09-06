@@ -1,4 +1,29 @@
 {
+  "groups": {
+    "title": "Gruppen",
+    "readout": "{{system}} + {{tags}} Tags",
+    "struggling": "Schwierig",
+    "marked": "Markiert",
+    "strugglingMeta": "In den letzten {{days}} Tagen mit „nochmal“ oder „schwer“ bewertet",
+    "markedMeta": "Karten, die du dir vorgemerkt hast",
+    "cardsDecks": "{{cards}} Karten · {{decks}} Stapel",
+    "detailReadout": "{{cards}} Karten in {{decks}} Stapeln",
+    "nothingYet": "Noch nichts",
+    "upToDate": "Auf dem Stand",
+    "study": "Lernen · {{count}}",
+    "browse": "Durchsehen",
+    "back": "Gruppen",
+    "decks": "Stapel",
+    "cards": "Karten",
+    "showMore": "{{count}} weitere zeigen",
+    "lastGrade": "Letzte Bewertung: {{grade}}",
+    "gradeAgain": "nochmal",
+    "gradeHard": "schwer",
+    "emptyTags": "Noch keine Tags. Tagge eine Karte, um sie stapelübergreifend zu gruppieren.",
+    "emptyGroup": "In dieser Gruppe ist noch nichts.",
+    "selectAria": "Gruppe {{name}} öffnen",
+    "searchPlaceholder": "Tags suchen…"
+  },
   "sessions": {
     "ofTotal": "{{shown}} von {{total}}",
     "history": "Verlauf",
@@ -1897,6 +1922,7 @@
         "cardActions": "Weitere Aktionen für {{title}}"
       },
       "tabs": {
+        "tagsOnly": "Tags",
         "decksOnly": "Stapel",
         "cardsOnly": "Karten"
       }
