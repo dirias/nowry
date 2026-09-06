@@ -139,3 +139,41 @@ export const segment = (active, first) => ({
   // screen. Same colour, same width; only the offset changes.
   '&:focus-visible': { ...focusRing['&:focus-visible'], outlineOffset: '-2px' }
 })
+
+/**
+ * The house button: a key you press (ADR-020, "Boost").
+ *
+ * A 2px edge under the button in the tone's darker shade gives it mass; hover
+ * lifts it 1px and deepens the edge; active pushes it 2px down and the edge
+ * disappears — the button travels the distance the edge promised. Radius `md`,
+ * the same as the segmented group beside it. Nothing here is a hue: the edge is
+ * whichever accent the user chose, darkened, so every preset gets the same
+ * signature in both schemes.
+ *
+ * The motion is 80ms and 2px. Slower or further reads as a toy; this is the
+ * one number in the fragment that must not be tuned per call site.
+ *
+ * Applied to the calendar first (CAL-008); the theme-wide `JoyButton` override
+ * that retires the per-site spread is CAL-009.
+ *
+ * @param {'primary' | 'neutral'} tone - primary for the solid action, neutral
+ *   for a level1 secondary
+ */
+export const keyButton = (tone = 'primary') => {
+  const edge = tone === 'primary' ? 'var(--joy-palette-primary-solidActiveBg)' : 'var(--joy-palette-neutral-outlinedBorder)'
+  return {
+    borderRadius: 'md',
+    transition: 'transform 80ms ease, box-shadow 80ms ease, background-color 80ms ease',
+    boxShadow: `0 2px 0 0 ${edge}`,
+    '&:hover': { transform: 'translateY(-1px)', boxShadow: `0 3px 0 0 ${edge}` },
+    '&:active': { transform: 'translateY(2px)', boxShadow: 'none' }
+  }
+}
+
+/**
+ * The key's engaged segment: a 2px accent underline inside the segment, on top
+ * of the level2 ground `segment()` already gives it. State stays a ground
+ * (§15.5) — the underline is the same "edge" idea as {@link keyButton}, not a
+ * tint. Spread after `segment(active, first)`.
+ */
+export const keySegment = (active) => (active ? { boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-primary-solidBg)' } : {})

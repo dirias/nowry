@@ -34,6 +34,29 @@ describe('formStyles', () => {
   })
 })
 
+describe('the key (ADR-020)', () => {
+  const { keyButton, keySegment } = require('../formStyles')
+
+  it('gives the primary an edge in the accent’s active shade, and a neutral one in the neutral border — never a hue of its own', () => {
+    expect(keyButton('primary').boxShadow).toBe('0 2px 0 0 var(--joy-palette-primary-solidActiveBg)')
+    expect(keyButton('neutral').boxShadow).toBe('0 2px 0 0 var(--joy-palette-neutral-outlinedBorder)')
+    expect(JSON.stringify(keyButton())).not.toMatch(/#[0-9a-f]{3,6}/i)
+  })
+
+  it('lifts 1px on hover and travels the 2px the edge promised on press, in 80ms', () => {
+    const key = keyButton()
+    expect(key['&:hover'].transform).toBe('translateY(-1px)')
+    expect(key['&:active']).toEqual({ transform: 'translateY(2px)', boxShadow: 'none' })
+    expect(key.transition).toMatch(/80ms/)
+    expect(key.borderRadius).toBe('md')
+  })
+
+  it('underlines an engaged segment with the accent and leaves a resting one alone', () => {
+    expect(keySegment(true)).toEqual({ boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-primary-solidBg)' })
+    expect(keySegment(false)).toEqual({})
+  })
+})
+
 describe('goalStyles re-export (§7.4)', () => {
   it('resolves to the same objects, so there is exactly one definition', () => {
     expect(goalFocusRing).toBe(focusRing)

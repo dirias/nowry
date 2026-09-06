@@ -2228,3 +2228,21 @@ The calendar grid is the reference case: solid event bricks became a tile beside
     Mark today with a badge on the number and leave the cell alone.
 *   **One anatomy across views.** The agenda row, the week and the month draw the same event with
     the same tile and the same title at two sizes. A view is an arrangement, not a new product.
+
+### 15.9 The key (ADR-020)
+
+The house button is a key you press. Use `keyButton(tone)` from `formStyles` on a solid or level1
+button and `keySegment(active)` after `segment()` on an engaged segment.
+
+*   **Mass, then travel.** A 2px edge under the button in the tone's darker shade; hover lifts it
+    1px; active pushes it 2px down and the edge disappears. The button travels exactly the distance
+    the edge promised. 80ms — slower or further reads as a toy.
+*   **Derived from the accent, never a hue of its own.** The edge is `primary.solidActiveBg` (or
+    `neutral.outlinedBorder` for a secondary), so every preset and both schemes get the same
+    signature. Brand yellow is not on the button.
+*   **Radius `md`, like the segmented group.** A row of controls shares one corner.
+*   **An engaged segment is underlined**, 2px in `primary.solidBg`, inside the segment, on top of
+    its level2 ground. The state is still the ground; the underline is the key's edge, turned
+    inward.
+*   **One solid per surface still holds.** The key makes the primary action heavier; it does not
+    make more of them.
