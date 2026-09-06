@@ -1046,6 +1046,7 @@
       "addTitle": "Add to calendar",
       "title": "Title",
       "date": "Date",
+      "done": "Done",
       "description": "Description",
       "focusArea": "Focus area",
       "focusAreaPlaceholder": "Choose a focus area…",

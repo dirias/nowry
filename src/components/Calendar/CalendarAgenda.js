@@ -11,6 +11,7 @@ import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 import { readableTextOn } from '../../theme/colorSchemeGenerator'
 import { focusRing, touchTargetBox } from '../Common/Form/formStyles'
 import { formatDayLabel, formatDaySide, formatMonthTitle } from './agendaGroups'
+import { COMPLETABLE } from './eventHelpers'
 
 const TYPE_ICON = {
   task: CheckCircleOutlinedIcon,
@@ -56,15 +57,11 @@ const GroupHeader = ({ group, language, t }) => (
   </Box>
 )
 
-// The two types with a completion state of their own. Goals and milestones
-// finish through the plan; habits through the routine (ADR-016, decision 6).
-const TICKABLE = ['task', 'priority']
-
 const AgendaRow = ({ ev, onSelect, onToggleComplete, t }) => {
   const Icon = eventIcon(ev)
   const completed = ev.status === 'completed'
   const typeLabel = t(`calendarPage.agenda.type.${ev.type}`)
-  const tickable = Boolean(onToggleComplete) && TICKABLE.includes(ev.type)
+  const tickable = Boolean(onToggleComplete) && COMPLETABLE.includes(ev.type)
   const tickLabel = completed ? t('calendarPage.agenda.markUndone') : t('calendarPage.agenda.markDone')
   return (
     <Box sx={rowSx}>

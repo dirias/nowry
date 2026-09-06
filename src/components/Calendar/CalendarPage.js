@@ -26,7 +26,7 @@ import EventFormModal from './EventFormModal'
 import CalendarToolbar from './CalendarToolbar'
 import CalendarAgenda from './CalendarAgenda'
 import { filterCalendarEvents } from './calendarFilters'
-import { stripTypePrefix } from './eventId'
+import { completionPatch, stripTypePrefix, undoneStatus } from './eventHelpers'
 import { addDays, addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, isSameDay, isSameMonth, startOfWeek } from './agendaGroups'
 
 // One glyph per type. Every milestone is a measurable step of its goal, so
@@ -125,10 +125,23 @@ const CalendarPage = () => {
 
   // CAL-01/CAL-02: Custom event rendering — icon + title for all event types
   const eventContent = useCallback((eventInfo) => {
-    const { type, textColor } = eventInfo.event.extendedProps
+    const { type, status, textColor } = eventInfo.event.extendedProps
+    const completed = status === 'completed'
     const IconComponent = EVENT_ICON_MAP[type] ?? AdjustOutlinedIcon
+    // Done state is visible wherever the item appears, not only where it is
+    // ticked (ADR-018): the same strike and fade the agenda row uses.
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, overflow: 'hidden', color: textColor }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          overflow: 'hidden',
+          color: textColor,
+          textDecoration: completed ? 'line-through' : 'none',
+          opacity: completed ? 0.6 : 1
+        }}
+      >
         <IconComponent sx={{ fontSize: 'sm', flexShrink: 0 }} />
         <Typography level='body-xs' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
           {eventInfo.event.title}
@@ -172,11 +185,12 @@ const CalendarPage = () => {
     async (ev) => {
       const next = ev.status !== 'completed'
       const patch = (status) => setEvents((prev) => prev.map((item) => (item.id === ev.id ? { ...item, status } : item)))
-      patch(next ? 'completed' : ev.type === 'task' ? 'pending' : 'active')
+      patch(next ? 'completed' : undoneStatus(ev.type))
       try {
-        const rawId = stripTypePrefix(ev.id)
-        if (ev.type === 'task') await tasksService.update(rawId, { is_completed: next })
-        else await annualPlanningService.updatePriority(rawId, { is_completed: next })
+        const body = completionPatch(ev.type, next)
+        if (ev.type === 'task') await tasksService.update(stripTypePrefix(ev.id), body)
+        else if (ev.type === 'priority') await annualPlanningService.updatePriority(stripTypePrefix(ev.id), body)
+        else await annualPlanningService.updateMilestone(ev.goalId, ev.milestoneId, body)
         calendarService.invalidateCache(userId)
       } catch (err) {
         patch(ev.status)

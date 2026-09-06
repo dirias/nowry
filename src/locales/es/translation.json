@@ -894,6 +894,7 @@
       "addTitle": "Añadir al calendario",
       "title": "Título",
       "date": "Fecha",
+      "done": "Hecho",
       "description": "Descripción",
       "focusArea": "Área de enfoque",
       "focusAreaPlaceholder": "Elige un área de enfoque…",

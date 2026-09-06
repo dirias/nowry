@@ -196,7 +196,29 @@ describe('CAL-003: edit mode', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'calendarModal.form.saveChanges' }))
     })
-    expect(annualPlanningService.updateMilestone).toHaveBeenCalledWith('g1', 'm1', { title: 'Week 4 long run', due_date: '2026-09-12' })
+    expect(annualPlanningService.updateMilestone).toHaveBeenCalledWith('g1', 'm1', {
+      title: 'Week 4 long run',
+      due_date: '2026-09-12',
+      completed: false
+    })
+  })
+
+  it('offers Done on a task, preset from its status, and saves it in the same request', async () => {
+    tasksService.update.mockResolvedValue({})
+    open({ mode: 'edit', event: { id: 'task-9', type: 'task', title: 'Buy stamps', date: new Date(2026, 8, 5), status: 'pending' } })
+    const done = screen.getByRole('checkbox', { name: 'calendarModal.form.done' })
+    expect(done).not.toBeChecked()
+    fireEvent.click(done)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'calendarModal.form.saveChanges' }))
+    })
+    expect(tasksService.update).toHaveBeenCalledTimes(1)
+    expect(tasksService.update).toHaveBeenCalledWith('9', { title: 'Buy stamps', deadline: '2026-09-05', is_completed: true })
+  })
+
+  it('offers no Done on a goal or a habit', () => {
+    open({ mode: 'edit', event: { id: 'goal-1', type: 'goal', title: 'Read', date: new Date() } })
+    expect(screen.queryByRole('checkbox')).toBeNull()
   })
 
   it('a milestone event that arrives without its address fails in the banner, not silently', async () => {

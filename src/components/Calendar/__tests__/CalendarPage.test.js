@@ -58,7 +58,7 @@ jest.mock('../../../api/services/calendar.service', () => ({
 }))
 jest.mock('../../../api/services', () => ({
   tasksService: { update: jest.fn() },
-  annualPlanningService: { updatePriority: jest.fn(), updateGoal: jest.fn() }
+  annualPlanningService: { updatePriority: jest.fn(), updateGoal: jest.fn(), updateMilestone: jest.fn() }
 }))
 jest.mock('../EventFormModal', () => () => null)
 // CalendarPage now reads userId from useAuth() to scope the ['calendarEvents', userId,
@@ -336,6 +336,17 @@ describe('CAL-002: the agenda row check', () => {
     date: today,
     focusAreaId: null
   }
+  const milestone = {
+    id: 'milestone-g1-0',
+    type: 'milestone',
+    title: 'Week 4',
+    status: 'pending',
+    color: '#10b981',
+    date: today,
+    focusAreaId: 'a1',
+    goalId: 'g1',
+    milestoneId: 'm1'
+  }
 
   const renderPhone = async () => {
     const CalendarPage = require('../CalendarPage').default
@@ -353,7 +364,7 @@ describe('CAL-002: the agenda row check', () => {
       resetFilters: jest.fn(),
       applyPreset: jest.fn()
     })
-    calendarService.getAllEvents.mockResolvedValue({ events: [task, priority], focusAreas: [] })
+    calendarService.getAllEvents.mockResolvedValue({ events: [task, priority, milestone], focusAreas: [] })
   })
 
   it('ticking a task sends only is_completed, and the row reads as done before the request resolves', async () => {
@@ -377,13 +388,23 @@ describe('CAL-002: the agenda row check', () => {
     expect(calendarService.invalidateCache).toHaveBeenCalledWith('test-user')
   })
 
+  it('ticking a milestone patches it by goal and milestone id with the milestone route’s own flag', async () => {
+    annualPlanningService.updateMilestone.mockResolvedValue({})
+    await renderPhone()
+    const checks = screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })
+    await act(async () => {
+      fireEvent.click(checks[2])
+    })
+    expect(annualPlanningService.updateMilestone).toHaveBeenCalledWith('g1', 'm1', { completed: true })
+  })
+
   it('a rejected request puts the row back and raises the page alert', async () => {
     tasksService.update.mockRejectedValue(new Error('offline'))
     await renderPhone()
     await act(async () => {
       fireEvent.click(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })[0])
     })
-    expect(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })).toHaveLength(3)
     expect(screen.queryByRole('button', { name: 'calendarPage.agenda.markUndone' })).toBeNull()
     expect(screen.getByRole('alert')).toHaveTextContent('calendarPage.error')
   })

@@ -889,6 +889,7 @@
       "addTitle": "Zum Kalender hinzufügen",
       "title": "Titel",
       "date": "Datum",
+      "done": "Erledigt",
       "description": "Beschreibung",
       "focusArea": "Fokusbereich",
       "focusAreaPlaceholder": "Wähle einen Fokusbereich…",

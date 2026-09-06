@@ -935,6 +935,7 @@
       "addTitle": "カレンダーに追加",
       "title": "タイトル",
       "date": "日付",
+      "done": "完了",
       "description": "説明",
       "focusArea": "重点分野",
       "focusAreaPlaceholder": "重点分野を選択…",

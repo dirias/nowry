@@ -200,14 +200,16 @@ export const calendarService = {
             // Milestone events — push milestones that have a due_date set
             // idx is raw array index (forEach, not filter().forEach()) — stable across completions
             ;(goal.milestones || []).forEach((ms, idx) => {
-              if (ms.due_date && !ms.completed) {
+              // Completed milestones stay on the calendar, struck through like a
+              // done task, rather than vanishing on the next load (ADR-018).
+              if (ms.due_date) {
                 events.push({
                   id: `milestone-${goal._id}-${idx}`,
                   title: ms.title,
                   date: parseLocalDate(ms.due_date),
                   type: 'milestone',
                   color: areaColor,
-                  status: 'pending',
+                  status: ms.completed ? 'completed' : 'pending',
                   areaName,
                   goalTitle: goal.title,
                   // The pair the milestone PATCH route is addressed by. The event

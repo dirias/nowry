@@ -222,3 +222,39 @@ describe('calendarService — CAL-004: milestone events carry goalId and milesto
     expect(milestone.milestoneId).toBe('ms-42')
   })
 })
+
+// ─── CAL-006: a completed milestone stays on the calendar ─────────────────────
+
+describe('calendarService — CAL-006: completed milestones are kept, as completed', () => {
+  const { tasksService } = require('./tasks.service')
+  const { fetchAnnualPlanData } = require('./annualPlanning.service')
+  const { queryClient } = require('../queryClient')
+  const { calendarService } = require('./calendar.service')
+
+  beforeEach(() => {
+    queryClient.fetchQuery.mockImplementation(({ queryFn }) => queryFn())
+    tasksService.getAll.mockResolvedValue([])
+  })
+
+  it('includes a completed milestone with status "completed" instead of dropping it', async () => {
+    fetchAnnualPlanData.mockResolvedValue({
+      plan: {},
+      priorities: [],
+      focusAreas: [],
+      goals: [
+        {
+          _id: 'g',
+          title: 'Run',
+          milestones: [
+            { id: 'a', title: 'Done one', due_date: '2026-09-01', completed: true },
+            { id: 'b', title: 'Open one', due_date: '2026-09-08' }
+          ]
+        }
+      ],
+      activities: [],
+      quarterReports: []
+    })
+    const { events } = await calendarService.getAllEvents('user-1')
+    expect(events.filter((e) => e.type === 'milestone').map((e) => e.status)).toEqual(['completed', 'pending'])
+  })
+})

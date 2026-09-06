@@ -911,6 +911,7 @@
       "addTitle": "Ajouter au calendrier",
       "title": "Titre",
       "date": "Date",
+      "done": "Fait",
       "description": "Description",
       "focusArea": "Domaine",
       "focusAreaPlaceholder": "Choisissez un domaine…",

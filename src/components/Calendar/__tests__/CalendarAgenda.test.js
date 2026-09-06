@@ -20,6 +20,16 @@ const goal = {
   areaName: 'Learning',
   date: today
 }
+const milestone = {
+  id: 'milestone-g1-0',
+  type: 'milestone',
+  title: 'Week 4',
+  status: 'pending',
+  color: '#10b981',
+  goalId: 'g1',
+  milestoneId: 'm1',
+  date: today
+}
 const habit = { id: 'activity-1', type: 'activity', title: 'Morning run', status: 'active', color: '#10b981', date: today }
 
 const todayGroup = (events) => ({ date: today, isToday: true, events })
@@ -27,7 +37,7 @@ const todayGroup = (events) => ({ date: today, isToday: true, events })
 const setup = (props = {}) =>
   render(
     <CalendarAgenda
-      groups={[todayGroup([task, priority, goal, habit])]}
+      groups={[todayGroup([task, priority, milestone, goal, habit])]}
       cursor={today}
       loading={false}
       language='en'
@@ -39,21 +49,21 @@ const setup = (props = {}) =>
   )
 
 describe('the check control', () => {
-  it('renders on task and priority rows only', () => {
+  it('renders on task, priority and milestone rows — never on a goal or a habit', () => {
     setup()
-    expect(screen.getAllByRole('button', { name: /calendarPage.agenda.mark/ })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: /calendarPage.agenda.mark/ })).toHaveLength(3)
   })
 
   it('names the action by the state it will move to, and carries the state as aria-pressed', () => {
     setup()
-    expect(screen.getByRole('button', { name: 'calendarPage.agenda.markDone' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })[0]).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByRole('button', { name: 'calendarPage.agenda.markUndone' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('hands the row’s event to onToggleComplete', () => {
     const onToggleComplete = jest.fn()
     setup({ onToggleComplete })
-    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.agenda.markDone' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })[0])
     expect(onToggleComplete).toHaveBeenCalledWith(task)
   })
 

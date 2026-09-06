@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, FormControl, FormHelperText, FormLabel, Option, Select, Sheet, Skeleton, Stack, Typography } from '@mui/joy'
+import { Box, Button, Checkbox, FormControl, FormHelperText, FormLabel, Option, Select, Sheet, Skeleton, Stack, Typography } from '@mui/joy'
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
@@ -17,7 +17,7 @@ import FormSheet from '../Common/Form/FormSheet'
 import FormTextArea from '../Common/Form/FormTextArea'
 import FormTextField from '../Common/Form/FormTextField'
 import { focusRing, formLabel, segment, segmentedGroup } from '../Common/Form/formStyles'
-import { stripTypePrefix } from './eventId'
+import { COMPLETABLE, completionPatch, stripTypePrefix } from './eventHelpers'
 
 /**
  * The four things a calendar day can be given (ADR-017). Habit is not one of
@@ -166,6 +166,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const [focusAreaId, setFocusAreaId] = useState('')
   const [goalId, setGoalId] = useState('')
   const [revealed, setRevealed] = useState([])
+  const [done, setDone] = useState(false)
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
@@ -178,6 +179,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
     setErrors({})
     setSaveError(null)
     setRevealed([])
+    setDone(isEdit && event?.status === 'completed')
     setFocusAreaId('')
     setGoalId('')
     setDescription(isEdit ? event?.description || '' : '')
@@ -262,14 +264,17 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
     const rawId = event?.id ? stripTypePrefix(event.id) : null
     if (!rawId) throw new Error('Missing event ID')
     const trimmed = title.trim()
+    // Done rides in the same request as the other fields (ADR-018): one PATCH.
+    const completion = COMPLETABLE.includes(activeType) ? completionPatch(activeType, done) : {}
     switch (activeType) {
       case 'task':
-        return tasksService.update(rawId, { title: trimmed, deadline: date || null })
+        return tasksService.update(rawId, { title: trimmed, deadline: date || null, ...completion })
       case 'priority':
         return annualPlanningService.updatePriority(rawId, {
           title: trimmed,
           description: description.trim() || '',
-          deadline: date || null
+          deadline: date || null,
+          ...completion
         })
       case 'goal':
         return annualPlanningService.updateGoal(rawId, { title: trimmed, target_date: date || null })
@@ -279,7 +284,11 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
         // Addressed by the goal and the milestone's own id, not by the
         // index-based event id (CAL-004).
         if (!event?.goalId || !event?.milestoneId) throw new Error('Missing milestone address')
-        return annualPlanningService.updateMilestone(event.goalId, event.milestoneId, { title: trimmed, due_date: date || null })
+        return annualPlanningService.updateMilestone(event.goalId, event.milestoneId, {
+          title: trimmed,
+          due_date: date || null,
+          ...completion
+        })
       default:
         return null
     }
@@ -399,6 +408,18 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
         )}
 
         <FormTextField labelKey='calendarModal.form.date' type='date' value={date} onChange={setDate} />
+
+        {/* From the grid the sheet is the one per-item surface, so completion
+            has to be reachable here as well as on the agenda row (ADR-018). */}
+        {isEdit && COMPLETABLE.includes(activeType) && (
+          <Checkbox
+            size='lg'
+            checked={done}
+            onChange={(e) => setDone(e.target.checked)}
+            label={t('calendarModal.form.done')}
+            sx={focusRing}
+          />
+        )}
 
         {(revealed.includes('description') || (isEdit && activeType === 'priority')) && (
           <FormTextArea
