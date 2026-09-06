@@ -5,6 +5,7 @@
     "scoreAria": "Score {{pct}} pour cent"
   },
   "common": {
+    "loadMore": "Charger plus",
     "loading": "Chargement...",
     "error": "Erreur",
     "save": "Enregistrer",
@@ -1908,6 +1909,18 @@
     }
   },
   "cards": {
+    "add": "Ajouter",
+    "manage_content": {
+      "aria": {
+        "viewMode": "Disposition",
+        "deckActions": "Plus d’actions pour {{name}}",
+        "cardActions": "Plus d’actions pour {{title}}"
+      },
+      "tabs": {
+        "decksOnly": "Paquets",
+        "cardsOnly": "Cartes"
+      }
+    },
     "import": {
       "deckNamePlaceholder": "Nom du paquet",
       "descriptionPlaceholder": "Description (optionnelle)"
@@ -2759,6 +2772,10 @@
     "elapsedSeconds": "{{seconds}} s écoulées"
   },
   "filters": {
+    "typeReadout": "Type · {{count}}",
+    "tagsReadout": "Étiquettes · {{count}}",
+    "clear": "Effacer",
+    "typeMenuAria": "Filtrer par type",
     "marked": "Marquées"
   },
   "pomodoro": {

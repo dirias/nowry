@@ -1,5 +1,6 @@
 {
   "common": {
+    "loadMore": "Load more",
     "loading": "Loading...",
     "error": "Error",
     "save": "Save",
@@ -1305,6 +1306,7 @@
     "coverImagePlaceholder": "https://example.com/image.jpg"
   },
   "cards": {
+    "add": "Add",
     "title": "Deck Library",
     "subtitle": "Manage your flashcards, quizzes, and visual learning materials",
     "studyCenter": "Study Center",
@@ -1404,6 +1406,8 @@
       "title": "Content manager",
       "deckCount": "{{decks}} decks · {{cards}} total cards",
       "tabs": {
+        "decksOnly": "Decks",
+        "cardsOnly": "Cards",
         "decks": "Decks ({{count}})",
         "cards": "Cards ({{count}})"
       },
@@ -1413,6 +1417,9 @@
         "placeholder": "Search decks and cards..."
       },
       "aria": {
+        "viewMode": "Layout",
+        "deckActions": "More actions for {{name}}",
+        "cardActions": "More actions for {{title}}",
         "search": "Search content",
         "gridView": "Grid view",
         "listView": "List view"
@@ -1651,6 +1658,10 @@
     }
   },
   "filters": {
+    "typeReadout": "Type · {{count}}",
+    "tagsReadout": "Tags · {{count}}",
+    "clear": "Clear",
+    "typeMenuAria": "Filter by type",
     "toggle": "Toggle filters",
     "type": "Type",
     "tags": "Tags",

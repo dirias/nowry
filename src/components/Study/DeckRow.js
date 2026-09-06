@@ -16,7 +16,7 @@ import { deckType } from './deckTypes'
  * and Browse both act on the deck, so both are `sm` secondaries of one shape;
  * the row's solid is never on the row (it is on the Today object).
  */
-export default function DeckRow({ deck, onStudy, onBrowse, formatRelativeDate }) {
+export default function DeckRow({ deck, onStudy, onBrowse, formatRelativeDate, trailing = null }) {
   const { t } = useTranslation()
   const type = deckType(deck.deck_type)
   const due = deck.due_cards || 0
@@ -96,6 +96,7 @@ export default function DeckRow({ deck, onStudy, onBrowse, formatRelativeDate })
           </Button>
         )}
       </Box>
+      {trailing}
     </Box>
   )
 }

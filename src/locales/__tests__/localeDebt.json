@@ -2960,7 +2960,8 @@
       "upgrade.welcome.message",
       "upgrade.welcome.title",
       "weekly.total",
-      "weekly.types.flashcards"
+      "weekly.types.flashcards",
+      "filters.typeReadout"
     ],
     "de": [
       "about.values.innovation.title",
@@ -3343,7 +3344,8 @@
       "upgrade.modelBadge",
       "upgrade.welcome.cta",
       "upgrade.welcome.message",
-      "upgrade.welcome.title"
+      "upgrade.welcome.title",
+      "filters.tagsReadout"
     ],
     "ja": [
       "accountSettings.plan.current",

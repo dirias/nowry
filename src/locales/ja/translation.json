@@ -5,6 +5,7 @@
     "scoreAria": "スコア {{pct}} パーセント"
   },
   "common": {
+    "loadMore": "さらに読み込む",
     "close": "閉じる",
     "loading": "読み込み中...",
     "error": "エラー",
@@ -1902,6 +1903,18 @@
     }
   },
   "cards": {
+    "add": "追加",
+    "manage_content": {
+      "aria": {
+        "viewMode": "表示形式",
+        "deckActions": "{{name}} のその他の操作",
+        "cardActions": "{{title}} のその他の操作"
+      },
+      "tabs": {
+        "decksOnly": "デッキ",
+        "cardsOnly": "カード"
+      }
+    },
     "generatedCards": {
       "titleSelectCards": "新しい学習カード",
       "titleAddToDeck": "デッキに追加",
@@ -2680,6 +2693,10 @@
     "elapsedSeconds": "経過 {{seconds}} 秒"
   },
   "filters": {
+    "typeReadout": "種類 · {{count}}",
+    "tagsReadout": "タグ · {{count}}",
+    "clear": "クリア",
+    "typeMenuAria": "種類で絞り込む",
     "marked": "マーク済み"
   },
   "pomodoro": {

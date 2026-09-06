@@ -21,15 +21,24 @@ export default function ViewSegment({ options, value, onChange, ariaLabel, testI
     >
       {options.map((option, index) => {
         const active = option.value === value
+        const iconOnly = Boolean(option.icon) && !option.label
         return (
           <Button
             key={option.value}
             variant='plain'
             color='neutral'
             aria-pressed={active}
+            aria-label={option.ariaLabel}
             onClick={() => onChange(option.value)}
-            sx={{ ...segment(active, index === 0), flex: { xs: 1, sm: 'none' }, gap: 0.75 }}
+            // An icon-only segment is a square of the row height (BUTTONS.md §5).
+            sx={{
+              ...segment(active, index === 0),
+              flex: { xs: 1, sm: 'none' },
+              gap: 0.75,
+              ...(iconOnly ? { px: 0, minWidth: { xs: 44, sm: 36 } } : {})
+            }}
           >
+            {option.icon}
             {option.label}
             {option.readout != null && (
               <span style={{ color: 'var(--joy-palette-text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>{option.readout}</span>

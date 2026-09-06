@@ -5,6 +5,7 @@
     "scoreAria": "Ergebnis {{pct}} Prozent"
   },
   "common": {
+    "loadMore": "Mehr laden",
     "close": "Schließen",
     "loading": "Laden...",
     "error": "Fehler",
@@ -1888,6 +1889,18 @@
     }
   },
   "cards": {
+    "add": "Hinzufügen",
+    "manage_content": {
+      "aria": {
+        "viewMode": "Anordnung",
+        "deckActions": "Weitere Aktionen für {{name}}",
+        "cardActions": "Weitere Aktionen für {{title}}"
+      },
+      "tabs": {
+        "decksOnly": "Stapel",
+        "cardsOnly": "Karten"
+      }
+    },
     "import": {
       "deckNamePlaceholder": "Stapelname",
       "descriptionPlaceholder": "Beschreibung (optional)"
@@ -2739,6 +2752,10 @@
     "elapsedSeconds": "{{seconds}} s vergangen"
   },
   "filters": {
+    "typeReadout": "Typ · {{count}}",
+    "tagsReadout": "Tags · {{count}}",
+    "clear": "Zurücksetzen",
+    "typeMenuAria": "Nach Typ filtern",
     "marked": "Markiert"
   },
   "pomodoro": {

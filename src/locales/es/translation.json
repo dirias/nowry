@@ -1,5 +1,6 @@
 {
   "common": {
+    "loadMore": "Cargar más",
     "loading": "Cargando...",
     "error": "Error",
     "save": "Guardar",
@@ -1045,6 +1046,7 @@
     "coverImagePlaceholder": "https://example.com/image.jpg"
   },
   "cards": {
+    "add": "Añadir",
     "title": "Biblioteca de Mazos",
     "subtitle": "Gestiona tus tarjetas, cuestionarios y material visual",
     "studyCenter": "Centro de Estudio",
@@ -1139,6 +1141,8 @@
       "title": "Gestor de contenido",
       "deckCount": "{{decks}} mazos · {{cards}} tarjetas en total",
       "tabs": {
+        "decksOnly": "Mazos",
+        "cardsOnly": "Tarjetas",
         "decks": "Mazos ({{count}})",
         "cards": "Tarjetas ({{count}})"
       },
@@ -1148,6 +1152,9 @@
         "placeholder": "Buscar mazos y tarjetas..."
       },
       "aria": {
+        "viewMode": "Disposición",
+        "deckActions": "Más acciones para {{name}}",
+        "cardActions": "Más acciones para {{title}}",
         "search": "Buscar contenido",
         "gridView": "Vista de cuadrícula",
         "listView": "Vista de lista"
@@ -1381,6 +1388,10 @@
     }
   },
   "filters": {
+    "typeReadout": "Tipo · {{count}}",
+    "tagsReadout": "Etiquetas · {{count}}",
+    "clear": "Quitar",
+    "typeMenuAria": "Filtrar por tipo",
     "toggle": "Alternar filtros",
     "type": "Tipo",
     "tags": "Etiquetas",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Container, Snackbar } from '@mui/joy'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
@@ -10,7 +10,6 @@ import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import ImportDeckModal from './ImportDeckModal'
 import DeckSettingsModal from '../Study/DeckSettingsModal'
 import DeckPublishSheet from '../Study/DeckPublishSheet'
-import StudyModePickerModal from '../Study/StudyModePickerModal'
 import { decksService, cardsService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
@@ -42,7 +41,7 @@ export default function CardHome() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null, section: 'study' })
   const [publishSheetState, setPublishSheetState] = useState({ open: false, deckId: null, deck: null })
-  const [modePickerState, setModePickerState] = useState({ open: false, deck: null })
+  const [searchParams, setSearchParams] = useSearchParams()
 
   // Stats
   const [stats, setStats] = useState({
@@ -56,6 +55,36 @@ export default function CardHome() {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 400)
     return () => clearTimeout(timer)
   }, [searchQuery])
+
+  // The Tags menu (PRD D5, E6): fetched once per mount; /study-cards/tags is
+  // the same counting the Cards view filters by.
+  useEffect(() => {
+    let cancelled = false
+    cardsService
+      .getTags()
+      .then((tags) => {
+        if (!cancelled) setAvailableTags(tags || [])
+      })
+      .catch(() => {
+        // Non-fatal — the Tags segment simply stays absent
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // `?new=deck|card|import` opens the matching sheet once and leaves the URL
+  // clean; the Today object's empty state links here (PRD D1).
+  useEffect(() => {
+    const wanted = searchParams.get('new')
+    if (!wanted) return
+    if (wanted === 'deck') setShowCreateDeck(true)
+    if (wanted === 'card') setShowCreateCard(true)
+    if (wanted === 'import') setShowImportDeck(true)
+    const params = new URLSearchParams(searchParams)
+    params.delete('new')
+    setSearchParams(params, { replace: true })
+  }, [searchParams, setSearchParams])
 
   const {
     cards: hookCards,
@@ -106,9 +135,9 @@ export default function CardHome() {
     fetchData()
   }, [cardsLoading, statsLoading, decksLoading, fetchData])
 
-  const handleStudy = (deck) => {
-    setModePickerState({ open: true, deck })
-  }
+  // Study and Browse open the session directly — no modal in the path (PRD D4).
+  const handleStudy = (deck) => navigate(`/study/${deck._id}?mode=study`)
+  const handleBrowse = (deck) => navigate(`/study/${deck._id}?mode=browse`)
 
   // Closing is the sheet's decision, not this one's: `Save & next` reports a
   // saved card and stays open for the next one. Closing here would end the
@@ -190,6 +219,7 @@ export default function CardHome() {
         loading={loading}
         searchQuery={searchQuery}
         onStudy={handleStudy}
+        onBrowse={handleBrowse}
         onEditDeck={handleEditDeck}
         onDeleteDeck={handleDeleteDeck}
         onEditCard={handleEditCard}
@@ -297,16 +327,6 @@ export default function CardHome() {
         deckId={deckSettingsState.deckId}
         initialSection={deckSettingsState.section}
         onSaved={reloadDecks}
-      />
-
-      <StudyModePickerModal
-        open={modePickerState.open}
-        onClose={() => setModePickerState({ open: false, deck: null })}
-        deck={modePickerState.deck || {}}
-        onSelectMode={(mode) => {
-          navigate(`/study/${modePickerState.deck._id}?mode=${mode}`)
-          setModePickerState({ open: false, deck: null })
-        }}
       />
 
       <DeckPublishSheet
