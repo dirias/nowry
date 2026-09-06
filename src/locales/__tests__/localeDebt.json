@@ -2963,7 +2963,11 @@
       "weekly.types.flashcards",
       "filters.typeReadout",
       "books.makeCards.subtitle_one",
-      "books.makeCards.subtitle_other"
+      "books.makeCards.subtitle_other",
+      "books.lib.pages_one",
+      "books.lib.pages_other",
+      "books.lib.sections_one",
+      "books.lib.sections_other"
     ],
     "de": [
       "about.values.innovation.title",
@@ -3348,7 +3352,9 @@
       "upgrade.welcome.message",
       "upgrade.welcome.title",
       "filters.tagsReadout",
-      "cards.manage_content.tabs.tagsOnly"
+      "cards.manage_content.tabs.tagsOnly",
+      "books.lib.tags",
+      "books.lib.tagsReadout"
     ],
     "ja": [
       "accountSettings.plan.current",
