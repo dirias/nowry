@@ -101,13 +101,7 @@ const CalendarToolbar = ({
         <IconButton variant='plain' color='neutral' onClick={onNext} aria-label={t('calendarPage.nav.next')} sx={arrowSx(false)}>
           <ChevronRightRounded />
         </IconButton>
-        <Button
-          variant='plain'
-          color='neutral'
-          onClick={onToday}
-          aria-pressed={showsToday}
-          sx={{ ...segment(showsToday, false) }}
-        >
+        <Button variant='plain' color='neutral' onClick={onToday} aria-pressed={showsToday} sx={{ ...segment(showsToday, false) }}>
           {t('calendarPage.nav.today')}
         </Button>
       </Sheet>
