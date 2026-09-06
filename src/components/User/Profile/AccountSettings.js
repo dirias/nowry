@@ -191,7 +191,7 @@ function useActiveSection(sectionIds) {
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function AccountSettings() {
   const { t, i18n } = useTranslation()
-  const { user, subscriptionTier } = useAuth()
+  const { user, subscriptionTier, updateUser } = useAuth()
   const { mode, setMode } = useColorScheme()
   const { themeColor: ctxThemeColor, setThemeColor } = useThemePreferences()
   const { knowledgeAccessEnabled, proactiveNudgingEnabled, updateAgentPrefs } = usePet()
@@ -332,6 +332,9 @@ export default function AccountSettings() {
     try {
       await userService.patchProfile({ username: trimmed })
       setLoadedUsername(trimmed)
+      // AuthContext's `user` is what Home greets by; without this the new name
+      // only appeared after a reload re-fetched /users/me.
+      updateUser({ username: trimmed })
       setUsernameSaved(true)
       setTimeout(() => setUsernameSaved(false), 2000)
     } catch (err) {

@@ -106,6 +106,17 @@ export const AuthProvider = ({ children }) => {
     return result
   }
 
+  /**
+   * Merge a partial profile into the cached user without a round trip.
+   * Screens that save a field through PATCH /users/profile call this so
+   * readers of `user` (the Home greeting, the header avatar) follow the
+   * change immediately; a full `checkUser()` would clear the session on a
+   * transient failure, which is the wrong price for a username edit.
+   */
+  const updateUser = (patch) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev))
+  }
+
   const logout = async () => {
     try {
       await authService.logout()
@@ -127,6 +138,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         checkUser,
+        updateUser,
         loading,
         isAuthenticated: !!user,
         subscriptionTier: user?.subscription?.tier ?? 'free',

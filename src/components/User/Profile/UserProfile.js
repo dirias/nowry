@@ -29,7 +29,7 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(false)
   const [avatarFile, setAvatarFile] = useState(null)
   const { t, i18n } = useTranslation()
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
 
   // User data state
   const [userData, setUserData] = useState({
@@ -119,6 +119,9 @@ export default function UserProfile() {
       })
 
       setUserData({ ...editData, username: trimmedUsername })
+      // Keep AuthContext in step so the Home greeting shows the new name
+      // without a reload.
+      updateUser({ username: trimmedUsername, bio: editData.bio })
       setAvatarFile(null)
       setIsEditing(false)
     } catch (error) {
