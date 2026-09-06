@@ -13,6 +13,7 @@ import '@fontsource-variable/literata'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { dailyReviewParams } from './dailyReviewParams'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePet } from '../../context/AgentContext'
@@ -488,7 +489,8 @@ export default function StudySession() {
       let reviewCards = []
 
       if (deckId === 'daily-review') {
-        reviewCards = await cardsService.getDailyReviewCards()
+        // STUDY-002: Quick 10, a tag group or the struggling group ride the URL.
+        reviewCards = await cardsService.getDailyReviewCards(dailyReviewParams(searchParams))
       } else if (isReadOnlyMode) {
         reviewCards = await cardsService.getAllCards(deckId)
       } else {
@@ -533,6 +535,9 @@ export default function StudySession() {
       // WeeklyStatsCard, and CardHome's Content Library pick up this
       // session's review results (next_review, etc.) immediately.
       if (userId) queryClient.invalidateQueries({ queryKey: ['cards', userId] })
+      // The forecast and the groups summarise the same cards (STUDY-002).
+      if (userId) queryClient.invalidateQueries({ queryKey: ['forecast', userId] })
+      if (userId) queryClient.invalidateQueries({ queryKey: ['groups', userId] })
       setViewContext(null)
       resetCompanionSession()
       if (interventionTimerRef.current) clearTimeout(interventionTimerRef.current)

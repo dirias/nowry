@@ -345,13 +345,40 @@ export const cardsService = {
    * @param {string[]} tags - Optional tag filters (OR logic on backend)
    * @param {string} search - Optional search query (server-side, title/content/tags/deck)
    * @param {boolean} markedOnly - Restrict to cards the user has marked (ADR-010)
+   * @param {'marked'|'struggling'|null} group - A system group (STUDY-001); struggling
+   *   cards come back with `last_grade` / `last_graded_at`
    */
-  async getAll(skip = 0, limit = 50, tags = [], search = '', markedOnly = false) {
+  async getAll(skip = 0, limit = 50, tags = [], search = '', markedOnly = false, group = null) {
     const params = new URLSearchParams({ skip, limit })
     tags.forEach((t) => params.append('tags', t))
     if (search) params.append('search', search)
     if (markedOnly) params.append('marked_only', 'true')
+    if (group) params.append('group', group)
     const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
+    return data
+  },
+
+  /**
+   * Due counts per local day for the coming days (STUDY-001). Starts tomorrow;
+   * today's number is `summary.due_today` in getStatistics(), one owner.
+   * @param {number} days
+   * @returns {Promise<{days: Array<{date: string, due: number}>, total: number}>}
+   */
+  async getForecast(days = 7) {
+    const params = new URLSearchParams({ days })
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (tz) params.append('tz', tz)
+    const { data } = await apiClient.get(`/study-cards/forecast?${params}`)
+    return data
+  },
+
+  /**
+   * Every tag and the two system groups (marked, struggling) with
+   * cards / decks / due / new (STUDY-001).
+   * @returns {Promise<{system: Array, tags: Array}>}
+   */
+  async getGroups() {
+    const { data } = await apiClient.get('/study-cards/groups')
     return data
   },
 
@@ -452,10 +479,17 @@ export const cardsService = {
    * Get today's locked daily review session across all active decks.
    * The selection is sticky for the day on the backend (introduced_at stamp),
    * so the same cards reappear across sessions until graded.
+   * @param {{ limit?: number, tags?: string[], group?: string }} [options] - STUDY-001:
+   *   `limit` caps the session (due first), `tags` / `group` narrow the pool server-side.
    * @returns {Promise<Array>} Array of cards (new + due reviews) for today
    */
-  async getDailyReviewCards() {
-    const { data } = await apiClient.get('/study-cards/daily-review')
+  async getDailyReviewCards({ limit, tags = [], group } = {}) {
+    const params = new URLSearchParams()
+    if (limit) params.append('limit', limit)
+    tags.forEach((t) => params.append('tags', t))
+    if (group) params.append('group', group)
+    const query = params.toString()
+    const { data } = await apiClient.get(`/study-cards/daily-review${query ? `?${query}` : ''}`)
     return data.cards || []
   },
 
