@@ -1,46 +1,22 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  Container,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  Stack,
-  Button,
-  Chip,
-  Grid,
-  Divider,
-  Skeleton,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  tabClasses,
-  Tooltip,
-  IconButton
-} from '@mui/joy'
-import {
-  School,
-  Quiz as QuizIcon,
-  Style,
-  AccountTree,
-  TrendingUp,
-  CalendarToday,
-  ArrowForward,
-  LocalFireDepartment,
-  Settings
-} from '@mui/icons-material'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Container, Typography, Box, Card, CardContent, Stack, Chip, Grid, Divider, Skeleton, Tooltip, IconButton } from '@mui/joy'
+import { Quiz as QuizIcon, Style, AccountTree, ArrowForward, Settings } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
+import { useForecast } from '../../hooks/useForecast'
 import { agentService } from '../../api/services/agent.service'
 import { usePet } from '../../context/AgentContext'
 import CardHome from '../Cards/CardHome'
 import DeckSettingsModal from './DeckSettingsModal'
 import StudyModePickerModal from './StudyModePickerModal'
 import RecentSessions from './RecentSessions'
+import TodayObject from './TodayObject'
+import ViewSegment from './ViewSegment'
 import { touchTargetBox } from '../Common/Form/formStyles'
+
+const VIEWS = ['dashboard', 'library']
 
 export default function StudyCenter() {
   const navigate = useNavigate()
@@ -59,41 +35,24 @@ export default function StudyCenter() {
   const [settingsState, setSettingsState] = useState({ open: false, deckId: null })
   const [settingsEverSaved, setSettingsEverSaved] = useState(false)
 
-  // Swipeable Logic
-  const [activeSectionIndex, setActiveSectionIndex] = useState(0)
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
-  const minSwipeDistance = 50
-
-  const handleTouchStart = (e) => {
-    setTouchEnd(null)
-    setTouchStart(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
-
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > minSwipeDistance
-    const isRightSwipe = distance < -minSwipeDistance
-
-    if (isLeftSwipe) {
-      // Swiping Left -> Go Next (min to max index)
-      setActiveSectionIndex((prev) => Math.min(prev + 1, 2))
-    }
-    if (isRightSwipe) {
-      // Swiping Right -> Go Prev
-      setActiveSectionIndex((prev) => Math.max(prev - 1, 0))
-    }
-  }
-
   const { statistics: statisticsData, loading: statsLoading } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
+  const { forecast } = useForecast(7)
   const { queuePreSessionIntervention } = usePet()
+
+  // The view lives in the URL (architecture addendum, "Routes") so the library
+  // is linkable and a phone's back control leaves a group, not the page.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const view = VIEWS.includes(searchParams.get('view')) ? searchParams.get('view') : 'dashboard'
+  const setView = useCallback(
+    (next) => {
+      const params = new URLSearchParams(searchParams)
+      if (next === 'dashboard') params.delete('view')
+      else params.set('view', next)
+      setSearchParams(params, { replace: true })
+    },
+    [searchParams, setSearchParams]
+  )
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -284,214 +243,57 @@ export default function StudyCenter() {
     return t('study.dates.weeksAgo', { count: Math.floor(diffDays / 7) })
   }
 
+  const weekly = statisticsData?.weekly_progress || []
+  const totalCards = stats.totalActive
+
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 4 } }}>
-      {/* Header — Stats & CTA */}
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        justifyContent='flex-end'
-        alignItems={{ xs: 'center', sm: 'flex-end' }}
-        spacing={{ xs: 2, md: 3 }}
-        sx={{ mb: { xs: 3, md: 4 }, mt: { xs: 1, md: 2 } }}
+      {/* Title row: the page on the left rail, one view segment on the right (PRD D2, §15.7) */}
+      <Box
+        component='header'
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+          justifyContent: 'space-between',
+          gap: 2,
+          mb: 3
+        }}
       >
-        {/* Minimalist Inline Stats */}
-        <Stack
-          direction='row'
-          spacing={{ xs: 1.5, sm: 2 }}
-          alignItems='center'
-          sx={{ opacity: 0.8, flexWrap: 'wrap', gap: { xs: 1, sm: 0 }, justifyContent: 'center', mb: { xs: 0, sm: 0.5 } }}
-        >
-          <Tooltip title={t('study.stats.dueToday')} placement='bottom' size='sm'>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <TrendingUp sx={{ fontSize: 16, color: 'primary.plainColor', opacity: 0.8 }} />
-              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-                <Skeleton loading={loading} variant='text' width='1ch'>
-                  {stats.dueToday}
-                </Skeleton>{' '}
-                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
-                  {t('study.stats.dueToday')}
-                </Typography>
-              </Typography>
-            </Box>
-          </Tooltip>
-          <Typography sx={{ color: 'divider' }}>•</Typography>
+        <Typography level='h2'>{t('study.title')}</Typography>
+        <ViewSegment
+          ariaLabel={t('study.title')}
+          testId='study-view'
+          value={view}
+          onChange={setView}
+          options={[
+            { value: 'dashboard', label: t('study.views.dashboard') },
+            { value: 'library', label: t('study.views.library') }
+          ]}
+        />
+      </Box>
 
-          <Tooltip title={t('study.stats.reviewedToday')} placement='bottom' size='sm'>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <School sx={{ fontSize: 16, color: 'success.plainColor', opacity: 0.8 }} />
-              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-                <Skeleton loading={loading} variant='text' width='1ch'>
-                  {stats.reviewedToday}
-                </Skeleton>{' '}
-                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
-                  {t('study.stats.reviewedToday')}
-                </Typography>
-              </Typography>
-            </Box>
-          </Tooltip>
-          <Typography sx={{ color: 'divider' }}>•</Typography>
+      {view === 'dashboard' && (
+        <>
+          <TodayObject
+            loading={loading}
+            dueToday={stats.dueToday}
+            newToday={stats.newToday}
+            reviewedToday={stats.reviewedToday}
+            streak={stats.streak}
+            totalCards={totalCards}
+            weekly={weekly}
+            forecast={forecast}
+            onStudy={() => navigate('/study/daily-review')}
+            onQuick={() => navigate('/study/daily-review?limit=10')}
+            onBrowse={() => setView('library')}
+            onCreateDeck={() => navigate('/study?view=library&new=deck')}
+            onBrowseDecks={() => navigate('/browse')}
+            onImport={() => navigate('/study?view=library&new=import')}
+          />
 
-          <Tooltip title={t('study.stats.totalCards')} placement='bottom' size='sm'>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Style sx={{ fontSize: 16, color: 'text.secondary', opacity: 0.8 }} />
-              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-                <Skeleton loading={loading} variant='text' width='1ch'>
-                  {stats.totalActive}
-                </Skeleton>{' '}
-                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
-                  {t('study.stats.totalCards')}
-                </Typography>
-              </Typography>
-            </Box>
-          </Tooltip>
-          <Typography sx={{ color: 'divider' }}>•</Typography>
-
-          <Tooltip title={t('profile.stats.days')} placement='bottom' size='sm'>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <LocalFireDepartment
-                sx={{
-                  fontSize: 18,
-                  color: stats.streak > 0 ? 'warning.plainColor' : 'text.tertiary',
-                  opacity: 0.9,
-                  filter: 'none'
-                }}
-              />
-              <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.secondary' }}>
-                <Skeleton loading={loading} variant='text' width='1ch'>
-                  {stats.streak}
-                </Skeleton>{' '}
-                <Typography component='span' fontWeight={400} sx={{ color: 'text.tertiary', display: { xs: 'none', lg: 'inline' } }}>
-                  {t('profile.stats.days')}
-                </Typography>
-              </Typography>
-            </Box>
-          </Tooltip>
-        </Stack>
-
-        {(stats.dueToday > 0 || stats.newToday > 0) && (
-          <Button
-            size='sm'
-            variant='outlined'
-            color='primary'
-            onClick={() => navigate('/study/daily-review')}
-            endDecorator={<ArrowForward sx={{ fontSize: 13, opacity: 0.7, transition: 'transform 0.2s ease' }} />}
-            sx={{
-              borderRadius: 'xl',
-              px: 2,
-              py: 0.75,
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              letterSpacing: '0.01em',
-              borderColor: 'primary.outlinedBorder',
-              color: 'primary.plainColor',
-              bgcolor: 'primary.softBg',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': {
-                bgcolor: 'primary.softHoverBg',
-                borderColor: 'primary.solidBg',
-                transform: 'translateY(-1px)',
-                boxShadow: 'sm',
-                '& .MuiButton-endDecorator svg': { transform: 'translateX(3px)', opacity: 1 }
-              },
-              '&:focus-visible': {
-                outline: '2px solid',
-                outlineColor: 'primary.outlinedBorder',
-                outlineOffset: '3px'
-              }
-            }}
-          >
-            {t('study.startStudying')}
-            <Typography component='span' level='body-xs' sx={{ ml: 0.75, opacity: 0.6, fontWeight: 500 }}>
-              {stats.dueToday + stats.newToday}
-            </Typography>
-          </Button>
-        )}
-      </Stack>
-
-      {/* Unified Tab Architecture - Left Aligned */}
-      <Tabs aria-label='Study Navigation' defaultValue={0} sx={{ bgcolor: 'transparent', mt: 0 }}>
-        <TabList
-          disableUnderline
-          sx={{
-            p: 0,
-            gap: 4,
-            borderRadius: 0,
-            bgcolor: 'transparent',
-            display: 'flex',
-            mb: { xs: 4, md: 6 },
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            width: '100%',
-            mx: 0,
-            [`& .${tabClasses.root}`]: {
-              bgcolor: 'transparent',
-              fontWeight: 600,
-              color: 'text.tertiary',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              paddingBottom: '8px',
-              marginBottom: '-1px', // Pull the border over the divider
-              borderTop: 'none',
-              borderLeft: 'none',
-              borderRight: 'none',
-              borderBottom: '2px solid transparent',
-              '&:hover': {
-                color: 'text.primary',
-                bgcolor: 'transparent'
-              }
-            },
-            [`& .${tabClasses.root}[aria-selected="true"]`]: {
-              boxShadow: 'none',
-              bgcolor: 'transparent',
-              color: 'primary.plainColor',
-              fontWeight: 800,
-              borderBottomColor: 'primary.plainColor'
-            }
-          }}
-        >
-          <Tab disableIndicator sx={{ borderRadius: 0, px: 1, py: 1 }}>
-            {t('study.tabs.dashboard')}
-          </Tab>
-          <Tab disableIndicator sx={{ borderRadius: 0, px: 1, py: 1 }}>
-            {t('study.tabs.contentLibrary')}
-          </Tab>
-        </TabList>
-
-        <TabPanel value={0} sx={{ p: 0 }}>
           {/* Zone 1 — Decks Needing Review / Attention */}
-          {decksNeedingReview.length === 0 ? (
-            <Box
-              role='status'
-              aria-label={t('study.empty.allDone')}
-              sx={{ borderLeft: '2px solid', borderColor: 'success.outlinedBorder', pl: 2, py: 0.75, mb: { xs: 3, md: 4 } }}
-            >
-              <Stack direction='row' alignItems='center' flexWrap='wrap' gap={1}>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  {stats.streak > 0 && (
-                    <>
-                      <Skeleton loading={loading} variant='text' width='6ch'>
-                        <Stack direction='row' spacing={0.75} alignItems='center'>
-                          <LocalFireDepartment sx={{ fontSize: 16, color: 'warning.plainColor' }} />
-                          <Typography level='body-sm' fontWeight={700} sx={{ color: 'text.primary' }}>
-                            {t('study.empty.streakLabel', { count: stats.streak })}
-                          </Typography>
-                        </Stack>
-                      </Skeleton>
-                      <Divider orientation='vertical' sx={{ height: 16, alignSelf: 'center' }} />
-                    </>
-                  )}
-                  <Typography level='body-sm' fontWeight={600} sx={{ color: 'text.primary' }}>
-                    {t('study.empty.allDone')}
-                  </Typography>
-                  <Divider orientation='vertical' sx={{ height: 16, alignSelf: 'center' }} />
-                  <Skeleton loading={loading} variant='text' width='8ch'>
-                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                      {t('study.empty.weeklyCards', { count: stats.reviewedToday })}
-                    </Typography>
-                  </Skeleton>
-                </Stack>
-              </Stack>
-            </Box>
-          ) : (
+          {decksNeedingReview.length > 0 && (
             <>
               <Typography level='title-lg' fontWeight={700} sx={{ mb: 2 }}>
                 {t('study.sections.needingReview')}
@@ -766,65 +568,6 @@ export default function StudyCenter() {
             </Box>
           )}
 
-          {/* Zone 2 — Weekly Momentum */}
-          {!statsLoading && statisticsData?.weekly_progress?.length > 0 && (
-            <Box sx={{ mb: { xs: 4, md: 6 } }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 2 }}>
-                <Typography level='title-lg' fontWeight={700}>
-                  {t('study.sections.weeklyMomentum')}
-                </Typography>
-                <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                  {t('study.sections.weeklyMomentumSubtitle', {
-                    count: statisticsData.weekly_progress.reduce((s, d) => s + d.cards, 0)
-                  })}
-                </Typography>
-              </Box>
-              <Box>
-                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: { xs: 1, md: 2 }, height: 96, justifyContent: 'space-between' }}>
-                  {statisticsData.weekly_progress.map((day, i) => {
-                    const maxVal = Math.max(...statisticsData.weekly_progress.map((d) => d.cards), 1)
-                    const heightPct = day.cards > 0 ? Math.max((day.cards / maxVal) * 100, 8) : 4
-                    const isToday = i === statisticsData.weekly_progress.length - 1
-                    return (
-                      <Tooltip key={day.date} title={`${day.cards} ${t('study.stats.cards')}`} size='sm' placement='top'>
-                        <Box
-                          sx={{
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: 1,
-                            height: '100%',
-                            justifyContent: 'flex-end'
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              width: '100%',
-                              height: `${heightPct}%`,
-                              borderRadius: 'sm',
-                              bgcolor: isToday ? 'primary.solidBg' : day.cards > 0 ? 'primary.softBg' : 'background.level2',
-                              transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }}
-                          />
-                          <Typography
-                            level='body-xs'
-                            sx={{
-                              color: isToday ? 'primary.plainColor' : 'text.tertiary',
-                              fontWeight: isToday ? 700 : 400
-                            }}
-                          >
-                            {day.day}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-                    )
-                  })}
-                </Box>
-              </Box>
-            </Box>
-          )}
-
           {/* Zone 3 — Session History */}
           <RecentSessions />
 
@@ -869,14 +612,10 @@ export default function StudyCenter() {
               </Box>
             </Box>
           )}
-        </TabPanel>
+        </>
+      )}
 
-        <TabPanel value={1} sx={{ p: 0 }}>
-          <Box sx={{ mt: -2 }}>
-            <CardHome />
-          </Box>
-        </TabPanel>
-      </Tabs>
+      {view === 'library' && <CardHome />}
 
       <DeckSettingsModal
         open={settingsState.open}

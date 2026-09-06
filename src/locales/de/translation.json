@@ -108,6 +108,28 @@
     "privacy": "/datenschutz"
   },
   "study": {
+    "views": {
+      "dashboard": "Übersicht",
+      "library": "Bibliothek"
+    },
+    "today": {
+      "title": "Heute",
+      "reviewed": "{{count}} wiederholt",
+      "beforeMidnight": "· lerne vor Mitternacht",
+      "allDone": "Alles erledigt",
+      "progress": "{{done}} von {{total}} heute erledigt",
+      "study": "Lernen · {{count}}",
+      "quick": "Kurz {{count}}",
+      "quickAria": "Eine kurze Sitzung mit {{count}} Karten lernen",
+      "browse": "Durchsehen",
+      "weekReadout": "{{reviewed}} wiederholt · {{tomorrow}} morgen fällig · {{week}} diese Woche",
+      "timelineAria": "Sieben Tage wiederholt, heute und sieben Tage fällig: {{reviewed}} diese Woche wiederholt, {{today}} heute fällig, {{week}} in den nächsten sieben Tagen",
+      "todayInitial": "H",
+      "emptySentence": "Noch nichts zu wiederholen. Ein Stapel mit zehn Karten reicht für den Anfang.",
+      "createDeck": "Stapel erstellen",
+      "browseDecks": "Stapel durchsehen",
+      "import": "Importieren"
+    },
     "title": "Lernzentrum",
     "subtitle": "Dein persönlicher Lernbereich",
     "stats": {

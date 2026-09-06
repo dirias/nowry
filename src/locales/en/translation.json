@@ -122,6 +122,28 @@
     "privacy": "/privacy"
   },
   "study": {
+    "views": {
+      "dashboard": "Dashboard",
+      "library": "Library"
+    },
+    "today": {
+      "title": "Today",
+      "reviewed": "{{count}} reviewed",
+      "beforeMidnight": "· study before midnight",
+      "allDone": "All done",
+      "progress": "{{done}} of {{total}} done today",
+      "study": "Study · {{count}}",
+      "quick": "Quick {{count}}",
+      "quickAria": "Study a short session of {{count}} cards",
+      "browse": "Browse",
+      "weekReadout": "{{reviewed}} reviewed · {{tomorrow}} due tomorrow · {{week}} this week",
+      "timelineAria": "Seven days reviewed, today, and seven days due: {{reviewed}} reviewed this week, {{today}} due today, {{week}} due in the next seven days",
+      "todayInitial": "T",
+      "emptySentence": "Nothing to review yet. A deck with ten cards is enough to start.",
+      "createDeck": "Create deck",
+      "browseDecks": "Browse decks",
+      "import": "Import"
+    },
     "title": "Study Center",
     "subtitle": "Your personalized learning hub",
     "byType": "Study by Type",

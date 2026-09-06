@@ -108,6 +108,28 @@
     "privacy": "/プライバシー"
   },
   "study": {
+    "views": {
+      "dashboard": "ダッシュボード",
+      "library": "ライブラリ"
+    },
+    "today": {
+      "title": "今日",
+      "reviewed": "{{count}}枚復習",
+      "beforeMidnight": "· 深夜0時までに学習",
+      "allDone": "すべて完了",
+      "progress": "今日 {{total}} 枚中 {{done}} 枚完了",
+      "study": "学習 · {{count}}",
+      "quick": "クイック {{count}}",
+      "quickAria": "{{count}}枚の短いセッションを学習する",
+      "browse": "閲覧",
+      "weekReadout": "{{reviewed}}枚復習 · 明日 {{tomorrow}}枚 · 今週 {{week}}枚",
+      "timelineAria": "過去7日間の復習、今日、今後7日間の予定: 今週 {{reviewed}}枚復習、今日 {{today}}枚、今後7日間で {{week}}枚",
+      "todayInitial": "今",
+      "emptySentence": "まだ復習するものがありません。10枚のカードのデッキがあれば始められます。",
+      "createDeck": "デッキを作成",
+      "browseDecks": "デッキを探す",
+      "import": "インポート"
+    },
     "title": "学習センター",
     "subtitle": "あなただけの学習ハブ",
     "stats": {

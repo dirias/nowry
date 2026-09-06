@@ -108,6 +108,28 @@
     "privacy": "/privacidad"
   },
   "study": {
+    "views": {
+      "dashboard": "Panel",
+      "library": "Biblioteca"
+    },
+    "today": {
+      "title": "Hoy",
+      "reviewed": "{{count}} repasadas",
+      "beforeMidnight": "· estudia antes de medianoche",
+      "allDone": "Todo hecho",
+      "progress": "{{done}} de {{total}} hechas hoy",
+      "study": "Estudiar · {{count}}",
+      "quick": "Rápido {{count}}",
+      "quickAria": "Estudiar una sesión corta de {{count}} tarjetas",
+      "browse": "Explorar",
+      "weekReadout": "{{reviewed}} repasadas · {{tomorrow}} para mañana · {{week}} esta semana",
+      "timelineAria": "Siete días repasados, hoy y siete días por vencer: {{reviewed}} repasadas esta semana, {{today}} para hoy, {{week}} en los próximos siete días",
+      "todayInitial": "H",
+      "emptySentence": "Aún no hay nada que repasar. Un mazo con diez tarjetas basta para empezar.",
+      "createDeck": "Crear mazo",
+      "browseDecks": "Explorar mazos",
+      "import": "Importar"
+    },
     "title": "Centro de Estudio",
     "subtitle": "Tu centro de aprendizaje personalizado",
     "stats": {

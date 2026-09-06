@@ -108,6 +108,28 @@
     "privacy": "/confidentialite"
   },
   "study": {
+    "views": {
+      "dashboard": "Tableau de bord",
+      "library": "Bibliothèque"
+    },
+    "today": {
+      "title": "Aujourd'hui",
+      "reviewed": "{{count}} révisées",
+      "beforeMidnight": "· révisez avant minuit",
+      "allDone": "Tout est fait",
+      "progress": "{{done}} sur {{total}} faites aujourd’hui",
+      "study": "Étudier · {{count}}",
+      "quick": "Rapide {{count}}",
+      "quickAria": "Étudier une courte session de {{count}} cartes",
+      "browse": "Parcourir",
+      "weekReadout": "{{reviewed}} révisées · {{tomorrow}} à revoir demain · {{week}} cette semaine",
+      "timelineAria": "Sept jours révisés, aujourd’hui et sept jours à venir : {{reviewed}} révisées cette semaine, {{today}} à revoir aujourd’hui, {{week}} dans les sept prochains jours",
+      "todayInitial": "A",
+      "emptySentence": "Rien à réviser pour l’instant. Un paquet de dix cartes suffit pour commencer.",
+      "createDeck": "Créer un paquet",
+      "browseDecks": "Parcourir les paquets",
+      "import": "Importer"
+    },
     "title": "Centre d'Étude",
     "subtitle": "Votre espace d'apprentissage personnalisé",
     "stats": {

@@ -1,33 +1,27 @@
 /**
- * Phase 33 Plan 02 — StudyCenter.js render-behavior + Profiler render-counter
- * harness (PERF-01).
+ * StudyCenter — the page shell after STUDY-003 (docs/prd-study-center.md).
  *
- * Harness idiom: multi-mock, require-after-mock, mirrors StudySession.test.js
- * (nowry/src/components/Cards/__tests__/StudySession.test.js). StudyCenter takes
- * no props — all data arrives via hooks, mocked below.
- *
- * D-03 evidence: the second describe block below wraps StudyCenter in a
- * <Profiler> and records a commit-count + total actualDuration baseline for a
- * representative dashboard interaction (clicking a due-deck card, which flips
- * modePickerState and forces a re-render). This test is run once against the
- * pre-fix StudyCenter.js (Task 1, BEFORE) and again unchanged against the
- * post-fix StudyCenter.js (Task 2, AFTER) — see 33-02-SUMMARY.md for the
- * captured numbers. Commit count is expected to be equal before/after (the
- * click still produces exactly one state update / one commit either way);
- * the optimization removes per-render computation work, not the render itself.
+ * Harness idiom: multi-mock, require-after-mock, mirrors StudySession.test.js.
+ * The component takes no props — all data arrives via hooks, mocked below.
+ * The `t` mock serialises options as JSON so a key with a count is assertable.
  */
 import React, { Profiler } from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
+const mockNavigate = jest.fn()
+let mockSearch = new URLSearchParams()
+// CRA's jest config resets every mock's implementation before each test, so
+// implementations are (re)installed in beforeEach, not here.
+const mockSetSearchParams = jest.fn()
 jest.mock('react-router-dom', () => ({
-  useNavigate: () => jest.fn()
+  useNavigate: () => mockNavigate,
+  useSearchParams: () => [mockSearch, mockSetSearchParams]
 }))
 
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) })
+  useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k), i18n: { language: 'en' } })
 }))
 
-/** Two decks: one due (renders in "needing review"), one non-due (renders in "your decks"). */
 const FIXTURE_DECKS = [
   {
     _id: 'd1',
@@ -51,90 +45,163 @@ const FIXTURE_DECKS = [
   }
 ]
 
-// Module-level stable refs ('mock' prefix is Jest's documented exception to the
-// out-of-scope-variable rule for jest.mock() factories). A fresh object literal
-// per call would give `statisticsData`/`hookDecks` a new identity on every
-// render, which StudyCenter's fetchData useCallback([hookDecks, statisticsData])
-// picks up as a changed dependency -> infinite re-render loop.
-const mockStatistics = {}
-const mockReloadStatistics = jest.fn()
-const mockReloadDecks = jest.fn()
+let mockDecks = FIXTURE_DECKS
+const BASE_STATISTICS = {
+  summary: { current_streak: 3 },
+  weekly_progress: [
+    { date: '2026-08-31', day: 'Mon', cards: 14 },
+    { date: '2026-09-01', day: 'Tue', cards: 22 },
+    { date: '2026-09-02', day: 'Wed', cards: 0 },
+    { date: '2026-09-03', day: 'Thu', cards: 9 },
+    { date: '2026-09-04', day: 'Fri', cards: 17 },
+    { date: '2026-09-05', day: 'Sat', cards: 0 },
+    { date: '2026-09-06', day: 'Sun', cards: 4 }
+  ]
+}
+let mockStatistics = BASE_STATISTICS
+const mockForecast = {
+  days: [
+    { date: '2026-09-07', due: 18 },
+    { date: '2026-09-08', due: 9 }
+  ],
+  total: 27
+}
 
 jest.mock('../../../hooks/useStatistics', () => ({
-  useStatistics: () => ({ statistics: mockStatistics, loading: false, error: null, reload: mockReloadStatistics })
+  useStatistics: () => ({ statistics: mockStatistics, loading: false, error: null, reload: jest.fn() })
 }))
-
 jest.mock('../../../hooks/useDeckData', () => ({
-  useDeckData: () => ({ decks: FIXTURE_DECKS, loading: false, error: null, reload: mockReloadDecks })
+  useDeckData: () => ({ decks: mockDecks, loading: false, error: null, reload: jest.fn() })
 }))
-
-jest.mock('../../../api/services/agent.service', () => ({
-  agentService: {
-    postIntervention: jest.fn().mockResolvedValue({})
-  }
+jest.mock('../../../hooks/useForecast', () => ({
+  useForecast: () => ({ forecast: mockForecast, loading: false, error: null, reload: jest.fn() })
 }))
-
-jest.mock('../../../context/AgentContext', () => ({
-  usePet: () => ({
-    queuePreSessionIntervention: jest.fn()
-  })
-}))
-
-jest.mock('../../Cards/CardHome', () => ({ __esModule: true, default: () => null }))
+const mockPostIntervention = jest.fn()
+jest.mock('../../../api/services/agent.service', () => ({ agentService: { postIntervention: (...args) => mockPostIntervention(...args) } }))
+jest.mock('../../../context/AgentContext', () => ({ usePet: () => ({ queuePreSessionIntervention: jest.fn() }) }))
+jest.mock('../../Cards/CardHome', () => ({ __esModule: true, default: () => <div data-testid='card-home' /> }))
 jest.mock('../DeckSettingsModal', () => ({ __esModule: true, default: () => null }))
 jest.mock('../StudyModePickerModal', () => ({ __esModule: true, default: () => null }))
 jest.mock('../RecentSessions', () => ({ __esModule: true, default: () => null }))
 
-// require-after-mock: the component under test is imported only after every
-// jest.mock() call above has registered, per the GoalCardGrid.test.js /
-// StudySession.test.js idiom.
 const StudyCenter = require('../StudyCenter').default
 
-/**
- * Wraps `ui` in a <Profiler>, returning the rendered element plus a live
- * `commits` array that accumulates `{ phase, actualDuration }` on every
- * React commit (D-03 evidence harness).
- */
-function withRenderCounter(ui) {
-  const commits = []
-  const onRender = (id, phase, actualDuration) => {
-    commits.push({ phase, actualDuration })
-  }
-  return {
-    element: (
-      <Profiler id='StudyCenter' onRender={onRender}>
-        {ui}
-      </Profiler>
-    ),
-    commits
-  }
-}
+beforeEach(() => {
+  mockNavigate.mockReset()
+  mockSetSearchParams.mockReset().mockImplementation((next) => {
+    mockSearch = new URLSearchParams(next)
+  })
+  mockPostIntervention.mockReset().mockResolvedValue({})
+  mockSearch = new URLSearchParams()
+  mockDecks = FIXTURE_DECKS
+  mockStatistics = BASE_STATISTICS
+})
 
-describe('StudyCenter dashboard smoke test (behavior-unchanged guard)', () => {
-  it("renders each fixture deck name and the due deck's due count", async () => {
+describe('the title row and the view segment (PRD D2)', () => {
+  it('names the page on the left rail and offers Dashboard | Library as one segmented object', async () => {
     render(<StudyCenter />)
+    expect(await screen.findByRole('heading', { level: 2, name: 'study.title' })).toBeInTheDocument()
+    const segment = screen.getByTestId('study-view')
+    const [dashboard, library] = segment.querySelectorAll('button')
+    expect(dashboard).toHaveAttribute('aria-pressed', 'true')
+    expect(library).toHaveAttribute('aria-pressed', 'false')
+  })
 
-    expect(await screen.findByText('Due Deck')).toBeInTheDocument()
-    expect(screen.getByText('Mastered Deck')).toBeInTheDocument()
-    // t mock serializes options as JSON — study.dueCount rendered with { count: 5 }
-    expect(screen.getByText(/study\.dueCount:\{"count":5\}/)).toBeInTheDocument()
+  it('puts the view in the URL and mounts the library there', async () => {
+    const first = render(<StudyCenter />)
+    fireEvent.click(screen.getByText('study.views.library'))
+    expect(mockSetSearchParams).toHaveBeenCalled()
+    expect(mockSearch.get('view')).toBe('library')
+    first.unmount()
+
+    mockSearch = new URLSearchParams('view=library')
+    render(<StudyCenter />)
+    expect(await screen.findByTestId('card-home')).toBeInTheDocument()
+  })
+})
+
+describe('the Today object (PRD D1, D9, D10)', () => {
+  it('reads due · new · reviewed · streak in one line and offers the one solid "Study · N"', async () => {
+    render(<StudyCenter />)
+    const today = await screen.findByTestId('today-object')
+    expect(today).toHaveTextContent('study.dueCount:{"count":5}')
+    expect(today).toHaveTextContent('study.deck.newCount:{"count":2}')
+    expect(today).toHaveTextContent('study.today.reviewed:{"count":4}')
+    expect(today).toHaveTextContent('study.empty.streakLabel:{"count":3}')
+    expect(today).not.toHaveTextContent('study.today.beforeMidnight')
+    fireEvent.click(screen.getByText('study.today.study:{"count":7}'))
+    expect(mockNavigate).toHaveBeenCalledWith('/study/daily-review')
+  })
+
+  it('warns "study before midnight" while the streak is alive and nothing has been reviewed today', async () => {
+    mockStatistics = {
+      ...mockStatistics,
+      weekly_progress: mockStatistics.weekly_progress.map((d, i, arr) => (i === arr.length - 1 ? { ...d, cards: 0 } : d))
+    }
+    render(<StudyCenter />)
+    expect(await screen.findByTestId('today-object')).toHaveTextContent('study.today.beforeMidnight')
+  })
+
+  it('says "Start your streak today" at zero, using the string that existed unused', async () => {
+    mockStatistics = { ...mockStatistics, summary: { current_streak: 0 } }
+    render(<StudyCenter />)
+    expect(await screen.findByTestId('today-object')).toHaveTextContent('study.empty.streakZeroLabel')
+  })
+
+  it('offers Quick 10 only when more than ten cards are asked, and caps the session', async () => {
+    mockDecks = [{ ...FIXTURE_DECKS[0], due_cards: 12, new_cards: 3 }]
+    const first = render(<StudyCenter />)
+    fireEvent.click(await screen.findByText('study.today.quick:{"count":10}'))
+    expect(mockNavigate).toHaveBeenCalledWith('/study/daily-review?limit=10')
+    first.unmount()
+
+    mockDecks = FIXTURE_DECKS
+    render(<StudyCenter />)
+    await screen.findByText('study.today.study:{"count":7}')
+    expect(screen.queryByText('study.today.quick:{"count":10}')).not.toBeInTheDocument()
+  })
+
+  it('closes the day as "All done" with a Browse secondary when nothing is due', async () => {
+    mockDecks = [FIXTURE_DECKS[1]]
+    render(<StudyCenter />)
+    const today = await screen.findByTestId('today-object')
+    expect(today).toHaveTextContent('study.today.allDone')
+    expect(screen.queryByText(/study\.today\.study:/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('study.today.browse'))
+    expect(mockSearch.get('view')).toBe('library')
+  })
+
+  it('is the same object with nothing in it for a new learner: one sentence, three ways in, no counters', async () => {
+    mockDecks = []
+    render(<StudyCenter />)
+    const today = await screen.findByTestId('today-object')
+    expect(today).toHaveTextContent('study.today.emptySentence')
+    expect(today).not.toHaveTextContent('study.dueCount')
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('study.today.createDeck'))
+    expect(mockNavigate).toHaveBeenCalledWith('/study?view=library&new=deck')
+  })
+
+  it('draws the timeline with a text alternative and the progress edge with a value', async () => {
+    render(<StudyCenter />)
+    expect(await screen.findByRole('img', { name: /study\.today\.timelineAria/ })).toBeInTheDocument()
+    const bar = screen.getByRole('progressbar')
+    await waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '4'))
+    expect(bar).toHaveAttribute('aria-valuemax', '11')
   })
 })
 
 describe('StudyCenter Profiler render-counter harness (D-03)', () => {
   it('captures a commit-count + duration baseline for a representative dashboard interaction', async () => {
-    const { element, commits } = withRenderCounter(<StudyCenter />)
-    render(element)
-
-    const dueDeckName = await screen.findByText('Due Deck')
-    // Click bubbles up to the ancestor Card's onClick (setModePickerState),
-    // producing one additional commit — the representative interaction.
-    fireEvent.click(dueDeckName)
-
+    const commits = []
+    render(
+      <Profiler id='StudyCenter' onRender={(id, phase, actualDuration) => commits.push({ phase, actualDuration })}>
+        <StudyCenter />
+      </Profiler>
+    )
+    fireEvent.click(await screen.findByText('Due Deck'))
     const totalDuration = commits.reduce((sum, c) => sum + c.actualDuration, 0)
-    // eslint-disable-next-line no-console
     console.log(`[StudyCenter Profiler D-03] commit count: ${commits.length}, total actualDuration: ${totalDuration.toFixed(4)}ms`)
-
     expect(commits.length).toBeGreaterThan(0)
   })
 })
