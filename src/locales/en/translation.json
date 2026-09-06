@@ -25,7 +25,32 @@
     "emptyTags": "No tags yet. Tag a card to group it across decks.",
     "emptyGroup": "Nothing in this group yet.",
     "selectAria": "Open the {{name}} group",
-    "searchPlaceholder": "Search tags…"
+    "searchPlaceholder": "Search tags…",
+    "tagActionsAria": "Actions for {{tag}}",
+    "rename": "Rename",
+    "renameAria": "New name for {{tag}}",
+    "mergeInto": "Merge into…",
+    "removeFromAll_one": "Remove from {{count}} card",
+    "removeFromAll_other": "Remove from all {{count}} cards",
+    "merge": {
+      "title": "Merge {{tag}} into…",
+      "subtitle_one": "Its {{count}} card takes the tag you pick instead.",
+      "subtitle_other": "Its {{count}} cards take the tag you pick instead.",
+      "searchAria": "Search for a tag to merge into",
+      "targetAria": "Merge into {{tag}}",
+      "empty": "No other tag to merge into yet.",
+      "noMatch": "No tag matches.",
+      "confirm_one": "Merge {{count}} card",
+      "confirm_other": "Merge {{count}} cards"
+    },
+    "remove": {
+      "title": "Remove {{tag}} from every card?",
+      "description_one": "The tag comes off {{count}} card; the card stays where it is.",
+      "description_other": "The tag comes off {{count}} cards; the cards stay where they are.",
+      "confirm_one": "Remove from {{count}} card",
+      "confirm_other": "Remove from {{count}} cards"
+    },
+    "tagError": "Couldn't change that tag."
   },
   "common": {
     "loadMore": "Load more",

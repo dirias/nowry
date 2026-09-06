@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Button, Skeleton, Stack, Typography } from '@mui/joy'
+import { Box, Button, Input, Skeleton, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import LocalOfferRounded from '@mui/icons-material/LocalOfferRounded'
 import BookmarkRounded from '@mui/icons-material/BookmarkRounded'
 import RepeatRounded from '@mui/icons-material/RepeatRounded'
-import { readout, tabularNums } from '../Common/Form/formStyles'
+import { focusRing, readout, tabularNums } from '../Common/Form/formStyles'
 import { useCardData } from '../../hooks/useCardData'
 import DeckRow from '../Study/DeckRow'
 import CardRow from './CardRow'
@@ -13,6 +13,9 @@ import SelectionBar from './SelectionBar'
 import BulkActionOverlays from './BulkActionOverlays'
 import { useCardSelection } from './useCardSelection'
 import { useBulkCardActions } from './useBulkCardActions'
+import TagActionsMenu from './TagActionsMenu'
+import TagActionOverlays from './TagActionOverlays'
+import { useTagActions } from './useTagActions'
 import { patchCardInCache } from '../../api/cardCache'
 
 export const GROUP_ICONS = { tag: LocalOfferRounded, marked: BookmarkRounded, struggling: RepeatRounded }
@@ -41,16 +44,25 @@ const byNextReview = (a, b) => {
  * The same selection bar as the Cards view stands in for the cards section's
  * head while a selection exists (PRD D16); the header with Study and Browse
  * stays. The bulk verbs run through the same hook and open the same surfaces.
+ *
+ * A tag's own verbs (PRD D17) sit on a kebab after the keys: Rename turns the
+ * title into a field; Merge into… and Remove confirm with their number.
+ * `existingTags` is the groups index, so a rename onto a name that exists is
+ * routed through the merge sheet; `onRenamed(to)` / `onRemoved()` move the
+ * URL. Struggling and Marked render no kebab.
  */
 export default function GroupDetail({
   group,
   summary,
   decks = [],
   availableTags = [],
+  existingTags = [],
   onEditCard,
   onEditTags,
   onDeleteCard,
-  onPreviewCards
+  onPreviewCards,
+  onRenamed,
+  onRemoved
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -81,6 +93,9 @@ export default function GroupDetail({
   }, [decks, summary])
   const asked = (summary?.due || 0) + (summary?.new || 0)
   const canStudy = group.kind !== 'marked'
+  const isTag = group.kind === 'tag'
+  const cardCount = summary?.cards ?? total
+  const tagActions = useTagActions({ tag: group.tag, existingTags, onRenamed, onRemoved })
   const sessionQuery = group.kind === 'tag' ? `tags=${encodeURIComponent(group.tag)}` : `group=${group.kind}`
 
   const deckName = (deckId) => decks.find((d) => d._id === deckId || d._id === deckId?._id)?.name || '—'
@@ -93,10 +108,7 @@ export default function GroupDetail({
     <Box component='section' aria-labelledby='group-detail-title' data-testid='group-detail'>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { md: 'flex-start' }, gap: 2, mb: 3 }}>
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Typography id='group-detail-title' level='h3' sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-            <Icon sx={{ fontSize: 'xl', color: 'text.tertiary' }} aria-hidden='true' />
-            {name}
-          </Typography>
+          <GroupTitle name={name} Icon={Icon} renaming={isTag && tagActions.renaming} actions={tagActions} />
           <Typography level='body-sm' sx={{ ...readout, color: 'text.secondary' }}>
             {t('groups.detailReadout', { cards: summary?.cards ?? total, decks: summary?.decks ?? deckRows.length })}
             {asked > 0 && (
@@ -114,18 +126,29 @@ export default function GroupDetail({
             {asked === 0 && (summary?.cards || 0) > 0 && ` · ${t('groups.upToDate')}`}
           </Typography>
         </Box>
-        {canStudy && (summary?.cards || 0) > 0 && (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ width: { xs: '100%', md: 'auto' }, flexShrink: 0 }}>
-            <Button variant='soft' color='neutral' onClick={() => navigate(`/study/daily-review?${sessionQuery}&mode=browse`)}>
-              {t('groups.browse')}
-            </Button>
-            {asked > 0 && (
-              <Button onClick={() => navigate(`/study/daily-review?${sessionQuery}`)} sx={tabularNums}>
-                {t('groups.study', { count: asked })}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, width: { xs: '100%', md: 'auto' }, flexShrink: 0 }}>
+          {canStudy && (summary?.cards || 0) > 0 && (
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ flex: { xs: 1, md: 'none' } }}>
+              <Button variant='soft' color='neutral' onClick={() => navigate(`/study/daily-review?${sessionQuery}&mode=browse`)}>
+                {t('groups.browse')}
               </Button>
-            )}
-          </Stack>
-        )}
+              {asked > 0 && (
+                <Button onClick={() => navigate(`/study/daily-review?${sessionQuery}`)} sx={tabularNums}>
+                  {t('groups.study', { count: asked })}
+                </Button>
+              )}
+            </Stack>
+          )}
+          {isTag && (
+            <TagActionsMenu
+              tag={group.tag}
+              count={cardCount}
+              onRename={tagActions.startRename}
+              onMerge={tagActions.requestMerge}
+              onRemove={tagActions.requestRemove}
+            />
+          )}
+        </Box>
       </Box>
 
       {deckRows.length > 0 && (
@@ -225,6 +248,45 @@ export default function GroupDetail({
         )}
       </Box>
       <BulkActionOverlays actions={bulk} decks={decks} />
+      {isTag && <TagActionOverlays actions={tagActions} tag={group.tag} count={cardCount} tags={existingTags} />}
     </Box>
+  )
+}
+
+/**
+ * The group's name as its h3, or — while a tag is being renamed — as a field
+ * in the same slot (PRD D17): Enter saves, Escape cancels. Blur does not
+ * cancel — the kebab's menu hands focus back to its button as it closes, and
+ * the field must survive that.
+ */
+function GroupTitle({ name, Icon, renaming, actions }) {
+  const { t } = useTranslation()
+  if (!renaming) {
+    return (
+      <Typography id='group-detail-title' level='h3' sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+        <Icon sx={{ fontSize: 'xl', color: 'text.tertiary' }} aria-hidden='true' />
+        {name}
+      </Typography>
+    )
+  }
+  return (
+    <Input
+      id='group-detail-title'
+      size='md'
+      autoFocus
+      defaultValue={name}
+      aria-label={t('groups.renameAria', { tag: name })}
+      startDecorator={<Icon sx={{ fontSize: 'xl', color: 'text.tertiary' }} aria-hidden='true' />}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          actions.submitRename(event.target.value)
+        } else if (event.key === 'Escape') {
+          event.preventDefault()
+          actions.cancelRename()
+        }
+      }}
+      sx={{ maxWidth: 420, ...focusRing }}
+    />
   )
 }

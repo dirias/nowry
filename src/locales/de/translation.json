@@ -25,7 +25,32 @@
     "emptyTags": "Noch keine Tags. Tagge eine Karte, um sie stapelübergreifend zu gruppieren.",
     "emptyGroup": "In dieser Gruppe ist noch nichts.",
     "selectAria": "Gruppe {{name}} öffnen",
-    "searchPlaceholder": "Tags suchen…"
+    "searchPlaceholder": "Tags suchen…",
+    "tagActionsAria": "Aktionen für {{tag}}",
+    "rename": "Umbenennen",
+    "renameAria": "Neuer Name für {{tag}}",
+    "mergeInto": "Zusammenführen mit…",
+    "removeFromAll_one": "Von {{count}} Karte entfernen",
+    "removeFromAll_other": "Von allen {{count}} Karten entfernen",
+    "merge": {
+      "title": "{{tag}} zusammenführen mit…",
+      "subtitle_one": "Ihre {{count}} Karte erhält stattdessen den gewählten Tag.",
+      "subtitle_other": "Ihre {{count}} Karten erhalten stattdessen den gewählten Tag.",
+      "searchAria": "Tag zum Zusammenführen suchen",
+      "targetAria": "Mit {{tag}} zusammenführen",
+      "empty": "Noch kein anderer Tag zum Zusammenführen.",
+      "noMatch": "Kein Tag passt.",
+      "confirm_one": "{{count}} Karte zusammenführen",
+      "confirm_other": "{{count}} Karten zusammenführen"
+    },
+    "remove": {
+      "title": "{{tag}} von jeder Karte entfernen?",
+      "description_one": "Der Tag wird von {{count}} Karte entfernt; die Karte bleibt, wo sie ist.",
+      "description_other": "Der Tag wird von {{count}} Karten entfernt; die Karten bleiben, wo sie sind.",
+      "confirm_one": "Von {{count}} Karte entfernen",
+      "confirm_other": "Von {{count}} Karten entfernen"
+    },
+    "tagError": "Der Tag ließ sich nicht ändern."
   },
   "sessions": {
     "ofTotal": "{{shown}} von {{total}}",

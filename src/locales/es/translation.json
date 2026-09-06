@@ -25,7 +25,32 @@
     "emptyTags": "Aún no hay etiquetas. Etiqueta una tarjeta para agruparla entre mazos.",
     "emptyGroup": "Todavía no hay nada en este grupo.",
     "selectAria": "Abrir el grupo {{name}}",
-    "searchPlaceholder": "Buscar etiquetas…"
+    "searchPlaceholder": "Buscar etiquetas…",
+    "tagActionsAria": "Acciones para {{tag}}",
+    "rename": "Renombrar",
+    "renameAria": "Nuevo nombre para {{tag}}",
+    "mergeInto": "Fusionar con…",
+    "removeFromAll_one": "Quitar de {{count}} tarjeta",
+    "removeFromAll_other": "Quitar de las {{count}} tarjetas",
+    "merge": {
+      "title": "Fusionar {{tag}} con…",
+      "subtitle_one": "Su {{count}} tarjeta pasa a llevar la etiqueta que elijas.",
+      "subtitle_other": "Sus {{count}} tarjetas pasan a llevar la etiqueta que elijas.",
+      "searchAria": "Buscar una etiqueta con la que fusionar",
+      "targetAria": "Fusionar con {{tag}}",
+      "empty": "Aún no hay otra etiqueta con la que fusionar.",
+      "noMatch": "Ninguna etiqueta coincide.",
+      "confirm_one": "Fusionar {{count}} tarjeta",
+      "confirm_other": "Fusionar {{count}} tarjetas"
+    },
+    "remove": {
+      "title": "¿Quitar {{tag}} de todas las tarjetas?",
+      "description_one": "La etiqueta se quita de {{count}} tarjeta; la tarjeta se queda donde está.",
+      "description_other": "La etiqueta se quita de {{count}} tarjetas; las tarjetas se quedan donde están.",
+      "confirm_one": "Quitar de {{count}} tarjeta",
+      "confirm_other": "Quitar de {{count}} tarjetas"
+    },
+    "tagError": "No se pudo cambiar esa etiqueta."
   },
   "common": {
     "loadMore": "Cargar más",

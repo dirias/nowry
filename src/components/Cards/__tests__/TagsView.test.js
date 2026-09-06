@@ -15,7 +15,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) })
 }))
 let mockMobile = false
-jest.mock('../../../hooks/useIsMobile', () => ({ useIsMobile: () => mockMobile }))
+jest.mock('../../../hooks/useIsMobile', () => ({ __esModule: true, useIsMobile: () => mockMobile, default: () => mockMobile }))
 
 const GROUPS = {
   system: [
@@ -183,6 +183,113 @@ describe('MGMT-004 — the selection bar inside an open group (PRD D16)', () => 
     fireEvent.click(within(bar).getByRole('button', { name: 'cards.mark.action' }))
     await waitFor(() => expect(mockBulk).toHaveBeenCalledWith({ ids: ['c1'], action: 'mark' }))
     await waitFor(() => expect(within(detail).queryByTestId('selection-bar')).not.toBeInTheDocument())
+  })
+})
+
+describe("MGMT-005 — a tag's verbs (PRD D17, US-010)", () => {
+  const openVerbs = () => {
+    mockSearch = new URLSearchParams('view=library&tab=tags&group=tag:verbs')
+    render(<TagsView decks={DECKS} />)
+    return screen.getByTestId('group-detail')
+  }
+  const openKebab = () => fireEvent.click(screen.getByRole('button', { name: 'groups.tagActionsAria:{"tag":"verbs"}' }))
+  const renameField = () => screen.getByRole('textbox', { name: 'groups.renameAria:{"tag":"verbs"}' })
+
+  it('offers a kebab on a tag — Rename, Merge into…, then Remove from all N cards — and none on Marked or Struggling', () => {
+    const first = render(<TagsView decks={DECKS} />)
+    mockSearch = new URLSearchParams('group=marked')
+    first.rerender(<TagsView decks={DECKS} />)
+    expect(screen.queryByTestId('tag-actions')).not.toBeInTheDocument()
+    mockSearch = new URLSearchParams('group=struggling')
+    first.rerender(<TagsView decks={DECKS} />)
+    expect(screen.queryByTestId('tag-actions')).not.toBeInTheDocument()
+    first.unmount()
+
+    openVerbs()
+    openKebab()
+    const items = screen.getAllByRole('menuitem')
+    expect(items.map((item) => item.textContent)).toEqual(['groups.rename', 'groups.mergeInto', 'groups.removeFromAll:{"count":46}'])
+    expect(items[2].previousElementSibling).toHaveAttribute('role', 'separator')
+  })
+
+  it('renames inline: the title becomes a field, Enter saves and the open group becomes the new tag', async () => {
+    const detail = openVerbs()
+    openKebab()
+    fireEvent.click(screen.getByText('groups.rename'))
+    expect(within(detail).queryByRole('heading', { level: 3 })).not.toBeInTheDocument()
+    const field = renameField()
+    expect(field).toHaveValue('verbs')
+    fireEvent.change(field, { target: { value: ' verbos ' } })
+    fireEvent.keyDown(field, { key: 'Enter' })
+    await waitFor(() => expect(mockRenameTag).toHaveBeenCalledWith('verbs', 'verbos'))
+    await waitFor(() => expect(mockSearch.get('group')).toBe('tag:verbos'))
+    expect(mockSearch.get('tab')).toBe('tags')
+    expect(mockInvalidate).toHaveBeenCalledWith(['cards', 'groups', 'tags'])
+  })
+
+  it('Escape cancels the rename, and an unchanged name saves nothing', async () => {
+    const detail = openVerbs()
+    openKebab()
+    fireEvent.click(screen.getByText('groups.rename'))
+    fireEvent.keyDown(renameField(), { key: 'Escape' })
+    expect(within(detail).getByRole('heading', { level: 3 })).toHaveTextContent('verbs')
+    openKebab()
+    fireEvent.click(screen.getByText('groups.rename'))
+    fireEvent.keyDown(renameField(), { key: 'Enter' })
+    expect(mockRenameTag).not.toHaveBeenCalled()
+    expect(within(detail).getByRole('heading', { level: 3 })).toHaveTextContent('verbs')
+  })
+
+  it('a rename onto a tag that already exists is a merge: the sheet opens with that tag picked and says the number first', async () => {
+    openVerbs()
+    openKebab()
+    fireEvent.click(screen.getByText('groups.rename'))
+    fireEvent.change(renameField(), { target: { value: 'asia' } })
+    fireEvent.keyDown(renameField(), { key: 'Enter' })
+    expect(mockRenameTag).not.toHaveBeenCalled()
+    const sheet = screen.getByRole('dialog')
+    expect(sheet).toHaveTextContent('groups.merge.title:{"tag":"verbs"}')
+    expect(sheet).toHaveTextContent('groups.merge.subtitle:{"count":46}')
+    expect(within(sheet).getByRole('button', { name: 'groups.merge.targetAria:{"tag":"asia"}' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(within(sheet).getByRole('button', { name: 'groups.merge.confirm:{"count":46}' }))
+    await waitFor(() => expect(mockRenameTag).toHaveBeenCalledWith('verbs', 'asia'))
+    await waitFor(() => expect(mockSearch.get('group')).toBe('tag:asia'))
+  })
+
+  it('Merge into… opens the sheet with nothing picked; picking a tag and confirming merges', async () => {
+    openVerbs()
+    openKebab()
+    fireEvent.click(screen.getByText('groups.mergeInto'))
+    const sheet = screen.getByRole('dialog')
+    const confirm = within(sheet).getByRole('button', { name: 'groups.merge.confirm:{"count":46}' })
+    expect(confirm).toBeDisabled()
+    fireEvent.click(within(sheet).getByRole('button', { name: 'groups.merge.targetAria:{"tag":"asia"}' }))
+    fireEvent.click(confirm)
+    await waitFor(() => expect(mockRenameTag).toHaveBeenCalledWith('verbs', 'asia'))
+  })
+
+  it('Remove asks once with its number, then removes the tag everywhere and shows the index', async () => {
+    openVerbs()
+    openKebab()
+    fireEvent.click(screen.getByText('groups.removeFromAll:{"count":46}'))
+    expect(mockRemoveTag).not.toHaveBeenCalled()
+    const ask = screen.getByRole('alertdialog')
+    expect(ask).toHaveTextContent('groups.remove.title:{"tag":"verbs"}')
+    expect(ask).toHaveTextContent('groups.remove.description:{"count":46}')
+    fireEvent.click(within(ask).getByRole('button', { name: 'groups.remove.confirm:{"count":46}' }))
+    await waitFor(() => expect(mockRemoveTag).toHaveBeenCalledWith('verbs'))
+    await waitFor(() => expect(mockSearch.get('group')).toBeNull())
+    expect(mockSearch.get('tab')).toBe('tags')
+  })
+
+  it('reports a failed verb in a Snackbar and keeps the group where it was', async () => {
+    mockRemoveTag.mockRejectedValue(new Error('boom'))
+    openVerbs()
+    openKebab()
+    fireEvent.click(screen.getByText('groups.removeFromAll:{"count":46}'))
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'groups.remove.confirm:{"count":46}' }))
+    await waitFor(() => expect(screen.getByText('groups.tagError')).toBeInTheDocument())
+    expect(mockSearch.get('group')).toBe('tag:verbs')
   })
 })
 

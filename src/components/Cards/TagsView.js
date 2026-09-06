@@ -20,6 +20,9 @@ const groupKey = (group) => (group.kind === 'tag' ? `tag:${group.tag}` : group.k
  *
  * Untagged is never a row here (PRD D15, ADR-023 point 1): the index readout
  * names the number and the number is a link that opens Cards with No tag on.
+ *
+ * A tag's verbs (PRD D17) report back here: after a rename or a merge the open
+ * group is the target tag; after a remove the index is shown.
  */
 export default function TagsView({ decks = [], search = '', availableTags = [], onEditCard, onEditTags, onDeleteCard, onPreviewCards }) {
   const { t } = useTranslation()
@@ -211,10 +214,13 @@ export default function TagsView({ decks = [], search = '', availableTags = [], 
             summary={selectedEntry?.summary}
             decks={decks}
             availableTags={availableTags}
+            existingTags={groups?.tags || []}
             onEditCard={onEditCard}
             onEditTags={onEditTags}
             onDeleteCard={onDeleteCard}
             onPreviewCards={onPreviewCards}
+            onRenamed={(to) => select({ kind: 'tag', tag: to })}
+            onRemoved={() => select(null)}
           />
         </Box>
       )}

@@ -24,7 +24,27 @@
     "emptyTags": "まだタグがありません。カードにタグを付けるとデッキをまたいでまとめられます。",
     "emptyGroup": "このグループにはまだ何もありません。",
     "selectAria": "{{name}} グループを開く",
-    "searchPlaceholder": "タグを検索…"
+    "searchPlaceholder": "タグを検索…",
+    "tagActionsAria": "{{tag}}の操作",
+    "rename": "名前を変更",
+    "renameAria": "{{tag}}の新しい名前",
+    "mergeInto": "別のタグに統合…",
+    "removeFromAll_other": "{{count}}枚すべてから外す",
+    "merge": {
+      "title": "{{tag}}の統合先…",
+      "subtitle_other": "{{count}}枚のカードに、選んだタグが代わりに付きます。",
+      "searchAria": "統合先のタグを検索",
+      "targetAria": "{{tag}}に統合",
+      "empty": "統合できる別のタグはまだありません。",
+      "noMatch": "一致するタグはありません。",
+      "confirm_other": "{{count}}枚を統合"
+    },
+    "remove": {
+      "title": "{{tag}}をすべてのカードから外しますか？",
+      "description_other": "{{count}}枚のカードからタグが外れます。カード自体はそのまま残ります。",
+      "confirm_other": "{{count}}枚から外す"
+    },
+    "tagError": "そのタグを変更できませんでした。"
   },
   "sessions": {
     "ofTotal": "{{total}} 件中 {{shown}} 件",

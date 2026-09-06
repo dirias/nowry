@@ -25,7 +25,32 @@
     "emptyTags": "Pas encore d’étiquettes. Étiquetez une carte pour la regrouper entre paquets.",
     "emptyGroup": "Rien dans ce groupe pour l’instant.",
     "selectAria": "Ouvrir le groupe {{name}}",
-    "searchPlaceholder": "Rechercher des étiquettes…"
+    "searchPlaceholder": "Rechercher des étiquettes…",
+    "tagActionsAria": "Actions pour {{tag}}",
+    "rename": "Renommer",
+    "renameAria": "Nouveau nom pour {{tag}}",
+    "mergeInto": "Fusionner avec…",
+    "removeFromAll_one": "Retirer de {{count}} carte",
+    "removeFromAll_other": "Retirer des {{count}} cartes",
+    "merge": {
+      "title": "Fusionner {{tag}} avec…",
+      "subtitle_one": "Sa {{count}} carte prend l’étiquette que vous choisissez.",
+      "subtitle_other": "Ses {{count}} cartes prennent l’étiquette que vous choisissez.",
+      "searchAria": "Rechercher une étiquette avec laquelle fusionner",
+      "targetAria": "Fusionner avec {{tag}}",
+      "empty": "Aucune autre étiquette avec laquelle fusionner pour l’instant.",
+      "noMatch": "Aucune étiquette ne correspond.",
+      "confirm_one": "Fusionner {{count}} carte",
+      "confirm_other": "Fusionner {{count}} cartes"
+    },
+    "remove": {
+      "title": "Retirer {{tag}} de toutes les cartes ?",
+      "description_one": "L’étiquette est retirée de {{count}} carte ; la carte reste où elle est.",
+      "description_other": "L’étiquette est retirée de {{count}} cartes ; les cartes restent où elles sont.",
+      "confirm_one": "Retirer de {{count}} carte",
+      "confirm_other": "Retirer de {{count}} cartes"
+    },
+    "tagError": "Impossible de modifier cette étiquette."
   },
   "sessions": {
     "ofTotal": "{{shown}} sur {{total}}",
