@@ -36,6 +36,10 @@ const CheckMark = () => <CheckRounded fontSize='small' sx={{ ml: 'auto', color: 
  * there is no "All" chip, no filter sheet and no active-filter strip — clearing
  * lives inside each menu, so engaging a filter never moves the list. On a phone
  * each object stretches rail to rail on its own line.
+ *
+ * The Tags menu ends with a hairline and "No tag · N" (PRD D15, US-008): a
+ * housekeeping state is a filter, never a group. Its count comes from the
+ * groups index, so the owner loads that once Cards or Tags is engaged.
  */
 export default function LibraryToolbar({
   tab,
@@ -51,6 +55,9 @@ export default function LibraryToolbar({
   selectedTags,
   onTagToggle,
   onClearTags,
+  untagged = false,
+  untaggedCount = 0,
+  onUntaggedToggle,
   markedOnly,
   onMarkedOnlyToggle,
   viewMode,
@@ -61,8 +68,12 @@ export default function LibraryToolbar({
 }) {
   const { t } = useTranslation()
   const typeActive = filterType !== 'all'
-  const tagsActive = selectedTags.length > 0
-  const showTags = availableTags.length > 0
+  // "No tag" is a filter like any tag (PRD D15, ADR-023 point 1): it counts in
+  // the readout and it clears with the rest. The menu exists as soon as there
+  // is anything to filter by — a tag, or cards without one.
+  const tagsActive = selectedTags.length > 0 || untagged
+  const tagsReadoutCount = selectedTags.length + (untagged ? 1 : 0)
+  const showTags = availableTags.length > 0 || untaggedCount > 0 || untagged
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5, mb: 3 }}>
@@ -150,7 +161,7 @@ export default function LibraryToolbar({
                 endDecorator={<KeyboardArrowDown fontSize='small' sx={{ opacity: 0.65 }} />}
                 sx={{ ...segment(tagsActive, false), flex: { xs: 1, sm: 'none' }, ...tabularNums }}
               >
-                {tagsActive ? t('filters.tagsReadout', { count: selectedTags.length }) : t('filters.tags')}
+                {tagsActive ? t('filters.tagsReadout', { count: tagsReadoutCount }) : t('filters.tags')}
               </MenuButton>
               <Menu placement='bottom-start' sx={menuSx}>
                 {availableTags.map(({ tag, count }) => {
@@ -176,6 +187,25 @@ export default function LibraryToolbar({
                     </MenuItem>
                   )
                 })}
+                {availableTags.length > 0 && <ListDivider />}
+                <MenuItem
+                  role='menuitemcheckbox'
+                  aria-checked={untagged}
+                  data-testid='no-tag-filter'
+                  onClick={keepOpen(() => onUntaggedToggle?.())}
+                  sx={itemSx}
+                >
+                  <Typography
+                    level='body-sm'
+                    sx={{ color: untagged ? 'text.primary' : 'text.secondary', fontWeight: untagged ? 'lg' : 'md' }}
+                  >
+                    {t('filters.noTag')}
+                  </Typography>
+                  <Typography level='body-xs' sx={{ color: 'text.tertiary', ml: 1, ...tabularNums }}>
+                    {untaggedCount}
+                  </Typography>
+                  {untagged && <CheckMark />}
+                </MenuItem>
                 {tagsActive && (
                   <MenuItem onClick={onClearTags} sx={{ ...itemSx, mt: 0.5 }}>
                     <Typography level='body-sm' sx={{ color: 'text.secondary' }}>

@@ -2,6 +2,9 @@
   "groups": {
     "title": "Groups",
     "readout": "{{system}} + {{tags}} tags",
+    "readoutUntagged_one": "{{count}} card untagged",
+    "readoutUntagged_other": "{{count}} cards untagged",
+    "untaggedLinkAria": "Show the {{count}} cards without a tag",
     "struggling": "Struggling",
     "marked": "Marked",
     "strugglingMeta": "Graded again or hard in the last {{days}} days",
@@ -1775,6 +1778,7 @@
       "emptyFlashcardBody": "Create a deck to start saving these flashcards for review.",
       "emptyQuiz": "Start your first quiz deck",
       "emptyQuizBody": "Create a deck to start saving these questions for review.",
+    "noTag": "No tag",
       "emptyVisual": "Start your first visual deck",
       "emptyVisualBody": "Create a deck to start saving these diagrams for review."
     },

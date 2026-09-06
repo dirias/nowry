@@ -2,6 +2,9 @@
   "groups": {
     "title": "Grupos",
     "readout": "{{system}} + {{tags}} etiquetas",
+    "readoutUntagged_one": "{{count}} tarjeta sin etiqueta",
+    "readoutUntagged_other": "{{count}} tarjetas sin etiqueta",
+    "untaggedLinkAria": "Mostrar las {{count}} tarjetas sin etiqueta",
     "struggling": "Difíciles",
     "marked": "Marcadas",
     "strugglingMeta": "Calificadas otra vez o difícil en los últimos {{days}} días",
@@ -1509,6 +1512,7 @@
       "emptyVisualBody": "Crea un mazo para empezar a guardar estos diagramas y repasarlos."
     },
     "common": {
+    "noTag": "Sin etiqueta",
       "addTags": "Añadir etiquetas",
       "chooseDeck": "Elegir un mazo",
       "typeFlashcard": "Tarjeta",

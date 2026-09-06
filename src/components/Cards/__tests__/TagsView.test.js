@@ -25,7 +25,8 @@ const GROUPS = {
   tags: [
     { tag: 'verbs', cards: 46, decks: 2, deck_ids: ['d1', 'd2'], due: 9, new: 2 },
     { tag: 'asia', cards: 140, decks: 1, deck_ids: ['d2'], due: 0, new: 0 }
-  ]
+  ],
+  untagged: { cards: 85, due: 6, new: 12 }
 }
 let mockGroups = GROUPS
 jest.mock('../../../hooks/useGroups', () => ({ useGroups: () => ({ groups: mockGroups, loading: false, error: null, reload: jest.fn() }) }))
@@ -67,6 +68,26 @@ describe('the index', () => {
     expect(rows[2]).toHaveTextContent('verbs')
     expect(rows[2]).toHaveTextContent('groups.cardsDecks:{"cards":46,"decks":2}')
     expect(rows[3]).toHaveTextContent('groups.upToDate')
+    expect(screen.getByText(/groups\.readout:\{"system":2,"tags":2\}/)).toBeInTheDocument()
+  })
+
+  it('names the untagged count in the readout as a link that opens Cards with No tag on — never as a row (PRD D15)', () => {
+    mockSearch = new URLSearchParams('view=library&tab=tags')
+    render(<TagsView decks={DECKS} />)
+    expect(screen.getAllByTestId('group-row')).toHaveLength(4)
+    expect(screen.queryByText(/groups\.untagged$/)).not.toBeInTheDocument()
+    const link = screen.getByRole('button', { name: 'groups.untaggedLinkAria:{"count":85}' })
+    expect(link).toHaveTextContent('groups.readoutUntagged:{"count":85}')
+    fireEvent.click(link)
+    expect(mockSearch.get('tab')).toBe('cards')
+    expect(mockSearch.get('untagged')).toBe('1')
+    expect(mockSearch.get('view')).toBe('library')
+  })
+
+  it('keeps the plain readout when nothing is untagged (§11: no zero counters)', () => {
+    mockGroups = { ...GROUPS, untagged: { cards: 0, due: 0, new: 0 } }
+    render(<TagsView decks={DECKS} />)
+    expect(screen.queryByRole('button', { name: /groups\.untaggedLinkAria/ })).not.toBeInTheDocument()
     expect(screen.getByText('groups.readout:{"system":2,"tags":2}')).toBeInTheDocument()
   })
 

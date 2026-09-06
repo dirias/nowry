@@ -21,6 +21,8 @@ jest.mock('../CardPreviewModal', () => ({ __esModule: true, default: () => null 
 jest.mock('../DeckAnalysisPanel', () => ({ __esModule: true, default: () => null }))
 jest.mock('../MarkToggle', () => ({ __esModule: true, default: () => <button type='button'>mark</button> }))
 jest.mock('../TagsView', () => ({ __esModule: true, default: () => <div data-testid='tags-view' /> }))
+const mockUseGroups = jest.fn()
+jest.mock('../../../hooks/useGroups', () => ({ useGroups: (...args) => mockUseGroups(...args) }))
 jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 
@@ -63,6 +65,8 @@ const defaultProps = () => ({
   selectedTags: [],
   onTagToggle: jest.fn(),
   onClearTags: jest.fn(),
+  untagged: false,
+  onUntaggedToggle: jest.fn(),
   markedOnly: false,
   onMarkedOnlyToggle: jest.fn(),
   onSearchChange: jest.fn(),
@@ -79,6 +83,13 @@ beforeEach(() => {
     mockSearch = new URLSearchParams(next)
   })
   mockNavigate.mockReset()
+  mockUseGroups.mockReset().mockReturnValue({
+    groups: { system: [], tags: [], untagged: { cards: 85, due: 6, new: 12 } },
+    untagged: { cards: 85, due: 6, new: 12 },
+    loading: false,
+    error: null,
+    reload: jest.fn()
+  })
   localStorage.clear()
 })
 
@@ -133,6 +144,49 @@ describe('the toolbar (PRD D5)', () => {
     expect(item).toHaveTextContent('3')
     fireEvent.click(item)
     expect(props.onTagToggle).toHaveBeenCalledWith('language')
+  })
+})
+
+describe('MGMT-003 — the No tag filter (PRD D15, US-008)', () => {
+  it('ends the Tags menu with a hairline and "No tag · N", and reports a toggle to its owner', () => {
+    mockSearch = new URLSearchParams('tab=cards')
+    const props = defaultProps()
+    render(<ManageContent {...props} />)
+    fireEvent.click(screen.getByLabelText('cards.tags.filterBy'))
+    const items = screen.getAllByRole('menuitemcheckbox')
+    const noTag = items[items.length - 1]
+    expect(noTag).toHaveTextContent('filters.noTag')
+    expect(noTag).toHaveTextContent('85')
+    expect(noTag).toHaveAttribute('aria-checked', 'false')
+    expect(noTag.previousElementSibling).toHaveAttribute('role', 'separator')
+    fireEvent.click(noTag)
+    expect(props.onUntaggedToggle).toHaveBeenCalledTimes(1)
+    expect(props.onTagToggle).not.toHaveBeenCalled()
+  })
+
+  it('counts No tag in the readout like any tag — "Tags · 1" — and clears it with the rest', () => {
+    mockSearch = new URLSearchParams('tab=cards')
+    const props = defaultProps()
+    render(<ManageContent {...props} untagged />)
+    expect(screen.getByText('filters.tagsReadout:{"count":1}')).toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('cards.tags.filterBy'))
+    expect(screen.getByTestId('no-tag-filter')).toHaveAttribute('aria-checked', 'true')
+    fireEvent.click(screen.getByText('filters.clear'))
+    expect(props.onClearTags).toHaveBeenCalledTimes(1)
+  })
+
+  it('still offers the row when the user has no tags at all, and never loads the index for Decks', () => {
+    mockSearch = new URLSearchParams('tab=cards')
+    render(<ManageContent {...defaultProps()} availableTags={[]} />)
+    expect(mockUseGroups).toHaveBeenLastCalledWith({ enabled: true })
+    fireEvent.click(screen.getByLabelText('cards.tags.filterBy'))
+    expect(screen.getByTestId('no-tag-filter')).toBeInTheDocument()
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument()
+  })
+
+  it('does not pay for the groups index on the Decks view', () => {
+    render(<ManageContent {...defaultProps()} />)
+    expect(mockUseGroups).toHaveBeenLastCalledWith({ enabled: false })
   })
 })
 

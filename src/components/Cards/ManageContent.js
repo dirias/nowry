@@ -11,6 +11,7 @@ import CardRow from './CardRow'
 import LibraryToolbar, { LIBRARY_TABS } from './LibraryToolbar'
 import TagsView from './TagsView'
 import DeckRow from '../Study/DeckRow'
+import { useGroups } from '../../hooks/useGroups'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 
@@ -44,6 +45,8 @@ export default function ManageContent({
   selectedTags = [],
   onTagToggle,
   onClearTags,
+  untagged = false,
+  onUntaggedToggle,
   markedOnly = false,
   onMarkedOnlyToggle,
   onSearchChange,
@@ -69,6 +72,11 @@ export default function ManageContent({
     },
     [searchParams, setSearchParams]
   )
+
+  // The groups index carries the untagged count the No tag row reads (PRD D15,
+  // NFR performance): it loads once Cards or Tags is engaged, never for Decks.
+  const { groups } = useGroups({ enabled: tab !== 'decks' })
+  const untaggedCount = groups?.untagged?.cards ?? 0
 
   const [filterType, setFilterType] = useState('all')
   const [viewMode, setViewMode] = useState(() => localStorage.getItem(VIEW_MODE_KEY) || 'grid')
@@ -119,10 +127,10 @@ export default function ManageContent({
     setPreviewState({ open: true, cards: filteredCards, initialIndex: index !== -1 ? index : 0 })
   }
 
-  const filtersActive = filterType !== 'all' || selectedTags.length > 0 || markedOnly || Boolean(searchQuery)
+  const filtersActive = filterType !== 'all' || selectedTags.length > 0 || untagged || markedOnly || Boolean(searchQuery)
   const clearAllFilters = useCallback(() => {
     setFilterType('all')
-    onClearTags?.()
+    onClearTags?.() // the owner clears the tags and No tag together
     if (markedOnly) onMarkedOnlyToggle?.()
     onSearchChange?.('')
   }, [markedOnly, onClearTags, onMarkedOnlyToggle, onSearchChange])
@@ -174,6 +182,9 @@ export default function ManageContent({
         selectedTags={selectedTags}
         onTagToggle={onTagToggle}
         onClearTags={onClearTags}
+        untagged={untagged}
+        untaggedCount={untaggedCount}
+        onUntaggedToggle={onUntaggedToggle}
         markedOnly={markedOnly}
         onMarkedOnlyToggle={onMarkedOnlyToggle}
         viewMode={viewMode}

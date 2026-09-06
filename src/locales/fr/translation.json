@@ -2,6 +2,9 @@
   "groups": {
     "title": "Groupes",
     "readout": "{{system}} + {{tags}} étiquettes",
+    "readoutUntagged_one": "{{count}} carte sans étiquette",
+    "readoutUntagged_other": "{{count}} cartes sans étiquette",
+    "untaggedLinkAria": "Afficher les {{count}} cartes sans étiquette",
     "struggling": "Difficiles",
     "marked": "Marquées",
     "strugglingMeta": "Notées « encore » ou « difficile » ces {{days}} derniers jours",
@@ -2914,6 +2917,7 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s écoulées"
+    "noTag": "Sans étiquette",
   },
   "filters": {
     "typeReadout": "Type · {{count}}",

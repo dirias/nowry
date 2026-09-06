@@ -2,6 +2,9 @@
   "groups": {
     "title": "Gruppen",
     "readout": "{{system}} + {{tags}} Tags",
+    "readoutUntagged_one": "{{count}} Karte ohne Tag",
+    "readoutUntagged_other": "{{count}} Karten ohne Tag",
+    "untaggedLinkAria": "Die {{count}} Karten ohne Tag anzeigen",
     "struggling": "Schwierig",
     "marked": "Markiert",
     "strugglingMeta": "In den letzten {{days}} Tagen mit „nochmal“ oder „schwer“ bewertet",
@@ -2894,6 +2897,7 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s vergangen"
+    "noTag": "Ohne Tag",
   },
   "filters": {
     "typeReadout": "Typ · {{count}}",

@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Box, Button, Skeleton, Stack, Typography } from '@mui/joy'
+import { Box, Button, Link, Skeleton, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded'
-import { listRow, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
+import { focusRing, listRow, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 import { useGroups } from '../../hooks/useGroups'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import GroupDetail, { GROUP_ICONS, parseGroupKey } from './GroupDetail'
@@ -17,6 +17,9 @@ const groupKey = (group) => (group.kind === 'tag' ? `tag:${group.tag}` : group.k
  * The open group lives in the URL (`?group=tag:verbs`), so it is linkable and
  * on a phone the index is the screen and a group opens as its own screen with
  * a back control.
+ *
+ * Untagged is never a row here (PRD D15, ADR-023 point 1): the index readout
+ * names the number and the number is a link that opens Cards with No tag on.
  */
 export default function TagsView({ decks = [], search = '', onEditCard, onDeleteCard, onPreviewCards }) {
   const { t } = useTranslation()
@@ -49,6 +52,17 @@ export default function TagsView({ decks = [], search = '', onEditCard, onDelete
       .filter((row) => !needle || row.tag.toLowerCase().includes(needle))
       .map((row) => ({ kind: 'tag', tag: row.tag, summary: row }))
   }, [groups, search])
+
+  const untaggedCount = groups?.untagged?.cards ?? 0
+  // Cards with No tag on, on the same page — `view` stays, `group` goes.
+  const openUntagged = useCallback(() => {
+    const params = new URLSearchParams()
+    const view = searchParams.get('view')
+    if (view) params.set('view', view)
+    params.set('tab', 'cards')
+    params.set('untagged', '1')
+    setSearchParams(params)
+  }, [searchParams, setSearchParams])
 
   const selectedEntry = selected && [...system, ...tags].find((entry) => groupKey(entry) === groupKey(selected))
   const showIndex = !isMobile || !selected
@@ -137,6 +151,21 @@ export default function TagsView({ decks = [], search = '', onEditCard, onDelete
             {!loading && (
               <Typography level='body-sm' sx={readout}>
                 {t('groups.readout', { system: system.length, tags: (groups?.tags || []).length })}
+                {untaggedCount > 0 && (
+                  <>
+                    <span aria-hidden='true'> · </span>
+                    <Link
+                      component='button'
+                      level='body-sm'
+                      underline='hover'
+                      onClick={openUntagged}
+                      aria-label={t('groups.untaggedLinkAria', { count: untaggedCount })}
+                      sx={{ ...readout, color: 'primary.plainColor', verticalAlign: 'baseline', ...focusRing }}
+                    >
+                      {t('groups.readoutUntagged', { count: untaggedCount })}
+                    </Link>
+                  </>
+                )}
               </Typography>
             )}
           </Stack>

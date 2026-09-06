@@ -37,6 +37,9 @@ export default function CardHome() {
   // query inputs rather than inside ManageContent — that component receives
   // `cards` as a prop and cannot re-run the query itself.
   const [markedOnly, setMarkedOnly] = useState(false)
+  // "No tag" is a server-side filter like a tag (PRD D15, FR-009); it clears
+  // with the tags and counts in the same readout.
+  const [untagged, setUntagged] = useState(false)
   const [availableTags, setAvailableTags] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null, section: 'study' })
@@ -86,6 +89,16 @@ export default function CardHome() {
     setSearchParams(params, { replace: true })
   }, [searchParams, setSearchParams])
 
+  // `?untagged=1` turns the No tag filter on once and leaves the URL clean; the
+  // Tags index readout links here (PRD D15, US-008).
+  useEffect(() => {
+    if (searchParams.get('untagged') !== '1') return
+    setUntagged(true)
+    const params = new URLSearchParams(searchParams)
+    params.delete('untagged')
+    setSearchParams(params, { replace: true })
+  }, [searchParams, setSearchParams])
+
   const {
     cards: hookCards,
     total: hookTotal,
@@ -93,7 +106,7 @@ export default function CardHome() {
     loading: cardsLoading,
     reload: reloadCards,
     fetchMore: reloadFetchMore
-  } = useCardData(selectedTags, debouncedSearch, markedOnly)
+  } = useCardData(selectedTags, debouncedSearch, markedOnly, null, untagged)
   const { statistics: hookStats, loading: statsLoading, reload: reloadStatistics } = useStatistics()
   const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
 
@@ -231,7 +244,12 @@ export default function CardHome() {
         availableTags={availableTags}
         selectedTags={selectedTags}
         onTagToggle={(tag) => setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))}
-        onClearTags={() => setSelectedTags([])}
+        onClearTags={() => {
+          setSelectedTags([])
+          setUntagged(false)
+        }}
+        untagged={untagged}
+        onUntaggedToggle={() => setUntagged((prev) => !prev)}
         markedOnly={markedOnly}
         onMarkedOnlyToggle={() => setMarkedOnly((prev) => !prev)}
         onSearchChange={setSearchQuery}
