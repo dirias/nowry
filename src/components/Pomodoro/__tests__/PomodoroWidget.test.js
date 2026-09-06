@@ -2,7 +2,7 @@
  * PomodoroWidget / PomodoroChip — the redesigned surfaces (POMO-002, ADR-013).
  *
  * Drives the components through a mocked usePomodoro() so each state can be
- * pinned without running a clock. Mirrors StudyModePickerModal.test.js's
+ * pinned without running a clock. Mirrors the retired StudyModePickerModal test's
  * react-i18next mock: `t` echoes the key, with options appended as JSON.
  */
 import React from 'react'

@@ -2,7 +2,10 @@ import React from 'react'
 import { Box, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-const CELL = 20
+// 15 cells must fit a 375px phone inside the Today object's padding: 16px cells at a
+// 4px gap are 296px; 20px cells at 8px are 412px and only fit from `sm` up.
+const CELL = { xs: 16, sm: 20 }
+const GAP = { xs: 0.5, sm: 1 }
 const BAR = 28
 
 /**
@@ -55,7 +58,7 @@ export default function ForecastStrip({ past = [], today = 0, future = [] }) {
     <Box
       role='img'
       aria-label={t('study.today.timelineAria', { reviewed: reviewedWeek, today, week: dueWeek })}
-      sx={{ display: 'flex', alignItems: 'flex-end', gap: 1 }}
+      sx={{ display: 'flex', alignItems: 'flex-end', gap: GAP, maxWidth: '100%' }}
     >
       {pastDays.map((d, i) => cell(`p${i}`, d.cards || 0, d.cards > 0 ? 'background.level3' : 'background.level2', initial(d.day)))}
       {cell('today', today, 'primary.solidBg', initial(past[past.length - 1]?.day) || t('study.today.todayInitial'), true)}
