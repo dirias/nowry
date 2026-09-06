@@ -2,26 +2,11 @@ import React from 'react'
 import { Box, IconButton, Link, Sheet, Skeleton, Typography } from '@mui/joy'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
-import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
-import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
-import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
-import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 
-import { readableTextOn } from '../../theme/colorSchemeGenerator'
 import { focusRing, touchTargetBox } from '../Common/Form/formStyles'
 import { formatDayLabel, formatDaySide, formatMonthTitle } from './agendaGroups'
 import { COMPLETABLE } from './eventHelpers'
-
-const TYPE_ICON = {
-  task: CheckCircleOutlinedIcon,
-  priority: FlagOutlinedIcon,
-  goal: AdjustOutlinedIcon,
-  milestone: DiamondOutlinedIcon,
-  activity: RepeatRoundedIcon
-}
-
-const eventIcon = (ev) => TYPE_ICON[ev.type] ?? AdjustOutlinedIcon
+import EventTypeTile from './EventTypeTile'
 
 const rowSx = {
   display: 'flex',
@@ -58,32 +43,13 @@ const GroupHeader = ({ group, language, t }) => (
 )
 
 const AgendaRow = ({ ev, onSelect, onToggleComplete, t }) => {
-  const Icon = eventIcon(ev)
   const completed = ev.status === 'completed'
   const typeLabel = t(`calendarPage.agenda.type.${ev.type}`)
   const tickable = Boolean(onToggleComplete) && COMPLETABLE.includes(ev.type)
   const tickLabel = completed ? t('calendarPage.agenda.markUndone') : t('calendarPage.agenda.markDone')
   return (
     <Box sx={rowSx}>
-      {/* ev.color is the focus area's own colour — user data, not a token —
-          so the glyph colour is derived from the fill it sits on, as the
-          month pills already do. */}
-      <Box
-        aria-hidden='true'
-        sx={{
-          width: 28,
-          height: 28,
-          borderRadius: 'sm',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: ev.color,
-          color: readableTextOn(ev.color)
-        }}
-      >
-        <Icon sx={{ fontSize: 'md', color: 'inherit' }} />
-      </Box>
+      <EventTypeTile type={ev.type} color={ev.color} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Link
           component='button'

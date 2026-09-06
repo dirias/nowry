@@ -11,33 +11,18 @@ import Typography from '@mui/joy/Typography'
 import Button from '@mui/joy/Button'
 import Alert from '@mui/joy/Alert'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
-import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
-import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
-import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
-import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 import { calendarService } from '../../api/services/calendar.service'
 import { tasksService, annualPlanningService } from '../../api/services'
 import { useCalendarFilters } from '../../hooks/useCalendarFilters'
 import { useAuth } from '../../context/AuthContext'
-import { readableTextOn } from '../../theme/colorSchemeGenerator'
 import { focusRing, touchTarget } from '../Common/Form/formStyles'
 import EventFormModal from './EventFormModal'
 import CalendarToolbar from './CalendarToolbar'
 import CalendarAgenda from './CalendarAgenda'
+import EventTypeTile from './EventTypeTile'
 import { filterCalendarEvents } from './calendarFilters'
 import { completionPatch, stripTypePrefix, undoneStatus } from './eventHelpers'
 import { addDays, addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, isSameDay, isSameMonth, startOfWeek } from './agendaGroups'
-
-// One glyph per type. Every milestone is a measurable step of its goal, so
-// there is no second kind to draw (CAL-005).
-const EVENT_ICON_MAP = {
-  task: CheckCircleOutlinedIcon,
-  priority: FlagOutlinedIcon,
-  goal: AdjustOutlinedIcon,
-  milestone: DiamondOutlinedIcon,
-  activity: RepeatRoundedIcon
-}
 
 // ADR-016: every event is all-day, so the two grid views are day grids — a
 // time grid would render 24 empty hour rows under a one-line strip. The third
@@ -45,26 +30,12 @@ const EVENT_ICON_MAP = {
 const FC_VIEWS = { month: 'dayGridMonth', week: 'dayGridWeek' }
 
 /**
- * The FullCalendar event object for one service event. `textColor` is derived
- * here rather than in `eventContent` because FullCalendar's own chrome (the
- * "+2 more" popover) reads it off the event, and a saturated area colour
- * fails AA for `text.primary` in at least one scheme (measured: amber 1.94:1).
+ * The FullCalendar event object for one service event. No colours are set on
+ * it: the row is transparent by stylesheet (ADR-019) and `eventContent` draws
+ * the colour on a tile from the service event, which rides whole on
+ * `extendedProps` so the editor receives the same object the agenda hands it.
  */
-const toCalendarEvent = (ev) => {
-  const textColor = readableTextOn(ev.color)
-  return {
-    id: ev.id,
-    title: ev.title,
-    start: ev.date,
-    allDay: true,
-    backgroundColor: ev.color,
-    borderColor: ev.color,
-    textColor,
-    // The whole service event rides along, so the editor receives the same
-    // object the agenda hands it and no field list is maintained twice.
-    extendedProps: { ...ev, textColor }
-  }
-}
+export const toCalendarEvent = (ev) => ({ id: ev.id, title: ev.title, start: ev.date, allDay: true, extendedProps: { ...ev } })
 
 const CalendarPage = () => {
   const { t, i18n } = useTranslation()
@@ -123,27 +94,27 @@ const CalendarPage = () => {
   const calendarEvents = useMemo(() => filteredEvents.map(toCalendarEvent), [filteredEvents])
   const agendaGroups = useMemo(() => groupAgenda(filteredEvents, cursor), [filteredEvents, cursor])
 
-  // CAL-01/CAL-02: Custom event rendering — icon + title for all event types
+  // Tile and title (ADR-019): colour on a 16px tile, the title on the surface.
+  // Done is visible wherever the item appears (ADR-018): strike and fade on the
+  // title only, the tile keeps its colour.
   const eventContent = useCallback((eventInfo) => {
-    const { type, status, textColor } = eventInfo.event.extendedProps
+    const { type, status, color } = eventInfo.event.extendedProps
     const completed = status === 'completed'
-    const IconComponent = EVENT_ICON_MAP[type] ?? AdjustOutlinedIcon
-    // Done state is visible wherever the item appears, not only where it is
-    // ticked (ADR-018): the same strike and fade the agenda row uses.
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          overflow: 'hidden',
-          color: textColor,
-          textDecoration: completed ? 'line-through' : 'none',
-          opacity: completed ? 0.6 : 1
-        }}
-      >
-        <IconComponent sx={{ fontSize: 'sm', flexShrink: 0 }} />
-        <Typography level='body-xs' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minHeight: 22, px: 0.5, overflow: 'hidden' }}>
+        <EventTypeTile type={type} color={color} size={16} glyphSize='xs' />
+        <Typography
+          level='body-xs'
+          noWrap
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            color: 'text.primary',
+            fontWeight: 'md',
+            textDecoration: completed ? 'line-through' : 'none',
+            opacity: completed ? 0.6 : 1
+          }}
+        >
           {eventInfo.event.title}
         </Typography>
       </Box>

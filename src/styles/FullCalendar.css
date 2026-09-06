@@ -1,22 +1,43 @@
 /* Bridge Joy UI semantic tokens to FullCalendar CSS variables.
    No hex values — all values reference Joy UI CSS custom properties.
    Joy UI updates --joy-palette-* vars on theme change;
-   FullCalendar picks up dark mode automatically via var() references. */
+   FullCalendar picks up dark mode automatically via var() references.
+
+   ADR-019: an event row is transparent — the colour lives on a 16px tile
+   drawn by eventContent, the title sits on the surface. Today is a badge on
+   the day number, not a tinted cell, so the grid carries no tint at all. */
 :root {
   --fc-border-color: var(--joy-palette-divider);
   --fc-page-bg-color: var(--joy-palette-background-surface);
   --fc-neutral-bg-color: var(--joy-palette-background-level1);
   --fc-highlight-color: var(--joy-palette-primary-softBg);
-  --fc-today-bg-color: var(--joy-palette-primary-softBg);
-  --fc-event-bg-color: var(--joy-palette-primary-solidBg);
-  --fc-event-border-color: var(--joy-palette-primary-solidBg);
-  --fc-event-text-color: var(--joy-palette-primary-solidColor);
+  --fc-today-bg-color: transparent;
+  --fc-event-bg-color: transparent;
+  --fc-event-border-color: transparent;
+  --fc-event-text-color: var(--joy-palette-text-primary);
   --fc-event-selected-overlay-color: rgba(0, 0, 0, 0.25);
-  --fc-button-bg-color: var(--joy-palette-background-level1);
-  --fc-button-border-color: var(--joy-palette-divider);
-  --fc-button-text-color: var(--joy-palette-text-primary);
-  --fc-button-hover-bg-color: var(--joy-palette-background-level2);
-  --fc-button-hover-border-color: var(--joy-palette-divider);
-  --fc-button-active-bg-color: var(--joy-palette-primary-solidBg);
-  --fc-button-active-border-color: var(--joy-palette-primary-solidBg);
+}
+
+/* The row: 22px, radius sm, 4px inset from the cell edge, a level1 ground on
+   hover because it opens the sheet (§15.1: pressable things get a ground). */
+.fc .fc-daygrid-event {
+  border-radius: var(--joy-radius-sm);
+  margin: 0 4px 2px;
+}
+.fc .fc-daygrid-event:hover {
+  background-color: var(--joy-palette-background-level1);
+}
+
+/* Today: the one accent-filled object on the grid. */
+.fc .fc-day-today .fc-daygrid-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: var(--joy-radius-full);
+  background: var(--joy-palette-primary-solidBg);
+  color: var(--joy-palette-primary-solidColor);
+  font-weight: var(--joy-fontWeight-lg);
 }

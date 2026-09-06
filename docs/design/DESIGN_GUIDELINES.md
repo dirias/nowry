@@ -2211,3 +2211,20 @@ on the page was audited for what it acts on before it was given a shape.
 *   **Shape is assigned by class, not by component.** Joy's `Chip` and `Button` are not classes;
     "acts on the list" and "acts on the view" are. Two controls of one class in one row take one
     shape — the segmented object — whatever they happen to be made of.
+
+### 15.8 Colour is a label, not a fill (ADR-019)
+
+The calendar grid is the reference case: solid event bricks became a tile beside a title.
+
+*   **Hue is identity; chroma is a budget spent on area.** A user-chosen or semantic colour tells
+    the eye which thing this is. Keep the hue at full strength and shrink the area it covers: a
+    16px tile is a label, a 140px bar is a wall. Six labels in a cell read as a list; six bars
+    read as a wall.
+*   **Text sits on a neutral.** A title on the surface gets the same contrast for every item in
+    both schemes. A title on a fill gets whatever that fill allows, differently every time, and a
+    user-picked colour can land below AA. Derive a foreground only for the glyph on the tile.
+*   **One tint per page, and it means state.** Today, a selection, an engaged control — a tint
+    says "this one is different now". If content is tinted too, state has nothing left to say.
+    Mark today with a badge on the number and leave the cell alone.
+*   **One anatomy across views.** The agenda row, the week and the month draw the same event with
+    the same tile and the same title at two sizes. A view is an arrangement, not a new product.

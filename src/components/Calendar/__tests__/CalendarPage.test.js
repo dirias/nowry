@@ -82,7 +82,7 @@ beforeEach(() => {
 
 // ─── Icon logic unit tests (pure logic, no render needed) ────────────────────
 
-// Mirrors EVENT_ICON_MAP in CalendarPage.js: one glyph per type. The star for a
+// Mirrors EVENT_TYPE_ICONS in EventTypeTile.js: one glyph per type. The star for a
 // "key result" milestone went in CAL-005 — every milestone is a measurable step
 // of its goal, so there was never a second kind to draw.
 const EVENT_ICON_MAP = {
@@ -104,6 +104,20 @@ describe('CalendarPage — one glyph per event type', () => {
     ['unknown', 'AdjustOutlinedIcon']
   ])('draws %s with %s', (type, icon) => {
     expect(resolveIcon(type)).toBe(icon)
+  })
+})
+
+// ─── CAL-007: the row is transparent; colour lives on the tile ──────────────
+
+describe('CAL-007: toCalendarEvent leaves colour to the tile', () => {
+  const { toCalendarEvent } = require('../CalendarPage')
+
+  it('sets no background, border or text colour on the FullCalendar object', () => {
+    const ev = { id: 'task-1', title: 'Buy stamps', date: new Date(2026, 8, 5), type: 'task', color: '#6366f1', status: 'pending' }
+    const out = toCalendarEvent(ev)
+    expect(out).toEqual({ id: 'task-1', title: 'Buy stamps', start: ev.date, allDay: true, extendedProps: ev })
+    expect(out).not.toHaveProperty('backgroundColor')
+    expect(out).not.toHaveProperty('textColor')
   })
 })
 
