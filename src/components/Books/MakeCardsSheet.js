@@ -32,8 +32,13 @@ export const needsCards = (section) => section.cards === 0 || Boolean(section.ch
 export const preTicked = (sections) => sections.filter(needsCards).map((section) => section.index)
 
 const SectionRow = ({ section, checked, onToggle }) => {
-  const { t } = useTranslation()
-  const cardsText = section.cards === 0 ? t('books.makeCards.noCards') : t('books.makeCards.cards', { count: section.cards })
+  const { t, i18n } = useTranslation()
+  // Absence is said once, by the tick: a section without cards reports its words and nothing else.
+  const parts = [
+    t('books.makeCards.words', { count: section.words, words: section.words.toLocaleString(i18n.language) }),
+    section.cards > 0 ? t('books.makeCards.cards', { count: section.cards }) : null,
+    section.changed ? t('books.makeCards.changed') : null
+  ].filter(Boolean)
   return (
     <Checkbox
       size='md'
@@ -51,8 +56,7 @@ const SectionRow = ({ section, checked, onToggle }) => {
             {section.heading}
           </Typography>
           <Typography level='body-sm' sx={{ ...readout, display: 'block' }}>
-            {t('books.makeCards.words', { count: section.words })} · {cardsText}
-            {section.changed && <> · {t('books.makeCards.changed')}</>}
+            {parts.join(' · ')}
           </Typography>
         </Box>
       }
