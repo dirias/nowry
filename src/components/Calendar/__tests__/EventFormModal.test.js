@@ -21,6 +21,7 @@ jest.mock('../../../api/services/annualPlanning.service', () => ({
     createGoal: jest.fn(),
     updateGoal: jest.fn(),
     createMilestone: jest.fn(),
+    updateMilestone: jest.fn(),
     createActivity: jest.fn(),
     updateActivity: jest.fn()
   }
@@ -183,9 +184,39 @@ describe('CAL-003: edit mode', () => {
     expect(screen.getByDisplayValue('Buy stamps')).toBeInTheDocument()
   })
 
-  it('a milestone cannot be edited from here and says so', () => {
+  it('a milestone edits like anything else, addressed by its goal and its own id', async () => {
+    annualPlanningService.updateMilestone.mockResolvedValue({})
+    open({
+      mode: 'edit',
+      event: {
+        id: 'milestone-g1-0',
+        type: 'milestone',
+        title: 'Week 4',
+        date: new Date(2026, 8, 12),
+        goalId: 'g1',
+        milestoneId: 'm1',
+        isKeyResult: true
+      }
+    })
+    expect(screen.getByRole('checkbox')).toBeChecked()
+    fireEvent.change(screen.getByLabelText(/calendarModal.form.title/), { target: { value: 'Week 4 long run' } })
+    fireEvent.click(screen.getByRole('checkbox'))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'calendarModal.form.saveChanges' }))
+    })
+    expect(annualPlanningService.updateMilestone).toHaveBeenCalledWith('g1', 'm1', {
+      title: 'Week 4 long run',
+      due_date: '2026-09-12',
+      is_key_result: false
+    })
+  })
+
+  it('a milestone event that arrives without its address fails in the banner, not silently', async () => {
     open({ mode: 'edit', event: { id: 'milestone-g1-0', type: 'milestone', title: 'Week 4', date: new Date() } })
-    expect(screen.getByText('calendarModal.form.milestoneReadOnly')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'calendarModal.form.saveChanges' })).toBeNull()
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'calendarModal.form.saveChanges' }))
+    })
+    expect(annualPlanningService.updateMilestone).not.toHaveBeenCalled()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
   })
 })

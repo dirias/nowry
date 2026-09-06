@@ -265,3 +265,40 @@ describe('calendarService — CAL-002: priority completion surfaces as status', 
     expect(events.filter((e) => e.type === 'priority').map((e) => e.status)).toEqual(['active', 'active'])
   })
 })
+
+// ─── CAL-004: a milestone event carries the address its PATCH route needs ──────
+
+describe('calendarService — CAL-004: milestone events carry goalId and milestoneId', () => {
+  const { tasksService } = require('./tasks.service')
+  const { fetchAnnualPlanData } = require('./annualPlanning.service')
+  const { queryClient } = require('../queryClient')
+  const { calendarService } = require('./calendar.service')
+
+  beforeEach(() => {
+    queryClient.fetchQuery.mockImplementation(({ queryFn }) => queryFn())
+    tasksService.getAll.mockResolvedValue([])
+  })
+
+  it("exposes the goal id and the milestone's own id beside the index-based event id", async () => {
+    fetchAnnualPlanData.mockResolvedValue({
+      plan: {},
+      priorities: [],
+      focusAreas: [{ _id: 'area-1', name: 'Health', color: '#14b8a6' }],
+      goals: [
+        {
+          _id: 'goal-7',
+          title: 'Run',
+          focus_area_id: 'area-1',
+          milestones: [{ id: 'ms-42', title: 'Week 4', due_date: '2026-09-12', completed: false }]
+        }
+      ],
+      activities: [],
+      quarterReports: []
+    })
+    const { events } = await calendarService.getAllEvents('user-1')
+    const milestone = events.find((e) => e.type === 'milestone')
+    expect(milestone.id).toBe('milestone-goal-7-0')
+    expect(milestone.goalId).toBe('goal-7')
+    expect(milestone.milestoneId).toBe('ms-42')
+  })
+})

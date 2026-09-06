@@ -925,7 +925,6 @@
       "titleRequired": "Ponle un título para guardarlo.",
       "saveErrorTitle": "No se pudo guardar este evento",
       "saveError": "Revisa tu conexión e inténtalo de nuevo. No se perdió nada.",
-      "milestoneReadOnly": "Los hitos se editan desde su meta en Planificación anual.",
       "types": {
         "task": "Tarea",
         "priority": "Prioridad",

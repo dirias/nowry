@@ -76,7 +76,8 @@ export const ENDPOINTS = {
     delete: (id) => `/annual-plan/activities/${id}`
   },
   milestones: {
-    create: (goalId) => `/annual-plan/goals/${goalId}/milestones`
+    create: (goalId) => `/annual-plan/goals/${goalId}/milestones`,
+    update: (goalId, milestoneId) => `/annual-plan/goals/${goalId}/milestones/${milestoneId}`
   },
   dailyRoutine: {
     base: '/annual-plan/daily-routine',

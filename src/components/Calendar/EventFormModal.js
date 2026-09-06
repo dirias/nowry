@@ -17,6 +17,7 @@ import FormSheet from '../Common/Form/FormSheet'
 import FormTextArea from '../Common/Form/FormTextArea'
 import FormTextField from '../Common/Form/FormTextField'
 import { focusRing, formLabel, segment, segmentedGroup } from '../Common/Form/formStyles'
+import { stripTypePrefix } from './eventId'
 
 /**
  * The four things a calendar day can be given (ADR-017). Habit is not one of
@@ -178,7 +179,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
     setErrors({})
     setSaveError(null)
     setRevealed([])
-    setKeyResult(false)
+    setKeyResult(isEdit ? Boolean(event?.isKeyResult) : false)
     setFocusAreaId('')
     setGoalId('')
     setDescription(isEdit ? event?.description || '' : '')
@@ -205,7 +206,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   const needsFocusArea = !isEdit && type === 'goal'
   const needsGoal = !isEdit && type === 'milestone'
   const railOffers = isEdit ? [] : (OPTIONAL_GROUPS[type] || []).filter((group) => !revealed.includes(group))
-  const milestoneReadOnly = isEdit && activeType === 'milestone'
 
   const changeType = (next) => {
     setType(next)
@@ -265,7 +265,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
   }
 
   const update = async () => {
-    const rawId = event?.id ? event.id.replace(/^[a-z]+-/, '') : null
+    const rawId = event?.id ? stripTypePrefix(event.id) : null
     if (!rawId) throw new Error('Missing event ID')
     const trimmed = title.trim()
     switch (activeType) {
@@ -281,6 +281,15 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
         return annualPlanningService.updateGoal(rawId, { title: trimmed, target_date: date || null })
       case 'activity':
         return annualPlanningService.updateActivity(rawId, { title: trimmed, due_date: date || null })
+      case 'milestone':
+        // Addressed by the goal and the milestone's own id, not by the
+        // index-based event id (CAL-004).
+        if (!event?.goalId || !event?.milestoneId) throw new Error('Missing milestone address')
+        return annualPlanningService.updateMilestone(event.goalId, event.milestoneId, {
+          title: trimmed,
+          due_date: date || null,
+          is_key_result: keyResult
+        })
       default:
         return null
     }
@@ -322,13 +331,11 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', gap: 2 }}>
       {/* Cancel stays enabled while saving so a stuck request is escapable. */}
       <Button variant='plain' onClick={onClose} size='lg' sx={actionSx}>
-        {milestoneReadOnly ? t('common.close') : t('calendarModal.form.cancel')}
+        {t('calendarModal.form.cancel')}
       </Button>
-      {!milestoneReadOnly && (
-        <Button onClick={submit} loading={saving} size='lg' sx={actionSx}>
-          {isEdit ? t('calendarModal.form.saveChanges') : t(`calendarModal.form.addAction.${type}`)}
-        </Button>
-      )}
+      <Button onClick={submit} loading={saving} size='lg' sx={actionSx}>
+        {isEdit ? t('calendarModal.form.saveChanges') : t(`calendarModal.form.addAction.${type}`)}
+      </Button>
     </Box>
   )
 
@@ -342,103 +349,97 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
       banner={saveError ? <FormErrorBanner titleKey='calendarModal.form.saveErrorTitle' detailText={saveError} /> : null}
       footer={footer}
     >
-      {milestoneReadOnly ? (
-        <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-          {t('calendarModal.form.milestoneReadOnly')}
-        </Typography>
-      ) : (
-        <Stack spacing={2.5}>
-          {!isEdit && <EventTypeObject value={type} onChange={changeType} t={t} />}
+      <Stack spacing={2.5}>
+        {!isEdit && <EventTypeObject value={type} onChange={changeType} t={t} />}
 
-          <FormTextField
-            labelKey='calendarModal.form.title'
-            placeholderKey={isEdit ? null : `calendarModal.form.placeholder.${type}`}
-            errorKey={errors.title ? 'calendarModal.form.titleRequired' : null}
-            value={title}
-            onChange={(value) => {
-              setTitle(value)
-              if (errors.title && value.trim()) setErrors((prev) => ({ ...prev, title: false }))
+        <FormTextField
+          labelKey='calendarModal.form.title'
+          placeholderKey={isEdit ? null : `calendarModal.form.placeholder.${type}`}
+          errorKey={errors.title ? 'calendarModal.form.titleRequired' : null}
+          value={title}
+          onChange={(value) => {
+            setTitle(value)
+            if (errors.title && value.trim()) setErrors((prev) => ({ ...prev, title: false }))
+          }}
+          onKeyDown={onTitleKeyDown}
+          required
+          autoFocus
+          inputRef={titleRef}
+        />
+
+        {needsFocusArea && (
+          <ContextPicker
+            labelKey='calendarModal.form.focusArea'
+            placeholderKey='calendarModal.form.focusAreaPlaceholder'
+            emptyKey='calendarModal.form.noAreas'
+            loading={contextLoading}
+            options={focusAreas}
+            value={focusAreaId}
+            onChange={(v) => {
+              setFocusAreaId(v)
+              setErrors((prev) => ({ ...prev, focusArea: false }))
             }}
-            onKeyDown={onTitleKeyDown}
-            required
-            autoFocus
-            inputRef={titleRef}
+            error={Boolean(errors.focusArea)}
+            t={t}
           />
+        )}
 
-          {needsFocusArea && (
-            <ContextPicker
-              labelKey='calendarModal.form.focusArea'
-              placeholderKey='calendarModal.form.focusAreaPlaceholder'
-              emptyKey='calendarModal.form.noAreas'
-              loading={contextLoading}
-              options={focusAreas}
-              value={focusAreaId}
-              onChange={(v) => {
-                setFocusAreaId(v)
-                setErrors((prev) => ({ ...prev, focusArea: false }))
-              }}
-              error={Boolean(errors.focusArea)}
-              t={t}
-            />
-          )}
+        {needsGoal && (
+          <ContextPicker
+            labelKey='calendarModal.form.goal'
+            placeholderKey='calendarModal.form.goalPlaceholder'
+            helperKey='calendarModal.form.goalHelper'
+            emptyKey='calendarModal.form.noActiveGoals'
+            loading={contextLoading}
+            options={openGoals}
+            value={goalId}
+            onChange={(v) => {
+              setGoalId(v)
+              setErrors((prev) => ({ ...prev, goal: false }))
+            }}
+            error={Boolean(errors.goal)}
+            t={t}
+          />
+        )}
 
-          {needsGoal && (
-            <ContextPicker
-              labelKey='calendarModal.form.goal'
-              placeholderKey='calendarModal.form.goalPlaceholder'
-              helperKey='calendarModal.form.goalHelper'
-              emptyKey='calendarModal.form.noActiveGoals'
-              loading={contextLoading}
-              options={openGoals}
-              value={goalId}
-              onChange={(v) => {
-                setGoalId(v)
-                setErrors((prev) => ({ ...prev, goal: false }))
-              }}
-              error={Boolean(errors.goal)}
-              t={t}
-            />
-          )}
+        {!isEdit && type === 'priority' && !annualPlanId && !contextLoading && (
+          <Typography level='body-sm' sx={{ color: 'text.secondary', px: 2, py: 1.5, borderRadius: 'md', bgcolor: 'background.level1' }}>
+            {t('calendarModal.form.noPlan')}
+          </Typography>
+        )}
 
-          {!isEdit && type === 'priority' && !annualPlanId && !contextLoading && (
-            <Typography level='body-sm' sx={{ color: 'text.secondary', px: 2, py: 1.5, borderRadius: 'md', bgcolor: 'background.level1' }}>
-              {t('calendarModal.form.noPlan')}
-            </Typography>
-          )}
+        <FormTextField labelKey='calendarModal.form.date' type='date' value={date} onChange={setDate} />
 
-          <FormTextField labelKey='calendarModal.form.date' type='date' value={date} onChange={setDate} />
+        {(revealed.includes('description') || (isEdit && activeType === 'priority')) && (
+          <FormTextArea
+            labelKey='calendarModal.form.description'
+            placeholderKey='calendarModal.form.descriptionPlaceholder'
+            value={description}
+            onChange={setDescription}
+            minRows={2}
+            autoFocus={!isEdit}
+          />
+        )}
 
-          {(revealed.includes('description') || (isEdit && activeType === 'priority')) && (
-            <FormTextArea
-              labelKey='calendarModal.form.description'
-              placeholderKey='calendarModal.form.descriptionPlaceholder'
-              value={description}
-              onChange={setDescription}
-              minRows={2}
-              autoFocus={!isEdit}
-            />
-          )}
+        {(revealed.includes('keyResult') || (isEdit && activeType === 'milestone')) && (
+          <Checkbox
+            size='lg'
+            checked={keyResult}
+            onChange={(e) => setKeyResult(e.target.checked)}
+            label={
+              <Box>
+                <Typography level='body-md'>{t('calendarModal.form.keyResult')}</Typography>
+                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                  {t('calendarModal.form.keyResultHelper')}
+                </Typography>
+              </Box>
+            }
+            sx={{ alignItems: 'flex-start', ...focusRing }}
+          />
+        )}
 
-          {revealed.includes('keyResult') && (
-            <Checkbox
-              size='lg'
-              checked={keyResult}
-              onChange={(e) => setKeyResult(e.target.checked)}
-              label={
-                <Box>
-                  <Typography level='body-md'>{t('calendarModal.form.keyResult')}</Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {t('calendarModal.form.keyResultHelper')}
-                  </Typography>
-                </Box>
-              }
-              sx={{ alignItems: 'flex-start', ...focusRing }}
-            />
-          )}
-
-          <FormDisclosureRail available={railOffers} labels={RAIL_LABELS} onReveal={reveal} />
-        </Stack>
-      )}
+        <FormDisclosureRail available={railOffers} labels={RAIL_LABELS} onReveal={reveal} />
+      </Stack>
     </FormSheet>
   )
 }

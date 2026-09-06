@@ -966,7 +966,6 @@
       "titleRequired": "保存するにはタイトルを入力してください。",
       "saveErrorTitle": "この予定を保存できませんでした",
       "saveError": "接続を確認してもう一度お試しください。入力内容は失われていません。",
-      "milestoneReadOnly": "マイルストーンは年間計画の目標から編集します。",
       "types": {
         "task": "タスク",
         "priority": "優先事項",

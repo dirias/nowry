@@ -1077,7 +1077,6 @@
       "titleRequired": "Give it a title to save it.",
       "saveErrorTitle": "Couldn't save this event",
       "saveError": "Check your connection and try again. Nothing was lost.",
-      "milestoneReadOnly": "Milestones are edited from their goal in Annual Planning.",
       "types": {
         "task": "Task",
         "priority": "Priority",

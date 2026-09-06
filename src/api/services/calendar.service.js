@@ -210,6 +210,11 @@ export const calendarService = {
                   status: 'pending',
                   areaName,
                   goalTitle: goal.title,
+                  // The pair the milestone PATCH route is addressed by. The event
+                  // id above stays index-based for stability; these are what an
+                  // edit from the calendar actually sends (CAL-004).
+                  goalId: goal._id,
+                  milestoneId: ms.id ?? null,
                   isKeyResult: !!ms.is_key_result,
                   focusAreaId: goal.focus_area_id || null // D-02: milestones inherit from parent goal
                 })

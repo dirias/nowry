@@ -283,6 +283,18 @@ export const annualPlanningService = {
     _bustPlanCache()
     return data
   },
+
+  /**
+   * PATCH one milestone by its own id (title, due_date, completed,
+   * is_key_result — the backend's MilestonePatch). Milestones have carried an
+   * id since the Goal model gained one; the calendar addressed them by array
+   * index only because nothing had wrapped this route (CAL-004).
+   */
+  async updateMilestone(goalId, milestoneId, patch) {
+    const { data } = await apiClient.patch(ENDPOINTS.milestones.update(goalId, milestoneId), patch)
+    _bustPlanCache()
+    return data
+  },
   async updateActivity(id, update) {
     const { data } = await apiClient.put(ENDPOINTS.activities.update(id), update)
     return data

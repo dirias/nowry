@@ -27,17 +27,8 @@ import EventFormModal from './EventFormModal'
 import CalendarToolbar from './CalendarToolbar'
 import CalendarAgenda from './CalendarAgenda'
 import { filterCalendarEvents } from './calendarFilters'
+import { stripTypePrefix } from './eventId'
 import { addDays, addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, isSameDay, isSameMonth, startOfWeek } from './agendaGroups'
-
-// Strip type prefix from compound event ID (e.g. 'task-abc123' → 'abc123')
-// Uses startsWith to avoid truncating hyphenated IDs (e.g. UUIDs, compound timestamp IDs)
-const TYPE_PREFIXES = ['task-', 'priority-', 'goal-', 'milestone-', 'activity-']
-const stripTypePrefix = (eventId) => {
-  for (const prefix of TYPE_PREFIXES) {
-    if (eventId.startsWith(prefix)) return eventId.slice(prefix.length)
-  }
-  return eventId
-}
 
 // CAL-01: Icon map for eventContent — milestone handled separately via isKeyResult branch
 const EVENT_ICON_MAP = {
@@ -68,16 +59,9 @@ const toCalendarEvent = (ev) => {
     backgroundColor: ev.color,
     borderColor: ev.color,
     textColor,
-    extendedProps: {
-      type: ev.type,
-      status: ev.status,
-      category: ev.category,
-      areaName: ev.areaName,
-      goalTitle: ev.goalTitle,
-      isKeyResult: ev.isKeyResult,
-      focusAreaId: ev.focusAreaId,
-      textColor
-    }
+    // The whole service event rides along, so the editor receives the same
+    // object the agenda hands it and no field list is maintained twice.
+    extendedProps: { ...ev, textColor }
   }
 }
 
@@ -174,11 +158,15 @@ const CalendarPage = () => {
   }, [effectiveView, cursor])
 
   // ── Editing ──────────────────────────────────────────────────────────────
+  // Both surfaces hand over the service event itself: the agenda directly, the
+  // grid through the extendedProps it was given above.
   const openEditor = useCallback((ev) => {
-    setEditingEvent({ id: ev.id, type: ev.type, title: ev.title, date: ev.date, status: ev.status, category: ev.category })
+    setEditingEvent(ev)
     setFormMode('edit')
     setFormOpen(true) // modal re-mounts cleanly via key prop (see EventFormModal below)
   }, [])
+
+  const handleEventClick = useCallback((clickInfo) => openEditor(clickInfo.event.extendedProps), [openEditor])
 
   // CAL-002 / ADR-016 decision 6: a task or priority is finished from its
   // agenda row. Optimistic-then-revert, as `usePriorityStatus` does: the list
@@ -200,21 +188,6 @@ const CalendarPage = () => {
       }
     },
     [userId]
-  )
-
-  const handleEventClick = useCallback(
-    (clickInfo) => {
-      const ev = clickInfo.event
-      openEditor({
-        id: ev.id,
-        type: ev.extendedProps.type,
-        title: ev.title,
-        date: ev.start,
-        status: ev.extendedProps.status,
-        category: ev.extendedProps.category
-      })
-    },
-    [openEditor]
   )
 
   // CAL-02: Time-block creation — click+drag on the grid
