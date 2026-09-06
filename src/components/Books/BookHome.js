@@ -7,36 +7,22 @@ import { WarningWindow, SuccessWindow, Error as ErrorWindow } from '../Messages'
 import BookEditSheet from './BookEditSheet'
 import BookCreateSheet from './BookCreateSheet'
 import { useAuth } from '../../context/AuthContext'
+import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import ContinueObject from './ContinueObject'
+import AddMenu from './AddMenu'
+import formatRelativeDate from '../../utils/formatRelativeDate'
+import { pickContinue, resumeHref } from './libraryQuery'
 import useBooks from '../../hooks/useBooks'
 import Book from './Book'
 import ImportPreviewModal from './ImportPreviewModal'
-import {
-  Box,
-  Typography,
-  Input,
-  Button,
-  Stack,
-  IconButton,
-  Card,
-  Grid,
-  Container,
-  Chip,
-  Modal,
-  ModalDialog,
-  Skeleton,
-  Avatar
-} from '@mui/joy'
-import AddIcon from '@mui/icons-material/Add'
-import UploadFileIcon from '@mui/icons-material/UploadFile'
-import SearchIcon from '@mui/icons-material/Search'
+import { Box, Typography, Button, Stack, IconButton, Card, Grid, Container, Chip, Skeleton, Snackbar } from '@mui/joy'
 import CloseIcon from '@mui/icons-material/Close'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
-import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import GridViewIcon from '@mui/icons-material/GridView'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
-import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 
 export default function BookHome() {
   const { books: allBooks, loading, error: fetchError, reload: fetchBooks } = useBooks()
@@ -66,6 +52,15 @@ export default function BookHome() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { user } = useAuth()
+  const { tier } = useSubscription()
+  const { openUpgradeModal } = useSubscriptionContext()
+  const relative = useCallback((value) => formatRelativeDate(t, value), [t])
+  // The document the page opens on (D1): the most recently edited one.
+  const continueDoc = useMemo(() => pickContinue(allBooks), [allBooks])
+  const handleUpgrade = useCallback(
+    (feature) => openUpgradeModal(t(feature === 'listen' ? 'upgrade.headlines.tts' : 'upgrade.headlines.generateFromBook')),
+    [openUpgradeModal, t]
+  )
 
   const handleViewChange = useCallback((newMode) => {
     setViewMode(newMode)
@@ -166,12 +161,7 @@ export default function BookHome() {
         // Refresh book list
         await fetchBooks()
 
-        setSuccessMessage(
-          t('books.successImport_plural', {
-            count: importedBooks.length,
-            pages: importedBooks.reduce((sum, book) => sum + book.page_count, 0)
-          })
-        )
+        setSuccessMessage(t('books.lib.importedToast', { count: importedBooks.length }))
 
         if (importedBooks.length === 1) {
           setLastImportedBookId(importedBooks[0]._id)
@@ -197,7 +187,14 @@ export default function BookHome() {
     setCurrentFileIndex(0)
   }, [])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  // The whole page is the dropzone (D12); a click never opens the picker — Import
+  // files (Add ▾, the empty object) calls `open` itself.
+  const {
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    open: openFilePicker
+  } = useDropzone({
     onDrop,
     accept: {
       'text/plain': ['.txt'],
@@ -206,7 +203,8 @@ export default function BookHome() {
       'application/msword': ['.doc']
     },
     multiple: true,
-    noClick: false
+    noClick: true,
+    noKeyboard: true
   })
 
   const handleBookClick = useCallback(
@@ -238,54 +236,29 @@ export default function BookHome() {
   }, [bookToDelete, fetchBooks, t])
 
   return (
-    <Container maxWidth='xl' sx={{ py: { xs: 3, md: 5 } }}>
-      {/* Glass Hero Header */}
-      <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 } }}>
-        <Typography level='h3' fontWeight={800} sx={{ mt: 0, mb: 0.5, letterSpacing: '-0.02em' }}>
+    <Container maxWidth='xl' {...getRootProps()} sx={{ py: { xs: 2, md: 4 } }}>
+      {/* Title row: the page on the left rail, Add ▾ on the right (D3, §15.7) */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
+        <Typography level='h2' component='h1'>
           {t('books.title')}
         </Typography>
-        <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 3, maxWidth: 500, mx: 'auto' }}>
-          {t('books.subtitle')}
-        </Typography>
-
-        <Box sx={{ maxWidth: 640, mx: 'auto' }}>
-          {allBooks.length > 0 ? (
-            <Input
-              size='lg'
-              placeholder={t('books.searchPlaceholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              startDecorator={<SearchIcon sx={{ color: 'text.tertiary', ml: 1 }} />}
-              endDecorator={
-                <Stack direction='row' spacing={1} alignItems='center' sx={{ mr: 0.5 }}>
-                  {searchTerm && (
-                    <IconButton size='sm' variant='plain' color='neutral' onClick={() => setSearchTerm('')}>
-                      <CloseIcon />
-                    </IconButton>
-                  )}
-                  <Button size='sm' variant='solid' color='primary' onClick={openCreate}>
-                    {t('books.create')}
-                  </Button>
-                </Stack>
-              }
-              sx={{
-                width: '100%',
-                borderRadius: 'xl',
-                boxShadow: 'sm',
-                bgcolor: 'rgba(var(--joy-palette-background-surfaceChannel) / 0.8)',
-                backdropFilter: 'blur(12px)',
-                '--Input-focusedThickness': '2px',
-                p: 0.75,
-                pl: 1
-              }}
-            />
-          ) : (
-            <Button size='lg' onClick={openCreate} startDecorator={<AddIcon />} sx={{ borderRadius: 'lg', px: 4, boxShadow: 'sm' }}>
-              {t('books.create')}
-            </Button>
-          )}
-        </Box>
+        <AddMenu onNew={openCreate} onImport={openFilePicker} />
       </Box>
+
+      {/* The summary object (D1, D2, D12): where you were, and what your notes owe the deck */}
+      <ContinueObject
+        loading={loading}
+        book={continueDoc}
+        tier={tier}
+        isDragActive={isDragActive}
+        formatRelativeDate={relative}
+        onContinue={() => continueDoc && navigate(resumeHref(continueDoc))}
+        onMakeCards={() => continueDoc && navigate(resumeHref(continueDoc, { makeCards: 1 }))}
+        onListen={() => continueDoc && navigate(resumeHref(continueDoc, { listen: 1 }))}
+        onNew={openCreate}
+        onImport={openFilePicker}
+        onUpgrade={handleUpgrade}
+      />
 
       {/* Controls & Tactile Carousel */}
       {allBooks.length > 0 && (
@@ -439,61 +412,6 @@ export default function BookHome() {
           ))}
         </Grid>
       )}
-      {allBooks.length === 0 && !loading && (
-        <Card
-          {...getRootProps()}
-          variant='outlined'
-          sx={{
-            textAlign: 'center',
-            py: 12,
-            px: 4,
-            cursor: 'pointer',
-            borderStyle: 'dashed',
-            borderColor: isDragActive ? 'primary.solidBg' : 'neutral.outlinedBorder',
-            backgroundColor: isDragActive ? 'primary.softBg' : 'background.surface',
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: 400,
-            '&:hover': {
-              borderColor: 'primary.main',
-              backgroundColor: 'background.level1',
-              boxShadow: 'sm'
-            }
-          }}
-        >
-          <Box
-            sx={{
-              p: 3,
-              borderRadius: '50%',
-              bgcolor: 'background.level2',
-              mb: 3,
-              color: 'text.tertiary',
-              transition: 'transform 0.2s',
-              ...(isDragActive && { transform: 'scale(1.1)', bgcolor: 'primary.softBg', color: 'primary.plainColor' })
-            }}
-          >
-            <CloudUploadIcon sx={{ fontSize: 40 }} />
-          </Box>
-          <Typography level='title-md' fontWeight={600} sx={{ mb: 1, color: 'text.secondary' }}>
-            {isDragActive ? t('books.dropTitleActive') : t('books.dropTitle')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 4, maxWidth: 450 }}>
-            {t('books.dropSubtitle')}
-          </Typography>
-
-          <Stack direction='row' spacing={1} justifyContent='center'>
-            {['PDF', 'Word', 'TXT'].map((type) => (
-              <Chip key={type} size='md' variant='soft' color='neutral'>
-                {type}
-              </Chip>
-            ))}
-          </Stack>
-        </Card>
-      )}
-
       {/* Books Grid - Filtered Results */}
       {!loading && allBooks.length > 0 && books.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
@@ -651,93 +569,36 @@ export default function BookHome() {
         />
       )}
 
-      <Modal
+      {/* Import success is a toast (DS-005): the imported document is the new Continue object */}
+      <Snackbar
         open={showSuccess}
+        autoHideDuration={6000}
         onClose={() => {
           setShowSuccess(false)
           setSuccessMessage('')
           setLastImportedBookId(null)
         }}
+        color='neutral'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        endDecorator={
+          lastImportedBookId ? (
+            <Button
+              size='sm'
+              variant='soft'
+              color='neutral'
+              onClick={() => {
+                setShowSuccess(false)
+                navigate(`/book/${lastImportedBookId}`)
+              }}
+            >
+              {t('books.lib.open')}
+            </Button>
+          ) : null
+        }
       >
-        <ModalDialog
-          variant='outlined'
-          sx={{
-            width: { xs: 'calc(100% - 32px)', sm: 450 },
-            maxWidth: 450,
-            borderRadius: { xs: 'lg', md: 'xl' },
-            boxShadow: 'lg',
-            p: 0
-          }}
-        >
-          {/* Header */}
-          <Box
-            sx={{
-              px: { xs: 2, sm: 3 },
-              py: { xs: 2, md: 2.5 },
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.level1',
-              textAlign: 'center'
-            }}
-          >
-            {/* An emoji in a 48px circle was decoration carrying no fact, and
-                emoji-as-content is a house-rule violation besides. The icon
-                says "succeeded" on its own; the circle around it said nothing. */}
-            <CheckCircleRoundedIcon aria-hidden='true' sx={{ fontSize: 40, color: 'success.plainColor', mb: 1 }} />
-            <Typography level='title-lg' sx={{ fontWeight: 700 }}>
-              {t('books.importSuccessTitle')}
-            </Typography>
-          </Box>
-
-          {/* Content */}
-          <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, md: 3 }, textAlign: 'center' }}>
-            <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-              {successMessage}
-            </Typography>
-          </Box>
-
-          {/* Footer */}
-          <Box
-            sx={{
-              px: { xs: 2, sm: 3 },
-              py: { xs: 2, md: 2.5 },
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.surface'
-            }}
-          >
-            <Stack spacing={2}>
-              {lastImportedBookId && (
-                <Button
-                  variant='solid'
-                  color='primary'
-                  onClick={() => {
-                    setShowSuccess(false)
-                    navigate(`/book/${lastImportedBookId}`)
-                  }}
-                  size='lg'
-                  fullWidth
-                >
-                  {t('books.openBook')}
-                </Button>
-              )}
-
-              <Button
-                variant={lastImportedBookId ? 'plain' : 'solid'}
-                color={lastImportedBookId ? 'neutral' : 'primary'}
-                onClick={() => {
-                  setShowSuccess(false)
-                  setLastImportedBookId(null)
-                }}
-                size='lg'
-                fullWidth
-              >
-                {t('books.continueToLibrary')}
-              </Button>
-            </Stack>
-          </Box>
-        </ModalDialog>
-      </Modal>
+        {successMessage}
+      </Snackbar>
 
       {showError && (
         <ErrorWindow
