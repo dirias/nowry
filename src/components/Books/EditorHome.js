@@ -54,6 +54,7 @@ import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import GeneratedCards from '../Cards/GeneratedCards'
 import MakeCardsSheet from './MakeCardsSheet'
 import scrollToHeadingText from '../Editor/scrollToHeadingText'
+import { createPointerSaver } from './pointerSaver'
 import QuestionnaireModal from '../Cards/QuestionnaireModal'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
@@ -340,6 +341,30 @@ export default function EditorHome() {
   }, [searchParams, setSearchParams, tocData, loading, t])
   useEffect(() => () => sectionJumpTimers.current.forEach(clearTimeout), [])
 
+  // The reading pointer (D2 / FR-002): the section the reader is under and, for
+  // an import, the page. Coalesced to one request per 5s and flushed on leave.
+  const pointerRef = useRef(null)
+  useEffect(() => {
+    if (!id) return undefined
+    const saver = createPointerSaver((patch) => booksService.update(id, patch).catch(() => {}))
+    pointerRef.current = saver
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') saver.flush()
+    }
+    document.addEventListener('visibilitychange', onHide)
+    return () => {
+      document.removeEventListener('visibilitychange', onHide)
+      saver.flush()
+      saver.dispose()
+      pointerRef.current = null
+    }
+  }, [id])
+  const handleSectionChange = useCallback((text) => {
+    if (text) pointerRef.current?.set({ last_section: text })
+  }, [])
+  // `?listen=1`: the navigator plays the resumed section once the TOC exists.
+  const [autoListen, setAutoListen] = useState(false)
+
   const handleGenerateCards = async (sections = null) => {
     setIsGeneratingCards(true)
     setGenerateCardsError(null)
@@ -404,6 +429,29 @@ export default function EditorHome() {
     }
     handleGenerateQuiz()
   }
+
+  // The library's deep links (docs/prd-books-library.md FR-003): `?page=N` scrolls to
+  // a page, `?makeCards=1` opens the sheet, `?quiz=1` starts the quiz, `?listen=1`
+  // plays. Each is acted on once the document is loaded and cleared from the URL.
+  useEffect(() => {
+    if (loading) return
+    const page = searchParams.get('page')
+    const makeCards = searchParams.get('makeCards')
+    const quiz = searchParams.get('quiz')
+    const listen = searchParams.get('listen')
+    if (!page && !makeCards && !quiz && !listen) return
+    const next = new URLSearchParams(searchParams)
+    ;['page', 'makeCards', 'quiz', 'listen'].forEach((key) => next.delete(key))
+    setSearchParams(next, { replace: true })
+    if (page) {
+      const index = Math.max(0, parseInt(page, 10) - 1)
+      sectionJumpTimers.current.push(...[0, 400, 1200].map((ms) => setTimeout(() => handleScrollToPage(index), ms)))
+    }
+    if (makeCards) setShowMakeCards(true)
+    if (quiz) handleGenerateQuizAction()
+    if (listen) setAutoListen(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, searchParams, setSearchParams])
 
   // Manual save always uses the latest content ref to avoid stale React state
   const handleManualSave = async () => {
@@ -674,6 +722,11 @@ export default function EditorHome() {
   const handlePageUpdate = useCallback((data) => {
     setPagesData(data)
   }, [])
+
+  useEffect(() => {
+    if (book?.source !== 'imported' || loading) return
+    pointerRef.current?.set({ reading_position: activePageIndex })
+  }, [activePageIndex, book?.source, loading])
 
   const handleReadingStatsChange = useCallback((stats) => {
     setReadingStats({ wordCount: stats.wordCount || 0, readingTime: stats.readingTime || 0 })
@@ -1253,6 +1306,8 @@ export default function EditorHome() {
           >
             <ContentNavigator
               toc={tocData}
+              onSectionChange={handleSectionChange}
+              autoPlay={autoListen}
               readingTime={readingStats.readingTime}
               editorInstanceRef={editorRef}
               bookId={book?._id}

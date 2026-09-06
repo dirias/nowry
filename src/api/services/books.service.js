@@ -64,7 +64,10 @@ export const booksService = {
    * @param {boolean} updates.auto_save_enabled - Auto-save preference
    * @returns {Promise<Object>} Updated book
    */
-  async update(id, { title, coverColor, coverImage, summary, tags, full_content, page_size, auto_save_enabled }) {
+  async update(
+    id,
+    { title, coverColor, coverImage, summary, tags, full_content, page_size, auto_save_enabled, last_section, reading_position }
+  ) {
     const payload = {}
 
     // Only include fields that are defined
@@ -76,6 +79,9 @@ export const booksService = {
     if (full_content !== undefined) payload.full_content = full_content
     if (page_size !== undefined) payload.page_size = page_size
     if (auto_save_enabled !== undefined) payload.auto_save_enabled = auto_save_enabled
+    // The reading pointer (BOOK-005): a position-only update never bumps updated_at.
+    if (last_section !== undefined) payload.last_section = last_section
+    if (reading_position !== undefined) payload.reading_position = reading_position
 
     const { data } = await apiClient.put(ENDPOINTS.books.update(id), payload)
     return data

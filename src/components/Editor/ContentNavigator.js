@@ -42,7 +42,11 @@ export default function ContentNavigator({
   ttsLanguage = 'en-US',
   onTtsLanguageChange,
   ttsAutoDetect = true,
-  onTtsAutoDetectChange
+  onTtsAutoDetectChange,
+  // The heading the reader is under, reported as text (docs/prd-books-library.md D2).
+  onSectionChange = null,
+  // `?listen=1` from the library: play the current section once the TOC exists.
+  autoPlay = false
 }) {
   const { t } = useTranslation()
   const { openUpgradeModal } = useSubscriptionContext()
@@ -104,6 +108,12 @@ export default function ContentNavigator({
 
     return () => scrollContainer.removeEventListener('scroll', handleScroll)
   }, [toc])
+
+  useEffect(() => {
+    if (!onSectionChange || !currentSection) return
+    const heading = toc.find((h) => h.id === currentSection)
+    if (heading?.text) onSectionChange(heading.text.trim())
+  }, [currentSection, toc, onSectionChange])
 
   const scrollToHeading = (headingId) => {
     const scrollContainer = document.querySelector('.editor-scroll-container')
@@ -230,6 +240,17 @@ export default function ContentNavigator({
     },
     [playingId, tier, bookId, ttsLanguage, ttsAutoDetect, extractSectionContent, openUpgradeModal, t]
   )
+
+  // One play per request: the section the reader resumed at, or the first.
+  const autoPlayed = useRef(false)
+  useEffect(() => {
+    if (!autoPlay || autoPlayed.current || toc.length === 0) return undefined
+    const timer = setTimeout(() => {
+      autoPlayed.current = true
+      handlePlaySection(currentSection || toc[0].id)
+    }, 1600)
+    return () => clearTimeout(timer)
+  }, [autoPlay, toc, currentSection, handlePlaySection])
 
   const hasTts = !!(editorInstanceRef && bookId)
 
