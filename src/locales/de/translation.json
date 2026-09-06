@@ -2043,6 +2043,12 @@
       "emptyVisualBody": "Erstelle einen Stapel, um diese Diagramme zu speichern und zu wiederholen."
     },
     "session": {
+      "source": {
+      "from": "aus {{document}} · {{section}}",
+      "fromDocument": "aus {{document}}",
+      "deleted": "aus einem gelöschten Dokument",
+      "openAria": "{{section}} in {{document}} öffnen"
+      },
       "tagFilter": {
         "noOptions": "Keine Tags in diesem Stapel",
         "clear": "Tag-Filter zurücksetzen",
@@ -2127,6 +2133,9 @@
     }
   },
   "books": {
+    "sectionMoved": "Dieser Abschnitt wurde umbenannt oder entfernt, darum wurde das Dokument oben geöffnet.",
+    "deleteKeepsCards_one": "Seine {{count}} Karte bleibt in deinen Stapeln.",
+    "deleteKeepsCards_other": "Seine {{count}} Karten bleiben in deinen Stapeln.",
     "makeCards": {
       "title": "Karten erstellen",
       "subtitle_one": "{{title}} · {{count}} Abschnitt",

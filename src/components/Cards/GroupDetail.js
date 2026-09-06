@@ -152,6 +152,7 @@ export default function GroupDetail({ group, summary, decks = [], onEditCard, on
                 onEdit={onEditCard}
                 onDelete={onDeleteCard}
                 onMarkChange={handleMarkChange}
+                showSource={group.kind === 'struggling'}
               />
             ))}
           </Box>

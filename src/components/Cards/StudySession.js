@@ -13,6 +13,7 @@ import '@fontsource-variable/literata'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import SourceReadout from './SourceReadout'
 import { dailyReviewParams } from './dailyReviewParams'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -1534,9 +1535,10 @@ export default function StudySession() {
                   <Typography level='body-xs' sx={{ mb: 2, color: 'warning.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                     {t('cards.session.labels.quiz')}
                   </Typography>
-                  <Typography level='h3' sx={{ mb: 4, fontWeight: 'lg' }}>
+                  <Typography level='h3' sx={{ mb: 1, fontWeight: 'lg' }}>
                     {currentCard.title}
                   </Typography>
+                  <SourceReadout card={currentCard} sx={{ mb: 3 }} />
 
                   <RadioGroup value={selectedAnswer} onChange={(e) => handleQuizAnswer(e.target.value)}>
                     <Stack spacing={2}>
@@ -1805,6 +1807,8 @@ export default function StudySession() {
                         <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 'lg', whiteSpace: 'pre-wrap' }}>
                           {currentCard.title}
                         </Typography>
+                        {/* Where the card came from (BOOK-004, D7): a readout, not a link — leaving mid-session is the row's job */}
+                        <SourceReadout card={currentCard} sx={{ mt: 2 }} />
                       </Box>
                       <Typography level='body-sm' sx={{ pt: 4, color: 'text.tertiary' }}>
                         <Box component='span' sx={{ display: { xs: 'inline', md: 'none' } }}>

@@ -2063,6 +2063,12 @@
       "emptyVisualBody": "Créez un paquet pour commencer à enregistrer ces diagrammes et les réviser."
     },
     "session": {
+      "source": {
+      "from": "de {{document}} · {{section}}",
+      "fromDocument": "de {{document}}",
+      "deleted": "d'un document que vous avez supprimé",
+      "openAria": "Ouvrir {{section}} dans {{document}}"
+      },
       "tagFilter": {
         "noOptions": "Aucune étiquette dans ce paquet",
         "clear": "Effacer les filtres d'étiquettes",
@@ -2147,6 +2153,9 @@
     }
   },
   "books": {
+    "sectionMoved": "Cette section a été renommée ou supprimée : le document s'est ouvert en haut.",
+    "deleteKeepsCards_one": "Sa {{count}} carte reste dans vos paquets.",
+    "deleteKeepsCards_other": "Ses {{count}} cartes restent dans vos paquets.",
     "makeCards": {
       "title": "Créer des cartes",
       "subtitle_one": "{{title}} · {{count}} section",

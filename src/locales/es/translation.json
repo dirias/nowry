@@ -994,6 +994,9 @@
     }
   },
   "books": {
+    "sectionMoved": "Esa sección cambió de nombre o ya no existe, así que el documento se abrió al inicio.",
+    "deleteKeepsCards_one": "Su {{count}} tarjeta se queda en tus mazos.",
+    "deleteKeepsCards_other": "Sus {{count}} tarjetas se quedan en tus mazos.",
     "makeCards": {
       "title": "Crear tarjetas",
       "subtitle_one": "{{title}} · {{count}} sección",
@@ -1272,6 +1275,12 @@
       "imagePreviewError": "No se pudo cargar esa imagen"
     },
     "session": {
+      "source": {
+      "from": "de {{document}} · {{section}}",
+      "fromDocument": "de {{document}}",
+      "deleted": "de un documento que eliminaste",
+      "openAria": "Abrir {{section}} en {{document}}"
+      },
       "tagFilter": {
         "noOptions": "No hay etiquetas en este mazo",
         "clear": "Quitar filtros de etiquetas",

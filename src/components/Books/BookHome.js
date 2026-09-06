@@ -642,7 +642,12 @@ export default function BookHome() {
           onClose={() => setShowWarning(false)}
           onConfirm={handleDeleteBook}
           title={t('books.deleteConfirmTitle')}
-          error_msg={t('books.deleteConfirmMsg')}
+          error_msg={[
+            t('books.deleteConfirmMsg'),
+            bookToDelete?.cards > 0 ? t('books.deleteKeepsCards', { count: bookToDelete.cards }) : null
+          ]
+            .filter(Boolean)
+            .join(' ')}
         />
       )}
 

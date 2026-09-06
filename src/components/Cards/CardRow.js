@@ -7,6 +7,7 @@ import DeleteRounded from '@mui/icons-material/DeleteRounded'
 import { focusRing, identityTile, listRow, oneLine, readout } from '../Common/Form/formStyles'
 import { deckType } from '../Study/deckTypes'
 import MarkToggle from './MarkToggle'
+import SourceReadout from './SourceReadout'
 
 /**
  * A card as one row (PRD US-003): type tile · title with one meta line
@@ -27,7 +28,11 @@ export function formatNextReview(t, iso) {
   return t('cards.manage_content.nextReview.inDays', { count: days })
 }
 
-export default function CardRow({ card, deckName, onPreview, onEdit, onDelete, onMarkChange }) {
+/**
+ * `showSource` — the Struggling group's rows carry the source as a link (D7):
+ * the card the learner keeps failing reopens the notes it was made from.
+ */
+export default function CardRow({ card, deckName, onPreview, onEdit, onDelete, onMarkChange, showSource = false }) {
   const { t } = useTranslation()
   const type = deckType(card.card_type)
   const tags = (card.tags || []).map((tag) => `#${tag}`).join(' ')
@@ -58,6 +63,7 @@ export default function CardRow({ card, deckName, onPreview, onEdit, onDelete, o
         <Typography level='body-xs' sx={{ color: 'text.tertiary', ...readout, fontSize: 'xs', ...oneLine }}>
           {meta}
         </Typography>
+        {showSource && <SourceReadout card={card} link />}
       </Box>
       <Box onClick={(event) => event.stopPropagation()} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
         <MarkToggle card={card} onMarkChange={onMarkChange} />

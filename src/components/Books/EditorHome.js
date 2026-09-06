@@ -4,7 +4,7 @@ import ContentNavigator from '../Editor/ContentNavigator'
 import EditorSkeleton from './EditorSkeleton'
 import useGenerationProgress from '../../hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
-import { useParams, useLocation } from 'react-router-dom'
+import { useParams, useLocation, useSearchParams } from 'react-router-dom'
 import {
   Save,
   Check,
@@ -53,6 +53,7 @@ import LockIcon from '@mui/icons-material/Lock'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import GeneratedCards from '../Cards/GeneratedCards'
 import MakeCardsSheet from './MakeCardsSheet'
+import scrollToHeadingText from '../Editor/scrollToHeadingText'
 import QuestionnaireModal from '../Cards/QuestionnaireModal'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
@@ -106,6 +107,7 @@ const compactOnlySx = { display: { xs: 'inline-flex', md: 'none' } }
 export default function EditorHome() {
   const { id } = useParams()
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useTranslation()
   const { setViewContext } = usePet()
   const { tier, aiUsageCount } = useSubscription()
@@ -314,6 +316,29 @@ export default function EditorHome() {
     },
     [id, bookName, pageSize, autoSaveEnabled]
   )
+
+  // `?section=<heading>` opens the document at that heading (D7). A heading that
+  // no longer exists — renamed or removed — opens at the top and says so (D13).
+  const [sectionNotice, setSectionNotice] = useState(null)
+  const sectionJumpTimers = useRef([])
+  useEffect(() => {
+    const wanted = searchParams.get('section')
+    if (!wanted || loading || tocData.length === 0) return
+    // Clearing the parameter re-runs this effect, so the parameter goes first
+    // and the jumps below are not tied to this run's cleanup.
+    const next = new URLSearchParams(searchParams)
+    next.delete('section')
+    setSearchParams(next, { replace: true })
+    if (!scrollToHeadingText(wanted)) {
+      setSectionNotice(t('books.sectionMoved'))
+      return
+    }
+    // The pagination plugin keeps laying pages out for a moment after the TOC
+    // exists, and each pass moves the heading; the last jump is the one that
+    // lands, so the same jump repeats while the layout settles.
+    sectionJumpTimers.current = [250, 700, 1400].map((ms) => setTimeout(() => scrollToHeadingText(wanted), ms))
+  }, [searchParams, setSearchParams, tocData, loading, t])
+  useEffect(() => () => sectionJumpTimers.current.forEach(clearTimeout), [])
 
   const handleGenerateCards = async (sections = null) => {
     setIsGeneratingCards(true)
@@ -1501,6 +1526,17 @@ export default function EditorHome() {
       )}
 
       {/* Error snackbars for book-wide AI generation */}
+      <Snackbar
+        open={!!sectionNotice}
+        autoHideDuration={6000}
+        onClose={() => setSectionNotice(null)}
+        color='neutral'
+        variant='soft'
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {sectionNotice}
+      </Snackbar>
+
       <Snackbar
         open={!!generateCardsError}
         autoHideDuration={4000}

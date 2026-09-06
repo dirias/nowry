@@ -674,6 +674,9 @@
     }
   },
   "books": {
+    "sectionMoved": "そのセクションは名前が変わったか削除されたため、ドキュメントを先頭で開きました。",
+    "deleteKeepsCards_one": "作成した {{count}} 枚のカードはデッキに残ります。",
+    "deleteKeepsCards_other": "作成した {{count}} 枚のカードはデッキに残ります。",
     "makeCards": {
       "title": "カードを作る",
       "subtitle_one": "{{title}} · {{count}} セクション",
@@ -2028,6 +2031,12 @@
       "emptyVisualBody": "デッキを作成して、この図を保存・復習しましょう。"
     },
     "session": {
+      "source": {
+      "from": "{{document}} · {{section}} より",
+      "fromDocument": "{{document}} より",
+      "deleted": "削除したドキュメントより",
+      "openAria": "{{document}} の {{section}} を開く"
+      },
       "complete": {
         "outsideFilter_other": "タグフィルターの外に、復習待ちのカードがあと{{count}}枚あります。"
       },

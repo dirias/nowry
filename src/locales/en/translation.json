@@ -1247,6 +1247,9 @@
     }
   },
   "books": {
+    "sectionMoved": "That section was renamed or removed, so the document opened at the top.",
+    "deleteKeepsCards_one": "Its {{count}} card stays in your decks.",
+    "deleteKeepsCards_other": "Its {{count}} cards stay in your decks.",
     "makeCards": {
       "title": "Make cards",
       "subtitle_one": "{{title}} · {{count}} section",
@@ -1542,6 +1545,12 @@
       "description": "Description"
     },
     "session": {
+      "source": {
+      "from": "from {{document}} · {{section}}",
+      "fromDocument": "from {{document}}",
+      "deleted": "from a document you deleted",
+      "openAria": "Open {{section}} in {{document}}"
+      },
       "tagFilter": {
         "noOptions": "No tags in this deck",
         "clear": "Clear tag filters",
