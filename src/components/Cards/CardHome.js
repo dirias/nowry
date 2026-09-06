@@ -179,6 +179,32 @@ export default function CardHome() {
     setDeletingDeck(deck)
   }
 
+  // Archive needs no confirm (PRD D18): Restore undoes it and history is kept.
+  // Both deck keys, the cards and the statistics change together.
+  const handleArchiveDeck = async (deck) => {
+    try {
+      await decksService.archive(deck._id)
+      reloadDecks()
+      reloadCards()
+      reloadStatistics()
+    } catch (error) {
+      console.error('Error archiving deck:', error)
+      setErrorSnackbar(error.response?.data?.detail || t('cards.archived.archiveError'))
+    }
+  }
+
+  const handleRestoreDeck = async (deck) => {
+    try {
+      await decksService.restore(deck._id)
+      reloadDecks()
+      reloadCards()
+      reloadStatistics()
+    } catch (error) {
+      console.error('Error restoring deck:', error)
+      setErrorSnackbar(error.response?.data?.detail || t('cards.archived.restoreError'))
+    }
+  }
+
   const confirmDeleteDeck = async () => {
     if (!deletingDeck) return
 
@@ -234,6 +260,8 @@ export default function CardHome() {
         onStudy={handleStudy}
         onBrowse={handleBrowse}
         onEditDeck={handleEditDeck}
+        onArchiveDeck={handleArchiveDeck}
+        onRestoreDeck={handleRestoreDeck}
         onDeleteDeck={handleDeleteDeck}
         onEditCard={handleEditCard}
         onDeleteCard={handleDeleteCard}

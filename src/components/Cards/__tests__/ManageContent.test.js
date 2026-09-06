@@ -23,6 +23,8 @@ jest.mock('../MarkToggle', () => ({ __esModule: true, default: () => <button typ
 jest.mock('../TagsView', () => ({ __esModule: true, default: () => <div data-testid='tags-view' /> }))
 const mockUseGroups = jest.fn()
 jest.mock('../../../hooks/useGroups', () => ({ useGroups: (...args) => mockUseGroups(...args) }))
+const mockUseDeckData = jest.fn()
+jest.mock('../../../hooks/useDeckData', () => ({ useDeckData: (...args) => mockUseDeckData(...args) }))
 jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 
@@ -54,6 +56,8 @@ const defaultProps = () => ({
   cards: [makeCard(), makeCard({ _id: 'c2', title: 'Card 2' })],
   loading: false,
   onEditDeck: jest.fn(),
+  onArchiveDeck: jest.fn(),
+  onRestoreDeck: jest.fn(),
   onDeleteDeck: jest.fn(),
   onEditCard: jest.fn(),
   onDeleteCard: jest.fn(),
@@ -90,7 +94,9 @@ beforeEach(() => {
     error: null,
     reload: jest.fn()
   })
+  mockUseDeckData.mockReset().mockReturnValue({ decks: [], loading: false, error: null, reload: jest.fn() })
   localStorage.clear()
+  sessionStorage.clear()
 })
 
 describe('the toolbar (PRD D5)', () => {
@@ -247,6 +253,53 @@ describe('decks as tiles and rows (PRD D3)', () => {
     fireEvent.click(screen.getByText('deckSettings.menuItem'))
     expect(props.onDeckSettings).toHaveBeenCalledWith(expect.objectContaining({ _id: 'd1' }))
     expect(props.onStudy).not.toHaveBeenCalled()
+  })
+})
+
+describe('MGMT-006 — Archive and the Archived section (PRD D18, US-010)', () => {
+  const archived = [
+    { _id: 'a1', name: 'Old Kanji', deck_type: 'flashcard', total_cards: 48, mastery: 62, archived_at: '2026-08-12T10:00:00Z' }
+  ]
+
+  it('offers Archive from the kebab and reports it to the owner without a confirm', () => {
+    const props = defaultProps()
+    render(<ManageContent {...props} />)
+    fireEvent.click(screen.getAllByLabelText(/cards\.manage_content\.aria\.deckActions/)[0])
+    fireEvent.click(screen.getByText('cards.deck.archive'))
+    expect(props.onArchiveDeck).toHaveBeenCalledWith(expect.objectContaining({ _id: 'd1' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('shows no Archived row while nothing is archived, and never on the Cards view', () => {
+    const first = render(<ManageContent {...defaultProps()} />)
+    expect(screen.queryByTestId('archived-decks')).not.toBeInTheDocument()
+    first.unmount()
+
+    mockUseDeckData.mockReturnValue({ decks: archived, loading: false })
+    mockSearch = new URLSearchParams('tab=cards')
+    render(<ManageContent {...defaultProps()} />)
+    expect(screen.queryByTestId('archived-decks')).not.toBeInTheDocument()
+  })
+
+  it('puts the Archived row at the foot of both layouts, and Restore reaches the owner', () => {
+    mockUseDeckData.mockReturnValue({ decks: archived, loading: false })
+    const props = defaultProps()
+    const first = render(<ManageContent {...props} />)
+    const section = screen.getByTestId('archived-decks')
+    expect(mockUseDeckData).toHaveBeenCalledWith(undefined, { archived: true })
+    const tiles = screen.getAllByTestId('deck-tile')
+    expect(tiles[tiles.length - 1].compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    first.unmount()
+
+    render(<ManageContent {...props} />)
+    fireEvent.click(screen.getByLabelText('cards.manage_content.aria.listView'))
+    const rows = screen.getAllByTestId('deck-row')
+    expect(rows).toHaveLength(2) // the active rows only; the archived list is closed
+    const foot = screen.getByTestId('archived-decks')
+    expect(rows[1].compareDocumentPosition(foot) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    fireEvent.click(within(foot).getByRole('button', { expanded: false }))
+    fireEvent.click(screen.getByRole('button', { name: 'study.deck.restoreAria:{"name":"Old Kanji"}' }))
+    expect(props.onRestoreDeck).toHaveBeenCalledWith(expect.objectContaining({ _id: 'a1' }))
   })
 })
 

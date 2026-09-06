@@ -198,6 +198,9 @@
       "browse": "Parcourir",
       "browseAria": "Parcourir {{name}}",
       "upToDate": "À jour",
+      "archivedOn": "archivé le {{date}}",
+      "historyKept": "Historique conservé",
+      "restoreAria": "Restaurer {{name}}",
       "dueIn": "Dans {{hours}} h",
       "mastery": "Maîtrise",
       "newCount": "{{count}} nouveau"
@@ -1937,6 +1940,16 @@
     }
   },
   "cards": {
+    "archived": {
+      "title": "Archivés",
+      "meta": "Hors d'Aujourd'hui, des prévisions et de tous les comptes · historique conservé",
+      "archiveError": "Impossible d'archiver le paquet.",
+      "restoreError": "Impossible de restaurer le paquet."
+    },
+    "deck": {
+      "archive": "Archiver",
+      "restore": "Restaurer"
+    },
     "add": "Ajouter",
     "manage_content": {
       "aria": {

@@ -201,6 +201,9 @@
       "browse": "Browse",
       "browseAria": "Browse {{name}}",
       "upToDate": "Up to date",
+      "archivedOn": "archived {{date}}",
+      "historyKept": "History kept",
+      "restoreAria": "Restore {{name}}",
       "dueIn": "Due in {{hours}}h",
       "mastery": "Mastery",
       "newCount": "{{count}} new"
@@ -1417,6 +1420,12 @@
     "coverImagePlaceholder": "https://example.com/image.jpg"
   },
   "cards": {
+    "archived": {
+      "title": "Archived",
+      "meta": "Out of Today, the forecast and every count · history kept",
+      "archiveError": "Couldn't archive the deck.",
+      "restoreError": "Couldn't restore the deck."
+    },
     "add": "Add",
     "title": "Deck Library",
     "subtitle": "Manage your flashcards, quizzes, and visual learning materials",
@@ -1574,6 +1583,8 @@
     "deck": {
       "edit": "Edit",
       "delete": "Delete",
+      "archive": "Archive",
+      "restore": "Restore",
       "addCard": "Add card",
       "preview": "Preview"
     },

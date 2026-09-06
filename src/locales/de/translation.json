@@ -147,6 +147,9 @@
       "browse": "Durchsehen",
       "browseAria": "{{name}} durchsehen",
       "upToDate": "Auf dem Stand",
+      "archivedOn": "archiviert am {{date}}",
+      "historyKept": "Verlauf erhalten",
+      "restoreAria": "{{name}} wiederherstellen",
       "dueIn": "In {{hours}} h fällig"
     },
     "views": {
@@ -1917,6 +1920,16 @@
     }
   },
   "cards": {
+    "archived": {
+      "title": "Archiviert",
+      "meta": "Nicht in Heute, der Vorschau oder einer Zählung · Verlauf bleibt erhalten",
+      "archiveError": "Der Stapel konnte nicht archiviert werden.",
+      "restoreError": "Der Stapel konnte nicht wiederhergestellt werden."
+    },
+    "deck": {
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen"
+    },
     "add": "Hinzufügen",
     "manage_content": {
       "aria": {

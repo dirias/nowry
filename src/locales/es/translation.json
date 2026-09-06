@@ -142,6 +142,9 @@
       "browse": "Explorar",
       "browseAria": "Explorar {{name}}",
       "upToDate": "Al día",
+      "archivedOn": "archivado el {{date}}",
+      "historyKept": "Historial conservado",
+      "restoreAria": "Restaurar {{name}}",
       "dueIn": "En {{hours}} h"
     },
     "views": {
@@ -1161,6 +1164,12 @@
     "coverImagePlaceholder": "https://example.com/image.jpg"
   },
   "cards": {
+    "archived": {
+      "title": "Archivados",
+      "meta": "Fuera de Hoy, del pronóstico y de todos los recuentos · historial conservado",
+      "archiveError": "No se pudo archivar el mazo.",
+      "restoreError": "No se pudo restaurar el mazo."
+    },
     "add": "Añadir",
     "title": "Biblioteca de Mazos",
     "subtitle": "Gestiona tus tarjetas, cuestionarios y material visual",
@@ -1313,6 +1322,8 @@
     "deck": {
       "edit": "Editar",
       "delete": "Eliminar",
+      "archive": "Archivar",
+      "restore": "Restaurar",
       "addCard": "Agregar tarjeta",
       "preview": "Vista previa"
     },

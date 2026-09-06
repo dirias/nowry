@@ -7,6 +7,7 @@ import CardPreviewModal from './CardPreviewModal'
 import DeckAnalysisPanel from './DeckAnalysisPanel'
 import DeckActionsMenu from './DeckActionsMenu'
 import DeckTile from './DeckTile'
+import ArchivedDecks from './ArchivedDecks'
 import CardRow from './CardRow'
 import LibraryToolbar, { LIBRARY_TABS } from './LibraryToolbar'
 import TagsView from './TagsView'
@@ -31,6 +32,8 @@ export default function ManageContent({
   cards,
   loading = false,
   onEditDeck,
+  onArchiveDeck,
+  onRestoreDeck,
   onDeleteDeck,
   onEditCard,
   onDeleteCard,
@@ -144,6 +147,7 @@ export default function ManageContent({
       onEditDeck={onEditDeck}
       onPublishDeck={onPublishDeck}
       onAnalyzeDeck={(id) => setActiveDeckAnalysis((prev) => (prev === id ? null : id))}
+      onArchiveDeck={onArchiveDeck}
       onDeleteDeck={onDeleteDeck}
       tier={tier}
       openUpgradeModal={openUpgradeModal}
@@ -251,6 +255,10 @@ export default function ManageContent({
               ))}
             </Box>
           )}
+          {/* The foot of the Decks view in both layouts (PRD D18): absent at zero. */}
+          <Box sx={{ mt: 3 }}>
+            <ArchivedDecks onRestore={onRestoreDeck} />
+          </Box>
         </Box>
       )}
 

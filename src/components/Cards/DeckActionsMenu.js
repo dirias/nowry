@@ -6,6 +6,7 @@ import AddRounded from '@mui/icons-material/AddRounded'
 import SettingsRounded from '@mui/icons-material/SettingsRounded'
 import EditRounded from '@mui/icons-material/EditRounded'
 import DeleteRounded from '@mui/icons-material/DeleteRounded'
+import ArchiveRounded from '@mui/icons-material/ArchiveRounded'
 import CloudUploadRounded from '@mui/icons-material/CloudUploadRounded'
 import PublicRounded from '@mui/icons-material/PublicRounded'
 import PsychologyRounded from '@mui/icons-material/PsychologyRounded'
@@ -15,6 +16,9 @@ import { focusRing } from '../Common/Form/formStyles'
 /**
  * The one menu behind every deck's kebab — tile and list row alike (PRD D3).
  * It used to be written twice, once per shape; one deck, one menu.
+ *
+ * Archive sits above Delete, after a hairline (PRD D18, ADR-023 point 4): a
+ * state the deck goes into and comes back from, beside the verb that ends it.
  */
 export default function DeckActionsMenu({
   deck,
@@ -23,6 +27,7 @@ export default function DeckActionsMenu({
   onEditDeck,
   onPublishDeck,
   onAnalyzeDeck,
+  onArchiveDeck,
   onDeleteDeck,
   tier,
   openUpgradeModal,
@@ -98,6 +103,13 @@ export default function DeckActionsMenu({
             </Chip>
           </MenuItem>
         )}
+        <ListDivider />
+        <MenuItem onClick={stop(onArchiveDeck)} sx={focusRing}>
+          <ListItemDecorator>
+            <ArchiveRounded />
+          </ListItemDecorator>
+          {t('cards.deck.archive')}
+        </MenuItem>
         <ListDivider />
         <MenuItem onClick={stop(onDeleteDeck)} color='danger' sx={focusRing}>
           <ListItemDecorator>

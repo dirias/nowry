@@ -146,6 +146,9 @@
       "browse": "閲覧",
       "browseAria": "{{name}} を閲覧",
       "upToDate": "最新の状態",
+      "archivedOn": "{{date}}にアーカイブ",
+      "historyKept": "履歴は保持",
+      "restoreAria": "{{name}} を復元",
       "dueIn": "{{hours}}時間後"
     },
     "views": {
@@ -2034,6 +2037,16 @@
     }
   },
   "cards": {
+    "archived": {
+      "title": "アーカイブ済み",
+      "meta": "今日・予測・すべての件数から除外 · 履歴は保持",
+      "archiveError": "デッキをアーカイブできませんでした。",
+      "restoreError": "デッキを復元できませんでした。"
+    },
+    "deck": {
+      "archive": "アーカイブ",
+      "restore": "復元"
+    },
     "add": "追加",
     "manage_content": {
       "aria": {
