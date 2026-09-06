@@ -998,6 +998,8 @@
   },
   "books": {
     "lib": {
+      "limitReadout": "{{count}} de {{limit}} libros · {{plan}} para {{next}}",
+      "unlimited": "ilimitados",
       "kindAria": "Qué documentos mostrar",
       "kind": {
         "all": "Todos",
@@ -1119,29 +1121,8 @@
       "titlePlaceholder": "Escribe el título del libro..."
     },
     "title": "Libros",
-    "library": "Biblioteca de libros",
-    "subtitle": "Tu colección personal",
     "create": "Crear Libro",
-    "totalBooks": "Total Libros",
-    "updatedWeek": "Actualizados esta semana",
-    "totalPages": "Total Páginas",
-    "searchPlaceholder": "Buscar por título, autor o ISBN...",
-    "dropTitle": "Arrastra archivos o haz clic para importar",
-    "dropSubtitle": "Soporta PDF, DOCX, DOC, TXT",
-    "emptyTitle": "Tu biblioteca está vacía",
-    "emptySubtitle": "Crea un nuevo libro o importa documentos para empezar",
-    "noMatches": "No hay libros que coincidan con \"{{query}}\"",
-    "unknownAuthor": "Autor Desconocido",
-    "updated": "Actualizado {{date}}",
-    "edit": "Editar",
     "delete": "Eliminar",
-    "deleteConfirmTitle": "Confirmar Eliminación",
-    "deleteConfirmMsg": "¿Deseas eliminar este libro y todas sus páginas?",
-    "successCreate": "Libro creado exitosamente",
-    "successDelete": "Libro eliminado exitosamente",
-    "successImport": "¡{{count}} libro importado exitosamente! {{pages}} páginas totales.",
-    "successImport_one": "¡{{count}} libro importado exitosamente! {{pages}} páginas totales.",
-    "successImport_other": "¡{{count}} libros importados exitosamente! {{pages}} páginas totales.",
     "errorImport": "Error al procesar el archivo. Por favor inténtalo de nuevo.",
     "untitled": "Libro sin título",
     "createTitle": "Nuevo libro",
@@ -1165,11 +1146,6 @@
     "saveFailed": "No se pudieron guardar tus cambios",
     "publishFailed": "No se pudo publicar tu libro",
     "unpublishFailed": "No se pudo despublicar tu libro",
-    "importSuccessTitle": "Importación completada",
-    "openBook": "Abrir libro",
-    "continueToLibrary": "Volver a la biblioteca",
-    "clearFilters": "Quitar filtros",
-    "errorFetch": "Error al cargar los libros",
     "pageCount_one": "{{count}} página",
     "pageCount_other": "{{count}} páginas",
     "coverColors": {
@@ -1512,7 +1488,6 @@
       "emptyVisualBody": "Crea un mazo para empezar a guardar estos diagramas y repasarlos."
     },
     "common": {
-    "noTag": "Sin etiqueta",
       "addTags": "Añadir etiquetas",
       "chooseDeck": "Elegir un mazo",
       "typeFlashcard": "Tarjeta",
@@ -1537,6 +1512,7 @@
   "filters": {
     "typeReadout": "Tipo · {{count}}",
     "tagsReadout": "Etiquetas · {{count}}",
+    "noTag": "Sin etiqueta",
     "clear": "Quitar",
     "typeMenuAria": "Filtrar por tipo",
     "toggle": "Alternar filtros",

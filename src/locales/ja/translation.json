@@ -677,6 +677,8 @@
   },
   "books": {
     "lib": {
+      "limitReadout": "ブック {{count}} / {{limit}} 冊 · {{plan}} なら {{next}}",
+      "unlimited": "無制限",
       "kindAria": "表示するドキュメント",
       "kind": {
         "all": "すべて",
@@ -788,9 +790,6 @@
       "generating": "カードを作成中…"
     },
     "autosave": "自動保存",
-    "emptySubtitle": "新しいブックを作成するか、ドキュメントをインポートして始めましょう",
-    "noResults": "\"{{term}}\" に一致するブックは見つかりませんでした",
-    "noMatches": "\"{{query}}\" に一致するブックはありません",
     "untitled": "無題の本",
     "createTitle": "新しい本",
     "createAction": "作成して書く",
@@ -813,11 +812,6 @@
     "saveFailed": "変更を保存できませんでした",
     "publishFailed": "本を公開できませんでした",
     "unpublishFailed": "本の公開を解除できませんでした",
-    "importSuccessTitle": "インポート完了",
-    "openBook": "本を開く",
-    "continueToLibrary": "ライブラリに戻る",
-    "clearFilters": "フィルターをクリア",
-    "errorFetch": "本の読み込みエラー",
     "pageCount_other": "{{count}} ページ",
     "coverColors": {
       "blue": "青",
@@ -831,7 +825,6 @@
     },
     "coverImagePlaceholder": "https://example.com/image.jpg",
     "errorImport": "ファイルの処理中にエラーが発生しました。もう一度お試しください。",
-    "unknownAuthor": "著者不明",
     "editor": {
       "titlePlaceholder": "本のタイトルを入力…",
       "contentPlaceholder": "書き始めましょう…",
@@ -2834,7 +2827,6 @@
     "deckPlaceholder": "デッキを選択",
     "deckNone": "デッキなし",
     "deckEmpty": "デッキはまだありません。"
-    "noTag": "タグなし",
   },
   "generation": {
     "elapsedSeconds": "経過 {{seconds}} 秒"
@@ -2842,6 +2834,7 @@
   "filters": {
     "typeReadout": "種類 · {{count}}",
     "tagsReadout": "タグ · {{count}}",
+    "noTag": "タグなし",
     "clear": "クリア",
     "typeMenuAria": "種類で絞り込む",
     "marked": "マーク済み"

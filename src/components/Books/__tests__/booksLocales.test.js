@@ -64,17 +64,9 @@ const FORM_KEYS = [
 ]
 
 /** Keys the library surface resolves, added or repaired by this phase. */
-const LIBRARY_KEYS = [
-  'importSuccessTitle',
-  'openBook',
-  'continueToLibrary',
-  'clearFilters',
-  'errorFetch',
-  'errorImport',
-  'unknownAuthor',
-  'pageCount_one',
-  'pageCount_other'
-]
+// The library's own strings live under `books.lib` (BOOK-007..009); these are
+// the ones still directly under `books` that the library and the editor share.
+const LIBRARY_KEYS = ['errorImport', 'deleteKeepsCards_one', 'deleteKeepsCards_other', 'sectionMoved', 'pageCount_one', 'pageCount_other']
 
 const COLOR_KEYS = ['blue', 'red', 'green', 'orange', 'purple', 'pink', 'black', 'grey']
 

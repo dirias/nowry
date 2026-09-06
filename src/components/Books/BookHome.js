@@ -14,7 +14,7 @@ import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import useBooks from '../../hooks/useBooks'
 import formatRelativeDate from '../../utils/formatRelativeDate'
-import { listRow } from '../Common/Form/formStyles'
+import { listRow, readout } from '../Common/Form/formStyles'
 import ContinueObject from './ContinueObject'
 import AddMenu from './AddMenu'
 import DocumentsToolbar from './DocumentsToolbar'
@@ -23,6 +23,7 @@ import DocumentTile from './DocumentTile'
 import DocumentActionsMenu from './DocumentActionsMenu'
 import DeleteDocumentDialog from './DeleteDocumentDialog'
 import { filterDocuments, kindCounts, pickContinue, resumeHref, sortDocuments, tagCounts } from './libraryQuery'
+import { BOOK_LIMITS, NEXT_PLAN, bookLimitFor } from '../../config/planLimits'
 
 const VIEW_KEY = 'book_view_mode'
 
@@ -71,6 +72,11 @@ export default function BookHome() {
   }, [])
 
   const continueDoc = useMemo(() => pickContinue(allBooks), [allBooks])
+  // The plan's book limit shows only when reached (D3): a readout on the title row,
+  // never a gate — Add still opens and lands on the create sheet's plan-limit case.
+  const limit = bookLimitFor(tier)
+  const atLimit = !loading && Number.isFinite(limit) && allBooks.length >= limit
+  const nextPlan = NEXT_PLAN[tier]
   const counts = useMemo(() => kindCounts(allBooks), [allBooks])
   const tags = useMemo(() => tagCounts(allBooks), [allBooks])
   const documents = useMemo(
@@ -202,9 +208,21 @@ export default function BookHome() {
 
       {/* Title row: the page on the left rail, Add ▾ on the right (D3, §15.7) */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
-        <Typography level='h2' component='h1'>
-          {t('books.title')}
-        </Typography>
+        <Stack direction='row' spacing={1.5} alignItems='baseline' sx={{ minWidth: 0 }}>
+          <Typography level='h2' component='h1'>
+            {t('books.title')}
+          </Typography>
+          {atLimit && (
+            <Typography level='body-sm' sx={{ ...readout, color: 'text.secondary' }} data-testid='book-limit'>
+              {t('books.lib.limitReadout', {
+                count: allBooks.length,
+                limit,
+                plan: t(`plans.${nextPlan}`),
+                next: Number.isFinite(BOOK_LIMITS[nextPlan]) ? BOOK_LIMITS[nextPlan] : t('books.lib.unlimited')
+              })}
+            </Typography>
+          )}
+        </Stack>
         <AddMenu onNew={openCreate} onImport={openFilePicker} />
       </Box>
 

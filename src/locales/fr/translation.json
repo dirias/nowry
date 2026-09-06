@@ -2157,6 +2157,8 @@
   },
   "books": {
     "lib": {
+      "limitReadout": "{{count}} livres sur {{limit}} · {{plan}} pour {{next}}",
+      "unlimited": "illimité",
       "kindAria": "Quels documents afficher",
       "kind": {
         "all": "Tous",
@@ -2299,11 +2301,6 @@
     "saveFailed": "Impossible d'enregistrer vos modifications",
     "publishFailed": "Impossible de publier votre livre",
     "unpublishFailed": "Impossible de dépublier votre livre",
-    "importSuccessTitle": "Importation terminée",
-    "openBook": "Ouvrir le livre",
-    "continueToLibrary": "Retour à la bibliothèque",
-    "clearFilters": "Effacer les filtres",
-    "errorFetch": "Erreur lors du chargement des livres",
     "pageCount_one": "{{count}} page",
     "pageCount_other": "{{count}} pages",
     "coverColors": {
@@ -2317,8 +2314,7 @@
       "grey": "Gris"
     },
     "coverImagePlaceholder": "https://example.com/image.jpg",
-    "errorImport": "Erreur lors du traitement du fichier. Veuillez réessayer.",
-    "unknownAuthor": "Auteur inconnu"
+    "errorImport": "Erreur lors du traitement du fichier. Veuillez réessayer."
   },
   "reports": {
     "modal": {
@@ -2917,11 +2913,11 @@
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s écoulées"
-    "noTag": "Sans étiquette",
   },
   "filters": {
     "typeReadout": "Type · {{count}}",
     "tagsReadout": "Étiquettes · {{count}}",
+    "noTag": "Sans étiquette",
     "clear": "Effacer",
     "typeMenuAria": "Filtrer par type",
     "marked": "Marquées"

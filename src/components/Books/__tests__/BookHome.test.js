@@ -18,7 +18,8 @@ jest.mock('react-dropzone', () => ({
   useDropzone: () => ({ getRootProps: () => ({}), getInputProps: () => ({}), isDragActive: false, open: jest.fn() })
 }))
 jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', username: 'didier' } }) }))
-jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'plus' }) }))
+let mockTier = 'plus'
+jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: mockTier }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 jest.mock('../BookCreateSheet', () => () => null)
 jest.mock('../BookEditSheet', () => () => null)
@@ -56,6 +57,7 @@ const renderPage = () =>
 beforeEach(() => {
   localStorage.setItem('book_view_mode', 'list')
   mockUseBooks.mockReset()
+  mockTier = 'plus'
 })
 
 describe('BookHome (BOOK-008)', () => {
@@ -81,6 +83,14 @@ describe('BookHome (BOOK-008)', () => {
     expect(screen.getAllByTestId('document-row')).toHaveLength(2)
     expect(screen.getByTestId('documents-kind')).toHaveTextContent('books.lib.kind.written1')
     expect(screen.getByTestId('documents-kind')).toHaveTextContent('books.lib.kind.imported1')
+  })
+
+  it('at the plan limit the title row carries the readout, and Add still opens (D3)', () => {
+    mockTier = 'free'
+    mockUseBooks.mockReturnValue({ books: [BOOKS[0], BOOKS[1], { ...BOOKS[0], _id: 'x' }], loading: false, error: null, reload: jest.fn() })
+    renderPage()
+    expect(screen.getByTestId('book-limit')).toHaveTextContent('books.lib.limitReadout:3')
+    expect(screen.getByRole('button', { name: 'books.lib.addAria' })).toBeInTheDocument()
   })
 
   it('error: says the list could not load', () => {

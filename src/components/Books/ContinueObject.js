@@ -137,10 +137,10 @@ export default function ContinueObject({
         )}
         <span>{t('books.lib.editedAt', { when: formatRelativeDate?.(book.updated_at) })}</span>
         {book.word_count != null && book.section_count != null && (
-          <>
+          <Box component='span' sx={{ display: { xs: 'none', sm: 'contents' } }}>
             <Dot />
             <span>{t('books.lib.wordsInSections', { words: number(book.word_count), count: book.section_count })}</span>
-          </>
+          </Box>
         )}
         <Dot />
         <span>{book.cards > 0 ? t('books.lib.cards', { count: book.cards }) : t('books.lib.noCardsYet')}</span>
