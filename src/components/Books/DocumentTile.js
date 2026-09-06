@@ -14,7 +14,7 @@ import { cardsReadout, measureOf, metaLine } from './documentCopy'
 export default function DocumentTile({ book, relative, username, onOpen, actions }) {
   const { t, i18n } = useTranslation()
   const meta = metaLine(t, book, relative, { username, locale: i18n.language })
-  const { strong, rest } = cardsReadout(t, book)
+  const readoutText = cardsReadout(t, book)
   const pct = measureOf(book)
   const open = () => onOpen?.(book)
   return (
@@ -66,22 +66,26 @@ export default function DocumentTile({ book, relative, username, onOpen, actions
           {actions}
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-        <Box sx={{ ...measureTrack, width: 'auto', flex: 1 }} aria-hidden='true'>
-          <Box sx={measureFill(pct ?? 0, book.cover_color || 'primary.solidBg')} />
-        </Box>
-        <Typography level='body-sm' sx={{ ...readout, color: 'text.secondary', flexShrink: 0, ...tabularNums }}>
-          {strong && (
-            <>
-              <Typography component='span' level='body-sm' sx={{ color: 'text.primary', fontWeight: 'md' }}>
-                {strong}
-              </Typography>
-              <span aria-hidden='true'> · </span>
-            </>
+      {(pct != null || readoutText) && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+          {pct != null && (
+            <Box sx={{ ...measureTrack, width: 'auto', flex: 1 }} aria-hidden='true'>
+              <Box sx={measureFill(pct, book.cover_color || 'primary.solidBg')} />
+            </Box>
           )}
-          <span>{rest}</span>
-        </Typography>
-      </Box>
+          <Typography level='body-sm' sx={{ ...readout, color: 'text.secondary', flexShrink: 0, ...tabularNums }}>
+            {readoutText?.strong && (
+              <>
+                <Typography component='span' level='body-sm' sx={{ color: 'text.primary', fontWeight: 'md' }}>
+                  {readoutText.strong}
+                </Typography>
+                <span aria-hidden='true'> · </span>
+              </>
+            )}
+            <span>{readoutText?.rest}</span>
+          </Typography>
+        </Box>
+      )}
     </Box>
   )
 }

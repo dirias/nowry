@@ -13,7 +13,7 @@ import { cardsReadout, measureOf, metaLine } from './documentCopy'
 export default function DocumentRow({ book, relative, username, onOpen, actions }) {
   const { t, i18n } = useTranslation()
   const meta = metaLine(t, book, relative, { username, locale: i18n.language })
-  const { strong, rest } = cardsReadout(t, book)
+  const readoutText = cardsReadout(t, book)
   const pct = measureOf(book)
   const open = () => onOpen?.(book)
   return (
@@ -40,27 +40,32 @@ export default function DocumentRow({ book, relative, username, onOpen, actions 
           {meta}
         </Typography>
       </Box>
+      {/* The slot keeps its width so titles and keys stay aligned; it draws only when there is something to measure */}
       <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.25, width: 110, flexShrink: 0 }} aria-hidden='true'>
-        <Box sx={measureTrack}>
-          <Box sx={measureFill(pct ?? 0, book.cover_color || 'primary.solidBg')} />
-        </Box>
-        <Typography level='body-xs' sx={{ ...readout, fontSize: 'xs', width: 34, textAlign: 'right' }}>
-          {pct == null ? '' : `${pct}%`}
-        </Typography>
+        {pct != null && (
+          <>
+            <Box sx={measureTrack}>
+              <Box sx={measureFill(pct, book.cover_color || 'primary.solidBg')} />
+            </Box>
+            <Typography level='body-xs' sx={{ ...readout, fontSize: 'xs', width: 34, textAlign: 'right' }}>
+              {`${pct}%`}
+            </Typography>
+          </>
+        )}
       </Box>
       <Typography
         level='body-sm'
         sx={{ ...readout, color: 'text.secondary', width: { xs: 'auto', sm: 130 }, textAlign: 'right', flexShrink: 0, ...tabularNums }}
       >
-        {strong && (
+        {readoutText?.strong && (
           <>
             <Typography component='span' level='body-sm' sx={{ color: 'text.primary', fontWeight: 'md' }}>
-              {strong}
+              {readoutText.strong}
             </Typography>
             <span aria-hidden='true'> · </span>
           </>
         )}
-        <span>{rest}</span>
+        <span>{readoutText?.rest}</span>
       </Typography>
       <Box sx={{ display: { xs: 'none', sm: 'flex' }, width: 72, justifyContent: 'flex-end', flexShrink: 0 }}>
         <Button

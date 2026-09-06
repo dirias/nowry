@@ -65,9 +65,17 @@ describe('documentCopy (BOOK-008, D6–D8)', () => {
     expect(measureOf(IMPORTED)).toBe(47)
   })
 
-  it('names the gap and draws no measure for an unknown count', () => {
-    expect(cardsReadout(t, { ...WRITTEN, cards: 0, due: 0 })).toEqual({ strong: null, rest: 'books.lib.noCardsYet' })
+  it('stays silent on a document without cards — no readout, no measure (D8); the gap is named once, on the summary object', () => {
+    expect(cardsReadout(t, { ...WRITTEN, cards: 0, due: 0 })).toBeNull()
+    expect(measureOf({ ...WRITTEN, cards: 0 })).toBeNull()
     expect(measureOf({ ...WRITTEN, section_count: null })).toBeNull()
+    expect(cardsReadout(t, { ...IMPORTED, page_count: null, cards: 0 })).toBeNull()
+  })
+
+  it('an empty row keeps its slots but says nothing in them', () => {
+    render(<DocumentRow book={{ ...WRITTEN, cards: 0, due: 0 }} relative={rel} />)
+    expect(screen.queryByText(/noCardsYet/)).toBeNull()
+    expect(screen.queryByText(/%/)).toBeNull()
   })
 })
 
