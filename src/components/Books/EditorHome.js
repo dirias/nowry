@@ -1465,6 +1465,11 @@ export default function EditorHome() {
       {showGeneratedCards && (
         <GeneratedCards
           cards={generatedCards}
+          source={{
+            source_book_id: String(book?._id || book?.id || ''),
+            source_book_title: book?.title || bookName || '',
+            source_section: null
+          }}
           book={book}
           onCancel={() => {
             setShowGeneratedCards(false)

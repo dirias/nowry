@@ -307,18 +307,16 @@ export const cardsService = {
   },
 
   /**
-   * Generate flashcards from full book content (Plus+ only)
+   * Generate flashcards from a document (Plus+ only).
    * @param {string} bookId - Book ID
-   * @returns {Promise<{cards: Array<{title: string, content: string}>}>}
+   * @param {number[]} [sections] - Section indexes from booksService.getSections (BOOK-001 D4);
+   *   absent = the whole document. With sections every card carries `source_section`.
+   * @returns {Promise<{cards: Array<{title: string, content: string, source_section?: object}>, source_book_id?: string, source_book_title?: string}>}
    */
-  async generateFromBook(bookId) {
-    const { data } = await apiClient.post(
-      ENDPOINTS.studyCards.generateFromBook,
-      {
-        book_id: bookId
-      },
-      { timeout: 120000 }
-    )
+  async generateFromBook(bookId, sections = null) {
+    const body = { book_id: bookId }
+    if (Array.isArray(sections) && sections.length) body.sections = sections
+    const { data } = await apiClient.post(ENDPOINTS.studyCards.generateFromBook, body, { timeout: 120000 })
     return data
   },
 

@@ -71,6 +71,8 @@ import { CalloutNode } from '../../nodes/CalloutNode'
 // available in reading mode iff its handler never writes to the open Lexical document.
 import { writesToDocument } from '../Menu/TextMenu'
 // Heavy UI Components (Lazy Loaded for performance)
+import { resolveCardSource } from './enclosingHeading'
+
 const StudyCard = React.lazy(() => import('../Cards/GeneratedCards'))
 const QuestionnaireModal = React.lazy(() => import('../Cards/QuestionnaireModal'))
 const VisualizerModal = React.lazy(() => import('../Cards/VisualizerModal'))
@@ -259,6 +261,8 @@ export default function Editor({
   const [showVisualizer, setShowVisualizer] = useState(false)
   const [showDiagramPanel, setShowDiagramPanel] = useState(false)
   const [selectedText, setSelectedText] = useState('')
+  // The book→cards stamp for the cards generated from the current selection (BOOK-002).
+  const [cardSource, setCardSource] = useState(null)
   const [cards, setCards] = useState([])
   // SSE card generation stream state
   const cardStreamAbortRef = useRef(null)
@@ -643,7 +647,11 @@ export default function Editor({
           const captured = commentAnchorPluginRef.current?.openComposerForSelection()
           if (!captured) setError(t('comments.errors.selectionLost'))
         } else if (option === 'create_study_card' && textToProcess) {
+          // Read the selection's section NOW — the dialog steals focus — then let the
+          // server resolve its ordinal and hash while the cards stream (BOOK-002).
+          const pendingSource = resolveCardSource({ book, editor: editorInstanceRef.current, getSections: booksService.getSections })
           startCardGeneration(textToProcess, 'auto')
+          setCardSource(await pendingSource)
         } else if (option === 'create_questionnaire' && textToProcess) {
           const response = await quizzesService.generate(textToProcess, 5, 'Medium')
           setQuestionnaireData(response)
@@ -651,7 +659,9 @@ export default function Editor({
         } else if (option === 'create_visual_content' && textToProcess) {
           setShowVisualizer(true)
         } else if (option === 'extract_vocabulary' && textToProcess) {
+          const pendingSource = resolveCardSource({ book, editor: editorInstanceRef.current, getSections: booksService.getSections })
           startCardGeneration(textToProcess, 'auto', EXTRACT_VOCABULARY_PROMPT)
+          setCardSource(await pendingSource)
         } else if (option === 'expand_with_ai' && textToProcess) {
           setIsExpandingText(true)
           try {
@@ -939,6 +949,7 @@ export default function Editor({
               <StudyCard
                 cards={cards}
                 book={book}
+                source={cardSource}
                 onCancel={handleCardModalCancel}
                 isStreaming={isCardStreaming}
                 streamError={cardStreamError}

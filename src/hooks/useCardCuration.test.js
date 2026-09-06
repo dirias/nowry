@@ -25,6 +25,15 @@ const EMPTY = { entries: [], source: [], nextId: 0 }
 
 const titlesOf = (state) => state.entries.map((entry) => entry.title)
 
+describe('the source stamp (BOOK-002)', () => {
+  it('rides the entry from the wire shape to the save, and is null when absent', () => {
+    const stamped = { title: 'q', content: 'a', source_section: { heading: 'Particles', index: 1, hash: 'h' } }
+    const state = syncEntries(EMPTY, [stamped, A])
+    expect(state.entries[0].source_section).toEqual({ heading: 'Particles', index: 1, hash: 'h' })
+    expect(state.entries[1].source_section).toBeNull()
+  })
+})
+
 describe('syncEntries — append vs reset', () => {
   it('builds an entry per card on the first arrival, every one kept', () => {
     const state = syncEntries(EMPTY, [A, B])
@@ -98,7 +107,7 @@ describe('syncEntries — append vs reset', () => {
   it('keeps the generated original beside the working text', () => {
     const state = syncEntries(EMPTY, [A])
 
-    expect(state.entries[0].original).toEqual({ title: A.title, content: A.content })
+    expect(state.entries[0].original).toEqual({ title: A.title, content: A.content, source_section: null })
   })
 })
 

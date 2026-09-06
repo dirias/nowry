@@ -54,6 +54,8 @@ const REGENERATE_COUNT_OPTIONS = [3, 5, 10, 20]
  * @param {object}   props
  * @param {Array}    props.cards               Generated cards, `{title, content}`.
  * @param {object}   [props.book]              Source book, when the cards came from one.
+ * @param {object}   [props.source]            The book→cards stamp (BOOK-002): `{ source_book_id,
+ *   source_book_title, source_section }`; a card's own `source_section` (section-generated) wins.
  * @param {string}   [props.newDeckNameDefault] Pre-fill for the inline create-deck name.
  *   Defaults to the book's title, which is where every pre-existing caller got it.
  * @param {Function} [props.onSaved]           Called with the number of cards actually
@@ -64,6 +66,7 @@ const REGENERATE_COUNT_OPTIONS = [3, 5, 10, 20]
 export default function GeneratedCards({
   cards = [],
   book,
+  source = null,
   newDeckNameDefault,
   onCancel,
   onSaved,
@@ -194,6 +197,18 @@ export default function GeneratedCards({
   // Sequential inserts (not Promise.all) so a mid-sequence plan-limit 403
   // stops cleanly with an accurate saved count — modal stays open,
   // selections preserved, backend remains the authority on the limit.
+  // The stamp every saved card carries when the cards came from a document
+  // (docs/prd-book-cards.md D1). A section-generated card's own stamp wins over
+  // the selection's; a hand-typed card in a dialog with no source gets nothing.
+  const sourceFields = (entry) =>
+    source?.source_book_id
+      ? {
+          source_book_id: source.source_book_id,
+          source_book_title: source.source_book_title ?? null,
+          source_section: entry.source_section ?? source.source_section ?? null
+        }
+      : {}
+
   const handleSaveCards = async () => {
     const { selectedDeckId, allTags } = saveToDeck
     if (!selectedDeckId) return
@@ -212,7 +227,8 @@ export default function GeneratedCards({
             title: card.title,
             content: card.content,
             deck_id: selectedDeckId,
-            tags: allTags
+            tags: allTags,
+            ...sourceFields(card)
           })
           saved += 1
         } catch (error) {

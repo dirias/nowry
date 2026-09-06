@@ -26,6 +26,16 @@ export const booksService = {
   },
 
   /**
+   * The document's sections with their card counts (BOOK-001, docs/prd-book-cards.md FR-002).
+   * @param {string} id - Book ID
+   * @returns {Promise<{book_id: string, title: string, sections: Array<{index: number, heading: string, words: number, cards: number, changed: boolean, hash: string}>}>}
+   */
+  async getSections(id) {
+    const { data } = await apiClient.get(`/books/${id}/sections`)
+    return data
+  },
+
+  /**
    * Create a new book
    * @param {Object} bookData - Book data
    * @param {string} bookData.title - Book title

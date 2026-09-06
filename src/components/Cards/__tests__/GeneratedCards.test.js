@@ -595,3 +595,24 @@ describe('the streaming placeholders', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 })
+
+describe('the source stamp (BOOK-002)', () => {
+  const SOURCE = { source_book_id: 'b1', source_book_title: 'N3 Grammar', source_section: { heading: 'Particles', index: 1, hash: 'h1' } }
+
+  it('writes the selection stamp on every card, and lets a card carry its own section', async () => {
+    const own = { heading: 'Verbs', index: 2, hash: 'h2' }
+    await renderModal({ source: SOURCE, cards: [CARDS[0], { ...CARDS[1], source_section: own }] })
+    await saveEverything()
+
+    expect(mockCreate).toHaveBeenNthCalledWith(1, expect.objectContaining({ ...SOURCE }))
+    expect(mockCreate).toHaveBeenNthCalledWith(2, expect.objectContaining({ source_book_id: 'b1', source_section: own }))
+  })
+
+  it('writes nothing about a source when the cards did not come from a document', async () => {
+    await renderModal()
+    await saveEverything()
+
+    expect(mockCreate.mock.calls[0][0]).not.toHaveProperty('source_book_id')
+    expect(mockCreate.mock.calls[0][0]).not.toHaveProperty('source_section')
+  })
+})

@@ -36,10 +36,13 @@ import { useCallback, useMemo, useState } from 'react'
  * callers hold the array in state or `useMemo`, so neither does.
  */
 
-/** Reads the wire shape (`{ title, content }`) into an entry's fields. */
+/** Reads the wire shape (`{ title, content, source_section? }`) into an entry's fields.
+ * `source_section` is the stamp a section-generated card carries (BOOK-002); it rides
+ * the entry untouched so the save can write it. */
 const fieldsOf = (card) => ({
   title: card?.title ?? '',
-  content: card?.content ?? ''
+  content: card?.content ?? '',
+  source_section: card?.source_section ?? null
 })
 
 /**
