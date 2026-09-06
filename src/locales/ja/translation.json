@@ -2123,10 +2123,10 @@
     },
     "session": {
       "source": {
-      "from": "{{document}} · {{section}} より",
-      "fromDocument": "{{document}} より",
-      "deleted": "削除したドキュメントより",
-      "openAria": "{{document}} の {{section}} を開く"
+        "from": "{{document}} · {{section}} より",
+        "fromDocument": "{{document}} より",
+        "deleted": "削除したドキュメントより",
+        "openAria": "{{document}} の {{section}} を開く"
       },
       "complete": {
         "outsideFilter_other": "タグフィルターの外に、復習待ちのカードがあと{{count}}枚あります。"
@@ -2257,6 +2257,28 @@
         "showMarked": "マークしたカードだけを表示",
         "showAll": "すべてのカードを表示"
       }
+    },
+    "select": {
+      "rowAria": "{{title}}を選択",
+      "barAria": "選択中のカード",
+      "clear": "選択を解除",
+      "count_other": "{{count}}枚を選択中",
+      "moveTo": "移動先",
+      "tag": "タグ",
+      "tagAria": "選択したカードにタグを付ける",
+      "unmark": "マークを外す",
+      "all": "{{count}}枚すべてを選択",
+      "newTag": "新しいタグ…",
+      "moveOne": "移動…",
+      "editTags": "タグ…",
+      "deleteTitle_other": "{{count}}枚のカードを削除しますか？",
+      "deleteDescription_other": "デッキとすべてのグループから外れ、復習履歴も一緒に消えます。",
+      "deleteConfirm_other": "{{count}}枚を削除",
+      "error": "選択したカードに適用できませんでした。"
+    },
+    "move": {
+      "title_other": "{{count}}枚のカードをデッキへ移動",
+      "confirm_other": "{{count}}枚を移動"
     }
   },
   "subscription": {

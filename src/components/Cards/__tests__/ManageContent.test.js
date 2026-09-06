@@ -5,7 +5,7 @@
  * rows of one anatomy; cards are rows. The `t` mock serialises options.
  */
 import React, { Profiler } from 'react'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 
 let mockSearch = new URLSearchParams()
 const mockSetSearchParams = jest.fn()
@@ -27,6 +27,13 @@ const mockUseDeckData = jest.fn()
 jest.mock('../../../hooks/useDeckData', () => ({ useDeckData: (...args) => mockUseDeckData(...args) }))
 jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
+const mockBulk = jest.fn()
+jest.mock('../../../api/services', () => ({ cardsService: { bulk: (...args) => mockBulk(...args) } }))
+const mockInvalidate = jest.fn()
+jest.mock('../../../api/cardCache', () => ({
+  patchCardInCache: jest.fn(),
+  invalidateCardCaches: (...args) => mockInvalidate(...args)
+}))
 
 const ManageContent = require('../ManageContent').default
 
@@ -95,6 +102,8 @@ beforeEach(() => {
     reload: jest.fn()
   })
   mockUseDeckData.mockReset().mockReturnValue({ decks: [], loading: false, error: null, reload: jest.fn() })
+  mockBulk.mockReset().mockResolvedValue({ updated: 1 })
+  mockInvalidate.mockReset().mockResolvedValue(undefined)
   localStorage.clear()
   sessionStorage.clear()
 })
@@ -300,6 +309,127 @@ describe('MGMT-006 — Archive and the Archived section (PRD D18, US-010)', () =
     fireEvent.click(within(foot).getByRole('button', { expanded: false }))
     fireEvent.click(screen.getByRole('button', { name: 'study.deck.restoreAria:{"name":"Old Kanji"}' }))
     expect(props.onRestoreDeck).toHaveBeenCalledWith(expect.objectContaining({ _id: 'a1' }))
+  })
+})
+
+describe('MGMT-004 — selection and the bulk verbs (PRD D16, US-009)', () => {
+  const rowCheckbox = (title) => screen.getByRole('checkbox', { name: `cards.select.rowAria:{"title":"${title}"}` })
+  const selectFirst = () => {
+    mockSearch = new URLSearchParams('tab=cards')
+    const props = defaultProps()
+    render(<ManageContent {...props} />)
+    fireEvent.click(rowCheckbox('Card 1'))
+    return props
+  }
+
+  it('offers a checkbox in every row, and the first check swaps the toolbar for the bar', () => {
+    mockSearch = new URLSearchParams('tab=cards')
+    render(<ManageContent {...defaultProps()} />)
+    expect(screen.getByTestId('library-tab')).toBeInTheDocument()
+    expect(rowCheckbox('Card 2')).not.toBeChecked()
+    fireEvent.click(rowCheckbox('Card 1'))
+    expect(rowCheckbox('Card 1')).toBeChecked()
+    const bar = screen.getByTestId('selection-bar')
+    expect(bar).toHaveTextContent('cards.select.count:{"count":1}')
+    expect(bar).toHaveTextContent('cards.select.all:{"count":2}')
+    expect(screen.queryByTestId('library-tab')).not.toBeInTheDocument()
+    expect(bar.querySelector('.MuiButton-variantSolid')).toBeNull()
+    expect(screen.getAllByTestId('card-row')).toHaveLength(2)
+  })
+
+  it('brings the toolbar back from ✕ and from Escape', () => {
+    selectFirst()
+    fireEvent.click(screen.getByRole('button', { name: 'cards.select.clear' }))
+    expect(screen.getByTestId('library-tab')).toBeInTheDocument()
+    expect(screen.queryByTestId('selection-bar')).not.toBeInTheDocument()
+
+    fireEvent.click(rowCheckbox('Card 2'))
+    expect(screen.getByTestId('selection-bar')).toBeInTheDocument()
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    expect(screen.getByTestId('library-tab')).toBeInTheDocument()
+  })
+
+  it('while selecting, a row click toggles instead of previewing, and Select all takes every loaded card', () => {
+    selectFirst()
+    fireEvent.click(screen.getAllByTestId('card-row')[1])
+    expect(screen.getByTestId('selection-bar')).toHaveTextContent('cards.select.count:{"count":2}')
+    fireEvent.click(screen.getAllByTestId('card-row')[1])
+    expect(screen.getByTestId('selection-bar')).toHaveTextContent('cards.select.count:{"count":1}')
+    fireEvent.click(screen.getByRole('button', { name: 'cards.select.all:{"count":2}' }))
+    expect(rowCheckbox('Card 2')).toBeChecked()
+  })
+
+  it('Move to opens the deck sheet and moves the selected ids in one call, then clears', async () => {
+    selectFirst()
+    fireEvent.click(screen.getByRole('button', { name: 'cards.select.moveTo' }))
+    const sheet = screen.getByRole('dialog')
+    expect(sheet).toHaveTextContent('cards.move.title:{"count":1}')
+    const confirm = within(sheet).getByRole('button', { name: 'cards.move.confirm:{"count":1}' })
+    expect(confirm).toBeDisabled()
+    fireEvent.click(within(sheet).getByRole('combobox'))
+    fireEvent.click(screen.getByRole('option', { name: 'French Grammar' }))
+    fireEvent.click(confirm)
+    await waitFor(() => expect(mockBulk).toHaveBeenCalledWith({ ids: ['c1'], action: 'move', deckId: 'd2' }))
+    await waitFor(() => expect(screen.queryByTestId('selection-bar')).not.toBeInTheDocument())
+    expect(mockInvalidate).toHaveBeenCalled()
+  })
+
+  it('Mark marks every selected id; Tag ▾ adds a tag and keeps the selection for the next pick', async () => {
+    selectFirst()
+    fireEvent.click(screen.getByRole('button', { name: 'cards.mark.action' }))
+    await waitFor(() => expect(mockBulk).toHaveBeenCalledWith({ ids: ['c1'], action: 'mark' }))
+    await waitFor(() => expect(screen.queryByTestId('selection-bar')).not.toBeInTheDocument())
+
+    fireEvent.click(rowCheckbox('Card 2'))
+    fireEvent.click(screen.getByRole('button', { name: 'cards.select.tagAria' }))
+    expect(screen.getByRole('menuitemcheckbox', { name: /language/ })).toHaveAttribute('aria-checked', 'true')
+    const field = screen.getByRole('textbox', { name: 'cards.select.newTag' })
+    fireEvent.change(field, { target: { value: 'kanji' } })
+    fireEvent.keyDown(field, { key: 'Enter' })
+    await waitFor(() => expect(mockBulk).toHaveBeenCalledWith({ ids: ['c2'], action: 'tag', tags: ['kanji'] }))
+    expect(screen.getByTestId('selection-bar')).toBeInTheDocument()
+  })
+
+  it('Delete asks once, then deletes the selected ids in one call', async () => {
+    selectFirst()
+    fireEvent.click(screen.getByRole('button', { name: 'cards.deck.delete' }))
+    expect(mockBulk).not.toHaveBeenCalled()
+    const ask = screen.getByRole('alertdialog')
+    expect(ask).toHaveTextContent('cards.select.deleteTitle:{"count":1}')
+    fireEvent.click(within(ask).getByRole('button', { name: 'cards.select.deleteConfirm:{"count":1}' }))
+    await waitFor(() => expect(mockBulk).toHaveBeenCalledWith({ ids: ['c1'], action: 'delete' }))
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+  })
+
+  it("orders the row's kebab Edit, Move to…, Tags…, then Delete after a hairline", () => {
+    mockSearch = new URLSearchParams('tab=cards')
+    const props = defaultProps()
+    props.onEditTags = jest.fn()
+    render(<ManageContent {...props} />)
+    fireEvent.click(screen.getAllByLabelText(/cards\.manage_content\.aria\.cardActions/)[0])
+    const items = screen.getAllByRole('menuitem')
+    expect(items.map((item) => item.textContent)).toEqual([
+      'cards.deck.edit',
+      'cards.select.moveOne',
+      'cards.select.editTags',
+      'cards.deck.delete'
+    ])
+    expect(items[3].previousElementSibling).toHaveAttribute('role', 'separator')
+    fireEvent.click(items[2])
+    expect(props.onEditTags).toHaveBeenCalledWith(expect.objectContaining({ _id: 'c1' }))
+    expect(screen.queryByTestId('selection-bar')).not.toBeInTheDocument()
+  })
+
+  it("a row's Move to… opens the same sheet for that one card", async () => {
+    mockSearch = new URLSearchParams('tab=cards')
+    render(<ManageContent {...defaultProps()} />)
+    fireEvent.click(screen.getAllByLabelText(/cards\.manage_content\.aria\.cardActions/)[1])
+    fireEvent.click(screen.getByText('cards.select.moveOne'))
+    const sheet = screen.getByRole('dialog')
+    fireEvent.click(within(sheet).getByRole('combobox'))
+    fireEvent.click(screen.getByRole('option', { name: 'Spanish Vocabulary' }))
+    fireEvent.click(within(sheet).getByRole('button', { name: 'cards.move.confirm:{"count":1}' }))
+    await waitFor(() => expect(mockBulk).toHaveBeenCalledWith({ ids: ['c2'], action: 'move', deckId: 'd1' }))
   })
 })
 

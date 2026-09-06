@@ -42,3 +42,22 @@ export function patchCardInCache(cardId, changes) {
     }
   })
 }
+
+/**
+ * Everything a card write can change, invalidated by resource prefix.
+ *
+ * A bulk verb (PRD FR-010) moves, tags, marks or deletes many cards at once;
+ * a tag verb (FR-011) renames or removes a tag on every card. Either can
+ * change the card list under any filter, the deck counters, the groups index,
+ * the tag menu and the statistics, so the caller names the resources and this
+ * invalidates each by its first key segment — the same prefix match
+ * `patchCardInCache` relies on, and one signed-in user per client, so the
+ * user segment is not needed to hit the right entries.
+ *
+ * @param {string[]} [resources] - query-key prefixes; the default is every one a card write touches
+ */
+export const CARD_WRITE_RESOURCES = ['cards', 'decks', 'groups', 'tags', 'statistics']
+
+export function invalidateCardCaches(resources = CARD_WRITE_RESOURCES) {
+  return Promise.all(resources.map((resource) => queryClient.invalidateQueries({ queryKey: [resource] })))
+}

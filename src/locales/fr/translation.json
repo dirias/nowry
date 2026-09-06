@@ -2080,10 +2080,10 @@
     },
     "session": {
       "source": {
-      "from": "de {{document}} · {{section}}",
-      "fromDocument": "de {{document}}",
-      "deleted": "d'un document que vous avez supprimé",
-      "openAria": "Ouvrir {{section}} dans {{document}}"
+        "from": "de {{document}} · {{section}}",
+        "fromDocument": "de {{document}}",
+        "deleted": "d'un document que vous avez supprimé",
+        "openAria": "Ouvrir {{section}} dans {{document}}"
       },
       "tagFilter": {
         "noOptions": "Aucune étiquette dans ce paquet",
@@ -2166,6 +2166,34 @@
         "showMarked": "Afficher uniquement les cartes marquées",
         "showAll": "Afficher toutes les cartes"
       }
+    },
+    "select": {
+      "rowAria": "Sélectionner {{title}}",
+      "barAria": "Cartes sélectionnées",
+      "clear": "Annuler la sélection",
+      "count_one": "{{count}} sélectionnée",
+      "count_other": "{{count}} sélectionnées",
+      "moveTo": "Déplacer vers",
+      "tag": "Étiquette",
+      "tagAria": "Étiqueter les cartes sélectionnées",
+      "unmark": "Retirer la marque",
+      "all": "Tout sélectionner ({{count}})",
+      "newTag": "Nouvelle étiquette…",
+      "moveOne": "Déplacer vers…",
+      "editTags": "Étiquettes…",
+      "deleteTitle_one": "Supprimer {{count}} carte ?",
+      "deleteTitle_other": "Supprimer {{count}} cartes ?",
+      "deleteDescription_one": "Elle quitte son paquet et tous les groupes ; son historique de révision part avec elle.",
+      "deleteDescription_other": "Elles quittent leurs paquets et tous les groupes ; leur historique de révision part avec elles.",
+      "deleteConfirm_one": "Supprimer {{count}} carte",
+      "deleteConfirm_other": "Supprimer {{count}} cartes",
+      "error": "Impossible d’appliquer cela aux cartes sélectionnées."
+    },
+    "move": {
+      "title_one": "Déplacer {{count}} carte vers un paquet",
+      "title_other": "Déplacer {{count}} cartes vers un paquet",
+      "confirm_one": "Déplacer {{count}} carte",
+      "confirm_other": "Déplacer {{count}} cartes"
     }
   },
   "books": {

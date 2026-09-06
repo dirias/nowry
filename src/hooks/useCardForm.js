@@ -43,7 +43,7 @@ const focusTarget = (node) => {
   scrollIntoViewSafely(target)
 }
 
-const useCardForm = ({ open, card = null, onSaved, onClose }) => {
+const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClose }) => {
   const [cardType, setCardType] = useState(() => card?.card_type || 'flashcard')
   const [pendingType, setPendingType] = useState(null)
   // Groups the user revealed under a type they have since switched away from.
@@ -70,7 +70,7 @@ const useCardForm = ({ open, card = null, onSaved, onClose }) => {
   // card or the deck list is how QuizCardModal wiped typed input whenever the
   // decks were refetched.
   const openState = useRef({})
-  openState.current = { cardType: card?.card_type || 'flashcard', presetDeckId, isEdit: Boolean(entity) }
+  openState.current = { cardType: card?.card_type || 'flashcard', presetDeckId, isEdit: Boolean(entity), initialSection }
 
   const refFor = useCallback((name) => {
     if (!refCallbacks.current[name]) {
@@ -111,7 +111,8 @@ const useCardForm = ({ open, card = null, onSaved, onClose }) => {
     validate: spec.validate,
     continueResets: spec.continueResets,
     buildPayload: spec.buildPayload,
-    persist
+    persist,
+    initialSection
   })
 
   const { reveal: coreReveal, setField, savedCount, errorAt, firstErrorField, submit, submitAndContinue } = core
@@ -131,7 +132,11 @@ const useCardForm = ({ open, card = null, onSaved, onClose }) => {
     // offers, so the group opens showing it — without taking the focus that
     // belongs to the first required field.
     if (!openState.current.isEdit && openState.current.presetDeckId) coreReveal('deck')
-  }, [open, coreReveal])
+    // A row's Tags… (PRD D16) opens on the tags rail: the core reveals the
+    // group; focus follows it once the group has rendered.
+    const section = openState.current.initialSection
+    if (section && GROUP_FOCUS[section]) setTimeout(() => focusField(GROUP_FOCUS[section]), 0)
+  }, [open, coreReveal, focusField])
 
   // A suggestion list is a nicety, not a dependency of the save path — a
   // failed fetch just leaves the field behaving exactly as it did before this

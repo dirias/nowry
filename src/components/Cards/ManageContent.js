@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Skeleton, Typography } from '@mui/joy'
@@ -10,6 +10,10 @@ import DeckTile from './DeckTile'
 import ArchivedDecks from './ArchivedDecks'
 import CardRow from './CardRow'
 import LibraryToolbar, { LIBRARY_TABS } from './LibraryToolbar'
+import SelectionBar from './SelectionBar'
+import BulkActionOverlays from './BulkActionOverlays'
+import { useCardSelection } from './useCardSelection'
+import { useBulkCardActions } from './useBulkCardActions'
 import TagsView from './TagsView'
 import DeckRow from '../Study/DeckRow'
 import { useGroups } from '../../hooks/useGroups'
@@ -26,6 +30,10 @@ const VIEW_MODE_KEY = 'nowry_deck_view_mode'
  * `cards` and `decks` are the owner's (CardHome) — server-filtered by search,
  * tags and the mark; only the type filter is local. The tab lives in the URL
  * (`?tab=cards`) so it is linkable and a phone's back control works.
+ *
+ * A selection on the Cards view swaps the toolbar for the selection bar in
+ * place (PRD D16, ADR-023 point 2); the bulk verbs run through one hook and
+ * open their surfaces here. A row's Move to… is the same move for one card.
  */
 export default function ManageContent({
   decks,
@@ -36,6 +44,7 @@ export default function ManageContent({
   onRestoreDeck,
   onDeleteDeck,
   onEditCard,
+  onEditTags,
   onDeleteCard,
   onAddCard,
   onStudy,
@@ -81,6 +90,22 @@ export default function ManageContent({
   const { groups } = useGroups({ enabled: tab !== 'decks' })
   const untaggedCount = groups?.untagged?.cards ?? 0
 
+  // The selection lives on the Cards view only; a tab change ends it.
+  const selection = useCardSelection()
+  const { clear: clearSelection } = selection
+  useEffect(() => {
+    clearSelection()
+  }, [tab, clearSelection])
+  // Tag ▾ is a multi-pick, so a tag or untag keeps the selection for the next
+  // pick and the tri-state reads back; every other verb clears it (US-009).
+  const afterBulk = useCallback(
+    (action) => {
+      if (action !== 'tag' && action !== 'untag') clearSelection()
+    },
+    [clearSelection]
+  )
+  const bulk = useBulkCardActions({ onDone: afterBulk })
+
   const [filterType, setFilterType] = useState('all')
   const [viewMode, setViewMode] = useState(() => localStorage.getItem(VIEW_MODE_KEY) || 'grid')
   const [activeDeckAnalysis, setActiveDeckAnalysis] = useState(null)
@@ -124,6 +149,16 @@ export default function ManageContent({
   )
 
   const deckName = (deckId) => decks.find((d) => d._id === deckId || d._id === deckId?._id)?.name || '—'
+
+  const selectedCards = useMemo(() => filteredCards.filter((card) => selection.isSelected(card._id)), [filteredCards, selection])
+  const selectedIds = selectedCards.map((card) => card._id)
+  const selecting = tab === 'cards' && selection.selecting
+  // A card that left the view — a filter, a refetch after a verb — leaves the
+  // selection with it, so the bar never counts what is not on screen.
+  const { retain } = selection
+  useEffect(() => {
+    retain(filteredCards.map((card) => card._id))
+  }, [filteredCards, retain])
 
   const handlePreviewCard = (card) => {
     const index = filteredCards.findIndex((c) => c._id === card._id)
@@ -172,31 +207,47 @@ export default function ManageContent({
 
   return (
     <Box>
-      <LibraryToolbar
-        tab={tab}
-        onTab={setTab}
-        decksCount={decks.length}
-        cardsCount={totalCards || cards.length}
-        tagsCount={availableTags.length + 2}
-        search={searchQuery}
-        onSearch={onSearchChange}
-        filterType={filterType}
-        onFilterType={setFilterType}
-        availableTags={availableTags}
-        selectedTags={selectedTags}
-        onTagToggle={onTagToggle}
-        onClearTags={onClearTags}
-        untagged={untagged}
-        untaggedCount={untaggedCount}
-        onUntaggedToggle={onUntaggedToggle}
-        markedOnly={markedOnly}
-        onMarkedOnlyToggle={onMarkedOnlyToggle}
-        viewMode={viewMode}
-        onViewMode={handleViewChange}
-        onNewDeck={onNewDeck}
-        onNewCard={onNewCard}
-        onImport={onImport}
-      />
+      {selecting ? (
+        <SelectionBar
+          selectedCards={selectedCards}
+          total={filteredCards.length}
+          availableTags={availableTags}
+          onClear={selection.clear}
+          onSelectAll={() => selection.selectAll(filteredCards.map((card) => card._id))}
+          onMove={() => bulk.requestMove(selectedIds)}
+          onTag={(tag) => bulk.run('tag', selectedIds, { tags: [tag] })}
+          onUntag={(tag) => bulk.run('untag', selectedIds, { tags: [tag] })}
+          onMark={() => bulk.run('mark', selectedIds)}
+          onUnmark={() => bulk.run('unmark', selectedIds)}
+          onDelete={() => bulk.requestDelete(selectedIds)}
+        />
+      ) : (
+        <LibraryToolbar
+          tab={tab}
+          onTab={setTab}
+          decksCount={decks.length}
+          cardsCount={totalCards || cards.length}
+          tagsCount={availableTags.length + 2}
+          search={searchQuery}
+          onSearch={onSearchChange}
+          filterType={filterType}
+          onFilterType={setFilterType}
+          availableTags={availableTags}
+          selectedTags={selectedTags}
+          onTagToggle={onTagToggle}
+          onClearTags={onClearTags}
+          untagged={untagged}
+          untaggedCount={untaggedCount}
+          onUntaggedToggle={onUntaggedToggle}
+          markedOnly={markedOnly}
+          onMarkedOnlyToggle={onMarkedOnlyToggle}
+          viewMode={viewMode}
+          onViewMode={handleViewChange}
+          onNewDeck={onNewDeck}
+          onNewCard={onNewCard}
+          onImport={onImport}
+        />
+      )}
 
       {tab === 'decks' && (
         <Box>
@@ -282,8 +333,15 @@ export default function ManageContent({
                     deckName={deckName(card.deck_id)}
                     onPreview={handlePreviewCard}
                     onEdit={onEditCard}
+                    onMove={(c) => bulk.requestMove([c._id])}
+                    onEditTags={onEditTags}
                     onDelete={onDeleteCard}
                     onMarkChange={handleMarkChange}
+                    selectable
+                    selected={selection.isSelected(card._id)}
+                    selecting={selection.selecting}
+                    onSelect={(c) => selection.toggle(c._id)}
+                    longPressHandlers={selection.longPressHandlers}
                   />
                 ))}
               </Box>
@@ -303,7 +361,9 @@ export default function ManageContent({
         <TagsView
           decks={decks}
           search={searchQuery}
+          availableTags={availableTags}
           onEditCard={onEditCard}
+          onEditTags={onEditTags}
           onDeleteCard={onDeleteCard}
           onPreviewCards={(list, index) => setPreviewState({ open: true, cards: list, initialIndex: index !== -1 ? index : 0 })}
         />
@@ -318,6 +378,7 @@ export default function ManageContent({
         decks={decks}
         onMarkChange={handleMarkChange}
       />
+      <BulkActionOverlays actions={bulk} decks={decks} />
     </Box>
   )
 }

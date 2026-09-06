@@ -31,10 +31,14 @@ import VisualCardFields from './card/VisualCardFields'
  */
 const BODIES = { flashcard: FlashcardFields, quiz: QuizCardFields, visual: VisualCardFields }
 
-export default function CreateCardModal({ open, onClose, onCardSaved, decks = [], card = null }) {
+/**
+ * `initialSection` — a group to open with (`'tags'`): a row's Tags… lands the
+ * user on the tags rail instead of the title (PRD D16). Read once, on open.
+ */
+export default function CreateCardModal({ open, onClose, onCardSaved, decks = [], card = null, initialSection = null }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const form = useCardForm({ open, card, onSaved: onCardSaved, onClose })
+  const form = useCardForm({ open, card, initialSection, onSaved: onCardSaved, onClose })
 
   const Body = BODIES[form.cardType] || FlashcardFields
   const titleKey = form.isEdit ? form.spec.editTitleKey : form.spec.createTitleKey

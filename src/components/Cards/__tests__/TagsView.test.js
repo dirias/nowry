@@ -2,7 +2,7 @@
  * TagsView — the library's third view (PRD D6, US-004, US-005, ADR-014).
  */
 import React from 'react'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 
 let mockSearch = new URLSearchParams()
 const mockSetSearchParams = jest.fn()
@@ -34,6 +34,21 @@ jest.mock('../../../hooks/useGroups', () => ({ useGroups: () => ({ groups: mockG
 const mockUseCardData = jest.fn()
 jest.mock('../../../hooks/useCardData', () => ({ useCardData: (...args) => mockUseCardData(...args) }))
 jest.mock('../MarkToggle', () => ({ __esModule: true, default: () => <button type='button'>mark</button> }))
+const mockBulk = jest.fn()
+const mockRenameTag = jest.fn()
+const mockRemoveTag = jest.fn()
+jest.mock('../../../api/services', () => ({
+  cardsService: {
+    bulk: (...args) => mockBulk(...args),
+    renameTag: (...args) => mockRenameTag(...args),
+    removeTag: (...args) => mockRemoveTag(...args)
+  }
+}))
+const mockInvalidate = jest.fn()
+jest.mock('../../../api/cardCache', () => ({
+  patchCardInCache: jest.fn(),
+  invalidateCardCaches: (...args) => mockInvalidate(...args)
+}))
 
 const TagsView = require('../TagsView').default
 
@@ -55,6 +70,10 @@ beforeEach(() => {
   mockMobile = false
   mockGroups = GROUPS
   mockUseCardData.mockReset().mockReturnValue({ cards: CARDS, total: 46, hasMore: true, loading: false, fetchMore: jest.fn() })
+  mockBulk.mockReset().mockResolvedValue({ updated: 1 })
+  mockRenameTag.mockReset().mockResolvedValue({ cards: 46 })
+  mockRemoveTag.mockReset().mockResolvedValue({ cards: 46 })
+  mockInvalidate.mockReset().mockResolvedValue(undefined)
 })
 
 describe('the index', () => {
@@ -147,6 +166,23 @@ describe('the open group', () => {
     expect(screen.queryByText(/groups\.study:/)).not.toBeInTheDocument()
     expect(screen.queryByText('groups.browse')).not.toBeInTheDocument()
     expect(screen.getAllByTestId('card-row')).toHaveLength(2)
+  })
+})
+
+describe('MGMT-004 — the selection bar inside an open group (PRD D16)', () => {
+  it('stands in for the cards head while a selection exists, keeps Study and Browse, and marks the selected ids', async () => {
+    mockSearch = new URLSearchParams('group=tag:verbs')
+    render(<TagsView decks={DECKS} availableTags={[{ tag: 'verbs', count: 46 }]} />)
+    const detail = screen.getByTestId('group-detail')
+    expect(within(detail).getByText('groups.cards')).toBeInTheDocument()
+    fireEvent.click(within(detail).getByRole('checkbox', { name: 'cards.select.rowAria:{"title":"ser vs estar"}' }))
+    const bar = within(detail).getByTestId('selection-bar')
+    expect(bar).toHaveTextContent('cards.select.count:{"count":1}')
+    expect(within(detail).queryByText('groups.cards')).not.toBeInTheDocument()
+    expect(within(detail).getByText('groups.study:{"count":11}')).toBeInTheDocument()
+    fireEvent.click(within(bar).getByRole('button', { name: 'cards.mark.action' }))
+    await waitFor(() => expect(mockBulk).toHaveBeenCalledWith({ ids: ['c1'], action: 'mark' }))
+    await waitFor(() => expect(within(detail).queryByTestId('selection-bar')).not.toBeInTheDocument())
   })
 })
 

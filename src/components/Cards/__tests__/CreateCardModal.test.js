@@ -334,6 +334,12 @@ describe('edit mode', () => {
     expect(screen.queryByRole('button', { name: 'cards.common.addTags' })).not.toBeInTheDocument()
   })
 
+  it('opens on the tags rail when a row asks for Tags… (PRD D16)', () => {
+    renderModal({ card: { ...CARD, tags: [] }, initialSection: 'tags' })
+    expect(screen.queryByRole('button', { name: 'cards.common.addTags' })).not.toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'form.tagAddAria' })).toBeInTheDocument()
+  })
+
   it('updates the card and closes', async () => {
     const { onClose } = renderModal({ card: CARD })
     fireEvent.change(back(), { target: { value: 'Paris' } })

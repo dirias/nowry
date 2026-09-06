@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Button, Skeleton, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +9,10 @@ import { readout, tabularNums } from '../Common/Form/formStyles'
 import { useCardData } from '../../hooks/useCardData'
 import DeckRow from '../Study/DeckRow'
 import CardRow from './CardRow'
+import SelectionBar from './SelectionBar'
+import BulkActionOverlays from './BulkActionOverlays'
+import { useCardSelection } from './useCardSelection'
+import { useBulkCardActions } from './useBulkCardActions'
 import { patchCardInCache } from '../../api/cardCache'
 
 export const GROUP_ICONS = { tag: LocalOfferRounded, marked: BookmarkRounded, struggling: RepeatRounded }
@@ -33,8 +37,21 @@ const byNextReview = (a, b) => {
  * next review. Tags and Struggling offer Study · N (N = due + new today) and
  * Browse; Marked offers neither — the mark may not narrow a study queue
  * (ADR-014), so its rows preview instead.
+ *
+ * The same selection bar as the Cards view stands in for the cards section's
+ * head while a selection exists (PRD D16); the header with Study and Browse
+ * stays. The bulk verbs run through the same hook and open the same surfaces.
  */
-export default function GroupDetail({ group, summary, decks = [], onEditCard, onDeleteCard, onPreviewCards }) {
+export default function GroupDetail({
+  group,
+  summary,
+  decks = [],
+  availableTags = [],
+  onEditCard,
+  onEditTags,
+  onDeleteCard,
+  onPreviewCards
+}) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const Icon = GROUP_ICONS[group.kind]
@@ -43,6 +60,21 @@ export default function GroupDetail({ group, summary, decks = [], onEditCard, on
   const systemGroup = group.kind === 'tag' ? null : group.kind
   const { cards, total, hasMore, loading, fetchMore } = useCardData(tagFilter, '', false, systemGroup)
   const sorted = useMemo(() => [...cards].sort(byNextReview), [cards])
+  const selection = useCardSelection()
+  const { clear: clearSelection } = selection
+  const afterBulk = useCallback(
+    (action) => {
+      if (action !== 'tag' && action !== 'untag') clearSelection()
+    },
+    [clearSelection]
+  )
+  const bulk = useBulkCardActions({ onDone: afterBulk })
+  const selectedCards = useMemo(() => sorted.filter((card) => selection.isSelected(card._id)), [sorted, selection])
+  const selectedIds = selectedCards.map((card) => card._id)
+  const { retain } = selection
+  useEffect(() => {
+    retain(sorted.map((card) => card._id))
+  }, [sorted, retain])
   const deckRows = useMemo(() => {
     const ids = new Set((summary?.deck_ids || []).map(String))
     return decks.filter((deck) => ids.has(String(deck._id)))
@@ -118,14 +150,34 @@ export default function GroupDetail({ group, summary, decks = [], onEditCard, on
       )}
 
       <Box component='section'>
-        <Stack direction='row' spacing={1.25} alignItems='baseline' sx={{ mb: 1, minHeight: 28 }}>
-          <Typography level='title-md'>{t('groups.cards')}</Typography>
-          {!loading && (
-            <Typography level='body-sm' sx={readout}>
-              {t('sessions.ofTotal', { shown: sorted.length, total })}
-            </Typography>
-          )}
-        </Stack>
+        {selection.selecting ? (
+          <SelectionBar
+            selectedCards={selectedCards}
+            total={sorted.length}
+            availableTags={availableTags}
+            onClear={selection.clear}
+            onSelectAll={() => selection.selectAll(sorted.map((card) => card._id))}
+            onMove={() => bulk.requestMove(selectedIds)}
+            onTag={(tag) => bulk.run('tag', selectedIds, { tags: [tag] })}
+            onUntag={(tag) => bulk.run('untag', selectedIds, { tags: [tag] })}
+            onMark={() => bulk.run('mark', selectedIds)}
+            onUnmark={() => bulk.run('unmark', selectedIds)}
+            onDelete={() => bulk.requestDelete(selectedIds)}
+            sx={{ mb: 1 }}
+          />
+        ) : (
+          // The bar's height, so the swap never moves the list under it.
+          <Box sx={{ display: 'flex', alignItems: 'center', minHeight: 40, mb: 1 }}>
+            <Stack direction='row' spacing={1.25} alignItems='baseline'>
+              <Typography level='title-md'>{t('groups.cards')}</Typography>
+              {!loading && (
+                <Typography level='body-sm' sx={readout}>
+                  {t('sessions.ofTotal', { shown: sorted.length, total })}
+                </Typography>
+              )}
+            </Stack>
+          </Box>
+        )}
         {loading ? (
           <Stack spacing={1}>
             {[1, 2, 3].map((i) => (
@@ -150,9 +202,16 @@ export default function GroupDetail({ group, summary, decks = [], onEditCard, on
                   )
                 }
                 onEdit={onEditCard}
+                onMove={(c) => bulk.requestMove([c._id])}
+                onEditTags={onEditTags}
                 onDelete={onDeleteCard}
                 onMarkChange={handleMarkChange}
                 showSource={group.kind === 'struggling'}
+                selectable
+                selected={selection.isSelected(card._id)}
+                selecting={selection.selecting}
+                onSelect={(c) => selection.toggle(c._id)}
+                longPressHandlers={selection.longPressHandlers}
               />
             ))}
           </Box>
@@ -165,6 +224,7 @@ export default function GroupDetail({ group, summary, decks = [], onEditCard, on
           </Box>
         )}
       </Box>
+      <BulkActionOverlays actions={bulk} decks={decks} />
     </Box>
   )
 }

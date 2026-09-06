@@ -10,10 +10,11 @@ import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import ImportDeckModal from './ImportDeckModal'
 import DeckSettingsModal from '../Study/DeckSettingsModal'
 import DeckPublishSheet from '../Study/DeckPublishSheet'
-import { decksService, cardsService } from '../../api/services'
+import { decksService } from '../../api/services'
 import { useCardData } from '../../hooks/useCardData'
 import { useStatistics } from '../../hooks/useStatistics'
 import { useDeckData } from '../../hooks/useDeckData'
+import { useTags } from '../../hooks/useTags'
 
 export default function CardHome() {
   const navigate = useNavigate()
@@ -28,6 +29,8 @@ export default function CardHome() {
   const [showImportDeck, setShowImportDeck] = useState(false)
   const [showCreateCard, setShowCreateCard] = useState(false)
   const [editingCard, setEditingCard] = useState(null)
+  // Tags… on a row opens the editor with the tags rail already revealed (PRD D16).
+  const [cardSection, setCardSection] = useState(null)
   const [deletingDeck, setDeletingDeck] = useState(null)
   const [deletingCard, setDeletingCard] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -40,7 +43,6 @@ export default function CardHome() {
   // "No tag" is a server-side filter like a tag (PRD D15, FR-009); it clears
   // with the tags and counts in the same readout.
   const [untagged, setUntagged] = useState(false)
-  const [availableTags, setAvailableTags] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [deckSettingsState, setDeckSettingsState] = useState({ open: false, deckId: null, section: 'study' })
   const [publishSheetState, setPublishSheetState] = useState({ open: false, deckId: null, deck: null })
@@ -59,22 +61,10 @@ export default function CardHome() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // The Tags menu (PRD D5, E6): fetched once per mount; /study-cards/tags is
-  // the same counting the Cards view filters by.
-  useEffect(() => {
-    let cancelled = false
-    cardsService
-      .getTags()
-      .then((tags) => {
-        if (!cancelled) setAvailableTags(tags || [])
-      })
-      .catch(() => {
-        // Non-fatal — the Tags segment simply stays absent
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  // The Tags menu (PRD D5, E6) on its own query key, so a bulk tag, a rename
+  // or a remove refreshes it beside the cards (ADR-008). A failed fetch is
+  // non-fatal — the Tags segment simply stays absent.
+  const { tags: availableTags } = useTags()
 
   // `?new=deck|card|import` opens the matching sheet once and leaves the URL
   // clean; the Today object's empty state links here (PRD D1).
@@ -227,6 +217,13 @@ export default function CardHome() {
   }
 
   const handleEditCard = (card) => {
+    setCardSection(null)
+    setEditingCard(card)
+    setShowCreateCard(true)
+  }
+
+  const handleEditTags = (card) => {
+    setCardSection('tags')
     setEditingCard(card)
     setShowCreateCard(true)
   }
@@ -264,6 +261,7 @@ export default function CardHome() {
         onRestoreDeck={handleRestoreDeck}
         onDeleteDeck={handleDeleteDeck}
         onEditCard={handleEditCard}
+        onEditTags={handleEditTags}
         onDeleteCard={handleDeleteCard}
         onAddCard={(deck) => {
           setEditingCard({ deck_id: deck._id })
@@ -326,10 +324,12 @@ export default function CardHome() {
           onClose={() => {
             setShowCreateCard(false)
             setEditingCard(null)
+            setCardSection(null)
           }}
           onCardSaved={handleCardSaved}
           decks={decks}
           card={editingCard}
+          initialSection={cardSection}
         />
       )}
 

@@ -1349,10 +1349,10 @@
     },
     "session": {
       "source": {
-      "from": "de {{document}} · {{section}}",
-      "fromDocument": "de {{document}}",
-      "deleted": "de un documento que eliminaste",
-      "openAria": "Abrir {{section}} en {{document}}"
+        "from": "de {{document}} · {{section}}",
+        "fromDocument": "de {{document}}",
+        "deleted": "de un documento que eliminaste",
+        "openAria": "Abrir {{section}} en {{document}}"
       },
       "tagFilter": {
         "noOptions": "No hay etiquetas en este mazo",
@@ -1518,6 +1518,34 @@
         "showMarked": "Mostrar solo las tarjetas marcadas",
         "showAll": "Mostrar todas las tarjetas"
       }
+    },
+    "select": {
+      "rowAria": "Seleccionar {{title}}",
+      "barAria": "Tarjetas seleccionadas",
+      "clear": "Quitar la selección",
+      "count_one": "{{count}} seleccionada",
+      "count_other": "{{count}} seleccionadas",
+      "moveTo": "Mover a",
+      "tag": "Etiqueta",
+      "tagAria": "Etiquetar las tarjetas seleccionadas",
+      "unmark": "Desmarcar",
+      "all": "Seleccionar las {{count}}",
+      "newTag": "Nueva etiqueta…",
+      "moveOne": "Mover a…",
+      "editTags": "Etiquetas…",
+      "deleteTitle_one": "¿Eliminar {{count}} tarjeta?",
+      "deleteTitle_other": "¿Eliminar {{count}} tarjetas?",
+      "deleteDescription_one": "Sale de su mazo y de todos los grupos; su historial de repaso se va con ella.",
+      "deleteDescription_other": "Salen de sus mazos y de todos los grupos; su historial de repaso se va con ellas.",
+      "deleteConfirm_one": "Eliminar {{count}} tarjeta",
+      "deleteConfirm_other": "Eliminar {{count}} tarjetas",
+      "error": "No se pudo aplicar a las tarjetas seleccionadas."
+    },
+    "move": {
+      "title_one": "Mover {{count}} tarjeta a un mazo",
+      "title_other": "Mover {{count}} tarjetas a un mazo",
+      "confirm_one": "Mover {{count}} tarjeta",
+      "confirm_other": "Mover {{count}} tarjetas"
     }
   },
   "filters": {

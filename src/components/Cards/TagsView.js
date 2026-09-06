@@ -21,7 +21,7 @@ const groupKey = (group) => (group.kind === 'tag' ? `tag:${group.tag}` : group.k
  * Untagged is never a row here (PRD D15, ADR-023 point 1): the index readout
  * names the number and the number is a link that opens Cards with No tag on.
  */
-export default function TagsView({ decks = [], search = '', onEditCard, onDeleteCard, onPreviewCards }) {
+export default function TagsView({ decks = [], search = '', availableTags = [], onEditCard, onEditTags, onDeleteCard, onPreviewCards }) {
   const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -210,7 +210,9 @@ export default function TagsView({ decks = [], search = '', onEditCard, onDelete
             group={selected}
             summary={selectedEntry?.summary}
             decks={decks}
+            availableTags={availableTags}
             onEditCard={onEditCard}
+            onEditTags={onEditTags}
             onDeleteCard={onDeleteCard}
             onPreviewCards={onPreviewCards}
           />

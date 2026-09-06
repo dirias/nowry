@@ -2060,10 +2060,10 @@
     },
     "session": {
       "source": {
-      "from": "aus {{document}} · {{section}}",
-      "fromDocument": "aus {{document}}",
-      "deleted": "aus einem gelöschten Dokument",
-      "openAria": "{{section}} in {{document}} öffnen"
+        "from": "aus {{document}} · {{section}}",
+        "fromDocument": "aus {{document}}",
+        "deleted": "aus einem gelöschten Dokument",
+        "openAria": "{{section}} in {{document}} öffnen"
       },
       "tagFilter": {
         "noOptions": "Keine Tags in diesem Stapel",
@@ -2146,6 +2146,34 @@
         "showMarked": "Nur markierte Karten anzeigen",
         "showAll": "Alle Karten anzeigen"
       }
+    },
+    "select": {
+      "rowAria": "{{title}} auswählen",
+      "barAria": "Ausgewählte Karten",
+      "clear": "Auswahl aufheben",
+      "count_one": "{{count}} ausgewählt",
+      "count_other": "{{count}} ausgewählt",
+      "moveTo": "Verschieben nach",
+      "tag": "Taggen",
+      "tagAria": "Ausgewählte Karten taggen",
+      "unmark": "Markierung entfernen",
+      "all": "Alle {{count}} auswählen",
+      "newTag": "Neuer Tag…",
+      "moveOne": "Verschieben nach…",
+      "editTags": "Tags bearbeiten…",
+      "deleteTitle_one": "{{count}} Karte löschen?",
+      "deleteTitle_other": "{{count}} Karten löschen?",
+      "deleteDescription_one": "Sie verlässt ihr Deck und jede Gruppe; ihr Wiederholungsverlauf geht mit.",
+      "deleteDescription_other": "Sie verlassen ihre Decks und jede Gruppe; ihr Wiederholungsverlauf geht mit.",
+      "deleteConfirm_one": "{{count}} Karte löschen",
+      "deleteConfirm_other": "{{count}} Karten löschen",
+      "error": "Das ließ sich nicht auf die ausgewählten Karten anwenden."
+    },
+    "move": {
+      "title_one": "{{count}} Karte in ein Deck verschieben",
+      "title_other": "{{count}} Karten in ein Deck verschieben",
+      "confirm_one": "{{count}} Karte verschieben",
+      "confirm_other": "{{count}} Karten verschieben"
     }
   },
   "books": {
