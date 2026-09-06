@@ -52,6 +52,7 @@ import {
 import LockIcon from '@mui/icons-material/Lock'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import GeneratedCards from '../Cards/GeneratedCards'
+import MakeCardsSheet from './MakeCardsSheet'
 import QuestionnaireModal from '../Cards/QuestionnaireModal'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
@@ -107,7 +108,7 @@ export default function EditorHome() {
   const location = useLocation()
   const { t } = useTranslation()
   const { setViewContext } = usePet()
-  const { tier } = useSubscription()
+  const { tier, aiUsageCount } = useSubscription()
   const { openUpgradeModal } = useSubscriptionContext()
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
@@ -152,6 +153,8 @@ export default function EditorHome() {
   const [generatedCards, setGeneratedCards] = useState([])
   const [showGeneratedCards, setShowGeneratedCards] = useState(false)
   const [generateCardsError, setGenerateCardsError] = useState(null)
+  // Make cards by section (BOOK-003): the sheet picks the sections, this runs them.
+  const [showMakeCards, setShowMakeCards] = useState(false)
 
   // Generate Quiz from Book state
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false)
@@ -312,12 +315,13 @@ export default function EditorHome() {
     [id, bookName, pageSize, autoSaveEnabled]
   )
 
-  const handleGenerateCards = async () => {
+  const handleGenerateCards = async (sections = null) => {
     setIsGeneratingCards(true)
     setGenerateCardsError(null)
     try {
-      const { cards } = await cardsService.generateFromBook(book?._id || book?.id)
+      const { cards } = await cardsService.generateFromBook(book?._id || book?.id, sections)
       setGeneratedCards(cards)
+      setShowMakeCards(false)
       setShowGeneratedCards(true)
     } catch (err) {
       console.error('Error generating cards from book:', err)
@@ -338,14 +342,10 @@ export default function EditorHome() {
   }
 
   // Single entry point for the card action — used by both the inline button and
-  // the overflow menu, so the tier gate behaves identically everywhere.
-  const handleGenerateCardsAction = () => {
-    if (isPlusLocked) {
-      openUpgradeModal(t('upgrade.headlines.generateFromBook'))
-      return
-    }
-    handleGenerateCards()
-  }
+  // the overflow menu. Every tier reaches the sheet: reads are free, and on a
+  // free account it is the sheet's key that is locked, so the upgrade prompt
+  // names the sections in the learner's own document (D10).
+  const handleGenerateCardsAction = () => setShowMakeCards(true)
 
   const handleGenerateQuiz = async () => {
     setIsGeneratingQuiz(true)
@@ -1462,6 +1462,17 @@ export default function EditorHome() {
       </Box>
 
       {/* Generate Cards from Book — results modal */}
+      <MakeCardsSheet
+        open={showMakeCards}
+        onClose={() => setShowMakeCards(false)}
+        book={book}
+        tier={tier}
+        aiUsageCount={aiUsageCount}
+        generating={isGeneratingCards}
+        onGenerate={handleGenerateCards}
+        onUpgrade={() => openUpgradeModal(t('upgrade.headlines.generateFromBook'))}
+      />
+
       {showGeneratedCards && (
         <GeneratedCards
           cards={generatedCards}

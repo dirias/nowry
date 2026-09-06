@@ -31,7 +31,7 @@ export const booksService = {
    * @returns {Promise<{book_id: string, title: string, sections: Array<{index: number, heading: string, words: number, cards: number, changed: boolean, hash: string}>}>}
    */
   async getSections(id) {
-    const { data } = await apiClient.get(`/books/${id}/sections`)
+    const { data } = await apiClient.get(`${ENDPOINTS.books.byId(id)}/sections`)
     return data
   },
 

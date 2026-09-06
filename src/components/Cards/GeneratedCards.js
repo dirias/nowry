@@ -458,34 +458,47 @@ export default function GeneratedCards({
                     minHeight: 200
                   }}
                 >
-                  {curation.entries.map((entry) => (
-                    <GeneratedCard
-                      key={entry.id}
-                      entry={entry}
-                      isEditing={editing?.id === entry.id}
-                      editingField={editing?.field}
-                      onEdit={(field) => setEditing({ id: entry.id, field })}
-                      onChangeField={(field, value) => curation.setField(entry.id, field, value)}
-                      onDoneEditing={() => closeEditor(entry.id)}
-                      onDoneEditingNext={() => editNextAfter(entry.id)}
-                      onCancelEditing={(openedWith) => {
-                        curation.setFields(entry.id, openedWith)
-                        closeEditor(entry.id)
-                      }}
-                      onDiscard={() => {
-                        curation.setKept(entry.id, false)
-                        setEditing(null)
-                        setFocusRequest({ id: entry.id, control: 'undo' })
-                      }}
-                      onRestore={() => {
-                        curation.setKept(entry.id, true)
-                        setFocusRequest({ id: entry.id, control: 'edit' })
-                      }}
-                      onRevert={() => curation.revert(entry.id)}
-                      focusRequest={focusRequest?.id === entry.id ? focusRequest.control : null}
-                      onFocusApplied={clearFocusRequest}
-                    />
-                  ))}
+                  {curation.entries.map((entry, index) => {
+                    // A run by section (BOOK-003) arrives grouped: a heading row
+                    // opens each section's drafts, spanning the grid.
+                    const heading = entry.source_section?.heading ?? null
+                    const previous = curation.entries[index - 1]?.source_section?.heading ?? null
+                    const opensSection = Boolean(heading) && heading !== previous
+                    return (
+                      <React.Fragment key={entry.id}>
+                        {opensSection && (
+                          <Typography level='title-sm' role='heading' aria-level={3} sx={{ gridColumn: '1 / -1', mt: index ? 1 : 0 }}>
+                            {heading}
+                          </Typography>
+                        )}
+                        <GeneratedCard
+                          entry={entry}
+                          isEditing={editing?.id === entry.id}
+                          editingField={editing?.field}
+                          onEdit={(field) => setEditing({ id: entry.id, field })}
+                          onChangeField={(field, value) => curation.setField(entry.id, field, value)}
+                          onDoneEditing={() => closeEditor(entry.id)}
+                          onDoneEditingNext={() => editNextAfter(entry.id)}
+                          onCancelEditing={(openedWith) => {
+                            curation.setFields(entry.id, openedWith)
+                            closeEditor(entry.id)
+                          }}
+                          onDiscard={() => {
+                            curation.setKept(entry.id, false)
+                            setEditing(null)
+                            setFocusRequest({ id: entry.id, control: 'undo' })
+                          }}
+                          onRestore={() => {
+                            curation.setKept(entry.id, true)
+                            setFocusRequest({ id: entry.id, control: 'edit' })
+                          }}
+                          onRevert={() => curation.revert(entry.id)}
+                          focusRequest={focusRequest?.id === entry.id ? focusRequest.control : null}
+                          onFocusApplied={clearFocusRequest}
+                        />
+                      </React.Fragment>
+                    )
+                  })}
 
                   {/* One placeholder per card still expected, so the list fills as they arrive */}
                   {isStreaming &&

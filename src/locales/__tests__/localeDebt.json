@@ -2961,7 +2961,9 @@
       "upgrade.welcome.title",
       "weekly.total",
       "weekly.types.flashcards",
-      "filters.typeReadout"
+      "filters.typeReadout",
+      "books.makeCards.subtitle_one",
+      "books.makeCards.subtitle_other"
     ],
     "de": [
       "about.values.innovation.title",

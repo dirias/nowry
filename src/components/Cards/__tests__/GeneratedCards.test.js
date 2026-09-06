@@ -616,3 +616,22 @@ describe('the source stamp (BOOK-002)', () => {
     expect(mockCreate.mock.calls[0][0]).not.toHaveProperty('source_section')
   })
 })
+
+describe('a run by section (BOOK-003)', () => {
+  it('opens each section of drafts with its heading, and shows none for a plain run', async () => {
+    const particles = { heading: 'Particles', index: 1, hash: 'h1' }
+    const verbs = { heading: 'Verbs', index: 2, hash: 'h2' }
+    const { unmount } = await renderModal({
+      cards: [
+        { ...CARDS[0], source_section: particles },
+        { title: 'は', content: 'topic marker', source_section: particles },
+        { ...CARDS[1], source_section: verbs }
+      ]
+    })
+    expect(screen.getAllByRole('heading', { level: 3 }).map((node) => node.textContent)).toEqual(['Particles', 'Verbs'])
+    unmount()
+
+    await renderModal()
+    expect(screen.queryByRole('heading', { level: 3 })).toBeNull()
+  })
+})
