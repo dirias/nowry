@@ -2231,6 +2231,9 @@ The calendar grid is the reference case: solid event bricks became a tile beside
 
 ### 15.9 The key (ADR-020)
 
+The full standard — geometry per size, variants, states, motion, segmented controls, composition,
+colour, code — is `docs/design/BUTTONS.md`. This section is the summary.
+
 The house button is a key you press. Use `keyButton(tone)` from `formStyles` on a solid or level1
 button and `keySegment(active)` after `segment()` on an engaged segment.
 

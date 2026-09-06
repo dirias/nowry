@@ -22,6 +22,7 @@ npm run build      # production build
 ## Design System
 
 **Always read before editing UI:** `docs/design/DESIGN_GUIDELINES.md`
+**Buttons and segmented controls:** `docs/design/BUTTONS.md` — the house button standard (ADR-020)
 
 ### Non-negotiables
 1. Use **Joy UI `sx` props** only — no `style={{}}`, no raw CSS

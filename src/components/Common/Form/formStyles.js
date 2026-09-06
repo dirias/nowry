@@ -166,7 +166,10 @@ export const keyButton = (tone = 'primary') => {
     transition: 'transform 80ms ease, box-shadow 80ms ease, background-color 80ms ease',
     boxShadow: `0 2px 0 0 ${edge}`,
     '&:hover': { transform: 'translateY(-1px)', boxShadow: `0 3px 0 0 ${edge}` },
-    '&:active': { transform: 'translateY(2px)', boxShadow: 'none' }
+    '&:active': { transform: 'translateY(2px)', boxShadow: 'none' },
+    // The edge still appears and disappears, which carries the same information
+    // without motion (BUTTONS.md §4).
+    '@media (prefers-reduced-motion: reduce)': { transition: 'none', '&:hover, &:active': { transform: 'none' } }
   }
 }
 

@@ -51,6 +51,12 @@ describe('the key (ADR-020)', () => {
     expect(key.borderRadius).toBe('md')
   })
 
+  it('stops moving under prefers-reduced-motion and keeps the edge as the signal', () => {
+    const reduced = keyButton()['@media (prefers-reduced-motion: reduce)']
+    expect(reduced.transition).toBe('none')
+    expect(reduced['&:hover, &:active'].transform).toBe('none')
+  })
+
   it('underlines an engaged segment with the accent and leaves a resting one alone', () => {
     expect(keySegment(true)).toEqual({ boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-primary-solidBg)' })
     expect(keySegment(false)).toEqual({})
