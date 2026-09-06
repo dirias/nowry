@@ -104,8 +104,12 @@ export default function ContinueObject({
           </>
         )}
         <span>{t('books.lib.openedAt', { when: formatRelativeDate?.(book.updated_at) })}</span>
-        <Dot />
-        <span>{book.cards > 0 ? t('books.lib.cardsFromDocument', { count: book.cards }) : t('books.lib.noCardsYet')}</span>
+        {book.cards > 0 && (
+          <>
+            <Dot />
+            <span>{t('books.lib.cardsFromDocument', { count: book.cards })}</span>
+          </>
+        )}
       </Stack>
     )
     actions = (
@@ -142,8 +146,12 @@ export default function ContinueObject({
             <span>{t('books.lib.wordsInSections', { words: number(book.word_count), count: book.section_count })}</span>
           </Box>
         )}
-        <Dot />
-        <span>{book.cards > 0 ? t('books.lib.cards', { count: book.cards }) : t('books.lib.noCardsYet')}</span>
+        {book.cards > 0 && (
+          <>
+            <Dot />
+            <span>{t('books.lib.cards', { count: book.cards })}</span>
+          </>
+        )}
         {book.due > 0 && (
           <>
             <Dot />
@@ -168,7 +176,9 @@ export default function ContinueObject({
         <Button onClick={onContinue}>{t('books.lib.continue')}</Button>
       </Stack>
     )
-    if (cover) edge = { pct: cover.pct, label: t('books.lib.sectionsCovered', { covered: cover.covered, total: cover.total }) }
+    // The edge draws once a section is covered; at zero the key already names the gap (D8).
+    if (cover && cover.covered > 0)
+      edge = { pct: cover.pct, label: t('books.lib.sectionsCovered', { covered: cover.covered, total: cover.total }) }
   }
 
   return (

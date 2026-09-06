@@ -61,6 +61,14 @@ describe('ContinueObject (BOOK-007)', () => {
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '67')
   })
 
+  it('says the absence once — on the key — with no readout and no edge for it (D8)', () => {
+    render(<ContinueObject book={{ ...WRITTEN, cards: 0, due: 0, sections_with_cards: 0 }} tier='plus' formatRelativeDate={rel} />)
+    expect(screen.getByRole('button', { name: 'books.lib.makeCardsSections:count=6' })).toBeInTheDocument()
+    expect(screen.queryByText(/noCardsYet/)).toBeNull()
+    expect(screen.queryByText(/cards:count/)).toBeNull()
+    expect(screen.queryByRole('progressbar')).toBeNull()
+  })
+
   it('hides the gap key when every section has cards', () => {
     render(<ContinueObject book={{ ...WRITTEN, sections_with_cards: 6 }} tier='plus' formatRelativeDate={rel} />)
     expect(screen.queryByRole('button', { name: /makeCardsSections/ })).toBeNull()
