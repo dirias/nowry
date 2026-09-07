@@ -37,7 +37,7 @@ jest.mock('@nowry/core/api/services', () => ({
 // useAnnualPlan below, since real useQuery would need a QueryClientProvider this
 // test doesn't set up.
 let mockRoutineData = null
-jest.mock('../../../hooks/useDailyRoutine', () => ({
+jest.mock('@nowry/core/hooks/useDailyRoutine', () => ({
   useDailyRoutine: () => ({ routine: mockRoutineData, loading: false, error: null, invalidate: jest.fn(), refetch: jest.fn() })
 }))
 
@@ -63,7 +63,7 @@ const mockAnnualPlanState = {
 
 // Plain factory rather than a jest.fn: CRA's jest config sets resetMocks, which
 // would strip the implementation off a jest.fn between tests.
-jest.mock('../../../hooks/useAnnualPlan', () => ({
+jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({
   __esModule: true,
   default: () => mockAnnualPlanState
 }))
@@ -71,8 +71,8 @@ jest.mock('../../../hooks/useAnnualPlan', () => ({
 // NOTE: real useAuth()-backed hooks (e.g. useDailyRoutine, prior to being mocked
 // above) derive their query-key userId from `user.id`, not `user.uid` — kept as
 // `id` here to match that convention (see hooks/useDailyRoutine.js).
-jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user', uid: 'test-user' } }) }))
-jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user', uid: 'test-user' } }) }))
+jest.mock('@nowry/core/hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 jest.mock('@nowry/core/api/services/goalAI.service', () => ({ analyzeGoals: jest.fn() }))
 jest.mock('../CloseQuarterModal', () => () => null)
@@ -162,9 +162,9 @@ describe('FE-AP-1: one hook call, shared quarter scope', () => {
     // bare sibling route to a child of the layout.
     const tabViews = ['OverviewTabView.js', 'GoalsTabView.js', 'ReportsTabView.js', 'AllPrioritiesPage.js']
     tabViews.forEach((file) => {
-      expect(fs.readFileSync(path.join(dir, file), 'utf8')).not.toMatch(/from '\.\.\/\.\.\/hooks\/useAnnualPlan'/)
+      expect(fs.readFileSync(path.join(dir, file), 'utf8')).not.toMatch(/from '@nowry\/core\/hooks\/useAnnualPlan'/)
     })
-    expect(fs.readFileSync(path.join(dir, 'AnnualPlanningLayout.js'), 'utf8')).toMatch(/from '\.\.\/\.\.\/hooks\/useAnnualPlan'/)
+    expect(fs.readFileSync(path.join(dir, 'AnnualPlanningLayout.js'), 'utf8')).toMatch(/from '@nowry\/core\/hooks\/useAnnualPlan'/)
   })
 
   it('scopes goals and metrics to ?q= before handing them to the child', async () => {

@@ -108,18 +108,18 @@ describe('ModelBadge inline (GATE-04)', () => {
   // If ModelBadge is extracted to its own file, update the import below.
 
   test('model badge key "upgrade.modelBadge" is defined in translation.json', () => {
-    const translation = require('../../../locales/en/translation.json')
+    const translation = require('@nowry/core/locales/en/translation.json')
     expect(translation.upgrade?.modelBadge).toBeDefined()
     expect(translation.upgrade?.modelBadge).not.toBe('')
   })
 
   test('inline CTA key "upgrade.inlineCtaText" is defined in translation.json', () => {
-    const translation = require('../../../locales/en/translation.json')
+    const translation = require('@nowry/core/locales/en/translation.json')
     expect(translation.upgrade?.inlineCtaText).toBeDefined()
   })
 
   test('modal title key "upgrade.modal.title" is defined in translation.json', () => {
-    const translation = require('../../../locales/en/translation.json')
+    const translation = require('@nowry/core/locales/en/translation.json')
     expect(translation.upgrade?.modal?.title).toBeDefined()
   })
 })

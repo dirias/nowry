@@ -17,9 +17,9 @@ jest.mock('react-i18next', () => ({
 jest.mock('react-dropzone', () => ({
   useDropzone: () => ({ getRootProps: () => ({}), getInputProps: () => ({}), isDragActive: false, open: jest.fn() })
 }))
-jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', username: 'didier' } }) }))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', username: 'didier' } }) }))
 let mockTier = 'plus'
-jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: mockTier }) }))
+jest.mock('@nowry/core/hooks/useSubscription', () => ({ useSubscription: () => ({ tier: mockTier }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 jest.mock('../BookCreateSheet', () => () => null)
 jest.mock('../BookEditSheet', () => () => null)
@@ -28,7 +28,7 @@ jest.mock('../../Messages', () => ({ Error: ({ error_msg }) => <div role='alert'
 jest.mock('@nowry/core/api/services', () => ({ booksService: {} }))
 
 const mockUseBooks = jest.fn()
-jest.mock('../../../hooks/useBooks', () => ({ __esModule: true, default: () => mockUseBooks(), useBooks: () => mockUseBooks() }))
+jest.mock('@nowry/core/hooks/useBooks', () => ({ __esModule: true, default: () => mockUseBooks(), useBooks: () => mockUseBooks() }))
 
 const BookHome = require('../BookHome').default
 

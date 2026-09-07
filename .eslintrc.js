@@ -138,6 +138,24 @@ module.exports = {
     },
     {
       /*
+       * Core's TEST files may use JSX.
+       *
+       * The JSX ban exists because `react-scripts` cannot transpile JSX in this
+       * package for the WEB BUNDLE. A test file is never bundled — it runs under
+       * babel-jest with the React preset — so the ban buys nothing there and
+       * costs the ability to render a provider in its own test.
+       *
+       * The browser-global and view-layer bans still apply. A test that wants
+       * storage configures the port, which is how `generationBudget.test.js` and
+       * the hook suites are written.
+       */
+      files: ['packages/core/**/*.test.js', 'packages/core/**/__tests__/**/*.js', 'packages/core/platform/testing.js'],
+      rules: {
+        'no-restricted-syntax': 'off'
+      }
+    },
+    {
+      /*
        * The three rules above match ANY property named fontSize / fontWeight /
        * borderRadius, not only the ones inside an `sx` prop — an AST selector
        * cannot tell the two apart. That is fine almost everywhere, because

@@ -25,7 +25,7 @@ import {
   EmojiEvents as EmojiEventsIcon
 } from '@mui/icons-material'
 import { annualPlanningService } from '@nowry/core/api/services'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import QuarterReportDetail from './QuarterReportDetail'
 
 const CloseQuarterModal = ({ open, onClose, onSuccess, targetQuarter, targetYear, planId, focusAreas, goals }) => {

@@ -8,6 +8,7 @@ import {
   env,
   telemetry,
   session,
+  alerts,
   PlatformNotConfiguredError,
   PlatformAlreadyConfiguredError,
   PlatformAdapterError
@@ -24,7 +25,8 @@ const makeAdapters = (overrides = {}) => ({
   },
   env: { apiUrl: 'http://api.test', apiTimeout: 10000, sentryDsn: undefined },
   telemetry: { captureException: jest.fn(), captureMessage: jest.fn(), addBreadcrumb: jest.fn() },
-  session: { onUnauthorized: jest.fn(), onSignedOut: jest.fn() },
+  session: { onUnauthorized: jest.fn(), onUnauthorizedSubscribe: jest.fn(() => () => {}), onSignedOut: jest.fn() },
+  alerts: { play: jest.fn(), announce: jest.fn(), requestPermission: jest.fn(async () => 'granted') },
   ...overrides
 })
 
@@ -37,7 +39,8 @@ describe('before configuration', () => {
     ['auth', () => auth.currentUser()],
     ['env', () => env.apiUrl],
     ['telemetry', () => telemetry.captureMessage('x')],
-    ['session', () => session.onSignedOut()]
+    ['session', () => session.onSignedOut()],
+    ['alerts', () => alerts.play()]
   ])('using %s raises PlatformNotConfiguredError naming the capability', (capability, use) => {
     expect(use).toThrow(PlatformNotConfiguredError)
     try {
@@ -68,7 +71,8 @@ describe('configuration', () => {
       { telemetry: { captureException: () => {} } },
       'captureException(error, options), captureMessage(message, options) and addBreadcrumb'
     ],
-    ['session', { session: { onUnauthorized: () => {} } }, 'onUnauthorized(options) and onSignedOut()'],
+    ['session', { session: { onUnauthorized: () => {} } }, 'onUnauthorized(options), onUnauthorizedSubscribe(handler) and onSignedOut()'],
+    ['alerts', { alerts: { play: () => {} } }, 'play(), announce(title, body) and requestPermission()'],
     ['env', { env: { apiUrl: '', apiTimeout: 1 } }, 'apiUrl must be a non-empty string'],
     ['env', { env: { apiUrl: 'http://a', apiTimeout: 'soon' } }, 'apiTimeout must be a finite number']
   ])('rejects a malformed %s adapter at configure time', (capability, override, detail) => {
@@ -141,6 +145,15 @@ describe('after configuration', () => {
   it('exposes the client-built Firebase instance and its Google path', async () => {
     expect(auth.instance()).toEqual({ name: 'firebase' })
     await expect(auth.signInWithGoogle()).resolves.toEqual({ user: { uid: 'u1' } })
+  })
+
+  it('delegates alerts, which are sound and OS notifications, not in-app messages', async () => {
+    alerts.play()
+    alerts.announce('Break over', 'Back to it')
+    await alerts.requestPermission()
+    expect(adapters.alerts.play).toHaveBeenCalled()
+    expect(adapters.alerts.announce).toHaveBeenCalledWith('Break over', 'Back to it')
+    expect(adapters.alerts.requestPermission).toHaveBeenCalled()
   })
 
   it('reads env through getters', () => {

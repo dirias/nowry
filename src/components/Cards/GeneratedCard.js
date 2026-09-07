@@ -4,7 +4,7 @@ import { BookOpen, Pencil, RotateCcw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import GeneratedCardEditor from './GeneratedCardEditor'
-import { isEdited, isIncomplete } from '../../hooks/useCardCuration'
+import { isEdited, isIncomplete } from '@nowry/core/hooks/useCardCuration'
 import { focusRing, oneLine } from '../Common/Form/formStyles'
 
 /**

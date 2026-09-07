@@ -1,8 +1,8 @@
-import de from '../../../../locales/de/translation.json'
-import en from '../../../../locales/en/translation.json'
-import es from '../../../../locales/es/translation.json'
-import fr from '../../../../locales/fr/translation.json'
-import ja from '../../../../locales/ja/translation.json'
+import de from '@nowry/core/locales/de/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
+import es from '@nowry/core/locales/es/translation.json'
+import fr from '@nowry/core/locales/fr/translation.json'
+import ja from '@nowry/core/locales/ja/translation.json'
 
 /**
  * The form system's shared namespace, guarded in all five locales.
@@ -18,7 +18,7 @@ const NON_ENGLISH = ['de', 'es', 'fr', 'ja']
  * A locale only owes the plural forms its own CLDR rules can select. Japanese
  * has a single `other` category, so `addedCount_one` is not a gap there — it is
  * a key i18next can never reach. ONB-015 dropped it; the rule itself lives in
- * `src/locales/__tests__/localeCoverage.test.js`.
+ * `packages/core/locales/__tests__/localeCoverage.test.js`.
  */
 const PLURAL_CATEGORIES = Object.keys(LOCALES).reduce((acc, name) => {
   acc[name] = new Set(new Intl.PluralRules(name).resolvedOptions().pluralCategories)

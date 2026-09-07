@@ -21,7 +21,7 @@
  * (FR-018), and mocking the control that owns them would test nothing.
  */
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -37,7 +37,7 @@ jest.mock('react-i18next', () => {
 
 // Mocked for its constants only: importing the real module drags in the API
 // client and every service behind it, for three frozen objects.
-jest.mock('../../../hooks/useProgressivePreferences', () => ({
+jest.mock('@nowry/core/hooks/useProgressivePreferences', () => ({
   __esModule: true,
   ACTION_PHASE: { IDLE: 'idle', PENDING: 'pending', SUCCEEDED: 'succeeded', ERROR: 'error' },
   PREFERENCES_PHASE: { IDLE: 'idle', LOADING: 'loading', READY: 'ready', ERROR: 'error' },
@@ -49,7 +49,7 @@ import React from 'react'
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 import PersonalizationScreen, { PERSONALIZATION_ISSUE, evaluateSelection } from '../PersonalizationScreen'
-import en from '../../../locales/en/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
 
 const copy = en.onboarding.personalization
 const taxonomy = en.taxonomy

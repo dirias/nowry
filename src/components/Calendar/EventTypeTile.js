@@ -6,7 +6,7 @@ import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 
-import { readableTextOn } from '../../theme/colorSchemeGenerator'
+import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 
 /** One glyph per event type. Every milestone is a measurable step (CAL-005), so one diamond. */
 export const EVENT_TYPE_ICONS = {

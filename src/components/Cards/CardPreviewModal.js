@@ -8,7 +8,7 @@ import DOMPurify from 'dompurify'
 import MarkToggle from './MarkToggle'
 import ttsService from '../../utils/tts.service'
 import TTSControls from '../TTS/TTSControls'
-import { useVoiceSettings } from '../../hooks/useVoiceSettings'
+import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 
 // Initialize Mermaid
 mermaid.initialize({

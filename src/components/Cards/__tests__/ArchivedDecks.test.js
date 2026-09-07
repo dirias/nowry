@@ -10,7 +10,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) })
 }))
 const mockUseDeckData = jest.fn()
-jest.mock('../../../hooks/useDeckData', () => ({ useDeckData: (...args) => mockUseDeckData(...args) }))
+jest.mock('@nowry/core/hooks/useDeckData', () => ({ useDeckData: (...args) => mockUseDeckData(...args) }))
 
 const ArchivedDecks = require('../ArchivedDecks').default
 

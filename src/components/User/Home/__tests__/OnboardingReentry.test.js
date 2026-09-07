@@ -20,7 +20,7 @@
  * and `show_next_steps` is false for all of them by construction.
  */
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -55,7 +55,7 @@ jest.mock('@nowry/core/api/services/cards.service', () => ({
 // AuthContext and, through it, the real i18n bootstrap — which the
 // `react-i18next` mock above cannot satisfy. This suite is about the re-entry
 // card; the panel's own coverage lives in `NextSteps.test.js`.
-jest.mock('../../../../hooks/useNextSteps', () => ({
+jest.mock('@nowry/core/hooks/useNextSteps', () => ({
   __esModule: true,
   default: () => ({ steps: [], resolved: true, allDone: true })
 }))
@@ -65,7 +65,7 @@ import { act, render, screen, fireEvent } from '@testing-library/react'
 
 import OnboardingSurfaces from '../OnboardingSurfaces'
 import { userService } from '@nowry/core/api/services/user.service'
-import en from '../../../../locales/en/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
 
 const copy = en.home.onboardingReentry
 

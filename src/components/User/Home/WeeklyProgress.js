@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Card, CardContent, Stack, Chip, Skeleton } from '@mui/joy'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { useStatistics } from '../../../hooks/useStatistics'
+import { useStatistics } from '@nowry/core/hooks/useStatistics'
 
 export default function WeeklyProgress() {
   const { t } = useTranslation()

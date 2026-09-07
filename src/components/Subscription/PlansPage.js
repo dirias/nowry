@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Container, Typography, Stack, Button, Alert } from '@mui/joy'
 import { subscriptionService } from '@nowry/core/api/services'
-import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import PlanCard from './PlanCard'
 
 // Price IDs are publishable values from env vars (safe to expose client-side per T-03-07-02).

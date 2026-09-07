@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, Stack, Typography } from '@mui/joy'
 
 import useOnboardingJourney, { JOURNEY_PHASE } from '../../hooks/useOnboardingJourney'
-import useProgressivePreferences from '../../hooks/useProgressivePreferences'
+import useProgressivePreferences from '@nowry/core/hooks/useProgressivePreferences'
 import { focusRing } from '../Common/Form/formStyles'
 import FirstDeckScreen from './FirstDeckScreen'
 import OnboardingPageShell from './OnboardingPageShell'

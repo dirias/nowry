@@ -2,11 +2,11 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
-import en from './locales/en/translation.json'
-import es from './locales/es/translation.json'
-import fr from './locales/fr/translation.json'
-import de from './locales/de/translation.json'
-import ja from './locales/ja/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
+import es from '@nowry/core/locales/es/translation.json'
+import fr from '@nowry/core/locales/fr/translation.json'
+import de from '@nowry/core/locales/de/translation.json'
+import ja from '@nowry/core/locales/ja/translation.json'
 
 const resources = {
   en: { translation: en },

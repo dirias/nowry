@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Stack, Typography } from '@mui/joy'
@@ -6,7 +6,7 @@ import { Alert, Button, Stack, Typography } from '@mui/joy'
 import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import FormSheet from '../Common/Form/FormSheet'
 import { focusRing } from '../Common/Form/formStyles'
-import useCardForm from '../../hooks/useCardForm'
+import useCardForm from '@nowry/core/hooks/useCardForm'
 import CardAuthorFooter from './card/CardAuthorFooter'
 import CardTypeSelector from './card/CardTypeSelector'
 import FlashcardFields from './card/FlashcardFields'
@@ -41,6 +41,22 @@ export default function CreateCardModal({ open, onClose, onCardSaved, decks = []
   const navigate = useNavigate()
   // The hook names what it needs and this file supplies the DOM (MOB-003B).
   const form = useCardForm({ open, card, initialSection, onSaved: onCardSaved, onClose, focusTarget: focusFirstControl })
+
+  /*
+   * Cmd/Ctrl+Enter saves. This lived inside useCardForm as a `document`
+   * listener; the hook is shared now, so the platform-specific gesture belongs
+   * to the surface that has a keyboard (MOB-004).
+   */
+  useEffect(() => {
+    if (!open) return undefined
+    const onKeyDown = (event) => {
+      if (event.key !== 'Enter' || !(event.metaKey || event.ctrlKey) || event.defaultPrevented) return
+      event.preventDefault()
+      form.primaryAction()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open, form])
 
   const Body = BODIES[form.cardType] || FlashcardFields
   const titleKey = form.isEdit ? form.spec.editTitleKey : form.spec.createTitleKey

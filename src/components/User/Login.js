@@ -13,7 +13,7 @@ import {
   SpeedRounded
 } from '@mui/icons-material'
 
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import { authService } from '@nowry/core/api/services/auth.service'
 
 const Login = () => {

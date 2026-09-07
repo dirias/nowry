@@ -43,7 +43,7 @@ describe.skip('CalendarPage — CAL-03: eventDrop calls correct update service',
 
 // Additional mocks needed for Phase 15 tests
 const mockUseCalendarFilters = jest.fn()
-jest.mock('../../../hooks/useCalendarFilters', () => ({
+jest.mock('@nowry/core/hooks/useCalendarFilters', () => ({
   useCalendarFilters: (...args) => mockUseCalendarFilters(...args)
 }))
 const mockIsMobile = jest.fn(() => false)
@@ -64,7 +64,7 @@ jest.mock('../EventFormModal', () => () => null)
 // CalendarPage now reads userId from useAuth() to scope the ['calendarEvents', userId,
 // year] React Query key (CACHE-008 / ADR-008) — mocked here since this test has no
 // AuthProvider wrapping it, following the convention from DailyRoutinePlanner.test.js.
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('@nowry/core/context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'test-user' } })
 }))
 
@@ -440,7 +440,7 @@ describe('CAL-002: the agenda row check', () => {
 // `calendar.service.js` emits, rather than mirroring either one. Mirroring the
 // formula here would let the production helper change underneath these
 // assertions and still pass, which is the failure mode the test exists to stop.
-const { readableTextOn, contrastRatio } = require('../../../theme/colorSchemeGenerator')
+const { readableTextOn, contrastRatio } = require('@nowry/core/tokens/colorSchemeGenerator')
 
 // The four fallbacks hardcoded in calendar.service.js. A user-defined
 // focus-area colour replaces these, so they are the floor, not the whole space.

@@ -1,21 +1,21 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+/**
+ * NotificationProvider — the web client's notification surface.
+ *
+ * The state lives in `@nowry/core/context/useNotificationState`; this file is
+ * the two things that cannot be shared: the Joy Snackbar it renders, and the
+ * `api:notify` CustomEvent it listens for, which is how the web platform
+ * adapter delivers a message from code that has no React in scope.
+ */
+import React, { createContext, useContext, useEffect } from 'react'
 import { Snackbar, Alert } from '@mui/joy'
+import { useNotificationState } from '@nowry/core/context/useNotificationState'
 
 const NotificationContext = createContext(null)
 
-/**
- * NotificationProvider
- * Listens to the global 'api:notify' CustomEvent dispatched by the API client
- * interceptor (which can't import React context directly) and shows a Joy UI Snackbar.
- */
 export const NotificationProvider = ({ children }) => {
-  const [notification, setNotification] = useState(null) // { message, severity }
+  const { notification, showNotification, dismiss } = useNotificationState()
 
-  const showNotification = useCallback((message, severity = 'error') => {
-    setNotification({ message, severity })
-  }, [])
-
-  // Listen for events dispatched by the API interceptor
+  // The web adapter's transport. Unchanged from before the split.
   useEffect(() => {
     const handleApiNotify = (e) => {
       const { message, severity } = e.detail || {}
@@ -25,15 +25,13 @@ export const NotificationProvider = ({ children }) => {
     return () => window.removeEventListener('api:notify', handleApiNotify)
   }, [showNotification])
 
-  const handleClose = () => setNotification(null)
-
   return (
     <NotificationContext.Provider value={{ showNotification }}>
       {children}
       <Snackbar
         open={!!notification}
         autoHideDuration={5000}
-        onClose={handleClose}
+        onClose={dismiss}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         sx={{ zIndex: 9999 }}
       >
@@ -41,7 +39,7 @@ export const NotificationProvider = ({ children }) => {
           <Alert
             variant='solid'
             color={notification.severity === 'warning' ? 'warning' : notification.severity === 'error' ? 'danger' : 'neutral'}
-            onClose={handleClose}
+            onClose={dismiss}
           >
             {notification.message}
           </Alert>

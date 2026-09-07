@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { focusRing, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
-import { MOTION } from '../../theme/tokens'
+import { MOTION } from '@nowry/core/tokens/tokens'
 import CoverMark from './CoverMark'
 import { cardsReadout, measureOf, metaLine } from './documentCopy'
 

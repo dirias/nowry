@@ -1,4 +1,4 @@
-import { TOUCH_TARGET, LIST_ROW_HEIGHT, FONT_WEIGHT, MOTION } from '../../../theme/tokens'
+import { TOUCH_TARGET, LIST_ROW_HEIGHT, FONT_WEIGHT, MOTION } from '@nowry/core/tokens/tokens'
 
 /**
  * Shared `sx` fragments for every form surface in the app.

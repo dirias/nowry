@@ -2,7 +2,7 @@ import * as React from 'react'
 import { IconButton, Snackbar, Tooltip } from '@mui/joy'
 import { BugReportRounded } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
 

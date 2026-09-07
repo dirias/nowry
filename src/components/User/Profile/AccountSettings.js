@@ -64,14 +64,14 @@ import { agentService } from '@nowry/core/api/services/agent.service'
 import { useColorScheme } from '@mui/joy/styles'
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
 import DeleteConfirmationModal from '../../Common/DeleteConfirmationModal'
-import { useAuth } from '../../../context/AuthContext'
-import { usePet } from '../../../context/AgentContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
+import { usePet } from '@nowry/core/context/AgentContext'
 import { auth } from '../../../config/firebase.config'
 import { useQueryClient } from '@tanstack/react-query'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
 import LearningPreferencesSection from './LearningPreferencesSection'
-import { getUsernameValidationError } from '../../../utils/usernameValidation'
+import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 const SECTION_IDS = [

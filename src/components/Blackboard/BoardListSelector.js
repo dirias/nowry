@@ -5,7 +5,7 @@ import LockRoundedIcon from '@mui/icons-material/LockRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
 import { blackboardService } from '@nowry/core/api/services/blackboard.service'
-import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 
 export default function BoardListSelector({ open, onClose, onSelectBoard }) {

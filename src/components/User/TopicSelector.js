@@ -5,7 +5,7 @@ import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUnch
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { useTranslation } from 'react-i18next'
 
-import { TOPICS, MAX_TOPICS, derivePrimaryTopic } from '../../constants/learningTaxonomy'
+import { TOPICS, MAX_TOPICS, derivePrimaryTopic } from '@nowry/core/constants/learningTaxonomy'
 import { optionBase, selectedOption, unselectedOption, blockedOption, visuallyHidden } from './taxonomySelectorStyles'
 
 /**

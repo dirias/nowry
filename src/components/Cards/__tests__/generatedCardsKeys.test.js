@@ -15,7 +15,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import en from '../../../locales/en/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
 
 const SOURCES = ['GeneratedCards.js', 'GeneratedCard.js', 'GeneratedCardEditor.js']
 

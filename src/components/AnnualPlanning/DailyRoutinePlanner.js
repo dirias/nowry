@@ -31,8 +31,8 @@ import {
 import { annualPlanningService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { todayKey } from '@nowry/core/api/utils/routineCache'
-import { useAnnualPlan } from '../../hooks/useAnnualPlan'
-import { useAuth } from '../../context/AuthContext'
+import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
+import { useAuth } from '@nowry/core/context/AuthContext'
 
 const DailyRoutinePlanner = () => {
   const { t } = useTranslation()

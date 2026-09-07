@@ -9,7 +9,7 @@
 const LOCALES = ['en', 'de', 'es', 'fr', 'ja']
 
 const translations = LOCALES.reduce((acc, locale) => {
-  acc[locale] = require(`../../../locales/${locale}/translation.json`)
+  acc[locale] = require(`@nowry/core/locales/${locale}/translation.json`)
   return acc
 }, {})
 
@@ -19,7 +19,7 @@ const get = (tree, dotted) => dotted.split('.').reduce((node, key) => (node == n
  * A locale only owes the plural forms its own CLDR rules can select. Japanese
  * has a single `other` category, so `_one` is not a gap there — it is a key
  * i18next can never reach. ONB-015 dropped those from the `ja` bundle; the rule
- * itself lives in `src/locales/__tests__/localeCoverage.test.js`.
+ * itself lives in `packages/core/locales/__tests__/localeCoverage.test.js`.
  */
 const PLURAL_CATEGORIES = LOCALES.reduce((acc, locale) => {
   acc[locale] = new Set(new Intl.PluralRules(locale).resolvedOptions().pluralCategories)

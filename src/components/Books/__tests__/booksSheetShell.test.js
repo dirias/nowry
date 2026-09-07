@@ -32,7 +32,7 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('react-router-dom', () => ({ ...jest.requireActual('react-router-dom'), useNavigate: () => jest.fn() }))
 
-jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { username: 'ada' } }) }))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: { username: 'ada' } }) }))
 
 jest.mock('@nowry/core/api/services', () => ({
   booksService: { create: jest.fn(), update: jest.fn() },

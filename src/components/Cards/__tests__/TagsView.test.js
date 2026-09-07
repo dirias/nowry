@@ -29,10 +29,12 @@ const GROUPS = {
   untagged: { cards: 85, due: 6, new: 12 }
 }
 let mockGroups = GROUPS
-jest.mock('../../../hooks/useGroups', () => ({ useGroups: () => ({ groups: mockGroups, loading: false, error: null, reload: jest.fn() }) }))
+jest.mock('@nowry/core/hooks/useGroups', () => ({
+  useGroups: () => ({ groups: mockGroups, loading: false, error: null, reload: jest.fn() })
+}))
 
 const mockUseCardData = jest.fn()
-jest.mock('../../../hooks/useCardData', () => ({ useCardData: (...args) => mockUseCardData(...args) }))
+jest.mock('@nowry/core/hooks/useCardData', () => ({ useCardData: (...args) => mockUseCardData(...args) }))
 jest.mock('../MarkToggle', () => ({ __esModule: true, default: () => <button type='button'>mark</button> }))
 const mockBulk = jest.fn()
 const mockRenameTag = jest.fn()

@@ -28,7 +28,7 @@
  * copy about what did and did not reach the library are the product here.
  */
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -55,7 +55,7 @@ jest.mock('../../../hooks/useOnboardingJourney', () => ({
   BROWSE_PHASE: { IDLE: 'idle', LOADING: 'loading', READY: 'ready', EMPTY: 'empty', ERROR: 'error' },
   default: jest.fn()
 }))
-jest.mock('../../../hooks/useProgressivePreferences', () => ({
+jest.mock('@nowry/core/hooks/useProgressivePreferences', () => ({
   __esModule: true,
   ACTION_PHASE: { IDLE: 'idle', PENDING: 'pending', SUCCEEDED: 'succeeded', ERROR: 'error' },
   PREFERENCES_PHASE: { IDLE: 'idle', LOADING: 'loading', READY: 'ready', ERROR: 'error' },
@@ -89,7 +89,7 @@ import React from 'react'
 import { act, render, screen, fireEvent, within } from '@testing-library/react'
 
 import FirstDeckScreen, { forkFailureKey, generatedCardCount, generatedCardList } from '../FirstDeckScreen'
-import en from '../../../locales/en/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
 
 const copy = en.onboarding.firstDeck
 const fill = (template, values) => template.replace(/{{(\w+)}}/g, (_, name) => String(values[name]))

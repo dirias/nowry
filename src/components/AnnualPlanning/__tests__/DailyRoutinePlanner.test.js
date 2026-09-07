@@ -38,14 +38,14 @@ const mockAnnualPlanState = {
   activities: [],
   loading: false
 }
-jest.mock('../../../hooks/useAnnualPlan', () => ({
+jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({
   useAnnualPlan: () => mockAnnualPlanState
 }))
 
 // DailyRoutinePlanner now invalidates the shared ['dailyRoutine', userId] React
 // Query key (CACHE-007 / ADR-008) after every mutation, which needs a userId from
 // useAuth() — mocked here since this test has no AuthProvider wrapping it.
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('@nowry/core/context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'test-user' } })
 }))
 

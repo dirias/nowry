@@ -73,7 +73,7 @@ const mockApplyReviewXp = jest.fn()
 const mockFlushPendingLevelUp = jest.fn()
 const mockCheer = jest.fn()
 
-jest.mock('../../../context/AgentContext', () => ({
+jest.mock('@nowry/core/context/AgentContext', () => ({
   usePet: () => ({
     setViewContext: mockSetViewContext,
     queueIntervention: mockQueueIntervention,
@@ -112,7 +112,7 @@ jest.mock('@nowry/core/api/services/studySessions.service', () => ({
   }
 }))
 
-jest.mock('../../../hooks/useCardData', () => ({
+jest.mock('@nowry/core/hooks/useCardData', () => ({
   useCardData: () => ({ cards: [], loading: false, reload: jest.fn() })
 }))
 
@@ -123,13 +123,13 @@ jest.mock('../../../hooks/useCardData', () => ({
 // imports useAuth (e.g. FocusAreaViewDialogSection.test.js,
 // AnnualPlanningLayout.test.js), needed because the real AuthContext module
 // pulls in src/i18n.js, which errors outside the app's real entry point.
-jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user' } }) }))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user' } }) }))
 
 jest.mock('@nowry/core/api/queryClient', () => ({
   queryClient: { invalidateQueries: jest.fn() }
 }))
 
-jest.mock('../../../hooks/useVoiceSettings', () => {
+jest.mock('@nowry/core/hooks/useVoiceSettings', () => {
   const benignSide = { voiceName: null, voiceLang: null, rate: 1.0, pitch: 1.0, autoPlay: false }
   return {
     useVoiceSettings: () => ({

@@ -2,13 +2,13 @@ import React, { createContext, useState, useEffect, useContext, useMemo } from '
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import CssBaseline from '@mui/joy/CssBaseline'
 import GlobalStyles from '@mui/joy/GlobalStyles'
-import { MOTION } from './tokens'
+import { MOTION } from '@nowry/core/tokens/tokens'
 
-import { generateColorScheme, STICKY_PALETTE } from './colorSchemeGenerator'
+import { generateColorScheme, STICKY_PALETTE } from '@nowry/core/tokens/colorSchemeGenerator'
 import themeConfig from './theme'
 import { components } from './components'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 
 // Context to allow other components to update theme settings
 export const ThemePreferencesContext = createContext({

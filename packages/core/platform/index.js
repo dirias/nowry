@@ -34,8 +34,14 @@
  * @property {(message: string, options?: object) => void} captureMessage
  * @property {(breadcrumb: object) => void} addBreadcrumb
  *
+ * @typedef {Object} AlertsAdapter
+ * @property {() => void} play                          a sound the user hears
+ * @property {(title: string, body: string) => void} announce   an OS-level notification
+ * @property {() => Promise<string>} requestPermission
+ *
  * @typedef {Object} SessionAdapter
  * @property {(options?: {redirect?: boolean}) => void} onUnauthorized
+ * @property {(handler: () => void) => () => void} onUnauthorizedSubscribe
  * @property {() => void} onSignedOut
  *
  * @typedef {Object} EnvAdapter
@@ -50,6 +56,7 @@
  * @property {EnvAdapter} env
  * @property {TelemetryAdapter} telemetry
  * @property {SessionAdapter} session
+ * @property {AlertsAdapter} alerts
  */
 import { PlatformNotConfiguredError, PlatformAlreadyConfiguredError, PlatformAdapterError } from './errors'
 
@@ -70,7 +77,7 @@ const validate = (candidate) => {
     throw new PlatformAdapterError('platform', 'configurePlatform() expects an object of adapters')
   }
 
-  const { storage, notify, auth, env, telemetry, session } = candidate
+  const { storage, notify, auth, env, telemetry, session, alerts } = candidate
 
   if (!storage || !isFunction(storage.get) || !isFunction(storage.set) || !isFunction(storage.remove)) {
     throw new PlatformAdapterError('storage', 'it must provide get(key), set(key, value) and remove(key)')
@@ -107,8 +114,11 @@ const validate = (candidate) => {
       'it must provide captureException(error, options), captureMessage(message, options) and addBreadcrumb(breadcrumb)'
     )
   }
-  if (!session || !isFunction(session.onUnauthorized) || !isFunction(session.onSignedOut)) {
-    throw new PlatformAdapterError('session', 'it must provide onUnauthorized(options) and onSignedOut()')
+  if (!session || !isFunction(session.onUnauthorized) || !isFunction(session.onUnauthorizedSubscribe) || !isFunction(session.onSignedOut)) {
+    throw new PlatformAdapterError('session', 'it must provide onUnauthorized(options), onUnauthorizedSubscribe(handler) and onSignedOut()')
+  }
+  if (!alerts || !isFunction(alerts.play) || !isFunction(alerts.announce) || !isFunction(alerts.requestPermission)) {
+    throw new PlatformAdapterError('alerts', 'it must provide play(), announce(title, body) and requestPermission()')
   }
 }
 
@@ -190,7 +200,22 @@ export const telemetry = {
  */
 export const session = {
   onUnauthorized: (options = {}) => capability('session').onUnauthorized(options),
+  /** Subscribe to the signal above; returns its unsubscribe. */
+  onUnauthorizedSubscribe: (handler) => capability('session').onUnauthorizedSubscribe(handler),
   onSignedOut: () => capability('session').onSignedOut()
+}
+
+/**
+ * Sound and OS-level notifications, as distinct from `notify`, which is an
+ * in-app message the user reads now. A focus timer that ends while the app is
+ * closed has to reach the person through the operating system, and the two
+ * clients do that with entirely different machinery: the Web Audio and
+ * Notification APIs here, expo-av and expo-notifications on mobile (MOB-024).
+ */
+export const alerts = {
+  play: () => capability('alerts').play(),
+  announce: (title, body) => capability('alerts').announce(title, body),
+  requestPermission: () => capability('alerts').requestPermission()
 }
 
 /**

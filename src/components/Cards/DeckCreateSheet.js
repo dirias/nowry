@@ -12,7 +12,8 @@ import FormTagInput from '../Common/Form/FormTagInput'
 import FormTextArea from '../Common/Form/FormTextArea'
 import FormTextField from '../Common/Form/FormTextField'
 import { focusRing } from '../Common/Form/formStyles'
-import useDeckForm from '../../hooks/useDeckForm'
+import useDeckForm from '@nowry/core/hooks/useDeckForm'
+import { focusFirstControl } from '../Common/Form/formUtils'
 
 /**
  * Deck creation — four elements at rest (DECKS.md §2.2).
@@ -39,7 +40,7 @@ const actionSx = { width: { xs: '100%', sm: 'auto' }, minHeight: 44, ...focusRin
 export default function DeckCreateSheet({ open, onClose, onSaved, onAddCards }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const form = useDeckForm({ open, onSaved, onClose })
+  const form = useDeckForm({ open, onSaved, onClose, focusControl: focusFirstControl })
   const created = form.createdDeck
 
   const banner = form.saveError ? (

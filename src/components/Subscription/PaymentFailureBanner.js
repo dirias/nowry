@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Typography, Stack } from '@mui/joy'
 import WarningIcon from '@mui/icons-material/Warning'
-import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { subscriptionService } from '@nowry/core/api/services'
 
 export default function PaymentFailureBanner() {

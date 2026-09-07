@@ -35,7 +35,7 @@ jest.mock('@nowry/core/api/services', () => ({
   }
 }))
 
-jest.mock('../../../hooks/useDeckData', () => ({
+jest.mock('@nowry/core/hooks/useDeckData', () => ({
   useDeckData: () => ({
     decks: [{ _id: 'deck-1', name: 'Biology', deck_type: 'flashcard' }],
     loading: false,
@@ -44,7 +44,7 @@ jest.mock('../../../hooks/useDeckData', () => ({
   })
 }))
 
-jest.mock('../../../hooks/useSubscription', () => ({
+jest.mock('@nowry/core/hooks/useSubscription', () => ({
   useSubscription: () => ({ tier: 'plus', flashcardLimit: Infinity, flashcardCount: 0 })
 }))
 

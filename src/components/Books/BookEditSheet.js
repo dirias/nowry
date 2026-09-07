@@ -13,10 +13,11 @@ import { focusRing } from '../Common/Form/formStyles'
 import { describeApiError } from '@nowry/core/utils/formUtils'
 import { publicContentService } from '@nowry/core/api/services'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
-import useBookForm from '../../hooks/useBookForm'
+import useBookForm from '@nowry/core/hooks/useBookForm'
 import PublishModal from '../Public/PublishModal'
 import BookCoverField from './book/BookCoverField'
 import BookHeaderPreview from './book/BookHeaderPreview'
+import { focusFirstControl } from '../Common/Form/formUtils'
 
 /**
  * Book editing — four elements at rest, down from fourteen (BOOKS.md §3).
@@ -53,7 +54,7 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
   const [publishOpen, setPublishOpen] = useState(false)
   const [publishError, setPublishError] = useState(null)
 
-  const form = useBookForm({ open, book, defaultCoverColor: themeColor, onSaved, onClose })
+  const form = useBookForm({ open, book, defaultCoverColor: themeColor, onSaved, onClose, focusControl: focusFirstControl })
 
   const runPublish = useCallback(async (action, next) => {
     setPublishError(null)

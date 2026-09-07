@@ -4,7 +4,7 @@ import { Box, Button, Stack, Typography } from '@mui/joy'
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 import ErrorOutlineRounded from '@mui/icons-material/ErrorOutlineRounded'
 
-import { ACTION_PHASE } from '../../hooks/useProgressivePreferences'
+import { ACTION_PHASE } from '@nowry/core/hooks/useProgressivePreferences'
 import { focusRing, touchTarget } from '../Common/Form/formStyles'
 
 /**

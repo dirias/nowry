@@ -11,10 +11,10 @@ import ImportDeckModal from './ImportDeckModal'
 import DeckSettingsModal from '../Study/DeckSettingsModal'
 import DeckPublishSheet from '../Study/DeckPublishSheet'
 import { decksService } from '@nowry/core/api/services'
-import { useCardData } from '../../hooks/useCardData'
-import { useStatistics } from '../../hooks/useStatistics'
-import { useDeckData } from '../../hooks/useDeckData'
-import { useTags } from '../../hooks/useTags'
+import { useCardData } from '@nowry/core/hooks/useCardData'
+import { useStatistics } from '@nowry/core/hooks/useStatistics'
+import { useDeckData } from '@nowry/core/hooks/useDeckData'
+import { useTags } from '@nowry/core/hooks/useTags'
 
 export default function CardHome() {
   const navigate = useNavigate()

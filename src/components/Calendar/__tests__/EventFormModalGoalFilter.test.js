@@ -23,7 +23,7 @@ jest.mock('@nowry/core/api/services/tasks.service', () => ({
 jest.mock('@nowry/core/api/services/annualPlanning.service', () => ({
   annualPlanningService: { createMilestone: jest.fn() }
 }))
-jest.mock('../../../hooks/useAnnualPlan', () => ({
+jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({
   useAnnualPlan: () => ({ plan: { _id: 'p1' }, areas: [], goals: mockGoals, loading: false })
 }))
 

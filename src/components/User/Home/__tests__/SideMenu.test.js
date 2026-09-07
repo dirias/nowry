@@ -24,7 +24,7 @@ jest.mock('@nowry/core/api/services', () => ({
   }
 }))
 
-jest.mock('../../../../hooks/useTaskData', () => ({
+jest.mock('@nowry/core/hooks/useTaskData', () => ({
   useTaskData: () => ({ tasks: [], loading: false, reload: jest.fn() })
 }))
 
@@ -35,7 +35,7 @@ jest.mock('../../../../hooks/useTaskData', () => ({
 let mockRoutineData = null
 const mockInvalidateRoutine = jest.fn()
 const mockRefetchRoutine = jest.fn()
-jest.mock('../../../../hooks/useDailyRoutine', () => ({
+jest.mock('@nowry/core/hooks/useDailyRoutine', () => ({
   useDailyRoutine: () => ({
     routine: mockRoutineData,
     loading: false,

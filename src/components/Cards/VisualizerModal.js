@@ -5,9 +5,9 @@ import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
 import { visualizerService, cardsService } from '@nowry/core/api/services'
-import { useSaveToDeck } from '../../hooks/useSaveToDeck'
+import { useSaveToDeck } from '@nowry/core/hooks/useSaveToDeck'
 import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
-import useGenerationProgress from '../../hooks/useGenerationProgress'
+import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
 
 mermaid.initialize({

@@ -23,8 +23,8 @@ import BoardListSelector from './BoardListSelector'
 import ShareBoardModal from './ShareBoardModal'
 import ConvertToCardsModal from './ConvertToCardsModal'
 import { blackboardService } from '@nowry/core/api/services/blackboard.service'
-import { useAnnualPlan } from '../../hooks/useAnnualPlan'
-import { useSubscription } from '../../hooks/useSubscription'
+import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { tasksService } from '@nowry/core/api/services'
 
 const BOARD_ID = 'main' // fallback board id for legacy boards

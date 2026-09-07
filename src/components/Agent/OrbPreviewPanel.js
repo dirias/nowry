@@ -7,8 +7,8 @@
 import React from 'react'
 import { Box, Sheet, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { usePet } from '../../context/AgentContext'
-import { resolveColor } from '../../utils/petColor'
+import { usePet } from '@nowry/core/context/AgentContext'
+import { resolveColor } from '@nowry/core/utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { PetOrb } from './StudyPet'
 

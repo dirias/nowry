@@ -29,7 +29,7 @@ import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
  *   onRefresh  — () => void
  */
 
-import useGenerationProgress from '../../hooks/useGenerationProgress'
+import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
 
 // Per-surface narration (PRD A5). Generic copy would be worse than the spinner it

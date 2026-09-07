@@ -48,13 +48,13 @@ import RecordVoiceOverRounded from '@mui/icons-material/RecordVoiceOverRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import { agentService } from '@nowry/core/api/services/agent.service'
 import { userService } from '@nowry/core/api/services'
-import { usePet } from '../../context/AgentContext'
-import { useSubscription } from '../../hooks/useSubscription'
+import { usePet } from '@nowry/core/context/AgentContext'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import CompanionTab from './CompanionTab'
 import OrbPreviewPanel from './OrbPreviewPanel'
 import petService from '@nowry/core/api/services/petService'
-import { suggestFromInterests } from '../../utils/petColor'
+import { suggestFromInterests } from '@nowry/core/utils/petColor'
 
 // ---------------------------------------------------------------------------
 // Static data

@@ -1,8 +1,8 @@
-import de from '../../../../locales/de/translation.json'
-import en from '../../../../locales/en/translation.json'
-import es from '../../../../locales/es/translation.json'
-import fr from '../../../../locales/fr/translation.json'
-import ja from '../../../../locales/ja/translation.json'
+import de from '@nowry/core/locales/de/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
+import es from '@nowry/core/locales/es/translation.json'
+import fr from '@nowry/core/locales/fr/translation.json'
+import ja from '@nowry/core/locales/ja/translation.json'
 
 /**
  * FE-C6 — the card-authoring namespaces, guarded in all five locales.

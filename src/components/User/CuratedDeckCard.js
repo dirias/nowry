@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, Card, Skeleton, Stack, Typography } from '@mui/joy'
 import LibraryAddRounded from '@mui/icons-material/LibraryAddRounded'
 
-import { TOPICS } from '../../constants/learningTaxonomy'
+import { TOPICS } from '@nowry/core/constants/learningTaxonomy'
 import { focusRing } from '../Common/Form/formStyles'
 import OfficialMark from './OfficialMark'
 import { selectedOption, visuallyHidden } from './taxonomySelectorStyles'

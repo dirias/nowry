@@ -2,7 +2,7 @@ import { buildDynamicTheme } from '../DynamicThemeProvider'
 import { GEOMETRY, edgeFor } from '../components'
 import { keyButton } from '../../components/Common/Form/formStyles'
 
-jest.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: null }) }))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: null }) }))
 
 const theme = buildDynamicTheme('#2a6971')
 const button = (ownerState) => theme.components.JoyButton.styleOverrides.root({ ownerState, theme })

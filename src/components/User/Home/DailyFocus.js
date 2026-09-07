@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button, CircularProgress, Stack } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
-import { useCardData } from '../../../hooks/useCardData'
-import { useDeckData } from '../../../hooks/useDeckData'
+import { useCardData } from '@nowry/core/hooks/useCardData'
+import { useDeckData } from '@nowry/core/hooks/useDeckData'
 
 const DailyFocus = () => {
   const navigate = useNavigate()

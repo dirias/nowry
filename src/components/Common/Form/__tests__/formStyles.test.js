@@ -71,7 +71,7 @@ describe('the key (ADR-020)', () => {
 
 describe('rows, readouts and measures (§15.11, DS-011)', () => {
   const { identityTile, listRow, readout, measureTrack, measureFill } = require('../formStyles')
-  const { LIST_ROW_HEIGHT } = require('../../../../theme/tokens')
+  const { LIST_ROW_HEIGHT } = require('@nowry/core/tokens/tokens')
 
   it('draws identity on a 16px tile at radius sm that never shrinks, in whatever colour it is handed', () => {
     expect(identityTile('primary.solidBg')).toEqual({

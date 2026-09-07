@@ -22,7 +22,7 @@
  * fails here instead of shipping as a raw key on screen.
  */
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -43,7 +43,7 @@ jest.mock('react-i18next', () => {
 
 // Mocked so the section can be driven through every save state without an API
 // client behind it. The constants mirror the real module exactly.
-jest.mock('../../../../hooks/useProgressivePreferences', () => ({
+jest.mock('@nowry/core/hooks/useProgressivePreferences', () => ({
   __esModule: true,
   ACTION_PHASE: { IDLE: 'idle', PENDING: 'pending', SUCCEEDED: 'succeeded', ERROR: 'error' },
   PREFERENCES_PHASE: { IDLE: 'idle', LOADING: 'loading', READY: 'ready', ERROR: 'error' },
@@ -60,9 +60,9 @@ import LearningPreferencesSection, {
   evaluateInterestsRange,
   reorder
 } from '../LearningPreferencesSection'
-import useProgressivePreferences from '../../../../hooks/useProgressivePreferences'
-import { MAX_TOPICS, STUDY_GOALS, TOPICS } from '../../../../constants/learningTaxonomy'
-import en from '../../../../locales/en/translation.json'
+import useProgressivePreferences from '@nowry/core/hooks/useProgressivePreferences'
+import { MAX_TOPICS, STUDY_GOALS, TOPICS } from '@nowry/core/constants/learningTaxonomy'
+import en from '@nowry/core/locales/en/translation.json'
 
 const copy = en.settings.learning
 const topicLabel = (value) => en.taxonomy.topics[value]

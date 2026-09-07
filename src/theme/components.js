@@ -1,4 +1,4 @@
-import { MOTION } from './tokens'
+import { MOTION } from '@nowry/core/tokens/tokens'
 
 /**
  * Joy component overrides — the house button, theme-wide (CAL-009, ADR-020).

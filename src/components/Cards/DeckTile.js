@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { focusRing, identityTile, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 import { deckType } from '../Study/deckTypes'
-import { MOTION } from '../../theme/tokens'
+import { MOTION } from '@nowry/core/tokens/tokens'
 
 /**
  * The library's grid tile: the deck row's five parts stacked into three lines

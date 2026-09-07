@@ -9,7 +9,7 @@
  * and enforced exclusivity.
  */
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -26,8 +26,8 @@ jest.mock('react-i18next', () => {
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import StudyGoalSelector from '../StudyGoalSelector'
-import { STUDY_GOALS } from '../../../constants/learningTaxonomy'
-import en from '../../../locales/en/translation.json'
+import { STUDY_GOALS } from '@nowry/core/constants/learningTaxonomy'
+import en from '@nowry/core/locales/en/translation.json'
 
 const labelOf = (value) => en.taxonomy.goals[value]
 

@@ -18,9 +18,9 @@ jest.mock('@nowry/core/api/services', () => ({
     getQuarterReports: jest.fn(() => Promise.resolve([]))
   }
 }))
-jest.mock('../../../hooks/useAnnualPlan', () => ({ useAnnualPlan: jest.fn() }))
-jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { uid: 'u1' } }) }))
-jest.mock('../../../hooks/useGoalCardModel', () => () => ({}))
+jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({ useAnnualPlan: jest.fn() }))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: { uid: 'u1' } }) }))
+jest.mock('@nowry/core/hooks/useGoalCardModel', () => () => ({}))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key) => key }) }))
 
 jest.mock('react-router-dom', () => ({
@@ -64,7 +64,7 @@ jest.mock('../../Common/DeleteConfirmationModal', () => () => null)
 import React from 'react'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import FocusAreaView from '../FocusAreaView'
-import { useAnnualPlan } from '../../../hooks/useAnnualPlan'
+import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { annualPlanningService } from '@nowry/core/api/services'
 
 // 2026-07-20 is in Q3, so a quarter-3 goal renders under the default filter.

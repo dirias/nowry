@@ -4,7 +4,7 @@ import { Box, Typography, Checkbox, Button, Stack, CircularProgress, Sheet, Chip
 import { useNavigate } from 'react-router-dom'
 import { CheckSquare, Clock } from 'lucide-react'
 import { tasksService, annualPlanningService } from '@nowry/core/api/services'
-import { useTaskData } from '../../../hooks/useTaskData'
+import { useTaskData } from '@nowry/core/hooks/useTaskData'
 
 /**
  * TodaysPrioritiesCard - Shows today's tasks and routine

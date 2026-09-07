@@ -9,7 +9,7 @@ import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 
 import { tasksService } from '@nowry/core/api/services/tasks.service'
 import { annualPlanningService } from '@nowry/core/api/services/annualPlanning.service'
-import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { calculateProgress } from '@nowry/core/domain/goalDerivation'
 import FormDisclosureRail from '../Common/Form/FormDisclosureRail'
 import FormErrorBanner from '../Common/Form/FormErrorBanner'

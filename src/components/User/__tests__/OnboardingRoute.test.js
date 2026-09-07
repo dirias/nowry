@@ -27,7 +27,7 @@
 const mockChangeLanguage = jest.fn()
 
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -92,7 +92,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import OnboardingRoute from '../OnboardingRoute'
 import { apiClient } from '@nowry/core/api/client'
-import en from '../../../locales/en/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
 
 const t = (path) => path.split('.').reduce((node, segment) => node[segment], en)
 

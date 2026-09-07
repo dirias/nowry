@@ -18,6 +18,7 @@
 import * as Sentry from '@sentry/react'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { auth as firebaseAuth } from '../config/firebase.config'
+import { playPomodoroNotification, requestNotificationPermission, showBrowserNotification } from '../utils/pomodoroSound'
 
 // Paths where a 401 redirect would bounce the user off the page that is trying
 // to sign them in. Lifted verbatim from the response interceptor.
@@ -86,6 +87,17 @@ export const webPlatform = {
    * that the shared layer now says *what happened* and this file decides what
    * the browser does about it.
    */
+  /**
+   * The browser's sound and Notification APIs. `pomodoroSound` stays in the web
+   * client precisely because it is these APIs; mobile will wire expo-av and
+   * expo-notifications to the same three calls (MOB-024).
+   */
+  alerts: {
+    play: () => playPomodoroNotification(),
+    announce: (title, body) => showBrowserNotification(title, body),
+    requestPermission: () => requestNotificationPermission()
+  },
+
   session: {
     onUnauthorized: ({ redirect = false } = {}) => {
       window.dispatchEvent(new CustomEvent('auth:unauthorized'))
@@ -94,6 +106,11 @@ export const webPlatform = {
       if (AUTH_PATHS.includes(currentPath)) return
       const returnUrl = encodeURIComponent(currentPath + window.location.search)
       window.location.href = `/login?returnUrl=${returnUrl}`
+    },
+    /** The other half of the same CustomEvent AuthContext has always listened for. */
+    onUnauthorizedSubscribe: (handler) => {
+      window.addEventListener('auth:unauthorized', handler)
+      return () => window.removeEventListener('auth:unauthorized', handler)
     },
     onSignedOut: () => {
       window.location.href = '/login'

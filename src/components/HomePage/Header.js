@@ -44,16 +44,16 @@ import {
   PersonAddRounded,
   AutoAwesomeRounded
 } from '@mui/icons-material'
-import { usePomodoro } from '../../context/PomodoroContext'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { formatClock } from '../Pomodoro/formatClock'
-import { usePet } from '../../context/AgentContext'
-import { Z_NAV } from '../../constants/zIndex'
+import { usePet } from '@nowry/core/context/AgentContext'
+import { Z_NAV } from '@nowry/core/constants/zIndex'
 import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 import { useTranslation } from 'react-i18next'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 
 const HeaderUtils = ({ variant = 'header' }) => {
   const { mode, setMode } = useColorScheme()

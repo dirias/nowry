@@ -8,8 +8,9 @@ import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import FormSheet from '../Common/Form/FormSheet'
 import FormTextField from '../Common/Form/FormTextField'
 import { focusRing } from '../Common/Form/formStyles'
-import { useAuth } from '../../context/AuthContext'
-import useBookCreate from '../../hooks/useBookCreate'
+import { useAuth } from '@nowry/core/context/AuthContext'
+import useBookCreate from '@nowry/core/hooks/useBookCreate'
+import { focusFirstControl } from '../Common/Form/formUtils'
 
 /**
  * Book creation — four elements at rest, and the fastest form in the system
@@ -54,7 +55,8 @@ export default function BookCreateSheet({ open, onClose }) {
     // placeholder that announces it. They cannot drift.
     defaultTitle: t('books.untitled'),
     username: user?.username,
-    onCreated
+    onCreated,
+    focusControl: focusFirstControl
   })
 
   const banner = form.saveError ? (

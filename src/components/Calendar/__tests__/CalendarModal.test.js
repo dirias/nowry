@@ -23,7 +23,7 @@ jest.mock('react-i18next', () => ({
 // CalendarModal reads userId from useAuth() to scope the getAllEvents() call —
 // mocked here since this test has no AuthProvider wrapping it, following the
 // convention already used in CalendarPage.test.js.
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('@nowry/core/context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'test-user' } })
 }))
 

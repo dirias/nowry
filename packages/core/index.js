@@ -27,6 +27,7 @@ export {
   env,
   telemetry,
   session,
+  alerts,
   PlatformNotConfiguredError,
   PlatformAlreadyConfiguredError,
   PlatformAdapterError

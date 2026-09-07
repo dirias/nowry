@@ -11,9 +11,9 @@ import NewsCarousel from './NewsCarousel'
 import WeeklyProgress from './WeeklyProgress'
 import StudyCalendar from './StudyCalendar'
 import BlackboardModal from '../../Blackboard/BlackboardModal'
-import { useAuth } from '../../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import { cardsService, decksService } from '@nowry/core/api/services'
-import { useDeckData } from '../../../hooks/useDeckData'
+import { useDeckData } from '@nowry/core/hooks/useDeckData'
 
 function Home() {
   const { user } = useAuth()

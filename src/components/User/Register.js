@@ -29,9 +29,9 @@ import {
   SpeedRounded,
   Google
 } from '@mui/icons-material'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import { authService } from '@nowry/core/api/services/auth.service'
-import { getUsernameValidationError } from '../../utils/usernameValidation'
+import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 
 const Register = () => {
   const [formData, setFormData] = useState({

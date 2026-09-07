@@ -16,10 +16,10 @@
 jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {}
 }))
-jest.mock('../../../hooks/useAnnualPlan', () => ({
+jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({
   useAnnualPlan: jest.fn()
 }))
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('@nowry/core/context/AuthContext', () => ({
   useAuth: jest.fn()
 }))
 jest.mock('react-router-dom', () => ({

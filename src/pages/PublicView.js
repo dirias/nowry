@@ -34,7 +34,7 @@ import {
 } from '@mui/icons-material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { publicContentService } from '@nowry/core/api/services'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import ReportModal from '../components/Public/ReportModal'
 import ContentRenderer from '../components/Public/ContentRenderer'
 import Editor from '../components/Books/Editor'

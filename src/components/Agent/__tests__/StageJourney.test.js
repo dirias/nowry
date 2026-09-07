@@ -26,7 +26,7 @@ jest.mock('../../../theme/DynamicThemeProvider', () => ({
 
 let mockAvatarUrl = null
 const mockGenerateNextStageArt = jest.fn().mockResolvedValue(false)
-jest.mock('../../../context/AgentContext', () => ({
+jest.mock('@nowry/core/context/AgentContext', () => ({
   usePet: () => ({ avatarUrl: mockAvatarUrl, generateNextStageArt: mockGenerateNextStageArt })
 }))
 

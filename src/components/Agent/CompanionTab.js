@@ -16,7 +16,7 @@
 import React from 'react'
 import { Alert, Box, Button, Card, Chip, Divider, FormControl, FormHelperText, FormLabel, Grid, Input, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import useGenerationProgress from '../../hooks/useGenerationProgress'
+import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
 import StageJourney from './StageJourney'
 

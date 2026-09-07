@@ -8,7 +8,7 @@ import { illustrationsService } from '@nowry/core/api/services/illustrations.ser
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import MermaidRenderer from './MermaidRenderer'
 
-import useGenerationProgress from '../../hooks/useGenerationProgress'
+import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
 
 // Per-surface narration (PRD A5). Generic copy would be worse than the spinner it

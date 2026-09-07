@@ -4,7 +4,7 @@ import { Box, Button, Link, Skeleton, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded'
 import { focusRing, listRow, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
-import { useGroups } from '../../hooks/useGroups'
+import { useGroups } from '@nowry/core/hooks/useGroups'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import GroupDetail, { GROUP_ICONS, parseGroupKey } from './GroupDetail'
 

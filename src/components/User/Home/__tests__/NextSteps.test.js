@@ -22,7 +22,7 @@
  * all.
  */
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -55,7 +55,7 @@ jest.mock('@nowry/core/api/services/cards.service', () => ({
 }))
 
 const mockNextSteps = jest.fn()
-jest.mock('../../../../hooks/useNextSteps', () => ({
+jest.mock('@nowry/core/hooks/useNextSteps', () => ({
   __esModule: true,
   default: () => mockNextSteps()
 }))
@@ -65,7 +65,7 @@ import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 import OnboardingSurfaces from '../OnboardingSurfaces'
 import { userService } from '@nowry/core/api/services/user.service'
-import en from '../../../../locales/en/translation.json'
+import en from '@nowry/core/locales/en/translation.json'
 
 const copy = en.home.nextSteps
 

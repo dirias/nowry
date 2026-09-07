@@ -32,8 +32,8 @@ import SortableTask from '../../Task/SortableTask'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { tasksService, annualPlanningService } from '@nowry/core/api/services'
-import { useTaskData } from '../../../hooks/useTaskData'
-import { useDailyRoutine } from '../../../hooks/useDailyRoutine'
+import { useTaskData } from '@nowry/core/hooks/useTaskData'
+import { useDailyRoutine } from '@nowry/core/hooks/useDailyRoutine'
 import { todayKey } from '@nowry/core/api/utils/routineCache'
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────

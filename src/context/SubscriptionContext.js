@@ -1,37 +1,21 @@
 /**
- * SubscriptionContext — Phase 4 (D-10, D-11, D-12)
+ * SubscriptionProvider — the web client's upgrade prompt.
  *
- * Manages session-local upgrade CTA dismiss state and upgrade modal visibility.
- * Does NOT replace useSubscription() hook — that remains the source of tier data.
+ * The state lives in `@nowry/core/context/useSubscriptionState`; this file is
+ * the one thing that cannot be shared, the `UpgradePrompt` it renders.
  *
- * Usage:
- *   const { upgradeDismissed, dismissUpgrade, isUpgradeModalOpen, openUpgradeModal, closeUpgradeModal }
- *     = useSubscriptionContext()
- *
- * State resets on page reload (React state only, no localStorage — per D-06).
+ * Does NOT replace `useSubscription()` — that remains the source of tier data.
+ * Dismiss state is session-scoped and resets on reload (D-06, Pitfall 3).
  */
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext } from 'react'
+import { useSubscriptionState } from '@nowry/core/context/useSubscriptionState'
 import UpgradePrompt from '../components/Common/UpgradePrompt'
 
 const SubscriptionContext = createContext(null)
 
 export const SubscriptionProvider = ({ children }) => {
-  // Session-scoped dismiss: resets on page reload (do NOT use localStorage — per D-06, Pitfall 3)
-  const [upgradeDismissed, setUpgradeDismissed] = useState(false)
-  // Upgrade modal visibility
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
-  // Optional headline for the upgrade modal (internal state — not exposed in context value)
-  const [upgradeHeadline, setUpgradeHeadline] = useState(null)
-
-  const dismissUpgrade = () => setUpgradeDismissed(true)
-  const openUpgradeModal = (headline = null) => {
-    setUpgradeHeadline(headline)
-    setIsUpgradeModalOpen(true)
-  }
-  const closeUpgradeModal = () => {
-    setIsUpgradeModalOpen(false)
-    setUpgradeHeadline(null)
-  }
+  const { upgradeDismissed, dismissUpgrade, isUpgradeModalOpen, openUpgradeModal, closeUpgradeModal, upgradeHeadline } =
+    useSubscriptionState()
 
   return (
     <SubscriptionContext.Provider
@@ -50,9 +34,7 @@ export const SubscriptionProvider = ({ children }) => {
 }
 
 export const useSubscriptionContext = () => {
-  const ctx = useContext(SubscriptionContext)
-  if (!ctx) {
-    throw new Error('useSubscriptionContext must be used within a SubscriptionProvider')
-  }
-  return ctx
+  const context = useContext(SubscriptionContext)
+  if (!context) throw new Error('useSubscriptionContext must be used within a SubscriptionProvider')
+  return context
 }

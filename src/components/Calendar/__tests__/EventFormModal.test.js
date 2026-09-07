@@ -32,7 +32,7 @@ let mockPlan = {
   goals: [{ _id: 'g1', title: 'Run a half marathon', status: 'in_progress', progress: 20, milestones: [] }],
   loading: false
 }
-jest.mock('../../../hooks/useAnnualPlan', () => ({
+jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({
   useAnnualPlan: () => mockPlan
 }))
 

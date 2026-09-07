@@ -14,7 +14,7 @@ jest.mock('react-i18next', () => ({
 }))
 // The real context module is loaded for MODES / durationFor / nextModeAfter; cut its
 // import chain off before it reaches Firebase and the API client.
-jest.mock('../../../hooks/useUserProfile', () => ({ useUserProfile: () => ({ profile: null }) }))
+jest.mock('@nowry/core/hooks/useUserProfile', () => ({ useUserProfile: () => ({ profile: null }) }))
 jest.mock('../../../utils/pomodoroSound', () => ({
   playPomodoroNotification: jest.fn(),
   showBrowserNotification: jest.fn(),
@@ -24,10 +24,10 @@ jest.mock('../../../utils/pomodoroSound', () => ({
 let mockPomodoro
 let mockPet = { isActive: false, isInStudySession: false }
 let mockIsMobile = false
-jest.mock('../../../context/AgentContext', () => ({ usePet: () => mockPet }))
+jest.mock('@nowry/core/context/AgentContext', () => ({ usePet: () => mockPet }))
 jest.mock('../../../hooks/useIsMobile', () => ({ useIsMobile: () => mockIsMobile }))
-jest.mock('../../../context/PomodoroContext', () => {
-  const actual = jest.requireActual('../../../context/PomodoroContext')
+jest.mock('@nowry/core/context/PomodoroContext', () => {
+  const actual = jest.requireActual('@nowry/core/context/PomodoroContext')
   return { ...actual, usePomodoro: () => mockPomodoro }
 })
 

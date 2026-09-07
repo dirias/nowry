@@ -37,7 +37,7 @@ jest.mock('react-router-dom', () => ({
 }))
 
 let mockUser = { username: 'ada' }
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('@nowry/core/context/AuthContext', () => ({
   useAuth: () => ({ user: mockUser })
 }))
 

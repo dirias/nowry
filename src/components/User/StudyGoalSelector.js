@@ -2,7 +2,7 @@ import React, { useId } from 'react'
 import { Box, Radio, RadioGroup, Sheet, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
-import { STUDY_GOALS } from '../../constants/learningTaxonomy'
+import { STUDY_GOALS } from '@nowry/core/constants/learningTaxonomy'
 import { optionBase, selectedOption, unselectedOption, overlayFocusRing } from './taxonomySelectorStyles'
 
 /**

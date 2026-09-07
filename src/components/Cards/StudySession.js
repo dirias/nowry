@@ -17,7 +17,7 @@ import SourceReadout from './SourceReadout'
 import { dailyReviewParams } from './dailyReviewParams'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
-import { usePet } from '../../context/AgentContext'
+import { usePet } from '@nowry/core/context/AgentContext'
 import {
   Container,
   Card,
@@ -37,18 +37,18 @@ import {
 import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, SwipeLeft, SwipeRight, SwipeVertical } from '@mui/icons-material'
 import { cardsService, decksService } from '@nowry/core/api/services'
 import { studySessionsService } from '@nowry/core/api/services/studySessions.service'
-import { useCardData } from '../../hooks/useCardData'
-import { useSessionFilters } from '../../hooks/useSessionFilters'
-import { useVoiceSettings } from '../../hooks/useVoiceSettings'
+import { useCardData } from '@nowry/core/hooks/useCardData'
+import { useSessionFilters } from '@nowry/core/hooks/useSessionFilters'
+import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import SessionFilterBar from './SessionFilterBar'
 import { tabularNums } from '../Common/Form/formStyles'
 import MarkToggle from './MarkToggle'
 import { queryClient } from '@nowry/core/api/queryClient'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
-import { Z_FULLSCREEN } from '../../constants/zIndex'
+import { Z_FULLSCREEN } from '@nowry/core/constants/zIndex'
 
 // Initialize Mermaid
 mermaid.initialize({

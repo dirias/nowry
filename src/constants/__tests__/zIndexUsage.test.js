@@ -19,14 +19,14 @@ const HEADER_PATH = path.join(__dirname, '../../components/HomePage/Header.js')
 describe('zIndexUsage — nav consumers import from centralized module', () => {
   it('PomodoroChip.js imports Z_NAV from the centralized constants module and holds no residual zIndex: 1100', () => {
     const source = fs.readFileSync(POMODORO_CHIP_PATH, 'utf8')
-    expect(source).toMatch(/from '\.\.\/\.\.\/constants\/zIndex'/)
+    expect(source).toMatch(/from '@nowry\/core\/constants\/zIndex'/)
     expect(source).toContain('Z_NAV')
     expect(source).not.toMatch(/zIndex:\s*1100/)
   })
 
   it('Header.js imports Z_NAV from the centralized constants module and holds no residual zIndex: 1100', () => {
     const source = fs.readFileSync(HEADER_PATH, 'utf8')
-    expect(source).toMatch(/from '\.\.\/\.\.\/constants\/zIndex'/)
+    expect(source).toMatch(/from '@nowry\/core\/constants\/zIndex'/)
     expect(source).toContain('Z_NAV')
     expect(source).not.toMatch(/zIndex:\s*1100/)
   })

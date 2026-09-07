@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Card, CardContent, Stack, Chip, Skeleton } from '@mui/joy'
-import { useStatistics } from '../../../hooks/useStatistics'
+import { useStatistics } from '@nowry/core/hooks/useStatistics'
 
 export default function StudyCalendar() {
   const { t } = useTranslation()

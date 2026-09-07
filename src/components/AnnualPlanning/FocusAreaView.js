@@ -44,18 +44,18 @@ import {
 import { alpha } from '@mui/system'
 
 import { annualPlanningService } from '@nowry/core/api/services'
-import { useAnnualPlan } from '../../hooks/useAnnualPlan'
-import { useAuth } from '../../context/AuthContext'
+import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import GoalDialog from './GoalDialog'
 import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
-import usePriorityStatus from '../../hooks/usePriorityStatus'
+import usePriorityStatus from '@nowry/core/hooks/usePriorityStatus'
 import CloseQuarterModal from './CloseQuarterModal'
 import GoalCard from './GoalCard'
 import GoalRow from './GoalRow'
 import GoalDetailDrawer from './goal/GoalDetailDrawer'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
-import useGoalCardModel from '../../hooks/useGoalCardModel'
+import useGoalCardModel from '@nowry/core/hooks/useGoalCardModel'
 import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter } from '@nowry/core/domain/goalDerivation'
 
 // --- GOAL-01 computation engine ---

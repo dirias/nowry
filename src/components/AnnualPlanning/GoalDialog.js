@@ -8,13 +8,14 @@ import FormTextArea from '../Common/Form/FormTextArea'
 import FormTextField from '../Common/Form/FormTextField'
 import { focusRing } from '../Common/Form/formStyles'
 import { scrollIntoViewSafely } from '../Common/Form/formUtils'
-import useGoalForm from '../../hooks/useGoalForm'
+import useGoalForm from '@nowry/core/hooks/useGoalForm'
 import GoalDetailRail from './goal/GoalDetailRail'
 import GoalImageField from './goal/GoalImageField'
 import GoalMilestoneEditor from './goal/GoalMilestoneEditor'
 import GoalScopeChip from './goal/GoalScopeChip'
 import GoalTimeframeFields from './goal/GoalTimeframeFields'
 import GoalTitleField from './goal/GoalTitleField'
+import { focusFirstControl } from '../Common/Form/formUtils'
 
 /**
  * GoalDialog — the Add/Edit Goal form, title-first.
@@ -42,7 +43,7 @@ const actionSx = { width: { xs: '100%', sm: 'auto' }, ...focusRing }
 
 const GoalDialog = ({ open, onClose, focusAreaId, onSuccess, goal = null, yearlyObjectives = [], initialSection = null }) => {
   const { t } = useTranslation()
-  const form = useGoalForm({ open, goal, focusAreaId, initialSection })
+  const form = useGoalForm({ open, goal, focusAreaId, initialSection, focusControl: focusFirstControl })
   const { formData, setField, revealed, titleError, saveError, isEdit } = form
 
   const milestonesRef = useRef(null)

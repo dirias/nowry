@@ -15,7 +15,7 @@
 const mockChangeLanguage = jest.fn()
 
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -31,7 +31,7 @@ jest.mock('react-i18next', () => {
 
 // Mocked for its constants only: importing the real module drags in the API
 // client and every service behind it, for two frozen objects.
-jest.mock('../../../hooks/useProgressivePreferences', () => ({
+jest.mock('@nowry/core/hooks/useProgressivePreferences', () => ({
   __esModule: true,
   ACTION_PHASE: { IDLE: 'idle', PENDING: 'pending', SUCCEEDED: 'succeeded', ERROR: 'error' },
   PREFERENCE_FIELD: { LANGUAGE: 'language', ACCENT_COLOR: 'theme_color', INTERESTS: 'interests', STUDY_GOAL: 'study_goal' },
@@ -48,8 +48,8 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 import WelcomeScreen from '../WelcomeScreen'
-import { getColorPresets } from '../../../theme/colorSchemeGenerator'
-import en from '../../../locales/en/translation.json'
+import { getColorPresets } from '@nowry/core/tokens/colorSchemeGenerator'
+import en from '@nowry/core/locales/en/translation.json'
 
 const welcome = en.onboarding.welcome
 const save = en.onboarding.save

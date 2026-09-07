@@ -24,7 +24,7 @@ import {
 import { ArrowForward as ArrowForwardIcon, ArrowBack as ArrowBackIcon, Check as CheckIcon } from '@mui/icons-material'
 
 import { annualPlanningService } from '@nowry/core/api/services'
-import { useAnnualPlan } from '../../hooks/useAnnualPlan'
+import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useNotification } from '../../context/NotificationContext'
 
 const ICONS = ['⭐', '💼', '💪', '💰', '❤️', '🎨', '📚', '🌱', '✈️', '🏠']

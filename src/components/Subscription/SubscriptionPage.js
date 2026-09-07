@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { Box, Container, Typography, Stack, Button, Alert, Skeleton, Chip, Divider, Modal, ModalDialog } from '@mui/joy'
 import { subscriptionService } from '@nowry/core/api/services'
-import { useSubscription } from '../../hooks/useSubscription'
-import { useAuth } from '../../context/AuthContext'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
+import { useAuth } from '@nowry/core/context/AuthContext'
 
 export default function SubscriptionPage() {
   const { t } = useTranslation()

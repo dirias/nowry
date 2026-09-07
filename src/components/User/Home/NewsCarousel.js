@@ -20,8 +20,8 @@ import { ArrowBackIosNew, ArrowForwardIos, TrendingUp, OpenInNew, Star, StarBord
 import { userService } from '@nowry/core/api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../../../context/AuthContext'
-import { useNews } from '../../../hooks/useNews'
+import { useAuth } from '@nowry/core/context/AuthContext'
+import { useNews } from '@nowry/core/hooks/useNews'
 
 export default function NewsCarousel() {
   const { t } = useTranslation()

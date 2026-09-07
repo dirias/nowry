@@ -1,4 +1,4 @@
-import { usePet } from '../../context/AgentContext'
+import { usePet } from '@nowry/core/context/AgentContext'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
 export const CORNER_INSET = 24

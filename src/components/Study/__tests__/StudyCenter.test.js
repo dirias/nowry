@@ -67,20 +67,20 @@ const mockForecast = {
   total: 27
 }
 
-jest.mock('../../../hooks/useStatistics', () => ({
+jest.mock('@nowry/core/hooks/useStatistics', () => ({
   useStatistics: () => ({ statistics: mockStatistics, loading: false, error: null, reload: jest.fn() })
 }))
-jest.mock('../../../hooks/useDeckData', () => ({
+jest.mock('@nowry/core/hooks/useDeckData', () => ({
   useDeckData: () => ({ decks: mockDecks, loading: false, error: null, reload: jest.fn() })
 }))
-jest.mock('../../../hooks/useForecast', () => ({
+jest.mock('@nowry/core/hooks/useForecast', () => ({
   useForecast: () => ({ forecast: mockForecast, loading: false, error: null, reload: jest.fn() })
 }))
 const mockPostIntervention = jest.fn()
 jest.mock('@nowry/core/api/services/agent.service', () => ({
   agentService: { postIntervention: (...args) => mockPostIntervention(...args) }
 }))
-jest.mock('../../../context/AgentContext', () => ({ usePet: () => ({ queuePreSessionIntervention: jest.fn() }) }))
+jest.mock('@nowry/core/context/AgentContext', () => ({ usePet: () => ({ queuePreSessionIntervention: jest.fn() }) }))
 jest.mock('../../Cards/CardHome', () => ({ __esModule: true, default: () => <div data-testid='card-home' /> }))
 jest.mock('../RecentSessions', () => ({ __esModule: true, default: () => null }))
 

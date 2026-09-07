@@ -12,10 +12,10 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { cardsService } from '@nowry/core/api/services'
 import { apiClient } from '@nowry/core/api/client'
 import { ENDPOINTS } from '@nowry/core/api/utils/endpoints'
-import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 
-import useGenerationProgress from '../../hooks/useGenerationProgress'
+import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
 
 // Per-surface narration (PRD A5). Generic copy would be worse than the spinner it

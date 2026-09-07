@@ -16,7 +16,7 @@ import SchoolRounded from '@mui/icons-material/SchoolRounded'
  */
 const STEP_ICONS = { study: SchoolRounded, book: MenuBookRounded, plan: FlagRounded }
 
-import useNextSteps from '../../../hooks/useNextSteps'
+import useNextSteps from '@nowry/core/hooks/useNextSteps'
 import { JOURNEY_PHASE } from '../../../hooks/useOnboardingJourney'
 import { focusRing, listRow } from '../../Common/Form/formStyles'
 import { visuallyHidden } from '../taxonomySelectorStyles'

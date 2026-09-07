@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Stack, CircularProgress, Sheet, Chip } from '@mui/joy'
 import { TrendingUp, CheckCircle2, BookOpen, Flame } from 'lucide-react'
-import { useCardData } from '../../../hooks/useCardData'
-import { useAnnualPlan } from '../../../hooks/useAnnualPlan'
-import { useTaskData } from '../../../hooks/useTaskData'
+import { useCardData } from '@nowry/core/hooks/useCardData'
+import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
+import { useTaskData } from '@nowry/core/hooks/useTaskData'
 
 /**
  * WeeklyStatsCard - Shows key weekly metrics

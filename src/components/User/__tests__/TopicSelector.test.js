@@ -13,7 +13,7 @@
  * shipping as a raw key on screen.
  */
 jest.mock('react-i18next', () => {
-  const bundle = require('../../../locales/en/translation.json')
+  const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
   return {
     useTranslation: () => ({
@@ -30,8 +30,8 @@ jest.mock('react-i18next', () => {
 import React from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import TopicSelector from '../TopicSelector'
-import { TOPICS, MAX_TOPICS } from '../../../constants/learningTaxonomy'
-import en from '../../../locales/en/translation.json'
+import { TOPICS, MAX_TOPICS } from '@nowry/core/constants/learningTaxonomy'
+import en from '@nowry/core/locales/en/translation.json'
 
 const labelOf = (value) => en.taxonomy.topics[value]
 const FIVE = TOPICS.slice(0, MAX_TOPICS).map((topic) => topic.value)

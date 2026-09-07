@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Card, Link, Stack, Typography } from '@mui/joy'
-import useGoalCardModel from '../../hooks/useGoalCardModel'
+import useGoalCardModel from '@nowry/core/hooks/useGoalCardModel'
 import GoalNextAction from './goal/GoalNextAction'
 import GoalOverflowMenu from './goal/GoalOverflowMenu'
 import GoalProgressBar from './goal/GoalProgressBar'

@@ -1,5 +1,5 @@
-import { STICKY_PALETTE } from './colorSchemeGenerator'
-import { FONT_FAMILY, FONT_SIZE, FONT_WEIGHT, LETTER_SPACING, LINE_HEIGHT, RADIUS, SPACING_BASE, Z_INDEX } from './tokens'
+import { STICKY_PALETTE } from '@nowry/core/tokens/colorSchemeGenerator'
+import { FONT_FAMILY, FONT_SIZE, FONT_WEIGHT, LETTER_SPACING, LINE_HEIGHT, RADIUS, SPACING_BASE, Z_INDEX } from '@nowry/core/tokens/tokens'
 
 const primaryMain = '#2a6971'
 const primaryHover = '#245a63'

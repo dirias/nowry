@@ -7,7 +7,7 @@
  */
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '../../../constants/zIndex'
+import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '@nowry/core/constants/zIndex'
 
 // StudyPet calls useLocation as well as useNavigate — it suppresses the pet on
 // the registration/onboarding routes. The mock provided only useNavigate, so
@@ -32,7 +32,7 @@ jest.mock('@nowry/core/api/services/quizService', () => ({
   }
 }))
 
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('@nowry/core/context/AuthContext', () => ({
   useAuth: () => ({ isAuthenticated: true })
 }))
 
@@ -47,7 +47,7 @@ jest.mock('../../../theme/DynamicThemeProvider', () => ({
 // mockUsePet factory — every test can override individual fields via
 // mockUsePet.mockReturnValue({ ...base, isInStudySession: true }).
 const mockUsePet = jest.fn()
-jest.mock('../../../context/AgentContext', () => ({
+jest.mock('@nowry/core/context/AgentContext', () => ({
   usePet: (...args) => mockUsePet(...args)
 }))
 

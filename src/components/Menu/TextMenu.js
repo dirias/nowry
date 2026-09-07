@@ -52,9 +52,9 @@ import {
   MessageSquarePlus
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useSubscription } from '../../hooks/useSubscription'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import { touchTargetBox } from '../Common/Form/formStyles'
 
 /**

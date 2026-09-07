@@ -19,7 +19,7 @@ import {
 import { CheckCircle, AlertCircle, HelpCircle, Circle, XCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cardsService } from '@nowry/core/api/services'
-import { useSaveToDeck } from '../../hooks/useSaveToDeck'
+import { useSaveToDeck } from '@nowry/core/hooks/useSaveToDeck'
 import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
 
 /**

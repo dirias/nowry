@@ -1,0 +1,195 @@
+/**
+ * Phase 16 — useCalendarFilters tests (FLT-02, FLT-03).
+ * FLT-02 migration tests use renderHook to exercise the real hook (WR-04 fix).
+ */
+
+import { renderHook, act } from '@testing-library/react'
+import { useCalendarFilters } from './useCalendarFilters'
+import { configureTestPlatform, resetPlatform } from '../platform/testing'
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const OLD_KEY = 'nowry:calendarFilters'
+const STORAGE_KEY = 'nowry_cal_filters_v1'
+const DEFAULT_FILTERS = {
+  habitsEnabled: false,
+  activeTypes: ['task', 'priority', 'goal', 'milestone'],
+  activeAreaIds: []
+}
+
+function isValidShape(parsed) {
+  return (
+    parsed !== null &&
+    typeof parsed === 'object' &&
+    !Array.isArray(parsed) &&
+    typeof parsed.habitsEnabled === 'boolean' &&
+    Array.isArray(parsed.activeTypes) &&
+    Array.isArray(parsed.activeAreaIds)
+  )
+}
+
+// applyPreset pure function used in FLT-03 tests (mirrors hook logic without useState).
+// `goals_only` is the one preset left: `today` / `this_week` were navigation that
+// also reset every filter, and ADR-016 gave the date to the toolbar's nav object.
+function applyPreset(name, currentFilters) {
+  if (name === 'goals_only') {
+    return { habitsEnabled: false, activeTypes: ['goal', 'milestone'], activeAreaIds: [] }
+  }
+  return currentFilters // no-op for unknown preset
+}
+
+// ─── Test setup ──────────────────────────────────────────────────────────────
+
+let storage
+
+beforeEach(() => {
+  ;({ storage } = configureTestPlatform())
+})
+
+afterEach(() => {
+  resetPlatform()
+  jest.restoreAllMocks()
+})
+
+// ─── FLT-02: localStorage migration ─────────────────────────────────────────
+// Tests exercise the real hook via renderHook so that refactors of the hook
+// migration path are caught by these tests (WR-04 fix).
+
+describe('FLT-02: localStorage migration', () => {
+  it('migrates habitsEnabled=true from old key to new key and deletes old key', () => {
+    // Arrange: set old key with habitsEnabled=true
+    storage.set(OLD_KEY, JSON.stringify({ habitsEnabled: true }))
+
+    // Act: render the real hook — migration runs in the useState initializer
+    const { result } = renderHook(() => useCalendarFilters())
+
+    // Assert: hook state reflects migrated value
+    expect(result.current.filters.habitsEnabled).toBe(true)
+    expect(result.current.filters.activeTypes).toEqual(['task', 'priority', 'goal', 'milestone'])
+    expect(result.current.filters.activeAreaIds).toEqual([])
+    // Migration should have removed the old key
+    expect(storage.get(OLD_KEY)).toBeNull()
+    // Migration should have written the new key
+    const stored = JSON.parse(storage.get(STORAGE_KEY))
+    expect(stored.habitsEnabled).toBe(true)
+  })
+
+  it('migrates habitsEnabled=false when old key value is malformed (missing field)', () => {
+    // Arrange: old key with missing habitsEnabled (malformed)
+    storage.set(OLD_KEY, JSON.stringify({ someOtherField: 'value' }))
+
+    // Act: render the real hook
+    const { result } = renderHook(() => useCalendarFilters())
+
+    // Assert: habitsEnabled defaults to false, old key removed
+    expect(result.current.filters.habitsEnabled).toBe(false)
+    expect(result.current.filters.activeTypes).toEqual(['task', 'priority', 'goal', 'milestone'])
+    expect(storage.get(OLD_KEY)).toBeNull()
+  })
+
+  it('reads new key when old key absent and shape is valid full object', () => {
+    // Arrange: only new key present with valid full shape
+    const validShape = { habitsEnabled: true, activeTypes: ['goal'], activeAreaIds: ['area-1'] }
+    storage.set(STORAGE_KEY, JSON.stringify(validShape))
+
+    // Act: render the real hook
+    const { result } = renderHook(() => useCalendarFilters())
+
+    // Assert: returns the stored valid shape
+    expect(result.current.filters).toEqual(validShape)
+  })
+
+  it('falls back to DEFAULT_FILTERS when new key has stale Phase 15 shape (only {habitsEnabled: boolean})', () => {
+    // Arrange: new key has old Phase 15 shape — missing activeTypes and activeAreaIds
+    storage.set(STORAGE_KEY, JSON.stringify({ habitsEnabled: false }))
+
+    // Act: render the real hook
+    const { result } = renderHook(() => useCalendarFilters())
+
+    // Assert: stale shape (missing activeTypes/activeAreaIds) falls back to defaults
+    expect(result.current.filters).toEqual(DEFAULT_FILTERS)
+  })
+
+  it('falls back to DEFAULT_FILTERS when the storage read throws', () => {
+    // Arrange: make the port's storage refuse to read, as blocked site data does
+    storage.failOn('get', new Error('storage unavailable'))
+
+    // Act: render the real hook — exception is caught internally
+    const { result } = renderHook(() => useCalendarFilters())
+
+    // Assert: exception caught, defaults returned
+    expect(result.current.filters).toEqual(DEFAULT_FILTERS)
+  })
+})
+
+// ─── FLT-02: shape validation (isValidShape) ────────────────────────────────
+
+describe('FLT-02: shape validation (isValidShape)', () => {
+  it("returns true for { habitsEnabled: false, activeTypes: ['task'], activeAreaIds: [] }", () => {
+    expect(isValidShape({ habitsEnabled: false, activeTypes: ['task'], activeAreaIds: [] })).toBe(true)
+  })
+
+  it('returns false when activeTypes is missing', () => {
+    expect(isValidShape({ habitsEnabled: false, activeAreaIds: [] })).toBe(false)
+  })
+
+  it('returns false when activeAreaIds is missing', () => {
+    expect(isValidShape({ habitsEnabled: false, activeTypes: ['task'] })).toBe(false)
+  })
+
+  it('returns false for null', () => {
+    expect(isValidShape(null)).toBe(false)
+  })
+
+  it('returns false for an array (not a plain object)', () => {
+    expect(isValidShape(['task', 'priority'])).toBe(false)
+  })
+})
+
+// ─── FLT-02: localStorage write on state change ──────────────────────────────
+
+describe('FLT-02: localStorage write on state change', () => {
+  it('writes correct JSON to STORAGE_KEY when filters object is serialized', () => {
+    // Arrange: a filters object matching the expected shape
+    const filters = { habitsEnabled: true, activeTypes: ['goal', 'milestone'], activeAreaIds: ['area-abc'] }
+
+    // Act: simulate the useEffect write
+    try {
+      storage.set(STORAGE_KEY, JSON.stringify(filters))
+    } catch (e) {
+      // no-op
+    }
+
+    // Assert: STORAGE_KEY contains correct JSON
+    const stored = JSON.parse(storage.get(STORAGE_KEY))
+    expect(stored).toEqual(filters)
+    expect(stored.habitsEnabled).toBe(true)
+    expect(stored.activeTypes).toEqual(['goal', 'milestone'])
+    expect(stored.activeAreaIds).toEqual(['area-abc'])
+  })
+})
+
+// ─── FLT-03: applyPreset logic ───────────────────────────────────────────────
+
+describe('FLT-03: applyPreset logic', () => {
+  it("'goals_only' produces { habitsEnabled: false, activeTypes: ['goal','milestone'], activeAreaIds: [] }", () => {
+    const result = applyPreset('goals_only', DEFAULT_FILTERS)
+    expect(result).toEqual({
+      habitsEnabled: false,
+      activeTypes: ['goal', 'milestone'],
+      activeAreaIds: []
+    })
+  })
+
+  it("'today' and 'this_week' are no longer presets — they leave the filters untouched (ADR-016)", () => {
+    const customState = { habitsEnabled: true, activeTypes: ['goal'], activeAreaIds: ['area-1'] }
+    expect(applyPreset('today', customState)).toBe(customState)
+    expect(applyPreset('this_week', customState)).toBe(customState)
+  })
+
+  it('unknown preset name is a no-op (returns current state unchanged)', () => {
+    const customState = { habitsEnabled: true, activeTypes: ['goal'], activeAreaIds: ['area-1'] }
+    const result = applyPreset('unknown_preset', customState)
+    expect(result).toBe(customState) // same reference — no-op
+  })
+})

@@ -6,7 +6,7 @@ import { GraphicEq, MenuBook, Public, Tune } from '@mui/icons-material'
 import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import FormSheet from '../Common/Form/FormSheet'
 import useIsMobile from '../../hooks/useIsMobile'
-import useDeckSettings from '../../hooks/useDeckSettings'
+import useDeckSettings from '@nowry/core/hooks/useDeckSettings'
 import DeckAudioSection from './deck/DeckAudioSection'
 import DeckIdentitySection from './deck/DeckIdentitySection'
 import DeckPublishSheet from './DeckPublishSheet'
@@ -14,6 +14,7 @@ import DeckPublishingSection from './deck/DeckPublishingSection'
 import DeckSettingsNav from './deck/DeckSettingsNav'
 import DeckStudySection from './deck/DeckStudySection'
 import { getDeckAccent } from './deck/deckAccent'
+import { subscribeToBrowserVoices } from '../../utils/speechVoices'
 
 /**
  * Deck settings — Variant E, the partial adopter (UX-CONTRACT §3, DECKS.md §3).
@@ -45,7 +46,7 @@ export default function DeckSettingsModal({ open, onClose, deckId, onSaved, init
   const { t } = useTranslation()
   const isMobile = useIsMobile()
   const [publishOpen, setPublishOpen] = useState(false)
-  const settings = useDeckSettings({ open, deckId, initialSection, onSaved, onClose })
+  const settings = useDeckSettings({ open, deckId, initialSection, onSaved, onClose, subscribeToVoices: subscribeToBrowserVoices })
 
   const { loading, deck, activeSection } = settings
   const { color: accent, Icon: AccentIcon } = getDeckAccent(deck?.deck_type)

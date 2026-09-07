@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { FormControl, FormHelperText, FormLabel, Input, Radio, RadioGroup, Skeleton, Stack, Typography } from '@mui/joy'
 
 import { focusRing, formLabel, touchTarget } from '../../Common/Form/formStyles'
-import { PACE_DEFAULTS } from '../../../hooks/useDeckSettings'
+import { PACE_DEFAULTS } from '@nowry/core/hooks/useDeckSettings'
 
 /**
  * Pace, new cards per day, and the review ceiling (DECKS.md §3.5).

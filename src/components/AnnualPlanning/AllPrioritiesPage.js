@@ -6,7 +6,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Add as AddIcon, Flag as FlagIcon } from '@mui/icons-material'
 import { annualPlanningService } from '@nowry/core/api/services'
-import usePriorityStatus from '../../hooks/usePriorityStatus'
+import usePriorityStatus from '@nowry/core/hooks/usePriorityStatus'
 import PriorityList from './PriorityList'
 import PriorityDialog from './PriorityDialog'
 import EmptyState from './EmptyState'

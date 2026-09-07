@@ -1,5 +1,5 @@
 import { buildDynamicTheme } from '../DynamicThemeProvider'
-import { FONT_SIZE, MIN_FONT_SIZE } from '../tokens'
+import { FONT_SIZE, MIN_FONT_SIZE } from '@nowry/core/tokens/tokens'
 
 /**
  * These assertions are deliberately made against the BUILT theme — the object
@@ -130,7 +130,7 @@ describe('theme colour independence', () => {
 // ─── DS-001: motion and layering ─────────────────────────────────────────────
 
 describe('MOTION (docs/design/MOTION.md)', () => {
-  const { MOTION } = require('../tokens')
+  const { MOTION } = require('@nowry/core/tokens/tokens')
 
   it('has exactly three durations, in milliseconds, strictly ordered', () => {
     const steps = Object.values(MOTION.duration)
@@ -148,7 +148,7 @@ describe('MOTION (docs/design/MOTION.md)', () => {
 })
 
 describe('Z_INDEX (docs/design/ELEVATION.md)', () => {
-  const { Z_INDEX } = require('../tokens')
+  const { Z_INDEX } = require('@nowry/core/tokens/tokens')
 
   it("keeps Joy's six layers at Joy's values, so its Menu, Modal, Snackbar and Tooltip keep their order untold", () => {
     expect(Z_INDEX).toMatchObject({ badge: 1, table: 10, popup: 1000, modal: 1300, snackbar: 1400, tooltip: 1500 })
