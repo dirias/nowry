@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { describeApiError } from '../components/Common/Form/formUtils'
+import { describeApiError } from '@nowry/core/utils/formUtils'
 
 /**
  * useFormCore — the state and persistence behind every form surface.

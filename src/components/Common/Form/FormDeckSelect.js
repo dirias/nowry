@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Option, Select } from '@mui/joy'
 
 import FormFieldFrame from './FormFieldFrame'
-import { extractDeckId } from './formUtils'
+import { extractDeckId } from '@nowry/core/utils/formUtils'
 import { focusRing, touchTarget } from './formStyles'
 
 /**

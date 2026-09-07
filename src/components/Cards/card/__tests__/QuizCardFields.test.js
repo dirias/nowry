@@ -21,7 +21,7 @@ jest.mock('react-i18next', () => ({
 }))
 
 const QuizCardFields = require('../QuizCardFields').default
-const { emptyCardValues } = require('../cardTypes')
+const { emptyCardValues } = require('@nowry/core/domain/cardTypes')
 
 /** Mirrors the parent: one values object, updated field by field. */
 const Harness = ({ initial, errors = {}, revealed = new Set(), availableChips = ['explanation', 'tags', 'deck'], onValues }) => {

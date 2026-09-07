@@ -7,7 +7,7 @@ import {
   getGoalProgress,
   getGoalState,
   getNextMilestone
-} from '../components/AnnualPlanning/goalDerivation'
+} from '@nowry/core/domain/goalDerivation'
 
 /**
  * useGoalCardModel — the one view model behind every goal layout.

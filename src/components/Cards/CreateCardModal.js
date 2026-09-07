@@ -12,6 +12,7 @@ import CardTypeSelector from './card/CardTypeSelector'
 import FlashcardFields from './card/FlashcardFields'
 import QuizCardFields from './card/QuizCardFields'
 import VisualCardFields from './card/VisualCardFields'
+import { focusFirstControl } from '../Common/Form/formUtils'
 
 /**
  * The one card sheet.
@@ -38,7 +39,8 @@ const BODIES = { flashcard: FlashcardFields, quiz: QuizCardFields, visual: Visua
 export default function CreateCardModal({ open, onClose, onCardSaved, decks = [], card = null, initialSection = null }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const form = useCardForm({ open, card, initialSection, onSaved: onCardSaved, onClose })
+  // The hook names what it needs and this file supplies the DOM (MOB-003B).
+  const form = useCardForm({ open, card, initialSection, onSaved: onCardSaved, onClose, focusTarget: focusFirstControl })
 
   const Body = BODIES[form.cardType] || FlashcardFields
   const titleKey = form.isEdit ? form.spec.editTitleKey : form.spec.createTitleKey

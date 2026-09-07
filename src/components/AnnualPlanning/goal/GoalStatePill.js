@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Chip } from '@mui/joy'
-import { GOAL_STATE_COLOR, GOAL_STATE_I18N } from '../goalDerivation'
+import { GOAL_STATE_COLOR, GOAL_STATE_I18N } from '@nowry/core/domain/goalDerivation'
 
 /**
  * GoalStatePill — the ONE chip that carries a goal's health.

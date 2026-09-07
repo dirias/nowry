@@ -4,7 +4,7 @@ import { Box } from '@mui/joy'
 import FormDeckSelect from '../../Common/Form/FormDeckSelect'
 import FormDisclosureRail from '../../Common/Form/FormDisclosureRail'
 import FormTagInput from '../../Common/Form/FormTagInput'
-import { RAIL_LABELS } from './cardTypes'
+import { RAIL_LABELS } from '@nowry/core/domain/cardTypes'
 
 /**
  * The tail every card body ends with: the two optional groups all three

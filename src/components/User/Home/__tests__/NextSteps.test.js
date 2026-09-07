@@ -85,9 +85,9 @@ const journey = (overrides = {}) => ({
 
 const steps = (done = {}) => ({
   steps: [
-    { id: 'study', i18nKey: 'study', to: '/study', Icon: () => null, done: done.study === true },
-    { id: 'book', i18nKey: 'book', to: '/books', Icon: () => null, done: done.book === true },
-    { id: 'plan', i18nKey: 'plan', to: '/annual-planning', Icon: () => null, done: done.plan === true }
+    { id: 'study', i18nKey: 'study', to: '/study', iconKey: 'study', done: done.study === true },
+    { id: 'book', i18nKey: 'book', to: '/books', iconKey: 'book', done: done.book === true },
+    { id: 'plan', i18nKey: 'plan', to: '/annual-planning', iconKey: 'plan', done: done.plan === true }
   ],
   resolved: true,
   allDone: done.study === true && done.book === true && done.plan === true

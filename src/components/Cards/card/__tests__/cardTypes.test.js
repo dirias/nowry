@@ -7,7 +7,7 @@
  * `deck_id`, which travelled as `undefined` and therefore never travelled at
  * all.
  */
-const { CARD_TYPE_SPECS, cardToFormState, contentPredicatesFor, emptyCardValues, specFor } = require('../cardTypes')
+const { CARD_TYPE_SPECS, cardToFormState, contentPredicatesFor, emptyCardValues, specFor } = require('@nowry/core/domain/cardTypes')
 
 const values = (overrides = {}) => ({ ...emptyCardValues(), ...overrides })
 

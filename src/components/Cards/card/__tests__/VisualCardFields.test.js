@@ -23,7 +23,7 @@ const mockSanitize = jest.fn((html) => `sanitized:${html}`)
 jest.mock('dompurify', () => ({ sanitize: (...args) => mockSanitize(...args) }))
 
 const VisualCardFields = require('../VisualCardFields').default
-const { emptyCardValues } = require('../cardTypes')
+const { emptyCardValues } = require('@nowry/core/domain/cardTypes')
 
 const setViewport = (mobile) => {
   window.matchMedia = (query) => ({

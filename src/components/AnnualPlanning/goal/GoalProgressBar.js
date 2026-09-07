@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, LinearProgress, Typography } from '@mui/joy'
-import { GOAL_STATE_COLOR } from '../goalDerivation'
+import { GOAL_STATE_COLOR } from '@nowry/core/domain/goalDerivation'
 
 /**
  * GoalProgressBar — magnitude by length, health by colour.

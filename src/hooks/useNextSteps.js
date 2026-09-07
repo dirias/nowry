@@ -1,8 +1,5 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import MenuBookRounded from '@mui/icons-material/MenuBookRounded'
-import SchoolRounded from '@mui/icons-material/SchoolRounded'
-import FlagRounded from '@mui/icons-material/FlagRounded'
 
 import { annualPlanningService, booksService } from '@nowry/core/api/services'
 import { useAuth } from '../context/AuthContext'
@@ -59,12 +56,12 @@ const countOf = (value) => {
  * @property {string} id - Stable identifier and React key
  * @property {string} i18nKey - Segment under `home.nextSteps.items.<i18nKey>.*`
  * @property {string} to - The route this row opens
- * @property {React.ComponentType} Icon
+ * @property {string} iconKey  named, not rendered — the client resolves it (MOB-003B)
  */
 export const NEXT_STEP_DEFINITIONS = [
-  { id: 'study', i18nKey: 'study', to: '/study', Icon: SchoolRounded },
-  { id: 'book', i18nKey: 'book', to: '/books', Icon: MenuBookRounded },
-  { id: 'plan', i18nKey: 'plan', to: '/annual-planning', Icon: FlagRounded }
+  { id: 'study', i18nKey: 'study', to: '/study', iconKey: 'study' },
+  { id: 'book', i18nKey: 'book', to: '/books', iconKey: 'book' },
+  { id: 'plan', i18nKey: 'plan', to: '/annual-planning', iconKey: 'plan' }
 ]
 
 /**

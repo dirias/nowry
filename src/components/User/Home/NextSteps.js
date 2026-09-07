@@ -5,6 +5,16 @@ import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/joy'
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import CloseRounded from '@mui/icons-material/CloseRounded'
+import FlagRounded from '@mui/icons-material/FlagRounded'
+import MenuBookRounded from '@mui/icons-material/MenuBookRounded'
+import SchoolRounded from '@mui/icons-material/SchoolRounded'
+
+/**
+ * useNextSteps names its icons rather than returning components, so that the
+ * hook can move into @nowry/core (MOB-003B). This is the web resolution; the
+ * mobile client will keep its own over the same keys.
+ */
+const STEP_ICONS = { study: SchoolRounded, book: MenuBookRounded, plan: FlagRounded }
 
 import useNextSteps from '../../../hooks/useNextSteps'
 import { JOURNEY_PHASE } from '../../../hooks/useOnboardingJourney'
@@ -142,7 +152,9 @@ const NextSteps = ({ journey }) => {
         sx={{ listStyle: 'none', m: 0, p: 0 }}
         divider={<Box sx={{ borderTop: '1px solid', borderColor: 'divider' }} />}
       >
-        {steps.map(({ id, i18nKey, to, Icon, done }) => {
+        {steps.map(({ id, i18nKey, to, iconKey, done }) => {
+          // An unknown key draws nothing rather than crashing Home.
+          const Icon = STEP_ICONS[iconKey] ?? null
           const title = t(`home.nextSteps.items.${i18nKey}.title`)
           const description = t(`home.nextSteps.items.${i18nKey}.description`)
 
@@ -171,9 +183,9 @@ const NextSteps = ({ journey }) => {
               >
                 {done ? (
                   <CheckCircleRounded aria-hidden sx={{ fontSize: 'xl', color: 'success.plainColor', flexShrink: 0 }} />
-                ) : (
+                ) : Icon ? (
                   <Icon aria-hidden sx={{ fontSize: 'xl', color: 'primary.plainColor', flexShrink: 0 }} />
-                )}
+                ) : null}
 
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography level='body-sm' sx={{ color: done ? 'text.tertiary' : 'text.primary', fontWeight: done ? 'md' : 'lg' }}>

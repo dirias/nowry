@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { decksService } from '@nowry/core/api/services'
-import { describeApiError } from '../components/Common/Form/formUtils'
+import { describeApiError } from '@nowry/core/utils/formUtils'
 import useDebouncedChannels from './useDebouncedChannels'
 
 /**

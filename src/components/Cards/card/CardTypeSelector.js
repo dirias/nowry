@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Box, Radio, RadioGroup, Stack, Typography } from '@mui/joy'
 
 import { focusRing, formLabel, touchTarget } from '../../Common/Form/formStyles'
-import { CARD_TYPES, accentColorFor, iconFor, specFor } from './cardTypes'
+import { CARD_TYPES, accentColorFor, specFor } from '@nowry/core/domain/cardTypes'
+import { iconFor } from './cardTypeIcons'
 
 /**
  * Choosing what kind of card this is, from inside the sheet (CARDS.md §4.4).

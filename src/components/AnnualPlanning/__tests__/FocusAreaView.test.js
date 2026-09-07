@@ -42,7 +42,7 @@ jest.mock('../GoalRow', () => () => null)
 jest.mock('../../Common/DeleteConfirmationModal', () => () => null)
 
 import { calculateTimeElapsedPercentage, calculateProgress, getCurrentQuarter } from '../FocusAreaView'
-import { getGoalState } from '../goalDerivation'
+import { getGoalState } from '@nowry/core/domain/goalDerivation'
 
 // 2026-07-20 falls in Q3 — getCurrentQuarter() returns 3 for these tests.
 const FIXED_NOW = new Date('2026-07-20T12:00:00')

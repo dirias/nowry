@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 
-import { describeApiError } from '../components/Common/Form/formUtils'
+import { describeApiError } from '@nowry/core/utils/formUtils'
 
 /**
  * Debounced autosave across several independent write paths.

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/joy'
 import { Add as AddIcon } from '@mui/icons-material'
 import GoalMilestoneEditorRow from './GoalMilestoneEditorRow'
-import { blankMilestone } from '../goalDerivation'
+import { blankMilestone } from '@nowry/core/domain/goalDerivation'
 import { focusRing } from './goalStyles'
 
 /**

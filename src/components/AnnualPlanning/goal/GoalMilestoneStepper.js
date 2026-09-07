@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Step, StepIndicator, Stepper, Tooltip, Typography } from '@mui/joy'
 import { Check as CheckIcon } from '@mui/icons-material'
-import { isMilestoneOverdue } from '../goalDerivation'
+import { isMilestoneOverdue } from '@nowry/core/domain/goalDerivation'
 import MilestoneDueDateBadge from './MilestoneDueDateBadge'
 import { focusRing } from './goalStyles'
 

@@ -27,7 +27,7 @@ jest.mock('@nowry/core/api/services', () => ({
 jest.mock('lucide-react', () => ({ Target: () => null, TrendingUp: () => null }))
 
 const AnnualGoalsCard = require('../AnnualGoalsCard').default
-const { GOAL_STATE_COLOR, getGoalProgress, getGoalState } = require('../../../AnnualPlanning/goalDerivation')
+const { GOAL_STATE_COLOR, getGoalProgress, getGoalState } = require('@nowry/core/domain/goalDerivation')
 
 const milestoneGoal = {
   _id: 'g1',

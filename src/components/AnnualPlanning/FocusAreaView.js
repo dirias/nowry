@@ -56,7 +56,7 @@ import GoalRow from './GoalRow'
 import GoalDetailDrawer from './goal/GoalDetailDrawer'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import useGoalCardModel from '../../hooks/useGoalCardModel'
-import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter } from './goalDerivation'
+import { calculateProgress, calculateTimeElapsedPercentage, getCurrentQuarter } from '@nowry/core/domain/goalDerivation'
 
 // --- GOAL-01 computation engine ---
 // The implementations moved to ./goalDerivation.js (ADR-003 / UX-CONTRACT §5.1):

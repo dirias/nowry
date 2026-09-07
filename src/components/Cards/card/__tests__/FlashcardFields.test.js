@@ -17,7 +17,7 @@ jest.mock('react-i18next', () => ({
 }))
 
 const FlashcardFields = require('../FlashcardFields').default
-const { emptyCardValues } = require('../cardTypes')
+const { emptyCardValues } = require('@nowry/core/domain/cardTypes')
 
 const renderBody = (props = {}) => {
   const setField = jest.fn()

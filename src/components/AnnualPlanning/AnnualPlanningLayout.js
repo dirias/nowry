@@ -16,7 +16,7 @@ import CloseQuarterModal from './CloseQuarterModal'
 import GoalAIPanel from './GoalAIPanel'
 import PlanIdentityBlock from './PlanIdentityBlock'
 import PlanScopeBar from './PlanScopeBar'
-import { getQuarterCloseState } from './quarterUtils'
+import { getQuarterCloseState } from '@nowry/core/domain/quarterUtils'
 
 /**
  * AnnualPlanningLayout — the single route element behind /annual-planning and its

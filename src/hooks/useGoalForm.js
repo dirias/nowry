@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { annualPlanningService } from '@nowry/core/api/services'
-import { blankMilestone } from '../components/AnnualPlanning/goalDerivation'
-import { describeApiError, emptyToNull, focusFirstControl } from '../components/Common/Form/formUtils'
+import { blankMilestone } from '@nowry/core/domain/goalDerivation'
+import { describeApiError, emptyToNull } from '@nowry/core/utils/formUtils'
+import { focusFirstControl } from '../components/Common/Form/formUtils'
 import useFormCore from './useFormCore'
 
 /**

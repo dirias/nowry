@@ -52,7 +52,10 @@ it('every row names a route (FR-069)', () => {
   expect(NEXT_STEP_DEFINITIONS.length).toBeLessThanOrEqual(4)
   NEXT_STEP_DEFINITIONS.forEach((definition) => {
     expect(definition.to).toMatch(/^\//)
-    expect(typeof definition.Icon).not.toBe('undefined')
+    // An icon is NAMED here, never returned as a component (MOB-003B):
+    // this module is bound for @nowry/core, and each client draws its own.
+    expect(typeof definition.iconKey).toBe('string')
+    expect(definition.iconKey).not.toBe('')
   })
 })
 

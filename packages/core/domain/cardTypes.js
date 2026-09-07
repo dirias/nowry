@@ -1,8 +1,4 @@
-import QuizIcon from '@mui/icons-material/Quiz'
-import StyleIcon from '@mui/icons-material/Style'
-import ImageIcon from '@mui/icons-material/Image'
-
-import { extractDeckId, parseTagInput } from '../../Common/Form/formUtils'
+import { extractDeckId, parseTagInput } from '../utils/formUtils'
 
 /**
  * The three card variants, declared once.
@@ -34,20 +30,25 @@ export const RAIL_LABELS = {
 export const CARD_TYPES = ['flashcard', 'quiz', 'visual']
 
 /**
- * Icon + accent color per type, colocated with the spec table below so a
+ * Icon KEY + accent colour per type, colocated with the spec table below so a
  * fourth card type only ever needs one new entry. This is the exact mapping
  * `StudyCard.js` already paints on the cards this modal creates (§2.1 —
  * semantic tokens only, no shade tokens like `warning.400`); reusing it here
  * means the picker and the card it produces teach one visual vocabulary,
  * not two.
+ *
+ * A key, not a component (MOB-003B). This module is shared, and the two clients
+ * draw from different icon sets — Material on the web, lucide-react-native on
+ * mobile — so it names the icon and each client resolves it. The web map lives
+ * in `src/components/Cards/card/cardTypeIcons.js`.
  */
 const CARD_TYPE_ICONS = {
-  flashcard: { icon: StyleIcon, accentColor: 'primary.plainColor' },
-  quiz: { icon: QuizIcon, accentColor: 'warning.plainColor' },
-  visual: { icon: ImageIcon, accentColor: 'success.plainColor' }
+  flashcard: { iconKey: 'cards', accentColor: 'primary.plainColor' },
+  quiz: { iconKey: 'quiz', accentColor: 'warning.plainColor' },
+  visual: { iconKey: 'image', accentColor: 'success.plainColor' }
 }
 
-export const iconFor = (cardType) => (CARD_TYPE_ICONS[cardType] || CARD_TYPE_ICONS.flashcard).icon
+export const iconKeyFor = (cardType) => (CARD_TYPE_ICONS[cardType] || CARD_TYPE_ICONS.flashcard).iconKey
 
 export const accentColorFor = (cardType) => (CARD_TYPE_ICONS[cardType] || CARD_TYPE_ICONS.flashcard).accentColor
 

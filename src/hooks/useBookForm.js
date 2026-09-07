@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { booksService } from '@nowry/core/api/services'
-import { focusFirstControl, parseTagInput } from '../components/Common/Form/formUtils'
+import { parseTagInput } from '@nowry/core/utils/formUtils'
+import { focusFirstControl } from '../components/Common/Form/formUtils'
 import useFormCore from './useFormCore'
 
 /**

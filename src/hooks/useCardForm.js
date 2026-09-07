@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { cardsService } from '@nowry/core/api/services'
-import { extractDeckId, scrollIntoViewSafely } from '../components/Common/Form/formUtils'
-import { cardToFormState, contentPredicatesFor, emptyCardValues, specFor } from '../components/Cards/card/cardTypes'
+import { extractDeckId } from '@nowry/core/utils/formUtils'
+import { cardToFormState, contentPredicatesFor, emptyCardValues, specFor } from '@nowry/core/domain/cardTypes'
 import useFormCore from './useFormCore'
 
 /**
@@ -32,18 +32,21 @@ const hasWriting = (values, fields) =>
   })
 
 /**
- * Focus whatever a name points at: a field, a group container, or an object
- * exposing `focus` (the option list, whose target depends on its contents).
+ * Moving focus is the client's job, not this hook's (MOB-003B).
+ *
+ * This module used to carry its own `focusTarget`, whose body was
+ * character-for-character `focusFirstControl` from the web form utilities:
+ * match a selector, fall back to the first control inside, focus it, scroll it
+ * into view. All of that is DOM, and this hook moves into @nowry/core in
+ * MOB-004, where there is no DOM to reach for.
+ *
+ * So the caller supplies it. The web app passes `focusFirstControl`; the mobile
+ * app will pass something that calls `.focus()` on a ref. The default is a
+ * no-op, which is also what every test wants.
  */
-const focusTarget = (node) => {
-  if (!node) return
-  const selector = 'input, textarea, select, button, [tabindex]'
-  const target = node.matches?.(selector) ? node : node.querySelector?.(selector) || node
-  target?.focus?.()
-  scrollIntoViewSafely(target)
-}
+const noFocus = () => {}
 
-const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClose }) => {
+const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClose, focusTarget = noFocus }) => {
   const [cardType, setCardType] = useState(() => card?.card_type || 'flashcard')
   const [pendingType, setPendingType] = useState(null)
   // Groups the user revealed under a type they have since switched away from.
@@ -81,7 +84,7 @@ const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClos
     return refCallbacks.current[name]
   }, [])
 
-  const focusField = useCallback((name) => focusTarget(nodes.current[name]), [])
+  const focusField = useCallback((name) => focusTarget(nodes.current[name]), [focusTarget])
 
   /** 403 is the plan limit, and it wants an Upgrade action rather than a sentence. */
   const persist = useCallback(

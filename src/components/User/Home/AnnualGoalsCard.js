@@ -4,7 +4,7 @@ import { Box, Typography, LinearProgress, Button, Stack, Sheet, Skeleton } from 
 import { useNavigate } from 'react-router-dom'
 import { Target, TrendingUp } from 'lucide-react'
 import { annualPlanningService } from '@nowry/core/api/services'
-import { GOAL_STATE_COLOR, getGoalProgress, getGoalState } from '../../AnnualPlanning/goalDerivation'
+import { GOAL_STATE_COLOR, getGoalProgress, getGoalState } from '@nowry/core/domain/goalDerivation'
 
 const SKELETON_ROWS = 4
 

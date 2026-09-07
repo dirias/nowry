@@ -5,7 +5,7 @@
  */
 import { renderHook } from '@testing-library/react'
 import useGoalCardModel from './useGoalCardModel'
-import { GOAL_STATE_COLOR, getGoalProgress, getGoalState } from '../components/AnnualPlanning/goalDerivation'
+import { GOAL_STATE_COLOR, getGoalProgress, getGoalState } from '@nowry/core/domain/goalDerivation'
 
 const goal = {
   _id: 'g1',
