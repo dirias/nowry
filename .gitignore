@@ -169,7 +169,9 @@ cython_debug/
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+# Unanchored: this is a workspace root, so `mobile/node_modules` and any
+# future `packages/*/node_modules` must be ignored too, not just the root one.
+node_modules/
 /.pnp
 .pnp.js
 

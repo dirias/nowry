@@ -4,5 +4,13 @@
   "private": true,
   "description": "Platform-free product logic shared by the Nowry web and mobile clients.",
   "main": "index.js",
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    }
+  }
 }

@@ -2,5 +2,23 @@
   "name": "nowry-mobile",
   "version": "0.0.0",
   "private": true,
-  "description": "Nowry mobile client (Expo + React Native). Scaffolded by MOB-005."
+  "description": "Nowry mobile client (Expo + React Native). Scaffolded by MOB-005.",
+  "dependencies": {
+    "expo": "^57.0.20",
+    "expo-constants": "~57.0.17",
+    "expo-linking": "~57.0.9",
+    "expo-router": "~57.0.19",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "@nowry/core": "*"
+  },
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start --dev-client",
+    "start:web-check": "expo start",
+    "lint": "eslint \"app/**/*.js\" \"*.js\""
+  }
 }
