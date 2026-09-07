@@ -6,7 +6,7 @@ import CloseRounded from '@mui/icons-material/CloseRounded'
 import ErrorOutlineRounded from '@mui/icons-material/ErrorOutlineRounded'
 import RocketLaunchRounded from '@mui/icons-material/RocketLaunchRounded'
 
-import useOnboardingJourney, { JOURNEY_PHASE } from '../../../hooks/useOnboardingJourney'
+import { JOURNEY_PHASE } from '../../../hooks/useOnboardingJourney'
 import { focusRing, touchTarget } from '../../Common/Form/formStyles'
 import { failureKey } from '../OnboardingFieldSaveState'
 import { visuallyHidden } from '../taxonomySelectorStyles'
@@ -47,6 +47,14 @@ import { visuallyHidden } from '../taxonomySelectorStyles'
  * this task removed. The user's durable "not now" is postponement, and it lives
  * on Welcome.
  *
+ * WHERE THE JOURNEY COMES FROM
+ *
+ * A prop, not a hook call (ONB-023). One `GET /users/onboarding` answers both
+ * this card and `NextSteps`, so `OnboardingSurfaces` owns the read and hands
+ * the same snapshot to both; owning it here again would double the request on
+ * every Home load. Nothing else about this component changed: the visibility
+ * rule below is still entirely the server's.
+ *
  * LOADING AND FAILURE MAY NOT COST HOME ANYTHING
  *
  * While the read is in flight this renders `null`, and Home renders in full
@@ -61,7 +69,7 @@ import { visuallyHidden } from '../taxonomySelectorStyles'
  * renders nothing, because there is no action to offer and an optional
  * invitation is not worth a permanent error on someone's Home.
  */
-const OnboardingReentry = () => {
+const OnboardingReentry = ({ journey }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const headingId = useId()
@@ -70,7 +78,7 @@ const OnboardingReentry = () => {
   const [dismissed, setDismissed] = useState(false)
   const [announcement, setAnnouncement] = useState('')
 
-  const { status, showReentry, journeyPhase, journeyError, reload } = useOnboardingJourney()
+  const { status, showReentry, journeyPhase, journeyError, reload } = journey
 
   const isReady = journeyPhase === JOURNEY_PHASE.READY
   const invited = isReady && status === 'incomplete' && showReentry === true

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded'
 import FocusBar from './FocusBar'
-import OnboardingReentry from './OnboardingReentry'
+import OnboardingSurfaces from './OnboardingSurfaces'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import WeeklyProgress from './WeeklyProgress'
@@ -43,14 +43,14 @@ function Home() {
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 3 } }}>
       {/*
-        Onboarding re-entry (ONB-012, ADR-007). Server-governed: it appears only
-        when `GET /users/onboarding` says the journey is incomplete and the
-        24-hour grace period has passed. It renders nothing while that read is in
-        flight, so everything below is never waiting on it, and it never opens
-        onboarding by itself. The old `wizard_completed` banner it replaced asked
-        the client to decide, and answered on a stale local flag.
+        Home's onboarding surfaces (ONB-012/ONB-023, ADR-007/ADR-024). One
+        `GET /users/onboarding` decides between them: re-entry belongs to an
+        incomplete journey, next steps to an activated one, and the server
+        guarantees at most one is offered. Both are silent while that read is in
+        flight, so nothing below waits on them, and neither ever opens
+        onboarding by itself.
       */}
-      <OnboardingReentry />
+      <OnboardingSurfaces />
 
       {/* Header - Welcome + Study Status */}
       <Box

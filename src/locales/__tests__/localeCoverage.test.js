@@ -98,7 +98,7 @@ const untranslatedIn = (locale) =>
  * section that edits the same preferences. `common.retry` is reached from every
  * onboarding network-error banner and is in scope by that route alone.
  */
-const STRICT_PREFIXES = ['onboarding.', 'taxonomy.', 'home.onboardingReentry.', 'settings.learning.']
+const STRICT_PREFIXES = ['onboarding.', 'taxonomy.', 'home.onboardingReentry.', 'home.nextSteps.', 'settings.learning.']
 const STRICT_EXTRA_KEYS = ['common.retry']
 const isStrict = (key) => STRICT_PREFIXES.some((prefix) => key.startsWith(prefix)) || STRICT_EXTRA_KEYS.includes(key)
 const STRICT_KEYS = EN_KEYS.filter(isStrict)

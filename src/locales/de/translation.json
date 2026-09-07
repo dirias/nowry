@@ -602,42 +602,6 @@
       "network": "Du scheinst offline zu sein. Prüfe deine Verbindung und versuche es erneut.",
       "rejected": "Dieser Wert wurde abgelehnt. Bitte wähle einen anderen.",
       "unknown": "Bei uns ist etwas schiefgelaufen."
-    },
-    "teaser": {
-      "regionLabel": "Was Nowry kann",
-      "skip": "Überspringen",
-      "previous": "Zurück",
-      "next": "Weiter",
-      "getStarted": "Loslegen",
-      "imagePlaceholder": "Vorschau folgt in Kürze",
-      "dotLabel": "Zu {{title}} wechseln",
-      "progress": "Folie {{current}} von {{total}}: {{title}}",
-      "cards": {
-        "smartBooks": {
-          "title": "Intelligente Bücher",
-          "description": "Verwandle Notizen und PDFs mit KI-gestütztem Lesen in strukturierte Bücher."
-        },
-        "studyCards": {
-          "title": "Lernkarten",
-          "description": "Wiederhole mit Karteikarten, die sich deinem Wissen anpassen."
-        },
-        "quizzes": {
-          "title": "Quiz",
-          "description": "Teste dich mit Quiz, die aus deinem eigenen Material erstellt werden."
-        },
-        "diagrams": {
-          "title": "Diagramme",
-          "description": "Erkenne Zusammenhänge zwischen Ideen mit KI-generierten Konzeptkarten."
-        },
-        "smartpet": {
-          "title": "Intelligentes Haustier",
-          "description": "Lass einen Begleiter wachsen, der jede Lernserie feiert."
-        },
-        "annualPlanning": {
-          "title": "Jahresplanung",
-          "description": "Setze Jahresziele und teile sie in Meilensteine, die du wirklich erreichst."
-        }
-      }
     }
   },
   "taxonomy": {
@@ -1662,6 +1626,28 @@
       "dismissed": "Einrichtungshinweis ausgeblendet.",
       "error": {
         "title": "Deine Einrichtung konnte nicht geprüft werden"
+      }
+    },
+    "nextSteps": {
+      "title": "Wie es weitergeht",
+      "body": "Drei Dinge zum Ausprobieren, jetzt wo dein erster Stapel da ist.",
+      "dismiss": "Diese Vorschläge ausblenden",
+      "dismissed": "Vorschläge ausgeblendet.",
+      "openLabel": "{{title}} öffnen",
+      "doneLabel": "erledigt",
+      "items": {
+        "study": {
+          "title": "Lerne deinen ersten Stapel",
+          "description": "Wiederhole ein paar Karten und Nowry plant sie ab dann für dich."
+        },
+        "book": {
+          "title": "Bring dein eigenes Material mit",
+          "description": "Mach aus einem Dokument oder deinen Notizen ein Buch und daraus Karten."
+        },
+        "plan": {
+          "title": "Setze dir ein Jahresziel",
+          "description": "Nenne eine Sache, die du lernen willst, und teile sie in Schritte auf."
+        }
       }
     }
   },

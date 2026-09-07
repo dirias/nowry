@@ -12,7 +12,12 @@
  *
  * The real `useOnboardingJourney` runs here, mocked only at the service
  * boundary, so the mapping from the response body to what the user sees is
- * actually exercised rather than assumed.
+ * actually exercised rather than assumed. It is reached through
+ * `OnboardingSurfaces`, which is where that read now lives (ONB-023) — the
+ * component under test takes the snapshot as a prop, so rendering it bare would
+ * hand it nothing. Its sibling `NextSteps` renders alongside and contributes
+ * nothing to any assertion here: every case below is an *incomplete* journey,
+ * and `show_next_steps` is false for all of them by construction.
  */
 jest.mock('react-i18next', () => {
   const bundle = require('../../../../locales/en/translation.json')
@@ -46,10 +51,19 @@ jest.mock('@nowry/core/api/services/cards.service', () => ({
   cardsService: { generateOnboardingFallback: jest.fn() }
 }))
 
+// `OnboardingSurfaces` also mounts `NextSteps`, whose signal hook reaches
+// AuthContext and, through it, the real i18n bootstrap — which the
+// `react-i18next` mock above cannot satisfy. This suite is about the re-entry
+// card; the panel's own coverage lives in `NextSteps.test.js`.
+jest.mock('../../../../hooks/useNextSteps', () => ({
+  __esModule: true,
+  default: () => ({ steps: [], resolved: true, allDone: true })
+}))
+
 import React from 'react'
 import { act, render, screen, fireEvent } from '@testing-library/react'
 
-import OnboardingReentry from '../OnboardingReentry'
+import OnboardingSurfaces from '../OnboardingSurfaces'
 import { userService } from '@nowry/core/api/services/user.service'
 import en from '../../../../locales/en/translation.json'
 
@@ -94,7 +108,7 @@ describe('visibility is the server’s decision', () => {
   it('invites the user when the journey is incomplete and show_reentry is true', async () => {
     userService.getOnboardingState.mockResolvedValue(journey())
 
-    render(<OnboardingReentry />)
+    render(<OnboardingSurfaces />)
 
     expect(await screen.findByText(copy.title)).toBeInTheDocument()
     expect(screen.getByText(copy.body)).toBeInTheDocument()
@@ -105,7 +119,7 @@ describe('visibility is the server’s decision', () => {
     // it from `postponed_at` would show the card here. Nothing may.
     userService.getOnboardingState.mockResolvedValue(journey({ postponed_at: '2026-08-15T09:00:00Z', show_reentry: false }))
 
-    const { container } = render(<OnboardingReentry />)
+    const { container } = render(<OnboardingSurfaces />)
 
     await settleRead()
     expect(screen.queryByText(copy.title)).not.toBeInTheDocument()
@@ -117,7 +131,7 @@ describe('visibility is the server’s decision', () => {
       journey({ status: 'activated', activated_at: '2026-08-15T09:00:00Z', show_reentry: false })
     )
 
-    const { container } = render(<OnboardingReentry />)
+    const { container } = render(<OnboardingSurfaces />)
 
     await settleRead()
     expect(container).toBeEmptyDOMElement()
@@ -128,7 +142,7 @@ describe('visibility is the server’s decision', () => {
     // snapshot cannot invite an activated user back into onboarding.
     userService.getOnboardingState.mockResolvedValue(journey({ status: 'activated', show_reentry: true }))
 
-    const { container } = render(<OnboardingReentry />)
+    const { container } = render(<OnboardingSurfaces />)
 
     await settleRead()
     expect(container).toBeEmptyDOMElement()
@@ -139,7 +153,7 @@ describe('re-entry never opens onboarding by itself', () => {
   it('navigates to /onboarding only when the user presses the action', async () => {
     userService.getOnboardingState.mockResolvedValue(journey())
 
-    render(<OnboardingReentry />)
+    render(<OnboardingSurfaces />)
     await screen.findByText(copy.title)
 
     expect(mockNavigate).not.toHaveBeenCalled()
@@ -156,7 +170,7 @@ describe('dismissal is view state only', () => {
     userService.getOnboardingState.mockResolvedValue(journey())
     const sessionSpy = jest.spyOn(Storage.prototype, 'setItem')
 
-    render(<OnboardingReentry />)
+    render(<OnboardingSurfaces />)
     await screen.findByText(copy.title)
 
     fireEvent.click(screen.getByRole('button', { name: copy.dismiss }))
@@ -174,7 +188,7 @@ describe('dismissal is view state only', () => {
   it('announces the dismissal and leaves focus somewhere predictable', async () => {
     userService.getOnboardingState.mockResolvedValue(journey())
 
-    render(<OnboardingReentry />)
+    render(<OnboardingSurfaces />)
     await screen.findByText(copy.title)
 
     fireEvent.click(screen.getByRole('button', { name: copy.dismiss }))
@@ -186,12 +200,12 @@ describe('dismissal is view state only', () => {
   it('comes back on the next Home view, because nothing was persisted', async () => {
     userService.getOnboardingState.mockResolvedValue(journey())
 
-    const first = render(<OnboardingReentry />)
+    const first = render(<OnboardingSurfaces />)
     await screen.findByText(copy.title)
     fireEvent.click(screen.getByRole('button', { name: copy.dismiss }))
     first.unmount()
 
-    render(<OnboardingReentry />)
+    render(<OnboardingSurfaces />)
     expect(await screen.findByText(copy.title)).toBeInTheDocument()
   })
 })
@@ -200,7 +214,7 @@ describe('the read costs Home nothing', () => {
   it('renders nothing at all while the journey read is in flight', () => {
     userService.getOnboardingState.mockReturnValue(new Promise(() => {}))
 
-    const { container } = render(<OnboardingReentry />)
+    const { container } = render(<OnboardingSurfaces />)
 
     expect(container).toBeEmptyDOMElement()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
@@ -209,7 +223,7 @@ describe('the read costs Home nothing', () => {
   it('states a recoverable failure as an error with a retry, not as an empty result', async () => {
     userService.getOnboardingState.mockRejectedValueOnce(httpError(503, 'service_unavailable'))
 
-    render(<OnboardingReentry />)
+    render(<OnboardingSurfaces />)
 
     expect(await screen.findByText(copy.error.title)).toBeInTheDocument()
     // Distinct from the invitation, and never dressed as "nothing to show".
@@ -226,7 +240,7 @@ describe('the read costs Home nothing', () => {
   it('says nothing at all when the failure is terminal', async () => {
     userService.getOnboardingState.mockRejectedValue(httpError(403, 'forbidden'))
 
-    const { container } = render(<OnboardingReentry />)
+    const { container } = render(<OnboardingSurfaces />)
 
     await settleRead()
     expect(container).toBeEmptyDOMElement()

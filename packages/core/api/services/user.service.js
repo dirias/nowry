@@ -177,6 +177,22 @@ export const userService = {
   },
 
   /**
+   * Retire Home's next-steps panel for good (ONB-022, ADR-024, FR-072).
+   *
+   * The one journey action that is legal only *after* activation, and the one
+   * that writes nothing but its own timestamp: status, last meaningful point
+   * and postponement are all untouched. Because the server holds the flag, the
+   * dismissal follows the account to every device — which is the whole reason
+   * this is a request rather than a `localStorage` write.
+   *
+   * @returns {Promise<Object>} Refreshed journey snapshot
+   */
+  async dismissOnboardingNextSteps() {
+    const { data } = await apiClient.patch('/users/onboarding', { action: 'dismiss_next_steps' }, ONBOARDING_OWNS_ITS_ERRORS)
+    return data
+  },
+
+  /**
    * Enable two-factor authentication
    * @returns {Promise<Object>} Backup codes
    */

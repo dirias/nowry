@@ -219,6 +219,7 @@ const useOnboardingJourney = ({ autoLoad = true, forkRetryDelayMs = DEFAULT_FORK
   const [fork, setFork] = useState(initialFork)
   const [point, setPoint] = useState(initialPoint)
   const [postponeState, setPostponeState] = useState(initialPostpone)
+  const [dismissState, setDismissState] = useState(initialPostpone)
   const [fallback, setFallback] = useState(initialFallback)
 
   const mountedRef = useRef(true)
@@ -342,6 +343,29 @@ const useOnboardingJourney = ({ autoLoad = true, forkRetryDelayMs = DEFAULT_FORK
       return { ok: false, error: classified }
     }
   }, [applySnapshot, reload])
+
+  /**
+   * Dismiss Home's next-steps panel (FR-072, ADR-024).
+   *
+   * Unlike `postpone`, this one is legal only while the journey is activated,
+   * and it moves no journey state — it retires a surface, nothing more. The
+   * caller may hide the panel optimistically, because a failed dismissal costs
+   * the user only a panel that comes back on the next load; there is nothing
+   * here worth an error row on somebody's Home.
+   */
+  const dismissNextSteps = useCallback(async () => {
+    if (mountedRef.current) setDismissState({ phase: ACTION_PHASE.PENDING, error: null })
+    try {
+      const snapshot = await userService.dismissOnboardingNextSteps()
+      applySnapshot(snapshot)
+      if (mountedRef.current) setDismissState({ phase: ACTION_PHASE.SUCCEEDED, error: null })
+      return { ok: true, journey: snapshot }
+    } catch (error) {
+      const classified = classifyError(error)
+      if (mountedRef.current) setDismissState({ phase: ACTION_PHASE.ERROR, error: classified })
+      return { ok: false, error: classified }
+    }
+  }, [applySnapshot])
 
   /**
    * Load the curated options for a topic (FR-024). Responses are sequenced, so
@@ -516,6 +540,7 @@ const useOnboardingJourney = ({ autoLoad = true, forkRetryDelayMs = DEFAULT_FORK
       isActivated: journey?.status === 'activated',
       resumeScreen: journey?.resume_screen ?? null,
       showReentry: journey?.show_reentry === true,
+      showNextSteps: journey?.show_next_steps === true,
       lastMeaningfulPoint: journey?.last_meaningful_point ?? null,
 
       // Journey read lifecycle.
@@ -532,6 +557,10 @@ const useOnboardingJourney = ({ autoLoad = true, forkRetryDelayMs = DEFAULT_FORK
       // Postponement.
       postpone,
       postponeState,
+
+      // Next steps — a Home surface only an activated journey ever sees.
+      dismissNextSteps,
+      dismissState,
 
       // Curated browse.
       browseState: browse,
@@ -557,6 +586,8 @@ const useOnboardingJourney = ({ autoLoad = true, forkRetryDelayMs = DEFAULT_FORK
       point,
       postpone,
       postponeState,
+      dismissNextSteps,
+      dismissState,
       browse,
       loadOfficialDecks,
       retryOfficialDecks,

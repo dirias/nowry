@@ -722,42 +722,6 @@
       "network": "You appear to be offline. Check your connection and try again.",
       "rejected": "That value wasn't accepted. Please choose another.",
       "unknown": "Something went wrong on our end."
-    },
-    "teaser": {
-      "regionLabel": "What Nowry can do",
-      "skip": "Skip",
-      "previous": "Previous",
-      "next": "Next",
-      "getStarted": "Get Started",
-      "imagePlaceholder": "Preview image coming soon",
-      "dotLabel": "Go to {{title}}",
-      "progress": "Slide {{current}} of {{total}}: {{title}}",
-      "cards": {
-        "smartBooks": {
-          "title": "Smart Books",
-          "description": "Turn notes and PDFs into structured books with AI-guided reading."
-        },
-        "studyCards": {
-          "title": "Study Cards",
-          "description": "Review flashcards that adapt to what you already know."
-        },
-        "quizzes": {
-          "title": "Quizzes",
-          "description": "Test yourself with quizzes generated from your own material."
-        },
-        "diagrams": {
-          "title": "Diagrams",
-          "description": "See how ideas connect with AI-generated concept maps."
-        },
-        "smartpet": {
-          "title": "Smartpet",
-          "description": "Grow a companion that celebrates every study streak."
-        },
-        "annualPlanning": {
-          "title": "Annual Planning",
-          "description": "Set yearly goals and break them into milestones you can hit."
-        }
-      }
     }
   },
   "taxonomy": {
@@ -2074,7 +2038,14 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
+      "examples": [
+        "Career Growth",
+        "Health & Vitality",
+        "Financial Freedom",
+        "Relationships",
+        "Creative Pursuits",
+        "Learning & Skills"
+      ]
     },
     "priority": {
       "title": "Yearly Priorities",
@@ -2945,6 +2916,28 @@
       "dismissed": "Setup reminder hidden.",
       "error": {
         "title": "We couldn't check your setup"
+      }
+    },
+    "nextSteps": {
+      "title": "What's next",
+      "body": "Three things to try now that you have your first deck.",
+      "dismiss": "Hide these suggestions",
+      "dismissed": "Suggestions hidden.",
+      "openLabel": "Open {{title}}",
+      "doneLabel": "done",
+      "items": {
+        "study": {
+          "title": "Study your first deck",
+          "description": "Review a few cards and Nowry starts scheduling them for you."
+        },
+        "book": {
+          "title": "Bring your own material",
+          "description": "Turn a document or your notes into a book, then into cards."
+        },
+        "plan": {
+          "title": "Set a goal for the year",
+          "description": "Name one thing you want to learn and break it into steps."
+        }
       }
     }
   },
