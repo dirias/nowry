@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Typography, Checkbox, Button, Stack, CircularProgress, Sheet, Chip } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import { CheckSquare, Clock } from 'lucide-react'
-import { tasksService, annualPlanningService } from '../../../api/services'
+import { tasksService, annualPlanningService } from '@nowry/core/api/services'
 import { useTaskData } from '../../../hooks/useTaskData'
 
 /**

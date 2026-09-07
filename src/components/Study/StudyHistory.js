@@ -17,7 +17,7 @@ import MenuBookRounded from '@mui/icons-material/MenuBookRounded'
 import CheckRounded from '@mui/icons-material/CheckRounded'
 import CloseRounded from '@mui/icons-material/CloseRounded'
 import RemoveRounded from '@mui/icons-material/RemoveRounded'
-import { studySessionsService } from '../../api/services/studySessions.service'
+import { studySessionsService } from '@nowry/core/api/services/studySessions.service'
 
 // ---------------------------------------------------------------------------
 // Helpers (duplicated here to keep this page self-contained)

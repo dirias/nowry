@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cardsService } from '../../api/services'
-import { invalidateCardCaches } from '../../api/cardCache'
+import { cardsService } from '@nowry/core/api/services'
+import { invalidateCardCaches } from '@nowry/core/api/cardCache'
 
 // What a tag verb can change: the card list under any filter, the groups
 // index and the tag menus. Deck counters and statistics are untouched.

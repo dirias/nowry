@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { publicContentService } from '../api/services'
+import { publicContentService } from '@nowry/core/api/services'
 import { useTranslation } from 'react-i18next'
 
 export function usePublishing() {

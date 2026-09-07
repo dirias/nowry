@@ -18,8 +18,8 @@ import {
   Alert
 } from '@mui/joy'
 import InfoIcon from '@mui/icons-material/Info'
-import { annualPlanningService } from '../../api/services'
-import { tasksService } from '../../api/services/tasks.service' // Check import path if needed, usually index exports it
+import { annualPlanningService } from '@nowry/core/api/services'
+import { tasksService } from '@nowry/core/api/services/tasks.service' // Check import path if needed, usually index exports it
 
 const PriorityDialog = ({ open, onClose, annualPlanId, focusAreas = [], existingPriorities = [], editingPriority = null, onSuccess }) => {
   const { t } = useTranslation()

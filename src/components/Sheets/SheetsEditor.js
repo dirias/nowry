@@ -14,7 +14,7 @@ import Alert from '@mui/joy/Alert'
 import Link from '@mui/joy/Link'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
-import sheetsService from '../../api/services/sheets.service'
+import sheetsService from '@nowry/core/api/services/sheets.service'
 
 const SheetsEditor = () => {
   const { sheetId } = useParams()

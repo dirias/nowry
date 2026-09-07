@@ -19,7 +19,7 @@ jest.mock('react-i18next', () => ({
 }))
 
 const mockGetSections = jest.fn()
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   booksService: { getSections: (...args) => mockGetSections(...args) }
 }))
 

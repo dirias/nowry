@@ -26,7 +26,7 @@ const mockGetById = jest.fn()
 const mockUpdateSettings = jest.fn()
 const mockGetSettings = jest.fn()
 const mockUpdate = jest.fn()
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   decksService: {
     getById: (...args) => mockGetById(...args),
     updateSettings: (...args) => mockUpdateSettings(...args),

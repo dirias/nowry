@@ -1,9 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
+import { configurePlatform } from '@nowry/core'
+import { webPlatform } from './platform/webPlatform'
 import App from './App'
 import './index.css'
 import './i18n' // Initialize i18n
+
+// Install the web client's adapters for the @nowry/core platform port.
+//
+// Import order does not matter here even though ES imports are hoisted above
+// this call: the port resolves each capability at CALL time, not at import
+// time, precisely so a shared module can be imported long before its client
+// has finished wiring itself up. What matters is only that this runs before
+// the first render, which it does.
+configurePlatform(webPlatform)
 
 // Sentry environment.
 //

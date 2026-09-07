@@ -34,7 +34,7 @@ jest.mock('react-i18next', () => ({
 const mockUpdate = jest.fn()
 const mockPublish = jest.fn()
 const mockUnpublish = jest.fn()
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   booksService: { update: (...args) => mockUpdate(...args) },
   publicContentService: {
     publishBook: (...args) => mockPublish(...args),

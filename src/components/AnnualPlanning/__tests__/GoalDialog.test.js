@@ -6,7 +6,7 @@
  * request, and that the goal card's next-action rung 5 still lands the cursor
  * in an empty milestone row now that the form opens collapsed.
  */
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: { createGoal: jest.fn(), updateGoal: jest.fn(), getActivities: jest.fn() }
 }))
 jest.mock('react-i18next', () => ({
@@ -19,7 +19,7 @@ jest.mock('react-i18next', () => ({
 import React from 'react'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import GoalDialog from '../GoalDialog'
-import { annualPlanningService } from '../../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 
 const QUARTERLY_CONTEXT = { type: 'quarterly', quarter: 3 }
 

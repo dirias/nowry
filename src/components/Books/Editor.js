@@ -76,14 +76,14 @@ import { resolveCardSource } from './enclosingHeading'
 const StudyCard = React.lazy(() => import('../Cards/GeneratedCards'))
 const QuestionnaireModal = React.lazy(() => import('../Cards/QuestionnaireModal'))
 const VisualizerModal = React.lazy(() => import('../Cards/VisualizerModal'))
-import { booksService, cardsService, quizzesService, illustrationsService } from '../../api/services'
+import { booksService, cardsService, quizzesService, illustrationsService } from '@nowry/core/api/services'
 import ColumnPlugin from '../../plugin/ColumnPlugin'
 import FloatingToolbarPlugin from '../Editor/plugins/FloatingToolbarPlugin'
 import CommentAnchorPlugin from '../Editor/plugins/CommentAnchorPlugin'
 import LinkPreviewPlugin from '../Editor/plugins/LinkPreviewPlugin'
 import EditorErrorBoundary from '../Editor/EditorErrorBoundary'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
-import { EXTRACT_VOCABULARY_PROMPT } from '../../constants/prompts'
+import { EXTRACT_VOCABULARY_PROMPT } from '@nowry/core/constants/prompts'
 
 // Backend wire-contract limit for POST /card/generate/stream sampleText.
 // Over-limit selections are clipped client-side — never send an over-limit body.

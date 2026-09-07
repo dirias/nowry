@@ -16,7 +16,7 @@ import { useBulkCardActions } from './useBulkCardActions'
 import TagActionsMenu from './TagActionsMenu'
 import TagActionOverlays from './TagActionOverlays'
 import { useTagActions } from './useTagActions'
-import { patchCardInCache } from '../../api/cardCache'
+import { patchCardInCache } from '@nowry/core/api/cardCache'
 
 export const GROUP_ICONS = { tag: LocalOfferRounded, marked: BookmarkRounded, struggling: RepeatRounded }
 

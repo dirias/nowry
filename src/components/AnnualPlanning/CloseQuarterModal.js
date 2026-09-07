@@ -24,7 +24,7 @@ import {
   ArrowForward as ArrowForwardIcon,
   EmojiEvents as EmojiEventsIcon
 } from '@mui/icons-material'
-import { annualPlanningService } from '../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 import { useAuth } from '../../context/AuthContext'
 import QuarterReportDetail from './QuarterReportDetail'
 

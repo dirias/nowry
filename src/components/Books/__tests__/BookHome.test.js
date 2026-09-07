@@ -25,7 +25,7 @@ jest.mock('../BookCreateSheet', () => () => null)
 jest.mock('../BookEditSheet', () => () => null)
 jest.mock('../ImportPreviewModal', () => () => null)
 jest.mock('../../Messages', () => ({ Error: ({ error_msg }) => <div role='alert'>{error_msg}</div> }))
-jest.mock('../../../api/services', () => ({ booksService: {} }))
+jest.mock('@nowry/core/api/services', () => ({ booksService: {} }))
 
 const mockUseBooks = jest.fn()
 jest.mock('../../../hooks/useBooks', () => ({ __esModule: true, default: () => mockUseBooks(), useBooks: () => mockUseBooks() }))

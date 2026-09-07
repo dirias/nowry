@@ -23,7 +23,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useNews, resolveCategories, NEWS_STALE_TIME } from './useNews'
 
 const mockGet = jest.fn()
-jest.mock('../api/client', () => ({
+jest.mock('@nowry/core/api/client', () => ({
   apiClient: {
     get: (...args) => mockGet(...args)
   }

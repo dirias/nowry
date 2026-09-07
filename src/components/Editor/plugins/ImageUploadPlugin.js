@@ -3,7 +3,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { COMMAND_PRIORITY_LOW, PASTE_COMMAND, DROP_COMMAND, $getSelection, $getRoot } from 'lexical'
 import imageCompression from 'browser-image-compression'
 import { $createImageNode } from '../../../nodes/ImageNode'
-import { imageService } from '../../../api/services/image.service'
+import { imageService } from '@nowry/core/api/services/image.service'
 
 const MAX_UPLOAD_MB = 8
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']

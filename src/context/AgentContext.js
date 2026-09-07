@@ -18,8 +18,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from './AuthContext'
-import { agentService } from '../api/services/agent.service'
-import petService from '../api/services/petService'
+import { agentService } from '@nowry/core/api/services/agent.service'
+import petService from '@nowry/core/api/services/petService'
 
 // ---------------------------------------------------------------------------
 // State shape

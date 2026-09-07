@@ -26,7 +26,7 @@
  * meaningful.
  */
 import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '../api/client'
+import { apiClient } from '@nowry/core/api/client'
 import { useAuth } from '../context/AuthContext'
 import { getNewsCategory, DEFAULT_NEWS_CATEGORY } from '../constants/learningTaxonomy'
 

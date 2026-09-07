@@ -81,7 +81,7 @@ jest.mock('./useDeckData', () => ({
 }))
 
 const mockUpdate = jest.fn().mockResolvedValue({})
-jest.mock('../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   decksService: { update: (...args) => mockUpdate(...args) }
 }))
 

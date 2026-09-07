@@ -19,7 +19,7 @@ import {
   Snackbar
 } from '@mui/joy'
 import { GridView as GridViewIcon, ViewList as ListIcon, FilterAltOff as FilterAltOffIcon } from '@mui/icons-material'
-import { annualPlanningService } from '../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 import useGoalCardModel from '../../hooks/useGoalCardModel'
 import GoalCard from './GoalCard'
 import GoalRow from './GoalRow'

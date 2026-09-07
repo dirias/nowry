@@ -25,7 +25,7 @@ jest.mock('react-i18next', () => ({
   })
 }))
 
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {
     updateAnnualPlan: jest.fn(),
     createAnnualPlan: jest.fn()
@@ -74,7 +74,7 @@ jest.mock('../../../hooks/useAnnualPlan', () => ({
 jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user', uid: 'test-user' } }) }))
 jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
-jest.mock('../../../api/services/goalAI.service', () => ({ analyzeGoals: jest.fn() }))
+jest.mock('@nowry/core/api/services/goalAI.service', () => ({ analyzeGoals: jest.fn() }))
 jest.mock('../CloseQuarterModal', () => () => null)
 jest.mock('../GoalAIPanel', () => () => null)
 

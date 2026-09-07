@@ -34,7 +34,7 @@ jest.mock('react-router-dom', () => ({ ...jest.requireActual('react-router-dom')
 
 jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { username: 'ada' } }) }))
 
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   booksService: { create: jest.fn(), update: jest.fn() },
   publicContentService: { publishBook: jest.fn(), unpublishBook: jest.fn() }
 }))

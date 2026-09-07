@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { cardsService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { cardsService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 export const GROUPS_STALE_TIME = 30000 // same as the card list it summarises

@@ -1,14 +1,16 @@
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  updateProfile,
-  GoogleAuthProvider,
-  signInWithPopup
-} from 'firebase/auth'
-import { auth } from '../../config/firebase.config'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth'
+import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
+
+/*
+ * Both clients run the same Firebase JS SDK (ADR-028) and differ only in how
+ * they construct the Auth object, so the operations above are shared and the
+ * instance arrives through the port. `signInWithPopup` is the exception: it has
+ * no mobile equivalent, so Google sign-in is a port capability that the web
+ * adapter implements with a popup and the mobile adapter will implement with
+ * expo-auth-session. Callers keep one function name either way.
+ */
+const firebaseAuth = () => authPort.instance()
 
 /**
  * Auth Service with Firebase Authentication
@@ -25,7 +27,7 @@ export const authService = {
   async register(email, password, username) {
     try {
       // Create user in Firebase
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuth(), email, password)
       const user = userCredential.user
 
       // Update display name
@@ -77,7 +79,7 @@ export const authService = {
   async login(email, password) {
     try {
       // Sign in with Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(firebaseAuth(), email, password)
       const user = userCredential.user
 
       // Get Firebase ID token
@@ -97,8 +99,8 @@ export const authService = {
         }
       )
 
-      // Store token in localStorage for API calls
-      localStorage.setItem('firebase_token', idToken)
+      // Store the token for API calls
+      storage.set('firebase_token', idToken)
 
       return {
         user: {
@@ -122,8 +124,7 @@ export const authService = {
    */
   async loginWithGoogle() {
     try {
-      const provider = new GoogleAuthProvider()
-      const userCredential = await signInWithPopup(auth, provider)
+      const userCredential = await authPort.signInWithGoogle()
       const user = userCredential.user
 
       // Get Firebase ID token
@@ -145,7 +146,7 @@ export const authService = {
         }
       )
 
-      localStorage.setItem('firebase_token', idToken)
+      storage.set('firebase_token', idToken)
 
       return {
         user: {
@@ -168,12 +169,12 @@ export const authService = {
    */
   async logout() {
     try {
-      await signOut(auth)
-      localStorage.removeItem('firebase_token')
+      await signOut(firebaseAuth())
+      storage.remove('firebase_token')
       // No `onboarding_skipped` cleanup: nothing reads that flag any more. Whether
       // onboarding is offered again is the server's answer now (ONB-012, ADR-007),
       // so there is no local suppression state left for logout to reset.
-      window.location.href = '/login'
+      session.onSignedOut()
     } catch (error) {
       console.error('Logout error:', error)
       throw error
@@ -187,8 +188,8 @@ export const authService = {
    */
   async resetPassword(email, langCode = 'en') {
     try {
-      auth.languageCode = langCode
-      await sendPasswordResetEmail(auth, email)
+      firebaseAuth().languageCode = langCode
+      await sendPasswordResetEmail(firebaseAuth(), email)
       return { message: 'Password reset email sent' }
     } catch (error) {
       console.error('Password reset error:', error)
@@ -201,7 +202,7 @@ export const authService = {
    * @returns {Object|null} Current user or null
    */
   getCurrentUser() {
-    return auth.currentUser
+    return authPort.currentUser()
   },
 
   /**
@@ -210,7 +211,7 @@ export const authService = {
    * @returns {Promise<string>} ID token
    */
   async getIdToken(forceRefresh = false) {
-    const user = auth.currentUser
+    const user = authPort.currentUser()
     if (!user) {
       throw new Error('No user logged in')
     }
@@ -218,12 +219,12 @@ export const authService = {
   },
 
   /**
-   * Refresh the Firebase ID token and update localStorage
+   * Refresh the Firebase ID token and update stored state
    * @returns {Promise<string>} New ID token
    */
   async refreshToken() {
     try {
-      const user = auth.currentUser
+      const user = authPort.currentUser()
       if (!user) {
         throw new Error('No user logged in')
       }
@@ -231,8 +232,8 @@ export const authService = {
       // Force refresh the token
       const newToken = await user.getIdToken(true)
 
-      // Update localStorage
-      localStorage.setItem('firebase_token', newToken)
+      // Update stored state
+      storage.set('firebase_token', newToken)
 
       console.log('[AuthService] Token refreshed successfully')
       return newToken
@@ -248,7 +249,7 @@ export const authService = {
    */
   async isTokenExpired() {
     try {
-      const user = auth.currentUser
+      const user = authPort.currentUser()
       if (!user) return true
 
       // Get token result with expiration time

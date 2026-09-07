@@ -5,11 +5,11 @@
  */
 import { renderHook, act } from '@testing-library/react'
 
-jest.mock('../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: { updatePriority: jest.fn() }
 }))
 
-const { annualPlanningService } = require('../api/services')
+const { annualPlanningService } = require('@nowry/core/api/services')
 const usePriorityStatus = require('./usePriorityStatus').default
 
 const priority = { _id: 'p1', title: 'P', is_active: true, is_completed: false, completed_at: null }

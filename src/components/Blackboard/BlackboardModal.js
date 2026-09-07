@@ -22,10 +22,10 @@ import BlackboardToolbar from './BlackboardToolbar'
 import BoardListSelector from './BoardListSelector'
 import ShareBoardModal from './ShareBoardModal'
 import ConvertToCardsModal from './ConvertToCardsModal'
-import { blackboardService } from '../../api/services/blackboard.service'
+import { blackboardService } from '@nowry/core/api/services/blackboard.service'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { useSubscription } from '../../hooks/useSubscription'
-import { tasksService } from '../../api/services'
+import { tasksService } from '@nowry/core/api/services'
 
 const BOARD_ID = 'main' // fallback board id for legacy boards
 const AUTOSAVE_DELAY = 1500

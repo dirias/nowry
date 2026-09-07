@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert, Button, Typography, Stack } from '@mui/joy'
 import WarningIcon from '@mui/icons-material/Warning'
 import { useSubscription } from '../../hooks/useSubscription'
-import { subscriptionService } from '../../api/services'
+import { subscriptionService } from '@nowry/core/api/services'
 
 export default function PaymentFailureBanner() {
   const { t } = useTranslation()

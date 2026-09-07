@@ -15,7 +15,7 @@ const mockGetDailyRoutine = jest.fn()
 const mockUpdateDailyRoutine = jest.fn()
 const mockUpdateRoutineCompletions = jest.fn()
 
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {
     getDailyRoutine: (...args) => mockGetDailyRoutine(...args),
     updateDailyRoutine: (...args) => mockUpdateDailyRoutine(...args),

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { cardsService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { cardsService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 // Matches the old apiCache TTL for this resource (see api/queryClient.js's

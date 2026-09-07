@@ -9,7 +9,7 @@
  */
 import { act, renderHook, waitFor } from '@testing-library/react'
 
-jest.mock('../api/services/user.service', () => ({
+jest.mock('@nowry/core/api/services/user.service', () => ({
   userService: {
     getGeneralPreferences: jest.fn(),
     updateGeneralPreferences: jest.fn()
@@ -17,14 +17,14 @@ jest.mock('../api/services/user.service', () => ({
 }))
 
 // Pulled in transitively by the shared error classifier; never called here.
-jest.mock('../api/services/publicContent.service', () => ({
+jest.mock('@nowry/core/api/services/publicContent.service', () => ({
   publicContentService: { browseOfficialDecks: jest.fn(), forkDeckForOnboarding: jest.fn() }
 }))
-jest.mock('../api/services/cards.service', () => ({
+jest.mock('@nowry/core/api/services/cards.service', () => ({
   cardsService: { generateOnboardingFallback: jest.fn() }
 }))
 
-const { userService } = require('../api/services/user.service')
+const { userService } = require('@nowry/core/api/services/user.service')
 
 const useProgressivePreferences = require('./useProgressivePreferences').default
 const { ACTION_PHASE, PREFERENCE_FIELD, PREFERENCES_PHASE, VALIDATION_ERROR_CODE } = require('./useProgressivePreferences')

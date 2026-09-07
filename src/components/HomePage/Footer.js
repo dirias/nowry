@@ -6,8 +6,8 @@ import { BugReportRounded, Brightness4, Brightness7, LanguageRounded } from '@mu
 import { useColorScheme } from '@mui/joy/styles'
 import { useAuth } from '../../context/AuthContext'
 import BugReportModal from '../Bugs/BugReportModal'
-import { bugsService } from '../../api/services/bugs.service'
-import { userService } from '../../api/services'
+import { bugsService } from '@nowry/core/api/services/bugs.service'
+import { userService } from '@nowry/core/api/services'
 
 const InstagramIcon = () => (
   <SvgIcon sx={{ fontSize: 18 }}>

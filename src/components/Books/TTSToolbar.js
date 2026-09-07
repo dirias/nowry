@@ -25,7 +25,7 @@ import LockIcon from '@mui/icons-material/Lock'
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
 import TitleRoundedIcon from '@mui/icons-material/TitleRounded'
 import { $getRoot } from 'lexical'
-import { ttsService } from '../../api/services/tts.ai.service'
+import { ttsService } from '@nowry/core/api/services/tts.ai.service'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 
 // Extract full book text from Lexical editor state

@@ -7,7 +7,7 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import TodayRoundedIcon from '@mui/icons-material/TodayRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
-import { calendarService } from '../../api/services/calendar.service'
+import { calendarService } from '@nowry/core/api/services/calendar.service'
 import { useAuth } from '../../context/AuthContext'
 import EventFormModal from './EventFormModal'
 

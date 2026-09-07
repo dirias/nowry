@@ -18,8 +18,8 @@
  * documented in `api/queryClient.js`.
  */
 import { useQuery } from '@tanstack/react-query'
-import { annualPlanningService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { annualPlanningService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 // Matches the old apiCache ROUTINE_TTL (formerly api/utils/routineCache.js).

@@ -19,14 +19,14 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k })
 }))
 
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   cardsService: {
     mark: jest.fn(),
     unmark: jest.fn()
   }
 }))
 
-const { cardsService } = require('../../../api/services')
+const { cardsService } = require('@nowry/core/api/services')
 const MarkToggle = require('../MarkToggle').default
 
 const UNMARKED = { _id: 'card-1', title: 'Mitochondrion', marked_at: null }

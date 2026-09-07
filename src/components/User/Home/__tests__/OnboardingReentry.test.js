@@ -32,17 +32,17 @@ jest.mock('react-i18next', () => {
 const mockNavigate = jest.fn()
 jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
 
-jest.mock('../../../../api/services/user.service', () => ({
+jest.mock('@nowry/core/api/services/user.service', () => ({
   userService: {
     getOnboardingState: jest.fn(),
     recordOnboardingPoint: jest.fn(),
     postponeOnboarding: jest.fn()
   }
 }))
-jest.mock('../../../../api/services/publicContent.service', () => ({
+jest.mock('@nowry/core/api/services/publicContent.service', () => ({
   publicContentService: { browseOfficialDecks: jest.fn(), forkDeckForOnboarding: jest.fn() }
 }))
-jest.mock('../../../../api/services/cards.service', () => ({
+jest.mock('@nowry/core/api/services/cards.service', () => ({
   cardsService: { generateOnboardingFallback: jest.fn() }
 }))
 
@@ -50,7 +50,7 @@ import React from 'react'
 import { act, render, screen, fireEvent } from '@testing-library/react'
 
 import OnboardingReentry from '../OnboardingReentry'
-import { userService } from '../../../../api/services/user.service'
+import { userService } from '@nowry/core/api/services/user.service'
 import en from '../../../../locales/en/translation.json'
 
 const copy = en.home.onboardingReentry

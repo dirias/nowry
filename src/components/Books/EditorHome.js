@@ -25,7 +25,7 @@ import {
 import CommentMarginRail from './Comments/CommentMarginRail'
 import CommentMobileDrawer from './Comments/CommentMobileDrawer'
 import { useComments } from '../../hooks/useComments'
-import { booksService, publicContentService, cardsService, quizService } from '../../api/services'
+import { booksService, publicContentService, cardsService, quizService } from '@nowry/core/api/services'
 import {
   Box,
   Input,

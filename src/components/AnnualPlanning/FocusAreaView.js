@@ -43,7 +43,7 @@ import {
 } from '@mui/icons-material'
 import { alpha } from '@mui/system'
 
-import { annualPlanningService } from '../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 import GoalDialog from './GoalDialog'

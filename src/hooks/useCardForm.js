@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { cardsService } from '../api/services'
+import { cardsService } from '@nowry/core/api/services'
 import { extractDeckId, scrollIntoViewSafely } from '../components/Common/Form/formUtils'
 import { cardToFormState, contentPredicatesFor, emptyCardValues, specFor } from '../components/Cards/card/cardTypes'
 import useFormCore from './useFormCore'

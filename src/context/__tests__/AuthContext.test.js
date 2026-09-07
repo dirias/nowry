@@ -17,13 +17,13 @@ jest.mock('firebase/auth', () => ({
   }
 }))
 jest.mock('../../config/firebase.config', () => ({ auth: { currentUser: null } }))
-jest.mock('../../api/client', () => ({ apiClient: { get: jest.fn() } }))
-jest.mock('../../api/services', () => ({ authService: {} }))
-jest.mock('../../api/queryClient', () => ({ queryClient: { clear: jest.fn() } }))
+jest.mock('@nowry/core/api/client', () => ({ apiClient: { get: jest.fn() } }))
+jest.mock('@nowry/core/api/services', () => ({ authService: {} }))
+jest.mock('@nowry/core/api/queryClient', () => ({ queryClient: { clear: jest.fn() } }))
 jest.mock('../../i18n', () => ({ changeLanguage: jest.fn() }))
 
 import { AuthProvider, useAuth } from '../AuthContext'
-import { apiClient } from '../../api/client'
+import { apiClient } from '@nowry/core/api/client'
 
 const renderWithConsumer = () => {
   let latest = null

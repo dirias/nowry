@@ -75,7 +75,7 @@ jest.mock('../../Cards/GeneratedCards', () => ({
 
 // The ONLY mock below the components. Everything between this and the DOM is
 // production code.
-jest.mock('../../../api/client', () => ({
+jest.mock('@nowry/core/api/client', () => ({
   __esModule: true,
   apiClient: {
     get: jest.fn(),
@@ -91,7 +91,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import OnboardingRoute, { ONBOARDING_TEASER_SEEN_KEY } from '../OnboardingRoute'
-import { apiClient } from '../../../api/client'
+import { apiClient } from '@nowry/core/api/client'
 import en from '../../../locales/en/translation.json'
 
 const t = (path) => path.split('.').reduce((node, segment) => node[segment], en)

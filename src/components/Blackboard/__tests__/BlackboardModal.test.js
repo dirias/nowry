@@ -24,7 +24,7 @@ jest.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: () => {} }
 }))
 
-jest.mock('../../../api/services/blackboard.service', () => ({
+jest.mock('@nowry/core/api/services/blackboard.service', () => ({
   blackboardService: {
     getBoard: jest.fn(),
     saveBoard: jest.fn(),
@@ -70,7 +70,7 @@ jest.mock('@xyflow/react', () => {
   }
 })
 
-const { blackboardService } = require('../../../api/services/blackboard.service')
+const { blackboardService } = require('@nowry/core/api/services/blackboard.service')
 const { BlackboardCanvas } = require('../BlackboardModal')
 
 const EMPTY_BOARD = { nodes: [], edges: [], viewport: { x: 0, y: 0, zoom: 1 } }

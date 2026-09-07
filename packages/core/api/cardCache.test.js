@@ -18,6 +18,14 @@ const card = (id, extra = {}) => ({ _id: id, title: id, marked_at: null, ...extr
 
 beforeEach(() => queryClient.clear())
 
+/*
+ * Also clear at the end, not only between tests. `setQueryData` builds a Query,
+ * and every Query schedules a garbage-collection timer; the last test's entry
+ * would otherwise keep that timer alive and Jest would never exit. Harmless
+ * under CRA's runner, fatal under a plain `jest` invocation in CI.
+ */
+afterAll(() => queryClient.clear())
+
 describe('patchCardInCache', () => {
   it('merges the change into the matching card', () => {
     const key = ['cards', 'user-1', { tags: [], search: '', markedOnly: false }]

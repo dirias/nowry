@@ -11,8 +11,8 @@ import { useDeckData } from './useDeckData'
 
 const mockGet = jest.fn()
 const mockInvalidate = jest.fn()
-jest.mock('../api/client', () => ({ apiClient: { get: (...args) => mockGet(...args) } }))
-jest.mock('../api/queryClient', () => ({ queryClient: { invalidateQueries: (...args) => mockInvalidate(...args) } }))
+jest.mock('@nowry/core/api/client', () => ({ apiClient: { get: (...args) => mockGet(...args) } }))
+jest.mock('@nowry/core/api/queryClient', () => ({ queryClient: { invalidateQueries: (...args) => mockInvalidate(...args) } }))
 jest.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'user-1' } }) }))
 
 const makeWrapper = () => {

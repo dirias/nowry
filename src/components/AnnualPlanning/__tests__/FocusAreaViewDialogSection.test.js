@@ -13,7 +13,7 @@
  * They render the real component and mock only its leaves.
  */
 
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {
     getQuarterReports: jest.fn(() => Promise.resolve([]))
   }
@@ -65,7 +65,7 @@ import React from 'react'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import FocusAreaView from '../FocusAreaView'
 import { useAnnualPlan } from '../../../hooks/useAnnualPlan'
-import { annualPlanningService } from '../../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 
 // 2026-07-20 is in Q3, so a quarter-3 goal renders under the default filter.
 const FIXED_NOW = new Date('2026-07-20T12:00:00')

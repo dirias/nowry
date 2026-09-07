@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { decksService, cardsService } from '../api/services'
+import { decksService, cardsService } from '@nowry/core/api/services'
 import { useDeckData } from './useDeckData'
 
 /**

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { commentsService } from '../api/services'
+import { commentsService } from '@nowry/core/api/services'
 
 // Mirrors useAutoSave's SAVE_STATUS pattern (src/hooks/useAutoSave.js).
 // This status machine only tracks the LIST fetch (GET) — create/update/remove

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { userService } from '../api/services/user.service'
+import { userService } from '@nowry/core/api/services/user.service'
 import { derivePrimaryTopic } from '../constants/learningTaxonomy'
 import { ACTION_PHASE, classifyError } from './useOnboardingJourney'
 

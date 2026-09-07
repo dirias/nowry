@@ -9,7 +9,7 @@
  */
 import { act, renderHook, waitFor } from '@testing-library/react'
 
-jest.mock('../api/services/user.service', () => ({
+jest.mock('@nowry/core/api/services/user.service', () => ({
   userService: {
     getOnboardingState: jest.fn(),
     recordOnboardingPoint: jest.fn(),
@@ -17,20 +17,20 @@ jest.mock('../api/services/user.service', () => ({
   }
 }))
 
-jest.mock('../api/services/publicContent.service', () => ({
+jest.mock('@nowry/core/api/services/publicContent.service', () => ({
   publicContentService: {
     browseOfficialDecks: jest.fn(),
     forkDeckForOnboarding: jest.fn()
   }
 }))
 
-jest.mock('../api/services/cards.service', () => ({
+jest.mock('@nowry/core/api/services/cards.service', () => ({
   cardsService: { generateOnboardingFallback: jest.fn() }
 }))
 
-const { userService } = require('../api/services/user.service')
-const { publicContentService } = require('../api/services/publicContent.service')
-const { cardsService } = require('../api/services/cards.service')
+const { userService } = require('@nowry/core/api/services/user.service')
+const { publicContentService } = require('@nowry/core/api/services/publicContent.service')
+const { cardsService } = require('@nowry/core/api/services/cards.service')
 
 const useOnboardingJourney = require('./useOnboardingJourney').default
 const { ACTION_PHASE, BROWSE_PHASE, JOURNEY_PHASE, classifyError } = require('./useOnboardingJourney')

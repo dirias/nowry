@@ -35,7 +35,7 @@ import QuizFeedbackBubble from './QuizFeedbackBubble'
 import DeckSelector from './DeckSelector'
 import QuizSummaryCard from './QuizSummaryCard'
 import PetMarkdown from './PetMarkdown'
-import { quizService } from '../../api/services/quizService'
+import { quizService } from '@nowry/core/api/services/quizService'
 
 // ---------------------------------------------------------------------------
 // Stage configuration — drives orb size, color, aura rings, and animation speed

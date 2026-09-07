@@ -15,7 +15,7 @@ import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded'
 import StyleRounded from '@mui/icons-material/StyleRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
-import { studySessionsService } from '../../api/services/studySessions.service'
+import { studySessionsService } from '@nowry/core/api/services/studySessions.service'
 import { listRow, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 
 const PREVIEW_COUNT = 5

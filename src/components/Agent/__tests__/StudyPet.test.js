@@ -24,7 +24,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) })
 }))
 
-jest.mock('../../../api/services/quizService', () => ({
+jest.mock('@nowry/core/api/services/quizService', () => ({
   quizService: {
     getQuizDecks: jest.fn().mockResolvedValue({ data: [] }),
     startQuizSession: jest.fn().mockResolvedValue({ data: {} }),

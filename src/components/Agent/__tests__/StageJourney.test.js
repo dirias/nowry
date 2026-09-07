@@ -15,7 +15,7 @@ jest.mock('react-i18next', () => ({
   })
 }))
 
-jest.mock('../../../api/services/agent.service', () => ({
+jest.mock('@nowry/core/api/services/agent.service', () => ({
   agentService: { getJourney: jest.fn() }
 }))
 
@@ -42,7 +42,7 @@ jest.mock('../StudyPet', () => ({
   )
 }))
 
-const { agentService } = require('../../../api/services/agent.service')
+const { agentService } = require('@nowry/core/api/services/agent.service')
 const StageJourney = require('../StageJourney').default
 
 const stage = (n, over = {}) => ({

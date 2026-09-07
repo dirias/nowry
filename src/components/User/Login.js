@@ -14,7 +14,7 @@ import {
 } from '@mui/icons-material'
 
 import { useAuth } from '../../context/AuthContext'
-import { authService } from '../../api/services/auth.service'
+import { authService } from '@nowry/core/api/services/auth.service'
 
 const Login = () => {
   const [email, setEmail] = useState('')

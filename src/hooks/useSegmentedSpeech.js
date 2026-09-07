@@ -13,9 +13,9 @@
  * utterance queuing.
  */
 
-import { ttsService as ttsAiService } from '../api/services/tts.ai.service'
+import { ttsService as ttsAiService } from '@nowry/core/api/services/tts.ai.service'
 import ttsService from '../utils/tts.service'
-import { queryClient } from '../api/queryClient'
+import { queryClient } from '@nowry/core/api/queryClient'
 
 const SEGMENTS_TTL_MS = 24 * 60 * 60 * 1000 // ~24h — segmentation is deterministic per text
 

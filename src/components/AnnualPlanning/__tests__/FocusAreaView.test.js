@@ -7,13 +7,13 @@
  * These tests import the module's named exports directly and never render the
  * component — no RTL render(), no DOM assertions. The jest.mock() calls below
  * are still required because importing FocusAreaView executes its module-level
- * imports: the services barrel ('../../api/services') eagerly re-exports every
+ * imports: the services barrel ('@nowry/core/api/services') eagerly re-exports every
  * service module and pulls in the real axios client (Jest ESM parse failure —
  * same issue documented in AllPrioritiesPage.test.js / PriorityList.test.js),
  * and AuthContext pulls in firebase + the axios apiClient.
  */
 
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {}
 }))
 jest.mock('../../../hooks/useAnnualPlan', () => ({

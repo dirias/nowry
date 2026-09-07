@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, Checkbox, Chip, Skeleton, Stack, Typography } from '@mui/joy'
 import LockIcon from '@mui/icons-material/Lock'
 
-import { booksService } from '../../api/services'
+import { booksService } from '@nowry/core/api/services'
 import FormSheet from '../Common/Form/FormSheet'
 import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import { focusRing, listRow, readout } from '../Common/Form/formStyles'

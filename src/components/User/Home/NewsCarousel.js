@@ -17,7 +17,7 @@ import {
 } from '@mui/joy'
 import { useKeenSlider } from 'keen-slider/react'
 import { ArrowBackIosNew, ArrowForwardIos, TrendingUp, OpenInNew, Star, StarBorder, Refresh, ErrorOutline } from '@mui/icons-material'
-import { userService } from '../../../api/services'
+import { userService } from '@nowry/core/api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../context/AuthContext'

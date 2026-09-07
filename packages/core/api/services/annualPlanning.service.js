@@ -2,7 +2,7 @@ import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
 import { queryClient } from '../queryClient'
 import { userService } from './user.service'
-import { auth } from '../../config/firebase.config'
+import { auth } from '../../platform'
 
 // Matches useAnnualPlan's old apiCache-backed PROFILE_TTL (CACHE-005), now used as
 // the React Query staleTime for the 'profile' key (CACHE-007).
@@ -149,20 +149,20 @@ export const annualPlanningService = {
    * useAnnualPlan.js's effect, not a hook itself — same pattern as useSegmentedSpeech's
    * migration to `queryClient.fetchQuery` (CACHE-005).
    *
-   * Query key is `['profile', firebaseUid]`, using `auth.currentUser?.uid` rather than
+   * Query key is `['profile', firebaseUid]`, using `auth.currentUser()?.uid` rather than
    * the backend `user.id` the other 7 migrated hooks key off of: this function has no
    * reliable access to the backend user object, since most `useAnnualPlan()` call sites
    * (FocusBar.js, WeeklyStatsCard.js, DailyRoutinePlanner.js, etc.) don't pass
-   * `preloadedUser`. `auth.currentUser` is a synchronous Firebase SDK global available
+   * `preloadedUser`. `auth.currentUser()` is a synchronous read through the platform port, available
    * outside React, unlike AuthContext's `user`. `useUserProfile.js` (PomodoroContext.js)
-   * and FocusBar.js's invalidation both key off this same `auth.currentUser?.uid` so all
+   * and FocusBar.js's invalidation both key off this same `auth.currentUser()?.uid` so all
    * three stay in sync under one query key.
    *
    * @param {object|null} [preloadedUser] - Optional user object from AuthContext. When
    *   provided, seeds the cache so the real /users/profile request is skipped.
    */
   async getCachedProfile(preloadedUser = null) {
-    const userId = auth.currentUser?.uid ?? null
+    const userId = auth.currentUser()?.uid ?? null
     if (preloadedUser) {
       queryClient.setQueryData(['profile', userId], preloadedUser)
     }

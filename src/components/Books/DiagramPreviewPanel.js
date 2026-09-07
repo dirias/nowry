@@ -4,7 +4,7 @@ import { Modal, ModalDialog, ModalClose, Typography, Button, Box, Select, Option
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import { illustrationsService } from '../../api/services/illustrations.service'
+import { illustrationsService } from '@nowry/core/api/services/illustrations.service'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import MermaidRenderer from './MermaidRenderer'
 

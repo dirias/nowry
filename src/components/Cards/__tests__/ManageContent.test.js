@@ -28,9 +28,9 @@ jest.mock('../../../hooks/useDeckData', () => ({ useDeckData: (...args) => mockU
 jest.mock('../../../hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
 jest.mock('../../../context/SubscriptionContext', () => ({ useSubscriptionContext: () => ({ openUpgradeModal: jest.fn() }) }))
 const mockBulk = jest.fn()
-jest.mock('../../../api/services', () => ({ cardsService: { bulk: (...args) => mockBulk(...args) } }))
+jest.mock('@nowry/core/api/services', () => ({ cardsService: { bulk: (...args) => mockBulk(...args) } }))
 const mockInvalidate = jest.fn()
-jest.mock('../../../api/cardCache', () => ({
+jest.mock('@nowry/core/api/cardCache', () => ({
   patchCardInCache: jest.fn(),
   invalidateCardCaches: (...args) => mockInvalidate(...args)
 }))

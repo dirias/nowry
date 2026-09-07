@@ -14,7 +14,7 @@ import Option from '@mui/joy/Option'
 import Button from '@mui/joy/Button'
 import Alert from '@mui/joy/Alert'
 import { TEMPLATES, TEMPLATE_OPTIONS } from './templates'
-import sheetsService from '../../api/services/sheets.service'
+import sheetsService from '@nowry/core/api/services/sheets.service'
 
 const CreateSheetModal = ({ open, onClose }) => {
   const { t } = useTranslation()

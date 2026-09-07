@@ -14,7 +14,7 @@ import {
 } from '@mui/icons-material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { annualPlanningService } from '../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 import { touchTarget } from '../Common/Form/formStyles'
 
 /**

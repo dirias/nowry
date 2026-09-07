@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cardsService } from '../../api/services'
-import { invalidateCardCaches } from '../../api/cardCache'
+import { cardsService } from '@nowry/core/api/services'
+import { invalidateCardCaches } from '@nowry/core/api/cardCache'
 
 /**
  * The one place a bulk verb runs (PRD D16, FR-010): `run(action, ids, extra)`

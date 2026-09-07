@@ -2,6 +2,10 @@
   "name": "nowry",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*",
+    "mobile"
+  ],
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
@@ -68,8 +72,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint  --fix \"src/**/*.{js,jsx,ts,tsx}\"",
-    "format": "prettier \"src/**/*.{js,jsx,ts,tsx,json,css,md}\" --write --config ./.prettierrc"
+    "lint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\" \"packages/core/**/*.js\"",
+    "format": "prettier \"src/**/*.{js,jsx,ts,tsx,json,css,md}\" \"packages/core/**/*.{js,json,md}\" --write --config ./.prettierrc",
+    "test:core": "jest --config packages/core/jest.config.js"
   },
   "eslintConfig": {
     "extends": [

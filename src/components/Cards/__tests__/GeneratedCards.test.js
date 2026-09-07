@@ -25,7 +25,7 @@ jest.mock('react-i18next', () => ({
 const mockCreate = jest.fn()
 const mockGetTags = jest.fn()
 const mockDeckCreate = jest.fn()
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   cardsService: {
     create: (...args) => mockCreate(...args),
     getTags: (...args) => mockGetTags(...args)

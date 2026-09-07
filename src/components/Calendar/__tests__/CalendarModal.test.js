@@ -33,7 +33,7 @@ jest.mock('../../../context/AuthContext', () => ({
 jest.mock('../EventFormModal', () => () => null)
 
 const mockGetAllEvents = jest.fn()
-jest.mock('../../../api/services/calendar.service', () => ({
+jest.mock('@nowry/core/api/services/calendar.service', () => ({
   calendarService: {
     getAllEvents: (...args) => mockGetAllEvents(...args)
   }

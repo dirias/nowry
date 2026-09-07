@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { decksService } from '../api/services'
+import { decksService } from '@nowry/core/api/services'
 import { useDeckData } from './useDeckData'
 
 // ─── Normalization helpers ────────────────────────────────────────────────────

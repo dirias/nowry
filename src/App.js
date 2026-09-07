@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { queryClient } from './api/queryClient'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { DynamicThemeProvider } from './theme/DynamicThemeProvider'
 import { Box, CircularProgress } from '@mui/joy'
 

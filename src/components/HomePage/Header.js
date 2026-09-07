@@ -52,7 +52,7 @@ import { useColorScheme } from '@mui/joy/styles'
 import Logo from '../../images/logo.png'
 import { useTranslation } from 'react-i18next'
 import BugReportModal from '../Bugs/BugReportModal'
-import { bugsService } from '../../api/services/bugs.service'
+import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { useAuth } from '../../context/AuthContext'
 
 const HeaderUtils = ({ variant = 'header' }) => {

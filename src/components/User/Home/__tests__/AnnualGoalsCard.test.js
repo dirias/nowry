@@ -20,7 +20,7 @@ const mockNavigate = jest.fn()
 jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
 
 const mockGetGoals = jest.fn()
-jest.mock('../../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: { getGoals: (...args) => mockGetGoals(...args) }
 }))
 

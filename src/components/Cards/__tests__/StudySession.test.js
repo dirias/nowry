@@ -92,7 +92,7 @@ jest.mock('../../../context/AgentContext', () => ({
   })
 }))
 
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   cardsService: {
     getDailyReviewCards: jest.fn(),
     getDueCards: jest.fn(),
@@ -105,7 +105,7 @@ jest.mock('../../../api/services', () => ({
   decksService: {}
 }))
 
-jest.mock('../../../api/services/studySessions.service', () => ({
+jest.mock('@nowry/core/api/services/studySessions.service', () => ({
   studySessionsService: {
     log: jest.fn().mockResolvedValue({}),
     list: jest.fn().mockResolvedValue({ sessions: [], total: 0 })
@@ -125,7 +125,7 @@ jest.mock('../../../hooks/useCardData', () => ({
 // pulls in src/i18n.js, which errors outside the app's real entry point.
 jest.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-user' } }) }))
 
-jest.mock('../../../api/queryClient', () => ({
+jest.mock('@nowry/core/api/queryClient', () => ({
   queryClient: { invalidateQueries: jest.fn() }
 }))
 
@@ -158,8 +158,8 @@ jest.mock('dompurify', () => ({
   default: { sanitize: (html) => html }
 }))
 
-const { cardsService } = require('../../../api/services')
-const { studySessionsService } = require('../../../api/services/studySessions.service')
+const { cardsService } = require('@nowry/core/api/services')
+const { studySessionsService } = require('@nowry/core/api/services/studySessions.service')
 
 // require-after-mock: the component under test is imported only after every
 // jest.mock() call above has registered, per the GoalCardGrid.test.js idiom.

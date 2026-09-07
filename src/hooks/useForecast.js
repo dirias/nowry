@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { cardsService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { cardsService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 export const FORECAST_STALE_TIME = 60000 // same window as statistics — the two are read together

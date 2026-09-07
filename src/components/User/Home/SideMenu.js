@@ -31,10 +31,10 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
 import SortableTask from '../../Task/SortableTask'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { tasksService, annualPlanningService } from '../../../api/services'
+import { tasksService, annualPlanningService } from '@nowry/core/api/services'
 import { useTaskData } from '../../../hooks/useTaskData'
 import { useDailyRoutine } from '../../../hooks/useDailyRoutine'
-import { todayKey } from '../../../api/utils/routineCache'
+import { todayKey } from '@nowry/core/api/utils/routineCache'
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 const LISTS_KEY = 'nowry_task_lists'

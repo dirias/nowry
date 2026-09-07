@@ -4,7 +4,7 @@ import { BugReportRounded } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import BugReportModal from '../Bugs/BugReportModal'
-import { bugsService } from '../../api/services/bugs.service'
+import { bugsService } from '@nowry/core/api/services/bugs.service'
 
 /**
  * Floating dev-only bug report button — fixed bottom-left.

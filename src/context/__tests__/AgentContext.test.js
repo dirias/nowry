@@ -23,7 +23,7 @@ jest.mock('../AuthContext', () => ({
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k, i18n: { language: 'en' } })
 }))
-jest.mock('../../api/services/agent.service', () => ({
+jest.mock('@nowry/core/api/services/agent.service', () => ({
   agentService: {
     getState: jest.fn(),
     getNudge: jest.fn(),
@@ -34,7 +34,7 @@ jest.mock('../../api/services/agent.service', () => ({
 }))
 
 import { AgentProvider, usePet } from '../AgentContext'
-import { agentService } from '../../api/services/agent.service'
+import { agentService } from '@nowry/core/api/services/agent.service'
 
 beforeEach(() => {
   mockAuthValue = { user: null, isAuthenticated: false }

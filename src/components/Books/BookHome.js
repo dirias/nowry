@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { Box, Button, Container, Skeleton, Snackbar, Stack, Typography } from '@mui/joy'
 
-import { booksService } from '../../api/services'
+import { booksService } from '@nowry/core/api/services'
 import { Error as ErrorWindow } from '../Messages'
 import BookEditSheet from './BookEditSheet'
 import BookCreateSheet from './BookCreateSheet'

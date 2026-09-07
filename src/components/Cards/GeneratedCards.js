@@ -24,7 +24,7 @@ import {
 } from '@mui/joy'
 import { RefreshCw, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { cardsService } from '../../api/services'
+import { cardsService } from '@nowry/core/api/services'
 import { focusRing } from '../Common/Form/formStyles'
 import useCardCuration from '../../hooks/useCardCuration'
 import { useSaveToDeck } from '../../hooks/useSaveToDeck'

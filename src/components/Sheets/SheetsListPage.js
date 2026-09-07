@@ -29,7 +29,7 @@ import ViewListRoundedIcon from '@mui/icons-material/ViewListRounded'
 import TableChartRoundedIcon from '@mui/icons-material/TableChartRounded'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
-import sheetsService from '../../api/services/sheets.service'
+import sheetsService from '@nowry/core/api/services/sheets.service'
 import CreateSheetModal from './CreateSheetModal'
 
 export default function SheetsListPage() {

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { booksService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { booksService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 // Matches the old apiCache TTL for this resource (see api/queryClient.js's

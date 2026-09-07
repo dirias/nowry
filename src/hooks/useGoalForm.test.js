@@ -10,13 +10,13 @@
  * already wrote. These tests pin that rule in both directions, plus the
  * empty-title Save that used to be a silent `return`.
  */
-jest.mock('../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: { createGoal: jest.fn(), updateGoal: jest.fn() }
 }))
 
 import { renderHook, act } from '@testing-library/react'
 import useGoalForm, { describeApiError, emptyToNull } from './useGoalForm'
-import { annualPlanningService } from '../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 
 const mount = (props) => renderHook((p) => useGoalForm(p), { initialProps: { open: true, focusAreaId: 'area-1', ...props } })
 

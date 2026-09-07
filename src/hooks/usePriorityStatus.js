@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { annualPlanningService } from '../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 
 /**
  * usePriorityStatus — the two status toggles a priority row offers (ADR-015).

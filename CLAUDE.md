@@ -2,14 +2,38 @@
 
 > **Parent context:** See `/Nowry/CLAUDE.md` for full project overview and architecture.
 
-## This Package
+## This Repository
 
-React 18 frontend using Joy UI component library.
+Nowry's **frontend clients** and the logic they share. It is an npm workspace root
+(ADR-032), not a single app.
+
+| Path | What it is |
+|---|---|
+| `src/`, `public/` | the web client — React 18 + Joy UI, Create React App |
+| `packages/core/` | `@nowry/core` — platform-free logic shared by both clients |
+| `mobile/` | the Expo + React Native client (empty until MOB-005) |
 
 ```bash
-npm start          # dev server — http://localhost:3000
-npm run build      # production build
+npm install        # at the repository root — links every workspace
+npm start          # web dev server — http://localhost:3000
+npm run build      # web production build
+npx jest --config packages/core/jest.config.js   # the shared package's tests
 ```
+
+### Before touching `packages/core`
+
+Read `packages/core/README.md`. Two rules govern every file there and both are
+load-bearing:
+
+1. **No JSX** (ADR-031). `react-scripts` transpiles JSX only under `src/`, and webpack
+   resolves the workspace symlink to a path outside it. Write providers with
+   `React.createElement`.
+2. **No browser globals** (ADR-026). No `window`, `document`, `localStorage`,
+   `sessionStorage`, `navigator`, `react-dom` or `@mui/*`. The environment arrives
+   through the platform port.
+
+A module there never returns a React component. Return an icon *key* and let each
+client map it.
 
 ## Stack
 

@@ -20,7 +20,7 @@ import {
 } from '@mui/joy'
 import { Style, Quiz as QuizIcon, AccountTree, Public, CallSplit } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { decksService } from '../../api/services'
+import { decksService } from '@nowry/core/api/services'
 
 export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublished }) {
   const { t } = useTranslation()

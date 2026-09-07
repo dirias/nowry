@@ -12,7 +12,7 @@ jest.mock('react-i18next', () => ({
 
 const mockUpdateRoutineCompletions = jest.fn()
 
-jest.mock('../../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {
     updateRoutineCompletions: (...args) => mockUpdateRoutineCompletions(...args)
   },

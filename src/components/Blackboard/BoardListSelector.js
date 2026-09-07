@@ -4,7 +4,7 @@ import { Box, Button, Chip, Divider, Input, Modal, ModalClose, ModalDialog, Skel
 import LockRoundedIcon from '@mui/icons-material/LockRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded'
-import { blackboardService } from '../../api/services/blackboard.service'
+import { blackboardService } from '@nowry/core/api/services/blackboard.service'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 

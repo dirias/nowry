@@ -9,7 +9,7 @@ import { $createCalloutNode } from '../../../nodes/CalloutNode'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import TextMenu from '../../Menu/TextMenu'
-import { ttsService } from '../../../api/services/tts.ai.service'
+import { ttsService } from '@nowry/core/api/services/tts.ai.service'
 
 // A stray drag across a single space should not pop a full toolbar.
 const MIN_SELECTION_CHARS = 2

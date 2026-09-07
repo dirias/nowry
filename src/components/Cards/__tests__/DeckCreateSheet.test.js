@@ -30,7 +30,7 @@ jest.mock('react-i18next', () => ({
 }))
 
 const mockCreate = jest.fn()
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   decksService: { create: (...args) => mockCreate(...args) }
 }))
 

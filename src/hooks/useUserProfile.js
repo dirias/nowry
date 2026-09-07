@@ -13,7 +13,7 @@
  * sync under one query key.
  */
 import { useQuery } from '@tanstack/react-query'
-import { userService } from '../api/services'
+import { userService } from '@nowry/core/api/services'
 import { auth } from '../config/firebase.config'
 import { useAuth } from '../context/AuthContext'
 

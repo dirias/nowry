@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { tasksService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { tasksService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 // Matches the old apiCache TTL for this resource (see api/queryClient.js's
@@ -19,7 +19,7 @@ const TASKS_STALE_TIME = 30000 // 30 seconds
  * version, whose invalidation was silent to already-mounted subscribers.
  *
  * Invalidate after a mutation (create/update/delete/toggle a task):
- *   import { queryClient } from '../api/queryClient'
+ *   import { queryClient } from '@nowry/core/api/queryClient'
  *   queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
  */
 export function useTaskData() {

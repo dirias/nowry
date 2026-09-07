@@ -17,10 +17,10 @@ let mockGoals = []
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k })
 }))
-jest.mock('../../../api/services/tasks.service', () => ({
+jest.mock('@nowry/core/api/services/tasks.service', () => ({
   tasksService: { create: jest.fn(), update: jest.fn() }
 }))
-jest.mock('../../../api/services/annualPlanning.service', () => ({
+jest.mock('@nowry/core/api/services/annualPlanning.service', () => ({
   annualPlanningService: { createMilestone: jest.fn() }
 }))
 jest.mock('../../../hooks/useAnnualPlan', () => ({

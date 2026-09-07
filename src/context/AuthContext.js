@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../config/firebase.config'
-import { apiClient } from '../api/client'
-import { authService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { apiClient } from '@nowry/core/api/client'
+import { authService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import i18n from '../i18n'
 
 const AuthContext = createContext(null)

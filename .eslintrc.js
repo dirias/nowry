@@ -75,6 +75,69 @@ module.exports = {
   overrides: [
     {
       /*
+       * The @nowry/core boundary (ADR-026, ADR-031).
+       *
+       * `packages/core` is consumed as SOURCE by two clients with different
+       * toolchains, and two constraints follow from that. Neither is a style
+       * preference; each one breaks a build when violated, in a place far from
+       * the file that caused it. So they are enforced here rather than
+       * remembered.
+       *
+       *   No JSX — `react-scripts` runs its JSX-capable babel-loader only over
+       *   `src/`, and webpack resolves the workspace symlink to a real path
+       *   outside it. JSX in this package fails the WEB build with a confusing
+       *   "experimental syntax" error pointing at a file the web app does not
+       *   own. Providers use React.createElement instead.
+       *
+       *   No browser globals and no view layer — the mobile client has no
+       *   `window`, and importing Joy or react-dom would drag the web view
+       *   layer into a package React Native has to load. Everything the
+       *   environment provides arrives through the platform port.
+       *
+       * A module here also never returns a React component: data that needs an
+       * icon returns an icon KEY, and each client maps it (MOB-003B, MOB-014).
+       * That one is a convention; an AST rule cannot see it.
+       */
+      files: ['packages/core/**/*.js'],
+      // `browser` stays off here on purpose: the restricted-globals rule below
+      // is the explicit guard, and leaving the browser env on would also make
+      // `fetch`, `URL` and friends look legitimate in a package that must load
+      // under React Native. `es2020` is for `globalThis`, which both runtimes
+      // have and which the boundary tests use to assert the DOM is absent.
+      env: { browser: false, es2020: true },
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          { name: 'window', message: 'No browser globals in @nowry/core. Use the platform port.' },
+          { name: 'document', message: 'No browser globals in @nowry/core. Use the platform port.' },
+          { name: 'localStorage', message: 'No browser globals in @nowry/core. Use `storage` from the platform port (ADR-027).' },
+          { name: 'sessionStorage', message: 'No browser globals in @nowry/core. Use `storage` from the platform port (ADR-027).' },
+          { name: 'navigator', message: 'No browser globals in @nowry/core. Use the platform port.' },
+          { name: 'alert', message: 'No browser globals in @nowry/core. Use `notify` from the platform port.' }
+        ],
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              { group: ['@mui/*'], message: '@nowry/core carries no view layer. Joy UI belongs to the web client.' },
+              { group: ['react-dom', 'react-dom/*'], message: '@nowry/core must load under React Native, which has no react-dom.' },
+              // Any depth of escape into a client's source tree, not just two
+              // levels: `../../../src/config/firebase.config` is exactly the
+              // import MOB-003 had to remove, and the narrower pattern missed it.
+              { group: ['**/src/**', '../../src/**', '../../../src/**'], message: '@nowry/core must not reach into a client. Move the shared part here instead (MOB-003B).' },
+              { group: ['i18next-browser-languagedetector'], message: 'Language detection is per client. Core holds the locales only.' }
+            ]
+          }
+        ],
+        'no-restricted-syntax': [
+          'error',
+          { selector: 'JSXElement', message: 'No JSX in @nowry/core — react-scripts cannot transpile it here. Use React.createElement (ADR-031).' },
+          { selector: 'JSXFragment', message: 'No JSX in @nowry/core — react-scripts cannot transpile it here. Use React.createElement (ADR-031).' }
+        ]
+      }
+    },
+    {
+      /*
        * The three rules above match ANY property named fontSize / fontWeight /
        * borderRadius, not only the ones inside an `sx` prop — an AST selector
        * cannot tell the two apart. That is fine almost everywhere, because

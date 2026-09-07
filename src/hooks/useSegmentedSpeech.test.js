@@ -13,10 +13,10 @@
 
 import { renderHook } from '@testing-library/react'
 import { useSegmentedSpeech } from './useSegmentedSpeech'
-import { queryClient } from '../api/queryClient'
+import { queryClient } from '@nowry/core/api/queryClient'
 
 const mockSegmentText = jest.fn()
-jest.mock('../api/services/tts.ai.service', () => ({
+jest.mock('@nowry/core/api/services/tts.ai.service', () => ({
   ttsService: { segmentText: (...args) => mockSegmentText(...args) }
 }))
 

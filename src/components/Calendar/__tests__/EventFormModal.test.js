@@ -11,10 +11,10 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k })
 }))
-jest.mock('../../../api/services/tasks.service', () => ({
+jest.mock('@nowry/core/api/services/tasks.service', () => ({
   tasksService: { create: jest.fn(), update: jest.fn() }
 }))
-jest.mock('../../../api/services/annualPlanning.service', () => ({
+jest.mock('@nowry/core/api/services/annualPlanning.service', () => ({
   annualPlanningService: {
     createPriority: jest.fn(),
     updatePriority: jest.fn(),
@@ -36,8 +36,8 @@ jest.mock('../../../hooks/useAnnualPlan', () => ({
   useAnnualPlan: () => mockPlan
 }))
 
-const { tasksService } = require('../../../api/services/tasks.service')
-const { annualPlanningService } = require('../../../api/services/annualPlanning.service')
+const { tasksService } = require('@nowry/core/api/services/tasks.service')
+const { annualPlanningService } = require('@nowry/core/api/services/annualPlanning.service')
 
 const open = (props = {}) => {
   const EventFormModal = require('../EventFormModal').default

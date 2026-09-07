@@ -20,7 +20,7 @@ import {
   Snackbar
 } from '@mui/joy'
 import { Edit, Save, Cancel, CameraAlt, AccountCircle, Email, CalendarToday } from '@mui/icons-material'
-import { userService } from '../../../api/services'
+import { userService } from '@nowry/core/api/services'
 import { useAuth } from '../../../context/AuthContext'
 import { getUsernameValidationError } from '../../../utils/usernameValidation'
 

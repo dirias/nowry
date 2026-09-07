@@ -3,7 +3,7 @@ import { Button, IconButton, Tooltip } from '@mui/joy'
 import { Bookmark, BookmarkBorder } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
-import { cardsService } from '../../api/services'
+import { cardsService } from '@nowry/core/api/services'
 
 /**
  * Explicit keyboard focus ring — Joy leans on the browser outline, which the

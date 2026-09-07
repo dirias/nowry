@@ -37,7 +37,7 @@ jest.mock('../MarkToggle', () => ({ __esModule: true, default: () => <button typ
 const mockBulk = jest.fn()
 const mockRenameTag = jest.fn()
 const mockRemoveTag = jest.fn()
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   cardsService: {
     bulk: (...args) => mockBulk(...args),
     renameTag: (...args) => mockRenameTag(...args),
@@ -45,7 +45,7 @@ jest.mock('../../../api/services', () => ({
   }
 }))
 const mockInvalidate = jest.fn()
-jest.mock('../../../api/cardCache', () => ({
+jest.mock('@nowry/core/api/cardCache', () => ({
   patchCardInCache: jest.fn(),
   invalidateCardCaches: (...args) => mockInvalidate(...args)
 }))

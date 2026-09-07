@@ -25,7 +25,7 @@ jest.mock('../../../context/SubscriptionContext', () => ({
 }))
 
 const mockGenerate = jest.fn()
-jest.mock('../../../api/services/tts.ai.service', () => ({
+jest.mock('@nowry/core/api/services/tts.ai.service', () => ({
   ttsService: {
     generate: (...args) => mockGenerate(...args)
   }

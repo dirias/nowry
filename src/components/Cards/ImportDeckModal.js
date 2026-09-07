@@ -23,7 +23,7 @@ import {
   Skeleton
 } from '@mui/joy'
 import { FileUpload, ArrowBack, CheckCircleOutline, WarningAmberRounded, Style as StyleIcon } from '@mui/icons-material'
-import { importService } from '../../api/services/import.service'
+import { importService } from '@nowry/core/api/services/import.service'
 
 const STEP = { UPLOAD: 0, PREVIEW: 1, IMPORTING: 2 }
 

@@ -16,10 +16,10 @@ jest.mock('react-i18next', () => ({
   Trans: ({ i18nKey }) => i18nKey
 }))
 // PriorityList.js imports annualPlanningService from the barrel index
-// ('../../api/services'), which eagerly re-exports every service module
+// ('@nowry/core/api/services'), which eagerly re-exports every service module
 // (books, cards, decks, etc.) and would otherwise pull in the real axios
 // client. Mock the barrel directly to avoid loading unrelated services.
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {
     deletePriority: jest.fn()
   }

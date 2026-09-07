@@ -30,7 +30,7 @@ import {
   Google
 } from '@mui/icons-material'
 import { useAuth } from '../../context/AuthContext'
-import { authService } from '../../api/services/auth.service'
+import { authService } from '@nowry/core/api/services/auth.service'
 import { getUsernameValidationError } from '../../utils/usernameValidation'
 
 const Register = () => {

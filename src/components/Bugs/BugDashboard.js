@@ -18,7 +18,7 @@ import {
   Alert
 } from '@mui/joy'
 import { Bug, Filter, TrendingUp } from 'lucide-react'
-import { bugsService } from '../../api/services/bugs.service'
+import { bugsService } from '@nowry/core/api/services/bugs.service'
 
 export default function BugDashboard() {
   const { t } = useTranslation()

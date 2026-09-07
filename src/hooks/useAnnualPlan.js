@@ -34,8 +34,8 @@
 
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { annualPlanningService, fetchAnnualPlanData, EMPTY_PLAN_DATA } from '../api/services/annualPlanning.service'
-import { queryClient } from '../api/queryClient'
+import { annualPlanningService, fetchAnnualPlanData, EMPTY_PLAN_DATA } from '@nowry/core/api/services/annualPlanning.service'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 // Matches the old apiCache PLAN_TTL for this resource.

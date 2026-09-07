@@ -77,7 +77,9 @@ jest.mock('../../../hooks/useForecast', () => ({
   useForecast: () => ({ forecast: mockForecast, loading: false, error: null, reload: jest.fn() })
 }))
 const mockPostIntervention = jest.fn()
-jest.mock('../../../api/services/agent.service', () => ({ agentService: { postIntervention: (...args) => mockPostIntervention(...args) } }))
+jest.mock('@nowry/core/api/services/agent.service', () => ({
+  agentService: { postIntervention: (...args) => mockPostIntervention(...args) }
+}))
 jest.mock('../../../context/AgentContext', () => ({ usePet: () => ({ queuePreSessionIntervention: jest.fn() }) }))
 jest.mock('../../Cards/CardHome', () => ({ __esModule: true, default: () => <div data-testid='card-home' /> }))
 jest.mock('../RecentSessions', () => ({ __esModule: true, default: () => null }))

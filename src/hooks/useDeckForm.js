@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { decksService } from '../api/services'
+import { decksService } from '@nowry/core/api/services'
 import { focusFirstControl, parseTagInput } from '../components/Common/Form/formUtils'
 import useFormCore from './useFormCore'
 

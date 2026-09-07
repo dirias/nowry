@@ -10,7 +10,7 @@ import {
   PsychologyRounded,
   SpeedRounded
 } from '@mui/icons-material'
-import { authService } from '../../api/services/auth.service'
+import { authService } from '@nowry/core/api/services/auth.service'
 
 const ResetPassword = () => {
   const [email, setEmail] = useState('')

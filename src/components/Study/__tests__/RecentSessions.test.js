@@ -10,7 +10,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k), i18n: { language: 'en' } })
 }))
 const mockList = jest.fn()
-jest.mock('../../../api/services/studySessions.service', () => ({ studySessionsService: { list: (...args) => mockList(...args) } }))
+jest.mock('@nowry/core/api/services/studySessions.service', () => ({ studySessionsService: { list: (...args) => mockList(...args) } }))
 
 const RecentSessions = require('../RecentSessions').default
 

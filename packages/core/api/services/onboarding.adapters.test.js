@@ -16,9 +16,14 @@ jest.mock('../client', () => ({
   }
 }))
 
-// cards.service reaches for the real Firebase SDK at import time for its
-// streaming path; the fallback adapter under test never touches it.
-jest.mock('../../config/firebase.config', () => ({ auth: { currentUser: null } }))
+/*
+ * No Firebase mock is needed any more. cards.service used to import the web
+ * client's `config/firebase.config` at module load for its streaming path; it
+ * now imports the platform port instead, and the port touches nothing until a
+ * capability is actually called. The fallback adapter under test never calls
+ * one, so this suite runs with the port unconfigured — which is the point of
+ * the port.
+ */
 
 const { apiClient } = require('../client')
 const { userService } = require('./user.service')

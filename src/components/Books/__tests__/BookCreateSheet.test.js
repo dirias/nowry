@@ -42,7 +42,7 @@ jest.mock('../../../context/AuthContext', () => ({
 }))
 
 const mockCreate = jest.fn()
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   booksService: { create: (...args) => mockCreate(...args) }
 }))
 

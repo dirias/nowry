@@ -26,7 +26,7 @@ import {
   CallSplit as ForkIcon,
   Explore as ExploreIcon
 } from '@mui/icons-material'
-import { publicContentService } from '../api/services'
+import { publicContentService } from '@nowry/core/api/services'
 import { SuccessWindow, Error as ErrorMsg } from '../components/Messages'
 
 const MyLikes = () => {

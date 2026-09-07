@@ -17,7 +17,7 @@ import {
   Typography
 } from '@mui/joy'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
-import { blackboardService } from '../../api/services/blackboard.service'
+import { blackboardService } from '@nowry/core/api/services/blackboard.service'
 
 export default function ShareBoardModal({ open, onClose, boardId }) {
   const { t } = useTranslation()

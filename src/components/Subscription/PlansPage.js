@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Container, Typography, Stack, Button, Alert } from '@mui/joy'
-import { subscriptionService } from '../../api/services'
+import { subscriptionService } from '@nowry/core/api/services'
 import { useSubscription } from '../../hooks/useSubscription'
 import PlanCard from './PlanCard'
 

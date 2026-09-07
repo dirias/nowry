@@ -23,7 +23,7 @@ import {
 } from '@mui/joy'
 import { ArrowForward as ArrowForwardIcon, ArrowBack as ArrowBackIcon, Check as CheckIcon } from '@mui/icons-material'
 
-import { annualPlanningService } from '../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { useNotification } from '../../context/NotificationContext'
 

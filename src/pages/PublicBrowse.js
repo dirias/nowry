@@ -44,7 +44,7 @@ import {
 } from '@mui/icons-material'
 import { focusRing, oneLine, segment, segmentedGroup, tabularNums, touchTarget } from '../components/Common/Form/formStyles'
 import { tabClasses } from '@mui/joy/Tab'
-import { publicContentService } from '../api/services'
+import { publicContentService } from '@nowry/core/api/services'
 import Book from '../components/Books/Book'
 
 const CATEGORIES = [

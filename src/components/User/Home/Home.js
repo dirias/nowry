@@ -12,7 +12,7 @@ import WeeklyProgress from './WeeklyProgress'
 import StudyCalendar from './StudyCalendar'
 import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '../../../context/AuthContext'
-import { cardsService, decksService } from '../../../api/services'
+import { cardsService, decksService } from '@nowry/core/api/services'
 import { useDeckData } from '../../../hooks/useDeckData'
 
 function Home() {

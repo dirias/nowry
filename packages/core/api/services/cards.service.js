@@ -1,11 +1,12 @@
-import * as Sentry from '@sentry/react'
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
 import { DEFAULT_CARD_GEN_PROMPT } from '../../constants/prompts'
-import { auth } from '../../config/firebase.config'
+import { auth, env, session, storage, telemetry } from '../../platform'
 
-// Same base-URL source as the Axios client (nowry/src/api/client/index.js)
-const STREAM_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
+// Same base-URL source as the Axios client (packages/core/api/client/index.js).
+// Read lazily, not at module scope: the port is configured by the client after
+// this module is imported.
+const streamBaseUrl = () => env.apiUrl
 
 // Stall detector: abort the stream if NO bytes (data or heartbeat) arrive for this long
 const STREAM_STALL_MS = 30000
@@ -17,36 +18,35 @@ const STREAM_STALL_MS = 30000
  * as captureApiError in api/client/index.js.
  */
 const captureStreamIssue = (errorOrMessage, tags = {}) => {
-  if (!Sentry.getClient?.()) return
   const options = { tags: { api_error: true, sse_stream: true, ...tags } }
   if (errorOrMessage instanceof Error) {
-    Sentry.captureException(errorOrMessage, options)
+    telemetry.captureException(errorOrMessage, options)
   } else {
-    Sentry.captureMessage(errorOrMessage, options)
+    telemetry.captureMessage(errorOrMessage, options)
   }
 }
 
 /**
  * Replicates the Axios request interceptor's token logic
  * (api/client/index.js lines ~27-41) for the fetch-based SSE path:
- * getIdToken(false) → Authorization header + localStorage sync,
- * with a fallback to the cached localStorage token on failure.
+ * getIdToken(false) → Authorization header + stored-token sync,
+ * with a fallback to the cached stored token on failure.
  */
 const buildStreamAuthHeaders = async () => {
   const headers = { 'Content-Type': 'application/json' }
   try {
-    const firebaseUser = auth.currentUser
+    const firebaseUser = auth.currentUser()
     if (firebaseUser) {
       // getIdToken(false) returns the cached token and silently refreshes
       // only when it is close to expiry (Firebase SDK internal threshold).
-      const token = await firebaseUser.getIdToken(false)
+      const token = await auth.getIdToken(false)
       headers.Authorization = `Bearer ${token}`
-      // Keep localStorage in sync for any code that still reads it directly
-      localStorage.setItem('firebase_token', token)
+      // Keep stored token in sync for any code that still reads it directly
+      storage.set('firebase_token', token)
     }
   } catch {
-    // If we can't get a token, fall back to the cached localStorage value
-    const cached = localStorage.getItem('firebase_token')
+    // If we can't get a token, fall back to the cached stored value
+    const cached = storage.get('firebase_token')
     if (cached) {
       headers.Authorization = `Bearer ${cached}`
     }
@@ -164,7 +164,7 @@ export const cardsService = {
 
     let response
     try {
-      response = await fetch(`${STREAM_BASE_URL}${ENDPOINTS.studyCards.generateStream}`, {
+      response = await fetch(`${streamBaseUrl()}${ENDPOINTS.studyCards.generateStream}`, {
         method: 'POST',
         headers,
         credentials: 'include',
@@ -189,10 +189,13 @@ export const cardsService = {
         detail = undefined
       }
       if (response.status === 401) {
-        // Same session-expiry mechanism as the Axios response interceptor
-        localStorage.removeItem('firebase_token')
-        localStorage.removeItem('firebase_user')
-        window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+        // Same session-expiry mechanism as the Axios response interceptor,
+        // minus the redirect: this path only announces, and that difference is
+        // preserved rather than unified, because unifying it would change
+        // behaviour.
+        storage.remove('firebase_token')
+        storage.remove('firebase_user')
+        session.onUnauthorized({ redirect: false })
       }
       if (response.status >= 500) {
         captureStreamIssue(`SSE pre-stream HTTP ${response.status}`, {
@@ -244,8 +247,8 @@ export const cardsService = {
         data = JSON.parse(parsed.data)
       } catch {
         // Unparseable frame: breadcrumb + skip — never crash the stream
-        if (Sentry.getClient?.()) {
-          Sentry.addBreadcrumb({
+        {
+          telemetry.addBreadcrumb({
             category: 'sse',
             message: 'Skipped unparseable SSE frame',
             level: 'warning',

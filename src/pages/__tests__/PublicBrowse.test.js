@@ -26,7 +26,7 @@ jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
 
 jest.mock('../../components/Books/Book', () => ({ __esModule: true, default: () => null }))
 
-jest.mock('../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   publicContentService: {
     browseBooks: jest.fn(),
     browseDecks: jest.fn(),
@@ -36,7 +36,7 @@ jest.mock('../../api/services', () => ({
   }
 }))
 
-const { publicContentService } = require('../../api/services')
+const { publicContentService } = require('@nowry/core/api/services')
 const PublicBrowse = require('../PublicBrowse').default
 
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString()

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { cardsService } from '../api/services'
-import { queryClient } from '../api/queryClient'
+import { cardsService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
 // Matches the old apiCache TTL for this resource (see api/queryClient.js's
@@ -26,7 +26,7 @@ const STATISTICS_STALE_TIME = 60000 // 60 seconds
  *
  * Invalidate after a mutation (e.g. a study session completes, a deck is
  * imported):
- *   import { queryClient } from '../api/queryClient'
+ *   import { queryClient } from '@nowry/core/api/queryClient'
  *   queryClient.invalidateQueries({ queryKey: ['statistics', userId] })
  */
 export function useStatistics() {

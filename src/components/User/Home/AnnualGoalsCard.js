@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Typography, LinearProgress, Button, Stack, Sheet, Skeleton } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import { Target, TrendingUp } from 'lucide-react'
-import { annualPlanningService } from '../../../api/services'
+import { annualPlanningService } from '@nowry/core/api/services'
 import { GOAL_STATE_COLOR, getGoalProgress, getGoalState } from '../../AnnualPlanning/goalDerivation'
 
 const SKELETON_ROWS = 4

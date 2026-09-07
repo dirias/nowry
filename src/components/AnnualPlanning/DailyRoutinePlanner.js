@@ -28,9 +28,9 @@ import {
   NightsStay as EveningIcon
 } from '@mui/icons-material'
 
-import { annualPlanningService } from '../../api/services'
-import { queryClient } from '../../api/queryClient'
-import { todayKey } from '../../api/utils/routineCache'
+import { annualPlanningService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
+import { todayKey } from '@nowry/core/api/utils/routineCache'
 import { useAnnualPlan } from '../../hooks/useAnnualPlan'
 import { useAuth } from '../../context/AuthContext'
 

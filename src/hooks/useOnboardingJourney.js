@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { cardsService } from '../api/services/cards.service'
-import { publicContentService } from '../api/services/publicContent.service'
-import { userService } from '../api/services/user.service'
+import { cardsService } from '@nowry/core/api/services/cards.service'
+import { publicContentService } from '@nowry/core/api/services/publicContent.service'
+import { userService } from '@nowry/core/api/services/user.service'
 
 /**
  * useOnboardingJourney — the route-local onboarding controller (ONB-005).

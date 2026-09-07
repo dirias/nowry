@@ -34,7 +34,11 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # This repository is an npm workspace root (ADR-032): the web client, the
+        # shared package and the mobile client all live here. This job only builds
+        # the web client, so it installs the root package and @nowry/core and skips
+        # the mobile workspace, which pulls in React Native and Expo.
+        run: npm ci --workspace=@nowry/core --include-workspace-root
 
       - name: Lint
         run: npm run lint

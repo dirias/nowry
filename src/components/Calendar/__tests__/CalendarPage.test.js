@@ -53,10 +53,10 @@ jest.mock('../../../hooks/useIsMobile', () => ({
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k) => k, i18n: { language: 'en' } })
 }))
-jest.mock('../../../api/services/calendar.service', () => ({
+jest.mock('@nowry/core/api/services/calendar.service', () => ({
   calendarService: { getAllEvents: jest.fn(), invalidateCache: jest.fn() }
 }))
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   tasksService: { update: jest.fn() },
   annualPlanningService: { updatePriority: jest.fn(), updateGoal: jest.fn(), updateMilestone: jest.fn() }
 }))
@@ -185,7 +185,7 @@ describe('CAL-001: the toolbar', () => {
   const mockApplyPreset = jest.fn()
   const mockSetFilters = jest.fn()
   const mockResetFilters = jest.fn()
-  const { calendarService } = require('../../../api/services/calendar.service')
+  const { calendarService } = require('@nowry/core/api/services/calendar.service')
 
   const mockFocusAreas = [
     { id: 'area-1', name: 'Learning', color: '#10b981' },
@@ -338,8 +338,8 @@ describe('CAL-001: the toolbar', () => {
 // ─── CAL-002: finishing a task or priority from its agenda row ──────────────
 
 describe('CAL-002: the agenda row check', () => {
-  const { calendarService } = require('../../../api/services/calendar.service')
-  const { tasksService, annualPlanningService } = require('../../../api/services')
+  const { calendarService } = require('@nowry/core/api/services/calendar.service')
+  const { tasksService, annualPlanningService } = require('@nowry/core/api/services')
 
   const today = new Date()
   const task = {

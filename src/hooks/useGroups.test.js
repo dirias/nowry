@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useGroups } from './useGroups'
 
 const mockGet = jest.fn()
-jest.mock('../api/client', () => ({ apiClient: { get: (...args) => mockGet(...args) } }))
+jest.mock('@nowry/core/api/client', () => ({ apiClient: { get: (...args) => mockGet(...args) } }))
 jest.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'user-1' } }) }))
 
 const makeWrapper = () => {

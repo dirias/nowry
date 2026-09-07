@@ -28,10 +28,10 @@ jest.mock('react-i18next', () => ({
 }))
 
 // AllPrioritiesPage.js imports annualPlanningService from the barrel index
-// ('../../api/services'), which eagerly re-exports every service module and
+// ('@nowry/core/api/services'), which eagerly re-exports every service module and
 // would otherwise pull in the real axios client (Jest ESM parse failure) —
 // same issue documented in PriorityList.test.js (24-03).
-jest.mock('../../../api/services', () => ({
+jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {
     updatePriority: jest.fn(),
     reorderPriorities: jest.fn(),
@@ -78,7 +78,7 @@ jest.mock('@dnd-kit/sortable', () => ({
   })
 }))
 
-const { annualPlanningService } = require('../../../api/services')
+const { annualPlanningService } = require('@nowry/core/api/services')
 const AllPrioritiesPage = require('../AllPrioritiesPage').default
 
 const makePriority = (overrides) => ({

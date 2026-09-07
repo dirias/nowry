@@ -1,16 +1,18 @@
 import axios from 'axios'
-import * as Sentry from '@sentry/react'
-import { auth } from '../../config/firebase.config'
-
-// Get base URL from environment or use default
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
+import { auth, env, notify, session, storage, telemetry } from '../../platform'
 
 /**
- * Main API client instance with configured defaults
+ * Main API client instance with configured defaults.
+ *
+ * `baseURL` and `timeout` are NOT set here. This module is imported long before
+ * a client finishes calling `configurePlatform()` — ES imports hoist above it —
+ * so reading `env` at module scope would raise PlatformNotConfiguredError at
+ * import time. They are applied in the request interceptor instead, which runs
+ * per request and therefore always after configuration. Axios resolves both
+ * when the request is dispatched, so the result is identical to setting them
+ * here.
  */
 export const apiClient = axios.create({
-  baseURL: BASE_URL,
-  timeout: Number(process.env.REACT_APP_API_TIMEOUT) || 10000,
   headers: {
     'Content-Type': 'application/json'
   },
@@ -24,19 +26,23 @@ export const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   async (config) => {
+    // Applied per request rather than at create time — see the note above.
+    config.baseURL = env.apiUrl
+    config.timeout = env.apiTimeout
+
     try {
-      const firebaseUser = auth.currentUser
+      const firebaseUser = auth.currentUser()
       if (firebaseUser && !config.headers.Authorization) {
         // getIdToken(false) returns the cached token and silently refreshes
         // only when it is close to expiry (Firebase SDK internal threshold).
-        const token = await firebaseUser.getIdToken(false)
+        const token = await auth.getIdToken(false)
         config.headers.Authorization = `Bearer ${token}`
-        // Keep localStorage in sync for any code that still reads it directly
-        localStorage.setItem('firebase_token', token)
+        // Keep stored token in sync for any code that still reads it directly
+        storage.set('firebase_token', token)
       }
     } catch {
-      // If we can't get a token, fall back to the cached localStorage value
-      const cached = localStorage.getItem('firebase_token')
+      // If we can't get a token, fall back to the cached stored value
+      const cached = storage.get('firebase_token')
       if (cached && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${cached}`
       }
@@ -50,12 +56,15 @@ apiClient.interceptors.request.use(
 )
 
 /**
- * Dispatch a user-visible notification via a custom DOM event.
- * NotificationContext listens to this so the interceptor stays
- * framework-agnostic (no React imports needed here).
+ * Hand a user-visible notification to the client.
+ *
+ * The web client still dispatches the same `api:notify` CustomEvent that
+ * NotificationContext listens for; that is now the web adapter's business
+ * rather than this file's, which is what lets this interceptor run under a
+ * client that has no DOM.
  */
 const notifyUser = (message, severity = 'error') => {
-  window.dispatchEvent(new CustomEvent('api:notify', { detail: { message, severity } }))
+  notify(message, severity)
 }
 
 /**
@@ -69,11 +78,8 @@ const captureApiError = (error) => {
   if (axios.isCancel(error) || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
     return
   }
-  // No-op when Sentry is not initialized (REACT_APP_SENTRY_DSN unset)
-  if (!Sentry.getClient?.()) {
-    return
-  }
-  Sentry.captureException(error, {
+  // The adapter no-ops when its SDK is not initialised.
+  telemetry.captureException(error, {
     contexts: {
       api: {
         url: error.config?.url,
@@ -144,20 +150,18 @@ apiClient.interceptors.response.use(
 
       console.warn('Unauthorized: Token expired or invalid. Logging out...')
 
-      // Clear all authentication data
-      localStorage.removeItem('firebase_token')
-      localStorage.removeItem('firebase_user')
+      // Clearing the stored credentials is shared policy — both clients do it.
+      storage.remove('firebase_token')
+      storage.remove('firebase_user')
 
-      // Dispatch a custom event that AuthContext can listen to
-      window.dispatchEvent(new CustomEvent('auth:unauthorized'))
-
-      // Only redirect if not already on auth pages
-      const currentPath = window.location.pathname
-      const authPaths = ['/login', '/register', '/forgot-password', '/resetPassword']
-      if (!authPaths.includes(currentPath)) {
-        const returnUrl = encodeURIComponent(currentPath + window.location.search)
-        window.location.href = `/login?returnUrl=${returnUrl}`
-      }
+      /*
+       * What the user then SEES is the client's business. The web adapter
+       * dispatches `auth:unauthorized` for AuthContext and redirects to
+       * /login?returnUrl=… unless the current path is already an auth page,
+       * which is exactly what this block did inline before the move. Mobile
+       * will reset navigation to its sign-in screen instead.
+       */
+      session.onUnauthorized({ redirect: true })
     }
 
     // Handle forbidden (403) — suppress for endpoints that open their own upgrade modal or error state
