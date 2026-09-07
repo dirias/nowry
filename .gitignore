@@ -1,6 +1,7 @@
 # Project
 # Lock files
-package-lock.json
+# package-lock.json is tracked on purpose: CI runs `npm ci` and caches on it,
+# and both need the lock file in the repo (frontend-deploy.yml).
 yarn.lock
 pnpm-lock.yaml
 Pipfile.lock
