@@ -41,5 +41,8 @@ export {
   SEGMENT_UNDERLINE
 } from './buttonSpec'
 
+export { Icon, fromMaterial, GLYPH_SIZES } from './icons'
+export { MATERIAL_TO_LUCIDE, NEEDS_A_DECISION, KEY_TO_LUCIDE } from './icons'
+
 // The ADR-021 composites.
 export * from './patterns'

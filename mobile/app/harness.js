@@ -23,6 +23,7 @@ import {
   Chip,
   Divider,
   FormField,
+  Icon,
   IconButton,
   IdentityTile,
   Input,
@@ -241,6 +242,19 @@ function Panel({ title }) {
 
         <Section label='Sheets'>
           <SheetDemo />
+        </Section>
+
+        <Section label='Icons'>
+          <Stack direction='row' spacing={2} alignItems='center' flexWrap='wrap'>
+            {['GraduationCap', 'BookOpen', 'Flag', 'Layers', 'CircleQuestionMark', 'Flame', 'Sparkles', 'Trash'].map((n) => (
+              <Icon key={n} name={n} />
+            ))}
+          </Stack>
+          <Stack direction='row' spacing={2} alignItems='center'>
+            <Icon name='Check' size='sm' color='text.tertiary' />
+            <Icon name='Check' size='md' color='text.secondary' />
+            <Icon name='Check' size='lg' color='primary.plainColor' />
+          </Stack>
         </Section>
 
         <Section label='Stack, row'>

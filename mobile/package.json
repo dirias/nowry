@@ -15,12 +15,14 @@
     "expo-status-bar": "~57.0.1",
     "firebase": "^12.18.0",
     "i18next": "^23.16.8",
+    "lucide-react-native": "^1.43.0",
     "react": "19.2.3",
     "react-i18next": "^13.5.0",
     "react-native": "0.86.3",
     "react-native-mmkv": "^4.3.2",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0"
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4"
   },
   "main": "expo-router/entry",
   "scripts": {
