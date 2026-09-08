@@ -35,19 +35,19 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name='index'
-        options={{ title: t('nav.home', 'Home'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.home} color={color} /> }}
+        options={{ title: t('nav.home'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.home} color={color} /> }}
       />
       <Tabs.Screen
         name='study'
-        options={{ title: t('nav.study', 'Study'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.study} color={color} /> }}
+        options={{ title: t('nav.study'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.study} color={color} /> }}
       />
       <Tabs.Screen
         name='pomodoro'
-        options={{ title: t('nav.focus', 'Focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
+        options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
       />
       <Tabs.Screen
         name='profile'
-        options={{ title: t('nav.profile', 'Profile'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.profile} color={color} /> }}
+        options={{ title: t('nav.profile'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.profile} color={color} /> }}
       />
     </Tabs>
   )

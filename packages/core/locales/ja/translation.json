@@ -199,7 +199,8 @@
       "dueToday": "課題",
       "reviewedToday": "復習済",
       "dayStreak": "連続",
-      "totalCards": "合計"
+      "totalCards": "合計",
+      "decks": "デッキ"
     },
     "byType": "タイプ別学習",
     "types": {
@@ -221,7 +222,8 @@
       "streakLabel": "{{count}}日連続",
       "allDone": "全て完了",
       "weeklyCards": "今日{{count}}枚復習済み",
-      "streakZeroLabel": "今日から連続記録を始めよう"
+      "streakZeroLabel": "今日から連続記録を始めよう",
+      "noDecks": "デッキを追加すると、Nowry がスケジュールを組み始めます。"
     },
     "sections": {
       "dueNow": "今日の復習",
@@ -1775,7 +1777,8 @@
           "description": "学びたいことを一つ挙げ、進められる段階に分けます。"
         }
       }
-    }
+    },
+    "loadFailed": "進捗を読み込めませんでした。"
   },
   "pet": {
     "stage": {
@@ -2924,5 +2927,12 @@
     "reset": "リセット",
     "skip": "次のセッションへ",
     "cycleProgress": "長い休憩まで {{count}} / {{total}} 集中セッション"
+  },
+  "nav": {
+    "home": "ホーム",
+    "study": "学習",
+    "focus": "集中",
+    "profile": "プロフィール",
+    "settings": "設定"
   }
 }

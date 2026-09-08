@@ -10,7 +10,7 @@ export default function StudyCenter() {
   return (
     <Screen>
       <Stack spacing={2}>
-        <Typography level='h4'>{t('nav.study', 'Study')}</Typography>
+        <Typography level='h4'>{t('nav.study')}</Typography>
         <Typography level='body-sm' color='text.tertiary'>
           Placeholder. MOB-019 builds Today, MOB-020 the library.
         </Typography>

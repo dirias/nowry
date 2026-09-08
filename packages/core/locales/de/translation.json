@@ -205,7 +205,8 @@
       "dueToday": "Fällig",
       "reviewedToday": "Gelernt",
       "dayStreak": "Serie",
-      "totalCards": "Gesamt"
+      "totalCards": "Gesamt",
+      "decks": "Stapel"
     },
     "byType": "Nach Typ lernen",
     "types": {
@@ -227,7 +228,8 @@
       "streakLabel": "{{count}}-Tage-Serie",
       "allDone": "Alles erledigt",
       "weeklyCards": "{{count}} heute wiederholt",
-      "streakZeroLabel": "Starte deine Serie heute"
+      "streakZeroLabel": "Starte deine Serie heute",
+      "noDecks": "Füge einen Stapel hinzu und Nowry plant ihn für dich."
     },
     "sections": {
       "dueNow": "Jetzt fällig",
@@ -1649,7 +1651,8 @@
           "description": "Nenne eine Sache, die du lernen willst, und teile sie in Schritte auf."
         }
       }
-    }
+    },
+    "loadFailed": "Dein Fortschritt konnte nicht geladen werden."
   },
   "pet": {
     "stage": {
@@ -2987,5 +2990,12 @@
     "reset": "Zurücksetzen",
     "skip": "Zur nächsten Sitzung springen",
     "cycleProgress": "{{count}} von {{total}} Fokus-Sitzungen bis zur langen Pause"
+  },
+  "nav": {
+    "home": "Start",
+    "study": "Lernen",
+    "focus": "Fokus",
+    "profile": "Profil",
+    "settings": "Einstellungen"
   }
 }

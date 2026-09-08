@@ -15,7 +15,7 @@ export default function Settings() {
   return (
     <Screen>
       <Stack spacing={2}>
-        <Typography level='h4'>{t('nav.settings', 'Settings')}</Typography>
+        <Typography level='h4'>{t('nav.settings')}</Typography>
         <Typography level='body-sm' color='text.tertiary'>
           Placeholder for MOB-025.
         </Typography>

@@ -12,12 +12,12 @@ export default function Profile() {
   return (
     <Screen>
       <Stack spacing={2}>
-        <Typography level='h4'>{t('nav.profile', 'Profile')}</Typography>
+        <Typography level='h4'>{t('nav.profile')}</Typography>
         <Typography level='body-md' color='text.secondary'>
           {user?.email ?? user?.username ?? 'signed in'}
         </Typography>
         <Button size='sm' variant='secondary' onPress={() => router.push('/settings')}>
-          {t('nav.settings', 'Settings')}
+          {t('nav.settings')}
         </Button>
         <Button size='sm' variant='tertiary' onPress={() => logout?.()}>
           Sign out

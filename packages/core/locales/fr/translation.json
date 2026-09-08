@@ -196,7 +196,8 @@
       "reviewedToday": "Revues",
       "dayStreak": "Série",
       "totalCards": "Total",
-      "cards": "cartes"
+      "cards": "cartes",
+      "decks": "paquets"
     },
     "byType": "Étudier par Type",
     "types": {
@@ -272,7 +273,8 @@
       "streakLabel": "Série de {{count}} jour(s)",
       "allDone": "Tout est à jour",
       "weeklyCards": "{{count}} révisé(s) aujourd'hui",
-      "streakZeroLabel": "Commencez votre série aujourd'hui"
+      "streakZeroLabel": "Commencez votre série aujourd'hui",
+      "noDecks": "Ajoutez un paquet et Nowry commencera à le planifier pour vous."
     },
     "dueCount": "{{count}} à revoir"
   },
@@ -1669,7 +1671,8 @@
           "description": "Nommez une chose à apprendre et découpez-la en étapes."
         }
       }
-    }
+    },
+    "loadFailed": "Impossible de charger votre progression."
   },
   "pet": {
     "stage": {
@@ -3007,5 +3010,12 @@
     "reset": "Réinitialiser",
     "skip": "Passer à la session suivante",
     "cycleProgress": "{{count}} sur {{total}} sessions de concentration avant une pause longue"
+  },
+  "nav": {
+    "home": "Accueil",
+    "study": "Étude",
+    "focus": "Concentration",
+    "profile": "Profil",
+    "settings": "Réglages"
   }
 }

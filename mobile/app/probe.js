@@ -66,7 +66,7 @@ export default function Index() {
       <Row label='storage (MMKV)' value={roundTrip} />
       <Row label='api url' value={env.apiUrl} />
       <Row label='language' value={i18n.language} />
-      <Row label='a translated string' value={t('common.save', 'common.save missing')} />
+      <Row label='a translated string' value={t('common.save')} />
       <Row label='firebase session' value={session} />
 
       <Row label='api call' value={apiResult} />

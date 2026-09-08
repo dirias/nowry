@@ -200,7 +200,8 @@
       "dueToday": "Pendientes",
       "reviewedToday": "Estudiadas",
       "dayStreak": "Racha",
-      "totalCards": "Total"
+      "totalCards": "Total",
+      "decks": "mazos"
     },
     "byType": "Estudiar por Tipo",
     "swipeHint": "Desliza para navegar",
@@ -223,7 +224,8 @@
       "streakLabel": "Racha de {{count}} día(s)",
       "allDone": "Todo al día",
       "weeklyCards": "{{count}} revisada(s) hoy",
-      "streakZeroLabel": "Comienza tu racha hoy"
+      "streakZeroLabel": "Comienza tu racha hoy",
+      "noDecks": "Añade un mazo y Nowry empezará a programarlo por ti."
     },
     "sections": {
       "dueNow": "Para hoy",
@@ -2657,7 +2659,8 @@
           "description": "Nombra algo que quieras aprender y divídelo en pasos."
         }
       }
-    }
+    },
+    "loadFailed": "No se pudo cargar tu progreso."
   },
   "pet": {
     "stage": {
@@ -3617,5 +3620,12 @@
     "reset": "Reiniciar",
     "skip": "Saltar a la siguiente sesión",
     "cycleProgress": "{{count}} de {{total}} sesiones de enfoque antes de un descanso largo"
+  },
+  "nav": {
+    "home": "Inicio",
+    "study": "Estudio",
+    "focus": "Enfoque",
+    "profile": "Perfil",
+    "settings": "Ajustes"
   }
 }

@@ -7,7 +7,7 @@ export default function Focus() {
   return (
     <Screen>
       <Stack spacing={2}>
-        <Typography level='h4'>{t('nav.focus', 'Focus')}</Typography>
+        <Typography level='h4'>{t('nav.focus')}</Typography>
         <Typography level='body-sm' color='text.tertiary'>
           Placeholder for MOB-024. The timer state already exists in @nowry/core and survives a cold start.
         </Typography>
