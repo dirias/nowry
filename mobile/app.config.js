@@ -13,6 +13,8 @@ module.exports = () => ({
   expo: {
     name: 'Nowry',
     slug: 'nowry',
+    // The EAS account that owns this project (chosen 2026-09-08).
+    owner: 'dirias',
     version: '0.1.0',
     orientation: 'portrait',
     // Deep links use the same route names as the web client, so a link maps
@@ -33,6 +35,9 @@ module.exports = () => ({
       typedRoutes: false
     },
     extra: {
+      // Written by hand because `eas init` cannot edit a dynamic config.
+      // Identifies this project on EAS; not a secret.
+      eas: { projectId: '6e825267-fab2-4276-97a0-f285d1098001' },
       apiUrl: process.env.EXPO_PUBLIC_API_URL,
       apiTimeout: Number(process.env.EXPO_PUBLIC_API_TIMEOUT || 10000),
       sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
