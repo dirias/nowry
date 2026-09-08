@@ -1,17 +1,25 @@
 /**
- * The root layout. Every screen mounts inside this.
+ * The root layout: providers, then the auth gate.
  *
- * The first two imports are the whole point of the file's order: the platform
- * port is installed, then i18next is initialised against it. Both are module
- * side effects, so they have run before any screen renders.
+ * The first two imports are the whole point of the file's order — the platform
+ * port is installed and i18next is initialised, both as module side effects, so
+ * they have run before any screen renders.
+ *
+ * Everything below is the shape every screen sits inside. It is deliberately
+ * one file: a provider added at a screen instead of here is a provider some
+ * screens do not have.
  */
 import '../src/platform/configure'
 import '../src/i18n'
 
-import { Stack } from 'expo-router'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { Slot } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { AuthProvider } from '@nowry/core/context/AuthContext'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { ThemeProvider } from '../src/theme'
 import { NotificationHost } from '../src/ui/Toast'
+import { AuthGate } from '../src/navigation/AuthGate'
 
 export default function RootLayout() {
   /*
@@ -21,10 +29,16 @@ export default function RootLayout() {
    */
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-        <NotificationHost />
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemeProvider>
+            <AuthGate>
+              <Slot />
+            </AuthGate>
+            <NotificationHost />
+          </ThemeProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </SafeAreaProvider>
   )
 }

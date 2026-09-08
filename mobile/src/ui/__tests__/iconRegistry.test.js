@@ -8,7 +8,7 @@
  */
 import fs from 'fs'
 import path from 'path'
-import { MATERIAL_TO_LUCIDE, KEY_TO_LUCIDE } from '../icons/iconMap'
+import { MATERIAL_TO_LUCIDE, KEY_TO_LUCIDE, NAV_ICONS } from '../icons/iconMap'
 
 const registrySource = () => fs.readFileSync(path.join(__dirname, '../icons/iconRegistry.js'), 'utf8')
 
@@ -25,7 +25,7 @@ const registryNames = () => {
 
 describe('the icon registry', () => {
   it('carries exactly what the map asks for, and nothing more', () => {
-    const wanted = new Set([...Object.values(MATERIAL_TO_LUCIDE), ...Object.values(KEY_TO_LUCIDE)])
+    const wanted = new Set([...Object.values(MATERIAL_TO_LUCIDE), ...Object.values(KEY_TO_LUCIDE), ...Object.values(NAV_ICONS)])
     const registered = registryNames()
 
     // In the map but not registered: throws on a device.

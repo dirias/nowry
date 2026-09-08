@@ -33,6 +33,7 @@ import { Circle } from 'lucide-react-native/icons/circle'
 import { CircleAlert } from 'lucide-react-native/icons/circle-alert'
 import { CircleCheck } from 'lucide-react-native/icons/circle-check'
 import { CircleQuestionMark } from 'lucide-react-native/icons/circle-question-mark'
+import { CircleUser } from 'lucide-react-native/icons/circle-user'
 import { CloudUpload } from 'lucide-react-native/icons/cloud-upload'
 import { Download } from 'lucide-react-native/icons/download'
 import { EllipsisVertical } from 'lucide-react-native/icons/ellipsis-vertical'
@@ -42,6 +43,7 @@ import { Flame } from 'lucide-react-native/icons/flame'
 import { FolderInput } from 'lucide-react-native/icons/folder-input'
 import { Globe } from 'lucide-react-native/icons/globe'
 import { GraduationCap } from 'lucide-react-native/icons/graduation-cap'
+import { House } from 'lucide-react-native/icons/house'
 import { Image } from 'lucide-react-native/icons/image'
 import { Info } from 'lucide-react-native/icons/info'
 import { Languages } from 'lucide-react-native/icons/languages'
@@ -69,6 +71,7 @@ import { Sparkles } from 'lucide-react-native/icons/sparkles'
 import { Sun } from 'lucide-react-native/icons/sun'
 import { Sunset } from 'lucide-react-native/icons/sunset'
 import { Tag } from 'lucide-react-native/icons/tag'
+import { Timer } from 'lucide-react-native/icons/timer'
 import { Trash } from 'lucide-react-native/icons/trash'
 import { TriangleAlert } from 'lucide-react-native/icons/triangle-alert'
 import { Upload } from 'lucide-react-native/icons/upload'
@@ -98,6 +101,7 @@ export const ICONS = {
   CircleAlert,
   CircleCheck,
   CircleQuestionMark,
+  CircleUser,
   CloudUpload,
   Download,
   EllipsisVertical,
@@ -107,6 +111,7 @@ export const ICONS = {
   FolderInput,
   Globe,
   GraduationCap,
+  House,
   Image,
   Info,
   Languages,
@@ -134,6 +139,7 @@ export const ICONS = {
   Sun,
   Sunset,
   Tag,
+  Timer,
   Trash,
   TriangleAlert,
   Upload,

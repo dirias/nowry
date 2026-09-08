@@ -121,6 +121,18 @@ export const NEEDS_A_DECISION = {
     'Used for "untagged" (ADR-023). lucide has Tag but no TagOff; candidates are TagOff-by-composition, Ban, or dropping the icon and keeping the word.'
 }
 
+/**
+ * The tab bar's icons (MOB-015). These have no Material counterpart in the web
+ * app — its navigation is a header, not a tab bar — so they are named directly
+ * rather than mapped.
+ */
+export const NAV_ICONS = {
+  home: 'House',
+  study: 'GraduationCap',
+  focus: 'Timer',
+  profile: 'CircleUser'
+}
+
 /** The icon keys the shared modules hand out (MOB-003B), resolved for mobile. */
 export const KEY_TO_LUCIDE = {
   // from cardTypes

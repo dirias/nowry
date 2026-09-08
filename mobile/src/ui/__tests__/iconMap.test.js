@@ -8,7 +8,7 @@
  */
 import fs from 'fs'
 import path from 'path'
-import { KEY_TO_LUCIDE, MATERIAL_TO_LUCIDE, NEEDS_A_DECISION } from '../icons/iconMap'
+import { KEY_TO_LUCIDE, MATERIAL_TO_LUCIDE, NAV_ICONS, NEEDS_A_DECISION } from '../icons/iconMap'
 
 /**
  * lucide-react-native cannot be imported here — it pulls in react-native-svg,
@@ -39,6 +39,14 @@ describe('the Material to lucide map', () => {
     const missing = Object.entries(KEY_TO_LUCIDE).filter(([, target]) => !names.has(target))
     expect(missing).toEqual([])
     expect(Object.keys(KEY_TO_LUCIDE)).toEqual(expect.arrayContaining(['cards', 'quiz', 'image', 'study', 'book', 'plan']))
+  })
+
+  it('resolves every tab bar icon', () => {
+    // The tab bar has no Material counterpart — the web navigates with a header
+    // — so these are named directly and still have to exist.
+    const missing = Object.entries(NAV_ICONS).filter(([, target]) => !names.has(target))
+    expect(missing).toEqual([])
+    expect(Object.keys(NAV_ICONS)).toEqual(['home', 'study', 'focus', 'profile'])
   })
 
   it('lists what it cannot map instead of guessing', () => {

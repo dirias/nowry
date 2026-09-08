@@ -23,7 +23,7 @@ export const GLYPH_SIZES = {
   lg: BUTTON_SIZES.lg.glyph
 }
 
-export function Icon({ name, size = 'md', color = 'text.secondary', strokeWidth = 2, ...rest }) {
+export function Icon({ name, size = 'md', color = 'text.secondary', literalColor = null, strokeWidth = 2, ...rest }) {
   const theme = useTheme()
   const Glyph = ICONS[name]
 
@@ -42,7 +42,13 @@ export function Icon({ name, size = 'md', color = 'text.secondary', strokeWidth 
     throw new Error(`Icon: "${size}" is not a glyph size. Use sm, md or lg (BUTTONS.md §2).`)
   }
 
-  return <Glyph size={px} color={resolveColor(theme, color)} strokeWidth={strokeWidth} {...rest} />
+  /*
+   * `literalColor` is the one escape, and it exists for exactly one caller: a
+   * navigator that interpolates between active and inactive and therefore hands
+   * back a resolved colour rather than a token. Everywhere else, naming a colour
+   * is the rule and `resolveColor` throws on a literal.
+   */
+  return <Glyph size={px} color={literalColor ?? resolveColor(theme, color)} strokeWidth={strokeWidth} {...rest} />
 }
 
 /**
