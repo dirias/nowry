@@ -5,14 +5,20 @@
   "description": "Nowry mobile client (Expo + React Native). Scaffolded by MOB-005.",
   "dependencies": {
     "@nowry/core": "*",
+    "@sentry/react-native": "~7.11.0",
     "expo": "^57.0.20",
     "expo-constants": "~57.0.17",
     "expo-dev-client": "~57.0.18",
     "expo-linking": "~57.0.9",
+    "expo-localization": "~57.0.1",
     "expo-router": "~57.0.19",
     "expo-status-bar": "~57.0.1",
+    "firebase": "^12.18.0",
+    "i18next": "^23.16.8",
     "react": "19.2.3",
+    "react-i18next": "^13.5.0",
     "react-native": "0.86.3",
+    "react-native-mmkv": "^4.3.2",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0"
   },
@@ -20,6 +26,7 @@
   "scripts": {
     "start": "expo start --dev-client",
     "start:web-check": "expo start",
-    "lint": "eslint \"app/**/*.js\" \"*.js\""
+    "lint": "eslint \"app/**/*.js\" \"src/**/*.js\" \"*.js\"",
+    "test": "jest --config jest.config.js"
   }
 }

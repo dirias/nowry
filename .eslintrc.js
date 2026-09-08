@@ -138,6 +138,26 @@ module.exports = {
     },
     {
       /*
+       * The mobile client.
+       *
+       * React Native, not a browser: no `window`, and a `__DEV__` global the
+       * bundler defines. The design-token rules above are for Joy `sx` objects
+       * and mean nothing against a StyleSheet, so they are off here; MOB-009
+       * brings the mobile theme and its own rules with it.
+       */
+      files: ['mobile/**/*.js'],
+      env: { browser: false, es2021: true, node: true, jest: true },
+      globals: { __DEV__: 'readonly', fetch: 'readonly', console: 'readonly' },
+      rules: {
+        'no-restricted-syntax': 'off',
+        // Expo compiles JSX with the automatic runtime, so React does not need
+        // to be in scope. The web app imports it everywhere out of habit, which
+        // is why this rule has never fired over there.
+        'react/react-in-jsx-scope': 'off'
+      }
+    },
+    {
+      /*
        * Core's TEST files may use JSX.
        *
        * The JSX ban exists because `react-scripts` cannot transpile JSX in this

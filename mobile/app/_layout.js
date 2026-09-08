@@ -1,12 +1,22 @@
 /**
  * The root layout. Every screen mounts inside this.
  *
- * Deliberately bare for MOB-005: this task proves the app builds, launches and
- * resolves `@nowry/core` across the workspace. The platform port is wired in
- * MOB-006, the theme in MOB-009, and the tab bar in MOB-015.
+ * The first two imports are the whole point of the file's order: the platform
+ * port is installed, then i18next is initialised against it. Both are module
+ * side effects, so they have run before any screen renders.
  */
+import '../src/platform/configure'
+import '../src/i18n'
+
 import { Stack } from 'expo-router'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { NotificationHost } from '../src/ui/Toast'
 
 export default function RootLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <SafeAreaProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+      <NotificationHost />
+    </SafeAreaProvider>
+  )
 }

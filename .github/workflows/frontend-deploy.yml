@@ -44,6 +44,16 @@ jobs:
         run: npm run lint
         continue-on-error: true  # Lint warnings do not block deployment
 
+      # The @nowry/core boundary is not a style preference: JSX or a browser
+      # global in that package breaks the WEB build with a confusing error
+      # pointing at a file the web app does not own (ADR-026, ADR-031). It has
+      # already caught two real bugs, so unlike the lint above it blocks.
+      - name: Shared package boundary
+        run: npx eslint "packages/core/**/*.js"
+
+      - name: Shared package tests
+        run: npm run test:core
+
       - name: Build
         run: npm run build
         env:
