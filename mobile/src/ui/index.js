@@ -1,10 +1,16 @@
 /**
  * The mobile primitives.
  *
- * Layout and text (MOB-010), action (MOB-011), input (MOB-012). Surface and
- * feedback arrive in MOB-013.
+ * Layout and text (MOB-010), action (MOB-011), input (MOB-012), surface and
+ * feedback (MOB-013).
+ *
+ * `Tooltip` is deliberately absent: it has no mobile expression, and its web
+ * call sites become a visible label or nothing.
  */
+export { ActionSheet } from './ActionSheet'
+export { BottomSheet } from './BottomSheet'
 export { Box } from './Box'
+export { Card, Sheet } from './Sheet'
 export { Checkbox, Radio } from './Choice'
 export { Button } from './Button'
 export { Chip } from './Chip'
@@ -14,9 +20,12 @@ export { messageFor } from './formMessage'
 export { Input } from './Input'
 export { IconButton } from './IconButton'
 export { Screen } from './Screen'
+export { Measure, Progress } from './Progress'
 export { Segmented } from './Segmented'
 export { Select } from './Select'
+export { Skeleton } from './Skeleton'
 export { Stack } from './Stack'
+export { NotificationHost } from './Toast'
 export { Typography, resolveColor } from './Typography'
 export { TYPE_LEVELS, TYPE_LEVEL_NAMES, MIN_FONT_SIZE } from './typeLevels'
 export {
@@ -31,3 +40,6 @@ export {
   SEGMENT_HEIGHT,
   SEGMENT_UNDERLINE
 } from './buttonSpec'
+
+// The ADR-021 composites.
+export * from './patterns'

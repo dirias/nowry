@@ -14,18 +14,29 @@ import { ScrollView, View } from 'react-native'
 import { ThemeProvider } from '../src/theme'
 import { useState } from 'react'
 import {
+  ActionSheet,
+  BottomSheet,
   Box,
   Button,
+  Card,
   Checkbox,
   Chip,
   Divider,
   FormField,
   IconButton,
+  IdentityTile,
   Input,
+  ListRow,
+  Measure,
+  Progress,
   Radio,
+  Readout,
   Segmented,
   Select,
+  Sheet,
+  Skeleton,
   Stack,
+  SummaryObject,
   Typography,
   BUTTON_SIZE_NAMES,
   BUTTON_VARIANT_NAMES,
@@ -162,6 +173,76 @@ function Panel({ title }) {
           <ChoiceDemo />
         </Section>
 
+        <Section label='Summary object (ADR-021 §1)'>
+          <SummaryObject
+            title='Today'
+            context='Monday, 8 September'
+            progress={62}
+            readouts={
+              <>
+                <Readout leading>12 due</Readout>
+                <Readout>4 decks</Readout>
+                <Readout>18 day streak</Readout>
+              </>
+            }
+            action={<Button size='sm'>Start studying</Button>}
+            secondary={
+              <Button size='sm' variant='tertiary'>
+                History
+              </Button>
+            }
+          />
+          <SummaryObject
+            title='Today'
+            context='Nothing due'
+            empty='All caught up. Add a deck when you are ready.'
+            action={<Button size='sm'>Add a deck</Button>}
+          />
+        </Section>
+
+        <Section label='List rows (ADR-021 §2)'>
+          <ListRow
+            tile={<IdentityTile color='primary.solidBg' />}
+            name='Spanish verbs'
+            meta='42 cards · reviewed yesterday'
+            measure={<Measure value={62} accessibilityLabel='62 percent learned' />}
+            readout={<Readout leading>3 due</Readout>}
+            onPress={() => {}}
+          />
+          <Divider />
+          <ListRow
+            tile={<IdentityTile color='danger.plainColor' />}
+            name='Kanji, set two'
+            meta='128 cards'
+            measure={<Measure value={0} accessibilityLabel='nothing learned yet' />}
+            readout={<Readout>up to date</Readout>}
+            onPress={() => {}}
+          />
+        </Section>
+
+        <Section label='Surfaces'>
+          <Sheet>
+            <Typography level='body-xs' color='text.secondary'>
+              Sheet — surface, radius lg, no border, no shadow
+            </Typography>
+          </Sheet>
+          <Card>
+            <Typography level='body-xs' color='text.secondary'>
+              Card — level1 with a hairline
+            </Typography>
+          </Card>
+        </Section>
+
+        <Section label='Loading and progress'>
+          <Skeleton width='70%' height={18} />
+          <Skeleton width='40%' height={14} />
+          <Progress value={38} accessibilityLabel='38 percent' />
+        </Section>
+
+        <Section label='Sheets'>
+          <SheetDemo />
+        </Section>
+
         <Section label='Stack, row'>
           <Stack direction='row' spacing={2} alignItems='center'>
             <Box bg='background.level2' padding={1} radius='sm' />
@@ -240,6 +321,36 @@ function ChoiceDemo() {
       <Checkbox checked={false} disabled label='Unavailable' onPress={() => {}} />
       <Radio checked={picked === 'daily'} label='Every day' onPress={() => setPicked('daily')} />
       <Radio checked={picked === 'weekly'} label='Every week' onPress={() => setPicked('weekly')} />
+    </Stack>
+  )
+}
+
+function SheetDemo() {
+  const [sheet, setSheet] = useState(false)
+  const [menu, setMenu] = useState(false)
+  return (
+    <Stack spacing={1}>
+      <Button size='sm' variant='secondary' onPress={() => setSheet(true)}>
+        Open a bottom sheet
+      </Button>
+      <Button size='sm' variant='secondary' onPress={() => setMenu(true)}>
+        Open an action sheet
+      </Button>
+      <BottomSheet visible={sheet} onClose={() => setSheet(false)} title='Drag me down'>
+        <Typography level='body-sm' color='text.secondary'>
+          Past a third of the height, or fast enough, it goes. Short of that it springs back.
+        </Typography>
+      </BottomSheet>
+      <ActionSheet
+        visible={menu}
+        onClose={() => setMenu(false)}
+        title='Deck'
+        actions={[
+          { id: 'rename', label: 'Rename' },
+          { id: 'archive', label: 'Archive' },
+          { id: 'delete', label: 'Delete', destructive: true }
+        ]}
+      />
     </Stack>
   )
 }
