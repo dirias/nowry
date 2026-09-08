@@ -18,8 +18,11 @@ import { buildTheme, DEFAULT_THEME_COLOR } from './buildTheme'
 
 const ThemeContext = createContext(null)
 
-export function ThemeProvider({ children, themeColor = DEFAULT_THEME_COLOR }) {
-  const scheme = useColorScheme() === 'dark' ? 'dark' : 'light'
+export function ThemeProvider({ children, themeColor = DEFAULT_THEME_COLOR, scheme: forced }) {
+  // `forced` exists for the harness, which has to show both schemes at once.
+  // Nothing in the app passes it; the OS decides.
+  const os = useColorScheme() === 'dark' ? 'dark' : 'light'
+  const scheme = forced ?? os
   const theme = useMemo(() => buildTheme(scheme, themeColor), [scheme, themeColor])
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
 }
