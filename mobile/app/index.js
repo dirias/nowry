@@ -14,12 +14,14 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { useTranslation } from 'react-i18next'
 import { auth, env, notify, storage } from '@nowry/core'
+import { useTheme } from '../src/theme'
 import { apiClient } from '@nowry/core/api/client'
 
 const PROBE_KEY = 'nowry.platformProbe'
 
 export default function Index() {
   const { t, i18n } = useTranslation()
+  const theme = useTheme()
   const [roundTrip, setRoundTrip] = useState('not run')
   const [session, setSession] = useState('checking…')
   const [apiResult, setApiResult] = useState('not called')
@@ -54,9 +56,12 @@ export default function Index() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <ScrollView contentContainerStyle={[styles.screen, { backgroundColor: theme.palette.background.body }]}>
       <StatusBar style='auto' />
-      <Text style={styles.title}>Nowry</Text>
+      <Text style={[styles.title, { color: theme.palette.text.primary }]}>Nowry</Text>
+      <Text style={[styles.label, { color: theme.palette.text.tertiary }]}>
+        scheme {theme.scheme} · accent {theme.palette.primary.solidBg} · level1 {theme.palette.background.level1}
+      </Text>
 
       <Row label='storage (MMKV)' value={roundTrip} />
       <Row label='api url' value={env.apiUrl} />
@@ -66,15 +71,21 @@ export default function Index() {
 
       <Row label='api call' value={apiResult} />
 
-      <Pressable style={styles.button} onPress={() => notify('Notifications reach the client', 'info')}>
-        <Text style={styles.buttonText}>Test the notification sink</Text>
+      <Pressable
+        style={[styles.button, { backgroundColor: theme.palette.primary.solidBg, borderRadius: theme.radius.md, ...theme.elevation.sm }]}
+        onPress={() => notify('Notifications reach the client', 'info')}
+      >
+        <Text style={[styles.buttonText, { color: theme.palette.primary.solidColor }]}>Test the notification sink</Text>
       </Pressable>
 
-      <Pressable style={styles.button} onPress={callApi}>
-        <Text style={styles.buttonText}>Call the API through the shared client</Text>
+      <Pressable
+        style={[styles.button, { backgroundColor: theme.palette.primary.solidBg, borderRadius: theme.radius.md, ...theme.elevation.sm }]}
+        onPress={callApi}
+      >
+        <Text style={[styles.buttonText, { color: theme.palette.primary.solidColor }]}>Call the API through the shared client</Text>
       </Pressable>
 
-      <Text style={styles.footnote}>
+      <Text style={[styles.footnote, { color: theme.palette.text.tertiary }]}>
         Placeholder for MOB-018. Everything above travels through the shared package and the platform port.
       </Text>
     </ScrollView>
@@ -82,10 +93,11 @@ export default function Index() {
 }
 
 function Row({ label, value }) {
+  const theme = useTheme()
   return (
     <View style={styles.row}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{String(value)}</Text>
+      <Text style={[styles.label, { color: theme.palette.text.tertiary }]}>{label}</Text>
+      <Text style={[styles.value, { color: theme.palette.text.primary }]}>{String(value)}</Text>
     </View>
   )
 }
@@ -96,7 +108,7 @@ const styles = StyleSheet.create({
   row: { gap: 2 },
   label: { fontSize: 12, opacity: 0.6 },
   value: { fontSize: 15 },
-  button: { marginTop: 16, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, backgroundColor: '#1F2937' },
-  buttonText: { color: '#FFFFFF', fontSize: 14, textAlign: 'center' },
-  footnote: { marginTop: 24, fontSize: 12, opacity: 0.5 }
+  button: { marginTop: 16, paddingVertical: 12, paddingHorizontal: 16 },
+  buttonText: { fontSize: 14, textAlign: 'center' },
+  footnote: { marginTop: 24, fontSize: 12 }
 })

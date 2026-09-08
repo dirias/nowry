@@ -10,13 +10,21 @@ import '../src/i18n'
 
 import { Stack } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { ThemeProvider } from '../src/theme'
 import { NotificationHost } from '../src/ui/Toast'
 
 export default function RootLayout() {
+  /*
+   * `themeColor` is the app default for now. MOB-018 passes the account's
+   * chosen colour once Home reads the profile; the provider already
+   * regenerates the palette when it changes.
+   */
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-      <NotificationHost />
+      <ThemeProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+        <NotificationHost />
+      </ThemeProvider>
     </SafeAreaProvider>
   )
 }
