@@ -16,10 +16,15 @@ import { useState } from 'react'
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   Divider,
+  FormField,
   IconButton,
+  Input,
+  Radio,
   Segmented,
+  Select,
   Stack,
   Typography,
   BUTTON_SIZE_NAMES,
@@ -149,6 +154,14 @@ function Panel({ title }) {
           <SegmentedDemo />
         </Section>
 
+        <Section label='Inputs'>
+          <InputDemo />
+        </Section>
+
+        <Section label='Choices'>
+          <ChoiceDemo />
+        </Section>
+
         <Section label='Stack, row'>
           <Stack direction='row' spacing={2} alignItems='center'>
             <Box bg='background.level2' padding={1} radius='sm' />
@@ -177,6 +190,57 @@ function SegmentedDemo() {
         { value: 'tags', label: 'Tags' }
       ]}
     />
+  )
+}
+
+function InputDemo() {
+  const [text, setText] = useState('')
+  const [choice, setChoice] = useState('flashcard')
+  return (
+    <Stack spacing={2}>
+      <FormField labelKey='Title' helperKey='What this deck is for' required>
+        <Input
+          value={text}
+          onChangeText={setText}
+          placeholder='Spanish verbs'
+          accessibilityLabel='Title'
+          returnKeyType='done'
+          autoCapitalize='sentences'
+        />
+      </FormField>
+      <FormField labelKey='Title' errorKey='This field is required'>
+        <Input value='' onChangeText={() => {}} invalid accessibilityLabel='Title, invalid' />
+      </FormField>
+      <FormField labelKey='Card type'>
+        <Select
+          accessibilityLabel='Card type'
+          value={choice}
+          onChange={setChoice}
+          placeholderKey='Choose one'
+          options={[
+            { value: 'flashcard', label: 'Flashcard' },
+            { value: 'quiz', label: 'Quiz' },
+            { value: 'visual', label: 'Visual' }
+          ]}
+        />
+      </FormField>
+      <FormField labelKey='Notes'>
+        <Input value='' onChangeText={() => {}} multiline accessibilityLabel='Notes' />
+      </FormField>
+    </Stack>
+  )
+}
+
+function ChoiceDemo() {
+  const [checked, setChecked] = useState(true)
+  const [picked, setPicked] = useState('daily')
+  return (
+    <Stack spacing={1}>
+      <Checkbox checked={checked} label='Shuffle the deck' onPress={() => setChecked(!checked)} />
+      <Checkbox checked={false} disabled label='Unavailable' onPress={() => {}} />
+      <Radio checked={picked === 'daily'} label='Every day' onPress={() => setPicked('daily')} />
+      <Radio checked={picked === 'weekly'} label='Every week' onPress={() => setPicked('weekly')} />
+    </Stack>
   )
 }
 
