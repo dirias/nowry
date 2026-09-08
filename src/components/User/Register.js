@@ -32,6 +32,7 @@ import {
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { authService } from '@nowry/core/api/services/auth.service'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
+import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -190,29 +191,9 @@ const Register = () => {
     } catch (error) {
       console.error('Google login error:', error)
 
-      // Parse Google login errors
-      let errorMessage = t('auth.errors.loginFailed')
-
-      if (error.code) {
-        switch (error.code) {
-          case 'auth/popup-closed-by-user':
-            errorMessage = t('auth.errors.googleCancelled')
-            break
-          case 'auth/popup-blocked':
-            errorMessage = t('auth.errors.popupBlocked')
-            break
-          case 'auth/account-exists-with-different-credential':
-            errorMessage = t('auth.errors.accountExistsDifferent')
-            break
-          case 'auth/network-request-failed':
-            errorMessage = t('auth.errors.networkError')
-            break
-          default:
-            errorMessage = error.message || t('auth.errors.loginFailed')
-        }
-      } else if (error.message) {
-        errorMessage = error.message
-      }
+      // One table, shared with the mobile client (MOB-016).
+      const key = authErrorKey(error)
+      const errorMessage = key === FALLBACK_KEY && error.message ? error.message : t(key)
 
       setErrors({ serverError: errorMessage })
       setLoading(false)

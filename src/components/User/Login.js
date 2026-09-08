@@ -15,6 +15,7 @@ import {
 
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { authService } from '@nowry/core/api/services/auth.service'
+import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -41,34 +42,15 @@ const Login = () => {
     } catch (error) {
       console.error('Login error:', error)
 
-      // Parse Firebase error codes for user-friendly messages
-      let errorMessage = t('auth.errors.loginFailed')
-
-      if (error.code) {
-        switch (error.code) {
-          case 'auth/invalid-credential':
-          case 'auth/wrong-password':
-          case 'auth/user-not-found':
-            errorMessage = t('auth.errors.invalidCredentials')
-            break
-          case 'auth/invalid-email':
-            errorMessage = t('auth.errors.emailInvalid')
-            break
-          case 'auth/user-disabled':
-            errorMessage = t('auth.errors.accountDisabled')
-            break
-          case 'auth/too-many-requests':
-            errorMessage = t('auth.errors.tooManyAttempts')
-            break
-          case 'auth/network-request-failed':
-            errorMessage = t('auth.errors.networkError')
-            break
-          default:
-            errorMessage = error.message || t('auth.errors.loginFailed')
-        }
-      } else if (error.message) {
-        errorMessage = error.message
-      }
+      /*
+       * One table, shared with the mobile client (MOB-016). This switch used to
+       * be written out here and again in Register.js, which is how
+       * `auth/network-request-failed` ended up handled in one and not the other.
+       * `authErrorKey` always returns a key; the transport message is only a
+       * fallback for a code the table has never seen.
+       */
+      const key = authErrorKey(error)
+      const errorMessage = key === FALLBACK_KEY && error.message ? error.message : t(key)
 
       setError(errorMessage)
       setLoading(false)
