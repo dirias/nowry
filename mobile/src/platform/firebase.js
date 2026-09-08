@@ -17,6 +17,7 @@ import Constants from 'expo-constants'
 import { initializeApp } from 'firebase/app'
 import { GoogleAuthProvider, getReactNativePersistence, initializeAuth } from 'firebase/auth'
 import { firebasePersistenceStore } from './storage'
+import { signInWithGoogle as googleSignIn } from './googleSignIn'
 
 const config = Constants.expoConfig?.extra?.firebase ?? {}
 
@@ -34,12 +35,13 @@ export const auth = initializeAuth(app, {
 
 /**
  * Google sign-in is the one auth operation that cannot be shared (ADR-028).
- * The web client uses a popup, which has no mobile equivalent; MOB-017 replaces
- * this with an expo-auth-session flow that returns the same credential shape.
+ * The flow lives in `googleSignIn.js`; this binds it to this client's Auth
+ * instance so the port exposes the same nullary function the web adapter does.
+ *
+ * Resolves to null when the user cancelled, which callers treat as "nothing
+ * happened" rather than as a failure.
  */
-export const signInWithGoogle = async () => {
-  throw new Error('Google sign-in arrives with MOB-017 (expo-auth-session). Use email and password for now.')
-}
+export const signInWithGoogle = () => googleSignIn(auth)
 
 export { GoogleAuthProvider }
 export default app

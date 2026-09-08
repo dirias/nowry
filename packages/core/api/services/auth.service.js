@@ -125,6 +125,15 @@ export const authService = {
   async loginWithGoogle() {
     try {
       const userCredential = await authPort.signInWithGoogle()
+
+      /*
+       * A cancellation, not a failure (MOB-017). The web's popup throws when it
+       * is dismissed, so this is null only on mobile — but the shared service is
+       * where the two shapes meet, so it is handled once here rather than at
+       * each caller. Callers treat null as "nothing happened".
+       */
+      if (!userCredential) return null
+
       const user = userCredential.user
 
       // Get Firebase ID token

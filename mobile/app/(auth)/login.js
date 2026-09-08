@@ -26,6 +26,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
   const [busy, setBusy] = useState(false)
+  const [googleBusy, setGoogleBusy] = useState(false)
 
   const submit = async () => {
     const next = {}
@@ -45,6 +46,25 @@ export default function Login() {
       // The password is never logged and never stored. It leaves this scope here.
       setPassword('')
       setBusy(false)
+    }
+  }
+
+  /*
+   * Google is the one path that differs per client (ADR-028). `signInWithGoogle`
+   * resolves to null when the user dismissed the browser, and that is a decision
+   * rather than a failure — showing "sign-in failed" because someone changed
+   * their mind is the app arguing with them.
+   */
+  const submitGoogle = async () => {
+    setErrors({})
+    setGoogleBusy(true)
+    try {
+      // null means the user dismissed the browser. Nothing to say about that.
+      await authService.loginWithGoogle()
+    } catch (error) {
+      setErrors({ form: authErrorKey(error) })
+    } finally {
+      setGoogleBusy(false)
     }
   }
 
@@ -96,6 +116,14 @@ export default function Login() {
 
         <Button onPress={submit} loading={busy} accessibilityLabel={t('auth.signIn')}>
           {t('auth.signIn')}
+        </Button>
+
+        <Typography level='body-xs' color='text.tertiary' style={{ textAlign: 'center' }}>
+          {t('auth.orContinueWith')}
+        </Typography>
+
+        <Button variant='secondary' onPress={submitGoogle} loading={googleBusy} accessibilityLabel={t('auth.signInGoogle')}>
+          {t('auth.signInGoogle')}
         </Button>
 
         <Stack direction='row' spacing={1} justifyContent='center'>

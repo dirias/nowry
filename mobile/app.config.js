@@ -30,7 +30,7 @@ module.exports = () => ({
       package: 'com.nowry.app',
       edgeToEdgeEnabled: true
     },
-    plugins: ['expo-router', 'expo-status-bar'],
+    plugins: ['expo-router', 'expo-status-bar', 'expo-localization', 'expo-web-browser'],
     experiments: {
       typedRoutes: false
     },
@@ -41,6 +41,11 @@ module.exports = () => ({
       apiUrl: process.env.EXPO_PUBLIC_API_URL,
       apiTimeout: Number(process.env.EXPO_PUBLIC_API_TIMEOUT || 10000),
       sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+      // Google issues one client ID per platform (MOB-017, ADR-028). The wrong
+      // one fails with redirect_uri_mismatch rather than anything useful.
+      googleClientIdIos: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
+      googleClientIdAndroid: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
+      googleClientIdWeb: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
       firebase: {
         apiKey: process.env.EXPO_PUBLIC_FB_API_KEY,
         authDomain: process.env.EXPO_PUBLIC_FB_AUTH_DOMAIN,
