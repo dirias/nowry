@@ -12,7 +12,20 @@
  */
 import { ScrollView, View } from 'react-native'
 import { ThemeProvider } from '../src/theme'
-import { Box, Divider, Stack, Typography, TYPE_LEVEL_NAMES } from '../src/ui'
+import { useState } from 'react'
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  Segmented,
+  Stack,
+  Typography,
+  BUTTON_SIZE_NAMES,
+  BUTTON_VARIANT_NAMES,
+  TYPE_LEVEL_NAMES
+} from '../src/ui'
 
 export default function Harness() {
   return (
@@ -83,6 +96,59 @@ function Panel({ title }) {
           ))}
         </Section>
 
+        <Section label='Buttons — every variant'>
+          {BUTTON_VARIANT_NAMES.map((variant) => (
+            <Button key={variant} variant={variant} onPress={() => {}}>
+              {variant}
+            </Button>
+          ))}
+        </Section>
+
+        <Section label='Buttons — every size'>
+          {BUTTON_SIZE_NAMES.map((size) => (
+            <Button key={size} size={size} onPress={() => {}}>
+              size {size}
+            </Button>
+          ))}
+        </Section>
+
+        <Section label='Buttons — states'>
+          <Button loading accessibilityLabel='Saving'>
+            Saving…
+          </Button>
+          <Button disabled accessibilityLabel='Unavailable'>
+            disabled
+          </Button>
+        </Section>
+
+        <Section label='Icon buttons'>
+          <Stack direction='row' spacing={2} alignItems='center'>
+            {['tertiary', 'secondary', 'primary'].map((variant) => (
+              <IconButton key={variant} variant={variant} accessibilityLabel={`${variant} icon button`} onPress={() => {}}>
+                <Typography level='title-sm' color={variant === 'primary' ? 'primary.solidColor' : 'text.secondary'}>
+                  ×
+                </Typography>
+              </IconButton>
+            ))}
+          </Stack>
+        </Section>
+
+        <Section label='Chips'>
+          <Stack direction='row' spacing={1} flexWrap='wrap'>
+            <Chip onPress={() => {}}>unselected</Chip>
+            <Chip selected onPress={() => {}}>
+              selected
+            </Chip>
+            <Chip size='md' onPress={() => {}}>
+              md
+            </Chip>
+          </Stack>
+        </Section>
+
+        <Section label='Segmented'>
+          <SegmentedDemo />
+        </Section>
+
         <Section label='Stack, row'>
           <Stack direction='row' spacing={2} alignItems='center'>
             <Box bg='background.level2' padding={1} radius='sm' />
@@ -95,6 +161,22 @@ function Panel({ title }) {
         </Section>
       </Stack>
     </Box>
+  )
+}
+
+function SegmentedDemo() {
+  const [value, setValue] = useState('decks')
+  return (
+    <Segmented
+      accessibilityLabel='Library view'
+      value={value}
+      onChange={setValue}
+      options={[
+        { value: 'decks', label: 'Decks' },
+        { value: 'cards', label: 'Cards' },
+        { value: 'tags', label: 'Tags' }
+      ]}
+    />
   )
 }
 

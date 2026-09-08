@@ -64,6 +64,20 @@ describe('buildTheme', () => {
     expect(motion.easing.standard).toHaveLength(4)
   })
 
+  it('gives radius as NUMBERS, because React Native ignores a CSS string', () => {
+    const { radius } = buildTheme('light', DEFAULT_THEME_COLOR)
+    expect(radius.md).toBe(8)
+    expect(radius.sm).toBe(6)
+    expect(radius.lg).toBe(12)
+    Object.values(radius).forEach((v) => expect(typeof v).toBe('number'))
+  })
+
+  it('gives spacing as numbers too', () => {
+    const { spacing } = buildTheme('light', DEFAULT_THEME_COLOR)
+    expect(spacing[2]).toBe(16)
+    expect(typeof spacing[3]).toBe('number')
+  })
+
   it('elevation.none is genuinely flat, so it is a real default', () => {
     expect(ELEVATION.none.shadowOpacity).toBe(0)
     expect(ELEVATION.none.elevation).toBe(0)

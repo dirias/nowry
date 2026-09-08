@@ -19,6 +19,13 @@ import {
   Z_INDEX
 } from '@nowry/core/tokens/tokens'
 import { ELEVATION } from './elevation'
+
+/**
+ * The shared RADIUS scale is CSS ('8px'), because the web hands it to Joy.
+ * React Native wants a number and silently ignores a string, which is how a
+ * button ends up with square corners and nothing says why.
+ */
+const toNumbers = (scale) => Object.fromEntries(Object.entries(scale).map(([k, v]) => [k, typeof v === 'string' ? parseFloat(v) : v]))
 import { DURATION, EASING } from './motionTokens'
 
 /** The same default the web client starts from. */
@@ -40,7 +47,7 @@ export const buildTheme = (scheme, themeColor) => {
     scheme,
     palette: mergeGroups(base, generated),
     // Colour lives in `palette`; these carry none.
-    radius: RADIUS,
+    radius: toNumbers(RADIUS),
     spacing: SPACING_SCALE,
     fontFamily: FONT_FAMILY,
     fontSize: FONT_SIZE,
