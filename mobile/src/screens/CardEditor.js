@@ -278,7 +278,7 @@ export function CardEditor({ card = null, deckId = null }) {
             the phone, so there is no Upgrade button here as there is on web. */}
         {form.saveError ? (
           <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {form.limitReached ? t('subscription.errors.limitReached') : form.saveError}
+            {form.saveErrorOffline ? t('errors.offline') : form.limitReached ? t('subscription.errors.limitReached') : form.saveError}
           </Typography>
         ) : null}
 

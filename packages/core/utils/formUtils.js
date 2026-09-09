@@ -38,6 +38,24 @@ export const describeApiError = (error) => {
 }
 
 /**
+ * Did this request fail because there was no network, rather than because the
+ * server said no?
+ *
+ * The difference matters to what the user is told. A 422 has a message worth
+ * reading; a phone in a tunnel produces the bare string "Network Error", which
+ * is English, is not a sentence, and tells the user nothing they can act on.
+ * A caller that knows the difference can say "you appear to be offline" in the
+ * user's own language instead.
+ *
+ * Axios sets no `response` when the request never reached a server, and marks
+ * the two ways that happens with a code: no route out, or a timeout waiting.
+ */
+export const isOfflineError = (error) => {
+  if (!error || error.response) return false
+  return error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED' || Boolean(error.request)
+}
+
+/**
  * A card's `deck_id` comes back populated as an object on some responses and as
  * a bare id string on others, so every card form hand-rolled the same ten-line
  * unwrap. One rule, one place.

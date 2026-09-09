@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 
-import { describeApiError } from '../utils/formUtils'
+import { describeApiError, isOfflineError } from '../utils/formUtils'
 
 /**
  * Debounced autosave across several independent write paths.
@@ -28,6 +28,8 @@ const useDebouncedChannels = ({ channels, delay = 600 }) => {
   const [savingKey, setSavingKey] = useState(null)
   const [savedKey, setSavedKey] = useState(null)
   const [error, setError] = useState(null)
+  // Whether that message came from a server or from a phone with no signal.
+  const [errorOffline, setErrorOffline] = useState(false)
 
   const timers = useRef({})
   const pending = useRef({})
@@ -47,12 +49,14 @@ const useDebouncedChannels = ({ channels, delay = 600 }) => {
       delete failed.current[channel]
       succeeded.current = true
       setError(null)
+      setErrorOffline(false)
       setSavedKey(job.key)
       setTimeout(() => setSavedKey(null), SAVED_FOR_MS)
     } catch (caught) {
       // Held so Retry re-sends the change rather than asking for it again.
       failed.current[channel] = job
       setError(describeApiError(caught))
+      setErrorOffline(isOfflineError(caught))
     } finally {
       setSavingKey(null)
     }
@@ -102,6 +106,7 @@ const useDebouncedChannels = ({ channels, delay = 600 }) => {
     savingKey,
     savedKey,
     error,
+    errorOffline,
     setError,
     queue,
     cancel,

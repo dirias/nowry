@@ -29,6 +29,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { cardsService, studySessionsService } from '@nowry/core/api/services'
 import { storage } from '@nowry/core'
+import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { Button, Card, Screen, Skeleton, Stack, Typography } from '../ui'
 
 const GRADES = ['again', 'hard', 'good', 'easy']
@@ -55,7 +56,9 @@ export function StudySession() {
 
   const deckName = useRef(null)
   const graded = useRef([])
-  const failed = useRef([])
+  // How many grades are waiting on a signal. Shown on the summary, because a
+  // session that has not reached the server yet is a fact the user should have.
+  const [queued, setQueued] = useState(0)
   const startedAt = useRef(new Date())
   const logged = useRef(false)
 
@@ -106,16 +109,17 @@ export function StudySession() {
 
     // An all-caught-up deck lands here too, with nothing to log.
     if (graded.current.length === 0) return
-    studySessionsService
-      .log({
-        deckId: id,
-        deckName: deckName.current,
-        startedAt: startedAt.current,
-        cards: graded.current
-      })
-      .catch(() => {
-        // History is a record, not the session. Losing it never interrupts.
-      })
+    const payload = {
+      deckId: id,
+      deckName: deckName.current,
+      startedAt: startedAt.current,
+      cards: graded.current
+    }
+    studySessionsService.log(payload).catch(() => {
+      // History is a record, not the session — it never interrupts. But it is
+      // queued rather than dropped, so a session studied offline still appears.
+      queueSession(payload)
+    })
   }, [complete, id])
 
   const grade = useCallback(
@@ -132,13 +136,23 @@ export function StudySession() {
       setRevealed(false)
       writeResume(id, { index: next, graded: graded.current, startedAt: startedAt.current })
 
-      cardsService.review(cardId, value, 'study').catch(() =>
-        // One retry, then it is recorded and reported on the summary. A grade
-        // that vanishes silently is worse than one the user is told about.
-        cardsService.review(cardId, value, 'study').catch(() => {
-          failed.current = [...failed.current, cardId]
+      /*
+       * A grade that cannot be sent is not lost and is not retried in a loop
+       * here: it goes to the outbox, which is on disk and survives the app
+       * being killed, and is sent in order when sending starts working (MOB-026).
+       * A successful send is also the moment to try anything already waiting.
+       */
+      cardsService
+        .review(cardId, value, 'study')
+        .then(() => {
+          flushOutbox().then(({ sent, remaining }) => {
+            if (sent > 0) setQueued(remaining)
+          })
         })
-      )
+        .catch(() => {
+          queueReview(cardId, value)
+          setQueued((n) => n + 1)
+        })
     },
     [cards, index, id]
   )
@@ -195,9 +209,9 @@ export function StudySession() {
           <Typography level='body-md' color='text.secondary'>
             {t('cards.session.complete.body', { count: graded.current.length })}
           </Typography>
-          {failed.current.length ? (
-            <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-              {t('cards.session.error')}
+          {queued > 0 ? (
+            <Typography level='body-sm' color='text.tertiary' accessibilityLiveRegion='polite'>
+              {t('cards.session.syncing', { count: queued })}
             </Typography>
           ) : null}
           <Button onPress={() => router.replace('/study')}>{t('cards.session.complete.backToLibrary')}</Button>

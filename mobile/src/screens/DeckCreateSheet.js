@@ -92,7 +92,7 @@ export function DeckCreateSheet({ visible, onClose, onCreated }) {
               decision exists to avoid. */}
           {form.saveError ? (
             <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-              {form.limitReached ? t('subscription.errors.limitReached') : form.saveError}
+              {form.saveErrorOffline ? t('errors.offline') : form.limitReached ? t('subscription.errors.limitReached') : form.saveError}
             </Typography>
           ) : null}
 

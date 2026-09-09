@@ -67,6 +67,7 @@ export function DeckDetail() {
     saveConfig,
     saveVoice,
     saveError,
+    saveErrorOffline,
     close
   } = settings
 
@@ -238,7 +239,8 @@ export function DeckDetail() {
 
         {saveError ? (
           <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {t('deckSettings.saveFailed')}
+            {/* "Network Error" is not a sentence and not the user's language. */}
+            {saveErrorOffline ? t('errors.offline') : t('deckSettings.saveFailed')}
           </Typography>
         ) : null}
 

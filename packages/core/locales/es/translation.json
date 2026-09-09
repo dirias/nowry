@@ -1393,9 +1393,8 @@
         "outsideFilter_other": "{{count}} tarjetas pendientes más quedan fuera de tu filtro de etiquetas."
       },
       "card": "Tarjeta {{current}} de {{total}}",
-      "syncing": "Sincronizando {{count}} revisión...",
-      "syncing_one": "Sincronizando {{count}} revisión...",
-      "syncing_other": "Sincronizando {{count}} revisiones...",
+      "syncing_one": "Sincronizando {{count}} repaso...",
+      "syncing_other": "Sincronizando {{count}} repasos...",
       "labels": {
         "question": "Pregunta",
         "answer": "Respuesta",
@@ -3642,5 +3641,8 @@
     "focus": "Enfoque",
     "profile": "Perfil",
     "settings": "Ajustes"
+  },
+  "errors": {
+    "offline": "Parece que no tienes conexión. No se perdió nada; inténtalo de nuevo cuando vuelvas a tener señal."
   }
 }

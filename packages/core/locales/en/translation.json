@@ -1657,7 +1657,6 @@
         "outsideFilter_other": "{{count}} more due cards sit outside your tag filter."
       },
       "card": "Card {{current}} of {{total}}",
-      "syncing": "Syncing {{count}} review...",
       "syncing_one": "Syncing {{count}} review...",
       "syncing_other": "Syncing {{count}} reviews...",
       "labels": {
@@ -3800,5 +3799,8 @@
     "focus": "Focus",
     "profile": "Profile",
     "settings": "Settings"
+  },
+  "errors": {
+    "offline": "You appear to be offline. Nothing was lost — try again when you have a signal."
   }
 }

@@ -190,6 +190,7 @@ const useDeckSettings = ({ open, deckId, initialSection = 'study', onSaved, onCl
     savingSection: saves.savingKey,
     savedSection: saves.savedKey,
     saveError: saves.error,
+    saveErrorOffline: saves.errorOffline,
     saveConfig,
     saveVoice,
     retry: saves.retry,

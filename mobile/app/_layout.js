@@ -19,6 +19,7 @@ import { AuthProvider } from '@nowry/core/context/AuthContext'
 import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { AppearanceProvider } from '../src/theme/AppearanceProvider'
+import { OfflineSync } from '../src/platform/OfflineSync'
 import { NotificationHost } from '../src/ui/Toast'
 import { AuthGate } from '../src/navigation/AuthGate'
 
@@ -40,6 +41,7 @@ export default function RootLayout() {
                 <Slot />
               </AuthGate>
             </PomodoroProvider>
+            <OfflineSync />
             <NotificationHost />
           </AppearanceProvider>
         </AuthProvider>

@@ -2170,7 +2170,9 @@
         "hard": "Difficile",
         "good": "Bien",
         "easy": "Facile"
-      }
+      },
+      "syncing_one": "Synchronisation de {{count}} révision...",
+      "syncing_other": "Synchronisation de {{count}} révisions..."
     },
     "common": {
       "addTags": "Ajouter des étiquettes",
@@ -3058,5 +3060,8 @@
     "focus": "Concentration",
     "profile": "Profil",
     "settings": "Réglages"
+  },
+  "errors": {
+    "offline": "Vous semblez hors ligne. Rien n'est perdu : réessayez dès que vous aurez du réseau."
   }
 }

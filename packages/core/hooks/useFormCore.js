@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { describeApiError } from '../utils/formUtils'
+import { describeApiError, isOfflineError } from '../utils/formUtils'
 
 /**
  * useFormCore — the state and persistence behind every form surface.
@@ -61,6 +61,8 @@ const useFormCore = ({
   const [errorAt, setErrorAt] = useState(0)
   const [firstErrorField, setFirstErrorField] = useState(null)
   const [saveError, setSaveError] = useState(null)
+  // Whether that message came from a server or from a phone with no signal.
+  const [saveErrorOffline, setSaveErrorOffline] = useState(false)
   const [saving, setSaving] = useState(false)
   const [savedCount, setSavedCount] = useState(0)
 
@@ -169,6 +171,7 @@ const useFormCore = ({
       return { saved: await persist(buildPayload(values), isEdit) }
     } catch (error) {
       setSaveError(describeApiError(error))
+      setSaveErrorOffline(isOfflineError(error))
       return null
     } finally {
       setSaving(false)
@@ -220,6 +223,7 @@ const useFormCore = ({
     errorAt,
     firstErrorField,
     saveError,
+    saveErrorOffline,
     saving,
     savedCount,
     isEdit,

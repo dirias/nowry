@@ -2152,7 +2152,9 @@
         "hard": "Schwer",
         "good": "Gut",
         "easy": "Leicht"
-      }
+      },
+      "syncing_one": "{{count}} Wiederholung wird synchronisiert...",
+      "syncing_other": "{{count}} Wiederholungen werden synchronisiert..."
     },
     "common": {
       "addTags": "Tags hinzufügen",
@@ -3040,5 +3042,8 @@
     "focus": "Fokus",
     "profile": "Profil",
     "settings": "Einstellungen"
+  },
+  "errors": {
+    "offline": "Du scheinst offline zu sein. Nichts ist verloren — versuch es erneut, sobald du Empfang hast."
   }
 }
