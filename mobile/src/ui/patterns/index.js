@@ -5,6 +5,7 @@
  * screen is made of, built once so a deck, an event and a book are visibly the
  * same class of thing.
  */
+export { ForecastStrip } from './ForecastStrip'
 export { IdentityTile } from './IdentityTile'
 export { ListRow } from './ListRow'
 export { NextStepsPanel } from './NextStepsPanel'

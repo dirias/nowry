@@ -256,7 +256,8 @@
         "label": "Browse",
         "description": "Look through every card — no grading, no schedule changes"
       }
-    }
+    },
+    "dueCount": "{{count}} fällig"
   },
   "auth": {
     "welcomeBack": "Willkommen zurück",
