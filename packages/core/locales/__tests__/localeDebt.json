@@ -764,11 +764,9 @@
       "subscription.errors.aiLimit",
       "subscription.errors.bookLimit",
       "subscription.errors.genericCreate",
-      "subscription.errors.limitReached",
       "subscription.errors.pageLimit",
       "subscription.errors.upgradeAdvice",
-      "subscription.errors.upgradeToUse",
-      "subscription.upgrade"
+      "subscription.errors.upgradeToUse"
     ],
     "de": [
       "agent.animation.freeTierError",
@@ -1419,11 +1417,9 @@
       "subscription.errors.aiLimit",
       "subscription.errors.bookLimit",
       "subscription.errors.genericCreate",
-      "subscription.errors.limitReached",
       "subscription.errors.pageLimit",
       "subscription.errors.upgradeAdvice",
-      "subscription.errors.upgradeToUse",
-      "subscription.upgrade"
+      "subscription.errors.upgradeToUse"
     ],
     "ja": [
       "agent.animation.freeTierError",
@@ -2077,11 +2073,9 @@
       "subscription.errors.aiLimit",
       "subscription.errors.bookLimit",
       "subscription.errors.genericCreate",
-      "subscription.errors.limitReached",
       "subscription.errors.pageLimit",
       "subscription.errors.upgradeAdvice",
-      "subscription.errors.upgradeToUse",
-      "subscription.upgrade"
+      "subscription.errors.upgradeToUse"
     ]
   },
   "untranslated": {

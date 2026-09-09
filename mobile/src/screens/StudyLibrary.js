@@ -25,7 +25,22 @@ import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useGroups } from '@nowry/core/hooks/useGroups'
 import { useTags } from '@nowry/core/hooks/useTags'
 import { useTheme } from '../theme'
-import { ActionSheet, Chip, Divider, IdentityTile, Input, ListRow, Measure, Readout, Segmented, Skeleton, Stack, Typography } from '../ui'
+import { DeckCreateSheet } from './DeckCreateSheet'
+import {
+  ActionSheet,
+  Button,
+  Chip,
+  Divider,
+  IdentityTile,
+  Input,
+  ListRow,
+  Measure,
+  Readout,
+  Segmented,
+  Skeleton,
+  Stack,
+  Typography
+} from '../ui'
 
 const VIEWS = { decks: 'decks', cards: 'cards', tags: 'tags' }
 
@@ -39,6 +54,7 @@ export function StudyLibrary({ header }) {
   const [markedOnly, setMarkedOnly] = useState(false)
   const [untagged, setUntagged] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [creating, setCreating] = useState(false)
 
   const decks = useDeckData(null)
   const tags = useTags({ enabled: view === VIEWS.tags })
@@ -107,6 +123,12 @@ export function StudyLibrary({ header }) {
           { value: VIEWS.tags, label: t('filters.tags') }
         ]}
       />
+
+      {view === VIEWS.decks ? (
+        <Button size='sm' variant='secondary' onPress={() => setCreating(true)} accessibilityLabel={t('study.today.createDeck')}>
+          {t('study.today.createDeck')}
+        </Button>
+      ) : null}
 
       {/* One toolbar row: search and the filter trigger. Never four rows. */}
       {view === VIEWS.cards ? (
@@ -189,6 +211,13 @@ export function StudyLibrary({ header }) {
             }
           }
         ]}
+      />
+
+      <DeckCreateSheet
+        visible={creating}
+        onClose={() => setCreating(false)}
+        // Not a close: the sheet stays up to confirm, and dismisses itself.
+        onCreated={() => decks.reload?.()}
       />
     </>
   )
