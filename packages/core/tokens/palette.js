@@ -53,6 +53,39 @@ export const BASE_PALETTE = {
       solidBg: '#636B74'
     },
     // Joy expresses this as rgba(neutral.mainChannel / 0.2).
+    /*
+     * The accent groups' STRUCTURAL names, from Joy's defaults.
+     *
+     * `colorSchemeGenerator` overrides solidBg, softBg and their companions per
+     * user, but it never supplies `plainColor` or `outlinedBorder` — those come
+     * from Joy, and the web writes them 102 times. Without them here, a mobile
+     * screen naming `danger.plainColor` resolves to undefined and throws.
+     * Extracted the same way as everything else in this file.
+     */
+    success: {
+      plainColor: '#1F7A1F',
+      outlinedBorder: '#A1E8A1',
+      softColor: '#0A470A',
+      softBg: '#E3FBE3',
+      solidBg: '#1F7A1F',
+      solidColor: '#FFF'
+    },
+    warning: {
+      plainColor: '#9A5B13',
+      outlinedBorder: '#F3C896',
+      softColor: '#492B08',
+      softBg: '#FDF0E1',
+      solidBg: '#9A5B13',
+      solidColor: '#FFF'
+    },
+    danger: {
+      plainColor: '#C41C1C',
+      outlinedBorder: '#F09898',
+      softColor: '#7D1212',
+      softBg: '#FCE4E4',
+      solidBg: '#C41C1C',
+      solidColor: '#FFF'
+    },
     divider: 'rgba(99, 107, 116, 0.2)',
     common: { white: '#FFFFFF', black: '#000000' }
   },
@@ -78,6 +111,39 @@ export const BASE_PALETTE = {
       plainColor: '#CDD7E1',
       softBg: '#171A1C',
       solidBg: '#555E68'
+    },
+    /*
+     * The accent groups' STRUCTURAL names, from Joy's defaults.
+     *
+     * `colorSchemeGenerator` overrides solidBg, softBg and their companions per
+     * user, but it never supplies `plainColor` or `outlinedBorder` — those come
+     * from Joy, and the web writes them 102 times. Without them here, a mobile
+     * screen naming `danger.plainColor` resolves to undefined and throws.
+     * Extracted the same way as everything else in this file.
+     */
+    success: {
+      plainColor: '#A1E8A1',
+      outlinedBorder: '#0A470A',
+      softColor: '#C7F7C7',
+      softBg: '#042F04',
+      solidBg: '#1F7A1F',
+      solidColor: '#FFF'
+    },
+    warning: {
+      plainColor: '#F3C896',
+      outlinedBorder: '#492B08',
+      softColor: '#FCE1C2',
+      softBg: '#2E1B05',
+      solidBg: '#9A5B13',
+      solidColor: '#FFF'
+    },
+    danger: {
+      plainColor: '#F09898',
+      outlinedBorder: '#7D1212',
+      softColor: '#F7C5C5',
+      softBg: '#430A0A',
+      solidBg: '#C41C1C',
+      solidColor: '#FFF'
     },
     divider: 'rgba(99, 107, 116, 0.16)',
     common: { white: '#FFFFFF', black: '#000000' }

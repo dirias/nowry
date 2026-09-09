@@ -45,6 +45,15 @@ describe.each(['light', 'dark'])('%s — the shared palette matches what the web
     expect(norm(resolve(webPalette(scheme), webPalette(scheme).text[key]))).toBe(norm(shared.text[key]))
   })
 
+  it.each(['success', 'warning', 'danger'])('%s.plainColor and .outlinedBorder', (group) => {
+    // These come from Joy's defaults, never from colorSchemeGenerator, and the
+    // web writes them 102 times. Their absence from the shared palette threw on
+    // a device before this covered them.
+    const p = webPalette(scheme)
+    expect(norm(resolve(p, p[group].plainColor))).toBe(norm(shared[group].plainColor))
+    expect(norm(resolve(p, p[group].outlinedBorder))).toBe(norm(shared[group].outlinedBorder))
+  })
+
   it('neutral.outlinedBorder', () => {
     expect(norm(resolve(webPalette(scheme), webPalette(scheme).neutral.outlinedBorder))).toBe(norm(shared.neutral.outlinedBorder))
   })

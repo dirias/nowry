@@ -28,6 +28,42 @@ describe('buildTheme', () => {
     expect(palette.divider).toBeTruthy()
   })
 
+  it.each(['light', 'dark'])('%s resolves every semantic name the primitives write', (scheme) => {
+    /*
+     * The list is not decorative: each of these is written by a primitive or a
+     * pattern in this package, and `resolveColor` throws on a name it cannot
+     * find. `success.plainColor` was missing and reached a device.
+     */
+    const { palette } = buildTheme(scheme, DEFAULT_THEME_COLOR)
+    const used = [
+      'text.primary',
+      'text.secondary',
+      'text.tertiary',
+      'background.body',
+      'background.surface',
+      'background.popup',
+      'background.level1',
+      'background.level2',
+      'background.level3',
+      'primary.solidBg',
+      'primary.solidColor',
+      'primary.softBg',
+      'primary.plainColor',
+      'primary.solidActiveBg',
+      'neutral.outlinedBorder',
+      'danger.plainColor',
+      'danger.softBg',
+      'success.plainColor',
+      'warning.plainColor'
+    ]
+    const missing = used.filter((name) => {
+      const [group, key] = name.split('.')
+      return palette[group]?.[key] === undefined
+    })
+    expect(missing).toEqual([])
+    expect(palette.divider).toBeTruthy()
+  })
+
   it('lets the generated accents override the base, and leaves the rest alone', () => {
     const theme = buildTheme('light', '#c0392b')
     // The accent group is per user, so it must come from the generator...
