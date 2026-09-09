@@ -2152,7 +2152,10 @@
         "openAria": "{{document}} の {{section}} を開く"
       },
       "complete": {
-        "outsideFilter_other": "タグフィルターの外に、復習待ちのカードがあと{{count}}枚あります。"
+        "outsideFilter_other": "タグフィルターの外に、復習待ちのカードがあと{{count}}枚あります。",
+        "title": "セッション完了",
+        "body": "{{count}} 枚のカードを復習しました。お疲れさまでした。",
+        "backToLibrary": "ライブラリに戻る"
       },
       "tagFilter": {
         "noOptions": "このデッキにタグはありません",
@@ -2190,7 +2193,21 @@
         }
       },
       "labels": {
-        "visual": "図解カード"
+        "visual": "図解カード",
+        "question": "問題",
+        "answer": "解答"
+      },
+      "loading": "学習セッションを読み込み中…",
+      "allCaughtUp": "すべて完了しました",
+      "noDue": "今のところ復習するカードはありません。",
+      "goBack": "戻る",
+      "card": "{{total}} 枚中 {{current}} 枚目",
+      "showAnswer": "答えを見る",
+      "grading": {
+        "again": "もう一度",
+        "hard": "難しい",
+        "good": "普通",
+        "easy": "簡単"
       }
     },
     "flashcard": {

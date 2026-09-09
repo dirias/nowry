@@ -1419,7 +1419,8 @@
           "title": "Aún no hay nada marcado",
           "body": "Marca una tarjeta mientras estudias y la encontrarás aquí."
         }
-      }
+      },
+      "showAnswer": "Ver respuesta"
     },
     "deleteModal": {
       "title": "Eliminar mazo",

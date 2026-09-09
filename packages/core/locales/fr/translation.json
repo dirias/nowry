@@ -2138,10 +2138,27 @@
       },
       "complete": {
         "outsideFilter_one": "{{count}} autre carte à revoir se trouve hors de votre filtre par tag.",
-        "outsideFilter_other": "{{count}} autres cartes à revoir se trouvent hors de votre filtre par tag."
+        "outsideFilter_other": "{{count}} autres cartes à revoir se trouvent hors de votre filtre par tag.",
+        "title": "Session terminée !",
+        "body": "Vous avez révisé {{count}} cartes. Bravo !",
+        "backToLibrary": "Retour à la bibliothèque"
       },
       "labels": {
-        "visual": "Diagramme visuel"
+        "visual": "Diagramme visuel",
+        "question": "Question",
+        "answer": "Réponse"
+      },
+      "loading": "Chargement de la session…",
+      "allCaughtUp": "Tout est à jour !",
+      "noDue": "Aucune carte à réviser pour le moment.",
+      "goBack": "Retour",
+      "card": "Carte {{current}} sur {{total}}",
+      "showAnswer": "Voir la réponse",
+      "grading": {
+        "again": "À revoir",
+        "hard": "Difficile",
+        "good": "Bien",
+        "easy": "Facile"
       }
     },
     "common": {

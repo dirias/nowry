@@ -138,6 +138,9 @@ const IDENTICAL_BY_DESIGN = {
     // "Date" and "Description" are the French words for the event form's fields.
     'calendarModal.form.date',
     'calendarModal.form.description',
+    // "Question" is the French word, so the study card's front label lands on
+    // English by coincidence. Its back label, "Réponse", does not.
+    'cards.session.labels.question',
     ...XP_GAINED
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has

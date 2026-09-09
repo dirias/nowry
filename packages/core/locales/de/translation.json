@@ -2120,10 +2120,27 @@
       },
       "complete": {
         "outsideFilter_one": "{{count}} weitere fällige Karte liegt außerhalb deines Tag-Filters.",
-        "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters."
+        "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters.",
+        "title": "Sitzung abgeschlossen!",
+        "body": "Du hast {{count}} Karten wiederholt. Gut gemacht!",
+        "backToLibrary": "Zurück zur Bibliothek"
       },
       "labels": {
-        "visual": "Visuelles Diagramm"
+        "visual": "Visuelles Diagramm",
+        "question": "Frage",
+        "answer": "Antwort"
+      },
+      "loading": "Lernsitzung wird geladen…",
+      "allCaughtUp": "Alles erledigt!",
+      "noDue": "Zurzeit sind keine Karten fällig.",
+      "goBack": "Zurück",
+      "card": "Karte {{current}} von {{total}}",
+      "showAnswer": "Antwort zeigen",
+      "grading": {
+        "again": "Nochmal",
+        "hard": "Schwer",
+        "good": "Gut",
+        "easy": "Leicht"
       }
     },
     "common": {
