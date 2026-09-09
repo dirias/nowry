@@ -9,6 +9,7 @@ import { auth as firebaseAuth, signInWithGoogle } from './firebase'
 import { publishNotification, publishUnauthorized, subscribeToUnauthorized } from './notifications'
 import { mobileStorage } from './storage'
 import { mobileTelemetry } from './telemetry'
+import { mobileAlerts } from './alerts'
 
 const extra = Constants.expoConfig?.extra ?? {}
 
@@ -52,11 +53,7 @@ export const mobilePlatform = {
    * timer in MOB-024, which brings expo-av and expo-notifications; until then
    * these exist so the port is satisfiable and nothing pretends otherwise.
    */
-  alerts: {
-    play: () => {},
-    announce: () => {},
-    requestPermission: async () => 'undetermined'
-  }
+  alerts: mobileAlerts
 }
 
 export default mobilePlatform

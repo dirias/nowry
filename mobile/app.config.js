@@ -30,7 +30,7 @@ module.exports = () => ({
       package: 'com.nowry.app',
       edgeToEdgeEnabled: true
     },
-    plugins: ['expo-router', 'expo-status-bar', 'expo-localization', 'expo-web-browser'],
+    plugins: ['expo-router', 'expo-status-bar', 'expo-localization', 'expo-web-browser', 'expo-notifications'],
     experiments: {
       typedRoutes: false
     },

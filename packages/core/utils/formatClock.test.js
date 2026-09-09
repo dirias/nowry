@@ -1,4 +1,4 @@
-import { formatClock } from '../formatClock'
+import { formatClock } from './formatClock'
 
 describe('formatClock', () => {
   it('renders mm:ss, zero-padded, never negative', () => {

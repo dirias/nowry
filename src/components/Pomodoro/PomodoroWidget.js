@@ -6,7 +6,7 @@ import { CloseRounded, RefreshRounded, SkipNextRounded } from '@mui/icons-materi
 import { MODES, durationFor, nextModeAfter, usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { focusRing } from '../Common/Form/formStyles'
 import { Z_NAV } from '@nowry/core/constants/zIndex'
-import { formatClock } from './formatClock'
+import { formatClock } from '@nowry/core/utils/formatClock'
 import { useTimerCorner } from './useTimerCorner'
 
 // 320px: the widest primary label ("Start break") plus the mode switch and the

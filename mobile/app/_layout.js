@@ -16,6 +16,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { Slot } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { AuthProvider } from '@nowry/core/context/AuthContext'
+import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { ThemeProvider } from '../src/theme'
 import { NotificationHost } from '../src/ui/Toast'
@@ -32,9 +33,13 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider>
-            <AuthGate>
-              <Slot />
-            </AuthGate>
+            {/* Outside the gate: the timer is restored from storage on mount
+                and must not be rebuilt every time the gate re-renders. */}
+            <PomodoroProvider>
+              <AuthGate>
+                <Slot />
+              </AuthGate>
+            </PomodoroProvider>
             <NotificationHost />
           </ThemeProvider>
         </AuthProvider>

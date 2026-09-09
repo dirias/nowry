@@ -45,7 +45,7 @@ import {
   AutoAwesomeRounded
 } from '@mui/icons-material'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
-import { formatClock } from '../Pomodoro/formatClock'
+import { formatClock } from '@nowry/core/utils/formatClock'
 import { usePet } from '@nowry/core/context/AgentContext'
 import { Z_NAV } from '@nowry/core/constants/zIndex'
 import { useColorScheme } from '@mui/joy/styles'

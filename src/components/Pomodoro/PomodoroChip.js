@@ -5,7 +5,7 @@ import { TimerOutlined } from '@mui/icons-material'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { focusRing } from '../Common/Form/formStyles'
 import { Z_NAV } from '@nowry/core/constants/zIndex'
-import { formatClock } from './formatClock'
+import { formatClock } from '@nowry/core/utils/formatClock'
 import { useTimerCorner } from './useTimerCorner'
 
 /**
