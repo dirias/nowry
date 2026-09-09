@@ -1944,7 +1944,8 @@
     },
     "deck": {
       "archive": "Archivieren",
-      "restore": "Wiederherstellen"
+      "restore": "Wiederherstellen",
+      "preview": "Vorschau"
     },
     "add": "Hinzufügen",
     "manage_content": {
@@ -2120,6 +2121,9 @@
       "complete": {
         "outsideFilter_one": "{{count}} weitere fällige Karte liegt außerhalb deines Tag-Filters.",
         "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters."
+      },
+      "labels": {
+        "visual": "Visuelles Diagramm"
       }
     },
     "common": {

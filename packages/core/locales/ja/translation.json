@@ -2067,7 +2067,8 @@
     },
     "deck": {
       "archive": "アーカイブ",
-      "restore": "復元"
+      "restore": "復元",
+      "preview": "プレビュー"
     },
     "add": "追加",
     "manage_content": {
@@ -2187,6 +2188,9 @@
           "title": "まだマークがありません",
           "body": "学習中にカードをマークすると、ここに集まります。"
         }
+      },
+      "labels": {
+        "visual": "図解カード"
       }
     },
     "flashcard": {

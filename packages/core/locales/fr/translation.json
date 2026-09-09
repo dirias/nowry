@@ -1962,7 +1962,8 @@
     },
     "deck": {
       "archive": "Archiver",
-      "restore": "Restaurer"
+      "restore": "Restaurer",
+      "preview": "Aperçu"
     },
     "add": "Ajouter",
     "manage_content": {
@@ -2138,6 +2139,9 @@
       "complete": {
         "outsideFilter_one": "{{count}} autre carte à revoir se trouve hors de votre filtre par tag.",
         "outsideFilter_other": "{{count}} autres cartes à revoir se trouvent hors de votre filtre par tag."
+      },
+      "labels": {
+        "visual": "Diagramme visuel"
       }
     },
     "common": {

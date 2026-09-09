@@ -26,6 +26,7 @@ import { useGroups } from '@nowry/core/hooks/useGroups'
 import { useTags } from '@nowry/core/hooks/useTags'
 import { useTheme } from '../theme'
 import { DeckCreateSheet } from './DeckCreateSheet'
+import { CardPreviewSheet } from './CardPreviewSheet'
 import {
   ActionSheet,
   Button,
@@ -55,6 +56,7 @@ export function StudyLibrary({ header }) {
   const [untagged, setUntagged] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [previewing, setPreviewing] = useState(null)
 
   const decks = useDeckData(null)
   const tags = useTags({ enabled: view === VIEWS.tags })
@@ -85,7 +87,8 @@ export function StudyLibrary({ header }) {
         meta: (card.tags ?? []).join(' · '),
         progress: null,
         readout: null,
-        onPress: () => router.push(`/study/deck/${card.deck_id ?? ''}`)
+        // A card row opens the card, not its deck's settings.
+        onPress: () => setPreviewing(card)
       }))
     }
     /*
@@ -212,6 +215,8 @@ export function StudyLibrary({ header }) {
           }
         ]}
       />
+
+      <CardPreviewSheet visible={Boolean(previewing)} card={previewing} onClose={() => setPreviewing(null)} />
 
       <DeckCreateSheet
         visible={creating}
