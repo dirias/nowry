@@ -739,7 +739,12 @@
       "language": "Sprache",
       "accentColor": "Akzentfarbe",
       "accentColorDesc": "Passe die Akzentfarbe der App an",
-      "interests": "Interessen"
+      "interests": "Interessen",
+      "modes": {
+        "system": "System",
+        "light": "Hell",
+        "dark": "Dunkel"
+      }
     },
     "learning": {
       "title": "Lernen",
@@ -824,7 +829,11 @@
       "marketing": "Marketing-E-Mails",
       "marketingDesc": "Erhalte Angebote und Tipps",
       "comingSoon": "Benachrichtigungen demnächst",
-      "comingSoonDesc": "Wir arbeiten an intelligenten Benachrichtigungen für deine Lernsessions"
+      "comingSoonDesc": "Wir arbeiten an intelligenten Benachrichtigungen für deine Lernsessions",
+      "allowed": "Dieses Gerät zeigt den Timer-Hinweis an.",
+      "blocked": "Dieses Gerät zeigt den Timer-Hinweis nicht an.",
+      "check": "Berechtigung prüfen",
+      "openSystem": "Systemeinstellungen öffnen"
     },
     "danger": {
       "title": "Gefahrenzone",

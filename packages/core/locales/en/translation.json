@@ -862,7 +862,12 @@
       "language": "Language",
       "accentColor": "Accent color",
       "accentColorDesc": "Customize the app accent color",
-      "interests": "Interests"
+      "interests": "Interests",
+      "modes": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+      }
     },
     "general": {
       "title": "General Preferences",
@@ -923,7 +928,11 @@
       "marketing": "Marketing emails",
       "marketingDesc": "Receive promotional offers",
       "comingSoon": "Notifications coming soon",
-      "comingSoonDesc": "We are working on smart notifications for your study sessions"
+      "comingSoonDesc": "We are working on smart notifications for your study sessions",
+      "allowed": "This device will show the timer alert.",
+      "blocked": "This device will not show the timer alert.",
+      "check": "Check permission",
+      "openSystem": "Open system settings"
     },
     "security": {
       "title": "Security",

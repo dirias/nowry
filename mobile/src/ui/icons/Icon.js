@@ -43,10 +43,11 @@ export function Icon({ name, size = 'md', color = 'text.secondary', literalColor
   }
 
   /*
-   * `literalColor` is the one escape, and it exists for exactly one caller: a
-   * navigator that interpolates between active and inactive and therefore hands
-   * back a resolved colour rather than a token. Everywhere else, naming a colour
-   * is the rule and `resolveColor` throws on a literal.
+   * `literalColor` is the one escape, for the two callers that hold a resolved
+   * colour rather than a token: the navigator, which interpolates between
+   * active and inactive, and the accent swatch, whose tick is `readableTextOn`
+   * of a colour the user picked. Everywhere else, naming a colour is the rule
+   * and `resolveColor` throws on a literal.
    */
   return <Glyph size={px} color={literalColor ?? resolveColor(theme, color)} strokeWidth={strokeWidth} {...rest} />
 }

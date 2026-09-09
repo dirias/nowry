@@ -739,7 +739,12 @@
       "language": "Idioma",
       "accentColor": "Color de acento",
       "accentColorDesc": "Personaliza el color de acento de la aplicación",
-      "interests": "Intereses"
+      "interests": "Intereses",
+      "modes": {
+        "system": "Sistema",
+        "light": "Claro",
+        "dark": "Oscuro"
+      }
     },
     "general": {
       "title": "Preferencias Generales",
@@ -800,7 +805,11 @@
       "marketing": "Correos de marketing",
       "marketingDesc": "Recibe ofertas promocionales",
       "comingSoon": "Notificaciones próximamente",
-      "comingSoonDesc": "Estamos trabajando en notificaciones inteligentes para tus sesiones de estudio"
+      "comingSoonDesc": "Estamos trabajando en notificaciones inteligentes para tus sesiones de estudio",
+      "allowed": "Este dispositivo mostrará la alerta del temporizador.",
+      "blocked": "Este dispositivo no mostrará la alerta del temporizador.",
+      "check": "Comprobar permiso",
+      "openSystem": "Abrir ajustes del sistema"
     },
     "security": {
       "title": "Seguridad",

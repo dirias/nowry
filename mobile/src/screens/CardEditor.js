@@ -274,6 +274,8 @@ export function CardEditor({ card = null, deckId = null }) {
           ))}
         </Stack>
 
+        {/* The limit is stated, not sold against: ADR-030 keeps purchase off
+            the phone, so there is no Upgrade button here as there is on web. */}
         {form.saveError ? (
           <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
             {form.limitReached ? t('subscription.errors.limitReached') : form.saveError}

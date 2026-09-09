@@ -757,7 +757,12 @@
       "language": "Langue",
       "accentColor": "Couleur d'accent",
       "accentColorDesc": "Personnalisez la couleur d'accent de l'application",
-      "interests": "Centres d'intérêt"
+      "interests": "Centres d'intérêt",
+      "modes": {
+        "system": "Système",
+        "light": "Clair",
+        "dark": "Sombre"
+      }
     },
     "learning": {
       "title": "Apprentissage",
@@ -842,7 +847,11 @@
       "marketing": "Emails marketing",
       "marketingDesc": "Recevez des offres promotionnelles",
       "comingSoon": "Notifications bientôt disponibles",
-      "comingSoonDesc": "Nous travaillons sur des notifications intelligentes pour vos sessions d'étude"
+      "comingSoonDesc": "Nous travaillons sur des notifications intelligentes pour vos sessions d'étude",
+      "allowed": "Cet appareil affichera l'alerte du minuteur.",
+      "blocked": "Cet appareil n'affichera pas l'alerte du minuteur.",
+      "check": "Vérifier l’autorisation",
+      "openSystem": "Ouvrir les réglages du système"
     },
     "danger": {
       "title": "Zone de danger",

@@ -889,7 +889,12 @@
       "language": "言語",
       "accentColor": "アクセントカラー",
       "accentColorDesc": "アプリのアクセントカラーをカスタマイズ",
-      "interests": "興味・関心"
+      "interests": "興味・関心",
+      "modes": {
+        "system": "システム",
+        "light": "ライト",
+        "dark": "ダーク"
+      }
     },
     "learning": {
       "title": "学習",
@@ -972,7 +977,11 @@
       "marketing": "マーケティングメール",
       "marketingDesc": "プロモーションオファーやヒントを受け取る",
       "comingSoon": "通知機能は近日公開",
-      "comingSoonDesc": "学習セッション向けのスマート通知を開発中です"
+      "comingSoonDesc": "学習セッション向けのスマート通知を開発中です",
+      "allowed": "この端末でタイマーの通知が表示されます。",
+      "blocked": "この端末ではタイマーの通知は表示されません。",
+      "check": "通知の許可を確認",
+      "openSystem": "システム設定を開く"
     },
     "danger": {
       "title": "危険エリア",

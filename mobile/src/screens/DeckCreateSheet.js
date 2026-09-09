@@ -86,25 +86,14 @@ export function DeckCreateSheet({ visible, onClose, onCreated }) {
               ))}
           </Stack>
 
-          {/* The plan limit is not a validation failure, so it says what it is
-              and points at the page that can change it. */}
+          {/* The plan limit says what it is and stops there. The web offers an
+              Upgrade button here; ADR-030 keeps purchase off the phone, and a
+              button that advertises a paid tier is the compliance question that
+              decision exists to avoid. */}
           {form.saveError ? (
             <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
               {form.limitReached ? t('subscription.errors.limitReached') : form.saveError}
             </Typography>
-          ) : null}
-
-          {form.limitReached ? (
-            <Button
-              variant='secondary'
-              onPress={() => {
-                form.dismiss()
-                router.push('/profile')
-              }}
-              accessibilityLabel={t('subscription.upgrade')}
-            >
-              {t('subscription.upgrade')}
-            </Button>
           ) : null}
 
           <Button onPress={form.create} loading={form.saving} accessibilityLabel={t('cards.create.create')}>

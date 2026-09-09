@@ -18,21 +18,21 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { AuthProvider } from '@nowry/core/context/AuthContext'
 import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
 import { queryClient } from '@nowry/core/api/queryClient'
-import { ThemeProvider } from '../src/theme'
+import { AppearanceProvider } from '../src/theme/AppearanceProvider'
 import { NotificationHost } from '../src/ui/Toast'
 import { AuthGate } from '../src/navigation/AuthGate'
 
 export default function RootLayout() {
   /*
-   * `themeColor` is the app default for now. MOB-018 passes the account's
-   * chosen colour once Home reads the profile; the provider already
-   * regenerates the palette when it changes.
+   * `AppearanceProvider` owns both halves of how the app looks and mounts the
+   * theme itself: the account's accent colour, and the device's light/dark
+   * choice. It sits inside the query provider because it reads the profile.
    */
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeProvider>
+          <AppearanceProvider>
             {/* Outside the gate: the timer is restored from storage on mount
                 and must not be rebuilt every time the gate re-renders. */}
             <PomodoroProvider>
@@ -41,7 +41,7 @@ export default function RootLayout() {
               </AuthGate>
             </PomodoroProvider>
             <NotificationHost />
-          </ThemeProvider>
+          </AppearanceProvider>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

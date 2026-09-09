@@ -153,6 +153,9 @@ const IDENTICAL_BY_DESIGN = {
     'cards.session.filters.tagsSelected',
     // "Agenda" is the German word for the calendar's list view as well.
     'calendarPage.views.agenda',
+    // "System" is the German word too, so the appearance option that means
+    // "follow the OS" lands on English. Its neighbours, Hell and Dunkel, do not.
+    'settings.appearance.modes.system',
     ...XP_GAINED
   ],
   ja: ['cards.session.xpGained_other']
