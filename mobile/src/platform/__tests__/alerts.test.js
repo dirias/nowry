@@ -18,11 +18,13 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: { TIME_INTERVAL: 'timeInterval' }
 }))
 
-jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }))
+const mockPlatform = { OS: 'ios' }
+jest.mock('react-native', () => ({ Platform: mockPlatform }))
 
 const { scheduleEndAlarm, cancelEndAlarm } = require('../alerts')
 
 beforeEach(() => {
+  mockPlatform.OS = 'ios'
   mockSchedule.mockReset().mockResolvedValue('id')
   mockCancelAll.mockReset().mockResolvedValue(undefined)
   mockChannel.mockReset().mockResolvedValue(undefined)
@@ -54,4 +56,16 @@ it('cancelling is only ever a withdrawal', async () => {
   await cancelEndAlarm()
   expect(mockCancelAll).toHaveBeenCalledTimes(1)
   expect(mockSchedule).not.toHaveBeenCalled()
+})
+
+it('asks Android for a channel with no custom sound', async () => {
+  // A channel's `sound` is a bundled filename, not a mode. Asking for one
+  // called "default" logs an error on every call and selects nothing.
+  mockPlatform.OS = 'android'
+
+  await scheduleEndAlarm({ seconds: 60, title: 'T', body: 'B' })
+
+  const [id, options] = mockChannel.mock.calls[0]
+  expect(id).toBe('nowry-focus')
+  expect(options).not.toHaveProperty('sound')
 })

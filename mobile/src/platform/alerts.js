@@ -38,13 +38,19 @@ Notifications.setNotificationHandler({
   })
 })
 
-/** Android delivers nothing without a channel, and silently. */
+/**
+ * Android delivers nothing without a channel, and silently.
+ *
+ * No `sound` key: a channel's `sound` is the FILENAME of a custom sound bundled
+ * into the native app, not a mode. Passing 'default' asks Android for a file
+ * called "default", which does not exist, and expo-notifications says so on
+ * every call. Omitting it is what selects the system default.
+ */
 const ensureChannel = async () => {
   if (Platform.OS !== 'android') return
   await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
     name: 'Focus timer',
-    importance: Notifications.AndroidImportance.HIGH,
-    sound: 'default'
+    importance: Notifications.AndroidImportance.HIGH
   })
 }
 
@@ -73,6 +79,9 @@ export const scheduleEndAlarm = async ({ seconds, title, body }) => {
     if (!(seconds > 0)) return
     await ensureChannel()
     await Notifications.scheduleNotificationAsync({
+      // The content's `sound` IS a mode — iOS reads 'default' as its own
+      // enum. Android ignores it and uses the channel's, which is the system
+      // default by the omission above.
       content: { title, body, sound: 'default' },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
