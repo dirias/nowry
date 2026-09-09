@@ -1963,7 +1963,8 @@
     "deck": {
       "archive": "Archiver",
       "restore": "Restaurer",
-      "preview": "Aperçu"
+      "preview": "Aperçu",
+      "addCard": "Ajouter une carte"
     },
     "add": "Ajouter",
     "manage_content": {
@@ -2030,7 +2031,8 @@
       "previewErrorAria": "Aperçu — le diagramme contient une erreur de syntaxe",
       "mermaidLink": "Référence de la syntaxe Mermaid",
       "addDescription": "Ajouter une description",
-      "descriptionLabel": "Description"
+      "descriptionLabel": "Description",
+      "editOnWeb": "Les cartes visuelles se modifient sur le web, où le diagramme peut être dessiné."
     },
     "generatedCards": {
       "titleSelectCards": "Nouvelles cartes d'étude",
@@ -2169,7 +2171,9 @@
       "typeVisual": "Visuel",
       "typeSelectorAria": "Type de carte",
       "switchTypeWarning": "Changer de type de carte supprimera ce que vous avez écrit pour ce type.",
-      "switchTypeConfirm": "Changer quand même"
+      "switchTypeConfirm": "Changer quand même",
+      "discardTitle": "Abandonner cette carte ?",
+      "discardBody": "Ce que vous avez écrit ici ne sera pas enregistré."
     },
     "create": {
       "newTitle": "Nouveau paquet",

@@ -1222,7 +1222,8 @@
       "previewErrorAria": "Vista previa: el diagrama tiene un error de sintaxis",
       "mermaidLink": "Referencia de sintaxis de Mermaid",
       "addDescription": "Añadir una descripción",
-      "descriptionLabel": "Descripción"
+      "descriptionLabel": "Descripción",
+      "editOnWeb": "Las tarjetas visuales se editan en la web, donde se puede dibujar el diagrama."
     },
     "dueToday": "Para hoy",
     "studyStreak": "Racha (días)",
@@ -1500,7 +1501,9 @@
       "typeVisual": "Visual",
       "typeSelectorAria": "Tipo de tarjeta",
       "switchTypeWarning": "Cambiar el tipo de tarjeta descartará lo que has escrito para este tipo.",
-      "switchTypeConfirm": "Cambiar de todos modos"
+      "switchTypeConfirm": "Cambiar de todos modos",
+      "discardTitle": "¿Descartar esta tarjeta?",
+      "discardBody": "Lo que escribiste aquí no se guardará."
     },
     "mark": {
       "mark": "Marcar para después",

@@ -439,6 +439,21 @@ export const cardsService = {
   },
 
   /**
+   * One card by id.
+   *
+   * Every list endpoint returns cards, so the web has never needed this: it
+   * always has the object in hand before it opens an editor. A phone does not
+   * — a route is a URL, and `/study/card/<id>` carries an id and nothing else.
+   *
+   * @param {string} id - Card ID
+   * @returns {Promise<Object>} The card
+   */
+  async getById(id) {
+    const { data } = await apiClient.get(ENDPOINTS.studyCards.byId(id))
+    return data
+  },
+
+  /**
    * Update an existing card
    */
   async update(id, updates) {

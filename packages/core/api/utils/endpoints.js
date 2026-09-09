@@ -21,6 +21,7 @@ export const ENDPOINTS = {
     generateStream: '/card/generate/stream',
     all: '/study-cards',
     create: '/study-cards',
+    byId: (id) => `/study-cards/${id}`,
     update: (id) => `/study-cards/${id}`,
     delete: (id) => `/study-cards/${id}`,
     mark: (id) => `/study-cards/${id}/mark`,

@@ -61,3 +61,14 @@ describe('the tag verbs', () => {
     expect(mockPost).toHaveBeenCalledWith('/study-cards/tags/remove', { tag: 'old' })
   })
 })
+
+describe('getById', () => {
+  it('asks for the one card, and returns the card rather than a wrapper', async () => {
+    mockGet.mockResolvedValueOnce({ data: { _id: 'c1', title: 'Front' } })
+
+    const card = await cardsService.getById('c1')
+
+    expect(mockGet).toHaveBeenCalledWith('/study-cards/c1')
+    expect(card).toEqual({ _id: 'c1', title: 'Front' })
+  })
+})

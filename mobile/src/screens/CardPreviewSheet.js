@@ -19,7 +19,8 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BottomSheet, Segmented, Stack, Typography } from '../ui'
+import { useRouter } from 'expo-router'
+import { BottomSheet, Button, Segmented, Stack, Typography } from '../ui'
 
 const SIDES = { front: 'front', back: 'back' }
 
@@ -28,6 +29,7 @@ const textFor = (card, side) => (side === SIDES.front ? card?.question || card?.
 
 export function CardPreviewSheet({ visible, card, onClose }) {
   const { t } = useTranslation()
+  const router = useRouter()
   const [side, setSide] = useState(SIDES.front)
 
   // A new card always opens on its front, whichever side the last one was left on.
@@ -65,6 +67,19 @@ export function CardPreviewSheet({ visible, card, onClose }) {
             {card.tags.join(' · ')}
           </Typography>
         ) : null}
+
+        {/* The sheet answers "what is on this card"; editing it is a screen, so
+            the sheet closes rather than stacking one surface over another. */}
+        <Button
+          variant='secondary'
+          onPress={() => {
+            const id = card?._id ?? card?.id
+            onClose()
+            if (id) router.push(`/study/card/${id}`)
+          }}
+        >
+          {t('common.edit')}
+        </Button>
       </Stack>
     </BottomSheet>
   )

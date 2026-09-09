@@ -1945,7 +1945,8 @@
     "deck": {
       "archive": "Archivieren",
       "restore": "Wiederherstellen",
-      "preview": "Vorschau"
+      "preview": "Vorschau",
+      "addCard": "Karte hinzufügen"
     },
     "add": "Hinzufügen",
     "manage_content": {
@@ -2012,7 +2013,8 @@
       "previewErrorAria": "Vorschau – Diagramm hat einen Syntaxfehler",
       "mermaidLink": "Mermaid-Syntaxreferenz",
       "addDescription": "Beschreibung hinzufügen",
-      "descriptionLabel": "Beschreibung"
+      "descriptionLabel": "Beschreibung",
+      "editOnWeb": "Visuelle Karten werden im Web bearbeitet, wo sich das Diagramm zeichnen lässt."
     },
     "generatedCards": {
       "titleSelectCards": "Neue Lernkarten",
@@ -2151,7 +2153,9 @@
       "typeVisual": "Visuell",
       "typeSelectorAria": "Kartentyp",
       "switchTypeWarning": "Beim Wechsel des Kartentyps geht verloren, was du für diesen Typ geschrieben hast.",
-      "switchTypeConfirm": "Trotzdem wechseln"
+      "switchTypeConfirm": "Trotzdem wechseln",
+      "discardTitle": "Diese Karte verwerfen?",
+      "discardBody": "Was du hier geschrieben hast, wird nicht gespeichert."
     },
     "create": {
       "newTitle": "Neuer Stapel",

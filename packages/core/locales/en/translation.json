@@ -1476,7 +1476,8 @@
       "previewErrorAria": "Preview — diagram has a syntax error",
       "mermaidLink": "Mermaid syntax reference",
       "addDescription": "Add a description",
-      "descriptionLabel": "Description"
+      "descriptionLabel": "Description",
+      "editOnWeb": "Visual cards are edited on the web, where the diagram can be drawn."
     },
     "dueToday": "Due Today",
     "studyStreak": "Study Streak",
@@ -1764,7 +1765,9 @@
       "typeVisual": "Visual",
       "typeSelectorAria": "Card type",
       "switchTypeWarning": "Switching card type will discard what you've written for this type.",
-      "switchTypeConfirm": "Switch anyway"
+      "switchTypeConfirm": "Switch anyway",
+      "discardTitle": "Discard this card?",
+      "discardBody": "What you've written here won't be saved."
     },
     "mark": {
       "mark": "Mark for later",

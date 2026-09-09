@@ -136,6 +136,10 @@ export function DeckDetail() {
           {t('study.deck.study')}
         </Button>
 
+        <Button size='md' variant='secondary' onPress={() => router.push(`/study/card/new?deckId=${String(deckId)}`)}>
+          {t('cards.deck.addCard')}
+        </Button>
+
         <Divider />
 
         <Typography level='title-md'>{t('deckSettings.nav.identity')}</Typography>

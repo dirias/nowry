@@ -2068,7 +2068,8 @@
     "deck": {
       "archive": "アーカイブ",
       "restore": "復元",
-      "preview": "プレビュー"
+      "preview": "プレビュー",
+      "addCard": "カードを追加"
     },
     "add": "追加",
     "manage_content": {
@@ -2258,7 +2259,8 @@
       "mermaidLink": "Mermaid 構文リファレンス",
       "addDescription": "説明を追加",
       "descriptionLabel": "説明",
-      "explanationPlaceholder": "補足説明..."
+      "explanationPlaceholder": "補足説明...",
+      "editOnWeb": "図解カードは図を描画できるウェブ版で編集します。"
     },
     "common": {
       "addTags": "タグを追加",
@@ -2268,7 +2270,9 @@
       "typeVisual": "ビジュアル",
       "typeSelectorAria": "カードの種類",
       "switchTypeWarning": "カードの種類を変更すると、この種類で入力した内容は破棄されます。",
-      "switchTypeConfirm": "変更する"
+      "switchTypeConfirm": "変更する",
+      "discardTitle": "このカードを破棄しますか？",
+      "discardBody": "ここに入力した内容は保存されません。"
     },
     "create": {
       "newTitle": "新しいデッキ",
