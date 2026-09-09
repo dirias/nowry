@@ -4,8 +4,22 @@ The Expo + React Native client. Expo SDK 57, Expo Router, bundling for iOS and
 Android; not yet installed on a device, which needs an Expo account (MOB-005).
 
     npm install          # at the repository root — links this workspace
-    cp .env.example .env # then fill it in; see EAS-SECRETS.md
+    cp .env.example .env # REQUIRED — see below
     npm start -w nowry-mobile
+
+## `mobile/.env` is not optional
+
+A development build loads its JavaScript from **Metro**, and Metro evaluates
+`app.config.js` on the developer's machine. The variables EAS holds are baked
+into the build's own copy and are irrelevant while you are developing.
+
+Without this file the app starts, reaches `initializeAuth`, and dies with
+`auth/invalid-api-key` — an error that points at Firebase and says nothing about
+the cause. `src/platform/firebase.js` now throws a message naming the fix
+instead.
+
+`app.config.js` is evaluated once when the dev server starts, so creating the
+file while the server is running changes nothing. Restart it.
 
 ## Two things this scaffold got right the hard way
 

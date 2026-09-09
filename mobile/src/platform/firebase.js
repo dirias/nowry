@@ -22,9 +22,23 @@ import { signInWithGoogle as googleSignIn } from './googleSignIn'
 const config = Constants.expoConfig?.extra?.firebase ?? {}
 
 if (!config.apiKey) {
-  // Loud, because the alternative is a sign-in screen that fails with an
-  // opaque Firebase error on a build whose environment was never set.
-  console.warn('[nowry] Firebase config is missing. Check the EXPO_PUBLIC_FB_* variables for this build profile.')
+  /*
+   * Fail here, naming the fix, rather than letting Firebase fail three frames
+   * later with `auth/invalid-api-key` — an error that points at Firebase and
+   * says nothing about the actual cause.
+   *
+   * The cause is almost always the same one, and it is not obvious: a
+   * development build loads its JS from METRO, and Metro evaluates
+   * `app.config.js` on the developer's machine. The values EAS holds are
+   * irrelevant while you are developing. Without `mobile/.env` the config is
+   * empty even though the build itself was configured correctly.
+   */
+  throw new Error(
+    '[nowry] Firebase is not configured for this dev server.\n\n' +
+      'A development build reads its config from Metro, not from the build, so EAS\u2019s variables do not apply here.\n' +
+      'Create mobile/.env with the EXPO_PUBLIC_FB_* values (see mobile/EAS-SECRETS.md) and restart the dev server \u2014\n' +
+      'app.config.js is evaluated once at startup, so a running server will not pick it up.'
+  )
 }
 
 const app = initializeApp(config)
