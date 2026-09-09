@@ -9,6 +9,17 @@
  * The account's saved language still wins once the profile loads — AuthContext
  * calls `changeLanguage` on the same singleton, from @nowry/core.
  */
+/*
+ * Hermes ships without `Intl.PluralRules`, and i18next needs it to resolve a
+ * plural. Its own warning suggests falling back to the v3 JSON format — which
+ * would be wrong here: the bundles carry 138 keys in v4 form (`_one` / `_other`)
+ * and v3 looks for `_plural`, so the "fix" would silently break every plural in
+ * the app.
+ *
+ * The polyfill is pure JavaScript, so it needs no rebuild. It must be imported
+ * before i18next initialises.
+ */
+import 'intl-pluralrules'
 import * as Localization from 'expo-localization'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'

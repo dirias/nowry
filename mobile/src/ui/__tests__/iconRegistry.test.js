@@ -50,6 +50,26 @@ describe('the icon registry', () => {
     expect(perIcon.length).toBe(registryNames().size)
   })
 
+  it('imports each icon as a DEFAULT, because that is all lucide exports', () => {
+    /*
+     * The bug this exists for: every per-icon module ends with
+     * `export { House as default }` and exports no named binding. A named
+     * import compiles, bundles, and yields undefined at runtime — every icon
+     * silently missing until the first one renders. It shipped once.
+     *
+     * The package itself is the evidence, so this cannot drift with a version.
+     */
+    const fixture = path.join(__dirname, '../../../node_modules/lucide-react-native/dist/esm/icons/house.mjs')
+    expect(fs.readFileSync(fixture, 'utf8')).toMatch(/export \{ \w+ as default \}/)
+
+    const imports = registrySource()
+      .split('\n')
+      .filter((line) => line.startsWith('import '))
+    // `import X from '…'`, never `import { X } from '…'`.
+    expect(imports.filter((l) => /^import \{/.test(l))).toEqual([])
+    expect(imports.every((l) => /^import [A-Z][A-Za-z0-9]* from /.test(l))).toBe(true)
+  })
+
   it('is generated, and says so', () => {
     expect(registrySource()).toMatch(/do not hand-edit/i)
   })
