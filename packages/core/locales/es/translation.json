@@ -3596,7 +3596,8 @@
     "deckLabel": "Mazo",
     "deckPlaceholder": "Elige un mazo",
     "deckNone": "Sin mazo",
-    "deckEmpty": "Todavía no tienes ningún mazo."
+    "deckEmpty": "Todavía no tienes ningún mazo.",
+    "invalidField": "Entrada no válida"
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s transcurridos"

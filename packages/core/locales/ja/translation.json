@@ -2922,7 +2922,8 @@
     "deckLabel": "デッキ",
     "deckPlaceholder": "デッキを選択",
     "deckNone": "デッキなし",
-    "deckEmpty": "デッキはまだありません。"
+    "deckEmpty": "デッキはまだありません。",
+    "invalidField": "入力が正しくありません"
   },
   "generation": {
     "elapsedSeconds": "経過 {{seconds}} 秒"

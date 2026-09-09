@@ -13,8 +13,10 @@ import { useEffect, useRef } from 'react'
 import { Animated, Easing } from 'react-native'
 import { useTheme, useReduceMotion } from '../theme'
 import { resolveColor } from './Typography'
+import { useTranslation } from 'react-i18next'
 
 export function Skeleton({ width = '100%', height = 16, radius = 'sm', style }) {
+  const { t } = useTranslation()
   const theme = useTheme()
   const reduceMotion = useReduceMotion()
   const pulse = useRef(new Animated.Value(0.5)).current
@@ -44,7 +46,7 @@ export function Skeleton({ width = '100%', height = 16, radius = 'sm', style }) 
   return (
     <Animated.View
       accessibilityRole='progressbar'
-      accessibilityLabel='Loading'
+      accessibilityLabel={t('common.loading')}
       style={[
         {
           width,

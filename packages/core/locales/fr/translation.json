@@ -3004,7 +3004,8 @@
     "deckLabel": "Paquet",
     "deckPlaceholder": "Choisir un paquet",
     "deckNone": "Aucun paquet",
-    "deckEmpty": "Vous n'avez pas encore de paquet."
+    "deckEmpty": "Vous n'avez pas encore de paquet.",
+    "invalidField": "Saisie non valide"
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s écoulées"

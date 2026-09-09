@@ -15,11 +15,13 @@ import { useTheme } from '../theme'
 import { resolveColor } from './Typography'
 import { MIN_TOUCH_TARGET } from './buttonSpec'
 import { TYPE_LEVELS } from './typeLevels'
+import { useTranslation } from 'react-i18next'
 
 export const Input = forwardRef(function Input(
   { value, onChangeText, placeholder, invalid = false, multiline = false, accessibilityLabel, editable = true, style, ...rest },
   ref
 ) {
+  const { t } = useTranslation()
   const theme = useTheme()
   const level = TYPE_LEVELS['body-md']
 
@@ -34,8 +36,9 @@ export const Input = forwardRef(function Input(
       multiline={multiline}
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: !editable }}
-      // React Native has no aria-invalid; this is what a screen reader reads.
-      accessibilityHint={invalid ? 'Invalid' : undefined}
+      // React Native has no aria-invalid; this is what a screen reader reads,
+      // so it is a translated string like everything else a person hears.
+      accessibilityHint={invalid ? t('form.invalidField') : undefined}
       style={[
         {
           minHeight: multiline ? MIN_TOUCH_TARGET * 2 : MIN_TOUCH_TARGET,

@@ -45,12 +45,16 @@ export default function ResetPassword() {
   return (
     <Screen>
       <Stack spacing={3} justifyContent='center' flex={1}>
-        <Typography level='h2'>{t('auth.resetPassword')}</Typography>
+        <Typography level='h2'>{t('auth.resetPassword.title')}</Typography>
 
         {sent ? (
-          <Typography level='body-md' color='text.secondary' accessibilityLiveRegion='polite'>
-            {t('auth.success')}
-          </Typography>
+          // The mail is sent, so the screen says what to do next.
+          <Stack spacing={1}>
+            <Typography level='title-md'>{t('auth.resetPassword.successTitle')}</Typography>
+            <Typography level='body-md' color='text.secondary' accessibilityLiveRegion='polite'>
+              {t('auth.resetPassword.successMsg')}
+            </Typography>
+          </Stack>
         ) : (
           <>
             {errors.form ? (
@@ -75,8 +79,8 @@ export default function ResetPassword() {
               />
             </FormField>
 
-            <Button onPress={submit} loading={busy} accessibilityLabel={t('auth.resetPassword')}>
-              {t('auth.resetPassword')}
+            <Button onPress={submit} loading={busy} accessibilityLabel={t('auth.resetPassword.sendCode')}>
+              {t('auth.resetPassword.sendCode')}
             </Button>
           </>
         )}

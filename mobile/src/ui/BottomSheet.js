@@ -21,6 +21,7 @@
 import { useRef } from 'react'
 import { Animated, Dimensions, Modal, PanResponder, Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
 import { useTheme, useReduceMotion } from '../theme'
 import { Typography, resolveColor } from './Typography'
 
@@ -28,6 +29,7 @@ const DISMISS_FRACTION = 0.33
 const DISMISS_VELOCITY = 0.5
 
 export function BottomSheet({ visible, onClose, title, children, accessibilityLabel, style }) {
+  const { t } = useTranslation()
   const theme = useTheme()
   const reduceMotion = useReduceMotion()
   const insets = useSafeAreaInsets()
@@ -67,7 +69,7 @@ export function BottomSheet({ visible, onClose, title, children, accessibilityLa
       <Pressable
         style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
         onPress={onClose}
-        accessibilityLabel='Close'
+        accessibilityLabel={t('common.close')}
         accessibilityRole='button'
       >
         <Animated.View
