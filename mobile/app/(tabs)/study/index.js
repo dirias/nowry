@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useForecast } from '@nowry/core/hooks/useForecast'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { Button, ForecastStrip, Readout, Screen, Skeleton, Stack, SummaryObject, Typography } from '../../../src/ui'
+import { StudyLibrary } from '../../../src/screens/StudyLibrary'
 
 export default function StudyCenter() {
   const { t, i18n } = useTranslation()
@@ -31,7 +32,7 @@ export default function StudyCenter() {
   const weekly = statistics?.weekly_progress ?? []
   const future = forecast?.days ?? []
 
-  const today = useMemo(
+  const todayLabel = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date()),
     [i18n.language]
   )
@@ -43,53 +44,60 @@ export default function StudyCenter() {
   const loading = statsLoading || forecastLoading
   const caughtUp = !loading && !statsError && dueToday === 0
 
+  /*
+   * The Today object is the LIST'S HEADER, not a sibling above it. A FlatList
+   * inside a ScrollView is not virtualised — React Native warns about exactly
+   * this — and the library has to stay virtualised for 500 cards.
+   */
+  const today = (
+    <Stack spacing={3}>
+      <SummaryObject
+        title={t('study.title')}
+        context={todayLabel}
+        readouts={
+          loading ? (
+            <Stack direction='row' spacing={2}>
+              <Skeleton width={64} height={14} />
+              <Skeleton width={88} height={14} />
+            </Stack>
+          ) : statsError ? null : (
+            <>
+              {/* The one load-bearing number lifts; the rest stay tertiary. */}
+              <Readout leading>{t('study.dueCount', { count: dueToday })}</Readout>
+              <Readout>{t('study.today.reviewed', { count: reviewedToday })}</Readout>
+              <Readout>{streak > 0 ? t('study.empty.streakLabel', { count: streak }) : t('study.empty.streakZeroLabel')}</Readout>
+            </>
+          )
+        }
+        empty={caughtUp ? t('study.today.allDone') : null}
+        action={
+          <Button size='sm' onPress={() => router.push('/study/due')} accessibilityLabel={t('study.startStudying')}>
+            {t('study.startStudying')}
+          </Button>
+        }
+      />
+
+      {loading ? (
+        <Skeleton width='100%' height={28} />
+      ) : (
+        <Stack spacing={1}>
+          <ForecastStrip past={weekly} today={dueToday} future={future} />
+          <Readout>{t('study.today.weekReadout', { reviewed: reviewedWeek, tomorrow: dueTomorrow, week: dueWeek })}</Readout>
+        </Stack>
+      )}
+
+      {statsError ? (
+        <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+          {t('home.loadFailed')}
+        </Typography>
+      ) : null}
+    </Stack>
+  )
+
+  // The library owns the scroll and the padding, so the Screen gives up both.
   return (
-    <Screen>
-      <Stack spacing={3}>
-        <SummaryObject
-          title={t('study.title')}
-          context={today}
-          readouts={
-            loading ? (
-              <Stack direction='row' spacing={2}>
-                <Skeleton width={64} height={14} />
-                <Skeleton width={88} height={14} />
-              </Stack>
-            ) : statsError ? null : (
-              <>
-                {/* The one load-bearing number lifts; the rest stay tertiary. */}
-                <Readout leading>{t('study.dueCount', { count: dueToday })}</Readout>
-                <Readout>{t('study.today.reviewed', { count: reviewedToday })}</Readout>
-                <Readout>{streak > 0 ? t('study.empty.streakLabel', { count: streak }) : t('study.empty.streakZeroLabel')}</Readout>
-              </>
-            )
-          }
-          // All caught up is the object saying so, in its own voice.
-          empty={caughtUp ? t('study.today.allDone') : null}
-          action={
-            <Button size='sm' onPress={() => router.push('/study/due')} accessibilityLabel={t('study.startStudying')}>
-              {t('study.startStudying')}
-            </Button>
-          }
-        />
-
-        {loading ? (
-          <Skeleton width='100%' height={28} />
-        ) : (
-          <Stack spacing={1}>
-            <ForecastStrip past={weekly} today={dueToday} future={future} />
-            <Readout>{t('study.today.weekReadout', { reviewed: reviewedWeek, tomorrow: dueTomorrow, week: dueWeek })}</Readout>
-          </Stack>
-        )}
-
-        {statsError ? (
-          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {t('home.loadFailed')}
-          </Typography>
-        ) : null}
-
-        {/* The library — Decks, Cards, Tags — lands here in MOB-020. */}
-      </Stack>
+    <Screen scroll={false} padding={0}>
+      <StudyLibrary header={today} />
     </Screen>
   )
 }

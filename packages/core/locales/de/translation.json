@@ -206,7 +206,8 @@
       "reviewedToday": "Gelernt",
       "dayStreak": "Serie",
       "totalCards": "Gesamt",
-      "decks": "Stapel"
+      "decks": "Stapel",
+      "cards": "Karten"
     },
     "byType": "Nach Typ lernen",
     "types": {
@@ -2956,7 +2957,10 @@
     "noTag": "Ohne Tag",
     "clear": "Zurücksetzen",
     "typeMenuAria": "Nach Typ filtern",
-    "marked": "Markiert"
+    "marked": "Markiert",
+    "tags": "Schlagwörter",
+    "toggle": "Filter anzeigen",
+    "clearAll": "Alle zurücksetzen"
   },
   "pomodoro": {
     "notification": {

@@ -201,7 +201,8 @@
       "reviewedToday": "Estudiadas",
       "dayStreak": "Racha",
       "totalCards": "Total",
-      "decks": "mazos"
+      "decks": "mazos",
+      "cards": "tarjetas"
     },
     "byType": "Estudiar por Tipo",
     "swipeHint": "Desliza para navegar",

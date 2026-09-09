@@ -2975,7 +2975,10 @@
     "noTag": "Sans étiquette",
     "clear": "Effacer",
     "typeMenuAria": "Filtrer par type",
-    "marked": "Marquées"
+    "marked": "Marquées",
+    "tags": "Étiquettes",
+    "toggle": "Afficher les filtres",
+    "clearAll": "Tout effacer"
   },
   "pomodoro": {
     "notification": {

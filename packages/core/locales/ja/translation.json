@@ -200,7 +200,8 @@
       "reviewedToday": "復習済",
       "dayStreak": "連続",
       "totalCards": "合計",
-      "decks": "デッキ"
+      "decks": "デッキ",
+      "cards": "カード"
     },
     "byType": "タイプ別学習",
     "types": {
@@ -2893,7 +2894,10 @@
     "noTag": "タグなし",
     "clear": "クリア",
     "typeMenuAria": "種類で絞り込む",
-    "marked": "マーク済み"
+    "marked": "マーク済み",
+    "tags": "タグ",
+    "toggle": "フィルターを表示",
+    "clearAll": "すべて解除"
   },
   "pomodoro": {
     "notification": {
