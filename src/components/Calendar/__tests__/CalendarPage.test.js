@@ -68,7 +68,7 @@ jest.mock('@nowry/core/context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'test-user' } })
 }))
 
-const { filterCalendarEvents } = require('../calendarFilters')
+const { filterCalendarEvents } = require('@nowry/core/domain/calendar/calendarFilters')
 
 // Default mock return value for existing Phase 15 tests
 beforeEach(() => {

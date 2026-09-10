@@ -46,7 +46,11 @@ describe('the Material to lucide map', () => {
     // — so these are named directly and still have to exist.
     const missing = Object.entries(NAV_ICONS).filter(([, target]) => !names.has(target))
     expect(missing).toEqual([])
-    expect(Object.keys(NAV_ICONS)).toEqual(['home', 'study', 'focus', 'profile'])
+    // Pinned, and the number is the point: the bar's own comment puts the
+    // ceiling at five before each tab becomes a target you aim at rather than
+    // press. Calendar took the fifth (MOB-043); a sixth needs a decision, not
+    // an edit.
+    expect(Object.keys(NAV_ICONS)).toEqual(['home', 'study', 'calendar', 'focus', 'profile'])
   })
 
   it('lists what it cannot map instead of guessing', () => {

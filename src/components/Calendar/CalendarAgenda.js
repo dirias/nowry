@@ -4,8 +4,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 
 import { focusRing, touchTargetBox } from '../Common/Form/formStyles'
-import { formatDayLabel, formatDaySide, formatMonthTitle } from './agendaGroups'
-import { COMPLETABLE } from './eventHelpers'
+import { formatDayLabel, formatDaySide, formatMonthTitle } from '@nowry/core/domain/calendar/agendaGroups'
+import { COMPLETABLE } from '@nowry/core/domain/calendar/eventHelpers'
 import EventTypeTile from './EventTypeTile'
 
 const rowSx = {

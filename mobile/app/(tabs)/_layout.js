@@ -1,10 +1,12 @@
 /**
- * The tab bar: Home, Study, Focus, Profile.
+ * The tab bar: Home, Study, Calendar, Focus, Profile.
  *
- * Four, deliberately. The web has fourteen routes; a phone's tab bar holds four
- * or five before each one becomes a target you aim at rather than press. What is
- * not here — Books, Calendar, Annual Planning — is out of v1 by ADR-030, not
- * hidden behind a "more" tab, which is where features go to be forgotten.
+ * Five, and five is the ceiling. The web has fourteen routes; a phone's tab bar
+ * holds four or five before each one becomes a target you aim at rather than
+ * press. Calendar took the fifth in V2 (MOB-043), which means the next parity
+ * surface cannot simply take a sixth — Books and Annual Planning need a
+ * decision about where they live, not an edit here. What is not in the bar is
+ * not hidden behind a "more" tab, which is where features go to be forgotten.
  *
  * Route names mirror the web's, so `nowry://study/<deckId>` and
  * `https://nowry.app/study/<deckId>` are the same path with no translation
@@ -67,6 +69,10 @@ export default function TabsLayout() {
         <Tabs.Screen
           name='study'
           options={{ title: t('nav.study'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.study} color={color} /> }}
+        />
+        <Tabs.Screen
+          name='calendar'
+          options={{ title: t('nav.calendar'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.calendar} color={color} /> }}
         />
         <Tabs.Screen
           name='pomodoro'

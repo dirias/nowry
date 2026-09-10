@@ -42,6 +42,7 @@ import CircleCheck from 'lucide-react-native/icons/circle-check'
 import CircleQuestionMark from 'lucide-react-native/icons/circle-question-mark'
 import CircleUser from 'lucide-react-native/icons/circle-user'
 import CloudUpload from 'lucide-react-native/icons/cloud-upload'
+import Diamond from 'lucide-react-native/icons/diamond'
 import Download from 'lucide-react-native/icons/download'
 import EllipsisVertical from 'lucide-react-native/icons/ellipsis-vertical'
 import FilePlus from 'lucide-react-native/icons/file-plus'
@@ -79,6 +80,7 @@ import Sparkles from 'lucide-react-native/icons/sparkles'
 import Sun from 'lucide-react-native/icons/sun'
 import Sunset from 'lucide-react-native/icons/sunset'
 import Tag from 'lucide-react-native/icons/tag'
+import Target from 'lucide-react-native/icons/target'
 import Timer from 'lucide-react-native/icons/timer'
 import Trash from 'lucide-react-native/icons/trash'
 import TriangleAlert from 'lucide-react-native/icons/triangle-alert'
@@ -112,6 +114,7 @@ export const ICONS = {
   CircleUser,
   Clock,
   CloudUpload,
+  Diamond,
   Download,
   EllipsisVertical,
   FilePlus,
@@ -149,6 +152,7 @@ export const ICONS = {
   Sun,
   Sunset,
   Tag,
+  Target,
   Timer,
   Trash,
   TriangleAlert,

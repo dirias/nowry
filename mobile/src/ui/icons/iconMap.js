@@ -129,6 +129,9 @@ export const NEEDS_A_DECISION = {
 export const NAV_ICONS = {
   home: 'House',
   study: 'GraduationCap',
+  // Five tabs, not four (MOB-043). The bar's own comment set the ceiling at
+  // five, and Calendar is the first of the parity surfaces to claim one.
+  calendar: 'CalendarDays',
   focus: 'Timer',
   profile: 'CircleUser'
 }
@@ -147,6 +150,14 @@ export const KEY_TO_LUCIDE = {
   // `History` in this version; a finished session is a thing that happened at a
   // time, so the clock is the honest one rather than the closest-looking.
   history: 'Clock',
+  // from the calendar's eventTypes (MOB-043). `Target` is the ring you aim at
+  // and `Diamond` the measurable step; both are lucide's own names, so neither
+  // is a substitution for something close.
+  task: 'CircleCheck',
+  priority: 'Flag',
+  goal: 'Target',
+  milestone: 'Diamond',
+  activity: 'Repeat',
   // The wordmark's leaf. Every phone board draws it beside "nowry" in the app
   // bar; the web ships the same mark as a PNG, which has no place in a bar that
   // has to recolour with the account's accent.

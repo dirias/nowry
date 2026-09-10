@@ -3806,6 +3806,7 @@
   "nav": {
     "home": "Home",
     "study": "Study",
+    "calendar": "Calendar",
     "focus": "Focus",
     "profile": "Profile",
     "settings": "Settings"

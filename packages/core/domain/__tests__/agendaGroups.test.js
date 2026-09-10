@@ -1,4 +1,4 @@
-import { addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, startOfWeek } from '../agendaGroups'
+import { addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, startOfWeek } from '../calendar/agendaGroups'
 
 const ev = (year, month, day, id = `${year}-${month}-${day}`) => ({ id, date: new Date(year, month, day) })
 

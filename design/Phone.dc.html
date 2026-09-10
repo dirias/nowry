@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #51d1e1; }
+    a:hover { color: #9be6f0; }
+  </style>
+</helmet>
+
+<div style="width: 375px; box-sizing: border-box; background: #0d1117; color: #e6edf3">
+
+  <!-- app header (the product's own chrome, not the OS bar) -->
+  <div style="background: #1e4c52; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px">
+    <span style="font-size: 17px; font-weight: 700; letter-spacing: 0.02em; color: #f4f7f8">NOWRY</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f7f8" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+  </div>
+
+  <div style="padding: 16px">
+    <div style="background: #171A1C; border: 1px solid rgba(159, 166, 173, 0.16); border-radius: 12px; padding: 16px">
+      <div style="display: flex; align-items: flex-start; gap: 8px">
+        <div style="flex: 1; min-width: 0">
+          <div style="font-size: 14px; font-weight: 600">What's next</div>
+          <div style="margin-top: 2px; font-size: 14px; line-height: 1.5; color: #9ba9b4">Three things to try now that you have your first deck.</div>
+        </div>
+        <!-- 44x44 touch target; the glyph inside stays 16 -->
+        <div style="flex-shrink: 0; width: 44px; height: 44px; margin: -10px -10px 0 0; display: flex; align-items: center; justify-content: center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ba9b4" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; margin-top: 8px">
+        <div style="display: flex; align-items: center; gap: 16px; min-height: 56px">
+          <svg style="flex-shrink: 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A1E8A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.8 2.8L16 9.6"></path></svg>
+          <div style="flex: 1; min-width: 0; font-size: 14px; font-weight: 500; color: #7d8590">Study your first deck</div>
+        </div>
+        <div style="height: 1px; background: rgba(159, 166, 173, 0.16)"></div>
+        <div style="display: flex; align-items: center; gap: 16px; min-height: 56px">
+          <svg style="flex-shrink: 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A1E8A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.8 2.8L16 9.6"></path></svg>
+          <div style="flex: 1; min-width: 0; font-size: 14px; font-weight: 500; color: #7d8590">Bring your own material</div>
+        </div>
+        <div style="height: 1px; background: rgba(159, 166, 173, 0.16)"></div>
+        <div style="display: flex; align-items: center; gap: 16px; min-height: 56px; padding: 8px 0">
+          <svg style="flex-shrink: 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#51d1e1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 5h11l-1.6 3.5L16 12H5"></path></svg>
+          <div style="flex: 1; min-width: 0">
+            <div style="font-size: 14px; font-weight: 600">Set a goal for the year</div>
+            <div style="margin-top: 1px; font-size: 12px; line-height: 1.5; color: #9ba9b4">Name one thing you want to learn and break it into steps.</div>
+          </div>
+          <svg style="flex-shrink: 0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d8590" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"></path></svg>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; font-size: 24px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2">Welcome back, Didier_I!</div>
+    <div style="margin-top: 4px; font-size: 12px; line-height: 1.5; color: #9ba9b4">Every little bit brings you closer to fluency!</div>
+
+    <div style="margin-top: 16px; display: flex; align-items: center; gap: 12px; background: #171A1C; border: 1px solid rgba(159, 166, 173, 0.16); border-radius: 8px; padding: 10px 14px; width: fit-content">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#51d1e1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5H19v13H5.5A1.5 1.5 0 0 1 4 16.5Z"></path><path d="M4 15.5A1.5 1.5 0 0 1 5.5 14H19"></path></svg>
+      <span style="font-size: 14px; font-weight: 500; color: #9ba9b4">Review 21 cards</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d8590" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13m-5-5 5 5-5 5"></path></svg>
+    </div>
+
+    <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid rgba(159, 166, 173, 0.16); display: flex; flex-direction: column; gap: 7px">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #7d8590">375 wide</div>
+      <div style="font-size: 12px; line-height: 1.55; color: #9ba9b4">Rows grow to 56 and the open one takes two lines. Nothing overflows sideways, and the close control keeps a 44 by 44 box even though its glyph is 16.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

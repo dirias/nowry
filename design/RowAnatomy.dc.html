@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #51d1e1; }
+    a:hover { color: #9be6f0; }
+  </style>
+</helmet>
+
+<div style="width: 1240px; box-sizing: border-box; background: #0d1117; color: #e6edf3; padding: 44px 48px 48px">
+
+  <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #7d8590">Row anatomy</div>
+  <div style="margin-top: 8px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Three rules decide what a row may say</div>
+
+  <!-- the measured row -->
+  <div style="margin-top: 32px; background: #171A1C; border: 1px solid rgba(159, 166, 173, 0.16); border-radius: 12px; padding: 0 20px">
+    <div style="display: flex; align-items: center; gap: 16px; min-height: 52px">
+      <svg style="flex-shrink: 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#51d1e1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 5h11l-1.6 3.5L16 12H5"></path></svg>
+      <div style="flex: 1; min-width: 0">
+        <div style="font-size: 14px; font-weight: 600">Set a goal for the year</div>
+        <div style="font-size: 12px; line-height: 1.5; color: #9ba9b4">Name one thing you want to learn and break it into steps.</div>
+      </div>
+      <svg style="flex-shrink: 0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d8590" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"></path></svg>
+    </div>
+  </div>
+
+  <!-- callouts under the row -->
+  <div style="display: grid; grid-template-columns: 56px 1fr 1fr 1fr 40px; gap: 12px; margin-top: 10px; align-items: start">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+      <span style="width: 1px; height: 16px; background: rgba(159, 166, 173, 0.28)"></span>
+      <span style="font-size: 11px; line-height: 1.4; color: #7d8590; text-align: center">Icon<br>20px</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span style="width: 1px; height: 16px; background: rgba(159, 166, 173, 0.28)"></span>
+      <span style="font-size: 11px; line-height: 1.4; color: #7d8590">Title · 14px / 600</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span style="width: 1px; height: 16px; background: rgba(159, 166, 173, 0.28)"></span>
+      <span style="font-size: 11px; line-height: 1.4; color: #7d8590">Prompt · 12px, secondary — present only while the row is open</span>
+    </div>
+    <div></div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+      <span style="width: 1px; height: 16px; background: rgba(159, 166, 173, 0.28)"></span>
+      <span style="font-size: 11px; line-height: 1.4; color: #7d8590; text-align: center">Chevron</span>
+    </div>
+  </div>
+  <div style="margin-top: 4px; font-size: 12px; color: #7d8590">Row height 52 on a pointer, 56 on a phone — the same rhythm as every other list in the app.</div>
+
+  <!-- the three rules -->
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 40px">
+
+    <div style="background: #161b22; border: 1px solid rgba(159, 166, 173, 0.16); border-radius: 12px; padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #51d1e1">FR-069</div>
+      <div style="font-size: 17px; font-weight: 600; line-height: 1.3">A row owns a destination</div>
+      <div style="font-size: 14px; line-height: 1.6; color: #9ba9b4; text-wrap: pretty">
+        No route, no row. This is the rule the carousel could not have passed: quizzes and diagrams are card types inside a deck, so neither has anywhere to open.
+      </div>
+      <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 7px">
+        <div style="font-size: 13px; color: #9ba9b4"><span style="color: #A1E8A1">in</span> &nbsp;Study, Books, Annual planning</div>
+        <div style="font-size: 13px; color: #9ba9b4"><span style="color: #F09898">out</span> &nbsp;Quizzes, Diagrams, the pet</div>
+      </div>
+    </div>
+
+    <div style="background: #161b22; border: 1px solid rgba(159, 166, 173, 0.16); border-radius: 12px; padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #51d1e1">FR-070</div>
+      <div style="font-size: 17px; font-weight: 600; line-height: 1.3">A done row stops inviting</div>
+      <div style="font-size: 14px; line-height: 1.6; color: #9ba9b4; text-wrap: pretty">
+        It keeps its place, takes a check, drops its prompt and its chevron, and stops being a control at all. Progress stays legible without asking for the same thing twice.
+      </div>
+      <div style="margin-top: 4px; display: flex; align-items: center; gap: 12px; background: #171A1C; border-radius: 8px; padding: 10px 12px">
+        <svg style="flex-shrink: 0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A1E8A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.8 2.8L16 9.6"></path></svg>
+        <span style="font-size: 13px; font-weight: 500; color: #7d8590">Study your first deck</span>
+      </div>
+    </div>
+
+    <div style="background: #161b22; border: 1px solid rgba(159, 166, 173, 0.16); border-radius: 12px; padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #51d1e1">FR-071</div>
+      <div style="font-size: 17px; font-weight: 600; line-height: 1.3">No answer means open</div>
+      <div style="font-size: 14px; line-height: 1.6; color: #9ba9b4; text-wrap: pretty">
+        Loading, failed, or a payload in a shape nobody expected: all three leave the row open. Suggesting something already done is mildly redundant. Ticking a box on no evidence is a lie.
+      </div>
+      <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 7px">
+        <div style="font-size: 13px; color: #9ba9b4">still loading &nbsp;<span style="color: #7d8590">→</span>&nbsp; open</div>
+        <div style="font-size: 13px; color: #9ba9b4">request failed &nbsp;<span style="color: #7d8590">→</span>&nbsp; open</div>
+        <div style="font-size: 13px; color: #9ba9b4">unexpected shape &nbsp;<span style="color: #7d8590">→</span>&nbsp; open</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 32px; font-size: 14px; line-height: 1.6; color: #9ba9b4; max-width: 960px; text-wrap: pretty">
+    The last rule has a second job: one dead signal can never let the panel decide everything is finished and retire itself for a user who never saw a working row.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -17,7 +17,7 @@ import FormSheet from '../Common/Form/FormSheet'
 import FormTextArea from '../Common/Form/FormTextArea'
 import FormTextField from '../Common/Form/FormTextField'
 import { focusRing, formLabel, segment, segmentedGroup } from '../Common/Form/formStyles'
-import { COMPLETABLE, completionPatch, stripTypePrefix } from './eventHelpers'
+import { COMPLETABLE, completionPatch, stripTypePrefix } from '@nowry/core/domain/calendar/eventHelpers'
 
 /**
  * The four things a calendar day can be given (ADR-017). Habit is not one of

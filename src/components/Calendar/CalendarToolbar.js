@@ -6,7 +6,7 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import CheckRounded from '@mui/icons-material/CheckRounded'
 
 import { focusRing, segment, segmentedGroup, tabularNums } from '../Common/Form/formStyles'
-import { ALL_TYPES, allTypesActive } from './calendarFilters'
+import { ALL_TYPES, allTypesActive } from '@nowry/core/domain/calendar/calendarFilters'
 
 export const CALENDAR_VIEWS = ['month', 'week', 'agenda']
 

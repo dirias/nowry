@@ -1,0 +1,26 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1240, "h": 940, "title": "The decision" },
+    { "file": "PanelStates.dc.html", "x": 1360, "y": 0, "w": 780, "h": 1080, "title": "Panel states" },
+    { "file": "HomeSurfaces.dc.html", "x": 0, "y": 1060, "w": 1240, "h": 720, "title": "Home's two surfaces" },
+    { "file": "Phone.dc.html", "x": 1360, "y": 1200, "w": 375, "h": 900, "title": "Phone · 375" },
+    { "file": "RowAnatomy.dc.html", "x": 0, "y": 1900, "w": 1240, "h": 760, "title": "Row anatomy" }
+  ],
+  "annotations": [
+    {
+      "id": "why-not-after",
+      "x": 0,
+      "y": -190,
+      "w": 420,
+      "text": "The question was where the carousel belonged: before the wizard or after it.\n\nThe answer was neither. Both are the same interruptive broadcast; only the timing of the interruption changes."
+    },
+    {
+      "id": "server-decides",
+      "x": 1360,
+      "y": -190,
+      "w": 380,
+      "text": "Visibility is the server's, not the client's — the same call ADR-007 made for re-entry.\n\nA browser-local flag is right on one device and wrong on every other."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

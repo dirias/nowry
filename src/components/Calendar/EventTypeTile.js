@@ -7,8 +7,13 @@ import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
+import { eventType } from '@nowry/core/domain/calendar/eventTypes'
 
-/** One glyph per event type. Every milestone is a measurable step (CAL-005), so one diamond. */
+/**
+ * The icon KEY each type hands out, resolved to this client's set. The table
+ * itself lives in `@nowry/core/domain/calendar/eventTypes` because both clients
+ * draw these five and a shared module never returns a component (ADR-031).
+ */
 export const EVENT_TYPE_ICONS = {
   task: CheckCircleOutlinedIcon,
   priority: FlagOutlinedIcon,
@@ -27,7 +32,7 @@ export const EVENT_TYPE_ICONS = {
  * accent swatches use.
  */
 const EventTypeTile = ({ type, color, size = 28, glyphSize = 'md' }) => {
-  const Icon = EVENT_TYPE_ICONS[type] ?? AdjustOutlinedIcon
+  const Icon = EVENT_TYPE_ICONS[eventType(type).iconKey]
   return (
     <Box
       aria-hidden='true'
