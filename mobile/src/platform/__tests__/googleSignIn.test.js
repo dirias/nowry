@@ -123,3 +123,17 @@ it('declares the scheme the redirect comes back on', () => {
   // The app's own scheme stays: it is what deep links use.
   expect(schemes).toContain('nowry')
 })
+
+it('names the redirect and the client id when Google refuses', async () => {
+  // Google answers a wrong client id, a wrong redirect and an unregistered
+  // fingerprint with the same two words. The message has to separate them.
+  mockPromptAsync.mockResolvedValue({ type: 'error', params: { error: 'invalid_request' } })
+
+  await expect(signInWithGoogle({})).rejects.toMatchObject({
+    code: 'auth/invalid_request',
+    message: expect.stringContaining('redirect_uri=com.nowry.app:/oauthredirect')
+  })
+  await expect(signInWithGoogle({})).rejects.toMatchObject({
+    message: expect.stringContaining('client_id=android-id.apps.googleusercontent.com')
+  })
+})

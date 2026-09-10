@@ -117,7 +117,17 @@ export const signInWithGoogle = async (auth) => {
   if (result.type === 'cancel' || result.type === 'dismiss') return null
 
   if (result.type !== 'success') {
-    const error = new Error(result.params?.error_description || 'Google sign-in did not complete')
+    /*
+     * Name what was sent, not just what came back.
+     *
+     * Google answers a wrong client id, a wrong redirect and an unregistered
+     * signing fingerprint with the same two words. Three different fixes, one
+     * message — so the message carries the two values a reader would otherwise
+     * spend an evening guessing at. Neither is a secret: the client id is
+     * public by design and the redirect is in the manifest.
+     */
+    const detail = result.params?.error_description || result.params?.error || 'Google sign-in did not complete'
+    const error = new Error(`${detail} — sent redirect_uri=${redirectUri} client_id=${clientId}`)
     error.code = result.params?.error ? `auth/${result.params.error}` : 'auth/popup-closed-by-user'
     throw error
   }
