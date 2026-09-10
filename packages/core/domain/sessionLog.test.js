@@ -8,7 +8,7 @@
 import { daysUntilReview, groupSummary, sessionLine, systemGroup, tagGroups } from './sessionLog'
 
 describe('sessionLine', () => {
-  it('reads the API\'s names and hands back the screen\'s', () => {
+  it("reads the API's names and hands back the screen's", () => {
     expect(
       sessionLine({
         _id: 's1',

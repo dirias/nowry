@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth'
 import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
+import { usernameFor } from '../../domain/username'
 
 /*
  * Both clients run the same Firebase JS SDK (ADR-028) and differ only in how
@@ -145,7 +146,7 @@ export const authService = {
         {
           firebase_uid: user.uid,
           email: user.email,
-          username: user.displayName || user.email.split('@')[0],
+          username: usernameFor({ displayName: user.displayName, email: user.email, uid: user.uid }),
           photo_url: user.photoURL
         },
         {
