@@ -16,6 +16,9 @@
  * feature is called the Power of 3 on the web's own setup screen. The Add key
  * disappears at three rather than failing at four.
  *
+ * It does not own a `Screen`: the plan and the calendar are two views of one
+ * thing and share a tab, so the tab owns the surface.
+ *
  * **No upgrade path, at any tier** (ADR-030). The web's layout reads
  * `useSubscription` and opens an upgrade modal; nothing on this screen may link
  * to a purchase, so the gate does not exist here and neither does the key.
@@ -38,7 +41,6 @@ import {
   ListRow,
   Measure,
   Readout,
-  Screen,
   SectionHeader,
   Skeleton,
   Stack,
@@ -114,55 +116,49 @@ export function AnnualPlanning() {
 
   if (loading && !plan) {
     return (
-      <Screen>
-        <Stack spacing={2}>
-          <Skeleton width='60%' height={28} />
-          <Skeleton width='100%' height={96} />
-          <Skeleton width='100%' height={56} />
-          <Skeleton width='100%' height={56} />
-        </Stack>
-      </Screen>
+      <Stack spacing={2}>
+        <Skeleton width='60%' height={28} />
+        <Skeleton width='100%' height={96} />
+        <Skeleton width='100%' height={56} />
+        <Skeleton width='100%' height={56} />
+      </Stack>
     )
   }
 
   if (error && !plan) {
     return (
-      <Screen>
-        <Stack spacing={2}>
-          <Typography level='body-md' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {t('annualPlanning.tabs.errorLoading')}
-          </Typography>
-          <Button variant='secondary' onPress={reload}>
-            {t('common.retry')}
-          </Button>
-        </Stack>
-      </Screen>
+      <Stack spacing={2}>
+        <Typography level='body-md' color='danger.plainColor' accessibilityLiveRegion='polite'>
+          {t('annualPlanning.tabs.errorLoading')}
+        </Typography>
+        <Button variant='secondary' onPress={reload}>
+          {t('common.retry')}
+        </Button>
+      </Stack>
     )
   }
 
   /* No plan is not an error and not an empty list: it is one thing to do. */
   if (!plan) {
     return (
-      <Screen>
-        <Stack spacing={2}>
-          <Typography level='h4' accessibilityRole='header'>
-            {t('annualPlanning.home.startJourney', { year })}
-          </Typography>
-          <Typography level='body-md' color='text.secondary'>
-            {t('annualPlanning.home.startDescription')}
-          </Typography>
-          <Button loading={creating} onPress={createPlan}>
-            {t('annualPlanning.home.createPlan')}
-          </Button>
-        </Stack>
-      </Screen>
+      <Stack spacing={2}>
+        <Typography level='h4' accessibilityRole='header'>
+          {t('annualPlanning.home.startJourney', { year })}
+        </Typography>
+        <Typography level='body-md' color='text.secondary'>
+          {t('annualPlanning.home.startDescription')}
+        </Typography>
+        <Button loading={creating} onPress={createPlan}>
+          {t('annualPlanning.home.createPlan')}
+        </Button>
+      </Stack>
     )
   }
 
   const atLimit = (areas || []).length >= MAX_AREAS
 
   return (
-    <Screen>
+    <>
       <Stack spacing={3}>
         {/* The plan is the page's one summary object (ADR-021 §15.10): what it
             is, the numbers that describe it, and its progress as the object's
@@ -290,7 +286,7 @@ export function AnnualPlanning() {
         onClose={() => setAreaSheet(false)}
         onSaved={reload}
       />
-    </Screen>
+    </>
   )
 }
 

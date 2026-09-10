@@ -1,9 +1,11 @@
 /**
- * `/annual-planning` — the web's own path, so one link opens the same thing on
- * both. It lives inside the tab group and shows no tab of its own: the bar is
- * full at five (MOB-043), and a screen reached from Home and from the calendar
- * does not need a sixth.
+ * `/annual-planning` — the web's own path, kept as a link target rather than as
+ * a screen. The plan lives in the Plan tab beside the calendar (MOB-046), so
+ * this redirects into that tab's second segment: Home's next-steps row and the
+ * web's URL both land on the plan, with the tab bar still under them.
  */
-import { AnnualPlanning } from '../../src/screens/AnnualPlanning'
+import { Redirect } from 'expo-router'
 
-export default AnnualPlanning
+export default function AnnualPlanningRoute() {
+  return <Redirect href='/calendar?view=overview' />
+}

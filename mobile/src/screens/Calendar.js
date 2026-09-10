@@ -11,6 +11,10 @@
  * ends the first row; the filter object stretches across the second; the agenda
  * fills what is left.
  *
+ * It does not own a `Screen`. The calendar and the plan are two views of one
+ * thing and share a tab, the way the Study Center's Dashboard and Library do,
+ * so the tab owns the surface and this owns what is on it.
+ *
  * **What the agenda is** (ADR-016): one group per day of the cursor's month
  * that has anything due, and in the current month the list starts at today
  * rather than making the reader scroll past what is already done. Today is
@@ -31,7 +35,6 @@
  */
 import { useCallback, useMemo, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { tasksService, annualPlanningService } from '@nowry/core/api/services'
 import { calendarEventsKey } from '@nowry/core/api/services/calendar.service'
@@ -48,7 +51,7 @@ import { resolveColor } from '../ui/Typography'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { CalendarFilterSheet } from './CalendarFilters'
 import { EventFormSheet } from './EventForm'
-import { Button, Chip, Divider, EventTile, Icon, IconButton, Screen, Skeleton, Stack, Typography } from '../ui'
+import { Button, Chip, Divider, EventTile, Icon, IconButton, Skeleton, Stack, Typography } from '../ui'
 
 /** The row's floor, and the web's own (`minHeight: 52`). */
 const ROW_HEIGHT = 52
@@ -65,7 +68,6 @@ export function Calendar() {
   const { t, i18n } = useTranslation()
   const language = i18n?.language ?? 'en'
   const theme = useTheme()
-  const router = useRouter()
   const { user } = useAuth()
   const userId = user?.id ?? null
 
@@ -117,7 +119,7 @@ export function Calendar() {
   const areasNarrowed = filters.activeAreaIds.length > 0
 
   return (
-    <Screen scroll={false}>
+    <>
       <Stack spacing={2} style={{ flex: 1 }}>
         {/* Row one: the month, and the screen's one solid. The web's row one is
             the page's title beside the same key; here the tab bar and the app
@@ -154,12 +156,6 @@ export function Calendar() {
               that disappears when it would do nothing moves the two beside it. */}
           <Button size='sm' variant='tertiary' disabled={showsToday} onPress={() => setCursor(new Date())}>
             {t('calendarPage.nav.today')}
-          </Button>
-          <View style={{ flex: 1 }} />
-          {/* The calendar is a view of the plan, so it carries the way there.
-              The plan has no tab of its own — the bar is full at five. */}
-          <Button size='sm' variant='tertiary' onPress={() => router.push('/annual-planning')}>
-            {t('annualPlanning.title')}
           </Button>
         </Stack>
 
@@ -227,7 +223,7 @@ export function Calendar() {
         onClose={() => setForm(null)}
         onSaved={reload}
       />
-    </Screen>
+    </>
   )
 }
 

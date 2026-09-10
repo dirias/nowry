@@ -130,8 +130,9 @@ export const NAV_ICONS = {
   home: 'House',
   study: 'GraduationCap',
   // Five tabs, not four (MOB-043). The bar's own comment set the ceiling at
-  // five, and Calendar is the first of the parity surfaces to claim one.
-  calendar: 'CalendarDays',
+  // five, and the plan claimed it — the calendar is the view it opens on, so
+  // the calendar's glyph is the one that names it.
+  plan: 'CalendarDays',
   focus: 'Timer',
   profile: 'CircleUser'
 }

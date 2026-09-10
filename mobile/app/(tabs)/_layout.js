@@ -1,11 +1,12 @@
 /**
- * The tab bar: Home, Study, Calendar, Focus, Profile.
+ * The tab bar: Home, Study, Plan, Focus, Profile.
  *
  * Five, and five is the ceiling. The web has fourteen routes; a phone's tab bar
  * holds four or five before each one becomes a target you aim at rather than
- * press. Calendar took the fifth in V2 (MOB-043), which means the next parity
- * surface cannot simply take a sixth — Books and Annual Planning need a
- * decision about where they live, not an edit here. What is not in the bar is
+ * press. Plan took the fifth in V2 (MOB-043) and holds two views, the calendar
+ * and the year's plan, on one segment — the Study Center's own arrangement. The
+ * next parity surface cannot simply take a sixth: Books needs a decision about
+ * where it lives, not an edit here. What is not in the bar is
  * not hidden behind a "more" tab, which is where features go to be forgotten.
  *
  * Route names mirror the web's, so `nowry://study/<deckId>` and
@@ -72,7 +73,7 @@ export default function TabsLayout() {
         />
         <Tabs.Screen
           name='calendar'
-          options={{ title: t('nav.calendar'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.calendar} color={color} /> }}
+          options={{ title: t('annualPlanning.title'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.plan} color={color} /> }}
         />
         {/* In the group so the tab bar stays under it, but not a tab: `href:
             null` is how Expo Router says "a route here, no button for it". The

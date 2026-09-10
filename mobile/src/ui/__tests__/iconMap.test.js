@@ -48,9 +48,9 @@ describe('the Material to lucide map', () => {
     expect(missing).toEqual([])
     // Pinned, and the number is the point: the bar's own comment puts the
     // ceiling at five before each tab becomes a target you aim at rather than
-    // press. Calendar took the fifth (MOB-043); a sixth needs a decision, not
-    // an edit.
-    expect(Object.keys(NAV_ICONS)).toEqual(['home', 'study', 'calendar', 'focus', 'profile'])
+    // press. Plan took the fifth (MOB-043) and holds two views on a segment; a
+    // sixth tab needs a decision, not an edit.
+    expect(Object.keys(NAV_ICONS)).toEqual(['home', 'study', 'plan', 'focus', 'profile'])
   })
 
   it('lists what it cannot map instead of guessing', () => {
