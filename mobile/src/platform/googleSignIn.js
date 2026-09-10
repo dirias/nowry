@@ -36,6 +36,13 @@
  *      exchanged — no client secret, because a public client has none, which is
  *      exactly what PKCE is for.
  *
+ * And one thing that is not code at all: **a new Android OAuth client has
+ * custom URI schemes DISABLED by default**, and this redirect is one. The
+ * request then fails at the consent screen with the same `invalid_request`,
+ * only the details dialog naming the cause. It is a toggle in the Google Cloud
+ * console under the client's advanced settings, and it is written up in
+ * EAS-SECRETS.md.
+ *
  * The provider `expo-auth-session` ships is a hook, and this is a plain
  * function behind the platform port, called from shared code that is not a
  * component. So its rules are followed rather than its hook used.

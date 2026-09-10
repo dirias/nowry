@@ -39,6 +39,23 @@ uses:
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS` | iOS | bundle id `com.nowry.app` |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID` | Android | package `com.nowry.app`, plus the build's SHA-1 |
 
+**Custom URI schemes are OFF by default on a new Android OAuth client.** This is
+the one that costs an evening. Google now creates Android clients with the
+setting disabled, and this app's redirect IS a custom URI scheme, so the client
+refuses the request before anything else is checked. It reaches the consent
+screen, shows the app's name and logo, and returns:
+
+> Error 400: invalid_request — Custom URI scheme is not enabled for your Android client.
+
+The fix is a toggle, not code: Google Cloud console → APIs and Services →
+Credentials → the Android client → Advanced settings → enable **Custom URI
+scheme** → Save. It takes a few minutes to propagate.
+
+Worth knowing because the same two words, `invalid_request`, are also what a
+wrong client id and an unregistered fingerprint produce. Only the details dialog
+separates them, which is why `googleSignIn.js` now puts the redirect and the
+client id into the error it throws.
+
 **Google's own rules, which are not obvious and fail identically when broken.**
 Both of these surface as `redirect_uri_mismatch`, which reads like a typo in the
 client ID rather than a wrong flow, so they are stated here and asserted in
