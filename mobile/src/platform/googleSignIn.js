@@ -64,6 +64,13 @@ const DISCOVERY = {
 
 const extra = Constants.expoConfig?.extra ?? {}
 
+/**
+ * The first scheme in the config is the one Expo's Linking treats as primary
+ * and the one a callback comes back on. Read rather than hardcoded, so renaming
+ * the app's scheme cannot silently break sign-in.
+ */
+const PRIMARY_SCHEME = [].concat(Constants.expoConfig?.scheme ?? 'nowry')[0]
+
 /** Google issues one client ID per platform; the wrong one is a redirect_uri_mismatch. */
 export const googleClientId = () =>
   Platform.select({
@@ -73,22 +80,27 @@ export const googleClientId = () =>
   })
 
 /**
- * `com.nowry.app:/oauthredirect` — the app's own id, which is what Google
- * registers against an installed-app client. `Application.applicationId` is the
- * value the OS actually launched with, so it cannot drift from the manifest the
- * way a constant in this file would.
+ * `nowry://oauthredirect` — the app's OWN scheme, not its package name.
  *
- * **Built directly rather than through `makeRedirectUri`.** That helper returns
- * the `native` value only when the execution environment is Standalone or Bare,
- * and falls back to a development `exp://…` URL otherwise. Google rejects that
- * with `Error 400: invalid_request` — it reached the consent screen, recognised
- * the app, and refused the request. What the redirect must be here is not
- * conditional on how the app was launched, so neither is this.
+ * Both halves of this have been wrong once, so both are written down.
+ *
+ * It is not built with `makeRedirectUri`: that helper returns its `native`
+ * value only under Standalone or Bare and otherwise hands back a development
+ * `exp://…` URL, which Google refuses outright.
+ *
+ * And it is not the package name, which is what Google's own documentation
+ * suggests. `com.nowry.app:/oauthredirect` was accepted by Google and came back
+ * with a valid code — but the app never saw it. `openAuthSessionAsync` waits
+ * for a URL matching the redirect it was given, the callback arrived on the
+ * app's primary scheme instead, and the two did not match. A redirect that does
+ * not match does not error: it leaks past the listener to the router, which
+ * shows "Unmatched Route" with the authorization code sitting in the URL.
+ *
+ * So the redirect is the scheme this app actually answers on. Google permits it
+ * because the client has custom URI schemes enabled — the setting that has to
+ * be turned on by hand, per EAS-SECRETS.md.
  */
-export const redirectUriFor = () => {
-  const id = Application.applicationId ?? Constants.expoConfig?.android?.package ?? Constants.expoConfig?.ios?.bundleIdentifier
-  return `${id}:/oauthredirect`
-}
+export const redirectUriFor = () => `${PRIMARY_SCHEME}://oauthredirect`
 
 /**
  * @param {object} auth - the client's Firebase Auth instance
@@ -105,6 +117,13 @@ export const signInWithGoogle = async (auth) => {
   }
 
   const redirectUri = redirectUriFor()
+
+  /*
+   * Said out loud in development, because the redirect is the value this flow
+   * gets wrong most often and the failure never names it: a mismatch does not
+   * error, it simply leaks the callback to the router as an unmatched route.
+   */
+  if (__DEV__) console.log('[google] redirect_uri =', redirectUri, '| client_id =', clientId)
 
   const request = new AuthSession.AuthRequest({
     clientId,

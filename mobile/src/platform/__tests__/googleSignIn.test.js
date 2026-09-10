@@ -29,7 +29,9 @@ jest.mock('expo-auth-session', () => ({
 }))
 jest.mock('expo-web-browser', () => ({ maybeCompleteAuthSession: jest.fn() }))
 jest.mock('expo-application', () => ({ applicationId: 'com.nowry.app' }))
-jest.mock('expo-constants', () => ({ expoConfig: { extra: { googleClientIdAndroid: 'android-id.apps.googleusercontent.com' } } }))
+jest.mock('expo-constants', () => ({
+  expoConfig: { scheme: ['nowry', 'com.nowry.app'], extra: { googleClientIdAndroid: 'android-id.apps.googleusercontent.com' } }
+}))
 jest.mock('react-native', () => ({ Platform: { OS: 'android', select: (map) => map.android } }))
 jest.mock('firebase/auth', () => ({
   GoogleAuthProvider: { credential: (...args) => mockCredential(...args) },
@@ -46,10 +48,21 @@ beforeEach(() => {
   mockSignIn.mockReset().mockResolvedValue({ user: { uid: 'u1' } })
 })
 
-it('redirects to the app id, never to our own scheme', () => {
-  // Google's installed-app clients accept `<applicationId>:/oauthredirect` and
-  // the reverse-DNS scheme they issue. `nowry://` is neither.
-  expect(redirectUriFor()).toBe('com.nowry.app:/oauthredirect')
+it('redirects to the scheme the app actually answers on', () => {
+  // The package name was tried and rejected — not by Google, which accepted it
+  // and returned a code, but by the app, which never saw the callback. Expo
+  // delivers it on the PRIMARY scheme, so the redirect has to be that one.
+  expect(redirectUriFor()).toBe('nowry://oauthredirect')
+})
+
+it('takes the scheme from the config rather than hardcoding it', () => {
+  // Renaming the app's scheme must not silently break sign-in.
+  jest.resetModules()
+  jest.doMock('expo-constants', () => ({ expoConfig: { scheme: 'renamed', extra: {} } }))
+  const { redirectUriFor: rebuilt } = require('../googleSignIn')
+  expect(rebuilt()).toBe('renamed://oauthredirect')
+  jest.dontMock('expo-constants')
+  jest.resetModules()
 })
 
 it('does not go through makeRedirectUri, which is conditional on how the app launched', () => {
@@ -70,7 +83,7 @@ it('asks for a code with PKCE, because Google will not hand an installed app an 
 
   expect(MockAuthRequest.lastConfig.responseType).toBe('code')
   expect(MockAuthRequest.lastConfig.usePKCE).toBe(true)
-  expect(MockAuthRequest.lastConfig.redirectUri).toBe('com.nowry.app:/oauthredirect')
+  expect(MockAuthRequest.lastConfig.redirectUri).toBe('nowry://oauthredirect')
   // openid is what makes Google issue an id_token at the exchange.
   expect(MockAuthRequest.lastConfig.scopes).toContain('openid')
 })
@@ -81,7 +94,7 @@ it('exchanges the code with the verifier, which is what stands in for a secret',
   const [request] = mockExchange.mock.calls[0]
   expect(request.code).toBe('auth-code')
   expect(request.extraParams.code_verifier).toBe('verifier-123')
-  expect(request.redirectUri).toBe('com.nowry.app:/oauthredirect')
+  expect(request.redirectUri).toBe('nowry://oauthredirect')
   // A public client has no secret, and sending one would be the bug.
   expect(request.clientSecret).toBeUndefined()
 })
@@ -115,13 +128,16 @@ it('says an exchange that returns no id_token is a credential problem', async ()
  * Google accepts the sign-in, and nothing returns — a hang with no error, which
  * is the worst shape a failure can take and the hardest to attribute.
  */
-it('declares the scheme the redirect comes back on', () => {
+it('declares the scheme the redirect comes back on, first', () => {
   const config = require('../../../app.config.js')().expo
   const schemes = [].concat(config.scheme)
 
+  // FIRST, because Expo's Linking treats the first as primary and delivers
+  // every callback on it. Second would send sign-in back to a scheme the
+  // listener is not watching, which is a leak to the router, not an error.
+  expect(schemes[0]).toBe('nowry')
+  // The package name stays declared so a redirect addressed to it still lands.
   expect(schemes).toContain(config.android.package)
-  // The app's own scheme stays: it is what deep links use.
-  expect(schemes).toContain('nowry')
 })
 
 it('names the redirect and the client id when Google refuses', async () => {
@@ -131,7 +147,7 @@ it('names the redirect and the client id when Google refuses', async () => {
 
   await expect(signInWithGoogle({})).rejects.toMatchObject({
     code: 'auth/invalid_request',
-    message: expect.stringContaining('redirect_uri=com.nowry.app:/oauthredirect')
+    message: expect.stringContaining('redirect_uri=nowry://oauthredirect')
   })
   await expect(signInWithGoogle({})).rejects.toMatchObject({
     message: expect.stringContaining('client_id=android-id.apps.googleusercontent.com')

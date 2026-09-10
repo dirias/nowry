@@ -61,11 +61,15 @@ Both of these surface as `redirect_uri_mismatch`, which reads like a typo in the
 client ID rather than a wrong flow, so they are stated here and asserted in
 `googleSignIn.test.js`:
 
-- **The redirect is `com.nowry.app:/oauthredirect`**, the app's own id. Google's
-  installed-app clients accept that and the reverse-DNS scheme they issue; they
-  do not accept an arbitrary scheme such as `nowry://`. Nothing needs to be
-  typed into the Google console for it — an Android client is identified by its
-  package and fingerprint, and an iOS client by its bundle id.
+- **The redirect is `nowry://oauthredirect`**, the app's own scheme — NOT the
+  package name, despite what Google's documentation suggests. The package name
+  was tried: Google accepted it and returned a valid code, and the app never saw
+  the callback, because Expo delivers a deep link on the FIRST declared scheme
+  and `openAuthSessionAsync` only resolves for a URL matching the redirect it
+  was given. A mismatch does not error — it leaks past the listener to the
+  router, which shows "Unmatched Route" with the authorization code sitting in
+  the URL. Nothing needs to be typed into the Google console for it; an Android
+  client is identified by its package and fingerprint.
 - **The flow is authorization code with PKCE**, not implicit. Google does not
   issue an `id_token` straight to an installed app, and a public client has no
   secret to send.

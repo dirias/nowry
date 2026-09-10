@@ -19,6 +19,13 @@
 module.exports = {
   rootDir: __dirname,
   testEnvironment: 'node',
+  /*
+   * React Native defines `__DEV__`; a bare Node environment does not. Code
+   * under test guards development-only behaviour with it, and without this
+   * every such line is a ReferenceError rather than a branch. True, because
+   * that is what a test run is.
+   */
+  globals: { __DEV__: true },
   testMatch: ['<rootDir>/src/**/__tests__/**/*.test.js'],
   resetMocks: true,
   transform: {

@@ -33,11 +33,12 @@ module.exports = () => ({
     // Deep links use the same route names as the web client, so a link maps
     // without a translation table (see docs/architecture.md).
     /*
-     * Two schemes, and the second is not decoration. Google's Android OAuth
-     * client redirects to `<package>:/oauthredirect`, so the OS only routes
-     * that back to this app if the package name is a declared scheme. Without
-     * it the browser opens, Google accepts the sign-in, and nothing returns —
-     * a hang with no error, which is the worst shape a failure can take.
+     * `nowry` is first, and first matters: Expo's Linking treats the first
+     * scheme as primary and delivers every callback on it. The OAuth redirect
+     * is built from this value for exactly that reason (see googleSignIn.js).
+     *
+     * `com.nowry.app` stays declared so a redirect addressed to the package
+     * name still reaches the app rather than nothing at all.
      */
     scheme: ['nowry', 'com.nowry.app'],
     userInterfaceStyle: 'automatic',
