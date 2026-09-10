@@ -28,8 +28,11 @@ export function SummaryObject({ title, context, readouts, action, secondary, pro
   return (
     <Sheet radius='lg' padding={0} elevation='none' style={[{ overflow: 'hidden' }, style]}>
       <View style={{ padding: theme.spacing[2], gap: theme.spacing[1.5] }}>
-        <View style={{ gap: 2 }}>
-          <Typography level='h4' color='text.primary'>
+        {/* Title and context share a baseline, as the PhoneDashboard artboard
+            draws them: "Today · Sat, 6 Sep" is one line of identity, not a
+            heading with a subtitle under it. */}
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: theme.spacing[1.5], flexWrap: 'wrap' }}>
+          <Typography level='title-lg' color='text.primary'>
             {title}
           </Typography>
           {context ? (

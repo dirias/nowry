@@ -267,7 +267,9 @@
       "today": "Today",
       "yesterday": "Yesterday",
       "daysAgo": "{{count}}d ago",
-      "weeksAgo": "{{count}}w ago"
+      "weeksAgo": "{{count}}w ago",
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min"
     },
     "stats": {
       "dueToday": "Due",
@@ -1552,7 +1554,6 @@
         "quizzes": "Quizzes",
         "visual": "Visual"
       },
-      "cardCount": "{{count}} card",
       "cardCount_one": "{{count}} card",
       "cardCount_other": "{{count}} cards",
       "noContent": "No content",
@@ -3049,7 +3050,6 @@
     "totalCount": "{{count}} total",
     "aiQuiz": "AI Quiz",
     "deckQuiz": "Deck Quiz",
-    "cardCount": "{{count}} cards",
     "viewAll": "View {{count}} more sessions",
     "showLess": "Show less",
     "expandAria": "Expand session details",
@@ -3061,7 +3061,9 @@
     "empty": "No sessions yet. Complete a study session or quiz to see your history here.",
     "viewHistory": "View history",
     "emptyHint": "Complete a study session to see it here",
-    "loadMore": "Load {{count}} more"
+    "loadMore": "Load {{count}} more",
+    "cardCount_one": "{{count}} card",
+    "cardCount_other": "{{count}} cards"
   },
   "agent": {
     "aria": {

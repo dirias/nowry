@@ -114,7 +114,15 @@ const XP_GAINED = ['cards.session.xpGained_one', 'cards.session.xpGained_other']
 
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
-  es: ['calendarPage.views.agenda', ...XP_GAINED],
+  es: [
+    // "min" is the abbreviation in this language too — the minute is an SI
+    // unit and its short form does not translate. Japanese uses 分 and does not
+    // appear here.
+    'study.dates.minutes_one',
+    'study.dates.minutes_other',
+    'calendarPage.views.agenda',
+    ...XP_GAINED
+  ],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
   // "Portrait(s)" is the French word, so both the heading and the numbered
@@ -141,6 +149,9 @@ const IDENTICAL_BY_DESIGN = {
     // "Question" is the French word, so the study card's front label lands on
     // English by coincidence. Its back label, "Réponse", does not.
     'cards.session.labels.question',
+    // See the Spanish note: "min" is the abbreviation here too.
+    'study.dates.minutes_one',
+    'study.dates.minutes_other',
     ...XP_GAINED
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has

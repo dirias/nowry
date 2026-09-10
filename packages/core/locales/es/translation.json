@@ -170,7 +170,8 @@
       "archivedOn": "archivado el {{date}}",
       "historyKept": "Historial conservado",
       "restoreAria": "Restaurar {{name}}",
-      "dueIn": "En {{hours}} h"
+      "dueIn": "En {{hours}} h",
+      "newCount": "{{count}} nuevas"
     },
     "views": {
       "dashboard": "Panel",
@@ -254,7 +255,14 @@
         "description": "Look through every card — no grading, no schedule changes"
       }
     },
-    "dueCount": "{{count}} pendientes"
+    "dueCount": "{{count}} pendientes",
+    "dates": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "daysAgo": "hace {{count}} d",
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min"
+    }
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",
@@ -1293,7 +1301,6 @@
         "quizzes": "Cuestionarios",
         "visual": "Visual"
       },
-      "cardCount": "{{count}} tarjeta",
       "cardCount_one": "{{count}} tarjeta",
       "cardCount_other": "{{count}} tarjetas",
       "noContent": "Sin contenido",
@@ -2769,7 +2776,6 @@
     "totalCount": "{{count}} en total",
     "aiQuiz": "Quiz con IA",
     "deckQuiz": "Quiz de baraja",
-    "cardCount": "{{count}} tarjetas",
     "viewAll": "Ver {{count}} sesiones más",
     "showLess": "Ver menos",
     "expandAria": "Expandir detalles de la sesión",
@@ -2781,7 +2787,9 @@
     "empty": "Aún no hay sesiones. Completa una sesión de estudio o quiz para ver tu historial aquí.",
     "viewHistory": "Ver historial",
     "emptyHint": "Completa una sesión de estudio para verla aquí",
-    "loadMore": "Cargar {{count}} más"
+    "loadMore": "Cargar {{count}} más",
+    "cardCount_one": "{{count}} tarjeta",
+    "cardCount_other": "{{count}} tarjetas"
   },
   "agent": {
     "aria": {

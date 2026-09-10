@@ -49,7 +49,12 @@
   "sessions": {
     "ofTotal": "{{total}} 件中 {{shown}} 件",
     "history": "履歴",
-    "scoreAria": "スコア {{pct}} パーセント"
+    "scoreAria": "スコア {{pct}} パーセント",
+    "srsReview": "カード復習",
+    "deckQuiz": "デッキクイズ",
+    "aiQuiz": "AIクイズ",
+    "cardCount_other": "{{count}} 枚",
+    "unknownTopic": "トピック不明"
   },
   "common": {
     "loadMore": "さらに読み込む",
@@ -169,7 +174,8 @@
       "archivedOn": "{{date}}にアーカイブ",
       "historyKept": "履歴は保持",
       "restoreAria": "{{name}} を復元",
-      "dueIn": "{{hours}}時間後"
+      "dueIn": "{{hours}}時間後",
+      "newCount": "新規 {{count}} 枚"
     },
     "views": {
       "dashboard": "ダッシュボード",
@@ -252,7 +258,13 @@
         "description": "Look through every card — no grading, no schedule changes"
       }
     },
-    "dueCount": "{{count}} 件"
+    "dueCount": "{{count}} 件",
+    "dates": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "daysAgo": "{{count}} 日前",
+      "minutes_other": "{{count}} 分"
+    }
   },
   "auth": {
     "welcomeBack": "おかえりなさい",
@@ -2091,7 +2103,8 @@
         "tagsOnly": "タグ",
         "decksOnly": "デッキ",
         "cardsOnly": "カード"
-      }
+      },
+      "cardCount_other": "{{count}} 枚"
     },
     "generatedCards": {
       "titleSelectCards": "新しい学習カード",

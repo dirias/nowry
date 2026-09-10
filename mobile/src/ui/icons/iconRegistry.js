@@ -36,6 +36,7 @@ import ChevronLeft from 'lucide-react-native/icons/chevron-left'
 import ChevronRight from 'lucide-react-native/icons/chevron-right'
 import ChevronUp from 'lucide-react-native/icons/chevron-up'
 import Circle from 'lucide-react-native/icons/circle'
+import Clock from 'lucide-react-native/icons/clock'
 import CircleAlert from 'lucide-react-native/icons/circle-alert'
 import CircleCheck from 'lucide-react-native/icons/circle-check'
 import CircleQuestionMark from 'lucide-react-native/icons/circle-question-mark'
@@ -108,6 +109,7 @@ export const ICONS = {
   CircleCheck,
   CircleQuestionMark,
   CircleUser,
+  Clock,
   CloudUpload,
   Download,
   EllipsisVertical,

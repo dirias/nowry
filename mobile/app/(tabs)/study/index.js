@@ -1,103 +1,59 @@
 /**
- * The Study Center's Today object (MOB-019, PRD D1, ADR-021 §15.10).
+ * The Study Center (MOB-033, PhoneDashboard artboard).
  *
- * One summary object: title and date, one readout line, the 15-cell timeline,
- * and the single primary action that starts the cards that are due. The web
- * puts the title on a left rail and the timeline and actions on a right rail;
- * at 375px those stack, which is the only difference.
+ * Title, then one segment: Dashboard or Library. That level was missing — the
+ * first build opened straight onto the library's Decks/Cards/Tags tabs, so the
+ * dashboard the canvas designed had nowhere to be.
  *
- * The library — Decks, Cards, Tags — arrives in MOB-020 below this.
- *
- * **All caught up is this object saying so**, not a separate box. The empty
- * state cannot replace the thing the user will press tomorrow (§13.2).
+ * The two views are genuinely different shapes, which is why they are two
+ * components rather than one with a branch: Dashboard is a short scroll of
+ * sections, Library is a virtualised list of up to five hundred rows.
  */
-import { useMemo } from 'react'
-import { useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useForecast } from '@nowry/core/hooks/useForecast'
-import { useStatistics } from '@nowry/core/hooks/useStatistics'
-import { Button, ForecastStrip, Readout, Screen, Skeleton, Stack, SummaryObject, Typography } from '../../../src/ui'
+import { Screen, Segmented, Stack, Typography } from '../../../src/ui'
+import { StudyDashboard } from '../../../src/screens/StudyDashboard'
 import { StudyLibrary } from '../../../src/screens/StudyLibrary'
 
+const VIEWS = { dashboard: 'dashboard', library: 'library' }
+
 export default function StudyCenter() {
-  const { t, i18n } = useTranslation()
-  const router = useRouter()
-  const { statistics, loading: statsLoading, error: statsError } = useStatistics()
-  const { forecast, loading: forecastLoading } = useForecast(7)
+  const { t } = useTranslation()
+  const [view, setView] = useState(VIEWS.dashboard)
 
-  const summary = statistics?.summary ?? null
-  const dueToday = summary?.due_today ?? 0
-  const reviewedToday = summary?.reviewed_today ?? 0
-  const streak = summary?.current_streak ?? 0
-  const weekly = statistics?.weekly_progress ?? []
-  const future = forecast?.days ?? []
-
-  const todayLabel = useMemo(
-    () => new Intl.DateTimeFormat(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date()),
-    [i18n.language]
-  )
-
-  const reviewedWeek = weekly.slice(0, -1).reduce((sum, d) => sum + (d.cards || 0), 0)
-  const dueTomorrow = future[0]?.due ?? 0
-  const dueWeek = future.reduce((sum, d) => sum + (d.due || 0), 0)
-
-  const loading = statsLoading || forecastLoading
-  const caughtUp = !loading && !statsError && dueToday === 0
-
-  /*
-   * The Today object is the LIST'S HEADER, not a sibling above it. A FlatList
-   * inside a ScrollView is not virtualised — React Native warns about exactly
-   * this — and the library has to stay virtualised for 500 cards.
-   */
-  const today = (
-    <Stack spacing={3}>
-      <SummaryObject
-        title={t('study.title')}
-        context={todayLabel}
-        readouts={
-          loading ? (
-            <Stack direction='row' spacing={2}>
-              <Skeleton width={64} height={14} />
-              <Skeleton width={88} height={14} />
-            </Stack>
-          ) : statsError ? null : (
-            <>
-              {/* The one load-bearing number lifts; the rest stay tertiary. */}
-              <Readout leading>{t('study.dueCount', { count: dueToday })}</Readout>
-              <Readout>{t('study.today.reviewed', { count: reviewedToday })}</Readout>
-              <Readout>{streak > 0 ? t('study.empty.streakLabel', { count: streak }) : t('study.empty.streakZeroLabel')}</Readout>
-            </>
-          )
-        }
-        empty={caughtUp ? t('study.today.allDone') : null}
-        action={
-          <Button size='sm' onPress={() => router.push('/study/due')} accessibilityLabel={t('study.startStudying')}>
-            {t('study.startStudying')}
-          </Button>
-        }
+  const header = (
+    <Stack spacing={2}>
+      <Typography level='h4'>{t('study.title')}</Typography>
+      <Segmented
+        accessibilityLabel={t('study.title')}
+        value={view}
+        onChange={setView}
+        options={[
+          { value: VIEWS.dashboard, label: t('study.views.dashboard') },
+          { value: VIEWS.library, label: t('study.views.library') }
+        ]}
       />
-
-      {loading ? (
-        <Skeleton width='100%' height={28} />
-      ) : (
-        <Stack spacing={1}>
-          <ForecastStrip past={weekly} today={dueToday} future={future} />
-          <Readout>{t('study.today.weekReadout', { reviewed: reviewedWeek, tomorrow: dueTomorrow, week: dueWeek })}</Readout>
-        </Stack>
-      )}
-
-      {statsError ? (
-        <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-          {t('home.loadFailed')}
-        </Typography>
-      ) : null}
     </Stack>
   )
 
-  // The library owns the scroll and the padding, so the Screen gives up both.
+  /*
+   * The library owns its own scroll because it is virtualised, and the header
+   * rides along as the list's header. The dashboard is a plain scroll.
+   */
+  if (view === VIEWS.library) {
+    return (
+      <Screen scroll={false} padding={0}>
+        <StudyLibrary header={header} />
+      </Screen>
+    )
+  }
+
   return (
-    <Screen scroll={false} padding={0}>
-      <StudyLibrary header={today} />
+    <Screen>
+      <Stack spacing={2}>
+        {header}
+        <StudyDashboard />
+      </Stack>
     </Screen>
   )
 }

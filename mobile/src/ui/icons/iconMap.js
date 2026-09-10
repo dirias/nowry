@@ -142,7 +142,11 @@ export const KEY_TO_LUCIDE = {
   // from useNextSteps
   study: 'GraduationCap',
   book: 'BookOpen',
-  plan: 'Flag'
+  plan: 'Flag',
+  // The Recent section's glyph well (PhoneDashboard board). lucide has no
+  // `History` in this version; a finished session is a thing that happened at a
+  // time, so the clock is the honest one rather than the closest-looking.
+  history: 'Clock'
 }
 
 export const MATERIAL_NAMES = Object.keys(MATERIAL_TO_LUCIDE)

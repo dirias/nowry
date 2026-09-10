@@ -55,7 +55,13 @@
   "sessions": {
     "ofTotal": "{{shown}} sur {{total}}",
     "history": "Historique",
-    "scoreAria": "Score {{pct}} pour cent"
+    "scoreAria": "Score {{pct}} pour cent",
+    "srsReview": "Révision de cartes",
+    "deckQuiz": "Quiz du paquet",
+    "aiQuiz": "Quiz IA",
+    "cardCount_one": "{{count}} carte",
+    "cardCount_other": "{{count}} cartes",
+    "unknownTopic": "Sujet inconnu"
   },
   "common": {
     "loadMore": "Charger plus",
@@ -265,7 +271,9 @@
       "today": "Aujourd'hui",
       "yesterday": "Hier",
       "daysAgo": "Il y a {{count}}j",
-      "weeksAgo": "Il y a {{count}}sem"
+      "weeksAgo": "Il y a {{count}}sem",
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min"
     },
     "empty": {
       "caughtUpTitle": "Tout est à jour !",
@@ -1986,7 +1994,9 @@
         "tagsOnly": "Étiquettes",
         "decksOnly": "Paquets",
         "cardsOnly": "Cartes"
-      }
+      },
+      "cardCount_one": "{{count}} carte",
+      "cardCount_other": "{{count}} cartes"
     },
     "import": {
       "deckNamePlaceholder": "Nom du paquet",

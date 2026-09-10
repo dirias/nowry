@@ -28,6 +28,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import useDeckSettings, { PACE_DEFAULTS } from '@nowry/core/hooks/useDeckSettings'
 import { decksService } from '@nowry/core/api/services'
+import { deckCounts } from '@nowry/core/domain/deckTypes'
 import { subscribeToDeviceVoices } from '../platform/voices'
 import { useTheme } from '../theme'
 import { Button, Checkbox, Divider, FormField, Input, Readout, Screen, Segmented, Select, Skeleton, Stack, Typography } from '../ui'
@@ -111,6 +112,7 @@ export function DeckDetail() {
     )
   }
 
+  const counts = deckCounts(deck)
   const side = voiceSettings?.[audioSide] || {}
   /* Spread `side` first: rate and pitch are set on the web and must survive a
    * screen that has no control for them. */
@@ -122,8 +124,9 @@ export function DeckDetail() {
         <Stack spacing={1}>
           <Typography level='h4'>{identity?.name || deck?.name || ''}</Typography>
           <Stack direction='row' spacing={2}>
-            <Readout leading>{`${deck?.card_count ?? 0} ${t('study.stats.cards')}`}</Readout>
-            {deck?.due_count ? <Readout>{t('study.dueCount', { count: deck.due_count })}</Readout> : null}
+            <Readout leading>{t('cards.manage_content.cardCount', { count: counts.total })}</Readout>
+            {counts.due > 0 ? <Readout>{t('study.dueCount', { count: counts.due })}</Readout> : null}
+            {counts.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: counts.fresh })}</Readout> : null}
           </Stack>
         </Stack>
 

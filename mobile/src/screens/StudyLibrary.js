@@ -29,6 +29,7 @@ import { DeckCreateSheet } from './DeckCreateSheet'
 import { CardPreviewSheet } from './CardPreviewSheet'
 import {
   ActionSheet,
+  DeckRow,
   Button,
   Chip,
   Divider,
@@ -71,12 +72,15 @@ export function StudyLibrary({ header }) {
   /** Decks, cards and tag groups, each reduced to the same five slots. */
   const rows = useMemo(() => {
     if (view === VIEWS.decks) {
+      /*
+       * A deck is drawn by `DeckRow`, the same component the dashboard uses.
+       * This list used to build its own row from `card_count` and `due_count` —
+       * names the API does not send — so every deck read "cards · 0" with no
+       * due count at all. `deckCounts` is now the one reader of those fields.
+       */
       return (decks.decks ?? []).map((deck) => ({
         key: deck._id ?? deck.id,
-        name: deck.name,
-        meta: t('study.stats.cards') + ' · ' + (deck.card_count ?? 0),
-        progress: deck.mastery ?? 0,
-        readout: deck.due_count ?? 0,
+        deck,
         onPress: () => router.push(`/study/deck/${deck._id ?? deck.id}`)
       }))
     }
@@ -164,18 +168,19 @@ export function StudyLibrary({ header }) {
         ItemSeparatorComponent={Divider}
         onEndReachedThreshold={0.6}
         onEndReached={view === VIEWS.cards ? cards.fetchMore : undefined}
-        renderItem={({ item }) => (
-          <ListRow
-            tile={<IdentityTile color='primary.solidBg' />}
-            name={item.name}
-            meta={item.meta}
-            measure={
-              typeof item.progress === 'number' ? <Measure value={item.progress} accessibilityLabel={String(item.progress)} /> : null
-            }
-            readout={item.readout ? <Readout leading>{String(item.readout)}</Readout> : null}
-            onPress={item.onPress}
-          />
-        )}
+        renderItem={({ item }) =>
+          item.deck ? (
+            <DeckRow deck={item.deck} onPress={item.onPress} />
+          ) : (
+            <ListRow
+              tile={<IdentityTile color='primary.solidBg' />}
+              name={item.name}
+              meta={item.meta}
+              readout={item.readout ? <Readout leading>{String(item.readout)}</Readout> : null}
+              onPress={item.onPress}
+            />
+          )
+        }
         ListEmptyComponent={
           loading ? (
             <Stack spacing={1}>
