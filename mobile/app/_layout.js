@@ -12,12 +12,13 @@
 import '../src/platform/configure'
 import '../src/i18n'
 
-import { QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Slot } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { AuthProvider } from '@nowry/core/context/AuthContext'
 import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
 import { queryClient } from '@nowry/core/api/queryClient'
+import { PERSIST_OPTIONS } from '../src/platform/queryPersistence'
 import { AppearanceProvider } from '../src/theme/AppearanceProvider'
 import { OfflineSync } from '../src/platform/OfflineSync'
 import { PushBridge } from '../src/platform/PushBridge'
@@ -32,7 +33,12 @@ export default function RootLayout() {
    */
   return (
     <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
+      {/* Not `QueryClientProvider`: this one holds rendering until the cache
+          is restored from disk. Without that wait the first query races the
+          restore, fails with no signal, and the cache arrives too late to
+          matter — which is what made an offline session say "Couldn't load
+          cards" over a queue that was already on the device. */}
+      <PersistQueryClientProvider client={queryClient} persistOptions={PERSIST_OPTIONS}>
         <AuthProvider>
           <AppearanceProvider>
             {/* Outside the gate: the timer is restored from storage on mount
@@ -47,7 +53,7 @@ export default function RootLayout() {
             <NotificationHost />
           </AppearanceProvider>
         </AuthProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </SafeAreaProvider>
   )
 }

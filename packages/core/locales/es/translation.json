@@ -1391,7 +1391,7 @@
         "title": "No cards yet",
         "body": "Add cards to this deck to browse them here."
       },
-      "error": "Couldn't load cards. Check your connection and try again.",
+      "error": "No se pudieron cargar las tarjetas. Revisa tu conexión e inténtalo de nuevo.",
       "enterFullscreen": "Pantalla completa",
       "exitFullscreen": "Salir de pantalla completa",
       "complete": {

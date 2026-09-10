@@ -4,8 +4,9 @@
  * Renders nothing. It exists because three things have to happen at the edges
  * of the app's life rather than inside any screen:
  *
- *   - **Start persisting the query cache**, so the Study tab has something to
- *     draw in a tunnel.
+ *   - **Erase the cache on sign-out.** Starting the persistence is not here:
+ *     it has to happen ABOVE the screens, in `_layout.js`, so the restore
+ *     finishes before anything queries.
  *   - **Send what is queued whenever the app comes forward.** Returning to the
  *     app is the moment a phone most often has signal again, and it costs one
  *     listener instead of a native connectivity module.
@@ -17,17 +18,13 @@
 import { useEffect, useRef } from 'react'
 import { AppState } from 'react-native'
 import { useAuth } from '@nowry/core/context/AuthContext'
-import { clearPersistedQueries, startQueryPersistence } from './queryPersistence'
+import { clearPersistedQueries } from './queryPersistence'
 import { clearQueue } from './syncQueue'
 import { flushOutbox } from './outbox'
 
 export function OfflineSync() {
   const { user } = useAuth()
   const wasSignedIn = useRef(false)
-
-  useEffect(() => {
-    startQueryPersistence()
-  }, [])
 
   useEffect(() => {
     if (user) {

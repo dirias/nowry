@@ -2203,7 +2203,7 @@
         "title": "No cards yet",
         "body": "Add cards to this deck to browse them here."
       },
-      "error": "Couldn't load cards. Check your connection and try again.",
+      "error": "カードを読み込めませんでした。接続を確認してもう一度お試しください。",
       "enterFullscreen": "全画面表示にする",
       "exitFullscreen": "全画面表示を終了する",
       "xpGained_other": "+{{count}} XP",

@@ -17,11 +17,16 @@
  * below the next account on this phone would restore the previous one's decks
  * from disk. `removeClient` is called explicitly rather than relying on the
  * empty cache being written back, because that is a race with the unmount.
+ *
+ * **Restoring has to finish before anything queries.** It did not: the restore
+ * was kicked off in an effect beside the screens, so the first fetch raced it,
+ * failed offline, and the cache arrived too late to matter. `PERSIST_OPTIONS`
+ * is handed to `PersistQueryClientProvider`, which holds rendering until the
+ * cache is back — which is the whole difference between a working offline open
+ * and "Couldn't load cards" over a queue that is already on the device.
  */
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
-import { persistQueryClient } from '@tanstack/react-query-persist-client'
 import { storage } from '@nowry/core'
-import { queryClient } from '@nowry/core/api/queryClient'
 
 const KEY = 'NOWRY_QUERY_CACHE'
 
@@ -40,20 +45,18 @@ const persister = createSyncStoragePersister({
   key: KEY
 })
 
-export const startQueryPersistence = () =>
-  persistQueryClient({
-    queryClient,
-    persister,
-    maxAge: MAX_AGE,
-    dehydrateOptions: {
-      shouldDehydrateQuery: (query) => {
-        // A failed query has nothing worth restoring, and restoring an error
-        // would show the user yesterday's failure as today's state.
-        if (query.state.status !== 'success') return false
-        return PERSISTED.includes(query.queryKey?.[0])
-      }
+export const PERSIST_OPTIONS = {
+  persister,
+  maxAge: MAX_AGE,
+  dehydrateOptions: {
+    shouldDehydrateQuery: (query) => {
+      // A failed query has nothing worth restoring, and restoring an error
+      // would show the user yesterday's failure as today's state.
+      if (query.state.status !== 'success') return false
+      return PERSISTED.includes(query.queryKey?.[0])
     }
-  })
+  }
+}
 
 export const clearPersistedQueries = () => {
   try {
@@ -63,4 +66,4 @@ export const clearPersistedQueries = () => {
   }
 }
 
-export default startQueryPersistence
+export default PERSIST_OPTIONS

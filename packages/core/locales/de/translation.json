@@ -2133,7 +2133,7 @@
         "title": "No cards yet",
         "body": "Add cards to this deck to browse them here."
       },
-      "error": "Couldn't load cards. Check your connection and try again.",
+      "error": "Karten konnten nicht geladen werden. Prüfe deine Verbindung und versuch es erneut.",
       "enterFullscreen": "Vollbild aktivieren",
       "exitFullscreen": "Vollbild beenden",
       "xpGained_one": "+{{count}} XP",

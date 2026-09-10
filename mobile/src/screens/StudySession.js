@@ -28,6 +28,7 @@ import { View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { cardsService, studySessionsService } from '@nowry/core/api/services'
+import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
 import { storage } from '@nowry/core'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -58,12 +59,9 @@ const backOf = (card) => card?.answer || card?.content || card?.back || ''
 export function StudySession() {
   const { deckId, tags, group, limit } = useLocalSearchParams()
   const id = String(deckId)
-  const isDaily = id === DAILY_REVIEW
   const { t } = useTranslation()
   const router = useRouter()
 
-  const [cards, setCards] = useState(null)
-  const [error, setError] = useState(false)
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [attempt, setAttempt] = useState(0)
@@ -86,53 +84,40 @@ export function StudySession() {
   const startedAt = useRef(new Date())
   const logged = useRef(false)
 
+  /*
+   * Through the query cache, not a bare fetch. The cache is persisted to disk,
+   * so a queue loaded with signal opens without one — and this screen is the
+   * one that most needs that. Fetching directly put the session outside the
+   * only mechanism that makes offline study possible, and airplane mode said
+   * "Couldn't load cards" over a queue already on the device.
+   */
+  const queue = useSessionCards({
+    deckId: id,
+    tags: tags ? [].concat(tags) : [],
+    group: group ? String(group) : undefined,
+    limit: limit ? Number(limit) : undefined,
+    attempt
+  })
+  const cards = queue.cards
+  const error = Boolean(queue.error)
+
   useEffect(() => {
-    let cancelled = false
-    setCards(null)
-    setError(false)
+    if (!cards) return
+    // Read while a card is in hand: the summary logs after the last one is
+    // gone, and the deck's name is only ever carried by a card.
+    deckName.current = cards[0]?.deck_id?.name ?? cards[0]?.deck_id?.title ?? null
 
     /*
-     * A daily review is a queue the SERVER owns: it stamps the selection for
-     * the day, so the same cards come back until they are graded rather than
-     * being re-drawn on every open. `tags` and `group` narrow that pool
-     * server-side, which is how a tag's "Study · 11" reaches only its cards.
+     * Resume before the first card is shown, not after: restoring an index a
+     * frame later would flash card one and then jump, which reads as a bug even
+     * when it lands in the right place.
      */
-    const load = isDaily
-      ? cardsService.getDailyReviewCards({
-          limit: limit ? Number(limit) : undefined,
-          tags: tags ? [].concat(tags) : [],
-          group: group ? String(group) : undefined
-        })
-      : cardsService.getDueCards(id)
-
-    load
-      .then((due) => {
-        if (cancelled) return
-        setCards(due)
-        // Read while a card is in hand: the summary logs after the last one is
-        // gone, and the deck's name is only ever carried by a card.
-        deckName.current = due[0]?.deck_id?.name ?? due[0]?.deck_id?.title ?? null
-
-        /*
-         * Resume before the first card is shown, not after: restoring an index
-         * a frame later would flash card one and then jump, which reads as a
-         * bug even when it lands in the right place.
-         */
-        const saved = readResume(id, due.length)
-        if (saved) {
-          setIndex(saved.index)
-          setGraded(saved.graded)
-          startedAt.current = new Date(saved.startedAt)
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setError(true)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [id, attempt, isDaily, tags, group, limit])
+    const saved = readResume(id, cards.length)
+    if (!saved) return
+    setIndex(saved.index)
+    setGraded(saved.graded)
+    startedAt.current = new Date(saved.startedAt)
+  }, [cards, id])
 
   const total = cards?.length ?? 0
   const current = cards?.[index] ?? null
