@@ -25,14 +25,16 @@ import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { usePetState } from '@nowry/core/hooks/usePetState'
-import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
-import { useTheme } from '../theme'
+import { useAppearance, useTheme } from '../theme'
 import { BottomSheet, Button, FormField, Input, PetOrb, Progress, Readout, Sheet, Skeleton, Stack, Typography } from '../ui'
 
 export function PetPanel() {
   const { t } = useTranslation()
   const theme = useTheme()
-  const { profile } = useUserProfile()
+  // The account's colour, already resolved for the whole app — the companion is
+  // the colour of the app it lives in, and deriving it a second time here would
+  // be a second answer to which colour that is.
+  const { accent } = useAppearance()
   const pet = usePetState()
   const [naming, setNaming] = useState(false)
 
@@ -40,7 +42,6 @@ export function PetPanel() {
   // is a moment the web owns, and pre-empting it here would spend it.
   if (!pet.loading && !pet.revealed) return null
 
-  const accent = profile?.preferences?.general?.theme_color ?? null
   const name = pet.name || t('agent.defaultName')
 
   return (

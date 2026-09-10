@@ -22,8 +22,7 @@ import { useState } from 'react'
 import { FlatList, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { usePublicDecks } from '@nowry/core/hooks/usePublicDecks'
-import { evidenceFor } from '@nowry/core/domain/publicEvidence'
-import { deckCounts } from '@nowry/core/domain/deckTypes'
+import { evidenceFor, publicAuthor, publicCardCount } from '@nowry/core/domain/publicEvidence'
 import { useTheme } from '../theme'
 import { BrowseFilterSheet, SORTS, SORT_LABELS } from './BrowseFilters'
 import { Button, Chip, Divider, Icon, Input, Readout, Skeleton, Stack, Typography } from '../ui'
@@ -149,8 +148,11 @@ export function Browse({ header = null }) {
  */
 function DeckRow({ deck, state, onAdd, t }) {
   const evidence = evidenceFor(deck)
-  const counts = deckCounts(deck)
-  const author = deck.author?.username || deck.owner?.username || null
+  // Both fields are read through the shared package, which is what lets the
+  // API-field guard see them: this row's first build invented
+  // `deck.author?.username`, and an invented camelCase path fails silently
+  // forever (MOB-050).
+  const author = publicAuthor(deck)
   const added = state === 'added'
 
   // Each metric is a number and its noun, and only when the number is above
@@ -173,9 +175,9 @@ function DeckRow({ deck, state, onAdd, t }) {
         </Stack>
         <Typography level='body-xs' color='text.tertiary' numberOfLines={1}>
           {[
-            author ? `${t('public.by')} ${author}` : null,
+            author ? t('public.byAuthor', { name: author }) : null,
             evidence.showCategory ? t(`public.categories.${evidence.category}`, evidence.category) : null,
-            counts.total ? `${counts.total} ${t('public.cards')}` : null,
+            publicCardCount(deck) ? `${publicCardCount(deck)} ${t('public.cards')}` : null,
             ...metrics
           ]
             .filter(Boolean)

@@ -2554,7 +2554,9 @@
       "mostLiked": "いいねが多い順",
       "mostForked": "コピーが多い順"
     },
-    "browse": "さがす"
+    "browse": "さがす",
+    "byAuthor": "作成者: {{name}}",
+    "unknownAuthor": "作成者不明"
   },
   "editor": {
     "mode": {

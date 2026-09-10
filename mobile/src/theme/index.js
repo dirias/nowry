@@ -38,3 +38,5 @@ export { buildTheme, DEFAULT_THEME_COLOR } from './buildTheme'
 export { ELEVATION } from './elevation'
 export { useMotion, useReduceMotion } from './motion'
 export { DURATION, EASING } from './motionTokens'
+
+export { AppearanceProvider, useAppearance, MODES } from './AppearanceProvider'

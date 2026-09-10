@@ -75,3 +75,18 @@ export const evidenceFor = (item) => {
  * narrows to two gets the same treatment as a library that only has two.
  */
 export const SPARSE_THRESHOLD = 3
+
+/**
+ * The two fields a public row reads off an item, named here and nowhere else.
+ *
+ * The phone's first browse row read `item.author?.username`, which is not a
+ * field this API has ever had: every row would have shown no author and nothing
+ * would have failed. The API-field guard could not catch it either — it flags
+ * snake_case names the shared package never uses, and an invented camelCase
+ * path is invisible to it. So the names live here, where the guard can see
+ * them and where both clients read the same ones.
+ */
+export const publicAuthor = (item) => item?.author_name || null
+
+/** A public deck says how many cards it has; a book does not. */
+export const publicCardCount = (item) => Number(item?.total_cards) || 0

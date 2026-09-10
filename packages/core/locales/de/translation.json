@@ -2621,7 +2621,9 @@
       "mostLiked": "Meiste Likes",
       "mostForked": "Meiste Kopien"
     },
-    "browse": "Entdecken"
+    "browse": "Entdecken",
+    "byAuthor": "von {{name}}",
+    "unknownAuthor": "Unbekannte:r Autor:in"
   },
   "editor": {
     "mode": {

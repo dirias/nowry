@@ -47,7 +47,7 @@ import { tabClasses } from '@mui/joy/Tab'
 import { publicContentService } from '@nowry/core/api/services'
 // The evidence rule and the sparse threshold are shared: the phone browses the
 // same catalogue and must not have a second answer about a young item (MOB-049).
-import { SPARSE_THRESHOLD, evidenceFor } from '@nowry/core/domain/publicEvidence'
+import { SPARSE_THRESHOLD, evidenceFor, publicAuthor, publicCardCount } from '@nowry/core/domain/publicEvidence'
 import Book from '../components/Books/Book'
 
 const CATEGORIES = [
@@ -520,7 +520,7 @@ const FeatureCard = ({ item, contentType, onItemClick, t }) => {
           {isBook ? item.title : item.name}
         </Typography>
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          {item.author_name || t('public.unknownAuthor')}
+          {publicAuthor(item) || t('public.unknownAuthor')}
         </Typography>
         {item.description && (
           <Typography
@@ -763,7 +763,7 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
                 <Book
                   book={{
                     ...item,
-                    author: item.author_name // Map author_name to author for Book component
+                    author: publicAuthor(item) // the shared reader names the field (MOB-050)
                   }}
                   handleBookClick={onItemClick}
                 />
@@ -914,7 +914,7 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
                       </Typography>
 
                       {/* Author */}
-                      {item.author_name && (
+                      {publicAuthor(item) && (
                         <Typography
                           level='body-xs'
                           sx={{
@@ -926,7 +926,7 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
                             bgcolor: 'transparent'
                           }}
                         >
-                          {t('public.byAuthor', { name: item.author_name })}
+                          {t('public.byAuthor', { name: publicAuthor(item) })}
                         </Typography>
                       )}
 
@@ -960,7 +960,7 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
                             fontSize: '0.7rem'
                           }}
                         >
-                          {item.total_cards || 0} {t('public.cards', { defaultValue: 'cards' })}
+                          {publicCardCount(item)} {t('public.cards', { defaultValue: 'cards' })}
                         </Chip>
                         {item?.forked_from && (
                           <Chip
@@ -1074,7 +1074,7 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
               )}
             </Stack>
             <Typography level='body-sm' sx={{ color: 'text.secondary' }} noWrap>
-              {item.author_name || t('public.unknownAuthor')}
+              {publicAuthor(item) || t('public.unknownAuthor')}
             </Typography>
           </Box>
 

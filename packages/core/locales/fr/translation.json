@@ -2633,7 +2633,9 @@
       "mostLiked": "Les plus aimés",
       "mostForked": "Les plus copiés"
     },
-    "browse": "Explorer"
+    "browse": "Explorer",
+    "byAuthor": "par {{name}}",
+    "unknownAuthor": "Auteur inconnu"
   },
   "editor": {
     "mode": {
