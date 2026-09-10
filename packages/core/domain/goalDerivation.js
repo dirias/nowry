@@ -42,6 +42,17 @@ export const calculateProgress = (goal) => {
  * the calendar year; quarterly goals against their own quarter.
  * Moved from FocusAreaView.js:73 with `now` added as an optional parameter.
  */
+/**
+ * A finished goal, by the definition the rest of the app already uses: an
+ * explicit `completed` status, or progress at 100%.
+ *
+ * It lived in the calendar's event form, where it decided which goals could
+ * still take a milestone. Both clients ask that question now, and a second copy
+ * would be a third rule — `FocusAreaView` locks a completed goal's milestones,
+ * and a form that disagreed would walk around that guard.
+ */
+export const isGoalCompleted = (goal) => goal?.status === 'completed' || (goal ? calculateProgress(goal) : 0) === 100
+
 export const calculateTimeElapsedPercentage = (goal, currentQuarter, now = new Date()) => {
   const year = now.getFullYear()
   const today = now
@@ -205,6 +216,7 @@ export const filterGoalActivities = (activities, goalId) => {
 export const blankMilestone = () => ({ title: '', completed: false, due_date: '' })
 
 export default {
+  isGoalCompleted,
   getCurrentQuarter,
   calculateProgress,
   calculateTimeElapsedPercentage,

@@ -30,7 +30,7 @@
  * routine, so neither is a row action on a day (ADR-018).
  */
 import { useCallback, useMemo, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { tasksService, annualPlanningService } from '@nowry/core/api/services'
 import { calendarEventsKey } from '@nowry/core/api/services/calendar.service'
@@ -44,11 +44,21 @@ import { COMPLETABLE, completionPatch, stripTypePrefix, undoneStatus } from '@no
 import { eventType } from '@nowry/core/domain/calendar/eventTypes'
 import { useTheme } from '../theme'
 import { resolveColor } from '../ui/Typography'
+import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { CalendarFilterSheet } from './CalendarFilters'
+import { EventFormSheet } from './EventForm'
 import { Button, Chip, Divider, EventTile, Icon, IconButton, Screen, Skeleton, Stack, Typography } from '../ui'
 
 /** The row's floor, and the web's own (`minHeight: 52`). */
 const ROW_HEIGHT = 52
+
+/**
+ * What Add prefills. Today while today is on screen; otherwise the first of the
+ * month being looked at. The web always prefills today, which is right on a
+ * page whose month is one control away — but a phone user who paged to October
+ * and reached for Add did not mean September.
+ */
+const defaultDateFor = (cursor) => (isSameMonth(cursor, new Date()) ? new Date() : new Date(cursor.getFullYear(), cursor.getMonth(), 1))
 
 export function Calendar() {
   const { t, i18n } = useTranslation()
@@ -59,6 +69,9 @@ export function Calendar() {
 
   const [cursor, setCursor] = useState(() => new Date())
   const [sheet, setSheet] = useState(null)
+  // `null` when closed; otherwise what the form is for. One piece of state, so
+  // the sheet cannot be open in create mode and edit mode at once.
+  const [form, setForm] = useState(null)
   const { filters, setFilters, applyPreset } = useCalendarFilters()
 
   const { groups, focusAreas, loading, error, reload } = useCalendarEvents({ cursor, filters })
@@ -104,13 +117,27 @@ export function Calendar() {
   return (
     <Screen scroll={false}>
       <Stack spacing={2} style={{ flex: 1 }}>
-        {/* Row one: the readout leads, the nav object ends it. The date is the
-            nav object's readout — text beside the control that moves it — not a
-            title centred between two groups (§15.4). */}
+        {/* Row one: the month, and the screen's one solid. The web's row one is
+            the page's title beside the same key; here the tab bar and the app
+            bar have already said "Calendar" twice, so the readout takes the
+            place of a third. */}
         <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
           <Typography level='h4' style={{ flex: 1 }} accessibilityRole='header'>
             {title}
           </Typography>
+          <Button
+            size='sm'
+            startGlyph={<Icon name='Plus' size='sm' color='primary.solidColor' />}
+            onPress={() => setForm({ mode: 'create', defaultDate: defaultDateFor(cursor) })}
+          >
+            {t('calendarPage.addEvent')}
+          </Button>
+        </Stack>
+
+        {/* Row two: the nav object. The date above is its readout — text beside
+            the control that moves it, not a title centred between groups
+            (§15.4). */}
+        <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
           <IconButton
             size='sm'
             accessibilityLabel={t('calendarPage.nav.previous')}
@@ -126,6 +153,7 @@ export function Calendar() {
           <Button size='sm' variant='tertiary' disabled={showsToday} onPress={() => setCursor(new Date())}>
             {t('calendarPage.nav.today')}
           </Button>
+          <View style={{ flex: 1 }} />
         </Stack>
 
         {/* Row two: the filter object. A count in the label, never a hue —
@@ -168,6 +196,7 @@ export function Calendar() {
               cursor={cursor}
               theme={theme}
               onToggleComplete={toggleComplete}
+              onSelect={(event) => setForm({ mode: 'edit', event })}
               t={t}
             />
           </View>
@@ -182,6 +211,15 @@ export function Calendar() {
         applyPreset={applyPreset}
         focusAreas={focusAreas}
       />
+
+      <EventFormSheet
+        open={Boolean(form)}
+        mode={form?.mode ?? 'create'}
+        event={form?.event ?? null}
+        defaultDate={form?.defaultDate ?? null}
+        onClose={() => setForm(null)}
+        onSaved={reload}
+      />
     </Screen>
   )
 }
@@ -191,7 +229,7 @@ export function Calendar() {
  * is tens of rows, not thousands, and the day headers are part of the list's
  * own rhythm rather than sticky chrome.
  */
-function Agenda({ groups, loading, language, cursor, theme, onToggleComplete, t }) {
+function Agenda({ groups, loading, language, cursor, theme, onToggleComplete, onSelect, t }) {
   const empty = !loading && groups.length === 0
 
   if (loading && groups.length === 0) {
@@ -228,7 +266,7 @@ function Agenda({ groups, loading, language, cursor, theme, onToggleComplete, t 
             </Typography>
           ) : null}
           {group.events.map((event) => (
-            <EventRow key={event.id} event={event} theme={theme} onToggleComplete={onToggleComplete} t={t} />
+            <EventRow key={event.id} event={event} theme={theme} onToggleComplete={onToggleComplete} onSelect={onSelect} t={t} />
           ))}
         </View>
       ))}
@@ -269,7 +307,7 @@ function DayHeader({ group, language, theme, t }) {
  * to a screen reader. The tick is only drawn for the types that have a
  * completion of their own.
  */
-function EventRow({ event, theme, onToggleComplete, t }) {
+function EventRow({ event, theme, onToggleComplete, onSelect, t }) {
   const completed = event.status === 'completed'
   const typeLabel = t(eventType(event.type).labelKey)
   const tickable = COMPLETABLE.includes(event.type)
@@ -287,7 +325,16 @@ function EventRow({ event, theme, onToggleComplete, t }) {
         }}
       >
         <EventTile type={event.type} color={event.color} />
-        <View style={{ flex: 1, minWidth: 0 }}>
+        {/* The title is the control that opens the thing, as it is on the web,
+            where it is a `Link` rather than the whole row: a row that is one
+            big button puts the tick inside another button, and a thumb that
+            lands between them gets whichever the platform prefers. */}
+        <Pressable
+          onPress={() => onSelect?.(event)}
+          accessibilityRole='button'
+          accessibilityLabel={event.title}
+          style={{ flex: 1, minWidth: 0, justifyContent: 'center', minHeight: MIN_TOUCH_TARGET }}
+        >
           <Typography
             level='body-md'
             numberOfLines={1}
@@ -299,7 +346,7 @@ function EventRow({ event, theme, onToggleComplete, t }) {
           <Typography level='body-xs' color='text.tertiary' numberOfLines={1}>
             {[event.areaName, typeLabel].filter(Boolean).join(' · ')}
           </Typography>
-        </View>
+        </Pressable>
         {tickable ? (
           <IconButton
             size='sm'

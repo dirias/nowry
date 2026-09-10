@@ -7,17 +7,16 @@ import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 
-import { tasksService } from '@nowry/core/api/services/tasks.service'
-import { annualPlanningService } from '@nowry/core/api/services/annualPlanning.service'
+import { calendarService } from '@nowry/core/api/services/calendar.service'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
-import { calculateProgress } from '@nowry/core/domain/goalDerivation'
+import { isGoalCompleted } from '@nowry/core/domain/goalDerivation'
 import FormDisclosureRail from '../Common/Form/FormDisclosureRail'
 import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import FormSheet from '../Common/Form/FormSheet'
 import FormTextArea from '../Common/Form/FormTextArea'
 import FormTextField from '../Common/Form/FormTextField'
 import { focusRing, formLabel, segment, segmentedGroup } from '../Common/Form/formStyles'
-import { COMPLETABLE, completionPatch, stripTypePrefix } from '@nowry/core/domain/calendar/eventHelpers'
+import { COMPLETABLE } from '@nowry/core/domain/calendar/eventHelpers'
 
 /**
  * The four things a calendar day can be given (ADR-017). Habit is not one of
@@ -39,16 +38,6 @@ const TYPE_ICONS = {
 /** Optional groups per type, offered as rail chips that remove themselves on use. */
 const OPTIONAL_GROUPS = { priority: ['description'] }
 const RAIL_LABELS = { description: 'calendarModal.form.addDescription' }
-
-/**
- * A finished goal, by the definition the rest of the app already uses (see
- * AnnualPlanningLayout and CloseQuarterModal): an explicit `completed` status,
- * or progress at 100%. `calculateProgress` is the shared pure helper in
- * goalDerivation, so this stays in step with every other goal surface rather
- * than inventing a third rule. FocusAreaView locks a completed goal's
- * milestones; offering completed goals here would walk around that guard.
- */
-const isGoalCompleted = (goal) => goal?.status === 'completed' || (goal ? calculateProgress(goal) : 0) === 100
 
 /** YYYY-MM-DD for <input type="date">, always in local time. */
 const toInputDate = (d) => {
@@ -226,73 +215,14 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
     return Object.keys(next).length === 0
   }
 
-  const create = async () => {
-    const trimmed = title.trim()
-    switch (type) {
-      case 'task':
-        return tasksService.create({ title: trimmed, deadline: date || null })
-      case 'priority':
-        return annualPlanningService.createPriority({
-          title: trimmed,
-          description: description.trim() || '',
-          deadline: date || null,
-          annual_plan_id: annualPlanId,
-          focus_area_id: null,
-          linked_entity_id: null,
-          linked_entity_type: null
-        })
-      case 'goal': {
-        // Quarter and year come from the target date so the goal lands in the
-        // quarter view it belongs to. T00:00:00 forces local-time parsing.
-        const targetDate = date ? new Date(`${date}T00:00:00`) : new Date()
-        return annualPlanningService.createGoal({
-          title: trimmed,
-          target_date: date || null,
-          focus_area_id: focusAreaId,
-          quarter: Math.ceil((targetDate.getMonth() + 1) / 3),
-          year: targetDate.getFullYear()
-        })
-      }
-      case 'milestone':
-        return annualPlanningService.createMilestone(goalId, { title: trimmed, due_date: date || null })
-      default:
-        return null
-    }
-  }
+  /*
+   * The four writes and the five edits live in `calendarService` now, because
+   * the phone makes the same ones and the quarter a goal lands in must not be
+   * computed twice (MOB-044). What stays here is this form's own state.
+   */
+  const create = () => calendarService.createEvent({ type, title, description, date, focusAreaId, goalId, annualPlanId })
 
-  const update = async () => {
-    const rawId = event?.id ? stripTypePrefix(event.id) : null
-    if (!rawId) throw new Error('Missing event ID')
-    const trimmed = title.trim()
-    // Done rides in the same request as the other fields (ADR-018): one PATCH.
-    const completion = COMPLETABLE.includes(activeType) ? completionPatch(activeType, done) : {}
-    switch (activeType) {
-      case 'task':
-        return tasksService.update(rawId, { title: trimmed, deadline: date || null, ...completion })
-      case 'priority':
-        return annualPlanningService.updatePriority(rawId, {
-          title: trimmed,
-          description: description.trim() || '',
-          deadline: date || null,
-          ...completion
-        })
-      case 'goal':
-        return annualPlanningService.updateGoal(rawId, { title: trimmed, target_date: date || null })
-      case 'activity':
-        return annualPlanningService.updateActivity(rawId, { title: trimmed, due_date: date || null })
-      case 'milestone':
-        // Addressed by the goal and the milestone's own id, not by the
-        // index-based event id (CAL-004).
-        if (!event?.goalId || !event?.milestoneId) throw new Error('Missing milestone address')
-        return annualPlanningService.updateMilestone(event.goalId, event.milestoneId, {
-          title: trimmed,
-          due_date: date || null,
-          ...completion
-        })
-      default:
-        return null
-    }
-  }
+  const update = () => calendarService.updateEvent({ event, title, description, date, done })
 
   const submit = async () => {
     if (saving || !validate()) return

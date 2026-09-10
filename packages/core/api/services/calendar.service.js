@@ -1,5 +1,6 @@
 import { tasksService } from './tasks.service'
-import { fetchAnnualPlanData } from './annualPlanning.service'
+import { annualPlanningService, fetchAnnualPlanData } from './annualPlanning.service'
+import { COMPLETABLE, completionPatch, stripTypePrefix } from '../../domain/calendar/eventHelpers'
 import { queryClient } from '../queryClient'
 
 /**
@@ -186,9 +187,7 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
 
     // Build a lookup map: focus_area_id → { color, name }
     // Assigned to outer areaMap so focusAreas can be extracted after all event pushes (D-01)
-    areaMap = Object.fromEntries(
-      planFocusAreas.map((area) => [area._id || area.id, { color: area.color || '#10b981', name: area.name }])
-    )
+    areaMap = Object.fromEntries(planFocusAreas.map((area) => [area._id || area.id, { color: area.color || '#10b981', name: area.name }]))
 
     goals.forEach((goal) => {
       const area = areaMap[goal.focus_area_id] || { color: '#10b981', name: '' }
@@ -259,6 +258,96 @@ export const calendarService = {
       queryFn: () => fetchCalendarEvents(userId, year),
       staleTime: CALENDAR_TTL
     })
+  },
+
+  /**
+   * Add one dated thing (ADR-017).
+   *
+   * Four kinds, four endpoints, and the differences between them are not
+   * cosmetic: a goal has to carry the quarter and year its target date falls
+   * in, or it lands outside the quarter view it belongs to, and a milestone is
+   * addressed through its goal rather than by an id of its own. That knowledge
+   * lived inside the web's form. It is here now because the phone needs the
+   * same four writes, and a second copy of the quarter arithmetic is a second
+   * answer to which quarter a date is in.
+   *
+   * Habit is deliberately not one of them: a habit is a schedule, and a form
+   * that can only write a date cannot make one.
+   */
+  async createEvent({ type, title, description = '', date = null, focusAreaId = null, goalId = null, annualPlanId = null }) {
+    const trimmed = title.trim()
+    switch (type) {
+      case 'task':
+        return tasksService.create({ title: trimmed, deadline: date || null })
+      case 'priority':
+        return annualPlanningService.createPriority({
+          title: trimmed,
+          description: description.trim() || '',
+          deadline: date || null,
+          annual_plan_id: annualPlanId,
+          focus_area_id: null,
+          linked_entity_id: null,
+          linked_entity_type: null
+        })
+      case 'goal': {
+        // T00:00:00 forces local-time parsing; a date-only string is UTC to
+        // `new Date()` and slips back a day west of Greenwich.
+        const target = date ? new Date(`${date}T00:00:00`) : new Date()
+        return annualPlanningService.createGoal({
+          title: trimmed,
+          target_date: date || null,
+          focus_area_id: focusAreaId,
+          quarter: Math.ceil((target.getMonth() + 1) / 3),
+          year: target.getFullYear()
+        })
+      }
+      case 'milestone':
+        return annualPlanningService.createMilestone(goalId, { title: trimmed, due_date: date || null })
+      default:
+        return null
+    }
+  },
+
+  /**
+   * Change one, including whether it is done — which rides in the same request
+   * as the rest rather than a second one (ADR-018).
+   *
+   * The `event` is the normalised calendar event, because two of these cases
+   * need what only it carries: a milestone's real address is its goal's id and
+   * its own, never the index-based event id (CAL-004).
+   */
+  async updateEvent({ event, title, description = '', date = null, done = false }) {
+    const type = event?.type ?? 'task'
+    const rawId = event?.id ? stripTypePrefix(event.id) : null
+    if (!rawId) throw new Error('calendarService.updateEvent: the event has no id')
+
+    const trimmed = title.trim()
+    const completion = COMPLETABLE.includes(type) ? completionPatch(type, done) : {}
+
+    switch (type) {
+      case 'task':
+        return tasksService.update(rawId, { title: trimmed, deadline: date || null, ...completion })
+      case 'priority':
+        return annualPlanningService.updatePriority(rawId, {
+          title: trimmed,
+          description: description.trim() || '',
+          deadline: date || null,
+          ...completion
+        })
+      case 'goal':
+        return annualPlanningService.updateGoal(rawId, { title: trimmed, target_date: date || null })
+      case 'activity':
+        return annualPlanningService.updateActivity(rawId, { title: trimmed, due_date: date || null })
+      case 'milestone':
+        if (!event?.goalId || !event?.milestoneId) throw new Error('calendarService.updateEvent: the milestone has no address')
+        return annualPlanningService.updateMilestone(event.goalId, event.milestoneId, {
+          title: trimmed,
+          due_date: date || null,
+          ...completion
+        })
+      default:
+        return null
+    }
   },
 
   /**
