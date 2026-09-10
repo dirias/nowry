@@ -6,7 +6,8 @@
  * reads like a typo in the ID rather than a wrong flow. So they are asserted
  * against the request this builds rather than discovered in a browser.
  */
-const mockPromptAsync = jest.fn()
+const mockParse = jest.fn()
+const mockOpen = jest.fn()
 const mockExchange = jest.fn()
 const mockCredential = jest.fn()
 const mockSignIn = jest.fn()
@@ -17,8 +18,14 @@ class MockAuthRequest {
     this.codeVerifier = 'verifier-123'
   }
 
-  promptAsync(...args) {
-    return mockPromptAsync(...args)
+  async makeAuthUrlAsync() {
+    return 'https://accounts.google.com/o/oauth2/v2/auth?whatever'
+  }
+
+  /** The library's own parse, stubbed: it is what checks `state`. */
+  parseReturnUrl(url) {
+    MockAuthRequest.parsed = url
+    return mockParse()
   }
 }
 
@@ -27,7 +34,10 @@ jest.mock('expo-auth-session', () => ({
   ResponseType: { Code: 'code', IdToken: 'id_token' },
   exchangeCodeAsync: (...args) => mockExchange(...args)
 }))
-jest.mock('expo-web-browser', () => ({ maybeCompleteAuthSession: jest.fn() }))
+jest.mock('expo-web-browser', () => ({
+  maybeCompleteAuthSession: jest.fn(),
+  openAuthSessionAsync: (...args) => mockOpen(...args)
+}))
 jest.mock('expo-application', () => ({ applicationId: 'com.nowry.app' }))
 jest.mock('expo-constants', () => ({
   expoConfig: { scheme: ['com.nowry.app', 'nowry'], extra: { googleClientIdAndroid: 'android-id.apps.googleusercontent.com' } }
@@ -42,10 +52,23 @@ const { redirectUriFor, signInWithGoogle } = require('../googleSignIn')
 
 beforeEach(() => {
   MockAuthRequest.lastConfig = null
-  mockPromptAsync.mockReset().mockResolvedValue({ type: 'success', params: { code: 'auth-code' } })
+  // Sync, like the library's own: it parses a URL, it does not await one.
+  mockParse.mockReset().mockReturnValue({ type: 'success', params: { code: 'auth-code' } })
+  mockOpen.mockReset().mockResolvedValue({ type: 'success', url: 'com.nowry.app://oauthredirect?code=auth-code' })
   mockExchange.mockReset().mockResolvedValue({ idToken: 'the-id-token' })
   mockCredential.mockReset().mockReturnValue('the-credential')
   mockSignIn.mockReset().mockResolvedValue({ user: { uid: 'u1' } })
+})
+
+it('waits on the address Expo hands back, which has one slash MORE than it sent', async () => {
+  // Google is told `com.nowry.app:/oauthredirect` and redirects there; Expo
+  // normalises what arrives to `<primary>://<path>`. promptAsync uses one value
+  // for both, so those two can never both be right — hence the separation.
+  await signInWithGoogle({})
+
+  const [, waitedOn] = mockOpen.mock.calls[0]
+  expect(waitedOn).toBe('com.nowry.app://oauthredirect')
+  expect(MockAuthRequest.lastConfig.redirectUri).toBe('com.nowry.app:/oauthredirect')
 })
 
 it('redirects on the package scheme, with ONE slash', () => {
@@ -109,10 +132,10 @@ it('hands Firebase the id_token from the exchange', async () => {
 })
 
 it('treats a dismissed browser as a decision, not a failure', async () => {
-  mockPromptAsync.mockResolvedValue({ type: 'dismiss' })
+  mockOpen.mockResolvedValue({ type: 'dismiss' })
   await expect(signInWithGoogle({})).resolves.toBeNull()
 
-  mockPromptAsync.mockResolvedValue({ type: 'cancel' })
+  mockOpen.mockResolvedValue({ type: 'cancel' })
   await expect(signInWithGoogle({})).resolves.toBeNull()
   expect(mockExchange).not.toHaveBeenCalled()
 })
@@ -145,7 +168,7 @@ it('declares the package name FIRST, which is the whole of the fix', () => {
 it('names the redirect and the client id when Google refuses', async () => {
   // Google answers a wrong client id, a wrong redirect and an unregistered
   // fingerprint with the same two words. The message has to separate them.
-  mockPromptAsync.mockResolvedValue({ type: 'error', params: { error: 'invalid_request' } })
+  mockParse.mockReturnValue({ type: 'error', params: { error: 'invalid_request' } })
 
   await expect(signInWithGoogle({})).rejects.toMatchObject({
     code: 'auth/invalid_request',

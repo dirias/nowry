@@ -76,6 +76,14 @@ client ID rather than a wrong flow, so they are stated here and asserted in
     given. A mismatch does not error: it leaks past the listener to the router,
     which shows "Unmatched Route" with the authorization code in the URL.
 
+  And the last piece: **Google is SENT one slash and Expo hands back two.**
+  `com.nowry.app:/oauthredirect` goes out, `com.nowry.app://oauthredirect` comes
+  in, because Expo normalises an incoming link to `<primary scheme>://<path>`.
+  `promptAsync` uses a single value for both, so it cannot satisfy both — the
+  browser is opened directly instead, told the outgoing form and the incoming
+  one separately, and the library's own `parseReturnUrl` still does the state
+  check.
+
   Nothing is typed into the Google console for the redirect; an Android client
   is identified by its package and fingerprint. The scheme order is asserted by
   a test, because getting it backwards fails silently in one direction.

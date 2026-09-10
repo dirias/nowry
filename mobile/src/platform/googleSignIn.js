@@ -110,6 +110,20 @@ export const googleClientId = () =>
 export const redirectUriFor = () => `${PRIMARY_SCHEME}:/oauthredirect`
 
 /**
+ * The same address as Expo hands it back.
+ *
+ * Google is told `com.nowry.app:/oauthredirect` and redirects there. Expo
+ * normalises what arrives to `<primary scheme>://<path>` before anyone sees it,
+ * so the callback turns up as `com.nowry.app://oauthredirect` — one slash more
+ * than was sent.
+ *
+ * `promptAsync` uses one value for both the outgoing redirect and the address
+ * it waits on, so those two can never both be right. This is the address to
+ * WAIT on; `redirectUriFor` is the one to SEND.
+ */
+export const returnUriFor = () => `${PRIMARY_SCHEME}://oauthredirect`
+
+/**
  * @param {object} auth - the client's Firebase Auth instance
  * @returns {Promise<import('firebase/auth').UserCredential | null>} null when the user cancelled
  */
@@ -144,7 +158,17 @@ export const signInWithGoogle = async (auth) => {
     usePKCE: true
   })
 
-  const result = await request.promptAsync(DISCOVERY)
+  /*
+   * Opened by hand rather than through `promptAsync`, which sends and waits on
+   * the same string. Google requires one form and Expo delivers the other, so
+   * the two have to be given separately. `parseReturnUrl` still does the
+   * checking — including the state comparison, which is the CSRF guard and is
+   * not something to hand-roll.
+   */
+  const authUrl = await request.makeAuthUrlAsync(DISCOVERY)
+  const opened = await WebBrowser.openAuthSessionAsync(authUrl, returnUriFor())
+
+  const result = opened.type === 'success' ? request.parseReturnUrl(opened.url) : { type: opened.type, params: {} }
 
   // A decision, not a failure.
   if (result.type === 'cancel' || result.type === 'dismiss') return null
