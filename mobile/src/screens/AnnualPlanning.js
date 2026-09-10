@@ -25,6 +25,7 @@
  */
 import { useCallback, useMemo, useState } from 'react'
 import { View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { annualPlanningService } from '@nowry/core/api/services'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
@@ -54,6 +55,7 @@ const MAX_AREAS = 3
 export function AnnualPlanning() {
   const { t } = useTranslation()
   const theme = useTheme()
+  const router = useRouter()
   const { user } = useAuth()
   const year = new Date().getFullYear()
 
@@ -270,6 +272,7 @@ export function AnnualPlanning() {
                   meta={(areas || []).find((area) => area._id === goal.focus_area_id)?.name ?? null}
                   measure={<Measure value={calculateProgress(goal)} accessibilityLabel={t('annualPlanning.home.progress')} />}
                   readout={<Readout>{calculateProgress(goal)}%</Readout>}
+                  onPress={() => router.push(`/annual-planning/goal/${goal._id}`)}
                 />
                 <Divider />
               </View>

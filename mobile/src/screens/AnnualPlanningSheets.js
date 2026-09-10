@@ -24,7 +24,7 @@ import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { useTheme } from '../theme'
 import { resolveColor } from '../ui/Typography'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
-import { BottomSheet, Button, FormField, Icon, Input, Stack, Typography } from '../ui'
+import { BottomSheet, Button, DateField, FormField, Icon, Input, Stack, Typography } from '../ui'
 
 export function AreaSheet({ open, planId, order = 1, existing = [], onClose, onSaved }) {
   const { t } = useTranslation()
@@ -162,6 +162,99 @@ function Swatches({ value, onChange, t }) {
         )
       })}
     </View>
+  )
+}
+
+/**
+ * Adding one step to a goal (MOB-047).
+ *
+ * A title and a date, which is the whole of a milestone the phone can make. The
+ * web's goal form can also mark one as a key result and reorder the set; both
+ * are restructuring, and restructuring stays on the web for now (PRD FR-022).
+ *
+ * It posts through `createMilestone(goalId, …)` rather than replacing the
+ * goal's whole array, so adding a step while another device ticks one does not
+ * undo the tick.
+ */
+export function MilestoneSheet({ goalId, open, onClose, onSaved }) {
+  const { t } = useTranslation()
+
+  const [title, setTitle] = useState('')
+  const [due, setDue] = useState('')
+  const [invalid, setInvalid] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    setTitle('')
+    setDue('')
+    setInvalid(false)
+    setFailed(false)
+  }, [open])
+
+  const save = async () => {
+    if (saving) return
+    if (!title.trim()) {
+      setInvalid(true)
+      return
+    }
+    setSaving(true)
+    setFailed(false)
+    try {
+      await annualPlanningService.createMilestone(goalId, { title: title.trim(), due_date: due || null })
+      onSaved?.()
+      onClose?.()
+    } catch {
+      setFailed(true)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <BottomSheet visible={open} onClose={saving ? () => {} : onClose} title={t('annualPlanning.goal.addMilestoneButton')}>
+      <Stack spacing={2}>
+        {failed ? (
+          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+            {t('annualPlanning.goal.milestoneUpdateError')}
+          </Typography>
+        ) : null}
+
+        <FormField labelKey='calendarModal.form.title' required errorKey={invalid ? 'form.requiredField' : null}>
+          {({ invalid: bad }) => (
+            <Input
+              value={title}
+              onChangeText={(value) => {
+                setTitle(value)
+                if (value.trim()) setInvalid(false)
+              }}
+              invalid={bad}
+              accessibilityLabel={t('annualPlanning.goal.milestoneTitleAria')}
+              placeholder={t('annualPlanning.goal.milestonePlaceholder')}
+            />
+          )}
+        </FormField>
+
+        <FormField labelKey='calendarModal.form.date'>
+          <DateField
+            value={due}
+            onChange={setDue}
+            accessibilityLabel={t('annualPlanning.goal.milestoneDueDateAria')}
+            placeholderKey='annualPlanning.goal.milestoneNoDate'
+          />
+        </FormField>
+
+        <Stack direction='row' spacing={1}>
+          <Button variant='tertiary' style={{ flex: 1 }} onPress={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button style={{ flex: 1 }} loading={saving} onPress={save}>
+            {t('annualPlanning.goal.addMilestoneButton')}
+          </Button>
+        </Stack>
+      </Stack>
+    </BottomSheet>
   )
 }
 
