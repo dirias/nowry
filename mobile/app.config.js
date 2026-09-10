@@ -32,7 +32,14 @@ module.exports = () => ({
     orientation: 'portrait',
     // Deep links use the same route names as the web client, so a link maps
     // without a translation table (see docs/architecture.md).
-    scheme: 'nowry',
+    /*
+     * Two schemes, and the second is not decoration. Google's Android OAuth
+     * client redirects to `<package>:/oauthredirect`, so the OS only routes
+     * that back to this app if the package name is a declared scheme. Without
+     * it the browser opens, Google accepts the sign-in, and nothing returns —
+     * a hang with no error, which is the worst shape a failure can take.
+     */
+    scheme: ['nowry', 'com.nowry.app'],
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {

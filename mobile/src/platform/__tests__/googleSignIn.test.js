@@ -94,3 +94,20 @@ it('says an exchange that returns no id_token is a credential problem', async ()
   mockExchange.mockResolvedValue({ accessToken: 'a' })
   await expect(signInWithGoogle({})).rejects.toMatchObject({ code: 'auth/invalid-credential' })
 })
+
+/**
+ * The redirect only comes back if the OS knows to route it here.
+ *
+ * Google's Android client redirects to `<package>:/oauthredirect`, so that
+ * package name has to be a declared scheme. Miss it and the browser opens,
+ * Google accepts the sign-in, and nothing returns — a hang with no error, which
+ * is the worst shape a failure can take and the hardest to attribute.
+ */
+it('declares the scheme the redirect comes back on', () => {
+  const config = require('../../../app.config.js')().expo
+  const schemes = [].concat(config.scheme)
+
+  expect(schemes).toContain(config.android.package)
+  // The app's own scheme stays: it is what deep links use.
+  expect(schemes).toContain('nowry')
+})
