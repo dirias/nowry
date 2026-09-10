@@ -2179,7 +2179,8 @@
         "again": "À revoir",
         "hard": "Difficile",
         "good": "Bien",
-        "easy": "Facile"
+        "easy": "Facile",
+        "alreadyAnswered": "Déjà évaluée"
       },
       "syncing_one": "Synchronisation de {{count}} révision...",
       "syncing_other": "Synchronisation de {{count}} révisions..."

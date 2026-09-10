@@ -30,7 +30,8 @@ import { useTranslation } from 'react-i18next'
 import { cardsService, studySessionsService } from '@nowry/core/api/services'
 import { storage } from '@nowry/core'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
-import { Button, Card, Screen, Skeleton, Stack, Typography } from '../ui'
+import { GRADE_VARIANTS } from '../ui/buttonSpec'
+import { Button, Card, Icon, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
 
 const GRADES = ['again', 'hard', 'good', 'easy']
 
@@ -53,9 +54,19 @@ export function StudySession() {
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  // The web shows its swipe affordance on the first card only, and drops it
+  // the moment any gesture is used. A hint that stays is an instruction.
+  const [hinted, setHinted] = useState(false)
 
   const deckName = useRef(null)
-  const graded = useRef([])
+  /*
+   * Keyed by card id, and state rather than a ref: stepping back has to SHOW
+   * that a card was already answered, which means the screen has to re-render
+   * when one is. A re-grade replaces rather than appends, so a card the user
+   * went back to cannot be counted or sent twice. The log wants a list, and
+   * `Object.values` keeps insertion order — the order they were given.
+   */
+  const [graded, setGraded] = useState({})
   // How many grades are waiting on a signal. Shown on the summary, because a
   // session that has not reached the server yet is a fact the user should have.
   const [queued, setQueued] = useState(0)
@@ -84,7 +95,7 @@ export function StudySession() {
         const saved = readResume(id, due.length)
         if (saved) {
           setIndex(saved.index)
-          graded.current = saved.graded
+          setGraded(saved.graded)
           startedAt.current = new Date(saved.startedAt)
         }
       })
@@ -108,33 +119,42 @@ export function StudySession() {
     storage.remove(resumeKey(id))
 
     // An all-caught-up deck lands here too, with nothing to log.
-    if (graded.current.length === 0) return
+    const answers = Object.values(graded)
+    if (answers.length === 0) return
     const payload = {
       deckId: id,
       deckName: deckName.current,
       startedAt: startedAt.current,
-      cards: graded.current
+      cards: answers
     }
     studySessionsService.log(payload).catch(() => {
       // History is a record, not the session — it never interrupts. But it is
       // queued rather than dropped, so a session studied offline still appears.
       queueSession(payload)
     })
-  }, [complete, id])
+  }, [complete, id, graded])
 
   const grade = useCallback(
     (value) => {
       const card = cards[index]
       const cardId = card._id ?? card.id
 
-      graded.current = [...graded.current, { cardId, cardTitle: frontOf(card) || null, grade: value, evaluation: GRADE_TO_EVAL[value] }]
+      // Re-grading a card the user stepped back to replaces the answer rather
+      // than recording two, which would double-count the session and send two
+      // reviews for one card.
+      const answers = {
+        ...graded,
+        [cardId]: { cardId, cardTitle: frontOf(card) || null, grade: value, evaluation: GRADE_TO_EVAL[value] }
+      }
+      setGraded(answers)
 
       // The next card comes up now. A grade that waits on the network is a
       // grade the user watches, and recall practice does not survive a spinner.
       const next = index + 1
       setIndex(next)
       setRevealed(false)
-      writeResume(id, { index: next, graded: graded.current, startedAt: startedAt.current })
+      setHinted(true)
+      writeResume(id, { index: next, graded: answers, startedAt: startedAt.current })
 
       /*
        * A grade that cannot be sent is not lost and is not retried in a loop
@@ -154,8 +174,26 @@ export function StudySession() {
           setQueued((n) => n + 1)
         })
     },
-    [cards, index, id]
+    [cards, index, id, graded]
   )
+
+  /**
+   * Forward without answering. Skipping is not a grade, so nothing is recorded
+   * and nothing is sent — the card comes round again next session.
+   */
+  const skip = useCallback(() => {
+    setIndex((n) => Math.min(total, n + 1))
+    setRevealed(false)
+    setHinted(true)
+  }, [total])
+
+  const back = useCallback(() => {
+    setIndex((n) => Math.max(0, n - 1))
+    setRevealed(false)
+    setHinted(true)
+  }, [])
+
+  const answered = Boolean(current && graded[current._id ?? current.id])
 
   const counter = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
 
@@ -207,7 +245,7 @@ export function StudySession() {
         <Stack spacing={2}>
           <Typography level='h4'>{t('cards.session.complete.title')}</Typography>
           <Typography level='body-md' color='text.secondary'>
-            {t('cards.session.complete.body', { count: graded.current.length })}
+            {t('cards.session.complete.body', { count: Object.keys(graded).length })}
           </Typography>
           {queued > 0 ? (
             <Typography level='body-sm' color='text.tertiary' accessibilityLiveRegion='polite'>
@@ -229,7 +267,12 @@ export function StudySession() {
 
         {/* The card fills what is left, so the grades sit in the bottom third
             of any screen height rather than at a measured offset. */}
-        <View style={{ flex: 1 }}>
+        <SwipeArea
+          style={{ flex: 1 }}
+          onLeft={skip}
+          onRight={index > 0 ? back : undefined}
+          onUp={revealed ? undefined : () => setRevealed(true)}
+        >
           <Card
             padding={3}
             elevation='sm'
@@ -258,19 +301,42 @@ export function StudySession() {
               ) : null}
             </Stack>
           </Card>
-        </View>
+        </SwipeArea>
+
+        {/* The gestures, said once, on the first card only. Every one of them
+            has a button that does the same thing, so this is an offer rather
+            than an instruction — and it is decorative, because a screen reader
+            already has the buttons. */}
+        {hinted ? null : (
+          <Stack direction='row' spacing={2} style={{ justifyContent: 'center' }} importantForAccessibility='no'>
+            <Icon name='ArrowLeft' size='sm' color='text.tertiary' />
+            <Icon name='ArrowUp' size='sm' color='text.tertiary' />
+            <Icon name='ArrowRight' size='sm' color='text.tertiary' />
+          </Stack>
+        )}
+
+        {/* A card reached by going back was already answered. The web says so
+            rather than letting an identical-looking row silently re-fire. */}
+        {answered ? (
+          <Typography level='body-xs' color='text.tertiary' accessibilityLiveRegion='polite'>
+            {t('cards.session.grading.alreadyAnswered')}
+          </Typography>
+        ) : null}
 
         {revealed ? (
           /*
-           * No solid among the four. The house rule is one solid per surface,
-           * and here the right number is zero: an accented "Good" is a nudge
-           * toward the answer that flatters the learner.
+           * Four tones, not four neutral keys, and they are the web's own:
+           * outlined danger, soft warning, soft success, solid primary. An
+           * earlier version made all four secondary on the reasoning that an
+           * accented key biases self-assessment. That reasoning lost to a
+           * design that has shipped for a year and to the fact that these four
+           * ARE the surface — the exception is recorded in `buttonSpec.js`.
            */
           <Stack direction='row' spacing={1}>
             {GRADES.map((value) => (
               <Button
                 key={value}
-                variant='secondary'
+                variant={GRADE_VARIANTS[value]}
                 size='md'
                 style={{ flex: 1 }}
                 onPress={() => grade(value)}
@@ -297,7 +363,7 @@ function readResume(deckId, total) {
     if (!raw) return null
     const saved = JSON.parse(raw)
     if (!Number.isInteger(saved.index) || saved.index <= 0 || saved.index >= total) return null
-    if (!Array.isArray(saved.graded)) return null
+    if (!saved.graded || typeof saved.graded !== 'object') return null
     return saved
   } catch {
     return null

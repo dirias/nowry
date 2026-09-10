@@ -2230,7 +2230,8 @@
         "again": "もう一度",
         "hard": "難しい",
         "good": "普通",
-        "easy": "簡単"
+        "easy": "簡単",
+        "alreadyAnswered": "評価済み"
       },
       "syncing_other": "{{count}} 件の復習を同期しています..."
     },

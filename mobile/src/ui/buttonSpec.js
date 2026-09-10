@@ -60,7 +60,54 @@ export const BUTTON_VARIANTS = {
     // "2px derived from the text colour" — never solid, so it cannot compete
     // with the primary.
     edge: 'danger.plainColor'
+  },
+
+  /*
+   * The four grades, and the one place the house table is set aside.
+   *
+   * BUTTONS.md gives a surface one solid and three neutral shapes. The study
+   * session breaks that on purpose and has since it shipped on the web: these
+   * four ARE the surface, they are answered in tenths of a second, and four
+   * identical neutral keys make the reader parse the words every time. The
+   * tones are the web's own — outlined danger, soft warning, soft success,
+   * solid primary — so a learner who studies on both sees one control.
+   *
+   * Recorded here rather than inlined at the call site, so the exception is a
+   * decision somebody can find and argue with rather than a colour somebody
+   * typed.
+   */
+  gradeAgain: {
+    ground: 'transparent',
+    groundPressed: 'danger.softBg',
+    label: 'danger.plainColor',
+    edge: 'danger.plainColor'
+  },
+  gradeHard: {
+    ground: 'warning.softBg',
+    groundPressed: 'background.level2',
+    label: 'warning.plainColor',
+    edge: 'warning.plainColor'
+  },
+  gradeGood: {
+    ground: 'success.softBg',
+    groundPressed: 'background.level2',
+    label: 'success.plainColor',
+    edge: 'success.plainColor'
+  },
+  gradeEasy: {
+    ground: 'primary.solidBg',
+    groundPressed: 'primary.solidActiveBg',
+    label: 'primary.solidColor',
+    edge: 'primary.solidActiveBg'
   }
+}
+
+/** Grade → button variant, in the order the row draws them. */
+export const GRADE_VARIANTS = {
+  again: 'gradeAgain',
+  hard: 'gradeHard',
+  good: 'gradeGood',
+  easy: 'gradeEasy'
 }
 
 export const BUTTON_VARIANT_NAMES = Object.keys(BUTTON_VARIANTS)

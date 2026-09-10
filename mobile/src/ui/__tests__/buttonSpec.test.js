@@ -7,6 +7,7 @@
  * shipping a button that is subtly not the house button.
  */
 import {
+  GRADE_VARIANTS,
   BUTTON_RADIUS,
   BUTTON_SIZES,
   BUTTON_SIZE_NAMES,
@@ -58,8 +59,35 @@ describe('geometry (BUTTONS.md §2)', () => {
 })
 
 describe('variants (BUTTONS.md §3)', () => {
-  it('has the four the standard names', () => {
-    expect(BUTTON_VARIANT_NAMES).toEqual(['primary', 'secondary', 'tertiary', 'danger'])
+  it('has the four the standard names, and the grade row as a named exception', () => {
+    // The house table is four. The study session's four grades are the one
+    // documented exception, carried here rather than typed at the call site so
+    // it is a decision somebody can find. See BUTTON_VARIANTS' own comment.
+    expect(BUTTON_VARIANT_NAMES).toEqual([
+      'primary',
+      'secondary',
+      'tertiary',
+      'danger',
+      'gradeAgain',
+      'gradeHard',
+      'gradeGood',
+      'gradeEasy'
+    ])
+  })
+
+  it('gives every grade its own tone, so the row is not four identical keys', () => {
+    const grades = Object.values(GRADE_VARIANTS).map((name) => BUTTON_VARIANTS[name])
+    expect(grades).toHaveLength(4)
+    grades.forEach((tone) => expect(tone).toBeDefined())
+    // Four distinct labels: that is the whole point of the exception.
+    expect(new Set(grades.map((tone) => tone.label)).size).toBe(4)
+  })
+
+  it('keeps exactly one solid on the grade row, and it is Easy', () => {
+    // Matching the web, where Easy is the solid. Two solids would be two
+    // primaries on one surface, which is what the standard actually forbids.
+    const solid = Object.entries(GRADE_VARIANTS).filter(([, name]) => BUTTON_VARIANTS[name].ground === 'primary.solidBg')
+    expect(solid.map(([grade]) => grade)).toEqual(['easy'])
   })
 
   it('names every colour semantically, so no preset is assumed', () => {

@@ -15,3 +15,4 @@ export { IDENTITY_TILE_SIZE, LIST_ROW_HEIGHT, MEASURE_HEIGHT, MEASURE_WIDTH, SUM
 export { DeckRow } from './DeckRow'
 export { SectionHeader, SECTION_HEADER_HEIGHT } from './SectionHeader'
 export { SessionRow, scoreColor } from './SessionRow'
+export { SwipeArea, SWIPE_DISTANCE } from './SwipeArea'

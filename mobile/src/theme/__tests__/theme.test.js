@@ -54,7 +54,9 @@ describe('buildTheme', () => {
       'danger.plainColor',
       'danger.softBg',
       'success.plainColor',
-      'warning.plainColor'
+      'success.softBg',
+      'warning.plainColor',
+      'warning.softBg'
     ]
     const missing = used.filter((name) => {
       const [group, key] = name.split('.')

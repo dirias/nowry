@@ -2167,7 +2167,8 @@
         "again": "Nochmal",
         "hard": "Schwer",
         "good": "Gut",
-        "easy": "Leicht"
+        "easy": "Leicht",
+        "alreadyAnswered": "Bereits bewertet"
       },
       "syncing_one": "{{count}} Wiederholung wird synchronisiert...",
       "syncing_other": "{{count}} Wiederholungen werden synchronisiert..."
