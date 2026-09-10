@@ -43,10 +43,7 @@ it('asks the deck endpoint for a deck', async () => {
 })
 
 it('asks the daily-review endpoint for the sentinel, and passes the narrowing', async () => {
-  const { result } = renderHook(
-    () => useSessionCards({ deckId: DAILY_REVIEW, tags: ['verbs'], group: undefined, limit: 10 }),
-    { wrapper }
-  )
+  const { result } = renderHook(() => useSessionCards({ deckId: DAILY_REVIEW, tags: ['verbs'], group: undefined, limit: 10 }), { wrapper })
 
   await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'c2' }]))
   expect(mockGetDaily).toHaveBeenCalledWith({ limit: 10, tags: ['verbs'], group: undefined })
@@ -76,7 +73,7 @@ it('reports an error only when it has nothing to show', async () => {
   expect(result.current.cards).toBeNull()
 })
 
-it('keeps a tag\'s session and the whole day\'s apart', async () => {
+it("keeps a tag's session and the whole day's apart", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const withClient = ({ children }) => React.createElement(QueryClientProvider, { client }, children)
 

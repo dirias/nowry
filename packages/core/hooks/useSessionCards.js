@@ -30,8 +30,7 @@ export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0 }
 
   const { data, isLoading, error, isFetching } = useQuery({
     queryKey: ['cards', userId, 'session', deckId, { tags, group, limit, attempt }],
-    queryFn: () =>
-      isDaily ? cardsService.getDailyReviewCards({ limit, tags, group }) : cardsService.getDueCards(deckId),
+    queryFn: () => (isDaily ? cardsService.getDailyReviewCards({ limit, tags, group }) : cardsService.getDueCards(deckId)),
     enabled: !!userId && !!deckId,
     /*
      * A session's queue is read once and then worked through. Refetching it

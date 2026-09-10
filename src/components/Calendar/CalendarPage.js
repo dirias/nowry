@@ -22,7 +22,16 @@ import CalendarAgenda from './CalendarAgenda'
 import EventTypeTile from './EventTypeTile'
 import { filterCalendarEvents } from '@nowry/core/domain/calendar/calendarFilters'
 import { completionPatch, stripTypePrefix, undoneStatus } from '@nowry/core/domain/calendar/eventHelpers'
-import { addDays, addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, isSameDay, isSameMonth, startOfWeek } from '@nowry/core/domain/calendar/agendaGroups'
+import {
+  addDays,
+  addMonths,
+  formatMonthTitle,
+  formatWeekTitle,
+  groupAgenda,
+  isSameDay,
+  isSameMonth,
+  startOfWeek
+} from '@nowry/core/domain/calendar/agendaGroups'
 
 // ADR-016: every event is all-day, so the two grid views are day grids — a
 // time grid would render 24 empty hour rows under a one-line strip. The third
