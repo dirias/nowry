@@ -1,13 +1,22 @@
 /**
- * The tab bar: Home, Study, Plan, Focus, Profile.
+ * The tab bar: Home, Study, Plan, Focus.
  *
- * Five, and five is the ceiling. The web has fourteen routes; a phone's tab bar
- * holds four or five before each one becomes a target you aim at rather than
- * press. Plan took the fifth in V2 (MOB-043) and holds two views, the calendar
- * and the year's plan, on one segment — the Study Center's own arrangement. The
- * next parity surface cannot simply take a sixth: Books needs a decision about
- * where it lives, not an edit here. What is not in the bar is
- * not hidden behind a "more" tab, which is where features go to be forgotten.
+ * Four. The web has fourteen routes; a phone's bar holds three to five
+ * top-level destinations before each becomes a target you aim at rather than
+ * press, which is where both platforms' own guidance puts it. What is not in
+ * the bar is not hidden behind a "more" tab, which is where features go to be
+ * forgotten.
+ *
+ * **Profile is not a destination here, and it never needed to be.** The app bar
+ * carries the account at the head of every screen, and that control already
+ * opened this exact route: two controls, one destination, everywhere in the app
+ * (MOB-048). The account belongs in the app bar on both platforms' guidance and
+ * that is where this product's own web client puts it. The route stays; only
+ * its button is gone.
+ *
+ * Plan holds two views — the calendar and the year's plan — on one segment,
+ * which is the Study Center's own arrangement. Books, when it lands, needs a
+ * decision about where it lives rather than an edit here.
  *
  * Route names mirror the web's, so `nowry://study/<deckId>` and
  * `https://nowry.app/study/<deckId>` are the same path with no translation
@@ -21,7 +30,7 @@
  *
  * **Each bar holds the inset at its own edge**, because each is the chrome
  * closest to it. Android draws this app under the system bars (edge-to-edge in
- * `app.config.js`), and nothing was holding the bottom one: "Profile" sat
+ * `app.config.js`), and nothing was holding the bottom one: the last tab sat
  * against the system navigation. Screens between the two defer both insets
  * through `ScreenChromeProvider`, so each is held exactly once.
  */
@@ -75,18 +84,17 @@ export default function TabsLayout() {
           name='calendar'
           options={{ title: t('annualPlanning.title'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.plan} color={color} /> }}
         />
-        {/* In the group so the tab bar stays under it, but not a tab: `href:
-            null` is how Expo Router says "a route here, no button for it". The
-            bar is full at five and Home's next-steps row already opens this. */}
+        {/* A redirect into the Plan tab, kept because it is the web's own path
+            and Home's next-steps row uses it. `href: null` is how Expo Router
+            says "a route here, no button for it". */}
         <Tabs.Screen name='annual-planning' options={{ href: null }} />
         <Tabs.Screen
           name='pomodoro'
           options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
         />
-        <Tabs.Screen
-          name='profile'
-          options={{ title: t('nav.profile'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.profile} color={color} /> }}
-        />
+        {/* A route, not a tab: the app bar's account opens it from anywhere,
+            and inside the group so the bar stays under it. */}
+        <Tabs.Screen name='profile' options={{ href: null }} />
       </Tabs>
     </ScreenChromeProvider>
   )

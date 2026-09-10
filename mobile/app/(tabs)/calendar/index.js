@@ -20,9 +20,9 @@
 import { useEffect, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { Screen, Segmented, Stack } from '../../src/ui'
-import { Calendar } from '../../src/screens/Calendar'
-import { AnnualPlanning } from '../../src/screens/AnnualPlanning'
+import { Screen, Segmented, Stack } from '../../../src/ui'
+import { Calendar } from '../../../src/screens/Calendar'
+import { AnnualPlanning } from '../../../src/screens/AnnualPlanning'
 
 const VIEWS = { calendar: 'calendar', overview: 'overview' }
 

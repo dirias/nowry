@@ -125,6 +125,11 @@ export const NEEDS_A_DECISION = {
  * The tab bar's icons (MOB-015). These have no Material counterpart in the web
  * app — its navigation is a header, not a tab bar — so they are named directly
  * rather than mapped.
+ *
+ * Four, since MOB-048. Profile left the bar because the app bar's account
+ * already opened the same route from every screen, and its glyph left with it:
+ * the avatar falls back to an initial rather than a silhouette, so nothing drew
+ * `CircleUser` at all.
  */
 export const NAV_ICONS = {
   home: 'House',
@@ -133,8 +138,7 @@ export const NAV_ICONS = {
   // five, and the plan claimed it — the calendar is the view it opens on, so
   // the calendar's glyph is the one that names it.
   plan: 'CalendarDays',
-  focus: 'Timer',
-  profile: 'CircleUser'
+  focus: 'Timer'
 }
 
 /** The icon keys the shared modules hand out (MOB-003B), resolved for mobile. */

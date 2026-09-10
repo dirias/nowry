@@ -272,7 +272,7 @@ export function AnnualPlanning() {
                   meta={(areas || []).find((area) => area._id === goal.focus_area_id)?.name ?? null}
                   measure={<Measure value={calculateProgress(goal)} accessibilityLabel={t('annualPlanning.home.progress')} />}
                   readout={<Readout>{calculateProgress(goal)}%</Readout>}
-                  onPress={() => router.push(`/annual-planning/goal/${goal._id}`)}
+                  onPress={() => router.push(`/calendar/goal/${goal._id}`)}
                 />
                 <Divider />
               </View>

@@ -46,11 +46,11 @@ describe('the Material to lucide map', () => {
     // — so these are named directly and still have to exist.
     const missing = Object.entries(NAV_ICONS).filter(([, target]) => !names.has(target))
     expect(missing).toEqual([])
-    // Pinned, and the number is the point: the bar's own comment puts the
-    // ceiling at five before each tab becomes a target you aim at rather than
-    // press. Plan took the fifth (MOB-043) and holds two views on a segment; a
-    // sixth tab needs a decision, not an edit.
-    expect(Object.keys(NAV_ICONS)).toEqual(['home', 'study', 'plan', 'focus', 'profile'])
+    // Pinned, and the number is the point. Five is the ceiling and four is
+    // where this bar sits: Profile left it because the app bar's account
+    // already opened the same route from every screen (MOB-048). A fifth needs
+    // a decision, not an edit.
+    expect(Object.keys(NAV_ICONS)).toEqual(['home', 'study', 'plan', 'focus'])
   })
 
   it('lists what it cannot map instead of guessing', () => {
