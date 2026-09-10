@@ -1962,7 +1962,9 @@
             "description": "質問には問いで返し、考えさせる。"
           }
         }
-      }
+      },
+      "levelLabel": "レベル {{level}}",
+      "xpToNextLevel": "次のレベルまで {{count}} XP"
     },
     "avatar": {
       "generateError": "問題が発生しました。もう一度お試しください。",
@@ -2092,6 +2094,9 @@
       "customPersonality": "Custom personality requires Plus or Pro",
       "morePersonality": "Unlock more personality generations with Pro",
       "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    },
+    "errors": {
+      "settingsLoadFailed": "設定を読み込めませんでした。初期値を表示しています。"
     }
   },
   "cards": {

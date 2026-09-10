@@ -1852,7 +1852,9 @@
             "description": "Répond aux questions par des questions guides."
           }
         }
-      }
+      },
+      "levelLabel": "Niveau {{level}}",
+      "xpToNextLevel": "{{count}} XP avant le niveau suivant"
     },
     "avatar": {
       "generateError": "Une erreur s'est produite. Veuillez réessayer.",
@@ -1984,6 +1986,9 @@
       "customPersonality": "Custom personality requires Plus or Pro",
       "morePersonality": "Unlock more personality generations with Pro",
       "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    },
+    "errors": {
+      "settingsLoadFailed": "Impossible de charger vos réglages. Valeurs par défaut affichées."
     }
   },
   "cards": {

@@ -2,9 +2,15 @@
  * Home (MOB-018).
  *
  * The one-column expression of the web Home: one summary object (ADR-021 §1),
- * the next-steps panel (ADR-024) while it is offered, and nothing else. The web
- * puts a news carousel, a weekly chart, a calendar and a blackboard beside it;
- * a phone that stacked all five would be a scroll, not a home.
+ * the companion, the next-steps panel (ADR-024) while it is offered, and
+ * nothing else. The web puts a news carousel, a weekly chart, a calendar and a
+ * blackboard beside it; a phone that stacked all five would be a scroll, not a
+ * home.
+ *
+ * The companion is here rather than in the Study Center because the Study
+ * Center is built to an approved artboard and this is not on it — and because
+ * the web's pet floats over every page, which is a thing a phone cannot do and
+ * should not imitate (MOB-050).
  *
  * Skeletons, never a page gate. The layout the reader is about to see is
  * already there while the numbers arrive, so nothing moves when they do.
@@ -16,6 +22,7 @@ import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { Button, NextStepsPanel, Readout, Screen, Skeleton, Stack, SummaryObject, Typography } from '../../src/ui'
+import { PetPanel } from '../../src/screens/PetPanel'
 
 export default function Home() {
   const { t } = useTranslation()
@@ -76,6 +83,8 @@ export default function Home() {
             {t('home.loadFailed')}
           </Typography>
         ) : null}
+
+        <PetPanel />
 
         <NextStepsPanel />
       </Stack>

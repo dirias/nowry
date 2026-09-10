@@ -27,7 +27,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { cardsService, studySessionsService } from '@nowry/core/api/services'
+import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
 import { storage } from '@nowry/core'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
@@ -190,6 +191,26 @@ export function StudySession() {
       // History is a record, not the session — it never interrupts. But it is
       // queued rather than dropped, so a session studied offline still appears.
       queueSession(payload)
+    })
+
+    /*
+     * The companion is fed by studying, and until now it was fed only by
+     * studying on the web (MOB-050). A pet that does not move after twenty
+     * cards on a phone is not a quiet pet, it is a broken one.
+     *
+     * The web's own two calls, with its own cap: session XP is capped at 500
+     * cards so one enormous session cannot outrun the curve, and the streak is
+     * awarded separately because it is about days rather than cards. Both are
+     * settled rather than awaited — XP is a reward, and a reward that can
+     * block the summary screen is a punishment.
+     */
+    Promise.allSettled([
+      agentService.awardSessionXp(Math.min(500, answers.length), id === DAILY_REVIEW ? null : id),
+      agentService.awardStreakXp()
+    ]).then(() => {
+      // The panel on Home reads a cached level; a level earned here is a level
+      // it is now wrong about.
+      queryClient.invalidateQueries({ queryKey: ['pet'] })
     })
   }, [complete, id, graded])
 

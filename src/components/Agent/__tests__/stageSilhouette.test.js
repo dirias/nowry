@@ -11,7 +11,10 @@
  * differ by something the eye can catch at 56–80px, without a portrait, and
  * without needing two stages side by side to compare.
  */
-import { STAGE_CONFIG, FORM_BORDER_RADIUS, MOOD_PRESENTATION, alphaHex } from '../StudyPet'
+// The stage table moved to the shared package when the phone started drawing
+// the same companion (MOB-050); the rest of the anatomy is still this client's.
+import { STAGE_CONFIG } from '@nowry/core/domain/petStages'
+import { FORM_BORDER_RADIUS, MOOD_PRESENTATION, alphaHex } from '../StudyPet'
 
 const STAGES = [1, 2, 3, 4, 5, 6]
 const VALID_MARKS = [null, 'crest', 'halo', 'crown']

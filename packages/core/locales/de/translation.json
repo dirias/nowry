@@ -1840,7 +1840,9 @@
             "description": "Beantwortet Fragen mit lenkenden Gegenfragen."
           }
         }
-      }
+      },
+      "levelLabel": "Level {{level}}",
+      "xpToNextLevel": "{{count}} XP bis zum nächsten Level"
     },
     "avatar": {
       "generateError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
@@ -1972,6 +1974,9 @@
       "customPersonality": "Custom personality requires Plus or Pro",
       "morePersonality": "Unlock more personality generations with Pro",
       "unlimitedMessages": "Unlimited messages with Plus or Pro"
+    },
+    "errors": {
+      "settingsLoadFailed": "Deine Einstellungen konnten nicht geladen werden. Es werden Standardwerte angezeigt."
     }
   },
   "cards": {

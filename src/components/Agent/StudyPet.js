@@ -36,33 +36,9 @@ import DeckSelector from './DeckSelector'
 import QuizSummaryCard from './QuizSummaryCard'
 import PetMarkdown from './PetMarkdown'
 import { quizService } from '@nowry/core/api/services/quizService'
-
-// ---------------------------------------------------------------------------
-// Stage configuration — drives orb size, color, aura rings, and animation speed
-// ---------------------------------------------------------------------------
-// dominantColor is the no-custom-colour fallback and must stay a 6-digit hex:
-// PetOrb appends hex alpha suffixes to it (`${activeColor}55`) to build glows.
-//
-// Each stage must be told apart at a glance, at 56–80px, without a portrait.
-// Size alone cannot do that — 24px spread over six stages is invisible in
-// isolation, and nobody sees two stages side by side. So every consecutive
-// pair differs by at least one *structural* feature:
-//
-//   form   'egg' | 'round'   — the silhouette itself
-//   mark   null | 'crest' | 'halo' | 'crown'   — an earned adornment
-//   rings  0–3                — aura rings
-//   orbit  0–5                — orbiting motes
-//
-// All four are procedural, so a free-tier pet evolves visibly without ever
-// touching the Plus-gated AI portrait.
-export const STAGE_CONFIG = {
-  1: { sizePx: 56, dominantColor: '#64b4ff', emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0 },
-  2: { sizePx: 60, dominantColor: '#78dcaa', emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0 },
-  3: { sizePx: 64, dominantColor: '#a445ff', emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0 },
-  4: { sizePx: 68, dominantColor: '#ffbe3c', emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0 },
-  5: { sizePx: 72, dominantColor: '#dc64ff', emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3 },
-  6: { sizePx: 80, dominantColor: '#ffe650', emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5 }
-}
+// The stage table is shared: the phone draws the same companion, and a stage
+// table inside one client's orb is that client's private pet (MOB-050).
+import { STAGE_CONFIG } from '@nowry/core/domain/petStages'
 
 // The egg's asymmetry is what sells stage 1 as "not yet formed"; every later
 // stage is a true circle.

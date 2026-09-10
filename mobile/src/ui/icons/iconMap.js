@@ -163,6 +163,11 @@ export const KEY_TO_LUCIDE = {
   goal: 'Target',
   milestone: 'Diamond',
   activity: 'Repeat',
+  // from petStages: the mark a companion earns at stages three, four and six
+  // (MOB-050). The halo is a ring rather than a glyph of its own.
+  crest: 'ChevronUp',
+  halo: 'Circle',
+  crown: 'Crown',
   // The wordmark's leaf. Every phone board draws it beside "nowry" in the app
   // bar; the web ships the same mark as a PNG, which has no place in a bar that
   // has to recolour with the account's accent.

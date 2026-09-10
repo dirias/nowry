@@ -42,6 +42,7 @@ import CircleCheck from 'lucide-react-native/icons/circle-check'
 import CircleQuestionMark from 'lucide-react-native/icons/circle-question-mark'
 import CloudUpload from 'lucide-react-native/icons/cloud-upload'
 import Diamond from 'lucide-react-native/icons/diamond'
+import Crown from 'lucide-react-native/icons/crown'
 import Download from 'lucide-react-native/icons/download'
 import EllipsisVertical from 'lucide-react-native/icons/ellipsis-vertical'
 import FilePlus from 'lucide-react-native/icons/file-plus'
@@ -112,6 +113,7 @@ export const ICONS = {
   CircleQuestionMark,
   Clock,
   CloudUpload,
+  Crown,
   Diamond,
   Download,
   EllipsisVertical,
