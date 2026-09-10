@@ -252,7 +252,8 @@ export function StudySession() {
     setHinted(true)
   }, [])
 
-  const answered = Boolean(current && graded[current._id ?? current.id])
+  const cardId = current?._id ?? current?.id ?? null
+  const answered = Boolean(cardId && graded[cardId])
 
   const counter = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
 
@@ -328,6 +329,9 @@ export function StudySession() {
             of any screen height rather than at a measured offset. */}
         <SwipeArea
           style={{ flex: 1 }}
+          // What the card is, so the swipe knows when the content behind it
+          // has actually changed.
+          resetKey={cardId ?? index}
           onLeft={skip}
           onRight={index > 0 ? back : undefined}
           onUp={revealed ? undefined : () => setRevealed(true)}
@@ -354,7 +358,15 @@ export function StudySession() {
              * turn meaningless and hands the reader the prompt they are
              * supposed to be recalling from.
              */}
+            {/*
+             * Keyed by the card, as the web's flip container is. A new card is
+             * always face up, and remounting is what makes that instant: a
+             * card graded while its answer was showing would otherwise spin
+             * back to its question over 240ms — with the NEXT card's question
+             * already on the face doing the spinning.
+             */}
             <FlipCard
+              key={cardId ?? index}
               style={{ flex: 1 }}
               flipped={revealed}
               front={

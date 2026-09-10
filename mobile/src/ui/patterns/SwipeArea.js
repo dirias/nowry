@@ -43,7 +43,7 @@
  * So this view stays invisible to the accessibility tree — announcing a
  * "swipeable" region that duplicates four visible buttons is noise, not help.
  */
-import { useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import { Animated, Easing, PanResponder } from 'react-native'
 import { useReduceMotion, useTheme } from '../../theme'
 
@@ -53,7 +53,7 @@ export const SWIPE_DISTANCE = 50
 /** Where a committed card goes if the view has not been measured yet. */
 const OFFSCREEN = 500
 
-export function SwipeArea({ onLeft, onRight, onUp, children, style }) {
+export function SwipeArea({ onLeft, onRight, onUp, children, style, resetKey }) {
   const theme = useTheme()
   const reduceMotion = useReduceMotion()
   const shift = useRef(new Animated.Value(0)).current
@@ -69,6 +69,19 @@ export function SwipeArea({ onLeft, onRight, onUp, children, style }) {
   // scale, and the guard in `motion.test.js` cannot read it either.
   const settings = useRef({ reduceMotion, motion: theme.motion })
   settings.current = { reduceMotion, motion: theme.motion }
+
+  /*
+   * The card comes back to centre when its CONTENT has changed, not when the
+   * exit animation ends. Putting it back in the animation's callback showed
+   * the card that had just left, at rest, in the middle of the screen, for the
+   * frame or two before React rendered the next one — the visible stutter on
+   * every swipe. `resetKey` is whatever identifies the card, so this runs in
+   * the same commit that swaps the content, before it is painted: the frame
+   * that shows a card at centre is always the frame that has the right one.
+   */
+  useLayoutEffect(() => {
+    shift.setValue(0)
+  }, [resetKey, shift])
 
   const responder = useMemo(
     () =>
@@ -102,13 +115,12 @@ export function SwipeArea({ onLeft, onRight, onUp, children, style }) {
           if (Math.abs(dx) > Math.abs(dy)) {
             const commit = dx < -SWIPE_DISTANCE ? onLeft : dx > SWIPE_DISTANCE ? onRight : null
             if (!commit) return travel(0)
-            // Off the edge first, then the card behind it changes, then the
-            // frame is put back — so the next card is simply there rather than
-            // sliding in from wherever the last one left.
-            return travel(Math.sign(dx) * width.current, () => {
-              shift.setValue(0)
-              commit()
-            })
+            // Off the edge first, and the card is left there: the screen
+            // behind it changes while nothing of it is visible, and the reset
+            // above brings the NEXT card back to centre. So the next card is
+            // simply there rather than sliding in from wherever the last one
+            // left, and the last one is never seen again.
+            return travel(Math.sign(dx) * width.current, commit)
           }
 
           // Up only. Down is not a gesture here.
