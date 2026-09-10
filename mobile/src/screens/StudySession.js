@@ -24,7 +24,7 @@
  * rather than starting over. The key is cleared on completion.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { cardsService, studySessionsService } from '@nowry/core/api/services'
@@ -32,7 +32,7 @@ import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
 import { storage } from '@nowry/core'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { GRADE_VARIANTS } from '../ui/buttonSpec'
-import { Button, Card, Icon, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
+import { Button, Card, Divider, Icon, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
 
 const GRADES = ['again', 'hard', 'good', 'easy']
 
@@ -284,34 +284,51 @@ export function StudySession() {
           onRight={index > 0 ? back : undefined}
           onUp={revealed ? undefined : () => setRevealed(true)}
         >
-          <Card
-            padding={3}
-            elevation='sm'
-            style={{ flex: 1, justifyContent: 'center' }}
-            /* A touch handler, deliberately not a Pressable. The reveal
-               already has a real button below; making the card a second
-               control would announce the same action twice to a screen
-               reader, and making it the ONLY control would announce it to
-               nobody. This is the shortcut for a thumb, invisible to the
-               accessibility tree, which is exactly what a shortcut is. */
-            onTouchEnd={revealed ? undefined : () => setRevealed(true)}
-          >
-            <Stack spacing={2}>
-              <Typography level='body-xs' color='text.tertiary'>
-                {t('cards.session.labels.question')}
-              </Typography>
-              <Typography level='h4'>{frontOf(current)}</Typography>
+          {/*
+           * A `Pressable`, not a raw touch handler. `onTouchEnd` fires at the
+           * end of ANY touch, including the end of a swipe — so navigating
+           * revealed the answer on the way past, which is the opposite of
+           * recall practice. `onPress` does not fire once the finger has
+           * travelled, which is exactly the distinction needed.
+           *
+           * It TOGGLES. Reveal-only left no way back to the question: a card
+           * turned over by accident stayed over, and the screen read as stuck.
+           *
+           * Kept out of the accessibility tree on purpose: the reveal has a
+           * real button below, and announcing the card as a second control
+           * would say the same thing twice.
+           */}
+          <Pressable style={{ flex: 1 }} onPress={() => setRevealed((shown) => !shown)} importantForAccessibility='no' accessible={false}>
+            <Card
+              padding={3}
+              elevation='sm'
+              /*
+               * Content sits at the TOP, not centred. Centring put a short
+               * question in the middle of a wall of grey with the answer
+               * floating below it, and gave a long one nowhere to grow. The
+               * question is what the reader looks for first, so it is where
+               * the eye lands first.
+               */
+              style={{ flex: 1 }}
+            >
+              <Stack spacing={2}>
+                <Typography level='body-xs' color='text.tertiary'>
+                  {t('cards.session.labels.question')}
+                </Typography>
+                <Typography level='h4'>{frontOf(current)}</Typography>
 
-              {revealed ? (
-                <>
-                  <Typography level='body-xs' color='text.tertiary'>
-                    {t('cards.session.labels.answer')}
-                  </Typography>
-                  <Typography level='body-lg'>{backOf(current)}</Typography>
-                </>
-              ) : null}
-            </Stack>
-          </Card>
+                {revealed ? (
+                  <>
+                    <Divider />
+                    <Typography level='body-xs' color='text.tertiary'>
+                      {t('cards.session.labels.answer')}
+                    </Typography>
+                    <Typography level='body-lg'>{backOf(current)}</Typography>
+                  </>
+                ) : null}
+              </Stack>
+            </Card>
+          </Pressable>
         </SwipeArea>
 
         {/* The gestures, said once, on the first card only. Every one of them

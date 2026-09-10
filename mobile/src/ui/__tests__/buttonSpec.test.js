@@ -122,3 +122,17 @@ describe('variants (BUTTONS.md §3)', () => {
     expect(DISABLED_OPACITY).toBe(0.45)
   })
 })
+
+describe('a key is readable', () => {
+  it('never paints its label in the colour of its own ground or edge', () => {
+    // `gradeAgain` shipped as transparent-on-danger-edge with a danger label:
+    // the edge is the layer behind the face, so it filled the key and the text
+    // vanished into it. A solid red block with no word on it reached a device.
+    Object.entries(BUTTON_VARIANTS).forEach(([name, tone]) => {
+      expect(tone.label).not.toBe(tone.ground)
+      // A transparent face shows whatever is behind it, which is the edge.
+      const visibleGround = tone.ground === 'transparent' ? tone.edge : tone.ground
+      expect(tone.label).not.toBe(visibleGround)
+    })
+  })
+})

@@ -76,9 +76,18 @@ export const BUTTON_VARIANTS = {
    * decision somebody can find and argue with rather than a colour somebody
    * typed.
    */
+  /*
+   * A soft ground, not a transparent one. The web draws Again as an OUTLINED
+   * danger button, and the first attempt copied that literally — transparent
+   * ground, danger edge. This Button paints the edge as the layer BEHIND the
+   * face, so a transparent face let the edge fill the whole key, and the label
+   * is that same red: a solid red block with invisible text, shipped and seen
+   * on a device. There is no border in this button's anatomy, so soft is the
+   * honest translation of outlined.
+   */
   gradeAgain: {
-    ground: 'transparent',
-    groundPressed: 'danger.softBg',
+    ground: 'danger.softBg',
+    groundPressed: 'background.level2',
     label: 'danger.plainColor',
     edge: 'danger.plainColor'
   },
