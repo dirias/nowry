@@ -61,15 +61,22 @@ Both of these surface as `redirect_uri_mismatch`, which reads like a typo in the
 client ID rather than a wrong flow, so they are stated here and asserted in
 `googleSignIn.test.js`:
 
-- **The redirect is `nowry://oauthredirect`**, the app's own scheme — NOT the
-  package name, despite what Google's documentation suggests. The package name
-  was tried: Google accepted it and returned a valid code, and the app never saw
-  the callback, because Expo delivers a deep link on the FIRST declared scheme
-  and `openAuthSessionAsync` only resolves for a URL matching the redirect it
-  was given. A mismatch does not error — it leaks past the listener to the
-  router, which shows "Unmatched Route" with the authorization code sitting in
-  the URL. Nothing needs to be typed into the Google console for it; an Android
-  client is identified by its package and fingerprint.
+- **The redirect is `com.nowry.app://oauthredirect`, and `com.nowry.app` must be
+  the FIRST scheme in `app.config.js`.** Two constraints meet here and only one
+  arrangement satisfies both, so both wrong ones are recorded:
+  - Google's Android client accepts a redirect only on the package name.
+    `nowry://oauthredirect` is refused with `invalid_request`, naming the
+    redirect in the error details.
+  - Expo's Linking delivers every callback on the FIRST declared scheme, and
+    `openAuthSessionAsync` resolves only for a URL matching the redirect it was
+    given. Sending the package form while `nowry` was first meant the callback
+    arrived where nothing was listening — which does not error. It leaks past
+    to the router, which shows "Unmatched Route" with the authorization code
+    sitting in the URL.
+
+  Nothing is typed into the Google console for the redirect; an Android client
+  is identified by its package and fingerprint. The order in `app.config.js` is
+  asserted by a test, because getting it backwards fails silently.
 - **The flow is authorization code with PKCE**, not implicit. Google does not
   issue an `id_token` straight to an installed app, and a public client has no
   secret to send.

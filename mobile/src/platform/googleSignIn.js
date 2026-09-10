@@ -88,17 +88,22 @@ export const googleClientId = () =>
  * value only under Standalone or Bare and otherwise hands back a development
  * `exp://…` URL, which Google refuses outright.
  *
- * And it is not the package name, which is what Google's own documentation
- * suggests. `com.nowry.app:/oauthredirect` was accepted by Google and came back
- * with a valid code — but the app never saw it. `openAuthSessionAsync` waits
- * for a URL matching the redirect it was given, the callback arrived on the
- * app's primary scheme instead, and the two did not match. A redirect that does
- * not match does not error: it leaks past the listener to the router, which
- * shows "Unmatched Route" with the authorization code sitting in the URL.
+ * It is the app's PRIMARY scheme, and that has to be the package name. Two
+ * constraints meet here and only one arrangement satisfies both:
  *
- * So the redirect is the scheme this app actually answers on. Google permits it
- * because the client has custom URI schemes enabled — the setting that has to
- * be turned on by hand, per EAS-SECRETS.md.
+ *   - Google's Android client accepts a redirect only on the package name. Send
+ *     `nowry://oauthredirect` and it refuses with `invalid_request`, naming the
+ *     redirect in the details.
+ *   - Expo's Linking delivers every callback on the FIRST declared scheme, and
+ *     `openAuthSessionAsync` resolves only for a URL matching the redirect it
+ *     was given. Send the package form while `nowry` is first and the callback
+ *     comes back somewhere nothing is listening — which does not error, it
+ *     leaks past to the router as "Unmatched Route", authorization code and
+ *     all.
+ *
+ * So `com.nowry.app` is first in `app.config.js`, and this reads that value
+ * rather than repeating it. Google permits a custom scheme at all only because
+ * the client has the setting enabled by hand, per EAS-SECRETS.md.
  */
 export const redirectUriFor = () => `${PRIMARY_SCHEME}://oauthredirect`
 

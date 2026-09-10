@@ -33,14 +33,18 @@ module.exports = () => ({
     // Deep links use the same route names as the web client, so a link maps
     // without a translation table (see docs/architecture.md).
     /*
-     * `nowry` is first, and first matters: Expo's Linking treats the first
-     * scheme as primary and delivers every callback on it. The OAuth redirect
-     * is built from this value for exactly that reason (see googleSignIn.js).
+     * Order matters, and this order is the only one that works. Expo's Linking
+     * treats the FIRST scheme as primary and delivers every callback on it, and
+     * Google's Android OAuth client accepts a redirect only on the package
+     * name. Put `nowry` first and the two disagree: Google refuses
+     * `nowry://oauthredirect` outright, and when the package form is sent
+     * instead, the callback comes back on `nowry://` where nothing is
+     * listening. Both failures were seen, in that order.
      *
-     * `com.nowry.app` stays declared so a redirect addressed to the package
-     * name still reaches the app rather than nothing at all.
+     * `nowry` stays declared, second, because it is the scheme deep links use
+     * and the one the web's URLs mirror.
      */
-    scheme: ['nowry', 'com.nowry.app'],
+    scheme: ['com.nowry.app', 'nowry'],
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
