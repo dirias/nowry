@@ -25,7 +25,6 @@ class MockAuthRequest {
 jest.mock('expo-auth-session', () => ({
   AuthRequest: MockAuthRequest,
   ResponseType: { Code: 'code', IdToken: 'id_token' },
-  makeRedirectUri: ({ native }) => native,
   exchangeCodeAsync: (...args) => mockExchange(...args)
 }))
 jest.mock('expo-web-browser', () => ({ maybeCompleteAuthSession: jest.fn() }))
@@ -51,6 +50,19 @@ it('redirects to the app id, never to our own scheme', () => {
   // Google's installed-app clients accept `<applicationId>:/oauthredirect` and
   // the reverse-DNS scheme they issue. `nowry://` is neither.
   expect(redirectUriFor()).toBe('com.nowry.app:/oauthredirect')
+})
+
+it('does not go through makeRedirectUri, which is conditional on how the app launched', () => {
+  // That helper returns its `native` value only under Standalone or Bare and
+  // otherwise hands back an `exp://…` development URL, which Google refuses
+  // with Error 400: invalid_request. What this must be is not conditional.
+  // Comments here NAME the helper, to record why it is avoided. Counting those
+  // would let the explanation fail the rule it explains.
+  const source = require('fs')
+    .readFileSync(require('path').resolve(__dirname, '../googleSignIn.js'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '')
+  expect(source).not.toMatch(/makeRedirectUri/)
 })
 
 it('asks for a code with PKCE, because Google will not hand an installed app an id_token', async () => {

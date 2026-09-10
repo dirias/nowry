@@ -70,11 +70,18 @@ export const googleClientId = () =>
  * registers against an installed-app client. `Application.applicationId` is the
  * value the OS actually launched with, so it cannot drift from the manifest the
  * way a constant in this file would.
+ *
+ * **Built directly rather than through `makeRedirectUri`.** That helper returns
+ * the `native` value only when the execution environment is Standalone or Bare,
+ * and falls back to a development `exp://…` URL otherwise. Google rejects that
+ * with `Error 400: invalid_request` — it reached the consent screen, recognised
+ * the app, and refused the request. What the redirect must be here is not
+ * conditional on how the app was launched, so neither is this.
  */
-export const redirectUriFor = () =>
-  AuthSession.makeRedirectUri({
-    native: `${Application.applicationId ?? Constants.expoConfig?.[Platform.OS]?.package ?? 'com.nowry.app'}:/oauthredirect`
-  })
+export const redirectUriFor = () => {
+  const id = Application.applicationId ?? Constants.expoConfig?.android?.package ?? Constants.expoConfig?.ios?.bundleIdentifier
+  return `${id}:/oauthredirect`
+}
 
 /**
  * @param {object} auth - the client's Firebase Auth instance
