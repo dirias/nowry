@@ -4,3 +4,8 @@ dist/
 ios/
 android/
 .env
+
+# FCM client config for Android push (MOB-028). Not a secret, but it is
+# per-project and per-developer: app.config.js picks it up when it is here.
+google-services.json
+GoogleService-Info.plist

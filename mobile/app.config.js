@@ -9,6 +9,19 @@
  * `extra` is what `expo-constants` reads at runtime, and it is what the mobile
  * platform adapter's `env` capability is built from (MOB-006).
  */
+const fs = require('fs')
+const path = require('path')
+
+/**
+ * Android push needs FCM credentials, which reach the app through
+ * `google-services.json` at BUILD time (MOB-028). The file is per-project and
+ * is not in the repository, so it is referenced only when it is actually there:
+ * naming a file that does not exist fails every build, including the ones that
+ * have nothing to do with push.
+ */
+const googleServices = path.join(__dirname, 'google-services.json')
+const androidPush = fs.existsSync(googleServices) ? { googleServicesFile: './google-services.json' } : {}
+
 module.exports = () => ({
   expo: {
     name: 'Nowry',
@@ -28,7 +41,8 @@ module.exports = () => ({
     },
     android: {
       package: 'com.nowry.app',
-      edgeToEdgeEnabled: true
+      edgeToEdgeEnabled: true,
+      ...androidPush
     },
     plugins: ['expo-router', 'expo-status-bar', 'expo-localization', 'expo-web-browser', 'expo-notifications'],
     experiments: {

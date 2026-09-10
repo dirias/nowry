@@ -220,6 +220,31 @@ export const userService = {
   },
 
   /**
+   * Register this device as a push target (MOB-027, MOB-028).
+   *
+   * The token identifies the DEVICE, so the server takes it away from any other
+   * account that holds it. Sending the locale too lets a future send path
+   * address the user in the language the phone is set to rather than the one
+   * the account was last saved with.
+   *
+   * @param {{ token: string, platform: 'ios' | 'android', locale: string }} device
+   * @returns {Promise<void>} 204 — no body
+   */
+  async registerDevice({ token, platform, locale }) {
+    await apiClient.post('/users/me/devices', { token, platform, locale })
+  },
+
+  /**
+   * Stop sending to this device. Idempotent: a token already gone is still 204.
+   *
+   * @param {string} token
+   * @returns {Promise<void>}
+   */
+  async deregisterDevice(token) {
+    await apiClient.delete(`/users/me/devices/${encodeURIComponent(token)}`)
+  },
+
+  /**
    * Export all user data as a downloadable JSON file.
    * The server responds with Content-Disposition: attachment.
    * @returns {Promise<Blob>} JSON blob for download

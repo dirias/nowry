@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
+import { unregisterFromPush } from '../platform/push'
 import { Button, Divider, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
 
 export function Profile() {
@@ -52,7 +53,16 @@ export function Profile() {
           {t('nav.settings')}
         </Button>
 
-        <Button variant='tertiary' onPress={() => logout?.()}>
+        {/* The token is withdrawn BEFORE the session ends: deregistering is an
+            authenticated request, so doing it afterwards is a 401 and a row
+            left behind that a later push would deliver to the wrong person. */}
+        <Button
+          variant='tertiary'
+          onPress={async () => {
+            await unregisterFromPush()
+            await logout?.()
+          }}
+        >
           {t('common.logout')}
         </Button>
       </Stack>
