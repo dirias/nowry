@@ -2577,7 +2577,46 @@
       "title": "Teile etwas, das du erstellt hast",
       "body": "Die Bibliothek wächst durch die Bücher und Stapel, die veröffentlicht werden.",
       "cta": "Aus deiner Bibliothek veröffentlichen"
-    }
+    },
+    "all": "Alle",
+    "by": "von",
+    "category": "Kategorie",
+    "clearFilters": "Filter zurücksetzen",
+    "forks": "Kopien",
+    "likes": "Likes",
+    "loadMore": "Mehr laden",
+    "noResults": "Keine öffentlichen Inhalte gefunden",
+    "searchPlaceholder": "Öffentliche Inhalte suchen…",
+    "sortBy": "Sortieren nach",
+    "tryFilters": "Passe deine Filter an",
+    "views": "Aufrufe",
+    "cards": "Karten",
+    "categories": {
+      "science": "Wissenschaft",
+      "math": "Mathematik",
+      "languages": "Sprachen",
+      "history": "Geschichte",
+      "literature": "Literatur",
+      "technology": "Technologie",
+      "art": "Kunst",
+      "music": "Musik",
+      "business": "Business",
+      "health": "Gesundheit",
+      "design": "Design",
+      "programming": "Programmierung",
+      "technical": "Technik",
+      "documentation": "Dokumentation",
+      "planning": "Planung",
+      "features": "Funktionen",
+      "deployment": "Bereitstellung"
+    },
+    "sortOptions": {
+      "recent": "Neueste",
+      "popular": "Beliebteste",
+      "mostLiked": "Meiste Likes",
+      "mostForked": "Meiste Kopien"
+    },
+    "browse": "Entdecken"
   },
   "editor": {
     "mode": {

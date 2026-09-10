@@ -2510,7 +2510,46 @@
       "title": "あなたが作ったものを共有しませんか",
       "body": "ライブラリは、公開された本やデッキによって育ちます。",
       "cta": "ライブラリから公開する"
-    }
+    },
+    "all": "すべて",
+    "by": "作成者:",
+    "category": "カテゴリ",
+    "clearFilters": "フィルターをクリア",
+    "forks": "コピー",
+    "likes": "いいね",
+    "loadMore": "もっと見る",
+    "noResults": "公開コンテンツが見つかりません",
+    "searchPlaceholder": "公開コンテンツを検索…",
+    "sortBy": "並び替え",
+    "tryFilters": "フィルターを変更してみてください",
+    "views": "閲覧",
+    "cards": "カード",
+    "categories": {
+      "science": "科学",
+      "math": "数学",
+      "languages": "語学",
+      "history": "歴史",
+      "literature": "文学",
+      "technology": "テクノロジー",
+      "art": "アート",
+      "music": "音楽",
+      "business": "ビジネス",
+      "health": "健康",
+      "design": "デザイン",
+      "programming": "プログラミング",
+      "technical": "技術",
+      "documentation": "ドキュメント",
+      "planning": "プランニング",
+      "features": "機能",
+      "deployment": "デプロイ"
+    },
+    "sortOptions": {
+      "recent": "新着順",
+      "popular": "人気順",
+      "mostLiked": "いいねが多い順",
+      "mostForked": "コピーが多い順"
+    },
+    "browse": "さがす"
   },
   "editor": {
     "mode": {

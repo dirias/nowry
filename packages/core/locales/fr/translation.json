@@ -2589,7 +2589,46 @@
       "title": "Partagez quelque chose que vous avez créé",
       "body": "La bibliothèque grandit grâce aux livres et paquets que chacun publie.",
       "cta": "Publier depuis votre bibliothèque"
-    }
+    },
+    "all": "Tous",
+    "by": "par",
+    "category": "Catégorie",
+    "clearFilters": "Effacer les filtres",
+    "forks": "copies",
+    "likes": "j'aime",
+    "loadMore": "Charger plus",
+    "noResults": "Aucun contenu public trouvé",
+    "searchPlaceholder": "Rechercher du contenu public…",
+    "sortBy": "Trier par",
+    "tryFilters": "Essayez d'ajuster vos filtres",
+    "views": "vues",
+    "cards": "cartes",
+    "categories": {
+      "science": "Sciences",
+      "math": "Mathématiques",
+      "languages": "Langues",
+      "history": "Histoire",
+      "literature": "Littérature",
+      "technology": "Technologie",
+      "art": "Art",
+      "music": "Musique",
+      "business": "Business",
+      "health": "Santé",
+      "design": "Design",
+      "programming": "Programmation",
+      "technical": "Technique",
+      "documentation": "Documentation",
+      "planning": "Planification",
+      "features": "Fonctionnalités",
+      "deployment": "Déploiement"
+    },
+    "sortOptions": {
+      "recent": "Plus récent",
+      "popular": "Plus populaire",
+      "mostLiked": "Les plus aimés",
+      "mostForked": "Les plus copiés"
+    },
+    "browse": "Explorer"
   },
   "editor": {
     "mode": {
