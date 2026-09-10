@@ -12,6 +12,14 @@
  *     list under the reader's thumb.
  *   - **It disappears entirely once every row is done.** Nobody should have to
  *     dismiss a list of things they have already finished.
+ *
+ * **A row this client cannot open is not shown.** The three destinations are
+ * declared in the shared package, for a product with fourteen routes; this one
+ * has five tabs and Books is not among them (ADR-030). The row was rendered
+ * anyway and pushed `/books`, which is not a route here — the same shape as the
+ * `/study/due` fault, and it would have said "Unmatched Route" to anyone who
+ * tapped it. `routes.test.js` now reads this list against the shared one, so a
+ * destination added there fails here rather than at a user's thumb.
  */
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
@@ -26,14 +34,21 @@ import { Typography } from '../Typography'
 import { KEY_TO_LUCIDE } from '../icons/iconMap'
 import { ListRow } from './ListRow'
 
+/**
+ * The destinations this client has screens for. Books is deferred, so its row
+ * is not offered until it is not deferred.
+ */
+export const OPENABLE_STEPS = ['/study', '/annual-planning']
+
 export function NextStepsPanel() {
   const { t } = useTranslation()
   const router = useRouter()
   const { offered, dismiss } = useNextStepsPanel()
-  const { steps, allDone } = useNextSteps()
+  const { steps: declared, allDone } = useNextSteps()
+  const steps = declared.filter((step) => OPENABLE_STEPS.includes(step.to))
 
   // Nobody dismisses a list of things they have already finished.
-  if (!offered || allDone) return null
+  if (!offered || allDone || steps.length === 0) return null
 
   return (
     <Sheet padding={2}>

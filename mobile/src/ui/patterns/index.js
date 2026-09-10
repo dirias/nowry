@@ -8,7 +8,7 @@
 export { ForecastStrip } from './ForecastStrip'
 export { IdentityTile } from './IdentityTile'
 export { ListRow } from './ListRow'
-export { NextStepsPanel } from './NextStepsPanel'
+export { NextStepsPanel, OPENABLE_STEPS } from './NextStepsPanel'
 export { Readout } from './Readout'
 export { SummaryObject } from './SummaryObject'
 export { IDENTITY_TILE_SIZE, LIST_ROW_HEIGHT, MEASURE_HEIGHT, MEASURE_WIDTH, SUMMARY_EDGE_HEIGHT } from './rowSpec'

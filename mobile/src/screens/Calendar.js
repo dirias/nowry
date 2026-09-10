@@ -31,6 +31,7 @@
  */
 import { useCallback, useMemo, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { tasksService, annualPlanningService } from '@nowry/core/api/services'
 import { calendarEventsKey } from '@nowry/core/api/services/calendar.service'
@@ -64,6 +65,7 @@ export function Calendar() {
   const { t, i18n } = useTranslation()
   const language = i18n?.language ?? 'en'
   const theme = useTheme()
+  const router = useRouter()
   const { user } = useAuth()
   const userId = user?.id ?? null
 
@@ -154,6 +156,11 @@ export function Calendar() {
             {t('calendarPage.nav.today')}
           </Button>
           <View style={{ flex: 1 }} />
+          {/* The calendar is a view of the plan, so it carries the way there.
+              The plan has no tab of its own — the bar is full at five. */}
+          <Button size='sm' variant='tertiary' onPress={() => router.push('/annual-planning')}>
+            {t('annualPlanning.title')}
+          </Button>
         </Stack>
 
         {/* Row two: the filter object. A count in the label, never a hue —

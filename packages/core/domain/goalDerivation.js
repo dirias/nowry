@@ -93,6 +93,30 @@ export const getGoalProgress = (goal) => {
 }
 
 /** The five goal states. Ordered as they are evaluated. */
+/**
+ * What a plan amounts to: how many goals are in scope, how many are finished,
+ * and how far along the set is.
+ *
+ * The layout computed this inline, with its own copy of "milestones done over
+ * milestones total, else the stored progress" — which is `calculateProgress`,
+ * written twice. Both clients ask for these three numbers now, so the rule is
+ * here and there is one of it. The average rounds each goal before averaging,
+ * as `calculateProgress` does; the previous inline copy averaged the unrounded
+ * values, which could differ by a point.
+ *
+ * @param {Array} goals - already narrowed to the quarter or year in question
+ * @returns {{ total: number, completed: number, progress: number }}
+ */
+export const planMetrics = (goals = []) => {
+  if (goals.length === 0) return { total: 0, completed: 0, progress: 0 }
+  const sum = goals.reduce((acc, goal) => acc + calculateProgress(goal), 0)
+  return {
+    total: goals.length,
+    completed: goals.filter(isGoalCompleted).length,
+    progress: Math.round(sum / goals.length)
+  }
+}
+
 export const GOAL_STATES = ['completed', 'not_started', 'on_track', 'at_risk', 'behind']
 
 /**
@@ -217,6 +241,7 @@ export const blankMilestone = () => ({ title: '', completed: false, due_date: ''
 
 export default {
   isGoalCompleted,
+  planMetrics,
   getCurrentQuarter,
   calculateProgress,
   calculateTimeElapsedPercentage,

@@ -1293,7 +1293,12 @@
           "さまざまな生活領域のバランスを考える"
         ],
         "saveError": "重点分野を保存できませんでした。もう一度お試しください。",
-        "colorSwatchLabel": "{{color}}のテーマを選択"
+        "colorSwatchLabel": "{{color}}のテーマを選択",
+        "colorTheme": "カラーテーマ",
+        "descriptionLabel": "説明（あなたの「なぜ」）",
+        "descriptionPlaceholder": "この分野が今年あなたにとって重要な理由は何ですか？",
+        "nameLabel": "名前",
+        "namePlaceholder": "例：健康とフィットネス"
       },
       "examples": [
         "キャリア成長",
@@ -1549,7 +1554,12 @@
       "quarterEndingIn": "第{{quarter}}四半期はあと {{count}} 日で終了します",
       "quarterEndingIn_other": "第{{quarter}}四半期はあと {{count}} 日で終了します",
       "routineCompletion": "完了",
-      "allYear": "通年"
+      "allYear": "通年",
+      "createPlan": "年間プランを作成",
+      "progress": "進捗",
+      "startDescription": "年間プランを作成して、目標を立て、進捗を記録し、今年の夢を実現しましょう。",
+      "startJourney": "{{year}}年の歩みを始めましょう",
+      "totalProgress": "完了"
     },
     "quarterReport": {
       "report": "Report",

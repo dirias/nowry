@@ -74,6 +74,10 @@ export default function TabsLayout() {
           name='calendar'
           options={{ title: t('nav.calendar'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.calendar} color={color} /> }}
         />
+        {/* In the group so the tab bar stays under it, but not a tab: `href:
+            null` is how Expo Router says "a route here, no button for it". The
+            bar is full at five and Home's next-steps row already opens this. */}
+        <Tabs.Screen name='annual-planning' options={{ href: null }} />
         <Tabs.Screen
           name='pomodoro'
           options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}

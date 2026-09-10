@@ -24,11 +24,14 @@ import {
 import { ArrowForward as ArrowForwardIcon, ArrowBack as ArrowBackIcon, Check as CheckIcon } from '@mui/icons-material'
 
 import { annualPlanningService } from '@nowry/core/api/services'
+import { FOCUS_AREA_COLORS } from '@nowry/core/domain/focusAreas'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useNotification } from '../../context/NotificationContext'
 
 const ICONS = ['⭐', '💼', '💪', '💰', '❤️', '🎨', '📚', '🌱', '✈️', '🏠']
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6']
+// The eight live in `@nowry/core/domain/focusAreas` so the phone offers the
+// same eight; an area's colour identifies it on both clients (MOB-045).
+const COLORS = FOCUS_AREA_COLORS
 
 const FocusAreaSetup = () => {
   const { t } = useTranslation()

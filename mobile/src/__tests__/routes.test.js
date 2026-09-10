@@ -79,6 +79,40 @@ for (const file of sources()) {
   }
 }
 
+/**
+ * The routes the SHARED package hands out. A screen that renders them cannot be
+ * caught by the scan above — the string is in `packages/core`, not in a
+ * `router.push` here — and one of them, `/books`, is a route this client does
+ * not have and will not have until Books is undeferred (ADR-030). The panel
+ * therefore declares what it can open, and this reads the two against each
+ * other: a destination that is neither openable nor a real route fails here
+ * rather than saying "Unmatched Route" under a user's thumb.
+ */
+const declaredSteps = () => {
+  const source = fs.readFileSync(path.join(ROOT, '../packages/core/hooks/useNextSteps.js'), 'utf8')
+  return [...source.matchAll(/to:\s*'([^']+)'/g)].map((match) => match[1])
+}
+
+const openableSteps = () => {
+  const source = fs.readFileSync(path.join(ROOT, 'src/ui/patterns/NextStepsPanel.js'), 'utf8')
+  const block = source.slice(source.indexOf('export const OPENABLE_STEPS'))
+  return [...block.slice(0, block.indexOf(']')).matchAll(/'([^']+)'/g)].map((match) => match[1])
+}
+
+describe("the shared package's next steps", () => {
+  it('offers only what this client has a screen for', () => {
+    const missing = openableSteps().filter((route) => !matches(route))
+    expect(missing).toEqual([])
+  })
+
+  it('accounts for every destination the shared hook declares', () => {
+    // Either the client can open it, or it is a route that exists anyway.
+    const unaccounted = declaredSteps().filter((route) => !openableSteps().includes(route) && matches(route))
+    expect(unaccounted).toEqual([])
+    expect(declaredSteps().length).toBeGreaterThan(openableSteps().length)
+  })
+})
+
 describe('the route tree', () => {
   it('was actually read', () => {
     expect(PATTERNS.length).toBeGreaterThan(10)

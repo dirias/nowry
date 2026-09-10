@@ -1165,7 +1165,12 @@
           "Pensez à l'équilibre entre les différents aspects de la vie"
         ],
         "saveError": "Nous n'avons pas pu enregistrer vos domaines prioritaires. Veuillez réessayer.",
-        "colorSwatchLabel": "Sélectionner le thème {{color}}"
+        "colorSwatchLabel": "Sélectionner le thème {{color}}",
+        "colorTheme": "Thème de couleur",
+        "descriptionLabel": "Description (votre « pourquoi »)",
+        "descriptionPlaceholder": "Pourquoi ce domaine est-il important pour vous cette année ?",
+        "nameLabel": "Nom",
+        "namePlaceholder": "ex. Santé et forme"
       },
       "examples": [
         "Croissance Professionnelle",
@@ -1431,7 +1436,12 @@
       "routineCompletion": "éléments terminés",
       "allYear": "Toute l'année",
       "reviewNow": "Passer en revue",
-      "quarterEndingIn_one": "Le trimestre {{quarter}} se termine dans {{count}} jour"
+      "quarterEndingIn_one": "Le trimestre {{quarter}} se termine dans {{count}} jour",
+      "createPlan": "Créer mon plan annuel",
+      "progress": "Progression",
+      "startDescription": "Créez votre plan annuel pour définir vos objectifs, suivre vos progrès et réaliser vos rêves cette année.",
+      "startJourney": "Commencez votre parcours {{year}}",
+      "totalProgress": "terminé"
     },
     "quarterReport": {
       "report": "Report",

@@ -175,6 +175,9 @@ const IDENTICAL_BY_DESIGN = {
     'settings.appearance.modes.system',
     // And "A–Z" is the same two letters here.
     'groups.orderAlpha',
+    // "Name" is the German word for a name, so the focus area's own field lands
+    // on English by coincidence rather than by neglect.
+    'annualPlanning.focusArea.setup.nameLabel',
     ...XP_GAINED
   ],
   ja: ['cards.session.xpGained_other']

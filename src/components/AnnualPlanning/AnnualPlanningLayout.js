@@ -17,6 +17,7 @@ import GoalAIPanel from './GoalAIPanel'
 import PlanIdentityBlock from './PlanIdentityBlock'
 import PlanScopeBar from './PlanScopeBar'
 import { getQuarterCloseState } from '@nowry/core/domain/quarterUtils'
+import { planMetrics } from '@nowry/core/domain/goalDerivation'
 
 /**
  * AnnualPlanningLayout — the single route element behind /annual-planning and its
@@ -137,10 +138,6 @@ const AnnualPlanningLayout = () => {
     setPriorities(hookPriorities)
     setQuarterReports(hookQuarterReports || [])
 
-    // Compute global metrics from the flat goals list
-    let totalProgressSum = 0
-    let completedGoalsCount = 0
-
     // Filter goals based on selected global Quarter
     let activeGoals = selectedQuarter === 'All' ? hookGoals : hookGoals.filter((g) => g.quarter === Number(selectedQuarter))
 
@@ -152,24 +149,11 @@ const AnnualPlanningLayout = () => {
       }
     }
 
-    activeGoals.forEach((g) => {
-      let goalProgress = 0
-      if (g.milestones?.length > 0) {
-        const done = g.milestones.filter((m) => m.completed).length
-        goalProgress = (done / g.milestones.length) * 100
-      } else {
-        goalProgress = g.progress || 0
-      }
-      if (g.status === 'completed' || goalProgress === 100) completedGoalsCount++
-      totalProgressSum += goalProgress
-    })
-
     setQuarterGoals(activeGoals)
-    setMetrics({
-      totalGoals: activeGoals.length,
-      completedGoals: completedGoalsCount,
-      progress: activeGoals.length > 0 ? Math.round(totalProgressSum / activeGoals.length) : 0
-    })
+    // The three numbers are `planMetrics` now, shared with the phone. This
+    // block carried its own copy of `calculateProgress` to get them.
+    const { total, completed, progress } = planMetrics(activeGoals)
+    setMetrics({ totalGoals: total, completedGoals: completed, progress })
   }, [loading, hookPlan, hookAreas, hookGoals, hookPriorities, hookQuarterReports, selectedQuarter, year])
 
   // RTN-03/D-09: read daily routine data via the same useDailyRoutine() query key
