@@ -10,17 +10,24 @@
  * `https://nowry.app/study/<deckId>` are the same path with no translation
  * table between them.
  *
- * **The bar holds the bottom inset, because it is the thing closest to the
- * edge.** Android draws this app under the system navigation (edge-to-edge in
- * `app.config.js`), and the bar was not clearing it: "Profile" sat under the
- * gesture handle. Every screen above the bar defers that inset to it through
- * `TabBarProvider`, so the space is held exactly once.
+ * **Two bars, and they carry different things.** The app bar at the head is
+ * identity — the mark and the account — exactly as every phone artboard draws
+ * it. Navigation is at the foot, where a thumb reaches. The web puts both in
+ * its header because a mouse has a pointer and a wide screen; splitting them is
+ * why a phone can have two bars without one being redundant.
+ *
+ * **Each bar holds the inset at its own edge**, because each is the chrome
+ * closest to it. Android draws this app under the system bars (edge-to-edge in
+ * `app.config.js`), and nothing was holding the bottom one: "Profile" sat
+ * against the system navigation. Screens between the two defer both insets
+ * through `ScreenChromeProvider`, so each is held exactly once.
  */
 import { Tabs } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../../src/theme'
-import { TabBarProvider } from '../../src/ui/tabBarContext'
+import { AppBar } from '../../src/ui'
+import { ScreenChromeProvider } from '../../src/ui/screenChrome'
 import { Icon } from '../../src/ui'
 import { NAV_ICONS } from '../../src/ui/icons'
 import { resolveColor } from '../../src/ui/Typography'
@@ -34,10 +41,12 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets()
 
   return (
-    <TabBarProvider>
+    <ScreenChromeProvider top bottom>
       <Tabs
         screenOptions={{
-          headerShown: false,
+          // The board's bar, not a navigator's: it is the same on every tab and
+          // on every screen pushed above them.
+          header: () => <AppBar />,
           tabBarActiveTintColor: resolveColor(theme, 'primary.plainColor'),
           tabBarInactiveTintColor: resolveColor(theme, 'text.tertiary'),
           tabBarStyle: {
@@ -68,7 +77,7 @@ export default function TabsLayout() {
           options={{ title: t('nav.profile'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.profile} color={color} /> }}
         />
       </Tabs>
-    </TabBarProvider>
+    </ScreenChromeProvider>
   )
 }
 

@@ -96,15 +96,30 @@ const JSX_TEXT = />[ \t\n]*([A-Za-z][A-Za-z0-9 ,.'’!?:%-]{2,})[ \t\n]*</g
 const USER_FACING =
   /\b(accessibilityLabel|accessibilityHint|placeholder|title|label)=(?:(['"])([^'"]{2,})\2|\{\s*(['"])([^'"]{2,})\4\s*\})/g
 
+/**
+ * The product's own name is not a string in any language.
+ *
+ * "Nowry" is a proper noun: it is the same on every screen in every locale, and
+ * putting it in the bundles would invite someone to translate it. It is listed
+ * here rather than allowed by a loose pattern, so a second exception has to be
+ * argued for the way this one was.
+ */
+const NOT_TRANSLATABLE = new Set(['Nowry'])
+
 describe('no user-facing string is written in English in the source', () => {
   it.each(files.map(({ rel }) => rel))('%s', (rel) => {
     const { text } = files.find((entry) => entry.rel === rel)
     const code = withoutComments(text)
 
     const found = [
-      ...[...code.matchAll(JSX_TEXT)].map(([, words]) => `text: ${words.trim()}`),
-      ...[...code.matchAll(USER_FACING)].map(([, prop, , quoted, , braced]) => `${prop}: ${quoted ?? braced}`)
+      ...[...code.matchAll(JSX_TEXT)].map(([, words]) => [words.trim(), `text: ${words.trim()}`]),
+      ...[...code.matchAll(USER_FACING)].map(([, prop, , quoted, , braced]) => {
+        const value = quoted ?? braced
+        return [value, `${prop}: ${value}`]
+      })
     ]
+      .filter(([value]) => !NOT_TRANSLATABLE.has(value))
+      .map(([, report]) => report)
 
     expect(found).toEqual([])
   })

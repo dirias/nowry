@@ -55,6 +55,7 @@ import Image from 'lucide-react-native/icons/image'
 import Info from 'lucide-react-native/icons/info'
 import Languages from 'lucide-react-native/icons/languages'
 import Layers from 'lucide-react-native/icons/layers'
+import Leaf from 'lucide-react-native/icons/leaf'
 import LayoutGrid from 'lucide-react-native/icons/layout-grid'
 import Library from 'lucide-react-native/icons/library'
 import List from 'lucide-react-native/icons/list'
@@ -124,6 +125,7 @@ export const ICONS = {
   Info,
   Languages,
   Layers,
+  Leaf,
   LayoutGrid,
   Library,
   List,
