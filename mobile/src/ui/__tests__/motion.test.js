@@ -90,6 +90,17 @@ describe('motion is spent from the scale', () => {
     expect(offenders).toEqual([])
   })
 
+  it('never leaves a turned face to backfaceVisibility', () => {
+    // On Android the prop is not a rendering rule. It is an alpha computed
+    // from the view's OWN rotation — `rotationY >= -90 && rotationY < 90` —
+    // and the composed transform of its ancestors is never consulted. A face
+    // held at 180 degrees so it reads upright once its card has turned is
+    // therefore invisible for good, which is how the study card's answer
+    // shipped as a blank white surface. Interpolate the visibility instead.
+    const offenders = files.filter((file) => read(file).includes('backfaceVisibility')).map(relative)
+    expect(offenders).toEqual([])
+  })
+
   it('asks about reduced motion wherever something moves', () => {
     const moves = /translateX|translateY|rotateY|rotateX|\brotate\b|scaleX|scaleY|\bscale\b/
     const offenders = []

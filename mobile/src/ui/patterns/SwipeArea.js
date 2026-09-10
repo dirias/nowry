@@ -26,6 +26,18 @@
  * `PanResponder` rather than a gesture library: this is one threshold on one
  * view, react-native ships it, and a native module would cost a rebuild.
  *
+ * **One driver for the card's travel, and it is the JavaScript one.** A pan is
+ * JavaScript by construction — `PanResponder` reports to JS and the position is
+ * written with `setValue` — so animating the same value natively afterwards
+ * means one node with two owners, and the symptom of that is a second gesture
+ * the card does not follow. The travel is a single transform on a single view
+ * for 240ms; consistency is worth more than the thread here.
+ *
+ * A new gesture also STOPS whatever the last one left running, and refuses to
+ * hand the touch back once it has claimed it. Both are about the second swipe:
+ * a card still finishing its exit is a card whose position two things disagree
+ * about.
+ *
  * **Every gesture has a control that does the same thing.** A swipe is a
  * shortcut for a thumb that already knows; the buttons underneath are the way.
  * So this view stays invisible to the accessibility tree — announcing a
@@ -64,6 +76,11 @@ export function SwipeArea({ onLeft, onRight, onUp, children, style }) {
         // Claim the gesture only once it is clearly a drag, so a tap on the
         // card still reaches the card.
         onMoveShouldSetPanResponder: (_event, { dx, dy }) => Math.abs(dx) > 8 || Math.abs(dy) > 8,
+        // Whatever the last swipe left running, this one owns the card now.
+        onPanResponderGrant: () => shift.stopAnimation(),
+        // Once this is a swipe it stays a swipe; nothing under it may take the
+        // touch back half way through.
+        onPanResponderTerminationRequest: () => false,
         onPanResponderMove: (_event, { dx, dy }) => {
           // Horizontal only. A vertical drag is the reveal, and the flip is
           // its own answer — dragging the card up as well would be two
@@ -79,7 +96,7 @@ export function SwipeArea({ onLeft, onRight, onUp, children, style }) {
               toValue: to,
               duration: reduceMotion ? 0 : motion.duration.slow,
               easing: Easing.bezier(...motion.easing.standard),
-              useNativeDriver: true
+              useNativeDriver: false
             }).start(() => then?.())
 
           if (Math.abs(dx) > Math.abs(dy)) {

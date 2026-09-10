@@ -26,10 +26,18 @@
  * content. It read as locked because it was.
  *
  * Visibility is a STEP at the halfway point, not a fade: each face is on for
- * the half of the turn it faces the reader. `backfaceVisibility` says the same
- * thing and is kept as well, but it cannot be the only mechanism — it is
- * unreliable on some Android GPUs, and the answer showing through the question
- * is the one failure this screen cannot have.
+ * the half of the turn it faces the reader. It is the ONLY mechanism, and
+ * `backfaceVisibility` is not used at all — on Android that prop is not a
+ * rendering rule, it is an alpha computed from the view's OWN rotation:
+ *
+ *     isFrontfaceVisible = rotationY >= -90 && rotationY < 90
+ *
+ * The back face is permanently rotated 180 degrees so it reads upright once the
+ * card has carried it round, which means Android saw a face turned away and set
+ * its alpha to zero — for good, whatever the parent was doing. That is why the
+ * answer was a blank white card. The composed transform of the ancestors is
+ * never consulted, so the prop cannot express "this face, once the card has
+ * turned". The interpolation can, exactly, on both platforms.
  *
  * **240ms, the `slow` step, standard easing** (MOTION.md §2): a flip is
  * position, and position is 240. Under reduced motion the duration is zero, so
@@ -73,7 +81,6 @@ export function FlipCard({ flipped, front, back, style }) {
   })
 
   const visibility = (outputRange) => ({
-    backfaceVisibility: 'hidden',
     opacity: turn.interpolate({ inputRange: [0, HALF[0], HALF[1], 1], outputRange })
   })
 
