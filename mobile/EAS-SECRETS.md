@@ -38,6 +38,29 @@ uses:
 |---|---|---|
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS` | iOS | bundle id `com.nowry.app` |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID` | Android | package `com.nowry.app`, plus the build's SHA-1 |
+
+**Google's own rules, which are not obvious and fail identically when broken.**
+Both of these surface as `redirect_uri_mismatch`, which reads like a typo in the
+client ID rather than a wrong flow, so they are stated here and asserted in
+`googleSignIn.test.js`:
+
+- **The redirect is `com.nowry.app:/oauthredirect`**, the app's own id. Google's
+  installed-app clients accept that and the reverse-DNS scheme they issue; they
+  do not accept an arbitrary scheme such as `nowry://`. Nothing needs to be
+  typed into the Google console for it — an Android client is identified by its
+  package and fingerprint, and an iOS client by its bundle id.
+- **The flow is authorization code with PKCE**, not implicit. Google does not
+  issue an `id_token` straight to an installed app, and a public client has no
+  secret to send.
+
+The Android client also needs the **SHA-1 of the signing certificate the build
+actually uses**, which is EAS's, not a local debug keystore:
+
+```bash
+cd mobile && npx eas-cli credentials
+# Android → the profile you are building → Keystore → read the SHA-1 fingerprint
+```
+
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB` | Web | already exists — it is what the web client uses |
 
 The Android one needs the signing certificate's SHA-1 fingerprint. For an EAS

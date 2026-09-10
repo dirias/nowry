@@ -20,8 +20,28 @@
  * Client IDs come from the environment, per platform, and are documented in
  * `EAS-SECRETS.md`. Google issues a different one for iOS, Android and Web, and
  * the wrong one fails with `redirect_uri_mismatch` rather than anything useful.
+ *
+ * **Two things here are Google's rules, not ours, and the first draft got both
+ * wrong.** They are worth stating because neither fails until a real client ID
+ * is in place, and then both fail as `redirect_uri_mismatch`, which reads like
+ * a typo in the ID.
+ *
+ *   1. **The redirect is the app's own id, not our `nowry://` scheme.** Google's
+ *      installed-app clients accept `<applicationId>:/oauthredirect` and the
+ *      reverse-DNS scheme they issue; they do not accept an arbitrary one. This
+ *      is what `expo-auth-session`'s own Google provider builds, and it is
+ *      built the same way here.
+ *   2. **The flow is code + PKCE, not implicit.** Google does not issue an
+ *      `id_token` straight to an installed app. It issues a code, which is
+ *      exchanged — no client secret, because a public client has none, which is
+ *      exactly what PKCE is for.
+ *
+ * The provider `expo-auth-session` ships is a hook, and this is a plain
+ * function behind the platform port, called from shared code that is not a
+ * component. So its rules are followed rather than its hook used.
  */
 import Constants from 'expo-constants'
+import * as Application from 'expo-application'
 import { Platform } from 'react-native'
 import * as AuthSession from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
@@ -46,6 +66,17 @@ export const googleClientId = () =>
   })
 
 /**
+ * `com.nowry.app:/oauthredirect` — the app's own id, which is what Google
+ * registers against an installed-app client. `Application.applicationId` is the
+ * value the OS actually launched with, so it cannot drift from the manifest the
+ * way a constant in this file would.
+ */
+export const redirectUriFor = () =>
+  AuthSession.makeRedirectUri({
+    native: `${Application.applicationId ?? Constants.expoConfig?.[Platform.OS]?.package ?? 'com.nowry.app'}:/oauthredirect`
+  })
+
+/**
  * @param {object} auth - the client's Firebase Auth instance
  * @returns {Promise<import('firebase/auth').UserCredential | null>} null when the user cancelled
  */
@@ -59,15 +90,18 @@ export const signInWithGoogle = async (auth) => {
     )
   }
 
-  const redirectUri = AuthSession.makeRedirectUri({ scheme: 'nowry' })
+  const redirectUri = redirectUriFor()
 
   const request = new AuthSession.AuthRequest({
     clientId,
     redirectUri,
-    // `id_token` is what Firebase wants; `openid` is what makes Google issue one.
+    // `openid` is what makes Google issue an id_token at all; Firebase wants
+    // that token and nothing else here does.
     scopes: ['openid', 'profile', 'email'],
-    responseType: AuthSession.ResponseType.IdToken,
-    extraParams: { nonce: (await AuthSession.generateNonce?.()) ?? undefined }
+    responseType: AuthSession.ResponseType.Code,
+    // A public client has no secret to prove itself with, so it proves the
+    // exchange instead. On by default; named because it is load-bearing.
+    usePKCE: true
   })
 
   const result = await request.promptAsync(DISCOVERY)
@@ -81,14 +115,23 @@ export const signInWithGoogle = async (auth) => {
     throw error
   }
 
-  const idToken = result.params?.id_token
-  if (!idToken) {
+  const tokens = await AuthSession.exchangeCodeAsync(
+    {
+      clientId,
+      code: result.params.code,
+      redirectUri,
+      extraParams: { code_verifier: request.codeVerifier }
+    },
+    DISCOVERY
+  )
+
+  if (!tokens.idToken) {
     const error = new Error('Google returned no id_token')
     error.code = 'auth/invalid-credential'
     throw error
   }
 
-  const credential = GoogleAuthProvider.credential(idToken)
+  const credential = GoogleAuthProvider.credential(tokens.idToken)
   return signInWithCredential(auth, credential)
 }
 
