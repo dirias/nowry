@@ -73,6 +73,23 @@ describe('motion is spent from the scale', () => {
     expect(offenders).toEqual([])
   })
 
+  it('never sequences an animation with a clock', () => {
+    // A `setTimeout` beside an animation is a second timeline that has to
+    // agree with the first, and it cannot: the standard easing is most of the
+    // way round at half the duration, so a swap timed at `duration / 2` lands
+    // nowhere near halfway. It is also cancellable independently — a gesture
+    // that cleared the timer left the card showing a face it had already
+    // turned away from, and every later tap turned it to the same content.
+    // Interpolate the value that is already running instead.
+    const offenders = []
+    for (const file of files) {
+      const source = read(file)
+      if (!source.includes('Animated.timing') && !source.includes('Animated.spring')) continue
+      if (/setTimeout|setInterval/.test(source)) offenders.push(relative(file))
+    }
+    expect(offenders).toEqual([])
+  })
+
   it('asks about reduced motion wherever something moves', () => {
     const moves = /translateX|translateY|rotateY|rotateX|\brotate\b|scaleX|scaleY|\bscale\b/
     const offenders = []

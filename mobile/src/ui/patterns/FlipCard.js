@@ -8,79 +8,89 @@
  * content, nothing turned, and the card grew as the answer arrived. A flashcard
  * that does not turn is a list.
  *
- * **One face is mounted, not two.** The web draws both faces at once, holds
- * them on top of each other with `position: absolute`, and hides whichever is
- * turned away. That is the CSS idiom and it does not survive the trip: two
- * absolutely positioned faces inside a flexed column left the card 50pt tall
- * with nothing legible in it, which is the state the first build of this
- * shipped in. Here the card holds ONE child in ordinary flow, which is the
- * layout the screen already had working, and the content is swapped at the
- * halfway point of the turn — the frame where the card is edge-on and there is
- * nothing to see. The child is counter-rotated while the back is up, so the
- * answer reads the right way round rather than mirrored.
+ * **One face is in flow, the other is over it.** The web makes BOTH faces
+ * absolute and lets the parent's fixed height hold the box open. Ported
+ * literally that leaves a flexed column with no in-flow content at all, and the
+ * card collapsed to an empty band — the state the first build of this shipped
+ * in. So the front is an ordinary child and gives the card its size; the back
+ * lies over it and takes that size from it.
  *
- * That also disposes of the spoiler the web had to write a comment about: the
- * answer is not in the tree at all until the card is halfway through turning
- * towards it.
+ * **Nothing about the turn runs in JavaScript.** The rotation and both faces'
+ * visibility are interpolations of one native-driven value, so the whole flip
+ * is handed to the UI thread once and no frame of it waits on a render. The
+ * build before this swapped the card's CONTENT halfway through, on a timer:
+ * `setTimeout(duration / 2)` is not halfway — the standard easing is most of
+ * the way round by then — and the swap re-rendered the screen mid-flight, which
+ * is the stutter. Worse, a swipe during the turn cancelled the timer, so the
+ * card kept the face it was on and every later tap turned it to the same
+ * content. It read as locked because it was.
+ *
+ * Visibility is a STEP at the halfway point, not a fade: each face is on for
+ * the half of the turn it faces the reader. `backfaceVisibility` says the same
+ * thing and is kept as well, but it cannot be the only mechanism — it is
+ * unreliable on some Android GPUs, and the answer showing through the question
+ * is the one failure this screen cannot have.
  *
  * **240ms, the `slow` step, standard easing** (MOTION.md §2): a flip is
- * position, and position is 240. Under reduced motion there is no turn and no
- * delay — the card is simply the other way round, removed rather than slowed,
- * which is the standard's rule. The faces differ in colour and label, so the
- * state stays legible with nothing moving.
+ * position, and position is 240. Under reduced motion the duration is zero, so
+ * the card is simply the other way round — removed, not slowed, which is the
+ * standard's rule. The faces differ in colour and label, so the state stays
+ * legible with nothing moving.
  */
-import { useEffect, useRef, useState } from 'react'
-import { Animated, Easing, View } from 'react-native'
+import { useEffect, useRef } from 'react'
+import { Animated, Easing, StyleSheet } from 'react-native'
 import { useReduceMotion, useTheme } from '../../theme'
 
 /** Enough depth for the turn to read as a turn, without the fisheye. */
 export const FLIP_PERSPECTIVE = 1200
 
-/** Half a turn, in degrees and as a transform the content is corrected by. */
-const HALF_TURN = '180deg'
-const MIRRORED = [{ rotateY: HALF_TURN }]
-const UPRIGHT = []
+/**
+ * The two frames the faces change over: halfway, and the frame before it. Two
+ * distinct values because an interpolation's input range has to increase — a
+ * repeated stop is not a step, it is an invariant violation.
+ */
+const HALF = [0.499, 0.5]
+
+const FRONT_VISIBLE = [1, 1, 0, 0]
+const BACK_VISIBLE = [0, 0, 1, 1]
 
 export function FlipCard({ flipped, front, back, style }) {
   const theme = useTheme()
   const reduceMotion = useReduceMotion()
   const turn = useRef(new Animated.Value(flipped ? 1 : 0)).current
-  // Which face's content is in the tree. It follows `flipped` half a turn
-  // late, so the swap happens behind the card's own edge.
-  const [showing, setShowing] = useState(flipped)
 
   useEffect(() => {
-    if (reduceMotion) {
-      turn.setValue(flipped ? 1 : 0)
-      setShowing(flipped)
-      return undefined
-    }
-
-    const duration = theme.motion.duration.slow
     Animated.timing(turn, {
       toValue: flipped ? 1 : 0,
-      duration,
+      duration: reduceMotion ? 0 : theme.motion.duration.slow,
       easing: Easing.bezier(...theme.motion.easing.standard),
       useNativeDriver: true
     }).start()
-
-    const swap = setTimeout(() => setShowing(flipped), duration / 2)
-    return () => clearTimeout(swap)
   }, [flipped, reduceMotion, turn, theme])
 
+  const rotation = (from, to) => ({
+    transform: [{ perspective: FLIP_PERSPECTIVE }, { rotateY: turn.interpolate({ inputRange: [0, 1], outputRange: [from, to] }) }]
+  })
+
+  const visibility = (outputRange) => ({
+    backfaceVisibility: 'hidden',
+    opacity: turn.interpolate({ inputRange: [0, HALF[0], HALF[1], 1], outputRange })
+  })
+
   return (
-    <Animated.View
-      style={[
-        style,
-        {
-          transform: [
-            { perspective: FLIP_PERSPECTIVE },
-            { rotateY: turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', HALF_TURN] }) }
-          ]
-        }
-      ]}
-    >
-      <View style={{ flex: 1, transform: showing ? MIRRORED : UPRIGHT }}>{showing ? back : front}</View>
+    <Animated.View style={[style, rotation('0deg', '180deg')]}>
+      {/* In flow: this is what the card is as tall as. */}
+      <Animated.View style={[{ flex: 1 }, visibility(FRONT_VISIBLE)]} pointerEvents={flipped ? 'none' : 'auto'}>
+        {front}
+      </Animated.View>
+      {/* Over it, turned the other way round, so it reads upright once the
+          card has carried it there. */}
+      <Animated.View
+        style={[StyleSheet.absoluteFill, { transform: [{ rotateY: '180deg' }] }, visibility(BACK_VISIBLE)]}
+        pointerEvents={flipped ? 'auto' : 'none'}
+      >
+        {back}
+      </Animated.View>
     </Animated.View>
   )
 }
