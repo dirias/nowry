@@ -26,6 +26,7 @@ import { useGroups } from '@nowry/core/hooks/useGroups'
 import { useTags } from '@nowry/core/hooks/useTags'
 import { useBulkCardActions } from '@nowry/core/hooks/useBulkCardActions'
 import { useCardSelection } from '@nowry/core/hooks/useCardSelection'
+import { systemGroup, tagGroups } from '@nowry/core/domain/sessionLog'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { useTheme } from '../theme'
 import { DeckCreateSheet } from './DeckCreateSheet'
@@ -131,23 +132,24 @@ export function StudyLibrary({ header }) {
      * learner opens the same way, across decks. They lead, because they are the
      * two a learner actually looks for.
      *
-     * `system` is a LIST of `{key, ...summary}` rows. This screen used to read
-     * `groups.marked` and `groups.struggling` as if it were an object keyed by
-     * name, so both always showed zero.
+     * `system` arrives as a LIST of rows. This screen read it as an object
+     * keyed by name, so both always showed zero; `systemGroup` is that lookup,
+     * written once in the shared package.
      */
-    const g = groups.groups ?? {}
-    const byKey = Object.fromEntries((g.system ?? []).map((row) => [row.key, row]))
-    const special = ['struggling', 'marked'].map((key) => ({
-      key,
-      name: t(`groups.${key}`),
-      meta: key === 'struggling' ? t('groups.strugglingMeta', { days: byKey[key]?.window_days ?? 14 }) : t('groups.markedMeta'),
-      glyph: key === 'marked' ? 'Bookmark' : 'TriangleAlert',
-      summary: byKey[key] ?? {},
-      onPress: () => router.push(`/study/group/${key}`)
-    }))
+    const special = ['struggling', 'marked'].map((key) => {
+      const summary = systemGroup(groups.groups, key)
+      return {
+        key,
+        name: t(`groups.${key}`),
+        meta: key === 'struggling' ? t('groups.strugglingMeta', { days: summary.windowDays }) : t('groups.markedMeta'),
+        glyph: key === 'marked' ? 'Bookmark' : 'TriangleAlert',
+        summary,
+        onPress: () => router.push(`/study/group/${key}`)
+      }
+    })
 
     const needle = search.trim().toLowerCase()
-    const tagRows = (g.tags ?? [])
+    const tagRows = tagGroups(groups.groups)
       .filter((row) => !needle || row.tag.toLowerCase().includes(needle))
       .map((row) => ({
         key: `tag:${row.tag}`,

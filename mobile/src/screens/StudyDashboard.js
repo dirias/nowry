@@ -21,6 +21,8 @@ import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { deckCounts } from '@nowry/core/domain/deckTypes'
+import { reviewedThisWeek, studySummary } from '@nowry/core/domain/studySummary'
+import { sessionLine } from '@nowry/core/domain/sessionLog'
 import { studySessionsService } from '@nowry/core/api/services'
 import { useForecast } from '@nowry/core/hooks/useForecast'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
@@ -44,14 +46,6 @@ import {
 const RECENT_COUNT = 3
 /** Up-to-date decks are reference; the rest are behind one key. */
 const UP_TO_DATE_PREVIEW = 3
-
-const SESSION_KIND = {
-  ai_quiz: 'sessions.aiQuiz',
-  srs_review: 'sessions.srsReview',
-  deck_quiz: 'sessions.deckQuiz'
-}
-
-const minutes = (seconds) => Math.max(1, Math.round((seconds || 0) / 60))
 
 export function StudyDashboard() {
   const { t, i18n } = useTranslation()
@@ -78,10 +72,13 @@ export function StudyDashboard() {
     }
   }, [])
 
-  const summary = statistics?.summary ?? null
-  const dueToday = summary?.due_today ?? 0
-  const reviewedToday = summary?.reviewed_today ?? 0
-  const streak = summary?.current_streak ?? 0
+  /*
+   * One reader for today's five numbers (`studySummary`). Due and new come
+   * from the decks rather than the statistics summary, which is what keeps the
+   * Today object and the "Due now" list below it from disagreeing — they are
+   * the same question asked twice.
+   */
+  const today = studySummary({ decks: decks.decks, statistics })
   const weekly = statistics?.weekly_progress ?? []
   const future = forecast?.days ?? []
 
@@ -91,27 +88,21 @@ export function StudyDashboard() {
   )
 
   const list = decks.decks
-  const { asking, upToDate, newToday } = useMemo(() => {
+  const { asking, upToDate } = useMemo(() => {
     const asks = []
     const rest = []
-    let fresh = 0
     for (const deck of list ?? []) {
-      const counts = deckCounts(deck)
-      fresh += counts.fresh
-      ;(counts.asked > 0 ? asks : rest).push(deck)
+      ;(deckCounts(deck).asked > 0 ? asks : rest).push(deck)
     }
     // The deck asking for the most comes first: the list is a queue, not an index.
     asks.sort((a, b) => deckCounts(b).asked - deckCounts(a).asked)
-    return { asking: asks, upToDate: rest, newToday: fresh }
+    return { asking: asks, upToDate: rest }
   }, [list])
 
-  const asked = dueToday + newToday
-  const loading = statsLoading || forecastLoading
-  const reviewedWeek = weekly.slice(0, -1).reduce((sum, d) => sum + (d.cards || 0), 0)
+  const loading = statsLoading || forecastLoading || decks.loading
+  const reviewedWeek = reviewedThisWeek(statistics)
   const dueTomorrow = future[0]?.due ?? 0
   const dueWeek = future.reduce((sum, d) => sum + (d.due || 0), 0)
-  const done = reviewedToday + asked
-  const progress = done > 0 ? (reviewedToday / done) * 100 : 0
 
   const shownUpToDate = showAllUpToDate ? upToDate : upToDate.slice(0, UP_TO_DATE_PREVIEW)
   const openDeck = (deck) => router.push(`/study/deck/${deck._id ?? deck.id}`)
@@ -123,7 +114,7 @@ export function StudyDashboard() {
       <SummaryObject
         title={t('study.today.title')}
         context={dateLabel}
-        progress={loading ? null : progress}
+        progress={loading ? null : today.progress}
         readouts={
           loading ? (
             <Stack direction='row' spacing={2}>
@@ -134,10 +125,12 @@ export function StudyDashboard() {
           ) : statsError ? null : (
             <>
               {/* The one load-bearing number, per the board and ADR-021 §3. */}
-              <Readout leading>{asked === 0 ? t('study.today.allDone') : t('study.dueCount', { count: dueToday })}</Readout>
-              {newToday > 0 ? <Readout>{t('study.deck.newCount', { count: newToday })}</Readout> : null}
-              <Readout>{t('study.today.reviewed', { count: reviewedToday })}</Readout>
-              <Readout>{streak > 0 ? t('study.empty.streakLabel', { count: streak }) : t('study.empty.streakZeroLabel')}</Readout>
+              <Readout leading>{today.asked === 0 ? t('study.today.allDone') : t('study.dueCount', { count: today.due })}</Readout>
+              {today.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: today.fresh })}</Readout> : null}
+              <Readout>{t('study.today.reviewed', { count: today.reviewedToday })}</Readout>
+              <Readout>
+                {today.streak > 0 ? t('study.empty.streakLabel', { count: today.streak }) : t('study.empty.streakZeroLabel')}
+              </Readout>
             </>
           )
         }
@@ -145,7 +138,7 @@ export function StudyDashboard() {
         action={
           (list ?? []).length === 0 ? null : (
             <Button size='md' onPress={() => router.push('/study/due')} accessibilityLabel={t('study.startStudying')}>
-              {asked > 0 ? t('study.today.study', { count: asked }) : t('study.today.browse')}
+              {today.asked > 0 ? t('study.today.study', { count: today.asked }) : t('study.today.browse')}
             </Button>
           )
         }
@@ -153,7 +146,7 @@ export function StudyDashboard() {
 
       {loading ? null : weekly.length > 0 || future.length > 0 ? (
         <Stack spacing={1}>
-          <ForecastStrip past={weekly} today={asked} future={future} />
+          <ForecastStrip past={weekly} today={today.asked} future={future} />
           <Readout>{t('study.today.weekReadout', { reviewed: reviewedWeek, tomorrow: dueTomorrow, week: dueWeek })}</Readout>
         </Stack>
       ) : null}
@@ -215,18 +208,18 @@ export function StudyDashboard() {
           {sessions === null ? (
             <Skeleton width='100%' height={56} />
           ) : (
-            sessions.map((session, index) => (
-              <View key={session.id ?? session._id ?? index}>
+            sessions.map(sessionLine).map((session, index) => (
+              <View key={session.id ?? index}>
                 <Divider />
                 <SessionRow
-                  title={session.deck_name || session.topic || t('sessions.unknownTopic')}
+                  title={session.title || t('sessions.unknownTopic')}
                   meta={[
-                    t(SESSION_KIND[session.session_type] ?? SESSION_KIND.deck_quiz),
-                    t('sessions.cardCount', { count: session.total_cards ?? 0 }),
-                    t('study.dates.minutes', { count: minutes(session.duration_seconds) })
+                    t(session.kindKey),
+                    t('sessions.cardCount', { count: session.cards }),
+                    t('study.dates.minutes', { count: session.minutes })
                   ].join(' · ')}
-                  when={relativeDay(t, session.completed_at)}
-                  score={session.score_percentage ?? null}
+                  when={relativeDay(t, session.completedAt)}
+                  score={session.score}
                 />
               </View>
             ))

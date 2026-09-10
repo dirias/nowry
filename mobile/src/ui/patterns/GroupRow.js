@@ -18,9 +18,9 @@ import { ListRow } from './ListRow'
 
 export function GroupRow({ name, meta, glyph = 'Tag', summary, onPress }) {
   const { t } = useTranslation()
-  const due = summary?.due || 0
-  const fresh = summary?.new || 0
-  const cards = summary?.cards || 0
+  // Already read by `groupSummary`, so `new` is `fresh` here and the row never
+  // touches an API field name.
+  const { due = 0, fresh = 0, cards = 0, decks = 0 } = summary ?? {}
 
   const readout =
     due + fresh > 0 ? (
@@ -43,7 +43,7 @@ export function GroupRow({ name, meta, glyph = 'Tag', summary, onPress }) {
     <ListRow
       tile={<Icon name={glyph} size='sm' color='text.tertiary' />}
       name={name}
-      meta={meta ?? t('groups.cardsDecks', { cards, decks: summary?.decks || 0 })}
+      meta={meta ?? t('groups.cardsDecks', { cards, decks })}
       readout={readout}
       action={<Icon name='ChevronRight' size='sm' color='text.tertiary' />}
       onPress={onPress}

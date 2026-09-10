@@ -26,15 +26,16 @@ import { useCardData } from '@nowry/core/hooks/useCardData'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useGroups } from '@nowry/core/hooks/useGroups'
 import { deckCounts, deckType } from '@nowry/core/domain/deckTypes'
+import { daysUntilReview, groupSummary, systemGroup, tagGroups } from '@nowry/core/domain/sessionLog'
 import { useTheme } from '../theme'
 import { Button, Divider, Icon, IdentityTile, ListRow, Readout, Screen, SectionHeader, Skeleton, Stack, Typography } from '../ui'
 
 const GLYPH = { tag: 'Tag', marked: 'Bookmark', struggling: 'TriangleAlert' }
 
-/** Soonest first; a card with no next review has not been seen and sorts last. */
+/** Soonest first; a card nobody has seen has no date and sorts last. */
 const byNextReview = (a, b) => {
-  const at = a.next_review ? new Date(a.next_review).getTime() : Infinity
-  const bt = b.next_review ? new Date(b.next_review).getTime() : Infinity
+  const at = daysUntilReview(a) ?? Infinity
+  const bt = daysUntilReview(b) ?? Infinity
   return at - bt
 }
 
@@ -58,20 +59,18 @@ export function GroupDetail({ groupId }) {
   const cardQuery = useCardData(isTag ? [group.tag] : [], '', false, isTag ? null : group.kind)
 
   const summary = useMemo(() => {
-    const g = groups.groups ?? {}
-    if (isTag) return (g.tags ?? []).find((row) => row.tag === group.tag) ?? {}
-    return (g.system ?? []).find((row) => row.key === group.kind) ?? {}
+    if (!isTag) return systemGroup(groups.groups, group.kind)
+    return groupSummary(tagGroups(groups.groups).find((row) => row.tag === group.tag))
   }, [groups.groups, group, isTag])
 
   const name = isTag ? group.tag : t(`groups.${group.kind}`)
-  const asked = (summary.due || 0) + (summary.new || 0)
   // ADR-014: a mark is a bookmark, not a scheduling signal.
-  const canStudy = group.kind !== 'marked' && (summary.cards || 0) > 0
+  const canStudy = group.kind !== 'marked' && summary.cards > 0
 
   const decks = useMemo(() => {
-    const ids = new Set((summary.deck_ids ?? []).map(String))
+    const ids = new Set(summary.deckIds.map(String))
     return (allDecks.decks ?? []).filter((deck) => ids.has(String(deck._id ?? deck.id)))
-  }, [allDecks.decks, summary.deck_ids])
+  }, [allDecks.decks, summary.deckIds])
 
   const cards = useMemo(() => [...(cardQuery.cards ?? [])].sort(byNextReview), [cardQuery.cards])
 
@@ -95,10 +94,10 @@ export function GroupDetail({ groupId }) {
           <Skeleton width='70%' height={16} />
         ) : (
           <Stack direction='row' spacing={2} flexWrap='wrap'>
-            <Readout>{t('groups.detailReadout', { cards: summary.cards ?? 0, decks: summary.decks ?? 0 })}</Readout>
+            <Readout>{t('groups.detailReadout', { cards: summary.cards, decks: summary.decks })}</Readout>
             {summary.due > 0 ? <Readout leading>{t('study.dueCount', { count: summary.due })}</Readout> : null}
-            {summary.new > 0 ? <Readout>{t('study.deck.newCount', { count: summary.new })}</Readout> : null}
-            {asked === 0 && (summary.cards || 0) > 0 ? <Readout>{t('groups.upToDate')}</Readout> : null}
+            {summary.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: summary.fresh })}</Readout> : null}
+            {summary.asked === 0 && summary.cards > 0 ? <Readout>{t('groups.upToDate')}</Readout> : null}
           </Stack>
         )}
 
@@ -108,7 +107,7 @@ export function GroupDetail({ groupId }) {
               {t('groups.browse')}
             </Button>
             <Button style={{ flex: 2 }} onPress={() => router.push(sessionHref)}>
-              {t('groups.study', { count: asked })}
+              {t('groups.study', { count: summary.asked })}
             </Button>
           </Stack>
         ) : null}
@@ -165,7 +164,7 @@ export function GroupDetail({ groupId }) {
                 meta={card.deck_name || null}
                 readout={
                   <Typography level='body-xs' color='text.tertiary'>
-                    {nextReviewLabel(t, card.next_review)}
+                    {nextReviewLabel(t, card)}
                   </Typography>
                 }
                 onPress={() => router.push(`/study/card/${card._id ?? card.id}`)}
@@ -179,10 +178,10 @@ export function GroupDetail({ groupId }) {
 }
 
 /** Due now, tomorrow, then "in N days" — the three the board draws. */
-function nextReviewLabel(t, iso) {
-  if (!iso) return t('study.deckPill.new')
-  const days = Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000)
-  if (days <= 0) return t('groups.dueNow')
+function nextReviewLabel(t, card) {
+  const days = daysUntilReview(card)
+  if (days === null) return t('study.deckPill.new')
+  if (days === 0) return t('groups.dueNow')
   if (days === 1) return t('groups.tomorrow')
   return t('groups.inDays', { count: days })
 }

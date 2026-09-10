@@ -32,7 +32,11 @@ export function Profile() {
     <Screen>
       <Stack spacing={3}>
         <Stack spacing={1}>
-          <Typography level='h4'>{profile?.full_name || profile?.username || t('profile.title')}</Typography>
+          {/* `username`, not `full_name`: the profile response carries id,
+              username, email, bio, avatar_url, photo_url, created_at,
+              subscription, stats and the two preference objects. There has
+              never been a full name, so that read always fell through. */}
+          <Typography level='h4'>{profile?.username || t('profile.title')}</Typography>
           <Readout>{user?.email ?? ''}</Readout>
         </Stack>
 
