@@ -50,7 +50,13 @@
       "confirm_one": "Remove from {{count}} card",
       "confirm_other": "Remove from {{count}} cards"
     },
-    "tagError": "Couldn't change that tag."
+    "tagError": "Couldn't change that tag.",
+    "orderDue": "Due first",
+    "orderAlpha": "A–Z",
+    "dueNow": "Due now",
+    "tomorrow": "Tomorrow",
+    "inDays_one": "In {{count}} day",
+    "inDays_other": "In {{count}} days"
   },
   "common": {
     "loadMore": "Load more",
@@ -1832,7 +1838,8 @@
       "type": "Remove type filter",
       "tag": "Remove {{tag}} tag filter"
     },
-    "marked": "Marked"
+    "marked": "Marked",
+    "searchTags": "Search tags…"
   },
   "subscription": {
     "upgrade": "Upgrade",

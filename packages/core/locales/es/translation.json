@@ -50,7 +50,13 @@
       "confirm_one": "Quitar de {{count}} tarjeta",
       "confirm_other": "Quitar de {{count}} tarjetas"
     },
-    "tagError": "No se pudo cambiar esa etiqueta."
+    "tagError": "No se pudo cambiar esa etiqueta.",
+    "orderDue": "Pendientes primero",
+    "orderAlpha": "A–Z",
+    "dueNow": "Toca ahora",
+    "tomorrow": "Mañana",
+    "inDays_one": "En {{count}} día",
+    "inDays_other": "En {{count}} días"
   },
   "common": {
     "loadMore": "Cargar más",
@@ -1574,7 +1580,8 @@
       "type": "Eliminar filtro de tipo",
       "tag": "Eliminar filtro de etiqueta {{tag}}"
     },
-    "marked": "Marcadas"
+    "marked": "Marcadas",
+    "searchTags": "Buscar etiquetas…"
   },
   "subscription": {
     "upgrade": "Mejorar Plan",

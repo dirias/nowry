@@ -50,7 +50,13 @@
       "confirm_one": "Retirer de {{count}} carte",
       "confirm_other": "Retirer de {{count}} cartes"
     },
-    "tagError": "Impossible de modifier cette étiquette."
+    "tagError": "Impossible de modifier cette étiquette.",
+    "orderDue": "À réviser d’abord",
+    "orderAlpha": "A–Z",
+    "dueNow": "À réviser",
+    "tomorrow": "Demain",
+    "inDays_one": "Dans {{count}} jour",
+    "inDays_other": "Dans {{count}} jours"
   },
   "sessions": {
     "ofTotal": "{{shown}} sur {{total}}",
@@ -3030,7 +3036,8 @@
     "marked": "Marquées",
     "tags": "Étiquettes",
     "toggle": "Afficher les filtres",
-    "clearAll": "Tout effacer"
+    "clearAll": "Tout effacer",
+    "searchTags": "Rechercher des étiquettes…"
   },
   "pomodoro": {
     "notification": {

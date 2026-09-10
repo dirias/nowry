@@ -44,7 +44,12 @@
       "description_other": "{{count}}枚のカードからタグが外れます。カード自体はそのまま残ります。",
       "confirm_other": "{{count}}枚から外す"
     },
-    "tagError": "そのタグを変更できませんでした。"
+    "tagError": "そのタグを変更できませんでした。",
+    "orderDue": "期限が近い順",
+    "orderAlpha": "あいうえお順",
+    "dueNow": "今すぐ",
+    "tomorrow": "明日",
+    "inDays_other": "{{count}} 日後"
   },
   "sessions": {
     "ofTotal": "{{total}} 件中 {{shown}} 件",
@@ -2951,7 +2956,8 @@
     "marked": "マーク済み",
     "tags": "タグ",
     "toggle": "フィルターを表示",
-    "clearAll": "すべて解除"
+    "clearAll": "すべて解除",
+    "searchTags": "タグを検索…"
   },
   "pomodoro": {
     "notification": {

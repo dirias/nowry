@@ -43,13 +43,24 @@ const files = [...sources(path.join(ROOT, 'app')), ...sources(path.join(ROOT, 's
 /** Prose in a comment is not a label. */
 const withoutComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
-const KEY = /\bt\(\s*'([a-zA-Z0-9_.]+)'/g
+/*
+ * Every quoted key inside a `t(...)` call, not only the first argument.
+ *
+ * The narrow version matched `t('a.b')` and nothing else, so
+ * `t(cond ? 'a.b' : 'c.d')` was invisible — and three keys written that way
+ * shipped untranslated before this was widened. A key is dotted and has no
+ * spaces, which is enough to tell one from an ordinary string argument.
+ */
+const T_CALL = /\bt\(([\s\S]{0,400}?)\)/g
+const KEY_LITERAL = /'([a-z][a-zA-Z0-9_]*(?:\.[a-zA-Z0-9_]+)+)'/g
 const KEY_PROP = /\b(labelKey|helperKey|errorKey|placeholderKey|titleKey|bodyKey)=(?:'|\{')([a-zA-Z0-9_.]+)'/g
 
 const usedKeys = new Set()
 for (const { text } of files) {
   const code = withoutComments(text)
-  for (const [, key] of code.matchAll(KEY)) usedKeys.add(key)
+  for (const [, args] of code.matchAll(T_CALL)) {
+    for (const [, key] of args.matchAll(KEY_LITERAL)) usedKeys.add(key)
+  }
   for (const [, , key] of code.matchAll(KEY_PROP)) usedKeys.add(key)
 }
 

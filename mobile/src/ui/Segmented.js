@@ -50,7 +50,8 @@ export function Segmented({ options, value, onChange, accessibilityLabel, style 
             onPress={() => onChange?.(option.value)}
             accessibilityRole='tab'
             accessibilityState={{ selected: active }}
-            accessibilityLabel={option.label}
+            // The count is part of what the tab is, so it is read with it.
+            accessibilityLabel={option.count == null ? option.label : `${option.label} ${option.count}`}
             style={({ pressed }) => ({
               flex: 1,
               minHeight: SEGMENT_HEIGHT,
@@ -64,9 +65,19 @@ export function Segmented({ options, value, onChange, accessibilityLabel, style 
             })}
           >
             <View style={{ alignItems: 'center' }}>
-              <Typography level='title-sm' color={active ? 'text.primary' : 'text.secondary'} numberOfLines={1}>
-                {option.label}
-              </Typography>
+              {/* A count beside the label, not under it (PhoneTags board):
+                  "Cards 312" is one tab, and a stacked number would make the
+                  segment two lines tall on a phone. */}
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+                <Typography level='title-sm' color={active ? 'text.primary' : 'text.secondary'} numberOfLines={1}>
+                  {option.label}
+                </Typography>
+                {option.count == null ? null : (
+                  <Typography level='body-sm' color='text.tertiary'>
+                    {option.count}
+                  </Typography>
+                )}
+              </View>
               {/* The key's edge, turned inward. */}
               <View
                 style={{

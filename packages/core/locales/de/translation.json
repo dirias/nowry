@@ -50,7 +50,13 @@
       "confirm_one": "Von {{count}} Karte entfernen",
       "confirm_other": "Von {{count}} Karten entfernen"
     },
-    "tagError": "Der Tag ließ sich nicht ändern."
+    "tagError": "Der Tag ließ sich nicht ändern.",
+    "orderDue": "Fällige zuerst",
+    "orderAlpha": "A–Z",
+    "dueNow": "Jetzt fällig",
+    "tomorrow": "Morgen",
+    "inDays_one": "In {{count}} Tag",
+    "inDays_other": "In {{count}} Tagen"
   },
   "sessions": {
     "ofTotal": "{{shown}} von {{total}}",
@@ -3018,7 +3024,8 @@
     "marked": "Markiert",
     "tags": "Schlagwörter",
     "toggle": "Filter anzeigen",
-    "clearAll": "Alle zurücksetzen"
+    "clearAll": "Alle zurücksetzen",
+    "searchTags": "Tags suchen…"
   },
   "pomodoro": {
     "notification": {
