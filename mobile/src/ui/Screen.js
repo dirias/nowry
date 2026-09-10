@@ -8,6 +8,11 @@
  *     `react-native-safe-area-context`, applied as padding rather than a
  *     `SafeAreaView` wrapper, so a screen can still paint its background edge to
  *     edge while its content stays clear.
+ *
+ *     The BOTTOM inset is only this screen's when nothing else is below it.
+ *     Under the tab bar it belongs to the bar, and a screen that claimed it too
+ *     would leave a band of dead space above one that is already clear of the
+ *     system navigation. `useHasTabBar` answers that; `edges` still overrides.
  *   - **The keyboard.** `KeyboardAvoidingView` behaves differently per platform
  *     and getting it wrong means a form field under the keyboard, which is the
  *     single most common mobile form bug.
@@ -19,16 +24,19 @@
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../theme'
+import { useHasTabBar } from './tabBarContext'
 import { resolveColor } from './Typography'
 
-export function Screen({ children, scroll = true, padding = 3, edges = ['top', 'bottom'], style, contentContainerStyle, ...rest }) {
+export function Screen({ children, scroll = true, padding = 3, edges, style, contentContainerStyle, ...rest }) {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const hasTabBar = useHasTabBar()
+  const applied = edges ?? (hasTabBar ? ['top'] : ['top', 'bottom'])
 
   const ground = { flex: 1, backgroundColor: resolveColor(theme, 'background.body') }
   const inset = {
-    paddingTop: edges.includes('top') ? insets.top : 0,
-    paddingBottom: edges.includes('bottom') ? insets.bottom : 0,
+    paddingTop: applied.includes('top') ? insets.top : 0,
+    paddingBottom: applied.includes('bottom') ? insets.bottom : 0,
     paddingLeft: insets.left,
     paddingRight: insets.right
   }

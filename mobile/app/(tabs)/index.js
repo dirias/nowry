@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
+import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { Button, NextStepsPanel, Readout, Screen, Skeleton, Stack, SummaryObject, Typography } from '../../src/ui'
 
 export default function Home() {
@@ -20,11 +21,19 @@ export default function Home() {
   const router = useRouter()
   const { user } = useAuth()
   const { statistics, loading, error } = useStatistics()
+  /*
+   * The deck count comes from the deck query, not from the statistics summary.
+   * That summary has no `decks` field — it carries total_cards, reviewed_cards,
+   * new_cards, due_today, current_streak and last_session_struggle — so reading
+   * one printed "0 decks" beside a real due count on every account that has
+   * decks.
+   */
+  const deckData = useDeckData(null)
 
   const summary = statistics?.summary ?? null
   const due = summary?.due_today ?? 0
   const streak = summary?.current_streak ?? 0
-  const decks = summary?.decks ?? 0
+  const decks = (deckData.decks ?? []).length
 
   return (
     <Screen>
@@ -33,7 +42,7 @@ export default function Home() {
           title={t('auth.welcomeBack')}
           context={user?.username ?? user?.email ?? undefined}
           readouts={
-            loading ? (
+            loading || deckData.loading ? (
               <Stack direction='row' spacing={2}>
                 <Skeleton width={72} height={14} />
                 <Skeleton width={64} height={14} />

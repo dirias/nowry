@@ -9,47 +9,66 @@
  * Route names mirror the web's, so `nowry://study/<deckId>` and
  * `https://nowry.app/study/<deckId>` are the same path with no translation
  * table between them.
+ *
+ * **The bar holds the bottom inset, because it is the thing closest to the
+ * edge.** Android draws this app under the system navigation (edge-to-edge in
+ * `app.config.js`), and the bar was not clearing it: "Profile" sat under the
+ * gesture handle. Every screen above the bar defers that inset to it through
+ * `TabBarProvider`, so the space is held exactly once.
  */
 import { Tabs } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../../src/theme'
+import { TabBarProvider } from '../../src/ui/tabBarContext'
 import { Icon } from '../../src/ui'
 import { NAV_ICONS } from '../../src/ui/icons'
 import { resolveColor } from '../../src/ui/Typography'
 
+/** The bar's own height, before the system navigation is added under it. */
+const TAB_BAR_HEIGHT = 56
+
 export default function TabsLayout() {
   const { t } = useTranslation()
   const theme = useTheme()
+  const insets = useSafeAreaInsets()
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: resolveColor(theme, 'primary.plainColor'),
-        tabBarInactiveTintColor: resolveColor(theme, 'text.tertiary'),
-        tabBarStyle: {
-          backgroundColor: resolveColor(theme, 'background.surface'),
-          borderTopColor: resolveColor(theme, 'divider')
-        }
-      }}
-    >
-      <Tabs.Screen
-        name='index'
-        options={{ title: t('nav.home'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.home} color={color} /> }}
-      />
-      <Tabs.Screen
-        name='study'
-        options={{ title: t('nav.study'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.study} color={color} /> }}
-      />
-      <Tabs.Screen
-        name='pomodoro'
-        options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
-      />
-      <Tabs.Screen
-        name='profile'
-        options={{ title: t('nav.profile'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.profile} color={color} /> }}
-      />
-    </Tabs>
+    <TabBarProvider>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: resolveColor(theme, 'primary.plainColor'),
+          tabBarInactiveTintColor: resolveColor(theme, 'text.tertiary'),
+          tabBarStyle: {
+            backgroundColor: resolveColor(theme, 'background.surface'),
+            borderTopColor: resolveColor(theme, 'divider'),
+            // The bar grows by the inset rather than moving up by it, so its
+            // ground still reaches the bottom of the window and the system
+            // navigation sits on the app's own surface rather than a seam.
+            height: TAB_BAR_HEIGHT + insets.bottom,
+            paddingBottom: insets.bottom
+          }
+        }}
+      >
+        <Tabs.Screen
+          name='index'
+          options={{ title: t('nav.home'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.home} color={color} /> }}
+        />
+        <Tabs.Screen
+          name='study'
+          options={{ title: t('nav.study'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.study} color={color} /> }}
+        />
+        <Tabs.Screen
+          name='pomodoro'
+          options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
+        />
+        <Tabs.Screen
+          name='profile'
+          options={{ title: t('nav.profile'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.profile} color={color} /> }}
+        />
+      </Tabs>
+    </TabBarProvider>
   )
 }
 
