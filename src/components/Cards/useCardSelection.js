@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCardSelection as useSharedSelection } from '@nowry/core/hooks/useCardSelection'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
 export const LONG_PRESS_MS = 500
@@ -8,44 +9,20 @@ export const LONG_PRESS_MS = 500
 const OWNED_BY_OVERLAY = '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]'
 
 /**
- * The selection over a list of cards (PRD D16, ADR-023 point 2): a set of
- * ids, `toggle` / `selectAll` / `clear`, and `selecting` — true while the set
- * is non-empty, which is what swaps the toolbar for the selection bar and
- * shows every row's checkbox at once.
+ * The web's selection: the shared set, plus the two ways this client starts and
+ * ends one.
  *
- * `retain(ids)` prunes it to the cards still listed. Escape clears it from
- * anywhere on the page while it exists. On a phone a
- * long press on a row starts it: `longPressHandlers(id)` are the pointer
- * handlers a row spreads, and they toggle the id after 500ms of press. The
- * click that follows the release is swallowed so the row does not toggle
- * straight back.
+ * The set and its rules moved to `@nowry/core/hooks/useCardSelection` so the
+ * phone runs the same ones. What stays here is DOM — Escape clears from
+ * anywhere on the page while a selection exists, and on a touch screen a long
+ * press on a row starts one. `longPressHandlers(id)` are the pointer handlers a
+ * row spreads; the click that follows the release is swallowed so the row does
+ * not toggle straight back.
  */
 export function useCardSelection() {
   const isMobile = useIsMobile()
-  const [selected, setSelected] = useState(() => new Set())
-  const selecting = selected.size > 0
-
-  const toggle = useCallback((id) => {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }, [])
-  const selectAll = useCallback((ids) => setSelected(new Set(ids)), [])
-  // Keep only what is still on screen: a card that left the list after a
-  // filter change or a bulk verb cannot stay selected out of sight.
-  const retain = useCallback((ids) => {
-    setSelected((prev) => {
-      if (prev.size === 0) return prev
-      const keep = new Set(ids)
-      const next = new Set([...prev].filter((id) => keep.has(id)))
-      return next.size === prev.size ? prev : next
-    })
-  }, [])
-  const clear = useCallback(() => setSelected((prev) => (prev.size === 0 ? prev : new Set())), [])
-  const isSelected = useCallback((id) => selected.has(id), [selected])
+  const shared = useSharedSelection()
+  const { selecting, clear, toggle } = shared
 
   useEffect(() => {
     if (!selecting) return undefined
@@ -92,10 +69,7 @@ export function useCardSelection() {
     [isMobile, cancelPress, toggle]
   )
 
-  return useMemo(
-    () => ({ selected, selecting, isSelected, toggle, selectAll, retain, clear, longPressHandlers }),
-    [selected, selecting, isSelected, toggle, selectAll, retain, clear, longPressHandlers]
-  )
+  return useMemo(() => ({ ...shared, longPressHandlers }), [shared, longPressHandlers])
 }
 
 export default useCardSelection

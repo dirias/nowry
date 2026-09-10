@@ -16,24 +16,30 @@
  * the 60fps criterion fails on a mid-range device with 500 cards, FlashList is
  * the upgrade and this comment is the reason it was not taken first.
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { FlatList, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useCardData } from '@nowry/core/hooks/useCardData'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useGroups } from '@nowry/core/hooks/useGroups'
+import { useTags } from '@nowry/core/hooks/useTags'
+import { useBulkCardActions } from '@nowry/core/hooks/useBulkCardActions'
+import { useCardSelection } from '@nowry/core/hooks/useCardSelection'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { useTheme } from '../theme'
 import { DeckCreateSheet } from './DeckCreateSheet'
 import { CardPreviewSheet } from './CardPreviewSheet'
+import { BulkOverlays } from './BulkOverlays'
 import {
   ActionSheet,
+  Checkbox,
   DeckRow,
   GroupRow,
   Icon,
   IconButton,
   SectionHeader,
+  SelectionBar,
   Button,
   Chip,
   Divider,
@@ -44,6 +50,7 @@ import {
   Readout,
   Segmented,
   Skeleton,
+  resolveColor,
   Stack,
   Typography
 } from '../ui'
@@ -65,6 +72,17 @@ export function StudyLibrary({ header }) {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [previewing, setPreviewing] = useState(null)
+
+  const selection = useCardSelection()
+  const bulk = useBulkCardActions({
+    onDone: (action) => {
+      // Tag and untag keep the selection, because the next pick is usually
+      // another tag for the same cards. Every other verb is finished with them.
+      if (action !== 'tag' && action !== 'untag') selection.clear()
+    }
+  })
+  // Only for the move and tag sheets; the list itself does not need them.
+  const allTags = useTags({ enabled: selection.selecting })
 
   const [order, setOrder] = useState(ORDERS.due)
 
@@ -103,10 +121,9 @@ export function StudyLibrary({ header }) {
         key: card._id ?? card.id,
         name: card.title || card.front || '',
         meta: (card.tags ?? []).join(' · '),
+        card,
         progress: null,
-        readout: null,
-        // A card row opens the card, not its deck's settings.
-        onPress: () => setPreviewing(card)
+        readout: null
       }))
     }
     /*
@@ -146,6 +163,14 @@ export function StudyLibrary({ header }) {
     return [...special, ...tagRows]
   }, [view, decks.decks, cards.cards, groups.groups, order, search, router, t])
 
+  const cardIds = useMemo(() => (cards.cards ?? []).map((card) => card._id ?? card.id), [cards.cards])
+  const { retain } = selection
+  useEffect(() => {
+    retain(cardIds)
+  }, [cardIds, retain])
+
+  const selectedIds = useMemo(() => cardIds.filter((cardId) => selection.isSelected(cardId)), [cardIds, selection])
+
   const counts = {
     decks: (decks.decks ?? []).length,
     // The card count is the server's total, not the page that has loaded.
@@ -155,7 +180,31 @@ export function StudyLibrary({ header }) {
 
   const filterCount = (markedOnly ? 1 : 0) + (untagged ? 1 : 0)
 
-  const listHeader = (
+  /* The board replaces the whole toolbar while a selection exists, so the list
+     never moves under the user's thumb when one starts. */
+  const selectionHeader = (
+    <Stack direction='row' spacing={1.5} alignItems='center' style={{ minHeight: MIN_TOUCH_TARGET }}>
+      <IconButton
+        size='md'
+        variant='secondary'
+        style={{ minWidth: MIN_TOUCH_TARGET }}
+        onPress={selection.clear}
+        accessibilityLabel={t('cards.select.clear')}
+      >
+        <Icon name='X' size='sm' color='text.secondary' />
+      </IconButton>
+      <Typography level='title-lg' style={{ flex: 1 }}>
+        {t('cards.select.count', { count: selectedIds.length })}
+      </Typography>
+      <Button size='sm' variant='tertiary' onPress={() => selection.selectAll(cardIds)}>
+        {t('cards.select.all', { count: counts.cards })}
+      </Button>
+    </Stack>
+  )
+
+  const listHeader = selection.selecting ? (
+    selectionHeader
+  ) : (
     <Stack spacing={2} style={{ paddingBottom: theme.spacing[1] }}>
       {header}
 
@@ -243,6 +292,28 @@ export function StudyLibrary({ header }) {
             <DeckRow deck={item.deck} onPress={item.onPress} />
           ) : item.summary ? (
             <GroupRow name={item.name} meta={item.meta} glyph={item.glyph} summary={item.summary} onPress={item.onPress} />
+          ) : item.card ? (
+            <ListRow
+              // While a selection exists, a tap is a pick — opening a card
+              // under the user's thumb mid-selection is how a bulk delete hits
+              // the wrong cards.
+              tile={
+                selection.selecting ? (
+                  <Checkbox
+                    checked={selection.isSelected(item.key)}
+                    onPress={() => selection.toggle(item.key)}
+                    accessibilityLabel={t('cards.select.rowAria', { title: item.name })}
+                  />
+                ) : (
+                  <IdentityTile color='primary.solidBg' />
+                )
+              }
+              name={item.name}
+              meta={item.meta}
+              onPress={selection.selecting ? () => selection.toggle(item.key) : () => setPreviewing(item.card)}
+              onLongPress={() => selection.toggle(item.key)}
+              style={selection.isSelected(item.key) ? { backgroundColor: resolveColor(theme, 'background.level1') } : undefined}
+            />
           ) : (
             <ListRow
               tile={<IdentityTile color='primary.solidBg' />}
@@ -292,6 +363,20 @@ export function StudyLibrary({ header }) {
           }
         ]}
       />
+
+      {selection.selecting ? (
+        <SelectionBar
+          disabled={bulk.pending}
+          onAction={(action) => {
+            if (action === 'move') return bulk.requestMove(selectedIds)
+            if (action === 'tag') return bulk.requestTag(selectedIds)
+            if (action === 'delete') return bulk.requestDelete(selectedIds)
+            return bulk.run('mark', selectedIds)
+          }}
+        />
+      ) : null}
+
+      <BulkOverlays bulk={bulk} decks={decks.decks ?? []} tags={(allTags.tags ?? []).map((row) => row.tag)} />
 
       <CardPreviewSheet visible={Boolean(previewing)} card={previewing} onClose={() => setPreviewing(null)} />
 

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cardsService } from '@nowry/core/api/services'
-import { invalidateCardCaches } from '@nowry/core/api/cardCache'
+import { cardsService } from '../api/services'
+import { invalidateCardCaches } from '../api/cardCache'
 
 /**
  * The one place a bulk verb runs (PRD D16, FR-010): `run(action, ids, extra)`
@@ -11,13 +11,23 @@ import { invalidateCardCaches } from '@nowry/core/api/cardCache'
  * ids are waiting on the move sheet or the delete confirm; the overlays read
  * that and the bar and the row kebab only ever ask.
  *
- * Errors land in `error` for the consumer's Snackbar; nothing here renders.
+ * Errors land in `error` for the consumer's Snackbar; nothing here renders —
+ * which is why it lives here rather than beside the web's components. The
+ * phone runs the same four verbs against the same endpoint, and a second copy
+ * would be a second answer to "what does Move do".
  */
 export function useBulkCardActions({ onDone } = {}) {
   const { t } = useTranslation()
   const [pending, setPending] = useState(false)
   const [error, setError] = useState(null)
   const [moveIds, setMoveIds] = useState(null)
+  /*
+   * Tag wants a surface too. The web reaches its tag list through a menu that
+   * is already open, so it never needed pending state; a phone has no menu to
+   * hang it on, so the ask is held here beside the other two rather than in
+   * one client's screen.
+   */
+  const [tagIds, setTagIds] = useState(null)
   const [deleteIds, setDeleteIds] = useState(null)
 
   const run = useCallback(
@@ -49,6 +59,16 @@ export function useBulkCardActions({ onDone } = {}) {
     [run, moveIds]
   )
 
+  const requestTag = useCallback((ids) => setTagIds(ids), [])
+  const cancelTag = useCallback(() => setTagIds(null), [])
+  const confirmTag = useCallback(
+    async (tag) => {
+      const ok = await run('tag', tagIds, { tags: [tag] })
+      if (ok) setTagIds(null)
+    },
+    [run, tagIds]
+  )
+
   const requestDelete = useCallback((ids) => setDeleteIds(ids), [])
   const cancelDelete = useCallback(() => setDeleteIds(null), [])
   const confirmDelete = useCallback(async () => {
@@ -67,6 +87,11 @@ export function useBulkCardActions({ onDone } = {}) {
     requestMove,
     cancelMove,
     confirmMove,
+    tagIds,
+    tagging: Boolean(tagIds && tagIds.length > 0),
+    requestTag,
+    cancelTag,
+    confirmTag,
     deleteIds,
     requestDelete,
     cancelDelete,

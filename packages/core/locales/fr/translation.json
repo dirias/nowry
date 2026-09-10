@@ -1987,7 +1987,8 @@
       "archive": "Archiver",
       "restore": "Restaurer",
       "preview": "Aperçu",
-      "addCard": "Ajouter une carte"
+      "addCard": "Ajouter une carte",
+      "delete": "Supprimer"
     },
     "add": "Ajouter",
     "manage_content": {

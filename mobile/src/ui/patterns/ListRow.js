@@ -14,7 +14,7 @@ import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
 import { LIST_ROW_HEIGHT } from './rowSpec'
 
-export function ListRow({ tile, name, meta, measure, readout, action, onPress, accessibilityLabel, style }) {
+export function ListRow({ tile, name, meta, measure, readout, action, onPress, onLongPress, accessibilityLabel, style }) {
   const theme = useTheme()
 
   const body = (pressed) => (
@@ -49,11 +49,14 @@ export function ListRow({ tile, name, meta, measure, readout, action, onPress, a
     </View>
   )
 
-  if (!onPress) return body(false)
+  if (!onPress && !onLongPress) return body(false)
 
   return (
     <Pressable
       onPress={onPress}
+      // A long press is how a phone starts a selection; the web uses a hover
+      // checkbox, which a phone has no pointer for.
+      onLongPress={onLongPress}
       accessibilityRole='button'
       accessibilityLabel={accessibilityLabel ?? (typeof name === 'string' ? name : undefined)}
     >

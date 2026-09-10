@@ -1975,7 +1975,8 @@
       "archive": "Archivieren",
       "restore": "Wiederherstellen",
       "preview": "Vorschau",
-      "addCard": "Karte hinzufügen"
+      "addCard": "Karte hinzufügen",
+      "delete": "Löschen"
     },
     "add": "Hinzufügen",
     "manage_content": {

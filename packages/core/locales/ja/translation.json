@@ -2095,7 +2095,8 @@
       "archive": "アーカイブ",
       "restore": "復元",
       "preview": "プレビュー",
-      "addCard": "カードを追加"
+      "addCard": "カードを追加",
+      "delete": "削除"
     },
     "add": "追加",
     "manage_content": {
