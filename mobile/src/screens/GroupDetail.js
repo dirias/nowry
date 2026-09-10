@@ -27,6 +27,7 @@ import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useGroups } from '@nowry/core/hooks/useGroups'
 import { deckCounts, deckType } from '@nowry/core/domain/deckTypes'
 import { daysUntilReview, groupSummary, systemGroup, tagGroups } from '@nowry/core/domain/sessionLog'
+import { DAILY_REVIEW } from './StudySession'
 import { useTheme } from '../theme'
 import { Button, Divider, Icon, IdentityTile, ListRow, Readout, Screen, SectionHeader, Skeleton, Stack, Typography } from '../ui'
 
@@ -74,7 +75,7 @@ export function GroupDetail({ groupId }) {
 
   const cards = useMemo(() => [...(cardQuery.cards ?? [])].sort(byNextReview), [cardQuery.cards])
 
-  const sessionHref = isTag ? `/study/due?tags=${encodeURIComponent(group.tag)}` : `/study/due?group=${group.kind}`
+  const sessionHref = isTag ? `/study/${DAILY_REVIEW}?tags=${encodeURIComponent(group.tag)}` : `/study/${DAILY_REVIEW}?group=${group.kind}`
 
   return (
     <Screen>

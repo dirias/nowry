@@ -40,12 +40,25 @@ const GRADE_TO_EVAL = { again: 'incorrect', hard: 'partial', good: 'correct', ea
 
 const resumeKey = (deckId) => `nowry.session.${deckId}`
 
+/**
+ * The web's sentinel for "today across every deck" — `/study/daily-review`,
+ * where the deck id slot carries the word rather than an id. Mobile mirrors the
+ * web's route names so one link opens the same thing on both (architecture
+ * addendum), which means it mirrors this too.
+ *
+ * The dashboard's solid key and Home's used to point at `/study/due`, which is
+ * no route at all: `[deckId]` matched it and the session asked the server for a
+ * deck called "due". The app's single most important button opened an error.
+ */
+export const DAILY_REVIEW = 'daily-review'
+
 const frontOf = (card) => card?.question || card?.title || card?.front || ''
 const backOf = (card) => card?.answer || card?.content || card?.back || ''
 
 export function StudySession() {
-  const { deckId } = useLocalSearchParams()
+  const { deckId, tags, group, limit } = useLocalSearchParams()
   const id = String(deckId)
+  const isDaily = id === DAILY_REVIEW
   const { t } = useTranslation()
   const router = useRouter()
 
@@ -78,8 +91,21 @@ export function StudySession() {
     setCards(null)
     setError(false)
 
-    cardsService
-      .getDueCards(id)
+    /*
+     * A daily review is a queue the SERVER owns: it stamps the selection for
+     * the day, so the same cards come back until they are graded rather than
+     * being re-drawn on every open. `tags` and `group` narrow that pool
+     * server-side, which is how a tag's "Study · 11" reaches only its cards.
+     */
+    const load = isDaily
+      ? cardsService.getDailyReviewCards({
+          limit: limit ? Number(limit) : undefined,
+          tags: tags ? [].concat(tags) : [],
+          group: group ? String(group) : undefined
+        })
+      : cardsService.getDueCards(id)
+
+    load
       .then((due) => {
         if (cancelled) return
         setCards(due)
@@ -106,7 +132,7 @@ export function StudySession() {
     return () => {
       cancelled = true
     }
-  }, [id, attempt])
+  }, [id, attempt, isDaily, tags, group, limit])
 
   const total = cards?.length ?? 0
   const current = cards?.[index] ?? null

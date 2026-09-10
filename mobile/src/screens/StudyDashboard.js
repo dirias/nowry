@@ -27,6 +27,7 @@ import { studySessionsService } from '@nowry/core/api/services'
 import { useForecast } from '@nowry/core/hooks/useForecast'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
+import { DAILY_REVIEW } from './StudySession'
 import { useTheme } from '../theme'
 import {
   Button,
@@ -137,7 +138,7 @@ export function StudyDashboard() {
         empty={!loading && !statsError && (list ?? []).length === 0 ? t('study.today.emptySentence') : null}
         action={
           (list ?? []).length === 0 ? null : (
-            <Button size='md' onPress={() => router.push('/study/due')} accessibilityLabel={t('study.startStudying')}>
+            <Button size='md' onPress={() => router.push(`/study/${DAILY_REVIEW}`)} accessibilityLabel={t('study.startStudying')}>
               {today.asked > 0 ? t('study.today.study', { count: today.asked }) : t('study.today.browse')}
             </Button>
           )
