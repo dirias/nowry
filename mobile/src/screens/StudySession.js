@@ -31,8 +31,25 @@ import { cardsService, studySessionsService } from '@nowry/core/api/services'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
 import { storage } from '@nowry/core'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
-import { GRADE_VARIANTS } from '../ui/buttonSpec'
-import { Button, Card, Divider, Icon, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
+import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
+import { Button, Card, FlipCard, Icon, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
+
+/**
+ * The action band is one constant height whichever face is up.
+ *
+ * Before the reveal it holds one `lg` key; after it, four `md` ones. Letting
+ * the band size itself made the card — which takes the space the band does not
+ * — a different height on each face, so turning a card visibly resized it. A
+ * flashcard is one object; it does not change shape when you turn it over.
+ */
+const ACTION_BAND = BUTTON_SIZES.lg.height + EDGE
+
+/**
+ * And so is the line above it, which is empty on most cards, carries the
+ * gesture hint on the first, and says "already answered" on one reached by
+ * going back. Three different heights on the same screen, for the same reason.
+ */
+const NOTICE_BAND = 20
 
 const GRADES = ['again', 'hard', 'good', 'easy']
 
@@ -55,6 +72,37 @@ export const DAILY_REVIEW = 'daily-review'
 
 const frontOf = (card) => card?.question || card?.title || card?.front || ''
 const backOf = (card) => card?.answer || card?.content || card?.back || ''
+
+/** The web's threshold for "this answer is prose, not a term". */
+const LONG_ANSWER = 100
+
+/**
+ * One face of the card: a coloured label, and the one thing this side says.
+ *
+ * Centred, which the previous build was not. Top alignment was right while the
+ * face held a question AND an answer stacked under it — the reader needed a
+ * fixed place to look. A face that holds one thing has no such problem, and a
+ * lone question pinned to the top of a tall card leaves the wall of empty
+ * surface the design canvas already diagnosed on the web.
+ *
+ * The label colours are the web's: the question's is the accent, the answer's
+ * is success. They are the only cue that reaches a reader mid-turn, and under
+ * reduced motion — where nothing rotates — they are the whole of it.
+ */
+function CardFace({ label, labelColor, level, text }) {
+  return (
+    <Card padding={3} elevation='sm' style={{ flex: 1, justifyContent: 'center' }}>
+      <Stack spacing={2} style={{ alignItems: 'center' }}>
+        <Typography level='body-xs' color={labelColor}>
+          {label}
+        </Typography>
+        <Typography level={level} style={{ textAlign: 'center' }}>
+          {text}
+        </Typography>
+      </Stack>
+    </Card>
+  )
+}
 
 export function StudySession() {
   const { deckId, tags, group, limit } = useLocalSearchParams()
@@ -299,86 +347,83 @@ export function StudySession() {
            * would say the same thing twice.
            */}
           <Pressable style={{ flex: 1 }} onPress={() => setRevealed((shown) => !shown)} importantForAccessibility='no' accessible={false}>
-            <Card
-              padding={3}
-              elevation='sm'
-              /*
-               * Content sits at the TOP, not centred. Centring put a short
-               * question in the middle of a wall of grey with the answer
-               * floating below it, and gave a long one nowhere to grow. The
-               * question is what the reader looks for first, so it is where
-               * the eye lands first.
-               */
+            {/*
+             * Two faces that turn, as on the web — not a question with an
+             * answer appended under it. The back face carries the answer and
+             * only the answer: showing the question on both faces makes the
+             * turn meaningless and hands the reader the prompt they are
+             * supposed to be recalling from.
+             */}
+            <FlipCard
               style={{ flex: 1 }}
-            >
-              <Stack spacing={2}>
-                <Typography level='body-xs' color='text.tertiary'>
-                  {t('cards.session.labels.question')}
-                </Typography>
-                <Typography level='h4'>{frontOf(current)}</Typography>
-
-                {revealed ? (
-                  <>
-                    <Divider />
-                    <Typography level='body-xs' color='text.tertiary'>
-                      {t('cards.session.labels.answer')}
-                    </Typography>
-                    <Typography level='body-lg'>{backOf(current)}</Typography>
-                  </>
-                ) : null}
-              </Stack>
-            </Card>
+              flipped={revealed}
+              front={
+                <CardFace label={t('cards.session.labels.question')} labelColor='primary.plainColor' level='h4' text={frontOf(current)} />
+              }
+              back={
+                <CardFace
+                  label={t('cards.session.labels.answer')}
+                  labelColor='success.plainColor'
+                  // The web's own switch: a long answer is prose and reads at
+                  // body size; a short one is a term and holds the card.
+                  level={backOf(current).length > LONG_ANSWER ? 'body-lg' : 'h4'}
+                  text={backOf(current)}
+                />
+              }
+            />
           </Pressable>
         </SwipeArea>
 
-        {/* The gestures, said once, on the first card only. Every one of them
-            has a button that does the same thing, so this is an offer rather
-            than an instruction — and it is decorative, because a screen reader
-            already has the buttons. */}
-        {hinted ? null : (
-          <Stack direction='row' spacing={2} style={{ justifyContent: 'center' }} importantForAccessibility='no'>
-            <Icon name='ArrowLeft' size='sm' color='text.tertiary' />
-            <Icon name='ArrowUp' size='sm' color='text.tertiary' />
-            <Icon name='ArrowRight' size='sm' color='text.tertiary' />
-          </Stack>
-        )}
+        {/* One line, one height, three possible contents: the gestures said
+            once on the first card, the note that this card already has a
+            grade, or nothing at all. */}
+        <View style={{ height: NOTICE_BAND, justifyContent: 'center' }}>
+          {answered ? (
+            <Typography level='body-xs' color='text.tertiary' accessibilityLiveRegion='polite' style={{ textAlign: 'center' }}>
+              {t('cards.session.grading.alreadyAnswered')}
+            </Typography>
+          ) : hinted ? null : (
+            /* Every gesture has a button that does the same thing, so this is
+               an offer rather than an instruction — and it is decorative,
+               because a screen reader already has the buttons. */
+            <Stack direction='row' spacing={2} style={{ justifyContent: 'center' }} importantForAccessibility='no'>
+              <Icon name='ArrowLeft' size='sm' color='text.tertiary' />
+              <Icon name='ArrowUp' size='sm' color='text.tertiary' />
+              <Icon name='ArrowRight' size='sm' color='text.tertiary' />
+            </Stack>
+          )}
+        </View>
 
-        {/* A card reached by going back was already answered. The web says so
-            rather than letting an identical-looking row silently re-fire. */}
-        {answered ? (
-          <Typography level='body-xs' color='text.tertiary' accessibilityLiveRegion='polite'>
-            {t('cards.session.grading.alreadyAnswered')}
-          </Typography>
-        ) : null}
-
-        {revealed ? (
-          /*
-           * Four tones, not four neutral keys, and they are the web's own:
-           * outlined danger, soft warning, soft success, solid primary. An
-           * earlier version made all four secondary on the reasoning that an
-           * accented key biases self-assessment. That reasoning lost to a
-           * design that has shipped for a year and to the fact that these four
-           * ARE the surface — the exception is recorded in `buttonSpec.js`.
-           */
-          <Stack direction='row' spacing={1}>
-            {GRADES.map((value) => (
-              <Button
-                key={value}
-                variant={GRADE_VARIANTS[value]}
-                size='md'
-                style={{ flex: 1 }}
-                onPress={() => grade(value)}
-                accessibilityLabel={t(`cards.session.grading.${value}`)}
-              >
-                {t(`cards.session.grading.${value}`)}
-              </Button>
-            ))}
-          </Stack>
-        ) : (
-          <Button size='lg' onPress={() => setRevealed(true)}>
-            {t('cards.session.showAnswer')}
-          </Button>
-        )}
+        <View style={{ height: ACTION_BAND, justifyContent: 'center' }}>
+          {revealed ? (
+            /*
+             * Four tones, not four neutral keys, and they are the web's own:
+             * outlined danger, soft warning, soft success, solid primary. An
+             * earlier version made all four secondary on the reasoning that an
+             * accented key biases self-assessment. That reasoning lost to a
+             * design that has shipped for a year and to the fact that these four
+             * ARE the surface — the exception is recorded in `buttonSpec.js`.
+             */
+            <Stack direction='row' spacing={1}>
+              {GRADES.map((value) => (
+                <Button
+                  key={value}
+                  variant={GRADE_VARIANTS[value]}
+                  size='md'
+                  style={{ flex: 1 }}
+                  onPress={() => grade(value)}
+                  accessibilityLabel={t(`cards.session.grading.${value}`)}
+                >
+                  {t(`cards.session.grading.${value}`)}
+                </Button>
+              ))}
+            </Stack>
+          ) : (
+            <Button size='lg' onPress={() => setRevealed(true)}>
+              {t('cards.session.showAnswer')}
+            </Button>
+          )}
+        </View>
       </Stack>
     </Screen>
   )
