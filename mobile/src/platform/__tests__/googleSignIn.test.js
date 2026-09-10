@@ -48,11 +48,13 @@ beforeEach(() => {
   mockSignIn.mockReset().mockResolvedValue({ user: { uid: 'u1' } })
 })
 
-it('redirects on the primary scheme, which must be the package name', () => {
-  // Both alternatives were tried against the real Google client. `nowry://` is
-  // refused by Google outright; the package form sent while `nowry` was primary
-  // came back where nothing was listening. Only this arrangement satisfies both.
-  expect(redirectUriFor()).toBe('com.nowry.app://oauthredirect')
+it('redirects on the package scheme, with ONE slash', () => {
+  // Every variant was tried against the real client. `nowry://oauthredirect`
+  // and `com.nowry.app://oauthredirect` are both refused by Google;
+  // `com.nowry.app:/oauthredirect` is accepted and returns a code. A custom
+  // scheme URI has no authority component, and Google checks.
+  expect(redirectUriFor()).toBe('com.nowry.app:/oauthredirect')
+  expect(redirectUriFor()).not.toContain('://')
 })
 
 it('takes the scheme from the config rather than hardcoding it', () => {
@@ -60,7 +62,7 @@ it('takes the scheme from the config rather than hardcoding it', () => {
   jest.resetModules()
   jest.doMock('expo-constants', () => ({ expoConfig: { scheme: 'renamed', extra: {} } }))
   const { redirectUriFor: rebuilt } = require('../googleSignIn')
-  expect(rebuilt()).toBe('renamed://oauthredirect')
+  expect(rebuilt()).toBe('renamed:/oauthredirect')
   jest.dontMock('expo-constants')
   jest.resetModules()
 })
@@ -83,7 +85,7 @@ it('asks for a code with PKCE, because Google will not hand an installed app an 
 
   expect(MockAuthRequest.lastConfig.responseType).toBe('code')
   expect(MockAuthRequest.lastConfig.usePKCE).toBe(true)
-  expect(MockAuthRequest.lastConfig.redirectUri).toBe('com.nowry.app://oauthredirect')
+  expect(MockAuthRequest.lastConfig.redirectUri).toBe('com.nowry.app:/oauthredirect')
   // openid is what makes Google issue an id_token at the exchange.
   expect(MockAuthRequest.lastConfig.scopes).toContain('openid')
 })
@@ -94,7 +96,7 @@ it('exchanges the code with the verifier, which is what stands in for a secret',
   const [request] = mockExchange.mock.calls[0]
   expect(request.code).toBe('auth-code')
   expect(request.extraParams.code_verifier).toBe('verifier-123')
-  expect(request.redirectUri).toBe('com.nowry.app://oauthredirect')
+  expect(request.redirectUri).toBe('com.nowry.app:/oauthredirect')
   // A public client has no secret, and sending one would be the bug.
   expect(request.clientSecret).toBeUndefined()
 })
@@ -147,7 +149,7 @@ it('names the redirect and the client id when Google refuses', async () => {
 
   await expect(signInWithGoogle({})).rejects.toMatchObject({
     code: 'auth/invalid_request',
-    message: expect.stringContaining('redirect_uri=com.nowry.app://oauthredirect')
+    message: expect.stringContaining('redirect_uri=com.nowry.app:/oauthredirect')
   })
   await expect(signInWithGoogle({})).rejects.toMatchObject({
     message: expect.stringContaining('client_id=android-id.apps.googleusercontent.com')

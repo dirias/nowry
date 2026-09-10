@@ -88,24 +88,26 @@ export const googleClientId = () =>
  * value only under Standalone or Bare and otherwise hands back a development
  * `exp://…` URL, which Google refuses outright.
  *
- * It is the app's PRIMARY scheme, and that has to be the package name. Two
- * constraints meet here and only one arrangement satisfies both:
+ * `com.nowry.app:/oauthredirect` — the package name, ONE slash, and it must
+ * also be the first scheme in `app.config.js`. Every part of that sentence was
+ * established by being wrong first, so every part is written down:
  *
- *   - Google's Android client accepts a redirect only on the package name. Send
- *     `nowry://oauthredirect` and it refuses with `invalid_request`, naming the
- *     redirect in the details.
- *   - Expo's Linking delivers every callback on the FIRST declared scheme, and
- *     `openAuthSessionAsync` resolves only for a URL matching the redirect it
- *     was given. Send the package form while `nowry` is first and the callback
- *     comes back somewhere nothing is listening — which does not error, it
- *     leaks past to the router as "Unmatched Route", authorization code and
- *     all.
+ *   - **The scheme must be the package name.** `nowry://oauthredirect` is
+ *     refused by Google with `invalid_request`, naming the redirect.
+ *   - **One slash, not two.** `com.nowry.app://oauthredirect` is refused the
+ *     same way; `com.nowry.app:/oauthredirect` is accepted and returns a code.
+ *     A custom scheme URI has no authority component, and Google checks.
+ *   - **It must be the FIRST scheme declared.** Expo's Linking delivers every
+ *     callback on the first one, and `openAuthSessionAsync` resolves only for a
+ *     URL matching the redirect it was given. With `nowry` first, Google
+ *     accepted the request and the callback came back where nothing was
+ *     listening — which does not error. It leaks past to the router as
+ *     "Unmatched Route", authorization code and all.
  *
- * So `com.nowry.app` is first in `app.config.js`, and this reads that value
- * rather than repeating it. Google permits a custom scheme at all only because
- * the client has the setting enabled by hand, per EAS-SECRETS.md.
+ * Google permits a custom scheme at all only because the client has the setting
+ * enabled by hand, per EAS-SECRETS.md.
  */
-export const redirectUriFor = () => `${PRIMARY_SCHEME}://oauthredirect`
+export const redirectUriFor = () => `${PRIMARY_SCHEME}:/oauthredirect`
 
 /**
  * @param {object} auth - the client's Firebase Auth instance

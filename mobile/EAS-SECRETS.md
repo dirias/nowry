@@ -61,22 +61,24 @@ Both of these surface as `redirect_uri_mismatch`, which reads like a typo in the
 client ID rather than a wrong flow, so they are stated here and asserted in
 `googleSignIn.test.js`:
 
-- **The redirect is `com.nowry.app://oauthredirect`, and `com.nowry.app` must be
-  the FIRST scheme in `app.config.js`.** Two constraints meet here and only one
-  arrangement satisfies both, so both wrong ones are recorded:
-  - Google's Android client accepts a redirect only on the package name.
-    `nowry://oauthredirect` is refused with `invalid_request`, naming the
-    redirect in the error details.
-  - Expo's Linking delivers every callback on the FIRST declared scheme, and
+- **The redirect is `com.nowry.app:/oauthredirect` — package name, ONE slash —
+  and `com.nowry.app` must be the FIRST scheme in `app.config.js`.** Each part
+  was established by being wrong first, and each wrong answer is recorded
+  because Google reports two of the three identically:
+  - **`nowry://oauthredirect`** — refused, `invalid_request`, redirect named in
+    the details. The scheme must be the package name.
+  - **`com.nowry.app://oauthredirect`** — refused the same way. A custom scheme
+    URI has no authority component, and Google checks the difference.
+  - **`com.nowry.app:/oauthredirect` while `nowry` was the first scheme** —
+    accepted by Google, code returned, and the app never saw it. Expo's Linking
+    delivers every callback on the FIRST declared scheme, and
     `openAuthSessionAsync` resolves only for a URL matching the redirect it was
-    given. Sending the package form while `nowry` was first meant the callback
-    arrived where nothing was listening — which does not error. It leaks past
-    to the router, which shows "Unmatched Route" with the authorization code
-    sitting in the URL.
+    given. A mismatch does not error: it leaks past the listener to the router,
+    which shows "Unmatched Route" with the authorization code in the URL.
 
   Nothing is typed into the Google console for the redirect; an Android client
-  is identified by its package and fingerprint. The order in `app.config.js` is
-  asserted by a test, because getting it backwards fails silently.
+  is identified by its package and fingerprint. The scheme order is asserted by
+  a test, because getting it backwards fails silently in one direction.
 - **The flow is authorization code with PKCE**, not implicit. Google does not
   issue an `id_token` straight to an installed app, and a public client has no
   secret to send.
