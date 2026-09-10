@@ -110,18 +110,20 @@ export const googleClientId = () =>
 export const redirectUriFor = () => `${PRIMARY_SCHEME}:/oauthredirect`
 
 /**
- * The same address as Expo hands it back.
+ * The sign-in that is in flight, if any.
  *
- * Google is told `com.nowry.app:/oauthredirect` and redirects there. Expo
- * normalises what arrives to `<primary scheme>://<path>` before anyone sees it,
- * so the callback turns up as `com.nowry.app://oauthredirect` — one slash more
- * than was sent.
+ * The callback does not come back through the browser helper on Android — it is
+ * delivered to the app as a deep link, which the router receives. Four attempts
+ * at making `openAuthSessionAsync` catch it failed, each in a different way, and
+ * each ended with the authorization code sitting in a URL on an "Unmatched
+ * Route" screen.
  *
- * `promptAsync` uses one value for both the outgoing redirect and the address
- * it waits on, so those two can never both be right. This is the address to
- * WAIT on; `redirectUriFor` is the one to SEND.
+ * So the router is where it is caught, and this is how the two halves meet: the
+ * caller still awaits one promise, the `/oauthredirect` route settles it. The
+ * verifier and the state live here for the same reason — they are needed at the
+ * exchange, which now happens on the other side of a browser trip.
  */
-export const returnUriFor = () => `${PRIMARY_SCHEME}://oauthredirect`
+let pending = null
 
 /**
  * @param {object} auth - the client's Firebase Auth instance
@@ -137,20 +139,16 @@ export const signInWithGoogle = async (auth) => {
     )
   }
 
-  const redirectUri = redirectUriFor()
+  // A second attempt while one is open would leave the first promise forever
+  // unsettled, and the caller waiting on it.
+  pending?.reject(new Error('Google sign-in was restarted'))
 
-  /*
-   * Said out loud in development, because the redirect is the value this flow
-   * gets wrong most often and the failure never names it: a mismatch does not
-   * error, it simply leaks the callback to the router as an unmatched route.
-   */
-  if (__DEV__) console.log('[google] redirect_uri =', redirectUri, '| client_id =', clientId)
+  const redirectUri = redirectUriFor()
 
   const request = new AuthSession.AuthRequest({
     clientId,
     redirectUri,
-    // `openid` is what makes Google issue an id_token at all; Firebase wants
-    // that token and nothing else here does.
+    // `openid` is what makes Google issue an id_token at the exchange.
     scopes: ['openid', 'profile', 'email'],
     responseType: AuthSession.ResponseType.Code,
     // A public client has no secret to prove itself with, so it proves the
@@ -159,54 +157,82 @@ export const signInWithGoogle = async (auth) => {
   })
 
   /*
-   * Opened by hand rather than through `promptAsync`, which sends and waits on
-   * the same string. Google requires one form and Expo delivers the other, so
-   * the two have to be given separately. `parseReturnUrl` still does the
-   * checking — including the state comparison, which is the CSRF guard and is
-   * not something to hand-roll.
+   * Registered BEFORE anything is awaited. Building the URL is asynchronous,
+   * and a cancel arriving during it would have nothing to settle — the caller
+   * would then wait on a promise nobody holds.
    */
+  const promise = new Promise((resolve, reject) => {
+    pending = { auth, clientId, redirectUri, request, resolve, reject }
+  })
+
   const authUrl = await request.makeAuthUrlAsync(DISCOVERY)
-  const opened = await WebBrowser.openAuthSessionAsync(authUrl, returnUriFor())
 
-  const result = opened.type === 'success' ? request.parseReturnUrl(opened.url) : { type: opened.type, params: {} }
+  /*
+   * `openAuthSessionAsync`, not `openBrowserAsync`: it still closes the tab
+   * when the app comes forward, which is the part that does work here. Its
+   * result is ignored — a dismissal is not a decision, because the redirect
+   * itself brings the app forward and dismisses the tab.
+   */
+  if (pending) WebBrowser.openAuthSessionAsync(authUrl, redirectUri).catch(() => {})
 
-  // A decision, not a failure.
-  if (result.type === 'cancel' || result.type === 'dismiss') return null
+  return promise
+}
 
-  if (result.type !== 'success') {
-    /*
-     * Name what was sent, not just what came back.
-     *
-     * Google answers a wrong client id, a wrong redirect and an unregistered
-     * signing fingerprint with the same two words. Three different fixes, one
-     * message — so the message carries the two values a reader would otherwise
-     * spend an evening guessing at. Neither is a secret: the client id is
-     * public by design and the redirect is in the manifest.
-     */
-    const detail = result.params?.error_description || result.params?.error || 'Google sign-in did not complete'
-    const error = new Error(`${detail} — sent redirect_uri=${redirectUri} client_id=${clientId}`)
-    error.code = result.params?.error ? `auth/${result.params.error}` : 'auth/popup-closed-by-user'
-    throw error
+/**
+ * Finish a sign-in from the callback the router received.
+ *
+ * Called by `app/oauthredirect.js` and nowhere else. Returns nothing: the
+ * caller of `signInWithGoogle` is the one waiting on the answer.
+ */
+export const completeGoogleSignIn = async (params = {}) => {
+  const inFlight = pending
+  if (!inFlight) return
+  pending = null
+
+  WebBrowser.dismissBrowser?.()
+
+  try {
+    // The state check is the CSRF guard: a callback that did not come from the
+    // request this app started must not sign anybody in.
+    if (params.state !== inFlight.request.state) {
+      const error = new Error('The sign-in that came back is not the one that was started')
+      error.code = 'auth/state-mismatch'
+      throw error
+    }
+
+    if (params.error || !params.code) {
+      const error = new Error(params.error_description || params.error || 'Google sign-in did not complete')
+      error.code = params.error ? `auth/${params.error}` : 'auth/popup-closed-by-user'
+      throw error
+    }
+
+    const tokens = await AuthSession.exchangeCodeAsync(
+      {
+        clientId: inFlight.clientId,
+        code: params.code,
+        redirectUri: inFlight.redirectUri,
+        extraParams: { code_verifier: inFlight.request.codeVerifier }
+      },
+      DISCOVERY
+    )
+
+    if (!tokens.idToken) {
+      const error = new Error('Google returned no id_token')
+      error.code = 'auth/invalid-credential'
+      throw error
+    }
+
+    const credential = GoogleAuthProvider.credential(tokens.idToken)
+    inFlight.resolve(await signInWithCredential(inFlight.auth, credential))
+  } catch (error) {
+    inFlight.reject(error)
   }
+}
 
-  const tokens = await AuthSession.exchangeCodeAsync(
-    {
-      clientId,
-      code: result.params.code,
-      redirectUri,
-      extraParams: { code_verifier: request.codeVerifier }
-    },
-    DISCOVERY
-  )
-
-  if (!tokens.idToken) {
-    const error = new Error('Google returned no id_token')
-    error.code = 'auth/invalid-credential'
-    throw error
-  }
-
-  const credential = GoogleAuthProvider.credential(tokens.idToken)
-  return signInWithCredential(auth, credential)
+/** Dismissing the browser without a callback is a decision, not a failure. */
+export const cancelGoogleSignIn = () => {
+  pending?.resolve(null)
+  pending = null
 }
 
 export default signInWithGoogle

@@ -1,14 +1,19 @@
 /**
- * The two rules that are Google's, not ours.
+ * Google sign-in, which failed five different ways before it worked.
  *
- * Both were wrong in the first draft, and neither fails until a real client ID
- * is in place — at which point both surface as `redirect_uri_mismatch`, which
- * reads like a typo in the ID rather than a wrong flow. So they are asserted
- * against the request this builds rather than discovered in a browser.
+ * The shape is unusual and the reason is in `googleSignIn.js`: the callback is
+ * not caught by the browser helper on Android, it is delivered to the app as a
+ * deep link and arrives at the router. So the flow is split — one call starts
+ * it and returns a promise, and the `/oauthredirect` route settles that promise
+ * once the callback lands.
+ *
+ * What is worth testing here is what the earlier attempts got wrong: the exact
+ * redirect, the exchange, and the state check that stops a callback from
+ * somewhere else signing anybody in.
  */
-const mockParse = jest.fn()
-const mockOpen = jest.fn()
 const mockExchange = jest.fn()
+const mockOpen = jest.fn()
+const mockDismiss = jest.fn()
 const mockCredential = jest.fn()
 const mockSignIn = jest.fn()
 
@@ -16,16 +21,11 @@ class MockAuthRequest {
   constructor(config) {
     MockAuthRequest.lastConfig = config
     this.codeVerifier = 'verifier-123'
+    this.state = 'state-abc'
   }
 
   async makeAuthUrlAsync() {
-    return 'https://accounts.google.com/o/oauth2/v2/auth?whatever'
-  }
-
-  /** The library's own parse, stubbed: it is what checks `state`. */
-  parseReturnUrl(url) {
-    MockAuthRequest.parsed = url
-    return mockParse()
+    return 'https://accounts.google.com/o/oauth2/v2/auth?built'
   }
 }
 
@@ -36,7 +36,8 @@ jest.mock('expo-auth-session', () => ({
 }))
 jest.mock('expo-web-browser', () => ({
   maybeCompleteAuthSession: jest.fn(),
-  openAuthSessionAsync: (...args) => mockOpen(...args)
+  openAuthSessionAsync: (...args) => mockOpen(...args),
+  dismissBrowser: (...args) => mockDismiss(...args)
 }))
 jest.mock('expo-application', () => ({ applicationId: 'com.nowry.app' }))
 jest.mock('expo-constants', () => ({
@@ -48,133 +49,178 @@ jest.mock('firebase/auth', () => ({
   signInWithCredential: (...args) => mockSignIn(...args)
 }))
 
-const { redirectUriFor, signInWithGoogle } = require('../googleSignIn')
+const { cancelGoogleSignIn, completeGoogleSignIn, redirectUriFor, signInWithGoogle } = require('../googleSignIn')
+
+const CALLBACK = { state: 'state-abc', code: 'auth-code' }
+
+/** Let the URL get built and the browser opened before asserting on either. */
+const started = () => new Promise((resolve) => setImmediate(resolve))
 
 beforeEach(() => {
   MockAuthRequest.lastConfig = null
-  // Sync, like the library's own: it parses a URL, it does not await one.
-  mockParse.mockReset().mockReturnValue({ type: 'success', params: { code: 'auth-code' } })
-  mockOpen.mockReset().mockResolvedValue({ type: 'success', url: 'com.nowry.app://oauthredirect?code=auth-code' })
+  mockOpen.mockReset().mockResolvedValue({ type: 'dismiss' })
+  mockDismiss.mockReset()
   mockExchange.mockReset().mockResolvedValue({ idToken: 'the-id-token' })
   mockCredential.mockReset().mockReturnValue('the-credential')
   mockSignIn.mockReset().mockResolvedValue({ user: { uid: 'u1' } })
 })
 
-it('waits on the address Expo hands back, which has one slash MORE than it sent', async () => {
-  // Google is told `com.nowry.app:/oauthredirect` and redirects there; Expo
-  // normalises what arrives to `<primary>://<path>`. promptAsync uses one value
-  // for both, so those two can never both be right — hence the separation.
-  await signInWithGoogle({})
-
-  const [, waitedOn] = mockOpen.mock.calls[0]
-  expect(waitedOn).toBe('com.nowry.app://oauthredirect')
-  expect(MockAuthRequest.lastConfig.redirectUri).toBe('com.nowry.app:/oauthredirect')
-})
-
-it('redirects on the package scheme, with ONE slash', () => {
-  // Every variant was tried against the real client. `nowry://oauthredirect`
-  // and `com.nowry.app://oauthredirect` are both refused by Google;
-  // `com.nowry.app:/oauthredirect` is accepted and returns a code. A custom
-  // scheme URI has no authority component, and Google checks.
-  expect(redirectUriFor()).toBe('com.nowry.app:/oauthredirect')
-  expect(redirectUriFor()).not.toContain('://')
-})
-
-it('takes the scheme from the config rather than hardcoding it', () => {
-  // Renaming the app's scheme must not silently break sign-in.
-  jest.resetModules()
-  jest.doMock('expo-constants', () => ({ expoConfig: { scheme: 'renamed', extra: {} } }))
-  const { redirectUriFor: rebuilt } = require('../googleSignIn')
-  expect(rebuilt()).toBe('renamed:/oauthredirect')
-  jest.dontMock('expo-constants')
-  jest.resetModules()
-})
-
-it('does not go through makeRedirectUri, which is conditional on how the app launched', () => {
-  // That helper returns its `native` value only under Standalone or Bare and
-  // otherwise hands back an `exp://…` development URL, which Google refuses
-  // with Error 400: invalid_request. What this must be is not conditional.
-  // Comments here NAME the helper, to record why it is avoided. Counting those
-  // would let the explanation fail the rule it explains.
-  const source = require('fs')
-    .readFileSync(require('path').resolve(__dirname, '../googleSignIn.js'), 'utf8')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
-  expect(source).not.toMatch(/makeRedirectUri/)
-})
-
-it('asks for a code with PKCE, because Google will not hand an installed app an id_token', async () => {
-  await signInWithGoogle({})
-
-  expect(MockAuthRequest.lastConfig.responseType).toBe('code')
-  expect(MockAuthRequest.lastConfig.usePKCE).toBe(true)
-  expect(MockAuthRequest.lastConfig.redirectUri).toBe('com.nowry.app:/oauthredirect')
-  // openid is what makes Google issue an id_token at the exchange.
-  expect(MockAuthRequest.lastConfig.scopes).toContain('openid')
-})
-
-it('exchanges the code with the verifier, which is what stands in for a secret', async () => {
-  await signInWithGoogle({})
-
-  const [request] = mockExchange.mock.calls[0]
-  expect(request.code).toBe('auth-code')
-  expect(request.extraParams.code_verifier).toBe('verifier-123')
-  expect(request.redirectUri).toBe('com.nowry.app:/oauthredirect')
-  // A public client has no secret, and sending one would be the bug.
-  expect(request.clientSecret).toBeUndefined()
-})
-
-it('hands Firebase the id_token from the exchange', async () => {
-  await signInWithGoogle({ instance: true })
-
-  expect(mockCredential).toHaveBeenCalledWith('the-id-token')
-  expect(mockSignIn).toHaveBeenCalledWith({ instance: true }, 'the-credential')
-})
-
-it('treats a dismissed browser as a decision, not a failure', async () => {
-  mockOpen.mockResolvedValue({ type: 'dismiss' })
-  await expect(signInWithGoogle({})).resolves.toBeNull()
-
-  mockOpen.mockResolvedValue({ type: 'cancel' })
-  await expect(signInWithGoogle({})).resolves.toBeNull()
-  expect(mockExchange).not.toHaveBeenCalled()
-})
-
-it('says an exchange that returns no id_token is a credential problem', async () => {
-  mockExchange.mockResolvedValue({ accessToken: 'a' })
-  await expect(signInWithGoogle({})).rejects.toMatchObject({ code: 'auth/invalid-credential' })
-})
-
-/**
- * The redirect only comes back if the OS knows to route it here.
- *
- * Google's Android client redirects to `<package>:/oauthredirect`, so that
- * package name has to be a declared scheme. Miss it and the browser opens,
- * Google accepts the sign-in, and nothing returns — a hang with no error, which
- * is the worst shape a failure can take and the hardest to attribute.
- */
-it('declares the package name FIRST, which is the whole of the fix', () => {
-  const config = require('../../../app.config.js')().expo
-  const schemes = [].concat(config.scheme)
-
-  // Google accepts a redirect only on the package name; Expo delivers every
-  // callback on the first declared scheme. Reversing these two is a sign-in
-  // that fails silently, so the order is asserted rather than trusted.
-  expect(schemes[0]).toBe(config.android.package)
-  // `nowry` stays declared: it is the scheme deep links use.
-  expect(schemes).toContain('nowry')
-})
-
-it('names the redirect and the client id when Google refuses', async () => {
-  // Google answers a wrong client id, a wrong redirect and an unregistered
-  // fingerprint with the same two words. The message has to separate them.
-  mockParse.mockReturnValue({ type: 'error', params: { error: 'invalid_request' } })
-
-  await expect(signInWithGoogle({})).rejects.toMatchObject({
-    code: 'auth/invalid_request',
-    message: expect.stringContaining('redirect_uri=com.nowry.app:/oauthredirect')
+describe('the redirect', () => {
+  it('is the package scheme with ONE slash', () => {
+    // Every other form was refused by Google against the real client:
+    // `nowry://oauthredirect` and `com.nowry.app://oauthredirect` both.
+    expect(redirectUriFor()).toBe('com.nowry.app:/oauthredirect')
+    expect(redirectUriFor()).not.toContain('://')
   })
-  await expect(signInWithGoogle({})).rejects.toMatchObject({
-    message: expect.stringContaining('client_id=android-id.apps.googleusercontent.com')
+
+  it('comes from the config rather than a constant', () => {
+    jest.resetModules()
+    jest.doMock('expo-constants', () => ({ expoConfig: { scheme: 'renamed', extra: {} } }))
+    const { redirectUriFor: rebuilt } = require('../googleSignIn')
+    expect(rebuilt()).toBe('renamed:/oauthredirect')
+    jest.dontMock('expo-constants')
+    jest.resetModules()
+  })
+
+  it('is not built by makeRedirectUri, which is conditional on how the app launched', () => {
+    // Comments here NAME the helper, to record why it is avoided. Counting
+    // those would let the explanation fail the rule it explains.
+    const source = require('fs')
+      .readFileSync(require('path').resolve(__dirname, '../googleSignIn.js'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '')
+    expect(source).not.toMatch(/makeRedirectUri/)
+  })
+})
+
+describe('starting a sign-in', () => {
+  it('asks for a code with PKCE, because Google will not hand an installed app an id_token', async () => {
+    const promise = signInWithGoogle({})
+    cancelGoogleSignIn()
+    await promise
+
+    expect(MockAuthRequest.lastConfig.responseType).toBe('code')
+    expect(MockAuthRequest.lastConfig.usePKCE).toBe(true)
+    expect(MockAuthRequest.lastConfig.redirectUri).toBe('com.nowry.app:/oauthredirect')
+    // openid is what makes Google issue an id_token at the exchange.
+    expect(MockAuthRequest.lastConfig.scopes).toContain('openid')
+  })
+
+  it('opens the built authorization URL', async () => {
+    const promise = signInWithGoogle({})
+    await started()
+
+    expect(mockOpen.mock.calls[0][0]).toBe('https://accounts.google.com/o/oauth2/v2/auth?built')
+
+    cancelGoogleSignIn()
+    await promise
+  })
+
+  it('does not open a browser for a sign-in already cancelled', async () => {
+    // Cancelling during the URL build must not leave a tab open behind it.
+    const promise = signInWithGoogle({})
+    cancelGoogleSignIn()
+    await promise
+    await started()
+
+    expect(mockOpen).not.toHaveBeenCalled()
+  })
+
+  it('refuses to be configured away', async () => {
+    jest.resetModules()
+    jest.doMock('expo-constants', () => ({ expoConfig: { scheme: 'nowry', extra: {} } }))
+    const { signInWithGoogle: unconfigured } = require('../googleSignIn')
+    await expect(unconfigured({})).rejects.toThrow(/not configured/)
+    jest.dontMock('expo-constants')
+    jest.resetModules()
+  })
+})
+
+describe('completing it from the callback', () => {
+  it('exchanges the code with the verifier and hands Firebase the id_token', async () => {
+    const promise = signInWithGoogle({ instance: true })
+    await completeGoogleSignIn(CALLBACK)
+
+    await expect(promise).resolves.toEqual({ user: { uid: 'u1' } })
+
+    const [request] = mockExchange.mock.calls[0]
+    expect(request.code).toBe('auth-code')
+    expect(request.extraParams.code_verifier).toBe('verifier-123')
+    expect(request.redirectUri).toBe('com.nowry.app:/oauthredirect')
+    // A public client has no secret, and sending one would be the bug.
+    expect(request.clientSecret).toBeUndefined()
+    expect(mockCredential).toHaveBeenCalledWith('the-id-token')
+    expect(mockSignIn).toHaveBeenCalledWith({ instance: true }, 'the-credential')
+  })
+
+  it('closes the browser tab behind it', async () => {
+    const promise = signInWithGoogle({})
+    await completeGoogleSignIn(CALLBACK)
+    await promise
+
+    expect(mockDismiss).toHaveBeenCalled()
+  })
+
+  it('refuses a callback whose state is not the one it started', async () => {
+    // The CSRF guard: a callback from somewhere else must not sign anybody in.
+    const promise = signInWithGoogle({})
+    await completeGoogleSignIn({ state: 'somebody-elses', code: 'auth-code' })
+
+    await expect(promise).rejects.toMatchObject({ code: 'auth/state-mismatch' })
+    expect(mockExchange).not.toHaveBeenCalled()
+  })
+
+  it('reports what Google said when it refused', async () => {
+    const promise = signInWithGoogle({})
+    await completeGoogleSignIn({ state: 'state-abc', error: 'invalid_request' })
+
+    await expect(promise).rejects.toMatchObject({ code: 'auth/invalid_request' })
+  })
+
+  it('treats an exchange with no id_token as a credential problem', async () => {
+    mockExchange.mockResolvedValue({ accessToken: 'a' })
+    const promise = signInWithGoogle({})
+    await completeGoogleSignIn(CALLBACK)
+
+    await expect(promise).rejects.toMatchObject({ code: 'auth/invalid-credential' })
+  })
+
+  it('does nothing at all when no sign-in is in flight', async () => {
+    // The route runs on every delivery; a stray one must not throw.
+    await expect(completeGoogleSignIn(CALLBACK)).resolves.toBeUndefined()
+    expect(mockExchange).not.toHaveBeenCalled()
+  })
+
+  it('settles the first promise when a second sign-in starts', async () => {
+    const first = signInWithGoogle({})
+    const second = signInWithGoogle({})
+
+    // Otherwise the first caller waits forever behind a browser it cannot see.
+    await expect(first).rejects.toThrow(/restarted/)
+    cancelGoogleSignIn()
+    await second
+  })
+})
+
+describe('cancelling', () => {
+  it('is a decision, not a failure', async () => {
+    const promise = signInWithGoogle({})
+    cancelGoogleSignIn()
+
+    await expect(promise).resolves.toBeNull()
+    expect(mockExchange).not.toHaveBeenCalled()
+  })
+})
+
+describe('the app config', () => {
+  it('declares the package name FIRST', () => {
+    const config = require('../../../app.config.js')().expo
+    const schemes = [].concat(config.scheme)
+
+    // Expo delivers every callback on the first declared scheme, so this is
+    // what decides where the redirect lands. Getting it backwards fails
+    // silently, which is why it is asserted.
+    expect(schemes[0]).toBe(config.android.package)
+    expect(schemes).toContain('nowry')
   })
 })
