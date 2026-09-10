@@ -8,70 +8,79 @@
  * content, nothing turned, and the card grew as the answer arrived. A flashcard
  * that does not turn is a list.
  *
- * **Two faces, one box.** Both faces fill the same container absolutely, so the
- * card is exactly one size whichever way round it is. The container's height is
- * whatever the caller gives it; nothing here measures content.
+ * **One face is mounted, not two.** The web draws both faces at once, holds
+ * them on top of each other with `position: absolute`, and hides whichever is
+ * turned away. That is the CSS idiom and it does not survive the trip: two
+ * absolutely positioned faces inside a flexed column left the card 50pt tall
+ * with nothing legible in it, which is the state the first build of this
+ * shipped in. Here the card holds ONE child in ordinary flow, which is the
+ * layout the screen already had working, and the content is swapped at the
+ * halfway point of the turn — the frame where the card is edge-on and there is
+ * nothing to see. The child is counter-rotated while the back is up, so the
+ * answer reads the right way round rather than mirrored.
  *
- * **`backfaceVisibility` AND an opacity step.** The former is what makes a flip
- * a flip, but it is unreliable on some Android GPUs, where both faces can paint
- * for a frame mid-turn — the answer flashing through the question is the one
- * failure this screen cannot have. So each face is also switched off at the
- * halfway point. Two mechanisms, one of which is belt.
+ * That also disposes of the spoiler the web had to write a comment about: the
+ * answer is not in the tree at all until the card is halfway through turning
+ * towards it.
  *
  * **240ms, the `slow` step, standard easing** (MOTION.md §2): a flip is
- * position, and position is 240. Under reduced motion the duration is zero, so
- * the card is simply the other way round — removed, not slowed, which is the
- * standard's rule. The faces differ in colour and label, so the state stays
- * legible with nothing moving.
+ * position, and position is 240. Under reduced motion there is no turn and no
+ * delay — the card is simply the other way round, removed rather than slowed,
+ * which is the standard's rule. The faces differ in colour and label, so the
+ * state stays legible with nothing moving.
  */
-import { useEffect, useRef } from 'react'
-import { Animated, Easing, StyleSheet } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { Animated, Easing, View } from 'react-native'
 import { useReduceMotion, useTheme } from '../../theme'
 
 /** Enough depth for the turn to read as a turn, without the fisheye. */
 export const FLIP_PERSPECTIVE = 1200
 
-/**
- * The frame the hidden face is switched off at: halfway, and the frame before
- * it. Two distinct values because an interpolation's input range has to
- * increase — a repeated stop is not a step, it is an invariant violation.
- */
-const HALF = [0.499, 0.5]
+/** Half a turn, in degrees and as a transform the content is corrected by. */
+const HALF_TURN = '180deg'
+const MIRRORED = [{ rotateY: HALF_TURN }]
+const UPRIGHT = []
 
 export function FlipCard({ flipped, front, back, style }) {
   const theme = useTheme()
   const reduceMotion = useReduceMotion()
   const turn = useRef(new Animated.Value(flipped ? 1 : 0)).current
+  // Which face's content is in the tree. It follows `flipped` half a turn
+  // late, so the swap happens behind the card's own edge.
+  const [showing, setShowing] = useState(flipped)
 
   useEffect(() => {
+    if (reduceMotion) {
+      turn.setValue(flipped ? 1 : 0)
+      setShowing(flipped)
+      return undefined
+    }
+
+    const duration = theme.motion.duration.slow
     Animated.timing(turn, {
       toValue: flipped ? 1 : 0,
-      duration: reduceMotion ? 0 : theme.motion.duration.slow,
+      duration,
       easing: Easing.bezier(...theme.motion.easing.standard),
       useNativeDriver: true
     }).start()
+
+    const swap = setTimeout(() => setShowing(flipped), duration / 2)
+    return () => clearTimeout(swap)
   }, [flipped, reduceMotion, turn, theme])
 
-  const face = (from, to, visibleWhile) => ({
-    ...StyleSheet.absoluteFillObject,
-    backfaceVisibility: 'hidden',
-    transform: [{ perspective: FLIP_PERSPECTIVE }, { rotateY: turn.interpolate({ inputRange: [0, 1], outputRange: [from, to] }) }],
-    // A step, not a fade: 1 for the half of the turn this face faces the
-    // reader, 0 for the half it does not.
-    opacity: turn.interpolate({
-      inputRange: [0, HALF[0], HALF[1], 1],
-      outputRange: visibleWhile === 'front' ? [1, 1, 0, 0] : [0, 0, 1, 1]
-    })
-  })
-
   return (
-    <Animated.View style={style}>
-      <Animated.View style={face('0deg', '180deg', 'front')} pointerEvents={flipped ? 'none' : 'auto'}>
-        {front}
-      </Animated.View>
-      <Animated.View style={face('180deg', '360deg', 'back')} pointerEvents={flipped ? 'auto' : 'none'}>
-        {back}
-      </Animated.View>
+    <Animated.View
+      style={[
+        style,
+        {
+          transform: [
+            { perspective: FLIP_PERSPECTIVE },
+            { rotateY: turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', HALF_TURN] }) }
+          ]
+        }
+      ]}
+    >
+      <View style={{ flex: 1, transform: showing ? MIRRORED : UPRIGHT }}>{showing ? back : front}</View>
     </Animated.View>
   )
 }
