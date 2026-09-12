@@ -2273,7 +2273,9 @@
       "title_other": "{{count}} Karten in ein Deck verschieben",
       "confirm_one": "{{count}} Karte verschieben",
       "confirm_other": "{{count}} Karten verschieben"
-    }
+    },
+    "newCard": "Neue Karte",
+    "newDeck": "Neuer Stapel"
   },
   "books": {
     "title": "Bücher",

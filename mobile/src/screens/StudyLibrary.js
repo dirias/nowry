@@ -27,6 +27,7 @@ import { useTags } from '@nowry/core/hooks/useTags'
 import { useBulkCardActions } from '@nowry/core/hooks/useBulkCardActions'
 import { useCardSelection } from '@nowry/core/hooks/useCardSelection'
 import { systemGroup, tagGroups } from '@nowry/core/domain/sessionLog'
+import { filterDecks } from '@nowry/core/domain/deckQuery'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { useTheme } from '../theme'
 import { DeckCreateSheet } from './DeckCreateSheet'
@@ -72,6 +73,7 @@ export function StudyLibrary({ header }) {
   const [untagged, setUntagged] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [adding, setAdding] = useState(false)
   const [previewing, setPreviewing] = useState(null)
 
   const selection = useCardSelection()
@@ -111,7 +113,12 @@ export function StudyLibrary({ header }) {
        * names the API does not send — so every deck read "cards · 0" with no
        * due count at all. `deckCounts` is now the one reader of those fields.
        */
-      return (decks.decks ?? []).map((deck) => ({
+      /*
+       * Filtered by the web's own predicate, from the shared package. This
+       * view had no search field and no filtering at all: with four decks that
+       * is invisible and with forty it is the screen's whole job (MOB-062).
+       */
+      return filterDecks(decks.decks, { search }).map((deck) => ({
         key: deck._id ?? deck.id,
         deck,
         onPress: () => router.push(`/study/deck/${deck._id ?? deck.id}`)
@@ -221,43 +228,56 @@ export function StudyLibrary({ header }) {
         ]}
       />
 
-      {view === VIEWS.decks ? (
-        <Button size='sm' variant='secondary' onPress={() => setCreating(true)} accessibilityLabel={t('study.today.createDeck')}>
-          {t('study.today.createDeck')}
-        </Button>
-      ) : null}
+      {/* One toolbar row: search, the filter key and the one that adds. Never
+          four rows — the web library grew to four before the redesign, which is
+          the fault the canvas names. The keys are icon-only at 44 square, as
+          the board draws them, so the field keeps the width.
 
-      {/* One toolbar row: search and the filter key. Never four rows — the web
-          library grew to four before the redesign, which is the fault the
-          canvas names. The key is icon-only at 44 square, as the board draws
-          it, so the field keeps the width. */}
-      {view === VIEWS.cards || view === VIEWS.tags ? (
-        <Stack direction='row' spacing={1} alignItems='center'>
-          <Input
-            value={search}
-            onChangeText={setSearch}
-            placeholder={t(view === VIEWS.tags ? 'filters.searchTags' : 'common.search')}
-            accessibilityLabel={t(view === VIEWS.tags ? 'filters.searchTags' : 'common.search')}
-            autoCapitalize='none'
-            returnKeyType='search'
-            style={{ flex: 1 }}
-          />
-          {view === VIEWS.cards ? (
-            <IconButton
-              // md is 40 and lg is 48; the board draws 44, which is the
-              // standard's own touch minimum and the height the field beside
-              // it already uses. `md` plus that floor is the two agreeing.
-              size='md'
-              style={{ minWidth: MIN_TOUCH_TARGET }}
-              variant='secondary'
-              onPress={() => setFiltersOpen(true)}
-              accessibilityLabel={filterCount > 0 ? `${t('filters.toggle')} · ${filterCount}` : t('filters.toggle')}
-            >
-              <Icon name='SlidersHorizontal' size='sm' color={filterCount > 0 ? 'primary.plainColor' : 'text.secondary'} />
-            </IconButton>
-          ) : null}
-        </Stack>
-      ) : null}
+          Search is on EVERY view, as the web's toolbar has it. It was on cards
+          and tags only, so a deck could be found by scrolling and by nothing
+          else (MOB-062). */}
+      <Stack direction='row' spacing={1} alignItems='center'>
+        <Input
+          value={search}
+          onChangeText={setSearch}
+          placeholder={t(view === VIEWS.tags ? 'filters.searchTags' : 'common.search')}
+          accessibilityLabel={t(view === VIEWS.tags ? 'filters.searchTags' : 'common.search')}
+          autoCapitalize='none'
+          returnKeyType='search'
+          style={{ flex: 1 }}
+        />
+        {view === VIEWS.cards ? (
+          <IconButton
+            // md is 40 and lg is 48; the board draws 44, which is the
+            // standard's own touch minimum and the height the field beside
+            // it already uses. `md` plus that floor is the two agreeing.
+            size='md'
+            style={{ minWidth: MIN_TOUCH_TARGET }}
+            variant='secondary'
+            onPress={() => setFiltersOpen(true)}
+            accessibilityLabel={filterCount > 0 ? `${t('filters.toggle')} · ${filterCount}` : t('filters.toggle')}
+          >
+            <Icon name='SlidersHorizontal' size='sm' color={filterCount > 0 ? 'primary.plainColor' : 'text.secondary'} />
+          </IconButton>
+        ) : null}
+        {/*
+         * The web's `Add ▾`, which is one key opening a short list — not a
+         * full-width slab that says only "Create deck". That slab was the
+         * whole of what this screen offered: a new CARD could not be made from
+         * the library at all, on a client that has the editor for one.
+         * Importing is the one item that stays absent: it needs a file picker,
+         * which is a native module and another build (as in Books).
+         */}
+        <IconButton
+          size='md'
+          style={{ minWidth: MIN_TOUCH_TARGET }}
+          variant='secondary'
+          onPress={() => setAdding(true)}
+          accessibilityLabel={t('cards.add')}
+        >
+          <Icon name='Plus' size='sm' color='text.secondary' />
+        </IconButton>
+      </Stack>
 
       {/* The section's own readout, and the order it is in. */}
       {view === VIEWS.tags ? (
@@ -363,6 +383,16 @@ export function StudyLibrary({ header }) {
               setUntagged(false)
             }
           }
+        ]}
+      />
+
+      <ActionSheet
+        visible={adding}
+        onClose={() => setAdding(false)}
+        title={t('cards.add')}
+        actions={[
+          { id: 'deck', label: t('cards.newDeck'), onPress: () => setCreating(true) },
+          { id: 'card', label: t('cards.newCard'), onPress: () => router.push('/study/card/new') }
         ]}
       />
 

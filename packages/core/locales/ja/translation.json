@@ -2382,7 +2382,9 @@
     "move": {
       "title_other": "{{count}}枚のカードをデッキへ移動",
       "confirm_other": "{{count}}枚を移動"
-    }
+    },
+    "newCard": "新しいカード",
+    "newDeck": "新しいデッキ"
   },
   "subscription": {
     "title": "Subscription & Billing",

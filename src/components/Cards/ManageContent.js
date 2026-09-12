@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Skeleton, Typography } from '@mui/joy'
 import { patchCardInCache } from '@nowry/core/api/cardCache'
+import { filterDecks } from '@nowry/core/domain/deckQuery'
 import CardPreviewModal from './CardPreviewModal'
 import DeckAnalysisPanel from './DeckAnalysisPanel'
 import DeckActionsMenu from './DeckActionsMenu'
@@ -125,21 +126,15 @@ export default function ManageContent({
   const openStudy = useCallback((deck) => (onStudy ? onStudy(deck) : navigate(`/study/${deck._id}?mode=study`)), [navigate, onStudy])
   const openBrowse = useCallback((deck) => (onBrowse ? onBrowse(deck) : navigate(`/study/${deck._id}?mode=browse`)), [navigate, onBrowse])
 
-  const filteredDecks = useMemo(() => {
-    const query = (searchQuery || '').toLowerCase()
-    return decks.filter((deck) => {
-      const orGroups = query.split(',')
-      const matchesSearch = orGroups.some((group) => {
-        const terms = group.trim().split(/\s+/).filter(Boolean)
-        if (terms.length === 0) return false
-        return terms.every((term) => deck.name.toLowerCase().includes(term) || deck.tags?.some((tag) => tag.toLowerCase().includes(term)))
-      })
-      const deckTypeKey = deck.deck_type || 'flashcard'
-      const matchesType = filterType === 'all' || deckTypeKey === filterType
-      const matchesTags = selectedTags.length === 0 || selectedTags.some((tag) => deck.tags?.includes(tag))
-      return (query.trim() === '' || matchesSearch) && matchesType && matchesTags
-    })
-  }, [decks, searchQuery, filterType, selectedTags])
+  /*
+   * The predicate lives in the shared package now (`deckQuery`). The phone's
+   * deck view had no search field and no filtering at all, and writing a second
+   * copy of this is how two libraries start (MOB-062).
+   */
+  const filteredDecks = useMemo(
+    () => filterDecks(decks, { search: searchQuery, type: filterType, tags: selectedTags }),
+    [decks, searchQuery, filterType, selectedTags]
+  )
 
   // Cards are filtered server-side (search + tags + mark via useCardData); only
   // the local type filter applies to what the API returned.

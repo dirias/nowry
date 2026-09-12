@@ -2285,7 +2285,9 @@
       "title_other": "Déplacer {{count}} cartes vers un paquet",
       "confirm_one": "Déplacer {{count}} carte",
       "confirm_other": "Déplacer {{count}} cartes"
-    }
+    },
+    "newCard": "Nouvelle carte",
+    "newDeck": "Nouveau paquet"
   },
   "books": {
     "title": "Livres",
