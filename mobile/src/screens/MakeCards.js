@@ -179,6 +179,12 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
       <Stack spacing={2}>
         {step === 'sections' ? (
           <>
+            {/*
+             * The subtitle and the select-all key, both from the web's own
+             * header. Select all/none was absent here and it was not a
+             * decision — the control audit (MOB-058) found it, which is what
+             * the audit is for.
+             */}
             {sections === null ? (
               <Stack spacing={1}>
                 {[0, 1, 2].map((i) => (
@@ -191,6 +197,21 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
               </Typography>
             ) : (
               <View>
+                <Stack direction='row' spacing={1} style={{ alignItems: 'center', paddingBottom: theme.spacing[1] }}>
+                  <Typography level='body-sm' color='text.tertiary' style={{ flex: 1 }} numberOfLines={1}>
+                    {t('books.makeCards.subtitle', { title: book?.title ?? '', count: sections.length })}
+                  </Typography>
+                  <Button
+                    size='sm'
+                    variant='tertiary'
+                    onPress={() =>
+                      setTicked((current) => (current.length === sections.length ? [] : sections.map((section) => section.index)))
+                    }
+                  >
+                    {t(ticked.length === sections.length ? 'books.makeCards.selectNone' : 'books.makeCards.selectAll')}
+                  </Button>
+                </Stack>
+
                 {sections.map((section) => (
                   <SectionRow
                     key={section.index}
@@ -223,11 +244,13 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
               </Button>
             </Stack>
 
-            {estimate > 0 ? (
-              <Typography level='body-xs' color='text.tertiary'>
-                {t('books.makeCards.budgetPro', { cards: estimate, sections: ticked.length })}
-              </Typography>
-            ) : null}
+            {/* The budget when something is ticked; the instruction when
+                nothing is, which is the web's own pair. */}
+            <Typography level='body-xs' color='text.tertiary'>
+              {ticked.length === 0
+                ? t('books.makeCards.pick')
+                : t('books.makeCards.budgetPro', { cards: estimate, sections: ticked.length })}
+            </Typography>
           </>
         ) : (
           <>
