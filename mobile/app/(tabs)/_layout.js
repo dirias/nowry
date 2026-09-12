@@ -32,13 +32,21 @@
  * its header because a mouse has a pointer and a wide screen; splitting them is
  * why a phone can have two bars without one being redundant.
  *
+ * **A tab button goes to the tab, never back into what was left open on it.**
+ * Pressing Study while a session was pushed on that tab reopened the session,
+ * because a tab navigator restores whatever its stack held. That is the right
+ * default for a browsing position and the wrong one for a task: the session
+ * writes its progress to storage after every grade and resumes on the card it
+ * was on, so popping it costs nothing and keeps the bar's promise — the label
+ * says Study, so the button opens the Study Center (MOB-080).
+ *
  * **Each bar holds the inset at its own edge**, because each is the chrome
  * closest to it. Android draws this app under the system bars (edge-to-edge in
  * `app.config.js`), and nothing was holding the bottom one: the last tab sat
  * against the system navigation. Screens between the two defer both insets
  * through `ScreenChromeProvider`, so each is held exactly once.
  */
-import { Tabs } from 'expo-router'
+import { Tabs, router } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../../src/theme'
@@ -50,6 +58,28 @@ import { resolveColor } from '../../src/ui/Typography'
 
 /** The bar's own height, before the system navigation is added under it. */
 const TAB_BAR_HEIGHT = 56
+
+/**
+ * A tab button goes to that tab's own screen, not back into what was pushed on
+ * it.
+ *
+ * Written against the router rather than against navigation state: Expo Router
+ * v57 keeps the nested stacks in its own store, and a tab screen's
+ * `navigation.getState()` reports its siblings with no nested state at all — so
+ * the React Navigation recipe of dispatching `POP_TO_TOP` at a nested key has
+ * no key to aim at. `navigate` takes an href and pops back to that route when
+ * it is already in the stack, which is exactly the wanted behaviour and is the
+ * router's job rather than ours.
+ *
+ * `preventDefault` because we are doing the navigation; without it the tab
+ * navigator restores its remembered stack immediately afterwards.
+ */
+const toTabRoot = (href) => () => ({
+  tabPress: (event) => {
+    event.preventDefault()
+    router.navigate(href)
+  }
+})
 
 export default function TabsLayout() {
   const { t } = useTranslation()
@@ -86,18 +116,22 @@ export default function TabsLayout() {
       >
         <Tabs.Screen
           name='index'
+          listeners={toTabRoot('/')}
           options={{ title: t('nav.home'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.home} color={color} /> }}
         />
         <Tabs.Screen
           name='study'
+          listeners={toTabRoot('/study')}
           options={{ title: t('nav.study'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.study} color={color} /> }}
         />
         <Tabs.Screen
           name='books'
+          listeners={toTabRoot('/books')}
           options={{ title: t('books.title'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.books} color={color} /> }}
         />
         <Tabs.Screen
           name='calendar'
+          listeners={toTabRoot('/calendar')}
           options={{ title: t('annualPlanning.title'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.plan} color={color} /> }}
         />
         {/* A redirect into the Plan tab, kept because it is the web's own path
@@ -106,6 +140,7 @@ export default function TabsLayout() {
         <Tabs.Screen name='annual-planning' options={{ href: null }} />
         <Tabs.Screen
           name='pomodoro'
+          listeners={toTabRoot('/pomodoro')}
           options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
         />
         {/* Routes, not tabs: the app bar's account opens Profile from anywhere

@@ -224,3 +224,48 @@ describe('the route tree', () => {
     })
   })
 })
+
+/**
+ * Every button in the tab bar, with the route its press goes to.
+ *
+ * A tab navigator restores whatever its stack held, so pressing Study while a
+ * session was pushed on that tab reopened the session rather than the Study
+ * Center — the bar's label said one thing and its button did another (MOB-080).
+ * The fix is one `tabPress` listener per tab, and this is what keeps it: a
+ * button with no listener silently returns to the old behaviour, and a listener
+ * aimed at the wrong href sends the reader to the wrong tab.
+ */
+const tabButtons = () => {
+  const source = fs.readFileSync(path.join(APP, '(tabs)/_layout.js'), 'utf8')
+  return [...source.matchAll(/<Tabs\.Screen\b[\s\S]*?\/>/g)]
+    .map((match) => match[0])
+    .filter((block) => block.includes('tabBarIcon'))
+    .map((block) => ({
+      name: block.match(/name='([^']+)'/)?.[1] ?? null,
+      href: block.match(/listeners=\{toTabRoot\('([^']+)'\)\}/)?.[1] ?? null
+    }))
+}
+
+describe('the tab bar', () => {
+  it('was actually read', () => {
+    expect(tabButtons().length).toBeGreaterThan(3)
+  })
+
+  it.each(tabButtons().map(({ name }) => name))('%s sends its press somewhere', (name) => {
+    const { href } = tabButtons().find((tab) => tab.name === name)
+    expect({ name, href }).toEqual({ name, href: href ?? 'no toTabRoot listener — this tab will resume whatever was pushed on it' })
+  })
+
+  it.each(tabButtons().map(({ name }) => name))('%s sends its press to a real route', (name) => {
+    const { href } = tabButtons().find((tab) => tab.name === name)
+    expect(matches(href) ? href : `${href} — no file matches this`).toEqual(href)
+  })
+
+  it.each(tabButtons().map(({ name }) => name))('%s sends its press to its OWN route', (name) => {
+    const { href } = tabButtons().find((tab) => tab.name === name)
+    // `index` is the group's own root, which is `/`; every other tab is named
+    // by its segment.
+    const own = name === 'index' ? '/' : `/${name}`
+    expect({ name, href }).toEqual({ name, href: own })
+  })
+})
