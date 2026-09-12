@@ -98,6 +98,23 @@ describe('reading a document body', () => {
     expect(blocks[0]).toMatchObject({ type: 'image', src: 'https://x/y.png', alt: 'A diagram' })
   })
 
+  it('keeps a soft line break, because a dropped one welds two lines together', () => {
+    const { blocks } = readDocument(
+      doc([{ type: 'paragraph', children: [text('first line'), { type: 'linebreak' }, text('second line')] }])
+    )
+    expect(blocks[0].spans.map((span) => span.text)).toEqual(['first line', '\n', 'second line'])
+  })
+
+  it('keeps a tab', () => {
+    const { blocks } = readDocument(doc([{ type: 'paragraph', children: [text('a'), { type: 'tab' }, text('b')] }]))
+    expect(blocks[0].spans.map((span) => span.text).join('')).toBe('a\tb')
+  })
+
+  it('still drops a paragraph that is only whitespace', () => {
+    const { blocks } = readDocument(doc([{ type: 'paragraph', children: [{ type: 'linebreak' }] }]))
+    expect(blocks).toHaveLength(0)
+  })
+
   it('counts the words it can see', () => {
     const { blocks } = readDocument(
       doc([

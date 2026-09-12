@@ -32,7 +32,7 @@ import { PLUS_MONTHLY_GENERATIONS } from '@nowry/core/domain/books/sectionCards'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useTheme } from '../theme'
-import { BottomSheet, Button, Checkbox, Divider, Select, Skeleton, Stack, Typography } from '../ui'
+import { BottomSheet, Button, Checkbox, Divider, FormField, Select, Skeleton, Stack, Typography } from '../ui'
 
 export function MakeCardsSheet({ open, book, onClose, onSaved }) {
   const { t } = useTranslation()
@@ -285,13 +285,18 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
               ))}
             </View>
 
-            <Select
-              value={deckId}
-              options={(decks.decks ?? []).map((deck) => ({ value: deck._id, label: deck.name }))}
-              onChange={setDeckId}
-              placeholderKey='cards.generatedCards.subtitleAddToDeck'
-              accessibilityLabel={t('cards.generatedCards.titleAddToDeck')}
-            />
+            {/* Labelled. Two unlabelled boxes — a trigger showing a deck name
+                and the open list under it — is a control that says what it
+                holds and never what it is for. */}
+            <FormField labelKey='cards.generatedCards.titleAddToDeck' helperKey='cards.generatedCards.subtitleAddToDeck'>
+              <Select
+                value={deckId}
+                options={(decks.decks ?? []).map((deck) => ({ value: deck._id, label: deck.name }))}
+                onChange={setDeckId}
+                placeholderKey='cards.generatedCards.subtitleAddToDeck'
+                accessibilityLabel={t('cards.generatedCards.titleAddToDeck')}
+              />
+            </FormField>
 
             {/* Beside the key that caused it: at the top of a sheet this long,
                 a failure is above the fold and reads as nothing happening. */}

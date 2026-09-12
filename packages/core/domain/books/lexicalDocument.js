@@ -59,6 +59,21 @@ const spansOf = (node) => {
       return
     }
     // A link wraps the text it labels; its own children carry the words.
+    /*
+     * A soft line break is a NODE, not a character, and dropping it is how a
+     * vocabulary list arrives as one unbroken paragraph: every entry ran into
+     * the next with no space between them, which is what the phone showed for
+     * a document whose every line is a term and its reading. A tab is the same
+     * kind of node.
+     */
+    if (child.type === 'linebreak') {
+      spans.push({ text: '\n', bold: false, italic: false, strikethrough: false, underline: false, code: false, link: null })
+      return
+    }
+    if (child.type === 'tab') {
+      spans.push({ text: '\t', bold: false, italic: false, strikethrough: false, underline: false, code: false, link: null })
+      return
+    }
     if (child.type === 'link' || child.type === 'autolink') {
       ;(child.children ?? []).forEach((inner) => walk(inner, { ...inherited, link: child.url ?? null }))
       return
@@ -93,7 +108,10 @@ const blockFor = (node) => {
       return { type: 'heading', level: Number(String(node.tag ?? 'h2').replace('h', '')) || 2, spans: spansOf(node) }
     case 'paragraph': {
       const spans = spansOf(node)
-      // An empty paragraph is spacing in the editor and noise in a reader.
+      // An empty paragraph is spacing in the editor and noise in a reader — but
+      // a paragraph whose only content is line breaks is not empty, it is
+      // deliberate space inside a block, so `trim` is asked of the words rather
+      // than of the whole run.
       return spans.some((span) => span.text.trim()) ? { type: 'paragraph', spans } : null
     }
     case 'quote':
