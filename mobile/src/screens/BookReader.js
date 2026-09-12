@@ -16,7 +16,7 @@
  * phone does instead is the thing a phone is good for — read it, and turn it
  * into cards.
  */
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Linking, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -24,9 +24,14 @@ import { useQuery } from '@tanstack/react-query'
 import { booksService } from '@nowry/core/api/services'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { documentWordCount, readDocument } from '@nowry/core/domain/books/lexicalDocument'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useTheme } from '../theme'
 import { resolveColor } from '../ui/Typography'
+import { MakeCardsSheet } from './MakeCards'
 import { Button, Divider, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
+
+/** The tiers whose accounts can generate; `free` cannot, and is not told so. */
+const CAN_GENERATE = ['plus', 'pro']
 
 export function BookReader() {
   const { bookId } = useLocalSearchParams()
@@ -34,6 +39,8 @@ export function BookReader() {
   const theme = useTheme()
   const router = useRouter()
   const { user } = useAuth()
+  const { tier } = useSubscription()
+  const [makingCards, setMakingCards] = useState(false)
 
   const id = String(bookId)
 
@@ -87,6 +94,18 @@ export function BookReader() {
           {words > 0 ? <Readout>{t('books.lib.words', { words, count: words })}</Readout> : null}
         </Stack>
 
+        {/*
+         * Only where the account can already use it. The web badges this key
+         * and opens its upgrade sheet; no mobile screen may advertise a paid
+         * tier at all (ADR-030), so here it is simply absent rather than shown
+         * locked. Reading the document is free either way.
+         */}
+        {CAN_GENERATE.includes(tier) ? (
+          <Button variant='secondary' onPress={() => setMakingCards(true)}>
+            {t('books.makeCards.title')}
+          </Button>
+        ) : null}
+
         {document.format === 'legacy-html' ? (
           <Typography level='body-md' color='text.secondary'>
             {t('books.reader.legacyOnly')}
@@ -103,6 +122,8 @@ export function BookReader() {
           </Stack>
         )}
       </Stack>
+
+      <MakeCardsSheet open={makingCards} book={data} onClose={() => setMakingCards(false)} />
     </Screen>
   )
 }

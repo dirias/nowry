@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { cardsService } from '@nowry/core/api/services'
 import { focusRing } from '../Common/Form/formStyles'
 import useCardCuration from '@nowry/core/hooks/useCardCuration'
+import { sourceFieldsFor } from '@nowry/core/domain/books/sectionCards'
 import { useSaveToDeck } from '@nowry/core/hooks/useSaveToDeck'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
@@ -200,14 +201,7 @@ export default function GeneratedCards({
   // The stamp every saved card carries when the cards came from a document
   // (docs/prd-book-cards.md D1). A section-generated card's own stamp wins over
   // the selection's; a hand-typed card in a dialog with no source gets nothing.
-  const sourceFields = (entry) =>
-    source?.source_book_id
-      ? {
-          source_book_id: source.source_book_id,
-          source_book_title: source.source_book_title ?? null,
-          source_section: entry.source_section ?? source.source_section ?? null
-        }
-      : {}
+  const sourceFields = (entry) => sourceFieldsFor(entry, source)
 
   const handleSaveCards = async () => {
     const { selectedDeckId, allTags } = saveToDeck
