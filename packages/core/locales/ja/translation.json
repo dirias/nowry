@@ -2135,7 +2135,13 @@
         "decksOnly": "デッキ",
         "cardsOnly": "カード"
       },
-      "cardCount_other": "{{count}} 枚"
+      "cardCount_other": "{{count}} 枚",
+      "filters": {
+        "all": "すべて",
+        "flashcards": "カード",
+        "quizzes": "クイズ",
+        "visual": "ビジュアル"
+      }
     },
     "generatedCards": {
       "titleSelectCards": "新しい学習カード",
@@ -3028,7 +3034,8 @@
     "tags": "タグ",
     "toggle": "フィルターを表示",
     "clearAll": "すべて解除",
-    "searchTags": "タグを検索…"
+    "searchTags": "タグを検索…",
+    "type": "種類"
   },
   "pomodoro": {
     "notification": {

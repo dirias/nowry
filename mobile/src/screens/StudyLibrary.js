@@ -6,9 +6,12 @@
  * different contents — which is the whole point of §15.11 and the reason the web
  * stopped drawing one deck four ways.
  *
- * **Filters are an ActionSheet, not a panel.** A filter panel on a phone pushes
- * the list it filters down the screen, so the thing you are judging moves while
- * you judge it. A sheet covers, then leaves.
+ * **Filters are a sheet, not a panel.** A filter panel on a phone pushes the
+ * list it filters down the screen, so the thing you are judging moves while you
+ * judge it. A sheet covers, then leaves. The web's three — Type, Tags and
+ * Marked — are three chips whose labels are their readouts, each opening a
+ * `ChoiceSheet`; it was one icon-only key over a list of two toggles, so two of
+ * the web's three could not be reached at all (MOB-064).
  *
  * **Virtualised with `FlatList`, not `FlashList`.** The architecture note names
  * `@shopify/flash-list`, which is a native module and therefore another build.
@@ -28,6 +31,7 @@ import { useBulkCardActions } from '@nowry/core/hooks/useBulkCardActions'
 import { useCardSelection } from '@nowry/core/hooks/useCardSelection'
 import { systemGroup, tagGroups } from '@nowry/core/domain/sessionLog'
 import { filterDecks } from '@nowry/core/domain/deckQuery'
+import { CARD_TYPES, filterCardsByType } from '@nowry/core/domain/cardTypes'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { useTheme } from '../theme'
 import { DeckCreateSheet } from './DeckCreateSheet'
@@ -35,6 +39,8 @@ import { CardPreviewSheet } from './CardPreviewSheet'
 import { BulkOverlays } from './BulkOverlays'
 import {
   ActionSheet,
+  ChoiceRow,
+  ChoiceSheet,
   Checkbox,
   DeckRow,
   GroupRow,
@@ -62,6 +68,9 @@ const VIEWS = { decks: 'decks', cards: 'cards', tags: 'tags' }
 /** The board's "Due first" key. The server's own order, and the other one. */
 const ORDERS = { due: 'due', alpha: 'alpha' }
 
+/** The web's own label keys, which are not the type names. */
+const TYPE_LABELS = { flashcard: 'flashcards', quiz: 'quizzes', visual: 'visual' }
+
 export function StudyLibrary({ header }) {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -71,7 +80,9 @@ export function StudyLibrary({ header }) {
   const [search, setSearch] = useState('')
   const [markedOnly, setMarkedOnly] = useState(false)
   const [untagged, setUntagged] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [filterType, setFilterType] = useState('all')
+  const [selectedTags, setSelectedTags] = useState([])
+  const [filtersOpen, setFiltersOpen] = useState(null)
   const [creating, setCreating] = useState(false)
   const [adding, setAdding] = useState(false)
   const [previewing, setPreviewing] = useState(null)
@@ -84,8 +95,12 @@ export function StudyLibrary({ header }) {
       if (action !== 'tag' && action !== 'untag') selection.clear()
     }
   })
-  // Only for the move and tag sheets; the list itself does not need them.
-  const allTags = useTags({ enabled: selection.selecting })
+  /*
+   * The tags, for the Tags filter and for the move and tag sheets. It used to
+   * load only while a selection existed, because the list had no tag filter
+   * to offer — the web's toolbar has had one all along (MOB-064).
+   */
+  const allTags = useTags()
 
   const [order, setOrder] = useState(ORDERS.due)
 
@@ -98,7 +113,7 @@ export function StudyLibrary({ header }) {
    */
   const groups = useGroups({ enabled: view === VIEWS.tags })
   // Only the cards view pages, so the other two do not pay for a card query.
-  const cards = useCardData([], view === VIEWS.cards ? search : '', markedOnly, null, untagged)
+  const cards = useCardData(selectedTags, view === VIEWS.cards ? search : '', markedOnly, null, untagged)
 
   const active = view === VIEWS.decks ? decks : view === VIEWS.cards ? cards : groups
   const loading = active.loading
@@ -118,14 +133,16 @@ export function StudyLibrary({ header }) {
        * view had no search field and no filtering at all: with four decks that
        * is invisible and with forty it is the screen's whole job (MOB-062).
        */
-      return filterDecks(decks.decks, { search }).map((deck) => ({
+      return filterDecks(decks.decks, { search, type: filterType, tags: selectedTags }).map((deck) => ({
         key: deck._id ?? deck.id,
         deck,
         onPress: () => router.push(`/study/deck/${deck._id ?? deck.id}`)
       }))
     }
     if (view === VIEWS.cards) {
-      return (cards.cards ?? []).map((card) => ({
+      // Type is the one axis the list endpoint does not take, so it narrows
+      // the loaded page — which is what the web does with the same predicate.
+      return filterCardsByType(cards.cards, filterType).map((card) => ({
         key: card._id ?? card.id,
         name: card.title || card.front || '',
         meta: (card.tags ?? []).join(' · '),
@@ -170,7 +187,7 @@ export function StudyLibrary({ header }) {
     if (order === ORDERS.alpha) tagRows.sort((a, b) => a.name.localeCompare(b.name))
 
     return [...special, ...tagRows]
-  }, [view, decks.decks, cards.cards, groups.groups, order, search, router, t])
+  }, [view, decks.decks, cards.cards, groups.groups, order, search, filterType, selectedTags, router, t])
 
   const cardIds = useMemo(() => (cards.cards ?? []).map((card) => card._id ?? card.id), [cards.cards])
   const { retain } = selection
@@ -187,7 +204,19 @@ export function StudyLibrary({ header }) {
     tags: (groups.groups?.tags ?? []).length
   }
 
-  const filterCount = (markedOnly ? 1 : 0) + (untagged ? 1 : 0)
+  const typeNarrowed = filterType !== 'all'
+  const tagsNarrowed = selectedTags.length > 0 || untagged
+  const tagsCount = selectedTags.length + (untagged ? 1 : 0)
+  /** Whether the list is showing less than everything, for the empty state. */
+  const filtering = typeNarrowed || tagsNarrowed || markedOnly || Boolean(search)
+
+  const clearFilters = () => {
+    setFilterType('all')
+    setSelectedTags([])
+    setUntagged(false)
+    setMarkedOnly(false)
+    setSearch('')
+  }
 
   /* The board replaces the whole toolbar while a selection exists, so the list
      never moves under the user's thumb when one starts. */
@@ -246,20 +275,7 @@ export function StudyLibrary({ header }) {
           returnKeyType='search'
           style={{ flex: 1 }}
         />
-        {view === VIEWS.cards ? (
-          <IconButton
-            // md is 40 and lg is 48; the board draws 44, which is the
-            // standard's own touch minimum and the height the field beside
-            // it already uses. `md` plus that floor is the two agreeing.
-            size='md'
-            style={{ minWidth: MIN_TOUCH_TARGET }}
-            variant='secondary'
-            onPress={() => setFiltersOpen(true)}
-            accessibilityLabel={filterCount > 0 ? `${t('filters.toggle')} · ${filterCount}` : t('filters.toggle')}
-          >
-            <Icon name='SlidersHorizontal' size='sm' color={filterCount > 0 ? 'primary.plainColor' : 'text.secondary'} />
-          </IconButton>
-        ) : null}
+
         {/*
          * The web's `Add ▾`, which is one key opening a short list — not a
          * full-width slab that says only "Create deck". That slab was the
@@ -278,6 +294,39 @@ export function StudyLibrary({ header }) {
           <Icon name='Plus' size='sm' color='text.secondary' />
         </IconButton>
       </Stack>
+
+      {/*
+       * The web's filter object: `[Type ▾ · Tags ▾ · Marked]`, where each
+       * label IS its readout — "Tags" means no filter, "Tags · 2" means two
+       * chosen, and a count never becomes a hue (§15.5). A phone has nothing
+       * to anchor a menu to, so each opens a sheet, which is the translation
+       * the calendar, Browse and the book library all already make.
+       *
+       * This was one icon-only key opening a list of two toggles, so Type and
+       * Tags — two of the web's three — could not be reached at all (MOB-064).
+       * Marked is a card idea and stays on the cards view; the other two narrow
+       * decks as well, which is what the web's own deck predicate does.
+       */}
+      {view === VIEWS.tags ? null : (
+        <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap'>
+          <Chip selected={typeNarrowed} onPress={() => setFiltersOpen('type')}>
+            {typeNarrowed ? t('filters.typeReadout', { count: 1 }) : t('filters.type')}
+          </Chip>
+          <Chip selected={tagsNarrowed} onPress={() => setFiltersOpen('tags')}>
+            {tagsNarrowed ? t('filters.tagsReadout', { count: tagsCount }) : t('filters.tags')}
+          </Chip>
+          {view === VIEWS.cards ? (
+            <Chip selected={markedOnly} onPress={() => setMarkedOnly((on) => !on)}>
+              {t('filters.marked')}
+            </Chip>
+          ) : null}
+          {/* No clear-all chip, deliberately, and no active-filter strip: the
+              web's own rule is that clearing lives inside each menu, so
+              engaging a filter never moves the list. A chip that appears when
+              a filter is on moves the row under the thumb that just set it.
+              "Clear all" belongs to the empty state, where it is the way out. */}
+        </Stack>
+      )}
 
       {/* The section's own readout, and the order it is in. */}
       {view === VIEWS.tags ? (
@@ -358,32 +407,83 @@ export function StudyLibrary({ header }) {
               {t('home.loadFailed')}
             </Typography>
           ) : (
-            <View style={{ paddingVertical: theme.spacing[3] }}>
-              <Typography level='body-md' color='text.tertiary'>
-                {t('groups.nothingYet')}
+            /*
+             * Two different emptinesses, as the web draws them: a list that has
+             * nothing in it, and a list whose filters are hiding everything. It
+             * said the never-had-any sentence in both cases, so a filter that
+             * matched nothing looked like an empty account — and the way back
+             * out of it was not on screen (MOB-064).
+             */
+            <Stack spacing={1} style={{ paddingVertical: theme.spacing[3] }}>
+              <Typography level='title-md' color='text.secondary'>
+                {view === VIEWS.tags ? t('groups.nothingYet') : t(`cards.manage_content.empty.${view}.title`)}
               </Typography>
-            </View>
+              {view === VIEWS.tags ? null : (
+                <Typography level='body-sm' color='text.tertiary'>
+                  {t(`cards.manage_content.empty.${view}.${filtering ? 'filter' : 'start'}`)}
+                </Typography>
+              )}
+              {filtering ? (
+                <View style={{ alignItems: 'flex-start', paddingTop: theme.spacing[1] }}>
+                  <Button size='sm' variant='secondary' onPress={clearFilters}>
+                    {t('filters.clearAll')}
+                  </Button>
+                </View>
+              ) : null}
+            </Stack>
           )
         }
       />
 
-      <ActionSheet
-        visible={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        title={t('filters.toggle')}
-        actions={[
-          { id: 'marked', label: t('filters.marked'), onPress: () => setMarkedOnly((v) => !v) },
-          // Untagged is a filter, not a pseudo-tag (ADR-023).
-          { id: 'untagged', label: t('filters.noTag'), onPress: () => setUntagged((v) => !v) },
-          {
-            id: 'clear',
-            label: t('filters.clearAll'),
-            onPress: () => {
-              setMarkedOnly(false)
-              setUntagged(false)
-            }
-          }
-        ]}
+      {/* One of three types, and the sheet closes on the pick. */}
+      <ChoiceSheet
+        visible={filtersOpen === 'type'}
+        onClose={() => setFiltersOpen(null)}
+        title={t('filters.type')}
+        value={filterType}
+        onChange={setFilterType}
+        options={CARD_TYPES.map((type) => ({ value: type, label: t(`cards.manage_content.filters.${TYPE_LABELS[type]}`) }))}
+      >
+        {/* "All" is the absence of a type filter, not a fourth type. */}
+        <ChoiceRow
+          label={t('public.all')}
+          chosen={filterType === 'all'}
+          role='radio'
+          onPress={() => {
+            setFilterType('all')
+            setFiltersOpen(null)
+          }}
+        />
+        <Divider />
+      </ChoiceSheet>
+
+      {/* Any number of tags, so the sheet stays open while they are ticked. */}
+      <ChoiceSheet
+        visible={filtersOpen === 'tags'}
+        multiple
+        onClose={() => setFiltersOpen(null)}
+        title={t('filters.tags')}
+        value={selectedTags}
+        onChange={setSelectedTags}
+        options={(allTags.tags ?? []).map((row) => ({ value: row.tag, label: row.tag, count: row.count }))}
+        extra={
+          <>
+            <Divider />
+            {/* "No tag" is a FILTER like any tag and clears with the rest — it
+                is never a group (PRD D15, ADR-023). */}
+            <ChoiceRow label={t('filters.noTag')} chosen={untagged} onPress={() => setUntagged((on) => !on)} />
+            {tagsNarrowed ? (
+              <ChoiceRow
+                label={t('filters.clear')}
+                role='button'
+                onPress={() => {
+                  setSelectedTags([])
+                  setUntagged(false)
+                }}
+              />
+            ) : null}
+          </>
+        }
       />
 
       <ActionSheet

@@ -2025,7 +2025,13 @@
         "cardsOnly": "Cartes"
       },
       "cardCount_one": "{{count}} carte",
-      "cardCount_other": "{{count}} cartes"
+      "cardCount_other": "{{count}} cartes",
+      "filters": {
+        "all": "Tous",
+        "flashcards": "Cartes",
+        "quizzes": "Quiz",
+        "visual": "Visuel"
+      }
     },
     "import": {
       "deckNamePlaceholder": "Nom du paquet",
@@ -3113,7 +3119,8 @@
     "tags": "Étiquettes",
     "toggle": "Afficher les filtres",
     "clearAll": "Tout effacer",
-    "searchTags": "Rechercher des étiquettes…"
+    "searchTags": "Rechercher des étiquettes…",
+    "type": "Type"
   },
   "pomodoro": {
     "notification": {

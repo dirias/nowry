@@ -2013,7 +2013,13 @@
         "cardsOnly": "Karten"
       },
       "cardCount_one": "{{count}} Karte",
-      "cardCount_other": "{{count}} Karten"
+      "cardCount_other": "{{count}} Karten",
+      "filters": {
+        "all": "Alle",
+        "flashcards": "Karten",
+        "quizzes": "Quiz",
+        "visual": "Visuell"
+      }
     },
     "import": {
       "deckNamePlaceholder": "Stapelname",
@@ -3101,7 +3107,8 @@
     "tags": "Schlagwörter",
     "toggle": "Filter anzeigen",
     "clearAll": "Alle zurücksetzen",
-    "searchTags": "Tags suchen…"
+    "searchTags": "Tags suchen…",
+    "type": "Typ"
   },
   "pomodoro": {
     "notification": {

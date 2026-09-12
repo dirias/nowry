@@ -30,6 +30,25 @@ export const RAIL_LABELS = {
 export const CARD_TYPES = ['flashcard', 'quiz', 'visual']
 
 /**
+ * A card's type, defaulted the way the API's older records need.
+ *
+ * The web writes `card.card_type || 'flashcard'` at its one filter site; the
+ * phone had no type filter at all, and adding one meant writing that default a
+ * second time. A default written twice is a default that diverges (MOB-064).
+ */
+export const cardTypeOf = (card) => card?.card_type || 'flashcard'
+
+/**
+ * Cards of one type, or all of them.
+ *
+ * Client-side on purpose, as on the web: the list endpoint narrows by tag,
+ * mark and group, and the type is the one axis it does not take. Filtering a
+ * loaded page is therefore the honest shape rather than a second request.
+ */
+export const filterCardsByType = (cards, type = 'all') =>
+  type === 'all' ? (cards ?? []) : (cards ?? []).filter((card) => cardTypeOf(card) === type)
+
+/**
  * Icon KEY + accent colour per type, colocated with the spec table below so a
  * fourth card type only ever needs one new entry. This is the exact mapping
  * `StudyCard.js` already paints on the cards this modal creates (§2.1 —

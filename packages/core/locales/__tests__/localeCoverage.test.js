@@ -143,10 +143,13 @@ const IDENTICAL_BY_DESIGN = {
     'pomodoro.pause',
     'pomodoro.modes.short.work',
     // "Agenda" and "Types" are the French words for the calendar's list view and
-    // its type filter; the counted form "Types · 2" follows the label.
+    // its type filter; the counted form "Types · 2" follows the label. The
+    // library's own type filter is the same word, and so is its readout.
     'calendarPage.views.agenda',
     'calendarPage.filters.types',
     'calendarPage.filters.typesSelected',
+    'filters.type',
+    'filters.typeReadout',
     // "Date" and "Description" are the French words for the event form's fields.
     'calendarModal.form.date',
     'calendarModal.form.description',

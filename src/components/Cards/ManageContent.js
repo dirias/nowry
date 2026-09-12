@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, Skeleton, Typography } from '@mui/joy'
 import { patchCardInCache } from '@nowry/core/api/cardCache'
 import { filterDecks } from '@nowry/core/domain/deckQuery'
+import { filterCardsByType } from '@nowry/core/domain/cardTypes'
 import CardPreviewModal from './CardPreviewModal'
 import DeckAnalysisPanel from './DeckAnalysisPanel'
 import DeckActionsMenu from './DeckActionsMenu'
@@ -138,10 +139,9 @@ export default function ManageContent({
 
   // Cards are filtered server-side (search + tags + mark via useCardData); only
   // the local type filter applies to what the API returned.
-  const filteredCards = useMemo(
-    () => cards.filter((card) => filterType === 'all' || (card.card_type || 'flashcard') === filterType),
-    [cards, filterType]
-  )
+  // The predicate and its `flashcard` default live in `cardTypes`, so the
+  // phone's own type filter cannot disagree with this one (MOB-064).
+  const filteredCards = useMemo(() => filterCardsByType(cards, filterType), [cards, filterType])
 
   const deckName = (deckId) => decks.find((d) => d._id === deckId || d._id === deckId?._id)?.name || '—'
 
