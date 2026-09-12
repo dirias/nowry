@@ -13,15 +13,18 @@
  */
 import { PixelRatio, Text } from 'react-native'
 import { useTheme } from '../theme'
-import { TYPE_LEVELS } from './typeLevels'
+import { FONT_WEIGHTS, FONT_WEIGHT_NAMES, TYPE_LEVELS } from './typeLevels'
 
 const FORBIDDEN = ['fontSize', 'fontWeight', 'lineHeight', 'fontFamily']
 
-export function Typography({ level = 'body-md', color = 'text.primary', style, children, ...rest }) {
+export function Typography({ level = 'body-md', weight = null, color = 'text.primary', style, children, ...rest }) {
   const theme = useTheme()
   const spec = TYPE_LEVELS[level]
 
   if (__DEV__) {
+    if (weight && !FONT_WEIGHTS[weight]) {
+      throw new Error(`Typography: "${weight}" is not a weight. Use ${FONT_WEIGHT_NAMES.join(', ')} (DESIGN_GUIDELINES §4.1).`)
+    }
     if (!spec) {
       throw new Error(`Typography: unknown level "${level}". Use one of: ${Object.keys(TYPE_LEVELS).join(', ')}`)
     }
@@ -44,7 +47,9 @@ export function Typography({ level = 'body-md', color = 'text.primary', style, c
       style={[
         {
           fontSize: spec.fontSize,
-          fontWeight: spec.fontWeight,
+          // The level's weight unless the caller names one: emphasis inside a
+          // level is the document's own, not a different level.
+          fontWeight: weight ? FONT_WEIGHTS[weight] : spec.fontWeight,
           lineHeight: spec.fontSize * scale * spec.lineHeightRatio,
           letterSpacing: spec.letterSpacing,
           color: resolved

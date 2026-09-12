@@ -218,8 +218,11 @@ function Spans({ spans, level }) {
       level={level}
       color={span.link ? 'primary.plainColor' : 'text.primary'}
       onPress={span.link ? () => Linking.openURL(span.link) : undefined}
+      // `weight`, not a raw `fontWeight`: emphasis inside a level is named in
+      // the type system now, because a bold run in a paragraph is not a
+      // different level and there was nothing else to call it.
+      weight={span.bold ? 'xl' : undefined}
       style={{
-        fontWeight: span.bold ? '700' : undefined,
         fontStyle: span.italic ? 'italic' : undefined,
         textDecorationLine: span.underline ? 'underline' : span.strikethrough ? 'line-through' : undefined
       }}

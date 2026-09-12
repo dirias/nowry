@@ -50,6 +50,25 @@ export const TYPE_LEVELS = {
 
 export const TYPE_LEVEL_NAMES = Object.keys(TYPE_LEVELS)
 
+/**
+ * The four named weights, which are the shared scale's own (`FONT_WEIGHT`) and
+ * the four the web's lint rule already insists on: sm, md, lg, xl.
+ *
+ * A level carries a weight, and that is almost always the answer. What it could
+ * not express is EMPHASIS INSIDE a level — a bold run in the middle of a
+ * paragraph, which is a document's own formatting rather than a heading. The
+ * reader in V3 needed exactly that and had nothing to name it with, so it set
+ * `fontWeight` at the call site and `Typography` threw, correctly. The error
+ * said what to do: if no level fits, the level system is wrong. This is the
+ * level system being less wrong.
+ *
+ * It is a WEIGHT, not a level: the size, line height and letter-spacing all
+ * stay the level's.
+ */
+export const FONT_WEIGHTS = { sm: '400', md: '500', lg: '600', xl: '700' }
+
+export const FONT_WEIGHT_NAMES = Object.keys(FONT_WEIGHTS)
+
 /** The legibility floor (tokens.MIN_FONT_SIZE). Nothing renders below it. */
 export const MIN_FONT_SIZE = 0.75 * REM
 

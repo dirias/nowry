@@ -60,3 +60,72 @@ describe('the type levels', () => {
     expect(Number(TYPE_LEVELS['title-md'].fontWeight)).toBeGreaterThan(Number(TYPE_LEVELS['body-md'].fontWeight))
   })
 })
+
+/**
+ * The forbidden keys, checked at every call site rather than only when one
+ * renders.
+ *
+ * `Typography` throws on `fontSize`, `fontWeight`, `lineHeight` and
+ * `fontFamily`, and that check is real — but it fires when the component
+ * renders, and there is no rendered-component test project here
+ * (`jest.config.js` records why). So the reader shipped a raw `fontWeight` for
+ * a bold run, every suite passed, and the first thing that ran it was a phone.
+ *
+ * The fix was to give the type system a name for emphasis; this is what stops
+ * the next call site reaching for the raw key while it waits.
+ */
+describe('no call site sets what the level owns', () => {
+  const fs = require('fs')
+  const path = require('path')
+
+  const SRC = path.join(__dirname, '..', '..')
+  const FORBIDDEN = ['fontSize', 'fontWeight', 'lineHeight', 'fontFamily']
+
+  const files = []
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === '__tests__') continue
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) walk(full)
+      else if (entry.name.endsWith('.js')) files.push(full)
+    }
+  }
+  walk(SRC)
+
+  /** The opening tag of every `<Typography …>` in a file. */
+  const openingTags = (source) => {
+    const tags = []
+    let at = source.indexOf('<Typography')
+    while (at !== -1) {
+      let depth = 0
+      let i = at
+      for (; i < source.length; i++) {
+        const ch = source[i]
+        if (ch === '{') depth++
+        else if (ch === '}') depth--
+        else if (ch === '>' && depth === 0) break
+      }
+      tags.push(source.slice(at, i))
+      at = source.indexOf('<Typography', i)
+    }
+    return tags
+  }
+
+  it('found the call sites, so the rule is not passing on an empty set', () => {
+    const total = files.reduce((count, file) => count + openingTags(fs.readFileSync(file, 'utf8')).length, 0)
+    expect(total).toBeGreaterThan(30)
+  })
+
+  it.each(FORBIDDEN)('never passes %s to Typography', (key) => {
+    const offenders = []
+    for (const file of files) {
+      const source = fs.readFileSync(file, 'utf8')
+      // The component itself is where these are set; everywhere else is a call.
+      if (path.basename(file) === 'Typography.js') continue
+      openingTags(source).forEach((tag) => {
+        if (new RegExp(`\\b${key}\\s*:`).test(tag)) offenders.push(path.relative(SRC, file))
+      })
+    }
+    expect([...new Set(offenders)]).toEqual([])
+  })
+})
