@@ -1,4 +1,4 @@
-import { createPointerSaver } from '../pointerSaver'
+import { createPointerSaver } from '../books/pointerSaver'
 
 describe('createPointerSaver (BOOK-006)', () => {
   beforeEach(() => jest.useFakeTimers())

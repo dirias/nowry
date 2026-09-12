@@ -1,6 +1,10 @@
 /**
  * The reading pointer's write path (docs/prd-books-library.md D2 / FR-002).
  *
+ * Shared, because both clients learn it the same way and must write it the same
+ * way: a phone that saved on every scroll would spend a request a second on a
+ * fact the document needs once (MOB-062).
+ *
  * The editor learns where the reader is many times a second — every scroll
  * moves the active heading or the active page. The document needs to know it
  * about once, so changes coalesce into one patch that goes out `delay` ms after
