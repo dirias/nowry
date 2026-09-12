@@ -8,7 +8,7 @@ import GridViewRounded from '@mui/icons-material/GridViewRounded'
 import ViewListRounded from '@mui/icons-material/ViewListRounded'
 import { focusRing, segment, segmentedGroup, tabularNums } from '../Common/Form/formStyles'
 import ViewSegment from '../Study/ViewSegment'
-import { KINDS, SORTS } from './libraryQuery'
+import { KINDS, SORTS } from '@nowry/core/domain/books/libraryQuery'
 
 const menuSx = { minWidth: 232, maxHeight: 360, overflow: 'auto', borderRadius: 'md', p: 0.5 }
 const itemSx = { borderRadius: 'sm', ...focusRing }

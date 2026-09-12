@@ -685,6 +685,7 @@
     }
   },
   "books": {
+    "title": "ブック",
     "lib": {
       "limitReadout": "ブック {{count}} / {{limit}} 冊 · {{plan}} なら {{next}}",
       "unlimited": "無制限",
@@ -842,6 +843,13 @@
     },
     "import": {
       "titlePlaceholder": "書籍のタイトルを入力..."
+    },
+    "reader": {
+      "empty": "このドキュメントにはまだ何もありません。",
+      "image": "画像です。ウェブでは表示できます。",
+      "imageWithAlt": "画像：{{alt}}。ウェブで開くと表示できます。",
+      "legacyOnly": "このドキュメントは古い形式で書かれているため、スマートフォンではまだ表示できません。ウェブで開いてお読みください。",
+      "unsupported": "{{name}} ブロックは、スマートフォンではまだ描画できません。"
     }
   },
   "sidemenu": {

@@ -1,4 +1,4 @@
-import { kindOf, readingPage } from './libraryQuery'
+import { kindOf, readingPage } from '@nowry/core/domain/books/libraryQuery'
 
 /**
  * The words on a document's row (docs/prd-books-library.md D6, D7): a meta line

@@ -8,7 +8,7 @@ import {
   sectionsWithoutCards,
   sortDocuments,
   tagCounts
-} from '../libraryQuery'
+} from '../books/libraryQuery'
 
 const written = {
   _id: 'w',

@@ -22,7 +22,7 @@ import DocumentRow from './DocumentRow'
 import DocumentTile from './DocumentTile'
 import DocumentActionsMenu from './DocumentActionsMenu'
 import DeleteDocumentDialog from './DeleteDocumentDialog'
-import { filterDocuments, kindCounts, pickContinue, resumeHref, sortDocuments, tagCounts } from './libraryQuery'
+import { filterDocuments, kindCounts, pickContinue, resumeHref, sortDocuments, tagCounts } from '@nowry/core/domain/books/libraryQuery'
 import { BOOK_LIMITS, NEXT_PLAN, bookLimitFor } from '../../config/planLimits'
 
 const VIEW_KEY = 'book_view_mode'

@@ -2281,6 +2281,7 @@
     }
   },
   "books": {
+    "title": "Livres",
     "lib": {
       "limitReadout": "{{count}} livres sur {{limit}} · {{plan}} pour {{next}}",
       "unlimited": "illimité",
@@ -2439,7 +2440,14 @@
       "grey": "Gris"
     },
     "coverImagePlaceholder": "https://example.com/image.jpg",
-    "errorImport": "Erreur lors du traitement du fichier. Veuillez réessayer."
+    "errorImport": "Erreur lors du traitement du fichier. Veuillez réessayer.",
+    "reader": {
+      "empty": "Ce document est encore vide.",
+      "image": "Une image, que cette application peut afficher sur le web.",
+      "imageWithAlt": "Une image : {{alt}}. Ouvrez-la sur le web pour la voir.",
+      "legacyOnly": "Ce document a été écrit dans un ancien format que le téléphone ne peut pas encore afficher. Ouvrez-le sur le web pour le lire.",
+      "unsupported": "Un bloc {{name}}, que le téléphone ne sait pas encore dessiner."
+    }
   },
   "reports": {
     "modal": {

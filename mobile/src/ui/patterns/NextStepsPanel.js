@@ -14,8 +14,9 @@
  *     dismiss a list of things they have already finished.
  *
  * **A row this client cannot open is not shown.** The three destinations are
- * declared in the shared package, for a product with fourteen routes; this one
- * has five tabs and Books is not among them (ADR-030). The row was rendered
+ * declared in the shared package, for a product with fourteen routes. All three
+ * are openable since V3 gave Books a library; before that, Books was rendered
+ * anyway and pushed a route that did not exist. The row was rendered
  * anyway and pushed `/books`, which is not a route here — the same shape as the
  * `/study/due` fault, and it would have said "Unmatched Route" to anyone who
  * tapped it. `routes.test.js` now reads this list against the shared one, so a
@@ -38,7 +39,7 @@ import { ListRow } from './ListRow'
  * The destinations this client has screens for. Books is deferred, so its row
  * is not offered until it is not deferred.
  */
-export const OPENABLE_STEPS = ['/study', '/annual-planning']
+export const OPENABLE_STEPS = ['/study', '/annual-planning', '/books']
 
 export function NextStepsPanel() {
   const { t } = useTranslation()

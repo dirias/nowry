@@ -1178,7 +1178,14 @@
       "black": "Negro",
       "grey": "Gris"
     },
-    "coverImagePlaceholder": "https://example.com/image.jpg"
+    "coverImagePlaceholder": "https://example.com/image.jpg",
+    "reader": {
+      "empty": "Este documento aún no tiene contenido.",
+      "image": "Una imagen, que esta app puede mostrar en la web.",
+      "imageWithAlt": "Una imagen: {{alt}}. Ábrela en la web para verla.",
+      "legacyOnly": "Este documento se escribió en un formato antiguo que el teléfono aún no puede mostrar. Ábrelo en la web para leerlo.",
+      "unsupported": "Un bloque de tipo {{name}}, que el teléfono aún no puede dibujar."
+    }
   },
   "cards": {
     "archived": {

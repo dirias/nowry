@@ -119,10 +119,14 @@ describe("the shared package's next steps", () => {
   })
 
   it('accounts for every destination the shared hook declares', () => {
-    // Either the client can open it, or it is a route that exists anyway.
-    const unaccounted = declaredSteps().filter((route) => !openableSteps().includes(route) && matches(route))
-    expect(unaccounted).toEqual([])
-    expect(declaredSteps().length).toBeGreaterThan(openableSteps().length)
+    // A destination this client has a screen for must be offered. Anything it
+    // does not have a screen for is simply absent, which is the point.
+    const unoffered = declaredSteps().filter((route) => !openableSteps().includes(route) && matches(route))
+    expect(unoffered).toEqual([])
+  })
+
+  it('declares nothing it cannot open', () => {
+    expect(openableSteps().filter((route) => !declaredSteps().includes(route))).toEqual([])
   })
 })
 

@@ -53,6 +53,21 @@ export const resumeHref = (book, extra = {}) => {
   return `/book/${book._id}${query ? `?${query}` : ''}`
 }
 
+/**
+ * What a written document is made of, for the row that says so.
+ *
+ * Named here rather than read at a call site, which is the rule the whole
+ * package follows: a screen that reaches for `word_count` itself is a screen
+ * the API-field guard cannot check and a name that can drift.
+ */
+export const composition = (book) => ({
+  words: book?.word_count ?? 0,
+  sections: book?.section_count ?? 0
+})
+
+/** How many cards a document has produced. */
+export const cardsFrom = (book) => book?.cards ?? 0
+
 export const kindCounts = (books = []) =>
   books.reduce(
     (acc, book) => {

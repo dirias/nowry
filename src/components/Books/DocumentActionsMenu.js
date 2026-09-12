@@ -10,7 +10,7 @@ import EditRounded from '@mui/icons-material/EditRounded'
 import DeleteRounded from '@mui/icons-material/DeleteRounded'
 import LockRounded from '@mui/icons-material/LockRounded'
 import { focusRing } from '../Common/Form/formStyles'
-import { kindOf } from './libraryQuery'
+import { kindOf } from '@nowry/core/domain/books/libraryQuery'
 
 /**
  * The one menu behind every document's kebab, row and tile alike

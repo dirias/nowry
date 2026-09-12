@@ -1,9 +1,13 @@
 /**
- * The tab bar: Home, Study, Plan, Focus.
+ * The tab bar: Home, Study, Books, Plan, Focus.
  *
- * Four. The web has fourteen routes; a phone's bar holds three to five
- * top-level destinations before each becomes a target you aim at rather than
- * press, which is where both platforms' own guidance puts it. What is not in
+ * Five, which is the ceiling and now the count. The web has fourteen routes; a
+ * phone's bar holds three to five top-level destinations before each becomes a
+ * target you aim at rather than press, which is where both platforms' own
+ * guidance puts it. Books took the fifth in V3 — it is a top-level route on the
+ * web with a library of its own, and there is nowhere else it belongs. A sixth
+ * surface does not get a tab: it takes one, and Focus is the candidate, because
+ * over there the timer is a chip and a widget with no route at all. What is not in
  * the bar is not hidden behind a "more" tab, which is where features go to be
  * forgotten.
  *
@@ -89,6 +93,10 @@ export default function TabsLayout() {
           options={{ title: t('nav.study'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.study} color={color} /> }}
         />
         <Tabs.Screen
+          name='books'
+          options={{ title: t('books.title'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.books} color={color} /> }}
+        />
+        <Tabs.Screen
           name='calendar'
           options={{ title: t('annualPlanning.title'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.plan} color={color} /> }}
         />
@@ -104,6 +112,9 @@ export default function TabsLayout() {
             and Profile opens Settings, and both sit inside the group so the bar
             stays under them. */}
         <Tabs.Screen name='profile' options={{ href: null }} />
+        {/* `/book/:id` is the reader. It sits beside the library rather than
+            under it, which is how the web serves the two. */}
+        <Tabs.Screen name='book' options={{ href: null }} />
         <Tabs.Screen name='settings' options={{ href: null }} />
       </Tabs>
     </ScreenChromeProvider>

@@ -3,7 +3,7 @@ import { Box, Button, Chip, Skeleton, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import LockRounded from '@mui/icons-material/LockRounded'
 import { readout, tabularNums } from '../Common/Form/formStyles'
-import { coverage, kindOf, readingPage, sectionsWithoutCards } from './libraryQuery'
+import { coverage, kindOf, readingPage, sectionsWithoutCards } from '@nowry/core/domain/books/libraryQuery'
 
 /**
  * The library's summary object (ADR-021 §15.10; docs/prd-books-library.md D1, D2,

@@ -2269,6 +2269,7 @@
     }
   },
   "books": {
+    "title": "Bücher",
     "lib": {
       "limitReadout": "{{count}} von {{limit}} Büchern · {{plan}} für {{next}}",
       "unlimited": "unbegrenzt",
@@ -2427,7 +2428,14 @@
       "grey": "Grau"
     },
     "coverImagePlaceholder": "https://example.com/image.jpg",
-    "errorImport": "Fehler beim Verarbeiten der Datei. Bitte versuche es erneut."
+    "errorImport": "Fehler beim Verarbeiten der Datei. Bitte versuche es erneut.",
+    "reader": {
+      "empty": "Dieses Dokument ist noch leer.",
+      "image": "Ein Bild, das diese App im Web anzeigen kann.",
+      "imageWithAlt": "Ein Bild: {{alt}}. Öffne es im Web, um es zu sehen.",
+      "legacyOnly": "Dieses Dokument wurde in einem älteren Format geschrieben, das das Telefon noch nicht anzeigen kann. Öffne es im Web, um es zu lesen.",
+      "unsupported": "Ein {{name}}-Block, den das Telefon noch nicht darstellen kann."
+    }
   },
   "reports": {
     "modal": {
