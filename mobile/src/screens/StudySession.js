@@ -31,10 +31,12 @@ import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
+import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import { storage } from '@nowry/core'
+import { useCardSpeech } from '../hooks/useCardSpeech'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
-import { Button, Card, FlipCard, Icon, MarkToggle, Progress, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
+import { Button, Card, FlipCard, Icon, MarkToggle, Progress, Screen, Skeleton, SpeakToggle, Stack, SwipeArea, Typography } from '../ui'
 
 /**
  * The action band is one constant height whichever face is up.
@@ -172,6 +174,19 @@ export function StudySession() {
   const total = cards?.length ?? 0
   const current = cards?.[index] ?? null
   const complete = cards !== null && index >= total
+
+  /*
+   * Audio (MOB-077). The deck's own voice settings, the same ones the deck
+   * screen writes and the web reads — and in a daily review, the settings of
+   * whichever deck the card in hand belongs to, because a mixed queue speaks
+   * Japanese on one card and German on the next.
+   *
+   * The side follows the face: reading the answer aloud while the question is
+   * showing would hand the learner the thing they are recalling.
+   */
+  const { voiceSettings, getSettingsForDeck } = useVoiceSettings(id)
+  const deckVoices = id === DAILY_REVIEW ? getSettingsForDeck(current?.deck_id?._id ?? current?.deck_id) : voiceSettings
+  const speech = useCardSpeech({ card: current, flipped: revealed, settings: revealed ? deckVoices?.back : deckVoices?.front })
 
   /** Fire-and-forget, once, when the last card has been graded. */
   useEffect(() => {
@@ -358,6 +373,16 @@ export function StudySession() {
             <Typography level='title-sm' color='text.primary' style={{ flex: 1, fontVariant: ['tabular-nums'] }}>
               {counter}
             </Typography>
+            {/*
+             * Listen (MOB-077). In the session's one header row beside the
+             * mark, not floating over the card as it does on the web: the card
+             * here IS the flip target, and a button sitting on top of a tap
+             * surface that does something else is a trap.
+             *
+             * Only when there is something to say — a card whose face is empty
+             * would otherwise offer a control that does nothing.
+             */}
+            {speech.canSpeak ? <SpeakToggle speaking={speech.speaking} onPress={speech.toggle} /> : null}
             <MarkToggle card={current} />
           </Stack>
 

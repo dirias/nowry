@@ -3789,7 +3789,9 @@
   },
   "tts": {
     "autoDetect": "Auto-detect language",
-    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language",
+    "listen": "Listen",
+    "stop": "Stop"
   },
   "form": {
     "saveAndNext": "Save & next",

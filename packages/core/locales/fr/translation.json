@@ -2064,6 +2064,18 @@
       "nextReview": {
         "inDays_one": "Dans {{count}} jour",
         "inDays_other": "Dans {{count}} jours"
+      },
+      "empty": {
+        "decks": {
+          "title": "Aucun paquet trouvé",
+          "filter": "Essayez de modifier vos filtres",
+          "start": "Créez votre premier paquet pour commencer"
+        },
+        "cards": {
+          "title": "Aucune carte trouvée",
+          "filter": "Essayez de modifier vos filtres",
+          "start": "Créez des cartes dans vos paquets pour commencer"
+        }
       }
     },
     "import": {
@@ -3131,7 +3143,9 @@
   },
   "tts": {
     "autoDetect": "Auto-detect language",
-    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language",
+    "listen": "Écouter",
+    "stop": "Arrêter"
   },
   "form": {
     "saveAndNext": "Enregistrer et suivant",

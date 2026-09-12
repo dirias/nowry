@@ -68,6 +68,7 @@ import MessageSquareText from 'lucide-react-native/icons/message-square-text'
 import Minus from 'lucide-react-native/icons/minus'
 import Moon from 'lucide-react-native/icons/moon'
 import Network from 'lucide-react-native/icons/network'
+import Pause from 'lucide-react-native/icons/pause'
 import Pencil from 'lucide-react-native/icons/pencil'
 import Play from 'lucide-react-native/icons/play'
 import Plus from 'lucide-react-native/icons/plus'
@@ -86,6 +87,7 @@ import Timer from 'lucide-react-native/icons/timer'
 import Trash from 'lucide-react-native/icons/trash'
 import TriangleAlert from 'lucide-react-native/icons/triangle-alert'
 import Upload from 'lucide-react-native/icons/upload'
+import Volume2 from 'lucide-react-native/icons/volume-2'
 import X from 'lucide-react-native/icons/x'
 
 export const ICONS = {
@@ -141,6 +143,7 @@ export const ICONS = {
   Minus,
   Moon,
   Network,
+  Pause,
   Pencil,
   Play,
   Plus,
@@ -159,6 +162,7 @@ export const ICONS = {
   Trash,
   TriangleAlert,
   Upload,
+  Volume2,
   X
 }
 

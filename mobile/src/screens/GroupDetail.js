@@ -178,8 +178,13 @@ export function GroupDetail({ groupId }) {
   )
 }
 
-/** Due now, tomorrow, then "in N days" — the three the board draws. */
-function nextReviewLabel(t, card) {
+/**
+ * Due now, tomorrow, then "in N days" — the three the board draws.
+ *
+ * Exported because the deck screen lists cards too (MOB-078), and two screens
+ * that phrase the same date two ways is how a learner stops believing either.
+ */
+export function nextReviewLabel(t, card) {
   const days = daysUntilReview(card)
   if (days === null) return t('study.deckPill.new')
   if (days === 0) return t('groups.dueNow')

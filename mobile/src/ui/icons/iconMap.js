@@ -54,6 +54,8 @@ export const MATERIAL_TO_LUCIDE = {
   Logout: 'LogOut',
   RepeatRounded: 'Repeat',
   PlayArrowRounded: 'Play',
+  PauseRounded: 'Pause',
+  VolumeUpRounded: 'Volume2',
   FileDownloadRounded: 'Download',
   FileUploadRounded: 'Upload',
   CloudUploadRounded: 'CloudUpload',

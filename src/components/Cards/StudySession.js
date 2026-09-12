@@ -18,6 +18,7 @@ import { dailyReviewParams } from './dailyReviewParams'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePet } from '@nowry/core/context/AgentContext'
+import { speechTextFor } from '@nowry/core/domain/cardSpeech'
 import {
   Container,
   Card,
@@ -1483,9 +1484,9 @@ export default function StudySession() {
               compact
               voiceSettings={isFlipped ? activeVoiceSettings.back : activeVoiceSettings.front}
               onVoiceSettingsChange={handleVoiceSettingsChange}
-              text={
-                isQuiz ? `${currentCard.title}. ${currentCard.options?.join(', ')}` : isFlipped ? currentCard.content : currentCard.title
-              }
+              /* What a card sounds like is a shared rule now: the phone speaks
+                 the same cards and had to agree with this line exactly. */
+              text={speechTextFor(currentCard, { flipped: isFlipped })}
             />
             {isQuiz ? (
               // Quiz Card

@@ -1,62 +1,29 @@
 /**
  * useSegmentedSpeech — mixed-language playback for Study Cards TTS (ADR-001).
  *
- * `getSegments(text)` calls the cached `POST /v1/tts/segment` boundary and
- * degrades silently (returns `null`) on any failure — offline, rate-limited,
- * or a backend error must never block or error out the existing free,
- * offline-capable Study Cards TTS experience. Callers fall back to the
- * existing single-utterance `ttsService.speak()` path when this returns null.
+ * `getSegments(text)` is the shared `fetchSegments` boundary: it degrades
+ * silently (returns `null`) on any failure — offline, rate-limited, or a
+ * backend error must never block the free, offline-capable single-utterance
+ * path. Callers fall back to `ttsService.speak()` when this returns null. The
+ * request, its cache key and its silence live in `@nowry/core` now, because
+ * the phone speaks too and a second copy of that rule would drift.
  *
  * `speakSegments(segments, options)` queues one `ttsService.speak()` call per
  * segment, chained sequentially off each segment's `onend`, reusing
  * `ttsService`'s existing cancel/re-speak timing rather than reimplementing
- * utterance queuing.
+ * utterance queuing. Sequencing stays here: it is wired to this platform's
+ * engine and nothing about it is shareable.
  */
 
-import { ttsService as ttsAiService } from '@nowry/core/api/services/tts.ai.service'
+import { fetchSegments, segmentLang, segmentText } from '@nowry/core/domain/speechSegments'
 import ttsService from '../utils/tts.service'
-import { queryClient } from '@nowry/core/api/queryClient'
-
-const SEGMENTS_TTL_MS = 24 * 60 * 60 * 1000 // ~24h — segmentation is deterministic per text
-
-/**
- * Fast non-cryptographic 32-bit hash (FNV-1a) used only to build a cache key
- * from card text — not a security boundary, just a cheap content fingerprint.
- */
-function fnv1aHash(str) {
-  let hash = 0x811c9dc5
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i)
-    hash = Math.imul(hash, 0x01000193)
-  }
-  return (hash >>> 0).toString(16)
-}
 
 export function useSegmentedSpeech() {
   /**
-   * Returns cached/fetched segments for `text`, or `null` on ANY failure
-   * (network error, 429, 500, offline). Never throws to the caller.
+   * Returns the segments for `text`, or `null` on ANY failure (network error,
+   * 429, 500, offline). Never throws to the caller.
    */
-  const getSegments = async (text) => {
-    if (!text) return null
-
-    try {
-      const segments = await queryClient.fetchQuery({
-        queryKey: ['ttsSegments', fnv1aHash(text)],
-        queryFn: () => ttsAiService.segmentText(text),
-        staleTime: SEGMENTS_TTL_MS,
-        // Disable the client's default retry (1) here — a segmentation
-        // failure must degrade silently and fast (single attempt), matching
-        // the old apiCache-backed behavior, not add a retry round-trip
-        // before falling back to plain single-utterance TTS.
-        retry: false
-      })
-      return segments && segments.length > 0 ? segments : null
-    } catch (err) {
-      // Silent degrade — the caller falls back to plain ttsService.speak().
-      return null
-    }
-  }
+  const getSegments = (text) => fetchSegments(text)
 
   /**
    * Speaks each segment in sequence, one `ttsService.speak()` call per
@@ -76,8 +43,8 @@ export function useSegmentedSpeech() {
       const isFirst = index === 0
       const isLast = index === segments.length - 1
 
-      ttsService.speak(segment.text, {
-        lang: segment.lang_code,
+      ttsService.speak(segmentText(segment), {
+        lang: segmentLang(segment),
         rate,
         onStart: () => {
           if (isFirst && onStart) onStart()

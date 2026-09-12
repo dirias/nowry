@@ -1,116 +1,66 @@
 /**
- * Deck detail and settings (MOB-021).
+ * A deck, opened (MOB-021, rebuilt by MOB-078).
  *
- * The web splits this across a row menu and a settings modal with four
- * sections. On a phone it is one screen: identity, then study pace, then audio.
- * There is no modal because there is nothing to put it over — the screen IS the
- * deck. Publishing is the one web section left out; it is its own sheet there
- * and is not in the v1 scope here.
+ * What this screen used to be: the deck's settings form. Tapping a deck in the
+ * library landed on a name field, a description, a study pace, two daily
+ * limits, an audio block and an Archive button — nine controls and no cards.
+ * The deck's own contents were reachable from nowhere in the app.
  *
- * Everything is the shared `useDeckSettings`, including the debounced
- * per-section saving, so the payload shape the server sees is the payload the
- * web sends. What this file adds is the phone's answers to two things that hook
- * cannot supply: the voice list, which comes from the client (MOB-004), and a
- * destructive confirmation.
+ * The web does the opposite in both halves: opening a deck opens its cards, and
+ * settings are one item in the row's menu. So the screen is the deck now —
+ * identity, the two things you do with a deck, and what is in it — and the form
+ * is one tap away behind a row that says what it is.
  *
- * **Archive confirms with the platform alert.** A destructive action deserves
- * the dialog the OS trains people to read, and `Alert` is accessible, modal and
- * cancel-by-default without any of our own code. Our BottomSheet is for
- * choices; this is a stop.
+ * **The cards are a list, not a session.** The web's Browse mode is its session
+ * component with the scheduler switched off, which is a fine answer on a screen
+ * wide enough to show a card and a sidebar and a poor one here. A list is what
+ * a phone's reader wants from a folder: what is in it, when each piece is next
+ * due, and a way into any one of them.
  *
- * **Leaving the screen flushes.** Every field autosaves on a debounce, so a
- * rename typed and immediately backed out of would otherwise be lost with the
- * timer. `close()` is the hook's flush, and it runs on unmount.
+ * **A card opens the same sheet it opens in the library.** Preview first, then
+ * Edit — two screens that open a card two different ways is how a learner
+ * learns not to trust either.
  */
-import { useEffect, useState } from 'react'
-import { Alert, View } from 'react-native'
+import { useMemo, useState } from 'react'
+import { View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import useDeckSettings, { PACE_DEFAULTS } from '@nowry/core/hooks/useDeckSettings'
-import { decksService } from '@nowry/core/api/services'
-import { deckCountsFrom } from '@nowry/core/domain/deckTypes'
+import { deckCounts } from '@nowry/core/domain/deckTypes'
+import { daysUntilReview } from '@nowry/core/domain/sessionLog'
+import { useDeckCards } from '@nowry/core/hooks/useDeckCards'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
-import { subscribeToDeviceVoices } from '../platform/voices'
-import { useTheme } from '../theme'
-import { Button, Checkbox, Divider, FormField, Input, Readout, Screen, Segmented, Select, Skeleton, Stack, Typography } from '../ui'
+import { CardPreviewSheet } from './CardPreviewSheet'
+import { nextReviewLabel } from './GroupDetail'
+import { Button, Divider, Icon, IdentityTile, ListRow, Readout, Screen, SectionHeader, Skeleton, Stack, Typography } from '../ui'
 
-const PACE_MODES = Object.keys(PACE_DEFAULTS)
-
-/** The two numbers a pace mode presets, and that either mode or hand can set. */
-const LIMITS = [
-  { field: 'new_per_day', labelKey: 'deckSettings.study.newPerDay' },
-  { field: 'max_reviews_per_day', labelKey: 'deckSettings.study.maxReviews' }
-]
+/** Soonest first; a card nobody has seen has no date and sorts last. */
+const byNextReview = (a, b) => (daysUntilReview(a) ?? Infinity) - (daysUntilReview(b) ?? Infinity)
 
 export function DeckDetail() {
   const { deckId } = useLocalSearchParams()
+  const id = String(deckId)
   const { t } = useTranslation()
   const router = useRouter()
-  const theme = useTheme()
-  const [archiving, setArchiving] = useState(false)
+  const [previewing, setPreviewing] = useState(null)
 
   /*
-   * The list, for its counts alone. `GET /decks/{id}` returns the stored
-   * document and computes no `due_cards` or `new_cards`, so this screen's two
-   * conditional readouts could never render: it said "26 cards" where the row
-   * that opened it said "20 due · 92%" (MOB-065). The list is already in the
-   * query cache — this screen is reached from it — so reading it costs nothing.
+   * The list, not `GET /decks/{id}`. The detail endpoint computes no
+   * `due_cards`, `new_cards` or `mastery`, so a screen built on it said "26
+   * cards" where the row that opened it said "20 due · 92%" (MOB-065). The
+   * list is in the query cache already — this screen is reached from it — and
+   * it is what a rename in the settings screen invalidates, so the title here
+   * changes when the name does.
    */
   const deckList = useDeckData(null)
+  const cards = useDeckCards(id)
 
-  const settings = useDeckSettings({
-    open: true,
-    deckId: String(deckId),
-    subscribeToVoices: subscribeToDeviceVoices
-  })
+  const deck = (deckList.decks ?? []).find((row) => String(row._id ?? row.id) === id) ?? null
+  const counts = deckCounts(deck)
+  const name = deck?.name || ''
 
-  const {
-    loading,
-    deck,
-    identity,
-    identityError,
-    setIdentityField,
-    config,
-    voiceSettings,
-    availableVoices,
-    audioSide,
-    setAudioSide,
-    saveConfig,
-    saveVoice,
-    saveError,
-    saveErrorOffline,
-    close
-  } = settings
+  const ordered = useMemo(() => [...(cards.cards ?? [])].sort(byNextReview), [cards.cards])
 
-  useEffect(() => close, [close])
-
-  /*
-   * Archive, not delete (ADR-023): a deck is put in a state, its history is
-   * kept, and it leaves the default list. The confirmation says that, because
-   * "Archive" alone reads like a synonym for delete to most people.
-   */
-  const confirmArchive = () => {
-    Alert.alert(t('cards.deck.archive'), t('study.deck.historyKept'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('cards.deck.archive'),
-        style: 'destructive',
-        onPress: async () => {
-          setArchiving(true)
-          try {
-            await decksService.archive(String(deckId))
-            router.replace('/study')
-          } catch {
-            Alert.alert(t('cards.archived.archiveError'))
-          } finally {
-            setArchiving(false)
-          }
-        }
-      }
-    ])
-  }
-
-  if (loading) {
+  if (deckList.loading && !deck) {
     return (
       <Screen>
         <Stack spacing={2}>
@@ -122,37 +72,28 @@ export function DeckDetail() {
     )
   }
 
-  const listEntry = (deckList.decks ?? []).find((row) => String(row._id ?? row.id) === String(deckId))
-  const counts = deckCountsFrom(deck, listEntry)
-  const side = voiceSettings?.[audioSide] || {}
-  /* Spread `side` first: rate and pitch are set on the web and must survive a
-   * screen that has no control for them. */
-  const updateVoice = (patch) => saveVoice({ ...voiceSettings, [audioSide]: { ...side, ...patch } })
-
   return (
     <Screen>
       <Stack spacing={3}>
         <Stack spacing={1}>
-          <Typography level='h4'>{identity?.name || deck?.name || ''}</Typography>
+          <Typography level='h4'>{name}</Typography>
           <Stack direction='row' spacing={2} flexWrap='wrap'>
-            {/* What KIND of deck, which the web's settings header states with a
-                chip in the type's own accent. It was the one thing the header
-                never said, on a screen whose every row is typed by it. */}
+            {/* What KIND of deck, which the web's header states with a chip in
+                the type's own accent. */}
             <Readout leading>{t(`study.types.${deck?.deck_type || 'flashcard'}s`)}</Readout>
-            <Readout>{t('cards.manage_content.cardCount', { count: counts.total })}</Readout>
+            <Readout>{t('cards.manage_content.cardCount', { count: counts.total || ordered.length })}</Readout>
             {counts.due > 0 ? <Readout>{t('study.dueCount', { count: counts.due })}</Readout> : null}
             {counts.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: counts.fresh })}</Readout> : null}
           </Stack>
         </Stack>
 
-        {/* The deck's one action, and the only solid button on the screen.
-            Everything below it is settings; this is what a deck is for. */}
+        {/* The deck's one action, and the only solid button on the screen. */}
         <Stack direction='row' spacing={1}>
           <Button
             size='lg'
             style={{ flex: 1 }}
-            onPress={() => router.push(`/study/${String(deckId)}`)}
-            accessibilityLabel={t('study.deckPill.ariaLabel', { name: identity?.name || deck?.name || '' })}
+            onPress={() => router.push(`/study/${id}`)}
+            accessibilityLabel={t('study.deckPill.ariaLabel', { name })}
           >
             {t('study.deck.study')}
           </Button>
@@ -160,121 +101,70 @@ export function DeckDetail() {
           {/* Beside it, not stacked under it. Two full-width slabs one above
               the other read as two equally weighted choices; the deck has one
               action and one alternative. */}
-          <Button size='lg' variant='secondary' style={{ flex: 1 }} onPress={() => router.push(`/study/card/new?deckId=${String(deckId)}`)}>
+          <Button size='lg' variant='secondary' style={{ flex: 1 }} onPress={() => router.push(`/study/card/new?deckId=${id}`)}>
             {t('cards.deck.addCard')}
           </Button>
         </Stack>
 
-        <Divider />
-
-        <Typography level='title-md'>{t('deckSettings.nav.identity')}</Typography>
-
-        {/* `setIdentityField` queues the save itself — there is no Save button
-            and no onBlur, because a rename must land whether or not the field
-            is ever left. */}
-        <FormField labelKey='deckSettings.identity.name' errorKey={identityError}>
-          <Input
-            value={identity?.name ?? ''}
-            onChangeText={(v) => setIdentityField('name', v)}
-            accessibilityLabel={t('deckSettings.identity.name')}
-            invalid={Boolean(identityError)}
-            returnKeyType='done'
+        {/*
+         * Settings as a row, above the cards rather than under them: it is one
+         * object, and burying it below a list of forty cards would be hiding
+         * it rather than demoting it. This is the web's menu item, with the
+         * web's own words and the web's own accessible name.
+         */}
+        <View>
+          <Divider />
+          <ListRow
+            tile={<Icon name='Settings' size='sm' color='text.tertiary' />}
+            name={t('deckSettings.menuItem')}
+            onPress={() => router.push(`/study/deck/${id}/settings`)}
+            accessibilityLabel={t('deckSettings.openAria', { name })}
           />
-        </FormField>
+          <Divider />
+        </View>
 
-        <FormField labelKey='deckSettings.identity.description'>
-          <Input
-            value={identity?.description ?? ''}
-            onChangeText={(v) => setIdentityField('description', v)}
-            accessibilityLabel={t('deckSettings.identity.description')}
-            multiline
-          />
-        </FormField>
+        {/* No count beside the title: the readout line at the top of the
+            screen already says how many cards this deck has, and two numbers
+            for one fact an inch apart is how they end up disagreeing. */}
+        <SectionHeader title={t('groups.cards')} />
 
-        <Divider />
-
-        <Typography level='title-md'>{t('deckSettings.nav.study')}</Typography>
-
-        <FormField labelKey='deckSettings.study.paceMode' helperKey={`deckSettings.pace.${config?.pace_mode ?? 'balanced'}Hint`}>
-          <Segmented
-            accessibilityLabel={t('deckSettings.study.paceMode')}
-            value={config?.pace_mode}
-            // A mode is a preset, so choosing one writes the two numbers below
-            // it. They stay editable: the mode is a starting point, not a lock.
-            onChange={(mode) => saveConfig({ ...config, pace_mode: mode, ...PACE_DEFAULTS[mode] })}
-            options={PACE_MODES.map((mode) => ({ value: mode, label: t(`deckSettings.pace.${mode}`) }))}
-          />
-        </FormField>
-
-        {LIMITS.map(({ field, labelKey }) => (
-          <FormField key={field} labelKey={labelKey}>
-            <Input
-              value={String(config?.[field] ?? '')}
-              onChangeText={(raw) => saveConfig({ ...config, [field]: Math.max(0, parseInt(raw, 10) || 0) })}
-              accessibilityLabel={t(labelKey)}
-              keyboardType='number-pad'
-              returnKeyType='done'
-            />
-          </FormField>
-        ))}
-
-        <Divider />
-
-        <Typography level='title-md'>{t('deckSettings.nav.audio')}</Typography>
-
-        {/* Which side the voice settings below apply to. */}
-        <Segmented
-          accessibilityLabel={t('deckSettings.audio.sideAria')}
-          value={audioSide}
-          onChange={setAudioSide}
-          options={[
-            { value: 'front', label: t('deckSettings.audio.front') },
-            { value: 'back', label: t('deckSettings.audio.back') }
-          ]}
-        />
-
-        <Checkbox
-          checked={side.auto_play ?? false}
-          onPress={() => updateVoice({ auto_play: !(side.auto_play ?? false) })}
-          label={t('deckSettings.audio.autoplay')}
-        />
-
-        <FormField labelKey='deckSettings.audio.voice'>
-          <Select
-            accessibilityLabel={t('deckSettings.audio.voice')}
-            value={side.voice_name ?? ''}
-            onChange={(name) =>
-              updateVoice({
-                voice_name: name || null,
-                voice_lang: availableVoices.find((v) => v.name === name)?.lang || null
-              })
-            }
-            placeholderKey='deckSettings.audio.systemDefault'
-            options={[
-              { value: '', label: t('deckSettings.audio.systemDefault') },
-              // A name chosen on the web must survive being opened here.
-              ...(side.voice_name && !availableVoices.some((v) => v.name === side.voice_name)
-                ? [{ value: side.voice_name, label: side.voice_name }]
-                : []),
-              ...availableVoices.map((v) => ({ value: v.name, label: `${v.name} · ${v.lang}` }))
-            ]}
-          />
-        </FormField>
-
-        {saveError ? (
+        {cards.loading ? (
+          <Stack spacing={1}>
+            <Skeleton width='100%' height={52} />
+            <Skeleton width='100%' height={52} />
+          </Stack>
+        ) : cards.error ? (
           <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {/* "Network Error" is not a sentence and not the user's language. */}
-            {saveErrorOffline ? t('errors.offline') : t('deckSettings.saveFailed')}
+            {t('home.loadFailed')}
           </Typography>
-        ) : null}
-
-        <View style={{ height: theme.spacing[2] }} />
-        <Divider />
-
-        <Button variant='danger' onPress={confirmArchive} loading={archiving} accessibilityLabel={t('cards.deck.archive')}>
-          {t('cards.deck.archive')}
-        </Button>
+        ) : ordered.length === 0 ? (
+          /* An empty deck has exactly one thing to do, and the key for it is
+             already on this screen — so this says what is true and points at
+             it rather than repeating the button. */
+          <Typography level='body-sm' color='text.tertiary'>
+            {t('cards.manage_content.empty.cards.title')}
+          </Typography>
+        ) : (
+          ordered.map((card) => (
+            <View key={card._id ?? card.id}>
+              <Divider />
+              <ListRow
+                tile={<IdentityTile color='primary.solidBg' />}
+                name={card.title || card.question || card.front || ''}
+                meta={(card.tags ?? []).join(' · ') || null}
+                readout={
+                  <Typography level='body-xs' color='text.tertiary'>
+                    {nextReviewLabel(t, card)}
+                  </Typography>
+                }
+                onPress={() => setPreviewing(card)}
+              />
+            </View>
+          ))
+        )}
       </Stack>
+
+      <CardPreviewSheet visible={Boolean(previewing)} card={previewing} onClose={() => setPreviewing(null)} />
     </Screen>
   )
 }

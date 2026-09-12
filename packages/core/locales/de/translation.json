@@ -2053,6 +2053,18 @@
       "nextReview": {
         "inDays_one": "In {{count}} Tag",
         "inDays_other": "In {{count}} Tagen"
+      },
+      "empty": {
+        "decks": {
+          "title": "Keine Stapel gefunden",
+          "filter": "Passe deine Filter an",
+          "start": "Erstelle deinen ersten Stapel, um zu beginnen"
+        },
+        "cards": {
+          "title": "Keine Karten gefunden",
+          "filter": "Passe deine Filter an",
+          "start": "Erstelle Karten in deinen Stapeln, um zu beginnen"
+        }
       }
     },
     "import": {
@@ -3120,7 +3132,9 @@
   },
   "tts": {
     "autoDetect": "Auto-detect language",
-    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language"
+    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language",
+    "listen": "Anhören",
+    "stop": "Stopp"
   },
   "form": {
     "saveAndNext": "Speichern & weiter",

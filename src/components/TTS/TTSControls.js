@@ -7,85 +7,42 @@ import ttsService from '../../utils/tts.service'
 import SettingsIcon from '@mui/icons-material/Settings'
 import CloseIcon from '@mui/icons-material/Close'
 import { useSegmentedSpeech } from '../../hooks/useSegmentedSpeech'
+import { languageOptions as deviceLanguages, resolveVoice as coreResolveVoice } from '@nowry/core/domain/voiceMatch'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Given the raw voices list from the Web Speech API, build a deduplicated
- * list of languages sorted alphabetically. Each entry has:
- *   { langCode, label, bestVoice }
+ * The device's languages, each with a display name.
  *
- * bestVoice is the highest-quality voice available for that language on
- * this device (preferring Google > Enhanced > Premium > first available).
+ * Which language a voice speaks, which of several voices is the good one, and
+ * what to do with Android's `ja_JP` are all `voiceMatch`'s rules now — the
+ * phone answers the same questions and a second copy of them drifted the first
+ * time it was written. What stays here is the label, because naming a language
+ * to a reader is a browser question: `Intl.DisplayNames` is not on every
+ * runtime that package serves.
  */
 function buildLanguageOptions(voices) {
-  const seen = new Map() // langBase → entry
-
-  for (const voice of voices) {
-    // Normalize lang code: some Android voices use underscore ("ja_JP")
-    const lang = voice.lang.replace(/_/g, '-')
-    const langBase = lang.split('-')[0].toLowerCase() // "ja", "en", "de"
-
-    if (!seen.has(langBase)) {
-      // Get a human-readable language name via Intl.DisplayNames
-      let label = langBase
-      try {
-        label = new Intl.DisplayNames([navigator.language || 'en'], { type: 'language' }).of(langBase) || langBase
-      } catch (_) {
-        label = langBase
-      }
-
-      seen.set(langBase, { langCode: lang, langBase, label, bestVoice: voice })
-    } else {
-      // Prefer higher-quality voice for the same language
-      const entry = seen.get(langBase)
-      const isCurrentBetter = voice.name.includes('Google') || voice.name.includes('Enhanced') || voice.name.includes('Premium')
-      const currentIsBetter =
-        entry.bestVoice.name.includes('Google') || entry.bestVoice.name.includes('Enhanced') || entry.bestVoice.name.includes('Premium')
-      if (isCurrentBetter && !currentIsBetter) {
-        seen.get(langBase).bestVoice = voice
-      }
-    }
-  }
-
-  return Array.from(seen.values()).sort((a, b) => a.label.localeCompare(b.label))
+  return (
+    deviceLanguages(voices)
+      .map((entry) => {
+        let label = entry.langBase
+        try {
+          label = new Intl.DisplayNames([navigator.language || 'en'], { type: 'language' }).of(entry.langBase) || entry.langBase
+        } catch (_) {
+          label = entry.langBase
+        }
+        return { ...entry, label }
+      })
+      /* Sorted by the NAME the reader sees, not by the code underneath it — the
+       shared list is ordered by code, which is the only order available to a
+       module that cannot name a language. */
+      .sort((a, b) => a.label.localeCompare(b.label))
+  )
 }
 
-/**
- * Find the best available voice for a given target language or voice name.
- * Priority:
- *   1. Exact language code match (e.g. "ja-JP" or "ja")
- *   2. Any voice whose lang starts with the target base
- *   3. Look up the target name in ALL system voices to derive its language
- */
+/** The saved voice, resolved against this device (see `voiceMatch`). */
 function resolveVoice(voices, { targetLang, targetName }) {
-  // 1. Language code match (primary — works cross-device)
-  if (targetLang) {
-    const base = targetLang.split('-')[0].toLowerCase()
-    // Prefer best quality for that language
-    const candidates = voices.filter((v) => v.lang.replace(/_/g, '-').split('-')[0].toLowerCase() === base)
-    if (candidates.length > 0) {
-      return candidates.find((v) => v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium')) || candidates[0]
-    }
-  }
-
-  // 2. Exact name match (same device, backward compat)
-  if (targetName) {
-    const exact = voices.find((v) => v.name === targetName)
-    if (exact) return exact
-  }
-
-  // 3. Derive language from the saved name via system voices
-  if (targetName) {
-    const allSystem = ttsService.getVoices()
-    const original = allSystem.find((v) => v.name === targetName)
-    if (original) {
-      const base = original.lang.split('-')[0].toLowerCase()
-      return voices.find((v) => v.lang.replace(/_/g, '-').split('-')[0].toLowerCase() === base) || null
-    }
-  }
-
-  return null
+  return coreResolveVoice(voices, { targetLang, targetName }, ttsService.getVoices())
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────

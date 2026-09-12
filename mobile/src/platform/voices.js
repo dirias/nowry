@@ -1,23 +1,47 @@
 /**
  * The voice list, on a phone.
  *
- * There is none yet, deliberately. The web enumerates voices through
- * `speechSynthesis`, which does not exist here; the mobile equivalent is
- * `expo-speech`, and that is a native module — another build, for a picker that
- * only matters once mobile actually speaks. Mobile TTS is not in v1.
+ * There was none: the phone offered a deck's whole Audio section — side,
+ * auto-play, voice — for audio it could never play, and the voice picker was
+ * permanently empty. That was recorded here as a decision, and it was the wrong
+ * one to keep once the session learned to speak (MOB-077).
  *
- * What this does NOT block is the criterion that matters: a deck's voice
- * settings written on the phone — the side, the rate, the pitch, and a voice
- * name already chosen on the web — are saved through the shared service and
- * honoured by the web's TTS. Only *discovering* new voice names waits.
+ * `useDeckSettings` takes the subscription as a parameter (MOB-004), so this
+ * file is still the only thing that knows the engine exists. What changed is
+ * that it now asks it.
  *
- * When mobile TTS lands, this becomes `Speech.getAvailableVoicesAsync()` and
- * nothing above it changes: `useDeckSettings` already takes the subscription as
- * a parameter (MOB-004).
+ * The list is asynchronous and, on Android, can come back empty on the first
+ * call while the engine is still starting. A subscription is the right shape
+ * for that: the picker draws with whatever it has, and fills in.
  */
+import { listVoices } from './speech'
+
+/**
+ * Android's engine takes a moment to enumerate. Three tries over four seconds,
+ * and then it is a device with no voices installed rather than a slow one —
+ * asking forever would be a timer that never stops on exactly those devices.
+ */
+const RETRY_MS = 1200
+const TRIES = 3
+
 export const subscribeToDeviceVoices = (onVoices) => {
+  let cancelled = false
+  let timer = null
+
+  const load = async (attempt = 1) => {
+    const voices = await listVoices()
+    if (cancelled) return
+    onVoices(voices)
+    if (voices.length === 0 && attempt < TRIES) timer = setTimeout(() => load(attempt + 1), RETRY_MS)
+  }
+
   onVoices([])
-  return () => {}
+  load()
+
+  return () => {
+    cancelled = true
+    if (timer) clearTimeout(timer)
+  }
 }
 
 export default subscribeToDeviceVoices
