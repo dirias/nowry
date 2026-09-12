@@ -15,9 +15,10 @@
  * "Click to flip". A gesture that is the only way to proceed is a control a
  * screen reader cannot find, so the primary action is a real button and the tap
  * is the shortcut for people who already know. Before the reveal there is one
- * solid button, which is what the surface is for; after it there are four
- * neutral choices and no solid at all, because making one grade the accented
- * one would bias the self-assessment the whole method rests on.
+ * solid key, which is what the surface is for; after it the web's own four —
+ * Again outlined in danger, Hard and Good soft, Easy solid in the accent
+ * (`GRADE_VARIANTS`). An earlier version of this note claimed four neutral
+ * choices and no solid; the code never did that and the web never has.
  *
  * **A grade survives the app dying.** Progress is written to storage after every
  * grade, so a session interrupted by a phone call resumes on the card it was on
@@ -33,7 +34,7 @@ import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
 import { storage } from '@nowry/core'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
-import { Button, Card, FlipCard, Icon, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
+import { Button, Card, FlipCard, Icon, MarkToggle, Progress, Screen, Skeleton, Stack, SwipeArea, Typography } from '../ui'
 
 /**
  * The action band is one constant height whichever face is up.
@@ -342,9 +343,27 @@ export function StudySession() {
   return (
     <Screen scroll={false}>
       <Stack spacing={2} style={{ flex: 1 }}>
-        <Typography level='body-sm' color='text.tertiary'>
-          {counter}
-        </Typography>
+        {/*
+         * The web's session header, on one row closed by a progress seam
+         * (ADR-011). The back control is in the app bar above, so this row is
+         * the count and the mark.
+         *
+         * Both were missing pieces rather than adaptations: the session had no
+         * progress indicator of any kind — twenty-four cards and a number —
+         * and no way to mark a card at all, which is the one thing SM-2 cannot
+         * infer and the moment the learner actually knows it (MOB-062).
+         */}
+        <Stack spacing={1}>
+          <Stack direction='row' spacing={1} alignItems='center'>
+            <Typography level='title-sm' color='text.primary' style={{ flex: 1, fontVariant: ['tabular-nums'] }}>
+              {counter}
+            </Typography>
+            <MarkToggle card={current} />
+          </Stack>
+
+          {/* Progress as an EDGE, not an object (§15.4). */}
+          <Progress value={total > 0 ? ((index + 1) / total) * 100 : 0} accessibilityLabel={counter} />
+        </Stack>
 
         {/* The card fills what is left, so the grades sit in the bottom third
             of any screen height rather than at a measured offset. */}

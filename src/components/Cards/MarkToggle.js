@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 import { Button, IconButton, Tooltip } from '@mui/joy'
 import { Bookmark, BookmarkBorder } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
-import { cardsService } from '@nowry/core/api/services'
+import { useCardMark } from '@nowry/core/hooks/useCardMark'
 
 /**
  * Explicit keyboard focus ring — Joy leans on the browser outline, which the
@@ -67,44 +67,20 @@ const FOCUS_RING = {
 export default function MarkToggle({ card, onMarkChange, size = 'sm', variant = 'plain', appearance = 'icon', sx }) {
   const { t } = useTranslation()
 
-  const cardId = card?._id || card?.id
-  const serverMarked = Boolean(card?.marked_at)
-
-  const [marked, setMarked] = useState(serverMarked)
-  const [pending, setPending] = useState(false)
-
   /*
-   * Follow the card, not just the mount. A session swaps a different card in
-   * underneath this component and the library re-renders rows in place, so the
-   * server's answer has to win whenever either the identity or the stored value
-   * changes — otherwise stepping back to an already-marked card shows it empty.
+   * The optimism, the rollback and the follow-the-card effect live in
+   * `useCardMark` in the shared package — the phone's session header needs the
+   * same three and a second copy of them is how two clients start disagreeing
+   * about what a mark is (MOB-062).
    */
-  useEffect(() => {
-    setMarked(serverMarked)
-  }, [cardId, serverMarked])
+  const { cardId, marked, pending, toggle } = useCardMark(card, onMarkChange)
 
-  const handleToggle = useCallback(
-    async (event) => {
-      // Card rows and preview cards are themselves click targets; without this
-      // marking a card would also open it.
-      event.stopPropagation()
-      if (!cardId || pending) return
-
-      const next = !marked
-      setMarked(next)
-      setPending(true)
-
-      try {
-        const updated = next ? await cardsService.mark(cardId) : await cardsService.unmark(cardId)
-        onMarkChange?.(cardId, updated?.marked_at ?? null)
-      } catch (error) {
-        setMarked(!next)
-      } finally {
-        setPending(false)
-      }
-    },
-    [cardId, marked, pending, onMarkChange]
-  )
+  const handleToggle = (event) => {
+    // Card rows and preview cards are themselves click targets; without this
+    // marking a card would also open it.
+    event.stopPropagation()
+    toggle()
+  }
 
   if (!cardId) return null
 
