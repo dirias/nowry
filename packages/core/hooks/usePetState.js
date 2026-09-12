@@ -65,9 +65,15 @@ export function usePetState() {
     xpForNextLevel: data?.xp_for_next_level ?? null,
     /** 0–1 toward the next level, computed server-side. Null until known. */
     levelProgress: data?.level_progress ?? null,
-    /** A companion that has never been revealed is not drawn at all. */
-    revealed: data?.pet_revealed ?? false,
-    active: data?.pet_active ?? false,
+    /*
+     * A companion that has never been revealed is not drawn at all — and the
+     * default when the field is ABSENT is revealed, which is what the web's own
+     * reducer has always done (`pet_revealed ?? true`). Defaulting to false
+     * here was an invention, and it hid the companion on a phone whose account
+     * the web shows one for: the panel simply never rendered (MOB-052).
+     */
+    revealed: data?.pet_revealed ?? true,
+    active: data?.pet_active ?? true,
     loading: isLoading,
     error: data ? null : (error ?? null),
     save

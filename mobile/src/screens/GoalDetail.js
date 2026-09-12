@@ -147,7 +147,16 @@ export function GoalDetail() {
 
         <View>
           <SectionHeader
-            title={t('annualPlanning.goal.milestoneCount', { count: milestones.length })}
+            /*
+             * The key reads "{{completed}} of {{total}} milestones" and uses
+             * `count` only to pick its plural. Passing `count` alone printed
+             * the two placeholders verbatim on the screen.
+             */
+            title={t('annualPlanning.goal.milestoneCount', {
+              completed: milestones.filter((milestone) => milestone.completed).length,
+              total: milestones.length,
+              count: milestones.length
+            })}
             action={
               <IconButton size='sm' accessibilityLabel={t('annualPlanning.goal.addMilestoneButton')} onPress={() => setSheet(true)}>
                 <Icon name='Plus' size='sm' />
@@ -187,11 +196,18 @@ export function GoalDetail() {
                     >
                       {milestone.title}
                     </Typography>
-                    {/* Lateness rides on the date that is already there rather
-                        than adding a badge that repeats it. */}
-                    <Typography level='body-xs' color={late ? 'danger.plainColor' : 'text.tertiary'}>
-                      {dueLabel(milestone.due_date) ?? t('annualPlanning.goal.milestoneNoDate')}
-                    </Typography>
+                    {/*
+                     * No date is silence, not a word. `milestoneNoDate` is the
+                     * web's placeholder for a date FIELD — using it as a
+                     * readout printed "Date" down the right of every undated
+                     * milestone, which reads as a column header. Lateness rides
+                     * on the date that is there rather than adding a badge.
+                     */}
+                    {dueLabel(milestone.due_date) ? (
+                      <Typography level='body-xs' color={late ? 'danger.plainColor' : 'text.tertiary'}>
+                        {dueLabel(milestone.due_date)}
+                      </Typography>
+                    ) : null}
                   </Stack>
                   <Divider />
                 </View>

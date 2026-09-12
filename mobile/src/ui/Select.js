@@ -10,6 +10,13 @@
  *
  * Recorded rather than assumed: if the design system later wants the platform
  * picker specifically, this is the file to change and the dependency to add.
+ *
+ * **Inside a sheet it expands in place instead.** A modal opened from inside a
+ * modal does not layer predictably on Android: in the calendar's event form
+ * this list came up squeezed against the bottom edge, half behind the sheet it
+ * belonged to, and the goal it was asking for could not be read. `useInSheet`
+ * is how it knows, so the same control serves both places without the caller
+ * choosing.
  */
 import { useState } from 'react'
 import { Modal, Pressable, ScrollView, View } from 'react-native'
@@ -17,11 +24,13 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '../theme'
 import { Typography, resolveColor } from './Typography'
 import { Divider } from './Divider'
+import { useInSheet } from './BottomSheet'
 import { MIN_TOUCH_TARGET } from './buttonSpec'
 
 export function Select({ value, options, onChange, placeholderKey = null, invalid = false, accessibilityLabel, style }) {
   const { t } = useTranslation()
   const theme = useTheme()
+  const inSheet = useInSheet()
   const [open, setOpen] = useState(false)
 
   if (__DEV__ && !accessibilityLabel) {
@@ -56,7 +65,24 @@ export function Select({ value, options, onChange, placeholderKey = null, invali
         </Typography>
       </Pressable>
 
-      <Modal visible={open} transparent animationType='fade' onRequestClose={() => setOpen(false)}>
+      {/* In a sheet: the list is part of the field, under the trigger. */}
+      {inSheet && open ? (
+        <View
+          style={{
+            marginTop: 6,
+            maxHeight: 220,
+            borderRadius: theme.radius.md,
+            borderWidth: 1,
+            borderColor: resolveColor(theme, 'neutral.outlinedBorder'),
+            backgroundColor: resolveColor(theme, 'background.surface'),
+            overflow: 'hidden'
+          }}
+        >
+          <Options options={options} value={value} onChange={onChange} close={() => setOpen(false)} theme={theme} />
+        </View>
+      ) : null}
+
+      <Modal visible={open && !inSheet} transparent animationType='fade' onRequestClose={() => setOpen(false)}>
         {/* Tapping the scrim dismisses, which is what a back gesture does too. */}
         <Pressable style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={() => setOpen(false)}>
           <Pressable
@@ -69,30 +95,37 @@ export function Select({ value, options, onChange, placeholderKey = null, invali
               maxHeight: '70%'
             }}
           >
-            <ScrollView>
-              {options.map((option, i) => (
-                <View key={option.value}>
-                  {i > 0 ? <Divider /> : null}
-                  <Pressable
-                    onPress={() => {
-                      onChange?.(option.value)
-                      setOpen(false)
-                    }}
-                    accessibilityRole='menuitem'
-                    accessibilityState={{ selected: option.value === value }}
-                    style={{ minHeight: MIN_TOUCH_TARGET, paddingHorizontal: theme.spacing[2], justifyContent: 'center' }}
-                  >
-                    <Typography level='body-md' color={option.value === value ? 'primary.plainColor' : 'text.primary'}>
-                      {option.label}
-                    </Typography>
-                  </Pressable>
-                </View>
-              ))}
-            </ScrollView>
+            <Options options={options} value={value} onChange={onChange} close={() => setOpen(false)} theme={theme} />
           </Pressable>
         </Pressable>
       </Modal>
     </>
+  )
+}
+
+/** The options themselves, drawn the same way in a sheet and in a modal. */
+function Options({ options, value, onChange, close, theme }) {
+  return (
+    <ScrollView keyboardShouldPersistTaps='handled'>
+      {options.map((option, i) => (
+        <View key={option.value}>
+          {i > 0 ? <Divider /> : null}
+          <Pressable
+            onPress={() => {
+              onChange?.(option.value)
+              close()
+            }}
+            accessibilityRole='menuitem'
+            accessibilityState={{ selected: option.value === value }}
+            style={{ minHeight: MIN_TOUCH_TARGET, paddingHorizontal: theme.spacing[2], justifyContent: 'center' }}
+          >
+            <Typography level='body-md' color={option.value === value ? 'primary.plainColor' : 'text.primary'}>
+              {option.label}
+            </Typography>
+          </Pressable>
+        </View>
+      ))}
+    </ScrollView>
   )
 }
 

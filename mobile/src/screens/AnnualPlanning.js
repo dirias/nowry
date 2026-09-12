@@ -12,6 +12,12 @@
  * year's plan and its focus areas is therefore in this slice; editing a goal,
  * closing a quarter, the reports and the AI panel are not.
  *
+ * **A goal lives inside its area.** The first build listed every goal of the
+ * quarter flat, under the areas — the web's Goals tab pasted under its
+ * Overview. Reported from the device: tapping an area did nothing and the goals
+ * were somewhere down the scroll. An area opens its own screen now, and this
+ * one shows what the web's Overview shows.
+ *
  * **Three focus areas, and the limit is the point** (`focusArea.limit`): the
  * feature is called the Power of 3 on the web's own setup screen. The Add key
  * disappears at three rather than failing at four.
@@ -30,7 +36,7 @@ import { useTranslation } from 'react-i18next'
 import { annualPlanningService } from '@nowry/core/api/services'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useAuth } from '@nowry/core/context/AuthContext'
-import { calculateProgress, getCurrentQuarter, isGoalCompleted, planMetrics } from '@nowry/core/domain/goalDerivation'
+import { getCurrentQuarter, planMetrics } from '@nowry/core/domain/goalDerivation'
 import { completionPatch } from '@nowry/core/domain/calendar/eventHelpers'
 import { useTheme } from '../theme'
 import { AreaSheet } from './AnnualPlanningSheets'
@@ -247,38 +253,6 @@ export function AnnualPlanning() {
             })
           )}
         </View>
-
-        {/* The goals of this quarter, flat, because a phone reading a plan
-            wants the list and not the tree. Each says which area it belongs to
-            rather than being nested under it. */}
-        <View>
-          <SectionHeader title={t('annualPlanning.tabs.goals')} count={quarterGoals.length} />
-          {quarterGoals.length === 0 ? (
-            <Typography level='body-md' color='text.secondary'>
-              {t('annualPlanning.tabs.goalsEmptyBody')}
-            </Typography>
-          ) : (
-            quarterGoals.map((goal) => (
-              <View key={goal._id}>
-                <ListRow
-                  tile={
-                    <Icon
-                      name={isGoalCompleted(goal) ? 'CircleCheck' : 'Target'}
-                      size='md'
-                      color={isGoalCompleted(goal) ? 'success.plainColor' : 'text.tertiary'}
-                    />
-                  }
-                  name={goal.title}
-                  meta={(areas || []).find((area) => area._id === goal.focus_area_id)?.name ?? null}
-                  measure={<Measure value={calculateProgress(goal)} accessibilityLabel={t('annualPlanning.home.progress')} />}
-                  readout={<Readout>{calculateProgress(goal)}%</Readout>}
-                  onPress={() => router.push(`/calendar/goal/${goal._id}`)}
-                />
-                <Divider />
-              </View>
-            ))
-          )}
-        </View>
       </Stack>
 
       <AreaSheet
@@ -294,7 +268,7 @@ export function AnnualPlanning() {
 }
 
 /** One focus area: its colour, its name, and how far its goals have got. */
-function AreaRow({ area, metrics, theme, t }) {
+function AreaRow({ area, metrics, theme, t, onPress }) {
   return (
     <View>
       <ListRow
@@ -308,6 +282,7 @@ function AreaRow({ area, metrics, theme, t }) {
         meta={t('annualPlanning.stats.totalGoals') + ': ' + metrics.total}
         measure={<Measure value={metrics.progress} accessibilityLabel={t('annualPlanning.home.progress')} />}
         readout={<Readout>{metrics.progress}%</Readout>}
+        onPress={onPress}
       />
       <Divider />
     </View>

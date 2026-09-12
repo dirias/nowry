@@ -8,7 +8,7 @@
  * call sites become a visible label or nothing.
  */
 export { ActionSheet } from './ActionSheet'
-export { BottomSheet } from './BottomSheet'
+export { BottomSheet, useInSheet } from './BottomSheet'
 export { Box } from './Box'
 export { Card, Sheet } from './Sheet'
 export { Checkbox, Radio } from './Choice'

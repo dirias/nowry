@@ -17,13 +17,39 @@
  *
  * Under reduced motion it appears rather than slides: presence motion is
  * removed, not slowed (MOTION.md §4).
+ *
+ * **It gets out of the keyboard's way itself.** A sheet sits on the bottom
+ * edge, which is exactly where the keyboard opens, and the calendar's event
+ * form shipped with every field hidden behind it — the user typed a title they
+ * could not see. Android's own resize mode does not reach inside a transparent
+ * modal under edge-to-edge, and `KeyboardAvoidingView` is unreliable there, so
+ * the sheet measures the keyboard and pads by it. Doing it in JavaScript also
+ * means no `softwareKeyboardLayoutMode` in the app config, which would have
+ * cost a new native build.
+ *
+ * **And it scrolls.** The content was a plain view under a 90% cap: anything
+ * taller than that was clipped with no way to reach it, which the event form
+ * hit the moment a picker and a description were both on screen.
  */
-import { useRef } from 'react'
-import { Animated, Dimensions, Modal, PanResponder, Pressable, View } from 'react-native'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { Animated, Dimensions, Keyboard, Modal, PanResponder, Platform, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useReduceMotion } from '../theme'
 import { Typography, resolveColor } from './Typography'
+
+/**
+ * Whether the thing rendering is already inside a sheet.
+ *
+ * A `Modal` opened from inside a `Modal` does not layer predictably on Android:
+ * the `Select` in the calendar's event form opened its option list as a second
+ * modal, and it came up squeezed against the bottom edge, half behind the sheet
+ * it belonged to. Controls that would open their own overlay read this and
+ * expand in place instead.
+ */
+const SheetContext = createContext(false)
+
+export const useInSheet = () => useContext(SheetContext)
 
 const DISMISS_FRACTION = 0.33
 const DISMISS_VELOCITY = 0.5
@@ -35,6 +61,19 @@ export function BottomSheet({ visible, onClose, title, children, accessibilityLa
   const insets = useSafeAreaInsets()
   const drag = useRef(new Animated.Value(0)).current
   const height = Dimensions.get('window').height
+  const [keyboard, setKeyboard] = useState(0)
+
+  useEffect(() => {
+    // iOS announces the keyboard before it arrives, Android only once it has.
+    const shown = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
+    const hidden = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
+    const open = Keyboard.addListener(shown, (event) => setKeyboard(event.endCoordinates?.height ?? 0))
+    const close = Keyboard.addListener(hidden, () => setKeyboard(0))
+    return () => {
+      open.remove()
+      close.remove()
+    }
+  }, [])
 
   const settle = () =>
     Animated.timing(drag, {
@@ -84,7 +123,9 @@ export function BottomSheet({ visible, onClose, title, children, accessibilityLa
               backgroundColor: resolveColor(theme, 'background.popup'),
               borderTopLeftRadius: theme.radius.xl,
               borderTopRightRadius: theme.radius.xl,
-              paddingBottom: insets.bottom + theme.spacing[2],
+              // The keyboard's height replaces the safe-area inset while it is
+              // up: the system bar it insets for is behind the keyboard.
+              paddingBottom: keyboard > 0 ? keyboard : insets.bottom + theme.spacing[2],
               maxHeight: '90%',
               transform: [{ translateY: drag }],
               ...theme.elevation.lg
@@ -101,7 +142,14 @@ export function BottomSheet({ visible, onClose, title, children, accessibilityLa
               </Typography>
             ) : null}
           </View>
-          <View style={{ paddingHorizontal: theme.spacing[2], paddingTop: theme.spacing[1] }}>{children}</View>
+          {/* `handled` so a tap on a control inside the sheet reaches it on the
+              first press rather than being eaten by the keyboard's dismissal. */}
+          <ScrollView
+            keyboardShouldPersistTaps='handled'
+            contentContainerStyle={{ paddingHorizontal: theme.spacing[2], paddingTop: theme.spacing[1] }}
+          >
+            <SheetContext.Provider value={true}>{children}</SheetContext.Provider>
+          </ScrollView>
         </Animated.View>
       </Pressable>
     </Modal>
