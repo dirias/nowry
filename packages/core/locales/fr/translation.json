@@ -1424,7 +1424,12 @@
       "noItems": "Aucun élément de routine configuré pour le moment",
       "deleteItem": "Supprimer l'élément",
       "addItem": "Ajouter un élément",
-      "editRoutine": "Modifier la routine"
+      "editRoutine": "Modifier la routine",
+      "short": {
+        "morning": "Matin",
+        "afternoon": "Après-midi",
+        "evening": "Soir"
+      }
     },
     "progress": {
       "title": "Tableau de Bord des Progrès",

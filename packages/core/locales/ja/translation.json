@@ -1538,7 +1538,12 @@
       "noItems": "まだルーティン項目が設定されていません",
       "deleteItem": "項目を削除",
       "addItem": "項目を追加",
-      "editRoutine": "ルーティンを編集"
+      "editRoutine": "ルーティンを編集",
+      "short": {
+        "morning": "朝",
+        "afternoon": "午後",
+        "evening": "夜"
+      }
     },
     "progress": {
       "title": "進捗ダッシュボード",

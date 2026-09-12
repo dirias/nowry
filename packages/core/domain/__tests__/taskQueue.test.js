@@ -1,4 +1,4 @@
-import { dueTodayCount, isDueBy, routineProgress, taskCategory, tasksDueToday } from '../taskQueue'
+import { dueTodayCount, isDueBy, taskCategory, tasksDueToday } from '../taskQueue'
 
 const now = new Date('2026-09-12T10:00:00')
 const task = (id, extra) => ({ _id: id, title: id, ...extra })
@@ -44,27 +44,6 @@ describe('tasksDueToday', () => {
     expect(isDueBy(task('x', { deadline: '2026-09-12T23:59:00' }), now)).toBe(true)
     expect(isDueBy(task('x', { deadline: '2026-09-13T00:01:00' }), now)).toBe(false)
     expect(isDueBy(task('x', {}), now)).toBe(false)
-  })
-})
-
-describe('routineProgress', () => {
-  it('counts every period together', () => {
-    const routine = {
-      morning: { items: [{ completed: true }, { completed: false }] },
-      evening: { items: [{ is_completed: true }] }
-    }
-    expect(routineProgress(routine)).toEqual({ done: 2, total: 3 })
-  })
-
-  it('reads a period that is a bare array', () => {
-    expect(routineProgress({ morning: [{ completed: true }, {}] })).toEqual({ done: 1, total: 2 })
-  })
-
-  it('is null for no routine at all, which is not the same as none ticked', () => {
-    expect(routineProgress(null)).toBeNull()
-    expect(routineProgress({})).toBeNull()
-    expect(routineProgress({ morning: { items: [] } })).toBeNull()
-    expect(routineProgress({ morning: { items: [{}, {}] } })).toEqual({ done: 0, total: 2 })
   })
 })
 

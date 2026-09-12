@@ -2324,7 +2324,12 @@
       "noItems": "No routine items configured yet",
       "deleteItem": "Delete item",
       "addItem": "Add item",
-      "editRoutine": "Edit routine"
+      "editRoutine": "Edit routine",
+      "short": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening"
+      }
     },
     "progress": {
       "title": "Progress Dashboard",

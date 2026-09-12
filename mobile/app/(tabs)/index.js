@@ -26,8 +26,8 @@
  * Skeletons, never a page gate. The layout the reader is about to see is
  * already there while the numbers arrive, so nothing moves when they do.
  */
-import { useState } from 'react'
-import { View } from 'react-native'
+import { useMemo, useState } from 'react'
+import { Image, Linking, Pressable, ScrollView, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -40,7 +40,18 @@ import { tasksService } from '@nowry/core/api/services'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { planMetrics } from '@nowry/core/domain/goalDerivation'
 import { deadlineReadout, watchedPriorities } from '@nowry/core/domain/priorityWatch'
-import { dueTodayCount, routineProgress, taskCategory, tasksDueToday } from '@nowry/core/domain/taskQueue'
+import { dueTodayCount, taskCategory, tasksDueToday } from '@nowry/core/domain/taskQueue'
+import {
+  ROUTINE_PERIODS,
+  completedToday,
+  currentPeriod,
+  routineItems,
+  routineProgress,
+  toggledCompletions,
+  todayKey
+} from '@nowry/core/domain/dailyRoutine'
+import { useNews } from '@nowry/core/hooks/useNews'
+import { annualPlanningService } from '@nowry/core/api/services'
 import { DAILY_REVIEW } from '../../src/screens/StudySession'
 import { useTheme } from '../../src/theme'
 import {
@@ -54,6 +65,7 @@ import {
   Readout,
   Screen,
   SectionHeader,
+  Segmented,
   Skeleton,
   Stack,
   SummaryObject,
@@ -65,6 +77,8 @@ import { PetPanel } from '../../src/screens/PetPanel'
 const TASKS_SHOWN = 4
 /** The web's short session, offered only when the day is longer than it. */
 const QUICK_SIZE = 10
+/** Enough to be a carousel, few enough that a cold open is not ten images. */
+const NEWS_SHOWN = 6
 
 export default function Home() {
   const { t, i18n } = useTranslation()
@@ -75,7 +89,7 @@ export default function Home() {
   const { statistics, loading: statsLoading, error: statsError } = useStatistics()
   const deckData = useDeckData(null)
   const taskData = useTaskData()
-  const { routine } = useDailyRoutine()
+  const { routine, invalidate: reloadRoutine } = useDailyRoutine()
   const plan = useAnnualPlan()
 
   /*
@@ -92,6 +106,16 @@ export default function Home() {
   const tasksCount = dueTodayCount(taskData.tasks)
   const routineToday = routineProgress(routine)
 
+  /*
+   * The web's caption under its greeting, picked once per mount rather than
+   * per render — a phrase that changes while you read it is a flicker, not a
+   * greeting.
+   */
+  const motivation = useMemo(() => {
+    const phrases = t('motivation.phrases', { returnObjects: true })
+    return Array.isArray(phrases) && phrases.length > 0 ? phrases[Math.floor(Math.random() * phrases.length)] : null
+  }, [t])
+
   const areas = plan.focusAreas ?? []
   const watching = watchedPriorities(plan.priorities, plan.goals, plan.preferredPriorityIds)
 
@@ -101,6 +125,7 @@ export default function Home() {
         <SummaryObject
           title={t('auth.welcomeBack')}
           context={user?.username ?? user?.email ?? undefined}
+          caption={motivation}
           readouts={
             loading ? (
               <Stack direction='row' spacing={2}>
@@ -168,6 +193,8 @@ export default function Home() {
 
         <TodayTasks tasks={tasksToday} total={tasksCount} loading={taskData.loading} onReload={taskData.reload} theme={theme} t={t} />
 
+        <Routine routine={routine} onReload={reloadRoutine} theme={theme} t={t} />
+
         <ThisYear
           areas={areas}
           goals={plan.goals}
@@ -180,6 +207,8 @@ export default function Home() {
         <Watching priorities={watching} areas={areas} language={i18n?.language ?? 'en'} theme={theme} t={t} />
 
         <PetPanel />
+
+        <News theme={theme} t={t} />
 
         <NextStepsPanel />
       </Stack>
@@ -399,6 +428,165 @@ function Watching({ priorities, areas, language, theme, t }) {
           </View>
         )
       })}
+    </View>
+  )
+}
+
+/**
+ * The day's routine, opened on the period the clock is in.
+ *
+ * The web's panel gives the three periods four icon-only tabs and its own
+ * canvas calls that the right idea drawn wrong: an unlabelled glyph is not a
+ * name. Here they are a named segment, and the clock still picks which one
+ * opens — looking at tonight at two in the afternoon is a normal want.
+ *
+ * Ticking is the one verb, and it is watching rather than working: the routine
+ * is WRITTEN on the planning side and ticked here.
+ */
+function Routine({ routine, onReload, theme, t }) {
+  const [period, setPeriod] = useState(currentPeriod())
+  const [pending, setPending] = useState(null)
+
+  const items = routineItems(routine, period)
+  const done = completedToday(routine)
+  const hasAny = ROUTINE_PERIODS.some((name) => routineItems(routine, name).length > 0)
+
+  if (!hasAny) return null
+
+  const toggle = async (item) => {
+    setPending(item.id)
+    try {
+      await annualPlanningService.updateRoutineCompletions(todayKey(), toggledCompletions(routine, item.id))
+      await onReload?.()
+    } catch {
+      // The interceptor reports it; the tick simply does not take.
+    } finally {
+      setPending(null)
+    }
+  }
+
+  return (
+    <View>
+      <SectionHeader title={t('annualPlanning.dailyRoutine.title')} />
+
+      <Stack style={{ paddingBottom: theme.spacing[1] }}>
+        <Segmented
+          accessibilityLabel={t('annualPlanning.dailyRoutine.title')}
+          value={period}
+          onChange={setPeriod}
+          options={ROUTINE_PERIODS.map((name) => ({
+            value: name,
+            /* Short labels, as the focus timer's modes already carry: the
+               full "Morning Routine" is three words on a third of 390pt. */
+            label: t(`annualPlanning.dailyRoutine.short.${name}`),
+            count: routineItems(routine, name).length || undefined
+          }))}
+        />
+      </Stack>
+
+      {items.length === 0 ? (
+        <Typography level='body-sm' color='text.tertiary'>
+          {t('annualPlanning.dailyRoutine.emptySubtitle')}
+        </Typography>
+      ) : (
+        items.map((item) => (
+          <View key={item.id}>
+            <Divider />
+            <ListRow
+              tile={
+                <Checkbox
+                  checked={done.has(item.id)}
+                  disabled={pending === item.id}
+                  onPress={() => toggle(item)}
+                  accessibilityLabel={t('annualPlanning.dailyRoutine.toggleItem')}
+                />
+              }
+              name={item.text || item.title || ''}
+              onPress={() => toggle(item)}
+            />
+          </View>
+        ))
+      )}
+    </View>
+  )
+}
+
+/**
+ * Reading.
+ *
+ * The web's carousel is the largest object on its Home and the canvas argues it
+ * should not be the page's centre of gravity — but it should be THERE, and it
+ * was not here at all. It is the one surface on this screen that asks nothing
+ * of the reader, which on a page otherwise made of obligations is doing real
+ * work.
+ *
+ * An article opens in the browser, because it is somebody else's page and this
+ * client has no reader for the web.
+ */
+function News({ theme, t }) {
+  /*
+   * The reader's own language and interests, off the profile the auth context
+   * already holds — which is where the web reads them, and reading them a
+   * second way would fire a request that can land after and overwrite the
+   * real one (its own note on that hook).
+   */
+  const { user } = useAuth()
+  const preferences = user?.preferences?.general
+  const { articles, loading, error } = useNews(preferences?.language, preferences?.interests)
+
+  const shown = (articles ?? []).slice(0, NEWS_SHOWN)
+
+  return (
+    <View>
+      <SectionHeader title={t('news.title')} />
+
+      {loading && shown.length === 0 ? (
+        <Stack direction='row' spacing={2}>
+          <Skeleton width={220} height={168} />
+          <Skeleton width={220} height={168} />
+        </Stack>
+      ) : error && shown.length === 0 ? (
+        <Typography level='body-sm' color='text.tertiary'>
+          {t('news.loadError')}
+        </Typography>
+      ) : shown.length === 0 ? (
+        <Typography level='body-sm' color='text.tertiary'>
+          {t('news.noArticles')}
+        </Typography>
+      ) : (
+        /* A carousel, as the web draws it: a row that scrolls sideways rather
+           than a column that pushes everything below it down the screen. */
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: theme.spacing[2] }}>
+          {shown.map((article, index) => (
+            <Pressable
+              key={article.url ?? index}
+              onPress={() => article.url && Linking.openURL(article.url)}
+              accessibilityRole='link'
+              accessibilityLabel={article.title}
+              style={({ pressed }) => ({ width: 220, opacity: pressed ? 0.7 : 1 })}
+            >
+              {article.urlToImage ? (
+                <Image
+                  source={{ uri: article.urlToImage }}
+                  style={{ width: 220, height: 110, borderRadius: theme.radius.md, backgroundColor: theme.palette.background.level2 }}
+                />
+              ) : (
+                <View
+                  style={{ width: 220, height: 110, borderRadius: theme.radius.md, backgroundColor: theme.palette.background.level2 }}
+                />
+              )}
+              <Typography level='body-sm' numberOfLines={2} style={{ paddingTop: theme.spacing[1] }}>
+                {article.title}
+              </Typography>
+              {article.source?.name ? (
+                <Typography level='body-xs' color='text.tertiary' numberOfLines={1}>
+                  {article.source.name}
+                </Typography>
+              ) : null}
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
     </View>
   )
 }

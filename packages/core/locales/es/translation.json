@@ -2051,7 +2051,12 @@
       "noItems": "Aún no hay elementos de rutina configurados",
       "deleteItem": "Eliminar elemento",
       "addItem": "Agregar elemento",
-      "editRoutine": "Editar rutina"
+      "editRoutine": "Editar rutina",
+      "short": {
+        "morning": "Mañana",
+        "afternoon": "Tarde",
+        "evening": "Noche"
+      }
     },
     "progress": {
       "title": "Panel de Progreso",

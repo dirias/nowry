@@ -1413,7 +1413,12 @@
       "noItems": "Noch keine Routine-Elemente konfiguriert",
       "deleteItem": "Element löschen",
       "addItem": "Element hinzufügen",
-      "editRoutine": "Routine bearbeiten"
+      "editRoutine": "Routine bearbeiten",
+      "short": {
+        "morning": "Morgen",
+        "afternoon": "Nachmittag",
+        "evening": "Abend"
+      }
     },
     "progress": {
       "title": "Fortschritts-Dashboard",

@@ -25,6 +25,7 @@ export function SummaryObject({
   title,
   context,
   readouts,
+  caption = null,
   aside = null,
   action,
   secondary,
@@ -52,6 +53,14 @@ export function SummaryObject({
             </Typography>
           ) : null}
         </View>
+
+        {/* A line under the identity: the web's motivational caption sits
+            here, beneath the greeting and above the numbers (MOB-075). */}
+        {caption ? (
+          <Typography level='body-sm' color='text.secondary'>
+            {caption}
+          </Typography>
+        ) : null}
 
         {/* Empty is one sentence in the same object, not a different screen. */}
         {empty ? (

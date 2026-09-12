@@ -73,15 +73,3 @@ export const taskCategory = (task) => {
 
 /** How many are open today — the Today object's readout. */
 export const dueTodayCount = (tasks, now = new Date()) => tasksDueToday(tasks, { now }).length
-
-/**
- * How much of the day's routine is behind you, as `{ done, total }`.
- *
- * `null` when there is no routine at all, which is different from a routine
- * with nothing ticked: one is an absence and the other is a zero (ADR-012).
- */
-export const routineProgress = (routine) => {
-  const items = ['morning', 'afternoon', 'evening'].flatMap((period) => routine?.[period]?.items ?? routine?.[period] ?? [])
-  if (!Array.isArray(items) || items.length === 0) return null
-  return { done: items.filter((item) => item?.completed || item?.is_completed).length, total: items.length }
-}

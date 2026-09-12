@@ -71,9 +71,20 @@ const read = (bundle, key) => key.split('.').reduce((node, part) => (node == nul
  * the language's own CLDR rules — Japanese has no `_one`. Presence of any form
  * is the right test here; `localeCoverage.test.js` owns the CLDR completeness.
  */
-const has = (bundle, key) =>
-  typeof read(bundle, key) === 'string' ||
-  ['_one', '_other', '_zero', '_two', '_few', '_many'].some((suffix) => typeof read(bundle, key + suffix) === 'string')
+const has = (bundle, key) => {
+  const value = read(bundle, key)
+  /*
+   * A LIST is a legitimate value: `t(key, { returnObjects: true })` is how
+   * i18next hands back an array, and Home's motivational caption picks one of
+   * five that way. A non-empty array of strings is as present as a string
+   * (MOB-075).
+   */
+  if (Array.isArray(value)) return value.length > 0 && value.every((entry) => typeof entry === 'string')
+  return (
+    typeof value === 'string' ||
+    ['_one', '_other', '_zero', '_two', '_few', '_many'].some((suffix) => typeof read(bundle, key + suffix) === 'string')
+  )
+}
 
 describe('every key the mobile client uses', () => {
   it('is a non-trivial number of keys, so an empty scan cannot pass', () => {
