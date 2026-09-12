@@ -18,12 +18,24 @@
  * the shared `petColor`, so a companion is the colour of the app it lives in,
  * and the glyph on it takes the readable contrast of that colour rather than a
  * token.
+ *
+ * **It wears a PORTRAIT, and that was missing for a cycle (MOB-089).** The web
+ * has drawn one since the pet shipped — a generated image for anyone who has
+ * made one, Nowry's six bundled illustrations for everyone else. The phone drew
+ * the coloured shape alone, which is not a simplification of the web but a
+ * different companion: the thing the learner recognises is the owl, and this
+ * was showing them a disc. The shape is still here and still does the work it
+ * always did — it is the ground the portrait sits on, and it is what is drawn
+ * when there is no portrait at all, or when one fails to load.
  */
-import { View } from 'react-native'
+import { useState } from 'react'
+import { Image, View } from 'react-native'
+import { petPortrait } from '@nowry/core/domain/petPortrait'
 import { resolveColor as petColorFor } from '@nowry/core/utils/petColor'
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { stageConfig } from '@nowry/core/domain/petStages'
 import { Icon } from '../icons'
+import { nowryArtFor } from './nowryArt'
 
 /** The mark each stage earns, as this client's glyphs. */
 const MARK_ICONS = { crest: 'ChevronUp', halo: 'Circle', crown: 'Crown' }
@@ -31,12 +43,22 @@ const MARK_ICONS = { crest: 'ChevronUp', halo: 'Circle', crown: 'Crown' }
 /** Each ring sits this much outside the one inside it. */
 const RING_STEP = 6
 
-export function PetOrb({ stage = 1, accent = null, size = null }) {
+export function PetOrb({ stage = 1, accent = null, size = null, avatarUrl = null, isDefaultCompanion = true }) {
   const config = stageConfig(stage)
   const body = size ?? config.sizePx
   const color = petColorFor(accent, stage)
   const rings = config.ringCount
   const outer = body + rings * RING_STEP * 2
+
+  /*
+   * A generated portrait is a URL over the network, and a network that is not
+   * there must not leave a hole where the companion was. On failure the shape
+   * underneath is what remains, which is the same companion at the same stage
+   * in the same colour — a fallback rather than an error.
+   */
+  const [failed, setFailed] = useState(false)
+  const portrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
+  const source = failed || !portrait ? null : portrait.kind === 'generated' ? { uri: portrait.url } : nowryArtFor(portrait.stage)
 
   return (
     <View
@@ -99,10 +121,25 @@ export function PetOrb({ stage = 1, accent = null, size = null }) {
           borderBottomLeftRadius: config.form === 'egg' ? body * 0.44 : body / 2,
           borderBottomRightRadius: config.form === 'egg' ? body * 0.44 : body / 2,
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          // Clips the portrait to the body's silhouette — an egg stays an egg.
+          // Everything that must extend BEYOND it (the rings, the motes) is a
+          // sibling above, never a child of this, which is the same division
+          // the web's orb makes and for the same reason.
+          overflow: 'hidden'
         }}
       >
-        {config.mark ? <Icon name={MARK_ICONS[config.mark]} size='sm' literalColor={readableTextOn(color)} /> : null}
+        {source ? (
+          <Image
+            source={source}
+            onError={() => setFailed(true)}
+            style={{ width: body, height: body }}
+            resizeMode='cover'
+            accessible={false}
+          />
+        ) : config.mark ? (
+          <Icon name={MARK_ICONS[config.mark]} size='sm' literalColor={readableTextOn(color)} />
+        ) : null}
       </View>
     </View>
   )

@@ -23,6 +23,7 @@ import { usePet } from '@nowry/core/context/AgentContext'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '@nowry/core/utils/petColor'
+import { petPortrait } from '@nowry/core/domain/petPortrait'
 import { nowryArtFor } from './nowryArt'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '@nowry/core/constants/zIndex'
@@ -341,7 +342,12 @@ export const PetOrb = ({
   // Nowry — the shipped default companion — stands in wherever the user has
   // not generated a portrait of their own. Bundled, so it is always present:
   // no wait, no failure, and free users get real art rather than an emoji.
-  const portraitUrl = avatarUrl || (isDefaultCompanion ? nowryArtFor(stage) : null)
+  //
+  // WHICH portrait is a shared decision (MOB-089): the phone draws the same
+  // companion and must not answer this question a second time. Only the art is
+  // per-client, because a bundled asset belongs to whichever bundler built it.
+  const portrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
+  const portraitUrl = portrait ? (portrait.kind === 'generated' ? portrait.url : nowryArtFor(portrait.stage)) : null
 
   // A locked rung shows the FORM without a face: the stage's silhouette,
   // rings and mark, but no emoji standing in for a creature the user has not
@@ -700,7 +706,12 @@ const StudyPet = () => {
   // What the companion looks like right now: the user's own portrait, else
   // Nowry's art for the current stage. The chat panel used to ignore both and
   // render the species emoji, so a user with a generated pet saw a leaf.
-  const panelPortraitUrl = avatarUrl || (isDefaultCompanion ? nowryArtFor(stage) : null)
+  const panelPortrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
+  const panelPortraitUrl = panelPortrait
+    ? panelPortrait.kind === 'generated'
+      ? panelPortrait.url
+      : nowryArtFor(panelPortrait.stage)
+    : null
 
   const [input, setInput] = useState('')
   // Tier enforcement state

@@ -30,6 +30,7 @@ import { forwardRef } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../theme'
+import { PET_BUBBLE_CLEARANCE } from './patterns/PetBubble'
 import { useScreenEdges } from './screenChrome'
 import { resolveColor } from './Typography'
 
@@ -58,11 +59,19 @@ export const Screen = forwardRef(function Screen(
   }
   const pad = { padding: theme.spacing[padding] }
 
+  /*
+   * Room under the last row for the companion, which floats in that corner on
+   * every tab (MOB-089). Reserved in the SCROLL padding only: a screen that
+   * does not scroll is one whose content is already sized to the window — the
+   * study session is the case, and it does not carry the bubble at all.
+   */
+  const clearance = { paddingBottom: theme.spacing[padding] + PET_BUBBLE_CLEARANCE }
+
   const body = scroll ? (
     <ScrollView
       ref={ref}
       style={{ flex: 1 }}
-      contentContainerStyle={[{ flexGrow: 1 }, pad, contentContainerStyle]}
+      contentContainerStyle={[{ flexGrow: 1 }, pad, clearance, contentContainerStyle]}
       keyboardShouldPersistTaps='handled'
       {...rest}
     >

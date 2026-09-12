@@ -513,7 +513,14 @@ export function StudySession() {
               than over it (ADR-022). It arrives a few seconds after the screen
               does, which is why it is placed below what the screen already
               said rather than above it. */}
-          <CompanionNote stage={pet.stage} text={buddy.message?.message} speech={buddySpeech} onDismiss={buddy.dismiss} />
+          <CompanionNote
+            stage={pet.stage}
+            avatarUrl={pet.avatarUrl}
+            isDefaultCompanion={pet.isDefaultCompanion}
+            text={buddy.message?.message}
+            speech={buddySpeech}
+            onDismiss={buddy.dismiss}
+          />
 
           <Button onPress={() => router.replace('/study')}>{t('cards.session.complete.backToLibrary')}</Button>
         </Stack>
@@ -655,7 +662,14 @@ export function StudySession() {
              * message about a card that covers that card is ADR-022's whole
              * subject.
              */
-            <CompanionNote stage={pet.stage} text={buddy.message.message} speech={buddySpeech} onDismiss={buddy.dismiss} />
+            <CompanionNote
+              stage={pet.stage}
+              avatarUrl={pet.avatarUrl}
+              isDefaultCompanion={pet.isDefaultCompanion}
+              text={buddy.message.message}
+              speech={buddySpeech}
+              onDismiss={buddy.dismiss}
+            />
           ) : answered ? (
             <Typography level='body-xs' color='text.tertiary' accessibilityLiveRegion='polite' style={{ textAlign: 'center' }}>
               {t('cards.session.grading.alreadyAnswered')}

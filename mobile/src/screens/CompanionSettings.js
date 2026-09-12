@@ -1,52 +1,28 @@
 /**
- * The companion, on Home (MOB-050).
+ * The companion, in Settings (MOB-089).
  *
- * The web's pet is a floating orb over every page, dragged where you like, with
- * a chat panel behind it. A phone has no room for a thing that floats over the
- * app and no pointer to drag it with, so the companion has a place instead: one
- * object on Home, showing what studying has made of it.
+ * This is what MOB-050's panel on Home actually held: the name, the level, the
+ * bar and the XP to the next one. None of it is on the web's Home either — the
+ * web keeps all four on its agent settings page and puts nothing but a floating
+ * portrait in front of the reader. So it moved here, which is the same page by
+ * another name, and Home got the column back.
  *
- * **It lives on Home rather than in the Study Center.** The Study Center is
- * built to an approved artboard and this is not on that board; Home's own
- * redesign is recorded as NOT APPROVED (PEND-004), so it is the surface with
- * room to answer a question the boards have not been asked yet.
- *
- * **Naming, and only naming.** The web also picks a species, and its own
- * description says why: species guides the AI PORTRAIT it generates. Portraits
- * are a paid tier, and no mobile screen may advertise one (ADR-030), so
- * offering the picker whose only purpose is that feature would be advertising
- * it sideways. A name is useful to everyone and gated for nobody.
- *
- * **Nothing here is a chat.** The companion's conversation, its quiz mode and
- * its celebrations are the largest single thing in the web client; they are not
- * this task and they are not implied by drawing the pet.
+ * **Naming, and only naming** (ADR-030). The web also picks a species, and its
+ * own description says why: species guides the AI PORTRAIT it generates.
+ * Portraits are a paid tier and no screen here may advertise one, so offering
+ * the picker whose only purpose is that feature would be advertising it
+ * sideways. A name is useful to everyone and gated for nobody.
  */
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { useRouter } from 'expo-router'
-import { setAskContext } from './askContext'
 import { useTranslation } from 'react-i18next'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useAppearance, useTheme } from '../theme'
-import { BottomSheet, Button, FormField, Input, PetOrb, Progress, Readout, Sheet, Skeleton, Stack, Typography } from '../ui'
+import { BottomSheet, Button, FormField, Input, PetOrb, Progress, Readout, Skeleton, Stack, Typography } from '../ui'
 
-export function PetPanel() {
+export function CompanionSettings() {
   const { t } = useTranslation()
   const theme = useTheme()
-  const router = useRouter()
-
-  /*
-   * No card, and Home is where the chat should put us back. Leaving it pops the
-   * tab navigator rather than the screen that opened it, so the opener says
-   * where it wants to be returned to (MOB-087).
-   */
-  const openChat = () => {
-    setAskContext(null, '/')
-    router.push('/agent')
-  }
-  // The account's colour, already resolved for the whole app — the companion is
-  // the colour of the app it lives in, and deriving it a second time here would
-  // be a second answer to which colour that is.
   const { accent } = useAppearance()
   const pet = usePetState()
   const [naming, setNaming] = useState(false)
@@ -58,9 +34,15 @@ export function PetPanel() {
   const name = pet.name || t('agent.defaultName')
 
   return (
-    <Sheet padding={2}>
+    <Stack spacing={2}>
+      <Typography level='title-md'>{t('agent.tabs.companion')}</Typography>
+
       <Stack direction='row' spacing={2} style={{ alignItems: 'center' }}>
-        {pet.loading ? <Skeleton width={64} height={64} radius='lg' /> : <PetOrb stage={pet.stage} accent={accent} />}
+        {pet.loading ? (
+          <Skeleton width={64} height={64} radius='lg' />
+        ) : (
+          <PetOrb stage={pet.stage} accent={accent} avatarUrl={pet.avatarUrl} isDefaultCompanion={pet.isDefaultCompanion} />
+        )}
 
         <Stack spacing={1} style={{ flex: 1, minWidth: 0 }}>
           <Typography level='title-md' numberOfLines={1}>
@@ -85,24 +67,13 @@ export function PetPanel() {
           ) : null}
         </Stack>
 
-        {/*
-         * Two controls, two weights. The companion answers now (MOB-085), and
-         * that is what it is FOR — so Ask is the object's action and the rename
-         * stays the quiet one beside it. Two tertiary links would have said
-         * they were peers, which they are not.
-         */}
-        <Stack spacing={1} style={{ alignItems: 'stretch' }}>
-          <Button size='sm' variant='secondary' onPress={openChat} accessibilityLabel={t('agent.aria.openBuddy')}>
-            {t('agent.chat.ask')}
-          </Button>
-          <Button size='sm' variant='tertiary' onPress={() => setNaming(true)}>
-            {t('common.edit')}
-          </Button>
-        </Stack>
+        <Button size='sm' variant='secondary' onPress={() => setNaming(true)}>
+          {t('common.edit')}
+        </Button>
       </Stack>
 
       <NameSheet open={naming} current={pet.name} onClose={() => setNaming(false)} onSave={pet.save} />
-    </Sheet>
+    </Stack>
   )
 }
 
@@ -170,4 +141,4 @@ function NameSheet({ open, current, onClose, onSave }) {
   )
 }
 
-export default PetPanel
+export default CompanionSettings

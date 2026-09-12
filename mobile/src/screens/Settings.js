@@ -30,6 +30,7 @@ import { requestNotificationPermission } from '../platform/alerts'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { Button, Divider, FormField, Icon, Input, Screen, Segmented, Select, Stack, Typography } from '../ui'
+import { CompanionSettings } from './CompanionSettings'
 
 /** The five bundles that ship. Each label is in its own language, on purpose. */
 const LANGUAGES = [
@@ -198,6 +199,12 @@ export function Settings() {
             {t('onboarding.save.unsaved')}
           </Typography>
         ) : null}
+
+        <Divider />
+
+        {/* The companion's readouts and its name, where the web keeps them
+            (MOB-089). They were a panel on Home; the web's Home has none. */}
+        <CompanionSettings />
 
         <Divider />
 

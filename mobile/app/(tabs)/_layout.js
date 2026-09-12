@@ -40,17 +40,28 @@
  * was on, so popping it costs nothing and keeps the bar's promise — the label
  * says Study, so the button opens the Study Center (MOB-080).
  *
+ * **The companion floats over all of it** (MOB-089), which is where the web
+ * keeps it and what §15.6 has always said: it rests in a corner and a phone
+ * keeps only the chip there. It is mounted here rather than on a screen because
+ * it belongs to the app rather than to a page — the same reason the web mounts
+ * it once in `App.js` — and here is where the tab bar's height is already
+ * known, so the bubble sits clear of it without a second answer to how tall
+ * that bar is.
+ *
  * **Each bar holds the inset at its own edge**, because each is the chrome
  * closest to it. Android draws this app under the system bars (edge-to-edge in
  * `app.config.js`), and nothing was holding the bottom one: the last tab sat
  * against the system navigation. Screens between the two defer both insets
  * through `ScreenChromeProvider`, so each is held exactly once.
  */
-import { Tabs, router } from 'expo-router'
+import { View } from 'react-native'
+import { Tabs, router, usePathname } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { usePetState } from '@nowry/core/hooks/usePetState'
+import { setAskContext } from '../../src/screens/askContext'
 import { useTheme } from '../../src/theme'
-import { AppBar } from '../../src/ui'
+import { AppBar, PetBubble } from '../../src/ui'
 import { ScreenChromeProvider, TAB_BAR_HEIGHT } from '../../src/ui/screenChrome'
 import { Icon } from '../../src/ui'
 import { NAV_ICONS } from '../../src/ui/icons'
@@ -78,10 +89,42 @@ const toTabRoot = (href) => () => ({
   }
 })
 
+/**
+ * Where the companion is NOT drawn.
+ *
+ * A study session's bottom corners are grade keys, and the whole of its screen
+ * below the card is the four of them. The web moves its bubble to the other
+ * corner there; a phone has one column and no other corner, and the session
+ * already carries Ask in its header row beside Listen and Mark. The chat is
+ * itself a conversation with the companion, so a bubble on it would offer to
+ * open what is already open.
+ */
+const STUDY_SECTIONS = ['card', 'deck', 'group', 'history']
+
+const isPetFree = (pathname) => {
+  if (pathname === '/agent') return true
+  // `/study/<deckId>` is the session; `/study/deck/…`, `/study/card/…` and the
+  // rest are ordinary screens under the same tab. A `startsWith('/study/')`
+  // test hid the companion on all of them, which is most of the Study tab.
+  const parts = pathname.split('/').filter(Boolean)
+  return parts[0] === 'study' && parts.length === 2 && !STUDY_SECTIONS.includes(parts[1])
+}
+
 export default function TabsLayout() {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const pet = usePetState()
+  const pathname = usePathname()
+
+  /*
+   * No card, and here is where the chat should put us back (MOB-087). The
+   * bubble is on every tab, so the opener is wherever it was pressed.
+   */
+  const openChat = () => {
+    setAskContext(null, pathname)
+    router.push('/agent')
+  }
 
   return (
     <ScreenChromeProvider top bottom>
@@ -144,15 +187,24 @@ export default function TabsLayout() {
             and Profile opens Settings, and both sit inside the group so the bar
             stays under them. */}
         <Tabs.Screen name='profile' options={{ href: null }} />
-        {/* The companion's chat. Reached from its panel on Home, never from the
-            bar: a fifth destination would take a tab from something that is one
-            (MOB-085). */}
+        {/* The companion's chat. Reached from the bubble and from the session's
+            Ask control, never from the bar: a sixth destination would take a tab
+            from something that is one (MOB-085). */}
         <Tabs.Screen name='agent' options={{ href: null }} />
         {/* `/book/:id` is the reader. It sits beside the library rather than
             under it, which is how the web serves the two. */}
         <Tabs.Screen name='book' options={{ href: null }} />
         <Tabs.Screen name='settings' options={{ href: null }} />
       </Tabs>
+
+      {/* Over the tabs and clear of the bar, which is measured here rather
+          than guessed there. `box-none` so only the bubble itself takes a
+          touch — the rest of that corner still belongs to the screen. */}
+      {isPetFree(pathname) ? null : (
+        <View pointerEvents='box-none' style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}>
+          <PetBubble pet={pet} onPress={openChat} bottom={TAB_BAR_HEIGHT + insets.bottom} />
+        </View>
+      )}
     </ScreenChromeProvider>
   )
 }

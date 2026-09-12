@@ -87,6 +87,14 @@ export function usePetState() {
     revealed: data?.pet_revealed ?? true,
     active: data?.pet_active ?? true,
     /*
+     * What it LOOKS like (MOB-089). The generated portrait when the account has
+     * one, and whether this is still the shipped default companion — which is
+     * what decides whether Nowry's bundled art stands in. `petPortrait` turns
+     * the pair into an answer; the art itself is each client's own file.
+     */
+    avatarUrl: data?.avatar_url ?? null,
+    isDefaultCompanion: data?.is_default_companion ?? true,
+    /*
      * The month's message budget rides on this same payload, so the chat costs
      * no request of its own to know whether it may send (MOB-085). `null` means
      * the account has no limit; `canSend` is true while the budget is unknown,

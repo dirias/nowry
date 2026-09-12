@@ -35,8 +35,13 @@
  * has no calendar or blackboard button — the calendar is a tab in the bar
  * below, and the blackboard is not built for this client.
  *
- * The companion stays. The web's pet floats over every page, which a phone
- * cannot do; this is where it lives instead (MOB-050).
+ * **The companion is not here** (MOB-089). MOB-050 gave it a panel on this
+ * screen on the reasoning that a phone cannot float a thing over every page. It
+ * can — §15.6 says the companion rests in a corner and a phone keeps only the
+ * chip there — and what the panel actually carried was a level, a progress bar,
+ * an XP line and a rename, none of which the web's Home shows and which
+ * together took more of this column than the day's tasks. The pet is a bubble
+ * over the tabs now; its readouts are in Settings, where the web keeps them.
  *
  * Skeletons, never a page gate. The layout the reader is about to see is
  * already there while the numbers arrive, so nothing moves when they do.
@@ -91,7 +96,6 @@ import {
   Typography,
   resolveColor
 } from '../../src/ui'
-import { PetPanel } from '../../src/screens/PetPanel'
 
 /** The board's count, and the web's. */
 const TASKS_SHOWN = 4
@@ -196,8 +200,10 @@ export default function Home() {
           t={t}
         />
 
-        <PetPanel />
-
+        {/* No companion here (MOB-089). The web's Home has none — the pet is a
+            floating bubble over every page, and the level, the bar and the
+            rename live on its settings page. A panel carrying all three took
+            more of this column than the day's tasks did. */}
         <News theme={theme} t={t} />
 
         <NextStepsPanel />

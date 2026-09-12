@@ -34,7 +34,7 @@ import { SpeakToggle } from './SpeakToggle'
 /** Small enough to be a speaker rather than a subject. */
 const ORB = 24
 
-export function CompanionNote({ stage = 1, text, speech = null, onDismiss }) {
+export function CompanionNote({ stage = 1, avatarUrl = null, isDefaultCompanion = true, text, speech = null, onDismiss }) {
   const { t } = useTranslation()
   const theme = useTheme()
   const { accent } = useAppearance()
@@ -55,7 +55,7 @@ export function CompanionNote({ stage = 1, text, speech = null, onDismiss }) {
         backgroundColor: resolveColor(theme, 'background.level1')
       }}
     >
-      <PetOrb stage={stage} accent={accent} size={ORB} />
+      <PetOrb stage={stage} accent={accent} size={ORB} avatarUrl={avatarUrl} isDefaultCompanion={isDefaultCompanion} />
 
       <Stack spacing={1} style={{ flex: 1, minWidth: 0 }}>
         <Typography level='body-sm' color='text.secondary'>
