@@ -235,7 +235,7 @@ export function StudySession() {
 
   /** Open the companion with the card in hand as what it is being asked about. */
   const openChat = useCallback(() => {
-    setAskContext(studyCardContext(current, { deckId: id, index, total, flipped: revealed, mode: 'study' }))
+    setAskContext(studyCardContext(current, { deckId: id, index, total, flipped: revealed, mode: 'study' }), `/study/${id}`)
     router.push('/agent')
   }, [current, id, index, total, revealed, router])
 

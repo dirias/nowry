@@ -33,7 +33,8 @@
  * part and is where the value is.
  */
 import { useCallback, useRef, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { BackHandler, ScrollView, View } from 'react-native'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { agentService } from '@nowry/core/api/services'
 import { chatHistory, plainReply, replyText } from '@nowry/core/domain/agentChat'
@@ -41,27 +42,37 @@ import { usePetState } from '@nowry/core/hooks/usePetState'
 import { isOfflineError } from '@nowry/core/utils/formUtils'
 import { takeAskContext } from './askContext'
 import { useAppearance, useTheme } from '../theme'
-import { Button, Card, Icon, Input, PetOrb, Screen, Stack, Typography, useKeyboardClearance, useKeyboardHeight } from '../ui'
+import { Button, Card, Icon, IconButton, Input, PetOrb, Screen, Stack, Typography, useKeyboardClearance, useKeyboardHeight } from '../ui'
 
 /** Whose turn a bubble is. `agent` is the server's `model`; see `chatHistory`. */
 const USER = 'user'
 const AGENT = 'agent'
+
+/**
+ * Which card a context is about, as a value two contexts can be compared by.
+ * The front is what the learner is looking at and what the empty state names;
+ * two contexts for the same card differ only in whether it has been turned,
+ * which is not a new conversation.
+ */
+const cardOf = (context) => context?.front ?? null
 
 export function AgentChat() {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const { accent } = useAppearance()
   const pet = usePetState()
+  const router = useRouter()
 
   /*
-   * What this conversation is ABOUT, taken once on mount (MOB-086). Taken
-   * rather than read, so the card belongs to this opening of the chat: coming
-   * back later from Home must not inherit a card someone was looking at then.
-   * Held in state so the same card grounds every turn of the conversation, not
-   * only the first — the web's `viewContext` follows the screen for the same
-   * reason.
+   * What this conversation is ABOUT, and where it came from (MOB-086).
+   *
+   * Taken rather than read, so the card belongs to this opening of the chat:
+   * coming back later from Home must not inherit a card someone was looking at
+   * then. Held in state so the same card grounds every turn, not only the first
+   * — the web's `viewContext` follows the screen for the same reason.
    */
-  const [context] = useState(takeAskContext)
+  const [handoff, setHandoff] = useState(takeAskContext)
+  const { context, from } = handoff
   const [turns, setTurns] = useState([])
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
@@ -79,6 +90,65 @@ export function AgentChat() {
    * what the screen already knows.
    */
   const spent = !pet.canSend
+
+  /*
+   * Taken again every time the screen is shown, and this is not belt and
+   * braces — it is the whole of MOB-087's second half. `/agent` is a route in
+   * the TAB group, so its component is mounted once and kept: closing it does
+   * not unmount it, and opening it a second time hands the user the first
+   * opening's state. Read only on mount, a chat opened from a card and closed
+   * would open from Home still showing that card, and still returning to that
+   * session. Focus is when an opening begins, so focus is when the handoff is
+   * taken.
+   *
+   * A focus with nothing pending is the screen coming back to itself — the
+   * keyboard closing, the app resuming — and changes nothing.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      const next = takeAskContext()
+      if (!next.context && !next.from) return
+
+      setHandoff(next)
+      // A different card is a different conversation. The same card reopened is
+      // the one you stepped out of, and its turns are still the answer.
+      if (cardOf(next.context) !== cardOf(context)) {
+        setTurns([])
+        setDraft('')
+        setFailure(null)
+      }
+    }, [context])
+  )
+
+  /*
+   * The way out, and the only one (MOB-087). `/agent` is a sibling route in the
+   * tab group, so the app bar's shared arrow and the hardware gesture both pop
+   * the TAB navigator rather than the screen that pushed this one — asking
+   * about a card and closing landed on Home. The opener says where it wants to
+   * be put back and this goes there; `navigate` pops to a screen already in the
+   * stack rather than mounting a second one, so the session is the same session
+   * on the same card.
+   */
+  const close = useCallback(() => {
+    if (from) router.navigate(from)
+    else router.back()
+  }, [from, router])
+
+  /*
+   * The gesture has to agree with the control, or one of them is a trap — and
+   * only while this screen is the one being looked at. Registered on mount it
+   * would outlive the closing, because the tab screen stays mounted, and then
+   * the back gesture ON THE SESSION would be answered by the chat.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      const listener = BackHandler.addEventListener('hardwareBackPress', () => {
+        close()
+        return true
+      })
+      return () => listener.remove()
+    }, [close])
+  )
 
   const send = useCallback(async () => {
     const message = draft.trim()
@@ -138,6 +208,12 @@ export function AgentChat() {
               </Typography>
             ) : null}
           </View>
+
+          {/* The chat's own way out, because the app bar's is not this
+              screen's to aim. */}
+          <IconButton variant='tertiary' onPress={close} accessibilityLabel={t('agent.aria.closeBuddy')}>
+            <Icon name='X' size='sm' color='text.secondary' />
+          </IconButton>
         </Stack>
 
         <ScrollView

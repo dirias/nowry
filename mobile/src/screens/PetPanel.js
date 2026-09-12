@@ -24,6 +24,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
+import { setAskContext } from './askContext'
 import { useTranslation } from 'react-i18next'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useAppearance, useTheme } from '../theme'
@@ -33,6 +34,16 @@ export function PetPanel() {
   const { t } = useTranslation()
   const theme = useTheme()
   const router = useRouter()
+
+  /*
+   * No card, and Home is where the chat should put us back. Leaving it pops the
+   * tab navigator rather than the screen that opened it, so the opener says
+   * where it wants to be returned to (MOB-087).
+   */
+  const openChat = () => {
+    setAskContext(null, '/')
+    router.push('/agent')
+  }
   // The account's colour, already resolved for the whole app — the companion is
   // the colour of the app it lives in, and deriving it a second time here would
   // be a second answer to which colour that is.
@@ -81,7 +92,7 @@ export function PetPanel() {
          * they were peers, which they are not.
          */}
         <Stack spacing={1} style={{ alignItems: 'stretch' }}>
-          <Button size='sm' variant='secondary' onPress={() => router.push('/agent')} accessibilityLabel={t('agent.aria.openBuddy')}>
+          <Button size='sm' variant='secondary' onPress={openChat} accessibilityLabel={t('agent.aria.openBuddy')}>
             {t('agent.chat.ask')}
           </Button>
           <Button size='sm' variant='tertiary' onPress={() => setNaming(true)}>
