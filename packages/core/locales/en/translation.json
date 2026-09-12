@@ -3129,13 +3129,19 @@
     "sessionOnly": "Session-only memory",
     "chat": {
       "empty": {
-        "title": "Start chatting",
-        "body": "Ask me anything about your studies"
+        "title": "Ask your companion",
+        "body": "About a card, a deck, or what to study next."
       },
       "error": {
         "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
       },
-      "upgradePlan": "Upgrade plan"
+      "upgradePlan": "Upgrade plan",
+      "thinking": "Thinking…",
+      "budgetSpent": "You have used this month's messages. The count starts again next month.",
+      "remaining_one": "{{count}} message left this month",
+      "remaining_other": "{{count}} messages left this month",
+      "failed": "That message did not go through. Your text is still here.",
+      "ask": "Ask"
     },
     "personality": {
       "error": {

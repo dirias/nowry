@@ -1994,13 +1994,19 @@
     "sessionOnly": "Session-only memory",
     "chat": {
       "empty": {
-        "title": "Start chatting",
-        "body": "Ask me anything about your studies"
+        "title": "Frag deinen Begleiter",
+        "body": "Zu einer Karte, einem Stapel oder dem nächsten Lernschritt."
       },
       "error": {
         "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
       },
-      "upgradePlan": "Upgrade plan"
+      "upgradePlan": "Upgrade plan",
+      "thinking": "Denkt nach…",
+      "budgetSpent": "Du hast die Nachrichten dieses Monats aufgebraucht. Nächsten Monat beginnt die Zählung neu.",
+      "remaining_one": "Noch {{count}} Nachricht diesen Monat",
+      "remaining_other": "Noch {{count}} Nachrichten diesen Monat",
+      "failed": "Diese Nachricht wurde nicht gesendet. Dein Text ist noch da.",
+      "ask": "Fragen"
     },
     "personality": {
       "error": {
@@ -2017,6 +2023,11 @@
     },
     "errors": {
       "settingsLoadFailed": "Deine Einstellungen konnten nicht geladen werden. Es werden Standardwerte angezeigt."
+    },
+    "aria": {
+      "openBuddy": "Lernbegleiter öffnen",
+      "closeBuddy": "Lernbegleiter schließen",
+      "sendMessage": "Nachricht senden"
     }
   },
   "cards": {

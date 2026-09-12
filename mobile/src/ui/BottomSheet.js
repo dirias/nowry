@@ -31,12 +31,13 @@
  * taller than that was clipped with no way to reach it, which the event form
  * hit the moment a picker and a description were both on screen.
  */
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { Animated, Dimensions, Keyboard, Modal, PanResponder, Platform, Pressable, ScrollView, View } from 'react-native'
+import { createContext, useContext, useRef, useState } from 'react'
+import { Animated, Dimensions, Modal, PanResponder, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useReduceMotion } from '../theme'
 import { Typography, resolveColor } from './Typography'
+import { useKeyboardHeight } from './useKeyboardHeight'
 
 /**
  * Whether the thing rendering is already inside a sheet.
@@ -61,19 +62,9 @@ export function BottomSheet({ visible, onClose, title, children, accessibilityLa
   const insets = useSafeAreaInsets()
   const drag = useRef(new Animated.Value(0)).current
   const height = Dimensions.get('window').height
-  const [keyboard, setKeyboard] = useState(0)
-
-  useEffect(() => {
-    // iOS announces the keyboard before it arrives, Android only once it has.
-    const shown = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
-    const hidden = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
-    const open = Keyboard.addListener(shown, (event) => setKeyboard(event.endCoordinates?.height ?? 0))
-    const close = Keyboard.addListener(hidden, () => setKeyboard(0))
-    return () => {
-      open.remove()
-      close.remove()
-    }
-  }, [])
+  // Measured rather than avoided; see `useKeyboardHeight`, which the chat
+  // screen needs for the same reason.
+  const keyboard = useKeyboardHeight()
 
   const settle = () =>
     Animated.timing(drag, {

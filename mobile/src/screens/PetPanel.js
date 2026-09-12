@@ -23,6 +23,7 @@
  */
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useAppearance, useTheme } from '../theme'
@@ -31,6 +32,7 @@ import { BottomSheet, Button, FormField, Input, PetOrb, Progress, Readout, Sheet
 export function PetPanel() {
   const { t } = useTranslation()
   const theme = useTheme()
+  const router = useRouter()
   // The account's colour, already resolved for the whole app — the companion is
   // the colour of the app it lives in, and deriving it a second time here would
   // be a second answer to which colour that is.
@@ -72,9 +74,20 @@ export function PetPanel() {
           ) : null}
         </Stack>
 
-        <Button size='sm' variant='tertiary' onPress={() => setNaming(true)}>
-          {t('common.edit')}
-        </Button>
+        {/*
+         * Two controls, two weights. The companion answers now (MOB-085), and
+         * that is what it is FOR — so Ask is the object's action and the rename
+         * stays the quiet one beside it. Two tertiary links would have said
+         * they were peers, which they are not.
+         */}
+        <Stack spacing={1} style={{ alignItems: 'stretch' }}>
+          <Button size='sm' variant='secondary' onPress={() => router.push('/agent')} accessibilityLabel={t('agent.aria.openBuddy')}>
+            {t('agent.chat.ask')}
+          </Button>
+          <Button size='sm' variant='tertiary' onPress={() => setNaming(true)}>
+            {t('common.edit')}
+          </Button>
+        </Stack>
       </Stack>
 
       <NameSheet open={naming} current={pet.name} onClose={() => setNaming(false)} onSave={pet.save} />

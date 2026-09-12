@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { agentService } from '../api/services/agent.service'
 import petService from '../api/services/petService'
 import { useAuth } from '../context/AuthContext'
+import { canSend, messageBudget } from '../domain/agentChat'
 import { stageConfig } from '../domain/petStages'
 
 /**
@@ -40,6 +41,16 @@ export function usePetState() {
     staleTime: 30 * 60 * 1000
   })
 
+  /**
+   * Re-read the companion. A chat reply spends a message and can cross a
+   * level, so the budget and the stage this hook reports are both stale the
+   * moment one lands (MOB-085).
+   */
+  const reload = useCallback(async () => {
+    if (!userId) return
+    await client.invalidateQueries({ queryKey: ['pet', userId] })
+  }, [client, userId])
+
   /** Rename or re-species the companion; both are optional and partial. */
   const save = useCallback(
     async (payload) => {
@@ -74,8 +85,17 @@ export function usePetState() {
      */
     revealed: data?.pet_revealed ?? true,
     active: data?.pet_active ?? true,
+    /*
+     * The month's message budget rides on this same payload, so the chat costs
+     * no request of its own to know whether it may send (MOB-085). `null` means
+     * the account has no limit; `canSend` is true while the budget is unknown,
+     * because the server is the authority and answers 429 if it disagrees.
+     */
+    budget: messageBudget(data),
+    canSend: canSend(data),
     loading: isLoading,
     error: data ? null : (error ?? null),
+    reload,
     save
   }
 }

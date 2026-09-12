@@ -2105,13 +2105,18 @@
     "sessionOnly": "Session-only memory",
     "chat": {
       "empty": {
-        "title": "Start chatting",
-        "body": "Ask me anything about your studies"
+        "title": "相棒に聞いてみる",
+        "body": "カードのこと、デッキのこと、次に何をやるか。"
       },
       "error": {
         "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
       },
-      "upgradePlan": "Upgrade plan"
+      "upgradePlan": "Upgrade plan",
+      "thinking": "考え中…",
+      "budgetSpent": "今月のメッセージを使い切りました。来月またリセットされます。",
+      "remaining_other": "今月はあと {{count}} 件",
+      "failed": "メッセージを送れませんでした。入力した文はそのままです。",
+      "ask": "聞く"
     },
     "personality": {
       "error": {
@@ -2128,6 +2133,11 @@
     },
     "errors": {
       "settingsLoadFailed": "設定を読み込めませんでした。初期値を表示しています。"
+    },
+    "aria": {
+      "openBuddy": "学習の相棒を開く",
+      "closeBuddy": "学習の相棒を閉じる",
+      "sendMessage": "メッセージを送信"
     }
   },
   "cards": {

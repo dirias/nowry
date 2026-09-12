@@ -16,7 +16,11 @@
  *     which are left; passing `edges` still overrides it.
  *   - **The keyboard.** `KeyboardAvoidingView` behaves differently per platform
  *     and getting it wrong means a form field under the keyboard, which is the
- *     single most common mobile form bug.
+ *     single most common mobile form bug. It works for a screen whose fields
+ *     are in the flow and scroll; it does NOT work for one with a control
+ *     pinned to the bottom edge under edge-to-edge, which is the case the
+ *     bottom sheet already had to solve by measuring. `keyboard='ignore'` opts
+ *     out for those, and they pad by `useKeyboardHeight` instead (MOB-085).
  *   - **The ground.** `background.body`, so no screen paints its own.
  *
  * `scroll` is on by default. At 200% font scale almost everything scrolls, and a
@@ -36,7 +40,7 @@ import { resolveColor } from './Typography'
  * something with no `scrollTo` on it (MOB-067).
  */
 export const Screen = forwardRef(function Screen(
-  { children, scroll = true, padding = 3, edges, style, contentContainerStyle, ...rest },
+  { children, scroll = true, padding = 3, edges, keyboard = 'avoid', style, contentContainerStyle, ...rest },
   ref
 ) {
   const theme = useTheme()
@@ -69,6 +73,10 @@ export const Screen = forwardRef(function Screen(
       {children}
     </View>
   )
+
+  // A screen that measures the keyboard itself must not also be avoided for,
+  // or it is compensated twice and its content lands above the keyboard's top.
+  if (keyboard === 'ignore') return <View style={[ground, inset, style]}>{body}</View>
 
   return (
     <KeyboardAvoidingView

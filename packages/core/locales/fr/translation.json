@@ -2005,13 +2005,19 @@
     "sessionOnly": "Session-only memory",
     "chat": {
       "empty": {
-        "title": "Start chatting",
-        "body": "Ask me anything about your studies"
+        "title": "Demandez à votre compagnon",
+        "body": "À propos d'une carte, d'un paquet, ou de quoi réviser ensuite."
       },
       "error": {
         "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
       },
-      "upgradePlan": "Upgrade plan"
+      "upgradePlan": "Upgrade plan",
+      "thinking": "Réflexion…",
+      "budgetSpent": "Vous avez utilisé les messages de ce mois-ci. Le compte repart le mois prochain.",
+      "remaining_one": "Il reste {{count}} message ce mois-ci",
+      "remaining_other": "Il reste {{count}} messages ce mois-ci",
+      "failed": "Ce message n'est pas parti. Votre texte est toujours là.",
+      "ask": "Demander"
     },
     "personality": {
       "error": {
@@ -2028,6 +2034,11 @@
     },
     "errors": {
       "settingsLoadFailed": "Impossible de charger vos réglages. Valeurs par défaut affichées."
+    },
+    "aria": {
+      "openBuddy": "Ouvrir le compagnon d'étude",
+      "closeBuddy": "Fermer le compagnon d'étude",
+      "sendMessage": "Envoyer le message"
     }
   },
   "cards": {

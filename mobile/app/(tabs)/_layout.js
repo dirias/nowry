@@ -51,13 +51,10 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../../src/theme'
 import { AppBar } from '../../src/ui'
-import { ScreenChromeProvider } from '../../src/ui/screenChrome'
+import { ScreenChromeProvider, TAB_BAR_HEIGHT } from '../../src/ui/screenChrome'
 import { Icon } from '../../src/ui'
 import { NAV_ICONS } from '../../src/ui/icons'
 import { resolveColor } from '../../src/ui/Typography'
-
-/** The bar's own height, before the system navigation is added under it. */
-const TAB_BAR_HEIGHT = 56
 
 /**
  * A tab button goes to that tab's own screen, not back into what was pushed on
@@ -147,6 +144,10 @@ export default function TabsLayout() {
             and Profile opens Settings, and both sit inside the group so the bar
             stays under them. */}
         <Tabs.Screen name='profile' options={{ href: null }} />
+        {/* The companion's chat. Reached from its panel on Home, never from the
+            bar: a fifth destination would take a tab from something that is one
+            (MOB-085). */}
+        <Tabs.Screen name='agent' options={{ href: null }} />
         {/* `/book/:id` is the reader. It sits beside the library rather than
             under it, which is how the web serves the two. */}
         <Tabs.Screen name='book' options={{ href: null }} />

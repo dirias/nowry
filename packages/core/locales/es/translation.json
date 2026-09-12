@@ -2856,13 +2856,19 @@
     "sessionOnly": "Session-only memory",
     "chat": {
       "empty": {
-        "title": "Start chatting",
-        "body": "Ask me anything about your studies"
+        "title": "Pregúntale a tu compañero",
+        "body": "Sobre una tarjeta, un mazo o qué estudiar después."
       },
       "error": {
         "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
       },
-      "upgradePlan": "Upgrade plan"
+      "upgradePlan": "Upgrade plan",
+      "thinking": "Pensando…",
+      "budgetSpent": "Has usado los mensajes de este mes. La cuenta empieza de nuevo el mes que viene.",
+      "remaining_one": "Queda {{count}} mensaje este mes",
+      "remaining_other": "Quedan {{count}} mensajes este mes",
+      "failed": "Ese mensaje no se envió. Tu texto sigue aquí.",
+      "ask": "Preguntar"
     },
     "personality": {
       "error": {

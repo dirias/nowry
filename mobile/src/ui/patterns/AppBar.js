@@ -39,8 +39,12 @@ const AVATAR = 32
  * back control, and a redirect that asked for one would be asking on behalf of
  * a tab root. Removed on the chrome pass, and `routes.test.js` now refuses a
  * redirect in this list (MOB-072).
+ *
+ * `agent` joined them with the companion's chat (MOB-085): it has no tab of its
+ * own, so without a back control the only way out of a conversation is to press
+ * another tab, which is leaving rather than going back.
  */
-const PUSHED_IN_TABS = ['profile', 'settings']
+const PUSHED_IN_TABS = ['agent', 'profile', 'settings']
 
 /**
  * Whether this screen was reached from another one.

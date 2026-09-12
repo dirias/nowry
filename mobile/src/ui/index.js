@@ -28,6 +28,8 @@ export { Skeleton } from './Skeleton'
 export { Stack } from './Stack'
 export { NotificationHost } from './Toast'
 export { Typography, resolveColor } from './Typography'
+export { useKeyboardHeight } from './useKeyboardHeight'
+export { useKeyboardClearance } from './screenChrome'
 export { TYPE_LEVELS, TYPE_LEVEL_NAMES, MIN_FONT_SIZE } from './typeLevels'
 export {
   BUTTON_SIZES,
