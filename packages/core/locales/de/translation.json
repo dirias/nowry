@@ -98,7 +98,8 @@
     "language": "Sprache",
     "studyBuddy": "Lernbegleiter",
     "moreActions": "Weitere Aktionen",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "add": "Hinzufügen"
   },
   "news": {
     "title": "Aktuelle Nachrichten",
@@ -1455,7 +1456,8 @@
       "progress": "Fortschritt",
       "startDescription": "Erstellen Sie Ihren Jahresplan, um Ziele zu setzen, Fortschritte zu verfolgen und Ihre Träume dieses Jahr zu verwirklichen.",
       "startJourney": "Starten Sie Ihr Jahr {{year}}",
-      "totalProgress": "abgeschlossen"
+      "totalProgress": "abgeschlossen",
+      "focusAreas": "Schwerpunkte"
     },
     "quarterReport": {
       "report": "Report",
@@ -1719,7 +1721,10 @@
         }
       }
     },
-    "loadFailed": "Dein Fortschritt konnte nicht geladen werden."
+    "loadFailed": "Dein Fortschritt konnte nicht geladen werden.",
+    "tasksToday_one": "{{count}} Aufgabe heute",
+    "tasksToday_other": "{{count}} Aufgaben heute",
+    "addTaskToday": "Eine Aufgabe für heute hinzufügen…"
   },
   "pet": {
     "stage": {

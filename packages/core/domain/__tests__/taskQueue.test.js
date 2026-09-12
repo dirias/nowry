@@ -1,0 +1,95 @@
+import { dueTodayCount, isDueBy, routineProgress, taskCategory, tasksDueToday } from '../taskQueue'
+
+const now = new Date('2026-09-12T10:00:00')
+const task = (id, extra) => ({ _id: id, title: id, ...extra })
+
+describe('tasksDueToday', () => {
+  const tasks = [
+    task('later', { deadline: '2026-11-01' }),
+    task('today-low', { deadline: '2026-09-12', priority: 'low' }),
+    task('overdue', { deadline: '2026-09-09', priority: 'low' }),
+    task('today-high', { deadline: '2026-09-12T23:00:00', priority: 'high' }),
+    task('done', { deadline: '2026-09-12', is_completed: true }),
+    task('undated', {})
+  ]
+
+  it('is today and before it, never the future', () => {
+    // The heading says "today", so the filter has to match it. The web's own
+    // card sorted every open task and took five, which put a November task
+    // under that heading.
+    expect(tasksDueToday(tasks, { now }).map((t) => t._id)).toEqual(['overdue', 'today-high', 'today-low'])
+  })
+
+  it('drops what is finished and what has no date', () => {
+    const ids = tasksDueToday(tasks, { now }).map((t) => t._id)
+    expect(ids).not.toContain('done')
+    expect(ids).not.toContain('undated')
+  })
+
+  it('ranks a task with no level with the middle one', () => {
+    const pair = [task('none', { deadline: '2026-09-12' }), task('low', { deadline: '2026-09-12', priority: 'low' })]
+    expect(tasksDueToday(pair, { now }).map((t) => t._id)).toEqual(['none', 'low'])
+  })
+
+  it('takes a limit, and survives an absent list', () => {
+    expect(tasksDueToday(tasks, { now, limit: 2 }).map((t) => t._id)).toEqual(['overdue', 'today-high'])
+    expect(tasksDueToday(undefined, { now })).toEqual([])
+  })
+
+  it('counts the same set it lists', () => {
+    expect(dueTodayCount(tasks, now)).toBe(3)
+  })
+
+  it('reads a deadline later today as due today, not as tomorrow', () => {
+    expect(isDueBy(task('x', { deadline: '2026-09-12T23:59:00' }), now)).toBe(true)
+    expect(isDueBy(task('x', { deadline: '2026-09-13T00:01:00' }), now)).toBe(false)
+    expect(isDueBy(task('x', {}), now)).toBe(false)
+  })
+})
+
+describe('routineProgress', () => {
+  it('counts every period together', () => {
+    const routine = {
+      morning: { items: [{ completed: true }, { completed: false }] },
+      evening: { items: [{ is_completed: true }] }
+    }
+    expect(routineProgress(routine)).toEqual({ done: 2, total: 3 })
+  })
+
+  it('reads a period that is a bare array', () => {
+    expect(routineProgress({ morning: [{ completed: true }, {}] })).toEqual({ done: 1, total: 2 })
+  })
+
+  it('is null for no routine at all, which is not the same as none ticked', () => {
+    expect(routineProgress(null)).toBeNull()
+    expect(routineProgress({})).toBeNull()
+    expect(routineProgress({ morning: { items: [] } })).toBeNull()
+    expect(routineProgress({ morning: { items: [{}, {}] } })).toEqual({ done: 0, total: 2 })
+  })
+})
+
+describe('taskCategory', () => {
+  it('keeps a real name', () => {
+    expect(taskCategory({ category: 'study' })).toBe('study')
+    expect(taskCategory({ category: '  Home  ' })).toBe('Home')
+  })
+
+  it('says nothing for a generated list id', () => {
+    // Task lists live only in the web's localStorage while their tasks sync,
+    // so `category` can hold an id no device has a name for. The web renders
+    // it raw; a row says nothing instead (MOB-074).
+    expect(taskCategory({ category: 'list_1788662138438' })).toBeNull()
+    expect(taskCategory({ category: 'LIST-1788662138438' })).toBeNull()
+  })
+
+  it('says nothing for no category at all', () => {
+    expect(taskCategory({})).toBeNull()
+    expect(taskCategory({ category: '   ' })).toBeNull()
+    expect(taskCategory(undefined)).toBeNull()
+  })
+
+  it('does not mistake a short word beginning with list for an id', () => {
+    expect(taskCategory({ category: 'listening' })).toBe('listening')
+    expect(taskCategory({ category: 'list_2' })).toBe('list_2')
+  })
+})

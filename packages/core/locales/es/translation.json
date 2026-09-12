@@ -78,7 +78,8 @@
     "language": "Idioma",
     "studyBuddy": "Compañero de Estudio",
     "moreActions": "Más acciones",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "add": "Añadir"
   },
   "news": {
     "title": "Últimas Noticias",
@@ -2722,7 +2723,10 @@
         }
       }
     },
-    "loadFailed": "No se pudo cargar tu progreso."
+    "loadFailed": "No se pudo cargar tu progreso.",
+    "tasksToday_one": "{{count}} tarea hoy",
+    "tasksToday_other": "{{count}} tareas hoy",
+    "addTaskToday": "Añade una tarea para hoy…"
   },
   "pet": {
     "stage": {

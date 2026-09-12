@@ -98,7 +98,8 @@
     "language": "Langue",
     "studyBuddy": "Compagnon d'étude",
     "moreActions": "Plus d'actions",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "add": "Ajouter"
   },
   "news": {
     "title": "Dernières Actualités",
@@ -1466,7 +1467,8 @@
       "progress": "Progression",
       "startDescription": "Créez votre plan annuel pour définir vos objectifs, suivre vos progrès et réaliser vos rêves cette année.",
       "startJourney": "Commencez votre parcours {{year}}",
-      "totalProgress": "terminé"
+      "totalProgress": "terminé",
+      "focusAreas": "Domaines clés"
     },
     "quarterReport": {
       "report": "Report",
@@ -1730,7 +1732,10 @@
         }
       }
     },
-    "loadFailed": "Impossible de charger votre progression."
+    "loadFailed": "Impossible de charger votre progression.",
+    "tasksToday_one": "{{count}} tâche aujourd'hui",
+    "tasksToday_other": "{{count}} tâches aujourd'hui",
+    "addTaskToday": "Ajoutez une tâche pour aujourd'hui…"
   },
   "pet": {
     "stage": {

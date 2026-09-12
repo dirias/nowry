@@ -88,7 +88,8 @@
     "language": "言語",
     "studyBuddy": "学習パートナー",
     "moreActions": "その他の操作",
-    "retry": "再試行"
+    "retry": "再試行",
+    "add": "追加"
   },
   "news": {
     "title": "最新ニュース",
@@ -1578,7 +1579,8 @@
       "progress": "進捗",
       "startDescription": "年間プランを作成して、目標を立て、進捗を記録し、今年の夢を実現しましょう。",
       "startJourney": "{{year}}年の歩みを始めましょう",
-      "totalProgress": "完了"
+      "totalProgress": "完了",
+      "focusAreas": "重点分野"
     },
     "quarterReport": {
       "report": "Report",
@@ -1835,7 +1837,9 @@
         }
       }
     },
-    "loadFailed": "進捗を読み込めませんでした。"
+    "loadFailed": "進捗を読み込めませんでした。",
+    "tasksToday_other": "今日のタスク {{count}} 件",
+    "addTaskToday": "今日のタスクを追加…"
   },
   "pet": {
     "stage": {
