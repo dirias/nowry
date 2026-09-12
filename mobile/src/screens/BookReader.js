@@ -15,26 +15,34 @@
  * editor, and a WebView or a rewrite is a decision rather than a port. What the
  * phone does instead is the thing a phone is good for — read it, and turn it
  * into cards.
+ *
+ * **It also reads a document that is not yours.** `?public=1` loads it through
+ * `GET /public/books/{id}`, which returns the whole document, so the catalogue
+ * can be read rather than only acquired (MOB-066). What it cannot do is
+ * everything past reading: making cards writes into your library from a
+ * document the server expects you to own, so a public read offers the copy
+ * instead — take it, and it is yours to work with.
  */
 import { useMemo, useState } from 'react'
 import { Linking, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { booksService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
+import { booksService, publicContentService } from '@nowry/core/api/services'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { documentWordCount, readDocument } from '@nowry/core/domain/books/lexicalDocument'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useTheme } from '../theme'
 import { resolveColor } from '../ui/Typography'
 import { MakeCardsSheet } from './MakeCards'
-import { Button, Divider, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
+import { Button, Divider, Icon, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
 
 /** The tiers whose accounts can generate; `free` cannot, and is not told so. */
 const CAN_GENERATE = ['plus', 'pro']
 
 export function BookReader() {
-  const { bookId } = useLocalSearchParams()
+  const { bookId, public: asPublic } = useLocalSearchParams()
   const { t, i18n } = useTranslation()
   const language = i18n?.language ?? 'en'
   const theme = useTheme()
@@ -44,10 +52,18 @@ export function BookReader() {
   const [makingCards, setMakingCards] = useState(false)
 
   const id = String(bookId)
+  /*
+   * A public document is somebody else's, so it is a different resource and a
+   * different cache entry — keying both as `['book', user, id]` would serve a
+   * catalogue read from the owner's copy and the other way round.
+   */
+  const isPublic = asPublic === '1'
+  const [adding, setAdding] = useState(false)
+  const [added, setAdded] = useState(false)
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['book', user?.id ?? null, id],
-    queryFn: () => booksService.getById(id),
+    queryKey: isPublic ? ['publicBook', id] : ['book', user?.id ?? null, id],
+    queryFn: () => (isPublic ? publicContentService.getPublicBook(id) : booksService.getById(id)),
     enabled: Boolean(user?.id && id),
     // A document changes when its author changes it, which is not while they
     // are reading it on another device.
@@ -103,7 +119,34 @@ export function BookReader() {
          * tier at all (ADR-030), so here it is simply absent rather than shown
          * locked. Reading the document is free either way.
          */}
-        {CAN_GENERATE.includes(tier) ? (
+        {isPublic ? (
+          /*
+           * Somebody else's document: the one thing to offer is the copy. The
+           * endpoint is idempotent on (book, user), so a second tap replays the
+           * copy that exists rather than making another.
+           */
+          <Button
+            variant='secondary'
+            disabled={added}
+            loading={adding}
+            startGlyph={added ? <Icon name='Check' size='sm' color='success.plainColor' /> : null}
+            onPress={async () => {
+              setAdding(true)
+              try {
+                await publicContentService.forkBook(id)
+                queryClient.invalidateQueries({ queryKey: ['books'] })
+                setAdded(true)
+              } catch {
+                // The client's interceptor already reports the failure; the key
+                // simply stays an offer.
+              } finally {
+                setAdding(false)
+              }
+            }}
+          >
+            {added ? t('public.added') : t('public.add')}
+          </Button>
+        ) : CAN_GENERATE.includes(tier) ? (
           <Button variant='secondary' onPress={() => setMakingCards(true)}>
             {t('books.makeCards.title')}
           </Button>
@@ -126,7 +169,7 @@ export function BookReader() {
         )}
       </Stack>
 
-      <MakeCardsSheet open={makingCards} book={data} onClose={() => setMakingCards(false)} />
+      <MakeCardsSheet open={makingCards && !isPublic} book={data} onClose={() => setMakingCards(false)} />
     </Screen>
   )
 }

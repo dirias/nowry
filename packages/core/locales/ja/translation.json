@@ -2589,7 +2589,10 @@
     },
     "browse": "さがす",
     "byAuthor": "作成者: {{name}}",
-    "unknownAuthor": "作成者不明"
+    "unknownAuthor": "作成者不明",
+    "library": "公開ライブラリ",
+    "books": "本",
+    "decks": "デッキ"
   },
   "editor": {
     "mode": {

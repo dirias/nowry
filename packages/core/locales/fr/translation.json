@@ -2688,7 +2688,10 @@
     },
     "browse": "Explorer",
     "byAuthor": "par {{name}}",
-    "unknownAuthor": "Auteur inconnu"
+    "unknownAuthor": "Auteur inconnu",
+    "library": "Bibliothèque publique",
+    "books": "Livres",
+    "decks": "Paquets"
   },
   "editor": {
     "mode": {

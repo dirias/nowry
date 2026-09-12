@@ -1,10 +1,18 @@
 /**
- * Browse — the public deck catalogue, on the phone (MOB-049).
+ * Browse — the public catalogue, on the phone (MOB-049, MOB-066).
  *
- * **Decks, not books.** The same endpoints serve both and the web browses both,
- * but this client has no reader: a shelf of books that cannot be opened is a
- * list of links to nothing, which is the fault I had just fixed in Home's
- * next-steps row. Books arrive here when Books arrives.
+ * **Books and decks, on one segment, as the web has them.** This screen shipped
+ * with decks only, and said so: the phone had no reader, and a shelf of books
+ * that cannot be opened is a list of links to nothing. V3 built the reader
+ * (MOB-056) and the restriction outlived the reason — the phone browsed half a
+ * catalogue while calling itself the catalogue.
+ *
+ * **A book is opened, a deck is taken.** Both rows offer the same Add key, and
+ * a book's title also opens it: `GET /public/books/{id}` returns the whole
+ * document, so the reader this client already has can read one without a copy
+ * being made first. That is what a catalogue is for. Everything past reading —
+ * making cards from it, keeping a position in it — needs the copy, and the row
+ * says so by offering it.
  *
  * **A metric renders only above zero** (ADR-012, `evidenceFor`). A zero is not
  * a small number, it is the absence of evidence, and a young catalogue whose
@@ -19,24 +27,28 @@
  * out of the library, so the library's queries are invalidated on success.
  */
 import { useState } from 'react'
-import { FlatList, View } from 'react-native'
+import { FlatList, Pressable, View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { usePublicDecks } from '@nowry/core/hooks/usePublicDecks'
+import { CATALOGUE_KINDS, usePublicCatalogue } from '@nowry/core/hooks/usePublicCatalogue'
 import { evidenceFor, publicAuthor, publicCardCount } from '@nowry/core/domain/publicEvidence'
 import { useTheme } from '../theme'
 import { BrowseFilterSheet, SORTS, SORT_LABELS } from './BrowseFilters'
-import { Button, Chip, Divider, Icon, Input, Readout, Skeleton, Stack, Typography } from '../ui'
+import { Button, Chip, Divider, Icon, Input, Readout, Segmented, Skeleton, Stack, Typography } from '../ui'
 
 export function Browse({ header = null }) {
   const { t } = useTranslation()
   const theme = useTheme()
+  const router = useRouter()
 
+  const [kind, setKind] = useState(CATALOGUE_KINDS[0])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [sort, setSort] = useState(SORTS[0])
   const [sheet, setSheet] = useState(null)
 
-  const { decks, total, loading, error, loadingMore, canLoadMore, loadMore, reload, forking, fork } = usePublicDecks({
+  const { items, total, loading, error, loadingMore, canLoadMore, loadMore, reload, forking, fork } = usePublicCatalogue({
+    kind,
     search,
     category,
     sort
@@ -45,6 +57,24 @@ export function Browse({ header = null }) {
   const controls = (
     <Stack spacing={2}>
       {header}
+
+      {/*
+       * The web's own two tabs, with the count on the ACTIVE one. Only that
+       * one can carry a count honestly: the browse endpoints return a total
+       * for the set they were asked about, and fetching the other half's would
+       * be a request for a number nobody has asked to see.
+       */}
+      <Segmented
+        accessibilityLabel={t('public.library')}
+        value={kind}
+        onChange={setKind}
+        options={CATALOGUE_KINDS.map((value) => ({
+          value,
+          label: t(`public.${value}`),
+          count: value === kind && !loading ? total : undefined
+        }))}
+      />
+
       <Input
         value={search}
         onChangeText={setSearch}
@@ -69,7 +99,7 @@ export function Browse({ header = null }) {
           </Chip>
         ) : null}
       </Stack>
-      {total > 0 ? <Readout>{t('public.showingOf', { count: decks.length, total })}</Readout> : null}
+      {total > 0 ? <Readout>{t('public.showingOf', { count: items.length, total })}</Readout> : null}
     </Stack>
   )
 
@@ -90,12 +120,20 @@ export function Browse({ header = null }) {
   return (
     <>
       <FlatList
-        data={decks}
+        data={items}
         keyExtractor={(deck) => String(deck._id ?? deck.id)}
         contentContainerStyle={{ padding: theme.spacing[3] }}
         ListHeaderComponent={<View style={{ paddingBottom: theme.spacing[2] }}>{controls}</View>}
         renderItem={({ item }) => (
-          <DeckRow deck={item} state={forking[item._id ?? item.id]} onAdd={() => fork(item._id ?? item.id).catch(() => {})} t={t} />
+          <CatalogueRow
+            item={item}
+            kind={kind}
+            state={forking[item._id ?? item.id]}
+            onAdd={() => fork(item._id ?? item.id).catch(() => {})}
+            /* Decks have no reader here; a deck's row is its Add key alone. */
+            onOpen={kind === 'books' ? () => router.push(`/book/${item._id ?? item.id}?public=1`) : undefined}
+            t={t}
+          />
         )}
         ItemSeparatorComponent={Divider}
         ListEmptyComponent={
@@ -140,13 +178,17 @@ export function Browse({ header = null }) {
 }
 
 /**
- * One public deck: what it is, who made it, and what it has to show for itself.
+ * One public item: what it is, who made it, and what it has to show for itself.
  *
- * The Add key is the row's only control, and it is secondary rather than solid:
- * a list of twenty rows with twenty solid keys is a list with no hierarchy at
- * all. Once a deck is taken the key becomes a statement rather than an offer.
+ * The Add key is secondary rather than solid: a list of twenty rows with twenty
+ * solid keys is a list with no hierarchy at all. Once an item is taken the key
+ * becomes a statement rather than an offer.
+ *
+ * A book's title opens it; a deck's does not, because this client reads
+ * documents and studies decks, and a deck is studied from the library it has
+ * been added to.
  */
-function DeckRow({ deck, state, onAdd, t }) {
+function CatalogueRow({ item: deck, kind, state, onAdd, onOpen, t }) {
   const evidence = evidenceFor(deck)
   // Both fields are read through the shared package, which is what lets the
   // API-field guard see them: this row's first build invented
@@ -165,7 +207,13 @@ function DeckRow({ deck, state, onAdd, t }) {
 
   return (
     <Stack direction='row' spacing={2} style={{ alignItems: 'center', paddingVertical: 8 }}>
-      <View style={{ flex: 1, minWidth: 0 }}>
+      <Pressable
+        onPress={onOpen}
+        disabled={!onOpen}
+        accessibilityRole={onOpen ? 'button' : undefined}
+        accessibilityLabel={onOpen ? t('books.lib.rowAria', { title: deck.title || deck.name }) : undefined}
+        style={({ pressed }) => ({ flex: 1, minWidth: 0, opacity: pressed && onOpen ? 0.7 : 1 })}
+      >
         <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
           <Typography level='body-md' numberOfLines={1} style={{ flexShrink: 1 }}>
             {deck.name || deck.title}
@@ -177,13 +225,13 @@ function DeckRow({ deck, state, onAdd, t }) {
           {[
             author ? t('public.byAuthor', { name: author }) : null,
             evidence.showCategory ? t(`public.categories.${evidence.category}`, evidence.category) : null,
-            publicCardCount(deck) ? `${publicCardCount(deck)} ${t('public.cards')}` : null,
+            kind === 'decks' && publicCardCount(deck) ? `${publicCardCount(deck)} ${t('public.cards')}` : null,
             ...metrics
           ]
             .filter(Boolean)
             .join(' · ')}
         </Typography>
-      </View>
+      </Pressable>
 
       <Button
         size='sm'

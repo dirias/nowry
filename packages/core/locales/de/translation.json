@@ -2677,7 +2677,10 @@
     },
     "browse": "Entdecken",
     "byAuthor": "von {{name}}",
-    "unknownAuthor": "Unbekannte:r Autor:in"
+    "unknownAuthor": "Unbekannte:r Autor:in",
+    "library": "Öffentliche Bibliothek",
+    "books": "Bücher",
+    "decks": "Stapel"
   },
   "editor": {
     "mode": {
