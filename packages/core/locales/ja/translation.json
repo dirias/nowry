@@ -1263,18 +1263,18 @@
       "priorities": "優先事項"
     },
     "tabs": {
-      "overview": "Overview",
-      "goals": "Goals",
-      "priorities": "Priorities",
-      "reports": "Reports",
-      "ariaLabel": "Annual Planning sections",
-      "goalsEmptyTitle": "No goals yet",
-      "goalsEmptyBody": "Add goals inside a focus area to see them here.",
+      "overview": "概要",
+      "goals": "目標",
+      "priorities": "優先事項",
+      "reports": "レポート",
+      "ariaLabel": "年間計画のセクション",
+      "goalsEmptyTitle": "目標はまだありません",
+      "goalsEmptyBody": "重点分野に目標を追加すると、ここに表示されます。",
       "errorLoading": "プランを読み込めませんでした。もう一度お試しください。",
       "gridView": "グリッド表示",
       "listView": "リスト表示",
-      "reportsEmptyTitle": "No reports yet",
-      "reportsEmptyBody": "Close a quarter to see its report here."
+      "reportsEmptyTitle": "レポートはまだありません",
+      "reportsEmptyBody": "四半期を締めると、そのレポートがここに表示されます。"
     },
     "breadcrumb": {
       "root": "Annual Planning"

@@ -1127,18 +1127,18 @@
       "priorities": "Priorités"
     },
     "tabs": {
-      "overview": "Overview",
-      "goals": "Goals",
-      "priorities": "Priorities",
-      "reports": "Reports",
-      "ariaLabel": "Annual Planning sections",
-      "goalsEmptyTitle": "No goals yet",
-      "goalsEmptyBody": "Add goals inside a focus area to see them here.",
+      "overview": "Aperçu",
+      "goals": "Objectifs",
+      "priorities": "Priorités",
+      "reports": "Rapports",
+      "ariaLabel": "Sections de la planification annuelle",
+      "goalsEmptyTitle": "Aucun objectif pour l'instant",
+      "goalsEmptyBody": "Ajoutez des objectifs dans un domaine clé pour les voir ici.",
       "errorLoading": "Impossible de charger votre plan. Veuillez réessayer.",
       "gridView": "Vue grille",
       "listView": "Vue liste",
-      "reportsEmptyTitle": "No reports yet",
-      "reportsEmptyBody": "Close a quarter to see its report here."
+      "reportsEmptyTitle": "Aucun rapport pour l'instant",
+      "reportsEmptyBody": "Clôturez un trimestre pour voir son bilan ici."
     },
     "breadcrumb": {
       "root": "Annual Planning"

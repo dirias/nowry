@@ -177,12 +177,10 @@ export function AnnualPlanning() {
           progress={metrics.progress}
           readouts={
             <>
-              <Readout leading>
-                {t('annualPlanning.stats.totalGoals')}: {metrics.total}
-              </Readout>
-              <Readout>
-                {t('annualPlanning.stats.completed')}: {metrics.completed}
-              </Readout>
+              {/* The web's own phrase for exactly this readout, translated in
+                  five. Building "Label: 2" by concatenation is a sentence no
+                  translator ever saw (MOB-062). */}
+              <Readout leading>{t('annualPlanning.header.goalsRatio', { completed: metrics.completed, total: metrics.total })}</Readout>
               <Readout>
                 {metrics.progress}% {t('annualPlanning.home.totalProgress')}
               </Readout>
@@ -255,7 +253,9 @@ export function AnnualPlanning() {
                       </IconButton>
                     }
                     name={priority.title || priority.name}
-                    meta={priority.description || null}
+                    /* A description identical to the title is the title said
+                       twice, which reads as a bug rather than as detail. */
+                    meta={priority.description && priority.description !== (priority.title || priority.name) ? priority.description : null}
                   />
                   <Divider />
                 </View>
@@ -289,7 +289,9 @@ function AreaRow({ area, metrics, theme, t, onPress }) {
           />
         }
         name={area.name}
-        meta={t('annualPlanning.stats.totalGoals') + ': ' + metrics.total}
+        /* An area with no goals says nothing rather than "0 of 0", which is a
+           ratio of nothing reported as a fact (D8's rule, again). */
+        meta={metrics.total > 0 ? t('annualPlanning.header.goalsRatio', { completed: metrics.completed, total: metrics.total }) : null}
         measure={<Measure value={metrics.progress} accessibilityLabel={t('annualPlanning.home.progress')} />}
         readout={<Readout>{metrics.progress}%</Readout>}
         onPress={onPress}

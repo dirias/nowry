@@ -121,27 +121,15 @@ export function Calendar() {
   return (
     <>
       <Stack spacing={2} style={{ flex: 1 }}>
-        {/* Row one: the month, and the screen's one solid. The web's row one is
-            the page's title beside the same key; here the tab bar and the app
-            bar have already said "Calendar" twice, so the readout takes the
-            place of a third. */}
+        {/*
+         * The web's own pairing: the readout leads and the nav object ends the
+         * same row. Splitting them left the nav alone on a row of its own with
+         * two thirds of it empty — reported by looking at it (MOB-062).
+         */}
         <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
           <Typography level='h4' style={{ flex: 1 }} accessibilityRole='header'>
             {title}
           </Typography>
-          <Button
-            size='sm'
-            startGlyph={<Icon name='Plus' size='sm' color='primary.solidColor' />}
-            onPress={() => setForm({ mode: 'create', defaultDate: defaultDateFor(cursor) })}
-          >
-            {t('calendarPage.addEvent')}
-          </Button>
-        </Stack>
-
-        {/* Row two: the nav object. The date above is its readout — text beside
-            the control that moves it, not a title centred between groups
-            (§15.4). */}
-        <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
           <IconButton
             size='sm'
             accessibilityLabel={t('calendarPage.nav.previous')}
@@ -156,6 +144,19 @@ export function Calendar() {
               that disappears when it would do nothing moves the two beside it. */}
           <Button size='sm' variant='tertiary' disabled={showsToday} onPress={() => setCursor(new Date())}>
             {t('calendarPage.nav.today')}
+          </Button>
+        </Stack>
+
+        {/* The page's one action, at the weight the web gives it: a small key
+            where its page title's row ends, not a full-width slab. The tab bar
+            has already said the page, so the row is the key alone. */}
+        <Stack direction='row' style={{ justifyContent: 'flex-end' }}>
+          <Button
+            size='sm'
+            startGlyph={<Icon name='Plus' size='sm' color='primary.solidColor' />}
+            onPress={() => setForm({ mode: 'create', defaultDate: defaultDateFor(cursor) })}
+          >
+            {t('calendarPage.addEvent')}
           </Button>
         </Stack>
 
