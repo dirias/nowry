@@ -80,6 +80,8 @@ export const MATERIAL_TO_LUCIDE = {
   Bookmark: 'Bookmark',
   BookmarkRounded: 'Bookmark',
   BookmarkBorder: 'Bookmark',
+  StarRounded: 'Star',
+  StarBorderRounded: 'Star',
   NoteAddRounded: 'FilePlus',
   Image: 'Image',
   Style: 'Layers',

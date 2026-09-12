@@ -77,6 +77,7 @@ import Search from 'lucide-react-native/icons/search'
 import Settings from 'lucide-react-native/icons/settings'
 import SlidersHorizontal from 'lucide-react-native/icons/sliders-horizontal'
 import Sparkles from 'lucide-react-native/icons/sparkles'
+import Star from 'lucide-react-native/icons/star'
 import Sun from 'lucide-react-native/icons/sun'
 import Sunset from 'lucide-react-native/icons/sunset'
 import Tag from 'lucide-react-native/icons/tag'
@@ -149,6 +150,7 @@ export const ICONS = {
   Settings,
   SlidersHorizontal,
   Sparkles,
+  Star,
   Sun,
   Sunset,
   Tag,

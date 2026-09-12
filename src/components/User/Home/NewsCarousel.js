@@ -17,11 +17,11 @@ import {
 } from '@mui/joy'
 import { useKeenSlider } from 'keen-slider/react'
 import { ArrowBackIosNew, ArrowForwardIos, TrendingUp, OpenInNew, Star, StarBorder, Refresh, ErrorOutline } from '@mui/icons-material'
-import { userService } from '@nowry/core/api/services'
 import 'keen-slider/keen-slider.min.css'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useNews } from '@nowry/core/hooks/useNews'
+import { unfavourited, useNewsFavourites } from '@nowry/core/hooks/useNewsFavourites'
 
 export default function NewsCarousel() {
   const { t } = useTranslation()
@@ -39,48 +39,17 @@ export default function NewsCarousel() {
   // Favourites stay in local state so a star toggle can render optimistically.
   // AuthContext does not re-fetch /users/me after the PATCH, so this remains
   // authoritative until the next profile load replaces it.
-  const [favoriteNews, setFavoriteNews] = useState(preferences?.favorite_news ?? [])
-  useEffect(() => {
-    setFavoriteNews(preferences?.favorite_news ?? [])
-  }, [preferences?.favorite_news])
-
+  /*
+   * The kept articles, their optimism and the rollback are `useNewsFavourites`
+   * in the shared package — the phone's carousel needs the same three and a
+   * second copy is how two clients start disagreeing about what a favourite is
+   * (MOB-076).
+   */
+  const { favourites: favoriteNews, isFavourite, toggle: toggleFavorite } = useNewsFavourites(preferences)
   const favoriteUrls = favoriteNews.map((article) => article.url)
 
   // Filter regular news (exclude favorited ones)
-  const regularNews = news.filter((article) => !favoriteUrls.includes(article.url))
-
-  // Toggle favorite - persist full article to user preferences
-  const toggleFavorite = async (article) => {
-    const isFavorite = favoriteUrls.includes(article.url)
-    // Snapshot for rollback on error
-    const previousFavorites = favoriteNews
-
-    const newFavoriteNews = isFavorite
-      ? favoriteNews.filter((fav) => fav.url !== article.url)
-      : [
-          ...favoriteNews,
-          {
-            url: article.url,
-            title: article.title,
-            description: article.description || '',
-            urlToImage: article.urlToImage || '',
-            category: article.category || ''
-          }
-        ]
-
-    // Optimistic update for immediate UI feedback
-    setFavoriteNews(newFavoriteNews)
-
-    try {
-      await userService.updateGeneralPreferences({
-        favorite_news: newFavoriteNews
-      })
-    } catch (err) {
-      console.error('Failed to update favorite:', err)
-      // Revert optimistic update on error
-      setFavoriteNews(previousFavorites)
-    }
-  }
+  const regularNews = unfavourited(news, favoriteNews)
 
   // Latest News slider
   const [sliderRef, instanceRef] = useKeenSlider({
@@ -319,7 +288,7 @@ export default function NewsCarousel() {
                             article={article}
                             loading={loading}
                             t={t}
-                            isFavorite={favoriteUrls.includes(article?.url)}
+                            isFavorite={isFavourite(article)}
                             onToggleFavorite={() => toggleFavorite(article)}
                           />
                         </Box>

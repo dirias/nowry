@@ -51,6 +51,7 @@ import {
   todayKey
 } from '@nowry/core/domain/dailyRoutine'
 import { useNews } from '@nowry/core/hooks/useNews'
+import { unfavourited, useNewsFavourites } from '@nowry/core/hooks/useNewsFavourites'
 import { annualPlanningService } from '@nowry/core/api/services'
 import { DAILY_REVIEW } from '../../src/screens/StudySession'
 import { useTheme } from '../../src/theme'
@@ -59,6 +60,7 @@ import {
   Checkbox,
   Divider,
   Input,
+  Icon,
   ListRow,
   Measure,
   NextStepsPanel,
@@ -69,7 +71,8 @@ import {
   Skeleton,
   Stack,
   SummaryObject,
-  Typography
+  Typography,
+  resolveColor
 } from '../../src/ui'
 import { PetPanel } from '../../src/screens/PetPanel'
 
@@ -533,57 +536,100 @@ function News({ theme, t }) {
   const { user } = useAuth()
   const preferences = user?.preferences?.general
   const { articles, loading, error } = useNews(preferences?.language, preferences?.interests)
+  const { favourites, isFavourite, toggle } = useNewsFavourites(preferences)
+  const [tab, setTab] = useState('latest')
 
-  const shown = (articles ?? []).slice(0, NEWS_SHOWN)
+  const latest = unfavourited(articles, favourites).slice(0, NEWS_SHOWN)
+  const shown = tab === 'latest' ? latest : favourites
 
   return (
     <View>
-      <SectionHeader title={t('news.title')} />
+      {/* No heading above the segment: the segment IS the heading, and the web
+          draws it the same way. A title reading "Latest news" over a tab
+          reading "Latest news" is the same words twice (MOB-076). */}
+      <Stack style={{ paddingBottom: theme.spacing[1], paddingTop: theme.spacing[1] }}>
+        <Segmented
+          accessibilityLabel={t('news.title')}
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'latest', label: t('news.title') },
+            { value: 'favourites', label: t('news.favorites'), count: favourites.length || undefined }
+          ]}
+        />
+      </Stack>
 
-      {loading && shown.length === 0 ? (
+      {loading && shown.length === 0 && tab === 'latest' ? (
         <Stack direction='row' spacing={2}>
           <Skeleton width={220} height={168} />
           <Skeleton width={220} height={168} />
         </Stack>
-      ) : error && shown.length === 0 ? (
+      ) : error && shown.length === 0 && tab === 'latest' ? (
         <Typography level='body-sm' color='text.tertiary'>
           {t('news.loadError')}
         </Typography>
       ) : shown.length === 0 ? (
         <Typography level='body-sm' color='text.tertiary'>
-          {t('news.noArticles')}
+          {tab === 'latest' ? t('news.noArticles') : t('news.noFavoritesHint')}
         </Typography>
       ) : (
         /* A carousel, as the web draws it: a row that scrolls sideways rather
            than a column that pushes everything below it down the screen. */
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: theme.spacing[2] }}>
           {shown.map((article, index) => (
-            <Pressable
-              key={article.url ?? index}
-              onPress={() => article.url && Linking.openURL(article.url)}
-              accessibilityRole='link'
-              accessibilityLabel={article.title}
-              style={({ pressed }) => ({ width: 220, opacity: pressed ? 0.7 : 1 })}
-            >
-              {article.urlToImage ? (
-                <Image
-                  source={{ uri: article.urlToImage }}
-                  style={{ width: 220, height: 110, borderRadius: theme.radius.md, backgroundColor: theme.palette.background.level2 }}
-                />
-              ) : (
-                <View
-                  style={{ width: 220, height: 110, borderRadius: theme.radius.md, backgroundColor: theme.palette.background.level2 }}
-                />
-              )}
-              <Typography level='body-sm' numberOfLines={2} style={{ paddingTop: theme.spacing[1] }}>
-                {article.title}
-              </Typography>
-              {article.source?.name ? (
-                <Typography level='body-xs' color='text.tertiary' numberOfLines={1}>
-                  {article.source.name}
+            <View key={article.url ?? index} style={{ width: 220 }}>
+              <Pressable
+                onPress={() => article.url && Linking.openURL(article.url)}
+                accessibilityRole='link'
+                accessibilityLabel={article.title}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                {article.urlToImage ? (
+                  <Image
+                    source={{ uri: article.urlToImage }}
+                    style={{ width: 220, height: 110, borderRadius: theme.radius.md, backgroundColor: theme.palette.background.level2 }}
+                  />
+                ) : (
+                  <View
+                    style={{ width: 220, height: 110, borderRadius: theme.radius.md, backgroundColor: theme.palette.background.level2 }}
+                  />
+                )}
+                <Typography level='body-sm' numberOfLines={2} style={{ paddingTop: theme.spacing[1] }}>
+                  {article.title}
                 </Typography>
-              ) : null}
-            </Pressable>
+              </Pressable>
+
+              {/* The star is its OWN control, not a corner of the card: an
+                  article opens and a favourite is kept, and one tap must not
+                  be able to do the other by accident. */}
+              <Pressable
+                onPress={() => toggle(article)}
+                accessibilityRole='button'
+                accessibilityState={{ selected: isFavourite(article) }}
+                accessibilityLabel={t('news.favorites')}
+                hitSlop={8}
+                style={({ pressed }) => ({
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: theme.spacing[0.5],
+                  paddingTop: theme.spacing[0.5],
+                  opacity: pressed ? 0.7 : 1
+                })}
+              >
+                <Icon
+                  name='Star'
+                  size='sm'
+                  color={isFavourite(article) ? 'warning.plainColor' : 'text.tertiary'}
+                  fill={isFavourite(article) ? resolveColor(theme, 'warning.plainColor') : 'none'}
+                />
+                {/* The category the feed was fetched under, which `useNews`
+                    tags onto every article — the web's card shows the same
+                    thing, and the RSS titles already carry their publication. */}
+                <Typography level='body-xs' color='text.tertiary' numberOfLines={1} style={{ flexShrink: 1 }}>
+                  {article.category ? t(`news.categories.${article.category}`, article.category) : ''}
+                </Typography>
+              </Pressable>
+            </View>
           ))}
         </ScrollView>
       )}
