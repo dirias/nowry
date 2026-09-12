@@ -2102,7 +2102,8 @@
       "discardCard": "Karte verwerfen",
       "discardCardAria": "{{title}} verwerfen",
       "restoreCardAria": "{{title}} wiederherstellen",
-      "undo": "Rückgängig"
+      "undo": "Rückgängig",
+      "frontTooLong": "Die Vorderseite ist länger als {{max}} Zeichen und kann so nicht gespeichert werden. Bearbeite sie im Web oder lass sie weg."
     },
     "saveToDeck": {
       "selectDeckLabel": "Stapel auswählen",

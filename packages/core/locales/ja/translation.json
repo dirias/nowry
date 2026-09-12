@@ -2174,7 +2174,8 @@
       "discardCard": "カードを除外",
       "discardCardAria": "{{title}}を除外",
       "restoreCardAria": "{{title}}を戻す",
-      "undo": "元に戻す"
+      "undo": "元に戻す",
+      "frontTooLong": "表面が {{max}} 文字を超えているため保存できません。ウェブで編集するか、除外してください。"
     },
     "saveToDeck": {
       "selectDeckLabel": "デッキを選択",

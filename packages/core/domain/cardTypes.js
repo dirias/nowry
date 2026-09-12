@@ -97,6 +97,20 @@ const contentPredicates = {
 
 const pickPredicates = (groups) => Object.fromEntries(groups.map((group) => [group, contentPredicates[group]]))
 
+/**
+ * The hard limit on a card's front, from the API's own model
+ * (`StudyCard.title: Field(..., max_length=100)`).
+ *
+ * It is a server constraint, so it belongs where both clients can see it rather
+ * than being discovered by a 422. Generated cards are where it bites: a
+ * question written by a model is not bounded by anything a person typed, and a
+ * save that dies on one over-long card looks like a save that does nothing.
+ */
+export const CARD_TITLE_MAX = 100
+
+/** True when a card's front cannot be saved as it stands. */
+export const titleTooLong = (card) => (card?.title ?? '').trim().length > CARD_TITLE_MAX
+
 export const CARD_TYPE_SPECS = {
   // Variant B — paired required fields. Neither half is "the title": a card
   // with a question and no answer is not a partial card, it is not a card.

@@ -2114,7 +2114,8 @@
       "discardCard": "Écarter la carte",
       "discardCardAria": "Écarter {{title}}",
       "restoreCardAria": "Restaurer {{title}}",
-      "undo": "Annuler"
+      "undo": "Annuler",
+      "frontTooLong": "Le recto dépasse {{max}} caractères, il ne peut donc pas être enregistré. Modifiez-le sur le web ou laissez-le de côté."
     },
     "saveToDeck": {
       "selectDeckLabel": "Sélectionner un paquet",

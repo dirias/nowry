@@ -1499,7 +1499,8 @@
       "discardCard": "Descartar tarjeta",
       "discardCardAria": "Descartar {{title}}",
       "restoreCardAria": "Restaurar {{title}}",
-      "undo": "Deshacer"
+      "undo": "Deshacer",
+      "frontTooLong": "El frente supera los {{max}} caracteres, así que no se puede guardar. Edítalo en la web o déjalo fuera."
     },
     "saveToDeck": {
       "selectDeckLabel": "Seleccionar mazo",

@@ -1757,7 +1757,8 @@
       "discardCard": "Discard card",
       "discardCardAria": "Discard {{title}}",
       "restoreCardAria": "Restore {{title}}",
-      "undo": "Undo"
+      "undo": "Undo",
+      "frontTooLong": "The front is longer than {{max}} characters, so it can't be saved. Edit it on the web, or leave it out."
     },
     "saveToDeck": {
       "selectDeckLabel": "Select Deck",

@@ -27,6 +27,7 @@ import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { booksService, cardsService } from '@nowry/core/api/services'
 import { estimateFor, preTicked, sourceFieldsFor } from '@nowry/core/domain/books/sectionCards'
+import { CARD_TITLE_MAX, titleTooLong } from '@nowry/core/domain/cardTypes'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useTheme } from '../theme'
@@ -80,9 +81,13 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
       const { cards } = await cardsService.generateFromBook(bookId, ticked)
       const rows = cards ?? []
       setGenerated(rows)
-      // Everything is kept until the learner says otherwise: a list that starts
-      // empty asks them to do the work twice.
-      setKept(Object.fromEntries(rows.map((_, index) => [index, true])))
+      /*
+       * Everything is kept until the learner says otherwise — a list that
+       * starts empty asks them to do the work twice — EXCEPT a card whose
+       * front is longer than the API will accept. That one cannot be saved as
+       * it stands, so it arrives unticked and says why.
+       */
+      setKept(Object.fromEntries(rows.map((card, index) => [index, !titleTooLong(card)])))
       setStep('review')
     } catch {
       setFailed(t('books.makeCards.loadError'))
@@ -102,13 +107,18 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
     }
     const rows = generated.filter((_, index) => kept[index])
     let saved = 0
-    try {
-      /*
-       * One at a time, as the web does, so a plan limit mid-run stops with an
-       * accurate count rather than an all-or-nothing lie about what reached
-       * the library.
-       */
-      for (const card of rows) {
+    let reason = null
+
+    /*
+     * One at a time, as the web does, and NOT stopping at the first refusal.
+     * The first build threw on one card and reported nothing, so a run where a
+     * single generated question ran past the API's 100-character title cap
+     * looked like a save that did nothing at all — a spinner, then the same
+     * screen. What reached the library is now counted, and the server's own
+     * message is what the user is told.
+     */
+    for (const card of rows) {
+      try {
         await cardsService.create({
           title: card.title,
           content: card.content,
@@ -116,16 +126,28 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
           ...sourceFieldsFor(card, source)
         })
         saved += 1
+      } catch (error) {
+        reason = reason ?? error?.response?.data?.detail ?? error?.message ?? null
       }
-      queryClient.invalidateQueries({ queryKey: ['decks'] })
-      queryClient.invalidateQueries({ queryKey: ['cards'] })
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['decks'] })
+    queryClient.invalidateQueries({ queryKey: ['cards'] })
+    setBusy(false)
+
+    if (saved === rows.length) {
       onSaved?.(saved)
       onClose?.()
-    } catch {
-      setFailed(saved > 0 ? t('cards.generatedCards.partialSave', { saved, total: rows.length }) : t('cards.generatedCards.saveError'))
-    } finally {
-      setBusy(false)
+      return
     }
+
+    // The sheet stays open with the list intact, so what did not save is still
+    // in front of the person who has to decide what to do about it.
+    setFailed(
+      saved > 0
+        ? `${t('cards.generatedCards.partialSave', { saved, total: rows.length })}${reason ? ` — ${reason}` : ''}`
+        : `${t('cards.generatedCards.saveError')}${reason ? ` — ${reason}` : ''}`
+    )
   }, [busy, deckId, generated, kept, bookId, book, onSaved, onClose, t])
 
   const keptCount = Object.values(kept).filter(Boolean).length
@@ -137,12 +159,6 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
       title={step === 'sections' ? t('books.makeCards.title') : t('cards.generatedCards.titleSelectCards')}
     >
       <Stack spacing={2}>
-        {failed ? (
-          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {failed}
-          </Typography>
-        ) : null}
-
         {step === 'sections' ? (
           <>
             {sections === null ? (
@@ -173,6 +189,12 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
                 ))}
               </View>
             )}
+
+            {failed ? (
+              <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+                {failed}
+              </Typography>
+            ) : null}
 
             <Stack direction='row' spacing={1}>
               <Button variant='tertiary' style={{ flex: 1 }} onPress={onClose}>
@@ -209,6 +231,11 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
                         <Typography level='body-sm' color='text.tertiary' numberOfLines={2}>
                           {card.content}
                         </Typography>
+                        {titleTooLong(card) ? (
+                          <Typography level='body-xs' color='danger.plainColor'>
+                            {t('cards.generatedCards.frontTooLong', { max: CARD_TITLE_MAX })}
+                          </Typography>
+                        ) : null}
                       </View>
                     }
                   />
@@ -224,6 +251,14 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
               placeholderKey='cards.generatedCards.subtitleAddToDeck'
               accessibilityLabel={t('cards.generatedCards.titleAddToDeck')}
             />
+
+            {/* Beside the key that caused it: at the top of a sheet this long,
+                a failure is above the fold and reads as nothing happening. */}
+            {failed ? (
+              <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+                {failed}
+              </Typography>
+            ) : null}
 
             <Stack direction='row' spacing={1}>
               <Button variant='tertiary' style={{ flex: 1 }} onPress={() => setStep('sections')}>
