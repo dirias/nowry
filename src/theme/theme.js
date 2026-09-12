@@ -135,7 +135,8 @@ const themeConfig = {
         text: {
           primary: '#1c1c1c',
           secondary: '#444',
-          tertiary: '#777'
+          // 4.5:1 on body, surface and level1; #777 missed all three (MOB-071).
+          tertiary: '#6f6f6f'
         },
         stickyNote: STICKY_PALETTE.light
       }

@@ -342,7 +342,17 @@ function buildLightScheme(primaryColor, variations, accents) {
     text: {
       primary: '#1c1c1c',
       secondary: '#444',
-      tertiary: '#777'
+      /*
+       * #6f6f6f, not #777, which missed 4.5:1 on every ground it is drawn on —
+       * 4.48 on `body`, 4.25 on `surface`, 4.05 on `level1`. This passes all
+       * three (MOB-071).
+       *
+       * THIS is the copy the web resolves: `DynamicThemeProvider` spreads the
+       * generator's `text` over the theme's, so `theme.js`'s own value never
+       * reaches a screen. `paletteParity.test.js` is what caught that, by
+       * failing when the other two were changed and this one was not.
+       */
+      tertiary: '#6f6f6f'
     }
   }
 }

@@ -36,22 +36,27 @@ const HAIRLINE = 1.05
 /**
  * Known shortfalls in the shared base palette, with what each reaches today.
  *
- *   - `text.tertiary` on any light ground: 4.25:1 against 4.5. Every caption
- *     and meta line in the app is this colour. `#6b7280` would clear it.
+ *   - ~~`text.tertiary` on any light ground~~ — **cleared** (MOB-071). It was
+ *     4.48, 4.25 and 4.05 against 4.5 on `body`, `surface` and `level1`, which
+ *     is every caption and meta line in the app. `#777` became `#6f6f6f`: eight
+ *     steps darker, below the threshold of noticing, and 5.02 / 4.77 / 4.55.
  *   - `neutral.outlinedBorder`: 1.38:1 light, 1.46:1 dark, against 3. This is
  *     an input's own outline, which WCAG 1.4.11 counts as identifying a
  *     control.
  *   - `primary.outlinedBorder` on a light ground: 2.06:1 against 3. This one is
- *     the focus ring (BUTTONS.md §focus), so it is the sharpest of the four —
+ *     the focus ring (BUTTONS.md §focus), so it is the sharpest of the three —
  *     WCAG 2.4.11 is explicit about focus indicators.
+ *
+ * The two borders are a WAIVER rather than an oversight, taken with the numbers
+ * in hand: clearing them needs roughly `#949494` and `#666666`, which turns
+ * every quiet hairline in the app into a visible grey line and changes how the
+ * whole thing reads. That is a design decision, and it was made deliberately
+ * (MOB-071) rather than deferred again.
  *
  * Each entry is `[scheme, foreground, background]`; the accent does not change
  * whether they fail, only by how much.
  */
 const DEBT = [
-  ['light', 'text.tertiary', 'background.body'],
-  ['light', 'text.tertiary', 'background.surface'],
-  ['light', 'text.tertiary', 'background.level1'],
   ['light', 'neutral.outlinedBorder', 'background.surface'],
   ['dark', 'neutral.outlinedBorder', 'background.surface'],
   ['light', 'primary.outlinedBorder', 'background.body']
