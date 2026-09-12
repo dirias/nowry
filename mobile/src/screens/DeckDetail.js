@@ -28,7 +28,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import useDeckSettings, { PACE_DEFAULTS } from '@nowry/core/hooks/useDeckSettings'
 import { decksService } from '@nowry/core/api/services'
-import { deckCounts } from '@nowry/core/domain/deckTypes'
+import { deckCountsFrom } from '@nowry/core/domain/deckTypes'
+import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { subscribeToDeviceVoices } from '../platform/voices'
 import { useTheme } from '../theme'
 import { Button, Checkbox, Divider, FormField, Input, Readout, Screen, Segmented, Select, Skeleton, Stack, Typography } from '../ui'
@@ -47,6 +48,15 @@ export function DeckDetail() {
   const router = useRouter()
   const theme = useTheme()
   const [archiving, setArchiving] = useState(false)
+
+  /*
+   * The list, for its counts alone. `GET /decks/{id}` returns the stored
+   * document and computes no `due_cards` or `new_cards`, so this screen's two
+   * conditional readouts could never render: it said "26 cards" where the row
+   * that opened it said "20 due · 92%" (MOB-065). The list is already in the
+   * query cache — this screen is reached from it — so reading it costs nothing.
+   */
+  const deckList = useDeckData(null)
 
   const settings = useDeckSettings({
     open: true,
@@ -112,7 +122,8 @@ export function DeckDetail() {
     )
   }
 
-  const counts = deckCounts(deck)
+  const listEntry = (deckList.decks ?? []).find((row) => String(row._id ?? row.id) === String(deckId))
+  const counts = deckCountsFrom(deck, listEntry)
   const side = voiceSettings?.[audioSide] || {}
   /* Spread `side` first: rate and pitch are set on the web and must survive a
    * screen that has no control for them. */
@@ -123,8 +134,12 @@ export function DeckDetail() {
       <Stack spacing={3}>
         <Stack spacing={1}>
           <Typography level='h4'>{identity?.name || deck?.name || ''}</Typography>
-          <Stack direction='row' spacing={2}>
-            <Readout leading>{t('cards.manage_content.cardCount', { count: counts.total })}</Readout>
+          <Stack direction='row' spacing={2} flexWrap='wrap'>
+            {/* What KIND of deck, which the web's settings header states with a
+                chip in the type's own accent. It was the one thing the header
+                never said, on a screen whose every row is typed by it. */}
+            <Readout leading>{t(`study.types.${deck?.deck_type || 'flashcard'}s`)}</Readout>
+            <Readout>{t('cards.manage_content.cardCount', { count: counts.total })}</Readout>
             {counts.due > 0 ? <Readout>{t('study.dueCount', { count: counts.due })}</Readout> : null}
             {counts.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: counts.fresh })}</Readout> : null}
           </Stack>
@@ -132,17 +147,23 @@ export function DeckDetail() {
 
         {/* The deck's one action, and the only solid button on the screen.
             Everything below it is settings; this is what a deck is for. */}
-        <Button
-          size='lg'
-          onPress={() => router.push(`/study/${String(deckId)}`)}
-          accessibilityLabel={t('study.deckPill.ariaLabel', { name: identity?.name || deck?.name || '' })}
-        >
-          {t('study.deck.study')}
-        </Button>
+        <Stack direction='row' spacing={1}>
+          <Button
+            size='lg'
+            style={{ flex: 1 }}
+            onPress={() => router.push(`/study/${String(deckId)}`)}
+            accessibilityLabel={t('study.deckPill.ariaLabel', { name: identity?.name || deck?.name || '' })}
+          >
+            {t('study.deck.study')}
+          </Button>
 
-        <Button size='md' variant='secondary' onPress={() => router.push(`/study/card/new?deckId=${String(deckId)}`)}>
-          {t('cards.deck.addCard')}
-        </Button>
+          {/* Beside it, not stacked under it. Two full-width slabs one above
+              the other read as two equally weighted choices; the deck has one
+              action and one alternative. */}
+          <Button size='lg' variant='secondary' style={{ flex: 1 }} onPress={() => router.push(`/study/card/new?deckId=${String(deckId)}`)}>
+            {t('cards.deck.addCard')}
+          </Button>
+        </Stack>
 
         <Divider />
 

@@ -881,23 +881,23 @@
       }
     },
     "dangerZone": {
-      "title": "Danger Zone",
-      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
-      "deleteButton": "Delete account",
-      "exportTitle": "Export Your Data",
-      "exportDescription": "Download a copy of all your data including books, decks, cards, tasks, and plans.",
-      "exportButton": "Export data"
+      "title": "Gefahrenzone",
+      "description": "Lösche dein Konto und alle zugehörigen Daten endgültig. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteButton": "Konto löschen",
+      "exportTitle": "Deine Daten exportieren",
+      "exportDescription": "Lade eine Kopie all deiner Daten herunter, einschließlich Bücher, Stapel, Karten, Aufgaben und Pläne.",
+      "exportButton": "Daten exportieren"
     },
     "deleteAccount": {
-      "title": "Delete your account",
-      "message": "This will permanently delete your account and all associated data (books, decks, cards, plans, goals). Your data will be retained for 30 days before final removal.",
-      "emailLabel": "Confirm your email address",
-      "emailPlaceholder": "Enter your email to confirm",
-      "emailRequired": "Email address is required to confirm deletion",
-      "emailMismatch": "Email address does not match. Please try again.",
-      "confirmDisabled": "Enter email to confirm",
-      "confirmEnabled": "Delete permanently",
-      "recoveryNotice": "Your data can be recovered within 30 days by contacting support. After 30 days, it will be permanently deleted."
+      "title": "Konto löschen",
+      "message": "Dadurch werden dein Konto und alle zugehörigen Daten (Bücher, Stapel, Karten, Pläne, Ziele) endgültig gelöscht. Deine Daten werden 30 Tage lang aufbewahrt, bevor sie endgültig entfernt werden.",
+      "emailLabel": "Bestätige deine E-Mail-Adresse",
+      "emailPlaceholder": "Gib deine E-Mail zur Bestätigung ein",
+      "emailRequired": "Zur Bestätigung der Löschung wird die E-Mail-Adresse benötigt",
+      "emailMismatch": "Die E-Mail-Adresse stimmt nicht überein. Bitte versuche es erneut.",
+      "confirmDisabled": "E-Mail zur Bestätigung eingeben",
+      "confirmEnabled": "Endgültig löschen",
+      "recoveryNotice": "Deine Daten können innerhalb von 30 Tagen über den Support wiederhergestellt werden. Danach werden sie endgültig gelöscht."
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -2460,7 +2460,7 @@
   },
   "subscription": {
     "title": "Subscription & Billing",
-    "currentPlan": "Current Plan",
+    "currentPlan": "Aktueller Tarif",
     "nextBillingDate": "Next billing date",
     "noBillingDate": "—",
     "manageBilling": "Manage billing in Stripe",
@@ -2472,7 +2472,7 @@
       "empty": "No AI usage this month"
     },
     "tier": {
-      "free": "Free",
+      "free": "Kostenlos",
       "plus": "Plus",
       "pro": "Pro"
     },

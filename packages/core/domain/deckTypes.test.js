@@ -6,7 +6,7 @@
  * with nothing failing. A reader that names the fields once cannot do that
  * twice.
  */
-import { DECK_TYPES, deckCounts, deckType } from './deckTypes'
+import { DECK_TYPES, deckCounts, deckCountsFrom, deckType } from './deckTypes'
 
 describe('deckType', () => {
   it('gives each type its own colour and label', () => {
@@ -55,5 +55,30 @@ describe('deckCounts', () => {
 
   it('asked is what the deck wants today, so up to date is zero', () => {
     expect(deckCounts({ due_cards: 0, new_cards: 0, total_cards: 20 }).asked).toBe(0)
+  })
+})
+
+describe('deckCountsFrom', () => {
+  // `GET /decks/{id}` returns the stored document and computes no counts; only
+  // the list route does. A detail screen reading the single-deck payload alone
+  // showed the card total and two permanent zeroes (MOB-065).
+  const detail = { _id: 'd1', name: 'JPN', deck_type: 'flashcard', total_cards: 26 }
+  const listEntry = { _id: 'd1', total_cards: 26, due_cards: 20, new_cards: 3, mastery: 92 }
+
+  it('takes the counts from the list entry when there is one', () => {
+    expect(deckCountsFrom(detail, listEntry)).toMatchObject({ total: 26, due: 20, fresh: 3, mastery: 92, asked: 23 })
+  })
+
+  it('falls back to the detail payload, which is all zeroes but never NaN', () => {
+    expect(deckCountsFrom(detail)).toMatchObject({ total: 26, due: 0, fresh: 0, mastery: 0, asked: 0 })
+  })
+
+  it('keeps the detail payload as the authority on the stored total', () => {
+    expect(deckCountsFrom({ ...detail, total_cards: 27 }, listEntry).total).toBe(27)
+  })
+
+  it('survives either side being absent', () => {
+    expect(deckCountsFrom(undefined, undefined)).toMatchObject({ total: 0, due: 0, fresh: 0 })
+    expect(deckCountsFrom(undefined, listEntry)).toMatchObject({ due: 20, fresh: 3 })
   })
 })

@@ -1029,23 +1029,23 @@
       }
     },
     "dangerZone": {
-      "title": "Danger Zone",
-      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
-      "deleteButton": "Delete account",
-      "exportTitle": "Export Your Data",
-      "exportDescription": "Download a copy of all your data including books, decks, cards, tasks, and plans.",
-      "exportButton": "Export data"
+      "title": "危険な操作",
+      "description": "アカウントと関連するすべてのデータを完全に削除します。この操作は取り消せません。",
+      "deleteButton": "アカウントを削除",
+      "exportTitle": "データをエクスポート",
+      "exportDescription": "本・デッキ・カード・タスク・プランを含む、すべてのデータのコピーをダウンロードします。",
+      "exportButton": "データをエクスポート"
     },
     "deleteAccount": {
-      "title": "Delete your account",
-      "message": "This will permanently delete your account and all associated data (books, decks, cards, plans, goals). Your data will be retained for 30 days before final removal.",
-      "emailLabel": "Confirm your email address",
-      "emailPlaceholder": "Enter your email to confirm",
-      "emailRequired": "Email address is required to confirm deletion",
-      "emailMismatch": "Email address does not match. Please try again.",
-      "confirmDisabled": "Enter email to confirm",
-      "confirmEnabled": "Delete permanently",
-      "recoveryNotice": "Your data can be recovered within 30 days by contacting support. After 30 days, it will be permanently deleted."
+      "title": "アカウントを削除",
+      "message": "アカウントと関連するすべてのデータ（本・デッキ・カード・プラン・目標）を完全に削除します。データは完全削除まで30日間保持されます。",
+      "emailLabel": "メールアドレスを確認",
+      "emailPlaceholder": "確認のためメールアドレスを入力",
+      "emailRequired": "削除を確認するにはメールアドレスが必要です",
+      "emailMismatch": "メールアドレスが一致しません。もう一度お試しください。",
+      "confirmDisabled": "確認のためメールアドレスを入力",
+      "confirmEnabled": "完全に削除",
+      "recoveryNotice": "30日以内であればサポートに連絡することでデータを復元できます。30日を過ぎると完全に削除されます。"
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -2388,7 +2388,7 @@
   },
   "subscription": {
     "title": "Subscription & Billing",
-    "currentPlan": "Current Plan",
+    "currentPlan": "現在のプラン",
     "nextBillingDate": "Next billing date",
     "noBillingDate": "—",
     "manageBilling": "Manage billing in Stripe",
@@ -2400,7 +2400,7 @@
       "empty": "No AI usage this month"
     },
     "tier": {
-      "free": "Free",
+      "free": "無料",
       "plus": "Plus",
       "pro": "Pro"
     },

@@ -46,3 +46,31 @@ export const deckCounts = (deck) => {
     allNew: total > 0 && total === fresh
   }
 }
+
+/**
+ * The counts, taken from whichever payload actually carries them.
+ *
+ * `GET /decks` computes `due_cards`, `new_cards` and `mastery` per deck;
+ * `GET /decks/{id}` returns the stored document and computes none of them. So a
+ * detail screen reading the single-deck payload gets the card total and two
+ * permanent zeroes — which is exactly what the phone's deck screen showed, a
+ * detail view saying less about a deck than the row that opened it (MOB-065).
+ *
+ * The list entry is the one that knows, and a client that reached the detail
+ * screen from the list already has it cached. This prefers it and falls back to
+ * the detail payload, so the screen is right whichever arrives first.
+ *
+ * @param {object} deck - the single-deck payload
+ * @param {object} [listEntry] - the same deck as the list route describes it
+ */
+export const deckCountsFrom = (deck, listEntry) => {
+  const counted = listEntry ?? deck
+  return deckCounts({
+    ...deck,
+    due_cards: counted?.due_cards ?? deck?.due_cards,
+    new_cards: counted?.new_cards ?? deck?.new_cards,
+    mastery: counted?.mastery ?? deck?.mastery,
+    // The stored total is the detail payload's own and is authoritative there.
+    total_cards: deck?.total_cards ?? counted?.total_cards
+  })
+}

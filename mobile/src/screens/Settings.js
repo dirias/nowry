@@ -205,11 +205,15 @@ export function Settings() {
         <Typography level='body-sm' color='text.secondary'>
           {t(permission === 'granted' ? 'settings.notifications.allowed' : 'settings.notifications.blocked')}
         </Typography>
+        {/* Two peers at one weight. A boxed key beside a bare text link says
+            one of them is the real action and the other is an aside, and here
+            the "aside" is the only thing that can actually change a denied
+            permission (MOB-065). */}
         <Stack direction='row' spacing={1}>
           <Button size='sm' variant='secondary' onPress={async () => setPermission(await requestNotificationPermission())}>
             {t('settings.notifications.check')}
           </Button>
-          <Button size='sm' variant='tertiary' onPress={() => Linking.openSettings()}>
+          <Button size='sm' variant='secondary' onPress={() => Linking.openSettings()}>
             {t('settings.notifications.openSystem')}
           </Button>
         </Stack>
