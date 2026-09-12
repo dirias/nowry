@@ -4,6 +4,7 @@ import { agentService } from '../api/services/agent.service'
 import petService from '../api/services/petService'
 import { useAuth } from '../context/AuthContext'
 import { canSend, messageBudget } from '../domain/agentChat'
+import { interventionSettings } from '../domain/interventionPolicy'
 import { stageConfig } from '../domain/petStages'
 
 /**
@@ -93,6 +94,12 @@ export function usePetState() {
      */
     budget: messageBudget(data),
     canSend: canSend(data),
+    /*
+     * And so do the four settings governing proactive messages, so a session
+     * knows whether the companion may interrupt it without a request of its
+     * own (MOB-088). Absent, every default applies — which is every switch on.
+     */
+    interventions: interventionSettings(data),
     loading: isLoading,
     error: data ? null : (error ?? null),
     reload,

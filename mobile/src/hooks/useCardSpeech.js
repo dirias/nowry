@@ -34,7 +34,20 @@ import { resolveVoice } from '@nowry/core/domain/voiceMatch'
 import { canSpeak, speak, stop } from '../platform/speech'
 import { subscribeToDeviceVoices } from '../platform/voices'
 
-export function useCardSpeech({ card, flipped = false, settings = null } = {}) {
+/**
+ * Speaking a piece of text, with the voice the deck saved for it.
+ *
+ * Split out of `useCardSpeech` for MOB-088: the companion's proactive messages
+ * carry a Listen control too, and they are not cards. Everything that makes
+ * the audio right — which voice a saved setting means on this device, how
+ * mixed-language text is split — is the same question for a reply as for a
+ * card, and answering it twice is how the two come to disagree.
+ *
+ * `autoPlay` is not offered here. A card auto-plays because a deck setting
+ * says the card should; a message that spoke itself on arrival would be the
+ * companion raising its voice, which is not a thing any setting asks for.
+ */
+export function useSpeech({ text = '', settings = null } = {}) {
   const [voices, setVoices] = useState([])
   const [speaking, setSpeaking] = useState(false)
 
@@ -46,8 +59,6 @@ export function useCardSpeech({ card, flipped = false, settings = null } = {}) {
   const runId = useRef(0)
 
   useEffect(() => subscribeToDeviceVoices(setVoices), [])
-
-  const text = useMemo(() => speechTextFor(card, { flipped }), [card, flipped])
 
   /** The device's answer to what the deck saved, for a given language. */
   const voiceFor = useCallback(
@@ -109,6 +120,30 @@ export function useCardSpeech({ card, flipped = false, settings = null } = {}) {
   const toggle = useCallback(() => (speaking ? halt() : play()), [speaking, halt, play])
 
   /*
+   * Whatever is speaking stops when the text changes or the screen goes. A
+   * session graded fast would otherwise stack utterances, and the fifth card
+   * would be hearing the second.
+   */
+  useEffect(() => halt, [text, halt])
+
+  /*
+   * `canSpeak` is false on a build made before the speech module was added, so
+   * the control simply is not there — an offer that does nothing is worse than
+   * no offer, and this is exactly the mistake the deck screen was making by
+   * showing an Audio section for audio that never played.
+   */
+  return { speaking, canSpeak: canSpeak() && Boolean(text), toggle, play, stop: halt }
+}
+
+/**
+ * A card, read aloud: the text it sounds like, plus the deck's auto-play.
+ */
+export function useCardSpeech({ card, flipped = false, settings = null } = {}) {
+  const text = useMemo(() => speechTextFor(card, { flipped }), [card, flipped])
+  const speech = useSpeech({ text, settings })
+  const { play, stop: halt } = speech
+
+  /*
    * Auto-play, and the silence that has to come with it. The cleanup runs on
    * every card and on leaving the session, which is what keeps a session the
    * user walked away from from talking to an empty room.
@@ -122,13 +157,7 @@ export function useCardSpeech({ card, flipped = false, settings = null } = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, settings?.autoPlay, halt])
 
-  /*
-   * `canSpeak` is false on a build made before the speech module was added, so
-   * the control simply is not there — an offer that does nothing is worse than
-   * no offer, and this is exactly the mistake the deck screen was making by
-   * showing an Audio section for audio that never played.
-   */
-  return { speaking, canSpeak: canSpeak() && Boolean(text), toggle, stop: halt }
+  return speech
 }
 
 export default useCardSpeech

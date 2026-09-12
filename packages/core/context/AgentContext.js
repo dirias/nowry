@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from './AuthContext'
 import { agentService } from '../api/services/agent.service'
 import petService from '../api/services/petService'
+import { allowIntervention, silenceUntil } from '../domain/interventionPolicy'
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -364,15 +365,13 @@ function agentReducer(state, action) {
         companionMessage: action.payload,
         companionInterventionCount: state.companionInterventionCount + 1
       }
-    case 'COMPANION_DISMISS': {
-      const SILENCE = { conservative: 1200000, balanced: 600000, frequent: 180000 }
+    case 'COMPANION_DISMISS':
       return {
         ...state,
         companionMessage: null,
         companionIsLoading: false,
-        companionSilentUntil: Date.now() + (SILENCE[state.interventionFrequency] ?? 600000)
+        companionSilentUntil: silenceUntil(state.interventionFrequency)
       }
-    }
     case 'COMPANION_RESET_SESSION':
       return {
         ...state,
@@ -807,21 +806,19 @@ export const AgentProvider = ({ children }) => {
       interventionTypes
     } = stateRef.current
 
-    // Gate 1: type enabled?
-    const typeKey = event.type // 'wrong_answer', 'session_summary', etc.
-    if (interventionTypes && !interventionTypes[typeKey]) return
-
-    // Gate 2: focus mode blocks in-session types
-    const IN_SESSION_TYPES = ['wrong_answer']
-    if (focusModeEnabled && isInStudySession && IN_SESSION_TYPES.includes(typeKey)) return
-
-    // Gate 3: per-session cap
-    const CAPS = { conservative: 1, balanced: 2, frequent: 4 }
-    const cap = CAPS[interventionFrequency] ?? 2
-    if (companionInterventionCount >= cap) return
-
-    // Gate 4: silence window (wrong_answer only)
-    if (typeKey === 'wrong_answer' && companionSilentUntil && Date.now() < companionSilentUntil) return
+    /*
+     * The four gates, and they are not decided here. `interventionPolicy` in
+     * the shared package holds them, because the phone ships interventions
+     * without this provider (MOB-088) and a second copy of these rules is a
+     * second answer to whether the companion may speak.
+     */
+    const allowed = allowIntervention(event.type, {
+      settings: { frequency: interventionFrequency, focusMode: focusModeEnabled, types: interventionTypes },
+      count: companionInterventionCount,
+      silentUntil: companionSilentUntil,
+      inSession: isInStudySession
+    })
+    if (!allowed) return
 
     dispatch({ type: 'COMPANION_LOADING' })
 

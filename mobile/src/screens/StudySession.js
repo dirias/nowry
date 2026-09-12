@@ -32,18 +32,22 @@ import { agentService, cardsService, studySessionsService } from '@nowry/core/ap
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
 import { bestLevelUp } from '@nowry/core/domain/petLevelUp'
+import { sessionSummaryEvent, wrongAnswerEvent } from '@nowry/core/domain/interventionPolicy'
 import { studyCardContext } from '@nowry/core/domain/screenContext'
+import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import { storage } from '@nowry/core'
 import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
-import { useCardSpeech } from '../hooks/useCardSpeech'
+import { useCardSpeech, useSpeech } from '../hooks/useCardSpeech'
+import { useInterventions } from '../hooks/useInterventions'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
 import {
   AskToggle,
   Button,
   Card,
+  CompanionNote,
   FlipCard,
   Icon,
   MarkToggle,
@@ -66,6 +70,18 @@ import {
  * flashcard is one object; it does not change shape when you turn it over.
  */
 const ACTION_BAND = BUTTON_SIZES.lg.height + EDGE
+
+/**
+ * How long after a missed card the companion waits before saying anything.
+ *
+ * The web's window, and its reasoning is sound: a line that appears the instant
+ * a grade is pressed reads as a reaction to the button rather than to the card,
+ * and lands while the learner is still looking at where the button was. The
+ * jitter is so that two missed cards in a row do not produce two lines in
+ * lockstep.
+ */
+const NUDGE_DELAY = 3000
+const NUDGE_JITTER = 5000
 
 /**
  * Above this OS text size the four grades stop sharing one row.
@@ -233,6 +249,39 @@ export function StudySession() {
   const deckVoices = id === DAILY_REVIEW ? getSettingsForDeck(current?.deck_id?._id ?? current?.deck_id) : voiceSettings
   const speech = useCardSpeech({ card: current, flipped: revealed, settings: revealed ? deckVoices?.back : deckVoices?.front })
 
+  /*
+   * The companion, speaking unasked (MOB-088).
+   *
+   * Its four settings ride on the companion state Home already caches, so a
+   * session knows whether it may be interrupted without a request of its own
+   * (NFR-001) — and honours a switch the learner turned off on the web, which
+   * is the whole reason the gates are shared rather than written here.
+   *
+   * `inSession` is what focus mode is asked about, and a finished session is
+   * not one: the summary after the last card interrupts nothing.
+   */
+  const pet = usePetState()
+  const buddy = useInterventions({ settings: pet.interventions, inSession: !complete })
+
+  /*
+   * And read aloud, with the same voice machinery the card uses (FR-011). The
+   * deck's settings carry the rate and the pitch; the LANGUAGE is detected from
+   * the text, because a reply about a Japanese card is written in the reader's
+   * language and reading it with the card's voice would be the wrong one.
+   */
+  const buddySpeech = useSpeech({ text: buddy.message?.message ?? '', settings: deckVoices?.back })
+
+  /*
+   * Named so the two callers can depend on it without depending on the whole
+   * hook — `queue` is stable, and the completion effect fires exactly once.
+   */
+  const askCompanion = buddy.queue
+
+  /** Cards already nudged about, so one card cannot produce two lines. */
+  const nudged = useRef(new Set())
+  const nudgeTimer = useRef(null)
+  useEffect(() => () => clearTimeout(nudgeTimer.current), [])
+
   /** Open the companion with the card in hand as what it is being asked about. */
   const openChat = useCallback(() => {
     setAskContext(studyCardContext(current, { deckId: id, index, total, flipped: revealed, mode: 'study' }), `/study/${id}`)
@@ -288,7 +337,29 @@ export function StudySession() {
        */
       setLevelUp(bestLevelUp(results.map((result) => (result.status === 'fulfilled' ? result.value : null))))
     })
-  }, [complete, id, graded])
+
+    /*
+     * And the companion's word on the session (MOB-088). Guarded on cards
+     * actually graded for the reason the web records: an all-caught-up deck
+     * lands here with nothing studied, and the summary it produced said
+     * "1 cards".
+     *
+     * A card is counted as missed if it ENDED on Again or Hard. The web counts
+     * every wrong pass, because it can see a card more than once; this screen
+     * replaces a re-grade rather than appending one, so a card has exactly one
+     * answer and the most-missed card is the first one Again was pressed on.
+     */
+    const missed = answers.filter((answer) => answer.grade === 'again' || answer.grade === 'hard')
+    const worst = missed.find((answer) => answer.grade === 'again') ?? missed[0] ?? null
+    askCompanion(
+      sessionSummaryEvent({
+        total: answers.length,
+        wrong: missed.length,
+        cardId: worst?.cardId ?? null,
+        front: worst?.cardTitle ?? null
+      })
+    )
+  }, [complete, id, graded, askCompanion])
 
   const grade = useCallback(
     (value) => {
@@ -329,8 +400,22 @@ export function StudySession() {
           queueReview(cardId, value)
           setQueued((n) => n + 1)
         })
+
+      /*
+       * A card the learner could not recall is the one moment the companion
+       * has something useful to say unasked (MOB-088). Once per card, after a
+       * pause, and only if the settings allow it — `queue` is the thing that
+       * asks, so nothing here decides.
+       */
+      if (value !== 'again' || nudged.current.has(cardId)) return
+      nudged.current.add(cardId)
+      clearTimeout(nudgeTimer.current)
+      nudgeTimer.current = setTimeout(
+        () => askCompanion(wrongAnswerEvent(card, { index, total: cards.length })),
+        NUDGE_DELAY + Math.random() * NUDGE_JITTER
+      )
     },
-    [cards, index, id, graded]
+    [cards, index, id, graded, askCompanion]
   )
 
   /**
@@ -423,6 +508,12 @@ export function StudySession() {
               rather than awaited — XP is a reward, and a reward that can hold
               up the summary is a punishment. */}
           {levelUp ? <PetLevelUp level={levelUp.level} stage={levelUp.stage} accent={accent} /> : null}
+
+          {/* The companion's word on the session, inside the summary rather
+              than over it (ADR-022). It arrives a few seconds after the screen
+              does, which is why it is placed below what the screen already
+              said rather than above it. */}
+          <CompanionNote stage={pet.stage} text={buddy.message?.message} speech={buddySpeech} onDismiss={buddy.dismiss} />
 
           <Button onPress={() => router.replace('/study')}>{t('cards.session.complete.backToLibrary')}</Button>
         </Stack>
@@ -555,7 +646,17 @@ export function StudySession() {
             once on the first card, the note that this card already has a
             grade, or nothing at all. */}
         <View style={{ minHeight: NOTICE_BAND, justifyContent: 'center' }}>
-          {answered ? (
+          {buddy.message ? (
+            /*
+             * A fourth possible content, and it takes the band because it is
+             * the only one of the four the learner did not already know. The
+             * hint and the already-graded note are both reminders; this is new
+             * information, and it goes HERE rather than over the card because a
+             * message about a card that covers that card is ADR-022's whole
+             * subject.
+             */
+            <CompanionNote stage={pet.stage} text={buddy.message.message} speech={buddySpeech} onDismiss={buddy.dismiss} />
+          ) : answered ? (
             <Typography level='body-xs' color='text.tertiary' accessibilityLiveRegion='polite' style={{ textAlign: 'center' }}>
               {t('cards.session.grading.alreadyAnswered')}
             </Typography>
