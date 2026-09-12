@@ -173,7 +173,15 @@ export function StudyDashboard() {
         }
         action={
           (list ?? []).length === 0 ? null : (
-            <Button size='md' onPress={() => router.push(`/study/${DAILY_REVIEW}`)} accessibilityLabel={t('study.startStudying')}>
+            /*
+             * No `accessibilityLabel`. The visible text IS the accessible
+             * name, and "Start Studying" as the name beside a visible
+             * "Study · 23" fails WCAG 2.5.3 (Label in Name) — a speech-input
+             * user says what they can see. The web's own key has no aria-label
+             * for the same reason, and `MarkToggle` already records the rule
+             * (MOB-042).
+             */
+            <Button size='md' onPress={() => router.push(`/study/${DAILY_REVIEW}`)}>
               {today.asked > 0 ? t('study.today.study', { count: today.asked }) : t('study.today.browse')}
             </Button>
           )

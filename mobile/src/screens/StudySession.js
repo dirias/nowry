@@ -361,8 +361,15 @@ export function StudySession() {
             <MarkToggle card={current} />
           </Stack>
 
-          {/* Progress as an EDGE, not an object (§15.4). */}
-          <Progress value={total > 0 ? ((index + 1) / total) * 100 : 0} accessibilityLabel={counter} />
+          {/*
+           * Progress as an EDGE, not an object (§15.4).
+           *
+           * Labelled with what it IS, not with what the line above it already
+           * says: the bar carried the counter as its name, so a screen reader
+           * read "Card 2 of 23" twice in a row (MOB-042). The number is the
+           * bar's VALUE, which `Progress` already announces.
+           */}
+          <Progress value={total > 0 ? ((index + 1) / total) * 100 : 0} accessibilityLabel={t('annualPlanning.goal.progress')} />
         </Stack>
 
         {/* The card fills what is left, so the grades sit in the bottom third
@@ -386,9 +393,12 @@ export function StudySession() {
            * It TOGGLES. Reveal-only left no way back to the question: a card
            * turned over by accident stayed over, and the screen read as stuck.
            *
-           * Kept out of the accessibility tree on purpose: the reveal has a
-           * real button below, and announcing the card as a second control
-           * would say the same thing twice.
+           * Its CONTENT stays readable — a screen reader has to be able to
+           * read the question — and the accessibility dump confirms it is: the
+           * card reads as "Question, イギリス". What it must not become is a
+           * second labelled control competing with the reveal button below, so
+           * it carries no name of its own and the text underneath supplies one
+           * (MOB-042).
            */}
           <Pressable style={{ flex: 1 }} onPress={() => setRevealed((shown) => !shown)} importantForAccessibility='no' accessible={false}>
             {/*

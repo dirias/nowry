@@ -28,8 +28,18 @@
  * touching (MOB-062). The entries also carry `date`, which is what a locale can
  * actually format, so that is what both halves read.
  *
- * The cells are decorative; the strip carries a text alternative on itself, so a
- * screen reader gets the sentence rather than fifteen unlabelled bars.
+ * **The strip is ONE element, and `accessible` is what says so.** A role and a
+ * label alone made no node at all: the accessibility tree carried fourteen
+ * weekday letters and not one word of the sentence that explains them
+ * (MOB-042). With `accessible` the strip is a single focusable node whose name
+ * is that sentence, and the letters sit inside it unfocusable — the cells are
+ * the picture, the label is the alternative to it.
+ *
+ * The letters still APPEAR in a `uiautomator` dump, which lists the view tree
+ * rather than the focus order; `focusable=false` is the attribute that decides
+ * whether a screen reader stops on them, and they carry it. `no-hide-
+ * descendants` on each cell is belt and braces for the old architecture, where
+ * the grouping is weaker.
  */
 import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -61,7 +71,7 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
   }
 
   const cell = (key, value, background, label, { emphasis = false, outlined = false } = {}) => (
-    <View key={key} style={{ width: CELL, alignItems: 'center', gap: theme.spacing[0.5] }}>
+    <View key={key} importantForAccessibility='no-hide-descendants' style={{ width: CELL, alignItems: 'center', gap: theme.spacing[0.5] }}>
       <View style={{ width: '100%', height: BAR, justifyContent: 'flex-end' }}>
         <View
           style={{
@@ -73,7 +83,14 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
           }}
         />
       </View>
-      <Typography level='body-xs' weight={emphasis ? 'lg' : 'md'} color={emphasis ? 'text.primary' : 'text.tertiary'}>
+      {/* On the new architecture a `Text` is its own accessibility node and
+          needs telling directly; hiding the View around it is not enough. */}
+      <Typography
+        level='body-xs'
+        weight={emphasis ? 'lg' : 'md'}
+        color={emphasis ? 'text.primary' : 'text.tertiary'}
+        importantForAccessibility='no-hide-descendants'
+      >
         {label}
       </Typography>
     </View>
@@ -81,6 +98,7 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
 
   return (
     <View
+      accessible
       accessibilityRole='image'
       accessibilityLabel={t('study.today.timelineAria', { reviewed: reviewedWeek, today, week: dueWeek })}
       style={{ flexDirection: 'row', gap: GAP, alignItems: 'flex-end' }}
@@ -98,7 +116,7 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
 
       {/* What happened, and what is going to. */}
       <View
-        accessible={false}
+        importantForAccessibility='no-hide-descendants'
         style={{ width: 1, alignSelf: 'stretch', marginHorizontal: 2, backgroundColor: resolveColor(theme, 'divider') }}
       />
 

@@ -41,7 +41,9 @@ function SessionDots({ filled, total, mode, label }) {
   const theme = useTheme()
 
   return (
-    <View accessibilityRole='image' accessibilityLabel={label} style={{ flexDirection: 'row', gap: theme.spacing[0.5] }}>
+    /* `accessible`, so the dots are one element with one sentence rather than
+       four unlabelled views and no sentence at all (MOB-042). */
+    <View accessible accessibilityRole='image' accessibilityLabel={label} style={{ flexDirection: 'row', gap: theme.spacing[0.5] }}>
       {Array.from({ length: total }, (_, index) => {
         const done = index < filled
         const current = !done && index === filled && mode === MODES.WORK
