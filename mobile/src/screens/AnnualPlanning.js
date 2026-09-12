@@ -211,7 +211,17 @@ export function AnnualPlanning() {
             (areas || []).map((area) => {
               const areaGoals = goalsByArea[area._id] ?? []
               const areaMetrics = planMetrics(areaGoals)
-              return <AreaRow key={area._id} area={area} metrics={areaMetrics} theme={theme} t={t} />
+              const areaId = area._id ?? area.id
+              return (
+                <AreaRow
+                  key={areaId}
+                  area={area}
+                  metrics={areaMetrics}
+                  theme={theme}
+                  t={t}
+                  onPress={() => router.push(`/calendar/area/${areaId}`)}
+                />
+              )
             })
           )}
           {atLimit ? (

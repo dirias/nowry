@@ -42,14 +42,27 @@ const patternOf = (file) =>
 
 const PATTERNS = routeFiles.map(patternOf)
 
-const matches = (route) => {
+/**
+ * The pattern a concrete route lands on, or null.
+ *
+ * The most specific one wins, as the router itself resolves it: `/study/card/new`
+ * is matched by both `new.js` and `[cardId].js`, and answering with the dynamic
+ * one would report the static file as unreachable.
+ */
+const patternFor = (route) => {
   const asked = route.split('/').filter(Boolean)
-  return PATTERNS.some((pattern) => {
-    const parts = pattern.split('/').filter(Boolean)
-    if (parts.length !== asked.length) return false
-    return parts.every((part, i) => /^\[.*\]$/.test(part) || part === asked[i])
-  })
+  const dynamic = (pattern) => pattern.split('/').filter((part) => /^\[.*\]$/.test(part)).length
+
+  return (
+    PATTERNS.filter((pattern) => {
+      const parts = pattern.split('/').filter(Boolean)
+      if (parts.length !== asked.length) return false
+      return parts.every((part, i) => /^\[.*\]$/.test(part) || part === asked[i])
+    }).sort((a, b) => dynamic(a) - dynamic(b))[0] ?? null
+  )
 }
+
+const matches = (route) => patternFor(route) !== null
 
 const sources = () => {
   const walkSrc = (dir) =>
@@ -110,6 +123,38 @@ describe("the shared package's next steps", () => {
     const unaccounted = declaredSteps().filter((route) => !openableSteps().includes(route) && matches(route))
     expect(unaccounted).toEqual([])
     expect(declaredSteps().length).toBeGreaterThan(openableSteps().length)
+  })
+})
+
+/**
+ * Routes the bar itself opens, or the system does. Everything else has to be
+ * reachable from inside the app.
+ */
+const REACHED_WITHOUT_A_PUSH = [
+  '/', // the Home tab
+  '/study', // the Study tab
+  '/calendar', // the Plan tab
+  '/pomodoro', // the Focus tab
+  '/oauthredirect', // Google's callback: the OS opens it, never this app
+  '/harness', // the visual harness, opened by hand at `nowry://harness` (MOB-010)
+  '/probe' // the platform-port probe, opened the same way
+]
+
+describe('every screen can be reached', () => {
+  /*
+   * The mirror of the rule below, and it exists because the other direction
+   * passed while a screen sat there unreachable: `/calendar/area/[areaId]` was
+   * written, the row that should open it was given the handler, and the call
+   * site was never passed one. Nothing failed — a component that accepts a
+   * press and is never given one is legal, and a route nothing opens is a file
+   * that compiles. Only a person tapping the row found it.
+   */
+  it.each(PATTERNS.filter((pattern) => !REACHED_WITHOUT_A_PUSH.includes(pattern)).sort())('%s is opened by something', (pattern) => {
+    // The shared package hands out routes too, and its strings are not in this
+    // client's source for the scan above to find.
+    const fromAnywhere = [...asked.keys()].concat(declaredSteps())
+    const opened = fromAnywhere.some((route) => patternFor(route.replace(/:param/g, 'x')) === pattern)
+    expect(opened ? pattern : `${pattern} — nothing opens this: no router.push, Link or redirect targets it`).toEqual(pattern)
   })
 })
 

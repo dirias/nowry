@@ -34,7 +34,9 @@ export function FocusAreaDetail() {
   const { areas, goals, loading } = useAnnualPlan(new Date().getFullYear(), user)
 
   const id = String(areaId)
-  const area = useMemo(() => (areas || []).find((candidate) => candidate._id === id) ?? null, [areas, id])
+  // `_id` is what the plan sends, but the calendar's own reader accepts either,
+  // so this does too rather than being the one place that insists.
+  const area = useMemo(() => (areas || []).find((candidate) => (candidate._id ?? candidate.id) === id) ?? null, [areas, id])
   const areaGoals = useMemo(() => (goals || []).filter((goal) => goal.focus_area_id === id), [goals, id])
   const metrics = useMemo(() => planMetrics(areaGoals), [areaGoals])
 
