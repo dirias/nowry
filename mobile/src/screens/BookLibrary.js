@@ -23,11 +23,11 @@ import { FlatList, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useBooks } from '@nowry/core/hooks/useBooks'
+import { cardsReadout, metaLine } from '@nowry/core/domain/books/documentCopy'
 import {
   KINDS,
   SORTS,
   cardsFrom,
-  composition,
   coverage,
   filterDocuments,
   kindCounts,
@@ -39,22 +39,7 @@ import {
 } from '@nowry/core/domain/books/libraryQuery'
 import { useTheme } from '../theme'
 import { LibraryFilterSheet } from './BookLibraryFilters'
-import {
-  Button,
-  Chip,
-  Divider,
-  Icon,
-  Input,
-  ListRow,
-  Measure,
-  Readout,
-  Screen,
-  Segmented,
-  Skeleton,
-  Stack,
-  SummaryObject,
-  Typography
-} from '../ui'
+import { Button, Chip, Divider, Icon, Input, ListRow, Readout, Screen, Segmented, Skeleton, Stack, SummaryObject, Typography } from '../ui'
 
 export function BookLibrary() {
   const { t, i18n } = useTranslation()
@@ -216,33 +201,27 @@ function ContinueCard({ book, onOpen, when, t }) {
  * both count the cards that came out of them.
  */
 function DocumentRow({ book, onOpen, when, t }) {
-  const imported = kindOf(book) === 'imported'
-  const covered = coverage(book)
-  const position = readingPage(book)
-  const made = composition(book)
-  const cards = cardsFrom(book)
-
-  const meta = [
-    imported
-      ? position
-        ? t('books.lib.pages', { count: position.total })
-        : null
-      : made.sections
-        ? t('books.lib.wordsInSections', { words: made.words, count: made.sections })
-        : null,
-    cards ? t('books.lib.cards', { count: cards }) : t('books.lib.noCardsYet'),
-    imported ? t('books.lib.openedAt', { when: when(book.updated_at) }) : t('books.lib.editedAt', { when: when(book.updated_at) })
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  /*
+   * The web's own composition, from the web's own module. The first build wrote
+   * its own and got three things wrong that only an emulator showed: it ran
+   * words and sections into one phrase, it printed "no cards yet" where the web
+   * is deliberately silent — absence is the default and the gap is named once,
+   * on the summary object (D8) — and it drew a measure the web hides below
+   * `sm`, because a row on 390pt has no width to spare for a bar.
+   */
+  const meta = metaLine(t, book, when)
+  const readout = cardsReadout(t, book)
 
   return (
     <ListRow
-      tile={<Icon name={imported ? 'BookOpen' : 'Book'} size='md' color='text.tertiary' />}
+      tile={<Icon name={kindOf(book) === 'imported' ? 'BookOpen' : 'Book'} size='md' color='text.tertiary' />}
       name={book.title || t('books.untitled')}
       meta={meta}
-      measure={covered ? <Measure value={covered.pct} accessibilityLabel={t('books.lib.sectionsCovered', covered)} /> : undefined}
-      readout={covered ? <Readout>{`${covered.covered}/${covered.total}`}</Readout> : undefined}
+      readout={
+        readout ? (
+          <Readout leading={Boolean(readout.strong)}>{[readout.strong, readout.rest].filter(Boolean).join(' · ')}</Readout>
+        ) : undefined
+      }
       onPress={onOpen}
       accessibilityLabel={t('books.lib.rowAria', { title: book.title || t('books.untitled') })}
     />

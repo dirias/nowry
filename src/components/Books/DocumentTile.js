@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { focusRing, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 import { MOTION } from '@nowry/core/tokens/tokens'
 import CoverMark from './CoverMark'
-import { cardsReadout, measureOf, metaLine } from './documentCopy'
+import { cardsReadout, measureOf, metaLine } from '@nowry/core/domain/books/documentCopy'
 
 /**
  * The grid tile: the row stacked (docs/prd-books-library.md D5). A 48×68 mark

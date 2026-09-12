@@ -35,7 +35,8 @@ const CAN_GENERATE = ['plus', 'pro']
 
 export function BookReader() {
   const { bookId } = useLocalSearchParams()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const language = i18n?.language ?? 'en'
   const theme = useTheme()
   const router = useRouter()
   const { user } = useAuth()
@@ -91,7 +92,9 @@ export function BookReader() {
           <Typography level='h4' accessibilityRole='header'>
             {data?.title || t('books.untitled')}
           </Typography>
-          {words > 0 ? <Readout>{t('books.lib.words', { words, count: words })}</Readout> : null}
+          {/* Grouped, as the library's row writes the same number: 1,517 there
+              and 1517 here is one app disagreeing with itself about a count. */}
+          {words > 0 ? <Readout>{t('books.lib.words', { words: words.toLocaleString(language), count: words })}</Readout> : null}
         </Stack>
 
         {/*

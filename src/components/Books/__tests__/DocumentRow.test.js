@@ -15,7 +15,7 @@ jest.mock('react-i18next', () => ({
 
 const DocumentRow = require('../DocumentRow').default
 const DocumentActionsMenu = require('../DocumentActionsMenu').default
-const { cardsReadout, metaLine, measureOf } = require('../documentCopy')
+const { cardsReadout, metaLine, measureOf } = require('@nowry/core/domain/books/documentCopy')
 
 const rel = () => 'Yesterday'
 const WRITTEN = {

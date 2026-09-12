@@ -3,7 +3,16 @@ import { kindOf, readingPage } from '@nowry/core/domain/books/libraryQuery'
 /**
  * The words on a document's row (docs/prd-books-library.md D6, D7): a meta line
  * that is true for its kind, and a readout that says what the deck has or
- * names the gap. Pure, so the row and the tile cannot disagree.
+ * names the gap. Pure, so the row and the tile cannot disagree — and shared,
+ * so the two CLIENTS cannot either.
+ *
+ * The phone composed its own version of this and got three things wrong that
+ * only an emulator showed: it ran the words and sections into one phrase, it
+ * printed "no cards yet" where the web is deliberately silent (D8 — absence is
+ * the default and the gap is named once, on the summary object), and it drew a
+ * measure the web hides below `sm`. All three were recorded in the control
+ * audit as "same" (MOB-058), which is what an audit written from prose rather
+ * than from the page is worth.
  */
 export const metaLine = (t, book, relative, { username = null, locale = undefined } = {}) => {
   if (kindOf(book) === 'imported') {

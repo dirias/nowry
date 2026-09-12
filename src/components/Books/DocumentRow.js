@@ -3,7 +3,7 @@ import { Box, Button, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { listRow, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 import CoverMark from './CoverMark'
-import { cardsReadout, measureOf, metaLine } from './documentCopy'
+import { cardsReadout, measureOf, metaLine } from '@nowry/core/domain/books/documentCopy'
 
 /**
  * One document as one row (ADR-021 §15.11; docs/prd-books-library.md D5–D8):
