@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useTranslation } from 'react-i18next'
 import { useUserProfile } from '../hooks/useUserProfile'
 import { alerts, storage } from '../platform'
+import { DEFAULT_SETTINGS, MODES, SESSIONS_BEFORE_LONG_BREAK, durationFor, isMode, nextModeAfter } from '../domain/pomodoroCycle'
 
 /**
  * PomodoroContext — one timer for the whole app.
@@ -27,35 +28,15 @@ const STORAGE_KEY = 'NOWRY_POMODORO_STATE'
 const STORAGE_VERSION = 2
 const TICK_MS = 250
 
-export const SESSIONS_BEFORE_LONG_BREAK = 4
-
-export const MODES = Object.freeze({
-  WORK: 'work',
-  SHORT_BREAK: 'shortBreak',
-  LONG_BREAK: 'longBreak'
-})
-
-export const DEFAULT_SETTINGS = Object.freeze({
-  work: 25,
-  shortBreak: 5,
-  longBreak: 15,
-  autoStart: false,
-  enabled: false
-})
-
-const isMode = (value) => Object.values(MODES).includes(value)
-
-/** Seconds a full session of `mode` lasts under `settings`. */
-export const durationFor = (mode, settings) => {
-  const minutes = mode === MODES.SHORT_BREAK ? settings.shortBreak : mode === MODES.LONG_BREAK ? settings.longBreak : settings.work
-  return Math.max(1, Number(minutes) || DEFAULT_SETTINGS[mode] || DEFAULT_SETTINGS.work) * 60
-}
-
-/** Which session follows `mode`, given how many focus sessions are complete. */
-export const nextModeAfter = (mode, completedSessions) => {
-  if (mode !== MODES.WORK) return MODES.WORK
-  return completedSessions > 0 && completedSessions % SESSIONS_BEFORE_LONG_BREAK === 0 ? MODES.LONG_BREAK : MODES.SHORT_BREAK
-}
+/*
+ * The timer's vocabulary is `domain/pomodoroCycle` and is re-exported here.
+ *
+ * It was defined in this file, which meant a pure derivation over it could not
+ * be written without importing a React context — and through it a provider, a
+ * profile hook and Firebase. Re-exporting keeps all eight existing call sites
+ * importing from where they always have.
+ */
+export { DEFAULT_SETTINGS, MODES, SESSIONS_BEFORE_LONG_BREAK, durationFor, isMode, nextModeAfter } from '../domain/pomodoroCycle'
 
 /**
  * Map a `/users/profile` response onto timer settings. Returns `null` when the

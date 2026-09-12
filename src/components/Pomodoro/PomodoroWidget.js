@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, IconButton, Sheet, Stack, Typography } from '@mui/joy'
 import { ClickAwayListener } from '@mui/base/ClickAwayListener'
 import { CloseRounded, RefreshRounded, SkipNextRounded } from '@mui/icons-material'
-import { MODES, durationFor, nextModeAfter, usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { MODES, usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { cycleProgress, statusLine } from '@nowry/core/domain/pomodoroCycle'
 import { focusRing } from '../Common/Form/formStyles'
 import { Z_NAV } from '@nowry/core/constants/zIndex'
 import { formatClock } from '@nowry/core/utils/formatClock'
@@ -22,13 +23,6 @@ const groundedControl = {
   borderRadius: 'md',
   '&:hover': { bgcolor: 'background.level1', color: 'text.primary' },
   ...focusRing
-}
-
-/** How far through the four-focus cycle the user is, as the dots show it. */
-export const cycleProgress = (completedSessions, mode, total) => {
-  const inCycle = completedSessions % total
-  const earnedLongBreak = mode === MODES.LONG_BREAK && completedSessions > 0 && inCycle === 0
-  return earnedLongBreak ? total : inCycle
 }
 
 const SessionDots = ({ filled, total, mode, label }) => (
@@ -149,15 +143,24 @@ const PomodoroWidget = () => {
   const filled = cycleProgress(completedSessions, mode, sessionsBeforeLongBreak)
   const modeLabel = (value) => t(`pomodoro.modes.${value}`)
 
-  const statusLine = () => {
-    if (isPaused) return t('pomodoro.status.paused', { minutes: Math.round((totalSeconds - timeLeft) / 60) })
-    if (isFocus) {
-      const next = nextModeAfter(mode, completedSessions + 1)
-      return t('pomodoro.status.next', { mode: modeLabel(next), minutes: durationFor(next, settings) / 60 })
-    }
-    if (isActive) return t('pomodoro.status.next', { mode: modeLabel(MODES.WORK), minutes: settings.work })
-    if (mode === MODES.LONG_BREAK) return t('pomodoro.status.longBreakEarned', { total: sessionsBeforeLongBreak })
-    return t('pomodoro.status.breakQueued', { count: filled, total: sessionsBeforeLongBreak })
+  /*
+   * Four cases, derived in the shared package: the phone showed only the last
+   * of them, always, so a paused timer and a running one said the same thing
+   * (MOB-062). It hands back a key and its parameters — including a mode NAME
+   * rather than a translated one, which is this caller's lookup (ADR-031).
+   */
+  const status = () => {
+    const { key, params } = statusLine({
+      mode,
+      isActive,
+      isPaused,
+      timeLeft,
+      totalSeconds,
+      completedSessions,
+      sessionsBeforeLongBreak,
+      settings
+    })
+    return t(key, { ...params, ...(params.mode ? { mode: modeLabel(params.mode) } : null) })
   }
 
   const primaryLabel = () => {
@@ -210,7 +213,7 @@ const PomodoroWidget = () => {
             {formatClock(timeLeft)}
           </Typography>
           <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-            {statusLine()}
+            {status()}
           </Typography>
         </Stack>
 

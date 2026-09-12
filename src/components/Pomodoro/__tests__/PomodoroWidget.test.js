@@ -33,7 +33,7 @@ jest.mock('@nowry/core/context/PomodoroContext', () => {
 
 const PomodoroWidget = require('../PomodoroWidget').default
 const PomodoroChip = require('../PomodoroChip').default
-const { cycleProgress } = require('../PomodoroWidget')
+const { cycleProgress } = require('@nowry/core/domain/pomodoroCycle')
 
 const base = () => ({
   timeLeft: 25 * 60,
@@ -200,6 +200,8 @@ describe('the corner the Study Buddy is not in', () => {
 })
 
 describe('cycleProgress', () => {
+  // The derivation itself moved to `domain/pomodoroCycle`, where it is covered
+  // case by case. This stays as the widget's own contract with it.
   it('counts focus sessions within the current cycle, and shows a full cycle on the long break', () => {
     expect(cycleProgress(0, 'work', 4)).toBe(0)
     expect(cycleProgress(3, 'work', 4)).toBe(3)

@@ -18,18 +18,56 @@
  * and rebuild the OS alarm once a second.
  */
 import { useEffect, useRef } from 'react'
+import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { MODES, usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { cycleProgress, statusLine } from '@nowry/core/domain/pomodoroCycle'
 import { formatClock } from '@nowry/core/utils/formatClock'
 import { cancelEndAlarm, scheduleEndAlarm } from '../../src/platform/alerts'
-import { Button, Progress, Screen, Segmented, Stack, Typography } from '../../src/ui'
+import { useTheme } from '../../src/theme'
+import { Button, Progress, Screen, Segmented, Stack, Typography, resolveColor } from '../../src/ui'
 
 const MODE_ORDER = [MODES.WORK, MODES.SHORT_BREAK, MODES.LONG_BREAK]
+
+/**
+ * How far through the cycle you are, as the web's widget draws it: a filled dot
+ * per focus session done, a ringed one for the session in hand.
+ *
+ * The phone had the sentence and not the dots. The sentence is the text
+ * alternative — it is what a screen reader gets from the row's label — and a
+ * screen that shows only the alternative is a screen missing its figure.
+ */
+function SessionDots({ filled, total, mode, label }) {
+  const theme = useTheme()
+
+  return (
+    <View accessibilityRole='image' accessibilityLabel={label} style={{ flexDirection: 'row', gap: theme.spacing[0.5] }}>
+      {Array.from({ length: total }, (_, index) => {
+        const done = index < filled
+        const current = !done && index === filled && mode === MODES.WORK
+        return (
+          <View
+            key={index}
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: resolveColor(theme, done ? 'primary.solidBg' : 'background.level2'),
+              ...(current
+                ? { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: resolveColor(theme, 'primary.solidBg') }
+                : null)
+            }}
+          />
+        )
+      })}
+    </View>
+  )
+}
 
 export default function Focus() {
   const { t } = useTranslation()
   const timer = usePomodoro()
-  const { mode, timeLeft, isActive, isPaused, progress, completedSessions, sessionsBeforeLongBreak } = timer
+  const { mode, timeLeft, totalSeconds, isActive, isPaused, progress, completedSessions, sessionsBeforeLongBreak, settings } = timer
 
   const secondsRef = useRef(timeLeft)
   secondsRef.current = timeLeft
@@ -48,6 +86,30 @@ export default function Focus() {
 
   const startLabel = isPaused ? 'pomodoro.resume' : mode === MODES.WORK ? 'pomodoro.start' : 'pomodoro.startBreak'
 
+  const isFocus = mode === MODES.WORK
+  const filled = cycleProgress(completedSessions, mode, sessionsBeforeLongBreak)
+
+  /*
+   * The web's four cases, derived in the shared package. This screen used to
+   * print the queued-break count unconditionally, so a paused timer, a running
+   * one and an earned long break all read the same — and it counted the cycle
+   * as `completedSessions % total`, which says "0 of 4" at exactly the moment
+   * the answer is four (MOB-062).
+   */
+  const status = () => {
+    const { key, params } = statusLine({
+      mode,
+      isActive,
+      isPaused,
+      timeLeft,
+      totalSeconds,
+      completedSessions,
+      sessionsBeforeLongBreak,
+      settings
+    })
+    return t(key, { ...params, ...(params.mode ? { mode: t(`pomodoro.modes.${params.mode}`) } : null) })
+  }
+
   return (
     <Screen>
       <Stack spacing={3}>
@@ -58,37 +120,43 @@ export default function Focus() {
           options={MODE_ORDER.map((value) => ({ value, label: t(`pomodoro.modes.short.${value}`) }))}
         />
 
+        {/* The mode and the cycle, on the row the web puts them on. */}
+        <Stack direction='row' spacing={1.5} alignItems='center'>
+          <Typography level='title-sm'>{t(`pomodoro.modes.${mode}`)}</Typography>
+          <SessionDots
+            filled={filled}
+            total={sessionsBeforeLongBreak}
+            mode={mode}
+            label={t('pomodoro.cycleProgress', { count: filled, total: sessionsBeforeLongBreak })}
+          />
+        </Stack>
+
         {/* The clock is the screen. Everything else explains or changes it. */}
         <Stack spacing={1}>
           <Typography level='h1' accessibilityLiveRegion='polite'>
             {formatClock(timeLeft)}
           </Typography>
           <Typography level='body-sm' color='text.tertiary'>
-            {t(`pomodoro.modes.${mode}`)}
+            {status()}
           </Typography>
         </Stack>
 
         <Progress value={progress * 100} accessibilityLabel={t(`pomodoro.modes.${mode}`)} />
 
-        <Typography level='body-sm' color='text.tertiary'>
-          {t('pomodoro.cycleProgress', {
-            count: completedSessions % sessionsBeforeLongBreak,
-            total: sessionsBeforeLongBreak
-          })}
-        </Typography>
-
         <Button size='lg' onPress={timer.toggleTimer}>
           {t(isActive ? 'pomodoro.pause' : startLabel)}
         </Button>
 
-        <Stack direction='row' spacing={1}>
-          <Button variant='secondary' style={{ flex: 1 }} onPress={timer.resetTimer}>
-            {t('pomodoro.reset')}
-          </Button>
-          <Button variant='tertiary' style={{ flex: 1 }} onPress={timer.skipSession}>
-            {t('pomodoro.skip')}
-          </Button>
-        </Stack>
+        {/*
+         * ONE secondary, as the web has it: reset while focusing, skip while on
+         * a break. Both were drawn at once, so "Skip to the next session" sat
+         * under a focus timer that has no next session to skip to — and the two
+         * were a boxed key beside a bare text link, which is two weights for
+         * one job.
+         */}
+        <Button variant='secondary' onPress={isFocus ? timer.resetTimer : timer.skipSession}>
+          {t(isFocus ? 'pomodoro.reset' : 'pomodoro.skip')}
+        </Button>
       </Stack>
     </Screen>
   )

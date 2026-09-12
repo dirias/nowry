@@ -56,10 +56,21 @@ export default function Home() {
               </Stack>
             ) : error ? null : (
               <>
-                {/* The one load-bearing number lifts to text.primary (ADR-021 §3). */}
-                <Readout leading>{`${due} ${t('study.due')}`}</Readout>
-                <Readout>{t('study.empty.streakLabel', { count: streak })}</Readout>
-                <Readout>{`${decks} ${t('study.stats.decks')}`}</Readout>
+                {/*
+                 * The translated phrases, not a number glued to a noun. These
+                 * three readouts were `${n} ${t('noun')}`, which is a sentence
+                 * no translator ever saw and which no language with a different
+                 * word order can produce (MOB-062).
+                 *
+                 * The one load-bearing number lifts to text.primary (ADR-021 §3).
+                 */}
+                <Readout leading>{t('study.dueCount', { count: due })}</Readout>
+                <Readout>
+                  {/* A streak of zero is not a streak. The Today object says
+                      "Start your streak today" here and so does this. */}
+                  {streak > 0 ? t('study.empty.streakLabel', { count: streak }) : t('study.empty.streakZeroLabel')}
+                </Readout>
+                <Readout>{t('study.sections.deckCount', { count: decks })}</Readout>
               </>
             )
           }
