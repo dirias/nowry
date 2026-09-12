@@ -1727,7 +1727,8 @@
           "body": "Mark a card while you study and it will be waiting here."
         }
       },
-      "showAnswer": "Show answer"
+      "showAnswer": "Show answer",
+      "cardShort": "{{current}} / {{total}}"
     },
     "deleteModal": {
       "title": "Delete Deck",
@@ -3141,7 +3142,8 @@
       "remaining_one": "{{count}} message left this month",
       "remaining_other": "{{count}} messages left this month",
       "failed": "That message did not go through. Your text is still here.",
-      "ask": "Ask"
+      "ask": "Ask",
+      "about": "About “{{card}}”."
     },
     "personality": {
       "error": {

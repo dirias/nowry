@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePet } from '@nowry/core/context/AgentContext'
 import { speechTextFor } from '@nowry/core/domain/cardSpeech'
+import { studyCardContext } from '@nowry/core/domain/screenContext'
 import {
   Container,
   Card,
@@ -406,26 +407,24 @@ export default function StudySession() {
   } = usePet()
 
   const buildStudyContext = React.useCallback(
-    (cardIdx, flipped) => {
-      const card = visibleCards[cardIdx]
-      if (!card) return null
-      return {
-        page: 'study_session',
-        deckId: deckId === 'daily-review' ? card.deck_id?._id || card.deck_id || null : deckId,
-        deckName: card.deck_id?.name || card.deck_id?.title || null,
-        cardIndex: cardIdx + 1,
-        // Must be the FILTERED total: this feeds the AI companion's context,
-        // and a mismatch makes the pet announce "card 3 of 20" while the
-        // screen reads "3 of 7".
-        totalCards: visibleCards.length,
-        cardType: card.card_type || 'basic',
-        isFlipped: flipped,
-        front: card.title || '',
-        back: flipped ? card.content || '' : null,
-        isDailyReview: deckId === 'daily-review',
+    (cardIdx, flipped) =>
+      /*
+       * The shape is `studyCardContext`'s now, shared with the phone. It was a
+       * literal here, and the server declared the same fields in snake_case
+       * with no alias, so every study-session field was dropped on arrival and
+       * the companion was told "a card in a study deck" with no anchor at all
+       * (PEND-003). One builder is what stops the two drifting again.
+       *
+       * `total` must be the FILTERED length: a mismatch makes the pet announce
+       * "card 3 of 20" while the screen reads "3 of 7".
+       */
+      studyCardContext(visibleCards[cardIdx], {
+        deckId,
+        index: cardIdx,
+        total: visibleCards.length,
+        flipped,
         mode
-      }
-    },
+      }),
     [visibleCards, deckId, mode]
   )
 

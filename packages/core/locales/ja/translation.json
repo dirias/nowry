@@ -2116,7 +2116,8 @@
       "budgetSpent": "今月のメッセージを使い切りました。来月またリセットされます。",
       "remaining_other": "今月はあと {{count}} 件",
       "failed": "メッセージを送れませんでした。入力した文はそのままです。",
-      "ask": "聞く"
+      "ask": "聞く",
+      "about": "「{{card}}」について。"
     },
     "personality": {
       "error": {
@@ -2317,7 +2318,8 @@
         "easy": "簡単",
         "alreadyAnswered": "評価済み"
       },
-      "syncing_other": "{{count}} 件の復習を同期しています..."
+      "syncing_other": "{{count}} 件の復習を同期しています...",
+      "cardShort": "{{current}} / {{total}}"
     },
     "flashcard": {
       "createTitle": "新しいフラッシュカード",

@@ -2017,7 +2017,8 @@
       "remaining_one": "Il reste {{count}} message ce mois-ci",
       "remaining_other": "Il reste {{count}} messages ce mois-ci",
       "failed": "Ce message n'est pas parti. Votre texte est toujours là.",
-      "ask": "Demander"
+      "ask": "Demander",
+      "about": "À propos de « {{card}} »."
     },
     "personality": {
       "error": {
@@ -2279,7 +2280,8 @@
         "alreadyAnswered": "Déjà évaluée"
       },
       "syncing_one": "Synchronisation de {{count}} révision...",
-      "syncing_other": "Synchronisation de {{count}} révisions..."
+      "syncing_other": "Synchronisation de {{count}} révisions...",
+      "cardShort": "{{current}} / {{total}}"
     },
     "common": {
       "addTags": "Ajouter des étiquettes",

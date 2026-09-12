@@ -31,7 +31,17 @@ export const agentService = {
         context,
         language
       },
-      { timeout: 60000 } // Extended timeout for AI generation + tool calls
+      {
+        timeout: 60000, // Extended timeout for AI generation + tool calls
+        /*
+         * Both clients show their own failure for a chat send — the web sets
+         * `state.error`, the phone puts a line above its composer and hands the
+         * text back. Without this the interceptor adds a global toast and, in
+         * development, a console error that raises a full-screen overlay: three
+         * reports of one failure, two of them covering the one that is useful.
+         */
+        suppressErrorToast: true
+      }
     )
     return data
   },

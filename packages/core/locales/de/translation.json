@@ -2006,7 +2006,8 @@
       "remaining_one": "Noch {{count}} Nachricht diesen Monat",
       "remaining_other": "Noch {{count}} Nachrichten diesen Monat",
       "failed": "Diese Nachricht wurde nicht gesendet. Dein Text ist noch da.",
-      "ask": "Fragen"
+      "ask": "Fragen",
+      "about": "Zu „{{card}}“."
     },
     "personality": {
       "error": {
@@ -2268,7 +2269,8 @@
         "alreadyAnswered": "Bereits bewertet"
       },
       "syncing_one": "{{count}} Wiederholung wird synchronisiert...",
-      "syncing_other": "{{count}} Wiederholungen werden synchronisiert..."
+      "syncing_other": "{{count}} Wiederholungen werden synchronisiert...",
+      "cardShort": "{{current}} / {{total}}"
     },
     "common": {
       "addTags": "Tags hinzufügen",

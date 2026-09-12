@@ -112,6 +112,14 @@ const STRICT_KEYS = EN_KEYS.filter(isStrict)
 // locales uses verbatim. It is identical by design, not debt to pay down.
 const XP_GAINED = ['cards.session.xpGained_one', 'cards.session.xpGained_other']
 
+/**
+ * The session's compact counter is "{{current}} / {{total}}" in every language:
+ * two numbers and a slash, with nothing in it to translate. The full sentence
+ * beside it, `cards.session.card`, is translated everywhere and is what a
+ * screen reader is given (MOB-086).
+ */
+const CARD_COUNTER = ['cards.session.cardShort']
+
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
   es: [
@@ -125,7 +133,8 @@ const IDENTICAL_BY_DESIGN = {
     'study.dates.minutes_one',
     'study.dates.minutes_other',
     'calendarPage.views.agenda',
-    ...XP_GAINED
+    ...XP_GAINED,
+    ...CARD_COUNTER
   ],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
@@ -161,7 +170,8 @@ const IDENTICAL_BY_DESIGN = {
     'study.dates.minutes_other',
     // And "A–Z" is the same two letters here.
     'groups.orderAlpha',
-    ...XP_GAINED
+    ...XP_GAINED,
+    ...CARD_COUNTER
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
@@ -181,9 +191,10 @@ const IDENTICAL_BY_DESIGN = {
     // "Name" is the German word for a name, so the focus area's own field lands
     // on English by coincidence rather than by neglect.
     'annualPlanning.focusArea.setup.nameLabel',
-    ...XP_GAINED
+    ...XP_GAINED,
+    ...CARD_COUNTER
   ],
-  ja: ['cards.session.xpGained_other']
+  ja: ['cards.session.xpGained_other', ...CARD_COUNTER]
 }
 
 /**

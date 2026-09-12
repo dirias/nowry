@@ -32,13 +32,16 @@ import { agentService, cardsService, studySessionsService } from '@nowry/core/ap
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
 import { bestLevelUp } from '@nowry/core/domain/petLevelUp'
+import { studyCardContext } from '@nowry/core/domain/screenContext'
 import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import { storage } from '@nowry/core'
 import { useAppearance } from '../theme'
+import { setAskContext } from './askContext'
 import { useCardSpeech } from '../hooks/useCardSpeech'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
 import {
+  AskToggle,
   Button,
   Card,
   FlipCard,
@@ -230,6 +233,12 @@ export function StudySession() {
   const deckVoices = id === DAILY_REVIEW ? getSettingsForDeck(current?.deck_id?._id ?? current?.deck_id) : voiceSettings
   const speech = useCardSpeech({ card: current, flipped: revealed, settings: revealed ? deckVoices?.back : deckVoices?.front })
 
+  /** Open the companion with the card in hand as what it is being asked about. */
+  const openChat = useCallback(() => {
+    setAskContext(studyCardContext(current, { deckId: id, index, total, flipped: revealed, mode: 'study' }))
+    router.push('/agent')
+  }, [current, id, index, total, revealed, router])
+
   /** Fire-and-forget, once, when the last card has been graded. */
   useEffect(() => {
     if (!complete || logged.current) return
@@ -343,7 +352,15 @@ export function StudySession() {
   const cardId = current?._id ?? current?.id ?? null
   const answered = Boolean(cardId && graded[cardId])
 
-  const counter = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
+  /*
+   * Two forms of one fact. The header is ONE row (ADR-011) and it now holds
+   * three labelled controls beside this — Listen, Mark and Ask — so the full
+   * sentence wrapped it onto a second line. The digits are what a sighted
+   * reader is actually scanning for; the sentence is what a screen reader needs,
+   * and it stays as this line's accessible name (MOB-086).
+   */
+  const counter = useMemo(() => t('cards.session.cardShort', { current: index + 1, total }), [t, index, total])
+  const counterSaid = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
 
   if (error) {
     return (
@@ -428,7 +445,12 @@ export function StudySession() {
          */}
         <Stack spacing={1}>
           <Stack direction='row' spacing={1} alignItems='center'>
-            <Typography level='title-sm' color='text.primary' style={{ flex: 1, fontVariant: ['tabular-nums'] }}>
+            <Typography
+              level='title-sm'
+              color='text.primary'
+              accessibilityLabel={counterSaid}
+              style={{ flex: 1, fontVariant: ['tabular-nums'] }}
+            >
               {counter}
             </Typography>
             {/*
@@ -442,6 +464,16 @@ export function StudySession() {
              */}
             {speech.canSpeak ? <SpeakToggle speaking={speech.speaking} onPress={speech.toggle} /> : null}
             <MarkToggle card={current} />
+            {/*
+             * Ask about THIS card (MOB-086). The context is handed over rather
+             * than put in the route: it carries the card's answer, and a
+             * learner's card text does not belong in a URL.
+             *
+             * The chat is pushed, so this session stays mounted behind it —
+             * back returns to the same card, the same face and the same queue,
+             * which is the whole reason the control is here rather than on Home.
+             */}
+            <AskToggle onPress={() => openChat()} />
           </Stack>
 
           {/*

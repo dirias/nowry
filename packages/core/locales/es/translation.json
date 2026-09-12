@@ -1470,7 +1470,8 @@
           "body": "Marca una tarjeta mientras estudias y la encontrarás aquí."
         }
       },
-      "showAnswer": "Ver respuesta"
+      "showAnswer": "Ver respuesta",
+      "cardShort": "{{current}} / {{total}}"
     },
     "deleteModal": {
       "title": "Eliminar mazo",
@@ -2868,7 +2869,8 @@
       "remaining_one": "Queda {{count}} mensaje este mes",
       "remaining_other": "Quedan {{count}} mensajes este mes",
       "failed": "Ese mensaje no se envió. Tu texto sigue aquí.",
-      "ask": "Preguntar"
+      "ask": "Preguntar",
+      "about": "Sobre «{{card}}»."
     },
     "personality": {
       "error": {

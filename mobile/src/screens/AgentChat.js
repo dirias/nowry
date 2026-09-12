@@ -39,6 +39,7 @@ import { agentService } from '@nowry/core/api/services'
 import { chatHistory, plainReply, replyText } from '@nowry/core/domain/agentChat'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { isOfflineError } from '@nowry/core/utils/formUtils'
+import { takeAskContext } from './askContext'
 import { useAppearance, useTheme } from '../theme'
 import { Button, Card, Icon, Input, PetOrb, Screen, Stack, Typography, useKeyboardClearance, useKeyboardHeight } from '../ui'
 
@@ -52,6 +53,15 @@ export function AgentChat() {
   const { accent } = useAppearance()
   const pet = usePetState()
 
+  /*
+   * What this conversation is ABOUT, taken once on mount (MOB-086). Taken
+   * rather than read, so the card belongs to this opening of the chat: coming
+   * back later from Home must not inherit a card someone was looking at then.
+   * Held in state so the same card grounds every turn of the conversation, not
+   * only the first — the web's `viewContext` follows the screen for the same
+   * reason.
+   */
+  const [context] = useState(takeAskContext)
   const [turns, setTurns] = useState([])
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
@@ -83,7 +93,7 @@ export function AgentChat() {
     setDraft('')
 
     try {
-      const response = await agentService.chat(message, chatHistory(turns), null, i18n?.language ?? 'en')
+      const response = await agentService.chat(message, chatHistory(turns), context, i18n?.language ?? 'en')
       /* The companion answers in markdown and this client has no renderer for
          it, so the markers come off rather than onto the screen. */
       setTurns([...asked, { from: AGENT, text: plainReply(replyText(response)) }])
@@ -99,7 +109,7 @@ export function AgentChat() {
     } finally {
       setSending(false)
     }
-  }, [draft, sending, spent, turns, i18n, t, pet])
+  }, [draft, sending, spent, turns, context, i18n, t, pet])
 
   return (
     /*
@@ -140,8 +150,10 @@ export function AgentChat() {
           {turns.length === 0 ? (
             <Stack spacing={1} style={{ paddingTop: theme.spacing[3] }}>
               <Typography level='title-sm'>{t('agent.chat.empty.title')}</Typography>
+              {/* Said, when there is a card. A chat that is silently grounded
+                  is one whose answers read as guesses. */}
               <Typography level='body-sm' color='text.tertiary'>
-                {t('agent.chat.empty.body')}
+                {context?.front ? t('agent.chat.about', { card: context.front }) : t('agent.chat.empty.body')}
               </Typography>
             </Stack>
           ) : (
