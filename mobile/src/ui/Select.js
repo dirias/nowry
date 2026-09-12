@@ -53,6 +53,7 @@ export function Select({ value, options, onChange, placeholderKey = null, invali
             paddingHorizontal: theme.spacing[1.5],
             justifyContent: 'center',
             borderRadius: theme.radius.md,
+            ...(inSheet && open ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : null),
             borderWidth: 1,
             borderColor: resolveColor(theme, invalid ? 'danger.plainColor' : 'neutral.outlinedBorder'),
             backgroundColor: resolveColor(theme, 'background.surface')
@@ -65,13 +66,20 @@ export function Select({ value, options, onChange, placeholderKey = null, invali
         </Typography>
       </Pressable>
 
-      {/* In a sheet: the list is part of the field, under the trigger. */}
+      {/*
+       * In a sheet the list is part of the FIELD, so it joins the trigger
+       * rather than floating under it: no gap, square where they meet, one
+       * border around both. Two separated boxes read as two controls, which is
+       * what the first build looked like — a deck name in one and a list of
+       * decks in another.
+       */}
       {inSheet && open ? (
         <View
           style={{
-            marginTop: 6,
+            marginTop: -1,
             maxHeight: 220,
-            borderRadius: theme.radius.md,
+            borderBottomLeftRadius: theme.radius.md,
+            borderBottomRightRadius: theme.radius.md,
             borderWidth: 1,
             borderColor: resolveColor(theme, 'neutral.outlinedBorder'),
             backgroundColor: resolveColor(theme, 'background.surface'),
