@@ -158,6 +158,27 @@ describe('every screen can be reached', () => {
   })
 })
 
+/**
+ * Screens that deliberately have no app bar: before you are signed in there is
+ * no account to show, the OAuth callback is a redirect with nothing on it, and
+ * the two harness screens exist to render primitives with no chrome around them.
+ */
+const CHROMELESS = ['(auth)', 'oauthredirect', 'harness', 'probe']
+
+describe('every screen has a way back', () => {
+  /*
+   * The app bar belongs to the tab group, and the back control belongs to the
+   * app bar. A route outside that group therefore has no bar, no account and
+   * nothing to return with except the system gesture — invisible on Android and
+   * an edge swipe on iOS. `/settings` shipped that way (MOB-053).
+   */
+  it.each(routeFiles.map((file) => path.relative(APP, file)).sort())('%s is inside the tab group', (relative) => {
+    const first = relative.split(path.sep)[0].replace(/\.js$/, '')
+    const inside = first === '(tabs)' || CHROMELESS.includes(first)
+    expect(inside ? relative : `${relative} — outside (tabs), so it has no app bar and no way back`).toEqual(relative)
+  })
+})
+
 describe('the route tree', () => {
   it('was actually read', () => {
     expect(PATTERNS.length).toBeGreaterThan(10)

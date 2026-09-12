@@ -62,7 +62,15 @@ export default function TabsLayout() {
           tabBarActiveTintColor: resolveColor(theme, 'primary.plainColor'),
           tabBarInactiveTintColor: resolveColor(theme, 'text.tertiary'),
           tabBarStyle: {
-            backgroundColor: resolveColor(theme, 'background.surface'),
+            /*
+             * `level1`, not `surface`. In light mode the page is #ffffff and
+             * `surface` is #f9f9f9 — a step so small that the bar had no ground
+             * of its own and read as four icons floating on the page, which is
+             * what "you can see the background of the app" meant. A navigation
+             * bar is chrome and has to look like a different layer from the
+             * content it sits under, on both schemes (MOB-053).
+             */
+            backgroundColor: resolveColor(theme, 'background.level1'),
             borderTopColor: resolveColor(theme, 'divider'),
             // The bar grows by the inset rather than moving up by it, so its
             // ground still reaches the bottom of the window and the system
@@ -92,9 +100,11 @@ export default function TabsLayout() {
           name='pomodoro'
           options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
         />
-        {/* A route, not a tab: the app bar's account opens it from anywhere,
-            and inside the group so the bar stays under it. */}
+        {/* Routes, not tabs: the app bar's account opens Profile from anywhere
+            and Profile opens Settings, and both sit inside the group so the bar
+            stays under them. */}
         <Tabs.Screen name='profile' options={{ href: null }} />
+        <Tabs.Screen name='settings' options={{ href: null }} />
       </Tabs>
     </ScreenChromeProvider>
   )

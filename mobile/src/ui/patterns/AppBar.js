@@ -19,7 +19,7 @@
  */
 import { Image, Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
+import { useRouter, useSegments } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
@@ -30,10 +30,31 @@ import { Icon } from '../icons'
 export const APP_BAR_HEIGHT = 56
 const AVATAR = 32
 
+/**
+ * Routes that live in the tab group but are pushed rather than tabbed, so they
+ * are one level deep even though their path is only two segments.
+ */
+const PUSHED_IN_TABS = ['profile', 'settings', 'annual-planning']
+
+/**
+ * Whether this screen was reached from another one.
+ *
+ * Read off the ROUTE rather than asked of the navigator, because the navigator
+ * would say yes on a tab root too: switching tabs is history, and a back arrow
+ * on Home pointing at whichever tab you came from is not what a back arrow
+ * means. A tab's root is its first two segments; anything deeper was pushed.
+ */
+const isPushed = (segments) => {
+  if (segments[0] !== '(tabs)') return true
+  if (segments.length > 2) return true
+  return PUSHED_IN_TABS.includes(segments[1])
+}
+
 export function AppBar() {
   const { t } = useTranslation()
   const theme = useTheme()
   const router = useRouter()
+  const segments = useSegments()
   const insets = useSafeAreaInsets()
   const { user } = useAuth()
   const { profile } = useUserProfile()
@@ -53,6 +74,28 @@ export function AppBar() {
         backgroundColor: resolveColor(theme, 'primary.solidBg')
       }}
     >
+      {/*
+       * The way back, where a thumb reaches for it.
+       *
+       * Most screens had none: the goal, the area, the deck, the card editor
+       * and settings were all reached by a push and left only the system
+       * gesture to return, which is invisible on Android and an edge swipe on
+       * iOS. Material would drop the wordmark beside it on a detail screen;
+       * this keeps it, because every phone artboard draws the mark in this bar
+       * and the row has the width for both.
+       */}
+      {isPushed(segments) && router.canGoBack() ? (
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole='button'
+          accessibilityLabel={t('common.goBack')}
+          hitSlop={8}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, marginLeft: -theme.spacing[1] })}
+        >
+          <Icon name='ArrowLeft' size='md' color='primary.solidColor' />
+        </Pressable>
+      ) : null}
+
       {/* One name, read once: the glyph is decorative beside the word. */}
       <View
         accessibilityRole='header'
