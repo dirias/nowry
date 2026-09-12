@@ -105,7 +105,14 @@ const tableBlock = (node) => ({
 const blockFor = (node) => {
   switch (node?.type) {
     case 'heading':
-      return { type: 'heading', level: Number(String(node.tag ?? 'h2').replace('h', '')) || 2, spans: spansOf(node) }
+      /*
+       * `text` beside the spans, because a heading is two things: something to
+       * draw, and the NAME of a section. The reading pointer is a heading's
+       * plain words — that is what the web writes as `last_section` — so a
+       * reader that had only the spans would have to re-derive it and could
+       * derive it differently (MOB-067).
+       */
+      return { type: 'heading', level: Number(String(node.tag ?? 'h2').replace('h', '')) || 2, spans: spansOf(node), text: plain(node) }
     case 'paragraph': {
       const spans = spansOf(node)
       // An empty paragraph is spacing in the editor and noise in a reader — but

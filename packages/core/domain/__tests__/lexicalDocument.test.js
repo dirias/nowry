@@ -125,3 +125,34 @@ describe('reading a document body', () => {
     expect(documentWordCount(blocks)).toBe(5)
   })
 })
+
+describe("a heading's plain text (MOB-067)", () => {
+  const doc = (nodes) => JSON.stringify({ root: { children: nodes } })
+  const heading = (children, tag = 'h2') => ({ type: 'heading', tag, children })
+
+  it('names the section beside the spans that draw it', () => {
+    const { blocks } = readDocument(doc([heading([{ type: 'text', text: 'Grammar' }])]))
+    expect(blocks[0]).toMatchObject({ type: 'heading', text: 'Grammar' })
+    expect(blocks[0].spans).toHaveLength(1)
+  })
+
+  it('joins a heading split across formatted runs, which is how the editor stores emphasis', () => {
+    const { blocks } = readDocument(
+      doc([
+        heading([
+          { type: 'text', text: 'The ' },
+          { type: 'text', text: 'kanji', format: 1 },
+          { type: 'text', text: ' list' }
+        ])
+      ])
+    )
+    // The pointer is a heading's WORDS, so it must not depend on how the editor
+    // happened to split them.
+    expect(blocks[0].text).toBe('The kanji list')
+  })
+
+  it('is an empty string for a heading with nothing in it', () => {
+    const { blocks } = readDocument(doc([heading([])]))
+    expect(blocks[0].text).toBe('')
+  })
+})

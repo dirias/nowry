@@ -34,6 +34,7 @@ import {
   kindOf,
   pickContinue,
   readingPage,
+  resumeHref,
   sortDocuments,
   tagCounts
 } from '@nowry/core/domain/books/libraryQuery'
@@ -62,7 +63,13 @@ export function BookLibrary() {
 
   const when = (value) => (value ? new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(new Date(value)) : '')
 
-  const open = (book) => router.push(`/book/${book._id}`)
+  /*
+   * Where you were, not the top. `resumeHref` is the shared answer — the
+   * section for a written document, the page for an import — and the phone
+   * pushed a bare `/book/<id>`, so a reader who stopped halfway started again
+   * at the beginning even though the pointer was saved (MOB-067).
+   */
+  const open = (book) => router.push(resumeHref(book))
 
   if (error) {
     return (

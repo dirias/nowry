@@ -22,13 +22,23 @@
  * `scroll` is on by default. At 200% font scale almost everything scrolls, and a
  * screen that assumed it fit is a screen with unreachable content.
  */
+import { forwardRef } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../theme'
 import { useScreenEdges } from './screenChrome'
 import { resolveColor } from './Typography'
 
-export function Screen({ children, scroll = true, padding = 3, edges, style, contentContainerStyle, ...rest }) {
+/*
+ * A ref reaches the SCROLL VIEW, not the outer frame. A screen that needs one
+ * needs it to scroll itself — the reader resuming at a saved section is the
+ * first — and handing back the keyboard-avoiding wrapper would give a caller
+ * something with no `scrollTo` on it (MOB-067).
+ */
+export const Screen = forwardRef(function Screen(
+  { children, scroll = true, padding = 3, edges, style, contentContainerStyle, ...rest },
+  ref
+) {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   // Which edges are still this screen's to inset for. See `screenChrome.js`.
@@ -46,6 +56,7 @@ export function Screen({ children, scroll = true, padding = 3, edges, style, con
 
   const body = scroll ? (
     <ScrollView
+      ref={ref}
       style={{ flex: 1 }}
       contentContainerStyle={[{ flexGrow: 1 }, pad, contentContainerStyle]}
       keyboardShouldPersistTaps='handled'
@@ -54,7 +65,7 @@ export function Screen({ children, scroll = true, padding = 3, edges, style, con
       {children}
     </ScrollView>
   ) : (
-    <View style={[{ flex: 1 }, pad, contentContainerStyle]} {...rest}>
+    <View ref={ref} style={[{ flex: 1 }, pad, contentContainerStyle]} {...rest}>
       {children}
     </View>
   )
@@ -69,6 +80,6 @@ export function Screen({ children, scroll = true, padding = 3, edges, style, con
       {body}
     </KeyboardAvoidingView>
   )
-}
+})
 
 export default Screen

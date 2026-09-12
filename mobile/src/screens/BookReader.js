@@ -16,6 +16,17 @@
  * phone does instead is the thing a phone is good for — read it, and turn it
  * into cards.
  *
+ * **It keeps your place.** The web writes `last_section` as the reader scrolls
+ * past a heading, and the library's continue object reads it back; the phone
+ * read documents and never wrote it, so a session on the phone left no trace
+ * and the web resumed wherever it had last been itself (MOB-067). The write
+ * path is `createPointerSaver` — one request per five seconds, flushed on leave
+ * — because both clients must write the pointer the same way. Which heading you
+ * are under is `readingPointer` beside this file, tested without a device.
+ *
+ * A document that is not yours is read and never written: there is no pointer
+ * to keep on somebody else's copy.
+ *
  * **It also reads a document that is not yours.** `?public=1` loads it through
  * `GET /public/books/{id}`, which returns the whole document, so the catalogue
  * can be read rather than only acquired (MOB-066). What it cannot do is
@@ -23,8 +34,8 @@
  * document the server expects you to own, so a public read offers the copy
  * instead — take it, and it is yours to work with.
  */
-import { useMemo, useState } from 'react'
-import { Linking, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AppState, Linking, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
@@ -32,17 +43,19 @@ import { queryClient } from '@nowry/core/api/queryClient'
 import { booksService, publicContentService } from '@nowry/core/api/services'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { documentWordCount, readDocument } from '@nowry/core/domain/books/lexicalDocument'
+import { createPointerSaver } from '@nowry/core/domain/books/pointerSaver'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useTheme } from '../theme'
 import { resolveColor } from '../ui/Typography'
 import { MakeCardsSheet } from './MakeCards'
+import { activeHeading, inDocumentOrder, offsetForSection } from './readingPointer'
 import { Button, Divider, Icon, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
 
 /** The tiers whose accounts can generate; `free` cannot, and is not told so. */
 const CAN_GENERATE = ['plus', 'pro']
 
 export function BookReader() {
-  const { bookId, public: asPublic } = useLocalSearchParams()
+  const { bookId, public: asPublic, section } = useLocalSearchParams()
   const { t, i18n } = useTranslation()
   const language = i18n?.language ?? 'en'
   const theme = useTheme()
@@ -73,6 +86,60 @@ export function BookReader() {
   const document = useMemo(() => readDocument(data?.full_content), [data])
   const words = useMemo(() => documentWordCount(document.blocks), [document])
 
+  /*
+   * Where each heading was laid out, keyed by its block index because
+   * `onLayout` fires per block and out of order.
+   */
+  const headings = useRef({})
+  const scroller = useRef(null)
+  const viewport = useRef(0)
+  const resumed = useRef(false)
+
+  /*
+   * The pointer's write path, for a document that is yours. It lives for the
+   * life of the screen and flushes twice: when the app stops being frontmost,
+   * which on a phone is how a reading session usually ends, and on unmount.
+   */
+  const pointer = useRef(null)
+  useEffect(() => {
+    if (!id || isPublic) return undefined
+    const saver = createPointerSaver((patch) => booksService.update(id, patch).catch(() => {}))
+    pointer.current = saver
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') saver.flush()
+    })
+    return () => {
+      subscription.remove()
+      saver.flush()
+      saver.dispose()
+      pointer.current = null
+    }
+  }, [id, isPublic])
+
+  const onHeadingLayout = useCallback((index, text, y) => {
+    headings.current[index] = { y, text }
+  }, [])
+
+  const onScroll = useCallback((event) => {
+    const { contentOffset, layoutMeasurement } = event.nativeEvent
+    viewport.current = layoutMeasurement?.height ?? viewport.current
+    const under = activeHeading(inDocumentOrder(headings.current), contentOffset?.y ?? 0, viewport.current)
+    if (under) pointer.current?.set({ last_section: under })
+  }, [])
+
+  /*
+   * Resume, once. The offsets arrive over the first frames, so this runs on
+   * every scroll-layout until it finds the section — and then never again, so
+   * a reader who scrolls away is not dragged back.
+   */
+  const onContentSizeChange = useCallback(() => {
+    if (resumed.current || !section) return
+    const offset = offsetForSection(inDocumentOrder(headings.current), String(section))
+    if (offset === null) return
+    resumed.current = true
+    scroller.current?.scrollTo({ y: offset, animated: false })
+  }, [section])
+
   if (isLoading && !data) {
     return (
       <Screen>
@@ -102,7 +169,15 @@ export function BookReader() {
   }
 
   return (
-    <Screen>
+    <Screen
+      ref={scroller}
+      onScroll={onScroll}
+      onContentSizeChange={onContentSizeChange}
+      // Four a second is enough to name the heading you are under and cheap
+      // enough not to matter; the write behind it coalesces to one request per
+      // five seconds anyway.
+      scrollEventThrottle={250}
+    >
       <Stack spacing={3}>
         <Stack spacing={1}>
           <Typography level='h4' accessibilityRole='header'>
@@ -163,7 +238,7 @@ export function BookReader() {
         ) : (
           <Stack spacing={2}>
             {document.blocks.map((block, index) => (
-              <Block key={index} block={block} theme={theme} t={t} />
+              <Block key={index} block={block} theme={theme} t={t} index={index} onHeadingLayout={onHeadingLayout} />
             ))}
           </Stack>
         )}
@@ -177,11 +252,19 @@ export function BookReader() {
 /** The heading levels this reader draws, capped at the type scale's own top. */
 const HEADING_LEVELS = { 1: 'h3', 2: 'h4', 3: 'title-lg', 4: 'title-md', 5: 'title-sm', 6: 'title-sm' }
 
-function Block({ block, theme, t }) {
+function Block({ block, theme, t, index, onHeadingLayout }) {
   switch (block.type) {
     case 'heading':
       return (
-        <Typography level={HEADING_LEVELS[block.level] ?? 'title-md'} accessibilityRole='header'>
+        <Typography
+          level={HEADING_LEVELS[block.level] ?? 'title-md'}
+          accessibilityRole='header'
+          /* Where this heading sits, so the pointer knows which one the reader
+             is under. `block.text` is the plain text the web writes too — the
+             pointer is a heading's WORDS, not an id, which is what lets a
+             document written on one client resume on the other. */
+          onLayout={(event) => onHeadingLayout?.(index, block.text, event.nativeEvent.layout.y)}
+        >
           <Spans spans={block.spans} level={HEADING_LEVELS[block.level] ?? 'title-md'} />
         </Typography>
       )
