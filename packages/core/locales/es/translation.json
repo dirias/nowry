@@ -178,7 +178,8 @@
       "historyKept": "Historial conservado",
       "restoreAria": "Restaurar {{name}}",
       "dueIn": "En {{hours}} h",
-      "newCount": "{{count}} nuevas"
+      "newCount_one": "{{count}} nueva",
+      "newCount_other": "{{count}} nuevas"
     },
     "views": {
       "dashboard": "Panel",
@@ -186,7 +187,8 @@
     },
     "today": {
       "title": "Hoy",
-      "reviewed": "{{count}} repasadas",
+      "reviewed_one": "{{count}} repasada",
+      "reviewed_other": "{{count}} repasadas",
       "beforeMidnight": "· estudia antes de medianoche",
       "allDone": "Todo hecho",
       "progress": "{{done}} de {{total}} hechas hoy",
@@ -230,7 +232,8 @@
     "due": "para hoy",
     "allReviewed": "Todo revisado",
     "empty": {
-      "streakLabel": "Racha de {{count}} día(s)",
+      "streakLabel_one": "Racha de {{count}} día",
+      "streakLabel_other": "Racha de {{count}} días",
       "allDone": "Todo al día",
       "weeklyCards": "{{count}} revisada(s) hoy",
       "streakZeroLabel": "Comienza tu racha hoy",
@@ -242,7 +245,8 @@
       "recent": "Recientes",
       "showAll": "Ver los {{count}}",
       "decksReadout": "{{decks}} mazos · {{cards}} tarjetas",
-      "deckCount": "{{count}} mazos",
+      "deckCount_one": "{{count}} mazo",
+      "deckCount_other": "{{count}} mazos",
       "yourDecks": "Tus mazos"
     },
     "deckPill": {
@@ -262,7 +266,8 @@
         "description": "Look through every card — no grading, no schedule changes"
       }
     },
-    "dueCount": "{{count}} pendientes",
+    "dueCount_one": "{{count}} pendiente",
+    "dueCount_other": "{{count}} pendientes",
     "dates": {
       "today": "Hoy",
       "yesterday": "Ayer",

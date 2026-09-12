@@ -23,7 +23,7 @@ import { deckCounts } from './deckTypes'
 
 /**
  * @param {{ decks?: Array, statistics?: Object }} sources
- * @returns {{ due: number, fresh: number, asked: number, total: number, reviewedToday: number, streak: number, progress: number }}
+ * @returns {{ due: number, fresh: number, asked: number, total: number, dayTotal: number, reviewedToday: number, streak: number, progress: number }}
  */
 export const studySummary = ({ decks, statistics } = {}) => {
   let due = 0
@@ -47,6 +47,14 @@ export const studySummary = ({ decks, statistics } = {}) => {
     fresh,
     asked,
     total,
+    /**
+     * The whole of today: what is still asked plus what is already answered.
+     * `total` above is every card the learner owns, which is a different
+     * number and the reason this one is named rather than re-derived at a call
+     * site — "{{done}} of {{total}} done today" was two different totals in the
+     * two clients until it was (MOB-062).
+     */
+    dayTotal: done,
     reviewedToday,
     streak: statistics?.summary?.current_streak ?? 0,
     /**

@@ -34,6 +34,7 @@ import {
   DeckRow,
   Divider,
   ForecastStrip,
+  Icon,
   Readout,
   SectionHeader,
   SessionRow,
@@ -45,6 +46,8 @@ import {
 
 /** Enough to answer "what did I just do", not a history page. */
 const RECENT_COUNT = 3
+/** The web's short session, offered only when the day is longer than it. */
+const QUICK_SIZE = 10
 /** Up-to-date decks are reference; the rest are behind one key. */
 const UP_TO_DATE_PREVIEW = 3
 
@@ -105,6 +108,17 @@ export function StudyDashboard() {
   const dueTomorrow = future[0]?.due ?? 0
   const dueWeek = future.reduce((sum, d) => sum + (d.due || 0), 0)
 
+  /**
+   * The web's own three cases: no streak at all, a live streak, and a live
+   * streak with nothing done yet — which is the one that says the day is still
+   * open and closes at midnight.
+   */
+  const streakLine = () => {
+    if (today.streak <= 0) return t('study.empty.streakZeroLabel')
+    const label = t('study.empty.streakLabel', { count: today.streak })
+    return today.reviewedToday === 0 && today.asked > 0 ? `${label} ${t('study.today.beforeMidnight')}` : label
+  }
+
   const shownUpToDate = showAllUpToDate ? upToDate : upToDate.slice(0, UP_TO_DATE_PREVIEW)
   const openDeck = (deck) => router.push(`/study/deck/${deck._id ?? deck.id}`)
 
@@ -129,13 +143,29 @@ export function StudyDashboard() {
               <Readout leading>{today.asked === 0 ? t('study.today.allDone') : t('study.dueCount', { count: today.due })}</Readout>
               {today.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: today.fresh })}</Readout> : null}
               <Readout>{t('study.today.reviewed', { count: today.reviewedToday })}</Readout>
-              <Readout>
-                {today.streak > 0 ? t('study.empty.streakLabel', { count: today.streak }) : t('study.empty.streakZeroLabel')}
-              </Readout>
+              {/*
+               * The streak carries the web's flame and the web's nudge. Both
+               * were missing: the readout was the bare count, so a live streak
+               * and a dead one looked identical, and "study before midnight" —
+               * the one line that says the streak is about to break — was never
+               * shown at all (MOB-062).
+               */}
+              <Stack direction='row' spacing={0.5} alignItems='center'>
+                <Icon name='Flame' size='sm' color={today.streak > 0 ? 'warning.plainColor' : 'text.tertiary'} />
+                <Readout>{streakLine()}</Readout>
+              </Stack>
             </>
           )
         }
         empty={!loading && !statsError && (list ?? []).length === 0 ? t('study.today.emptySentence') : null}
+        aside={
+          loading || (weekly.length === 0 && future.length === 0) ? null : (
+            <Stack spacing={1}>
+              <ForecastStrip past={weekly} today={today.asked} future={future} />
+              <Readout>{t('study.today.weekReadout', { reviewed: reviewedWeek, tomorrow: dueTomorrow, week: dueWeek })}</Readout>
+            </Stack>
+          )
+        }
         action={
           (list ?? []).length === 0 ? null : (
             <Button size='md' onPress={() => router.push(`/study/${DAILY_REVIEW}`)} accessibilityLabel={t('study.startStudying')}>
@@ -143,14 +173,26 @@ export function StudyDashboard() {
             </Button>
           )
         }
+        /*
+         * The web's one secondary, and only when it means something: a day of
+         * twenty-four is worth cutting to ten, a day of six is not. It was
+         * absent here, so the only way into a short session was to start the
+         * long one and stop (MOB-062).
+         */
+        secondary={
+          today.asked > QUICK_SIZE ? (
+            <Button
+              size='md'
+              variant='secondary'
+              onPress={() => router.push(`/study/${DAILY_REVIEW}?limit=${QUICK_SIZE}`)}
+              accessibilityLabel={t('study.today.quickAria', { count: QUICK_SIZE })}
+            >
+              {t('study.today.quick', { count: QUICK_SIZE })}
+            </Button>
+          ) : null
+        }
+        progressLabel={loading || statsError ? null : t('study.today.progress', { done: today.reviewedToday, total: today.dayTotal })}
       />
-
-      {loading ? null : weekly.length > 0 || future.length > 0 ? (
-        <Stack spacing={1}>
-          <ForecastStrip past={weekly} today={today.asked} future={future} />
-          <Readout>{t('study.today.weekReadout', { reviewed: reviewedWeek, tomorrow: dueTomorrow, week: dueWeek })}</Readout>
-        </Stack>
-      ) : null}
 
       {statsError ? (
         <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
@@ -160,7 +202,13 @@ export function StudyDashboard() {
 
       {gap}
 
-      <SectionHeader title={t('study.sections.dueNow')} count={t('study.sections.deckCount', { count: asking.length })} />
+      {/* The web's own readout: how many decks AND how many cards, because
+          "3 decks" does not say whether today is ten minutes or an hour. This
+          was the deck count alone (MOB-062). */}
+      <SectionHeader
+        title={t('study.sections.dueNow')}
+        count={t('study.sections.decksReadout', { decks: asking.length, cards: today.asked })}
+      />
       {decks.loading ? (
         <Stack spacing={1}>
           <Skeleton width='100%' height={56} />
@@ -183,8 +231,10 @@ export function StudyDashboard() {
         <>
           {gap}
           <SectionHeader
+            /* A bare "1" beside a heading is a number with no noun. The web
+               says "1 deck" here, in the phrase five locales already have. */
             title={t('study.sections.upToDate')}
-            count={String(upToDate.length)}
+            count={t('study.sections.deckCount', { count: upToDate.length })}
             action={
               upToDate.length > UP_TO_DATE_PREVIEW && !showAllUpToDate ? (
                 <Button size='sm' variant='secondary' onPress={() => setShowAllUpToDate(true)}>
@@ -202,31 +252,36 @@ export function StudyDashboard() {
         </>
       ) : null}
 
-      {sessions === null || sessions.length > 0 ? (
-        <>
-          {gap}
-          <SectionHeader title={t('study.sections.recent')} />
-          {sessions === null ? (
-            <Skeleton width='100%' height={56} />
-          ) : (
-            sessions.map(sessionLine).map((session, index) => (
-              <View key={session.id ?? index}>
-                <Divider />
-                <SessionRow
-                  title={session.title || t('sessions.unknownTopic')}
-                  meta={[
-                    t(session.kindKey),
-                    t('sessions.cardCount', { count: session.cards }),
-                    t('study.dates.minutes', { count: session.minutes })
-                  ].join(' · ')}
-                  when={relativeDay(t, session.completedAt)}
-                  score={session.score}
-                />
-              </View>
-            ))
-          )}
-        </>
-      ) : null}
+      {/* Empty is the section with its sentence in it, not a missing section
+          (ADR-021 §1). Hiding it made "what did I just do" a question the page
+          answered by having no answer anywhere. */}
+      <>
+        {gap}
+        <SectionHeader title={t('study.sections.recent')} />
+        {sessions === null ? (
+          <Skeleton width='100%' height={56} />
+        ) : sessions.length === 0 ? (
+          <Typography level='body-sm' color='text.tertiary'>
+            {t('sessions.emptyHint')}
+          </Typography>
+        ) : (
+          sessions.map(sessionLine).map((session, index) => (
+            <View key={session.id ?? index}>
+              <Divider />
+              <SessionRow
+                title={session.title || t('sessions.unknownTopic')}
+                meta={[
+                  t(session.kindKey),
+                  t('sessions.cardCount', { count: session.cards }),
+                  t('study.dates.minutes', { count: session.minutes })
+                ].join(' · ')}
+                when={relativeDay(t, session.completedAt)}
+                score={session.score}
+              />
+            </View>
+          ))
+        )}
+      </>
     </Stack>
   )
 }

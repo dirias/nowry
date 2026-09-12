@@ -67,7 +67,8 @@
     "aiQuiz": "Quiz IA",
     "cardCount_one": "{{count}} carte",
     "cardCount_other": "{{count}} cartes",
-    "unknownTopic": "Sujet inconnu"
+    "unknownTopic": "Sujet inconnu",
+    "emptyHint": "Terminez une session d'étude pour la voir ici"
   },
   "common": {
     "loadMore": "Charger plus",
@@ -186,7 +187,8 @@
     },
     "today": {
       "title": "Aujourd'hui",
-      "reviewed": "{{count}} révisées",
+      "reviewed_one": "{{count}} révisée",
+      "reviewed_other": "{{count}} révisées",
       "beforeMidnight": "· révisez avant minuit",
       "allDone": "Tout est fait",
       "progress": "{{done}} sur {{total}} faites aujourd’hui",
@@ -242,7 +244,8 @@
       "restoreAria": "Restaurer {{name}}",
       "dueIn": "Dans {{hours}} h",
       "mastery": "Maîtrise",
-      "newCount": "{{count}} nouveau"
+      "newCount_one": "{{count}} nouvelle",
+      "newCount_other": "{{count}} nouvelles"
     },
     "sections": {
       "dueNow": "À revoir",
@@ -250,7 +253,8 @@
       "recent": "Récent",
       "showAll": "Voir les {{count}}",
       "decksReadout": "{{decks}} paquets · {{cards}} cartes",
-      "deckCount": "{{count}} paquets",
+      "deckCount_one": "{{count}} paquet",
+      "deckCount_other": "{{count}} paquets",
       "needingReview": "Decks à réviser",
       "weeklyMomentum": "Dynamique hebdomadaire",
       "weeklyMomentumSubtitle": "{{count}} cartes cette semaine",
@@ -285,13 +289,15 @@
     "empty": {
       "caughtUpTitle": "Tout est à jour !",
       "caughtUpSubtitle": "Aucun deck ne nécessite de révision pour l'instant.",
-      "streakLabel": "Série de {{count}} jour(s)",
+      "streakLabel_one": "Série de {{count}} jour",
+      "streakLabel_other": "Série de {{count}} jours",
       "allDone": "Tout est à jour",
       "weeklyCards": "{{count}} révisé(s) aujourd'hui",
       "streakZeroLabel": "Commencez votre série aujourd'hui",
       "noDecks": "Ajoutez un paquet et Nowry commencera à le planifier pour vous."
     },
-    "dueCount": "{{count}} à revoir"
+    "dueCount_one": "{{count}} à revoir",
+    "dueCount_other": "{{count}} à revoir"
   },
   "auth": {
     "welcomeBack": "Bon retour",

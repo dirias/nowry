@@ -189,7 +189,8 @@
     },
     "today": {
       "title": "Today",
-      "reviewed": "{{count}} reviewed",
+      "reviewed_one": "{{count}} reviewed",
+      "reviewed_other": "{{count}} reviewed",
       "beforeMidnight": "· study before midnight",
       "allDone": "All done",
       "progress": "{{done}} of {{total}} done today",
@@ -238,7 +239,8 @@
       "restoreAria": "Restore {{name}}",
       "dueIn": "Due in {{hours}}h",
       "mastery": "Mastery",
-      "newCount": "{{count}} new"
+      "newCount_one": "{{count}} new",
+      "newCount_other": "{{count}} new"
     },
     "sections": {
       "dueNow": "Due now",
@@ -246,7 +248,8 @@
       "recent": "Recent",
       "showAll": "Show all {{count}}",
       "decksReadout": "{{decks}} decks · {{cards}} cards",
-      "deckCount": "{{count}} decks",
+      "deckCount_one": "{{count}} deck",
+      "deckCount_other": "{{count}} decks",
       "needingReview": "Decks Needing Review",
       "weeklyMomentum": "Weekly Momentum",
       "weeklyMomentumSubtitle": "{{count}} cards this week",
@@ -289,13 +292,15 @@
     "empty": {
       "caughtUpTitle": "You're all caught up!",
       "caughtUpSubtitle": "No decks need review right now.",
-      "streakLabel": "{{count}}-day streak",
+      "streakLabel_one": "{{count}}-day streak",
+      "streakLabel_other": "{{count}}-day streak",
       "allDone": "All caught up",
       "weeklyCards": "{{count}} reviewed today",
       "streakZeroLabel": "Start your streak today",
       "noDecks": "Add a deck and Nowry starts scheduling it for you."
     },
-    "dueCount": "{{count}} due"
+    "dueCount_one": "{{count}} due",
+    "dueCount_other": "{{count}} due"
   },
   "auth": {
     "welcomeBack": "Welcome Back",

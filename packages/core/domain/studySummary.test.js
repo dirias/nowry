@@ -46,10 +46,18 @@ describe('studySummary', () => {
       fresh: 0,
       asked: 0,
       total: 0,
+      dayTotal: 0,
       reviewedToday: 0,
       streak: 0,
       progress: 0
     })
+  })
+
+  it("names the whole day, so the two clients' progress readouts agree", () => {
+    // 7 answered plus 19 still asked. `total` is every card the learner owns,
+    // which is a different number — "{{done}} of {{total}} done today" read the
+    // wrong one until this was named (MOB-062).
+    expect(studySummary({ decks, statistics }).dayTotal).toBe(26)
   })
 
   it('reports progress as what is behind you out of the whole day', () => {

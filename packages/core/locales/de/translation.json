@@ -67,7 +67,8 @@
     "aiQuiz": "KI-Quiz",
     "cardCount_one": "{{count}} Karte",
     "cardCount_other": "{{count}} Karten",
-    "unknownTopic": "Unbekanntes Thema"
+    "unknownTopic": "Unbekanntes Thema",
+    "emptyHint": "Schließe eine Lernsitzung ab, um sie hier zu sehen"
   },
   "common": {
     "loadMore": "Mehr laden",
@@ -189,7 +190,8 @@
       "historyKept": "Verlauf erhalten",
       "restoreAria": "{{name}} wiederherstellen",
       "dueIn": "In {{hours}} h fällig",
-      "newCount": "{{count}} neu"
+      "newCount_one": "{{count}} neu",
+      "newCount_other": "{{count}} neu"
     },
     "views": {
       "dashboard": "Übersicht",
@@ -197,7 +199,8 @@
     },
     "today": {
       "title": "Heute",
-      "reviewed": "{{count}} wiederholt",
+      "reviewed_one": "{{count}} wiederholt",
+      "reviewed_other": "{{count}} wiederholt",
       "beforeMidnight": "· lerne vor Mitternacht",
       "allDone": "Alles erledigt",
       "progress": "{{done}} von {{total}} heute erledigt",
@@ -240,7 +243,8 @@
     "due": "fällig",
     "allReviewed": "Alles überprüft",
     "empty": {
-      "streakLabel": "{{count}}-Tage-Serie",
+      "streakLabel_one": "{{count}}-Tages-Serie",
+      "streakLabel_other": "{{count}}-Tage-Serie",
       "allDone": "Alles erledigt",
       "weeklyCards": "{{count}} heute wiederholt",
       "streakZeroLabel": "Starte deine Serie heute",
@@ -252,7 +256,8 @@
       "recent": "Zuletzt",
       "showAll": "Alle {{count}} zeigen",
       "decksReadout": "{{decks}} Stapel · {{cards}} Karten",
-      "deckCount": "{{count}} Stapel",
+      "deckCount_one": "{{count}} Stapel",
+      "deckCount_other": "{{count}} Stapel",
       "yourDecks": "Deine Decks"
     },
     "deckPill": {
@@ -272,7 +277,8 @@
         "description": "Look through every card — no grading, no schedule changes"
       }
     },
-    "dueCount": "{{count}} fällig",
+    "dueCount_one": "{{count}} fällig",
+    "dueCount_other": "{{count}} fällig",
     "dates": {
       "today": "Heute",
       "yesterday": "Gestern",

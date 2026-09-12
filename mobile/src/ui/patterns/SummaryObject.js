@@ -21,7 +21,18 @@ import { Stack } from '../Stack'
 import { Typography, resolveColor } from '../Typography'
 import { SUMMARY_EDGE_HEIGHT } from './rowSpec'
 
-export function SummaryObject({ title, context, readouts, action, secondary, progress = null, empty = null, style }) {
+export function SummaryObject({
+  title,
+  context,
+  readouts,
+  aside = null,
+  action,
+  secondary,
+  progress = null,
+  progressLabel = null,
+  empty = null,
+  style
+}) {
   const theme = useTheme()
   const showEdge = typeof progress === 'number'
 
@@ -53,11 +64,26 @@ export function SummaryObject({ title, context, readouts, action, secondary, pro
           </Stack>
         ) : null}
 
+        {/* The object's own figure, above its actions. The web draws it on a
+            right rail beside the title; at 390pt that rail is gone and the
+            figure takes the row the rail would have been. It is part of the
+            object either way — the study strip spent a release floating below
+            the card as if it belonged to the page (MOB-062). */}
+        {aside}
+
         {action || secondary ? (
           <Stack direction='row' spacing={1} alignItems='center'>
             {action}
             {secondary}
           </Stack>
+        ) : null}
+
+        {/* What the edge below means. A 3px line says a proportion and never
+            says of what. */}
+        {showEdge && progressLabel ? (
+          <Typography level='body-xs' color='text.tertiary' style={{ fontVariant: ['tabular-nums'] }}>
+            {progressLabel}
+          </Typography>
         ) : null}
       </View>
 

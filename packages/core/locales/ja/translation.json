@@ -59,7 +59,8 @@
     "deckQuiz": "デッキクイズ",
     "aiQuiz": "AIクイズ",
     "cardCount_other": "{{count}} 枚",
-    "unknownTopic": "トピック不明"
+    "unknownTopic": "トピック不明",
+    "emptyHint": "学習セッションを完了すると、ここに表示されます"
   },
   "common": {
     "loadMore": "さらに読み込む",
@@ -181,7 +182,7 @@
       "historyKept": "履歴は保持",
       "restoreAria": "{{name}} を復元",
       "dueIn": "{{hours}}時間後",
-      "newCount": "新規 {{count}} 枚"
+      "newCount_other": "新規 {{count}} 枚"
     },
     "views": {
       "dashboard": "ダッシュボード",
@@ -189,7 +190,7 @@
     },
     "today": {
       "title": "今日",
-      "reviewed": "{{count}}枚復習",
+      "reviewed_other": "{{count}}枚復習",
       "beforeMidnight": "· 深夜0時までに学習",
       "allDone": "すべて完了",
       "progress": "今日 {{total}} 枚中 {{done}} 枚完了",
@@ -232,7 +233,7 @@
     "due": "期限",
     "allReviewed": "すべて復習済み",
     "empty": {
-      "streakLabel": "{{count}}日連続",
+      "streakLabel_other": "{{count}}日連続",
       "allDone": "全て完了",
       "weeklyCards": "今日{{count}}枚復習済み",
       "streakZeroLabel": "今日から連続記録を始めよう",
@@ -244,7 +245,7 @@
       "recent": "最近",
       "showAll": "すべて表示 ({{count}})",
       "decksReadout": "{{decks}} デッキ · {{cards}} 枚",
-      "deckCount": "{{count}} デッキ",
+      "deckCount_other": "{{count}} デッキ",
       "yourDecks": "あなたのデッキ"
     },
     "deckPill": {
@@ -264,7 +265,7 @@
         "description": "Look through every card — no grading, no schedule changes"
       }
     },
-    "dueCount": "{{count}} 件",
+    "dueCount_other": "{{count}} 件",
     "dates": {
       "today": "今日",
       "yesterday": "昨日",

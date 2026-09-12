@@ -17,12 +17,12 @@ const BAR = 28
  * §5 — the first frame is the strip). The `aria-label` is the text
  * alternative PRD US-007 asks for; the cells themselves are decorative.
  *
- * @param {Array<{day: string, cards: number}>} past - statistics.weekly_progress (oldest first, today last)
+ * @param {Array<{date: string, day: string, cards: number}>} past - statistics.weekly_progress (oldest first, today last)
  * @param {number} today - cards asked of the learner today (due + new)
  * @param {Array<{date: string, due: number}>} future - forecast.days (tomorrow first)
  */
 export default function ForecastStrip({ past = [], today = 0, future = [] }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const pastDays = past.slice(0, -1) // the last entry of weekly_progress is today
   const max = Math.max(1, ...pastDays.map((d) => d.cards || 0), today, ...future.map((d) => d.due || 0))
   const height = (value) => (value > 0 ? Math.max(3, Math.round((value / max) * BAR)) : 3)
@@ -48,10 +48,17 @@ export default function ForecastStrip({ past = [], today = 0, future = [] }) {
     </Box>
   )
 
-  const initial = (label) => (label || '').trim().charAt(0).toUpperCase()
-  const weekday = (iso) => {
+  /*
+   * Every letter is formatted from the date, and none from the API. A weekly
+   * entry carries `day`, which the server writes as `"%A"[:3]` — an English
+   * abbreviation — and `date`, which a locale can actually format. Reading the
+   * first put "S M T W T F S" beside "D L M X J V S" on one strip in a Spanish
+   * app: the same seven weekdays in two languages, touching (MOB-062).
+   */
+  const weekday = (iso, fallback) => {
     const d = new Date(`${iso}T12:00:00`)
-    return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { weekday: 'narrow' })
+    if (Number.isNaN(d.getTime())) return (fallback || '').trim().charAt(0).toUpperCase()
+    return d.toLocaleDateString(i18n.language, { weekday: 'narrow' })
   }
 
   return (
@@ -60,8 +67,14 @@ export default function ForecastStrip({ past = [], today = 0, future = [] }) {
       aria-label={t('study.today.timelineAria', { reviewed: reviewedWeek, today, week: dueWeek })}
       sx={{ display: 'flex', alignItems: 'flex-end', gap: GAP, maxWidth: '100%' }}
     >
-      {pastDays.map((d, i) => cell(`p${i}`, d.cards || 0, d.cards > 0 ? 'background.level3' : 'background.level2', initial(d.day)))}
-      {cell('today', today, 'primary.solidBg', initial(past[past.length - 1]?.day) || t('study.today.todayInitial'), true)}
+      {pastDays.map((d, i) => cell(`p${i}`, d.cards || 0, d.cards > 0 ? 'background.level3' : 'background.level2', weekday(d.date, d.day)))}
+      {cell(
+        'today',
+        today,
+        'primary.solidBg',
+        weekday(past[past.length - 1]?.date, past[past.length - 1]?.day) || t('study.today.todayInitial'),
+        true
+      )}
       <Box aria-hidden='true' sx={{ width: '1px', alignSelf: 'stretch', bgcolor: 'divider', mx: 0.25 }} />
       {future.map((d, i) =>
         cell(`f${i}`, d.due || 0, d.due > 0 ? 'primary.softBg' : 'background.level2', weekday(d.date), false, d.due > 0)
