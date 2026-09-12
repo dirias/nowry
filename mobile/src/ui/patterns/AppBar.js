@@ -33,8 +33,14 @@ const AVATAR = 32
 /**
  * Routes that live in the tab group but are pushed rather than tabbed, so they
  * are one level deep even though their path is only two segments.
+ *
+ * `annual-planning` was in this list and is not a screen: it is a `Redirect`
+ * onto the Plan tab's second segment, so it never stays on screen to want a
+ * back control, and a redirect that asked for one would be asking on behalf of
+ * a tab root. Removed on the chrome pass, and `routes.test.js` now refuses a
+ * redirect in this list (MOB-072).
  */
-const PUSHED_IN_TABS = ['profile', 'settings', 'annual-planning']
+const PUSHED_IN_TABS = ['profile', 'settings']
 
 /**
  * Whether this screen was reached from another one.

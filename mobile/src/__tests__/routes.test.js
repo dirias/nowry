@@ -183,6 +183,32 @@ describe('every screen has a way back', () => {
   })
 })
 
+/**
+ * The app bar's list of routes that are pushed despite being two segments deep.
+ *
+ * A name in it must be a real screen. `annual-planning` was in it and is a
+ * `Redirect` onto a tab root: it never stays on screen to want a back control,
+ * and if it had rendered one it would have been offering a way back out of a
+ * tab (MOB-072).
+ */
+const pushedInTabs = () => {
+  const source = fs.readFileSync(path.join(ROOT, 'src/ui/patterns/AppBar.js'), 'utf8')
+  const block = source.slice(source.indexOf('const PUSHED_IN_TABS'))
+  return [...block.slice(0, block.indexOf(']')).matchAll(/'([^']+)'/g)].map((match) => match[1])
+}
+
+describe("the app bar's pushed routes", () => {
+  it.each(pushedInTabs())('%s is a route', (name) => {
+    expect(matches(`/${name}`) ? name : `${name} — named as pushed, but no route file matches it`).toEqual(name)
+  })
+
+  it.each(pushedInTabs())('%s is a screen, not a redirect', (name) => {
+    const file = routeFiles.find((candidate) => patternOf(candidate) === `/${name}`)
+    const source = fs.readFileSync(file, 'utf8')
+    expect(source.includes('<Redirect') ? `${name} — a redirect cannot be pushed; it has nowhere to go back to` : name).toEqual(name)
+  })
+})
+
 describe('the route tree', () => {
   it('was actually read', () => {
     expect(PATTERNS.length).toBeGreaterThan(10)
