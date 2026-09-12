@@ -34,10 +34,23 @@ export const AuthProvider = ({ children }) => {
       if (lang) {
         i18n.changeLanguage(lang)
       }
-    } catch {
-      // 401 here means the backend session is invalid despite a Firebase user existing.
-      // Clear state; the onAuthStateChanged null branch will handle redirect.
-      setUser(null)
+    } catch (error) {
+      /*
+       * Only the server saying no ends a session.
+       *
+       * This used to clear the user for ANY failure, and on a phone that is a
+       * different rule than it is in a browser: a request that never reached
+       * the server is a lift, a tunnel, or a laptop that changed Wi-Fi — not an
+       * invalid session. Signing someone out for it also defeats the offline
+       * work, because the persisted cache never gets a chance to serve what it
+       * has; the login screen arrives first.
+       *
+       * 401 and 403 are the backend's answer that this session is not valid.
+       * Everything else — no response at all, a 500, a timeout — leaves the
+       * Firebase session alone and keeps whatever profile was last known.
+       */
+      const status = error?.response?.status
+      if (status === 401 || status === 403) setUser(null)
     } finally {
       setLoading(false)
     }
