@@ -449,6 +449,23 @@ describe('session completion XP', () => {
     expect(mockFlushPendingLevelUp).toHaveBeenCalled()
   })
 
+  it('releases a banked level-up when the session is LEFT, not only when it is finished', async () => {
+    /*
+     * A learner who crosses a level and then backs out of the session used to
+     * keep the celebration in memory until their next completed session, or
+     * lose it to a reload. Leaving is stopping, which is the same reasoning
+     * the summary flush carries (PEND-001).
+     */
+    const cards = [{ _id: 'q1', id: 'q1', title: 'Only', content: 'A' }]
+    const view = renderSession({ cards })
+    await screen.findByText('Only')
+    expect(mockFlushPendingLevelUp).not.toHaveBeenCalled()
+
+    view.unmount()
+
+    expect(mockFlushPendingLevelUp).toHaveBeenCalled()
+  })
+
   it('survives a review response that carries no XP block', async () => {
     // grant_xp is fire-and-forget server-side: a failure there returns the
     // review without an xp block rather than failing the whole request.

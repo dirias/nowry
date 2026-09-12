@@ -542,9 +542,18 @@ export default function StudySession() {
       if (userId) queryClient.invalidateQueries({ queryKey: ['groups', userId] })
       setViewContext(null)
       resetCompanionSession()
+      /*
+       * A level-up banked mid-session is released here too, not only at the
+       * summary. Leaving the session IS stopping — the reasoning the summary
+       * flush carries applies identically — and without this a learner who
+       * crosses a level and then backs out keeps the celebration in memory
+       * until their next completed session, or loses it to a reload (PEND-001).
+       * The flush is a no-op when nothing is banked.
+       */
+      flushPendingLevelUp()
       if (interventionTimerRef.current) clearTimeout(interventionTimerRef.current)
     }
-  }, [userId, setViewContext, resetCompanionSession])
+  }, [userId, setViewContext, resetCompanionSession, flushPendingLevelUp])
 
   // Retry failed reviews in background
   useEffect(() => {

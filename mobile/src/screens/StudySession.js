@@ -31,12 +31,28 @@ import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
+import { bestLevelUp } from '@nowry/core/domain/petLevelUp'
 import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import { storage } from '@nowry/core'
+import { useAppearance } from '../theme'
 import { useCardSpeech } from '../hooks/useCardSpeech'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
-import { Button, Card, FlipCard, Icon, MarkToggle, Progress, Screen, Skeleton, SpeakToggle, Stack, SwipeArea, Typography } from '../ui'
+import {
+  Button,
+  Card,
+  FlipCard,
+  Icon,
+  MarkToggle,
+  PetLevelUp,
+  Progress,
+  Screen,
+  Skeleton,
+  SpeakToggle,
+  Stack,
+  SwipeArea,
+  Typography
+} from '../ui'
 
 /**
  * The action band is one constant height whichever face is up.
@@ -120,6 +136,11 @@ export function StudySession() {
   // The web shows its swipe affordance on the first card only, and drops it
   // the moment any gesture is used. A hint that stays is an instruction.
   const [hinted, setHinted] = useState(false)
+  // What the two XP grants at the end of the session reached, if anything.
+  const [levelUp, setLevelUp] = useState(null)
+  // The account's colour, already resolved for the whole app — the companion
+  // is the colour of the app it lives in (MOB-050).
+  const { accent } = useAppearance()
 
   const deckName = useRef(null)
   /*
@@ -223,10 +244,19 @@ export function StudySession() {
     Promise.allSettled([
       agentService.awardSessionXp(Math.min(500, answers.length), id === DAILY_REVIEW ? null : id),
       agentService.awardStreakXp()
-    ]).then(() => {
+    ]).then((results) => {
       // The panel on Home reads a cached level; a level earned here is a level
       // it is now wrong about.
       queryClient.invalidateQueries({ queryKey: ['pet'] })
+
+      /*
+       * The reply is the only place a level-up is ever announced — the server
+       * does not push, and the pet's state endpoint says where you are, never
+       * that you just arrived. This threw it away, so a level earned on the
+       * phone was silent (PEND-001). Either grant can cross the line and only
+       * the furthest one is shown: two celebrations for one session is a bug.
+       */
+      setLevelUp(bestLevelUp(results.map((result) => (result.status === 'fulfilled' ? result.value : null))))
     })
   }, [complete, id, graded])
 
@@ -349,6 +379,13 @@ export function StudySession() {
               {t('cards.session.syncing', { count: queued })}
             </Typography>
           ) : null}
+
+          {/* The companion, at the stage this session reached. It arrives a
+              moment after the summary does, because the grants are settled
+              rather than awaited — XP is a reward, and a reward that can hold
+              up the summary is a punishment. */}
+          {levelUp ? <PetLevelUp level={levelUp.level} stage={levelUp.stage} accent={accent} /> : null}
+
           <Button onPress={() => router.replace('/study')}>{t('cards.session.complete.backToLibrary')}</Button>
         </Stack>
       </Screen>

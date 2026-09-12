@@ -36,6 +36,7 @@ import DeckSelector from './DeckSelector'
 import QuizSummaryCard from './QuizSummaryCard'
 import PetMarkdown from './PetMarkdown'
 import { quizService } from '@nowry/core/api/services/quizService'
+import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 // The stage table is shared: the phone draws the same companion, and a stage
 // table inside one client's orb is that client's private pet (MOB-050).
 import { STAGE_CONFIG } from '@nowry/core/domain/petStages'
@@ -1278,9 +1279,28 @@ const StudyPet = () => {
     }
   }, [])
 
+  /**
+   * Enter sends; Shift+Enter breaks a line (PEND-002).
+   *
+   * This was deliberately the other way round — "Enter = newline (default
+   * textarea behaviour — send is button-only)" — and it is the wrong default
+   * for a chat. Every chat the user already has open does the opposite: Slack,
+   * Discord, ChatGPT, Messages. Nowry's pet chat is a chat.
+   *
+   * Two things the rule has to survive:
+   *
+   * - **A touch keyboard has no Shift+Enter**, and its return key is expected
+   *   to make a new line. So on a coarse pointer the old behaviour stands and
+   *   the send button remains the way to send. Read at keypress rather than
+   *   cached, because a tablet with a keyboard attached changes answer.
+   * - **An IME is mid-word.** Enter commits a candidate in Japanese, Chinese
+   *   and Korean input; sending there would post half a word and is the single
+   *   most common way this change goes wrong.
+   */
   const handleKeyDown = (e) => {
-    // Enter = newline (default textarea behaviour — send is button-only)
-    // Shift+Enter also works naturally as a second newline
+    if (!shouldSendOnKey(e, { coarsePointer: hasCoarsePointer() })) return
+    e.preventDefault()
+    handleSend()
   }
 
   // Track message limit reached state: triggered by 429 (context error) or usage reaching limit
