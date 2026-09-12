@@ -3,7 +3,7 @@
     "title": "グループ",
     "readout": "{{system}} + {{tags}} タグ",
     "readoutUntagged_other": "タグなし{{count}}枚",
-    "untaggedLinkAria": "タグのない{{count}}枚のカードを表示",
+    "untaggedLinkAria_other": "タグのない{{count}}枚のカードを表示",
     "struggling": "苦手",
     "marked": "マーク済み",
     "strugglingMeta": "過去{{days}}日間に「もう一度」または「難しい」と評価",
@@ -60,7 +60,8 @@
     "aiQuiz": "AIクイズ",
     "cardCount_other": "{{count}} 枚",
     "unknownTopic": "トピック不明",
-    "emptyHint": "学習セッションを完了すると、ここに表示されます"
+    "emptyHint": "学習セッションを完了すると、ここに表示されます",
+    "viewAll_other": "他{{count}}件のセッションを表示"
   },
   "common": {
     "loadMore": "さらに読み込む",
@@ -196,7 +197,7 @@
       "progress": "今日 {{total}} 枚中 {{done}} 枚完了",
       "study": "学習 · {{count}}",
       "quick": "クイック {{count}}",
-      "quickAria": "{{count}}枚の短いセッションを学習する",
+      "quickAria_other": "{{count}}枚の短いセッションを学習する",
       "browse": "閲覧",
       "weekReadout": "{{reviewed}}枚復習 · 明日 {{tomorrow}}枚 · 今週 {{week}}枚",
       "timelineAria": "過去7日間の復習、今日、今後7日間の予定: 今週 {{reviewed}}枚復習、今日 {{today}}枚、今後7日間で {{week}}枚",
@@ -227,15 +228,15 @@
       "noDecks": "{{type}}のデッキはまだありません"
     },
     "startReview": "毎日の復習を始める",
-    "reviewMsg": "復習が必要なカードが{{count}}枚あります",
+    "reviewMsg_other": "復習が必要なカードが{{count}}枚あります",
     "startStudying": "学習を始める",
-    "viewAll": "全{{count}}デッキを表示 →",
+    "viewAll_other": "全{{count}}デッキを表示 →",
     "due": "期限",
     "allReviewed": "すべて復習済み",
     "empty": {
       "streakLabel_other": "{{count}}日連続",
       "allDone": "全て完了",
-      "weeklyCards": "今日{{count}}枚復習済み",
+      "weeklyCards_other": "今日{{count}}枚復習済み",
       "streakZeroLabel": "今日から連続記録を始めよう",
       "noDecks": "デッキを追加すると、Nowry がスケジュールを組み始めます。"
     },
@@ -246,7 +247,8 @@
       "showAll": "すべて表示 ({{count}})",
       "decksReadout": "{{decks}} デッキ · {{cards}} 枚",
       "deckCount_other": "{{count}} デッキ",
-      "yourDecks": "あなたのデッキ"
+      "yourDecks": "あなたのデッキ",
+      "weeklyMomentumSubtitle_other": "今週{{count}}枚"
     },
     "deckPill": {
       "ariaLabel": "{{name}}を学習",
@@ -475,7 +477,7 @@
       "validation": {
         "title": "まだ準備ができていません",
         "missingInterests": "続けるには、トピックを1つ以上選んでください。",
-        "tooManyInterests": "トピックが {{count}} 件選ばれています。{{max}} 件以下にするため、{{excess}} 件外してください。",
+        "tooManyInterests_other": "トピックが {{count}} 件選ばれています。{{max}} 件以下にするため、{{excess}} 件外してください。",
         "missingGoal": "続けるには、学習目標を1つ選んでください。"
       },
       "saveError": {
@@ -1170,7 +1172,8 @@
         "milestone": "マイルストーン",
         "activity": "習慣"
       }
-    }
+    },
+    "eventCount_other": "{{count}}件の予定"
   },
   "about": {
     "title": "Nowryについて",
@@ -1557,7 +1560,7 @@
       "dailyRoutineBtn": "日課",
       "yearlyPriorities": "年間優先事項",
       "noPrioritiesAdded": "まだ優先事項が追加されていません",
-      "viewAllPriorities": "{{count}}件の優先事項をすべて表示 →",
+      "viewAllPriorities_other": "{{count}}件の優先事項をすべて表示 →",
       "reviewNow": "今すぐレビュー",
       "quarterEndedOn": "第{{quarter}}四半期は {{date}} に終了しました",
       "quarterEndsToday": "第{{quarter}}四半期は本日終了します",
@@ -2012,7 +2015,7 @@
       "regenerating": "再生成中...",
       "animationGenerating": "コンパニオンをアニメーション化しています...",
       "regenerateAriaLabel": "コンパニオンのポートレートを再生成",
-      "generationsRemaining": "今月残り{{count}}回",
+      "generationsRemaining_other": "今月残り{{count}}回",
       "upgradePlus": "Plusにアップグレード",
       "upgradePlusAriaLabel": "AIポートレートを解放するにはPlusにアップグレード",
       "species": {
@@ -2141,6 +2144,9 @@
         "flashcards": "カード",
         "quizzes": "クイズ",
         "visual": "ビジュアル"
+      },
+      "nextReview": {
+        "inDays_other": "{{count}}日後"
       }
     },
     "generatedCards": {
@@ -2215,7 +2221,7 @@
       "complete": {
         "outsideFilter_other": "タグフィルターの外に、復習待ちのカードがあと{{count}}枚あります。",
         "title": "セッション完了",
-        "body": "{{count}} 枚のカードを復習しました。お疲れさまでした。",
+        "body_other": "{{count}} 枚のカードを復習しました。お疲れさまでした。",
         "backToLibrary": "ライブラリに戻る"
       },
       "tagFilter": {
@@ -2376,7 +2382,7 @@
       "tag": "タグ",
       "tagAria": "選択したカードにタグを付ける",
       "unmark": "マークを外す",
-      "all": "{{count}}枚すべてを選択",
+      "all_other": "{{count}}枚すべてを選択",
       "newTag": "新しいタグ…",
       "moveOne": "移動…",
       "editTags": "タグ…",
@@ -2390,7 +2396,9 @@
       "confirm_other": "{{count}}枚を移動"
     },
     "newCard": "新しいカード",
-    "newDeck": "新しいデッキ"
+    "newDeck": "新しいデッキ",
+    "dueLabel_other": "{{count}}件",
+    "studyNew_other": "学習（新規{{count}}枚）"
   },
   "subscription": {
     "title": "Subscription & Billing",
@@ -2622,7 +2630,7 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{total}}枚中{{count}}枚のカードを生成しました",
-      "progressAuto": "{{count}}枚のカードを生成しました...",
+      "progressAuto_other": "{{count}}枚のカードを生成しました...",
       "generating": "カードを生成中...",
       "retry": "再試行",
       "retryAria": "カード生成を再試行",
@@ -2868,7 +2876,9 @@
         "s0": "ノートを読んでいます...",
         "s1": "残すべき考えを探しています...",
         "s2": "カードに変換しています..."
-      }
+      },
+      "selectedNodes_other": "選択した{{count}}個のノードから",
+      "success_other": "{{count}}枚のカードを{{deckName}}に追加しました"
     }
   },
   "calendarPage": {
@@ -3080,5 +3090,13 @@
   },
   "errors": {
     "offline": "オフラインのようです。入力は保持されています。電波が戻ったらもう一度お試しください。"
+  },
+  "comments": {
+    "moreNotesAriaLabel_other": "下に{{count}}件のメモを表示"
+  },
+  "focusBar": {
+    "daysLeft_other": "残り{{count}}日",
+    "daysRemaining_other": "残り{{count}}日",
+    "overdueBy_other": "{{count}}日遅れ"
   }
 }

@@ -4,7 +4,8 @@
     "readout": "{{system}} + {{tags}} etiquetas",
     "readoutUntagged_one": "{{count}} tarjeta sin etiqueta",
     "readoutUntagged_other": "{{count}} tarjetas sin etiqueta",
-    "untaggedLinkAria": "Mostrar las {{count}} tarjetas sin etiqueta",
+    "untaggedLinkAria_one": "Mostrar {{count}} tarjeta sin etiqueta",
+    "untaggedLinkAria_other": "Mostrar las {{count}} tarjetas sin etiqueta",
     "struggling": "Difíciles",
     "marked": "Marcadas",
     "strugglingMeta": "Calificadas otra vez o difícil en los últimos {{days}} días",
@@ -194,7 +195,8 @@
       "progress": "{{done}} de {{total}} hechas hoy",
       "study": "Estudiar · {{count}}",
       "quick": "Rápido {{count}}",
-      "quickAria": "Estudiar una sesión corta de {{count}} tarjetas",
+      "quickAria_one": "Estudiar una sesión corta de {{count}} tarjeta",
+      "quickAria_other": "Estudiar una sesión corta de {{count}} tarjetas",
       "browse": "Explorar",
       "weekReadout": "{{reviewed}} repasadas · {{tomorrow}} para mañana · {{week}} esta semana",
       "timelineAria": "Siete días repasados, hoy y siete días por vencer: {{reviewed}} repasadas esta semana, {{today}} para hoy, {{week}} en los próximos siete días",
@@ -226,16 +228,19 @@
       "noDecks": "No hay mazos de {{type}}"
     },
     "startReview": "Comienza tu Repaso Diario",
-    "reviewMsg": "Tienes {{count}} tarjetas listas para repasar",
+    "reviewMsg_one": "Tienes {{count}} tarjeta lista para repasar",
+    "reviewMsg_other": "Tienes {{count}} tarjetas listas para repasar",
     "startStudying": "Empezar a Estudiar",
-    "viewAll": "Ver todos los {{count}} mazos →",
+    "viewAll_one": "Ver {{count}} mazo →",
+    "viewAll_other": "Ver todos los {{count}} mazos →",
     "due": "para hoy",
     "allReviewed": "Todo revisado",
     "empty": {
       "streakLabel_one": "Racha de {{count}} día",
       "streakLabel_other": "Racha de {{count}} días",
       "allDone": "Todo al día",
-      "weeklyCards": "{{count}} revisada(s) hoy",
+      "weeklyCards_one": "{{count}} revisada hoy",
+      "weeklyCards_other": "{{count}} revisadas hoy",
       "streakZeroLabel": "Comienza tu racha hoy",
       "noDecks": "Añade un mazo y Nowry empezará a programarlo por ti."
     },
@@ -247,7 +252,9 @@
       "decksReadout": "{{decks}} mazos · {{cards}} tarjetas",
       "deckCount_one": "{{count}} mazo",
       "deckCount_other": "{{count}} mazos",
-      "yourDecks": "Tus mazos"
+      "yourDecks": "Tus mazos",
+      "weeklyMomentumSubtitle_one": "{{count}} tarjeta esta semana",
+      "weeklyMomentumSubtitle_other": "{{count}} tarjetas esta semana"
     },
     "deckPill": {
       "ariaLabel": "Estudiar {{name}}",
@@ -478,7 +485,8 @@
       "validation": {
         "title": "Todavía no está listo",
         "missingInterests": "Elige al menos un tema para continuar.",
-        "tooManyInterests": "Tienes {{count}} temas seleccionados. Quita {{excess}} para continuar con {{max}} o menos.",
+        "tooManyInterests_one": "Tienes {{count}} tema seleccionado. Quita {{excess}} para continuar con {{max}} o menos.",
+        "tooManyInterests_other": "Tienes {{count}} temas seleccionados. Quita {{excess}} para continuar con {{max}} o menos.",
         "missingGoal": "Elige un objetivo de estudio para continuar."
       },
       "saveError": {
@@ -1019,7 +1027,9 @@
         "milestone": "Hito",
         "activity": "Hábito"
       }
-    }
+    },
+    "eventCount_one": "{{count}} evento",
+    "eventCount_other": "{{count}} eventos"
   },
   "books": {
     "lib": {
@@ -1279,10 +1289,12 @@
     "confirmDeleteCard": "¿Estás seguro de que quieres eliminar esta tarjeta?",
     "deleteCardError": "Error al eliminar la tarjeta. Inténtalo de nuevo.",
     "studyDue": "Estudiar ({{count}})",
-    "studyNew": "Aprender ({{count}} nuevas)",
+    "studyNew_one": "Aprender ({{count}} nueva)",
+    "studyNew_other": "Aprender ({{count}} nuevas)",
     "preview": "Vista previa",
     "noCardsYet": "Sin tarjetas aún",
-    "dueLabel": "{{count}} pendiente",
+    "dueLabel_one": "{{count}} pendiente",
+    "dueLabel_other": "{{count}} pendientes",
     "typeLabels": {
       "card": "Tarjeta",
       "cards": "Tarjetas",
@@ -1333,7 +1345,8 @@
         "inHours_one": "En {{count}} hora",
         "inHours_other": "En {{count}} horas",
         "tomorrow": "Mañana",
-        "inDays": "En {{count}} días"
+        "inDays_one": "En {{count}} día",
+        "inDays_other": "En {{count}} días"
       },
       "empty": {
         "decks": {
@@ -1409,7 +1422,8 @@
       "exitFullscreen": "Salir de pantalla completa",
       "complete": {
         "title": "¡Sesión completa!",
-        "body": "Revisaste {{count}} tarjetas. ¡Buen trabajo!",
+        "body_one": "Revisaste {{count}} tarjeta. ¡Buen trabajo!",
+        "body_other": "Revisaste {{count}} tarjetas. ¡Buen trabajo!",
         "backToLibrary": "Volver a la biblioteca",
         "cardsReviewed": "tarjetas revisadas",
         "needsAttentionLabel": "necesitan más práctica",
@@ -1561,7 +1575,8 @@
       "tag": "Etiqueta",
       "tagAria": "Etiquetar las tarjetas seleccionadas",
       "unmark": "Desmarcar",
-      "all": "Seleccionar las {{count}}",
+      "all_one": "Seleccionar {{count}}",
+      "all_other": "Seleccionar las {{count}}",
       "newTag": "Nueva etiqueta…",
       "moveOne": "Mover a…",
       "editTags": "Etiquetas…",
@@ -2077,7 +2092,8 @@
       "focusAreas": "Áreas de Enfoque",
       "yearlyPriorities": "Prioridades Anuales",
       "noPrioritiesAdded": "Aún no se han agregado prioridades",
-      "viewAllPriorities": "Ver las {{count}} prioridades →",
+      "viewAllPriorities_one": "Ver {{count}} prioridad →",
+      "viewAllPriorities_other": "Ver las {{count}} prioridades →",
       "progress": "Progreso",
       "save": "Guardar",
       "quarterEndedOn": "El trimestre {{quarter}} terminó el {{date}}",
@@ -2186,10 +2202,13 @@
       "routine": "Rutina"
     },
     "overdue": "Atrasado",
-    "daysLeft": "{{count}} días restantes",
+    "daysLeft_one": "{{count}} día restante",
+    "daysLeft_other": "{{count}} días restantes",
     "noDeadline": "Sin fecha límite",
-    "overdueBy": "{{count}} días de retraso",
-    "daysRemaining": "{{count}} días restantes",
+    "overdueBy_one": "{{count}} día de retraso",
+    "overdueBy_other": "{{count}} días de retraso",
+    "daysRemaining_one": "{{count}} día restante",
+    "daysRemaining_other": "{{count}} días restantes",
     "noDeadlineEntity": "{{entity}} • Sin fecha límite",
     "choosePrioritiesTooltip": "Elegir prioridades para mostrar",
     "noPrioritiesYet": "Aún no hay prioridades",
@@ -2398,7 +2417,8 @@
     "unresolveAriaLabel": "Reabrir la nota",
     "resolvedLabel": "Resuelta",
     "moreNotes": "{{count}} más",
-    "moreNotesAriaLabel": "Mostrar {{count}} notas más abajo",
+    "moreNotesAriaLabel_one": "Mostrar {{count}} nota más abajo",
+    "moreNotesAriaLabel_other": "Mostrar {{count}} notas más abajo",
     "unanchoredGroupTitle": "Notas sin anclaje ({{count}})",
     "time": {
       "justNow": "Ahora mismo",
@@ -2797,7 +2817,8 @@
     "totalCount": "{{count}} en total",
     "aiQuiz": "Quiz con IA",
     "deckQuiz": "Quiz de baraja",
-    "viewAll": "Ver {{count}} sesiones más",
+    "viewAll_one": "Ver {{count}} sesión más",
+    "viewAll_other": "Ver {{count}} sesiones más",
     "showLess": "Ver menos",
     "expandAria": "Expandir detalles de la sesión",
     "collapseAria": "Colapsar detalles de la sesión",
@@ -3038,7 +3059,8 @@
       "regenerating": "Regenerando...",
       "animationGenerating": "Animando a tu compañero...",
       "regenerateAriaLabel": "Regenerar retrato del compañero",
-      "generationsRemaining": "{{count}} restantes este mes",
+      "generationsRemaining_one": "{{count}} restante este mes",
+      "generationsRemaining_other": "{{count}} restantes este mes",
       "upgradePlus": "Actualizar a Plus",
       "upgradePlusAriaLabel": "Actualiza a Plus para desbloquear retratos IA",
       "species": {
@@ -3227,7 +3249,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{count}} de {{total}} tarjetas generadas",
-      "progressAuto": "{{count}} tarjetas generadas...",
+      "progressAuto_one": "{{count}} tarjeta generada...",
+      "progressAuto_other": "{{count}} tarjetas generadas...",
       "generating": "Generando tarjetas...",
       "retry": "Reintentar",
       "retryAria": "Reintentar la generación de tarjetas",
@@ -3474,7 +3497,11 @@
         "s0": "Leyendo tus notas...",
         "s1": "Buscando las ideas que vale la pena guardar...",
         "s2": "Convirtiéndolas en tarjetas..."
-      }
+      },
+      "selectedNodes_one": "De {{count}} nodo seleccionado",
+      "selectedNodes_other": "De {{count}} nodos seleccionados",
+      "success_one": "{{count}} tarjeta añadida a {{deckName}}",
+      "success_other": "{{count}} tarjetas añadidas a {{deckName}}"
     }
   },
   "calendarPage": {

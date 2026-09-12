@@ -4,7 +4,8 @@
     "readout": "{{system}} + {{tags}} Tags",
     "readoutUntagged_one": "{{count}} Karte ohne Tag",
     "readoutUntagged_other": "{{count}} Karten ohne Tag",
-    "untaggedLinkAria": "Die {{count}} Karten ohne Tag anzeigen",
+    "untaggedLinkAria_one": "Die {{count}} Karte ohne Tag anzeigen",
+    "untaggedLinkAria_other": "Die {{count}} Karten ohne Tag anzeigen",
     "struggling": "Schwierig",
     "marked": "Markiert",
     "strugglingMeta": "In den letzten {{days}} Tagen mit „nochmal“ oder „schwer“ bewertet",
@@ -68,7 +69,9 @@
     "cardCount_one": "{{count}} Karte",
     "cardCount_other": "{{count}} Karten",
     "unknownTopic": "Unbekanntes Thema",
-    "emptyHint": "Schließe eine Lernsitzung ab, um sie hier zu sehen"
+    "emptyHint": "Schließe eine Lernsitzung ab, um sie hier zu sehen",
+    "viewAll_one": "{{count}} weitere Sitzung ansehen",
+    "viewAll_other": "{{count}} weitere Sitzungen ansehen"
   },
   "common": {
     "loadMore": "Mehr laden",
@@ -206,7 +209,8 @@
       "progress": "{{done}} von {{total}} heute erledigt",
       "study": "Lernen · {{count}}",
       "quick": "Kurz {{count}}",
-      "quickAria": "Eine kurze Sitzung mit {{count}} Karten lernen",
+      "quickAria_one": "Eine kurze Sitzung mit {{count}} Karte lernen",
+      "quickAria_other": "Eine kurze Sitzung mit {{count}} Karten lernen",
       "browse": "Durchsehen",
       "weekReadout": "{{reviewed}} wiederholt · {{tomorrow}} morgen fällig · {{week}} diese Woche",
       "timelineAria": "Sieben Tage wiederholt, heute und sieben Tage fällig: {{reviewed}} diese Woche wiederholt, {{today}} heute fällig, {{week}} in den nächsten sieben Tagen",
@@ -237,16 +241,19 @@
       "noDecks": "Keine {{type}}-Decks"
     },
     "startReview": "Beginne deine tägliche Überprüfung",
-    "reviewMsg": "Du hast {{count}} Karten zur Überprüfung bereit",
+    "reviewMsg_one": "Du hast {{count}} Karte zur Überprüfung bereit",
+    "reviewMsg_other": "Du hast {{count}} Karten zur Überprüfung bereit",
     "startStudying": "Lernen beginnen",
-    "viewAll": "Alle {{count}} Decks anzeigen →",
+    "viewAll_one": "{{count}} Stapel anzeigen →",
+    "viewAll_other": "Alle {{count}} Stapel anzeigen →",
     "due": "fällig",
     "allReviewed": "Alles überprüft",
     "empty": {
       "streakLabel_one": "{{count}}-Tages-Serie",
       "streakLabel_other": "{{count}}-Tage-Serie",
       "allDone": "Alles erledigt",
-      "weeklyCards": "{{count}} heute wiederholt",
+      "weeklyCards_one": "{{count}} heute wiederholt",
+      "weeklyCards_other": "{{count}} heute wiederholt",
       "streakZeroLabel": "Starte deine Serie heute",
       "noDecks": "Füge einen Stapel hinzu und Nowry plant ihn für dich."
     },
@@ -258,7 +265,9 @@
       "decksReadout": "{{decks}} Stapel · {{cards}} Karten",
       "deckCount_one": "{{count}} Stapel",
       "deckCount_other": "{{count}} Stapel",
-      "yourDecks": "Deine Decks"
+      "yourDecks": "Deine Decks",
+      "weeklyMomentumSubtitle_one": "{{count}} Karte diese Woche",
+      "weeklyMomentumSubtitle_other": "{{count}} Karten diese Woche"
     },
     "deckPill": {
       "ariaLabel": "Lernen {{name}}",
@@ -489,7 +498,8 @@
       "validation": {
         "title": "Noch nicht bereit",
         "missingInterests": "Wähle mindestens ein Thema, um fortzufahren.",
-        "tooManyInterests": "Du hast {{count}} Themen ausgewählt. Entferne {{excess}}, um mit höchstens {{max}} fortzufahren.",
+        "tooManyInterests_one": "Du hast {{count}} Thema ausgewählt. Entferne {{excess}}, um mit höchstens {{max}} fortzufahren.",
+        "tooManyInterests_other": "Du hast {{count}} Themen ausgewählt. Entferne {{excess}}, um mit höchstens {{max}} fortzufahren.",
         "missingGoal": "Wähle ein Lernziel, um fortzufahren."
       },
       "saveError": {
@@ -1026,7 +1036,9 @@
         "milestone": "Meilenstein",
         "activity": "Gewohnheit"
       }
-    }
+    },
+    "eventCount_one": "{{count}} Termin",
+    "eventCount_other": "{{count}} Termine"
   },
   "about": {
     "title": "Über Nowry",
@@ -1423,7 +1435,8 @@
       "dailyRoutineBtn": "Tagesablauf",
       "yearlyPriorities": "Jahresprioritäten",
       "noPrioritiesAdded": "Noch keine Prioritäten hinzugefügt",
-      "viewAllPriorities": "Alle {{count}} Prioritäten anzeigen →",
+      "viewAllPriorities_one": "{{count}} Priorität anzeigen →",
+      "viewAllPriorities_other": "Alle {{count}} Prioritäten anzeigen →",
       "quarterEndedOn": "Quartal {{quarter}} endete am {{date}}",
       "quarterEndsToday": "Quartal {{quarter}} endet heute",
       "quarterEndingIn": "Quartal {{quarter}} endet in {{count}} Tag",
@@ -1887,7 +1900,8 @@
       "regenerating": "Wird regeneriert...",
       "animationGenerating": "Dein Begleiter wird animiert...",
       "regenerateAriaLabel": "Begleiter-Porträt regenerieren",
-      "generationsRemaining": "{{count}} übrig diesen Monat",
+      "generationsRemaining_one": "{{count}} übrig diesen Monat",
+      "generationsRemaining_other": "{{count}} übrig diesen Monat",
       "upgradePlus": "Auf Plus upgraden",
       "upgradePlusAriaLabel": "Upgrade auf Plus, um KI-Porträts freizuschalten",
       "species": {
@@ -2019,6 +2033,10 @@
         "flashcards": "Karten",
         "quizzes": "Quiz",
         "visual": "Visuell"
+      },
+      "nextReview": {
+        "inDays_one": "In {{count}} Tag",
+        "inDays_other": "In {{count}} Tagen"
       }
     },
     "import": {
@@ -2185,7 +2203,8 @@
         "outsideFilter_one": "{{count}} weitere fällige Karte liegt außerhalb deines Tag-Filters.",
         "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters.",
         "title": "Sitzung abgeschlossen!",
-        "body": "Du hast {{count}} Karten wiederholt. Gut gemacht!",
+        "body_one": "Du hast {{count}} Karte wiederholt. Gut gemacht!",
+        "body_other": "Du hast {{count}} Karten wiederholt. Gut gemacht!",
         "backToLibrary": "Zurück zur Bibliothek"
       },
       "labels": {
@@ -2262,7 +2281,8 @@
       "tag": "Taggen",
       "tagAria": "Ausgewählte Karten taggen",
       "unmark": "Markierung entfernen",
-      "all": "Alle {{count}} auswählen",
+      "all_one": "{{count}} auswählen",
+      "all_other": "Alle {{count}} auswählen",
       "newTag": "Neuer Tag…",
       "moveOne": "Verschieben nach…",
       "editTags": "Tags bearbeiten…",
@@ -2281,7 +2301,11 @@
       "confirm_other": "{{count}} Karten verschieben"
     },
     "newCard": "Neue Karte",
-    "newDeck": "Neuer Stapel"
+    "newDeck": "Neuer Stapel",
+    "dueLabel_one": "{{count}} fällig",
+    "dueLabel_other": "{{count}} fällig",
+    "studyNew_one": "Lernen ({{count}} neu)",
+    "studyNew_other": "Lernen ({{count}} neu)"
   },
   "books": {
     "title": "Bücher",
@@ -2694,7 +2718,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{count}} von {{total}} Karten erstellt",
-      "progressAuto": "{{count}} Karten erstellt...",
+      "progressAuto_one": "{{count}} Karte erstellt...",
+      "progressAuto_other": "{{count}} Karten erstellt...",
       "generating": "Karten werden erstellt...",
       "retry": "Erneut versuchen",
       "retryAria": "Kartenerstellung erneut versuchen",
@@ -2940,7 +2965,11 @@
         "s0": "Deine Notizen werden gelesen...",
         "s1": "Die wichtigen Ideen werden gesucht...",
         "s2": "Sie werden in Karten umgewandelt..."
-      }
+      },
+      "selectedNodes_one": "Aus {{count}} ausgewähltem Knoten",
+      "selectedNodes_other": "Aus {{count}} ausgewählten Knoten",
+      "success_one": "{{count}} Karte zu {{deckName}} hinzugefügt",
+      "success_other": "{{count}} Karten zu {{deckName}} hinzugefügt"
     }
   },
   "calendarPage": {
@@ -3153,5 +3182,17 @@
   },
   "errors": {
     "offline": "Du scheinst offline zu sein. Nichts ist verloren — versuch es erneut, sobald du Empfang hast."
+  },
+  "comments": {
+    "moreNotesAriaLabel_one": "{{count}} weitere Notiz unten anzeigen",
+    "moreNotesAriaLabel_other": "{{count}} weitere Notizen unten anzeigen"
+  },
+  "focusBar": {
+    "daysLeft_one": "Noch {{count}} Tag",
+    "daysLeft_other": "Noch {{count}} Tage",
+    "daysRemaining_one": "Noch {{count}} Tag",
+    "daysRemaining_other": "Noch {{count}} Tage",
+    "overdueBy_one": "{{count}} Tag überfällig",
+    "overdueBy_other": "{{count}} Tage überfällig"
   }
 }

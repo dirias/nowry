@@ -4,7 +4,8 @@
     "readout": "{{system}} + {{tags}} étiquettes",
     "readoutUntagged_one": "{{count}} carte sans étiquette",
     "readoutUntagged_other": "{{count}} cartes sans étiquette",
-    "untaggedLinkAria": "Afficher les {{count}} cartes sans étiquette",
+    "untaggedLinkAria_one": "Afficher {{count}} carte sans étiquette",
+    "untaggedLinkAria_other": "Afficher les {{count}} cartes sans étiquette",
     "struggling": "Difficiles",
     "marked": "Marquées",
     "strugglingMeta": "Notées « encore » ou « difficile » ces {{days}} derniers jours",
@@ -68,7 +69,9 @@
     "cardCount_one": "{{count}} carte",
     "cardCount_other": "{{count}} cartes",
     "unknownTopic": "Sujet inconnu",
-    "emptyHint": "Terminez une session d'étude pour la voir ici"
+    "emptyHint": "Terminez une session d'étude pour la voir ici",
+    "viewAll_one": "Voir {{count}} session de plus",
+    "viewAll_other": "Voir {{count}} sessions de plus"
   },
   "common": {
     "loadMore": "Charger plus",
@@ -194,7 +197,8 @@
       "progress": "{{done}} sur {{total}} faites aujourd’hui",
       "study": "Étudier · {{count}}",
       "quick": "Rapide {{count}}",
-      "quickAria": "Étudier une courte session de {{count}} cartes",
+      "quickAria_one": "Étudier une courte session de {{count}} carte",
+      "quickAria_other": "Étudier une courte session de {{count}} cartes",
       "browse": "Parcourir",
       "weekReadout": "{{reviewed}} révisées · {{tomorrow}} à revoir demain · {{week}} cette semaine",
       "timelineAria": "Sept jours révisés, aujourd’hui et sept jours à venir : {{reviewed}} révisées cette semaine, {{today}} à revoir aujourd’hui, {{week}} dans les sept prochains jours",
@@ -225,9 +229,11 @@
       "noDecks": "Pas de paquets {{type}}"
     },
     "startReview": "Commencez votre révision quotidienne",
-    "reviewMsg": "Vous avez {{count}} cartes prêtes à être révisées",
+    "reviewMsg_one": "Vous avez {{count}} carte prête à être révisée",
+    "reviewMsg_other": "Vous avez {{count}} cartes prêtes à être révisées",
     "startStudying": "Commencer à étudier",
-    "viewAll": "Voir tous les {{count}} paquets →",
+    "viewAll_one": "Voir {{count}} paquet →",
+    "viewAll_other": "Voir tous les {{count}} paquets →",
     "due": "à faire",
     "allReviewed": "Tout révisé",
     "tabs": {
@@ -257,7 +263,8 @@
       "deckCount_other": "{{count}} paquets",
       "needingReview": "Decks à réviser",
       "weeklyMomentum": "Dynamique hebdomadaire",
-      "weeklyMomentumSubtitle": "{{count}} cartes cette semaine",
+      "weeklyMomentumSubtitle_one": "{{count}} carte cette semaine",
+      "weeklyMomentumSubtitle_other": "{{count}} cartes cette semaine",
       "recentPerformance": "Performances récentes",
       "yourDecks": "Vos decks"
     },
@@ -292,7 +299,8 @@
       "streakLabel_one": "Série de {{count}} jour",
       "streakLabel_other": "Série de {{count}} jours",
       "allDone": "Tout est à jour",
-      "weeklyCards": "{{count}} révisé(s) aujourd'hui",
+      "weeklyCards_one": "{{count}} révisée aujourd'hui",
+      "weeklyCards_other": "{{count}} révisées aujourd'hui",
       "streakZeroLabel": "Commencez votre série aujourd'hui",
       "noDecks": "Ajoutez un paquet et Nowry commencera à le planifier pour vous."
     },
@@ -501,7 +509,8 @@
       "validation": {
         "title": "Pas encore prêt",
         "missingInterests": "Choisissez au moins un sujet pour continuer.",
-        "tooManyInterests": "Vous avez {{count}} sujets sélectionnés. Retirez-en {{excess}} pour continuer avec {{max}} au maximum.",
+        "tooManyInterests_one": "Vous avez {{count}} sujet sélectionné. Retirez-en {{excess}} pour continuer avec {{max}} au maximum.",
+        "tooManyInterests_other": "Vous avez {{count}} sujets sélectionnés. Retirez-en {{excess}} pour continuer avec {{max}} au maximum.",
         "missingGoal": "Choisissez un objectif d'étude pour continuer."
       },
       "saveError": {
@@ -1038,7 +1047,9 @@
         "milestone": "Jalon",
         "activity": "Habitude"
       }
-    }
+    },
+    "eventCount_one": "{{count}} événement",
+    "eventCount_other": "{{count}} événements"
   },
   "about": {
     "title": "À propos de Nowry",
@@ -1435,7 +1446,8 @@
       "dailyRoutineBtn": "Routine Quotidienne",
       "yearlyPriorities": "Priorités Annuelles",
       "noPrioritiesAdded": "Aucune priorité ajoutée pour le moment",
-      "viewAllPriorities": "Voir les {{count}} priorités →",
+      "viewAllPriorities_one": "Voir {{count}} priorité →",
+      "viewAllPriorities_other": "Voir les {{count}} priorités →",
       "quarterEndedOn": "Le trimestre {{quarter}} s'est terminé le {{date}}",
       "quarterEndsToday": "Le trimestre {{quarter}} se termine aujourd’hui",
       "quarterEndingIn": "Le trimestre {{quarter}} se termine dans {{count}} jour",
@@ -1899,7 +1911,8 @@
       "regenerating": "Régénération...",
       "animationGenerating": "Animation de votre compagnon...",
       "regenerateAriaLabel": "Régénérer le portrait du compagnon",
-      "generationsRemaining": "{{count}} restant(s) ce mois",
+      "generationsRemaining_one": "{{count}} restant ce mois",
+      "generationsRemaining_other": "{{count}} restants ce mois",
       "upgradePlus": "Passer à Plus",
       "upgradePlusAriaLabel": "Passez à Plus pour débloquer les portraits IA",
       "species": {
@@ -2031,6 +2044,10 @@
         "flashcards": "Cartes",
         "quizzes": "Quiz",
         "visual": "Visuel"
+      },
+      "nextReview": {
+        "inDays_one": "Dans {{count}} jour",
+        "inDays_other": "Dans {{count}} jours"
       }
     },
     "import": {
@@ -2197,7 +2214,8 @@
         "outsideFilter_one": "{{count}} autre carte à revoir se trouve hors de votre filtre par tag.",
         "outsideFilter_other": "{{count}} autres cartes à revoir se trouvent hors de votre filtre par tag.",
         "title": "Session terminée !",
-        "body": "Vous avez révisé {{count}} cartes. Bravo !",
+        "body_one": "Vous avez révisé {{count}} carte. Bravo !",
+        "body_other": "Vous avez révisé {{count}} cartes. Bravo !",
         "backToLibrary": "Retour à la bibliothèque"
       },
       "labels": {
@@ -2274,7 +2292,8 @@
       "tag": "Étiquette",
       "tagAria": "Étiqueter les cartes sélectionnées",
       "unmark": "Retirer la marque",
-      "all": "Tout sélectionner ({{count}})",
+      "all_one": "Sélectionner {{count}}",
+      "all_other": "Tout sélectionner ({{count}})",
       "newTag": "Nouvelle étiquette…",
       "moveOne": "Déplacer vers…",
       "editTags": "Étiquettes…",
@@ -2293,7 +2312,11 @@
       "confirm_other": "Déplacer {{count}} cartes"
     },
     "newCard": "Nouvelle carte",
-    "newDeck": "Nouveau paquet"
+    "newDeck": "Nouveau paquet",
+    "dueLabel_one": "{{count}} à revoir",
+    "dueLabel_other": "{{count}} à revoir",
+    "studyNew_one": "Apprendre ({{count}} nouvelle)",
+    "studyNew_other": "Apprendre ({{count}} nouvelles)"
   },
   "books": {
     "title": "Livres",
@@ -2706,7 +2729,8 @@
   "aiMagic": {
     "streaming": {
       "progress": "{{count}} carte(s) sur {{total}} générée(s)",
-      "progressAuto": "{{count}} carte(s) générée(s)...",
+      "progressAuto_one": "{{count}} carte générée...",
+      "progressAuto_other": "{{count}} cartes générées...",
       "generating": "Génération des cartes...",
       "retry": "Réessayer",
       "retryAria": "Réessayer la génération de cartes",
@@ -2952,7 +2976,11 @@
         "s0": "Lecture de vos notes...",
         "s1": "Repérage des idées à garder...",
         "s2": "Conversion en cartes..."
-      }
+      },
+      "selectedNodes_one": "À partir de {{count}} nœud sélectionné",
+      "selectedNodes_other": "À partir de {{count}} nœuds sélectionnés",
+      "success_one": "{{count}} carte ajoutée à {{deckName}}",
+      "success_other": "{{count}} cartes ajoutées à {{deckName}}"
     }
   },
   "calendarPage": {
@@ -3165,5 +3193,17 @@
   },
   "errors": {
     "offline": "Vous semblez hors ligne. Rien n'est perdu : réessayez dès que vous aurez du réseau."
+  },
+  "comments": {
+    "moreNotesAriaLabel_one": "Afficher {{count}} note de plus ci-dessous",
+    "moreNotesAriaLabel_other": "Afficher {{count}} notes de plus ci-dessous"
+  },
+  "focusBar": {
+    "daysLeft_one": "{{count}} jour restant",
+    "daysLeft_other": "{{count}} jours restants",
+    "daysRemaining_one": "{{count}} jour restant",
+    "daysRemaining_other": "{{count}} jours restants",
+    "overdueBy_one": "{{count}} jour de retard",
+    "overdueBy_other": "{{count}} jours de retard"
   }
 }

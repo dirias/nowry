@@ -23,10 +23,23 @@
 jest.mock('react-i18next', () => {
   const bundle = require('@nowry/core/locales/en/translation.json')
   const resolve = (key) => key.split('.').reduce((node, segment) => (node == null ? undefined : node[segment]), bundle)
+  /*
+   * `count` picks a plural form, as i18next does. Without this the mock asks
+   * the bundle for a base key that a pluralised string no longer has, and
+   * returns the key path — which reads as a rendering bug in whatever is being
+   * tested rather than as a gap in the mock (MOB-064).
+   */
+  const lookup = (key, options) => {
+    if (options && typeof options.count === 'number') {
+      const plural = resolve(`${key}_${options.count === 1 ? 'one' : 'other'}`)
+      if (typeof plural === 'string') return plural
+    }
+    return resolve(key)
+  }
   return {
     useTranslation: () => ({
       t: (key, options) => {
-        const raw = resolve(key)
+        const raw = lookup(key, options)
         if (typeof raw !== 'string') return key
         return raw.replace(/{{(\w+)}}/g, (_, name) => String(options?.[name] ?? `{{${name}}}`))
       },
@@ -190,7 +203,8 @@ describe('validation tells the three cases apart (FR-016, FR-022)', () => {
 
     fireEvent.click(primaryAction())
 
-    expect(screen.getByRole('alert')).toHaveTextContent(fill(copy.validation.tooManyInterests, { count: 6, excess: 1, max: 5 }))
+    // The key is plural now — six topics takes `_other` (MOB-064).
+    expect(screen.getByRole('alert')).toHaveTextContent(fill(copy.validation.tooManyInterests_other, { count: 6, excess: 1, max: 5 }))
     expect(journey.recordPoint).not.toHaveBeenCalled()
   })
 
