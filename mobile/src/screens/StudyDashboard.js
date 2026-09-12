@@ -61,13 +61,18 @@ export function StudyDashboard() {
   const decks = useDeckData()
 
   const [sessions, setSessions] = useState(null)
+  const [sessionTotal, setSessionTotal] = useState(0)
   const [showAllUpToDate, setShowAllUpToDate] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     studySessionsService
       .list(RECENT_COUNT)
-      .then((data) => !cancelled && setSessions(data?.sessions ?? []))
+      .then((data) => {
+        if (cancelled) return
+        setSessions(data?.sessions ?? [])
+        setSessionTotal(data?.total ?? 0)
+      })
       // Recent is the least load-bearing thing here; its absence is silence,
       // not an error the learner has to read past.
       .catch(() => !cancelled && setSessions([]))
@@ -257,7 +262,23 @@ export function StudyDashboard() {
           answered by having no answer anywhere. */}
       <>
         {gap}
-        <SectionHeader title={t('study.sections.recent')} />
+        {/*
+         * The web ends this rail with "N total" and "History →". Both were
+         * absent because the screen they point at did not exist, so three rows
+         * were not a preview of anything — they were the whole record
+         * (MOB-064).
+         */}
+        <SectionHeader
+          title={t('study.sections.recent')}
+          count={sessions && sessions.length > 0 ? t('sessions.ofTotal', { shown: sessions.length, total: sessionTotal }) : null}
+          action={
+            sessionTotal > RECENT_COUNT ? (
+              <Button size='sm' variant='tertiary' onPress={() => router.push('/study/history')}>
+                {t('sessions.history')}
+              </Button>
+            ) : null
+          }
+        />
         {sessions === null ? (
           <Skeleton width='100%' height={56} />
         ) : sessions.length === 0 ? (

@@ -71,7 +71,13 @@
     "unknownTopic": "Unbekanntes Thema",
     "emptyHint": "Schließe eine Lernsitzung ab, um sie hier zu sehen",
     "viewAll_one": "{{count}} weitere Sitzung ansehen",
-    "viewAll_other": "{{count}} weitere Sitzungen ansehen"
+    "viewAll_other": "{{count}} weitere Sitzungen ansehen",
+    "title": "Letzte Sitzungen",
+    "empty": "Noch keine Sitzungen. Schließe eine Lernsitzung oder ein Quiz ab, um deinen Verlauf hier zu sehen.",
+    "noCardDetail": "Keine Kartendetails verfügbar.",
+    "cardRef": "Karte Nr. {{id}}",
+    "totalCount": "{{count}} insgesamt",
+    "loadMore": "{{count}} weitere laden"
   },
   "common": {
     "loadMore": "Mehr laden",

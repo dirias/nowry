@@ -71,7 +71,13 @@
     "unknownTopic": "Sujet inconnu",
     "emptyHint": "Terminez une session d'étude pour la voir ici",
     "viewAll_one": "Voir {{count}} session de plus",
-    "viewAll_other": "Voir {{count}} sessions de plus"
+    "viewAll_other": "Voir {{count}} sessions de plus",
+    "title": "Sessions récentes",
+    "empty": "Aucune session pour l'instant. Terminez une session d'étude ou un quiz pour voir votre historique ici.",
+    "noCardDetail": "Aucun détail de carte disponible.",
+    "cardRef": "Carte n° {{id}}",
+    "totalCount": "{{count}} au total",
+    "loadMore": "Charger {{count}} de plus"
   },
   "common": {
     "loadMore": "Charger plus",

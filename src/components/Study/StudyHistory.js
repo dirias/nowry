@@ -18,6 +18,7 @@ import CheckRounded from '@mui/icons-material/CheckRounded'
 import CloseRounded from '@mui/icons-material/CloseRounded'
 import RemoveRounded from '@mui/icons-material/RemoveRounded'
 import { studySessionsService } from '@nowry/core/api/services/studySessions.service'
+import { sessionCardLine } from '@nowry/core/domain/sessionLog'
 
 // ---------------------------------------------------------------------------
 // Helpers (duplicated here to keep this page self-contained)
@@ -46,10 +47,13 @@ const scoreColor = (pct) => {
   return 'danger'
 }
 
-const evalIcon = (evaluation) => {
-  if (evaluation === 'correct') return <CheckRounded sx={{ fontSize: 12, color: 'success.plainColor' }} />
-  if (evaluation === 'partial') return <RemoveRounded sx={{ fontSize: 12, color: 'warning.plainColor' }} />
-  return <CloseRounded sx={{ fontSize: 12, color: 'danger.plainColor' }} />
+/** The glyph for an evaluation. Which of the three it is, and its colour, are
+    `evaluationOf`'s; the component that draws it is this client's. */
+const EVAL_GLYPHS = { Check: CheckRounded, Minus: RemoveRounded, X: CloseRounded }
+
+const evalIcon = ({ iconKey, color }) => {
+  const Glyph = EVAL_GLYPHS[iconKey] ?? CloseRounded
+  return <Glyph sx={{ fontSize: 12, color }} />
 }
 
 // ---------------------------------------------------------------------------
@@ -151,35 +155,38 @@ const SessionRow = ({ session, t }) => {
                 {t('sessions.noCardDetail')}
               </Typography>
             )}
-            {session.cards.map((card, i) => (
+            {/* Which of the payload's four shapes this card is, decided in
+                `sessionCardLine` — the phone's history reads the same four
+                (MOB-064). */}
+            {session.cards.map(sessionCardLine).map((line, i) => (
               <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                <Box sx={{ mt: 0.25, flexShrink: 0 }}>{evalIcon(card.evaluation)}</Box>
+                <Box sx={{ mt: 0.25, flexShrink: 0 }}>{evalIcon(line.evaluation)}</Box>
                 <Box sx={{ minWidth: 0, flex: 1 }}>
-                  {card.question_text && (
+                  {line.question && (
                     <Typography level='body-xs' sx={{ color: 'text.primary' }}>
-                      {card.question_text}
+                      {line.question}
                     </Typography>
                   )}
-                  {card.correct_answer && card.evaluation !== 'correct' && (
+                  {line.answer && (
                     <Typography level='body-xs' sx={{ color: 'text.secondary', mt: 0.25 }}>
-                      → {card.correct_answer}
+                      → {line.answer}
                     </Typography>
                   )}
-                  {card.card_title && !card.question_text && (
+                  {line.title && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography level='body-xs' sx={{ color: 'text.primary' }}>
-                        {card.card_title}
+                        {line.title}
                       </Typography>
-                      {card.grade && (
+                      {line.grade && (
                         <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                          {card.grade}
+                          {line.grade}
                         </Typography>
                       )}
                     </Box>
                   )}
-                  {!card.question_text && !card.card_title && card.card_id && (
+                  {line.ref && (
                     <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                      {t('sessions.cardRef', { id: card.card_id.slice(-6) })}
+                      {t('sessions.cardRef', { id: line.ref })}
                     </Typography>
                   )}
                 </Box>

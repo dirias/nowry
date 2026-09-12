@@ -61,7 +61,13 @@
     "cardCount_other": "{{count}} 枚",
     "unknownTopic": "トピック不明",
     "emptyHint": "学習セッションを完了すると、ここに表示されます",
-    "viewAll_other": "他{{count}}件のセッションを表示"
+    "viewAll_other": "他{{count}}件のセッションを表示",
+    "title": "最近のセッション",
+    "empty": "セッションはまだありません。学習セッションかクイズを完了すると、ここに履歴が表示されます。",
+    "noCardDetail": "カードの詳細はありません。",
+    "cardRef": "カード #{{id}}",
+    "totalCount": "合計 {{count}} 件",
+    "loadMore": "さらに {{count}} 件読み込む"
   },
   "common": {
     "loadMore": "さらに読み込む",
