@@ -37,8 +37,11 @@ export function Chip({ children, onPress, selected = false, size = 'sm', accessi
   const body = (
     <View
       style={{
-        height: spec.height,
+        // A minimum, not a height — the label grows with the OS font setting
+        // and a fixed box clips it (MOB-083, and see `Button`).
+        minHeight: spec.height,
         paddingHorizontal: spec.paddingX,
+        paddingVertical: 4,
         borderRadius: theme.radius.sm,
         backgroundColor: resolveColor(theme, selected ? 'background.level2' : 'background.level1'),
         flexDirection: 'row',

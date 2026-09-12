@@ -97,8 +97,18 @@ export function Button({
         >
           <Animated.View
             style={{
-              height: spec.height,
+              /*
+               * A MINIMUM, not a height. `<Text>` scales with the OS font
+               * setting and a fixed box does not, so at the accessibility
+               * sizes the label simply overflowed and was sliced top and
+               * bottom — on Home the app's own primary key read "Repasar 25
+               * tarjetas" with the tops and tails of its letters cut off
+               * (MOB-083). At the default scale the label is shorter than the
+               * spec height, so nothing about any button moves.
+               */
+              minHeight: spec.height,
               paddingHorizontal: spec.paddingX,
+              paddingVertical: EDGE,
               borderRadius: radius,
               backgroundColor: resolveColorOrTransparent(theme, pressed ? tone.groundPressed : tone.ground),
               flexDirection: 'row',

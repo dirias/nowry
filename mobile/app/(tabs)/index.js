@@ -93,6 +93,12 @@ const PRIORITIES_SHOWN = 2
 /** The tab the web's panel gives its task list, beside the three periods. */
 const TASKS_TAB = 'tasks'
 /**
+ * The narrowest the greeting may be squeezed before the review key drops to
+ * its own line. Roughly the longest word in it at the default size — below
+ * that, a word no longer fits on one line and the title breaks mid-word.
+ */
+const GREETING_MIN = 200
+/**
  * `ListRow`'s own horizontal padding, which its pressed ground needs and which
  * therefore sets the rail every row's content sits on. The capture row and the
  * done disclosure are not `ListRow`s — one holds a field and the other a
@@ -203,8 +209,15 @@ export default function Home() {
  */
 function Greeting({ name, motivation, due, loading, statsMissing, onReview, theme, t }) {
   return (
-    <Stack direction='row' spacing={2} style={{ alignItems: 'flex-start' }}>
-      <View style={{ flex: 1, gap: theme.spacing[0.5] }}>
+    /*
+     * The row wraps, as the web's header does. At the accessibility text sizes
+     * the key needs most of the width, and a greeting squeezed into what is
+     * left breaks mid-word — "¡Bienv / enido / de n / uevo". `minWidth` is what
+     * forces the wrap: below it the key drops to its own line and both are
+     * whole (MOB-083).
+     */
+    <Stack direction='row' spacing={2} flexWrap='wrap' style={{ alignItems: 'flex-start' }}>
+      <View style={{ flex: 1, minWidth: GREETING_MIN, gap: theme.spacing[0.5] }}>
         <Typography level='h4'>{t('dashboard.welcome', { name })}</Typography>
         {motivation ? (
           <Typography level='body-xs' color='text.secondary'>

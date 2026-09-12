@@ -64,6 +64,9 @@ export function IconButton({ children, onPress, variant = 'tertiary', size = 'md
             style={{
               // Square, of the row height — never narrower (BUTTONS.md §5).
               width: spec.height,
+              // A glyph is a fixed size and does not grow with the OS font
+              // setting, so this one stays a height rather than a minimum
+              // (MOB-083).
               height: spec.height,
               borderRadius: radius,
               backgroundColor:

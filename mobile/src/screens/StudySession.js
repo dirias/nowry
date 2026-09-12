@@ -25,7 +25,7 @@
  * rather than starting over. The key is cleared on completion.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, View, useWindowDimensions } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
@@ -63,6 +63,17 @@ import {
  * flashcard is one object; it does not change shape when you turn it over.
  */
 const ACTION_BAND = BUTTON_SIZES.lg.height + EDGE
+
+/**
+ * Above this OS text size the four grades stop sharing one row.
+ *
+ * At 200% each of four keys on a 358pt row gets 85pt and "Difícil" needs a
+ * hundred, so two of the four read "Difí" and "Fáci" — clipped without even an
+ * ellipsis to say so, on the app's core interaction (MOB-083). Two rows of two
+ * is the only arrangement that keeps all four legible, and it costs the band
+ * its constant height, which is the smaller of the two losses.
+ */
+const GRADES_WRAP_ABOVE = 1.3
 
 /**
  * And so is the line above it, which is empty on most cards, carries the
@@ -141,6 +152,16 @@ export function StudySession() {
   // The account's colour, already resolved for the whole app — the companion
   // is the colour of the app it lives in (MOB-050).
   const { accent } = useAppearance()
+  /*
+   * The OS text size decides whether four grades fit on one row. Read from
+   * `useWindowDimensions`, not `PixelRatio.getFontScale()`: the latter reports
+   * the metrics captured when the process started, and this app declares
+   * `fontScale` in its `configChanges`, so the activity is never recreated when
+   * the setting changes — the static read stayed at 1.0 for the whole session
+   * and the wrap never fired. This one updates.
+   */
+  const { fontScale } = useWindowDimensions()
+  const wrapGrades = fontScale > GRADES_WRAP_ABOVE
 
   const deckName = useRef(null)
   /*
@@ -501,7 +522,7 @@ export function StudySession() {
         {/* One line, one height, three possible contents: the gestures said
             once on the first card, the note that this card already has a
             grade, or nothing at all. */}
-        <View style={{ height: NOTICE_BAND, justifyContent: 'center' }}>
+        <View style={{ minHeight: NOTICE_BAND, justifyContent: 'center' }}>
           {answered ? (
             <Typography level='body-xs' color='text.tertiary' accessibilityLiveRegion='polite' style={{ textAlign: 'center' }}>
               {t('cards.session.grading.alreadyAnswered')}
@@ -518,7 +539,9 @@ export function StudySession() {
           )}
         </View>
 
-        <View style={{ height: ACTION_BAND, justifyContent: 'center' }}>
+        {/* A MINIMUM height, not a height: the labels inside grow with the OS
+            text size and a fixed band clips them. */}
+        <View style={{ minHeight: ACTION_BAND, justifyContent: 'center' }}>
           {revealed ? (
             /*
              * Four tones, not four neutral keys, and they are the web's own:
@@ -528,13 +551,14 @@ export function StudySession() {
              * design that has shipped for a year and to the fact that these four
              * ARE the surface — the exception is recorded in `buttonSpec.js`.
              */
-            <Stack direction='row' spacing={1}>
+            <Stack direction='row' spacing={1} flexWrap={wrapGrades ? 'wrap' : 'nowrap'}>
               {GRADES.map((value) => (
                 <Button
                   key={value}
                   variant={GRADE_VARIANTS[value]}
                   size='md'
-                  style={{ flex: 1 }}
+                  /* Two rows of two once the labels no longer fit in one. */
+                  style={wrapGrades ? { flexBasis: '47%', flexGrow: 1 } : { flex: 1 }}
                   onPress={() => grade(value)}
                   accessibilityLabel={t(`cards.session.grading.${value}`)}
                 >
