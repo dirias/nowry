@@ -55,7 +55,15 @@ import { tasksService } from '@nowry/core/api/services'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { deadlineReadout, watchedPriorities } from '@nowry/core/domain/priorityWatch'
 import { dueTodayCount, taskCategory, taskDueState, tasksDueToday } from '@nowry/core/domain/taskQueue'
-import { ROUTINE_PERIODS, completedToday, currentPeriod, routineItems, toggledCompletions, todayKey } from '@nowry/core/domain/dailyRoutine'
+import {
+  ROUTINE_PERIODS,
+  completedToday,
+  currentPeriod,
+  routineItemTitle,
+  routineItems,
+  toggledCompletions,
+  todayKey
+} from '@nowry/core/domain/dailyRoutine'
 import { useNews } from '@nowry/core/hooks/useNews'
 import { unfavourited, useNewsFavourites } from '@nowry/core/hooks/useNewsFavourites'
 import { annualPlanningService } from '@nowry/core/api/services'
@@ -68,12 +76,14 @@ import {
   Divider,
   Input,
   Icon,
+  IconButton,
   LIST_ROW_HEIGHT,
   ListRow,
   NextStepsPanel,
   Progress,
   Readout,
   Screen,
+  SectionHeader,
   Segmented,
   Sheet,
   Skeleton,
@@ -181,6 +191,7 @@ export default function Home() {
           tasksCount={dueTodayCount(taskData.tasks)}
           tasksLoading={taskData.loading}
           reloadTasks={taskData.reload}
+          onEditRoutine={() => router.push('/annual-planning/daily-routine')}
           theme={theme}
           t={t}
         />
@@ -336,15 +347,20 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
  * with its own heading. They are one object: the same question asked four ways,
  * which is what the single tab strip says and two headings cannot.
  *
- * **It opens on a tab that has something in it.** The clock's period first, as
- * the web does; then any period that does have items; then tasks. The web can
- * afford to open on an empty morning because its empty state offers the editor
- * that fills it — this client has no routine editor at all yet.
+ * **It opens on the period the clock is in**, as the web's does. Looking at
+ * tonight at two in the afternoon is a normal want, so the tabs stay. It used
+ * to hunt for a period with something in it and fall through to the tasks,
+ * because an empty routine tab was a dead end: there was no routine editor, so
+ * the empty state could offer nothing. There is one now (MOB-084), so the
+ * fallback is gone and an empty morning says what to do about it.
  *
  * **The tabs carry words.** The web's four are unlabelled glyphs and its own
- * design canvas calls that the right idea drawn wrong.
+ * design canvas calls that the right idea drawn wrong. This is the one place
+ * this screen deliberately differs, and it is the difference between a control
+ * a screen reader can name and one it cannot.
  *
- * What the canvas changed, and why each one is a rule rather than a taste:
+ * What the day-panel canvas changed, and why each one is a rule rather than a
+ * taste:
  *
  * - **The ground.** It was `level1` with a hairline, which is the ground that
  *   means *pressable* (§15.1) — so the thing the controls act on was drawn as a
@@ -365,15 +381,22 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
  *   (§15.2). What they were for was making a tick reversible, and that is the
  *   list's job: the done tasks sit behind one disclosure at the foot.
  * - **The period's name is not repeated inside its own tab.** The same fix the
- *   news carousel already took.
+ *   news carousel already took — which is why the way into the editor is a row
+ *   at the foot of the list rather than a pencil on a heading that no longer
+ *   exists.
  *
- * Ticking is the one verb the routine has here, and the only one: the routine
- * is WRITTEN on the web and ticked here. Tasks get one more — capture — because
- * writing a thought down is not managing tasks, and a phone is where the
- * thought arrives.
+ * Ticking is the verb the routine has here, and writing it is one tap away
+ * rather than absent: the edit row at the foot of the list opens the editor,
+ * and so does the empty state's key. Tasks get capture as well — writing a
+ * thought down is not managing tasks, and a phone is where the thought
+ * arrives.
  */
-function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, reloadTasks, theme, t }) {
-  const [tab, setTab] = useState(() => openingTab(routine))
+function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, reloadTasks, onEditRoutine, theme, t }) {
+  /*
+   * The period the clock is in, read once when the panel mounts. A routine that
+   * arrives a moment later does not move the tab under the reader's thumb.
+   */
+  const [tab, setTab] = useState(() => currentPeriod())
 
   const onTasks = tab === TASKS_TAB
   const done = completedToday(routine)
@@ -417,7 +440,7 @@ function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, rel
         {onTasks ? (
           <TaskTab tasks={tasks} loading={tasksLoading} onReload={reloadTasks} theme={theme} t={t} />
         ) : (
-          <RoutineTab items={items} done={done} routine={routine} onReload={reloadRoutine} t={t} />
+          <RoutineTab period={tab} items={items} done={done} routine={routine} onReload={reloadRoutine} onEdit={onEditRoutine} t={t} />
         )}
       </Stack>
     </Sheet>
@@ -425,20 +448,20 @@ function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, rel
 }
 
 /**
- * The tab to open on: the clock's period if it holds anything, otherwise the
- * first period that does, otherwise the tasks.
+ * One period of the routine: its items, and the way into writing them.
  *
- * Read once, when the panel mounts. A routine that arrives a moment later does
- * not move the tab under the reader's thumb.
+ * The editor was written, removed when it turned out there was nothing to open
+ * — the phone could tick a routine item and nothing anywhere could create one —
+ * and is reachable again now that there is one (MOB-084).
+ *
+ * **The way in is a row at the foot, not a pencil on a heading.** The heading
+ * is gone: the tab above already says which period this is, and repeating it
+ * inside its own tab is the fault the news carousel was corrected for
+ * (MOB-081). A row is also the anatomy this panel already uses for the other
+ * verb it keeps — the tasks tab opens with a capture row, so the routine
+ * closing with an edit row is the same object, said twice.
  */
-function openingTab(routine) {
-  const now = currentPeriod()
-  if (routineItems(routine, now).length > 0) return now
-  return ROUTINE_PERIODS.find((name) => routineItems(routine, name).length > 0) ?? TASKS_TAB
-}
-
-/** One period of the routine: its items, and nothing above them. */
-function RoutineTab({ items, done, routine, onReload, t }) {
+function RoutineTab({ period, items, done, routine, onReload, onEdit, t }) {
   const [pending, setPending] = useState(null)
 
   const toggle = async (item) => {
@@ -454,12 +477,20 @@ function RoutineTab({ items, done, routine, onReload, t }) {
   }
 
   if (items.length === 0) {
-    /* Said, and nothing offered: this client has no routine editor, so a key
-       here would be a key to nowhere. */
+    /* Said, and something offered. An empty state that names the thing to do
+       and cannot start it is the fault this panel shipped with. */
     return (
-      <Typography level='body-sm' color='text.tertiary'>
-        {t('annualPlanning.dailyRoutine.emptySubtitle')}
-      </Typography>
+      <Stack spacing={1.5} style={{ paddingTop: 8 }}>
+        <Typography level='body-md' color='text.secondary'>
+          {t(`annualPlanning.dailyRoutine.${period}EmptyTitle`)}
+        </Typography>
+        <Typography level='body-sm' color='text.tertiary'>
+          {t('annualPlanning.dailyRoutine.emptySubtitle')}
+        </Typography>
+        <Button variant='secondary' onPress={onEdit}>
+          {t('annualPlanning.dailyRoutine.emptyCta')}
+        </Button>
+      </Stack>
     )
   }
 
@@ -477,11 +508,22 @@ function RoutineTab({ items, done, routine, onReload, t }) {
                 accessibilityLabel={t('annualPlanning.dailyRoutine.toggleItem')}
               />
             }
-            name={item.text || item.title || ''}
+            /* The item's own reader: an item written on the web carries `text`,
+               one slotted in from a goal carries `title`, and a screen that
+               guessed between them showed blanks for half a routine. */
+            name={routineItemTitle(item)}
             onPress={() => toggle(item)}
           />
         </View>
       ))}
+
+      {/* The way into writing them, at the foot of what they are. */}
+      <Divider />
+      <ListRow
+        tile={<Icon name='Pencil' size='sm' color='text.tertiary' />}
+        name={t('annualPlanning.dailyRoutine.editRoutine')}
+        onPress={onEdit}
+      />
     </View>
   )
 }

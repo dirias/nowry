@@ -1418,7 +1418,10 @@
         "morning": "Morgen",
         "afternoon": "Nachmittag",
         "evening": "Abend"
-      }
+      },
+      "renameItem": "Element umbenennen",
+      "deleteBody": "„{{title}}“ wird aus jedem Tag deiner Routine entfernt.",
+      "saveError": "Diese Änderung konnte nicht gespeichert werden. Versuche es erneut."
     },
     "progress": {
       "title": "Fortschritts-Dashboard",

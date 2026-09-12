@@ -1429,7 +1429,10 @@
         "morning": "Matin",
         "afternoon": "Après-midi",
         "evening": "Soir"
-      }
+      },
+      "renameItem": "Renommer l’élément",
+      "deleteBody": "« {{title}} » sera retiré de chaque journée de votre routine.",
+      "saveError": "Cette modification n’a pas pu être enregistrée. Réessayez."
     },
     "progress": {
       "title": "Tableau de Bord des Progrès",
