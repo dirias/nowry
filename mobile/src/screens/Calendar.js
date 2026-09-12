@@ -147,22 +147,18 @@ export function Calendar() {
           </Button>
         </Stack>
 
-        {/* The page's one action, at the weight the web gives it: a small key
-            where its page title's row ends, not a full-width slab. The tab bar
-            has already said the page, so the row is the key alone. */}
-        <Stack direction='row' style={{ justifyContent: 'flex-end' }}>
-          <Button
-            size='sm'
-            startGlyph={<Icon name='Plus' size='sm' color='primary.solidColor' />}
-            onPress={() => setForm({ mode: 'create', defaultDate: defaultDateFor(cursor) })}
-          >
-            {t('calendarPage.addEvent')}
-          </Button>
-        </Stack>
-
-        {/* Row two: the filter object. A count in the label, never a hue —
-            "Types" means no filter, "Types · 2" means two chosen (§15.5). */}
-        <Stack direction='row' spacing={1}>
+        {/*
+         * Row two: the filter object, and the page's one action where the row
+         * ends.
+         *
+         * The web gives that key a row of its own because that row also holds
+         * the page title. This client has no page title — the tab bar and the
+         * segment above have already said "Calendar" twice — so the key alone
+         * on a row left two thirds of it empty, which is the same fault as
+         * before it moved and merely a row lower (MOB-065). The filter chips
+         * are compact; the key takes the space they leave.
+         */}
+        <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
           <Chip
             selected={filters.habitsEnabled}
             onPress={() => setFilters((f) => ({ ...f, habitsEnabled: !f.habitsEnabled }))}
@@ -180,6 +176,16 @@ export function Calendar() {
               ? t('calendarPage.filters.areasSelected', { count: filters.activeAreaIds.length })
               : t('calendarPage.filters.areas')}
           </Chip>
+
+          <View style={{ flex: 1 }} />
+
+          <Button
+            size='sm'
+            startGlyph={<Icon name='Plus' size='sm' color='primary.solidColor' />}
+            onPress={() => setForm({ mode: 'create', defaultDate: defaultDateFor(cursor) })}
+          >
+            {t('calendarPage.addEvent')}
+          </Button>
         </Stack>
 
         {error ? (

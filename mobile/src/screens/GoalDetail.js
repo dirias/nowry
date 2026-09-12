@@ -138,9 +138,19 @@ export function GoalDetail() {
             accessibilityLabel={t('annualPlanning.goal.progress')}
             style={{ backgroundColor: resolveTrack(theme, state) }}
           />
-          {next ? (
-            <Typography level='body-sm' color='text.tertiary'>
-              {next.title}
+          {/*
+           * `getNextMilestone` returns `{ milestone, index, isOverdue }` — not
+           * the milestone. Reading `next.title` off the wrapper was undefined,
+           * so this rendered an empty line between the bar and the milestones
+           * and nothing failed (MOB-065). The two phrases it should have been
+           * using are already translated in five, and `isOverdue` exists so
+           * the caller can choose between them.
+           */}
+          {next?.milestone ? (
+            <Typography level='body-sm' color={next.isOverdue ? 'danger.plainColor' : 'text.tertiary'}>
+              {t(next.isOverdue ? 'annualPlanning.goal.next.overdue' : 'annualPlanning.goal.next.label', {
+                title: next.milestone.title
+              })}
             </Typography>
           ) : null}
         </Stack>

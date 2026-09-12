@@ -75,9 +75,18 @@ export function FocusAreaDetail() {
             <Typography level='h4' accessibilityRole='header' numberOfLines={2}>
               {area.name}
             </Typography>
-            <Readout>
-              {t('annualPlanning.stats.totalGoals')}: {metrics.total} · {metrics.progress}% {t('annualPlanning.home.totalProgress')}
-            </Readout>
+            {/*
+             * Two translated phrases, not a noun glued to a number. This was
+             * `t('totalGoals') + ': ' + n`, the third place in this feature
+             * building a sentence by concatenation — and the phrase for it,
+             * `goalsRatio`, already exists in five locales (MOB-065).
+             */}
+            <Stack direction='row' spacing={2} flexWrap='wrap'>
+              {metrics.total > 0 ? (
+                <Readout>{t('annualPlanning.header.goalsRatio', { completed: metrics.completed, total: metrics.total })}</Readout>
+              ) : null}
+              {metrics.total > 0 ? <Readout>{t('annualPlanning.header.progress', { percent: metrics.progress })}</Readout> : null}
+            </Stack>
           </Stack>
         </Stack>
 

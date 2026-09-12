@@ -289,11 +289,16 @@ function AreaRow({ area, metrics, theme, t, onPress }) {
           />
         }
         name={area.name}
-        /* An area with no goals says nothing rather than "0 of 0", which is a
-           ratio of nothing reported as a fact (D8's rule, again). */
+        /*
+         * An area with no goals says nothing at all — not "0 of 0", and not a
+         * 0% beside an empty bar either. A ratio of nothing is not a fact and
+         * a measure of nothing is not a measurement (ADR-012). The meta line
+         * was fixed first and the measure was left drawing for another pass,
+         * which is how half a rule survives (MOB-065).
+         */
         meta={metrics.total > 0 ? t('annualPlanning.header.goalsRatio', { completed: metrics.completed, total: metrics.total }) : null}
-        measure={<Measure value={metrics.progress} accessibilityLabel={t('annualPlanning.home.progress')} />}
-        readout={<Readout>{metrics.progress}%</Readout>}
+        measure={metrics.total > 0 ? <Measure value={metrics.progress} accessibilityLabel={t('annualPlanning.home.progress')} /> : null}
+        readout={metrics.total > 0 ? <Readout>{metrics.progress}%</Readout> : null}
         onPress={onPress}
       />
       <Divider />
