@@ -38,6 +38,7 @@ import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { getCurrentQuarter, planMetrics } from '@nowry/core/domain/goalDerivation'
 import { completionPatch } from '@nowry/core/domain/calendar/eventHelpers'
+import { deadlineReadout } from '@nowry/core/domain/priorityWatch'
 import { useTheme } from '../theme'
 import { AreaSheet } from './AnnualPlanningSheets'
 import {
@@ -59,7 +60,7 @@ import {
 const MAX_AREAS = 3
 
 export function AnnualPlanning() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const theme = useTheme()
   const router = useRouter()
   const { user } = useAuth()
@@ -256,6 +257,17 @@ export function AnnualPlanning() {
                     /* A description identical to the title is the title said
                        twice, which reads as a bug rather than as detail. */
                     meta={priority.description && priority.description !== (priority.title || priority.name) ? priority.description : null}
+                    /*
+                     * When it is due. The web badges every priority that has a
+                     * deadline and this page showed none at all, on the one
+                     * screen whose whole subject is what you committed to and
+                     * by when. Read through `deadlineReadout`, the same rule
+                     * Home's strip uses, so the two screens cannot phrase one
+                     * date two ways — and lifted to `text.primary` when it has
+                     * passed, because the word carries the state and a hue on a
+                     * plan reads as an error (§15.5).
+                     */
+                    readout={priorityWhen(t, i18n?.language ?? 'en', priority, done)}
                   />
                   <Divider />
                 </View>
@@ -304,6 +316,25 @@ function AreaRow({ area, metrics, theme, t, onPress }) {
       <Divider />
     </View>
   )
+}
+
+/**
+ * A priority's deadline, as the row's readout — or nothing, for a priority
+ * that never had one.
+ *
+ * A completed priority's deadline stops being a claim on the future, so it
+ * never leads: the web strikes it through and drops it to tertiary for the
+ * same reason.
+ */
+function priorityWhen(t, language, priority, done) {
+  const readout = deadlineReadout(priority)
+  if (!readout) return null
+  // A key of null means no phrase fits this distance; the date is the readout,
+  // and only this side knows the reader's locale.
+  const text = readout.key
+    ? t(readout.key, readout.params)
+    : new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(new Date(readout.params.date))
+  return <Readout leading={!done && readout.key === 'focusBar.overdue'}>{text}</Readout>
 }
 
 export default AnnualPlanning
