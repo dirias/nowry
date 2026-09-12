@@ -1543,7 +1543,10 @@
         "morning": "朝",
         "afternoon": "午後",
         "evening": "夜"
-      }
+      },
+      "renameItem": "項目の名前を変更",
+      "deleteBody": "「{{title}}」は毎日のルーティンから削除されます。",
+      "saveError": "その変更を保存できませんでした。もう一度お試しください。"
     },
     "progress": {
       "title": "進捗ダッシュボード",

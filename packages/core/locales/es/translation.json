@@ -2056,7 +2056,10 @@
         "morning": "Mañana",
         "afternoon": "Tarde",
         "evening": "Noche"
-      }
+      },
+      "renameItem": "Renombrar elemento",
+      "deleteBody": "«{{title}}» se eliminará de todos los días de tu rutina.",
+      "saveError": "No se pudo guardar ese cambio. Inténtalo de nuevo."
     },
     "progress": {
       "title": "Panel de Progreso",

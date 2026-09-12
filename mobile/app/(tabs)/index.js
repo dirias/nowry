@@ -55,7 +55,15 @@ import { tasksService } from '@nowry/core/api/services'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { deadlineReadout, watchedPriorities } from '@nowry/core/domain/priorityWatch'
 import { TASK_FILTERS, dueTodayCount, taskCategory, tasksDueToday } from '@nowry/core/domain/taskQueue'
-import { ROUTINE_PERIODS, completedToday, currentPeriod, routineItems, toggledCompletions, todayKey } from '@nowry/core/domain/dailyRoutine'
+import {
+  ROUTINE_PERIODS,
+  completedToday,
+  currentPeriod,
+  routineItemTitle,
+  routineItems,
+  toggledCompletions,
+  todayKey
+} from '@nowry/core/domain/dailyRoutine'
 import { useNews } from '@nowry/core/hooks/useNews'
 import { unfavourited, useNewsFavourites } from '@nowry/core/hooks/useNewsFavourites'
 import { annualPlanningService } from '@nowry/core/api/services'
@@ -69,9 +77,11 @@ import {
   Divider,
   Input,
   Icon,
+  IconButton,
   ListRow,
   NextStepsPanel,
   Screen,
+  SectionHeader,
   Segmented,
   Skeleton,
   Stack,
@@ -320,19 +330,23 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
  * this screen deliberately differs, and it is the difference between a control
  * a screen reader can name and one it cannot.
  *
- * **It opens on a tab that has something in it.** The clock's period first, as
- * the web does; then any period that does have items; then tasks. The web can
- * afford to open on an empty morning because its empty state offers the editor
- * that fills it — this client has no routine editor at all yet, so opening on
- * an empty tab would be an empty panel with no way forward.
+ * **It opens on the clock's period, even when that period is empty.** It used
+ * to hunt for a period with something in it and fall through to the tasks,
+ * because an empty routine tab was a dead end: this client had no routine
+ * editor, so the empty state could offer nothing. It has one now, so the
+ * fallback is gone and an empty morning says what to do about it (MOB-080).
  *
- * Ticking is the one verb the routine has here, and the only one: the routine
- * is WRITTEN on the web and ticked here, which is why there is no pencil.
- * Tasks get one more — capture — because writing a thought down is not managing
- * tasks, and a phone is where the thought arrives.
+ * Ticking is the verb the routine has here, and writing it is one tap away
+ * rather than absent: the pencil opens the editor, and so does the empty
+ * state's key. Tasks get capture as well — writing a thought down is not
+ * managing tasks, and a phone is where the thought arrives.
  */
 function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, reloadTasks, theme, t }) {
-  const [tab, setTab] = useState(() => openingTab(routine))
+  /*
+   * The period the clock is in, read once when the panel mounts. A routine that
+   * arrives a moment later does not move the tab under the reader's thumb.
+   */
+  const [tab, setTab] = useState(() => currentPeriod())
 
   return (
     <Card padding={2}>
@@ -364,20 +378,14 @@ function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, rel
 }
 
 /**
- * The tab to open on: the clock's period if it holds anything, otherwise the
- * first period that does, otherwise the tasks.
+ * One period of the routine: its name, a pencil, and its items.
  *
- * Read once, when the panel mounts. A routine that arrives a moment later does
- * not move the tab under the reader's thumb.
+ * The pencil and the empty state's key both open the editor at the web's own
+ * path. They were written, removed when it turned out there was no editor to
+ * open, and are back now that there is (MOB-080).
  */
-function openingTab(routine) {
-  const now = currentPeriod()
-  if (routineItems(routine, now).length > 0) return now
-  return ROUTINE_PERIODS.find((name) => routineItems(routine, name).length > 0) ?? TASKS_TAB
-}
-
-/** One period of the routine: its name and its items. */
 function RoutineTab({ period, routine, onReload, t }) {
+  const router = useRouter()
   const [pending, setPending] = useState(null)
 
   const items = routineItems(routine, period)
@@ -395,16 +403,33 @@ function RoutineTab({ period, routine, onReload, t }) {
     }
   }
 
+  const edit = () => router.push('/annual-planning/daily-routine')
+
   return (
     <View>
-      <Typography level='title-md'>{t(`annualPlanning.dailyRoutine.${period}`)}</Typography>
+      <SectionHeader
+        title={t(`annualPlanning.dailyRoutine.${period}`)}
+        action={
+          <IconButton size='sm' accessibilityLabel={t('annualPlanning.dailyRoutine.editRoutine')} onPress={edit}>
+            <Icon name='Pencil' size='sm' />
+          </IconButton>
+        }
+      />
 
       {items.length === 0 ? (
-        /* Said, and nothing offered: this client has no routine editor, so a
-           key here would be a key to nowhere. */
-        <Typography level='body-sm' color='text.tertiary' style={{ paddingTop: 8 }}>
-          {t('annualPlanning.dailyRoutine.emptySubtitle')}
-        </Typography>
+        /* Said, and something offered. An empty state that names the thing to
+           do and cannot start it is the fault this panel shipped with. */
+        <Stack spacing={1.5} style={{ paddingTop: 8 }}>
+          <Typography level='body-md' color='text.secondary'>
+            {t(`annualPlanning.dailyRoutine.${period}EmptyTitle`)}
+          </Typography>
+          <Typography level='body-sm' color='text.tertiary'>
+            {t('annualPlanning.dailyRoutine.emptySubtitle')}
+          </Typography>
+          <Button variant='secondary' onPress={edit}>
+            {t('annualPlanning.dailyRoutine.emptyCta')}
+          </Button>
+        </Stack>
       ) : (
         items.map((item) => (
           <View key={item.id}>
@@ -418,7 +443,7 @@ function RoutineTab({ period, routine, onReload, t }) {
                   accessibilityLabel={t('annualPlanning.dailyRoutine.toggleItem')}
                 />
               }
-              name={item.text || item.title || ''}
+              name={routineItemTitle(item)}
               onPress={() => toggle(item)}
             />
           </View>

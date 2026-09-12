@@ -2329,7 +2329,10 @@
         "morning": "Morning",
         "afternoon": "Afternoon",
         "evening": "Evening"
-      }
+      },
+      "renameItem": "Rename item",
+      "deleteBody": "“{{title}}” will be removed from every day of your routine.",
+      "saveError": "That change could not be saved. Try again."
     },
     "progress": {
       "title": "Progress Dashboard",
