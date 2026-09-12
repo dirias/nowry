@@ -114,11 +114,16 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
         { emphasis: true }
       )}
 
-      {/* What happened, and what is going to. */}
-      <View
-        importantForAccessibility='no-hide-descendants'
-        style={{ width: 1, alignSelf: 'stretch', marginHorizontal: 2, backgroundColor: resolveColor(theme, 'divider') }}
-      />
+      {/* What happened, and what is going to — drawn only when there is a
+          second half to separate. Offline the forecast does not arrive, and the
+          strip ended in a hairline with nothing after it, which reads as a
+          broken control rather than as a week with no forecast (MOB-069). */}
+      {future.length > 0 ? (
+        <View
+          importantForAccessibility='no-hide-descendants'
+          style={{ width: 1, alignSelf: 'stretch', marginHorizontal: 2, backgroundColor: resolveColor(theme, 'divider') }}
+        />
+      ) : null}
 
       {future.map((day, i) =>
         cell(`future-${i}`, day.due || 0, day.due > 0 ? 'primary.softBg' : 'background.level2', weekday(day.date), {

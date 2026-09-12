@@ -18,9 +18,16 @@
 import { useEffect, useRef } from 'react'
 import { AppState } from 'react-native'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { clearPersistedQueries } from './queryPersistence'
 import { clearQueue } from './syncQueue'
 import { flushOutbox } from './outbox'
+
+/**
+ * What a delivered grade changes. The server has just recorded a review, so
+ * every number derived from one is now wrong on screen (MOB-069).
+ */
+const AFTER_A_SEND = ['decks', 'cards', 'statistics', 'forecast']
 
 export function OfflineSync() {
   const { user } = useAuth()
@@ -40,9 +47,18 @@ export function OfflineSync() {
   }, [user])
 
   useEffect(() => {
-    flushOutbox()
+    const send = () =>
+      flushOutbox()
+        .then(({ sent }) => {
+          if (sent > 0) AFTER_A_SEND.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }))
+        })
+        // A failed drain leaves the queue as it found it and tries again on the
+        // next foreground; there is nothing to report here.
+        .catch(() => {})
+
+    send()
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') flushOutbox()
+      if (state === 'active') send()
     })
     return () => subscription.remove()
   }, [])

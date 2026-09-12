@@ -109,6 +109,13 @@ export function StudyDashboard() {
   }, [list])
 
   const loading = statsLoading || forecastLoading || decks.loading
+  /*
+   * An error is worth stating only when it left the screen empty. Offline, the
+   * persisted cache fills the whole object and the refetch still fails — so a
+   * red "couldn't load your progress" sat under a card showing that progress,
+   * which reads as a broken page rather than a stale one (MOB-069).
+   */
+  const statsMissing = Boolean(statsError) && !statistics
   const reviewedWeek = reviewedThisWeek(statistics)
   const dueTomorrow = future[0]?.due ?? 0
   const dueWeek = future.reduce((sum, d) => sum + (d.due || 0), 0)
@@ -142,7 +149,7 @@ export function StudyDashboard() {
               <Skeleton width={56} height={14} />
               <Skeleton width={72} height={14} />
             </Stack>
-          ) : statsError ? null : (
+          ) : statsMissing ? null : (
             <>
               {/* The one load-bearing number, per the board and ADR-021 §3. */}
               <Readout leading>{today.asked === 0 ? t('study.today.allDone') : t('study.dueCount', { count: today.due })}</Readout>
@@ -162,7 +169,7 @@ export function StudyDashboard() {
             </>
           )
         }
-        empty={!loading && !statsError && (list ?? []).length === 0 ? t('study.today.emptySentence') : null}
+        empty={!loading && !statsMissing && (list ?? []).length === 0 ? t('study.today.emptySentence') : null}
         aside={
           loading || (weekly.length === 0 && future.length === 0) ? null : (
             <Stack spacing={1}>
@@ -204,10 +211,10 @@ export function StudyDashboard() {
             </Button>
           ) : null
         }
-        progressLabel={loading || statsError ? null : t('study.today.progress', { done: today.reviewedToday, total: today.dayTotal })}
+        progressLabel={loading || statsMissing ? null : t('study.today.progress', { done: today.reviewedToday, total: today.dayTotal })}
       />
 
-      {statsError ? (
+      {statsMissing ? (
         <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
           {t('home.loadFailed')}
         </Typography>

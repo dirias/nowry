@@ -15,6 +15,37 @@ import i18n from 'i18next'
 
 const AuthContext = createContext(null)
 
+/**
+ * The last profile this device saw, so a cold start with no network has
+ * something to restore. Erased on logout and on a 401/403 (MOB-069).
+ */
+const PROFILE_KEY = 'NOWRY_LAST_PROFILE'
+
+const rememberProfile = (profile) => {
+  try {
+    if (profile) storage.set(PROFILE_KEY, JSON.stringify(profile))
+  } catch {
+    // A device that cannot write it simply has no offline profile.
+  }
+}
+
+const forgetProfile = () => {
+  try {
+    storage.remove(PROFILE_KEY)
+  } catch {
+    // Nothing the caller can do; the in-memory user is already cleared.
+  }
+}
+
+const lastProfile = () => {
+  try {
+    const raw = storage.get(PROFILE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -29,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiClient.get('/users/me')
       setUser(response.data)
+      rememberProfile(response.data)
       // Preferences are nested under preferences.general in the backend
       const lang = response.data?.preferences?.general?.language
       if (lang) {
@@ -50,7 +82,25 @@ export const AuthProvider = ({ children }) => {
        * Firebase session alone and keeps whatever profile was last known.
        */
       const status = error?.response?.status
-      if (status === 401 || status === 403) setUser(null)
+      if (status === 401 || status === 403) {
+        setUser(null)
+        forgetProfile()
+      } else {
+        /*
+         * A COLD start with no network is the case the rule above does not
+         * cover: keeping "whatever profile was last known" keeps nothing when
+         * the app has only just launched and nothing is known yet. The result
+         * was the login screen on a plane, for someone whose Firebase session
+         * had restored perfectly well from disk (MOB-069).
+         *
+         * So the last profile is written down when it arrives and read back
+         * when the request that would have fetched it cannot reach anyone. It
+         * is the user's own profile on the user's own device, alongside the
+         * decks and cards already persisted there, and it is erased on logout
+         * and on the server saying the session is invalid.
+         */
+        setUser((current) => current ?? lastProfile())
+      }
     } finally {
       setLoading(false)
     }
@@ -73,8 +123,12 @@ export const AuthProvider = ({ children }) => {
         // Firebase session is confirmed — now safe to fetch backend profile
         await checkUser()
       } else {
-        // No Firebase session at all (new visit or after logout)
+        // No Firebase session at all (new visit or after logout). Firebase
+        // restores its own session from disk without a network, so this is a
+        // genuine "not signed in" rather than an offline one — the offline
+        // profile goes with it.
         setUser(null)
+        forgetProfile()
         setLoading(false)
       }
     })
@@ -152,6 +206,9 @@ export const AuthProvider = ({ children }) => {
       // reads through React Query now (ADR-008), so this is the single wipe.
       queryClient.clear()
       setUser(null)
+      // The offline profile goes with the cache: the next person to open this
+      // device must not be greeted by the last person's name.
+      forgetProfile()
     }
   }
 

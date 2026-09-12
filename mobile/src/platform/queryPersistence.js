@@ -33,8 +33,17 @@ const KEY = 'NOWRY_QUERY_CACHE'
 /** A day: long enough that yesterday's queue is still there this morning. */
 const MAX_AGE = 24 * 60 * 60 * 1000
 
-/** The resources the study loop reads. Everything else stays in memory. */
-const PERSISTED = ['decks', 'cards', 'groups', 'forecast', 'tags']
+/**
+ * The resources the study loop reads. Everything else stays in memory.
+ *
+ * `statistics` joined them after the offline run: the dashboard reads today's
+ * reviewed count and the streak from it, and without a copy on disk a cold
+ * start with no network showed a Today object with its numbers missing and a
+ * red "couldn't load your progress" under it (MOB-069). A persisted copy can be
+ * a few hours stale, which is the same bargain the decks and cards already
+ * make, and React Query refetches the moment the network comes back.
+ */
+const PERSISTED = ['decks', 'cards', 'groups', 'forecast', 'tags', 'statistics']
 
 const persister = createSyncStoragePersister({
   storage: {
