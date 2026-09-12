@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next'
 import { useBooks } from '@nowry/core/hooks/useBooks'
 import {
   KINDS,
+  SORTS,
   cardsFrom,
   composition,
   coverage,
@@ -33,10 +34,27 @@ import {
   kindOf,
   pickContinue,
   readingPage,
-  sortDocuments
+  sortDocuments,
+  tagCounts
 } from '@nowry/core/domain/books/libraryQuery'
 import { useTheme } from '../theme'
-import { Button, Divider, Icon, Input, ListRow, Measure, Readout, Screen, Skeleton, Stack, SummaryObject, Typography } from '../ui'
+import { LibraryFilterSheet } from './BookLibraryFilters'
+import {
+  Button,
+  Chip,
+  Divider,
+  Icon,
+  Input,
+  ListRow,
+  Measure,
+  Readout,
+  Screen,
+  Segmented,
+  Skeleton,
+  Stack,
+  SummaryObject,
+  Typography
+} from '../ui'
 
 export function BookLibrary() {
   const { t, i18n } = useTranslation()
@@ -46,11 +64,15 @@ export function BookLibrary() {
 
   const [kind, setKind] = useState(KINDS[0])
   const [search, setSearch] = useState('')
+  const [sort, setSort] = useState(SORTS[0])
+  const [tags, setTags] = useState([])
+  const [sheet, setSheet] = useState(null)
 
   const { books, loading, error, reload } = useBooks()
 
   const counts = useMemo(() => kindCounts(books), [books])
-  const rows = useMemo(() => sortDocuments(filterDocuments(books, { kind, search }), 'edited'), [books, kind, search])
+  const allTags = useMemo(() => tagCounts(books), [books])
+  const rows = useMemo(() => sortDocuments(filterDocuments(books, { kind, search, tags }), sort), [books, kind, search, tags, sort])
   const continues = useMemo(() => pickContinue(books), [books])
 
   const when = (value) => (value ? new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(new Date(value)) : '')
@@ -84,24 +106,32 @@ export function BookLibrary() {
         <ContinueCard book={continues} onOpen={open} when={when} t={t} />
       )}
 
-      {/* The segment separates written from imported, which is the one
-          distinction this library actually has. The counts ride in the labels,
-          as every other filter object in this app does. */}
-      <Stack direction='row' spacing={1}>
-        {KINDS.map((value) => (
-          <Button
-            key={value}
-            size='sm'
-            variant={kind === value ? 'secondary' : 'tertiary'}
-            onPress={() => setKind(value)}
-            accessibilityLabel={t(`books.lib.kind.${value}`)}
-          >
-            {`${t(`books.lib.kind.${value}`)} · ${counts[value]}`}
-          </Button>
-        ))}
-      </Stack>
+      {/*
+       * The web's own toolbar, in its own order: the kind segment with counts,
+       * then search, then Tags and Sort as menus whose labels are their
+       * readouts. It was three plain keys and a search box before — the same
+       * information in a different shape, which is the kind of drift that makes
+       * two clients cost twice as much to keep in step.
+       */}
+      <Segmented
+        accessibilityLabel={t('books.lib.kindAria')}
+        value={kind}
+        onChange={setKind}
+        options={KINDS.map((value) => ({ value, label: `${t(`books.lib.kind.${value}`)} · ${counts[value]}` }))}
+      />
 
       <Input value={search} onChangeText={setSearch} placeholder={t('books.lib.search')} accessibilityLabel={t('books.lib.search')} />
+
+      <Stack direction='row' spacing={1}>
+        {allTags.length > 0 ? (
+          <Chip selected={tags.length > 0} onPress={() => setSheet('tags')}>
+            {tags.length > 0 ? t('books.lib.tagsReadout', { count: tags.length }) : t('books.lib.tags')}
+          </Chip>
+        ) : null}
+        <Chip selected={sort !== SORTS[0]} onPress={() => setSheet('sort')}>
+          {t('books.lib.sort', { by: t(`books.lib.sortBy.${sort}`) })}
+        </Chip>
+      </Stack>
     </Stack>
   )
 
@@ -127,6 +157,16 @@ export function BookLibrary() {
             </Typography>
           )
         }
+      />
+
+      <LibraryFilterSheet
+        open={sheet}
+        onClose={() => setSheet(null)}
+        sort={sort}
+        onSort={setSort}
+        tags={tags}
+        onTags={setTags}
+        available={allTags}
       />
     </Screen>
   )
