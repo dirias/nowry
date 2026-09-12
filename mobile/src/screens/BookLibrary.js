@@ -191,6 +191,14 @@ function ContinueCard({ book, onOpen, when, t }) {
           </Readout>
           {imported && position ? <Readout>{t('books.lib.pagesRead', { page: position.page, total: position.total })}</Readout> : null}
           {cardsFrom(book) ? <Readout>{t('books.lib.cardsFromDocument', { count: cardsFrom(book) })}</Readout> : null}
+          {/*
+           * What the document owes you TODAY, which this object dropped. Every
+           * other readout here is a fact about the document; this is the only
+           * one that asks for something, and the web draws it in `text.primary`
+           * for exactly that reason. Above zero only (ADR-012) — a summary that
+           * reports having nothing due is reporting an absence.
+           */}
+          {book.due > 0 ? <Readout leading>{t('books.lib.dueToday', { count: book.due })}</Readout> : null}
         </>
       }
       action={

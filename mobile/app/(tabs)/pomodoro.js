@@ -145,20 +145,29 @@ export default function Focus() {
 
         <Progress value={progress * 100} accessibilityLabel={t(`pomodoro.modes.${mode}`)} />
 
-        <Button size='lg' onPress={timer.toggleTimer}>
-          {t(isActive ? 'pomodoro.pause' : startLabel)}
-        </Button>
-
         {/*
-         * ONE secondary, as the web has it: reset while focusing, skip while on
-         * a break. Both were drawn at once, so "Skip to the next session" sat
-         * under a focus timer that has no next session to skip to — and the two
-         * were a boxed key beside a bare text link, which is two weights for
-         * one job.
+         * Beside, not stacked. Two full-width slabs one above the other read as
+         * two equally weighted choices, and this screen has one action and one
+         * alternative — the same correction the deck screen and the group
+         * screen already carry, and the phone's reading of §15.6's two rails:
+         * the alternative starts on the left, the action ends on the right.
          */}
-        <Button variant='secondary' onPress={isFocus ? timer.resetTimer : timer.skipSession}>
-          {t(isFocus ? 'pomodoro.reset' : 'pomodoro.skip')}
-        </Button>
+        <Stack direction='row' spacing={1}>
+          {/*
+           * ONE secondary, as the web has it: reset while focusing, skip while
+           * on a break. Both were drawn at once, so "Skip to the next session"
+           * sat under a focus timer that has no next session to skip to — and
+           * the two were a boxed key beside a bare text link, which is two
+           * weights for one job.
+           */}
+          <Button size='lg' variant='secondary' style={{ flex: 1 }} onPress={isFocus ? timer.resetTimer : timer.skipSession}>
+            {t(isFocus ? 'pomodoro.reset' : 'pomodoro.skip')}
+          </Button>
+
+          <Button size='lg' style={{ flex: 2 }} onPress={timer.toggleTimer}>
+            {t(isActive ? 'pomodoro.pause' : startLabel)}
+          </Button>
+        </Stack>
       </Stack>
     </Screen>
   )
