@@ -144,9 +144,26 @@ export function BottomSheet({ visible, onClose, title, children, accessibilityLa
           </View>
           {/* `handled` so a tap on a control inside the sheet reaches it on the
               first press rather than being eaten by the keyboard's dismissal. */}
+          {/*
+           * `flexShrink` is what makes the sheet SCROLLABLE rather than merely
+           * tall. Without it a ScrollView inside a `maxHeight` box sizes itself
+           * to its content and never scrolls, so when the keyboard came up the
+           * event form's action row sat half behind it with no way to reach it
+           * — the field was fixed in MOB-052 and the buttons were not
+           * (MOB-073). With it the list takes the space that is left and the
+           * rest scrolls, whatever height the keyboard turns out to be.
+           *
+           * The bottom pad is the second half: a row flush against the sheet's
+           * edge reads as cut off even when it is whole.
+           */}
           <ScrollView
+            style={{ flexShrink: 1 }}
             keyboardShouldPersistTaps='handled'
-            contentContainerStyle={{ paddingHorizontal: theme.spacing[2], paddingTop: theme.spacing[1] }}
+            contentContainerStyle={{
+              paddingHorizontal: theme.spacing[2],
+              paddingTop: theme.spacing[1],
+              paddingBottom: theme.spacing[2]
+            }}
           >
             <SheetContext.Provider value={true}>{children}</SheetContext.Provider>
           </ScrollView>
