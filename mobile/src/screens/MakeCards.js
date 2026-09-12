@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next'
 import { booksService, cardsService } from '@nowry/core/api/services'
 import { estimateFor, preTicked, sourceFieldsFor } from '@nowry/core/domain/books/sectionCards'
 import { CARD_TITLE_MAX, titleTooLong } from '@nowry/core/domain/cardTypes'
+import { PLUS_MONTHLY_GENERATIONS } from '@nowry/core/domain/books/sectionCards'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useTheme } from '../theme'
@@ -89,8 +90,25 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
        */
       setKept(Object.fromEntries(rows.map((card, index) => [index, !titleTooLong(card)])))
       setStep('review')
-    } catch {
-      setFailed(t('books.makeCards.loadError'))
+    } catch (error) {
+      /*
+       * The first build reported "couldn't read the document's sections" here,
+       * which is the OTHER failure in this sheet: the sections were on screen,
+       * listed and ticked, while the message said they could not be read. A
+       * wrong explanation is worse than none — it sends the reader to look at
+       * the part that is working.
+       */
+      const status = error?.response?.status
+      const detail = error?.response?.data?.detail ?? null
+      if (status === 403) {
+        // The plan's allowance, stated as a fact. No upgrade path, at any tier
+        // (ADR-030).
+        setFailed(t('books.makeCards.budgetSpent', { limit: PLUS_MONTHLY_GENERATIONS }))
+      } else if (status === 503 || status === 502 || status === 429) {
+        setFailed(t('aiMagic.generateFromBook.errorAiService'))
+      } else {
+        setFailed(detail ?? t('aiMagic.generateFromBook.error'))
+      }
     } finally {
       setBusy(false)
     }

@@ -3257,7 +3257,7 @@
       "generating": "Generating cards…",
       "generatingQuiz": "Generating quiz…",
       "generatingHint": "AI is working — this may take up to a minute",
-      "error": "Couldn't generate from book. Please try again.",
+      "error": "No se pudieron crear tarjetas desde el documento. Inténtalo de nuevo.",
       "errorQuiz": "Couldn't generate quiz from book. Please try again.",
       "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento.",
       "stages": {

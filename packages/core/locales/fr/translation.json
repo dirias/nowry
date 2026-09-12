@@ -2727,13 +2727,14 @@
       "generating": "Generating cards…",
       "generatingQuiz": "Generating quiz…",
       "generatingHint": "AI is working — this may take up to a minute",
-      "error": "Couldn't generate from book. Please try again.",
+      "error": "Impossible de créer des cartes à partir du document. Réessayez.",
       "errorQuiz": "Couldn't generate quiz from book. Please try again.",
       "stages": {
         "s0": "Lecture de votre livre...",
         "s1": "Sélection de l'essentiel...",
         "s2": "Rédaction du résultat..."
-      }
+      },
+      "errorAiService": "Le service d'IA est momentanément indisponible. Réessayez dans un instant."
     },
     "analyzeDeck": {
       "label": "Analyze Deck",

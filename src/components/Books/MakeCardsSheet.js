@@ -4,7 +4,7 @@ import { Box, Button, Checkbox, Chip, Skeleton, Stack, Typography } from '@mui/j
 import LockIcon from '@mui/icons-material/Lock'
 
 import { booksService } from '@nowry/core/api/services'
-import { estimateFor, needsCards, preTicked } from '@nowry/core/domain/books/sectionCards'
+import { PLUS_MONTHLY_GENERATIONS, estimateFor, needsCards, preTicked } from '@nowry/core/domain/books/sectionCards'
 import FormSheet from '../Common/Form/FormSheet'
 import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import { focusRing, listRow, readout } from '../Common/Form/formStyles'
@@ -24,8 +24,9 @@ import { focusRing, listRow, readout } from '../Common/Form/formStyles'
  * come from the server's own estimate, and one run is one generation.
  */
 
-/** Plus's monthly allowance (plans.features.aiUsagePlus); Pro is unlimited. */
-export const PLUS_MONTHLY_GENERATIONS = 100
+// Plus's monthly allowance now lives beside the other section rules, because
+// the phone needs the same number to explain a 403 (MOB-057).
+export { PLUS_MONTHLY_GENERATIONS } from '@nowry/core/domain/books/sectionCards'
 
 // D5 and the pre-tick live in `@nowry/core/domain/books/sectionCards` so the
 // phone's sheet opens with the same sections ticked (MOB-057).

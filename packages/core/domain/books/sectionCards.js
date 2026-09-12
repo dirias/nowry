@@ -11,6 +11,14 @@
  */
 
 /**
+ * Plus's monthly allowance (`plans.features.aiUsagePlus`); Pro is unlimited.
+ *
+ * It was a constant in the web's sheet, and the phone needs the same number to
+ * say what a 403 from the generator means without offering an upgrade (ADR-030).
+ */
+export const PLUS_MONTHLY_GENERATIONS = 100
+
+/**
  * D5 — a section needs cards when it has none, or when its text changed after
  * the cards were made. The default press covers the gap and regenerates
  * nothing the learner did not ask for.

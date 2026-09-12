@@ -2648,13 +2648,14 @@
       "generating": "Generating cards…",
       "generatingQuiz": "Generating quiz…",
       "generatingHint": "AI is working — this may take up to a minute",
-      "error": "Couldn't generate from book. Please try again.",
+      "error": "ドキュメントからカードを作成できませんでした。もう一度お試しください。",
       "errorQuiz": "Couldn't generate quiz from book. Please try again.",
       "stages": {
         "s0": "本を読んでいます...",
         "s1": "重要な内容を選んでいます...",
         "s2": "結果をまとめています..."
-      }
+      },
+      "errorAiService": "AI サービスが一時的に利用できません。しばらくしてからお試しください。"
     },
     "analyzeDeck": {
       "label": "Analyze Deck",
