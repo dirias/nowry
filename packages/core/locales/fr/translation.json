@@ -3237,6 +3237,10 @@
     "daysRemaining_one": "{{count}} jour restant",
     "daysRemaining_other": "{{count}} jours restants",
     "overdueBy_one": "{{count}} jour de retard",
-    "overdueBy_other": "{{count}} jours de retard"
+    "overdueBy_other": "{{count}} jours de retard",
+    "noPrioritiesYet": "Aucune priorité pour l'instant",
+    "createPriority": "Créer une priorité",
+    "overdue": "En retard",
+    "noDeadline": "Sans échéance"
   }
 }

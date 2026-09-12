@@ -3226,6 +3226,10 @@
     "daysRemaining_one": "Noch {{count}} Tag",
     "daysRemaining_other": "Noch {{count}} Tage",
     "overdueBy_one": "{{count}} Tag überfällig",
-    "overdueBy_other": "{{count}} Tage überfällig"
+    "overdueBy_other": "{{count}} Tage überfällig",
+    "noPrioritiesYet": "Noch keine Prioritäten",
+    "createPriority": "Priorität erstellen",
+    "overdue": "Überfällig",
+    "noDeadline": "Keine Frist"
   }
 }

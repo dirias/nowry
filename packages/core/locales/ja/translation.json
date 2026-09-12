@@ -3127,8 +3127,12 @@
     "moreNotesAriaLabel_other": "下に{{count}}件のメモを表示"
   },
   "focusBar": {
-    "daysLeft_other": "残り{{count}}日",
+    "daysLeft_other": "残り {{count}} 日",
     "daysRemaining_other": "残り{{count}}日",
-    "overdueBy_other": "{{count}}日遅れ"
+    "overdueBy_other": "{{count}}日遅れ",
+    "noPrioritiesYet": "優先事項はまだありません",
+    "createPriority": "優先事項を作成",
+    "overdue": "期限切れ",
+    "noDeadline": "期限なし"
   }
 }

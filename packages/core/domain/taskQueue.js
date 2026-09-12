@@ -30,13 +30,27 @@ export const isDueBy = (task, now = new Date()) => {
 }
 
 /**
- * Today's open tasks, overdue first.
+ * The web's three, in the web's order. `pending` is the default everywhere
+ * because a list of today's tasks means the ones still to do — but a tick has
+ * to be reversible, and a filter that cannot show a completed task is a tick
+ * with no way back (MOB-079).
+ */
+export const TASK_FILTERS = ['all', 'pending', 'completed']
+
+const matchesStatus = (task, status) => {
+  if (status === 'all') return true
+  if (status === 'completed') return Boolean(task?.is_completed)
+  return !task?.is_completed
+}
+
+/**
+ * Today's tasks, overdue first.
  *
  * @param {Array} tasks
- * @param {{ now?: Date, limit?: number }} options
+ * @param {{ now?: Date, limit?: number, status?: 'all'|'pending'|'completed' }} options
  */
-export const tasksDueToday = (tasks, { now = new Date(), limit = null } = {}) => {
-  const due = (tasks ?? []).filter((task) => !task?.is_completed && isDueBy(task, now))
+export const tasksDueToday = (tasks, { now = new Date(), limit = null, status = 'pending' } = {}) => {
+  const due = (tasks ?? []).filter((task) => matchesStatus(task, status) && isDueBy(task, now))
   const today = startOfDay(now)
 
   due.sort((a, b) => {

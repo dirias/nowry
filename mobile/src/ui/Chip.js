@@ -9,6 +9,11 @@
  * says so with `selected`, rather than turning the accent colour.
  *
  * `size='sm'` is the house default for filter chips, per the frontend rules.
+ *
+ * `startGlyph` and `endGlyph` bracket the label: an area's emoji on one side,
+ * a deadline's "3d" on the other. Both are drawn by the caller, because a chip
+ * that knew what an area or a deadline was would be a different component
+ * wearing this one's name.
  */
 import { Pressable, View } from 'react-native'
 import { useTheme } from '../theme'
@@ -20,7 +25,7 @@ const SIZES = {
   md: { height: 32, paddingX: 12, level: 'title-sm' }
 }
 
-export function Chip({ children, onPress, selected = false, size = 'sm', accessibilityLabel, startGlyph, style, ...rest }) {
+export function Chip({ children, onPress, selected = false, size = 'sm', accessibilityLabel, startGlyph, endGlyph, style, ...rest }) {
   const theme = useTheme()
   const spec = SIZES[size]
 
@@ -42,9 +47,10 @@ export function Chip({ children, onPress, selected = false, size = 'sm', accessi
       }}
     >
       {startGlyph}
-      <Typography level={spec.level} color={selected ? 'text.primary' : 'text.secondary'} numberOfLines={1}>
+      <Typography level={spec.level} color={selected ? 'text.primary' : 'text.secondary'} numberOfLines={1} style={{ flexShrink: 1 }}>
         {children}
       </Typography>
+      {endGlyph}
     </View>
   )
 

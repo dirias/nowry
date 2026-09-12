@@ -72,3 +72,33 @@ describe('taskCategory', () => {
     expect(taskCategory({ category: 'list_2' })).toBe('list_2')
   })
 })
+
+describe('tasksDueToday, by status', () => {
+  const tasks = [
+    { _id: 'a', title: 'Overdue and open', deadline: '2026-09-08T00:00:00Z' },
+    { _id: 'b', title: 'Done today', deadline: '2026-09-12T00:00:00Z', is_completed: true },
+    { _id: 'c', title: 'Open today', deadline: '2026-09-12T00:00:00Z' },
+    { _id: 'd', title: 'Next week', deadline: '2026-09-20T00:00:00Z' }
+  ]
+  const now = new Date('2026-09-12T10:00:00')
+
+  it('shows what is still to do, by default', () => {
+    expect(tasksDueToday(tasks, { now }).map((task) => task._id)).toEqual(['a', 'c'])
+  })
+
+  it('shows what was ticked, so a tick can be taken back', () => {
+    expect(tasksDueToday(tasks, { now, status: 'completed' }).map((task) => task._id)).toEqual(['b'])
+  })
+
+  it('shows both, and never a task that is not due yet', () => {
+    expect(
+      tasksDueToday(tasks, { now, status: 'all' })
+        .map((task) => task._id)
+        .sort()
+    ).toEqual(['a', 'b', 'c'])
+  })
+
+  it('counts only what is outstanding', () => {
+    expect(dueTodayCount(tasks, now)).toBe(2)
+  })
+})
