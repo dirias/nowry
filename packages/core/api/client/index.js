@@ -28,7 +28,23 @@ apiClient.interceptors.request.use(
   async (config) => {
     // Applied per request rather than at create time — see the note above.
     config.baseURL = env.apiUrl
-    config.timeout = env.apiTimeout
+
+    /*
+     * The default applies only where the call did not ask for its own.
+     *
+     * This used to assign unconditionally, which quietly discarded every
+     * `{ timeout: … }` a service passed — and eight of them do, because they
+     * wait on a model: 60s for a chat reply, 120s for card generation, 360s for
+     * a video. Every one of those ran on the 10-second default instead and came
+     * back as `ECONNABORTED` with no response, which is a failure with nothing
+     * in it to explain itself. Making cards from a document on a phone hit it
+     * every time (MOB-060).
+     *
+     * `!config.timeout` rather than `??`: axios leaves this at 0 when nobody
+     * set one, and 0 means "no timeout at all" — which is not what an unset
+     * value should become.
+     */
+    if (!config.timeout) config.timeout = env.apiTimeout
 
     try {
       const firebaseUser = auth.currentUser()
