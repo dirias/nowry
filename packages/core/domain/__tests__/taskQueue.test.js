@@ -1,4 +1,4 @@
-import { dueTodayCount, isDueBy, taskCategory, tasksDueToday } from '../taskQueue'
+import { dueTodayCount, isDueBy, taskCategory, taskDueState, tasksDueToday } from '../taskQueue'
 
 const now = new Date('2026-09-12T10:00:00')
 const task = (id, extra) => ({ _id: id, title: id, ...extra })
@@ -100,5 +100,36 @@ describe('tasksDueToday, by status', () => {
 
   it('counts only what is outstanding', () => {
     expect(dueTodayCount(tasks, now)).toBe(2)
+  })
+})
+
+describe('taskDueState', () => {
+  const now = new Date('2026-09-12T10:00:00')
+
+  it('calls a task from an earlier day late', () => {
+    expect(taskDueState({ deadline: '2026-09-08T00:00:00Z' }, now)).toBe('overdue')
+  })
+
+  it("calls today's task today, whatever hour it carries", () => {
+    expect(taskDueState({ deadline: '2026-09-12T23:00:00' }, now)).toBe('today')
+    expect(taskDueState({ deadline: '2026-09-12T01:00:00' }, now)).toBe('today')
+  })
+
+  it('says nothing about a task that is not due yet', () => {
+    expect(taskDueState({ deadline: '2026-09-20T00:00:00Z' }, now)).toBeNull()
+  })
+
+  it('says nothing about a task with no deadline at all', () => {
+    expect(taskDueState({ title: 'Someday' }, now)).toBeNull()
+    expect(taskDueState(null, now)).toBeNull()
+  })
+
+  it('agrees with the order the list is already sorted in', () => {
+    const tasks = [
+      { _id: 'today', deadline: '2026-09-12T00:00:00Z' },
+      { _id: 'late', deadline: '2026-09-09T00:00:00Z' }
+    ]
+    const [first] = tasksDueToday(tasks, { now })
+    expect(taskDueState(first, now)).toBe('overdue')
   })
 })

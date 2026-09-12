@@ -8,13 +8,17 @@
  *
  * The web's hover ground becomes a pressed ground here, since a phone has no
  * pointer to hover with. Everything else is the same grammar.
+ *
+ * `dimmed` is the one variant: a row whose subject is done. It lowers the name
+ * to `text.tertiary` and nothing else — no strike, no tint, because the state
+ * already has a tick and a second signal would be the same fact said twice.
  */
 import { Pressable, View } from 'react-native'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
 import { LIST_ROW_HEIGHT } from './rowSpec'
 
-export function ListRow({ tile, name, meta, measure, readout, action, onPress, onLongPress, accessibilityLabel, style }) {
+export function ListRow({ tile, name, meta, measure, readout, action, dimmed = false, onPress, onLongPress, accessibilityLabel, style }) {
   const theme = useTheme()
 
   const body = (pressed) => (
@@ -34,7 +38,10 @@ export function ListRow({ tile, name, meta, measure, readout, action, onPress, o
     >
       {tile}
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Typography level='title-sm' color='text.primary' numberOfLines={1}>
+        {/* `dimmed` is for a row whose subject is finished — a completed task,
+            an archived deck. The name stops competing with the open ones above
+            it, and the tick beside it is no longer the only thing saying so. */}
+        <Typography level='title-sm' color={dimmed ? 'text.tertiary' : 'text.primary'} numberOfLines={1}>
           {name}
         </Typography>
         {meta ? (

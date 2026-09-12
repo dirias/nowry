@@ -54,7 +54,7 @@ import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { tasksService } from '@nowry/core/api/services'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { deadlineReadout, watchedPriorities } from '@nowry/core/domain/priorityWatch'
-import { TASK_FILTERS, dueTodayCount, taskCategory, tasksDueToday } from '@nowry/core/domain/taskQueue'
+import { dueTodayCount, taskCategory, taskDueState, tasksDueToday } from '@nowry/core/domain/taskQueue'
 import { ROUTINE_PERIODS, completedToday, currentPeriod, routineItems, toggledCompletions, todayKey } from '@nowry/core/domain/dailyRoutine'
 import { useNews } from '@nowry/core/hooks/useNews'
 import { unfavourited, useNewsFavourites } from '@nowry/core/hooks/useNewsFavourites'
@@ -63,16 +63,19 @@ import { DAILY_REVIEW } from '../../src/screens/StudySession'
 import { useTheme } from '../../src/theme'
 import {
   Button,
-  Card,
   Checkbox,
   Chip,
   Divider,
   Input,
   Icon,
+  LIST_ROW_HEIGHT,
   ListRow,
   NextStepsPanel,
+  Progress,
+  Readout,
   Screen,
   Segmented,
+  Sheet,
   Skeleton,
   Stack,
   Typography,
@@ -89,6 +92,14 @@ const AREAS_SHOWN = 3
 const PRIORITIES_SHOWN = 2
 /** The tab the web's panel gives its task list, beside the three periods. */
 const TASKS_TAB = 'tasks'
+/**
+ * `ListRow`'s own horizontal padding, which its pressed ground needs and which
+ * therefore sets the rail every row's content sits on. The capture row and the
+ * done disclosure are not `ListRow`s — one holds a field and the other a
+ * caret — so they have to be told the rail, or they land 12pt to the left of
+ * every task under them, which is the misalignment the redesign is about.
+ */
+const ROW_RAIL = 1.5
 
 export default function Home() {
   const { t, i18n } = useTranslation()
@@ -306,60 +317,97 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
 
 /**
  * The day, as one panel with four tabs — the web's `SideMenu`, and the largest
- * object on its Home.
+ * object on its Home. Redrawn to the day-panel canvas, direction A (MOB-081).
  *
  * Tasks and the routine were two separate sections here, a screen apart, each
  * with its own heading. They are one object: the same question asked four ways,
  * which is what the single tab strip says and two headings cannot.
  *
- * **It opens on the period the clock is in**, as the web's does. Looking at
- * tonight at two in the afternoon is a normal want, so the tabs stay.
- *
- * **The tabs carry words.** The web's four are unlabelled glyphs and its own
- * design canvas calls that the right idea drawn wrong. This is the one place
- * this screen deliberately differs, and it is the difference between a control
- * a screen reader can name and one it cannot.
- *
  * **It opens on a tab that has something in it.** The clock's period first, as
  * the web does; then any period that does have items; then tasks. The web can
  * afford to open on an empty morning because its empty state offers the editor
- * that fills it — this client has no routine editor at all yet, so opening on
- * an empty tab would be an empty panel with no way forward.
+ * that fills it — this client has no routine editor at all yet.
+ *
+ * **The tabs carry words.** The web's four are unlabelled glyphs and its own
+ * design canvas calls that the right idea drawn wrong.
+ *
+ * What the canvas changed, and why each one is a rule rather than a taste:
+ *
+ * - **The ground.** It was `level1` with a hairline, which is the ground that
+ *   means *pressable* (§15.1) — so the thing the controls act on was drawn as a
+ *   control, and the companion below it on Home, which is decoration, was the
+ *   one drawn on `surface`. The ladder was inverted. It is a `surface` sheet
+ *   now, lifted once, and the segmented control's own `level1` ground is
+ *   legible again for the first time: it used to sit on `level1` inside
+ *   `level1` and vanish, leaving the cell hairlines floating.
+ * - **Progress is the edge under the tabs** (§15.4), 3pt, exactly content
+ *   width, doing the divider's job as well. The day's ratio was a sentence
+ *   before, or nothing.
+ * - **Capture is the first ROW of the list**, not a form above it. A bordered
+ *   field and a second button, forty points tall and aligned to nothing below
+ *   them, on the one interaction this panel should be fastest at. It is still
+ *   zero taps to type.
+ * - **The status filters are gone.** Three chips cutting the day three ways,
+ *   directly under four tabs cutting it four ways — two segmented ideas stacked
+ *   (§15.2). What they were for was making a tick reversible, and that is the
+ *   list's job: the done tasks sit behind one disclosure at the foot.
+ * - **The period's name is not repeated inside its own tab.** The same fix the
+ *   news carousel already took.
  *
  * Ticking is the one verb the routine has here, and the only one: the routine
- * is WRITTEN on the web and ticked here, which is why there is no pencil.
- * Tasks get one more — capture — because writing a thought down is not managing
- * tasks, and a phone is where the thought arrives.
+ * is WRITTEN on the web and ticked here. Tasks get one more — capture — because
+ * writing a thought down is not managing tasks, and a phone is where the
+ * thought arrives.
  */
 function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, reloadTasks, theme, t }) {
   const [tab, setTab] = useState(() => openingTab(routine))
 
-  return (
-    <Card padding={2}>
-      <Stack spacing={2}>
-        <Segmented
-          accessibilityLabel={t('annualPlanning.dailyRoutine.title')}
-          value={tab}
-          onChange={setTab}
-          options={[
-            ...ROUTINE_PERIODS.map((name) => ({
-              value: name,
-              /* Short labels, as the focus timer's modes already carry: the
-                 full "Morning Routine" is three words on a quarter of 390pt. */
-              label: t(`annualPlanning.dailyRoutine.short.${name}`),
-              count: routineItems(routine, name).length || undefined
-            })),
-            { value: TASKS_TAB, label: t('tasks.title'), count: tasksCount || undefined }
-          ]}
-        />
+  const onTasks = tab === TASKS_TAB
+  const done = completedToday(routine)
+  const items = onTasks ? [] : routineItems(routine, tab)
 
-        {tab === TASKS_TAB ? (
+  /*
+   * The ratio the edge draws. Both halves come from the tab in hand: the day's
+   * tasks, or the period's items. A tab with nothing in it draws an empty edge
+   * rather than none, so the panel is the same shape on all four — a container
+   * that resizes when you change tabs reads as four different objects.
+   */
+  const ratio = onTasks
+    ? { done: tasksDueToday(tasks, { status: 'completed' }).length, total: tasksDueToday(tasks, { status: 'all' }).length }
+    : { done: items.filter((item) => done.has(item.id)).length, total: items.length }
+
+  return (
+    <Sheet padding={2} elevation='sm'>
+      <Stack spacing={2}>
+        <Stack spacing={1}>
+          <Segmented
+            accessibilityLabel={t('annualPlanning.dailyRoutine.title')}
+            value={tab}
+            onChange={setTab}
+            options={[
+              ...ROUTINE_PERIODS.map((name) => ({
+                value: name,
+                /* Short labels, as the focus timer's modes already carry: the
+                   full "Morning Routine" is three words on a quarter of 390pt. */
+                label: t(`annualPlanning.dailyRoutine.short.${name}`),
+                count: routineItems(routine, name).length || undefined
+              })),
+              { value: TASKS_TAB, label: t('tasks.title'), count: tasksCount || undefined }
+            ]}
+          />
+          <Progress
+            value={ratio.total > 0 ? (ratio.done / ratio.total) * 100 : 0}
+            accessibilityLabel={t('tasks.progress.label', { done: ratio.done, total: ratio.total })}
+          />
+        </Stack>
+
+        {onTasks ? (
           <TaskTab tasks={tasks} loading={tasksLoading} onReload={reloadTasks} theme={theme} t={t} />
         ) : (
-          <RoutineTab period={tab} routine={routine} onReload={reloadRoutine} t={t} />
+          <RoutineTab items={items} done={done} routine={routine} onReload={reloadRoutine} t={t} />
         )}
       </Stack>
-    </Card>
+    </Sheet>
   )
 }
 
@@ -376,12 +424,9 @@ function openingTab(routine) {
   return ROUTINE_PERIODS.find((name) => routineItems(routine, name).length > 0) ?? TASKS_TAB
 }
 
-/** One period of the routine: its name and its items. */
-function RoutineTab({ period, routine, onReload, t }) {
+/** One period of the routine: its items, and nothing above them. */
+function RoutineTab({ items, done, routine, onReload, t }) {
   const [pending, setPending] = useState(null)
-
-  const items = routineItems(routine, period)
-  const done = completedToday(routine)
 
   const toggle = async (item) => {
     setPending(item.id)
@@ -395,35 +440,35 @@ function RoutineTab({ period, routine, onReload, t }) {
     }
   }
 
+  if (items.length === 0) {
+    /* Said, and nothing offered: this client has no routine editor, so a key
+       here would be a key to nowhere. */
+    return (
+      <Typography level='body-sm' color='text.tertiary'>
+        {t('annualPlanning.dailyRoutine.emptySubtitle')}
+      </Typography>
+    )
+  }
+
   return (
     <View>
-      <Typography level='title-md'>{t(`annualPlanning.dailyRoutine.${period}`)}</Typography>
-
-      {items.length === 0 ? (
-        /* Said, and nothing offered: this client has no routine editor, so a
-           key here would be a key to nowhere. */
-        <Typography level='body-sm' color='text.tertiary' style={{ paddingTop: 8 }}>
-          {t('annualPlanning.dailyRoutine.emptySubtitle')}
-        </Typography>
-      ) : (
-        items.map((item) => (
-          <View key={item.id}>
-            <Divider />
-            <ListRow
-              tile={
-                <Checkbox
-                  checked={done.has(item.id)}
-                  disabled={pending === item.id}
-                  onPress={() => toggle(item)}
-                  accessibilityLabel={t('annualPlanning.dailyRoutine.toggleItem')}
-                />
-              }
-              name={item.text || item.title || ''}
-              onPress={() => toggle(item)}
-            />
-          </View>
-        ))
-      )}
+      {items.map((item, index) => (
+        <View key={item.id}>
+          {index === 0 ? null : <Divider />}
+          <ListRow
+            tile={
+              <Checkbox
+                checked={done.has(item.id)}
+                disabled={pending === item.id}
+                onPress={() => toggle(item)}
+                accessibilityLabel={t('annualPlanning.dailyRoutine.toggleItem')}
+              />
+            }
+            name={item.text || item.title || ''}
+            onPress={() => toggle(item)}
+          />
+        </View>
+      ))}
     </View>
   )
 }
@@ -432,25 +477,32 @@ function RoutineTab({ period, routine, onReload, t }) {
  * The panel's fourth tab: today's tasks, checkable in place, with the two verbs
  * Home keeps.
  *
- * The capture field is the exception to the watching rule and it earns it: the
- * web panel's type-and-Enter field is the fastest interaction on it, and
- * sending someone to another screen to write a thought down is a regression.
+ * **Capture is a row, not a form.** It carries a `+` where the checkbox goes,
+ * so it lands on the same two rails as every task under it, and the field has
+ * no box of its own because the row is already the box. Zero taps to type, as
+ * before — the point was never to slow it down, it was to stop a form sitting
+ * on top of a list.
  *
- * **And the web's three filters, because a tick has to be reversible.** Pending
- * is the default and is what this list has always shown — which meant that
- * ticking a task made it vanish with no screen anywhere in this client able to
- * show it again. The calendar cannot: its agenda drops the days of the current
- * month that have already passed, so an overdue task is not on it either. Three
- * chips fix that and are what the web's own panel carries.
+ * **Done is a disclosure, not a mode.** Ticking a task used to make it vanish
+ * with no screen anywhere in this client able to show it again: the calendar's
+ * agenda drops the days of the current month that have already passed, so an
+ * overdue task is not on it either. Three filter chips fixed that and cost a
+ * whole control row; one line at the foot fixes it and costs nothing when there
+ * is nothing done (ADR-012).
  *
- * Everything else — search, reordering, editing, deleting — is work, and work
- * is not here.
+ * **Late is the one thing a row says about itself.** Two of the three tasks on
+ * this account were overdue and every row looked identical. Only `overdue`
+ * draws: "today" is what the panel already means, and a readout on every row
+ * that says the same word is texture, not information.
  */
 function TaskTab({ tasks, loading, onReload, theme, t }) {
-  const [filter, setFilter] = useState('pending')
   const [draft, setDraft] = useState('')
   const [saving, setSaving] = useState(false)
   const [busy, setBusy] = useState({})
+  const [showDone, setShowDone] = useState(false)
+
+  const shown = tasksDueToday(tasks, { limit: TASKS_SHOWN })
+  const finished = tasksDueToday(tasks, { status: 'completed' })
 
   const add = async () => {
     const title = draft.trim()
@@ -482,11 +534,54 @@ function TaskTab({ tasks, loading, onReload, theme, t }) {
     }
   }
 
-  const shown = tasksDueToday(tasks, { limit: TASKS_SHOWN, status: filter })
+  const taskRow = (task, { finished: isDone = false } = {}) => {
+    const id = task._id ?? task.id
+    const late = !isDone && taskDueState(task) === 'overdue'
+    return (
+      <ListRow
+        key={id}
+        dimmed={isDone}
+        tile={
+          <Checkbox
+            checked={Boolean(task.is_completed)}
+            disabled={Boolean(busy[id])}
+            onPress={() => toggle(task)}
+            accessibilityLabel={t('calendarPage.agenda.markDone')}
+          />
+        }
+        name={task.title}
+        /* Never a raw list id: see `taskCategory`. */
+        meta={taskCategory(task)}
+        /* The word carries the state, and it lifts to `text.primary` rather
+           than turning red: a hue on a dashboard reads as an error (§15.5). */
+        readout={late ? <Readout leading>{t('focusBar.overdue')}</Readout> : null}
+        onPress={() => toggle(task)}
+      />
+    )
+  }
 
   return (
     <View>
-      <Stack direction='row' spacing={1} style={{ alignItems: 'center', paddingBottom: theme.spacing[1] }}>
+      {/* The capture row. `Input` keeps its own type scale and placeholder
+          colour; only its box is taken off, because the row is the box. */}
+      <Stack
+        direction='row'
+        spacing={1.5}
+        style={{ alignItems: 'center', minHeight: LIST_ROW_HEIGHT, paddingHorizontal: theme.spacing[ROW_RAIL] }}
+      >
+        <View
+          importantForAccessibility='no'
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: theme.radius.sm,
+            backgroundColor: resolveColor(theme, 'background.level1'),
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Icon name='Plus' size='sm' color='text.secondary' />
+        </View>
         <Input
           value={draft}
           onChangeText={setDraft}
@@ -494,54 +589,72 @@ function TaskTab({ tasks, loading, onReload, theme, t }) {
           accessibilityLabel={t('home.addTaskToday')}
           returnKeyType='done'
           onSubmitEditing={add}
-          style={{ flex: 1 }}
+          editable={!saving}
+          style={{ flex: 1, borderWidth: 0, backgroundColor: 'transparent', paddingHorizontal: 0, minHeight: LIST_ROW_HEIGHT }}
         />
-        <Button size='md' variant='secondary' loading={saving} disabled={!draft.trim()} onPress={add}>
-          {t('common.add')}
-        </Button>
-      </Stack>
-
-      <Stack direction='row' spacing={1} style={{ paddingBottom: theme.spacing[1] }}>
-        {TASK_FILTERS.map((name) => (
-          <Chip key={name} selected={filter === name} onPress={() => setFilter(name)}>
-            {t(`tasks.filter.${name}`)}
-          </Chip>
-        ))}
+        {/* The key appears once there is something to save. An always-on
+            button beside an empty field is a control that cannot be used. */}
+        {draft.trim() ? (
+          <Button size='sm' variant='secondary' loading={saving} onPress={add}>
+            {t('common.add')}
+          </Button>
+        ) : null}
       </Stack>
 
       {loading && shown.length === 0 ? (
         <Stack spacing={1}>
+          <Divider />
           <Skeleton width='100%' height={44} />
           <Skeleton width='100%' height={44} />
         </Stack>
       ) : shown.length === 0 ? (
-        <Typography level='body-sm' color='text.tertiary'>
-          {t('calendarPage.agenda.emptyToday')}
-        </Typography>
+        <>
+          <Divider />
+          <Typography level='body-sm' color='text.tertiary' style={{ paddingTop: theme.spacing[1] }}>
+            {t('calendarPage.agenda.emptyToday')}
+          </Typography>
+        </>
       ) : (
-        shown.map((task) => {
-          const id = task._id ?? task.id
-          return (
-            <View key={id}>
-              <Divider />
-              <ListRow
-                tile={
-                  <Checkbox
-                    checked={Boolean(task.is_completed)}
-                    disabled={Boolean(busy[id])}
-                    onPress={() => toggle(task)}
-                    accessibilityLabel={t('calendarPage.agenda.markDone')}
-                  />
-                }
-                name={task.title}
-                /* Never a raw list id: see `taskCategory`. */
-                meta={taskCategory(task)}
-                onPress={() => toggle(task)}
-              />
-            </View>
-          )
-        })
+        shown.map((task) => (
+          <View key={task._id ?? task.id}>
+            <Divider />
+            {taskRow(task)}
+          </View>
+        ))
       )}
+
+      {/* Nothing done today, nothing to disclose. */}
+      {finished.length > 0 ? (
+        <View>
+          <Divider />
+          <Pressable
+            onPress={() => setShowDone((open) => !open)}
+            accessibilityRole='button'
+            accessibilityState={{ expanded: showDone }}
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: theme.spacing[1],
+              minHeight: LIST_ROW_HEIGHT,
+              paddingHorizontal: theme.spacing[ROW_RAIL],
+              opacity: pressed ? 0.7 : 1
+            })}
+          >
+            <Icon name={showDone ? 'ChevronDown' : 'ChevronRight'} size='sm' color='text.tertiary' />
+            <Typography level='body-sm' color='text.secondary'>
+              {`${t('tasks.filter.completed')} · ${finished.length}`}
+            </Typography>
+          </Pressable>
+          {showDone
+            ? finished.map((task) => (
+                <View key={task._id ?? task.id}>
+                  <Divider />
+                  {taskRow(task, { finished: true })}
+                </View>
+              ))
+            : null}
+        </View>
+      ) : null}
     </View>
   )
 }

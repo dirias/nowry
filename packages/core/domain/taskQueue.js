@@ -30,6 +30,20 @@ export const isDueBy = (task, now = new Date()) => {
 }
 
 /**
+ * Whether a task that is due is LATE, or due today. `null` when it is neither.
+ *
+ * The one fact a list of today's tasks exists to carry, and the list did not
+ * carry it: two of three rows on Home were overdue and every row looked the
+ * same (MOB-081). It is a rule rather than a component's local ternary because
+ * the sort above already draws the same line, and two readings of "late" that
+ * drift is how a list orders itself one way and labels itself another.
+ */
+export const taskDueState = (task, now = new Date()) => {
+  if (!isDueBy(task, now)) return null
+  return startOfDay(task.deadline) < startOfDay(now) ? 'overdue' : 'today'
+}
+
+/**
  * The web's three, in the web's order. `pending` is the default everywhere
  * because a list of today's tasks means the ones still to do — but a tick has
  * to be reversible, and a filter that cannot show a completed task is a tick
