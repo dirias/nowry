@@ -490,12 +490,12 @@
         "names": {
           "teal": "Sarcelle",
           "lake": "Lac",
-          "iris": "Iris",
+          "iris": "Bleu iris",
           "plum": "Prune",
-          "rose": "Rose",
+          "rose": "Vieux rose",
           "umber": "Terre d’ombre",
-          "olive": "Olive",
-          "graphite": "Graphite"
+          "olive": "Vert olive",
+          "graphite": "Gris graphite"
         }
       },
       "postponeError": {
