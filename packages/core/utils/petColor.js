@@ -17,6 +17,8 @@
  * initial companion setup in AgentSettings.
  */
 
+import { DEFAULT_ACCENT } from '../tokens/colorSchemeGenerator'
+
 // ---------------------------------------------------------------------------
 // Color map — slug → hex (source of truth for all pet colors)
 // ---------------------------------------------------------------------------
@@ -55,17 +57,10 @@ const LIGHT_SPREAD = 0.1
 const lerp = (from, to, t) => from + (to - from) * t
 
 // ---------------------------------------------------------------------------
-// Default dominant colors per stage — used when no custom color is set.
-// These mirror the STAGE_CONFIG.dominantColor values in StudyPet.js.
+// No per-stage palette (ADR-034). An account with no accent has the default
+// accent — the companion is always the colour of the app it lives in.
 // ---------------------------------------------------------------------------
-const STAGE_DOMINANT = {
-  1: '#64b4ff',
-  2: '#78dcaa',
-  3: '#a445ff',
-  4: '#ffbe3c',
-  5: '#dc64ff',
-  6: '#ffe650'
-}
+const VALID_STAGES = new Set([1, 2, 3, 4, 5, 6])
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -142,15 +137,14 @@ function hslToHex({ h, s, l }) {
  * The accent fixes the hue (the pet's identity, chosen by the user); the stage
  * shifts saturation and lightness (the pet's maturity, earned through study).
  *
- * @param {string|null} accentColor - The user's theme colour hex, or null for the stage default.
+ * @param {string|null} accentColor - The user's theme colour hex, or null for the default accent.
  * @param {number} stage            - Evolution stage (1–6).
  * @returns {string}                - A 6-digit hex string, e.g. '#a855f7'.
  */
 export function resolveColor(accentColor, stage) {
-  const safeStage = STAGE_DOMINANT[stage] ? stage : 1
-  const baseHex = HEX_RE.test(accentColor ?? '') ? accentColor : STAGE_DOMINANT[safeStage]
+  const safeStage = VALID_STAGES.has(stage) ? stage : 1
+  const baseHex = HEX_RE.test(accentColor ?? '') ? accentColor : DEFAULT_ACCENT
   const rgb = hexToRgb(baseHex)
-  if (!rgb) return STAGE_DOMINANT[1]
 
   const { h, s, l } = rgbToHsl(rgb)
 

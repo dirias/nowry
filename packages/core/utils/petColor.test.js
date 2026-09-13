@@ -1,4 +1,5 @@
 import { resolveColor, suggestFromInterests } from './petColor'
+import { DEFAULT_ACCENT } from '../tokens/colorSchemeGenerator'
 
 // The eight accent presets a user can actually pick (getColorPresets()).
 // The companion's colour follows this, not the removed pet_color slug.
@@ -90,9 +91,10 @@ describe('resolveColor', () => {
     }
   })
 
-  it('falls back to the per-stage default palette when no accent is set', () => {
-    const defaults = STAGES.map((stage) => resolveColor(null, stage))
-    expect(new Set(defaults).size).toBe(6)
+  it('wears the default accent when no accent is set — there is no per-stage palette (ADR-034)', () => {
+    for (const stage of STAGES) {
+      expect(resolveColor(null, stage)).toBe(resolveColor(DEFAULT_ACCENT, stage))
+    }
     expect(resolveColor(null, 3)).toBe(resolveColor('not-a-colour', 3))
   })
 

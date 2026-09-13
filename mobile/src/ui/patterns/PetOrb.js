@@ -38,6 +38,7 @@ import { petPortrait } from '@nowry/core/domain/petPortrait'
 import { resolveColor as petColorFor } from '@nowry/core/utils/petColor'
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { stageConfig } from '@nowry/core/domain/petStages'
+import { EARNED_GOLD } from '@nowry/core/tokens/colorSystem'
 import { Icon } from '../icons'
 import { nowryArtFor } from './nowryArt'
 import { useOrbMotion } from './useOrbMotion'
@@ -121,8 +122,9 @@ export function PetOrb({
               width: 4,
               height: 4,
               borderRadius: 2,
-              backgroundColor: color,
-              opacity: 0.8,
+              // Earned, so gold (ADR-034) — the body keeps the accent.
+              backgroundColor: EARNED_GOLD,
+              opacity: 0.9,
               transform: [{ translateX: Math.cos(angle) * radius }, { translateY: Math.sin(angle) * radius }]
             }}
           />

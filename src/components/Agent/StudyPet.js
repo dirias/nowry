@@ -42,6 +42,8 @@ import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 // The stage table is shared: the phone draws the same companion, and a stage
 // table inside one client's orb is that client's private pet (MOB-050).
 import { STAGE_CONFIG } from '@nowry/core/domain/petStages'
+import { DEFAULT_ACCENT } from '@nowry/core/tokens/colorSchemeGenerator'
+import { EARNED_GOLD } from '@nowry/core/tokens/colorSystem'
 
 // The egg's asymmetry is what sells stage 1 as "not yet formed"; every later
 // stage is a true circle.
@@ -296,7 +298,7 @@ export const PetOrb = ({
       ? (SPECIES_CONFIG[species][mood] ?? SPECIES_CONFIG[species].idle)
       : (moodEmoji[mood] ?? config.emoji)
 
-  const activeColor = dominantColorOverride ?? config.dominantColor
+  const activeColor = dominantColorOverride ?? resolveColor(DEFAULT_ACCENT, stage)
 
   /*
    * Nowry is an owl, in all six of its forms, and an account that never chose
@@ -396,8 +398,9 @@ export const PetOrb = ({
     <>
       {auraRings}
       <ProgressRing progress={levelProgress} size={config.sizePx} color={activeColor} />
-      <OrbitLayer count={config.orbitCount} size={config.sizePx} color={activeColor} reduceMotion={reduceMotion} />
-      <StageMark mark={config.mark} size={config.sizePx} color={activeColor} />
+      {/* What a stage earns is drawn in gold, the one colour that means earned (ADR-034). */}
+      <OrbitLayer count={config.orbitCount} size={config.sizePx} color={EARNED_GOLD} reduceMotion={reduceMotion} />
+      <StageMark mark={config.mark} size={config.sizePx} color={EARNED_GOLD} />
     </>
   )
 

@@ -179,6 +179,9 @@ export const STATUS_SPEC = Object.freeze({
 
 export const GOLD_SPEC = Object.freeze({ C: 0.15, h: 80, solidL: 0.815, darkSolidL: 0.815 })
 
+/** Gold as one literal, for surfaces that append hex alpha or paint a canvas. */
+export const EARNED_GOLD = oklchToHex(GOLD_SPEC.solidL, GOLD_SPEC.C, GOLD_SPEC.h)
+
 // ── 6 · Categories ─────────────────────────────────────────────────────────
 /**
  * One family for everything a learner tags. Ids are stable because they are

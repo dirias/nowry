@@ -1,9 +1,10 @@
 /**
  * The companion's six stages, as data (MOB-050).
  *
- * The table drives the orb's size, colour, aura rings and animation speed.
- * `dominantColor` is the no-custom-colour fallback and must stay a 6-digit hex:
- * PetOrb appends hex alpha suffixes to it (`${activeColor}55`) to build glows.
+ * The table drives the orb's size, aura rings and animation speed. It carries
+ * no colour (ADR-034): the companion wears the learner's accent at every stage
+ * (`utils/petColor`), and what a stage EARNS — its mark and its motes — is
+ * drawn in gold, the one colour that means earned.
  *
  * Each stage must be told apart at a glance, at 56–80px, without a portrait.
  * Size alone cannot do that — 24px spread over six stages is invisible in
@@ -28,12 +29,12 @@
  * point of the table.
  */
 export const STAGE_CONFIG = {
-  1: { sizePx: 56, dominantColor: '#64b4ff', emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0 },
-  2: { sizePx: 60, dominantColor: '#78dcaa', emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0 },
-  3: { sizePx: 64, dominantColor: '#a445ff', emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0 },
-  4: { sizePx: 68, dominantColor: '#ffbe3c', emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0 },
-  5: { sizePx: 72, dominantColor: '#dc64ff', emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3 },
-  6: { sizePx: 80, dominantColor: '#ffe650', emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5 }
+  1: { sizePx: 56, emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0 },
+  2: { sizePx: 60, emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0 },
+  3: { sizePx: 64, emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0 },
+  4: { sizePx: 68, emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0 },
+  5: { sizePx: 72, emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3 },
+  6: { sizePx: 80, emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5 }
 }
 
 /** A stage outside 1–6 is stage one: an unknown pet has not evolved. */

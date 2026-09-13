@@ -76,12 +76,11 @@ describe('STAGE_CONFIG', () => {
     }
   })
 
-  // Guards the PET-001 contract at this layer too: PetOrb appends a two-digit
-  // hex alpha to this value (`${activeColor}55`) to build its glow, which is
-  // invalid CSS against any non-hex colour format.
-  it('keeps every fallback dominantColor a 6-digit hex', () => {
+  // ADR-034: the stages carry no colour of their own. The companion wears the
+  // accent; a per-stage neon here would be a second palette nobody chose.
+  it('carries no per-stage colour', () => {
     for (const stage of STAGES) {
-      expect(STAGE_CONFIG[stage].dominantColor).toMatch(/^#[0-9a-f]{6}$/)
+      expect(STAGE_CONFIG[stage]).not.toHaveProperty('dominantColor')
     }
   })
 
