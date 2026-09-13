@@ -8,6 +8,7 @@ import FormImageField from '../../Common/Form/FormImageField'
 import { focusRing, formLabel } from '../../Common/Form/formStyles'
 import useIsMobile from '../../../hooks/useIsMobile'
 import BookCoverSwatch from './BookCoverSwatch'
+import { COVER_PRESETS } from '@nowry/core/constants/bookCovers'
 
 /**
  * The cover group: eight preset colours, an arbitrary-colour picker, and an
@@ -25,16 +26,8 @@ import BookCoverSwatch from './BookCoverSwatch'
  * book cover when they switched theme.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-const PRESET_COLORS = [
-  { hex: '#0B6BCB', nameKey: 'books.coverColors.blue' },
-  { hex: '#C41C1C', nameKey: 'books.coverColors.red' },
-  { hex: '#1F7A1F', nameKey: 'books.coverColors.green' },
-  { hex: '#9A5B13', nameKey: 'books.coverColors.orange' },
-  { hex: '#6523cf', nameKey: 'books.coverColors.purple' },
-  { hex: '#c41c88', nameKey: 'books.coverColors.pink' },
-  { hex: '#000000', nameKey: 'books.coverColors.black' },
-  { hex: '#555555', nameKey: 'books.coverColors.grey' }
-]
+// Shared with the phone's details sheet, so both clients offer the same eight (MOB-102).
+const PRESET_COLORS = COVER_PRESETS
 
 const BookCoverField = ({ color, onColorChange, imageUrl, onImageChange, inputRef = null }) => {
   const { t } = useTranslation()

@@ -48,10 +48,10 @@ import { queryClient } from '@nowry/core/api/queryClient'
 import { userService } from '@nowry/core/api/services'
 import { requestNotificationPermission } from '../platform/alerts'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
-import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import {
   Button,
   Chip,
+  ColorSwatch,
   Divider,
   FormField,
   Icon,
@@ -89,43 +89,6 @@ const LANGUAGES = [
  * still shown, still selected and still preserved — see `swatches`.
  */
 const PRESET_ACCENTS = ['#2a6971', '#3b5bdb', '#7048e8', '#c2255c', '#e8590c', '#2b8a3e']
-
-const SWATCH = 32
-const MIN_TOUCH = 44
-
-/**
- * One accent choice.
- *
- * Not a `Chip`: a chip paints its own ground, which is the one thing a swatch
- * must not do. And selection is a mark on the colour, never the colour alone —
- * a ring of hue around a square of hue is invisible to a viewer who cannot
- * distinguish the two, so the chosen one carries a tick in whichever of black
- * or white is legible on it.
- */
-function Swatch({ hex, selected, onPress, label }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole='button'
-      accessibilityState={{ selected }}
-      accessibilityLabel={label}
-      style={{ minWidth: MIN_TOUCH, minHeight: MIN_TOUCH, alignItems: 'center', justifyContent: 'center' }}
-    >
-      <View
-        style={{
-          width: SWATCH,
-          height: SWATCH,
-          borderRadius: SWATCH / 2,
-          backgroundColor: hex,
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        {selected ? <Icon name='Check' size='sm' literalColor={readableTextOn(hex)} /> : null}
-      </View>
-    </Pressable>
-  )
-}
 
 export function Settings() {
   const { t, i18n } = useTranslation()
@@ -224,7 +187,7 @@ export function Settings() {
         <FormField labelKey='settings.appearance.accentColor' helperKey='settings.appearance.accentColorDesc'>
           <Stack direction='row' spacing={1}>
             {swatches.map((hex) => (
-              <Swatch
+              <ColorSwatch
                 key={hex}
                 hex={hex}
                 selected={hex === accent}

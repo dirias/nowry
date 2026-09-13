@@ -3177,7 +3177,8 @@
     "deckPlaceholder": "Deck auswählen",
     "deckNone": "Kein Deck",
     "deckEmpty": "Du hast noch keine Decks.",
-    "invalidField": "Ungültige Eingabe"
+    "invalidField": "Ungültige Eingabe",
+    "tagsCommaHelper": "Tags durch Kommas trennen."
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s vergangen"

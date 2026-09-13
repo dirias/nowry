@@ -3682,7 +3682,8 @@
     "deckPlaceholder": "Elige un mazo",
     "deckNone": "Sin mazo",
     "deckEmpty": "Todavía no tienes ningún mazo.",
-    "invalidField": "Entrada no válida"
+    "invalidField": "Entrada no válida",
+    "tagsCommaHelper": "Separa las etiquetas con comas."
   },
   "generation": {
     "elapsedSeconds": "{{seconds}} s transcurridos"

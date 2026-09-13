@@ -29,8 +29,22 @@ import { useTranslation } from 'react-i18next'
 import useCardForm from '@nowry/core/hooks/useCardForm'
 import { RAIL_LABELS } from '@nowry/core/domain/cardTypes'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
-import { parseTagInput } from '@nowry/core/utils/formUtils'
-import { Button, Chip, Divider, FormField, Icon, IconButton, Input, Radio, Screen, Segmented, Select, Stack, Typography } from '../ui'
+import {
+  Button,
+  Chip,
+  Divider,
+  FormField,
+  Icon,
+  IconButton,
+  Input,
+  Radio,
+  Screen,
+  Segmented,
+  Select,
+  Stack,
+  TagField,
+  Typography
+} from '../ui'
 
 /** The two types a phone can author. `visual` is read on the web. */
 const TYPES = ['flashcard', 'quiz']
@@ -241,14 +255,8 @@ export function CardEditor({ card = null, deckId = null }) {
         ) : null}
 
         {form.revealed.has('tags') ? (
-          <FormField labelKey='form.tagsLabel' helperKey='form.tagPlaceholder'>
-            <Input
-              value={(form.values.tags ?? []).join(', ')}
-              onChangeText={(value) => setField('tags', parseTagInput(value))}
-              accessibilityLabel={t('form.tagsLabel')}
-              autoCapitalize='none'
-            />
-          </FormField>
+          // The field that let a comma vanish as it was typed; see TagField (MOB-102).
+          <TagField value={form.values.tags ?? []} onChange={(tags) => setField('tags', tags)} helperKey='form.tagsCommaHelper' />
         ) : null}
 
         {form.revealed.has('deck') ? (

@@ -50,7 +50,10 @@ import {
 import { useTheme } from '../theme'
 import { LibraryFilterSheet } from './BookLibraryFilters'
 import { MakeCardsSheet } from './MakeCards'
+import { BookDetailsSheet } from './BookDetailsSheet'
+import { DeleteDocumentSheet } from './DeleteDocumentSheet'
 import {
+  ActionSheet,
   Button,
   Card,
   Chip,
@@ -90,6 +93,15 @@ export function BookLibrary() {
   const [grid, setGrid] = useState(true)
   /** The document whose sections are being turned into cards, if any. */
   const [making, setMaking] = useState(null)
+  /*
+   * One document at a time can have its menu, its details or its deletion
+   * open, and which of the three is the `step`. Held as the document and the
+   * step rather than three booleans, so a sheet cannot open on one document
+   * while another's menu is still showing (MOB-102).
+   */
+  const [acting, setActing] = useState({ book: null, step: null })
+  const openMenu = (book) => setActing({ book, step: 'menu' })
+  const closeActing = () => setActing({ book: null, step: null })
 
   const { books, loading, error, reload } = useBooks()
 
@@ -212,9 +224,24 @@ export function BookLibrary() {
           item.filler ? (
             <View style={{ flex: 1 }} />
           ) : grid ? (
-            <DocumentTile book={item} isContinue={item._id === continues?._id} onOpen={() => open(item)} when={when} theme={theme} t={t} />
+            <DocumentTile
+              book={item}
+              isContinue={item._id === continues?._id}
+              onOpen={() => open(item)}
+              onMenu={() => openMenu(item)}
+              when={when}
+              theme={theme}
+              t={t}
+            />
           ) : (
-            <DocumentRow book={item} isContinue={item._id === continues?._id} onOpen={() => open(item)} when={when} t={t} />
+            <DocumentRow
+              book={item}
+              isContinue={item._id === continues?._id}
+              onOpen={() => open(item)}
+              onMenu={() => openMenu(item)}
+              when={when}
+              t={t}
+            />
           )
         }
         ListEmptyComponent={
@@ -235,6 +262,48 @@ export function BookLibrary() {
       {/* The same sheet the reader opens, so a document makes cards the one
           way whichever screen asked for them. */}
       <MakeCardsSheet open={Boolean(making)} book={making} onClose={() => setMaking(null)} />
+
+      {/*
+       * The web's document menu, as a sheet from the bottom edge where the
+       * thumb already is (MOB-102). Its three rows and their order are the
+       * web's: Open, Edit details, and Delete last — named, coloured and at
+       * the far end, so the row that destroys is never one pixel from the row
+       * that renames.
+       */}
+      <ActionSheet
+        visible={acting.step === 'menu'}
+        onClose={closeActing}
+        title={acting.book?.title || t('books.untitled')}
+        accessibilityLabel={t('books.lib.menuAria', { title: acting.book?.title || '' })}
+        actions={[
+          { id: 'open', label: t('books.lib.open'), onPress: () => acting.book && open(acting.book) },
+          /*
+           * The document comes from THIS render, not from state. The sheet
+           * closes itself before it runs an action, and closing clears the
+           * document — so reading it back out of state handed the details sheet
+           * `null`, and the menu simply closed with nothing opening.
+           */
+          { id: 'edit', label: t('books.lib.editDetails'), onPress: () => setActing({ book: acting.book, step: 'edit' }) },
+          {
+            id: 'delete',
+            label: t('books.lib.deleteAction'),
+            destructive: true,
+            onPress: () => setActing({ book: acting.book, step: 'delete' })
+          }
+        ]}
+      />
+
+      <BookDetailsSheet book={acting.book} open={acting.step === 'edit'} onSaved={() => reload()} onClose={closeActing} />
+
+      <DeleteDocumentSheet
+        book={acting.book}
+        open={acting.step === 'delete'}
+        onDeleted={() => {
+          closeActing()
+          reload()
+        }}
+        onClose={closeActing}
+      />
 
       <LibraryFilterSheet
         open={sheet}
@@ -331,17 +400,29 @@ function ContinueCard({ book, onOpen, onMakeCards, when, t }) {
  * that a row does not: at two up you recognise a book by its cover before you
  * have read its name.
  */
-function DocumentTile({ book, isContinue = false, onOpen, when, theme, t }) {
+function DocumentTile({ book, isContinue = false, onOpen, onMenu, when, theme, t }) {
   const readout = cardsReadout(t, book)
 
   return (
     <Pressable
       onPress={onOpen}
+      // A long press is how a phone offers what a right-click offers — a
+      // shortcut to the menu, never its only door (the key below is that).
+      onLongPress={onMenu}
       accessibilityRole='button'
       accessibilityLabel={book.title || t('books.untitled')}
+      accessibilityActions={[{ name: 'menu', label: t('books.lib.menuAria', { title: book.title || '' }) }]}
+      onAccessibilityAction={(event) => event.nativeEvent.actionName === 'menu' && onMenu?.()}
       style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.7 : 1 })}
     >
       <Card padding={1.5} radius='md'>
+        {/* The menu key, top right where the web puts its kebab. Visible, not
+            revealed on hover, because a phone has no hover to reveal it. */}
+        <View style={{ position: 'absolute', top: theme.spacing[0.5], right: theme.spacing[0.5], zIndex: 1 }}>
+          <IconButton variant='tertiary' onPress={onMenu} accessibilityLabel={t('books.lib.menuAria', { title: book.title || '' })}>
+            <Icon name='EllipsisVertical' size='sm' color='text.tertiary' />
+          </IconButton>
+        </View>
         <Stack spacing={1}>
           {/*
            * The cover, above the title and in a book's own proportion
@@ -372,7 +453,7 @@ function DocumentTile({ book, isContinue = false, onOpen, when, theme, t }) {
  * an import counts pages, a written document counts words and sections, and
  * both count the cards that came out of them.
  */
-function DocumentRow({ book, isContinue = false, onOpen, when, t }) {
+function DocumentRow({ book, isContinue = false, onOpen, onMenu, when, t }) {
   /*
    * The web's own composition, from the web's own module. The first build wrote
    * its own and got three things wrong that only an emulator showed: it ran
@@ -395,7 +476,13 @@ function DocumentRow({ book, isContinue = false, onOpen, when, t }) {
           <Readout leading={Boolean(readout.strong)}>{[readout.strong, readout.rest].filter(Boolean).join(' · ')}</Readout>
         ) : undefined
       }
+      action={
+        <IconButton variant='tertiary' onPress={onMenu} accessibilityLabel={t('books.lib.menuAria', { title: book.title || '' })}>
+          <Icon name='EllipsisVertical' size='sm' color='text.tertiary' />
+        </IconButton>
+      }
       onPress={onOpen}
+      onLongPress={onMenu}
       accessibilityLabel={t('books.lib.rowAria', { title: book.title || t('books.untitled') })}
     />
   )

@@ -3083,7 +3083,8 @@
     "deckPlaceholder": "デッキを選択",
     "deckNone": "デッキなし",
     "deckEmpty": "デッキはまだありません。",
-    "invalidField": "入力が正しくありません"
+    "invalidField": "入力が正しくありません",
+    "tagsCommaHelper": "タグはカンマで区切ってください。"
   },
   "generation": {
     "elapsedSeconds": "経過 {{seconds}} 秒"

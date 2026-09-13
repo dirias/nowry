@@ -3829,7 +3829,8 @@
     "deckPlaceholder": "Choose a deck",
     "deckNone": "No deck",
     "deckEmpty": "You don't have any decks yet.",
-    "invalidField": "Invalid entry"
+    "invalidField": "Invalid entry",
+    "tagsCommaHelper": "Separate tags with commas."
   },
   "generation": {
     "elapsedSeconds": "{{seconds}}s elapsed"
