@@ -4,7 +4,16 @@ describe('COVER_PRESETS', () => {
   // Stored on every document, so pinned by literal: a moved constant must fail
   // here rather than quietly turn everyone's presets into custom colours.
   it('offers the eight ADR-034 colours, exactly', () => {
-    expect(COVER_PRESETS.map((preset) => preset.hex)).toEqual(['#4493d0', '#ca6e5d', '#54a061', '#bc7d2f', '#8c7ed0', '#b86fa9', '#142023', '#7f9094'])
+    expect(COVER_PRESETS.map((preset) => preset.hex)).toEqual([
+      '#4493d0',
+      '#ca6e5d',
+      '#54a061',
+      '#bc7d2f',
+      '#8c7ed0',
+      '#b86fa9',
+      '#142023',
+      '#7f9094'
+    ])
   })
 
   it('names every swatch, because a colour alone is eight identical buttons to a screen reader', () => {
