@@ -1,8 +1,14 @@
 /**
  * Settings (MOB-025).
  *
- * Three sections, in the order a phone's settings screens usually read:
- * appearance, notifications, then the part that ends the account.
+ * Appearance, the companion, the timer, notifications, then the part that ends
+ * the account — the order a phone's settings screens usually read.
+ *
+ * **The timer's settings were honoured and uneditable** (MOB-093), which is the
+ * same state the companion's five message switches were in a day ago: the Focus
+ * tab has read `pomodoro.work_minutes` off the profile since it shipped and had
+ * no way to change it, so a phone-only account ran 25-minute sessions for ever
+ * whatever it wanted.
  *
  * **Nothing here sells anything.** ADR-030 keeps subscription purchase off the
  * phone entirely, and the moment a mobile screen advertises a paid tier it
@@ -24,12 +30,24 @@ import { Alert, Linking, Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { settingsFromProfile } from '@nowry/core/context/PomodoroContext'
+import { DEFAULT_SETTINGS } from '@nowry/core/domain/pomodoroCycle'
+import { POMODORO_DURATIONS, POMODORO_PREFS, clampMinutes, pomodoroPatch } from '@nowry/core/domain/pomodoroPrefs'
+import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import useProgressivePreferences, { PREFERENCE_FIELD } from '@nowry/core/hooks/useProgressivePreferences'
+import { queryClient } from '@nowry/core/api/queryClient'
 import { userService } from '@nowry/core/api/services'
 import { requestNotificationPermission } from '../platform/alerts'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
-import { Button, Divider, FormField, Icon, Input, ListRow, Screen, Segmented, Select, Stack, Typography } from '../ui'
+import { Button, Divider, FormField, Icon, Input, ListRow, Screen, Segmented, Select, SettingRow, Stack, Switch, Typography } from '../ui'
+
+/** Each duration's own label, which the shared table has no business knowing. */
+const LENGTH_LABELS = {
+  work: 'settings.productivity.focusDuration',
+  shortBreak: 'settings.productivity.shortBreak',
+  longBreak: 'settings.productivity.longBreak'
+}
 
 /** The five bundles that ship. Each label is in its own language, on purpose. */
 const LANGUAGES = [
@@ -216,6 +234,10 @@ export function Settings() {
 
         <Divider />
 
+        <ProductivitySection t={t} />
+
+        <Divider />
+
         <Typography level='title-md'>{t('settings.notifications.title')}</Typography>
         <Typography level='body-sm' color='text.secondary'>
           {t(permission === 'granted' ? 'settings.notifications.allowed' : 'settings.notifications.blocked')}
@@ -268,6 +290,93 @@ export function Settings() {
         </Button>
       </Stack>
     </Screen>
+  )
+}
+
+/**
+ * The timer, as the Focus tab actually reads it.
+ *
+ * Read through `settingsFromProfile`, which is the same function
+ * `PomodoroContext` uses — including its fallback to the flat `pomodoro_*` keys
+ * older accounts carry — so the number in the field is the number the timer
+ * will run. Written one key at a time, which the partial-update route allows,
+ * and the profile query is refreshed so the tab follows without a reload.
+ *
+ * **The durations are committed when the field is left, not on every
+ * keystroke.** Typing "3" on the way to "30" would otherwise save a
+ * three-minute focus session, and a phone keyboard makes that two taps apart.
+ */
+function ProductivitySection({ t }) {
+  const { profile } = useUserProfile()
+  const stored = settingsFromProfile(profile) ?? DEFAULT_SETTINGS
+  const [draft, setDraft] = useState(null)
+
+  const write = async (patch) => {
+    try {
+      await userService.updateGeneralPreferences(patch)
+    } finally {
+      // Refreshed either way: on success so the timer follows, and on failure
+      // so the field snaps back to what the server still holds.
+      await queryClient.invalidateQueries({ queryKey: ['profile'] })
+    }
+  }
+
+  const commit = (name) => {
+    const typed = draft?.[name]
+    setDraft(null)
+    if (typed === undefined) return
+    const held = clampMinutes(name, typed)
+    if (held !== stored[name]) write(pomodoroPatch(name, held))
+  }
+
+  return (
+    <Stack spacing={2}>
+      <Typography level='title-md'>{t('settings.productivity.title')}</Typography>
+
+      <SettingRow
+        label={t('settings.productivity.enableTimer')}
+        description={t('settings.productivity.enableTimerDesc')}
+        value={stored.enabled}
+        onPress={() => write(pomodoroPatch('enabled', !stored.enabled))}
+      >
+        <Switch value={stored.enabled} />
+      </SettingRow>
+
+      {/* The lengths belong to a timer that is switched on. The web hides them
+          too, and hiding rather than disabling is right here: they are not
+          refused, they are not yet part of anything. */}
+      {stored.enabled
+        ? POMODORO_DURATIONS.map((name) => (
+            <FormField key={name} labelKey={LENGTH_LABELS[name]}>
+              <Stack spacing={1}>
+                <Input
+                  value={String(draft?.[name] ?? stored[name])}
+                  onChangeText={(text) => setDraft({ [name]: text.replace(/[^0-9]/g, '') })}
+                  onBlur={() => commit(name)}
+                  keyboardType='number-pad'
+                  accessibilityLabel={t(LENGTH_LABELS[name])}
+                />
+                {/* The recommendation, which `FormField`'s helper cannot carry:
+                    it takes a translation KEY and this one needs a number. */}
+                <Typography level='body-xs' color='text.tertiary'>
+                  {t('settings.productivity.recommendedMinutes', { count: POMODORO_PREFS[name].fallback })}
+                </Typography>
+              </Stack>
+            </FormField>
+          ))
+        : null}
+
+      {stored.enabled ? (
+        <SettingRow
+          label={t('settings.productivity.autoStart')}
+          description={t('settings.productivity.autoStartDesc')}
+          value={stored.autoStart}
+          onPress={() => write(pomodoroPatch('autoStart', !stored.autoStart))}
+        >
+          <Switch value={stored.autoStart} />
+        </SettingRow>
+      ) : null}
+    </Stack>
   )
 }
 
