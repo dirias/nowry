@@ -46,6 +46,9 @@ module.exports = () => ({
      */
     scheme: ['com.nowry.app', 'nowry'],
     userInterfaceStyle: 'automatic',
+    // The Spiral in Coil Gold on Ink Teal, rendered from the shared geometry
+    // (ADR-034, BRAND.md). Store listing artwork is still MOB-030's.
+    icon: './assets/brand/icon.png',
     newArchEnabled: true,
     ios: {
       bundleIdentifier: 'com.nowry.app',
@@ -54,6 +57,7 @@ module.exports = () => ({
     android: {
       package: 'com.nowry.app',
       edgeToEdgeEnabled: true,
+      adaptiveIcon: { foregroundImage: './assets/brand/adaptive-icon.png', backgroundColor: '#0b3e43' },
       ...androidPush
     },
     plugins: ['expo-router', 'expo-status-bar', 'expo-localization', 'expo-web-browser', 'expo-notifications'],

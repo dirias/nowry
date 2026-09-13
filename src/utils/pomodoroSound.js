@@ -120,8 +120,10 @@ export const showBrowserNotification = (title, body) => {
   if ('Notification' in window && Notification.permission === 'granted') {
     new Notification(title, {
       body,
-      icon: '/logo192.png',
-      badge: '/logo192.png',
+      icon: `${process.env.PUBLIC_URL}/logo192.png`,
+      // A badge is drawn as a single-colour silhouette, so it is the compact
+      // coil in white on transparent, not the opaque app icon (BRAND.md).
+      badge: `${process.env.PUBLIC_URL}/badge.png`,
       tag: 'pomodoro-complete'
     })
   }

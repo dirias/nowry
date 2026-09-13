@@ -81,7 +81,7 @@ const StudyGoalSelector = ({ value = null, onChange, disabled = false, name = 's
                 disabled={disabled}
                 // Neutral, not primary: the checked dot then draws from the
                 // neutral outlined tokens instead of the user's accent, which
-                // can be any lightness at all across the seven presets.
+                // can be any colour at all — a preset or a custom pick.
                 color='neutral'
                 variant='outlined'
                 label={

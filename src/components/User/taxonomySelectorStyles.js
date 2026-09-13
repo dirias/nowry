@@ -5,7 +5,8 @@
  *
  * The obvious Joy idiom for "this chip is on" is `variant='soft'`, which paints
  * `primary.softBg`. Measured against the surfaces those chips actually sit on,
- * across all seven accent presets `colorSchemeGenerator` ships:
+ * across the seven accent presets `colorSchemeGenerator` shipped before ADR-034
+ * (the ladder's tints are no stronger, so the conclusion stands):
  *
  *   primary.softBg vs background.surface (light) — 1.00:1 … 1.06:1
  *   primary.softBg vs background.surface (dark)  — 1.00:1 … 1.27:1

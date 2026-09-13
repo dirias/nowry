@@ -186,7 +186,7 @@ const FieldSaveState = ({ id, state, onRetry }) => {
  * token. Everything around it — ring, check glyph, focus — is either a token or
  * the preset's own `contrastText`, which `colorSchemeGenerator` derives from
  * luminance (`468cf7f`). Hardcoding `white` here is exactly the bug that fix
- * removed: on Sunset Orange a white check is nearly invisible.
+ * removed: on a light custom accent a white check is nearly invisible.
  *
  * Selection is a glyph plus a ring in `text.primary`, never the color alone
  * (NFR-004), and the preset's name reaches assistive technology through the

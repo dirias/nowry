@@ -148,8 +148,8 @@ export default function TabsLayout() {
           tabBarInactiveTintColor: resolveColor(theme, 'text.tertiary'),
           tabBarStyle: {
             /*
-             * `level1`, not `surface`. In light mode the page is #ffffff and
-             * `surface` is #f9f9f9 — a step so small that the bar had no ground
+             * `level1`, not `surface`. In light mode the page and `surface` are
+             * one small step apart on the paper ladder — a step so small that the bar had no ground
              * of its own and read as four icons floating on the page, which is
              * what "you can see the background of the app" meant. A navigation
              * bar is chrome and has to look like a different layer from the

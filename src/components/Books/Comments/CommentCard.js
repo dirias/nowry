@@ -150,13 +150,13 @@ function CommentCard({
         ...positionSx,
         borderRadius: 'md',
         overflow: 'hidden',
-        // `background.level2` rather than the more obvious `level1`: this
-        // theme's dark palette puts `surface` (#161b22, which the rail uses)
-        // and `level1` (#171A1C) within one step of each other, so a level1
-        // card is invisible against the rail in dark mode — only its hairline
-        // border survives. `level2` is the first token that separates from the
-        // rail in BOTH schemes (#DDE7EE on #f9f9f9 light, #32383E on #161b22
-        // dark), which is what makes these read as cards rather than as rows.
+        // `background.level2` rather than the more obvious `level1`: in dark
+        // mode `surface` (which the rail uses) and `level1` sit one small step
+        // apart, so a level1 card is invisible against the rail — only its
+        // hairline border survives. `level2` is the first token that separates
+        // from the rail in BOTH schemes, which is what makes these read as
+        // cards rather than as rows. (Measured on Joy's palette; ADR-034's
+        // ladder keeps the same ordering.)
         bgcolor: 'background.level2',
         borderColor: isActive ? 'primary.outlinedBorder' : 'divider',
         borderStyle: isOrphaned ? 'dashed' : 'solid',

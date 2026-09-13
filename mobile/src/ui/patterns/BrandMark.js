@@ -13,6 +13,9 @@ import { spiralMark } from '@nowry/core/tokens/brandMark'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
 
+/** The wordmark's tracking: −0.03 em of `h4`'s 20 points (BRAND.md). */
+const WORDMARK_TRACKING = -0.6
+
 /** At and below this size the coil drops a turn so its gaps stay open. */
 const COMPACT_AT = 32
 
@@ -46,7 +49,7 @@ export function BrandLockup({ markSize = 28, color = 'text.primary' }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
       <BrandMark size={markSize} color={color} />
-      <Typography level='h4' weight='xl' color={color}>
+      <Typography level='h4' weight='xl' color={color} style={{ letterSpacing: WORDMARK_TRACKING }}>
         nowry
       </Typography>
     </View>

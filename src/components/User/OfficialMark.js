@@ -10,7 +10,7 @@ import VerifiedRounded from '@mui/icons-material/VerifiedRounded'
  *
  * The obvious Joy idiom for a badge is `variant='soft' color='primary'`, and
  * ONB-007 already measured what that actually delivers: `primary.softBg` sits at
- * 1.00–1.06:1 against `background.surface` across all seven accent presets, and
+ * 1.00–1.06:1 against `background.surface` across the pre-ADR-034 presets, and
  * `primary.outlinedBorder` reaches only 1.10–1.94:1. Neither clears the 3:1 that
  * WCAG 2.2 asks of a non-text indicator, and NFR-004 forbids colour carrying
  * meaning on its own regardless. FR-056 asks for a *distinguishable* mark, so

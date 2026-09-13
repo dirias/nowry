@@ -29,7 +29,7 @@ export const useThemePreferences = () => useContext(ThemePreferencesContext)
  *
  * That mattered here because three effects were stacking in the same
  * direction — Inter renders lighter and wider than SF Pro, `antialiased`
- * lightens it further, and dark mode on #0d1117 is where thin text degrades
+ * lightens it further, and dark mode on a near-black page is where thin text degrades
  * worst. Nobody had seen them separated.
  *
  * 'auto' restores the browser default (subpixel antialiasing on macOS/Windows).

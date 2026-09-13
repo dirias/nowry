@@ -1377,8 +1377,8 @@ export default function EditorHome() {
                 borderRadius: '8px'
               },
               // `text.tertiary`, not `neutral.outlinedBorder`: in dark mode the
-              // latter is #32383E — identical to this container's own
-              // `background.level2`, which would make the hovered thumb vanish.
+              // latter sits right beside this container's own `background.level2`
+              // on the neutral scale, which would make the hovered thumb vanish.
               '&::-webkit-scrollbar-thumb:hover': {
                 bgcolor: 'text.tertiary'
               }

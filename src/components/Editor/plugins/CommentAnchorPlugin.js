@@ -458,7 +458,7 @@ const CommentAnchorPlugin = forwardRef(function CommentAnchorPlugin(
                       // once the note is resolved.
                       //
                       // `softActiveBg`, not the paler `softBg` this used to
-                      // use: in the light scheme `warning.softBg` is #fef8e7,
+                      // use: in the light scheme `warning.softBg` is a near-white tint,
                       // which at any opacity low enough to read text through is
                       // indistinguishable from the page.
                       //

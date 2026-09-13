@@ -15,7 +15,7 @@ import EventFormModal from './EventFormModal'
 /**
  * `palette` is a Joy color name, never a painted value. Paired with
  * `variant='solid'`, Joy supplies the matching `solidColor` foreground, which
- * `colorSchemeGenerator` derives from the background's luminance — so the chip
+ * `colorSchemeGenerator` picks by contrast with that background — so the chip
  * stays legible against whichever accent the user picked, in both schemes. The
  * previous map painted `bgcolor` by hand and hardcoded `common.white` on top of
  * it, the same unverified pairing that shipped as a bug on the accent swatches
