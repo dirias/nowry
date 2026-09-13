@@ -26,6 +26,12 @@ import { blackboardService } from '@nowry/core/api/services/blackboard.service'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { tasksService } from '@nowry/core/api/services'
+import { categoryDot } from '@nowry/core/tokens/colorSystem'
+
+// The minimap paints on a canvas and cannot resolve a CSS variable, so it takes
+// literal colours — from the category family (ADR-034), not invented here.
+const MINIMAP_NOTE = categoryDot('amber')
+const MINIMAP_NODE = categoryDot('moss')
 
 const BOARD_ID = 'main' // fallback board id for legacy boards
 const AUTOSAVE_DELAY = 1500
@@ -360,7 +366,7 @@ function BlackboardCanvas({
             background: 'var(--joy-palette-background-level1)',
             border: '1px solid var(--joy-palette-neutral-outlinedBorder)'
           }}
-          nodeColor={(n) => (n.type === 'stickyNote' ? '#f59e0b' : '#10b981')}
+          nodeColor={(n) => (n.type === 'stickyNote' ? MINIMAP_NOTE : MINIMAP_NODE)}
         />
         <BlackboardToolbar
           goals={goals}

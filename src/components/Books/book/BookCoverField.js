@@ -17,7 +17,7 @@ import { COVER_PRESETS } from '@nowry/core/constants/bookCovers'
  * they want is the wrong question (BOOKS.md §3.5).
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * PRESET_COLORS is raw hex ON PURPOSE, and it is the only hex permitted in the
+ * PRESET_COLORS is literal hex ON PURPOSE, and it is the only hex permitted in the
  * books form files. These are not styling constants: a cover colour is content
  * the user chose. It is stored as a hex string on the book document and
  * rendered straight back by the cover, `SketchPicker` already lets the user

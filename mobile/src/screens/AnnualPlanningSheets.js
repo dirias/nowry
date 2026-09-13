@@ -43,7 +43,7 @@ export function AreaSheet({ open, planId, order = 1, existing = [], onClose, onS
     setInvalid(false)
     setFailed(false)
     const taken = new Set(existing.map((area) => (area?.color ?? '').toUpperCase()))
-    setColor(FOCUS_AREA_COLORS.find((candidate) => !taken.has(candidate)) ?? FOCUS_AREA_COLORS[0])
+    setColor(FOCUS_AREA_COLORS.find((candidate) => !taken.has(candidate.toUpperCase())) ?? FOCUS_AREA_COLORS[0])
   }, [open, existing])
 
   const save = async () => {

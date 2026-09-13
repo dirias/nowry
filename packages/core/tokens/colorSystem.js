@@ -204,5 +204,8 @@ export function categoryColors({ h, C }, mode) {
   return { dot: oklchToHex(0.72, C * 0.95, h), tint: oklchToHex(0.27, Math.min(C * 0.33, 0.04), h), ink: oklchToHex(0.88, C * 0.5, h) }
 }
 
+/** The stored swatch for a category id: its light dot. */
+export const categoryDot = (id) => categoryColors(CATEGORY_SPEC.find((c) => c.id === id) ?? CATEGORY_SPEC[0], 'light').dot
+
 /** The swatch a picker stores: the light dot of each chromatic category. */
 export const CATEGORY_COLORS = Object.freeze(CATEGORY_SPEC.filter((c) => c.id !== 'graphite').map((c) => categoryColors(c, 'light').dot))

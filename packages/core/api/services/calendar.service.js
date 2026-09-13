@@ -2,6 +2,12 @@ import { tasksService } from './tasks.service'
 import { annualPlanningService, fetchAnnualPlanData } from './annualPlanning.service'
 import { COMPLETABLE, completionPatch, stripTypePrefix } from '../../domain/calendar/eventHelpers'
 import { queryClient } from '../queryClient'
+import { categoryDot } from '../../tokens/colorSystem'
+
+/** Types the learner did not colour, drawn from the category family (ADR-034). */
+const TASK_COLOR = categoryDot('lake')
+const PRIORITY_COLOR = categoryDot('amber')
+const UNASSIGNED_AREA_COLOR = categoryDot('moss')
 
 /**
  * Parse a date value as LOCAL time.
@@ -149,7 +155,7 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
           title: task.title,
           date: parseLocalDate(task.deadline),
           type: 'task',
-          color: '#6366f1',
+          color: TASK_COLOR,
           status: task.is_completed ? 'completed' : 'pending',
           category: task.category || null,
           focusAreaId: null // D-02: tasks have no focus area
@@ -175,7 +181,7 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
           title: p.title || p.name,
           date: parseLocalDate(p.deadline || p.target_date),
           type: 'priority',
-          color: '#f59e0b',
+          color: PRIORITY_COLOR,
           // A finished priority reads as `completed`, the same word tasks
           // use, so the agenda has one rule for the two tickable types
           // (ADR-016). Unfinished keeps whatever the plan says.
@@ -187,10 +193,10 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
 
     // Build a lookup map: focus_area_id → { color, name }
     // Assigned to outer areaMap so focusAreas can be extracted after all event pushes (D-01)
-    areaMap = Object.fromEntries(planFocusAreas.map((area) => [area._id || area.id, { color: area.color || '#10b981', name: area.name }]))
+    areaMap = Object.fromEntries(planFocusAreas.map((area) => [area._id || area.id, { color: area.color || UNASSIGNED_AREA_COLOR, name: area.name }]))
 
     goals.forEach((goal) => {
-      const area = areaMap[goal.focus_area_id] || { color: '#10b981', name: '' }
+      const area = areaMap[goal.focus_area_id] || { color: UNASSIGNED_AREA_COLOR, name: '' }
       const areaColor = area.color
       const areaName = area.name
 
@@ -235,7 +241,7 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
 
     // Activities are returned from /full directly
     activities.forEach((act) => {
-      const area = areaMap[act.focus_area_id] || { color: '#10b981', name: '' }
+      const area = areaMap[act.focus_area_id] || { color: UNASSIGNED_AREA_COLOR, name: '' }
       generateHabitOccurrences(act, year, area.color, area.name, events)
     })
   } else {

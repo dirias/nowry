@@ -50,7 +50,9 @@ const renderField = (props = {}) => {
   return { ...view, onColorChange, onImageChange }
 }
 
-const PRESET_HEXES = ['#0B6BCB', '#C41C1C', '#1F7A1F', '#9A5B13', '#6523cf', '#c41c88', '#000000', '#555555']
+// The category family and the ink (ADR-034), pinned: a stored cover must never
+// change because a constant moved.
+const PRESET_HEXES = ['#4493d0', '#ca6e5d', '#54a061', '#bc7d2f', '#8c7ed0', '#b86fa9', '#142023', '#7f9094']
 
 beforeEach(() => setViewport(false))
 
@@ -87,13 +89,13 @@ describe('the swatches', () => {
   })
 
   it('marks the current colour checked, and reports a change by value', () => {
-    const { onColorChange } = renderField({ color: '#C41C1C' })
+    const { onColorChange } = renderField({ color: '#ca6e5d' })
 
     expect(screen.getByRole('radio', { name: 'books.coverColors.red' })).toBeChecked()
     expect(screen.getByRole('radio', { name: 'books.coverColors.blue' })).not.toBeChecked()
 
     fireEvent.click(screen.getByRole('radio', { name: 'books.coverColors.green' }))
-    expect(onColorChange).toHaveBeenCalledWith('#1F7A1F')
+    expect(onColorChange).toHaveBeenCalledWith('#54a061')
   })
 })
 

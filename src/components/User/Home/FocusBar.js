@@ -8,6 +8,10 @@ import useAnnualPlan from '@nowry/core/hooks/useAnnualPlan'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useTranslation } from 'react-i18next'
 import { touchTarget, touchTargetBox } from '../../Common/Form/formStyles'
+import { categoryDot } from '@nowry/core/tokens/colorSystem'
+
+/** An area saved without a colour (ADR-034 category family). */
+const UNCOLOURED_AREA = categoryDot('iris')
 
 /**
  * FocusBar - Horizontal strip showing goals + priorities at a glance
@@ -451,7 +455,7 @@ const FocusBar = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 0.75 } }}>
             {focusAreas.slice(0, 3).map((area) => {
               const progress = calculateProgress(area)
-              const hexColor = area.color || '#8B5CF6'
+              const hexColor = area.color || UNCOLOURED_AREA
 
               return (
                 <Tooltip key={area._id || area.id} title={`${area.name}: ${progress}%`} size='sm'>
