@@ -1,236 +1,98 @@
-# 🎨 Nowry Color System Documentation
+# Nowry colour system
 
-## Overview
+> The standard since ADR-034 (2026-09-13). It replaced a prototype that took its colours from four
+> libraries — Material presets, Joy's blue-grey neutrals, Tailwind tags and GitHub's dark theme — and
+> generated tints in HSL, whose lightness is not what the eye sees.
 
-Nowry uses a **centralized, dynamic color system** that generates complete, professional color schemes from a single primary color chosen by the user. No colors are hardcoded anywhere in the application.
+## The rule in one line
 
-## Architecture
+**Six roles, each with one job, all computed in OKLCH on one lightness ladder in `@nowry/core`.**
+No component invents a colour; both clients read the same values; a test guards every contrast.
 
-### Single Source of Truth
+## The six roles
+
+| # | Role | What it is for | Never |
+|---|---|---|---|
+| 1 | **Brand** — Ink Teal, Coil Gold, Paper | The Spiral mark, the app icon, marketing | UI state |
+| 2 | **Neutrals** — Paper (light), Deep (dark) | Grounds, containers, borders, all text | Pure grey or pure black text |
+| 3 | **Accent** — the learner's colour | Primary actions, selection, focus ring, links, the companion's body | Meaning (it is chosen, so it cannot signal) |
+| 4 | **Status** — moss, amber, brick | Done, attention, destructive | Decoration or identity |
+| 5 | **Gold** | What is earned: stage marks, motes, a finished year | A warning; decoration |
+| 6 | **Categories** — eight hues and graphite | What a learner tags: focus areas, events, sticky notes, covers | Status — always a dot plus a label |
+
+## Where it lives
 
 ```
-User Preference (#2a6971) 
-    ↓
-colorSchemeGenerator.js (Algorithm)
-    ↓
-Complete Color Palette (Primary, Success, Warning, Danger, etc.)
-    ↓
-DynamicThemeProvider
-    ↓
-All Components
+packages/core/tokens/
+├── oklch.js                OKLCH ↔ hex, gamut clamping, WCAG contrast, OKLab distance
+├── colorSystem.js          the ladder: BRAND, NEUTRALS, buildTone, accentTone,
+│                           STATUS_SPEC, GOLD_SPEC, EARNED_GOLD, CATEGORY_SPEC,
+│                           categoryColors, categoryDot, CATEGORY_COLORS
+├── colorSchemeGenerator.js generateColorScheme(hex) → every Joy group, both modes;
+│                           getColorPresets, DEFAULT_ACCENT, STICKY_PALETTE, readableTextOn
+├── palette.js              BASE_PALETTE — the phone's base, built from colorSystem
+└── brandMark.js            the Spiral's geometry (see BRAND.md)
 ```
 
-## Key Files
+- **Web:** `src/theme/theme.js` spreads `generateColorScheme(DEFAULT_ACCENT)` into Joy's colour schemes,
+  and `DynamicThemeProvider` spreads the learner's scheme over it. `theme.js` spells out no hex.
+- **Phone:** `mobile/src/theme/buildTheme.js` merges `BASE_PALETTE` with the same generator.
+- **Parity:** `src/theme/__tests__/paletteParity.test.js` resolves the web's Joy theme and fails if it
+  disagrees with `BASE_PALETTE`.
 
-### 1. `theme/colorSchemeGenerator.js`
-**Purpose**: Professional color scheme generator using color theory
+## How a value is made
 
-**Features**:
-- Converts primary color to complete palette
-- Generates harmonious accent colors (success, warning, danger)
-- Creates proper shades & tints for all states (hover, active, soft, etc.)
-- Supports both light and dark modes
-- Based on HSL color space for precise control
+Every colour is a lightness **L**, a chroma **C** and a hue **h**. OKLCH's L is perceptual: hold it
+fixed, move the hue, and contrast stays put. That is the whole guarantee.
 
-**Main Functions**:
-```javascript
-generateColorScheme(primaryColor) // Returns complete theme palette
-getColorPresets() // Returns curated color options
-getColorName(hex) // Suggests color name based on hue
+- **Neutrals** are warm paper (h 85) in light and deep teal-ink (h 215) in dark, at chroma ≤ 0.022.
+  They carry a 50–900 scale so every Joy token nobody names — an input border, a soft neutral —
+  still lands on the ladder.
+- **Tones** (`buildTone`) turn one `{C, h}` into every Joy variant key — solid, soft, plain,
+  outlined, their hover and active states — plus a 50–900 scale, for light and dark. Light solids
+  rest at L 0.505 with paper text; dark solids rest at L 0.70 with ink text.
+- **The accent is normalised** (`accentTone`): the learner's hue, their chroma capped at 0.13, the
+  ladder's lightness. Black, white, a neon and a preset all come out equally readable.
+
+## Presets
+
+Stored values. Teal keeps the backend's default so no account changes; the others sit at L 0.505.
+
+| Key | Hex | | Key | Hex |
+|---|---|---|---|---|
+| teal *(default)* | `#2a6971` | | rose | `#924968` |
+| lake | `#346898` | | umber | `#805c43` |
+| iris | `#5f5c99` | | olive | `#6e6634` |
+| plum | `#825080` | | graphite | `#5c666f` |
+
+A custom hex is allowed on the web and kept on the phone; the generator puts it on the ladder.
+Names are localized under `onboarding.welcome.accent.names.<key>`.
+
+## What the tests guarantee
+
+`packages/core/tokens/__tests__/` and `mobile/src/theme/__tests__/contrast.test.js`:
+
+- 4.5:1 for solid, soft and plain text, for every preset and extreme accents (black, white, grey), in both modes
+- 3:1 for the dark outlined border (focus rings)
+- text primary, secondary and tertiary at 4.5:1 on body, surface and level1, in both modes
+- every preset at least 0.08 apart (OKLab) from every status solid — a primary button never looks like Delete
+- every category ink at 4.5:1 on its tint; gold at 4.5:1 on Ink Teal
+- the stored swatches (presets, categories, covers) pinned by literal, so a moved constant cannot repaint user data
+
+## Using it in components
+
+```jsx
+// ✅ semantic names — they follow the accent and the mode
+sx={{ color: 'text.secondary', bgcolor: 'background.level1' }}
+<Button color='danger' variant='soft'>
+<Chip sx={{ bgcolor: 'gold.softBg', color: 'gold.softColor' }}>
+
+// ✅ a literal only where a surface cannot resolve a variable, from core
+import { EARNED_GOLD, categoryDot } from '@nowry/core/tokens/colorSystem'
+
+// ❌ a hex, a numeric shade, or a colour from outside the system
+sx={{ color: '#444', bgcolor: 'neutral.100' }}
 ```
 
-### 2. `theme/DynamicThemeProvider.js`
-**Purpose**: React context provider for dynamic theming
-
-**Features**:
-- Fetches user's color preference from backend
-- Generates theme using `colorSchemeGenerator`
-- Provides theme to entire app via Material UI Joy
-- Allows runtime color changes
-
-**Default Color**: `#2a6971` (Ocean Teal)
-
-### 3. `theme/theme.js`
-**Purpose**: Base theme configuration
-
-**Contains**:
-- Typography settings
-- Spacing rules
-- Border radius values
-- Shadow definitions
-- **Note**: Color values here are fallbacks only
-
-## Color Theory Implementation
-
-### Primary Color Processing
-
-1. **User selects primary color** (e.g., `#2a6971`)
-2. **Algorithm generates variations**:
-   - **Darker**: For hover states (`-8%` lightness)
-   - **Darkest**: For active states (`-15%` lightness)
-   - **Lighter**: For soft backgrounds (`+35%` lightness, reduced saturation)
-   - **Lightest**: For hover on soft (`+45%` lightness)
-   - **Very Light**: For subtle backgrounds (97% lightness)
-
-### Accent Colors (Color Harmony)
-
-Following professional UI/UX standards:
-
-- **Success**: Green (#4caf50 region) - Universal positive indicator
-- **Warning**: Yellow-Orange (#ff9800 region) - Attention without alarm
-- **Danger**: Red (#f44336 region) - Clear danger signal
-
-These colors are **independent of primary** to ensure:
-- Consistent UX across all themes
-- Accessibility (proper contrast ratios)
-- Universal color associations
-
-## Usage in Components
-
-### ✅ Correct (Dynamic)
-```javascript
-// Use theme colors
-sx={{ 
-  backgroundColor: 'primary.solidBg',
-  color: 'primary.solidColor',
-  '&:hover': { backgroundColor: 'primary.solidHoverBg' }
-}}
-```
-
-### ❌ Incorrect (Hardcoded)
-```javascript
-// Never hardcode colors!
-sx={{ 
-  backgroundColor: '#2a6971',
-  color: 'white',
-  '&:hover': { backgroundColor: '#245a63' }
-}}
-```
-
-## Available Color Tokens
-
-### Primary Palette
-- `primary.plainColor` - For text/icons
-- `primary.plainHoverBg` - Hover background for plain variant
-- `primary.solidBg` - Solid button/component background
-- `primary.solidHoverBg` - Hover state for solid
-- `primary.solidColor` - Text on solid background (usually white)
-- `primary.softBg` - Soft/subtle background
-- `primary.softColor` - Text on soft background
-- `primary.outlinedBorder` - Border color for outlined variant
-
-### Success, Warning, Danger
-Same structure as primary:
-- `success.solidBg`, `success.solidHoverBg`, `success.softBg`, etc.
-- `warning.solidBg`, `warning.solidHoverBg`, `warning.softBg`, etc.
-- `danger.solidBg`, `danger.solidHoverBg`, `danger.softBg`, etc.
-
-### Neutral & Background
-- `background.body` - Main page background
-- `background.surface` - Card/panel background
-- `background.popup` - Modal/dropdown background
-- `text.primary` - Main text color
-- `text.secondary` - Secondary text color
-- `text.tertiary` - Tertiary/muted text color
-
-## User Customization Flow
-
-1. **Onboarding/Settings**: User picks primary color
-2. **Save to Backend**: Color stored in user preferences
-3. **DynamicThemeProvider**: Fetches and applies on load
-4. **Real-time Update**: Changes reflect immediately
-
-## Accessibility
-
-All generated colors ensure:
-- **WCAG AA compliance** for text contrast
-- **Consistent indicators** (green=success, red=danger)
-- **Dark mode support** with proper adjustments
-
-## Future Enhancements
-
-### Planned Features
-- ✅ AI-powered color scheme suggestions
-- ✅ Color palette validation & accessibility scoring
-- ✅ Export/import color schemes
-- ✅ Pre-made designer palettes
-- ✅ Color scheme marketplace
-
-### AI Integration Ideas
-```javascript
-// Future: AI-suggested complementary colors
-const aiSuggestions = await generateAIColorScheme({
-  primary: userColor,
-  context: 'learning platform',
-  mood: 'calm and focused',
-  accessibility: 'AAA'
-})
-```
-
-## Best Practices
-
-1. **Never hardcode colors** - Always use theme tokens
-2. **Test in both modes** - Verify light and dark themes
-3. **Use semantic colors** - `success` for positive, `danger` for negative
-4. **Check contrast** - Ensure readability on all backgrounds
-5. **Document custom colors** - If adding new tokens, document them
-
-## Examples
-
-### Button with Primary Color
-```javascript
-<Button color="primary" variant="solid">
-  Click Me
-</Button>
-```
-
-### Custom Card with Theme Colors
-```javascript
-<Card
-  sx={{
-    backgroundColor: 'primary.softBg',
-    borderColor: 'primary.outlinedBorder',
-    '&:hover': {
-      backgroundColor: 'primary.softHoverBg',
-      transform: 'translateY(-2px)'
-    }
-  }}
->
-  Content
-</Card>
-```
-
-### Header with Dynamic Background
-```javascript
-<Sheet
-  sx={(theme) => ({
-    backgroundColor: theme.palette.primary.solidBg,
-    color: 'white',
-    opacity: 0.95
-  })}
->
-  Header Content
-</Sheet>
-```
-
-## Debugging
-
-### Check Current Theme Color
-```javascript
-// In any component
-const { themeColor } = useThemePreferences()
-console.log('Current theme color:', themeColor)
-```
-
-### View Generated Palette
-```javascript
-import { generateColorScheme } from './theme/colorSchemeGenerator'
-
-const palette = generateColorScheme('#2a6971')
-console.log(palette)
-```
-
----
-
-**Last Updated**: December 2024
-**Maintained By**: Nowry Development Team
+User data is the one exception to "no hex": a focus area's, a cover's or an event's stored colour is
+rendered as stored.

@@ -49,6 +49,8 @@ client map it.
 **Buttons and segmented controls:** `docs/design/BUTTONS.md` — the house button standard (ADR-020)
 **Motion:** `docs/design/MOTION.md` — three durations, two easings, reduced motion (DS-001)
 **Elevation and layering:** `docs/design/ELEVATION.md` — what a shadow means; layers by name, never by number (DS-001)
+**Colour:** `docs/design/COLOR_SYSTEM.md` — six roles on one OKLCH ladder in `packages/core/tokens/colorSystem.js` (ADR-034)
+**Brand:** `docs/design/BRAND.md` — the Spiral mark, its sizes and colours; never redraw it by hand (ADR-034)
 **The index of all standards:** `docs/design/DESIGN_GUIDELINES.md` §16
 
 ### Non-negotiables

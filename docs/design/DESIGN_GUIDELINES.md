@@ -22,7 +22,7 @@
 *   **Usage:** Use the application's design tokens or CSS variables.
 *   **Mode Compatibility:** All designs MUST work seamlessly in both **Dark** and **Light** modes.
     *   Use usage-based tokens (e.g., `neutral.softBg`) that automatically adjust per mode.
-*   **Detailed Documentation:** Refer to [`COLOR_SYSTEM.md`](./COLOR_SYSTEM.md) for deeper insights into the dynamic color generation algorithm and full palette tokens.
+*   **Detailed Documentation:** [`COLOR_SYSTEM.md`](./COLOR_SYSTEM.md) — six roles (brand, neutrals, accent, status, gold, categories) on one OKLCH ladder in `@nowry/core` (ADR-034). The brand mark and its rules are in [`BRAND.md`](./BRAND.md).
 *   **Palette:**
     *   **Primary:** Used sparingly for main actions (CTAs).
     *   **Neutral:** Used for structural elements, borders, and secondary text.
@@ -2327,9 +2327,10 @@ and ships with the token, helper or lint rule that keeps it true. Read the one y
 
 | Standard | Document | Enforced by |
 |---|---|---|
-| Colour | `COLOR_SYSTEM.md` | semantic tokens; `readableTextOn` |
+| Colour | `COLOR_SYSTEM.md` (ADR-034) | `colorSystem.js` in core; contrast and distance tests over every preset; `paletteParity.test.js` |
+| Brand | `BRAND.md` (ADR-034) | `spiralMark()` in core; `BrandMark`/`BrandLockup` on both clients |
 | Buttons & segmented controls | `BUTTONS.md` (ADR-020) | `keyButton`, `keySegment`, `segment`, `segmentedGroup` in `formStyles` |
 | Motion | `MOTION.md` (DS-001) | `MOTION` in `tokens.js`; `--nowry-motion-*`; lint on literal durations |
 | Elevation & layering | `ELEVATION.md` (DS-001) | Joy's `shadow` scale; `Z_INDEX` via `theme.zIndex`; lint on numeric `zIndex` |
 | The summary object; rows, readouts & measures | §15.10–15.11 (ADR-021, DS-011) | `identityTile`, `listRow`, `readout`, `measureTrack`/`measureFill` in `formStyles`; `LIST_ROW_HEIGHT` in `tokens.js` |
-| Icons, accessibility, formatting, feedback, layout, navigation, brand, QA | DS-002 … DS-010 in `docs/tasks.md` | to come, in that order |
+| Icons, accessibility, formatting, feedback, layout, navigation, QA | DS-002 … DS-008, DS-010 in `docs/tasks.md` | to come, in that order |
