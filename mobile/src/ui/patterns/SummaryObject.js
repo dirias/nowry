@@ -13,13 +13,40 @@
  * **Empty is the same object.** One sentence and its actions, never hidden and
  * never a centred block — a centred empty state replaces the object the user
  * will use tomorrow with one they will never see again.
+ *
+ * **The readouts are ONE line, joined by middots** (MOB-095). They were set at
+ * a 16pt gap with no separator, which made three facts standing near each other
+ * — and wrapped after two, so the study streak sat on a line of its own under
+ * the counts it belongs with. The web has always drawn this as a sentence:
+ * "21 due · 0 reviewed · start your streak today", at half the gap with a
+ * tertiary dot between. Same words, one line instead of three, which is the
+ * whole of what "more minimalistic on the web" meant.
  */
+import { Children, Fragment, isValidElement } from 'react'
 import { View } from 'react-native'
 import { useTheme } from '../../theme'
 import { Sheet } from '../Sheet'
 import { Stack } from '../Stack'
 import { Typography, resolveColor } from '../Typography'
 import { SUMMARY_EDGE_HEIGHT } from './rowSpec'
+
+/**
+ * The readouts as a flat list, whatever shape the caller wrote them in.
+ *
+ * Every call site passes a fragment, because that is how you write four
+ * conditional siblings in JSX — and `Children.toArray` sees a fragment as ONE
+ * child, so a separator between "them" would have nothing to separate. Opened
+ * one level, then flattened, which also drops the nulls a conditional readout
+ * leaves behind: `·` beside a missing number is how a separator gives away
+ * that it was written as decoration.
+ */
+const flatten = (readouts) => {
+  const top = Children.toArray(readouts)
+  if (top.length === 1 && isValidElement(top[0]) && top[0].type === Fragment) {
+    return Children.toArray(top[0].props.children)
+  }
+  return top
+}
 
 export function SummaryObject({
   title,
@@ -68,8 +95,24 @@ export function SummaryObject({
             {empty}
           </Typography>
         ) : readouts ? (
-          <Stack direction='row' spacing={2} alignItems='center' flexWrap='wrap'>
-            {readouts}
+          <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap'>
+            {/*
+             * The dots are SIBLINGS of the readouts, not wrappers around them,
+             * which is how the web writes this row and it matters at 390pt.
+             * Bound to the item that follows, a dot wraps with it and a line
+             * begins with "·"; left flat, it stays at the end of the line it
+             * fits on, where a trailing separator reads as "continues".
+             */}
+            {flatten(readouts).flatMap((readout, index) =>
+              index === 0
+                ? [readout]
+                : [
+                    <Typography key={`dot-${index}`} level='body-sm' color='text.tertiary' importantForAccessibility='no'>
+                      ·
+                    </Typography>,
+                    readout
+                  ]
+            )}
           </Stack>
         ) : null}
 
