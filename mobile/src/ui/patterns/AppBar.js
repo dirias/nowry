@@ -29,6 +29,18 @@ import { Avatar } from './Avatar'
 import { Icon } from '../icons'
 
 export const APP_BAR_HEIGHT = 56
+/**
+ * The mark, and the height it is drawn at.
+ *
+ * The source is 212×145 — cropped from the web's own `logo.png` rather than
+ * redrawn, so there is one owl and not two. 22 points tall leaves the word
+ * beside it as the tallest thing in the row, which is the right order: the
+ * name is what the bar says and the mark is what it wears.
+ */
+const BRAND_MARK = require('../../../assets/brand/owl.png')
+const MARK_HEIGHT = 22
+const MARK_WIDTH = Math.round(MARK_HEIGHT * (212 / 145))
+
 const AVATAR = 32
 
 /**
@@ -107,13 +119,29 @@ export function AppBar() {
         </Pressable>
       ) : null}
 
-      {/* One name, read once: the glyph is decorative beside the word. */}
+      {/*
+       * The brand's own mark, not a stand-in for it (MOB-101).
+       *
+       * This was a generic leaf glyph tinted gold — a placeholder that read as
+       * a decision, because it is the right colour in the right place and
+       * nothing about it says "this is not the logo". The web's header has
+       * carried the owl since it shipped, so the phone was wearing a different
+       * brand in the one spot a brand is always looked for.
+       *
+       * The MARK alone rather than the whole lockup. The web's is a wordmark:
+       * owl, "NOWRY", and "BOOST THE WAY YOU LEARN" under it, 766 points wide.
+       * At the 24 points this bar has, the tagline is two points tall and the
+       * word is unreadable — so the mark carries the identity and the name
+       * stays as type, which is what it already was.
+       *
+       * One name, read once: the mark is decorative beside the word.
+       */}
       <View
         accessibilityRole='header'
         accessibilityLabel='Nowry'
         style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing[1] }}
       >
-        <Icon name='Leaf' size='md' color='warning.solidBg' />
+        <Image source={BRAND_MARK} style={{ width: MARK_WIDTH, height: MARK_HEIGHT }} resizeMode='contain' accessible={false} />
         <Typography level='title-lg' color='primary.solidColor'>
           Nowry
         </Typography>
