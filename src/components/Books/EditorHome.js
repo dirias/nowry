@@ -823,7 +823,7 @@ export default function EditorHome() {
   if (!book) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: 2 }}>
-        <CloudOff size={48} color='var(--joy-palette-neutral-500)' />
+        <CloudOff size={48} color='var(--joy-palette-text-tertiary)' />
         <Typography level='h4' color='neutral'>
           Book not found or could not be loaded
         </Typography>

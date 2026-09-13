@@ -42,8 +42,9 @@ import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 // The stage table is shared: the phone draws the same companion, and a stage
 // table inside one client's orb is that client's private pet (MOB-050).
 import { STAGE_CONFIG } from '@nowry/core/domain/petStages'
-import { DEFAULT_ACCENT } from '@nowry/core/tokens/colorSchemeGenerator'
-import { EARNED_GOLD } from '@nowry/core/tokens/colorSystem'
+import { DEFAULT_ACCENT, readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
+import { earnedGold } from '@nowry/core/tokens/colorSystem'
+import { useTheme } from '@mui/joy/styles'
 
 // The egg's asymmetry is what sells stage 1 as "not yet formed"; every later
 // stage is a true circle.
@@ -269,6 +270,7 @@ export const PetOrb = ({
 }) => {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion()
+  const earned = earnedGold(useTheme().palette.mode)
   const moodEmoji = {
     idle: '🔮',
     happy: '✨',
@@ -329,7 +331,7 @@ export const PetOrb = ({
     borderRadius: FORM_BORDER_RADIUS[config.form] ?? FORM_BORDER_RADIUS.round,
     border: 'none',
     cursor: preview ? 'default' : 'pointer',
-    background: `radial-gradient(circle at 35% 35%, ${activeColor}, var(--joy-palette-background-body, #0c0818))`,
+    background: `radial-gradient(circle at 35% 35%, ${activeColor}, var(--joy-palette-background-body))`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -399,8 +401,8 @@ export const PetOrb = ({
       {auraRings}
       <ProgressRing progress={levelProgress} size={config.sizePx} color={activeColor} />
       {/* What a stage earns is drawn in gold, the one colour that means earned (ADR-034). */}
-      <OrbitLayer count={config.orbitCount} size={config.sizePx} color={EARNED_GOLD} reduceMotion={reduceMotion} />
-      <StageMark mark={config.mark} size={config.sizePx} color={EARNED_GOLD} />
+      <OrbitLayer count={config.orbitCount} size={config.sizePx} color={earned} reduceMotion={reduceMotion} />
+      <StageMark mark={config.mark} size={config.sizePx} color={earned} />
     </>
   )
 
@@ -419,7 +421,7 @@ export const PetOrb = ({
             width: '100%',
             height: '100%',
             borderRadius: '50%',
-            background: `radial-gradient(circle at 35% 35%, ${activeColor}, var(--joy-palette-background-body, #0c0818))`,
+            background: `radial-gradient(circle at 35% 35%, ${activeColor}, var(--joy-palette-background-body))`,
             zIndex: 2
           }}
         />
@@ -515,7 +517,7 @@ export const PetOrb = ({
           bottom: -4,
           right: -4,
           background: activeColor,
-          color: 'var(--joy-palette-common-white)',
+          color: readableTextOn(activeColor),
           fontSize: 12,
           fontWeight: 700,
           lineHeight: 1,
@@ -1611,7 +1613,7 @@ const StudyPet = () => {
                                 padding: '8px 12px',
                                 borderRadius: '16px 16px 4px 16px',
                                 background: resolvedColor,
-                                color: 'var(--joy-palette-text-primary)',
+                                color: readableTextOn(resolvedColor),
                                 fontSize: 14,
                                 lineHeight: 1.55,
                                 fontFamily: 'Inter, sans-serif',
@@ -1863,9 +1865,7 @@ const StudyPet = () => {
                         border: 'none',
                         background: input.trim() && !isTyping && !answerPending ? resolvedColor : 'var(--joy-palette-background-level2)',
                         color:
-                          input.trim() && !isTyping && !answerPending
-                            ? 'var(--joy-palette-common-white)'
-                            : 'var(--joy-palette-text-tertiary)',
+                          input.trim() && !isTyping && !answerPending ? readableTextOn(resolvedColor) : 'var(--joy-palette-text-tertiary)',
                         cursor: input.trim() && !isTyping && !answerPending ? 'pointer' : 'not-allowed',
                         fontSize: 16,
                         display: 'flex',

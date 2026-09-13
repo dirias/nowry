@@ -36,9 +36,9 @@ const OrbPreviewPanel = ({ petSpecies, petName, avatarUrl }) => {
         variant='outlined'
         sx={{
           borderRadius: 'xl',
-          background: 'linear-gradient(160deg, rgba(16,16,32,0.6) 0%, rgba(22,14,42,0.6) 100%)',
-          backdropFilter: 'blur(24px)',
-          borderColor: 'rgba(164,69,255,0.2)',
+          // The preview sits on the page like any panel (ADR-034); it was violet
+          // glass from the retired per-stage palette.
+          bgcolor: 'background.level1',
           overflow: 'hidden'
         }}
       >

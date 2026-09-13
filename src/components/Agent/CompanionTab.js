@@ -272,11 +272,6 @@ const CompanionTab = ({
                 fullWidth
                 onClick={() => onGenerateAvatar('manual')}
                 aria-label={t('agent.companion.generateAvatarAriaLabel')}
-                sx={{
-                  // Justified brand gradient constant — semantic tokens don't map to this multi-stop gradient
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  '&:hover': { background: 'linear-gradient(135deg, #5a6fd6, #6a3d9a)' }
-                }}
               >
                 {t('agent.companion.generateAvatar')}
               </Button>

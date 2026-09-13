@@ -166,7 +166,9 @@ function Ribbon({ width }) {
         right: '18%',
         width: Math.max(6, Math.round(width * 0.15)),
         height: Math.max(12, Math.round(width * 0.42)),
-        bgcolor: 'warning.solidBg',
+        // The learner's own mark, so the accent (ADR-034): warning means
+        // attention and gold means earned; a bookmark is neither.
+        bgcolor: 'primary.solidBg',
         clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%)'
       }}
     />

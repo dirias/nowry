@@ -12,7 +12,7 @@ const Task = ({ task, onToggle, onDelete, onUpdate }) => {
     setTempDeadline(task.deadline ? task.deadline.split('T')[0] : '')
   }, [task.deadline])
 
-  const priorityColor = task.priority === 'high' ? 'danger.400' : task.priority === 'medium' ? 'warning.500' : 'success.500'
+  const priorityColor = task.priority === 'high' ? 'danger.solidBg' : task.priority === 'medium' ? 'warning.solidBg' : 'success.solidBg'
 
   const handleDeadlineSave = () => {
     setEditingDeadline(false)

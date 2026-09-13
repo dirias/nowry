@@ -213,11 +213,13 @@ function BookShape({ cover, colour, width, height, theme, onImageError }) {
 function Ribbon({ width, theme }) {
   const w = Math.max(6, Math.round(width * 0.15))
   const h = Math.max(12, Math.round(width * 0.42))
-  const gold = resolveColor(theme, 'warning.solidBg')
+  // The learner's own mark, so the accent (ADR-034): warning means attention
+  // and gold means earned; a bookmark is neither.
+  const ribbon = resolveColor(theme, 'primary.solidBg')
   const tip = w / Math.SQRT2
   return (
     <View pointerEvents='none' style={{ position: 'absolute', top: -2, right: width * 0.18, width: w, height: h + tip / 2 }}>
-      <View style={{ width: w, height: h - tip / 2, backgroundColor: gold }} />
+      <View style={{ width: w, height: h - tip / 2, backgroundColor: ribbon }} />
       <View
         style={{
           position: 'absolute',
@@ -225,7 +227,7 @@ function Ribbon({ width, theme }) {
           top: h - tip,
           width: tip,
           height: tip,
-          backgroundColor: gold,
+          backgroundColor: ribbon,
           transform: [{ rotate: '45deg' }]
         }}
       />

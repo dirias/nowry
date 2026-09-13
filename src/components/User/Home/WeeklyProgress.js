@@ -3,6 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { Box, Typography, Card, CardContent, Stack, Chip, Skeleton } from '@mui/joy'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
+import { categoryDot } from '@nowry/core/tokens/colorSystem'
+
+/** Chart series draw from the category family (ADR-034); SVG strokes cannot take a token. */
+const SERIES = { flashcards: categoryDot('lake'), quizzes: categoryDot('amber'), visual: categoryDot('lagoon'), books: categoryDot('moss') }
 
 export default function WeeklyProgress() {
   const { t } = useTranslation()
@@ -51,8 +55,12 @@ export default function WeeklyProgress() {
         <ResponsiveContainer width='100%' height={250}>
           <LineChart data={weeklyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
             <CartesianGrid strokeDasharray='3 3' opacity={0.3} />
-            <XAxis dataKey='day' tick={{ fontSize: 12 }} stroke='#888' />
-            <YAxis tick={{ fontSize: 12 }} stroke='#888' label={{ value: 'Items', angle: -90, position: 'insideLeft', fontSize: 12 }} />
+            <XAxis dataKey='day' tick={{ fontSize: 12 }} stroke='var(--joy-palette-text-tertiary)' />
+            <YAxis
+              tick={{ fontSize: 12 }}
+              stroke='var(--joy-palette-text-tertiary)'
+              label={{ value: 'Items', angle: -90, position: 'insideLeft', fontSize: 12 }}
+            />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'var(--joy-palette-background-surface)',
@@ -64,10 +72,10 @@ export default function WeeklyProgress() {
               labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
             />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-            <Line type='monotone' dataKey='flashcards' stroke='#0B6BCB' name='Flashcards' strokeWidth={2} dot={{ r: 4 }} />
-            <Line type='monotone' dataKey='quizzes' stroke='#F57C00' name='Quizzes' strokeWidth={2} dot={{ r: 4 }} />
-            <Line type='monotone' dataKey='visual' stroke='#0288D1' name='Visual' strokeWidth={2} dot={{ r: 4 }} />
-            <Line type='monotone' dataKey='books' stroke='#388E3C' name='Books' strokeWidth={2} dot={{ r: 4 }} />
+            <Line type='monotone' dataKey='flashcards' stroke={SERIES.flashcards} name='Flashcards' strokeWidth={2} dot={{ r: 4 }} />
+            <Line type='monotone' dataKey='quizzes' stroke={SERIES.quizzes} name='Quizzes' strokeWidth={2} dot={{ r: 4 }} />
+            <Line type='monotone' dataKey='visual' stroke={SERIES.visual} name='Visual' strokeWidth={2} dot={{ r: 4 }} />
+            <Line type='monotone' dataKey='books' stroke={SERIES.books} name='Books' strokeWidth={2} dot={{ r: 4 }} />
           </LineChart>
         </ResponsiveContainer>
 

@@ -49,6 +49,13 @@ import { publicContentService } from '@nowry/core/api/services'
 // same catalogue and must not have a second answer about a young item (MOB-049).
 import { SPARSE_THRESHOLD, evidenceFor, publicAuthor, publicCardCount } from '@nowry/core/domain/publicEvidence'
 import CoverMark from '../components/Books/CoverMark'
+import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
+
+/** The glyph on a cover: legible on the stored colour, or on the accent when there is none. */
+const coverInk = (item) => {
+  const hex = item.cover_color || item.color
+  return /^#[0-9a-f]{6}$/i.test(hex ?? '') ? readableTextOn(hex) : 'primary.solidColor'
+}
 
 const CATEGORIES = [
   'science',
@@ -522,7 +529,7 @@ const FeatureCard = ({ item, contentType, onItemClick, t }) => {
             justifyContent: 'center'
           }}
         >
-          {!item.image_url && <MenuBookIcon sx={{ fontSize: 'xl4', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />}
+          {!item.image_url && <MenuBookIcon sx={{ fontSize: 'xl4', color: coverInk(item), opacity: 0.8 }} aria-hidden='true' />}
         </Box>
       )}
 
@@ -1102,7 +1109,7 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
                 borderColor: 'divider'
               }}
             >
-              {!item.image_url && <MenuBookIcon sx={{ fontSize: 'lg', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />}
+              {!item.image_url && <MenuBookIcon sx={{ fontSize: 'lg', color: coverInk(item), opacity: 0.8 }} aria-hidden='true' />}
             </Box>
           )}
 

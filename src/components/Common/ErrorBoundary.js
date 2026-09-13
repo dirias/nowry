@@ -49,7 +49,7 @@ class ErrorBoundary extends React.Component {
             color: 'text.secondary'
           }}
         >
-          <WarningAmberRoundedIcon sx={{ fontSize: 48, color: 'warning.400' }} />
+          <WarningAmberRoundedIcon sx={{ fontSize: 48, color: 'warning.plainColor' }} />
           <Typography level='title-md' color='neutral'>
             Something went wrong in this section.
           </Typography>

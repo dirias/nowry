@@ -204,6 +204,13 @@ export const GOLD_SPEC = Object.freeze({ C: 0.15, h: 80, solidL: 0.815, darkSoli
 /** Gold as one literal, for surfaces that append hex alpha or paint a canvas. */
 export const EARNED_GOLD = oklchToHex(GOLD_SPEC.solidL, GOLD_SPEC.C, GOLD_SPEC.h)
 
+/**
+ * Gold for a small earned mark drawn straight on the page. Bright gold is 1.7:1
+ * on light paper, so in light mode it deepens to the gold tone's plain colour;
+ * on a dark page the bright gold reads as it is.
+ */
+export const earnedGold = (mode) => (mode === 'light' ? buildTone(GOLD_SPEC, 'light').plainColor : EARNED_GOLD)
+
 // ── 6 · Categories ─────────────────────────────────────────────────────────
 /**
  * One family for everything a learner tags. Ids are stable because they are

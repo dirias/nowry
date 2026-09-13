@@ -207,7 +207,7 @@ const FocusBar = () => {
           <Typography
             level='body-xs'
             sx={{
-              color: hasDeadline ? (isOverdue ? 'danger.solidColor' : isUrgent ? 'warning.solidColor' : 'text.tertiary') : 'text.tertiary',
+              color: hasDeadline ? (isOverdue ? 'danger.plainColor' : isUrgent ? 'warning.plainColor' : 'text.tertiary') : 'text.tertiary',
               fontWeight: 700,
               flexShrink: 0
             }}
@@ -351,9 +351,9 @@ const FocusBar = () => {
                         sx={{
                           color: hasDeadline
                             ? isOverdue
-                              ? 'danger.solidColor'
+                              ? 'danger.plainColor'
                               : isUrgent
-                                ? 'warning.solidColor'
+                                ? 'warning.plainColor'
                                 : 'text.tertiary'
                             : 'text.tertiary'
                         }}
@@ -380,7 +380,7 @@ const FocusBar = () => {
                           level='body-xs'
                           sx={{
                             fontWeight: 700,
-                            color: isOverdue ? 'danger.solidColor' : isUrgent ? 'warning.solidColor' : 'text.secondary'
+                            color: isOverdue ? 'danger.plainColor' : isUrgent ? 'warning.plainColor' : 'text.secondary'
                           }}
                         >
                           {isOverdue ? '!' : `${daysUntil}d`}

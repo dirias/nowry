@@ -60,7 +60,7 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
                 p: 1,
                 borderRadius: 'md',
                 bgcolor: 'primary.softBg',
-                color: 'primary.solidColor',
+                color: 'primary.softColor',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

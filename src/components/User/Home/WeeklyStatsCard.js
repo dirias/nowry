@@ -201,7 +201,7 @@ const WeeklyStatsCard = () => {
                   height: 40,
                   borderRadius: 'sm',
                   bgcolor: `${stat.color}.softBg`,
-                  color: `${stat.color}.solidColor`
+                  color: `${stat.color}.softColor`
                 }}
               >
                 <Icon size={20} strokeWidth={2.5} />

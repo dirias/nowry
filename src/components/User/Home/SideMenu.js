@@ -320,8 +320,8 @@ const SideMenu = () => {
   }
 
   const periodIcon = {
-    morning: <WbSunnyIcon sx={{ fontSize: 32, color: 'warning.solidBg' }} />,
-    afternoon: <WbTwilightIcon sx={{ fontSize: 32, color: 'warning.solidBg' }} />,
+    morning: <WbSunnyIcon sx={{ fontSize: 32, color: 'warning.plainColor' }} />,
+    afternoon: <WbTwilightIcon sx={{ fontSize: 32, color: 'warning.plainColor' }} />,
     evening: <NightsStayIcon sx={{ fontSize: 32, color: 'primary.plainColor' }} />
   }
 

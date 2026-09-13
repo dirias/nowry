@@ -222,7 +222,8 @@ export default function UserProfile() {
                     width: { xs: 100, md: 120 },
                     height: { xs: 100, md: 120 },
                     fontSize: 'xl5',
-                    bgcolor: 'primary.solidBg'
+                    bgcolor: 'primary.solidBg',
+                    color: 'primary.solidColor'
                   }}
                 >
                   {editData.username ? editData.username.charAt(0).toUpperCase() : '?'}

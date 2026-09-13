@@ -121,10 +121,11 @@ const QuickAccessCard = () => {
                   height: 48,
                   borderRadius: 'md',
                   bgcolor: `${action.color}.softBg`,
-                  color: `${action.color}.solidColor`,
+                  color: `${action.color}.softColor`,
                   transition: 'all 0.2s',
                   '&:hover': {
-                    bgcolor: `${action.color}.solidBg`
+                    bgcolor: `${action.color}.solidBg`,
+                    color: `${action.color}.solidColor`
                   }
                 }}
               >

@@ -2,6 +2,7 @@ import React, { memo, useState, useRef, useCallback } from 'react'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
 import { Box, IconButton, Tooltip } from '@mui/joy'
 import { useTheme, useColorScheme } from '@mui/joy/styles'
+import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 
@@ -258,7 +259,7 @@ const StickyNoteNode = memo(({ data, selected }) => {
               <IconButton
                 size='sm'
                 variant='solid'
-                sx={{ '--IconButton-size': '22px', bgcolor: color.border, color: 'primary.solidColor', borderRadius: 'sm' }}
+                sx={{ '--IconButton-size': '22px', bgcolor: color.border, color: readableTextOn(colorLiteral.border), borderRadius: 'sm' }}
                 onClick={(e) => {
                   e.stopPropagation()
                   startEdit()

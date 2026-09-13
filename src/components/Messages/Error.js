@@ -33,7 +33,7 @@ const ErrorWindow = ({ title, error_msg, onClose }) => {
                 height: 40,
                 borderRadius: '50%',
                 bgcolor: 'warning.softBg',
-                color: 'warning.solidBg',
+                color: 'warning.softColor',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

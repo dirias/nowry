@@ -56,7 +56,7 @@ const DeleteConfirmationModal = ({
               p: 1,
               borderRadius: 'md',
               bgcolor: isDanger ? 'danger.softBg' : 'warning.softBg',
-              color: isDanger ? 'danger.solidColor' : 'warning.solidColor',
+              color: isDanger ? 'danger.softColor' : 'warning.softColor',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'

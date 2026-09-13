@@ -9,6 +9,14 @@
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import { EARNED_GOLD, NEUTRALS } from '@nowry/core/tokens/colorSystem'
+
+/*
+ * A celebration is a dark card over any page, in either mode, so it takes the
+ * dark scheme's own colours as literals — and gold, because it marks something
+ * earned (ADR-034). It was violet glass from the retired per-stage palette.
+ */
+const CARD = { ground: NEUTRALS.dark.background.popup, text: NEUTRALS.dark.text.primary, hint: NEUTRALS.dark.text.tertiary }
 
 // Slim stage config — emoji only (full config lives in StudyPet.js)
 const STAGE_CONFIG = {
@@ -58,11 +66,11 @@ const LevelUpCelebration = ({ levelUpData, stage, onDismiss }) => {
         transition={{ type: 'spring', stiffness: 320, damping: 24 }}
         style={{
           width: 220,
-          background: 'linear-gradient(160deg, rgba(16,16,32,0.97) 0%, rgba(22,14,42,0.97) 100%)',
+          background: CARD.ground,
           border: '1px solid rgba(255,255,255,0.12)',
           borderRadius: 16,
           backdropFilter: 'blur(20px)',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(164,69,255,0.2)',
+          boxShadow: `0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px ${EARNED_GOLD}33`,
           padding: '20px 16px',
           display: 'flex',
           flexDirection: 'column',
@@ -85,7 +93,7 @@ const LevelUpCelebration = ({ levelUpData, stage, onDismiss }) => {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#e8e8f5' }}
+          style={{ margin: 0, fontSize: 15, fontWeight: 700, color: CARD.text }}
         >
           {t(`pet.stage.${stage}.name`, STAGE_NAMES[stage])}
         </motion.p>
@@ -94,7 +102,7 @@ const LevelUpCelebration = ({ levelUpData, stage, onDismiss }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.55 }}
-          style={{ margin: 0, fontSize: 12, color: 'rgba(164, 69, 255, 0.9)', fontWeight: 500 }}
+          style={{ margin: 0, fontSize: 12, color: EARNED_GOLD, fontWeight: 500 }}
         >
           {t('pet.levelUp.reached', { level: levelUpData.newLevel })}
         </motion.p>
@@ -103,7 +111,7 @@ const LevelUpCelebration = ({ levelUpData, stage, onDismiss }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}
+          style={{ margin: '4px 0 0', fontSize: 12, color: CARD.hint }}
         >
           {t('pet.levelUp.dismiss')}
         </motion.p>
