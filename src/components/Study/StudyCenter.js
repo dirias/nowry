@@ -20,7 +20,7 @@ const VIEWS = ['dashboard', 'library']
 
 export default function StudyCenter() {
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [decks, setDecks] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -114,13 +114,16 @@ export default function StudyCenter() {
           const totalDueCount = (statisticsData.summary?.due_today ?? 0) + (statisticsData.summary?.new_today ?? 0)
           const daysSince = Math.floor((Date.now() - new Date(statisticsData.summary.last_study_date).getTime()) / (1000 * 60 * 60 * 24))
           agentService
-            .postIntervention({
-              type: 're_engagement',
-              total_due_count: totalDueCount,
-              top_deck_name: topDeck?.name ?? '',
-              top_deck_due: topDeck?.due_cards ?? 0,
-              days_since_last_session: daysSince
-            })
+            .postIntervention(
+              {
+                type: 're_engagement',
+                total_due_count: totalDueCount,
+                top_deck_name: topDeck?.name ?? '',
+                top_deck_due: topDeck?.due_cards ?? 0,
+                days_since_last_session: daysSince
+              },
+              i18n.language
+            )
             .then((result) => {
               localStorage.setItem(reengagementKey, '1')
               queuePreSessionIntervention(result)
@@ -139,13 +142,16 @@ export default function StudyCenter() {
       const presessionKey = `nowry_presession_seen_${topDeck._id}_${todayUTC}`
       if (!localStorage.getItem(presessionKey)) {
         agentService
-          .postIntervention({
-            type: 'pre_session_framing',
-            deck_id: topDeck._id,
-            deck_name: topDeck.name,
-            due_count: topDeck.due_cards,
-            last_struggle_pattern: statisticsData.summary?.last_session_struggle ?? null
-          })
+          .postIntervention(
+            {
+              type: 'pre_session_framing',
+              deck_id: topDeck._id,
+              deck_name: topDeck.name,
+              due_count: topDeck.due_cards,
+              last_struggle_pattern: statisticsData.summary?.last_session_struggle ?? null
+            },
+            i18n.language
+          )
           .then((result) => {
             localStorage.setItem(presessionKey, '1')
             queuePreSessionIntervention(result)
@@ -162,10 +168,13 @@ export default function StudyCenter() {
     const milestoneSteaks = [7, 14, 30, 60, 100]
     if (currentStreak && milestoneSteaks.includes(currentStreak)) {
       agentService
-        .postIntervention({
-          type: 'streak_milestone',
-          streak_count: currentStreak
-        })
+        .postIntervention(
+          {
+            type: 'streak_milestone',
+            streak_count: currentStreak
+          },
+          i18n.language
+        )
         .then((result) => {
           if (result.already_seen === true) return
           queuePreSessionIntervention(result)

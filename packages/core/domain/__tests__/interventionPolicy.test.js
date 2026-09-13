@@ -143,9 +143,10 @@ describe('wrongAnswerEvent', () => {
   }
 
   it('builds the payload the server declares', () => {
-    expect(wrongAnswerEvent(card, { index: 3, total: 25 })).toEqual({
+    expect(wrongAnswerEvent(card, { index: 3, total: 25, deckName: 'JLPT N3' })).toEqual({
       type: 'wrong_answer',
       card_id: 'c1',
+      deck_name: 'JLPT N3',
       card_front: 'ずいぶん',
       card_back: 'considerably',
       card_notes: 'adverb',
@@ -171,12 +172,22 @@ describe('wrongAnswerEvent', () => {
   it('is nothing without a card', () => {
     expect(wrongAnswerEvent(null)).toBeNull()
   })
+
+  it('omits the deck rather than naming it "this deck"', () => {
+    // The server used to substitute that phrase and hand it to the model as a
+    // NAME, which is how a summary came back saying "The deck this deck"
+    // (MOB-099). Null lets the server say Unknown, which its own rules forbid
+    // it from papering over.
+    expect(wrongAnswerEvent(card).deck_name).toBeNull()
+    expect(sessionSummaryEvent({ total: 1 }).deck_name).toBeNull()
+  })
 })
 
 describe('sessionSummaryEvent', () => {
   it('builds the payload the server declares', () => {
-    expect(sessionSummaryEvent({ total: 25, wrong: 4, cardId: 'c1', front: 'ずいぶん' })).toEqual({
+    expect(sessionSummaryEvent({ total: 25, wrong: 4, cardId: 'c1', front: 'ずいぶん', deckName: 'JLPT N3' })).toEqual({
       type: 'session_summary',
+      deck_name: 'JLPT N3',
       session_total_cards: 25,
       session_wrong_count: 4,
       most_missed_card_id: 'c1',

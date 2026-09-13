@@ -828,7 +828,7 @@ export const AgentProvider = ({ children }) => {
     }, 12000)
 
     try {
-      const result = await agentService.postIntervention(event)
+      const result = await agentService.postIntervention(event, i18n.language)
       clearTimeout(timeoutId)
       dispatch({ type: 'COMPANION_SUCCESS', payload: result })
     } catch {

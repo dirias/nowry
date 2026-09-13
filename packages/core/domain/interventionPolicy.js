@@ -136,11 +136,19 @@ export function allowIntervention(type, { settings = null, count = 0, silentUnti
  * @param {{index?: number, total?: number}} where - `index` is ZERO-based as a
  *   list is; the payload's `session_card_index` is one-based as a person counts.
  */
-export function wrongAnswerEvent(card, { index = 0, total = 0 } = {}) {
+export function wrongAnswerEvent(card, { index = 0, total = 0, deckName = null } = {}) {
   if (!card) return null
   return {
     type: 'wrong_answer',
     card_id: card._id || card.id,
+    /*
+     * The deck's NAME, which the server used to substitute with the words
+     * "this deck" — and a model told the deck is called "this deck" writes
+     * "The deck this deck" (MOB-099). Omitted rather than faked when the
+     * caller has none: the server says "Unknown" and its own rules forbid
+     * inventing one.
+     */
+    deck_name: deckName || null,
     card_front: card.title || card.front || '',
     card_back: card.content || card.back || '',
     card_notes: card.notes || null,
@@ -155,9 +163,10 @@ export function wrongAnswerEvent(card, { index = 0, total = 0 } = {}) {
  *
  * @param {{total?: number, wrong?: number, cardId?: string|null, front?: string|null}} session
  */
-export function sessionSummaryEvent({ total = 0, wrong = 0, cardId = null, front = null } = {}) {
+export function sessionSummaryEvent({ total = 0, wrong = 0, cardId = null, front = null, deckName = null } = {}) {
   return {
     type: 'session_summary',
+    deck_name: deckName || null,
     session_total_cards: total,
     session_wrong_count: wrong,
     most_missed_card_id: cardId,

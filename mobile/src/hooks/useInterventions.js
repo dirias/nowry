@@ -24,6 +24,7 @@
  * be the interruption the settings exist to prevent.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { agentService } from '@nowry/core/api/services'
 import { plainReply } from '@nowry/core/domain/agentChat'
 import { allowIntervention, silenceUntil } from '@nowry/core/domain/interventionPolicy'
@@ -37,6 +38,7 @@ import { allowIntervention, silenceUntil } from '@nowry/core/domain/intervention
 const PATIENCE = 12000
 
 export function useInterventions({ settings = null, inSession = true } = {}) {
+  const { i18n } = useTranslation()
   const [message, setMessage] = useState(null)
 
   /*
@@ -103,7 +105,7 @@ export function useInterventions({ settings = null, inSession = true } = {}) {
       timer.current = setTimeout(() => mineStill() && dismiss(), PATIENCE)
 
       try {
-        const reply = await agentService.postIntervention(event)
+        const reply = await agentService.postIntervention(event, i18n?.language ?? 'en')
         if (!mineStill()) return
         clearTimeout(timer.current)
         // Only a message that actually arrived is spent against the session's
@@ -123,7 +125,7 @@ export function useInterventions({ settings = null, inSession = true } = {}) {
         setMessage(null)
       }
     },
-    [dismiss, inSession]
+    [dismiss, inSession, i18n]
   )
 
   /*

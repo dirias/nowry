@@ -356,7 +356,10 @@ export function StudySession() {
         total: answers.length,
         wrong: missed.length,
         cardId: worst?.cardId ?? null,
-        front: worst?.cardTitle ?? null
+        front: worst?.cardTitle ?? null,
+        // The one fact this screen has and the server had to guess at: it used
+        // to fill the prompt with the words "this deck" (MOB-099).
+        deckName: deckName.current
       })
     )
   }, [complete, id, graded, askCompanion])
@@ -411,7 +414,7 @@ export function StudySession() {
       nudged.current.add(cardId)
       clearTimeout(nudgeTimer.current)
       nudgeTimer.current = setTimeout(
-        () => askCompanion(wrongAnswerEvent(card, { index, total: cards.length })),
+        () => askCompanion(wrongAnswerEvent(card, { index, total: cards.length, deckName: deckName.current })),
         NUDGE_DELAY + Math.random() * NUDGE_JITTER
       )
     },

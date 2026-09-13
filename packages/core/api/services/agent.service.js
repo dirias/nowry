@@ -88,8 +88,15 @@ export const agentService = {
    * @param {{ type: string, card_id?: string, [key: string]: any }} event - Intervention event payload.
    * @returns {Promise<{ type: string, message: string, card_id?: string }>}
    */
-  postIntervention: async (event) => {
-    const { data } = await apiClient.post('/agent/intervention', event, { timeout: 30000 })
+  postIntervention: async (event, language = 'en') => {
+    /*
+     * The language rides on the event, exactly as it does on a chat message
+     * (MOB-099). Without it the server's intervention prompt said "write in
+     * plain English" and meant it, so the same companion answered a Spanish
+     * learner in Spanish when asked and in English when it spoke first — about
+     * the same card, seconds apart.
+     */
+    const { data } = await apiClient.post('/agent/intervention', { language, ...event }, { timeout: 30000 })
     return data
   },
 
