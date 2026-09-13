@@ -4,6 +4,14 @@
  * Appearance, the companion, the timer, notifications, then the part that ends
  * the account — the order a phone's settings screens usually read.
  *
+ * **What you are learning is here** (MOB-094). The topics drive the news feed,
+ * the deck suggestions and the companion's persona, and the first one is
+ * primary — the server derives that from the order, so the order is the
+ * setting and not a presentation of it. On a browser the web reorders with
+ * move-up and move-down keys beside a list; here the chips are the order, and
+ * a selected one carries its position, so promoting a topic is one tap on the
+ * thing itself rather than a control beside it.
+ *
  * **The timer's settings were honoured and uneditable** (MOB-093), which is the
  * same state the companion's five message switches were in a day ago: the Focus
  * tab has read `pomodoro.work_minutes` off the profile since it shipped and had
@@ -35,12 +43,28 @@ import { DEFAULT_SETTINGS } from '@nowry/core/domain/pomodoroCycle'
 import { POMODORO_DURATIONS, POMODORO_PREFS, clampMinutes, pomodoroPatch } from '@nowry/core/domain/pomodoroPrefs'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import useProgressivePreferences, { PREFERENCE_FIELD } from '@nowry/core/hooks/useProgressivePreferences'
+import { MAX_TOPICS, STUDY_GOALS, TOPICS } from '@nowry/core/constants/learningTaxonomy'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { userService } from '@nowry/core/api/services'
 import { requestNotificationPermission } from '../platform/alerts'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
-import { Button, Divider, FormField, Icon, Input, ListRow, Screen, Segmented, Select, SettingRow, Stack, Switch, Typography } from '../ui'
+import {
+  Button,
+  Chip,
+  Divider,
+  FormField,
+  Icon,
+  Input,
+  ListRow,
+  Screen,
+  Segmented,
+  Select,
+  SettingRow,
+  Stack,
+  Switch,
+  Typography
+} from '../ui'
 
 /** Each duration's own label, which the shared table has no business knowing. */
 const LENGTH_LABELS = {
@@ -234,6 +258,10 @@ export function Settings() {
 
         <Divider />
 
+        <LearningSection prefs={prefs} t={t} />
+
+        <Divider />
+
         <ProductivitySection t={t} />
 
         <Divider />
@@ -290,6 +318,98 @@ export function Settings() {
         </Button>
       </Stack>
     </Screen>
+  )
+}
+
+/**
+ * What you are learning, and in what order.
+ *
+ * The topics are chips because they are a set you pick from, and the SELECTED
+ * ones carry their position — 1, 2, 3 — because the first is primary and the
+ * server derives that from the array's order. That makes the order a setting
+ * rather than a presentation of one, so it has to be changeable, and on a phone
+ * the cheapest honest way is the chip itself: pressing an unselected topic
+ * appends it, pressing a selected one that is not first promotes it to first,
+ * and pressing the first one removes it. One control, three outcomes, each
+ * stated in the chip's accessible name.
+ *
+ * The web spends two icon keys per row on this and a live region to announce
+ * them. That is the right answer beside a list on a wide screen and the wrong
+ * one here, where it would be ten extra targets in a strip of chips.
+ */
+function LearningSection({ prefs, t }) {
+  const interests = prefs.values[PREFERENCE_FIELD.INTERESTS] ?? []
+  const goal = prefs.values[PREFERENCE_FIELD.STUDY_GOAL] ?? null
+  const [full, setFull] = useState(false)
+
+  const press = (value) => {
+    const at = interests.indexOf(value)
+    setFull(false)
+    // Not chosen: append, unless the five are spoken for.
+    if (at === -1) {
+      if (interests.length >= MAX_TOPICS) return setFull(true)
+      return prefs.setInterests([...interests, value])
+    }
+    // Chosen and first: this is the only press that removes one, because the
+    // primary is the one a second press has nothing left to promote it to.
+    if (at === 0) return prefs.setInterests(interests.filter((topic) => topic !== value))
+    // Chosen but not first: promote.
+    prefs.setInterests([value, ...interests.filter((topic) => topic !== value)])
+  }
+
+  return (
+    <Stack spacing={2}>
+      <Typography level='title-md'>{t('settings.learning.title')}</Typography>
+      <Typography level='body-sm' color='text.secondary'>
+        {t('settings.learning.lead')}
+      </Typography>
+
+      <Stack direction='row' spacing={1} flexWrap='wrap'>
+        {TOPICS.map((topic) => {
+          const at = interests.indexOf(topic.value)
+          const label = t(topic.i18nKey)
+          return (
+            <Chip
+              key={topic.value}
+              selected={at !== -1}
+              /* Elements, not strings: `Chip` renders these as children and a
+                 bare string outside a `Text` is nothing on this platform. */
+              startGlyph={<Typography level='body-sm'>{topic.icon}</Typography>}
+              endGlyph={
+                at === -1 ? undefined : (
+                  <Typography level='body-xs' color='primary.plainColor' style={{ fontVariant: ['tabular-nums'] }}>
+                    {at + 1}
+                  </Typography>
+                )
+              }
+              onPress={() => press(topic.value)}
+              /* The name says what the press will do, which is the whole of
+                 how three outcomes on one control stay honest (WCAG 2.5.3). */
+              accessibilityLabel={
+                at === -1 ? label : at === 0 ? `${label} — ${t('settings.learning.order.primary')}` : `${label} ${at + 1}`
+              }
+            >
+              {label}
+            </Chip>
+          )
+        })}
+      </Stack>
+
+      {full ? (
+        <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='assertive'>
+          {t('taxonomy.selector.topics.limitReached', { max: MAX_TOPICS })}
+        </Typography>
+      ) : null}
+
+      <FormField labelKey='taxonomy.selector.goals.label' helperKey='taxonomy.selector.goals.hint'>
+        <Select
+          accessibilityLabel={t('taxonomy.selector.goals.label')}
+          value={goal ?? STUDY_GOALS[0].value}
+          onChange={prefs.setStudyGoal}
+          options={STUDY_GOALS.map((option) => ({ value: option.value, label: t(option.i18nKey) }))}
+        />
+      </FormField>
+    </Stack>
   )
 }
 
