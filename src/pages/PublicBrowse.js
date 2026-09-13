@@ -48,7 +48,7 @@ import { publicContentService } from '@nowry/core/api/services'
 // The evidence rule and the sparse threshold are shared: the phone browses the
 // same catalogue and must not have a second answer about a young item (MOB-049).
 import { SPARSE_THRESHOLD, evidenceFor, publicAuthor, publicCardCount } from '@nowry/core/domain/publicEvidence'
-import Book from '../components/Books/Book'
+import CoverMark from '../components/Books/CoverMark'
 
 const CATEGORIES = [
   'science',
@@ -498,22 +498,33 @@ const FeatureCard = ({ item, contentType, onItemClick, t }) => {
       onClick={() => onItemClick(item)}
       sx={{ p: 0, overflow: 'hidden', cursor: 'pointer', borderRadius: 'lg', '&:hover': { borderColor: 'primary.outlinedBorder' } }}
     >
-      <Box
-        sx={{
-          height: 168,
-          bgcolor: item.cover_color || item.color || 'primary.solidBg',
-          backgroundImage: item.cover_image ? `url(${item.cover_image})` : item.image_url ? `url(${item.image_url})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        {!item.cover_image && !item.image_url && (
-          <MenuBookIcon sx={{ fontSize: 'xl4', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />
-        )}
-      </Box>
+      {isBook ? (
+        /*
+         * A book's cover, standing on a quiet ground (BOOK-010). This band was
+         * the colour filling 168 pixels with a book glyph in the middle — a
+         * colour field with a picture OF a book on it, rather than the book.
+         * The colour lives on the cover now, where it is the document's, and
+         * the shape says page or book the way the library does.
+         */
+        <Box sx={{ height: 168, bgcolor: 'background.level1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CoverMark book={item} width={88} publicDoc />
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            height: 168,
+            bgcolor: item.cover_color || item.color || 'primary.solidBg',
+            backgroundImage: item.image_url ? `url(${item.image_url})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {!item.image_url && <MenuBookIcon sx={{ fontSize: 'xl4', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />}
+        </Box>
+      )}
 
       <CardContent sx={{ p: 2, gap: 1 }}>
         <Typography level='title-sm' sx={{ fontWeight: 'lg' }}>
@@ -754,19 +765,50 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
         {items.map((item) => (
           <Grid key={item._id} xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
             {isBook ? (
-              // Reuse Book.js component for consistency. It is the same card the
-              // user's own library renders, so it knows nothing about public
-              // metadata — the evidence and the acquire action are added
-              // underneath rather than pushed into a component shared with a
-              // surface that has neither.
+              // The evidence and the acquire action sit underneath the tile
+              // rather than inside it: the cover is the library's, and it knows
+              // nothing about views, likes or adding.
               <Box sx={{ width: '100%', maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Book
-                  book={{
-                    ...item,
-                    author: publicAuthor(item) // the shared reader names the field (MOB-050)
+                {/*
+                 * The library's cover, not the retired 3D card (BOOK-010). D5
+                 * kept `Book.js` alive for this one surface; it was the last
+                 * place a document wore a gradient ramp, a glowing icon and a
+                 * pointer glare, and the only place a public book looked
+                 * nothing like the same book in its owner's library.
+                 */}
+                <Box
+                  role='button'
+                  tabIndex={0}
+                  onClick={() => onItemClick(item)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      onItemClick(item)
+                    }
                   }}
-                  handleBookClick={onItemClick}
-                />
+                  sx={{
+                    display: 'flex',
+                    gap: 1.5,
+                    p: 2,
+                    borderRadius: 'md',
+                    bgcolor: 'background.surface',
+                    cursor: 'pointer',
+                    '&:hover, &:focus-visible': { bgcolor: 'background.level1' }
+                  }}
+                >
+                  <CoverMark book={item} width={56} publicDoc />
+                  <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography
+                      level='title-sm'
+                      sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                    >
+                      {item.title}
+                    </Typography>
+                    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                      {publicAuthor(item) || t('public.unknownAuthor')}
+                    </Typography>
+                  </Box>
+                </Box>
                 <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ gap: 1, flexWrap: 'wrap' }}>
                   <Evidence item={item} t={t} />
                   <Box onClick={(event) => event.stopPropagation()}>
@@ -1034,27 +1076,35 @@ const ContentGrid = ({ items, loading, onItemClick, onPublish, contentType, deck
             '&:hover': { bgcolor: 'background.level1' }
           }}
         >
-          <Box
-            sx={{
-              gridArea: 'cover',
-              width: { xs: 46, md: 52 },
-              height: isBook ? { xs: 62, md: 70 } : { xs: 46, md: 52 },
-              borderRadius: 'sm',
-              overflow: 'hidden',
-              flexShrink: 0,
-              bgcolor: item.cover_color || item.color || 'primary.solidBg',
-              backgroundImage: item.cover_image ? `url(${item.cover_image})` : item.image_url ? `url(${item.image_url})` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid',
-              borderColor: 'divider'
-            }}
-          >
-            {!item.cover_image && <MenuBookIcon sx={{ fontSize: 'lg', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />}
-          </Box>
+          {isBook ? (
+            // The same cover the library draws, so a public book and a book of
+            // your own are recognisably the same kind of thing (BOOK-010).
+            <Box sx={{ gridArea: 'cover', flexShrink: 0 }}>
+              <CoverMark book={item} width={46} publicDoc />
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                gridArea: 'cover',
+                width: { xs: 46, md: 52 },
+                height: { xs: 46, md: 52 },
+                borderRadius: 'sm',
+                overflow: 'hidden',
+                flexShrink: 0,
+                bgcolor: item.cover_color || item.color || 'primary.solidBg',
+                backgroundImage: item.image_url ? `url(${item.image_url})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid',
+                borderColor: 'divider'
+              }}
+            >
+              {!item.image_url && <MenuBookIcon sx={{ fontSize: 'lg', color: 'common.white', opacity: 0.8 }} aria-hidden='true' />}
+            </Box>
+          )}
 
           <Box sx={{ gridArea: 'identity', minWidth: 0 }}>
             <Stack direction='row' spacing={0.75} alignItems='center' sx={{ flexWrap: 'wrap', gap: 0.5 }}>

@@ -11,7 +11,7 @@ import { cardsReadout, measureOf, metaLine } from '@nowry/core/domain/books/docu
  * beside the title and meta, the readout, the measure; no hero, no tilt, no
  * text on the colour. Hover is a level1 ground at quick; the kebab appears with it.
  */
-export default function DocumentTile({ book, relative, username, onOpen, actions }) {
+export default function DocumentTile({ book, isContinue = false, relative, username, onOpen, actions }) {
   const { t, i18n } = useTranslation()
   const meta = metaLine(t, book, relative, { username, locale: i18n.language })
   const readoutText = cardsReadout(t, book)
@@ -46,7 +46,7 @@ export default function DocumentTile({ book, relative, username, onOpen, actions
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-        <CoverMark book={book} width={48} />
+        <CoverMark book={book} width={48} ribbon={isContinue} />
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Typography
             level='title-sm'

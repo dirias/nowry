@@ -303,6 +303,7 @@ export default function BookHome() {
               <DocumentTile
                 key={book._id}
                 book={book}
+                isContinue={book._id === continueDoc?._id}
                 relative={relative}
                 username={username}
                 onOpen={openDocument}
@@ -316,6 +317,7 @@ export default function BookHome() {
               <DocumentRow
                 key={book._id}
                 book={book}
+                isContinue={book._id === continueDoc?._id}
                 relative={relative}
                 username={username}
                 onOpen={openDocument}

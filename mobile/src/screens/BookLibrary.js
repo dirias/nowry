@@ -54,6 +54,7 @@ import {
   Button,
   Card,
   Chip,
+  CoverMark,
   Divider,
   Icon,
   IconButton,
@@ -211,9 +212,9 @@ export function BookLibrary() {
           item.filler ? (
             <View style={{ flex: 1 }} />
           ) : grid ? (
-            <DocumentTile book={item} onOpen={() => open(item)} when={when} theme={theme} t={t} />
+            <DocumentTile book={item} isContinue={item._id === continues?._id} onOpen={() => open(item)} when={when} theme={theme} t={t} />
           ) : (
-            <DocumentRow book={item} onOpen={() => open(item)} when={when} t={t} />
+            <DocumentRow book={item} isContinue={item._id === continues?._id} onOpen={() => open(item)} when={when} t={t} />
           )
         }
         ListEmptyComponent={
@@ -330,7 +331,7 @@ function ContinueCard({ book, onOpen, onMakeCards, when, t }) {
  * that a row does not: at two up you recognise a book by its cover before you
  * have read its name.
  */
-function DocumentTile({ book, onOpen, when, theme, t }) {
+function DocumentTile({ book, isContinue = false, onOpen, when, theme, t }) {
   const readout = cardsReadout(t, book)
 
   return (
@@ -342,18 +343,14 @@ function DocumentTile({ book, onOpen, when, theme, t }) {
     >
       <Card padding={1.5} radius='md'>
         <Stack spacing={1}>
-          <View
-            importantForAccessibility='no'
-            style={{
-              height: 64,
-              borderRadius: theme.radius.sm,
-              backgroundColor: book.cover_color || resolveColor(theme, 'primary.softBg'),
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Icon name={kindOf(book) === 'imported' ? 'BookOpen' : 'Book'} size='md' color='text.tertiary' />
-          </View>
+          {/*
+           * The cover, above the title and in a book's own proportion
+           * (BOOK-010). This was a 64-point landscape SLAB across the tile's
+           * full width — a book is taller than wide and that was the opposite,
+           * and it broke D5's "no hero", which the web's tile obeys. It is the
+           * reason the grid read as "just square boxes".
+           */}
+          <CoverMark book={book} width={62} ribbon={isContinue} ground='background.level1' />
 
           <Typography level='title-sm' numberOfLines={2}>
             {book.title || t('books.untitled')}
@@ -375,7 +372,7 @@ function DocumentTile({ book, onOpen, when, theme, t }) {
  * an import counts pages, a written document counts words and sections, and
  * both count the cards that came out of them.
  */
-function DocumentRow({ book, onOpen, when, t }) {
+function DocumentRow({ book, isContinue = false, onOpen, when, t }) {
   /*
    * The web's own composition, from the web's own module. The first build wrote
    * its own and got three things wrong that only an emulator showed: it ran
@@ -389,7 +386,8 @@ function DocumentRow({ book, onOpen, when, t }) {
 
   return (
     <ListRow
-      tile={<Icon name={kindOf(book) === 'imported' ? 'BookOpen' : 'Book'} size='md' color='text.tertiary' />}
+      /* The cover, where a generic book glyph was: page or book by kind (BOOK-010). */
+      tile={<CoverMark book={book} width={28} ribbon={isContinue} />}
       name={book.title || t('books.untitled')}
       meta={meta}
       readout={

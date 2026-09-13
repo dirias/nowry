@@ -10,7 +10,7 @@ import { cardsReadout, measureOf, metaLine } from '@nowry/core/domain/books/docu
  * cover mark · title with its meta line · the coverage measure in the cover's
  * colour · the cards readout · Open · the kebab. Click opens where you were.
  */
-export default function DocumentRow({ book, relative, username, onOpen, actions }) {
+export default function DocumentRow({ book, isContinue = false, relative, username, onOpen, actions }) {
   const { t, i18n } = useTranslation()
   const meta = metaLine(t, book, relative, { username, locale: i18n.language })
   const readoutText = cardsReadout(t, book)
@@ -31,7 +31,7 @@ export default function DocumentRow({ book, relative, username, onOpen, actions 
       }}
       sx={{ ...listRow, cursor: 'pointer' }}
     >
-      <CoverMark book={book} width={28} />
+      <CoverMark book={book} width={28} ribbon={isContinue} />
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
         <Typography level='title-sm' sx={oneLine}>
           {book.title || t('books.untitled')}

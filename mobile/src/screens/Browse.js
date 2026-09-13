@@ -34,7 +34,7 @@ import { CATALOGUE_KINDS, usePublicCatalogue } from '@nowry/core/hooks/usePublic
 import { evidenceFor, publicAuthor, publicCardCount } from '@nowry/core/domain/publicEvidence'
 import { useTheme } from '../theme'
 import { BrowseFilterSheet, SORTS, SORT_LABELS } from './BrowseFilters'
-import { Button, Chip, Divider, Icon, Input, Readout, Segmented, Skeleton, Stack, Typography } from '../ui'
+import { Button, Chip, CoverMark, Divider, Icon, Input, Readout, Segmented, Skeleton, Stack, Typography } from '../ui'
 
 export function Browse({ header = null }) {
   const { t } = useTranslation()
@@ -207,6 +207,15 @@ function CatalogueRow({ item: deck, kind, state, onAdd, onOpen, t }) {
 
   return (
     <Stack direction='row' spacing={2} style={{ alignItems: 'center', paddingVertical: 8 }}>
+      {/*
+       * A public book wears the library's cover (BOOK-010), so a book someone
+       * published and a book of your own read as the same kind of thing. This
+       * row had no cover at all: a title and a meta line, identical in shape to
+       * a deck's. `publicDoc` keeps its shape and none of your progress — the
+       * coverage on it is its owner's, and there is nothing of yours left open
+       * in it to mark with a ribbon.
+       */}
+      {kind === 'books' ? <CoverMark book={deck} width={34} publicDoc /> : null}
       <Pressable
         onPress={onOpen}
         disabled={!onOpen}

@@ -24,8 +24,6 @@ jest.mock('react-i18next', () => ({
 const mockNavigate = jest.fn()
 jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
 
-jest.mock('../../components/Books/Book', () => ({ __esModule: true, default: () => null }))
-
 jest.mock('@nowry/core/api/services', () => ({
   publicContentService: {
     browseBooks: jest.fn(),

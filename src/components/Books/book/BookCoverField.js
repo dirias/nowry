@@ -19,7 +19,7 @@ import BookCoverSwatch from './BookCoverSwatch'
  * PRESET_COLORS is raw hex ON PURPOSE, and it is the only hex permitted in the
  * books form files. These are not styling constants: a cover colour is content
  * the user chose. It is stored as a hex string on the book document and
- * rendered straight back by `Book.js`, `SketchPicker` already lets the user
+ * rendered straight back by the cover, `SketchPicker` already lets the user
  * store any hex in the spectrum, and the value has no light or dark variant. A
  * semantic token here would be actively wrong — it would repaint the user's
  * book cover when they switched theme.
