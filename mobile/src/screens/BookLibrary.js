@@ -16,10 +16,18 @@
  * **No editing, and no importing.** V3 reads a document and makes cards from it
  * (PRD FR-031…FR-034). Importing a PDF needs a file picker, which is a native
  * module and a new build; writing needs Lexical, which has no React Native
- * build at all. Both are named decisions rather than gaps.
+ * build at all. Both are named decisions rather than gaps — which is also why
+ * the web's "Add" key in the title row is absent here and not a drift.
+ *
+ * **The grid is back** (MOB-097). MOB-082 recorded its absence as a decision to
+ * settle rather than a fault, on the reasoning that a row at 390pt carries more
+ * than a tile does. The web defaults to a two-up grid on a phone and offers
+ * both, and offering both is the answer: the row is for reading the library and
+ * the tile is for recognising a cover, and which one you want depends on what
+ * you came for.
  */
 import { useMemo, useState } from 'react'
-import { FlatList, View } from 'react-native'
+import { FlatList, Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useBooks } from '@nowry/core/hooks/useBooks'
@@ -35,12 +43,31 @@ import {
   pickContinue,
   readingPage,
   resumeHref,
+  sectionsWithoutCards,
   sortDocuments,
   tagCounts
 } from '@nowry/core/domain/books/libraryQuery'
 import { useTheme } from '../theme'
 import { LibraryFilterSheet } from './BookLibraryFilters'
-import { Button, Chip, Divider, Icon, Input, ListRow, Readout, Screen, Segmented, Skeleton, Stack, SummaryObject, Typography } from '../ui'
+import { MakeCardsSheet } from './MakeCards'
+import {
+  Button,
+  Card,
+  Chip,
+  Divider,
+  Icon,
+  IconButton,
+  Input,
+  ListRow,
+  Readout,
+  Screen,
+  Segmented,
+  Skeleton,
+  Stack,
+  SummaryObject,
+  Typography,
+  resolveColor
+} from '../ui'
 
 export function BookLibrary() {
   const { t, i18n } = useTranslation()
@@ -53,6 +80,15 @@ export function BookLibrary() {
   const [sort, setSort] = useState(SORTS[0])
   const [tags, setTags] = useState([])
   const [sheet, setSheet] = useState(null)
+  /*
+   * Grid by default, as the web's library is. Not persisted: the web keeps it
+   * in `localStorage`, and a preference that lives on one device is a setting
+   * this client would have to invent a home for — worth doing when it is asked
+   * for, not while restoring the view itself.
+   */
+  const [grid, setGrid] = useState(true)
+  /** The document whose sections are being turned into cards, if any. */
+  const [making, setMaking] = useState(null)
 
   const { books, loading, error, reload } = useBooks()
 
@@ -95,7 +131,7 @@ export function BookLibrary() {
       {loading && books.length === 0 ? (
         <Skeleton width='100%' height={96} />
       ) : (
-        <ContinueCard book={continues} onOpen={open} when={when} t={t} />
+        <ContinueCard book={continues} onOpen={open} onMakeCards={() => setMaking(continues)} when={when} t={t} />
       )}
 
       {/*
@@ -123,19 +159,63 @@ export function BookLibrary() {
         <Chip selected={sort !== SORTS[0]} onPress={() => setSheet('sort')}>
           {t('books.lib.sort', { by: t(`books.lib.sortBy.${sort}`) })}
         </Chip>
+
+        <View style={{ flex: 1 }} />
+
+        {/* Grid or list, as the web's own toggle — at the far end of the
+            toolbar row, because it governs the shape of what is below rather
+            than which documents are in it. */}
+        <IconButton
+          variant={grid ? 'secondary' : 'tertiary'}
+          onPress={() => setGrid(true)}
+          accessibilityLabel={t('books.lib.viewGrid')}
+          accessibilityState={{ selected: grid }}
+        >
+          <Icon name='LayoutGrid' size='sm' color={grid ? 'text.primary' : 'text.tertiary'} />
+        </IconButton>
+        <IconButton
+          variant={grid ? 'tertiary' : 'secondary'}
+          onPress={() => setGrid(false)}
+          accessibilityLabel={t('books.lib.viewList')}
+          accessibilityState={{ selected: !grid }}
+        >
+          <Icon name='List' size='sm' color={grid ? 'text.tertiary' : 'text.primary'} />
+        </IconButton>
       </Stack>
     </Stack>
   )
 
+  /*
+   * One cell per column, so an odd last row keeps its empty half. Computed
+   * rather than memoised: there is an early return above this, and a hook after
+   * one is a hook that does not always run.
+   */
+  const cells = grid && rows.length % 2 === 1 ? [...rows, { _id: '__filler__', filler: true }] : rows
+
   return (
     <Screen scroll={false} padding={0}>
       <FlatList
-        data={rows}
+        data={cells}
+        // Two up in the grid, which is the web's own `xs` column count.
+        key={grid ? 'grid' : 'list'}
+        numColumns={grid ? 2 : 1}
+        columnWrapperStyle={grid ? { gap: theme.spacing[1.5] } : undefined}
         keyExtractor={(book) => String(book._id)}
-        contentContainerStyle={{ padding: theme.spacing[3] }}
+        contentContainerStyle={{ padding: theme.spacing[3], gap: grid ? theme.spacing[1.5] : 0 }}
         ListHeaderComponent={header}
-        ItemSeparatorComponent={Divider}
-        renderItem={({ item }) => <DocumentRow book={item} onOpen={() => open(item)} when={when} t={t} />}
+        ItemSeparatorComponent={grid ? null : Divider}
+        renderItem={({ item }) =>
+          /* The filler for an odd last row. Without it `flex: 1` makes a lone
+             tile fill the width and the grid stops being a grid on its last
+             line — the web's `repeat(2, 1fr)` keeps the column either way. */
+          item.filler ? (
+            <View style={{ flex: 1 }} />
+          ) : grid ? (
+            <DocumentTile book={item} onOpen={() => open(item)} when={when} theme={theme} t={t} />
+          ) : (
+            <DocumentRow book={item} onOpen={() => open(item)} when={when} t={t} />
+          )
+        }
         ListEmptyComponent={
           loading ? (
             <Stack spacing={2}>
@@ -150,6 +230,10 @@ export function BookLibrary() {
           )
         }
       />
+
+      {/* The same sheet the reader opens, so a document makes cards the one
+          way whichever screen asked for them. */}
+      <MakeCardsSheet open={Boolean(making)} book={making} onClose={() => setMaking(null)} />
 
       <LibraryFilterSheet
         open={sheet}
@@ -170,7 +254,7 @@ export function BookLibrary() {
  * different screen (ADR-021 §1) — and it says it without offering to import or
  * to write, because this client can do neither.
  */
-function ContinueCard({ book, onOpen, when, t }) {
+function ContinueCard({ book, onOpen, onMakeCards, when, t }) {
   if (!book) {
     return <SummaryObject title={t('books.title')} empty={t('books.lib.emptySentence')} />
   }
@@ -178,6 +262,8 @@ function ContinueCard({ book, onOpen, when, t }) {
   const imported = kindOf(book) === 'imported'
   const position = readingPage(book)
   const covered = coverage(book)
+  // Only a written document has sections waiting for cards; an import has pages.
+  const gap = imported ? 0 : sectionsWithoutCards(book)
 
   return (
     <SummaryObject
@@ -206,7 +292,81 @@ function ContinueCard({ book, onOpen, when, t }) {
           {t('books.lib.continue')}
         </Button>
       }
+      /*
+       * The web's second key, which this object never had (MOB-082 recorded it,
+       * MOB-097 builds it). "Make cards · N sections" is the whole point of
+       * having written the document, and on the phone the only way to it was to
+       * open the reader and find it in there — so the object that says what the
+       * document owes you could not act on it.
+       *
+       * Above zero only, as the web is: a document whose every section already
+       * has cards is not offered a key that would make none.
+       *
+       * The web's OTHER second key is Listen, for an imported document. Speech
+       * exists on this client since MOB-077 but is wired to cards alone, and
+       * reading a document aloud is a feature rather than a wiring — left named
+       * rather than half-built.
+       */
+      secondary={
+        gap > 0 ? (
+          <Button size='sm' variant='secondary' onPress={onMakeCards}>
+            {t('books.lib.makeCardsSections', { count: gap })}
+          </Button>
+        ) : null
+      }
     />
+  )
+}
+
+/**
+ * One document, as a tile (MOB-097).
+ *
+ * The web's own anatomy: a coloured cover mark, the title over two lines, and
+ * the same meta line the row carries — which is the point of having both views
+ * rather than two different documents. Nothing here is a second reading of a
+ * book; `metaLine` and `cardsReadout` are the row's readers.
+ *
+ * The cover is the document's own colour, which is the one thing a tile has
+ * that a row does not: at two up you recognise a book by its cover before you
+ * have read its name.
+ */
+function DocumentTile({ book, onOpen, when, theme, t }) {
+  const readout = cardsReadout(t, book)
+
+  return (
+    <Pressable
+      onPress={onOpen}
+      accessibilityRole='button'
+      accessibilityLabel={book.title || t('books.untitled')}
+      style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.7 : 1 })}
+    >
+      <Card padding={1.5} radius='md'>
+        <Stack spacing={1}>
+          <View
+            importantForAccessibility='no'
+            style={{
+              height: 64,
+              borderRadius: theme.radius.sm,
+              backgroundColor: book.cover_color || resolveColor(theme, 'primary.softBg'),
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Icon name={kindOf(book) === 'imported' ? 'BookOpen' : 'Book'} size='md' color='text.tertiary' />
+          </View>
+
+          <Typography level='title-sm' numberOfLines={2}>
+            {book.title || t('books.untitled')}
+          </Typography>
+          <Typography level='body-xs' color='text.tertiary' numberOfLines={2}>
+            {metaLine(t, book, when)}
+          </Typography>
+          {readout ? (
+            <Readout leading={Boolean(readout.strong)}>{[readout.strong, readout.rest].filter(Boolean).join(' · ')}</Readout>
+          ) : null}
+        </Stack>
+      </Card>
+    </Pressable>
   )
 }
 

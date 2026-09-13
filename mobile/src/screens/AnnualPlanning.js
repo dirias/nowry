@@ -308,26 +308,51 @@ export function AnnualPlanning() {
   )
 }
 
-/** One focus area: its colour, its name, and how far its goals have got. */
+/**
+ * One focus area: what it IS, and how far its goals have got (MOB-097).
+ *
+ * The web's card leads with the area's own emoji and its DESCRIPTION —
+ * "🏠 Life / Start a new life in Japan ❤️" — and puts the measure under both.
+ * This row drew a blank colour swatch and a ratio, so three areas read as a
+ * progress table rather than as the three things the year is about, and the one
+ * sentence the person wrote about each was nowhere on the phone at all.
+ *
+ * The colour did not go: it is the tile's ground, under the icon, which is both
+ * signals in the space one was using. Home's own focus chips have carried the
+ * icon since MOB-079, so this row was disagreeing with a strip on the next tab
+ * about how an area is identified.
+ */
 function AreaRow({ area, metrics, theme, t, onPress }) {
+  const ratio = metrics.total > 0 ? t('annualPlanning.header.goalsRatio', { completed: metrics.completed, total: metrics.total }) : null
+
   return (
     <View>
       <ListRow
         tile={
           <View
             importantForAccessibility='no'
-            style={{ width: 28, height: 28, borderRadius: theme.radius.sm, backgroundColor: area.color || undefined }}
-          />
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: theme.radius.sm,
+              backgroundColor: area.color || undefined,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {area.icon ? <Typography level='body-sm'>{area.icon}</Typography> : null}
+          </View>
         }
         name={area.name}
         /*
-         * An area with no goals says nothing at all — not "0 of 0", and not a
-         * 0% beside an empty bar either. A ratio of nothing is not a fact and
-         * a measure of nothing is not a measurement (ADR-012). The meta line
-         * was fixed first and the measure was left drawing for another pass,
-         * which is how half a rule survives (MOB-065).
+         * The description first, because it is what the person wrote and the
+         * ratio is what the app counted. Joined by the house middot when both
+         * exist, and an area with no goals says NOTHING about them — not
+         * "0 of 0", and not a 0% beside an empty bar either. A ratio of
+         * nothing is not a fact and a measure of nothing is not a measurement
+         * (ADR-012, MOB-065).
          */
-        meta={metrics.total > 0 ? t('annualPlanning.header.goalsRatio', { completed: metrics.completed, total: metrics.total }) : null}
+        meta={[area.description, ratio].filter(Boolean).join(' · ') || null}
         measure={metrics.total > 0 ? <Measure value={metrics.progress} accessibilityLabel={t('annualPlanning.home.progress')} /> : null}
         readout={metrics.total > 0 ? <Readout>{metrics.progress}%</Readout> : null}
         onPress={onPress}
