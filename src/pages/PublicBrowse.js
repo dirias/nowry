@@ -262,11 +262,10 @@ const PublicBrowse = () => {
                 bgcolor: 'transparent',
                 color: 'text.primary',
                 fontWeight: 'lg',
-                // `plainColor`, not `solidBg`: the generator derives solidBg
-                // from the darkest variation of the user's accent, which on the
-                // dark page ground is all but invisible (measured at
-                // #153438 on #0d1117). `plainColor` is the one token corrected
-                // for legibility against the page in BOTH schemes.
+                // `plainColor`, not `solidBg`: a solid is dark in both modes
+                // (ADR-034) and a 2px underline in it nearly vanishes on the
+                // dark page. `plainColor` is the one token corrected for
+                // legibility against the page in BOTH schemes.
                 borderBottomColor: 'primary.plainColor'
               }
             }
