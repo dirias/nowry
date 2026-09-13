@@ -199,7 +199,15 @@ export function AgentChat() {
               the same orb Home carries, so the chat is plainly the same
               companion and not a second one. */}
         <Stack direction='row' spacing={2} style={{ alignItems: 'center' }}>
-          <PetOrb stage={pet.stage} accent={accent} size={40} avatarUrl={pet.avatarUrl} isDefaultCompanion={pet.isDefaultCompanion} />
+          <PetOrb
+            stage={pet.stage}
+            accent={accent}
+            size={40}
+            avatarUrl={pet.avatarUrl}
+            isDefaultCompanion={pet.isDefaultCompanion}
+            species={pet.species}
+            mood={pet.mood}
+          />
           <View style={{ flex: 1 }}>
             <Typography level='title-md'>{name}</Typography>
             {pet.budget ? (

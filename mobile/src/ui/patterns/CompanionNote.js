@@ -55,7 +55,9 @@ export function CompanionNote({ stage = 1, avatarUrl = null, isDefaultCompanion 
         backgroundColor: resolveColor(theme, 'background.level1')
       }}
     >
-      <PetOrb stage={stage} accent={accent} size={ORB} avatarUrl={avatarUrl} isDefaultCompanion={isDefaultCompanion} />
+      {/* Still: at 24pt beside a sentence a moving portrait is noise, and the
+            sentence is what the reader is here for. */}
+      <PetOrb stage={stage} accent={accent} size={ORB} avatarUrl={avatarUrl} isDefaultCompanion={isDefaultCompanion} still />
 
       <Stack spacing={1} style={{ flex: 1, minWidth: 0 }}>
         <Typography level='body-sm' color='text.secondary'>

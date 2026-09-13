@@ -24,6 +24,7 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '@nowry/core/utils/petColor'
 import { petPortrait } from '@nowry/core/domain/petPortrait'
+import { MOOD_PRESENTATION, alphaHex, companionSpecies, speciesMotion as gaitFor } from '@nowry/core/domain/petMotion'
 import { nowryArtFor } from './nowryArt'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '@nowry/core/constants/zIndex'
@@ -61,23 +62,6 @@ export const FORM_BORDER_RADIUS = {
 // Guilt is what makes people delete study apps, so nothing here decays,
 // sickens or scolds — the pet simply rests until you come back.
 // ---------------------------------------------------------------------------
-export const MOOD_PRESENTATION = {
-  idle: { saturate: 1.0, brightness: 1.0, speedScale: 1.0, driftY: 6, glow: 1.0 },
-  happy: { saturate: 1.18, brightness: 1.08, speedScale: 0.72, driftY: 9, glow: 1.25 },
-  thinking: { saturate: 0.95, brightness: 1.0, speedScale: 1.15, driftY: 4, glow: 0.9 },
-  tired: { saturate: 0.42, brightness: 0.82, speedScale: 1.9, driftY: 2, glow: 0.55 },
-  speaking: { saturate: 1.08, brightness: 1.04, speedScale: 0.85, driftY: 7, glow: 1.1 }
-}
-
-/**
- * Scale a two-digit hex alpha by a multiplier, clamped to a valid byte.
- * The orb's glows are built by appending hex alpha to a 6-digit colour, so a
- * mood's glow strength has to be expressed in the same form.
- */
-export const alphaHex = (base, multiplier) =>
-  Math.max(0, Math.min(255, Math.round(base * multiplier)))
-    .toString(16)
-    .padStart(2, '0')
 
 // ---------------------------------------------------------------------------
 // Species configuration — emoji set per species × mood
@@ -100,52 +84,6 @@ const SPECIES_CONFIG = {
 // Animates the portrait directly in the orb. Each preset targets a different
 // visual metaphor: wing-spread pulse for fliers, gait-bounce for walkers, etc.
 // ---------------------------------------------------------------------------
-const SPECIES_MOTION = {
-  // ── Winged fliers: scaleX pulse = wing spread/contract ──────────────────
-  owl: {
-    animate: { scaleX: [1, 1.12, 1], scaleY: [1, 0.94, 1] },
-    transition: { repeat: Infinity, duration: 0.85, ease: 'easeInOut' }
-  },
-  dragon: {
-    animate: { scaleX: [1, 1.16, 1], scaleY: [1, 0.92, 1] },
-    transition: { repeat: Infinity, duration: 1.3, ease: 'easeInOut' }
-  },
-  phoenix: {
-    animate: { scaleX: [1, 1.13, 1], scaleY: [1, 0.94, 1] },
-    transition: { repeat: Infinity, duration: 1.0, ease: 'easeInOut' }
-  },
-  // ── Walkers: y-bounce + rotate rock = walking gait ──────────────────────
-  cat: {
-    animate: { y: [0, -3, 0], rotate: [0, 2, 0, -2, 0] },
-    transition: { repeat: Infinity, duration: 0.7, ease: 'easeInOut' }
-  },
-  fox: {
-    animate: { y: [0, -3, 0], rotate: [0, 2.5, 0, -2.5, 0] },
-    transition: { repeat: Infinity, duration: 0.65, ease: 'easeInOut' }
-  },
-  robot: {
-    animate: { y: [0, -2, 0], rotate: [0, 1, 0, -1, 0] },
-    transition: { repeat: Infinity, duration: 0.5, ease: 'linear' }
-  },
-  // ── Spinners ─────────────────────────────────────────────────────────────
-  crystal: {
-    animate: { rotate: [0, 360] },
-    transition: { repeat: Infinity, duration: 5, ease: 'linear' }
-  },
-  star: {
-    animate: { rotate: [0, 360], scale: [1, 1.07, 1] },
-    transition: { repeat: Infinity, duration: 3.5, ease: 'linear' }
-  },
-  // ── Swayers ──────────────────────────────────────────────────────────────
-  leaf: {
-    animate: { rotate: [-7, 7, -7] },
-    transition: { repeat: Infinity, duration: 2.8, ease: 'easeInOut' }
-  },
-  music: {
-    animate: { y: [0, -5, 0], rotate: [-3, 3, -3] },
-    transition: { repeat: Infinity, duration: 0.6, ease: 'easeInOut' }
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -360,7 +298,12 @@ export const PetOrb = ({
 
   const activeColor = dominantColorOverride ?? config.dominantColor
 
-  const speciesMotion = SPECIES_MOTION[species] ?? null
+  /*
+   * Nowry is an owl, in all six of its forms, and an account that never chose
+   * a species has no `pet_species` — so reading that field alone left the
+   * companion every learner starts with as the one pet with no gait (MOB-090).
+   */
+  const speciesMotion = gaitFor(companionSpecies({ species, isDefaultCompanion }))
 
   const feeling = MOOD_PRESENTATION[mood] ?? MOOD_PRESENTATION.idle
   const moodDuration = config.pulseDuration * feeling.speedScale

@@ -41,7 +41,14 @@ export function CompanionSettings() {
         {pet.loading ? (
           <Skeleton width={64} height={64} radius='lg' />
         ) : (
-          <PetOrb stage={pet.stage} accent={accent} avatarUrl={pet.avatarUrl} isDefaultCompanion={pet.isDefaultCompanion} />
+          <PetOrb
+            stage={pet.stage}
+            accent={accent}
+            avatarUrl={pet.avatarUrl}
+            isDefaultCompanion={pet.isDefaultCompanion}
+            species={pet.species}
+            mood={pet.mood}
+          />
         )}
 
         <Stack spacing={1} style={{ flex: 1, minWidth: 0 }}>

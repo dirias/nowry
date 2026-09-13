@@ -95,6 +95,13 @@ export function usePetState() {
     avatarUrl: data?.avatar_url ?? null,
     isDefaultCompanion: data?.is_default_companion ?? true,
     /*
+     * And how it is FEELING, which is what the drift's distance and speed say
+     * (MOB-090). The server computes it from how studying has been going; the
+     * phone read none of it, so its companion was permanently idle even by the
+     * one measure it could have shown.
+     */
+    mood: data?.mood ?? 'idle',
+    /*
      * The month's message budget rides on this same payload, so the chat costs
      * no request of its own to know whether it may send (MOB-085). `null` means
      * the account has no limit; `canSend` is true while the budget is unknown,

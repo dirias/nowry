@@ -91,7 +91,15 @@ export function PetBubble({ pet, onPress, bottom = 0 }) {
         })}
       >
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <PetOrb stage={pet.stage} accent={accent} size={BODY} avatarUrl={pet.avatarUrl} isDefaultCompanion={pet.isDefaultCompanion} />
+          <PetOrb
+            stage={pet.stage}
+            accent={accent}
+            size={BODY}
+            avatarUrl={pet.avatarUrl}
+            isDefaultCompanion={pet.isDefaultCompanion}
+            species={pet.species}
+            mood={pet.mood}
+          />
           <LevelRing progress={pet.levelProgress} size={BODY} color={petColorFor(accent, pet.stage)} />
         </View>
       </Pressable>

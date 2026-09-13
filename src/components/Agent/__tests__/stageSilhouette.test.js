@@ -14,7 +14,9 @@
 // The stage table moved to the shared package when the phone started drawing
 // the same companion (MOB-050); the rest of the anatomy is still this client's.
 import { STAGE_CONFIG } from '@nowry/core/domain/petStages'
-import { FORM_BORDER_RADIUS, MOOD_PRESENTATION, alphaHex } from '../StudyPet'
+import { FORM_BORDER_RADIUS } from '../StudyPet'
+// The mood table and its alpha helper are shared with the phone now (MOB-090).
+import { MOOD_PRESENTATION, alphaHex } from '@nowry/core/domain/petMotion'
 
 const STAGES = [1, 2, 3, 4, 5, 6]
 const VALID_MARKS = [null, 'crest', 'halo', 'crown']

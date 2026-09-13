@@ -45,10 +45,22 @@ const stripComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, '').replac
 const read = (file) => stripComments(fs.readFileSync(file, 'utf8'))
 const relative = (file) => path.relative(ROOT, file)
 
+/**
+ * Where a duration is deliberately not on the scale, and why.
+ *
+ * The three steps are for STATE CHANGES. The companion's idle loops are not
+ * state changes: each period is a characteristic of the creature, written in
+ * the shared motion table beside the keyframes it paces, and an owl's 0.85s
+ * wingbeat has no more business being `base` than a heart rate does. Named
+ * here so it stays one file rather than becoming a habit (MOB-090).
+ */
+const OFF_SCALE = ['ui/patterns/useOrbMotion.js']
+
 describe('motion is spent from the scale', () => {
   it('never writes a duration as a number', () => {
     const offenders = []
     for (const file of files) {
+      if (OFF_SCALE.includes(relative(file))) continue
       const source = read(file)
       for (const [, value] of source.matchAll(/\bduration:\s*([^,\n}]+)/g)) {
         // `0` is the reduced-motion branch, which is the standard's own rule
@@ -103,12 +115,31 @@ describe('motion is spent from the scale', () => {
 
   it('asks about reduced motion wherever something moves', () => {
     const moves = /translateX|translateY|rotateY|rotateX|\brotate\b|scaleX|scaleY|\bscale\b/
+    const asks = /reduceMotion|useReduceMotion|reduce\b/
+
+    /*
+     * The question may be answered one module away, and often should be: the
+     * companion's orb spreads transforms a hook built, and that hook is where
+     * the setting is read. What is not allowed is nobody asking — so a file
+     * that moves has to ask, or import something local that does.
+     */
+    const delegates = (file, source) => {
+      for (const [, spec] of source.matchAll(/from '(\.[^']*)'/g)) {
+        const target = path.resolve(path.dirname(file), spec)
+        for (const candidate of [`${target}.js`, path.join(target, 'index.js')]) {
+          if (fs.existsSync(candidate) && asks.test(read(candidate))) return true
+        }
+      }
+      return false
+    }
+
     const offenders = []
     for (const file of files) {
       const source = read(file)
       if (!source.includes('Animated')) continue
       if (!moves.test(source)) continue
-      if (/reduceMotion|useReduceMotion|reduce\b/.test(source)) continue
+      if (asks.test(source)) continue
+      if (delegates(file, source)) continue
       offenders.push(relative(file))
     }
     expect(offenders).toEqual([])

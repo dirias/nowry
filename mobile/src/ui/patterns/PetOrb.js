@@ -7,12 +7,15 @@
  * is invisible in isolation, and nobody ever sees two stages side by side. So
  * the phone draws exactly what the table says and adds nothing of its own.
  *
- * **Nothing here animates.** The web's orb pulses on a per-stage duration
- * because it is a floating object on a desktop page. An always-running idle
- * animation on a phone is battery spent on decoration, and the stage is already
- * legible without it — which is the entire reason the structural features
- * exist. If the pet ever gains motion here it will be a reaction to something,
- * not a heartbeat.
+ * **It moves, and MOB-050 was wrong that it should not.** That task wrote the
+ * stillness down as a decision — an always-running idle animation being battery
+ * spent on decoration — and the reasoning mistook what the movement is for. The
+ * drift's distance and speed are how the MOOD is read, and the mood is the one
+ * thing about a companion that changes minute to minute; the gait is how the
+ * SPECIES is read. Neither is available any other way on this screen, so a still
+ * pet does not look calm, it looks broken (MOB-090). Both loops are transforms
+ * on the native driver, so the cost is not the JavaScript thread, and both stop
+ * dead when the device asks for reduced motion.
  *
  * **The colour is user data.** It resolves from the account's accent through
  * the shared `petColor`, so a companion is the colour of the app it lives in,
@@ -29,13 +32,15 @@
  * when there is no portrait at all, or when one fails to load.
  */
 import { useState } from 'react'
-import { Image, View } from 'react-native'
+import { Animated, Image, View } from 'react-native'
+import { companionSpecies } from '@nowry/core/domain/petMotion'
 import { petPortrait } from '@nowry/core/domain/petPortrait'
 import { resolveColor as petColorFor } from '@nowry/core/utils/petColor'
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { stageConfig } from '@nowry/core/domain/petStages'
 import { Icon } from '../icons'
 import { nowryArtFor } from './nowryArt'
+import { useOrbMotion } from './useOrbMotion'
 
 /** The mark each stage earns, as this client's glyphs. */
 const MARK_ICONS = { crest: 'ChevronUp', halo: 'Circle', crown: 'Crown' }
@@ -43,8 +48,22 @@ const MARK_ICONS = { crest: 'ChevronUp', halo: 'Circle', crown: 'Crown' }
 /** Each ring sits this much outside the one inside it. */
 const RING_STEP = 6
 
-export function PetOrb({ stage = 1, accent = null, size = null, avatarUrl = null, isDefaultCompanion = true }) {
+export function PetOrb({
+  stage = 1,
+  accent = null,
+  size = null,
+  avatarUrl = null,
+  isDefaultCompanion = true,
+  species = null,
+  mood = 'idle',
+  still = false
+}) {
   const config = stageConfig(stage)
+  const motion = useOrbMotion({
+    mood,
+    species: companionSpecies({ species, isDefaultCompanion }),
+    pulseDuration: config.pulseDuration
+  })
   const body = size ?? config.sizePx
   const color = petColorFor(accent, stage)
   const rings = config.ringCount
@@ -60,11 +79,16 @@ export function PetOrb({ stage = 1, accent = null, size = null, avatarUrl = null
   const portrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
   const source = failed || !portrait ? null : portrait.kind === 'generated' ? { uri: portrait.url } : nowryArtFor(portrait.stage)
 
+  // `still` is for the places a moving portrait would be noise rather than
+  // presence: a 24px speaker beside a sentence, a row in a settings list.
+  const drift = still ? [] : motion.drift
+  const gait = still ? [] : motion.gait
+
   return (
-    <View
+    <Animated.View
       importantForAccessibility='no'
       accessible={false}
-      style={{ width: outer, height: outer, alignItems: 'center', justifyContent: 'center' }}
+      style={{ width: outer, height: outer, alignItems: 'center', justifyContent: 'center', transform: drift }}
     >
       {/* Aura, outermost first, each fainter than the one inside it. */}
       {Array.from({ length: rings }, (_, i) => {
@@ -130,18 +154,27 @@ export function PetOrb({ stage = 1, accent = null, size = null, avatarUrl = null
         }}
       >
         {source ? (
-          <Image
+          /*
+           * The GAIT rides on the portrait, inside the clip, never on the body
+           * that does the clipping — which is where the web puts it and for a
+           * reason that is obvious the moment it is wrong: scaling the body
+           * turns the companion's silhouette into an ellipse, so a wing spread
+           * read as the whole creature being squashed.
+           */
+          <Animated.Image
             source={source}
             onError={() => setFailed(true)}
-            style={{ width: body, height: body }}
+            style={{ width: body, height: body, transform: gait }}
             resizeMode='cover'
             accessible={false}
           />
         ) : config.mark ? (
-          <Icon name={MARK_ICONS[config.mark]} size='sm' literalColor={readableTextOn(color)} />
+          <Animated.View style={{ transform: gait }}>
+            <Icon name={MARK_ICONS[config.mark]} size='sm' literalColor={readableTextOn(color)} />
+          </Animated.View>
         ) : null}
       </View>
-    </View>
+    </Animated.View>
   )
 }
 
