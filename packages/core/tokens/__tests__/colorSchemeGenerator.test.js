@@ -1,4 +1,5 @@
-import { contrastRatio, relativeLuminance, readableTextOn, generateColorScheme, getColorPresets } from '../colorSchemeGenerator'
+import { contrastRatio, relativeLuminance, readableTextOn, generateColorScheme, getColorPresets, getColorName, STICKY_PALETTE } from '../colorSchemeGenerator'
+import { deltaE, hexToOklch } from '../oklch'
 
 const AA = 4.5
 const MODES = ['light', 'dark']
@@ -121,8 +122,26 @@ describe('generateColorScheme — semantic groups', () => {
 })
 
 describe('getColorPresets', () => {
-  it('still exposes the eight curated colors unchanged', () => {
-    expect(PRESET_COLORS).toEqual(['#2a6971', '#0b6bcb', '#9c27b0', '#e91e63', '#f44336', '#ff9800', '#4caf50', '#795548'])
+  it('exposes the eight ADR-034 presets, Teal first at the stored default', () => {
+    expect(PRESET_COLORS).toEqual(['#2a6971', '#346898', '#5f5c99', '#825080', '#924968', '#805c43', '#6e6634', '#5c666f'])
+    expect(getColorPresets().map((preset) => preset.key)).toEqual(['teal', 'lake', 'iris', 'plum', 'rose', 'umber', 'olive', 'graphite'])
+  })
+
+  it('sits every preset but the stored default on the ladder lightness', () => {
+    for (const color of PRESET_COLORS.slice(1)) {
+      expect(hexToOklch(color).L).toBeCloseTo(0.505, 2)
+    }
+  })
+
+  // E3 of the PRD: Crimson Red was the danger colour, Forest Green the success
+  // colour. A preset must look unlike every status solid in both modes.
+  it.each(PRESET_COLORS)('keeps %s visibly apart from success, warning and danger', (color) => {
+    const scheme = generateColorScheme(color)
+    for (const mode of MODES) {
+      for (const status of ['success', 'warning', 'danger']) {
+        expect(deltaE(scheme[mode].primary.solidBg, scheme[mode][status].solidBg)).toBeGreaterThan(0.08)
+      }
+    }
   })
 
   it('exposes a contrastText that clears AA on its own swatch', () => {
@@ -187,5 +206,59 @@ describe('thin accent lines clear the non-text contrast floor', () => {
   it('leaves the light scheme untouched, since it already defined its own border', () => {
     const { light } = generateColorScheme('#2a6971')
     expect(light.primary.outlinedBorder).toBeDefined()
+  })
+})
+
+describe('generateColorScheme — every group and the neutrals (ADR-034)', () => {
+  it.each(MODES)('text primary, secondary and tertiary clear AA on body, surface and level1 in %s', (mode) => {
+    const { text, background } = generateColorScheme('#2a6971')[mode]
+    for (const level of ['primary', 'secondary', 'tertiary']) {
+      for (const ground of ['body', 'surface', 'level1']) {
+        expect(contrastRatio(text[level], background[ground])).toBeGreaterThanOrEqual(AA)
+      }
+    }
+  })
+
+  it.each(MODES)('gold solid and soft text clear AA in %s', (mode) => {
+    const { gold } = generateColorScheme('#2a6971')[mode]
+    expect(contrastRatio(gold.solidBg, gold.solidColor)).toBeGreaterThanOrEqual(AA)
+    expect(contrastRatio(gold.softBg, gold.softColor)).toBeGreaterThanOrEqual(AA)
+  })
+
+  it('normalises any accent onto the ladder, so a neon and a preset share a lightness', () => {
+    const neon = hexToOklch(generateColorScheme('#ff00ff').light.primary.solidBg)
+    const preset = hexToOklch(generateColorScheme('#346898').light.primary.solidBg)
+    expect(neon.L).toBeCloseTo(preset.L, 2)
+    expect(neon.C).toBeLessThanOrEqual(0.131)
+  })
+
+  it('keeps the accent hue', () => {
+    const { h } = hexToOklch(generateColorScheme('#924968').light.primary.solidBg)
+    expect(Math.abs(h - hexToOklch('#924968').h)).toBeLessThan(3)
+  })
+
+  it('carries a full 50–900 scale so no Joy default hue leaks in', () => {
+    const { primary, neutral } = generateColorScheme('#2a6971').light
+    for (const step of [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]) {
+      expect(primary[step]).toMatch(/^#[0-9a-f]{6}$/)
+      expect(neutral[step]).toMatch(/^#[0-9a-f]{6}$/)
+    }
+  })
+})
+
+describe('STICKY_PALETTE', () => {
+  it.each(MODES)('keeps the stored ids and readable note text in %s', (mode) => {
+    expect(Object.keys(STICKY_PALETTE[mode])).toEqual(['yellow', 'green', 'blue', 'purple', 'pink', 'teal', 'red', 'slate'])
+    for (const note of Object.values(STICKY_PALETTE[mode])) {
+      expect(contrastRatio(note.text, note.bg)).toBeGreaterThanOrEqual(AA)
+    }
+  })
+})
+
+describe('getColorName', () => {
+  it('names each preset after itself', () => {
+    for (const preset of getColorPresets()) {
+      expect(getColorName(preset.color)).toBe(preset.label)
+    }
   })
 })
