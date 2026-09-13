@@ -2,11 +2,12 @@
  * The theme's contract, not its colours.
  *
  * The exact hex values are guarded on the web side by `paletteParity.test.js`,
- * which compares them against what Joy actually resolves. What matters here is
+ * which resolves the web's Joy theme against the shared `BASE_PALETTE`. What matters here is
  * that the merge order is right, that both schemes are complete, and that a
  * screen can reach every semantic name it needs without touching a shade.
  */
 import { BASE_PALETTE } from '@nowry/core/tokens/palette'
+import { contrastRatio, generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
 import { ELEVATION } from '../elevation'
 import { buildTheme, DEFAULT_THEME_COLOR } from '../buildTheme'
 
@@ -69,10 +70,17 @@ describe('buildTheme', () => {
   it('lets the generated accents override the base, and leaves the rest alone', () => {
     const theme = buildTheme('light', '#c0392b')
     // The accent group is per user, so it must come from the generator...
-    expect(theme.palette.primary.solidBg).not.toBe(BASE_PALETTE.light.neutral.solidBg)
+    expect(theme.palette.primary.solidBg).toBe(generateColorScheme('#c0392b').light.primary.solidBg)
     // ...while the structural names stay exactly as the shared base defines them.
     expect(theme.palette.background.level1).toBe(BASE_PALETTE.light.background.level1)
     expect(theme.palette.divider).toBe(BASE_PALETTE.light.divider)
+  })
+
+  it('carries gold, and keeps the accent solid dark with light text in dark mode (ADR-034)', () => {
+    const { palette } = buildTheme('dark', DEFAULT_THEME_COLOR)
+    expect(palette.gold.solidBg).toMatch(/^#[0-9a-f]{6}$/)
+    expect(contrastRatio('#ffffff', palette.primary.solidBg)).toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(palette.primary.solidColor, palette.primary.solidBg)).toBeGreaterThanOrEqual(4.5)
   })
 
   it('regenerates when the account colour changes', () => {

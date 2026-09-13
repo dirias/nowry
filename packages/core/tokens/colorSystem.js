@@ -133,7 +133,7 @@ function lightTone({ C, h, solidL = 0.505 }) {
     plainHoverBg: tint,
     plainActiveBg: tintHover,
     outlinedColor: at(0.47),
-    outlinedBorder: at(0.8, C * 0.55),
+    outlinedBorder: at(0.62, C * 0.8),
     outlinedHoverBorder: at(0.7, C * 0.8),
     outlinedHoverBg: tint,
     outlinedActiveBg: tintHover

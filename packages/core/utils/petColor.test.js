@@ -1,9 +1,9 @@
 import { resolveColor, suggestFromInterests } from './petColor'
-import { DEFAULT_ACCENT } from '../tokens/colorSchemeGenerator'
+import { DEFAULT_ACCENT, getColorPresets } from '../tokens/colorSchemeGenerator'
 
 // The eight accent presets a user can actually pick (getColorPresets()).
 // The companion's colour follows this, not the removed pet_color slug.
-const ACCENTS = ['#2a6971', '#0b6bcb', '#9c27b0', '#e91e63', '#f44336', '#ff9800', '#4caf50', '#795548']
+const ACCENTS = getColorPresets().map((preset) => preset.color)
 
 const HEX_6 = /^#[0-9a-f]{6}$/
 const STAGES = [1, 2, 3, 4, 5, 6]

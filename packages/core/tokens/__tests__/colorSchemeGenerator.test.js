@@ -211,9 +211,13 @@ describe('thin accent lines clear the non-text contrast floor', () => {
     expect(dark.primary.outlinedBorder).not.toBe('#12467B')
   })
 
-  it('leaves the light scheme untouched, since it already defined its own border', () => {
-    const { light } = generateColorScheme('#2a6971')
-    expect(light.primary.outlinedBorder).toBeDefined()
+  // The focus ring (formStyles.focusRing, components.js) — 2.06:1 before
+  // ADR-034 and waived; cleared by the audit.
+  it.each(ACCENTS)('light outlinedBorder is a legible focus ring on body, surface and level1 for %s', (accent) => {
+    const { light } = generateColorScheme(accent)
+    for (const ground of ['body', 'surface', 'level1']) {
+      expect(contrast(light.primary.outlinedBorder, light.background[ground])).toBeGreaterThanOrEqual(NON_TEXT_FLOOR)
+    }
   })
 })
 

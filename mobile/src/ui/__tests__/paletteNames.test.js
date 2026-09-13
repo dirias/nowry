@@ -19,7 +19,7 @@ const { buildTheme, DEFAULT_THEME_COLOR } = require('../../theme/buildTheme')
 
 const ROOT = path.resolve(__dirname, '../..')
 const SCHEMES = ['light', 'dark']
-const ACCENTS = [DEFAULT_THEME_COLOR, '#c2255c', '#2b8a3e']
+const ACCENTS = [DEFAULT_THEME_COLOR, '#924968', '#6e6634']
 
 const walk = (dir) =>
   fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
