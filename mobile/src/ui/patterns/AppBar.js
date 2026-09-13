@@ -25,6 +25,7 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
+import { Avatar } from './Avatar'
 import { Icon } from '../icons'
 
 export const APP_BAR_HEIGHT = 56
@@ -71,7 +72,6 @@ export function AppBar() {
   const { profile } = useUserProfile()
 
   const photo = profile?.avatar_url || profile?.photo_url || null
-  const initial = (profile?.username || user?.email || '?').trim().charAt(0).toUpperCase()
 
   return (
     <View
@@ -128,25 +128,7 @@ export function AppBar() {
         hitSlop={8}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
-        {photo ? (
-          <Image source={{ uri: photo }} style={{ width: AVATAR, height: AVATAR, borderRadius: AVATAR / 2 }} />
-        ) : (
-          // An initial, not a silhouette: it says whose account this is.
-          <View
-            style={{
-              width: AVATAR,
-              height: AVATAR,
-              borderRadius: AVATAR / 2,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: resolveColor(theme, 'primary.softBg')
-            }}
-          >
-            <Typography level='title-sm' color='primary.plainColor'>
-              {initial}
-            </Typography>
-          </View>
-        )}
+        <Avatar uri={photo} name={profile?.username || user?.email || ''} size={AVATAR} />
       </Pressable>
     </View>
   )

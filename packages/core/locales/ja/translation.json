@@ -2490,6 +2490,11 @@
     "upgrade": "アップグレード",
     "errors": {
       "limitReached": "プランの上限に達しました。"
+    },
+    "usage": {
+      "books": "ブック",
+      "flashcards": "カード",
+      "decks": "デッキ"
     }
   },
   "plans": {

@@ -2591,6 +2591,11 @@
     "upgrade": "Passer à un forfait supérieur",
     "errors": {
       "limitReached": "Limite atteinte pour votre forfait."
+    },
+    "usage": {
+      "books": "Livres",
+      "flashcards": "Cartes",
+      "decks": "Paquets"
     }
   },
   "plans": {

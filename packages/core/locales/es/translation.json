@@ -1667,6 +1667,11 @@
     "upgradeProcessing": {
       "title": "Upgrade in Progress",
       "message": "Your payment was received. Your plan will update within a few minutes — please refresh the page shortly."
+    },
+    "usage": {
+      "books": "Libros",
+      "flashcards": "Tarjetas",
+      "decks": "Mazos"
     }
   },
   "about": {

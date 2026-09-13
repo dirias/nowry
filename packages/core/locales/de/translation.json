@@ -2580,6 +2580,11 @@
     "upgrade": "Jetzt upgraden",
     "errors": {
       "limitReached": "Limit deines Tarifs erreicht."
+    },
+    "usage": {
+      "books": "Bücher",
+      "flashcards": "Karten",
+      "decks": "Stapel"
     }
   },
   "plans": {
