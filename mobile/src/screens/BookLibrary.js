@@ -293,7 +293,13 @@ export function BookLibrary() {
         ]}
       />
 
-      <BookDetailsSheet book={acting.book} open={acting.step === 'edit'} onSaved={() => reload()} onClose={closeActing} />
+      <BookDetailsSheet
+        book={acting.book}
+        open={acting.step === 'edit'}
+        onSaved={() => reload()}
+        onPublished={() => reload()}
+        onClose={closeActing}
+      />
 
       <DeleteDocumentSheet
         book={acting.book}

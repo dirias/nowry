@@ -191,6 +191,10 @@ const IDENTICAL_BY_DESIGN = {
     // "Name" is the German word for a name, so the focus area's own field lands
     // on English by coincidence rather than by neglect.
     'annualPlanning.focusArea.setup.nameLabel',
+    // The publish listing's "Tags" follows the tag filter's "Tag" above, and
+    // "Optional" is the German word for an optional field (MOB-103).
+    'public.tags',
+    'common.optional',
     ...XP_GAINED,
     ...CARD_COUNTER
   ],

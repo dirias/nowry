@@ -89,7 +89,10 @@
     "studyBuddy": "学習パートナー",
     "moreActions": "その他の操作",
     "retry": "再試行",
-    "add": "追加"
+    "add": "追加",
+    "back": "戻る",
+    "optional": "任意",
+    "select": "選択"
   },
   "news": {
     "title": "最新ニュース",
@@ -2634,7 +2637,31 @@
     "unknownAuthor": "作成者不明",
     "library": "公開ライブラリ",
     "books": "本",
-    "decks": "デッキ"
+    "decks": "デッキ",
+    "difficulty": "難易度",
+    "language": "言語",
+    "license": "ライセンス",
+    "originalContent": "これは自分のオリジナルコンテンツです",
+    "tags": "タグ",
+    "publishModal": {
+      "title": "公開ライブラリに公開",
+      "description": "コンテンツをコミュニティと共有しましょう",
+      "submit": "公開する",
+      "categoryRequired": "カテゴリーは必須です",
+      "tagsRequired": "タグを1つ以上入力してください",
+      "addTag": "タグを追加"
+    },
+    "licenses": {
+      "all_rights": "All Rights Reserved（著作権所有）",
+      "cc_by": "CC BY（表示）",
+      "cc_by_sa": "CC BY-SA（継承）",
+      "cc0": "CC0（パブリックドメイン）"
+    },
+    "difficultyLevels": {
+      "beginner": "初級",
+      "intermediate": "中級",
+      "advanced": "上級"
+    }
   },
   "editor": {
     "mode": {

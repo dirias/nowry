@@ -18,37 +18,22 @@ import {
   Divider
 } from '@mui/joy'
 import { Add as AddIcon } from '@mui/icons-material'
-
-const CATEGORIES = ['science', 'math', 'languages', 'history', 'literature', 'technology', 'art', 'music', 'business', 'health']
-
-const DIFFICULTY_LEVELS = ['beginner', 'intermediate', 'advanced']
-
-const LICENSES = ['all_rights', 'cc_by', 'cc_by_sa', 'cc0']
-
-const LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'es', name: 'Español' },
-  { code: 'fr', name: 'Français' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'ja', name: '日本語' },
-  { code: 'zh', name: '中文' },
-  { code: 'pt', name: 'Português' },
-  { code: 'ru', name: 'Русский' },
-  { code: 'ar', name: 'العربية' },
-  { code: 'hi', name: 'हिन्दी' }
-]
+import {
+  CONTENT_LANGUAGES,
+  DIFFICULTY_LEVELS,
+  LICENSES,
+  PUBLISH_CATEGORIES,
+  emptyListing,
+  listingErrors,
+  listingPayload
+} from '@nowry/core/domain/publishListing'
 
 const PublishModal = ({ open, onClose, onPublish, contentType = 'book' }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
-  const [formData, setFormData] = useState({
-    category: '',
-    tags: [],
-    language: 'en',
-    difficulty_level: '',
-    license_type: 'all_rights',
-    is_original_content: true
-  })
+  // The listing's options, rules and request body are @nowry/core's, which the
+  // phone publishes through too (MOB-103).
+  const [formData, setFormData] = useState(() => emptyListing(i18n.language))
 
   const [newTag, setNewTag] = useState('')
   const [errors, setErrors] = useState({})
@@ -69,22 +54,14 @@ const PublishModal = ({ open, onClose, onPublish, contentType = 'book' }) => {
   }
 
   const handleSubmit = () => {
-    // Validation
-    const newErrors = {}
-    if (!formData.category) {
-      newErrors.category = t('public.publishModal.categoryRequired')
-    }
-    if (formData.tags.length === 0) {
-      newErrors.tags = t('public.publishModal.tagsRequired')
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
+    const keys = listingErrors(formData)
+    if (Object.keys(keys).length > 0) {
+      setErrors(Object.fromEntries(Object.entries(keys).map(([field, key]) => [field, t(key)])))
       return
     }
 
-    // Submit
-    onPublish(formData)
+    // An unchosen difficulty is sent as null: the API refuses an empty one.
+    onPublish(listingPayload(formData))
   }
 
   return (
@@ -125,7 +102,7 @@ const PublishModal = ({ open, onClose, onPublish, contentType = 'book' }) => {
               size='lg'
               sx={{ minHeight: '56px' }}
             >
-              {CATEGORIES.map((cat) => (
+              {PUBLISH_CATEGORIES.map((cat) => (
                 <Option key={cat} value={cat}>
                   {t(`public.categories.${cat}`)}
                 </Option>
@@ -199,7 +176,7 @@ const PublishModal = ({ open, onClose, onPublish, contentType = 'book' }) => {
               size='lg'
               sx={{ minHeight: '56px' }}
             >
-              {LANGUAGES.map((lang) => (
+              {CONTENT_LANGUAGES.map((lang) => (
                 <Option key={lang.code} value={lang.code}>
                   {lang.name}
                 </Option>
@@ -211,8 +188,8 @@ const PublishModal = ({ open, onClose, onPublish, contentType = 'book' }) => {
           <FormControl>
             <FormLabel sx={{ mb: 2, fontWeight: 600, fontSize: '1rem' }}>{t('public.difficulty')}</FormLabel>
             <Select
-              value={formData.difficulty_level}
-              onChange={(e, value) => setFormData({ ...formData, difficulty_level: value })}
+              value={formData.difficulty}
+              onChange={(e, value) => setFormData({ ...formData, difficulty: value })}
               placeholder={t('common.optional')}
               size='lg'
               sx={{ minHeight: '56px' }}
@@ -229,8 +206,8 @@ const PublishModal = ({ open, onClose, onPublish, contentType = 'book' }) => {
           <FormControl>
             <FormLabel sx={{ mb: 2, fontWeight: 600, fontSize: '1rem' }}>{t('public.license')}</FormLabel>
             <Select
-              value={formData.license_type}
-              onChange={(e, value) => setFormData({ ...formData, license_type: value })}
+              value={formData.license}
+              onChange={(e, value) => setFormData({ ...formData, license: value })}
               size='lg'
               sx={{ minHeight: '56px' }}
             >
@@ -245,8 +222,8 @@ const PublishModal = ({ open, onClose, onPublish, contentType = 'book' }) => {
           {/* Original Content Checkbox */}
           <FormControl sx={{ mt: 3 }}>
             <Checkbox
-              checked={formData.is_original_content}
-              onChange={(e) => setFormData({ ...formData, is_original_content: e.target.checked })}
+              checked={formData.original}
+              onChange={(e) => setFormData({ ...formData, original: e.target.checked })}
               label={t('public.originalContent')}
               size='lg'
               sx={{ py: 1.5 }}

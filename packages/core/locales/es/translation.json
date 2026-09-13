@@ -79,7 +79,10 @@
     "studyBuddy": "Compañero de Estudio",
     "moreActions": "Más acciones",
     "retry": "Reintentar",
-    "add": "Añadir"
+    "add": "Añadir",
+    "back": "Atrás",
+    "optional": "Opcional",
+    "select": "Seleccionar"
   },
   "news": {
     "title": "Últimas Noticias",

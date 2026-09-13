@@ -25,7 +25,14 @@ import { Input } from '../Input'
 
 const sameTags = (a = [], b = []) => a.length === b.length && a.every((tag, index) => tag === b[index])
 
-export function TagField({ value = [], onChange, labelKey = 'form.tagsLabel', helperKey = 'form.tagsCommaHelper' }) {
+export function TagField({
+  value = [],
+  onChange,
+  labelKey = 'form.tagsLabel',
+  helperKey = 'form.tagsCommaHelper',
+  errorKey = null,
+  required = false
+}) {
   const { t } = useTranslation()
   const [text, setText] = useState(() => value.join(', '))
   // What this field last reported, so a change it caused is not mistaken for
@@ -46,8 +53,15 @@ export function TagField({ value = [], onChange, labelKey = 'form.tagsLabel', he
   }
 
   return (
-    <FormField labelKey={labelKey} helperKey={helperKey}>
-      <Input value={text} onChangeText={change} accessibilityLabel={t(labelKey)} autoCapitalize='none' autoCorrect={false} />
+    <FormField labelKey={labelKey} helperKey={helperKey} errorKey={errorKey} required={required}>
+      <Input
+        value={text}
+        onChangeText={change}
+        invalid={Boolean(errorKey)}
+        accessibilityLabel={t(labelKey)}
+        autoCapitalize='none'
+        autoCorrect={false}
+      />
     </FormField>
   )
 }

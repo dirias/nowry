@@ -99,7 +99,10 @@
     "studyBuddy": "Compagnon d'étude",
     "moreActions": "Plus d'actions",
     "retry": "Réessayer",
-    "add": "Ajouter"
+    "add": "Ajouter",
+    "back": "Retour",
+    "optional": "Facultatif",
+    "select": "Sélectionner"
   },
   "news": {
     "title": "Dernières Actualités",
@@ -2735,7 +2738,31 @@
     "unknownAuthor": "Auteur inconnu",
     "library": "Bibliothèque publique",
     "books": "Livres",
-    "decks": "Paquets"
+    "decks": "Paquets",
+    "difficulty": "Difficulté",
+    "language": "Langue",
+    "license": "Licence",
+    "originalContent": "Ce contenu est le mien",
+    "tags": "Étiquettes",
+    "publishModal": {
+      "title": "Publier dans la bibliothèque publique",
+      "description": "Partagez votre contenu avec la communauté",
+      "submit": "Publier",
+      "categoryRequired": "La catégorie est obligatoire",
+      "tagsRequired": "Au moins un tag est requis",
+      "addTag": "Ajouter un tag"
+    },
+    "licenses": {
+      "all_rights": "Tous droits réservés",
+      "cc_by": "CC BY (Paternité)",
+      "cc_by_sa": "CC BY-SA (Partage dans les mêmes conditions)",
+      "cc0": "CC0 (Domaine public)"
+    },
+    "difficultyLevels": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé"
+    }
   },
   "editor": {
     "mode": {

@@ -99,7 +99,10 @@
     "studyBuddy": "Lernbegleiter",
     "moreActions": "Weitere Aktionen",
     "retry": "Erneut versuchen",
-    "add": "Hinzufügen"
+    "add": "Hinzufügen",
+    "back": "Zurück",
+    "optional": "Optional",
+    "select": "Auswählen"
   },
   "news": {
     "title": "Aktuelle Nachrichten",
@@ -2724,7 +2727,31 @@
     "unknownAuthor": "Unbekannte:r Autor:in",
     "library": "Öffentliche Bibliothek",
     "books": "Bücher",
-    "decks": "Stapel"
+    "decks": "Stapel",
+    "difficulty": "Schwierigkeit",
+    "language": "Sprache",
+    "license": "Lizenz",
+    "originalContent": "Das ist mein eigener Inhalt",
+    "tags": "Tags",
+    "publishModal": {
+      "title": "In der öffentlichen Bibliothek veröffentlichen",
+      "description": "Teile deine Inhalte mit der Community",
+      "submit": "Veröffentlichen",
+      "categoryRequired": "Eine Kategorie ist erforderlich",
+      "tagsRequired": "Mindestens ein Tag ist erforderlich",
+      "addTag": "Tag hinzufügen"
+    },
+    "licenses": {
+      "all_rights": "Alle Rechte vorbehalten",
+      "cc_by": "CC BY (Namensnennung)",
+      "cc_by_sa": "CC BY-SA (Weitergabe unter gleichen Bedingungen)",
+      "cc0": "CC0 (Gemeinfrei)"
+    },
+    "difficultyLevels": {
+      "beginner": "Anfänger",
+      "intermediate": "Fortgeschritten",
+      "advanced": "Experte"
+    }
   },
   "editor": {
     "mode": {
