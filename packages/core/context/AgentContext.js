@@ -796,46 +796,53 @@ export const AgentProvider = ({ children }) => {
    * applied after the user dismisses a message.
    * @param {{ type: string, card_id?: string, [key: string]: any }} event
    */
-  const queueIntervention = useCallback(async (event) => {
-    const {
-      companionInterventionCount,
-      companionSilentUntil,
-      interventionFrequency,
-      focusModeEnabled,
-      isInStudySession,
-      interventionTypes
-    } = stateRef.current
+  const queueIntervention = useCallback(
+    async (event) => {
+      const {
+        companionInterventionCount,
+        companionSilentUntil,
+        interventionFrequency,
+        focusModeEnabled,
+        isInStudySession,
+        interventionTypes
+      } = stateRef.current
 
-    /*
-     * The four gates, and they are not decided here. `interventionPolicy` in
-     * the shared package holds them, because the phone ships interventions
-     * without this provider (MOB-088) and a second copy of these rules is a
-     * second answer to whether the companion may speak.
-     */
-    const allowed = allowIntervention(event.type, {
-      settings: { frequency: interventionFrequency, focusMode: focusModeEnabled, types: interventionTypes },
-      count: companionInterventionCount,
-      silentUntil: companionSilentUntil,
-      inSession: isInStudySession
-    })
-    if (!allowed) return
+      /*
+       * The four gates, and they are not decided here. `interventionPolicy` in
+       * the shared package holds them, because the phone ships interventions
+       * without this provider (MOB-088) and a second copy of these rules is a
+       * second answer to whether the companion may speak.
+       */
+      const allowed = allowIntervention(event.type, {
+        settings: { frequency: interventionFrequency, focusMode: focusModeEnabled, types: interventionTypes },
+        count: companionInterventionCount,
+        silentUntil: companionSilentUntil,
+        inSession: isInStudySession
+      })
+      if (!allowed) return
 
-    dispatch({ type: 'COMPANION_LOADING' })
+      dispatch({ type: 'COMPANION_LOADING' })
 
-    // 12-second timeout — LLM can be slow; if it exceeds this, dismiss silently
-    const timeoutId = setTimeout(() => {
-      dispatch({ type: 'COMPANION_DISMISS' })
-    }, 12000)
+      // 12-second timeout — LLM can be slow; if it exceeds this, dismiss silently
+      const timeoutId = setTimeout(() => {
+        dispatch({ type: 'COMPANION_DISMISS' })
+      }, 12000)
 
-    try {
-      const result = await agentService.postIntervention(event, i18n.language)
-      clearTimeout(timeoutId)
-      dispatch({ type: 'COMPANION_SUCCESS', payload: result })
-    } catch {
-      clearTimeout(timeoutId)
-      dispatch({ type: 'COMPANION_DISMISS' })
-    }
-  }, [])
+      try {
+        const result = await agentService.postIntervention(event, i18n.language)
+        clearTimeout(timeoutId)
+        dispatch({ type: 'COMPANION_SUCCESS', payload: result })
+      } catch {
+        clearTimeout(timeoutId)
+        dispatch({ type: 'COMPANION_DISMISS' })
+      }
+      // The language is a dependency and not an omission: this callback outlives
+      // a language change — it is handed to a timer several seconds before it
+      // runs — and a stale one would answer in the language you were reading in
+      // when the session started (MOB-099).
+    },
+    [i18n.language]
+  )
 
   /**
    * Queue a pre-session companion intervention.

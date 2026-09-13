@@ -3576,7 +3576,8 @@
         "goal": "Meta",
         "milestone": "Hito",
         "activity": "Hábito"
-      }
+      },
+      "earlier": "Antes de este mes"
     }
   },
   "goalAi": {

@@ -4,7 +4,7 @@ import { calendarEventsKey, fetchCalendarEvents } from '../api/services/calendar
 import { queryClient } from '../api/queryClient'
 import { useAuth } from '../context/AuthContext'
 import { filterCalendarEvents } from '../domain/calendar/calendarFilters'
-import { groupAgenda } from '../domain/calendar/agendaGroups'
+import { groupAgenda, pastAgenda } from '../domain/calendar/agendaGroups'
 
 /**
  * Everything with a date on it, grouped the way an agenda reads it (MOB-043).
@@ -40,16 +40,31 @@ export function useCalendarEvents({ cursor = new Date(), filters } = {}) {
   const events = data?.events ?? null
   const focusAreas = data?.focusAreas ?? []
 
+  const visible = useMemo(() => (events && filters ? filterCalendarEvents(events, filters) : events), [events, filters])
+
   const groups = useMemo(() => {
-    if (!events) return []
-    return groupAgenda(filters ? filterCalendarEvents(events, filters) : events, cursor)
+    if (!visible) return []
+    return groupAgenda(visible, cursor)
     // `cursor` is a Date and a new object on every render of a screen that
     // holds it in state; its TIME is what the grouping depends on.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, filters, cursor.getTime()])
+  }, [visible, cursor.getTime()])
+
+  /*
+   * The current month's days BEFORE today, which the agenda deliberately
+   * leaves out (MOB-100). Offered rather than shown: a client with a month grid
+   * beside its agenda has no use for them, and one without a grid — the phone —
+   * has nowhere else to reach them from.
+   */
+  const past = useMemo(() => {
+    if (!visible) return []
+    return pastAgenda(visible, cursor)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, cursor.getTime()])
 
   return {
     groups,
+    past,
     focusAreas,
     loading: isLoading,
     /** True only when there is nothing to show: a cached month beats an error. */

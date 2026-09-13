@@ -2978,7 +2978,8 @@
         "goal": "目標",
         "milestone": "マイルストーン",
         "activity": "習慣"
-      }
+      },
+      "earlier": "今月のこれまで"
     }
   },
   "goalAi": {

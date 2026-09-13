@@ -3723,7 +3723,8 @@
         "goal": "Goal",
         "milestone": "Milestone",
         "activity": "Habit"
-      }
+      },
+      "earlier": "Earlier this month"
     }
   },
   "goalAi": {

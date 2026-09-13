@@ -3071,7 +3071,8 @@
         "goal": "Ziel",
         "milestone": "Meilenstein",
         "activity": "Gewohnheit"
-      }
+      },
+      "earlier": "Früher diesen Monat"
     }
   },
   "goalAi": {

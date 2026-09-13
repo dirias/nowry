@@ -78,7 +78,7 @@ export function Calendar() {
   const [form, setForm] = useState(null)
   const { filters, setFilters, applyPreset } = useCalendarFilters()
 
-  const { groups, focusAreas, loading, error, reload } = useCalendarEvents({ cursor, filters })
+  const { groups, past, focusAreas, loading, error, reload } = useCalendarEvents({ cursor, filters })
 
   const showsToday = isSameMonth(cursor, new Date())
   const title = useMemo(() => formatMonthTitle(cursor, language), [cursor, language])
@@ -201,6 +201,7 @@ export function Calendar() {
           <View style={{ flex: 1 }}>
             <Agenda
               groups={groups}
+              past={past}
               loading={loading}
               language={language}
               cursor={cursor}
@@ -239,7 +240,16 @@ export function Calendar() {
  * is tens of rows, not thousands, and the day headers are part of the list's
  * own rhythm rather than sticky chrome.
  */
-function Agenda({ groups, loading, language, cursor, theme, onToggleComplete, onSelect, t }) {
+function Agenda({ groups, past, loading, language, cursor, theme, onToggleComplete, onSelect, t }) {
+  /*
+   * Closed, because the agenda's rule is still the rule: the list starts at
+   * today and what is already done does not sit above it (ADR-016). What
+   * changed is that the days behind it are now reachable at all — on the web
+   * they are one click away in the month grid, and this client has no grid, so
+   * an overdue item from earlier this month could be found from nowhere
+   * (MOB-100).
+   */
+  const [showPast, setShowPast] = useState(false)
   const empty = !loading && groups.length === 0
 
   if (loading && groups.length === 0) {
@@ -265,21 +275,50 @@ function Agenda({ groups, loading, language, cursor, theme, onToggleComplete, on
     )
   }
 
+  const day = (group) => (
+    <View key={group.date.getTime()}>
+      <DayHeader group={group} language={language} theme={theme} t={t} />
+      {group.isToday && group.events.length === 0 ? (
+        <Typography level='body-sm' color='text.tertiary' style={{ paddingVertical: theme.spacing[2] }}>
+          {t('calendarPage.agenda.emptyToday')}
+        </Typography>
+      ) : null}
+      {group.events.map((event) => (
+        <EventRow key={event.id} event={event} theme={theme} onToggleComplete={onToggleComplete} onSelect={onSelect} t={t} />
+      ))}
+    </View>
+  )
+
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: theme.spacing[3] }}>
-      {groups.map((group) => (
-        <View key={group.date.getTime()}>
-          <DayHeader group={group} language={language} theme={theme} t={t} />
-          {group.isToday && group.events.length === 0 ? (
-            <Typography level='body-sm' color='text.tertiary' style={{ paddingVertical: theme.spacing[2] }}>
-              {t('calendarPage.agenda.emptyToday')}
+      {/* Above today, because that is where earlier is. Counted, so the row
+          says whether opening it is worth the tap — the same disclosure the
+          task panel uses for what is already done (MOB-081). */}
+      {past.length > 0 ? (
+        <>
+          <Pressable
+            onPress={() => setShowPast((open) => !open)}
+            accessibilityRole='button'
+            accessibilityState={{ expanded: showPast }}
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: theme.spacing[1],
+              minHeight: ROW_HEIGHT,
+              paddingHorizontal: theme.spacing[1],
+              opacity: pressed ? 0.7 : 1
+            })}
+          >
+            <Icon name={showPast ? 'ChevronDown' : 'ChevronRight'} size='sm' color='text.tertiary' />
+            <Typography level='body-sm' color='text.secondary'>
+              {`${t('calendarPage.agenda.earlier')} · ${past.reduce((sum, group) => sum + group.events.length, 0)}`}
             </Typography>
-          ) : null}
-          {group.events.map((event) => (
-            <EventRow key={event.id} event={event} theme={theme} onToggleComplete={onToggleComplete} onSelect={onSelect} t={t} />
-          ))}
-        </View>
-      ))}
+          </Pressable>
+          {showPast ? past.map(day) : null}
+        </>
+      ) : null}
+
+      {groups.map(day)}
     </ScrollView>
   )
 }

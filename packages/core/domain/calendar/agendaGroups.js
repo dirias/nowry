@@ -44,12 +44,45 @@ export const formatDaySide = (date, language, isToday) =>
   new Intl.DateTimeFormat(language, isToday ? { weekday: 'short', day: 'numeric', month: 'short' } : { month: 'short' }).format(date)
 
 /**
+ * One group per day that has events, within the month `cursor` is in.
+ *
+ * `keep` decides which of that month's days are in scope, which is the only
+ * thing that differs between the agenda and the days behind it.
+ */
+function groupDays(events, cursor, today, keep) {
+  const year = cursor.getFullYear()
+  const month = cursor.getMonth()
+  const currentMonth = isSameMonth(cursor, today)
+  const byDay = new Map()
+
+  events.forEach((ev) => {
+    const date = ev.date
+    if (date.getFullYear() !== year || date.getMonth() !== month) return
+    if (!keep(date.getDate(), currentMonth)) return
+    const day = date.getDate()
+    if (!byDay.has(day)) byDay.set(day, [])
+    byDay.get(day).push(ev)
+  })
+
+  return { byDay, year, month, currentMonth }
+}
+
+const toGroups = ({ byDay, year, month, currentMonth }, today) =>
+  [...byDay.keys()]
+    .sort((a, b) => a - b)
+    .map((day) => ({
+      date: new Date(year, month, day),
+      isToday: currentMonth && day === today.getDate(),
+      events: byDay.get(day)
+    }))
+
+/**
  * The agenda's groups for the month `cursor` is in.
  *
  * Rules (ADR-016, decision 5):
  *  - Only that month's events are listed, one group per day that has any.
- *  - In the current month the list starts at today; earlier days are reached
- *    with the nav object, not by scrolling past what is already done.
+ *  - In the current month the list starts at today; earlier days are
+ *    `pastAgenda` below, not scrolled past.
  *  - Today is ALWAYS the first group of the current month, even with no
  *    events, so the page always has a "now" — FullCalendar's list view could
  *    not do this, which is why the agenda is Nowry's own.
@@ -60,27 +93,33 @@ export const formatDaySide = (date, language, isToday) =>
  * @returns {Array<{ date: Date, isToday: boolean, events: Array }>}
  */
 export function groupAgenda(events, cursor, today = new Date()) {
-  const year = cursor.getFullYear()
-  const month = cursor.getMonth()
-  const currentMonth = isSameMonth(cursor, today)
-  const byDay = new Map()
+  const grouped = groupDays(events, cursor, today, (day, currentMonth) => !currentMonth || day >= today.getDate())
+  if (grouped.currentMonth && !grouped.byDay.has(today.getDate())) grouped.byDay.set(today.getDate(), [])
+  return toGroups(grouped, today)
+}
 
-  events.forEach((ev) => {
-    const date = ev.date
-    if (date.getFullYear() !== year || date.getMonth() !== month) return
-    if (currentMonth && date.getDate() < today.getDate()) return
-    const day = date.getDate()
-    if (!byDay.has(day)) byDay.set(day, [])
-    byDay.get(day).push(ev)
-  })
-
-  if (currentMonth && !byDay.has(today.getDate())) byDay.set(today.getDate(), [])
-
-  return [...byDay.keys()]
-    .sort((a, b) => a - b)
-    .map((day) => ({
-      date: new Date(year, month, day),
-      isToday: currentMonth && day === today.getDate(),
-      events: byDay.get(day)
-    }))
+/**
+ * What the current month has already been, and this exists because of where
+ * the agenda is (MOB-100).
+ *
+ * ADR-016 starts the list at today and sends you to the nav object for
+ * anything earlier. That is right on the web, which draws a month GRID beside
+ * the agenda — every past day is one click away in it. The phone has no grid:
+ * the agenda IS the calendar there, so an overdue item from earlier this month
+ * was reachable from nowhere at all. Found by falling into it — a task ticked
+ * by accident could not be found again.
+ *
+ * So the rule holds and the days behind it are a separate list the caller may
+ * choose to offer. Empty for any month but the current one, because "earlier"
+ * only means something relative to now: a past month's agenda already starts
+ * at its first day.
+ *
+ * @returns {Array<{ date: Date, isToday: boolean, events: Array }>} chronological
+ */
+export function pastAgenda(events, cursor, today = new Date()) {
+  if (!isSameMonth(cursor, today)) return []
+  return toGroups(
+    groupDays(events, cursor, today, (day, currentMonth) => currentMonth && day < today.getDate()),
+    today
+  )
 }

@@ -1,4 +1,4 @@
-import { addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, startOfWeek } from '../calendar/agendaGroups'
+import { addMonths, formatMonthTitle, formatWeekTitle, groupAgenda, pastAgenda, startOfWeek } from '../calendar/agendaGroups'
 
 const ev = (year, month, day, id = `${year}-${month}-${day}`) => ({ id, date: new Date(year, month, day) })
 
@@ -55,5 +55,45 @@ describe("the nav object's arithmetic and readout", () => {
     const title = formatWeekTitle(new Date(2026, 8, 5), 'en')
     expect(title).toMatch(/Aug 30/)
     expect(title).toMatch(/Sep 5, 2026/)
+  })
+})
+
+describe('pastAgenda', () => {
+  const TODAY = new Date(2026, 8, 13) // Sun 13 Sep 2026
+  const at = (day, month = 8, year = 2026) => ({ date: new Date(year, month, day), id: `${year}-${month}-${day}` })
+
+  it('is what the agenda leaves behind, in the current month', () => {
+    const groups = pastAgenda([at(3), at(9), at(13), at(20)], TODAY, TODAY)
+    expect(groups.map((group) => group.date.getDate())).toEqual([3, 9])
+  })
+
+  it('never includes today, which the agenda already leads with', () => {
+    expect(pastAgenda([at(13)], TODAY, TODAY)).toEqual([])
+  })
+
+  it('together with the agenda it accounts for every event in the month', () => {
+    const events = [at(1), at(9), at(13), at(28)]
+    const seen = [...pastAgenda(events, TODAY, TODAY), ...groupAgenda(events, TODAY, TODAY)].flatMap((group) => group.events)
+    expect(seen).toHaveLength(events.length)
+  })
+
+  it('is empty for any month but the current one', () => {
+    // "Earlier" only means something relative to now; a past month's agenda
+    // already starts at its first day.
+    const august = new Date(2026, 7, 15)
+    expect(pastAgenda([at(1, 7), at(30, 7)], august, TODAY)).toEqual([])
+  })
+
+  it('ignores events from other months entirely', () => {
+    expect(pastAgenda([at(30, 7), at(3)], TODAY, TODAY).map((group) => group.date.getDate())).toEqual([3])
+  })
+
+  it('never inserts an empty day, unlike the agenda´s today', () => {
+    expect(pastAgenda([], TODAY, TODAY)).toEqual([])
+  })
+
+  it('reads chronologically, as the agenda does', () => {
+    const groups = pastAgenda([at(11), at(2), at(7)], TODAY, TODAY)
+    expect(groups.map((group) => group.date.getDate())).toEqual([2, 7, 11])
   })
 })
