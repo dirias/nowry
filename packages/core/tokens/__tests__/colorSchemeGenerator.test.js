@@ -1,4 +1,12 @@
-import { contrastRatio, relativeLuminance, readableTextOn, generateColorScheme, getColorPresets, getColorName, STICKY_PALETTE } from '../colorSchemeGenerator'
+import {
+  contrastRatio,
+  relativeLuminance,
+  readableTextOn,
+  generateColorScheme,
+  getColorPresets,
+  getColorName,
+  STICKY_PALETTE
+} from '../colorSchemeGenerator'
 import { deltaE, hexToOklch } from '../oklch'
 
 const AA = 4.5

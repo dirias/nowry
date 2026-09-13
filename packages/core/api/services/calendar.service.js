@@ -193,7 +193,9 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
 
     // Build a lookup map: focus_area_id → { color, name }
     // Assigned to outer areaMap so focusAreas can be extracted after all event pushes (D-01)
-    areaMap = Object.fromEntries(planFocusAreas.map((area) => [area._id || area.id, { color: area.color || UNASSIGNED_AREA_COLOR, name: area.name }]))
+    areaMap = Object.fromEntries(
+      planFocusAreas.map((area) => [area._id || area.id, { color: area.color || UNASSIGNED_AREA_COLOR, name: area.name }])
+    )
 
     goals.forEach((goal) => {
       const area = areaMap[goal.focus_area_id] || { color: UNASSIGNED_AREA_COLOR, name: '' }

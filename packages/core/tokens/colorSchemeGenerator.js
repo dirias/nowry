@@ -107,12 +107,24 @@ export function getColorPresets() {
  * every note, so they keep their historical names; the colours behind them are
  * the categories closest to what each name promised.
  */
-const STICKY_TO_CATEGORY = { yellow: 'amber', green: 'moss', blue: 'lake', purple: 'iris', pink: 'orchid', teal: 'lagoon', red: 'clay', slate: 'graphite' }
+const STICKY_TO_CATEGORY = {
+  yellow: 'amber',
+  green: 'moss',
+  blue: 'lake',
+  purple: 'iris',
+  pink: 'orchid',
+  teal: 'lagoon',
+  red: 'clay',
+  slate: 'graphite'
+}
 
 const stickyFor = (mode) =>
   Object.fromEntries(
     Object.entries(STICKY_TO_CATEGORY).map(([id, categoryId]) => {
-      const { dot, tint, ink } = categoryColors(CATEGORY_SPEC.find((c) => c.id === categoryId), mode)
+      const { dot, tint, ink } = categoryColors(
+        CATEGORY_SPEC.find((c) => c.id === categoryId),
+        mode
+      )
       return [id, { bg: tint, border: dot, text: ink }]
     })
   )

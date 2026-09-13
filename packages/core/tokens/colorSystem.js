@@ -69,8 +69,24 @@ const neutralRoles = (mode) => {
   return {
     scale: s,
     background: light
-      ? { body: paper(0.988, 0.004), surface: s[50], popup: paper(0.995, 0.003), level1: s[100], level2: s[200], level3: s[300], tooltip: s[800] }
-      : { body: ink(0.188, 0.019), surface: s[900], popup: ink(0.258, 0.022), level1: s[800], level2: s[700], level3: s[600], tooltip: s[600] },
+      ? {
+          body: paper(0.988, 0.004),
+          surface: s[50],
+          popup: paper(0.995, 0.003),
+          level1: s[100],
+          level2: s[200],
+          level3: s[300],
+          tooltip: s[800]
+        }
+      : {
+          body: ink(0.188, 0.019),
+          surface: s[900],
+          popup: ink(0.258, 0.022),
+          level1: s[800],
+          level2: s[700],
+          level3: s[600],
+          tooltip: s[600]
+        },
     text: light
       ? { primary: s[800], secondary: s[700], tertiary: s[500], icon: s[500] }
       : { primary: s[100], secondary: s[300], tertiary: s[400], icon: s[400] },
