@@ -15,10 +15,10 @@
  * something — the colour, which always has a value, lives behind "Change the
  * cover" exactly as it does on the web.
  *
- * **What is not here.** The cover IMAGE needs an image picker, which is a
- * native module and a rebuilt binary, so it is shown but not changeable — and
- * choosing a colour leaves an existing image in place rather than silently
- * clearing it. Publish drags in the public listing flow and is its own decision.
+ * **The cover image is an address, as it is on the web** (MOB-103). MOB-102
+ * left it out on the belief that it needed an image picker and a rebuilt binary.
+ * The web's cover image has always been a URL pasted into a field; so is this.
+ * The cover preview above draws it in the document's own shape.
  */
 import { useCallback } from 'react'
 import { View } from 'react-native'
@@ -26,7 +26,20 @@ import { useTranslation } from 'react-i18next'
 import { COVER_PRESETS } from '@nowry/core/constants/bookCovers'
 import useBookForm from '@nowry/core/hooks/useBookForm'
 import { useTheme } from '../theme'
-import { BottomSheet, Button, Chip, ColorSwatch, CoverMark, FormField, Input, Stack, TagField, Typography, resolveColor } from '../ui'
+import {
+  BottomSheet,
+  Button,
+  Chip,
+  ColorSwatch,
+  CoverMark,
+  FormField,
+  ImageUrlField,
+  Input,
+  Stack,
+  TagField,
+  Typography,
+  resolveColor
+} from '../ui'
 
 /** The web's rail labels, one per group the form can reveal. */
 const REVEAL_LABELS = {
@@ -57,7 +70,7 @@ export function BookDetailsSheet({ book, open, onSaved, onClose }) {
   // The preview is the cover this document will wear, drawn by the same
   // component the library draws — so a colour is judged on a page or a book,
   // not on a circle.
-  const preview = { ...book, cover_color: form.values.coverColor, title: form.values.title }
+  const preview = { ...book, cover_color: form.values.coverColor, cover_image: form.values.coverImage, title: form.values.title }
 
   return (
     <BottomSheet visible={open} onClose={form.saving ? () => {} : onClose} title={t('books.editTitle')}>
@@ -83,19 +96,33 @@ export function BookDetailsSheet({ book, open, onSaved, onClose }) {
         </FormField>
 
         {form.revealed.has('cover') ? (
-          <FormField labelKey='books.coverColorLabel'>
-            <View ref={form.refFor('cover')} style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -theme.spacing[0.5] }}>
-              {COVER_PRESETS.map((preset) => (
-                <ColorSwatch
-                  key={preset.hex}
-                  hex={preset.hex}
-                  selected={String(form.values.coverColor).toLowerCase() === preset.hex.toLowerCase()}
-                  onPress={() => form.setField('coverColor', preset.hex)}
-                  label={t(preset.nameKey)}
-                />
-              ))}
-            </View>
-          </FormField>
+          <>
+            <FormField labelKey='books.coverColorLabel'>
+              <View ref={form.refFor('cover')} style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -theme.spacing[0.5] }}>
+                {COVER_PRESETS.map((preset) => (
+                  <ColorSwatch
+                    key={preset.hex}
+                    hex={preset.hex}
+                    selected={String(form.values.coverColor).toLowerCase() === preset.hex.toLowerCase()}
+                    onPress={() => form.setField('coverColor', preset.hex)}
+                    label={t(preset.nameKey)}
+                  />
+                ))}
+              </View>
+            </FormField>
+
+            {/* The web's cover group holds both, in this order: the colour and
+                then the image, which covers the colour when it loads. */}
+            <ImageUrlField
+              labelKey='books.coverImageLabel'
+              placeholderKey='books.coverImagePlaceholder'
+              altKey='books.coverImageAlt'
+              errorMessageKey='books.coverImageError'
+              value={form.values.coverImage}
+              onChange={(value) => form.setField('coverImage', value)}
+              preview={false}
+            />
+          </>
         ) : null}
 
         {form.revealed.has('tags') ? (

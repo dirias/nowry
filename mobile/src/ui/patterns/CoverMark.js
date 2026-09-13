@@ -17,6 +17,7 @@
  * fixed opacity over the colour, and the fold is a flat triangle made from a
  * rotated square. No text on the colour. No motion. The colour is the user's.
  */
+import { useEffect, useState } from 'react'
 import { Image, View } from 'react-native'
 import { BOOK, COVER_RATIO, PAGE, coverOf } from '@nowry/core/domain/books/coverSpec'
 import { useTheme } from '../../theme'
@@ -30,16 +31,33 @@ import { resolveColor } from '../Typography'
  */
 export function CoverMark({ book, width = 28, ribbon = false, publicDoc = false, ground = 'background.body' }) {
   const theme = useTheme()
-  const cover = coverOf(book, { ribbon, public: publicDoc })
+  /*
+   * An image that fails to load falls back to the drawn cover rather than a
+   * blank one (MOB-103). The server stores any string as a cover image, so a
+   * mistyped or expired address is an ordinary state, and a document whose
+   * cover goes white because of it looks deleted rather than mis-set.
+   */
+  const [imageFailed, setImageFailed] = useState(false)
+  useEffect(() => setImageFailed(false), [book?.cover_image])
+  const drawn = coverOf(book, { ribbon, public: publicDoc })
+  const cover = imageFailed ? { ...drawn, image: null } : drawn
   const height = Math.round(width * COVER_RATIO)
   const colour = cover.color || resolveColor(theme, 'primary.solidBg')
 
   return (
     <View importantForAccessibility='no' accessible={false} style={{ width, height }}>
       {cover.shape === 'book' ? (
-        <BookShape cover={cover} colour={colour} width={width} height={height} theme={theme} />
+        <BookShape cover={cover} colour={colour} width={width} height={height} theme={theme} onImageError={() => setImageFailed(true)} />
       ) : (
-        <PageShape cover={cover} colour={colour} width={width} height={height} theme={theme} ground={ground} />
+        <PageShape
+          cover={cover}
+          colour={colour}
+          width={width}
+          height={height}
+          theme={theme}
+          ground={ground}
+          onImageError={() => setImageFailed(true)}
+        />
       )}
       {cover.ribbon ? <Ribbon width={width} theme={theme} /> : null}
     </View>
@@ -47,7 +65,7 @@ export function CoverMark({ book, width = 28, ribbon = false, publicDoc = false,
 }
 
 /** Paper, a colour tab, a folded corner, and the ruled lines. */
-function PageShape({ cover, colour, width, height, theme, ground }) {
+function PageShape({ cover, colour, width, height, theme, ground, onImageError }) {
   const paper = resolveColor(theme, 'background.body')
   const edge = resolveColor(theme, 'divider')
   const fold = Math.round(width * PAGE.foldWidth)
@@ -67,7 +85,13 @@ function PageShape({ cover, colour, width, height, theme, ground }) {
       }}
     >
       {cover.image ? (
-        <Image source={{ uri: cover.image }} style={{ width: '100%', height: '100%' }} resizeMode='cover' accessible={false} />
+        <Image
+          source={{ uri: cover.image }}
+          onError={onImageError}
+          style={{ width: '100%', height: '100%' }}
+          resizeMode='cover'
+          accessible={false}
+        />
       ) : (
         <>
           <View style={{ position: 'absolute', left: 0, top: 0, width: width - fold, height: tab, backgroundColor: colour }} />
@@ -133,7 +157,7 @@ function PageShape({ cover, colour, width, height, theme, ground }) {
 }
 
 /** The colour, a solid spine, and a page edge beside the cover. */
-function BookShape({ cover, colour, width, height, theme }) {
+function BookShape({ cover, colour, width, height, theme, onImageError }) {
   return (
     <View style={{ width, height }}>
       <View
@@ -153,7 +177,13 @@ function BookShape({ cover, colour, width, height, theme }) {
       />
       <View style={{ width, height, backgroundColor: colour, borderRadius: theme.radius.xs, overflow: 'hidden' }}>
         {cover.image ? (
-          <Image source={{ uri: cover.image }} style={{ width: '100%', height: '100%' }} resizeMode='cover' accessible={false} />
+          <Image
+            source={{ uri: cover.image }}
+            onError={onImageError}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode='cover'
+            accessible={false}
+          />
         ) : null}
         <View
           style={{
