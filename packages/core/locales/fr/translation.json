@@ -3266,7 +3266,8 @@
     "pause": "Pause",
     "reset": "Réinitialiser",
     "skip": "Passer à la session suivante",
-    "cycleProgress": "{{count}} sur {{total}} sessions de concentration avant une pause longue"
+    "cycleProgress": "{{count}} sur {{total}} sessions de concentration avant une pause longue",
+    "dialCaption": "{{mode}} · {{current}} sur {{total}}"
   },
   "nav": {
     "home": "Accueil",

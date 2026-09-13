@@ -26,6 +26,7 @@ import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
 import { Avatar } from './Avatar'
+import { TimerChip } from './TimerChip'
 import { Icon } from '../icons'
 
 export const APP_BAR_HEIGHT = 56
@@ -138,6 +139,9 @@ export function AppBar() {
       </View>
 
       <View style={{ flex: 1 }} />
+
+      {/* A running session, visible from every screen (MOB-104). */}
+      <TimerChip />
 
       <Pressable
         onPress={() => router.push('/profile')}

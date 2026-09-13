@@ -95,3 +95,34 @@ export const statusLine = ({ mode, isActive, isPaused, timeLeft, totalSeconds, c
     params: { count: cycleProgress(completedSessions, mode, sessionsBeforeLongBreak), total: sessionsBeforeLongBreak }
   }
 }
+
+/** The share of the ring left empty between two sessions of the cycle. */
+export const RING_GAP = 0.02
+
+/**
+ * The focus dial's ring, as arcs (MOB-104).
+ *
+ * The cycle IS the ring: during focus it is one arc per session of the cycle,
+ * the finished ones full and the one in hand filling as the clock runs, so a
+ * single object says both how far through this session and how far through
+ * the cycle you are. A break is not a session of the cycle, so during one the
+ * ring is a single arc filling with the break.
+ *
+ * Fractions of the circumference, starting at twelve o'clock and going
+ * clockwise; the client turns them into strokes.
+ *
+ * @returns {Array<{ start: number, length: number, fill: number }>}
+ */
+export const ringArcs = ({ mode, completedSessions, sessionsBeforeLongBreak, progress }) => {
+  const clamped = Math.min(1, Math.max(0, Number(progress) || 0))
+  if (mode !== MODES.WORK) return [{ start: 0, length: 1, fill: clamped }]
+
+  const total = Math.max(1, sessionsBeforeLongBreak)
+  const done = cycleProgress(completedSessions, mode, total)
+  const gap = total > 1 ? RING_GAP : 0
+  return Array.from({ length: total }, (_, index) => ({
+    start: index / total + gap / 2,
+    length: 1 / total - gap,
+    fill: index < done ? 1 : index === done ? clamped : 0
+  }))
+}

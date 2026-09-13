@@ -242,26 +242,44 @@ const tabButtons = () => {
     .filter((block) => block.includes('tabBarIcon'))
     .map((block) => ({
       name: block.match(/name='([^']+)'/)?.[1] ?? null,
-      href: block.match(/listeners=\{toTabRoot\('([^']+)'\)\}/)?.[1] ?? null
+      href: block.match(/listeners=\{toTabRoot\('([^']+)'\)\}/)?.[1] ?? null,
+      raises: /listeners=\{raiseFocus\}/.test(block)
     }))
 }
+
+/**
+ * Focus is the one tab that is not a page: its press raises the full-screen
+ * timer over the tab you are on (MOB-104), so it has no route to send you to.
+ * Named here so a second tab cannot quietly stop being a destination.
+ */
+const RAISES_AN_OVERLAY = ['pomodoro']
+
+const routedTabs = () => tabButtons().filter(({ name }) => !RAISES_AN_OVERLAY.includes(name))
 
 describe('the tab bar', () => {
   it('was actually read', () => {
     expect(tabButtons().length).toBeGreaterThan(3)
   })
 
-  it.each(tabButtons().map(({ name }) => name))('%s sends its press somewhere', (name) => {
+  it('raises an overlay from Focus and from no other tab', () => {
+    expect(
+      tabButtons()
+        .filter(({ raises }) => raises)
+        .map(({ name }) => name)
+    ).toEqual(RAISES_AN_OVERLAY)
+  })
+
+  it.each(routedTabs().map(({ name }) => name))('%s sends its press somewhere', (name) => {
     const { href } = tabButtons().find((tab) => tab.name === name)
     expect({ name, href }).toEqual({ name, href: href ?? 'no toTabRoot listener — this tab will resume whatever was pushed on it' })
   })
 
-  it.each(tabButtons().map(({ name }) => name))('%s sends its press to a real route', (name) => {
+  it.each(routedTabs().map(({ name }) => name))('%s sends its press to a real route', (name) => {
     const { href } = tabButtons().find((tab) => tab.name === name)
     expect(matches(href) ? href : `${href} — no file matches this`).toEqual(href)
   })
 
-  it.each(tabButtons().map(({ name }) => name))('%s sends its press to its OWN route', (name) => {
+  it.each(routedTabs().map(({ name }) => name))('%s sends its press to its OWN route', (name) => {
     const { href } = tabButtons().find((tab) => tab.name === name)
     // `index` is the group's own root, which is `/`; every other tab is named
     // by its segment.

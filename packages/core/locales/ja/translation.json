@@ -3161,7 +3161,8 @@
     "pause": "一時停止",
     "reset": "リセット",
     "skip": "次のセッションへ",
-    "cycleProgress": "長い休憩まで {{count}} / {{total}} 集中セッション"
+    "cycleProgress": "長い休憩まで {{count}} / {{total}} 集中セッション",
+    "dialCaption": "{{mode}} · {{total}}回中{{current}}回目"
   },
   "nav": {
     "home": "ホーム",

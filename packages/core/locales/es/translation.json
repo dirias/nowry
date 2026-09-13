@@ -3723,7 +3723,8 @@
     "pause": "Pausar",
     "reset": "Reiniciar",
     "skip": "Saltar a la siguiente sesión",
-    "cycleProgress": "{{count}} de {{total}} sesiones de enfoque antes de un descanso largo"
+    "cycleProgress": "{{count}} de {{total}} sesiones de enfoque antes de un descanso largo",
+    "dialCaption": "{{mode}} · {{current}} de {{total}}"
   },
   "nav": {
     "home": "Inicio",

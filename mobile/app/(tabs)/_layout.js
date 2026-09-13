@@ -61,6 +61,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { setAskContext } from '../../src/screens/askContext'
 import { useTheme } from '../../src/theme'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { FocusScreen } from '../../src/screens/FocusScreen'
 import { AppBar, PetBubble } from '../../src/ui'
 import { ScreenChromeProvider, TAB_BAR_HEIGHT } from '../../src/ui/screenChrome'
 import { Icon } from '../../src/ui'
@@ -116,6 +118,15 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets()
   const pet = usePetState()
   const pathname = usePathname()
+  const { setShowWidget } = usePomodoro()
+
+  // The one tab whose press opens something over the bar rather than a route.
+  const raiseFocus = () => ({
+    tabPress: (event) => {
+      event.preventDefault()
+      setShowWidget(true)
+    }
+  })
 
   /*
    * No card, and here is where the chat should put us back (MOB-087). The
@@ -178,9 +189,12 @@ export default function TabsLayout() {
             and Home's next-steps row uses it. `href: null` is how Expo Router
             says "a route here, no button for it". */}
         <Tabs.Screen name='annual-planning' options={{ href: null }} />
+        {/* Focus is a button that raises the full-screen timer over the tab
+            you are on, not a page of its own (MOB-104). The tab you were on
+            stays selected underneath, because that is where closing it lands. */}
         <Tabs.Screen
           name='pomodoro'
-          listeners={toTabRoot('/pomodoro')}
+          listeners={raiseFocus}
           options={{ title: t('nav.focus'), tabBarIcon: ({ color }) => <TabIcon name={NAV_ICONS.focus} color={color} /> }}
         />
         {/* Routes, not tabs: the app bar's account opens Profile from anywhere
@@ -200,6 +214,8 @@ export default function TabsLayout() {
       {/* Over the tabs and clear of the bar, which is measured here rather
           than guessed there. `box-none` so only the bubble itself takes a
           touch — the rest of that corner still belongs to the screen. */}
+      <FocusScreen />
+
       {isPetFree(pathname) ? null : (
         <View pointerEvents='box-none' style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}>
           <PetBubble pet={pet} onPress={openChat} bottom={TAB_BAR_HEIGHT + insets.bottom} />

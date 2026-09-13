@@ -33,6 +33,17 @@
 const REM = 16
 
 export const TYPE_LEVELS = {
+  /*
+   * The web's two display levels, "above h1, for hero surfaces only" (MOB-104).
+   * The one exception to translation 1: their clamps are pinned to the MAXIMUM,
+   * 4rem and 3rem. A web display line sits in a page that reflows with the
+   * window, so it shrinks with it; the phone's only display surface is the
+   * focus dial, a full-screen object whose size does not depend on a column
+   * width, and at the 2.5rem floor its clock would be smaller than the board
+   * that was chosen drew it.
+   */
+  'display-lg': { fontSize: 4 * REM, fontWeight: '700', lineHeightRatio: 1.2, letterSpacing: -1.28 },
+  'display-md': { fontSize: 3 * REM, fontWeight: '700', lineHeightRatio: 1.2, letterSpacing: -0.96 },
   h1: { fontSize: 1.75 * REM, fontWeight: '700', lineHeightRatio: 1.33334, letterSpacing: -0.5 },
   h2: { fontSize: 1.5 * REM, fontWeight: '700', lineHeightRatio: 1.33334, letterSpacing: -0.5 },
   h3: { fontSize: 1.25 * REM, fontWeight: '600', lineHeightRatio: 1.33334, letterSpacing: -0.25 },

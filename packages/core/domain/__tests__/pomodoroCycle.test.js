@@ -1,4 +1,4 @@
-import { MODES, cycleProgress, statusLine } from '../pomodoroCycle'
+import { MODES, RING_GAP, cycleProgress, ringArcs, statusLine } from '../pomodoroCycle'
 
 const settings = { work: 25, shortBreak: 5, longBreak: 15, sessionsBeforeLongBreak: 4 }
 
@@ -77,5 +77,38 @@ describe('statusLine', () => {
 
   it('returns a mode NAME, never a translated string (ADR-031)', () => {
     expect(statusLine(base).params.mode).toBe(MODES.SHORT_BREAK)
+  })
+})
+
+describe('ringArcs', () => {
+  const focus = { mode: MODES.WORK, completedSessions: 1, sessionsBeforeLongBreak: 4, progress: 0.5 }
+
+  it('draws one arc per session of the cycle during focus', () => {
+    const arcs = ringArcs(focus)
+    expect(arcs).toHaveLength(4)
+    expect(arcs.map((arc) => arc.fill)).toEqual([1, 0.5, 0, 0])
+  })
+
+  it('leaves a gap between arcs and stays inside the circle', () => {
+    const arcs = ringArcs(focus)
+    arcs.forEach((arc, index) => {
+      expect(arc.start).toBeCloseTo(index / 4 + RING_GAP / 2)
+      expect(arc.length).toBeCloseTo(0.25 - RING_GAP)
+    })
+    const last = arcs[3]
+    expect(last.start + last.length).toBeLessThan(1)
+  })
+
+  it('starts a fresh cycle after the long break', () => {
+    expect(ringArcs({ ...focus, completedSessions: 4, progress: 0 }).map((arc) => arc.fill)).toEqual([0, 0, 0, 0])
+  })
+
+  it('is one arc filling with the break during a break', () => {
+    expect(ringArcs({ ...focus, mode: MODES.SHORT_BREAK, progress: 0.3 })).toEqual([{ start: 0, length: 1, fill: 0.3 }])
+  })
+
+  it('clamps progress it cannot draw', () => {
+    expect(ringArcs({ ...focus, completedSessions: 0, progress: 2 })[0].fill).toBe(1)
+    expect(ringArcs({ ...focus, mode: MODES.LONG_BREAK, progress: undefined })[0].fill).toBe(0)
   })
 })

@@ -8,8 +8,10 @@
 import { MIN_FONT_SIZE, TYPE_LEVELS, TYPE_LEVEL_NAMES } from '../typeLevels'
 
 describe('the type levels', () => {
-  it('carries exactly the eleven levels the design system names', () => {
+  it('carries exactly the thirteen levels the design system names', () => {
     expect(TYPE_LEVEL_NAMES).toEqual([
+      'display-lg',
+      'display-md',
       'h1',
       'h2',
       'h3',
@@ -41,6 +43,8 @@ describe('the type levels', () => {
   })
 
   it('descends in size within each family', () => {
+    expect(TYPE_LEVELS['display-lg'].fontSize).toBeGreaterThan(TYPE_LEVELS['display-md'].fontSize)
+    expect(TYPE_LEVELS['display-md'].fontSize).toBeGreaterThan(TYPE_LEVELS.h1.fontSize)
     expect(TYPE_LEVELS.h1.fontSize).toBeGreaterThan(TYPE_LEVELS.h2.fontSize)
     expect(TYPE_LEVELS.h2.fontSize).toBeGreaterThan(TYPE_LEVELS.h3.fontSize)
     expect(TYPE_LEVELS['title-lg'].fontSize).toBeGreaterThan(TYPE_LEVELS['title-md'].fontSize)
