@@ -6,7 +6,7 @@
  * plain Node environment. This one can, and it is where all the merging lives.
  */
 import { BASE_PALETTE } from '@nowry/core/tokens/palette'
-import { generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
+import { DEFAULT_ACCENT, generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
 import {
   FONT_FAMILY,
   FONT_SIZE,
@@ -28,14 +28,16 @@ import { ELEVATION } from './elevation'
 const toNumbers = (scale) => Object.fromEntries(Object.entries(scale).map(([k, v]) => [k, typeof v === 'string' ? parseFloat(v) : v]))
 import { DURATION, EASING } from './motionTokens'
 
-/** The same default the web client starts from. */
-export const DEFAULT_THEME_COLOR = '#2a6971'
+/** The same default the web client starts from: the shared generator's. */
+export const DEFAULT_THEME_COLOR = DEFAULT_ACCENT
 
 /** Accent groups override the base; everything else is the base's. */
 const mergeGroups = (base, generated) => {
   const out = { ...base }
   for (const [group, values] of Object.entries(generated || {})) {
-    out[group] = { ...(base[group] || {}), ...values }
+    // `divider` is a single colour, not a group; spreading a string makes an
+    // object of its characters.
+    out[group] = typeof values === 'string' ? values : { ...(base[group] || {}), ...values }
   }
   return out
 }

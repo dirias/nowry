@@ -182,30 +182,30 @@ describe('accent (FR-012, FR-013)', () => {
   it('applies the accent on selection and saves it immediately', () => {
     renderScreen()
 
-    fireEvent.click(screen.getByRole('radio', { name: welcome.accent.names.royalPurple }))
+    fireEvent.click(screen.getByRole('radio', { name: welcome.accent.names.iris }))
 
-    expect(mockSetThemeColor).toHaveBeenCalledWith('#9c27b0')
-    expect(preferences.setPreference).toHaveBeenCalledWith('theme_color', '#9c27b0')
+    expect(mockSetThemeColor).toHaveBeenCalledWith('#5f5c99')
+    expect(preferences.setPreference).toHaveBeenCalledWith('theme_color', '#5f5c99')
   })
 
   it('names the current accent in words, so selection does not depend on color', () => {
-    preferences.values.theme_color = '#4caf50'
+    preferences.values.theme_color = '#6e6634'
     renderScreen()
 
-    expect(screen.getByText(`Accent: ${welcome.accent.names.forestGreen}`)).toBeInTheDocument()
+    expect(screen.getByText(`Accent: ${welcome.accent.names.olive}`)).toBeInTheDocument()
   })
 
-  it('draws the selected check from the preset contrast, never a hardcoded white', () => {
-    const orange = PRESETS.find((preset) => preset.color === '#ff9800')
-    preferences.values.theme_color = orange.color
+  it('draws the selected check from the preset contrast, never a hardcoded colour', () => {
+    const graphite = PRESETS.find((preset) => preset.key === 'graphite')
+    preferences.values.theme_color = graphite.color
     const { container } = renderScreen()
 
-    // `468cf7f` derives this from luminance; on Sunset Orange the readable
-    // answer is black, which is exactly the case a literal 'white' broke.
-    expect(orange.contrastText).toBe('#000000')
+    // The check takes `contrastText`, derived from luminance. Every ADR-034
+    // preset sits at one lightness, so the readable answer is white for all.
+    expect(graphite.contrastText).toBe('#ffffff')
     const check = container.querySelector('svg[data-testid="CheckRoundedIcon"]')
     expect(check).not.toBeNull()
-    expect(getComputedStyle(check).color).toBe('rgb(0, 0, 0)')
+    expect(getComputedStyle(check).color).toBe('rgb(255, 255, 255)')
   })
 
   it('falls back to a readable name when the saved accent is not a shipped preset', () => {
@@ -226,7 +226,7 @@ describe('honest save state (FR-039, FR-040)', () => {
   })
 
   it('names the field that did not save, keeps the visible choice, and offers a retry', () => {
-    preferences.values.theme_color = '#e91e63'
+    preferences.values.theme_color = '#924968'
     preferences.fields.theme_color = idleField({
       phase: 'error',
       isConfirmed: false,
@@ -239,7 +239,7 @@ describe('honest save state (FR-039, FR-040)', () => {
     expect(screen.getByText(en.onboarding.failure.network)).toBeInTheDocument()
     expect(screen.queryByText(save.saved)).toBeNull()
     // The choice is still on screen — a failed save must not roll the UI back.
-    expect(screen.getByRole('radio', { name: welcome.accent.names.rosePink })).toBeChecked()
+    expect(screen.getByRole('radio', { name: welcome.accent.names.rose })).toBeChecked()
 
     fireEvent.click(screen.getAllByRole('button', { name: save.retry })[0])
     expect(preferences.retryField).toHaveBeenCalledWith('theme_color')

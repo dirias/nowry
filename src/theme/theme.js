@@ -1,12 +1,13 @@
-import { STICKY_PALETTE } from '@nowry/core/tokens/colorSchemeGenerator'
+import { DEFAULT_ACCENT, STICKY_PALETTE, generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
 import { FONT_FAMILY, FONT_SIZE, FONT_WEIGHT, LETTER_SPACING, LINE_HEIGHT, RADIUS, SPACING_BASE, Z_INDEX } from '@nowry/core/tokens/tokens'
 
-const primaryMain = '#2a6971'
-const primaryHover = '#245a63'
-const primaryActive = '#1e4c54'
-
-const yellowAccent = '#ffcc00'
-const yellowHover = '#ffdb4d'
+/**
+ * The palette before a learner's accent has loaded: the default accent on the
+ * shared ladder (ADR-034). No colour is spelled out in this file — every value,
+ * including the neutral 50–900 scale Joy's own components resolve through,
+ * comes from `@nowry/core/tokens/colorSystem`, the same source the phone reads.
+ */
+const defaultScheme = generateColorScheme(DEFAULT_ACCENT)
 
 /**
  * The base theme CONFIG — a plain object, deliberately NOT passed through
@@ -103,69 +104,10 @@ const themeConfig = {
 
   colorSchemes: {
     light: {
-      palette: {
-        primary: {
-          plainColor: primaryMain,
-          plainHoverBg: '#edf7f8',
-          plainActiveBg: '#d9eff1',
-          solidBg: primaryMain,
-          solidHoverBg: primaryHover,
-          solidActiveBg: primaryActive,
-          solidColor: '#fff',
-          softBg: '#e6f3f4',
-          softHoverBg: '#d3ebed',
-          softActiveBg: '#c0e3e6',
-          softColor: primaryMain,
-          outlinedBorder: '#a9d2d5',
-          outlinedHoverBg: '#e1eff0'
-        },
-        success: {
-          solidBg: yellowAccent,
-          solidHoverBg: yellowHover,
-          solidColor: '#000'
-        },
-        neutral: {
-          plainHoverBg: yellowHover
-        },
-        background: {
-          body: '#ffffff',
-          surface: '#f9f9f9',
-          popup: '#ffffff'
-        },
-        text: {
-          primary: '#1c1c1c',
-          secondary: '#444',
-          // 4.5:1 on body, surface and level1; #777 missed all three (MOB-071).
-          tertiary: '#6f6f6f'
-        },
-        stickyNote: STICKY_PALETTE.light
-      }
+      palette: { ...defaultScheme.light, stickyNote: STICKY_PALETTE.light }
     },
     dark: {
-      palette: {
-        primary: {
-          plainColor: '#88c9d1',
-          plainHoverBg: '#1c444a',
-          solidBg: '#3a9dac',
-          solidHoverBg: '#2d8a97',
-          solidActiveBg: '#257d8a',
-          solidColor: '#fff',
-          softBg: '#17393d',
-          softHoverBg: '#1c444a',
-          softColor: '#bde4e9'
-        },
-        background: {
-          body: '#0d1117',
-          surface: '#161b22',
-          popup: '#1e242c'
-        },
-        text: {
-          primary: '#e6edf3',
-          secondary: '#9ba9b4',
-          tertiary: '#7d8590'
-        },
-        stickyNote: STICKY_PALETTE.dark
-      }
+      palette: { ...defaultScheme.dark, stickyNote: STICKY_PALETTE.dark }
     }
   }
 }

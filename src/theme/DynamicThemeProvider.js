@@ -4,7 +4,7 @@ import CssBaseline from '@mui/joy/CssBaseline'
 import GlobalStyles from '@mui/joy/GlobalStyles'
 import { MOTION } from '@nowry/core/tokens/tokens'
 
-import { generateColorScheme, STICKY_PALETTE } from '@nowry/core/tokens/colorSchemeGenerator'
+import { DEFAULT_ACCENT, generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
 import themeConfig from './theme'
 import { components } from './components'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +12,7 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 
 // Context to allow other components to update theme settings
 export const ThemePreferencesContext = createContext({
-  themeColor: '#2a6971', // Match base theme teal
+  themeColor: DEFAULT_ACCENT,
   setThemeColor: () => {}
 })
 
@@ -65,37 +65,18 @@ export const buildDynamicTheme = (themeColor) => {
     colorSchemes: {
       light: {
         ...themeConfig.colorSchemes.light,
-        palette: {
-          ...themeConfig.colorSchemes.light.palette,
-          primary: colorScheme.light.primary,
-          success: colorScheme.light.success,
-          warning: colorScheme.light.warning,
-          danger: colorScheme.light.danger,
-          neutral: colorScheme.light.neutral,
-          background: colorScheme.light.background,
-          text: colorScheme.light.text,
-          stickyNote: STICKY_PALETTE.light
-        }
+        palette: { ...themeConfig.colorSchemes.light.palette, ...colorScheme.light }
       },
       dark: {
         ...themeConfig.colorSchemes.dark,
-        palette: {
-          ...themeConfig.colorSchemes.dark.palette,
-          primary: colorScheme.dark.primary,
-          success: colorScheme.dark.success,
-          warning: colorScheme.dark.warning,
-          danger: colorScheme.dark.danger,
-          background: colorScheme.dark.background,
-          text: colorScheme.dark.text,
-          stickyNote: STICKY_PALETTE.dark
-        }
+        palette: { ...themeConfig.colorSchemes.dark.palette, ...colorScheme.dark }
       }
     }
   })
 }
 
 export const DynamicThemeProvider = ({ children }) => {
-  const [themeColor, setThemeColor] = useState('#2a6971')
+  const [themeColor, setThemeColor] = useState(DEFAULT_ACCENT)
   const { user } = useAuth()
   const { i18n } = useTranslation()
 

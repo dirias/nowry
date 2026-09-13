@@ -569,14 +569,14 @@
         "selected": "Accent: {{name}}",
         "custom": "Custom color",
         "names": {
-          "oceanTeal": "Ocean teal",
-          "skyBlue": "Sky blue",
-          "royalPurple": "Royal purple",
-          "rosePink": "Rose pink",
-          "crimsonRed": "Crimson red",
-          "sunsetOrange": "Sunset orange",
-          "forestGreen": "Forest green",
-          "earthBrown": "Earth brown"
+          "teal": "Teal",
+          "lake": "Lake",
+          "iris": "Iris",
+          "plum": "Plum",
+          "rose": "Rose",
+          "umber": "Umber",
+          "olive": "Olive",
+          "graphite": "Graphite"
         }
       },
       "postponeError": {

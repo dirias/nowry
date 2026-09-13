@@ -477,14 +477,14 @@
         "selected": "Akzent: {{name}}",
         "custom": "Eigene Farbe",
         "names": {
-          "oceanTeal": "Ozeanblaugrün",
-          "skyBlue": "Himmelblau",
-          "royalPurple": "Königsviolett",
-          "rosePink": "Rosé",
-          "crimsonRed": "Karmesinrot",
-          "sunsetOrange": "Sonnenuntergangsorange",
-          "forestGreen": "Waldgrün",
-          "earthBrown": "Erdbraun"
+          "teal": "Petrol",
+          "lake": "Seeblau",
+          "iris": "Iris",
+          "plum": "Pflaume",
+          "rose": "Rosé",
+          "umber": "Umbra",
+          "olive": "Oliv",
+          "graphite": "Graphit"
         }
       },
       "postponeError": {

@@ -456,14 +456,14 @@
         "selected": "アクセント: {{name}}",
         "custom": "カスタムカラー",
         "names": {
-          "oceanTeal": "オーシャンティール",
-          "skyBlue": "スカイブルー",
-          "royalPurple": "ロイヤルパープル",
-          "rosePink": "ローズピンク",
-          "crimsonRed": "クリムゾンレッド",
-          "sunsetOrange": "サンセットオレンジ",
-          "forestGreen": "フォレストグリーン",
-          "earthBrown": "アースブラウン"
+          "teal": "ティール",
+          "lake": "レイク",
+          "iris": "アイリス",
+          "plum": "プラム",
+          "rose": "ローズ",
+          "umber": "アンバー",
+          "olive": "オリーブ",
+          "graphite": "グラファイト"
         }
       },
       "postponeError": {

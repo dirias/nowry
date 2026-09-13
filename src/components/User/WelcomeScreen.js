@@ -112,25 +112,6 @@ const resolveLanguage = (candidate) => {
 const ACCENT_PRESETS = getColorPresets()
 
 /**
- * Localized names for the shipped presets, keyed by the preset's own color.
- *
- * The generator's `label` is an English string, and NFR-008 does not exempt an
- * accessible name from the five locales. A color the map does not know falls
- * back to that English label rather than to a raw key (NFR-012) — a preset
- * added later is then merely untranslated, never broken.
- */
-const ACCENT_NAME_KEYS = {
-  '#2a6971': 'oceanTeal',
-  '#0b6bcb': 'skyBlue',
-  '#9c27b0': 'royalPurple',
-  '#e91e63': 'rosePink',
-  '#f44336': 'crimsonRed',
-  '#ff9800': 'sunsetOrange',
-  '#4caf50': 'forestGreen',
-  '#795548': 'earthBrown'
-}
-
-/**
  * Map a hook error code to a sentence. The hooks publish machine codes and no
  * copy at all (ONB-005, ONB-006), precisely so that a server code nobody has
  * translated yet cannot reach the screen as English.
@@ -325,8 +306,9 @@ const WelcomeScreen = ({ shell, journey, preferences, onNext, onExit }) => {
 
   const accentName = useCallback(
     (preset) => {
-      const key = ACCENT_NAME_KEYS[preset.color]
-      return key ? t(`onboarding.welcome.accent.names.${key}`) : preset.label
+      // The generator's `label` is English; NFR-008 does not exempt an
+      // accessible name from the five locales, so the preset's `key` names it.
+      return preset.key ? t(`onboarding.welcome.accent.names.${preset.key}`) : preset.label
     },
     [t]
   )

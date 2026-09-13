@@ -48,6 +48,7 @@ import { queryClient } from '@nowry/core/api/queryClient'
 import { userService } from '@nowry/core/api/services'
 import { requestNotificationPermission } from '../platform/alerts'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
+import { getColorPresets } from '@nowry/core/tokens/colorSchemeGenerator'
 import {
   Button,
   Chip,
@@ -83,12 +84,14 @@ const LANGUAGES = [
 ]
 
 /**
- * Accent presets. The web offers a full colour input; a phone has no equivalent
- * without a picker dependency, and a grid of choices is the better control on a
- * touch screen anyway. A colour set on the web that is not one of these is
- * still shown, still selected and still preserved — see `swatches`.
+ * Accent presets — the same eight the web offers (ADR-034), from the shared
+ * generator, so the two clients cannot offer different choices. A phone has no
+ * colour input without a picker dependency, and a grid of choices is the better
+ * control on a touch screen anyway. A colour set on the web that is not one of
+ * these is still shown, still selected and still preserved — see `swatches`.
  */
-const PRESET_ACCENTS = ['#2a6971', '#3b5bdb', '#7048e8', '#c2255c', '#e8590c', '#2b8a3e']
+const PRESETS = getColorPresets()
+const PRESET_ACCENTS = PRESETS.map((preset) => preset.color)
 
 export function Settings() {
   const { t, i18n } = useTranslation()
@@ -120,6 +123,12 @@ export function Settings() {
   }
 
   const swatches = PRESET_ACCENTS.includes(accent) ? PRESET_ACCENTS : [accent, ...PRESET_ACCENTS]
+
+  /** A preset's name in words, so a screen reader does not read out a hex. */
+  const accentName = (hex) => {
+    const preset = PRESETS.find((candidate) => candidate.color === hex)
+    return preset ? t(`onboarding.welcome.accent.names.${preset.key}`) : t('onboarding.welcome.accent.custom')
+  }
 
   /**
    * Two confirmations, as the store guidelines require and as the consequence
@@ -185,17 +194,17 @@ export function Settings() {
         </FormField>
 
         <FormField labelKey='settings.appearance.accentColor' helperKey='settings.appearance.accentColorDesc'>
-          <Stack direction='row' spacing={1}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {swatches.map((hex) => (
               <ColorSwatch
                 key={hex}
                 hex={hex}
                 selected={hex === accent}
                 onPress={() => chooseAccent(hex)}
-                label={`${t('settings.appearance.accentColor')} ${hex}`}
+                label={`${t('settings.appearance.accentColor')} ${accentName(hex)}`}
               />
             ))}
-          </Stack>
+          </View>
         </FormField>
 
         {prefs.hasUnsavedChanges ? (

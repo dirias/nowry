@@ -488,14 +488,14 @@
         "selected": "Accent : {{name}}",
         "custom": "Couleur personnalisée",
         "names": {
-          "oceanTeal": "Bleu-vert océan",
-          "skyBlue": "Bleu ciel",
-          "royalPurple": "Violet royal",
-          "rosePink": "Rose",
-          "crimsonRed": "Rouge cramoisi",
-          "sunsetOrange": "Orange couchant",
-          "forestGreen": "Vert forêt",
-          "earthBrown": "Brun terre"
+          "teal": "Sarcelle",
+          "lake": "Lac",
+          "iris": "Iris",
+          "plum": "Prune",
+          "rose": "Rose",
+          "umber": "Terre d’ombre",
+          "olive": "Olive",
+          "graphite": "Graphite"
         }
       },
       "postponeError": {
