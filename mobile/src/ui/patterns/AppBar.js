@@ -30,16 +30,17 @@ import { Icon } from '../icons'
 
 export const APP_BAR_HEIGHT = 56
 /**
- * The mark, and the height it is drawn at.
+ * The web's own logo file, at the web's own height.
  *
- * The source is 212×145 — cropped from the web's own `logo.png` rather than
- * redrawn, so there is one owl and not two. 22 points tall leaves the word
- * beside it as the tallest thing in the row, which is the right order: the
- * name is what the bar says and the mark is what it wears.
+ * `logo.png` is the whole lockup — the owl, the NOWRY wordmark, and "BOOST THE
+ * WAY YOU LEARN" — 766×274 on a transparent ground with white letters, drawn
+ * for a coloured header. The web's `Header` renders it at `height: 40`, and so
+ * does this. The same file rather than a copy redrawn for the phone, so the two
+ * clients cannot come to wear different versions of the brand.
  */
-const BRAND_MARK = require('../../../assets/brand/owl.png')
-const MARK_HEIGHT = 22
-const MARK_WIDTH = Math.round(MARK_HEIGHT * (212 / 145))
+const BRAND_LOGO = require('../../../assets/brand/logo.png')
+const LOGO_HEIGHT = 40
+const LOGO_WIDTH = Math.round(LOGO_HEIGHT * (766 / 274))
 
 const AVATAR = 32
 
@@ -120,31 +121,20 @@ export function AppBar() {
       ) : null}
 
       {/*
-       * The brand's own mark, not a stand-in for it (MOB-101).
+       * The brand, whole (MOB-101).
        *
-       * This was a generic leaf glyph tinted gold — a placeholder that read as
-       * a decision, because it is the right colour in the right place and
-       * nothing about it says "this is not the logo". The web's header has
-       * carried the owl since it shipped, so the phone was wearing a different
-       * brand in the one spot a brand is always looked for.
+       * This was a generic leaf glyph tinted gold beside the word "Nowry" — a
+       * placeholder that read as a decision, because it was the right colour in
+       * the right place. A first correction swapped in the owl alone, on the
+       * reasoning that the tagline is too small to read at this height. It is
+       * small on the web too, at exactly this height, and the lockup is the
+       * brand as a unit: the owl without its wordmark is a bird, not Nowry.
+       * Matched to the web rather than re-decided here.
        *
-       * The MARK alone rather than the whole lockup. The web's is a wordmark:
-       * owl, "NOWRY", and "BOOST THE WAY YOU LEARN" under it, 766 points wide.
-       * At the 24 points this bar has, the tagline is two points tall and the
-       * word is unreadable — so the mark carries the identity and the name
-       * stays as type, which is what it already was.
-       *
-       * One name, read once: the mark is decorative beside the word.
+       * One name, read once: the image is the header, and it says "Nowry".
        */}
-      <View
-        accessibilityRole='header'
-        accessibilityLabel='Nowry'
-        style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing[1] }}
-      >
-        <Image source={BRAND_MARK} style={{ width: MARK_WIDTH, height: MARK_HEIGHT }} resizeMode='contain' accessible={false} />
-        <Typography level='title-lg' color='primary.solidColor'>
-          Nowry
-        </Typography>
+      <View accessibilityRole='header' accessibilityLabel='Nowry'>
+        <Image source={BRAND_LOGO} style={{ width: LOGO_WIDTH, height: LOGO_HEIGHT }} resizeMode='contain' accessible={false} />
       </View>
 
       <View style={{ flex: 1 }} />
