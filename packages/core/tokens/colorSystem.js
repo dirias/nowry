@@ -92,7 +92,7 @@ const neutralRoles = (mode) => {
       : { primary: s[100], secondary: s[300], tertiary: s[400], icon: s[400] },
     neutral: light
       ? { outlinedBorder: s[300], plainColor: s[700], softBg: s[100], solidBg: s[500] }
-      : { outlinedBorder: s[700], plainColor: s[300], softBg: s[800], solidBg: s[500] },
+      : { outlinedBorder: s[600], plainColor: s[300], softBg: s[800], solidBg: s[500] },
     divider: light ? s[200] : s[700]
   }
 }
@@ -140,15 +140,15 @@ function lightTone({ C, h, solidL = 0.505 }) {
   }
 }
 
-function darkTone({ C, h, darkSolidL = 0.7 }) {
+function darkTone({ C, h, darkSolidL = 0.52 }) {
   const at = (L, chroma = C) => oklchToHex(L, chroma, h)
   const solidBg = at(darkSolidL)
   const [tint, tintHover, tintActive] = softSteps(at, C * 1.4, [0.27, 0.31, 0.35])
   return {
     ...toneScale(C, h),
     solidBg,
-    solidHoverBg: at(darkSolidL + 0.05),
-    solidActiveBg: at(darkSolidL - 0.06),
+    solidHoverBg: at(darkSolidL + 0.04),
+    solidActiveBg: at(darkSolidL - 0.05),
     solidColor: textOn(solidBg, 'dark'),
     softBg: tint,
     softHoverBg: tintHover,
@@ -166,9 +166,15 @@ function darkTone({ C, h, darkSolidL = 0.7 }) {
 }
 
 /**
- * Every Joy variant key for one hue, plus its 50–900 scale. `solidL` is the
- * tone's resting lightness in light mode; `darkSolidL` lifts it so the solid
- * reads on a dark ground, where text on it turns to ink.
+ * Every Joy variant key for one hue, plus its 50–900 scale.
+ *
+ * A solid is DARK in both modes, with paper text on it: L 0.505 in light, 0.52
+ * in dark. The first cut of ADR-034 lifted the dark solid to L 0.70 with ink
+ * text, and the audit found about fifteen places across both clients built on
+ * white text over the accent — auth panels, checkboxes, badges, the phone's
+ * status bar — each unreadable at 2.6:1. A dark solid keeps them all true and
+ * still stands 3.5:1 off the dark page. Warning and gold are the exceptions by
+ * nature (amber and gold cannot be dark), so they rest light with ink text.
  */
 export const buildTone = (spec, mode) => (mode === 'light' ? lightTone(spec) : darkTone(spec))
 
@@ -188,9 +194,9 @@ export function accentTone(hex, mode) {
 
 // ── 4 · Status and 5 · Gold ────────────────────────────────────────────────
 export const STATUS_SPEC = Object.freeze({
-  success: { C: 0.11, h: 152, solidL: 0.55, darkSolidL: 0.77 },
+  success: { C: 0.11, h: 152, solidL: 0.55, darkSolidL: 0.55 },
   warning: { C: 0.145, h: 58, solidL: 0.76, darkSolidL: 0.78 },
-  danger: { C: 0.16, h: 28, solidL: 0.53, darkSolidL: 0.7 }
+  danger: { C: 0.16, h: 28, solidL: 0.53, darkSolidL: 0.53 }
 })
 
 export const GOLD_SPEC = Object.freeze({ C: 0.15, h: 80, solidL: 0.815, darkSolidL: 0.815 })

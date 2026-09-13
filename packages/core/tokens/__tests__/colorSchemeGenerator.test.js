@@ -270,3 +270,22 @@ describe('getColorName', () => {
     }
   })
 })
+
+// The audit's regression: a light dark-mode solid broke every screen built on
+// light text over the accent. A solid is dark in both modes, with light text,
+// and still reads as a shape on the dark page.
+describe('solids stay dark with light text in both modes', () => {
+  it.each(PRESET_COLORS)('keeps the %s solid dark, its text light, and the shape visible on the page', (color) => {
+    for (const mode of MODES) {
+      const { primary, background } = generateColorScheme(color)[mode]
+      expect(relativeLuminance(primary.solidColor)).toBeGreaterThan(relativeLuminance(primary.solidBg))
+      expect(contrastRatio('#ffffff', primary.solidBg)).toBeGreaterThanOrEqual(AA)
+      expect(contrastRatio(primary.solidBg, background.body)).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  it.each(['success', 'danger'])('keeps the %s solid dark with light text in dark mode', (group) => {
+    const tone = generateColorScheme('#2a6971').dark[group]
+    expect(contrastRatio('#ffffff', tone.solidBg)).toBeGreaterThanOrEqual(AA)
+  })
+})

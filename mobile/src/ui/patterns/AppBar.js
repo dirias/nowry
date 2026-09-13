@@ -18,6 +18,7 @@
  * status bar sits on the accent rather than on a seam.
  */
 import { Pressable, View } from 'react-native'
+import { StatusBar } from 'expo-status-bar'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useSegments } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +26,7 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
+import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { Avatar } from './Avatar'
 import { TimerChip } from './TimerChip'
 import { BrandLockup } from './BrandMark'
@@ -120,6 +122,13 @@ export function AppBar() {
        *
        * One name, read once: the lockup is the header, and it says "Nowry".
        */}
+      {/*
+       * The status bar sits ON this bar, so its icons take the bar's foreground,
+       * not the OS appearance: the system draws dark icons in light mode, and
+       * on the accent they were 2.9:1 (audit, ADR-034). Mounted with the bar,
+       * so a screen without it gets the OS default back.
+       */}
+      <StatusBar style={readableTextOn(resolveColor(theme, 'primary.solidBg')) === '#ffffff' ? 'light' : 'dark'} />
       <View accessibilityRole='header' accessibilityLabel='Nowry'>
         <BrandLockup markSize={MARK_SIZE} color='primary.solidColor' />
       </View>

@@ -230,10 +230,9 @@ const Header = () => {
           zIndex: Z_NAV,
           flexShrink: 0,
           backdropFilter: 'blur(12px)',
-          // The header's text is white, so its ground must be dark in both modes.
-          // Since ADR-034 the dark scheme's solid accent is LIGHT (ink text on it),
-          // so dark mode takes the accent's deep tint instead.
-          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.softHoverBg : theme.palette.primary.solidBg,
+          // The header's text is white; the accent solid is dark in both modes
+          // (ADR-034), so it is the header's ground in both.
+          backgroundColor: theme.palette.primary.solidBg,
           opacity: 0.95,
           boxShadow: theme.palette.mode === 'dark' ? 'md' : 'lg',
           color: 'white'
