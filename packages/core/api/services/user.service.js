@@ -1,4 +1,5 @@
 import { apiClient } from '../client'
+import { timeZoneParam } from '../../utils/localTimeZone'
 
 /**
  * Opt out of the client's global error toast (ONB-014).
@@ -21,7 +22,7 @@ export const userService = {
    * @returns {Promise<Object>} User profile data
    */
   async getProfile() {
-    const { data } = await apiClient.get('/users/profile')
+    const { data } = await apiClient.get(`/users/profile${timeZoneParam()}`)
     return data
   },
 

@@ -1,4 +1,5 @@
 import { apiClient } from '../client'
+import { localTimeZone, timeZoneParam } from '../../utils/localTimeZone'
 import { ENDPOINTS } from '../utils/endpoints'
 import { DEFAULT_CARD_GEN_PROMPT } from '../../constants/prompts'
 import { auth, env, session, storage, telemetry } from '../../platform'
@@ -405,7 +406,7 @@ export const cardsService = {
    */
   async getForecast(days = 7) {
     const params = new URLSearchParams({ days })
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const tz = localTimeZone()
     if (tz) params.append('tz', tz)
     const { data } = await apiClient.get(`/study-cards/forecast?${params}`)
     return data
@@ -551,7 +552,7 @@ export const cardsService = {
    * Get study statistics
    */
   async getStatistics() {
-    const { data } = await apiClient.get('/study-cards/statistics')
+    const { data } = await apiClient.get(`/study-cards/statistics${timeZoneParam()}`)
     return data
   }
 }
