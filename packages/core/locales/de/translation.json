@@ -1979,7 +1979,8 @@
       "portraitsDescription": "Alle Porträts, die du für diese Form erzeugt hast. Wähle, welches dein Begleiter trägt.",
       "portraitWorn": "Getragen",
       "portraitOption": "Porträt {{index}}",
-      "portraitsForStage": "Porträts — {{stage}}"
+      "portraitsForStage": "Porträts — {{stage}}",
+      "speciesMovement": "Die Art bestimmt, wie sich dein Begleiter bewegt."
     },
     "settingsSubtitle": "Verhalten und Persönlichkeit deines Begleiters konfigurieren",
     "headerStatus": "Lv{{level}} · {{tier}} · {{remaining}} Funken übrig",

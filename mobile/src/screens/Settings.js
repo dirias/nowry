@@ -29,8 +29,7 @@ import { userService } from '@nowry/core/api/services'
 import { requestNotificationPermission } from '../platform/alerts'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
-import { Button, Divider, FormField, Icon, Input, Screen, Segmented, Select, Stack, Typography } from '../ui'
-import { CompanionSettings } from './CompanionSettings'
+import { Button, Divider, FormField, Icon, Input, ListRow, Screen, Segmented, Select, Stack, Typography } from '../ui'
 
 /** The five bundles that ship. Each label is in its own language, on purpose. */
 const LANGUAGES = [
@@ -202,9 +201,18 @@ export function Settings() {
 
         <Divider />
 
-        {/* The companion's readouts and its name, where the web keeps them
-            (MOB-089). They were a panel on Home; the web's Home has none. */}
-        <CompanionSettings />
+        {/*
+         * The companion has its own page, as it does on the web (MOB-091).
+         * Thirteen controls is a page rather than a section, and burying them
+         * under Appearance would make this screen a scroll to get anywhere.
+         */}
+        <ListRow
+          tile={<Icon name='MessageSquareText' size='md' color='text.secondary' />}
+          name={t('agent.tabs.companion')}
+          meta={t('agent.settingsSubtitle')}
+          action={<Icon name='ChevronRight' size='sm' color='text.tertiary' />}
+          onPress={() => router.push('/settings/companion')}
+        />
 
         <Divider />
 

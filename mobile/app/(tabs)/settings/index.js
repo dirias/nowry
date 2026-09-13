@@ -7,4 +7,4 @@
  * at all — no name, no account, and nothing to go back with except the system
  * gesture (MOB-053).
  */
-export { default } from '../../src/screens/Settings'
+export { default } from '../../../src/screens/Settings'
