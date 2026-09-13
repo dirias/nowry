@@ -49,7 +49,7 @@ import { formatClock } from '@nowry/core/utils/formatClock'
 import { usePet } from '@nowry/core/context/AgentContext'
 import { Z_NAV } from '@nowry/core/constants/zIndex'
 import { useColorScheme } from '@mui/joy/styles'
-import Logo from '../../images/logo.png'
+import { BrandLockup } from '../Common/Brand/BrandMark'
 import { useTranslation } from 'react-i18next'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
@@ -230,7 +230,10 @@ const Header = () => {
           zIndex: Z_NAV,
           flexShrink: 0,
           backdropFilter: 'blur(12px)',
-          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.solidHoverBg : theme.palette.primary.solidBg,
+          // The header's text is white, so its ground must be dark in both modes.
+          // Since ADR-034 the dark scheme's solid accent is LIGHT (ink text on it),
+          // so dark mode takes the accent's deep tint instead.
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.softHoverBg : theme.palette.primary.solidBg,
           opacity: 0.95,
           boxShadow: theme.palette.mode === 'dark' ? 'md' : 'lg',
           color: 'white'
@@ -249,7 +252,7 @@ const Header = () => {
             '&:hover': { opacity: 0.8 }
           }}
         >
-          <Box component='img' src={Logo} alt='Nowry logo' sx={{ height: 40 }} />
+          <BrandLockup markSize={30} />
         </Box>
 
         {/* Spacer */}

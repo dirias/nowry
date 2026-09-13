@@ -115,7 +115,11 @@ const USER_FACING =
  * here rather than allowed by a loose pattern, so a second exception has to be
  * argued for the way this one was.
  */
-const NOT_TRANSLATABLE = new Set(['Nowry'])
+const NOT_TRANSLATABLE = new Set([
+  'Nowry',
+  // The same name as the wordmark draws it: lower-case by design (ADR-034).
+  'nowry'
+])
 
 describe('no user-facing string is written in English in the source', () => {
   it.each(files.map(({ rel }) => rel))('%s', (rel) => {

@@ -17,7 +17,7 @@
  * rather than moving down, so its ground reaches the top of the window and the
  * status bar sits on the accent rather than on a seam.
  */
-import { Image, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useSegments } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -27,21 +27,12 @@ import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
 import { Avatar } from './Avatar'
 import { TimerChip } from './TimerChip'
+import { BrandLockup } from './BrandMark'
 import { Icon } from '../icons'
 
 export const APP_BAR_HEIGHT = 56
-/**
- * The web's own logo file, at the web's own height.
- *
- * `logo.png` is the whole lockup — the owl, the NOWRY wordmark, and "BOOST THE
- * WAY YOU LEARN" — 766×274 on a transparent ground with white letters, drawn
- * for a coloured header. The web's `Header` renders it at `height: 40`, and so
- * does this. The same file rather than a copy redrawn for the phone, so the two
- * clients cannot come to wear different versions of the brand.
- */
-const BRAND_LOGO = require('../../../assets/brand/logo.png')
-const LOGO_HEIGHT = 40
-const LOGO_WIDTH = Math.round(LOGO_HEIGHT * (766 / 274))
+/** The lockup's mark, sized to sit in a 56-point bar beside a 32-point avatar. */
+const MARK_SIZE = 28
 
 const AVATAR = 32
 
@@ -122,20 +113,15 @@ export function AppBar() {
       ) : null}
 
       {/*
-       * The brand, whole (MOB-101).
+       * The brand (MOB-101, ADR-034): the Spiral and the wordmark, the same
+       * lockup and the same geometry as the web's header. The owl lockup this
+       * replaced was a picture of the brand; this is the brand, so it wears the
+       * bar's own foreground colour and stays legible on any accent.
        *
-       * This was a generic leaf glyph tinted gold beside the word "Nowry" — a
-       * placeholder that read as a decision, because it was the right colour in
-       * the right place. A first correction swapped in the owl alone, on the
-       * reasoning that the tagline is too small to read at this height. It is
-       * small on the web too, at exactly this height, and the lockup is the
-       * brand as a unit: the owl without its wordmark is a bird, not Nowry.
-       * Matched to the web rather than re-decided here.
-       *
-       * One name, read once: the image is the header, and it says "Nowry".
+       * One name, read once: the lockup is the header, and it says "Nowry".
        */}
       <View accessibilityRole='header' accessibilityLabel='Nowry'>
-        <Image source={BRAND_LOGO} style={{ width: LOGO_WIDTH, height: LOGO_HEIGHT }} resizeMode='contain' accessible={false} />
+        <BrandLockup markSize={MARK_SIZE} color='primary.solidColor' />
       </View>
 
       <View style={{ flex: 1 }} />
