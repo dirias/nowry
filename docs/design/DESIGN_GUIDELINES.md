@@ -23,10 +23,14 @@
 *   **Mode Compatibility:** All designs MUST work seamlessly in both **Dark** and **Light** modes.
     *   Use usage-based tokens (e.g., `neutral.softBg`) that automatically adjust per mode.
 *   **Detailed Documentation:** [`COLOR_SYSTEM.md`](./COLOR_SYSTEM.md) — six roles (brand, neutrals, accent, status, gold, categories) on one OKLCH ladder in `@nowry/core` (ADR-034). The brand mark and its rules are in [`BRAND.md`](./BRAND.md).
-*   **Palette:**
-    *   **Primary:** Used sparingly for main actions (CTAs).
-    *   **Neutral:** Used for structural elements, borders, and secondary text.
-    *   **Danger:** Reserved strictly for destructive actions (Delete).
+*   **Palette — six roles, one job each** (ADR-034, full table in `COLOR_SYSTEM.md`):
+    *   **Brand:** the Spiral's colours; the logo and icon only, never UI state.
+    *   **Neutrals:** grounds, containers, borders and all text.
+    *   **Primary (accent):** the learner's colour, used sparingly for main actions, selection, focus and links.
+    *   **Status:** `success` done, `warning` attention, `danger` strictly destructive (Delete).
+    *   **Gold:** only what is earned — stage marks, motes, a finished year.
+    *   **Categories:** what a learner tags (focus areas, events, notes, covers), always a dot plus a label.
+*   **Foreground belongs to its ground.** `*.solidColor` only on `*.solidBg`; `*.softColor` on `*.softBg`; `*.plainColor` on the page. A solid's text colour on a tint is invisible in one mode or the other.
 
 ### 2.1 Semantic Color Token Quick Reference
 
@@ -342,7 +346,7 @@ This is `fontVariantNumeric`, not `font-feature-settings: 'tnum'`, on purpose. T
             ```
         *   **Benefits:**
             - Direct control over all styling
-            - Dynamic colors apply reliably (e.g., `area?.color || '#ef4444'`)
+            - Dynamic colors apply reliably (e.g., `area?.color || categoryDot('clay')`)
             - Works consistently in dark/light themes
             - No dependency on Joy UI's internal CSS variables
             - Production-stable with no workarounds
@@ -2255,7 +2259,7 @@ The house button is a key you press. Since CAL-009 the theme draws it on every `
     the edge promised. 80ms — slower or further reads as a toy.
 *   **Derived from the accent, never a hue of its own.** The edge is `primary.solidActiveBg` (or
     `neutral.outlinedBorder` for a secondary), so every preset and both schemes get the same
-    signature. Brand yellow is not on the button.
+    signature. Brand gold is not on the button.
 *   **Radius `md`, like the segmented group.** A row of controls shares one corner.
 *   **An engaged segment is underlined**, 2px in `primary.solidBg`, inside the segment, on top of
     its level2 ground. The state is still the ground; the underline is the key's edge, turned

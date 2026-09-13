@@ -26,11 +26,13 @@ No component invents a colour; both clients read the same values; a test guards 
 packages/core/tokens/
 ├── oklch.js                OKLCH ↔ hex, gamut clamping, WCAG contrast, OKLab distance
 ├── colorSystem.js          the ladder: BRAND, NEUTRALS, buildTone, accentTone,
-│                           STATUS_SPEC, GOLD_SPEC, EARNED_GOLD, CATEGORY_SPEC,
+│                           STATUS_SPEC, GOLD_SPEC, EARNED_GOLD, earnedGold(mode),
+│                           CATEGORY_SPEC,
 │                           categoryColors, categoryDot, CATEGORY_COLORS
 ├── colorSchemeGenerator.js generateColorScheme(hex) → every Joy group, both modes;
 │                           getColorPresets, DEFAULT_ACCENT, STICKY_PALETTE, readableTextOn
 ├── palette.js              BASE_PALETTE — the phone's base, built from colorSystem
+├── ../constants/bookCovers.js  COVER_PRESETS — the category family and ink, shared by both clients
 └── brandMark.js            the Spiral's geometry (see BRAND.md)
 ```
 
@@ -49,8 +51,13 @@ fixed, move the hue, and contrast stays put. That is the whole guarantee.
   They carry a 50–900 scale so every Joy token nobody names — an input border, a soft neutral —
   still lands on the ladder.
 - **Tones** (`buildTone`) turn one `{C, h}` into every Joy variant key — solid, soft, plain,
-  outlined, their hover and active states — plus a 50–900 scale, for light and dark. Light solids
-  rest at L 0.505 with paper text; dark solids rest at L 0.70 with ink text.
+  outlined, their hover and active states — plus a 50–900 scale, for light and dark. Accent,
+  success and danger solids are **dark in both modes** (L 0.505 light, 0.52 dark) with paper text;
+  warning and gold solids are light with ink, because amber and gold cannot be dark. The first cut
+  lifted the dark solid to L 0.70 with ink; the audit found fifteen screens on both clients built
+  on light text over the accent, so it was lowered.
+- **The focus ring** is `primary.outlinedBorder`: L 0.62 in light (3.1:1 or better on body,
+  surface and level1), L 0.55 in dark.
 - **The accent is normalised** (`accentTone`): the learner's hue, their chroma capped at 0.13, the
   ladder's lightness. Black, white, a neon and a preset all come out equally readable.
 
@@ -73,7 +80,8 @@ Names are localized under `onboarding.welcome.accent.names.<key>`.
 `packages/core/tokens/__tests__/` and `mobile/src/theme/__tests__/contrast.test.js`:
 
 - 4.5:1 for solid, soft and plain text, for every preset and extreme accents (black, white, grey), in both modes
-- 3:1 for the dark outlined border (focus rings)
+- 3:1 for the outlined border (the focus ring) in both modes
+- every accent solid dark with light text, and 3:1 off the page, in both modes
 - text primary, secondary and tertiary at 4.5:1 on body, surface and level1, in both modes
 - every preset at least 0.08 apart (OKLab) from every status solid — a primary button never looks like Delete
 - every category ink at 4.5:1 on its tint; gold at 4.5:1 on Ink Teal
@@ -88,7 +96,8 @@ sx={{ color: 'text.secondary', bgcolor: 'background.level1' }}
 <Chip sx={{ bgcolor: 'gold.softBg', color: 'gold.softColor' }}>
 
 // ✅ a literal only where a surface cannot resolve a variable, from core
-import { EARNED_GOLD, categoryDot } from '@nowry/core/tokens/colorSystem'
+import { EARNED_GOLD, earnedGold, categoryDot } from '@nowry/core/tokens/colorSystem'
+// earnedGold(mode): a small earned mark on the page (bright gold is 1.7:1 on paper)
 
 // ❌ a hex, a numeric shade, or a colour from outside the system
 sx={{ color: '#444', bgcolor: 'neutral.100' }}

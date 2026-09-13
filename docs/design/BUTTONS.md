@@ -103,11 +103,11 @@ first)` buttons at 36px (44 at `xs`).
 - **Accent-agnostic.** The primary is a per-user preset; nothing in the standard may assume teal.
   Every colour is a semantic token — `primary.solidBg`, `neutral.outlinedBorder`,
   `background.level1` — and every shade the key needs already exists in the generated palette.
-- **No brand yellow on buttons.** `theme.js` sets success to yellow but the palette generator
-  overrides it at runtime, and a fixed yellow beside a user's purple or orange accent is a clash
-  the user did not choose.
-- **Foreground is derived, never assumed.** `primary.solidColor` comes from `readableTextOn`, so a
-  light accent gets dark text.
+- **No brand gold on buttons.** Gold means earned (COLOR_SYSTEM.md, ADR-034); a fixed gold beside
+  a learner's plum or olive accent is a clash they did not choose.
+- **Foreground is derived, never assumed.** `primary.solidColor` is chosen by contrast with the
+  solid. Every accent solid is dark in both modes (L 0.505 light, 0.52 dark), so it is paper;
+  warning and gold solids are light, so theirs is ink.
 
 ## 8. In code
 
