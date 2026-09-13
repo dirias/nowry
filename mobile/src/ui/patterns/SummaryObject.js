@@ -123,34 +123,65 @@ export function SummaryObject({
             the card as if it belonged to the page (MOB-062). */}
         {aside}
 
+        {/*
+         * Stacked and full width, with the SOLID one last (MOB-096).
+         *
+         * The web's own breakpoint: `direction={{xs: 'column', sm: 'row'}}`
+         * with `width: {xs: '100%'}`, and the secondary written first so the
+         * primary ends up at the bottom. Both halves matter on a phone. Side by
+         * side, each key gets less than half the width and the shorter label
+         * makes the smaller target, so the quick session is easier to hit than
+         * the session; stacked, they are the same target and the one a thumb
+         * reaches first is the one the object is for.
+         */}
         {action || secondary ? (
-          <Stack direction='row' spacing={1} alignItems='center'>
-            {action}
+          <Stack spacing={1}>
             {secondary}
+            {action}
           </Stack>
         ) : null}
 
-        {/* What the edge below means. A 3px line says a proportion and never
-            says of what. */}
+        {/*
+         * Progress, under the control row and spanning EXACTLY the content
+         * width (§15.4, MOB-096). It used to run full bleed to the card's
+         * edges, outside the padded column — which made it the card's border
+         * rather than the content's rule, and the standard draws the
+         * distinction in those words: "full width is wrong for a floating bar
+         * and right for a rule", the rule being the content's. It also does
+         * the job of the divider that would otherwise sit there.
+         */}
+        {showEdge ? (
+          <View
+            accessibilityRole='progressbar'
+            accessibilityValue={{ min: 0, max: 100, now: Math.round(progress) }}
+            accessibilityLabel={progressLabel ?? undefined}
+            style={{
+              height: SUMMARY_EDGE_HEIGHT,
+              borderRadius: theme.radius.full,
+              overflow: 'hidden',
+              backgroundColor: resolveColor(theme, 'background.level2')
+            }}
+          >
+            <View
+              style={{
+                width: `${Math.min(100, Math.max(0, progress))}%`,
+                height: '100%',
+                borderRadius: theme.radius.full,
+                backgroundColor: resolveColor(theme, 'primary.solidBg')
+              }}
+            />
+          </View>
+        ) : null}
+
+        {/* What the edge above means. A 3px line says a proportion and never
+            says of what — and it says it UNDER the line, as the web does,
+            because a caption belongs to the thing before it. */}
         {showEdge && progressLabel ? (
           <Typography level='body-xs' color='text.tertiary' style={{ fontVariant: ['tabular-nums'] }}>
             {progressLabel}
           </Typography>
         ) : null}
       </View>
-
-      {/* Progress is the object's bottom edge, not a bar inside it. */}
-      {showEdge ? (
-        <View style={{ height: SUMMARY_EDGE_HEIGHT, backgroundColor: resolveColor(theme, 'background.level2') }}>
-          <View
-            style={{
-              width: `${Math.min(100, Math.max(0, progress))}%`,
-              height: '100%',
-              backgroundColor: resolveColor(theme, 'primary.solidBg')
-            }}
-          />
-        </View>
-      ) : null}
     </Sheet>
   )
 }

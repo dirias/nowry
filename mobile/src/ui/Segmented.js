@@ -64,31 +64,41 @@ export function Segmented({ options, value, onChange, accessibilityLabel, style 
               backgroundColor: active || pressed ? resolveColor(theme, 'background.level2') : 'transparent'
             })}
           >
-            <View style={{ alignItems: 'center' }}>
-              {/* A count beside the label, not under it (PhoneTags board):
-                  "Cards 312" is one tab, and a stacked number would make the
-                  segment two lines tall on a phone. */}
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-                <Typography level='title-sm' color={active ? 'text.primary' : 'text.secondary'} numberOfLines={1}>
-                  {option.label}
+            {/* A count beside the label, not under it (PhoneTags board):
+                "Cards 312" is one tab, and a stacked number would make the
+                segment two lines tall on a phone. */}
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+              <Typography level='title-sm' color={active ? 'text.primary' : 'text.secondary'} numberOfLines={1}>
+                {option.label}
+              </Typography>
+              {option.count == null ? null : (
+                <Typography level='body-sm' color='text.tertiary'>
+                  {option.count}
                 </Typography>
-                {option.count == null ? null : (
-                  <Typography level='body-sm' color='text.tertiary'>
-                    {option.count}
-                  </Typography>
-                )}
-              </View>
-              {/* The key's edge, turned inward. */}
+              )}
+            </View>
+
+            {/*
+             * The key's edge, turned inward — and it belongs to the SEGMENT,
+             * not to the word inside it (MOB-096). Nested with the label it
+             * stretched to the label's width, so a short tab wore a short
+             * underline and a long one a long one: the signature changed size
+             * with the text it was signing. The web draws it as an inset
+             * box-shadow on the segment's own bottom edge, which is the whole
+             * width by construction, and that is what this now is.
+             */}
+            {active ? (
               <View
                 style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
                   height: UNDERLINE,
-                  alignSelf: 'stretch',
-                  marginTop: 2,
-                  borderRadius: UNDERLINE,
-                  backgroundColor: active ? resolveColor(theme, 'primary.solidBg') : 'transparent'
+                  backgroundColor: resolveColor(theme, 'primary.solidBg')
                 }}
               />
-            </View>
+            ) : null}
           </Pressable>
         )
       })}
