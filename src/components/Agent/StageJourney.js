@@ -23,10 +23,18 @@ import { agentService } from '@nowry/core/api/services/agent.service'
 import { resolveColor } from '@nowry/core/utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { PetOrb } from './StudyPet'
-import { nowryArtFor, LOCKED_SILHOUETTE_FILTER } from './nowryArt'
+import { CompanionMark } from './CompanionMark'
 import StagePortraits from './StagePortraits'
 
 const STAGE_COUNT = 6
+
+/**
+ * CSS filter that turns a generated portrait into a flat locked silhouette.
+ * A silhouette, not greyscale: greyscale on illustrated art reads as
+ * "disabled/broken", while a solid fill reads as "locked but real" and keeps
+ * the outline that tells one rung from the next (PET-008).
+ */
+const LOCKED_SILHOUETTE_FILTER = 'brightness(0) invert(0.26)'
 
 /** One rung of the ladder. */
 const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, currentStage, isOpen, onOpen, t, locale }) => {
@@ -94,18 +102,20 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
           minHeight: 92,
           width: '100%',
           // Locked forms are shown, not hidden — that is the whole point.
-          // A flat silhouette rather than greyscale: greyscale on illustrated
-          // art reads as "disabled", while a solid fill reads as "locked but
-          // real" and preserves the outline, so Oracle's spread wing and
-          // Luminary's crown still tell those rungs apart at a glance.
-          // Reached forms are always full colour, portrait or not — they
-          // happened. Only unreached forms are silhouetted.
-          filter: reached ? 'none' : isDefaultCompanion || formArt ? LOCKED_SILHOUETTE_FILTER : 'grayscale(0.85)',
+          // A generated portrait is flattened to a silhouette rather than
+          // greyed: greyscale on illustrated art reads as "disabled", while a
+          // solid fill reads as "locked but real" and preserves the outline.
+          // Nowry's coil draws its own locked state (one flat colour), so it
+          // needs no filter. Reached forms are always full colour, portrait or
+          // not — they happened. Only unreached forms are silhouetted.
+          filter: reached || isDefaultCompanion ? 'none' : formArt ? LOCKED_SILHOUETTE_FILTER : 'grayscale(0.85)',
           opacity: reached || isDefaultCompanion || formArt ? 1 : 0.45
         }}
       >
         {isDefaultCompanion ? (
-          <Box component='img' src={nowryArtFor(stage)} alt='' sx={{ width: 84, height: 84, objectFit: 'contain', display: 'block' }} />
+          // Nowry's form for this rung: the coil one turn further on each
+          // step, in the learner's accent once earned (BRAND-007).
+          <CompanionMark stage={stage} mood='idle' size={84} color={resolveColor(accentColor, stage)} locked={!reached} />
         ) : (
           <PetOrb
             mood='idle'

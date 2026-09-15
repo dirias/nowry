@@ -10,9 +10,12 @@
  * its own SVG primitive: a filled `body` path, a `head` and a `tail` circle in
  * the mark's colour, and an `eye` circle cut out of the head. Everything is in
  * a 100 × 100 view box so a client only chooses the size.
+ *
+ * The default companion is the same coil grown by stages (`companionMark.js`),
+ * so `coil()` is exported for it: one geometry, two proportions.
  */
 
-const VIEW = 100
+export const VIEW = 100
 
 /** How much wider each turn is than the one inside it. */
 const GROWTH_PER_TURN = 1.85
@@ -71,6 +74,34 @@ function fitter(points, headRadius, pad) {
 }
 
 /**
+ * A coil's drawn parts in the 100 × 100 view box — the mark and the companion
+ * are both this, with different proportions and a different number of turns.
+ *
+ * @param {{turns: number, tail: number, head: number, headDeg: number, pad: number}} spec
+ * @returns {{ body: string, head: object, tail: object, facing: {x: number, y: number} }}
+ *   `facing` is the unit direction the head travels in, for placing a face.
+ */
+export function coil({ turns, tail, head, headDeg, pad }) {
+  const points = centreLine({ turns, tail, head, headDeg, samples: 160 })
+  const headRadius = (head / 2) * 2.7
+  const { scale, at } = fitter(points, headRadius, pad)
+  const { left, right } = edges(points)
+  const last = points[points.length - 1]
+
+  const body = `M${[...left, ...right.reverse()].map((p) => `${at(p).x} ${at(p).y}`).join(' L')}Z`
+  const headCentre = at(last)
+  const before = points[points.length - 6]
+  const travel = Math.hypot(last.x - before.x, last.y - before.y) || 1
+
+  return {
+    body,
+    head: { cx: headCentre.x, cy: headCentre.y, r: round(headRadius * scale) },
+    tail: { cx: at(points[0]).x, cy: at(points[0]).y, r: round((tail / 2) * scale) },
+    facing: { x: (last.x - before.x) / travel, y: (last.y - before.y) / travel }
+  }
+}
+
+/**
  * The Spiral's parts in a 100 × 100 view box.
  *
  * @param {object} [options]
@@ -81,25 +112,14 @@ function fitter(points, headRadius, pad) {
  */
 export function spiralMark({ preset = 'full', headDeg = -55, pad = 0.04 } = {}) {
   const spec = SPIRAL_PRESETS[preset] ?? SPIRAL_PRESETS.full
-  const points = centreLine({ ...spec, headDeg, samples: 160 })
-  const headRadius = (spec.head / 2) * 2.7
-  const { scale, at } = fitter(points, headRadius, pad)
-  const { left, right } = edges(points)
-  const last = points[points.length - 1]
-
-  const body = `M${[...left, ...right.reverse()].map((p) => `${at(p).x} ${at(p).y}`).join(' L')}Z`
-  const headCentre = at(last)
-  const before = points[points.length - 6]
-  const travel = Math.hypot(last.x - before.x, last.y - before.y) || 1
-  const ux = (last.x - before.x) / travel
-  const uy = (last.y - before.y) / travel
-  const r = round(headRadius * scale)
+  const { body, head, tail, facing } = coil({ ...spec, headDeg, pad })
+  const r = head.r
 
   return {
     viewBox: `0 0 ${VIEW} ${VIEW}`,
     body,
-    head: { cx: headCentre.x, cy: headCentre.y, r },
-    tail: { cx: at(points[0]).x, cy: at(points[0]).y, r: round((spec.tail / 2) * scale) },
-    eye: { cx: round(headCentre.x + ux * r * 0.18), cy: round(headCentre.y + uy * r * 0.18), r: round(r * 0.3) }
+    head,
+    tail,
+    eye: { cx: round(head.cx + facing.x * r * 0.18), cy: round(head.cy + facing.y * r * 0.18), r: round(r * 0.3) }
   }
 }

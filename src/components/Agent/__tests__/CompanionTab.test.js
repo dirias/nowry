@@ -2,7 +2,7 @@
  * PET-008 — the species control is a paid generation input.
  *
  * Species shapes the portrait the image model draws; it is not the pet's face.
- * Free users are with Nowry, who is an owl by definition, so the choice would
+ * Free users are with Nowry, who is the Spiral by definition, so the choice would
  * do nothing for them and must not appear — showing a control that cannot
  * change anything is worse than not offering it.
  */
@@ -52,12 +52,12 @@ const speciesCards = () => screen.queryAllByRole('radio')
 describe('CompanionTab — species control', () => {
   it('offers every species the generator understands, to a paid user', () => {
     renderTab({ tier: 'pro' })
-    expect(speciesCards()).toHaveLength(10)
+    expect(speciesCards()).toHaveLength(11)
   })
 
   it('shows it to Plus as well as Pro', () => {
     renderTab({ tier: 'plus' })
-    expect(speciesCards()).toHaveLength(10)
+    expect(speciesCards()).toHaveLength(11)
   })
 
   it('hides it entirely from free users', () => {

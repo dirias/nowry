@@ -15,9 +15,13 @@
  *   mark   null | 'crest' | 'halo' | 'crown'   — an earned adornment
  *   rings  0–3                — aura rings
  *   orbit  0–5                — orbiting motes
+ *   turns  0.5–2.5            — how far the default companion's coil has grown
  *
- * All four are procedural, so a free-tier pet evolves visibly without ever
- * touching the Plus-gated AI portrait.
+ * All five are procedural, so a free-tier pet evolves visibly without ever
+ * touching the Plus-gated AI portrait. `turns` is the Spiral companion's own
+ * rung (BRAND-007): each stage adds to the coil, the way the mark's gaps widen
+ * — an egg with the first curl inside, then three quarters of a turn, one,
+ * one and a half, two, two and a half.
  *
  * It lived inside the web's 2,000-line pet component, which made a stage table
  * the property of one client's floating orb. Both clients draw the same
@@ -29,12 +33,12 @@
  * point of the table.
  */
 export const STAGE_CONFIG = {
-  1: { sizePx: 56, emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0 },
-  2: { sizePx: 60, emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0 },
-  3: { sizePx: 64, emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0 },
-  4: { sizePx: 68, emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0 },
-  5: { sizePx: 72, emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3 },
-  6: { sizePx: 80, emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5 }
+  1: { sizePx: 56, emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0, turns: 0.5 },
+  2: { sizePx: 60, emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0, turns: 0.75 },
+  3: { sizePx: 64, emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0, turns: 1 },
+  4: { sizePx: 68, emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0, turns: 1.5 },
+  5: { sizePx: 72, emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3, turns: 2 },
+  6: { sizePx: 80, emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5, turns: 2.5 }
 }
 
 /** A stage outside 1–6 is stage one: an unknown pet has not evolved. */

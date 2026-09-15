@@ -16,7 +16,7 @@ describe('petPortrait', () => {
     expect(petPortrait({ isDefaultCompanion: true, stage: 5 })).toEqual({ kind: 'default', stage: 5 })
   })
 
-  it('draws nobody else’s owl on a personalised companion with no art', () => {
+  it('draws nobody else’s creature on a personalised companion with no art', () => {
     expect(petPortrait({ isDefaultCompanion: false, stage: 3 })).toBeNull()
   })
 

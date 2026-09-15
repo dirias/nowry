@@ -24,12 +24,17 @@
  *
  * **It wears a PORTRAIT, and that was missing for a cycle (MOB-089).** The web
  * has drawn one since the pet shipped — a generated image for anyone who has
- * made one, Nowry's six bundled illustrations for everyone else. The phone drew
- * the coloured shape alone, which is not a simplification of the web but a
- * different companion: the thing the learner recognises is the owl, and this
- * was showing them a disc. The shape is still here and still does the work it
- * always did — it is the ground the portrait sits on, and it is what is drawn
- * when there is no portrait at all, or when one fails to load.
+ * made one, Nowry for everyone else. The phone drew the coloured shape alone,
+ * which is not a simplification of the web but a different companion: the
+ * thing the learner recognises is the creature, and this was showing them a
+ * disc. The shape is still here and still does the work it always did — it is
+ * the ground the portrait sits on, and it is what is drawn when there is no
+ * portrait at all, or when one fails to load.
+ *
+ * **Nowry is the Spiral, drawn (BRAND-007).** The six owl illustrations are
+ * gone; the default companion is the coil from the shared geometry, one turn
+ * further at every stage, in whichever of paper or ink reads on the accent
+ * body — the same parts the web draws, from the same module.
  */
 import { useState } from 'react'
 import { Animated, Image, View } from 'react-native'
@@ -41,7 +46,7 @@ import { stageConfig } from '@nowry/core/domain/petStages'
 import { earnedGold } from '@nowry/core/tokens/colorSystem'
 import { useTheme } from '../../theme'
 import { Icon } from '../icons'
-import { nowryArtFor } from './nowryArt'
+import { CompanionMark } from './CompanionMark'
 import { useOrbMotion } from './useOrbMotion'
 
 /** The mark each stage earns, as this client's glyphs. */
@@ -80,7 +85,8 @@ export function PetOrb({
    */
   const [failed, setFailed] = useState(false)
   const portrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
-  const source = failed || !portrait ? null : portrait.kind === 'generated' ? { uri: portrait.url } : nowryArtFor(portrait.stage)
+  const source = failed || portrait?.kind !== 'generated' ? null : { uri: portrait.url }
+  const wearsNowry = !source && portrait?.kind === 'default'
 
   // `still` is for the places a moving portrait would be noise rather than
   // presence: a 24px speaker beside a sentence, a row in a settings list.
@@ -172,6 +178,10 @@ export function PetOrb({
             resizeMode='cover'
             accessible={false}
           />
+        ) : wearsNowry ? (
+          <Animated.View style={{ transform: gait }}>
+            <CompanionMark stage={portrait.stage} mood={mood} size={Math.round(body * 0.78)} literalColor={readableTextOn(color)} />
+          </Animated.View>
         ) : config.mark ? (
           <Animated.View style={{ transform: gait }}>
             <Icon name={MARK_ICONS[config.mark]} size='sm' literalColor={readableTextOn(color)} />

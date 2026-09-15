@@ -18,6 +18,7 @@
  */
 
 import { DEFAULT_ACCENT } from '../tokens/colorSchemeGenerator'
+import { DEFAULT_SPECIES } from '../domain/petMotion'
 
 // ---------------------------------------------------------------------------
 // Color map — slug → hex (source of truth for all pet colors)
@@ -194,11 +195,11 @@ const SPECIES_BY_TOPIC = {
  * @returns {{ species: string }}
  */
 export function suggestFromInterests(interests = []) {
-  if (!interests || interests.length === 0) return { species: 'owl' }
+  if (!interests || interests.length === 0) return { species: DEFAULT_SPECIES }
   // Ranked: the first topic that maps wins, so the primary topic decides.
   for (const interest of interests) {
     const species = SPECIES_BY_TOPIC[String(interest).trim().toLowerCase()]
     if (species) return { species }
   }
-  return { species: 'owl' }
+  return { species: DEFAULT_SPECIES }
 }

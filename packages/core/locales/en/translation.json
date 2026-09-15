@@ -3389,6 +3389,7 @@
       "animStage3": "Rendering final frames...",
       "animStage4": "Almost ready — worth the wait ✨",
       "species": {
+        "spiral": "Spiral",
         "owl": "Owl",
         "fox": "Fox",
         "cat": "Cat",

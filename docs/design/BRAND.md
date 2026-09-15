@@ -54,6 +54,22 @@ the mark and the icon, the neutrals, the status colours, gold, and the category 
 
 ## The companion
 
-The default companion's illustrations are still the owl until BRAND-007 replaces them with the Spiral
-creature (stages by turn count, moods by head and eye). Its colour already follows the system: the
-body wears the learner's accent, and what a stage earns is gold.
+Nowry, the companion every learner starts with, is the Spiral grown by stages (BRAND-007). It is
+drawn, never illustrated: `@nowry/core/tokens/companionMark.js` → `companionMark({ stage, mood })`
+builds it from the same coil as the mark, and each client draws the parts with its own SVG primitive
+(`src/components/Agent/CompanionMark.js` on the web, `mobile/src/ui/patterns/CompanionMark.js` on
+the phone).
+
+- **Stages differ by turn count, not size.** The stage table (`domain/petStages.js`) carries `turns`:
+  an egg with the first curl inside, then ¾ of a turn, one, one and a half, two, two and a half. The
+  rings and motes a stage earns stay gold.
+- **Mood is where the head points and how the eye is drawn.** Idle looks ahead; happy lifts its head
+  with a closed, smiling eye; thinking glances up; tired lowers its head and the eye is a line;
+  speaking opens a small mouth ahead of the eye. The face is always cut out, never painted.
+- **Colour follows the system.** On the page the companion wears the learner's accent
+  (`utils/petColor`); on an accent-coloured body it is drawn in whichever of paper or ink reads
+  there. A rung not yet earned is the same shape in `text.tertiary`, flat and quiet.
+- **It breathes.** The gait for `spiral` in `domain/petMotion.js` swells the coil slightly and
+  turns the head a few degrees; mood sets the drift as for every species.
+- **The guardrails above apply.** No slit pupil, fang, tongue or scale texture, on screen or in the
+  avatar prompt's description of the species (`AVATAR_SPECIES_DESCRIPTORS` in the API).

@@ -25,7 +25,7 @@ import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '@nowry/core/utils/petColor'
 import { petPortrait } from '@nowry/core/domain/petPortrait'
 import { MOOD_PRESENTATION, alphaHex, companionSpecies, speciesMotion as gaitFor } from '@nowry/core/domain/petMotion'
-import { nowryArtFor } from './nowryArt'
+import { CompanionDisc, CompanionMark } from './CompanionMark'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '@nowry/core/constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
@@ -70,6 +70,7 @@ export const FORM_BORDER_RADIUS = {
 // Species configuration — emoji set per species × mood
 // ---------------------------------------------------------------------------
 const SPECIES_CONFIG = {
+  spiral: { idle: '🌀', happy: '🌀', thinking: '💭', tired: '😴', speaking: '💬' },
   owl: { idle: '🦉', happy: '🦉', thinking: '🤔', tired: '😴', speaking: '🗣️' },
   fox: { idle: '🦊', happy: '😄', thinking: '🧠', tired: '😪', speaking: '💬' },
   cat: { idle: '🐱', happy: '😸', thinking: '😼', tired: '😿', speaking: '🐱' },
@@ -282,14 +283,15 @@ export const PetOrb = ({
   const config = STAGE_CONFIG[stage] ?? STAGE_CONFIG[1]
 
   // Nowry — the shipped default companion — stands in wherever the user has
-  // not generated a portrait of their own. Bundled, so it is always present:
-  // no wait, no failure, and free users get real art rather than an emoji.
+  // not generated a portrait of their own. Drawn from geometry the app ships
+  // (BRAND-007), so it is always present: no wait, no failure, and free users
+  // get the brand's own creature rather than an emoji.
   //
   // WHICH portrait is a shared decision (MOB-089): the phone draws the same
-  // companion and must not answer this question a second time. Only the art is
-  // per-client, because a bundled asset belongs to whichever bundler built it.
+  // companion and must not answer this question a second time.
   const portrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
-  const portraitUrl = portrait ? (portrait.kind === 'generated' ? portrait.url : nowryArtFor(portrait.stage)) : null
+  const portraitUrl = portrait?.kind === 'generated' ? portrait.url : null
+  const wearsNowry = portrait?.kind === 'default'
 
   // A locked rung shows the FORM without a face: the stage's silhouette,
   // rings and mark, but no emoji standing in for a creature the user has not
@@ -303,8 +305,8 @@ export const PetOrb = ({
   const activeColor = dominantColorOverride ?? resolveColor(DEFAULT_ACCENT, stage)
 
   /*
-   * Nowry is an owl, in all six of its forms, and an account that never chose
-   * a species has no `pet_species` — so reading that field alone left the
+   * Nowry is the Spiral, in all six of its forms, and an account that never
+   * chose a species has no `pet_species` — so reading that field alone left the
    * companion every learner starts with as the one pet with no gait (MOB-090).
    */
   const speciesMotion = gaitFor(companionSpecies({ species, isDefaultCompanion }))
@@ -410,7 +412,7 @@ export const PetOrb = ({
   const innerContent = (
     <>
       {/* Shimmer while generating */}
-      {isGenerating && !portraitUrl && (
+      {isGenerating && !portraitUrl && !wearsNowry && (
         <motion.div
           animate={{ opacity: [0.3, 0.7, 0.3] }}
           transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
@@ -450,6 +452,27 @@ export const PetOrb = ({
                   if (typeof onAvatarError === 'function') onAvatarError()
                 }}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </motion.div>
+          </motion.div>
+        ) : wearsNowry ? (
+          // Nowry's form for this stage, in whichever of paper or ink reads on
+          // the accent body. Keyed on the stage so a level-up cross-fades the
+          // forms; a mood change turns the head in place.
+          <motion.div
+            key={`nowry-${portrait.stage}`}
+            initial={{ opacity: 0, scale: 0.88 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.88 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <motion.div animate={speciesMotion?.animate} transition={speciesMotion?.transition} style={{ display: 'flex' }}>
+              <CompanionMark
+                stage={portrait.stage}
+                mood={mood}
+                size={Math.round(config.sizePx * 0.78)}
+                color={readableTextOn(activeColor)}
               />
             </motion.div>
           </motion.div>
@@ -655,11 +678,8 @@ const StudyPet = () => {
   // Nowry's art for the current stage. The chat panel used to ignore both and
   // render the species emoji, so a user with a generated pet saw a leaf.
   const panelPortrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
-  const panelPortraitUrl = panelPortrait
-    ? panelPortrait.kind === 'generated'
-      ? panelPortrait.url
-      : nowryArtFor(panelPortrait.stage)
-    : null
+  const panelPortraitUrl = panelPortrait?.kind === 'generated' ? panelPortrait.url : null
+  const panelWearsNowry = panelPortrait?.kind === 'default'
 
   const [input, setInput] = useState('')
   // Tier enforcement state
@@ -1387,6 +1407,14 @@ const StudyPet = () => {
                             boxShadow: `0 0 0 2px ${resolvedColor}55`
                           }}
                         />
+                      ) : panelWearsNowry ? (
+                        <CompanionDisc
+                          stage={stage}
+                          mood={mood}
+                          size={28}
+                          accent={resolvedColor}
+                          sx={{ boxShadow: `0 0 0 2px ${resolvedColor}55` }}
+                        />
                       ) : (
                         <span style={{ fontSize: 20 }}>
                           {petSpecies && SPECIES_CONFIG[petSpecies]
@@ -1499,6 +1527,14 @@ const StudyPet = () => {
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                           />
                         </div>
+                      ) : panelWearsNowry ? (
+                        <CompanionDisc
+                          stage={stage}
+                          mood={mood}
+                          size={80}
+                          accent={resolvedColor}
+                          sx={{ boxShadow: `0 0 0 4px ${resolvedColor}55, 0 6px 28px ${resolvedColor}44`, margin: '0 auto 12px' }}
+                        />
                       ) : (
                         <div
                           style={{

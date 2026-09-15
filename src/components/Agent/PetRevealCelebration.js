@@ -27,6 +27,7 @@ const CARD = { ground: NEUTRALS.dark.background.popup, text: NEUTRALS.dark.text.
 // here (as LevelUpCelebration duplicates STAGE_CONFIG) to avoid a circular
 // import, since StudyPet.js imports this component.
 const SPECIES_IDLE_EMOJI = {
+  spiral: '🌀',
   owl: '🦉',
   fox: '🦊',
   cat: '🐱',

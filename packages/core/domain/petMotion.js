@@ -9,8 +9,8 @@
  * how the mood is read, and the mood is the one thing about a companion that
  * changes minute to minute. A still pet does not look calm, it looks broken.
  *
- * **Mood sets the amplitude, species sets the gait.** They compose: a tired owl
- * flaps at the same rate as a happy one and drifts a third as far. Both tables
+ * **Mood sets the amplitude, species sets the gait.** They compose: a tired coil
+ * breathes at the same rate as a happy one and drifts a third as far. Both tables
  * are DATA rather than animations, so each client drives them with its own
  * engine — framer-motion on the web, `Animated` on the phone — and neither
  * invents a number the other does not have.
@@ -39,10 +39,15 @@ export const MOOD_PRESENTATION = {
 }
 
 /**
- * The gait, by species. Winged fliers spread and contract, walkers bounce and
- * rock, spinners turn, swayers rock from the root.
+ * The gait, by species. The coil breathes, winged fliers spread and contract,
+ * walkers bounce and rock, spinners turn, swayers rock from the root.
  */
 export const SPECIES_MOTION = {
+  // ── The Spiral: the coil breathes, swelling a little and settling back ────
+  spiral: {
+    animate: { scale: [1, 1.06, 1], rotate: [0, -4, 0] },
+    transition: { repeat: Infinity, duration: 2.4, ease: 'easeInOut' }
+  },
   // ── Winged fliers: scaleX pulse = wing spread/contract ──────────────────
   owl: {
     animate: { scaleX: [1, 1.12, 1], scaleY: [1, 0.94, 1] },
@@ -92,16 +97,20 @@ export const SPECIES_MOTION = {
 /** The presentation for a mood, including one the server has never sent. */
 export const moodPresentation = (mood) => MOOD_PRESENTATION[mood] ?? MOOD_PRESENTATION.idle
 
+/** The species every learner starts with: the Spiral (BRAND-007). */
+export const DEFAULT_SPECIES = 'spiral'
+
 /**
  * Which species a companion moves as.
  *
- * Nowry — the shipped default — is an owl: it is the owl both clients draw, in
- * all six of its bundled forms. An account that has never chosen a species has
- * no `pet_species`, and reading that field alone gave the default companion no
- * gait at all, so the owl every learner starts with was the one pet that did
- * not move like anything.
+ * Nowry — the shipped default — is the Spiral: the coil both clients draw, in
+ * all six of its forms. An account that has never chosen a species has no
+ * `pet_species`, and reading that field alone gave the default companion no
+ * gait at all, so the companion every learner starts with was the one pet that
+ * did not move like anything.
  */
-export const companionSpecies = ({ species = null, isDefaultCompanion = true } = {}) => species || (isDefaultCompanion ? 'owl' : null)
+export const companionSpecies = ({ species = null, isDefaultCompanion = true } = {}) =>
+  species || (isDefaultCompanion ? DEFAULT_SPECIES : null)
 
 /** The gait for a species, or nothing for one with no table entry. */
 export const speciesMotion = (species) => SPECIES_MOTION[species] ?? null

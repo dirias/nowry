@@ -3,6 +3,7 @@
  * Handles all communication with the /agent backend endpoints.
  */
 import { apiClient } from '../client'
+import { DEFAULT_SPECIES } from '../../domain/petMotion'
 
 export const agentService = {
   /**
@@ -125,7 +126,7 @@ export const agentService = {
   generatePersonality: async (styleHints, petSpecies) => {
     const { data } = await apiClient.post('/agent/generate-personality', {
       style_hints: styleHints || '',
-      pet_species: petSpecies || 'owl'
+      pet_species: petSpecies || DEFAULT_SPECIES
     })
     return data // { personality_text, generations_used, generations_limit, reset_date }
   },

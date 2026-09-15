@@ -250,9 +250,11 @@ describe('StudyPet — evolution stage rendering', () => {
 
 describe('StudyPet — the default companion', () => {
   it('shows Nowry when the user has not personalised a pet', () => {
-    withPet({ isDefaultCompanion: true, avatarUrl: null })
+    withPet({ isDefaultCompanion: true, avatarUrl: null, stage: 3 })
     render(<StudyPet />)
-    expect(orb().querySelector('img')).toBeTruthy()
+    // The Spiral, drawn — not an image (BRAND-007).
+    expect(orb().querySelector('img')).toBeNull()
+    expect(orb().querySelector('svg[data-companion-stage="3"]')).toBeTruthy()
   })
 
   it('prefers the user’s own portrait over Nowry', () => {
@@ -265,6 +267,7 @@ describe('StudyPet — the default companion', () => {
     withPet({ isDefaultCompanion: false, avatarUrl: null })
     render(<StudyPet />)
     expect(orb().querySelector('img')).toBeNull()
+    expect(orb().querySelector('svg[data-companion-stage]')).toBeNull()
     expect(orb().textContent).not.toBe('')
   })
 })
@@ -333,6 +336,7 @@ describe('StudyPet — the chat panel shows the companion', () => {
   }
 
   const panelImages = () => Array.from(document.body.querySelectorAll('img')).map((img) => img.getAttribute('src'))
+  const panelNowry = () => document.body.querySelectorAll('svg[data-companion-stage]')
 
   it('shows the user’s own portrait beside its name', () => {
     openPanel({ avatarUrl: 'https://example.com/luna.png', petSpecies: 'leaf' })
@@ -341,12 +345,14 @@ describe('StudyPet — the chat panel shows the companion', () => {
 
   it('shows Nowry for a default companion rather than a species emoji', () => {
     openPanel({ avatarUrl: null, isDefaultCompanion: true, petSpecies: 'leaf' })
-    expect(panelImages().length).toBeGreaterThan(0)
+    expect(panelNowry().length).toBeGreaterThan(0)
+    expect(document.body.textContent).not.toContain('🌿')
   })
 
   it('falls back to an emoji only when there is no portrait at all', () => {
     openPanel({ avatarUrl: null, isDefaultCompanion: false, petSpecies: 'leaf' })
     expect(panelImages()).toHaveLength(0)
+    expect(panelNowry()).toHaveLength(0)
     expect(document.body.textContent).toContain('🌿')
   })
 })

@@ -8,7 +8,7 @@
  *
  * Species appears for paid tiers only, and only as an input to portrait
  * generation — it is not the pet's face. Free users are with Nowry, who is an
- * owl by definition, so the control would do nothing for them.
+ * the Spiral by definition, so the control would do nothing for them.
  *
  * All API calls are handled by the parent (AgentSettings) via callbacks.
  * This component is purely presentational.
@@ -53,7 +53,7 @@ const ANIMATION_ESTIMATED_MS = 180000
 // Component
 // ---------------------------------------------------------------------------
 
-const SPECIES_SLUGS = ['owl', 'fox', 'cat', 'dragon', 'robot', 'star', 'phoenix', 'crystal', 'leaf', 'music']
+const SPECIES_SLUGS = ['spiral', 'owl', 'fox', 'cat', 'dragon', 'robot', 'star', 'phoenix', 'crystal', 'leaf', 'music']
 
 const CompanionTab = ({
   petName,
@@ -144,7 +144,7 @@ const CompanionTab = ({
 
       {/* ── Section: Species (paid only — a generation input) ───────────────
           Species shapes the portrait the model draws; it is not the pet's
-          face. Free users are with Nowry, who is an owl by definition, so
+          face. Free users are with Nowry, who is an the Spiral by definition, so
           the choice would do nothing for them and is hidden.
 
           Deliberately labels rather than emoji: the old emoji grid implied

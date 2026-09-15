@@ -128,10 +128,10 @@ describe('suggestFromInterests', () => {
     expect(suggestFromInterests(['underwater_basket_weaving', 'music'])).toEqual({ species: 'music' })
   })
 
-  it('defaults to the owl when nothing matches or nothing is given', () => {
-    expect(suggestFromInterests([])).toEqual({ species: 'owl' })
-    expect(suggestFromInterests()).toEqual({ species: 'owl' })
-    expect(suggestFromInterests(['underwater basket weaving'])).toEqual({ species: 'owl' })
+  it('defaults to the Spiral when nothing matches or nothing is given', () => {
+    expect(suggestFromInterests([])).toEqual({ species: 'spiral' })
+    expect(suggestFromInterests()).toEqual({ species: 'spiral' })
+    expect(suggestFromInterests(['underwater basket weaving'])).toEqual({ species: 'spiral' })
   })
 
   it("never suggests a colour — that follows the user's own theme accent now", () => {

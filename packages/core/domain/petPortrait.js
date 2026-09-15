@@ -2,16 +2,15 @@
  * What the companion actually looks like (MOB-089).
  *
  * The web has drawn a PORTRAIT since the pet shipped — a generated image for
- * anyone who has made one, and six bundled illustrations of Nowry for everyone
- * else, so a free account gets real art rather than a shape. The phone drew a
- * coloured circle instead. That was not a simplification of the web, it was a
- * different companion: the thing the learner recognises is the owl, and the
- * phone was showing them a disc.
+ * anyone who has made one, and Nowry for everyone else, so a free account gets
+ * real art rather than a shape. The phone drew a coloured circle instead. That
+ * was not a simplification of the web, it was a different companion: the thing
+ * the learner recognises is the creature, and the phone was showing them a disc.
  *
- * The DECISION is shared and the ART is not, which is ADR-031's rule applied to
- * pictures. A bundled asset is resolved by the bundler — webpack under CRA,
- * Metro on the phone — and neither can read the other's. So this returns which
- * portrait to draw and each client supplies the file.
+ * The DECISION is shared and the DRAWING is not, which is ADR-031's rule
+ * applied to pictures. Nowry is the Spiral from `tokens/companionMark`
+ * (BRAND-007), and each client draws those parts with its own SVG primitive.
+ * So this returns which portrait to draw and each client renders it.
  */
 
 /**
@@ -26,7 +25,7 @@ export function petPortrait({ avatarUrl = null, isDefaultCompanion = true, stage
   if (avatarUrl) return { kind: 'generated', url: avatarUrl }
   // Nowry stands in wherever no portrait has been generated, and only for the
   // default companion: a user who chose their own species and has not generated
-  // art is not shown somebody else's owl.
+  // art is not shown somebody else's creature.
   if (isDefaultCompanion) return { kind: 'default', stage }
   return null
 }

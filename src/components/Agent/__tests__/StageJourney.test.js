@@ -166,12 +166,17 @@ describe('StageJourney', () => {
   // PET-008: which art a rung shows depends on whether the user has
   // personalised. Free users, and anyone who has not generated a portrait, are
   // still with Nowry — the shipped default companion.
-  it('shows all six of Nowry’s illustrations for a default companion', async () => {
+  it('shows all six of Nowry’s forms for a default companion', async () => {
     agentService.getJourney.mockResolvedValue(journey(2, {}, true))
     const { container } = render(<StageJourney />)
 
     await screen.findByText('pet.stage.1.name')
-    expect(container.querySelectorAll('img')).toHaveLength(6)
+    // The Spiral at every rung, one turn further each time (BRAND-007) — and
+    // no image: the default companion is geometry the app ships.
+    expect(container.querySelectorAll('img')).toHaveLength(0)
+    const forms = container.querySelectorAll('svg[data-companion-stage]')
+    expect(forms).toHaveLength(6)
+    expect(Array.from(forms).map((svg) => svg.getAttribute('data-companion-stage'))).toEqual(['1', '2', '3', '4', '5', '6'])
     // The procedural orb is for personalised pets only.
     expect(screen.queryByTestId('orb-stage-1')).not.toBeInTheDocument()
   })
@@ -182,6 +187,7 @@ describe('StageJourney', () => {
 
     expect(await screen.findByTestId('orb-stage-1')).toBeInTheDocument()
     expect(container.querySelectorAll('img')).toHaveLength(0)
+    expect(container.querySelectorAll('svg[data-companion-stage]')).toHaveLength(0)
   })
 
   // A paying user's own portrait was never passed into the ladder, so their
