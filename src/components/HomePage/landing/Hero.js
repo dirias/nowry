@@ -10,9 +10,11 @@ import { ArrowForwardRounded } from '@mui/icons-material'
  * One `<h1>` at `display-lg`, one sentence, one solid CTA and the library as
  * the proof link; the product frame sits beside it on desktop and under it on
  * a phone, so the headline is the first thing a visitor reads at any width.
- * `frame` is the drawn Study Center (SITE-002); the caption under it says so.
+ * `frame` is the drawn Study Center and `phoneFrame` the drawn phone Home
+ * (SITE-002): a phone visitor sees the client they would use, a desktop
+ * visitor the one they are looking at. The caption under each says so.
  */
-const Hero = ({ frame }) => {
+const Hero = ({ frame, phoneFrame }) => {
   const { t } = useTranslation()
 
   return (
@@ -48,10 +50,16 @@ const Hero = ({ frame }) => {
         </Typography>
       </Stack>
 
-      <Stack spacing={1.5} sx={{ minWidth: 0 }}>
+      <Stack spacing={1.5} sx={{ minWidth: 0, display: { xs: 'none', md: 'flex' } }}>
         {frame}
         <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
           {t('landing.hero.frameCaption')}
+        </Typography>
+      </Stack>
+      <Stack spacing={1.5} alignItems='flex-start' sx={{ minWidth: 0, display: { xs: 'flex', md: 'none' } }}>
+        {phoneFrame}
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          {t('landing.hero.phoneCaption')}
         </Typography>
       </Stack>
     </Box>

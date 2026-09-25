@@ -397,7 +397,8 @@
       "cta": "Create a free account",
       "proof": "Browse the public library",
       "fineprint": "No card required. Five languages: English, Español, Français, Deutsch, 日本語.",
-      "frameCaption": "The Study Center, as it looks today."
+      "frameCaption": "The Study Center, as it looks today.",
+      "phoneCaption": "Home on the phone, as it looks today."
     },
     "features": {
       "title": "Everything You Need to Excel",
@@ -482,6 +483,69 @@
       "title": "Nowry is in early access.",
       "body": "What you see is the product as it stands, and it changes every week. Join now, tell us what to build next, and meet the Spiral: it grows one turn at a time, the way a year does.",
       "cta": "Create a free account"
+    },
+    "frames": {
+      "studyCenter": {
+        "title": "Study Center",
+        "date": "Thursday 25 September",
+        "nav": {
+          "study": "Study",
+          "books": "Books",
+          "plan": "Plan",
+          "calendar": "Calendar"
+        },
+        "chip": "Study · {{count}}",
+        "readout": "{{cards}} cards due · {{decks}} decks · {{days}}-day streak",
+        "decks": {
+          "chem": "Organic chemistry",
+          "jp": "Japanese N3 · verbs",
+          "kant": "Kant, first critique",
+          "algebra": "Linear algebra"
+        },
+        "due": "{{count}} due",
+        "upToDate": "up to date",
+        "week": "This week",
+        "stage": "stage {{stage}} · {{turns}} turns"
+      },
+      "book": {
+        "section": "3 · Mitochondria",
+        "before": "The inner membrane folds into cristae, which ",
+        "highlight": "increase the surface available for the electron transport chain",
+        "after": ". ATP synthase sits across it and uses the proton gradient to phosphorylate ADP.",
+        "action": "Make a card",
+        "from": "from the highlight"
+      },
+      "card": {
+        "counter": "Card {{n}} of {{total}} · from Mitochondria §3",
+        "prompt": "What do the cristae do for the electron transport chain?",
+        "answer": "They increase the inner-membrane surface, so more transport complexes and ATP synthase fit.",
+        "missed": "Missed",
+        "hard": "Hard",
+        "good": "Good",
+        "easy": "Easy"
+      },
+      "year": {
+        "title": "My 2026 plan",
+        "week": "week {{week}} of 52",
+        "areas": {
+          "bio": "Biology degree",
+          "jp": "Japanese",
+          "health": "Health"
+        }
+      },
+      "phone": {
+        "date": "Thursday 25 September",
+        "greeting": "Good evening",
+        "today": "Today",
+        "progress": "{{done}} of {{total}}",
+        "tasks": {
+          "review": "Review 21 cards",
+          "read": "Read Mitochondria §4",
+          "run": "Run · 30 min"
+        },
+        "due": "{{count}} decks due",
+        "focus": "Focus"
+      }
     }
   },
   "about": {

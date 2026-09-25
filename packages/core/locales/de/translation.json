@@ -395,7 +395,8 @@
       "cta": "Kostenloses Konto erstellen",
       "proof": "Öffentliche Bibliothek ansehen",
       "fineprint": "Keine Karte nötig. Fünf Sprachen: English, Español, Français, Deutsch, 日本語.",
-      "frameCaption": "Das Lernzentrum, so wie es heute aussieht."
+      "frameCaption": "Das Lernzentrum, so wie es heute aussieht.",
+      "phoneCaption": "Home auf dem Handy, so wie es heute aussieht."
     },
     "features": {
       "title": "Alles, Was Sie zum Erfolg Brauchen",
@@ -480,6 +481,69 @@
       "title": "Nowry ist im Early Access.",
       "body": "Was du siehst, ist das Produkt in seinem heutigen Stand, und es ändert sich jede Woche. Mach jetzt mit, sag uns, was wir als Nächstes bauen sollen, und lerne die Spirale kennen: Sie wächst eine Windung nach der anderen, wie ein Jahr.",
       "cta": "Kostenloses Konto erstellen"
+    },
+    "frames": {
+      "studyCenter": {
+        "title": "Lernzentrum",
+        "date": "Donnerstag, 25. September",
+        "nav": {
+          "study": "Lernen",
+          "books": "Bücher",
+          "plan": "Planung",
+          "calendar": "Kalender"
+        },
+        "chip": "Lernen · {{count}}",
+        "readout": "{{cards}} Karten fällig · {{decks}} Stapel · {{days}} Tage in Folge",
+        "decks": {
+          "chem": "Organische Chemie",
+          "jp": "Japanisch N3 · Verben",
+          "kant": "Kant, erste Kritik",
+          "algebra": "Lineare Algebra"
+        },
+        "due": "{{count}} fällig",
+        "upToDate": "auf Stand",
+        "week": "Diese Woche",
+        "stage": "Stufe {{stage}} · {{turns}} Windungen"
+      },
+      "book": {
+        "section": "3 · Mitochondrien",
+        "before": "Die innere Membran faltet sich zu Cristae, die ",
+        "highlight": "die Fläche für die Elektronentransportkette vergrößern",
+        "after": ". Die ATP-Synthase sitzt darin und nutzt den Protonengradienten, um ADP zu phosphorylieren.",
+        "action": "Karte erstellen",
+        "from": "aus der Markierung"
+      },
+      "card": {
+        "counter": "Karte {{n}} von {{total}} · aus Mitochondrien §3",
+        "prompt": "Was leisten die Cristae für die Elektronentransportkette?",
+        "answer": "Sie vergrößern die Fläche der inneren Membran, sodass mehr Transportkomplexe und ATP-Synthase Platz finden.",
+        "missed": "Verfehlt",
+        "hard": "Schwer",
+        "good": "Gut",
+        "easy": "Leicht"
+      },
+      "year": {
+        "title": "Mein Plan 2026",
+        "week": "Woche {{week}} von 52",
+        "areas": {
+          "bio": "Biologiestudium",
+          "jp": "Japanisch",
+          "health": "Gesundheit"
+        }
+      },
+      "phone": {
+        "date": "Donnerstag, 25. September",
+        "greeting": "Guten Abend",
+        "today": "Heute",
+        "progress": "{{done}} von {{total}}",
+        "tasks": {
+          "review": "21 Karten wiederholen",
+          "read": "Mitochondrien §4 lesen",
+          "run": "Laufen · 30 Min."
+        },
+        "due": "{{count}} Stapel fällig",
+        "focus": "Fokus"
+      }
     }
   },
   "onboarding": {

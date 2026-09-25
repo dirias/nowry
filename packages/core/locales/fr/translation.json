@@ -406,7 +406,8 @@
       "cta": "Créer un compte gratuit",
       "proof": "Parcourir la bibliothèque publique",
       "fineprint": "Sans carte bancaire. Cinq langues : English, Español, Français, Deutsch, 日本語.",
-      "frameCaption": "Le Centre d'étude, tel qu'il est aujourd'hui."
+      "frameCaption": "Le Centre d'étude, tel qu'il est aujourd'hui.",
+      "phoneCaption": "L'accueil sur le téléphone, tel qu'il est aujourd'hui."
     },
     "features": {
       "title": "Tout ce dont Vous Avez Besoin pour Exceller",
@@ -491,6 +492,69 @@
       "title": "Nowry est en accès anticipé.",
       "body": "Ce que vous voyez est le produit tel qu'il est, et il change chaque semaine. Rejoignez-nous, dites-nous quoi construire ensuite et faites connaissance avec la Spirale : elle grandit d'un tour à la fois, comme une année.",
       "cta": "Créer un compte gratuit"
+    },
+    "frames": {
+      "studyCenter": {
+        "title": "Centre d'étude",
+        "date": "Jeudi 25 septembre",
+        "nav": {
+          "study": "Étude",
+          "books": "Livres",
+          "plan": "Planification",
+          "calendar": "Calendrier"
+        },
+        "chip": "Étudier · {{count}}",
+        "readout": "{{cards}} cartes à revoir · {{decks}} paquets · {{days}} jours d'affilée",
+        "decks": {
+          "chem": "Chimie organique",
+          "jp": "Japonais N3 · verbes",
+          "kant": "Kant, première critique",
+          "algebra": "Algèbre linéaire"
+        },
+        "due": "{{count}} à revoir",
+        "upToDate": "à jour",
+        "week": "Cette semaine",
+        "stage": "stade {{stage}} · {{turns}} tours"
+      },
+      "book": {
+        "section": "3 · Mitochondries",
+        "before": "La membrane interne se replie en crêtes, qui ",
+        "highlight": "augmentent la surface disponible pour la chaîne de transport des électrons",
+        "after": ". L'ATP synthase la traverse et utilise le gradient de protons pour phosphoryler l'ADP.",
+        "action": "Créer une carte",
+        "from": "depuis le surlignage"
+      },
+      "card": {
+        "counter": "Carte {{n}} sur {{total}} · de Mitochondries §3",
+        "prompt": "Que font les crêtes pour la chaîne de transport des électrons ?",
+        "answer": "Elles augmentent la surface de la membrane interne : plus de complexes de transport et d'ATP synthase y tiennent.",
+        "missed": "Ratée",
+        "hard": "Difficile",
+        "good": "Bien",
+        "easy": "Facile"
+      },
+      "year": {
+        "title": "Mon plan 2026",
+        "week": "semaine {{week}} sur 52",
+        "areas": {
+          "bio": "Licence de biologie",
+          "jp": "Japonais",
+          "health": "Santé"
+        }
+      },
+      "phone": {
+        "date": "Jeudi 25 septembre",
+        "greeting": "Bonsoir",
+        "today": "Aujourd'hui",
+        "progress": "{{done}} sur {{total}}",
+        "tasks": {
+          "review": "Revoir 21 cartes",
+          "read": "Lire Mitochondries §4",
+          "run": "Course · 30 min"
+        },
+        "due": "{{count}} paquets à revoir",
+        "focus": "Concentration"
+      }
     }
   },
   "onboarding": {

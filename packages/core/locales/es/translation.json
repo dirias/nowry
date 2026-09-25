@@ -376,7 +376,8 @@
       "cta": "Crear una cuenta gratis",
       "proof": "Explorar la biblioteca pública",
       "fineprint": "Sin tarjeta. Cinco idiomas: English, Español, Français, Deutsch, 日本語.",
-      "frameCaption": "El Centro de estudio, tal como se ve hoy."
+      "frameCaption": "El Centro de estudio, tal como se ve hoy.",
+      "phoneCaption": "Inicio en el teléfono, tal como se ve hoy."
     },
     "features": {
       "title": "Todo lo que Necesitas para Destacar",
@@ -461,6 +462,69 @@
       "title": "Nowry está en acceso anticipado.",
       "body": "Lo que ves es el producto tal como está, y cambia cada semana. Únete ahora, dinos qué construir después y conoce a la Espiral: crece una vuelta a la vez, como un año.",
       "cta": "Crear una cuenta gratis"
+    },
+    "frames": {
+      "studyCenter": {
+        "title": "Centro de estudio",
+        "date": "Jueves 25 de septiembre",
+        "nav": {
+          "study": "Estudio",
+          "books": "Libros",
+          "plan": "Planificación",
+          "calendar": "Calendario"
+        },
+        "chip": "Estudiar · {{count}}",
+        "readout": "{{cards}} tarjetas pendientes · {{decks}} mazos · racha de {{days}} días",
+        "decks": {
+          "chem": "Química orgánica",
+          "jp": "Japonés N3 · verbos",
+          "kant": "Kant, primera crítica",
+          "algebra": "Álgebra lineal"
+        },
+        "due": "{{count}} pendientes",
+        "upToDate": "al día",
+        "week": "Esta semana",
+        "stage": "etapa {{stage}} · {{turns}} vueltas"
+      },
+      "book": {
+        "section": "3 · Mitocondrias",
+        "before": "La membrana interna se pliega en crestas, que ",
+        "highlight": "aumentan la superficie disponible para la cadena de transporte de electrones",
+        "after": ". La ATP sintasa la atraviesa y usa el gradiente de protones para fosforilar el ADP.",
+        "action": "Crear tarjeta",
+        "from": "desde el subrayado"
+      },
+      "card": {
+        "counter": "Tarjeta {{n}} de {{total}} · de Mitocondrias §3",
+        "prompt": "¿Qué aportan las crestas a la cadena de transporte de electrones?",
+        "answer": "Aumentan la superficie de la membrana interna, así caben más complejos de transporte y ATP sintasa.",
+        "missed": "Fallida",
+        "hard": "Difícil",
+        "good": "Bien",
+        "easy": "Fácil"
+      },
+      "year": {
+        "title": "Mi plan 2026",
+        "week": "semana {{week}} de 52",
+        "areas": {
+          "bio": "Grado en Biología",
+          "jp": "Japonés",
+          "health": "Salud"
+        }
+      },
+      "phone": {
+        "date": "Jueves 25 de septiembre",
+        "greeting": "Buenas tardes",
+        "today": "Hoy",
+        "progress": "{{done}} de {{total}}",
+        "tasks": {
+          "review": "Repasar 21 tarjetas",
+          "read": "Leer Mitocondrias §4",
+          "run": "Correr · 30 min"
+        },
+        "due": "{{count}} mazos pendientes",
+        "focus": "Enfoque"
+      }
     }
   },
   "onboarding": {
