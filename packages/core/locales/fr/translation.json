@@ -1141,45 +1141,43 @@
     "eventCount_other": "{{count}} événements"
   },
   "contact": {
-    "emailPlaceholder": "vous@exemple.com",
-    "title": "Nous Contacter",
-    "subtitle": "Vous avez des questions? Nous serions ravis de vous entendre. Envoyez-nous un message et nous vous répondrons dès que possible.",
-    "info": {
-      "email": {
-        "title": "Envoyez-nous un Email",
-        "desc": "Nous répondons généralement dans les 24 heures"
-      },
-      "phone": {
-        "title": "Appelez-nous",
-        "desc": "Lun-Ven, 9h-18h EST"
-      },
-      "visit": {
-        "title": "Visitez-nous",
-        "desc": "San Francisco, CA 94102"
-      }
-    },
+    "title": "Contact",
+    "lead": "Écrivez-nous ou utilisez le formulaire. Chaque message est lu par les personnes qui construisent Nowry.",
     "form": {
-      "title": "Envoyez-nous un Message",
-      "success": "Merci! Votre message a été envoyé avec succès. Nous vous répondrons bientôt.",
-      "name": "Votre Nom",
-      "namePlaceholder": "Jean Dupont",
-      "email": "Adresse Email",
-      "subject": "Sujet",
-      "subjectPlaceholder": "Comment pouvons-nous vous aider?",
+      "name": "Votre nom",
+      "email": "Email",
       "message": "Message",
-      "messagePlaceholder": "Parlez-nous de votre question ou commentaire...",
-      "send": "Envoyer le Message"
+      "messagePlaceholder": "Une question, un bug, quelque chose que vous aimeriez que Nowry fasse.",
+      "send": "Envoyer",
+      "sent": "Envoyé. Nous lisons chaque message et répondons à ceux qui le demandent.",
+      "failed": "L'envoi a échoué. Votre message est toujours là ; réessayez ou écrivez à support@nowry.app."
     },
     "faq": {
-      "title": "Questions Fréquentes",
-      "q1": "Comment commencer?",
-      "a1": "Créez simplement un compte gratuit et commencez à explorer nos fonctionnalités. Aucune carte de crédit requise!",
-      "q2": "Nowry est-il vraiment gratuit?",
-      "a2": "Oui! Nos fonctionnalités principales sont entièrement gratuites. Nous proposons également des plans premium avec des fonctionnalités avancées.",
-      "q3": "Puis-je importer mes cartes existantes?",
-      "a3": "Absolument! Nous prenons en charge l'importation de divers formats, notamment CSV, Anki et Quizlet.",
-      "q4": "Offrez-vous des réductions étudiantes?",
-      "a4": "Oui, nous offrons des tarifs spéciaux pour les étudiants vérifiés. Contactez-nous pour plus de détails."
+      "title": "Questions fréquentes",
+      "start": {
+        "q": "Comment commencer ?",
+        "a": "Créez un compte gratuit. Vous pouvez ajouter un livre ou un paquet dès la première minute ; rien n'est bloqué derrière une carte bancaire."
+      },
+      "free": {
+        "q": "Nowry est-il gratuit ?",
+        "a": "Livres, cartes, étude et planification sont gratuits. Plus et Pro paient la génération par IA.",
+        "link": "Voir les tarifs."
+      },
+      "anki": {
+        "q": "Puis-je importer mes paquets Anki ?",
+        "a": "Oui. Importez un fichier .apkg depuis le menu d'un paquet. Les autres formats ne sont pas encore pris en charge."
+      },
+      "phone": {
+        "q": "Existe-t-il une application mobile ?",
+        "a": "Oui, le même compte sur iOS et Android, avec la boucle d'étude en premier."
+      }
+    },
+    "follow": "Suivre le travail",
+    "networks": {
+      "tiktok": "TikTok",
+      "instagram": "Instagram",
+      "x": "X",
+      "facebook": "Facebook"
     }
   },
   "annualPlanning": {

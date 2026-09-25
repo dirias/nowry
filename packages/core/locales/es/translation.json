@@ -1757,45 +1757,43 @@
     }
   },
   "contact": {
-    "emailPlaceholder": "tu@ejemplo.com",
-    "title": "Ponte en Contacto",
-    "subtitle": "¿Tienes preguntas? Nos encantaría saber de ti. Envíanos un mensaje y te responderemos lo antes posible.",
-    "info": {
-      "email": {
-        "title": "Envíanos un Email",
-        "desc": "Normalmente respondemos en 24 horas"
-      },
-      "phone": {
-        "title": "Llámanos",
-        "desc": "Lun-Vie, 9AM-6PM EST"
-      },
-      "visit": {
-        "title": "Visítanos",
-        "desc": "San Francisco, CA 94102"
-      }
-    },
+    "title": "Contacto",
+    "lead": "Escríbenos o usa el formulario. Cada mensaje lo leen las personas que construyen Nowry.",
     "form": {
-      "title": "Envíanos un Mensaje",
-      "success": "¡Gracias! Tu mensaje ha sido enviado exitosamente. Te responderemos pronto.",
-      "name": "Tu Nombre",
-      "namePlaceholder": "Juan Pérez",
-      "email": "Correo Electrónico",
-      "subject": "Asunto",
-      "subjectPlaceholder": "¿Cómo podemos ayudarte?",
+      "name": "Tu nombre",
+      "email": "Correo electrónico",
       "message": "Mensaje",
-      "messagePlaceholder": "Cuéntanos más sobre tu pregunta o comentario...",
-      "send": "Enviar Mensaje"
+      "messagePlaceholder": "Una pregunta, un error, algo que te gustaría que Nowry hiciera.",
+      "send": "Enviar",
+      "sent": "Enviado. Leemos cada mensaje y respondemos los que lo necesitan.",
+      "failed": "No se pudo enviar. Tu mensaje sigue aquí; inténtalo de nuevo o escribe a support@nowry.app."
     },
     "faq": {
-      "title": "Preguntas Frecuentes",
-      "q1": "¿Cómo empiezo?",
-      "a1": "Simplemente crea una cuenta gratuita y comienza a explorar nuestras funciones. ¡No se requiere tarjeta de crédito!",
-      "q2": "¿Nowry es realmente gratis?",
-      "a2": "¡Sí! Nuestras funciones principales son completamente gratuitas. También ofrecemos planes premium con funciones avanzadas.",
-      "q3": "¿Puedo importar mis tarjetas existentes?",
-      "a3": "¡Absolutamente! Admitimos la importación de varios formatos, incluidos CSV, Anki y Quizlet.",
-      "q4": "¿Ofrecen descuentos para estudiantes?",
-      "a4": "Sí, ofrecemos precios especiales para estudiantes verificados. Contáctanos para más detalles."
+      "title": "Preguntas frecuentes",
+      "start": {
+        "q": "¿Cómo empiezo?",
+        "a": "Crea una cuenta gratis. Puedes añadir un libro o un mazo en el primer minuto; nada está detrás de una tarjeta."
+      },
+      "free": {
+        "q": "¿Nowry es gratis?",
+        "a": "Libros, tarjetas, estudio y planificación son gratis. Plus y Pro pagan la generación con IA.",
+        "link": "Ver precios."
+      },
+      "anki": {
+        "q": "¿Puedo traer mis mazos de Anki?",
+        "a": "Sí. Importa un archivo .apkg desde el menú de un mazo. Otros formatos aún no son compatibles."
+      },
+      "phone": {
+        "q": "¿Hay app para el teléfono?",
+        "a": "Sí, la misma cuenta en iOS y Android, con el ciclo de estudio primero."
+      }
+    },
+    "follow": "Sigue el trabajo",
+    "networks": {
+      "tiktok": "TikTok",
+      "instagram": "Instagram",
+      "x": "X",
+      "facebook": "Facebook"
     }
   },
   "annualPlanning": {

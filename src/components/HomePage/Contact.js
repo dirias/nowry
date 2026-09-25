@@ -1,408 +1,170 @@
 import React, { useState } from 'react'
-import {
-  Box,
-  Typography,
-  Button,
-  Sheet,
-  Stack,
-  Card,
-  CardContent,
-  Container,
-  Grid,
-  Input,
-  Textarea,
-  FormControl,
-  FormLabel,
-  Alert
-} from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import {
-  EmailRounded,
-  LocationOnRounded,
-  PhoneRounded,
-  SendRounded,
-  X,
-  Facebook,
-  LinkedIn,
-  Instagram,
-  CheckCircleRounded
-} from '@mui/icons-material'
+import { Link as RouterLink } from 'react-router-dom'
+import { Alert, Box, Button, Container, FormControl, FormLabel, Input, Link, Stack, Textarea, Typography } from '@mui/joy'
+import { contactService } from '@nowry/core/api/services/contact.service'
 
+/** Where the public conversation happens; the same four the footer carries. */
+const FOLLOW = [
+  { key: 'tiktok', href: 'https://www.tiktok.com/@nowry_app' },
+  { key: 'instagram', href: 'https://www.instagram.com/nowry_app/' },
+  { key: 'x', href: 'https://x.com/Nowry_app' },
+  { key: 'facebook', href: 'https://www.facebook.com/profile.php?id=61575408886765' }
+]
+
+const FAQ = ['start', 'free', 'anki', 'phone']
+const EMPTY = { name: '', email: '', message: '' }
+
+/**
+ * Contact (docs/prd-public-site.md D6): the support address, a form that
+ * sends through the API, and four questions with answers the product can
+ * back. Nothing else — no phone, no address, no hours, no map.
+ *
+ * On success the message is cleared and a soft success Alert says so; on
+ * failure the message stays and a soft danger Alert says so (FR-6).
+ */
 const Contact = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const [form, setForm] = useState(EMPTY)
+  const [status, setStatus] = useState('idle') // idle | sending | sent | failed
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  })
-  const [submitted, setSubmitted] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
 
-  const contactInfo = [
-    {
-      icon: <EmailRounded />,
-      title: t('contact.info.email.title'),
-      content: 'support@nowry.com',
-      description: t('contact.info.email.desc'),
-      color: 'primary'
-    },
-    {
-      icon: <PhoneRounded />,
-      title: t('contact.info.phone.title'),
-      content: '+1 (555) 123-4567',
-      description: t('contact.info.phone.desc'),
-      color: 'success'
-    },
-    {
-      icon: <LocationOnRounded />,
-      title: t('contact.info.visit.title'),
-      content: '123 Learning Street',
-      description: t('contact.info.visit.desc'),
-      color: 'warning'
-    }
-  ]
-
-  const socialLinks = [
-    { icon: <X />, label: 'Twitter', url: '#' },
-    { icon: <Facebook />, label: 'Facebook', url: '#' },
-    { icon: <LinkedIn />, label: 'LinkedIn', url: '#' },
-    { icon: <Instagram />, label: 'Instagram', url: '#' }
-  ]
-
-  const faqs = [
-    {
-      question: t('contact.faq.q1'),
-      answer: t('contact.faq.a1')
-    },
-    {
-      question: t('contact.faq.q2'),
-      answer: t('contact.faq.a2')
-    },
-    {
-      question: t('contact.faq.q3'),
-      answer: t('contact.faq.a3')
-    },
-    {
-      question: t('contact.faq.q4'),
-      answer: t('contact.faq.a4')
-    }
-  ]
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-  }
-
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitted(true)
-      setLoading(false)
-      setFormData({ name: '', email: '', subject: '', message: '' })
-
-      // Reset success message after 5 seconds
-      setTimeout(() => setSubmitted(false), 5000)
-    }, 1500)
+    setStatus('sending')
+    try {
+      await contactService.send({ ...form, locale: i18n.language, page: window.location.pathname })
+      setForm(EMPTY)
+      setStatus('sent')
+    } catch {
+      setStatus('failed')
+    }
   }
 
   return (
-    <Sheet
-      sx={{
-        // Fill the remaining space inside the app's flex column — never exceed it.
-        // `minHeight: '100vh'` here would stack on top of the header + footer and
-        // force a scrollbar even when the content is short.
-        flex: 1,
-        bgcolor: 'background.body'
-      }}
-    >
-      <Container maxWidth='lg'>
-        {/* Hero Section */}
+    <Box sx={{ bgcolor: 'background.body', flex: 1 }}>
+      <Container maxWidth='lg' sx={{ py: { xs: 6, md: 10 } }}>
         <Box
           sx={{
-            pt: { xs: 12, md: 16 },
-            pb: { xs: 6, md: 8 },
-            textAlign: 'center'
+            display: 'grid',
+            gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 7fr) minmax(0, 5fr)' },
+            columnGap: { md: 12 },
+            rowGap: 6
           }}
         >
-          <Typography
-            level='display-lg'
-            component='h1'
-            sx={{
-              fontWeight: 800,
-              letterSpacing: -2,
-              lineHeight: 1.1,
-              mb: 3,
-              color: 'primary.plainColor'
-            }}
-          >
-            {t('contact.title')}
-          </Typography>
-          <Typography
-            level='body-lg'
-            sx={{
-              maxWidth: 700,
-              mx: 'auto',
-              color: 'text.secondary',
-              mb: 2
-            }}
-          >
-            {t('contact.subtitle')}
-          </Typography>
-        </Box>
-
-        {/* Contact Info Cards */}
-        <Grid container spacing={3} sx={{ mb: 8 }}>
-          {contactInfo.map((info, index) => (
-            <Grid key={index} xs={12} md={4}>
-              <Card
-                variant='soft'
-                color={info.color}
-                sx={{
-                  height: '100%',
-                  p: 3,
-                  textAlign: 'center',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 'lg'
-                  }
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: `${info.color}.solidBg`,
-                    color: `${info.color}.solidColor`,
-                    mx: 'auto',
-                    mb: 2,
-                    fontSize: 28
-                  }}
-                >
-                  {info.icon}
-                </Box>
-                <Typography level='title-lg' fontWeight={600} mb={1}>
-                  {info.title}
-                </Typography>
-                <Typography level='title-md' mb={0.5}>
-                  {info.content}
-                </Typography>
-                <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                  {info.description}
-                </Typography>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Main Content: Form + FAQ */}
-        <Grid container spacing={6} sx={{ mb: 8 }}>
-          {/* Contact Form */}
-          <Grid xs={12} md={7}>
-            <Card variant='outlined' sx={{ p: 4 }}>
-              <Typography level='h3' fontWeight={700} mb={3}>
-                {t('contact.form.title')}
+          <Stack spacing={4} component='section' aria-labelledby='contact-title'>
+            <Stack spacing={1.5}>
+              <Typography id='contact-title' level='h1' sx={{ color: 'text.primary' }}>
+                {t('contact.title')}
               </Typography>
-
-              {submitted && (
-                <Alert color='success' variant='soft' sx={{ mb: 3 }} startDecorator={<CheckCircleRounded />}>
-                  {t('contact.form.success')}
-                </Alert>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <Stack spacing={2.5}>
-                  <FormControl required>
-                    <FormLabel>{t('contact.form.name')}</FormLabel>
-                    <Input
-                      name='name'
-                      placeholder={t('contact.form.namePlaceholder')}
-                      value={formData.name}
-                      onChange={handleChange}
-                      size='lg'
-                    />
-                  </FormControl>
-
-                  <FormControl required>
-                    <FormLabel>{t('contact.form.email')}</FormLabel>
-                    <Input
-                      type='email'
-                      name='email'
-                      placeholder={t('contact.emailPlaceholder')}
-                      value={formData.email}
-                      onChange={handleChange}
-                      size='lg'
-                    />
-                  </FormControl>
-
-                  <FormControl required>
-                    <FormLabel>{t('contact.form.subject')}</FormLabel>
-                    <Input
-                      name='subject'
-                      placeholder={t('contact.form.subjectPlaceholder')}
-                      value={formData.subject}
-                      onChange={handleChange}
-                      size='lg'
-                    />
-                  </FormControl>
-
-                  <FormControl required>
-                    <FormLabel>{t('contact.form.message')}</FormLabel>
-                    <Textarea
-                      name='message'
-                      placeholder={t('contact.form.messagePlaceholder')}
-                      value={formData.message}
-                      onChange={handleChange}
-                      minRows={6}
-                      size='lg'
-                    />
-                  </FormControl>
-
-                  <Button
-                    type='submit'
-                    size='lg'
-                    loading={loading}
-                    endDecorator={!loading && <SendRounded />}
-                    sx={{
-                      mt: 1,
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: 'lg'
-                      }
-                    }}
-                  >
-                    {t('contact.form.send')}
-                  </Button>
-                </Stack>
-              </form>
-            </Card>
-          </Grid>
-
-          {/* FAQ Section */}
-          <Grid xs={12} md={5}>
-            <Box>
-              <Typography level='h3' fontWeight={700} mb={3}>
-                {t('contact.faq.title')}
-              </Typography>
-
-              <Stack spacing={2}>
-                {faqs.map((faq, index) => (
-                  <Card key={index} variant='outlined' sx={{ p: 2.5 }}>
-                    <Typography level='title-md' fontWeight={600} mb={1}>
-                      {faq.question}
-                    </Typography>
-                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                      {faq.answer}
-                    </Typography>
-                  </Card>
-                ))}
-              </Stack>
-
-              {/* Social Links */}
-              <Box sx={{ mt: 4 }}>
-                <Typography level='title-md' fontWeight={600} mb={2}>
-                  {t('contact.followUs')}
-                </Typography>
-                <Stack direction='row' spacing={1.5}>
-                  {socialLinks.map((social, index) => (
-                    <Box
-                      key={index}
-                      component='a'
-                      href={social.url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      sx={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: 'background.level1',
-                        color: 'text.primary',
-                        transition: 'all 0.2s ease',
-                        textDecoration: 'none',
-                        '&:hover': {
-                          bgcolor: 'primary.solidBg',
-                          color: 'primary.solidColor',
-                          transform: 'translateY(-3px)',
-                          boxShadow: 'md'
-                        }
-                      }}
-                    >
-                      {social.icon}
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-
-        {/* Map Section (Placeholder) */}
-        <Box sx={{ mb: 8 }}>
-          <Card
-            variant='outlined'
-            sx={{
-              height: 400,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'background.level1'
-            }}
-          >
-            <Stack spacing={2} alignItems='center'>
-              <LocationOnRounded sx={{ fontSize: 60, color: 'primary.plainColor' }} />
-              <Typography level='h4' fontWeight={600}>
-                {t('contact.location.title')}
-              </Typography>
-              <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-                123 Learning Street, San Francisco, CA 94102
-              </Typography>
-              <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                {t('contact.location.subtitle')}
+              <Typography level='body-lg' sx={{ color: 'text.secondary' }}>
+                {t('contact.lead')}{' '}
+                <Link href='mailto:support@nowry.app' sx={{ fontWeight: 'lg' }}>
+                  support@nowry.app
+                </Link>
               </Typography>
             </Stack>
-          </Card>
-        </Box>
 
-        {/* Business Hours */}
-        <Box sx={{ pb: 12 }}>
-          <Card variant='soft' color='primary' sx={{ p: 4, textAlign: 'center' }}>
-            <Typography level='h4' fontWeight={700} mb={3}>
-              {t('contact.hours.title')}
-            </Typography>
-            <Grid container spacing={2} sx={{ maxWidth: 600, mx: 'auto' }}>
-              <Grid xs={6}>
-                <Typography level='body-md' fontWeight={600}>
-                  {t('contact.hours.weekdays')}
-                </Typography>
-                <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                  9:00 AM - 6:00 PM EST
-                </Typography>
-              </Grid>
-              <Grid xs={6}>
-                <Typography level='body-md' fontWeight={600}>
-                  {t('contact.hours.weekends')}
-                </Typography>
-                <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-                  10:00 AM - 4:00 PM EST
-                </Typography>
-              </Grid>
-            </Grid>
-          </Card>
+            {status === 'sent' && (
+              <Alert color='success' variant='soft'>
+                {t('contact.form.sent')}
+              </Alert>
+            )}
+            {status === 'failed' && (
+              <Alert color='danger' variant='soft'>
+                {t('contact.form.failed')}
+              </Alert>
+            )}
+
+            <form onSubmit={onSubmit}>
+              <Stack spacing={2.5}>
+                <FormControl required>
+                  <FormLabel>{t('contact.form.name')}</FormLabel>
+                  <Input name='name' value={form.name} onChange={onChange} size='lg' autoComplete='name' />
+                </FormControl>
+                <FormControl required>
+                  <FormLabel>{t('contact.form.email')}</FormLabel>
+                  <Input
+                    type='email'
+                    name='email'
+                    value={form.email}
+                    onChange={onChange}
+                    size='lg'
+                    autoComplete='email'
+                    placeholder={t('auth.emailPlaceholder')}
+                  />
+                </FormControl>
+                <FormControl required>
+                  <FormLabel>{t('contact.form.message')}</FormLabel>
+                  <Textarea
+                    name='message'
+                    value={form.message}
+                    onChange={onChange}
+                    minRows={6}
+                    size='lg'
+                    placeholder={t('contact.form.messagePlaceholder')}
+                  />
+                </FormControl>
+                <Box>
+                  <Button type='submit' size='lg' loading={status === 'sending'}>
+                    {t('contact.form.send')}
+                  </Button>
+                </Box>
+              </Stack>
+            </form>
+          </Stack>
+
+          <Stack spacing={5} component='aside'>
+            <Stack component='section' aria-labelledby='contact-faq-title' spacing={1}>
+              <Typography id='contact-faq-title' level='title-md' component='h2' sx={{ color: 'text.tertiary' }}>
+                {t('contact.faq.title')}
+              </Typography>
+              <Stack component='dl' sx={{ m: 0 }}>
+                {FAQ.map((key) => (
+                  <Box key={key} sx={{ py: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                    <Typography component='dt' level='title-md' sx={{ color: 'text.primary', mb: 0.5 }}>
+                      {t(`contact.faq.${key}.q`)}
+                    </Typography>
+                    <Typography component='dd' level='body-sm' sx={{ color: 'text.secondary', m: 0 }}>
+                      {t(`contact.faq.${key}.a`)}
+                      {key === 'free' && (
+                        <>
+                          {' '}
+                          <Link component={RouterLink} to={{ pathname: '/', hash: '#pricing' }} sx={{ fontWeight: 'lg' }}>
+                            {t('contact.faq.free.link')}
+                          </Link>
+                        </>
+                      )}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Stack>
+
+            <Stack component='section' aria-labelledby='contact-follow-title' spacing={1.5}>
+              <Typography id='contact-follow-title' level='title-md' component='h2' sx={{ color: 'text.tertiary' }}>
+                {t('contact.follow')}
+              </Typography>
+              <Stack direction='row' spacing={2.5} flexWrap='wrap' useFlexGap>
+                {FOLLOW.map(({ key, href }) => (
+                  <Link
+                    key={key}
+                    href={href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    level='body-md'
+                    sx={{ color: 'text.secondary', fontWeight: 'lg' }}
+                  >
+                    {t(`contact.networks.${key}`)}
+                  </Link>
+                ))}
+              </Stack>
+            </Stack>
+          </Stack>
         </Box>
       </Container>
-    </Sheet>
+    </Box>
   )
 }
 

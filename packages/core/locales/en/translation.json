@@ -530,55 +530,43 @@
     }
   },
   "contact": {
-    "emailPlaceholder": "you@example.com",
-    "title": "Get in Touch",
-    "subtitle": "Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
-    "info": {
-      "email": {
-        "title": "Email Us",
-        "desc": "We typically respond within 24 hours"
-      },
-      "phone": {
-        "title": "Call Us",
-        "desc": "Mon-Fri, 9AM-6PM EST"
-      },
-      "visit": {
-        "title": "Visit Us",
-        "desc": "San Francisco, CA 94102"
-      }
-    },
+    "title": "Contact",
+    "lead": "Write to us or use the form. Every message is read by the people who build Nowry.",
     "form": {
-      "title": "Send us a Message",
-      "success": "Thank you! Your message has been sent successfully. We'll get back to you soon.",
-      "name": "Your Name",
-      "namePlaceholder": "John Doe",
-      "email": "Email Address",
-      "subject": "Subject",
-      "subjectPlaceholder": "How can we help?",
+      "name": "Your name",
+      "email": "Email",
       "message": "Message",
-      "messagePlaceholder": "Tell us more about your question or feedback...",
-      "send": "Send Message"
+      "messagePlaceholder": "A question, a bug, something you wish Nowry did.",
+      "send": "Send",
+      "sent": "Sent. We read every message and answer the ones that need one.",
+      "failed": "That did not go through. Your message is still here; try again, or email support@nowry.app."
     },
     "faq": {
-      "title": "Frequently Asked",
-      "q1": "How do I get started?",
-      "a1": "Simply create a free account and start exploring our features. No credit card required!",
-      "q2": "Is Nowry really free?",
-      "a2": "Yes! Our core features are completely free. We also offer premium plans with advanced features.",
-      "q3": "Can I import my existing flashcards?",
-      "a3": "Absolutely! We support importing from various formats including CSV, Anki, and Quizlet.",
-      "q4": "Do you offer student discounts?",
-      "a4": "Yes! Students with a valid .edu email get 50% off all premium plans."
+      "title": "Questions people ask",
+      "start": {
+        "q": "How do I start?",
+        "a": "Create a free account. You can add a book or a deck in the first minute; nothing is gated behind a card."
+      },
+      "free": {
+        "q": "Is Nowry free?",
+        "a": "Books, cards, study and planning are free. Plus and Pro pay for AI generation.",
+        "link": "See pricing."
+      },
+      "anki": {
+        "q": "Can I bring my Anki decks?",
+        "a": "Yes. Import an .apkg file from a deck's menu. Other formats are not supported yet."
+      },
+      "phone": {
+        "q": "Is there a phone app?",
+        "a": "Yes, the same account on iOS and Android, with the study loop first."
+      }
     },
-    "followUs": "Follow Us",
-    "location": {
-      "title": "Our Location",
-      "subtitle": "Interactive map coming soon"
-    },
-    "hours": {
-      "title": "Business Hours",
-      "weekdays": "Monday - Friday",
-      "weekends": "Saturday - Sunday"
+    "follow": "Follow the work",
+    "networks": {
+      "tiktok": "TikTok",
+      "instagram": "Instagram",
+      "x": "X",
+      "facebook": "Facebook"
     }
   },
   "onboarding": {
