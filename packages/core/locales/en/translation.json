@@ -311,7 +311,7 @@
     "welcomeBack": "Welcome Back",
     "signInSubtitle": "Sign in to continue your learning journey",
     "createAccount": "Create Account",
-    "createAccountSubtitle": "Join thousands of learners worldwide",
+    "createAccountSubtitle": "Free, no card. Nowry is in early access.",
     "email": "Email",
     "password": "Password",
     "username": "Username",
@@ -391,37 +391,12 @@
   "landing": {
     "hero": {
       "title": "Your books,\nyour cards,\nyour year.",
-      "subtitle": "The all-in-one study app with smart books, AI-powered flashcards, and spaced repetition — built for people who take learning seriously.",
       "lead": "Nowry turns what you read into flashcards, schedules every review, and ties your studying to the goals you set for the year. On the web and on your phone. Free to start.",
       "cta": "Create a free account",
       "proof": "Browse the public library",
       "fineprint": "No card required. Five languages: English, Español, Français, Deutsch, 日本語.",
       "frameCaption": "The Study Center, as it looks today.",
       "phoneCaption": "Home on the phone, as it looks today."
-    },
-    "features": {
-      "title": "Everything You Need to Excel",
-      "subtitle": "Powerful features designed to make learning enjoyable and effective",
-      "smartBooks": {
-        "title": "Smart Books",
-        "desc": "Write notes, highlight passages, and generate flashcards from any paragraph with one tap"
-      },
-      "aiPowered": {
-        "title": "AI-Powered",
-        "desc": "AI suggests flashcards from your book highlights and adapts to your weak areas"
-      },
-      "spacedRepetition": {
-        "title": "Spaced Repetition",
-        "desc": "Rate each card as Easy, Good, Hard, or Missed — the algorithm handles the rest"
-      },
-      "trackProgress": {
-        "title": "Track Progress",
-        "desc": "See your review streaks, card mastery rate, and study time at a glance"
-      }
-    },
-    "cta": {
-      "title": "Be Part of Something Early",
-      "subtitle": "Nowry is in early access. Join now and help shape the product."
     },
     "loop": {
       "title": "Read, make cards, study, plan. Then again.",

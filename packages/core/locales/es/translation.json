@@ -290,7 +290,7 @@
     "welcomeBack": "Bienvenido de nuevo",
     "signInSubtitle": "Inicia sesión para continuar tu aprendizaje",
     "createAccount": "Crear Cuenta",
-    "createAccountSubtitle": "Únete a miles de estudiantes en todo el mundo",
+    "createAccountSubtitle": "Gratis, sin tarjeta. Nowry está en acceso anticipado.",
     "email": "Correo electrónico",
     "password": "Contraseña",
     "username": "Nombre de usuario",
@@ -370,37 +370,12 @@
   "landing": {
     "hero": {
       "title": "Tus libros,\ntus tarjetas,\ntu año.",
-      "subtitle": "La app de estudio todo en uno con libros inteligentes, tarjetas con IA y repetición espaciada — para quienes se toman el aprendizaje en serio.",
       "lead": "Nowry convierte lo que lees en tarjetas, programa cada repaso y conecta tu estudio con las metas que fijas para el año. En la web y en tu teléfono. Gratis para empezar.",
       "cta": "Crear una cuenta gratis",
       "proof": "Explorar la biblioteca pública",
       "fineprint": "Sin tarjeta. Cinco idiomas: English, Español, Français, Deutsch, 日本語.",
       "frameCaption": "El Centro de estudio, tal como se ve hoy.",
       "phoneCaption": "Inicio en el teléfono, tal como se ve hoy."
-    },
-    "features": {
-      "title": "Todo lo que Necesitas para Destacar",
-      "subtitle": "Funciones poderosas diseñadas para hacer el aprendizaje agradable y efectivo",
-      "smartBooks": {
-        "title": "Libros Inteligentes",
-        "desc": "Escribe notas, resalta párrafos y genera tarjetas de cualquier pasaje con un toque"
-      },
-      "aiPowered": {
-        "title": "Impulsado por IA",
-        "desc": "La IA sugiere tarjetas a partir de tus resaltados y se adapta a tus áreas débiles"
-      },
-      "spacedRepetition": {
-        "title": "Repetición Espaciada",
-        "desc": "Califica cada tarjeta como Fácil, Bien, Difícil o Fallida — el algoritmo hace el resto"
-      },
-      "trackProgress": {
-        "title": "Seguimiento del Progreso",
-        "desc": "Ve tus rachas, tasa de dominio y tiempo de estudio de un vistazo"
-      }
-    },
-    "cta": {
-      "title": "Sé parte desde el principio",
-      "subtitle": "Nowry está en acceso anticipado. Únete ahora y ayuda a dar forma al producto."
     },
     "loop": {
       "title": "Lee, crea tarjetas, estudia, planifica. Y otra vez.",

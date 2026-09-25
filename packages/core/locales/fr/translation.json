@@ -320,7 +320,7 @@
     "welcomeBack": "Bon retour",
     "signInSubtitle": "Connectez-vous pour continuer votre apprentissage",
     "createAccount": "Créer un compte",
-    "createAccountSubtitle": "Rejoignez des milliers d'apprenants dans le monde",
+    "createAccountSubtitle": "Gratuit, sans carte bancaire. Nowry est en accès anticipé.",
     "email": "Email",
     "password": "Mot de passe",
     "username": "Nom d'utilisateur",
@@ -400,37 +400,12 @@
   "landing": {
     "hero": {
       "title": "Vos livres,\nvos cartes,\nvotre année.",
-      "subtitle": "L'app d'étude tout-en-un avec des livres intelligents, des flashcards IA et la répétition espacée — pour ceux qui prennent l'apprentissage au sérieux.",
       "lead": "Nowry transforme ce que vous lisez en cartes, programme chaque révision et relie vos études aux objectifs que vous fixez pour l'année. Sur le web et sur votre téléphone. Gratuit pour commencer.",
       "cta": "Créer un compte gratuit",
       "proof": "Parcourir la bibliothèque publique",
       "fineprint": "Sans carte bancaire. Cinq langues : English, Español, Français, Deutsch, 日本語.",
       "frameCaption": "Le Centre d'étude, tel qu'il est aujourd'hui.",
       "phoneCaption": "L'accueil sur le téléphone, tel qu'il est aujourd'hui."
-    },
-    "features": {
-      "title": "Tout ce dont Vous Avez Besoin pour Exceller",
-      "subtitle": "Des fonctionnalités puissantes conçues pour rendre l'apprentissage agréable et efficace",
-      "smartBooks": {
-        "title": "Livres Intelligents",
-        "desc": "Prenez des notes, surlignez des passages et générez des cartes depuis n'importe quel paragraphe en un geste"
-      },
-      "aiPowered": {
-        "title": "Alimenté par l'IA",
-        "desc": "L'IA suggère des cartes à partir de vos surlignages et s'adapte à vos points faibles"
-      },
-      "spacedRepetition": {
-        "title": "Répétition Espacée",
-        "desc": "Notez chaque carte comme Facile, Bien, Difficile ou Raté — l'algorithme s'occupe du reste"
-      },
-      "trackProgress": {
-        "title": "Suivi des Progrès",
-        "desc": "Visualisez vos séries, taux de maîtrise et temps d'étude en un coup d'œil"
-      }
-    },
-    "cta": {
-      "title": "Rejoignez l'aventure dès le début",
-      "subtitle": "Nowry est en accès anticipé. Rejoignez-nous maintenant et aidez à façonner le produit."
     },
     "loop": {
       "title": "Lire, créer des cartes, étudier, planifier. Et recommencer.",

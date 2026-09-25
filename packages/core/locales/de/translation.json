@@ -309,7 +309,7 @@
     "welcomeBack": "Willkommen zurück",
     "signInSubtitle": "Melde dich an, um weiterzulernen",
     "createAccount": "Konto erstellen",
-    "createAccountSubtitle": "Schließe dich tausenden Lernenden weltweit an",
+    "createAccountSubtitle": "Kostenlos, ohne Karte. Nowry ist im Early Access.",
     "email": "E-Mail",
     "password": "Passwort",
     "username": "Benutzername",
@@ -389,37 +389,12 @@
   "landing": {
     "hero": {
       "title": "Deine Bücher,\ndeine Karten,\ndein Jahr.",
-      "subtitle": "Die All-in-One-Lern-App mit intelligenten Büchern, KI-Karteikarten und Spaced Repetition — für Menschen, die Lernen ernst nehmen.",
       "lead": "Nowry macht aus dem, was du liest, Karteikarten, plant jede Wiederholung und verbindet dein Lernen mit den Zielen, die du dir für das Jahr setzt. Im Web und auf dem Handy. Kostenlos zum Start.",
       "cta": "Kostenloses Konto erstellen",
       "proof": "Öffentliche Bibliothek ansehen",
       "fineprint": "Keine Karte nötig. Fünf Sprachen: English, Español, Français, Deutsch, 日本語.",
       "frameCaption": "Das Lernzentrum, so wie es heute aussieht.",
       "phoneCaption": "Home auf dem Handy, so wie es heute aussieht."
-    },
-    "features": {
-      "title": "Alles, Was Sie zum Erfolg Brauchen",
-      "subtitle": "Leistungsstarke Funktionen, die das Lernen angenehm und effektiv machen",
-      "smartBooks": {
-        "title": "Intelligente Bücher",
-        "desc": "Notizen schreiben, Passagen markieren und Karteikarten aus beliebigen Absätzen generieren"
-      },
-      "aiPowered": {
-        "title": "KI-Gesteuert",
-        "desc": "KI schlägt Karteikarten aus Ihren Markierungen vor und passt sich Ihren Schwächen an"
-      },
-      "spacedRepetition": {
-        "title": "Verteilte Wiederholung",
-        "desc": "Jede Karte als Einfach, Gut, Schwer oder Verpasst bewerten — der Algorithmus erledigt den Rest"
-      },
-      "trackProgress": {
-        "title": "Fortschritt Verfolgen",
-        "desc": "Serien, Beherrschungsrate und Lernzeit auf einen Blick sehen"
-      }
-    },
-    "cta": {
-      "title": "Teil von etwas Besonderem sein",
-      "subtitle": "Nowry befindet sich im Early Access. Mach jetzt mit und gestalte das Produkt."
     },
     "loop": {
       "title": "Lesen, Karten machen, lernen, planen. Und wieder von vorn.",
