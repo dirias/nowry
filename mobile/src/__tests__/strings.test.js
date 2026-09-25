@@ -118,7 +118,13 @@ const USER_FACING =
 const NOT_TRANSLATABLE = new Set([
   'Nowry',
   // The same name as the wordmark draws it: lower-case by design (ADR-034).
-  'nowry'
+  'nowry',
+  // The display lockup (BRAND-009) sets the name in three pieces — `n`, the
+  // coil standing in for the `o`, then `wry` — so the tail of the proper noun
+  // appears as its own text node. It is the same word as `nowry` above and just
+  // as untranslatable; the lockup carries `nowry` as its accessibility label, so
+  // nothing reads the fragment aloud. (`n` is too short for JSX_TEXT to see.)
+  'wry'
 ])
 
 describe('no user-facing string is written in English in the source', () => {

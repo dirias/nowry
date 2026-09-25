@@ -123,3 +123,51 @@ export function spiralMark({ preset = 'full', headDeg = -55, pad = 0.04 } = {}) 
     eye: { cx: round(head.cx + facing.x * r * 0.18), cy: round(head.cy + facing.y * r * 0.18), r: round(r * 0.3) }
   }
 }
+
+/**
+ * The display lockup's fit: what it takes for the coil to sit as the `o` of
+ * `nowry` (BRAND-009, ADR-034's 2026-09-25 amendment).
+ *
+ * Every value is a fraction of the font size, so one set of numbers serves both
+ * clients at any size. They are measured, not guessed — five fits were rendered
+ * at 72, 40, 22 and 16 px and read:
+ *
+ * - `em` 0.72 with `pad` 0. A round glyph fitted inside a square box always
+ *   reads small; the canvas's 0.604 em box plus the geometry's own 0.02 padding
+ *   left the coil looking like a dot between the `n` and the `w`.
+ * - `side` −0.01. An `o` is fitted tighter than an `n` because its silhouette
+ *   curves away at the corners; the square SVG box does not, so it needs pulling in.
+ * - `headDeg` −100, where the mark itself uses −55. At −55 the head hangs down
+ *   and right, into the `w`. At −100 the coil's opening sits where an `o` closes.
+ *
+ * `MIN_PX` is the floor, and it is the whole reason there are two lockups: below
+ * it the turns merge and the coil reads as a bullet. At the app bar's 22 px the
+ * word still reads and the mark does not — see BRAND.md.
+ */
+export const WORDMARK_FIT = Object.freeze({
+  em: 0.72,
+  side: -0.01,
+  drop: 0.105,
+  headDeg: -100,
+  pad: 0,
+  MIN_PX: 40
+})
+
+/**
+ * The coil as the letter `o`, at a given font size.
+ *
+ * @param {number} fontPx - the wordmark's font size in px
+ * @returns {{ size: number, side: number, drop: number, mark: object }|null}
+ *   `null` below `WORDMARK_FIT.MIN_PX`, which is the signal to draw the standard
+ *   lockup instead. Callers must honour it rather than scaling down anyway.
+ */
+export function wordmarkCoil(fontPx) {
+  if (typeof fontPx !== 'number' || !(fontPx >= WORDMARK_FIT.MIN_PX)) return null
+  const { em, side, drop, headDeg, pad } = WORDMARK_FIT
+  return {
+    size: Math.round(fontPx * em),
+    side: round(fontPx * side),
+    drop: round(fontPx * drop),
+    mark: spiralMark({ preset: 'full', headDeg, pad })
+  }
+}

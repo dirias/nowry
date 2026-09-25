@@ -42,9 +42,28 @@ crest · outlines, shadows, gradients or a rotated mark · the owl.
 
 ## The wordmark
 
-`nowry`, lower-case, the display face at its heaviest weight (`fontWeight: 'xl'`), tracking −0.03 em,
-beside the mark at a gap of 8 px. It is a proper noun: never translated, never set in capitals. The
-display face is the app's `display` token until DS-007 decides it.
+`nowry`, lower-case, the display face at its heaviest weight (`fontWeight: 'xl'`), tracking −0.03 em.
+It is a proper noun: never translated, never set in capitals. The display face is the app's `display`
+token until DS-007 decides it.
+
+### Two lockups, chosen by size
+
+| Lockup | Where | Component |
+|---|---|---|
+| **Standard** — the mark beside the word, gap 8 px | every product size; the only lockup below 40 px | `BrandLockup` |
+| **Display** — the coil in place of the `o` | 40 px type and above: splash, landing header, marketing | `BrandWordmark` |
+
+**The 40 px floor is not a preference.** Below it the coil's turns merge: at the app bar's 22 px it
+reads as a bullet, so the word survives and the mark does not — at the one size every learner sees on
+every screen. Measured on 2026-09-25 (ADR-034's amendment). Above it the display lockup is the
+stronger mark and about 30% narrower.
+
+- **Fit:** `WORDMARK_FIT` in `@nowry/core/tokens/brandMark.js`, applied by each client's
+  `BrandWordmark`. A 0.72 em coil box with `pad: 0`, bearings −0.01 em, baseline drop 0.105 em, head
+  at −100°. Never re-derive these per client, and never nudge them per screen.
+- **Why the head turns.** The mark's own −55° points the head down and right, straight into the `w`.
+  At −100° the coil's opening sits where an `o` closes.
+- **Colour:** both lockups follow the mark's rule — one colour, the foreground of the ground.
 
 ## What stays fixed across accents
 
