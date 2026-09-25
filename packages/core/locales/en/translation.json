@@ -468,7 +468,6 @@
           "plan": "Plan",
           "calendar": "Calendar"
         },
-        "chip": "Study · {{count}}",
         "readout": "{{cards}} cards due · {{decks}} decks · {{days}}-day streak",
         "decks": {
           "chem": "Organic chemistry",
@@ -476,10 +475,12 @@
           "kant": "Kant, first critique",
           "algebra": "Linear algebra"
         },
-        "due": "{{count}} due",
         "upToDate": "up to date",
         "week": "This week",
-        "stage": "stage {{stage}} · {{turns}} turns"
+        "stage": "stage {{stage}} · {{turns}} turns",
+        "chipLabel": "Study",
+        "due_one": "{{count}} due",
+        "due_other": "{{count}} due"
       },
       "book": {
         "section": "3 · Mitochondria",
@@ -517,8 +518,9 @@
           "read": "Read Mitochondria §4",
           "run": "Run · 30 min"
         },
-        "due": "{{count}} decks due",
-        "focus": "Focus"
+        "focus": "Focus",
+        "due_one": "{{count}} deck due",
+        "due_other": "{{count}} decks due"
       }
     },
     "pricing": {
@@ -2790,6 +2792,10 @@
       "title": "Share something you have made",
       "body": "The library grows from the books and decks people publish.",
       "cta": "Publish from your library"
+    },
+    "emptyLibrary": {
+      "title": "Nothing here yet",
+      "body": "The library is new. Publish a book or a deck from your own library and be the first."
     }
   },
   "focusBar": {

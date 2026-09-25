@@ -213,7 +213,9 @@ describe('a thin result set', () => {
   it('leaves an empty result to the empty state, not to the invitation', async () => {
     await renderBrowse([])
 
-    expect(await screen.findByText('public.noResults')).toBeInTheDocument()
+    // No search and no category: the library is new, not filtered (SITE-007).
+    expect(await screen.findByText('public.emptyLibrary.title')).toBeInTheDocument()
+    expect(screen.queryByText('public.noResults')).not.toBeInTheDocument()
     expect(screen.queryByTestId('sparse-library')).not.toBeInTheDocument()
     expect(screen.queryByText('public.sparse.title')).not.toBeInTheDocument()
   })

@@ -477,7 +477,6 @@
           "plan": "Planification",
           "calendar": "Calendrier"
         },
-        "chip": "Étudier · {{count}}",
         "readout": "{{cards}} cartes à revoir · {{decks}} paquets · {{days}} jours d'affilée",
         "decks": {
           "chem": "Chimie organique",
@@ -485,10 +484,12 @@
           "kant": "Kant, première critique",
           "algebra": "Algèbre linéaire"
         },
-        "due": "{{count}} à revoir",
         "upToDate": "à jour",
         "week": "Cette semaine",
-        "stage": "stade {{stage}} · {{turns}} tours"
+        "stage": "stade {{stage}} · {{turns}} tours",
+        "chipLabel": "Étudier",
+        "due_one": "{{count}} à revoir",
+        "due_other": "{{count}} à revoir"
       },
       "book": {
         "section": "3 · Mitochondries",
@@ -526,8 +527,9 @@
           "read": "Lire Mitochondries §4",
           "run": "Course · 30 min"
         },
-        "due": "{{count}} paquets à revoir",
-        "focus": "Concentration"
+        "focus": "Concentration",
+        "due_one": "{{count}} paquet à revoir",
+        "due_other": "{{count}} paquets à revoir"
       }
     },
     "pricing": {
@@ -2802,6 +2804,10 @@
       "beginner": "Débutant",
       "intermediate": "Intermédiaire",
       "advanced": "Avancé"
+    },
+    "emptyLibrary": {
+      "title": "Rien ici pour l'instant",
+      "body": "La bibliothèque est nouvelle. Publiez un livre ou un paquet depuis votre propre bibliothèque et soyez la première personne."
     }
   },
   "editor": {

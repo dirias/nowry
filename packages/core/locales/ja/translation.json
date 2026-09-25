@@ -445,7 +445,6 @@
           "plan": "計画",
           "calendar": "カレンダー"
         },
-        "chip": "学習 · {{count}}",
         "readout": "復習待ち {{cards}} 枚 · {{decks}} デッキ · {{days}} 日連続",
         "decks": {
           "chem": "有機化学",
@@ -453,10 +452,11 @@
           "kant": "カント『純粋理性批判』",
           "algebra": "線形代数"
         },
-        "due": "{{count}} 枚",
         "upToDate": "最新",
         "week": "今週",
-        "stage": "ステージ {{stage}} · {{turns}} 巻き"
+        "stage": "ステージ {{stage}} · {{turns}} 巻き",
+        "chipLabel": "学習",
+        "due_other": "{{count}} 枚"
       },
       "book": {
         "section": "3 · ミトコンドリア",
@@ -494,8 +494,8 @@
           "read": "ミトコンドリア §4 を読む",
           "run": "ランニング · 30 分"
         },
-        "due": "復習待ちデッキ {{count}}",
-        "focus": "フォーカス"
+        "focus": "フォーカス",
+        "due_other": "復習待ちデッキ {{count}}"
       }
     },
     "pricing": {
@@ -2702,6 +2702,10 @@
       "beginner": "初級",
       "intermediate": "中級",
       "advanced": "上級"
+    },
+    "emptyLibrary": {
+      "title": "まだ何もありません",
+      "body": "ライブラリはできたばかりです。自分のライブラリから本やデッキを公開して、最初の一人になってください。"
     }
   },
   "editor": {

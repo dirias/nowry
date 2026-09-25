@@ -91,7 +91,7 @@ const PhoneFrame = ({ sx = {} }) => {
 
       <Stack direction='row' alignItems='center' spacing={1.25} sx={{ ...framePanel, borderRadius: 'lg', p: 1.5 }}>
         <Typography level='body-xs' sx={frameSolidChip}>
-          {t('landing.frames.studyCenter.chip', { count: 21 })}
+          {t('landing.frames.studyCenter.chipLabel')} · 21
         </Typography>
         <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
           {t('landing.frames.phone.due', { count: DUE_DECKS })}

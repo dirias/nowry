@@ -66,7 +66,7 @@ const StudyCenterFrame = ({ sx = {} }) => {
 
           <Stack direction='row' alignItems='center' spacing={1.5} sx={{ ...framePanel, px: 1.5, py: 1.25 }}>
             <Typography level='body-xs' sx={frameSolidChip}>
-              {t('landing.frames.studyCenter.chip', { count: SUMMARY.cards })}
+              {t('landing.frames.studyCenter.chipLabel')} · {SUMMARY.cards}
             </Typography>
             <Typography level='body-xs' sx={{ color: 'text.secondary', minWidth: 0 }}>
               {t('landing.frames.studyCenter.readout', SUMMARY)}

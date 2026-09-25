@@ -447,7 +447,6 @@
           "plan": "Planificación",
           "calendar": "Calendario"
         },
-        "chip": "Estudiar · {{count}}",
         "readout": "{{cards}} tarjetas pendientes · {{decks}} mazos · racha de {{days}} días",
         "decks": {
           "chem": "Química orgánica",
@@ -455,10 +454,12 @@
           "kant": "Kant, primera crítica",
           "algebra": "Álgebra lineal"
         },
-        "due": "{{count}} pendientes",
         "upToDate": "al día",
         "week": "Esta semana",
-        "stage": "etapa {{stage}} · {{turns}} vueltas"
+        "stage": "etapa {{stage}} · {{turns}} vueltas",
+        "chipLabel": "Estudiar",
+        "due_one": "{{count}} pendiente",
+        "due_other": "{{count}} pendientes"
       },
       "book": {
         "section": "3 · Mitocondrias",
@@ -496,8 +497,9 @@
           "read": "Leer Mitocondrias §4",
           "run": "Correr · 30 min"
         },
-        "due": "{{count}} mazos pendientes",
-        "focus": "Enfoque"
+        "focus": "Enfoque",
+        "due_one": "{{count}} mazo pendiente",
+        "due_other": "{{count}} mazos pendientes"
       }
     },
     "pricing": {
@@ -2609,6 +2611,10 @@
       "title": "Comparte algo que hayas creado",
       "body": "La biblioteca crece con los libros y mazos que la gente publica.",
       "cta": "Publicar desde tu biblioteca"
+    },
+    "emptyLibrary": {
+      "title": "Aún no hay nada aquí",
+      "body": "La biblioteca es nueva. Publica un libro o un mazo desde tu propia biblioteca y sé la primera persona."
     }
   },
   "publish": {

@@ -466,7 +466,6 @@
           "plan": "Planung",
           "calendar": "Kalender"
         },
-        "chip": "Lernen · {{count}}",
         "readout": "{{cards}} Karten fällig · {{decks}} Stapel · {{days}} Tage in Folge",
         "decks": {
           "chem": "Organische Chemie",
@@ -474,10 +473,12 @@
           "kant": "Kant, erste Kritik",
           "algebra": "Lineare Algebra"
         },
-        "due": "{{count}} fällig",
         "upToDate": "auf Stand",
         "week": "Diese Woche",
-        "stage": "Stufe {{stage}} · {{turns}} Windungen"
+        "stage": "Stufe {{stage}} · {{turns}} Windungen",
+        "chipLabel": "Lernen",
+        "due_one": "{{count}} fällig",
+        "due_other": "{{count}} fällig"
       },
       "book": {
         "section": "3 · Mitochondrien",
@@ -515,8 +516,9 @@
           "read": "Mitochondrien §4 lesen",
           "run": "Laufen · 30 Min."
         },
-        "due": "{{count}} Stapel fällig",
-        "focus": "Fokus"
+        "focus": "Fokus",
+        "due_one": "{{count}} Stapel fällig",
+        "due_other": "{{count}} Stapel fällig"
       }
     },
     "pricing": {
@@ -2791,6 +2793,10 @@
       "beginner": "Anfänger",
       "intermediate": "Fortgeschritten",
       "advanced": "Experte"
+    },
+    "emptyLibrary": {
+      "title": "Hier ist noch nichts",
+      "body": "Die Bibliothek ist neu. Veröffentliche ein Buch oder einen Stapel aus deiner eigenen Bibliothek und sei die erste Person."
     }
   },
   "editor": {

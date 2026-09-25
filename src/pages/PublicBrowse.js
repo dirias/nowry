@@ -104,6 +104,9 @@ const PublicBrowse = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [deckCards, setDeckCards] = useState({}) // Store cards for each deck
 
+  /** A search or a category narrows the library; an empty result without either means the library is empty. */
+  const isFiltered = Boolean(filters.search || filters.category)
+
   const handleViewChange = (newMode) => {
     setViewMode(newMode)
     localStorage.setItem('public_view_mode', newMode)
@@ -476,14 +479,14 @@ const PublicBrowse = () => {
         </Box>
       )}
 
-      {/* Empty State */}
+      {/* Empty State — an empty library with no filter is new, not filtered (SITE-007) */}
       {!loading && items.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography level='h4' sx={{ mb: 1 }}>
-            {t('public.noResults')}
+            {isFiltered ? t('public.noResults') : t('public.emptyLibrary.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('public.tryFilters')}
+            {isFiltered ? t('public.tryFilters') : t('public.emptyLibrary.body')}
           </Typography>
         </Box>
       )}
