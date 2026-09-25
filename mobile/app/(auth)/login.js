@@ -1,13 +1,12 @@
 /**
- * Sign in with email (MOB-016).
+ * Sign in with email (MOB-016), on the shared AuthShell (SITE-010).
  *
  * Every Firebase call here works on React Native unchanged — `signInWithEmailAndPassword`
- * through the shared `authService`. Google is the one exception and arrives in
- * MOB-017 (ADR-028).
+ * through the shared `authService`. Google is the one exception (ADR-028, MOB-017).
  *
  * The error text comes from `authErrorKey` in @nowry/core, the same table the
- * web screens now read, so a wrong password says the same thing on both clients
- * by construction rather than by two switches that agree today.
+ * web screens read, so a wrong password says the same thing on both clients by
+ * construction rather than by two switches that agree today.
  *
  * The primary is never disabled to enforce validation (BUTTONS.md §4). An empty
  * field fails loudly under the field on press; a grey button that will not say
@@ -18,7 +17,8 @@ import { Link } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
-import { Button, FormField, Input, Screen, Stack, Typography } from '../../src/ui'
+import { Button, Divider, FormField, Input, Stack, Typography } from '../../src/ui'
+import { AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
 
 export default function Login() {
   const { t } = useTranslation()
@@ -69,21 +69,18 @@ export default function Login() {
   }
 
   return (
-    <Screen>
-      <Stack spacing={3} justifyContent='center' flex={1}>
-        <Stack spacing={1}>
-          <Typography level='h2'>{t('auth.welcomeBack')}</Typography>
-          <Typography level='body-md' color='text.secondary'>
-            {t('auth.signInSubtitle')}
-          </Typography>
-        </Stack>
+    <AuthShell
+      title={t('auth.welcomeBack')}
+      subtitle={t('auth.signInSubtitle')}
+      footer={<AuthFooter prompt={t('auth.newHere')} href='/register' label={t('landing.hero.cta')} />}
+    >
+      {errors.form ? (
+        <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+          {t(errors.form)}
+        </Typography>
+      ) : null}
 
-        {errors.form ? (
-          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {t(errors.form)}
-          </Typography>
-        ) : null}
-
+      <Stack spacing={2}>
         <FormField labelKey='auth.email' errorKey={errors.email}>
           <Input
             value={email}
@@ -114,31 +111,29 @@ export default function Login() {
           />
         </FormField>
 
-        <Button onPress={submit} loading={busy} accessibilityLabel={t('auth.signIn')}>
-          {t('auth.signIn')}
-        </Button>
-
-        <Typography level='body-xs' color='text.tertiary' style={{ textAlign: 'center' }}>
-          {t('auth.orContinueWith')}
-        </Typography>
-
-        <Button variant='secondary' onPress={submitGoogle} loading={googleBusy} accessibilityLabel={t('auth.signInGoogle')}>
-          {t('auth.signInGoogle')}
-        </Button>
-
-        <Stack direction='row' spacing={1} justifyContent='center'>
+        <Stack direction='row'>
           <Link href='/resetPassword' asChild>
             <Button variant='tertiary' size='sm'>
               {t('auth.forgotPassword')}
             </Button>
           </Link>
-          <Link href='/register' asChild>
-            <Button variant='tertiary' size='sm'>
-              {t('auth.createOne')}
-            </Button>
-          </Link>
         </Stack>
       </Stack>
-    </Screen>
+
+      <Button size='lg' onPress={submit} loading={busy} accessibilityLabel={t('auth.signIn')}>
+        {t('auth.signIn')}
+      </Button>
+
+      <Stack direction='row' alignItems='center' spacing={1.5}>
+        <Typography level='body-xs' color='text.tertiary'>
+          {t('auth.orContinueWith')}
+        </Typography>
+        <Divider style={{ flex: 1 }} />
+      </Stack>
+
+      <Button variant='secondary' size='lg' onPress={submitGoogle} loading={googleBusy} accessibilityLabel={t('auth.signInGoogle')}>
+        {t('auth.signInGoogle')}
+      </Button>
+    </AuthShell>
   )
 }
