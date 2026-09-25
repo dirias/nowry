@@ -7,7 +7,6 @@ import { DynamicThemeProvider } from './theme/DynamicThemeProvider'
 import { Box, CircularProgress } from '@mui/joy'
 
 import './styles/App.css'
-import './styles/Landing.css'
 import './styles/Login.css'
 import './styles/Messages.css'
 import './styles/SideMenu.css'

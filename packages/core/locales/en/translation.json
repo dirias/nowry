@@ -391,26 +391,13 @@
   },
   "landing": {
     "hero": {
-      "title": "Learn Smarter,\nNot Harder",
+      "title": "Your books,\nyour cards,\nyour year.",
       "subtitle": "The all-in-one study app with smart books, AI-powered flashcards, and spaced repetition — built for people who take learning seriously.",
-      "ctaPrimary": "Start Learning Free",
-      "ctaSecondary": "Explore Features"
-    },
-    "howItWorks": {
-      "title": "How Nowry Works",
-      "subtitle": "From zero to studying in three steps",
-      "step1": {
-        "title": "Build Your Library",
-        "desc": "Add books, write notes, and create flashcard decks from your own material"
-      },
-      "step2": {
-        "title": "Study With Science",
-        "desc": "Our spaced repetition engine schedules every review at the right moment"
-      },
-      "step3": {
-        "title": "Plan & Track",
-        "desc": "Set annual goals and connect them to what you study every day"
-      }
+      "lead": "Nowry turns what you read into flashcards, schedules every review, and ties your studying to the goals you set for the year. On the web and on your phone. Free to start.",
+      "cta": "Create a free account",
+      "proof": "Browse the public library",
+      "fineprint": "No card required. Five languages: English, Español, Français, Deutsch, 日本語.",
+      "frameCaption": "The Study Center, as it looks today."
     },
     "features": {
       "title": "Everything You Need to Excel",
@@ -434,20 +421,67 @@
     },
     "cta": {
       "title": "Be Part of Something Early",
-      "subtitle": "Nowry is in early access. Join now and help shape the product.",
-      "primary": "Start Free Today",
-      "social": "Follow our journey"
+      "subtitle": "Nowry is in early access. Join now and help shape the product."
     },
-    "social": {
-      "title": "Start Learning Today",
-      "subtitle": "Join Nowry and discover a better way to learn with modern tools designed for your success",
-      "benefits": {
-        "1": "Create unlimited books and flashcards",
-        "2": "Access from any device, anywhere",
-        "3": "Track your progress with analytics",
-        "4": "Join study groups and collaborate"
+    "loop": {
+      "title": "Read, make cards, study, plan. Then again.",
+      "lead": "Every part of Nowry feeds the next: a highlight on Monday is a card on Tuesday and a point on your year plan by Friday.",
+      "read": {
+        "title": "Read",
+        "desc": "Bring a book or write your own. Highlight what matters."
       },
-      "cta": "Get Started Now"
+      "cards": {
+        "title": "Make cards",
+        "desc": "One tap turns a highlight into a card that remembers its page."
+      },
+      "study": {
+        "title": "Study",
+        "desc": "Rate each card Missed, Hard, Good or Easy. The schedule does the rest."
+      },
+      "plan": {
+        "title": "Plan the year",
+        "desc": "Three focus areas, and every session counts toward one of them."
+      }
+    },
+    "ledger": {
+      "title": "One account, eight places to work.",
+      "study": {
+        "title": "Study Center",
+        "desc": "Decks and cards, sessions, marked cards, tag filters, quizzes and your history in one place."
+      },
+      "books": {
+        "title": "Books",
+        "desc": "Write or import, highlight a passage, make a card from it. Listen to any page read aloud."
+      },
+      "planning": {
+        "title": "Annual planning",
+        "desc": "Three focus areas, goals, priorities and a daily routine that connect to what you study."
+      },
+      "calendar": {
+        "title": "Calendar",
+        "desc": "Events and milestones beside your tasks and priorities, by month or as an agenda."
+      },
+      "focus": {
+        "title": "Focus",
+        "desc": "A Pomodoro timer that follows you through the app as a small chip."
+      },
+      "library": {
+        "title": "Public library",
+        "desc": "Publish a book or a deck, browse what others made, fork a copy into your own library."
+      },
+      "sheets": {
+        "title": "Sheets",
+        "desc": "Quick spreadsheets for a budget, a reading list, a plan."
+      },
+      "phone": {
+        "title": "On your phone",
+        "desc": "The same account on iOS and Android, with the study loop first."
+      }
+    },
+    "note": {
+      "title": "Nowry is in early access.",
+      "body": "What you see is the product as it stands, and it changes every week. Join now, tell us what to build next, and meet the Spiral: it grows one turn at a time, the way a year does.",
+      "cta": "Create a free account"
     }
   },
   "about": {

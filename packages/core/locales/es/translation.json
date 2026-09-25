@@ -370,26 +370,13 @@
   },
   "landing": {
     "hero": {
-      "title": "Aprende Mejor,\nNo Más Duro",
+      "title": "Tus libros,\ntus tarjetas,\ntu año.",
       "subtitle": "La app de estudio todo en uno con libros inteligentes, tarjetas con IA y repetición espaciada — para quienes se toman el aprendizaje en serio.",
-      "ctaPrimary": "Empezar Gratis",
-      "ctaSecondary": "Explorar funciones"
-    },
-    "howItWorks": {
-      "title": "Cómo funciona Nowry",
-      "subtitle": "De cero a estudiar en tres pasos",
-      "step1": {
-        "title": "Construye tu biblioteca",
-        "desc": "Agrega libros, escribe notas y crea mazos de tarjetas con tu propio material"
-      },
-      "step2": {
-        "title": "Estudia con ciencia",
-        "desc": "Nuestro motor de repetición espaciada programa cada repaso en el momento justo"
-      },
-      "step3": {
-        "title": "Planifica y registra",
-        "desc": "Establece metas anuales y conéctalas a lo que estudias cada día"
-      }
+      "lead": "Nowry convierte lo que lees en tarjetas, programa cada repaso y conecta tu estudio con las metas que fijas para el año. En la web y en tu teléfono. Gratis para empezar.",
+      "cta": "Crear una cuenta gratis",
+      "proof": "Explorar la biblioteca pública",
+      "fineprint": "Sin tarjeta. Cinco idiomas: English, Español, Français, Deutsch, 日本語.",
+      "frameCaption": "El Centro de estudio, tal como se ve hoy."
     },
     "features": {
       "title": "Todo lo que Necesitas para Destacar",
@@ -413,20 +400,67 @@
     },
     "cta": {
       "title": "Sé parte desde el principio",
-      "subtitle": "Nowry está en acceso anticipado. Únete ahora y ayuda a dar forma al producto.",
-      "primary": "Empieza gratis hoy",
-      "social": "Síguenos"
+      "subtitle": "Nowry está en acceso anticipado. Únete ahora y ayuda a dar forma al producto."
     },
-    "social": {
-      "title": "Comienza a Aprender Hoy",
-      "subtitle": "Únete a Nowry y descubre una mejor manera de aprender con herramientas modernas diseñadas para tu éxito",
-      "benefits": {
-        "1": "Crea libros y tarjetas de memoria ilimitados",
-        "2": "Accede desde cualquier dispositivo, en cualquier lugar",
-        "3": "Rastrea tu progreso con análisis",
-        "4": "Únete a grupos de estudio y colabora"
+    "loop": {
+      "title": "Lee, crea tarjetas, estudia, planifica. Y otra vez.",
+      "lead": "Cada parte de Nowry alimenta a la siguiente: un subrayado del lunes es una tarjeta el martes y un punto en tu plan anual el viernes.",
+      "read": {
+        "title": "Lee",
+        "desc": "Trae un libro o escribe el tuyo. Subraya lo que importa."
       },
-      "cta": "Empezar Ahora"
+      "cards": {
+        "title": "Crea tarjetas",
+        "desc": "Un toque convierte un subrayado en una tarjeta que recuerda su página."
+      },
+      "study": {
+        "title": "Estudia",
+        "desc": "Califica cada tarjeta como Fallida, Difícil, Bien o Fácil. El calendario hace el resto."
+      },
+      "plan": {
+        "title": "Planifica el año",
+        "desc": "Tres áreas de enfoque, y cada sesión cuenta para una de ellas."
+      }
+    },
+    "ledger": {
+      "title": "Una cuenta, ocho lugares donde trabajar.",
+      "study": {
+        "title": "Centro de estudio",
+        "desc": "Mazos y tarjetas, sesiones, tarjetas marcadas, filtros por etiqueta, cuestionarios y tu historial en un solo lugar."
+      },
+      "books": {
+        "title": "Libros",
+        "desc": "Escribe o importa, subraya un pasaje, crea una tarjeta a partir de él. Escucha cualquier página en voz alta."
+      },
+      "planning": {
+        "title": "Planificación anual",
+        "desc": "Tres áreas de enfoque, metas, prioridades y una rutina diaria conectadas con lo que estudias."
+      },
+      "calendar": {
+        "title": "Calendario",
+        "desc": "Eventos e hitos junto a tus tareas y prioridades, por mes o como agenda."
+      },
+      "focus": {
+        "title": "Enfoque",
+        "desc": "Un temporizador Pomodoro que te acompaña por toda la app como un pequeño chip."
+      },
+      "library": {
+        "title": "Biblioteca pública",
+        "desc": "Publica un libro o un mazo, explora lo que otros hicieron, copia una versión a tu propia biblioteca."
+      },
+      "sheets": {
+        "title": "Hojas",
+        "desc": "Hojas de cálculo rápidas para un presupuesto, una lista de lectura, un plan."
+      },
+      "phone": {
+        "title": "En tu teléfono",
+        "desc": "La misma cuenta en iOS y Android, con el ciclo de estudio primero."
+      }
+    },
+    "note": {
+      "title": "Nowry está en acceso anticipado.",
+      "body": "Lo que ves es el producto tal como está, y cambia cada semana. Únete ahora, dinos qué construir después y conoce a la Espiral: crece una vuelta a la vez, como un año.",
+      "cta": "Crear una cuenta gratis"
     }
   },
   "onboarding": {

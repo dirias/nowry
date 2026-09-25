@@ -389,26 +389,13 @@
   },
   "landing": {
     "hero": {
-      "title": "Besser Lernen,\nNicht Härter",
+      "title": "Deine Bücher,\ndeine Karten,\ndein Jahr.",
       "subtitle": "Die All-in-One-Lern-App mit intelligenten Büchern, KI-Karteikarten und Spaced Repetition — für Menschen, die Lernen ernst nehmen.",
-      "ctaPrimary": "Kostenlos Starten",
-      "ctaSecondary": "Funktionen erkunden"
-    },
-    "howItWorks": {
-      "title": "Wie Nowry funktioniert",
-      "subtitle": "In drei Schritten vom Anfang bis zum Lernen",
-      "step1": {
-        "title": "Bibliothek aufbauen",
-        "desc": "Bücher hinzufügen, Notizen schreiben und Karteikarten aus eigenem Material erstellen"
-      },
-      "step2": {
-        "title": "Wissenschaftlich lernen",
-        "desc": "Unser Spaced-Repetition-System plant jede Wiederholung zum optimalen Zeitpunkt"
-      },
-      "step3": {
-        "title": "Planen und verfolgen",
-        "desc": "Jahresziele setzen und mit dem täglichen Lernen verknüpfen"
-      }
+      "lead": "Nowry macht aus dem, was du liest, Karteikarten, plant jede Wiederholung und verbindet dein Lernen mit den Zielen, die du dir für das Jahr setzt. Im Web und auf dem Handy. Kostenlos zum Start.",
+      "cta": "Kostenloses Konto erstellen",
+      "proof": "Öffentliche Bibliothek ansehen",
+      "fineprint": "Keine Karte nötig. Fünf Sprachen: English, Español, Français, Deutsch, 日本語.",
+      "frameCaption": "Das Lernzentrum, so wie es heute aussieht."
     },
     "features": {
       "title": "Alles, Was Sie zum Erfolg Brauchen",
@@ -432,20 +419,67 @@
     },
     "cta": {
       "title": "Teil von etwas Besonderem sein",
-      "subtitle": "Nowry befindet sich im Early Access. Mach jetzt mit und gestalte das Produkt.",
-      "primary": "Heute kostenlos starten",
-      "social": "Folge unserer Reise"
+      "subtitle": "Nowry befindet sich im Early Access. Mach jetzt mit und gestalte das Produkt."
     },
-    "social": {
-      "title": "Beginnen Sie Heute zu Lernen",
-      "subtitle": "Treten Sie Nowry bei und entdecken Sie einen besseren Weg zu lernen mit modernen Tools für Ihren Erfolg",
-      "benefits": {
-        "1": "Erstellen Sie unbegrenzt Bücher und Lernkarten",
-        "2": "Greifen Sie von jedem Gerät überall zu",
-        "3": "Verfolgen Sie Ihren Fortschritt mit Analysen",
-        "4": "Treten Sie Lerngruppen bei und arbeiten Sie zusammen"
+    "loop": {
+      "title": "Lesen, Karten machen, lernen, planen. Und wieder von vorn.",
+      "lead": "Jeder Teil von Nowry speist den nächsten: Eine Markierung am Montag ist am Dienstag eine Karte und am Freitag ein Punkt in deinem Jahresplan.",
+      "read": {
+        "title": "Lesen",
+        "desc": "Bring ein Buch mit oder schreib dein eigenes. Markiere, was zählt."
       },
-      "cta": "Jetzt Starten"
+      "cards": {
+        "title": "Karten machen",
+        "desc": "Ein Tipp macht aus einer Markierung eine Karte, die ihre Seite kennt."
+      },
+      "study": {
+        "title": "Lernen",
+        "desc": "Bewerte jede Karte mit Verfehlt, Schwer, Gut oder Leicht. Den Rest übernimmt der Zeitplan."
+      },
+      "plan": {
+        "title": "Das Jahr planen",
+        "desc": "Drei Schwerpunkte, und jede Sitzung zählt für einen davon."
+      }
+    },
+    "ledger": {
+      "title": "Ein Konto, acht Orte zum Arbeiten.",
+      "study": {
+        "title": "Lernzentrum",
+        "desc": "Stapel und Karten, Sitzungen, markierte Karten, Tag-Filter, Quizze und dein Verlauf an einem Ort."
+      },
+      "books": {
+        "title": "Bücher",
+        "desc": "Schreiben oder importieren, eine Passage markieren, eine Karte daraus machen. Jede Seite vorlesen lassen."
+      },
+      "planning": {
+        "title": "Jahresplanung",
+        "desc": "Drei Schwerpunkte, Ziele, Prioritäten und eine Tagesroutine, die mit deinem Lernen verbunden sind."
+      },
+      "calendar": {
+        "title": "Kalender",
+        "desc": "Termine und Meilensteine neben deinen Aufgaben und Prioritäten, als Monat oder als Agenda."
+      },
+      "focus": {
+        "title": "Fokus",
+        "desc": "Ein Pomodoro-Timer, der dich als kleiner Chip durch die ganze App begleitet."
+      },
+      "library": {
+        "title": "Öffentliche Bibliothek",
+        "desc": "Veröffentliche ein Buch oder einen Stapel, stöbere in dem, was andere gemacht haben, und kopiere dir eine Version in deine Bibliothek."
+      },
+      "sheets": {
+        "title": "Tabellen",
+        "desc": "Schnelle Tabellen für ein Budget, eine Leseliste, einen Plan."
+      },
+      "phone": {
+        "title": "Auf deinem Handy",
+        "desc": "Dasselbe Konto auf iOS und Android, mit dem Lernkreislauf zuerst."
+      }
+    },
+    "note": {
+      "title": "Nowry ist im Early Access.",
+      "body": "Was du siehst, ist das Produkt in seinem heutigen Stand, und es ändert sich jede Woche. Mach jetzt mit, sag uns, was wir als Nächstes bauen sollen, und lerne die Spirale kennen: Sie wächst eine Windung nach der anderen, wie ein Jahr.",
+      "cta": "Kostenloses Konto erstellen"
     }
   },
   "onboarding": {
