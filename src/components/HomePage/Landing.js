@@ -3,6 +3,7 @@ import { Box, Container } from '@mui/joy'
 import Hero from './landing/Hero'
 import Loop from './landing/Loop'
 import Ledger from './landing/Ledger'
+import Pricing from './landing/Pricing'
 import Note from './landing/Note'
 import StudyCenterFrame from './frames/StudyCenterFrame'
 import PhoneFrame from './frames/PhoneFrame'
@@ -17,7 +18,7 @@ import YearFrame from './frames/YearFrame'
  * own order: the hero, the loop, the ledger (`#library`), the note. The
  * pictures are the product drawn from its own tokens (`./frames`), so they wear
  * the visitor's mode and accent and never go stale. Pricing (`#pricing`)
- * arrives with SITE-003.
+ * reads the same tier table as `/plans`.
  */
 const Landing = () => (
   <Box sx={{ bgcolor: 'background.body' }}>
@@ -32,6 +33,7 @@ const Landing = () => (
         }}
       />
       <Ledger />
+      <Pricing />
       <Note />
     </Container>
   </Box>

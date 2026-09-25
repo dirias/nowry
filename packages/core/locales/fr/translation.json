@@ -555,6 +555,13 @@
         "due": "{{count}} paquets à revoir",
         "focus": "Concentration"
       }
+    },
+    "pricing": {
+      "title": "Étudier est gratuit. L'IA se paie.",
+      "lead": "Livres, cartes, étude et planification ne coûtent jamais rien. Plus et Pro paient la génération : des cartes à partir d'un chapitre, des quiz, l'expansion, l'écoute.",
+      "perMonth": "par mois",
+      "annual": "ou {{price}} par an",
+      "cta": "Commencer avec {{name}}"
     }
   },
   "onboarding": {

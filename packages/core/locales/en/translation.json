@@ -546,6 +546,13 @@
         "due": "{{count}} decks due",
         "focus": "Focus"
       }
+    },
+    "pricing": {
+      "title": "Free to study. Pay for the AI.",
+      "lead": "Books, cards, study and planning never cost anything. Plus and Pro pay for generation: cards from a chapter, quizzes, expansion, Listen.",
+      "perMonth": "per month",
+      "annual": "or {{price}} a year",
+      "cta": "Start with {{name}}"
     }
   },
   "about": {

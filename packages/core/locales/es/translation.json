@@ -525,6 +525,13 @@
         "due": "{{count}} mazos pendientes",
         "focus": "Enfoque"
       }
+    },
+    "pricing": {
+      "title": "Estudiar es gratis. Pagas por la IA.",
+      "lead": "Libros, tarjetas, estudio y planificación nunca cuestan nada. Plus y Pro pagan la generación: tarjetas de un capítulo, cuestionarios, ampliación, Escuchar.",
+      "perMonth": "al mes",
+      "annual": "o {{price}} al año",
+      "cta": "Empezar con {{name}}"
     }
   },
   "onboarding": {

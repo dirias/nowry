@@ -544,6 +544,13 @@
         "due": "{{count}} Stapel fällig",
         "focus": "Fokus"
       }
+    },
+    "pricing": {
+      "title": "Lernen ist kostenlos. Bezahlt wird die KI.",
+      "lead": "Bücher, Karten, Lernen und Planung kosten nie etwas. Plus und Pro bezahlen die Generierung: Karten aus einem Kapitel, Quizze, Erweiterung, Vorlesen.",
+      "perMonth": "pro Monat",
+      "annual": "oder {{price}} im Jahr",
+      "cta": "Mit {{name}} starten"
     }
   },
   "onboarding": {

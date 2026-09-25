@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Container, Typography, Stack, Button, Alert } from '@mui/joy'
 import { subscriptionService } from '@nowry/core/api/services'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
+import { PLAN_TIERS } from '@nowry/core/domain/plans'
 import PlanCard from './PlanCard'
 
 // Price IDs are publishable values from env vars (safe to expose client-side per T-03-07-02).
@@ -36,32 +37,10 @@ export default function PlansPage() {
 
   const isMonthly = billingInterval === 'monthly'
 
-  const FREE_FEATURES = [
-    { label: t('plans.features.cardGeneration'), value: t('plans.features.cardGenerationFree') },
-    { label: t('plans.features.bookExpansion'), value: t('plans.features.bookExpansionFree') },
-    { label: t('plans.features.quizGeneration'), value: t('plans.features.quizGenerationFree') },
-    { label: t('plans.features.aiUsage'), value: t('plans.features.aiUsageFree') },
-    { label: t('plans.features.studyCards'), value: t('plans.features.studyCardsAll') },
-    { label: t('plans.features.support'), value: t('plans.features.supportFree') }
-  ]
-
-  const PLUS_FEATURES = [
-    { label: t('plans.features.cardGeneration'), value: t('plans.features.cardGenerationPlus') },
-    { label: t('plans.features.bookExpansion'), value: t('plans.features.bookExpansionPlus') },
-    { label: t('plans.features.quizGeneration'), value: t('plans.features.quizGenerationPlus') },
-    { label: t('plans.features.aiUsage'), value: t('plans.features.aiUsagePlus') },
-    { label: t('plans.features.studyCards'), value: t('plans.features.studyCardsAll') },
-    { label: t('plans.features.support'), value: t('plans.features.supportPlus') }
-  ]
-
-  const PRO_FEATURES = [
-    { label: t('plans.features.cardGeneration'), value: t('plans.features.cardGenerationPro') },
-    { label: t('plans.features.bookExpansion'), value: t('plans.features.bookExpansionPro') },
-    { label: t('plans.features.quizGeneration'), value: t('plans.features.quizGenerationPro') },
-    { label: t('plans.features.aiUsage'), value: t('plans.features.aiUsagePro') },
-    { label: t('plans.features.studyCards'), value: t('plans.features.studyCardsAll') },
-    { label: t('plans.features.support'), value: t('plans.features.supportPro') }
-  ]
+  // One table for both surfaces (ADR-035 §5): the public pricing section
+  // reads the same tiers, so a visitor and an account see the same numbers.
+  const [free, plus, pro] = PLAN_TIERS
+  const featuresOf = (tier) => tier.features.map(({ label, value }) => ({ label: t(label), value: t(value) }))
 
   // CTA label per current tier + target tier
   const getPlusCta = () => {
@@ -152,9 +131,9 @@ export default function PlansPage() {
         {/* Free plan */}
         <PlanCard
           name={t('subscription.tier.free')}
-          price='$0'
+          price={free.price.monthly}
           period={t('plans.billingToggle.monthly')}
-          features={FREE_FEATURES}
+          features={featuresOf(free)}
           isCurrent={currentTier === 'free'}
           ctaLabel={currentTier === 'free' ? t('plans.currentPlan') : null}
           onUpgrade={null}
@@ -165,9 +144,9 @@ export default function PlansPage() {
         {/* Plus plan */}
         <PlanCard
           name={t('subscription.tier.plus')}
-          price={isMonthly ? '$8.99' : '$89.99'}
+          price={plus.price[billingInterval]}
           period={isMonthly ? t('plans.billingToggle.monthly') : t('plans.billingToggle.annual')}
-          features={PLUS_FEATURES}
+          features={featuresOf(plus)}
           isCurrent={currentTier === 'plus'}
           ctaLabel={getPlusCta()}
           onUpgrade={currentTier === 'free' ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual) : null}
@@ -178,9 +157,9 @@ export default function PlansPage() {
         {/* Pro plan */}
         <PlanCard
           name={t('subscription.tier.pro')}
-          price={isMonthly ? '$19.99' : '$199.99'}
+          price={pro.price[billingInterval]}
           period={isMonthly ? t('plans.billingToggle.monthly') : t('plans.billingToggle.annual')}
-          features={PRO_FEATURES}
+          features={featuresOf(pro)}
           isCurrent={currentTier === 'pro'}
           ctaLabel={getProCta()}
           onUpgrade={currentTier !== 'pro' ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual) : null}
