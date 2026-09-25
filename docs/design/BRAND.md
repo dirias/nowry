@@ -42,9 +42,11 @@ crest · outlines, shadows, gradients or a rotated mark · the owl.
 
 ## The wordmark
 
-`nowry`, lower-case, the display face at its heaviest weight (`fontWeight: 'xl'`), tracking −0.03 em.
-It is a proper noun: never translated, never set in capitals. The display face is the app's `display`
-token until DS-007 decides it.
+`nowry`, lower-case, the display face at its heaviest weight (`fontWeight: 'xl'`, which is 700),
+tracking −0.03 em. It is a proper noun: never translated, never set in capitals. The display face is
+**Bricolage Grotesque** since DS-007B (2026-09-25), through the app's `display` token — the name
+wears it wherever it appears, which is why h4 keeps that token even though the two faces are
+indistinguishable at 20px.
 
 ### Two lockups, chosen by size
 

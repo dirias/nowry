@@ -50,6 +50,19 @@
       and resolves down the stack to the platform face.
     -->
   <link rel="preload" as="font" type="font/woff2" crossorigin href="%PUBLIC_URL%/fonts/inter-latin-wght-normal.woff2" />
+  <!--
+      The display face (DS-007B). Preloaded for the same reason Inter is: it sets
+      every page title, which is above the fold on every screen, so letting it
+      arrive late means a visible reflow on the first thing a learner reads.
+
+      The `wght` cut, not `opsz`: Bricolage ships an optical-size axis we do not
+      drive, and the weight-axis file is the smaller of the two. 41 KB — slightly
+      less than Inter's 48 KB, and the only other face on the critical path.
+
+      `unicode-range` is dropped here as it is for Inter, for the same reason:
+      per-glyph fallback should serve ja, not an empty range.
+    -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="%PUBLIC_URL%/fonts/bricolage-grotesque-latin-wght-normal.woff2" />
   <style>
     @font-face {
       font-family: 'Inter Variable';
@@ -57,6 +70,14 @@
       font-display: swap;
       font-weight: 100 900;
       src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+    }
+
+    @font-face {
+      font-family: 'Bricolage Grotesque Variable';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 200 800;
+      src: url('/fonts/bricolage-grotesque-latin-wght-normal.woff2') format('woff2-variations');
     }
   </style>
 </head>

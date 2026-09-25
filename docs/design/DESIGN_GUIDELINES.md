@@ -249,7 +249,7 @@ is wrong — not the element.
 | Token | Face | Notes |
 |---|---|---|
 | `fontFamily.body` | Inter Variable | Self-hosted, preloaded, one `.woff2` file — no Google Fonts link anywhere in the app. |
-| `fontFamily.display` | Inter Variable | Deliberately the same face as `body` today. It's a separate token so a distinct display face can be introduced later by editing one line, instead of hunting every heading in the app. |
+| `fontFamily.display` | Bricolage Grotesque Variable | Self-hosted and preloaded beside Inter, 41 KB (DS-007B, chosen 2026-09-25). Joy resolves `h1`–`h4` and both `display-*` levels against this token and `title-*`/`body-*` against `body`, so the one line in `tokens.js` moves every heading and nothing else — never restate the family per level. The boundary falls at h4/`title-lg`: at h4's 20px the two faces are indistinguishable, but h4 keeps the display face because `BrandLockup` sets the wordmark there. |
 | `fontFamily.reading` | Literata Variable | Lazy-loaded — imported only by the reading surfaces themselves (book pages, editor preview, card front/back), never on the critical path. Applied exclusively via the `readingSurface` fragment in `formStyles.js`. |
 | `fontFamily.code` | Source Code Pro (monospace stack) | Unchanged. |
 

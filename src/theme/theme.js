@@ -68,6 +68,15 @@ const themeConfig = {
    *    augmentation needed.
    */
   typography: {
+    // Nothing here names a font family on purpose. Joy already points h1–h4 at
+    // `fontFamily-display` and title-*/body-* at `fontFamily-body`
+    // (extendTheme.js), so pointing the token at the display face in
+    // `tokens.js` moves exactly the four heading levels and nothing else
+    // (DS-007B). Restating it per level would be a second place to forget.
+    //
+    // The boundary lands at h4/title-lg rather than h3/h4, which is what keeps
+    // the header wordmark in the display face: `BrandLockup` sets the word at
+    // h4, and BRAND.md requires the name to wear that face wherever it appears.
     h1: { letterSpacing: LETTER_SPACING.display, fontVariantNumeric: 'tabular-nums' },
     h2: { letterSpacing: LETTER_SPACING.display, fontVariantNumeric: 'tabular-nums' },
     h3: { letterSpacing: LETTER_SPACING.heading, fontVariantNumeric: 'tabular-nums' },

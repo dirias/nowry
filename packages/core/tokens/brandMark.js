@@ -143,6 +143,14 @@ export function spiralMark({ preset = 'full', headDeg = -55, pad = 0.04 } = {}) 
  * `MIN_PX` is the floor, and it is the whole reason there are two lockups: below
  * it the turns merge and the coil reads as a bullet. At the app bar's 22 px the
  * word still reads and the mark does not — see BRAND.md.
+ *
+ * **Re-measured for DS-007B and unchanged.** The fit was tuned to Inter, and the
+ * display face is now Bricolage Grotesque. Measured off both self-hosted files
+ * at weight 700, per 100 px em: the `o`'s ink height 56.34 → 55.27, its advance
+ * 61.33 → 60.93, its ink width 53.39 → 53.57, the `n`'s advance 62.25 → 63.12.
+ * Under 2% on every axis, which on a 0.72 em box is 0.014 em — less than the
+ * rounding in `wordmarkCoil` already introduces. Re-measure again only if the
+ * display face changes to something further from Inter's proportions.
  */
 export const WORDMARK_FIT = Object.freeze({
   em: 0.72,

@@ -40,10 +40,18 @@ export const FONT_FAMILY = {
   // The UI face. Self-hosted variable Inter — see public/fonts + index.html.
   body: `'Inter Variable', ${fallback}`,
 
-  // Deliberately the SAME face as `body` today. It exists as a separate token
-  // so a display face can be introduced post-launch by editing this one line,
-  // instead of hunting every heading in the app.
-  display: `'Inter Variable', ${fallback}`,
+  // The display face (DS-007B, chosen 2026-09-25 from the Buttons canvas's Type
+  // board). Self-hosted beside Inter — see public/index.html.
+  //
+  // This one line moves every heading: Joy resolves h1–h4 and the two display-*
+  // levels against this token, and title-*/body-* against `body`. That is the
+  // whole mechanism, which is what the token was created for.
+  //
+  // Measured while choosing it: at h4's 20px Bricolage and Inter are
+  // indistinguishable, so the face earns its 41 KB at h3 and above. h4 keeps it
+  // anyway — the header wordmark is set at h4, and the name wears the display
+  // face wherever it appears (BRAND.md).
+  display: `'Bricolage Grotesque Variable', ${fallback}`,
 
   // Long-form prose only — book pages, editor preview, card front/back. Loaded
   // lazily from the reading surfaces themselves, never on the critical path.
