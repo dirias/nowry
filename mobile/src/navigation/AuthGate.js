@@ -36,7 +36,10 @@ export function AuthGate({ children }) {
     if (loading) return
 
     if (!isAuthenticated && !inPublicGroup) {
-      router.replace('/login')
+      // Welcome, not the sign-in form (docs/prd-public-site.md D-M1): a stranger
+      // who installs the app meets the product before the gate; a returning
+      // user taps Sign in once. A literal, so routes.test can see the target.
+      router.replace('/welcome')
     } else if (isAuthenticated && inPublicGroup) {
       router.replace('/')
     }
