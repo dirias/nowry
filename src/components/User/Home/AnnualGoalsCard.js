@@ -27,7 +27,7 @@ const AnnualGoalsCard = () => {
   const fetchGoals = React.useCallback(async () => {
     try {
       setLoading(true)
-      const data = await annualPlanningService.getGoals()
+      const data = await annualPlanningService.getAllGoals()
 
       // Lowest progress first: the goals needing attention lead.
       const sortedGoals = data

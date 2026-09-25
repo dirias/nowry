@@ -19,9 +19,9 @@ jest.mock('react-i18next', () => ({
 const mockNavigate = jest.fn()
 jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
 
-const mockGetGoals = jest.fn()
+const mockGetAllGoals = jest.fn()
 jest.mock('@nowry/core/api/services', () => ({
-  annualPlanningService: { getGoals: (...args) => mockGetGoals(...args) }
+  annualPlanningService: { getAllGoals: (...args) => mockGetAllGoals(...args) }
 }))
 
 jest.mock('lucide-react', () => ({ Target: () => null, TrendingUp: () => null }))
@@ -40,7 +40,7 @@ const milestoneGoal = {
 
 beforeEach(() => {
   jest.clearAllMocks()
-  mockGetGoals.mockResolvedValue([milestoneGoal])
+  mockGetAllGoals.mockResolvedValue([milestoneGoal])
 })
 
 describe('the fixed derivation', () => {
@@ -65,7 +65,7 @@ describe('the fixed derivation', () => {
   })
 
   it('falls back to the stored progress field for a goal with no milestones', async () => {
-    mockGetGoals.mockResolvedValue([{ _id: 'g2', title: 'No milestones', progress: 40, type: 'quarterly', quarter: 1 }])
+    mockGetAllGoals.mockResolvedValue([{ _id: 'g2', title: 'No milestones', progress: 40, type: 'quarterly', quarter: 1 }])
     render(<AnnualGoalsCard />)
     await waitFor(() => expect(screen.getByText('annualPlanning.goal.percentComplete:{"percent":40}')).toBeInTheDocument())
   })
@@ -99,7 +99,7 @@ describe('agreement with the Goals tab', () => {
 describe('the four states', () => {
   it('Loading renders per-row Skeletons, not a full-card spinner', async () => {
     let resolve
-    mockGetGoals.mockReturnValue(
+    mockGetAllGoals.mockReturnValue(
       new Promise((r) => {
         resolve = r
       })
@@ -116,7 +116,7 @@ describe('the four states', () => {
   })
 
   it('Success renders one row per goal, capped at four', async () => {
-    mockGetGoals.mockResolvedValue(
+    mockGetAllGoals.mockResolvedValue(
       Array.from({ length: 7 }, (_, i) => ({ _id: `g${i}`, title: `Goal ${i}`, progress: i * 10, type: 'quarterly', quarter: 1 }))
     )
     render(<AnnualGoalsCard />)
@@ -124,20 +124,20 @@ describe('the four states', () => {
   })
 
   it('Error falls back to the empty state with its CTA, not a console-only dead end', async () => {
-    mockGetGoals.mockRejectedValue(new Error('network'))
+    mockGetAllGoals.mockRejectedValue(new Error('network'))
     render(<AnnualGoalsCard />)
     await waitFor(() => expect(screen.getByText('dashboard.annualGoals.noGoals')).toBeInTheDocument())
     expect(screen.getByText('dashboard.annualGoals.createGoal')).toBeInTheDocument()
   })
 
   it('Empty renders the unchanged copy and CTA', async () => {
-    mockGetGoals.mockResolvedValue([])
+    mockGetAllGoals.mockResolvedValue([])
     render(<AnnualGoalsCard />)
     await waitFor(() => expect(screen.getByText('dashboard.annualGoals.noGoals')).toBeInTheDocument())
   })
 
   it('sorts the goals needing attention first', async () => {
-    mockGetGoals.mockResolvedValue([
+    mockGetAllGoals.mockResolvedValue([
       { _id: 'high', title: 'High', progress: 90, type: 'quarterly', quarter: 1 },
       { _id: 'low', title: 'Low', progress: 10, type: 'quarterly', quarter: 1 }
     ])

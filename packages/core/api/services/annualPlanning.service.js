@@ -246,9 +246,27 @@ export const annualPlanningService = {
   },
 
   // Goals
+  /**
+   * Goals for ONE focus area. The endpoint requires `focus_area_id`, so calling
+   * this without one used to put the literal string "undefined" in the query and
+   * come back 404 — silently, on every Home load, on both clients. There is no
+   * "every goal" variant of this route; use getAllGoals() for that.
+   */
   async getGoals(focusAreaId) {
+    if (!focusAreaId) {
+      throw new Error('getGoals requires a focusAreaId; use getAllGoals() for every goal in a year')
+    }
     const { data } = await apiClient.get(ENDPOINTS.goals.all(focusAreaId))
     return data
+  },
+  /**
+   * Every goal in a year, across all focus areas. Reads through the same
+   * fetchAnnualPlanData() the planning page and the calendar use, so it costs one
+   * /annual-plan/full request and cannot drift from what those surfaces show.
+   */
+  async getAllGoals(year = new Date().getFullYear()) {
+    const { goals } = await fetchAnnualPlanData(year)
+    return goals
   },
   async createGoal(goal) {
     const { data } = await apiClient.post(ENDPOINTS.goals.create, goal)

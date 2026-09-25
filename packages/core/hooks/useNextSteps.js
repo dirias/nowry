@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
-import { annualPlanningService, booksService } from '../api/services'
+import { booksService, fetchAnnualPlanData } from '../api/services'
 import { useAuth } from '../context/AuthContext'
 import { useStatistics } from './useStatistics'
 
@@ -31,9 +31,15 @@ import { useStatistics } from './useStatistics'
  *
  * `useStatistics` is the shared React Query entry (ADR-008) that WeeklyProgress
  * and StudyCalendar already subscribe to on this very page, so the study signal
- * costs no request at all. The other two are bounded list reads behind their
- * own keys with a long stale time: the answer this hook needs from them is
- * "any at all", which does not change minute to minute.
+ * costs no request at all. The plan signal is the same trick: it reads through
+ * the `['annualPlan', userId, year]` key useAnnualPlan and the calendar already
+ * share (CACHE-008), with that module's own fetchAnnualPlanData as the queryFn,
+ * so it is a cache hit wherever a plan has been read. It used to call
+ * getGoals() with no focus area, which put the string "undefined" in the query
+ * and came back 404 on every load — the row could never resolve, so `allDone`
+ * could never fire. Books stays a bounded list read behind its own key with a
+ * long stale time: the answer this hook needs is "any at all", which does not
+ * change minute to minute.
  */
 
 /** These answer a yes/no question about the past, so they age slowly. */
@@ -86,9 +92,13 @@ export const useNextSteps = () => {
     staleTime: NEXT_STEPS_STALE_TIME
   })
 
-  const goals = useQuery({
-    queryKey: ['nextSteps', 'goals', userId],
-    queryFn: () => annualPlanningService.getGoals(),
+  // The shared plan key, not a key of this hook's own: see "why these reads are
+  // cheap" above. The year matches useAnnualPlan's default, or the read would
+  // miss the cache it is here to hit.
+  const year = new Date().getFullYear()
+  const plan = useQuery({
+    queryKey: ['annualPlan', userId, year],
+    queryFn: () => fetchAnnualPlanData(year),
     enabled,
     staleTime: NEXT_STEPS_STALE_TIME
   })
@@ -99,7 +109,7 @@ export const useNextSteps = () => {
     // this user own cards" — a forked deck alone would satisfy the latter.
     const reviewed = statisticsLoading ? null : (statistics?.summary?.reviewed_cards ?? null)
     const bookCount = books.isPending || books.isError ? null : countOf(books.data)
-    const goalCount = goals.isPending || goals.isError ? null : countOf(goals.data)
+    const goalCount = plan.isPending || plan.isError ? null : countOf(plan.data?.goals)
 
     const answers = { study: reviewed, book: bookCount, plan: goalCount }
     const steps = NEXT_STEP_DEFINITIONS.map((definition) => ({
@@ -110,7 +120,7 @@ export const useNextSteps = () => {
     const resolved = Object.values(answers).every((value) => typeof value === 'number')
 
     return { steps, resolved, allDone: resolved && steps.every((step) => step.done) }
-  }, [statistics, statisticsLoading, books.data, books.isPending, books.isError, goals.data, goals.isPending, goals.isError])
+  }, [statistics, statisticsLoading, books.data, books.isPending, books.isError, plan.data, plan.isPending, plan.isError])
 }
 
 export default useNextSteps

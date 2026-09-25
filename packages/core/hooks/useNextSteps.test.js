@@ -22,11 +22,18 @@ jest.mock('./useStatistics', () => ({ useStatistics: () => mockStatistics() }))
 jest.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'user-1' } }) }))
 
 const mockGetBooks = jest.fn()
-const mockGetGoals = jest.fn()
+const mockFetchPlan = jest.fn()
 jest.mock('../api/services', () => ({
   booksService: { getAll: (...args) => mockGetBooks(...args) },
-  annualPlanningService: { getGoals: (...args) => mockGetGoals(...args) }
+  fetchAnnualPlanData: (...args) => mockFetchPlan(...args)
 }))
+
+/**
+ * The plan signal reads through the shared ['annualPlan', userId, year] key, so
+ * the hook receives fetchAnnualPlanData's normalized plan data and counts its
+ * `goals` — not a bare goals list.
+ */
+const givenGoals = (goals) => mockFetchPlan.mockResolvedValue({ goals })
 
 const makeWrapper = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -43,10 +50,27 @@ beforeEach(() => {
   jest.clearAllMocks()
   mockStatistics.mockReturnValue(stats(0))
   mockGetBooks.mockResolvedValue([])
-  mockGetGoals.mockResolvedValue([])
+  givenGoals([])
 })
 
 const renderNextSteps = () => renderHook(() => useNextSteps(), { wrapper: makeWrapper() })
+
+it('reads the plan through the shared key, so a page that has one pays nothing', async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const Wrapper = ({ children }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  givenGoals([{ id: 'g1' }])
+
+  renderHook(() => useNextSteps(), { wrapper: Wrapper })
+  await waitFor(() => expect(mockFetchPlan).toHaveBeenCalled())
+
+  // The exact key useAnnualPlan and calendarService read through (CACHE-008).
+  // A key of this hook's own would fetch the same plan a second time.
+  const keys = client
+    .getQueryCache()
+    .getAll()
+    .map((query) => query.queryKey)
+  expect(keys).toContainEqual(['annualPlan', 'user-1', new Date().getFullYear()])
+})
 
 it('every row names a route (FR-069)', () => {
   expect(NEXT_STEP_DEFINITIONS.length).toBeLessThanOrEqual(4)
@@ -62,7 +86,7 @@ it('every row names a route (FR-069)', () => {
 it('marks a row done only when its signal counts at least one', async () => {
   mockStatistics.mockReturnValue(stats(12))
   mockGetBooks.mockResolvedValue([{ id: 'b1' }])
-  mockGetGoals.mockResolvedValue([])
+  givenGoals([])
 
   const { result } = renderNextSteps()
   await waitFor(() => expect(result.current.resolved).toBe(true))
@@ -77,7 +101,7 @@ it('marks a row done only when its signal counts at least one', async () => {
 it('retires the panel only when every row is done', async () => {
   mockStatistics.mockReturnValue(stats(3))
   mockGetBooks.mockResolvedValue([{ id: 'b1' }])
-  mockGetGoals.mockResolvedValue([{ id: 'g1' }])
+  givenGoals([{ id: 'g1' }])
 
   const { result } = renderNextSteps()
 
@@ -97,7 +121,7 @@ it('leaves a row available while its signal is still loading (FR-071)', () => {
 it('leaves a row available when its signal fails, and never claims it done', async () => {
   mockStatistics.mockReturnValue(stats(9))
   mockGetBooks.mockRejectedValue(new Error('network down'))
-  mockGetGoals.mockResolvedValue([{ id: 'g1' }])
+  givenGoals([{ id: 'g1' }])
 
   const { result } = renderNextSteps()
   await waitFor(() => expect(byId(result.current.steps).plan.done).toBe(true))
@@ -111,7 +135,7 @@ it('leaves a row available when its signal fails, and never claims it done', asy
 it('treats a payload that is not a list as no answer rather than as zero', async () => {
   mockStatistics.mockReturnValue(stats(1))
   mockGetBooks.mockResolvedValue({ unexpected: 'shape' })
-  mockGetGoals.mockResolvedValue([{ id: 'g1' }])
+  givenGoals([{ id: 'g1' }])
 
   const { result } = renderNextSteps()
   await waitFor(() => expect(byId(result.current.steps).study.done).toBe(true))
