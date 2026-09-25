@@ -12,9 +12,8 @@ import { Link } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
+import { passwordLongEnough } from '@nowry/core/domain/authRules'
 import { Button, FormField, Input, Screen, Stack, Typography } from '../../src/ui'
-
-const MIN_PASSWORD = 6
 
 export default function Register() {
   const { t } = useTranslation()
@@ -30,7 +29,7 @@ export default function Register() {
     if (!username.trim()) next.username = 'auth.errors.usernameRequired'
     if (!email.trim()) next.email = 'auth.errors.emailRequired'
     if (!password) next.password = 'auth.errors.passwordRequired'
-    else if (password.length < MIN_PASSWORD) next.password = 'auth.errors.passwordLength'
+    else if (!passwordLongEnough(password)) next.password = 'auth.errors.passwordLength'
     if (confirm !== password) next.confirm = 'auth.errors.passwordMismatch'
     setErrors(next)
     if (Object.keys(next).length) return

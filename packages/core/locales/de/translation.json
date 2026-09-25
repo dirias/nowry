@@ -307,8 +307,8 @@
   },
   "auth": {
     "welcomeBack": "Willkommen zurück",
-    "signInSubtitle": "Melde dich an, um weiterzulernen",
-    "createAccount": "Konto erstellen",
+    "signInSubtitle": "Melde dich an, um weiterzulernen.",
+    "createAccount": "Erstelle dein Konto",
     "createAccountSubtitle": "Kostenlos, ohne Karte. Nowry ist im Early Access.",
     "email": "E-Mail",
     "password": "Passwort",
@@ -363,18 +363,18 @@
     "resetPassword": {
       "title": "Passwort zurücksetzen",
       "subtitle": {
-        "step1": "Wir senden dir einen Bestätigungscode",
+        "step1": "Wir schicken dir per E-Mail einen Link, um ein neues Passwort zu wählen.",
         "step2": "Gib den Code ein, der an deine E-Mail gesendet wurde",
         "step3": "Wähle ein starkes neues Passwort"
       },
       "codeSent": "Bestätigungscode an deine E-Mail gesendet!",
       "verifyCode": "Code bestätigen",
-      "sendCode": "Bestätigungscode senden",
+      "sendCode": "Link an mich senden",
       "resend": "Erneut senden",
       "resendPrompt": "Code nicht erhalten?",
-      "successTitle": "Passwort erfolgreich zurückgesetzt! 🎉",
+      "successTitle": "Sieh in dein Postfach",
       "successMsg": "Dein Passwort wurde erfolgreich zurückgesetzt. Du kannst dich jetzt mit deinem neuen Passwort anmelden.",
-      "goToLogin": "Zur Anmeldung",
+      "goToLogin": "Zurück zur Anmeldung",
       "backToLogin": "Zurück zur Anmeldung",
       "emailLabel": "E-Mail-Adresse",
       "codeLabel": "Bestätigungscode",
@@ -384,7 +384,8 @@
         "codeRequired": "Bestätigungscode ist erforderlich",
         "codeLength": "Code muss 6 Ziffern haben"
       }
-    }
+    },
+    "newHere": "Neu hier?"
   },
   "landing": {
     "hero": {

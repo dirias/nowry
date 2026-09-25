@@ -287,9 +287,9 @@
     }
   },
   "auth": {
-    "welcomeBack": "Bienvenido de nuevo",
-    "signInSubtitle": "Inicia sesión para continuar tu aprendizaje",
-    "createAccount": "Crear Cuenta",
+    "welcomeBack": "Hola de nuevo",
+    "signInSubtitle": "Inicia sesión para seguir estudiando.",
+    "createAccount": "Crea tu cuenta",
     "createAccountSubtitle": "Gratis, sin tarjeta. Nowry está en acceso anticipado.",
     "email": "Correo electrónico",
     "password": "Contraseña",
@@ -298,8 +298,8 @@
     "usernamePlaceholder": "juanlopez",
     "confirmPassword": "Confirmar Contraseña",
     "forgotPassword": "¿Olvidaste tu contraseña?",
-    "signIn": "Iniciar Sesión",
-    "signUp": "Crear Cuenta",
+    "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta",
     "orContinueWith": "o continuar con",
     "signInGoogle": "Iniciar sesión con Google",
     "signInFacebook": "Iniciar sesión con Facebook",
@@ -342,21 +342,21 @@
       "redirecting": "Redirigiendo al asistente de configuración..."
     },
     "resetPassword": {
-      "title": "Restablecer Contraseña",
+      "title": "Restablecer contraseña",
       "subtitle": {
-        "step1": "Te enviaremos un código de verificación",
+        "step1": "Te enviaremos por correo un enlace para elegir una contraseña nueva.",
         "step2": "Ingresa el código enviado a tu correo",
         "step3": "Elige una nueva contraseña segura"
       },
       "codeSent": "¡Código de verificación enviado a tu correo!",
       "verifyCode": "Verificar Código",
-      "sendCode": "Enviar Código de Verificación",
+      "sendCode": "Enviarme un enlace",
       "resend": "Reenviar",
       "resendPrompt": "¿No recibiste el código?",
-      "successTitle": "¡Contraseña Restablecida! 🎉",
+      "successTitle": "Revisa tu correo",
       "successMsg": "Tu contraseña se restableció con éxito. Ahora puedes iniciar sesión con tu nueva contraseña.",
-      "goToLogin": "Ir a Iniciar Sesión",
-      "backToLogin": "Volver a Iniciar Sesión",
+      "goToLogin": "Volver a iniciar sesión",
+      "backToLogin": "Volver a iniciar sesión",
       "emailLabel": "Correo Electrónico",
       "codeLabel": "Código de Verificación",
       "newPasswordLabel": "Nueva Contraseña",
@@ -365,7 +365,8 @@
         "codeRequired": "El código de verificación es obligatorio",
         "codeLength": "El código debe tener 6 dígitos"
       }
-    }
+    },
+    "newHere": "¿Eres nuevo aquí?"
   },
   "landing": {
     "hero": {

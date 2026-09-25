@@ -286,8 +286,8 @@
   },
   "auth": {
     "welcomeBack": "おかえりなさい",
-    "signInSubtitle": "学習の旅を続けましょう",
-    "createAccount": "アカウント作成",
+    "signInSubtitle": "サインインして学習を続けましょう。",
+    "createAccount": "アカウントを作成しましょう",
     "createAccountSubtitle": "無料、カード登録不要。Nowry は早期アクセス中です。",
     "email": "メールアドレス",
     "password": "パスワード",
@@ -297,7 +297,7 @@
     "confirmPassword": "パスワード確認",
     "forgotPassword": "パスワードをお忘れですか？",
     "signIn": "サインイン",
-    "signUp": "アカウント作成",
+    "signUp": "アカウントを作成",
     "orContinueWith": "または以下で続行",
     "signInGoogle": "Googleでサインイン",
     "signInFacebook": "Facebookでログイン",
@@ -340,21 +340,21 @@
       "redirecting": "セットアップウィザードへリダイレクト中..."
     },
     "resetPassword": {
-      "title": "パスワードのリセット",
+      "title": "パスワードをリセット",
       "subtitle": {
-        "step1": "確認コードをお送りします",
+        "step1": "新しいパスワードを選ぶためのリンクをメールでお送りします。",
         "step2": "メールに送信されたコードを入力してください",
         "step3": "強力な新しいパスワードを選択してください"
       },
       "codeSent": "確認コードをメールに送信しました！",
       "verifyCode": "コードを確認",
-      "sendCode": "確認コードを送信",
+      "sendCode": "リンクを送る",
       "resend": "再送信",
       "resendPrompt": "コードが届きませんか？",
-      "successTitle": "パスワードのリセット成功！ 🎉",
+      "successTitle": "メールを確認してください",
       "successMsg": "パスワードが正常にリセットされました。新しいパスワードでサインインできます。",
-      "goToLogin": "ログインへ移動",
-      "backToLogin": "ログインへ戻る",
+      "goToLogin": "サインインに戻る",
+      "backToLogin": "サインインに戻る",
       "emailLabel": "メールアドレス",
       "codeLabel": "確認コード",
       "newPasswordLabel": "新しいパスワード",
@@ -363,7 +363,8 @@
         "codeRequired": "確認コードは必須です",
         "codeLength": "コードは6桁である必要があります"
       }
-    }
+    },
+    "newHere": "はじめての方ですか？"
   },
   "landing": {
     "hero": {

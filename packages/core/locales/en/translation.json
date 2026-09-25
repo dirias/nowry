@@ -308,9 +308,9 @@
     "dueCount_other": "{{count}} due"
   },
   "auth": {
-    "welcomeBack": "Welcome Back",
-    "signInSubtitle": "Sign in to continue your learning journey",
-    "createAccount": "Create Account",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to keep studying.",
+    "createAccount": "Create your account",
     "createAccountSubtitle": "Free, no card. Nowry is in early access.",
     "email": "Email",
     "password": "Password",
@@ -319,8 +319,8 @@
     "usernamePlaceholder": "johndoe",
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot password?",
-    "signIn": "Sign In",
-    "signUp": "Create Account",
+    "signIn": "Sign in",
+    "signUp": "Create account",
     "orContinueWith": "or continue with",
     "signInGoogle": "Sign in with Google",
     "signInFacebook": "Sign in with Facebook",
@@ -363,21 +363,21 @@
       "redirecting": "Redirecting to setup wizard..."
     },
     "resetPassword": {
-      "title": "Reset Password",
+      "title": "Reset password",
       "subtitle": {
-        "step1": "We'll send you a verification code",
+        "step1": "We will email you a link to choose a new password.",
         "step2": "Enter the code sent to your email",
         "step3": "Choose a strong new password"
       },
       "codeSent": "Verification code sent to your email!",
       "verifyCode": "Verify Code",
-      "sendCode": "Send Verification Code",
+      "sendCode": "Email me a link",
       "resend": "Resend",
       "resendPrompt": "Didn't receive the code?",
-      "successTitle": "Check your Email 📧",
+      "successTitle": "Check your email",
       "successMsg": "We've sent a password reset link to your email. Click the link to choose a new password.",
-      "goToLogin": "Back to Login",
-      "backToLogin": "Back to Login",
+      "goToLogin": "Back to sign in",
+      "backToLogin": "Back to sign in",
       "emailLabel": "Email Address",
       "codeLabel": "Verification Code",
       "newPasswordLabel": "New Password",
@@ -386,7 +386,8 @@
         "codeRequired": "Verification code is required",
         "codeLength": "Code must be 6 digits"
       }
-    }
+    },
+    "newHere": "New here?"
   },
   "landing": {
     "hero": {

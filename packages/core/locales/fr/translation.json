@@ -318,8 +318,8 @@
   },
   "auth": {
     "welcomeBack": "Bon retour",
-    "signInSubtitle": "Connectez-vous pour continuer votre apprentissage",
-    "createAccount": "Créer un compte",
+    "signInSubtitle": "Connectez-vous pour continuer à étudier.",
+    "createAccount": "Créez votre compte",
     "createAccountSubtitle": "Gratuit, sans carte bancaire. Nowry est en accès anticipé.",
     "email": "Email",
     "password": "Mot de passe",
@@ -329,7 +329,7 @@
     "confirmPassword": "Confirmer le mot de passe",
     "forgotPassword": "Mot de passe oublié ?",
     "signIn": "Se connecter",
-    "signUp": "S'inscrire",
+    "signUp": "Créer un compte",
     "orContinueWith": "ou continuer avec",
     "signInGoogle": "Continuer avec Google",
     "signInFacebook": "Se connecter avec Facebook",
@@ -374,18 +374,18 @@
     "resetPassword": {
       "title": "Réinitialiser le mot de passe",
       "subtitle": {
-        "step1": "Nous vous enverrons un code de vérification",
+        "step1": "Nous vous enverrons par email un lien pour choisir un nouveau mot de passe.",
         "step2": "Entrez le code envoyé à votre email",
         "step3": "Choisissez un nouveau mot de passe fort"
       },
       "codeSent": "Code de vérification envoyé à votre email !",
       "verifyCode": "Vérifier le code",
-      "sendCode": "Envoyer le code de vérification",
+      "sendCode": "M'envoyer un lien",
       "resend": "Renvoyer",
       "resendPrompt": "Vous n'avez pas reçu le code ?",
-      "successTitle": "Mot de passe réinitialisé ! 🎉",
+      "successTitle": "Consultez votre boîte mail",
       "successMsg": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
-      "goToLogin": "Aller à la connexion",
+      "goToLogin": "Retour à la connexion",
       "backToLogin": "Retour à la connexion",
       "emailLabel": "Adresse Email",
       "codeLabel": "Code de Vérification",
@@ -395,7 +395,8 @@
         "codeRequired": "Le code de vérification est requis",
         "codeLength": "Le code doit comporter 6 chiffres"
       }
-    }
+    },
+    "newHere": "Nouveau ici ?"
   },
   "landing": {
     "hero": {

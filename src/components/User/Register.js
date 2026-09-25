@@ -31,6 +31,7 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import { authService } from '@nowry/core/api/services/auth.service'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
+import { passwordLongEnough } from '@nowry/core/domain/authRules'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -106,7 +107,7 @@ const Register = () => {
     }
     if (!formData.email) newErrors.email = t('auth.errors.emailRequired')
     if (!formData.password) newErrors.password = t('auth.errors.passwordRequired')
-    if (formData.password.length < 8) newErrors.password = t('auth.errors.passwordLength')
+    if (!passwordLongEnough(formData.password)) newErrors.password = t('auth.errors.passwordLength')
     if (formData.password !== formData.passwordConfirmation) {
       newErrors.passwordConfirmation = t('auth.errors.passwordMismatch')
     }
