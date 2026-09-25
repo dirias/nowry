@@ -42,7 +42,10 @@ import {
   Brightness7,
   LoginRounded,
   PersonAddRounded,
-  AutoAwesomeRounded
+  AutoAwesomeRounded,
+  PublicRounded,
+  SellRounded,
+  MailOutlineRounded
 } from '@mui/icons-material'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { formatClock } from '@nowry/core/utils/formatClock'
@@ -77,8 +80,9 @@ const HeaderUtils = ({ variant = 'header' }) => {
         ...focusSx
       }
     : {
-        color: 'rgba(255, 255, 255, 0.9)',
-        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' },
+        // The header variant renders for guests only, on the page ground (ADR-035 §3).
+        color: 'text.secondary',
+        '&:hover': { bgcolor: 'background.level1', color: 'text.primary' },
         ...focusSx
       }
 
@@ -203,17 +207,36 @@ const Header = () => {
 
   const isActive = (path) => location.pathname === path
 
-  const navLinkSx = (path) => ({
-    fontWeight: isActive(path) ? 600 : 400,
-    color: isActive(path) ? 'white' : 'rgba(255, 255, 255, 0.72)',
-    bgcolor: isActive(path) ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-    borderRadius: 'md',
-    px: 1.5,
-    '&:hover': {
-      bgcolor: 'rgba(255, 255, 255, 0.10)',
-      color: 'white'
-    }
-  })
+  // The signed-in header sits on the accent solid (ADR-034); the guest header
+  // sits on the page ground (ADR-035 §3), so a nav link has two grounds to read on.
+  const navLinkSx = (path) =>
+    isLoggedIn
+      ? {
+          fontWeight: isActive(path) ? 600 : 400,
+          color: isActive(path) ? 'white' : 'rgba(255, 255, 255, 0.72)',
+          bgcolor: isActive(path) ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+          borderRadius: 'md',
+          px: 1.5,
+          '&:hover': {
+            bgcolor: 'rgba(255, 255, 255, 0.10)',
+            color: 'white'
+          }
+        }
+      : {
+          fontWeight: isActive(path) ? 'lg' : 'md',
+          color: isActive(path) ? 'text.primary' : 'text.secondary',
+          bgcolor: isActive(path) ? 'background.level1' : 'transparent',
+          borderRadius: 'md',
+          px: 1.5,
+          '&:hover': { bgcolor: 'background.level1', color: 'text.primary' }
+        }
+
+  /** The guest header's nav: the library, pricing on the landing, contact. */
+  const guestNav = [
+    { name: t('header.library'), to: '/browse', path: '/browse', icon: <PublicRounded /> },
+    { name: t('header.pricing'), to: { pathname: '/', hash: '#pricing' }, path: '/#pricing', icon: <SellRounded /> },
+    { name: t('header.contact'), to: '/contact', path: '/contact', icon: <MailOutlineRounded /> }
+  ]
 
   return (
     <>
@@ -230,12 +253,13 @@ const Header = () => {
           zIndex: Z_NAV,
           flexShrink: 0,
           backdropFilter: 'blur(12px)',
-          // The header's text is white; the accent solid is dark in both modes
-          // (ADR-034), so it is the header's ground in both.
-          backgroundColor: theme.palette.primary.solidBg,
-          opacity: 0.95,
-          boxShadow: theme.palette.mode === 'dark' ? 'md' : 'lg',
-          color: 'white'
+          // Signed in, the header's text is white and the accent solid — dark in
+          // both modes (ADR-034) — is its ground. For a guest the header sits on
+          // the page ground with a hairline under it (ADR-035 §3).
+          backgroundColor: isLoggedIn ? theme.palette.primary.solidBg : theme.palette.background.body,
+          opacity: isLoggedIn ? 0.95 : 1,
+          boxShadow: isLoggedIn ? (theme.palette.mode === 'dark' ? 'md' : 'lg') : 'none',
+          color: isLoggedIn ? 'white' : theme.palette.text.primary
         })}
       >
         {/* Logo */}
@@ -285,12 +309,11 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Button variant='plain' component={Link} to='/browse' size='sm' sx={navLinkSx('/browse')}>
-                {t('public.browse')}
-              </Button>
-              <Button variant='plain' component={Link} to='/about' size='sm' sx={navLinkSx('/about')}>
-                {t('header.about')}
-              </Button>
+              {guestNav.map((item) => (
+                <Button key={item.path} variant='plain' color='neutral' component={Link} to={item.to} size='sm' sx={navLinkSx(item.path)}>
+                  {item.name}
+                </Button>
+              ))}
             </>
           )}
         </Stack>
@@ -302,11 +325,19 @@ const Header = () => {
             variant='plain'
             size='sm'
             onClick={() => setMobileMenuOpen(true)}
-            sx={{
-              display: { xs: 'flex', md: 'none' },
-              color: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
-            }}
+            sx={
+              isLoggedIn
+                ? {
+                    display: { xs: 'flex', md: 'none' },
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
+                  }
+                : {
+                    display: { xs: 'flex', md: 'none' },
+                    color: 'text.primary',
+                    '&:hover': { bgcolor: 'background.level1' }
+                  }
+            }
             aria-label={t('header.drawer.menu')}
           >
             <MenuRounded />
@@ -491,33 +522,10 @@ const Header = () => {
           ) : (
             <>
               <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
-                <Button
-                  component={Link}
-                  to='/login'
-                  variant='plain'
-                  size='sm'
-                  sx={{
-                    fontWeight: 500,
-                    color: 'rgba(255, 255, 255, 0.88)',
-                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.10)', color: 'white' }
-                  }}
-                >
+                <Button component={Link} to='/login' variant='plain' color='neutral' size='sm' sx={{ color: 'text.primary' }}>
                   {t('auth.signIn')}
                 </Button>
-                <Button
-                  component={Link}
-                  to='/register'
-                  variant='solid'
-                  size='sm'
-                  sx={{
-                    fontWeight: 600,
-                    bgcolor: 'white',
-                    color: 'primary.solidBg',
-                    borderRadius: 'xl',
-                    px: 2.5,
-                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.92)' }
-                  }}
-                >
+                <Button component={Link} to='/register' size='sm'>
                   {t('header.getStarted')}
                 </Button>
                 <HeaderUtils />
@@ -705,34 +713,20 @@ const Header = () => {
                 <ListDivider sx={{ my: 1 }} />
 
                 {/* Nav links */}
-                <ListItem>
-                  <ListItemButton
-                    component={Link}
-                    to='/browse'
-                    onClick={() => setMobileMenuOpen(false)}
-                    selected={isActive('/browse')}
-                    sx={{ borderRadius: 'sm' }}
-                  >
-                    <ListItemDecorator>
-                      <SchoolRounded />
-                    </ListItemDecorator>
-                    {t('public.browse')}
-                  </ListItemButton>
-                </ListItem>
-                <ListItem>
-                  <ListItemButton
-                    component={Link}
-                    to='/about'
-                    onClick={() => setMobileMenuOpen(false)}
-                    selected={isActive('/about')}
-                    sx={{ borderRadius: 'sm' }}
-                  >
-                    <ListItemDecorator>
-                      <MenuBookRounded />
-                    </ListItemDecorator>
-                    {t('header.about')}
-                  </ListItemButton>
-                </ListItem>
+                {guestNav.map((item) => (
+                  <ListItem key={item.path}>
+                    <ListItemButton
+                      component={Link}
+                      to={item.to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      selected={isActive(item.path)}
+                      sx={{ borderRadius: 'sm' }}
+                    >
+                      <ListItemDecorator>{item.icon}</ListItemDecorator>
+                      {item.name}
+                    </ListItemButton>
+                  </ListItem>
+                ))}
 
                 <ListDivider sx={{ my: 1 }} />
 

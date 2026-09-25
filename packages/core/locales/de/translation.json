@@ -141,7 +141,6 @@
     "study": "Lernen",
     "cards": "Karten",
     "books": "Bücher",
-    "about": "Über uns",
     "contact": "Kontakt",
     "settings": "Einstellungen",
     "getStarted": "Loslegen",
@@ -155,7 +154,9 @@
         "free": "Kostenlos",
         "pro": "Pro"
       }
-    }
+    },
+    "library": "Bibliothek",
+    "pricing": "Preise"
   },
   "footer": {
     "rights": "Alle Rechte vorbehalten.",
@@ -163,10 +164,8 @@
       "tagline": "Der intelligentere Weg zu lernen."
     },
     "links": {
-      "title": "Produkt",
-      "browse": "Erkunden",
-      "about": "Über uns",
-      "planner": "Jahresplaner"
+      "library": "Bibliothek",
+      "pricing": "Preise"
     },
     "support": {
       "title": "Support",
@@ -1154,44 +1153,6 @@
     },
     "eventCount_one": "{{count}} Termin",
     "eventCount_other": "{{count}} Termine"
-  },
-  "about": {
-    "title": "Über Nowry",
-    "subtitle": "Wir haben uns zum Ziel gesetzt, das Lernen für alle durch innovative Technologie und evidenzbasierte Methoden zugänglich, effektiv und angenehm zu machen.",
-    "mission": {
-      "title": "Unsere Mission",
-      "desc": "Lernende weltweit mit intelligenten Tools zu stärken, die sich an ihren einzigartigen Lernstil anpassen und den Wissenserwerb schneller, effizienter und angenehmer als je zuvor machen."
-    },
-    "vision": {
-      "title": "Unsere Vision",
-      "desc": "Eine Welt, in der jeder Zugang zu personalisierten, KI-gesteuerten Lernerfahrungen hat, die sein volles Potenzial freisetzen. Wir stellen uns Bildung vor, die sich an Sie anpasst, nicht umgekehrt."
-    },
-    "values": {
-      "title": "Unsere Grundwerte",
-      "subtitle": "Die Prinzipien, die alles leiten, was wir tun",
-      "innovation": {
-        "title": "Innovation",
-        "desc": "Wir entwickeln unsere Plattform ständig mit modernsten Lerntechniken und KI weiter"
-      },
-      "community": {
-        "title": "Gemeinschaft",
-        "desc": "Aufbau einer unterstützenden Umgebung, in der sich Lernende gegenseitig zum Erfolg verhelfen"
-      },
-      "trust": {
-        "title": "Vertrauen",
-        "desc": "Ihre Daten und Privatsphäre sind unsere obersten Prioritäten, immer sicher und geschützt"
-      },
-      "support": {
-        "title": "Unterstützung",
-        "desc": "Engagiert, Ihnen zu helfen, Ihre Lernziele mit reaktionsschneller Unterstützung zu erreichen"
-      }
-    },
-    "cta": {
-      "title": "Bereit Anzufangen?",
-      "subtitle": "Beginnen Sie heute Ihre Lernreise mit Nowry. Erstellen Sie jetzt Ihr kostenloses Konto!",
-      "primary": "Kostenlos Starten",
-      "secondary": "Kontaktieren Sie Uns"
-    }
   },
   "contact": {
     "emailPlaceholder": "du@beispiel.com",

@@ -47,12 +47,13 @@ const Footer = () => {
     setBugReportOpen(false)
   }
 
+  // Library · Pricing · Contact · Privacy · Terms · the one support address (PRD FR-10).
   const navLinks = [
-    { label: t('footer.links.browse'), path: '/browse' },
-    { label: t('footer.links.about'), path: '/about' },
-    { label: t('footer.support.contact'), path: '/contact' },
-    { label: t('footer.links.privacy'), path: '/privacy' },
-    { label: t('footer.links.terms'), path: '/terms' }
+    { key: 'library', label: t('footer.links.library'), to: '/browse' },
+    { key: 'pricing', label: t('footer.links.pricing'), to: { pathname: '/', hash: '#pricing' } },
+    { key: 'contact', label: t('footer.support.contact'), to: '/contact' },
+    { key: 'privacy', label: t('footer.links.privacy'), to: '/privacy' },
+    { key: 'terms', label: t('footer.links.terms'), to: '/terms' }
   ]
 
   const socialLinks = [
@@ -89,9 +90,9 @@ const Footer = () => {
           <Stack direction='row' spacing={0} alignItems='center' flexWrap='wrap'>
             {navLinks.map((link) => (
               <Button
-                key={link.path}
+                key={link.key}
                 component={Link}
-                to={link.path}
+                to={link.to}
                 variant='plain'
                 color='neutral'
                 size='sm'

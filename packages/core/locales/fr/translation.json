@@ -141,7 +141,6 @@
     "study": "Études",
     "cards": "Cartes",
     "books": "Livres",
-    "about": "À propos",
     "contact": "Contact",
     "settings": "Paramètres",
     "getStarted": "Commencer",
@@ -155,7 +154,9 @@
         "free": "Gratuit",
         "pro": "Pro"
       }
-    }
+    },
+    "library": "Bibliothèque",
+    "pricing": "Tarifs"
   },
   "footer": {
     "rights": "Tous droits réservés.",
@@ -163,10 +164,8 @@
       "tagline": "La façon plus intelligente d'apprendre."
     },
     "links": {
-      "title": "Produit",
-      "browse": "Explorer",
-      "about": "À propos",
-      "planner": "Planificateur annuel"
+      "library": "Bibliothèque",
+      "pricing": "Tarifs"
     },
     "support": {
       "title": "Support",
@@ -1165,44 +1164,6 @@
     },
     "eventCount_one": "{{count}} événement",
     "eventCount_other": "{{count}} événements"
-  },
-  "about": {
-    "title": "À propos de Nowry",
-    "subtitle": "Nous avons pour mission de rendre l'apprentissage accessible, efficace et agréable pour tous grâce à une technologie innovante et des méthodes fondées sur des preuves.",
-    "mission": {
-      "title": "Notre Mission",
-      "desc": "Donner aux apprenants du monde entier des outils intelligents qui s'adaptent à leur style d'apprentissage unique, rendant l'acquisition de connaissances plus rapide, plus efficace et plus agréable que jamais."
-    },
-    "vision": {
-      "title": "Notre Vision",
-      "desc": "Un monde où chacun a accès à des expériences d'apprentissage personnalisées et alimentées par l'IA qui libèrent tout son potentiel. Nous envisageons une éducation qui s'adapte à vous, et non l'inverse."
-    },
-    "values": {
-      "title": "Nos Valeurs Fondamentales",
-      "subtitle": "Les principes qui guident tout ce que nous faisons",
-      "innovation": {
-        "title": "Innovation",
-        "desc": "Nous faisons constamment évoluer notre plateforme avec des techniques d'apprentissage de pointe et l'IA"
-      },
-      "community": {
-        "title": "Communauté",
-        "desc": "Construire un environnement de soutien où les apprenants s'entraident pour réussir"
-      },
-      "trust": {
-        "title": "Confiance",
-        "desc": "Vos données et votre vie privée sont nos principales priorités, toujours sécurisées et protégées"
-      },
-      "support": {
-        "title": "Support",
-        "desc": "Dédiés à vous aider à atteindre vos objectifs d'apprentissage avec une assistance réactive"
-      }
-    },
-    "cta": {
-      "title": "Prêt à Commencer?",
-      "subtitle": "Commencez votre parcours d'apprentissage avec Nowry aujourd'hui. Créez votre compte gratuit maintenant!",
-      "primary": "Commencer Gratuitement",
-      "secondary": "Nous Contacter"
-    }
   },
   "contact": {
     "emailPlaceholder": "vous@exemple.com",

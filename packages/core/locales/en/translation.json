@@ -129,7 +129,6 @@
     "study": "Study",
     "cards": "Cards",
     "books": "Books",
-    "about": "About",
     "contact": "Contact",
     "settings": "Settings",
     "getStarted": "Get Started",
@@ -143,7 +142,9 @@
         "free": "Free",
         "pro": "Pro"
       }
-    }
+    },
+    "library": "Library",
+    "pricing": "Pricing"
   },
   "footer": {
     "rights": "All rights reserved.",
@@ -151,12 +152,10 @@
       "tagline": "The smarter way to learn."
     },
     "links": {
-      "title": "Product",
-      "browse": "Browse",
-      "about": "About",
-      "planner": "Annual Planner",
       "privacy": "Privacy Policy",
-      "terms": "Terms of Service"
+      "terms": "Terms of Service",
+      "library": "Library",
+      "pricing": "Pricing"
     },
     "support": {
       "title": "Support",
@@ -553,44 +552,6 @@
       "perMonth": "per month",
       "annual": "or {{price}} a year",
       "cta": "Start with {{name}}"
-    }
-  },
-  "about": {
-    "title": "About Nowry",
-    "subtitle": "We're on a mission to make learning accessible, effective, and enjoyable for everyone through innovative technology and evidence-based methods.",
-    "mission": {
-      "title": "Our Mission",
-      "desc": "To empower learners worldwide with intelligent tools that adapt to their unique learning style, making knowledge acquisition faster, more efficient, and more enjoyable than ever before."
-    },
-    "vision": {
-      "title": "Our Vision",
-      "desc": "A world where every person has access to personalized, AI-powered learning experiences that unlock their full potential. We envision education that adapts to you, not the other way around."
-    },
-    "values": {
-      "title": "Our Core Values",
-      "subtitle": "The principles that guide everything we do",
-      "innovation": {
-        "title": "Innovation",
-        "desc": "We constantly evolve our platform with cutting-edge learning techniques and AI"
-      },
-      "community": {
-        "title": "Community",
-        "desc": "Building a supportive environment where learners help each other succeed"
-      },
-      "trust": {
-        "title": "Trust",
-        "desc": "Your data and privacy are our top priorities, always secure and protected"
-      },
-      "support": {
-        "title": "Support",
-        "desc": "Dedicated to helping you achieve your learning goals with responsive assistance"
-      }
-    },
-    "cta": {
-      "title": "Ready to Get Started?",
-      "subtitle": "Start your learning journey with Nowry today. Create your free account now!",
-      "primary": "Get Started Free",
-      "secondary": "Contact Us"
     }
   },
   "contact": {

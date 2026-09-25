@@ -36,7 +36,6 @@ import StudyPet from './components/Agent/StudyPet'
 
 // ── Lazily loaded: code-split at route level ─────────────────────────
 const Landing = lazy(() => import('./components/HomePage/Landing'))
-const About = lazy(() => import('./components/HomePage/About'))
 const Contact = lazy(() => import('./components/HomePage/Contact'))
 const Login = lazy(() => import('./components/User/Login'))
 const Register = lazy(() => import('./components/User/Register'))
@@ -76,7 +75,7 @@ const SheetsListPage = lazy(() => import('./components/Sheets/SheetsListPage'))
 const SheetsEditor = lazy(() => import('./components/Sheets/SheetsEditor'))
 
 /** Routes where the Footer should remain visible even for authenticated users */
-const PUBLIC_MARKETING_ROUTES = ['/about', '/contact', '/privacy', '/terms']
+const PUBLIC_MARKETING_ROUTES = ['/contact', '/privacy', '/terms']
 
 /**
  * Min-height for the document-flow layout. `100dvh` tracks mobile browser-chrome
@@ -161,7 +160,8 @@ const AppContent = () => {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Public Routes */}
-              <Route path='/about' element={<About />} />
+              {/* About folded into the landing's early-access note (ADR-035 §5). */}
+              <Route path='/about' element={<Navigate to='/' replace />} />
               <Route path='/contact' element={<Contact />} />
               <Route path='/browse' element={<PublicBrowse />} />
               <Route path='/public/:type/:id' element={<PublicView />} />
