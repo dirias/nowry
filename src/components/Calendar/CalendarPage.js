@@ -244,7 +244,9 @@ const CalendarPage = () => {
       <Stack spacing={2} sx={{ height: '100%' }}>
         {/* Row one: the page and its one solid-primary action (ADR-016, decision 1) */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-          <Typography level='h2'>{t('calendarPage.title')}</Typography>
+          <Typography level='h2' component='h1'>
+            {t('calendarPage.title')}
+          </Typography>
           <Button
             startDecorator={<AddRoundedIcon />}
             size='sm'

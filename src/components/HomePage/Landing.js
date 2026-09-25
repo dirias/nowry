@@ -8,14 +8,15 @@ import { AutoStoriesRounded, PsychologyRounded, SpeedRounded, TrendingUpRounded 
 const HowItWorksStep = ({ number, title, description }) => (
   <Box sx={{ flex: 1, textAlign: { xs: 'left', md: 'center' } }}>
     <Typography
-      level='h1'
+      level='display-md'
+      component='span'
+      aria-hidden
       sx={{
-        fontSize: '3rem',
-        fontWeight: 800,
         color: 'primary.plainColor',
         opacity: 0.3,
         lineHeight: 1,
-        mb: 1
+        mb: 1,
+        display: 'block'
       }}
     >
       {String(number).padStart(2, '0')}
@@ -174,7 +175,7 @@ const Landing = () => {
 
         {/* HOW IT WORKS */}
         <Box sx={{ py: { xs: 4, md: 6 }, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography level='h1' fontWeight={700} sx={{ mb: 1, color: 'text.primary' }}>
+          <Typography level='h2' sx={{ mb: 1, color: 'text.primary' }}>
             {t('landing.howItWorks.title')}
           </Typography>
           <Typography level='body-lg' sx={{ color: 'text.secondary', mb: 6, maxWidth: 500 }}>
@@ -206,7 +207,7 @@ const Landing = () => {
 
         {/* CTA */}
         <Box sx={{ py: { xs: 4, md: 6 }, textAlign: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography level='h1' fontWeight={700} sx={{ mb: 2, color: 'text.primary' }}>
+          <Typography level='h2' sx={{ mb: 2, color: 'text.primary' }}>
             {t('landing.cta.title')}
           </Typography>
           <Typography level='body-lg' sx={{ color: 'text.secondary', mb: 4, maxWidth: 500, mx: 'auto' }}>

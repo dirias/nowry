@@ -100,7 +100,9 @@ beforeEach(() => {
 describe('the title row and the view segment (PRD D2)', () => {
   it('names the page on the left rail and offers Dashboard | Library as one segmented object', async () => {
     render(<StudyCenter />)
-    expect(await screen.findByRole('heading', { level: 2, name: 'study.title' })).toBeInTheDocument()
+    // Level 1, set at h2's size: the page title is the page's one <h1>, and the
+    // level is only how big it looks (§4.1.2b).
+    expect(await screen.findByRole('heading', { level: 1, name: 'study.title' })).toBeInTheDocument()
     const segment = screen.getByTestId('study-view')
     const [dashboard, library] = segment.querySelectorAll('button')
     expect(dashboard).toHaveAttribute('aria-pressed', 'true')

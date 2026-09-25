@@ -234,7 +234,9 @@ export default function StudyCenter() {
           mb: 3
         }}
       >
-        <Typography level='h2'>{t('study.title')}</Typography>
+        <Typography level='h2' component='h1'>
+          {t('study.title')}
+        </Typography>
         <ViewSegment
           ariaLabel={t('study.title')}
           testId='study-view'

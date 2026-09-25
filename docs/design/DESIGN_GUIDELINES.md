@@ -218,6 +218,32 @@ Two floors, for two different reasons:
 
 **DR-4: never shrink body text to make content fit on mobile.** If it doesn't fit, reduce content, change the layout, or truncate (§7.2 / §7.3) — `body-xs` (12px) is a floor, not a starting point. This is the rule that stops the next density crunch from reproducing the sub-12px sites this project cleaned up: nearly every one of them existed because someone needed a few more pixels of horizontal room and reached for a smaller font instead of a smaller layout.
 
+#### 4.1.2b One `<h1>` per page — the level and the element are separate choices
+
+**Every page emits exactly one `<h1>`, and `level` does not decide which element that is.**
+
+Joy maps `h1`–`h4` to real heading tags, so `level` and element move together unless you separate
+them — and they usually should. A page title inside the app is a page title whatever size it is set
+at: the app's own pages look right at `h2`'s size, and a marketing hero wants `display-lg`. Both are
+still the page's one `<h1>`:
+
+```jsx
+<Typography level='h2' component='h1'>{t('study.title')}</Typography>      // in-app page title
+<Typography level='display-lg' component='h1'>{t('landing.hero')}</Typography>  // marketing hero
+```
+
+Two rules follow, and a test enforces both (`headingHierarchy.test.js`):
+
+1. **No file emits more than one `<h1>`.** Landing ran six: its hero, two section headings set at
+   `h1`, and three decorative step numbers — "01", "02", "03" — that were `level='h1'` because they
+   needed to be large. Size is what `level` is for; a number is not a heading.
+2. **A `display-*` level always carries `component=`.** It renders a `<span>` otherwise (§4.1.3), so
+   a hero set that way silently leaves the page with no `<h1>` at all.
+
+If something needs heading *size* and is not a heading, set the level and override the element:
+`component='span'` or `component='p'`. If it needs to be a heading and the size is wrong, the level
+is wrong — not the element.
+
 #### 4.1.3 Font families
 
 | Token | Face | Notes |
