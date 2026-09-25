@@ -2544,48 +2544,48 @@
   "plans": {
     "plus": "Plus",
     "pro": "Pro",
-    "title": "Choose Your Plan",
-    "subtitle": "Unlock AI features that match your learning style",
-    "currentPlan": "Your current plan",
+    "title": "プランを選ぶ",
+    "subtitle": "学び方に合った AI 機能を解放しましょう",
+    "currentPlan": "現在のプラン",
     "billingToggle": {
-      "label": "Billing period:",
-      "monthly": "Monthly",
-      "annual": "Annual (Save 17%)"
+      "label": "請求サイクル：",
+      "monthly": "月額",
+      "annual": "年額（17% お得）"
     },
     "cta": {
-      "upgradeToPlus": "Upgrade to Plus",
-      "upgradeToPro": "Upgrade to Pro",
-      "switchToPro": "Switch to Pro",
-      "getStarted": "Get started"
-    },
-    "features": {
-      "cardGeneration": "Generate cards from text",
-      "cardGenerationFree": "Up to 2 cards",
-      "cardGenerationPlus": "Book-level analysis (20 cards)",
-      "cardGenerationPro": "Full deck AI redesign",
-      "bookExpansion": "Expand selected text with AI",
-      "bookExpansionFree": "Character limited",
-      "bookExpansionPlus": "Soft limit",
-      "bookExpansionPro": "Unlimited",
-      "quizGeneration": "Generate quiz questions",
-      "quizGenerationFree": "Up to 5 questions",
-      "quizGenerationPlus": "Book-level (20 questions)",
-      "quizGenerationPro": "Full deck AI redesign",
-      "aiUsage": "Monthly AI generations",
-      "aiUsageFree": "0 (view only)",
-      "aiUsagePlus": "100 / month",
-      "aiUsagePro": "Unlimited",
-      "studyCards": "Flashcard study sessions",
-      "studyCardsAll": "Unlimited",
-      "books": "Smart Books",
-      "booksAll": "Unlimited",
-      "support": "Support",
-      "supportFree": "Community",
-      "supportPlus": "Email support",
-      "supportPro": "Priority support"
+      "upgradeToPlus": "Plus にアップグレード",
+      "upgradeToPro": "Pro にアップグレード",
+      "switchToPro": "Pro に切り替える",
+      "getStarted": "始める"
     },
     "error": {
-      "checkoutFailed": "Could not start checkout. Please try again."
+      "checkoutFailed": "決済を開始できませんでした。もう一度お試しください。"
+    },
+    "features": {
+      "cardGeneration": "テキストからカードを生成",
+      "cardGenerationFree": "最大 2 枚",
+      "cardGenerationPlus": "本全体の分析（20 枚）",
+      "cardGenerationPro": "デッキ全体を AI で再構成",
+      "bookExpansion": "選択したテキストを AI で展開",
+      "bookExpansionFree": "文字数制限あり",
+      "bookExpansionPlus": "ゆるやかな上限",
+      "bookExpansionPro": "無制限",
+      "quizGeneration": "クイズ問題を生成",
+      "quizGenerationFree": "最大 5 問",
+      "quizGenerationPlus": "本全体（20 問）",
+      "quizGenerationPro": "デッキ全体を AI で再構成",
+      "aiUsage": "月間の AI 生成回数",
+      "aiUsageFree": "0（閲覧のみ）",
+      "aiUsagePlus": "月 100 回",
+      "aiUsagePro": "無制限",
+      "studyCards": "フラッシュカード学習セッション",
+      "studyCardsAll": "無制限",
+      "books": "スマートブック",
+      "booksAll": "無制限",
+      "support": "サポート",
+      "supportFree": "コミュニティ",
+      "supportPlus": "メールサポート",
+      "supportPro": "優先サポート"
     }
   },
   "billing": {

@@ -2635,48 +2635,48 @@
   "plans": {
     "plus": "Plus",
     "pro": "Pro",
-    "title": "Choose Your Plan",
-    "subtitle": "Unlock AI features that match your learning style",
-    "currentPlan": "Your current plan",
+    "title": "Wähle deinen Plan",
+    "subtitle": "Schalte KI-Funktionen frei, die zu deinem Lernen passen",
+    "currentPlan": "Dein aktueller Plan",
     "billingToggle": {
-      "label": "Billing period:",
-      "monthly": "Monthly",
-      "annual": "Annual (Save 17%)"
+      "label": "Abrechnungszeitraum:",
+      "monthly": "Monatlich",
+      "annual": "Jährlich (17 % sparen)"
     },
     "cta": {
-      "upgradeToPlus": "Upgrade to Plus",
-      "upgradeToPro": "Upgrade to Pro",
-      "switchToPro": "Switch to Pro",
-      "getStarted": "Get started"
-    },
-    "features": {
-      "cardGeneration": "Generate cards from text",
-      "cardGenerationFree": "Up to 2 cards",
-      "cardGenerationPlus": "Book-level analysis (20 cards)",
-      "cardGenerationPro": "Full deck AI redesign",
-      "bookExpansion": "Expand selected text with AI",
-      "bookExpansionFree": "Character limited",
-      "bookExpansionPlus": "Soft limit",
-      "bookExpansionPro": "Unlimited",
-      "quizGeneration": "Generate quiz questions",
-      "quizGenerationFree": "Up to 5 questions",
-      "quizGenerationPlus": "Book-level (20 questions)",
-      "quizGenerationPro": "Full deck AI redesign",
-      "aiUsage": "Monthly AI generations",
-      "aiUsageFree": "0 (view only)",
-      "aiUsagePlus": "100 / month",
-      "aiUsagePro": "Unlimited",
-      "studyCards": "Flashcard study sessions",
-      "studyCardsAll": "Unlimited",
-      "books": "Smart Books",
-      "booksAll": "Unlimited",
-      "support": "Support",
-      "supportFree": "Community",
-      "supportPlus": "Email support",
-      "supportPro": "Priority support"
+      "upgradeToPlus": "Auf Plus upgraden",
+      "upgradeToPro": "Auf Pro upgraden",
+      "switchToPro": "Zu Pro wechseln",
+      "getStarted": "Loslegen"
     },
     "error": {
-      "checkoutFailed": "Could not start checkout. Please try again."
+      "checkoutFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuch es noch einmal."
+    },
+    "features": {
+      "cardGeneration": "Karten aus Text generieren",
+      "cardGenerationFree": "Bis zu 2 Karten",
+      "cardGenerationPlus": "Analyse des ganzen Buchs (20 Karten)",
+      "cardGenerationPro": "KI-Neugestaltung des ganzen Stapels",
+      "bookExpansion": "Markierten Text mit KI erweitern",
+      "bookExpansionFree": "Zeichenlimit",
+      "bookExpansionPlus": "Weiches Limit",
+      "bookExpansionPro": "Unbegrenzt",
+      "quizGeneration": "Quizfragen generieren",
+      "quizGenerationFree": "Bis zu 5 Fragen",
+      "quizGenerationPlus": "Ganzes Buch (20 Fragen)",
+      "quizGenerationPro": "KI-Neugestaltung des ganzen Stapels",
+      "aiUsage": "KI-Generierungen pro Monat",
+      "aiUsageFree": "0 (nur ansehen)",
+      "aiUsagePlus": "100 pro Monat",
+      "aiUsagePro": "Unbegrenzt",
+      "studyCards": "Lernsitzungen mit Karteikarten",
+      "studyCardsAll": "Unbegrenzt",
+      "books": "Intelligente Bücher",
+      "booksAll": "Unbegrenzt",
+      "support": "Support",
+      "supportFree": "Community",
+      "supportPlus": "Support per E-Mail",
+      "supportPro": "Bevorzugter Support"
     }
   },
   "billing": {
