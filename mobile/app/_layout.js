@@ -13,7 +13,10 @@ import '../src/platform/configure'
 import '../src/i18n'
 
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { useFonts } from 'expo-font'
 import { Slot } from 'expo-router'
+import * as SplashScreen from 'expo-splash-screen'
+import { useEffect } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { AuthProvider } from '@nowry/core/context/AuthContext'
 import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
@@ -24,8 +27,30 @@ import { OfflineSync } from '../src/platform/OfflineSync'
 import { PushBridge } from '../src/platform/PushBridge'
 import { NotificationHost } from '../src/ui/Toast'
 import { AuthGate } from '../src/navigation/AuthGate'
+import { DISPLAY_FONTS } from '../src/ui/displayFonts'
+
+// Held so the first frame is not the platform face swapping to Bricolage a
+// moment later. The fonts are local assets, so the hold is milliseconds.
+SplashScreen.preventAutoHideAsync().catch(() => {
+  /* Already hidden, or no splash on this build. Neither is worth a crash. */
+})
 
 export default function RootLayout() {
+  /*
+   * The display face (DS-007B). `error` is honoured as well as `loaded`: a font
+   * that fails to load must not hold the app behind a splash screen forever.
+   * `Typography` already falls back to the platform face for any family React
+   * Native cannot resolve, so the cost of failure is the wrong typeface, not a
+   * dead app — and that is a cost worth paying to stay running.
+   */
+  const [fontsLoaded, fontError] = useFonts(DISPLAY_FONTS)
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {})
+  }, [fontsLoaded, fontError])
+
+  if (!fontsLoaded && !fontError) return null
+
   /*
    * `AppearanceProvider` owns both halves of how the app looks and mounts the
    * theme itself: the account's accent colour, and the device's light/dark

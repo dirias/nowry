@@ -14,6 +14,7 @@
 import { PixelRatio, Text } from 'react-native'
 import { useTheme } from '../theme'
 import { FONT_WEIGHTS, FONT_WEIGHT_NAMES, TYPE_LEVELS } from './typeLevels'
+import { displayFamily } from './displayFace'
 
 const FORBIDDEN = ['fontSize', 'fontWeight', 'lineHeight', 'fontFamily']
 
@@ -42,14 +43,22 @@ export function Typography({ level = 'body-md', weight = null, color = 'text.pri
   const scale = PixelRatio.getFontScale()
   const resolved = resolveColor(theme, color)
 
+  // The level's weight unless the caller names one: emphasis inside a level is
+  // the document's own, not a different level.
+  const fontWeight = weight ? FONT_WEIGHTS[weight] : spec.fontWeight
+  const family = displayFamily(level, Number(fontWeight))
+
   return (
     <Text
       style={[
         {
           fontSize: spec.fontSize,
-          // The level's weight unless the caller names one: emphasis inside a
-          // level is the document's own, not a different level.
-          fontWeight: weight ? FONT_WEIGHTS[weight] : spec.fontWeight,
+          // A static font file per weight is how React Native wants the display
+          // face, and the weight is baked into the file. Setting `fontWeight`
+          // on top of it makes Android synthesise a second, faux bold over a
+          // face that is already bold, so it is left off when a family is named
+          // (DS-007B). Headings that fall back to the platform face keep it.
+          ...(family ? { fontFamily: family } : { fontWeight }),
           lineHeight: spec.fontSize * scale * spec.lineHeightRatio,
           letterSpacing: spec.letterSpacing,
           color: resolved

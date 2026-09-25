@@ -67,6 +67,25 @@ stronger mark and about 30% narrower.
   At −100° the coil's opening sits where an `o` closes.
 - **Colour:** both lockups follow the mark's rule — one colour, the foreground of the ground.
 
+### The face on each client
+
+| Client | Headings (h1–h4, display-*) | Everything else |
+|---|---|---|
+| Web | Bricolage Grotesque, self-hosted, preloaded | Inter Variable |
+| Phone | Bricolage Grotesque, two static weights bundled | the platform face — San Francisco / Roboto |
+
+**The phone's body face is a decision, not an omission.** The platform faces cost no bundle bytes,
+are what each OS tunes for, and already honour the text-size setting `Typography` works to respect.
+The brand lives in the headings and the wordmark, so that is what is shipped. It is an explicit
+exception to ADR-029's "the phone renders Nowry's own tokens", and the two clients therefore differ
+in body text.
+
+The phone's two files are **instanced from the same woff2 the web serves** (`fontTools`, `wght` at
+600 and 700) — React Native needs ttf and fontsource ships woff2 only, and fetching a second copy
+from elsewhere would let the clients drift onto different outlines of one face. Only two weights,
+because between them the heading levels use only 600 and 700. A heading asking for less falls back
+to the platform face rather than being drawn 100–200 too heavy; see `mobile/src/ui/displayFace.js`.
+
 ## What stays fixed across accents
 
 A learner can choose any of eight presets or a custom colour. Whatever they choose, these do not move:
