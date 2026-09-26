@@ -362,6 +362,15 @@ describe('the ended state (ADR-036)', () => {
     expect(get().completedSessions).toBe(0)
   })
 
+  test('dismiss silences the chime even when the sheet was already closed', () => {
+    const { get } = endAFocus()
+    expect(get().showWidget).toBe(false)
+    act(() => get().dismissEnd())
+    expect(adapters.alerts.stop).toHaveBeenCalledTimes(1)
+    expect(get().isEnded).toBe(true)
+    expect(get().showWidget).toBe(false)
+  })
+
   test('reset and a mode change leave the ended state and silence the chime', () => {
     const first = endAFocus()
     act(() => first.get().resetTimer())

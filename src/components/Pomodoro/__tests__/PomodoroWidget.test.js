@@ -50,7 +50,26 @@ const base = () => ({
   resetTimer: jest.fn(),
   skipSession: jest.fn(),
   changeMode: jest.fn(),
+  // The end of a session (ADR-036)
+  isEnded: false,
+  autoStartIn: null,
+  extension: 0,
+  sessionSeconds: 25 * 60,
+  extendMinutes: [5, 10],
+  extendSession: jest.fn(),
+  startNext: jest.fn(),
+  stopAfterEnd: jest.fn(),
+  dismissEnd: jest.fn(),
   settings: { work: 25, shortBreak: 5, longBreak: 15, autoStart: false, enabled: true }
+})
+
+const ended = (overrides = {}) => ({
+  ...base(),
+  isEnded: true,
+  timeLeft: 0,
+  progress: 1,
+  completedSessions: 2,
+  ...overrides
 })
 
 beforeEach(() => {
@@ -230,5 +249,112 @@ describe('PomodoroChip', () => {
     mockPomodoro = { ...base(), showWidget: false, isActive: true, timeLeft: 61, progress: 0.9 }
     rerender(<PomodoroChip />)
     expect(screen.getByText('01:01')).toBeInTheDocument()
+  })
+})
+
+describe('the end of a session (ADR-036)', () => {
+  const endLive = (overrides) => {
+    const utils = render(<PomodoroWidget />)
+    mockPomodoro = ended(overrides)
+    utils.rerender(<PomodoroWidget />)
+    return utils
+  }
+
+  it('promotes the sheet to an alertdialog named by the verdict, with focus on the dialog itself', () => {
+    endLive()
+    const dialog = screen.getByRole('alertdialog', { name: 'pomodoro.timesUp' })
+    expect(dialog).toBeInTheDocument()
+    expect(document.activeElement).toBe(dialog)
+    expect(screen.queryByRole('region', { name: 'common.pomodoro' })).not.toBeInTheDocument()
+    expect(dialog).toHaveAccessibleDescription(
+      'pomodoro.status.endedFocus:{"minutes":25,"mode":"pomodoro.modes.shortBreak","nextMinutes":5}'
+    )
+    expect(document.title).toBe('pomodoro.timesUp · Nowry')
+  })
+
+  it('the three slots keep their shapes and change what they say', () => {
+    endLive()
+    const extend = screen.getByRole('group', { name: 'pomodoro.extend' })
+    const segments = extend.querySelectorAll('button')
+    expect(segments).toHaveLength(2)
+    expect(segments[0]).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(segments[0])
+    expect(mockPomodoro.extendSession).toHaveBeenCalledWith(5)
+    fireEvent.click(segments[1])
+    expect(mockPomodoro.extendSession).toHaveBeenCalledWith(10)
+
+    fireEvent.click(screen.getByRole('button', { name: 'pomodoro.stop' }))
+    expect(mockPomodoro.stopAfterEnd).toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'pomodoro.startBreak' }))
+    expect(mockPomodoro.startNext).toHaveBeenCalled()
+
+    expect(screen.queryByRole('group', { name: 'pomodoro.modes.label' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'pomodoro.reset' })).not.toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100')
+  })
+
+  it('names the next session on the primary: focus after a break, the long break when earned', () => {
+    endLive({ mode: 'shortBreak', completedSessions: 1, sessionSeconds: 300 })
+    expect(screen.getByRole('button', { name: 'pomodoro.startFocus' })).toBeInTheDocument()
+    expect(screen.getByText('pomodoro.status.endedBreak:{"minutes":5,"mode":"pomodoro.modes.work","nextMinutes":25}')).toBeInTheDocument()
+  })
+
+  it('offers the long break when the cycle has earned it', () => {
+    endLive({ completedSessions: 3 })
+    expect(screen.getByRole('button', { name: 'pomodoro.startLongBreak' })).toBeInTheDocument()
+  })
+
+  it('counts down in the status line when auto-start will decide', () => {
+    endLive({ autoStartIn: 7, settings: { ...base().settings, autoStart: true } })
+    expect(
+      screen.getByText('pomodoro.status.endedFocusAuto:{"minutes":25,"mode":"pomodoro.modes.shortBreak","nextMinutes":5,"seconds":7}')
+    ).toBeInTheDocument()
+  })
+
+  it('Escape demotes it: the question stays, the chime does not', () => {
+    endLive()
+    fireEvent.keyDown(screen.getByRole('alertdialog'), { key: 'Escape' })
+    expect(mockPomodoro.dismissEnd).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  })
+
+  it('the close key demotes it too', () => {
+    endLive()
+    fireEvent.click(screen.getByRole('button', { name: 'pomodoro.close' }))
+    expect(mockPomodoro.dismissEnd).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  })
+
+  it('an ended state restored after a reload comes back in the corner, not promoted', () => {
+    mockPomodoro = ended()
+    render(<PomodoroWidget />)
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'common.pomodoro' })).toBeInTheDocument()
+    expect(screen.getByText('pomodoro.timesUp')).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'pomodoro.extend' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'pomodoro.close' }))
+    expect(mockPomodoro.setShowWidget).toHaveBeenCalledWith(false)
+  })
+
+  it('the promoted sheet appears even when the widget was minimised', () => {
+    mockPomodoro = { ...base(), showWidget: false }
+    const { rerender } = render(<PomodoroWidget />)
+    mockPomodoro = ended({ showWidget: false })
+    rerender(<PomodoroWidget />)
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+  })
+
+  it('the chip says the verdict while a session end is unanswered', () => {
+    mockPomodoro = ended({ showWidget: false })
+    render(<PomodoroChip />)
+    expect(screen.getByText('pomodoro.timesUp')).toBeInTheDocument()
+  })
+
+  it('a running extension says how much more, then what', () => {
+    mockPomodoro = { ...base(), isActive: true, extension: 300, timeLeft: 250, totalSeconds: 300, sessionSeconds: 1800, progress: 0.17 }
+    render(<PomodoroWidget />)
+    expect(screen.getByText('pomodoro.status.extended:{"minutes":5,"mode":"pomodoro.modes.shortBreak"}')).toBeInTheDocument()
+    expect(screen.getByText('04:10')).toBeInTheDocument()
   })
 })

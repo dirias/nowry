@@ -187,7 +187,11 @@ const Header = () => {
   }, [mobileMenuOpen, handleTouchEnd, handleTouchMove, handleTouchStart, isInStudySession])
 
   // Pomodoro
-  const { timeLeft, isActive: isTimerActive, showWidget, setShowWidget, settings } = usePomodoro()
+  const { timeLeft, isActive: isTimerActive, isEnded: isTimerEnded, showWidget, setShowWidget, settings } = usePomodoro()
+  // The menu's readout: the clock while running, the verdict while a session's
+  // end waits for an answer (ADR-036).
+  const timerReadout = isTimerEnded ? t('pomodoro.timesUp') : formatClock(timeLeft)
+  const showTimerReadout = isTimerActive || isTimerEnded
 
   const logout = async () => {
     await contextLogout()
@@ -479,9 +483,9 @@ const Header = () => {
                           </ListItemDecorator>
                           <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ flex: 1 }}>
                             <Typography level='body-sm'>{t('common.pomodoro')}</Typography>
-                            {isTimerActive && (
+                            {showTimerReadout && (
                               <Typography level='body-xs' sx={{ color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' }}>
-                                {formatClock(timeLeft)}
+                                {timerReadout}
                               </Typography>
                             )}
                           </Stack>
@@ -643,7 +647,7 @@ const Header = () => {
                         <ListItemDecorator>
                           <TimerRounded />
                         </ListItemDecorator>
-                        {isTimerActive ? `${t('common.pomodoro')} (${formatClock(timeLeft)})` : t('common.pomodoro')}
+                        {showTimerReadout ? `${t('common.pomodoro')} (${timerReadout})` : t('common.pomodoro')}
                       </ListItemButton>
                     </ListItem>
                   </>

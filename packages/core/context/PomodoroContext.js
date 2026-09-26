@@ -427,6 +427,17 @@ export const PomodoroProvider = ({ children }) => {
     })
   }, [])
 
+  /**
+   * Demote the promoted sheet: silence the chime and put the timer away, the
+   * question left standing. Distinct from `setShowWidget(false)` because the
+   * sheet may already have been closed when the session ended, and the chime
+   * must stop either way.
+   */
+  const dismissEnd = useCallback(() => {
+    alerts.stop()
+    setTimer((prev) => (prev.showWidget ? { ...prev, showWidget: false } : prev))
+  }, [])
+
   const baseSeconds = durationFor(mode, settings)
   const totalSeconds = extension || baseSeconds
 
@@ -457,6 +468,7 @@ export const PomodoroProvider = ({ children }) => {
       extendSession,
       startNext,
       stopAfterEnd,
+      dismissEnd,
       settings
     }),
     [
@@ -482,6 +494,7 @@ export const PomodoroProvider = ({ children }) => {
       extendSession,
       startNext,
       stopAfterEnd,
+      dismissEnd,
       settings
     ]
   )

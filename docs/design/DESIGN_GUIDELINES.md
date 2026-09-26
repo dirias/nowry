@@ -2225,6 +2225,20 @@ border, 320px wide, 24px from the corner. Inside it the ladder holds without exc
     default, right in a session, bottom-right when there is no pet. A phone has no second corner, so
     there the open widget is a full-width sheet raised clear of the pet, and only the chip stays in
     a corner.
+*   **The end of a session is the one moment the sheet is promoted (ADR-036).** At zero the same
+    320px object moves from the corner to the centre of the viewport, on the `modal` layer behind a
+    backdrop, as an `alertdialog`. This is the one exception to the no-backdrop rule above, and it
+    holds only because acknowledging the moment *is* the job: Escape, the close key and the backdrop
+    all demote it — back to the chip, still ended — so no keystroke decides anything. Initial focus
+    lands on the dialog itself, never on a key. An ended state restored after a reload is not
+    promoted; the live moment is over, and it comes back in the corner.
+*   **Every slot keeps its shape and changes what it says — the readout included.** Ended, the mode
+    switch's slot holds the two extensions (`+5 min · +10 min`), the secondary slot a labelled
+    `Stop` key, the primary the next session (`Start break` / `Start focus` / `Start long break`).
+    The readout, the loudest text on the sheet, says the verdict — **Time's up** — not the clock at
+    zero, and it names the dialog; the status line beneath says what was done and what comes next
+    ("25 min of focus · Next: Short break, 5 min"). One phrase for every end: the title row already
+    names the session, and "Time's up" is the phrase every kitchen timer taught the user already.
 *   **A message about content sits in the content's object, never over it (ADR-022).** The floating
     companion carries presence only. When it has something to say about a deck, a due count or a
     streak, the message renders inline under the readout of the object it is about — one row on

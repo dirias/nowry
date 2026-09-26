@@ -19,12 +19,14 @@ import { useTimerCorner } from './useTimerCorner'
  */
 const PomodoroChip = () => {
   const { t } = useTranslation()
-  const { showWidget, setShowWidget, settings, isActive, isPaused, timeLeft, progress } = usePomodoro()
+  const { showWidget, setShowWidget, settings, isActive, isPaused, isEnded, timeLeft, progress } = usePomodoro()
   const corner = useTimerCorner()
 
   if (!settings.enabled || showWidget) return null
 
-  const label = isActive || isPaused ? formatClock(timeLeft) : t('pomodoro.modes.work')
+  // The chip carries the state, which is what lets the sheet be demoted at no
+  // cost: while a session's end is unanswered, the chip says so (ADR-036).
+  const label = isEnded ? t('pomodoro.timesUp') : isActive || isPaused ? formatClock(timeLeft) : t('pomodoro.modes.work')
 
   return (
     <Button
@@ -52,7 +54,7 @@ const PomodoroChip = () => {
       <Typography level='body-sm' sx={{ fontWeight: 'lg', fontVariantNumeric: 'tabular-nums', color: 'inherit' }}>
         {label}
       </Typography>
-      {isActive && (
+      {(isActive || isEnded) && (
         <Box aria-hidden='true' sx={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 3, bgcolor: 'background.level2' }}>
           <Box sx={{ width: `${progress * 100}%`, height: '100%', bgcolor: 'primary.solidBg' }} />
         </Box>
