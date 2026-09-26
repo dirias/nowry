@@ -33,7 +33,7 @@ const Ledger = () => {
   const { t } = useTranslation()
 
   return (
-    <Box component='section' id='library' aria-labelledby='landing-ledger-title' sx={{ py: { xs: 6, md: 10 } }}>
+    <Box component='section' id='library' aria-labelledby='landing-ledger-title' sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: 80 }}>
       <Typography id='landing-ledger-title' level='h2' sx={{ color: 'text.primary', mb: { xs: 3, md: 5 } }}>
         {t('landing.ledger.title')}
       </Typography>

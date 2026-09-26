@@ -229,6 +229,12 @@ const Header = () => {
       <Sheet
         component='header'
         sx={(theme) => ({
+          // Pinned in both layouts: the fixed shell keeps it at the top by
+          // construction, and on the document-flow guest pages it used to
+          // scroll away with the page (a deep link to /#pricing landed with no
+          // header at all). The sections it links to carry a scroll margin.
+          position: 'sticky',
+          top: 0,
           borderBottom: '1px solid',
           borderColor: 'divider',
           display: 'flex',

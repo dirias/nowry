@@ -15,7 +15,7 @@ const Pricing = () => {
   const { t } = useTranslation()
 
   return (
-    <Box component='section' id='pricing' aria-labelledby='landing-pricing-title' sx={{ py: { xs: 6, md: 10 } }}>
+    <Box component='section' id='pricing' aria-labelledby='landing-pricing-title' sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: 80 }}>
       <Stack spacing={1.5} sx={{ maxWidth: 640, mb: { xs: 4, md: 6 } }}>
         <Typography id='landing-pricing-title' level='h2' sx={{ color: 'text.primary' }}>
           {t('landing.pricing.title')}
