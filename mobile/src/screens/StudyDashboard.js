@@ -21,7 +21,7 @@ import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { deckCounts } from '@nowry/core/domain/deckTypes'
-import { reviewedThisWeek, studySummary } from '@nowry/core/domain/studySummary'
+import { studySummary } from '@nowry/core/domain/studySummary'
 import { sessionLine } from '@nowry/core/domain/sessionLog'
 import { studySessionsService } from '@nowry/core/api/services'
 import { useForecast } from '@nowry/core/hooks/useForecast'
@@ -116,9 +116,6 @@ export function StudyDashboard() {
    * which reads as a broken page rather than a stale one (MOB-069).
    */
   const statsMissing = Boolean(statsError) && !statistics
-  const reviewedWeek = reviewedThisWeek(statistics)
-  const dueTomorrow = future[0]?.due ?? 0
-  const dueWeek = future.reduce((sum, d) => sum + (d.due || 0), 0)
 
   /**
    * The web's own three cases: no streak at all, a live streak, and a live
@@ -170,12 +167,14 @@ export function StudyDashboard() {
           )
         }
         empty={!loading && !statsMissing && (list ?? []).length === 0 ? t('study.today.emptySentence') : null}
+        /*
+         * The strip carries its own two labels now, the web's "Last 7 days · N"
+         * and "Next 7 days · N · tomorrow N" (SITE-015); the sentence that used
+         * to sit under it read from a key the web had removed (MOB-105).
+         */
         aside={
           loading || (weekly.length === 0 && future.length === 0) ? null : (
-            <Stack spacing={1}>
-              <ForecastStrip past={weekly} today={today.asked} future={future} />
-              <Readout>{t('study.today.weekReadout', { reviewed: reviewedWeek, tomorrow: dueTomorrow, week: dueWeek })}</Readout>
-            </Stack>
+            <ForecastStrip past={weekly} today={today.asked} future={future} />
           )
         }
         action={

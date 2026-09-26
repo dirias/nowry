@@ -40,6 +40,17 @@
  * whether a screen reader stops on them, and they carry it. `no-hide-
  * descendants` on each cell is belt and braces for the old architecture, where
  * the grouping is weaker.
+ *
+ * **The two labels under the halves are the web's (SITE-015).** The web's strip
+ * stopped carrying a sentence under it — "N reviewed · N due tomorrow · N this
+ * week" — and instead labels each half once: "Last 7 days · N" under the past,
+ * "Next 7 days · N · tomorrow N" under the future, and one sentence in place
+ * of both in a first week, when there is nothing behind and nothing ahead. The
+ * dashboard here still rendered that sentence from a key the web had dropped,
+ * so the phone read the key's name in every language (MOB-105). The labels
+ * now live in the strip, as they do on the web, and the first week draws no
+ * past cells for the same reason the web draws none: seven empty stubs are not
+ * history.
  */
 import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -56,12 +67,17 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
   const theme = useTheme()
 
   // The last entry of weekly_progress is today, which the middle cell owns.
-  const pastDays = past.slice(0, -1)
+  const history = past.slice(0, -1)
+  const reviewedWeek = history.reduce((sum, d) => sum + (d.cards || 0), 0)
+  const dueWeek = future.reduce((sum, d) => sum + (d.due || 0), 0)
+  const firstWeek = reviewedWeek === 0 && dueWeek === 0
+  const pastDays = firstWeek ? [] : history
   const max = Math.max(1, ...pastDays.map((d) => d.cards || 0), today, ...future.map((d) => d.due || 0))
   const height = (value) => (value > 0 ? Math.max(MIN_BAR, Math.round((value / max) * BAR)) : MIN_BAR)
 
-  const reviewedWeek = pastDays.reduce((sum, d) => sum + (d.cards || 0), 0)
-  const dueWeek = future.reduce((sum, d) => sum + (d.due || 0), 0)
+  const rightLabel = firstWeek
+    ? t('study.today.firstWeek')
+    : t('study.today.stripFuture', { count: dueWeek, tomorrow: future[0]?.due ?? 0 })
 
   const narrow = new Intl.DateTimeFormat(i18n?.language ?? 'en', { weekday: 'narrow' })
   const weekday = (iso, fallback) => {
@@ -96,40 +112,61 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
     </View>
   )
 
+  const label = (key, text) => (
+    <Typography
+      key={key}
+      level='body-xs'
+      color='text.tertiary'
+      style={{ fontVariant: ['tabular-nums'] }}
+      importantForAccessibility='no-hide-descendants'
+    >
+      {text}
+    </Typography>
+  )
+
   return (
     <View
       accessible
       accessibilityRole='image'
       accessibilityLabel={t('study.today.timelineAria', { reviewed: reviewedWeek, today, week: dueWeek })}
-      style={{ flexDirection: 'row', gap: GAP, alignItems: 'flex-end' }}
+      style={{ gap: theme.spacing[0.5] }}
     >
-      {pastDays.map((day, i) =>
-        cell(`past-${i}`, day.cards || 0, day.cards > 0 ? 'background.level3' : 'background.level2', weekday(day.date, day.day))
-      )}
-      {cell(
-        'today',
-        today,
-        'primary.solidBg',
-        weekday(past[past.length - 1]?.date, past[past.length - 1]?.day) || t('study.today.todayInitial'),
-        { emphasis: true }
-      )}
+      <View style={{ flexDirection: 'row', gap: GAP, alignItems: 'flex-end' }}>
+        {pastDays.map((day, i) =>
+          cell(`past-${i}`, day.cards || 0, day.cards > 0 ? 'background.level3' : 'background.level2', weekday(day.date, day.day))
+        )}
+        {cell(
+          'today',
+          today,
+          'primary.solidBg',
+          weekday(past[past.length - 1]?.date, past[past.length - 1]?.day) || t('study.today.todayInitial'),
+          { emphasis: true }
+        )}
 
-      {/* What happened, and what is going to — drawn only when there is a
+        {/* What happened, and what is going to — drawn only when there is a
           second half to separate. Offline the forecast does not arrive, and the
           strip ended in a hairline with nothing after it, which reads as a
           broken control rather than as a week with no forecast (MOB-069). */}
-      {future.length > 0 ? (
-        <View
-          importantForAccessibility='no-hide-descendants'
-          style={{ width: 1, alignSelf: 'stretch', marginHorizontal: 2, backgroundColor: resolveColor(theme, 'divider') }}
-        />
-      ) : null}
+        {future.length > 0 ? (
+          <View
+            importantForAccessibility='no-hide-descendants'
+            style={{ width: 1, alignSelf: 'stretch', marginHorizontal: 2, backgroundColor: resolveColor(theme, 'divider') }}
+          />
+        ) : null}
 
-      {future.map((day, i) =>
-        cell(`future-${i}`, day.due || 0, day.due > 0 ? 'primary.softBg' : 'background.level2', weekday(day.date), {
-          outlined: day.due > 0
-        })
-      )}
+        {future.map((day, i) =>
+          cell(`future-${i}`, day.due || 0, day.due > 0 ? 'primary.softBg' : 'background.level2', weekday(day.date), {
+            outlined: day.due > 0
+          })
+        )}
+      </View>
+
+      {/* One label under each half, as the web draws them; the past's label
+          only when there is a past to label. */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: theme.spacing[2] }}>
+        {label('past', pastDays.length > 0 ? t('study.today.stripPast', { count: reviewedWeek }) : '')}
+        {label('future', rightLabel)}
+      </View>
     </View>
   )
 }
