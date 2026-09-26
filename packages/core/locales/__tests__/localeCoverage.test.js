@@ -132,6 +132,8 @@ const IDENTICAL_BY_DESIGN = {
     // appear here.
     'study.dates.minutes_one',
     'study.dates.minutes_other',
+    // "+5 min" is the same abbreviation again, with a sign and a number in front.
+    'pomodoro.extendBy',
     'calendarPage.views.agenda',
     ...XP_GAINED,
     ...CARD_COUNTER
@@ -168,6 +170,8 @@ const IDENTICAL_BY_DESIGN = {
     // See the Spanish note: "min" is the abbreviation here too.
     'study.dates.minutes_one',
     'study.dates.minutes_other',
+    // "+5 min" is the same abbreviation again, with a sign and a number in front.
+    'pomodoro.extendBy',
     // And "A–Z" is the same two letters here.
     'groups.orderAlpha',
     ...XP_GAINED,

@@ -2,7 +2,17 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useTranslation } from 'react-i18next'
 import { useUserProfile } from '../hooks/useUserProfile'
 import { alerts, storage } from '../platform'
-import { DEFAULT_SETTINGS, MODES, SESSIONS_BEFORE_LONG_BREAK, durationFor, isMode, nextModeAfter } from '../domain/pomodoroCycle'
+import {
+  AUTO_START_GRACE_MS,
+  DEFAULT_SETTINGS,
+  ENDED_TTL_MS,
+  EXTEND_MINUTES,
+  MODES,
+  SESSIONS_BEFORE_LONG_BREAK,
+  durationFor,
+  isMode,
+  nextModeAfter
+} from '../domain/pomodoroCycle'
 
 /**
  * PomodoroContext — one timer for the whole app.
@@ -18,9 +28,16 @@ import { DEFAULT_SETTINGS, MODES, SESSIONS_BEFORE_LONG_BREAK, durationFor, isMod
  * - Preferences come from `profile.preferences.pomodoro` — the sub-document
  *   `PUT /users/preferences/general` writes. Older documents that carried the
  *   flat `pomodoro_*` keys under `preferences.general` are still honoured.
- * - A finished session moves to the next one on its own (work → break → work,
- *   long break after every fourth focus). `autoStart` decides whether that next
- *   session also starts running.
+ * - **The end of a session is a state, not a tick (ADR-036).** At zero the
+ *   timer keeps its mode, sets `ended`, rings once and counts nothing. The
+ *   user resolves it: `extendSession` runs the same session on, `startNext`
+ *   counts it and runs the next, `stopAfterEnd` counts it and queues the next
+ *   idle. With `autoStart` the ended state resolves itself after a ten-second
+ *   countdown unless the user acts first. Every one of those calls
+ *   `alerts.stop()`, which is what makes the chime stoppable at all.
+ * - An ended state older than ten minutes is not a live question: on restore
+ *   it moves on silently, exactly as a timer that ran out while the app was
+ *   closed always has.
  */
 
 const PomodoroContext = createContext(null)
@@ -65,6 +82,9 @@ const isSameDay = (a, b) => {
 
 const remainingSeconds = (endTime, now = Date.now()) => Math.max(0, Math.ceil((endTime - now) / 1000))
 
+/** The fields the ended state adds, all at rest. Spread over any resolution. */
+const NOT_ENDED = Object.freeze({ ended: false, endedAt: null, autoStartsAt: null, autoStartIn: null })
+
 const freshState = (mode = MODES.WORK, completedSessions = 0) => ({
   mode,
   timeLeft: durationFor(mode, DEFAULT_SETTINGS),
@@ -75,13 +95,42 @@ const freshState = (mode = MODES.WORK, completedSessions = 0) => ({
   // move the displayed time.
   sessionTouched: false,
   completedSessions,
-  showWidget: false
+  showWidget: false,
+  ...NOT_ENDED,
+  // `extension` is the length of the current extension while one runs (the
+  // progress edge restarts for it); `extendedTotal` is every extension this
+  // session has had, so the ended status can say "30 min of focus".
+  extension: 0,
+  extendedTotal: 0
+})
+
+const extensionFields = (parsed) => ({
+  extension: Number(parsed.extension) || 0,
+  extendedTotal: Number(parsed.extendedTotal) || 0
+})
+
+/** The session counted and the next one queued idle — what a stale end resolves to. */
+const movedOn = (parsed, completedSessions, showWidget) => {
+  const sessions = parsed.mode === MODES.WORK ? completedSessions + 1 : completedSessions
+  return { ...freshState(nextModeAfter(parsed.mode, sessions), sessions), showWidget }
+}
+
+/** The ended state as restored: in the corner, no countdown — the live moment is over. */
+const endedAgain = (parsed, base, endedAt) => ({
+  ...base,
+  ...extensionFields(parsed),
+  timeLeft: 0,
+  sessionTouched: true,
+  ended: true,
+  endedAt
 })
 
 /**
  * Rebuild timer state from what the last session left in localStorage. A timer
  * that ran out while the app was closed is completed here (silently — no sound
- * for something that ended an hour ago) so the user lands on the next session.
+ * for something that ended an hour ago) so the user lands on the next session;
+ * one that ended within the last ten minutes is still a question, and comes
+ * back ended (ADR-036).
  */
 export const restorePersistedState = (raw, now = Date.now()) => {
   if (!raw) return freshState()
@@ -96,17 +145,23 @@ export const restorePersistedState = (raw, now = Date.now()) => {
   const completedSessions = parsed.savedAt && isSameDay(parsed.savedAt, now) ? Number(parsed.completedSessions) || 0 : 0
   const base = { ...freshState(parsed.mode, completedSessions), showWidget: Boolean(parsed.showWidget) }
 
+  if (parsed.ended && typeof parsed.endedAt === 'number') {
+    return now - parsed.endedAt <= ENDED_TTL_MS
+      ? endedAgain(parsed, base, parsed.endedAt)
+      : movedOn(parsed, completedSessions, base.showWidget)
+  }
+
   if (parsed.isActive && typeof parsed.endTime === 'number') {
     const remaining = remainingSeconds(parsed.endTime, now)
     if (remaining > 0) {
-      return { ...base, timeLeft: remaining, isActive: true, endTime: parsed.endTime, sessionTouched: true }
+      return { ...base, ...extensionFields(parsed), timeLeft: remaining, isActive: true, endTime: parsed.endTime, sessionTouched: true }
     }
-    const sessions = parsed.mode === MODES.WORK ? completedSessions + 1 : completedSessions
-    return { ...freshState(nextModeAfter(parsed.mode, sessions), sessions), showWidget: base.showWidget }
+    if (now - parsed.endTime <= ENDED_TTL_MS) return endedAgain(parsed, base, parsed.endTime)
+    return movedOn(parsed, completedSessions, base.showWidget)
   }
 
   if (parsed.sessionTouched && typeof parsed.timeLeft === 'number' && parsed.timeLeft > 0) {
-    return { ...base, timeLeft: parsed.timeLeft, sessionTouched: true }
+    return { ...base, ...extensionFields(parsed), timeLeft: parsed.timeLeft, sessionTouched: true }
   }
   return base
 }
@@ -146,7 +201,20 @@ export const PomodoroProvider = ({ children }) => {
   const timerRef = useRef(timer)
   timerRef.current = timer
 
-  const { mode, timeLeft, isActive, endTime, sessionTouched, completedSessions, showWidget } = timer
+  const {
+    mode,
+    timeLeft,
+    isActive,
+    endTime,
+    sessionTouched,
+    completedSessions,
+    showWidget,
+    ended,
+    autoStartsAt,
+    autoStartIn,
+    extension,
+    extendedTotal
+  } = timer
 
   // Preferences — from the profile query, whenever it (re)loads.
   useEffect(() => {
@@ -169,30 +237,58 @@ export const PomodoroProvider = ({ children }) => {
     writeStorage(timer)
   }, [timer])
 
-  const completeSession = useCallback(
-    ({ notify = true } = {}) => {
-      const finishedMode = timerRef.current.mode
+  /**
+   * Zero. The session is shown as ended and nothing is counted yet; the chime
+   * plays once and the OS notice goes out, silent when the chime did play so
+   * there is one sound source at a time.
+   */
+  const endSession = useCallback(() => {
+    const now = Date.now()
+    const finishedMode = timerRef.current.mode
+    setTimer((prev) => ({
+      ...prev,
+      isActive: false,
+      endTime: null,
+      timeLeft: 0,
+      sessionTouched: true,
+      ended: true,
+      endedAt: now,
+      autoStartsAt: settings.autoStart ? now + AUTO_START_GRACE_MS : null,
+      autoStartIn: settings.autoStart ? Math.ceil(AUTO_START_GRACE_MS / 1000) : null
+    }))
+    const played = alerts.play() === true
+    const bodyKey = finishedMode === MODES.WORK ? 'pomodoro.notification.workDone' : 'pomodoro.notification.breakDone'
+    alerts.announce(t('pomodoro.notification.title'), t(bodyKey), { silent: played })
+  }, [settings, t])
+
+  /**
+   * Count the session and move to the next one — running or queued. Every path
+   * out of the ended state goes through here or `extendSession`, and each
+   * stops the chime first.
+   */
+  const moveOn = useCallback(
+    ({ running, closeWidget = false }) => {
+      alerts.stop()
       setTimer((prev) => {
         const sessions = prev.mode === MODES.WORK ? prev.completedSessions + 1 : prev.completedSessions
         const next = nextModeAfter(prev.mode, sessions)
         const duration = durationFor(next, settings)
-        const running = settings.autoStart
         return {
           ...prev,
+          ...NOT_ENDED,
           mode: next,
           completedSessions: sessions,
           timeLeft: duration,
           isActive: running,
           endTime: running ? Date.now() + duration * 1000 : null,
-          sessionTouched: running
+          sessionTouched: running,
+          extension: 0,
+          extendedTotal: 0,
+          showWidget: closeWidget ? false : prev.showWidget
         }
       })
-      if (!notify) return
-      alerts.play()
-      const bodyKey = finishedMode === MODES.WORK ? 'pomodoro.notification.workDone' : 'pomodoro.notification.breakDone'
-      alerts.announce(t('pomodoro.notification.title'), t(bodyKey))
     },
-    [settings, t]
+    [settings]
   )
 
   // The tick. Derives `timeLeft` from `endTime` so it is exact after a
@@ -206,7 +302,7 @@ export const PomodoroProvider = ({ children }) => {
       if (remaining === 0) {
         clearInterval(intervalId)
         intervalId = null
-        completeSession()
+        endSession()
       }
     }
     tick()
@@ -214,7 +310,27 @@ export const PomodoroProvider = ({ children }) => {
     return () => {
       if (intervalId) clearInterval(intervalId)
     }
-  }, [isActive, endTime, completeSession])
+  }, [isActive, endTime, endSession])
+
+  // The auto-start countdown: the same wall-clock derivation, ten seconds long.
+  useEffect(() => {
+    if (!ended || !autoStartsAt) return undefined
+    let intervalId = null
+    const tick = () => {
+      const left = remainingSeconds(autoStartsAt)
+      setTimer((prev) => (prev.autoStartIn === left ? prev : { ...prev, autoStartIn: left }))
+      if (left === 0) {
+        clearInterval(intervalId)
+        intervalId = null
+        moveOn({ running: true })
+      }
+    }
+    tick()
+    intervalId = setInterval(tick, TICK_MS)
+    return () => {
+      if (intervalId) clearInterval(intervalId)
+    }
+  }, [ended, autoStartsAt, moveOn])
 
   const startTimer = useCallback(() => {
     // Ask once, on the first user gesture; a denial or an unsupported browser is fine.
@@ -222,7 +338,7 @@ export const PomodoroProvider = ({ children }) => {
       .then(() => alerts.requestPermission())
       .catch(() => false)
     setTimer((prev) => {
-      if (prev.isActive) return prev
+      if (prev.isActive || prev.ended) return prev
       const seconds = prev.timeLeft > 0 ? prev.timeLeft : durationFor(prev.mode, settings)
       return { ...prev, timeLeft: seconds, isActive: true, endTime: Date.now() + seconds * 1000, sessionTouched: true }
     })
@@ -232,24 +348,65 @@ export const PomodoroProvider = ({ children }) => {
     setTimer((prev) => (prev.isActive ? { ...prev, isActive: false, endTime: null } : prev))
   }, [])
 
+  /** Count the ended session and run the next one. */
+  const startNext = useCallback(() => moveOn({ running: true }), [moveOn])
+
+  /** Count the ended session, queue the next one idle, and put the timer away. */
+  const stopAfterEnd = useCallback(() => moveOn({ running: false, closeWidget: true }), [moveOn])
+
+  /** Run the ended session on for `minutes` more. Nothing is counted. */
+  const extendSession = useCallback((minutes) => {
+    const seconds = Math.max(1, Math.round(Number(minutes) || 0)) * 60
+    alerts.stop()
+    setTimer((prev) =>
+      prev.ended
+        ? {
+            ...prev,
+            ...NOT_ENDED,
+            isActive: true,
+            timeLeft: seconds,
+            endTime: Date.now() + seconds * 1000,
+            sessionTouched: true,
+            extension: seconds,
+            extendedTotal: prev.extendedTotal + seconds
+          }
+        : prev
+    )
+  }, [])
+
   const toggleTimer = useCallback(() => {
-    if (isActive) pauseTimer()
+    if (ended) startNext()
+    else if (isActive) pauseTimer()
     else startTimer()
-  }, [isActive, pauseTimer, startTimer])
+  }, [ended, isActive, pauseTimer, startNext, startTimer])
 
   const resetTimer = useCallback(() => {
-    setTimer((prev) => ({ ...prev, isActive: false, endTime: null, sessionTouched: false, timeLeft: durationFor(prev.mode, settings) }))
+    alerts.stop()
+    setTimer((prev) => ({
+      ...prev,
+      ...NOT_ENDED,
+      isActive: false,
+      endTime: null,
+      sessionTouched: false,
+      extension: 0,
+      extendedTotal: 0,
+      timeLeft: durationFor(prev.mode, settings)
+    }))
   }, [settings])
 
   const changeMode = useCallback(
     (newMode) => {
       if (!isMode(newMode)) return
+      alerts.stop()
       setTimer((prev) => ({
         ...prev,
+        ...NOT_ENDED,
         mode: newMode,
         isActive: false,
         endTime: null,
         sessionTouched: false,
+        extension: 0,
+        extendedTotal: 0,
         timeLeft: durationFor(newMode, settings)
       }))
     },
@@ -257,24 +414,35 @@ export const PomodoroProvider = ({ children }) => {
   )
 
   /** Jump to the next session without waiting (e.g. cut a break short). Never rings. */
-  const skipSession = useCallback(() => completeSession({ notify: false }), [completeSession])
+  const skipSession = useCallback(() => moveOn({ running: settings.autoStart }), [moveOn, settings.autoStart])
 
   const setShowWidget = useCallback((value) => {
     setTimer((prev) => {
       const next = typeof value === 'function' ? value(prev.showWidget) : Boolean(value)
-      return prev.showWidget === next ? prev : { ...prev, showWidget: next }
+      if (prev.showWidget === next) return prev
+      // Closing the sheet while it is ended is a demotion: the question stays,
+      // the chime does not.
+      if (!next && prev.ended) alerts.stop()
+      return { ...prev, showWidget: next }
     })
   }, [])
 
-  const totalSeconds = durationFor(mode, settings)
+  const baseSeconds = durationFor(mode, settings)
+  const totalSeconds = extension || baseSeconds
 
   const value = useMemo(
     () => ({
       timeLeft,
       totalSeconds,
-      progress: totalSeconds > 0 ? Math.min(1, Math.max(0, (totalSeconds - timeLeft) / totalSeconds)) : 0,
+      /** The whole session so far: its length plus every extension. */
+      sessionSeconds: baseSeconds + extendedTotal,
+      progress: ended ? 1 : totalSeconds > 0 ? Math.min(1, Math.max(0, (totalSeconds - timeLeft) / totalSeconds)) : 0,
       isActive,
-      isPaused: sessionTouched && !isActive,
+      isPaused: sessionTouched && !isActive && !ended,
+      isEnded: ended,
+      autoStartIn,
+      extension,
+      extendMinutes: EXTEND_MINUTES,
       mode,
       completedSessions,
       sessionsBeforeLongBreak: SESSIONS_BEFORE_LONG_BREAK,
@@ -286,13 +454,21 @@ export const PomodoroProvider = ({ children }) => {
       resetTimer,
       skipSession,
       changeMode,
+      extendSession,
+      startNext,
+      stopAfterEnd,
       settings
     }),
     [
       timeLeft,
       totalSeconds,
+      baseSeconds,
+      extendedTotal,
       isActive,
       sessionTouched,
+      ended,
+      autoStartIn,
+      extension,
       mode,
       completedSessions,
       showWidget,
@@ -303,6 +479,9 @@ export const PomodoroProvider = ({ children }) => {
       resetTimer,
       skipSession,
       changeMode,
+      extendSession,
+      startNext,
+      stopAfterEnd,
       settings
     ]
   )

@@ -117,8 +117,14 @@ const validate = (candidate) => {
   if (!session || !isFunction(session.onUnauthorized) || !isFunction(session.onUnauthorizedSubscribe) || !isFunction(session.onSignedOut)) {
     throw new PlatformAdapterError('session', 'it must provide onUnauthorized(options), onUnauthorizedSubscribe(handler) and onSignedOut()')
   }
-  if (!alerts || !isFunction(alerts.play) || !isFunction(alerts.announce) || !isFunction(alerts.requestPermission)) {
-    throw new PlatformAdapterError('alerts', 'it must provide play(), announce(title, body) and requestPermission()')
+  if (
+    !alerts ||
+    !isFunction(alerts.play) ||
+    !isFunction(alerts.stop) ||
+    !isFunction(alerts.announce) ||
+    !isFunction(alerts.requestPermission)
+  ) {
+    throw new PlatformAdapterError('alerts', 'it must provide play(), stop(), announce(title, body, options) and requestPermission()')
   }
 }
 
@@ -210,11 +216,17 @@ export const session = {
  * in-app message the user reads now. A focus timer that ends while the app is
  * closed has to reach the person through the operating system, and the two
  * clients do that with entirely different machinery: the Web Audio and
- * Notification APIs here, expo-av and expo-notifications on mobile (MOB-024).
+ * Notification APIs here, expo-notifications on mobile (MOB-024).
+ *
+ * `play` returns whether a sound actually started, so the caller can ask for a
+ * silent `announce` and keep one sound source at a time; `stop` silences it,
+ * and is what every action at the end of a session calls (ADR-036). On the
+ * phone both are honest no-ops: its sound is the notification's own.
  */
 export const alerts = {
   play: () => capability('alerts').play(),
-  announce: (title, body) => capability('alerts').announce(title, body),
+  stop: () => capability('alerts').stop(),
+  announce: (title, body, options = {}) => capability('alerts').announce(title, body, options),
   requestPermission: () => capability('alerts').requestPermission()
 }
 

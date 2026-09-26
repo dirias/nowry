@@ -3188,7 +3188,12 @@
       "next": "次 · {{mode}}、{{minutes}}分",
       "paused": "一時停止中 · {{minutes}}分経過",
       "breakQueued": "集中 {{count}} / {{total}} 完了 · {{total}}回で長い休憩",
-      "longBreakEarned": "集中セッション{{total}}回完了 · この後サイクルがリセット"
+      "longBreakEarned": "集中セッション{{total}}回完了 · この後サイクルがリセット",
+      "endedFocus": "集中{{minutes}}分 · 次：{{mode}}、{{nextMinutes}}分",
+      "endedBreak": "休憩{{minutes}}分 · 次：{{mode}}、{{nextMinutes}}分",
+      "endedFocusAuto": "集中{{minutes}}分 · {{mode}}は{{seconds}}秒後に開始",
+      "endedBreakAuto": "休憩{{minutes}}分 · {{mode}}は{{seconds}}秒後に開始",
+      "extended": "延長中 · あと{{minutes}}分 · その後{{mode}}"
     },
     "open": "ポモドーロタイマーを開く",
     "close": "タイマーを閉じる",
@@ -3200,7 +3205,13 @@
     "reset": "リセット",
     "skip": "次のセッションへ",
     "cycleProgress": "長い休憩まで {{count}} / {{total}} 集中セッション",
-    "dialCaption": "{{mode}} · {{total}}回中{{current}}回目"
+    "dialCaption": "{{mode}} · {{total}}回中{{current}}回目",
+    "timesUp": "時間です",
+    "extend": "このセッションに時間を追加",
+    "extendBy": "+{{minutes}}分",
+    "stop": "停止",
+    "startFocus": "集中を開始",
+    "startLongBreak": "長い休憩を開始"
   },
   "nav": {
     "home": "ホーム",

@@ -18,7 +18,12 @@
 import * as Sentry from '@sentry/react'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { auth as firebaseAuth } from '../config/firebase.config'
-import { playPomodoroNotification, requestNotificationPermission, showBrowserNotification } from '../utils/pomodoroSound'
+import {
+  playPomodoroNotification,
+  requestNotificationPermission,
+  showBrowserNotification,
+  stopPomodoroNotification
+} from '../utils/pomodoroSound'
 
 // Paths where a 401 redirect would bounce the user off the page that is trying
 // to sign them in. Lifted verbatim from the response interceptor.
@@ -94,7 +99,8 @@ export const webPlatform = {
    */
   alerts: {
     play: () => playPomodoroNotification(),
-    announce: (title, body) => showBrowserNotification(title, body),
+    stop: () => stopPomodoroNotification(),
+    announce: (title, body, options) => showBrowserNotification(title, body, options),
     requestPermission: () => requestNotificationPermission()
   },
 

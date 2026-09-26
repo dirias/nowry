@@ -3302,7 +3302,12 @@
       "next": "Ensuite · {{mode}}, {{minutes}} min",
       "paused": "En pause · {{minutes}} min écoulées",
       "breakQueued": "Concentration {{count}} sur {{total}} terminée · pause longue après {{total}}",
-      "longBreakEarned": "{{total}} sessions de concentration terminées · le cycle repart ensuite"
+      "longBreakEarned": "{{total}} sessions de concentration terminées · le cycle repart ensuite",
+      "endedFocus": "{{minutes}} min de concentration · Ensuite : {{mode}}, {{nextMinutes}} min",
+      "endedBreak": "{{minutes}} min de pause · Ensuite : {{mode}}, {{nextMinutes}} min",
+      "endedFocusAuto": "{{minutes}} min de concentration · {{mode}} commence dans {{seconds}} s",
+      "endedBreakAuto": "{{minutes}} min de pause · {{mode}} commence dans {{seconds}} s",
+      "extended": "Prolongé · {{minutes}} min de plus · puis {{mode}}"
     },
     "open": "Ouvrir le minuteur Pomodoro",
     "close": "Fermer le minuteur",
@@ -3314,7 +3319,13 @@
     "reset": "Réinitialiser",
     "skip": "Passer à la session suivante",
     "cycleProgress": "{{count}} sur {{total}} sessions de concentration avant une pause longue",
-    "dialCaption": "{{mode}} · {{current}} sur {{total}}"
+    "dialCaption": "{{mode}} · {{current}} sur {{total}}",
+    "timesUp": "Temps écoulé",
+    "extend": "Ajouter du temps à cette session",
+    "extendBy": "+{{minutes}} min",
+    "stop": "Arrêter",
+    "startFocus": "Démarrer la concentration",
+    "startLongBreak": "Commencer la pause longue"
   },
   "nav": {
     "home": "Accueil",

@@ -26,7 +26,7 @@ const makeAdapters = (overrides = {}) => ({
   env: { apiUrl: 'http://api.test', apiTimeout: 10000, sentryDsn: undefined },
   telemetry: { captureException: jest.fn(), captureMessage: jest.fn(), addBreadcrumb: jest.fn() },
   session: { onUnauthorized: jest.fn(), onUnauthorizedSubscribe: jest.fn(() => () => {}), onSignedOut: jest.fn() },
-  alerts: { play: jest.fn(), announce: jest.fn(), requestPermission: jest.fn(async () => 'granted') },
+  alerts: { play: jest.fn(() => true), stop: jest.fn(), announce: jest.fn(), requestPermission: jest.fn(async () => 'granted') },
   ...overrides
 })
 
@@ -72,7 +72,7 @@ describe('configuration', () => {
       'captureException(error, options), captureMessage(message, options) and addBreadcrumb'
     ],
     ['session', { session: { onUnauthorized: () => {} } }, 'onUnauthorized(options), onUnauthorizedSubscribe(handler) and onSignedOut()'],
-    ['alerts', { alerts: { play: () => {} } }, 'play(), announce(title, body) and requestPermission()'],
+    ['alerts', { alerts: { play: () => {} } }, 'play(), stop(), announce(title, body, options) and requestPermission()'],
     ['env', { env: { apiUrl: '', apiTimeout: 1 } }, 'apiUrl must be a non-empty string'],
     ['env', { env: { apiUrl: 'http://a', apiTimeout: 'soon' } }, 'apiTimeout must be a finite number']
   ])('rejects a malformed %s adapter at configure time', (capability, override, detail) => {
@@ -148,11 +148,15 @@ describe('after configuration', () => {
   })
 
   it('delegates alerts, which are sound and OS notifications, not in-app messages', async () => {
-    alerts.play()
+    expect(alerts.play()).toBe(true)
+    alerts.stop()
     alerts.announce('Break over', 'Back to it')
+    alerts.announce('Break over', 'Back to it', { silent: true })
     await alerts.requestPermission()
     expect(adapters.alerts.play).toHaveBeenCalled()
-    expect(adapters.alerts.announce).toHaveBeenCalledWith('Break over', 'Back to it')
+    expect(adapters.alerts.stop).toHaveBeenCalled()
+    expect(adapters.alerts.announce).toHaveBeenNthCalledWith(1, 'Break over', 'Back to it', {})
+    expect(adapters.alerts.announce).toHaveBeenNthCalledWith(2, 'Break over', 'Back to it', { silent: true })
     expect(adapters.alerts.requestPermission).toHaveBeenCalled()
   })
 

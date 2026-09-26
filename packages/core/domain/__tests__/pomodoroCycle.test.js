@@ -112,3 +112,63 @@ describe('ringArcs', () => {
     expect(ringArcs({ ...focus, mode: MODES.LONG_BREAK, progress: undefined })[0].fill).toBe(0)
   })
 })
+
+describe('statusLine — the end of a session (ADR-036)', () => {
+  const ended = {
+    mode: MODES.WORK,
+    isActive: false,
+    isPaused: false,
+    isEnded: true,
+    timeLeft: 0,
+    totalSeconds: 1500,
+    sessionSeconds: 1500,
+    completedSessions: 0,
+    sessionsBeforeLongBreak: 4,
+    settings
+  }
+
+  it('says what was done and what comes next when a focus ends', () => {
+    expect(statusLine(ended)).toEqual({
+      key: 'pomodoro.status.endedFocus',
+      params: { minutes: 25, mode: MODES.SHORT_BREAK, nextMinutes: 5 }
+    })
+  })
+
+  it('counts the extensions into the minutes, and earns the long break', () => {
+    expect(statusLine({ ...ended, sessionSeconds: 1800, completedSessions: 3 })).toEqual({
+      key: 'pomodoro.status.endedFocus',
+      params: { minutes: 30, mode: MODES.LONG_BREAK, nextMinutes: 15 }
+    })
+  })
+
+  it('says focus comes next when a break ends', () => {
+    expect(statusLine({ ...ended, mode: MODES.SHORT_BREAK, totalSeconds: 300, sessionSeconds: 300, completedSessions: 1 })).toEqual({
+      key: 'pomodoro.status.endedBreak',
+      params: { minutes: 5, mode: MODES.WORK, nextMinutes: 25 }
+    })
+  })
+
+  it('counts down when auto-start will take the decision', () => {
+    expect(statusLine({ ...ended, autoStartIn: 7 })).toEqual({
+      key: 'pomodoro.status.endedFocusAuto',
+      params: { minutes: 25, mode: MODES.SHORT_BREAK, nextMinutes: 5, seconds: 7 }
+    })
+    expect(statusLine({ ...ended, mode: MODES.LONG_BREAK, autoStartIn: 0, completedSessions: 4 }).key).toBe(
+      'pomodoro.status.endedBreakAuto'
+    )
+  })
+
+  it('names an extension while it runs, and what follows it', () => {
+    expect(statusLine({ ...ended, isEnded: false, isActive: true, extension: 300, timeLeft: 200, totalSeconds: 300 })).toEqual({
+      key: 'pomodoro.status.extended',
+      params: { minutes: 5, mode: MODES.SHORT_BREAK }
+    })
+  })
+
+  it('a paused extension is simply paused', () => {
+    expect(statusLine({ ...ended, isEnded: false, isPaused: true, extension: 300, timeLeft: 120, totalSeconds: 300 })).toEqual({
+      key: 'pomodoro.status.paused',
+      params: { minutes: 3 }
+    })
+  })
+})

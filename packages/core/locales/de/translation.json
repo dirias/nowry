@@ -3291,7 +3291,12 @@
       "next": "Als Nächstes · {{mode}}, {{minutes}} Min",
       "paused": "Pausiert · {{minutes}} Min vergangen",
       "breakQueued": "Fokus {{count}} von {{total}} geschafft · lange Pause nach {{total}}",
-      "longBreakEarned": "{{total}} Fokus-Sitzungen geschafft · danach beginnt der Zyklus neu"
+      "longBreakEarned": "{{total}} Fokus-Sitzungen geschafft · danach beginnt der Zyklus neu",
+      "endedFocus": "{{minutes}} Min Fokus · Als Nächstes: {{mode}}, {{nextMinutes}} Min",
+      "endedBreak": "{{minutes}} Min Pause · Als Nächstes: {{mode}}, {{nextMinutes}} Min",
+      "endedFocusAuto": "{{minutes}} Min Fokus · {{mode}} beginnt in {{seconds}} s",
+      "endedBreakAuto": "{{minutes}} Min Pause · {{mode}} beginnt in {{seconds}} s",
+      "extended": "Verlängert · {{minutes}} Min mehr · danach {{mode}}"
     },
     "open": "Pomodoro-Timer öffnen",
     "close": "Timer schließen",
@@ -3303,7 +3308,13 @@
     "reset": "Zurücksetzen",
     "skip": "Zur nächsten Sitzung springen",
     "cycleProgress": "{{count}} von {{total}} Fokus-Sitzungen bis zur langen Pause",
-    "dialCaption": "{{mode}} · {{current}} von {{total}}"
+    "dialCaption": "{{mode}} · {{current}} von {{total}}",
+    "timesUp": "Zeit ist um",
+    "extend": "Zeit zu dieser Sitzung hinzufügen",
+    "extendBy": "+{{minutes}} Min",
+    "stop": "Stopp",
+    "startFocus": "Fokus starten",
+    "startLongBreak": "Lange Pause starten"
   },
   "nav": {
     "home": "Start",

@@ -115,7 +115,7 @@ describe('preferences', () => {
 })
 
 describe('running and completing sessions', () => {
-  test('start counts down from the wall clock and completes into a short break', () => {
+  test('start counts down from the wall clock and ends — shown, rung once, counted by nobody yet (ADR-036)', () => {
     mockProfile = profileWith({ enabled: true, work_minutes: 1 })
     const { get } = mount()
 
@@ -127,26 +127,59 @@ describe('running and completing sessions', () => {
 
     advance(30 * 1000)
     expect(get().isActive).toBe(false)
-    expect(get().mode).toBe('shortBreak')
-    expect(get().completedSessions).toBe(1)
-    expect(get().timeLeft).toBe(5 * 60)
+    expect(get().isEnded).toBe(true)
+    expect(get().isPaused).toBe(false)
+    expect(get().mode).toBe('work')
+    expect(get().completedSessions).toBe(0)
+    expect(get().timeLeft).toBe(0)
+    expect(get().progress).toBe(1)
+    expect(get().autoStartIn).toBeNull()
     expect(adapters.alerts.play).toHaveBeenCalledTimes(1)
-    expect(adapters.alerts.announce).toHaveBeenCalledWith('pomodoro.notification.title', 'pomodoro.notification.workDone')
+    // The chime played, so the OS notice is silent: one sound source at a time.
+    expect(adapters.alerts.announce).toHaveBeenCalledWith('pomodoro.notification.title', 'pomodoro.notification.workDone', { silent: true })
+
+    // Nothing rings again while it waits.
+    advance(60 * 1000)
+    expect(adapters.alerts.play).toHaveBeenCalledTimes(1)
+    expect(get().isEnded).toBe(true)
   })
 
-  test('auto-start rolls straight into the next session', () => {
+  test('auto-start counts ten seconds down on the ended sheet, then runs the next session', () => {
     mockProfile = profileWith({ enabled: true, work_minutes: 1, short_break_minutes: 1, auto_start: true })
     const { get } = mount()
 
     act(() => get().startTimer())
     advance(60 * 1000)
+    expect(get().isEnded).toBe(true)
+    expect(get().mode).toBe('work')
+    expect(get().autoStartIn).toBe(10)
+
+    advance(3 * 1000)
+    expect(get().autoStartIn).toBe(7)
+
+    advance(7 * 1000)
+    expect(get().isEnded).toBe(false)
     expect(get().mode).toBe('shortBreak')
     expect(get().isActive).toBe(true)
+    expect(get().completedSessions).toBe(1)
+    expect(adapters.alerts.stop).toHaveBeenCalled()
 
-    advance(60 * 1000)
+    advance(70 * 1000)
     expect(get().mode).toBe('work')
     expect(get().isActive).toBe(true)
-    expect(get().completedSessions).toBe(1)
+  })
+
+  test('any action cancels the auto-start countdown', () => {
+    mockProfile = profileWith({ enabled: true, work_minutes: 1, auto_start: true })
+    const { get } = mount()
+    act(() => get().startTimer())
+    advance(60 * 1000)
+    act(() => get().extendSession(5))
+    expect(get().autoStartIn).toBeNull()
+    advance(15 * 1000)
+    expect(get().mode).toBe('work')
+    expect(get().isActive).toBe(true)
+    expect(get().timeLeft).toBe(5 * 60 - 15)
   })
 
   test('every fourth focus session earns a long break', () => {
@@ -165,6 +198,15 @@ describe('running and completing sessions', () => {
     expect(get().mode).toBe('shortBreak')
     expect(get().completedSessions).toBe(1)
     expect(adapters.alerts.play).not.toHaveBeenCalled()
+  })
+
+  test('a silent play (no Web Audio) leaves the notification its own sound', () => {
+    adapters.alerts.play.mockReturnValue(false)
+    mockProfile = profileWith({ enabled: true, work_minutes: 1 })
+    const { get } = mount()
+    act(() => get().startTimer())
+    advance(60 * 1000)
+    expect(adapters.alerts.announce).toHaveBeenCalledWith(expect.any(String), expect.any(String), { silent: false })
   })
 
   test('reset returns to the full duration of the current mode', () => {
@@ -243,5 +285,136 @@ describe('persistence across reloads', () => {
     first.unmount()
     expect(JSON.parse(testStorage.get(STORAGE_KEY)).showWidget).toBe(true)
     expect(mount().get().showWidget).toBe(true)
+  })
+})
+
+describe('the ended state (ADR-036)', () => {
+  const endAFocus = (prefs = { enabled: true, work_minutes: 25 }) => {
+    mockProfile = profileWith(prefs)
+    const mounted = mount()
+    act(() => mounted.get().startTimer())
+    advance(25 * 60 * 1000)
+    expect(mounted.get().isEnded).toBe(true)
+    adapters.alerts.stop.mockClear()
+    return mounted
+  }
+
+  test('extend runs the same session on; nothing is counted; the edge restarts', () => {
+    const { get } = endAFocus()
+    act(() => get().extendSession(5))
+    expect(adapters.alerts.stop).toHaveBeenCalledTimes(1)
+    expect(get().isEnded).toBe(false)
+    expect(get().isActive).toBe(true)
+    expect(get().mode).toBe('work')
+    expect(get().completedSessions).toBe(0)
+    expect(get().timeLeft).toBe(5 * 60)
+    expect(get().totalSeconds).toBe(5 * 60)
+    expect(get().sessionSeconds).toBe(30 * 60)
+    expect(get().extension).toBe(5 * 60)
+
+    // The extension ends the same way the session did.
+    advance(5 * 60 * 1000)
+    expect(get().isEnded).toBe(true)
+    expect(get().completedSessions).toBe(0)
+    expect(adapters.alerts.play).toHaveBeenCalledTimes(2)
+  })
+
+  test('start next counts the session and runs the break', () => {
+    const { get } = endAFocus()
+    act(() => get().startNext())
+    expect(adapters.alerts.stop).toHaveBeenCalledTimes(1)
+    expect(get().mode).toBe('shortBreak')
+    expect(get().isActive).toBe(true)
+    expect(get().completedSessions).toBe(1)
+    expect(get().isEnded).toBe(false)
+    expect(get().extension).toBe(0)
+  })
+
+  test('stop counts the session, queues the break idle, and puts the timer away', () => {
+    const { get } = endAFocus()
+    act(() => get().setShowWidget(true))
+    act(() => get().stopAfterEnd())
+    expect(adapters.alerts.stop).toHaveBeenCalledTimes(1)
+    expect(get().mode).toBe('shortBreak')
+    expect(get().isActive).toBe(false)
+    expect(get().isPaused).toBe(false)
+    expect(get().completedSessions).toBe(1)
+    expect(get().timeLeft).toBe(5 * 60)
+    expect(get().showWidget).toBe(false)
+  })
+
+  test('toggle while ended means start next; start alone does nothing', () => {
+    const { get } = endAFocus()
+    act(() => get().startTimer())
+    expect(get().isEnded).toBe(true)
+    act(() => get().toggleTimer())
+    expect(get().mode).toBe('shortBreak')
+    expect(get().isActive).toBe(true)
+  })
+
+  test('closing the sheet while ended silences the chime and keeps the question', () => {
+    const { get } = endAFocus()
+    act(() => get().setShowWidget(true))
+    adapters.alerts.stop.mockClear()
+    act(() => get().setShowWidget(false))
+    expect(adapters.alerts.stop).toHaveBeenCalledTimes(1)
+    expect(get().isEnded).toBe(true)
+    expect(get().completedSessions).toBe(0)
+  })
+
+  test('reset and a mode change leave the ended state and silence the chime', () => {
+    const first = endAFocus()
+    act(() => first.get().resetTimer())
+    expect(first.get().isEnded).toBe(false)
+    expect(first.get().timeLeft).toBe(25 * 60)
+    expect(adapters.alerts.stop).toHaveBeenCalledTimes(1)
+    first.unmount()
+    testStorage.clear()
+
+    const second = endAFocus()
+    act(() => second.get().changeMode('shortBreak'))
+    expect(second.get().isEnded).toBe(false)
+    expect(second.get().mode).toBe('shortBreak')
+    expect(adapters.alerts.stop).toHaveBeenCalledTimes(1)
+  })
+
+  test('a reload within ten minutes restores the ended state, without ringing', () => {
+    const first = endAFocus()
+    first.unmount()
+    adapters.alerts.play.mockClear()
+
+    jest.setSystemTime(T0 + 25 * 60 * 1000 + 2 * 60 * 1000)
+    const second = mount()
+    expect(second.get().isEnded).toBe(true)
+    expect(second.get().mode).toBe('work')
+    expect(second.get().completedSessions).toBe(0)
+    expect(second.get().autoStartIn).toBeNull()
+    expect(adapters.alerts.play).not.toHaveBeenCalled()
+  })
+
+  test('a reload later than that moves on silently, as a closed app always did', () => {
+    const first = endAFocus()
+    first.unmount()
+    adapters.alerts.play.mockClear()
+
+    jest.setSystemTime(T0 + 25 * 60 * 1000 + 11 * 60 * 1000)
+    const second = mount()
+    expect(second.get().isEnded).toBe(false)
+    expect(second.get().mode).toBe('shortBreak')
+    expect(second.get().completedSessions).toBe(1)
+    expect(adapters.alerts.play).not.toHaveBeenCalled()
+  })
+
+  test('a timer that ran out while the tab was closed, two minutes ago, comes back ended', () => {
+    mockProfile = profileWith({ enabled: true, work_minutes: 1 })
+    const first = mount()
+    act(() => first.get().startTimer())
+    first.unmount()
+
+    jest.setSystemTime(T0 + 3 * 60 * 1000)
+    const second = mount()
+    expect(second.get().isEnded).toBe(true)
+    expect(second.get().mode).toBe('work')
+    expect(adapters.alerts.play).not.toHaveBeenCalled()
   })
 })

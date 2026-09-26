@@ -44,6 +44,21 @@ export const DEFAULT_SETTINGS = Object.freeze({
 
 export const isMode = (value) => Object.values(MODES).includes(value)
 
+/**
+ * The end of a session (ADR-036).
+ *
+ * `AUTO_START_GRACE_MS` is how long the ended sheet counts down before an
+ * auto-start takes the decision: long enough to reach "+5", short enough that
+ * someone who walked away still gets the break they asked for.
+ * `ENDED_TTL_MS` is how long an ended session stays a live question; restored
+ * later than that, the timer moves on silently, as it always did.
+ * `EXTEND_MINUTES` are the two lengths the sheet offers, in the mode switch's
+ * slot; a third ("Custom…") may join if anyone asks.
+ */
+export const AUTO_START_GRACE_MS = 10 * 1000
+export const ENDED_TTL_MS = 10 * 60 * 1000
+export const EXTEND_MINUTES = Object.freeze([5, 10])
+
 /** Seconds a full session of `mode` lasts under `settings`. */
 export const durationFor = (mode, settings) => {
   const minutes = mode === MODES.SHORT_BREAK ? settings.shortBreak : mode === MODES.LONG_BREAK ? settings.longBreak : settings.work
@@ -74,11 +89,41 @@ export const cycleProgress = (completedSessions, mode, total) => {
  *
  * @returns {{ key: string, params: object }}
  */
-export const statusLine = ({ mode, isActive, isPaused, timeLeft, totalSeconds, completedSessions, sessionsBeforeLongBreak, settings }) => {
+export const statusLine = ({
+  mode,
+  isActive,
+  isPaused,
+  isEnded = false,
+  autoStartIn = null,
+  extension = 0,
+  sessionSeconds = null,
+  timeLeft,
+  totalSeconds,
+  completedSessions,
+  sessionsBeforeLongBreak,
+  settings
+}) => {
   const isFocus = mode === MODES.WORK
+  const nextAfterThis = isFocus ? nextModeAfter(mode, completedSessions + 1) : MODES.WORK
 
+  // Ended: what was done, and what comes next — or when it starts by itself.
+  if (isEnded) {
+    const minutes = Math.round((sessionSeconds ?? totalSeconds) / 60)
+    const params = { minutes, mode: nextAfterThis, nextMinutes: durationFor(nextAfterThis, settings) / 60 }
+    if (autoStartIn !== null && autoStartIn !== undefined) {
+      return {
+        key: isFocus ? 'pomodoro.status.endedFocusAuto' : 'pomodoro.status.endedBreakAuto',
+        params: { ...params, seconds: autoStartIn }
+      }
+    }
+    return { key: isFocus ? 'pomodoro.status.endedFocus' : 'pomodoro.status.endedBreak', params }
+  }
   if (isPaused) {
     return { key: 'pomodoro.status.paused', params: { minutes: Math.round((totalSeconds - timeLeft) / 60) } }
+  }
+  // An extension running: how much more, and what follows it.
+  if (isActive && extension > 0) {
+    return { key: 'pomodoro.status.extended', params: { minutes: extension / 60, mode: nextAfterThis } }
   }
   if (isFocus) {
     const next = nextModeAfter(mode, completedSessions + 1)

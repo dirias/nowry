@@ -56,7 +56,7 @@ export const configureTestPlatform = (overrides = {}) => {
     env: { apiUrl: 'http://api.test', apiTimeout: 10000, sentryDsn: undefined },
     telemetry: { captureException: jest.fn(), captureMessage: jest.fn(), addBreadcrumb: jest.fn() },
     session: { onUnauthorized: jest.fn(), onUnauthorizedSubscribe: jest.fn(() => () => {}), onSignedOut: jest.fn() },
-    alerts: { play: jest.fn(), announce: jest.fn(), requestPermission: jest.fn(async () => 'granted') },
+    alerts: { play: jest.fn(() => true), stop: jest.fn(), announce: jest.fn(), requestPermission: jest.fn(async () => 'granted') },
     ...overrides,
     // last, so a caller's partial override cannot leave the port without one
     storage

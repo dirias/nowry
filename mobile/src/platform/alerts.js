@@ -102,9 +102,14 @@ export const cancelEndAlarm = async () => {
   }
 }
 
-/** The port's shape. See the file comment for why two of the three are empty. */
+/**
+ * The port's shape. See the file comment for why `play` and `announce` are
+ * empty; `stop` is empty for the same reason — there is no sound of ours to
+ * stop, and `play` returning `false` tells the shared timer so (ADR-036).
+ */
 export const mobileAlerts = {
-  play: () => {},
+  play: () => false,
+  stop: () => {},
   announce: () => {},
   requestPermission: requestNotificationPermission
 }
