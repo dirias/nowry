@@ -1,8 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Stack, LinearProgress } from '@mui/joy'
+import { Box, Typography, Stack } from '@mui/joy'
 import { ArrowForward as ArrowForwardIcon } from '@mui/icons-material'
+import { measureFill, measureTrack, readout } from '../Common/Form/formStyles'
 
 /**
  * FocusAreaCard — one focus area on the Overview tab.
@@ -32,13 +33,10 @@ const FocusAreaCard = ({ area, progress, goalCount, to }) => {
         borderRadius: 'lg',
         textDecoration: 'none',
         color: 'inherit',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+        // Hover is a ground, never a lift: a card is content, and the only depth
+        // on the page is the key's edge (ELEVATION.md §2, SITE-012).
         '&:hover': {
-          bgcolor: 'background.surface',
-          boxShadow: 'xs',
-          transform: 'translateY(-2px)',
-          borderColor: 'primary.outlinedBorder',
+          bgcolor: 'background.level1',
           '& .hover-arrow': { opacity: 1 }
         },
         '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
@@ -81,17 +79,16 @@ const FocusAreaCard = ({ area, progress, goalCount, to }) => {
       {/* No `mt: 'auto'` here on purpose — pushing this row to the bottom is what
           padded the old card out to ~200px. The 2-line clamp above already keeps
           the progress rows aligned across a grid row. */}
+      {/* The row anatomy every list in the product uses (§15.11, SITE-012): the
+          measure, then its percent as a tabular readout on the right, then the count. */}
       <Stack direction='row' spacing={1} alignItems='center'>
-        <Typography level='body-xs' fontWeight={700} sx={{ color: 'text.secondary', minWidth: '4ch' }}>
+        <Box sx={{ ...measureTrack, width: 'auto', flex: 1, flexShrink: 1 }}>
+          <Box sx={measureFill(progress)} />
+        </Box>
+        <Typography level='body-xs' sx={{ ...readout, fontSize: 'xs', width: 34, textAlign: 'right' }}>
           {progress}%
         </Typography>
-        <LinearProgress
-          determinate
-          value={progress}
-          thickness={4}
-          sx={{ flex: 1, bgcolor: 'background.level2', color: 'primary.solidBg', borderRadius: 'xs' }}
-        />
-        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+        <Typography level='body-xs' sx={{ color: 'text.tertiary', whiteSpace: 'nowrap' }}>
           {t('annualPlanning.overview.areaGoalCount', { count: goalCount })}
         </Typography>
       </Stack>
