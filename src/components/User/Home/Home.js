@@ -10,6 +10,9 @@ import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import TodayObject from '../../Study/TodayObject'
 import { useTodayData } from '../../Study/useTodayData'
+import { useTaskData } from '@nowry/core/hooks/useTaskData'
+import { useDailyRoutine } from '@nowry/core/hooks/useDailyRoutine'
+import { routineProgress } from '@nowry/core/domain/dailyRoutine'
 import StudyCalendar from './StudyCalendar'
 import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -27,8 +30,16 @@ function Home() {
     return phraseList[Math.floor(Math.random() * phraseList.length)]
   }, [t])
 
-  // The same numbers the Study Center shows, from the same hook (SITE-013).
+  // The same study numbers the Study Center shows (SITE-013), plus the day's
+  // tasks and routine: Home's object says the day across domains (SITE-015).
   const today = useTodayData()
+  const { tasks } = useTaskData()
+  const { routine } = useDailyRoutine()
+  const tasksToday = useMemo(() => {
+    const open = tasks.filter((task) => !task.is_completed).length
+    return { open, done: tasks.length - open }
+  }, [tasks])
+  const routineToday = useMemo(() => routineProgress(routine), [routine])
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 3 } }}>
@@ -124,6 +135,27 @@ function Home() {
       {/* Focus Bar - Goals + Priorities at a glance */}
       <FocusBar />
 
+      {/* The summary object, full width under the band (ADR-021, SITE-015): the day across domains. */}
+      <TodayObject
+        variant='home'
+        loading={today.loading}
+        dueToday={today.dueToday}
+        newToday={today.newToday}
+        reviewedToday={today.reviewedToday}
+        streak={today.streak}
+        totalCards={today.totalCards}
+        weekly={today.weekly}
+        forecast={today.forecast}
+        tasksToday={tasksToday}
+        routine={routineToday}
+        onStudy={() => navigate('/study/daily-review')}
+        onQuick={() => navigate('/study/daily-review?limit=10')}
+        onBrowse={() => navigate('/study?view=library')}
+        onCreateDeck={() => navigate('/study?view=library&new=deck')}
+        onBrowseDecks={() => navigate('/browse')}
+        onImport={() => navigate('/study?view=library&new=import')}
+      />
+
       {/* Top Row - News & Tasks */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid xs={12} md={8} sx={{ order: { xs: 2, md: 1 } }}>
@@ -134,28 +166,9 @@ function Home() {
         </Grid>
       </Grid>
 
-      {/* Bottom Row - Weekly Progress & Calendar */}
+      {/* Bottom Row - Calendar */}
       <Grid container spacing={2}>
-        <Grid xs={12} md={6}>
-          {/* One summary object and one week visual across Home and the Study Center (SITE-013). */}
-          <TodayObject
-            loading={today.loading}
-            dueToday={today.dueToday}
-            newToday={today.newToday}
-            reviewedToday={today.reviewedToday}
-            streak={today.streak}
-            totalCards={today.totalCards}
-            weekly={today.weekly}
-            forecast={today.forecast}
-            onStudy={() => navigate('/study/daily-review')}
-            onQuick={() => navigate('/study/daily-review?limit=10')}
-            onBrowse={() => navigate('/study?view=library')}
-            onCreateDeck={() => navigate('/study?view=library&new=deck')}
-            onBrowseDecks={() => navigate('/browse')}
-            onImport={() => navigate('/study?view=library&new=import')}
-          />
-        </Grid>
-        <Grid xs={12} md={6}>
+        <Grid xs={12}>
           <StudyCalendar />
         </Grid>
       </Grid>

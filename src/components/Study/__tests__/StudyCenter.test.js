@@ -123,12 +123,13 @@ describe('the title row and the view segment (PRD D2)', () => {
 })
 
 describe('the Today object (PRD D1, D9, D10)', () => {
-  it('reads due · new · reviewed · streak in one line and offers the one solid "Study · N"', async () => {
+  it('reads to do · done · streak in one line and offers the one solid "Study · N"', async () => {
     render(<StudyCenter />)
     const today = await screen.findByTestId('today-object')
-    expect(today).toHaveTextContent('study.dueCount:{"count":5}')
-    expect(today).toHaveTextContent('study.deck.newCount:{"count":2}')
-    expect(today).toHaveTextContent('study.today.reviewed:{"count":4}')
+    // One number, once (ADR-021 as amended): due + new is said as "7 today"; the split lives in the strip's tooltip.
+    expect(today).toHaveTextContent('study.today.todayCount:{"count":7}')
+    expect(today).not.toHaveTextContent('study.dueCount')
+    expect(today).toHaveTextContent('study.today.doneCount:{"count":4}')
     expect(today).toHaveTextContent('study.empty.streakLabel:{"count":3}')
     expect(today).not.toHaveTextContent('study.today.beforeMidnight')
     fireEvent.click(screen.getByText('study.today.study:{"count":7}'))

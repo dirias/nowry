@@ -38,18 +38,19 @@ const Readout = ({ children, sx = {} }) => (
   </Typography>
 )
 
-/** ForecastStrip.js: seven reviewed days · hairline · today · seven due days. */
+/** ForecastStrip.js (SITE-015): reviewed days · hairline · today as a marker with its number · due days; one label per half. */
 const Strip = ({ t }) => {
   const asked = TODAY.due + TODAY.fresh
-  const max = Math.max(...PAST, asked, ...FUTURE)
+  const max = Math.max(...PAST, ...FUTURE)
   const height = (v) => (v > 0 ? Math.max(3, Math.round((v / max) * 26)) : 3)
-  const cell = (key, v, bg, label, outlined = false, emphasis = false) => (
+  const heaviest = FUTURE.indexOf(Math.max(...FUTURE))
+  const cell = (key, v, bg, label, { outlined = false, emphasis = false, marker = false } = {}) => (
     <Stack key={key} alignItems='center' spacing={0.5} sx={{ width: 12 }}>
       <Box sx={{ height: 26, width: '100%', display: 'flex', alignItems: 'flex-end' }}>
         <Box
           sx={{
             width: '100%',
-            height: height(v),
+            height: marker ? 11 : height(v),
             borderRadius: 'xs',
             bgcolor: bg,
             border: outlined ? '1px solid' : 0,
@@ -60,18 +61,37 @@ const Strip = ({ t }) => {
       </Box>
       <Typography
         level='body-xs'
-        sx={{ fontSize: '0.5rem', color: emphasis ? 'text.primary' : 'text.tertiary', fontWeight: emphasis ? 'lg' : 'md' }}
+        sx={{
+          fontSize: '0.5rem',
+          minHeight: '1.2em',
+          color: marker ? 'primary.plainColor' : emphasis ? 'text.primary' : 'text.tertiary',
+          fontWeight: emphasis || marker ? 'lg' : 'md'
+        }}
       >
         {label}
       </Typography>
     </Stack>
   )
   return (
-    <Stack direction='row' spacing={0.5} alignItems='flex-end'>
-      {PAST.map((v, i) => cell(`p${i}`, v, 'background.level3', DAYS[i]))}
-      <Box sx={{ width: '1px', alignSelf: 'stretch', bgcolor: 'divider', mx: 0.25 }} />
-      {cell('today', asked, 'primary.solidBg', t('study.today.todayInitial'), false, true)}
-      {FUTURE.map((v, i) => cell(`f${i}`, v, 'primary.softBg', DAYS[(i + 1) % 7], true))}
+    <Stack spacing={0.25}>
+      <Stack direction='row' spacing={0.5} alignItems='flex-end'>
+        {PAST.map((v, i) => cell(`p${i}`, v, 'background.level3', ''))}
+        <Box sx={{ width: '1px', alignSelf: 'stretch', bgcolor: 'divider', mx: 0.25 }} />
+        {cell('today', asked, 'primary.solidBg', asked, { marker: true })}
+        <Box sx={{ width: '1px', alignSelf: 'stretch', bgcolor: 'divider', mx: 0.25 }} />
+        {FUTURE.map((v, i) =>
+          cell(`f${i}`, v, v ? 'primary.softBg' : 'background.level2', i === heaviest ? DAYS[(i + 1) % 7] : '', {
+            outlined: v > 0,
+            emphasis: i === heaviest
+          })
+        )}
+      </Stack>
+      <Stack direction='row' justifyContent='space-between' spacing={1}>
+        <Readout sx={{ fontSize: '0.55rem' }}>{t('study.today.stripPast', { count: PAST.reduce((a, b) => a + b, 0) })}</Readout>
+        <Readout sx={{ fontSize: '0.55rem' }}>
+          {t('study.today.stripFuture', { count: FUTURE.reduce((a, b) => a + b, 0), tomorrow: FUTURE[0] })}
+        </Readout>
+      </Stack>
     </Stack>
   )
 }
@@ -201,10 +221,10 @@ const StudyCenterFrame = ({ sx = {} }) => {
               </Stack>
               <Readout sx={{ color: 'text.secondary' }}>
                 <Box component='span' sx={{ color: 'text.primary', fontWeight: 'md' }}>
-                  {t('study.dueCount', { count: TODAY.due })}
+                  {t('study.today.todayCount', { count: asked })}
                 </Box>
                 {' · '}
-                {t('study.deck.newCount', { count: TODAY.fresh })} · {t('study.today.reviewed', { count: TODAY.reviewed })} ·{' '}
+                {t('study.today.doneCount', { count: TODAY.reviewed })} ·{' '}
                 <Box component='span' sx={{ color: 'warning.plainColor' }}>
                   ▲
                 </Box>{' '}
@@ -212,16 +232,7 @@ const StudyCenterFrame = ({ sx = {} }) => {
               </Readout>
             </Stack>
             <Stack direction='row' alignItems='flex-end' spacing={2} sx={{ flexShrink: 0, display: { xs: 'none', sm: 'flex' } }}>
-              <Stack alignItems='flex-end' spacing={0.5}>
-                <Strip t={t} />
-                <Readout sx={{ fontSize: '0.6rem' }}>
-                  {t('study.today.weekReadout', {
-                    reviewed: PAST.reduce((a, b) => a + b, 0),
-                    tomorrow: FUTURE[0],
-                    week: FUTURE.reduce((a, b) => a + b, 0)
-                  })}
-                </Readout>
-              </Stack>
+              <Strip t={t} />
               <Stack direction='row' spacing={0.75}>
                 <Typography level='body-xs' sx={{ ...frameSoftChip, fontWeight: 'lg' }}>
                   {t('study.today.quick', { count: 10 })}
@@ -235,7 +246,6 @@ const StudyCenterFrame = ({ sx = {} }) => {
           <Box sx={frameTrack}>
             <Box sx={frameFill(Math.round((TODAY.reviewed / total) * 100))} />
           </Box>
-          <Readout sx={{ fontSize: '0.6rem' }}>{t('study.today.progress', { done: TODAY.reviewed, total })}</Readout>
         </Stack>
 
         {/* The lists: Due now and Up to date. At this width the real page stacks Recent below (its two columns start at lg), so the frame ends here. */}
