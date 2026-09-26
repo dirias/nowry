@@ -16,10 +16,7 @@ const MakeCardsFrame = ({ sx = {} }) => {
   const picked = ROWS.filter((r) => r.checked).length
 
   return (
-    <Box
-      aria-hidden
-      sx={{ ...frameShell, bgcolor: 'background.surface', aspectRatio: { xs: 'auto', sm: '4 / 3' }, p: 2, gap: 0.75, ...sx }}
-    >
+    <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', minHeight: { sm: 220 }, flex: 1, p: 2, gap: 0.75, ...sx }}>
       <Stack direction='row' alignItems='baseline' spacing={1}>
         <Typography level='title-sm' sx={{ color: 'text.primary', flexShrink: 0 }}>
           {t('books.makeCards.title')}

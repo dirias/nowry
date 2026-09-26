@@ -17,7 +17,9 @@ export const frameShell = {
   bgcolor: 'background.body',
   overflow: 'hidden',
   display: 'flex',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  // Sized by content (SITE-014 fix): a locale's longer copy makes the frame taller, never clipped.
+  height: 'auto'
 }
 
 /** A surface inside a frame, radius `md`. */

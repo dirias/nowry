@@ -12,7 +12,7 @@ const SectionFrame = ({ sx = {} }) => {
   const { t } = useTranslation()
 
   return (
-    <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', aspectRatio: { xs: 'auto', sm: '4 / 3' }, p: 2, gap: 1, ...sx }}>
+    <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', minHeight: { sm: 220 }, flex: 1, p: 2, gap: 1, ...sx }}>
       <Typography level='title-sm' sx={{ color: 'text.primary' }}>
         {t('landing.frames.section.heading')}
       </Typography>

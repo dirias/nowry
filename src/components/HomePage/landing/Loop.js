@@ -32,13 +32,19 @@ const Loop = ({ frames = {} }) => {
           p: 0,
           display: 'grid',
           gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
-          gap: { xs: 4, md: 4 }
+          // Two rows per step — the frame, then the text — so every frame in
+          // a row is the height of the tallest (a locale's copy decides it,
+          // nothing is clipped) and the four captions sit on one line.
+          gridAutoRows: { md: 'auto auto' },
+          columnGap: 4,
+          rowGap: { xs: 4, md: 2 },
+          '& > li': { display: 'contents' }
         }}
       >
         {LOOP_STEPS.map((step, index) => (
-          <Stack component='li' key={step} spacing={2} sx={{ minWidth: 0 }}>
-            {frames[step]}
-            <Stack spacing={0.75}>
+          <li key={step}>
+            <Box sx={{ minWidth: 0, gridRow: { md: 1 }, gridColumn: { md: index + 1 }, display: 'flex' }}>{frames[step]}</Box>
+            <Stack spacing={0.75} sx={{ minWidth: 0, gridRow: { md: 2 }, gridColumn: { md: index + 1 }, mb: { xs: 0, md: 2 } }}>
               <Stack direction='row' spacing={1.25} alignItems='baseline'>
                 <Typography level='title-sm' sx={{ color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' }} aria-hidden>
                   {String(index + 1).padStart(2, '0')}
@@ -51,7 +57,7 @@ const Loop = ({ frames = {} }) => {
                 {t(`landing.loop.${step}.desc`)}
               </Typography>
             </Stack>
-          </Stack>
+          </li>
         ))}
       </Box>
     </Box>

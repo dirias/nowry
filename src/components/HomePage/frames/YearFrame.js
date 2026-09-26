@@ -14,10 +14,7 @@ const YearFrame = ({ sx = {} }) => {
   const { t } = useTranslation()
 
   return (
-    <Box
-      aria-hidden
-      sx={{ ...frameShell, bgcolor: 'background.surface', aspectRatio: { xs: 'auto', sm: '4 / 3' }, p: 2, gap: 0.75, ...sx }}
-    >
+    <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', minHeight: { sm: 220 }, flex: 1, p: 2, gap: 0.75, ...sx }}>
       <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={1}>
         <Typography level='title-sm' sx={{ color: 'text.primary' }}>
           {t('annualPlanning.myPlan')}

@@ -22,7 +22,7 @@ const CardFrame = ({ answered = true, sx = {} }) => {
   const { t } = useTranslation()
 
   return (
-    <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', aspectRatio: { xs: 'auto', sm: '4 / 3' }, p: 2, gap: 1, ...sx }}>
+    <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', minHeight: { sm: 220 }, flex: 1, p: 2, gap: 1, ...sx }}>
       <Stack direction='row' justifyContent='space-between' spacing={1}>
         <Typography level='body-xs' sx={{ color: 'text.tertiary', flexShrink: 0 }}>
           {t('cards.session.card', COUNTER)}
@@ -39,12 +39,23 @@ const CardFrame = ({ answered = true, sx = {} }) => {
           {t('landing.frames.card.answer')}
         </Typography>
       )}
-      <Stack direction='row' spacing={0.75} sx={{ mt: 'auto' }}>
+      <Stack direction='row' spacing={0.5} sx={{ mt: 'auto', pt: 1 }}>
         {GRADES.map(({ key, sx: tone }) => (
           <Typography
             key={key}
             level='body-xs'
-            sx={{ flex: 1, textAlign: 'center', py: 0.75, borderRadius: 'sm', fontWeight: 'lg', boxSizing: 'border-box', ...tone }}
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              textAlign: 'center',
+              px: 0.25,
+              py: 0.75,
+              borderRadius: 'sm',
+              fontWeight: 'lg',
+              boxSizing: 'border-box',
+              overflowWrap: 'anywhere',
+              ...tone
+            }}
           >
             {t(`cards.session.grading.${key}`)}
           </Typography>
