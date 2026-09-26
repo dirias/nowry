@@ -114,9 +114,10 @@ const DeckRow = ({ t, deck, upToDate = false }) => (
     </Stack>
     <Readout
       sx={{
-        width: 72,
+        minWidth: 72,
         textAlign: 'right',
         whiteSpace: 'nowrap',
+        flexShrink: 0,
         color: upToDate ? 'text.tertiary' : 'text.primary',
         fontWeight: upToDate ? 'sm' : 'md'
       }}
