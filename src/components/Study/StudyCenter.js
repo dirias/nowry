@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Container, Typography, Box, Button, Stack } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { useStatistics } from '@nowry/core/hooks/useStatistics'
-import { useDeckData } from '@nowry/core/hooks/useDeckData'
-import { useForecast } from '@nowry/core/hooks/useForecast'
+import { useTodayData } from './useTodayData'
 import { agentService } from '@nowry/core/api/services/agent.service'
 import { usePet } from '@nowry/core/context/AgentContext'
 import CardHome from '../Cards/CardHome'
@@ -21,21 +19,18 @@ const VIEWS = ['dashboard', 'library']
 export default function StudyCenter() {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
-  const [decks, setDecks] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
-    dueToday: 0,
-    newToday: 0,
-    reviewedToday: 0,
-    totalActive: 0,
-    streak: 0
-  })
-
   const [showAllUpToDate, setShowAllUpToDate] = useState(false)
 
-  const { statistics: statisticsData, loading: statsLoading } = useStatistics()
-  const { decks: hookDecks, loading: decksLoading, reload: reloadDecks } = useDeckData()
-  const { forecast } = useForecast(7)
+  // One hook for the Today object's numbers, shared with Home (SITE-013).
+  const today = useTodayData()
+  const { statistics: statisticsData, statsLoading, decks, loading, reloadDecks, forecast } = today
+  const stats = {
+    dueToday: today.dueToday,
+    newToday: today.newToday,
+    reviewedToday: today.reviewedToday,
+    totalActive: today.totalCards,
+    streak: today.streak
+  }
   const { queuePreSessionIntervention } = usePet()
 
   // The view lives in the URL (architecture addendum, "Routes") so the library
@@ -52,46 +47,6 @@ export default function StudyCenter() {
     [searchParams, setSearchParams]
   )
 
-  const fetchData = React.useCallback(async () => {
-    try {
-      setLoading(true)
-
-      const resolvedDecks = hookDecks || []
-      setDecks(resolvedDecks)
-
-      // Derive global counts directly from deck data — single source of truth
-      const dueToday = resolvedDecks.reduce((sum, d) => sum + (d.due_cards || 0), 0)
-      const newToday = resolvedDecks.reduce((sum, d) => sum + (d.new_cards || 0), 0)
-      const totalActive = resolvedDecks.reduce((sum, d) => sum + (d.total_cards || 0), 0)
-
-      // Streak + weekly progress come exclusively from the statistics endpoint
-      const summary = statisticsData?.summary || {}
-      const weeklyData = statisticsData?.weekly_progress || []
-      const todayData = weeklyData[weeklyData.length - 1]
-      const reviewedToday = todayData ? todayData.cards || 0 : 0
-
-      setStats({
-        dueToday,
-        newToday,
-        reviewedToday,
-        totalActive,
-        streak: summary.current_streak || 0
-      })
-
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching study data:', error)
-      setLoading(false)
-    }
-  }, [hookDecks, statisticsData])
-
-  useEffect(() => {
-    if (statsLoading || decksLoading) return
-    fetchData()
-  }, [statsLoading, decksLoading, fetchData])
-
-  // Phase 2 — Proactive companion: pre-session triggers evaluated once per render cycle
-  // when all data is loaded. Priority order: re-engagement → pre-session framing → streak milestone.
   const phase2FiredRef = useRef(false)
   useEffect(() => {
     if (loading || statsLoading || !statisticsData || !decks?.length) return

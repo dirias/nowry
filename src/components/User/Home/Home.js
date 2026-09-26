@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Grid, Typography, Container, IconButton, Tooltip, Skeleton } from '@mui/joy'
+import { Box, Grid, Typography, Container, IconButton, Tooltip } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded'
@@ -8,19 +8,17 @@ import FocusBar from './FocusBar'
 import OnboardingSurfaces from './OnboardingSurfaces'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
-import WeeklyProgress from './WeeklyProgress'
+import TodayObject from '../../Study/TodayObject'
+import { useTodayData } from '../../Study/useTodayData'
 import StudyCalendar from './StudyCalendar'
 import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '@nowry/core/context/AuthContext'
-import { cardsService, decksService } from '@nowry/core/api/services'
-import { useDeckData } from '@nowry/core/hooks/useDeckData'
 
 function Home() {
   const { user } = useAuth()
   const username = user?.username
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [studyStats, setStudyStats] = useState({ dueCount: 0, loading: true })
   const [blackboardOpen, setBlackboardOpen] = useState(false)
 
   const motivationPhrase = useMemo(() => {
@@ -29,16 +27,8 @@ function Home() {
     return phraseList[Math.floor(Math.random() * phraseList.length)]
   }, [t])
 
-  const { decks, loading: decksLoading } = useDeckData()
-
-  useEffect(() => {
-    if (decksLoading) return
-
-    // Use deck-level stats which are already budget-aware and capped by the backend
-    const totalStudy = decks.reduce((acc, deck) => acc + (deck.due_cards || 0) + (deck.new_cards || 0), 0)
-
-    setStudyStats({ dueCount: totalStudy, loading: false })
-  }, [decks, decksLoading])
+  // The same numbers the Study Center shows, from the same hook (SITE-013).
+  const today = useTodayData()
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 3 } }}>
@@ -52,7 +42,9 @@ function Home() {
       */}
       <OnboardingSurfaces />
 
-      {/* Header - Welcome + Study Status */}
+      {/* Header — the greeting. The "N due" pill that sat on the right was a
+          clickable Box a keyboard could not reach and a duplicate of the Today
+          object's Study key below (SITE-013). */}
       <Box
         sx={{
           display: 'flex',
@@ -127,79 +119,6 @@ function Home() {
             </IconButton>
           </Tooltip>
         </Box>
-
-        {/* Right: Study Stats - Single ternary keeps header stable at all states */}
-        {studyStats.loading ? (
-          <Skeleton variant='rectangular' width={120} height={32} sx={{ borderRadius: 'sm', flexShrink: 0 }} />
-        ) : studyStats.dueCount > 0 ? (
-          <Box
-            onClick={() => navigate('/study/daily-review')}
-            sx={{
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              px: 1.25,
-              py: 0,
-              height: '32px',
-              borderRadius: 'sm',
-              border: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.75,
-              bgcolor: 'transparent',
-              '&:hover': {
-                borderColor: 'primary.outlinedBorder',
-                bgcolor: 'background.level1',
-                '& .arrow-icon': {
-                  transform: 'translateX(3px)',
-                  opacity: 1
-                }
-              },
-              '&:active': {
-                transform: 'scale(0.98)'
-              }
-            }}
-          >
-            <Box sx={{ fontSize: '0.95rem', lineHeight: 1, opacity: 0.9 }}>📚</Box>
-            <Typography level='body-sm' sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1 }}>
-              {t('dashboard.dailyFocus.reviewCount', { count: studyStats.dueCount })}
-            </Typography>
-            <Box
-              className='arrow-icon'
-              sx={{ fontSize: '0.875rem', color: 'text.tertiary', lineHeight: 1, transition: 'all 0.2s ease', opacity: 0.5 }}
-            >
-              →
-            </Box>
-          </Box>
-        ) : (
-          <Box sx={{ textAlign: 'right' }}>
-            {/* NOT migrated to h3's fluid clamp (Wave B, Part 2) — documented exception.
-                This message fills the same row as its sibling branch above (the
-                "N due" chip), which is a compact 32px pill with ~13px text. Growing
-                this to h3 (20->24px fluid) would make the empty-state branch visibly
-                larger than the has-cards branch it replaces, which reads as an
-                inconsistency introduced by this migration rather than fixed by it.
-                Left at its original static values pending a look from someone who can
-                see both branches rendered side by side — not migrated. */}
-            <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2, fontSize: { xs: '1rem', md: '1.5rem' } }}>
-              {t('dashboard.dailyFocus.allCaughtUp')}
-            </Typography>
-            <Typography
-              level='body-sm'
-              sx={{
-                color: 'text.secondary',
-                fontWeight: 'normal',
-                pt: 0.5,
-                pb: 0.5,
-                borderBottom: '1px solid',
-                borderColor: 'success.outlinedBorder',
-                display: { xs: 'none', sm: 'inline-block' }
-              }}
-            >
-              {t('dashboard.dailyFocus.noDueCards')}
-            </Typography>
-          </Box>
-        )}
       </Box>
 
       {/* Focus Bar - Goals + Priorities at a glance */}
@@ -218,7 +137,23 @@ function Home() {
       {/* Bottom Row - Weekly Progress & Calendar */}
       <Grid container spacing={2}>
         <Grid xs={12} md={6}>
-          <WeeklyProgress />
+          {/* One summary object and one week visual across Home and the Study Center (SITE-013). */}
+          <TodayObject
+            loading={today.loading}
+            dueToday={today.dueToday}
+            newToday={today.newToday}
+            reviewedToday={today.reviewedToday}
+            streak={today.streak}
+            totalCards={today.totalCards}
+            weekly={today.weekly}
+            forecast={today.forecast}
+            onStudy={() => navigate('/study/daily-review')}
+            onQuick={() => navigate('/study/daily-review?limit=10')}
+            onBrowse={() => navigate('/study?view=library')}
+            onCreateDeck={() => navigate('/study?view=library&new=deck')}
+            onBrowseDecks={() => navigate('/browse')}
+            onImport={() => navigate('/study?view=library&new=import')}
+          />
         </Grid>
         <Grid xs={12} md={6}>
           <StudyCalendar />
