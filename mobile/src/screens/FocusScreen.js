@@ -30,7 +30,7 @@ import { StatusBar } from 'expo-status-bar'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MODES, usePomodoro } from '@nowry/core/context/PomodoroContext'
-import { cycleProgress, ringArcs, statusLine } from '@nowry/core/domain/pomodoroCycle'
+import { cycleProgress, nextModeAfter, ringArcs, statusLine } from '@nowry/core/domain/pomodoroCycle'
 import { formatClock } from '@nowry/core/utils/formatClock'
 import { cancelEndAlarm, scheduleEndAlarm } from '../platform/alerts'
 import { useTheme } from '../theme'
@@ -67,9 +67,36 @@ export function FocusScreen() {
   const { width } = useWindowDimensions()
   const reduceMotion = useReduceMotion()
   const timer = usePomodoro()
-  const { mode, timeLeft, totalSeconds, isActive, isPaused, progress, completedSessions, sessionsBeforeLongBreak, settings } = timer
+  const {
+    mode,
+    timeLeft,
+    totalSeconds,
+    sessionSeconds,
+    isActive,
+    isPaused,
+    isEnded,
+    autoStartIn,
+    extension,
+    extendMinutes,
+    progress,
+    completedSessions,
+    sessionsBeforeLongBreak,
+    settings,
+    setShowWidget
+  } = timer
 
   useEndAlarm({ isActive, mode, timeLeft })
+
+  // The phone's promotion (ADR-036): when a session ends while the app is in
+  // front, this screen rises over whatever tab is open, the way the web moves
+  // its sheet to the centre. A restored ended state does not — the live moment
+  // is over — so this arms on the transition only. In the background the OS
+  // notification is the interruption, and a tap lands here.
+  const wasEnded = useRef(isEnded)
+  useEffect(() => {
+    if (isEnded && !wasEnded.current) setShowWidget(true)
+    wasEnded.current = isEnded
+  }, [isEnded, setShowWidget])
 
   const close = () => timer.setShowWidget(false)
   const isFocus = mode === MODES.WORK
@@ -77,7 +104,20 @@ export function FocusScreen() {
   const padding = theme.spacing[3]
   const dial = Math.min(DIAL_MAX, width - padding * 2 - theme.spacing[4])
 
-  const status = statusLine({ mode, isActive, isPaused, timeLeft, totalSeconds, completedSessions, sessionsBeforeLongBreak, settings })
+  const status = statusLine({
+    mode,
+    isActive,
+    isPaused,
+    isEnded,
+    autoStartIn,
+    extension,
+    sessionSeconds,
+    timeLeft,
+    totalSeconds,
+    completedSessions,
+    sessionsBeforeLongBreak,
+    settings
+  })
   const statusText = t(status.key, {
     ...status.params,
     ...(status.params.mode ? { mode: t(`pomodoro.modes.${status.params.mode}`) } : null)
@@ -93,6 +133,11 @@ export function FocusScreen() {
     : t(`pomodoro.modes.${mode}`)
 
   const startLabel = isPaused ? 'pomodoro.resume' : isFocus ? 'pomodoro.start' : 'pomodoro.startBreak'
+
+  // Ended: the primary names what comes next, the same three labels the web uses.
+  const nextMode = isFocus ? nextModeAfter(mode, completedSessions + 1) : MODES.WORK
+  const nextLabel =
+    nextMode === MODES.WORK ? 'pomodoro.startFocus' : nextMode === MODES.LONG_BREAK ? 'pomodoro.startLongBreak' : 'pomodoro.startBreak'
 
   return (
     <Modal
@@ -145,7 +190,8 @@ export function FocusScreen() {
           <FocusDial
             size={dial}
             arcs={ringArcs({ mode, completedSessions, sessionsBeforeLongBreak, progress })}
-            clock={formatClock(timeLeft)}
+            clock={isEnded ? t('pomodoro.timesUp') : formatClock(timeLeft)}
+            verdict={isEnded}
             caption={caption}
             ringLabel={t('pomodoro.cycleProgress', { count: done, total: sessionsBeforeLongBreak })}
           />
@@ -154,16 +200,37 @@ export function FocusScreen() {
           </Typography>
         </View>
 
-        {/* ONE alternative, as the web has it: reset while focusing, skip while
-            on a break. */}
-        <Stack spacing={1}>
-          <Button size='lg' variant='secondary' onPress={isFocus ? timer.resetTimer : timer.skipSession}>
-            {t(isFocus ? 'pomodoro.reset' : 'pomodoro.skip')}
-          </Button>
-          <Button size='lg' onPress={timer.toggleTimer}>
-            {t(isActive ? 'pomodoro.pause' : startLabel)}
-          </Button>
-        </Stack>
+        {isEnded ? (
+          /* The end of a session (ADR-036): the key column is the web's ended
+             row stood upright — the two extensions as one segmented object,
+             a labelled Stop, and the next session as the primary. The mode
+             switch above stays: changing mode is also a decision. */
+          <Stack spacing={1}>
+            <Segmented
+              accessibilityLabel={t('pomodoro.extend')}
+              value={null}
+              onChange={timer.extendSession}
+              options={extendMinutes.map((minutes) => ({ value: minutes, label: t('pomodoro.extendBy', { minutes }) }))}
+            />
+            <Button size='lg' variant='secondary' onPress={timer.stopAfterEnd}>
+              {t('pomodoro.stop')}
+            </Button>
+            <Button size='lg' onPress={timer.startNext}>
+              {t(nextLabel)}
+            </Button>
+          </Stack>
+        ) : (
+          /* ONE alternative, as the web has it: reset while focusing, skip while
+             on a break. */
+          <Stack spacing={1}>
+            <Button size='lg' variant='secondary' onPress={isFocus ? timer.resetTimer : timer.skipSession}>
+              {t(isFocus ? 'pomodoro.reset' : 'pomodoro.skip')}
+            </Button>
+            <Button size='lg' onPress={timer.toggleTimer}>
+              {t(isActive ? 'pomodoro.pause' : startLabel)}
+            </Button>
+          </Stack>
+        )}
       </View>
     </Modal>
   )

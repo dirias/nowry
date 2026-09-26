@@ -19,7 +19,13 @@ import { Typography, resolveColor } from '../Typography'
 /** The ring's stroke, in points. Thick enough to read as a track at arm's length. */
 const STROKE = 8
 
-export function FocusDial({ size, arcs, clock, caption, ringLabel }) {
+/**
+ * `clock` is the readout: the time while the timer runs, the verdict ("Time's
+ * up") when the session has ended (ADR-036). `verdict` says which, because words
+ * need a step less than digits to sit inside the ring, and a phrase that would
+ * still not fit in a long locale shrinks rather than breaks the circle.
+ */
+export function FocusDial({ size, arcs, clock, caption, ringLabel, verdict = false }) {
   const theme = useTheme()
   const radius = (size - STROKE) / 2
   const circumference = 2 * Math.PI * radius
@@ -51,7 +57,12 @@ export function FocusDial({ size, arcs, clock, caption, ringLabel }) {
         </Svg>
       </View>
 
-      <Typography level='display-lg' style={{ fontVariant: ['tabular-nums'] }}>
+      <Typography
+        level={verdict ? 'display-md' : 'display-lg'}
+        numberOfLines={1}
+        adjustsFontSizeToFit={verdict}
+        style={{ fontVariant: ['tabular-nums'], textAlign: 'center', maxWidth: size - STROKE * 2 - 24 }}
+      >
         {clock}
       </Typography>
       <Typography level='body-sm' color='text.tertiary'>
