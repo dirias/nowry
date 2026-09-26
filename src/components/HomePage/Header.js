@@ -121,7 +121,6 @@ const Header = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout: contextLogout } = useAuth()
-  const isLoggedIn = !!user
   const displayName = user?.username || user?.email?.split('@')[0] || ''
   const resolvedAvatarUrl = user?.avatar_url || user?.photo_url || user?.avatar || undefined
   const { t } = useTranslation()
@@ -207,29 +206,16 @@ const Header = () => {
 
   const isActive = (path) => location.pathname === path
 
-  // The signed-in header sits on the accent solid (ADR-034); the guest header
-  // sits on the page ground (ADR-035 §3), so a nav link has two grounds to read on.
-  const navLinkSx = (path) =>
-    isLoggedIn
-      ? {
-          fontWeight: isActive(path) ? 600 : 400,
-          color: isActive(path) ? 'white' : 'rgba(255, 255, 255, 0.72)',
-          bgcolor: isActive(path) ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-          borderRadius: 'md',
-          px: 1.5,
-          '&:hover': {
-            bgcolor: 'rgba(255, 255, 255, 0.10)',
-            color: 'white'
-          }
-        }
-      : {
-          fontWeight: isActive(path) ? 'lg' : 'md',
-          color: isActive(path) ? 'text.primary' : 'text.secondary',
-          bgcolor: isActive(path) ? 'background.level1' : 'transparent',
-          borderRadius: 'md',
-          px: 1.5,
-          '&:hover': { bgcolor: 'background.level1', color: 'text.primary' }
-        }
+  // One ground for guests and members (ADR-035, amended 2026-09-26): a nav link
+  // reads on the page ground in both states.
+  const navLinkSx = (path) => ({
+    fontWeight: isActive(path) ? 'lg' : 'md',
+    color: isActive(path) ? 'text.primary' : 'text.secondary',
+    bgcolor: isActive(path) ? 'background.level1' : 'transparent',
+    borderRadius: 'md',
+    px: 1.5,
+    '&:hover': { bgcolor: 'background.level1', color: 'text.primary' }
+  })
 
   /** The guest header's nav: the library, pricing on the landing, contact. */
   const guestNav = [
@@ -252,14 +238,12 @@ const Header = () => {
           py: 1.5,
           zIndex: Z_NAV,
           flexShrink: 0,
-          backdropFilter: 'blur(12px)',
-          // Signed in, the header's text is white and the accent solid — dark in
-          // both modes (ADR-034) — is its ground. For a guest the header sits on
-          // the page ground with a hairline under it (ADR-035 §3).
-          backgroundColor: isLoggedIn ? theme.palette.primary.solidBg : theme.palette.background.body,
-          opacity: isLoggedIn ? 0.95 : 1,
-          boxShadow: isLoggedIn ? (theme.palette.mode === 'dark' ? 'md' : 'lg') : 'none',
-          color: isLoggedIn ? 'white' : theme.palette.text.primary
+          // The page ground with a hairline under it, signed in or not (ADR-035 §3,
+          // amended 2026-09-26). The header used to be the accent solid for
+          // members and changed ground at sign-in; the accent is spent on the
+          // Study key now, not on a bar.
+          backgroundColor: theme.palette.background.body,
+          color: theme.palette.text.primary
         })}
       >
         {/* Logo */}
@@ -325,19 +309,11 @@ const Header = () => {
             variant='plain'
             size='sm'
             onClick={() => setMobileMenuOpen(true)}
-            sx={
-              isLoggedIn
-                ? {
-                    display: { xs: 'flex', md: 'none' },
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }
-                  }
-                : {
-                    display: { xs: 'flex', md: 'none' },
-                    color: 'text.primary',
-                    '&:hover': { bgcolor: 'background.level1' }
-                  }
-            }
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              color: 'text.primary',
+              '&:hover': { bgcolor: 'background.level1' }
+            }}
             aria-label={t('header.drawer.menu')}
           >
             <MenuRounded />
@@ -354,8 +330,8 @@ const Header = () => {
                   aria-label={t('common.toggleTheme')}
                   sx={{
                     display: { xs: 'none', md: 'flex' },
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' },
+                    color: 'text.secondary',
+                    '&:hover': { bgcolor: 'background.level1', color: 'text.primary' },
                     '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
                   }}
                 >
@@ -385,7 +361,7 @@ const Header = () => {
                           width: 32,
                           height: 32,
                           border: '2px solid',
-                          borderColor: 'rgba(255, 255, 255, 0.35)',
+                          borderColor: 'neutral.outlinedBorder',
                           borderRadius: '50%',
                           cursor: 'pointer'
                         }}
@@ -397,7 +373,8 @@ const Header = () => {
                             position: 'absolute',
                             inset: -3,
                             borderRadius: '50%',
-                            border: '2px solid rgba(255, 255, 255, 0.6)',
+                            border: '2px solid',
+                            borderColor: 'primary.outlinedBorder',
                             animation: 'nowry-pulse 2s ease-in-out infinite',
                             '@keyframes nowry-pulse': {
                               '0%, 100%': { opacity: 1 },
