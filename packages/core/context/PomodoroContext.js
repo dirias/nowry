@@ -256,9 +256,13 @@ export const PomodoroProvider = ({ children }) => {
       autoStartsAt: settings.autoStart ? now + AUTO_START_GRACE_MS : null,
       autoStartIn: settings.autoStart ? Math.ceil(AUTO_START_GRACE_MS / 1000) : null
     }))
-    const played = alerts.play() === true
     const bodyKey = finishedMode === MODES.WORK ? 'pomodoro.notification.workDone' : 'pomodoro.notification.breakDone'
-    alerts.announce(t('pomodoro.notification.title'), t(bodyKey), { silent: played })
+    const announce = (played) => alerts.announce(t('pomodoro.notification.title'), t(bodyKey), { silent: played === true })
+    // `play` answers at once when it can; it answers later only when the
+    // browser has to be asked to resume audio first (a page never clicked).
+    const played = alerts.play()
+    if (played && typeof played.then === 'function') played.then(announce, () => announce(false))
+    else announce(played)
   }, [settings, t])
 
   /**
@@ -269,6 +273,7 @@ export const PomodoroProvider = ({ children }) => {
   const moveOn = useCallback(
     ({ running, closeWidget = false }) => {
       alerts.stop()
+      if (running) alerts.prime()
       setTimer((prev) => {
         const sessions = prev.mode === MODES.WORK ? prev.completedSessions + 1 : prev.completedSessions
         const next = nextModeAfter(prev.mode, sessions)
@@ -333,6 +338,9 @@ export const PomodoroProvider = ({ children }) => {
   }, [ended, autoStartsAt, moveOn])
 
   const startTimer = useCallback(() => {
+    // The gesture that starts a timer is what lets the chime sound later,
+    // outside one: open the audio path now, synchronously, while it counts.
+    alerts.prime()
     // Ask once, on the first user gesture; a denial or an unsupported browser is fine.
     Promise.resolve()
       .then(() => alerts.requestPermission())
@@ -358,6 +366,7 @@ export const PomodoroProvider = ({ children }) => {
   const extendSession = useCallback((minutes) => {
     const seconds = Math.max(1, Math.round(Number(minutes) || 0)) * 60
     alerts.stop()
+    alerts.prime()
     setTimer((prev) =>
       prev.ended
         ? {

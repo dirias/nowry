@@ -200,6 +200,26 @@ describe('running and completing sessions', () => {
     expect(adapters.alerts.play).not.toHaveBeenCalled()
   })
 
+  test('starting a timer primes the sound path from the gesture', () => {
+    mockProfile = profileWith({ enabled: true })
+    const { get } = mount()
+    act(() => get().startTimer())
+    expect(adapters.alerts.prime).toHaveBeenCalledTimes(1)
+  })
+
+  test('a play that must resume the browser first answers later, and the notice waits for it', async () => {
+    adapters.alerts.play.mockReturnValue(Promise.resolve(true))
+    mockProfile = profileWith({ enabled: true, work_minutes: 1 })
+    const { get } = mount()
+    act(() => get().startTimer())
+    advance(60 * 1000)
+    expect(adapters.alerts.announce).not.toHaveBeenCalled()
+    await act(async () => {
+      await Promise.resolve()
+    })
+    expect(adapters.alerts.announce).toHaveBeenCalledWith(expect.any(String), expect.any(String), { silent: true })
+  })
+
   test('a silent play (no Web Audio) leaves the notification its own sound', () => {
     adapters.alerts.play.mockReturnValue(false)
     mockProfile = profileWith({ enabled: true, work_minutes: 1 })

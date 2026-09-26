@@ -4,11 +4,18 @@
  * **The chime is a cue, not an alarm.** One pass of the melody, about six
  * seconds, at one gain. The version before this scheduled six repeats over
  * 32 seconds and kept no reference to any of it, so nothing in the app could
- * silence it — not Pause, Reset, Skip nor Close. The handle below is the whole
- * fix: `play` keeps the context it opened, `stop` closes it, and the shared
- * timer calls `stop` from every action the user can take at the end of a
- * session. Nothing loops; the promoted sheet is the interruption, the sound
- * only announces it.
+ * silence it — not Pause, Reset, Skip nor Close. `play` keeps the oscillators
+ * it started, `stop` stops them, and the shared timer calls `stop` from every
+ * action the user can take at the end of a session. Nothing loops; the
+ * promoted sheet is the interruption, the sound only announces it.
+ *
+ * **One context, opened on a click.** A browser lets Web Audio run only after
+ * the page has been interacted with, and a context created outside a gesture
+ * can start `suspended` — which plays nothing and throws nothing. So the
+ * context is opened once, by `prime`, from the click that starts a timer, and
+ * kept for the page's life. `play` still copes with a suspended context: it
+ * asks it to resume and reports the truth, as a promise, so the caller can
+ * leave the OS notification its own sound when the chime could not start.
  *
  * **One sound source at a time.** The browser notification takes `silent`, so
  * the OS does not add its own tone on top of the chime, and its click focuses
@@ -54,32 +61,64 @@ const GAIN = 0.3
 export const CHIME_SECONDS = MELODY.reduce((sum, step) => sum + step.duration, 0)
 const TAIL_MS = 500
 
-/** The chime currently sounding, if any: its context and the timer that closes it. */
+/** The page's one audio context, opened by `prime` or the first `play`. */
+let context = null
+/** The chime currently sounding, if any: its oscillators and the timer that forgets them. */
 let current = null
 
-const closeQuietly = (context) => {
+const swallow = (maybePromise) => {
+  if (maybePromise && typeof maybePromise.catch === 'function') maybePromise.catch(() => {})
+}
+
+const getContext = () => {
+  if (context && context.state !== 'closed') return context
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext
+  if (!AudioContextCtor) return null
+  context = new AudioContextCtor()
+  return context
+}
+
+/**
+ * Open the audio context from a user gesture so the chime is allowed to sound
+ * later, outside one. Call it from the click that starts a timer. Harmless
+ * when called again, or on a browser without Web Audio.
+ */
+export const primePomodoroNotification = () => {
   try {
-    const result = context.close()
-    if (result && typeof result.catch === 'function') result.catch(() => {})
+    const ctx = getContext()
+    if (!ctx) return false
+    if (ctx.state === 'suspended') swallow(ctx.resume())
+    return true
   } catch {
-    // Already closed, or a context that never opened. Nothing is sounding.
+    return false
   }
 }
 
 /** Silence the chime if it is sounding. Safe to call at any time. */
 export const stopPomodoroNotification = () => {
   if (!current) return
-  const { context, timeoutId } = current
+  const { oscillators, timeoutId } = current
   current = null
   clearTimeout(timeoutId)
-  closeQuietly(context)
+  oscillators.forEach((oscillator) => {
+    try {
+      oscillator.stop()
+    } catch {
+      // Already stopped: its scheduled end came first.
+    }
+    try {
+      oscillator.disconnect()
+    } catch {
+      // Never connected, or gone with a closed context.
+    }
+  })
 }
 
-const playTone = (context, frequency, startTime, duration) => {
-  const oscillator = context.createOscillator()
-  const gainNode = context.createGain()
+const playTone = (ctx, frequency, startTime, duration) => {
+  const oscillator = ctx.createOscillator()
+  const gainNode = ctx.createGain()
   oscillator.connect(gainNode)
-  gainNode.connect(context.destination)
+  gainNode.connect(ctx.destination)
   oscillator.type = 'sine'
   oscillator.frequency.value = frequency
   gainNode.gain.setValueAtTime(0, startTime)
@@ -87,37 +126,53 @@ const playTone = (context, frequency, startTime, duration) => {
   gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
   oscillator.start(startTime)
   oscillator.stop(startTime + duration)
+  return oscillator
+}
+
+const schedule = (ctx) => {
+  const oscillators = []
+  let at = ctx.currentTime
+  for (const { note, duration } of MELODY) {
+    if (note > 0) oscillators.push(playTone(ctx, note, at, duration))
+    at += duration
+  }
+  const pass = { oscillators, timeoutId: null }
+  pass.timeoutId = setTimeout(
+    () => {
+      if (current === pass) current = null
+    },
+    CHIME_SECONDS * 1000 + TAIL_MS
+  )
+  current = pass
 }
 
 /**
- * Play the chime once. Returns `true` when it started, so the caller knows the
- * notification should stay silent; `false` when this browser has no Web Audio
- * or refused it, in which case the notification's own sound is the cue.
+ * Play the chime once. Resolves to `true` when it started, so the caller knows
+ * the notification should stay silent; `false` when this browser has no Web
+ * Audio, refused it, or would not let the context run — in which case the
+ * notification's own sound is the cue. Synchronous (a plain boolean) whenever
+ * the answer is known at once; a promise only when the context has to be
+ * resumed first.
  *
- * @returns {boolean}
+ * @returns {boolean | Promise<boolean>}
  */
 export const playPomodoroNotification = () => {
   stopPomodoroNotification()
   try {
-    const AudioContextCtor = window.AudioContext || window.webkitAudioContext
-    if (!AudioContextCtor) return false
-    const context = new AudioContextCtor()
-
-    let at = context.currentTime
-    for (const { note, duration } of MELODY) {
-      if (note > 0) playTone(context, note, at, duration)
-      at += duration
+    const ctx = getContext()
+    if (!ctx) return false
+    if (ctx.state === 'running') {
+      schedule(ctx)
+      return true
     }
-
-    const timeoutId = setTimeout(
-      () => {
-        if (current && current.context === context) current = null
-        closeQuietly(context)
-      },
-      CHIME_SECONDS * 1000 + TAIL_MS
-    )
-    current = { context, timeoutId }
-    return true
+    if (ctx.state !== 'suspended') return false
+    return Promise.resolve(ctx.resume())
+      .then(() => {
+        if (ctx.state !== 'running') return false
+        schedule(ctx)
+        return true
+      })
+      .catch(() => false)
   } catch (error) {
     console.error('Failed to play notification sound:', error)
     return false

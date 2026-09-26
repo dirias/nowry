@@ -20,6 +20,7 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { auth as firebaseAuth } from '../config/firebase.config'
 import {
   playPomodoroNotification,
+  primePomodoroNotification,
   requestNotificationPermission,
   showBrowserNotification,
   stopPomodoroNotification
@@ -98,6 +99,7 @@ export const webPlatform = {
    * expo-notifications to the same three calls (MOB-024).
    */
   alerts: {
+    prime: () => primePomodoroNotification(),
     play: () => playPomodoroNotification(),
     stop: () => stopPomodoroNotification(),
     announce: (title, body, options) => showBrowserNotification(title, body, options),

@@ -119,12 +119,16 @@ const validate = (candidate) => {
   }
   if (
     !alerts ||
+    !isFunction(alerts.prime) ||
     !isFunction(alerts.play) ||
     !isFunction(alerts.stop) ||
     !isFunction(alerts.announce) ||
     !isFunction(alerts.requestPermission)
   ) {
-    throw new PlatformAdapterError('alerts', 'it must provide play(), stop(), announce(title, body, options) and requestPermission()')
+    throw new PlatformAdapterError(
+      'alerts',
+      'it must provide prime(), play(), stop(), announce(title, body, options) and requestPermission()'
+    )
   }
 }
 
@@ -218,12 +222,16 @@ export const session = {
  * clients do that with entirely different machinery: the Web Audio and
  * Notification APIs here, expo-notifications on mobile (MOB-024).
  *
- * `play` returns whether a sound actually started, so the caller can ask for a
+ * `prime` opens the sound path from a user gesture, because a browser lets Web
+ * Audio run only after one; `play` returns whether a sound actually started
+ * (at once, or as a promise when the browser had to be asked), so the caller can ask for a
  * silent `announce` and keep one sound source at a time; `stop` silences it,
  * and is what every action at the end of a session calls (ADR-036). On the
  * phone both are honest no-ops: its sound is the notification's own.
  */
 export const alerts = {
+  /** Open the sound path from a user gesture, so `play` is allowed later without one. */
+  prime: () => capability('alerts').prime(),
   play: () => capability('alerts').play(),
   stop: () => capability('alerts').stop(),
   announce: (title, body, options = {}) => capability('alerts').announce(title, body, options),
