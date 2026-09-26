@@ -413,15 +413,15 @@
       "lead": "Chaque partie de Nowry nourrit la suivante : un passage surligné le lundi devient une carte le mardi et un point sur votre plan annuel le vendredi.",
       "read": {
         "title": "Lire",
-        "desc": "Apportez un livre ou écrivez le vôtre. Surlignez ce qui compte."
+        "desc": "Apportez un livre ou écrivez le vôtre. Un titre et les paragraphes qui le suivent forment une section."
       },
       "cards": {
         "title": "Créer des cartes",
-        "desc": "Un geste transforme un surlignage en carte qui se souvient de sa page."
+        "desc": "Cochez les sections voulues. Nowry crée les cartes, et chacune se souvient d'où elle vient."
       },
       "study": {
         "title": "Étudier",
-        "desc": "Notez chaque carte Ratée, Difficile, Bien ou Facile. Le calendrier fait le reste."
+        "desc": "Notez chaque carte Encore, Difficile, Bien ou Facile. Le calendrier fait le reste."
       },
       "plan": {
         "title": "Planifier l'année",
@@ -470,48 +470,34 @@
     },
     "frames": {
       "studyCenter": {
-        "title": "Centre d'étude",
-        "date": "Jeudi 25 septembre",
-        "nav": {
-          "study": "Étude",
-          "books": "Livres",
-          "plan": "Planification",
-          "calendar": "Calendrier"
-        },
-        "readout": "{{cards}} cartes à revoir · {{decks}} paquets · {{days}} jours d'affilée",
+        "date": "Jeudi 25 sept.",
+        "minutes_one": "{{count}} min",
+        "minutes_other": "{{count}} min",
         "decks": {
           "chem": "Chimie organique",
           "jp": "Japonais N3 · verbes",
           "kant": "Kant, première critique",
           "algebra": "Algèbre linéaire"
-        },
-        "upToDate": "à jour",
-        "week": "Cette semaine",
-        "stage": "stade {{stage}} · {{turns}} tours",
-        "chipLabel": "Étudier",
-        "due_one": "{{count}} à revoir",
-        "due_other": "{{count}} à revoir"
+        }
       },
-      "book": {
-        "section": "3 · Mitochondries",
-        "before": "La membrane interne se replie en crêtes, qui ",
-        "highlight": "augmentent la surface disponible pour la chaîne de transport des électrons",
-        "after": ". L'ATP synthase la traverse et utilise le gradient de protons pour phosphoryler l'ADP.",
-        "action": "Créer une carte",
-        "from": "depuis le surlignage"
+      "section": {
+        "document": "Mitochondries",
+        "heading": "3 · Crêtes",
+        "paragraph1": "La membrane interne se replie en crêtes, qui augmentent la surface disponible pour la chaîne de transport des électrons. L'ATP synthase la traverse et utilise le gradient de protons pour phosphoryler l'ADP.",
+        "paragraph2": "Chaque tour du rotor produit trois ATP ; la chaîne qui l'entraîne fait l'objet du §4.",
+        "position": "Section {{n}} sur {{total}}"
+      },
+      "makeCards": {
+        "membrane": "2 · La membrane externe",
+        "mitochondria": "3 · Crêtes",
+        "chain": "4 · La chaîne de transport des électrons"
       },
       "card": {
-        "counter": "Carte {{n}} sur {{total}} · de Mitochondries §3",
         "prompt": "Que font les crêtes pour la chaîne de transport des électrons ?",
-        "answer": "Elles augmentent la surface de la membrane interne : plus de complexes de transport et d'ATP synthase y tiennent.",
-        "missed": "Ratée",
-        "hard": "Difficile",
-        "good": "Bien",
-        "easy": "Facile"
+        "answer": "Elles augmentent la surface de la membrane interne : plus de complexes de transport et d'ATP synthase y tiennent."
       },
       "year": {
-        "title": "Mon plan 2026",
-        "week": "semaine {{week}} sur 52",
+        "all": "Tout",
         "areas": {
           "bio": "Licence de biologie",
           "jp": "Japonais",
@@ -519,18 +505,13 @@
         }
       },
       "phone": {
-        "date": "Jeudi 25 septembre",
-        "greeting": "Bonsoir",
-        "today": "Aujourd'hui",
-        "progress": "{{done}} sur {{total}}",
+        "name": "Ana",
+        "caption": "De petits pas, chaque jour.",
         "tasks": {
           "review": "Revoir 21 cartes",
-          "read": "Lire Mitochondries §4",
+          "read": "Lire Crêtes §4",
           "run": "Course · 30 min"
-        },
-        "focus": "Concentration",
-        "due_one": "{{count}} paquet à revoir",
-        "due_other": "{{count}} paquets à revoir"
+        }
       }
     },
     "pricing": {

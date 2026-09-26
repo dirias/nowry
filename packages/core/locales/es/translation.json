@@ -383,15 +383,15 @@
       "lead": "Cada parte de Nowry alimenta a la siguiente: un subrayado del lunes es una tarjeta el martes y un punto en tu plan anual el viernes.",
       "read": {
         "title": "Lee",
-        "desc": "Trae un libro o escribe el tuyo. Subraya lo que importa."
+        "desc": "Trae un libro o escribe el tuyo. Un título y los párrafos que siguen son una sección."
       },
       "cards": {
         "title": "Crea tarjetas",
-        "desc": "Un toque convierte un subrayado en una tarjeta que recuerda su página."
+        "desc": "Marca las secciones que quieras. Nowry crea las tarjetas, y cada una recuerda de dónde salió."
       },
       "study": {
         "title": "Estudia",
-        "desc": "Califica cada tarjeta como Fallida, Difícil, Bien o Fácil. El calendario hace el resto."
+        "desc": "Califica cada tarjeta como Otra vez, Difícil, Bien o Fácil. El calendario hace el resto."
       },
       "plan": {
         "title": "Planifica el año",
@@ -440,48 +440,34 @@
     },
     "frames": {
       "studyCenter": {
-        "title": "Centro de estudio",
-        "date": "Jueves 25 de septiembre",
-        "nav": {
-          "study": "Estudio",
-          "books": "Libros",
-          "plan": "Planificación",
-          "calendar": "Calendario"
-        },
-        "readout": "{{cards}} tarjetas pendientes · {{decks}} mazos · racha de {{days}} días",
+        "date": "Jueves 25 sep",
+        "minutes_one": "{{count}} min",
+        "minutes_other": "{{count}} min",
         "decks": {
           "chem": "Química orgánica",
           "jp": "Japonés N3 · verbos",
           "kant": "Kant, primera crítica",
           "algebra": "Álgebra lineal"
-        },
-        "upToDate": "al día",
-        "week": "Esta semana",
-        "stage": "etapa {{stage}} · {{turns}} vueltas",
-        "chipLabel": "Estudiar",
-        "due_one": "{{count}} pendiente",
-        "due_other": "{{count}} pendientes"
+        }
       },
-      "book": {
-        "section": "3 · Mitocondrias",
-        "before": "La membrana interna se pliega en crestas, que ",
-        "highlight": "aumentan la superficie disponible para la cadena de transporte de electrones",
-        "after": ". La ATP sintasa la atraviesa y usa el gradiente de protones para fosforilar el ADP.",
-        "action": "Crear tarjeta",
-        "from": "desde el subrayado"
+      "section": {
+        "document": "Mitocondrias",
+        "heading": "3 · Crestas",
+        "paragraph1": "La membrana interna se pliega en crestas, que aumentan la superficie disponible para la cadena de transporte de electrones. La ATP sintasa la atraviesa y usa el gradiente de protones para fosforilar el ADP.",
+        "paragraph2": "Cada giro del rotor produce tres ATP; la cadena que lo impulsa es el tema del §4.",
+        "position": "Sección {{n}} de {{total}}"
+      },
+      "makeCards": {
+        "membrane": "2 · La membrana externa",
+        "mitochondria": "3 · Crestas",
+        "chain": "4 · La cadena de transporte de electrones"
       },
       "card": {
-        "counter": "Tarjeta {{n}} de {{total}} · de Mitocondrias §3",
         "prompt": "¿Qué aportan las crestas a la cadena de transporte de electrones?",
-        "answer": "Aumentan la superficie de la membrana interna, así caben más complejos de transporte y ATP sintasa.",
-        "missed": "Fallida",
-        "hard": "Difícil",
-        "good": "Bien",
-        "easy": "Fácil"
+        "answer": "Aumentan la superficie de la membrana interna, así caben más complejos de transporte y ATP sintasa."
       },
       "year": {
-        "title": "Mi plan 2026",
-        "week": "semana {{week}} de 52",
+        "all": "Todo",
         "areas": {
           "bio": "Grado en Biología",
           "jp": "Japonés",
@@ -489,18 +475,13 @@
         }
       },
       "phone": {
-        "date": "Jueves 25 de septiembre",
-        "greeting": "Buenas tardes",
-        "today": "Hoy",
-        "progress": "{{done}} de {{total}}",
+        "name": "Ana",
+        "caption": "Pasos pequeños, cada día.",
         "tasks": {
           "review": "Repasar 21 tarjetas",
-          "read": "Leer Mitocondrias §4",
+          "read": "Leer Crestas §4",
           "run": "Correr · 30 min"
-        },
-        "focus": "Enfoque",
-        "due_one": "{{count}} mazo pendiente",
-        "due_other": "{{count}} mazos pendientes"
+        }
       }
     },
     "pricing": {

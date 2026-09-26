@@ -3,22 +3,34 @@ import { useTranslation } from 'react-i18next'
 import { Box, Stack, Typography } from '@mui/joy'
 import { frameShell } from './frameStyles'
 
-const COUNTER = { n: 12, total: 30 }
-const RATINGS = ['missed', 'hard', 'good', 'easy']
+const COUNTER = { current: 12, total: 30 }
 
 /**
- * A study card, drawn: where it came from, the prompt, the answer, and the four
- * rating keys as secondaries — grounds on `level1`, no hue (§15.5).
- * `answered` shows the answer; the loop's "Make cards" step shows the prompt alone.
+ * The four grade keys as StudySession.js draws them — Again outlined danger,
+ * Hard soft warning, Good soft success, Easy solid primary — the one recorded
+ * exception to the house button's single solid (buttonSpec on both clients).
  */
+const GRADES = [
+  { key: 'again', sx: { border: '1px solid', borderColor: 'danger.outlinedBorder', color: 'danger.plainColor' } },
+  { key: 'hard', sx: { bgcolor: 'warning.softBg', color: 'warning.softColor' } },
+  { key: 'good', sx: { bgcolor: 'success.softBg', color: 'success.softColor' } },
+  { key: 'easy', sx: { bgcolor: 'primary.solidBg', color: 'primary.solidColor' } }
+]
+
+/** A study card, drawn beside StudySession.js: the counter, the SourceReadout, the prompt, the answer, the four keys. */
 const CardFrame = ({ answered = true, sx = {} }) => {
   const { t } = useTranslation()
 
   return (
     <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', aspectRatio: { xs: 'auto', sm: '4 / 3' }, p: 2, gap: 1, ...sx }}>
-      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-        {t('landing.frames.card.counter', COUNTER)}
-      </Typography>
+      <Stack direction='row' justifyContent='space-between' spacing={1}>
+        <Typography level='body-xs' sx={{ color: 'text.tertiary', flexShrink: 0 }}>
+          {t('cards.session.card', COUNTER)}
+        </Typography>
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }} noWrap>
+          {t('cards.session.source.from', { document: t('landing.frames.section.document'), section: t('landing.frames.section.heading') })}
+        </Typography>
+      </Stack>
       <Typography level='title-sm' sx={{ color: 'text.primary' }}>
         {t('landing.frames.card.prompt')}
       </Typography>
@@ -28,21 +40,13 @@ const CardFrame = ({ answered = true, sx = {} }) => {
         </Typography>
       )}
       <Stack direction='row' spacing={0.75} sx={{ mt: 'auto' }}>
-        {RATINGS.map((rating) => (
+        {GRADES.map(({ key, sx: tone }) => (
           <Typography
-            key={rating}
+            key={key}
             level='body-xs'
-            sx={{
-              flex: 1,
-              textAlign: 'center',
-              py: 0.75,
-              borderRadius: 'sm',
-              bgcolor: 'background.level1',
-              color: 'text.secondary',
-              boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-neutral-outlinedBorder)'
-            }}
+            sx={{ flex: 1, textAlign: 'center', py: 0.75, borderRadius: 'sm', fontWeight: 'lg', boxSizing: 'border-box', ...tone }}
           >
-            {t(`landing.frames.card.${rating}`)}
+            {t(`cards.session.grading.${key}`)}
           </Typography>
         ))}
       </Stack>

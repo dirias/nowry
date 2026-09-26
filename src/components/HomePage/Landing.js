@@ -8,7 +8,8 @@ import Pricing from './landing/Pricing'
 import Note from './landing/Note'
 import StudyCenterFrame from './frames/StudyCenterFrame'
 import PhoneFrame from './frames/PhoneFrame'
-import BookFrame from './frames/BookFrame'
+import SectionFrame from './frames/SectionFrame'
+import MakeCardsFrame from './frames/MakeCardsFrame'
 import CardFrame from './frames/CardFrame'
 import YearFrame from './frames/YearFrame'
 
@@ -17,8 +18,9 @@ import YearFrame from './frames/YearFrame'
  *
  * One column on the shared Container, one left edge, sections in the product's
  * own order: the hero, the loop, the ledger (`#library`), the note. The
- * pictures are the product drawn from its own tokens (`./frames`), so they wear
- * the visitor's mode and accent and never go stale. Pricing (`#pricing`)
+ * pictures are the product drawn beside its own components (`./frames`,
+ * ADR-035 §1 as amended), so they wear the visitor's mode and accent, match
+ * the screens element for element, and never go stale. Pricing (`#pricing`)
  * reads the same tier table as `/plans`.
  */
 const Landing = () => {
@@ -37,8 +39,8 @@ const Landing = () => {
         <Hero frame={<StudyCenterFrame />} phoneFrame={<PhoneFrame />} />
         <Loop
           frames={{
-            read: <BookFrame />,
-            cards: <CardFrame answered={false} />,
+            read: <SectionFrame />,
+            cards: <MakeCardsFrame />,
             study: <CardFrame />,
             plan: <YearFrame />
           }}

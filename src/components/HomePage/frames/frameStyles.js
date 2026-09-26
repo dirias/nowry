@@ -1,13 +1,13 @@
 /**
- * What every drawn frame shares (ADR-035 §1).
+ * What every drawn frame shares (ADR-035 §1, SITE-014).
  *
- * A frame is an illustration of a surface, built from the same tokens the
- * surface is built from, so it wears the visitor's mode and accent. It is
- * `aria-hidden`: the copy beside it carries the meaning. Numbers inside are
- * fixed sample content, never data.
+ * A frame is an illustration of a surface, built beside the surface's own
+ * component from the same tokens, so it wears the visitor's mode and accent
+ * and matches the page element for element. It is `aria-hidden`: the copy
+ * beside it carries the meaning. Numbers inside are fixed sample content.
  */
 
-/** The outer window of a frame: a bordered surface on the page ground, radius `lg`. */
+/** The outer window of a frame: a bordered ground, radius `lg`. */
 export const frameShell = {
   width: '100%',
   boxSizing: 'border-box',
@@ -20,7 +20,7 @@ export const frameShell = {
   flexDirection: 'column'
 }
 
-/** A card inside a frame: a surface with a hairline, radius `md`. */
+/** A surface inside a frame, radius `md`. */
 export const framePanel = {
   borderRadius: 'md',
   border: '1px solid',
@@ -28,7 +28,7 @@ export const framePanel = {
   bgcolor: 'background.surface'
 }
 
-/** The frame-sized measure: a 3px track on `level2`, the fill in the accent (§15.11). */
+/** The row-sized measure (formStyles.measureTrack at frame scale): 3px on `level2`, the fill in the accent. */
 export const frameTrack = {
   height: 3,
   borderRadius: 'full',
@@ -43,12 +43,44 @@ export const frameFill = (pct) => ({
   bgcolor: 'primary.solidBg'
 })
 
-/** The solid readout chip the summary object carries ("Study · 30"). */
+/** The house button's two tones at frame scale: the one solid key, and a soft neutral secondary. */
 export const frameSolidChip = {
   px: 1,
   py: 0.5,
   borderRadius: 'sm',
   bgcolor: 'primary.solidBg',
   color: 'primary.solidColor',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+  boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-primary-solidActiveBg)'
 }
+
+export const frameSoftChip = {
+  px: 1,
+  py: 0.5,
+  borderRadius: 'sm',
+  bgcolor: 'background.level1',
+  color: 'text.secondary',
+  whiteSpace: 'nowrap',
+  boxShadow: 'inset 0 -2px 0 0 var(--joy-palette-neutral-outlinedBorder)'
+}
+
+/** The segmented group (formStyles.segmentedGroup / segment) at frame scale. */
+export const frameSegment = {
+  display: 'inline-flex',
+  borderRadius: 'md',
+  bgcolor: 'background.level1',
+  border: '1px solid',
+  borderColor: 'divider',
+  overflow: 'hidden'
+}
+
+export const frameSegmentItem = (active, first) => ({
+  px: 1,
+  py: 0.5,
+  borderLeft: first ? 0 : '1px solid',
+  borderColor: 'divider',
+  bgcolor: active ? 'background.level2' : 'transparent',
+  color: active ? 'text.primary' : 'text.secondary',
+  fontWeight: 'md',
+  whiteSpace: 'nowrap'
+})

@@ -1,53 +1,60 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Stack, Typography } from '@mui/joy'
-import { CATEGORY_COLORS } from '@nowry/core/tokens/colorSystem'
-import { frameShell, frameTrack, frameFill } from './frameStyles'
+import { frameShell, frameTrack, frameFill, frameSegment, frameSegmentItem } from './frameStyles'
 
-const WEEK = 39
+/** OverviewTabView + FocusAreaCard.js: the plan's name with its quarter, and the area cards on the row anatomy (SITE-012). */
 const AREAS = [
-  { key: 'bio', pct: 62, category: 0 },
-  { key: 'jp', pct: 40, category: 3 },
-  { key: 'health', pct: 80, category: 5 }
+  { key: 'bio', icon: '🧬', pct: 62, goals: 4 },
+  { key: 'jp', icon: '🗾', pct: 40, goals: 2 },
+  { key: 'health', icon: '🏃', pct: 80, goals: 3 }
 ]
 
-/**
- * The year plan, drawn: the plan's title with the week readout, one measure
- * for the year, and three focus areas each with its category dot (the one
- * family a learner tags with, ADR-034) and its measure.
- */
 const YearFrame = ({ sx = {} }) => {
   const { t } = useTranslation()
 
   return (
-    <Box aria-hidden sx={{ ...frameShell, bgcolor: 'background.surface', aspectRatio: { xs: 'auto', sm: '4 / 3' }, p: 2, gap: 1.5, ...sx }}>
-      <Stack direction='row' justifyContent='space-between' alignItems='baseline' spacing={1}>
+    <Box
+      aria-hidden
+      sx={{ ...frameShell, bgcolor: 'background.surface', aspectRatio: { xs: 'auto', sm: '4 / 3' }, p: 2, gap: 0.75, ...sx }}
+    >
+      <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={1}>
         <Typography level='title-sm' sx={{ color: 'text.primary' }}>
-          {t('landing.frames.year.title')}
+          {t('annualPlanning.myPlan')}
         </Typography>
-        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          {t('landing.frames.year.week', { week: WEEK })}
-        </Typography>
+        <Box sx={frameSegment}>
+          <Typography level='body-xs' sx={{ ...frameSegmentItem(true, true), fontSize: '0.6rem', py: 0.25 }}>
+            Q3
+          </Typography>
+          <Typography level='body-xs' sx={{ ...frameSegmentItem(false, false), fontSize: '0.6rem', py: 0.25 }}>
+            {t('landing.frames.year.all')}
+          </Typography>
+        </Box>
       </Stack>
-      <Box sx={frameTrack}>
-        <Box sx={frameFill((WEEK / 52) * 100)} />
-      </Box>
-      {AREAS.map(({ key, pct, category }) => (
-        <Stack key={key} spacing={0.75}>
-          <Stack direction='row' justifyContent='space-between' alignItems='center'>
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <Box sx={{ width: 8, height: 8, borderRadius: 'full', bgcolor: CATEGORY_COLORS[category] }} />
-              <Typography level='body-xs' sx={{ color: 'text.primary' }}>
-                {t(`landing.frames.year.areas.${key}`)}
-              </Typography>
-            </Stack>
-            <Typography level='body-xs' sx={{ color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' }}>
-              {pct}%
+      {AREAS.map(({ key, icon, pct, goals }) => (
+        <Stack key={key} spacing={0.5} sx={{ px: 1, py: 0.75, borderRadius: 'sm', border: '1px solid', borderColor: 'divider' }}>
+          <Stack direction='row' alignItems='center' spacing={0.75}>
+            <Typography level='body-xs' component='span' sx={{ lineHeight: 1 }}>
+              {icon}
+            </Typography>
+            <Typography level='body-xs' sx={{ color: 'text.primary', fontWeight: 'md' }}>
+              {t(`landing.frames.year.areas.${key}`)}
             </Typography>
           </Stack>
-          <Box sx={frameTrack}>
-            <Box sx={{ ...frameFill(pct), bgcolor: CATEGORY_COLORS[category] }} />
-          </Box>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Box sx={{ ...frameTrack, flex: 1 }}>
+              <Box sx={frameFill(pct)} />
+            </Box>
+            <Typography
+              level='body-xs'
+              sx={{ color: 'text.tertiary', fontSize: '0.6rem', width: 24, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
+            >
+              {pct}%
+            </Typography>
+            <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.6rem', whiteSpace: 'nowrap' }}>
+              {t('annualPlanning.overview.areaGoalCount', { count: goals })}
+            </Typography>
+          </Stack>
         </Stack>
       ))}
     </Box>

@@ -404,15 +404,15 @@
       "lead": "Every part of Nowry feeds the next: a highlight on Monday is a card on Tuesday and a point on your year plan by Friday.",
       "read": {
         "title": "Read",
-        "desc": "Bring a book or write your own. Highlight what matters."
+        "desc": "Bring a book or write your own. A heading and the paragraphs under it are a section."
       },
       "cards": {
         "title": "Make cards",
-        "desc": "One tap turns a highlight into a card that remembers its page."
+        "desc": "Tick the sections you want. Nowry makes the cards, and each one remembers where it came from."
       },
       "study": {
         "title": "Study",
-        "desc": "Rate each card Missed, Hard, Good or Easy. The schedule does the rest."
+        "desc": "Rate each card Again, Hard, Good or Easy. The schedule does the rest."
       },
       "plan": {
         "title": "Plan the year",
@@ -461,48 +461,34 @@
     },
     "frames": {
       "studyCenter": {
-        "title": "Study Center",
-        "date": "Thursday 25 September",
-        "nav": {
-          "study": "Study",
-          "books": "Books",
-          "plan": "Plan",
-          "calendar": "Calendar"
-        },
-        "readout": "{{cards}} cards due · {{decks}} decks · {{days}}-day streak",
+        "date": "Thursday 25 Sep",
+        "minutes_one": "{{count}} min",
+        "minutes_other": "{{count}} min",
         "decks": {
           "chem": "Organic chemistry",
           "jp": "Japanese N3 · verbs",
           "kant": "Kant, first critique",
           "algebra": "Linear algebra"
-        },
-        "upToDate": "up to date",
-        "week": "This week",
-        "stage": "stage {{stage}} · {{turns}} turns",
-        "chipLabel": "Study",
-        "due_one": "{{count}} due",
-        "due_other": "{{count}} due"
+        }
       },
-      "book": {
-        "section": "3 · Mitochondria",
-        "before": "The inner membrane folds into cristae, which ",
-        "highlight": "increase the surface available for the electron transport chain",
-        "after": ". ATP synthase sits across it and uses the proton gradient to phosphorylate ADP.",
-        "action": "Make a card",
-        "from": "from the highlight"
+      "section": {
+        "document": "Mitochondria",
+        "heading": "3 · Cristae",
+        "paragraph1": "The inner membrane folds into cristae, which increase the surface available for the electron transport chain. ATP synthase sits across it and uses the proton gradient to phosphorylate ADP.",
+        "paragraph2": "Each turn of the rotor yields three ATP; the chain that drives it is the subject of §4.",
+        "position": "Section {{n}} of {{total}}"
+      },
+      "makeCards": {
+        "membrane": "2 · The outer membrane",
+        "mitochondria": "3 · Cristae",
+        "chain": "4 · The electron transport chain"
       },
       "card": {
-        "counter": "Card {{n}} of {{total}} · from Mitochondria §3",
         "prompt": "What do the cristae do for the electron transport chain?",
-        "answer": "They increase the inner-membrane surface, so more transport complexes and ATP synthase fit.",
-        "missed": "Missed",
-        "hard": "Hard",
-        "good": "Good",
-        "easy": "Easy"
+        "answer": "They increase the inner-membrane surface, so more transport complexes and ATP synthase fit."
       },
       "year": {
-        "title": "My 2026 plan",
-        "week": "week {{week}} of 52",
+        "all": "All",
         "areas": {
           "bio": "Biology degree",
           "jp": "Japanese",
@@ -510,18 +496,13 @@
         }
       },
       "phone": {
-        "date": "Thursday 25 September",
-        "greeting": "Good evening",
-        "today": "Today",
-        "progress": "{{done}} of {{total}}",
+        "name": "Ana",
+        "caption": "Small steps, every day.",
         "tasks": {
           "review": "Review 21 cards",
-          "read": "Read Mitochondria §4",
+          "read": "Read Cristae §4",
           "run": "Run · 30 min"
-        },
-        "focus": "Focus",
-        "due_one": "{{count}} deck due",
-        "due_other": "{{count}} decks due"
+        }
       }
     },
     "pricing": {
