@@ -219,17 +219,21 @@ const StudyCenterFrame = ({ sx = {} }) => {
                 </Typography>
                 <Readout>{t('landing.frames.studyCenter.date')}</Readout>
               </Stack>
-              <Readout sx={{ color: 'text.secondary' }}>
-                <Box component='span' sx={{ color: 'text.primary', fontWeight: 'md' }}>
+              {/* As in TodayObject: a phrase never breaks inside; the line wraps at the dots. */}
+              <Stack direction='row' spacing={0.75} flexWrap='wrap' useFlexGap>
+                <Readout sx={{ color: 'text.primary', fontWeight: 'md', whiteSpace: 'nowrap' }}>
                   {t('study.today.todayCount', { count: asked })}
-                </Box>
-                {' · '}
-                {t('study.today.doneCount', { count: TODAY.reviewed })} ·{' '}
-                <Box component='span' sx={{ color: 'warning.plainColor' }}>
-                  ▲
-                </Box>{' '}
-                {t('study.empty.streakLabel', { count: TODAY.streak })}
-              </Readout>
+                </Readout>
+                <Readout>·</Readout>
+                <Readout sx={{ whiteSpace: 'nowrap' }}>{t('study.today.doneCount', { count: TODAY.reviewed })}</Readout>
+                <Readout>·</Readout>
+                <Readout sx={{ whiteSpace: 'nowrap' }}>
+                  <Box component='span' sx={{ color: 'warning.plainColor' }}>
+                    ▲
+                  </Box>{' '}
+                  {t('study.empty.streakLabel', { count: TODAY.streak })}
+                </Readout>
+              </Stack>
             </Stack>
             <Stack direction='row' alignItems='flex-end' spacing={2} sx={{ flexShrink: 0, display: { xs: 'none', sm: 'flex' } }}>
               <Strip t={t} />
