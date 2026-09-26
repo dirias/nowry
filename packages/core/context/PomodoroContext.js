@@ -70,7 +70,8 @@ export const settingsFromProfile = (profile) => {
     shortBreak: pick('short_break_minutes', 'pomodoro_short_break_minutes', DEFAULT_SETTINGS.shortBreak),
     longBreak: pick('long_break_minutes', 'pomodoro_long_break_minutes', DEFAULT_SETTINGS.longBreak),
     autoStart: Boolean(pick('auto_start', 'pomodoro_auto_start', DEFAULT_SETTINGS.autoStart)),
-    enabled: Boolean(pick('enabled', 'pomodoro_enabled', DEFAULT_SETTINGS.enabled))
+    enabled: Boolean(pick('enabled', 'pomodoro_enabled', DEFAULT_SETTINGS.enabled)),
+    sound: Boolean(pick('sound', 'pomodoro_sound', DEFAULT_SETTINGS.sound))
   }
 }
 
@@ -260,7 +261,9 @@ export const PomodoroProvider = ({ children }) => {
     const announce = (played) => alerts.announce(t('pomodoro.notification.title'), t(bodyKey), { silent: played === true })
     // `play` answers at once when it can; it answers later only when the
     // browser has to be asked to resume audio first (a page never clicked).
-    const played = alerts.play()
+    // With the sound preference off the chime is skipped and the OS notice
+    // keeps its own tone — one sound source at a time, either way.
+    const played = settings.sound ? alerts.play() : false
     if (played && typeof played.then === 'function') played.then(announce, () => announce(false))
     else announce(played)
   }, [settings, t])

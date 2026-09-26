@@ -968,7 +968,10 @@
       "longBreak": "Long break (minutes)",
       "recommendedMinutes": "Recommended: {{count}}",
       "autoStart": "Auto-start",
-      "autoStartDesc": "Automatically start the next session"
+      "autoStartDesc": "Automatically start the next session",
+      "sound": "Sound at the end of a session",
+      "soundDesc": "One short chime when a focus or a break ends. Off, the browser notification keeps its own sound.",
+      "play": "Play"
     },
     "notifications": {
       "title": "Notifications",

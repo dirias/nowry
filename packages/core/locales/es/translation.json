@@ -906,7 +906,10 @@
       "longBreak": "Descanso largo (minutos)",
       "recommendedMinutes": "Recomendado: {{count}}",
       "autoStart": "Inicio automático",
-      "autoStartDesc": "Iniciar automáticamente la siguiente sesión"
+      "autoStartDesc": "Iniciar automáticamente la siguiente sesión",
+      "sound": "Sonido al final de una sesión",
+      "soundDesc": "Un breve aviso cuando termina un enfoque o un descanso. Desactivado, la notificación del navegador conserva su propio sonido.",
+      "play": "Reproducir"
     },
     "notifications": {
       "title": "Notificaciones",

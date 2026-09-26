@@ -1041,7 +1041,10 @@
       "longBreak": "長い休憩（分）",
       "recommendedMinutes": "推奨：{{count}}",
       "autoStart": "自動開始",
-      "autoStartDesc": "次のセッションを自動的に開始する"
+      "autoStartDesc": "次のセッションを自動的に開始する",
+      "sound": "セッション終了時の音",
+      "soundDesc": "集中や休憩が終わったときに短い音を鳴らします。オフにするとブラウザ通知の音のみになります。",
+      "play": "再生"
     },
     "general": {
       "title": "一般設定",

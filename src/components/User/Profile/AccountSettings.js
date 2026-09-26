@@ -60,6 +60,7 @@ import BookRoundedIcon from '@mui/icons-material/BookRounded'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import { userService } from '@nowry/core/api/services'
+import { alerts } from '@nowry/core/platform'
 import { agentService } from '@nowry/core/api/services/agent.service'
 import { useColorScheme } from '@mui/joy/styles'
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
@@ -220,7 +221,8 @@ export default function AccountSettings() {
     pomodoro_short_break_minutes: 5,
     pomodoro_long_break_minutes: 15,
     pomodoro_auto_start: false,
-    pomodoro_enabled: false
+    pomodoro_enabled: false,
+    pomodoro_sound: true
   })
 
   // ── Notifications ───────────────────────────────────────────────────────────
@@ -296,7 +298,8 @@ export default function AccountSettings() {
           pomodoro_short_break_minutes: pomodoro.short_break_minutes ?? general.pomodoro_short_break_minutes ?? 5,
           pomodoro_long_break_minutes: pomodoro.long_break_minutes ?? general.pomodoro_long_break_minutes ?? 15,
           pomodoro_auto_start: pomodoro.auto_start ?? general.pomodoro_auto_start ?? false,
-          pomodoro_enabled: pomodoro.enabled ?? general.pomodoro_enabled ?? false
+          pomodoro_enabled: pomodoro.enabled ?? general.pomodoro_enabled ?? false,
+          pomodoro_sound: pomodoro.sound ?? true
         }
         setPreferences(prefs)
         setThemeColor(prefs.theme_color)
@@ -890,6 +893,39 @@ export default function AccountSettings() {
                         checked={preferences.pomodoro_auto_start}
                         onChange={(e) => handlePreferenceUpdate('pomodoro_auto_start', e.target.checked)}
                       />
+                    </Stack>
+
+                    <Divider />
+
+                    {/* The sound at the end of a session (ADR-036, POMO-008). The Play
+                        key is the "test sound" affordance ADR-013 took off the widget:
+                        it opens the audio path from this click and plays the one pass,
+                        so the user hears exactly what zero will sound like. */}
+                    <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2}>
+                      <Box>
+                        <Typography level='title-sm'>{t('settings.productivity.sound')}</Typography>
+                        <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                          {t('settings.productivity.soundDesc')}
+                        </Typography>
+                      </Box>
+                      <Stack direction='row' alignItems='center' spacing={1.5}>
+                        <Button
+                          size='sm'
+                          variant='soft'
+                          color='neutral'
+                          aria-label={t('pomodoro.testSound')}
+                          onClick={() => {
+                            alerts.prime()
+                            alerts.play()
+                          }}
+                        >
+                          {t('settings.productivity.play')}
+                        </Button>
+                        <Switch
+                          checked={preferences.pomodoro_sound}
+                          onChange={(e) => handlePreferenceUpdate('pomodoro_sound', e.target.checked)}
+                        />
+                      </Stack>
                     </Stack>
                   </>
                 )}

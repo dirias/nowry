@@ -23,6 +23,11 @@ import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
 
 const CHANNEL_ID = 'nowry-focus'
+/*
+ * Android fixes a channel's sound at creation, so "no sound" is a second
+ * channel rather than a flag on the first (POMO-008).
+ */
+const QUIET_CHANNEL_ID = 'nowry-focus-quiet'
 
 /*
  * Show the alarm even when the app is open. The timer's zero is worth seeing
@@ -46,11 +51,20 @@ Notifications.setNotificationHandler({
  * called "default", which does not exist, and expo-notifications says so on
  * every call. Omitting it is what selects the system default.
  */
-const ensureChannel = async () => {
+const ensureChannel = async (sound = true) => {
   if (Platform.OS !== 'android') return
-  await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-    name: 'Focus timer',
-    importance: Notifications.AndroidImportance.HIGH
+  if (sound) {
+    await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
+      name: 'Focus timer',
+      importance: Notifications.AndroidImportance.HIGH
+    })
+    return
+  }
+  // `null` here IS a mode: no sound on this channel, ever.
+  await Notifications.setNotificationChannelAsync(QUIET_CHANNEL_ID, {
+    name: 'Focus timer (quiet)',
+    importance: Notifications.AndroidImportance.HIGH,
+    sound: null
   })
 }
 
@@ -73,20 +87,20 @@ export const requestNotificationPermission = async () => {
  * standing. Returns nothing: a caller cannot do anything useful with a failure
  * here that it would not already do by watching its own clock.
  */
-export const scheduleEndAlarm = async ({ seconds, title, body }) => {
+export const scheduleEndAlarm = async ({ seconds, title, body, sound = true }) => {
   try {
     await cancelEndAlarm()
     if (!(seconds > 0)) return
-    await ensureChannel()
+    await ensureChannel(sound)
     await Notifications.scheduleNotificationAsync({
       // The content's `sound` IS a mode — iOS reads 'default' as its own
-      // enum. Android ignores it and uses the channel's, which is the system
-      // default by the omission above.
-      content: { title, body, sound: 'default' },
+      // enum and `null` as silent. Android ignores it and uses the channel's:
+      // the system default on the first channel, nothing on the quiet one.
+      content: { title, body, sound: sound ? 'default' : null },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: Math.ceil(seconds),
-        channelId: CHANNEL_ID
+        channelId: sound ? CHANNEL_ID : QUIET_CHANNEL_ID
       }
     })
   } catch {

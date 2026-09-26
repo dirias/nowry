@@ -42,7 +42,7 @@ const MODE_ORDER = [MODES.WORK, MODES.SHORT_BREAK, MODES.LONG_BREAK]
 /** The dial never grows past this, so a tablet does not get a dinner plate. */
 const DIAL_MAX = 300
 
-function useEndAlarm({ isActive, mode, timeLeft }) {
+function useEndAlarm({ isActive, mode, timeLeft, sound }) {
   const { t } = useTranslation()
   const secondsRef = useRef(timeLeft)
   secondsRef.current = timeLeft
@@ -54,10 +54,11 @@ function useEndAlarm({ isActive, mode, timeLeft }) {
     }
     scheduleEndAlarm({
       seconds: secondsRef.current,
+      sound,
       title: t('pomodoro.notification.title'),
       body: t(mode === MODES.WORK ? 'pomodoro.notification.workDone' : 'pomodoro.notification.breakDone')
     })
-  }, [isActive, mode, t])
+  }, [isActive, mode, sound, t])
 }
 
 export function FocusScreen() {
@@ -85,7 +86,7 @@ export function FocusScreen() {
     setShowWidget
   } = timer
 
-  useEndAlarm({ isActive, mode, timeLeft })
+  useEndAlarm({ isActive, mode, timeLeft, sound: settings.sound })
 
   // The phone's promotion (ADR-036): when a session ends while the app is in
   // front, this screen rises over whatever tab is open, the way the web moves

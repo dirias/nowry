@@ -922,7 +922,10 @@
       "longBreak": "Pause longue (minutes)",
       "recommendedMinutes": "Recommandé : {{count}}",
       "autoStart": "Démarrage automatique",
-      "autoStartDesc": "Démarrer automatiquement la session suivante"
+      "autoStartDesc": "Démarrer automatiquement la session suivante",
+      "sound": "Son à la fin d’une session",
+      "soundDesc": "Un bref carillon quand une concentration ou une pause se termine. Désactivé, la notification du navigateur garde son propre son.",
+      "play": "Écouter"
     },
     "general": {
       "title": "Préférences Générales",

@@ -69,3 +69,16 @@ it('asks Android for a channel with no custom sound', async () => {
   expect(id).toBe('nowry-focus')
   expect(options).not.toHaveProperty('sound')
 })
+
+it('schedules the alarm silent, on the quiet channel, when the sound preference is off (POMO-008)', async () => {
+  mockPlatform.OS = 'android'
+
+  await scheduleEndAlarm({ seconds: 60, title: 'T', body: 'B', sound: false })
+
+  const [id, options] = mockChannel.mock.calls[0]
+  expect(id).toBe('nowry-focus-quiet')
+  expect(options.sound).toBeNull()
+  const [{ content, trigger }] = mockSchedule.mock.calls[0]
+  expect(content.sound).toBeNull()
+  expect(trigger.channelId).toBe('nowry-focus-quiet')
+})

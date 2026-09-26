@@ -78,7 +78,7 @@ describe('preferences', () => {
   test('reads the nested preferences.pomodoro sub-document the API writes', () => {
     mockProfile = profileWith({ enabled: true, work_minutes: 50, short_break_minutes: 10, long_break_minutes: 20, auto_start: true })
     const { get } = mount()
-    expect(get().settings).toEqual({ enabled: true, work: 50, shortBreak: 10, longBreak: 20, autoStart: true })
+    expect(get().settings).toEqual({ enabled: true, work: 50, shortBreak: 10, longBreak: 20, autoStart: true, sound: true })
     expect(get().timeLeft).toBe(50 * 60)
   })
 
@@ -218,6 +218,16 @@ describe('running and completing sessions', () => {
       await Promise.resolve()
     })
     expect(adapters.alerts.announce).toHaveBeenCalledWith(expect.any(String), expect.any(String), { silent: true })
+  })
+
+  test('with the sound preference off, no chime, and the notification keeps its own sound', () => {
+    mockProfile = profileWith({ enabled: true, work_minutes: 1, sound: false })
+    const { get } = mount()
+    expect(get().settings.sound).toBe(false)
+    act(() => get().startTimer())
+    advance(60 * 1000)
+    expect(adapters.alerts.play).not.toHaveBeenCalled()
+    expect(adapters.alerts.announce).toHaveBeenCalledWith(expect.any(String), expect.any(String), { silent: false })
   })
 
   test('a silent play (no Web Audio) leaves the notification its own sound', () => {

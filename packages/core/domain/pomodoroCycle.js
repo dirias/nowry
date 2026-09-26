@@ -39,7 +39,9 @@ export const DEFAULT_SETTINGS = Object.freeze({
   shortBreak: 5,
   longBreak: 15,
   autoStart: false,
-  enabled: false
+  enabled: false,
+  /** Whether the end of a session plays the chime (ADR-036, POMO-008). */
+  sound: true
 })
 
 export const isMode = (value) => Object.values(MODES).includes(value)

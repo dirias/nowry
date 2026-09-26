@@ -911,7 +911,10 @@
       "longBreak": "Lange Pause (Minuten)",
       "recommendedMinutes": "Empfohlen: {{count}}",
       "autoStart": "Automatisch starten",
-      "autoStartDesc": "Nächste Sitzung automatisch starten"
+      "autoStartDesc": "Nächste Sitzung automatisch starten",
+      "sound": "Ton am Ende einer Sitzung",
+      "soundDesc": "Ein kurzer Klang, wenn Fokus oder Pause enden. Aus, behält die Browser-Benachrichtigung ihren eigenen Ton.",
+      "play": "Abspielen"
     },
     "general": {
       "title": "Allgemeine Einstellungen",
