@@ -91,7 +91,7 @@ const MyLikes = () => {
       <Container maxWidth='xl' sx={{ py: { xs: 2, md: 4 } }}>
         {/* Header */}
         <Box sx={{ mb: 3 }}>
-          <Typography level='h3' sx={{ mb: 1 }}>
+          <Typography level='h3' component='h1' sx={{ mb: 1 }}>
             {t('public.myLikes')}
           </Typography>
           <Typography level='body-md' sx={{ color: 'text.secondary' }}>

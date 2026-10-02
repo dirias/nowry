@@ -244,6 +244,21 @@ If something needs heading *size* and is not a heading, set the level and overri
 `component='span'` or `component='p'`. If it needs to be a heading and the size is wrong, the level
 is wrong — not the element.
 
+**Four surfaces have no `<h1>`, on purpose.** A page whose subject is an editable field does not have
+a heading to name — you cannot make an `<input>` an `h1`, and the field's own label is the accessible
+answer. Do not add one to satisfy the rule:
+
+| Surface | Why |
+|---|---|
+| `EditorHome` | the book's name is the editable title field, `aria-label`'d |
+| `SheetsEditor` | the sheet's name is the same click-to-edit field |
+| `StudySession` | its headings are the card's content and the session's counters; a card's title changes per card and is not the page's subject |
+| `PomodoroWidget`, `PomodoroChip` | floating controls, not pages |
+
+`AccountSettings` is a different case and a real gap: it has section headings and no page title at
+all, so there is nothing to name yet. Giving a section the `h1` would be wrong — a section is not the
+page. It needs a title first, which is a design change, not a semantic one.
+
 #### 4.1.3 Font families
 
 | Token | Face | Notes |

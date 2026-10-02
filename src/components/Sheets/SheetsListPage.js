@@ -129,7 +129,7 @@ export default function SheetsListPage() {
     <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Header */}
       <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 3 }}>
-        <Typography level='h2' fontWeight={700}>
+        <Typography level='h2' component='h1' fontWeight={700}>
           {t('sheets.list.title')}
         </Typography>
         <Button startDecorator={<AddIcon />} onClick={() => setShowCreateModal(true)} aria-label={t('sheets.list.new')}>

@@ -117,7 +117,7 @@ export default function SubscriptionPage() {
         </ModalDialog>
       </Modal>
 
-      <Typography level='h2' sx={{ color: 'text.primary', mb: 4 }}>
+      <Typography level='h2' component='h1' sx={{ color: 'text.primary', mb: 4 }}>
         {t('subscription.title')}
       </Typography>
 

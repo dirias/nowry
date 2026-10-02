@@ -614,7 +614,7 @@ export default function AgentSettings() {
           )}
         </Box>
         <Box>
-          <Typography level='h2' sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+          <Typography level='h2' component='h1' sx={{ fontWeight: 700, lineHeight: 1.2 }}>
             {petName || t('agent.defaultName')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>

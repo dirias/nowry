@@ -254,7 +254,7 @@ export default function StudyHistory() {
 
       {/* Header */}
       <Stack direction='row' justifyContent='space-between' alignItems='baseline' sx={{ mb: 3 }}>
-        <Typography level='h3' fontWeight={700}>
+        <Typography level='h3' component='h1' fontWeight={700}>
           {t('sessions.title')}
         </Typography>
         {!loading && total > 0 && (

@@ -59,7 +59,7 @@ export default function PlansPage() {
     <Container maxWidth='xl' sx={{ py: 4 }}>
       {/* Page Header */}
       <Stack alignItems='center' spacing={1} sx={{ mb: 4 }}>
-        <Typography level='h2' sx={{ color: 'text.primary' }}>
+        <Typography level='h2' component='h1' sx={{ color: 'text.primary' }}>
           {t('plans.title')}
         </Typography>
         <Typography level='body-md' sx={{ color: 'text.secondary' }}>

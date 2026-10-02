@@ -66,7 +66,9 @@ export default function BugDashboard() {
       {/* Header */}
       <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 3 }}>
         <Bug size={32} color='#f97316' />
-        <Typography level='h3'>Bug Dashboard</Typography>
+        <Typography level='h3' component='h1'>
+          Bug Dashboard
+        </Typography>
         <Chip size='sm' color='warning'>
           Developer
         </Chip>

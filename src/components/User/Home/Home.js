@@ -69,7 +69,7 @@ function Home() {
         {/* Left: Welcome Message + Calendar Icon */}
         <Box sx={{ flex: 1, minWidth: { xs: 200, md: 250 }, display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography level='h3' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2 }}>
+            <Typography level='h3' component='h1' fontWeight={600} sx={{ mb: 0.5, lineHeight: 1.2 }}>
               {t('dashboard.welcome', { name: username })}
             </Typography>
             <Typography
