@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Stack } from '@mui/joy'
+import { Box, Button, Stack, Typography } from '@mui/joy'
 import { Public as PublicIcon, PublicOff as PublicOffIcon } from '@mui/icons-material'
 
 import FormDisclosureRail from '../Common/Form/FormDisclosureRail'
@@ -12,6 +12,7 @@ import FormTextField from '../Common/Form/FormTextField'
 import { focusRing } from '../Common/Form/formStyles'
 import { describeApiError } from '@nowry/core/utils/formUtils'
 import { publicContentService } from '@nowry/core/api/services'
+import { publishBlockKey, publishBlockKeyFor, publishBlockReason } from '@nowry/core/domain/publishListing'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import useBookForm from '@nowry/core/hooks/useBookForm'
 import PublishModal from '../Public/PublishModal'
@@ -66,9 +67,17 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
       // A publish failure used to reach a hand-rolled toast pinned at
       // `top: 80, right: 20, zIndex: 10000`, which landed over the header at
       // 375px. It is the same banner as every other failure now.
+      const blockReason = publishBlockReason(error)
+      if (blockReason) {
+        // ADR-037: the server refused for origin; the sentence is the whole message.
+        setPublishError({ key: publishBlockKey(blockReason), detail: '' })
+        return
+      }
       setPublishError({ key: next ? 'books.publishFailed' : 'books.unpublishFailed', detail: describeApiError(error) })
     }
   }, [])
+
+  const blockedKey = published ? null : publishBlockKeyFor('book', book)
 
   const failure = publishError || (form.saveError ? { key: 'books.saveFailed', detail: form.saveError } : null)
 
@@ -147,16 +156,22 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
               the footer's action row (§7). Consolidating it with the deck
               publish flows is a separate piece of work. */}
           <Box sx={{ pt: 1 }}>
-            <Button
-              variant='outlined'
-              color='neutral'
-              size='sm'
-              onClick={() => (published ? runPublish(() => publicContentService.unpublishBook(book._id), false) : setPublishOpen(true))}
-              startDecorator={published ? <PublicOffIcon sx={{ fontSize: 16 }} /> : <PublicIcon sx={{ fontSize: 16 }} />}
-              sx={{ minHeight: 44, ...focusRing }}
-            >
-              {t(published ? 'public.unpublish' : 'public.publish')}
-            </Button>
+            {blockedKey ? (
+              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                {t(blockedKey)}
+              </Typography>
+            ) : (
+              <Button
+                variant='outlined'
+                color='neutral'
+                size='sm'
+                onClick={() => (published ? runPublish(() => publicContentService.unpublishBook(book._id), false) : setPublishOpen(true))}
+                startDecorator={published ? <PublicOffIcon sx={{ fontSize: 16 }} /> : <PublicIcon sx={{ fontSize: 16 }} />}
+                sx={{ minHeight: 44, ...focusRing }}
+              >
+                {t(published ? 'public.unpublish' : 'public.publish')}
+              </Button>
+            )}
           </Box>
         </Stack>
       </FormSheet>

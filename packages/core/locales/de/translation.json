@@ -2719,6 +2719,11 @@
     "publish": "Veröffentlichen",
     "published": "Veröffentlicht",
     "unpublish": "Veröffentlichung aufheben",
+    "publishBlocked": {
+      "imported_deck": "Dieser Stapel wurde aus einer Datei importiert und kann deshalb nicht in der Community veröffentlicht werden. In Nowry erstellte Stapel können es.",
+      "imported_book": "Dieses Buch wurde aus einer Datei importiert und kann deshalb nicht in der Community veröffentlicht werden. In Nowry geschriebene Bücher können es.",
+      "cards_from_imported_book": "Einige dieser Karten stammen aus einem importierten Buch, deshalb kann dieser Stapel nicht in der Community veröffentlicht werden."
+    },
     "publishInstant": "Mit der Community teilen",
     "add": "Hinzufügen",
     "added": "Hinzugefügt",

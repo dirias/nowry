@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Button, Chip, Skeleton, Stack, Typography } from '@mui/joy'
 import { Public } from '@mui/icons-material'
 
+import { publishBlockKeyFor } from '@nowry/core/domain/publishListing'
+
 import { focusRing, touchTarget } from '../../Common/Form/formStyles'
 
 /**
@@ -21,11 +23,16 @@ import { focusRing, touchTarget } from '../../Common/Form/formStyles'
  *
  * Publishing has one implementation and this is it — the deck create form used
  * to carry a second, with `category: 'Other'` and `language: 'en'` hardcoded.
+ *
+ * A deck that arrived from a file cannot be published (ADR-037). The section
+ * says so in place of the control, so the user is told before filling in a
+ * listing the server would refuse.
  */
 const DeckPublishingSection = ({ loading, deck, onManage }) => {
   const { t } = useTranslation()
   const isPublic = Boolean(deck?.is_public)
   const manageKey = isPublic ? 'publish.manageButton' : 'publish.publishButton'
+  const blockedKey = loading ? null : publishBlockKeyFor('deck', deck)
 
   return (
     <Stack gap={2} alignItems='flex-start'>
@@ -46,16 +53,22 @@ const DeckPublishingSection = ({ loading, deck, onManage }) => {
         )}
       </Stack>
 
-      <Button
-        variant='outlined'
-        color='primary'
-        size='sm'
-        startDecorator={<Public sx={{ fontSize: 16 }} />}
-        onClick={onManage}
-        sx={{ ...touchTarget, ...focusRing }}
-      >
-        {t(manageKey)}
-      </Button>
+      {blockedKey ? (
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+          {t(blockedKey)}
+        </Typography>
+      ) : (
+        <Button
+          variant='outlined'
+          color='primary'
+          size='sm'
+          startDecorator={<Public sx={{ fontSize: 16 }} />}
+          onClick={onManage}
+          sx={{ ...touchTarget, ...focusRing }}
+        >
+          {t(manageKey)}
+        </Button>
+      )}
     </Stack>
   )
 }

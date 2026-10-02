@@ -2494,6 +2494,11 @@
     "publishInstant": "Compartir con la comunidad",
     "publish": "Publicar",
     "unpublish": "Retirar",
+    "publishBlocked": {
+      "imported_deck": "Este mazo se importó desde un archivo, así que no puede publicarse en la comunidad. Los mazos creados en Nowry sí pueden.",
+      "imported_book": "Este libro se importó desde un archivo, así que no puede publicarse en la comunidad. Los libros escritos en Nowry sí pueden.",
+      "cards_from_imported_book": "Algunas de estas tarjetas se crearon a partir de un libro importado, así que este mazo no puede publicarse en la comunidad."
+    },
     "published": "Publicado",
     "browse": "Explorar",
     "library": "Biblioteca pública",

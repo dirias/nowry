@@ -20,7 +20,9 @@ import {
   PUBLISH_CATEGORIES,
   emptyListing,
   listingErrors,
-  listingPayload
+  listingPayload,
+  publishBlockKey,
+  publishBlockReason
 } from '@nowry/core/domain/publishListing'
 import { describeApiError, isOfflineError } from '@nowry/core/utils/formUtils'
 import { Button, FormField, Select, SettingRow, Stack, Switch, TagField, Typography } from '../ui'
@@ -52,9 +54,16 @@ export function PublishListing({ onPublish, onBack }) {
     try {
       await onPublish(listingPayload(listing))
     } catch (error) {
+      const blockReason = publishBlockReason(error)
       const detail = describeApiError(error)
       setFailure(
-        isOfflineError(error) ? t('errors.offline') : detail ? `${t('books.publishFailed')} · ${detail}` : t('books.publishFailed')
+        blockReason
+          ? t(publishBlockKey(blockReason))
+          : isOfflineError(error)
+            ? t('errors.offline')
+            : detail
+              ? `${t('books.publishFailed')} · ${detail}`
+              : t('books.publishFailed')
       )
     } finally {
       setSending(false)

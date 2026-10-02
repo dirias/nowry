@@ -21,6 +21,7 @@ import {
 import { Style, Quiz as QuizIcon, AccountTree, Public, CallSplit } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { decksService } from '@nowry/core/api/services'
+import { publishBlockKey, publishBlockReason } from '@nowry/core/domain/publishListing'
 
 export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublished }) {
   const { t } = useTranslation()
@@ -79,7 +80,11 @@ export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublis
       onPublished()
       onClose()
     } catch (err) {
-      if (err?.response?.status === 409) setError(t('publish.error.alreadyPublished'))
+      // ADR-037: a refusal for origin carries a code; read it before guessing
+      // from the status, which 409 alone cannot tell apart from a fork conflict.
+      const blockReason = publishBlockReason(err)
+      if (blockReason) setError(t(publishBlockKey(blockReason)))
+      else if (err?.response?.status === 400) setError(t('publish.error.alreadyPublished'))
       else if (err?.response?.status === 403) setError(t('publish.error.notOwner'))
       else setError(t('publish.error.generic'))
     } finally {

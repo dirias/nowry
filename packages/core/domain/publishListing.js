@@ -90,3 +90,38 @@ export const listingPayload = (listing) => ({
 
 /** Whether a document or deck is in the public library. */
 export const isPublished = (content) => Boolean(content?.is_public)
+
+/**
+ * Why the library may refuse a listing (ADR-037).
+ *
+ * The server answers `409 {"code": "source_not_publishable", "reason"}` for
+ * content that arrived from a file: an imported deck, an imported book, or a
+ * deck whose cards were made from an imported book. The code-to-key mapping
+ * lives here once so the deck sheet, the book sheet and the phone all say the
+ * same sentence — and say it before asking, when the content itself already
+ * shows a file origin.
+ */
+export const PUBLISH_BLOCK_CODE = 'source_not_publishable'
+
+export const PUBLISH_BLOCK_REASONS = ['imported_deck', 'imported_book', 'cards_from_imported_book']
+
+/** Whether a deck or document came from a file rather than being written here. */
+export const hasFileOrigin = (content) => content?.source === 'imported'
+
+/** The reason the server refused a listing, or null when the error is something else. */
+export const publishBlockReason = (error) => {
+  const detail = error?.response?.data?.detail
+  if (!detail || typeof detail !== 'object' || Array.isArray(detail)) return null
+  if (detail.code !== PUBLISH_BLOCK_CODE) return null
+  return PUBLISH_BLOCK_REASONS.includes(detail.reason) ? detail.reason : PUBLISH_BLOCK_REASONS[0]
+}
+
+/** The translation key that explains a refusal, by reason. */
+export const publishBlockKey = (reason) =>
+  `public.publishBlocked.${PUBLISH_BLOCK_REASONS.includes(reason) ? reason : PUBLISH_BLOCK_REASONS[0]}`
+
+/** The sentence to show instead of the publish control, or null when publishing may be offered. */
+export const publishBlockKeyFor = (contentType, content) => {
+  if (!hasFileOrigin(content) || isPublished(content)) return null
+  return publishBlockKey(contentType === 'book' ? 'imported_book' : 'imported_deck')
+}

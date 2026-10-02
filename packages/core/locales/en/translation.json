@@ -2675,6 +2675,11 @@
     "publishInstant": "Share with community",
     "publish": "Publish",
     "unpublish": "Unpublish",
+    "publishBlocked": {
+      "imported_deck": "This deck was imported from a file, so it can't be published to the community. Decks written in Nowry can.",
+      "imported_book": "This book was imported from a file, so it can't be published to the community. Books written in Nowry can.",
+      "cards_from_imported_book": "Some of these cards were made from an imported book, so this deck can't be published to the community."
+    },
     "published": "Published",
     "browse": "Browse",
     "library": "Public Library",

@@ -2730,6 +2730,11 @@
     "publish": "Publier",
     "published": "Publié",
     "unpublish": "Dépublier",
+    "publishBlocked": {
+      "imported_deck": "Ce paquet a été importé depuis un fichier, il ne peut donc pas être publié dans la communauté. Les paquets créés dans Nowry le peuvent.",
+      "imported_book": "Ce livre a été importé depuis un fichier, il ne peut donc pas être publié dans la communauté. Les livres écrits dans Nowry le peuvent.",
+      "cards_from_imported_book": "Certaines de ces cartes ont été créées à partir d'un livre importé, ce paquet ne peut donc pas être publié dans la communauté."
+    },
     "publishInstant": "Partager avec la communauté",
     "add": "Ajouter",
     "added": "Ajouté",
