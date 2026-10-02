@@ -37,10 +37,6 @@ const tabElement = (props = {}) => (
     avatarError={null}
     generationsRemaining={3}
     onGenerateAvatar={jest.fn()}
-    animationUrl={null}
-    animationGenerating={false}
-    animationError={null}
-    onGenerateAnimation={jest.fn()}
     {...props}
   />
 )
@@ -114,10 +110,7 @@ describe('CompanionTab — generation progress', () => {
     })
   const barValue = (name) => Number(screen.getByRole('progressbar', { name }).getAttribute('aria-valuenow'))
 
-  // The animation section only exists once a portrait does.
-  const PORTRAIT = 'https://example.test/pet.png'
   const AVATAR_LABEL = 'agent.companion.avatarGenerating'
-  const ANIMATION_LABEL = 'agent.companion.animationGenerating'
 
   it('shows no progress bar while nothing is generating', () => {
     renderTab()
@@ -138,22 +131,22 @@ describe('CompanionTab — generation progress', () => {
   })
 
   it('keeps advancing after a generation outruns its budget', () => {
-    // The private hook capped at 95 and stopped. The animation budget is 180s,
-    // so a 300s run — which happens — showed a frozen bar for two minutes.
-    renderTab({ animationGenerating: true, avatarUrl: PORTRAIT })
+    // The private hook capped at 95 and stopped. The avatar budget is 70s,
+    // so a slow run showed a frozen bar until it finished.
+    renderTab({ avatarGenerating: true })
 
-    advance(180000)
-    const atBudget = barValue(ANIMATION_LABEL)
+    advance(70000)
+    const atBudget = barValue(AVATAR_LABEL)
 
-    advance(180000)
-    expect(barValue(ANIMATION_LABEL)).toBeGreaterThan(atBudget)
+    advance(70000)
+    expect(barValue(AVATAR_LABEL)).toBeGreaterThan(atBudget)
   })
 
   it('never claims a generation is finished while it is still running', () => {
-    renderTab({ animationGenerating: true, avatarUrl: PORTRAIT })
+    renderTab({ avatarGenerating: true })
 
     advance(3600000)
-    expect(barValue(ANIMATION_LABEL)).toBeLessThan(100)
+    expect(barValue(AVATAR_LABEL)).toBeLessThan(100)
   })
 
   it('holds no finished bar after a failed generation', () => {

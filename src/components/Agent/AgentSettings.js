@@ -294,12 +294,7 @@ export default function AgentSettings() {
     avatarStartedAt,
     avatarError,
     generationsRemaining,
-    generateAvatar,
-    animationUrl,
-    animationGenerating,
-    animationStartedAt,
-    animationError,
-    generateAnimation
+    generateAvatar
   } = usePet()
   const { tier: subscriptionTier } = useSubscription()
   const { openUpgradeModal } = useSubscriptionContext()
@@ -1072,11 +1067,6 @@ export default function AgentSettings() {
                 avatarError={avatarError}
                 generationsRemaining={generationsRemaining}
                 onGenerateAvatar={generateAvatar}
-                animationUrl={animationUrl}
-                animationGenerating={animationGenerating}
-                animationStartedAt={animationStartedAt}
-                animationError={animationError}
-                onGenerateAnimation={generateAnimation}
               />
             </Grid>
             <Grid xs={12} md={5}>

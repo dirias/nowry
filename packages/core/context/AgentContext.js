@@ -115,14 +115,6 @@ const initialState = {
    */
   avatarStartedAt: null,
   generationsRemaining: null,
-  /** AI-generated looping animation */
-  animationUrl: null,
-  animationStage: null,
-  animationRegenPending: false,
-  animationGenerating: false,
-  animationError: null,
-  /** Epoch ms the in-flight animation run began, or null (GEN-007). */
-  animationStartedAt: null,
   /** Proactive companion intervention */
   companionMessage: null, // { type, message, card_id? } | null
   companionIsLoading: false,
@@ -178,9 +170,6 @@ function agentReducer(state, action) {
         avatarUrl: action.payload.avatar_url ?? null,
         avatarStage: action.payload.avatar_stage ?? null,
         avatarRegenPending: action.payload.avatar_regen_pending ?? false,
-        animationUrl: action.payload.animation_url ?? null,
-        animationStage: action.payload.animation_stage ?? null,
-        animationRegenPending: action.payload.animation_regen_pending ?? false,
         interventionFrequency: action.payload.agent_intervention_frequency ?? 'balanced',
         focusModeEnabled: action.payload.agent_focus_mode ?? false,
         interventionTypes: {
@@ -296,29 +285,6 @@ function agentReducer(state, action) {
     case 'SET_AVATAR_REGEN_PENDING':
       return { ...state, avatarRegenPending: true }
 
-    case 'ANIMATION_GENERATING':
-      return { ...state, animationGenerating: true, animationError: null, animationStartedAt: Date.now() }
-
-    case 'ANIMATION_GENERATED':
-      return {
-        ...state,
-        animationGenerating: false,
-        animationUrl: action.payload.animation_url,
-        animationStage: action.payload.avatar_stage,
-        animationRegenPending: false,
-        animationError: null,
-        animationStartedAt: null
-      }
-
-    case 'ANIMATION_GENERATE_ERROR':
-      return { ...state, animationGenerating: false, animationError: action.payload, animationStartedAt: null }
-
-    case 'ANIMATION_CLEAR_ERROR':
-      return { ...state, animationError: null }
-
-    case 'SET_ANIMATION_REGEN_PENDING':
-      return { ...state, animationRegenPending: true }
-
     case 'XP_PROGRESS':
       // Progress only. Never touches justLeveledUp — a level-up is dispatched
       // separately so it can be banked while the user is mid-session.
@@ -416,11 +382,6 @@ export const AgentProvider = ({ children }) => {
   useEffect(() => {
     avatarUrlRef.current = state.avatarUrl
   }, [state.avatarUrl])
-  // Keep a stable ref to animationUrl so sendMessage can check for an existing animation
-  const animationUrlRef = useRef(state.animationUrl)
-  useEffect(() => {
-    animationUrlRef.current = state.animationUrl
-  }, [state.animationUrl])
 
   // Load the pet's initial state once the user is authenticated
   useEffect(() => {
@@ -447,14 +408,12 @@ export const AgentProvider = ({ children }) => {
       })
   }, [isAuthenticated, user, state.initialized])
 
-  // On init, auto-trigger evolution regeneration if pending and portrait/animation already exists
+  // On init, auto-trigger evolution regeneration if pending and a portrait already exists.
+  // (ADR-040: the AI animation is held; nothing regenerates it.)
   useEffect(() => {
     if (!state.initialized) return
     if (state.avatarRegenPending && state.avatarUrl) {
       generateAvatar('evolution')
-    }
-    if (state.animationRegenPending && state.animationUrl) {
-      generateAnimation('evolution')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.initialized])
@@ -524,24 +483,6 @@ export const AgentProvider = ({ children }) => {
     }
   }, [])
 
-  const generateAnimation = useCallback(async (trigger = 'manual') => {
-    dispatch({ type: 'ANIMATION_GENERATING' })
-    try {
-      const data = await agentService.generateAnimation(trigger)
-      dispatch({ type: 'ANIMATION_GENERATED', payload: data })
-    } catch (err) {
-      const code = err?.response?.data?.detail
-      const errorKey =
-        {
-          animation_generation_requires_plus: 'agent.animation.freeTierError',
-          animation_rate_limit_exceeded: 'agent.animation.rateLimitError',
-          animation_requires_avatar: 'agent.animation.requiresAvatar',
-          animation_requires_hosted_avatar: 'agent.animation.requiresHostedAvatar'
-        }[code] || 'agent.animation.generateError'
-      dispatch({ type: 'ANIMATION_GENERATE_ERROR', payload: errorKey })
-    }
-  }, [])
-
   /**
    * Send a message to the Study Buddy.
    * Automatically includes the current view context as grounding.
@@ -599,13 +540,8 @@ export const AgentProvider = ({ children }) => {
         generateAvatar('evolution')
       }
       // No existing portrait → user still needs to generate their first one manually
-      dispatch({ type: 'SET_ANIMATION_REGEN_PENDING' })
-      if (animationUrlRef.current) {
-        // User already has an animation — silently regenerate for the new evolution stage
-        generateAnimation('evolution')
-      }
     },
-    [generateAnimation, generateAvatar]
+    [generateAvatar]
   )
 
   const sendMessage = useCallback(
@@ -931,11 +867,6 @@ export const AgentProvider = ({ children }) => {
         generateAvatar,
         generateNextStageArt,
         clearAvatarUrl,
-        generateAnimation,
-        animationUrl: state.animationUrl,
-        animationGenerating: state.animationGenerating,
-        animationError: state.animationError,
-        animationRegenPending: state.animationRegenPending,
         queueIntervention,
         queuePreSessionIntervention,
         dismissCompanion,

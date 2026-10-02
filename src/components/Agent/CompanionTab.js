@@ -4,7 +4,7 @@
  * Provides:
  *   1. Name — free-text input (max 20 chars), saved on blur.
  *   2. Evolution journey — every form, earned and still ahead.
- *   3. AI portrait / animation generation (Plus and Pro).
+ *   3. AI portrait generation (Plus and Pro). The AI animation is held (ADR-040).
  *
  * Species appears for paid tiers only, and only as an input to portrait
  * generation — it is not the pet's face. Free users are with Nowry, who is an
@@ -35,19 +35,10 @@ const AVATAR_STAGES = [
   { after: 50, icon: '⏳', msgKey: 'agent.companion.avatarStage3' }
 ]
 
-const ANIMATION_STAGES = [
-  { after: 0, icon: '🎬', msgKey: 'agent.companion.animStage0' },
-  { after: 20, icon: '🦋', msgKey: 'agent.companion.animStage1' },
-  { after: 60, icon: '🔄', msgKey: 'agent.companion.animStage2' },
-  { after: 120, icon: '🎞️', msgKey: 'agent.companion.animStage3' },
-  { after: 240, icon: '✨', msgKey: 'agent.companion.animStage4' }
-]
-
 // Budgets for the two waits, in milliseconds. Both are hand-set from observed
 // runs (PRD non-goal: no telemetry-derived pacing in v1). They are the point at
 // which the bar reads 80% — not a deadline, and overrunning one is not an error.
 const AVATAR_ESTIMATED_MS = 70000
-const ANIMATION_ESTIMATED_MS = 180000
 
 // ---------------------------------------------------------------------------
 // Component
@@ -70,12 +61,7 @@ const CompanionTab = ({
   avatarStartedAt,
   avatarError,
   generationsRemaining,
-  onGenerateAvatar,
-  animationUrl,
-  animationGenerating,
-  animationStartedAt,
-  animationError,
-  onGenerateAnimation
+  onGenerateAvatar
 }) => {
   const { t } = useTranslation()
 
@@ -90,14 +76,6 @@ const CompanionTab = ({
     stages: AVATAR_STAGES,
     surface: 'avatar',
     startedAt: avatarStartedAt
-  })
-  const animStatus = useGenerationProgress({
-    active: animationGenerating,
-    failed: Boolean(animationError),
-    estimatedMs: ANIMATION_ESTIMATED_MS,
-    stages: ANIMATION_STAGES,
-    surface: 'animation',
-    startedAt: animationStartedAt
   })
 
   return (
@@ -335,81 +313,6 @@ const CompanionTab = ({
       </Box>
 
       <Divider />
-
-      {/* ── Section: AI Animation ─────────────────────────────────────────── */}
-      <Box>
-        <Typography level='title-md' fontWeight={700} mb={0.5}>
-          {t('agent.companion.animationTitle')}
-        </Typography>
-
-        {tier === 'free' && (
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('agent.companion.animationLockedDescription')}
-          </Typography>
-        )}
-
-        {tier !== 'free' && !avatarUrl && (
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('agent.companion.animationRequiresAvatar')}
-          </Typography>
-        )}
-
-        {tier !== 'free' && !!avatarUrl && (
-          <Stack spacing={2}>
-            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              {t('agent.companion.animationDescription')}
-            </Typography>
-
-            {/* Legacy base64 portrait — must regenerate via Cloudinary first */}
-            {avatarUrl?.startsWith('data:') && (
-              <Alert variant='soft' color='warning' size='sm'>
-                {t('agent.companion.animationRequiresNewPortrait')}
-              </Alert>
-            )}
-
-            {!avatarUrl?.startsWith('data:') && !animationUrl && !animationGenerating && (
-              <Button
-                variant='outlined'
-                color='neutral'
-                fullWidth
-                onClick={() => onGenerateAnimation('manual')}
-                aria-label={t('agent.companion.generateAnimationAriaLabel')}
-              >
-                {t('agent.companion.generateAnimation')}
-              </Button>
-            )}
-
-            {animStatus.visible && (
-              <Box py={1} sx={{ width: '100%' }}>
-                <GenerationProgress progress={animStatus} label={t('agent.companion.animationGenerating')} />
-              </Box>
-            )}
-
-            {!!animationUrl && !animationGenerating && !avatarUrl?.startsWith('data:') && (
-              <Stack direction='row' spacing={1} alignItems='center'>
-                <Typography level='body-sm' sx={{ color: 'success.plainColor' }}>
-                  ✓ {t('agent.companion.animationReady')}
-                </Typography>
-                <Button
-                  variant='outlined'
-                  color='neutral'
-                  size='sm'
-                  onClick={() => onGenerateAnimation('manual')}
-                  aria-label={t('agent.companion.regenerateAnimationAriaLabel')}
-                >
-                  {t('agent.companion.regenerateAnimation')}
-                </Button>
-              </Stack>
-            )}
-
-            {animationError && (
-              <Alert variant='soft' color='danger' size='sm'>
-                {t(animationError, { defaultValue: t('agent.avatar.generateError') })}
-              </Alert>
-            )}
-          </Stack>
-        )}
-      </Box>
     </Stack>
   )
 }

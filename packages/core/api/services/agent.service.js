@@ -102,21 +102,6 @@ export const agentService = {
   },
 
   /**
-   * Trigger AI animation generation for the current user's pet.
-   * Returns a looping video URL stored as animation_url.
-   * @param {'manual' | 'evolution'} trigger - How the generation was initiated.
-   * @returns {{ animation_url: string, avatar_stage: number }}
-   */
-  generateAnimation: async (trigger = 'manual') => {
-    const { data } = await apiClient.post(
-      '/agent/generate-animation',
-      { trigger },
-      { timeout: 360000 } // Extended timeout: Luma generation (1–5 min) + Cloudinary upload
-    )
-    return data
-  },
-
-  /**
    * Trigger AI personality generation for the current user's pet.
    * Plus users get 1/month, Pro users get 3/month. Backend enforces limit (402 when exceeded).
    * @param {string} styleHints - Optional style description from the user.
