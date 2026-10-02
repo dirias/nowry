@@ -44,7 +44,7 @@ export default function PlansPage() {
   // One table for both surfaces (ADR-035 §5): the public pricing section
   // reads the same tiers, so a visitor and an account see the same numbers.
   const [free, plus, pro] = PLAN_TIERS
-  const featuresOf = (tier) => tier.features.map(({ label, value }) => ({ label: t(label), value: t(value) }))
+  const featuresOf = (tier) => tier.features.map(({ label, value, options }) => ({ label: t(label), value: t(value, options) }))
 
   // CTA label per current tier + target tier
   const getPlusCta = () => {

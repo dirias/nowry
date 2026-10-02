@@ -71,7 +71,7 @@ const Pricing = () => {
               </Stack>
 
               <Stack component='ul' spacing={1.25} sx={{ listStyle: 'none', m: 0, p: 0, flex: 1 }}>
-                {tier.features.map(({ label, value }) => (
+                {tier.features.map(({ label, value, options }) => (
                   <Stack component='li' key={label} direction='row' spacing={1.25} alignItems='flex-start'>
                     <CheckRounded fontSize='small' sx={{ color: 'primary.plainColor', mt: 0.25, flexShrink: 0 }} />
                     <Box sx={{ minWidth: 0 }}>
@@ -79,7 +79,7 @@ const Pricing = () => {
                         {t(label)}
                       </Typography>
                       <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                        {t(value)}
+                        {t(value, options)}
                       </Typography>
                     </Box>
                   </Stack>

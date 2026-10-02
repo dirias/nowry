@@ -14,13 +14,28 @@
 
 export const PLAN_INTERVALS = Object.freeze(['monthly', 'annual'])
 
-/** The six rows every tier answers, in the order the cards show them. */
-export const PLAN_FEATURE_ROWS = Object.freeze(['cardGeneration', 'bookExpansion', 'quizGeneration', 'aiUsage', 'studyCards', 'support'])
+/**
+ * The free tier's monthly ceiling on AI generation calls (tier contract,
+ * ADR-041). One number, read by the pricing copy here and enforced by the API's
+ * usage dependency; change it in both places together.
+ */
+export const FREE_AI_CALLS_PER_MONTH = 50
+
+/**
+ * The six rows every tier answers, in the order the cards show them. Every row
+ * names something a server gate actually reads (GTM-004): there is no support
+ * desk and no deck redesign on the page because there is none in the product.
+ */
+export const PLAN_FEATURE_ROWS = Object.freeze(['cardGeneration', 'bookExpansion', 'quizGeneration', 'aiUsage', 'studyCards', 'readAloud'])
+
+/** Interpolation values a row's copy needs, by row and tier suffix. */
+const ROW_OPTIONS = Object.freeze({ aiUsageFree: { limit: FREE_AI_CALLS_PER_MONTH } })
 
 const rows = (suffixes) =>
   PLAN_FEATURE_ROWS.map((row, i) => ({
     label: `plans.features.${row}`,
-    value: `plans.features.${row}${suffixes[i]}`
+    value: `plans.features.${row}${suffixes[i]}`,
+    options: ROW_OPTIONS[`${row}${suffixes[i]}`] ?? undefined
   }))
 
 export const PLAN_TIERS = Object.freeze([
