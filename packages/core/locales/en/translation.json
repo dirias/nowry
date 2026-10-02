@@ -810,6 +810,9 @@
         "counter": "{{selected}} of {{max}} selected",
         "primaryStatus": "Primary topic: {{topic}}",
         "limitReached": "You have reached the limit of {{max}} topics. Remove one to choose another.",
+        "aiLimitReached": "You've used this month's {{limit}} AI generations. More on Plus, or next month.",
+        "documentTooLong": "This document is over the {{limit}}-word ceiling. Split it into two.",
+        "ttsLimitReached": "You've reached this month's read-aloud allowance.",
         "srSelected": "Selected, position {{position}} of {{total}}",
         "srPrimary": "Selected, primary topic, position {{position}} of {{total}}",
         "srBlocked": "Not available, limit of {{max}} topics reached"
@@ -3400,6 +3403,7 @@
       "avatarTitle": "AI Portrait",
       "avatarDescription": "Generate a unique AI portrait of your companion based on your profile.",
       "avatarLockedTitle": "AI Portrait",
+      "avatarFreeOnce": "Your first portrait is free. Later ones, and a new one at every stage, come with Plus.",
       "avatarLockedDescription": "Get a unique AI-generated portrait of your companion.",
       "avatarGenerating": "Creating your companion...",
       "generateAvatar": "Generate your companion",

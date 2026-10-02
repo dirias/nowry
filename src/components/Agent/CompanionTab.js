@@ -190,8 +190,8 @@ const CompanionTab = ({
           {t('agent.companion.avatarTitle')}
         </Typography>
 
-        {/* FREE TIER — locked */}
-        {tier === 'free' && (
+        {/* FREE TIER — locked once the one free portrait exists (ADR-041) */}
+        {tier === 'free' && !!avatarUrl && (
           <Card
             variant='outlined'
             sx={{
@@ -232,11 +232,11 @@ const CompanionTab = ({
           </Card>
         )}
 
-        {/* PLUS/PRO — no avatar yet */}
-        {tier !== 'free' && !avatarUrl && (
+        {/* No avatar yet — every tier; the first one is free (ADR-041) */}
+        {!avatarUrl && (
           <Stack spacing={2}>
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              {t('agent.companion.avatarDescription')}
+              {tier === 'free' ? t('agent.companion.avatarFreeOnce') : t('agent.companion.avatarDescription')}
             </Typography>
 
             {avatarStatus.visible ? (

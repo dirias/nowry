@@ -61,6 +61,7 @@ import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { LexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import Toolbar from './Toolbar'
 import { useAutoSave, SAVE_STATUS } from '../../hooks/useAutoSave'
+import { limitRefusalKey, limitRefusalOptions } from '@nowry/core/domain/limits'
 import { Menu as MenuIcon, MoreVertical } from 'lucide-react'
 import PublicIcon from '@mui/icons-material/Public'
 import PublicOffIcon from '@mui/icons-material/PublicOff'
@@ -376,7 +377,10 @@ export default function EditorHome() {
     } catch (err) {
       console.error('Error generating cards from book:', err)
       const status = err.response?.status
-      if (status === 403) {
+      const limitKey = limitRefusalKey(err) // ADR-041: this month's ceiling
+      if (limitKey) {
+        setGenerateCardsError(t(limitKey, limitRefusalOptions(err)))
+      } else if (status === 403) {
         openUpgradeModal(t('upgrade.headlines.generateFromBook'))
       } else {
         const isAiServiceError = status === 503 || status === 502 || status === 429
@@ -454,6 +458,9 @@ export default function EditorHome() {
   }, [loading, searchParams, setSearchParams])
 
   // Manual save always uses the latest content ref to avoid stale React state
+  const [saveErrorKey, setSaveErrorKey] = useState(null)
+  const [saveErrorOptions, setSaveErrorOptions] = useState({})
+
   const handleManualSave = async () => {
     try {
       const latestContent = latestContentRef.current || content
@@ -465,6 +472,9 @@ export default function EditorHome() {
       resetBaseline(latestContent)
     } catch (e) {
       console.error('Manual save failed:', e)
+      // ADR-041: a document past the word ceiling is refused with a code; say so.
+      setSaveErrorKey(limitRefusalKey(e))
+      setSaveErrorOptions(limitRefusalOptions(e))
     }
   }
 
@@ -693,7 +703,7 @@ export default function EditorHome() {
         <Stack direction='row' spacing={0.75} alignItems='center'>
           <AlertTriangle size={13} style={{ color: 'var(--joy-palette-danger-plainColor)' }} />
           <Typography level='body-xs' sx={{ color: 'danger.plainColor' }}>
-            {t('books.status.saveFailed', { defaultValue: 'Save failed' })}
+            {saveErrorKey ? t(saveErrorKey, saveErrorOptions) : t('books.status.saveFailed', { defaultValue: 'Save failed' })}
           </Typography>
         </Stack>
       )

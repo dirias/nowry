@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { limitRefusalKey } from '@nowry/core/domain/limits'
 import {
   Box,
   Button,
@@ -107,7 +108,8 @@ export default function TTSToolbar({ tier, editorInstanceRef, bookId }) {
         // by a `segmentation_failed:`-prefixed `detail` string; anything
         // else (including non-auto-detect failures) keeps the generic message.
         const isSegmentationFailure = typeof e?.ttsDetail === 'string' && e.ttsDetail.startsWith('segmentation_failed:')
-        setTtsError(isSegmentationFailure ? t('aiMagic.tts.segmentError') : t('aiMagic.tts.error'))
+        const limitKey = limitRefusalKey(e) // ADR-041: this month's read-aloud allowance
+        setTtsError(limitKey ? t(limitKey) : isSegmentationFailure ? t('aiMagic.tts.segmentError') : t('aiMagic.tts.error'))
       }
     },
     [bookId, ttsLanguage, autoDetect, tier, editorInstanceRef, t]

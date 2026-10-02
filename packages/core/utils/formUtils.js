@@ -34,6 +34,9 @@ export const describeApiError = (error) => {
       .join(' · ')
   }
   if (typeof detail === 'string') return detail
+  // A refusal with a stable code (ADR-037, ADR-038, ADR-041): the code is more
+  // useful than the transport's message. Surfaces that know the code translate it.
+  if (detail && typeof detail === 'object' && typeof detail.code === 'string') return detail.code
   return error?.message || ''
 }
 

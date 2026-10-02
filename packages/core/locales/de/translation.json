@@ -768,6 +768,9 @@
         "counter": "{{selected}} von {{max}} ausgewählt",
         "primaryStatus": "Hauptthema: {{topic}}",
         "limitReached": "Du hast das Limit von {{max}} Themen erreicht. Entferne eines, um ein anderes zu wählen.",
+        "aiLimitReached": "Du hast die {{limit}} KI-Generierungen dieses Monats verbraucht. Mehr mit Plus, oder nächsten Monat.",
+        "documentTooLong": "Dieses Dokument liegt über der Grenze von {{limit}} Wörtern. Teile es in zwei.",
+        "ttsLimitReached": "Du hast das Vorlese-Kontingent dieses Monats erreicht.",
         "srSelected": "Ausgewählt, Position {{position}} von {{total}}",
         "srPrimary": "Ausgewählt, Hauptthema, Position {{position}} von {{total}}",
         "srBlocked": "Nicht verfügbar, Limit von {{max}} Themen erreicht"
@@ -1959,6 +1962,7 @@
       "avatarTitle": "KI-Porträt",
       "avatarDescription": "Generiere ein einzigartiges KI-Porträt deines Begleiters basierend auf deinem Profil.",
       "avatarLockedTitle": "KI-Porträt",
+      "avatarFreeOnce": "Dein erstes Porträt ist kostenlos. Weitere, und ein neues auf jeder Stufe, gibt es mit Plus.",
       "avatarLockedDescription": "Erhalte ein einzigartiges KI-generiertes Porträt deines Begleiters.",
       "avatarGenerating": "Begleiter wird erstellt...",
       "generateAvatar": "Begleiter generieren",

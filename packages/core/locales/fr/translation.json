@@ -779,6 +779,9 @@
         "counter": "{{selected}} sur {{max}} sélectionnés",
         "primaryStatus": "Sujet principal : {{topic}}",
         "limitReached": "Vous avez atteint la limite de {{max}} sujets. Retirez-en un pour en choisir un autre.",
+        "aiLimitReached": "Vous avez utilisé les {{limit}} générations par l'IA de ce mois. Plus avec Plus, ou le mois prochain.",
+        "documentTooLong": "Ce document dépasse le plafond de {{limit}} mots. Coupez-le en deux.",
+        "ttsLimitReached": "Vous avez atteint la lecture à voix haute disponible ce mois-ci.",
         "srSelected": "Sélectionné, position {{position}} sur {{total}}",
         "srPrimary": "Sélectionné, sujet principal, position {{position}} sur {{total}}",
         "srBlocked": "Non disponible, limite de {{max}} sujets atteinte"
@@ -1970,6 +1973,7 @@
       "avatarTitle": "Portrait IA",
       "avatarDescription": "Générez un portrait IA unique de votre compagnon basé sur votre profil.",
       "avatarLockedTitle": "Portrait IA",
+      "avatarFreeOnce": "Votre premier portrait est offert. Les suivants, et un nouveau à chaque étape, viennent avec Plus.",
       "avatarLockedDescription": "Obtenez un portrait unique généré par IA de votre compagnon.",
       "avatarGenerating": "Création de votre compagnon...",
       "generateAvatar": "Générer votre compagnon",

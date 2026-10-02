@@ -732,6 +732,9 @@
         "counter": "{{max}}件中{{selected}}件を選択中",
         "primaryStatus": "メイントピック: {{topic}}",
         "limitReached": "トピックの上限{{max}}件に達しました。別のトピックを選ぶには1つ解除してください。",
+        "aiLimitReached": "今月の AI 生成 {{limit}} 回を使い切りました。Plus ならもっと、または来月にどうぞ。",
+        "documentTooLong": "この文書は {{limit}} 語の上限を超えています。二つに分けてください。",
+        "ttsLimitReached": "今月の読み上げ上限に達しました。",
         "srSelected": "選択済み、{{total}}件中{{position}}番目",
         "srPrimary": "選択済み、メイントピック、{{total}}件中{{position}}番目",
         "srBlocked": "選択できません。トピックの上限{{max}}件に達しています"
@@ -2064,6 +2067,7 @@
       "avatarTitle": "AIポートレート",
       "avatarDescription": "プロフィールに基づいてコンパニオンのユニークなAIポートレートを生成します。",
       "avatarLockedTitle": "AIポートレート",
+      "avatarFreeOnce": "最初の肖像は無料です。その後の肖像と、各ステージの新しい肖像は Plus で。",
       "avatarLockedDescription": "コンパニオンのユニークなAI生成ポートレートを取得しましょう。",
       "avatarGenerating": "コンパニオンを作成中...",
       "generateAvatar": "コンパニオンを生成する",

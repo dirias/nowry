@@ -18,7 +18,10 @@ const extractTtsErrorDetail = (error) => {
   if (!(data instanceof ArrayBuffer)) return undefined
   try {
     const parsed = JSON.parse(new TextDecoder('utf-8').decode(data))
-    return typeof parsed?.detail === 'string' ? parsed.detail : undefined
+    if (typeof parsed?.detail === 'string') return parsed.detail
+    // A refusal with a code (ADR-041's fair-use ceiling) surfaces as that code.
+    if (parsed?.detail && typeof parsed.detail === 'object' && typeof parsed.detail.code === 'string') return parsed.detail.code
+    return undefined
   } catch {
     return undefined
   }

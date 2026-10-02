@@ -14,6 +14,8 @@ import '@fontsource-variable/literata'
 import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { AI_LIMIT_REACHED_CODE } from '@nowry/core/domain/limits'
+import { FREE_AI_CALLS_PER_MONTH } from '@nowry/core/domain/plans'
 import { Box, useTheme, Snackbar, Alert, Button, LinearProgress } from '@mui/joy'
 import DiagramPreviewPanel from './DiagramPreviewPanel'
 import DOMPurify from 'dompurify'
@@ -571,7 +573,12 @@ export default function Editor({
         },
         onError: (e) => {
           setIsCardStreaming(false)
-          if (e.status === 403) {
+          if (e.status === 429 || e.code === AI_LIMIT_REACHED_CODE) {
+            // ADR-041: this month's AI generations are used up; say so, no upgrade modal.
+            setShowStudyCard(false)
+            setIsLimitError(true)
+            setError(t('subscription.errors.aiLimitReached', { limit: e.limit ?? FREE_AI_CALLS_PER_MONTH }))
+          } else if (e.status === 403) {
             // Plan limit reached — same behavior as the legacy catch block
             setShowStudyCard(false)
             setIsLimitError(true)
