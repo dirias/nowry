@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/joy'
 import { CheckRounded } from '@mui/icons-material'
 import { FEATURED_TIER_ID, PLAN_TIERS } from '@nowry/core/domain/plans'
+import { useBeta } from '@nowry/core/context/BetaContext'
 
 /**
  * Pricing in public (PRD D4, ADR-035 §5): the three tiers from the one table
@@ -13,6 +14,7 @@ import { FEATURED_TIER_ID, PLAN_TIERS } from '@nowry/core/domain/plans'
  */
 const Pricing = () => {
   const { t } = useTranslation()
+  const { config: beta } = useBeta()
 
   return (
     <Box component='section' id='pricing' aria-labelledby='landing-pricing-title' sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: 80 }}>
@@ -84,15 +86,21 @@ const Pricing = () => {
                 ))}
               </Stack>
 
-              <Button
-                component={Link}
-                to='/register'
-                variant={featured ? 'solid' : 'soft'}
-                color={featured ? 'primary' : 'neutral'}
-                fullWidth
-              >
-                {tier.id === 'free' ? t('landing.hero.cta') : t('landing.pricing.cta', { name })}
-              </Button>
+              {tier.id !== 'free' && !beta.upgrades_open ? (
+                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                  {t('beta.upgradesClosed')}
+                </Typography>
+              ) : (
+                <Button
+                  component={Link}
+                  to='/register'
+                  variant={featured ? 'solid' : 'soft'}
+                  color={featured ? 'primary' : 'neutral'}
+                  fullWidth
+                >
+                  {tier.id === 'free' ? t('landing.hero.cta') : t('landing.pricing.cta', { name })}
+                </Button>
+              )}
             </Stack>
           )
         })}

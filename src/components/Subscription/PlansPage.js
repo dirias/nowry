@@ -4,6 +4,7 @@ import { Box, Container, Typography, Stack, Button, Alert } from '@mui/joy'
 import { subscriptionService } from '@nowry/core/api/services'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { PLAN_TIERS } from '@nowry/core/domain/plans'
+import { useBeta } from '@nowry/core/context/BetaContext'
 import PlanCard from './PlanCard'
 
 // Price IDs are publishable values from env vars (safe to expose client-side per T-03-07-02).
@@ -18,6 +19,9 @@ const PRICE_IDS = {
 export default function PlansPage() {
   const { t } = useTranslation()
   const { tier: currentTier } = useSubscription()
+  // ADR-038: while the beta keeps upgrades closed, no card offers a checkout.
+  const { config: beta } = useBeta()
+  const upgradesOpen = beta.upgrades_open
   const [billingInterval, setBillingInterval] = useState('monthly')
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -45,12 +49,14 @@ export default function PlansPage() {
   // CTA label per current tier + target tier
   const getPlusCta = () => {
     if (currentTier === 'plus') return t('plans.currentPlan')
+    if (!upgradesOpen) return null
     if (currentTier === 'free') return t('plans.cta.upgradeToPlus')
     return null // pro users: no downgrade CTA on this page
   }
 
   const getProCta = () => {
     if (currentTier === 'pro') return t('plans.currentPlan')
+    if (!upgradesOpen) return null
     if (currentTier === 'plus') return t('plans.cta.switchToPro')
     return t('plans.cta.upgradeToPro') // free users
   }
@@ -120,6 +126,12 @@ export default function PlansPage() {
         </Alert>
       )}
 
+      {!upgradesOpen && (
+        <Alert color='neutral' variant='soft' sx={{ mb: 3 }}>
+          {t('beta.upgradesClosed')}
+        </Alert>
+      )}
+
       {/* Plans Grid — 3 columns desktop, 2 tablet, 1 mobile */}
       <Box
         sx={{
@@ -149,7 +161,7 @@ export default function PlansPage() {
           features={featuresOf(plus)}
           isCurrent={currentTier === 'plus'}
           ctaLabel={getPlusCta()}
-          onUpgrade={currentTier === 'free' ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual) : null}
+          onUpgrade={upgradesOpen && currentTier === 'free' ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual) : null}
           loading={checkoutLoading}
           showSavings={!isMonthly}
         />
@@ -162,7 +174,7 @@ export default function PlansPage() {
           features={featuresOf(pro)}
           isCurrent={currentTier === 'pro'}
           ctaLabel={getProCta()}
-          onUpgrade={currentTier !== 'pro' ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual) : null}
+          onUpgrade={upgradesOpen && currentTier !== 'pro' ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual) : null}
           loading={checkoutLoading}
           showSavings={!isMonthly}
         />

@@ -13,12 +13,16 @@
 import React from 'react'
 import { Modal, ModalDialog, ModalClose, Typography, Box, Button, Stack, List, ListItem } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+import { useBeta } from '@nowry/core/context/BetaContext'
 import { useNavigate } from 'react-router-dom'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 
 const UpgradePrompt = ({ open, onClose, headline }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  // ADR-038: closed upgrades turn the prompt into a notice with one key.
+  const { config: beta } = useBeta()
+  const upgradesOpen = beta.upgrades_open
 
   // MUST call onClose() BEFORE navigating (Pitfall 5 — prevents modal persisting after nav)
   const handleUpgrade = () => {
@@ -74,7 +78,7 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
                 {headline || t('upgrade.modal.title')}
               </Typography>
               <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                {t('upgrade.modal.description')}
+                {upgradesOpen ? t('upgrade.modal.description') : t('beta.upgradesClosed')}
               </Typography>
             </Box>
           </Box>
@@ -115,9 +119,11 @@ const UpgradePrompt = ({ open, onClose, headline }) => {
             <Button variant='outlined' color='neutral' onClick={onClose} fullWidth size='lg' aria-label={t('common.cancel')}>
               {t('common.cancel')}
             </Button>
-            <Button variant='solid' color='primary' onClick={handleUpgrade} fullWidth size='lg' aria-label={t('upgrade.modal.cta')}>
-              {t('upgrade.modal.cta')}
-            </Button>
+            {upgradesOpen && (
+              <Button variant='solid' color='primary' onClick={handleUpgrade} fullWidth size='lg' aria-label={t('upgrade.modal.cta')}>
+                {t('upgrade.modal.cta')}
+              </Button>
+            )}
           </Stack>
         </Box>
       </ModalDialog>

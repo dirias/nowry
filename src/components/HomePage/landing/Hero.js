@@ -1,8 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Stack, Typography } from '@mui/joy'
+import { Box, Button, Chip, Stack, Typography } from '@mui/joy'
 import { ArrowForwardRounded } from '@mui/icons-material'
+import { useBeta } from '@nowry/core/context/BetaContext'
+import WaitlistForm from '../../Public/WaitlistForm'
 
 /**
  * The landing's first view (PRD public-site D1, D3, D11).
@@ -16,6 +18,7 @@ import { ArrowForwardRounded } from '@mui/icons-material'
  */
 const Hero = ({ frame, phoneFrame }) => {
   const { t } = useTranslation()
+  const { config: beta } = useBeta()
 
   return (
     <Box
@@ -31,6 +34,11 @@ const Hero = ({ frame, phoneFrame }) => {
       }}
     >
       <Stack spacing={3} alignItems='flex-start'>
+        {beta.active && (
+          <Chip size='sm' variant='soft' color='primary'>
+            {t('beta.mark')}
+          </Chip>
+        )}
         <Typography id='landing-hero-title' level='display-lg' component='h1' sx={{ color: 'text.primary', whiteSpace: 'pre-line' }}>
           {t('landing.hero.title')}
         </Typography>
@@ -48,6 +56,7 @@ const Hero = ({ frame, phoneFrame }) => {
         <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
           {t('landing.hero.fineprint')}
         </Typography>
+        {beta.invite_required && <WaitlistForm source='/' />}
       </Stack>
 
       <Stack spacing={1.5} sx={{ minWidth: 0, display: { xs: 'none', md: 'flex' } }}>

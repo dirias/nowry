@@ -2,6 +2,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, se
 import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
 import { usernameFor } from '../../domain/username'
+import { inviteHeaders } from '../../domain/beta'
 
 /*
  * Both clients run the same Firebase JS SDK (ADR-028) and differ only in how
@@ -23,9 +24,10 @@ export const authService = {
    * @param {string} email
    * @param {string} password
    * @param {string} username
+   * @param {string} [inviteCode] the beta invite, sent as a header while invites are required (ADR-038)
    * @returns {Promise<Object>} User data
    */
-  async register(email, password, username) {
+  async register(email, password, username, inviteCode) {
     try {
       // Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth(), email, password)
@@ -51,7 +53,8 @@ export const authService = {
         },
         {
           headers: {
-            Authorization: `Bearer ${idToken}`
+            Authorization: `Bearer ${idToken}`,
+            ...inviteHeaders(inviteCode)
           }
         }
       )
@@ -123,7 +126,7 @@ export const authService = {
    * Sign in with Google OAuth
    * @returns {Promise<Object>} User session data
    */
-  async loginWithGoogle() {
+  async loginWithGoogle(inviteCode) {
     try {
       const userCredential = await authPort.signInWithGoogle()
 
@@ -151,7 +154,8 @@ export const authService = {
         },
         {
           headers: {
-            Authorization: `Bearer ${idToken}`
+            Authorization: `Bearer ${idToken}`,
+            ...inviteHeaders(inviteCode)
           }
         }
       )

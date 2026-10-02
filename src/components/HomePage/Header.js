@@ -57,6 +57,7 @@ import { useTranslation } from 'react-i18next'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { useBeta } from '@nowry/core/context/BetaContext'
 
 const HeaderUtils = ({ variant = 'header' }) => {
   const { mode, setMode } = useColorScheme()
@@ -124,6 +125,7 @@ const Header = () => {
   const displayName = user?.username || user?.email?.split('@')[0] || ''
   const resolvedAvatarUrl = user?.avatar_url || user?.photo_url || user?.avatar || undefined
   const { t } = useTranslation()
+  const { config: beta } = useBeta()
   const { petName, isInStudySession } = usePet()
   const { mode, setMode } = useColorScheme()
 
@@ -270,6 +272,11 @@ const Header = () => {
           }}
         >
           <BrandLockup markSize={30} />
+          {beta.active && (
+            <Chip size='sm' variant='soft' color='primary' sx={{ ml: 1 }} aria-label={t('beta.mark')}>
+              {t('beta.mark')}
+            </Chip>
+          )}
         </Box>
 
         {/* Spacer */}

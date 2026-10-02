@@ -32,6 +32,10 @@ import { authService } from '@nowry/core/api/services/auth.service'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
 import { passwordLongEnough } from '@nowry/core/domain/authRules'
+import { isInviteRefusal } from '@nowry/core/domain/beta'
+import { betaService } from '@nowry/core/api/services/beta.service'
+import { useBeta } from '@nowry/core/context/BetaContext'
+import WaitlistForm from '../Public/WaitlistForm'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -49,6 +53,8 @@ const Register = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false)
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { config: beta } = useBeta()
+  const inviteRequired = beta.invite_required
   const { login } = useAuth()
 
   // Password strength calculation
@@ -114,10 +120,25 @@ const Register = () => {
     if (!formData.acceptedTerms) {
       newErrors.acceptedTerms = t('auth.errors.termsRequired')
     }
+    // ADR-038: while invites are required, the code is checked here, before a
+    // Firebase account exists, so a wrong code leaves nothing behind.
+    const inviteCode = inviteRequired ? String(formData.inviteCode ?? '').trim() : ''
+    if (inviteRequired && !inviteCode) {
+      newErrors.inviteCode = t('beta.inviteInvalid')
+    }
 
     if (Object.keys(newErrors).length === 0) {
       setLoading(true)
       try {
+        if (inviteRequired) {
+          const check = await betaService.checkInvite(inviteCode)
+          if (!check?.valid) {
+            setErrors({ inviteCode: t('beta.inviteInvalid') })
+            setLoading(false)
+            return
+          }
+        }
+
         // PublicOnlyRoute (wrapping this route) redirects to `/` the instant
         // `isAuthenticated` flips true, which happens inside Firebase's
         // onAuthStateChanged listener — often before this function's own
@@ -131,7 +152,7 @@ const Register = () => {
         navigate('/register?returnUrl=%2Fonboarding', { replace: true })
 
         // 1. Create user in Firebase Auth & sync to MongoDB
-        await authService.register(formData.email, formData.password, formData.username)
+        await authService.register(formData.email, formData.password, formData.username, inviteCode)
 
         // Firebase auth service already logs the user in and stores the token
         // No need to call the old login endpoint
@@ -161,6 +182,8 @@ const Register = () => {
 
         if (usernameFormatRejected) {
           newErrors.username = t('settings.account.usernameInvalid')
+        } else if (isInviteRefusal(error)) {
+          newErrors.inviteCode = t('beta.inviteInvalid')
         } else {
           newErrors.serverError = error.message || t('auth.errors.serverError')
         }
@@ -177,8 +200,9 @@ const Register = () => {
     setLoading(true)
 
     try {
-      // Use Firebase Google OAuth
-      const response = await authService.loginWithGoogle()
+      // Use Firebase Google OAuth. The invite field, if filled, travels with
+      // the sign-up (ADR-038); a refusal below means the server wanted one.
+      const response = await authService.loginWithGoogle(inviteRequired ? String(formData.inviteCode ?? '').trim() : undefined)
 
       // Same explicit one-time navigation as Login's Google path (ADR-007):
       // first-time Google users start in onboarding, everybody else goes Home.
@@ -189,6 +213,15 @@ const Register = () => {
       }
     } catch (error) {
       console.error('Google login error:', error)
+
+      if (isInviteRefusal(error)) {
+        // The Firebase account exists but no Nowry account was created. Sign
+        // out so the guard does not treat them as signed in, and say why.
+        await authService.logout().catch(() => {})
+        setErrors({ serverError: t('beta.inviteRequired'), inviteCode: t('beta.inviteInvalid') })
+        setLoading(false)
+        return
+      }
 
       // One table, shared with the mobile client (MOB-016).
       const key = authErrorKey(error)
@@ -230,6 +263,23 @@ const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <Stack spacing={2.5}>
+            {inviteRequired && (
+              <FormControl error={!!errors.inviteCode}>
+                <FormLabel>{t('beta.inviteCode')}</FormLabel>
+                <Input
+                  type='text'
+                  name='inviteCode'
+                  id='register-invite-code'
+                  placeholder={t('beta.inviteCodePlaceholder')}
+                  value={formData.inviteCode ?? ''}
+                  onChange={handleChange}
+                  size='lg'
+                  autoComplete='one-time-code'
+                />
+                {errors.inviteCode && <FormHelperText>{errors.inviteCode}</FormHelperText>}
+              </FormControl>
+            )}
+
             <FormControl error={!!errors.username}>
               <FormLabel>{t('auth.username')}</FormLabel>
               <Input
@@ -357,6 +407,15 @@ const Register = () => {
             {t('auth.signInGoogle')}
           </Button>
         </Stack>
+
+        {inviteRequired && (
+          <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 1.5 }}>
+              {t('beta.noCode')}
+            </Typography>
+            <WaitlistForm source='/register' compact />
+          </Box>
+        )}
 
         <Typography level='body-xs' textAlign='center' sx={{ mt: 2, color: 'text.tertiary', lineHeight: 1.5 }}>
           {t('auth.byContinuing')}{' '}

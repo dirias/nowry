@@ -3360,5 +3360,21 @@
     "createPriority": "Créer une priorité",
     "overdue": "En retard",
     "noDeadline": "Sans échéance"
+  },
+  "beta": {
+    "mark": "Bêta",
+    "inviteCode": "Code d'invitation",
+    "inviteCodePlaceholder": "Le code qu'on vous a donné",
+    "inviteInvalid": "Ce code n'est pas l'un des nôtres. Vérifiez-le, ou inscrivez-vous sur la liste d'attente.",
+    "inviteRequired": "Nowry est en bêta privée. Inscrivez-vous avec un code d'invitation, ou rejoignez la liste d'attente.",
+    "noCode": "Pas de code ?",
+    "upgradesClosed": "Les abonnements ouvriront après la bêta. Tout ce que vous pouvez faire aujourd'hui est gratuit pendant les tests.",
+    "waitlist": {
+      "title": "Rejoindre la liste d'attente",
+      "lead": "Laissez votre e-mail et nous vous écrirons quand une place se libère.",
+      "cta": "Rejoindre la liste",
+      "sent": "Vous êtes sur la liste. Nous vous écrirons quand une place se libère.",
+      "failed": "L'envoi a échoué. Réessayez dans un instant."
+    }
   }
 }

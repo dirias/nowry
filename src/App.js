@@ -29,6 +29,7 @@ import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { AgentProvider, usePet } from '@nowry/core/context/AgentContext'
 import { SubscriptionProvider } from './context/SubscriptionContext'
+import { BetaProvider } from '@nowry/core/context/BetaContext'
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/Common/ErrorBoundary'
 import StudyPet from './components/Agent/StudyPet'
@@ -443,6 +444,7 @@ const AppContent = () => {
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
+      <BetaProvider>
       <AuthProvider>
         <PomodoroProvider>
           <DynamicThemeProvider>
@@ -458,6 +460,7 @@ const App = () => {
           </DynamicThemeProvider>
         </PomodoroProvider>
       </AuthProvider>
+      </BetaProvider>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   )

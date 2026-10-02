@@ -3935,5 +3935,21 @@
   },
   "errors": {
     "offline": "You appear to be offline. Nothing was lost — try again when you have a signal."
+  },
+  "beta": {
+    "mark": "Beta",
+    "inviteCode": "Invite code",
+    "inviteCodePlaceholder": "The code you were given",
+    "inviteInvalid": "That code isn't one of ours. Check it, or join the waitlist below.",
+    "inviteRequired": "Nowry is in private beta. Sign up with an invite code, or join the waitlist.",
+    "noCode": "No invite code?",
+    "upgradesClosed": "Upgrades open after the beta. Everything you can do today is free while we test.",
+    "waitlist": {
+      "title": "Join the waitlist",
+      "lead": "Leave your email and we'll write when a place opens.",
+      "cta": "Join the waitlist",
+      "sent": "You're on the list. We'll write when a place opens.",
+      "failed": "That didn't go through. Try again in a moment."
+    }
   }
 }

@@ -7,6 +7,7 @@ import AuthShell from './AuthShell'
 
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { authService } from '@nowry/core/api/services/auth.service'
+import { isInviteRefusal } from '@nowry/core/domain/beta'
 import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
 
 const Login = () => {
@@ -70,6 +71,15 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Google login error:', error)
+
+      if (isInviteRefusal(error)) {
+        // ADR-038: a Google identity with no Nowry account, while invites are
+        // required. Sign out of Firebase and send them to register with a code.
+        await authService.logout().catch(() => {})
+        setError(t('beta.inviteRequired'))
+        setLoading(false)
+        return
+      }
 
       // Parse Google login errors
       let errorMessage = t('auth.errors.loginFailed')

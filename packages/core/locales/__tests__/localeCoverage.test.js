@@ -120,9 +120,14 @@ const XP_GAINED = ['cards.session.xpGained_one', 'cards.session.xpGained_other']
  */
 const CARD_COUNTER = ['cards.session.cardShort']
 
+// "Beta" is the word Spanish and German product UI use for a beta, unchanged
+// from English; French writes "Bêta" and Japanese ベータ, so neither is here.
+const BETA_MARK = ['beta.mark']
+
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
   es: [
+    ...BETA_MARK,
     // "A–Z" is a range of letters, not a phrase. Spanish, French and German
     // all write the same two, so the sort label lands on English by having
     // nothing to translate. Japanese uses あいうえお順 and is not here.
@@ -181,6 +186,7 @@ const IDENTICAL_BY_DESIGN = {
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
   // and its counted form land on English by agreement, not by neglect.
   de: [
+    ...BETA_MARK,
     'taxonomy.topics.design',
     'news.categories.design',
     'cards.session.filters.tags',
