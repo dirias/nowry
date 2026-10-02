@@ -445,21 +445,21 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BetaProvider>
-      <AuthProvider>
-        <PomodoroProvider>
-          <DynamicThemeProvider>
-            <NotificationProvider>
-              <AgentProvider>
-                <Router>
-                  <SubscriptionProvider>
-                    <AppContent />
-                  </SubscriptionProvider>
-                </Router>
-              </AgentProvider>
-            </NotificationProvider>
-          </DynamicThemeProvider>
-        </PomodoroProvider>
-      </AuthProvider>
+        <AuthProvider>
+          <PomodoroProvider>
+            <DynamicThemeProvider>
+              <NotificationProvider>
+                <AgentProvider>
+                  <Router>
+                    <SubscriptionProvider>
+                      <AppContent />
+                    </SubscriptionProvider>
+                  </Router>
+                </AgentProvider>
+              </NotificationProvider>
+            </DynamicThemeProvider>
+          </PomodoroProvider>
+        </AuthProvider>
       </BetaProvider>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

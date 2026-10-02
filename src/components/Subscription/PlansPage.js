@@ -161,7 +161,9 @@ export default function PlansPage() {
           features={featuresOf(plus)}
           isCurrent={currentTier === 'plus'}
           ctaLabel={getPlusCta()}
-          onUpgrade={upgradesOpen && currentTier === 'free' ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual) : null}
+          onUpgrade={
+            upgradesOpen && currentTier === 'free' ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual) : null
+          }
           loading={checkoutLoading}
           showSavings={!isMonthly}
         />
@@ -174,7 +176,9 @@ export default function PlansPage() {
           features={featuresOf(pro)}
           isCurrent={currentTier === 'pro'}
           ctaLabel={getProCta()}
-          onUpgrade={upgradesOpen && currentTier !== 'pro' ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual) : null}
+          onUpgrade={
+            upgradesOpen && currentTier !== 'pro' ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual) : null
+          }
           loading={checkoutLoading}
           showSavings={!isMonthly}
         />
