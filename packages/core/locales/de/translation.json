@@ -165,7 +165,8 @@
     },
     "links": {
       "library": "Bibliothek",
-      "pricing": "Preise"
+      "pricing": "Preise",
+      "copyright": "Urheberrecht"
     },
     "support": {
       "title": "Support",
@@ -190,7 +191,8 @@
   },
   "routes": {
     "terms": "/nutzungsbedingungen",
-    "privacy": "/datenschutz"
+    "privacy": "/datenschutz",
+    "copyright": "/copyright"
   },
   "study": {
     "deck": {
@@ -1718,8 +1720,15 @@
         "content1": "Sie behalten das Eigentum an allen von Ihnen hochgeladenen Inhalten. Durch die Nutzung von Nowry gewähren Sie uns jedoch eine Lizenz zur Verarbeitung Ihrer Inhalte zum Zweck der Bereitstellung und Verbesserung des Dienstes, einschließlich der Nutzung von KI-Modellen.",
         "content2": "KI-generierte Inhalte werden für Bildungszwecke bereitgestellt. Obwohl wir uns um Genauigkeit bemühen, garantiert Nowry nicht für die Richtigkeit der KI-generierten Materialien."
       },
+      "copyright": {
+        "title": "5. Urheberrecht und die Werke anderer",
+        "content1": "Alle Rechte an dem, was du in Nowry schreibst, bleiben bei dir. Wenn du ein Buch oder einen Stapel in der öffentlichen Bibliothek veröffentlichst, räumst du Nowry eine nicht-exklusive Lizenz ein, es zu hosten, anzuzeigen und anderen das Forken zu erlauben, solange es öffentlich bleibt, und du bestätigst, dass du es teilen darfst.",
+        "content2": "Inhalte, die aus einer Datei kamen, etwa ein Anki-Stapel oder ein hochgeladenes Dokument, bleiben privat: Sie können nicht in der Bibliothek veröffentlicht werden, weil wir nicht wissen können, wessen Werk sie enthalten.",
+        "content3": "Wenn du glaubst, dass etwas in der öffentlichen Bibliothek dein Urheberrecht verletzt, schick uns eine Meldung. Wir entfernen Inhalte, die eine gültige Meldung benennt, informieren die Person, die sie veröffentlicht hat, und schließen die Konten von Wiederholungstätern.",
+        "link": "Ein Urheberrechtsproblem melden"
+      },
       "conduct": {
-        "title": "5. Verbotenes Verhalten",
+        "title": "6. Verbotenes Verhalten",
         "content": "Sie stimmen zu, Folgendes nicht zu tun:",
         "items": [
           "Versuch des Reverse-Engineerings unserer KI-Modelle oder Plattform.",
@@ -1729,21 +1738,52 @@
         ]
       },
       "liability": {
-        "title": "6. Haftungsbeschränkung",
+        "title": "7. Haftungsbeschränkung",
         "content": "Nowry haftet nicht für indirekte, zufällige, besondere, Folgeschäden oder Strafschadensersatz, die sich aus Ihrer Nutzung oder der Unfähigkeit zur Nutzung des Dienstes ergeben."
       },
       "termination": {
-        "title": "7. Kündigung",
+        "title": "8. Kündigung",
         "content": "Wir behalten uns das Recht vor, Ihr Konto nach eigenem Ermessen und ohne Vorankündigung zu kündigen oder auszusetzen, wenn ein Verhalten vorliegt, von dem wir glauben, dass es gegen diese Nutzungsbedingungen verstößt oder für andere Benutzer oder unsere Geschäftsinteressen schädlich ist."
       },
       "changes": {
-        "title": "8. Änderungen der Bedingungen",
+        "title": "9. Änderungen der Bedingungen",
         "content": "Wir können diese Nutzungsbedingungen von Zeit zu Zeit aktualisieren. Ihre fortgesetzte Nutzung des Dienstes nach Änderungen gilt als Annahme der neuen Bedingungen."
       },
       "contact": {
-        "title": "9. Kontaktinformationen",
+        "title": "10. Kontaktinformationen",
         "content": "Bei Fragen zu diesen Bedingungen kontaktieren Sie uns bitte unter:",
         "email": "E-Mail: support@nowry.app"
+      }
+    },
+    "copyright": {
+      "title": "Urheberrechtsmeldungen",
+      "lead": "Wenn dein Werk ohne deine Erlaubnis in Nowrys öffentlicher Bibliothek erscheint, sag es uns hier. Vollständige Meldungen bearbeiten wir in der Regel innerhalb weniger Tage.",
+      "stepsTitle": "Was eine Meldung braucht",
+      "steps": [
+        "Deinen Namen und eine Kontaktmöglichkeit",
+        "Das Werk, das dir gehört, und wo wir es sehen können",
+        "Wo die Kopie in Nowry ist, als Link",
+        "Eine Erklärung, dass du in gutem Glauben davon ausgehst, dass die Nutzung nicht erlaubt ist",
+        "Eine Erklärung, dass die Meldung zutrifft und dass du Inhaber bist oder für ihn handelst"
+      ],
+      "agentTitle": "Benannter Vertreter",
+      "agentLead": "Meldungen können auch per E-Mail gesendet werden an",
+      "agentNote": "Die Postanschrift des registrierten Vertreters wird hier veröffentlicht, sobald die Registrierung abgeschlossen ist.",
+      "counterTitle": "Wenn dein Inhalt entfernt wurde",
+      "counterLead": "Wenn du glaubst, dass eine Entfernung ein Fehler war, antworte auf die Meldungs-E-Mail mit denselben fünf Punkten und einer Erklärung, dass du die Zuständigkeit der Gerichte am Sitz von Nowry anerkennst. Wir stellen den Inhalt wieder her, sofern der Anspruchsteller nicht innerhalb von zehn Werktagen Klage erhebt.",
+      "form": {
+        "title": "Eine Meldung senden",
+        "name": "Dein Name",
+        "email": "Deine E-Mail",
+        "work": "Das Werk, das dir gehört",
+        "workPlaceholder": "Titel, Autor und wo wir das Original sehen können",
+        "location": "Wo es in Nowry ist",
+        "locationPlaceholder": "Ein Link zum Buch oder Stapel",
+        "statement": "Ich gehe in gutem Glauben davon aus, dass die Nutzung nicht erlaubt ist, diese Meldung trifft zu, und ich bin Inhaber oder handle für ihn.",
+        "signature": "Gib deinen vollständigen Namen als Unterschrift ein",
+        "submit": "Meldung senden",
+        "sent": "Deine Meldung ist eingegangen. Wir schreiben dir an die angegebene Adresse.",
+        "failed": "Das hat nicht geklappt. Versuch es noch einmal oder schreib an die Adresse des Vertreters oben."
       }
     }
   },
@@ -2661,31 +2701,31 @@
       "checkoutFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuch es noch einmal."
     },
     "features": {
-        "cardGeneration": "Karten aus Text generieren",
-        "cardGenerationFree": "Bis zu 2 Karten",
-        "cardGenerationPlus": "Analyse des ganzen Buchs (20 Karten)",
-        "cardGenerationPro": "Buchweit, unbegrenzt oft",
-        "bookExpansion": "Markierten Text mit KI erweitern",
-        "bookExpansionFree": "Zeichenlimit",
-        "bookExpansionPlus": "Weiches Limit",
-        "bookExpansionPro": "Unbegrenzt",
-        "quizGeneration": "Quizfragen generieren",
-        "quizGenerationFree": "Bis zu 5 Fragen",
-        "quizGenerationPlus": "Ganzes Buch (20 Fragen)",
-        "quizGenerationPro": "Buchweit, unbegrenzt oft",
-        "aiUsage": "KI-Generierungen",
-        "aiUsageFree": "Bis zu {{limit}} im Monat",
-        "aiUsagePlus": "Unbegrenzt, fair use",
-        "aiUsagePro": "Unbegrenzt, fair use",
-        "studyCards": "Lernsitzungen mit Karteikarten",
-        "studyCardsAll": "Unbegrenzt",
-        "books": "Intelligente Bücher",
-        "booksAll": "Unbegrenzt",
-        "readAloud": "Deine Bücher vorlesen lassen",
-        "readAloudFree": "Nicht enthalten",
-        "readAloudPlus": "Jeder Abschnitt",
-        "readAloudPro": "Jede Sprache"
-      }
+      "cardGeneration": "Karten aus Text generieren",
+      "cardGenerationFree": "Bis zu 2 Karten",
+      "cardGenerationPlus": "Analyse des ganzen Buchs (20 Karten)",
+      "cardGenerationPro": "Buchweit, unbegrenzt oft",
+      "bookExpansion": "Markierten Text mit KI erweitern",
+      "bookExpansionFree": "Zeichenlimit",
+      "bookExpansionPlus": "Weiches Limit",
+      "bookExpansionPro": "Unbegrenzt",
+      "quizGeneration": "Quizfragen generieren",
+      "quizGenerationFree": "Bis zu 5 Fragen",
+      "quizGenerationPlus": "Ganzes Buch (20 Fragen)",
+      "quizGenerationPro": "Buchweit, unbegrenzt oft",
+      "aiUsage": "KI-Generierungen",
+      "aiUsageFree": "Bis zu {{limit}} im Monat",
+      "aiUsagePlus": "Unbegrenzt, fair use",
+      "aiUsagePro": "Unbegrenzt, fair use",
+      "studyCards": "Lernsitzungen mit Karteikarten",
+      "studyCardsAll": "Unbegrenzt",
+      "books": "Intelligente Bücher",
+      "booksAll": "Unbegrenzt",
+      "readAloud": "Deine Bücher vorlesen lassen",
+      "readAloudFree": "Nicht enthalten",
+      "readAloudPlus": "Jeder Abschnitt",
+      "readAloudPro": "Jede Sprache"
+    }
   },
   "billing": {
     "paymentFailed": {

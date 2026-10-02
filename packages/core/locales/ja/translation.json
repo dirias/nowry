@@ -155,7 +155,8 @@
     },
     "links": {
       "library": "ライブラリ",
-      "pricing": "料金"
+      "pricing": "料金",
+      "copyright": "著作権"
     },
     "support": {
       "title": "サポート",
@@ -180,7 +181,8 @@
   },
   "routes": {
     "terms": "/規約",
-    "privacy": "/プライバシー"
+    "privacy": "/プライバシー",
+    "copyright": "/copyright"
   },
   "study": {
     "deck": {
@@ -1825,8 +1827,15 @@
         "content1": "アップロードしたコンテンツの所有権はお客様に帰属します。ただし、Nowryを利用することで、お客様はAIモデルの使用を含む、サービスの提供および改善の目的でコンテンツを処理するライセンスを当社に付与するものとします。",
         "content2": "AI生成コンテンツは教育目的で提供されます。正確を期しておりますが、NowryはAI生成教材の正確性を保証するものではありません。"
       },
+      "copyright": {
+        "title": "5. 著作権と他者の作品",
+        "content1": "Nowry で書いたものの権利はすべてあなたのものです。本やデッキを公開ライブラリに公開すると、公開されている間、Nowry にそれをホストし、表示し、他の人がフォークできるようにする非独占的なライセンスを与え、共有する権利があることを確認したことになります。",
+        "content2": "Anki デッキやアップロードした文書など、ファイルから取り込んだ内容は非公開のままです。誰の作品が含まれているかを私たちが知ることができないため、ライブラリには公開できません。",
+        "content3": "公開ライブラリの内容があなたの著作権を侵害していると思われる場合は、通知を送ってください。有効な通知が特定した内容を削除し、公開した本人に知らせ、繰り返す場合はアカウントを閉鎖します。",
+        "link": "著作権の問題を報告する"
+      },
       "conduct": {
-        "title": "5. 禁止事項",
+        "title": "6. 禁止事項",
         "content": "お客様は以下を行わないことに同意するものとします。",
         "items": [
           "当社のAIモデルまたはプラットフォームのリバースエンジニアリングの試み。",
@@ -1836,21 +1845,52 @@
         ]
       },
       "liability": {
-        "title": "6. 責任の制限",
+        "title": "7. 責任の制限",
         "content": "Nowryは、サービスの使用または使用不能から生じる間接的、付随的、特別、結果的、または懲罰的な損害について、一切の責任を負わないものとします。"
       },
       "termination": {
-        "title": "7. 終了",
+        "title": "8. 終了",
         "content": "当社は、当社の固有の裁量により、これらの利用規約に違反している、または他のユーザーや当社のビジネス利益に有害であると思われる行為について、通知なしにアカウントを終了または一時停止する権利を留保します。"
       },
       "changes": {
-        "title": "8. 規約の変更",
+        "title": "9. 規約の変更",
         "content": "当社は、随時これらの利用規約を更新する場合があります。変更後に継続してサービスを利用することは、新しい規約に同意したものとみなされます。"
       },
       "contact": {
-        "title": "9. お問い合わせ情報",
+        "title": "10. お問い合わせ情報",
         "content": "これらの規約に関するご質問は、以下までご連絡ください。",
         "email": "メールアドレス: support@nowry.app"
+      }
+    },
+    "copyright": {
+      "title": "著作権侵害の通知",
+      "lead": "あなたの作品が許可なく Nowry の公開ライブラリに掲載されている場合は、ここでお知らせください。完全な通知には通常数日以内に対応します。",
+      "stepsTitle": "通知に必要なもの",
+      "steps": [
+        "あなたの名前と連絡方法",
+        "あなたが権利を持つ作品と、それを確認できる場所",
+        "Nowry 内でコピーがある場所（リンク）",
+        "その利用が許可されていないと誠実に信じている旨の記述",
+        "通知が正確であり、あなたが権利者本人または代理人である旨の記述"
+      ],
+      "agentTitle": "指定代理人",
+      "agentLead": "通知はメールでも送れます：",
+      "agentNote": "登録された代理人の郵送先住所は、登録完了後にここに掲載します。",
+      "counterTitle": "あなたのコンテンツが削除された場合",
+      "counterLead": "削除が誤りだと思われる場合は、通知メールに同じ五つの項目と、Nowry の所在地の裁判所の管轄に同意する旨を添えて返信してください。申立人が十営業日以内に訴訟を提起しない限り、コンテンツを復元します。",
+      "form": {
+        "title": "通知を送る",
+        "name": "お名前",
+        "email": "メールアドレス",
+        "work": "あなたが権利を持つ作品",
+        "workPlaceholder": "タイトル、著者、原本を確認できる場所",
+        "location": "Nowry 内の場所",
+        "locationPlaceholder": "本またはデッキへのリンク",
+        "statement": "この利用は許可されていないと誠実に信じており、この通知は正確で、私は権利者本人または代理人です。",
+        "signature": "署名としてフルネームを入力してください",
+        "submit": "通知を送信",
+        "sent": "通知を受け取りました。ご記入のアドレスにご連絡します。",
+        "failed": "送信できませんでした。もう一度お試しいただくか、上記の代理人のメールアドレスにご連絡ください。"
       }
     }
   },
@@ -2562,31 +2602,31 @@
       "checkoutFailed": "決済を開始できませんでした。もう一度お試しください。"
     },
     "features": {
-        "cardGeneration": "テキストからカードを生成",
-        "cardGenerationFree": "最大 2 枚",
-        "cardGenerationPlus": "本全体の分析（20 枚）",
-        "cardGenerationPro": "本全体から、回数無制限",
-        "bookExpansion": "選択したテキストを AI で展開",
-        "bookExpansionFree": "文字数制限あり",
-        "bookExpansionPlus": "ゆるやかな上限",
-        "bookExpansionPro": "無制限",
-        "quizGeneration": "クイズ問題を生成",
-        "quizGenerationFree": "最大 5 問",
-        "quizGenerationPlus": "本全体（20 問）",
-        "quizGenerationPro": "本全体から、回数無制限",
-        "aiUsage": "AI 生成",
-        "aiUsageFree": "月 {{limit}} 回まで",
-        "aiUsagePlus": "無制限（適正利用の範囲で）",
-        "aiUsagePro": "無制限（適正利用の範囲で）",
-        "studyCards": "フラッシュカード学習セッション",
-        "studyCardsAll": "無制限",
-        "books": "スマートブック",
-        "booksAll": "無制限",
-        "readAloud": "本の読み上げ",
-        "readAloudFree": "含まれません",
-        "readAloudPlus": "どのセクションでも",
-        "readAloudPro": "どの言語でも"
-      }
+      "cardGeneration": "テキストからカードを生成",
+      "cardGenerationFree": "最大 2 枚",
+      "cardGenerationPlus": "本全体の分析（20 枚）",
+      "cardGenerationPro": "本全体から、回数無制限",
+      "bookExpansion": "選択したテキストを AI で展開",
+      "bookExpansionFree": "文字数制限あり",
+      "bookExpansionPlus": "ゆるやかな上限",
+      "bookExpansionPro": "無制限",
+      "quizGeneration": "クイズ問題を生成",
+      "quizGenerationFree": "最大 5 問",
+      "quizGenerationPlus": "本全体（20 問）",
+      "quizGenerationPro": "本全体から、回数無制限",
+      "aiUsage": "AI 生成",
+      "aiUsageFree": "月 {{limit}} 回まで",
+      "aiUsagePlus": "無制限（適正利用の範囲で）",
+      "aiUsagePro": "無制限（適正利用の範囲で）",
+      "studyCards": "フラッシュカード学習セッション",
+      "studyCardsAll": "無制限",
+      "books": "スマートブック",
+      "booksAll": "無制限",
+      "readAloud": "本の読み上げ",
+      "readAloudFree": "含まれません",
+      "readAloudPlus": "どのセクションでも",
+      "readAloudPro": "どの言語でも"
+    }
   },
   "billing": {
     "paymentFailed": {

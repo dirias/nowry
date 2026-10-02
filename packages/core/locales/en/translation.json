@@ -155,7 +155,8 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "library": "Library",
-      "pricing": "Pricing"
+      "pricing": "Pricing",
+      "copyright": "Copyright"
     },
     "support": {
       "title": "Support",
@@ -180,7 +181,8 @@
   },
   "routes": {
     "terms": "/terms",
-    "privacy": "/privacy"
+    "privacy": "/privacy",
+    "copyright": "/copyright"
   },
   "study": {
     "views": {
@@ -1987,31 +1989,31 @@
       "getStarted": "Get started"
     },
     "features": {
-        "cardGeneration": "Generate cards from text",
-        "cardGenerationFree": "Up to 2 cards",
-        "cardGenerationPlus": "Book-level analysis (20 cards)",
-        "cardGenerationPro": "Book-level, unlimited runs",
-        "bookExpansion": "Expand selected text with AI",
-        "bookExpansionFree": "Character limited",
-        "bookExpansionPlus": "Soft limit",
-        "bookExpansionPro": "Unlimited",
-        "quizGeneration": "Generate quiz questions",
-        "quizGenerationFree": "Up to 5 questions",
-        "quizGenerationPlus": "Book-level (20 questions)",
-        "quizGenerationPro": "Book-level, unlimited runs",
-        "aiUsage": "AI generations",
-        "aiUsageFree": "Up to {{limit}} a month",
-        "aiUsagePlus": "Unlimited, fair use",
-        "aiUsagePro": "Unlimited, fair use",
-        "studyCards": "Flashcard study sessions",
-        "studyCardsAll": "Unlimited",
-        "books": "Smart Books",
-        "booksAll": "Unlimited",
-        "readAloud": "Read your books aloud",
-        "readAloudFree": "Not included",
-        "readAloudPlus": "Any section",
-        "readAloudPro": "Any language"
-      },
+      "cardGeneration": "Generate cards from text",
+      "cardGenerationFree": "Up to 2 cards",
+      "cardGenerationPlus": "Book-level analysis (20 cards)",
+      "cardGenerationPro": "Book-level, unlimited runs",
+      "bookExpansion": "Expand selected text with AI",
+      "bookExpansionFree": "Character limited",
+      "bookExpansionPlus": "Soft limit",
+      "bookExpansionPro": "Unlimited",
+      "quizGeneration": "Generate quiz questions",
+      "quizGenerationFree": "Up to 5 questions",
+      "quizGenerationPlus": "Book-level (20 questions)",
+      "quizGenerationPro": "Book-level, unlimited runs",
+      "aiUsage": "AI generations",
+      "aiUsageFree": "Up to {{limit}} a month",
+      "aiUsagePlus": "Unlimited, fair use",
+      "aiUsagePro": "Unlimited, fair use",
+      "studyCards": "Flashcard study sessions",
+      "studyCardsAll": "Unlimited",
+      "books": "Smart Books",
+      "booksAll": "Unlimited",
+      "readAloud": "Read your books aloud",
+      "readAloudFree": "Not included",
+      "readAloudPlus": "Any section",
+      "readAloudPro": "Any language"
+    },
     "error": {
       "checkoutFailed": "Could not start checkout. Please try again."
     }
@@ -2995,8 +2997,15 @@
         "content1": "You retain ownership of any content you upload. However, by using Nowry, you grant us a license to process your content for the purpose of providing and improving the service, including the use of AI models.",
         "content2": "AI-generated content is provided for educational purposes. While we strive for accuracy, Nowry does not guarantee the correctness of AI-generated materials."
       },
+      "copyright": {
+        "title": "5. Copyright and other people's work",
+        "content1": "You keep every right to what you write in Nowry. By publishing a book or deck to the public library you give Nowry a non-exclusive licence to host it, show it and let others fork it for as long as it stays public, and you confirm you have the right to share it.",
+        "content2": "Content that arrived from a file, such as an Anki deck or an uploaded document, stays private: it cannot be published to the library, because we cannot know whose work it contains.",
+        "content3": "If you believe something in the public library infringes your copyright, send us a notice. We remove content a valid notice identifies, tell the person who published it, and close the accounts of repeat infringers.",
+        "link": "Report a copyright problem"
+      },
       "conduct": {
-        "title": "5. Prohibited Conduct",
+        "title": "6. Prohibited Conduct",
         "content": "You agree not to:",
         "items": [
           "Attempt to reverse-engineer our AI models or platform.",
@@ -3006,21 +3015,52 @@
         ]
       },
       "liability": {
-        "title": "6. Limitation of Liability",
+        "title": "7. Limitation of Liability",
         "content": "Nowry shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use or inability to use the service."
       },
       "termination": {
-        "title": "7. Termination",
+        "title": "8. Termination",
         "content": "We reserve the right to terminate or suspend your account at our sole discretion, without notice, for conduct that we believe violates these Terms of Service or is harmful to other users or our business interests."
       },
       "changes": {
-        "title": "8. Changes to Terms",
+        "title": "9. Changes to Terms",
         "content": "We may update these Terms of Service from time to time. Your continued use of the service after any changes constitutes acceptance of the new terms."
       },
       "contact": {
-        "title": "9. Contact Information",
+        "title": "10. Contact Information",
         "content": "For any questions regarding these Terms, please contact us at:",
         "email": "Email: support@nowry.app"
+      }
+    },
+    "copyright": {
+      "title": "Copyright notices",
+      "lead": "If your work appears in Nowry's public library without your permission, tell us here. We act on complete notices, usually within a few days.",
+      "stepsTitle": "What a notice needs",
+      "steps": [
+        "Your name and a way to reach you",
+        "The work you own, and where we can see it",
+        "Where the copy is in Nowry, as a link",
+        "A statement that you believe in good faith the use is not authorised",
+        "A statement that the notice is accurate and that you are the owner or act for them"
+      ],
+      "agentTitle": "Designated agent",
+      "agentLead": "Notices can also be sent by email to",
+      "agentNote": "The registered agent's postal address is published here once registration is complete.",
+      "counterTitle": "If your content was removed",
+      "counterLead": "If you believe a removal was a mistake, reply to the notice email with the same five points and a statement that you consent to the jurisdiction of the courts where Nowry is established. We restore the content unless the claimant files a court action within ten business days.",
+      "form": {
+        "title": "Send a notice",
+        "name": "Your name",
+        "email": "Your email",
+        "work": "The work you own",
+        "workPlaceholder": "Title, author, and where we can see the original",
+        "location": "Where it is in Nowry",
+        "locationPlaceholder": "A link to the book or deck",
+        "statement": "I believe in good faith the use is not authorised, this notice is accurate, and I am the owner or act for them.",
+        "signature": "Type your full name as signature",
+        "submit": "Send notice",
+        "sent": "Your notice was received. We'll write to you at the address you gave.",
+        "failed": "That didn't go through. Try again, or email the agent address above."
       }
     }
   },

@@ -165,7 +165,8 @@
     },
     "links": {
       "library": "Bibliothèque",
-      "pricing": "Tarifs"
+      "pricing": "Tarifs",
+      "copyright": "Droits d'auteur"
     },
     "support": {
       "title": "Support",
@@ -190,7 +191,8 @@
   },
   "routes": {
     "terms": "/conditions",
-    "privacy": "/confidentialite"
+    "privacy": "/confidentialite",
+    "copyright": "/copyright"
   },
   "study": {
     "views": {
@@ -1729,8 +1731,15 @@
         "content1": "Vous conservez la propriété de tout contenu que vous téléchargez. Cependant, en utilisant Nowry, vous nous accordez une licence pour traiter votre contenu dans le but de fournir et d'améliorer le service, y compris l'utilisation de modèles d'IA.",
         "content2": "Le contenu généré par l'IA est fourni à des fins éducatives. Bien que nous nous efforcions d'être précis, Nowry ne garantit pas l'exactitude des supports générés par l'IA."
       },
+      "copyright": {
+        "title": "5. Droits d'auteur et œuvres d'autrui",
+        "content1": "Vous conservez tous les droits sur ce que vous écrivez dans Nowry. En publiant un livre ou un paquet dans la bibliothèque publique, vous accordez à Nowry une licence non exclusive pour l'héberger, l'afficher et laisser d'autres le dupliquer tant qu'il reste public, et vous confirmez avoir le droit de le partager.",
+        "content2": "Le contenu arrivé depuis un fichier, comme un paquet Anki ou un document importé, reste privé : il ne peut pas être publié dans la bibliothèque, car nous ne pouvons pas savoir à qui appartient l'œuvre qu'il contient.",
+        "content3": "Si vous pensez qu'un élément de la bibliothèque publique porte atteinte à vos droits d'auteur, envoyez-nous une notification. Nous retirons le contenu qu'une notification valide identifie, prévenons la personne qui l'a publié et fermons les comptes des récidivistes.",
+        "link": "Signaler un problème de droits d'auteur"
+      },
       "conduct": {
-        "title": "5. Conduite Prohibée",
+        "title": "6. Conduite Prohibée",
         "content": "Vous acceptez de ne pas :",
         "items": [
           "Tenter de faire de l'ingénierie inverse sur nos modèles d'IA ou notre plateforme.",
@@ -1740,21 +1749,52 @@
         ]
       },
       "liability": {
-        "title": "6. Limitation de Responsabilité",
+        "title": "7. Limitation de Responsabilité",
         "content": "Nowry ne pourra être tenu responsable des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs résultant de votre utilisation ou de votre incapacité à utiliser le service."
       },
       "termination": {
-        "title": "7. Résiliation",
+        "title": "8. Résiliation",
         "content": "Nous nous réservons le droit de résilier ou de suspendre votre compte à notre seule discrétion, sans préavis, pour une conduite que nous estimons violer ces Conditions Générales d'Utilisation ou préjudiciable à d'autres utilisateurs ou à nos intérêts commerciaux."
       },
       "changes": {
-        "title": "8. Modifications des Conditions",
+        "title": "9. Modifications des Conditions",
         "content": "Nous pouvons mettre à jour ces Conditions Générales d'Utilisation de temps à autre. Votre utilisation continue du service après toute modification constitue l'acceptation des nouvelles conditions."
       },
       "contact": {
-        "title": "9. Informations de Contact",
+        "title": "10. Informations de Contact",
         "content": "Pour toute question concernant ces conditions, veuillez nous contacter à l'adresse suivante :",
         "email": "E-mail : support@nowry.app"
+      }
+    },
+    "copyright": {
+      "title": "Notifications de droits d'auteur",
+      "lead": "Si votre œuvre apparaît dans la bibliothèque publique de Nowry sans votre permission, dites-le-nous ici. Nous traitons les notifications complètes, en général sous quelques jours.",
+      "stepsTitle": "Ce qu'une notification doit contenir",
+      "steps": [
+        "Votre nom et un moyen de vous joindre",
+        "L'œuvre qui vous appartient, et où nous pouvons la voir",
+        "Où se trouve la copie dans Nowry, sous forme de lien",
+        "Une déclaration selon laquelle vous estimez de bonne foi que l'usage n'est pas autorisé",
+        "Une déclaration selon laquelle la notification est exacte et que vous êtes le titulaire ou agissez pour lui"
+      ],
+      "agentTitle": "Agent désigné",
+      "agentLead": "Les notifications peuvent aussi être envoyées par e-mail à",
+      "agentNote": "L'adresse postale de l'agent enregistré sera publiée ici une fois l'enregistrement effectué.",
+      "counterTitle": "Si votre contenu a été retiré",
+      "counterLead": "Si vous pensez qu'un retrait est une erreur, répondez à l'e-mail de notification avec les mêmes cinq points et une déclaration par laquelle vous acceptez la compétence des tribunaux du lieu où Nowry est établie. Nous rétablissons le contenu sauf si le plaignant engage une action en justice sous dix jours ouvrés.",
+      "form": {
+        "title": "Envoyer une notification",
+        "name": "Votre nom",
+        "email": "Votre e-mail",
+        "work": "L'œuvre qui vous appartient",
+        "workPlaceholder": "Titre, auteur, et où nous pouvons voir l'original",
+        "location": "Où elle se trouve dans Nowry",
+        "locationPlaceholder": "Un lien vers le livre ou le paquet",
+        "statement": "J'estime de bonne foi que l'usage n'est pas autorisé, cette notification est exacte, et je suis le titulaire ou j'agis pour lui.",
+        "signature": "Tapez votre nom complet en guise de signature",
+        "submit": "Envoyer la notification",
+        "sent": "Votre notification a été reçue. Nous vous écrirons à l'adresse indiquée.",
+        "failed": "L'envoi a échoué. Réessayez, ou écrivez à l'adresse de l'agent ci-dessus."
       }
     }
   },
@@ -2672,31 +2712,31 @@
       "checkoutFailed": "Impossible de lancer le paiement. Veuillez réessayer."
     },
     "features": {
-        "cardGeneration": "Générer des cartes à partir d'un texte",
-        "cardGenerationFree": "Jusqu'à 2 cartes",
-        "cardGenerationPlus": "Analyse du livre entier (20 cartes)",
-        "cardGenerationPro": "Par livre, sans limite d'exécutions",
-        "bookExpansion": "Développer le texte sélectionné avec l'IA",
-        "bookExpansionFree": "Limité en caractères",
-        "bookExpansionPlus": "Limite souple",
-        "bookExpansionPro": "Illimité",
-        "quizGeneration": "Générer des questions de quiz",
-        "quizGenerationFree": "Jusqu'à 5 questions",
-        "quizGenerationPlus": "Livre entier (20 questions)",
-        "quizGenerationPro": "Par livre, sans limite d'exécutions",
-        "aiUsage": "Générations par l'IA",
-        "aiUsageFree": "Jusqu'à {{limit}} par mois",
-        "aiUsagePlus": "Illimitées, usage raisonnable",
-        "aiUsagePro": "Illimitées, usage raisonnable",
-        "studyCards": "Sessions d'étude par cartes",
-        "studyCardsAll": "Illimité",
-        "books": "Livres intelligents",
-        "booksAll": "Illimité",
-        "readAloud": "Lecture à voix haute de vos livres",
-        "readAloudFree": "Non inclus",
-        "readAloudPlus": "N'importe quelle section",
-        "readAloudPro": "N'importe quelle langue"
-      }
+      "cardGeneration": "Générer des cartes à partir d'un texte",
+      "cardGenerationFree": "Jusqu'à 2 cartes",
+      "cardGenerationPlus": "Analyse du livre entier (20 cartes)",
+      "cardGenerationPro": "Par livre, sans limite d'exécutions",
+      "bookExpansion": "Développer le texte sélectionné avec l'IA",
+      "bookExpansionFree": "Limité en caractères",
+      "bookExpansionPlus": "Limite souple",
+      "bookExpansionPro": "Illimité",
+      "quizGeneration": "Générer des questions de quiz",
+      "quizGenerationFree": "Jusqu'à 5 questions",
+      "quizGenerationPlus": "Livre entier (20 questions)",
+      "quizGenerationPro": "Par livre, sans limite d'exécutions",
+      "aiUsage": "Générations par l'IA",
+      "aiUsageFree": "Jusqu'à {{limit}} par mois",
+      "aiUsagePlus": "Illimitées, usage raisonnable",
+      "aiUsagePro": "Illimitées, usage raisonnable",
+      "studyCards": "Sessions d'étude par cartes",
+      "studyCardsAll": "Illimité",
+      "books": "Livres intelligents",
+      "booksAll": "Illimité",
+      "readAloud": "Lecture à voix haute de vos livres",
+      "readAloudFree": "Non inclus",
+      "readAloudPlus": "N'importe quelle section",
+      "readAloudPro": "N'importe quelle langue"
+    }
   },
   "billing": {
     "paymentFailed": {

@@ -53,7 +53,8 @@ const Footer = () => {
     { key: 'pricing', label: t('footer.links.pricing'), to: { pathname: '/', hash: '#pricing' } },
     { key: 'contact', label: t('footer.support.contact'), to: '/contact' },
     { key: 'privacy', label: t('footer.links.privacy'), to: '/privacy' },
-    { key: 'terms', label: t('footer.links.terms'), to: '/terms' }
+    { key: 'terms', label: t('footer.links.terms'), to: '/terms' },
+    { key: 'copyright', label: t('footer.links.copyright'), to: '/copyright' }
   ]
 
   const socialLinks = [

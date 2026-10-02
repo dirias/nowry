@@ -4,12 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { ArrowBackRounded as ArrowBackIcon } from '@mui/icons-material'
 import DOMPurify from 'dompurify'
+import { LEGAL_PRIVACY_UPDATED } from '@nowry/core/constants/site'
 
 const PrivacyPolicy = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
 
-  const lastUpdatedDate = new Date().toLocaleDateString(i18n.language, {
+  // The date the text last changed, not today's (GTM-008).
+  const lastUpdatedDate = new Date(LEGAL_PRIVACY_UPDATED).toLocaleDateString(i18n.language, {
     month: 'long',
     day: 'numeric',
     year: 'numeric'

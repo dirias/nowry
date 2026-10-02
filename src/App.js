@@ -68,6 +68,7 @@ const PomodoroWidget = lazy(() => import('./components/Pomodoro/PomodoroWidget')
 const PomodoroChip = lazy(() => import('./components/Pomodoro/PomodoroChip'))
 const PrivacyPolicy = lazy(() => import('./components/HomePage/PrivacyPolicy'))
 const TermsOfService = lazy(() => import('./components/HomePage/TermsOfService'))
+const CopyrightNotice = lazy(() => import('./components/HomePage/CopyrightNotice'))
 const PlansPage = lazy(() => import('./components/Subscription/PlansPage'))
 const SubscriptionPage = lazy(() => import('./components/Subscription/SubscriptionPage'))
 const CalendarPage = lazy(() => import('./components/Calendar/CalendarPage'))
@@ -75,7 +76,7 @@ const SheetsListPage = lazy(() => import('./components/Sheets/SheetsListPage'))
 const SheetsEditor = lazy(() => import('./components/Sheets/SheetsEditor'))
 
 /** Routes where the Footer should remain visible even for authenticated users */
-const PUBLIC_MARKETING_ROUTES = ['/contact', '/privacy', '/terms']
+const PUBLIC_MARKETING_ROUTES = ['/contact', '/privacy', '/terms', '/copyright']
 
 /**
  * Min-height for the document-flow layout. `100dvh` tracks mobile browser-chrome
@@ -169,6 +170,7 @@ const AppContent = () => {
               {/* Legal Pages */}
               <Route path='/privacy' element={<PrivacyPolicy />} />
               <Route path='/terms' element={<TermsOfService />} />
+              <Route path='/copyright' element={<CopyrightNotice />} />
 
               {/* Application Dashboard (Protected) */}
               <Route

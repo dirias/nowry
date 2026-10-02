@@ -124,10 +124,15 @@ const CARD_COUNTER = ['cards.session.cardShort']
 // from English; French writes "Bêta" and Japanese ベータ, so neither is here.
 const BETA_MARK = ['beta.mark']
 
+// The takedown page lives at one path in every language: "/copyright" is a
+// URL, not a phrase, and the API's notice endpoint is the same for everyone.
+const COPYRIGHT_ROUTE = ['routes.copyright']
+
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
   es: [
     ...BETA_MARK,
+    ...COPYRIGHT_ROUTE,
     // "A–Z" is a range of letters, not a phrase. Spanish, French and German
     // all write the same two, so the sort label lands on English by having
     // nothing to translate. Japanese uses あいうえお順 and is not here.
@@ -148,6 +153,7 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    ...COPYRIGHT_ROUTE,
     'taxonomy.topics.business',
     'taxonomy.topics.design',
     'news.categories.design',
@@ -187,6 +193,7 @@ const IDENTICAL_BY_DESIGN = {
   // and its counted form land on English by agreement, not by neglect.
   de: [
     ...BETA_MARK,
+    ...COPYRIGHT_ROUTE,
     'taxonomy.topics.design',
     'news.categories.design',
     'cards.session.filters.tags',
@@ -208,7 +215,7 @@ const IDENTICAL_BY_DESIGN = {
     ...XP_GAINED,
     ...CARD_COUNTER
   ],
-  ja: ['cards.session.xpGained_other', ...CARD_COUNTER]
+  ja: ['cards.session.xpGained_other', ...CARD_COUNTER, ...COPYRIGHT_ROUTE]
 }
 
 /**

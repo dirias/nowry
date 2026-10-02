@@ -3,12 +3,15 @@ import { Container, Typography, Box, Stack, Divider, Link, Button } from '@mui/j
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { ArrowBackRounded as ArrowBackIcon } from '@mui/icons-material'
+import { Link as RouterLink } from 'react-router-dom'
+import { LEGAL_TERMS_UPDATED } from '@nowry/core/constants/site'
 
 const TermsOfService = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
 
-  const lastUpdatedDate = new Date().toLocaleDateString(i18n.language, {
+  // The date the text last changed, not today's (GTM-008). Move it when the text moves.
+  const lastUpdatedDate = new Date(LEGAL_TERMS_UPDATED).toLocaleDateString(i18n.language, {
     month: 'long',
     day: 'numeric',
     year: 'numeric'
@@ -78,6 +81,26 @@ const TermsOfService = () => {
           </Typography>
           <Typography level='body-md' sx={{ mb: 2 }}>
             {t('legal.terms.content.content2')}
+          </Typography>
+        </section>
+
+        <Divider />
+
+        <section>
+          <Typography level='h3' sx={{ mb: 2 }}>
+            {t('legal.terms.copyright.title')}
+          </Typography>
+          <Typography level='body-md' sx={{ mb: 2 }}>
+            {t('legal.terms.copyright.content1')}
+          </Typography>
+          <Typography level='body-md' sx={{ mb: 2 }}>
+            {t('legal.terms.copyright.content2')}
+          </Typography>
+          <Typography level='body-md' sx={{ mb: 2 }}>
+            {t('legal.terms.copyright.content3')}{' '}
+            <Link component={RouterLink} to='/copyright' sx={{ fontWeight: 'lg' }}>
+              {t('legal.terms.copyright.link')}
+            </Link>
           </Typography>
         </section>
 
