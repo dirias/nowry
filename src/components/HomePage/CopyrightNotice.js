@@ -1,6 +1,21 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Box, Button, Checkbox, Container, FormControl, FormLabel, Input, Link, List, ListItem, Stack, Textarea, Typography } from '@mui/joy'
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControl,
+  FormLabel,
+  Input,
+  Link,
+  List,
+  ListItem,
+  Stack,
+  Textarea,
+  Typography
+} from '@mui/joy'
 
 import { copyrightService } from '@nowry/core/api/services/copyright.service'
 import { COPYRIGHT_AGENT_EMAIL } from '@nowry/core/constants/site'
@@ -119,11 +134,25 @@ const CopyrightNotice = () => {
             </FormControl>
             <FormControl required>
               <FormLabel>{t('legal.copyright.form.work')}</FormLabel>
-              <Textarea name='work' id='copyright-work' value={form.work} onChange={onChange} minRows={3} placeholder={t('legal.copyright.form.workPlaceholder')} />
+              <Textarea
+                name='work'
+                id='copyright-work'
+                value={form.work}
+                onChange={onChange}
+                minRows={3}
+                placeholder={t('legal.copyright.form.workPlaceholder')}
+              />
             </FormControl>
             <FormControl required>
               <FormLabel>{t('legal.copyright.form.location')}</FormLabel>
-              <Input name='location' id='copyright-location' value={form.location} onChange={onChange} size='md' placeholder={t('legal.copyright.form.locationPlaceholder')} />
+              <Input
+                name='location'
+                id='copyright-location'
+                value={form.location}
+                onChange={onChange}
+                size='md'
+                placeholder={t('legal.copyright.form.locationPlaceholder')}
+              />
             </FormControl>
             <FormControl required>
               <Checkbox
@@ -143,7 +172,13 @@ const CopyrightNotice = () => {
               <Input name='signature' id='copyright-signature' value={form.signature} onChange={onChange} size='md' autoComplete='off' />
             </FormControl>
 
-            <Button type='submit' size='lg' loading={status === 'sending'} disabled={!form.statement} sx={{ alignSelf: 'flex-start', ...focusRing }}>
+            <Button
+              type='submit'
+              size='lg'
+              loading={status === 'sending'}
+              disabled={!form.statement}
+              sx={{ alignSelf: 'flex-start', ...focusRing }}
+            >
               {t('legal.copyright.form.submit')}
             </Button>
           </Stack>
