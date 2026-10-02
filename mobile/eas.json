@@ -28,6 +28,17 @@
       "env": {
         "EXPO_PUBLIC_API_TIMEOUT": "10000"
       }
+    },
+    "beta": {
+      "extends": "preview",
+      "distribution": "internal",
+      "autoIncrement": true,
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_TIMEOUT": "10000"
+      }
     }
   },
   "submit": {

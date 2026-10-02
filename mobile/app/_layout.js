@@ -19,6 +19,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { AuthProvider } from '@nowry/core/context/AuthContext'
+import { BetaProvider } from '@nowry/core/context/BetaContext'
 import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { PERSIST_OPTIONS } from '../src/platform/queryPersistence'
@@ -64,20 +65,22 @@ export default function RootLayout() {
           matter — which is what made an offline session say "Couldn't load
           cards" over a queue that was already on the device. */}
       <PersistQueryClientProvider client={queryClient} persistOptions={PERSIST_OPTIONS}>
-        <AuthProvider>
-          <AppearanceProvider>
-            {/* Outside the gate: the timer is restored from storage on mount
+        <BetaProvider>
+          <AuthProvider>
+            <AppearanceProvider>
+              {/* Outside the gate: the timer is restored from storage on mount
                 and must not be rebuilt every time the gate re-renders. */}
-            <PomodoroProvider>
-              <AuthGate>
-                <Slot />
-              </AuthGate>
-            </PomodoroProvider>
-            <OfflineSync />
-            <PushBridge />
-            <NotificationHost />
-          </AppearanceProvider>
-        </AuthProvider>
+              <PomodoroProvider>
+                <AuthGate>
+                  <Slot />
+                </AuthGate>
+              </PomodoroProvider>
+              <OfflineSync />
+              <PushBridge />
+              <NotificationHost />
+            </AppearanceProvider>
+          </AuthProvider>
+        </BetaProvider>
       </PersistQueryClientProvider>
     </SafeAreaProvider>
   )

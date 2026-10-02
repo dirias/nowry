@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useSegments } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { useBeta } from '@nowry/core/context/BetaContext'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
@@ -73,6 +74,7 @@ export function AppBar() {
   const { t } = useTranslation()
   const theme = useTheme()
   const router = useRouter()
+  const { config: beta } = useBeta()
   const segments = useSegments()
   const insets = useSafeAreaInsets()
   const { user } = useAuth()
@@ -131,6 +133,17 @@ export function AppBar() {
       <StatusBar style={readableTextOn(resolveColor(theme, 'primary.solidBg')) === '#ffffff' ? 'light' : 'dark'} />
       <View accessibilityRole='header' accessibilityLabel='Nowry'>
         <BrandLockup markSize={MARK_SIZE} color='primary.solidColor' />
+        {beta.active ? (
+          <Typography
+            level='body-xs'
+            color='primary.solidColor'
+            weight='lg'
+            style={{ marginLeft: theme.spacing[1] }}
+            accessibilityLabel={t('beta.mark')}
+          >
+            {t('beta.mark')}
+          </Typography>
+        ) : null}
       </View>
 
       <View style={{ flex: 1 }} />

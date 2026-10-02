@@ -17,6 +17,7 @@ import { Link } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
+import { isInviteRefusal } from '@nowry/core/domain/beta'
 import { Button, Divider, FormField, Input, Stack, Typography } from '../../src/ui'
 import { AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
 
@@ -41,7 +42,10 @@ export default function Login() {
       // No navigation here: AuthGate moves us the moment the session resolves,
       // so success has exactly one code path whatever caused it.
     } catch (error) {
-      setErrors({ form: authErrorKey(error) })
+      // ADR-038: a Firebase identity with no Nowry account, while invites are
+      // required, is told to register with a code.
+      if (isInviteRefusal(error)) await authService.logout().catch(() => {})
+      setErrors({ form: isInviteRefusal(error) ? 'beta.inviteRequired' : authErrorKey(error) })
     } finally {
       // The password is never logged and never stored. It leaves this scope here.
       setPassword('')
@@ -62,7 +66,8 @@ export default function Login() {
       // null means the user dismissed the browser. Nothing to say about that.
       await authService.loginWithGoogle()
     } catch (error) {
-      setErrors({ form: authErrorKey(error) })
+      if (isInviteRefusal(error)) await authService.logout().catch(() => {})
+      setErrors({ form: isInviteRefusal(error) ? 'beta.inviteRequired' : authErrorKey(error) })
     } finally {
       setGoogleBusy(false)
     }

@@ -14,6 +14,9 @@ import { Linking } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
+import { isInviteRefusal } from '@nowry/core/domain/beta'
+import { betaService } from '@nowry/core/api/services'
+import { useBeta } from '@nowry/core/context/BetaContext'
 import { passwordLongEnough } from '@nowry/core/domain/authRules'
 import { legalUrl } from '@nowry/core/constants/site'
 import { Button, Checkbox, Divider, FormField, Input, Stack, Typography } from '../../src/ui'
@@ -29,9 +32,16 @@ export default function Register() {
   const [errors, setErrors] = useState({})
   const [busy, setBusy] = useState(false)
   const [googleBusy, setGoogleBusy] = useState(false)
+  // ADR-038/039: while invites are required the phone asks for the code too,
+  // and checks it before a Firebase account exists.
+  const [inviteCode, setInviteCode] = useState('')
+  const { config: beta } = useBeta()
+  const inviteRequired = beta.invite_required
+  const code = inviteRequired ? inviteCode.trim() : undefined
 
   const submit = async () => {
     const next = {}
+    if (inviteRequired && !inviteCode.trim()) next.invite = 'beta.inviteInvalid'
     if (!username.trim()) next.username = 'auth.errors.usernameRequired'
     if (!email.trim()) next.email = 'auth.errors.emailRequired'
     if (!password) next.password = 'auth.errors.passwordRequired'
@@ -43,10 +53,17 @@ export default function Register() {
 
     setBusy(true)
     try {
-      await authService.register(email.trim(), password, username.trim())
+      if (inviteRequired) {
+        const check = await betaService.checkInvite(code)
+        if (!check?.valid) {
+          setErrors({ invite: 'beta.inviteInvalid' })
+          return
+        }
+      }
+      await authService.register(email.trim(), password, username.trim(), code)
       // AuthGate moves us once the session resolves.
     } catch (error) {
-      setErrors({ form: authErrorKey(error) })
+      setErrors(isInviteRefusal(error) ? { form: 'beta.inviteRequired', invite: 'beta.inviteInvalid' } : { form: authErrorKey(error) })
     } finally {
       setPassword('')
       setConfirm('')
@@ -59,9 +76,16 @@ export default function Register() {
     setErrors({})
     setGoogleBusy(true)
     try {
-      await authService.loginWithGoogle()
+      await authService.loginWithGoogle(code)
     } catch (error) {
-      setErrors({ form: authErrorKey(error) })
+      if (isInviteRefusal(error)) {
+        // A Google identity exists but no Nowry account was created; leave
+        // Firebase signed out so AuthGate does not treat them as in.
+        await authService.logout().catch(() => {})
+        setErrors({ form: 'beta.inviteRequired', invite: 'beta.inviteInvalid' })
+      } else {
+        setErrors({ form: authErrorKey(error) })
+      }
     } finally {
       setGoogleBusy(false)
     }
@@ -83,6 +107,21 @@ export default function Register() {
       ) : null}
 
       <Stack spacing={2}>
+        {inviteRequired ? (
+          <FormField labelKey='beta.inviteCode' errorKey={errors.invite}>
+            <Input
+              value={inviteCode}
+              onChangeText={setInviteCode}
+              placeholder={t('beta.inviteCodePlaceholder')}
+              accessibilityLabel={t('beta.inviteCode')}
+              invalid={Boolean(errors.invite)}
+              autoCapitalize='none'
+              autoComplete='one-time-code'
+              returnKeyType='next'
+            />
+          </FormField>
+        ) : null}
+
         <FormField labelKey='auth.username' errorKey={errors.username}>
           <Input
             value={username}

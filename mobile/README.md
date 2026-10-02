@@ -50,3 +50,17 @@ ADR-028 keeps the Firebase JS SDK on both clients.
 `npm ci --workspace=@nowry/core --include-workspace-root`, which leaves this
 workspace's 151MB of React Native and Expo out of the job. Verified from a wiped
 tree; keep it that way.
+
+## Beta build (ADR-039, GTM-009)
+
+The phone joins the private beta through internal distribution, not a store
+listing. `eas build --profile beta --platform android` produces an internal
+APK; cohort 1 onward installs through the Play Console internal testing
+track, cohort 0 may install the APK directly. The build reads
+`EXPO_PUBLIC_API_URL` from the EAS environment it is built in (see
+EAS-SECRETS.md): point it at the dev API for the beta. Google sign-in on
+Android needs the beta build's signing SHA-1 registered in Firebase. While
+`BETA_INVITE_REQUIRED` is on, the register screen asks for the invite code
+and checks it before creating a Firebase account; a refused Google sign-in is
+signed out and told why. There is no waitlist on the phone: testers arrive
+with codes.
