@@ -256,7 +256,14 @@ export function CardEditor({ card = null, deckId = null }) {
 
         {form.revealed.has('tags') ? (
           // The field that let a comma vanish as it was typed; see TagField (MOB-102).
-          <TagField value={form.values.tags ?? []} onChange={(tags) => setField('tags', tags)} helperKey='form.tagsCommaHelper' />
+          <TagField
+            value={form.values.tags ?? []}
+            onChange={(tags) => setField('tags', tags)}
+            helperKey='form.tagsCommaHelper'
+            // The deck's existing tags, fetched once per open by the shared
+            // form and offered under the line (MOB-106).
+            suggestions={form.tagSuggestions}
+          />
         ) : null}
 
         {form.revealed.has('deck') ? (

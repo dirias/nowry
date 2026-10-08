@@ -16,12 +16,21 @@
  * A chip-and-Enter input like the web's is the richer answer and a native
  * build of it is its own piece of work. A phone keyboard makes a comma one tap
  * away, and the helper line says to use one.
+ *
+ * **The deck's existing tags are offered under the line (MOB-106).** The web
+ * suggests them as it is typed; the phone showed nothing, so a tag had to be
+ * remembered and retyped exactly, and "Japan" next to "japan" was the usual
+ * result. `suggestions` is the same pool `useCardForm` already fetches; the
+ * chips narrow by the tag being typed and a tap writes it into the line.
  */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { parseTagInput } from '@nowry/core/utils/formUtils'
+import { Chip } from '../Chip'
 import { FormField } from '../FormField'
 import { Input } from '../Input'
+import { Stack } from '../Stack'
+import { suggestTags, withPickedTag } from './tagSuggestions'
 
 const sameTags = (a = [], b = []) => a.length === b.length && a.every((tag, index) => tag === b[index])
 
@@ -31,7 +40,8 @@ export function TagField({
   labelKey = 'form.tagsLabel',
   helperKey = 'form.tagsCommaHelper',
   errorKey = null,
-  required = false
+  required = false,
+  suggestions = []
 }) {
   const { t } = useTranslation()
   const [text, setText] = useState(() => value.join(', '))
@@ -52,6 +62,8 @@ export function TagField({
     onChange?.(parsed)
   }
 
+  const offered = suggestTags(suggestions, text)
+
   return (
     <FormField labelKey={labelKey} helperKey={helperKey} errorKey={errorKey} required={required}>
       <Input
@@ -62,6 +74,15 @@ export function TagField({
         autoCapitalize='none'
         autoCorrect={false}
       />
+      {offered.length > 0 ? (
+        <Stack direction='row' spacing={1} flexWrap='wrap' accessibilityLabel={t('form.tagAddAria')}>
+          {offered.map((tag) => (
+            <Chip key={tag} onPress={() => change(withPickedTag(text, tag))}>
+              {tag}
+            </Chip>
+          ))}
+        </Stack>
+      ) : null}
     </FormField>
   )
 }
