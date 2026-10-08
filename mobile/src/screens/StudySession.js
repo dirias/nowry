@@ -4,7 +4,9 @@
  * The web's session is 1945 lines because it carries a pet, XP, Mermaid,
  * text-to-speech, fullscreen, swipe hints and a tag filter bar. None of that is
  * the session. What the session is: show a card, reveal its answer, take a
- * grade, move on, and log what happened.
+ * grade, move on, and log what happened. (The pet, the speech and the tag
+ * filter have since arrived — MOB-088, MOB-077, MOB-107 — each as its own
+ * piece beside the session rather than inside it.)
  *
  * **Scheduling is not reimplemented, and cannot be.** SM-2 runs on the server;
  * `cardsService.review(id, grade, mode)` is the whole of it. The phone sends the
@@ -31,6 +33,7 @@ import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
+import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
 import { bestLevelUp } from '@nowry/core/domain/petLevelUp'
 import { sessionSummaryEvent, wrongAnswerEvent } from '@nowry/core/domain/interventionPolicy'
 import { studyCardContext } from '@nowry/core/domain/screenContext'
@@ -41,13 +44,18 @@ import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
 import { useCardSpeech, useSpeech } from '../hooks/useCardSpeech'
 import { useInterventions } from '../hooks/useInterventions'
+import { cardKey, fullQueueIndex, positionAfter, useSessionTagFilter } from '../hooks/useSessionTagFilter'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
 import {
   AskToggle,
   Button,
   Card,
+  Chip,
+  ChoiceRow,
+  ChoiceSheet,
   CompanionNote,
+  Divider,
   FlipCard,
   Icon,
   MarkToggle,
@@ -211,26 +219,39 @@ export function StudySession() {
     limit: limit ? Number(limit) : undefined,
     attempt
   })
-  const cards = queue.cards
+  const allCards = queue.cards
   const error = Boolean(queue.error)
 
+  /*
+   * The queue, narrowed by tag (MOB-107, ADR-014). `cards` below is the
+   * VISIBLE queue — what the counter, the grades and the summary count — and
+   * `allCards` is what the server sent. The two are the same array until a
+   * tag is chosen, so nothing downstream pays for the distinction.
+   */
+  const tagFilter = useSessionTagFilter(allCards)
+  const cards = tagFilter.visibleCards
+  const [tagsOpen, setTagsOpen] = useState(false)
+
   useEffect(() => {
-    if (!cards) return
+    if (!allCards) return
     // Read while a card is in hand: the summary logs after the last one is
     // gone, and the deck's name is only ever carried by a card.
-    deckName.current = cards[0]?.deck_id?.name ?? cards[0]?.deck_id?.title ?? null
+    deckName.current = allCards[0]?.deck_id?.name ?? allCards[0]?.deck_id?.title ?? null
 
     /*
      * Resume before the first card is shown, not after: restoring an index a
      * frame later would flash card one and then jump, which reads as a bug even
      * when it lands in the right place.
+     *
+     * Over the FULL queue: a session resumes with no filter, and the record
+     * is written in the same terms (see `grade`).
      */
-    const saved = readResume(id, cards.length)
+    const saved = readResume(id, allCards.length)
     if (!saved) return
     setIndex(saved.index)
     setGraded(saved.graded)
     startedAt.current = new Date(saved.startedAt)
-  }, [cards, id])
+  }, [allCards, id])
 
   const total = cards?.length ?? 0
   const current = cards?.[index] ?? null
@@ -384,7 +405,8 @@ export function StudySession() {
       setIndex(next)
       setRevealed(false)
       setHinted(true)
-      writeResume(id, { index: next, graded: answers, startedAt: startedAt.current })
+      // In the full queue's terms, because that is how it will be read back.
+      writeResume(id, { index: fullQueueIndex(allCards, cards, next), graded: answers, startedAt: startedAt.current })
 
       /*
        * A grade that cannot be sent is not lost and is not retried in a loop
@@ -418,7 +440,7 @@ export function StudySession() {
         NUDGE_DELAY + Math.random() * NUDGE_JITTER
       )
     },
-    [cards, index, id, graded, askCompanion]
+    [cards, allCards, index, id, graded, askCompanion]
   )
 
   /**
@@ -439,6 +461,25 @@ export function StudySession() {
 
   const cardId = current?._id ?? current?.id ?? null
   const answered = Boolean(cardId && graded[cardId])
+
+  /**
+   * A new selection, and where it leaves the learner (MOB-107). The card in
+   * hand is followed when it survives the narrowing — its answer stays shown if
+   * it was, because the card on screen did not change — and the session goes
+   * to the top of the narrowed queue when it does not. Decided here, in the
+   * same tick as the selection, so no frame shows the old index over the new
+   * list.
+   */
+  const chooseTags = useCallback(
+    (tags) => {
+      const next = filterCardsByTags(allCards, tags)
+      const at = positionAfter(next, cardId)
+      if (cardKey(next?.[at]) !== cardId) setRevealed(false)
+      setIndex(at)
+      tagFilter.setSelectedTags(tags)
+    },
+    [allCards, cardId, tagFilter]
+  )
 
   /*
    * Two forms of one fact. The header is ONE row (ADR-011) and it now holds
@@ -470,6 +511,24 @@ export function StudySession() {
           <Skeleton width='40%' height={20} />
           <Skeleton width='100%' height={220} />
           <Skeleton width='100%' height={48} />
+        </Stack>
+      </Screen>
+    )
+  }
+
+  if (total === 0 && tagFilter.isFiltering) {
+    // Nothing matches, which is not "all caught up": the queue is still there
+    // behind the filter, and the way out is to loosen it (ADR-014, point 5).
+    return (
+      <Screen>
+        <Stack spacing={2}>
+          <Typography level='h4'>{t('cards.session.tagFilter.empty.title')}</Typography>
+          <Typography level='body-md' color='text.secondary'>
+            {t('cards.session.tagFilter.empty.body')}
+          </Typography>
+          <Button variant='secondary' onPress={() => chooseTags([])}>
+            {t('cards.session.tagFilter.clear')}
+          </Button>
         </Stack>
       </Screen>
     )
@@ -586,6 +645,21 @@ export function StudySession() {
            * bar's VALUE, which `Progress` already announces.
            */}
           <Progress value={total > 0 ? ((index + 1) / total) * 100 : 0} accessibilityLabel={t('annualPlanning.goal.progress')} />
+
+          {/*
+           * The web's filter object, reduced to the one dimension study mode
+           * has (ADR-014): a Tags chip whose label is its readout, opening the
+           * same sheet the library uses. Only when there is something to
+           * choose — a queue with no tags has nothing to narrow by, and the
+           * web draws no bar for it either.
+           */}
+          {tagFilter.availableTags.length > 0 ? (
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <Chip selected={tagFilter.isFiltering} onPress={() => setTagsOpen(true)} accessibilityLabel={t('filters.tags')}>
+                {tagFilter.isFiltering ? t('filters.tagsReadout', { count: tagFilter.selectedTags.length }) : t('filters.tags')}
+              </Chip>
+            </Stack>
+          ) : null}
         </Stack>
 
         {/* The card fills what is left, so the grades sit in the bottom third
@@ -723,6 +797,27 @@ export function StudySession() {
           )}
         </View>
       </Stack>
+
+      {/* Any number of tags, so the sheet stays open while they are ticked;
+          clearing lives inside it, as the web's menu and the library's sheet
+          both keep it. */}
+      <ChoiceSheet
+        visible={tagsOpen}
+        multiple
+        onClose={() => setTagsOpen(false)}
+        title={t('filters.tags')}
+        value={tagFilter.selectedTags}
+        onChange={chooseTags}
+        options={tagFilter.availableTags.map(({ tag, count }) => ({ value: tag, label: tag, count }))}
+        extra={
+          tagFilter.isFiltering ? (
+            <>
+              <Divider />
+              <ChoiceRow label={t('filters.clear')} role='button' onPress={() => chooseTags([])} />
+            </>
+          ) : null
+        }
+      />
     </Screen>
   )
 }
