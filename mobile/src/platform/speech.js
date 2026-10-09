@@ -37,6 +37,16 @@ try {
 /** Whether this build can speak at all. The Listen control asks. */
 export const canSpeak = () => Speech !== null
 
+/**
+ * How long the engine gets to START before the utterance is given up on, and
+ * how long it gets to FINISH. The second scales with the text: a long answer
+ * takes a while, and a cap that cut it off mid-sentence would be the bug.
+ */
+export const START_GRACE_MS = 2500
+export const MS_PER_CHARACTER = 350
+export const MIN_FINISH_MS = 6000
+export const finishBudgetFor = (text) => Math.max(MIN_FINISH_MS, String(text ?? '').length * MS_PER_CHARACTER)
+
 /** The web's voice shape, plus the identifier the engine needs back. */
 const asVoice = (voice) => ({
   name: voice?.name || voice?.identifier || '',
@@ -58,17 +68,31 @@ export async function listVoices() {
 /**
  * Say `text`, cancelling whatever is being said.
  *
- * `onDone` fires once, whether the utterance finished or was stopped, so a
- * caller's "speaking" flag can never be left stuck on — `onStopped` is not
- * emitted by every engine and `onError` is emitted by some for a plain cancel.
+ * `onDone` fires once, whether the utterance finished, was stopped, or never
+ * happened, so a caller's "speaking" flag can never be left stuck on —
+ * `onStopped` is not emitted by every engine and `onError` is emitted by some
+ * for a plain cancel.
+ *
+ * **An utterance the engine drops sends nothing back** (MOB-113). Android's
+ * `TextToSpeech.speak` returns an error code the native module ignores, and a
+ * voice that cannot synthesise — a network voice with no network — is exactly
+ * such a drop: no start, no done, no error, ever. That left the Listen control
+ * on Stop after the first card, on a real phone, with every later tap halting
+ * nothing. So the utterance is given a grace period to start and a budget to
+ * finish, and is settled as an error when either runs out.
  */
 export function speak(text, { lang, rate, pitch, voice, onStart, onDone, onError } = {}) {
   if (!text || !Speech) return
 
   let settled = false
+  let started = false
+  let startTimer = null
+  let finishTimer = null
   const settle = (report) => {
     if (settled) return
     settled = true
+    clearTimeout(startTimer)
+    clearTimeout(finishTimer)
     report?.()
     onDone?.()
   }
@@ -79,17 +103,45 @@ export function speak(text, { lang, rate, pitch, voice, onStart, onDone, onError
       voice: voice || undefined,
       rate: rate ?? 1.0,
       pitch: pitch ?? 1.0,
-      onStart: () => onStart?.(),
+      onStart: () => {
+        started = true
+        clearTimeout(startTimer)
+        onStart?.()
+      },
       onDone: () => settle(),
       onStopped: () => settle(),
       onError: (error) => settle(() => onError?.(error))
     })
+    startTimer = setTimeout(() => {
+      if (!started) settle(() => onError?.(new Error('speech never started')))
+    }, START_GRACE_MS)
+    finishTimer = setTimeout(() => settle(() => onError?.(new Error('speech never finished'))), finishBudgetFor(text))
   } catch (error) {
     // An engine that refuses the utterance still has to release the caller:
     // a "speaking" flag nothing ever clears leaves a Stop button that stops
     // nothing.
     settle(() => onError?.(error))
   }
+}
+
+/**
+ * The voice to hand the engine, if any (MOB-113).
+ *
+ * Only a voice the learner picked BY NAME on this device goes to the engine.
+ * A voice matched by language alone stays with the engine's own default for
+ * that language: the matcher cannot tell a local voice from a network one,
+ * and Google's engine lists the network voices first, so "best for ja" was a
+ * voice that needs Google's servers and fails silently without them. The
+ * default is what the first tap used, and the first tap always worked.
+ *
+ * @param {{ name?: string, identifier?: string | null } | null} resolved - what `resolveVoice` chose
+ * @param {{ voiceName?: string | null } | null} settings - the deck's saved side
+ * @returns {string | null} an identifier for the engine, or null for its default
+ */
+export function voiceToRequest(resolved, settings) {
+  const chosen = settings?.voiceName
+  if (!chosen || !resolved || resolved.name !== chosen) return null
+  return resolved.identifier ?? null
 }
 
 /** Silence, now. Safe to call when nothing is speaking. */

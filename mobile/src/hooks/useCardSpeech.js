@@ -31,7 +31,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { speechTextFor } from '@nowry/core/domain/cardSpeech'
 import { fetchSegments, segmentLang, segmentText } from '@nowry/core/domain/speechSegments'
 import { resolveVoice } from '@nowry/core/domain/voiceMatch'
-import { canSpeak, speak, stop } from '../platform/speech'
+import { canSpeak, speak, stop, voiceToRequest } from '../platform/speech'
 import { subscribeToDeviceVoices } from '../platform/voices'
 
 /**
@@ -92,7 +92,8 @@ export function useSpeech({ text = '', settings = null } = {}) {
       setSpeaking(true)
       speak(text, {
         lang: voice?.lang || settings?.voiceLang || undefined,
-        voice: voice?.identifier,
+        // The language travels; the voice only when it was chosen here (MOB-113).
+        voice: voiceToRequest(voice, settings),
         rate,
         pitch,
         onDone: () => current() && setSpeaking(false)
@@ -108,14 +109,14 @@ export function useSpeech({ text = '', settings = null } = {}) {
       const voice = voiceFor(language)
       speak(segmentText(segments[index]), {
         lang: voice?.lang || language,
-        voice: voice?.identifier,
+        voice: voiceToRequest(voice, settings),
         rate,
         pitch,
         onDone: () => next(index + 1)
       })
     }
     next(0)
-  }, [text, halt, settings?.mode, settings?.rate, settings?.pitch, settings?.voiceLang, voiceFor])
+  }, [text, halt, settings, voiceFor])
 
   const toggle = useCallback(() => (speaking ? halt() : play()), [speaking, halt, play])
 
