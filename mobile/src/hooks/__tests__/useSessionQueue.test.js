@@ -9,7 +9,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const { cardKey, positionAfter, fullQueueIndex, matchesQueueSearch } = require('../useSessionQueue')
+const { cardKey, positionAfter, fullQueueIndex, matchesQueueSearch, narrowQueue } = require('../useSessionQueue')
 
 const queue = [{ _id: 'a', tags: ['verbs'] }, { _id: 'b', tags: ['nouns'] }, { id: 'c', tags: ['verbs', 'nouns'] }, { _id: 'd' }]
 
@@ -59,12 +59,36 @@ describe('what the resume record stores', () => {
   })
 })
 
-describe('the mark stays out of the study queue (ADR-010)', () => {
-  const source = fs.readFileSync(path.resolve(__dirname, '../useSessionQueue.js'), 'utf8')
+describe('the mark stays out of the study queue (ADR-010), and narrows only All (ADR-042)', () => {
+  const marked = [
+    { _id: 'a', tags: ['verbs'], marked_at: '2026-10-01T00:00:00Z' },
+    { _id: 'b', tags: ['nouns'] },
+    { _id: 'c', tags: ['verbs'], marked_at: '2026-10-02T00:00:00Z' }
+  ]
 
-  it('imports the tag utilities only', () => {
-    expect(source).toMatch(/import \{ countTags, filterCardsByTags \} from '@nowry\/core\/utils\/tagFilter'/)
-    expect(source).not.toMatch(/filterCardsByMark|countMarked/)
+  it('ignores markedOnly under Due, even when asked', () => {
+    expect(narrowQueue(marked, { markedOnly: true, scope: 'due' })).toBe(marked)
+  })
+
+  it('applies it under All', () => {
+    expect(narrowQueue(marked, { markedOnly: true, scope: 'all' }).map(cardKey)).toEqual(['a', 'c'])
+  })
+
+  it('composes with tags under All, and tags alone under Due', () => {
+    expect(narrowQueue(marked, { selectedTags: ['verbs'], markedOnly: true, scope: 'all' }).map(cardKey)).toEqual(['a', 'c'])
+    expect(narrowQueue(marked, { selectedTags: ['nouns'], scope: 'due' }).map(cardKey)).toEqual(['b'])
+  })
+
+  it('returns the same array with nothing selected, and null while loading', () => {
+    expect(narrowQueue(marked, {})).toBe(marked)
+    expect(narrowQueue(null, { markedOnly: true, scope: 'all' })).toBeNull()
+  })
+
+  it('is the only place the mark utilities are reached from', () => {
+    const source = fs.readFileSync(path.resolve(__dirname, '../useSessionQueue.js'), 'utf8')
+    const uses = source.match(/filterCardsByMark\(/g) ?? []
+    expect(uses).toHaveLength(1)
+    expect(source).toMatch(/scope === 'all' \? filterCardsByMark\(byTags, markedOnly\) : byTags/)
   })
 })
 

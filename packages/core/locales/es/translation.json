@@ -1572,7 +1572,14 @@
         "noMatch": "Nada en esta cola coincide.",
         "done": "Listo",
         "answered": "Respondida",
-        "current": "Tarjeta actual"
+        "current": "Tarjeta actual",
+        "due": "Pendientes",
+        "all": "Todas",
+        "scopeAria": "Qué tarjetas",
+        "allCards": "Todas las tarjetas",
+        "markedNeedsAll": "Marcadas se aplica a todas las tarjetas.",
+        "previous": "Tarjeta anterior",
+        "next": "Tarjeta siguiente"
       }
     },
     "deleteModal": {

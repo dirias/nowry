@@ -33,7 +33,6 @@ import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
-import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
 import { bestLevelUp } from '@nowry/core/domain/petLevelUp'
 import { sessionSummaryEvent, wrongAnswerEvent } from '@nowry/core/domain/interventionPolicy'
 import { studyCardContext } from '@nowry/core/domain/screenContext'
@@ -44,7 +43,7 @@ import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
 import { useCardSpeech, useSpeech } from '../hooks/useCardSpeech'
 import { useInterventions } from '../hooks/useInterventions'
-import { cardKey, fullQueueIndex, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
+import { cardKey, fullQueueIndex, narrowQueue, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -56,6 +55,7 @@ import {
   CompanionNote,
   FlipCard,
   Icon,
+  IconButton,
   MarkToggle,
   PetLevelUp,
   Progress,
@@ -161,8 +161,9 @@ function CardFace({ label, labelColor, level, text }) {
 }
 
 export function StudySession() {
-  const { deckId, tags, group, limit } = useLocalSearchParams()
+  const { deckId, tags, group, limit, scope: scopeParam } = useLocalSearchParams()
   const id = String(deckId)
+  const isDaily = id === DAILY_REVIEW
   const { t } = useTranslation()
   const router = useRouter()
 
@@ -210,13 +211,23 @@ export function StudySession() {
    * only mechanism that makes offline study possible, and airplane mode said
    * "Couldn't load cards" over a queue already on the device.
    */
-  const queue = useSessionCards({
+  /*
+   * Which cards are in front of the learner (MOB-109, ADR-042): the due
+   * queue SM-2 chose, or every card of the deck. The daily review has no
+   * All. Both scopes are mounted so switching is a cache hit the second
+   * time; only the one in use is fetched.
+   */
+  const [scope, setScope] = useState(scopeParam === 'all' && !isDaily ? 'all' : 'due')
+  const sessionParams = {
     deckId: id,
     tags: tags ? [].concat(tags) : [],
     group: group ? String(group) : undefined,
     limit: limit ? Number(limit) : undefined,
     attempt
-  })
+  }
+  const dueQueue = useSessionCards({ ...sessionParams, scope: 'due' })
+  const allQueue = useSessionCards({ ...sessionParams, scope: 'all', enabled: scope === 'all' })
+  const queue = scope === 'all' ? allQueue : dueQueue
   const allCards = queue.cards
   const error = Boolean(queue.error)
 
@@ -229,12 +240,21 @@ export function StudySession() {
    * The count readout opens it as a sheet (MOB-108, ADR-042): the one control
    * that already described the queue is the way into it.
    */
-  const queueView = useSessionQueue(allCards)
+  const queueView = useSessionQueue(allCards, { scope })
   const cards = queueView.visibleCards
   const [queueOpen, setQueueOpen] = useState(false)
 
+  /*
+   * The card to land on once a scope's queue arrives. Due → All is a cache
+   * miss the first time, so the position cannot be decided in the same tick
+   * as the switch; the id is kept and settled when the list is here.
+   */
+  const pendingAnchor = useRef(null)
+  const resumed = useRef(false)
+
   useEffect(() => {
-    if (!allCards) return
+    if (!allCards || resumed.current || scope !== 'due') return
+    resumed.current = true
     // Read while a card is in hand: the summary logs after the last one is
     // gone, and the deck's name is only ever carried by a card.
     deckName.current = allCards[0]?.deck_id?.name ?? allCards[0]?.deck_id?.title ?? null
@@ -252,9 +272,17 @@ export function StudySession() {
     setIndex(saved.index)
     setGraded(saved.graded)
     startedAt.current = new Date(saved.startedAt)
-  }, [allCards, id])
+  }, [allCards, id, scope])
 
   const total = cards?.length ?? 0
+
+  useEffect(() => {
+    if (pendingAnchor.current === null || !cards) return
+    const at = positionAfter(cards, pendingAnchor.current)
+    pendingAnchor.current = null
+    setIndex(at)
+    setRevealed(false)
+  }, [cards])
   const current = cards?.[index] ?? null
   const complete = cards !== null && index >= total
 
@@ -449,10 +477,12 @@ export function StudySession() {
    * and nothing is sent — the card comes round again next session.
    */
   const skip = useCallback(() => {
-    setIndex((n) => Math.min(total, n + 1))
+    // Under All the last card is a wall, not a finish line: there is no
+    // session to complete, so the index never reaches `total`.
+    setIndex((n) => Math.min(scope === 'all' ? Math.max(0, total - 1) : total, n + 1))
     setRevealed(false)
     setHinted(true)
-  }, [total])
+  }, [total, scope])
 
   const back = useCallback(() => {
     setIndex((n) => Math.max(0, n - 1))
@@ -473,13 +503,51 @@ export function StudySession() {
    */
   const chooseTags = useCallback(
     (tags) => {
-      const next = filterCardsByTags(allCards, tags)
+      const next = narrowQueue(allCards, { selectedTags: tags, markedOnly: queueView.markedOnly, scope })
       const at = positionAfter(next, cardId)
       if (cardKey(next?.[at]) !== cardId) setRevealed(false)
       setIndex(at)
       queueView.setSelectedTags(tags)
     },
-    [allCards, cardId, queueView]
+    [allCards, cardId, queueView, scope]
+  )
+
+  /**
+   * A new scope, and where it leaves the learner (MOB-109). Due → All always
+   * keeps the card in hand; All → Due keeps it when it is due and goes to the
+   * first due card when it is not; the mark clears on the way to Due because
+   * it cannot narrow that queue (ADR-010). When the other scope's list is not
+   * here yet, the landing is deferred to the effect above.
+   */
+  const chooseScope = useCallback(
+    (next) => {
+      if (next === scope) return
+      const nextCards = next === 'all' ? allQueue.cards : dueQueue.cards
+      const markedOnly = next === 'all' && queueView.markedOnly
+      if (next === 'due' && queueView.markedOnly) queueView.setMarkedOnly(false)
+      if (nextCards) {
+        const visible = narrowQueue(nextCards, { selectedTags: queueView.selectedTags, markedOnly, scope: next })
+        const at = positionAfter(visible, cardId)
+        if (cardKey(visible?.[at]) !== cardId) setRevealed(false)
+        setIndex(at)
+      } else {
+        pendingAnchor.current = cardId
+      }
+      setScope(next)
+    },
+    [scope, allQueue.cards, dueQueue.cards, queueView, cardId]
+  )
+
+  /** Marked, toggled under All: the card in hand is followed as with tags. */
+  const chooseMarked = useCallback(
+    (on) => {
+      const visible = narrowQueue(allCards, { selectedTags: queueView.selectedTags, markedOnly: on, scope })
+      const at = positionAfter(visible, cardId)
+      if (cardKey(visible?.[at]) !== cardId) setRevealed(false)
+      setIndex(at)
+      queueView.setMarkedOnly(on)
+    },
+    [allCards, queueView, scope, cardId]
   )
 
   /** A row in the queue sheet, tapped: that card, face up (MOB-108). */
@@ -774,7 +842,42 @@ export function StudySession() {
         {/* A MINIMUM height, not a height: the labels inside grow with the OS
             text size and a fixed band clips them. */}
         <View style={{ minHeight: ACTION_BAND, justifyContent: 'center' }}>
-          {revealed ? (
+          {scope === 'all' ? (
+            /*
+             * The band is the mode (ADR-042 point 3). Under All it is
+             * previous and next with the scope named between them; the
+             * position is already in the readout. No grade exists here.
+             */
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <IconButton
+                variant='secondary'
+                size='lg'
+                onPress={back}
+                disabled={index === 0}
+                accessibilityLabel={t('cards.session.queue.previous')}
+              >
+                <Icon name='ChevronLeft' size='md' color='text.primary' />
+              </IconButton>
+              <Typography level='body-sm' color='text.secondary' numberOfLines={1} style={{ flex: 1, textAlign: 'center' }}>
+                {[
+                  t('cards.session.queue.allCards'),
+                  queueView.markedOnly ? t('filters.marked') : null,
+                  queueView.selectedTags.length > 0 ? queueView.selectedTags.join(', ') : null
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Typography>
+              <IconButton
+                variant='secondary'
+                size='lg'
+                onPress={skip}
+                disabled={index >= total - 1}
+                accessibilityLabel={t('cards.session.queue.next')}
+              >
+                <Icon name='ChevronRight' size='md' color='text.primary' />
+              </IconButton>
+            </Stack>
+          ) : revealed ? (
             /*
              * Four tones, not four neutral keys, and they are the web's own:
              * outlined danger, soft warning, soft success, solid primary. An
@@ -819,6 +922,18 @@ export function StudySession() {
         selectedTags={queueView.selectedTags}
         onTagsChange={chooseTags}
         onJump={jumpTo}
+        scope={scope}
+        onScopeChange={chooseScope}
+        dueCount={dueQueue.cards?.length ?? null}
+        allCount={allQueue.cards?.length ?? null}
+        daily={isDaily}
+        markedOnly={queueView.markedOnly}
+        markedCount={queueView.markedCount}
+        onMarkedChange={chooseMarked}
+        onClear={() => {
+          chooseTags([])
+          if (queueView.markedOnly) chooseMarked(false)
+        }}
       />
     </Screen>
   )

@@ -14,8 +14,11 @@
  * its URL — the selection — and two placements the session needs to keep its
  * footing when the list under it changes.
  *
- * **The mark filter is not here**, and must not be: ADR-010 keeps it to
- * Browse, and the phone has no Browse session.
+ * **The mark filter reaches the queue only under the All scope** (MOB-109,
+ * ADR-042). ADR-010 keeps the mark away from the study queue; All is every card
+ * of the deck, not the queue SM-2 chose, and that is the one place it may
+ * narrow. `narrowQueue` is where that rule is enforced, so a caller cannot
+ * get a marked-only due queue by passing the wrong flag.
  *
  * The web's `useSessionFilters` is not reused because it reads the selection
  * from `react-router-dom`'s search params; on the phone the selection is state,
@@ -29,7 +32,7 @@
  */
 import { useCallback, useMemo, useState } from 'react'
 import { backText, frontText } from '@nowry/core/domain/cardSpeech'
-import { countTags, filterCardsByTags } from '@nowry/core/utils/tagFilter'
+import { countMarked, countTags, filterCardsByMark, filterCardsByTags } from '@nowry/core/utils/tagFilter'
 
 /** The two spellings a card's id has worn. */
 export const cardKey = (card) => card?._id ?? card?.id ?? null
@@ -61,6 +64,21 @@ export function fullQueueIndex(allCards, visible, index) {
   return at >= 0 ? at : allCards.length
 }
 
+/**
+ * The queue as the learner sees it, from the server's list and the selection.
+ *
+ * Tags narrow under either scope; the mark narrows under All only (ADR-010).
+ * With nothing selected this returns the same array it was given, which the
+ * utilities promise and the session's memos rely on.
+ *
+ * @param {Array<object> | null} cards
+ * @param {{ selectedTags?: string[], markedOnly?: boolean, scope?: 'due' | 'all' }} selection
+ */
+export function narrowQueue(cards, { selectedTags = [], markedOnly = false, scope = 'due' } = {}) {
+  const byTags = filterCardsByTags(cards, selectedTags)
+  return scope === 'all' ? filterCardsByMark(byTags, markedOnly) : byTags
+}
+
 /** Whether a card answers a search: its two faces and its tags, case-insensitively. */
 export function matchesQueueSearch(card, needle) {
   const query = String(needle ?? '')
@@ -73,24 +91,35 @@ export function matchesQueueSearch(card, needle) {
 
 /**
  * @param {Array<object> | null} cards - the queue as the server returned it; null while loading
+ * @param {{ scope?: 'due' | 'all' }} [options]
  */
-export function useSessionQueue(cards) {
+export function useSessionQueue(cards, { scope = 'due' } = {}) {
   const [selectedTags, setSelectedTags] = useState([])
+  const [markedOnly, setMarkedOnly] = useState(false)
 
   const availableTags = useMemo(() => countTags(cards), [cards])
+  const markedCount = useMemo(() => (scope === 'all' ? countMarked(cards) : 0), [scope, cards])
   // With nothing selected this is the SAME array (the utility promises so),
   // which keeps every memo downstream of the queue intact — and keeps `null`
   // as `null`, so the loading state survives the narrowing.
-  const visibleCards = useMemo(() => filterCardsByTags(cards, selectedTags), [cards, selectedTags])
+  const visibleCards = useMemo(() => narrowQueue(cards, { selectedTags, markedOnly, scope }), [cards, selectedTags, markedOnly, scope])
   const clearTags = useCallback(() => setSelectedTags([]), [])
+  const clearAll = useCallback(() => {
+    setSelectedTags([])
+    setMarkedOnly(false)
+  }, [])
 
   return {
     availableTags,
     selectedTags,
     setSelectedTags,
     clearTags,
+    markedOnly,
+    setMarkedOnly,
+    markedCount,
+    clearAll,
     visibleCards,
-    isFiltering: selectedTags.length > 0
+    isFiltering: selectedTags.length > 0 || (scope === 'all' && markedOnly)
   }
 }
 

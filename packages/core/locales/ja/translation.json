@@ -2412,7 +2412,14 @@
         "noMatch": "このキューに一致するカードはありません。",
         "done": "完了",
         "answered": "回答済み",
-        "current": "現在のカード"
+        "current": "現在のカード",
+        "due": "復習",
+        "all": "すべて",
+        "scopeAria": "どのカード",
+        "allCards": "すべてのカード",
+        "markedNeedsAll": "「マーク済み」はすべてのカードに適用されます。",
+        "previous": "前のカード",
+        "next": "次のカード"
       }
     },
     "flashcard": {

@@ -1776,7 +1776,14 @@
         "noMatch": "Nothing in this queue matches.",
         "done": "Done",
         "answered": "Answered",
-        "current": "Current card"
+        "current": "Current card",
+        "due": "Due",
+        "all": "All",
+        "scopeAria": "Which cards",
+        "allCards": "All cards",
+        "markedNeedsAll": "Marked applies to all cards.",
+        "previous": "Previous card",
+        "next": "Next card"
       }
     },
     "deleteModal": {

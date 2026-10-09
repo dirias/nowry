@@ -2383,7 +2383,14 @@
         "noMatch": "Rien dans cette file ne correspond.",
         "done": "Terminé",
         "answered": "Répondue",
-        "current": "Carte en cours"
+        "current": "Carte en cours",
+        "due": "À réviser",
+        "all": "Toutes",
+        "scopeAria": "Quelles cartes",
+        "allCards": "Toutes les cartes",
+        "markedNeedsAll": "Marquées s'applique à toutes les cartes.",
+        "previous": "Carte précédente",
+        "next": "Carte suivante"
       }
     },
     "common": {

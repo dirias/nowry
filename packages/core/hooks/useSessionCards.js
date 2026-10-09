@@ -23,15 +23,28 @@ export const DAILY_REVIEW = 'daily-review'
  * The key carries every narrowing, so a tag's session and the whole day's are
  * separate entries and neither serves the other's cards from cache.
  */
-export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0 } = {}) {
+/**
+ * @param {object} options
+ * @param {'due' | 'all'} [options.scope] - `all` is every card of the deck, the web's browse
+ *   mode and the phone's All scope (ADR-042); ignored for the daily review, which has no All.
+ * @param {boolean} [options.enabled] - a second scope can be mounted without being fetched.
+ */
+export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0, scope = 'due', enabled = true } = {}) {
   const { user } = useAuth()
   const userId = user?.id ?? null
   const isDaily = deckId === DAILY_REVIEW
 
+  const everyCard = scope === 'all' && !isDaily
+
   const { data, isLoading, error, isFetching } = useQuery({
-    queryKey: ['cards', userId, 'session', deckId, { tags, group, limit, attempt }],
-    queryFn: () => (isDaily ? cardsService.getDailyReviewCards({ limit, tags, group }) : cardsService.getDueCards(deckId)),
-    enabled: !!userId && !!deckId,
+    queryKey: ['cards', userId, 'session', deckId, { tags, group, limit, attempt, scope: everyCard ? 'all' : 'due' }],
+    queryFn: () =>
+      isDaily
+        ? cardsService.getDailyReviewCards({ limit, tags, group })
+        : everyCard
+          ? cardsService.getAllCards(deckId)
+          : cardsService.getDueCards(deckId),
+    enabled: enabled && !!userId && !!deckId,
     /*
      * A session's queue is read once and then worked through. Refetching it
      * mid-session would change the cards under the user's thumb, so it stays

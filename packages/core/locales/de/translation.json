@@ -2372,7 +2372,14 @@
         "noMatch": "Nichts in dieser Warteschlange passt.",
         "done": "Fertig",
         "answered": "Beantwortet",
-        "current": "Aktuelle Karte"
+        "current": "Aktuelle Karte",
+        "due": "Fällig",
+        "all": "Alle",
+        "scopeAria": "Welche Karten",
+        "allCards": "Alle Karten",
+        "markedNeedsAll": "Markiert gilt für alle Karten.",
+        "previous": "Vorherige Karte",
+        "next": "Nächste Karte"
       }
     },
     "common": {

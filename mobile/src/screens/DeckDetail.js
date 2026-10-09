@@ -100,9 +100,16 @@ export function DeckDetail() {
 
           {/* Beside it, not stacked under it. Two full-width slabs one above
               the other read as two equally weighted choices; the deck has one
-              action and one alternative. */}
-          <Button size='lg' variant='secondary' style={{ flex: 1 }} onPress={() => router.push(`/study/card/new?deckId=${id}`)}>
-            {t('cards.deck.addCard')}
+              action and one alternative. The alternative is the web's own:
+              Browse opens the session over every card (MOB-109, ADR-042). */}
+          <Button
+            size='lg'
+            variant='secondary'
+            style={{ flex: 1 }}
+            onPress={() => router.push(`/study/${id}?scope=all`)}
+            accessibilityLabel={t('study.deck.browseAria', { name })}
+          >
+            {t('study.deck.browse')}
           </Button>
         </Stack>
 
@@ -113,6 +120,14 @@ export function DeckDetail() {
          * web's own words and the web's own accessible name.
          */}
         <View>
+          <Divider />
+          {/* Adding a card is a row now, above Settings: it was the second key
+              until Browse took that slot (MOB-109). */}
+          <ListRow
+            tile={<Icon name='Plus' size='sm' color='text.tertiary' />}
+            name={t('cards.deck.addCard')}
+            onPress={() => router.push(`/study/card/new?deckId=${id}`)}
+          />
           <Divider />
           <ListRow
             tile={<Icon name='Settings' size='sm' color='text.tertiary' />}
