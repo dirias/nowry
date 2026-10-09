@@ -2419,7 +2419,8 @@
         "allCards": "すべてのカード",
         "markedNeedsAll": "「マーク済み」はすべてのカードに適用されます。",
         "previous": "前のカード",
-        "next": "次のカード"
+        "next": "次のカード",
+        "decksReadout": "デッキ · {{count}}"
       }
     },
     "flashcard": {

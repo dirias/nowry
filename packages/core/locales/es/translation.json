@@ -1579,7 +1579,8 @@
         "allCards": "Todas las tarjetas",
         "markedNeedsAll": "Marcadas se aplica a todas las tarjetas.",
         "previous": "Tarjeta anterior",
-        "next": "Tarjeta siguiente"
+        "next": "Tarjeta siguiente",
+        "decksReadout": "Mazos · {{count}}"
       }
     },
     "deleteModal": {

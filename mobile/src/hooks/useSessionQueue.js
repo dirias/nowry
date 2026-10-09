@@ -37,6 +37,39 @@ import { countMarked, countTags, filterCardsByMark, filterCardsByTags } from '@n
 /** The two spellings a card's id has worn. */
 export const cardKey = (card) => card?._id ?? card?.id ?? null
 
+/** The deck a card belongs to, whether the list sent the deck or only its id. */
+export const deckKeyOf = (card) => {
+  const deck = card?.deck_id
+  if (deck && typeof deck === 'object') return deck._id ?? deck.id ?? null
+  return deck ?? null
+}
+
+/**
+ * The decks a mixed queue draws from, most cards first (MOB-110). The daily
+ * review has no All scope, so its sheet narrows by deck instead; a deck session
+ * has one deck and gets an empty list.
+ *
+ * The daily review's cards carry the deck as a bare id, so `names` — the deck
+ * list the library already caches, as `{ [id]: name }` — supplies the label;
+ * a card that embeds its deck names itself.
+ *
+ * @returns {Array<{ id: string, name: string, count: number }>}
+ */
+export function countDecks(cards, names = {}) {
+  if (!Array.isArray(cards)) return []
+  const counts = new Map()
+  for (const card of cards) {
+    const id = deckKeyOf(card)
+    if (id === null) continue
+    const deck = card?.deck_id
+    const name = (deck && typeof deck === 'object' && (deck.name || deck.title)) || names[id] || String(id)
+    const row = counts.get(id) ?? { id, name, count: 0 }
+    row.count += 1
+    counts.set(id, row)
+  }
+  return Array.from(counts.values()).sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+}
+
 /**
  * Where the card in hand sits after the queue is narrowed: its new position
  * when it survived, the top when it did not. Mirrors the web's anchor logic
@@ -74,9 +107,13 @@ export function fullQueueIndex(allCards, visible, index) {
  * @param {Array<object> | null} cards
  * @param {{ selectedTags?: string[], markedOnly?: boolean, scope?: 'due' | 'all' }} selection
  */
-export function narrowQueue(cards, { selectedTags = [], markedOnly = false, scope = 'due' } = {}) {
+export function narrowQueue(cards, { selectedTags = [], markedOnly = false, scope = 'due', selectedDecks = [] } = {}) {
   const byTags = filterCardsByTags(cards, selectedTags)
-  return scope === 'all' ? filterCardsByMark(byTags, markedOnly) : byTags
+  const byDecks =
+    Array.isArray(byTags) && Array.isArray(selectedDecks) && selectedDecks.length > 0
+      ? byTags.filter((card) => selectedDecks.includes(deckKeyOf(card)))
+      : byTags
+  return scope === 'all' ? filterCardsByMark(byDecks, markedOnly) : byDecks
 }
 
 /** Whether a card answers a search: its two faces and its tags, case-insensitively. */
@@ -93,19 +130,25 @@ export function matchesQueueSearch(card, needle) {
  * @param {Array<object> | null} cards - the queue as the server returned it; null while loading
  * @param {{ scope?: 'due' | 'all' }} [options]
  */
-export function useSessionQueue(cards, { scope = 'due' } = {}) {
+export function useSessionQueue(cards, { scope = 'due', deckNames = {} } = {}) {
   const [selectedTags, setSelectedTags] = useState([])
+  const [selectedDecks, setSelectedDecks] = useState([])
   const [markedOnly, setMarkedOnly] = useState(false)
 
   const availableTags = useMemo(() => countTags(cards), [cards])
+  const availableDecks = useMemo(() => countDecks(cards, deckNames), [cards, deckNames])
   const markedCount = useMemo(() => (scope === 'all' ? countMarked(cards) : 0), [scope, cards])
   // With nothing selected this is the SAME array (the utility promises so),
   // which keeps every memo downstream of the queue intact — and keeps `null`
   // as `null`, so the loading state survives the narrowing.
-  const visibleCards = useMemo(() => narrowQueue(cards, { selectedTags, markedOnly, scope }), [cards, selectedTags, markedOnly, scope])
+  const visibleCards = useMemo(
+    () => narrowQueue(cards, { selectedTags, selectedDecks, markedOnly, scope }),
+    [cards, selectedTags, selectedDecks, markedOnly, scope]
+  )
   const clearTags = useCallback(() => setSelectedTags([]), [])
   const clearAll = useCallback(() => {
     setSelectedTags([])
+    setSelectedDecks([])
     setMarkedOnly(false)
   }, [])
 
@@ -114,12 +157,15 @@ export function useSessionQueue(cards, { scope = 'due' } = {}) {
     selectedTags,
     setSelectedTags,
     clearTags,
+    availableDecks,
+    selectedDecks,
+    setSelectedDecks,
     markedOnly,
     setMarkedOnly,
     markedCount,
     clearAll,
     visibleCards,
-    isFiltering: selectedTags.length > 0 || (scope === 'all' && markedOnly)
+    isFiltering: selectedTags.length > 0 || selectedDecks.length > 0 || (scope === 'all' && markedOnly)
   }
 }
 

@@ -1783,7 +1783,8 @@
         "allCards": "All cards",
         "markedNeedsAll": "Marked applies to all cards.",
         "previous": "Previous card",
-        "next": "Next card"
+        "next": "Next card",
+        "decksReadout": "Decks · {{count}}"
       }
     },
     "deleteModal": {

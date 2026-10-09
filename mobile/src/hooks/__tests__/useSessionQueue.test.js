@@ -9,7 +9,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const { cardKey, positionAfter, fullQueueIndex, matchesQueueSearch, narrowQueue } = require('../useSessionQueue')
+const { cardKey, deckKeyOf, countDecks, positionAfter, fullQueueIndex, matchesQueueSearch, narrowQueue } = require('../useSessionQueue')
 
 const queue = [{ _id: 'a', tags: ['verbs'] }, { _id: 'b', tags: ['nouns'] }, { id: 'c', tags: ['verbs', 'nouns'] }, { _id: 'd' }]
 
@@ -88,7 +88,7 @@ describe('the mark stays out of the study queue (ADR-010), and narrows only All 
     const source = fs.readFileSync(path.resolve(__dirname, '../useSessionQueue.js'), 'utf8')
     const uses = source.match(/filterCardsByMark\(/g) ?? []
     expect(uses).toHaveLength(1)
-    expect(source).toMatch(/scope === 'all' \? filterCardsByMark\(byTags, markedOnly\) : byTags/)
+    expect(source).toMatch(/scope === 'all' \? filterCardsByMark\(byDecks, markedOnly\) : byDecks/)
   })
 })
 
@@ -116,5 +116,45 @@ describe('a search finds a card by either face or a tag', () => {
   it('survives a card with no text and no tags', () => {
     expect(matchesQueueSearch({}, 'x')).toBe(false)
     expect(matchesQueueSearch(null, 'x')).toBe(false)
+  })
+})
+
+describe('a mixed queue is narrowed by deck (MOB-110)', () => {
+  const mixed = [
+    { _id: 'a', deck_id: { _id: 'd1', name: 'JPN' } },
+    { _id: 'b', deck_id: { _id: 'd2', name: 'Anatomy' } },
+    { _id: 'c', deck_id: 'd1' },
+    { _id: 'd' }
+  ]
+
+  it('reads the deck from an object or a bare id', () => {
+    expect(deckKeyOf(mixed[0])).toBe('d1')
+    expect(deckKeyOf(mixed[2])).toBe('d1')
+    expect(deckKeyOf(mixed[3])).toBeNull()
+  })
+
+  it('counts decks most cards first, named when the list named them', () => {
+    expect(countDecks(mixed)).toEqual([
+      { id: 'd1', name: 'JPN', count: 2 },
+      { id: 'd2', name: 'Anatomy', count: 1 }
+    ])
+    expect(countDecks(null)).toEqual([])
+  })
+
+  it('names a bare-id deck from the deck list, and falls back to the id', () => {
+    const bare = [
+      { _id: 'a', deck_id: 'd1' },
+      { _id: 'b', deck_id: 'd9' }
+    ]
+    expect(countDecks(bare, { d1: 'JPN' })).toEqual([
+      { id: 'd1', name: 'JPN', count: 1 },
+      { id: 'd9', name: 'd9', count: 1 }
+    ])
+  })
+
+  it('narrows by deck under either scope and leaves the array alone with none chosen', () => {
+    expect(narrowQueue(mixed, { selectedDecks: ['d2'] }).map(cardKey)).toEqual(['b'])
+    expect(narrowQueue(mixed, { selectedDecks: ['d1'], scope: 'all' }).map(cardKey)).toEqual(['a', 'c'])
+    expect(narrowQueue(mixed, { selectedDecks: [] })).toBe(mixed)
   })
 })

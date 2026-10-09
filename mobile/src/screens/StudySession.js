@@ -38,6 +38,7 @@ import { sessionSummaryEvent, wrongAnswerEvent } from '@nowry/core/domain/interv
 import { studyCardContext } from '@nowry/core/domain/screenContext'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
+import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { storage } from '@nowry/core'
 import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
@@ -161,7 +162,7 @@ function CardFace({ label, labelColor, level, text }) {
 }
 
 export function StudySession() {
-  const { deckId, tags, group, limit, scope: scopeParam } = useLocalSearchParams()
+  const { deckId, tags, group, limit, scope: scopeParam, card: cardParam } = useLocalSearchParams()
   const id = String(deckId)
   const isDaily = id === DAILY_REVIEW
   const { t } = useTranslation()
@@ -240,7 +241,17 @@ export function StudySession() {
    * The count readout opens it as a sheet (MOB-108, ADR-042): the one control
    * that already described the queue is the way into it.
    */
-  const queueView = useSessionQueue(allCards, { scope })
+  /*
+   * The daily review's cards name their deck by id only; the deck list the
+   * library already caches supplies the names the queue sheet shows (MOB-110).
+   * A deck session's cards embed the deck and this map goes unread.
+   */
+  const deckList = useDeckData(null)
+  const deckNames = useMemo(
+    () => Object.fromEntries((deckList.decks ?? []).map((deck) => [String(deck._id ?? deck.id), deck.name || deck.title || ''])),
+    [deckList.decks]
+  )
+  const queueView = useSessionQueue(allCards, { scope, deckNames })
   const cards = queueView.visibleCards
   const [queueOpen, setQueueOpen] = useState(false)
 
@@ -249,8 +260,10 @@ export function StudySession() {
    * miss the first time, so the position cannot be decided in the same tick
    * as the switch; the id is kept and settled when the list is here.
    */
-  const pendingAnchor = useRef(null)
-  const resumed = useRef(false)
+  // A link that names a card lands on it (MOB-110); a session opened that
+  // way is not a resumed one.
+  const pendingAnchor = useRef(cardParam ? String(cardParam) : null)
+  const resumed = useRef(Boolean(cardParam))
 
   useEffect(() => {
     if (!allCards || resumed.current || scope !== 'due') return
@@ -503,7 +516,12 @@ export function StudySession() {
    */
   const chooseTags = useCallback(
     (tags) => {
-      const next = narrowQueue(allCards, { selectedTags: tags, markedOnly: queueView.markedOnly, scope })
+      const next = narrowQueue(allCards, {
+        selectedTags: tags,
+        selectedDecks: queueView.selectedDecks,
+        markedOnly: queueView.markedOnly,
+        scope
+      })
       const at = positionAfter(next, cardId)
       if (cardKey(next?.[at]) !== cardId) setRevealed(false)
       setIndex(at)
@@ -526,7 +544,12 @@ export function StudySession() {
       const markedOnly = next === 'all' && queueView.markedOnly
       if (next === 'due' && queueView.markedOnly) queueView.setMarkedOnly(false)
       if (nextCards) {
-        const visible = narrowQueue(nextCards, { selectedTags: queueView.selectedTags, markedOnly, scope: next })
+        const visible = narrowQueue(nextCards, {
+          selectedTags: queueView.selectedTags,
+          selectedDecks: queueView.selectedDecks,
+          markedOnly,
+          scope: next
+        })
         const at = positionAfter(visible, cardId)
         if (cardKey(visible?.[at]) !== cardId) setRevealed(false)
         setIndex(at)
@@ -538,10 +561,32 @@ export function StudySession() {
     [scope, allQueue.cards, dueQueue.cards, queueView, cardId]
   )
 
+  /** Decks, in a mixed queue: the card in hand is followed as with tags (MOB-110). */
+  const chooseDecks = useCallback(
+    (decks) => {
+      const next = narrowQueue(allCards, {
+        selectedTags: queueView.selectedTags,
+        selectedDecks: decks,
+        markedOnly: queueView.markedOnly,
+        scope
+      })
+      const at = positionAfter(next, cardId)
+      if (cardKey(next?.[at]) !== cardId) setRevealed(false)
+      setIndex(at)
+      queueView.setSelectedDecks(decks)
+    },
+    [allCards, queueView, scope, cardId]
+  )
+
   /** Marked, toggled under All: the card in hand is followed as with tags. */
   const chooseMarked = useCallback(
     (on) => {
-      const visible = narrowQueue(allCards, { selectedTags: queueView.selectedTags, markedOnly: on, scope })
+      const visible = narrowQueue(allCards, {
+        selectedTags: queueView.selectedTags,
+        selectedDecks: queueView.selectedDecks,
+        markedOnly: on,
+        scope
+      })
       const at = positionAfter(visible, cardId)
       if (cardKey(visible?.[at]) !== cardId) setRevealed(false)
       setIndex(at)
@@ -921,6 +966,10 @@ export function StudySession() {
         availableTags={queueView.availableTags}
         selectedTags={queueView.selectedTags}
         onTagsChange={chooseTags}
+        availableDecks={queueView.availableDecks}
+        selectedDecks={queueView.selectedDecks}
+        onDecksChange={chooseDecks}
+        deckNames={deckNames}
         onJump={jumpTo}
         scope={scope}
         onScopeChange={chooseScope}
@@ -932,6 +981,7 @@ export function StudySession() {
         onMarkedChange={chooseMarked}
         onClear={() => {
           chooseTags([])
+          if (queueView.selectedDecks.length > 0) chooseDecks([])
           if (queueView.markedOnly) chooseMarked(false)
         }}
       />

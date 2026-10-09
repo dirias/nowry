@@ -2390,7 +2390,8 @@
         "allCards": "Toutes les cartes",
         "markedNeedsAll": "Marquées s'applique à toutes les cartes.",
         "previous": "Carte précédente",
-        "next": "Carte suivante"
+        "next": "Carte suivante",
+        "decksReadout": "Paquets · {{count}}"
       }
     },
     "common": {

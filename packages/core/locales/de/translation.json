@@ -2379,7 +2379,8 @@
         "allCards": "Alle Karten",
         "markedNeedsAll": "Markiert gilt für alle Karten.",
         "previous": "Vorherige Karte",
-        "next": "Nächste Karte"
+        "next": "Nächste Karte",
+        "decksReadout": "Stapel · {{count}}"
       }
     },
     "common": {

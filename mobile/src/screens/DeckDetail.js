@@ -21,27 +21,18 @@
  * Edit — two screens that open a card two different ways is how a learner
  * learns not to trust either.
  */
-import { useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { deckCounts } from '@nowry/core/domain/deckTypes'
-import { daysUntilReview } from '@nowry/core/domain/sessionLog'
-import { useDeckCards } from '@nowry/core/hooks/useDeckCards'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
-import { CardPreviewSheet } from './CardPreviewSheet'
-import { nextReviewLabel } from './GroupDetail'
-import { Button, Divider, Icon, IdentityTile, ListRow, Readout, Screen, SectionHeader, Skeleton, Stack, Typography } from '../ui'
-
-/** Soonest first; a card nobody has seen has no date and sorts last. */
-const byNextReview = (a, b) => (daysUntilReview(a) ?? Infinity) - (daysUntilReview(b) ?? Infinity)
+import { Button, Divider, Icon, ListRow, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
 
 export function DeckDetail() {
   const { deckId } = useLocalSearchParams()
   const id = String(deckId)
   const { t } = useTranslation()
   const router = useRouter()
-  const [previewing, setPreviewing] = useState(null)
 
   /*
    * The list, not `GET /decks/{id}`. The detail endpoint computes no
@@ -52,13 +43,10 @@ export function DeckDetail() {
    * changes when the name does.
    */
   const deckList = useDeckData(null)
-  const cards = useDeckCards(id)
 
   const deck = (deckList.decks ?? []).find((row) => String(row._id ?? row.id) === id) ?? null
   const counts = deckCounts(deck)
   const name = deck?.name || ''
-
-  const ordered = useMemo(() => [...(cards.cards ?? [])].sort(byNextReview), [cards.cards])
 
   if (deckList.loading && !deck) {
     return (
@@ -81,7 +69,7 @@ export function DeckDetail() {
             {/* What KIND of deck, which the web's header states with a chip in
                 the type's own accent. */}
             <Readout leading>{t(`study.types.${deck?.deck_type || 'flashcard'}s`)}</Readout>
-            <Readout>{t('cards.manage_content.cardCount', { count: counts.total || ordered.length })}</Readout>
+            <Readout>{t('cards.manage_content.cardCount', { count: counts.total })}</Readout>
             {counts.due > 0 ? <Readout>{t('study.dueCount', { count: counts.due })}</Readout> : null}
             {counts.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: counts.fresh })}</Readout> : null}
           </Stack>
@@ -137,49 +125,7 @@ export function DeckDetail() {
           />
           <Divider />
         </View>
-
-        {/* No count beside the title: the readout line at the top of the
-            screen already says how many cards this deck has, and two numbers
-            for one fact an inch apart is how they end up disagreeing. */}
-        <SectionHeader title={t('groups.cards')} />
-
-        {cards.loading ? (
-          <Stack spacing={1}>
-            <Skeleton width='100%' height={52} />
-            <Skeleton width='100%' height={52} />
-          </Stack>
-        ) : cards.error ? (
-          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {t('home.loadFailed')}
-          </Typography>
-        ) : ordered.length === 0 ? (
-          /* An empty deck has exactly one thing to do, and the key for it is
-             already on this screen — so this says what is true and points at
-             it rather than repeating the button. */
-          <Typography level='body-sm' color='text.tertiary'>
-            {t('cards.manage_content.empty.cards.title')}
-          </Typography>
-        ) : (
-          ordered.map((card) => (
-            <View key={card._id ?? card.id}>
-              <Divider />
-              <ListRow
-                tile={<IdentityTile color='primary.solidBg' />}
-                name={card.title || card.question || card.front || ''}
-                meta={(card.tags ?? []).join(' · ') || null}
-                readout={
-                  <Typography level='body-xs' color='text.tertiary'>
-                    {nextReviewLabel(t, card)}
-                  </Typography>
-                }
-                onPress={() => setPreviewing(card)}
-              />
-            </View>
-          ))
-        )}
       </Stack>
-
-      <CardPreviewSheet visible={Boolean(previewing)} card={previewing} onClose={() => setPreviewing(null)} />
     </Screen>
   )
 }

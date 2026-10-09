@@ -48,6 +48,7 @@ const GOVERNS_NOTHING = {
     'filters.tagsReadout',
     'books.lib.tagsReadout',
     'cards.session.filters.tagsSelected',
+    'cards.session.queue.decksReadout',
     'calendarPage.filters.typesSelected',
     'calendarPage.filters.areasSelected',
     'cards.studyDue',

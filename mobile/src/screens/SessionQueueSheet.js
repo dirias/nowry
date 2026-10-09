@@ -24,7 +24,7 @@ import { ScrollView, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { frontText } from '@nowry/core/domain/cardSpeech'
 import { useTheme } from '../theme'
-import { cardKey, matchesQueueSearch } from '../hooks/useSessionQueue'
+import { cardKey, deckKeyOf, matchesQueueSearch } from '../hooks/useSessionQueue'
 import { BottomSheet, Button, Chip, ChoiceRow, Divider, Input, ListRow, Segmented, Stack, Typography, resolveColor } from '../ui'
 import { CHOICE_LIST_MAX_HEIGHT } from '../ui/patterns/ChoiceSheet'
 
@@ -56,6 +56,10 @@ export function SessionQueueSheet({
   availableTags = [],
   selectedTags = [],
   onTagsChange,
+  availableDecks = [],
+  selectedDecks = [],
+  onDecksChange,
+  deckNames = {},
   onJump,
   scope = 'due',
   onScopeChange,
@@ -68,17 +72,22 @@ export function SessionQueueSheet({
   onClear
 }) {
   const { t } = useTranslation()
-  const [tagsOpen, setTagsOpen] = useState(false)
+  // Which chip's rows have taken the list's place: 'tags', 'decks' or none.
+  const [menu, setMenu] = useState(null)
+  const tagsOpen = menu === 'tags'
+  const decksOpen = menu === 'decks'
   const [search, setSearch] = useState('')
   // Said once, when the dim Marked chip is tapped under Due; gone on the next change.
   const [note, setNote] = useState(null)
 
   const markedLive = scope === 'all'
-  const narrowed = selectedTags.length > 0 || (markedLive && markedOnly)
+  const narrowed = selectedTags.length > 0 || selectedDecks.length > 0 || (markedLive && markedOnly)
   const rows = useMemo(() => (Array.isArray(cards) ? cards.filter((card) => matchesQueueSearch(card, search)) : []), [cards, search])
 
   const toggleTag = (tag) =>
     onTagsChange?.(selectedTags.includes(tag) ? selectedTags.filter((item) => item !== tag) : [...selectedTags, tag])
+  const toggleDeck = (id) =>
+    onDecksChange?.(selectedDecks.includes(id) ? selectedDecks.filter((item) => item !== id) : [...selectedDecks, id])
 
   const pressMarked = () => {
     if (markedLive) {
@@ -96,7 +105,7 @@ export function SessionQueueSheet({
   }
 
   const close = () => {
-    setTagsOpen(false)
+    setMenu(null)
     setNote(null)
     onClose?.()
   }
@@ -123,12 +132,24 @@ export function SessionQueueSheet({
         <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap'>
           <Chip
             selected={selectedTags.length > 0 || tagsOpen}
-            onPress={() => setTagsOpen((open) => !open)}
+            onPress={() => setMenu(tagsOpen ? null : 'tags')}
             accessibilityLabel={t('filters.tags')}
             accessibilityState={{ expanded: tagsOpen }}
           >
             {selectedTags.length > 0 ? t('filters.tagsReadout', { count: selectedTags.length }) : t('filters.tags')}
           </Chip>
+          {/* A mixed queue is narrowed by deck as often as by tag; a deck
+              session has one deck and no chip (ADR-042 point 6). */}
+          {daily ? (
+            <Chip
+              selected={selectedDecks.length > 0 || decksOpen}
+              onPress={() => setMenu(decksOpen ? null : 'decks')}
+              accessibilityLabel={t('groups.decks')}
+              accessibilityState={{ expanded: decksOpen }}
+            >
+              {selectedDecks.length > 0 ? t('cards.session.queue.decksReadout', { count: selectedDecks.length }) : t('groups.decks')}
+            </Chip>
+          ) : null}
           {daily ? null : (
             <Chip
               selected={markedLive && markedOnly}
@@ -153,7 +174,7 @@ export function SessionQueueSheet({
           </Typography>
         ) : null}
 
-        {tagsOpen ? null : (
+        {menu ? null : (
           <Input
             value={search}
             onChangeText={setSearch}
@@ -171,7 +192,15 @@ export function SessionQueueSheet({
                 <ChoiceRow key={tag} label={tag} count={count} chosen={selectedTags.includes(tag)} onPress={() => toggleTag(tag)} />
               ))}
               <Divider />
-              <ChoiceRow label={t('cards.session.queue.done')} role='button' onPress={() => setTagsOpen(false)} />
+              <ChoiceRow label={t('cards.session.queue.done')} role='button' onPress={() => setMenu(null)} />
+            </>
+          ) : decksOpen ? (
+            <>
+              {availableDecks.map(({ id, name, count }) => (
+                <ChoiceRow key={id} label={name} count={count} chosen={selectedDecks.includes(id)} onPress={() => toggleDeck(id)} />
+              ))}
+              <Divider />
+              <ChoiceRow label={t('cards.session.queue.done')} role='button' onPress={() => setMenu(null)} />
             </>
           ) : rows.length === 0 ? (
             <Typography level='body-sm' color='text.tertiary' style={{ textAlign: 'center', paddingVertical: 16 }}>
@@ -184,12 +213,17 @@ export function SessionQueueSheet({
               const answered = Boolean(id !== null && graded[id])
               const name = frontText(card)
               const state = current ? t('cards.session.queue.current') : answered ? t('cards.session.queue.answered') : null
+              // A mixed queue says which deck; a deck's own queue says the tag.
+              const deck = card?.deck_id
+              const deckId = deckKeyOf(card)
+              const embedded = deck && typeof deck === 'object' ? deck.name || deck.title || null : null
+              const meta = daily ? (embedded ?? deckNames[deckId] ?? null) : ((card.tags ?? [])[0] ?? null)
               return (
                 <ListRow
                   key={String(id ?? name)}
                   tile={<QueueTick current={current} answered={answered} />}
                   name={name}
-                  meta={(card.tags ?? [])[0] ?? null}
+                  meta={meta}
                   accessibilityLabel={state ? `${name} · ${state}` : name}
                   onPress={() => {
                     onJump?.(id)

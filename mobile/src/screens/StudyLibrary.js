@@ -35,7 +35,6 @@ import { CARD_TYPES, filterCardsByType } from '@nowry/core/domain/cardTypes'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { useTheme } from '../theme'
 import { DeckCreateSheet } from './DeckCreateSheet'
-import { CardPreviewSheet } from './CardPreviewSheet'
 import { BulkOverlays } from './BulkOverlays'
 import {
   ActionSheet,
@@ -76,6 +75,19 @@ export function StudyLibrary({ header }) {
   const theme = useTheme()
   const router = useRouter()
 
+  /**
+   * A card row opens the session over its deck's every card, landed on that
+   * card (MOB-110, ADR-042 point 7). The preview sheet it used to open
+   * re-stated the card's two faces with a segmented control; the session
+   * already shows a card, so it shows this one.
+   */
+  const openCard = (card) => {
+    const deck = card?.deck_id
+    const deckId = deck && typeof deck === 'object' ? (deck._id ?? deck.id) : deck
+    if (!deckId) return
+    router.push(`/study/${deckId}?scope=all&card=${encodeURIComponent(card._id ?? card.id)}`)
+  }
+
   const [view, setView] = useState(VIEWS.decks)
   const [search, setSearch] = useState('')
   const [markedOnly, setMarkedOnly] = useState(false)
@@ -85,7 +97,6 @@ export function StudyLibrary({ header }) {
   const [filtersOpen, setFiltersOpen] = useState(null)
   const [creating, setCreating] = useState(false)
   const [adding, setAdding] = useState(false)
-  const [previewing, setPreviewing] = useState(null)
 
   const selection = useCardSelection()
   const bulk = useBulkCardActions({
@@ -381,7 +392,7 @@ export function StudyLibrary({ header }) {
               }
               name={item.name}
               meta={item.meta}
-              onPress={selection.selecting ? () => selection.toggle(item.key) : () => setPreviewing(item.card)}
+              onPress={selection.selecting ? () => selection.toggle(item.key) : () => openCard(item.card)}
               onLongPress={() => selection.toggle(item.key)}
               style={selection.isSelected(item.key) ? { backgroundColor: resolveColor(theme, 'background.level1') } : undefined}
             />
@@ -509,8 +520,6 @@ export function StudyLibrary({ header }) {
       ) : null}
 
       <BulkOverlays bulk={bulk} decks={decks.decks ?? []} tags={(allTags.tags ?? []).map((row) => row.tag)} />
-
-      <CardPreviewSheet visible={Boolean(previewing)} card={previewing} onClose={() => setPreviewing(null)} />
 
       <DeckCreateSheet
         visible={creating}
