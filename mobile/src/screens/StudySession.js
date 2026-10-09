@@ -42,6 +42,7 @@ import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { storage } from '@nowry/core'
 import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
+import { sourceLineFor } from './cardSource'
 import { useCardSpeech, useSpeech } from '../hooks/useCardSpeech'
 import { useInterventions } from '../hooks/useInterventions'
 import { cardKey, fullQueueIndex, narrowQueue, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
@@ -146,7 +147,7 @@ const LONG_ANSWER = 100
  * is success. They are the only cue that reaches a reader mid-turn, and under
  * reduced motion — where nothing rotates — they are the whole of it.
  */
-function CardFace({ label, labelColor, level, text }) {
+function CardFace({ label, labelColor, level, text, source = null }) {
   return (
     <Card padding={3} elevation='sm' style={{ flex: 1, justifyContent: 'center' }}>
       <Stack spacing={2} style={{ alignItems: 'center' }}>
@@ -156,6 +157,13 @@ function CardFace({ label, labelColor, level, text }) {
         <Typography level={level} style={{ textAlign: 'center' }}>
           {text}
         </Typography>
+        {/* Where the card came from, as the web says it under its card
+            (MOB-111): one quiet line, on both faces, only when there is one. */}
+        {source ? (
+          <Typography level='body-xs' color='text.tertiary' style={{ textAlign: 'center' }}>
+            {source}
+          </Typography>
+        ) : null}
       </Stack>
     </Card>
   )
@@ -614,6 +622,14 @@ export function StudySession() {
    * reader is actually scanning for; the sentence is what a screen reader needs,
    * and it stays as this line's accessible name (MOB-086).
    */
+  const source = useMemo(() => sourceLineFor(t, current), [t, current])
+  /*
+   * A filtered session that ends is finished for ITS cards, not the deck's
+   * (ADR-014 point 4). Graded cards stay in the queue, so the difference is
+   * exactly the due cards the filter hid — the web's own arithmetic.
+   */
+  const dueOutsideFilter = scope === 'due' && queueView.isFiltering && allCards ? allCards.length - total : 0
+
   const counter = useMemo(() => t('cards.session.cardShort', { current: index + 1, total }), [t, index, total])
   const counterSaid = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
 
@@ -685,6 +701,11 @@ export function StudySession() {
           <Typography level='body-md' color='text.secondary'>
             {t('cards.session.complete.body', { count: Object.keys(graded).length })}
           </Typography>
+          {dueOutsideFilter > 0 ? (
+            <Typography level='body-sm' color='text.tertiary'>
+              {t('cards.session.complete.outsideFilter', { count: dueOutsideFilter })}
+            </Typography>
+          ) : null}
           {queued > 0 ? (
             <Typography level='body-sm' color='text.tertiary' accessibilityLiveRegion='polite'>
               {t('cards.session.syncing', { count: queued })}
@@ -831,7 +852,13 @@ export function StudySession() {
               style={{ flex: 1 }}
               flipped={revealed}
               front={
-                <CardFace label={t('cards.session.labels.question')} labelColor='primary.plainColor' level='h4' text={frontOf(current)} />
+                <CardFace
+                  label={t('cards.session.labels.question')}
+                  labelColor='primary.plainColor'
+                  level='h4'
+                  text={frontOf(current)}
+                  source={source}
+                />
               }
               back={
                 <CardFace
@@ -841,6 +868,7 @@ export function StudySession() {
                   // body size; a short one is a term and holds the card.
                   level={backOf(current).length > LONG_ANSWER ? 'body-lg' : 'h4'}
                   text={backOf(current)}
+                  source={source}
                 />
               }
             />
