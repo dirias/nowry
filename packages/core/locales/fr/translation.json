@@ -2375,7 +2375,16 @@
       },
       "syncing_one": "Synchronisation de {{count}} révision...",
       "syncing_other": "Synchronisation de {{count}} révisions...",
-      "cardShort": "{{current}} / {{total}}"
+      "cardShort": "{{current}} / {{total}}",
+      "queue": {
+        "title": "File",
+        "open": "Ouvre la file",
+        "search": "Chercher dans cette file",
+        "noMatch": "Rien dans cette file ne correspond.",
+        "done": "Terminé",
+        "answered": "Répondue",
+        "current": "Carte en cours"
+      }
     },
     "common": {
       "addTags": "Ajouter des étiquettes",

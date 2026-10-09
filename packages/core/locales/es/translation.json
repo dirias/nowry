@@ -1564,7 +1564,16 @@
         }
       },
       "showAnswer": "Ver respuesta",
-      "cardShort": "{{current}} / {{total}}"
+      "cardShort": "{{current}} / {{total}}",
+      "queue": {
+        "title": "Cola",
+        "open": "Abre la cola",
+        "search": "Buscar en esta cola",
+        "noMatch": "Nada en esta cola coincide.",
+        "done": "Listo",
+        "answered": "Respondida",
+        "current": "Tarjeta actual"
+      }
     },
     "deleteModal": {
       "title": "Eliminar mazo",

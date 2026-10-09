@@ -1,5 +1,6 @@
 /**
- * The session's tag filter keeps its footing when the queue narrows (MOB-107).
+ * The session's queue keeps its footing when it narrows, and its search finds
+ * without filtering (MOB-107, MOB-108).
  *
  * The hook itself is two memos over the shared utilities; what is tested here
  * is the two placements the session relies on, which are the part that can be
@@ -8,7 +9,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const { cardKey, positionAfter, fullQueueIndex } = require('../useSessionTagFilter')
+const { cardKey, positionAfter, fullQueueIndex, matchesQueueSearch } = require('../useSessionQueue')
 
 const queue = [{ _id: 'a', tags: ['verbs'] }, { _id: 'b', tags: ['nouns'] }, { id: 'c', tags: ['verbs', 'nouns'] }, { _id: 'd' }]
 
@@ -59,10 +60,37 @@ describe('what the resume record stores', () => {
 })
 
 describe('the mark stays out of the study queue (ADR-010)', () => {
-  const source = fs.readFileSync(path.resolve(__dirname, '../useSessionTagFilter.js'), 'utf8')
+  const source = fs.readFileSync(path.resolve(__dirname, '../useSessionQueue.js'), 'utf8')
 
   it('imports the tag utilities only', () => {
     expect(source).toMatch(/import \{ countTags, filterCardsByTags \} from '@nowry\/core\/utils\/tagFilter'/)
     expect(source).not.toMatch(/filterCardsByMark|countMarked/)
+  })
+})
+
+describe('a search finds a card by either face or a tag', () => {
+  const card = { title: '〜地方 (東北地方)', content: 'Region. Tōhoku is north of Kantō.', tags: ['jpn', 'Genki'] }
+
+  it('matches case-insensitively on the front, the back and the tags', () => {
+    expect(matchesQueueSearch(card, '東北')).toBe(true)
+    expect(matchesQueueSearch(card, 'tōhoku')).toBe(true)
+    expect(matchesQueueSearch(card, 'genki')).toBe(true)
+    expect(matchesQueueSearch(card, 'verbs')).toBe(false)
+  })
+
+  it('matches everything with nothing typed, so an empty search is no search', () => {
+    expect(matchesQueueSearch(card, '')).toBe(true)
+    expect(matchesQueueSearch(card, '   ')).toBe(true)
+    expect(matchesQueueSearch(card, undefined)).toBe(true)
+  })
+
+  it('reads the older field names too', () => {
+    expect(matchesQueueSearch({ question: 'きっかけ', answer: 'trigger' }, 'trigger')).toBe(true)
+    expect(matchesQueueSearch({ front: 'a', back: 'b' }, 'b')).toBe(true)
+  })
+
+  it('survives a card with no text and no tags', () => {
+    expect(matchesQueueSearch({}, 'x')).toBe(false)
+    expect(matchesQueueSearch(null, 'x')).toBe(false)
   })
 })

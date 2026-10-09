@@ -1768,7 +1768,16 @@
         }
       },
       "showAnswer": "Show answer",
-      "cardShort": "{{current}} / {{total}}"
+      "cardShort": "{{current}} / {{total}}",
+      "queue": {
+        "title": "Queue",
+        "open": "Opens the queue",
+        "search": "Search this queue",
+        "noMatch": "Nothing in this queue matches.",
+        "done": "Done",
+        "answered": "Answered",
+        "current": "Current card"
+      }
     },
     "deleteModal": {
       "title": "Delete Deck",

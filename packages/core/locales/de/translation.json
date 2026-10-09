@@ -2364,7 +2364,16 @@
       },
       "syncing_one": "{{count}} Wiederholung wird synchronisiert...",
       "syncing_other": "{{count}} Wiederholungen werden synchronisiert...",
-      "cardShort": "{{current}} / {{total}}"
+      "cardShort": "{{current}} / {{total}}",
+      "queue": {
+        "title": "Warteschlange",
+        "open": "Öffnet die Warteschlange",
+        "search": "In dieser Warteschlange suchen",
+        "noMatch": "Nichts in dieser Warteschlange passt.",
+        "done": "Fertig",
+        "answered": "Beantwortet",
+        "current": "Aktuelle Karte"
+      }
     },
     "common": {
       "addTags": "Tags hinzufügen",

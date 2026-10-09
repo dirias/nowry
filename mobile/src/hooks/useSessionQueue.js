@@ -1,5 +1,5 @@
 /**
- * Narrowing a session's queue by tag, on the phone (MOB-107, ADR-014).
+ * The session's queue as the learner sees it, on the phone (MOB-107, MOB-108; ADR-014, ADR-042).
  *
  * The web's session has had this since ADR-014: the tag filter is a client-side
  * view over the due queue the server returned, the subset keeps the server's
@@ -20,8 +20,15 @@
  * The web's `useSessionFilters` is not reused because it reads the selection
  * from `react-router-dom`'s search params; on the phone the selection is state,
  * because a filter is not a place the Back button should retreat through.
+ *
+ * MOB-108 made the count readout the door to this queue (ADR-042): the sheet it
+ * opens lists `visibleCards`, and a search over that list is answered here too.
+ * **Search finds; it does not filter.** It narrows the sheet's list so a card can
+ * be found and jumped to, and never the session — one keystroke must not turn
+ * the readout into "1 / 1".
  */
 import { useCallback, useMemo, useState } from 'react'
+import { backText, frontText } from '@nowry/core/domain/cardSpeech'
 import { countTags, filterCardsByTags } from '@nowry/core/utils/tagFilter'
 
 /** The two spellings a card's id has worn. */
@@ -54,10 +61,20 @@ export function fullQueueIndex(allCards, visible, index) {
   return at >= 0 ? at : allCards.length
 }
 
+/** Whether a card answers a search: its two faces and its tags, case-insensitively. */
+export function matchesQueueSearch(card, needle) {
+  const query = String(needle ?? '')
+    .trim()
+    .toLowerCase()
+  if (!query) return true
+  const haystack = [frontText(card), backText(card), ...(Array.isArray(card?.tags) ? card.tags : [])]
+  return haystack.some((text) => typeof text === 'string' && text.toLowerCase().includes(query))
+}
+
 /**
  * @param {Array<object> | null} cards - the queue as the server returned it; null while loading
  */
-export function useSessionTagFilter(cards) {
+export function useSessionQueue(cards) {
   const [selectedTags, setSelectedTags] = useState([])
 
   const availableTags = useMemo(() => countTags(cards), [cards])
@@ -77,4 +94,4 @@ export function useSessionTagFilter(cards) {
   }
 }
 
-export default useSessionTagFilter
+export default useSessionQueue

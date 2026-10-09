@@ -44,7 +44,8 @@ import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
 import { useCardSpeech, useSpeech } from '../hooks/useCardSpeech'
 import { useInterventions } from '../hooks/useInterventions'
-import { cardKey, fullQueueIndex, positionAfter, useSessionTagFilter } from '../hooks/useSessionTagFilter'
+import { cardKey, fullQueueIndex, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
+import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
 import {
@@ -52,10 +53,7 @@ import {
   Button,
   Card,
   Chip,
-  ChoiceRow,
-  ChoiceSheet,
   CompanionNote,
-  Divider,
   FlipCard,
   Icon,
   MarkToggle,
@@ -227,10 +225,13 @@ export function StudySession() {
    * VISIBLE queue — what the counter, the grades and the summary count — and
    * `allCards` is what the server sent. The two are the same array until a
    * tag is chosen, so nothing downstream pays for the distinction.
+   *
+   * The count readout opens it as a sheet (MOB-108, ADR-042): the one control
+   * that already described the queue is the way into it.
    */
-  const tagFilter = useSessionTagFilter(allCards)
-  const cards = tagFilter.visibleCards
-  const [tagsOpen, setTagsOpen] = useState(false)
+  const queueView = useSessionQueue(allCards)
+  const cards = queueView.visibleCards
+  const [queueOpen, setQueueOpen] = useState(false)
 
   useEffect(() => {
     if (!allCards) return
@@ -476,9 +477,21 @@ export function StudySession() {
       const at = positionAfter(next, cardId)
       if (cardKey(next?.[at]) !== cardId) setRevealed(false)
       setIndex(at)
-      tagFilter.setSelectedTags(tags)
+      queueView.setSelectedTags(tags)
     },
-    [allCards, cardId, tagFilter]
+    [allCards, cardId, queueView]
+  )
+
+  /** A row in the queue sheet, tapped: that card, face up (MOB-108). */
+  const jumpTo = useCallback(
+    (id) => {
+      const at = cards.findIndex((card) => cardKey(card) === id)
+      if (at < 0) return
+      setIndex(at)
+      setRevealed(false)
+      setHinted(true)
+    },
+    [cards]
   )
 
   /*
@@ -516,7 +529,7 @@ export function StudySession() {
     )
   }
 
-  if (total === 0 && tagFilter.isFiltering) {
+  if (total === 0 && queueView.isFiltering) {
     // Nothing matches, which is not "all caught up": the queue is still there
     // behind the filter, and the way out is to loosen it (ADR-014, point 5).
     return (
@@ -605,14 +618,24 @@ export function StudySession() {
          */}
         <Stack spacing={1}>
           <Stack direction='row' spacing={1} alignItems='center'>
-            <Typography
-              level='title-sm'
-              color='text.primary'
-              accessibilityLabel={counterSaid}
-              style={{ flex: 1, fontVariant: ['tabular-nums'] }}
+            {/*
+             * The readout is the door (MOB-108, ADR-042). It is the row's only
+             * left-hand control, so it reads as the screen's subject rather
+             * than one chip among four; the chevron is the one thing that says
+             * it opens. Selected while the sheet is up.
+             */}
+            <Chip
+              size='md'
+              selected={queueOpen}
+              onPress={() => setQueueOpen(true)}
+              accessibilityLabel={`${counterSaid}. ${t('cards.session.queue.open')}`}
+              accessibilityState={{ expanded: queueOpen }}
+              endGlyph={<Icon name='ChevronDown' size='sm' color='text.tertiary' />}
+              textStyle={{ fontVariant: ['tabular-nums'] }}
+              style={{ marginRight: 'auto' }}
             >
               {counter}
-            </Typography>
+            </Chip>
             {/*
              * Listen (MOB-077). In the session's one header row beside the
              * mark, not floating over the card as it does on the web: the card
@@ -645,21 +668,6 @@ export function StudySession() {
            * bar's VALUE, which `Progress` already announces.
            */}
           <Progress value={total > 0 ? ((index + 1) / total) * 100 : 0} accessibilityLabel={t('annualPlanning.goal.progress')} />
-
-          {/*
-           * The web's filter object, reduced to the one dimension study mode
-           * has (ADR-014): a Tags chip whose label is its readout, opening the
-           * same sheet the library uses. Only when there is something to
-           * choose — a queue with no tags has nothing to narrow by, and the
-           * web draws no bar for it either.
-           */}
-          {tagFilter.availableTags.length > 0 ? (
-            <Stack direction='row' spacing={1} alignItems='center'>
-              <Chip selected={tagFilter.isFiltering} onPress={() => setTagsOpen(true)} accessibilityLabel={t('filters.tags')}>
-                {tagFilter.isFiltering ? t('filters.tagsReadout', { count: tagFilter.selectedTags.length }) : t('filters.tags')}
-              </Chip>
-            </Stack>
-          ) : null}
         </Stack>
 
         {/* The card fills what is left, so the grades sit in the bottom third
@@ -798,25 +806,19 @@ export function StudySession() {
         </View>
       </Stack>
 
-      {/* Any number of tags, so the sheet stays open while they are ticked;
-          clearing lives inside it, as the web's menu and the library's sheet
-          both keep it. */}
-      <ChoiceSheet
-        visible={tagsOpen}
-        multiple
-        onClose={() => setTagsOpen(false)}
-        title={t('filters.tags')}
-        value={tagFilter.selectedTags}
-        onChange={chooseTags}
-        options={tagFilter.availableTags.map(({ tag, count }) => ({ value: tag, label: tag, count }))}
-        extra={
-          tagFilter.isFiltering ? (
-            <>
-              <Divider />
-              <ChoiceRow label={t('filters.clear')} role='button' onPress={() => chooseTags([])} />
-            </>
-          ) : null
-        }
+      {/* The queue: its filters at the head, its cards below, a tap to jump.
+          Clearing lives inside it, as the web's menu and the library's sheet
+          both keep it (MOB-108). */}
+      <SessionQueueSheet
+        visible={queueOpen}
+        onClose={() => setQueueOpen(false)}
+        cards={cards}
+        currentId={cardId}
+        graded={graded}
+        availableTags={queueView.availableTags}
+        selectedTags={queueView.selectedTags}
+        onTagsChange={chooseTags}
+        onJump={jumpTo}
       />
     </Screen>
   )

@@ -25,7 +25,18 @@ const SIZES = {
   md: { height: 32, paddingX: 12, level: 'title-sm' }
 }
 
-export function Chip({ children, onPress, selected = false, size = 'sm', accessibilityLabel, startGlyph, endGlyph, style, ...rest }) {
+export function Chip({
+  children,
+  onPress,
+  selected = false,
+  size = 'sm',
+  accessibilityLabel,
+  startGlyph,
+  endGlyph,
+  style,
+  textStyle,
+  ...rest
+}) {
   const theme = useTheme()
   const spec = SIZES[size]
 
@@ -50,7 +61,12 @@ export function Chip({ children, onPress, selected = false, size = 'sm', accessi
       }}
     >
       {startGlyph}
-      <Typography level={spec.level} color={selected ? 'text.primary' : 'text.secondary'} numberOfLines={1} style={{ flexShrink: 1 }}>
+      <Typography
+        level={spec.level}
+        color={selected ? 'text.primary' : 'text.secondary'}
+        numberOfLines={1}
+        style={[{ flexShrink: 1 }, textStyle]}
+      >
         {children}
       </Typography>
       {endGlyph}

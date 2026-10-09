@@ -2404,7 +2404,16 @@
         "alreadyAnswered": "評価済み"
       },
       "syncing_other": "{{count}} 件の復習を同期しています...",
-      "cardShort": "{{current}} / {{total}}"
+      "cardShort": "{{current}} / {{total}}",
+      "queue": {
+        "title": "キュー",
+        "open": "キューを開く",
+        "search": "このキューを検索",
+        "noMatch": "このキューに一致するカードはありません。",
+        "done": "完了",
+        "answered": "回答済み",
+        "current": "現在のカード"
+      }
     },
     "flashcard": {
       "createTitle": "新しいフラッシュカード",
