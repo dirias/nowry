@@ -34,7 +34,25 @@ import useDeckSettings, { PACE_DEFAULTS } from '@nowry/core/hooks/useDeckSetting
 import { decksService } from '@nowry/core/api/services'
 import { subscribeToDeviceVoices } from '../platform/voices'
 import { useTheme } from '../theme'
-import { Button, Checkbox, Divider, FormField, Input, Screen, Segmented, Select, Skeleton, Stack, Typography } from '../ui'
+import {
+  Button,
+  Checkbox,
+  Divider,
+  FormField,
+  Input,
+  ListRow,
+  RestSheet,
+  Screen,
+  Segmented,
+  Select,
+  Skeleton,
+  Stack,
+  Typography,
+  restLabel
+} from '../ui'
+import { deckRest } from '@nowry/core/domain/cardRest'
+import { invalidateCardCaches } from '@nowry/core/api/cardCache'
+import { REST_WRITE_RESOURCES } from '@nowry/core/hooks/useCardRest'
 
 const PACE_MODES = Object.keys(PACE_DEFAULTS)
 
@@ -46,7 +64,7 @@ const LIMITS = [
 
 export function DeckSettings() {
   const { deckId } = useLocalSearchParams()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const router = useRouter()
   const theme = useTheme()
   const [archiving, setArchiving] = useState(false)
@@ -82,6 +100,23 @@ export function DeckSettings() {
    * kept, and it leaves the default list. The confirmation says that, because
    * "Archive" alone reads like a synonym for delete to most people.
    */
+  const [restOpen, setRestOpen] = useState(false)
+  const [restError, setRestError] = useState(false)
+  // The deck as the last rest write returned it: this screen's own deck is
+  // loaded once, so the row reads the write's answer until it is reopened.
+  const [restedDeck, setRestedDeck] = useState(null)
+  const shownDeck = restedDeck ?? deck
+  const writeDeckRest = async (write) => {
+    setRestError(false)
+    try {
+      const updated = await write()
+      if (updated) setRestedDeck(updated)
+      await invalidateCardCaches(REST_WRITE_RESOURCES)
+    } catch {
+      setRestError(true)
+    }
+  }
+
   const confirmArchive = () => {
     Alert.alert(t('cards.deck.archive'), t('study.deck.historyKept'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -184,6 +219,25 @@ export function DeckSettings() {
           </FormField>
         ))}
 
+        {/* The deck rests (SR-003, ADR-043): a row, like Settings on the deck
+            screen, reading the deck's own rest; the sheet is the card's and
+            the tag's. Unlike archive below, the deck stays in the library. */}
+        <View>
+          <Divider />
+          <ListRow
+            name={deckRest(shownDeck).resting ? restLabel(t, deckRest(shownDeck), i18n.language) : t('cards.rest.restDeck')}
+            meta={t('cards.rest.restDeckHint')}
+            onPress={() => setRestOpen(true)}
+            accessibilityLabel={t('cards.rest.restDeck')}
+          />
+          <Divider />
+        </View>
+        {restError ? (
+          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+            {t('cards.rest.error')}
+          </Typography>
+        ) : null}
+
         <Divider />
 
         <Typography level='title-md'>{t('deckSettings.nav.audio')}</Typography>
@@ -241,6 +295,16 @@ export function DeckSettings() {
           {t('cards.deck.archive')}
         </Button>
       </Stack>
+
+      <RestSheet
+        visible={restOpen}
+        onClose={() => setRestOpen(false)}
+        title={deck?.name ?? null}
+        resting={deckRest(shownDeck).resting}
+        onRest={(until) => writeDeckRest(() => decksService.rest(String(deckId), until))}
+        onWake={() => writeDeckRest(() => decksService.wake(String(deckId)))}
+        hint={t('cards.rest.restDeckHint')}
+      />
     </Screen>
   )
 }

@@ -185,7 +185,8 @@
       "restoreAria": "Restaurar {{name}}",
       "dueIn": "En {{hours}} h",
       "newCount_one": "{{count}} nueva",
-      "newCount_other": "{{count}} nuevas"
+      "newCount_other": "{{count}} nuevas",
+      "resting": "En descanso"
     },
     "views": {
       "dashboard": "Panel",
@@ -1705,6 +1706,32 @@
       "title_other": "Mover {{count}} tarjetas a un mazo",
       "confirm_one": "Mover {{count}} tarjeta",
       "confirm_other": "Mover {{count}} tarjetas"
+    },
+    "rest": {
+      "action": "Descansar",
+      "actionOn": "En descanso",
+      "restCard": "Descansar esta tarjeta",
+      "restUntil": "Descansar hasta…",
+      "wake": "Despertar",
+      "untilWoken": "Hasta que la despiertes",
+      "week": "Una semana",
+      "twoWeeks": "Dos semanas",
+      "month": "Un mes",
+      "resting": "En descanso",
+      "restingUntil": "En descanso hasta el {{date}}",
+      "sheetTitle": "Descanso",
+      "restTag": "Descansar esta etiqueta",
+      "restDeck": "Descansar este mazo",
+      "restDeckHint": "Sus tarjetas salen del repaso diario y de los conteos. Su calendario se conserva.",
+      "kept": "Conserva su calendario. Despiértala cuando quieras.",
+      "lighten": "Aligerar hoy",
+      "count_one": "{{count}} en descanso",
+      "count_other": "{{count}} en descanso",
+      "landing_one": "{{count}} tarjeta atrasada se repartió en los próximos días. No se perdió nada.",
+      "landing_other": "{{count}} tarjetas atrasadas se repartieron en {{days}} días. No se perdió nada.",
+      "error": "No se pudo cambiar el descanso. Inténtalo de nuevo.",
+      "lightened_one": "{{count}} tarjeta pasó a los próximos días.",
+      "lightened_other": "{{count}} tarjetas pasaron a los próximos días."
     }
   },
   "filters": {

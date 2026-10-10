@@ -53,8 +53,14 @@ export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0, 
     staleTime: 15 * 60 * 1000
   })
 
+  // A deck's queue is a plain list; the daily review is wrapped with what the
+  // day said about it (SR-002): the resting count and the landing, if any.
+  const cards = Array.isArray(data) ? data : (data?.items ?? null)
+
   return {
-    cards: data ?? null,
+    cards,
+    resting: Array.isArray(data) ? 0 : (data?.resting ?? 0),
+    spread: Array.isArray(data) ? null : (data?.spread ?? null),
     loading: isLoading,
     /** True only when there is nothing to show: cached cards beat an error. */
     error: data ? null : (error ?? null),

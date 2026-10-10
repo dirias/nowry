@@ -264,7 +264,8 @@
       "dueIn": "Due in {{hours}}h",
       "mastery": "Mastery",
       "newCount_one": "{{count}} new",
-      "newCount_other": "{{count}} new"
+      "newCount_other": "{{count}} new",
+      "resting": "Resting"
     },
     "sections": {
       "dueNow": "Due now",
@@ -1909,6 +1910,32 @@
       "title_other": "Move {{count}} cards to a deck",
       "confirm_one": "Move {{count}} card",
       "confirm_other": "Move {{count}} cards"
+    },
+    "rest": {
+      "action": "Rest",
+      "actionOn": "Resting",
+      "restCard": "Rest this card",
+      "restUntil": "Rest until…",
+      "wake": "Wake",
+      "untilWoken": "Until woken",
+      "week": "A week",
+      "twoWeeks": "Two weeks",
+      "month": "A month",
+      "resting": "Resting",
+      "restingUntil": "Resting until {{date}}",
+      "sheetTitle": "Rest",
+      "restTag": "Rest this tag",
+      "restDeck": "Rest this deck",
+      "restDeckHint": "Its cards leave the daily review and the counts. Their schedule is kept.",
+      "kept": "Keeps its schedule. Wake it any time.",
+      "lighten": "Lighten today",
+      "count_one": "{{count}} resting",
+      "count_other": "{{count}} resting",
+      "landing_one": "{{count}} overdue card was spread over the coming days. Nothing was dropped.",
+      "landing_other": "{{count}} overdue cards were spread over {{days}} days. Nothing was dropped.",
+      "error": "Couldn't change the rest. Try again.",
+      "lightened_one": "Moved {{count}} card to the coming days.",
+      "lightened_other": "Moved {{count}} cards to the coming days."
     }
   },
   "filters": {

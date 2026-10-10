@@ -371,11 +371,55 @@ export const cardsService = {
    *   deckId?: string, tags?: string[] }} request
    * @returns {Promise<{updated: number}>}
    */
-  async bulk({ ids, action, deckId, tags }) {
+  async bulk({ ids, action, deckId, tags, until }) {
     const body = { ids, action }
     if (deckId !== undefined) body.deck_id = deckId
     if (tags !== undefined) body.tags = tags
+    if (until !== undefined && until !== null) body.until = until instanceof Date ? until.toISOString() : until
     const { data } = await apiClient.post('/study-cards/bulk', body)
+    return data
+  },
+
+  /**
+   * Rest a card: out of play, schedule kept (SR-003, ADR-043). `until` is a
+   * Date, or null for "until woken". The card's own hold only.
+   */
+  async rest(id, until = null) {
+    const { data } = await apiClient.put(`/study-cards/${id}/rest`, { until: until ? until.toISOString() : null })
+    return data
+  },
+
+  /** Wake a card: its own hold goes; a tag's or a deck's stays. */
+  async wake(id) {
+    const { data } = await apiClient.delete(`/study-cards/${id}/rest`)
+    return data
+  },
+
+  /**
+   * Rest a tag: every card carrying it leaves play (SR-003).
+   * @returns {Promise<{tag: string, rest_until: string | null, cards: number}>}
+   */
+  async restTag(tag, until = null) {
+    const { data } = await apiClient.put(`/study-cards/tags/${encodeURIComponent(tag)}/rest`, { until: until ? until.toISOString() : null })
+    return data
+  },
+
+  /** Wake a tag; the woken cards land softly (SR-002). */
+  async wakeTag(tag) {
+    const { data } = await apiClient.delete(`/study-cards/tags/${encodeURIComponent(tag)}/rest`)
+    return data
+  },
+
+  /**
+   * The soft landing, asked for (SR-002): spread the overdue pile forward.
+   * `perDay` below the deck's cap is "Lighten today".
+   * @returns {Promise<{cards: number, days: number, decks: number}>}
+   */
+  async spread({ deckId, perDay, includeToday = false } = {}) {
+    const body = { include_today: includeToday }
+    if (deckId) body.deck_id = deckId
+    if (perDay) body.per_day = perDay
+    const { data } = await apiClient.post('/study-cards/spread', body)
     return data
   },
 
@@ -545,7 +589,15 @@ export const cardsService = {
     if (group) params.append('group', group)
     const query = params.toString()
     const { data } = await apiClient.get(`/study-cards/daily-review${query ? `?${query}` : ''}`)
-    return data.cards || []
+    // The cards, and what the day said about them: how many rest, and whether a
+    // pile was spread on arrival (SR-002). `items` is the name the web's session
+    // already reads for a wrapped list.
+    return {
+      items: data.cards || [],
+      total: data.total ?? (data.cards || []).length,
+      resting: data.resting ?? 0,
+      spread: data.spread ?? null
+    }
   },
 
   /**

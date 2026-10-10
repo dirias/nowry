@@ -25,6 +25,8 @@ import { studySummary } from '@nowry/core/domain/studySummary'
 import { sessionLine } from '@nowry/core/domain/sessionLog'
 import { studySessionsService } from '@nowry/core/api/services'
 import { useForecast } from '@nowry/core/hooks/useForecast'
+import { useGroups } from '@nowry/core/hooks/useGroups'
+import { restingTotal } from '@nowry/core/domain/cardRest'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { DAILY_REVIEW } from './StudySession'
@@ -59,6 +61,9 @@ export function StudyDashboard() {
   const { statistics, loading: statsLoading, error: statsError } = useStatistics()
   const { forecast, loading: forecastLoading } = useForecast(7)
   const decks = useDeckData()
+  // Named beside due, never folded into it (SR-003, ADR-043 point 7).
+  const groups = useGroups({ enabled: true })
+  const resting = restingTotal(groups.groups)
 
   const [sessions, setSessions] = useState(null)
   const [sessionTotal, setSessionTotal] = useState(0)
@@ -152,6 +157,7 @@ export function StudyDashboard() {
               <Readout leading>{today.asked === 0 ? t('study.today.allDone') : t('study.dueCount', { count: today.due })}</Readout>
               {today.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: today.fresh })}</Readout> : null}
               <Readout>{t('study.today.reviewed', { count: today.reviewedToday })}</Readout>
+              {resting > 0 ? <Readout>{t('cards.rest.count', { count: resting })}</Readout> : null}
               {/*
                * The streak carries the web's flame and the web's nudge. Both
                * were missing: the readout was the bare count, so a live streak

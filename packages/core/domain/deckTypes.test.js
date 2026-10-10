@@ -36,13 +36,14 @@ describe('deckCounts', () => {
       fresh: 2,
       total: 41,
       mastery: 41,
+      resting: 0,
       asked: 11,
       allNew: false
     })
   })
 
   it('is all zeroes for a deck that is missing them, not NaN', () => {
-    expect(deckCounts({})).toEqual({ due: 0, fresh: 0, total: 0, mastery: 0, asked: 0, allNew: false })
+    expect(deckCounts({})).toEqual({ due: 0, fresh: 0, total: 0, mastery: 0, resting: 0, asked: 0, allNew: false })
     expect(deckCounts(null).asked).toBe(0)
   })
 

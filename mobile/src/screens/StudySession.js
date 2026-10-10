@@ -39,6 +39,9 @@ import { studyCardContext } from '@nowry/core/domain/screenContext'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
+import { invalidateCardCaches } from '@nowry/core/api/cardCache'
+import { REST_WRITE_RESOURCES } from '@nowry/core/hooks/useCardRest'
+import { spreadOf } from '@nowry/core/domain/cardRest'
 import { storage } from '@nowry/core'
 import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
@@ -239,6 +242,10 @@ export function StudySession() {
   const queue = scope === 'all' ? allQueue : dueQueue
   const allCards = queue.cards
   const error = Boolean(queue.error)
+  // What the day said on arrival (SR-002): a pile spread forward, if one was.
+  const landing = spreadOf(dueQueue)
+  const [landingSeen, setLandingSeen] = useState(false)
+  const [lightening, setLightening] = useState(false)
 
   /*
    * The queue, narrowed by tag (MOB-107, ADR-014). `cards` below is the
@@ -455,6 +462,7 @@ export function StudySession() {
       setIndex(next)
       setRevealed(false)
       setHinted(true)
+      setLandingSeen(true)
       // In the full queue's terms, because that is how it will be read back.
       writeResume(id, { index: fullQueueIndex(allCards, cards, next), graded: answers, startedAt: startedAt.current })
 
@@ -503,6 +511,7 @@ export function StudySession() {
     setIndex((n) => Math.min(scope === 'all' ? Math.max(0, total - 1) : total, n + 1))
     setRevealed(false)
     setHinted(true)
+    setLandingSeen(true)
   }, [total, scope])
 
   const back = useCallback(() => {
@@ -602,6 +611,56 @@ export function StudySession() {
     },
     [allCards, queueView, scope, cardId]
   )
+
+  /**
+   * Rest or wake one card from the queue sheet (SR-003). Rest is membership:
+   * after the write every count is refetched, and under Due the rested card
+   * leaves the queue. The session follows the NEXT card so resting the card in
+   * hand does not drop the learner at the top, and resting the last card does
+   * not end the session.
+   */
+  const settleRest = useCallback(
+    async (id, write) => {
+      const at = cards.findIndex((card) => cardKey(card) === id)
+      const next = at >= 0 ? (cards[at + 1] ?? cards[at - 1] ?? null) : null
+      if (id === cardId && next) pendingAnchor.current = cardKey(next)
+      try {
+        await write()
+        await invalidateCardCaches(REST_WRITE_RESOURCES)
+      } catch {
+        pendingAnchor.current = null
+      }
+    },
+    [cards, cardId]
+  )
+  const restCard = useCallback((id, until) => settleRest(id, () => cardsService.rest(id, until)), [settleRest])
+  const wakeCard = useCallback((id) => settleRest(id, () => cardsService.wake(id)), [settleRest])
+  const editCard = useCallback(
+    (id) => {
+      setQueueOpen(false)
+      router.push(`/study/card/${id}`)
+    },
+    [router]
+  )
+
+  /**
+   * Lighten today (SR-002): the soft landing with a smaller cap, today's
+   * overflow included, over every active deck. Half of what is in front of
+   * the learner moves to the coming days; the queue is refetched.
+   */
+  const lightenToday = useCallback(async () => {
+    if (lightening || total === 0) return
+    setLightening(true)
+    try {
+      await cardsService.spread({ perDay: Math.max(1, Math.ceil(total / 2)), includeToday: true })
+      pendingAnchor.current = cardId
+      await invalidateCardCaches(REST_WRITE_RESOURCES)
+    } catch {
+      /* The queue is as it was; the key is still there to try again. */
+    } finally {
+      setLightening(false)
+    }
+  }, [lightening, total, cardId])
 
   /** A row in the queue sheet, tapped: that card, face up (MOB-108). */
   const jumpTo = useCallback(
@@ -879,7 +938,21 @@ export function StudySession() {
             once on the first card, the note that this card already has a
             grade, or nothing at all. */}
         <View style={{ minHeight: NOTICE_BAND, justifyContent: 'center' }}>
-          {buddy.message ? (
+          {landing && !landingSeen && index === 0 && !buddy.message ? (
+            /*
+             * The number is a plan, not a debt (PRD P3): a pile spread on
+             * arrival is said once, here, with the one key that lightens the
+             * day further. Dismissed by the first move, like the hint.
+             */
+            <Stack spacing={0.5} style={{ alignItems: 'center' }}>
+              <Typography level='body-xs' color='text.secondary' accessibilityLiveRegion='polite' style={{ textAlign: 'center' }}>
+                {t('cards.rest.landing', { count: landing.cards, days: landing.days })}
+              </Typography>
+              <Button size='sm' variant='tertiary' onPress={lightenToday} loading={lightening} accessibilityLabel={t('cards.rest.lighten')}>
+                {t('cards.rest.lighten')}
+              </Button>
+            </Stack>
+          ) : buddy.message ? (
             /*
              * A fourth possible content, and it takes the band because it is
              * the only one of the four the learner did not already know. The
@@ -1012,6 +1085,9 @@ export function StudySession() {
           if (queueView.selectedDecks.length > 0) chooseDecks([])
           if (queueView.markedOnly) chooseMarked(false)
         }}
+        onRest={restCard}
+        onWake={wakeCard}
+        onEdit={editCard}
       />
     </Screen>
   )

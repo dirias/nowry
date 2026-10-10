@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next'
 import { useCardData } from '@nowry/core/hooks/useCardData'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useGroups } from '@nowry/core/hooks/useGroups'
+import { isResting } from '@nowry/core/domain/cardRest'
 import { useTags } from '@nowry/core/hooks/useTags'
 import { useBulkCardActions } from '@nowry/core/hooks/useBulkCardActions'
 import { useCardSelection } from '@nowry/core/hooks/useCardSelection'
@@ -201,6 +202,11 @@ export function StudyLibrary({ header }) {
   }, [view, decks.decks, cards.cards, groups.groups, order, search, filterType, selectedTags, router, t])
 
   const cardIds = useMemo(() => (cards.cards ?? []).map((card) => card._id ?? card.id), [cards.cards])
+  // Rest reads Wake once everything picked already rests (SR-003), as Mark does.
+  const allResting = useMemo(() => {
+    const picked = (cards.cards ?? []).filter((card) => selection.isSelected(card._id ?? card.id))
+    return picked.length > 0 && picked.every((card) => isResting(card))
+  }, [cards.cards, selection])
   const { retain } = selection
   useEffect(() => {
     retain(cardIds)
@@ -510,10 +516,12 @@ export function StudyLibrary({ header }) {
       {selection.selecting ? (
         <SelectionBar
           disabled={bulk.pending}
+          allResting={allResting}
           onAction={(action) => {
             if (action === 'move') return bulk.requestMove(selectedIds)
             if (action === 'tag') return bulk.requestTag(selectedIds)
             if (action === 'delete') return bulk.requestDelete(selectedIds)
+            if (action === 'rest') return bulk.run(allResting ? 'wake' : 'rest', selectedIds)
             return bulk.run('mark', selectedIds)
           }}
         />

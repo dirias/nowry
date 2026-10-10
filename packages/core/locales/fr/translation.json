@@ -281,7 +281,8 @@
       "dueIn": "Dans {{hours}} h",
       "mastery": "Maîtrise",
       "newCount_one": "{{count}} nouvelle",
-      "newCount_other": "{{count}} nouvelles"
+      "newCount_other": "{{count}} nouvelles",
+      "resting": "Au repos"
     },
     "sections": {
       "dueNow": "À revoir",
@@ -2148,7 +2149,8 @@
       "restore": "Restaurer",
       "preview": "Aperçu",
       "addCard": "Ajouter une carte",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "edit": "Modifier"
     },
     "add": "Ajouter",
     "manage_content": {
@@ -2471,7 +2473,33 @@
     "dueLabel_one": "{{count}} à revoir",
     "dueLabel_other": "{{count}} à revoir",
     "studyNew_one": "Apprendre ({{count}} nouvelle)",
-    "studyNew_other": "Apprendre ({{count}} nouvelles)"
+    "studyNew_other": "Apprendre ({{count}} nouvelles)",
+    "rest": {
+      "action": "Mettre au repos",
+      "actionOn": "Au repos",
+      "restCard": "Mettre cette carte au repos",
+      "restUntil": "Au repos jusqu’à…",
+      "wake": "Réveiller",
+      "untilWoken": "Jusqu’au réveil",
+      "week": "Une semaine",
+      "twoWeeks": "Deux semaines",
+      "month": "Un mois",
+      "resting": "Au repos",
+      "restingUntil": "Au repos jusqu’au {{date}}",
+      "sheetTitle": "Repos",
+      "restTag": "Mettre ce tag au repos",
+      "restDeck": "Mettre ce paquet au repos",
+      "restDeckHint": "Ses cartes quittent la révision du jour et les compteurs. Leur planning est conservé.",
+      "kept": "Conserve son planning. Réveillez-la quand vous voulez.",
+      "lighten": "Alléger aujourd’hui",
+      "count_one": "{{count}} au repos",
+      "count_other": "{{count}} au repos",
+      "landing_one": "{{count}} carte en retard a été répartie sur les prochains jours. Rien n’a été perdu.",
+      "landing_other": "{{count}} cartes en retard ont été réparties sur {{days}} jours. Rien n’a été perdu.",
+      "error": "Impossible de changer le repos. Réessayez.",
+      "lightened_one": "{{count}} carte reportée aux prochains jours.",
+      "lightened_other": "{{count}} cartes reportées aux prochains jours."
+    }
   },
   "books": {
     "title": "Livres",

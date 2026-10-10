@@ -205,7 +205,8 @@
       "restoreAria": "{{name}} wiederherstellen",
       "dueIn": "In {{hours}} h fällig",
       "newCount_one": "{{count}} neu",
-      "newCount_other": "{{count}} neu"
+      "newCount_other": "{{count}} neu",
+      "resting": "Ruht"
     },
     "views": {
       "dashboard": "Übersicht",
@@ -2137,7 +2138,8 @@
       "restore": "Wiederherstellen",
       "preview": "Vorschau",
       "addCard": "Karte hinzufügen",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "edit": "Bearbeiten"
     },
     "add": "Hinzufügen",
     "manage_content": {
@@ -2460,7 +2462,33 @@
     "dueLabel_one": "{{count}} fällig",
     "dueLabel_other": "{{count}} fällig",
     "studyNew_one": "Lernen ({{count}} neu)",
-    "studyNew_other": "Lernen ({{count}} neu)"
+    "studyNew_other": "Lernen ({{count}} neu)",
+    "rest": {
+      "action": "Ruhen lassen",
+      "actionOn": "Ruht",
+      "restCard": "Diese Karte ruhen lassen",
+      "restUntil": "Ruhen lassen bis …",
+      "wake": "Wecken",
+      "untilWoken": "Bis zum Wecken",
+      "week": "Eine Woche",
+      "twoWeeks": "Zwei Wochen",
+      "month": "Einen Monat",
+      "resting": "Ruht",
+      "restingUntil": "Ruht bis {{date}}",
+      "sheetTitle": "Ruhe",
+      "restTag": "Dieses Tag ruhen lassen",
+      "restDeck": "Diesen Stapel ruhen lassen",
+      "restDeckHint": "Seine Karten verlassen die Tageswiederholung und die Zähler. Ihr Zeitplan bleibt erhalten.",
+      "kept": "Behält ihren Zeitplan. Jederzeit wecken.",
+      "lighten": "Heute entlasten",
+      "count_one": "{{count}} ruht",
+      "count_other": "{{count}} ruhen",
+      "landing_one": "{{count}} überfällige Karte wurde auf die nächsten Tage verteilt. Nichts ging verloren.",
+      "landing_other": "{{count}} überfällige Karten wurden auf {{days}} Tage verteilt. Nichts ging verloren.",
+      "error": "Die Ruhe konnte nicht geändert werden. Versuch es noch einmal.",
+      "lightened_one": "{{count}} Karte auf die nächsten Tage verschoben.",
+      "lightened_other": "{{count}} Karten auf die nächsten Tage verschoben."
+    }
   },
   "books": {
     "title": "Bücher",

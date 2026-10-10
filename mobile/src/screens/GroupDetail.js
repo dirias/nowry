@@ -18,18 +18,37 @@
  * left it out for the same reason and recorded it; this is that decision, not a
  * gap.
  */
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useCardData } from '@nowry/core/hooks/useCardData'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useGroups } from '@nowry/core/hooks/useGroups'
+import { cardsService } from '@nowry/core/api/services'
+import { invalidateCardCaches } from '@nowry/core/api/cardCache'
+import { REST_WRITE_RESOURCES } from '@nowry/core/hooks/useCardRest'
+import { cardRest, groupRest } from '@nowry/core/domain/cardRest'
 import { deckCounts, deckType } from '@nowry/core/domain/deckTypes'
 import { daysUntilReview, groupSummary, systemGroup, tagGroups } from '@nowry/core/domain/sessionLog'
 import { DAILY_REVIEW } from './StudySession'
 import { useTheme } from '../theme'
-import { Button, Divider, Icon, IdentityTile, ListRow, Readout, Screen, SectionHeader, Skeleton, Stack, Typography } from '../ui'
+import {
+  Button,
+  Chip,
+  Divider,
+  Icon,
+  IdentityTile,
+  ListRow,
+  Readout,
+  RestSheet,
+  Screen,
+  SectionHeader,
+  Skeleton,
+  Stack,
+  Typography,
+  restLabel
+} from '../ui'
 
 const GLYPH = { tag: 'Tag', marked: 'Bookmark', struggling: 'TriangleAlert' }
 
@@ -48,9 +67,11 @@ export const parseGroupId = (raw) => {
 }
 
 export function GroupDetail({ groupId }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const router = useRouter()
   const theme = useTheme()
+  const [restOpen, setRestOpen] = useState(false)
+  const [restError, setRestError] = useState(false)
 
   const group = useMemo(() => parseGroupId(groupId), [groupId])
   const isTag = group.kind === 'tag'
@@ -77,6 +98,24 @@ export function GroupDetail({ groupId }) {
 
   const sessionHref = isTag ? `/study/${DAILY_REVIEW}?tags=${encodeURIComponent(group.tag)}` : `/study/${DAILY_REVIEW}?group=${group.kind}`
 
+  /*
+   * A tag rests (SR-003, ADR-043): one chip in the head, reading the tag's
+   * own rest, opening the same sheet a card and a deck get. The write goes to
+   * the tag's dedicated route; every count is refetched after.
+   */
+  const tagRest = groupRest(summary)
+  // A tag whose every card rests is resting, not up to date.
+  const fullyResting = summary.cards > 0 && summary.resting >= summary.cards
+  const writeTagRest = async (write) => {
+    setRestError(false)
+    try {
+      await write()
+      await invalidateCardCaches(REST_WRITE_RESOURCES)
+    } catch {
+      setRestError(true)
+    }
+  }
+
   return (
     <Screen>
       <Stack spacing={2}>
@@ -98,7 +137,7 @@ export function GroupDetail({ groupId }) {
             <Readout>{t('groups.detailReadout', { cards: summary.cards, decks: summary.decks })}</Readout>
             {summary.due > 0 ? <Readout leading>{t('study.dueCount', { count: summary.due })}</Readout> : null}
             {summary.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: summary.fresh })}</Readout> : null}
-            {summary.asked === 0 && summary.cards > 0 ? <Readout>{t('groups.upToDate')}</Readout> : null}
+            {summary.asked === 0 && !fullyResting ? <Readout>{t('groups.upToDate')}</Readout> : null}
           </Stack>
         )}
 
@@ -110,6 +149,20 @@ export function GroupDetail({ groupId }) {
             <Button style={{ flex: 2 }} onPress={() => router.push(sessionHref)}>
               {t('groups.study', { count: summary.asked })}
             </Button>
+          </Stack>
+        ) : null}
+
+        {isTag ? (
+          <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap'>
+            <Chip selected={tagRest.resting} onPress={() => setRestOpen(true)} accessibilityLabel={t('cards.rest.restTag')}>
+              {tagRest.resting ? restLabel(t, tagRest, i18n.language) : t('cards.rest.action')}
+            </Chip>
+            {summary.resting > 0 ? <Readout>{t('cards.rest.count', { count: summary.resting })}</Readout> : null}
+            {restError ? (
+              <Typography level='body-xs' color='danger.plainColor' accessibilityLiveRegion='polite'>
+                {t('cards.rest.error')}
+              </Typography>
+            ) : null}
           </Stack>
         ) : null}
 
@@ -163,9 +216,10 @@ export function GroupDetail({ groupId }) {
               <ListRow
                 name={card.title || card.question || ''}
                 meta={card.deck_name || null}
+                dimmed={cardRest(card).resting}
                 readout={
                   <Typography level='body-xs' color='text.tertiary'>
-                    {nextReviewLabel(t, card)}
+                    {cardRest(card).resting ? restLabel(t, cardRest(card), i18n.language) : nextReviewLabel(t, card)}
                   </Typography>
                 }
                 onPress={() => router.push(`/study/card/${card._id ?? card.id}`)}
@@ -174,6 +228,18 @@ export function GroupDetail({ groupId }) {
           ))
         )}
       </Stack>
+
+      {isTag ? (
+        <RestSheet
+          visible={restOpen}
+          onClose={() => setRestOpen(false)}
+          title={group.tag}
+          resting={tagRest.resting}
+          onRest={(until) => writeTagRest(() => cardsService.restTag(group.tag, until))}
+          onWake={() => writeTagRest(() => cardsService.wakeTag(group.tag))}
+          hint={t('cards.rest.restTag')}
+        />
+      ) : null}
     </Screen>
   )
 }

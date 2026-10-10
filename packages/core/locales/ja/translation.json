@@ -194,7 +194,8 @@
       "historyKept": "履歴は保持",
       "restoreAria": "{{name}} を復元",
       "dueIn": "{{hours}}時間後",
-      "newCount_other": "新規 {{count}} 枚"
+      "newCount_other": "新規 {{count}} 枚",
+      "resting": "休止中"
     },
     "views": {
       "dashboard": "ダッシュボード",
@@ -2238,7 +2239,8 @@
       "restore": "復元",
       "preview": "プレビュー",
       "addCard": "カードを追加",
-      "delete": "削除"
+      "delete": "削除",
+      "edit": "編集"
     },
     "add": "追加",
     "manage_content": {
@@ -2542,7 +2544,30 @@
     "newCard": "新しいカード",
     "newDeck": "新しいデッキ",
     "dueLabel_other": "{{count}}件",
-    "studyNew_other": "学習（新規{{count}}枚）"
+    "studyNew_other": "学習（新規{{count}}枚）",
+    "rest": {
+      "action": "休ませる",
+      "actionOn": "休止中",
+      "restCard": "このカードを休ませる",
+      "restUntil": "期限を決めて休ませる…",
+      "wake": "起こす",
+      "untilWoken": "起こすまで",
+      "week": "1週間",
+      "twoWeeks": "2週間",
+      "month": "1か月",
+      "resting": "休止中",
+      "restingUntil": "{{date}}まで休止中",
+      "sheetTitle": "休止",
+      "restTag": "このタグを休ませる",
+      "restDeck": "このデッキを休ませる",
+      "restDeckHint": "カードは今日の復習と集計から外れます。スケジュールはそのまま残ります。",
+      "kept": "スケジュールはそのまま。いつでも起こせます。",
+      "lighten": "今日を軽くする",
+      "count_other": "{{count}}枚休止中",
+      "landing_other": "期限切れのカード{{count}}枚を{{days}}日間に分けました。何も失われていません。",
+      "error": "休止の変更に失敗しました。もう一度お試しください。",
+      "lightened_other": "{{count}}枚を次の日以降に回しました。"
+    }
   },
   "subscription": {
     "title": "Subscription & Billing",

@@ -26,11 +26,13 @@ export const BULK_ACTIONS = [
   { action: 'move', glyph: 'FolderInput', labelKey: 'cards.select.moveTo' },
   { action: 'tag', glyph: 'Tag', labelKey: 'cards.select.tag' },
   { action: 'mark', glyph: 'Bookmark', labelKey: 'cards.mark.action', unmarkKey: 'cards.select.unmark' },
+  // Rest reads Wake once everything picked already rests (SR-003).
+  { action: 'rest', glyph: 'Moon', labelKey: 'cards.rest.action', unmarkKey: 'cards.rest.wake' },
   { action: 'delete', glyph: 'Trash', labelKey: 'cards.deck.delete', danger: true }
 ]
 
 /** Mark reads Unmark once everything picked is already marked, as on the web. */
-export function SelectionBar({ onAction, allMarked = false, disabled = false, style }) {
+export function SelectionBar({ onAction, allMarked = false, allResting = false, disabled = false, style }) {
   const { t } = useTranslation()
   const theme = useTheme()
 
@@ -51,7 +53,8 @@ export function SelectionBar({ onAction, allMarked = false, disabled = false, st
     >
       {BULK_ACTIONS.map(({ action, glyph, labelKey, unmarkKey, danger }) => {
         const color = danger ? 'danger.plainColor' : 'text.primary'
-        const label = t(allMarked && unmarkKey ? unmarkKey : labelKey)
+        const flipped = action === 'rest' ? allResting : allMarked
+        const label = t(flipped && unmarkKey ? unmarkKey : labelKey)
         return (
           <Pressable
             key={action}

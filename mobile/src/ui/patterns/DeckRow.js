@@ -19,31 +19,36 @@ import { deckCounts, deckType } from '@nowry/core/domain/deckTypes'
 import { Typography } from '../Typography'
 import { Icon } from '../icons'
 import { IdentityTile } from './IdentityTile'
+import { deckRest } from '@nowry/core/domain/cardRest'
 import { ListRow } from './ListRow'
 
 export function DeckRow({ deck, onPress }) {
   const { t } = useTranslation()
   const type = deckType(deck?.deck_type)
-  const { due, fresh, mastery, asked, allNew } = deckCounts(deck)
+  const { due, fresh, mastery, asked, allNew, resting } = deckCounts(deck)
+  const deckResting = deckRest(deck).resting
 
   const meta = `${t(type.labelKey)} · ${allNew ? t('study.deckPill.new') : `${mastery}%`}`
 
-  const readout =
-    asked > 0 ? (
-      <Typography level='body-sm' color='text.secondary'>
-        {due > 0 ? (
-          <Typography level='body-sm' color='text.primary'>
-            {t('study.dueCount', { count: due })}
-          </Typography>
-        ) : null}
-        {due > 0 && fresh > 0 ? ' · ' : ''}
-        {fresh > 0 ? t('study.deck.newCount', { count: fresh }) : ''}
-      </Typography>
-    ) : (
-      <Typography level='body-sm' color='text.tertiary'>
-        {t('study.deck.upToDate')}
-      </Typography>
-    )
+  const readout = deckResting ? (
+    <Typography level='body-sm' color='text.tertiary'>
+      {t('study.deck.resting')}
+    </Typography>
+  ) : asked > 0 ? (
+    <Typography level='body-sm' color='text.secondary'>
+      {due > 0 ? (
+        <Typography level='body-sm' color='text.primary'>
+          {t('study.dueCount', { count: due })}
+        </Typography>
+      ) : null}
+      {due > 0 && fresh > 0 ? ' · ' : ''}
+      {fresh > 0 ? t('study.deck.newCount', { count: fresh }) : ''}
+    </Typography>
+  ) : (
+    <Typography level='body-sm' color='text.tertiary'>
+      {resting > 0 ? t('cards.rest.count', { count: resting }) : t('study.deck.upToDate')}
+    </Typography>
+  )
 
   return (
     <ListRow

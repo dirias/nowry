@@ -73,12 +73,20 @@ describe('daysUntilReview', () => {
 describe('groupSummary', () => {
   it('renames `new`, which cannot be a property name a caller reaches for safely', () => {
     const summary = groupSummary({ cards: 46, decks: 3, due: 9, new: 2, deck_ids: ['d1'] })
-    expect(summary).toEqual({ cards: 46, decks: 3, deckIds: ['d1'], due: 9, fresh: 2, asked: 11, windowDays: 14 })
+    expect(summary).toEqual({ cards: 46, decks: 3, deckIds: ['d1'], due: 9, fresh: 2, asked: 11, resting: 0, restUntil: null, windowDays: 14 })
   })
 
   it('is all zeroes for a group that is missing, not NaN', () => {
     expect(groupSummary(undefined).asked).toBe(0)
     expect(groupSummary(undefined).deckIds).toEqual([])
+  })
+
+  it('keeps a tag\'s rest when a summary is summarised again (SR-003)', () => {
+    const once = groupSummary({ tag: 'kanji', cards: 3, rest_until: '2026-10-17T00:00:00Z', resting: 3 })
+    expect(once.restUntil).toBe('2026-10-17T00:00:00Z')
+    const twice = groupSummary(once)
+    expect(twice.restUntil).toBe('2026-10-17T00:00:00Z')
+    expect(twice.resting).toBe(3)
   })
 })
 
@@ -106,7 +114,7 @@ describe('systemGroup', () => {
 describe('tagGroups', () => {
   it('keeps the tag beside its numbers', () => {
     expect(tagGroups({ tags: [{ tag: 'verbs', cards: 46, due: 9, new: 2 }] })).toEqual([
-      { tag: 'verbs', cards: 46, decks: 0, deckIds: [], due: 9, fresh: 2, asked: 11, windowDays: 14 }
+      { tag: 'verbs', cards: 46, decks: 0, deckIds: [], due: 9, fresh: 2, asked: 11, resting: 0, restUntil: null, windowDays: 14 }
     ])
   })
 

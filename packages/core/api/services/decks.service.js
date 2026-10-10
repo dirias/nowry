@@ -43,6 +43,21 @@ export const decksService = {
   },
 
   /**
+   * Rest a deck: its cards leave play, schedule kept, library unchanged
+   * (SR-003, ADR-043). `until` is a Date, or null for "until woken".
+   */
+  async rest(id, until = null) {
+    const { data } = await apiClient.post(`/decks/${id}/rest`, { until: until ? until.toISOString() : null })
+    return data
+  },
+
+  /** Wake a deck; its cards land softly (SR-002). */
+  async wake(id) {
+    const { data } = await apiClient.post(`/decks/${id}/wake`)
+    return data
+  },
+
+  /**
    * Get deck by ID
    */
   async getById(id) {

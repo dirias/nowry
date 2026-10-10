@@ -23,15 +23,34 @@ import { useMemo, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { frontText } from '@nowry/core/domain/cardSpeech'
+import { cardRest } from '@nowry/core/domain/cardRest'
 import { useTheme } from '../theme'
 import { cardKey, deckKeyOf, matchesQueueSearch } from '../hooks/useSessionQueue'
-import { BottomSheet, Button, Chip, ChoiceRow, Divider, Input, ListRow, Segmented, Stack, Typography, resolveColor } from '../ui'
+import {
+  ActionSheet,
+  BottomSheet,
+  Button,
+  Chip,
+  ChoiceRow,
+  Divider,
+  Input,
+  ListRow,
+  RestSheet,
+  Segmented,
+  Stack,
+  Typography,
+  resolveColor,
+  restLabel
+} from '../ui'
 import { CHOICE_LIST_MAX_HEIGHT } from '../ui/patterns/ChoiceSheet'
 
-/** The row's state, drawn as one small circle: a ring for the card in hand, a fill for an answered one. */
-function QueueTick({ current, answered }) {
+/**
+ * The row's state, drawn as one small circle: a ring for the card in hand, a
+ * fill for an answered one, a dashed ring for one that rests (SR-003).
+ */
+function QueueTick({ current, answered, resting = false }) {
   const theme = useTheme()
-  const ring = resolveColor(theme, current ? 'primary.plainColor' : answered ? 'success.plainColor' : 'divider')
+  const ring = resolveColor(theme, current ? 'primary.plainColor' : answered ? 'success.plainColor' : resting ? 'text.tertiary' : 'divider')
   return (
     <View
       importantForAccessibility='no'
@@ -40,6 +59,7 @@ function QueueTick({ current, answered }) {
         height: 14,
         borderRadius: 7,
         borderWidth: current ? 4 : 1.5,
+        borderStyle: resting && !current ? 'dashed' : 'solid',
         borderColor: ring,
         backgroundColor: answered && !current ? ring : 'transparent'
       }}
@@ -69,9 +89,15 @@ export function SessionQueueSheet({
   markedOnly = false,
   markedCount = 0,
   onMarkedChange,
-  onClear
+  onClear,
+  onRest,
+  onWake,
+  onEdit
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  // A row held: the card whose rest is being decided (SR-003).
+  const [held, setHeld] = useState(null)
+  const [restOpen, setRestOpen] = useState(false)
   // Which chip's rows have taken the list's place: 'tags', 'decks' or none.
   const [menu, setMenu] = useState(null)
   const tagsOpen = menu === 'tags'
@@ -107,8 +133,22 @@ export function SessionQueueSheet({
   const close = () => {
     setMenu(null)
     setNote(null)
+    setHeld(null)
+    setRestOpen(false)
     onClose?.()
   }
+
+  const heldRest = held ? cardRest(held) : null
+  const heldId = held ? cardKey(held) : null
+  const heldActions = held
+    ? [
+        heldRest.resting
+          ? { id: 'wake', label: t('cards.rest.wake'), onPress: () => onWake?.(heldId) }
+          : { id: 'rest', label: t('cards.rest.restCard'), onPress: () => onRest?.(heldId, null) },
+        { id: 'until', label: t('cards.rest.restUntil'), onPress: () => setRestOpen(true) },
+        ...(onEdit ? [{ id: 'edit', label: t('cards.deck.edit'), onPress: () => onEdit(heldId) }] : [])
+      ]
+    : []
 
   return (
     <BottomSheet visible={visible} onClose={close} title={t('cards.session.queue.title')}>
@@ -212,23 +252,34 @@ export function SessionQueueSheet({
               const current = id !== null && id === currentId
               const answered = Boolean(id !== null && graded[id])
               const name = frontText(card)
-              const state = current ? t('cards.session.queue.current') : answered ? t('cards.session.queue.answered') : null
+              const rest = cardRest(card)
+              const state = current
+                ? t('cards.session.queue.current')
+                : answered
+                  ? t('cards.session.queue.answered')
+                  : rest.resting
+                    ? t('cards.rest.resting')
+                    : null
               // A mixed queue says which deck; a deck's own queue says the tag.
               const deck = card?.deck_id
               const deckId = deckKeyOf(card)
               const embedded = deck && typeof deck === 'object' ? deck.name || deck.title || null : null
-              const meta = daily ? (embedded ?? deckNames[deckId] ?? null) : ((card.tags ?? [])[0] ?? null)
+              const plainMeta = daily ? (embedded ?? deckNames[deckId] ?? null) : ((card.tags ?? [])[0] ?? null)
+              // A resting card says so where its tag would be; the tag is a tap away.
+              const meta = rest.resting ? restLabel(t, rest, i18n.language) : plainMeta
               return (
                 <ListRow
                   key={String(id ?? name)}
-                  tile={<QueueTick current={current} answered={answered} />}
+                  tile={<QueueTick current={current} answered={answered} resting={rest.resting} />}
                   name={name}
                   meta={meta}
+                  dimmed={rest.resting}
                   accessibilityLabel={state ? `${name} · ${state}` : name}
                   onPress={() => {
                     onJump?.(id)
                     close()
                   }}
+                  onLongPress={onRest ? () => setHeld(card) : undefined}
                 />
               )
             })
@@ -239,6 +290,27 @@ export function SessionQueueSheet({
       <Button variant='secondary' onPress={close} style={{ marginTop: 16 }}>
         {t('common.close')}
       </Button>
+
+      {/* A held row's verbs (SR-003): rest, rest until, wake, edit. The sheet
+          over the sheet is brief and closes on the pick. */}
+      <ActionSheet
+        visible={Boolean(held) && !restOpen}
+        onClose={() => setHeld(null)}
+        title={held ? frontText(held) : ''}
+        actions={heldActions}
+      />
+      <RestSheet
+        visible={restOpen}
+        onClose={() => {
+          setRestOpen(false)
+          setHeld(null)
+        }}
+        title={held ? frontText(held) : null}
+        resting={Boolean(heldRest?.resting)}
+        onRest={(until) => onRest?.(heldId, until)}
+        onWake={() => onWake?.(heldId)}
+        hint={t('cards.rest.kept')}
+      />
     </BottomSheet>
   )
 }

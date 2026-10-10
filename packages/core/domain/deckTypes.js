@@ -35,11 +35,14 @@ export const deckCounts = (deck) => {
   const fresh = deck?.new_cards || 0
   const total = deck?.total_cards || 0
   const mastery = deck?.mastery || 0
+  const resting = deck?.resting_cards || 0
   return {
     due,
     fresh,
     total,
     mastery,
+    /** Out of play, for any reason; named beside due, never folded in (SR-003). */
+    resting,
     /** How much this deck is asking for today. Zero means up to date. */
     asked: due + fresh,
     /** A deck nobody has studied yet draws an empty measure, never a full grey bar. */

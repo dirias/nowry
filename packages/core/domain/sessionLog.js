@@ -106,6 +106,11 @@ export const groupSummary = (row) => ({
   due: row?.due ?? 0,
   fresh: row?.new ?? 0,
   asked: (row?.due ?? 0) + (row?.new ?? 0),
+  /** Out of play, named beside due (SR-003, ADR-043 point 7). */
+  resting: row?.resting ?? 0,
+  /** A tag's own rest, when the row is a tag's; the reader in cardRest says what it means.
+   *  Read under both names so summarising a summary (which the phone does) keeps it. */
+  restUntil: row?.rest_until ?? row?.restUntil ?? null,
   /** How far back "struggling" looks. The server decides; the label says so. */
   windowDays: row?.window_days ?? 14
 })
