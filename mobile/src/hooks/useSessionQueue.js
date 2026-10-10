@@ -29,10 +29,20 @@
  * **Search finds; it does not filter.** It narrows the sheet's list so a card can
  * be found and jumped to, and never the session — one keystroke must not turn
  * the readout into "1 / 1".
+ *
+ * **Under Due the Tags rows are the POOL's, not the queue's** (TAG-002,
+ * ADR-044). The server counts, beside the session's cards, every tag of the
+ * deck with a new or due card; a tag the day's budget did not pick is listed
+ * all the same, and a tag with nothing waiting is not. Choosing one refetches
+ * the session with the tag narrowing the pool before the budget, so the
+ * selection is owned by the screen (`selectedTags` / `onSelectedTags`) and fed
+ * to `useSessionCards`; this hook only reads it. Under All nothing changed:
+ * the rows are the served cards' tags and the narrowing is a view.
  */
 import { useCallback, useMemo, useState } from 'react'
 import { backText, frontText } from '@nowry/core/domain/cardSpeech'
-import { countMarked, countTags, filterCardsByMark, filterCardsByTags } from '@nowry/core/utils/tagFilter'
+import { countMarked, filterCardsByMark, filterCardsByTags } from '@nowry/core/utils/tagFilter'
+import { sessionTagRows } from '@nowry/core/domain/sessionTags'
 
 /** The two spellings a card's id has worn. */
 export const cardKey = (card) => card?._id ?? card?.id ?? null
@@ -128,14 +138,24 @@ export function matchesQueueSearch(card, needle) {
 
 /**
  * @param {Array<object> | null} cards - the queue as the server returned it; null while loading
- * @param {{ scope?: 'due' | 'all' }} [options]
+ * @param {object} [options]
+ * @param {'due' | 'all'} [options.scope]
+ * @param {Object<string, string>} [options.deckNames]
+ * @param {Array<object>} [options.poolTags] - the server's pool tags, listed under Due
+ * @param {string[]} [options.selectedTags] - the screen's selection, when it owns it
+ * @param {(tags: string[]) => void} [options.onSelectedTags]
  */
-export function useSessionQueue(cards, { scope = 'due', deckNames = {} } = {}) {
-  const [selectedTags, setSelectedTags] = useState([])
+export function useSessionQueue(
+  cards,
+  { scope = 'due', deckNames = {}, poolTags = null, selectedTags: owned = null, onSelectedTags = null } = {}
+) {
+  const [ownTags, setOwnTags] = useState([])
+  const selectedTags = owned ?? ownTags
+  const setSelectedTags = onSelectedTags ?? setOwnTags
   const [selectedDecks, setSelectedDecks] = useState([])
   const [markedOnly, setMarkedOnly] = useState(false)
 
-  const availableTags = useMemo(() => countTags(cards), [cards])
+  const availableTags = useMemo(() => sessionTagRows(scope, poolTags, cards), [scope, poolTags, cards])
   const availableDecks = useMemo(() => countDecks(cards, deckNames), [cards, deckNames])
   const markedCount = useMemo(() => (scope === 'all' ? countMarked(cards) : 0), [scope, cards])
   // With nothing selected this is the SAME array (the utility promises so),
@@ -145,12 +165,12 @@ export function useSessionQueue(cards, { scope = 'due', deckNames = {} } = {}) {
     () => narrowQueue(cards, { selectedTags, selectedDecks, markedOnly, scope }),
     [cards, selectedTags, selectedDecks, markedOnly, scope]
   )
-  const clearTags = useCallback(() => setSelectedTags([]), [])
+  const clearTags = useCallback(() => setSelectedTags([]), [setSelectedTags])
   const clearAll = useCallback(() => {
     setSelectedTags([])
     setSelectedDecks([])
     setMarkedOnly(false)
-  }, [])
+  }, [setSelectedTags])
 
   return {
     availableTags,

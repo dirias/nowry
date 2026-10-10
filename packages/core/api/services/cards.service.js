@@ -553,14 +553,23 @@ export const cardsService = {
   },
 
   /**
-   * Get due cards for a specific deck directly from the API
-   * @param {string} deckId - Deck ID to fetch due cards for
-   * @returns {Promise<Array>} Array of due study cards
+   * The deck's study session: the day's selection, and the pool's tags.
+   *
+   * `tags` narrow the POOL the day's budgets draw from (TAG-001, ADR-044), so
+   * a tag's session is SM-2's own selection for that tag's cards. `tags` on
+   * the answer is the deck's tags with something waiting, unnarrowed, so the
+   * learner can move between them.
+   *
+   * @param {string} deckId
+   * @param {{ tags?: string[] }} [options]
+   * @returns {Promise<{ items: Array<object>, total: number, tags: Array<{tag: string, new: number, due: number}> }>}
    */
-  async getDueCards(deckId) {
+  async getDueCards(deckId, { tags = [] } = {}) {
     const params = new URLSearchParams({ deck_id: deckId, due_only: 'true', limit: 500 })
+    tags.forEach((t) => params.append('tags', t))
     const { data } = await apiClient.get(`${ENDPOINTS.studyCards.all}?${params}`)
-    return data.cards || []
+    const items = data.cards || []
+    return { items, total: data.total ?? items.length, tags: data.tags || [] }
   },
 
   /**

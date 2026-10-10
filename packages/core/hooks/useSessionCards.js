@@ -43,7 +43,9 @@ export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0, 
         ? cardsService.getDailyReviewCards({ limit, tags, group })
         : everyCard
           ? cardsService.getAllCards(deckId)
-          : cardsService.getDueCards(deckId),
+          : // A deck's tags narrow its pool before the budget (TAG-002, ADR-044),
+            // the way the daily review's have since STUDY-002.
+            cardsService.getDueCards(deckId, { tags }),
     enabled: enabled && !!userId && !!deckId,
     /*
      * A session's queue is read once and then worked through. Refetching it
@@ -53,14 +55,17 @@ export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0, 
     staleTime: 15 * 60 * 1000
   })
 
-  // A deck's queue is a plain list; the daily review is wrapped with what the
-  // day said about it (SR-002): the resting count and the landing, if any.
+  // Every session answer is wrapped now (the cards, the pool's tags, and for
+  // the daily review what the day said: the resting count and the landing);
+  // a plain list is still read, for an answer shaped before TAG-001.
   const cards = Array.isArray(data) ? data : (data?.items ?? null)
 
   return {
     cards,
     resting: Array.isArray(data) ? 0 : (data?.resting ?? 0),
     spread: Array.isArray(data) ? null : (data?.spread ?? null),
+    /** The pool's tags with something waiting (TAG-002); read through `poolTagRows`. */
+    poolTags: Array.isArray(data) ? [] : (data?.tags ?? []),
     loading: isLoading,
     /** True only when there is nothing to show: cached cards beat an error. */
     error: data ? null : (error ?? null),

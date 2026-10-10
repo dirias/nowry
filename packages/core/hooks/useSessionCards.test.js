@@ -38,7 +38,7 @@ it('asks the deck endpoint for a deck', async () => {
   const { result } = renderHook(() => useSessionCards({ deckId: 'd1' }), { wrapper })
 
   await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'c1' }]))
-  expect(mockGetDue).toHaveBeenCalledWith('d1')
+  expect(mockGetDue).toHaveBeenCalledWith('d1', { tags: [] })
   expect(mockGetDaily).not.toHaveBeenCalled()
 })
 
@@ -85,4 +85,20 @@ it("keeps a tag's session and the whole day's apart", async () => {
 
   // A different narrowing is a different queue, not the same one from cache.
   await waitFor(() => expect(tagged.result.current.cards).toEqual([{ _id: 'tagged' }]))
+})
+
+// TAG-002 — a deck's tags narrow its pool server-side, and the answer carries
+// the pool's tags.
+it('sends a deck session its tags and reads the pool tags off the answer', async () => {
+  mockGetDue.mockResolvedValue({ items: [{ _id: 'c9', tags: ['verbs'] }], total: 1, tags: [{ tag: 'verbs', new: 0, due: 3 }] })
+  const { result } = renderHook(() => useSessionCards({ deckId: 'd1', tags: ['verbs'] }), { wrapper })
+  await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'c9', tags: ['verbs'] }]))
+  expect(mockGetDue).toHaveBeenCalledWith('d1', { tags: ['verbs'] })
+  expect(result.current.poolTags).toEqual([{ tag: 'verbs', new: 0, due: 3 }])
+})
+
+it('reads no pool tags off a plain list', async () => {
+  const { result } = renderHook(() => useSessionCards({ deckId: 'd1' }), { wrapper })
+  await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'c1' }]))
+  expect(result.current.poolTags).toEqual([])
 })

@@ -238,7 +238,17 @@ export function StudySession() {
     limit: limit ? Number(limit) : undefined,
     attempt
   }
-  const dueQueue = useSessionCards({ ...sessionParams, scope: 'due' })
+  /*
+   * The tag choice is a session setting the screen owns (TAG-002, ADR-044,
+   * PRD D6): under Due it is sent to the server, which narrows the POOL before
+   * the budget, so the chosen tag's new and due cards come into the session
+   * rather than today's queue being thinned. The route's `?tags=` seeds it.
+   * The unnarrowed day stays mounted — it is the first fetch, so a cache hit —
+   * for the summary's outside-filter count (PRD D4).
+   */
+  const [tagChoice, setTagChoice] = useState(sessionParams.tags)
+  const dueQueue = useSessionCards({ ...sessionParams, tags: tagChoice, scope: 'due' })
+  const baseDueQueue = useSessionCards({ ...sessionParams, scope: 'due' })
   const allQueue = useSessionCards({ ...sessionParams, scope: 'all', enabled: scope === 'all' })
   const queue = scope === 'all' ? allQueue : dueQueue
   const allCards = queue.cards
@@ -267,7 +277,13 @@ export function StudySession() {
     () => Object.fromEntries((deckList.decks ?? []).map((deck) => [String(deck._id ?? deck.id), deck.name || deck.title || ''])),
     [deckList.decks]
   )
-  const queueView = useSessionQueue(allCards, { scope, deckNames })
+  const queueView = useSessionQueue(allCards, {
+    scope,
+    deckNames,
+    poolTags: dueQueue.poolTags,
+    selectedTags: tagChoice,
+    onSelectedTags: setTagChoice
+  })
   const cards = queueView.visibleCards
   const [queueOpen, setQueueOpen] = useState(false)
   /*
@@ -554,6 +570,14 @@ export function StudySession() {
    */
   const chooseTags = useCallback(
     (tags) => {
+      if (scope === 'due') {
+        // The server re-selects for the tag (ADR-044 point 2); the card in
+        // hand is kept when it is in the new queue, else the first card
+        // (PRD D7). Landed by the anchor effect once the queue arrives.
+        pendingAnchor.current = cardId
+        setTagChoice(tags)
+        return
+      }
       const next = narrowQueue(allCards, {
         selectedTags: tags,
         selectedDecks: queueView.selectedDecks,
@@ -746,10 +770,16 @@ export function StudySession() {
   const source = useMemo(() => sourceLineFor(t, current), [t, current])
   /*
    * A filtered session that ends is finished for ITS cards, not the deck's
-   * (ADR-014 point 4). Graded cards stay in the queue, so the difference is
-   * exactly the due cards the filter hid — the web's own arithmetic.
+   * (ADR-014 point 4). A chosen tag narrows the pool server-side now (ADR-044
+   * point 4), so the count is the unnarrowed day's cards that carry no chosen
+   * tag, plus whatever the Decks chip hid of the served queue.
    */
-  const dueOutsideFilter = scope === 'due' && queueView.isFiltering && allCards ? allCards.length - total : 0
+  const dueOutsideFilter = useMemo(() => {
+    if (scope !== 'due' || !allCards) return 0
+    const base = baseDueQueue.cards
+    const hiddenByTags = tagChoice.length > 0 && base ? base.length - narrowQueue(base, { selectedTags: tagChoice, scope }).length : 0
+    return Math.max(0, hiddenByTags) + Math.max(0, allCards.length - total)
+  }, [scope, allCards, baseDueQueue.cards, tagChoice, total])
 
   const counter = useMemo(() => t('cards.session.cardShort', { current: index + 1, total }), [t, index, total])
   const counterSaid = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
