@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { countMarked, countTags, filterCardsByMark, filterCardsByTags } from '../utils/tagFilter'
+import { poolTagRows } from '../domain/sessionTags'
 
 /**
  * Frozen empty array shared by every "no tags" return path. A fresh `[]` per
@@ -41,12 +42,17 @@ const NO_TAGS = Object.freeze([])
  * router context the same live params object, so this coexists safely with
  * StudySession's existing call rather than needing the value threaded down.
  *
- * @param {{ cards: Array<object>, tagsEnabled: boolean, markEnabled: boolean }} params
+ * @param {{ cards: Array<object>, tagsEnabled: boolean, markEnabled: boolean, poolTags?: Array<object> | null }} params -
+ *   `poolTags` is the server's list of the pool's tags with something waiting (TAG-003,
+ *   ADR-044): given, it is the tag tally; absent (Browse), the tally is counted over `cards`.
  */
-export function useSessionFilters({ cards, tagsEnabled, markEnabled }) {
+export function useSessionFilters({ cards, tagsEnabled, markEnabled, poolTags = null }) {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const availableTags = useMemo(() => (tagsEnabled ? countTags(cards) : NO_TAGS), [tagsEnabled, cards])
+  const availableTags = useMemo(
+    () => (tagsEnabled ? (poolTags ? poolTagRows(poolTags) : countTags(cards)) : NO_TAGS),
+    [tagsEnabled, poolTags, cards]
+  )
 
   const tagsParam = tagsEnabled ? searchParams.get('tags') : null
 

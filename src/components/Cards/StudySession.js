@@ -48,6 +48,7 @@ import MarkToggle from './MarkToggle'
 import RestToggle from './RestToggle'
 import CreateCardModal from './CreateCardModal'
 import { isResting } from '@nowry/core/domain/cardRest'
+import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
 import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -329,6 +330,15 @@ export default function StudySession() {
   const modeChipColor = { study: 'neutral', browse: 'primary' }[mode]
 
   const [cards, setCards] = useState([])
+  /*
+   * The pool's tags, from the session answer (TAG-003, ADR-044): every tag of
+   * the deck with a new or due card, unnarrowed, so the Tags menu lists what
+   * is waiting rather than what today's budget happened to pick. Null in
+   * Browse, where the menu counts the served cards as before. `baseCards` is
+   * the unnarrowed day — the first fetch — kept for the outside-filter count.
+   */
+  const [poolTags, setPoolTags] = useState(null)
+  const baseCards = useRef([])
   const [currentIndex, setCurrentIndex] = useState(0)
   /*
    * The leech's offer (SR-004): the card just graded Again for the fourth time
@@ -380,8 +390,12 @@ export default function StudySession() {
     useSessionFilters({
       cards,
       tagsEnabled: true,
-      markEnabled: isReadOnlyMode
+      markEnabled: isReadOnlyMode,
+      poolTags: isReadOnlyMode ? null : poolTags
     })
+  // A string, not the array: the array is rebuilt whenever the pool's tags
+  // arrive, and a refetch keyed on it would fetch forever.
+  const tagsKey = isReadOnlyMode ? '' : selectedTags.join(',')
 
   const handleCardMouseMove = React.useCallback((e) => {
     if (!e.currentTarget) return
@@ -516,18 +530,26 @@ export default function StudySession() {
       } else if (isReadOnlyMode) {
         reviewCards = await cardsService.getAllCards(deckId)
       } else {
-        reviewCards = await cardsService.getDueCards(deckId)
+        // The chosen tags narrow the POOL before the budget (ADR-044 point
+        // 2), so a tag's session is SM-2's own selection for that tag.
+        reviewCards = await cardsService.getDueCards(deckId, { tags: tagsKey ? tagsKey.split(',') : [] })
       }
+
+      // The pool's tags ride beside the cards. A plain list (an answer shaped
+      // before TAG-001) has none, and the menu then counts the served cards.
+      if (!isReadOnlyMode) setPoolTags(Array.isArray(reviewCards) ? null : (reviewCards?.tags ?? null))
 
       if (reviewCards && (reviewCards.length > 0 || reviewCards.items?.length > 0)) {
         const processed = (reviewCards.items || reviewCards).map((card) => ({
           ...card,
           id: card._id || card.id
         }))
+        if (!tagsKey) baseCards.current = processed
         setCards(processed)
       } else {
+        if (!tagsKey) baseCards.current = []
         setCards([])
-        if (mode === 'study') {
+        if (mode === 'study' && !tagsKey) {
           setSessionComplete(true)
         }
       }
@@ -537,7 +559,7 @@ export default function StudySession() {
     } finally {
       setLoading(false)
     }
-  }, [deckId, isReadOnlyMode, mode])
+  }, [deckId, isReadOnlyMode, mode, tagsKey])
 
   useEffect(() => {
     if (cardsLoading) return
@@ -1286,7 +1308,10 @@ export default function StudySession() {
   // Count what was in the session, and say how many due cards the tag filter
   // left out — "Session complete" must never read as "all caught up" (ADR-014).
   // Graded cards stay in `cards`, so the difference is exactly the hidden ones.
-  const dueOutsideFilter = mode === 'study' && isFiltering ? cards.length - visibleCards.length : 0
+  // With the tag narrowing the pool server-side (ADR-044 point 4), the count is
+  // the unnarrowed day's cards that carry no chosen tag.
+  const dueOutsideFilter =
+    mode === 'study' && isFiltering ? baseCards.current.length - filterCardsByTags(baseCards.current, selectedTags).length : 0
 
   if (sessionComplete) {
     return (

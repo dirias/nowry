@@ -1455,3 +1455,49 @@ describe('SR-004 — the leech offer', () => {
     expect(screen.queryByTestId('leech-offer')).not.toBeInTheDocument()
   })
 })
+
+// TAG-003 — in study mode the Tags menu lists the POOL's tags from the session
+// answer, and a tag pick refetches the session with the tag narrowing the pool
+// (ADR-044). A tag the day's budget left out is offered all the same.
+describe('TAG-003 — the pool’s tags, and a refetch on a tag choice', () => {
+  const answer = () => ({
+    items: makeTaggedCards(),
+    total: 3,
+    tags: [
+      { tag: 'verbs', new: 0, due: 2 },
+      { tag: 'waiting', new: 5, due: 0 }
+    ]
+  })
+
+  it('lists a tag whose cards are not in today’s queue, and refetches with it when picked', async () => {
+    mockSearchParams = new URLSearchParams('mode=study')
+    // The session answer carries the pool's tags beside the cards (TAG-001).
+    renderSession({ cards: answer() })
+    await screen.findByTestId('session-footer')
+    expect(cardsService.getDueCards).toHaveBeenLastCalledWith(expect.anything(), { tags: [] })
+
+    await selectTag('waiting')
+
+    await waitFor(() => expect(cardsService.getDueCards).toHaveBeenLastCalledWith(expect.anything(), { tags: ['waiting'] }))
+    expect(mockSearchParams.get('tags')).toBe('waiting')
+  })
+
+  it('lists the pool’s tags and not a served card’s tag with nothing waiting', async () => {
+    mockSearchParams = new URLSearchParams('mode=study')
+    // `nouns` is on two served cards but the pool says nothing of it is waiting.
+    renderSession({
+      cards: {
+        items: makeTaggedCards(),
+        total: 3,
+        tags: [
+          { tag: 'nouns', new: 0, due: 0 },
+          { tag: 'verbs', new: 1, due: 0 }
+        ]
+      }
+    })
+    await screen.findByTestId('session-footer')
+    fireEvent.click(await findTagsSegment())
+    expect(await screen.findByRole('menuitemcheckbox', { name: /^verbs/ })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitemcheckbox', { name: /^nouns/ })).not.toBeInTheDocument()
+  })
+})
