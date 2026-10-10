@@ -25,6 +25,8 @@ const renderBar = (props = {}) => {
     onUntag: jest.fn(),
     onMark: jest.fn(),
     onUnmark: jest.fn(),
+    onRest: jest.fn(),
+    onWake: jest.fn(),
     onDelete: jest.fn()
   }
   render(<SelectionBar selectedCards={[card('c1'), card('c2')]} total={5} availableTags={TAGS} {...handlers} {...props} />)
@@ -80,5 +82,23 @@ describe('Tag ▾', () => {
     expect(handlers.onTag).toHaveBeenCalledWith('asia')
     // The menu stays open across picks.
     expect(screen.getByTestId('tag-menu')).toBeInTheDocument()
+  })
+})
+
+describe('rest (SR-003)', () => {
+  it('reads Rest, and Wake once everything picked already rests', () => {
+    const handlers = renderBar()
+    const bar = screen.getByTestId('selection-bar')
+    fireEvent.click(within(bar).getByRole('button', { name: 'cards.rest.action' }))
+    expect(handlers.onRest).toHaveBeenCalledTimes(1)
+    expect(handlers.onWake).not.toHaveBeenCalled()
+  })
+
+  it('wakes a selection that rests', () => {
+    const resting = [card('c1', { rest_until: '9999-12-31T00:00:00Z' }), card('c2', { rest_until: '9999-12-31T00:00:00Z' })]
+    const handlers = renderBar({ selectedCards: resting })
+    const bar = screen.getByTestId('selection-bar')
+    fireEvent.click(within(bar).getByRole('button', { name: 'cards.rest.wake' }))
+    expect(handlers.onWake).toHaveBeenCalledTimes(1)
   })
 })

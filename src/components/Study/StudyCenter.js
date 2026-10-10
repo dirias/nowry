@@ -11,6 +11,7 @@ import TodayObject from './TodayObject'
 import ViewSegment from './ViewSegment'
 import DeckRow from './DeckRow'
 import { readout } from '../Common/Form/formStyles'
+import { deckRest } from '@nowry/core/domain/cardRest'
 
 const UP_TO_DATE_PREVIEW = 3
 
@@ -24,6 +25,9 @@ export default function StudyCenter() {
   // One hook for the Today object's numbers, shared with Home (SITE-013).
   const today = useTodayData()
   const { statistics: statisticsData, statsLoading, decks, loading, reloadDecks, forecast } = today
+  // What rests, for the Today object's readout (SR-003): summed from the deck
+  // rows the page already holds, so no second request and no second cache.
+  const restingToday = decks.reduce((sum, deck) => sum + deckRest(deck).restingCards, 0)
   const stats = {
     dueToday: today.dueToday,
     newToday: today.newToday,
@@ -211,6 +215,7 @@ export default function StudyCenter() {
             dueToday={stats.dueToday}
             newToday={stats.newToday}
             reviewedToday={stats.reviewedToday}
+            resting={restingToday}
             streak={stats.streak}
             totalCards={totalCards}
             weekly={weekly}

@@ -13,6 +13,9 @@ import DeckPublishSheet from './DeckPublishSheet'
 import DeckPublishingSection from './deck/DeckPublishingSection'
 import DeckSettingsNav from './deck/DeckSettingsNav'
 import DeckStudySection from './deck/DeckStudySection'
+import { decksService } from '@nowry/core/api/services'
+import { invalidateCardCaches } from '@nowry/core/api/cardCache'
+import { REST_WRITE_RESOURCES } from '@nowry/core/hooks/useCardRest'
 import { getDeckAccent } from './deck/deckAccent'
 import { subscribeToBrowserVoices } from '../../utils/speechVoices'
 
@@ -116,7 +119,24 @@ export default function DeckSettingsModal({ open, onClose, deckId, onSaved, init
               />
             )}
 
-            {activeSection === 'study' && <DeckStudySection loading={loading} config={settings.config} onChange={settings.saveConfig} />}
+            {activeSection === 'study' && (
+              <DeckStudySection
+                loading={loading}
+                config={settings.config}
+                onChange={settings.saveConfig}
+                deck={deck}
+                onRest={async (until) => {
+                  const updated = await decksService.rest(deck?._id ?? deck?.id, until)
+                  await invalidateCardCaches(REST_WRITE_RESOURCES)
+                  return updated
+                }}
+                onWake={async () => {
+                  const updated = await decksService.wake(deck?._id ?? deck?.id)
+                  await invalidateCardCaches(REST_WRITE_RESOURCES)
+                  return updated
+                }}
+              />
+            )}
 
             {activeSection === 'audio' && (
               <DeckAudioSection

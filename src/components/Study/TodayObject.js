@@ -45,6 +45,7 @@ export default function TodayObject({
   forecast = null,
   tasksToday = null,
   routine = null,
+  resting = 0,
   onStudy,
   onQuick,
   onBrowse,
@@ -115,6 +116,13 @@ export default function TodayObject({
         <>
           {dot}
           {phrase(t('study.today.doneCount', { count: reviewedToday }))}
+        </>
+      )}
+      {/* Named beside due, never folded into it (SR-003, ADR-043 point 7). */}
+      {!isHome && resting > 0 && (
+        <>
+          {dot}
+          {phrase(t('cards.rest.count', { count: resting }))}
         </>
       )}
       {dot}

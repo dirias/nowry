@@ -16,6 +16,11 @@ import { useBulkCardActions } from '@nowry/core/hooks/useBulkCardActions'
 import TagActionsMenu from './TagActionsMenu'
 import TagActionOverlays from './TagActionOverlays'
 import { useTagActions } from './useTagActions'
+import { groupRest } from '@nowry/core/domain/cardRest'
+import { cardsService } from '@nowry/core/api/services'
+import { invalidateCardCaches } from '@nowry/core/api/cardCache'
+import { REST_WRITE_RESOURCES } from '@nowry/core/hooks/useCardRest'
+import { restLabel } from './restLabel'
 import { patchCardInCache } from '@nowry/core/api/cardCache'
 
 export const GROUP_ICONS = { tag: LocalOfferRounded, marked: BookmarkRounded, struggling: RepeatRounded }
@@ -64,7 +69,7 @@ export default function GroupDetail({
   onRenamed,
   onRemoved
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const Icon = GROUP_ICONS[group.kind]
   const name = group.kind === 'tag' ? group.tag : t(`groups.${group.kind}`)
@@ -96,6 +101,18 @@ export default function GroupDetail({
   const isTag = group.kind === 'tag'
   const cardCount = summary?.cards ?? total
   const tagActions = useTagActions({ tag: group.tag, existingTags, onRenamed, onRemoved })
+
+  // A tag rests (SR-003, ADR-043): through its dedicated route, then every
+  // count is refetched; the summary row carries the tag's own rest.
+  const tagRest = groupRest({ restUntil: summary?.rest_until ?? summary?.restUntil ?? null })
+  const restTag = async (until) => {
+    await cardsService.restTag(group.tag, until)
+    await invalidateCardCaches(REST_WRITE_RESOURCES)
+  }
+  const wakeTag = async () => {
+    await cardsService.wakeTag(group.tag)
+    await invalidateCardCaches(REST_WRITE_RESOURCES)
+  }
   const sessionQuery = group.kind === 'tag' ? `tags=${encodeURIComponent(group.tag)}` : `group=${group.kind}`
 
   const deckName = (deckId) => decks.find((d) => d._id === deckId || d._id === deckId?._id)?.name || '—'
@@ -123,7 +140,9 @@ export default function GroupDetail({
                 {(summary?.new || 0) > 0 && t('study.deck.newCount', { count: summary.new })}
               </>
             )}
-            {asked === 0 && (summary?.cards || 0) > 0 && ` · ${t('groups.upToDate')}`}
+            {asked === 0 && (summary?.cards || 0) > (summary?.resting || 0) && ` · ${t('groups.upToDate')}`}
+            {(summary?.resting || 0) > 0 && ` · ${t('cards.rest.count', { count: summary.resting })}`}
+            {tagRest.resting && ` · ${restLabel(t, tagRest, i18n.language)}`}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, width: { xs: '100%', md: 'auto' }, flexShrink: 0 }}>
@@ -141,6 +160,9 @@ export default function GroupDetail({
           )}
           {isTag && (
             <TagActionsMenu
+              resting={tagRest.resting}
+              onRest={restTag}
+              onWake={wakeTag}
               tag={group.tag}
               count={cardCount}
               onRename={tagActions.startRename}
@@ -185,6 +207,8 @@ export default function GroupDetail({
             onUntag={(tag) => bulk.run('untag', selectedIds, { tags: [tag] })}
             onMark={() => bulk.run('mark', selectedIds)}
             onUnmark={() => bulk.run('unmark', selectedIds)}
+            onRest={() => bulk.run('rest', selectedIds)}
+            onWake={() => bulk.run('wake', selectedIds)}
             onDelete={() => bulk.requestDelete(selectedIds)}
             sx={{ mb: 1 }}
           />

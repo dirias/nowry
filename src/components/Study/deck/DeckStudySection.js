@@ -1,6 +1,21 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { FormControl, FormHelperText, FormLabel, Input, Radio, RadioGroup, Skeleton, Stack, Typography } from '@mui/joy'
+import {
+  Button,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Input,
+  Option,
+  Radio,
+  RadioGroup,
+  Select,
+  Skeleton,
+  Stack,
+  Typography
+} from '@mui/joy'
+import { REST_PRESETS, deckRest, untilFromPreset } from '@nowry/core/domain/cardRest'
+import { restLabel } from '../../Cards/restLabel'
 
 import { focusRing, formLabel, touchTarget } from '../../Common/Form/formStyles'
 import { PACE_DEFAULTS } from '@nowry/core/hooks/useDeckSettings'
@@ -19,8 +34,16 @@ import { PACE_DEFAULTS } from '@nowry/core/hooks/useDeckSettings'
  */
 const clamp = (raw, min, max) => Math.max(min, Math.min(max, parseInt(raw, 10) || min))
 
-const DeckStudySection = ({ loading, config, onChange }) => {
-  const { t } = useTranslation()
+const DeckStudySection = ({ loading, config, onChange, deck = null, onRest, onWake }) => {
+  const { t, i18n } = useTranslation()
+  // The deck as the last rest write returned it; the modal's deck is loaded once.
+  const [restedDeck, setRestedDeck] = React.useState(null)
+  const shownDeck = restedDeck ?? deck
+  const rest = deckRest(shownDeck)
+  const write = async (fn) => {
+    const updated = await fn()
+    if (updated) setRestedDeck(updated)
+  }
 
   return (
     <Stack gap={3}>
@@ -92,6 +115,36 @@ const DeckStudySection = ({ loading, config, onChange }) => {
           />
         )}
       </FormControl>
+
+      {/* The deck rests (SR-003, ADR-043): its cards leave the daily review and
+          the counts, schedule kept, and it stays in the library — unlike archive. */}
+      {onRest && (
+        <FormControl>
+          <FormLabel sx={formLabel}>{rest.resting ? restLabel(t, rest, i18n.language) : t('cards.rest.restDeck')}</FormLabel>
+          <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap>
+            <Select
+              size='sm'
+              placeholder={t('cards.rest.restUntil')}
+              value={null}
+              onChange={(event, key) => key && write(() => onRest(untilFromPreset(key)))}
+              slotProps={{ button: { 'aria-label': t('cards.rest.restDeck') } }}
+              sx={{ minWidth: 180, ...touchTarget, ...focusRing }}
+            >
+              {REST_PRESETS.map((preset) => (
+                <Option key={preset.key} value={preset.key}>
+                  {t(`cards.rest.${preset.key}`)}
+                </Option>
+              ))}
+            </Select>
+            {rest.resting && (
+              <Button size='sm' variant='soft' color='neutral' onClick={() => write(() => onWake())} sx={{ ...touchTarget, ...focusRing }}>
+                {t('cards.rest.wake')}
+              </Button>
+            )}
+          </Stack>
+          <FormHelperText>{t('cards.rest.restDeckHint')}</FormHelperText>
+        </FormControl>
+      )}
     </Stack>
   )
 }

@@ -5,6 +5,9 @@ import CloseRounded from '@mui/icons-material/CloseRounded'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import Bookmark from '@mui/icons-material/Bookmark'
 import BookmarkBorder from '@mui/icons-material/BookmarkBorder'
+import BedtimeRounded from '@mui/icons-material/BedtimeRounded'
+import BedtimeOutlined from '@mui/icons-material/BedtimeOutlined'
+import { isResting } from '@nowry/core/domain/cardRest'
 import { focusRing, tabularNums } from '../Common/Form/formStyles'
 import TagMenu from './TagMenu'
 
@@ -30,12 +33,16 @@ export default function SelectionBar({
   onUntag,
   onMark,
   onUnmark,
+  onRest,
+  onWake,
   onDelete,
   sx
 }) {
   const { t } = useTranslation()
   const count = selectedCards.length
   const allMarked = count > 0 && selectedCards.every((card) => Boolean(card.marked_at))
+  // Rest reads Wake once everything picked already rests (SR-003), as Mark does.
+  const allResting = count > 0 && selectedCards.every((card) => isResting(card))
 
   return (
     <Box
@@ -76,6 +83,17 @@ export default function SelectionBar({
       >
         {allMarked ? t('cards.select.unmark') : t('cards.mark.action')}
       </Button>
+      {onRest && (
+        <Button
+          variant='soft'
+          color='neutral'
+          startDecorator={allResting ? <BedtimeRounded /> : <BedtimeOutlined />}
+          onClick={allResting ? onWake : onRest}
+          sx={focusRing}
+        >
+          {allResting ? t('cards.rest.wake') : t('cards.rest.action')}
+        </Button>
+      )}
       <Button variant='soft' color='neutral' onClick={onDelete} sx={{ color: 'danger.plainColor', ...focusRing }}>
         {t('cards.deck.delete')}
       </Button>

@@ -45,6 +45,8 @@ import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import SessionFilterBar from './SessionFilterBar'
 import { tabularNums } from '../Common/Form/formStyles'
 import MarkToggle from './MarkToggle'
+import RestToggle from './RestToggle'
+import { isResting } from '@nowry/core/domain/cardRest'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
@@ -1049,6 +1051,25 @@ export default function StudySession() {
     setCards((prev) => patchCardById(prev, cardId, { marked_at: markedAt }))
   }, [])
 
+  /*
+   * Rest is membership (SR-003, ADR-043): a card that rests under study
+   * leaves the queue — removed by id, never by assigning a filtered list — and
+   * the anchor effect holds the learner on the next card. Under browse it
+   * stays, drawn resting, so it can be woken from here. Waking a card patches
+   * its rest; the scheduler's fields are not touched either way.
+   */
+  const handleRestChange = React.useCallback(
+    (cardId, updated) => {
+      const patch = { rest_until: updated?.rest_until ?? null, rests: updated?.rests ?? [] }
+      if (mode === 'study' && isResting(updated)) {
+        setCards((prev) => prev.filter((card) => (card._id || card.id) !== cardId))
+        return
+      }
+      setCards((prev) => patchCardById(prev, cardId, patch))
+    },
+    [mode]
+  )
+
   const handleFullscreenToggle = React.useCallback(() => {
     setIsFullscreen((prev) => !prev)
   }, [])
@@ -1312,13 +1333,13 @@ export default function StudySession() {
               // A session with nothing to filter must not reserve the filters'
               // row — an empty grid row still spends the rowGap above it. The
               // predicate mirrors the bar's own render gate, in either mode.
-              gridTemplateColumns: hasFilters ? { xs: 'auto 1fr auto', sm: 'auto auto 1fr auto' } : 'auto 1fr auto',
+              gridTemplateColumns: hasFilters ? { xs: 'auto 1fr auto auto', sm: 'auto auto 1fr auto auto' } : 'auto 1fr auto auto',
               gridTemplateAreas: hasFilters
                 ? {
-                    xs: '"back count mark" "filters filters filters"',
-                    sm: '"back count filters mark"'
+                    xs: '"back count rest mark" "filters filters filters filters"',
+                    sm: '"back count filters rest mark"'
                   }
-                : '"back count mark"'
+                : '"back count rest mark"'
             }}
           >
             <IconButton
@@ -1364,6 +1385,9 @@ export default function StudySession() {
                 dilutes them and implies the mark is a grade. Labelled, because
                 an unnamed glyph is how it went undiscovered — and its right
                 edge lands on the same rule as the card's own controls. */}
+            {/* Rest beside the mark (SR-003): the card leaves play, its
+                schedule kept. Under study it leaves the queue too. */}
+            {currentCard && <RestToggle card={currentCard} onRestChange={handleRestChange} sx={{ gridArea: 'rest', justifySelf: 'end' }} />}
             {currentCard && (
               <MarkToggle
                 card={currentCard}

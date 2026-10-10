@@ -214,6 +214,8 @@ export default function ManageContent({
           onUntag={(tag) => bulk.run('untag', selectedIds, { tags: [tag] })}
           onMark={() => bulk.run('mark', selectedIds)}
           onUnmark={() => bulk.run('unmark', selectedIds)}
+          onRest={() => bulk.run('rest', selectedIds)}
+          onWake={() => bulk.run('wake', selectedIds)}
           onDelete={() => bulk.requestDelete(selectedIds)}
         />
       ) : (

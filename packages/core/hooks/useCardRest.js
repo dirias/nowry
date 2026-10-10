@@ -12,7 +12,13 @@ import { cardsService } from '../api/services'
 import { CARD_WRITE_RESOURCES, invalidateCardCaches } from '../api/cardCache'
 import { cardRest } from '../domain/cardRest'
 
-export const REST_WRITE_RESOURCES = [...CARD_WRITE_RESOURCES, 'forecast']
+// Everything a card write invalidates, plus the forecast, which rest moves.
+// Tolerant of a partial mock of the cache module (several web tests stub only
+// its functions), so importing this hook never throws at module load.
+export const REST_WRITE_RESOURCES = [
+  ...(Array.isArray(CARD_WRITE_RESOURCES) ? CARD_WRITE_RESOURCES : ['cards', 'decks', 'groups', 'tags', 'statistics']),
+  'forecast'
+]
 
 export const useCardRest = (card, onRestChange) => {
   const cardId = card?._id || card?.id || null

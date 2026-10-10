@@ -210,8 +210,19 @@ describe("MGMT-005 — a tag's verbs (PRD D17, US-010)", () => {
     openVerbs()
     openKebab()
     const items = screen.getAllByRole('menuitem')
-    expect(items.map((item) => item.textContent)).toEqual(['groups.rename', 'groups.mergeInto', 'groups.removeFromAll:{"count":46}'])
+    // SR-003 put the tag's rest between the edits and the removal: the four
+    // lengths, each its own item, and Wake only while the tag rests.
+    expect(items.map((item) => item.textContent)).toEqual([
+      'groups.rename',
+      'groups.mergeInto',
+      'cards.rest.action · cards.rest.untilWoken',
+      'cards.rest.action · cards.rest.week',
+      'cards.rest.action · cards.rest.twoWeeks',
+      'cards.rest.action · cards.rest.month',
+      'groups.removeFromAll:{"count":46}'
+    ])
     expect(items[2].previousElementSibling).toHaveAttribute('role', 'separator')
+    expect(items[6].previousElementSibling).toHaveAttribute('role', 'separator')
   })
 
   it('renames inline: the title becomes a field, Enter saves and the open group becomes the new tag', async () => {
