@@ -30,19 +30,21 @@ let pending = null
  *
  * @param {object|null} context - what the chat is being asked about.
  * @param {string|null} from - the href to return to when the chat closes.
+ * @param {string|null} prompt - a first turn the chat sends on arrival
+ *   (SR-004's re-explain); null leaves the composer to the learner.
  */
-export function setAskContext(context, from = null) {
-  pending = context || from ? { context: context ?? null, from: from ?? null } : null
+export function setAskContext(context, from = null, prompt = null) {
+  pending = context || from || prompt ? { context: context ?? null, from: from ?? null, prompt: prompt ?? null } : null
 }
 
 /**
- * The chat, once. `{context, from}`, both possibly null, and cleared either
- * way.
+ * The chat, once. `{context, from, prompt}`, each possibly null, and cleared
+ * either way.
  */
 export function takeAskContext() {
   const taken = pending
   pending = null
-  return taken ?? { context: null, from: null }
+  return taken ?? { context: null, from: null, prompt: null }
 }
 
 /** For tests, and for a sign-out that must not leave a card behind. */

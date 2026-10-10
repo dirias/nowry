@@ -52,7 +52,7 @@ const TYPES = ['flashcard', 'quiz']
 const OPTION_FLOOR = 2
 const OPTION_CEILING = 6
 
-export function CardEditor({ card = null, deckId = null }) {
+export function CardEditor({ card = null, deckId = null, draft = null }) {
   const { t } = useTranslation()
   const router = useRouter()
   const navigation = useNavigation()
@@ -69,6 +69,8 @@ export function CardEditor({ card = null, deckId = null }) {
   const form = useCardForm({
     open: true,
     card: seed,
+    // A split (SR-004): another card's words, no id, so the save creates.
+    draft,
     onSaved: () => {
       setDirty(false)
       setSaved((n) => n + 1)

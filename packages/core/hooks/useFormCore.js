@@ -15,6 +15,8 @@ import { describeApiError, isOfflineError } from '../utils/formUtils'
  *
  * @param open              the sheet's open flag; the reset keys off its rising edge
  * @param entity            null in add mode, the object in edit mode
+ * @param draft             add mode with a head start: an entity-shaped object WITHOUT an id,
+ *                          read through toFormState; saving creates (SR-004's split)
  * @param initialValues     () => ({...})            add-mode state
  * @param toFormState       (entity) => ({...})      edit-mode state
  * @param groups            disclosure group names, in body order
@@ -39,6 +41,7 @@ const revealedAtOpen = (entity, groups, hasContent, initialSection) =>
 const useFormCore = ({
   open,
   entity = null,
+  draft = null,
   initialValues = () => ({}),
   toFormState = () => ({}),
   groups = [],
@@ -70,7 +73,7 @@ const useFormCore = ({
   const wasOpen = useRef(false)
   // The reset reads these, but must never re-run because one changed identity.
   const config = useRef({})
-  config.current = { entity, initialValues, toFormState, groups, hasContent, onReveal, isEdit, initialSection }
+  config.current = { entity, draft, initialValues, toFormState, groups, hasContent, onReveal, isEdit, initialSection }
 
   /**
    * Re-initialise on the rising edge of `open`, and at no other time.
@@ -89,11 +92,14 @@ const useFormCore = ({
     wasOpen.current = true
 
     const current = config.current
-    const base = current.isEdit ? current.toFormState(current.entity) : current.initialValues()
+    // A draft is read like an entity and saved like a blank: the groups it
+    // fills are shown, and the save creates.
+    const seedEntity = current.isEdit ? current.entity : current.draft
+    const base = seedEntity ? current.toFormState(seedEntity) : current.initialValues()
     const seeded = current.initialSection ? current.onReveal[current.initialSection]?.(base) : null
 
     setValues(seeded ? { ...base, ...seeded } : base)
-    setRevealed(revealedAtOpen(current.isEdit ? current.entity : null, current.groups, current.hasContent, current.initialSection))
+    setRevealed(revealedAtOpen(seedEntity, current.groups, current.hasContent, current.initialSection))
     setLastRevealed(null)
     setErrors({})
     setFirstErrorField(null)

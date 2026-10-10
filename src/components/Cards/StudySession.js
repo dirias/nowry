@@ -46,7 +46,9 @@ import SessionFilterBar from './SessionFilterBar'
 import { tabularNums } from '../Common/Form/formStyles'
 import MarkToggle from './MarkToggle'
 import RestToggle from './RestToggle'
+import CreateCardModal from './CreateCardModal'
 import { isResting } from '@nowry/core/domain/cardRest'
+import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import TTSControls from '../TTS/TTSControls'
@@ -240,11 +242,15 @@ const SessionFooter = React.memo(function SessionFooter({
   pendingSyncCount,
   previousGrade,
   xpFloater,
+  notice = null,
   t
 }) {
   return (
     <Box data-testid='session-footer' sx={{ width: '100%', position: 'relative' }}>
       <XpFloater floater={xpFloater} t={t} />
+      {/* The session's notice band (SR-004): the leech's way out, above the
+          count so the grades below it stay where the hands expect them. */}
+      {notice}
       <Stack direction='row' spacing={1} alignItems='center' justifyContent='center' sx={{ mb: 1 }}>
         <Chip size='sm' variant='soft' color={modeChipColor}>
           {t(`cards.session.mode.${mode}`)}
@@ -313,7 +319,7 @@ function patchCardById(list, cardId, patch) {
 export default function StudySession() {
   const { deckId } = useParams()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const userId = user?.id ?? null
   const mermaidRef = useRef(null)
@@ -324,6 +330,17 @@ export default function StudySession() {
 
   const [cards, setCards] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
+  /*
+   * The leech's offer (SR-004): the card just graded Again for the fourth time
+   * inside the Struggling window, with its three exits in the footer until the
+   * next grade takes it away unanswered. `rested` is the first exit taken, said
+   * in the same place. `split` is the editor open on the card's words as a
+   * draft. Once per card per session, kept in the ref.
+   */
+  const [leech, setLeech] = useState(null)
+  const [leechPending, setLeechPending] = useState(false)
+  const [split, setSplit] = useState(null)
+  const leechOffered = useRef(new Set())
   const [isFlipped, setIsFlipped] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sessionComplete, setSessionComplete] = useState(false)
@@ -397,6 +414,8 @@ export default function StudySession() {
   const {
     setViewContext,
     queueIntervention,
+    open: openCompanion,
+    sendMessage,
     resetCompanionSession,
     setStudySession,
     setStudySessionFullscreen,
@@ -922,6 +941,17 @@ export default function StudySession() {
         }
       }
 
+      // THE LEECH (SR-004): the fourth Again inside the Struggling window is
+      // offered a way out in the footer, once per card per session. Any other
+      // grade takes an open offer away — nothing is forced.
+      const offer = leechOffer(currentCard, {
+        grade,
+        sessionAgains: againCountPerCardId.current[cardId] || 1,
+        offered: leechOffered.current
+      })
+      if (offer) leechOffered.current.add(cardId)
+      setLeech(offer ? { card: currentCard, offer, rested: null } : null)
+
       // COMPANION INTERVENTION: trigger a delayed nudge for 'again' grade
       if (grade === 'again') {
         const wrongCardId = currentCard._id || currentCard.id
@@ -1069,6 +1099,88 @@ export default function StudySession() {
     },
     [mode]
   )
+
+  /**
+   * The leech's three exits (SR-004). The card is behind the learner by now,
+   * so a rest patches it in place rather than removing it: the queue is in
+   * memory here and removing an earlier card would shift the one in hand.
+   */
+  const leechRest = React.useCallback(async () => {
+    if (!leech || leechPending) return
+    setLeechPending(true)
+    const until = leechRestUntil()
+    try {
+      const updated = await cardsService.rest(leech.offer.cardId, until)
+      const patch = { rest_until: updated?.rest_until ?? until.toISOString(), rests: updated?.rests ?? [] }
+      setCards((prev) => patchCardById(prev, leech.offer.cardId, patch))
+      setLeech((open) => (open ? { ...open, rested: until } : open))
+    } catch {
+      /* The offer stays; the key is still there to try again. */
+    } finally {
+      setLeechPending(false)
+    }
+  }, [leech, leechPending])
+
+  /** Re-explain: the companion opens on the card and is asked on the learner's behalf. */
+  const leechExplain = React.useCallback(() => {
+    if (!leech) return
+    const at = Math.max(
+      0,
+      visibleCards.findIndex((card) => (card._id || card.id) === leech.offer.cardId)
+    )
+    openCompanion()
+    sendMessage(t('cards.leech.prompt'), buildStudyContext(at, true))
+    setLeech(null)
+  }, [leech, visibleCards, openCompanion, sendMessage, buildStudyContext, t])
+
+  /** Split: the editor opens on the card's words as a draft; saving creates a second card. */
+  const leechSplit = React.useCallback(async () => {
+    if (!leech) return
+    const draft = splitDraft(leech.card)
+    setLeech(null)
+    let decks = []
+    try {
+      decks = await decksService.getAll()
+    } catch {
+      /* The deck is already on the draft; the list is for changing it. */
+    }
+    setSplit({ draft, decks })
+  }, [leech])
+
+  const leechNotice = leech ? (
+    <Stack
+      direction='row'
+      spacing={1}
+      alignItems='center'
+      justifyContent='center'
+      flexWrap='wrap'
+      useFlexGap
+      role='status'
+      data-testid='leech-offer'
+      sx={{ mb: 1 }}
+    >
+      <Typography level='body-sm' sx={{ color: 'text.secondary', textAlign: 'center' }}>
+        {leech.rested
+          ? t('cards.leech.rested', {
+              date: new Intl.DateTimeFormat(i18n?.language, { day: 'numeric', month: 'short' }).format(leech.rested)
+            })
+          : t('cards.leech.notice', { title: leech.offer.title })}
+      </Typography>
+      {!leech.rested && (
+        <Stack direction='row' spacing={0.5}>
+          <Button size='sm' variant='plain' color='neutral' loading={leechPending} onClick={leechRest}>
+            {t('cards.leech.rest')}
+          </Button>
+          <Button size='sm' variant='plain' color='neutral' onClick={leechExplain}>
+            {t('cards.leech.explain')}
+          </Button>
+          <Button size='sm' variant='plain' color='neutral' onClick={leechSplit}>
+            {t('cards.leech.split')}
+          </Button>
+        </Stack>
+      )}
+    </Stack>
+  ) : null
 
   const handleFullscreenToggle = React.useCallback(() => {
     setIsFullscreen((prev) => !prev)
@@ -1255,6 +1367,9 @@ export default function StudySession() {
                 {t('cards.session.complete.outsideFilter', { count: dueOutsideFilter })}
               </Typography>
             )}
+            {/* The fourth Again on the LAST card lands here, not in the footer
+                (SR-004): an offer lost to the summary is no offer. */}
+            {leechNotice}
             <Button size='lg' variant='solid' color='primary' onClick={() => navigate('/study')}>
               {t('cards.session.complete.backToLibrary')}
             </Button>
@@ -1638,6 +1753,7 @@ export default function StudySession() {
                     pendingSyncCount={reviewQueue.length}
                     previousGrade={previousGrade}
                     xpFloater={xpFloater}
+                    notice={leechNotice}
                     t={t}
                   />
                 </Box>
@@ -1730,6 +1846,7 @@ export default function StudySession() {
                     pendingSyncCount={reviewQueue.length}
                     previousGrade={previousGrade}
                     xpFloater={xpFloater}
+                    notice={leechNotice}
                     t={t}
                   />
                 </Box>
@@ -1950,6 +2067,7 @@ export default function StudySession() {
                         pendingSyncCount={reviewQueue.length}
                         previousGrade={previousGrade}
                         xpFloater={xpFloater}
+                        notice={leechNotice}
                         t={t}
                       />
                     </Box>
@@ -1973,6 +2091,15 @@ export default function StudySession() {
           )}
         </Stack>
       )}
+
+      {/* The split (SR-004): the editor on the card's words, saving a second card. */}
+      <CreateCardModal
+        open={Boolean(split)}
+        onClose={() => setSplit(null)}
+        onCardSaved={() => {}}
+        decks={split?.decks ?? []}
+        draft={split?.draft ?? null}
+      />
     </Container>
   )
 }

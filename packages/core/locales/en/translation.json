@@ -1936,6 +1936,14 @@
       "error": "Couldn't change the rest. Try again.",
       "lightened_one": "Moved {{count}} card to the coming days.",
       "lightened_other": "Moved {{count}} cards to the coming days."
+    },
+    "leech": {
+      "notice": "Missed four times: “{{title}}”. Give it a way out.",
+      "rest": "Rest a week",
+      "explain": "Re-explain",
+      "split": "Split",
+      "rested": "Resting for a week. Back on {{date}}.",
+      "prompt": "I've missed this card four times now. Explain it a different way, and tell me what I might be mixing it up with."
     }
   },
   "filters": {

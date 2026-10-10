@@ -36,11 +36,12 @@ const BODIES = { flashcard: FlashcardFields, quiz: QuizCardFields, visual: Visua
  * `initialSection` — a group to open with (`'tags'`): a row's Tags… lands the
  * user on the tags rail instead of the title (PRD D16). Read once, on open.
  */
-export default function CreateCardModal({ open, onClose, onCardSaved, decks = [], card = null, initialSection = null }) {
+export default function CreateCardModal({ open, onClose, onCardSaved, decks = [], card = null, draft = null, initialSection = null }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   // The hook names what it needs and this file supplies the DOM (MOB-003B).
-  const form = useCardForm({ open, card, initialSection, onSaved: onCardSaved, onClose, focusTarget: focusFirstControl })
+  // `draft` is a split (SR-004): another card's words without its id, so the save creates.
+  const form = useCardForm({ open, card, draft, initialSection, onSaved: onCardSaved, onClose, focusTarget: focusFirstControl })
 
   /*
    * Cmd/Ctrl+Enter saves. This lived inside useCardForm as a `document`

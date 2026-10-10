@@ -1732,6 +1732,14 @@
       "error": "No se pudo cambiar el descanso. Inténtalo de nuevo.",
       "lightened_one": "{{count}} tarjeta pasó a los próximos días.",
       "lightened_other": "{{count}} tarjetas pasaron a los próximos días."
+    },
+    "leech": {
+      "notice": "Fallada cuatro veces: «{{title}}». Dale una salida.",
+      "rest": "Descansar una semana",
+      "explain": "Explicar de otro modo",
+      "split": "Dividir",
+      "rested": "Descansa una semana. Vuelve el {{date}}.",
+      "prompt": "Ya he fallado esta tarjeta cuatro veces. Explícamela de otra manera y dime con qué podría estar confundiéndola."
     }
   },
   "filters": {

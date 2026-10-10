@@ -1401,3 +1401,57 @@ describe('study mode tag filter (ADR-014)', () => {
     expect(screen.queryByTestId('complete-outside-filter')).not.toBeInTheDocument()
   })
 })
+
+// SR-004 — the leech, offered a way out. The fourth Again inside the
+// Struggling window (three recorded on the card, this session's one) puts the
+// offer in the footer; any other grade, or an earlier Again, puts nothing.
+describe('SR-004 — the leech offer', () => {
+  const daysAgo = (days) => new Date(Date.now() - days * 86400000).toISOString()
+  const stuck = () => {
+    const cards = makeCards()
+    cards[0] = { ...cards[0], lapses: [daysAgo(1), daysAgo(3), daysAgo(5)] }
+    return cards
+  }
+
+  it('offers rest, re-explain and split on the fourth Again', async () => {
+    renderSession({ cards: stuck() })
+    fireEvent.click(await screen.findByText('cards.session.grading.again'))
+    const offer = await screen.findByTestId('leech-offer')
+    expect(offer).toHaveTextContent('cards.leech.notice')
+    expect(within(offer).getByText('cards.leech.rest')).toBeInTheDocument()
+    expect(within(offer).getByText('cards.leech.explain')).toBeInTheDocument()
+    expect(within(offer).getByText('cards.leech.split')).toBeInTheDocument()
+  })
+
+  it('rests the card a week through the dedicated route and says so in place', async () => {
+    cardsService.rest = jest.fn().mockResolvedValue({ rest_until: daysAgo(-7), rests: [] })
+    renderSession({ cards: stuck() })
+    fireEvent.click(await screen.findByText('cards.session.grading.again'))
+    fireEvent.click(await screen.findByText('cards.leech.rest'))
+    await waitFor(() => expect(cardsService.rest).toHaveBeenCalledWith('c1', expect.any(Date)))
+    const until = cardsService.rest.mock.calls[0][1]
+    expect(Math.round((until.getTime() - Date.now()) / 86400000)).toBe(7)
+    expect(await screen.findByText(/cards\.leech\.rested/)).toBeInTheDocument()
+    expect(screen.queryByText('cards.leech.rest')).not.toBeInTheDocument()
+    // The card in hand did not move: the rested card is behind the learner.
+    expect(screen.getByText('Capital of France?')).toBeInTheDocument()
+  })
+
+  it('offers nothing before the fourth Again, and nothing on another grade', async () => {
+    const cards = makeCards()
+    cards[0] = { ...cards[0], lapses: [daysAgo(1), daysAgo(3)] }
+    renderSession({ cards })
+    fireEvent.click(await screen.findByText('cards.session.grading.again'))
+    await screen.findByText('Capital of France?')
+    expect(screen.queryByTestId('leech-offer')).not.toBeInTheDocument()
+  })
+
+  it('offers nothing on an Again outside the window', async () => {
+    const cards = makeCards()
+    cards[0] = { ...cards[0], lapses: [daysAgo(20), daysAgo(30), daysAgo(40)] }
+    renderSession({ cards })
+    fireEvent.click(await screen.findByText('cards.session.grading.again'))
+    await screen.findByText('Capital of France?')
+    expect(screen.queryByTestId('leech-offer')).not.toBeInTheDocument()
+  })
+})

@@ -42,6 +42,7 @@ import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { invalidateCardCaches } from '@nowry/core/api/cardCache'
 import { REST_WRITE_RESOURCES } from '@nowry/core/hooks/useCardRest'
 import { spreadOf } from '@nowry/core/domain/cardRest'
+import { leechOffer, leechRestUntil } from '@nowry/core/domain/leech'
 import { storage } from '@nowry/core'
 import { useAppearance } from '../theme'
 import { setAskContext } from './askContext'
@@ -176,7 +177,7 @@ export function StudySession() {
   const { deckId, tags, group, limit, scope: scopeParam, card: cardParam } = useLocalSearchParams()
   const id = String(deckId)
   const isDaily = id === DAILY_REVIEW
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const router = useRouter()
 
   const [index, setIndex] = useState(0)
@@ -269,6 +270,15 @@ export function StudySession() {
   const queueView = useSessionQueue(allCards, { scope, deckNames })
   const cards = queueView.visibleCards
   const [queueOpen, setQueueOpen] = useState(false)
+  /*
+   * The leech's offer (SR-004): the card just graded Again for the fourth
+   * time inside the Struggling window, with its three exits, until the next
+   * grade or move takes it away unanswered. `rested` is the first exit taken,
+   * said in the same band. Once per card per session, kept in the ref.
+   */
+  const [leech, setLeech] = useState(null)
+  const [leechPending, setLeechPending] = useState(false)
+  const leechOffered = useRef(new Set())
 
   /*
    * The card to land on once a scope's queue arrives. Due → All is a cache
@@ -485,6 +495,15 @@ export function StudySession() {
         })
 
       /*
+       * The leech (SR-004): the fourth Again inside the Struggling window is
+       * offered a way out, in the notice band, once per card per session. Any
+       * other grade takes an open offer away — nothing is forced.
+       */
+      const offer = leechOffer(card, { grade: value, sessionAgains: 1, offered: leechOffered.current })
+      if (offer) leechOffered.current.add(cardId)
+      setLeech(offer ? { card, offer, rested: null } : null)
+
+      /*
        * A card the learner could not recall is the one moment the companion
        * has something useful to say unasked (MOB-088). Once per card, after a
        * pause, and only if the settings allow it — `queue` is the thing that
@@ -512,12 +531,14 @@ export function StudySession() {
     setRevealed(false)
     setHinted(true)
     setLandingSeen(true)
+    setLeech(null)
   }, [total, scope])
 
   const back = useCallback(() => {
     setIndex((n) => Math.max(0, n - 1))
     setRevealed(false)
     setHinted(true)
+    setLeech(null)
   }, [])
 
   const cardId = current?._id ?? current?.id ?? null
@@ -644,6 +665,47 @@ export function StudySession() {
   )
 
   /**
+   * The leech's three exits (SR-004). The offer is about the card just
+   * graded, which is behind the learner by now, so the card in hand is the
+   * anchor through the refetch a rest causes.
+   */
+  const leechRest = useCallback(async () => {
+    if (!leech || leechPending) return
+    setLeechPending(true)
+    const until = leechRestUntil()
+    pendingAnchor.current = cardId
+    try {
+      await restCard(leech.offer.cardId, until)
+      setLeech((open) => (open ? { ...open, rested: until } : open))
+    } finally {
+      setLeechPending(false)
+    }
+  }, [leech, leechPending, cardId, restCard])
+
+  /** Re-explain: the chat opens on the card and asks for it on the learner's behalf. */
+  const leechExplain = useCallback(() => {
+    if (!leech) return
+    const at = Math.max(
+      0,
+      cards.findIndex((card) => cardKey(card) === leech.offer.cardId)
+    )
+    setAskContext(
+      studyCardContext(leech.card, { deckId: id, index: at, total, flipped: true, mode: 'study' }),
+      `/study/${id}`,
+      t('cards.leech.prompt')
+    )
+    setLeech(null)
+    router.push('/agent')
+  }, [leech, cards, id, total, router, t])
+
+  /** Split: the editor opens with the card's words as a draft; saving creates a second card. */
+  const leechSplit = useCallback(() => {
+    if (!leech) return
+    setLeech(null)
+    router.push(`/study/card/new?from=${leech.offer.cardId}`)
+  }, [leech, router])
+
+  /**
    * Lighten today (SR-002): the soft landing with a smaller cap, today's
    * overflow included, over every active deck. Half of what is in front of
    * the learner moves to the coming days; the queue is refetched.
@@ -752,6 +814,36 @@ export function StudySession() {
     )
   }
 
+  /*
+   * The leech's offer (SR-004) as one element, because it has two homes: the
+   * notice band under the card, and the summary — the fourth Again on the
+   * LAST card lands there, and an offer lost to the summary is no offer.
+   */
+  const leechBand = leech ? (
+    <Stack spacing={0.5} style={{ alignItems: 'center' }}>
+      <Typography level='body-xs' color='text.secondary' numberOfLines={1} accessibilityLiveRegion='polite' style={{ textAlign: 'center' }}>
+        {leech.rested
+          ? t('cards.leech.rested', {
+              date: new Intl.DateTimeFormat(i18n?.language, { day: 'numeric', month: 'short' }).format(leech.rested)
+            })
+          : t('cards.leech.notice', { title: leech.offer.title })}
+      </Typography>
+      {leech.rested ? null : (
+        <Stack direction='row' spacing={1} style={{ justifyContent: 'center' }}>
+          <Button size='sm' variant='tertiary' onPress={leechRest} loading={leechPending} accessibilityLabel={t('cards.leech.rest')}>
+            {t('cards.leech.rest')}
+          </Button>
+          <Button size='sm' variant='tertiary' onPress={leechExplain} accessibilityLabel={t('cards.leech.explain')}>
+            {t('cards.leech.explain')}
+          </Button>
+          <Button size='sm' variant='tertiary' onPress={leechSplit} accessibilityLabel={t('cards.leech.split')}>
+            {t('cards.leech.split')}
+          </Button>
+        </Stack>
+      )}
+    </Stack>
+  ) : null
+
   if (complete) {
     return (
       <Screen>
@@ -765,6 +857,7 @@ export function StudySession() {
               {t('cards.session.complete.outsideFilter', { count: dueOutsideFilter })}
             </Typography>
           ) : null}
+          {leechBand}
           {queued > 0 ? (
             <Typography level='body-sm' color='text.tertiary' accessibilityLiveRegion='polite'>
               {t('cards.session.syncing', { count: queued })}
@@ -952,6 +1045,14 @@ export function StudySession() {
                 {t('cards.rest.lighten')}
               </Button>
             </Stack>
+          ) : leech ? (
+            /*
+             * The leech's way out (SR-004, PRD D6). It outranks the companion's
+             * nudge for the same miss because it is the one content here the
+             * learner can act on; the nudge waits its turn. The next grade or
+             * move takes it away unanswered, which is the fourth answer.
+             */
+            leechBand
           ) : buddy.message ? (
             /*
              * A fourth possible content, and it takes the band because it is

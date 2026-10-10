@@ -46,6 +46,15 @@ describe('useFormCore — initialisation', () => {
     expect(result.current.isEdit).toBe(true)
   })
 
+  it('starts from a draft read like an entity, and still knows it is adding (SR-004)', () => {
+    const draft = { title: 'ありがとう', content: 'thank you', deck_id: 'd1', tags: ['jp'] }
+    const { result } = setup({ draft, groups: ['tags'], hasContent: { tags: (entity) => entity.tags?.length > 0 } })
+    expect(result.current.values).toEqual({ title: 'ありがとう', content: 'thank you', deck_id: 'd1', tags: ['jp'] })
+    expect(result.current.isEdit).toBe(false)
+    // The groups the draft fills are shown, as an entity's would be.
+    expect(result.current.revealed.has('tags')).toBe(true)
+  })
+
   it('does not initialise while closed', () => {
     const { result } = renderHook(() => useFormCore({ open: false, ...flashcard() }))
     expect(result.current.values).toEqual({ title: '', content: '', deck_id: '', tags: [] })

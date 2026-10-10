@@ -46,8 +46,8 @@ const hasWriting = (values, fields) =>
  */
 const noFocus = () => {}
 
-const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClose, focusTarget = noFocus }) => {
-  const [cardType, setCardType] = useState(() => card?.card_type || 'flashcard')
+const useCardForm = ({ open, card = null, draft = null, initialSection = null, onSaved, onClose, focusTarget = noFocus }) => {
+  const [cardType, setCardType] = useState(() => card?.card_type || draft?.card_type || 'flashcard')
   const [pendingType, setPendingType] = useState(null)
   // Groups the user revealed under a type they have since switched away from.
   // `useFormCore` keeps one revealed set for the sheet's whole life, which is
@@ -64,7 +64,7 @@ const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClos
   const spec = specFor(cardType)
   const entity = card && (card._id || card.id) ? card : null
   const cardId = entity?._id || entity?.id
-  const presetDeckId = extractDeckId(card?.deck_id)
+  const presetDeckId = extractDeckId(card?.deck_id ?? draft?.deck_id)
 
   const nodes = useRef({})
   const refCallbacks = useRef({})
@@ -73,7 +73,12 @@ const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClos
   // card or the deck list is how QuizCardModal wiped typed input whenever the
   // decks were refetched.
   const openState = useRef({})
-  openState.current = { cardType: card?.card_type || 'flashcard', presetDeckId, isEdit: Boolean(entity), initialSection }
+  openState.current = {
+    cardType: card?.card_type || draft?.card_type || 'flashcard',
+    presetDeckId,
+    isEdit: Boolean(entity),
+    initialSection
+  }
 
   const refFor = useCallback((name) => {
     if (!refCallbacks.current[name]) {
@@ -106,6 +111,9 @@ const useCardForm = ({ open, card = null, initialSection = null, onSaved, onClos
   const core = useFormCore({
     open,
     entity,
+    // A split (SR-004): the card's words without its identity, so the save
+    // creates a second card and the first keeps its schedule.
+    draft: entity ? null : draft,
     initialValues,
     toFormState: cardToFormState,
     groups: spec.groups,

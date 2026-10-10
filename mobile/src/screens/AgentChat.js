@@ -32,7 +32,7 @@
  * nudge. The grounding — asking about the card in front of you — is the next
  * part and is where the value is.
  */
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { BackHandler, ScrollView, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -72,7 +72,7 @@ export function AgentChat() {
    * — the web's `viewContext` follows the screen for the same reason.
    */
   const [handoff, setHandoff] = useState(takeAskContext)
-  const { context, from } = handoff
+  const { context, from, prompt } = handoff
   const [turns, setTurns] = useState([])
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
@@ -150,36 +150,53 @@ export function AgentChat() {
     }, [close])
   )
 
-  const send = useCallback(async () => {
-    const message = draft.trim()
-    if (!message || sending || spent) return
+  const sendText = useCallback(
+    async (text) => {
+      const message = text.trim()
+      if (!message || sending || spent) return
 
-    setSending(true)
-    setFailure(null)
-    // The turn appears immediately and the field empties: a chat that waits for
-    // the server before showing what you typed reads as a dropped message.
-    const asked = [...turns, { from: USER, text: message }]
-    setTurns(asked)
-    setDraft('')
+      setSending(true)
+      setFailure(null)
+      // The turn appears immediately and the field empties: a chat that waits for
+      // the server before showing what you typed reads as a dropped message.
+      const asked = [...turns, { from: USER, text: message }]
+      setTurns(asked)
+      setDraft('')
 
-    try {
-      const response = await agentService.chat(message, chatHistory(turns), context, i18n?.language ?? 'en')
-      /* The companion answers in markdown and this client has no renderer for
-         it, so the markers come off rather than onto the screen. */
-      setTurns([...asked, { from: AGENT, text: plainReply(replyText(response)) }])
-      // The reply carries the month's count, so the footer is right without a
-      // second read of the companion state.
-      await pet.reload?.()
-    } catch (error) {
-      // The question stays on screen and the text comes back to the field, so
-      // nothing the user wrote is lost to a tunnel.
-      setTurns(turns)
-      setDraft(message)
-      setFailure(isOfflineError(error) ? t('errors.offline') : t('agent.chat.failed'))
-    } finally {
-      setSending(false)
-    }
-  }, [draft, sending, spent, turns, context, i18n, t, pet])
+      try {
+        const response = await agentService.chat(message, chatHistory(turns), context, i18n?.language ?? 'en')
+        /* The companion answers in markdown and this client has no renderer for
+           it, so the markers come off rather than onto the screen. */
+        setTurns([...asked, { from: AGENT, text: plainReply(replyText(response)) }])
+        // The reply carries the month's count, so the footer is right without a
+        // second read of the companion state.
+        await pet.reload?.()
+      } catch (error) {
+        // The question stays on screen and the text comes back to the field, so
+        // nothing the user wrote is lost to a tunnel.
+        setTurns(turns)
+        setDraft(message)
+        setFailure(isOfflineError(error) ? t('errors.offline') : t('agent.chat.failed'))
+      } finally {
+        setSending(false)
+      }
+    },
+    [sending, spent, turns, context, i18n, t, pet]
+  )
+
+  const send = useCallback(() => sendText(draft), [sendText, draft])
+
+  /*
+   * A handoff can carry a first turn (SR-004): the session asked, on the
+   * learner's behalf, for a card to be explained again. Sent once, as if
+   * typed, so the answer arrives without a second tap — the learner chose
+   * this by pressing the offer, and the composer is theirs from then on.
+   */
+  useEffect(() => {
+    if (!prompt) return
+    setHandoff((current) => ({ ...current, prompt: null }))
+    sendText(prompt)
+  }, [prompt, sendText])
 
   return (
     /*

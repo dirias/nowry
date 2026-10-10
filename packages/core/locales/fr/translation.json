@@ -2499,6 +2499,14 @@
       "error": "Impossible de changer le repos. Réessayez.",
       "lightened_one": "{{count}} carte reportée aux prochains jours.",
       "lightened_other": "{{count}} cartes reportées aux prochains jours."
+    },
+    "leech": {
+      "notice": "Ratée quatre fois : « {{title}} ». Offrez-lui une issue.",
+      "rest": "Reposer une semaine",
+      "explain": "Réexpliquer",
+      "split": "Scinder",
+      "rested": "Au repos une semaine. De retour le {{date}}.",
+      "prompt": "J'ai raté cette carte quatre fois. Explique-la-moi autrement et dis-moi avec quoi je pourrais la confondre."
     }
   },
   "books": {

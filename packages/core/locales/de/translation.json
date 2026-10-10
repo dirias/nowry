@@ -2488,6 +2488,14 @@
       "error": "Die Ruhe konnte nicht geändert werden. Versuch es noch einmal.",
       "lightened_one": "{{count}} Karte auf die nächsten Tage verschoben.",
       "lightened_other": "{{count}} Karten auf die nächsten Tage verschoben."
+    },
+    "leech": {
+      "notice": "Viermal verfehlt: „{{title}}“. Gib ihr einen Ausweg.",
+      "rest": "Eine Woche ruhen",
+      "explain": "Neu erklären",
+      "split": "Aufteilen",
+      "rested": "Ruht eine Woche. Zurück am {{date}}.",
+      "prompt": "Ich habe diese Karte jetzt viermal verfehlt. Erkläre sie mir anders und sag mir, womit ich sie verwechseln könnte."
     }
   },
   "books": {
