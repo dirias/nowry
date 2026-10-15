@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next'
 import { useToday } from '@nowry/core/hooks/useToday'
 import { useBlocks } from '@nowry/core/hooks/useBlocks'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
+import { usePlanTomorrowBlock } from '@nowry/core/hooks/usePlanTomorrowBlock'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
@@ -74,6 +75,8 @@ export function PlanDay() {
 
   const day = useToday({ date: key, dueToday })
   const history = useBlocks({ from: addDaysKey(todayKey, -STREAK_WINDOW_DAYS), to: todayKey })
+  // The evening ritual, offered once a learner has blocks (PRD D6, PLAN-007).
+  usePlanTomorrowBlock({ blocks: history.blocks, create: history.create, title: t('blocks.planTomorrow.title') })
   const log = useBlockLog()
   const { areas } = useAnnualPlan()
 

@@ -26,6 +26,7 @@ import Footer from './components/HomePage/Footer'
 import DevBugReportButton from './components/Dev/DevBugReportButton'
 import { AuthProvider, useAuth } from '@nowry/core/context/AuthContext'
 import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
+import BlockReminders from './components/Common/BlockReminders'
 import { NotificationProvider } from './context/NotificationContext'
 import { AgentProvider, usePet } from '@nowry/core/context/AgentContext'
 import { SubscriptionProvider } from './context/SubscriptionContext'
@@ -429,6 +430,8 @@ const AppContent = () => {
       {showFooter && <Footer />}
 
       <DevBugReportButton />
+
+      <BlockReminders />
 
       <Suspense fallback={null}>
         <PomodoroChip />

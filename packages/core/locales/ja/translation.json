@@ -1102,7 +1102,10 @@
       "allowed": "この端末でタイマーの通知が表示されます。",
       "blocked": "この端末ではタイマーの通知は表示されません。",
       "check": "通知の許可を確認",
-      "openSystem": "システム設定を開く"
+      "openSystem": "システム設定を開く",
+      "blockReminders": "ブロックのリマインダー",
+      "blockRemindersHint": "ブロックごとに 1 件、設定したリードタイムで通知します。",
+      "blockRemindersWeb": "Nowry を開いている間、各ブロックの時刻にお知らせが表示されます。"
     },
     "danger": {
       "title": "危険エリア",
@@ -3143,7 +3146,7 @@
       "menuBlock": "ブロック",
       "dueRow": "期限",
       "cards_other": "{{count}}枚のカード",
-      "routineGroup": "{{period}}のルーティン · {{count}}",
+      "routineGroup": "{{period}}のルーティン · {{size}}",
       "period": {
         "morning": "朝",
         "afternoon": "午後",
@@ -3425,6 +3428,22 @@
     }
   },
   "blocks": {
+    "reminder": {
+      "now": "{{title}} · 今",
+      "inMinutes_other": "{{title}} まで {{count}} 分",
+      "body": "{{minutes}} 分 · {{source}}"
+    },
+    "planTomorrow": {
+      "title": "明日の計画"
+    },
+    "home": {
+      "now": "今",
+      "panelAria": "今とタスク",
+      "empty": "今日の予定はありません。",
+      "planDay": "一日を計画する",
+      "openDay": "一日を開く",
+      "dayDone": "今日のブロックは終わりました。"
+    },
     "day": "日",
     "add": "ブロックを追加",
     "empty": "予定はありません。ブロックを追加するか、明日の計画を立てましょう。",

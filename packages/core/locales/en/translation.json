@@ -996,7 +996,10 @@
       "allowed": "This device will show the timer alert.",
       "blocked": "This device will not show the timer alert.",
       "check": "Check permission",
-      "openSystem": "Open system settings"
+      "openSystem": "Open system settings",
+      "blockReminders": "Block reminders",
+      "blockRemindersHint": "One notification per block, at the lead you set on it.",
+      "blockRemindersWeb": "While Nowry is open, a notice appears at each block's time."
     },
     "security": {
       "title": "Security",
@@ -3864,7 +3867,7 @@
       "dueRow": "Due",
       "cards_one": "{{count}} card",
       "cards_other": "{{count}} cards",
-      "routineGroup": "{{period}} routine · {{count}}",
+      "routineGroup": "{{period}} routine · {{size}}",
       "period": {
         "morning": "Morning",
         "afternoon": "Afternoon",
@@ -4125,6 +4128,23 @@
     }
   },
   "blocks": {
+    "reminder": {
+      "now": "{{title}} · now",
+      "inMinutes_one": "{{title}} in {{count}} min",
+      "inMinutes_other": "{{title}} in {{count}} min",
+      "body": "{{minutes}} min · {{source}}"
+    },
+    "planTomorrow": {
+      "title": "Plan tomorrow"
+    },
+    "home": {
+      "now": "Now",
+      "panelAria": "Now and tasks",
+      "empty": "Nothing planned today.",
+      "planDay": "Plan the day",
+      "openDay": "Open the day",
+      "dayDone": "The day's blocks are behind you."
+    },
     "day": "Day",
     "add": "Add block",
     "empty": "Nothing planned. Add a block or plan tomorrow.",

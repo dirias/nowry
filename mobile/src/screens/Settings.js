@@ -47,6 +47,7 @@ import { MAX_TOPICS, STUDY_GOALS, TOPICS } from '@nowry/core/constants/learningT
 import { queryClient } from '@nowry/core/api/queryClient'
 import { userService } from '@nowry/core/api/services'
 import { requestNotificationPermission } from '../platform/alerts'
+import { useBlockReminderSetting } from '@nowry/core/hooks/useBlockReminders'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
 import { getColorPresets } from '@nowry/core/tokens/colorSchemeGenerator'
 import {
@@ -105,6 +106,7 @@ export function Settings() {
   const [emailError, setEmailError] = useState(null)
   const [deleteError, setDeleteError] = useState(null)
   const [permission, setPermission] = useState(null)
+  const blockReminders = useBlockReminderSetting()
 
   const language = prefs.values[PREFERENCE_FIELD.LANGUAGE] || i18n.language
   const accent = appearance.accent
@@ -254,6 +256,16 @@ export function Settings() {
             {t('settings.notifications.openSystem')}
           </Button>
         </Stack>
+        {/* The device's own switch (PRD D6): a reminder is a local notification,
+            so wanting them here and not on the laptop is the ordinary case. */}
+        <SettingRow
+          label={t('settings.notifications.blockReminders')}
+          description={t('settings.notifications.blockRemindersHint')}
+          value={blockReminders.enabled}
+          onPress={() => blockReminders.setEnabled(!blockReminders.enabled)}
+        >
+          <Switch value={blockReminders.enabled} />
+        </SettingRow>
 
         <Divider />
 

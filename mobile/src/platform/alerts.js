@@ -28,11 +28,17 @@ const CHANNEL_ID = 'nowry-focus'
  * channel rather than a flag on the first (POMO-008).
  */
 const QUIET_CHANNEL_ID = 'nowry-focus-quiet'
+/** Block reminders have their own channel, so a learner can quiet one and not the other (PLAN-007). */
+const BLOCKS_CHANNEL_ID = 'nowry-blocks'
+/** iOS holds 64 pending notifications per app; the focus alarm needs one. */
+const MAX_BLOCK_REMINDERS = 60
+/** The identifier of the standing focus alarm, so cancelling it cancels nothing else. */
+let endAlarmId = null
 
 /*
  * Show the alarm even when the app is open. The timer's zero is worth seeing
- * whether or not the user is looking at the Focus tab, and this is the only
- * notification the app schedules.
+ * whether or not the user is looking at the Focus tab; a block's reminder is
+ * worth seeing for the same reason (PLAN-007).
  */
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -92,7 +98,7 @@ export const scheduleEndAlarm = async ({ seconds, title, body, sound = true }) =
     await cancelEndAlarm()
     if (!(seconds > 0)) return
     await ensureChannel(sound)
-    await Notifications.scheduleNotificationAsync({
+    endAlarmId = await Notifications.scheduleNotificationAsync({
       // The content's `sound` IS a mode — iOS reads 'default' as its own
       // enum and `null` as silent. Android ignores it and uses the channel's:
       // the system default on the first channel, nothing on the quiet one.
@@ -110,9 +116,69 @@ export const scheduleEndAlarm = async ({ seconds, title, body, sound = true }) =
 
 export const cancelEndAlarm = async () => {
   try {
-    await Notifications.cancelAllScheduledNotificationsAsync()
+    /*
+     * Only the alarm's own identifier. This used to cancel EVERY scheduled
+     * notification, which was fine while the alarm was the only one; with the
+     * block reminders standing beside it, a paused timer must not silence the
+     * week (PLAN-007).
+     */
+    if (endAlarmId) await Notifications.cancelScheduledNotificationAsync(endAlarmId)
+    endAlarmId = null
   } catch {
     // As above.
+  }
+}
+
+const ensureBlocksChannel = async () => {
+  if (Platform.OS !== 'android') return
+  await Notifications.setNotificationChannelAsync(BLOCKS_CHANNEL_ID, {
+    name: 'Block reminders',
+    importance: Notifications.AndroidImportance.HIGH
+  })
+}
+
+const isBlockReminder = (request) => request?.content?.data?.kind === 'block'
+
+/**
+ * Withdraw every standing block reminder and nothing else. The focus alarm,
+ * if one stands, is not ours to touch here.
+ */
+export const cancelBlockReminders = async () => {
+  try {
+    const standing = await Notifications.getAllScheduledNotificationsAsync()
+    await Promise.all(standing.filter(isBlockReminder).map((request) => Notifications.cancelScheduledNotificationAsync(request.identifier)))
+  } catch {
+    // As above.
+  }
+}
+
+/**
+ * Hand the OS one dated notification per reminder item (the hook composed the
+ * words), replacing whatever stood before. Returns how many it now holds; 0
+ * when permission is missing, which the Settings screen is the place to fix.
+ */
+export const scheduleBlockReminders = async (items) => {
+  try {
+    await cancelBlockReminders()
+    const permission = await Notifications.getPermissionsAsync()
+    if (!permission.granted) return 0
+    await ensureBlocksChannel()
+    let count = 0
+    for (const item of (items ?? []).slice(0, MAX_BLOCK_REMINDERS)) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: item.title,
+          body: item.body,
+          sound: 'default',
+          data: { kind: 'block', blockId: item.blockId, date: item.date }
+        },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: item.fireAt, channelId: BLOCKS_CHANNEL_ID }
+      })
+      count += 1
+    }
+    return count
+  } catch {
+    return 0
   }
 }
 
@@ -126,7 +192,9 @@ export const mobileAlerts = {
   play: () => false,
   stop: () => {},
   announce: () => {},
-  requestPermission: requestNotificationPermission
+  requestPermission: requestNotificationPermission,
+  scheduleBlockReminders,
+  cancelBlockReminders
 }
 
 export default mobileAlerts

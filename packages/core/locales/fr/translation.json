@@ -984,7 +984,10 @@
       "allowed": "Cet appareil affichera l'alerte du minuteur.",
       "blocked": "Cet appareil n'affichera pas l'alerte du minuteur.",
       "check": "Vérifier l’autorisation",
-      "openSystem": "Ouvrir les réglages du système"
+      "openSystem": "Ouvrir les réglages du système",
+      "blockReminders": "Rappels de blocs",
+      "blockRemindersHint": "Une notification par bloc, avec l’avance que vous lui donnez.",
+      "blockRemindersWeb": "Tant que Nowry est ouvert, un avis apparaît à l’heure de chaque bloc."
     },
     "danger": {
       "title": "Zone de danger",
@@ -3261,7 +3264,7 @@
       "dueRow": "Échéances",
       "cards_one": "{{count}} carte",
       "cards_other": "{{count}} cartes",
-      "routineGroup": "Routine {{period}} · {{count}}",
+      "routineGroup": "Routine {{period}} · {{size}}",
       "period": {
         "morning": "du matin",
         "afternoon": "de l'après-midi",
@@ -3551,6 +3554,23 @@
     }
   },
   "blocks": {
+    "reminder": {
+      "now": "{{title}} · maintenant",
+      "inMinutes_one": "{{title}} dans {{count}} min",
+      "inMinutes_other": "{{title}} dans {{count}} min",
+      "body": "{{minutes}} min · {{source}}"
+    },
+    "planTomorrow": {
+      "title": "Planifier demain"
+    },
+    "home": {
+      "now": "Maintenant",
+      "panelAria": "Maintenant et tâches",
+      "empty": "Rien de prévu aujourd'hui.",
+      "planDay": "Planifier la journée",
+      "openDay": "Ouvrir la journée",
+      "dayDone": "Les blocs du jour sont derrière vous."
+    },
     "day": "Jour",
     "add": "Ajouter un bloc",
     "empty": "Rien de prévu. Ajoutez un bloc ou planifiez demain.",

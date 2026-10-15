@@ -131,6 +131,9 @@ const COPYRIGHT_ROUTE = ['routes.copyright']
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
   es: [
+    // A reminder's body is a number, "min" and the source word: the same
+    // three pieces in every Latin locale (PLAN-007).
+    'blocks.reminder.body',
     ...BETA_MARK,
     ...COPYRIGHT_ROUTE,
     // "A–Z" is a range of letters, not a phrase. Spanish, French and German
@@ -145,6 +148,13 @@ const IDENTICAL_BY_DESIGN = {
     // "+5 min" is the same abbreviation again, with a sign and a number in front.
     'pomodoro.extendBy',
     'calendarPage.views.agenda',
+    // The block readouts are the same "min" and "h" abbreviations with numbers
+    // in front — "6 h 10 min", "20 min · {{source}}" (PLAN-004).
+    'calendarPage.blocks.minutes',
+    'calendarPage.blocks.hoursMinutes',
+    'calendarPage.blocks.meta',
+    'calendarPage.blocks.form.remindMinutes_one',
+    'calendarPage.blocks.form.remindMinutes_other',
     ...XP_GAINED,
     ...CARD_COUNTER
   ],
@@ -153,6 +163,9 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    // A reminder's body is a number, "min" and the source word: the same
+    // three pieces in every Latin locale (PLAN-007).
+    'blocks.reminder.body',
     ...COPYRIGHT_ROUTE,
     'taxonomy.topics.business',
     'taxonomy.topics.design',
@@ -182,6 +195,19 @@ const IDENTICAL_BY_DESIGN = {
     // UI says "Focus" for a focus block as it does for the timer's mode above.
     'blocks.source.routine',
     'blocks.source.focus',
+    // The calendar's block rows and form say the same two words, and "Date"
+    // again for the one-off's day (PLAN-004); the readouts are the "min" and
+    // "h" abbreviations with numbers in front.
+    'calendarPage.blocks.source.routine',
+    'calendarPage.blocks.source.focus',
+    'calendarPage.blocks.form.source.routine',
+    'calendarPage.blocks.form.source.focus',
+    'calendarPage.blocks.form.onceDate',
+    'calendarPage.blocks.minutes',
+    'calendarPage.blocks.hoursMinutes',
+    'calendarPage.blocks.meta',
+    'calendarPage.blocks.form.remindMinutes_one',
+    'calendarPage.blocks.form.remindMinutes_other',
     // See the Spanish note: "min" is the abbreviation here too.
     'study.dates.minutes_one',
     'study.dates.minutes_other',
@@ -218,6 +244,8 @@ const IDENTICAL_BY_DESIGN = {
     // "Optional" is the German word for an optional field (MOB-103).
     'public.tags',
     'common.optional',
+    // "Routine" is the German word for the block form's first source (PLAN-004).
+    'calendarPage.blocks.form.source.routine',
     ...XP_GAINED,
     ...CARD_COUNTER
   ],

@@ -934,7 +934,10 @@
       "allowed": "Este dispositivo mostrará la alerta del temporizador.",
       "blocked": "Este dispositivo no mostrará la alerta del temporizador.",
       "check": "Comprobar permiso",
-      "openSystem": "Abrir ajustes del sistema"
+      "openSystem": "Abrir ajustes del sistema",
+      "blockReminders": "Recordatorios de bloques",
+      "blockRemindersHint": "Una notificación por bloque, con la antelación que le pongas.",
+      "blockRemindersWeb": "Mientras Nowry esté abierto, aparece un aviso a la hora de cada bloque."
     },
     "security": {
       "title": "Seguridad",
@@ -3730,7 +3733,7 @@
       "dueRow": "Vence",
       "cards_one": "{{count}} tarjeta",
       "cards_other": "{{count}} tarjetas",
-      "routineGroup": "Rutina {{period}} · {{count}}",
+      "routineGroup": "Rutina {{period}} · {{size}}",
       "period": {
         "morning": "de la mañana",
         "afternoon": "de la tarde",
@@ -3991,6 +3994,23 @@
     }
   },
   "blocks": {
+    "reminder": {
+      "now": "{{title}} · ahora",
+      "inMinutes_one": "{{title}} en {{count}} min",
+      "inMinutes_other": "{{title}} en {{count}} min",
+      "body": "{{minutes}} min · {{source}}"
+    },
+    "planTomorrow": {
+      "title": "Planear mañana"
+    },
+    "home": {
+      "now": "Ahora",
+      "panelAria": "Ahora y tareas",
+      "empty": "Nada planeado para hoy.",
+      "planDay": "Planificar el día",
+      "openDay": "Abrir el día",
+      "dayDone": "Los bloques de hoy ya han pasado."
+    },
     "day": "Día",
     "add": "Añadir bloque",
     "empty": "Nada planeado. Añade un bloque o planifica mañana.",

@@ -239,11 +239,13 @@ export const alerts = {
   /**
    * Block reminders (PLAN-002, PRD D6): one local notification per occurrence
    * for the days ahead. Optional on the adapter — a client without a scheduler
-   * (the web) schedules nothing and says so with 0.
+   * (the web) schedules nothing and says so with `null`.
    */
-  scheduleBlockReminders: (occurrences) => {
+  scheduleBlockReminders: (items) => {
     const adapter = capability('alerts')
-    return isFunction(adapter.scheduleBlockReminders) ? adapter.scheduleBlockReminders(occurrences) : 0
+    // `null` says "no scheduler here", which is the web; a number is how many
+    // the OS now holds. The hook arms in-session timers only for `null`.
+    return isFunction(adapter.scheduleBlockReminders) ? adapter.scheduleBlockReminders(items) : null
   },
   cancelBlockReminders: () => {
     const adapter = capability('alerts')

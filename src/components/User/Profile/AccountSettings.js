@@ -48,8 +48,7 @@ import {
   LockRounded,
   VpnKeyRounded,
   PersonRounded,
-  WarningAmberRounded,
-  NotificationsOffRounded
+  WarningAmberRounded
 } from '@mui/icons-material'
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded'
 import MenuRounded from '@mui/icons-material/MenuRounded'
@@ -71,6 +70,7 @@ import { auth } from '../../../config/firebase.config'
 import { useQueryClient } from '@tanstack/react-query'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
+import { useBlockReminderSetting } from '@nowry/core/hooks/useBlockReminders'
 import LearningPreferencesSection from './LearningPreferencesSection'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 
@@ -192,6 +192,7 @@ function useActiveSection(sectionIds) {
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function AccountSettings() {
   const { t, i18n } = useTranslation()
+  const blockReminders = useBlockReminderSetting()
   const { user, subscriptionTier, updateUser } = useAuth()
   const { mode, setMode } = useColorScheme()
   const { themeColor: ctxThemeColor, setThemeColor } = useThemePreferences()
@@ -935,32 +936,22 @@ export default function AccountSettings() {
 
             {/* ── Section 5: Notifications ───────────────────────────────────────── */}
             <SectionBlock id='section-notifications' title={t('settings.notifications.title')} loading={pageLoading}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  py: 6,
-                  gap: 2,
-                  opacity: 0.5,
-                  pointerEvents: 'none',
-                  userSelect: 'none'
-                }}
-              >
-                <NotificationsOffRounded sx={{ fontSize: 40, color: 'text.tertiary' }} />
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography level='title-sm' sx={{ color: 'text.secondary', mb: 0.5 }}>
-                    {t('settings.notifications.comingSoon')}
-                  </Typography>
+              {/* The browser's own switch (PRD D6, PLAN-007): the web has no
+                  scheduler, so a reminder is an in-session notice at the
+                  block's time while a tab is open. */}
+              <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2}>
+                <Box>
+                  <Typography level='title-sm'>{t('settings.notifications.blockReminders')}</Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {t('settings.notifications.comingSoonDesc')}
+                    {t('settings.notifications.blockRemindersWeb')}
                   </Typography>
                 </Box>
-                <Chip variant='soft' color='neutral' size='sm'>
-                  {t('settings.security.comingSoon')}
-                </Chip>
-              </Box>
+                <Switch
+                  checked={blockReminders.enabled}
+                  onChange={(event) => blockReminders.setEnabled(event.target.checked)}
+                  slotProps={{ input: { 'aria-label': t('settings.notifications.blockReminders') } }}
+                />
+              </Stack>
             </SectionBlock>
             <Divider />
 

@@ -973,7 +973,10 @@
       "allowed": "Dieses Gerät zeigt den Timer-Hinweis an.",
       "blocked": "Dieses Gerät zeigt den Timer-Hinweis nicht an.",
       "check": "Berechtigung prüfen",
-      "openSystem": "Systemeinstellungen öffnen"
+      "openSystem": "Systemeinstellungen öffnen",
+      "blockReminders": "Block-Erinnerungen",
+      "blockRemindersHint": "Eine Benachrichtigung pro Block, mit der eingestellten Vorlaufzeit.",
+      "blockRemindersWeb": "Solange Nowry geöffnet ist, erscheint zur Zeit jedes Blocks ein Hinweis."
     },
     "danger": {
       "title": "Gefahrenzone",
@@ -3250,7 +3253,7 @@
       "dueRow": "Fällig",
       "cards_one": "{{count}} Karte",
       "cards_other": "{{count}} Karten",
-      "routineGroup": "Routine am {{period}} · {{count}}",
+      "routineGroup": "Routine am {{period}} · {{size}}",
       "period": {
         "morning": "Morgen",
         "afternoon": "Nachmittag",
@@ -3540,6 +3543,23 @@
     }
   },
   "blocks": {
+    "reminder": {
+      "now": "{{title}} · jetzt",
+      "inMinutes_one": "{{title}} in {{count}} Min.",
+      "inMinutes_other": "{{title}} in {{count}} Min.",
+      "body": "{{minutes}} Min. · {{source}}"
+    },
+    "planTomorrow": {
+      "title": "Morgen planen"
+    },
+    "home": {
+      "now": "Jetzt",
+      "panelAria": "Jetzt und Aufgaben",
+      "empty": "Heute ist nichts geplant.",
+      "planDay": "Den Tag planen",
+      "openDay": "Den Tag öffnen",
+      "dayDone": "Die Blöcke des Tages liegen hinter dir."
+    },
     "day": "Tag",
     "add": "Block hinzufügen",
     "empty": "Nichts geplant. Füge einen Block hinzu oder plane morgen.",

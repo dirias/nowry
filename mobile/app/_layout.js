@@ -26,6 +26,7 @@ import { PERSIST_OPTIONS } from '../src/platform/queryPersistence'
 import { AppearanceProvider } from '../src/theme/AppearanceProvider'
 import { OfflineSync } from '../src/platform/OfflineSync'
 import { PushBridge } from '../src/platform/PushBridge'
+import { BlockReminders } from '../src/platform/BlockReminders'
 import { NotificationHost } from '../src/ui/Toast'
 import { AuthGate } from '../src/navigation/AuthGate'
 import { DISPLAY_FONTS } from '../src/ui/displayFonts'
@@ -77,6 +78,7 @@ export default function RootLayout() {
               </PomodoroProvider>
               <OfflineSync />
               <PushBridge />
+              <BlockReminders />
               <NotificationHost />
             </AppearanceProvider>
           </AuthProvider>
