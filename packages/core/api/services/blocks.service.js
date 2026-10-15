@@ -27,7 +27,10 @@ export const blocksService = {
     const { data } = await apiClient.get(ENDPOINTS.blocks.list, { params: { from, to } })
     const blocks = (data?.blocks ?? []).map(readBlock)
     const byId = new Map(blocks.map((b) => [b.id, b]))
-    const occurrences = (data?.occurrences ?? []).map(readOccurrence).map((o) => ({ ...o, block: byId.get(o.blockId) ?? null }))
+    const occurrences = (data?.occurrences ?? []).map(readOccurrence).map((o) => {
+      const block = byId.get(o.blockId) ?? null
+      return { ...o, block, title: o.title || block?.title || '' }
+    })
     return { blocks, occurrences, migrated: data?.migrated ?? null }
   },
 

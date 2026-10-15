@@ -189,9 +189,12 @@ const CalendarPage = () => {
   const moments = useBlockMoments({ occurrences, todayKey })
 
   const filteredEvents = useMemo(() => filterCalendarEvents(events, filters), [events, filters])
+  // Blocks live on the hours (ADR-045 §2): Day and Week draw them, Month keeps
+  // the deadlines alone — three routine tiles in every cell said nothing a
+  // learner could act on, and hid the dates that were due.
   const blockEvents = useMemo(
-    () => toBlockEvents(occurrences ?? [], { groupRoutines: effectiveView === 'week' }),
-    [occurrences, effectiveView]
+    () => (isTimeGrid ? toBlockEvents(occurrences ?? [], { groupRoutines: effectiveView === 'week' }) : []),
+    [occurrences, effectiveView, isTimeGrid]
   )
   const calendarEvents = useMemo(() => [...filteredEvents.map(toCalendarEvent), ...blockEvents], [filteredEvents, blockEvents])
   const agendaGroups = useMemo(

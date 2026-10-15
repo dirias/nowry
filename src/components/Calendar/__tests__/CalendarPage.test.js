@@ -742,6 +742,8 @@ describe('PLAN-004: the time grids, the blocks on them, and what the grid may wr
 
   it('deadlines stay all-day; occurrences become timed events on local strings carrying their occurrence', async () => {
     await renderPage()
+    // Blocks live on the hours: Day and Week draw them, Month does not.
+    fireEvent.click(view('day'))
     const deadline = lastFc().events.find((event) => event.id === 'task-1')
     expect(deadline.allDay).toBe(true)
     const [studyEvent] = blockEvents()
