@@ -154,7 +154,7 @@ describe('the Now tab', () => {
     expect(mockUndo).toHaveBeenCalledWith(kept)
   })
 
-  it('reads the day back once it is spent: the last three past rows, read-only', () => {
+  it('reads the day back once it is spent: the last three past rows, ticks live', () => {
     const past = ['07:00', '07:30', '08:00', '08:30'].map((start, i) =>
       occurrence(`p${i}`, start, `Block ${i}`, { log: i % 2 ? { status: 'kept' } : { status: 'skipped' } })
     )
@@ -166,7 +166,9 @@ describe('the Now tab', () => {
     expect(rows).toHaveLength(3)
     expect(rows[0]).toHaveTextContent('Block 1')
     expect(rows.map((row) => row.getAttribute('data-block-state'))).toEqual(['kept', 'skipped', 'kept'])
-    expect(screen.queryByRole('button', { name: 'calendarPage.blocks.markKept' })).toBeNull()
+    // The ticks stay live on a spent day: the evening is when the day is ticked.
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.markKept' }))
+    expect(mockKeep).toHaveBeenCalledTimes(1)
     expect(screen.queryByRole('link', { name: 'blocks.row.start' })).toBeNull()
   })
 

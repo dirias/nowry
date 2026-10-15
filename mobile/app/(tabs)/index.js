@@ -102,7 +102,7 @@ const NOW_TAB = 'now'
 const TASKS_TAB = 'tasks'
 /** Current, next, and this many of what follows: a glance, not the timeline. */
 const LATER_SHOWN = 3
-/** When the day is spent, the last blocks it held, read back. */
+/** When the day is spent, the last blocks it held, read back — ticks live, since the evening is when the day is ticked. */
 const PAST_SHOWN = 3
 /**
  * The narrowest the greeting may be squeezed before the review key drops to
@@ -555,8 +555,8 @@ function NowTab({ day, ahead, log, areaColors, onOpenDay, onStart, theme, t }) {
             areaColor={o.block?.areaId ? (areaColors.get(o.block.areaId) ?? null) : null}
             due={day.due}
             suggestedMinutes={day.suggestedStudyLength}
-            onOpen={spent ? undefined : onOpenDay}
-            onToggle={spent ? undefined : toggle}
+            onOpen={onOpenDay}
+            onToggle={toggle}
             onStart={onStart}
           />
         </View>

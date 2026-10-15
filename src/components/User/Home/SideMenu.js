@@ -765,7 +765,7 @@ const NowTab = ({ day, log, focusAreas, onStart, t }) => {
             nowMinutes={day.nowMinutes}
             current={!spent && index === 0}
             color={sourceColor(o, focusAreas)}
-            onToggle={spent ? null : toggle}
+            onToggle={toggle}
             t={t}
           />
         </React.Fragment>
@@ -833,22 +833,20 @@ const NowRow = ({ occurrence, nowMinutes, current, color, onToggle, onStart, t }
         >
           {t('blocks.row.start')}
         </JoyLink>
-      ) : onToggle ? (
+      ) : (
+        /* The tick is live on every row, the spent day's included: the evening
+           is when a learner ticks what the day held (PRD D5). */
         <IconButton
           size='sm'
           variant='plain'
           color={kept ? 'success' : 'neutral'}
-          onClick={() => onToggle(occurrence)}
+          onClick={() => onToggle?.(occurrence)}
           aria-label={tickLabel}
           aria-pressed={kept}
           sx={tickSx(kept)}
         >
           {kept ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
         </IconButton>
-      ) : (
-        <Box aria-hidden='true' sx={{ ...tickSx(kept), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {kept ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
-        </Box>
       )}
     </Box>
   )
