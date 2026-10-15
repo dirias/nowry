@@ -3347,6 +3347,7 @@
     "notification": {
       "title": "ポモドーロタイマー",
       "workDone": "集中セッションが完了しました。休憩の時間です。",
+      "blockDone": "{{title}} が終わりました。",
       "breakDone": "休憩終了。集中する準備はできましたか？"
     },
     "modes": {
@@ -3428,6 +3429,13 @@
     }
   },
   "blocks": {
+    "free": {
+      "title": "集中セッション"
+    },
+    "end": {
+      "kept": "達成",
+      "notKept": "未達成"
+    },
     "reminder": {
       "now": "{{title}} · 今",
       "inMinutes_other": "{{title}} まで {{count}} 分",

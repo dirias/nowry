@@ -130,6 +130,9 @@ const SheetContent = ({ timer, t, ids, onClose }) => {
     extendSession,
     startNext,
     stopAfterEnd,
+    block,
+    keepBlock,
+    skipBlock,
     settings
   } = timer
 
@@ -184,19 +187,19 @@ const SheetContent = ({ timer, t, ids, onClose }) => {
         size='sm'
         variant='soft'
         color='neutral'
-        onClick={stopAfterEnd}
+        onClick={block ? skipBlock : stopAfterEnd}
         sx={{ minHeight: 32, px: 1.5, borderRadius: 'md', ...focusRing }}
       >
-        {t('pomodoro.stop')}
+        {block ? t('blocks.end.notKept') : t('pomodoro.stop')}
       </Button>
       <Button
         size='sm'
         variant='solid'
         color='primary'
-        onClick={startNext}
+        onClick={block ? () => keepBlock() : startNext}
         sx={{ flex: '1 1 auto', minWidth: 96, minHeight: 32, px: 1.5, borderRadius: 'md', whiteSpace: 'nowrap', ...focusRing }}
       >
-        {startLabelFor(nextMode, t)}
+        {block ? t('blocks.end.kept') : startLabelFor(nextMode, t)}
       </Button>
     </>
   ) : (

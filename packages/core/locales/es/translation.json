@@ -3925,6 +3925,7 @@
     "notification": {
       "title": "Temporizador Pomodoro",
       "workDone": "Sesión de enfoque completada. Hora de un descanso.",
+      "blockDone": "{{title}} ha terminado.",
       "breakDone": "Descanso terminado. ¿Listo para concentrarte?"
     },
     "modes": {
@@ -3994,6 +3995,13 @@
     }
   },
   "blocks": {
+    "free": {
+      "title": "Sesión de enfoque"
+    },
+    "end": {
+      "kept": "Cumplido",
+      "notKept": "No cumplido"
+    },
     "reminder": {
       "now": "{{title}} · ahora",
       "inMinutes_one": "{{title}} en {{count}} min",

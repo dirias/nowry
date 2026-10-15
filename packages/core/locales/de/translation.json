@@ -3458,6 +3458,7 @@
     "notification": {
       "title": "Pomodoro-Timer",
       "workDone": "Fokus-Sitzung abgeschlossen. Zeit für eine Pause.",
+      "blockDone": "{{title}} ist vorbei.",
       "breakDone": "Pause vorbei. Bereit, dich zu konzentrieren?"
     },
     "modes": {
@@ -3543,6 +3544,13 @@
     }
   },
   "blocks": {
+    "free": {
+      "title": "Fokus-Sitzung"
+    },
+    "end": {
+      "kept": "Geschafft",
+      "notKept": "Nicht geschafft"
+    },
     "reminder": {
       "now": "{{title}} · jetzt",
       "inMinutes_one": "{{title}} in {{count}} Min.",

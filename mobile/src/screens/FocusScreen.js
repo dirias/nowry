@@ -125,13 +125,15 @@ export function FocusScreen() {
   })
 
   // Which session of the cycle this is, while focusing; a break is not one.
-  const caption = isFocus
-    ? t('pomodoro.dialCaption', {
-        mode: t('pomodoro.modes.work'),
-        current: Math.min(done + 1, sessionsBeforeLongBreak),
-        total: sessionsBeforeLongBreak
-      })
-    : t(`pomodoro.modes.${mode}`)
+  const caption = timer.block
+    ? timer.block.title
+    : isFocus
+      ? t('pomodoro.dialCaption', {
+          mode: t('pomodoro.modes.work'),
+          current: Math.min(done + 1, sessionsBeforeLongBreak),
+          total: sessionsBeforeLongBreak
+        })
+      : t(`pomodoro.modes.${mode}`)
 
   const startLabel = isPaused ? 'pomodoro.resume' : isFocus ? 'pomodoro.start' : 'pomodoro.startBreak'
 
@@ -213,12 +215,27 @@ export function FocusScreen() {
               onChange={timer.extendSession}
               options={extendMinutes.map((minutes) => ({ value: minutes, label: t('pomodoro.extendBy', { minutes }) }))}
             />
-            <Button size='lg' variant='secondary' onPress={timer.stopAfterEnd}>
-              {t('pomodoro.stop')}
-            </Button>
-            <Button size='lg' onPress={timer.startNext}>
-              {t(nextLabel)}
-            </Button>
+            {timer.block ? (
+              /* A block's end is a question about the block (PRD D7): kept, or
+                 not. Both log it and put the timer away. */
+              <>
+                <Button size='lg' variant='secondary' onPress={timer.skipBlock}>
+                  {t('blocks.end.notKept')}
+                </Button>
+                <Button size='lg' onPress={() => timer.keepBlock()}>
+                  {t('blocks.end.kept')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size='lg' variant='secondary' onPress={timer.stopAfterEnd}>
+                  {t('pomodoro.stop')}
+                </Button>
+                <Button size='lg' onPress={timer.startNext}>
+                  {t(nextLabel)}
+                </Button>
+              </>
+            )}
           </Stack>
         ) : (
           /* ONE alternative, as the web has it: reset while focusing, skip while

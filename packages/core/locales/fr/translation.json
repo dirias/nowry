@@ -3469,6 +3469,7 @@
     "notification": {
       "title": "Minuteur Pomodoro",
       "workDone": "Session de concentration terminée. C'est l'heure de la pause.",
+      "blockDone": "{{title}} est terminé.",
       "breakDone": "Pause terminée. Prêt à vous concentrer ?"
     },
     "modes": {
@@ -3554,6 +3555,13 @@
     }
   },
   "blocks": {
+    "free": {
+      "title": "Séance de concentration"
+    },
+    "end": {
+      "kept": "Tenu",
+      "notKept": "Pas tenu"
+    },
     "reminder": {
       "now": "{{title}} · maintenant",
       "inMinutes_one": "{{title}} dans {{count}} min",

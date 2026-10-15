@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useTranslation } from 'react-i18next'
 import { useUserProfile } from '../hooks/useUserProfile'
 import { alerts, storage } from '../platform'
+import { blocksService } from '../api/services/blocks.service'
+import { queryClient } from '../api/queryClient'
+import { formatTime, localDateKey } from '../domain/blocks/dates'
 import {
   AUTO_START_GRACE_MS,
   DEFAULT_SETTINGS,
@@ -102,12 +105,25 @@ const freshState = (mode = MODES.WORK, completedSessions = 0) => ({
   // progress edge restarts for it); `extendedTotal` is every extension this
   // session has had, so the ended status can say "30 min of focus".
   extension: 0,
-  extendedTotal: 0
+  extendedTotal: 0,
+  /*
+   * The block this session runs, when it runs one (PLAN-006, PRD D7): the
+   * occurrence's identity and length, so the end can be logged against it.
+   * `blockSeconds` is the block's own length, which replaces the mode's
+   * preference as the session's base; `startedAt` is when the session began,
+   * kept for every focus session so a free one can be recorded as a block.
+   */
+  block: null,
+  blockSeconds: 0,
+  startedAt: null
 })
 
 const extensionFields = (parsed) => ({
   extension: Number(parsed.extension) || 0,
-  extendedTotal: Number(parsed.extendedTotal) || 0
+  extendedTotal: Number(parsed.extendedTotal) || 0,
+  block: parsed.block && typeof parsed.block === 'object' ? parsed.block : null,
+  blockSeconds: Number(parsed.blockSeconds) || 0,
+  startedAt: typeof parsed.startedAt === 'number' ? parsed.startedAt : null
 })
 
 /** The session counted and the next one queued idle — what a stale end resolves to. */
@@ -214,7 +230,9 @@ export const PomodoroProvider = ({ children }) => {
     autoStartsAt,
     autoStartIn,
     extension,
-    extendedTotal
+    extendedTotal,
+    block,
+    blockSeconds
   } = timer
 
   // Preferences — from the profile query, whenever it (re)loads.
@@ -257,8 +275,10 @@ export const PomodoroProvider = ({ children }) => {
       autoStartsAt: settings.autoStart ? now + AUTO_START_GRACE_MS : null,
       autoStartIn: settings.autoStart ? Math.ceil(AUTO_START_GRACE_MS / 1000) : null
     }))
+    const block = timerRef.current.block
     const bodyKey = finishedMode === MODES.WORK ? 'pomodoro.notification.workDone' : 'pomodoro.notification.breakDone'
-    const announce = (played) => alerts.announce(t('pomodoro.notification.title'), t(bodyKey), { silent: played === true })
+    const body = block ? t('pomodoro.notification.blockDone', { title: block.title }) : t(bodyKey)
+    const announce = (played) => alerts.announce(t('pomodoro.notification.title'), body, { silent: played === true })
     // `play` answers at once when it can; it answers later only when the
     // browser has to be asked to resume audio first (a page never clicked).
     // With the sound preference off the chime is skipped and the OS notice
@@ -267,6 +287,66 @@ export const PomodoroProvider = ({ children }) => {
     if (played && typeof played.then === 'function') played.then(announce, () => announce(false))
     else announce(played)
   }, [settings, t])
+
+  /** Seconds this session has run: its base plus every extension, less what is left. */
+  const elapsedSeconds = (state) =>
+    Math.max(0, (state.blockSeconds || durationFor(state.mode, settings)) + state.extendedTotal - state.timeLeft)
+
+  /**
+   * Write the running block's outcome to its log (PRD D5, D7). Fire and
+   * forget: the sheet's keys are the decision, the request follows, and the
+   * day's ranges refetch when it lands.
+   */
+  const logBlock = useCallback(
+    (status, extra = {}) => {
+      const state = timerRef.current
+      if (!state.block) return
+      const minutes = status === 'skipped' ? 0 : Math.round(elapsedSeconds(state) / 60)
+      blocksService
+        .setLog(state.block.blockId, state.block.date, {
+          status,
+          startedAt: state.startedAt ? new Date(state.startedAt) : null,
+          endedAt: new Date(),
+          minutes,
+          record: extra.record ?? null
+        })
+        .then(() => queryClient.invalidateQueries({ queryKey: ['blocks'] }))
+        .catch(() => {})
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settings]
+  )
+
+  /**
+   * A focus session started free leaves a trace too (PRD D7): a one-off
+   * block of its length on today's record, kept. Five minutes is the floor a
+   * block has; shorter is a false start, not a session.
+   */
+  const recordFreeSession = useCallback(
+    (state) => {
+      if (state.mode !== MODES.WORK || state.block || !state.startedAt) return
+      const minutes = Math.round(elapsedSeconds(state) / 60)
+      if (minutes < 5) return
+      const started = new Date(state.startedAt)
+      blocksService
+        .create({
+          title: t('blocks.free.title'),
+          source: { type: 'focus', id: null },
+          start: formatTime(started.getHours() * 60 + started.getMinutes()),
+          lengthMin: Math.max(5, Math.round(minutes / 5) * 5),
+          daysOfWeek: [],
+          date: localDateKey(started),
+          reminderMin: null
+        })
+        .then((block) =>
+          blocksService.setLog(block.id, localDateKey(started), { status: 'kept', startedAt: started, endedAt: new Date(), minutes })
+        )
+        .then(() => queryClient.invalidateQueries({ queryKey: ['blocks'] }))
+        .catch(() => {})
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settings, t]
+  )
 
   /**
    * Count the session and move to the next one — running or queued. Every path
@@ -277,6 +357,7 @@ export const PomodoroProvider = ({ children }) => {
     ({ running, closeWidget = false }) => {
       alerts.stop()
       if (running) alerts.prime()
+      if (timerRef.current.ended) recordFreeSession(timerRef.current)
       setTimer((prev) => {
         const sessions = prev.mode === MODES.WORK ? prev.completedSessions + 1 : prev.completedSessions
         const next = nextModeAfter(prev.mode, sessions)
@@ -292,11 +373,14 @@ export const PomodoroProvider = ({ children }) => {
           sessionTouched: running,
           extension: 0,
           extendedTotal: 0,
+          block: null,
+          blockSeconds: 0,
+          startedAt: null,
           showWidget: closeWidget ? false : prev.showWidget
         }
       })
     },
-    [settings]
+    [settings, recordFreeSession]
   )
 
   // The tick. Derives `timeLeft` from `endTime` so it is exact after a
@@ -351,13 +435,65 @@ export const PomodoroProvider = ({ children }) => {
     setTimer((prev) => {
       if (prev.isActive || prev.ended) return prev
       const seconds = prev.timeLeft > 0 ? prev.timeLeft : durationFor(prev.mode, settings)
-      return { ...prev, timeLeft: seconds, isActive: true, endTime: Date.now() + seconds * 1000, sessionTouched: true }
+      const startedAt = prev.sessionTouched && prev.startedAt ? prev.startedAt : Date.now()
+      return { ...prev, timeLeft: seconds, isActive: true, endTime: Date.now() + seconds * 1000, sessionTouched: true, startedAt }
     })
   }, [settings])
 
   const pauseTimer = useCallback(() => {
     setTimer((prev) => (prev.isActive ? { ...prev, isActive: false, endTime: null } : prev))
   }, [])
+
+  /**
+   * Run a block (PRD D7, ADR-045 §7): a focus session of the block's length,
+   * named after it, started now, with the sheet open. Whatever was running
+   * is set aside without a record; the block is the decision.
+   */
+  const startBlock = useCallback((occurrence) => {
+    alerts.stop()
+    alerts.prime()
+    Promise.resolve()
+      .then(() => alerts.requestPermission())
+      .catch(() => false)
+    const seconds = Math.max(60, Math.round(Number(occurrence?.lengthMin) || 0) * 60)
+    const now = Date.now()
+    setTimer((prev) => ({
+      ...prev,
+      ...NOT_ENDED,
+      mode: MODES.WORK,
+      isActive: true,
+      timeLeft: seconds,
+      endTime: now + seconds * 1000,
+      sessionTouched: true,
+      extension: 0,
+      extendedTotal: 0,
+      showWidget: true,
+      startedAt: now,
+      blockSeconds: seconds,
+      block: {
+        blockId: occurrence.blockId,
+        date: occurrence.date,
+        title: occurrence.title || occurrence.block?.title || '',
+        lengthMin: Number(occurrence.lengthMin) || 0,
+        sourceType: occurrence.block?.source?.type ?? 'free'
+      }
+    }))
+  }, [])
+
+  /** The ended block was kept: log it (with what it produced) and put the timer away. */
+  const keepBlock = useCallback(
+    (extra = {}) => {
+      logBlock('kept', extra)
+      moveOn({ running: false, closeWidget: true })
+    },
+    [logBlock, moveOn]
+  )
+
+  /** The ended block was not kept: log the skip and put the timer away. */
+  const skipBlock = useCallback(() => {
+    logBlock('skipped')
+    moveOn({ running: false, closeWidget: true })
+  }, [logBlock, moveOn])
 
   /** Count the ended session and run the next one. */
   const startNext = useCallback(() => moveOn({ running: true }), [moveOn])
@@ -392,8 +528,16 @@ export const PomodoroProvider = ({ children }) => {
     else startTimer()
   }, [ended, isActive, pauseTimer, startNext, startTimer])
 
+  /** A block cut short after a minute is a partial; sooner, it was a false start. */
+  const abandonBlock = useCallback(() => {
+    const state = timerRef.current
+    if (state.block && elapsedSeconds(state) >= 60) logBlock('partial')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logBlock])
+
   const resetTimer = useCallback(() => {
     alerts.stop()
+    abandonBlock()
     setTimer((prev) => ({
       ...prev,
       ...NOT_ENDED,
@@ -402,14 +546,18 @@ export const PomodoroProvider = ({ children }) => {
       sessionTouched: false,
       extension: 0,
       extendedTotal: 0,
+      block: null,
+      blockSeconds: 0,
+      startedAt: null,
       timeLeft: durationFor(prev.mode, settings)
     }))
-  }, [settings])
+  }, [settings, abandonBlock])
 
   const changeMode = useCallback(
     (newMode) => {
       if (!isMode(newMode)) return
       alerts.stop()
+      abandonBlock()
       setTimer((prev) => ({
         ...prev,
         ...NOT_ENDED,
@@ -419,10 +567,13 @@ export const PomodoroProvider = ({ children }) => {
         sessionTouched: false,
         extension: 0,
         extendedTotal: 0,
+        block: null,
+        blockSeconds: 0,
+        startedAt: null,
         timeLeft: durationFor(newMode, settings)
       }))
     },
-    [settings]
+    [settings, abandonBlock]
   )
 
   /** Jump to the next session without waiting (e.g. cut a break short). Never rings. */
@@ -450,7 +601,8 @@ export const PomodoroProvider = ({ children }) => {
     setTimer((prev) => (prev.showWidget ? { ...prev, showWidget: false } : prev))
   }, [])
 
-  const baseSeconds = durationFor(mode, settings)
+  // A block's own length is the session's base while one runs (PRD D7).
+  const baseSeconds = blockSeconds || durationFor(mode, settings)
   const totalSeconds = extension || baseSeconds
 
   const value = useMemo(
@@ -481,6 +633,11 @@ export const PomodoroProvider = ({ children }) => {
       startNext,
       stopAfterEnd,
       dismissEnd,
+      /** The block this session runs, or null (PLAN-006). */
+      block,
+      startBlock,
+      keepBlock,
+      skipBlock,
       settings
     }),
     [
@@ -507,6 +664,10 @@ export const PomodoroProvider = ({ children }) => {
       startNext,
       stopAfterEnd,
       dismissEnd,
+      block,
+      startBlock,
+      keepBlock,
+      skipBlock,
       settings
     ]
   )

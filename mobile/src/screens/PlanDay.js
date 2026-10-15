@@ -26,6 +26,8 @@ import { useTranslation } from 'react-i18next'
 import { useToday } from '@nowry/core/hooks/useToday'
 import { useBlocks } from '@nowry/core/hooks/useBlocks'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { DAILY_REVIEW } from './StudySession'
 import { usePlanTomorrowBlock } from '@nowry/core/hooks/usePlanTomorrowBlock'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
@@ -78,6 +80,25 @@ export function PlanDay() {
   // The evening ritual, offered once a learner has blocks (PRD D6, PLAN-007).
   usePlanTomorrowBlock({ blocks: history.blocks, create: history.create, title: t('blocks.planTomorrow.title') })
   const log = useBlockLog()
+  const timer = usePomodoro()
+  /*
+   * Start runs the block on the timer (PRD D7). A study block is the block's
+   * work (PRD D8): the review opens with a budget the length implies (about
+   * 40 s a card) and the clock rides in the app bar; any other block opens
+   * the Focus dial, named after it.
+   */
+  const startBlock = useCallback(
+    (o) => {
+      timer.startBlock(o)
+      if (o.block?.source?.type === 'study') {
+        timer.setShowWidget(false)
+        router.push(`/study/${DAILY_REVIEW}?limit=${Math.max(1, Math.round((o.lengthMin || 0) * 1.5))}`)
+        return
+      }
+      router.push('/pomodoro')
+    },
+    [timer, router]
+  )
   const { areas } = useAnnualPlan()
 
   const logs = useMemo(() => (history.occurrences ?? []).filter((o) => o.log).map((o) => o.log), [history.occurrences])
@@ -170,7 +191,7 @@ export function PlanDay() {
             onOpen={(o) => setSheet({ mode: 'edit', block: o.block })}
             onMenu={setMenu}
             onToggle={toggle}
-            onStart={() => router.push('/pomodoro')}
+            onStart={startBlock}
           />
         )}
       </ScrollView>
