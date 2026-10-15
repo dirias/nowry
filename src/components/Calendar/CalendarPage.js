@@ -77,6 +77,8 @@ const TIME_GRID = {
   slotMinTime: '06:00:00',
   slotMaxTime: '22:00:00',
   slotDuration: '00:30:00',
+  // A ten-minute block is still one line of text tall; the grid's default 15px clips it.
+  eventMinHeight: 24,
   scrollTime: '07:00:00',
   slotLabelFormat: { hour: 'numeric', minute: '2-digit' }
 }

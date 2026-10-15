@@ -46,13 +46,35 @@
    its own ground through eventContent — kept, skipped, running, upcoming are
    grounds, never hues — so the FullCalendar frame around it is transparent and
    square-cornered at radius sm. The now line is the one accent-coloured rule. */
-.fc .fc-timegrid-event {
+.fc .fc-timegrid-event,
+.fc .fc-timegrid-event-harness-inset .fc-timegrid-event,
+.fc .fc-timegrid-event.fc-event-mirror {
+  border: 0;
   border-radius: var(--joy-radius-sm);
+  /* FullCalendar rings every inset event with a 1px page-colour shadow; in dark
+     mode that was the second outline around every block. */
   box-shadow: none;
-  margin: 0 1px;
+  margin: 1px 2px 0 2px;
+  background: transparent;
 }
 .fc .fc-timegrid-event .fc-event-main {
   padding: 0;
+}
+.fc .fc-timegrid-event .fc-event-main-frame {
+  height: 100%;
+}
+/* The hour label sits ON its line, as every calendar a learner has used draws
+   it, not centred in the half hour below it. */
+.fc .fc-timegrid-slot-label {
+  vertical-align: top;
+}
+.fc .fc-timegrid-slot-label-cushion {
+  position: relative;
+  top: -0.6em;
+  padding-top: 0;
+}
+.fc .fc-timegrid-slot-minor {
+  border-top-style: dotted;
 }
 .fc .fc-timegrid-slot {
   height: 2.25em;

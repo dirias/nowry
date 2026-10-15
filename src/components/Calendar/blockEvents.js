@@ -48,13 +48,21 @@ export const blockTileColors = (occurrence, focusAreas = []) => {
 }
 
 /** The ground, ink and decoration each state draws (PRD D11: state is a ground). */
+/**
+ * State is a ground, never a border or a hue (§15.5, ADR-045 §6): upcoming
+ * sits on `level1`, kept on the soft tint with a check, skipped on `level2`
+ * struck, running on the solid, missed on `level1` in tertiary ink. The
+ * outlined box the first cut drew for upcoming was a shape family the
+ * standard set aside, and in dark mode it read as a second ring around
+ * FullCalendar's own.
+ */
 export const BLOCK_STATE_SX = {
   kept: { bgcolor: 'primary.softBg', color: 'primary.plainColor' },
   partial: { bgcolor: 'primary.softBg', color: 'primary.plainColor' },
   skipped: { bgcolor: 'background.level2', color: 'text.tertiary', textDecoration: 'line-through' },
   running: { bgcolor: 'primary.solidBg', color: 'primary.solidColor' },
-  upcoming: { bgcolor: 'background.surface', color: 'text.primary', border: '1px solid', borderColor: 'primary.outlinedBorder' },
-  missed: { bgcolor: 'background.surface', color: 'text.primary', border: '1px solid', borderColor: 'primary.outlinedBorder' }
+  upcoming: { bgcolor: 'background.level1', color: 'text.primary' },
+  missed: { bgcolor: 'background.level1', color: 'text.tertiary' }
 }
 
 /** The state of a grid event — a run reads its items together, a single its own log and the clock. */
@@ -120,12 +128,15 @@ export const BlockEventContent = ({ event, focusAreas, todayKey, nowMinutes, due
     <Box
       data-block-state={state}
       sx={{
+        /* One line, centred in whatever height the grid gives: a ten-minute
+           block is one line tall (the grid's `eventMinHeight`), a longer one
+           keeps its line at the top. */
         height: '100%',
+        minHeight: 0,
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         gap: 0.75,
-        px: 0.5,
-        py: 0.25,
+        px: 0.75,
         borderRadius: 'sm',
         overflow: 'hidden',
         ...stateSx

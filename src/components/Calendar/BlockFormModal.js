@@ -117,7 +117,7 @@ const SourceObject = ({ value, onChange, t }) => (
 
 /** The goal a goal block is for — the event form's milestone picker, reused in shape. */
 const GoalPicker = ({ loading, options, value, onChange, error, t }) => (
-  <FormControl required error={error}>
+  <FormControl error={error}>
     <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.goal')}</FormLabel>
     {loading ? (
       <Skeleton variant='rectangular' height={48} sx={{ borderRadius: 'sm' }} />
@@ -149,27 +149,32 @@ const GoalPicker = ({ loading, options, value, onChange, error, t }) => (
 const LengthStepper = ({ value, onChange, hint, t }) => (
   <FormControl>
     <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.lasts')}</FormLabel>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    {/* One object: two keys at the small size with the length as the readout
+        between them. Large square keys around a floating number read as three
+        things; this reads as one control. */}
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
       <IconButton
         variant='soft'
         color='neutral'
+        size='sm'
         onClick={() => onChange(clampLength(value - BLOCK_STEP))}
         aria-label={t('calendarPage.blocks.form.less')}
-        sx={focusRing}
+        sx={{ minHeight: { xs: 44, sm: 36 }, minWidth: { xs: 44, sm: 36 }, ...focusRing }}
       >
-        <RemoveRoundedIcon />
+        <RemoveRoundedIcon fontSize='small' />
       </IconButton>
-      <Typography level='title-md' aria-live='polite' sx={{ minWidth: 88, textAlign: 'center', ...tabularNums }}>
+      <Typography level='body-md' aria-live='polite' sx={{ minWidth: 72, textAlign: 'center', fontWeight: 'md', ...tabularNums }}>
         {formatMinutes(value, t)}
       </Typography>
       <IconButton
         variant='soft'
         color='neutral'
+        size='sm'
         onClick={() => onChange(clampLength(value + BLOCK_STEP))}
         aria-label={t('calendarPage.blocks.form.more')}
-        sx={focusRing}
+        sx={{ minHeight: { xs: 44, sm: 36 }, minWidth: { xs: 44, sm: 36 }, ...focusRing }}
       >
-        <AddRoundedIcon />
+        <AddRoundedIcon fontSize='small' />
       </IconButton>
     </Box>
     {hint && <FormHelperText>{hint}</FormHelperText>}
@@ -181,24 +186,40 @@ const RepeatsObject = ({ once, days, date, onToggleDay, onOnceChange, onDateChan
   <FormControl error={Boolean(error)}>
     <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.repeats')}</FormLabel>
     {!once && (
-      <Sheet variant='outlined' role='group' aria-label={t('calendarPage.blocks.form.repeats')} sx={{ ...segmentedGroup, width: '100%' }}>
-        {WEEKDAYS.map((day, index) => {
+      /* Seven toggles, not a segment: a segment means "one of", weekdays are
+         "any of". Each is its own key with its own ground — level2 when on,
+         level1 when off — and a gap between them says they do not share. */
+      <Box role='group' aria-label={t('calendarPage.blocks.form.repeats')} sx={{ display: 'flex', gap: 0.5 }}>
+        {WEEKDAYS.map((day) => {
           const on = days.includes(day)
           return (
             <Button
               key={day}
-              variant='plain'
+              variant='soft'
               color='neutral'
+              size='sm'
               onClick={() => onToggleDay(day)}
               aria-pressed={on}
               aria-label={labels[day].long}
-              sx={{ ...segment(on, index === 0), flex: 1, px: 0, minWidth: 0 }}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                px: 0,
+                minHeight: { xs: 44, sm: 36 },
+                bgcolor: on ? 'background.level2' : 'background.level1',
+                color: on ? 'text.primary' : 'text.tertiary',
+                fontWeight: on ? 'lg' : 'md',
+                '--variant-softHoverBg': on ? 'var(--joy-palette-background-level2)' : 'var(--joy-palette-background-level1)',
+                '--variant-softActiveBg': on ? 'var(--joy-palette-background-level2)' : 'var(--joy-palette-background-level1)',
+                '&:hover': { color: 'text.primary' },
+                ...focusRing
+              }}
             >
               {labels[day].narrow}
             </Button>
           )
         })}
-      </Sheet>
+      </Box>
     )}
     <Switch
       checked={once}
@@ -457,17 +478,12 @@ const BlockFormModal = ({ open, onClose, onSaved, mode = 'create', block = null,
   const actionSx = { width: { xs: '100%', sm: 'auto' }, ...focusRing }
   const footer = (
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', gap: 2 }}>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
-        {/* Cancel stays enabled while saving so a stuck request is escapable. */}
-        <Button variant='soft' color='neutral' onClick={onClose} size='lg' sx={actionSx}>
-          {t('calendarPage.blocks.form.cancel')}
-        </Button>
-        {isEdit && (
-          <Button variant='soft' color='danger' onClick={() => setConfirmDelete(true)} size='lg' sx={actionSx}>
-            {t('calendarPage.blocks.form.delete')}
-          </Button>
-        )}
-      </Box>
+      {/* Cancel stays enabled while saving so a stuck request is escapable.
+          Delete is not a key of this row (one solid, one secondary, §15.9);
+          it sits at the body's foot as a danger link. */}
+      <Button variant='soft' color='neutral' onClick={onClose} size='lg' sx={actionSx}>
+        {t('calendarPage.blocks.form.cancel')}
+      </Button>
       <Button onClick={submit} loading={saving} size='lg' sx={actionSx}>
         {isEdit ? t('calendarPage.blocks.form.save') : t('calendarPage.blocks.form.add')}
       </Button>
@@ -496,7 +512,6 @@ const BlockFormModal = ({ open, onClose, onSaved, mode = 'create', block = null,
               if (errors.title && value.trim()) setErrors((prev) => ({ ...prev, title: false }))
             }}
             onKeyDown={onTitleKeyDown}
-            required
             autoFocus
             inputRef={titleRef}
           />
@@ -585,6 +600,13 @@ const BlockFormModal = ({ open, onClose, onSaved, mode = 'create', block = null,
               language={language}
               t={t}
             />
+          )}
+          {isEdit && (
+            <Box sx={{ pt: 1 }}>
+              <Button variant='plain' color='danger' size='sm' onClick={() => setConfirmDelete(true)} sx={{ px: 1, ...focusRing }}>
+                {t('calendarPage.blocks.form.delete')}
+              </Button>
+            </Box>
           )}
         </Stack>
       </FormSheet>
