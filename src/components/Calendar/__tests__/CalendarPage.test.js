@@ -12,8 +12,17 @@
 import React, { act } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 
-// Mock FullCalendar packages (not yet installed in Wave 0)
-jest.mock('@fullcalendar/react', () => () => null, { virtual: true })
+// Mock FullCalendar packages (not yet installed in Wave 0). The component
+// records the props it was given so a suite can call its callbacks (PLAN-010).
+const mockFullCalendar = jest.fn()
+jest.mock(
+  '@fullcalendar/react',
+  () => (props) => {
+    mockFullCalendar(props)
+    return null
+  },
+  { virtual: true }
+)
 jest.mock('@fullcalendar/daygrid', () => ({}), { virtual: true })
 jest.mock('@fullcalendar/timegrid', () => ({}), { virtual: true })
 jest.mock('@fullcalendar/interaction', () => ({}), { virtual: true })
@@ -431,6 +440,68 @@ describe('CAL-002: the agenda row check', () => {
     expect(screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })).toHaveLength(3)
     expect(screen.queryByRole('button', { name: 'calendarPage.agenda.markUndone' })).toBeNull()
     expect(screen.getByRole('alert')).toHaveTextContent('calendarPage.error')
+  })
+})
+
+// ─── PLAN-010: the year on screen, and the day dropped on ───────────────────
+
+describe('PLAN-010: the year on screen and the local drop date', () => {
+  const { calendarService } = require('@nowry/core/api/services/calendar.service')
+  const { tasksService } = require('@nowry/core/api/services')
+  // Tokyo, UTC+9: a local midnight is still yesterday in UTC. Faked through the
+  // Date's own offset — Jest copies `process.env`, so a TZ set there never
+  // reaches V8 and the test would run in the machine's zone instead.
+  const TOKYO_OFFSET_MINUTES = -540
+
+  const renderPage = async () => {
+    const CalendarPage = require('../CalendarPage').default
+    await act(async () => {
+      render(<CalendarPage />)
+    })
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(TOKYO_OFFSET_MINUTES)
+    mockIsMobile.mockReturnValue(false)
+    mockUseCalendarFilters.mockReturnValue({
+      filters: { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] },
+      setFilters: jest.fn(),
+      resetFilters: jest.fn(),
+      applyPreset: jest.fn()
+    })
+    calendarService.getAllEvents.mockResolvedValue({ events: [], focusAreas: [] })
+  })
+
+  it('fetches the year of the month on screen, and again when paging crosses into the next year', async () => {
+    await renderPage()
+    const thisYear = new Date().getFullYear()
+    expect(calendarService.getAllEvents).toHaveBeenCalledWith('test-user', thisYear)
+
+    const next = screen.getByRole('button', { name: 'calendarPage.nav.next' })
+    for (let month = 0; month < 12; month += 1) {
+      await act(async () => {
+        fireEvent.click(next)
+      })
+    }
+    // Twelve months on is the same month next year: one more fetch, for that year.
+    expect(calendarService.getAllEvents).toHaveBeenCalledTimes(2)
+    expect(calendarService.getAllEvents).toHaveBeenLastCalledWith('test-user', thisYear + 1)
+  })
+
+  it('writes the day dropped on as the local date, not the UTC one', async () => {
+    tasksService.update.mockResolvedValue({})
+    await renderPage()
+    const { eventDrop } = mockFullCalendar.mock.calls.at(-1)[0]
+    const revert = jest.fn()
+    // Midnight on New Year's Day in Tokyo: `toISOString` says 2026-12-31.
+    const start = new Date('2026-12-31T15:00:00Z')
+
+    await act(async () => {
+      await eventDrop({ event: { id: 'task-1', start, extendedProps: { type: 'task' } }, revert })
+    })
+    expect(tasksService.update).toHaveBeenCalledWith('1', { deadline: '2027-01-01' })
+    expect(revert).not.toHaveBeenCalled()
   })
 })
 

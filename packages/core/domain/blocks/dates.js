@@ -10,8 +10,15 @@
 
 const pad = (n) => String(n).padStart(2, '0')
 
-/** "YYYY-MM-DD" of a Date, in local time. */
-export const localDateKey = (date = new Date()) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+/**
+ * "YYYY-MM-DD" of a Date, in local time. The instant shifted by its own offset
+ * reads, in UTC, as the local wall clock; written this way so a test can fake
+ * the zone through `getTimezoneOffset` alone.
+ */
+export const localDateKey = (date = new Date()) => {
+  const wallClock = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return `${wallClock.getUTCFullYear()}-${pad(wallClock.getUTCMonth() + 1)}-${pad(wallClock.getUTCDate())}`
+}
 
 /** A local-midnight Date for a key. Invalid keys give an invalid Date. */
 export const parseDateKey = (key) => {

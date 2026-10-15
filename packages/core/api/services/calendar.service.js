@@ -257,10 +257,13 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
 }
 
 export const calendarService = {
-  /** @param {string|null} userId - Caller's backend user id (useAuth().user?.id ?? null) */
-  async getAllEvents(userId) {
-    const year = new Date().getFullYear()
-
+  /**
+   * @param {string|null} userId - Caller's backend user id (useAuth().user?.id ?? null)
+   * @param {number} [year] - the year on screen (PLAN-010); today's when the
+   *   caller has no cursor. The phone's `useCalendarEvents` passes its cursor's
+   *   year the same way, so both clients read and write the same keyed entry.
+   */
+  async getAllEvents(userId, year = new Date().getFullYear()) {
     return queryClient.fetchQuery({
       queryKey: calendarEventsKey(userId, year),
       queryFn: () => fetchCalendarEvents(userId, year),

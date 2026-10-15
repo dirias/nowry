@@ -22,6 +22,7 @@ import CalendarAgenda from './CalendarAgenda'
 import EventTypeTile from './EventTypeTile'
 import { filterCalendarEvents } from '@nowry/core/domain/calendar/calendarFilters'
 import { completionPatch, stripTypePrefix, undoneStatus } from '@nowry/core/domain/calendar/eventHelpers'
+import { localDateKey } from '@nowry/core/domain/dailyRoutine'
 import {
   addDays,
   addMonths,
@@ -58,6 +59,9 @@ const CalendarPage = () => {
 
   const [view, setView] = useState('month')
   const [cursor, setCursor] = useState(() => new Date())
+  // The year fetched is the year on screen, not today's (PLAN-010): paging
+  // into next January has to fetch next January, as the phone already does.
+  const year = cursor.getFullYear()
   const [events, setEvents] = useState([])
   const [focusAreas, setFocusAreas] = useState([])
   const [loading, setLoading] = useState(true)
@@ -80,7 +84,7 @@ const CalendarPage = () => {
     setLoading(true)
     setCalendarError(null)
     try {
-      const { events: allEvents, focusAreas: loadedAreas } = await calendarService.getAllEvents(userId)
+      const { events: allEvents, focusAreas: loadedAreas } = await calendarService.getAllEvents(userId, year)
       setEvents(allEvents)
       setFocusAreas(loadedAreas)
     } catch (err) {
@@ -88,7 +92,7 @@ const CalendarPage = () => {
     } finally {
       setLoading(false)
     }
-  }, [userId])
+  }, [userId, year])
 
   useEffect(() => {
     loadEvents()
@@ -205,7 +209,10 @@ const CalendarPage = () => {
   const handleEventDrop = useCallback(
     async (info) => {
       const { event, revert } = info
-      const dateStr = event.start.toISOString().split('T')[0]
+      // The day the user dropped on, in their own zone: `toISOString` would
+      // name the UTC day, which east of Greenwich is already yesterday by the
+      // evening (PLAN-010).
+      const dateStr = localDateKey(event.start)
       const rawId = stripTypePrefix(event.id)
       const type = event.extendedProps.type
       try {

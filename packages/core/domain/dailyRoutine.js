@@ -1,3 +1,5 @@
+import { localDateKey } from './blocks/dates'
+
 /**
  * The daily routine, as both clients read it (MOB-075).
  *
@@ -22,11 +24,17 @@
 
 export const ROUTINE_PERIODS = ['morning', 'afternoon', 'evening']
 
+/**
+ * A date as `daily_completions` keys it: `YYYY-MM-DD` on the user's own
+ * clock, never the UTC one `toISOString` would give. At 22:30 in Los Angeles
+ * the UTC day has already turned; the user's has not, and the tick belongs to
+ * the evening they are in (PLAN-010). One implementation, the Block domain's
+ * (ADR-045 §3), so the routine and the blocks can never key a day apart.
+ */
+export { localDateKey }
+
 /** Today, as `daily_completions` keys it. */
-export const todayKey = (now = new Date()) => {
-  const pad = (value) => String(value).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-}
+export const todayKey = (now = new Date()) => localDateKey(now)
 
 /**
  * The period the clock is in.
