@@ -101,5 +101,12 @@ export const ENDPOINTS = {
     create: '/v1/comments',
     update: (id) => `/v1/comments/${id}`,
     delete: (id) => `/v1/comments/${id}`
+  },
+  blocks: {
+    list: '/blocks',
+    create: '/blocks',
+    summary: '/blocks/summary',
+    byId: (id) => `/blocks/${id}`,
+    log: (id, date) => `/blocks/${id}/log/${date}`
   }
 }
