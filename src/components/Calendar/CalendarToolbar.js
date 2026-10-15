@@ -5,10 +5,12 @@ import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import CheckRounded from '@mui/icons-material/CheckRounded'
 
-import { focusRing, segment, segmentedGroup, tabularNums } from '../Common/Form/formStyles'
+import { focusRing, readout, segment, segmentedGroup, tabularNums } from '../Common/Form/formStyles'
 import { ALL_TYPES, allTypesActive } from '@nowry/core/domain/calendar/calendarFilters'
 
-export const CALENDAR_VIEWS = ['month', 'week', 'agenda']
+// Day and Week are time grids since PLAN-004 (ADR-045 §6): the blocks give the
+// hours something to hold. Month stays a day grid; Agenda stays Nowry's list.
+export const CALENDAR_VIEWS = ['day', 'week', 'month', 'agenda']
 
 const TYPE_ROWS = [
   { key: 'goal', labelKey: 'calendarPage.filters.typeGoal' },
@@ -52,12 +54,18 @@ const CheckMark = () => <CheckRounded fontSize='small' sx={{ ml: 'auto', color: 
  * stretches between both rules on its own row, and the view object is absent —
  * the agenda is the phone's only view.
  *
+ * `summary` is a second readout beside the date — "14 of 23 blocks kept ·
+ * 6 h 10 min" for the Day or Week on screen (PLAN-004). A count is text
+ * beside its control, never a chip (§15.11); the page passes null when the
+ * view has no range to count.
+ *
  * Purely presentational: the page owns the cursor, the view and the filters.
  */
 const CalendarToolbar = ({
   view,
   onViewChange,
   title,
+  summary = null,
   onPrev,
   onNext,
   onToday,
@@ -106,9 +114,26 @@ const CalendarToolbar = ({
         </Button>
       </Sheet>
 
-      <Typography level='title-lg' sx={{ order: { xs: 1, sm: 2 }, flex: { xs: 1, sm: 'none' }, minWidth: 0, ...tabularNums }}>
-        {title}
-      </Typography>
+      <Box
+        sx={{
+          order: { xs: 1, sm: 2 },
+          flex: { xs: 1, sm: 'none' },
+          minWidth: 0,
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 1.5,
+          flexWrap: 'wrap'
+        }}
+      >
+        <Typography level='title-lg' sx={{ ...tabularNums }}>
+          {title}
+        </Typography>
+        {summary && (
+          <Typography level='body-sm' data-testid='calendar-blocks-summary' sx={{ ...readout }}>
+            {summary}
+          </Typography>
+        )}
+      </Box>
 
       <Box sx={{ flex: 1, order: 3, display: { xs: 'none', sm: 'block' } }} />
 

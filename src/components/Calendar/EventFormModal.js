@@ -143,12 +143,14 @@ const ContextPicker = ({ labelKey, placeholderKey, helperKey, emptyKey, loading,
  *   mode  – 'create' | 'edit'
  *   event – the normalised calendar event (edit), null for create
  *   defaultDate – Date to prefill when creating
+ *   initialType – the type the Add menu chose (PLAN-004); 'task' when absent
  */
-const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = null, defaultDate }) => {
+const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = null, defaultDate, initialType = 'task' }) => {
   const { t } = useTranslation()
   const isEdit = mode === 'edit'
+  const startingType = TYPES.includes(initialType) ? initialType : 'task'
 
-  const [type, setType] = useState('task')
+  const [type, setType] = useState(startingType)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState('')
@@ -177,11 +179,11 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
       setTitle(event.title || '')
       setDate(toInputDate(event.date))
     } else {
-      setType('task')
+      setType(startingType)
       setTitle('')
       setDate(toInputDate(defaultDate || new Date()))
     }
-  }, [open, isEdit, event, defaultDate])
+  }, [open, isEdit, event, defaultDate, startingType])
 
   const activeType = isEdit ? event?.type || 'task' : type
   const annualPlanId = cachedPlan?._id

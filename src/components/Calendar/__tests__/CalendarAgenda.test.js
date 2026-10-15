@@ -106,3 +106,59 @@ describe('the rows', () => {
     expect(screen.queryByText('calendarPage.agenda.empty.title')).toBeNull()
   })
 })
+
+// ─── PLAN-004: a block on the day — time · tile · title · meta · tick ────────
+
+describe('PLAN-004: block rows', () => {
+  const { localDateKey } = require('@nowry/core/domain/blocks')
+  const todayKey = localDateKey(today)
+  const block = { id: 'b1', title: 'Morning review', source: { type: 'study', id: null }, start: '07:30', lengthMin: 20, areaId: null }
+  const occurrence = { date: todayKey, blockId: 'b1', start: '07:30', lengthMin: 20, title: 'Morning review', block, log: null }
+  const kept = { ...occurrence, log: { status: 'kept', minutes: 20 } }
+
+  const setupBlocks = (blocks, props = {}) =>
+    setup({
+      groups: [{ date: today, isToday: true, events: [task], blocks }],
+      onSelectBlock: jest.fn(),
+      onToggleKept: jest.fn(),
+      todayKey,
+      nowMinutes: 0,
+      ...props
+    })
+
+  it('draws the time as the left readout, the meta line, and sits before the deadlines', () => {
+    setupBlocks([occurrence])
+    const row = screen.getByTestId('agenda-block-row')
+    expect(row).toHaveTextContent('07:30')
+    expect(row).toHaveTextContent('calendarPage.blocks.meta')
+    const taskTitle = screen.getByRole('button', { name: 'Finish Spanish deck' })
+    expect(row.compareDocumentPosition(taskTitle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('the tick names the state it moves to, carries aria-pressed, and hands over the occurrence', () => {
+    const onToggleKept = jest.fn()
+    setupBlocks([occurrence], { onToggleKept })
+    const tick = screen.getByRole('button', { name: 'calendarPage.blocks.markKept' })
+    expect(tick).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(tick)
+    expect(onToggleKept).toHaveBeenCalledWith(occurrence)
+  })
+
+  it('a kept block offers undo and is pressed', () => {
+    setupBlocks([kept])
+    expect(screen.getByRole('button', { name: 'calendarPage.blocks.undoKept' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('opens the block from its title', () => {
+    const onSelectBlock = jest.fn()
+    setupBlocks([occurrence], { onSelectBlock })
+    fireEvent.click(screen.getByRole('button', { name: 'Morning review' }))
+    expect(onSelectBlock).toHaveBeenCalledWith(occurrence)
+  })
+
+  it('a Today with blocks and nothing due is not called empty', () => {
+    setup({ groups: [{ date: today, isToday: true, events: [], blocks: [occurrence] }], todayKey, nowMinutes: 0 })
+    expect(screen.queryByText('calendarPage.agenda.emptyToday')).toBeNull()
+    expect(screen.getByTestId('agenda-block-row')).toBeInTheDocument()
+  })
+})

@@ -69,7 +69,54 @@ jest.mock('@nowry/core/api/services', () => ({
   tasksService: { update: jest.fn() },
   annualPlanningService: { updatePriority: jest.fn(), updateGoal: jest.fn(), updateMilestone: jest.fn() }
 }))
-jest.mock('../EventFormModal', () => () => null)
+// Both sheets record the props the page hands them, so a suite can assert
+// which one opened, in which mode, with what (PLAN-004).
+const mockEventFormModal = jest.fn()
+jest.mock('../EventFormModal', () => (props) => {
+  mockEventFormModal(props)
+  return null
+})
+const mockBlockFormModal = jest.fn()
+jest.mock('../BlockFormModal', () => (props) => {
+  mockBlockFormModal(props)
+  return null
+})
+jest.mock('@fullcalendar/core/locales-all', () => [], { virtual: true })
+const mockUseBlocks = jest.fn()
+jest.mock('@nowry/core/hooks/useBlocks', () => ({
+  useBlocks: (...args) => mockUseBlocks(...args)
+}))
+const mockUseBlockLog = jest.fn()
+jest.mock('@nowry/core/hooks/useBlockLog', () => ({
+  useBlockLog: () => mockUseBlockLog()
+}))
+const mockUseBlocksSummary = jest.fn()
+jest.mock('../useBlocksSummary', () => ({
+  useBlocksSummary: (...args) => mockUseBlocksSummary(...args)
+}))
+jest.mock('../../Study/useTodayData', () => ({
+  useTodayData: () => ({ dueToday: 27, forecast: { days: [] } })
+}))
+const mockUpdateBlock = jest.fn()
+const mockKeep = jest.fn()
+const mockUndo = jest.fn()
+const armBlockHooks = (occurrences = []) => {
+  mockUpdateBlock.mockResolvedValue({})
+  mockKeep.mockResolvedValue({})
+  mockUndo.mockResolvedValue({})
+  mockUseBlocks.mockReturnValue({
+    blocks: [],
+    occurrences,
+    loading: false,
+    error: null,
+    create: jest.fn(),
+    update: mockUpdateBlock,
+    remove: jest.fn(),
+    reload: jest.fn()
+  })
+  mockUseBlockLog.mockReturnValue({ keep: mockKeep, skip: jest.fn(), undo: mockUndo, pending: false })
+  mockUseBlocksSummary.mockReturnValue({ summary: null, loading: false, error: null })
+}
 // CalendarPage now reads userId from useAuth() to scope the ['calendarEvents', userId,
 // year] React Query key (CACHE-008 / ADR-008) — mocked here since this test has no
 // AuthProvider wrapping it, following the convention from DailyRoutinePlanner.test.js.
@@ -87,6 +134,7 @@ beforeEach(() => {
     resetFilters: jest.fn(),
     applyPreset: jest.fn()
   })
+  armBlockHooks()
 })
 
 // ─── Icon logic unit tests (pure logic, no render needed) ────────────────────
@@ -324,11 +372,15 @@ describe('CAL-001: the toolbar', () => {
     expect(updater({ habitsEnabled: false, activeTypes: [], activeAreaIds: ['area-2'] }).activeAreaIds).toEqual([])
   })
 
-  it('offers Month, Week and Agenda as one object on desktop', async () => {
+  it('offers Day, Week, Month and Agenda as one object on desktop, in that order (PLAN-004)', async () => {
     await renderPage()
+    const { within } = require('@testing-library/react')
+    const names = within(screen.getByTestId('calendar-views'))
+      .getAllByRole('button')
+      .map((button) => button.textContent)
+    expect(names).toEqual(['calendarPage.views.day', 'calendarPage.views.week', 'calendarPage.views.month', 'calendarPage.views.agenda'])
     expect(screen.getByRole('button', { name: 'calendarPage.views.month' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: 'calendarPage.views.week' })).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.queryByRole('button', { name: 'calendarPage.views.day' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'calendarPage.views.agenda' }))
     expect(screen.getByRole('button', { name: 'calendarPage.views.agenda' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByTestId('calendar-agenda')).toBeInTheDocument()
@@ -473,6 +525,12 @@ describe('PLAN-010: the year on screen and the local drop date', () => {
     calendarService.getAllEvents.mockResolvedValue({ events: [], focusAreas: [] })
   })
 
+  // `resetMocks` clears mocks; it does not restore spies. Left in place, the
+  // Tokyo offset reaches every suite after this one and skews its date keys.
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('fetches the year of the month on screen, and again when paging crosses into the next year', async () => {
     await renderPage()
     const thisYear = new Date().getFullYear()
@@ -560,5 +618,293 @@ describe('CalendarPage — event pill label contrast (WCAG 2.2 AA)', () => {
   it('never throws on a malformed focus-area colour from the database', () => {
     expect(() => readableTextOn(undefined)).not.toThrow()
     expect(() => readableTextOn('not-a-colour')).not.toThrow()
+  })
+})
+
+// ─── PLAN-004: Day and Week time grids, blocks on the hours (ADR-045 §6) ────
+
+describe('PLAN-004: the time grids, the blocks on them, and what the grid may write', () => {
+  const { calendarService } = require('@nowry/core/api/services/calendar.service')
+  const { localDateKey, addDaysKey, parseDateKey } = require('@nowry/core/domain/blocks')
+  const { within } = require('@testing-library/react')
+
+  const today = new Date()
+  const todayKey = localDateKey(today)
+  const tomorrowKey = addDaysKey(todayKey, 1)
+  const at = (key, hours, minutes) => {
+    const date = parseDateKey(key)
+    date.setHours(hours, minutes, 0, 0)
+    return date
+  }
+
+  const study = {
+    id: 'b1',
+    title: 'Morning review',
+    source: { type: 'study', id: null },
+    start: '07:30',
+    lengthMin: 20,
+    daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+    date: null,
+    areaId: null
+  }
+  const oneOff = {
+    id: 'b2',
+    title: 'Call the bank',
+    source: { type: 'free', id: null },
+    start: '15:00',
+    lengthMin: 30,
+    daysOfWeek: [],
+    date: todayKey,
+    areaId: null
+  }
+  const routine = (id, start) => ({
+    id,
+    title: `Routine ${id}`,
+    source: { type: 'routine', id: null },
+    start,
+    lengthMin: 10,
+    daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+    date: null,
+    areaId: null
+  })
+  const occurrenceOf = (block, date = todayKey) => ({
+    date,
+    blockId: block.id,
+    start: block.start,
+    lengthMin: block.lengthMin,
+    title: block.title,
+    block,
+    log: null
+  })
+  const task = {
+    id: 'task-1',
+    type: 'task',
+    title: 'Finish Spanish deck',
+    status: 'pending',
+    color: '#6366f1',
+    date: today,
+    focusAreaId: null
+  }
+
+  const lastFc = () => mockFullCalendar.mock.calls.at(-1)[0]
+  const blockEvents = () => lastFc().events.filter((event) => event.extendedProps.kind === 'block')
+  const view = (name) => screen.getByRole('button', { name: `calendarPage.views.${name}` })
+
+  const renderPage = async () => {
+    const CalendarPage = require('../CalendarPage').default
+    await act(async () => {
+      render(<CalendarPage />)
+    })
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsMobile.mockReturnValue(false)
+    mockUseCalendarFilters.mockReturnValue({
+      filters: { habitsEnabled: false, activeTypes: ['task', 'priority', 'goal', 'milestone'], activeAreaIds: [] },
+      setFilters: jest.fn(),
+      resetFilters: jest.fn(),
+      applyPreset: jest.fn()
+    })
+    calendarService.getAllEvents.mockResolvedValue({ events: [task], focusAreas: [] })
+    armBlockHooks([occurrenceOf(study), occurrenceOf(oneOff)])
+  })
+
+  it('Day and Week are time grids from 06:00 to 22:00 on half-hour slots with the all-day row and the now line', async () => {
+    await renderPage()
+    expect(lastFc().initialView).toBe('dayGridMonth')
+    expect(lastFc().plugins).toHaveLength(3)
+    fireEvent.click(view('day'))
+    expect(lastFc()).toMatchObject({
+      initialView: 'timeGridDay',
+      slotMinTime: '06:00:00',
+      slotMaxTime: '22:00:00',
+      slotDuration: '00:30:00',
+      scrollTime: '07:00:00',
+      allDaySlot: true,
+      nowIndicator: true,
+      locale: 'en'
+    })
+    fireEvent.click(view('week'))
+    expect(lastFc().initialView).toBe('timeGridWeek')
+  })
+
+  it('deadlines stay all-day; occurrences become timed events on local strings carrying their occurrence', async () => {
+    await renderPage()
+    const deadline = lastFc().events.find((event) => event.id === 'task-1')
+    expect(deadline.allDay).toBe(true)
+    const [studyEvent] = blockEvents()
+    expect(studyEvent).toMatchObject({ start: `${todayKey}T07:30:00`, end: `${todayKey}T07:50:00`, allDay: false })
+    expect(studyEvent.extendedProps.occurrence.block).toBe(study)
+    expect(lastFc().eventDurationEditable).toBe(false)
+  })
+
+  it('Week draws a run of routine items as one event; Day draws every item', async () => {
+    armBlockHooks([occurrenceOf(routine('r1', '07:00')), occurrenceOf(routine('r2', '07:10')), occurrenceOf(routine('r3', '07:20'))])
+    await renderPage()
+    fireEvent.click(view('week'))
+    const [run] = blockEvents()
+    expect(blockEvents()).toHaveLength(1)
+    expect(run.extendedProps.group).toMatchObject({ period: 'morning', count: 3 })
+    fireEvent.click(view('day'))
+    expect(blockEvents()).toHaveLength(3)
+  })
+
+  it('clicking a block opens the block sheet in edit mode; a run opens its Day', async () => {
+    await renderPage()
+    fireEvent.click(view('week'))
+    const occurrence = occurrenceOf(study)
+    await act(async () => {
+      lastFc().eventClick({ event: { extendedProps: { kind: 'block', occurrence, group: null } } })
+    })
+    expect(mockBlockFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'edit', block: study, occurrence })
+    expect(mockEventFormModal.mock.calls.at(-1)[0].open).toBe(false)
+
+    const run = { kind: 'block', occurrence: occurrenceOf(routine('r1', '07:00'), tomorrowKey), group: { period: 'morning', count: 2 } }
+    await act(async () => {
+      lastFc().eventClick({ event: { extendedProps: run } })
+    })
+    expect(view('day')).toHaveAttribute('aria-pressed', 'true')
+    expect(lastFc().initialDate.getDate()).toBe(parseDateKey(tomorrowKey).getDate())
+  })
+
+  it('a selection on the hours opens the block sheet as a one-off on the five-minute grid; on the all-day row it opens the event form', async () => {
+    await renderPage()
+    fireEvent.click(view('day'))
+    await act(async () => {
+      lastFc().select({ allDay: false, start: at(todayKey, 9, 2), end: at(todayKey, 9, 33) })
+    })
+    expect(mockBlockFormModal.mock.calls.at(-1)[0]).toMatchObject({
+      open: true,
+      mode: 'create',
+      block: null,
+      prefill: { date: todayKey, start: '09:00', lengthMin: 30 }
+    })
+    await act(async () => {
+      lastFc().select({ allDay: true, start: at(todayKey, 0, 0), end: at(tomorrowKey, 0, 0) })
+    })
+    expect(mockEventFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', initialType: 'task' })
+  })
+
+  it('a dropped one-off writes its date and start; a recurring block writes its start within its weekday and reverts across one, saying why', async () => {
+    await renderPage()
+    const revert = jest.fn()
+    await act(async () => {
+      await lastFc().eventDrop({
+        event: { extendedProps: { kind: 'block', occurrence: occurrenceOf(oneOff) }, start: at(tomorrowKey, 16, 0) },
+        revert
+      })
+    })
+    expect(mockUpdateBlock).toHaveBeenCalledWith({ id: 'b2', changes: { date: tomorrowKey, start: '16:00' } })
+
+    await act(async () => {
+      await lastFc().eventDrop({
+        event: { extendedProps: { kind: 'block', occurrence: occurrenceOf(study) }, start: at(todayKey, 9, 0) },
+        revert
+      })
+    })
+    expect(mockUpdateBlock).toHaveBeenLastCalledWith({ id: 'b1', changes: { start: '09:00' } })
+    expect(revert).not.toHaveBeenCalled()
+
+    await act(async () => {
+      await lastFc().eventDrop({
+        event: { extendedProps: { kind: 'block', occurrence: occurrenceOf(study) }, start: at(tomorrowKey, 9, 0) },
+        revert
+      })
+    })
+    expect(revert).toHaveBeenCalledTimes(1)
+    expect(mockUpdateBlock).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole('status')).toHaveTextContent('calendarPage.blocks.dragRuleKept')
+  })
+
+  it('a resize writes the length alone, in five-minute steps; a block never drops onto the all-day row', async () => {
+    await renderPage()
+    const revert = jest.fn()
+    await act(async () => {
+      await lastFc().eventResize({
+        event: { extendedProps: { kind: 'block', occurrence: occurrenceOf(study) }, start: at(todayKey, 7, 30), end: at(todayKey, 8, 17) },
+        revert
+      })
+    })
+    expect(mockUpdateBlock).toHaveBeenCalledWith({ id: 'b1', changes: { lengthMin: 45 } })
+    expect(revert).not.toHaveBeenCalled()
+
+    const { eventAllow } = lastFc()
+    const blockEvent = { extendedProps: { kind: 'block', occurrence: occurrenceOf(study), group: null } }
+    expect(eventAllow({ allDay: false }, blockEvent)).toBe(true)
+    expect(eventAllow({ allDay: true }, blockEvent)).toBe(false)
+    expect(eventAllow({ allDay: false }, { extendedProps: { kind: 'block', occurrence: occurrenceOf(study), group: { count: 2 } } })).toBe(
+      false
+    )
+    expect(eventAllow({ allDay: true }, { extendedProps: { type: 'task' } })).toBe(true)
+    expect(eventAllow({ allDay: false }, { extendedProps: { type: 'task' } })).toBe(false)
+  })
+
+  it('Add is the page’s one solid key and opens a menu: Block first, then the four deadline types, each preselecting the event form', async () => {
+    await renderPage()
+    expect(document.querySelectorAll('.MuiButton-variantSolid')).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.add' }))
+    const items = await screen.findAllByRole('menuitem')
+    expect(items.map((item) => item.textContent)).toEqual([
+      'calendarPage.blocks.menuBlock',
+      'calendarModal.form.types.task',
+      'calendarModal.form.types.priority',
+      'calendarModal.form.types.goal',
+      'calendarModal.form.types.milestone'
+    ])
+    fireEvent.click(items[0])
+    expect(mockBlockFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', prefill: null })
+
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.add' }))
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'calendarModal.form.types.goal' }))
+    expect(mockEventFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', initialType: 'goal' })
+  })
+
+  it('reads the range’s kept count and minutes beside the date on Day and Week, and not on Month', async () => {
+    mockUseBlocksSummary.mockReturnValue({
+      summary: { planned: 23, kept: 14, skipped: 3, partial: 0, minutes: 370 },
+      loading: false,
+      error: null
+    })
+    await renderPage()
+    expect(screen.queryByTestId('calendar-blocks-summary')).toBeNull()
+    expect(mockUseBlocksSummary.mock.calls.at(-1)[0].enabled).toBe(false)
+    fireEvent.click(view('week'))
+    expect(screen.getByTestId('calendar-blocks-summary')).toHaveTextContent(
+      'calendarPage.blocks.summaryKept · calendarPage.blocks.hoursMinutes'
+    )
+    expect(mockUseBlocksSummary.mock.calls.at(-1)[0].enabled).toBe(true)
+    fireEvent.click(view('month'))
+    expect(screen.queryByTestId('calendar-blocks-summary')).toBeNull()
+  })
+
+  it('‹ › step by a day in Day, and the readout names the day', async () => {
+    await renderPage()
+    fireEvent.click(view('day'))
+    const dayTitle = (date) =>
+      new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date)
+    expect(screen.getByText(dayTitle(today))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'calendarPage.nav.today' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.nav.next' }))
+    expect(screen.getByText(dayTitle(parseDateKey(tomorrowKey)))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'calendarPage.nav.today' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('the agenda lists today’s blocks with their time before the deadlines, and the tick keeps one', async () => {
+    await renderPage()
+    fireEvent.click(view('agenda'))
+    const agenda = screen.getByTestId('calendar-agenda')
+    const rows = within(agenda).getAllByTestId('agenda-block-row')
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toHaveTextContent('07:30')
+    expect(rows[0]).toHaveTextContent('calendarPage.blocks.meta')
+    // The block rows precede the task row in the document.
+    const taskTitle = within(agenda).getByRole('button', { name: 'Finish Spanish deck' })
+    expect(rows[1].compareDocumentPosition(taskTitle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    await act(async () => {
+      fireEvent.click(within(rows[0]).getByRole('button', { name: 'calendarPage.blocks.markKept' }))
+    })
+    expect(mockKeep).toHaveBeenCalledWith(occurrenceOf(study))
+    expect(mockUseBlocks.mock.calls.at(-1)[0]).toMatchObject({ from: todayKey.slice(0, 8) + '01' })
   })
 })

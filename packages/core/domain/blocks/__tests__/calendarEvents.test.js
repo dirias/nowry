@@ -76,7 +76,13 @@ describe('toBlockEvents', () => {
   })
 
   it('never groups across two days or two periods', () => {
-    const items = [routine('r1', '07:00'), routine('r2', '07:10'), routine('r3', '13:00'), routine('r4', '13:10'), routine('r1', '07:00', '2026-10-15')]
+    const items = [
+      routine('r1', '07:00'),
+      routine('r2', '07:10'),
+      routine('r3', '13:00'),
+      routine('r4', '13:10'),
+      routine('r1', '07:00', '2026-10-15')
+    ]
     const events = toBlockEvents(items, { groupRoutines: true })
     expect(events.map((event) => event.extendedProps.group?.count ?? 1)).toEqual([2, 2, 1])
   })

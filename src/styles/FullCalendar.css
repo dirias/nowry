@@ -41,3 +41,38 @@
   color: var(--joy-palette-primary-solidColor);
   font-weight: var(--joy-fontWeight-lg);
 }
+
+/* PLAN-004 (ADR-045 §6): Day and Week are time grids. A block event draws
+   its own ground through eventContent — kept, skipped, running, upcoming are
+   grounds, never hues — so the FullCalendar frame around it is transparent and
+   square-cornered at radius sm. The now line is the one accent-coloured rule. */
+.fc .fc-timegrid-event {
+  border-radius: var(--joy-radius-sm);
+  box-shadow: none;
+  margin: 0 1px;
+}
+.fc .fc-timegrid-event .fc-event-main {
+  padding: 0;
+}
+.fc .fc-timegrid-slot {
+  height: 2.25em;
+}
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-timegrid-axis-cushion {
+  color: var(--joy-palette-text-tertiary);
+  font-size: var(--joy-fontSize-xs);
+  font-variant-numeric: tabular-nums;
+}
+.fc .fc-col-header-cell-cushion {
+  color: var(--joy-palette-text-secondary);
+  font-weight: var(--joy-fontWeight-md);
+  text-decoration: none;
+}
+.fc .fc-timegrid-now-indicator-line {
+  border-color: var(--joy-palette-primary-solidBg);
+}
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: var(--joy-palette-primary-solidBg);
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}

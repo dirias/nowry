@@ -102,9 +102,7 @@ const groupEvent = (run) => {
  */
 export const toBlockEvents = (occurrences, { groupRoutines = false } = {}) => {
   if (!groupRoutines) return (occurrences ?? []).map(singleEvent)
-  return routineRuns(occurrences).flatMap((run) =>
-    run.routine && run.items.length > 1 ? [groupEvent(run)] : run.items.map(singleEvent)
-  )
+  return routineRuns(occurrences).flatMap((run) => (run.routine && run.items.length > 1 ? [groupEvent(run)] : run.items.map(singleEvent)))
 }
 
 /**
