@@ -3429,6 +3429,11 @@
     }
   },
   "blocks": {
+    "moments": {
+      "kept_after_skips": "{{title}}、2 回の未達成のあと復帰。",
+      "week_kept": "今週は {{planned}} ブロック中 {{kept}} を達成。",
+      "under_estimate": "{{title}} を {{minutes}} 分で完了（予定 {{estimate}} 分）。"
+    },
     "today": {
       "nextStudy": "次の学習ブロック · {{time}}"
     },

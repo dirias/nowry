@@ -28,6 +28,7 @@ import { useBlocks } from '@nowry/core/hooks/useBlocks'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { useBlockMoments } from '@nowry/core/hooks/useBlockMoments'
 import { useNavigate } from 'react-router-dom'
 import { focusRing, touchTarget } from '../Common/Form/formStyles'
 import EventFormModal from './EventFormModal'
@@ -184,6 +185,8 @@ const CalendarPage = () => {
   const { keep, undo } = useBlockLog()
   const { dueToday } = useTodayData()
   const { summary } = useBlocksSummary({ from: blockRange?.from, to: blockRange?.to, enabled: isTimeGrid })
+  // The companion speaks from the log, inside the page's own notice slot (PLAN-009).
+  const moments = useBlockMoments({ occurrences, todayKey })
 
   const filteredEvents = useMemo(() => filterCalendarEvents(events, filters), [events, filters])
   const blockEvents = useMemo(
@@ -526,6 +529,22 @@ const CalendarPage = () => {
         {calendarError && (
           <Alert color='danger' variant='soft' role='alert' aria-live='assertive'>
             {t('calendarPage.error')}
+          </Alert>
+        )}
+
+        {moments.text && (
+          <Alert
+            color='primary'
+            variant='soft'
+            role='status'
+            data-testid='calendar-block-moment'
+            endDecorator={
+              <IconButton variant='plain' color='neutral' size='sm' onClick={moments.dismiss} aria-label={t('common.close')} sx={focusRing}>
+                <CloseRoundedIcon fontSize='small' />
+              </IconButton>
+            }
+          >
+            {moments.text}
           </Alert>
         )}
 

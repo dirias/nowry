@@ -3995,6 +3995,11 @@
     }
   },
   "blocks": {
+    "moments": {
+      "kept_after_skips": "{{title}}, de vuelta tras dos faltas.",
+      "week_kept": "{{kept}} de {{planned}} bloques cumplidos esta semana.",
+      "under_estimate": "{{title}} hecho en {{minutes}} min, {{estimate}} previstos."
+    },
     "today": {
       "nextStudy": "Próximo bloque de estudio · {{time}}"
     },

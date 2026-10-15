@@ -3555,6 +3555,11 @@
     }
   },
   "blocks": {
+    "moments": {
+      "kept_after_skips": "{{title}}, de retour après deux absences.",
+      "week_kept": "{{kept}} blocs tenus sur {{planned}} cette semaine.",
+      "under_estimate": "{{title}} fait en {{minutes}} min, {{estimate}} prévues."
+    },
     "today": {
       "nextStudy": "Prochain bloc d’étude · {{time}}"
     },

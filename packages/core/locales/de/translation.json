@@ -3544,6 +3544,11 @@
     }
   },
   "blocks": {
+    "moments": {
+      "kept_after_skips": "{{title}} – wieder dabei nach zwei Aussetzern.",
+      "week_kept": "{{kept}} von {{planned}} Blöcken diese Woche geschafft.",
+      "under_estimate": "{{title}} in {{minutes}} Min. erledigt, {{estimate}} geplant."
+    },
     "today": {
       "nextStudy": "Nächster Lernblock · {{time}}"
     },

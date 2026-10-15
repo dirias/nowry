@@ -4129,6 +4129,11 @@
     }
   },
   "blocks": {
+    "moments": {
+      "kept_after_skips": "{{title}}, back after two misses.",
+      "week_kept": "{{kept}} of {{planned}} blocks kept this week.",
+      "under_estimate": "{{title}} done in {{minutes}} min, {{estimate}} planned."
+    },
     "today": {
       "nextStudy": "Next study block · {{time}}"
     },

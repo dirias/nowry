@@ -109,8 +109,11 @@ export function allowIntervention(type, { settings = null, count = 0, silentUnti
   const types = settings?.types ?? DEFAULT_TYPES
 
   // 1 — the type's own switch. An unknown type has no switch and is allowed;
-  // the server is the authority on what types exist.
-  if (type in types && !types[type]) return false
+  // the server is the authority on what types exist. A block moment (PLAN-009)
+  // is the streak milestone's family — a kept streak of the day's blocks rather
+  // than of cards — so the one switch governs both.
+  const governed = type === 'block_moment' ? 'streak_milestone' : type
+  if (governed in types && !types[governed]) return false
 
   // 2 — focus mode, for the types that interrupt.
   if (settings?.focusMode && inSession && IN_SESSION_TYPES.includes(type)) return false

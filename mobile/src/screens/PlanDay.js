@@ -29,6 +29,7 @@ import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { DAILY_REVIEW } from './StudySession'
 import { usePlanTomorrowBlock } from '@nowry/core/hooks/usePlanTomorrowBlock'
+import { useBlockMoments } from '@nowry/core/hooks/useBlockMoments'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
@@ -42,6 +43,7 @@ import {
   BlockRow,
   Button,
   Chip,
+  CompanionNote,
   Divider,
   Icon,
   IconButton,
@@ -79,6 +81,8 @@ export function PlanDay() {
   const history = useBlocks({ from: addDaysKey(todayKey, -STREAK_WINDOW_DAYS), to: todayKey })
   // The evening ritual, offered once a learner has blocks (PRD D6, PLAN-007).
   usePlanTomorrowBlock({ blocks: history.blocks, create: history.create, title: t('blocks.planTomorrow.title') })
+  // The companion speaks from the log, inside the object, never over it (PLAN-009, ADR-022).
+  const moments = useBlockMoments({ occurrences: history.occurrences, todayKey })
   const log = useBlockLog()
   const timer = usePomodoro()
   /*
@@ -179,20 +183,24 @@ export function PlanDay() {
             </Button>
           </Stack>
         ) : (
-          <Timeline
-            day={day}
-            clock={clock}
-            currentId={currentId}
-            logs={logs}
-            todayKey={todayKey}
-            areaColors={areaColors}
-            theme={theme}
-            t={t}
-            onOpen={(o) => setSheet({ mode: 'edit', block: o.block })}
-            onMenu={setMenu}
-            onToggle={toggle}
-            onStart={startBlock}
-          />
+          <>
+            <Timeline
+              day={day}
+              clock={clock}
+              currentId={currentId}
+              logs={logs}
+              todayKey={todayKey}
+              areaColors={areaColors}
+              theme={theme}
+              t={t}
+              onOpen={(o) => setSheet({ mode: 'edit', block: o.block })}
+              onMenu={setMenu}
+              onToggle={toggle}
+              onStart={startBlock}
+            />
+            {/* The companion speaks from the log, inside the object (PLAN-009, ADR-022). */}
+            {moments.text ? <CompanionNote text={moments.text} onDismiss={moments.dismiss} /> : null}
+          </>
         )}
       </ScrollView>
 
