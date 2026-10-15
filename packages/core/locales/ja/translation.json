@@ -219,6 +219,7 @@
       "import": "インポート",
       "todayCount_other": "今日 {{count}} 枚",
       "doneCount_other": "{{count}} 枚完了",
+      "tomorrowCount_other": "明日 {{count}} 枚",
       "cardsCount_other": "カード {{count}} 枚",
       "tasksCount_other": "タスク {{count}} 件",
       "routineCount": "日課 {{total}} 件中 {{done}} 件",

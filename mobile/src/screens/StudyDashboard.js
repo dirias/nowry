@@ -95,6 +95,7 @@ export function StudyDashboard() {
   const today = studySummary({ decks: decks.decks, statistics })
   const weekly = statistics?.weekly_progress ?? []
   const future = forecast?.days ?? []
+  const tomorrowDue = future[0]?.due ?? 0
 
   const dateLabel = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date()),
@@ -136,7 +137,14 @@ export function StudyDashboard() {
   const shownUpToDate = showAllUpToDate ? upToDate : upToDate.slice(0, UP_TO_DATE_PREVIEW)
   const openDeck = (deck) => router.push(`/study/deck/${deck._id ?? deck.id}`)
 
-  const gap = <View style={{ height: theme.spacing[2] }} />
+  /*
+   * 8, not 16. The Stack already puts 16 on each side of this spacer, so a
+   * 16 here made 48 between the Today object and "Due now" — a section gap
+   * three times the object's own padding, on a screen where the object was
+   * already two thirds of the content (MOB-114). 16 + 8 = 24 is the section
+   * rhythm; the object's rows keep their 12.
+   */
+  const gap = <View style={{ height: theme.spacing[1] }} />
 
   return (
     <Stack spacing={2}>
@@ -158,6 +166,9 @@ export function StudyDashboard() {
               {today.fresh > 0 ? <Readout>{t('study.deck.newCount', { count: today.fresh })}</Readout> : null}
               <Readout>{t('study.today.reviewed', { count: today.reviewedToday })}</Readout>
               {resting > 0 ? <Readout>{t('cards.rest.count', { count: resting })}</Readout> : null}
+              {/* The one number from the strip's captions worth a readout: what
+                  tomorrow asks, and only when it asks anything (MOB-114). */}
+              {tomorrowDue > 0 ? <Readout>{t('study.today.tomorrowCount', { count: tomorrowDue })}</Readout> : null}
               {/*
                * The streak carries the web's flame and the web's nudge. Both
                * were missing: the readout was the bare count, so a live streak
@@ -174,13 +185,14 @@ export function StudyDashboard() {
         }
         empty={!loading && !statsMissing && (list ?? []).length === 0 ? t('study.today.emptySentence') : null}
         /*
-         * The strip carries its own two labels now, the web's "Last 7 days · N"
-         * and "Next 7 days · N · tomorrow N" (SITE-015); the sentence that used
-         * to sit under it read from a key the web had removed (MOB-105).
+         * Bars and letters, no captions (MOB-114). The web's two labels under
+         * the halves (SITE-015) say in words what the bars draw, and on this
+         * one axis they were a row between the readouts and the key. Their one
+         * number that is news — tomorrow's — is a readout above instead.
          */
         aside={
           loading || (weekly.length === 0 && future.length === 0) ? null : (
-            <ForecastStrip past={weekly} today={today.asked} future={future} />
+            <ForecastStrip past={weekly} today={today.asked} future={future} captions={false} />
           )
         }
         action={

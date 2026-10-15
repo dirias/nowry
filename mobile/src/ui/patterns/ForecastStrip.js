@@ -51,6 +51,16 @@
  * now live in the strip, as they do on the web, and the first week draws no
  * past cells for the same reason the web draws none: seven empty stubs are not
  * history.
+ *
+ * **The captions are optional (MOB-114).** On the Today object's one axis the
+ * two labels are a row of their own, and they say in words what the bars
+ * already draw — "Last 7 days · 11" under six bars whose heights are those
+ * eleven. The web keeps them because its strip sits beside the keys on a rail
+ * with room to spare; the phone's sits between the readouts and the key, where
+ * every row pushes the key down. With `captions={false}` the strip is bars and
+ * letters, the sentence stays as its accessible name, and the one caption that
+ * is not a restatement — the first week's "Your first week starts today." —
+ * is still drawn, because in that week there are no bars to restate.
  */
 import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -62,7 +72,7 @@ const GAP = 4
 const BAR = 28
 const MIN_BAR = 3
 
-export function ForecastStrip({ past = [], today = 0, future = [] }) {
+export function ForecastStrip({ past = [], today = 0, future = [], captions = true }) {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
 
@@ -162,11 +172,14 @@ export function ForecastStrip({ past = [], today = 0, future = [] }) {
       </View>
 
       {/* One label under each half, as the web draws them; the past's label
-          only when there is a past to label. */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: theme.spacing[2] }}>
-        {label('past', pastDays.length > 0 ? t('study.today.stripPast', { count: reviewedWeek }) : '')}
-        {label('future', rightLabel)}
-      </View>
+          only when there is a past to label. Without captions, only the first
+          week's sentence survives — it restates nothing. */}
+      {captions || firstWeek ? (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: theme.spacing[2] }}>
+          {label('past', pastDays.length > 0 ? t('study.today.stripPast', { count: reviewedWeek }) : '')}
+          {label('future', rightLabel)}
+        </View>
+      ) : null}
     </View>
   )
 }

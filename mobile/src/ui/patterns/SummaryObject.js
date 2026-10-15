@@ -21,6 +21,19 @@
  * "21 due · 0 reviewed · start your streak today", at half the gap with a
  * tertiary dot between. Same words, one line instead of three, which is the
  * whole of what "more minimalistic on the web" meant.
+ *
+ * **The keys share one row, and the edge has no caption** (MOB-114, the Today
+ * object canvas of 2026-10-15). Measured, the Study Center's object was 318pt
+ * on a 390pt phone — 68% of the content area on a 4.7-inch screen, with the
+ * key as its sixth row and one deck row visible under it. One axis had taken
+ * everything the web spreads over a second rail and stacked it, and two of the
+ * rows said in words what another row already said: the caption restated the
+ * readout ("0 reviewed" and "0 of 27 done today"), and 27 was written three
+ * times. The web dropped its caption in SITE-015 for the same reason. The keys
+ * were stacked for target size (MOB-096), but that argument assumed two equal
+ * halves; beside the key at its own width the secondary is the smaller target
+ * and the solid is more than twice as wide, which is what the thumb finds
+ * first. The `progressLabel` is still the edge's accessible name.
  */
 import { Children, Fragment, isValidElement } from 'react'
 import { View } from 'react-native'
@@ -29,6 +42,9 @@ import { Sheet } from '../Sheet'
 import { Stack } from '../Stack'
 import { Typography, resolveColor } from '../Typography'
 import { SUMMARY_EDGE_HEIGHT } from './rowSpec'
+
+/** The least width the key shares a row at; narrower, it takes its own line. */
+const KEY_MIN_WIDTH = 160
 
 /**
  * The readouts as a flat list, whatever shape the caller wrote them in.
@@ -124,21 +140,27 @@ export function SummaryObject({
         {aside}
 
         {/*
-         * Stacked and full width, with the SOLID one last (MOB-096).
+         * One row: the secondary at its own width, the solid takes the rest
+         * (MOB-114; §15.10 says "at most one secondary BESIDE it").
          *
-         * The web's own breakpoint: `direction={{xs: 'column', sm: 'row'}}`
-         * with `width: {xs: '100%'}`, and the secondary written first so the
-         * primary ends up at the bottom. Both halves matter on a phone. Side by
-         * side, each key gets less than half the width and the shorter label
-         * makes the smaller target, so the quick session is easier to hit than
-         * the session; stacked, they are the same target and the one a thumb
-         * reaches first is the one the object is for.
+         * MOB-096 stacked them so the shorter label would not be the easier
+         * target. That holds only when the two share the width equally. Here
+         * the secondary is as wide as its label and the key takes the rest,
+         * so the key is the larger target by a wide margin and sits where it
+         * did — last, nearest the thumb. A secondary on its own (the day is
+         * done, the key is Browse) takes the whole row, as the web's does.
+         *
+         * The row wraps. A secondary can carry a long label (the library's
+         * "Make cards · 3 sections", longer in German), and the key must never
+         * be squeezed under its own name to make room: below 160pt for the key
+         * it drops to a line of its own at full width, which is the stacked
+         * shape this replaces, kept as the fallback rather than the rule.
          */}
         {action || secondary ? (
-          <Stack spacing={1}>
-            {secondary}
-            {action}
-          </Stack>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[1] }}>
+            {secondary ? <View style={{ flexGrow: action ? 0 : 1 }}>{secondary}</View> : null}
+            {action ? <View style={{ flexGrow: 1, flexBasis: KEY_MIN_WIDTH }}>{action}</View> : null}
+          </View>
         ) : null}
 
         {/*
@@ -173,14 +195,11 @@ export function SummaryObject({
           </View>
         ) : null}
 
-        {/* What the edge above means. A 3px line says a proportion and never
-            says of what — and it says it UNDER the line, as the web does,
-            because a caption belongs to the thing before it. */}
-        {showEdge && progressLabel ? (
-          <Typography level='body-xs' color='text.tertiary' style={{ fontVariant: ['tabular-nums'] }}>
-            {progressLabel}
-          </Typography>
-        ) : null}
+        {/* No caption under the edge. The readout line above already says what
+            is done and what is asked, so a "0 of 27 done today" under the line
+            was the same two numbers a third time, on a row of their own. The
+            sentence is the edge's accessible name instead (MOB-114; the web
+            made the same cut in SITE-015). */}
       </View>
     </Sheet>
   )

@@ -211,6 +211,8 @@
       "todayCount_other": "{{count}} today",
       "doneCount_one": "{{count}} done",
       "doneCount_other": "{{count}} done",
+      "tomorrowCount_one": "{{count}} tomorrow",
+      "tomorrowCount_other": "{{count}} tomorrow",
       "cardsCount_one": "{{count}} card",
       "cardsCount_other": "{{count}} cards",
       "tasksCount_one": "{{count}} task",

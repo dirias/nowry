@@ -214,6 +214,8 @@
       "todayCount_other": "{{count}} hoy",
       "doneCount_one": "{{count}} hecha",
       "doneCount_other": "{{count}} hechas",
+      "tomorrowCount_one": "{{count}} mañana",
+      "tomorrowCount_other": "{{count}} mañana",
       "cardsCount_one": "{{count}} tarjeta",
       "cardsCount_other": "{{count}} tarjetas",
       "tasksCount_one": "{{count}} tarea",

@@ -234,6 +234,8 @@
       "todayCount_other": "{{count}} heute",
       "doneCount_one": "{{count}} erledigt",
       "doneCount_other": "{{count}} erledigt",
+      "tomorrowCount_one": "{{count}} morgen",
+      "tomorrowCount_other": "{{count}} morgen",
       "cardsCount_one": "{{count}} Karte",
       "cardsCount_other": "{{count}} Karten",
       "tasksCount_one": "{{count}} Aufgabe",
