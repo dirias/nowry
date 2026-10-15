@@ -3544,6 +3544,9 @@
     }
   },
   "blocks": {
+    "today": {
+      "nextStudy": "Nächster Lernblock · {{time}}"
+    },
     "free": {
       "title": "Fokus-Sitzung"
     },

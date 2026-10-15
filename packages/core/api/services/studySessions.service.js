@@ -39,6 +39,7 @@ export const studySessionsService = {
         evaluation: c.evaluation
       }))
     })
-    return data
+    // Read into the clients' words here: a screen never spells an API field.
+    return { logged: Boolean(data?.logged), scorePercentage: data?.score_percentage ?? null, sessionId: data?.session_id ?? null }
   }
 }

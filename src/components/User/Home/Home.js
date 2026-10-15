@@ -13,6 +13,7 @@ import { useTodayData } from '../../Study/useTodayData'
 import { useTaskData } from '@nowry/core/hooks/useTaskData'
 import { useDailyRoutine } from '@nowry/core/hooks/useDailyRoutine'
 import { routineProgress } from '@nowry/core/domain/dailyRoutine'
+import { tasksDueToday } from '@nowry/core/domain/taskQueue'
 import StudyCalendar from './StudyCalendar'
 import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -35,10 +36,12 @@ function Home() {
   const today = useTodayData()
   const { tasks } = useTaskData()
   const { routine } = useDailyRoutine()
-  const tasksToday = useMemo(() => {
-    const open = tasks.filter((task) => !task.is_completed).length
-    return { open, done: tasks.length - open }
-  }, [tasks])
+  // "N tasks" means today's (PRD E7): due today by the local date, or overdue,
+  // the same reading the phone's Tasks tab and its count already use.
+  const tasksToday = useMemo(
+    () => ({ open: tasksDueToday(tasks).length, done: tasksDueToday(tasks, { status: 'completed' }).length }),
+    [tasks]
+  )
   const routineToday = useMemo(() => routineProgress(routine), [routine])
 
   return (

@@ -27,6 +27,8 @@ import { useCalendarFilters } from '@nowry/core/hooks/useCalendarFilters'
 import { useBlocks } from '@nowry/core/hooks/useBlocks'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { useNavigate } from 'react-router-dom'
 import { focusRing, touchTarget } from '../Common/Form/formStyles'
 import EventFormModal from './EventFormModal'
 import BlockFormModal from './BlockFormModal'
@@ -284,6 +286,25 @@ const CalendarPage = () => {
     setFormOpen(true) // modal re-mounts cleanly via key prop (see EventFormModal below)
   }, [])
 
+  const timer = usePomodoro()
+  const navigate = useNavigate()
+  /*
+   * Start runs the block on the timer (PRD D7). A study block is the block's
+   * work (PRD D8): the review opens on the budget its length implies (about
+   * 40 s a card) with the timer's chip in the corner; any other block opens
+   * the Focus sheet, named after it.
+   */
+  const startBlock = useCallback(
+    (occurrence) => {
+      timer.startBlock(occurrence)
+      if (occurrence.block?.source?.type === 'study') {
+        timer.setShowWidget(false)
+        navigate(`/study/daily-review?limit=${Math.max(1, Math.round((occurrence.lengthMin || 0) * 1.5))}`)
+      }
+    },
+    [timer, navigate]
+  )
+
   const openBlockEditor = useCallback((occurrence) => {
     setBlockEditing({ block: occurrence.block, occurrence })
     setBlockPrefill(null)
@@ -540,6 +561,7 @@ const CalendarPage = () => {
             onToggleComplete={toggleComplete}
             onSelectBlock={openBlockEditor}
             onToggleKept={toggleKept}
+            onStartBlock={startBlock}
             focusAreas={focusAreas}
             todayKey={todayKey}
             nowMinutes={nowMinutes}

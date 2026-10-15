@@ -39,6 +39,7 @@ import {
 import { ArrowBack, ArrowForward, CheckCircle, Fullscreen, FullscreenExit, SwipeLeft, SwipeRight, SwipeVertical } from '@mui/icons-material'
 import { cardsService, decksService } from '@nowry/core/api/services'
 import { studySessionsService } from '@nowry/core/api/services/studySessions.service'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { useCardData } from '@nowry/core/hooks/useCardData'
 import { useSessionFilters } from '@nowry/core/hooks/useSessionFilters'
 import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
@@ -325,6 +326,9 @@ export default function StudySession() {
   const userId = user?.id ?? null
   const mermaidRef = useRef(null)
   const [searchParams] = useSearchParams()
+  const timer = usePomodoro()
+  const timerRef = useRef(timer)
+  timerRef.current = timer
   const mode = searchParams.get('mode') || 'study'
   const isReadOnlyMode = mode === 'browse'
   const modeChipColor = { study: 'neutral', browse: 'primary' }[mode]
@@ -742,6 +746,14 @@ export default function StudySession() {
           deckName: deckNameValue,
           startedAt: sessionStartTime.current,
           cards: gradedCards.current
+        })
+        .then((logged) => {
+          // The block's work is done (PRD D8): the study block that opened this
+          // review is kept, with the session it produced on its record.
+          const timer = timerRef.current
+          if (timer?.block?.sourceType === 'study') {
+            timer.keepBlock({ record: { studySessionId: logged?.sessionId ?? null, cards: gradedCards.current.length } })
+          }
         })
         .catch(() => {
           // Non-fatal — history logging never interrupts the study experience

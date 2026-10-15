@@ -46,6 +46,8 @@ export default function TodayObject({
   tasksToday = null,
   routine = null,
   resting = 0,
+  /** The next unlogged study block's start today, or null (PLAN-005). */
+  nextBlockAt = null,
   onStudy,
   onQuick,
   onBrowse,
@@ -123,6 +125,12 @@ export default function TodayObject({
         <>
           {dot}
           {phrase(t('cards.rest.count', { count: resting }))}
+        </>
+      )}
+      {!isHome && nextBlockAt && (
+        <>
+          {dot}
+          {phrase(t('blocks.today.nextStudy', { time: nextBlockAt }))}
         </>
       )}
       {dot}

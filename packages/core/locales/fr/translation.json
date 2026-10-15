@@ -3555,6 +3555,9 @@
     }
   },
   "blocks": {
+    "today": {
+      "nextStudy": "Prochain bloc d’étude · {{time}}"
+    },
     "free": {
       "title": "Séance de concentration"
     },

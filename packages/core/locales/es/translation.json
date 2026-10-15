@@ -3995,6 +3995,9 @@
     }
   },
   "blocks": {
+    "today": {
+      "nextStudy": "Próximo bloque de estudio · {{time}}"
+    },
     "free": {
       "title": "Sesión de enfoque"
     },

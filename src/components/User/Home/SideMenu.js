@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Sheet,
@@ -14,27 +15,60 @@ import {
   Chip,
   ChipDelete,
   Divider,
+  Skeleton,
   Tabs,
   TabList,
   Tab,
   TabPanel,
   Link as JoyLink
 } from '@mui/joy'
-import { Link as RouterLink } from 'react-router-dom'
-import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
-import WbSunnyIcon from '@mui/icons-material/WbSunny'
-import WbTwilightIcon from '@mui/icons-material/WbTwilight'
-import NightsStayIcon from '@mui/icons-material/NightsStay'
+import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 import SortableTask from '../../Task/SortableTask'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { tasksService, annualPlanningService } from '@nowry/core/api/services'
+import { tasksService } from '@nowry/core/api/services'
 import { useTaskData } from '@nowry/core/hooks/useTaskData'
-import { useDailyRoutine } from '@nowry/core/hooks/useDailyRoutine'
-import { todayKey } from '@nowry/core/api/utils/routineCache'
+import { useToday } from '@nowry/core/hooks/useToday'
+import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
+import useAnnualPlan from '@nowry/core/hooks/useAnnualPlan'
+import { stateOf } from '@nowry/core/domain/blocks'
+import { useTodayData } from '../../Study/useTodayData'
+import { focusRing, identityTile, listRow, readout, touchTargetBox } from '../../Common/Form/formStyles'
+
+/** The Now tab: current, next, and this many of what follows — a glance, not the timeline. */
+const LATER_SHOWN = 3
+/** When the day is spent, the last blocks it held, read back. */
+const PAST_SHOWN = 3
+/** The time column, as the agenda's block row sets it. */
+const TIME_COLUMN_WIDTH = 44
+
+/** The source's colour: identity is the tile, and only the tile (§15.11). */
+const sourceColor = (occurrence, focusAreas) => {
+  const type = occurrence.block?.source?.type ?? 'free'
+  if (type === 'goal') {
+    const area = (focusAreas ?? []).find((a) => (a._id ?? a.id) === occurrence.block?.areaId)
+    return area?.color || 'primary.softBg'
+  }
+  if (type === 'focus') return 'warning.plainColor'
+  if (type === 'task' || type === 'free') return 'neutral.outlinedBorder'
+  return 'primary.solidBg'
+}
+
+/** The agenda's completion idiom: empty circle to keep, filled success check to undo. */
+const tickSx = (on) => ({
+  ...touchTargetBox,
+  borderRadius: 'sm',
+  flexShrink: 0,
+  color: on ? 'success.plainColor' : 'text.tertiary',
+  ...focusRing
+})
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 const LISTS_KEY = 'nowry_task_lists'
@@ -85,10 +119,6 @@ const SideMenu = () => {
   const [tasks, setTasks] = React.useState([])
   const [search, setSearch] = React.useState('')
   const [statusFilter, setStatusFilter] = React.useState('pending')
-  // Keys: item.id -> true when checked (D-05: migrated from index-based keys to stay
-  // consistent with DailyRoutinePlanner.js, which uses the same id-based format).
-  // Sourced from backend (cross-device sync) — seeding logic below is key-format-agnostic.
-  const [routineCompletions, setRoutineCompletions] = React.useState({})
 
   // ── Task lists state ──────────────────────────────────────────────────────
   const [lists, setLists] = React.useState(loadLists)
@@ -99,29 +129,41 @@ const SideMenu = () => {
   const searchInputRef = React.useRef(null)
   // ─────────────────────────────────────────────────────────────────────────
 
-  // Helper function to determine current time period
-  const getCurrentPeriod = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'morning'
-    if (hour < 18) return 'afternoon'
-    return 'evening'
-  }
-
-  const [activeTab, setActiveTab] = React.useState(getCurrentPeriod())
+  // The panel opens on Now (PLAN-008): the clock is the reader, not a tab.
+  const [activeTab, setActiveTab] = React.useState('now')
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor))
 
   const { tasks: tasksData, loading: tasksLoading, reload: reloadTasks } = useTaskData()
-  const {
-    routine,
-    loading: routineLoading,
-    error: routineError,
-    invalidate: invalidateRoutine,
-    refetch: refetchRoutine
-  } = useDailyRoutine()
 
-  const loading = tasksLoading || routineLoading
-  const error = !!routineError
+  /*
+   * The one spine (PRD D9): the same hook the calendar's Day reads, fed the
+   * same due count the Today object shows, so Home and the calendar cannot
+   * disagree about a block or its state. The tick writes through the same
+   * optimistic log the agenda uses.
+   */
+  const { dueToday } = useTodayData()
+  const day = useToday({ dueToday })
+  const timer = usePomodoro()
+  const navigate = useNavigate()
+  // Start runs the block on the timer (PRD D7); a study block opens the review
+  // on the budget its length implies, any other block the Focus sheet (PLAN-006).
+  const startBlock = React.useCallback(
+    (occurrence) => {
+      timer.startBlock(occurrence)
+      if (occurrence.block?.source?.type === 'study') {
+        timer.setShowWidget(false)
+        navigate(`/study/daily-review?limit=${Math.max(1, Math.round((occurrence.lengthMin || 0) * 1.5))}`)
+        return
+      }
+      navigate('/calendar')
+    },
+    [timer, navigate]
+  )
+  const log = useBlockLog()
+  const { focusAreas } = useAnnualPlan()
+
+  const loading = tasksLoading
 
   // Mirror the task list from the shared hook into local state — tasks below are
   // mutated optimistically (add/remove/toggle/reorder) ahead of their own reload.
@@ -134,16 +176,6 @@ const SideMenu = () => {
     setTasks(JSON.parse(tasksDataJson))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasksDataJson])
-
-  // Seed completion state from backend (cross-device sync + midnight reset via date key)
-  React.useEffect(() => {
-    if (!routine) return
-    const today = todayKey()
-    const backendCompletions = routine?.daily_completions?.[today] || []
-    // Convert array of keys to object map { "morning_0": true, ... }
-    const completionMap = Object.fromEntries(backendCompletions.map((k) => [k, true]))
-    setRoutineCompletions(completionMap)
-  }, [routine])
 
   // Focus new list input when shown
   React.useEffect(() => {
@@ -282,26 +314,6 @@ const SideMenu = () => {
     }
   }
 
-  // Toggle a routine item's completion — optimistic UI, persisted to backend for
-  // cross-device sync. D-05: uses item.id directly (not `${period}_${index}`) to
-  // stay consistent with DailyRoutinePlanner.js's id-based keys and avoid checkmarks
-  // silently reattaching to the wrong item on reorder/delete.
-  const toggleRoutineItem = (itemId) => {
-    const previous = routineCompletions
-    const updated = { ...routineCompletions, [itemId]: !routineCompletions[itemId] }
-    setRoutineCompletions(updated)
-    const activeKeys = Object.entries(updated)
-      .filter(([, v]) => v)
-      .map(([k]) => k)
-    annualPlanningService
-      .updateRoutineCompletions(todayKey(), activeKeys)
-      .then(() => invalidateRoutine())
-      .catch((err) => {
-        console.error('Failed to save routine completion:', err)
-        setRoutineCompletions(previous)
-      })
-  }
-
   if (loading) {
     return (
       <Sheet
@@ -310,177 +322,6 @@ const SideMenu = () => {
       >
         <CircularProgress />
       </Sheet>
-    )
-  }
-
-  // Routine Helper
-  const getRoutineItems = (period) => {
-    if (!routine) return []
-    return routine[`${period}_routine`] || []
-  }
-
-  const periodIcon = {
-    morning: <WbSunnyIcon sx={{ fontSize: 32, color: 'warning.plainColor' }} />,
-    afternoon: <WbTwilightIcon sx={{ fontSize: 32, color: 'warning.plainColor' }} />,
-    evening: <NightsStayIcon sx={{ fontSize: 32, color: 'primary.plainColor' }} />
-  }
-
-  const renderRoutineList = (items, period) => {
-    if (error) {
-      return (
-        <Box
-          sx={{
-            py: 4,
-            px: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 1.5,
-            textAlign: 'center'
-          }}
-        >
-          <Typography level='body-sm' sx={{ color: 'danger.plainColor' }}>
-            {t('annualPlanning.tabs.errorLoading')}
-          </Typography>
-          <Button size='sm' variant='soft' onClick={() => refetchRoutine()} aria-label={t('common.retry')}>
-            {t('common.retry')}
-          </Button>
-        </Box>
-      )
-    }
-    if (!items || items.length === 0) {
-      return (
-        <Box
-          sx={{
-            py: 4,
-            px: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 1.5,
-            textAlign: 'center'
-          }}
-        >
-          {periodIcon[period]}
-          <Box>
-            <Typography level='title-sm' sx={{ mb: 0.5 }}>
-              {t(`annualPlanning.dailyRoutine.${period}EmptyTitle`)}
-            </Typography>
-            <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-              {t('annualPlanning.dailyRoutine.emptySubtitle')}
-            </Typography>
-          </Box>
-          <Button
-            component={RouterLink}
-            to='/annual-planning/daily-routine'
-            size='sm'
-            variant='outlined'
-            color='neutral'
-            aria-label={t('annualPlanning.dailyRoutine.emptyCta')}
-            sx={{ mt: 0.5 }}
-          >
-            {t('annualPlanning.dailyRoutine.emptyCta')}
-          </Button>
-        </Box>
-      )
-    }
-    return (
-      <Stack
-        sx={{
-          maxHeight: 240,
-          overflowY: 'auto',
-          '&::-webkit-scrollbar': { width: 4 },
-          '&::-webkit-scrollbar-thumb': { bgcolor: 'neutral.outlinedBorder', borderRadius: 2 },
-          '&::-webkit-scrollbar-track': { bgcolor: 'transparent' }
-        }}
-      >
-        {items.map((item, index) => {
-          const isChecked = !!routineCompletions[item.id]
-          return (
-            <Box
-              key={item.id || index}
-              onClick={() => toggleRoutineItem(item.id)}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.25,
-                py: 0.75,
-                px: 0.5,
-                borderBottom: index < items.length - 1 ? '1px solid' : 'none',
-                borderColor: 'divider',
-                transition: 'background 0.12s',
-                borderRadius: index === items.length - 1 ? '0 0 sm sm' : 0,
-                cursor: 'pointer',
-                '&:hover': { bgcolor: 'background.level1' }
-              }}
-            >
-              {/* Checkbox — §5 custom checkbox pattern */}
-              <Box
-                role='checkbox'
-                aria-checked={isChecked}
-                aria-label={t('annualPlanning.dailyRoutine.toggleItem')}
-                tabIndex={0}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggleRoutineItem(item.id)
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    toggleRoutineItem(item.id)
-                  }
-                }}
-                sx={{
-                  width: 16,
-                  height: 16,
-                  border: '1.5px solid',
-                  borderColor: isChecked ? 'primary.outlinedBorder' : 'neutral.outlinedBorder',
-                  borderRadius: '4px',
-                  flexShrink: 0,
-                  bgcolor: isChecked ? 'primary.solidBg' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', borderRadius: 'sm' }
-                }}
-              >
-                {isChecked && (
-                  <Box
-                    component='svg'
-                    viewBox='0 0 24 24'
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      fill: 'none',
-                      stroke: 'var(--joy-palette-common-white)',
-                      strokeWidth: 3,
-                      strokeLinecap: 'round',
-                      strokeLinejoin: 'round'
-                    }}
-                  >
-                    <polyline points='20 6 9 17 4 12' />
-                  </Box>
-                )}
-              </Box>
-              <Typography
-                level='body-sm'
-                sx={{
-                  color: isChecked ? 'text.tertiary' : 'text.primary',
-                  flex: 1,
-                  userSelect: 'none',
-                  textDecoration: isChecked ? 'line-through' : 'none',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {item.title}
-              </Typography>
-            </Box>
-          )
-        })}
-      </Stack>
     )
   }
 
@@ -517,7 +358,7 @@ const SideMenu = () => {
       }}
     >
       <Tabs
-        aria-label='Routine and Tasks'
+        aria-label={t('blocks.home.panelAria')}
         value={activeTab}
         onChange={(e, val) => setActiveTab(val)}
         sx={{ bgcolor: 'transparent', height: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}
@@ -535,35 +376,13 @@ const SideMenu = () => {
         >
           <Tab
             disableIndicator
-            value='morning'
-            variant={activeTab === 'morning' ? 'solid' : 'plain'}
-            color={activeTab === 'morning' ? 'primary' : 'neutral'}
+            value='now'
+            variant={activeTab === 'now' ? 'solid' : 'plain'}
+            color={activeTab === 'now' ? 'primary' : 'neutral'}
             sx={{ borderRadius: 'lg', flex: 1 }}
           >
-            <Tooltip title={t('annualPlanning.dailyRoutine.morning')} size='sm'>
-              <WbSunnyIcon />
-            </Tooltip>
-          </Tab>
-          <Tab
-            disableIndicator
-            value='afternoon'
-            variant={activeTab === 'afternoon' ? 'solid' : 'plain'}
-            color={activeTab === 'afternoon' ? 'primary' : 'neutral'}
-            sx={{ borderRadius: 'lg', flex: 1 }}
-          >
-            <Tooltip title={t('annualPlanning.dailyRoutine.afternoon')} size='sm'>
-              <WbTwilightIcon />
-            </Tooltip>
-          </Tab>
-          <Tab
-            disableIndicator
-            value='evening'
-            variant={activeTab === 'evening' ? 'solid' : 'plain'}
-            color={activeTab === 'evening' ? 'primary' : 'neutral'}
-            sx={{ borderRadius: 'lg', flex: 1 }}
-          >
-            <Tooltip title={t('annualPlanning.dailyRoutine.evening')} size='sm'>
-              <NightsStayIcon />
+            <Tooltip title={t('blocks.home.now')} size='sm'>
+              <ScheduleRoundedIcon />
             </Tooltip>
           </Tab>
           <Tab
@@ -581,10 +400,10 @@ const SideMenu = () => {
 
         {/* Tab Panels */}
 
-        {/* Morning */}
-        {activeTab === 'morning' && (
+        {/* Now — the day's blocks around the clock (PLAN-008, PRD D9) */}
+        {activeTab === 'now' && (
           <TabPanel
-            value='morning'
+            value='now'
             sx={{
               p: '0 !important',
               m: 0,
@@ -594,86 +413,7 @@ const SideMenu = () => {
               overflow: 'hidden'
             }}
           >
-            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
-              <Typography level='title-md' startDecorator={<WbSunnyIcon color='primary' />}>
-                {t('annualPlanning.dailyRoutine.morning')}
-              </Typography>
-              <IconButton
-                component={RouterLink}
-                to='/annual-planning/daily-routine'
-                size='sm'
-                variant='plain'
-                color='neutral'
-                aria-label={t('annualPlanning.dailyRoutine.editRoutine')}
-              >
-                <EditRoundedIcon />
-              </IconButton>
-            </Stack>
-            {renderRoutineList(getRoutineItems('morning'), 'morning')}
-          </TabPanel>
-        )}
-
-        {/* Afternoon */}
-        {activeTab === 'afternoon' && (
-          <TabPanel
-            value='afternoon'
-            sx={{
-              p: '0 !important',
-              m: 0,
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
-              <Typography level='title-md' startDecorator={<WbTwilightIcon color='primary' />}>
-                {t('annualPlanning.dailyRoutine.afternoon')}
-              </Typography>
-              <IconButton
-                component={RouterLink}
-                to='/annual-planning/daily-routine'
-                size='sm'
-                variant='plain'
-                color='neutral'
-                aria-label={t('annualPlanning.dailyRoutine.editRoutine')}
-              >
-                <EditRoundedIcon />
-              </IconButton>
-            </Stack>
-            {renderRoutineList(getRoutineItems('afternoon'), 'afternoon')}
-          </TabPanel>
-        )}
-
-        {/* Evening */}
-        {activeTab === 'evening' && (
-          <TabPanel
-            value='evening'
-            sx={{
-              p: '0 !important',
-              m: 0,
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5, flexShrink: 0 }}>
-              <Typography level='title-md' startDecorator={<NightsStayIcon color='primary' />}>
-                {t('annualPlanning.dailyRoutine.evening')}
-              </Typography>
-              <IconButton
-                component={RouterLink}
-                to='/annual-planning/daily-routine'
-                size='sm'
-                variant='plain'
-                color='neutral'
-                aria-label={t('annualPlanning.dailyRoutine.editRoutine')}
-              >
-                <EditRoundedIcon />
-              </IconButton>
-            </Stack>
-            {renderRoutineList(getRoutineItems('evening'), 'evening')}
+            <NowTab day={day} log={log} focusAreas={focusAreas} onStart={startBlock} t={t} />
           </TabPanel>
         )}
 
@@ -939,6 +679,178 @@ const SideMenu = () => {
         )}
       </Tabs>
     </Sheet>
+  )
+}
+
+/**
+ * The day around the clock: now · next · later, from the one spine (PRD D9).
+ *
+ * The current block leads and carries "Start", a link into the calendar
+ * where the block is worked (PLAN-006 wires Focus); the rows after it carry
+ * the agenda's tick, which keeps or undoes through the same optimistic log,
+ * so a block kept here is kept on the calendar at once. When the day is
+ * spent — nothing running, nothing ahead — the tab reads the day back: one
+ * line of copy, then the last blocks it held with their states, read-only.
+ * Home is where you watch; the calendar is where you work.
+ *
+ * Each row is the one anatomy (§15.11): time readout · 16px tile in the
+ * source's colour · title over "20 min · study" · the tick or the link.
+ * State is the title's strike and the tick's fill, never a tint on the row.
+ */
+const NowTab = ({ day, log, focusAreas, onStart, t }) => {
+  const toggle = (o) => (o.log?.status === 'kept' ? log.undo(o) : log.keep(o))
+
+  if (day.loading && day.occurrences.length === 0) {
+    return (
+      <Stack>
+        {[0, 1].map((i) => (
+          <Box key={i} sx={listRow}>
+            <Skeleton variant='rectangular' width={16} height={16} sx={{ borderRadius: 'sm', flexShrink: 0 }} />
+            <Box sx={{ flex: 1 }}>
+              <Skeleton variant='text' level='body-sm' width='55%' />
+              <Skeleton variant='text' level='body-xs' width='30%' />
+            </Box>
+          </Box>
+        ))}
+      </Stack>
+    )
+  }
+
+  if (day.error) {
+    return (
+      <Stack spacing={1} alignItems='flex-start' sx={{ pt: 1 }}>
+        <Typography level='body-sm' sx={{ color: 'danger.plainColor' }} aria-live='polite'>
+          {t('blocks.error')}
+        </Typography>
+        <Button size='sm' variant='plain' onClick={() => day.reload()} aria-label={t('common.retry')}>
+          {t('common.retry')}
+        </Button>
+      </Stack>
+    )
+  }
+
+  if (day.occurrences.length === 0) {
+    /* Empty is the same object with one sentence in it (§15.10), and the way
+       into the calendar, where the block is made. */
+    return (
+      <Stack spacing={1} alignItems='flex-start' sx={{ pt: 1 }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+          {t('blocks.home.empty')}
+        </Typography>
+        <JoyLink component={RouterLink} to='/calendar' level='body-sm' sx={{ fontWeight: 'md', ...focusRing }}>
+          {t('blocks.home.planDay')}
+        </JoyLink>
+      </Stack>
+    )
+  }
+
+  const ahead = day.current ? [day.current, day.next, ...day.later.slice(0, LATER_SHOWN)].filter(Boolean) : []
+  const spent = ahead.length === 0
+  const rows = spent ? day.past.slice(-PAST_SHOWN) : ahead
+
+  return (
+    <Box sx={{ flex: 1, overflowY: 'auto' }}>
+      {spent && (
+        <Typography level='body-xs' sx={{ color: 'text.tertiary', pb: 1 }}>
+          {t('blocks.home.dayDone')}
+        </Typography>
+      )}
+
+      {rows.map((o, index) => (
+        <React.Fragment key={`${o.blockId}|${o.date}`}>
+          {index > 0 && <Divider />}
+          <NowRow
+            onStart={onStart}
+            occurrence={o}
+            nowMinutes={day.nowMinutes}
+            current={!spent && index === 0}
+            color={sourceColor(o, focusAreas)}
+            onToggle={spent ? null : toggle}
+            t={t}
+          />
+        </React.Fragment>
+      ))}
+
+      {/* The way into working the day, at the foot of what it holds. */}
+      <Divider />
+      <Box sx={{ ...listRow, minHeight: 44 }}>
+        <JoyLink component={RouterLink} to='/calendar' level='body-sm' sx={{ color: 'text.secondary', ...focusRing }}>
+          {t('blocks.home.openDay')}
+        </JoyLink>
+      </Box>
+    </Box>
+  )
+}
+
+const NowRow = ({ occurrence, nowMinutes, current, color, onToggle, onStart, t }) => {
+  const state = stateOf(occurrence, nowMinutes)
+  const kept = state === 'kept' || state === 'partial'
+  const skipped = state === 'skipped'
+  const running = state === 'running'
+  const type = occurrence.block?.source?.type ?? 'free'
+  const title = occurrence.title || occurrence.block?.title || ''
+  const meta = t('calendarPage.blocks.meta', { minutes: occurrence.lengthMin, source: t(`calendarPage.blocks.source.${type}`) })
+  const tickLabel = kept ? t('calendarPage.blocks.undoKept') : t('calendarPage.blocks.markKept')
+
+  return (
+    <Box sx={{ ...listRow, gap: 1.5 }} data-testid='home-block-row' data-block-state={state}>
+      <Typography
+        level='body-sm'
+        sx={{
+          ...readout,
+          width: TIME_COLUMN_WIDTH,
+          flexShrink: 0,
+          color: running ? 'primary.plainColor' : 'text.tertiary',
+          fontWeight: running ? 'lg' : 'md'
+        }}
+      >
+        {occurrence.start}
+      </Typography>
+      <Box aria-hidden='true' sx={identityTile(color)} />
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          level='body-sm'
+          noWrap
+          sx={{
+            fontWeight: 'md',
+            color: skipped ? 'text.tertiary' : 'text.primary',
+            textDecoration: skipped ? 'line-through' : 'none'
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+          {meta}
+        </Typography>
+      </Box>
+      {current ? (
+        <JoyLink
+          component='button'
+          type='button'
+          level='body-sm'
+          onClick={() => onStart?.(occurrence)}
+          sx={{ fontWeight: 'md', flexShrink: 0, ...focusRing }}
+        >
+          {t('blocks.row.start')}
+        </JoyLink>
+      ) : onToggle ? (
+        <IconButton
+          size='sm'
+          variant='plain'
+          color={kept ? 'success' : 'neutral'}
+          onClick={() => onToggle(occurrence)}
+          aria-label={tickLabel}
+          aria-pressed={kept}
+          sx={tickSx(kept)}
+        >
+          {kept ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
+        </IconButton>
+      ) : (
+        <Box aria-hidden='true' sx={{ ...tickSx(kept), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {kept ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
+        </Box>
+      )}
+    </Box>
   )
 }
 

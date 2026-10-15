@@ -4129,6 +4129,9 @@
     }
   },
   "blocks": {
+    "today": {
+      "nextStudy": "Next study block · {{time}}"
+    },
     "free": {
       "title": "Focus session"
     },

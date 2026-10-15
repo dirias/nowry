@@ -29,6 +29,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pressable, View, useWindowDimensions } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
@@ -175,6 +176,9 @@ function CardFace({ label, labelColor, level, text, source = null }) {
 
 export function StudySession() {
   const { deckId, tags, group, limit, scope: scopeParam, card: cardParam } = useLocalSearchParams()
+  const timer = usePomodoro()
+  const timerRef = useRef(timer)
+  timerRef.current = timer
   const id = String(deckId)
   const isDaily = id === DAILY_REVIEW
   const { t, i18n } = useTranslation()
@@ -407,11 +411,21 @@ export function StudySession() {
       startedAt: startedAt.current,
       cards: answers
     }
-    studySessionsService.log(payload).catch(() => {
-      // History is a record, not the session — it never interrupts. But it is
-      // queued rather than dropped, so a session studied offline still appears.
-      queueSession(payload)
-    })
+    studySessionsService
+      .log(payload)
+      .then((logged) => {
+        // The block's work is done (PRD D8): the study block that opened this
+        // review is kept, with the session it produced on its record.
+        const timer = timerRef.current
+        if (timer?.block?.sourceType === 'study') {
+          timer.keepBlock({ record: { studySessionId: logged?.sessionId ?? null, cards: answers.length } })
+        }
+      })
+      .catch(() => {
+        // History is a record, not the session — it never interrupts. But it is
+        // queued rather than dropped, so a session studied offline still appears.
+        queueSession(payload)
+      })
 
     /*
      * The companion is fed by studying, and until now it was fed only by

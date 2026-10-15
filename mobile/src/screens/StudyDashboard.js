@@ -25,6 +25,7 @@ import { studySummary } from '@nowry/core/domain/studySummary'
 import { sessionLine } from '@nowry/core/domain/sessionLog'
 import { studySessionsService } from '@nowry/core/api/services'
 import { useForecast } from '@nowry/core/hooks/useForecast'
+import { useToday } from '@nowry/core/hooks/useToday'
 import { useGroups } from '@nowry/core/hooks/useGroups'
 import { restingTotal } from '@nowry/core/domain/cardRest'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
@@ -96,6 +97,8 @@ export function StudyDashboard() {
   const weekly = statistics?.weekly_progress ?? []
   const future = forecast?.days ?? []
   const tomorrowDue = future[0]?.due ?? 0
+  // The one line the Study object says about the day's plan (PRD D8, PLAN-005).
+  const day = useToday({ dueToday: today.due })
 
   const dateLabel = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date()),
@@ -169,6 +172,7 @@ export function StudyDashboard() {
               {/* The one number from the strip's captions worth a readout: what
                   tomorrow asks, and only when it asks anything (MOB-114). */}
               {tomorrowDue > 0 ? <Readout>{t('study.today.tomorrowCount', { count: tomorrowDue })}</Readout> : null}
+              {day.nextStudy ? <Readout>{t('blocks.today.nextStudy', { time: day.nextStudy.start })}</Readout> : null}
               {/*
                * The streak carries the web's flame and the web's nudge. Both
                * were missing: the readout was the bare count, so a live streak

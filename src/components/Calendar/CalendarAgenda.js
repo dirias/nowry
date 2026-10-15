@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, IconButton, Link, Sheet, Skeleton, Typography } from '@mui/joy'
+import { Box, Button, IconButton, Link, Sheet, Skeleton, Typography } from '@mui/joy'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 
@@ -108,7 +108,7 @@ const AgendaRow = ({ ev, onSelect, onToggleComplete, t }) => {
  * row has — kept on, undo off. Skipped is a strike, running lifts the time to
  * the accent; state never tints the row (§15.5).
  */
-const BlockRow = ({ occurrence, focusAreas, todayKey, nowMinutes, onSelect, onToggleKept, t }) => {
+const BlockRow = ({ occurrence, focusAreas, todayKey, nowMinutes, onSelect, onToggleKept, onStart, t }) => {
   const state = stateOf(occurrence, clockOn(occurrence.date, todayKey, nowMinutes))
   const kept = state === 'kept' || state === 'partial'
   const skipped = state === 'skipped'
@@ -137,6 +137,18 @@ const BlockRow = ({ occurrence, focusAreas, todayKey, nowMinutes, onSelect, onTo
           {blockMeta(occurrence, t)}
         </Typography>
       </Box>
+      {/* Today's block, still ahead or running, can be started from here (PRD D7). */}
+      {onStart && occurrence.date === todayKey && !occurrence.log && (state === 'upcoming' || running) && (
+        <Button
+          size='sm'
+          variant='soft'
+          color='primary'
+          onClick={() => onStart(occurrence)}
+          sx={{ minHeight: 32, borderRadius: 'md', ...focusRing }}
+        >
+          {t('blocks.row.start')}
+        </Button>
+      )}
       {onToggleKept && (
         <IconButton
           size='sm'
@@ -192,6 +204,7 @@ const CalendarAgenda = ({
   onToggleComplete,
   onSelectBlock,
   onToggleKept,
+  onStartBlock,
   focusAreas = [],
   todayKey,
   nowMinutes = 0,
@@ -240,6 +253,7 @@ const CalendarAgenda = ({
                 nowMinutes={nowMinutes}
                 onSelect={onSelectBlock ?? (() => {})}
                 onToggleKept={onToggleKept}
+                onStart={onStartBlock}
                 t={t}
               />
             ))}

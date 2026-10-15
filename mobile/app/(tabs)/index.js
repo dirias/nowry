@@ -11,8 +11,8 @@
  *   1. a header — the greeting, one motivational line, and the review key
  *   2. `FocusBar` — ONE row of small chips: three areas by percentage, two
  *      priorities by deadline
- *   3. `SideMenu` — ONE panel whose four tabs are morning, afternoon, evening
- *      and tasks
+ *   3. `SideMenu` — ONE panel whose two tabs are now and tasks (PLAN-008: the
+ *      three period tabs over the routine became one tab over the day's blocks)
  *   4. the news carousel
  *
  * Three faults it was reported with, all of them structural:
@@ -30,8 +30,8 @@
  *   annual plan is glanced at from Home and edited in Planning.
  *
  * **What is deliberately still different**, because a phone is not a browser:
- * the routine's four tabs carry WORDS here rather than the web's four
- * unlabelled glyphs (an unnamed icon is not a name, MOB-062), and the header
+ * the panel's two tabs carry WORDS here rather than the web's unlabelled
+ * glyphs (an unnamed icon is not a name, MOB-062), and the header
  * has no calendar or blackboard button — the calendar is a tab in the bar
  * below, and the blackboard is not built for this client.
  *
@@ -46,7 +46,7 @@
  * Skeletons, never a page gate. The layout the reader is about to see is
  * already there while the numbers arrive, so nothing moves when they do.
  */
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Image, Linking, Pressable, ScrollView, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
@@ -54,27 +54,20 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useTaskData } from '@nowry/core/hooks/useTaskData'
-import { useDailyRoutine } from '@nowry/core/hooks/useDailyRoutine'
+import { useToday } from '@nowry/core/hooks/useToday'
+import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { DAILY_REVIEW } from '../../src/screens/StudySession'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { tasksService } from '@nowry/core/api/services'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { deadlineReadout, watchedPriorities } from '@nowry/core/domain/priorityWatch'
 import { dueTodayCount, taskCategory, taskDueState, tasksDueToday } from '@nowry/core/domain/taskQueue'
-import {
-  ROUTINE_PERIODS,
-  completedToday,
-  currentPeriod,
-  routineItemTitle,
-  routineItems,
-  toggledCompletions,
-  todayKey
-} from '@nowry/core/domain/dailyRoutine'
 import { useNews } from '@nowry/core/hooks/useNews'
 import { unfavourited, useNewsFavourites } from '@nowry/core/hooks/useNewsFavourites'
-import { annualPlanningService } from '@nowry/core/api/services'
-import { DAILY_REVIEW } from '../../src/screens/StudySession'
 import { useTheme } from '../../src/theme'
 import {
+  BlockRow,
   Button,
   Checkbox,
   Chip,
@@ -104,8 +97,13 @@ const NEWS_SHOWN = 6
 /** The web's own two numbers for its strip: three areas, two priorities. */
 const AREAS_SHOWN = 3
 const PRIORITIES_SHOWN = 2
-/** The tab the web's panel gives its task list, beside the three periods. */
+/** The panel's two tabs: the day's blocks around the clock, and the tasks. */
+const NOW_TAB = 'now'
 const TASKS_TAB = 'tasks'
+/** Current, next, and this many of what follows: a glance, not the timeline. */
+const LATER_SHOWN = 3
+/** When the day is spent, the last blocks it held, read back. */
+const PAST_SHOWN = 3
 /**
  * The narrowest the greeting may be squeezed before the review key drops to
  * its own line. Roughly the longest word in it at the default size — below
@@ -130,7 +128,6 @@ export default function Home() {
   const { statistics, loading: statsLoading, error: statsError } = useStatistics()
   const deckData = useDeckData(null)
   const taskData = useTaskData()
-  const { routine, invalidate: reloadRoutine } = useDailyRoutine()
   const plan = useAnnualPlan()
 
   /*
@@ -141,6 +138,30 @@ export default function Home() {
   const today = studySummary({ decks: deckData.decks, statistics })
   const loading = statsLoading || deckData.loading
   const statsMissing = Boolean(statsError) && !statistics
+
+  /*
+   * The one spine (PRD D9): the same hook the Plan tab's Day reads, fed the
+   * same due count, so Home and Plan cannot disagree about a block or its
+   * state. The tick writes through the same optimistic log.
+   */
+  const day = useToday({ dueToday: today.due })
+  const log = useBlockLog()
+  const timer = usePomodoro()
+  // Start runs the block on the timer (PRD D7); a study block opens the review
+  // on the budget its length implies, with the clock in the app bar (PLAN-006).
+  const startBlock = useCallback(
+    (o) => {
+      timer.startBlock(o)
+      if (o.block?.source?.type === 'study') {
+        timer.setShowWidget(false)
+        router.push(`/study/${DAILY_REVIEW}?limit=${Math.max(1, Math.round((o.lengthMin || 0) * 1.5))}`)
+        return
+      }
+      router.push('/pomodoro')
+    },
+    [timer, router]
+  )
+  const areaColors = useMemo(() => new Map((plan.focusAreas ?? []).map((a) => [a._id ?? a.id, a.color])), [plan.focusAreas])
 
   /*
    * The web's caption under its greeting, picked once per mount rather than
@@ -189,13 +210,15 @@ export default function Home() {
         />
 
         <DayPanel
-          routine={routine}
-          reloadRoutine={reloadRoutine}
+          day={day}
+          log={log}
+          areaColors={areaColors}
           tasks={taskData.tasks}
           tasksCount={dueTodayCount(taskData.tasks)}
           tasksLoading={taskData.loading}
           reloadTasks={taskData.reload}
-          onEditRoutine={() => router.push('/annual-planning/daily-routine')}
+          onOpenDay={() => router.push('/calendar?view=day')}
+          onStart={startBlock}
           theme={theme}
           t={t}
         />
@@ -346,21 +369,21 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
 }
 
 /**
- * The day, as one panel with four tabs — the web's `SideMenu`, and the largest
- * object on its Home. Redrawn to the day-panel canvas, direction A (MOB-081).
+ * The day, as one panel with two tabs — the web's `SideMenu`, and the largest
+ * object on its Home. Redrawn to the day-panel canvas, direction A (MOB-081),
+ * and put on blocks by PLAN-008 (PRD D9, E7).
  *
  * Tasks and the routine were two separate sections here, a screen apart, each
- * with its own heading. They are one object: the same question asked four ways,
+ * with its own heading. They are one object: the same question asked two ways,
  * which is what the single tab strip says and two headings cannot.
  *
- * **It opens on the period the clock is in**, as the web's does. Looking at
- * tonight at two in the afternoon is a normal want, so the tabs stay. It used
- * to hunt for a period with something in it and fall through to the tasks,
- * because an empty routine tab was a dead end: there was no routine editor, so
- * the empty state could offer nothing. There is one now (MOB-084), so the
- * fallback is gone and an empty morning says what to do about it.
+ * **It opens on Now.** The three period tabs used to open on the period the
+ * clock was in; the clock is now the reader itself. `useToday` says which
+ * block is running or next, and the tab lists that one first, the one after
+ * it, and a few of what follows. Home is where you watch; the Plan tab's Day
+ * is where you work, and the row at the foot opens it.
  *
- * **The tabs carry words.** The web's four are unlabelled glyphs and its own
+ * **The tabs carry words.** The web's are unlabelled glyphs and its own
  * design canvas calls that the right idea drawn wrong. This is the one place
  * this screen deliberately differs, and it is the difference between a control
  * a screen reader can name and one it cannot.
@@ -391,145 +414,157 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
  *   at the foot of the list rather than a pencil on a heading that no longer
  *   exists.
  *
- * Ticking is the verb the routine has here, and writing it is one tap away
- * rather than absent: the edit row at the foot of the list opens the editor,
- * and so does the empty state's key. Tasks get capture as well — writing a
- * thought down is not managing tasks, and a phone is where the thought
- * arrives.
+ * Keeping is the verb a block has here, and planning it is one tap away
+ * rather than absent: the row at the foot of the list opens the Day, and so
+ * does the empty state's key. Tasks get capture as well — writing a thought
+ * down is not managing tasks, and a phone is where the thought arrives.
  */
-function DayPanel({ routine, reloadRoutine, tasks, tasksCount, tasksLoading, reloadTasks, onEditRoutine, theme, t }) {
-  /*
-   * The period the clock is in, read once when the panel mounts. A routine that
-   * arrives a moment later does not move the tab under the reader's thumb.
-   */
-  const [tab, setTab] = useState(() => currentPeriod())
-
+function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloadTasks, onOpenDay, onStart, theme, t }) {
+  const [tab, setTab] = useState(NOW_TAB)
   const onTasks = tab === TASKS_TAB
-  const done = completedToday(routine)
-  const items = onTasks ? [] : routineItems(routine, tab)
 
   /*
    * The ratio the edge draws. Both halves come from the tab in hand: the day's
-   * tasks, or the period's items. A tab with nothing in it draws an empty edge
-   * rather than none, so the panel is the same shape on all four — a container
-   * that resizes when you change tabs reads as four different objects.
+   * tasks, or the day's blocks kept (`keptRate`, the same number the Plan
+   * tab's foot reads). A tab with nothing in it draws an empty edge rather
+   * than none, so the panel is the same shape on both — a container that
+   * resizes when you change tabs reads as two different objects.
    */
-  const ratio = onTasks
-    ? { done: tasksDueToday(tasks, { status: 'completed' }).length, total: tasksDueToday(tasks, { status: 'all' }).length }
-    : { done: items.filter((item) => done.has(item.id)).length, total: items.length }
+  const taskRatio = {
+    done: tasksDueToday(tasks, { status: 'completed' }).length,
+    total: tasksDueToday(tasks, { status: 'all' }).length
+  }
+  const ahead = aheadOf(day)
 
   return (
     <Sheet padding={2} elevation='sm'>
       <Stack spacing={2}>
         <Stack spacing={1}>
           <Segmented
-            accessibilityLabel={t('annualPlanning.dailyRoutine.title')}
+            accessibilityLabel={t('blocks.home.panelAria')}
             value={tab}
             onChange={setTab}
             options={[
-              ...ROUTINE_PERIODS.map((name) => ({
-                value: name,
-                /* Short labels, as the focus timer's modes already carry: the
-                   full "Morning Routine" is three words on a quarter of 390pt. */
-                label: t(`annualPlanning.dailyRoutine.short.${name}`),
-                count: routineItems(routine, name).length || undefined
-              })),
+              { value: NOW_TAB, label: t('blocks.home.now'), count: ahead.length || undefined },
               { value: TASKS_TAB, label: t('tasks.title'), count: tasksCount || undefined }
             ]}
           />
-          <Progress
-            value={ratio.total > 0 ? (ratio.done / ratio.total) * 100 : 0}
-            accessibilityLabel={t('tasks.progress.label', { done: ratio.done, total: ratio.total })}
-          />
+          {onTasks ? (
+            <Progress
+              value={taskRatio.total > 0 ? (taskRatio.done / taskRatio.total) * 100 : 0}
+              accessibilityLabel={t('tasks.progress.label', { done: taskRatio.done, total: taskRatio.total })}
+            />
+          ) : (
+            <Progress
+              value={day.kept.rate * 100}
+              accessibilityLabel={t('blocks.keptOf', { kept: day.kept.kept, total: day.kept.planned })}
+            />
+          )}
         </Stack>
 
         {onTasks ? (
           <TaskTab tasks={tasks} loading={tasksLoading} onReload={reloadTasks} theme={theme} t={t} />
         ) : (
-          <RoutineTab period={tab} items={items} done={done} routine={routine} onReload={reloadRoutine} onEdit={onEditRoutine} t={t} />
+          <NowTab day={day} ahead={ahead} log={log} areaColors={areaColors} onOpenDay={onOpenDay} onStart={onStart} theme={theme} t={t} />
         )}
       </Stack>
     </Sheet>
   )
 }
 
-/**
- * One period of the routine: its items, and the way into writing them.
- *
- * The editor was written, removed when it turned out there was nothing to open
- * — the phone could tick a routine item and nothing anywhere could create one —
- * and is reachable again now that there is one (MOB-084).
- *
- * **The way in is a row at the foot, not a pencil on a heading.** The heading
- * is gone: the tab above already says which period this is, and repeating it
- * inside its own tab is the fault the news carousel was corrected for
- * (MOB-081). A row is also the anatomy this panel already uses for the other
- * verb it keeps — the tasks tab opens with a capture row, so the routine
- * closing with an edit row is the same object, said twice.
- */
-function RoutineTab({ period, items, done, routine, onReload, onEdit, t }) {
-  const [pending, setPending] = useState(null)
+/** The rows ahead of the clock: current, next, and a few of what follows. */
+const aheadOf = (day) => (day.current ? [day.current, day.next, ...day.later.slice(0, LATER_SHOWN)].filter(Boolean) : [])
 
-  const toggle = async (item) => {
-    setPending(item.id)
-    try {
-      await annualPlanningService.updateRoutineCompletions(todayKey(), toggledCompletions(routine, item.id))
-      await onReload?.()
-    } catch {
-      // The interceptor reports it; the tick simply does not take.
-    } finally {
-      setPending(null)
-    }
+/**
+ * The day around the clock: now · next · later, from the one spine (PRD D9).
+ *
+ * The current block leads and carries the Start key, as `BlockRow` draws it;
+ * the rows after it carry the tick, and the tick keeps or undoes through the
+ * same optimistic log the Day uses, so a block kept here is kept there at
+ * once. When the day is spent — nothing running, nothing ahead — the tab
+ * reads the day back: one line of copy, then the last blocks it held with
+ * their states, read-only. The record is written on the Day; Home only says
+ * how it went.
+ *
+ * **The way in is a row at the foot, not a pencil on a heading.** The tab
+ * above already says what this is, and repeating it inside its own tab is
+ * the fault the news carousel was corrected for (MOB-081). A row is also the
+ * anatomy this panel already uses for the other verb it keeps — the tasks
+ * tab opens with a capture row, so the day closing with an open row is the
+ * same object, said twice.
+ */
+function NowTab({ day, ahead, log, areaColors, onOpenDay, onStart, theme, t }) {
+  const toggle = (o) => (o.log?.status === 'kept' ? log.undo(o) : log.keep(o))
+
+  if (day.loading && day.occurrences.length === 0) {
+    return (
+      <Stack spacing={1}>
+        <Skeleton width='100%' height={LIST_ROW_HEIGHT} />
+        <Skeleton width='100%' height={LIST_ROW_HEIGHT} />
+      </Stack>
+    )
   }
 
-  if (items.length === 0) {
-    /* Said, and something offered. An empty state that names the thing to do
-       and cannot start it is the fault this panel shipped with. */
+  if (day.error) {
     return (
-      <Stack spacing={1.5} style={{ paddingTop: 8 }}>
-        <Typography level='body-md' color='text.secondary'>
-          {t(`annualPlanning.dailyRoutine.${period}EmptyTitle`)}
+      <Stack spacing={1.5} style={{ paddingTop: theme.spacing[1] }}>
+        <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+          {t('blocks.error')}
         </Typography>
-        <Typography level='body-sm' color='text.tertiary'>
-          {t('annualPlanning.dailyRoutine.emptySubtitle')}
-        </Typography>
-        <Button variant='secondary' onPress={onEdit}>
-          {t('annualPlanning.dailyRoutine.emptyCta')}
+        <Button size='sm' variant='secondary' onPress={day.reload}>
+          {t('common.retry')}
         </Button>
       </Stack>
     )
   }
 
+  if (day.occurrences.length === 0) {
+    /* Said, and something offered: one sentence and a tertiary key into the
+       Day, where the block is made (§15.10 — empty is the same object). */
+    return (
+      <Stack spacing={1} style={{ paddingTop: theme.spacing[1], alignItems: 'flex-start' }}>
+        <Typography level='body-md' color='text.secondary'>
+          {t('blocks.home.empty')}
+        </Typography>
+        <Button size='sm' variant='tertiary' onPress={onOpenDay}>
+          {t('blocks.home.planDay')}
+        </Button>
+      </Stack>
+    )
+  }
+
+  const spent = ahead.length === 0
+  const rows = spent ? day.past.slice(-PAST_SHOWN) : ahead
+
   return (
     <View>
-      {items.map((item, index) => (
-        <View key={item.id}>
+      {spent ? (
+        <Typography level='body-sm' color='text.tertiary' style={{ paddingBottom: theme.spacing[1] }}>
+          {t('blocks.home.dayDone')}
+        </Typography>
+      ) : null}
+
+      {rows.map((o, index) => (
+        <View key={`${o.blockId}|${o.date}`}>
           {index === 0 ? null : <Divider />}
-          <ListRow
-            tile={
-              <Checkbox
-                checked={done.has(item.id)}
-                disabled={pending === item.id}
-                onPress={() => toggle(item)}
-                accessibilityLabel={t('annualPlanning.dailyRoutine.toggleItem')}
-              />
-            }
-            /* The item's own reader: an item written on the web carries `text`,
-               one slotted in from a goal carries `title`, and a screen that
-               guessed between them showed blanks for half a routine. */
-            name={routineItemTitle(item)}
-            onPress={() => toggle(item)}
+          <BlockRow
+            occurrence={o}
+            clock={day.nowMinutes}
+            isToday
+            current={!spent && index === 0}
+            areaColor={o.block?.areaId ? (areaColors.get(o.block.areaId) ?? null) : null}
+            due={day.due}
+            suggestedMinutes={day.suggestedStudyLength}
+            onOpen={spent ? undefined : onOpenDay}
+            onToggle={spent ? undefined : toggle}
+            onStart={onStart}
           />
         </View>
       ))}
 
-      {/* The way into writing them, at the foot of what they are. */}
+      {/* The way into working the day, at the foot of what it holds. */}
       <Divider />
-      <ListRow
-        tile={<Icon name='Pencil' size='sm' color='text.tertiary' />}
-        name={t('annualPlanning.dailyRoutine.editRoutine')}
-        onPress={onEdit}
-      />
+      <ListRow tile={<Icon name='CalendarDays' size='sm' color='text.tertiary' />} name={t('blocks.home.openDay')} onPress={onOpenDay} />
     </View>
   )
 }

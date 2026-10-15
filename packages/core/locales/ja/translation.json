@@ -3429,6 +3429,9 @@
     }
   },
   "blocks": {
+    "today": {
+      "nextStudy": "次の学習ブロック · {{time}}"
+    },
     "free": {
       "title": "集中セッション"
     },
