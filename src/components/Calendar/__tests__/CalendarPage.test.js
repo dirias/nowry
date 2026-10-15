@@ -15,6 +15,17 @@ import { render, screen, fireEvent } from '@testing-library/react'
 // Mock FullCalendar packages (not yet installed in Wave 0). The component
 // records the props it was given so a suite can call its callbacks (PLAN-010).
 const mockFullCalendar = jest.fn()
+// The Start wiring (PLAN-005/006) reads the timer; this suite renders no provider.
+const mockTimer = { block: null, startBlock: jest.fn(), setShowWidget: jest.fn(), keepBlock: jest.fn(), skipBlock: jest.fn() }
+// The Start wiring navigates; this suite renders no Router.
+const mockNavigate = jest.fn()
+jest.mock('react-router-dom', () => ({ ...jest.requireActual('react-router-dom'), useNavigate: () => mockNavigate }))
+
+jest.mock('@nowry/core/context/PomodoroContext', () => ({
+  ...jest.requireActual('@nowry/core/context/PomodoroContext'),
+  usePomodoro: () => mockTimer
+}))
+
 jest.mock(
   '@fullcalendar/react',
   () => (props) => {

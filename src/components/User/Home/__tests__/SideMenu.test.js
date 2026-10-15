@@ -7,6 +7,13 @@ import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
+// The Start wiring (PLAN-005/006) reads the timer; this suite renders no provider.
+const mockTimer = { block: null, startBlock: jest.fn(), setShowWidget: jest.fn(), keepBlock: jest.fn(), skipBlock: jest.fn() }
+jest.mock('@nowry/core/context/PomodoroContext', () => ({
+  ...jest.requireActual('@nowry/core/context/PomodoroContext'),
+  usePomodoro: () => mockTimer
+}))
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key })
 }))
@@ -125,7 +132,10 @@ describe('the Now tab', () => {
       expect.stringContaining('Walk')
     ])
     expect(rows[0]).toHaveAttribute('data-block-state', 'running')
-    expect(screen.getByRole('link', { name: 'blocks.row.start' })).toHaveAttribute('href', '/calendar')
+    // Start runs the block (PLAN-006) rather than linking to the calendar.
+    fireEvent.click(screen.getByRole('button', { name: 'blocks.row.start' }))
+    expect(mockTimer.startBlock).toHaveBeenCalledTimes(1)
+    expect(mockTimer.startBlock.mock.calls[0][0].blockId).toBe('b1')
     // One tick per row after the current one.
     expect(screen.getAllByRole('button', { name: 'calendarPage.blocks.markKept' })).toHaveLength(4)
   })

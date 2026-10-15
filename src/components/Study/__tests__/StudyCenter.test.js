@@ -13,6 +13,9 @@ let mockSearch = new URLSearchParams()
 // CRA's jest config resets every mock's implementation before each test, so
 // implementations are (re)installed in beforeEach, not here.
 const mockSetSearchParams = jest.fn()
+// The next-study-block readout (PLAN-005) reads the spine; stubbed here, as the data hooks are.
+jest.mock('@nowry/core/hooks/useToday', () => ({ useToday: () => ({ nextStudy: null, occurrences: [], loading: false, error: null }) }))
+
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
   useSearchParams: () => [mockSearch, mockSetSearchParams]

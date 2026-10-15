@@ -29,6 +29,13 @@ let mockSearchParams = new URLSearchParams()
 // Each call site gets its own useState (both live in StudySession's hook list),
 // which is fine: only the tag filter ever writes, and only it needs to observe
 // its own writes. `mode` is immutable for a session's lifetime.
+// A study block's record (PLAN-005) reads the timer; this suite renders no provider.
+const mockTimer = { block: null, startBlock: jest.fn(), setShowWidget: jest.fn(), keepBlock: jest.fn(), skipBlock: jest.fn() }
+jest.mock('@nowry/core/context/PomodoroContext', () => ({
+  ...jest.requireActual('@nowry/core/context/PomodoroContext'),
+  usePomodoro: () => mockTimer
+}))
+
 jest.mock('react-router-dom', () => {
   const ReactModule = require('react')
   return {
