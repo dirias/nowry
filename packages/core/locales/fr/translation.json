@@ -3215,6 +3215,7 @@
       "today": "Aujourd’hui"
     },
     "views": {
+      "day": "Jour",
       "month": "Mois",
       "week": "Semaine",
       "agenda": "Agenda"
@@ -3253,6 +3254,91 @@
         "activity": "Habitude"
       },
       "earlier": "Plus tôt ce mois-ci"
+    },
+    "add": "Ajouter",
+    "blocks": {
+      "menuBlock": "Bloc",
+      "dueRow": "Échéances",
+      "cards_one": "{{count}} carte",
+      "cards_other": "{{count}} cartes",
+      "routineGroup": "Routine {{period}} · {{count}}",
+      "period": {
+        "morning": "du matin",
+        "afternoon": "de l'après-midi",
+        "evening": "du soir"
+      },
+      "summaryKept_one": "{{kept}} bloc sur {{count}} tenu",
+      "summaryKept_other": "{{kept}} blocs sur {{count}} tenus",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min",
+      "meta": "{{minutes}} min · {{source}}",
+      "source": {
+        "routine": "routine",
+        "study": "révision",
+        "focus": "focus",
+        "goal": "objectif",
+        "task": "tâche",
+        "free": "libre"
+      },
+      "markKept": "Marquer comme tenu",
+      "undoKept": "Annuler « tenu »",
+      "kept": "Tenu",
+      "skip": "Passer",
+      "undo": "Annuler",
+      "state": {
+        "kept": "Tenu",
+        "partial": "Tenu en partie",
+        "skipped": "Passé",
+        "running": "En cours",
+        "upcoming": "À venir",
+        "missed": "Non noté"
+      },
+      "dragRuleKept": "Un bloc récurrent garde ses jours de la semaine. Déplacez-le dans sa journée, ou changez ses jours dans le formulaire.",
+      "form": {
+        "addTitle": "Ajouter un bloc",
+        "editTitle": "Modifier le bloc",
+        "title": "Titre",
+        "titlePlaceholder": "Révision du matin",
+        "titleRequired": "Donnez un nom au bloc",
+        "for": "Pour",
+        "source": {
+          "routine": "Routine",
+          "study": "Révision",
+          "focus": "Focus",
+          "goal": "Objectif"
+        },
+        "goal": "Objectif",
+        "goalPlaceholder": "Choisir un objectif",
+        "goalRequired": "Choisissez l'objectif de ce bloc",
+        "noGoals": "Aucun objectif ouvert — ajoutez-en un dans la planification annuelle",
+        "starts": "Commence à",
+        "lasts": "Dure",
+        "less": "5 minutes de moins",
+        "more": "5 minutes de plus",
+        "forecastHint_one": "{{count}} carte à revoir ≈ {{minutes}} min, selon votre prévision",
+        "forecastHint_other": "{{count}} cartes à revoir ≈ {{minutes}} min, selon votre prévision",
+        "repeats": "Se répète",
+        "once": "Une seule fois, le …",
+        "onceDate": "Date",
+        "daysRequired": "Choisissez au moins un jour de la semaine, ou faites-en un bloc unique",
+        "dateRequired": "Choisissez le jour",
+        "remind": "Rappel",
+        "remindOff": "Non",
+        "remindAtStart": "Au début",
+        "remindMinutes_one": "{{count}} min",
+        "remindMinutes_other": "{{count}} min",
+        "after": "Après",
+        "afterNone": "Rien de particulier",
+        "afterHelper": "Facultatif — le bloc que celui-ci suit",
+        "today": "Aujourd'hui",
+        "cancel": "Annuler",
+        "add": "Ajouter le bloc",
+        "save": "Enregistrer",
+        "delete": "Supprimer le bloc",
+        "deleteTitle": "Supprimer ce bloc ?",
+        "deleteBody": "Il disparaît de chaque jour où il était prévu. Les jours déjà tenus restent dans le journal.",
+        "saveError": "Impossible d'enregistrer le bloc. Réessayez."
+      }
     }
   },
   "goalAi": {
@@ -3462,6 +3548,74 @@
       "cta": "Rejoindre la liste",
       "sent": "Vous êtes sur la liste. Nous vous écrirons quand une place se libère.",
       "failed": "L'envoi a échoué. Réessayez dans un instant."
+    }
+  },
+  "blocks": {
+    "day": "Jour",
+    "add": "Ajouter un bloc",
+    "empty": "Rien de prévu. Ajoutez un bloc ou planifiez demain.",
+    "error": "Impossible de charger la journée.",
+    "keptOf": "{{kept}} tenus sur {{total}}",
+    "periodKept": "{{kept}} sur {{total}} tenus",
+    "nav": {
+      "previousDay": "Jour précédent",
+      "nextDay": "Jour suivant"
+    },
+    "source": {
+      "routine": "Routine",
+      "study": "Étude",
+      "focus": "Focus",
+      "goal": "Objectif",
+      "task": "Tâche",
+      "free": "Libre"
+    },
+    "row": {
+      "start": "Démarrer",
+      "studyDue_one": "{{count}} à revoir ≈ {{minutes}} min",
+      "studyDue_other": "{{count}} à revoir ≈ {{minutes}} min",
+      "streak_one": "Série de {{count}} jour",
+      "streak_other": "Série de {{count}} jours",
+      "tickAria": "Marquer {{title}} comme tenu",
+      "untickAria": "Effacer le registre de {{title}}",
+      "openAria": "Modifier {{title}}"
+    },
+    "actions": {
+      "kept": "Tenu",
+      "skip": "Passer",
+      "undo": "Annuler"
+    },
+    "confirmDelete": {
+      "title": "Supprimer ce bloc ?",
+      "body": "« {{title}} » et son registre seront retirés de tous les jours.",
+      "confirm": "Supprimer le bloc"
+    },
+    "sheet": {
+      "addTitle": "Nouveau bloc",
+      "editTitle": "Modifier le bloc",
+      "title": "Titre",
+      "titlePlaceholder": "Révision du matin",
+      "titleRequired": "Donnez un titre au bloc.",
+      "for": "Pour",
+      "starts": "Commence",
+      "hour": "Heure",
+      "minute": "Min.",
+      "lasts": "Dure",
+      "shorter": "Moins",
+      "longer": "Plus",
+      "lengthHint_one": "{{count}} carte à revoir ≈ {{minutes}} min, d'après votre prévision",
+      "lengthHint_other": "{{count}} cartes à revoir ≈ {{minutes}} min, d'après votre prévision",
+      "repeats": "Se répète",
+      "once": "Une fois le…",
+      "daysRequired": "Choisissez au moins un jour.",
+      "dateRequired": "Choisissez une date.",
+      "remind": "Rappeler",
+      "remindOff": "Non",
+      "remindAtStart": "Au début",
+      "after": "Après",
+      "afterNone": "Aucun",
+      "afterHelper": "Suit un autre bloc.",
+      "save": "Enregistrer",
+      "saveError": "Le bloc n'a pas pu être enregistré. Réessayez."
     }
   }
 }

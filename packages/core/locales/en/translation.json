@@ -3818,6 +3818,7 @@
       "today": "Today"
     },
     "views": {
+      "day": "Day",
       "month": "Month",
       "week": "Week",
       "agenda": "Agenda"
@@ -3856,6 +3857,91 @@
         "activity": "Habit"
       },
       "earlier": "Earlier this month"
+    },
+    "add": "Add",
+    "blocks": {
+      "menuBlock": "Block",
+      "dueRow": "Due",
+      "cards_one": "{{count}} card",
+      "cards_other": "{{count}} cards",
+      "routineGroup": "{{period}} routine · {{count}}",
+      "period": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening"
+      },
+      "summaryKept_one": "{{kept}} of {{count}} block kept",
+      "summaryKept_other": "{{kept}} of {{count}} blocks kept",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min",
+      "meta": "{{minutes}} min · {{source}}",
+      "source": {
+        "routine": "routine",
+        "study": "study",
+        "focus": "focus",
+        "goal": "goal",
+        "task": "task",
+        "free": "free"
+      },
+      "markKept": "Mark as kept",
+      "undoKept": "Undo kept",
+      "kept": "Kept",
+      "skip": "Skip",
+      "undo": "Undo",
+      "state": {
+        "kept": "Kept",
+        "partial": "Partly kept",
+        "skipped": "Skipped",
+        "running": "Running now",
+        "upcoming": "Coming up",
+        "missed": "Not logged"
+      },
+      "dragRuleKept": "A recurring block keeps its weekdays. Move it within its day, or change its days in the form.",
+      "form": {
+        "addTitle": "Add block",
+        "editTitle": "Edit block",
+        "title": "Title",
+        "titlePlaceholder": "Morning review",
+        "titleRequired": "Give the block a name",
+        "for": "For",
+        "source": {
+          "routine": "Routine",
+          "study": "Study",
+          "focus": "Focus",
+          "goal": "Goal"
+        },
+        "goal": "Goal",
+        "goalPlaceholder": "Choose a goal",
+        "goalRequired": "Choose the goal this block is for",
+        "noGoals": "No open goals — add one in Annual Planning",
+        "starts": "Starts",
+        "lasts": "Lasts",
+        "less": "5 minutes less",
+        "more": "5 minutes more",
+        "forecastHint_one": "{{count}} card due ≈ {{minutes}} min, from your forecast",
+        "forecastHint_other": "{{count}} cards due ≈ {{minutes}} min, from your forecast",
+        "repeats": "Repeats",
+        "once": "Only once, on …",
+        "onceDate": "Date",
+        "daysRequired": "Pick at least one weekday, or make it a one-off",
+        "dateRequired": "Pick the day",
+        "remind": "Remind",
+        "remindOff": "Off",
+        "remindAtStart": "At start",
+        "remindMinutes_one": "{{count}} min",
+        "remindMinutes_other": "{{count}} min",
+        "after": "After",
+        "afterNone": "Nothing in particular",
+        "afterHelper": "Optional — the block this one follows",
+        "today": "Today",
+        "cancel": "Cancel",
+        "add": "Add block",
+        "save": "Save",
+        "delete": "Delete block",
+        "deleteTitle": "Delete this block?",
+        "deleteBody": "It leaves every day it was planned on. Days already kept stay on the record.",
+        "saveError": "Couldn't save the block. Try again."
+      }
     }
   },
   "goalAi": {
@@ -4036,6 +4122,74 @@
       "cta": "Join the waitlist",
       "sent": "You're on the list. We'll write when a place opens.",
       "failed": "That didn't go through. Try again in a moment."
+    }
+  },
+  "blocks": {
+    "day": "Day",
+    "add": "Add block",
+    "empty": "Nothing planned. Add a block or plan tomorrow.",
+    "error": "The day could not be loaded.",
+    "keptOf": "Kept {{kept}} of {{total}}",
+    "periodKept": "{{kept}} of {{total}} kept",
+    "nav": {
+      "previousDay": "Previous day",
+      "nextDay": "Next day"
+    },
+    "source": {
+      "routine": "Routine",
+      "study": "Study",
+      "focus": "Focus",
+      "goal": "Goal",
+      "task": "Task",
+      "free": "Free"
+    },
+    "row": {
+      "start": "Start",
+      "studyDue_one": "{{count}} due ≈ {{minutes}} min",
+      "studyDue_other": "{{count}} due ≈ {{minutes}} min",
+      "streak_one": "{{count}}-day streak",
+      "streak_other": "{{count}}-day streak",
+      "tickAria": "Mark {{title}} as kept",
+      "untickAria": "Clear the record for {{title}}",
+      "openAria": "Edit {{title}}"
+    },
+    "actions": {
+      "kept": "Kept",
+      "skip": "Skip",
+      "undo": "Undo"
+    },
+    "confirmDelete": {
+      "title": "Delete this block?",
+      "body": "“{{title}}” and its record will be removed from every day.",
+      "confirm": "Delete block"
+    },
+    "sheet": {
+      "addTitle": "New block",
+      "editTitle": "Edit block",
+      "title": "Title",
+      "titlePlaceholder": "Morning review",
+      "titleRequired": "Give the block a title.",
+      "for": "For",
+      "starts": "Starts",
+      "hour": "Hour",
+      "minute": "Minute",
+      "lasts": "Lasts",
+      "shorter": "Shorter",
+      "longer": "Longer",
+      "lengthHint_one": "{{count}} card due ≈ {{minutes}} min, from your forecast",
+      "lengthHint_other": "{{count}} cards due ≈ {{minutes}} min, from your forecast",
+      "repeats": "Repeats",
+      "once": "Once on…",
+      "daysRequired": "Choose at least one day.",
+      "dateRequired": "Choose a date.",
+      "remind": "Remind",
+      "remindOff": "Off",
+      "remindAtStart": "At start",
+      "after": "After",
+      "afterNone": "None",
+      "afterHelper": "Follows another block.",
+      "save": "Save",
+      "saveError": "The block could not be saved. Try again."
     }
   }
 }

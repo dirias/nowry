@@ -3204,6 +3204,7 @@
       "today": "Heute"
     },
     "views": {
+      "day": "Tag",
       "month": "Monat",
       "week": "Woche",
       "agenda": "Agenda"
@@ -3242,6 +3243,91 @@
         "activity": "Gewohnheit"
       },
       "earlier": "Früher diesen Monat"
+    },
+    "add": "Hinzufügen",
+    "blocks": {
+      "menuBlock": "Zeitblock",
+      "dueRow": "Fällig",
+      "cards_one": "{{count}} Karte",
+      "cards_other": "{{count}} Karten",
+      "routineGroup": "Routine am {{period}} · {{count}}",
+      "period": {
+        "morning": "Morgen",
+        "afternoon": "Nachmittag",
+        "evening": "Abend"
+      },
+      "summaryKept_one": "{{kept}} von {{count}} Block eingehalten",
+      "summaryKept_other": "{{kept}} von {{count}} Blöcken eingehalten",
+      "hoursMinutes": "{{hours}} Std. {{minutes}} Min.",
+      "minutes": "{{minutes}} Min.",
+      "meta": "{{minutes}} Min. · {{source}}",
+      "source": {
+        "routine": "Routine",
+        "study": "Lernen",
+        "focus": "Fokus",
+        "goal": "Ziel",
+        "task": "Aufgabe",
+        "free": "frei"
+      },
+      "markKept": "Als eingehalten markieren",
+      "undoKept": "Eingehalten zurücknehmen",
+      "kept": "Eingehalten",
+      "skip": "Überspringen",
+      "undo": "Rückgängig",
+      "state": {
+        "kept": "Eingehalten",
+        "partial": "Teilweise eingehalten",
+        "skipped": "Übersprungen",
+        "running": "Läuft gerade",
+        "upcoming": "Steht bevor",
+        "missed": "Nicht erfasst"
+      },
+      "dragRuleKept": "Ein wiederkehrender Block behält seine Wochentage. Verschiebe ihn innerhalb seines Tages oder ändere die Tage im Formular.",
+      "form": {
+        "addTitle": "Block hinzufügen",
+        "editTitle": "Block bearbeiten",
+        "title": "Titel",
+        "titlePlaceholder": "Morgenwiederholung",
+        "titleRequired": "Gib dem Block einen Namen",
+        "for": "Für",
+        "source": {
+          "routine": "Routine",
+          "study": "Lernen",
+          "focus": "Fokus",
+          "goal": "Ziel"
+        },
+        "goal": "Ziel",
+        "goalPlaceholder": "Ziel wählen",
+        "goalRequired": "Wähle das Ziel, für das dieser Block ist",
+        "noGoals": "Keine offenen Ziele — lege eines in der Jahresplanung an",
+        "starts": "Beginnt um",
+        "lasts": "Dauert",
+        "less": "5 Minuten weniger",
+        "more": "5 Minuten mehr",
+        "forecastHint_one": "{{count}} Karte fällig ≈ {{minutes}} Min., laut deiner Prognose",
+        "forecastHint_other": "{{count}} Karten fällig ≈ {{minutes}} Min., laut deiner Prognose",
+        "repeats": "Wiederholt sich",
+        "once": "Nur einmal, am …",
+        "onceDate": "Datum",
+        "daysRequired": "Wähle mindestens einen Wochentag oder mache den Block einmalig",
+        "dateRequired": "Wähle den Tag",
+        "remind": "Erinnern",
+        "remindOff": "Aus",
+        "remindAtStart": "Zu Beginn",
+        "remindMinutes_one": "{{count}} Min.",
+        "remindMinutes_other": "{{count}} Min.",
+        "after": "Nach",
+        "afterNone": "Nichts Bestimmtes",
+        "afterHelper": "Optional — der Block, auf den dieser folgt",
+        "today": "Heute",
+        "cancel": "Abbrechen",
+        "add": "Block hinzufügen",
+        "save": "Speichern",
+        "delete": "Block löschen",
+        "deleteTitle": "Diesen Block löschen?",
+        "deleteBody": "Er verschwindet von jedem Tag, an dem er geplant war. Bereits eingehaltene Tage bleiben im Protokoll.",
+        "saveError": "Der Block konnte nicht gespeichert werden. Versuch es noch einmal."
+      }
     }
   },
   "goalAi": {
@@ -3451,6 +3537,74 @@
       "cta": "Eintragen",
       "sent": "Du stehst auf der Liste. Wir schreiben dir, sobald ein Platz frei ist.",
       "failed": "Das hat nicht geklappt. Versuch es gleich noch einmal."
+    }
+  },
+  "blocks": {
+    "day": "Tag",
+    "add": "Block hinzufügen",
+    "empty": "Nichts geplant. Füge einen Block hinzu oder plane morgen.",
+    "error": "Der Tag konnte nicht geladen werden.",
+    "keptOf": "{{kept}} von {{total}} eingehalten",
+    "periodKept": "{{kept}} von {{total}} geschafft",
+    "nav": {
+      "previousDay": "Vortag",
+      "nextDay": "Nächster Tag"
+    },
+    "source": {
+      "routine": "Routine",
+      "study": "Lernen",
+      "focus": "Fokus",
+      "goal": "Ziel",
+      "task": "Aufgabe",
+      "free": "Frei"
+    },
+    "row": {
+      "start": "Starten",
+      "studyDue_one": "{{count}} fällig ≈ {{minutes}} Min.",
+      "studyDue_other": "{{count}} fällig ≈ {{minutes}} Min.",
+      "streak_one": "{{count}}-Tage-Serie",
+      "streak_other": "{{count}}-Tage-Serie",
+      "tickAria": "{{title}} als eingehalten markieren",
+      "untickAria": "Eintrag für {{title}} löschen",
+      "openAria": "{{title}} bearbeiten"
+    },
+    "actions": {
+      "kept": "Eingehalten",
+      "skip": "Überspringen",
+      "undo": "Rückgängig"
+    },
+    "confirmDelete": {
+      "title": "Diesen Block löschen?",
+      "body": "„{{title}}“ und sein Eintrag werden von jedem Tag entfernt.",
+      "confirm": "Block löschen"
+    },
+    "sheet": {
+      "addTitle": "Neuer Block",
+      "editTitle": "Block bearbeiten",
+      "title": "Titel",
+      "titlePlaceholder": "Morgendliche Wiederholung",
+      "titleRequired": "Gib dem Block einen Titel.",
+      "for": "Für",
+      "starts": "Beginnt",
+      "hour": "Stunde",
+      "minute": "Min.",
+      "lasts": "Dauer",
+      "shorter": "Kürzer",
+      "longer": "Länger",
+      "lengthHint_one": "{{count}} Karte fällig ≈ {{minutes}} Min., laut deiner Vorschau",
+      "lengthHint_other": "{{count}} Karten fällig ≈ {{minutes}} Min., laut deiner Vorschau",
+      "repeats": "Wiederholt sich",
+      "once": "Einmal am…",
+      "daysRequired": "Wähle mindestens einen Tag.",
+      "dateRequired": "Wähle ein Datum.",
+      "remind": "Erinnern",
+      "remindOff": "Aus",
+      "remindAtStart": "Zu Beginn",
+      "after": "Nach",
+      "afterNone": "Keiner",
+      "afterHelper": "Folgt auf einen anderen Block.",
+      "save": "Speichern",
+      "saveError": "Der Block konnte nicht gespeichert werden. Versuch es erneut."
     }
   }
 }

@@ -3684,6 +3684,7 @@
       "today": "Hoy"
     },
     "views": {
+      "day": "Día",
       "month": "Mes",
       "week": "Semana",
       "agenda": "Agenda"
@@ -3722,6 +3723,91 @@
         "activity": "Hábito"
       },
       "earlier": "Antes de este mes"
+    },
+    "add": "Añadir",
+    "blocks": {
+      "menuBlock": "Bloque",
+      "dueRow": "Vence",
+      "cards_one": "{{count}} tarjeta",
+      "cards_other": "{{count}} tarjetas",
+      "routineGroup": "Rutina {{period}} · {{count}}",
+      "period": {
+        "morning": "de la mañana",
+        "afternoon": "de la tarde",
+        "evening": "de la noche"
+      },
+      "summaryKept_one": "{{kept}} de {{count}} bloque cumplido",
+      "summaryKept_other": "{{kept}} de {{count}} bloques cumplidos",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min",
+      "meta": "{{minutes}} min · {{source}}",
+      "source": {
+        "routine": "rutina",
+        "study": "estudio",
+        "focus": "enfoque",
+        "goal": "meta",
+        "task": "tarea",
+        "free": "libre"
+      },
+      "markKept": "Marcar como cumplido",
+      "undoKept": "Deshacer cumplido",
+      "kept": "Cumplido",
+      "skip": "Omitir",
+      "undo": "Deshacer",
+      "state": {
+        "kept": "Cumplido",
+        "partial": "Cumplido en parte",
+        "skipped": "Omitido",
+        "running": "En curso",
+        "upcoming": "Próximo",
+        "missed": "Sin registrar"
+      },
+      "dragRuleKept": "Un bloque recurrente conserva sus días de la semana. Muévelo dentro de su día o cambia los días en el formulario.",
+      "form": {
+        "addTitle": "Añadir bloque",
+        "editTitle": "Editar bloque",
+        "title": "Título",
+        "titlePlaceholder": "Repaso de la mañana",
+        "titleRequired": "Ponle un nombre al bloque",
+        "for": "Para",
+        "source": {
+          "routine": "Rutina",
+          "study": "Estudio",
+          "focus": "Enfoque",
+          "goal": "Meta"
+        },
+        "goal": "Meta",
+        "goalPlaceholder": "Elige una meta",
+        "goalRequired": "Elige la meta a la que pertenece este bloque",
+        "noGoals": "No hay metas abiertas — añade una en la planificación anual",
+        "starts": "Empieza a las",
+        "lasts": "Dura",
+        "less": "5 minutos menos",
+        "more": "5 minutos más",
+        "forecastHint_one": "{{count}} tarjeta pendiente ≈ {{minutes}} min, según tu previsión",
+        "forecastHint_other": "{{count}} tarjetas pendientes ≈ {{minutes}} min, según tu previsión",
+        "repeats": "Se repite",
+        "once": "Solo una vez, el …",
+        "onceDate": "Fecha",
+        "daysRequired": "Elige al menos un día de la semana o hazlo puntual",
+        "dateRequired": "Elige el día",
+        "remind": "Recordar",
+        "remindOff": "No",
+        "remindAtStart": "Al empezar",
+        "remindMinutes_one": "{{count}} min",
+        "remindMinutes_other": "{{count}} min",
+        "after": "Después de",
+        "afterNone": "Nada en particular",
+        "afterHelper": "Opcional — el bloque al que sigue este",
+        "today": "Hoy",
+        "cancel": "Cancelar",
+        "add": "Añadir bloque",
+        "save": "Guardar",
+        "delete": "Eliminar bloque",
+        "deleteTitle": "¿Eliminar este bloque?",
+        "deleteBody": "Desaparece de todos los días en los que estaba planificado. Los días ya cumplidos quedan en el registro.",
+        "saveError": "No se pudo guardar el bloque. Inténtalo de nuevo."
+      }
     }
   },
   "goalAi": {
@@ -3902,6 +3988,74 @@
       "cta": "Apuntarme",
       "sent": "Ya estás en la lista. Te escribiremos cuando haya sitio.",
       "failed": "No se pudo enviar. Inténtalo de nuevo en un momento."
+    }
+  },
+  "blocks": {
+    "day": "Día",
+    "add": "Añadir bloque",
+    "empty": "Nada planeado. Añade un bloque o planifica mañana.",
+    "error": "No se pudo cargar el día.",
+    "keptOf": "Cumplidos {{kept}} de {{total}}",
+    "periodKept": "{{kept}} de {{total}} cumplidos",
+    "nav": {
+      "previousDay": "Día anterior",
+      "nextDay": "Día siguiente"
+    },
+    "source": {
+      "routine": "Rutina",
+      "study": "Estudio",
+      "focus": "Enfoque",
+      "goal": "Meta",
+      "task": "Tarea",
+      "free": "Libre"
+    },
+    "row": {
+      "start": "Empezar",
+      "studyDue_one": "{{count}} pendiente ≈ {{minutes}} min",
+      "studyDue_other": "{{count}} pendientes ≈ {{minutes}} min",
+      "streak_one": "Racha de {{count}} día",
+      "streak_other": "Racha de {{count}} días",
+      "tickAria": "Marcar {{title}} como cumplido",
+      "untickAria": "Borrar el registro de {{title}}",
+      "openAria": "Editar {{title}}"
+    },
+    "actions": {
+      "kept": "Cumplido",
+      "skip": "Omitir",
+      "undo": "Deshacer"
+    },
+    "confirmDelete": {
+      "title": "¿Eliminar este bloque?",
+      "body": "“{{title}}” y su registro se eliminarán de todos los días.",
+      "confirm": "Eliminar bloque"
+    },
+    "sheet": {
+      "addTitle": "Nuevo bloque",
+      "editTitle": "Editar bloque",
+      "title": "Título",
+      "titlePlaceholder": "Repaso matutino",
+      "titleRequired": "Ponle un título al bloque.",
+      "for": "Para",
+      "starts": "Empieza",
+      "hour": "Hora",
+      "minute": "Minuto",
+      "lasts": "Dura",
+      "shorter": "Menos",
+      "longer": "Más",
+      "lengthHint_one": "{{count}} tarjeta pendiente ≈ {{minutes}} min, según tu previsión",
+      "lengthHint_other": "{{count}} tarjetas pendientes ≈ {{minutes}} min, según tu previsión",
+      "repeats": "Se repite",
+      "once": "Solo el…",
+      "daysRequired": "Elige al menos un día.",
+      "dateRequired": "Elige una fecha.",
+      "remind": "Recordar",
+      "remindOff": "No",
+      "remindAtStart": "Al empezar",
+      "after": "Después de",
+      "afterNone": "Ninguno",
+      "afterHelper": "Sigue a otro bloque.",
+      "save": "Guardar",
+      "saveError": "No se pudo guardar el bloque. Inténtalo de nuevo."
     }
   }
 }

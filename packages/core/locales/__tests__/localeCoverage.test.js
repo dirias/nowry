@@ -178,6 +178,10 @@ const IDENTICAL_BY_DESIGN = {
     // "Question" is the French word, so the study card's front label lands on
     // English by coincidence. Its back label, "Réponse", does not.
     'cards.session.labels.question',
+    // "Routine" is the French word for the recurring blocks, and French product
+    // UI says "Focus" for a focus block as it does for the timer's mode above.
+    'blocks.source.routine',
+    'blocks.source.focus',
     // See the Spanish note: "min" is the abbreviation here too.
     'study.dates.minutes_one',
     'study.dates.minutes_other',
@@ -198,6 +202,8 @@ const IDENTICAL_BY_DESIGN = {
     'news.categories.design',
     'cards.session.filters.tags',
     'cards.session.filters.tagsSelected',
+    // "Routine" is the German word for the recurring blocks too.
+    'blocks.source.routine',
     // "Agenda" is the German word for the calendar's list view as well.
     'calendarPage.views.agenda',
     // "System" is the German word too, so the appearance option that means

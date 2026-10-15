@@ -191,12 +191,13 @@ export function AnnualPlanning() {
         />
 
         {/*
-         * The way into the routine editor from the Plan tab (MOB-080).
+         * The way into the routine from the Plan tab (MOB-080).
          *
          * Home's panel has a pencil on it, and that was the only door: a user
          * who never scrolled Home could not find the screen at all. The routine
          * is the day-sized view of this plan, so its door belongs directly
-         * under the plan's own summary.
+         * under the plan's own summary. Since PLAN-003 the routine is the
+         * recurring blocks on this tab's Day, so the row opens that segment.
          */}
         <View>
           <ListRow
@@ -204,7 +205,7 @@ export function AnnualPlanning() {
             name={t('annualPlanning.dailyRoutine.title')}
             meta={t('annualPlanning.dailyRoutine.subtitle')}
             action={<Icon name='ChevronRight' size='sm' color='text.tertiary' />}
-            onPress={() => router.push('/annual-planning/daily-routine')}
+            onPress={() => router.push('/calendar?view=day')}
           />
           <Divider />
         </View>
