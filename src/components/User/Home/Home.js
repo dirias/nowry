@@ -152,7 +152,6 @@ function Home() {
         tasksToday={tasksToday}
         routine={routineToday}
         onStudy={() => navigate('/study/daily-review')}
-        onQuick={() => navigate('/study/daily-review?limit=10')}
         onBrowse={() => navigate('/study?view=library')}
         onCreateDeck={() => navigate('/study?view=library&new=deck')}
         onBrowseDecks={() => navigate('/browse')}

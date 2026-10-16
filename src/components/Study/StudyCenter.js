@@ -9,6 +9,7 @@ import { usePet } from '@nowry/core/context/AgentContext'
 import CardHome from '../Cards/CardHome'
 import RecentSessions from './RecentSessions'
 import TodayObject from './TodayObject'
+import ItemSheet from '../Calendar/ItemSheet'
 import ViewSegment from './ViewSegment'
 import DeckRow from './DeckRow'
 import { readout } from '../Common/Form/formStyles'
@@ -26,6 +27,12 @@ export default function StudyCenter() {
   // One hook for the Today object's numbers, shared with Home (SITE-013).
   const today = useTodayData()
   const day = useToday({ dueToday: today.dueToday ?? 0 })
+  // The day's study time (PLAN-014): the first study block on today's hours,
+  // kept or not — once one exists the key opens it rather than making a second.
+  const studyToday = useMemo(() => (day.occurrences ?? []).find((o) => o.block?.source?.type === 'study') ?? null, [day.occurrences])
+  const dayBlocks = useMemo(() => (day.occurrences ?? []).map((o) => o.block).filter(Boolean), [day.occurrences])
+  const [studySheet, setStudySheet] = useState(false)
+  const planStudy = useCallback(() => setStudySheet(true), [])
   const { statistics: statisticsData, statsLoading, decks, loading, reloadDecks, forecast } = today
   // What rests, for the Today object's readout (SR-003): summed from the deck
   // rows the page already holds, so no second request and no second cache.
@@ -224,11 +231,30 @@ export default function StudyCenter() {
             weekly={weekly}
             forecast={forecast}
             onStudy={() => navigate('/study/daily-review')}
-            onQuick={() => navigate('/study/daily-review?limit=10')}
+            studyTimeAt={studyToday?.start ?? null}
+            onPlanStudy={planStudy}
             onBrowse={() => setView('library')}
             onCreateDeck={() => navigate('/study?view=library&new=deck')}
             onBrowseDecks={() => navigate('/browse')}
             onImport={() => navigate('/study?view=library&new=import')}
+          />
+
+          {/* "Plan a study time" (PLAN-014): the item sheet with Scheduled and the
+              title filled; the forecast sizes it until the learner does. Once a
+              study time exists today, the same key opens it. */}
+          <ItemSheet
+            key={studyToday?.blockId ?? 'study-time'}
+            open={studySheet}
+            onClose={() => setStudySheet(false)}
+            onSaved={day.reload}
+            mode={studyToday ? 'edit' : 'create'}
+            source={studyToday ? { block: studyToday.block, occurrence: studyToday } : null}
+            prefill={
+              studyToday
+                ? null
+                : { title: t('items.studyTitle'), origin: 'study', scheduled: { start: '07:30', daysOfWeek: [0, 1, 2, 3, 4, 5, 6] } }
+            }
+            blocks={dayBlocks}
           />
 
           {/* The lists: two groups of one row (PRD D3), Recent on the right at lg (D11) */}

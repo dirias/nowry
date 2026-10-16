@@ -31,6 +31,7 @@ import { restingTotal } from '@nowry/core/domain/cardRest'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { DAILY_REVIEW } from './StudySession'
+import { ItemSheet } from './ItemSheet'
 import { useTheme } from '../theme'
 import {
   Button,
@@ -49,8 +50,6 @@ import {
 
 /** Enough to answer "what did I just do", not a history page. */
 const RECENT_COUNT = 3
-/** The web's short session, offered only when the day is longer than it. */
-const QUICK_SIZE = 10
 /** Up-to-date decks are reference; the rest are behind one key. */
 const UP_TO_DATE_PREVIEW = 3
 
@@ -99,6 +98,11 @@ export function StudyDashboard() {
   const tomorrowDue = future[0]?.due ?? 0
   // The one line the Study object says about the day's plan (PRD D8, PLAN-005).
   const day = useToday({ dueToday: today.due })
+  // The day's study time (PLAN-014): the first study block on today's hours;
+  // once one exists the key opens it rather than making a second.
+  const studyToday = useMemo(() => (day.occurrences ?? []).find((o) => o.block?.source?.type === 'study') ?? null, [day.occurrences])
+  const dayBlocks = useMemo(() => (day.occurrences ?? []).map((o) => o.block).filter(Boolean), [day.occurrences])
+  const [studySheet, setStudySheet] = useState(false)
 
   const dateLabel = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date()),
@@ -220,19 +224,34 @@ export function StudyDashboard() {
          * absent here, so the only way into a short session was to start the
          * long one and stop (MOB-062).
          */
+        /*
+         * The one secondary (§15.10): the day's study time — plan one, or open
+         * the one that exists (PRD D4, FR-005). It took Quick 10's slot; the
+         * short session is still the review's `limit`.
+         */
         secondary={
-          today.asked > QUICK_SIZE ? (
-            <Button
-              size='md'
-              variant='secondary'
-              onPress={() => router.push(`/study/${DAILY_REVIEW}?limit=${QUICK_SIZE}`)}
-              accessibilityLabel={t('study.today.quickAria', { count: QUICK_SIZE })}
-            >
-              {t('study.today.quick', { count: QUICK_SIZE })}
-            </Button>
-          ) : null
+          <Button size='md' variant='secondary' onPress={() => setStudySheet(true)}>
+            {studyToday ? t('study.today.studyTime', { time: studyToday.start }) : t('study.today.planStudy')}
+          </Button>
         }
         progressLabel={loading || statsMissing ? null : t('study.today.progress', { done: today.reviewedToday, total: today.dayTotal })}
+      />
+
+      {/* "Plan a study time" (PLAN-014): the item sheet with Scheduled and the title filled. */}
+      <ItemSheet
+        open={studySheet}
+        mode={studyToday ? 'edit' : 'create'}
+        source={studyToday ? { block: studyToday.block, occurrence: studyToday } : null}
+        prefill={
+          studyToday
+            ? null
+            : { title: t('items.studyTitle'), origin: 'study', scheduled: { start: '07:30', daysOfWeek: [0, 1, 2, 3, 4, 5, 6] } }
+        }
+        blocks={dayBlocks}
+        due={day.due}
+        suggestedMinutes={day.suggestedStudyLength}
+        onClose={() => setStudySheet(false)}
+        onSaved={day.reload}
       />
 
       {statsMissing ? (

@@ -5,8 +5,6 @@ import LocalFireDepartmentRounded from '@mui/icons-material/LocalFireDepartmentR
 import { readout, tabularNums } from '../Common/Form/formStyles'
 import ForecastStrip from './ForecastStrip'
 
-const QUICK_SIZE = 10
-
 /** The object folds at these widths of ITS OWN container, never the window's (SITE-015). */
 const FOLD = { row: 900, split: 560 }
 
@@ -48,8 +46,11 @@ export default function TodayObject({
   resting = 0,
   /** The next unlogged study block's start today, or null (PLAN-005). */
   nextBlockAt = null,
+  /** Today's study time, once one exists: its start, or null (PLAN-014). */
+  studyTimeAt = null,
   onStudy,
-  onQuick,
+  /** Plan a study time, or open the one that exists (PLAN-014). */
+  onPlanStudy,
   onBrowse,
   onCreateDeck,
   onBrowseDecks,
@@ -164,9 +165,12 @@ export default function TodayObject({
     </Stack>
   ) : (
     <Stack direction='row' spacing={1} className='today-keys'>
-      {!isHome && asked > QUICK_SIZE && (
-        <Button variant='soft' color='neutral' onClick={onQuick} aria-label={t('study.today.quickAria', { count: QUICK_SIZE })}>
-          {t('study.today.quick', { count: QUICK_SIZE })}
+      {/* The one secondary (§15.10): the day's study time — plan one, or open
+          the one that exists (PRD D4, FR-005). It replaced Quick 10, whose
+          short session is still the review's `limit`. */}
+      {!isHome && onPlanStudy && (
+        <Button variant='soft' color='neutral' onClick={onPlanStudy} sx={studyTimeAt ? tabularNums : undefined}>
+          {studyTimeAt ? t('study.today.studyTime', { time: studyTimeAt }) : t('study.today.planStudy')}
         </Button>
       )}
       <Button onClick={onStudy} disabled={loading} sx={tabularNums}>

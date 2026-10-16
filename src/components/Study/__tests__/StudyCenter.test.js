@@ -14,7 +14,13 @@ let mockSearch = new URLSearchParams()
 // implementations are (re)installed in beforeEach, not here.
 const mockSetSearchParams = jest.fn()
 // The next-study-block readout (PLAN-005) reads the spine; stubbed here, as the data hooks are.
-jest.mock('@nowry/core/hooks/useToday', () => ({ useToday: () => ({ nextStudy: null, occurrences: [], loading: false, error: null }) }))
+let mockDay = { nextStudy: null, occurrences: [], loading: false, error: null, reload: jest.fn() }
+jest.mock('@nowry/core/hooks/useToday', () => ({ useToday: () => mockDay }))
+const mockItemSheet = jest.fn()
+jest.mock('../../Calendar/ItemSheet', () => (props) => {
+  mockItemSheet(props)
+  return null
+})
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
@@ -154,17 +160,34 @@ describe('the Today object (PRD D1, D9, D10)', () => {
     expect(await screen.findByTestId('today-object')).toHaveTextContent('study.empty.streakZeroLabel')
   })
 
-  it('offers Quick 10 only when more than ten cards are asked, and caps the session', async () => {
-    mockDecks = [{ ...FIXTURE_DECKS[0], due_cards: 12, new_cards: 3 }]
-    const first = render(<StudyCenter />)
-    fireEvent.click(await screen.findByText('study.today.quick:{"count":10}'))
-    expect(mockNavigate).toHaveBeenCalledWith('/study/daily-review?limit=10')
-    first.unmount()
-
-    mockDecks = FIXTURE_DECKS
+  it('offers "Plan a study time" in the secondary slot, opening the sheet as a scheduled study time with its title', async () => {
+    mockDay = { nextStudy: null, occurrences: [], loading: false, error: null, reload: jest.fn() }
     render(<StudyCenter />)
-    await screen.findByText('study.today.study:{"count":7}')
+    fireEvent.click(await screen.findByText('study.today.planStudy'))
+    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({
+      open: true,
+      mode: 'create',
+      prefill: { title: 'items.studyTitle', origin: 'study', scheduled: { start: '07:30', daysOfWeek: [0, 1, 2, 3, 4, 5, 6] } }
+    })
     expect(screen.queryByText('study.today.quick:{"count":10}')).not.toBeInTheDocument()
+  })
+
+  it('once a study time exists today the key names it and opens that block', async () => {
+    const block = {
+      id: 'b1',
+      title: 'Morning review',
+      source: { type: 'study', id: null },
+      start: '07:30',
+      lengthMin: 20,
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      date: null
+    }
+    const occurrence = { date: '2026-10-16', blockId: 'b1', start: '07:30', lengthMin: 20, title: 'Morning review', block, log: null }
+    mockDay = { nextStudy: occurrence, occurrences: [occurrence], loading: false, error: null, reload: jest.fn() }
+    render(<StudyCenter />)
+    fireEvent.click(await screen.findByText('study.today.studyTime:{"time":"07:30"}'))
+    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'edit', source: { block, occurrence }, blocks: [block] })
+    mockDay = { nextStudy: null, occurrences: [], loading: false, error: null, reload: jest.fn() }
   })
 
   it('closes the day as "All done" with a Browse secondary when nothing is due', async () => {
