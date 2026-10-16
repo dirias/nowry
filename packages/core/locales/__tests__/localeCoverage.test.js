@@ -131,6 +131,8 @@ const COPYRIGHT_ROUTE = ['routes.copyright']
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
   es: [
+    // A whole-hour length is a number and "h" in every Latin locale (PLAN-004).
+    'calendarPage.blocks.hours',
     // A reminder's body is a number, "min" and the source word: the same
     // three pieces in every Latin locale (PLAN-007).
     'blocks.reminder.body',
@@ -163,6 +165,8 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    // A whole-hour length is a number and "h" in every Latin locale (PLAN-004).
+    'calendarPage.blocks.hours',
     // A reminder's body is a number, "min" and the source word: the same
     // three pieces in every Latin locale (PLAN-007).
     'blocks.reminder.body',

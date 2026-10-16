@@ -76,6 +76,7 @@ export const formatMinutes = (minutes, t) => {
   const total = Math.max(0, Math.round(minutes || 0))
   const hours = Math.floor(total / 60)
   const rest = total % 60
+  if (hours > 0 && rest === 0) return t('calendarPage.blocks.hours', { hours })
   return hours > 0 ? t('calendarPage.blocks.hoursMinutes', { hours, minutes: rest }) : t('calendarPage.blocks.minutes', { minutes: rest })
 }
 

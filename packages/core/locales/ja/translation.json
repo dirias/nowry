@@ -3154,6 +3154,7 @@
       },
       "summaryKept_other": "{{count}}ブロック中{{kept}}を実行",
       "hoursMinutes": "{{hours}}時間{{minutes}}分",
+      "hours": "{{hours}} 時間",
       "minutes": "{{minutes}}分",
       "meta": "{{minutes}}分 · {{source}}",
       "source": {
@@ -3211,6 +3212,10 @@
         "remindMinutes_other": "{{count}}分前",
         "after": "この後に",
         "afterNone": "特になし",
+        "moreOptions": "詳細",
+        "moreSummary": "リマインド {{remind}} · {{after}} の後",
+        "onceInstead": "一回だけにする",
+        "weeklyInstead": "曜日で繰り返す",
         "afterHelper": "任意 — このブロックが続くブロック",
         "today": "今日",
         "cancel": "キャンセル",

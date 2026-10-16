@@ -71,6 +71,8 @@ describe('the sheet', () => {
     ;['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].forEach((day) =>
       expect(segment(day)).toHaveAttribute('aria-pressed', 'true')
     )
+    // Remind and After sit behind the More disclosure until one is set.
+    fireEvent.click(screen.getByRole('button', { name: /calendarPage\.blocks\.form\.moreOptions/ }))
     expect(segment('calendarPage.blocks.form.remindOff')).toHaveAttribute('aria-pressed', 'true')
     expect(primary()).toHaveTextContent('calendarPage.blocks.form.add')
     expect(primary()).not.toBeDisabled()
@@ -96,7 +98,7 @@ describe('the sheet', () => {
     expect(screen.getByText('calendarPage.blocks.form.daysRequired')).toBeInTheDocument()
     expect(mockCreate).not.toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('switch'))
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.form.onceInstead' }))
     expect(screen.queryByRole('button', { name: 'Monday' })).toBeNull()
     const date = screen.getByLabelText('calendarPage.blocks.form.onceDate')
     fireEvent.change(date, { target: { value: mockTomorrowKey } })
@@ -111,6 +113,7 @@ describe('the sheet', () => {
     fireEvent.change(title(), { target: { value: '  Morning stretch ' } })
     fireEvent.change(screen.getByLabelText('calendarPage.blocks.form.starts'), { target: { value: '06:45' } })
     fireEvent.click(segment('Sunday'))
+    fireEvent.click(screen.getByRole('button', { name: /calendarPage\.blocks\.form\.moreOptions/ }))
     fireEvent.click(screen.getAllByRole('button', { name: 'calendarPage.blocks.form.remindMinutes 5' })[0])
     await act(async () => {
       fireEvent.click(primary())
@@ -139,7 +142,7 @@ describe('the sheet', () => {
     expect(screen.getByText('calendarPage.blocks.form.forecastHint 27 20')).toBeInTheDocument()
 
     // A one-off tomorrow reads tomorrow's forecast: 9 cards → 5 min.
-    fireEvent.click(screen.getByRole('switch'))
+    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.form.onceInstead' }))
     fireEvent.change(screen.getByLabelText('calendarPage.blocks.form.onceDate'), { target: { value: mockTomorrowKey } })
     expect(screen.getByText('calendarPage.blocks.minutes 5')).toBeInTheDocument()
     expect(screen.getByText('calendarPage.blocks.form.forecastHint 9 5')).toBeInTheDocument()
@@ -190,6 +193,7 @@ describe('the sheet', () => {
       date: null
     }
     open({ mode: 'edit', block, blocks })
+    fireEvent.click(screen.getByRole('button', { name: /calendarPage\.blocks\.form\.moreOptions/ }))
     fireEvent.click(screen.getByRole('combobox', { name: 'calendarPage.blocks.form.after' }))
     const options = screen.getAllByRole('option').map((o) => o.textContent)
     expect(options).toEqual(['calendarPage.blocks.form.afterNone', 'Coffee'])

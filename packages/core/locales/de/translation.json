@@ -3262,6 +3262,7 @@
       "summaryKept_one": "{{kept}} von {{count}} Block eingehalten",
       "summaryKept_other": "{{kept}} von {{count}} Blöcken eingehalten",
       "hoursMinutes": "{{hours}} Std. {{minutes}} Min.",
+      "hours": "{{hours}} Std.",
       "minutes": "{{minutes}} Min.",
       "meta": "{{minutes}} Min. · {{source}}",
       "source": {
@@ -3321,6 +3322,10 @@
         "remindMinutes_other": "{{count}} Min.",
         "after": "Nach",
         "afterNone": "Nichts Bestimmtes",
+        "moreOptions": "Mehr",
+        "moreSummary": "Erinnern {{remind}} · danach {{after}}",
+        "onceInstead": "Stattdessen nur einmal",
+        "weeklyInstead": "Stattdessen an Wochentagen",
         "afterHelper": "Optional — der Block, auf den dieser folgt",
         "today": "Heute",
         "cancel": "Abbrechen",

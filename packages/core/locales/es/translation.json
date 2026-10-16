@@ -3742,6 +3742,7 @@
       "summaryKept_one": "{{kept}} de {{count}} bloque cumplido",
       "summaryKept_other": "{{kept}} de {{count}} bloques cumplidos",
       "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "hours": "{{hours}} h",
       "minutes": "{{minutes}} min",
       "meta": "{{minutes}} min · {{source}}",
       "source": {
@@ -3801,6 +3802,10 @@
         "remindMinutes_other": "{{count}} min",
         "after": "Después de",
         "afterNone": "Nada en particular",
+        "moreOptions": "Más",
+        "moreSummary": "avisar {{remind}} · después {{after}}",
+        "onceInstead": "Solo una vez en su lugar",
+        "weeklyInstead": "Repetir por días en su lugar",
         "afterHelper": "Opcional — el bloque al que sigue este",
         "today": "Hoy",
         "cancel": "Cancelar",

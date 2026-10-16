@@ -37,6 +37,7 @@ import {
   studyBlockLength
 } from '@nowry/core/domain/blocks'
 import { useTodayData } from '../Study/useTodayData'
+import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded'
 import DeleteConfirmationModal from '../Common/DeleteConfirmationModal'
 import FormErrorBanner from '../Common/Form/FormErrorBanner'
 import FormSheet from '../Common/Form/FormSheet'
@@ -221,12 +222,17 @@ const RepeatsObject = ({ once, days, date, onToggleDay, onOnceChange, onDateChan
         })}
       </Box>
     )}
-    <Switch
-      checked={once}
-      onChange={(event) => onOnceChange(event.target.checked)}
-      endDecorator={t('calendarPage.blocks.form.once')}
-      sx={{ alignSelf: 'flex-start', mt: 1, ...focusRing }}
-    />
+    {/* One line, not a switch row: the other mode is a link, and the date
+        field appears only when it is the mode. */}
+    <Button
+      variant='plain'
+      color='neutral'
+      size='sm'
+      onClick={() => onOnceChange(!once)}
+      sx={{ alignSelf: 'flex-start', mt: 0.5, px: 0.5, color: 'primary.plainColor', ...focusRing }}
+    >
+      {t(once ? 'calendarPage.blocks.form.weeklyInstead' : 'calendarPage.blocks.form.onceInstead')}
+    </Button>
     {once && (
       <Input
         type='date'
@@ -241,18 +247,21 @@ const RepeatsObject = ({ once, days, date, onToggleDay, onOnceChange, onDateChan
   </FormControl>
 )
 
+/** The words for a reminder setting, shared by the object and the disclosure's readout. */
+const remindLabel = (option, t) =>
+  option === null
+    ? t('calendarPage.blocks.form.remindOff')
+    : option === 0
+      ? t('calendarPage.blocks.form.remindAtStart')
+      : t('calendarPage.blocks.form.remindMinutes', { count: option })
+
 /** "Remind" — Off · At start · 5 min · 15 min · 30 min, one object. */
 const RemindObject = ({ value, onChange, t }) => (
   <FormControl>
     <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.remind')}</FormLabel>
     <Sheet variant='outlined' role='group' aria-label={t('calendarPage.blocks.form.remind')} sx={{ ...segmentedGroup, width: '100%' }}>
       {REMINDER_OPTIONS.map((option, index) => {
-        const label =
-          option === null
-            ? t('calendarPage.blocks.form.remindOff')
-            : option === 0
-              ? t('calendarPage.blocks.form.remindAtStart')
-              : t('calendarPage.blocks.form.remindMinutes', { count: option })
+        const label = remindLabel(option, t)
         return (
           <Button
             key={String(option)}
@@ -341,6 +350,8 @@ const BlockFormModal = ({ open, onClose, onSaved, mode = 'create', block = null,
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // Remind and After open on their own only when one of them is set.
+  const [moreOpen, setMoreOpen] = useState(() => form.reminderMin !== null || Boolean(form.afterBlockId))
   const [log, setLog] = useState(occurrence?.log ?? null)
   const titleRef = useRef(null)
 
@@ -366,6 +377,10 @@ const BlockFormModal = ({ open, onClose, onSaved, mode = 'create', block = null,
     [cachedGoals]
   )
   const otherRecurring = useMemo(() => (blocks ?? []).filter((b) => !b.date && b.id !== block?.id), [blocks, block])
+  // The disclosure's readout: what After says now, lowercased as a readout.
+  const afterLabel = (
+    otherRecurring.find((b) => b.id === form.afterBlockId)?.title || t('calendarPage.blocks.form.afterNone')
+  ).toLowerCase()
 
   const weekdayLabels = useMemo(() => {
     const narrow = new Intl.DateTimeFormat(language, { weekday: 'narrow' })
@@ -532,19 +547,21 @@ const BlockFormModal = ({ open, onClose, onSaved, mode = 'create', block = null,
             />
           )}
 
-          <FormControl>
-            <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.starts')}</FormLabel>
-            <Input
-              type='time'
-              size='lg'
-              value={form.start}
-              onChange={(event) => patch({ start: event.target.value || form.start })}
-              slotProps={{ input: { step: TIME_STEP_SECONDS, 'aria-label': t('calendarPage.blocks.form.starts') } }}
-              sx={focusRing}
-            />
-          </FormControl>
-
-          <LengthStepper value={lengthMin} onChange={(value) => patch({ lengthMin: value, lengthSet: true })} hint={lengthHint} t={t} />
+          {/* Starts and Lasts are one class, "when": one row, two halves. */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, alignItems: 'start' }}>
+            <FormControl>
+              <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.starts')}</FormLabel>
+              <Input
+                type='time'
+                size='lg'
+                value={form.start}
+                onChange={(event) => patch({ start: event.target.value || form.start })}
+                slotProps={{ input: { step: TIME_STEP_SECONDS, 'aria-label': t('calendarPage.blocks.form.starts') } }}
+                sx={focusRing}
+              />
+            </FormControl>
+            <LengthStepper value={lengthMin} onChange={(value) => patch({ lengthMin: value, lengthSet: true })} hint={lengthHint} t={t} />
+          </Box>
 
           <RepeatsObject
             once={form.once}
@@ -564,9 +581,39 @@ const BlockFormModal = ({ open, onClose, onSaved, mode = 'create', block = null,
             t={t}
           />
 
-          <RemindObject value={form.reminderMin} onChange={(reminderMin) => patch({ reminderMin })} t={t} />
+          {/* The two fields most blocks never touch, behind one line that
+              reads their values (§progressive disclosure). Open on its own
+              only when a value is set. */}
+          <Box>
+            <Button
+              variant='plain'
+              color='neutral'
+              size='sm'
+              aria-expanded={moreOpen}
+              aria-controls='block-form-more'
+              onClick={() => setMoreOpen((open) => !open)}
+              startDecorator={
+                <ExpandMoreRounded
+                  aria-hidden='true'
+                  sx={{
+                    fontSize: 'xl',
+                    transform: moreOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                    transition: 'transform var(--nowry-motion-quick) var(--nowry-motion-standard)'
+                  }}
+                />
+              }
+              sx={{ px: 0.5, ...focusRing }}
+            >
+              {t('calendarPage.blocks.form.moreOptions')}
+              <Typography component='span' level='body-sm' sx={{ color: 'text.tertiary', ml: 1, fontWeight: 'md' }}>
+                {t('calendarPage.blocks.form.moreSummary', { remind: remindLabel(form.reminderMin, t), after: afterLabel })}
+              </Typography>
+            </Button>
+          </Box>
 
-          {otherRecurring.length > 0 && (
+          {moreOpen && <RemindObject value={form.reminderMin} onChange={(reminderMin) => patch({ reminderMin })} t={t} />}
+
+          {moreOpen && otherRecurring.length > 0 && (
             <FormControl>
               <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.after')}</FormLabel>
               <Select
