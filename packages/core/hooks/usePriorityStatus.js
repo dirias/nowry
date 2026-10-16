@@ -2,18 +2,19 @@ import { useCallback } from 'react'
 import { annualPlanningService } from '../api/services'
 
 /**
- * usePriorityStatus — the two status toggles a priority row offers (ADR-015).
+ * usePriorityStatus — what a priority row can do (ADR-015, ADR-046 §5).
  *
- * Both are optimistic: the local list is patched first, the request follows,
- * and a rejection restores the exact original values. The caller owns the
- * list; this hook only needs its setter, so it works over outlet context
- * (AllPrioritiesPage, OverviewTabView) and over local state (FocusAreaView)
- * alike, which is what lets the three surfaces share one implementation.
+ * A priority is a flag on a task or a milestone, so a row offers two things:
+ * done, and the flag off. Both are optimistic: the local list is patched
+ * first, the request follows, and a rejection restores the original values.
+ * The caller owns the list; this hook only needs its setter, so it works over
+ * outlet context (AllPrioritiesPage, OverviewTabView) and over local state
+ * (FocusAreaView) alike.
  *
- * `toggleComplete` sends only `is_completed`; the server stamps `completed_at`.
- * The optimistic patch mirrors that stamp so a row reads as done immediately.
- * It never writes `is_active` — completed and inactive are independent in the
- * data and only exclusive in the UI.
+ * `toggleComplete` writes the item's own done flag through
+ * `annualPlanningService.completePriority`. `unflag` removes the row — the
+ * item stays where it lives; it just stops being a priority. Pausing
+ * (`is_active`) is gone with the object it belonged to.
  */
 const usePriorityStatus = (setPriorities) => {
   const patchById = useCallback(
@@ -21,44 +22,34 @@ const usePriorityStatus = (setPriorities) => {
     [setPriorities]
   )
 
-  const toggle = useCallback(
-    async (priority, { payload, optimistic, revert }) => {
-      patchById(priority._id, optimistic)
+  const toggleComplete = useCallback(
+    async (priority) => {
+      const next = !priority.is_completed
+      patchById(priority._id, { is_completed: next, completed_at: next ? new Date().toISOString() : null })
       try {
-        await annualPlanningService.updatePriority(priority._id, payload)
+        await annualPlanningService.completePriority(priority, next)
       } catch (error) {
         console.error('Failed to update priority status:', error)
-        patchById(priority._id, revert)
+        patchById(priority._id, { is_completed: !!priority.is_completed, completed_at: priority.completed_at ?? null })
       }
     },
     [patchById]
   )
 
-  const toggleActive = useCallback(
-    (priority) => {
-      const next = !priority.is_active
-      return toggle(priority, {
-        payload: { is_active: next },
-        optimistic: { is_active: next },
-        revert: { is_active: priority.is_active }
-      })
+  const unflag = useCallback(
+    async (priority) => {
+      setPriorities((prev) => prev.filter((p) => p._id !== priority._id))
+      try {
+        await annualPlanningService.unflagPriority(priority)
+      } catch (error) {
+        console.error('Failed to unflag priority:', error)
+        setPriorities((prev) => [...prev, priority])
+      }
     },
-    [toggle]
+    [setPriorities]
   )
 
-  const toggleComplete = useCallback(
-    (priority) => {
-      const next = !priority.is_completed
-      return toggle(priority, {
-        payload: { is_completed: next },
-        optimistic: { is_completed: next, completed_at: next ? new Date().toISOString() : null },
-        revert: { is_completed: !!priority.is_completed, completed_at: priority.completed_at ?? null }
-      })
-    },
-    [toggle]
-  )
-
-  return { toggleActive, toggleComplete }
+  return { toggleComplete, unflag }
 }
 
 export default usePriorityStatus

@@ -55,7 +55,6 @@ jest.mock('../GoalCard', () => {
 })
 
 jest.mock('../GoalRow', () => () => null)
-jest.mock('../PriorityDialog', () => () => null)
 jest.mock('../PriorityList', () => () => null)
 jest.mock('../CloseQuarterModal', () => () => null)
 jest.mock('../goal/GoalDetailDrawer', () => () => null)

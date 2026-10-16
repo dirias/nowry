@@ -174,7 +174,7 @@ export default function Home() {
   }, [t])
 
   const areas = plan.focusAreas ?? []
-  const watching = watchedPriorities(plan.priorities, plan.goals, plan.preferredPriorityIds)
+  const watching = watchedPriorities(plan.priorities, plan.goals)
 
   return (
     <Screen>
@@ -300,9 +300,11 @@ function Greeting({ name, motivation, due, loading, statsMissing, onReview, them
  * width of the screen, and a bordered bar of bordered chips is two frames for
  * one line.
  *
- * Which priorities appear is the user's stored preference, read by
- * `watchedPriorities`. Choosing them is the web's modal, and choosing is work:
- * Planning is where it belongs, and this is the tap that opens it.
+ * Which priorities appear is `watchedPriorities`' own rule: the first flagged
+ * items by deadline (ADR-046 §5). A priority is a flag on a task or a
+ * milestone, so flagging IS the choice — the picker that chose four of them is
+ * gone, and nothing here offers to create one. The chip opens Planning, where
+ * the list lives.
  */
 function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan, t }) {
   if (loading && areas.length === 0 && priorities.length === 0) {
@@ -353,16 +355,13 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
       ))}
 
       {/* The web's own empty branch, and it only appears once there are areas:
-          a page with no plan at all says nothing rather than asking for one. */}
+          a page with no plan at all says nothing rather than asking for one.
+          Quiet text, not a key — there is no priority to create, only an item
+          to flag, and that is done on the item (ADR-046 §5). */}
       {priorities.length === 0 && areas.length > 0 ? (
-        <>
-          <Typography level='body-xs' color='text.tertiary'>
-            {t('focusBar.noPrioritiesYet')}
-          </Typography>
-          <Button size='sm' variant='tertiary' onPress={onOpenPlan}>
-            {t('focusBar.createPriority')}
-          </Button>
-        </>
+        <Typography level='body-xs' color='text.tertiary'>
+          {t('focusBar.flagHint')}
+        </Typography>
       ) : null}
     </Stack>
   )

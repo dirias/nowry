@@ -39,17 +39,13 @@ describe('watchablePriorities', () => {
 })
 
 describe('watchedPriorities', () => {
-  it('shows the first four when the user has never chosen', () => {
+  it('shows the first four of the pool — flagging is the choice (ADR-046 §5), there is no picker', () => {
     expect(watchedPriorities(priorities, goals).map((p) => p._id)).toEqual(['p2', 'p1', 'p6', 'p3'])
     expect(WATCHED_DEFAULT).toBe(4)
   })
 
-  it('shows exactly what was chosen, still deadline-first', () => {
-    expect(watchedPriorities(priorities, goals, ['p6', 'p2']).map((p) => p._id)).toEqual(['p2', 'p6'])
-  })
-
-  it('ignores a chosen id that is completed or gone', () => {
-    expect(watchedPriorities(priorities, goals, ['p4', 'p2', 'nope']).map((p) => p._id)).toEqual(['p2'])
+  it('ignores a third argument an old caller still passes', () => {
+    expect(watchedPriorities(priorities, goals, ['p6']).map((p) => p._id)).toEqual(['p2', 'p1', 'p6', 'p3'])
   })
 })
 

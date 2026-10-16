@@ -34,7 +34,6 @@ jest.mock('react-i18next', () => ({
 // Sibling components imported by FocusAreaView that pull in services/router
 // context via their own direct submodule imports (bypassing the barrel mock).
 jest.mock('../GoalDialog', () => () => null)
-jest.mock('../PriorityDialog', () => () => null)
 jest.mock('../PriorityList', () => () => null)
 jest.mock('../CloseQuarterModal', () => () => null)
 jest.mock('../GoalCard', () => () => null)

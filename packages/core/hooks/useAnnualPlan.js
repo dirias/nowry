@@ -20,10 +20,10 @@
  * A 404 from either path means "no plan exists for this year" — a clean empty
  * state, not an error.
  *
- * The profile fetch (for preferredPriorityIds) intentionally stays on the
- * `apiCache` singleton via `annualPlanningService.getCachedProfile()` — see
- * that function's docstring for why it's out of scope for this migration.
- * Accepts optional preloadedUser from AuthContext to skip its round-trip.
+ * Since ADR-046 §5 a priority is a flag on a task or a milestone, and Home
+ * shows the first four flagged items (`watchedPriorities`). The profile fetch
+ * that once resolved a chosen list (`homepage_priority_ids`) is gone with the
+ * picker, so this hook reads one query and nothing else.
  *
  * `fetchAnnualPlanData`/`EMPTY_PLAN_DATA` live in `annualPlanning.service.js`
  * (not here) so `calendarService.getAllEvents()` can share the exact same
@@ -32,9 +32,8 @@
  * fetch. See that file's `fetchAnnualPlanData` docstring for details.
  */
 
-import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { annualPlanningService, fetchAnnualPlanData, EMPTY_PLAN_DATA } from '../api/services/annualPlanning.service'
+import { fetchAnnualPlanData, EMPTY_PLAN_DATA } from '../api/services/annualPlanning.service'
 import { queryClient } from '../api/queryClient'
 import { useAuth } from '../context/AuthContext'
 
@@ -43,14 +42,10 @@ const PLAN_STALE_TIME = 5 * 60000 // 5 min
 
 /**
  * @param {number} year - Year to fetch (defaults to current year)
- * @param {object|null} [preloadedUser] - Optional user object from AuthContext.
- *   When provided, skips the /users/profile network request entirely.
  */
-export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = null) => {
+export const useAnnualPlan = (year = new Date().getFullYear()) => {
   const { user } = useAuth()
   const userId = user?.id ?? null
-
-  const [preferredPriorityIds, setPreferredPriorityIds] = useState([])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['annualPlan', userId, year],
@@ -58,18 +53,6 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
     enabled: !!userId,
     staleTime: PLAN_STALE_TIME
   })
-
-  // Profile fetch stays independent of the plan query (see file header) — it
-  // resolves preferredPriorityIds regardless of whether a plan exists.
-  useEffect(() => {
-    let cancelled = false
-    annualPlanningService.getCachedProfile(preloadedUser).then((profile) => {
-      if (!cancelled) setPreferredPriorityIds(profile?.preferences?.homepage_priority_ids || [])
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [preloadedUser])
 
   const reload = async () => {
     if (!userId) return
@@ -86,7 +69,6 @@ export const useAnnualPlan = (year = new Date().getFullYear(), preloadedUser = n
     activities: planData.activities,
     priorities: planData.priorities,
     quarterReports: planData.quarterReports,
-    preferredPriorityIds,
     loading: isLoading,
     error: error ?? null,
     reload

@@ -186,7 +186,11 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
           // use, so the agenda has one rule for the two tickable types
           // (ADR-016). Unfinished keeps whatever the plan says.
           status: p.is_completed ? 'completed' : p.status || 'active',
-          focusAreaId: null // D-02: priorities have no focus area
+          focusAreaId: null, // D-02: priorities have no focus area
+          // A priority is a flag on a task or a milestone (ADR-046 §5); the
+          // event carries that item's address so a row can write to it.
+          linkedType: p.linked_entity_type ?? null,
+          linkedId: p.linked_entity_id ?? null
         })
       }
     })
@@ -256,6 +260,22 @@ export async function fetchCalendarEvents(userId, year = new Date().getFullYear(
   return { events, focusAreas }
 }
 
+/**
+ * A priority is a flag on an item (ADR-046 §5), so an edit from the calendar
+ * goes to that item — a task by its id, a milestone by its goal and its own —
+ * and done goes through the one completion write the priority lists use, only
+ * when it actually changed. There is no priority document to write to.
+ */
+const updatePriorityEvent = async (event, rawId, title, date, done) => {
+  const ref = { _id: rawId, linked_entity_type: event?.linkedType ?? 'task', linked_entity_id: event?.linkedId ?? rawId }
+  const result =
+    ref.linked_entity_type === 'milestone'
+      ? await annualPlanningService.updateMilestone(ref.linked_entity_id, rawId, { title, due_date: date || null })
+      : await tasksService.update(ref.linked_entity_id, { title, deadline: date || null })
+  if (done !== (event?.status === 'completed')) await annualPlanningService.completePriority(ref, done)
+  return result
+}
+
 export const calendarService = {
   /**
    * @param {string|null} userId - Caller's backend user id (useAuth().user?.id ?? null)
@@ -285,21 +305,11 @@ export const calendarService = {
    * Habit is deliberately not one of them: a habit is a schedule, and a form
    * that can only write a date cannot make one.
    */
-  async createEvent({ type, title, description = '', date = null, focusAreaId = null, goalId = null, annualPlanId = null }) {
+  async createEvent({ type, title, date = null, focusAreaId = null, goalId = null }) {
     const trimmed = title.trim()
     switch (type) {
       case 'task':
         return tasksService.create({ title: trimmed, deadline: date || null })
-      case 'priority':
-        return annualPlanningService.createPriority({
-          title: trimmed,
-          description: description.trim() || '',
-          deadline: date || null,
-          annual_plan_id: annualPlanId,
-          focus_area_id: null,
-          linked_entity_id: null,
-          linked_entity_type: null
-        })
       case 'goal': {
         // T00:00:00 forces local-time parsing; a date-only string is UTC to
         // `new Date()` and slips back a day west of Greenwich.
@@ -327,7 +337,7 @@ export const calendarService = {
    * need what only it carries: a milestone's real address is its goal's id and
    * its own, never the index-based event id (CAL-004).
    */
-  async updateEvent({ event, title, description = '', date = null, done = false }) {
+  async updateEvent({ event, title, date = null, done = false }) {
     const type = event?.type ?? 'task'
     const rawId = event?.id ? stripTypePrefix(event.id) : null
     if (!rawId) throw new Error('calendarService.updateEvent: the event has no id')
@@ -339,12 +349,7 @@ export const calendarService = {
       case 'task':
         return tasksService.update(rawId, { title: trimmed, deadline: date || null, ...completion })
       case 'priority':
-        return annualPlanningService.updatePriority(rawId, {
-          title: trimmed,
-          description: description.trim() || '',
-          deadline: date || null,
-          ...completion
-        })
+        return updatePriorityEvent(event, rawId, trimmed, date, done)
       case 'goal':
         return annualPlanningService.updateGoal(rawId, { title: trimmed, target_date: date || null })
       case 'activity':

@@ -57,12 +57,10 @@ export const ENDPOINTS = {
     update: (id) => `/annual-plan/focus-areas/${id}`,
     delete: (id) => `/annual-plan/focus-areas/${id}`
   },
+  // Priorities are read only (ADR-046 §5): the flag is written on the task or
+  // the milestone it sits on, through their own routes.
   priorities: {
-    all: (planId) => `/annual-plan/priorities?annual_plan_id=${planId}`,
-    create: '/annual-plan/priorities',
-    update: (id) => `/annual-plan/priorities/${id}`,
-    delete: (id) => `/annual-plan/priorities/${id}`,
-    reorder: '/annual-plan/priorities/reorder'
+    all: (planId) => `/annual-plan/priorities?annual_plan_id=${planId}`
   },
   goals: {
     all: (focusAreaId) => `/annual-plan/goals?focus_area_id=${focusAreaId}`,
@@ -78,7 +76,8 @@ export const ENDPOINTS = {
   },
   milestones: {
     create: (goalId) => `/annual-plan/goals/${goalId}/milestones`,
-    update: (goalId, milestoneId) => `/annual-plan/goals/${goalId}/milestones/${milestoneId}`
+    update: (goalId, milestoneId) => `/annual-plan/goals/${goalId}/milestones/${milestoneId}`,
+    delete: (goalId, milestoneId) => `/annual-plan/goals/${goalId}/milestones/${milestoneId}`
   },
   dailyRoutine: {
     base: '/annual-plan/daily-routine',

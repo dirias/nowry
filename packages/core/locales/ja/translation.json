@@ -228,7 +228,9 @@
       "firstWeek": "最初の一週間は今日から。",
       "cellReviewed_other": "{{day}} · {{count}} 枚復習",
       "cellDue_other": "{{day}} · {{count}} 枚",
-      "cellToday_other": "{{day}} · {{count}} 枚"
+      "cellToday_other": "{{day}} · {{count}} 枚",
+      "planStudy": "学習時間を計画",
+      "studyTime": "学習時間 · {{time}}"
     },
     "title": "学習センター",
     "subtitle": "あなただけの学習ハブ",
@@ -1240,7 +1242,6 @@
       "goalPlaceholder": "所属する目標を選択…",
       "goalHelper": "進行中の目標のみ表示されます。",
       "noActiveGoals": "追加できる進行中の目標がありません。年間計画で目標を作成するか、タスクとして追加してください。",
-      "noPlan": "優先事項を追加する前に、年間計画で今年の計画を作成してください。",
       "placeholder": {
         "task": "何をする必要がありますか？",
         "priority": "今年大切なことは？",
@@ -1380,38 +1381,25 @@
     },
     "priority": {
       "title": "年間優先事項",
-      "add": "優先事項を追加",
-      "edit": "優先事項を編集",
-      "delete": "優先事項を削除",
-      "name": "優先事項",
-      "deadline": "目標日",
-      "linkedTo": "{{area}}に関連",
       "noGoals": "まだ目標がリンクされていません",
       "noActivePriorities": "アクティブな優先事項はありません",
       "filterActive": "アクティブ",
       "filterAll": "すべて ({{count}})",
       "filterLabel": "優先事項をステータスで絞り込む",
-      "activeEmptyBody": "完了済みと非アクティブの優先事項は非表示です。",
+      "activeEmptyBody": "完了した優先事項は非表示になっています。",
       "showAll": "すべて表示 ({{count}})",
       "completedSection": "完了済み",
       "done": "Done",
-      "inactive": "非アクティブ",
-      "activeIcon": "アクティブ",
-      "inactiveIcon": "非アクティブ",
-      "activate": "有効にする",
-      "markInactive": "非アクティブにする",
       "markComplete": "完了にする",
       "markIncomplete": "未完了に戻す",
-      "showInactive": "非アクティブを表示 ({{count}})",
-      "hideInactive": "非アクティブを非表示",
-      "dragHandle": "ドラッグして並べ替え",
-      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
-      "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
       "emptyTitle": "優先事項はまだありません",
-      "emptyBody": "優先事項とは、今年もっとも大切な数少ないことです。3〜5 個で十分です。",
-      "emptyCta": "優先事項を追加",
-      "addPriority": "優先事項を追加"
+      "emptyBody": "優先事項は、今年もっとも大切な数少ないことです。タスクやマイルストーンに旗を立てて優先事項にしましょう。",
+      "unflag": "優先事項から外す",
+      "flagHint": "タスクやマイルストーンに旗を立てると、ここに表示されます。",
+      "kind": {
+        "task": "タスク",
+        "milestone": "マイルストーン"
+      }
     },
     "goal": {
       "add": "目標を追加",
@@ -1697,8 +1685,7 @@
       "prioritiesTitle": "年間コミットメント",
       "prioritiesManage": "管理",
       "prioritiesEmptyTitle": "優先事項はまだありません",
-      "prioritiesEmptyBody": "今年もっとも大切なことをいくつか挙げましょう。3〜5 個で十分です。",
-      "prioritiesEmptyCta": "優先事項を追加",
+      "prioritiesEmptyBody": "今年もっとも大切な数少ないこと。タスクやマイルストーンに旗を立てて優先事項にしましょう。",
       "areaGoalCount_other": "{{count}} 件の目標"
     }
   },
@@ -3410,12 +3397,9 @@
   },
   "focusBar": {
     "daysLeft_other": "残り {{count}} 日",
-    "daysRemaining_other": "残り{{count}}日",
-    "overdueBy_other": "{{count}}日遅れ",
-    "noPrioritiesYet": "優先事項はまだありません",
-    "createPriority": "優先事項を作成",
     "overdue": "期限切れ",
-    "noDeadline": "期限なし"
+    "noDeadline": "期限なし",
+    "flagHint": "タスクやマイルストーンに旗を立てると、ここで見守れます"
   },
   "beta": {
     "mark": "ベータ",
@@ -3527,6 +3511,56 @@
       "afterHelper": "別のブロックの後に続きます。",
       "save": "保存",
       "saveError": "ブロックを保存できませんでした。もう一度お試しください。"
+    }
+  },
+  "items": {
+    "sheet": {
+      "addTitle": "追加",
+      "editTitle": "編集",
+      "title": "タイトル",
+      "titlePlaceholder": "10ページ読む",
+      "titleRequired": "タイトルを入力してください",
+      "due": "期限",
+      "noDate": "日付なし",
+      "priority": "優先事項",
+      "priorityHint": "ホームと概要に表示されます",
+      "scheduled": "予定",
+      "setTime": "時間を決める",
+      "removeTime": "時間を外す",
+      "days": "曜日",
+      "onceDate": "日付",
+      "onceHint": "曜日を選ばなければ、期限日に一度だけ予定されます。",
+      "dateRequired": "日付を選ぶか、期限を設定してください",
+      "goal": "目標の一部",
+      "goalNone": "特になし",
+      "done": "完了",
+      "delete": "削除",
+      "deleteTitle": "この項目を削除しますか？",
+      "deleteBody": "時間、日付、記録も一緒に削除されます。"
+    },
+    "reading": {
+      "task": "タスク",
+      "routine": "ルーティン",
+      "milestone": "マイルストーン",
+      "study": "学習時間"
+    },
+    "readout": {
+      "priority": "優先",
+      "due": "期限 {{date}}",
+      "once": "{{date}} {{time}}",
+      "onceNoDay": "一度 {{time}}",
+      "everyDay": "毎日 {{time}}",
+      "weekdays": "平日 {{time}}",
+      "someDays_other": "週{{count}}日 {{time}}"
+    },
+    "key": {
+      "add": {
+        "task": "タスクを追加",
+        "routine": "ルーティンを追加",
+        "milestone": "マイルストーンを追加",
+        "study": "学習時間を追加"
+      },
+      "save": "保存"
     }
   }
 }

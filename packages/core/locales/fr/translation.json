@@ -238,7 +238,9 @@
       "cellDue_one": "{{day}} · {{count}} à revoir",
       "cellDue_other": "{{day}} · {{count}} à revoir",
       "cellToday_one": "{{day}} · {{count}} à faire",
-      "cellToday_other": "{{day}} · {{count}} à faire"
+      "cellToday_other": "{{day}} · {{count}} à faire",
+      "planStudy": "Planifier un temps d’étude",
+      "studyTime": "Temps d’étude · {{time}}"
     },
     "title": "Centre d'Étude",
     "subtitle": "Votre espace d'apprentissage personnalisé",
@@ -1126,7 +1128,6 @@
       "goalPlaceholder": "Choisissez l’objectif auquel il appartient…",
       "goalHelper": "Seuls les objectifs encore ouverts sont listés.",
       "noActiveGoals": "Aucun objectif ouvert auquel le rattacher. Créez un objectif dans la planification annuelle, ou ajoutez-le comme tâche.",
-      "noPlan": "Créez le plan de cette année dans la planification annuelle avant d’ajouter une priorité.",
       "placeholder": {
         "task": "Que faut-il faire ?",
         "priority": "Qu’est-ce qui compte cette année ?",
@@ -1267,38 +1268,25 @@
     },
     "priority": {
       "title": "Priorités Annuelles",
-      "add": "Ajouter une Priorité",
-      "edit": "Modifier la Priorité",
-      "delete": "Supprimer la Priorité",
-      "name": "Priorité",
-      "deadline": "Date Cible",
-      "linkedTo": "Lié à {{area}}",
       "noGoals": "Aucun objectif lié pour le moment",
       "noActivePriorities": "Aucune priorité active",
       "filterActive": "Actives",
       "filterAll": "Toutes ({{count}})",
       "filterLabel": "Filtrer les priorités par statut",
-      "activeEmptyBody": "Les priorités terminées et inactives sont masquées.",
+      "activeEmptyBody": "Les priorités terminées sont masquées.",
       "showAll": "Tout afficher ({{count}})",
       "completedSection": "Terminées",
       "done": "Done",
-      "inactive": "Inactive",
-      "activeIcon": "Active",
-      "inactiveIcon": "Inactive",
-      "activate": "Activer",
-      "markInactive": "Marquer comme inactive",
       "markComplete": "Marquer comme terminée",
       "markIncomplete": "Marquer comme non terminée",
-      "showInactive": "Afficher les inactives ({{count}})",
-      "hideInactive": "Masquer les inactives",
-      "dragHandle": "Glisser pour réorganiser",
-      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
-      "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
       "emptyTitle": "Aucune priorité pour le moment",
-      "emptyBody": "Les priorités sont les quelques choses qui comptent le plus cette année. Trois à cinq suffisent.",
-      "emptyCta": "Ajouter une priorité",
-      "addPriority": "Ajouter une priorité"
+      "emptyBody": "Les priorités sont les quelques choses qui comptent le plus cette année. Marquez une tâche ou un jalon pour en faire une.",
+      "unflag": "Retirer des priorités",
+      "flagHint": "Marquez une tâche ou un jalon et il apparaîtra ici.",
+      "kind": {
+        "task": "Tâche",
+        "milestone": "Jalon"
+      }
     },
     "goal": {
       "add": "Ajouter un Objectif",
@@ -1444,9 +1432,6 @@
       "achievementsPlaceholder": "Listez ce que vous avez accompli ce trimestre...",
       "challengesPlaceholder": "Décrivez les défis auxquels vous avez fait face...",
       "lessonsPlaceholder": "Qu'avez-vous appris ?"
-    },
-    "priorityDialog": {
-      "searchPlaceholder": "Sélectionner un objectif, une tâche ou une routine..."
     },
     "dailyRoutine": {
       "title": "Planificateur de Routine Quotidienne",
@@ -1601,8 +1586,7 @@
       "prioritiesTitle": "Engagements annuels",
       "prioritiesManage": "Gérer",
       "prioritiesEmptyTitle": "Aucune priorité pour le moment",
-      "prioritiesEmptyBody": "Nommez les quelques choses qui comptent le plus cette année. Trois à cinq suffisent.",
-      "prioritiesEmptyCta": "Ajouter une priorité",
+      "prioritiesEmptyBody": "Les quelques choses qui comptent le plus cette année. Marquez une tâche ou un jalon pour en faire une priorité.",
       "areaGoalCount_one": "{{count}} objectif",
       "areaGoalCount_other": "{{count}} objectifs"
     }
@@ -3534,14 +3518,9 @@
   "focusBar": {
     "daysLeft_one": "{{count}} jour restant",
     "daysLeft_other": "{{count}} jours restants",
-    "daysRemaining_one": "{{count}} jour restant",
-    "daysRemaining_other": "{{count}} jours restants",
-    "overdueBy_one": "{{count}} jour de retard",
-    "overdueBy_other": "{{count}} jours de retard",
-    "noPrioritiesYet": "Aucune priorité pour l'instant",
-    "createPriority": "Créer une priorité",
     "overdue": "En retard",
-    "noDeadline": "Sans échéance"
+    "noDeadline": "Sans échéance",
+    "flagHint": "Marquez une tâche ou un jalon pour le suivre ici"
   },
   "beta": {
     "mark": "Bêta",
@@ -3657,6 +3636,57 @@
       "afterHelper": "Suit un autre bloc.",
       "save": "Enregistrer",
       "saveError": "Le bloc n'a pas pu être enregistré. Réessayez."
+    }
+  },
+  "items": {
+    "sheet": {
+      "addTitle": "Ajouter",
+      "editTitle": "Modifier",
+      "title": "Titre",
+      "titlePlaceholder": "Lire 10 pages",
+      "titleRequired": "Donnez-lui un titre",
+      "due": "Échéance",
+      "noDate": "Sans date",
+      "priority": "Priorité",
+      "priorityHint": "Visible sur l’accueil et dans l’aperçu",
+      "scheduled": "Planifié",
+      "setTime": "Fixer une heure",
+      "removeTime": "Retirer l’heure",
+      "days": "Quels jours",
+      "onceDate": "Quel jour",
+      "onceHint": "Sans jour choisi, c’est planifié une fois, le jour de l’échéance.",
+      "dateRequired": "Choisissez un jour ou donnez une échéance",
+      "goal": "Partie d’un objectif",
+      "goalNone": "Rien en particulier",
+      "done": "Terminé",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer cet élément ?",
+      "deleteBody": "Son heure, sa date et son historique partent avec lui."
+    },
+    "reading": {
+      "task": "Tâche",
+      "routine": "Routine",
+      "milestone": "Jalon",
+      "study": "Temps d’étude"
+    },
+    "readout": {
+      "priority": "priorité",
+      "due": "échéance {{date}}",
+      "once": "{{date}} à {{time}}",
+      "onceNoDay": "une fois à {{time}}",
+      "everyDay": "tous les jours à {{time}}",
+      "weekdays": "en semaine à {{time}}",
+      "someDays_one": "{{count}} jour par semaine à {{time}}",
+      "someDays_other": "{{count}} jours par semaine à {{time}}"
+    },
+    "key": {
+      "add": {
+        "task": "Ajouter une tâche",
+        "routine": "Ajouter une routine",
+        "milestone": "Ajouter un jalon",
+        "study": "Ajouter un temps d’étude"
+      },
+      "save": "Enregistrer"
     }
   }
 }

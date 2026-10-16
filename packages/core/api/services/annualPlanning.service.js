@@ -1,12 +1,8 @@
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
 import { queryClient } from '../queryClient'
-import { userService } from './user.service'
-import { auth } from '../../platform'
-
-// Matches useAnnualPlan's old apiCache-backed PROFILE_TTL (CACHE-005), now used as
-// the React Query staleTime for the 'profile' key (CACHE-007).
-const PROFILE_TTL = 60000 // 60s
+import { tasksService } from './tasks.service'
+import { priorityItemRef } from '../../domain/priorities'
 
 /** Bust all caches that depend on the annual plan or calendar after any mutation */
 const _bustPlanCache = () => {
@@ -140,38 +136,6 @@ export const annualPlanningService = {
     const { data } = await apiClient.get(ENDPOINTS.annualPlan.full, { params: { year } })
     return data
   },
-  /**
-   * Cached wrapper around userService.getProfile(), used by useAnnualPlan to derive
-   * preferredPriorityIds without a duplicate /users/profile round-trip.
-   *
-   * Migrated to React Query (CACHE-007 / ADR-008) via `queryClient.fetchQuery` rather
-   * than `useQuery`: this is a plain, non-component function invoked imperatively from
-   * useAnnualPlan.js's effect, not a hook itself — same pattern as useSegmentedSpeech's
-   * migration to `queryClient.fetchQuery` (CACHE-005).
-   *
-   * Query key is `['profile', firebaseUid]`, using `auth.currentUser()?.uid` rather than
-   * the backend `user.id` the other 7 migrated hooks key off of: this function has no
-   * reliable access to the backend user object, since most `useAnnualPlan()` call sites
-   * (FocusBar.js, WeeklyStatsCard.js, DailyRoutinePlanner.js, etc.) don't pass
-   * `preloadedUser`. `auth.currentUser()` is a synchronous read through the platform port, available
-   * outside React, unlike AuthContext's `user`. `useUserProfile.js` (PomodoroContext.js)
-   * and FocusBar.js's invalidation both key off this same `auth.currentUser()?.uid` so all
-   * three stay in sync under one query key.
-   *
-   * @param {object|null} [preloadedUser] - Optional user object from AuthContext. When
-   *   provided, seeds the cache so the real /users/profile request is skipped.
-   */
-  async getCachedProfile(preloadedUser = null) {
-    const userId = auth.currentUser()?.uid ?? null
-    if (preloadedUser) {
-      queryClient.setQueryData(['profile', userId], preloadedUser)
-    }
-    return queryClient.fetchQuery({
-      queryKey: ['profile', userId],
-      queryFn: () => userService.getProfile().catch(() => null),
-      staleTime: PROFILE_TTL
-    })
-  },
   async createAnnualPlan(planData) {
     const { data } = await apiClient.post(ENDPOINTS.annualPlan.create, planData)
     return data
@@ -224,23 +188,26 @@ export const annualPlanningService = {
     const { data } = await apiClient.get(ENDPOINTS.priorities.all(annualPlanId))
     return data
   },
-  async createPriority(priority) {
-    const { data } = await apiClient.post(ENDPOINTS.priorities.create, priority)
+  /**
+   * Done or not, written on the item the flag sits on (ADR-046 §5): a task's
+   * `is_completed`, a milestone's `completed`.
+   */
+  async completePriority(priority, done) {
+    const ref = priorityItemRef(priority)
+    const data =
+      ref.kind === 'milestone'
+        ? await this.updateMilestone(ref.goalId, ref.id, { completed: done })
+        : await tasksService.update(ref.id, { is_completed: done })
     _bustPlanCache()
     return data
   },
-  async updatePriority(id, update) {
-    const { data } = await apiClient.put(ENDPOINTS.priorities.update(id), update)
-    _bustPlanCache()
-    return data
-  },
-  async deletePriority(id) {
-    const { data } = await apiClient.delete(ENDPOINTS.priorities.delete(id))
-    _bustPlanCache()
-    return data
-  },
-  async reorderPriorities(annualPlanId, priorityIds) {
-    const { data } = await apiClient.patch(ENDPOINTS.priorities.reorder, { annual_plan_id: annualPlanId, priority_ids: priorityIds })
+  /** The flag off. The item stays; it just stops being a priority. */
+  async unflagPriority(priority) {
+    const ref = priorityItemRef(priority)
+    const data =
+      ref.kind === 'milestone'
+        ? await this.updateMilestone(ref.goalId, ref.id, { is_priority: false })
+        : await tasksService.update(ref.id, { is_priority: false })
     _bustPlanCache()
     return data
   },
@@ -310,6 +277,12 @@ export const annualPlanningService = {
    */
   async updateMilestone(goalId, milestoneId, patch) {
     const { data } = await apiClient.patch(ENDPOINTS.milestones.update(goalId, milestoneId), patch)
+    _bustPlanCache()
+    return data
+  },
+  /** DELETE one milestone by its own id (the item sheet's delete, PLAN-012). */
+  async deleteMilestone(goalId, milestoneId) {
+    const { data } = await apiClient.delete(ENDPOINTS.milestones.delete(goalId, milestoneId))
     _bustPlanCache()
     return data
   },

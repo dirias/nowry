@@ -37,11 +37,11 @@ import { annualPlanningService } from '@nowry/core/api/services'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { getCurrentQuarter, planMetrics } from '@nowry/core/domain/goalDerivation'
-import { completionPatch } from '@nowry/core/domain/calendar/eventHelpers'
 import { deadlineReadout } from '@nowry/core/domain/priorityWatch'
 import { useTheme } from '../theme'
 import { AreaSheet } from './AnnualPlanningSheets'
 import {
+  ActionSheet,
   Button,
   Divider,
   Icon,
@@ -74,6 +74,9 @@ export function AnnualPlanning() {
   // same second; waiting for a round trip to redraw it is a screen that feels
   // broken (the same rule as the agenda's tick).
   const [pending, setPending] = useState({})
+  // The row whose long press opened the one thing a priority row can do
+  // besides its tick: stop being a priority.
+  const [held, setHeld] = useState(null)
 
   const quarter = getCurrentQuarter()
   // The quarter's goals, which is what the web's scope bar defaults to.
@@ -108,19 +111,36 @@ export function AnnualPlanning() {
     }
   }, [year, reload])
 
+  /*
+   * A priority is a flag on a task or a milestone (ADR-046 §5), so the tick is
+   * written on the item the flag sits on; `completePriority` reads the row's
+   * address and chooses the task's or the milestone's write.
+   */
   const togglePriority = useCallback(
     async (priority) => {
       const id = priority._id ?? priority.id
       const done = !(pending[id] ?? priority.is_completed)
       setPending((state) => ({ ...state, [id]: done }))
       try {
-        await annualPlanningService.updatePriority(id, completionPatch('priority', done))
+        await annualPlanningService.completePriority(priority, done)
         reload()
       } catch {
         setPending((state) => ({ ...state, [id]: !done }))
       }
     },
     [pending, reload]
+  )
+
+  /* The flag off. The item stays where it lives; the row leaves this list. */
+  const unflag = useCallback(
+    async (priority) => {
+      try {
+        await annualPlanningService.unflagPriority(priority)
+      } finally {
+        reload()
+      }
+    },
+    [reload]
   )
 
   if (loading && !plan) {
@@ -251,10 +271,12 @@ export function AnnualPlanning() {
         </View>
 
         <View>
+          {/* No Add key: a priority is not created, an item is flagged, and
+              that happens on the item (ADR-046 §5). The empty state says so. */}
           <SectionHeader title={t('annualPlanning.priority.title')} count={(priorities || []).length} />
           {(priorities || []).length === 0 ? (
             <Typography level='body-md' color='text.secondary'>
-              {t('annualPlanning.priority.noGoals')}
+              {t('annualPlanning.priority.flagHint')}
             </Typography>
           ) : (
             (priorities || []).map((priority) => {
@@ -274,9 +296,7 @@ export function AnnualPlanning() {
                       </IconButton>
                     }
                     name={priority.title || priority.name}
-                    /* A description identical to the title is the title said
-                       twice, which reads as a bug rather than as detail. */
-                    meta={priority.description && priority.description !== (priority.title || priority.name) ? priority.description : null}
+                    meta={priorityMeta(t, priority)}
                     /*
                      * When it is due. The web badges every priority that has a
                      * deadline and this page showed none at all, on the one
@@ -288,6 +308,19 @@ export function AnnualPlanning() {
                      * plan reads as an error (§15.5).
                      */
                     readout={priorityWhen(t, i18n?.language ?? 'en', priority, done)}
+                    /* The visible door to the flag, beside the row. The long
+                       press below is its shortcut, never its only way in. */
+                    action={
+                      <IconButton
+                        size='sm'
+                        variant='tertiary'
+                        accessibilityLabel={t('annualPlanning.priority.unflag')}
+                        onPress={() => setHeld(priority)}
+                      >
+                        <Icon name='EllipsisVertical' size='sm' color='text.tertiary' />
+                      </IconButton>
+                    }
+                    onLongPress={() => setHeld(priority)}
                   />
                   <Divider />
                 </View>
@@ -296,6 +329,23 @@ export function AnnualPlanning() {
           )}
         </View>
       </Stack>
+
+      <ActionSheet
+        visible={held !== null}
+        onClose={() => setHeld(null)}
+        title={held?.title || held?.name || ''}
+        actions={[
+          {
+            id: 'unflag',
+            label: t('annualPlanning.priority.unflag'),
+            onPress: () => {
+              const priority = held
+              setHeld(null)
+              if (priority) unflag(priority)
+            }
+          }
+        ]}
+      />
 
       <AreaSheet
         open={areaSheet}
@@ -361,6 +411,24 @@ function AreaRow({ area, metrics, theme, t, onPress }) {
       <Divider />
     </View>
   )
+}
+
+/**
+ * The row's meta line: what KIND of item the flag is on, then the description
+ * when the item has one.
+ *
+ * The kind leads because it is the fact the flag no longer says by itself — a
+ * row here is a task or a milestone wearing a flag (ADR-046 §5), and the list
+ * mixes the two. A description identical to the title is the title said twice,
+ * which reads as a bug rather than as detail, so it is dropped.
+ */
+function priorityMeta(t, priority) {
+  const kind = t(
+    priority.linked_entity_type === 'milestone' ? 'annualPlanning.priority.kind.milestone' : 'annualPlanning.priority.kind.task'
+  )
+  const title = priority.title || priority.name
+  const description = priority.description && priority.description !== title ? priority.description : null
+  return [kind, description].filter(Boolean).join(' · ')
 }
 
 /**

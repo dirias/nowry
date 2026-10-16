@@ -5,7 +5,6 @@ import { Alert, Box, Button, Container, Stack, Typography } from '@mui/joy'
 import { Timeline as TimelineIcon, ArrowForward as ArrowForwardIcon, Warning as WarningIcon } from '@mui/icons-material'
 import { annualPlanningService } from '@nowry/core/api/services'
 import useAnnualPlan from '@nowry/core/hooks/useAnnualPlan'
-import { useAuth } from '@nowry/core/context/AuthContext'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { useDailyRoutine } from '@nowry/core/hooks/useDailyRoutine'
@@ -35,7 +34,6 @@ const AnnualPlanningLayout = () => {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const year = new Date().getFullYear()
-  const { user } = useAuth()
   const { tier } = useSubscription()
   const { openUpgradeModal } = useSubscriptionContext()
 
@@ -52,7 +50,7 @@ const AnnualPlanningLayout = () => {
     loading,
     error,
     reload
-  } = useAnnualPlan(year, user)
+  } = useAnnualPlan(year)
 
   const currentQCalc = String(Math.floor(new Date().getMonth() / 3) + 1)
   const selectedQuarter = searchParams.get('q') || currentQCalc

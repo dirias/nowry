@@ -16,8 +16,6 @@ jest.mock('@nowry/core/api/services/tasks.service', () => ({
 }))
 jest.mock('@nowry/core/api/services/annualPlanning.service', () => ({
   annualPlanningService: {
-    createPriority: jest.fn(),
-    updatePriority: jest.fn(),
     createGoal: jest.fn(),
     updateGoal: jest.fn(),
     createMilestone: jest.fn(),
@@ -61,12 +59,14 @@ describe('Phase 17 MOB-03: EventFormModal smoke tests', () => {
 describe('CAL-003: the type object', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('offers Task, Priority, Goal and Milestone as pressed segments, and no Habit', () => {
+  it('offers Task, Goal and Milestone as pressed segments, and no Habit or Priority', () => {
     open()
-    ;['task', 'priority', 'goal', 'milestone'].forEach((type) =>
+    ;['task', 'goal', 'milestone'].forEach((type) =>
       expect(segment(type)).toHaveAttribute('aria-pressed', type === 'task' ? 'true' : 'false')
     )
     expect(screen.queryByRole('button', { name: 'calendarModal.form.types.activity' })).toBeNull()
+    // A priority is a flag on a task or a milestone (ADR-046 §5), not a kind to create.
+    expect(screen.queryByRole('button', { name: 'calendarModal.form.types.priority' })).toBeNull()
   })
 
   it('sits on the shared sheet, with a close control', () => {
@@ -156,15 +156,6 @@ describe('CAL-003: what each type sends', () => {
       fireEvent.click(primary('milestone'))
     })
     expect(annualPlanningService.createMilestone).toHaveBeenCalledWith('g1', { title: 'Week 4 long run', due_date: '2026-09-12' })
-  })
-
-  it('a priority offers its description as a rail chip, not a permanent field', () => {
-    open()
-    fireEvent.click(segment('priority'))
-    expect(screen.queryByLabelText(/calendarModal.form.description/)).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'calendarModal.form.addDescription' }))
-    expect(screen.getByLabelText(/calendarModal.form.description/)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'calendarModal.form.addDescription' })).toBeNull()
   })
 })
 

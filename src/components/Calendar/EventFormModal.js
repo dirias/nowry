@@ -19,13 +19,15 @@ import { focusRing, formLabel, segment, segmentedGroup } from '../Common/Form/fo
 import { COMPLETABLE } from '@nowry/core/domain/calendar/eventHelpers'
 
 /**
- * The four things a calendar day can be given (ADR-017). Habit is not one of
+ * The three things a calendar day can be given (ADR-017). Habit is not one of
  * them: a habit is a schedule, and this form could only ever write a date —
  * the shape `calendar.service.js` files under "legacy". Planning cut the same
  * loop from the goal form in FE-A4. Milestone is: a dated step of a goal is
  * exactly what a calendar day is for, and the calendar already draws them.
+ * Priority is not one either, since ADR-046 §5: it is a flag on a task or a
+ * milestone, not a thing to create. (PLAN-012 replaces this sheet wholesale.)
  */
-const TYPES = ['task', 'priority', 'goal', 'milestone']
+const TYPES = ['task', 'goal', 'milestone']
 
 const TYPE_ICONS = {
   task: CheckCircleOutlinedIcon,
@@ -36,7 +38,7 @@ const TYPE_ICONS = {
 }
 
 /** Optional groups per type, offered as rail chips that remove themselves on use. */
-const OPTIONAL_GROUPS = { priority: ['description'] }
+const OPTIONAL_GROUPS = {}
 const RAIL_LABELS = { description: 'calendarModal.form.addDescription' }
 
 /** YYYY-MM-DD for <input type="date">, always in local time. */
@@ -333,12 +335,6 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
           />
         )}
 
-        {!isEdit && type === 'priority' && !annualPlanId && !contextLoading && (
-          <Typography level='body-sm' sx={{ color: 'text.secondary', px: 2, py: 1.5, borderRadius: 'md', bgcolor: 'background.level1' }}>
-            {t('calendarModal.form.noPlan')}
-          </Typography>
-        )}
-
         <FormTextField labelKey='calendarModal.form.date' type='date' value={date} onChange={setDate} />
 
         {/* From the grid the sheet is the one per-item surface, so completion
@@ -353,7 +349,7 @@ const EventFormModal = ({ open, onClose, onSuccess, mode = 'create', event = nul
           />
         )}
 
-        {(revealed.includes('description') || (isEdit && activeType === 'priority')) && (
+        {revealed.includes('description') && (
           <FormTextArea
             labelKey='calendarModal.form.description'
             placeholderKey='calendarModal.form.descriptionPlaceholder'

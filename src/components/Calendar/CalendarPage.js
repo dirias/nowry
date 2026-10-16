@@ -86,6 +86,13 @@ const TIME_GRID = {
 /** The four things the Add menu makes through the event form (ADR-017). */
 const EVENT_TYPES = ['task', 'priority', 'goal', 'milestone']
 
+/** The item a priority event's flag sits on, in the shape the priority writes take (ADR-046 §5). */
+const priorityRef = (ev) => ({
+  _id: stripTypePrefix(ev.id),
+  linked_entity_type: ev.linkedType ?? 'task',
+  linked_entity_id: ev.linkedId ?? stripTypePrefix(ev.id)
+})
+
 /** The clock is re-read once a minute: a block's state changes on the minute. */
 const TICK_MS = 60 * 1000
 
@@ -374,7 +381,8 @@ const CalendarPage = () => {
   // CAL-002 / ADR-016 decision 6: a task or priority is finished from its
   // agenda row. Optimistic-then-revert, as `usePriorityStatus` does: the list
   // is patched first, the request follows, and a rejection restores the exact
-  // status the row had. Only `is_completed` is ever sent.
+  // status the row had. Only the done flag is ever sent. A priority is a flag
+  // on a task or a milestone (ADR-046 §5), so its tick goes to that item.
   const toggleComplete = useCallback(
     async (ev) => {
       const next = ev.status !== 'completed'
@@ -383,7 +391,7 @@ const CalendarPage = () => {
       try {
         const body = completionPatch(ev.type, next)
         if (ev.type === 'task') await tasksService.update(stripTypePrefix(ev.id), body)
-        else if (ev.type === 'priority') await annualPlanningService.updatePriority(stripTypePrefix(ev.id), body)
+        else if (ev.type === 'priority') await annualPlanningService.completePriority(priorityRef(ev), next)
         else await annualPlanningService.updateMilestone(ev.goalId, ev.milestoneId, body)
         calendarService.invalidateCache(userId)
       } catch (err) {
@@ -444,7 +452,12 @@ const CalendarPage = () => {
             await tasksService.update(rawId, { deadline: dateStr })
             break
           case 'priority':
-            await annualPlanningService.updatePriority(rawId, { deadline: dateStr })
+            // The flag's item moves: a task by its deadline, a milestone by its due date.
+            if (event.extendedProps.linkedType === 'milestone') {
+              await annualPlanningService.updateMilestone(event.extendedProps.linkedId, rawId, { due_date: dateStr })
+            } else {
+              await tasksService.update(event.extendedProps.linkedId ?? rawId, { deadline: dateStr })
+            }
             break
           case 'goal':
             await annualPlanningService.updateGoal(rawId, { target_date: dateStr })

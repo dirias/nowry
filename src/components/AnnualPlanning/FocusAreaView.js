@@ -45,9 +45,7 @@ import { alpha } from '@mui/system'
 
 import { annualPlanningService } from '@nowry/core/api/services'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
-import { useAuth } from '@nowry/core/context/AuthContext'
 import GoalDialog from './GoalDialog'
-import PriorityDialog from './PriorityDialog'
 import PriorityList from './PriorityList'
 import usePriorityStatus from '@nowry/core/hooks/usePriorityStatus'
 import CloseQuarterModal from './CloseQuarterModal'
@@ -69,7 +67,6 @@ const FocusAreaView = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { user } = useAuth()
   const {
     plan,
     goals: allGoals,
@@ -78,7 +75,7 @@ const FocusAreaView = () => {
     activities,
     loading: hookLoading,
     reload
-  } = useAnnualPlan(new Date().getFullYear(), user)
+  } = useAnnualPlan(new Date().getFullYear())
 
   const [area, setArea] = useState(null)
   const [priorities, setPriorities] = useState([])
@@ -89,8 +86,6 @@ const FocusAreaView = () => {
   const [dialogSection, setDialogSection] = useState(null)
   const [deletingGoal, setDeletingGoal] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
-  const [showPriorityDialog, setShowPriorityDialog] = useState(false)
-  const [editingPriority, setEditingPriority] = useState(null)
 
   // Detail drawer. Replaces the per-goal expansion Sets and the activity cache:
   // there is nothing to expand in place any more, and activities arrive with the
@@ -126,17 +121,9 @@ const FocusAreaView = () => {
         const areaGoals = allGoals.filter((g) => g.focus_area_id === foundArea._id || g.focus_area_id?._id === foundArea._id)
         setGoals(areaGoals)
 
-        // Filter Priorities:
-        // 1. Explicitly assigned to this Focus Area
-        // 2. OR Linked to a Goal that belongs to this Focus Area
-        const areaGoalIds = new Set(areaGoals.map((g) => g._id))
-        const areaPriorities = allPriorities.filter((p) => {
-          const isDirectlyAssigned = p.focus_area_id === id || p.focus_area_id?._id === id
-          const isLinkedToAreaGoal = p.linked_entity_type === 'goal' && areaGoalIds.has(p.linked_entity_id)
-          return isDirectlyAssigned || isLinkedToAreaGoal
-        })
-
-        setPriorities(areaPriorities)
+        // This area's flagged items: a flagged milestone carries its goal's
+        // area (ADR-046 §5); a task has none, so it is never an area's.
+        setPriorities(allPriorities.filter((p) => p.focus_area_id === id || p.focus_area_id?._id === id))
       }
     }
     setLoading(false)
@@ -194,45 +181,19 @@ const FocusAreaView = () => {
       }
     }
 
-    // Snapshot original priority state for linked priorities BEFORE the optimistic update
-    // so we can accurately revert to the real original values if the API call fails.
-    const originalPriorityStates = new Map(
-      priorities
-        .filter((p) => p.linked_entity_type === 'goal' && p.linked_entity_id === goal._id)
-        .map((p) => [p._id, { is_completed: p.is_completed, completed_at: p.completed_at }])
-    )
-
-    // Optimistic update — instant UI response, no hook reload needed
+    // Optimistic update — instant UI response, no hook reload needed. A
+    // priority is a flag on a milestone now (ADR-046 §5), so a goal's status
+    // has nothing to cascade to.
     setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: newStatus } : g)))
     setPendingGoalId(goal._id)
-
-    // Cascade to linked priorities optimistically:
-    // completing a goal archives its priorities; un-completing reactivates them.
-    setPriorities((prev) =>
-      prev.map((p) =>
-        p.linked_entity_type === 'goal' && p.linked_entity_id === goal._id
-          ? {
-              ...p,
-              is_completed: newStatus === 'completed',
-              completed_at: newStatus === 'completed' ? new Date().toISOString() : null
-            }
-          : p
-      )
-    )
 
     try {
       await annualPlanningService.updateGoal(goal._id, { ...goal, status: newStatus })
       // Cache is busted by the service. Optimistic state is already correct,
       // so no need to reload — just let the next navigation get fresh data.
     } catch (error) {
-      // Revert both optimistic updates to their exact original values
+      // Revert the optimistic update to its exact original value
       setGoals((prev) => prev.map((g) => (g._id === goal._id ? { ...g, status: goal.status } : g)))
-      setPriorities((prev) =>
-        prev.map((p) => {
-          const original = originalPriorityStates.get(p._id)
-          return original ? { ...p, ...original } : p
-        })
-      )
       setToast('annualPlanning.goal.statusUpdateError')
     } finally {
       setPendingGoalId(null)
@@ -275,23 +236,8 @@ const FocusAreaView = () => {
     await fetchData()
   }
 
-  const handleDeletePriority = () => {
-    // Refresh data after delete
-    fetchData()
-  }
-
-  const handleEditPriority = (priority) => {
-    setEditingPriority(priority)
-    setShowPriorityDialog(true)
-  }
-
-  // Shared optimistic status toggles (ADR-015 point 6).
-  const { toggleActive, toggleComplete } = usePriorityStatus(setPriorities)
-
-  const handleClosePriorityDialog = () => {
-    setShowPriorityDialog(false)
-    setEditingPriority(null)
-  }
+  // Shared optimistic writes (ADR-015 point 6): done, and the flag off.
+  const { toggleComplete, unflag } = usePriorityStatus(setPriorities)
 
   // Quarter State
   const [searchParams, setSearchParams] = useSearchParams()
@@ -825,27 +771,13 @@ const FocusAreaView = () => {
 
         <PriorityList
           priorities={priorities}
+          areas={allAreas}
           filterable
-          onEdit={handleEditPriority}
-          onDelete={handleDeletePriority}
-          onToggleActive={toggleActive}
           onToggleComplete={toggleComplete}
+          onUnflag={unflag}
           emptyMessage={t('annualPlanning.priority.noGoals')}
         />
       </Box>
-
-      <PriorityDialog
-        open={showPriorityDialog}
-        onClose={handleClosePriorityDialog}
-        annualPlanId={plan?._id}
-        focusAreas={allAreas}
-        existingPriorities={allPriorities}
-        editingPriority={editingPriority}
-        onSuccess={() => {
-          fetchData()
-          handleClosePriorityDialog()
-        }}
-      />
 
       <GoalDetailDrawer
         open={Boolean(detailGoal)}

@@ -228,7 +228,9 @@
       "cellDue_one": "{{day}} · {{count}} due",
       "cellDue_other": "{{day}} · {{count}} due",
       "cellToday_one": "{{day}} · {{count}} to do",
-      "cellToday_other": "{{day}} · {{count}} to do"
+      "cellToday_other": "{{day}} · {{count}} to do",
+      "planStudy": "Plan a study time",
+      "studyTime": "Study time · {{time}}"
     },
     "title": "Study Center",
     "subtitle": "Your personalized learning hub",
@@ -1188,7 +1190,6 @@
       "goalPlaceholder": "Choose the goal it belongs to…",
       "goalHelper": "Only goals that are still open are listed.",
       "noActiveGoals": "No open goals to attach this to. Create a goal in Annual Planning, or add it as a task instead.",
-      "noPlan": "Create this year's plan in Annual Planning before adding a priority.",
       "placeholder": {
         "task": "What needs doing?",
         "priority": "What matters this year?",
@@ -2203,38 +2204,25 @@
     },
     "priority": {
       "title": "Yearly Priorities",
-      "add": "Add Priority",
-      "edit": "Edit Priority",
-      "delete": "Delete Priority",
-      "name": "Priority",
-      "deadline": "Target Date",
-      "linkedTo": "Linked to {{area}}",
       "noGoals": "No priorities added yet",
       "noActivePriorities": "No active priorities",
       "filterActive": "Active",
       "filterAll": "All ({{count}})",
       "filterLabel": "Filter priorities by status",
-      "activeEmptyBody": "Completed and inactive priorities are hidden.",
+      "activeEmptyBody": "Completed priorities are hidden.",
       "showAll": "Show all ({{count}})",
       "completedSection": "Completed",
       "done": "Done",
-      "inactive": "Inactive",
-      "activeIcon": "Active",
-      "inactiveIcon": "Inactive",
-      "activate": "Activate",
-      "markInactive": "Mark inactive",
       "markComplete": "Mark complete",
       "markIncomplete": "Mark incomplete",
-      "showInactive": "Show inactive ({{count}})",
-      "hideInactive": "Hide inactive",
-      "dragHandle": "Drag to reorder",
-      "deleteConfirmMessage": "Are you sure you want to delete \"<bold>{{title}}</bold>\"?",
-      "linkedToEntity": "This priority is linked to a {{entityType}}",
-      "linkedEntityRemains": "The priority will be permanently deleted, but the linked {{entityType}} will remain unchanged and accessible from its original location.",
       "emptyTitle": "No priorities yet",
-      "emptyBody": "Priorities are the few things that matter most this year. Three to five is plenty.",
-      "emptyCta": "Add a priority",
-      "addPriority": "Add priority"
+      "emptyBody": "Priorities are the few things that matter most this year. Flag a task or a milestone to make it one.",
+      "unflag": "Remove from priorities",
+      "flagHint": "Flag a task or a milestone and it appears here.",
+      "kind": {
+        "task": "Task",
+        "milestone": "Milestone"
+      }
     },
     "goal": {
       "add": "Add Goal",
@@ -2383,14 +2371,6 @@
       "achievementsPlaceholder": "List what you achieved this quarter...",
       "challengesPlaceholder": "Describe challenges you faced...",
       "lessonsPlaceholder": "What did you learn?"
-    },
-    "priorityDialog": {
-      "searchPlaceholder": "Select goal, task, or routine...",
-      "editTitle": "Edit Annual Priority",
-      "addTitle": "Add Annual Priority",
-      "cancel": "Cancel",
-      "saveChanges": "Save Changes",
-      "addPriority": "Add Priority"
     },
     "dailyRoutine": {
       "title": "Daily Routine Planner",
@@ -2554,8 +2534,7 @@
       "prioritiesTitle": "Yearly Commitments",
       "prioritiesManage": "Manage",
       "prioritiesEmptyTitle": "No priorities yet",
-      "prioritiesEmptyBody": "Name the few things that matter most this year. Three to five is plenty.",
-      "prioritiesEmptyCta": "Add a priority",
+      "prioritiesEmptyBody": "The few things that matter most this year. Flag a task or a milestone to make it one.",
       "areaGoalCount_one": "{{count}} goal",
       "areaGoalCount_other": "{{count}} goals"
     }
@@ -2858,31 +2837,11 @@
     }
   },
   "focusBar": {
-    "modal": {
-      "title": "Select Priorities",
-      "description": "Choose up to 4 priorities to display on your homepage",
-      "noPriorities": "No priorities found",
-      "createPriorities": "Create Priorities",
-      "cancel": "Cancel",
-      "save": "Save Selection"
-    },
-    "entity": {
-      "goal": "Goal",
-      "task": "Task",
-      "routine": "Routine"
-    },
     "overdue": "Overdue",
     "daysLeft_one": "{{count}} day left",
     "daysLeft_other": "{{count}} days left",
     "noDeadline": "No deadline",
-    "overdueBy_one": "Overdue by {{count}} day",
-    "overdueBy_other": "Overdue by {{count}} days",
-    "daysRemaining_one": "{{count}} day remaining",
-    "daysRemaining_other": "{{count}} days remaining",
-    "noDeadlineEntity": "{{entity}} • No deadline",
-    "choosePrioritiesTooltip": "Choose priorities to display",
-    "noPrioritiesYet": "No priorities yet",
-    "createPriority": "Create Priority"
+    "flagHint": "Flag a task or a milestone to watch it here"
   },
   "deckSettings": {
     "menuItem": "Settings",
@@ -4231,6 +4190,57 @@
       "afterHelper": "Follows another block.",
       "save": "Save",
       "saveError": "The block could not be saved. Try again."
+    }
+  },
+  "items": {
+    "sheet": {
+      "addTitle": "Add",
+      "editTitle": "Edit",
+      "title": "Title",
+      "titlePlaceholder": "Read 10 pages",
+      "titleRequired": "Give it a title",
+      "due": "Due",
+      "noDate": "No date",
+      "priority": "Priority",
+      "priorityHint": "Shown on Home and in Overview",
+      "scheduled": "Scheduled",
+      "setTime": "Set a time",
+      "removeTime": "Remove the time",
+      "days": "Which days",
+      "onceDate": "On which day",
+      "onceHint": "Pick no day and it is scheduled once, on the due day.",
+      "dateRequired": "Pick a day, or give it a due date",
+      "goal": "Part of a goal",
+      "goalNone": "Nothing in particular",
+      "done": "Done",
+      "delete": "Delete",
+      "deleteTitle": "Delete this item?",
+      "deleteBody": "Its time, its date and its record go with it."
+    },
+    "reading": {
+      "task": "Task",
+      "routine": "Routine",
+      "milestone": "Milestone",
+      "study": "Study time"
+    },
+    "readout": {
+      "priority": "priority",
+      "due": "due {{date}}",
+      "once": "{{date}} at {{time}}",
+      "onceNoDay": "once at {{time}}",
+      "everyDay": "every day at {{time}}",
+      "weekdays": "weekdays at {{time}}",
+      "someDays_one": "{{count}} day a week at {{time}}",
+      "someDays_other": "{{count}} days a week at {{time}}"
+    },
+    "key": {
+      "add": {
+        "task": "Add task",
+        "routine": "Add routine",
+        "milestone": "Add milestone",
+        "study": "Add study time"
+      },
+      "save": "Save"
     }
   }
 }

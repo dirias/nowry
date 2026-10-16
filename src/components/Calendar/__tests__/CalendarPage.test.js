@@ -78,7 +78,7 @@ jest.mock('@nowry/core/api/services/calendar.service', () => ({
 }))
 jest.mock('@nowry/core/api/services', () => ({
   tasksService: { update: jest.fn() },
-  annualPlanningService: { updatePriority: jest.fn(), updateGoal: jest.fn(), updateMilestone: jest.fn() }
+  annualPlanningService: { completePriority: jest.fn(), updateGoal: jest.fn(), updateMilestone: jest.fn() }
 }))
 // Both sheets record the props the page hands them, so a suite can assert
 // which one opened, in which mode, with what (PLAN-004).
@@ -430,7 +430,9 @@ describe('CAL-002: the agenda row check', () => {
     status: 'active',
     color: '#f59e0b',
     date: today,
-    focusAreaId: null
+    focusAreaId: null,
+    linkedType: 'task',
+    linkedId: '1'
   }
   const milestone = {
     id: 'milestone-g1-0',
@@ -470,17 +472,20 @@ describe('CAL-002: the agenda row check', () => {
     fireEvent.click(check)
     expect(tasksService.update).toHaveBeenCalledWith('1', { is_completed: true })
     expect(screen.getByRole('button', { name: 'calendarPage.agenda.markUndone' })).toHaveAttribute('aria-pressed', 'true')
-    expect(annualPlanningService.updatePriority).not.toHaveBeenCalled()
+    expect(annualPlanningService.completePriority).not.toHaveBeenCalled()
   })
 
-  it('ticking a priority goes through updatePriority with the bare id', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
+  it('ticking a priority goes through completePriority with the item its flag is on (ADR-046 §5)', async () => {
+    annualPlanningService.completePriority.mockResolvedValue({})
     await renderPhone()
     const checks = screen.getAllByRole('button', { name: 'calendarPage.agenda.markDone' })
     await act(async () => {
       fireEvent.click(checks[1])
     })
-    expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('1', { is_completed: true })
+    expect(annualPlanningService.completePriority).toHaveBeenCalledWith(
+      { _id: '1', linked_entity_type: 'task', linked_entity_id: '1' },
+      true
+    )
     expect(calendarService.invalidateCache).toHaveBeenCalledWith('test-user')
   })
 

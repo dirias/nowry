@@ -1,18 +1,18 @@
 /**
- * usePriorityStatus (ADR-015 point 6) — the one implementation of the two
- * optimistic status toggles that AllPrioritiesPage, FocusAreaView and
- * OverviewTabView share.
+ * usePriorityStatus (ADR-015 point 6, ADR-046 §5) — the one implementation of
+ * what a priority row can do, shared by AllPrioritiesPage, FocusAreaView and
+ * OverviewTabView: done, and the flag off.
  */
 import { renderHook, act } from '@testing-library/react'
 
 jest.mock('../api/services', () => ({
-  annualPlanningService: { updatePriority: jest.fn() }
+  annualPlanningService: { completePriority: jest.fn(), unflagPriority: jest.fn() }
 }))
 
 const { annualPlanningService } = require('../api/services')
 const usePriorityStatus = require('./usePriorityStatus').default
 
-const priority = { _id: 'p1', title: 'P', is_active: true, is_completed: false, completed_at: null }
+const priority = { _id: 'p1', title: 'P', is_completed: false, completed_at: null, linked_entity_type: 'task', linked_entity_id: 'p1' }
 
 /** A setter that applies functional updates to a plain array we can inspect. */
 const makeSetter = (initial) => {
@@ -26,8 +26,8 @@ const makeSetter = (initial) => {
 beforeEach(() => jest.clearAllMocks())
 
 describe('toggleComplete', () => {
-  it('patches is_completed and a completed_at stamp locally, then sends only is_completed', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
+  it('patches is_completed and a completed_at stamp locally, then writes done on the item', async () => {
+    annualPlanningService.completePriority.mockResolvedValue({})
     const { state, setPriorities } = makeSetter([priority])
     const { result } = renderHook(() => usePriorityStatus(setPriorities))
 
@@ -35,59 +35,44 @@ describe('toggleComplete', () => {
 
     expect(state.list[0].is_completed).toBe(true)
     expect(typeof state.list[0].completed_at).toBe('string')
-    expect(state.list[0].is_active).toBe(true)
-    expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('p1', { is_completed: true })
+    expect(annualPlanningService.completePriority).toHaveBeenCalledWith(priority, true)
   })
 
-  it('restores the exact original is_completed and completed_at when the request rejects', async () => {
+  it('restores the original values when the request fails', async () => {
+    annualPlanningService.completePriority.mockRejectedValue(new Error('offline'))
     jest.spyOn(console, 'error').mockImplementation(() => {})
-    annualPlanningService.updatePriority.mockRejectedValue(new Error('boom'))
-    const done = { ...priority, is_completed: true, completed_at: '2026-09-01T00:00:00.000Z' }
-    const { state, setPriorities } = makeSetter([done])
-    const { result } = renderHook(() => usePriorityStatus(setPriorities))
-
-    await act(() => result.current.toggleComplete(done))
-
-    expect(state.list[0].is_completed).toBe(true)
-    expect(state.list[0].completed_at).toBe('2026-09-01T00:00:00.000Z')
-    expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('p1', { is_completed: false })
-    console.error.mockRestore()
-  })
-
-  it('only touches the row with the matching id', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
-    const other = { ...priority, _id: 'p2' }
-    const { state, setPriorities } = makeSetter([priority, other])
+    const { state, setPriorities } = makeSetter([priority])
     const { result } = renderHook(() => usePriorityStatus(setPriorities))
 
     await act(() => result.current.toggleComplete(priority))
 
-    expect(state.list[1]).toBe(other)
+    expect(state.list[0].is_completed).toBe(false)
+    expect(state.list[0].completed_at).toBeNull()
+    console.error.mockRestore()
   })
 })
 
-describe('toggleActive', () => {
-  it('flips is_active locally and sends only is_active, never is_completed', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
-    const { state, setPriorities } = makeSetter([priority])
+describe('unflag', () => {
+  it('drops the row at once and turns the flag off on the item', async () => {
+    annualPlanningService.unflagPriority.mockResolvedValue({})
+    const { state, setPriorities } = makeSetter([priority, { ...priority, _id: 'p2' }])
     const { result } = renderHook(() => usePriorityStatus(setPriorities))
 
-    await act(() => result.current.toggleActive(priority))
+    await act(() => result.current.unflag(priority))
 
-    expect(state.list[0].is_active).toBe(false)
-    expect(state.list[0].is_completed).toBe(false)
-    expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('p1', { is_active: false })
+    expect(state.list.map((p) => p._id)).toEqual(['p2'])
+    expect(annualPlanningService.unflagPriority).toHaveBeenCalledWith(priority)
   })
 
-  it('restores is_active when the request rejects', async () => {
+  it('puts the row back when the request fails', async () => {
+    annualPlanningService.unflagPriority.mockRejectedValue(new Error('offline'))
     jest.spyOn(console, 'error').mockImplementation(() => {})
-    annualPlanningService.updatePriority.mockRejectedValue(new Error('boom'))
     const { state, setPriorities } = makeSetter([priority])
     const { result } = renderHook(() => usePriorityStatus(setPriorities))
 
-    await act(() => result.current.toggleActive(priority))
+    await act(() => result.current.unflag(priority))
 
-    expect(state.list[0].is_active).toBe(true)
+    expect(state.list).toHaveLength(1)
     console.error.mockRestore()
   })
 })

@@ -17,9 +17,10 @@ const focusRing = {
  * OverviewTabView — the Annual Planning overview tab.
  *
  * Dashboard, not a management surface: it shows focus areas and a recall list of
- * yearly commitments that can be ticked off, nothing more. Priorities CRUD (add,
- * edit, delete, reorder, pause) lives on the Priorities tab, so the two surfaces
- * have genuinely different jobs instead of being the same list rendered twice.
+ * the flagged items that can be ticked off, nothing more. A priority is a flag
+ * on a task or a milestone (ADR-046 §5); the flag comes off on the Priorities
+ * tab, so the two surfaces have genuinely different jobs instead of being the
+ * same list rendered twice.
  *
  * Reads all plan data from the layout's outlet context — never calls useAnnualPlan.
  */
@@ -108,30 +109,19 @@ const OverviewTabView = () => {
           ))}
         </Stack>
       ) : priorities.length === 0 ? (
+        /* Nothing is created here: an item is flagged in its own sheet, so the
+           empty state says where a priority comes from and offers no key. */
         <EmptyState
           py={6}
           icon={<FlagIcon sx={{ fontSize: 48, color: 'text.tertiary', opacity: 0.5, mb: 2 }} />}
           title={t('annualPlanning.overview.prioritiesEmptyTitle')}
           body={t('annualPlanning.overview.prioritiesEmptyBody')}
           bodyMaxWidth={420}
-          action={
-            <Button component={Link} to={prioritiesHref} size='sm' sx={{ mt: 2, ...focusRing }}>
-              {t('annualPlanning.overview.prioritiesEmptyCta')}
-            </Button>
-          }
         />
       ) : (
-        /* Recall preview: no edit, no delete, no pause, no drag — only the check.
-           Active-only by default — done/inactive rows are noise on a dashboard. */
-        <PriorityList
-          priorities={priorities}
-          filterable
-          maxVisible={3}
-          showEditButton={false}
-          showDeleteButton={false}
-          onToggleActive={null}
-          onToggleComplete={toggleComplete}
-        />
+        /* Recall preview: no unflag — only the check.
+           Active-only by default — done rows are noise on a dashboard. */
+        <PriorityList priorities={priorities} areas={areas} filterable maxVisible={3} onToggleComplete={toggleComplete} />
       )}
     </Box>
   )

@@ -165,6 +165,8 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    // "Routine" is the word in fr too (PLAN-012).
+    'items.reading.routine',
     // A whole-hour length is a number and "h" in every Latin locale (PLAN-004).
     'calendarPage.blocks.hours',
     // A reminder's body is a number, "min" and the source word: the same
@@ -226,6 +228,8 @@ const IDENTICAL_BY_DESIGN = {
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
   // and its counted form land on English by agreement, not by neglect.
   de: [
+    // "Routine" is the word in de too (PLAN-012).
+    'items.reading.routine',
     ...BETA_MARK,
     ...COPYRIGHT_ROUTE,
     'taxonomy.topics.design',

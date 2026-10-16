@@ -12,7 +12,8 @@ jest.mock('@fullcalendar/react', () => () => null, { virtual: true })
 // Mock the service dependencies so we can call getAllEvents() directly
 jest.mock('./tasks.service', () => ({
   tasksService: {
-    getAll: jest.fn()
+    getAll: jest.fn(),
+    update: jest.fn()
   }
 }))
 
@@ -23,7 +24,9 @@ jest.mock('./tasks.service', () => ({
 // quarterReports } — see annualPlanning.service.js for the transform.
 jest.mock('./annualPlanning.service', () => ({
   annualPlanningService: {
-    getFullAnnualPlan: jest.fn()
+    getFullAnnualPlan: jest.fn(),
+    updateMilestone: jest.fn(),
+    completePriority: jest.fn()
   },
   fetchAnnualPlanData: jest.fn()
 }))
@@ -256,5 +259,72 @@ describe('calendarService — CAL-006: completed milestones are kept, as complet
     })
     const { events } = await calendarService.getAllEvents('user-1')
     expect(events.filter((e) => e.type === 'milestone').map((e) => e.status)).toEqual(['completed', 'pending'])
+  })
+})
+
+// ─── PLAN-013 (ADR-046 §5): a priority is a flag on an item ───────────────────
+
+describe('calendarService — PLAN-013: a priority event addresses the item its flag is on', () => {
+  const { tasksService } = require('./tasks.service')
+  const { fetchAnnualPlanData, annualPlanningService } = require('./annualPlanning.service')
+  const { queryClient } = require('../queryClient')
+  const { calendarService } = require('./calendar.service')
+
+  const plan = (priorities) => ({ plan: {}, priorities, focusAreas: [], goals: [], activities: [], quarterReports: [] })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    queryClient.fetchQuery.mockImplementation(({ queryFn }) => queryFn())
+    tasksService.getAll.mockResolvedValue([])
+  })
+
+  it('a flagged task and a flagged milestone arrive with linkedType and linkedId', async () => {
+    fetchAnnualPlanData.mockResolvedValue(
+      plan([
+        { _id: 't1', title: 'Essay', deadline: '2026-09-30', linked_entity_type: 'task', linked_entity_id: 't1' },
+        { _id: 'm1', title: 'Week 4', deadline: '2026-10-30', linked_entity_type: 'milestone', linked_entity_id: 'g1' }
+      ])
+    )
+    const { events } = await calendarService.getAllEvents('user-1')
+    const [task, milestone] = events.filter((e) => e.type === 'priority')
+    expect(task).toMatchObject({ id: 'priority-t1', linkedType: 'task', linkedId: 't1' })
+    expect(milestone).toMatchObject({ id: 'priority-m1', linkedType: 'milestone', linkedId: 'g1' })
+  })
+
+  it('createEvent no longer makes a priority — there is nothing to create', async () => {
+    await expect(calendarService.createEvent({ type: 'priority', title: 'X', date: '2026-09-30' })).resolves.toBeNull()
+    expect(tasksService.update).not.toHaveBeenCalled()
+    expect(annualPlanningService.completePriority).not.toHaveBeenCalled()
+  })
+
+  it('editing a flagged task writes its title and deadline on the task', async () => {
+    tasksService.update.mockResolvedValue({ _id: 't1' })
+    const event = { id: 'priority-t1', type: 'priority', status: 'active', linkedType: 'task', linkedId: 't1' }
+    await calendarService.updateEvent({ event, title: ' Essay ', date: '2026-10-01', done: false })
+    expect(tasksService.update).toHaveBeenCalledWith('t1', { title: 'Essay', deadline: '2026-10-01' })
+    expect(annualPlanningService.completePriority).not.toHaveBeenCalled()
+  })
+
+  it('editing a flagged milestone writes through its goal, by its own id', async () => {
+    annualPlanningService.updateMilestone.mockResolvedValue({})
+    const event = { id: 'priority-m1', type: 'priority', status: 'active', linkedType: 'milestone', linkedId: 'g1' }
+    await calendarService.updateEvent({ event, title: 'Week 4', date: null, done: false })
+    expect(annualPlanningService.updateMilestone).toHaveBeenCalledWith('g1', 'm1', { title: 'Week 4', due_date: null })
+    expect(tasksService.update).not.toHaveBeenCalled()
+  })
+
+  it('ticking done from the sheet goes through completePriority with the item address, only when it changed', async () => {
+    tasksService.update.mockResolvedValue({})
+    annualPlanningService.completePriority.mockResolvedValue({})
+    const event = { id: 'priority-t1', type: 'priority', status: 'active', linkedType: 'task', linkedId: 't1' }
+    await calendarService.updateEvent({ event, title: 'Essay', date: '2026-10-01', done: true })
+    expect(annualPlanningService.completePriority).toHaveBeenCalledWith(
+      { _id: 't1', linked_entity_type: 'task', linked_entity_id: 't1' },
+      true
+    )
+
+    annualPlanningService.completePriority.mockClear()
+    await calendarService.updateEvent({ event: { ...event, status: 'completed' }, title: 'Essay', date: '2026-10-01', done: true })
+    expect(annualPlanningService.completePriority).not.toHaveBeenCalled()
   })
 })

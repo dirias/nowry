@@ -1,17 +1,15 @@
 /**
- * Phase 24 Plan 04 — AllPrioritiesPage tests (PRI-01, PRI-03, PRI-04).
- * Task 1 (behaviors 1-4): active/inactive/completed split, optimistic is_active
- * toggle + revert-on-error, drag-end reorder scoped to active-only ids.
- * Task 2: Show/Hide inactive toggle visibility + 3-section render (covered by
- * the same DOM assertions since the split/toggle state drives what renders).
+ * AllPrioritiesPage — the Priorities tab (PLAN-013, ADR-046 §5).
  *
- * FE-AP-6 update: AllPrioritiesPage is now a child route of AnnualPlanningLayout
- * and reads plan data from useOutletContext() instead of calling useAnnualPlan.
- * These tests therefore mount it under a real router whose parent route supplies
- * the context, rather than mocking the hook. The `priorities`/`setPriorities` pair
- * lives in the harness because the layout owns that state now — the optimistic
- * flip and the revert-on-rejection still exercise exactly the same transitions,
- * they just round-trip through outlet context instead of local component state.
+ * A priority is a flag on a task or a milestone. The page lists the flagged
+ * items in two groups, open and completed, and offers done and the flag off,
+ * both optimistic through `usePriorityStatus`. Nothing is created here: there
+ * is no Add key, no dialog, no drag, no inactive section.
+ *
+ * AllPrioritiesPage is a child route of AnnualPlanningLayout and reads plan
+ * data from useOutletContext(). These tests mount it under a real router whose
+ * parent route supplies the context. The `priorities`/`setPriorities` pair
+ * lives in the harness because the layout owns that state.
  */
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
@@ -20,62 +18,16 @@ import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom'
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, opts) => (opts && opts.count !== undefined ? `${key}:${opts.count}` : key)
-  }),
-  // PriorityList.js (rendered by every test here) also uses <Trans> for its
-  // delete-confirmation dialog. Without a mock it resolves to undefined and
-  // React logs an invalid-element warning on every render (WR-06).
-  Trans: ({ i18nKey }) => i18nKey
+  })
 }))
 
-// AllPrioritiesPage.js imports annualPlanningService from the barrel index
-// ('@nowry/core/api/services'), which eagerly re-exports every service module and
-// would otherwise pull in the real axios client (Jest ESM parse failure) —
-// same issue documented in PriorityList.test.js (24-03).
+// usePriorityStatus imports annualPlanningService from the barrel index, which
+// would otherwise pull in the real axios client (Jest ESM parse failure).
 jest.mock('@nowry/core/api/services', () => ({
   annualPlanningService: {
-    updatePriority: jest.fn(),
-    reorderPriorities: jest.fn(),
-    deletePriority: jest.fn()
+    completePriority: jest.fn(),
+    unflagPriority: jest.fn()
   }
-}))
-
-// PriorityDialog pulls in tasksService via a direct submodule import that
-// bypasses the barrel mock above. Out of scope for this plan — stub it.
-jest.mock('../PriorityDialog', () => () => null)
-
-let capturedOnDragEnd = null
-jest.mock('@dnd-kit/core', () => ({
-  DndContext: ({ children, onDragEnd }) => {
-    capturedOnDragEnd = onDragEnd
-    return children
-  },
-  closestCenter: jest.fn(),
-  PointerSensor: jest.fn(),
-  KeyboardSensor: jest.fn(),
-  useSensor: jest.fn(),
-  useSensors: jest.fn(() => [])
-}))
-
-jest.mock('@dnd-kit/sortable', () => ({
-  // Mirrors dnd-kit's own arrayMove semantics (splice-based move) without
-  // pulling in the real package, which imports KeyboardCode from
-  // '@dnd-kit/core' at module scope — incompatible with the '@dnd-kit/core'
-  // mock above.
-  arrayMove: (array, from, to) => {
-    const result = array.slice()
-    const [item] = result.splice(from, 1)
-    result.splice(to, 0, item)
-    return result
-  },
-  verticalListSortingStrategy: 'vertical',
-  SortableContext: ({ children }) => children,
-  useSortable: () => ({
-    attributes: {},
-    listeners: {},
-    setNodeRef: jest.fn(),
-    transform: null,
-    transition: null
-  })
 }))
 
 const { annualPlanningService } = require('@nowry/core/api/services')
@@ -86,14 +38,16 @@ const makePriority = (overrides) => ({
   title: 'Priority',
   is_completed: false,
   is_active: true,
+  linked_entity_type: 'task',
+  linked_entity_id: 'p1',
+  focus_area_id: null,
   ...overrides
 })
 
 const basePriorities = [
-  makePriority({ _id: 'active1', title: 'Active One', is_active: true, is_completed: false }),
-  makePriority({ _id: 'active2', title: 'Active Two', is_active: true, is_completed: false }),
-  makePriority({ _id: 'inactive1', title: 'Inactive One', is_active: false, is_completed: false }),
-  makePriority({ _id: 'completed1', title: 'Completed One', is_active: true, is_completed: true })
+  makePriority({ _id: 'open1', title: 'Open One', linked_entity_id: 'open1' }),
+  makePriority({ _id: 'open2', title: 'Open Two', linked_entity_type: 'milestone', linked_entity_id: 'g1', focus_area_id: 'a1' }),
+  makePriority({ _id: 'completed1', title: 'Completed One', linked_entity_id: 'completed1', is_completed: true })
 ]
 
 /**
@@ -103,7 +57,19 @@ const basePriorities = [
  */
 const ContextProvider = ({ initialPriorities, plan, reload }) => {
   const [priorities, setPriorities] = React.useState(initialPriorities)
-  return <Outlet context={{ plan, areas: [], priorities, setPriorities, loading: false, error: null, reload }} />
+  return (
+    <Outlet
+      context={{
+        plan,
+        areas: [{ _id: 'a1', name: 'Health', color: '#4caf50' }],
+        priorities,
+        setPriorities,
+        loading: false,
+        error: null,
+        reload
+      }}
+    />
+  )
 }
 
 const renderPage = ({ priorities = basePriorities, plan = { _id: 'plan1' }, reload = jest.fn() } = {}) =>
@@ -119,143 +85,92 @@ const renderPage = ({ priorities = basePriorities, plan = { _id: 'plan1' }, relo
 
 beforeEach(() => {
   jest.clearAllMocks()
-  capturedOnDragEnd = null
 })
 
-describe('Phase 24 PRI-01/PRI-03: active/inactive/completed split + inactive toggle', () => {
-  it('Test 1: active priorities render immediately, inactive is hidden behind the toggle, completed renders inline', () => {
+describe('two groups, nothing to add', () => {
+  it('renders open rows first and completed rows under their own heading', () => {
     renderPage()
-
-    expect(screen.getByText('Active One')).toBeInTheDocument()
-    expect(screen.getByText('Active Two')).toBeInTheDocument()
+    expect(screen.getByText('Open One')).toBeInTheDocument()
+    expect(screen.getByText('Open Two')).toBeInTheDocument()
+    expect(screen.getByText('annualPlanning.priority.completedSection')).toBeInTheDocument()
     expect(screen.getByText('Completed One')).toBeInTheDocument()
-    expect(screen.queryByText('Inactive One')).not.toBeInTheDocument()
-    expect(screen.getByText('annualPlanning.priority.showInactive:1')).toBeInTheDocument()
   })
 
-  it('clicking Show inactive (N) reveals the inactive section and flips the label to Hide inactive', () => {
+  it('has no Add key, no inactive section and no drag handle', () => {
     renderPage()
-
-    fireEvent.click(screen.getByText('annualPlanning.priority.showInactive:1'))
-
-    expect(screen.getByText('Inactive One')).toBeInTheDocument()
-    expect(screen.getByText('annualPlanning.priority.hideInactive')).toBeInTheDocument()
-
-    fireEvent.click(screen.getByText('annualPlanning.priority.hideInactive'))
-
-    expect(screen.queryByText('Inactive One')).not.toBeInTheDocument()
-    expect(screen.getByText('annualPlanning.priority.showInactive:1')).toBeInTheDocument()
-  })
-
-  it('the toggle is not rendered when there are no inactive priorities', () => {
-    renderPage({
-      priorities: [makePriority({ _id: 'active1', title: 'Active One', is_active: true, is_completed: false })]
-    })
-
+    expect(screen.queryByText('annualPlanning.priority.addPriority')).not.toBeInTheDocument()
     expect(screen.queryByText(/showInactive/)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('annualPlanning.priority.dragHandle')).not.toBeInTheDocument()
+    const names = screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))
+    expect(names.every((name) => /markComplete|markIncomplete|unflag/.test(name))).toBe(true)
+  })
+
+  it('the empty state says where a priority comes from and offers no key', () => {
+    renderPage({ priorities: [] })
+    expect(screen.getByText('annualPlanning.priority.emptyTitle')).toBeInTheDocument()
+    expect(screen.getByText('annualPlanning.priority.emptyBody')).toBeInTheDocument()
+    expect(screen.queryByText('annualPlanning.priority.emptyCta')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 })
 
-describe('Phase 24 PRI-01 (D-04): optimistic is_active toggle', () => {
-  it('Test 2: clicking the flag icon flips local is_active immediately (the row leaves the active section) and calls updatePriority', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
-    renderPage({
-      priorities: [makePriority({ _id: 'active1', title: 'Active One', is_active: true, is_completed: false })]
-    })
-
-    fireEvent.click(screen.getByLabelText('annualPlanning.priority.markInactive'))
-
-    // Optimistic flip happens synchronously, before the awaited call resolves: the
-    // priority is now inactive and moves out of the active section into the
-    // (collapsed by default) inactive bucket.
-    expect(screen.queryByLabelText('annualPlanning.priority.markInactive')).not.toBeInTheDocument()
-    expect(screen.getByText('annualPlanning.priority.showInactive:1')).toBeInTheDocument()
-
-    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('active1', { is_active: false }))
-  })
-
-  it('Test 3: reverts local is_active when updatePriority rejects, restoring the priority to the active section', async () => {
-    annualPlanningService.updatePriority.mockRejectedValue(new Error('network error'))
-    renderPage({
-      priorities: [makePriority({ _id: 'active1', title: 'Active One', is_active: true, is_completed: false })]
-    })
-
-    fireEvent.click(screen.getByLabelText('annualPlanning.priority.markInactive'))
-    expect(screen.queryByLabelText('annualPlanning.priority.markInactive')).not.toBeInTheDocument()
-
-    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalled())
-    await waitFor(() => expect(screen.getByLabelText('annualPlanning.priority.markInactive')).toBeInTheDocument())
-  })
-})
-
-describe('Phase 24 PRI-04 (D-07, D-08): drag-to-reorder active priorities only', () => {
-  it('Test 4: dragging an active priority calls reorderPriorities with only active, non-completed ids in the new order', async () => {
-    annualPlanningService.reorderPriorities.mockResolvedValue({})
+describe('done, optimistically (ADR-015)', () => {
+  it('ticking an open row moves it to Completed at once and writes done on the item', async () => {
+    annualPlanningService.completePriority.mockResolvedValue({})
     renderPage()
-
-    expect(capturedOnDragEnd).toBeInstanceOf(Function)
-    await capturedOnDragEnd({ active: { id: 'active2' }, over: { id: 'active1' } })
-
-    await waitFor(() => expect(annualPlanningService.reorderPriorities).toHaveBeenCalledWith('plan1', ['active2', 'active1']))
-  })
-
-  it('does not call reorderPriorities when dropped in the same position', async () => {
-    renderPage()
-
-    await capturedOnDragEnd({ active: { id: 'active1' }, over: { id: 'active1' } })
-
-    expect(annualPlanningService.reorderPriorities).not.toHaveBeenCalled()
-  })
-})
-
-describe('ADR-015 PRIO-001: optimistic is_completed toggle', () => {
-  it('Test 5: clicking the check on an active row moves it to the Completed section immediately and patches is_completed: true', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
-    renderPage()
-    // active1 + active2 are unfinished; completed1 is the only finished row
     expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(2)
-    expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(1)
 
     fireEvent.click(screen.getAllByLabelText('annualPlanning.priority.markComplete')[0])
 
     expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(1)
     expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(2)
-    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('active1', { is_completed: true }))
+    await waitFor(() =>
+      expect(annualPlanningService.completePriority).toHaveBeenCalledWith(expect.objectContaining({ _id: 'open1' }), true)
+    )
   })
 
-  it('Test 6: reverts to the active section when updatePriority rejects', async () => {
-    annualPlanningService.updatePriority.mockRejectedValue(new Error('network error'))
+  it('reverts to the open group when the write rejects', async () => {
+    annualPlanningService.completePriority.mockRejectedValue(new Error('network error'))
+    jest.spyOn(console, 'error').mockImplementation(() => {})
     renderPage()
     fireEvent.click(screen.getAllByLabelText('annualPlanning.priority.markComplete')[0])
     expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(2)
 
-    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalled())
     await waitFor(() => expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(2))
-    expect(screen.getAllByLabelText('annualPlanning.priority.markIncomplete')).toHaveLength(1)
+    console.error.mockRestore()
   })
 
-  it('Test 7: clicking the check on a completed row reverts it and patches is_completed: false', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
+  it('ticking a completed row reopens it', async () => {
+    annualPlanningService.completePriority.mockResolvedValue({})
     renderPage()
     fireEvent.click(screen.getByLabelText('annualPlanning.priority.markIncomplete'))
     expect(screen.queryByLabelText('annualPlanning.priority.markIncomplete')).not.toBeInTheDocument()
-    expect(screen.getAllByLabelText('annualPlanning.priority.markComplete')).toHaveLength(3)
-    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('completed1', { is_completed: false }))
+    await waitFor(() =>
+      expect(annualPlanningService.completePriority).toHaveBeenCalledWith(expect.objectContaining({ _id: 'completed1' }), false)
+    )
+  })
+})
+
+describe('the flag off', () => {
+  it('"Remove from priorities" drops the row at once and calls unflagPriority with the item', async () => {
+    annualPlanningService.unflagPriority.mockResolvedValue({})
+    renderPage()
+    fireEvent.click(screen.getAllByLabelText('annualPlanning.priority.unflag')[1])
+    expect(screen.queryByText('Open Two')).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(annualPlanningService.unflagPriority).toHaveBeenCalledWith(
+        expect.objectContaining({ _id: 'open2', linked_entity_type: 'milestone', linked_entity_id: 'g1' })
+      )
+    )
   })
 
-  it('Test 8: completing never writes is_active — a paused row that is completed comes back paused when reverted', async () => {
-    annualPlanningService.updatePriority.mockResolvedValue({})
+  it('brings the row back when the write rejects', async () => {
+    annualPlanningService.unflagPriority.mockRejectedValue(new Error('network error'))
+    jest.spyOn(console, 'error').mockImplementation(() => {})
     renderPage()
-    fireEvent.click(screen.getByText('annualPlanning.priority.showInactive:1'))
-    // inactive1 is the only row with a resume action
-    const inactiveRowCheck = screen.getAllByLabelText('annualPlanning.priority.markComplete')[2]
-    fireEvent.click(inactiveRowCheck)
-    await waitFor(() => expect(annualPlanningService.updatePriority).toHaveBeenCalledWith('inactive1', { is_completed: true }))
-    expect(annualPlanningService.updatePriority).not.toHaveBeenCalledWith(
-      'inactive1',
-      expect.objectContaining({ is_active: expect.anything() })
-    )
-    // the inactive toggle disappears because no unfinished inactive rows remain
-    expect(screen.queryByText('annualPlanning.priority.hideInactive')).not.toBeInTheDocument()
+    fireEvent.click(screen.getAllByLabelText('annualPlanning.priority.unflag')[0])
+    expect(screen.queryByText('Open One')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('Open One')).toBeInTheDocument())
+    console.error.mockRestore()
   })
 })

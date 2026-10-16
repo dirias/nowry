@@ -58,7 +58,6 @@ const GOVERNS_NOTHING = {
     'cards.session.markFilter.label',
     'annualPlanning.priority.filterAll',
     'annualPlanning.priority.showAll',
-    'annualPlanning.priority.showInactive',
     'annualPlanning.quarterReport.booksFinished',
     'annualPlanning.reports.snapshots',
     'comments.unanchoredGroupTitle',
