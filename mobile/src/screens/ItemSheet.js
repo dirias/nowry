@@ -327,8 +327,9 @@ export function ItemSheet({
 
   // ── The rows' values ───────────────────────────────────────────────────
   const dueValue = facts.due ? formatDate(facts.due, language) : t('items.sheet.noDate')
+  // Two lines on purpose: the row is narrow, and a break inside "20 min" read as two values.
   const scheduledValue = facts.scheduled
-    ? `${sayPart(scheduledReadout(withLength), t, language)} · ${minutesLabel(lengthMin)}`
+    ? `${sayPart(scheduledReadout(withLength), t, language)}\n${minutesLabel(lengthMin)}`
     : t('items.sheet.noDate')
   const remindValue = (option) =>
     option == null ? t('blocks.sheet.remindOff') : option === 0 ? t('blocks.sheet.remindAtStart') : minutesLabel(option)
