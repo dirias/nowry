@@ -82,14 +82,9 @@ jest.mock('@nowry/core/api/services', () => ({
 }))
 // Both sheets record the props the page hands them, so a suite can assert
 // which one opened, in which mode, with what (PLAN-004).
-const mockEventFormModal = jest.fn()
-jest.mock('../EventFormModal', () => (props) => {
-  mockEventFormModal(props)
-  return null
-})
-const mockBlockFormModal = jest.fn()
-jest.mock('../BlockFormModal', () => (props) => {
-  mockBlockFormModal(props)
+const mockItemSheet = jest.fn()
+jest.mock('../ItemSheet', () => (props) => {
+  mockItemSheet(props)
   return null
 })
 jest.mock('@fullcalendar/core/locales-all', () => [], { virtual: true })
@@ -768,15 +763,14 @@ describe('PLAN-004: the time grids, the blocks on them, and what the grid may wr
     expect(blockEvents()).toHaveLength(3)
   })
 
-  it('clicking a block opens the block sheet in edit mode; a run opens its Day', async () => {
+  it('clicking a block opens the item sheet on it; a run opens its Day', async () => {
     await renderPage()
     fireEvent.click(view('week'))
     const occurrence = occurrenceOf(study)
     await act(async () => {
       lastFc().eventClick({ event: { extendedProps: { kind: 'block', occurrence, group: null } } })
     })
-    expect(mockBlockFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'edit', block: study, occurrence })
-    expect(mockEventFormModal.mock.calls.at(-1)[0].open).toBe(false)
+    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'edit', source: { block: study, occurrence } })
 
     const run = { kind: 'block', occurrence: occurrenceOf(routine('r1', '07:00'), tomorrowKey), group: { period: 'morning', count: 2 } }
     await act(async () => {
@@ -786,22 +780,22 @@ describe('PLAN-004: the time grids, the blocks on them, and what the grid may wr
     expect(lastFc().initialDate.getDate()).toBe(parseDateKey(tomorrowKey).getDate())
   })
 
-  it('a selection on the hours opens the block sheet as a one-off on the five-minute grid; on the all-day row it opens the event form', async () => {
+  it('a selection on the hours opens the item sheet scheduled once there, on the five-minute grid; on the all-day row it fills Due', async () => {
     await renderPage()
     fireEvent.click(view('day'))
     await act(async () => {
       lastFc().select({ allDay: false, start: at(todayKey, 9, 2), end: at(todayKey, 9, 33) })
     })
-    expect(mockBlockFormModal.mock.calls.at(-1)[0]).toMatchObject({
+    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({
       open: true,
       mode: 'create',
-      block: null,
-      prefill: { date: todayKey, start: '09:00', lengthMin: 30 }
+      source: null,
+      prefill: { scheduled: { date: todayKey, start: '09:00', lengthMin: 30 } }
     })
     await act(async () => {
-      lastFc().select({ allDay: true, start: at(todayKey, 0, 0), end: at(tomorrowKey, 0, 0) })
+      lastFc().select({ allDay: true, start: at(tomorrowKey, 0, 0), end: at(addDaysKey(tomorrowKey, 1), 0, 0) })
     })
-    expect(mockEventFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', initialType: 'task' })
+    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', prefill: { due: tomorrowKey } })
   })
 
   it('a dropped one-off writes its date and start; a recurring block writes its start within its weekday and reverts across one, saying why', async () => {
@@ -858,24 +852,25 @@ describe('PLAN-004: the time grids, the blocks on them, and what the grid may wr
     expect(eventAllow({ allDay: false }, { extendedProps: { type: 'task' } })).toBe(false)
   })
 
-  it('Add is the page’s one solid key and opens a menu: Block first, then the four deadline types, each preselecting the event form', async () => {
+  it('Add is the page’s one solid key and opens the item sheet directly, due today — there is no kind to choose', async () => {
     await renderPage()
     expect(document.querySelectorAll('.MuiButton-variantSolid')).toHaveLength(1)
     fireEvent.click(screen.getByRole('button', { name: 'calendarPage.add' }))
-    const items = await screen.findAllByRole('menuitem')
-    expect(items.map((item) => item.textContent)).toEqual([
-      'calendarPage.blocks.menuBlock',
-      'calendarModal.form.types.task',
-      'calendarModal.form.types.priority',
-      'calendarModal.form.types.goal',
-      'calendarModal.form.types.milestone'
-    ])
-    fireEvent.click(items[0])
-    expect(mockBlockFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', prefill: null })
+    expect(screen.queryByRole('menuitem')).toBeNull()
+    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', source: null, prefill: { due: todayKey } })
+  })
 
-    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.add' }))
-    fireEvent.click(await screen.findByRole('menuitem', { name: 'calendarModal.form.types.goal' }))
-    expect(mockEventFormModal.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'create', initialType: 'goal' })
+  it('a task row opens the item sheet on the task it stands for; a goal row opens its area', async () => {
+    await renderPage()
+    fireEvent.click(view('agenda'))
+    await act(async () => {
+      fireEvent.click(within(screen.getByTestId('calendar-agenda')).getByRole('button', { name: 'Finish Spanish deck' }))
+    })
+    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({
+      open: true,
+      mode: 'edit',
+      source: { task: { _id: '1', title: 'Finish Spanish deck' } }
+    })
   })
 
   it('reads the range’s kept count and minutes beside the date on Day and Week, and not on Month', async () => {

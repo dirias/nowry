@@ -37,7 +37,7 @@ import { studySummary } from '@nowry/core/domain/studySummary'
 import { addDaysKey, keptRate, localDateKey, parseDateKey } from '@nowry/core/domain/blocks'
 import { useTheme } from '../theme'
 import { PET_BUBBLE_CLEARANCE } from '../ui/patterns/PetBubble'
-import { BlockSheet } from './BlockSheet'
+import { ItemSheet } from './ItemSheet'
 import {
   ActionSheet,
   BlockRow,
@@ -134,7 +134,7 @@ export function PlanDay() {
         { id: 'kept', label: t('blocks.actions.kept'), onPress: () => log.keep(menu) },
         { id: 'skip', label: t('blocks.actions.skip'), onPress: () => log.skip(menu) },
         { id: 'undo', label: t('blocks.actions.undo'), disabled: !menu.log, onPress: () => log.undo(menu) },
-        { id: 'edit', label: t('common.edit'), onPress: () => setSheet({ mode: 'edit', block: menu.block }) },
+        { id: 'edit', label: t('common.edit'), onPress: () => setSheet({ mode: 'edit', source: { block: menu.block, occurrence: menu } }) },
         { id: 'delete', label: t('common.delete'), destructive: true, onPress: () => setConfirming(menu) }
       ]
     : []
@@ -193,7 +193,7 @@ export function PlanDay() {
               areaColors={areaColors}
               theme={theme}
               t={t}
-              onOpen={(o) => setSheet({ mode: 'edit', block: o.block })}
+              onOpen={(o) => setSheet({ mode: 'edit', source: { block: o.block, occurrence: o } })}
               onMenu={setMenu}
               onToggle={toggle}
               onStart={startBlock}
@@ -211,7 +211,7 @@ export function PlanDay() {
           <Button
             variant='secondary'
             startGlyph={<Icon name='Plus' size='sm' color='text.secondary' />}
-            onPress={() => setSheet({ mode: 'create' })}
+            onPress={() => setSheet({ mode: 'create', prefill: { scheduled: { date: key } } })}
           >
             {t('blocks.add')}
           </Button>
@@ -241,18 +241,17 @@ export function PlanDay() {
         ]}
       />
 
-      <BlockSheet
+      {/* The item sheet (PLAN-012): the hours fill Scheduled on this day; a row opens its block. */}
+      <ItemSheet
         open={Boolean(sheet)}
         mode={sheet?.mode ?? 'create'}
-        block={sheet?.block ?? null}
-        date={key}
+        source={sheet?.source ?? null}
+        prefill={sheet?.prefill ?? null}
         blocks={history.blocks ?? []}
         due={day.due}
         suggestedMinutes={day.suggestedStudyLength}
         onClose={() => setSheet(null)}
-        create={history.create}
-        update={history.update}
-        remove={history.remove}
+        onSaved={day.reload}
       />
     </View>
   )

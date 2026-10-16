@@ -9,6 +9,7 @@
  */
 export { ActionSheet } from './ActionSheet'
 export { BottomSheet, useInSheet } from './BottomSheet'
+export { FullSheet } from './FullSheet'
 export { Box } from './Box'
 export { Card, Sheet } from './Sheet'
 export { Checkbox, Radio } from './Choice'

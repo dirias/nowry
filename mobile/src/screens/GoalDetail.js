@@ -34,7 +34,7 @@ import {
 } from '@nowry/core/domain/goalDerivation'
 import { completionPatch } from '@nowry/core/domain/calendar/eventHelpers'
 import { useTheme } from '../theme'
-import { MilestoneSheet } from './AnnualPlanningSheets'
+import { ItemSheet } from './ItemSheet'
 import { Button, Chip, Divider, Icon, IconButton, Progress, Readout, Screen, SectionHeader, Skeleton, Stack, Typography } from '../ui'
 
 export function GoalDetail() {
@@ -227,7 +227,8 @@ export function GoalDetail() {
         </View>
       </Stack>
 
-      <MilestoneSheet goalId={id} open={sheet} onClose={() => setSheet(false)} onSaved={reload} />
+      {/* A step of this goal, through the item sheet with the goal filled (PLAN-012). */}
+      <ItemSheet open={sheet} mode='create' prefill={{ goalId: id }} onClose={() => setSheet(false)} onSaved={reload} />
     </Screen>
   )
 }

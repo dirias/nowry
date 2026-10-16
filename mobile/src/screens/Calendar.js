@@ -35,6 +35,7 @@
  */
 import { useCallback, useMemo, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { tasksService, annualPlanningService } from '@nowry/core/api/services'
 import { calendarEventsKey } from '@nowry/core/api/services/calendar.service'
@@ -42,6 +43,9 @@ import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useCalendarEvents } from '@nowry/core/hooks/useCalendarEvents'
 import { useCalendarFilters } from '@nowry/core/hooks/useCalendarFilters'
+import { useBlocks } from '@nowry/core/hooks/useBlocks'
+import { localDateKey, monthRangeKeys } from '@nowry/core/domain/blocks'
+import { sourceFromEvent } from '@nowry/core/domain/items'
 import { addMonths, formatDayLabel, formatDaySide, formatMonthTitle, isSameMonth } from '@nowry/core/domain/calendar/agendaGroups'
 import { ALL_TYPES, allTypesActive } from '@nowry/core/domain/calendar/calendarFilters'
 import { COMPLETABLE, completionPatch, stripTypePrefix, undoneStatus } from '@nowry/core/domain/calendar/eventHelpers'
@@ -50,7 +54,7 @@ import { useTheme } from '../theme'
 import { resolveColor } from '../ui/Typography'
 import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 import { CalendarFilterSheet } from './CalendarFilters'
-import { EventFormSheet } from './EventForm'
+import { ItemSheet } from './ItemSheet'
 import { Button, Chip, Divider, EventTile, Icon, IconButton, Skeleton, Stack, Typography } from '../ui'
 
 /** The row's floor, and the web's own (`minHeight: 52`). */
@@ -79,6 +83,24 @@ export function Calendar() {
   const { filters, setFilters, applyPreset } = useCalendarFilters()
 
   const { groups, past, focusAreas, loading, error, reload } = useCalendarEvents({ cursor, filters })
+  // The month's blocks, so an item opened from a row shows the time it already has.
+  const monthRange = useMemo(() => monthRangeKeys(cursor), [cursor])
+  const { blocks } = useBlocks({ from: monthRange.from, to: monthRange.to })
+  const router = useRouter()
+
+  /*
+   * A row opens the item sheet with what the event stands for (ADR-046). A goal
+   * is not an item: its row opens the goal's own page. A habit is a schedule the
+   * blocks replaced; its row opens nothing.
+   */
+  const openEvent = useCallback(
+    (event) => {
+      const source = sourceFromEvent(event)
+      if (source) return setForm({ mode: 'edit', source })
+      if (event.type === 'goal') router.push(`/calendar/goal/${stripTypePrefix(event.id)}`)
+    },
+    [router]
+  )
 
   const showsToday = isSameMonth(cursor, new Date())
   const title = useMemo(() => formatMonthTitle(cursor, language), [cursor, language])
@@ -104,8 +126,14 @@ export function Calendar() {
       const id = stripTypePrefix(event.id)
       try {
         if (event.type === 'task') await tasksService.update(id, completionPatch('task', done))
-        else if (event.type === 'priority') await annualPlanningService.updatePriority(id, completionPatch('priority', done))
-        else if (event.type === 'milestone') {
+        else if (event.type === 'priority') {
+          // A priority is a flag on a task or a milestone (ADR-046 §5): the
+          // tick goes to the item the flag sits on, which the event addresses.
+          await annualPlanningService.completePriority(
+            { _id: id, linked_entity_type: event.linkedType, linked_entity_id: event.linkedId },
+            done
+          )
+        } else if (event.type === 'milestone') {
           await annualPlanningService.updateMilestone(event.goalId, event.milestoneId, completionPatch('milestone', done))
         }
       } catch {
@@ -182,7 +210,7 @@ export function Calendar() {
           <Button
             size='sm'
             startGlyph={<Icon name='Plus' size='sm' color='primary.solidColor' />}
-            onPress={() => setForm({ mode: 'create', defaultDate: defaultDateFor(cursor) })}
+            onPress={() => setForm({ mode: 'create', prefill: { due: localDateKey(defaultDateFor(cursor)) } })}
           >
             {t('calendarPage.addEvent')}
           </Button>
@@ -207,7 +235,7 @@ export function Calendar() {
               cursor={cursor}
               theme={theme}
               onToggleComplete={toggleComplete}
-              onSelect={(event) => setForm({ mode: 'edit', event })}
+              onSelect={openEvent}
               t={t}
             />
           </View>
@@ -223,11 +251,13 @@ export function Calendar() {
         focusAreas={focusAreas}
       />
 
-      <EventFormSheet
+      {/* The item sheet (PLAN-012): Add fills Due with the day on screen; a row opens what it stands for. */}
+      <ItemSheet
         open={Boolean(form)}
         mode={form?.mode ?? 'create'}
-        event={form?.event ?? null}
-        defaultDate={form?.defaultDate ?? null}
+        source={form?.source ?? null}
+        prefill={form?.prefill ?? null}
+        blocks={blocks ?? []}
         onClose={() => setForm(null)}
         onSaved={reload}
       />

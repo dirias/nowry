@@ -13,13 +13,7 @@ import Typography from '@mui/joy/Typography'
 import Button from '@mui/joy/Button'
 import IconButton from '@mui/joy/IconButton'
 import Alert from '@mui/joy/Alert'
-import Dropdown from '@mui/joy/Dropdown'
-import Menu from '@mui/joy/Menu'
-import MenuButton from '@mui/joy/MenuButton'
-import MenuItem from '@mui/joy/MenuItem'
-import ListDivider from '@mui/joy/ListDivider'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { calendarService } from '@nowry/core/api/services/calendar.service'
 import { tasksService, annualPlanningService } from '@nowry/core/api/services'
@@ -30,9 +24,9 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { useBlockMoments } from '@nowry/core/hooks/useBlockMoments'
 import { useNavigate } from 'react-router-dom'
+import { sourceFromEvent } from '@nowry/core/domain/items'
 import { focusRing, touchTarget } from '../Common/Form/formStyles'
-import EventFormModal from './EventFormModal'
-import BlockFormModal from './BlockFormModal'
+import ItemSheet from './ItemSheet'
 import CalendarToolbar from './CalendarToolbar'
 import CalendarAgenda from './CalendarAgenda'
 import EventTypeTile from './EventTypeTile'
@@ -83,9 +77,6 @@ const TIME_GRID = {
   slotLabelFormat: { hour: 'numeric', minute: '2-digit' }
 }
 
-/** The four things the Add menu makes through the event form (ADR-017). */
-const EVENT_TYPES = ['task', 'priority', 'goal', 'milestone']
-
 /** The item a priority event's flag sits on, in the shape the priority writes take (ADR-046 §5). */
 const priorityRef = (ev) => ({
   _id: stripTypePrefix(ev.id),
@@ -95,9 +86,6 @@ const priorityRef = (ev) => ({
 
 /** The clock is re-read once a minute: a block's state changes on the minute. */
 const TICK_MS = 60 * 1000
-
-const menuSx = { minWidth: 200, borderRadius: 'md', p: 0.5 }
-const itemSx = { borderRadius: 'sm', ...focusRing }
 
 /**
  * The FullCalendar event object for one service event. No colours are set on
@@ -131,16 +119,10 @@ const CalendarPage = () => {
   const [calendarError, setCalendarError] = useState(null)
   const [notice, setNotice] = useState(null)
 
-  const [formOpen, setFormOpen] = useState(false)
-  const [formMode, setFormMode] = useState('create')
-  const [formType, setFormType] = useState('task')
-  const [editingEvent, setEditingEvent] = useState(null)
-  const [formDefaultDate, setFormDefaultDate] = useState(null)
-
-  const [blockOpen, setBlockOpen] = useState(false)
-  const [blockMode, setBlockMode] = useState('create')
-  const [blockEditing, setBlockEditing] = useState(null)
-  const [blockPrefill, setBlockPrefill] = useState(null)
+  // The item sheet (PLAN-012, ADR-046): `null` when closed; otherwise what it is
+  // for — `{ mode, source, prefill }`. One piece of state, so it cannot be open
+  // for a new item and an existing one at once.
+  const [sheet, setSheet] = useState(null)
 
   const { filters, setFilters, applyPreset } = useCalendarFilters()
 
@@ -312,17 +294,24 @@ const CalendarPage = () => {
     api.changeView(FC_VIEWS[effectiveView] ?? FC_VIEWS.month, cursor)
   }, [effectiveView, cursor])
 
-  // ── Editing ──────────────────────────────────────────────────────────────
-  // Both surfaces hand over the service event itself: the agenda directly, the
-  // grid through the extendedProps it was given above.
-  const openEditor = useCallback((ev) => {
-    setEditingEvent(ev)
-    setFormMode('edit')
-    setFormOpen(true) // modal re-mounts cleanly via key prop (see EventFormModal below)
-  }, [])
-
   const timer = usePomodoro()
   const navigate = useNavigate()
+
+  // ── Editing ──────────────────────────────────────────────────────────────
+  // Both surfaces hand over the service event itself: the agenda directly, the
+  // grid through the extendedProps it was given above. The sheet opens with
+  // what the event stands for (ADR-046). A goal is not an item: its row opens
+  // its area in Planning. A habit is a schedule the blocks replaced; its row
+  // opens nothing.
+  const openEditor = useCallback(
+    (ev) => {
+      const source = sourceFromEvent(ev)
+      if (source) return setSheet({ mode: 'edit', source, prefill: null })
+      if (ev.type === 'goal' && ev.focusAreaId) navigate(`/annual-planning/area/${ev.focusAreaId}`)
+    },
+    [navigate]
+  )
+
   /*
    * Start runs the block on the timer (PRD D7). A study block is the block's
    * work (PRD D8): the review opens on the budget its length implies (about
@@ -341,26 +330,14 @@ const CalendarPage = () => {
   )
 
   const openBlockEditor = useCallback((occurrence) => {
-    setBlockEditing({ block: occurrence.block, occurrence })
-    setBlockPrefill(null)
-    setBlockMode('edit')
-    setBlockOpen(true)
+    setSheet({ mode: 'edit', source: { block: occurrence.block, occurrence }, prefill: null })
   }, [])
 
-  const openBlockCreate = useCallback((prefill = null) => {
-    setBlockEditing(null)
-    setBlockPrefill(prefill)
-    setBlockMode('create')
-    setBlockOpen(true)
-  }, [])
-
-  const openEventCreate = useCallback((type, date = new Date()) => {
-    setEditingEvent(null)
-    setFormMode('create')
-    setFormType(type)
-    setFormDefaultDate(date)
-    setFormOpen(true)
-  }, [])
+  /** The Add key: a blank sheet, due today (PRD D4). */
+  const openCreate = useCallback(
+    (prefill = null) => setSheet({ mode: 'create', source: null, prefill: prefill ?? { due: todayKey } }),
+    [todayKey]
+  )
 
   // A grouped run in Week hides its items; Day draws every one, so a click on
   // the run opens that day rather than guessing which item was meant.
@@ -402,21 +379,16 @@ const CalendarPage = () => {
     [userId]
   )
 
-  // A selection on the hours makes a block there (one-off, on the five-minute
-  // grid); a selection on days or the all-day row makes a deadline, as before.
+  // Context fills one fact (PRD D4): a selection on the hours fills Scheduled
+  // once, there, on the five-minute grid; a day or the all-day row fills Due.
   const handleSelect = useCallback(
     (selectionInfo) => {
-      if (selectionInfo.allDay) openEventCreate('task', selectionInfo.start)
-      else openBlockCreate(selectionToBlock(selectionInfo.start, selectionInfo.end))
+      if (selectionInfo.allDay) openCreate({ due: localDateKey(selectionInfo.start) })
+      else openCreate({ scheduled: selectionToBlock(selectionInfo.start, selectionInfo.end) })
       calendarRef.current?.getApi().unselect()
     },
-    [openEventCreate, openBlockCreate]
+    [openCreate]
   )
-
-  const handleFormSuccess = useCallback(() => {
-    setFormOpen(false)
-    reload()
-  }, [reload])
 
   // CAL-03: Drag-and-drop rescheduling. A block writes what its rule allows
   // (PRD D1): a one-off its date and start, a recurring block its start on the
@@ -503,33 +475,22 @@ const CalendarPage = () => {
     <Container maxWidth='xl' sx={{ px: { xs: 2, md: 3 }, py: { xs: 3, sm: 4 }, height: { xs: 'auto', sm: 'calc(100vh - 64px)' } }}>
       <Stack spacing={2} sx={{ height: '100%' }}>
         {/* Row one: the page and its one solid-primary action (ADR-016, decision 1).
-            Since PLAN-004 the key is a menu: a block, or one of the four deadlines. */}
+            Since PLAN-012 the key opens the item sheet directly: there is no kind
+            to choose, so there is no menu. */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
           <Typography level='h2' component='h1'>
             {t('calendarPage.title')}
           </Typography>
-          <Dropdown>
-            <MenuButton
-              slots={{ root: Button }}
-              slotProps={{ root: { variant: 'solid', color: 'primary', size: 'sm' } }}
-              startDecorator={<AddRoundedIcon />}
-              endDecorator={<KeyboardArrowDown fontSize='small' />}
-              sx={{ ...focusRing, ...touchTarget, flexShrink: 0 }}
-            >
-              {t('calendarPage.add')}
-            </MenuButton>
-            <Menu placement='bottom-end' sx={menuSx}>
-              <MenuItem onClick={() => openBlockCreate()} sx={itemSx}>
-                <Typography level='body-sm'>{t('calendarPage.blocks.menuBlock')}</Typography>
-              </MenuItem>
-              <ListDivider />
-              {EVENT_TYPES.map((type) => (
-                <MenuItem key={type} onClick={() => openEventCreate(type)} sx={itemSx}>
-                  <Typography level='body-sm'>{t(`calendarModal.form.types.${type}`)}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Dropdown>
+          <Button
+            variant='solid'
+            color='primary'
+            size='sm'
+            startDecorator={<AddRoundedIcon />}
+            onClick={() => openCreate()}
+            sx={{ ...focusRing, ...touchTarget, flexShrink: 0 }}
+          >
+            {t('calendarPage.add')}
+          </Button>
         </Box>
 
         {/* Row two: one toolbar on the grid's rails */}
@@ -641,28 +602,16 @@ const CalendarPage = () => {
         )}
       </Stack>
 
-      {/* Event create/edit modal — key forces clean re-mount when editing a different event */}
-      <EventFormModal
-        key={editingEvent?.id ?? 'new'}
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSuccess={handleFormSuccess}
-        mode={formMode}
-        event={editingEvent}
-        defaultDate={formDefaultDate}
-        initialType={formType}
-      />
-
-      {/* The block sheet (PLAN-004). `useBlocks` invalidates the family on
-          every write, so the grid and the readout refetch without a reload here. */}
-      <BlockFormModal
-        key={blockEditing?.block?.id ?? 'new-block'}
-        open={blockOpen}
-        onClose={() => setBlockOpen(false)}
-        mode={blockMode}
-        block={blockEditing?.block ?? null}
-        occurrence={blockEditing?.occurrence ?? null}
-        prefill={blockPrefill}
+      {/* The item sheet (PLAN-012). `useBlocks` and the writer invalidate what
+          they touch; the deadlines reload here, as the forms' success did. */}
+      <ItemSheet
+        key={sheet?.source?.block?.id ?? sheet?.source?.task?._id ?? sheet?.source?.milestone?.id ?? 'new'}
+        open={Boolean(sheet)}
+        onClose={() => setSheet(null)}
+        onSaved={reload}
+        mode={sheet?.mode ?? 'create'}
+        source={sheet?.source ?? null}
+        prefill={sheet?.prefill ?? null}
         blocks={blocks ?? []}
       />
     </Container>

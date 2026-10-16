@@ -51,6 +51,8 @@ import { useKeyboardHeight } from './useKeyboardHeight'
 const SheetContext = createContext(false)
 
 export const useInSheet = () => useContext(SheetContext)
+/** For another sheet shape (the full-height item sheet) to mark its inside the same way. */
+export const InSheet = SheetContext.Provider
 
 const DISMISS_FRACTION = 0.33
 const DISMISS_VELOCITY = 0.5
