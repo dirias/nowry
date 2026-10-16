@@ -40,6 +40,8 @@ const title = () => screen.getByLabelText(/items.sheet.title/)
 const readout = () => screen.getByTestId('item-readout')
 const key = (name) => screen.getByRole('button', { name })
 const dayToggle = (name) => within(screen.getByRole('group', { name: 'items.sheet.days' })).getByRole('button', { name })
+const row = (id) => within(screen.getByTestId(`row-${id}`))
+const openRow = (id, label = 'items.sheet.set') => fireEvent.click(row(id).getByRole('button', { name: label }))
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -57,12 +59,15 @@ describe('no kind to choose: the readout and the key follow the facts', () => {
 
   it('setting a time on weekdays with no due date reads as a routine; a due date makes it a task again', () => {
     open()
-    fireEvent.click(key('items.sheet.setTime'))
+    openRow('scheduled')
     fireEvent.click(dayToggle('Monday'))
     expect(readout()).toHaveTextContent('items.reading.routine')
     expect(key('items.key.add.routine')).toBeInTheDocument()
+    openRow('due')
     fireEvent.change(screen.getByLabelText('items.sheet.due'), { target: { value: tomorrowKey } })
     expect(key('items.key.add.task')).toBeInTheDocument()
+    // One row open at a time: opening Due closed Scheduled.
+    expect(screen.queryByRole('group', { name: 'items.sheet.days' })).toBeNull()
   })
 
   it('picking a goal reads as a milestone; the priority switch says priority in the readout, never in the key', () => {
@@ -94,9 +99,9 @@ describe('context fills one fact', () => {
     )
   })
 
-  it('from a day: due that day; the Study Center: a scheduled study time with its title', () => {
+  it('from a day: due that day, read on its row and in the readout', () => {
     open({ prefill: { due: tomorrowKey } })
-    expect(screen.getByLabelText('items.sheet.due')).toHaveValue(tomorrowKey)
+    expect(row('due').getByRole('button', { name: 'items.sheet.change' })).toBeInTheDocument()
     expect(readout()).toHaveTextContent('items.readout.due')
   })
 
@@ -110,7 +115,7 @@ describe('context fills one fact', () => {
 describe('the key is never disabled; errors are loud', () => {
   it('an empty title fails under the field; a once time with no day and no due date fails under Scheduled', async () => {
     open()
-    fireEvent.click(key('items.sheet.setTime'))
+    openRow('scheduled')
     await act(async () => {
       fireEvent.click(key('items.key.add.task'))
     })
@@ -133,6 +138,22 @@ describe('the key is never disabled; errors are loud', () => {
   })
 })
 
+describe('the rows (PRD D10)', () => {
+  it('a once time with a due date needs no second date; without one the once-date field appears; × removes the time', () => {
+    open({ prefill: { due: tomorrowKey } })
+    openRow('scheduled')
+    expect(screen.queryByLabelText('items.sheet.onceDate')).toBeNull()
+    expect(screen.getByText('items.sheet.onceOnDue')).toBeInTheDocument()
+    openRow('due', 'items.sheet.change')
+    fireEvent.click(row('due').getByRole('button', { name: 'items.sheet.noDate' }))
+    openRow('scheduled', 'items.sheet.change')
+    expect(screen.getByLabelText('items.sheet.onceDate')).toBeInTheDocument()
+    fireEvent.click(row('scheduled').getByRole('button', { name: 'items.sheet.removeTime' }))
+    expect(row('scheduled').getByRole('button', { name: 'items.sheet.set' })).toBeInTheDocument()
+    expect(screen.queryByTestId('row-more')).toBeNull()
+  })
+})
+
 describe('edit reads any document', () => {
   const task = { _id: 't1', title: 'Essay', deadline: `${tomorrowKey}T00:00:00`, is_priority: true, is_completed: false }
   const block = {
@@ -147,10 +168,12 @@ describe('edit reads any document', () => {
 
   it('a task with its block opens with due, priority and the time, its goal locked, and saves with done', async () => {
     open({ mode: 'edit', source: { task }, blocks: [block] })
-    expect(screen.getByLabelText('items.sheet.due')).toHaveValue(tomorrowKey)
+    expect(row('due').getByRole('button', { name: 'items.sheet.change' })).toBeInTheDocument()
     expect(screen.getByLabelText('items.sheet.priority')).toBeChecked()
+    openRow('scheduled', 'items.sheet.change')
     expect(screen.getByLabelText('calendarPage.blocks.form.starts')).toHaveValue('13:00')
-    expect(screen.queryByRole('button', { name: 'items.sheet.goal' })).toBeNull()
+    // The goal is locked once the item exists: a value, no action.
+    expect(row('goal').queryByRole('button')).toBeNull()
     fireEvent.click(screen.getByLabelText('items.sheet.done'))
     await act(async () => {
       fireEvent.click(key('items.key.save'))
@@ -176,6 +199,7 @@ describe('edit reads any document', () => {
     mockKeep.mockResolvedValue({})
     open({ mode: 'edit', source: { block: routine, occurrence }, blocks: [routine] })
     expect(readout()).toHaveTextContent('items.reading.routine')
+    openRow('scheduled', 'items.sheet.change')
     expect(dayToggle('Monday')).toHaveAttribute('aria-pressed', 'true')
     await act(async () => {
       fireEvent.click(key('calendarPage.blocks.kept'))

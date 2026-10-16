@@ -19,7 +19,7 @@ import {
 } from '@mui/joy'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
-import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
@@ -33,7 +33,8 @@ import {
   keyLabel,
   missingIn,
   readoutParts,
-  repeats
+  repeats,
+  scheduledReadout
 } from '@nowry/core/domain/items'
 import {
   BLOCK_STEP,
@@ -58,29 +59,33 @@ import { formatMinutes } from './blockEvents'
 
 /**
  * ItemSheet — the one form for everything a learner writes down (PLAN-012,
- * ADR-046). A title and four optional facts: Due, Scheduled, Priority, Part
- * of a goal. Nothing asks what kind it is; the header's readout and the key's
- * label read the kind off the facts as they change ("Add task", "Add
- * routine", "Add milestone"). Context fills one fact on open: a day fills
- * Due, the hours fill Scheduled, a goal's page fills the goal, the Study
- * Center fills a scheduled study time; the Add key opens it blank.
+ * PLAN-015, ADR-046). A title and four optional facts: Due, Scheduled,
+ * Priority, Part of a goal. Nothing asks what kind it is; the header's readout
+ * and the key's label read the kind off the facts ("Add task", "Add routine",
+ * "Add milestone"). Context fills one fact on open: a day fills Due, the hours
+ * fill Scheduled, a goal's page fills the goal, the Study Center fills a
+ * scheduled study time; the Add key opens it blank.
  *
- * Replaces EventFormModal and BlockFormModal. The writes are `useItemWriter`'s;
- * what is here is this form's own state.
+ * **Each fact is a row that reads its value** (PRD D10). One anatomy — label ·
+ * value · one action at the end. An unset row reads quietly and offers Set; a
+ * set row reads its value and offers Change (Scheduled also ×). One row opens
+ * at a time, in place, on a `level1` ground; the sheet is a `standard` sheet
+ * and never scrolls with a row open. The once-date field exists only while
+ * there is no due date: with one, a once item is scheduled on its due day.
  *
  * Props:
  *   open, onClose, onSaved – the sheet's lifecycle; `onSaved` after a write
  *   mode     – 'create' | 'edit'
  *   source   – what is being edited: `{ task, milestone, goalId, block, occurrence }`
- *              (task and milestone in the API's shape, block camelCase)
  *   prefill  – partial facts for create: `{ title, due, scheduled, goalId, origin }`
- *   blocks   – the learner's blocks, for the After picker and to find the one the item spans
+ *   blocks   – the learner's blocks, for After and to find the block an item spans
  */
 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6] // Monday first, the API's convention
 const DEFAULT_LENGTH = 20
 const TIME_STEP_SECONDS = 300
 const A_MONDAY = new Date(2024, 0, 1)
+const LABEL_WIDTH = 128
 
 const clampLength = (minutes) => Math.min(MAX_BLOCK_MINUTES, Math.max(MIN_BLOCK_MINUTES, minutes))
 
@@ -111,42 +116,82 @@ const existingOf = (source, blocks) => {
   return { task: source.task ?? null, milestone: source.milestone ?? null, goalId: source.goalId ?? null, block }
 }
 
-/** "20 min" with − and + on the five-minute grid. */
-const LengthStepper = ({ value, onChange, hint, t }) => (
-  <FormControl>
-    <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.lasts')}</FormLabel>
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-      <IconButton
-        variant='soft'
-        color='neutral'
-        size='sm'
-        onClick={() => onChange(clampLength(value - BLOCK_STEP))}
-        aria-label={t('calendarPage.blocks.form.less')}
-        sx={{ minHeight: { xs: 44, sm: 36 }, minWidth: { xs: 44, sm: 36 }, ...focusRing }}
-      >
-        <RemoveRoundedIcon fontSize='small' />
-      </IconButton>
-      <Typography level='body-md' aria-live='polite' sx={{ minWidth: 72, textAlign: 'center', fontWeight: 'md', ...tabularNums }}>
-        {formatMinutes(value, t)}
+const formatDate = (key, language, long = false) =>
+  new Intl.DateTimeFormat(
+    language,
+    long ? { weekday: 'long', day: 'numeric', month: 'long' } : { weekday: 'short', day: 'numeric', month: 'short' }
+  ).format(new Date(`${key}T00:00:00`))
+
+/** A readout part → its sentence, with a date key formatted for the locale. */
+const sayPart = ({ key, params }, t, language) =>
+  params?.date ? t(key, { ...params, date: formatDate(params.date, language) }) : t(key, params)
+
+/** The quiet in-row action: Set · Change · Choose · Done. */
+const RowAction = ({ label, onClick, expanded = null }) => (
+  <Button
+    variant='plain'
+    color='primary'
+    size='sm'
+    onClick={onClick}
+    aria-expanded={expanded ?? undefined}
+    sx={{ px: 0.75, minHeight: 32, flexShrink: 0, ...focusRing }}
+  >
+    {label}
+  </Button>
+)
+
+/**
+ * The row anatomy (PRD D10): label · value · one action. `quiet` draws an
+ * unset value in tertiary ink. `editor`, when present, is the open state
+ * drawn under the row on a level1 ground.
+ */
+const FactRow = ({ label, value, quiet = false, action = null, editor = null, last = false, testId }) => (
+  <Box data-testid={testId} sx={{ borderBottom: last || editor ? 0 : '1px solid', borderColor: 'divider' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minHeight: 52 }}>
+      <Typography level='body-sm' sx={{ width: LABEL_WIDTH, flexShrink: 0, fontWeight: 'lg' }}>
+        {label}
       </Typography>
-      <IconButton
-        variant='soft'
-        color='neutral'
-        size='sm'
-        onClick={() => onChange(clampLength(value + BLOCK_STEP))}
-        aria-label={t('calendarPage.blocks.form.more')}
-        sx={{ minHeight: { xs: 44, sm: 36 }, minWidth: { xs: 44, sm: 36 }, ...focusRing }}
-      >
-        <AddRoundedIcon fontSize='small' />
-      </IconButton>
+      <Typography level='body-md' noWrap sx={{ flex: 1, minWidth: 0, color: quiet ? 'text.tertiary' : 'text.primary', ...tabularNums }}>
+        {value}
+      </Typography>
+      {action}
     </Box>
-    {hint && <FormHelperText>{hint}</FormHelperText>}
-  </FormControl>
+    {editor && <Box sx={{ bgcolor: 'background.level1', borderRadius: 'md', px: 2, py: 1.75, mb: 1.5 }}>{editor}</Box>}
+  </Box>
+)
+
+/** "20 min" with − and + on the five-minute grid. */
+const LengthStepper = ({ value, onChange, t }) => (
+  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+    <IconButton
+      variant='soft'
+      color='neutral'
+      size='sm'
+      onClick={() => onChange(clampLength(value - BLOCK_STEP))}
+      aria-label={t('calendarPage.blocks.form.less')}
+      sx={{ minHeight: 32, minWidth: 32, ...focusRing }}
+    >
+      <RemoveRoundedIcon fontSize='small' />
+    </IconButton>
+    <Typography level='body-md' aria-live='polite' sx={{ minWidth: 64, textAlign: 'center', fontWeight: 'md', ...tabularNums }}>
+      {formatMinutes(value, t)}
+    </Typography>
+    <IconButton
+      variant='soft'
+      color='neutral'
+      size='sm'
+      onClick={() => onChange(clampLength(value + BLOCK_STEP))}
+      aria-label={t('calendarPage.blocks.form.more')}
+      sx={{ minHeight: 32, minWidth: 32, ...focusRing }}
+    >
+      <AddRoundedIcon fontSize='small' />
+    </IconButton>
+  </Box>
 )
 
 /** Seven toggles, "any of": each its own key with its own ground. */
 const DayToggles = ({ days, onToggle, labels, t }) => (
-  <Box role='group' aria-label={t('items.sheet.days')} sx={{ display: 'flex', gap: 0.5 }}>
+  <Box role='group' aria-label={t('items.sheet.days')} sx={{ display: 'flex', gap: 0.5, flex: 1 }}>
     {WEEKDAYS.map((day) => {
       const on = days.includes(day)
       return (
@@ -162,12 +207,12 @@ const DayToggles = ({ days, onToggle, labels, t }) => (
             flex: 1,
             minWidth: 0,
             px: 0,
-            minHeight: { xs: 44, sm: 36 },
-            bgcolor: on ? 'background.level2' : 'background.level1',
+            minHeight: 36,
+            bgcolor: on ? 'background.level2' : 'background.surface',
             color: on ? 'text.primary' : 'text.tertiary',
             fontWeight: on ? 'lg' : 'md',
-            '--variant-softHoverBg': on ? 'var(--joy-palette-background-level2)' : 'var(--joy-palette-background-level1)',
-            '--variant-softActiveBg': on ? 'var(--joy-palette-background-level2)' : 'var(--joy-palette-background-level1)',
+            '--variant-softHoverBg': on ? 'var(--joy-palette-background-level2)' : 'var(--joy-palette-background-surface)',
+            '--variant-softActiveBg': on ? 'var(--joy-palette-background-level2)' : 'var(--joy-palette-background-surface)',
             '&:hover': { color: 'text.primary' },
             ...focusRing
           }}
@@ -186,78 +231,46 @@ const remindLabel = (option, t) =>
       ? t('calendarPage.blocks.form.remindAtStart')
       : t('calendarPage.blocks.form.remindMinutes', { count: option })
 
-const RemindObject = ({ value, onChange, t }) => (
-  <FormControl>
-    <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.remind')}</FormLabel>
-    <Sheet variant='outlined' role='group' aria-label={t('calendarPage.blocks.form.remind')} sx={{ ...segmentedGroup, width: '100%' }}>
-      {REMINDER_OPTIONS.map((option, index) => (
-        <Button
-          key={String(option)}
-          variant='plain'
-          color='neutral'
-          onClick={() => onChange(option)}
-          aria-pressed={value === option}
-          sx={{ ...segment(value === option, index === 0), flex: 1, px: 1 }}
-        >
-          {remindLabel(option, t)}
-        </Button>
-      ))}
-    </Sheet>
-  </FormControl>
+const EditorLabel = ({ children }) => (
+  <Typography level='body-xs' sx={{ width: 76, flexShrink: 0, fontWeight: 'lg', color: 'text.secondary' }}>
+    {children}
+  </Typography>
 )
 
 /** The day's record for a block occurrence: its state, and Kept · Skip · Undo. */
-const TodaySection = ({ occurrence, log, state, onKeep, onSkip, onUndo, pending, language, t }) => {
-  const heading =
-    occurrence.date === localDateKey()
-      ? t('calendarPage.blocks.form.today')
-      : new Intl.DateTimeFormat(language, { weekday: 'long', day: 'numeric', month: 'long' }).format(
-          new Date(`${occurrence.date}T00:00:00`)
-        )
-  return (
-    <Box sx={{ p: 2, borderRadius: 'md', bgcolor: 'background.level1' }}>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1.5 }}>
-        <Typography level='title-sm'>{heading}</Typography>
-        <Typography level='body-sm' sx={{ color: 'text.tertiary', ...tabularNums }}>
-          {t(`calendarPage.blocks.state.${state}`)}
-        </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        <Button
-          variant='soft'
-          color='neutral'
-          size='sm'
-          onClick={onKeep}
-          aria-pressed={log?.status === 'kept'}
-          loading={pending}
-          sx={focusRing}
-        >
-          {t('calendarPage.blocks.kept')}
-        </Button>
-        <Button variant='soft' color='neutral' size='sm' onClick={onSkip} aria-pressed={log?.status === 'skipped'} sx={focusRing}>
-          {t('calendarPage.blocks.skip')}
-        </Button>
-        {log && (
-          <Button variant='plain' color='neutral' size='sm' onClick={onUndo} sx={focusRing}>
-            {t('calendarPage.blocks.undo')}
-          </Button>
-        )}
-      </Box>
+const TodaySection = ({ occurrence, log, state, onKeep, onSkip, onUndo, pending, language, t }) => (
+  <Box sx={{ p: 2, borderRadius: 'md', bgcolor: 'background.level1', mt: 2 }}>
+    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1.5 }}>
+      <Typography level='title-sm'>
+        {occurrence.date === localDateKey() ? t('calendarPage.blocks.form.today') : formatDate(occurrence.date, language, true)}
+      </Typography>
+      <Typography level='body-sm' sx={{ color: 'text.tertiary', ...tabularNums }}>
+        {t(`calendarPage.blocks.state.${state}`)}
+      </Typography>
     </Box>
-  )
-}
-
-/** The header's readout, joined from the facts' parts. */
-const readoutText = (facts, t, language) =>
-  readoutParts(facts)
-    .map(({ key, params }) => {
-      if (!params?.date) return t(key, params)
-      const date = new Intl.DateTimeFormat(language, { weekday: 'short', day: 'numeric', month: 'short' }).format(
-        new Date(`${params.date}T00:00:00`)
-      )
-      return t(key, { ...params, date })
-    })
-    .join(' · ')
+    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      <Button
+        variant='soft'
+        color='neutral'
+        size='sm'
+        onClick={onKeep}
+        aria-pressed={log?.status === 'kept'}
+        loading={pending}
+        sx={focusRing}
+      >
+        {t('calendarPage.blocks.kept')}
+      </Button>
+      <Button variant='soft' color='neutral' size='sm' onClick={onSkip} aria-pressed={log?.status === 'skipped'} sx={focusRing}>
+        {t('calendarPage.blocks.skip')}
+      </Button>
+      {log && (
+        <Button variant='plain' color='neutral' size='sm' onClick={onUndo} sx={focusRing}>
+          {t('calendarPage.blocks.undo')}
+        </Button>
+      )}
+    </Box>
+  </Box>
+)
 
 const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, prefill = null, blocks = [] }) => {
   const { t, i18n } = useTranslation()
@@ -266,13 +279,14 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
   const occurrence = source?.occurrence ?? null
 
   const [facts, setFacts] = useState(() => initialFacts({ isEdit, source, prefill, blocks }))
+  // The one open row: 'due' | 'scheduled' | 'goal' | 'more' | null.
+  const [openRow, setOpenRow] = useState(null)
   const [lengthSet, setLengthSet] = useState(isEdit)
   const [done, setDone] = useState(false)
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(false)
   const [log, setLog] = useState(occurrence?.log ?? null)
   const titleRef = useRef(null)
 
@@ -285,12 +299,13 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
     if (!open) return
     const next = initialFacts({ isEdit, source, prefill, blocks })
     setFacts(next)
+    // The hours hand over a time to confirm, so that row opens; everything else opens closed.
+    setOpenRow(!isEdit && prefill?.scheduled ? 'scheduled' : null)
     setLengthSet(isEdit || Boolean(prefill?.scheduled?.lengthMin))
     setDone(Boolean(source?.task?.is_completed || source?.milestone?.completed))
     setErrors({})
     setSaveError(null)
     setConfirmDelete(false)
-    setMoreOpen(next.scheduled?.reminderMin != null || Boolean(next.scheduled?.afterBlockId))
     setLog(occurrence?.log ?? null)
     // `blocks` only serves to find the block an item spans; a refetch must not reset typing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -298,6 +313,7 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
 
   const patch = (changes) => setFacts((prev) => ({ ...prev, ...changes }))
   const patchScheduled = (changes) => setFacts((prev) => ({ ...prev, scheduled: { ...prev.scheduled, ...changes } }))
+  const toggleRow = (row) => setOpenRow((prev) => (prev === row ? null : row))
 
   const openGoals = useMemo(
     () =>
@@ -325,6 +341,7 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
   const proposal = due > 0 ? studyBlockLength(due) : null
   const lengthMin = facts.scheduled ? (!lengthSet && proposal ? proposal : facts.scheduled.lengthMin) : DEFAULT_LENGTH
   const lengthHint = proposal ? t('calendarPage.blocks.form.forecastHint', { count: due, minutes: proposal }) : null
+  const withLength = facts.scheduled ? { ...facts, scheduled: { ...facts.scheduled, lengthMin } } : facts
 
   const toggleDay = (day) => {
     const days = facts.scheduled.daysOfWeek
@@ -333,10 +350,11 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
   }
 
   const validate = () => {
-    const missing = missingIn({ ...facts, scheduled: facts.scheduled ? { ...facts.scheduled, lengthMin } : null })
+    const missing = missingIn(withLength)
     const next = { title: missing.includes('title'), date: missing.includes('date') }
     setErrors(next)
     if (next.title) titleRef.current?.focus()
+    if (next.date) setOpenRow('scheduled')
     return missing.length === 0
   }
 
@@ -345,9 +363,8 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
     setSaving(true)
     setSaveError(null)
     try {
-      const toSave = facts.scheduled ? { ...facts, scheduled: { ...facts.scheduled, lengthMin } } : facts
       const areaId = openGoals.find((g) => g.id === facts.goalId)?.areaId ?? null
-      await saveItem(toSave, existing, { areaId, done: isEdit && (source?.task || source?.milestone) ? done : null })
+      await saveItem(withLength, existing, { areaId, done: goalLocked ? done : null })
       onSaved?.()
       onClose()
     } catch (err) {
@@ -388,10 +405,166 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
 
   const showsRecord = isEdit && occurrence && occurrence.date <= todayKey
   const recordState = showsRecord ? stateOf({ ...occurrence, log }, clockOn(occurrence.date, todayKey, minutesOfDay(new Date()))) : null
-  const canTick = isEdit && Boolean(source?.task || source?.milestone)
   const afterLabel = (
     otherRecurring.find((b) => b.id === facts.scheduled?.afterBlockId)?.title || t('calendarPage.blocks.form.afterNone')
   ).toLowerCase()
+  const onceNeedsDate = facts.scheduled && !repeats(facts.scheduled) && !facts.due
+
+  // ── The rows' values ───────────────────────────────────────────────────
+  const dueValue = facts.due ? formatDate(facts.due, language) : t('items.sheet.noDate')
+  const scheduledValue = facts.scheduled
+    ? `${sayPart(scheduledReadout(withLength), t, language)} · ${formatMinutes(lengthMin, t)}`
+    : t('items.sheet.noDate')
+  const goalValue = goalLabel ?? t('items.sheet.goalNone')
+  const moreValue = facts.scheduled
+    ? t('calendarPage.blocks.form.moreSummary', { remind: remindLabel(facts.scheduled.reminderMin ?? null, t), after: afterLabel })
+    : ''
+
+  // ── The editors: the open state of a row ───────────────────────────────
+  const dueEditor = (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Input
+        type='date'
+        size='md'
+        value={facts.due ?? ''}
+        onChange={(event) => patch({ due: event.target.value || null })}
+        slotProps={{ input: { 'aria-label': t('items.sheet.due') } }}
+        sx={{ maxWidth: 220, ...focusRing }}
+      />
+      {facts.due && (
+        <Button variant='plain' color='neutral' size='sm' onClick={() => patch({ due: null })} sx={focusRing}>
+          {t('items.sheet.noDate')}
+        </Button>
+      )}
+    </Box>
+  )
+
+  const scheduledEditor = facts.scheduled && (
+    <Stack spacing={1.5}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+        <EditorLabel>{t('calendarPage.blocks.form.starts')}</EditorLabel>
+        <Input
+          type='time'
+          size='md'
+          value={facts.scheduled.start}
+          onChange={(event) => patchScheduled({ start: event.target.value || facts.scheduled.start })}
+          slotProps={{ input: { step: TIME_STEP_SECONDS, 'aria-label': t('calendarPage.blocks.form.starts') } }}
+          sx={{ width: 140, ...focusRing }}
+        />
+        <EditorLabel>{t('calendarPage.blocks.form.lasts')}</EditorLabel>
+        <LengthStepper
+          value={lengthMin}
+          onChange={(value) => {
+            patchScheduled({ lengthMin: value })
+            setLengthSet(true)
+          }}
+          t={t}
+        />
+      </Box>
+      {lengthHint && (
+        <Typography level='body-xs' sx={{ color: 'text.tertiary', pl: 11 }}>
+          {lengthHint}
+        </Typography>
+      )}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <EditorLabel>{t('items.sheet.days')}</EditorLabel>
+        <DayToggles days={facts.scheduled.daysOfWeek} onToggle={toggleDay} labels={weekdayLabels} t={t} />
+      </Box>
+      {onceNeedsDate && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <EditorLabel>{t('items.sheet.onceDate')}</EditorLabel>
+          <Input
+            type='date'
+            size='md'
+            value={facts.scheduled.date ?? ''}
+            onChange={(event) => {
+              patchScheduled({ date: event.target.value || null })
+              setErrors((prev) => ({ ...prev, date: false }))
+            }}
+            slotProps={{ input: { 'aria-label': t('items.sheet.onceDate') } }}
+            sx={{ maxWidth: 220, ...focusRing }}
+          />
+        </Box>
+      )}
+      <FormHelperText sx={{ pl: 11, color: errors.date ? 'danger.plainColor' : 'text.tertiary' }}>
+        {errors.date
+          ? t('items.sheet.dateRequired')
+          : repeats(facts.scheduled)
+            ? ''
+            : facts.due
+              ? t('items.sheet.onceOnDue')
+              : t('items.sheet.onceHint')}
+      </FormHelperText>
+    </Stack>
+  )
+
+  const goalEditor = goalsLoading ? (
+    <Skeleton variant='rectangular' height={40} sx={{ borderRadius: 'sm' }} />
+  ) : (
+    <Select
+      size='md'
+      value={facts.goalId || null}
+      onChange={(_, v) => {
+        patch({ goalId: v || null })
+        setOpenRow(null)
+      }}
+      placeholder={t('items.sheet.goalNone')}
+      slotProps={{ button: { 'aria-label': t('items.sheet.goal') } }}
+      sx={{ maxWidth: 360, ...focusRing }}
+    >
+      <Option value=''>{t('items.sheet.goalNone')}</Option>
+      {openGoals.map((option) => (
+        <Option key={option.id} value={option.id}>
+          {option.label}
+        </Option>
+      ))}
+    </Select>
+  )
+
+  const moreEditor = facts.scheduled && (
+    <Stack spacing={2}>
+      <FormControl>
+        <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.remind')}</FormLabel>
+        <Sheet variant='outlined' role='group' aria-label={t('calendarPage.blocks.form.remind')} sx={{ ...segmentedGroup, width: '100%' }}>
+          {REMINDER_OPTIONS.map((option, index) => (
+            <Button
+              key={String(option)}
+              variant='plain'
+              color='neutral'
+              onClick={() => patchScheduled({ reminderMin: option })}
+              aria-pressed={(facts.scheduled.reminderMin ?? null) === option}
+              sx={{ ...segment((facts.scheduled.reminderMin ?? null) === option, index === 0), flex: 1, px: 1 }}
+            >
+              {remindLabel(option, t)}
+            </Button>
+          ))}
+        </Sheet>
+      </FormControl>
+      {otherRecurring.length > 0 && (
+        <FormControl>
+          <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.after')}</FormLabel>
+          <Select
+            size='md'
+            value={facts.scheduled.afterBlockId || null}
+            onChange={(_, v) => patchScheduled({ afterBlockId: v || null })}
+            placeholder={t('calendarPage.blocks.form.afterNone')}
+            slotProps={{ button: { 'aria-label': t('calendarPage.blocks.form.after') } }}
+            sx={focusRing}
+          >
+            <Option value=''>{t('calendarPage.blocks.form.afterNone')}</Option>
+            {otherRecurring.map((other) => (
+              <Option key={other.id} value={other.id}>
+                {other.title}
+              </Option>
+            ))}
+          </Select>
+          <FormHelperText>{t('calendarPage.blocks.form.afterHelper')}</FormHelperText>
+        </FormControl>
+      )}
+    </Stack>
+  )
+
+  const actionLabel = (row, isSet) => (openRow === row ? t('items.sheet.closeRow') : isSet ? t('items.sheet.change') : t('items.sheet.set'))
 
   const actionSx = { width: { xs: '100%', sm: 'auto' }, ...focusRing }
   const footer = (
@@ -413,14 +586,16 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
         titleKey={isEdit ? 'items.sheet.editTitle' : 'items.sheet.addTitle'}
         subtitleText={
           <Box component='span' aria-live='polite' data-testid='item-readout'>
-            {readoutText(facts, t, language)}
+            {readoutParts(withLength)
+              .map((part) => sayPart(part, t, language))
+              .join(' · ')}
           </Box>
         }
-        width='simple'
+        width='standard'
         banner={saveError ? <FormErrorBanner titleKey='calendarModal.form.saveErrorTitle' detailText={saveError} /> : null}
         footer={footer}
       >
-        <Stack spacing={2.5}>
+        <Box sx={{ mb: 1 }}>
           <FormTextField
             labelKey='items.sheet.title'
             placeholderKey='items.sheet.titlePlaceholder'
@@ -436,214 +611,145 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
             autoFocus
             inputRef={titleRef}
           />
+        </Box>
 
-          {/* Due and Priority are one row: the two facts that make a task. */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, alignItems: 'start' }}>
-            <FormControl>
-              <FormLabel sx={formLabel}>{t('items.sheet.due')}</FormLabel>
-              <Input
-                type='date'
-                size='lg'
-                value={facts.due ?? ''}
-                onChange={(event) => patch({ due: event.target.value || null })}
-                slotProps={{ input: { 'aria-label': t('items.sheet.due') } }}
-                sx={focusRing}
+        <FactRow
+          testId='row-due'
+          label={t('items.sheet.due')}
+          value={dueValue}
+          quiet={!facts.due}
+          action={
+            <RowAction label={actionLabel('due', Boolean(facts.due))} expanded={openRow === 'due'} onClick={() => toggleRow('due')} />
+          }
+          editor={openRow === 'due' ? dueEditor : null}
+        />
+
+        <FactRow
+          testId='row-scheduled'
+          label={t('items.sheet.scheduled')}
+          value={scheduledValue}
+          quiet={!facts.scheduled}
+          action={
+            <>
+              <RowAction
+                label={actionLabel('scheduled', Boolean(facts.scheduled))}
+                expanded={openRow === 'scheduled'}
+                onClick={() => {
+                  if (!facts.scheduled) patch({ scheduled: defaultScheduled({ date: facts.due }) })
+                  toggleRow('scheduled')
+                }}
               />
-            </FormControl>
-            <FormControl>
-              <FormLabel sx={formLabel}>{t('items.sheet.priority')}</FormLabel>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, minHeight: 48 }}>
-                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                  {t('items.sheet.priorityHint')}
-                </Typography>
-                <Switch
-                  checked={facts.priority}
-                  onChange={(event) => patch({ priority: event.target.checked })}
-                  slotProps={{ input: { 'aria-label': t('items.sheet.priority') } }}
-                  sx={focusRing}
-                />
-              </Box>
-            </FormControl>
-          </Box>
-
-          {/* Scheduled: off until a time is set; then Starts · Lasts, the days, and the once rule. */}
-          <FormControl error={Boolean(errors.date)}>
-            <FormLabel sx={formLabel}>{t('items.sheet.scheduled')}</FormLabel>
-            {!facts.scheduled ? (
-              <Button
-                variant='plain'
-                color='neutral'
-                size='sm'
-                onClick={() => patch({ scheduled: defaultScheduled({ date: facts.due }) })}
-                sx={{ alignSelf: 'flex-start', px: 0.5, color: 'primary.plainColor', ...focusRing }}
-              >
-                {t('items.sheet.setTime')}
-              </Button>
-            ) : (
-              <Stack spacing={1.5}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, alignItems: 'start' }}>
-                  <FormControl>
-                    <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.starts')}</FormLabel>
-                    <Input
-                      type='time'
-                      size='lg'
-                      value={facts.scheduled.start}
-                      onChange={(event) => patchScheduled({ start: event.target.value || facts.scheduled.start })}
-                      slotProps={{ input: { step: TIME_STEP_SECONDS, 'aria-label': t('calendarPage.blocks.form.starts') } }}
-                      sx={focusRing}
-                    />
-                  </FormControl>
-                  <LengthStepper
-                    value={lengthMin}
-                    onChange={(value) => {
-                      patchScheduled({ lengthMin: value })
-                      setLengthSet(true)
-                    }}
-                    hint={lengthHint}
-                    t={t}
-                  />
-                </Box>
-                <DayToggles days={facts.scheduled.daysOfWeek} onToggle={toggleDay} labels={weekdayLabels} t={t} />
-                {!repeats(facts.scheduled) && (
-                  <Input
-                    type='date'
-                    size='lg'
-                    value={facts.scheduled.date ?? facts.due ?? ''}
-                    onChange={(event) => {
-                      patchScheduled({ date: event.target.value || null })
-                      setErrors((prev) => ({ ...prev, date: false }))
-                    }}
-                    slotProps={{ input: { 'aria-label': t('items.sheet.onceDate') } }}
-                    sx={focusRing}
-                  />
-                )}
-                <FormHelperText>{errors.date ? t('items.sheet.dateRequired') : t('items.sheet.onceHint')}</FormHelperText>
-                <Button
+              {facts.scheduled && (
+                <IconButton
                   variant='plain'
                   color='neutral'
                   size='sm'
-                  onClick={() => patch({ scheduled: null })}
-                  sx={{ alignSelf: 'flex-start', px: 0.5, ...focusRing }}
+                  aria-label={t('items.sheet.removeTime')}
+                  onClick={() => {
+                    patch({ scheduled: null })
+                    if (openRow === 'scheduled' || openRow === 'more') setOpenRow(null)
+                  }}
+                  sx={{ minHeight: 32, minWidth: 32, ...focusRing }}
                 >
-                  {t('items.sheet.removeTime')}
-                </Button>
-              </Stack>
-            )}
-          </FormControl>
-
-          {/* Part of a goal: a picker on create, a readout once the item exists. */}
-          <FormControl>
-            <FormLabel sx={formLabel}>{t('items.sheet.goal')}</FormLabel>
-            {goalLocked ? (
-              <Typography level='body-md' sx={{ color: 'text.secondary', minHeight: 48, display: 'flex', alignItems: 'center' }}>
-                {goalLabel ?? t('items.sheet.goalNone')}
-              </Typography>
-            ) : goalsLoading ? (
-              <Skeleton variant='rectangular' height={48} sx={{ borderRadius: 'sm' }} />
-            ) : (
-              <Select
-                size='lg'
-                value={facts.goalId || null}
-                onChange={(_, v) => patch({ goalId: v || null })}
-                placeholder={t('items.sheet.goalNone')}
-                slotProps={{ button: { 'aria-label': t('items.sheet.goal') } }}
-                sx={focusRing}
-              >
-                <Option value=''>{t('items.sheet.goalNone')}</Option>
-                {openGoals.map((option) => (
-                  <Option key={option.id} value={option.id}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-            )}
-          </FormControl>
-
-          {facts.scheduled && (
-            <Box>
-              <Button
-                variant='plain'
-                color='neutral'
-                size='sm'
-                aria-expanded={moreOpen}
-                aria-controls='item-sheet-more'
-                onClick={() => setMoreOpen((prev) => !prev)}
-                startDecorator={
-                  <ExpandMoreRounded
-                    aria-hidden='true'
-                    sx={{
-                      fontSize: 'xl',
-                      transform: moreOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
-                      transition: 'transform var(--nowry-motion-quick) var(--nowry-motion-standard)'
-                    }}
-                  />
-                }
-                sx={{ px: 0.5, ...focusRing }}
-              >
-                {t('calendarPage.blocks.form.moreOptions')}
-                <Typography component='span' level='body-sm' sx={{ color: 'text.tertiary', ml: 1, fontWeight: 'md' }}>
-                  {t('calendarPage.blocks.form.moreSummary', {
-                    remind: remindLabel(facts.scheduled.reminderMin ?? null, t),
-                    after: afterLabel
-                  })}
-                </Typography>
-              </Button>
-            </Box>
-          )}
-
-          {facts.scheduled && moreOpen && (
-            <Stack id='item-sheet-more' spacing={2.5}>
-              <RemindObject value={facts.scheduled.reminderMin ?? null} onChange={(reminderMin) => patchScheduled({ reminderMin })} t={t} />
-              {otherRecurring.length > 0 && (
-                <FormControl>
-                  <FormLabel sx={formLabel}>{t('calendarPage.blocks.form.after')}</FormLabel>
-                  <Select
-                    size='lg'
-                    value={facts.scheduled.afterBlockId || null}
-                    onChange={(_, v) => patchScheduled({ afterBlockId: v || null })}
-                    placeholder={t('calendarPage.blocks.form.afterNone')}
-                    slotProps={{ button: { 'aria-label': t('calendarPage.blocks.form.after') } }}
-                    sx={focusRing}
-                  >
-                    <Option value=''>{t('calendarPage.blocks.form.afterNone')}</Option>
-                    {otherRecurring.map((other) => (
-                      <Option key={other.id} value={other.id}>
-                        {other.title}
-                      </Option>
-                    ))}
-                  </Select>
-                  <FormHelperText>{t('calendarPage.blocks.form.afterHelper')}</FormHelperText>
-                </FormControl>
+                  <CloseRoundedIcon fontSize='small' />
+                </IconButton>
               )}
-            </Stack>
-          )}
+            </>
+          }
+          editor={openRow === 'scheduled' ? scheduledEditor : null}
+        />
 
-          {canTick && (
-            <Checkbox size='lg' checked={done} onChange={(e) => setDone(e.target.checked)} label={t('items.sheet.done')} sx={focusRing} />
-          )}
-
-          {showsRecord && (
-            <TodaySection
-              occurrence={occurrence}
-              log={log}
-              state={recordState}
-              onKeep={record(keep, { status: 'kept', minutes: occurrence.lengthMin })}
-              onSkip={record(skip, { status: 'skipped', minutes: 0 })}
-              onUndo={record(undo, null)}
-              pending={pending}
-              language={language}
-              t={t}
+        <FactRow
+          testId='row-priority'
+          label={t('items.sheet.priority')}
+          value={t(facts.priority ? 'items.sheet.on' : 'items.sheet.off')}
+          quiet={!facts.priority}
+          action={
+            <Switch
+              checked={facts.priority}
+              onChange={(event) => patch({ priority: event.target.checked })}
+              slotProps={{ input: { 'aria-label': t('items.sheet.priority') } }}
+              sx={focusRing}
             />
-          )}
+          }
+        />
 
-          {isEdit && (
-            <Box sx={{ pt: 1 }}>
-              <Button variant='plain' color='danger' size='sm' onClick={() => setConfirmDelete(true)} sx={{ px: 1, ...focusRing }}>
-                {t('items.sheet.delete')}
-              </Button>
-            </Box>
-          )}
-        </Stack>
+        <FactRow
+          testId='row-goal'
+          label={t('items.sheet.goal')}
+          value={goalValue}
+          quiet={!facts.goalId}
+          action={
+            goalLocked ? null : (
+              <RowAction
+                label={openRow === 'goal' ? t('items.sheet.closeRow') : facts.goalId ? t('items.sheet.change') : t('items.sheet.choose')}
+                expanded={openRow === 'goal'}
+                onClick={() => toggleRow('goal')}
+              />
+            )
+          }
+          editor={openRow === 'goal' ? goalEditor : null}
+          last={!facts.scheduled && !goalLocked}
+        />
+
+        {facts.scheduled && (
+          <FactRow
+            testId='row-more'
+            label={t('calendarPage.blocks.form.moreOptions')}
+            value={moreValue}
+            quiet
+            action={
+              <RowAction
+                label={openRow === 'more' ? t('items.sheet.closeRow') : t('items.sheet.change')}
+                expanded={openRow === 'more'}
+                onClick={() => toggleRow('more')}
+              />
+            }
+            editor={openRow === 'more' ? moreEditor : null}
+            last={!goalLocked}
+          />
+        )}
+
+        {goalLocked && (
+          <FactRow
+            testId='row-done'
+            label={t('items.sheet.done')}
+            value={t(done ? 'items.sheet.on' : 'items.sheet.off')}
+            quiet={!done}
+            action={
+              <Checkbox
+                size='lg'
+                checked={done}
+                onChange={(e) => setDone(e.target.checked)}
+                slotProps={{ input: { 'aria-label': t('items.sheet.done') } }}
+                sx={focusRing}
+              />
+            }
+            last
+          />
+        )}
+
+        {showsRecord && (
+          <TodaySection
+            occurrence={occurrence}
+            log={log}
+            state={recordState}
+            onKeep={record(keep, { status: 'kept', minutes: occurrence.lengthMin })}
+            onSkip={record(skip, { status: 'skipped', minutes: 0 })}
+            onUndo={record(undo, null)}
+            pending={pending}
+            language={language}
+            t={t}
+          />
+        )}
+
+        {isEdit && (
+          <Box sx={{ pt: 2 }}>
+            <Button variant='plain' color='danger' size='sm' onClick={() => setConfirmDelete(true)} sx={{ px: 1, ...focusRing }}>
+              {t('items.sheet.delete')}
+            </Button>
+          </Box>
+        )}
       </FormSheet>
 
       {isEdit && (

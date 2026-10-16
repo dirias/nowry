@@ -1,12 +1,16 @@
 /**
- * The item sheet, on the phone (PLAN-012, ADR-046).
+ * The item sheet, on the phone (PLAN-012, PLAN-016, ADR-046).
  *
  * One form for everything a learner writes down: a title and four optional
  * facts — Due, Scheduled, Priority, Part of a goal. Nothing asks what kind it
  * is; the header's readout and the key read the kind off the facts as they
- * change. It replaces the event form and the block sheet, and it takes the
- * screen (`FullSheet`): a form of this many fields in a bottom sheet left
- * half the phone dead and the keys behind the keyboard.
+ * change. It takes the screen (`FullSheet`).
+ *
+ * **Each fact is a row that reads its value** (PRD D10): label · value · one
+ * action at the end, 56pt. An unset row reads quietly and offers Set; a set
+ * row reads its value and offers Change (Scheduled also ×). One row opens at a
+ * time, in place, on a `level1` ground. The once-date field exists only while
+ * there is no due date.
  *
  * The writes are `useItemWriter`'s, shared with the web; the facts come from
  * `@nowry/core/domain/items`, so this file spells no API field (its
@@ -14,10 +18,11 @@
  *
  * **Nothing is disabled to express an error** (BUTTONS.md §4). An empty title
  * fails under the field; a once time with neither a day nor a due date fails
- * under Scheduled; a refused request fails at the top with everything typed.
+ * under Scheduled, which opens to show it; a refused request fails at the top
+ * with everything typed.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
@@ -31,7 +36,8 @@ import {
   keyLabel,
   missingIn,
   readoutParts,
-  repeats
+  repeats,
+  scheduledReadout
 } from '@nowry/core/domain/items'
 import {
   BLOCK_STEP,
@@ -70,6 +76,8 @@ const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6]
 const A_MONDAY = new Date(2024, 0, 1)
 const HOURS = Array.from({ length: 24 }, (_, h) => h)
 const MINUTES = Array.from({ length: 60 / BLOCK_STEP }, (_, i) => i * BLOCK_STEP)
+const LABEL_WIDTH = 104
+const ROW_HEIGHT = 56
 
 const pad = (n) => String(n).padStart(2, '0')
 const clampLength = (minutes) => Math.min(MAX_BLOCK_MINUTES, Math.max(MIN_BLOCK_MINUTES, minutes))
@@ -88,6 +96,57 @@ const initialFacts = ({ isEdit, source, prefill, blocks }) => {
   const facts = factsFrom(prefill ?? {})
   if (facts.scheduled) facts.scheduled = defaultScheduled(facts.scheduled)
   return facts
+}
+
+const formatDate = (key, language) =>
+  new Intl.DateTimeFormat(language, { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(`${key}T00:00:00`))
+
+/** A readout part → its sentence, with a date key formatted for the locale. */
+const sayPart = ({ key, params }, t, language) =>
+  params?.date ? t(key, { ...params, date: formatDate(params.date, language) }) : t(key, params)
+
+/** The row anatomy (PRD D10): label · value · one action; the open editor under it. */
+function FactRow({ label, value, quiet = false, action = null, editor = null, last = false, theme }) {
+  return (
+    <View style={{ borderBottomWidth: last || editor ? 0 : StyleSheet.hairlineWidth, borderBottomColor: resolveColor(theme, 'divider') }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: ROW_HEIGHT, gap: theme.spacing[1] }}>
+        <Typography level='title-sm' style={{ width: LABEL_WIDTH }}>
+          {label}
+        </Typography>
+        <Typography
+          level='body-md'
+          color={quiet ? 'text.tertiary' : 'text.primary'}
+          numberOfLines={2}
+          style={{ flex: 1, fontVariant: ['tabular-nums'] }}
+        >
+          {value}
+        </Typography>
+        {action}
+      </View>
+      {editor ? (
+        <View
+          style={{
+            backgroundColor: resolveColor(theme, 'background.level1'),
+            borderRadius: theme.radius.md,
+            padding: theme.spacing[1.5],
+            marginBottom: theme.spacing[1.5],
+            gap: theme.spacing[1.5]
+          }}
+        >
+          {editor}
+        </View>
+      ) : null}
+    </View>
+  )
+}
+
+/** The quiet in-row action: Set · Change · Choose · Done. */
+function RowAction({ label, onPress, expanded = null }) {
+  return (
+    <Button variant='tertiary' size='sm' onPress={onPress} accessibilityState={expanded === null ? undefined : { expanded }}>
+      {label}
+    </Button>
+  )
 }
 
 /**
@@ -117,13 +176,14 @@ export function ItemSheet({
   const occurrence = source?.occurrence ?? null
 
   const [facts, setFacts] = useState(() => initialFacts({ isEdit, source, prefill, blocks }))
+  // The one open row: 'due' | 'scheduled' | 'goal' | 'more' | null.
+  const [openRow, setOpenRow] = useState(null)
   const [lengthTouched, setLengthTouched] = useState(isEdit)
   const [done, setDone] = useState(false)
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(false)
   const [log, setLog] = useState(occurrence?.log ?? null)
 
   const { saveItem, deleteItem } = useItemWriter()
@@ -135,13 +195,14 @@ export function ItemSheet({
     if (!open) return
     const next = initialFacts({ isEdit, source, prefill, blocks })
     setFacts(next)
+    // The hours hand over a time to confirm, so that row opens; everything else opens closed.
+    setOpenRow(!isEdit && prefill?.scheduled ? 'scheduled' : null)
     setLengthTouched(isEdit || Boolean(prefill?.scheduled?.lengthMin))
     setDone(Boolean(source?.task?.is_completed || source?.milestone?.completed))
     setErrors({})
     setSaveError(false)
     setSaving(false)
     setConfirmingDelete(false)
-    setMoreOpen(next.scheduled?.reminderMin != null || Boolean(next.scheduled?.afterBlockId))
     setLog(occurrence?.log ?? null)
     // `blocks` only serves to find the block an item spans; a refetch must not reset typing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -149,6 +210,7 @@ export function ItemSheet({
 
   const patch = (changes) => setFacts((prev) => ({ ...prev, ...changes }))
   const patchScheduled = (changes) => setFacts((prev) => ({ ...prev, scheduled: { ...prev.scheduled, ...changes } }))
+  const toggleRow = (row) => setOpenRow((prev) => (prev === row ? null : row))
 
   const openGoals = useMemo(
     () => [
@@ -190,6 +252,7 @@ export function ItemSheet({
       ? clampLength(suggestedMinutes)
       : facts.scheduled.lengthMin
     : DEFAULT_LENGTH
+  const withLength = facts.scheduled ? { ...facts, scheduled: { ...facts.scheduled, lengthMin } } : facts
   const start = facts.scheduled?.start ?? PERIOD_STARTS.morning
   const hour = Math.floor(minutesOf(start) / 60)
   const minute = minutesOf(start) % 60
@@ -204,27 +267,21 @@ export function ItemSheet({
     setErrors((prev) => ({ ...prev, date: false }))
   }
 
-  const readout = readoutParts(facts)
-    .map(({ key, params }) => {
-      if (!params?.date) return t(key, params)
-      const date = new Intl.DateTimeFormat(language, { weekday: 'short', day: 'numeric', month: 'short' }).format(
-        new Date(`${params.date}T00:00:00`)
-      )
-      return t(key, { ...params, date })
-    })
+  const readout = readoutParts(withLength)
+    .map((part) => sayPart(part, t, language))
     .join(' · ')
 
   const submit = async () => {
     if (saving) return
-    const toSave = facts.scheduled ? { ...facts, scheduled: { ...facts.scheduled, lengthMin } } : facts
-    const missing = missingIn(toSave)
+    const missing = missingIn(withLength)
     setErrors({ title: missing.includes('title'), date: missing.includes('date') })
+    if (missing.includes('date')) setOpenRow('scheduled')
     if (missing.length > 0) return
     setSaving(true)
     setSaveError(false)
     try {
       const areaId = (goals || []).find((g) => g._id === facts.goalId)?.focus_area_id ?? null
-      await saveItem(toSave, existing, { areaId, done: goalLocked ? done : null })
+      await saveItem(withLength, existing, { areaId, done: goalLocked ? done : null })
       onSaved?.()
       onClose?.()
     } catch {
@@ -265,6 +322,159 @@ export function ItemSheet({
   const recordState = showsRecord
     ? stateOf({ ...occurrence, log }, clockOn(occurrence.date, todayKey, new Date().getHours() * 60 + new Date().getMinutes()))
     : null
+  const onceNeedsDate = facts.scheduled && !repeats(facts.scheduled) && !facts.due
+  const minutesLabel = (count) => t('study.dates.minutes', { count })
+
+  // ── The rows' values ───────────────────────────────────────────────────
+  const dueValue = facts.due ? formatDate(facts.due, language) : t('items.sheet.noDate')
+  const scheduledValue = facts.scheduled
+    ? `${sayPart(scheduledReadout(withLength), t, language)} · ${minutesLabel(lengthMin)}`
+    : t('items.sheet.noDate')
+  const remindValue = (option) =>
+    option == null ? t('blocks.sheet.remindOff') : option === 0 ? t('blocks.sheet.remindAtStart') : minutesLabel(option)
+  const moreValue = facts.scheduled
+    ? t('calendarPage.blocks.form.moreSummary', {
+        remind: remindValue(facts.scheduled.reminderMin),
+        after: (others.find((o) => o.value === (facts.scheduled.afterBlockId ?? ''))?.label ?? others[0].label).toLowerCase()
+      })
+    : ''
+  const actionLabel = (row, isSet) => (openRow === row ? t('items.sheet.closeRow') : isSet ? t('items.sheet.change') : t('items.sheet.set'))
+
+  // ── The editors: the open state of a row ───────────────────────────────
+  const dueEditor = (
+    <Stack spacing={1}>
+      <DateField
+        value={facts.due ?? ''}
+        onChange={(value) => patch({ due: value || null })}
+        accessibilityLabel={t('items.sheet.due')}
+        placeholderKey='items.sheet.noDate'
+      />
+    </Stack>
+  )
+
+  const scheduledEditor = facts.scheduled ? (
+    <Stack spacing={1.5}>
+      <Stack direction='row' spacing={1}>
+        <View style={{ flex: 1 }}>
+          <Select
+            value={hour}
+            options={HOURS.map((h) => ({ value: h, label: pad(h) }))}
+            onChange={(h) => setClock(h, minute)}
+            accessibilityLabel={t('blocks.sheet.hour')}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Select
+            value={minute}
+            options={MINUTES.map((m) => ({ value: m, label: pad(m) }))}
+            onChange={(m) => setClock(hour, m)}
+            accessibilityLabel={t('blocks.sheet.minute')}
+          />
+        </View>
+        <Stack direction='row' spacing={0.5} style={{ alignItems: 'center', flex: 1.3 }}>
+          <IconButton variant='secondary' accessibilityLabel={t('blocks.sheet.shorter')} onPress={() => stepLength(-BLOCK_STEP)}>
+            <Icon name='Minus' size='sm' color='text.secondary' />
+          </IconButton>
+          <Typography level='title-sm' style={{ flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }}>
+            {minutesLabel(lengthMin)}
+          </Typography>
+          <IconButton variant='secondary' accessibilityLabel={t('blocks.sheet.longer')} onPress={() => stepLength(BLOCK_STEP)}>
+            <Icon name='Plus' size='sm' color='text.secondary' />
+          </IconButton>
+        </Stack>
+      </Stack>
+      {isStudy && due > 0 ? (
+        <Typography level='body-xs' color='text.tertiary'>
+          {t('blocks.sheet.lengthHint', { count: due, minutes: suggestedMinutes })}
+        </Typography>
+      ) : null}
+      <View accessibilityLabel={t('items.sheet.days')} style={{ flexDirection: 'row', gap: theme.spacing[0.5] }}>
+        {weekdays.map((day) => {
+          const on = facts.scheduled.daysOfWeek.includes(day.index)
+          return (
+            <Pressable
+              key={day.index}
+              onPress={() => toggleDay(day.index)}
+              accessibilityRole='togglebutton'
+              accessibilityState={{ checked: on }}
+              accessibilityLabel={day.name}
+              style={({ pressed }) => ({
+                flex: 1,
+                minHeight: 44,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: theme.radius.md,
+                opacity: pressed ? 0.7 : 1,
+                backgroundColor: resolveColor(theme, on ? 'background.level2' : 'background.surface')
+              })}
+            >
+              <Typography level='title-sm' color={on ? 'text.primary' : 'text.tertiary'}>
+                {day.initial}
+              </Typography>
+            </Pressable>
+          )
+        })}
+      </View>
+      {onceNeedsDate ? (
+        <DateField
+          value={facts.scheduled.date ?? ''}
+          onChange={(value) => {
+            patchScheduled({ date: value || null })
+            setErrors((prev) => ({ ...prev, date: false }))
+          }}
+          accessibilityLabel={t('items.sheet.onceDate')}
+          placeholderKey='items.sheet.onceDate'
+          clearable={false}
+        />
+      ) : null}
+      <Typography level='body-xs' color={errors.date ? 'danger.plainColor' : 'text.tertiary'} accessibilityLiveRegion='polite'>
+        {errors.date
+          ? t('items.sheet.dateRequired')
+          : repeats(facts.scheduled)
+            ? ''
+            : facts.due
+              ? t('items.sheet.onceOnDue')
+              : t('items.sheet.onceHint')}
+      </Typography>
+    </Stack>
+  ) : null
+
+  const goalEditor = planLoading ? (
+    <Skeleton width='100%' height={44} />
+  ) : (
+    <Select
+      value={facts.goalId ?? ''}
+      options={openGoals}
+      onChange={(value) => {
+        patch({ goalId: value || null })
+        setOpenRow(null)
+      }}
+      accessibilityLabel={t('items.sheet.goal')}
+    />
+  )
+
+  const moreEditor = facts.scheduled ? (
+    <Stack spacing={1.5}>
+      <FormField labelKey='blocks.sheet.remind'>
+        <Segmented
+          accessibilityLabel={t('blocks.sheet.remind')}
+          value={String(facts.scheduled.reminderMin ?? null)}
+          onChange={(value) => patchScheduled({ reminderMin: value === 'null' ? null : Number(value) })}
+          options={REMINDER_OPTIONS.map((option) => ({ value: String(option), label: remindValue(option) }))}
+        />
+      </FormField>
+      {others.length > 1 ? (
+        <FormField labelKey='blocks.sheet.after' helperKey='blocks.sheet.afterHelper'>
+          <Select
+            value={facts.scheduled.afterBlockId ?? ''}
+            options={others}
+            onChange={(value) => patchScheduled({ afterBlockId: value || null })}
+            accessibilityLabel={t('blocks.sheet.after')}
+          />
+        </FormField>
+      ) : null}
+    </Stack>
+  ) : null
 
   const footer = confirmingDelete ? (
     <Stack spacing={1}>
@@ -300,231 +510,145 @@ export function ItemSheet({
       readout={readout}
       footer={footer}
     >
-      <Stack spacing={2.5}>
+      <Stack spacing={0}>
         {saveError ? (
-          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
+          <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite' style={{ marginBottom: theme.spacing[2] }}>
             {t('calendarPage.blocks.form.saveError')}
           </Typography>
         ) : null}
 
-        <FormField labelKey='items.sheet.title' required errorKey={errors.title ? 'items.sheet.titleRequired' : null}>
-          {({ invalid }) => (
-            <Input
-              value={facts.title}
-              onChangeText={(value) => {
-                patch({ title: value })
-                if (errors.title && value.trim()) setErrors((prev) => ({ ...prev, title: false }))
-              }}
-              invalid={invalid}
-              accessibilityLabel={t('items.sheet.title')}
-              placeholder={t('items.sheet.titlePlaceholder')}
-              autoCapitalize='sentences'
-              returnKeyType='done'
-            />
-          )}
-        </FormField>
-
-        {/* Due and Priority are one row: the two facts that make a task. */}
-        <Stack direction='row' spacing={1.5}>
-          <View style={{ flex: 1.1 }}>
-            <FormField labelKey='items.sheet.due'>
-              <DateField
-                value={facts.due ?? ''}
-                onChange={(value) => patch({ due: value || null })}
-                accessibilityLabel={t('items.sheet.due')}
-                placeholderKey='items.sheet.noDate'
+        <View style={{ marginBottom: theme.spacing[1] }}>
+          <FormField labelKey='items.sheet.title' required errorKey={errors.title ? 'items.sheet.titleRequired' : null}>
+            {({ invalid }) => (
+              <Input
+                value={facts.title}
+                onChangeText={(value) => {
+                  patch({ title: value })
+                  if (errors.title && value.trim()) setErrors((prev) => ({ ...prev, title: false }))
+                }}
+                invalid={invalid}
+                accessibilityLabel={t('items.sheet.title')}
+                placeholder={t('items.sheet.titlePlaceholder')}
+                autoCapitalize='sentences'
+                returnKeyType='done'
               />
-            </FormField>
-          </View>
-          <View style={{ flex: 1 }}>
-            <FormField labelKey='items.sheet.priority'>
-              <Stack direction='row' spacing={1} style={{ alignItems: 'center', justifyContent: 'space-between', minHeight: 48 }}>
-                <Typography level='body-xs' color='text.tertiary' style={{ flex: 1 }}>
-                  {t('items.sheet.priorityHint')}
-                </Typography>
-                <Switch
-                  value={facts.priority}
-                  onValueChange={(priority) => patch({ priority })}
-                  accessibilityLabel={t('items.sheet.priority')}
-                />
-              </Stack>
-            </FormField>
-          </View>
-        </Stack>
+            )}
+          </FormField>
+        </View>
 
-        <FormField labelKey='items.sheet.scheduled' errorKey={errors.date ? 'items.sheet.dateRequired' : null}>
-          {!facts.scheduled ? (
-            <Button
-              variant='tertiary'
-              style={{ alignSelf: 'flex-start' }}
-              onPress={() => patch({ scheduled: defaultScheduled({ date: facts.due }) })}
-            >
-              {t('items.sheet.setTime')}
-            </Button>
-          ) : (
-            <Stack spacing={1.5}>
-              <Stack direction='row' spacing={1}>
-                <View style={{ flex: 1 }}>
-                  <Select
-                    value={hour}
-                    options={HOURS.map((h) => ({ value: h, label: pad(h) }))}
-                    onChange={(h) => setClock(h, minute)}
-                    accessibilityLabel={t('blocks.sheet.hour')}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Select
-                    value={minute}
-                    options={MINUTES.map((m) => ({ value: m, label: pad(m) }))}
-                    onChange={(m) => setClock(hour, m)}
-                    accessibilityLabel={t('blocks.sheet.minute')}
-                  />
-                </View>
-                <Stack direction='row' spacing={0.5} style={{ alignItems: 'center', flex: 1.3 }}>
-                  <IconButton variant='secondary' accessibilityLabel={t('blocks.sheet.shorter')} onPress={() => stepLength(-BLOCK_STEP)}>
-                    <Icon name='Minus' size='sm' color='text.secondary' />
-                  </IconButton>
-                  <Typography level='title-sm' style={{ flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }}>
-                    {t('study.dates.minutes', { count: lengthMin })}
-                  </Typography>
-                  <IconButton variant='secondary' accessibilityLabel={t('blocks.sheet.longer')} onPress={() => stepLength(BLOCK_STEP)}>
-                    <Icon name='Plus' size='sm' color='text.secondary' />
-                  </IconButton>
-                </Stack>
-              </Stack>
-              {isStudy && due > 0 ? (
-                <Typography level='body-xs' color='text.tertiary'>
-                  {t('blocks.sheet.lengthHint', { count: due, minutes: suggestedMinutes })}
-                </Typography>
-              ) : null}
-              <View accessibilityLabel={t('items.sheet.days')} style={{ flexDirection: 'row', gap: theme.spacing[1] }}>
-                {weekdays.map((day) => {
-                  const on = facts.scheduled.daysOfWeek.includes(day.index)
-                  return (
-                    <Pressable
-                      key={day.index}
-                      onPress={() => toggleDay(day.index)}
-                      accessibilityRole='togglebutton'
-                      accessibilityState={{ checked: on }}
-                      accessibilityLabel={day.name}
-                      style={({ pressed }) => ({
-                        flex: 1,
-                        minHeight: 44,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: theme.radius.md,
-                        opacity: pressed ? 0.7 : 1,
-                        backgroundColor: resolveColor(theme, on ? 'background.level2' : 'background.level1')
-                      })}
-                    >
-                      <Typography level='title-sm' color={on ? 'text.primary' : 'text.tertiary'}>
-                        {day.initial}
-                      </Typography>
-                    </Pressable>
-                  )
-                })}
-              </View>
-              {!repeats(facts.scheduled) ? (
-                <DateField
-                  value={facts.scheduled.date ?? facts.due ?? ''}
-                  onChange={(value) => {
-                    patchScheduled({ date: value || null })
-                    setErrors((prev) => ({ ...prev, date: false }))
+        <FactRow
+          theme={theme}
+          label={t('items.sheet.due')}
+          value={dueValue}
+          quiet={!facts.due}
+          action={
+            <RowAction label={actionLabel('due', Boolean(facts.due))} expanded={openRow === 'due'} onPress={() => toggleRow('due')} />
+          }
+          editor={openRow === 'due' ? dueEditor : null}
+        />
+
+        <FactRow
+          theme={theme}
+          label={t('items.sheet.scheduled')}
+          value={scheduledValue}
+          quiet={!facts.scheduled}
+          action={
+            <Stack direction='row' spacing={0} style={{ alignItems: 'center' }}>
+              <RowAction
+                label={actionLabel('scheduled', Boolean(facts.scheduled))}
+                expanded={openRow === 'scheduled'}
+                onPress={() => {
+                  if (!facts.scheduled) patch({ scheduled: defaultScheduled({ date: facts.due }) })
+                  toggleRow('scheduled')
+                }}
+              />
+              {facts.scheduled ? (
+                <IconButton
+                  size='sm'
+                  accessibilityLabel={t('items.sheet.removeTime')}
+                  onPress={() => {
+                    patch({ scheduled: null })
+                    if (openRow === 'scheduled' || openRow === 'more') setOpenRow(null)
                   }}
-                  accessibilityLabel={t('items.sheet.onceDate')}
-                  placeholderKey='items.sheet.onceDate'
-                  clearable={false}
-                />
+                >
+                  <Icon name='X' size='sm' color='text.secondary' />
+                </IconButton>
               ) : null}
-              {/* The once rule sits under the days it is about, not under the field. */}
-              <Typography level='body-xs' color='text.tertiary'>
-                {t('items.sheet.onceHint')}
-              </Typography>
-              <Button variant='tertiary' style={{ alignSelf: 'flex-start' }} onPress={() => patch({ scheduled: null })}>
-                {t('items.sheet.removeTime')}
-              </Button>
             </Stack>
-          )}
-        </FormField>
+          }
+          editor={openRow === 'scheduled' ? scheduledEditor : null}
+        />
 
-        <FormField labelKey='items.sheet.goal'>
-          {goalLocked ? (
-            <Typography level='body-md' color='text.secondary'>
-              {goalLabel ?? t('items.sheet.goalNone')}
-            </Typography>
-          ) : planLoading ? (
-            <Skeleton width='100%' height={44} />
-          ) : (
-            <Select
-              value={facts.goalId ?? ''}
-              options={openGoals}
-              onChange={(value) => patch({ goalId: value || null })}
-              accessibilityLabel={t('items.sheet.goal')}
+        <FactRow
+          theme={theme}
+          label={t('items.sheet.priority')}
+          value={t(facts.priority ? 'items.sheet.on' : 'items.sheet.off')}
+          quiet={!facts.priority}
+          action={
+            <Switch
+              value={facts.priority}
+              onValueChange={(priority) => patch({ priority })}
+              accessibilityLabel={t('items.sheet.priority')}
             />
-          )}
-        </FormField>
+          }
+        />
+
+        <FactRow
+          theme={theme}
+          label={t('items.sheet.goal')}
+          value={goalLabel ?? t('items.sheet.goalNone')}
+          quiet={!facts.goalId}
+          action={
+            goalLocked ? null : (
+              <RowAction
+                label={openRow === 'goal' ? t('items.sheet.closeRow') : facts.goalId ? t('items.sheet.change') : t('items.sheet.choose')}
+                expanded={openRow === 'goal'}
+                onPress={() => toggleRow('goal')}
+              />
+            )
+          }
+          editor={openRow === 'goal' ? goalEditor : null}
+          last={!facts.scheduled && !goalLocked}
+        />
 
         {facts.scheduled ? (
-          <Pressable
-            onPress={() => setMoreOpen((on) => !on)}
-            accessibilityRole='button'
-            accessibilityState={{ expanded: moreOpen }}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing[1], minHeight: 44 }}
-          >
-            <Icon name={moreOpen ? 'ChevronDown' : 'ChevronRight'} size='sm' color='primary.plainColor' />
-            <Typography level='body-md' color='primary.plainColor'>
-              {t('calendarPage.blocks.form.moreOptions')}
-            </Typography>
-            <Typography level='body-sm' color='text.tertiary' numberOfLines={1} style={{ flex: 1 }}>
-              {t('calendarPage.blocks.form.moreSummary', {
-                remind:
-                  facts.scheduled.reminderMin == null
-                    ? t('blocks.sheet.remindOff')
-                    : facts.scheduled.reminderMin === 0
-                      ? t('blocks.sheet.remindAtStart')
-                      : t('study.dates.minutes', { count: facts.scheduled.reminderMin }),
-                after: (others.find((o) => o.value === (facts.scheduled.afterBlockId ?? ''))?.label ?? others[0].label).toLowerCase()
-              })}
-            </Typography>
-          </Pressable>
+          <FactRow
+            theme={theme}
+            label={t('calendarPage.blocks.form.moreOptions')}
+            value={moreValue}
+            quiet
+            action={
+              <RowAction
+                label={openRow === 'more' ? t('items.sheet.closeRow') : t('items.sheet.change')}
+                expanded={openRow === 'more'}
+                onPress={() => toggleRow('more')}
+              />
+            }
+            editor={openRow === 'more' ? moreEditor : null}
+            last={!goalLocked}
+          />
         ) : null}
 
-        {facts.scheduled && moreOpen ? (
-          <FormField labelKey='blocks.sheet.remind'>
-            <Segmented
-              accessibilityLabel={t('blocks.sheet.remind')}
-              value={String(facts.scheduled.reminderMin ?? null)}
-              onChange={(value) => patchScheduled({ reminderMin: value === 'null' ? null : Number(value) })}
-              options={REMINDER_OPTIONS.map((option) => ({
-                value: String(option),
-                label:
-                  option === null
-                    ? t('blocks.sheet.remindOff')
-                    : option === 0
-                      ? t('blocks.sheet.remindAtStart')
-                      : t('study.dates.minutes', { count: option })
-              }))}
-            />
-          </FormField>
+        {goalLocked ? (
+          <FactRow
+            theme={theme}
+            label={t('items.sheet.done')}
+            value={t(done ? 'items.sheet.on' : 'items.sheet.off')}
+            quiet={!done}
+            action={<Checkbox checked={done} onPress={() => setDone((on) => !on)} label='' accessibilityLabel={t('items.sheet.done')} />}
+            last
+          />
         ) : null}
-
-        {facts.scheduled && moreOpen && others.length > 1 ? (
-          <FormField labelKey='blocks.sheet.after' helperKey='blocks.sheet.afterHelper'>
-            <Select
-              value={facts.scheduled.afterBlockId ?? ''}
-              options={others}
-              onChange={(value) => patchScheduled({ afterBlockId: value || null })}
-              accessibilityLabel={t('blocks.sheet.after')}
-            />
-          </FormField>
-        ) : null}
-
-        {goalLocked ? <Checkbox checked={done} onPress={() => setDone((on) => !on)} label={t('items.sheet.done')} /> : null}
 
         {showsRecord ? (
           <Stack
             spacing={1}
-            style={{ padding: theme.spacing[2], borderRadius: theme.radius.md, backgroundColor: resolveColor(theme, 'background.level1') }}
+            style={{
+              marginTop: theme.spacing[2],
+              padding: theme.spacing[2],
+              borderRadius: theme.radius.md,
+              backgroundColor: resolveColor(theme, 'background.level1')
+            }}
           >
             <Stack direction='row' spacing={1} style={{ alignItems: 'baseline' }}>
               <Typography level='title-sm'>{t('calendarPage.blocks.form.today')}</Typography>
@@ -557,7 +681,11 @@ export function ItemSheet({
         ) : null}
 
         {isEdit && !confirmingDelete ? (
-          <Button variant='tertiary' style={{ alignSelf: 'flex-start' }} onPress={() => setConfirmingDelete(true)}>
+          <Button
+            variant='tertiary'
+            style={{ alignSelf: 'flex-start', marginTop: theme.spacing[2] }}
+            onPress={() => setConfirmingDelete(true)}
+          >
             {t('items.sheet.delete')}
           </Button>
         ) : null}
