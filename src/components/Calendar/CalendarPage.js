@@ -211,6 +211,25 @@ const CalendarPage = () => {
     )
   }, [isTimeGrid, summary, t])
 
+  // The block's tick (PRD D5): `useBlockLog` is optimistic across every cached
+  // range, so the row moves at once; a rejection is the cache's own revert.
+  // On a Week run the tick keeps every item of the run, or undoes them all.
+  const toggleKept = useCallback(
+    async (occurrence, group = null) => {
+      const targets = group?.occurrences ?? [occurrence]
+      const allKept = targets.every((o) => o.log?.status === 'kept')
+      try {
+        for (const o of targets) {
+          if (allKept) await undo(o)
+          else if (o.log?.status !== 'kept') await keep(o)
+        }
+      } catch (err) {
+        setCalendarError(err)
+      }
+    },
+    [keep, undo]
+  )
+
   // Tile and title (ADR-019): colour on a 16px tile, the title on the surface.
   // Done is visible wherever the item appears (ADR-018): strike and fade on the
   // title only, the tile keeps its colour. A block draws its state as a ground.
@@ -224,6 +243,7 @@ const CalendarPage = () => {
             todayKey={todayKey}
             nowMinutes={nowMinutes}
             dueToday={dueToday}
+            onToggleKept={toggleKept}
             t={t}
           />
         )
@@ -250,7 +270,7 @@ const CalendarPage = () => {
         </Box>
       )
     },
-    [focusAreas, todayKey, nowMinutes, dueToday, t]
+    [focusAreas, todayKey, nowMinutes, dueToday, toggleKept, t]
   )
 
   // ── Navigation: the page owns the cursor; FullCalendar follows it ────────
@@ -372,20 +392,6 @@ const CalendarPage = () => {
       }
     },
     [userId]
-  )
-
-  // The block's tick (PRD D5): `useBlockLog` is optimistic across every cached
-  // range, so the row moves at once; a rejection is the cache's own revert.
-  const toggleKept = useCallback(
-    async (occurrence) => {
-      try {
-        if (occurrence.log?.status === 'kept') await undo(occurrence)
-        else await keep(occurrence)
-      } catch (err) {
-        setCalendarError(err)
-      }
-    },
-    [keep, undo]
   )
 
   // A selection on the hours makes a block there (one-off, on the five-minute

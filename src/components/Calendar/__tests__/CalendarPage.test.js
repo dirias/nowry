@@ -920,4 +920,61 @@ describe('PLAN-004: the time grids, the blocks on them, and what the grid may wr
     expect(mockKeep).toHaveBeenCalledWith(occurrenceOf(study))
     expect(mockUseBlocks.mock.calls.at(-1)[0]).toMatchObject({ from: todayKey.slice(0, 8) + '01' })
   })
+
+  // ─── PLAN-011 (ADR-046 §7): a grid block is a row — glyph in the tile, a tick at the end ───
+
+  const gridBlock = (occurrence, group = null) => lastFc().eventContent({ event: { extendedProps: { kind: 'block', occurrence, group } } })
+
+  it('the grid tile carries the source glyph, and a kept block keeps its tile instead of trading it for a check', async () => {
+    await renderPage()
+    fireEvent.click(view('day'))
+    const { unmount } = render(gridBlock(occurrenceOf(study)))
+    expect(within(screen.getByTestId('block-tile')).getByTestId('StyleOutlinedIcon')).toBeInTheDocument()
+    unmount()
+    const kept = { ...occurrenceOf(study), log: { status: 'kept' } }
+    const { container } = render(gridBlock(kept))
+    expect(container.querySelector('[data-block-state="kept"]')).toBeInTheDocument()
+    expect(within(screen.getByTestId('block-tile')).getByTestId('StyleOutlinedIcon')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'calendarPage.blocks.undoKept' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('the tick at the block’s end keeps it without reaching the event click; today’s shows always, tomorrow’s on hover', async () => {
+    await renderPage()
+    fireEvent.click(view('day'))
+    const onEventClick = jest.fn()
+    render(<div onClick={onEventClick}>{gridBlock(occurrenceOf(study))}</div>)
+    const tick = screen.getByRole('button', { name: 'calendarPage.blocks.markKept' })
+    expect(tick).toHaveAttribute('data-block-tick', 'always')
+    expect(tick).toHaveAttribute('aria-pressed', 'false')
+    await act(async () => {
+      fireEvent.click(tick)
+    })
+    expect(mockKeep).toHaveBeenCalledWith(occurrenceOf(study))
+    expect(onEventClick).not.toHaveBeenCalled()
+
+    render(gridBlock(occurrenceOf(study, tomorrowKey)))
+    const [, ahead] = screen.getAllByRole('button', { name: 'calendarPage.blocks.markKept' })
+    expect(ahead).toHaveAttribute('data-block-tick', 'hover')
+  })
+
+  it('the tick on a Week run keeps every item not yet kept, and undoes them all once they are', async () => {
+    await renderPage()
+    fireEvent.click(view('week'))
+    const items = [occurrenceOf(routine('r1', '07:00')), { ...occurrenceOf(routine('r2', '07:10')), log: { status: 'kept' } }]
+    const { unmount } = render(gridBlock(items[0], { period: 'morning', count: 2, occurrences: items }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.markKept' }))
+    })
+    expect(mockKeep).toHaveBeenCalledTimes(1)
+    expect(mockKeep).toHaveBeenCalledWith(items[0])
+    expect(mockUndo).not.toHaveBeenCalled()
+    unmount()
+
+    const allKept = items.map((o) => ({ ...o, log: { status: 'kept' } }))
+    render(gridBlock(allKept[0], { period: 'morning', count: 2, occurrences: allKept }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.undoKept' }))
+    })
+    expect(mockUndo).toHaveBeenCalledTimes(2)
+  })
 })

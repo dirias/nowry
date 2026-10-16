@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, Typography } from '@mui/joy'
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined'
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
@@ -10,16 +11,17 @@ import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { clockOn, groupStateOf, stateOf } from '@nowry/core/domain/blocks'
-import { identityTile } from '../Common/Form/formStyles'
+import { focusRing, identityTile } from '../Common/Form/formStyles'
 
 /**
  * How a block is drawn on the web calendar (PLAN-004; PRD D11).
  *
  * A block is the one row anatomy (ADR-021): a 16px identity tile in its
- * source's colour, the title, a meta line. State is a GROUND (§15.5): kept is
- * the soft tint with a leading check, skipped is `level2` with the title
- * struck, running is the solid, upcoming and missed sit on the surface with a
- * hairline. No hex anywhere — a goal block borrows its area's data colour the
+ * source's colour carrying the source's glyph, the title, and a tick at the
+ * end (ADR-046 §7, PLAN-011). State is a GROUND (§15.5): kept is the soft
+ * tint, skipped is `level2` with the title struck, running is the solid,
+ * upcoming and missed sit on `level1`. The tile never changes with state — a
+ * bare square read as a checkbox, and a check in its place made it one. No hex anywhere — a goal block borrows its area's data colour the
  * way the deadline tiles do (ADR-019), with the glyph derived by contrast.
  */
 
@@ -88,16 +90,18 @@ export const blockMeta = (occurrence, t) =>
   })
 
 /**
- * The identity tile (ADR-019): 16px with no glyph on the grid, 28px with the
- * source's glyph on the agenda row. On a running block the solid ground is
- * the tile's own colour, so the tile inverts to stay visible.
+ * The identity tile (ADR-019): 16px on the grid, 28px on the agenda row, the
+ * source's glyph on both so the tile reads as a label and never as a control
+ * (§15.7). On a running block the solid ground is the tile's own colour, so
+ * the tile inverts to stay visible.
  */
-export const BlockTile = ({ occurrence, focusAreas, size = 16, glyph = false, inverted = false }) => {
+export const BlockTile = ({ occurrence, focusAreas, size = 16, glyph = true, inverted = false }) => {
   const colors = inverted ? { bg: 'primary.solidColor', fg: 'primary.solidBg' } : blockTileColors(occurrence, focusAreas)
   const Icon = SOURCE_ICONS[sourceOf(occurrence)] ?? ScheduleOutlinedIcon
   return (
     <Box
       aria-hidden='true'
+      data-testid='block-tile'
       sx={{
         ...identityTile(colors.bg, size),
         color: colors.fg,
@@ -106,24 +110,73 @@ export const BlockTile = ({ occurrence, focusAreas, size = 16, glyph = false, in
         justifyContent: 'center'
       }}
     >
-      {glyph && <Icon sx={{ fontSize: 'md', color: 'inherit' }} />}
+      {glyph && <Icon sx={{ fontSize: size <= 16 ? 'xs' : 'md', color: 'inherit' }} />}
     </Box>
   )
 }
 
+/** A click on the tick must not reach FullCalendar's eventClick or start a drag. */
+const stopEvent = (e) => e.stopPropagation()
+
+/**
+ * The tick at a grid block's end: 20px, keeps or undoes without opening the
+ * sheet. Today's and past occurrences always show it; an upcoming one shows
+ * it on hover or focus, so the grid ahead stays quiet (PRD D8).
+ */
+const BlockTick = ({ kept, reveal, label, onClick }) => (
+  <Box
+    component='button'
+    type='button'
+    aria-label={label}
+    aria-pressed={kept}
+    data-block-tick={reveal}
+    onClick={onClick}
+    onMouseDown={stopEvent}
+    onTouchStart={stopEvent}
+    sx={{
+      ml: 'auto',
+      flexShrink: 0,
+      width: 20,
+      height: 20,
+      p: 0,
+      border: 0,
+      borderRadius: 'sm',
+      bgcolor: 'transparent',
+      color: 'inherit',
+      cursor: 'pointer',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      opacity: reveal === 'hover' ? 0 : 1,
+      transition: 'opacity var(--nowry-motion-quick) var(--nowry-motion-standard)',
+      '&:focus-visible': { opacity: 1 },
+      ...focusRing
+    }}
+  >
+    {kept ? (
+      <CheckCircleIcon sx={{ fontSize: 'md', color: 'inherit' }} />
+    ) : (
+      <RadioButtonUncheckedIcon sx={{ fontSize: 'md', color: 'inherit' }} />
+    )}
+  </Box>
+)
+
 /**
  * The grid event. In Week a run of routine items is one event named by its
- * period and count; a study block on today's date says what is due.
+ * period and count; a study block on today's date says what is due. The tick
+ * on a run keeps every item in it.
  */
-export const BlockEventContent = ({ event, focusAreas, todayKey, nowMinutes, dueToday, t }) => {
+export const BlockEventContent = ({ event, focusAreas, todayKey, nowMinutes, dueToday, onToggleKept, t }) => {
   const { occurrence, group } = event.extendedProps
   const state = eventStateOf({ occurrence, group }, todayKey, nowMinutes)
   const stateSx = BLOCK_STATE_SX[state] ?? BLOCK_STATE_SX.upcoming
+  const kept = state === 'kept' || state === 'partial'
   const isStudyToday = !group && sourceOf(occurrence) === 'study' && occurrence.date === todayKey && dueToday > 0
   const label = group
     ? t('calendarPage.blocks.routineGroup', { period: t(`calendarPage.blocks.period.${group.period}`), size: group.count })
     : occurrence.title
   const suffix = isStudyToday ? ` · ${t('calendarPage.blocks.cards', { count: dueToday })}` : ''
+  const reveal = occurrence.date <= todayKey ? 'always' : 'hover'
 
   return (
     <Box
@@ -140,14 +193,11 @@ export const BlockEventContent = ({ event, focusAreas, todayKey, nowMinutes, due
         px: 0.75,
         borderRadius: 'sm',
         overflow: 'hidden',
+        '&:hover [data-block-tick], &:focus-within [data-block-tick]': { opacity: 1 },
         ...stateSx
       }}
     >
-      {state === 'kept' || state === 'partial' ? (
-        <CheckRoundedIcon sx={{ fontSize: 'md', flexShrink: 0, color: 'inherit' }} />
-      ) : (
-        <BlockTile occurrence={occurrence} focusAreas={focusAreas} inverted={state === 'running'} />
-      )}
+      <BlockTile occurrence={occurrence} focusAreas={focusAreas} inverted={state === 'running'} />
       <Typography
         level='body-xs'
         noWrap
@@ -162,6 +212,17 @@ export const BlockEventContent = ({ event, focusAreas, todayKey, nowMinutes, due
         {label}
         {suffix}
       </Typography>
+      {onToggleKept && (
+        <BlockTick
+          kept={kept}
+          reveal={reveal}
+          label={t(kept ? 'calendarPage.blocks.undoKept' : 'calendarPage.blocks.markKept')}
+          onClick={(e) => {
+            stopEvent(e)
+            onToggleKept(occurrence, group)
+          }}
+        />
+      )}
     </Box>
   )
 }
