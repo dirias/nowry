@@ -352,11 +352,7 @@ export function ItemSheet({
           </View>
         </Stack>
 
-        <FormField
-          labelKey='items.sheet.scheduled'
-          errorKey={errors.date ? 'items.sheet.dateRequired' : null}
-          helperKey={facts.scheduled && !errors.date ? 'items.sheet.onceHint' : null}
-        >
+        <FormField labelKey='items.sheet.scheduled' errorKey={errors.date ? 'items.sheet.dateRequired' : null}>
           {!facts.scheduled ? (
             <Button
               variant='tertiary'
@@ -440,6 +436,10 @@ export function ItemSheet({
                   clearable={false}
                 />
               ) : null}
+              {/* The once rule sits under the days it is about, not under the field. */}
+              <Typography level='body-xs' color='text.tertiary'>
+                {t('items.sheet.onceHint')}
+              </Typography>
               <Button variant='tertiary' style={{ alignSelf: 'flex-start' }} onPress={() => patch({ scheduled: null })}>
                 {t('items.sheet.removeTime')}
               </Button>

@@ -213,7 +213,7 @@ export function PlanDay() {
             startGlyph={<Icon name='Plus' size='sm' color='text.secondary' />}
             onPress={() => setSheet({ mode: 'create', prefill: { scheduled: { date: key } } })}
           >
-            {t('blocks.add')}
+            {t('items.sheet.addTitle')}
           </Button>
         </View>
       </View>
