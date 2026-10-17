@@ -133,6 +133,7 @@ describe('readers', () => {
       ownerId: 'u1',
       ownerName: 'Didier',
       collaborators: [],
+      collaboratorNames: {},
       isOwner: true,
       updatedAt: '2026-10-17T09:00:00Z',
       counts: { notes: 4, links: 3, items: 1, cards: 12 },

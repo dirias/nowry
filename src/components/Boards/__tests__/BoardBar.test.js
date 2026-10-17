@@ -111,6 +111,16 @@ describe('the name', () => {
   })
 })
 
+describe('initialsOf', () => {
+  it('takes the first and last word, or two letters of one', () => {
+    const { initialsOf } = require('../BoardBar')
+    expect(initialsOf('Ana María Lopez')).toBe('AL')
+    expect(initialsOf('olivia')).toBe('OL')
+    expect(initialsOf('bob@example.com')).toBe('BO')
+    expect(initialsOf('')).toBe('')
+  })
+})
+
 describe('sharing and the menu', () => {
   it('Share is a secondary key for the owner, and absent for a collaborator', () => {
     const onShare = jest.fn()
@@ -123,8 +133,11 @@ describe('sharing and the menu', () => {
   })
 
   it('shows who the board is shared with', () => {
-    renderBar({ collaborators: 2 })
-    expect(screen.getByRole('img', { name: 'boards.bar.collaborators:2' })).toBeInTheDocument()
+    renderBar({ collaborators: ['u1', 'u2'], collaboratorNames: { u1: 'Ana Lopez' } })
+    expect(screen.getByRole('group', { name: 'boards.bar.collaborators:2' })).toBeInTheDocument()
+    // A named collaborator shows initials and the name; one without a name keeps the glyph.
+    expect(screen.getByLabelText('Ana Lopez')).toHaveTextContent('AL')
+    expect(screen.getAllByLabelText('boards.bar.collaborators:2').length).toBeGreaterThan(1)
   })
 
   it('the menu duplicates, lists the keys and deletes', () => {

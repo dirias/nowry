@@ -152,26 +152,47 @@ function BoardName({ name, editing, onEdit, onRename, onDone }) {
   )
 }
 
-/** The people a board is shared with (BOARD-007). The list carries ids, not names, so each is a person glyph. */
-function Collaborators({ count }) {
+/** Two letters for a name: first and last word, or the first two letters of one word. */
+export const initialsOf = (name) => {
+  const words = String(name ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+  if (!words.length) return ''
+  const letters = words.length > 1 ? [words[0][0], words[words.length - 1][0]] : [...words[0]].slice(0, 2)
+  return letters.join('').toUpperCase()
+}
+
+/**
+ * The people a board is shared with (BOARD-007, BOARD-012): their initials,
+ * the name on hover. A collaborator whose name could not be read keeps the
+ * person glyph.
+ */
+function Collaborators({ ids, names }) {
   const { t } = useTranslation()
+  const count = ids.length
   const label = t('boards.bar.collaborators', { count })
-  const shown = Math.min(count, 3)
+  const shown = ids.slice(0, 3)
   return (
-    <Tooltip title={label} size='sm'>
-      <AvatarGroup size='sm' role='img' aria-label={label} sx={{ '--Avatar-size': '28px', '--AvatarGroup-gap': '-6px' }}>
-        {Array.from({ length: shown }, (_, i) => (
-          <Avatar key={i} variant='soft' color='neutral'>
-            <PersonRounded />
+    <AvatarGroup size='sm' role='group' aria-label={label} sx={{ '--Avatar-size': '28px', '--AvatarGroup-gap': '-6px' }}>
+      {shown.map((id) => {
+        const name = names[id] ?? null
+        return (
+          <Tooltip key={id} title={name ?? label} size='sm'>
+            <Avatar variant='soft' color='neutral' aria-label={name ?? label}>
+              {name ? initialsOf(name) : <PersonRounded />}
+            </Avatar>
+          </Tooltip>
+        )
+      })}
+      {count > shown.length && (
+        <Tooltip title={label} size='sm'>
+          <Avatar variant='soft' color='neutral' aria-label={label}>
+            +{count - shown.length}
           </Avatar>
-        ))}
-        {count > shown && (
-          <Avatar variant='soft' color='neutral'>
-            +{count - shown}
-          </Avatar>
-        )}
-      </AvatarGroup>
-    </Tooltip>
+        </Tooltip>
+      )}
+    </AvatarGroup>
   )
 }
 
@@ -194,7 +215,8 @@ export default function BoardBar({
   name,
   status,
   hasPending,
-  collaborators = 0,
+  collaborators = [],
+  collaboratorNames = {},
   canShare,
   canDelete,
   onRename,
@@ -232,7 +254,7 @@ export default function BoardBar({
         <SaveStatus status={status} hasPending={hasPending} />
       </Box>
       <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-        {collaborators > 0 && <Collaborators count={collaborators} />}
+        {collaborators.length > 0 && <Collaborators ids={collaborators} names={collaboratorNames} />}
         {canShare && (
           <Button variant='soft' color='neutral' size='sm' startDecorator={<PersonAddAlt1Rounded />} onClick={onShare}>
             {t('boards.bar.share')}

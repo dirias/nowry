@@ -183,7 +183,8 @@ function BoardView({ id }) {
         name={name}
         status={status}
         hasPending={hasPending}
-        collaborators={board.collaborators?.length ?? 0}
+        collaborators={board.collaborators ?? []}
+        collaboratorNames={board.collaboratorNames ?? {}}
         canShare={isOwner}
         canDelete={isOwner}
         onRename={renameBoard}
@@ -205,7 +206,7 @@ function BoardView({ id }) {
         tabIndex={-1}
         sx={{ display: 'none' }}
       />
-      <BoardLinks boardId={id} apply={apply}>
+      <BoardLinks boardId={id} apply={apply} nodes={board.nodes}>
         <BoardCanvas
           board={board}
           apply={apply}

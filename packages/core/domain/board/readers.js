@@ -57,6 +57,7 @@ export const readBoard = (doc) =>
         name: doc.name ?? '',
         ownerId: doc.owner_user_id ?? null,
         collaborators: doc.collaborators ?? [],
+        collaboratorNames: doc.collaborator_names ?? {},
         rev: num(doc.rev),
         nodes: (doc.nodes ?? []).map(readNode),
         links: (doc.links ?? []).map(readLink),
@@ -83,6 +84,7 @@ export const readBoardSummary = (doc) =>
         ownerId: doc.owner_user_id ?? null,
         ownerName: doc.owner_name ?? '',
         collaborators: doc.collaborators ?? [],
+        collaboratorNames: doc.collaborator_names ?? {},
         isOwner: Boolean(doc.is_owner),
         updatedAt: doc.updated_at ?? null,
         counts: {

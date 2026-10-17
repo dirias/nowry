@@ -105,7 +105,7 @@ describe('BoardPage — states', () => {
     mockUseBoard.mockReturnValue(hooks)
     renderAt('/boards/b1')
     expect(screen.getByTestId('board-name')).toHaveTextContent('Photosynthesis')
-    expect(screen.getByRole('img', { name: 'boards.bar.collaborators:1' })).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'boards.bar.collaborators:1' })).toBeInTheDocument()
     expect(mockCanvasProps).toMatchObject({
       apply: hooks.apply,
       checkpoint: hooks.checkpoint,

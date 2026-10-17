@@ -5,6 +5,7 @@
  * item sheet or the goal's area; a note's cards open on their deck.
  */
 import React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { CssVarsProvider } from '@mui/joy/styles'
 import BoardLinks from '../BoardLinks'
@@ -26,7 +27,9 @@ jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
 jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'me' } }) }))
 jest.mock('@nowry/core/api/queryClient', () => ({ queryClient: { invalidateQueries: jest.fn() } }))
 jest.mock('@nowry/core/api/services/tasks.service', () => ({ tasksService: { create: jest.fn(), update: jest.fn() } }))
-jest.mock('@nowry/core/api/services/annualPlanning.service', () => ({ annualPlanningService: { updateMilestone: jest.fn() } }))
+jest.mock('@nowry/core/api/services/annualPlanning.service', () => ({
+  annualPlanningService: { updateMilestone: jest.fn(), getGoal: jest.fn() }
+}))
 jest.mock('@nowry/core/api/services/cards.service', () => ({ cardsService: { getById: jest.fn() } }))
 const mockTasks = [{ _id: 't1', title: 'Essay', is_completed: false }]
 const mockGoals = [{ _id: 'g1', title: 'Pass biology', focus_area_id: 'a1', milestones: [{ id: 'm1', title: 'Unit 3 test' }] }]
@@ -83,17 +86,22 @@ function Probe() {
   return null
 }
 
+const queries = () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
+let client = queries()
 const mount = (children) =>
   render(
-    <CssVarsProvider>
-      <BoardLinks boardId='b1' apply={apply}>
-        <Probe />
-        {children}
-      </BoardLinks>
-    </CssVarsProvider>
+    <QueryClientProvider client={client}>
+      <CssVarsProvider>
+        <BoardLinks boardId='b1' apply={apply}>
+          <Probe />
+          {children}
+        </BoardLinks>
+      </CssVarsProvider>
+    </QueryClientProvider>
   )
 
 beforeEach(() => {
+  client = queries()
   board = {
     nodes: [note('a', 'Read chapter 3\nfocus on the Calvin cycle'), note('b', 'Book the lab'), note('c', '')],
     links: [{ id: 'l1', from: 'a', to: 'b', label: '' }]
@@ -150,11 +158,13 @@ describe('Make items', () => {
     const { rerender } = mount(<BoardSelectionActions nodes={[{ ...board.nodes[0], kind: 'text' }]} />)
     expect(screen.queryByRole('button', { name: 'boards.selection.makeCards' })).toBeNull()
     rerender(
-      <CssVarsProvider>
-        <BoardLinks boardId='b1' apply={apply}>
-          <BoardSelectionActions nodes={[board.nodes[0]]} />
-        </BoardLinks>
-      </CssVarsProvider>
+      <QueryClientProvider client={client}>
+        <CssVarsProvider>
+          <BoardLinks boardId='b1' apply={apply}>
+            <BoardSelectionActions nodes={[board.nodes[0]]} />
+          </BoardLinks>
+        </CssVarsProvider>
+      </QueryClientProvider>
     )
     fireEvent.click(screen.getByRole('button', { name: 'boards.selection.makeCards' }))
     expect(screen.getByTestId('make-cards-sheet')).toBeInTheDocument()
@@ -199,5 +209,30 @@ describe('a note’s cards', () => {
     await act(() => links.openCards({ cardIds: ['c1', 'c2'] }))
     expect(cardsService.getById).toHaveBeenCalledWith('c1')
     expect(mockNavigate).toHaveBeenCalledWith('/study/d9?mode=browse')
+  })
+})
+
+describe('items from another year (BOARD-013)', () => {
+  it('fetches a goal that is not in this year’s plan, once, by its id, and reads its milestone live', async () => {
+    const { annualPlanningService } = require('@nowry/core/api/services/annualPlanning.service')
+    annualPlanningService.getGoal.mockResolvedValue({
+      _id: 'g-old',
+      title: 'Run 10k',
+      focus_area_id: 'a1',
+      milestones: [{ id: 'm-old', title: 'Half marathon', due_date: '2025-06-01', completed: true }]
+    })
+    const item = { id: 'i1', kind: 'item', x: 0, y: 0, ref: { kind: 'milestone', id: 'm-old', goalId: 'g-old' } }
+    render(
+      <QueryClientProvider client={client}>
+        <CssVarsProvider>
+          <BoardLinks boardId='b1' apply={apply} nodes={[item]}>
+            <Probe />
+          </BoardLinks>
+        </CssVarsProvider>
+      </QueryClientProvider>
+    )
+    await waitFor(() => expect(links.read(item.ref)).toMatchObject({ status: 'ready', title: 'Half marathon', done: true }))
+    expect(annualPlanningService.getGoal).toHaveBeenCalledTimes(1)
+    expect(annualPlanningService.getGoal).toHaveBeenCalledWith('g-old')
   })
 })

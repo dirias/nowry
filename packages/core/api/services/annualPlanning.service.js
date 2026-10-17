@@ -240,6 +240,15 @@ export const annualPlanningService = {
     _bustPlanCache()
     return data
   },
+  /**
+   * One goal by its id, from any year (BOARD-013): a board item can point at a
+   * goal or a milestone outside this year's plan. Quiet: a goal that is gone
+   * is a state the caller shows, not an error toast.
+   */
+  async getGoal(id) {
+    const { data } = await apiClient.get(ENDPOINTS.goals.one(id), { suppressErrorToast: true })
+    return data
+  },
   async updateGoal(id, update) {
     const { data } = await apiClient.put(ENDPOINTS.goals.update(id), update)
     _bustPlanCache()

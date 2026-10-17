@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueries } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Snackbar } from '@mui/joy'
 import { tasksService } from '@nowry/core/api/services/tasks.service'
@@ -42,13 +43,19 @@ export const createTasksFrom = async (notes) => {
   return { made, failed }
 }
 
+/** One stable reading of the stray-goal queries (a module-level `combine` is memoised by the library). */
+const combineStray = (results) => ({
+  goals: results.map((r) => r.data).filter(Boolean),
+  loading: results.some((r) => r.isLoading)
+})
+
 /**
  * What the board reaches outside itself (BOARD-005, BOARD-006): the tasks and
  * the plan its item tiles read, their tick, the item sheet a tile opens, the
  * cards a note made, Make items and Make cards. Wraps the canvas on the board
  * page; the sheets and the page's success line render here.
  */
-export default function BoardLinks({ boardId, apply, children }) {
+export default function BoardLinks({ boardId, apply, nodes = [], children }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -65,16 +72,42 @@ export default function BoardLinks({ boardId, apply, children }) {
   const [makingItems, setMakingItems] = useState(false)
   const [notice, setNotice] = useState(null)
 
-  const loading = tasksLoading || planLoading
+  // Goals the board points at that are not in this year's plan (BOARD-013):
+  // fetched one by one, by id, so an item from another year reads live.
+  const strayGoalIds = useMemo(() => {
+    const known = new Set((goals ?? []).map((g) => String(g._id ?? g.id)))
+    const wanted = new Set()
+    nodes.forEach((n) => {
+      if (n.kind !== 'item' || !n.ref) return
+      const goalId = n.ref.kind === 'goal' ? n.ref.id : n.ref.kind === 'milestone' ? n.ref.goalId : null
+      if (goalId && !known.has(String(goalId))) wanted.add(String(goalId))
+    })
+    return [...wanted].sort()
+  }, [nodes, goals])
+  const stray = useQueries({
+    combine: combineStray,
+    queries: planLoading
+      ? []
+      : strayGoalIds.map((goalId) => ({
+          queryKey: ['goal', userId, goalId],
+          queryFn: () => annualPlanningService.getGoal(goalId).catch((err) => (err?.response?.status === 404 ? null : Promise.reject(err))),
+          staleTime: 60 * 1000,
+          retry: false
+        }))
+  })
+  const allGoals = useMemo(() => (stray.goals.length ? [...(goals ?? []), ...stray.goals] : goals), [goals, stray.goals])
+
+  const loading = tasksLoading || planLoading || stray.loading
   const error = tasksError ?? planError ?? null
 
   const refresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
     queryClient.invalidateQueries({ queryKey: ['annualPlan', userId] })
+    queryClient.invalidateQueries({ queryKey: ['goal', userId] })
     queryClient.invalidateQueries({ queryKey: ['calendarEvents', userId] })
   }, [userId])
 
-  const read = useCallback((ref) => readItem(ref, { tasks, goals, loading, error }), [tasks, goals, loading, error])
+  const read = useCallback((ref) => readItem(ref, { tasks, goals: allGoals, loading, error }), [tasks, allGoals, loading, error])
 
   /** The tick: throws when the write fails, so the tile can take its optimistic state back. */
   const setDone = useCallback(
@@ -150,8 +183,8 @@ export default function BoardLinks({ boardId, apply, children }) {
   const linkCards = useCallback((made) => apply((b) => addCardIds(b, made)), [apply])
 
   const value = useMemo(
-    () => ({ tasks, goals, areas, loading, error, read, setDone, openItem, openCards, makeItems, makingItems, makeCards }),
-    [tasks, goals, areas, loading, error, read, setDone, openItem, openCards, makeItems, makingItems, makeCards]
+    () => ({ tasks, goals: allGoals, areas, loading, error, read, setDone, openItem, openCards, makeItems, makingItems, makeCards }),
+    [tasks, allGoals, areas, loading, error, read, setDone, openItem, openCards, makeItems, makingItems, makeCards]
   )
 
   return (
