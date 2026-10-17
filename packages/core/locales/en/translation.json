@@ -864,7 +864,8 @@
     },
     "capture": {
       "listAria": "List: {{name}}",
-      "failed": "That task was not added. Try again."
+      "failed": "That task was not added. Try again.",
+      "placeholder": "Add a task"
     },
     "day": {
       "upcoming": "Upcoming",

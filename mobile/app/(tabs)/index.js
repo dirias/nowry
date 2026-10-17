@@ -55,40 +55,43 @@ import { useTaskData } from '@nowry/core/hooks/useTaskData'
 import { useToday } from '@nowry/core/hooks/useToday'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { DAILY_REVIEW } from '../../src/screens/StudySession'
+import { ItemSheet } from '../../src/screens/ItemSheet'
+import { MIN_TOUCH_TARGET } from '../../src/ui/buttonSpec'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { tasksService } from '@nowry/core/api/services'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { deadlineReadout, watchedPriorities } from '@nowry/core/domain/priorityWatch'
-import { dueTodayCount, taskCategory, taskDueState, tasksDueToday } from '@nowry/core/domain/taskQueue'
+import { dayTasks } from '@nowry/core/domain/taskQueue'
+import { localDateKey } from '@nowry/core/domain/blocks'
+import { useTaskLists } from '@nowry/core/hooks/useTaskLists'
+import { useBlocks } from '@nowry/core/hooks/useBlocks'
 import { useNews } from '@nowry/core/hooks/useNews'
 import { unfavourited, useNewsFavourites } from '@nowry/core/hooks/useNewsFavourites'
 import { useTheme } from '../../src/theme'
 import {
   BlockRow,
   Button,
-  Checkbox,
+  ChoiceSheet,
   Chip,
   Divider,
   Input,
   Icon,
   IconButton,
   LIST_ROW_HEIGHT,
-  ListRow,
   NextStepsPanel,
   Progress,
-  Readout,
   Screen,
   SectionHeader,
   Segmented,
   Sheet,
   Skeleton,
   Stack,
+  TaskRow,
+  TIME_COLUMN_WIDTH,
   Typography,
   resolveColor
 } from '../../src/ui'
 
-/** The board's count, and the web's. */
-const TASKS_SHOWN = 4
 /** Enough to be a carousel, few enough that a cold open is not ten images. */
 const NEWS_SHOWN = 6
 /** The web's own two numbers for its strip: three areas, two priorities. */
@@ -108,9 +111,9 @@ const PAST_SHOWN = 3
  */
 const GREETING_MIN = 200
 /**
- * `ListRow`'s own horizontal padding, which its pressed ground needs and which
+ * The rows' own horizontal padding, which their pressed ground needs and which
  * therefore sets the rail every row's content sits on. The capture row and the
- * done disclosure are not `ListRow`s — one holds a field and the other a
+ * foot rows are not `TaskRow`s — one holds a field and the others a
  * caret — so they have to be told the rail, or they land 12pt to the left of
  * every task under them, which is the misalignment the redesign is about.
  */
@@ -125,6 +128,8 @@ export default function Home() {
   const { statistics, loading: statsLoading, error: statsError } = useStatistics()
   const deckData = useDeckData(null)
   const taskData = useTaskData()
+  // A task's title opens the item sheet (PLAN-020), where it is edited, flagged, moved or deleted.
+  const [sheet, setSheet] = useState(null)
   const plan = useAnnualPlan()
 
   /*
@@ -142,6 +147,8 @@ export default function Home() {
    * state. The tick writes through the same optimistic log.
    */
   const day = useToday({ dueToday: today.due })
+  // The day's block rules, so a task with a time opens with it in the sheet (PLAN-020).
+  const dayBlocks = useBlocks({ from: day.date, to: day.date })
   const log = useBlockLog()
   const areaColors = useMemo(() => new Map((plan.focusAreas ?? []).map((a) => [a._id ?? a.id, a.color])), [plan.focusAreas])
 
@@ -196,10 +203,11 @@ export default function Home() {
           log={log}
           areaColors={areaColors}
           tasks={taskData.tasks}
-          tasksCount={dueTodayCount(taskData.tasks)}
           tasksLoading={taskData.loading}
+          tasksError={taskData.error}
           reloadTasks={taskData.reload}
           onOpenDay={() => router.push('/calendar?view=day')}
+          onOpenTask={(task) => setSheet({ source: { task } })}
           theme={theme}
           t={t}
         />
@@ -212,6 +220,16 @@ export default function Home() {
 
         <NextStepsPanel />
       </Stack>
+
+      <ItemSheet
+        open={Boolean(sheet)}
+        mode={sheet ? 'edit' : 'create'}
+        source={sheet?.source ?? null}
+        prefill={null}
+        blocks={dayBlocks.blocks ?? []}
+        onClose={() => setSheet(null)}
+        onSaved={taskData.reload}
+      />
     </Screen>
   )
 }
@@ -397,7 +415,7 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
  * does the empty state's key. Tasks get capture as well — writing a thought
  * down is not managing tasks, and a phone is where the thought arrives.
  */
-function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloadTasks, onOpenDay, theme, t }) {
+function DayPanel({ day, log, areaColors, tasks, tasksLoading, tasksError, reloadTasks, onOpenDay, onOpenTask, theme, t }) {
   const [tab, setTab] = useState(NOW_TAB)
   const onTasks = tab === TASKS_TAB
 
@@ -408,10 +426,8 @@ function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloa
    * than none, so the panel is the same shape on both — a container that
    * resizes when you change tabs reads as two different objects.
    */
-  const taskRatio = {
-    done: tasksDueToday(tasks, { status: 'completed' }).length,
-    total: tasksDueToday(tasks, { status: 'all' }).length
-  }
+  const taskDay = dayTasks(tasks)
+  const taskRatio = { done: taskDay.done.length, total: taskDay.done.length + taskDay.open.length }
   const ahead = aheadOf(day)
 
   return (
@@ -424,13 +440,13 @@ function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloa
             onChange={setTab}
             options={[
               { value: NOW_TAB, label: t('blocks.home.now'), count: ahead.length || undefined },
-              { value: TASKS_TAB, label: t('tasks.title'), count: tasksCount || undefined }
+              { value: TASKS_TAB, label: t('tasks.title'), count: taskDay.open.length || undefined }
             ]}
           />
           {onTasks ? (
             <Progress
-              value={taskRatio.total > 0 ? (taskRatio.done / taskRatio.total) * 100 : 0}
-              accessibilityLabel={t('tasks.progress.label', { done: taskRatio.done, total: taskRatio.total })}
+              value={taskDay.rate * 100}
+              accessibilityLabel={t('tasks.day.edgeAria', { done: taskRatio.done, total: taskRatio.total })}
             />
           ) : (
             <Progress
@@ -441,7 +457,15 @@ function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloa
         </Stack>
 
         {onTasks ? (
-          <TaskTab tasks={tasks} loading={tasksLoading} onReload={reloadTasks} theme={theme} t={t} />
+          <TaskTab
+            tasks={tasks}
+            loading={tasksLoading}
+            error={tasksError}
+            onReload={reloadTasks}
+            onOpenTask={onOpenTask}
+            theme={theme}
+            t={t}
+          />
         ) : (
           <NowTab day={day} ahead={ahead} log={log} areaColors={areaColors} onOpenDay={onOpenDay} theme={theme} t={t} />
         )}
@@ -540,54 +564,91 @@ function NowTab({ day, ahead, log, areaColors, onOpenDay, theme, t }) {
 
       {/* The way into working the day, at the foot of what it holds. */}
       <Divider />
-      <ListRow tile={<Icon name='CalendarDays' size='sm' color='text.tertiary' />} name={t('blocks.home.openDay')} onPress={onOpenDay} />
+      <FootRow glyph='CalendarDays' label={t('blocks.home.openDay')} onPress={onOpenDay} theme={theme} />
     </View>
   )
 }
 
 /**
- * The panel's fourth tab: today's tasks, checkable in place, with the two verbs
- * Home keeps.
- *
- * **Capture is a row, not a form.** It carries a `+` where the checkbox goes,
- * so it lands on the same two rails as every task under it, and the field has
- * no box of its own because the row is already the box. Zero taps to type, as
- * before — the point was never to slow it down, it was to stop a form sitting
- * on top of a list.
- *
- * **Done is a disclosure, not a mode.** Ticking a task used to make it vanish
- * with no screen anywhere in this client able to show it again: the calendar's
- * agenda drops the days of the current month that have already passed, so an
- * overdue task is not on it either. Three filter chips fixed that and cost a
- * whole control row; one line at the foot fixes it and costs nothing when there
- * is nothing done (ADR-012).
- *
- * **Late is the one thing a row says about itself.** Two of the three tasks on
- * this account were overdue and every row looked identical. Only `overdue`
- * draws: "today" is what the panel already means, and a readout on every row
- * that says the same word is texture, not information.
+ * A foot row on the rows' rails (ADR-021 amendment 2026-10-17): an empty When
+ * column, a glyph in the tile's slot, words on the title rail. A link ("Open
+ * the day") or a counted disclosure ("Upcoming · 4"), never a third control.
  */
-function TaskTab({ tasks, loading, onReload, theme, t }) {
+function FootRow({ glyph, label, onPress, expanded, theme }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole='button'
+      accessibilityState={expanded === undefined ? undefined : { expanded }}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: theme.spacing[2],
+        minHeight: LIST_ROW_HEIGHT,
+        paddingHorizontal: theme.spacing[ROW_RAIL],
+        borderRadius: theme.radius.md,
+        backgroundColor: pressed ? resolveColor(theme, 'background.level1') : 'transparent'
+      })}
+    >
+      <View style={{ width: TIME_COLUMN_WIDTH }} />
+      <View style={{ width: 20, alignItems: 'center' }}>
+        <Icon name={glyph} size='sm' color='text.tertiary' />
+      </View>
+      <Typography level='body-md' color='text.secondary'>
+        {label}
+      </Typography>
+    </Pressable>
+  )
+}
+
+/**
+ * The Tasks tab (PLAN-020, PRD-items D11–D12): today, on the Now tab's row.
+ *
+ * Late and today's open tasks, ordered late, flagged, date; the count on the
+ * tab is exactly these rows. Each is a `TaskRow`: "Late" in the When column,
+ * the clipboard or the flag in the tile, the list under the title, the tick at
+ * the end — where `BlockRow` puts it, so the two tabs are one object. The title
+ * opens the item sheet, where the date, the flag, the list and Delete live.
+ *
+ * **Capture is the first row**, due today, into the list its picker names; the
+ * key appears once there is something to save. **What is not today is one tap
+ * down**: "Upcoming · N" (dated soonest first, undated last) and
+ * "Completed · N" (ticked today) are counted disclosures at the foot.
+ */
+function TaskTab({ tasks, loading, error, onReload, onOpenTask, theme, t }) {
+  const { lists } = useTaskLists()
   const [draft, setDraft] = useState('')
+  const [listId, setListId] = useState(null)
+  const [picking, setPicking] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [busy, setBusy] = useState({})
+  const [ticks, setTicks] = useState({})
+  const [showUpcoming, setShowUpcoming] = useState(false)
   const [showDone, setShowDone] = useState(false)
 
-  const shown = tasksDueToday(tasks, { limit: TASKS_SHOWN })
-  const finished = tasksDueToday(tasks, { status: 'completed' })
+  // A tick shows at once and holds until the list comes back with it.
+  const shown = useMemo(
+    () =>
+      tasks.map((task) => {
+        const tick = ticks[task._id ?? task.id]
+        return tick === undefined ? task : { ...task, is_completed: tick, updated_at: new Date().toISOString() }
+      }),
+    [tasks, ticks]
+  )
+  const now = new Date()
+  const day = dayTasks(shown, now)
+  const list = lists.find((entry) => entry.id === listId) ?? null
 
   const add = async () => {
     const title = draft.trim()
     if (!title || saving) return
     setSaving(true)
     try {
-      // Due today, because the field sits inside a panel that says today.
-      await tasksService.create({ title, deadline: new Date().toISOString() })
+      // Due today, because the panel says today; a date key, so no zone moves it.
+      await tasksService.create({ title, deadline: localDateKey(), category: list?.id ?? null, is_completed: false })
       setDraft('')
       await onReload?.()
     } catch {
-      // The client's interceptor reports the failure; the text stays in the
-      // field so nothing the user typed is lost.
+      // The client's interceptor reports the failure; the text stays in the field.
     } finally {
       setSaving(false)
     }
@@ -595,57 +656,112 @@ function TaskTab({ tasks, loading, onReload, theme, t }) {
 
   const toggle = async (task) => {
     const id = task._id ?? task.id
-    setBusy((state) => ({ ...state, [id]: true }))
+    const next = !task.is_completed
+    setTicks((state) => ({ ...state, [id]: next }))
     try {
-      await tasksService.toggleComplete(id, task.is_completed)
+      await tasksService.update(id, { is_completed: next })
       await onReload?.()
     } catch {
-      // Left unticked; the list is re-read either way.
+      // Left as it was: the list is the record.
     } finally {
-      setBusy((state) => ({ ...state, [id]: false }))
+      setTicks(({ [id]: _drop, ...rest }) => rest)
     }
   }
 
-  const taskRow = (task, { finished: isDone = false } = {}) => {
-    const id = task._id ?? task.id
-    const late = !isDone && taskDueState(task) === 'overdue'
+  const rows = (items) =>
+    items.map((task) => (
+      <View key={task._id ?? task.id}>
+        <Divider />
+        <TaskRow task={task} lists={lists} now={now} onOpen={onOpenTask} onToggle={toggle} />
+      </View>
+    ))
+
+  const body = () => {
+    if (loading && tasks.length === 0) {
+      return (
+        <Stack spacing={1}>
+          <Divider />
+          <Skeleton width='100%' height={44} />
+          <Skeleton width='100%' height={44} />
+        </Stack>
+      )
+    }
+    if (error && tasks.length === 0) {
+      return (
+        <Stack spacing={1.5} style={{ paddingTop: theme.spacing[1], alignItems: 'flex-start' }}>
+          <Divider />
+          <Typography level='body-sm' color='text.secondary' accessibilityLiveRegion='polite'>
+            {t('tasks.day.error')}
+          </Typography>
+          <Button size='sm' variant='secondary' onPress={onReload}>
+            {t('common.retry')}
+          </Button>
+        </Stack>
+      )
+    }
     return (
-      <ListRow
-        key={id}
-        dimmed={isDone}
-        tile={
-          <Checkbox
-            checked={Boolean(task.is_completed)}
-            disabled={Boolean(busy[id])}
-            onPress={() => toggle(task)}
-            accessibilityLabel={t('calendarPage.agenda.markDone')}
-          />
-        }
-        name={task.title}
-        /* Never a raw list id: see `taskCategory`. */
-        meta={taskCategory(task)}
-        /* The word carries the state, and it lifts to `text.primary` rather
-           than turning red: a hue on a dashboard reads as an error (§15.5). */
-        readout={late ? <Readout leading>{t('focusBar.overdue')}</Readout> : null}
-        onPress={() => toggle(task)}
-      />
+      <>
+        {day.open.length === 0 ? (
+          <>
+            <Divider />
+            <Typography
+              level='body-sm'
+              color='text.tertiary'
+              style={{
+                paddingVertical: theme.spacing[1.5],
+                paddingLeft: theme.spacing[ROW_RAIL] + TIME_COLUMN_WIDTH + 20 + 2 * theme.spacing[2]
+              }}
+            >
+              {t('tasks.day.empty')}
+            </Typography>
+          </>
+        ) : (
+          rows(day.open)
+        )}
+        {day.upcoming.length > 0 ? (
+          <View>
+            <Divider />
+            <FootRow
+              glyph={showUpcoming ? 'ChevronDown' : 'ChevronRight'}
+              label={`${t('tasks.day.upcoming')} · ${day.upcoming.length}`}
+              expanded={showUpcoming}
+              onPress={() => setShowUpcoming((open) => !open)}
+              theme={theme}
+            />
+            {showUpcoming ? rows(day.upcoming) : null}
+          </View>
+        ) : null}
+        {day.done.length > 0 ? (
+          <View>
+            <Divider />
+            <FootRow
+              glyph={showDone ? 'ChevronDown' : 'ChevronRight'}
+              label={`${t('tasks.filter.completed')} · ${day.done.length}`}
+              expanded={showDone}
+              onPress={() => setShowDone((open) => !open)}
+              theme={theme}
+            />
+            {showDone ? rows(day.done) : null}
+          </View>
+        ) : null}
+      </>
     )
   }
 
   return (
     <View>
-      {/* The capture row. `Input` keeps its own type scale and placeholder
-          colour; only its box is taken off, because the row is the box. */}
+      {/* The capture row, on the rows' rails: When is empty, "+" is in the tile's slot. */}
       <Stack
         direction='row'
-        spacing={1.5}
+        spacing={2}
         style={{ alignItems: 'center', minHeight: LIST_ROW_HEIGHT, paddingHorizontal: theme.spacing[ROW_RAIL] }}
       >
+        <View style={{ width: TIME_COLUMN_WIDTH }} />
         <View
           importantForAccessibility='no'
           style={{
-            width: 22,
-            height: 22,
+            width: 20,
+            height: 20,
             borderRadius: theme.radius.sm,
             backgroundColor: resolveColor(theme, 'background.level1'),
             alignItems: 'center',
@@ -657,76 +773,44 @@ function TaskTab({ tasks, loading, onReload, theme, t }) {
         <Input
           value={draft}
           onChangeText={setDraft}
-          placeholder={t('home.addTaskToday')}
+          // The short form: the list picker shares the row, and the panel already says today.
+          placeholder={t('tasks.capture.placeholder')}
           accessibilityLabel={t('home.addTaskToday')}
           returnKeyType='done'
           onSubmitEditing={add}
           editable={!saving}
           style={{ flex: 1, borderWidth: 0, backgroundColor: 'transparent', paddingHorizontal: 0, minHeight: LIST_ROW_HEIGHT }}
         />
-        {/* The key appears once there is something to save. An always-on
-            button beside an empty field is a control that cannot be used. */}
         {draft.trim() ? (
           <Button size='sm' variant='secondary' loading={saving} onPress={add}>
             {t('common.add')}
           </Button>
-        ) : null}
+        ) : (
+          <Pressable
+            onPress={() => setPicking(true)}
+            accessibilityRole='button'
+            accessibilityLabel={t('tasks.capture.listAria', { name: list?.name ?? t('tasks.lists.general') })}
+            hitSlop={8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing[0.5], minHeight: MIN_TOUCH_TARGET }}
+          >
+            <Typography level='body-sm' color='text.secondary' numberOfLines={1} style={{ maxWidth: 110 }}>
+              {list?.name ?? t('tasks.lists.general')}
+            </Typography>
+            <Icon name='ChevronDown' size='sm' color='text.tertiary' />
+          </Pressable>
+        )}
       </Stack>
 
-      {loading && shown.length === 0 ? (
-        <Stack spacing={1}>
-          <Divider />
-          <Skeleton width='100%' height={44} />
-          <Skeleton width='100%' height={44} />
-        </Stack>
-      ) : shown.length === 0 ? (
-        <>
-          <Divider />
-          <Typography level='body-sm' color='text.tertiary' style={{ paddingTop: theme.spacing[1] }}>
-            {t('calendarPage.agenda.emptyToday')}
-          </Typography>
-        </>
-      ) : (
-        shown.map((task) => (
-          <View key={task._id ?? task.id}>
-            <Divider />
-            {taskRow(task)}
-          </View>
-        ))
-      )}
+      {body()}
 
-      {/* Nothing done today, nothing to disclose. */}
-      {finished.length > 0 ? (
-        <View>
-          <Divider />
-          <Pressable
-            onPress={() => setShowDone((open) => !open)}
-            accessibilityRole='button'
-            accessibilityState={{ expanded: showDone }}
-            style={({ pressed }) => ({
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: theme.spacing[1],
-              minHeight: LIST_ROW_HEIGHT,
-              paddingHorizontal: theme.spacing[ROW_RAIL],
-              opacity: pressed ? 0.7 : 1
-            })}
-          >
-            <Icon name={showDone ? 'ChevronDown' : 'ChevronRight'} size='sm' color='text.tertiary' />
-            <Typography level='body-sm' color='text.secondary'>
-              {`${t('tasks.filter.completed')} · ${finished.length}`}
-            </Typography>
-          </Pressable>
-          {showDone
-            ? finished.map((task) => (
-                <View key={task._id ?? task.id}>
-                  <Divider />
-                  {taskRow(task, { finished: true })}
-                </View>
-              ))
-            : null}
-        </View>
-      ) : null}
+      <ChoiceSheet
+        visible={picking}
+        onClose={() => setPicking(false)}
+        title={t('items.sheet.list')}
+        value={list?.id ?? ''}
+        onChange={(value) => setListId(value || null)}
+        options={[{ value: '', label: t('tasks.lists.general') }, ...lists.map((entry) => ({ value: entry.id, label: entry.name }))]}
+      />
     </View>
   )
 }

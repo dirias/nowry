@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { useItemWriter } from '@nowry/core/hooks/useItemWriter'
+import { useTaskLists } from '@nowry/core/hooks/useTaskLists'
 import { isGoalCompleted } from '@nowry/core/domain/goalDerivation'
 import {
   blockForMilestone,
@@ -35,6 +36,7 @@ import {
   itemFromSources,
   keyLabel,
   missingIn,
+  readingOf,
   readoutParts,
   repeats,
   scheduledReadout
@@ -191,6 +193,7 @@ export function ItemSheet({
   const { saveItem, deleteItem } = useItemWriter()
   const record = useBlockLog()
   const { goals, loading: planLoading } = useAnnualPlan()
+  const { lists: taskLists } = useTaskLists()
 
   // Opening resets the form; a reset on close would show the wipe mid-slide.
   useEffect(() => {
@@ -442,6 +445,20 @@ export function ItemSheet({
     </Stack>
   ) : null
 
+  // A task's list (PLAN-021): General, or one of the learner's lists; the Goal row's grammar.
+  const currentList = taskLists.find((list) => list.id === facts.list) ?? null
+  const listEditor = (
+    <Select
+      value={currentList ? currentList.id : ''}
+      options={[{ value: '', label: t('tasks.lists.general') }, ...taskLists.map((list) => ({ value: list.id, label: list.name }))]}
+      onChange={(value) => {
+        patch({ list: value || null })
+        setOpenRow(null)
+      }}
+      accessibilityLabel={t('items.sheet.list')}
+    />
+  )
+
   const goalEditor = planLoading ? (
     <Skeleton width='100%' height={44} />
   ) : (
@@ -595,6 +612,23 @@ export function ItemSheet({
             />
           }
         />
+
+        {readingOf(facts) === 'task' ? (
+          <FactRow
+            theme={theme}
+            label={t('items.sheet.list')}
+            value={currentList?.name ?? t('tasks.lists.general')}
+            quiet={!currentList}
+            action={
+              <RowAction
+                label={openRow === 'list' ? t('items.sheet.closeRow') : t('items.sheet.change')}
+                expanded={openRow === 'list'}
+                onPress={() => toggleRow('list')}
+              />
+            }
+            editor={openRow === 'list' ? listEditor : null}
+          />
+        ) : null}
 
         <FactRow
           theme={theme}

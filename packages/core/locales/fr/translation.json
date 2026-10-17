@@ -833,7 +833,8 @@
     },
     "capture": {
       "listAria": "Liste : {{name}}",
-      "failed": "La tâche n'a pas été ajoutée. Réessayez."
+      "failed": "La tâche n'a pas été ajoutée. Réessayez.",
+      "placeholder": "Ajouter une tâche"
     },
     "day": {
       "upcoming": "À venir",

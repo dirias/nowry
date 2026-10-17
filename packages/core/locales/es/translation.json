@@ -803,7 +803,8 @@
     },
     "capture": {
       "listAria": "Lista: {{name}}",
-      "failed": "No se añadió la tarea. Inténtalo de nuevo."
+      "failed": "No se añadió la tarea. Inténtalo de nuevo.",
+      "placeholder": "Añadir una tarea"
     },
     "day": {
       "upcoming": "Próximas",

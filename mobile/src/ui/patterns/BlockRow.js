@@ -56,7 +56,7 @@ export const SOURCE_GLYPHS = {
  * is derived from the fill, as `EventTile` does, so a pale area keeps a dark
  * glyph. Out of the accessibility tree: the meta line says the source in words.
  */
-function SourceTile({ type, color, theme }) {
+export function SourceTile({ type, color, theme, glyph = null }) {
   const fill = color.includes('.') ? resolveColor(theme, color) : color
   return (
     <View
@@ -72,7 +72,7 @@ function SourceTile({ type, color, theme }) {
         backgroundColor: fill
       }}
     >
-      <Icon name={SOURCE_GLYPHS[type] ?? SOURCE_GLYPHS.free} size={12} literalColor={readableTextOn(fill)} />
+      <Icon name={glyph ?? SOURCE_GLYPHS[type] ?? SOURCE_GLYPHS.free} size={12} literalColor={readableTextOn(fill)} />
     </View>
   )
 }
@@ -185,7 +185,7 @@ export function BlockRow({
  * day was kept, a dash when it was partly kept, empty otherwise. Its role is
  * checkbox so a screen reader says what pressing it does.
  */
-function Tick({ kept, partial, theme, accessibilityLabel, onPress }) {
+export function Tick({ kept, partial, theme, accessibilityLabel, onPress }) {
   const filled = kept || partial
   return (
     <Pressable

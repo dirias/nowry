@@ -822,7 +822,8 @@
     },
     "capture": {
       "listAria": "Liste: {{name}}",
-      "failed": "Die Aufgabe wurde nicht hinzugefügt. Versuche es erneut."
+      "failed": "Die Aufgabe wurde nicht hinzugefügt. Versuche es erneut.",
+      "placeholder": "Aufgabe hinzufügen"
     },
     "day": {
       "upcoming": "Demnächst",
