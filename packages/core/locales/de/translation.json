@@ -190,11 +190,6 @@
     "language": "Sprache",
     "bugReport": "Fehler melden"
   },
-  "routes": {
-    "terms": "/nutzungsbedingungen",
-    "privacy": "/datenschutz",
-    "copyright": "/copyright"
-  },
   "study": {
     "deck": {
       "study": "Lernen",

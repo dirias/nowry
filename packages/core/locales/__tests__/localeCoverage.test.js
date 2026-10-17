@@ -124,10 +124,6 @@ const CARD_COUNTER = ['cards.session.cardShort']
 // from English; French writes "Bêta" and Japanese ベータ, so neither is here.
 const BETA_MARK = ['beta.mark']
 
-// The takedown page lives at one path in every language: "/copyright" is a
-// URL, not a phrase, and the API's notice endpoint is the same for everyone.
-const COPYRIGHT_ROUTE = ['routes.copyright']
-
 /*
  * The board's key list prints keys as their caps print them (BOARD-004).
  * "Tab", "Esc" and "Ctrl" are what the keys say on Spanish, French, German
@@ -152,7 +148,6 @@ const IDENTICAL_BY_DESIGN = {
     // three pieces in every Latin locale (PLAN-007).
     'blocks.reminder.body',
     ...BETA_MARK,
-    ...COPYRIGHT_ROUTE,
     // "A–Z" is a range of letters, not a phrase. Spanish, French and German
     // all write the same two, so the sort label lands on English by having
     // nothing to translate. Japanese uses あいうえお順 and is not here.
@@ -199,7 +194,6 @@ const IDENTICAL_BY_DESIGN = {
     // A reminder's body is a number, "min" and the source word: the same
     // three pieces in every Latin locale (PLAN-007).
     'blocks.reminder.body',
-    ...COPYRIGHT_ROUTE,
     'taxonomy.topics.business',
     'taxonomy.topics.design',
     'news.categories.design',
@@ -270,7 +264,6 @@ const IDENTICAL_BY_DESIGN = {
     // "Routine" is the word in de too (PLAN-012).
     'items.reading.routine',
     ...BETA_MARK,
-    ...COPYRIGHT_ROUTE,
     'taxonomy.topics.design',
     'news.categories.design',
     'cards.session.filters.tags',
@@ -306,7 +299,11 @@ const IDENTICAL_BY_DESIGN = {
     'boards.menu.importTypes',
     'boards.menu.exportCanvas',
     'boards.inOut.source.mermaid',
-    'boards.inOut.source.canvas','cards.session.xpGained_other', ...CARD_COUNTER, ...COPYRIGHT_ROUTE, ...CAP('mod', 'tab', 'esc', 'enter', 'delete')]
+    'boards.inOut.source.canvas',
+    'cards.session.xpGained_other',
+    ...CARD_COUNTER,
+    ...CAP('mod', 'tab', 'esc', 'enter', 'delete')
+  ]
 }
 
 /**

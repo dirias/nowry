@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { LEGAL_PATHS } from '@nowry/core/constants/site'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Input, Button, Divider, Link, FormControl, FormLabel, Alert, LinearProgress, Stack, IconButton } from '@mui/joy'
 import { EmailRounded, LockRounded, VisibilityRounded, VisibilityOffRounded, Google } from '@mui/icons-material'
@@ -200,11 +201,11 @@ const Login = () => {
 
         <Typography level='body-xs' textAlign='center' sx={{ mt: 2, color: 'text.tertiary', lineHeight: 1.5 }}>
           {t('auth.byContinuing')}{' '}
-          <Link component={RouterLink} to={t('routes.terms')} sx={{ fontWeight: 500 }}>
+          <Link component={RouterLink} to={LEGAL_PATHS.terms} sx={{ fontWeight: 500 }}>
             {t('auth.termsOfService')}
           </Link>{' '}
           {t('auth.and')}{' '}
-          <Link component={RouterLink} to={t('routes.privacy')} sx={{ fontWeight: 500 }}>
+          <Link component={RouterLink} to={LEGAL_PATHS.privacy} sx={{ fontWeight: 500 }}>
             {t('auth.privacyPolicy')}
           </Link>
         </Typography>

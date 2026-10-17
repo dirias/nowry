@@ -190,11 +190,6 @@
     "language": "Langue",
     "bugReport": "Signaler un bug"
   },
-  "routes": {
-    "terms": "/conditions",
-    "privacy": "/confidentialite",
-    "copyright": "/copyright"
-  },
   "study": {
     "views": {
       "dashboard": "Tableau de bord",

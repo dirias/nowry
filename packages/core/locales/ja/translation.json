@@ -180,11 +180,6 @@
     "language": "言語",
     "bugReport": "バグを報告"
   },
-  "routes": {
-    "terms": "/規約",
-    "privacy": "/プライバシー",
-    "copyright": "/copyright"
-  },
   "study": {
     "deck": {
       "study": "学習",

@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom'
+import { LEGAL_PATH_ALIASES } from '@nowry/core/constants/site'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from '@nowry/core/api/queryClient'
@@ -174,6 +175,9 @@ const AppContent = () => {
               <Route path='/privacy' element={<PrivacyPolicy />} />
               <Route path='/terms' element={<TermsOfService />} />
               <Route path='/copyright' element={<CopyrightNotice />} />
+              {Object.entries(LEGAL_PATH_ALIASES).map(([alias, path]) => (
+                <Route key={alias} path={alias} element={<Navigate to={path} replace />} />
+              ))}
 
               {/* Application Dashboard (Protected) */}
               <Route

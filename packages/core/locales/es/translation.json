@@ -170,11 +170,6 @@
     "language": "Idioma",
     "bugReport": "Reportar error"
   },
-  "routes": {
-    "terms": "/terminos",
-    "privacy": "/privacidad",
-    "copyright": "/copyright"
-  },
   "study": {
     "deck": {
       "study": "Estudiar",

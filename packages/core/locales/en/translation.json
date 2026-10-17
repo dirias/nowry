@@ -180,11 +180,6 @@
     "language": "Language",
     "bugReport": "Report Bug"
   },
-  "routes": {
-    "terms": "/terms",
-    "privacy": "/privacy",
-    "copyright": "/copyright"
-  },
   "study": {
     "views": {
       "dashboard": "Dashboard",
