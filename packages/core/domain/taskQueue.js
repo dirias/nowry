@@ -6,16 +6,18 @@
  * you work — and it means this file answers exactly one question: which tasks
  * belong in the "Tasks today" section, and in what order (MOB-074).
  *
- * The order is the web's own, named rather than re-derived: overdue first,
- * then by the task's own priority, then by deadline. What the web did NOT do
+ * The order is one rule, named rather than re-derived: overdue first, then
+ * flagged, then by deadline (PRD-items D12). What the web did NOT do
  * is narrow to today — its card sorts every open task and takes five, so a task
  * due in November sits under a heading that says "today". The heading is the
  * contract, so the filter matches it.
  */
 
-/** How the three levels rank. A task with no level sits with the middle. */
-const RANK = { high: 0, medium: 1, low: 2 }
-const rankOf = (task) => RANK[task?.priority] ?? RANK.medium
+/**
+ * Flagged first (ADR-046: a priority is a flag). The legacy `priority` level
+ * defaults to "medium" on every task, so it ranks nothing and is not read.
+ */
+const rankOf = (task) => (task?.is_priority ? 0 : 1)
 
 const startOfDay = (value) => {
   const date = new Date(value)
@@ -92,12 +94,105 @@ export const tasksDueToday = (tasks, { now = new Date(), limit = null, status = 
  * with names, this stops matching anything and the names come through.
  */
 const GENERATED_ID = /^list[_-]\d{6,}$/i
+/** A server list's id (PLAN-021). Unmatched, it is a deleted list: still an id, never a name. */
+const OBJECT_ID = /^[a-f0-9]{24}$/i
 
-export const taskCategory = (task) => {
+/**
+ * A task's list by name, from the learner's lists (PLAN-021, PRD-items D13):
+ * the list's name when `category` is one of their ids, a real category word
+ * ("study") as itself, and nothing for an id with no list behind it.
+ */
+export const listNameOf = (task, lists = []) => {
   const category = String(task?.category ?? '').trim()
-  if (!category || GENERATED_ID.test(category)) return null
+  // "general" is what the web filed unlisted tasks under: General is no list.
+  if (!category || category.toLowerCase() === 'general') return null
+  const list = (lists ?? []).find((entry) => entry?.id === category)
+  if (list) return list.name
+  if (GENERATED_ID.test(category) || OBJECT_ID.test(category)) return null
   return category
 }
 
+export const taskCategory = (task) => listNameOf(task, [])
+
 /** How many are open today — the Today object's readout. */
 export const dueTodayCount = (tasks, now = new Date()) => tasksDueToday(tasks, { now }).length
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * An instant from the API. Its datetimes are UTC written without a zone
+ * ("2026-10-17T20:00:00"), which a JavaScript engine reads as local time; one
+ * without a zone is read as UTC here.
+ */
+const instantOf = (value) => {
+  if (!value) return null
+  const text = String(value)
+  const zoned = /[zZ]|[+-]\d{2}:?\d{2}$/.test(text) || !text.includes('T') ? text : `${text}Z`
+  const date = new Date(zoned)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+/**
+ * Open tasks not due by today: dated soonest first, undated last, flagged first
+ * within a day (PRD-items D12: the Upcoming disclosure).
+ */
+export const upcomingTasks = (tasks, now = new Date()) =>
+  (tasks ?? [])
+    .filter((task) => task && !task.is_completed && !isDueBy(task, now))
+    .sort((a, b) => {
+      const dayA = a.deadline ? startOfDay(a.deadline) : Infinity
+      const dayB = b.deadline ? startOfDay(b.deadline) : Infinity
+      if (dayA !== dayB) return dayA - dayB
+      return rankOf(a) - rankOf(b)
+    })
+
+/** Tasks ticked today: completed, and last written today (the Completed disclosure). */
+export const doneToday = (tasks, now = new Date()) =>
+  (tasks ?? []).filter((task) => {
+    if (!task?.is_completed) return false
+    const touched = instantOf(task.updated_at)
+    return touched !== null && startOfDay(touched) === startOfDay(now)
+  })
+
+/**
+ * The day panel's three task lists, and the edge's ratio: today's open rows
+ * (the count), what is later, and what was ticked today.
+ */
+export const dayTasks = (tasks, now = new Date()) => {
+  const open = tasksDueToday(tasks, { now })
+  const done = doneToday(tasks, now)
+  const total = open.length + done.length
+  return { open, upcoming: upcomingTasks(tasks, now), done, rate: total === 0 ? 0 : done.length / total }
+}
+
+/**
+ * When a task is, for the row's When column (ADR-021 amendment 2026-10-17):
+ * `late`, `today`, `soon` (inside a week), `later`, or `none` (no date).
+ */
+export const whenOf = (task, now = new Date()) => {
+  if (!task?.deadline) return { kind: 'none', date: null }
+  const due = startOfDay(task.deadline)
+  const today = startOfDay(now)
+  if (due === null) return { kind: 'none', date: null }
+  const date = new Date(due)
+  if (due < today) return { kind: task.is_completed ? 'later' : 'late', date }
+  if (due === today) return { kind: 'today', date }
+  return { kind: Math.round((due - today) / DAY_MS) < 7 ? 'soon' : 'later', date }
+}
+
+/**
+ * The When column's words: "Late", nothing for today or no date, a short
+ * weekday inside a week, a short date beyond it (the year only when it is not
+ * this one).
+ */
+export const whenText = (task, { now = new Date(), language = 'en', t } = {}) => {
+  const { kind, date } = whenOf(task, now)
+  if (kind === 'late') return t ? t('tasks.row.late') : 'Late'
+  if (kind === 'soon') return new Intl.DateTimeFormat(language, { weekday: 'short' }).format(date)
+  if (kind === 'later') {
+    const sameYear = date.getFullYear() === now.getFullYear()
+    const options = sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: '2-digit' }
+    return new Intl.DateTimeFormat(language, options).format(date)
+  }
+  return ''
+}

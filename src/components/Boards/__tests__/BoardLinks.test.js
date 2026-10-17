@@ -126,6 +126,7 @@ describe('Make items', () => {
       title: 'Read chapter 3',
       deadline: null,
       is_priority: false,
+      category: null,
       is_completed: false,
       description: 'focus on the Calvin cycle'
     })
@@ -133,6 +134,7 @@ describe('Make items', () => {
       title: 'Book the lab',
       deadline: null,
       is_priority: false,
+      category: null,
       is_completed: false
     })
     expect(steps).toEqual([undefined])

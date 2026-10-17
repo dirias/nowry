@@ -22,6 +22,8 @@ jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({
     loading: false
   })
 }))
+const mockTaskLists = [{ id: 'L1', name: 'Shopping list' }]
+jest.mock('@nowry/core/hooks/useTaskLists', () => ({ useTaskLists: () => ({ lists: mockTaskLists }) }))
 jest.mock('../../Study/useTodayData', () => ({ useTodayData: () => ({ dueToday: 27, forecast: { days: [] } }) }))
 
 const { localDateKey, addDaysKey } = require('@nowry/core/domain/blocks')
@@ -250,3 +252,24 @@ describe('edit reads any document', () => {
     expect(onClose).toHaveBeenCalled()
   })
 })
+
+describe('a task’s list (PLAN-021)', () => {
+  it('reads the list, offers the learner’s lists, and saves the one picked', async () => {
+    const milk = { _id: 't9', title: 'Milk', deadline: null, is_completed: false, category: 'L1' }
+    open({ mode: 'edit', source: { task: milk } })
+    expect(row('list').getByText('Shopping list')).toBeInTheDocument()
+    openRow('list', 'items.sheet.change')
+    fireEvent.click(screen.getByRole('combobox', { name: 'items.sheet.list' }))
+    fireEvent.click(screen.getByRole('option', { name: 'tasks.lists.general' }))
+    await act(async () => {
+      fireEvent.click(key('items.key.save'))
+    })
+    expect(mockSaveItem).toHaveBeenCalledWith(expect.objectContaining({ title: 'Milk', list: null }), expect.anything(), expect.anything())
+  })
+
+  it('is not a row for a milestone or a routine item', () => {
+    open({ prefill: { goalId: 'g1' } })
+    expect(screen.queryByTestId('row-list')).toBeNull()
+  })
+})
+

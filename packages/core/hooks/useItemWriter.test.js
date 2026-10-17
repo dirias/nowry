@@ -44,7 +44,7 @@ describe('saveItem, create', () => {
   it('due only → one task; the caches for tasks and the calendar are invalidated', async () => {
     const w = writer()
     await act(() => w.saveItem(factsFrom({ title: 'Essay', due: '2026-10-16' })))
-    expect(tasksService.create).toHaveBeenCalledWith({ title: 'Essay', deadline: '2026-10-16', is_priority: false, is_completed: false })
+    expect(tasksService.create).toHaveBeenCalledWith({ title: 'Essay', deadline: '2026-10-16', is_priority: false, category: null, is_completed: false })
     expect(mockCreateBlock).not.toHaveBeenCalled()
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['tasks', 'u1'] })
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['calendarEvents', 'u1'] })
@@ -104,6 +104,7 @@ describe('saveItem, edit', () => {
       title: 'Essay v2',
       deadline: '2026-10-17',
       is_priority: true,
+      category: null,
       is_completed: true
     })
     expect(mockUpdateBlock).toHaveBeenCalledWith({
@@ -118,7 +119,7 @@ describe('saveItem, edit', () => {
     const w = writer()
     await act(() => w.saveItem(factsFrom({ title: 'Essay' }), { task, block }))
     expect(mockRemoveBlock).toHaveBeenCalledWith('b1')
-    expect(tasksService.update).toHaveBeenCalledWith('t1', { title: 'Essay', deadline: null, is_priority: false })
+    expect(tasksService.update).toHaveBeenCalledWith('t1', { title: 'Essay', deadline: null, is_priority: false, category: null })
     expect(tasksService.delete).not.toHaveBeenCalled()
   })
 
@@ -126,7 +127,7 @@ describe('saveItem, edit', () => {
     const routine = { id: 'b2', title: 'Read', source: { type: 'routine', id: null }, ...weekdays }
     const w = writer()
     await act(() => w.saveItem(factsFrom({ title: 'Read', due: '2026-10-20', scheduled: weekdays }), { block: routine }))
-    expect(tasksService.create).toHaveBeenCalledWith({ title: 'Read', deadline: '2026-10-20', is_priority: false, is_completed: false })
+    expect(tasksService.create).toHaveBeenCalledWith({ title: 'Read', deadline: '2026-10-20', is_priority: false, category: null, is_completed: false })
     expect(mockUpdateBlock).toHaveBeenCalledWith({ id: 'b2', changes: expect.objectContaining({ source: { type: 'task', id: 't-new' } }) })
   })
 

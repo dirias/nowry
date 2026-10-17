@@ -1,46 +1,32 @@
 import * as React from 'react'
-import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Sheet,
-  Typography,
-  Stack,
-  Box,
-  Button,
-  Input,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-  LinearProgress,
-  Chip,
-  ChipDelete,
-  Divider,
-  Skeleton,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  Link as JoyLink
-} from '@mui/joy'
-import { Link as RouterLink } from 'react-router-dom'
-import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
-import SortableTask from '../../Task/SortableTask'
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { tasksService } from '@nowry/core/api/services'
+import { Box, Button, Divider, Sheet, Skeleton, Stack, Tab, TabList, TabPanel, Tabs, Typography, Link as JoyLink } from '@mui/joy'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined'
 import { useTaskData } from '@nowry/core/hooks/useTaskData'
+import { useTaskLists } from '@nowry/core/hooks/useTaskLists'
 import { useToday } from '@nowry/core/hooks/useToday'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
+import { useBlocks } from '@nowry/core/hooks/useBlocks'
 import useAnnualPlan from '@nowry/core/hooks/useAnnualPlan'
+import { useAuth } from '@nowry/core/context/AuthContext'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { stateOf } from '@nowry/core/domain/blocks'
+import { dayTasks } from '@nowry/core/domain/taskQueue'
 import { useTodayData } from '../../Study/useTodayData'
-import { focusRing, listRow, readout, segment, segmentedGroup, tabularNums, touchTargetBox } from '../../Common/Form/formStyles'
-import { BlockTile } from '../../Calendar/blockEvents'
-import { dueTodayCount } from '@nowry/core/domain/taskQueue'
+import { focusRing, listRow, segment, segmentedGroup, tabularNums } from '../../Common/Form/formStyles'
+import { BlockTile, blockMeta } from '../../Calendar/blockEvents'
+import ItemSheet from '../../Calendar/ItemSheet'
+import { DayEdge, DayFootRow, DayRow } from './DayRow'
+import TasksTab from './TasksTab'
+import { useLegacyTaskListImport } from './useLegacyTaskListImport'
+
+/**
+ * Home's day panel (PLAN-008, PLAN-018, PLAN-019): one segment over two tabs,
+ * Now and Tasks, that draw one row (ADR-021 amendment 2026-10-17). Each tab's
+ * count is the rows above its foot; the edge under the segment is the tab's
+ * progress. A row's title opens the item sheet; its circle is its one action.
+ */
 
 /** The Now tab: current, next, and this many of what follows — a glance, not the timeline. */
 const LATER_SHOWN = 3
@@ -49,277 +35,59 @@ const PAST_SHOWN = 3
 
 /** The rows ahead of the clock: current, next, and a few of what follows (the phone's `aheadOf`). */
 const aheadOf = (day) => (day?.current ? [day.current, day.next, ...(day.later ?? []).slice(0, LATER_SHOWN)].filter(Boolean) : [])
-/** The time column, as the agenda's block row sets it. */
-const TIME_COLUMN_WIDTH = 44
 
-/** The source's colour: identity is the tile, and only the tile (§15.11). */
-/** The agenda's completion idiom: empty circle to keep, filled success check to undo. */
-const tickSx = (on) => ({
-  ...touchTargetBox,
-  borderRadius: 'sm',
-  flexShrink: 0,
-  color: on ? 'success.plainColor' : 'text.tertiary',
-  ...focusRing
-})
-
-// ─── localStorage helpers ─────────────────────────────────────────────────────
-const LISTS_KEY = 'nowry_task_lists'
-const ACTIVE_LIST_KEY = 'nowry_active_task_list'
-
-const loadLists = () => {
-  try {
-    const raw = localStorage.getItem(LISTS_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-const saveLists = (lists) => {
-  try {
-    localStorage.setItem(LISTS_KEY, JSON.stringify(lists))
-  } catch {
-    /* ignore storage write errors */
-  }
-}
-
-const loadActiveList = () => {
-  return localStorage.getItem(ACTIVE_LIST_KEY) || 'all'
-}
-
-const saveActiveList = (id) => {
-  localStorage.setItem(ACTIVE_LIST_KEY, id)
-}
-// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * A tab's panel. Its list reaches 12px past each side (`listRow`'s hover ground,
+ * PLAN-018), so the panel must not clip: a clipping box with content past its
+ * edge scrolls sideways the moment a control at that edge takes focus. The
+ * height is bounded by `minHeight: 0` instead, so the list scrolls inside it.
+ */
+const tabPanelSx = { p: '0 !important', m: 0, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'visible' }
 
 const SideMenu = () => {
   const { t } = useTranslation()
-
-  // Chip style helpers — use semantic primary tokens so dark mode and
-  // user color preference both work correctly through the Joy UI palette.
-  const activeChipSx = {
-    bgcolor: 'primary.softBg',
-    color: 'primary.plainColor',
-    fontWeight: 600,
-    border: 'none'
-  }
-  const inactiveChipSx = {
-    bgcolor: 'background.level2',
-    color: 'text.secondary',
-    border: 'none'
-  }
-  const [tasks, setTasks] = React.useState([])
-  const [search, setSearch] = React.useState('')
-  const [statusFilter, setStatusFilter] = React.useState('pending')
-
-  // ── Task lists state ──────────────────────────────────────────────────────
-  const [lists, setLists] = React.useState(loadLists)
-  const [activeList, setActiveList] = React.useState(loadActiveList)
-  const [addingList, setAddingList] = React.useState(false)
-  const [newListName, setNewListName] = React.useState('')
-  const newListInputRef = React.useRef(null)
-  const searchInputRef = React.useRef(null)
-  // ─────────────────────────────────────────────────────────────────────────
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const timer = usePomodoro()
 
   // The panel opens on Now (PLAN-008): the clock is the reader, not a tab.
   const [activeTab, setActiveTab] = React.useState('now')
+  const [sheet, setSheet] = React.useState(null)
 
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor))
-
-  const { tasks: tasksData, loading: tasksLoading, reload: reloadTasks } = useTaskData()
+  const { tasks, loading: tasksLoading, error: tasksError, reload: reloadTasks } = useTaskData()
+  const { importLegacy } = useTaskLists()
+  useLegacyTaskListImport(importLegacy, Boolean(user?.id))
 
   /*
    * The one spine (PRD D9): the same hook the calendar's Day reads, fed the
    * same due count the Today object shows, so Home and the calendar cannot
-   * disagree about a block or its state. The tick writes through the same
-   * optimistic log the agenda uses.
+   * disagree about a block or its state.
    */
   const { dueToday } = useTodayData()
   const day = useToday({ dueToday })
-  // The tabs' counts, the phone's own (PLAN-018): the blocks still ahead, the tasks due today.
-  const nowCount = aheadOf(day).length
-  const openTaskCount = dueTodayCount(tasks)
+  const { blocks } = useBlocks({ from: day.date, to: day.date })
   const log = useBlockLog()
   const { focusAreas } = useAnnualPlan()
 
-  const loading = tasksLoading
+  const taskDay = dayTasks(tasks)
+  const tabs = [
+    { value: 'now', label: t('blocks.home.now'), count: aheadOf(day).length },
+    { value: 'tasks', label: t('tasks.title'), count: taskDay.open.length }
+  ]
+  const edge =
+    activeTab === 'now'
+      ? { rate: day.kept.rate, label: t('blocks.keptOf', { kept: day.kept.kept, total: day.kept.planned }) }
+      : {
+          rate: taskDay.rate,
+          label: t('tasks.day.edgeAria', { done: taskDay.done.length, total: taskDay.done.length + taskDay.open.length })
+        }
 
-  // Mirror the task list from the shared hook into local state — tasks below are
-  // mutated optimistically (add/remove/toggle/reorder) ahead of their own reload.
-  // Compares by content (not tasksData's array identity) before seeding: useTaskData()
-  // falls back to `data ?? []`, a fresh array reference on every render while the query
-  // has no data yet (unauthenticated/loading), which would otherwise re-run this effect
-  // and re-render forever.
-  const tasksDataJson = JSON.stringify(tasksData)
-  React.useEffect(() => {
-    setTasks(JSON.parse(tasksDataJson))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tasksDataJson])
-
-  // Focus new list input when shown
-  React.useEffect(() => {
-    if (addingList && newListInputRef.current) {
-      newListInputRef.current.focus()
+  const startBlock = (occurrence) => {
+    timer.startBlock(occurrence)
+    if (occurrence.block?.source?.type === 'study') {
+      timer.setShowWidget(false)
+      navigate(`/study/daily-review?limit=${Math.max(1, Math.round((occurrence.lengthMin || 0) * 1.5))}`)
     }
-  }, [addingList])
-
-  // ── List management ───────────────────────────────────────────────────────
-  const handleSelectList = (id) => {
-    setActiveList(id)
-    saveActiveList(id)
-    setSearch('')
-  }
-
-  const handleStartAddList = () => {
-    setAddingList(true)
-    setNewListName('')
-  }
-
-  const handleConfirmAddList = () => {
-    const trimmed = newListName.trim()
-    if (!trimmed) {
-      setAddingList(false)
-      return
-    }
-    const id = `list_${Date.now()}`
-    const updated = [...lists, { id, label: trimmed }]
-    setLists(updated)
-    saveLists(updated)
-    setActiveList(id)
-    saveActiveList(id)
-    setAddingList(false)
-    setNewListName('')
-  }
-
-  const handleCancelAddList = () => {
-    setAddingList(false)
-    setNewListName('')
-  }
-
-  const handleDeleteList = (e, id) => {
-    e.stopPropagation()
-    const updated = lists.filter((l) => l.id !== id)
-    setLists(updated)
-    saveLists(updated)
-    if (activeList === id) {
-      setActiveList('all')
-      saveActiveList('all')
-    }
-  }
-  // ─────────────────────────────────────────────────────────────────────────
-
-  // Task Management
-  const addTask = async (title) => {
-    try {
-      const newTask = {
-        title: title.trim(),
-        description: '',
-        is_completed: false,
-        priority: 'medium',
-        deadline: null,
-        tags: [],
-        category: activeList === 'all' ? 'general' : activeList
-      }
-
-      const created = await tasksService.create(newTask)
-      setTasks([...tasks, created])
-      reloadTasks()
-      setSearch('')
-    } catch (error) {
-      console.error('Error adding task:', error)
-    }
-  }
-
-  const removeTask = async (id) => {
-    try {
-      await tasksService.delete(id)
-      setTasks(tasks.filter((t) => (t._id || t.id) !== id))
-      reloadTasks()
-    } catch (error) {
-      console.error('Error deleting task:', error)
-    }
-  }
-
-  const toggleTask = async (task) => {
-    try {
-      const updated = await tasksService.toggleComplete(task._id || task.id, task.is_completed)
-      setTasks(tasks.map((t) => ((t._id || t.id) === (updated._id || updated.id) ? updated : t)))
-      reloadTasks()
-    } catch (error) {
-      console.error('Error toggling task:', error)
-    }
-  }
-
-  const updateTask = async (updatedTask) => {
-    try {
-      const taskId = updatedTask._id || updatedTask.id
-      const updates = {
-        title: updatedTask.title,
-        deadline: updatedTask.deadline,
-        priority: updatedTask.priority,
-        is_completed: updatedTask.is_completed
-      }
-
-      const updated = await tasksService.update(taskId, updates)
-      setTasks((prev) => prev.map((t) => ((t._id || t.id) === taskId ? updated : t)))
-      reloadTasks()
-    } catch (error) {
-      console.error('Error updating task:', error)
-    }
-  }
-
-  const filteredTasks = tasks.filter((t) => {
-    const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = statusFilter === 'all' ? true : statusFilter === 'completed' ? t.is_completed : !t.is_completed
-    const matchesList = activeList === 'all' ? true : t.category === activeList
-    return matchesSearch && matchesStatus && matchesList
-  })
-
-  const isExactTitleMatch = (text) => tasks.some((t) => t.title.trim().toLowerCase() === text.trim().toLowerCase())
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && search.trim() && !isExactTitleMatch(search)) {
-      addTask(search)
-    }
-  }
-
-  const handleDragEnd = (event) => {
-    const { active, over } = event
-    if (active.id !== over?.id) {
-      const oldIndex = tasks.findIndex((t) => (t._id || t.id) === active.id)
-      const newIndex = tasks.findIndex((t) => (t._id || t.id) === over.id)
-      const newTasks = arrayMove(tasks, oldIndex, newIndex)
-      setTasks(newTasks)
-    }
-  }
-
-  if (loading) {
-    return (
-      <Sheet
-        variant='outlined'
-        sx={{ borderRadius: 'md', p: 2, minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <CircularProgress />
-      </Sheet>
-    )
-  }
-
-  // Map a category id → display label
-  const getCategoryLabel = (catId) => {
-    if (!catId || catId === 'general' || catId === 'all') return t('tasks.lists.general')
-    const found = lists.find((l) => l.id === catId)
-    return found ? found.label : catId
-  }
-
-  // Group filteredTasks by category — only used when activeList === 'all'
-  const getGroupedTasks = () => {
-    const groups = {}
-    filteredTasks.forEach((task) => {
-      const cat = task.category || 'general'
-      if (!groups[cat]) groups[cat] = []
-      groups[cat].push(task)
-    })
-    return Object.entries(groups).map(([id, items]) => ({ id, label: getCategoryLabel(id), tasks: items }))
   }
 
   return (
@@ -342,14 +110,9 @@ const SideMenu = () => {
         onChange={(e, val) => setActiveTab(val)}
         sx={{ bgcolor: 'transparent', height: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}
       >
-        {/* One segment with words and counts, as the phone has it ("Now 2 · Tasks 3"):
-            an icon-only pair made you guess, and a solid fill on the engaged tab was a
-            second solid key on the page (ADR-020: engaged = level2 ground + underline). */}
-        <TabList disableUnderline sx={{ ...segmentedGroup, mb: 2, flexShrink: 0, p: 0, gap: 0 }}>
-          {[
-            { value: 'now', label: t('blocks.home.now'), count: nowCount },
-            { value: 'tasks', label: t('tasks.title'), count: openTaskCount }
-          ].map((tab, index) => (
+        {/* One segment with words and counts (PLAN-018, ADR-020: engaged = level2 ground + underline). */}
+        <TabList disableUnderline sx={{ ...segmentedGroup, mb: 1, flexShrink: 0, p: 0, gap: 0 }}>
+          {tabs.map((tab, index) => (
             <Tab
               key={tab.value}
               disableIndicator
@@ -368,311 +131,65 @@ const SideMenu = () => {
           ))}
         </TabList>
 
-        {/* Tab Panels */}
+        {/* Progress is the edge under the tabs, on both (§15.4). */}
+        <DayEdge rate={edge.rate} label={edge.label} />
 
-        {/* Now — the day's blocks around the clock (PLAN-008, PRD D9) */}
         {activeTab === 'now' && (
-          <TabPanel
-            value='now'
-            sx={{
-              p: '0 !important',
-              m: 0,
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            <NowTab day={day} log={log} focusAreas={focusAreas} t={t} />
+          <TabPanel value='now' sx={tabPanelSx}>
+            <NowTab
+              day={day}
+              log={log}
+              focusAreas={focusAreas}
+              onOpen={(occurrence) => setSheet({ source: { block: occurrence.block, occurrence } })}
+              t={t}
+            />
           </TabPanel>
         )}
 
-        {/* Tasks */}
         {activeTab === 'tasks' && (
-          <TabPanel value='tasks' sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            {/* The filter. No title: the tab above already says Tasks (PLAN-018). */}
-            <Stack direction='row' alignItems='center' justifyContent='flex-end' sx={{ mb: 1 }}>
-              <Stack direction='row' spacing={0.5}>
-                {['all', 'pending', 'completed'].map((f) => (
-                  <Chip
-                    key={f}
-                    size='sm'
-                    variant='plain'
-                    color='neutral'
-                    onClick={() => setStatusFilter(f)}
-                    sx={{ cursor: 'pointer', px: 1, ...(statusFilter === f ? activeChipSx : inactiveChipSx) }}
-                  >
-                    {t(`tasks.filter.${f}`)}
-                  </Chip>
-                ))}
-              </Stack>
-            </Stack>
-
-            {/* ── Completion progress ─────────────────────────────────────── */}
-            {(() => {
-              const listTasks = activeList === 'all' ? tasks : tasks.filter((t) => t.category === activeList)
-              const total = listTasks.length
-              const done = listTasks.filter((t) => t.is_completed).length
-              const pct = total === 0 ? 0 : Math.round((done / total) * 100)
-              return (
-                <Box sx={{ mb: 1.5, flexShrink: 0 }}>
-                  <Stack direction='row' justifyContent='space-between' alignItems='baseline' sx={{ mb: 0.5 }}>
-                    <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                      {total === 0 ? t('tasks.progress.noTasks') : t('tasks.progress.label', { done, total })}
-                    </Typography>
-                    {total > 0 && (
-                      <Typography
-                        level='body-xs'
-                        sx={{ color: pct === 100 ? 'success.plainColor' : 'text.tertiary', fontWeight: pct === 100 ? 600 : 400 }}
-                      >
-                        {pct}%
-                      </Typography>
-                    )}
-                  </Stack>
-                  <LinearProgress
-                    determinate
-                    value={pct}
-                    color='primary'
-                    size='sm'
-                    sx={{
-                      borderRadius: 'sm',
-                      '--LinearProgress-thickness': '5px',
-                      bgcolor: 'background.level2'
-                    }}
-                  />
-                </Box>
-              )
-            })()}
-            {/* ────────────────────────────────────────────────────────────── */}
-
-            {/* ── List chips row ──────────────────────────────────────────── */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                flexWrap: 'nowrap',
-                overflowX: 'auto',
-                mb: 1,
-                pb: 0.5,
-                flexShrink: 0,
-                // hide scrollbar but keep functionality
-                '&::-webkit-scrollbar': { display: 'none' },
-                scrollbarWidth: 'none'
-              }}
-            >
-              {/* "All" chip */}
-              <Chip
-                size='sm'
-                variant='plain'
-                color='neutral'
-                onClick={() => handleSelectList('all')}
-                sx={{ cursor: 'pointer', flexShrink: 0, ...(activeList === 'all' ? activeChipSx : inactiveChipSx) }}
-              >
-                {t('tasks.lists.all')}
-              </Chip>
-
-              {/* User-created list chips */}
-              {lists.map((list) => (
-                <Chip
-                  key={list.id}
-                  size='sm'
-                  variant='plain'
-                  color='neutral'
-                  onClick={() => handleSelectList(list.id)}
-                  endDecorator={
-                    <ChipDelete onDelete={(e) => handleDeleteList(e, list.id)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }} />
-                  }
-                  sx={{
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                    ...(activeList === list.id ? activeChipSx : inactiveChipSx)
-                  }}
-                >
-                  {list.label}
-                </Chip>
-              ))}
-
-              {/* Inline new-list input or + button */}
-              {addingList ? (
-                <Input
-                  size='sm'
-                  placeholder={t('tasks.lists.listPlaceholder')}
-                  value={newListName}
-                  onChange={(e) => setNewListName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleConfirmAddList()
-                    if (e.key === 'Escape') handleCancelAddList()
-                  }}
-                  onBlur={handleConfirmAddList}
-                  slotProps={{ input: { ref: newListInputRef } }}
-                  sx={{ width: 110, flexShrink: 0, '--Input-minHeight': '24px', py: 0 }}
-                />
-              ) : (
-                <Tooltip title={t('tasks.lists.addList')} size='sm'>
-                  <IconButton
-                    size='sm'
-                    variant='plain'
-                    color='neutral'
-                    onClick={handleStartAddList}
-                    sx={{ flexShrink: 0, '--IconButton-size': '24px', opacity: 0.6, '&:hover': { opacity: 1 } }}
-                  >
-                    <AddRoundedIcon sx={{ fontSize: 16 }} />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-            {/* ────────────────────────────────────────────────────────────── */}
-
-            {/* Search / Add Input */}
-            <Box sx={{ position: 'relative', mb: 1 }}>
-              <Input
-                size='sm'
-                placeholder={
-                  activeList === 'all'
-                    ? t('tasks.searchPlaceholder')
-                    : t('tasks.addToListPlaceholder', { list: getCategoryLabel(activeList) })
-                }
-                startDecorator={<SearchRoundedIcon />}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={handleKeyDown}
-                slotProps={{ input: { ref: searchInputRef } }}
-                sx={{ width: '100%' }}
-              />
-              {search.trim() && !isExactTitleMatch(search) && (
-                <Tooltip title={t('tasks.addTooltip', { title: search })}>
-                  <IconButton
-                    onClick={() => addTask(search)}
-                    size='sm'
-                    color='primary'
-                    variant='soft'
-                    sx={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)' }}
-                  >
-                    <AddRoundedIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-
-            {/* Task List */}
-            <Box
-              sx={{
-                flex: 1,
-                overflowY: 'auto',
-                '&::-webkit-scrollbar': { width: 4 },
-                '&::-webkit-scrollbar-thumb': { bgcolor: 'neutral.outlinedBorder', borderRadius: 2 },
-                '&::-webkit-scrollbar-track': { bgcolor: 'transparent' }
-              }}
-            >
-              {tasks.length === 0 ? (
-                /* ── Fully empty ── */
-                <Box sx={{ py: 4, px: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, textAlign: 'center' }}>
-                  <FormatListBulletedIcon sx={{ fontSize: 32, color: 'text.secondary' }} />
-                  <Box>
-                    <Typography level='title-sm' sx={{ mb: 0.5 }}>
-                      {t('tasks.emptyTitle')}
-                    </Typography>
-                    <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                      {t('tasks.emptySubtitle')}
-                    </Typography>
-                  </Box>
-                </Box>
-              ) : filteredTasks.length === 0 ? (
-                /* ── No match ── */
-                <Box sx={{ py: 3, px: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, textAlign: 'center' }}>
-                  <FormatListBulletedIcon sx={{ fontSize: 24, color: 'text.secondary', opacity: 0.6 }} />
-                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                    {t('tasks.noMatchTitle')}
-                  </Typography>
-                </Box>
-              ) : activeList === 'all' ? (
-                /* ── Grouped by category ── */
-                <Stack spacing={0}>
-                  {getGroupedTasks().map((group, gi) => (
-                    <Box key={group.id}>
-                      {gi > 0 && <Divider sx={{ my: 1 }} />}
-                      <Typography
-                        level='body-xs'
-                        sx={{
-                          px: 0.5,
-                          pb: 0.5,
-                          color: 'text.tertiary',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em'
-                        }}
-                      >
-                        {group.label}
-                      </Typography>
-                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                        <SortableContext items={group.tasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
-                          <Stack spacing={0.5}>
-                            {group.tasks.map((task) => (
-                              <SortableTask
-                                key={task._id || task.id}
-                                task={task}
-                                onToggle={() => toggleTask(task)}
-                                onDelete={() => removeTask(task._id || task.id)}
-                                onUpdate={updateTask}
-                              />
-                            ))}
-                          </Stack>
-                        </SortableContext>
-                      </DndContext>
-                    </Box>
-                  ))}
-                </Stack>
-              ) : (
-                /* ── Single list flat view ── */
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={filteredTasks.map((t) => t._id || t.id)} strategy={verticalListSortingStrategy}>
-                    <Stack spacing={0.5}>
-                      {filteredTasks.map((task) => (
-                        <SortableTask
-                          key={task._id || task.id}
-                          task={task}
-                          onToggle={() => toggleTask(task)}
-                          onDelete={() => removeTask(task._id || task.id)}
-                          onUpdate={updateTask}
-                        />
-                      ))}
-                    </Stack>
-                  </SortableContext>
-                </DndContext>
-              )}
-            </Box>
+          <TabPanel value='tasks' sx={tabPanelSx}>
+            <TasksTab
+              tasks={tasks}
+              loading={tasksLoading}
+              error={tasksError}
+              onReload={reloadTasks}
+              onOpenTask={(task) => setSheet({ source: { task } })}
+            />
           </TabPanel>
         )}
       </Tabs>
+
+      {/* The item sheet (PLAN-012): editing, flagging, moving and deleting live here. */}
+      <ItemSheet
+        key={sheet?.source?.block?.id ?? sheet?.source?.task?._id ?? 'closed'}
+        open={Boolean(sheet)}
+        onClose={() => setSheet(null)}
+        onSaved={reloadTasks}
+        mode={sheet ? 'edit' : 'create'}
+        source={sheet?.source ?? null}
+        prefill={null}
+        blocks={blocks ?? []}
+        onStart={startBlock}
+      />
     </Sheet>
   )
 }
 
 /**
  * The day around the clock: now · next · later, from the one spine (PRD D9).
- *
- * The current block leads; every row carries the agenda's tick, which keeps
- * or undoes through the same optimistic log, so a block kept here is kept on
- * the calendar at once. Start is not a row action (PLAN-017): it lives in the
- * block's sheet on the calendar. When the day is
- * spent — nothing running, nothing ahead — the tab reads the day back: one
- * line of copy, then the last blocks it held with their states, read-only.
- * Home is where you watch; the calendar is where you work.
- *
- * Each row is the one anatomy (§15.11): time readout · 16px tile in the
- * source's colour · title over "20 min · study" · the tick or the link.
- * State is the title's strike and the tick's fill, never a tint on the row.
+ * Every row carries the tick (PLAN-017); the title opens the block's sheet,
+ * where Start lives. When the day is spent the tab reads the last blocks back.
  */
-const NowTab = ({ day, log, focusAreas, t }) => {
+const NowTab = ({ day, log, focusAreas, onOpen, t }) => {
   const toggle = (o) => (o.log?.status === 'kept' ? log.undo(o) : log.keep(o))
 
   if (day.loading && day.occurrences.length === 0) {
     return (
       <Stack>
         {[0, 1].map((i) => (
-          <Box key={i} sx={listRow}>
-            <Skeleton variant='rectangular' width={16} height={16} sx={{ borderRadius: 'sm', flexShrink: 0 }} />
+          <Box key={i} sx={{ ...listRow, gap: 1.5 }} aria-hidden='true'>
+            <Skeleton variant='text' level='body-xs' sx={{ width: 30 }} />
+            <Skeleton variant='rectangular' width={16} height={16} sx={{ borderRadius: 'xs', flexShrink: 0 }} />
             <Box sx={{ flex: 1 }}>
               <Skeleton variant='text' level='body-sm' width='55%' />
               <Skeleton variant='text' level='body-xs' width='30%' />
@@ -728,78 +245,40 @@ const NowTab = ({ day, log, focusAreas, t }) => {
       {rows.map((o, index) => (
         <React.Fragment key={`${o.blockId}|${o.date}`}>
           {index > 0 && <Divider />}
-          <NowRow occurrence={o} nowMinutes={day.nowMinutes} focusAreas={focusAreas} onToggle={toggle} t={t} />
+          <NowRow occurrence={o} nowMinutes={day.nowMinutes} focusAreas={focusAreas} onToggle={toggle} onOpen={onOpen} t={t} />
         </React.Fragment>
       ))}
 
-      {/* The way into working the day, at the foot of what it holds. */}
+      {/* The way into working the day, at the foot of what it holds, on the rows' rails. */}
       <Divider />
-      <Box sx={{ ...listRow, minHeight: 44 }}>
-        <JoyLink component={RouterLink} to='/calendar' level='body-sm' sx={{ color: 'text.secondary', ...focusRing }}>
-          {t('blocks.home.openDay')}
-        </JoyLink>
-      </Box>
+      <DayFootRow component={RouterLink} to='/calendar' glyph={<CalendarTodayOutlinedIcon />}>
+        {t('blocks.home.openDay')}
+      </DayFootRow>
     </Box>
   )
 }
 
-const NowRow = ({ occurrence, nowMinutes, focusAreas, onToggle, t }) => {
+const NowRow = ({ occurrence, nowMinutes, focusAreas, onToggle, onOpen, t }) => {
   const state = stateOf(occurrence, nowMinutes)
   const kept = state === 'kept' || state === 'partial'
-  const skipped = state === 'skipped'
-  const running = state === 'running'
-  const type = occurrence.block?.source?.type ?? 'free'
   const title = occurrence.title || occurrence.block?.title || ''
-  const meta = t('calendarPage.blocks.meta', { minutes: occurrence.lengthMin, source: t(`calendarPage.blocks.source.${type}`) })
-  const tickLabel = kept ? t('calendarPage.blocks.undoKept') : t('calendarPage.blocks.markKept')
-
   return (
-    <Box sx={{ ...listRow, gap: 1.5 }} data-testid='home-block-row' data-block-state={state}>
-      <Typography
-        level='body-sm'
-        sx={{
-          ...readout,
-          width: TIME_COLUMN_WIDTH,
-          flexShrink: 0,
-          color: running ? 'primary.plainColor' : 'text.tertiary',
-          fontWeight: running ? 'lg' : 'md'
-        }}
-      >
-        {occurrence.start}
-      </Typography>
-      {/* The tile is a label, never a control (§15.8, PLAN-018): the source's glyph in it,
-          so it is not read as a second checkbox beside the tick. */}
-      <BlockTile occurrence={occurrence} focusAreas={focusAreas} />
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          level='body-sm'
-          noWrap
-          sx={{
-            fontWeight: 'md',
-            color: skipped ? 'text.tertiary' : 'text.primary',
-            textDecoration: skipped ? 'line-through' : 'none'
-          }}
-        >
-          {title}
-        </Typography>
-        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          {meta}
-        </Typography>
-      </Box>
-      {/* The tick is every row's one action, the current row's included (PLAN-017):
-          Start lives in the block's sheet, where the timer is a choice. */}
-      <IconButton
-        size='sm'
-        variant='plain'
-        color={kept ? 'success' : 'neutral'}
-        onClick={() => onToggle?.(occurrence)}
-        aria-label={tickLabel}
-        aria-pressed={kept}
-        sx={tickSx(kept)}
-      >
-        {kept ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
-      </IconButton>
-    </Box>
+    <DayRow
+      testId='home-block-row'
+      state={state}
+      lead={occurrence.start}
+      leadTone={state === 'running' ? 'now' : 'quiet'}
+      // The tile is a label, never a control (§15.8, PLAN-018).
+      tile={<BlockTile occurrence={occurrence} focusAreas={focusAreas} />}
+      title={title}
+      meta={blockMeta(occurrence, t)}
+      done={kept}
+      struck={state === 'skipped'}
+      onOpen={() => onOpen(occurrence)}
+      openLabel={t('blocks.row.openAria', { title })}
+      tickLabel={kept ? t('calendarPage.blocks.undoKept') : t('calendarPage.blocks.markKept')}
+      onToggle={() => onToggle(occurrence)}
+    />
   )
 }
 

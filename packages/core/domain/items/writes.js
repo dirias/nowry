@@ -31,7 +31,7 @@ export const needsTask = (facts) => {
 export const writesFor = (facts, { taskId = null, areaId = null } = {}) => {
   const reading = readingOf(facts)
   const title = facts.title.trim()
-  const task = needsTask(facts) ? { title, deadline: facts.due, is_priority: Boolean(facts.priority) } : null
+  const task = needsTask(facts) ? { title, deadline: facts.due, is_priority: Boolean(facts.priority), category: facts.list ?? null } : null
   const milestone = reading === 'milestone' ? { title, due_date: facts.due, is_priority: Boolean(facts.priority) } : null
   const block = facts.scheduled
     ? {

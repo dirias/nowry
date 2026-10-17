@@ -772,29 +772,44 @@
   },
   "tasks": {
     "title": "Tareas",
-    "searchPlaceholder": "Buscar o añadir tareas...",
     "filter": {
-      "all": "Todas",
-      "completed": "Completadas",
-      "pending": "Pendientes"
+      "completed": "Completadas"
     },
     "lists": {
-      "all": "Todas",
       "general": "General",
       "addList": "Nueva lista",
-      "listPlaceholder": "Nombre de lista..."
+      "listPlaceholder": "Nombre de lista...",
+      "new": "Nueva lista…",
+      "edit": "Editar listas…",
+      "dialogTitle": "Listas",
+      "renameAria": "Renombrar {{name}}",
+      "deleteAria": "Eliminar {{name}}",
+      "deleteTitle": "¿Eliminar «{{name}}»?",
+      "deleteBody": "Sus tareas se quedan, en {{general}}.",
+      "exists": "Ya tienes una lista con ese nombre.",
+      "saveError": "No se guardó. Inténtalo de nuevo.",
+      "none": "Aún no hay listas."
     },
-    "empty": "No hay tareas. ¡Escribe para añadir una!",
-    "noMatch": "Ninguna tarea coincide con tus filtros",
-    "emptyTitle": "Aún no hay tareas",
-    "emptySubtitle": "Empieza a organizar tu día añadiendo tu primera tarea.",
-    "emptyCta": "Añadir una tarea",
-    "noMatchTitle": "Sin tareas coincidentes",
-    "addToListPlaceholder": "Añadir a {{list}}...",
-    "addTooltip": "Añadir \"{{title}}\"",
     "progress": {
-      "label": "{{done}} de {{total}} completadas",
-      "noTasks": "Aún no hay tareas"
+      "label": "{{done}} de {{total}} completadas"
+    },
+    "row": {
+      "late": "Atrasada",
+      "task": "Tarea",
+      "priority": "Prioridad",
+      "openAria": "Abrir {{title}}",
+      "markDone": "Marcar {{title}} como hecha",
+      "markUndone": "Marcar {{title}} como pendiente"
+    },
+    "capture": {
+      "listAria": "Lista: {{name}}",
+      "failed": "No se añadió la tarea. Inténtalo de nuevo."
+    },
+    "day": {
+      "upcoming": "Próximas",
+      "empty": "Nada para hoy.",
+      "error": "No se cargaron tus tareas.",
+      "edgeAria": "{{done}} de {{total}} tareas hechas hoy"
     }
   },
   "sidemenu": {
@@ -4342,7 +4357,8 @@
       "closeRow": "Listo",
       "off": "No",
       "on": "Sí",
-      "onceOnDue": "Una vez, el día de vencimiento"
+      "onceOnDue": "Una vez, el día de vencimiento",
+      "list": "Lista"
     },
     "reading": {
       "task": "Tarea",

@@ -57,14 +57,14 @@ describe('writesFor (D7): nothing merges underneath', () => {
     const plan = writesFor(factsFrom({ title: ' Essay ', due: '2026-10-16' }))
     expect(plan).toEqual({
       reading: 'task',
-      task: { title: 'Essay', deadline: '2026-10-16', is_priority: false },
+      task: { title: 'Essay', deadline: '2026-10-16', is_priority: false, category: null },
       milestone: null,
       block: null
     })
   })
   it('due and scheduled once → a task and a block sourced to it, on the due day', () => {
     const plan = writesFor(factsFrom({ title: 'Essay', due: '2026-10-16', priority: true, scheduled: once }), { taskId: 't1' })
-    expect(plan.task).toEqual({ title: 'Essay', deadline: '2026-10-16', is_priority: true })
+    expect(plan.task).toEqual({ title: 'Essay', deadline: '2026-10-16', is_priority: true, category: null })
     expect(plan.block).toMatchObject({
       title: 'Essay',
       source: { type: 'task', id: 't1' },
@@ -243,5 +243,14 @@ describe('sourceFromEvent: a calendar event names the documents it stands for', 
     expect(sourceFromEvent({ id: 'goal-g1', type: 'goal' })).toBeNull()
     expect(sourceFromEvent({ id: 'activity-a1', type: 'activity' })).toBeNull()
     expect(sourceFromEvent(null)).toBeNull()
+  })
+})
+
+describe('a task keeps its list (PLAN-021)', () => {
+  it('reads the list off the task and writes it back as its category', () => {
+    const facts = itemFromSources({ task: { _id: 't1', title: 'Milk', deadline: null, category: 'list-id' } })
+    expect(facts.list).toBe('list-id')
+    expect(writesFor(facts).task.category).toBe('list-id')
+    expect(writesFor({ ...facts, list: null }).task.category).toBeNull()
   })
 })

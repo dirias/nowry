@@ -754,29 +754,44 @@
   },
   "tasks": {
     "title": "タスク",
-    "searchPlaceholder": "タスクを検索または追加...",
     "filter": {
-      "all": "すべて",
-      "completed": "完了",
-      "pending": "未完了"
+      "completed": "完了"
     },
     "lists": {
-      "all": "すべて",
       "general": "一般",
       "addList": "新しいリスト",
-      "listPlaceholder": "リスト名..."
+      "listPlaceholder": "リスト名...",
+      "new": "新しいリスト…",
+      "edit": "リストを編集…",
+      "dialogTitle": "リスト",
+      "renameAria": "{{name}}の名前を変更",
+      "deleteAria": "{{name}}を削除",
+      "deleteTitle": "「{{name}}」を削除しますか？",
+      "deleteBody": "タスクは残り、「{{general}}」に移ります。",
+      "exists": "同じ名前のリストがすでにあります。",
+      "saveError": "保存できませんでした。もう一度お試しください。",
+      "none": "リストはまだありません。"
     },
-    "empty": "タスクはまだありません。入力して追加しましょう！",
-    "noMatch": "フィルターに一致するタスクはありません",
-    "emptyTitle": "タスクはまだありません",
-    "emptySubtitle": "最初のタスクを追加して、今日の予定を整理しましょう。",
-    "emptyCta": "タスクを追加",
-    "noMatchTitle": "一致するタスクはありません",
-    "addToListPlaceholder": "{{list}} に追加...",
-    "addTooltip": "\"{{title}}\" を追加",
     "progress": {
-      "label": "{{total}} 件中 {{done}} 件完了",
-      "noTasks": "タスクはまだありません"
+      "label": "{{total}} 件中 {{done}} 件完了"
+    },
+    "row": {
+      "late": "期限切れ",
+      "task": "タスク",
+      "priority": "優先",
+      "openAria": "{{title}}を開く",
+      "markDone": "{{title}}を完了にする",
+      "markUndone": "{{title}}を未完了に戻す"
+    },
+    "capture": {
+      "listAria": "リスト：{{name}}",
+      "failed": "タスクを追加できませんでした。もう一度お試しください。"
+    },
+    "day": {
+      "upcoming": "今後",
+      "empty": "今日が期限のものはありません。",
+      "error": "タスクを読み込めませんでした。",
+      "edgeAria": "今日のタスク {{total}} 件中 {{done}} 件完了"
     }
   },
   "books": {
@@ -3772,7 +3787,8 @@
       "closeRow": "完了",
       "off": "オフ",
       "on": "オン",
-      "onceOnDue": "期限日に一度"
+      "onceOnDue": "期限日に一度",
+      "list": "リスト"
     },
     "reading": {
       "task": "タスク",

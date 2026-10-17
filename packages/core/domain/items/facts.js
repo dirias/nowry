@@ -15,9 +15,10 @@
  * @property {boolean} priority
  * @property {string|null} goalId       part of a goal
  * @property {'study'|null} origin      made from the Study Center: the study time
+ * @property {string|null} list         a task's list id (PLAN-021); null is General
  */
 
-export const EMPTY_FACTS = Object.freeze({ title: '', due: null, scheduled: null, priority: false, goalId: null, origin: null })
+export const EMPTY_FACTS = Object.freeze({ title: '', due: null, scheduled: null, priority: false, goalId: null, origin: null, list: null })
 
 /** A complete Facts from a partial one; the sheet starts from this. */
 export const factsFrom = (partial = {}) => ({ ...EMPTY_FACTS, ...partial })

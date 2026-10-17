@@ -8,7 +8,7 @@ describe('tasksDueToday', () => {
     task('later', { deadline: '2026-11-01' }),
     task('today-low', { deadline: '2026-09-12', priority: 'low' }),
     task('overdue', { deadline: '2026-09-09', priority: 'low' }),
-    task('today-high', { deadline: '2026-09-12T23:00:00', priority: 'high' }),
+    task('today-high', { deadline: '2026-09-12T23:00:00', is_priority: true }),
     task('done', { deadline: '2026-09-12', is_completed: true }),
     task('undated', {})
   ]
@@ -26,9 +26,9 @@ describe('tasksDueToday', () => {
     expect(ids).not.toContain('undated')
   })
 
-  it('ranks a task with no level with the middle one', () => {
-    const pair = [task('none', { deadline: '2026-09-12' }), task('low', { deadline: '2026-09-12', priority: 'low' })]
-    expect(tasksDueToday(pair, { now }).map((t) => t._id)).toEqual(['none', 'low'])
+  it('puts a flagged task first within its day, and ignores the legacy level', () => {
+    const pair = [task('high', { deadline: '2026-09-12', priority: 'high' }), task('flagged', { deadline: '2026-09-12', is_priority: true })]
+    expect(tasksDueToday(pair, { now }).map((t) => t._id)).toEqual(['flagged', 'high'])
   })
 
   it('takes a limit, and survives an absent list', () => {

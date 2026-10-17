@@ -7,6 +7,7 @@ import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined'
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
 import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
@@ -224,6 +225,31 @@ export const BlockEventContent = ({ event, focusAreas, todayKey, nowMinutes, due
           }}
         />
       )}
+    </Box>
+  )
+}
+
+/**
+ * A task's tile in Home's day panel (PLAN-019): the same tile a task block
+ * wears, a clipboard, or a flag when the task is flagged (ADR-046). A label,
+ * never a check: the row's tick is one tile away.
+ */
+export const TaskTile = ({ flagged = false, size = 16 }) => {
+  const Icon = flagged ? FlagOutlinedIcon : AssignmentOutlinedIcon
+  return (
+    <Box
+      aria-hidden='true'
+      data-testid='task-tile'
+      data-flagged={flagged}
+      sx={{
+        ...identityTile('neutral.outlinedBorder', size),
+        color: 'text.primary',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <Icon sx={{ fontSize: size <= 16 ? 'xs' : 'md', color: 'inherit' }} />
     </Box>
   )
 }

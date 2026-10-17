@@ -1,10 +1,11 @@
 /**
- * SideMenu's Now tab (PLAN-008, PRD D9): the day's blocks from the one spine,
- * the current block first with its Start link, the tick writing through the
- * optimistic log, and the day read back once it is spent.
+ * SideMenu (PLAN-008, PLAN-019): the Now tab's blocks from the one spine, the
+ * tick writing through the optimistic log, the day read back once it is spent;
+ * the Tasks tab on the same row, its disclosures, capture and states; and the
+ * one-time hand-over of this browser's lists (PLAN-021).
  */
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
 // The Start wiring (PLAN-005/006) reads the timer; this suite renders no provider.
@@ -15,7 +16,7 @@ jest.mock('@nowry/core/context/PomodoroContext', () => ({
 }))
 
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key) => key })
+  useTranslation: () => ({ t: (key) => key, i18n: { language: 'en' } })
 }))
 
 jest.mock('@nowry/core/api/services', () => ({
@@ -27,9 +28,39 @@ jest.mock('@nowry/core/api/services', () => ({
   }
 }))
 
+let mockTasks = []
+let mockTasksState = { loading: false, error: null }
+const mockReloadTasks = jest.fn()
 jest.mock('@nowry/core/hooks/useTaskData', () => ({
-  useTaskData: () => ({ tasks: [], loading: false, reload: jest.fn() })
+  useTaskData: () => ({ tasks: mockTasks, ...mockTasksState, reload: mockReloadTasks })
 }))
+
+let mockLists = []
+const mockImportLegacy = jest.fn()
+const mockCreateList = jest.fn()
+jest.mock('@nowry/core/hooks/useTaskLists', () => ({
+  useTaskLists: () => ({
+    lists: mockLists,
+    loading: false,
+    error: null,
+    create: mockCreateList,
+    rename: jest.fn(),
+    remove: jest.fn(),
+    importLegacy: mockImportLegacy
+  })
+}))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'me' } }) }))
+jest.mock('@nowry/core/hooks/useBlocks', () => ({ useBlocks: () => ({ blocks: [] }) }))
+
+let mockSheetProps = null
+jest.mock(
+  '../../../Calendar/ItemSheet',
+  () =>
+    function ItemSheetStub(props) {
+      mockSheetProps = props
+      return null
+    }
+)
 
 // The core hooks are react-query reads; they are mocked at the module
 // boundary, this file's convention, so no QueryClientProvider is needed.
@@ -48,22 +79,6 @@ jest.mock('@nowry/core/hooks/useAnnualPlan', () => ({
 }))
 jest.mock('../../../Study/useTodayData', () => ({
   useTodayData: () => ({ dueToday: 12 })
-}))
-
-jest.mock('../../../Task/SortableTask', () => () => null)
-
-jest.mock('@dnd-kit/core', () => ({
-  DndContext: ({ children }) => children,
-  closestCenter: jest.fn(),
-  PointerSensor: jest.fn(),
-  KeyboardSensor: jest.fn(),
-  useSensor: jest.fn(),
-  useSensors: jest.fn(() => [])
-}))
-jest.mock('@dnd-kit/sortable', () => ({
-  arrayMove: jest.fn(),
-  SortableContext: ({ children }) => children,
-  verticalListSortingStrategy: jest.fn()
 }))
 
 const SideMenu = require('../SideMenu').default
@@ -106,6 +121,12 @@ const renderPanel = () =>
 
 beforeEach(() => {
   jest.clearAllMocks()
+  mockTasks = []
+  mockTasksState = { loading: false, error: null }
+  mockLists = []
+  mockSheetProps = null
+  mockImportLegacy.mockResolvedValue([])
+  window.localStorage.clear()
   mockKeep.mockResolvedValue(undefined)
   mockUndo.mockResolvedValue(undefined)
 })
@@ -131,7 +152,7 @@ describe('the Now tab', () => {
       expect.stringContaining('Write'),
       expect.stringContaining('Walk')
     ])
-    expect(rows[0]).toHaveAttribute('data-block-state', 'running')
+    expect(rows[0]).toHaveAttribute('data-row-state', 'running')
     // Start is not a row action; the current row has its tick like the rest.
     expect(screen.queryByRole('button', { name: 'blocks.row.start' })).toBeNull()
     expect(screen.getAllByRole('button', { name: 'calendarPage.blocks.markKept' })).toHaveLength(5)
@@ -166,7 +187,7 @@ describe('the Now tab', () => {
     const rows = screen.getAllByTestId('home-block-row')
     expect(rows).toHaveLength(3)
     expect(rows[0]).toHaveTextContent('Block 1')
-    expect(rows.map((row) => row.getAttribute('data-block-state'))).toEqual(['kept', 'skipped', 'kept'])
+    expect(rows.map((row) => row.getAttribute('data-row-state'))).toEqual(['kept', 'skipped', 'kept'])
     // The ticks stay live on a spent day: the evening is when the day is ticked.
     fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.markKept' }))
     expect(mockKeep).toHaveBeenCalledTimes(1)
@@ -181,12 +202,154 @@ describe('the Now tab', () => {
     expect(screen.getByRole('link', { name: 'blocks.home.planDay' })).toHaveAttribute('href', '/calendar')
   })
 
-  it('still has the Tasks tab beside it', () => {
-    mockDay = dayWith({})
+  it('opens the block’s item sheet from its title', () => {
+    const current = occurrence('b1', '09:00', 'Morning review')
+    mockDay = dayWith({ occurrences: [current], current })
     renderPanel()
 
-    // The tab's glyph is named by a tooltip, not an aria-label: pick it by position.
-    fireEvent.click(screen.getAllByRole('tab')[1])
-    expect(screen.getByText('tasks.emptyTitle')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'blocks.row.openAria' }))
+    expect(mockSheetProps).toMatchObject({ open: true, mode: 'edit', source: { block: current.block, occurrence: current } })
+  })
+})
+
+const dayKey = (offset) => {
+  const d = new Date()
+  d.setDate(d.getDate() + offset)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+const task = (id, extra = {}) => ({ _id: id, title: id, is_completed: false, deadline: null, ...extra })
+const openTasks = () => fireEvent.click(screen.getAllByRole('tab')[1])
+
+describe('the Tasks tab (PLAN-019): the Now row, for tasks', () => {
+  beforeEach(() => {
+    mockDay = dayWith({})
+  })
+
+  it('lists late and today’s tasks on the one row: Late as a word, the tile, the list under the title, the circle last', () => {
+    mockLists = [{ id: '6a6b5f6e11d5b6cc24a77c32', name: 'Shopping list' }]
+    mockTasks = [
+      task('Regleta', { deadline: `${dayKey(-30)}T00:00:00`, category: '6a6b5f6e11d5b6cc24a77c32' }),
+      task('Gym', { deadline: `${dayKey(-40)}T00:00:00`, is_priority: true }),
+      task('Today', { deadline: `${dayKey(0)}T00:00:00` }),
+      task('Later', { deadline: `${dayKey(20)}T00:00:00` }),
+      task('Someday')
+    ]
+    renderPanel()
+    openTasks()
+
+    const rows = screen.getAllByTestId('home-task-row')
+    // Late first, flagged first among them, then today; later and undated wait behind Upcoming.
+    expect(rows.map((row) => row.textContent)).toEqual([
+      expect.stringContaining('Gym'),
+      expect.stringContaining('Regleta'),
+      expect.stringContaining('Today')
+    ])
+    expect(rows[0]).toHaveTextContent('tasks.row.late')
+    expect(rows[0]).toHaveTextContent('tasks.row.priority · tasks.row.task')
+    expect(rows[1]).toHaveTextContent('Shopping list')
+    expect(rows[2]).not.toHaveTextContent('tasks.row.late')
+    expect(rows[0].querySelector('[data-testid="task-tile"]')).toHaveAttribute('data-flagged', 'true')
+    // The circle is the row's last control, as on Now.
+    const controls = rows[0].querySelectorAll('button')
+    expect(controls[controls.length - 1]).toHaveAttribute('aria-label', 'tasks.row.markDone')
+    // The tab's count is the rows above the foot.
+    expect(screen.getAllByRole('tab')[1]).toHaveTextContent('3')
+    // No status chips, no search, no list chips, no handles.
+    expect(screen.queryByText('tasks.filter.pending')).toBeNull()
+    expect(screen.queryByPlaceholderText('tasks.searchPlaceholder')).toBeNull()
+  })
+
+  it('opens Upcoming and Completed from the foot', () => {
+    mockTasks = [
+      task('Later', { deadline: `${dayKey(20)}T00:00:00` }),
+      task('Someday'),
+      task('Done', { deadline: `${dayKey(0)}T00:00:00`, is_completed: true, updated_at: new Date().toISOString() })
+    ]
+    renderPanel()
+    openTasks()
+
+    expect(screen.getByText('tasks.day.empty')).toBeInTheDocument()
+    const upcoming = screen.getByRole('button', { name: 'tasks.day.upcoming · 2' })
+    expect(upcoming).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(upcoming)
+    expect(screen.getAllByTestId('home-task-row').map((row) => row.textContent)).toEqual([
+      expect.stringContaining('Later'),
+      expect.stringContaining('Someday')
+    ])
+    fireEvent.click(screen.getByRole('button', { name: 'tasks.filter.completed · 1' }))
+    expect(screen.getByRole('button', { name: 'tasks.row.markUndone' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('ticks a task with the circle, at once', async () => {
+    const { tasksService } = require('@nowry/core/api/services')
+    tasksService.update.mockResolvedValue({})
+    mockTasks = [task('Essay', { deadline: `${dayKey(0)}T00:00:00` })]
+    renderPanel()
+    openTasks()
+
+    fireEvent.click(screen.getByRole('button', { name: 'tasks.row.markDone' }))
+    expect(tasksService.update).toHaveBeenCalledWith('Essay', { is_completed: true })
+    await waitFor(() => expect(mockReloadTasks).toHaveBeenCalled())
+  })
+
+  it('opens the task’s item sheet from its title', () => {
+    const essay = task('Essay', { deadline: `${dayKey(0)}T00:00:00` })
+    mockTasks = [essay]
+    renderPanel()
+    openTasks()
+
+    fireEvent.click(screen.getByRole('button', { name: 'tasks.row.openAria' }))
+    expect(mockSheetProps).toMatchObject({ open: true, mode: 'edit', source: { task: essay } })
+  })
+
+  it('captures a task due today, into the list its menu names', async () => {
+    const { tasksService } = require('@nowry/core/api/services')
+    tasksService.create.mockResolvedValue({ _id: 'n1' })
+    mockLists = [{ id: 'L1', name: 'Shopping list' }]
+    renderPanel()
+    openTasks()
+
+    fireEvent.click(screen.getByRole('button', { name: 'tasks.capture.listAria' }))
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Shopping list' }))
+    const field = screen.getByRole('textbox', { name: 'home.addTaskToday' })
+    fireEvent.change(field, { target: { value: '  Tape ' } })
+    fireEvent.keyDown(field, { key: 'Enter' })
+    await waitFor(() =>
+      expect(tasksService.create).toHaveBeenCalledWith({ title: 'Tape', deadline: dayKey(0), category: 'L1', is_completed: false })
+    )
+  })
+
+  it('shows skeleton rows while loading, and a retry when the tasks did not load', () => {
+    mockTasksState = { loading: true, error: null }
+    const { unmount } = renderPanel()
+    openTasks()
+    expect(screen.queryByTestId('home-task-row')).toBeNull()
+    expect(screen.queryByRole('progressbar')).toBeNull()
+    unmount()
+
+    mockTasksState = { loading: false, error: new Error('offline') }
+    renderPanel()
+    openTasks()
+    expect(screen.getByRole('alert')).toHaveTextContent('tasks.day.error')
+    fireEvent.click(screen.getByRole('button', { name: 'common.retry' }))
+    expect(mockReloadTasks).toHaveBeenCalled()
+  })
+})
+
+describe('the lists this browser kept (PLAN-021)', () => {
+  it('hands them to the server once, then forgets them', async () => {
+    mockDay = dayWith({})
+    window.localStorage.setItem('nowry_task_lists', JSON.stringify([{ id: 'list_1788662138438', label: 'shopping list' }]))
+    renderPanel()
+
+    await waitFor(() => expect(mockImportLegacy).toHaveBeenCalledWith([{ legacy_id: 'list_1788662138438', name: 'shopping list' }]))
+    await waitFor(() => expect(window.localStorage.getItem('nowry_task_lists')).toBeNull())
+  })
+
+  it('does nothing when there is nothing to hand over', () => {
+    mockDay = dayWith({})
+    renderPanel()
+    expect(mockImportLegacy).not.toHaveBeenCalled()
   })
 })

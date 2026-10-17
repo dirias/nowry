@@ -791,29 +791,44 @@
   },
   "tasks": {
     "title": "Aufgaben",
-    "searchPlaceholder": "Aufgaben suchen oder hinzufügen...",
     "filter": {
-      "all": "Alle",
-      "completed": "Erledigt",
-      "pending": "Ausstehend"
+      "completed": "Erledigt"
     },
     "lists": {
-      "all": "Alle",
       "general": "Allgemein",
       "addList": "Neue Liste",
-      "listPlaceholder": "Listenname..."
+      "listPlaceholder": "Listenname...",
+      "new": "Neue Liste…",
+      "edit": "Listen bearbeiten…",
+      "dialogTitle": "Listen",
+      "renameAria": "{{name}} umbenennen",
+      "deleteAria": "{{name}} löschen",
+      "deleteTitle": "„{{name}}“ löschen?",
+      "deleteBody": "Ihre Aufgaben bleiben, unter {{general}}.",
+      "exists": "Du hast schon eine Liste mit diesem Namen.",
+      "saveError": "Das wurde nicht gespeichert. Versuche es erneut.",
+      "none": "Noch keine Listen."
     },
-    "empty": "Noch keine Aufgaben. Tippe, um eine hinzuzufügen!",
-    "noMatch": "Keine Aufgaben entsprechen deinen Filtern",
-    "emptyTitle": "Noch keine Aufgaben",
-    "emptySubtitle": "Starte deinen Tag, indem du deine erste Aufgabe hinzufügst.",
-    "emptyCta": "Aufgabe hinzufügen",
-    "noMatchTitle": "Keine passenden Aufgaben",
-    "addToListPlaceholder": "Zu {{list}} hinzufügen...",
-    "addTooltip": "\"{{title}}\" hinzufügen",
     "progress": {
-      "label": "{{done}} von {{total}} abgeschlossen",
-      "noTasks": "Noch keine Aufgaben"
+      "label": "{{done}} von {{total}} abgeschlossen"
+    },
+    "row": {
+      "late": "Überfällig",
+      "task": "Aufgabe",
+      "priority": "Priorität",
+      "openAria": "{{title}} öffnen",
+      "markDone": "{{title}} als erledigt markieren",
+      "markUndone": "{{title}} als offen markieren"
+    },
+    "capture": {
+      "listAria": "Liste: {{name}}",
+      "failed": "Die Aufgabe wurde nicht hinzugefügt. Versuche es erneut."
+    },
+    "day": {
+      "upcoming": "Demnächst",
+      "empty": "Heute ist nichts fällig.",
+      "error": "Deine Aufgaben wurden nicht geladen.",
+      "edgeAria": "{{done}} von {{total}} Aufgaben heute erledigt"
     }
   },
   "sidemenu": {
@@ -3906,7 +3921,8 @@
       "closeRow": "Fertig",
       "off": "Aus",
       "on": "An",
-      "onceOnDue": "Einmal, am Fälligkeitstag"
+      "onceOnDue": "Einmal, am Fälligkeitstag",
+      "list": "Liste"
     },
     "reading": {
       "task": "Aufgabe",

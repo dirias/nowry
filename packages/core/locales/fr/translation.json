@@ -802,29 +802,44 @@
   },
   "tasks": {
     "title": "Tâches",
-    "searchPlaceholder": "Rechercher ou ajouter des tâches...",
     "filter": {
-      "all": "Toutes",
-      "completed": "Terminées",
-      "pending": "En attente"
+      "completed": "Terminées"
     },
     "lists": {
-      "all": "Toutes",
       "general": "Général",
       "addList": "Nouvelle liste",
-      "listPlaceholder": "Nom de la liste..."
+      "listPlaceholder": "Nom de la liste...",
+      "new": "Nouvelle liste…",
+      "edit": "Modifier les listes…",
+      "dialogTitle": "Listes",
+      "renameAria": "Renommer {{name}}",
+      "deleteAria": "Supprimer {{name}}",
+      "deleteTitle": "Supprimer « {{name}} » ?",
+      "deleteBody": "Ses tâches restent, dans {{general}}.",
+      "exists": "Vous avez déjà une liste de ce nom.",
+      "saveError": "Ce n'est pas enregistré. Réessayez.",
+      "none": "Aucune liste pour l'instant."
     },
-    "empty": "Pas encore de tâches. Écrivez pour en ajouter une !",
-    "noMatch": "Aucune tâche ne correspond à vos filtres",
-    "emptyTitle": "Aucune tâche pour l'instant",
-    "emptySubtitle": "Commencez à organiser votre journée en ajoutant votre première tâche.",
-    "emptyCta": "Ajouter une tâche",
-    "noMatchTitle": "Aucune tâche correspondante",
-    "addToListPlaceholder": "Ajouter à {{list}}...",
-    "addTooltip": "Ajouter \"{{title}}\"",
     "progress": {
-      "label": "{{done}} sur {{total}} terminées",
-      "noTasks": "Aucune tâche pour l'instant"
+      "label": "{{done}} sur {{total}} terminées"
+    },
+    "row": {
+      "late": "En retard",
+      "task": "Tâche",
+      "priority": "Priorité",
+      "openAria": "Ouvrir {{title}}",
+      "markDone": "Marquer {{title}} comme faite",
+      "markUndone": "Marquer {{title}} comme à faire"
+    },
+    "capture": {
+      "listAria": "Liste : {{name}}",
+      "failed": "La tâche n'a pas été ajoutée. Réessayez."
+    },
+    "day": {
+      "upcoming": "À venir",
+      "empty": "Rien à faire aujourd'hui.",
+      "error": "Vos tâches ne se sont pas chargées.",
+      "edgeAria": "{{done}} tâches sur {{total}} faites aujourd’hui"
     }
   },
   "sidemenu": {
@@ -3917,7 +3932,8 @@
       "closeRow": "OK",
       "off": "Non",
       "on": "Oui",
-      "onceOnDue": "Une fois, le jour de l’échéance"
+      "onceOnDue": "Une fois, le jour de l’échéance",
+      "list": "Liste"
     },
     "reading": {
       "task": "Tâche",

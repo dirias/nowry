@@ -60,7 +60,8 @@ export const itemFromSources = ({ task = null, milestone = null, goalId = null, 
       title: task.title ?? '',
       due: dateKeyOf(task.deadline),
       scheduled: scheduledOf(block ?? blockForTask(task, blocks)),
-      priority: Boolean(task.is_priority)
+      priority: Boolean(task.is_priority),
+      list: task.category ?? null
     })
   }
   if (block) {

@@ -833,29 +833,44 @@
   },
   "tasks": {
     "title": "Tasks",
-    "searchPlaceholder": "Search or add tasks...",
     "filter": {
-      "all": "All",
-      "completed": "Completed",
-      "pending": "Pending"
+      "completed": "Completed"
     },
     "lists": {
-      "all": "All",
       "general": "General",
       "addList": "New list",
-      "listPlaceholder": "List name..."
+      "listPlaceholder": "List name...",
+      "new": "New list…",
+      "edit": "Edit lists…",
+      "dialogTitle": "Lists",
+      "renameAria": "Rename {{name}}",
+      "deleteAria": "Delete {{name}}",
+      "deleteTitle": "Delete “{{name}}”?",
+      "deleteBody": "Its tasks stay, in {{general}}.",
+      "exists": "You already have a list with that name.",
+      "saveError": "That did not save. Try again.",
+      "none": "No lists yet."
     },
-    "empty": "No tasks yet. Type to add one!",
-    "noMatch": "No tasks match your filters",
-    "emptyTitle": "No tasks yet",
-    "emptySubtitle": "Start organizing your day by adding your first task.",
-    "emptyCta": "Add a task",
-    "noMatchTitle": "No matching tasks",
-    "addToListPlaceholder": "Add to {{list}}...",
-    "addTooltip": "Add \"{{title}}\"",
     "progress": {
-      "label": "{{done}} of {{total}} complete",
-      "noTasks": "No tasks yet"
+      "label": "{{done}} of {{total}} complete"
+    },
+    "row": {
+      "late": "Late",
+      "task": "Task",
+      "priority": "Priority",
+      "openAria": "Open {{title}}",
+      "markDone": "Mark {{title}} done",
+      "markUndone": "Mark {{title}} not done"
+    },
+    "capture": {
+      "listAria": "List: {{name}}",
+      "failed": "That task was not added. Try again."
+    },
+    "day": {
+      "upcoming": "Upcoming",
+      "empty": "Nothing due today.",
+      "error": "Your tasks did not load.",
+      "edgeAria": "{{done}} of {{total}} tasks done today"
     }
   },
   "sidemenu": {
@@ -4447,7 +4462,8 @@
       "closeRow": "Done",
       "off": "Off",
       "on": "On",
-      "onceOnDue": "Once, on the due day"
+      "onceOnDue": "Once, on the due day",
+      "list": "List"
     },
     "reading": {
       "task": "Task",

@@ -25,6 +25,7 @@ import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { useItemWriter } from '@nowry/core/hooks/useItemWriter'
+import { useTaskLists } from '@nowry/core/hooks/useTaskLists'
 import { isGoalCompleted } from '@nowry/core/domain/goalDerivation'
 import {
   blockForMilestone,
@@ -33,6 +34,7 @@ import {
   itemFromSources,
   keyLabel,
   missingIn,
+  readingOf,
   readoutParts,
   repeats,
   scheduledReadout
@@ -288,7 +290,7 @@ const ItemSheet = ({ open, onClose, onSaved, onStart = null, mode = 'create', so
   const occurrence = source?.occurrence ?? null
 
   const [facts, setFacts] = useState(() => initialFacts({ isEdit, source, prefill, blocks }))
-  // The one open row: 'due' | 'scheduled' | 'goal' | 'more' | null.
+  // The one open row: 'due' | 'scheduled' | 'list' | 'goal' | 'more' | null.
   const [openRow, setOpenRow] = useState(null)
   const [lengthSet, setLengthSet] = useState(isEdit)
   const [done, setDone] = useState(false)
@@ -302,6 +304,7 @@ const ItemSheet = ({ open, onClose, onSaved, onStart = null, mode = 'create', so
   const { saveItem, deleteItem } = useItemWriter()
   const { keep, skip, undo, pending } = useBlockLog()
   const { goals: cachedGoals, loading: goalsLoading } = useAnnualPlan()
+  const { lists: taskLists } = useTaskLists()
   const { dueToday, forecast } = useTodayData()
 
   useEffect(() => {
@@ -507,6 +510,27 @@ const ItemSheet = ({ open, onClose, onSaved, onStart = null, mode = 'create', so
     </Stack>
   )
 
+  const currentList = taskLists.find((list) => list.id === facts.list) ?? null
+  const listEditor = (
+    <Select
+      size='md'
+      value={currentList ? currentList.id : ''}
+      onChange={(_, v) => {
+        patch({ list: v || null })
+        setOpenRow(null)
+      }}
+      slotProps={{ button: { 'aria-label': t('items.sheet.list') } }}
+      sx={{ maxWidth: 360, ...focusRing }}
+    >
+      <Option value=''>{t('tasks.lists.general')}</Option>
+      {taskLists.map((list) => (
+        <Option key={list.id} value={list.id}>
+          {list.name}
+        </Option>
+      ))}
+    </Select>
+  )
+
   const goalEditor = goalsLoading ? (
     <Skeleton variant='rectangular' height={40} sx={{ borderRadius: 'sm' }} />
   ) : (
@@ -682,6 +706,24 @@ const ItemSheet = ({ open, onClose, onSaved, onStart = null, mode = 'create', so
             />
           }
         />
+
+        {/* A task's list (PLAN-021): General, or one of the learner's lists; the Goal row's grammar. */}
+        {readingOf(facts) === 'task' && (
+          <FactRow
+            testId='row-list'
+            label={t('items.sheet.list')}
+            value={currentList?.name ?? t('tasks.lists.general')}
+            quiet={!currentList}
+            action={
+              <RowAction
+                label={openRow === 'list' ? t('items.sheet.closeRow') : t('items.sheet.change')}
+                expanded={openRow === 'list'}
+                onClick={() => toggleRow('list')}
+              />
+            }
+            editor={openRow === 'list' ? listEditor : null}
+          />
+        )}
 
         <FactRow
           testId='row-goal'
