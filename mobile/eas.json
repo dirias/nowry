@@ -39,9 +39,38 @@
       "env": {
         "EXPO_PUBLIC_API_TIMEOUT": "10000"
       }
+    },
+    "production-apk": {
+      "extends": "production",
+      "distribution": "internal",
+      "environment": "production",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_TIMEOUT": "10000"
+      }
+    },
+    "beta-play": {
+      "extends": "preview",
+      "distribution": "store",
+      "environment": "preview",
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_TIMEOUT": "10000"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "beta-play": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
+      }
+    }
   }
 }

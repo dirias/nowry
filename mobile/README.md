@@ -64,3 +64,19 @@ Android needs the beta build's signing SHA-1 registered in Firebase. While
 and checks it before creating a Firebase account; a refused Google sign-in is
 signed out and told why. There is no waitlist on the phone: testers arrive
 with codes.
+
+Three Android profiles, one per audience:
+
+| Profile | Builds | Environment | For |
+|---|---|---|---|
+| `beta` | APK, internal link | preview (dev API) | cohort 0, installed from the EAS link |
+| `beta-play` | app bundle (`.aab`) | preview (dev API) | cohort 1 on, Play's internal testing track |
+| `production-apk` | APK, internal link | production | a production build to sideload and check |
+
+`beta-play` names its environment because a store build otherwise reads
+`production`, which would point testers at the production API. Upload its
+bundle under Play Console, Testing, Internal testing, Create release, or run
+`eas submit --profile beta-play --platform android` (a draft on the internal
+track; it asks for a Play service-account key the first time). Play App
+Signing re-signs the bundle with Google's key: add that SHA-1 (Setup, App
+signing) in Firebase too, or Google sign-in fails on the Play install.
