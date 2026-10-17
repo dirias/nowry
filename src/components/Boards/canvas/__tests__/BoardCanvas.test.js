@@ -218,6 +218,17 @@ describe('making a note', () => {
     expect(screen.getByRole('button', { name: 'boards.tools.select' })).toHaveAttribute('aria-pressed', 'true')
   })
 
+  it('a double-click with the N tool makes one note, not two (BOARD-011)', () => {
+    mount()
+    fireEvent.keyDown(canvas(), { key: 'n' })
+    act(() => mockFlowProps.onPaneClick({ clientX: 10, clientY: 10 }))
+    fireEvent.doubleClick(screen.getByTestId('pane'), { clientX: 11, clientY: 10 })
+    expect(nodes()).toHaveLength(1)
+    // A double-click somewhere else is a new gesture, and makes its note.
+    fireEvent.doubleClick(screen.getByTestId('pane'), { clientX: 300, clientY: 200 })
+    expect(nodes()).toHaveLength(2)
+  })
+
   it('a new board starts on one note, already typing', () => {
     mount(BOARD(), { startWithNote: true })
     act(() => mockFlowProps.onInit(mockFlow))

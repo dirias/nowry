@@ -3311,7 +3311,10 @@
         "selectAll": "Alles auswählen",
         "undo": "Rückgängig",
         "redo": "Wiederholen",
-        "keys": "Diese Liste"
+        "keys": "Diese Liste",
+        "copy": "Kopieren",
+        "cut": "Ausschneiden",
+        "paste": "Einfügen: Notizen, ein Mermaid-Diagramm oder eine Gliederung"
       },
       "cap": {
         "mod": "Strg",

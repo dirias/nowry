@@ -47,6 +47,9 @@ export const KEY_GROUPS = [
       ['finish', [['esc']]],
       ['label', [['doubleClick']]],
       ['remove', [['delete']]],
+      ['copy', [['mod', 'C']]],
+      ['cut', [['mod', 'X']]],
+      ['paste', [['mod', 'V']]],
       ['duplicate', [['mod', 'D']]],
       ['frameSelection', [['mod', 'G']]],
       ['nudge', [['arrows'], ['shift', 'arrows']]]

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import {
   fromParsed,
+  placeClear,
   insert,
   limitCheck,
   nextId,
@@ -176,6 +177,7 @@ const hasTextSelection = (doc) => {
  * @param {object} options.boardRef the board as it is now
  * @param {Function} options.apply the board's one way to change
  * @param {Function} options.viewCentre the centre of the visible canvas, in flow coordinates
+ * @param {Function} [options.reveal] brings these nodes into view when they are out of it
  * @param {Function} options.isEditing whether a node or a link label is being edited
  * @param {Function} options.getSelectedIds the selected node ids still on the board
  * @param {Function} options.select selects exactly these new nodes
@@ -217,8 +219,12 @@ export default function useBoardClipboard(options) {
         if (verb === 'imported') onStatus?.({ text: t(parsed.error === 'empty' ? 'boards.inOut.empty' : 'boards.inOut.unreadable') })
         return false
       }
-      const incoming = fromParsed(parsed, { origin: viewCentre(), zBase: topZ(boardRef.current) })
-      return place(incoming, (counts) => incomingLine(t, counts, { format: read, verb }))
+      // Laid out at the view's centre, then moved the least it can to cover nothing (BOARD-010).
+      const laid = fromParsed(parsed, { origin: viewCentre(), zBase: topZ(boardRef.current) })
+      const { incoming, offset } = placeClear(boardRef.current, laid)
+      const went = place(incoming, (counts) => incomingLine(t, counts, { format: read, verb }))
+      if (went && offset.moved) latest.current.reveal?.(incoming.nodes)
+      return went
     },
     [place]
   )

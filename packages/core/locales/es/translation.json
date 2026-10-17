@@ -3771,7 +3771,10 @@
         "selectAll": "Seleccionar todo",
         "undo": "Deshacer",
         "redo": "Rehacer",
-        "keys": "Esta lista"
+        "keys": "Esta lista",
+        "copy": "Copiar",
+        "cut": "Cortar",
+        "paste": "Pegar: notas, un diagrama Mermaid o un esquema"
       },
       "cap": {
         "mod": "Ctrl",

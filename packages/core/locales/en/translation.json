@@ -1429,7 +1429,10 @@
         "selectAll": "Select all",
         "undo": "Undo",
         "redo": "Redo",
-        "keys": "This list"
+        "keys": "This list",
+        "copy": "Copy",
+        "cut": "Cut",
+        "paste": "Paste: notes, a Mermaid diagram or an outline"
       },
       "cap": {
         "mod": "Ctrl",

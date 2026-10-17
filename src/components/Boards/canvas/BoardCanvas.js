@@ -5,6 +5,7 @@ import '@xyflow/react/dist/style.css'
 import { Box, Typography } from '@mui/joy'
 import { useColorScheme } from '@mui/joy/styles'
 import {
+  bounds,
   DEFAULT_NOTE_COLOR,
   DEFAULT_SIZES,
   addChild,
@@ -51,6 +52,8 @@ const MULTI_SELECT_KEYS = ['Shift', 'Meta', 'Control']
 const ZOOM_KEYS = ['Meta', 'Control']
 const VIEW_KEYS = ['selected', 'editing', 'plus', 'fresh', 'measured', 'rank']
 const PANNING_TOOLS = ['select', 'hand']
+/** A double-click this soon after the Note tool made a note, at the same spot, is that same gesture. */
+const TOOL_DOUBLE_CLICK_MS = 500
 const CONNECTION_LINE = { stroke: 'var(--joy-palette-primary-solidBg)', strokeWidth: 1.6 }
 const PRO_OPTIONS = { hideAttribution: true }
 const FIT_OPTIONS = { padding: 0.2, maxZoom: 1 }
@@ -370,6 +373,20 @@ function CanvasInner({
     return flow.screenToFlowPosition({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
   }, [flow])
 
+  /** Pans, at the same zoom, to nodes placed out of sight (a paste moved clear of the board). */
+  const reveal = useCallback(
+    (nodes) => {
+      const box = bounds(nodes)
+      const rect = wrapperRef.current?.getBoundingClientRect?.()
+      if (!box || !rect?.width) return
+      const vp = flow.getViewport()
+      const seen = { x: -vp.x / vp.zoom, y: -vp.y / vp.zoom, w: rect.width / vp.zoom, h: rect.height / vp.zoom }
+      const inside = box.x >= seen.x && box.y >= seen.y && box.x + box.w <= seen.x + seen.w && box.y + box.h <= seen.y + seen.h
+      if (!inside) flow.setCenter(box.x + box.w / 2, box.y + box.h / 2, { zoom: vp.zoom, duration: viewDuration() })
+    },
+    [flow]
+  )
+
   const selectIncoming = useCallback((ids) => {
     ids.forEach((id) => freshRef.current.add(id))
     setSelectedEdgeIds([])
@@ -381,6 +398,7 @@ function CanvasInner({
     boardRef,
     apply,
     viewCentre,
+    reveal,
     isEditing: () => Boolean(stateRef.current.editingId) || editingEdgeId !== null,
     getSelectedIds: () => selection().ids,
     select: selectIncoming,
@@ -574,6 +592,7 @@ function CanvasInner({
 
   const isValidConnection = useCallback((c) => c.source !== c.target, [])
 
+  const toolMadeRef = useRef(null)
   const onPaneClick = useCallback(
     (event) => {
       lastClickRef.current = flow.screenToFlowPosition({ x: event.clientX, y: event.clientY })
@@ -582,6 +601,9 @@ function CanvasInner({
       const point = flow.screenToFlowPosition({ x: event.clientX, y: event.clientY })
       if (current === 'note') createNote(point)
       else createText(point)
+      // A double-click with the tool is two clicks and a double-click: the
+      // first click made the note, so the double-click must not make another.
+      toolMadeRef.current = { at: Date.now(), x: event.clientX, y: event.clientY }
       setTool('select')
     },
     [createNote, createText, flow]
@@ -592,6 +614,8 @@ function CanvasInner({
     (event) => {
       if (!event.target?.classList?.contains('react-flow__pane')) return
       if (!PANNING_TOOLS.includes(stateRef.current.tool)) return
+      const made = toolMadeRef.current
+      if (made && Date.now() - made.at < TOOL_DOUBLE_CLICK_MS && Math.hypot(event.clientX - made.x, event.clientY - made.y) < 8) return
       createNote(flow.screenToFlowPosition({ x: event.clientX, y: event.clientY }))
     },
     [createNote, flow]
