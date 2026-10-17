@@ -22,8 +22,7 @@ import {
   TabPanel,
   Link as JoyLink
 } from '@mui/joy'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { usePomodoro } from '@nowry/core/context/PomodoroContext'
+import { Link as RouterLink } from 'react-router-dom'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
@@ -144,22 +143,6 @@ const SideMenu = () => {
    */
   const { dueToday } = useTodayData()
   const day = useToday({ dueToday })
-  const timer = usePomodoro()
-  const navigate = useNavigate()
-  // Start runs the block on the timer (PRD D7); a study block opens the review
-  // on the budget its length implies, any other block the Focus sheet (PLAN-006).
-  const startBlock = React.useCallback(
-    (occurrence) => {
-      timer.startBlock(occurrence)
-      if (occurrence.block?.source?.type === 'study') {
-        timer.setShowWidget(false)
-        navigate(`/study/daily-review?limit=${Math.max(1, Math.round((occurrence.lengthMin || 0) * 1.5))}`)
-        return
-      }
-      navigate('/calendar')
-    },
-    [timer, navigate]
-  )
   const log = useBlockLog()
   const { focusAreas } = useAnnualPlan()
 
@@ -413,7 +396,7 @@ const SideMenu = () => {
               overflow: 'hidden'
             }}
           >
-            <NowTab day={day} log={log} focusAreas={focusAreas} onStart={startBlock} t={t} />
+            <NowTab day={day} log={log} focusAreas={focusAreas} t={t} />
           </TabPanel>
         )}
 
@@ -685,10 +668,10 @@ const SideMenu = () => {
 /**
  * The day around the clock: now · next · later, from the one spine (PRD D9).
  *
- * The current block leads and carries "Start", a link into the calendar
- * where the block is worked (PLAN-006 wires Focus); the rows after it carry
- * the agenda's tick, which keeps or undoes through the same optimistic log,
- * so a block kept here is kept on the calendar at once. When the day is
+ * The current block leads; every row carries the agenda's tick, which keeps
+ * or undoes through the same optimistic log, so a block kept here is kept on
+ * the calendar at once. Start is not a row action (PLAN-017): it lives in the
+ * block's sheet on the calendar. When the day is
  * spent — nothing running, nothing ahead — the tab reads the day back: one
  * line of copy, then the last blocks it held with their states, read-only.
  * Home is where you watch; the calendar is where you work.
@@ -697,7 +680,7 @@ const SideMenu = () => {
  * source's colour · title over "20 min · study" · the tick or the link.
  * State is the title's strike and the tick's fill, never a tint on the row.
  */
-const NowTab = ({ day, log, focusAreas, onStart, t }) => {
+const NowTab = ({ day, log, focusAreas, t }) => {
   const toggle = (o) => (o.log?.status === 'kept' ? log.undo(o) : log.keep(o))
 
   if (day.loading && day.occurrences.length === 0) {
@@ -759,15 +742,7 @@ const NowTab = ({ day, log, focusAreas, onStart, t }) => {
       {rows.map((o, index) => (
         <React.Fragment key={`${o.blockId}|${o.date}`}>
           {index > 0 && <Divider />}
-          <NowRow
-            onStart={onStart}
-            occurrence={o}
-            nowMinutes={day.nowMinutes}
-            current={!spent && index === 0}
-            color={sourceColor(o, focusAreas)}
-            onToggle={toggle}
-            t={t}
-          />
+          <NowRow occurrence={o} nowMinutes={day.nowMinutes} color={sourceColor(o, focusAreas)} onToggle={toggle} t={t} />
         </React.Fragment>
       ))}
 
@@ -782,7 +757,7 @@ const NowTab = ({ day, log, focusAreas, onStart, t }) => {
   )
 }
 
-const NowRow = ({ occurrence, nowMinutes, current, color, onToggle, onStart, t }) => {
+const NowRow = ({ occurrence, nowMinutes, color, onToggle, t }) => {
   const state = stateOf(occurrence, nowMinutes)
   const kept = state === 'kept' || state === 'partial'
   const skipped = state === 'skipped'
@@ -823,31 +798,19 @@ const NowRow = ({ occurrence, nowMinutes, current, color, onToggle, onStart, t }
           {meta}
         </Typography>
       </Box>
-      {current ? (
-        <JoyLink
-          component='button'
-          type='button'
-          level='body-sm'
-          onClick={() => onStart?.(occurrence)}
-          sx={{ fontWeight: 'md', flexShrink: 0, ...focusRing }}
-        >
-          {t('blocks.row.start')}
-        </JoyLink>
-      ) : (
-        /* The tick is live on every row, the spent day's included: the evening
-           is when a learner ticks what the day held (PRD D5). */
-        <IconButton
-          size='sm'
-          variant='plain'
-          color={kept ? 'success' : 'neutral'}
-          onClick={() => onToggle?.(occurrence)}
-          aria-label={tickLabel}
-          aria-pressed={kept}
-          sx={tickSx(kept)}
-        >
-          {kept ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
-        </IconButton>
-      )}
+      {/* The tick is every row's one action, the current row's included (PLAN-017):
+          Start lives in the block's sheet, where the timer is a choice. */}
+      <IconButton
+        size='sm'
+        variant='plain'
+        color={kept ? 'success' : 'neutral'}
+        onClick={() => onToggle?.(occurrence)}
+        aria-label={tickLabel}
+        aria-pressed={kept}
+        sx={tickSx(kept)}
+      >
+        {kept ? <CheckCircleIcon fontSize='small' /> : <RadioButtonUncheckedIcon fontSize='small' />}
+      </IconButton>
     </Box>
   )
 }

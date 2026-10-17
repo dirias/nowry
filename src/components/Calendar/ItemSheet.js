@@ -20,6 +20,7 @@ import {
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
+import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded'
 
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
@@ -79,6 +80,7 @@ import { formatMinutes } from './blockEvents'
  *   source   – what is being edited: `{ task, milestone, goalId, block, occurrence }`
  *   prefill  – partial facts for create: `{ title, due, scheduled, goalId, origin }`
  *   blocks   – the learner's blocks, for After and to find the block an item spans
+ *   onStart  – runs a block on the timer; when given, today's unlogged block offers Start
  */
 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6] // Monday first, the API's convention
@@ -238,7 +240,7 @@ const EditorLabel = ({ children }) => (
 )
 
 /** The day's record for a block occurrence: its state, and Kept · Skip · Undo. */
-const TodaySection = ({ occurrence, log, state, onKeep, onSkip, onUndo, pending, language, t }) => (
+const TodaySection = ({ occurrence, log, state, onStart, onKeep, onSkip, onUndo, pending, language, t }) => (
   <Box sx={{ p: 2, borderRadius: 'md', bgcolor: 'background.level1', mt: 2 }}>
     <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1.5 }}>
       <Typography level='title-sm'>
@@ -249,6 +251,13 @@ const TodaySection = ({ occurrence, log, state, onKeep, onSkip, onUndo, pending,
       </Typography>
     </Box>
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      {/* Start is here, not on the row (PLAN-017): the timer is a choice made
+          about one block, and a late start is as welcome as an early one. */}
+      {onStart && (
+        <Button variant='soft' color='primary' size='sm' onClick={onStart} startDecorator={<PlayArrowRounded />} sx={focusRing}>
+          {t('blocks.row.start')}
+        </Button>
+      )}
       <Button
         variant='soft'
         color='neutral'
@@ -272,7 +281,7 @@ const TodaySection = ({ occurrence, log, state, onKeep, onSkip, onUndo, pending,
   </Box>
 )
 
-const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, prefill = null, blocks = [] }) => {
+const ItemSheet = ({ open, onClose, onSaved, onStart = null, mode = 'create', source = null, prefill = null, blocks = [] }) => {
   const { t, i18n } = useTranslation()
   const language = i18n?.language ?? 'en'
   const isEdit = mode === 'edit' && Boolean(source)
@@ -734,6 +743,14 @@ const ItemSheet = ({ open, onClose, onSaved, mode = 'create', source = null, pre
             occurrence={occurrence}
             log={log}
             state={recordState}
+            onStart={
+              onStart && occurrence.date === todayKey && !log
+                ? () => {
+                    onStart(occurrence)
+                    onClose()
+                  }
+                : null
+            }
             onKeep={record(keep, { status: 'kept', minutes: occurrence.lengthMin })}
             onSkip={record(skip, { status: 'skipped', minutes: 0 })}
             onUndo={record(undo, null)}

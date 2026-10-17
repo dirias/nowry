@@ -48,6 +48,13 @@ beforeEach(() => {
   mockDeregisterDevice.mockReset().mockResolvedValue(undefined)
 })
 
+describe('a block reminder (PLAN-017)', () => {
+  it('opens the Day with that block named, so its sheet opens where Start is', () => {
+    expect(routeFor({ kind: 'block', id: 'b1' })).toBe('/calendar?view=day&block=b1')
+    expect(routeFor({ kind: 'block' })).toBe('/calendar?view=day')
+  })
+})
+
 describe('routeFor', () => {
   it('maps the kinds this version knows', () => {
     expect(routeFor({ kind: 'study' })).toBe('/study')

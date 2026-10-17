@@ -158,6 +158,37 @@ describe('saveItem, a block that points at a task the sheet did not receive', ()
   })
 })
 
+describe('saveItem, a goal block that has no milestone', () => {
+  it('patches the block and adds no step to the goal, however often it is saved', async () => {
+    const block = {
+      id: 'b9',
+      title: 'Running',
+      source: { type: 'goal', id: 'g1' },
+      start: '08:00',
+      lengthMin: 60,
+      daysOfWeek: [],
+      date: '2026-10-17'
+    }
+    const w = writer()
+    await act(() =>
+      w.saveItem(factsFrom({ title: 'Running', goalId: 'g1', scheduled: { ...once, start: '08:00', lengthMin: 60, date: '2026-10-17' } }), {
+        block
+      })
+    )
+    await act(() =>
+      w.saveItem(factsFrom({ title: 'Running', goalId: 'g1', scheduled: { ...once, start: '08:30', lengthMin: 60, date: '2026-10-17' } }), {
+        block
+      })
+    )
+    expect(annualPlanningService.createMilestone).not.toHaveBeenCalled()
+    expect(tasksService.create).not.toHaveBeenCalled()
+    expect(mockUpdateBlock).toHaveBeenLastCalledWith({
+      id: 'b9',
+      changes: expect.objectContaining({ start: '08:30', source: { type: 'goal', id: 'g1' } })
+    })
+  })
+})
+
 describe('deleteItem', () => {
   it('removes everything the item spans', async () => {
     const w = writer()

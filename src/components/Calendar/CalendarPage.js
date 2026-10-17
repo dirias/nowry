@@ -565,7 +565,6 @@ const CalendarPage = () => {
             onToggleComplete={toggleComplete}
             onSelectBlock={openBlockEditor}
             onToggleKept={toggleKept}
-            onStartBlock={startBlock}
             focusAreas={focusAreas}
             todayKey={todayKey}
             nowMinutes={nowMinutes}
@@ -613,6 +612,7 @@ const CalendarPage = () => {
         source={sheet?.source ?? null}
         prefill={sheet?.prefill ?? null}
         blocks={blocks ?? []}
+        onStart={startBlock}
       />
     </Container>
   )

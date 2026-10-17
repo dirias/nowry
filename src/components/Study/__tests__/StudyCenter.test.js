@@ -14,6 +14,8 @@ let mockSearch = new URLSearchParams()
 // implementations are (re)installed in beforeEach, not here.
 const mockSetSearchParams = jest.fn()
 // The next-study-block readout (PLAN-005) reads the spine; stubbed here, as the data hooks are.
+const mockTimer = { startBlock: jest.fn(), setShowWidget: jest.fn() }
+jest.mock('@nowry/core/context/PomodoroContext', () => ({ usePomodoro: () => mockTimer }))
 let mockDay = { nextStudy: null, occurrences: [], loading: false, error: null, reload: jest.fn() }
 jest.mock('@nowry/core/hooks/useToday', () => ({ useToday: () => mockDay }))
 const mockItemSheet = jest.fn()
@@ -186,7 +188,12 @@ describe('the Today object (PRD D1, D9, D10)', () => {
     mockDay = { nextStudy: occurrence, occurrences: [occurrence], loading: false, error: null, reload: jest.fn() }
     render(<StudyCenter />)
     fireEvent.click(await screen.findByText('study.today.studyTime:{"time":"07:30"}'))
-    expect(mockItemSheet.mock.calls.at(-1)[0]).toMatchObject({ open: true, mode: 'edit', source: { block, occurrence }, blocks: [block] })
+    const props = mockItemSheet.mock.calls.at(-1)[0]
+    expect(props).toMatchObject({ open: true, mode: 'edit', source: { block, occurrence }, blocks: [block] })
+    // Start from that sheet runs the block and opens the review sized to it.
+    props.onStart(occurrence)
+    expect(mockTimer.startBlock).toHaveBeenCalledWith(occurrence)
+    expect(mockNavigate).toHaveBeenCalledWith('/study/daily-review?limit=30')
     mockDay = { nextStudy: null, occurrences: [], loading: false, error: null, reload: jest.fn() }
   })
 

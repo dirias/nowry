@@ -19,9 +19,9 @@
  * and the overview (MOB-046). It owns its own scroll so the floating key can
  * sit over the list rather than scroll with it.
  */
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, View } from 'react-native'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useToday } from '@nowry/core/hooks/useToday'
 import { useBlocks } from '@nowry/core/hooks/useBlocks'
@@ -86,7 +86,8 @@ export function PlanDay() {
   const log = useBlockLog()
   const timer = usePomodoro()
   /*
-   * Start runs the block on the timer (PRD D7). A study block is the block's
+   * Start runs the block on the timer (PRD D7). It is offered in the block's
+   * sheet, not on the row (PLAN-017). A study block is the block's
    * work (PRD D8): the review opens with a budget the length implies (about
    * 40 s a card) and the clock rides in the app bar; any other block opens
    * the Focus dial, named after it.
@@ -126,6 +127,19 @@ export function PlanDay() {
    */
   const clock = day.isToday ? day.nowMinutes : key < todayKey ? 24 * 60 : -1
   const currentId = day.isToday ? (day.current?.blockId ?? null) : null
+
+  /*
+   * A tapped reminder lands here naming its block (PLAN-017): the sheet opens
+   * on today's occurrence of it, where Start is. The param is a one-shot
+   * instruction, cleared once obeyed, as the tab's own `view` is.
+   */
+  const { block: askedBlock } = useLocalSearchParams()
+  useEffect(() => {
+    if (!askedBlock || !day.occurrences) return
+    const asked = day.occurrences.find((o) => o.blockId === askedBlock)
+    if (asked) setSheet({ mode: 'edit', source: { block: asked.block, occurrence: asked } })
+    router.setParams({ block: undefined })
+  }, [askedBlock, day.occurrences, router])
 
   const toggle = useCallback((o) => (o.log?.status === 'kept' ? log.undo(o) : log.keep(o)), [log])
 
@@ -196,7 +210,6 @@ export function PlanDay() {
               onOpen={(o) => setSheet({ mode: 'edit', source: { block: o.block, occurrence: o } })}
               onMenu={setMenu}
               onToggle={toggle}
-              onStart={startBlock}
             />
             {/* The companion speaks from the log, inside the object (PLAN-009, ADR-022). */}
             {moments.text ? <CompanionNote text={moments.text} onDismiss={moments.dismiss} /> : null}
@@ -252,6 +265,7 @@ export function PlanDay() {
         suggestedMinutes={day.suggestedStudyLength}
         onClose={() => setSheet(null)}
         onSaved={day.reload}
+        onStart={startBlock}
       />
     </View>
   )
@@ -261,7 +275,7 @@ export function PlanDay() {
  * The hours: three period groups, a hairline under each header, one row per
  * block, and the now-line between what is behind and what is next.
  */
-function Timeline({ day, clock, currentId, logs, todayKey, areaColors, theme, t, onOpen, onMenu, onToggle, onStart }) {
+function Timeline({ day, clock, currentId, logs, todayKey, areaColors, theme, t, onOpen, onMenu, onToggle }) {
   if (day.loading && day.occurrences.length === 0) {
     return (
       <Stack spacing={2}>
@@ -307,7 +321,6 @@ function Timeline({ day, clock, currentId, logs, todayKey, areaColors, theme, t,
                     occurrence={o}
                     clock={clock}
                     isToday={day.isToday}
-                    current={currentId === o.blockId}
                     logs={logs}
                     todayKey={todayKey}
                     areaColor={o.block?.areaId ? (areaColors.get(o.block.areaId) ?? null) : null}
@@ -316,7 +329,6 @@ function Timeline({ day, clock, currentId, logs, todayKey, areaColors, theme, t,
                     onOpen={onOpen}
                     onMenu={onMenu}
                     onToggle={onToggle}
-                    onStart={onStart}
                   />
                   {lineAfterLast && o === last ? <NowLine theme={theme} /> : null}
                 </View>

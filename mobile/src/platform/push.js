@@ -38,8 +38,9 @@ const DESTINATIONS = {
   deck: (id) => (id ? `/study/deck/${encodeURIComponent(id)}` : '/study'),
   session: (id) => (id ? `/study/${encodeURIComponent(id)}` : '/study'),
   focus: () => '/pomodoro',
-  // A block's reminder opens the day it is on (PLAN-007).
-  block: () => '/calendar?view=day'
+  // A block's reminder opens the day it is on with that block's sheet, where
+  // Start is (PLAN-007, PLAN-017).
+  block: (id) => (id ? `/calendar?view=day&block=${encodeURIComponent(id)}` : '/calendar?view=day')
 }
 
 /**

@@ -23,6 +23,8 @@ import { needsTask, writesFor } from '../domain/items'
  *     it as a readout. Moving a step between goals is a delete and a create.
  *   - The block follows the facts: made when Scheduled is set, patched when it
  *     changes, removed when it is cleared.
+ *   - A milestone is made only for a new item. Editing an existing goal block
+ *     patches the block and leaves the goal's steps alone.
  */
 export function useItemWriter() {
   const { user } = useAuth()
@@ -62,7 +64,10 @@ export function useItemWriter() {
       if (existing?.milestone) {
         const patch = first.milestone ?? { title: facts.title.trim(), due_date: facts.due }
         await annualPlanningService.updateMilestone(goalId, existing.milestone.id, done === null ? patch : { ...patch, completed: done })
-      } else if (first.milestone) {
+      } else if (first.milestone && !existing?.block) {
+        // A step is made only when the item is new. An existing block for a
+        // goal (a migrated habit, a goal's time) stays a block: saving it must
+        // not add a milestone to the goal on every save.
         await annualPlanningService.createMilestone(goalId, { ...first.milestone, completed: Boolean(done) })
       }
 

@@ -111,7 +111,7 @@ beforeEach(() => {
 })
 
 describe('the Now tab', () => {
-  it('opens on Now and lists the current block first with Start, then next and later with ticks', () => {
+  it('opens on Now and lists the current block first, every row with the tick and none with Start (PLAN-017)', () => {
     const running = occurrence('b1', '09:00', 'Morning review')
     const next = occurrence('b2', '10:00', 'Stretch')
     const later = [
@@ -132,12 +132,9 @@ describe('the Now tab', () => {
       expect.stringContaining('Walk')
     ])
     expect(rows[0]).toHaveAttribute('data-block-state', 'running')
-    // Start runs the block (PLAN-006) rather than linking to the calendar.
-    fireEvent.click(screen.getByRole('button', { name: 'blocks.row.start' }))
-    expect(mockTimer.startBlock).toHaveBeenCalledTimes(1)
-    expect(mockTimer.startBlock.mock.calls[0][0].blockId).toBe('b1')
-    // One tick per row after the current one.
-    expect(screen.getAllByRole('button', { name: 'calendarPage.blocks.markKept' })).toHaveLength(4)
+    // Start is not a row action; the current row has its tick like the rest.
+    expect(screen.queryByRole('button', { name: 'blocks.row.start' })).toBeNull()
+    expect(screen.getAllByRole('button', { name: 'calendarPage.blocks.markKept' })).toHaveLength(5)
   })
 
   it('keeps a block through the log on tick, and undoes a kept one', () => {
@@ -147,7 +144,11 @@ describe('the Now tab', () => {
     mockDay = dayWith({ occurrences: [current, next, kept], current, next, later: [kept] })
     renderPanel()
 
-    fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.markKept' }))
+    // The current row ticks like the rest (PLAN-017): first the current, then the next.
+    const [currentTick, nextTick] = screen.getAllByRole('button', { name: 'calendarPage.blocks.markKept' })
+    fireEvent.click(currentTick)
+    expect(mockKeep).toHaveBeenCalledWith(current)
+    fireEvent.click(nextTick)
     expect(mockKeep).toHaveBeenCalledWith(next)
 
     fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.undoKept' }))
@@ -169,7 +170,7 @@ describe('the Now tab', () => {
     // The ticks stay live on a spent day: the evening is when the day is ticked.
     fireEvent.click(screen.getByRole('button', { name: 'calendarPage.blocks.markKept' }))
     expect(mockKeep).toHaveBeenCalledTimes(1)
-    expect(screen.queryByRole('link', { name: 'blocks.row.start' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'blocks.row.start' })).toBeNull()
   })
 
   it('says the day is empty and offers the calendar', () => {

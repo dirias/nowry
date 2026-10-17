@@ -207,6 +207,39 @@ describe('edit reads any document', () => {
     expect(mockKeep).toHaveBeenCalledWith(occurrence)
   })
 
+  it('Start lives in the day record: today’s unlogged block offers it, late ones too, and it closes the sheet (PLAN-017)', async () => {
+    const routine = {
+      id: 'b3',
+      title: 'Run',
+      source: { type: 'goal', id: 'g1' },
+      start: '00:05',
+      lengthMin: 30,
+      daysOfWeek: [],
+      date: todayKey
+    }
+    const missed = { date: todayKey, blockId: 'b3', start: '00:05', lengthMin: 30, title: 'Run', block: routine, log: null }
+    const onStart = jest.fn()
+    const { onClose } = open({ mode: 'edit', source: { block: routine, occurrence: missed }, blocks: [routine], onStart })
+    fireEvent.click(key('blocks.row.start'))
+    expect(onStart).toHaveBeenCalledWith(missed)
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('a logged block, or a sheet with no timer to run, offers no Start', () => {
+    const routine = {
+      id: 'b3',
+      title: 'Run',
+      source: { type: 'routine', id: null },
+      start: '07:30',
+      lengthMin: 20,
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      date: null
+    }
+    const kept = { date: todayKey, blockId: 'b3', start: '07:30', lengthMin: 20, title: 'Run', block: routine, log: { status: 'kept' } }
+    open({ mode: 'edit', source: { block: routine, occurrence: kept }, blocks: [routine], onStart: jest.fn() })
+    expect(screen.queryByRole('button', { name: 'blocks.row.start' })).toBeNull()
+  })
+
   it('delete confirms, then removes everything the item spans', async () => {
     const { onClose } = open({ mode: 'edit', source: { task }, blocks: [block] })
     fireEvent.click(key('items.sheet.delete'))

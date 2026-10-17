@@ -170,7 +170,7 @@ export const scheduleBlockReminders = async (items) => {
           title: item.title,
           body: item.body,
           sound: 'default',
-          data: { kind: 'block', blockId: item.blockId, date: item.date }
+          data: { kind: 'block', id: item.blockId, blockId: item.blockId, date: item.date }
         },
         trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: item.fireAt, channelId: BLOCKS_CHANNEL_ID }
       })

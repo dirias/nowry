@@ -157,6 +157,7 @@ function RowAction({ label, onPress, expanded = null }) {
  *   prefill  – partial facts for create: `{ title, due, scheduled, goalId, origin }`
  *   blocks   – the learner's blocks, for After and to find the block an item spans
  *   due, suggestedMinutes – the forecast, which sizes a study time until the learner does
+ *   onStart  – runs a block on the timer; when given, today's unlogged block offers Start (PLAN-017)
  */
 export function ItemSheet({
   open,
@@ -167,7 +168,8 @@ export function ItemSheet({
   due = 0,
   suggestedMinutes = DEFAULT_LENGTH,
   onClose,
-  onSaved
+  onSaved,
+  onStart = null
 }) {
   const { t, i18n } = useTranslation()
   const language = i18n?.language ?? 'en'
@@ -657,7 +659,21 @@ export function ItemSheet({
                 {t(`calendarPage.blocks.state.${recordState}`)}
               </Typography>
             </Stack>
-            <Stack direction='row' spacing={1}>
+            <Stack direction='row' spacing={1} style={{ flexWrap: 'wrap' }}>
+              {/* Start is here, not on the row (PLAN-017): a late start is as welcome as an early one. */}
+              {onStart && occurrence.date === todayKey && !log ? (
+                <Button
+                  size='sm'
+                  variant='secondary'
+                  startGlyph={<Icon name='Play' size='sm' color='text.secondary' />}
+                  onPress={() => {
+                    onStart(occurrence)
+                    onClose?.()
+                  }}
+                >
+                  {t('blocks.row.start')}
+                </Button>
+              ) : null}
               <Button
                 size='sm'
                 variant={log?.status === 'kept' ? undefined : 'secondary'}

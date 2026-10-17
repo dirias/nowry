@@ -4,6 +4,7 @@ import { Container, Typography, Box, Button, Stack } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { useTodayData } from './useTodayData'
 import { useToday } from '@nowry/core/hooks/useToday'
+import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { agentService } from '@nowry/core/api/services/agent.service'
 import { usePet } from '@nowry/core/context/AgentContext'
 import CardHome from '../Cards/CardHome'
@@ -33,6 +34,17 @@ export default function StudyCenter() {
   const dayBlocks = useMemo(() => (day.occurrences ?? []).map((o) => o.block).filter(Boolean), [day.occurrences])
   const [studySheet, setStudySheet] = useState(false)
   const planStudy = useCallback(() => setStudySheet(true), [])
+  // Start from the study time's sheet runs the block and opens the review on
+  // the budget its length implies (about 40 s a card), as the calendar's does.
+  const timer = usePomodoro()
+  const startStudy = useCallback(
+    (occurrence) => {
+      timer.startBlock(occurrence)
+      timer.setShowWidget(false)
+      navigate(`/study/daily-review?limit=${Math.max(1, Math.round((occurrence.lengthMin || 0) * 1.5))}`)
+    },
+    [timer, navigate]
+  )
   const { statistics: statisticsData, statsLoading, decks, loading, reloadDecks, forecast } = today
   // What rests, for the Today object's readout (SR-003): summed from the deck
   // rows the page already holds, so no second request and no second cache.
@@ -247,6 +259,7 @@ export default function StudyCenter() {
             open={studySheet}
             onClose={() => setStudySheet(false)}
             onSaved={day.reload}
+            onStart={startStudy}
             mode={studyToday ? 'edit' : 'create'}
             source={studyToday ? { block: studyToday.block, occurrence: studyToday } : null}
             prefill={

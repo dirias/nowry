@@ -5,16 +5,16 @@
  * a 44pt column · a 16pt tile in the source's colour · the title over a meta
  * line ("20 min · study", and for today's study block "27 due ≈ 20 min") ·
  * the record on the right. The record is the tick — a 22pt circle on a 44pt
- * target — or, for the one block that is now, the page's single solid key,
- * Start. That row is 64pt rather than 56 and carries a 3pt progress edge under
- * it; it reads 0% until the Focus dial drives it (PLAN-006).
+ * target — on every row, the one that is now included (PLAN-017): Start is
+ * not a row action; it lives in the block's sheet, where the timer is a
+ * choice made about one block.
  *
  * Kept is a filled tick. Skipped is the title struck on `text.tertiary` — the
  * strike is the one place a second signal is allowed, because a skipped block
  * has no tick to say so. A past block nobody logged shows the empty circle.
  *
- * It does not use `ListRow`: the strike, the taller current row and the edge
- * are three things that row rightly refuses, and the numbers are the same.
+ * It does not use `ListRow`: the strike and the streak are things that row
+ * rightly refuses, and the numbers are the same.
  *
  * The title opens the sheet; a long press opens the row's menu; the tick is
  * its own control, as it is on the agenda, so a thumb between them gets one
@@ -26,13 +26,10 @@ import { rowStreak, stateOf } from '@nowry/core/domain/blocks'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
 import { Icon } from '../icons'
-import { Button } from '../Button'
 import { IdentityTile } from './IdentityTile'
 import { MIN_TOUCH_TARGET } from '../buttonSpec'
-import { LIST_ROW_HEIGHT, MEASURE_HEIGHT } from './rowSpec'
+import { LIST_ROW_HEIGHT } from './rowSpec'
 
-/** The current row is a step taller: it holds a key, not a tick. */
-export const CURRENT_ROW_HEIGHT = 64
 export const TIME_COLUMN_WIDTH = 44
 export const TICK_SIZE = 22
 /** Streaks under two are not streaks yet. */
@@ -50,7 +47,6 @@ export function BlockRow({
   occurrence,
   clock,
   isToday = false,
-  current = false,
   logs = [],
   todayKey,
   areaColor = null,
@@ -58,8 +54,7 @@ export function BlockRow({
   suggestedMinutes = 0,
   onOpen,
   onMenu,
-  onToggle,
-  onStart
+  onToggle
 }) {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -82,7 +77,7 @@ export function BlockRow({
     .filter(Boolean)
     .join(' · ')
 
-  const height = current ? CURRENT_ROW_HEIGHT : LIST_ROW_HEIGHT
+  const height = LIST_ROW_HEIGHT
 
   return (
     <View>
@@ -131,39 +126,14 @@ export function BlockRow({
           </View>
         </Pressable>
 
-        {current ? (
-          <Button size='sm' startGlyph={<Icon name='Play' size='sm' color='primary.solidColor' />} onPress={() => onStart?.(occurrence)}>
-            {t('blocks.row.start')}
-          </Button>
-        ) : (
-          <Tick
-            kept={kept}
-            partial={partial}
-            theme={theme}
-            accessibilityLabel={t(kept ? 'blocks.row.untickAria' : 'blocks.row.tickAria', { title })}
-            onPress={() => onToggle?.(occurrence)}
-          />
-        )}
+        <Tick
+          kept={kept}
+          partial={partial}
+          theme={theme}
+          accessibilityLabel={t(kept ? 'blocks.row.untickAria' : 'blocks.row.tickAria', { title })}
+          onPress={() => onToggle?.(occurrence)}
+        />
       </View>
-
-      {/* The running block's progress is its bottom edge, as the summary
-          object's is (§15.10). Decorative: the Start key beside it is the
-          control, and PLAN-006 is what moves the fill. */}
-      {current ? (
-        <View
-          importantForAccessibility='no'
-          accessible={false}
-          style={{
-            marginHorizontal: theme.spacing[1.5],
-            height: MEASURE_HEIGHT,
-            borderRadius: MEASURE_HEIGHT,
-            overflow: 'hidden',
-            backgroundColor: resolveColor(theme, 'background.level2')
-          }}
-        >
-          <View style={{ width: '0%', height: '100%', backgroundColor: resolveColor(theme, 'primary.solidBg') }} />
-        </View>
-      ) : null}
     </View>
   )
 }

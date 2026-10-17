@@ -135,7 +135,7 @@ describe('the block reminders', () => {
       title: 'Morning review in 5 min',
       body: '20 min · Study',
       sound: 'default',
-      data: { kind: 'block', blockId: 'b1', date: '2026-10-15' }
+      data: { kind: 'block', id: 'b1', blockId: 'b1', date: '2026-10-15' }
     })
     expect(trigger).toEqual({ type: 'date', date: items[0].fireAt, channelId: 'nowry-blocks' })
   })

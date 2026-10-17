@@ -919,6 +919,15 @@ describe('PLAN-004: the time grids, the blocks on them, and what the grid may wr
     })
     expect(mockKeep).toHaveBeenCalledWith(occurrenceOf(study))
     expect(mockUseBlocks.mock.calls.at(-1)[0]).toMatchObject({ from: todayKey.slice(0, 8) + '01' })
+    // The tick is the row's one action: no Start on any agenda row (PLAN-017).
+    expect(within(agenda).queryByRole('button', { name: 'blocks.row.start' })).toBeNull()
+  })
+
+  it('hands the item sheet the timer, so Start runs the block from there (PLAN-017)', async () => {
+    await renderPage()
+    const { onStart } = mockItemSheet.mock.calls.at(-1)[0]
+    onStart(occurrenceOf(oneOff))
+    expect(mockTimer.startBlock).toHaveBeenCalledWith(occurrenceOf(oneOff))
   })
 
   // ─── PLAN-011 (ADR-046 §7): a grid block is a row — glyph in the tile, a tick at the end ───

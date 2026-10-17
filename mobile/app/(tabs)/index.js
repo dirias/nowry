@@ -56,7 +56,6 @@ import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useTaskData } from '@nowry/core/hooks/useTaskData'
 import { useToday } from '@nowry/core/hooks/useToday'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
-import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { DAILY_REVIEW } from '../../src/screens/StudySession'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { tasksService } from '@nowry/core/api/services'
@@ -146,21 +145,6 @@ export default function Home() {
    */
   const day = useToday({ dueToday: today.due })
   const log = useBlockLog()
-  const timer = usePomodoro()
-  // Start runs the block on the timer (PRD D7); a study block opens the review
-  // on the budget its length implies, with the clock in the app bar (PLAN-006).
-  const startBlock = useCallback(
-    (o) => {
-      timer.startBlock(o)
-      if (o.block?.source?.type === 'study') {
-        timer.setShowWidget(false)
-        router.push(`/study/${DAILY_REVIEW}?limit=${Math.max(1, Math.round((o.lengthMin || 0) * 1.5))}`)
-        return
-      }
-      router.push('/pomodoro')
-    },
-    [timer, router]
-  )
   const areaColors = useMemo(() => new Map((plan.focusAreas ?? []).map((a) => [a._id ?? a.id, a.color])), [plan.focusAreas])
 
   /*
@@ -218,7 +202,6 @@ export default function Home() {
           tasksLoading={taskData.loading}
           reloadTasks={taskData.reload}
           onOpenDay={() => router.push('/calendar?view=day')}
-          onStart={startBlock}
           theme={theme}
           t={t}
         />
@@ -418,7 +401,7 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
  * does the empty state's key. Tasks get capture as well — writing a thought
  * down is not managing tasks, and a phone is where the thought arrives.
  */
-function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloadTasks, onOpenDay, onStart, theme, t }) {
+function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloadTasks, onOpenDay, theme, t }) {
   const [tab, setTab] = useState(NOW_TAB)
   const onTasks = tab === TASKS_TAB
 
@@ -464,7 +447,7 @@ function DayPanel({ day, log, areaColors, tasks, tasksCount, tasksLoading, reloa
         {onTasks ? (
           <TaskTab tasks={tasks} loading={tasksLoading} onReload={reloadTasks} theme={theme} t={t} />
         ) : (
-          <NowTab day={day} ahead={ahead} log={log} areaColors={areaColors} onOpenDay={onOpenDay} onStart={onStart} theme={theme} t={t} />
+          <NowTab day={day} ahead={ahead} log={log} areaColors={areaColors} onOpenDay={onOpenDay} theme={theme} t={t} />
         )}
       </Stack>
     </Sheet>
@@ -492,7 +475,7 @@ const aheadOf = (day) => (day.current ? [day.current, day.next, ...day.later.sli
  * tab opens with a capture row, so the day closing with an open row is the
  * same object, said twice.
  */
-function NowTab({ day, ahead, log, areaColors, onOpenDay, onStart, theme, t }) {
+function NowTab({ day, ahead, log, areaColors, onOpenDay, theme, t }) {
   const toggle = (o) => (o.log?.status === 'kept' ? log.undo(o) : log.keep(o))
 
   if (day.loading && day.occurrences.length === 0) {
@@ -550,13 +533,11 @@ function NowTab({ day, ahead, log, areaColors, onOpenDay, onStart, theme, t }) {
             occurrence={o}
             clock={day.nowMinutes}
             isToday
-            current={!spent && index === 0}
             areaColor={o.block?.areaId ? (areaColors.get(o.block.areaId) ?? null) : null}
             due={day.due}
             suggestedMinutes={day.suggestedStudyLength}
             onOpen={onOpenDay}
             onToggle={toggle}
-            onStart={onStart}
           />
         </View>
       ))}
