@@ -2636,7 +2636,7 @@
     "billingToggle": {
       "label": "請求サイクル：",
       "monthly": "月額",
-      "annual": "年額（17% お得）"
+      "annual": "年額（{{percent}}% お得）"
     },
     "cta": {
       "upgradeToPlus": "Plus にアップグレード",
@@ -2672,6 +2672,10 @@
       "readAloudFree": "含まれません",
       "readAloudPlus": "どのセクションでも",
       "readAloudPro": "どの言語でも"
+    },
+    "per": {
+      "monthly": "月",
+      "annual": "年"
     }
   },
   "billing": {

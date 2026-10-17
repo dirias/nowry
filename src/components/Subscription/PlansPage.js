@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Container, Typography, Stack, Button, Alert } from '@mui/joy'
 import { subscriptionService } from '@nowry/core/api/services'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
-import { PLAN_TIERS } from '@nowry/core/domain/plans'
+import { PLAN_TIERS, annualSavingsPercent } from '@nowry/core/domain/plans'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import PlanCard from './PlanCard'
 
@@ -40,6 +40,8 @@ export default function PlansPage() {
   }
 
   const isMonthly = billingInterval === 'monthly'
+  // The saving the toggle promises is read off the prices (GTM-006), never typed.
+  const savingsPercent = annualSavingsPercent()
 
   // One table for both surfaces (ADR-035 §5): the public pricing section
   // reads the same tiers, so a visitor and an account see the same numbers.
@@ -102,10 +104,10 @@ export default function PlansPage() {
             color='primary'
             size='sm'
             onClick={() => setBillingInterval('annual')}
-            aria-label={t('plans.billingToggle.annual')}
+            aria-label={t('plans.billingToggle.annual', { percent: savingsPercent })}
             aria-pressed={!isMonthly}
           >
-            {t('plans.billingToggle.annual')}
+            {t('plans.billingToggle.annual', { percent: savingsPercent })}
           </Button>
         </Box>
       </Stack>
@@ -144,7 +146,7 @@ export default function PlansPage() {
         <PlanCard
           name={t('subscription.tier.free')}
           price={free.price.monthly}
-          period={t('plans.billingToggle.monthly')}
+          period={t('plans.per.monthly')}
           features={featuresOf(free)}
           isCurrent={currentTier === 'free'}
           ctaLabel={currentTier === 'free' ? t('plans.currentPlan') : null}
@@ -157,7 +159,7 @@ export default function PlansPage() {
         <PlanCard
           name={t('subscription.tier.plus')}
           price={plus.price[billingInterval]}
-          period={isMonthly ? t('plans.billingToggle.monthly') : t('plans.billingToggle.annual')}
+          period={t(`plans.per.${billingInterval}`)}
           features={featuresOf(plus)}
           isCurrent={currentTier === 'plus'}
           ctaLabel={getPlusCta()}
@@ -172,7 +174,7 @@ export default function PlansPage() {
         <PlanCard
           name={t('subscription.tier.pro')}
           price={pro.price[billingInterval]}
-          period={isMonthly ? t('plans.billingToggle.monthly') : t('plans.billingToggle.annual')}
+          period={t(`plans.per.${billingInterval}`)}
           features={featuresOf(pro)}
           isCurrent={currentTier === 'pro'}
           ctaLabel={getProCta()}

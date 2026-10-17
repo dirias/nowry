@@ -2281,7 +2281,7 @@
     "billingToggle": {
       "label": "Billing period:",
       "monthly": "Monthly",
-      "annual": "Annual (Save 17%)"
+      "annual": "Annual (save {{percent}}%)"
     },
     "cta": {
       "upgradeToPlus": "Upgrade to Plus",
@@ -2317,6 +2317,10 @@
     },
     "error": {
       "checkoutFailed": "Could not start checkout. Please try again."
+    },
+    "per": {
+      "monthly": "month",
+      "annual": "year"
     }
   },
   "billing": {

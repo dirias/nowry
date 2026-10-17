@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button, Stack, Chip, Divider, Skeleton } from '@mui/joy'
+import { annualSavingsPercent } from '@nowry/core/domain/plans'
 import CheckIcon from '@mui/icons-material/Check'
 
 export default function PlanCard({
@@ -44,7 +45,7 @@ export default function PlanCard({
           )}
           {showSavings && !isCurrent && (
             <Chip size='sm' variant='soft' color='warning'>
-              {t('plans.billingToggle.annual')}
+              {t('plans.billingToggle.annual', { percent: annualSavingsPercent() })}
             </Chip>
           )}
         </Stack>

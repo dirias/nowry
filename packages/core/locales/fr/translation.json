@@ -2747,7 +2747,7 @@
     "billingToggle": {
       "label": "Période de facturation :",
       "monthly": "Mensuel",
-      "annual": "Annuel (17 % d'économie)"
+      "annual": "Annuel ({{percent}} % d'économie)"
     },
     "cta": {
       "upgradeToPlus": "Passer à Plus",
@@ -2783,6 +2783,10 @@
       "readAloudFree": "Non inclus",
       "readAloudPlus": "N'importe quelle section",
       "readAloudPro": "N'importe quelle langue"
+    },
+    "per": {
+      "monthly": "mois",
+      "annual": "an"
     }
   },
   "billing": {

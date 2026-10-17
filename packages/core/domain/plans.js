@@ -48,13 +48,13 @@ export const PLAN_TIERS = Object.freeze([
   {
     id: 'plus',
     nameKey: 'subscription.tier.plus',
-    price: { monthly: '$8.99', annual: '$89.99' },
+    price: { monthly: '$8.99', annual: '$53.99' },
     features: rows(['Plus', 'Plus', 'Plus', 'Plus', 'All', 'Plus'])
   },
   {
     id: 'pro',
     nameKey: 'subscription.tier.pro',
-    price: { monthly: '$19.99', annual: '$199.99' },
+    price: { monthly: '$19.99', annual: '$119.99' },
     features: rows(['Pro', 'Pro', 'Pro', 'Pro', 'All', 'Pro'])
   }
 ])
@@ -63,3 +63,18 @@ export const PLAN_TIERS = Object.freeze([
 export const FEATURED_TIER_ID = 'plus'
 
 export const planTier = (id) => PLAN_TIERS.find((tier) => tier.id === id) ?? null
+
+const amountOf = (price) => Number(String(price).replace(/[^0-9.]/g, ''))
+
+/**
+ * What a year costs against twelve months, rounded to whole percent, for the paid tier
+ * that saves least (GTM-006: the market band is about half). Read by the
+ * billing toggle, so the label cannot promise more than every tier gives.
+ */
+export const annualSavingsPercent = (tiers = PLAN_TIERS) => {
+  const savings = tiers
+    .map(({ price }) => ({ month: amountOf(price.monthly), year: amountOf(price.annual) }))
+    .filter(({ month }) => month > 0)
+    .map(({ month, year }) => Math.round((1 - year / (month * 12)) * 100))
+  return savings.length ? Math.min(...savings) : 0
+}

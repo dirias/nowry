@@ -3330,7 +3330,7 @@
     "billingToggle": {
       "label": "Periodo de facturación:",
       "monthly": "Mensual",
-      "annual": "Anual (ahorra 17 %)"
+      "annual": "Anual (ahorra {{percent}} %)"
     },
     "cta": {
       "upgradeToPlus": "Pasar a Plus",
@@ -3366,6 +3366,10 @@
       "readAloudFree": "No incluido",
       "readAloudPlus": "Cualquier sección",
       "readAloudPro": "Cualquier idioma"
+    },
+    "per": {
+      "monthly": "mes",
+      "annual": "año"
     }
   },
   "billing": {

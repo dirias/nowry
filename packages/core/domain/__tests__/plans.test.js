@@ -40,3 +40,23 @@ describe('PLAN_TIERS', () => {
     expect(planTier('enterprise')).toBeNull()
   })
 })
+
+describe('annual pricing (GTM-006)', () => {
+  const { annualSavingsPercent } = require('../plans')
+
+  it('prices a year at about half of twelve months, in the market band', () => {
+    expect(planTier('plus').price.annual).toBe('$53.99')
+    expect(planTier('pro').price.annual).toBe('$119.99')
+    expect(annualSavingsPercent()).toBe(50)
+  })
+
+  it('promises the smallest saving any paid tier gives, and nothing for a free one', () => {
+    const tiers = [
+      { price: { monthly: '$0', annual: '$0' } },
+      { price: { monthly: '$10', annual: '$60' } },
+      { price: { monthly: '$20', annual: '$96' } }
+    ]
+    expect(annualSavingsPercent(tiers)).toBe(50)
+    expect(annualSavingsPercent([{ price: { monthly: '$0', annual: '$0' } }])).toBe(0)
+  })
+})

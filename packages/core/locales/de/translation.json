@@ -2736,7 +2736,7 @@
     "billingToggle": {
       "label": "Abrechnungszeitraum:",
       "monthly": "Monatlich",
-      "annual": "Jährlich (17 % sparen)"
+      "annual": "Jährlich ({{percent}} % sparen)"
     },
     "cta": {
       "upgradeToPlus": "Auf Plus upgraden",
@@ -2772,6 +2772,10 @@
       "readAloudFree": "Nicht enthalten",
       "readAloudPlus": "Jeder Abschnitt",
       "readAloudPro": "Jede Sprache"
+    },
+    "per": {
+      "monthly": "Monat",
+      "annual": "Jahr"
     }
   },
   "billing": {
