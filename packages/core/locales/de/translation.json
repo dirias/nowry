@@ -141,6 +141,7 @@
     "study": "Lernen",
     "cards": "Karten",
     "books": "Bücher",
+    "boards": "Boards",
     "contact": "Kontakt",
     "settings": "Einstellungen",
     "getStarted": "Loslegen",
@@ -3101,74 +3102,6 @@
     }
   },
   "blackboard": {
-    "title": "Blackboard",
-    "defaultBoardName": "My Blackboard",
-    "subtitle": "Brainstorm freely — auto-saved",
-    "tooltip": "Open Blackboard",
-    "toolbar": {
-      "sticky": "Sticky",
-      "addSticky": "Add sticky note",
-      "addGoal": "Add a goal",
-      "addPriority": "Add a priority",
-      "addTask": "Add a task",
-      "clear": "Clear board",
-      "myBoards": "My Boards",
-      "loadingBoard": "Opening your board…"
-    },
-    "picker": {
-      "title": {
-        "goal": "Select a goal",
-        "priority": "Select a priority",
-        "task": "Select a task"
-      },
-      "search": "Search...",
-      "empty": "Nothing found"
-    },
-    "clear": {
-      "title": "Clear board?",
-      "desc": "All notes and connections will be permanently removed.",
-      "confirm": "Clear everything"
-    },
-    "canvasError": {
-      "message": "Could not load this board. Try again.",
-      "retry": "Retry board"
-    },
-    "boardListSelector": {
-      "title": "My Boards",
-      "subtitle": "Select a board to open or create a new one",
-      "newBoard": "New board",
-      "newBoardPlaceholder": "Board name",
-      "ownedBoards": "Your Boards",
-      "sharedBoards": "Shared with You",
-      "empty": {
-        "title": "No boards yet",
-        "body": "Create your first board to get started"
-      },
-      "error": "Could not load boards. Try again.",
-      "sharedWith": "Shared by {{name}}"
-    },
-    "upgrade": {
-      "share": "Share boards with Plus or Pro",
-      "multiBoard": "Unlock unlimited boards with Pro"
-    },
-    "boards": {
-      "newBoard": "New board"
-    },
-    "share": {
-      "title": "Share this board",
-      "inviteLabel": "Invite by email",
-      "inviteSubtitle": "They will see this board in their board list",
-      "sendInvite": "Send invite",
-      "empty": {
-        "title": "Not shared yet",
-        "body": "Invite someone by their email address"
-      },
-      "error": {
-        "notFound": "User not found. Check the email address.",
-        "alreadyInvited": "This user already has access.",
-        "notOwner": "Only the board owner can share this board"
-      }
-    },
     "convertToCardsModal": {
       "stages": {
         "s0": "Deine Notizen werden gelesen...",
@@ -3179,6 +3112,212 @@
       "selectedNodes_other": "Aus {{count}} ausgewählten Knoten",
       "success_one": "{{count}} Karte zu {{deckName}} hinzugefügt",
       "success_other": "{{count}} Karten zu {{deckName}} hinzugefügt"
+    }
+  },
+  "boards": {
+    "title": "Boards",
+    "untitled": "Unbenanntes Board",
+    "count_one": "{{count}} Board",
+    "count_other": "{{count}} Boards",
+    "newBoard": "Neues Board",
+    "limit": "Dein Tarif umfasst ein Board; mit Pro so viele, wie du brauchst.",
+    "seePlans": "Tarife ansehen",
+    "createFailed": "Das Board konnte nicht erstellt werden. Versuche es noch einmal.",
+    "renameFailed": "Das Board konnte nicht umbenannt werden. Versuche es noch einmal.",
+    "duplicateFailed": "Das Board konnte nicht dupliziert werden. Versuche es noch einmal.",
+    "loadError": "Deine Boards konnten nicht geladen werden.",
+    "empty": "Noch keine Boards. Auf einem Board arbeitest du ein Thema durch, bevor daraus Karten werden.",
+    "tile": {
+      "open": "{{name}} öffnen",
+      "menu": "Aktionen für {{name}}",
+      "edited": {
+        "justNow": "Gerade bearbeitet",
+        "minutes_one": "Vor {{count}} Min. bearbeitet",
+        "minutes_other": "Vor {{count}} Min. bearbeitet",
+        "hours_one": "Vor {{count}} Std. bearbeitet",
+        "hours_other": "Vor {{count}} Std. bearbeitet",
+        "yesterday": "Gestern bearbeitet",
+        "on": "Bearbeitet am {{date}}"
+      },
+      "notes_one": "{{count}} Notiz",
+      "notes_other": "{{count}} Notizen",
+      "items_one": "{{count}} Element",
+      "items_other": "{{count}} Elemente",
+      "cards_one": "{{count}} Karte erstellt",
+      "cards_other": "{{count}} Karten erstellt",
+      "sharedWith_one": "geteilt mit {{count}} Person",
+      "sharedWith_other": "geteilt mit {{count}} Personen",
+      "sharedBy": "geteilt von {{name}}"
+    },
+    "menu": {
+      "rename": "Umbenennen",
+      "duplicate": "Duplizieren",
+      "share": "Teilen",
+      "delete": "Löschen",
+      "keys": "Tastenkürzel"
+    },
+    "rename": {
+      "label": "Name des Boards"
+    },
+    "delete": {
+      "title": "Dieses Board löschen?",
+      "description": "„{{name}}“ und alles darauf wird gelöscht.",
+      "consequenceContent": "Seine Notizen, Verbindungen und Rahmen gehen mit",
+      "consequenceCards": "Daraus erstellte Karten bleiben in ihren Decks",
+      "confirm": "Board löschen",
+      "failed": "Das Board konnte nicht gelöscht werden. Versuche es noch einmal."
+    },
+    "bar": {
+      "back": "Zu den Boards",
+      "renameAria": "{{name}}: umbenennen",
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert",
+      "notSaved": "Nicht gespeichert · neuer Versuch",
+      "share": "Teilen",
+      "more": "Weitere Board-Aktionen",
+      "collaborators_one": "Geteilt mit {{count}} Person",
+      "collaborators_other": "Geteilt mit {{count}} Personen"
+    },
+    "page": {
+      "notFound": "Dieses Board gibt es nicht, oder es ist nicht mit dir geteilt.",
+      "loadError": "Dieses Board konnte nicht geöffnet werden.",
+      "backToBoards": "Zurück zu den Boards"
+    },
+    "hint": {
+      "first": "Benenne, was du gerade durchdenkst.",
+      "next": "Tab fügt die nächste Idee hinzu · Doppelklick irgendwo für eine weitere"
+    },
+    "canvas": {
+      "label": "Board-Fläche"
+    },
+    "note": {
+      "placeholder": "Schreib eine Idee",
+      "editAria": "Notiztext"
+    },
+    "text": {
+      "placeholder": "Überschrift",
+      "editAria": "Textblock"
+    },
+    "frame": {
+      "untitled": "Unbenannter Rahmen",
+      "titleAria": "Titel des Rahmens"
+    },
+    "item": {
+      "kind": {
+        "task": "Aufgabe",
+        "milestone": "Meilenstein",
+        "goal": "Ziel"
+      },
+      "linked": "Verknüpftes Element"
+    },
+    "link": {
+      "placeholder": "Beschriftung",
+      "labelAria": "Beschriftung der Verbindung"
+    },
+    "plus": {
+      "top": "Verbundene Notiz darüber hinzufügen",
+      "right": "Verbundene Notiz rechts hinzufügen",
+      "bottom": "Verbundene Notiz darunter hinzufügen",
+      "left": "Verbundene Notiz links hinzufügen"
+    },
+    "tools": {
+      "label": "Werkzeuge",
+      "select": "Auswählen (V)",
+      "hand": "Verschieben (H)",
+      "note": "Notiz (N)",
+      "text": "Textblock (T)",
+      "frame": "Rahmen (F)",
+      "item": "Element (I)"
+    },
+    "zoom": {
+      "in": "Vergrößern",
+      "out": "Verkleinern",
+      "fit": "Board einpassen (⇧1)"
+    },
+    "selection": {
+      "label": "Auswahl",
+      "colors": {
+        "yellow": "Gelb",
+        "green": "Grün",
+        "blue": "Blau",
+        "pink": "Rosa",
+        "grey": "Grau"
+      },
+      "sizeLabel": "Textgröße",
+      "size": {
+        "md": "Fließtext",
+        "lg": "Überschrift",
+        "xl": "Titel"
+      },
+      "frame": "Einrahmen",
+      "delete": "Löschen"
+    },
+    "share": {
+      "title": "Dieses Board teilen",
+      "subtitle": "Wen du einlädst, kann es öffnen und bearbeiten; deine und ihre Änderungen bleiben erhalten.",
+      "inviteLabel": "Per E-Mail einladen",
+      "placeholder": "name@beispiel.de",
+      "inviteHelp": "Das Board erscheint dann in ihrer Board-Liste.",
+      "send": "Einladung senden",
+      "sent": "Einladung gesendet.",
+      "invitedNow": "Gerade eingeladen",
+      "empty": "Noch nicht geteilt. Lade jemanden über die E-Mail-Adresse ein.",
+      "upgrade": "Boards teilen mit Plus oder Pro",
+      "error": {
+        "empty": "Gib eine E-Mail-Adresse ein.",
+        "notFound": "Niemand nutzt Nowry mit dieser E-Mail. Prüfe die Adresse.",
+        "alreadyInvited": "Diese Person hat bereits Zugriff.",
+        "notOwner": "Nur die Person, der das Board gehört, kann es teilen.",
+        "failed": "Die Einladung wurde nicht gesendet. Versuche es noch einmal."
+      }
+    },
+    "keys": {
+      "title": "Tastenkürzel",
+      "groups": {
+        "move": "Bewegen",
+        "make": "Erstellen",
+        "edit": "Bearbeiten und verbinden",
+        "select": "Auswählen",
+        "history": "Rückgängig und Hilfe"
+      },
+      "rows": {
+        "pan": "Ansicht verschieben",
+        "zoom": "Zoomen",
+        "fitBoard": "Board einpassen",
+        "fitSelection": "Auswahl einpassen",
+        "note": "Notiz an dieser Stelle",
+        "child": "Verbundene Notiz rechts",
+        "sibling": "Notiz darunter",
+        "text": "Textblock",
+        "frame": "Rahmen",
+        "edit": "Ausgewählte Notiz bearbeiten",
+        "finish": "Bearbeiten beenden",
+        "label": "Verbindung beschriften",
+        "remove": "Löschen",
+        "duplicate": "Duplizieren",
+        "frameSelection": "Auswahl einrahmen",
+        "nudge": "Verschieben",
+        "selectTool": "Auswahlwerkzeug",
+        "addToSelection": "Zur Auswahl hinzufügen",
+        "selectBox": "Mit einem Rahmen auswählen",
+        "selectAll": "Alles auswählen",
+        "undo": "Rückgängig",
+        "redo": "Wiederholen",
+        "keys": "Diese Liste"
+      },
+      "cap": {
+        "mod": "Strg",
+        "space": "Leertaste",
+        "tab": "Tab",
+        "enter": "Eingabe",
+        "esc": "Esc",
+        "delete": "Entf",
+        "drag": "ziehen",
+        "click": "klicken",
+        "doubleClick": "Doppelklick",
+        "wheel": "Mausrad",
+        "type": "tippen"
+      }
     }
   },
   "calendarPage": {

@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Grid, Typography, Container, IconButton, Tooltip } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
-import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded'
 import FocusBar from './FocusBar'
 import OnboardingSurfaces from './OnboardingSurfaces'
 import SideMenu from './SideMenu'
@@ -15,7 +14,6 @@ import { useDailyRoutine } from '@nowry/core/hooks/useDailyRoutine'
 import { routineProgress } from '@nowry/core/domain/dailyRoutine'
 import { tasksDueToday } from '@nowry/core/domain/taskQueue'
 import StudyCalendar from './StudyCalendar'
-import BlackboardModal from '../../Blackboard/BlackboardModal'
 import { useAuth } from '@nowry/core/context/AuthContext'
 
 function Home() {
@@ -23,7 +21,6 @@ function Home() {
   const username = user?.username
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [blackboardOpen, setBlackboardOpen] = useState(false)
 
   const motivationPhrase = useMemo(() => {
     const phrases = t('motivation.phrases', { returnObjects: true })
@@ -110,28 +107,6 @@ function Home() {
               <CalendarMonthRoundedIcon sx={{ fontSize: 18 }} />
             </IconButton>
           </Tooltip>
-          {/* Blackboard Icon */}
-          <Tooltip title={t('blackboard.tooltip', 'Open Blackboard')} size='sm' placement='bottom'>
-            <IconButton
-              size='sm'
-              variant='plain'
-              color='neutral'
-              onClick={() => setBlackboardOpen(true)}
-              sx={{
-                '--IconButton-size': '32px',
-                borderRadius: 'sm',
-                border: '1px solid',
-                borderColor: 'divider',
-                transition: 'all 0.15s',
-                '&:hover': {
-                  bgcolor: 'background.level1',
-                  borderColor: 'primary.outlinedBorder'
-                }
-              }}
-            >
-              <PsychologyRoundedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
         </Box>
       </Box>
 
@@ -174,9 +149,6 @@ function Home() {
           <StudyCalendar />
         </Grid>
       </Grid>
-
-      {/* Blackboard Modal */}
-      <BlackboardModal open={blackboardOpen} onClose={() => setBlackboardOpen(false)} />
     </Container>
   )
 }

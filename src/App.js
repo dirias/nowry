@@ -45,6 +45,8 @@ const OnboardingRoute = lazy(() => import('./components/User/OnboardingRoute'))
 const Home = lazy(() => import('./components/User/Home/Home'))
 const EditorHome = lazy(() => import('./components/Books/EditorHome'))
 const BookHome = lazy(() => import('./components/Books/BookHome'))
+const BoardsPage = lazy(() => import('./components/Boards/BoardsPage'))
+const BoardPage = lazy(() => import('./components/Boards/BoardPage'))
 const CardHome = lazy(() => import('./components/Cards/CardHome'))
 const StudySession = lazy(() => import('./components/Cards/StudySession'))
 const StudyCenter = lazy(() => import('./components/Study/StudyCenter'))
@@ -235,6 +237,22 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     <EditorHome />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/boards'
+                element={
+                  <ProtectedRoute>
+                    <BoardsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/boards/:id'
+                element={
+                  <ProtectedRoute>
+                    <BoardPage />
                   </ProtectedRoute>
                 }
               />

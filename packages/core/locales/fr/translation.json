@@ -141,6 +141,7 @@
     "study": "Études",
     "cards": "Cartes",
     "books": "Livres",
+    "boards": "Tableaux",
     "contact": "Contact",
     "settings": "Paramètres",
     "getStarted": "Commencer",
@@ -3112,74 +3113,6 @@
     }
   },
   "blackboard": {
-    "title": "Blackboard",
-    "defaultBoardName": "My Blackboard",
-    "subtitle": "Brainstorm freely — auto-saved",
-    "tooltip": "Open Blackboard",
-    "toolbar": {
-      "sticky": "Sticky",
-      "addSticky": "Add sticky note",
-      "addGoal": "Add a goal",
-      "addPriority": "Add a priority",
-      "addTask": "Add a task",
-      "clear": "Clear board",
-      "myBoards": "My Boards",
-      "loadingBoard": "Opening your board…"
-    },
-    "picker": {
-      "title": {
-        "goal": "Select a goal",
-        "priority": "Select a priority",
-        "task": "Select a task"
-      },
-      "search": "Search...",
-      "empty": "Nothing found"
-    },
-    "clear": {
-      "title": "Clear board?",
-      "desc": "All notes and connections will be permanently removed.",
-      "confirm": "Clear everything"
-    },
-    "canvasError": {
-      "message": "Could not load this board. Try again.",
-      "retry": "Retry board"
-    },
-    "boardListSelector": {
-      "title": "My Boards",
-      "subtitle": "Select a board to open or create a new one",
-      "newBoard": "New board",
-      "newBoardPlaceholder": "Board name",
-      "ownedBoards": "Your Boards",
-      "sharedBoards": "Shared with You",
-      "empty": {
-        "title": "No boards yet",
-        "body": "Create your first board to get started"
-      },
-      "error": "Could not load boards. Try again.",
-      "sharedWith": "Shared by {{name}}"
-    },
-    "upgrade": {
-      "share": "Share boards with Plus or Pro",
-      "multiBoard": "Unlock unlimited boards with Pro"
-    },
-    "boards": {
-      "newBoard": "New board"
-    },
-    "share": {
-      "title": "Share this board",
-      "inviteLabel": "Invite by email",
-      "inviteSubtitle": "They will see this board in their board list",
-      "sendInvite": "Send invite",
-      "empty": {
-        "title": "Not shared yet",
-        "body": "Invite someone by their email address"
-      },
-      "error": {
-        "notFound": "User not found. Check the email address.",
-        "alreadyInvited": "This user already has access.",
-        "notOwner": "Only the board owner can share this board"
-      }
-    },
     "convertToCardsModal": {
       "stages": {
         "s0": "Lecture de vos notes...",
@@ -3190,6 +3123,212 @@
       "selectedNodes_other": "À partir de {{count}} nœuds sélectionnés",
       "success_one": "{{count}} carte ajoutée à {{deckName}}",
       "success_other": "{{count}} cartes ajoutées à {{deckName}}"
+    }
+  },
+  "boards": {
+    "title": "Tableaux",
+    "untitled": "Tableau sans titre",
+    "count_one": "{{count}} tableau",
+    "count_other": "{{count}} tableaux",
+    "newBoard": "Nouveau tableau",
+    "limit": "Votre forfait permet un tableau ; Pro en permet autant qu’il vous faut.",
+    "seePlans": "Voir les forfaits",
+    "createFailed": "Impossible de créer le tableau. Réessayez.",
+    "renameFailed": "Impossible de renommer le tableau. Réessayez.",
+    "duplicateFailed": "Impossible de dupliquer le tableau. Réessayez.",
+    "loadError": "Vos tableaux n’ont pas pu être chargés.",
+    "empty": "Aucun tableau pour l’instant. Un tableau sert à démêler un sujet avant d’en faire des cartes.",
+    "tile": {
+      "open": "Ouvrir {{name}}",
+      "menu": "Actions pour {{name}}",
+      "edited": {
+        "justNow": "Modifié à l’instant",
+        "minutes_one": "Modifié il y a {{count}} min",
+        "minutes_other": "Modifié il y a {{count}} min",
+        "hours_one": "Modifié il y a {{count}} h",
+        "hours_other": "Modifié il y a {{count}} h",
+        "yesterday": "Modifié hier",
+        "on": "Modifié le {{date}}"
+      },
+      "notes_one": "{{count}} note",
+      "notes_other": "{{count}} notes",
+      "items_one": "{{count}} élément",
+      "items_other": "{{count}} éléments",
+      "cards_one": "{{count}} carte créée",
+      "cards_other": "{{count}} cartes créées",
+      "sharedWith_one": "partagé avec {{count}} personne",
+      "sharedWith_other": "partagé avec {{count}} personnes",
+      "sharedBy": "partagé par {{name}}"
+    },
+    "menu": {
+      "rename": "Renommer",
+      "duplicate": "Dupliquer",
+      "share": "Partager",
+      "delete": "Supprimer",
+      "keys": "Raccourcis clavier"
+    },
+    "rename": {
+      "label": "Nom du tableau"
+    },
+    "delete": {
+      "title": "Supprimer ce tableau ?",
+      "description": "« {{name}} » et tout ce qu’il contient seront supprimés.",
+      "consequenceContent": "Ses notes, liens et cadres disparaissent avec lui",
+      "consequenceCards": "Les cartes créées à partir de lui restent dans leurs paquets",
+      "confirm": "Supprimer le tableau",
+      "failed": "Impossible de supprimer le tableau. Réessayez."
+    },
+    "bar": {
+      "back": "Tableaux",
+      "renameAria": "{{name}} : renommer",
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "notSaved": "Non enregistré · nouvel essai",
+      "share": "Partager",
+      "more": "Autres actions du tableau",
+      "collaborators_one": "Partagé avec {{count}} personne",
+      "collaborators_other": "Partagé avec {{count}} personnes"
+    },
+    "page": {
+      "notFound": "Ce tableau n’existe pas ou n’est pas partagé avec vous.",
+      "loadError": "Ce tableau n’a pas pu être ouvert.",
+      "backToBoards": "Retour aux tableaux"
+    },
+    "hint": {
+      "first": "Nommez ce que vous cherchez à comprendre.",
+      "next": "Tab ajoute l’idée suivante · double-cliquez n’importe où pour une autre"
+    },
+    "canvas": {
+      "label": "Toile du tableau"
+    },
+    "note": {
+      "placeholder": "Écrivez une idée",
+      "editAria": "Texte de la note"
+    },
+    "text": {
+      "placeholder": "Titre",
+      "editAria": "Bloc de texte"
+    },
+    "frame": {
+      "untitled": "Cadre sans titre",
+      "titleAria": "Titre du cadre"
+    },
+    "item": {
+      "kind": {
+        "task": "Tâche",
+        "milestone": "Jalon",
+        "goal": "Objectif"
+      },
+      "linked": "Élément lié"
+    },
+    "link": {
+      "placeholder": "Libellé",
+      "labelAria": "Libellé du lien"
+    },
+    "plus": {
+      "top": "Ajouter une note liée au-dessus",
+      "right": "Ajouter une note liée à droite",
+      "bottom": "Ajouter une note liée en dessous",
+      "left": "Ajouter une note liée à gauche"
+    },
+    "tools": {
+      "label": "Outils",
+      "select": "Sélection (V)",
+      "hand": "Main (H)",
+      "note": "Note (N)",
+      "text": "Texte (T)",
+      "frame": "Cadre (F)",
+      "item": "Élément (I)"
+    },
+    "zoom": {
+      "in": "Zoom avant",
+      "out": "Zoom arrière",
+      "fit": "Ajuster le tableau (⇧1)"
+    },
+    "selection": {
+      "label": "Sélection",
+      "colors": {
+        "yellow": "Jaune",
+        "green": "Vert",
+        "blue": "Bleu",
+        "pink": "Rose",
+        "grey": "Gris"
+      },
+      "sizeLabel": "Taille du texte",
+      "size": {
+        "md": "Corps",
+        "lg": "Titre",
+        "xl": "Grand titre"
+      },
+      "frame": "Encadrer",
+      "delete": "Supprimer"
+    },
+    "share": {
+      "title": "Partager ce tableau",
+      "subtitle": "Les personnes invitées peuvent l’ouvrir et le modifier ; vos modifications et les leurs sont toutes conservées.",
+      "inviteLabel": "Inviter par e-mail",
+      "placeholder": "nom@exemple.com",
+      "inviteHelp": "Elles trouveront ce tableau dans leur liste de tableaux.",
+      "send": "Envoyer l’invitation",
+      "sent": "Invitation envoyée.",
+      "invitedNow": "Invité à l’instant",
+      "empty": "Pas encore partagé. Invitez quelqu’un avec son adresse e-mail.",
+      "upgrade": "Partagez vos tableaux avec Plus ou Pro",
+      "error": {
+        "empty": "Saisissez une adresse e-mail.",
+        "notFound": "Personne n’utilise Nowry avec cet e-mail. Vérifiez l’adresse.",
+        "alreadyInvited": "Cette personne a déjà accès.",
+        "notOwner": "Seul le propriétaire du tableau peut le partager.",
+        "failed": "L’invitation n’a pas été envoyée. Réessayez."
+      }
+    },
+    "keys": {
+      "title": "Raccourcis clavier",
+      "groups": {
+        "move": "Se déplacer",
+        "make": "Créer",
+        "edit": "Modifier et relier",
+        "select": "Sélectionner",
+        "history": "Annuler et aide"
+      },
+      "rows": {
+        "pan": "Déplacer la vue",
+        "zoom": "Zoomer",
+        "fitBoard": "Ajuster le tableau",
+        "fitSelection": "Ajuster la sélection",
+        "note": "Note à cet endroit",
+        "child": "Note liée à droite",
+        "sibling": "Note en dessous",
+        "text": "Texte",
+        "frame": "Cadre",
+        "edit": "Modifier la note sélectionnée",
+        "finish": "Terminer la saisie",
+        "label": "Nommer un lien",
+        "remove": "Supprimer",
+        "duplicate": "Dupliquer",
+        "frameSelection": "Encadrer la sélection",
+        "nudge": "Décaler",
+        "selectTool": "Outil de sélection",
+        "addToSelection": "Ajouter à la sélection",
+        "selectBox": "Sélectionner par un cadre",
+        "selectAll": "Tout sélectionner",
+        "undo": "Annuler",
+        "redo": "Rétablir",
+        "keys": "Cette liste"
+      },
+      "cap": {
+        "mod": "Ctrl",
+        "space": "Espace",
+        "tab": "Tab",
+        "enter": "Entrée",
+        "esc": "Échap",
+        "delete": "Suppr",
+        "drag": "glisser",
+        "click": "clic",
+        "doubleClick": "double-clic",
+        "wheel": "molette",
+        "type": "saisir"
+      }
     }
   },
   "calendarPage": {

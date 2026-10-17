@@ -45,7 +45,8 @@ import {
   AutoAwesomeRounded,
   PublicRounded,
   SellRounded,
-  MailOutlineRounded
+  MailOutlineRounded,
+  SpaceDashboardRounded
 } from '@mui/icons-material'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { formatClock } from '@nowry/core/utils/formatClock'
@@ -210,7 +211,8 @@ const Header = () => {
     setBugReportOpen(false)
   }
 
-  const isActive = (path) => location.pathname === path
+  // A board's own page (/boards/:id) still reads as Boards in the bar (BOARD-003).
+  const isActive = (path) => location.pathname === path || (path === '/boards' && location.pathname.startsWith('/boards/'))
 
   // One ground for guests and members (ADR-035, amended 2026-09-26): a nav link
   // reads on the page ground in both states.
@@ -293,6 +295,7 @@ const Header = () => {
               {[
                 { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
                 { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
+                { name: t('header.boards'), path: '/boards', icon: <SpaceDashboardRounded /> },
                 { name: t('annualPlanning.title'), path: '/annual-planning', icon: <TimelineRounded /> }
               ].map((item) => (
                 <Button
@@ -604,6 +607,7 @@ const Header = () => {
                 {[
                   { name: t('header.study'), path: '/study', icon: <AutoStoriesRounded /> },
                   { name: t('header.books'), path: '/books', icon: <MenuBookRounded /> },
+                  { name: t('header.boards'), path: '/boards', icon: <SpaceDashboardRounded /> },
                   { name: t('annualPlanning.title'), path: '/annual-planning', icon: <TimelineRounded /> }
                 ].map((item) => (
                   <ListItem key={item.name}>

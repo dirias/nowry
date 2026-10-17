@@ -15,8 +15,9 @@ import { apiClient } from '../client'
 const QUIET = { suppressErrorToast: true }
 
 export const blackboardService = {
+  /** Quiet: the board page says "not found" or "no access" in its own words. */
   async getBoard(boardId) {
-    const { data } = await apiClient.get(`/blackboards/${boardId}`)
+    const { data } = await apiClient.get(`/blackboards/${boardId}`, QUIET)
     return data
   },
 

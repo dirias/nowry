@@ -128,6 +128,15 @@ const BETA_MARK = ['beta.mark']
 // URL, not a phrase, and the API's notice endpoint is the same for everyone.
 const COPYRIGHT_ROUTE = ['routes.copyright']
 
+/*
+ * The board's key list prints keys as their caps print them (BOARD-004).
+ * "Tab", "Esc" and "Ctrl" are what the keys say on Spanish, French, German
+ * and Japanese keyboards alike; Japanese keyboards print "Enter" and "Delete"
+ * too. Where a locale's cap says something else (Strg, Échap, Intro, Entf,
+ * Supr, Entrée) the bundle says it.
+ */
+const CAP = (...caps) => caps.map((cap) => `boards.keys.cap.${cap}`)
+
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
   es: [
@@ -158,7 +167,8 @@ const IDENTICAL_BY_DESIGN = {
     'calendarPage.blocks.form.remindMinutes_one',
     'calendarPage.blocks.form.remindMinutes_other',
     ...XP_GAINED,
-    ...CARD_COUNTER
+    ...CARD_COUNTER,
+    ...CAP('mod', 'tab', 'esc')
   ],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
@@ -222,7 +232,13 @@ const IDENTICAL_BY_DESIGN = {
     // And "A–Z" is the same two letters here.
     'groups.orderAlpha',
     ...XP_GAINED,
-    ...CARD_COUNTER
+    ...CARD_COUNTER,
+    // "Note" is the French word for a note, so the Note tool and the tile's
+    // count land on English by coincidence (BOARD-003, BOARD-004).
+    'boards.tools.note',
+    'boards.tile.notes_one',
+    'boards.tile.notes_other',
+    ...CAP('mod', 'tab')
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
@@ -255,9 +271,14 @@ const IDENTICAL_BY_DESIGN = {
     // "Routine" is the German word for the block form's first source (PLAN-004).
     'calendarPage.blocks.form.source.routine',
     ...XP_GAINED,
-    ...CARD_COUNTER
+    ...CARD_COUNTER,
+    // "Board" is the loanword German product UI uses for a whiteboard, so the
+    // page's title and its top-bar link say it as English does (BOARD-003).
+    'boards.title',
+    'header.boards',
+    ...CAP('tab', 'esc')
   ],
-  ja: ['cards.session.xpGained_other', ...CARD_COUNTER, ...COPYRIGHT_ROUTE]
+  ja: ['cards.session.xpGained_other', ...CARD_COUNTER, ...COPYRIGHT_ROUTE, ...CAP('mod', 'tab', 'esc', 'enter', 'delete')]
 }
 
 /**

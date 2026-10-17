@@ -121,6 +121,7 @@
     "study": "Estudio",
     "cards": "Tarjetas",
     "books": "Libros",
+    "boards": "Tableros",
     "contact": "Contacto",
     "settings": "Ajustes",
     "getStarted": "Comenzar",
@@ -3561,74 +3562,6 @@
     }
   },
   "blackboard": {
-    "title": "Blackboard",
-    "defaultBoardName": "My Blackboard",
-    "subtitle": "Brainstorm freely — auto-saved",
-    "tooltip": "Open Blackboard",
-    "toolbar": {
-      "sticky": "Sticky",
-      "addSticky": "Add sticky note",
-      "addGoal": "Add a goal",
-      "addPriority": "Add a priority",
-      "addTask": "Add a task",
-      "clear": "Clear board",
-      "myBoards": "My Boards",
-      "loadingBoard": "Opening your board…"
-    },
-    "picker": {
-      "title": {
-        "goal": "Select a goal",
-        "priority": "Select a priority",
-        "task": "Select a task"
-      },
-      "search": "Search...",
-      "empty": "Nothing found"
-    },
-    "clear": {
-      "title": "Clear board?",
-      "desc": "All notes and connections will be permanently removed.",
-      "confirm": "Clear everything"
-    },
-    "canvasError": {
-      "message": "Could not load this board. Try again.",
-      "retry": "Retry board"
-    },
-    "boardListSelector": {
-      "title": "My Boards",
-      "subtitle": "Select a board to open or create a new one",
-      "newBoard": "New board",
-      "newBoardPlaceholder": "Board name",
-      "ownedBoards": "Your Boards",
-      "sharedBoards": "Shared with You",
-      "empty": {
-        "title": "No boards yet",
-        "body": "Create your first board to get started"
-      },
-      "error": "Could not load boards. Try again.",
-      "sharedWith": "Shared by {{name}}"
-    },
-    "upgrade": {
-      "share": "Share boards with Plus or Pro",
-      "multiBoard": "Unlock unlimited boards with Pro"
-    },
-    "boards": {
-      "newBoard": "New board"
-    },
-    "share": {
-      "title": "Share this board",
-      "inviteLabel": "Invite by email",
-      "inviteSubtitle": "They will see this board in their board list",
-      "sendInvite": "Send invite",
-      "empty": {
-        "title": "Not shared yet",
-        "body": "Invite someone by their email address"
-      },
-      "error": {
-        "notFound": "User not found. Check the email address.",
-        "alreadyInvited": "This user already has access.",
-        "notOwner": "Only the board owner can share this board"
-      }
-    },
     "convertToCardsModal": {
       "stages": {
         "s0": "Leyendo tus notas...",
@@ -3639,6 +3572,212 @@
       "selectedNodes_other": "De {{count}} nodos seleccionados",
       "success_one": "{{count}} tarjeta añadida a {{deckName}}",
       "success_other": "{{count}} tarjetas añadidas a {{deckName}}"
+    }
+  },
+  "boards": {
+    "title": "Tableros",
+    "untitled": "Tablero sin título",
+    "count_one": "{{count}} tablero",
+    "count_other": "{{count}} tableros",
+    "newBoard": "Nuevo tablero",
+    "limit": "Tu plan admite un tablero; Pro admite todos los que necesites.",
+    "seePlans": "Ver planes",
+    "createFailed": "No se pudo crear el tablero. Inténtalo de nuevo.",
+    "renameFailed": "No se pudo renombrar el tablero. Inténtalo de nuevo.",
+    "duplicateFailed": "No se pudo duplicar el tablero. Inténtalo de nuevo.",
+    "loadError": "No se pudieron cargar tus tableros.",
+    "empty": "Aún no hay tableros. Un tablero es donde trabajas un tema antes de convertirlo en tarjetas.",
+    "tile": {
+      "open": "Abrir {{name}}",
+      "menu": "Acciones de {{name}}",
+      "edited": {
+        "justNow": "Editado ahora mismo",
+        "minutes_one": "Editado hace {{count}} min",
+        "minutes_other": "Editado hace {{count}} min",
+        "hours_one": "Editado hace {{count}} h",
+        "hours_other": "Editado hace {{count}} h",
+        "yesterday": "Editado ayer",
+        "on": "Editado el {{date}}"
+      },
+      "notes_one": "{{count}} nota",
+      "notes_other": "{{count}} notas",
+      "items_one": "{{count}} elemento",
+      "items_other": "{{count}} elementos",
+      "cards_one": "{{count}} tarjeta creada",
+      "cards_other": "{{count}} tarjetas creadas",
+      "sharedWith_one": "compartido con {{count}} persona",
+      "sharedWith_other": "compartido con {{count}} personas",
+      "sharedBy": "compartido por {{name}}"
+    },
+    "menu": {
+      "rename": "Renombrar",
+      "duplicate": "Duplicar",
+      "share": "Compartir",
+      "delete": "Eliminar",
+      "keys": "Atajos de teclado"
+    },
+    "rename": {
+      "label": "Nombre del tablero"
+    },
+    "delete": {
+      "title": "¿Eliminar este tablero?",
+      "description": "Se eliminará «{{name}}» y todo lo que contiene.",
+      "consequenceContent": "Sus notas, enlaces y marcos se van con él",
+      "consequenceCards": "Las tarjetas creadas a partir de él siguen en sus mazos",
+      "confirm": "Eliminar tablero",
+      "failed": "No se pudo eliminar el tablero. Inténtalo de nuevo."
+    },
+    "bar": {
+      "back": "Tableros",
+      "renameAria": "{{name}}: renombrar",
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "notSaved": "Sin guardar · reintentando",
+      "share": "Compartir",
+      "more": "Más acciones del tablero",
+      "collaborators_one": "Compartido con {{count}} persona",
+      "collaborators_other": "Compartido con {{count}} personas"
+    },
+    "page": {
+      "notFound": "Este tablero no existe o no está compartido contigo.",
+      "loadError": "No se pudo abrir este tablero.",
+      "backToBoards": "Volver a los tableros"
+    },
+    "hint": {
+      "first": "Pon nombre a lo que estás resolviendo.",
+      "next": "Tab añade la siguiente idea · doble clic en cualquier sitio para otra"
+    },
+    "canvas": {
+      "label": "Lienzo del tablero"
+    },
+    "note": {
+      "placeholder": "Escribe una idea",
+      "editAria": "Texto de la nota"
+    },
+    "text": {
+      "placeholder": "Encabezado",
+      "editAria": "Bloque de texto"
+    },
+    "frame": {
+      "untitled": "Marco sin título",
+      "titleAria": "Título del marco"
+    },
+    "item": {
+      "kind": {
+        "task": "Tarea",
+        "milestone": "Hito",
+        "goal": "Objetivo"
+      },
+      "linked": "Elemento vinculado"
+    },
+    "link": {
+      "placeholder": "Etiqueta",
+      "labelAria": "Etiqueta del enlace"
+    },
+    "plus": {
+      "top": "Añadir una nota enlazada encima",
+      "right": "Añadir una nota enlazada a la derecha",
+      "bottom": "Añadir una nota enlazada debajo",
+      "left": "Añadir una nota enlazada a la izquierda"
+    },
+    "tools": {
+      "label": "Herramientas",
+      "select": "Seleccionar (V)",
+      "hand": "Mano (H)",
+      "note": "Nota (N)",
+      "text": "Texto (T)",
+      "frame": "Marco (F)",
+      "item": "Elemento (I)"
+    },
+    "zoom": {
+      "in": "Acercar",
+      "out": "Alejar",
+      "fit": "Ajustar el tablero (⇧1)"
+    },
+    "selection": {
+      "label": "Selección",
+      "colors": {
+        "yellow": "Amarillo",
+        "green": "Verde",
+        "blue": "Azul",
+        "pink": "Rosa",
+        "grey": "Gris"
+      },
+      "sizeLabel": "Tamaño del texto",
+      "size": {
+        "md": "Cuerpo",
+        "lg": "Encabezado",
+        "xl": "Título"
+      },
+      "frame": "Enmarcar",
+      "delete": "Eliminar"
+    },
+    "share": {
+      "title": "Compartir este tablero",
+      "subtitle": "Quien invites podrá abrirlo y editarlo; se conservan tus cambios y los suyos.",
+      "inviteLabel": "Invitar por correo",
+      "placeholder": "nombre@ejemplo.com",
+      "inviteHelp": "Encontrará este tablero en su lista de tableros.",
+      "send": "Enviar invitación",
+      "sent": "Invitación enviada.",
+      "invitedNow": "Invitado ahora mismo",
+      "empty": "Aún no se comparte. Invita a alguien con su correo electrónico.",
+      "upgrade": "Comparte tableros con Plus o Pro",
+      "error": {
+        "empty": "Escribe una dirección de correo.",
+        "notFound": "Nadie usa Nowry con ese correo. Revisa la dirección.",
+        "alreadyInvited": "Esta persona ya tiene acceso.",
+        "notOwner": "Solo quien creó el tablero puede compartirlo.",
+        "failed": "No se envió la invitación. Inténtalo de nuevo."
+      }
+    },
+    "keys": {
+      "title": "Atajos de teclado",
+      "groups": {
+        "move": "Moverse",
+        "make": "Crear",
+        "edit": "Editar y conectar",
+        "select": "Seleccionar",
+        "history": "Deshacer y ayuda"
+      },
+      "rows": {
+        "pan": "Desplazar la vista",
+        "zoom": "Ampliar o reducir",
+        "fitBoard": "Ajustar el tablero",
+        "fitSelection": "Ajustar la selección",
+        "note": "Nota donde estás",
+        "child": "Nota enlazada a la derecha",
+        "sibling": "Nota debajo",
+        "text": "Texto",
+        "frame": "Marco",
+        "edit": "Editar la nota seleccionada",
+        "finish": "Terminar de editar",
+        "label": "Etiquetar un enlace",
+        "remove": "Eliminar",
+        "duplicate": "Duplicar",
+        "frameSelection": "Enmarcar la selección",
+        "nudge": "Mover un poco",
+        "selectTool": "Herramienta de selección",
+        "addToSelection": "Añadir a la selección",
+        "selectBox": "Seleccionar con un recuadro",
+        "selectAll": "Seleccionar todo",
+        "undo": "Deshacer",
+        "redo": "Rehacer",
+        "keys": "Esta lista"
+      },
+      "cap": {
+        "mod": "Ctrl",
+        "space": "Espacio",
+        "tab": "Tab",
+        "enter": "Intro",
+        "esc": "Esc",
+        "delete": "Supr",
+        "drag": "arrastrar",
+        "click": "clic",
+        "doubleClick": "doble clic",
+        "wheel": "rueda",
+        "type": "escribir"
+      }
     }
   },
   "calendarPage": {

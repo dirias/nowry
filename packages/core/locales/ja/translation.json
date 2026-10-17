@@ -131,6 +131,7 @@
     "study": "学習",
     "cards": "カード",
     "books": "ブック",
+    "boards": "ボード",
     "contact": "お問い合わせ",
     "settings": "設定",
     "getStarted": "始める",
@@ -3000,74 +3001,6 @@
     }
   },
   "blackboard": {
-    "title": "Blackboard",
-    "defaultBoardName": "My Blackboard",
-    "subtitle": "Brainstorm freely — auto-saved",
-    "tooltip": "Open Blackboard",
-    "toolbar": {
-      "sticky": "Sticky",
-      "addSticky": "Add sticky note",
-      "addGoal": "Add a goal",
-      "addPriority": "Add a priority",
-      "addTask": "Add a task",
-      "clear": "Clear board",
-      "myBoards": "My Boards",
-      "loadingBoard": "Opening your board…"
-    },
-    "picker": {
-      "title": {
-        "goal": "Select a goal",
-        "priority": "Select a priority",
-        "task": "Select a task"
-      },
-      "search": "Search...",
-      "empty": "Nothing found"
-    },
-    "clear": {
-      "title": "Clear board?",
-      "desc": "All notes and connections will be permanently removed.",
-      "confirm": "Clear everything"
-    },
-    "canvasError": {
-      "message": "Could not load this board. Try again.",
-      "retry": "Retry board"
-    },
-    "boardListSelector": {
-      "title": "My Boards",
-      "subtitle": "Select a board to open or create a new one",
-      "newBoard": "New board",
-      "newBoardPlaceholder": "Board name",
-      "ownedBoards": "Your Boards",
-      "sharedBoards": "Shared with You",
-      "empty": {
-        "title": "No boards yet",
-        "body": "Create your first board to get started"
-      },
-      "error": "Could not load boards. Try again.",
-      "sharedWith": "Shared by {{name}}"
-    },
-    "upgrade": {
-      "share": "Share boards with Plus or Pro",
-      "multiBoard": "Unlock unlimited boards with Pro"
-    },
-    "boards": {
-      "newBoard": "New board"
-    },
-    "share": {
-      "title": "Share this board",
-      "inviteLabel": "Invite by email",
-      "inviteSubtitle": "They will see this board in their board list",
-      "sendInvite": "Send invite",
-      "empty": {
-        "title": "Not shared yet",
-        "body": "Invite someone by their email address"
-      },
-      "error": {
-        "notFound": "User not found. Check the email address.",
-        "alreadyInvited": "This user already has access.",
-        "notOwner": "Only the board owner can share this board"
-      }
-    },
     "convertToCardsModal": {
       "stages": {
         "s0": "ノートを読んでいます...",
@@ -3076,6 +3009,204 @@
       },
       "selectedNodes_other": "選択した{{count}}個のノードから",
       "success_other": "{{count}}枚のカードを{{deckName}}に追加しました"
+    }
+  },
+  "boards": {
+    "title": "ボード",
+    "untitled": "無題のボード",
+    "count_other": "ボード{{count}}件",
+    "newBoard": "新しいボード",
+    "limit": "現在のプランではボードは1つまでです。Proなら必要なだけ作れます。",
+    "seePlans": "プランを見る",
+    "createFailed": "ボードを作成できませんでした。もう一度お試しください。",
+    "renameFailed": "ボード名を変更できませんでした。もう一度お試しください。",
+    "duplicateFailed": "ボードを複製できませんでした。もう一度お試しください。",
+    "loadError": "ボードを読み込めませんでした。",
+    "empty": "まだボードはありません。ボードは、カードにする前にテーマを考え抜く場所です。",
+    "tile": {
+      "open": "{{name}}を開く",
+      "menu": "{{name}}の操作",
+      "edited": {
+        "justNow": "たった今編集",
+        "minutes_other": "{{count}}分前に編集",
+        "hours_other": "{{count}}時間前に編集",
+        "yesterday": "昨日編集",
+        "on": "{{date}}に編集"
+      },
+      "notes_other": "ノート{{count}}件",
+      "items_other": "項目{{count}}件",
+      "cards_other": "カード{{count}}枚作成",
+      "sharedWith_other": "{{count}}人と共有",
+      "sharedBy": "{{name}}さんが共有"
+    },
+    "menu": {
+      "rename": "名前を変更",
+      "duplicate": "複製",
+      "share": "共有",
+      "delete": "削除",
+      "keys": "キーボードショートカット"
+    },
+    "rename": {
+      "label": "ボード名"
+    },
+    "delete": {
+      "title": "このボードを削除しますか？",
+      "description": "「{{name}}」とその中身がすべて削除されます。",
+      "consequenceContent": "ノート、つながり、フレームも一緒に削除されます",
+      "consequenceCards": "このボードから作ったカードはデッキに残ります",
+      "confirm": "ボードを削除",
+      "failed": "ボードを削除できませんでした。もう一度お試しください。"
+    },
+    "bar": {
+      "back": "ボード一覧",
+      "renameAria": "{{name}}：名前を変更",
+      "saving": "保存中…",
+      "saved": "保存済み",
+      "notSaved": "未保存・再試行中",
+      "share": "共有",
+      "more": "ボードのその他の操作",
+      "collaborators_other": "{{count}}人と共有中"
+    },
+    "page": {
+      "notFound": "このボードは存在しないか、あなたと共有されていません。",
+      "loadError": "このボードを開けませんでした。",
+      "backToBoards": "ボード一覧に戻る"
+    },
+    "hint": {
+      "first": "考えたいことに名前をつけましょう。",
+      "next": "Tabで次のアイデア・どこでもダブルクリックでもう1枚"
+    },
+    "canvas": {
+      "label": "ボードのキャンバス"
+    },
+    "note": {
+      "placeholder": "アイデアを入力",
+      "editAria": "ノートの本文"
+    },
+    "text": {
+      "placeholder": "見出し",
+      "editAria": "テキストブロック"
+    },
+    "frame": {
+      "untitled": "無題のフレーム",
+      "titleAria": "フレームのタイトル"
+    },
+    "item": {
+      "kind": {
+        "task": "タスク",
+        "milestone": "マイルストーン",
+        "goal": "目標"
+      },
+      "linked": "リンクされた項目"
+    },
+    "link": {
+      "placeholder": "ラベル",
+      "labelAria": "つながりのラベル"
+    },
+    "plus": {
+      "top": "上につながったノートを追加",
+      "right": "右につながったノートを追加",
+      "bottom": "下につながったノートを追加",
+      "left": "左につながったノートを追加"
+    },
+    "tools": {
+      "label": "ツール",
+      "select": "選択 (V)",
+      "hand": "手のひら (H)",
+      "note": "ノート (N)",
+      "text": "テキスト (T)",
+      "frame": "フレーム (F)",
+      "item": "項目 (I)"
+    },
+    "zoom": {
+      "in": "拡大",
+      "out": "縮小",
+      "fit": "ボード全体を表示 (⇧1)"
+    },
+    "selection": {
+      "label": "選択中",
+      "colors": {
+        "yellow": "黄",
+        "green": "緑",
+        "blue": "青",
+        "pink": "ピンク",
+        "grey": "グレー"
+      },
+      "sizeLabel": "文字サイズ",
+      "size": {
+        "md": "本文",
+        "lg": "見出し",
+        "xl": "タイトル"
+      },
+      "frame": "フレームで囲む",
+      "delete": "削除"
+    },
+    "share": {
+      "title": "このボードを共有",
+      "subtitle": "招待した人はボードを開いて編集できます。あなたの変更も相手の変更も残ります。",
+      "inviteLabel": "メールで招待",
+      "placeholder": "name@example.jp",
+      "inviteHelp": "相手のボード一覧にこのボードが表示されます。",
+      "send": "招待を送信",
+      "sent": "招待を送信しました。",
+      "invitedNow": "今招待した人",
+      "empty": "まだ共有されていません。メールアドレスで招待しましょう。",
+      "upgrade": "PlusまたはProでボードを共有できます",
+      "error": {
+        "empty": "メールアドレスを入力してください。",
+        "notFound": "そのメールアドレスのNowryユーザーはいません。アドレスを確認してください。",
+        "alreadyInvited": "この人はすでにアクセスできます。",
+        "notOwner": "ボードを共有できるのは所有者だけです。",
+        "failed": "招待を送信できませんでした。もう一度お試しください。"
+      }
+    },
+    "keys": {
+      "title": "キーボードショートカット",
+      "groups": {
+        "move": "移動",
+        "make": "作成",
+        "edit": "編集とつなぐ",
+        "select": "選択",
+        "history": "元に戻すとヘルプ"
+      },
+      "rows": {
+        "pan": "表示を移動",
+        "zoom": "ズーム",
+        "fitBoard": "ボード全体を表示",
+        "fitSelection": "選択範囲を表示",
+        "note": "その場所にノート",
+        "child": "右につながったノート",
+        "sibling": "下にノート",
+        "text": "テキスト",
+        "frame": "フレーム",
+        "edit": "選択中のノートを編集",
+        "finish": "編集を終える",
+        "label": "つながりにラベルをつける",
+        "remove": "削除",
+        "duplicate": "複製",
+        "frameSelection": "選択範囲をフレームで囲む",
+        "nudge": "少し動かす",
+        "selectTool": "選択ツール",
+        "addToSelection": "選択に追加",
+        "selectBox": "範囲で選択",
+        "selectAll": "すべて選択",
+        "undo": "元に戻す",
+        "redo": "やり直す",
+        "keys": "この一覧"
+      },
+      "cap": {
+        "mod": "Ctrl",
+        "space": "スペース",
+        "tab": "Tab",
+        "enter": "Enter",
+        "esc": "Esc",
+        "delete": "Delete",
+        "drag": "ドラッグ",
+        "click": "クリック",
+        "doubleClick": "ダブルクリック",
+        "wheel": "ホイール",
+        "type": "入力"
+      }
     }
   },
   "calendarPage": {
