@@ -1219,36 +1219,6 @@
       }
     }
   },
-  "blackboard": {
-    "toolbar": {
-      "convertingCards": "Generating cards..."
-    },
-    "convert": {
-      "addToDeck": "Add to deck",
-      "empty": {
-        "title": "No text found",
-        "body": "Add content to sticky notes or title nodes and try again"
-      },
-      "error": {
-        "timeout": "Generation took too long. Try with fewer nodes.",
-        "failed": "Card generation failed. Try again."
-      },
-      "truncated": "Some board content was trimmed. Select fewer nodes for complete coverage."
-    },
-    "convertToCardsModal": {
-      "title": "Review generated cards",
-      "selectedNodes_one": "From {{count}} selected node",
-      "selectedNodes_other": "From {{count}} selected nodes",
-      "confirmDeck": "Choose target deck",
-      "success_one": "{{count}} card added to {{deckName}}",
-      "success_other": "{{count}} cards added to {{deckName}}",
-      "stages": {
-        "s0": "Reading your notes...",
-        "s1": "Finding the ideas worth keeping...",
-        "s2": "Turning them into cards..."
-      }
-    }
-  },
   "boards": {
     "title": "Boards",
     "untitled": "Untitled board",
@@ -1289,7 +1259,14 @@
       "duplicate": "Duplicate",
       "share": "Share",
       "delete": "Delete",
-      "keys": "Keyboard shortcuts"
+      "keys": "Keyboard shortcuts",
+      "import": "Import a file…",
+      "importTypes": ".mmd · .md · .canvas",
+      "export": "Export",
+      "exportPng": "Image (PNG)",
+      "exportSvg": "Image (SVG)",
+      "exportOutline": "Outline (Markdown)",
+      "exportCanvas": "JSON Canvas"
     },
     "rename": {
       "label": "Board name"
@@ -1327,7 +1304,12 @@
     },
     "note": {
       "placeholder": "Type an idea",
-      "editAria": "Note text"
+      "editAria": "Note text",
+      "cards_one": "{{count}} card",
+      "cards_other": "{{count}} cards",
+      "cardsAria_one": "Open the card made from this note",
+      "cardsAria_other": "Open the {{count}} cards made from this note",
+      "cardsFailed": "Those cards could not be opened."
     },
     "text": {
       "placeholder": "Heading",
@@ -1343,7 +1325,13 @@
         "milestone": "Milestone",
         "goal": "Goal"
       },
-      "linked": "Linked item"
+      "linked": "Linked item",
+      "missing": "No longer in your plan",
+      "loadError": "Could not read this item",
+      "open": "Open {{title}}",
+      "markDone": "Mark {{title}} as done",
+      "markUndone": "Mark {{title}} as not done",
+      "tickFailed": "That change was not saved. Try again."
     },
     "link": {
       "placeholder": "Label",
@@ -1385,7 +1373,10 @@
         "xl": "Title"
       },
       "frame": "Frame",
-      "delete": "Delete"
+      "delete": "Delete",
+      "makeCards": "Make cards",
+      "makeItems_one": "Make item",
+      "makeItems_other": "Make items"
     },
     "share": {
       "title": "Share this board",
@@ -1453,6 +1444,107 @@
         "wheel": "wheel",
         "type": "type"
       }
+    },
+    "items": {
+      "made_one": "Made {{count}} task",
+      "made_other": "Made {{count}} tasks",
+      "partial": "Made {{made}} of {{total}} tasks; the rest could not be made.",
+      "failed": "The tasks could not be made. Try again.",
+      "empty": "These notes have no words to make a task from."
+    },
+    "picker": {
+      "title": "Add an item",
+      "hint": "↑ ↓ to move · Enter to place · Esc to close",
+      "search": "Search tasks, milestones and goals",
+      "groups": {
+        "task": "Tasks",
+        "milestone": "Milestones",
+        "goal": "Goals"
+      },
+      "done": "done",
+      "empty": "Nothing matches “{{query}}”.",
+      "none": "No tasks, milestones or goals yet.",
+      "loadError": "Your tasks and plan could not be loaded."
+    },
+    "cards": {
+      "title": "Make cards",
+      "fromNotes_one": "From {{count}} note",
+      "fromNotes_other": "From {{count}} notes",
+      "toAdd_one": "{{count}} card to add",
+      "toAdd_other": "{{count}} cards to add",
+      "deck": "Deck",
+      "change": "Change",
+      "chooseDeck": "Choose a deck",
+      "noDecks": "You have no decks yet.",
+      "makeDeck": "Make a deck",
+      "decksError": "Your decks could not be loaded.",
+      "generating": "Making cards from your notes",
+      "stages": {
+        "s0": "Reading your notes…",
+        "s1": "Finding what is worth remembering…",
+        "s2": "Writing questions and answers…"
+      },
+      "from": "From {{title}}",
+      "leftOut": "From {{title}} · left out",
+      "untitledNote": "an untitled note",
+      "include": "Add “{{title}}”",
+      "editFront": "Edit the question",
+      "editBack": "Edit the answer",
+      "frontPlaceholder": "Question",
+      "backPlaceholder": "Answer",
+      "makeAgain": "Make again",
+      "addByHand": "Add a card by hand",
+      "add_one": "Add {{count}} card",
+      "add_other": "Add {{count}} cards",
+      "added_one": "Added {{count}} card to {{deck}}",
+      "added_other": "Added {{count}} cards to {{deck}}",
+      "errorTitle": "The cards could not be made",
+      "errorTimeout": "Making them took too long. Try again, or select fewer notes.",
+      "errorFailed": "Something went wrong while making them. Try again.",
+      "emptyText": "These notes have no words to make cards from.",
+      "noneBack": "No cards came back. Make again, or add one by hand.",
+      "truncated": "Only the first 20 notes were read.",
+      "addErrorTitle": "Some cards were not added",
+      "addError_one": "{{count}} card could not be added. Try again.",
+      "addError_other": "{{count}} cards could not be added. Try again.",
+      "needDeck": "Choose a deck to add them to.",
+      "needCard": "Tick at least one card to add."
+    },
+    "inOut": {
+      "pasted": "Pasted {{what}} from {{source}}",
+      "imported": "Imported {{what}} from {{source}}",
+      "pastedCopy": "Pasted {{what}}",
+      "source": {
+        "mermaid": "Mermaid",
+        "outline": "an outline",
+        "canvas": "JSON Canvas",
+        "text": "text"
+      },
+      "parts": {
+        "notes_one": "{{count}} note",
+        "notes_other": "{{count}} notes",
+        "texts_one": "{{count}} text block",
+        "texts_other": "{{count}} text blocks",
+        "items_one": "{{count}} item",
+        "items_other": "{{count}} items",
+        "links_one": "{{count}} link",
+        "links_other": "{{count}} links",
+        "frames_one": "a frame",
+        "frames_other": "{{count}} frames"
+      },
+      "list": {
+        "pair": "{{first}} and {{last}}",
+        "separator": ", "
+      },
+      "undo": "Undo",
+      "tooManyNodes": "That would make {{total}} notes; a board holds {{max}}.",
+      "tooManyLinks": "That would make {{total}} links; a board holds {{max}}.",
+      "unsupportedMermaid": "Only Mermaid flowcharts and mind maps can be read.",
+      "unreadable": "This file could not be read.",
+      "empty": "There is nothing in this file to add.",
+      "fileTooBig": "This file is over 1 MB; a board takes files up to 1 MB.",
+      "exportEmpty": "There is nothing on the board to export.",
+      "exportFailed": "The image could not be made. Try again."
     }
   },
   "books": {

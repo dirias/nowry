@@ -3101,19 +3101,6 @@
       "manage": "Manage subscription"
     }
   },
-  "blackboard": {
-    "convertToCardsModal": {
-      "stages": {
-        "s0": "Deine Notizen werden gelesen...",
-        "s1": "Die wichtigen Ideen werden gesucht...",
-        "s2": "Sie werden in Karten umgewandelt..."
-      },
-      "selectedNodes_one": "Aus {{count}} ausgewähltem Knoten",
-      "selectedNodes_other": "Aus {{count}} ausgewählten Knoten",
-      "success_one": "{{count}} Karte zu {{deckName}} hinzugefügt",
-      "success_other": "{{count}} Karten zu {{deckName}} hinzugefügt"
-    }
-  },
   "boards": {
     "title": "Boards",
     "untitled": "Unbenanntes Board",
@@ -3154,7 +3141,14 @@
       "duplicate": "Duplizieren",
       "share": "Teilen",
       "delete": "Löschen",
-      "keys": "Tastenkürzel"
+      "keys": "Tastenkürzel",
+      "import": "Datei importieren …",
+      "importTypes": ".mmd · .md · .canvas",
+      "export": "Exportieren",
+      "exportPng": "Bild (PNG)",
+      "exportSvg": "Bild (SVG)",
+      "exportOutline": "Gliederung (Markdown)",
+      "exportCanvas": "JSON Canvas"
     },
     "rename": {
       "label": "Name des Boards"
@@ -3192,7 +3186,12 @@
     },
     "note": {
       "placeholder": "Schreib eine Idee",
-      "editAria": "Notiztext"
+      "editAria": "Notiztext",
+      "cards_one": "{{count}} Karte",
+      "cards_other": "{{count}} Karten",
+      "cardsAria_one": "Die Karte aus dieser Notiz öffnen",
+      "cardsAria_other": "Die {{count}} Karten aus dieser Notiz öffnen",
+      "cardsFailed": "Diese Karten konnten nicht geöffnet werden."
     },
     "text": {
       "placeholder": "Überschrift",
@@ -3208,7 +3207,13 @@
         "milestone": "Meilenstein",
         "goal": "Ziel"
       },
-      "linked": "Verknüpftes Element"
+      "linked": "Verknüpftes Element",
+      "missing": "Nicht mehr in deinem Plan",
+      "loadError": "Dieses Element konnte nicht gelesen werden",
+      "open": "{{title}} öffnen",
+      "markDone": "{{title}} als erledigt markieren",
+      "markUndone": "{{title}} als nicht erledigt markieren",
+      "tickFailed": "Die Änderung wurde nicht gespeichert. Versuch es noch einmal."
     },
     "link": {
       "placeholder": "Beschriftung",
@@ -3250,7 +3255,10 @@
         "xl": "Titel"
       },
       "frame": "Einrahmen",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "makeCards": "Karten erstellen",
+      "makeItems_one": "Element erstellen",
+      "makeItems_other": "Elemente erstellen"
     },
     "share": {
       "title": "Dieses Board teilen",
@@ -3318,6 +3326,107 @@
         "wheel": "Mausrad",
         "type": "tippen"
       }
+    },
+    "items": {
+      "made_one": "{{count}} Aufgabe erstellt",
+      "made_other": "{{count}} Aufgaben erstellt",
+      "partial": "{{made}} von {{total}} Aufgaben erstellt; der Rest ging nicht.",
+      "failed": "Die Aufgaben konnten nicht erstellt werden. Versuch es noch einmal.",
+      "empty": "Diese Notizen enthalten keine Wörter, aus denen eine Aufgabe werden könnte."
+    },
+    "picker": {
+      "title": "Element hinzufügen",
+      "hint": "↑ ↓ zum Wählen · Enter zum Platzieren · Esc zum Schließen",
+      "search": "Aufgaben, Meilensteine und Ziele durchsuchen",
+      "groups": {
+        "task": "Aufgaben",
+        "milestone": "Meilensteine",
+        "goal": "Ziele"
+      },
+      "done": "erledigt",
+      "empty": "Nichts passt zu „{{query}}“.",
+      "none": "Noch keine Aufgaben, Meilensteine oder Ziele.",
+      "loadError": "Deine Aufgaben und dein Plan konnten nicht geladen werden."
+    },
+    "cards": {
+      "title": "Karten erstellen",
+      "fromNotes_one": "Aus {{count}} Notiz",
+      "fromNotes_other": "Aus {{count}} Notizen",
+      "toAdd_one": "{{count}} Karte zum Hinzufügen",
+      "toAdd_other": "{{count}} Karten zum Hinzufügen",
+      "deck": "Stapel",
+      "change": "Ändern",
+      "chooseDeck": "Stapel wählen",
+      "noDecks": "Du hast noch keine Stapel.",
+      "makeDeck": "Stapel anlegen",
+      "decksError": "Deine Stapel konnten nicht geladen werden.",
+      "generating": "Karten aus deinen Notizen werden erstellt",
+      "stages": {
+        "s0": "Deine Notizen werden gelesen …",
+        "s1": "Das Merkenswerte wird herausgesucht …",
+        "s2": "Fragen und Antworten werden geschrieben …"
+      },
+      "from": "Aus {{title}}",
+      "leftOut": "Aus {{title}} · weggelassen",
+      "untitledNote": "einer Notiz ohne Titel",
+      "include": "„{{title}}“ hinzufügen",
+      "editFront": "Frage bearbeiten",
+      "editBack": "Antwort bearbeiten",
+      "frontPlaceholder": "Frage",
+      "backPlaceholder": "Antwort",
+      "makeAgain": "Neu erstellen",
+      "addByHand": "Karte von Hand hinzufügen",
+      "add_one": "{{count}} Karte hinzufügen",
+      "add_other": "{{count}} Karten hinzufügen",
+      "added_one": "{{count}} Karte zu {{deck}} hinzugefügt",
+      "added_other": "{{count}} Karten zu {{deck}} hinzugefügt",
+      "errorTitle": "Die Karten konnten nicht erstellt werden",
+      "errorTimeout": "Das hat zu lange gedauert. Versuch es noch einmal oder wähle weniger Notizen.",
+      "errorFailed": "Beim Erstellen ist etwas schiefgegangen. Versuch es noch einmal.",
+      "emptyText": "Diese Notizen enthalten keine Wörter, aus denen Karten werden könnten.",
+      "noneBack": "Es kamen keine Karten zurück. Erstelle sie neu oder füge eine von Hand hinzu.",
+      "truncated": "Nur die ersten 20 Notizen wurden gelesen.",
+      "addErrorTitle": "Einige Karten wurden nicht hinzugefügt",
+      "addError_one": "{{count}} Karte konnte nicht hinzugefügt werden. Versuch es noch einmal.",
+      "addError_other": "{{count}} Karten konnten nicht hinzugefügt werden. Versuch es noch einmal.",
+      "needDeck": "Wähle einen Stapel, in den sie kommen.",
+      "needCard": "Hake mindestens eine Karte zum Hinzufügen an."
+    },
+    "inOut": {
+      "pasted": "Eingefügt: {{what}} aus {{source}}",
+      "imported": "Importiert: {{what}} aus {{source}}",
+      "pastedCopy": "Eingefügt: {{what}}",
+      "source": {
+        "mermaid": "Mermaid",
+        "outline": "einer Gliederung",
+        "canvas": "JSON Canvas",
+        "text": "Text"
+      },
+      "parts": {
+        "notes_one": "{{count}} Notiz",
+        "notes_other": "{{count}} Notizen",
+        "texts_one": "{{count}} Textblock",
+        "texts_other": "{{count}} Textblöcke",
+        "items_one": "{{count}} Element",
+        "items_other": "{{count}} Elemente",
+        "links_one": "{{count}} Verbindung",
+        "links_other": "{{count}} Verbindungen",
+        "frames_one": "ein Rahmen",
+        "frames_other": "{{count}} Rahmen"
+      },
+      "list": {
+        "pair": "{{first}} und {{last}}",
+        "separator": ", "
+      },
+      "undo": "Rückgängig",
+      "tooManyNodes": "Das wären {{total}} Notizen; ein Board fasst höchstens {{max}}.",
+      "tooManyLinks": "Das wären {{total}} Verbindungen; ein Board fasst höchstens {{max}}.",
+      "unsupportedMermaid": "Nur Mermaid-Flussdiagramme und -Mindmaps können gelesen werden.",
+      "unreadable": "Diese Datei konnte nicht gelesen werden.",
+      "empty": "In dieser Datei gibt es nichts hinzuzufügen.",
+      "fileTooBig": "Diese Datei ist größer als 1 MB; ein Board nimmt Dateien bis 1 MB.",
+      "exportEmpty": "Auf dem Board gibt es nichts zu exportieren.",
+      "exportFailed": "Das Bild konnte nicht erstellt werden. Versuche es noch einmal."
     }
   },
   "calendarPage": {

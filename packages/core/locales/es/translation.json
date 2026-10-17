@@ -3561,19 +3561,6 @@
       "manage": "Manage subscription"
     }
   },
-  "blackboard": {
-    "convertToCardsModal": {
-      "stages": {
-        "s0": "Leyendo tus notas...",
-        "s1": "Buscando las ideas que vale la pena guardar...",
-        "s2": "Convirtiéndolas en tarjetas..."
-      },
-      "selectedNodes_one": "De {{count}} nodo seleccionado",
-      "selectedNodes_other": "De {{count}} nodos seleccionados",
-      "success_one": "{{count}} tarjeta añadida a {{deckName}}",
-      "success_other": "{{count}} tarjetas añadidas a {{deckName}}"
-    }
-  },
   "boards": {
     "title": "Tableros",
     "untitled": "Tablero sin título",
@@ -3614,7 +3601,14 @@
       "duplicate": "Duplicar",
       "share": "Compartir",
       "delete": "Eliminar",
-      "keys": "Atajos de teclado"
+      "keys": "Atajos de teclado",
+      "import": "Importar un archivo…",
+      "importTypes": ".mmd · .md · .canvas",
+      "export": "Exportar",
+      "exportPng": "Imagen (PNG)",
+      "exportSvg": "Imagen (SVG)",
+      "exportOutline": "Esquema (Markdown)",
+      "exportCanvas": "JSON Canvas"
     },
     "rename": {
       "label": "Nombre del tablero"
@@ -3652,7 +3646,12 @@
     },
     "note": {
       "placeholder": "Escribe una idea",
-      "editAria": "Texto de la nota"
+      "editAria": "Texto de la nota",
+      "cards_one": "{{count}} tarjeta",
+      "cards_other": "{{count}} tarjetas",
+      "cardsAria_one": "Abrir la tarjeta creada a partir de esta nota",
+      "cardsAria_other": "Abrir las {{count}} tarjetas creadas a partir de esta nota",
+      "cardsFailed": "No se pudieron abrir esas tarjetas."
     },
     "text": {
       "placeholder": "Encabezado",
@@ -3668,7 +3667,13 @@
         "milestone": "Hito",
         "goal": "Objetivo"
       },
-      "linked": "Elemento vinculado"
+      "linked": "Elemento vinculado",
+      "missing": "Ya no está en tu plan",
+      "loadError": "No se pudo leer este elemento",
+      "open": "Abrir {{title}}",
+      "markDone": "Marcar {{title}} como hecho",
+      "markUndone": "Marcar {{title}} como pendiente",
+      "tickFailed": "Ese cambio no se guardó. Inténtalo de nuevo."
     },
     "link": {
       "placeholder": "Etiqueta",
@@ -3710,7 +3715,10 @@
         "xl": "Título"
       },
       "frame": "Enmarcar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "makeCards": "Crear tarjetas",
+      "makeItems_one": "Crear elemento",
+      "makeItems_other": "Crear elementos"
     },
     "share": {
       "title": "Compartir este tablero",
@@ -3778,6 +3786,107 @@
         "wheel": "rueda",
         "type": "escribir"
       }
+    },
+    "items": {
+      "made_one": "{{count}} tarea creada",
+      "made_other": "{{count}} tareas creadas",
+      "partial": "Se crearon {{made}} de {{total}} tareas; las demás no se pudieron crear.",
+      "failed": "No se pudieron crear las tareas. Inténtalo de nuevo.",
+      "empty": "Estas notas no tienen palabras con las que crear una tarea."
+    },
+    "picker": {
+      "title": "Añadir un elemento",
+      "hint": "↑ ↓ para moverte · Intro para colocar · Esc para cerrar",
+      "search": "Buscar tareas, hitos y objetivos",
+      "groups": {
+        "task": "Tareas",
+        "milestone": "Hitos",
+        "goal": "Objetivos"
+      },
+      "done": "hecho",
+      "empty": "Nada coincide con «{{query}}».",
+      "none": "Aún no hay tareas, hitos ni objetivos.",
+      "loadError": "No se pudieron cargar tus tareas y tu plan."
+    },
+    "cards": {
+      "title": "Crear tarjetas",
+      "fromNotes_one": "De {{count}} nota",
+      "fromNotes_other": "De {{count}} notas",
+      "toAdd_one": "{{count}} tarjeta para añadir",
+      "toAdd_other": "{{count}} tarjetas para añadir",
+      "deck": "Mazo",
+      "change": "Cambiar",
+      "chooseDeck": "Elige un mazo",
+      "noDecks": "Todavía no tienes mazos.",
+      "makeDeck": "Crear un mazo",
+      "decksError": "No se pudieron cargar tus mazos.",
+      "generating": "Creando tarjetas a partir de tus notas",
+      "stages": {
+        "s0": "Leyendo tus notas…",
+        "s1": "Buscando lo que vale la pena recordar…",
+        "s2": "Escribiendo preguntas y respuestas…"
+      },
+      "from": "De {{title}}",
+      "leftOut": "De {{title}} · descartada",
+      "untitledNote": "una nota sin título",
+      "include": "Añadir «{{title}}»",
+      "editFront": "Editar la pregunta",
+      "editBack": "Editar la respuesta",
+      "frontPlaceholder": "Pregunta",
+      "backPlaceholder": "Respuesta",
+      "makeAgain": "Crear de nuevo",
+      "addByHand": "Añadir una tarjeta a mano",
+      "add_one": "Añadir {{count}} tarjeta",
+      "add_other": "Añadir {{count}} tarjetas",
+      "added_one": "{{count}} tarjeta añadida a {{deck}}",
+      "added_other": "{{count}} tarjetas añadidas a {{deck}}",
+      "errorTitle": "No se pudieron crear las tarjetas",
+      "errorTimeout": "Tardó demasiado. Inténtalo de nuevo o selecciona menos notas.",
+      "errorFailed": "Algo salió mal al crearlas. Inténtalo de nuevo.",
+      "emptyText": "Estas notas no tienen palabras con las que crear tarjetas.",
+      "noneBack": "No llegó ninguna tarjeta. Créalas de nuevo o añade una a mano.",
+      "truncated": "Solo se leyeron las primeras 20 notas.",
+      "addErrorTitle": "Algunas tarjetas no se añadieron",
+      "addError_one": "No se pudo añadir {{count}} tarjeta. Inténtalo de nuevo.",
+      "addError_other": "No se pudieron añadir {{count}} tarjetas. Inténtalo de nuevo.",
+      "needDeck": "Elige el mazo al que añadirlas.",
+      "needCard": "Marca al menos una tarjeta para añadir."
+    },
+    "inOut": {
+      "pasted": "Pegado desde {{source}}: {{what}}",
+      "imported": "Importado desde {{source}}: {{what}}",
+      "pastedCopy": "Pegado: {{what}}",
+      "source": {
+        "mermaid": "Mermaid",
+        "outline": "un esquema",
+        "canvas": "JSON Canvas",
+        "text": "texto"
+      },
+      "parts": {
+        "notes_one": "{{count}} nota",
+        "notes_other": "{{count}} notas",
+        "texts_one": "{{count}} bloque de texto",
+        "texts_other": "{{count}} bloques de texto",
+        "items_one": "{{count}} elemento",
+        "items_other": "{{count}} elementos",
+        "links_one": "{{count}} enlace",
+        "links_other": "{{count}} enlaces",
+        "frames_one": "un marco",
+        "frames_other": "{{count}} marcos"
+      },
+      "list": {
+        "pair": "{{first}} y {{last}}",
+        "separator": ", "
+      },
+      "undo": "Deshacer",
+      "tooManyNodes": "Serían {{total}} notas; un tablero admite {{max}}.",
+      "tooManyLinks": "Serían {{total}} enlaces; un tablero admite {{max}}.",
+      "unsupportedMermaid": "Solo se pueden leer diagramas de flujo y mapas mentales de Mermaid.",
+      "unreadable": "No se pudo leer este archivo.",
+      "empty": "Este archivo no tiene nada que añadir.",
+      "fileTooBig": "Este archivo supera 1 MB; un tablero admite archivos de hasta 1 MB.",
+      "exportEmpty": "No hay nada en el tablero para exportar.",
+      "exportFailed": "No se pudo crear la imagen. Inténtalo de nuevo."
     }
   },
   "calendarPage": {

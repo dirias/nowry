@@ -21,7 +21,7 @@ const read = (relative) => fs.readFileSync(path.join(root, relative), 'utf8')
 const PANEL_SURFACES = [
   'components/Cards/VisualizerModal.js',
   'components/Cards/DeckAnalysisPanel.js',
-  'components/Blackboard/ConvertToCardsModal.js',
+  'components/Boards/MakeCardsSheet.js',
   'components/AnnualPlanning/GoalAIPanel.js',
   'components/Books/DiagramPreviewPanel.js'
 ]

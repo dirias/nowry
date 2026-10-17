@@ -140,6 +140,12 @@ const CAP = (...caps) => caps.map((cap) => `boards.keys.cap.${cap}`)
 const IDENTICAL_BY_DESIGN = {
   // "Agenda" is the Spanish word for the calendar's list view.
   es: [
+    // Boards (BOARD-008/009): file extensions, format names (Mermaid, JSON Canvas) and the list comma are the same in every language.
+    'boards.menu.importTypes',
+    'boards.menu.exportCanvas',
+    'boards.inOut.source.mermaid',
+    'boards.inOut.source.canvas',
+    'boards.inOut.list.separator',
     // A whole-hour length is a number and "h" in every Latin locale (PLAN-004).
     'calendarPage.blocks.hours',
     // A reminder's body is a number, "min" and the source word: the same
@@ -175,6 +181,17 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    // Boards (BOARD-006/008/009): file extensions, format names and the list comma are universal; "Image (PNG)", "note" and "Question" are the French words.
+    'boards.menu.importTypes',
+    'boards.menu.exportCanvas',
+    'boards.inOut.source.mermaid',
+    'boards.inOut.source.canvas',
+    'boards.inOut.list.separator',
+    'boards.menu.exportSvg',
+    'boards.menu.exportPng',
+    'boards.inOut.parts.notes_one',
+    'boards.inOut.parts.notes_other',
+    'boards.cards.frontPlaceholder',
     // "Routine" is the word in fr too (PLAN-012).
     'items.reading.routine',
     // A whole-hour length is a number and "h" in every Latin locale (PLAN-004).
@@ -244,6 +261,12 @@ const IDENTICAL_BY_DESIGN = {
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
   // and its counted form land on English by agreement, not by neglect.
   de: [
+    // Boards (BOARD-008/009): file extensions, format names (Mermaid, JSON Canvas) and the list comma are the same in every language.
+    'boards.menu.importTypes',
+    'boards.menu.exportCanvas',
+    'boards.inOut.source.mermaid',
+    'boards.inOut.source.canvas',
+    'boards.inOut.list.separator',
     // "Routine" is the word in de too (PLAN-012).
     'items.reading.routine',
     ...BETA_MARK,
@@ -278,7 +301,12 @@ const IDENTICAL_BY_DESIGN = {
     'header.boards',
     ...CAP('tab', 'esc')
   ],
-  ja: ['cards.session.xpGained_other', ...CARD_COUNTER, ...COPYRIGHT_ROUTE, ...CAP('mod', 'tab', 'esc', 'enter', 'delete')]
+  ja: [
+    // Boards (BOARD-008/009): file extensions and format names (Mermaid, JSON Canvas) are written in Latin script in Japanese UI.
+    'boards.menu.importTypes',
+    'boards.menu.exportCanvas',
+    'boards.inOut.source.mermaid',
+    'boards.inOut.source.canvas','cards.session.xpGained_other', ...CARD_COUNTER, ...COPYRIGHT_ROUTE, ...CAP('mod', 'tab', 'esc', 'enter', 'delete')]
 }
 
 /**

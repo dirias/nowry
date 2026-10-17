@@ -10,7 +10,10 @@ import {
   IconButton,
   Input,
   ListDivider,
+  List,
+  ListItem,
   ListItemDecorator,
+  ListSubheader,
   Menu,
   MenuButton,
   MenuItem,
@@ -27,6 +30,10 @@ import EditRounded from '@mui/icons-material/EditRounded'
 import ContentCopyRounded from '@mui/icons-material/ContentCopyRounded'
 import KeyboardRounded from '@mui/icons-material/KeyboardRounded'
 import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded'
+import UploadFileRounded from '@mui/icons-material/UploadFileRounded'
+import ImageOutlined from '@mui/icons-material/ImageOutlined'
+import FormatListBulletedRounded from '@mui/icons-material/FormatListBulletedRounded'
+import DataObjectRounded from '@mui/icons-material/DataObjectRounded'
 import { focusRing, oneLine } from '../Common/Form/formStyles'
 import { afterMenu } from './menuFocus'
 
@@ -168,11 +175,20 @@ function Collaborators({ count }) {
   )
 }
 
+/** The four ways out (BOARD-009, PRD D9), in the menu's order. */
+export const EXPORT_ITEMS = [
+  { format: 'png', labelKey: 'boards.menu.exportPng', Icon: ImageOutlined },
+  { format: 'svg', labelKey: 'boards.menu.exportSvg', Icon: ImageOutlined },
+  { format: 'outline', labelKey: 'boards.menu.exportOutline', Icon: FormatListBulletedRounded },
+  { format: 'canvas', labelKey: 'boards.menu.exportCanvas', Icon: DataObjectRounded }
+]
+
 /**
  * The board bar (BOARD-003, canvas board 2): where you are, what the board is
  * called, whether it is kept, and who it is shared with. Its keys are
  * secondary — the board itself is the page's work, so it has no solid key
- * (ADR-020). Import and Export join the menu with BOARD-008/009.
+ * (ADR-020). Its menu also takes a board in from a file and out as an image,
+ * an outline or a JSON Canvas file (BOARD-008/009, canvas board 7).
  */
 export default function BoardBar({
   name,
@@ -185,7 +201,9 @@ export default function BoardBar({
   onShare,
   onDuplicate,
   onDelete,
-  onShowKeys
+  onShowKeys,
+  onImport,
+  onExport
 }) {
   const { t } = useTranslation()
   const [renaming, setRenaming] = useState(false)
@@ -246,6 +264,35 @@ export default function BoardBar({
               </ListItemDecorator>
               {t('boards.menu.keys')}
             </MenuItem>
+            {(onImport || onExport) && <ListDivider />}
+            {onImport && (
+              <MenuItem onClick={onImport}>
+                <ListItemDecorator>
+                  <UploadFileRounded />
+                </ListItemDecorator>
+                {t('boards.menu.import')}
+                <Typography level='body-xs' sx={{ ml: 'auto', pl: 2, color: 'text.tertiary' }}>
+                  {t('boards.menu.importTypes')}
+                </Typography>
+              </MenuItem>
+            )}
+            {onExport && (
+              <ListItem nested>
+                <ListSubheader id='board-menu-export' sx={{ color: 'text.tertiary' }}>
+                  {t('boards.menu.export')}
+                </ListSubheader>
+                <List aria-labelledby='board-menu-export' sx={{ '--ListItem-paddingLeft': '1.25rem' }}>
+                  {EXPORT_ITEMS.map(({ format, labelKey, Icon }) => (
+                    <MenuItem key={format} onClick={() => onExport(format)}>
+                      <ListItemDecorator>
+                        <Icon />
+                      </ListItemDecorator>
+                      {t(labelKey)}
+                    </MenuItem>
+                  ))}
+                </List>
+              </ListItem>
+            )}
             {canDelete && <ListDivider />}
             {canDelete && (
               <MenuItem color='danger' onClick={onDelete}>

@@ -3000,17 +3000,6 @@
       "manage": "Manage subscription"
     }
   },
-  "blackboard": {
-    "convertToCardsModal": {
-      "stages": {
-        "s0": "ノートを読んでいます...",
-        "s1": "残すべき考えを探しています...",
-        "s2": "カードに変換しています..."
-      },
-      "selectedNodes_other": "選択した{{count}}個のノードから",
-      "success_other": "{{count}}枚のカードを{{deckName}}に追加しました"
-    }
-  },
   "boards": {
     "title": "ボード",
     "untitled": "無題のボード",
@@ -3044,7 +3033,14 @@
       "duplicate": "複製",
       "share": "共有",
       "delete": "削除",
-      "keys": "キーボードショートカット"
+      "keys": "キーボードショートカット",
+      "import": "ファイルを読み込む…",
+      "importTypes": ".mmd · .md · .canvas",
+      "export": "書き出す",
+      "exportPng": "画像 (PNG)",
+      "exportSvg": "画像 (SVG)",
+      "exportOutline": "アウトライン (Markdown)",
+      "exportCanvas": "JSON Canvas"
     },
     "rename": {
       "label": "ボード名"
@@ -3081,7 +3077,10 @@
     },
     "note": {
       "placeholder": "アイデアを入力",
-      "editAria": "ノートの本文"
+      "editAria": "ノートの本文",
+      "cards_other": "カード{{count}}枚",
+      "cardsAria_other": "このメモから作った{{count}}枚のカードを開く",
+      "cardsFailed": "カードを開けませんでした。"
     },
     "text": {
       "placeholder": "見出し",
@@ -3097,7 +3096,13 @@
         "milestone": "マイルストーン",
         "goal": "目標"
       },
-      "linked": "リンクされた項目"
+      "linked": "リンクされた項目",
+      "missing": "プランから削除されています",
+      "loadError": "この項目を読み込めませんでした",
+      "open": "{{title}}を開く",
+      "markDone": "{{title}}を完了にする",
+      "markUndone": "{{title}}を未完了に戻す",
+      "tickFailed": "変更を保存できませんでした。もう一度お試しください。"
     },
     "link": {
       "placeholder": "ラベル",
@@ -3139,7 +3144,9 @@
         "xl": "タイトル"
       },
       "frame": "フレームで囲む",
-      "delete": "削除"
+      "delete": "削除",
+      "makeCards": "カードを作成",
+      "makeItems_other": "項目にする"
     },
     "share": {
       "title": "このボードを共有",
@@ -3207,6 +3214,96 @@
         "wheel": "ホイール",
         "type": "入力"
       }
+    },
+    "items": {
+      "made_other": "タスクを{{count}}件作成しました",
+      "partial": "{{total}}件中{{made}}件のタスクを作成しました。残りは作成できませんでした。",
+      "failed": "タスクを作成できませんでした。もう一度お試しください。",
+      "empty": "これらのメモにはタスクにできる言葉がありません。"
+    },
+    "picker": {
+      "title": "項目を追加",
+      "hint": "↑ ↓ で移動 · Enter で配置 · Esc で閉じる",
+      "search": "タスク、マイルストーン、目標を検索",
+      "groups": {
+        "task": "タスク",
+        "milestone": "マイルストーン",
+        "goal": "目標"
+      },
+      "done": "完了",
+      "empty": "「{{query}}」に一致するものはありません。",
+      "none": "タスク、マイルストーン、目標はまだありません。",
+      "loadError": "タスクとプランを読み込めませんでした。"
+    },
+    "cards": {
+      "title": "カードを作成",
+      "fromNotes_other": "メモ{{count}}件から",
+      "toAdd_other": "追加するカード{{count}}枚",
+      "deck": "デッキ",
+      "change": "変更",
+      "chooseDeck": "デッキを選択",
+      "noDecks": "デッキがまだありません。",
+      "makeDeck": "デッキを作成",
+      "decksError": "デッキを読み込めませんでした。",
+      "generating": "メモからカードを作成しています",
+      "stages": {
+        "s0": "メモを読んでいます…",
+        "s1": "覚えておく価値のあることを探しています…",
+        "s2": "問題と答えを書いています…"
+      },
+      "from": "「{{title}}」から",
+      "leftOut": "「{{title}}」から · 除外",
+      "untitledNote": "無題のメモ",
+      "include": "「{{title}}」を追加",
+      "editFront": "問題を編集",
+      "editBack": "答えを編集",
+      "frontPlaceholder": "問題",
+      "backPlaceholder": "答え",
+      "makeAgain": "作り直す",
+      "addByHand": "手動でカードを追加",
+      "add_other": "カードを{{count}}枚追加",
+      "added_other": "{{deck}}にカードを{{count}}枚追加しました",
+      "errorTitle": "カードを作成できませんでした",
+      "errorTimeout": "時間がかかりすぎました。もう一度試すか、選ぶメモを減らしてください。",
+      "errorFailed": "作成中に問題が発生しました。もう一度お試しください。",
+      "emptyText": "これらのメモにはカードにできる言葉がありません。",
+      "noneBack": "カードが返ってきませんでした。作り直すか、手動で追加してください。",
+      "truncated": "最初の20件のメモだけを読み込みました。",
+      "addErrorTitle": "一部のカードを追加できませんでした",
+      "addError_other": "{{count}}枚のカードを追加できませんでした。もう一度お試しください。",
+      "needDeck": "追加先のデッキを選んでください。",
+      "needCard": "追加するカードを1枚以上選んでください。"
+    },
+    "inOut": {
+      "pasted": "{{source}}から{{what}}を貼り付けました",
+      "imported": "{{source}}から{{what}}を読み込みました",
+      "pastedCopy": "{{what}}を貼り付けました",
+      "source": {
+        "mermaid": "Mermaid",
+        "outline": "アウトライン",
+        "canvas": "JSON Canvas",
+        "text": "テキスト"
+      },
+      "parts": {
+        "notes_other": "ノート{{count}}件",
+        "texts_other": "テキスト{{count}}件",
+        "items_other": "項目{{count}}件",
+        "links_other": "つながり{{count}}本",
+        "frames_other": "フレーム{{count}}個"
+      },
+      "list": {
+        "pair": "{{first}}、{{last}}",
+        "separator": "、"
+      },
+      "undo": "元に戻す",
+      "tooManyNodes": "ノートが合計{{total}}件になります。1つのボードに置けるのは{{max}}件までです。",
+      "tooManyLinks": "つながりが合計{{total}}本になります。1つのボードに置けるのは{{max}}本までです。",
+      "unsupportedMermaid": "読み込めるのは Mermaid のフローチャートとマインドマップだけです。",
+      "unreadable": "このファイルを読み込めませんでした。",
+      "empty": "このファイルには追加できる内容がありません。",
+      "fileTooBig": "このファイルは 1 MB を超えています。読み込めるのは 1 MB までのファイルです。",
+      "exportEmpty": "ボードに書き出せるものがありません。",
+      "exportFailed": "画像を作成できませんでした。もう一度お試しください。"
     }
   },
   "calendarPage": {

@@ -33,6 +33,8 @@ jest.mock('../canvas/BoardCanvas', () => {
   }
   return CanvasStub
 })
+// The live items and Make cards read the plan and the decks (BoardLinks.test.js covers them).
+jest.mock('../BoardLinks', () => ({ __esModule: true, default: ({ children }) => children }))
 
 const BoardPage = require('../BoardPage').default
 

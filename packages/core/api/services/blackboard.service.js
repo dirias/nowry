@@ -69,7 +69,8 @@ export const blackboardService = {
     const { data } = await apiClient.post(
       `/blackboards/${boardId}/generate-cards`,
       { node_ids: nodeIds, node_texts: nodeTexts },
-      { timeout: 30000 }
+      // The Make cards sheet says what went wrong in its own words (BOARD-006).
+      { timeout: 30000, suppressErrorToast: true }
     )
     return data
   }

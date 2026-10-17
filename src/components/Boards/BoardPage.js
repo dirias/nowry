@@ -12,6 +12,12 @@ import ShareSheet from './ShareSheet'
 import DeleteBoardDialog from './DeleteBoardDialog'
 import useBoardShare from './useBoardShare'
 import { firstNoteName } from './boardMeta'
+import BoardLinks from './BoardLinks'
+import { boardSelectionActions } from './BoardSelectionActions'
+import { IMPORT_ACCEPT } from './canvas/useBoardClipboard'
+
+/** How long a status line (a paste, an import, a refusal) stays. */
+export const STATUS_DURATION = 6000
 
 const statusOf = (err) => err?.response?.status ?? err?.status ?? null
 
@@ -78,6 +84,9 @@ function BoardView({ id }) {
   const [deleting, setDeleting] = useState(false)
   const [deletePending, setDeletePending] = useState(false)
   const [notice, setNotice] = useState(null)
+  const [statusLine, setStatusLine] = useState(null)
+  const commandsRef = useRef(null)
+  const fileRef = useRef(null)
 
   // The `new` flag does its work once: a reload opens the board as it is.
   useEffect(() => {
@@ -141,6 +150,21 @@ function BoardView({ id }) {
     }
   }
 
+  // In and out (BOARD-008/009): the canvas does the work; the page owns the menu, the picker and the lines.
+  const showStatus = useCallback((line) => setStatusLine({ ...line, id: Date.now() }), [])
+  const undoIncoming = () => {
+    setStatusLine(null)
+    undo()
+    commandsRef.current?.focus()
+  }
+  const importChosen = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    await commandsRef.current?.importFile(file)
+    commandsRef.current?.focus()
+  }
+
   if (!board) {
     if (error) {
       const code = statusOf(error)
@@ -167,23 +191,62 @@ function BoardView({ id }) {
         onDuplicate={duplicateBoard}
         onDelete={() => setDeleting(true)}
         onShowKeys={() => setKeysOpen(true)}
+        onImport={() => fileRef.current?.click()}
+        onExport={(format) => commandsRef.current?.exportAs(format)}
       />
-      <BoardCanvas
-        board={board}
-        apply={apply}
-        checkpoint={checkpoint}
-        undo={undo}
-        redo={redo}
-        setViewport={setViewport}
-        startWithNote={isNew}
-        hint={hint}
-        onShowKeys={() => setKeysOpen(true)}
+      <Box
+        component='input'
+        type='file'
+        ref={fileRef}
+        accept={IMPORT_ACCEPT}
+        onChange={importChosen}
+        aria-label={t('boards.menu.import')}
+        data-testid='board-import-input'
+        tabIndex={-1}
+        sx={{ display: 'none' }}
       />
+      <BoardLinks boardId={id} apply={apply}>
+        <BoardCanvas
+          board={board}
+          apply={apply}
+          checkpoint={checkpoint}
+          undo={undo}
+          redo={redo}
+          setViewport={setViewport}
+          startWithNote={isNew}
+          hint={hint}
+          onShowKeys={() => setKeysOpen(true)}
+          selectionActions={boardSelectionActions}
+          onStatus={showStatus}
+          onError={setNotice}
+          commandsRef={commandsRef}
+        />
+      </BoardLinks>
       <KeysSheet open={keysOpen} onClose={() => setKeysOpen(false)} />
       {shareId && <ShareSheet open boardId={shareId} onClose={closeShare} onInvited={reload} />}
       <DeleteBoardDialog open={deleting} name={name} onClose={() => setDeleting(false)} onConfirm={deleteBoard} loading={deletePending} />
       <Snackbar open={Boolean(notice)} onClose={() => setNotice(null)} autoHideDuration={4000} color='danger' variant='soft' role='alert'>
         {notice}
+      </Snackbar>
+      <Snackbar
+        key={statusLine?.id}
+        open={Boolean(statusLine)}
+        onClose={(_event, reason) => reason !== 'clickaway' && setStatusLine(null)}
+        autoHideDuration={STATUS_DURATION}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        color='neutral'
+        variant='solid'
+        role='status'
+        data-testid='board-status-line'
+        endDecorator={
+          statusLine?.undo ? (
+            <Button size='sm' variant='soft' color='neutral' onClick={undoIncoming}>
+              {t('boards.inOut.undo')}
+            </Button>
+          ) : null
+        }
+      >
+        {statusLine?.text}
       </Snackbar>
     </Box>
   )

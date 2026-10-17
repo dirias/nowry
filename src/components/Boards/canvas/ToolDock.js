@@ -18,8 +18,8 @@ const GROUPS = [
     { id: 'note', Icon: StickyNote2Rounded },
     { id: 'text', Icon: TitleRounded },
     { id: 'frame', Icon: CropFreeRounded },
-    // Items arrive with BOARD-005; the key is held for them.
-    { id: 'item', Icon: TaskAltRounded, later: true }
+    // Not a tool that stays armed: it opens the item picker (BOARD-005).
+    { id: 'item', Icon: TaskAltRounded }
   ]
 ]
 
@@ -57,14 +57,13 @@ export default function ToolDock({ tool, onTool }) {
       {GROUPS.map((group, index) => (
         <React.Fragment key={group[0].id}>
           {index > 0 && <Box aria-hidden='true' sx={{ height: '1px', mx: 0.75, my: 0.25, bgcolor: 'divider' }} />}
-          {group.map(({ id, Icon, later }) => {
+          {group.map(({ id, Icon }) => {
             const on = tool === id
             const label = t(`boards.tools.${id}`)
             const button = (
               <IconButton
                 aria-label={label}
                 aria-pressed={on}
-                disabled={later}
                 onClick={() => onTool(id)}
                 variant='plain'
                 color='neutral'
@@ -83,7 +82,7 @@ export default function ToolDock({ tool, onTool }) {
             )
             return (
               <Tooltip key={id} title={label} placement='right' size='sm'>
-                {later ? <span>{button}</span> : button}
+                {button}
               </Tooltip>
             )
           })}

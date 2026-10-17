@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Background, BackgroundVariant, ConnectionMode, ReactFlow, ReactFlowProvider, useReactFlow } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
@@ -31,11 +31,16 @@ import ToolDock from './ToolDock'
 import ZoomControls from './ZoomControls'
 import SelectionBar from './SelectionBar'
 import FrameDrawLayer from './FrameDrawLayer'
+import ItemPicker from './ItemPicker'
+import { addItem } from './itemEdits'
 import useBoardKeys from './useBoardKeys'
 import { addFrame, addText, placeNodes, presentIds, resizeNodes } from './boardEdits'
 import { frameRanks, toFlowEdge, toFlowNode } from './toFlow'
 import { canvasSx, hintSx } from './canvasStyles'
 import { viewDuration } from './motion'
+import useBoardClipboard, { itemTitleOf } from './useBoardClipboard'
+import useBoardExport from './useBoardExport'
+import { useBoardLinks } from '../boardLinksContext'
 
 const nodeTypes = { note: NoteNode, text: TextNode, frame: FrameNode, item: ItemNode }
 const edgeTypes = { link: LinkEdge }
@@ -100,9 +105,12 @@ function CanvasInner({
   startWithNote = false,
   hint = false,
   onShowKeys,
-  selectionActions
+  selectionActions,
+  onStatus,
+  onError,
+  commandsRef
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const flow = useReactFlow()
   const { mode, systemMode } = useColorScheme()
   const wrapperRef = useRef(null)
@@ -353,6 +361,83 @@ function CanvasInner({
     [apply, selection]
   )
 
+  // ── In and out (PRD D9): paste, copy, cut, import, export ─────────────────
+  const boardLinks = useBoardLinks()
+  const itemTitle = useMemo(() => itemTitleOf(t, boardLinks), [t, boardLinks])
+
+  const viewCentre = useCallback(() => {
+    const rect = wrapperRef.current?.getBoundingClientRect?.() ?? { left: 0, top: 0, width: 0, height: 0 }
+    return flow.screenToFlowPosition({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+  }, [flow])
+
+  const selectIncoming = useCallback((ids) => {
+    ids.forEach((id) => freshRef.current.add(id))
+    setSelectedEdgeIds([])
+    setSelectedIds(ids)
+  }, [])
+
+  const { importFile } = useBoardClipboard({
+    wrapperRef,
+    boardRef,
+    apply,
+    viewCentre,
+    isEditing: () => Boolean(stateRef.current.editingId) || editingEdgeId !== null,
+    getSelectedIds: () => selection().ids,
+    select: selectIncoming,
+    removeSelection,
+    onStatus,
+    itemTitle,
+    t,
+    language: i18n?.language
+  })
+
+  const exportAs = useBoardExport({
+    wrapperRef,
+    boardRef,
+    flow,
+    getSelection: selection,
+    setSelection: ({ ids, edgeIds }) => {
+      setSelectedIds(ids)
+      setSelectedEdgeIds(edgeIds)
+    },
+    itemTitle,
+    onStatus,
+    onError,
+    t
+  })
+
+  // The page's board menu reaches the canvas through these (Import a file…, Export).
+  useImperativeHandle(commandsRef, () => ({ importFile, exportAs, focus: focusCanvas }), [importFile, exportAs, focusCanvas])
+
+  // ── Items (BOARD-005, PRD D6): `I` picks a task, a milestone or a goal ───
+  const [picking, setPicking] = useState(false)
+  const lastClickRef = useRef(null)
+
+  /** The last click on the canvas while it is still in view, else the view's centre. */
+  const placement = useCallback(() => {
+    const last = lastClickRef.current
+    const rect = wrapperRef.current?.getBoundingClientRect?.()
+    if (last && rect && rect.width > 0) {
+      const a = flow.screenToFlowPosition({ x: rect.left, y: rect.top })
+      const b = flow.screenToFlowPosition({ x: rect.right, y: rect.bottom })
+      if (last.x >= a.x && last.x <= b.x && last.y >= a.y && last.y <= b.y) return last
+    }
+    return viewCentre()
+  }, [flow, viewCentre])
+
+  const placeItem = useCallback(
+    ({ ref, title }) => {
+      const id = nextId('i')
+      const point = placement()
+      lastClickRef.current = null
+      apply((b) => addItem(b, { id, x: point.x, y: point.y, ref, title }))
+      setPicking(false)
+      selectIncoming([id])
+      keepFocus()
+    },
+    [apply, placement, selectIncoming, keepFocus]
+  )
+
   // ── Keys (PRD D3) ─────────────────────────────────────────────────────────
   const singleNode = useCallback(() => {
     const { ids, edgeIds } = selection()
@@ -402,8 +487,9 @@ function CanvasInner({
       type: ({ char }) => beginEdit(singleNode().id, { append: char }),
       keys: () => onShowKeys?.(),
       tool: ({ tool: next }) => {
-        // Items arrive with BOARD-005: the key is held, and does nothing yet.
-        if (next !== 'item') setTool(next)
+        // `I` opens the item picker rather than arming a tool (BOARD-005).
+        if (next === 'item') setPicking(true)
+        else setTool(next)
       }
     }
   )
@@ -490,6 +576,7 @@ function CanvasInner({
 
   const onPaneClick = useCallback(
     (event) => {
+      lastClickRef.current = flow.screenToFlowPosition({ x: event.clientX, y: event.clientY })
       const current = stateRef.current.tool
       if (current !== 'note' && current !== 'text') return
       const point = flow.screenToFlowPosition({ x: event.clientX, y: event.clientY })
@@ -665,12 +752,26 @@ function CanvasInner({
         <ToolDock
           tool={tool}
           onTool={(next) => {
-            setTool(next)
-            focusCanvas()
+            if (next === 'item') setPicking(true)
+            else {
+              setTool(next)
+              focusCanvas()
+            }
           }}
         />
         <ZoomControls />
         {tool === 'frame' && <FrameDrawLayer onDraw={onDraw} />}
+        {/* Mounted only while open, so its search field takes focus each time it opens. */}
+        {picking && (
+          <ItemPicker
+            open
+            onClose={() => {
+              setPicking(false)
+              keepFocus()
+            }}
+            onPick={placeItem}
+          />
+        )}
         {hint && noteCount < 2 && (
           <Box sx={hintSx} data-testid='board-first-hint'>
             <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>

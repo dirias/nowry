@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 
-/** The single-letter tools (PRD D3). `I` is held for items (BOARD-005). */
+/** The single-letter tools (PRD D3). `I` opens the item picker (BOARD-005). */
 export const TOOL_KEYS = { v: 'select', h: 'hand', n: 'note', t: 'text', f: 'frame', i: 'item' }
 
 /** One press of an arrow moves 10, with Shift 50. */

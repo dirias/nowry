@@ -41,6 +41,7 @@ const builtKeys = () => [
   ...['md', 'lg', 'xl'].map((size) => `boards.selection.size.${size}`),
   ...['top', 'right', 'bottom', 'left'].map((side) => `boards.plus.${side}`),
   ...['task', 'milestone', 'goal'].map((kind) => `boards.item.kind.${kind}`),
+  ...['task', 'milestone', 'goal'].map((kind) => `boards.picker.groups.${kind}`),
   ...['saving', 'saved', 'notSaved'].map((state) => `boards.bar.${state}`),
   ...KEY_GROUPS.map((group) => `boards.keys.groups.${group.id}`),
   ...KEY_GROUPS.flatMap((group) => group.rows.map(([row]) => `boards.keys.rows.${row}`)),
