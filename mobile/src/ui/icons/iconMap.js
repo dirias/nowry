@@ -66,6 +66,8 @@ export const MATERIAL_TO_LUCIDE = {
   CheckCircleRounded: 'CircleCheck',
   CheckCircleOutline: 'CircleCheck',
   CheckCircleOutlineRounded: 'CircleCheck',
+  // A task block's tile (PLAN-018): a clipboard, never a check beside the tick.
+  AssignmentOutlined: 'ClipboardList',
   RadioButtonUncheckedRounded: 'Circle',
   ErrorOutlineRounded: 'CircleAlert',
   WarningRounded: 'TriangleAlert',

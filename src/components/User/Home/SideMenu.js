@@ -25,7 +25,6 @@ import {
 import { Link as RouterLink } from 'react-router-dom'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
-import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
@@ -39,27 +38,21 @@ import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import useAnnualPlan from '@nowry/core/hooks/useAnnualPlan'
 import { stateOf } from '@nowry/core/domain/blocks'
 import { useTodayData } from '../../Study/useTodayData'
-import { focusRing, identityTile, listRow, readout, touchTargetBox } from '../../Common/Form/formStyles'
+import { focusRing, listRow, readout, segment, segmentedGroup, tabularNums, touchTargetBox } from '../../Common/Form/formStyles'
+import { BlockTile } from '../../Calendar/blockEvents'
+import { dueTodayCount } from '@nowry/core/domain/taskQueue'
 
 /** The Now tab: current, next, and this many of what follows — a glance, not the timeline. */
 const LATER_SHOWN = 3
 /** When the day is spent, the last blocks it held, read back. */
 const PAST_SHOWN = 3
+
+/** The rows ahead of the clock: current, next, and a few of what follows (the phone's `aheadOf`). */
+const aheadOf = (day) => (day?.current ? [day.current, day.next, ...(day.later ?? []).slice(0, LATER_SHOWN)].filter(Boolean) : [])
 /** The time column, as the agenda's block row sets it. */
 const TIME_COLUMN_WIDTH = 44
 
 /** The source's colour: identity is the tile, and only the tile (§15.11). */
-const sourceColor = (occurrence, focusAreas) => {
-  const type = occurrence.block?.source?.type ?? 'free'
-  if (type === 'goal') {
-    const area = (focusAreas ?? []).find((a) => (a._id ?? a.id) === occurrence.block?.areaId)
-    return area?.color || 'primary.softBg'
-  }
-  if (type === 'focus') return 'warning.plainColor'
-  if (type === 'task' || type === 'free') return 'neutral.outlinedBorder'
-  return 'primary.solidBg'
-}
-
 /** The agenda's completion idiom: empty circle to keep, filled success check to undo. */
 const tickSx = (on) => ({
   ...touchTargetBox,
@@ -143,6 +136,9 @@ const SideMenu = () => {
    */
   const { dueToday } = useTodayData()
   const day = useToday({ dueToday })
+  // The tabs' counts, the phone's own (PLAN-018): the blocks still ahead, the tasks due today.
+  const nowCount = aheadOf(day).length
+  const openTaskCount = dueTodayCount(tasks)
   const log = useBlockLog()
   const { focusAreas } = useAnnualPlan()
 
@@ -346,39 +342,30 @@ const SideMenu = () => {
         onChange={(e, val) => setActiveTab(val)}
         sx={{ bgcolor: 'transparent', height: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}
       >
-        <TabList
-          disableUnderline
-          sx={{
-            p: 0.5,
-            gap: 0.5,
-            borderRadius: 'xl',
-            bgcolor: 'background.level1',
-            mb: 2,
-            flexShrink: 0
-          }}
-        >
-          <Tab
-            disableIndicator
-            value='now'
-            variant={activeTab === 'now' ? 'solid' : 'plain'}
-            color={activeTab === 'now' ? 'primary' : 'neutral'}
-            sx={{ borderRadius: 'lg', flex: 1 }}
-          >
-            <Tooltip title={t('blocks.home.now')} size='sm'>
-              <ScheduleRoundedIcon />
-            </Tooltip>
-          </Tab>
-          <Tab
-            disableIndicator
-            value='tasks'
-            variant={activeTab === 'tasks' ? 'solid' : 'plain'}
-            color={activeTab === 'tasks' ? 'primary' : 'neutral'}
-            sx={{ borderRadius: 'lg', flex: 1 }}
-          >
-            <Tooltip title={t('tasks.title')} size='sm'>
-              <FormatListBulletedIcon />
-            </Tooltip>
-          </Tab>
+        {/* One segment with words and counts, as the phone has it ("Now 2 · Tasks 3"):
+            an icon-only pair made you guess, and a solid fill on the engaged tab was a
+            second solid key on the page (ADR-020: engaged = level2 ground + underline). */}
+        <TabList disableUnderline sx={{ ...segmentedGroup, mb: 2, flexShrink: 0, p: 0, gap: 0 }}>
+          {[
+            { value: 'now', label: t('blocks.home.now'), count: nowCount },
+            { value: 'tasks', label: t('tasks.title'), count: openTaskCount }
+          ].map((tab, index) => (
+            <Tab
+              key={tab.value}
+              disableIndicator
+              value={tab.value}
+              variant='plain'
+              color='neutral'
+              sx={{ ...segment(activeTab === tab.value, index === 0), flex: 1, gap: 0.75, ...focusRing }}
+            >
+              {tab.label}
+              {tab.count > 0 && (
+                <Typography component='span' level='body-sm' sx={{ color: 'text.tertiary', ...tabularNums }}>
+                  {tab.count}
+                </Typography>
+              )}
+            </Tab>
+          ))}
         </TabList>
 
         {/* Tab Panels */}
@@ -403,11 +390,8 @@ const SideMenu = () => {
         {/* Tasks */}
         {activeTab === 'tasks' && (
           <TabPanel value='tasks' sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            {/* Header & Filter */}
-            <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ mb: 1 }}>
-              <Typography level='title-md' startDecorator={<FormatListBulletedIcon sx={{ fontSize: 18, color: 'primary.plainColor' }} />}>
-                {t('tasks.title')}
-              </Typography>
+            {/* The filter. No title: the tab above already says Tasks (PLAN-018). */}
+            <Stack direction='row' alignItems='center' justifyContent='flex-end' sx={{ mb: 1 }}>
               <Stack direction='row' spacing={0.5}>
                 {['all', 'pending', 'completed'].map((f) => (
                   <Chip
@@ -727,12 +711,14 @@ const NowTab = ({ day, log, focusAreas, t }) => {
     )
   }
 
-  const ahead = day.current ? [day.current, day.next, ...day.later.slice(0, LATER_SHOWN)].filter(Boolean) : []
+  const ahead = aheadOf(day)
   const spent = ahead.length === 0
   const rows = spent ? day.past.slice(-PAST_SHOWN) : ahead
 
   return (
-    <Box sx={{ flex: 1, overflowY: 'auto' }}>
+    // `listRow` reaches 12px past its column (mx -1.5) so its hover ground lines up;
+    // a vertical scroller turns that into a sideways one unless it makes room (PLAN-018).
+    <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', px: 1.5, mx: -1.5 }}>
       {spent && (
         <Typography level='body-xs' sx={{ color: 'text.tertiary', pb: 1 }}>
           {t('blocks.home.dayDone')}
@@ -742,7 +728,7 @@ const NowTab = ({ day, log, focusAreas, t }) => {
       {rows.map((o, index) => (
         <React.Fragment key={`${o.blockId}|${o.date}`}>
           {index > 0 && <Divider />}
-          <NowRow occurrence={o} nowMinutes={day.nowMinutes} color={sourceColor(o, focusAreas)} onToggle={toggle} t={t} />
+          <NowRow occurrence={o} nowMinutes={day.nowMinutes} focusAreas={focusAreas} onToggle={toggle} t={t} />
         </React.Fragment>
       ))}
 
@@ -757,7 +743,7 @@ const NowTab = ({ day, log, focusAreas, t }) => {
   )
 }
 
-const NowRow = ({ occurrence, nowMinutes, color, onToggle, t }) => {
+const NowRow = ({ occurrence, nowMinutes, focusAreas, onToggle, t }) => {
   const state = stateOf(occurrence, nowMinutes)
   const kept = state === 'kept' || state === 'partial'
   const skipped = state === 'skipped'
@@ -781,7 +767,9 @@ const NowRow = ({ occurrence, nowMinutes, color, onToggle, t }) => {
       >
         {occurrence.start}
       </Typography>
-      <Box aria-hidden='true' sx={identityTile(color)} />
+      {/* The tile is a label, never a control (§15.8, PLAN-018): the source's glyph in it,
+          so it is not read as a second checkbox beside the tick. */}
+      <BlockTile occurrence={occurrence} focusAreas={focusAreas} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
           level='body-sm'

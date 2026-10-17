@@ -2299,6 +2299,10 @@ The calendar grid is the reference case: solid event bricks became a tile beside
     Mark today with a badge on the number and leave the cell alone.
 *   **One anatomy across views.** The agenda row, the week and the month draw the same event with
     the same tile and the same title at two sizes. A view is an arrangement, not a new product.
+*   **A tile carries its glyph, and never a check** (PLAN-018). A bare coloured square at a
+    row's start reads as a checkbox, so a row that also has a tick shows two. Put the source's
+    glyph in the tile and take the tile out of the accessibility tree. The glyph is never a check
+    or a circle: a task's tile is a clipboard, because the tick is one tile away.
 
 ### 15.9 The key (ADR-020)
 

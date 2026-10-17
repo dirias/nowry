@@ -2,7 +2,7 @@
  * One block on one day as one row (PLAN-003, PRD D11, ADR-021 §15.11).
  *
  * The five parts in the one order, with the time readout leading: `07:30` in
- * a 44pt column · a 16pt tile in the source's colour · the title over a meta
+ * a 44pt column · a 20pt tile in the source's colour with its glyph · the title over a meta
  * line ("20 min · study", and for today's study block "27 due ≈ 20 min") ·
  * the record on the right. The record is the tick — a 22pt circle on a 44pt
  * target — on every row, the one that is now included (PLAN-017): Start is
@@ -26,14 +26,56 @@ import { rowStreak, stateOf } from '@nowry/core/domain/blocks'
 import { useTheme } from '../../theme'
 import { Typography, resolveColor } from '../Typography'
 import { Icon } from '../icons'
-import { IdentityTile } from './IdentityTile'
+import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { MIN_TOUCH_TARGET } from '../buttonSpec'
 import { LIST_ROW_HEIGHT } from './rowSpec'
 
 export const TIME_COLUMN_WIDTH = 44
 export const TICK_SIZE = 22
+/** The tile is 20pt so its glyph reads; the row's other tiles (EventTile) are 28. */
+export const TILE_SIZE = 20
 /** Streaks under two are not streaks yet. */
 export const STREAK_FLOOR = 2
+
+/** The source's glyph, in the phone's icon set (the web's `SOURCE_ICONS`). */
+export const SOURCE_GLYPHS = {
+  routine: 'Repeat',
+  study: 'Layers',
+  focus: 'Timer',
+  goal: 'Target',
+  // Not a check: a tick-shaped glyph one tile from the tick is the second
+  // checkbox this tile exists to remove (PLAN-018).
+  task: 'ClipboardList',
+  free: 'Clock'
+}
+
+/**
+ * The tile: the source's colour with its glyph in it (PLAN-018). A bare square
+ * beside the tick read as a second checkbox; with its glyph it reads as a
+ * label (§15.8), as the web calendar's has since PLAN-011. The glyph's colour
+ * is derived from the fill, as `EventTile` does, so a pale area keeps a dark
+ * glyph. Out of the accessibility tree: the meta line says the source in words.
+ */
+function SourceTile({ type, color, theme }) {
+  const fill = color.includes('.') ? resolveColor(theme, color) : color
+  return (
+    <View
+      importantForAccessibility='no'
+      accessible={false}
+      style={{
+        width: TILE_SIZE,
+        height: TILE_SIZE,
+        borderRadius: theme.radius.sm,
+        flexShrink: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: fill
+      }}
+    >
+      <Icon name={SOURCE_GLYPHS[type] ?? SOURCE_GLYPHS.free} size={12} literalColor={readableTextOn(fill)} />
+    </View>
+  )
+}
 
 /** The source's colour: identity is the tile, and only the tile (§15.11). */
 export const sourceColor = (type, areaColor = null) => {
@@ -110,7 +152,7 @@ export function BlockRow({
           <Typography level='body-xs' color='text.tertiary' style={{ width: TIME_COLUMN_WIDTH, fontVariant: ['tabular-nums'] }}>
             {occurrence.start}
           </Typography>
-          <IdentityTile color={sourceColor(type, areaColor)} />
+          <SourceTile type={type} color={sourceColor(type, areaColor)} theme={theme} />
           <View style={{ flex: 1, minWidth: 0 }}>
             <Typography
               level='title-md'

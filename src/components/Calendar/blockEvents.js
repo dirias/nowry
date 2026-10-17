@@ -6,7 +6,7 @@ import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded'
 import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined'
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
 import AdjustOutlinedIcon from '@mui/icons-material/AdjustOutlined'
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 
 import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
@@ -31,7 +31,8 @@ export const SOURCE_ICONS = {
   study: StyleOutlinedIcon,
   focus: TimerOutlinedIcon,
   goal: AdjustOutlinedIcon,
-  task: CheckCircleOutlinedIcon,
+  // Not a check: the row's tick sits one tile away (PLAN-018).
+  task: AssignmentOutlinedIcon,
   free: ScheduleOutlinedIcon
 }
 
@@ -92,7 +93,7 @@ export const blockMeta = (occurrence, t) =>
 /**
  * The identity tile (ADR-019): 16px on the grid, 28px on the agenda row, the
  * source's glyph on both so the tile reads as a label and never as a control
- * (§15.7). On a running block the solid ground is the tile's own colour, so
+ * (§15.8). On a running block the solid ground is the tile's own colour, so
  * the tile inverts to stay visible.
  */
 export const BlockTile = ({ occurrence, focusAreas, size = 16, glyph = true, inverted = false }) => {

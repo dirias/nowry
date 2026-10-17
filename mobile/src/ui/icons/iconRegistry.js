@@ -39,6 +39,7 @@ import Circle from 'lucide-react-native/icons/circle'
 import Clock from 'lucide-react-native/icons/clock'
 import CircleAlert from 'lucide-react-native/icons/circle-alert'
 import CircleCheck from 'lucide-react-native/icons/circle-check'
+import ClipboardList from 'lucide-react-native/icons/clipboard-list'
 import CircleQuestionMark from 'lucide-react-native/icons/circle-question-mark'
 import CloudUpload from 'lucide-react-native/icons/cloud-upload'
 import Diamond from 'lucide-react-native/icons/diamond'
@@ -113,6 +114,7 @@ export const ICONS = {
   Circle,
   CircleAlert,
   CircleCheck,
+  ClipboardList,
   CircleQuestionMark,
   Clock,
   CloudUpload,

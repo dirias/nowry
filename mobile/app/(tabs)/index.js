@@ -30,9 +30,7 @@
  *   annual plan is glanced at from Home and edited in Planning.
  *
  * **What is deliberately still different**, because a phone is not a browser:
- * the panel's two tabs carry WORDS here rather than the web's unlabelled
- * glyphs (an unnamed icon is not a name, MOB-062), and the header
- * has no calendar or blackboard button — the calendar is a tab in the bar
+ * the header has no calendar or boards button — the calendar is a tab in the bar
  * below, and the blackboard is not built for this client.
  *
  * **The companion is not here** (MOB-089). MOB-050 gave it a panel on this
@@ -365,10 +363,8 @@ function FocusBar({ areas, priorities, loading, language, onOpenArea, onOpenPlan
  * it, and a few of what follows. Home is where you watch; the Plan tab's Day
  * is where you work, and the row at the foot opens it.
  *
- * **The tabs carry words.** The web's are unlabelled glyphs and its own
- * design canvas calls that the right idea drawn wrong. This is the one place
- * this screen deliberately differs, and it is the difference between a control
- * a screen reader can name and one it cannot.
+ * **The tabs carry words** — an unnamed icon is not a name (MOB-062). The
+ * web's were glyphs until PLAN-018 gave them these words and counts too.
  *
  * What the day-panel canvas changed, and why each one is a rule rather than a
  * taste:
@@ -460,8 +456,8 @@ const aheadOf = (day) => (day.current ? [day.current, day.next, ...day.later.sli
 /**
  * The day around the clock: now · next · later, from the one spine (PRD D9).
  *
- * The current block leads and carries the Start key, as `BlockRow` draws it;
- * the rows after it carry the tick, and the tick keeps or undoes through the
+ * The current block leads; every row carries the tick (Start lives in the
+ * block's sheet since PLAN-017), and the tick keeps or undoes through the
  * same optimistic log the Day uses, so a block kept here is kept there at
  * once. When the day is spent — nothing running, nothing ahead — the tab
  * reads the day back: one line of copy, then the last blocks it held with
