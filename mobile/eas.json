@@ -37,7 +37,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_TIMEOUT": "10000"
+        "EXPO_PUBLIC_API_TIMEOUT": "10000",
+        "EXPO_PUBLIC_API_URL": "https://nowry-api-development.up.railway.app"
       }
     },
     "production-apk": {
@@ -60,7 +61,8 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_TIMEOUT": "10000"
+        "EXPO_PUBLIC_API_TIMEOUT": "10000",
+        "EXPO_PUBLIC_API_URL": "https://nowry-api-development.up.railway.app"
       }
     }
   },
