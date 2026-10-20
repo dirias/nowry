@@ -56,28 +56,30 @@ export const fromParsed = (parsed, { origin = { x: 0, y: 0 }, idPrefix = 'n', zB
   const ids = new Map(parsed.nodes.map((n) => [n.id, nextId(idPrefix)]))
   const frameIds = new Map((parsed.frames ?? []).map((f) => [f.id, nextId('f')]))
   const endOf = (id) => ids.get(id) ?? frameIds.get(id)
-  const links = parsed.links
+  // An invisible link places its ends but is not drawn.
+  const layoutLinks = parsed.links
     .filter((l) => endOf(l.from) && endOf(l.to))
-    .map((l) => ({ id: nextId('l'), from: endOf(l.from), to: endOf(l.to), label: l.label ?? '' }))
+    .map((l) => ({ id: nextId('l'), from: endOf(l.from), to: endOf(l.to), label: l.label ?? '', invisible: Boolean(l.invisible) }))
+  const links = layoutLinks.filter((l) => !l.invisible).map(({ invisible, ...l }) => l)
   const hasParent = new Set(links.map((l) => l.to))
   const nodes = parsed.nodes.map((n, i) => {
     const id = ids.get(n.id)
-    return boardNode(n, { id, color: hasParent.has(id) ? 'green' : 'yellow', z: zBase + 1 + i })
+    return boardNode(n, { id, color: n.color ?? (hasParent.has(id) ? 'green' : 'yellow'), z: zBase + 1 + i })
   })
   const frames = (parsed.frames ?? []).map((f) => ({
     id: frameIds.get(f.id),
     title: f.title ?? '',
-    members: (f.members ?? []).map((m) => ids.get(m)).filter(Boolean)
+    members: (f.members ?? []).map((m) => ids.get(m)).filter(Boolean),
+    parent: frameIds.get(f.parent) ?? null,
+    direction: f.direction ?? null
   }))
 
-  // Links to a frame do not shape the layout; only node-to-node links do.
-  const nodeLinks = links.filter((l) => !frameIds.has(l.from) && !frameIds.has(l.to))
+  // A flowchart lays frames out as blocks, so links to a frame shape it too; a tree only follows node links.
   const nodeIdSet = new Set(nodes.map((n) => n.id))
-  const layoutLinks = nodeLinks.filter((l) => nodeIdSet.has(l.from) && nodeIdSet.has(l.to))
   const laid =
     parsed.type === 'flowchart'
       ? layoutGraph({ nodes, links: layoutLinks, frames }, { direction: parsed.direction ?? 'LR' })
-      : layoutTree({ nodes, links: layoutLinks, frames })
+      : layoutTree({ nodes, links: layoutLinks.filter((l) => nodeIdSet.has(l.from) && nodeIdSet.has(l.to)), frames })
 
   const frameNodes = laid.frames.map((f) => ({
     id: f.id,

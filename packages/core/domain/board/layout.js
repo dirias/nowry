@@ -7,9 +7,9 @@
  * Input nodes need an `id` and a kind (for their size); frames are
  * `{ id, title, members: [id] }`. Positions are top-left corners.
  */
-import { FRAME_PADDING, FRAME_TITLE_BAND, layoutSize } from './kinds'
+import { DEFAULT_SIZES, FRAME_PADDING, FRAME_TITLE_BAND, layoutSize } from './kinds'
 
-const FRAME_GROUP_GAP = FRAME_PADDING * 2 + FRAME_TITLE_BAND
+const DEFAULT_FRAME = DEFAULT_SIZES.frame
 
 /** Every node's frame (the innermost one that lists it). */
 const frameOf = (frames = []) => {
@@ -84,34 +84,13 @@ const assignLayers = (ids, edges) => {
 const barycentre = (neighbours, position, fallback) =>
   neighbours.length ? neighbours.reduce((sum, id) => sum + position.get(id), 0) / neighbours.length : fallback
 
-/**
- * Orders each layer by the mean position of its neighbours in the layer
- * before, sweeping down, up and down again. Members of one frame are kept
- * together in a layer so the frame can wrap them.
- */
-const orderLayers = (layers, parents, children, frameIds) => {
+/** Orders each layer by the mean position of its neighbours in the layer before, sweeping down, up and down again. */
+const orderLayers = (layers, parents, children) => {
   const position = new Map()
   layers.forEach((layer) => layer.forEach((id, i) => position.set(id, i)))
   const sortLayer = (layer, neighboursOf) => {
     const key = new Map(layer.map((id, i) => [id, barycentre(neighboursOf(id), position, i)]))
-    const groupKey = new Map()
-    layer.forEach((id) => {
-      const f = frameIds.get(id)
-      if (!f) return
-      const g = groupKey.get(f) ?? []
-      g.push(key.get(id))
-      groupKey.set(f, g)
-    })
-    const groupOf = (id) => {
-      const f = frameIds.get(id)
-      if (!f) return key.get(id)
-      const g = groupKey.get(f)
-      return g.reduce((a, b) => a + b, 0) / g.length
-    }
-    const sorted = [...layer].sort(
-      (a, b) =>
-        groupOf(a) - groupOf(b) || String(frameIds.get(a) ?? '').localeCompare(String(frameIds.get(b) ?? '')) || key.get(a) - key.get(b)
-    )
+    const sorted = [...layer].sort((a, b) => key.get(a) - key.get(b))
     sorted.forEach((id, i) => position.set(id, i))
     return sorted
   }
@@ -170,51 +149,118 @@ const centre = (nodes, frames) => {
 }
 
 /**
- * A layered layout (PRD D9: left to right for a flowchart). `gapX` is the
- * room between layers, `gapY` between neighbours in a layer, whichever way
- * the layers run.
- *
- * @returns {{ nodes: object[], frames: object[] }}
+ * Boxes `{ id, w, h }` in layers along `direction`, each layer centred
+ * across. Returns top-left corners with the whole starting at (0, 0), and
+ * the size it takes.
  */
-export const layoutGraph = ({ nodes = [], links = [], frames = [] }, { direction = 'LR', gapX = 80, gapY = 32 } = {}) => {
-  const ids = nodes.map((n) => n.id)
-  const byId = new Map(nodes.map((n) => [n.id, n]))
-  const edges = acyclicEdges(ids, links)
-  const { layer, parents, children } = assignLayers(ids, edges)
+const layered = (boxes, links, { direction, gapX, gapY }) => {
+  const ids = boxes.map((b) => b.id)
+  const byId = new Map(boxes.map((b) => [b.id, b]))
+  const { layer, parents, children } = assignLayers(ids, acyclicEdges(ids, links))
   const layers = []
   ids.forEach((id) => {
     const l = layer.get(id) ?? 0
     layers[l] = layers[l] ?? []
     layers[l].push(id)
   })
-  const frameIds = frameOf(frames)
-  const ordered = orderLayers(layers.filter(Boolean), parents, children, frameIds)
   const across = direction === 'TB' ? 'w' : 'h'
   const along = direction === 'TB' ? 'h' : 'w'
 
   const placed = new Map()
   let offset = 0
-  ordered.forEach((layerIds) => {
-    const sizes = layerIds.map((id) => layoutSize(byId.get(id)))
+  orderLayers(layers.filter(Boolean), parents, children).forEach((layerIds) => {
+    const sizes = layerIds.map((id) => byId.get(id))
     const depth = Math.max(...sizes.map((s) => s[along]))
-    // Stack the layer, with extra room where one frame's members end.
     let cursor = 0
     const starts = layerIds.map((id, i) => {
-      if (i > 0) cursor += gapY + (frameIds.get(id) !== frameIds.get(layerIds[i - 1]) ? FRAME_GROUP_GAP : 0)
+      if (i > 0) cursor += gapY
       const start = cursor
       cursor += sizes[i][across]
       return start
     })
-    const middle = cursor / 2
     layerIds.forEach((id, i) => {
-      const a = starts[i] - middle
+      const a = starts[i] - cursor / 2
       const b = offset + (depth - sizes[i][along]) / 2
       placed.set(id, direction === 'TB' ? { x: a, y: b } : { x: b, y: a })
     })
     offset += depth + gapX
   })
-  const laid = nodes.map((n) => ({ ...n, ...placed.get(n.id) }))
-  return centre(laid, wrapFrames(laid, frames))
+  const rects = ids.map((id) => ({ ...placed.get(id), w: byId.get(id).w, h: byId.get(id).h }))
+  if (!rects.length) return { placed, w: 0, h: 0 }
+  const minX = Math.min(...rects.map((r) => r.x))
+  const minY = Math.min(...rects.map((r) => r.y))
+  placed.forEach((p, id) => placed.set(id, { x: p.x - minX, y: p.y - minY }))
+  return {
+    placed,
+    w: Math.max(...rects.map((r) => r.x + r.w)) - minX,
+    h: Math.max(...rects.map((r) => r.y + r.h)) - minY
+  }
+}
+
+/** Where a node or frame sits: the frame that holds it, or null on the board itself. */
+const containerFinder = (frames) => {
+  const frameById = new Map(frames.map((f) => [f.id, f]))
+  const nodeFrame = frameOf(frames)
+  return (id) => {
+    const parent = frameById.has(id) ? frameById.get(id).parent : nodeFrame.get(id)
+    return parent && frameById.has(parent) && parent !== id ? parent : null
+  }
+}
+
+/**
+ * A layered layout (PRD D9: left to right for a flowchart). A frame is laid
+ * out first, in its own direction if it has one, and then placed as one block
+ * beside its neighbours, so frames never overlap and a link to a frame (or to
+ * something inside it) places the whole frame. `gapX` is the room between
+ * layers, `gapY` between neighbours in a layer, whichever way the layers run.
+ *
+ * @returns {{ nodes: object[], frames: object[] }}
+ */
+export const layoutGraph = ({ nodes = [], links = [], frames = [] }, { direction = 'LR', gapX = 80, gapY = 32 } = {}) => {
+  const containerOf = containerFinder(frames)
+  // The node or frame that stands for `id` among the things directly in `scope`.
+  const unitIn = (id, scope) => {
+    for (let cur = id, guard = 0; cur && guard <= frames.length; cur = containerOf(cur), guard += 1) {
+      if (containerOf(cur) === scope) return cur
+    }
+    return null
+  }
+  const at = new Map()
+
+  // Lays out what `scope` holds; positions land in `at` relative to the scope's top-left.
+  const block = (scope, dir) => {
+    const inner = new Map()
+    const boxes = [
+      ...nodes.filter((n) => containerOf(n.id) === scope).map((n) => ({ id: n.id, ...layoutSize(n) })),
+      ...frames
+        .filter((f) => containerOf(f.id) === scope)
+        .map((f) => {
+          const content = block(f.id, f.direction ?? dir)
+          inner.set(f.id, content)
+          if (!content.w) return { id: f.id, w: DEFAULT_FRAME.w, h: DEFAULT_FRAME.h }
+          return { id: f.id, w: content.w + FRAME_PADDING * 2, h: content.h + FRAME_PADDING * 2 + FRAME_TITLE_BAND }
+        })
+    ]
+    const unitLinks = links
+      .map((l) => ({ from: unitIn(l.from, scope), to: unitIn(l.to, scope) }))
+      .filter((l) => l.from && l.to && l.from !== l.to)
+    const laid = layered(boxes, unitLinks, { direction: dir, gapX, gapY })
+    boxes.forEach((b) => {
+      const p = laid.placed.get(b.id)
+      at.set(b.id, { ...p, w: b.w, h: b.h })
+      // Move what the frame holds from its own origin to inside the frame.
+      inner.get(b.id)?.members.forEach((id) => {
+        const m = at.get(id)
+        at.set(id, { ...m, x: m.x + p.x + FRAME_PADDING, y: m.y + p.y + FRAME_PADDING + FRAME_TITLE_BAND })
+      })
+    })
+    return { w: laid.w, h: laid.h, members: [...at.keys()].filter((id) => unitIn(id, scope)) }
+  }
+  block(null, direction)
+
+  const laid = nodes.map((n) => ({ ...n, x: at.get(n.id).x, y: at.get(n.id).y }))
+  const placedFrames = frames.map((f) => ({ ...f, ...at.get(f.id) }))
+  return centre(laid, placedFrames)
 }
 
 /** The tree in a set of links: each node's first incoming link is its parent; other links do not shape it. */

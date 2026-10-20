@@ -2,7 +2,7 @@
  * Text in (PRD D9): Mermaid (flowchart and mindmap), indented outlines, JSON
  * Canvas, and plain lines. A parser returns a parsed graph
  *
- *   { type, direction?, nodes: [{ id, text, kind?, shape? }], links: [{ from, to, label, tree? }], frames: [{ id, title, members, parent }] }
+ *   { type, direction?, nodes: [{ id, text, kind?, shape?, color? }], links: [{ from, to, label, tree?, invisible? }], frames: [{ id, title, members, parent, direction? }] }
  *
  * or `{ error }`. `fromParsed` turns a parsed graph into board nodes; JSON
  * Canvas comes back already as board nodes, positioned.
@@ -30,13 +30,16 @@ const mermaidLines = (text) => {
     .filter((line) => line.trim().length > 0)
 }
 
-/** A label as text: quotes, Markdown-string backticks, `<br>` and entities resolved. */
+/** A label as text: quotes, Markdown-string backticks, `<br>`, other HTML tags and entities resolved. */
 const cleanLabel = (raw) => {
   let label = String(raw ?? '').trim()
   if (label.length >= 2 && label.startsWith('"') && label.endsWith('"')) label = label.slice(1, -1)
   if (label.length >= 2 && label.startsWith('`') && label.endsWith('`')) label = label.slice(1, -1)
   return label
     .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?[a-z][^<>]*>/gi, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n[ \t]+/g, '\n')
     .replace(/#quot;/g, '"')
     .replace(/#amp;/g, '&')
     .replace(/#lt;/g, '<')
@@ -114,9 +117,9 @@ const readNodeRef = (s, i) => {
   let end = head.end
   const shape = readShape(s, end)
   if (shape) end = shape.end
-  const cls = s.slice(end).match(/^:::[\w-]+/)
+  const cls = s.slice(end).match(/^:::([\w-]+)/)
   if (cls) end += cls[0].length
-  return { id: head.id, label: shape?.label ?? null, shape: shape?.shape ?? null, end }
+  return { id: head.id, label: shape?.label ?? null, shape: shape?.shape ?? null, cls: cls?.[1] ?? null, end }
 }
 
 /** `A & B`: one or more node refs joined by `&`. */
@@ -174,7 +177,26 @@ const readEdge = (s, i) => {
   return { label, style: edgeStyle(arrow[2]), head: edgeHead(head), invisible: arrow[2].startsWith('~'), end }
 }
 
-const IGNORED = /^(classDef|class|style|linkStyle|click|direction|accTitle|accDescr)\b/
+const IGNORED = /^(linkStyle|click|accTitle|accDescr)\b/
+
+/** `fill:#f00,stroke:#333,color:#fff` → `{ fill, stroke }`. */
+const readStyle = (body) =>
+  Object.fromEntries(
+    String(body ?? '')
+      .split(',')
+      .map((part) => part.split(':').map((s) => s.trim()))
+      .filter(([key, value]) => (key === 'fill' || key === 'stroke') && value)
+  )
+
+/**
+ * The note colour a Mermaid style reads as: the stroke when it has a hue (a
+ * diagram drawn dark keeps its hue in the stroke), else the fill.
+ */
+const styleColor = ({ fill, stroke } = {}) => {
+  const fromStroke = stroke ? nearestNoteColor(stroke) : null
+  if (fromStroke && fromStroke !== 'grey') return fromStroke
+  return fill ? nearestNoteColor(fill) : null
+}
 
 const subgraphHead = (rest) => {
   const body = rest.trim()
@@ -196,9 +218,15 @@ const parseFlowchart = (lines, header) => {
   const links = []
   const frames = []
   const stack = []
+  const classDefs = new Map()
+  const classesOf = new Map()
+  const styles = new Map()
   let anonymous = 0
 
+  const addClass = (id, name) => classesOf.set(id, [...(classesOf.get(id) ?? []), name])
+
   const see = (ref) => {
+    if (ref.cls) addClass(ref.id, ref.cls)
     const existing = nodes.get(ref.id)
     if (existing) {
       if (ref.label !== null) Object.assign(existing, { text: ref.label, shape: ref.shape })
@@ -209,9 +237,22 @@ const parseFlowchart = (lines, header) => {
     if (frame) frame.members.push(ref.id)
   }
 
+  // classDef, class, style and a subgraph's own direction: true when the line was one.
+  const styling = (line) => {
+    const def = line.match(/^classDef\s+(\S+)\s+(.*)$/)
+    if (def) def[1].split(',').forEach((name) => classDefs.set(name, readStyle(def[2])))
+    const cls = line.match(/^class\s+(\S+)\s+([\w-]+)$/)
+    if (cls) cls[1].split(',').forEach((id) => addClass(id, cls[2]))
+    const style = line.match(/^style\s+(\S+)\s+(.*)$/)
+    if (style) styles.set(style[1], readStyle(style[2]))
+    const dir = line.match(/^direction\s+(\w+)$/)
+    if (dir && stack.length) stack[stack.length - 1].direction = flowDirection(dir[1])
+    return /^(classDef|class|style|direction)\b/.test(line)
+  }
+
   const statement = (raw) => {
     const line = raw.trim().replace(/;$/, '')
-    if (!line || IGNORED.test(line)) return
+    if (!line || IGNORED.test(line) || styling(line)) return
     if (/^end$/.test(line)) {
       stack.pop()
       return
@@ -235,11 +276,11 @@ const parseFlowchart = (lines, header) => {
       const next = readGroup(line, edge.end)
       if (!next) break
       next.refs.forEach(see)
-      if (!edge.invisible) {
-        group.refs.forEach((a) =>
-          next.refs.forEach((b) => links.push({ from: a.id, to: b.id, label: edge.label, style: edge.style, head: edge.head }))
-        )
-      }
+      // `~~~` draws nothing but still places its ends, as it does in Mermaid.
+      const extra = edge.invisible ? { invisible: true } : {}
+      group.refs.forEach((a) =>
+        next.refs.forEach((b) => links.push({ from: a.id, to: b.id, label: edge.label, style: edge.style, head: edge.head, ...extra }))
+      )
       group = next
       at = next.end
     }
@@ -252,6 +293,12 @@ const parseFlowchart = (lines, header) => {
   frameIds.forEach((id) => nodes.delete(id))
   frames.forEach((f) => {
     f.members = f.members.filter((id) => !frameIds.has(id))
+  })
+  // Colour: a `style` line, else the last class, else `classDef default`.
+  nodes.forEach((node) => {
+    const named = (classesOf.get(node.id) ?? []).map((name) => classDefs.get(name)).filter(Boolean)
+    const color = styleColor(styles.get(node.id) ?? named[named.length - 1] ?? classDefs.get('default'))
+    if (color) node.color = color
   })
   return { type: 'flowchart', direction: flowDirection(header[2]), nodes: [...nodes.values()], links, frames }
 }
