@@ -2371,7 +2371,17 @@
         "markedNeedsAll": "Markiert gilt für alle Karten.",
         "previous": "Vorherige Karte",
         "next": "Nächste Karte",
-        "decksReadout": "Stapel · {{count}}"
+        "decksReadout": "Stapel · {{count}}",
+        "titleDaily_one": "{{count}} heute zu lernen",
+        "titleDaily_other": "{{count}} heute zu lernen",
+        "titleDue_one": "{{deck}} · {{count}} fällig",
+        "titleDue_other": "{{deck}} · {{count}} fällig",
+        "titleAll_one": "{{deck}} · {{count}} Karte",
+        "titleAll_other": "{{deck}} · {{count}} Karten",
+        "showCount_one": "{{count}} Karte zeigen",
+        "showCount_other": "{{count}} Karten zeigen",
+        "studyCount_one": "{{count}} Karte lernen",
+        "studyCount_other": "{{count}} Karten lernen"
       }
     },
     "common": {

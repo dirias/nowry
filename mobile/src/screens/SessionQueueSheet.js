@@ -13,8 +13,8 @@
  * tap on it says where the mark applies instead of doing nothing.
  *
  * **Tags open in place of the list, not over it.** A sheet over a sheet is two
- * things to dismiss; the rows swap for the tag rows and a Done row swaps them
- * back, so the filter object stays one object.
+ * things to dismiss; the rows swap for the tag rows, and the footer key (or the
+ * chip again) swaps them back, so the filter object stays one object (MOB-117).
  *
  * **Search narrows this list and nothing else.** The readout above the sheet
  * does not change while typing; the list says when nothing matches.
@@ -26,6 +26,7 @@ import { frontText } from '@nowry/core/domain/cardSpeech'
 import { cardRest } from '@nowry/core/domain/cardRest'
 import { useTheme } from '../theme'
 import { cardKey, deckKeyOf, matchesQueueSearch } from '../hooks/useSessionQueue'
+import { sheetFooter, sheetTitle } from './queueSheet'
 import {
   ActionSheet,
   BottomSheet,
@@ -80,6 +81,7 @@ export function SessionQueueSheet({
   selectedDecks = [],
   onDecksChange,
   deckNames = {},
+  deckName = null,
   onJump,
   scope = 'due',
   onScopeChange,
@@ -138,6 +140,9 @@ export function SessionQueueSheet({
     onClose?.()
   }
 
+  const count = Array.isArray(cards) ? cards.length : 0
+  const footer = sheetFooter({ menu, narrowed, scope, count })
+
   const heldRest = held ? cardRest(held) : null
   const heldId = held ? cardKey(held) : null
   const heldActions = held
@@ -151,7 +156,7 @@ export function SessionQueueSheet({
     : []
 
   return (
-    <BottomSheet visible={visible} onClose={close} title={t('cards.session.queue.title')}>
+    <BottomSheet visible={visible} onClose={close} title={sheetTitle(t, { daily, scope, deckName, count })}>
       <Stack spacing={1.5}>
         {/* Which cards are in front of the learner: the web's URL mode as the
             first dimension of the filter object (ADR-042 point 2). */}
@@ -231,16 +236,12 @@ export function SessionQueueSheet({
               {availableTags.map(({ tag, count }) => (
                 <ChoiceRow key={tag} label={tag} count={count} chosen={selectedTags.includes(tag)} onPress={() => toggleTag(tag)} />
               ))}
-              <Divider />
-              <ChoiceRow label={t('cards.session.queue.done')} role='button' onPress={() => setMenu(null)} />
             </>
           ) : decksOpen ? (
             <>
               {availableDecks.map(({ id, name, count }) => (
                 <ChoiceRow key={id} label={name} count={count} chosen={selectedDecks.includes(id)} onPress={() => toggleDeck(id)} />
               ))}
-              <Divider />
-              <ChoiceRow label={t('cards.session.queue.done')} role='button' onPress={() => setMenu(null)} />
             </>
           ) : rows.length === 0 ? (
             <Typography level='body-sm' color='text.tertiary' style={{ textAlign: 'center', paddingVertical: 16 }}>
@@ -287,8 +288,13 @@ export function SessionQueueSheet({
         </ScrollView>
       </Stack>
 
-      <Button variant='secondary' onPress={close} style={{ marginTop: 16 }}>
-        {t('common.close')}
+      {/* The sheet's one exit, and its label is the result (MOB-117). */}
+      <Button variant='secondary' onPress={footer === 'show' ? () => setMenu(null) : close} style={{ marginTop: 16 }}>
+        {footer === 'show'
+          ? t('cards.session.queue.showCount', { count })
+          : footer === 'study'
+            ? t('cards.session.queue.studyCount', { count })
+            : t('common.close')}
       </Button>
 
       {/* A held row's verbs (SR-003): rest, rest until, wake, edit. The sheet

@@ -1599,7 +1599,17 @@
         "markedNeedsAll": "Marcadas se aplica a todas las tarjetas.",
         "previous": "Tarjeta anterior",
         "next": "Tarjeta siguiente",
-        "decksReadout": "Mazos · {{count}}"
+        "decksReadout": "Mazos · {{count}}",
+        "titleDaily_one": "{{count}} para estudiar hoy",
+        "titleDaily_other": "{{count}} para estudiar hoy",
+        "titleDue_one": "{{deck}} · {{count}} pendiente",
+        "titleDue_other": "{{deck}} · {{count}} pendientes",
+        "titleAll_one": "{{deck}} · {{count}} tarjeta",
+        "titleAll_other": "{{deck}} · {{count}} tarjetas",
+        "showCount_one": "Ver {{count}} tarjeta",
+        "showCount_other": "Ver {{count}} tarjetas",
+        "studyCount_one": "Estudiar {{count}} tarjeta",
+        "studyCount_other": "Estudiar {{count}} tarjetas"
       }
     },
     "deleteModal": {

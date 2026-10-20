@@ -2413,7 +2413,12 @@
         "markedNeedsAll": "「マーク済み」はすべてのカードに適用されます。",
         "previous": "前のカード",
         "next": "次のカード",
-        "decksReadout": "デッキ · {{count}}"
+        "decksReadout": "デッキ · {{count}}",
+        "titleDaily_other": "今日の学習 {{count}}枚",
+        "titleDue_other": "{{deck}} · 復習 {{count}}枚",
+        "titleAll_other": "{{deck}} · {{count}}枚",
+        "showCount_other": "{{count}}枚を表示",
+        "studyCount_other": "{{count}}枚を学習"
       }
     },
     "flashcard": {

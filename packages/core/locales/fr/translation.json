@@ -2382,7 +2382,17 @@
         "markedNeedsAll": "Marquées s'applique à toutes les cartes.",
         "previous": "Carte précédente",
         "next": "Carte suivante",
-        "decksReadout": "Paquets · {{count}}"
+        "decksReadout": "Paquets · {{count}}",
+        "titleDaily_one": "{{count}} à étudier aujourd’hui",
+        "titleDaily_other": "{{count}} à étudier aujourd’hui",
+        "titleDue_one": "{{deck}} · {{count}} à revoir",
+        "titleDue_other": "{{deck}} · {{count}} à revoir",
+        "titleAll_one": "{{deck}} · {{count}} carte",
+        "titleAll_other": "{{deck}} · {{count}} cartes",
+        "showCount_one": "Afficher {{count}} carte",
+        "showCount_other": "Afficher {{count}} cartes",
+        "studyCount_one": "Étudier {{count}} carte",
+        "studyCount_other": "Étudier {{count}} cartes"
       }
     },
     "common": {

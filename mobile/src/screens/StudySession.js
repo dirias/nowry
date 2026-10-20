@@ -58,7 +58,7 @@ import {
   AskToggle,
   Button,
   Card,
-  Chip,
+  QueueReadout,
   CompanionNote,
   FlipCard,
   Icon,
@@ -954,18 +954,14 @@ export function StudySession() {
              * than one chip among four; the chevron is the one thing that says
              * it opens. Selected while the sheet is up.
              */}
-            <Chip
-              size='md'
-              selected={queueOpen}
+            <QueueReadout
+              open={queueOpen}
               onPress={() => setQueueOpen(true)}
               accessibilityLabel={`${counterSaid}. ${t('cards.session.queue.open')}`}
-              accessibilityState={{ expanded: queueOpen }}
-              endGlyph={<Icon name='ChevronDown' size='sm' color='text.tertiary' />}
-              textStyle={{ fontVariant: ['tabular-nums'] }}
               style={{ marginRight: 'auto' }}
             >
               {counter}
-            </Chip>
+            </QueueReadout>
             {/*
              * Listen (MOB-077). In the session's one header row beside the
              * mark, not floating over the card as it does on the web: the card
@@ -1216,6 +1212,7 @@ export function StudySession() {
         selectedDecks={queueView.selectedDecks}
         onDecksChange={chooseDecks}
         deckNames={deckNames}
+        deckName={deckName.current}
         onJump={jumpTo}
         scope={scope}
         onScopeChange={chooseScope}

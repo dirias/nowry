@@ -2029,7 +2029,17 @@
         "markedNeedsAll": "Marked applies to all cards.",
         "previous": "Previous card",
         "next": "Next card",
-        "decksReadout": "Decks · {{count}}"
+        "decksReadout": "Decks · {{count}}",
+        "titleDaily_one": "{{count}} to study today",
+        "titleDaily_other": "{{count}} to study today",
+        "titleDue_one": "{{deck}} · {{count}} due",
+        "titleDue_other": "{{deck}} · {{count}} due",
+        "titleAll_one": "{{deck}} · {{count}} card",
+        "titleAll_other": "{{deck}} · {{count}} cards",
+        "showCount_one": "Show {{count}} card",
+        "showCount_other": "Show {{count}} cards",
+        "studyCount_one": "Study {{count}} card",
+        "studyCount_other": "Study {{count}} cards"
       }
     },
     "deleteModal": {
