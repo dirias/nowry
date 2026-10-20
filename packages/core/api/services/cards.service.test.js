@@ -72,3 +72,20 @@ describe('getById', () => {
     expect(card).toEqual({ _id: 'c1', title: 'Front' })
   })
 })
+
+describe('getDailyReviewCards (MOB-118)', () => {
+  it('carries the pool tags beside the cards', async () => {
+    const tags = [
+      { tag: 'generated', new: 0, due: 25 },
+      { tag: 'jpn', new: 0, due: 0 }
+    ]
+    mockGet.mockResolvedValueOnce({ data: { cards: [{ _id: 'c1' }], total: 1, resting: 2, spread: null, tags } })
+    const day = await cardsService.getDailyReviewCards()
+    expect(day).toEqual({ items: [{ _id: 'c1' }], total: 1, resting: 2, spread: null, tags })
+  })
+
+  it('reads an answer without tags as none', async () => {
+    mockGet.mockResolvedValueOnce({ data: { cards: [] } })
+    expect((await cardsService.getDailyReviewCards()).tags).toEqual([])
+  })
+})

@@ -600,12 +600,15 @@ export const cardsService = {
     const { data } = await apiClient.get(`/study-cards/daily-review${query ? `?${query}` : ''}`)
     // The cards, and what the day said about them: how many rest, and whether a
     // pile was spread on arrival (SR-002). `items` is the name the web's session
-    // already reads for a wrapped list.
+    // already reads for a wrapped list. And the pool's tags (TAG-001), which
+    // this object left behind when SR-002 rebuilt it, so the phone's daily
+    // review listed no tags at all (MOB-118).
     return {
       items: data.cards || [],
       total: data.total ?? (data.cards || []).length,
       resting: data.resting ?? 0,
-      spread: data.spread ?? null
+      spread: data.spread ?? null,
+      tags: data.tags || []
     }
   },
 
