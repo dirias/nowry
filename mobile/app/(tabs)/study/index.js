@@ -1,24 +1,23 @@
 /**
  * The Study Center (MOB-033, PhoneDashboard artboard).
  *
- * Title, then one segment: Dashboard, Library or Browse. The first two were the
- * board's; Browse joined them in V2 (MOB-049) because "find more decks" is the
- * same question as "which of my decks", asked of a bigger shelf. The web keeps
- * its catalogue at `/browse` in the header, which a phone has no room for, and
- * a fifth tab is not the answer either.
+ * Title, then one segment: Dashboard or Library. Browse joined them in V2
+ * (MOB-049) as the public catalogue, drawn in the Library's grammar — its own
+ * "Decks" count beside the Library's — so two shelves looked like one tab
+ * repeated. It left the segment in MOB-119 and became Discover, pushed from
+ * the Library (MOB-120): other people's decks are reached from your own.
  *
- * The three views are genuinely different shapes, which is why they are three
+ * The two views are genuinely different shapes, which is why they are two
  * components rather than one with a branch: Dashboard is a short scroll of
- * sections, Library and Browse are lists that own their own scrolling.
+ * sections, Library is a list that owns its own scrolling.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Screen, Segmented, Stack, Typography } from '../../../src/ui'
 import { StudyDashboard } from '../../../src/screens/StudyDashboard'
 import { StudyLibrary } from '../../../src/screens/StudyLibrary'
-import { Browse } from '../../../src/screens/Browse'
 
-const VIEWS = { dashboard: 'dashboard', library: 'library', browse: 'browse' }
+const VIEWS = { dashboard: 'dashboard', library: 'library' }
 
 export default function StudyCenter() {
   const { t } = useTranslation()
@@ -33,8 +32,7 @@ export default function StudyCenter() {
         onChange={setView}
         options={[
           { value: VIEWS.dashboard, label: t('study.views.dashboard') },
-          { value: VIEWS.library, label: t('study.views.library') },
-          { value: VIEWS.browse, label: t('public.browse') }
+          { value: VIEWS.library, label: t('study.views.library') }
         ]}
       />
     </Stack>
@@ -48,14 +46,6 @@ export default function StudyCenter() {
     return (
       <Screen scroll={false} padding={0}>
         <StudyLibrary header={header} />
-      </Screen>
-    )
-  }
-
-  if (view === VIEWS.browse) {
-    return (
-      <Screen scroll={false} padding={0}>
-        <Browse header={header} />
       </Screen>
     )
   }
