@@ -204,7 +204,12 @@ export function StudyDashboard() {
           )
         }
         action={
-          (list ?? []).length === 0 ? null : (
+          /*
+           * Nothing asked today, no study key (MOB-116). It said "Browse" and
+           * opened an empty daily review — a third meaning of the word, and a
+           * door to nothing. Home says "All caught up" in the same case.
+           */
+          (list ?? []).length === 0 || today.asked === 0 ? null : (
             /*
              * No `accessibilityLabel`. The visible text IS the accessible
              * name, and "Start Studying" as the name beside a visible
@@ -214,7 +219,7 @@ export function StudyDashboard() {
              * (MOB-042).
              */
             <Button size='md' onPress={() => router.push(`/study/${DAILY_REVIEW}`)}>
-              {today.asked > 0 ? t('study.today.study', { count: today.asked }) : t('study.today.browse')}
+              {t('study.today.study', { count: today.asked })}
             </Button>
           )
         }

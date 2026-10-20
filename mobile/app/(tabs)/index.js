@@ -266,10 +266,16 @@ function Greeting({ name, motivation, due, loading, statsMissing, onReview, them
       </View>
 
       {loading ? (
-        <Skeleton width={128} height={36} />
+        <Skeleton width={112} height={40} />
       ) : statsMissing ? null : due > 0 ? (
-        <Button size='sm' variant='secondary' onPress={onReview}>
-          {t('dashboard.dailyFocus.reviewCount', { count: due })}
+        /*
+         * The Today object's own key, word for word and size for size (MOB-116):
+         * the two open the same daily review, and a different verb at a
+         * different size read as a different door. Secondary here because the
+         * day panel holds Home's one solid key (BUTTONS.md).
+         */
+        <Button size='md' variant='secondary' onPress={onReview}>
+          {t('study.today.study', { count: due })}
         </Button>
       ) : (
         <Typography level='body-sm' color='text.secondary' style={{ maxWidth: 140, textAlign: 'right' }}>
