@@ -2039,7 +2039,11 @@
         "showCount_one": "Show {{count}} card",
         "showCount_other": "Show {{count}} cards",
         "studyCount_one": "Study {{count}} card",
-        "studyCount_other": "Study {{count}} cards"
+        "studyCount_other": "Study {{count}} cards",
+        "idle": "Nothing due today",
+        "untagged_one": "{{count}} of {{total}} cards has no tag",
+        "untagged_other": "{{count}} of {{total}} cards have no tag",
+        "noTags": "No tags yet. Tag cards to study them by topic."
       }
     },
     "deleteModal": {

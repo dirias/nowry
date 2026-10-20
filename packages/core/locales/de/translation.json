@@ -2381,7 +2381,11 @@
         "showCount_one": "{{count}} Karte zeigen",
         "showCount_other": "{{count}} Karten zeigen",
         "studyCount_one": "{{count}} Karte lernen",
-        "studyCount_other": "{{count}} Karten lernen"
+        "studyCount_other": "{{count}} Karten lernen",
+        "idle": "Heute nichts fällig",
+        "untagged_one": "{{count}} von {{total}} Karten hat keinen Tag",
+        "untagged_other": "{{count}} von {{total}} Karten haben keinen Tag",
+        "noTags": "Noch keine Tags. Versieh Karten mit Tags, um sie nach Thema zu lernen."
       }
     },
     "common": {

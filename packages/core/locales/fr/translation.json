@@ -2392,7 +2392,11 @@
         "showCount_one": "Afficher {{count}} carte",
         "showCount_other": "Afficher {{count}} cartes",
         "studyCount_one": "Étudier {{count}} carte",
-        "studyCount_other": "Étudier {{count}} cartes"
+        "studyCount_other": "Étudier {{count}} cartes",
+        "idle": "Rien à revoir aujourd’hui",
+        "untagged_one": "{{count}} carte sur {{total}} n’a pas d’étiquette",
+        "untagged_other": "{{count}} cartes sur {{total}} n’ont pas d’étiquette",
+        "noTags": "Pas encore d’étiquettes. Étiquetez des cartes pour les étudier par thème."
       }
     },
     "common": {

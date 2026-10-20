@@ -42,7 +42,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { backText, frontText } from '@nowry/core/domain/cardSpeech'
 import { countMarked, filterCardsByMark, filterCardsByTags } from '@nowry/core/utils/tagFilter'
-import { sessionTagRows } from '@nowry/core/domain/sessionTags'
+import { idleTagRows, sessionTagRows } from '@nowry/core/domain/sessionTags'
 
 /** The two spellings a card's id has worn. */
 export const cardKey = (card) => card?._id ?? card?.id ?? null
@@ -126,6 +126,20 @@ export function narrowQueue(cards, { selectedTags = [], markedOnly = false, scop
   return scope === 'all' ? filterCardsByMark(byDecks, markedOnly) : byDecks
 }
 
+/**
+ * How many of the day's waiting cards carry no tag (MOB-118). Said at the foot
+ * of the Tags list so a learner whose waiting cards are untagged reads why a
+ * tag cannot narrow them, instead of meeting a list that looks broken.
+ *
+ * @param {Array<object> | null} cards - the unnarrowed due queue
+ * @returns {{ count: number, total: number }}
+ */
+export function untaggedOf(cards) {
+  if (!Array.isArray(cards)) return { count: 0, total: 0 }
+  const count = cards.filter((card) => !Array.isArray(card?.tags) || card.tags.length === 0).length
+  return { count, total: cards.length }
+}
+
 /** Whether a card answers a search: its two faces and its tags, case-insensitively. */
 export function matchesQueueSearch(card, needle) {
   const query = String(needle ?? '')
@@ -144,10 +158,11 @@ export function matchesQueueSearch(card, needle) {
  * @param {Array<object>} [options.poolTags] - the server's pool tags, listed under Due
  * @param {string[]} [options.selectedTags] - the screen's selection, when it owns it
  * @param {(tags: string[]) => void} [options.onSelectedTags]
+ * @param {Array<object> | null} [options.baseCards] - the unnarrowed due queue, for the untagged line
  */
 export function useSessionQueue(
   cards,
-  { scope = 'due', deckNames = {}, poolTags = null, selectedTags: owned = null, onSelectedTags = null } = {}
+  { scope = 'due', deckNames = {}, poolTags = null, selectedTags: owned = null, onSelectedTags = null, baseCards = null } = {}
 ) {
   const [ownTags, setOwnTags] = useState([])
   const selectedTags = owned ?? ownTags
@@ -156,6 +171,9 @@ export function useSessionQueue(
   const [markedOnly, setMarkedOnly] = useState(false)
 
   const availableTags = useMemo(() => sessionTagRows(scope, poolTags, cards), [scope, poolTags, cards])
+  // Under Due only: Browse lists the served cards' tags and has no idle ones (ADR-048).
+  const idleTags = useMemo(() => (scope === 'due' ? idleTagRows(poolTags) : []), [scope, poolTags])
+  const untagged = useMemo(() => (scope === 'due' ? untaggedOf(baseCards) : { count: 0, total: 0 }), [scope, baseCards])
   const availableDecks = useMemo(() => countDecks(cards, deckNames), [cards, deckNames])
   const markedCount = useMemo(() => (scope === 'all' ? countMarked(cards) : 0), [scope, cards])
   // With nothing selected this is the SAME array (the utility promises so),
@@ -174,6 +192,8 @@ export function useSessionQueue(
 
   return {
     availableTags,
+    idleTags,
+    untagged,
     selectedTags,
     setSelectedTags,
     clearTags,

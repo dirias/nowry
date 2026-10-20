@@ -34,6 +34,28 @@ export const poolTagRows = (poolTags) => {
 }
 
 /**
+ * The pool's tags with nothing waiting today (MOB-118, ADR-048).
+ *
+ * The server lists every tag of the pool; `poolTagRows` keeps the ones that
+ * can be studied. The phone names the rest, dimmed, so its list is the
+ * library's list and an empty one is never a mystery. Not choosable: a tag
+ * with nothing new or due would open an empty session.
+ *
+ * @param {Array<{tag?: string, new?: number, due?: number}> | null | undefined} poolTags
+ * @returns {string[]}
+ */
+export const idleTagRows = (poolTags) => {
+  if (!Array.isArray(poolTags)) return []
+  const waiting = new Set(poolTagRows(poolTags).map((row) => row.tag))
+  const idle = new Set()
+  for (const row of poolTags) {
+    const tag = typeof row?.tag === 'string' ? row.tag.trim() : ''
+    if (tag && !waiting.has(tag)) idle.add(tag)
+  }
+  return Array.from(idle).sort((a, b) => a.localeCompare(b))
+}
+
+/**
  * The rows a session's Tags control lists, by scope.
  *
  * @param {'due' | 'all'} scope

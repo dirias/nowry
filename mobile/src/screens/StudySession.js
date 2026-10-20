@@ -286,7 +286,8 @@ export function StudySession() {
     deckNames,
     poolTags: dueQueue.poolTags,
     selectedTags: tagChoice,
-    onSelectedTags: setTagChoice
+    onSelectedTags: setTagChoice,
+    baseCards: baseDueQueue.cards
   })
   const cards = queueView.visibleCards
   const [queueOpen, setQueueOpen] = useState(false)
@@ -1206,6 +1207,8 @@ export function StudySession() {
         currentId={cardId}
         graded={graded}
         availableTags={queueView.availableTags}
+        idleTags={queueView.idleTags}
+        untagged={queueView.untagged}
         selectedTags={queueView.selectedTags}
         onTagsChange={chooseTags}
         availableDecks={queueView.availableDecks}

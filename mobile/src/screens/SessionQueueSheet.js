@@ -75,6 +75,8 @@ export function SessionQueueSheet({
   currentId = null,
   graded = {},
   availableTags = [],
+  idleTags = [],
+  untagged = { count: 0, total: 0 },
   selectedTags = [],
   onTagsChange,
   availableDecks = [],
@@ -233,9 +235,32 @@ export function SessionQueueSheet({
         <ScrollView style={{ maxHeight: CHOICE_LIST_MAX_HEIGHT }} keyboardShouldPersistTaps='handled'>
           {tagsOpen ? (
             <>
-              {availableTags.map(({ tag, count }) => (
-                <ChoiceRow key={tag} label={tag} count={count} chosen={selectedTags.includes(tag)} onPress={() => toggleTag(tag)} />
+              {availableTags.map(({ tag, count: waiting }) => (
+                <ChoiceRow key={tag} label={tag} count={waiting} chosen={selectedTags.includes(tag)} onPress={() => toggleTag(tag)} />
               ))}
+              {/* The pool's other tags, named and dimmed, never choosable: the
+                  list is the library's list, and a tag with nothing waiting
+                  would open an empty session (MOB-118, ADR-048). */}
+              {idleTags.length > 0 && availableTags.length > 0 ? <Divider /> : null}
+              {idleTags.map((tag) => (
+                <ListRow
+                  key={tag}
+                  name={tag}
+                  meta={t('cards.session.queue.idle')}
+                  dimmed
+                  accessibilityLabel={`${tag} · ${t('cards.session.queue.idle')}`}
+                />
+              ))}
+              {availableTags.length === 0 && idleTags.length === 0 ? (
+                <Typography level='body-sm' color='text.tertiary' style={{ paddingVertical: 12 }}>
+                  {t('cards.session.queue.noTags')}
+                </Typography>
+              ) : null}
+              {untagged.count > 0 ? (
+                <Typography level='body-xs' color='text.tertiary' style={{ paddingTop: 12 }}>
+                  {t('cards.session.queue.untagged', { count: untagged.count, total: untagged.total })}
+                </Typography>
+              ) : null}
             </>
           ) : decksOpen ? (
             <>

@@ -9,7 +9,16 @@
 const fs = require('fs')
 const path = require('path')
 
-const { cardKey, deckKeyOf, countDecks, positionAfter, fullQueueIndex, matchesQueueSearch, narrowQueue } = require('../useSessionQueue')
+const {
+  cardKey,
+  deckKeyOf,
+  countDecks,
+  positionAfter,
+  fullQueueIndex,
+  matchesQueueSearch,
+  narrowQueue,
+  untaggedOf
+} = require('../useSessionQueue')
 
 const queue = [{ _id: 'a', tags: ['verbs'] }, { _id: 'b', tags: ['nouns'] }, { id: 'c', tags: ['verbs', 'nouns'] }, { _id: 'd' }]
 
@@ -156,5 +165,15 @@ describe('a mixed queue is narrowed by deck (MOB-110)', () => {
     expect(narrowQueue(mixed, { selectedDecks: ['d2'] }).map(cardKey)).toEqual(['b'])
     expect(narrowQueue(mixed, { selectedDecks: ['d1'], scope: 'all' }).map(cardKey)).toEqual(['a', 'c'])
     expect(narrowQueue(mixed, { selectedDecks: [] })).toBe(mixed)
+  })
+})
+
+describe('untaggedOf (MOB-118)', () => {
+  it('counts the waiting cards with no tag against the whole queue', () => {
+    expect(untaggedOf([{ tags: ['a'] }, { tags: [] }, {}, { tags: null }])).toEqual({ count: 3, total: 4 })
+  })
+
+  it('is zero over nothing loaded', () => {
+    expect(untaggedOf(null)).toEqual({ count: 0, total: 0 })
   })
 })

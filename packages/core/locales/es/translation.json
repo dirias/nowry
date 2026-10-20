@@ -1609,7 +1609,11 @@
         "showCount_one": "Ver {{count}} tarjeta",
         "showCount_other": "Ver {{count}} tarjetas",
         "studyCount_one": "Estudiar {{count}} tarjeta",
-        "studyCount_other": "Estudiar {{count}} tarjetas"
+        "studyCount_other": "Estudiar {{count}} tarjetas",
+        "idle": "Nada pendiente hoy",
+        "untagged_one": "{{count}} de {{total}} tarjetas no tiene etiqueta",
+        "untagged_other": "{{count}} de {{total}} tarjetas no tienen etiqueta",
+        "noTags": "Aún no hay etiquetas. Etiqueta tarjetas para estudiarlas por tema."
       }
     },
     "deleteModal": {

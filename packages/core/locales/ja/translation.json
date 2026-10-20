@@ -2418,7 +2418,10 @@
         "titleDue_other": "{{deck}} · 復習 {{count}}枚",
         "titleAll_other": "{{deck}} · {{count}}枚",
         "showCount_other": "{{count}}枚を表示",
-        "studyCount_other": "{{count}}枚を学習"
+        "studyCount_other": "{{count}}枚を学習",
+        "idle": "今日の復習なし",
+        "untagged_other": "{{total}}枚中{{count}}枚にタグがありません",
+        "noTags": "タグはまだありません。カードにタグを付けるとテーマ別に学習できます。"
       }
     },
     "flashcard": {
