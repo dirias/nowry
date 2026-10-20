@@ -1215,7 +1215,8 @@ export function StudySession() {
         selectedDecks={queueView.selectedDecks}
         onDecksChange={chooseDecks}
         deckNames={deckNames}
-        deckName={deckName.current}
+        // A deck session's cards carry the deck as a bare id; the deck list names it.
+        deckName={deckName.current ?? deckNames[String(id)] ?? null}
         onJump={jumpTo}
         scope={scope}
         onScopeChange={chooseScope}

@@ -40,15 +40,29 @@ export const CHOICE_LIST_MAX_HEIGHT = 400
  * @param {string} [swatch] - a resolved colour, for an option that has one
  *   (a focus area). Decorative; the label carries the identity.
  */
-export function ChoiceRow({ label, chosen = false, onPress, role = 'checkbox', swatch = null, count = null }) {
+/**
+ * `disabled` draws an option that exists but cannot be chosen today, in the
+ * same geometry as the rest, so the list keeps one left edge and one count
+ * column (MOB-118): the count slot carries the reason instead of a number.
+ */
+export function ChoiceRow({ label, chosen = false, onPress, role = 'checkbox', swatch = null, count = null, disabled = false }) {
   const theme = useTheme()
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
       accessibilityRole={role}
-      accessibilityLabel={label}
-      accessibilityState={role === 'radio' ? { selected: chosen } : role === 'checkbox' ? { checked: chosen } : undefined}
+      accessibilityLabel={disabled && count !== null ? `${label} · ${count}` : label}
+      accessibilityState={
+        role === 'radio'
+          ? { selected: chosen, disabled }
+          : role === 'checkbox'
+            ? { checked: chosen, disabled }
+            : disabled
+              ? { disabled }
+              : undefined
+      }
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
@@ -65,7 +79,7 @@ export function ChoiceRow({ label, chosen = false, onPress, role = 'checkbox', s
           style={{ width: 10, height: 10, borderRadius: theme.radius.xs, backgroundColor: swatch, flexShrink: 0 }}
         />
       ) : null}
-      <Typography level='body-md' color={chosen ? 'text.primary' : 'text.secondary'} style={{ flex: 1 }}>
+      <Typography level='body-md' color={disabled ? 'text.tertiary' : chosen ? 'text.primary' : 'text.secondary'} style={{ flex: 1 }}>
         {label}
       </Typography>
       {/* A count is a readout beside the option, never part of its name: the

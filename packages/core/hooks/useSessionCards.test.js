@@ -102,3 +102,47 @@ it('reads no pool tags off a plain list', async () => {
   await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'c1' }]))
   expect(result.current.poolTags).toEqual([])
 })
+
+// MOB-118 — a tag choice must not drop the session to its loading branch.
+describe('a new narrowing of the same deck', () => {
+  it('keeps the cards on screen until the new pool arrives', async () => {
+    let resolveTagged
+    mockGetDue.mockResolvedValueOnce([{ _id: 'all' }]).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveTagged = resolve
+        })
+    )
+    const { result, rerender } = renderHook(({ tags }) => useSessionCards({ deckId: 'd1', tags }), {
+      wrapper,
+      initialProps: { tags: [] }
+    })
+    await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'all' }]))
+
+    rerender({ tags: ['verbs'] })
+    expect(result.current.cards).toEqual([{ _id: 'all' }])
+
+    resolveTagged([{ _id: 'verbs-only' }])
+    await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'verbs-only' }]))
+  })
+
+  it('never shows another deck the previous deck’s cards', async () => {
+    let resolveSecond
+    mockGetDue.mockResolvedValueOnce([{ _id: 'd1-card' }]).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveSecond = resolve
+        })
+    )
+    const { result, rerender } = renderHook(({ deckId }) => useSessionCards({ deckId }), {
+      wrapper,
+      initialProps: { deckId: 'd1' }
+    })
+    await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'd1-card' }]))
+
+    rerender({ deckId: 'd2' })
+    expect(result.current.cards).toBeNull()
+    resolveSecond([{ _id: 'd2-card' }])
+    await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'd2-card' }]))
+  })
+})

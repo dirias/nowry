@@ -243,13 +243,7 @@ export function SessionQueueSheet({
                   would open an empty session (MOB-118, ADR-048). */}
               {idleTags.length > 0 && availableTags.length > 0 ? <Divider /> : null}
               {idleTags.map((tag) => (
-                <ListRow
-                  key={tag}
-                  name={tag}
-                  meta={t('cards.session.queue.idle')}
-                  dimmed
-                  accessibilityLabel={`${tag} · ${t('cards.session.queue.idle')}`}
-                />
+                <ChoiceRow key={tag} label={tag} count={t('cards.session.queue.idle')} disabled />
               ))}
               {availableTags.length === 0 && idleTags.length === 0 ? (
                 <Typography level='body-sm' color='text.tertiary' style={{ paddingVertical: 12 }}>

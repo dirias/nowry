@@ -48,6 +48,14 @@ export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0, 
             cardsService.getDueCards(deckId, { tags }),
     enabled: enabled && !!userId && !!deckId,
     /*
+     * A new narrowing of the SAME deck keeps the cards on screen until the
+     * new pool arrives (MOB-118). Choosing a tag changes the key, and a bare
+     * `null` in between sent the session to its loading branch, which
+     * unmounted the queue sheet the tag was chosen in and reset it. Another
+     * deck never borrows these cards: the key's fourth slot is the deck.
+     */
+    placeholderData: (previous, previousQuery) => (previousQuery?.queryKey?.[3] === deckId ? previous : undefined),
+    /*
      * A session's queue is read once and then worked through. Refetching it
      * mid-session would change the cards under the user's thumb, so it stays
      * fresh for as long as a session plausibly lasts.
