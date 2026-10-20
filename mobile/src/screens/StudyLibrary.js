@@ -412,6 +412,23 @@ export function StudyLibrary({ header }) {
             />
           )
         }
+        /*
+         * Other people's shelf, reached from your own (MOB-120). It was a
+         * sibling segment drawn like this list, which read as a duplicate.
+         * At the foot of the decks only: cards and tags are yours alone.
+         */
+        ListFooterComponent={
+          view === VIEWS.decks && !selection.selecting && !loading ? (
+            <View style={{ borderTopWidth: 1, borderTopColor: resolveColor(theme, 'divider'), marginTop: theme.spacing[1] }}>
+              <ListRow
+                name={t('public.discoverRow')}
+                meta={t('public.discoverMeta')}
+                action={<Icon name='ChevronRight' size='sm' color='text.tertiary' />}
+                onPress={() => router.push('/study/discover')}
+              />
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
           loading ? (
             <Stack spacing={1}>
@@ -509,7 +526,9 @@ export function StudyLibrary({ header }) {
         title={t('cards.add')}
         actions={[
           { id: 'deck', label: t('cards.newDeck'), onPress: () => setCreating(true) },
-          { id: 'card', label: t('cards.newCard'), onPress: () => router.push('/study/card/new') }
+          { id: 'card', label: t('cards.newCard'), onPress: () => router.push('/study/card/new') },
+          // Other people's decks are something you add, too (MOB-120).
+          { id: 'discover', label: t('public.discoverRow'), onPress: () => router.push('/study/discover') }
         ]}
       />
 

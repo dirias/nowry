@@ -2921,7 +2921,12 @@
     "emptyLibrary": {
       "title": "Rien ici pour l'instant",
       "body": "La bibliothèque est nouvelle. Publiez un livre ou un paquet depuis votre propre bibliothèque et soyez la première personne."
-    }
+    },
+    "discover": "Découvrir",
+    "discoverRow": "Découvrir des paquets et des livres",
+    "discoverMeta": "Partagés par d’autres apprenants",
+    "nothingShared": "Rien n’est encore partagé",
+    "nothingSharedHint": "Les paquets et livres publiés par d’autres apprenants apparaissent ici."
   },
   "editor": {
     "mode": {

@@ -1,5 +1,6 @@
 /**
- * Browse — the public catalogue, on the phone (MOB-049, MOB-066).
+ * The public catalogue, on the phone (MOB-049, MOB-066), shown as Discover
+ * (MOB-120, `app/(tabs)/study/discover.js`).
  *
  * **Books and decks, on one segment, as the web has them.** This screen shipped
  * with decks only, and said so: the phone had no reader, and a shelf of books
@@ -53,6 +54,12 @@ export function Browse({ header = null }) {
     category,
     sort
   })
+
+  const narrowed = Boolean(search.trim() || category)
+  const clearNarrowing = () => {
+    setSearch('')
+    setCategory('')
+  }
 
   const controls = (
     <Stack spacing={2}>
@@ -144,13 +151,24 @@ export function Browse({ header = null }) {
               ))}
             </Stack>
           ) : (
-            <Stack spacing={1} style={{ paddingVertical: theme.spacing[4] }}>
+            /*
+             * Two emptinesses (MOB-120). With nothing narrowing it, an empty
+             * catalogue is an empty catalogue: it said "Try adjusting your
+             * filters" to a learner who had set none. With a search or a
+             * category, the way out is on screen.
+             */
+            <Stack spacing={1} style={{ paddingVertical: theme.spacing[4], alignItems: 'flex-start' }}>
               <Typography level='title-md' color='text.secondary'>
-                {t('public.noResults')}
+                {t(narrowed ? 'public.noResults' : 'public.nothingShared')}
               </Typography>
               <Typography level='body-sm' color='text.secondary'>
-                {t('public.tryFilters')}
+                {t(narrowed ? 'public.tryFilters' : 'public.nothingSharedHint')}
               </Typography>
+              {narrowed ? (
+                <Button size='sm' variant='secondary' onPress={clearNarrowing}>
+                  {t('public.clearFilters')}
+                </Button>
+              ) : null}
             </Stack>
           )
         }

@@ -2664,7 +2664,12 @@
     "emptyLibrary": {
       "title": "Aún no hay nada aquí",
       "body": "La biblioteca es nueva. Publica un libro o un mazo desde tu propia biblioteca y sé la primera persona."
-    }
+    },
+    "discover": "Descubrir",
+    "discoverRow": "Descubrir mazos y libros",
+    "discoverMeta": "Compartidos por otros estudiantes",
+    "nothingShared": "Aún no hay nada compartido",
+    "nothingSharedHint": "Aquí aparecen los mazos y libros que publican otros estudiantes."
   },
   "publish": {
     "openSheet": "Compartir con la comunidad",

@@ -3090,7 +3090,12 @@
     "emptyLibrary": {
       "title": "Nothing here yet",
       "body": "The library is new. Publish a book or a deck from your own library and be the first."
-    }
+    },
+    "discover": "Discover",
+    "discoverRow": "Discover decks and books",
+    "discoverMeta": "Shared by other learners",
+    "nothingShared": "Nothing shared yet",
+    "nothingSharedHint": "Decks and books other learners publish show up here."
   },
   "focusBar": {
     "overdue": "Overdue",

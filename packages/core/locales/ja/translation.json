@@ -2804,7 +2804,12 @@
     "emptyLibrary": {
       "title": "まだ何もありません",
       "body": "ライブラリはできたばかりです。自分のライブラリから本やデッキを公開して、最初の一人になってください。"
-    }
+    },
+    "discover": "見つける",
+    "discoverRow": "デッキと本を見つける",
+    "discoverMeta": "他の学習者が共有",
+    "nothingShared": "まだ共有されたものはありません",
+    "nothingSharedHint": "他の学習者が公開したデッキや本がここに表示されます。"
   },
   "editor": {
     "mode": {

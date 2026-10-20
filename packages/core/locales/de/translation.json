@@ -2910,7 +2910,12 @@
     "emptyLibrary": {
       "title": "Hier ist noch nichts",
       "body": "Die Bibliothek ist neu. Veröffentliche ein Buch oder einen Stapel aus deiner eigenen Bibliothek und sei die erste Person."
-    }
+    },
+    "discover": "Entdecken",
+    "discoverRow": "Decks und Bücher entdecken",
+    "discoverMeta": "Von anderen Lernenden geteilt",
+    "nothingShared": "Noch nichts geteilt",
+    "nothingSharedHint": "Decks und Bücher, die andere Lernende veröffentlichen, erscheinen hier."
   },
   "editor": {
     "mode": {
