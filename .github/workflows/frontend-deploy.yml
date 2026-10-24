@@ -1,7 +1,12 @@
 # Frontend Deploy — Nowry React App
 #
-# Triggers on push to main. Runs validation (lint, build, test) before
-# Vercel's GitHub integration automatically deploys to production.
+# Triggers on push and pull request to main and dev. Runs validation (lint,
+# build, every test suite) before Vercel's GitHub integration deploys.
+#
+# Every test step blocks (QA-001, ADR-049). Vercel deploys through its own
+# GitHub integration, so a red run stops production only when Vercel waits for
+# checks or branch protection on `main` requires these jobs: both are settings
+# outside this file.
 #
 # Required GitHub Secrets (Settings → Secrets and Variables → Actions):
 #   REACT_APP_SENTRY_DSN  — Sentry frontend DSN (from Sentry project settings)
@@ -17,6 +22,11 @@ on:
   push:
     branches:
       - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
 
 jobs:
   build:
@@ -30,7 +40,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -62,9 +72,32 @@ jobs:
           # CI=false prevents react-scripts from treating warnings as errors
           CI: false
 
-      - name: Test
-        run: npm test -- --watchAll=false --passWithNoTests
-        continue-on-error: true  # Tests are advisory in Phase 1 (no test suite yet)
+      - name: Web tests
+        run: npm test -- --watchAll=false
+        env:
+          CI: true
+
+  mobile:
+    name: Mobile unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # The mobile suite needs the mobile workspace and @nowry/core, which the
+      # web job skips. It runs in Node only (see mobile/jest.config.js).
+      - name: Install dependencies
+        run: npm ci --workspace=nowry-mobile --workspace=@nowry/core --include-workspace-root
+
+      - name: Mobile tests
+        run: npm test --workspace=nowry-mobile
 
   # Vercel deployment is automatic via GitHub integration.
   # Uncomment this job only if Vercel GitHub integration is NOT configured:
