@@ -3,6 +3,9 @@
  */
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+// The routine keys a day by the learner's clock (PLAN-010); toISOString's UTC
+// day made these fail every morning east of UTC and never in CI (QA-009).
+import { localDateKey } from '@nowry/core/domain/blocks/dates'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key })
@@ -92,7 +95,7 @@ describe('RTN-01: checkbox toggle persists', () => {
   })
 
   it('Test 2: clicking a checked checkbox again removes the item id from the persisted array', async () => {
-    const todayStr = new Date().toISOString().slice(0, 10)
+    const todayStr = localDateKey(new Date())
     mockGetDailyRoutine.mockResolvedValue(baseRoutine({ daily_completions: { [todayStr]: [ITEM_ID] } }))
     render(<DailyRoutinePlanner />)
     await waitFor(() =>
@@ -107,7 +110,7 @@ describe('RTN-01: checkbox toggle persists', () => {
 
 describe('D-04: migration index to id', () => {
   it('Test 3: index-based daily_completions keys are rewritten to id-based keys and persisted once on load', async () => {
-    const todayStr = new Date().toISOString().slice(0, 10)
+    const todayStr = localDateKey(new Date())
     mockGetDailyRoutine.mockResolvedValue(baseRoutine({ daily_completions: { [todayStr]: ['morning_0'] } }))
     render(<DailyRoutinePlanner />)
     await waitFor(() => expect(mockUpdateDailyRoutine).toHaveBeenCalledTimes(1))

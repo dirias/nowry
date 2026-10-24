@@ -12,6 +12,9 @@ import path from 'path'
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useOutletContext } from 'react-router-dom'
+// The routine keys a day by the learner's clock (PLAN-010); toISOString's UTC
+// day made these fail every morning east of UTC and never in CI (QA-009).
+import { localDateKey } from '@nowry/core/domain/blocks/dates'
 
 // Interpolating stub so assertions can see the values passed to t(), not just the key.
 jest.mock('react-i18next', () => ({
@@ -115,7 +118,7 @@ describe('RTN-03 / D-07 / D-08: daily routine chip in the persistent header', ()
       morning_routine: [{ id: 'a' }, { id: 'b' }],
       afternoon_routine: [{ id: 'c' }],
       evening_routine: [],
-      daily_completions: { [new Date().toISOString().slice(0, 10)]: ['a'] }
+      daily_completions: { [localDateKey(new Date())]: ['a'] }
     }
     renderLayout()
     await waitFor(() => expect(screen.getByText('annualPlanning.header.routineRatio(completed=1,total=3)')).toBeInTheDocument())
