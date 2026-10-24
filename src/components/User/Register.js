@@ -186,7 +186,11 @@ const Register = () => {
         } else if (isInviteRefusal(error)) {
           newErrors.inviteCode = t('beta.inviteInvalid')
         } else {
-          newErrors.serverError = error.message || t('auth.errors.serverError')
+          // Through the shared table, as Login does: `error.message` is
+          // Firebase's English ("Firebase: Error (auth/email-already-in-use).")
+          // or a transport's, never a sentence for the user (QA-009).
+          const key = authErrorKey(error)
+          newErrors.serverError = t(key === FALLBACK_KEY ? 'auth.errors.serverError' : key)
         }
         setErrors(newErrors)
         setLoading(false)
