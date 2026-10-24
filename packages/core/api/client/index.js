@@ -1,4 +1,5 @@
 import axios from 'axios'
+import i18n from 'i18next'
 import { auth, env, notify, session, storage, telemetry } from '../../platform'
 
 /**
@@ -72,15 +73,20 @@ apiClient.interceptors.request.use(
 )
 
 /**
- * Hand a user-visible notification to the client.
+ * Hand a user-visible notification to the client, in the user's language.
+ *
+ * The message is a translation key, resolved here through the i18next
+ * singleton both clients initialise (as AuthContext does). It used to be an
+ * English sentence, which every client rendered as-is, so a Japanese user's
+ * timeout read in English (QA-009).
  *
  * The web client still dispatches the same `api:notify` CustomEvent that
  * NotificationContext listens for; that is now the web adapter's business
  * rather than this file's, which is what lets this interceptor run under a
  * client that has no DOM.
  */
-const notifyUser = (message, severity = 'error') => {
-  notify(message, severity)
+const notifyUser = (key, severity = 'error') => {
+  notify(i18n.t(key), severity)
 }
 
 /**
@@ -151,7 +157,7 @@ apiClient.interceptors.response.use(
 
     // Handle request timeout — suppress for endpoints that surface their own error UI
     if (!suppressGlobalToast && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
-      notifyUser('Request timed out. Please check your connection and try again.', 'warning')
+      notifyUser('errors.api.timeout', 'warning')
     }
 
     // Handle unauthorized (401) — Token expired or invalid
@@ -183,7 +189,7 @@ apiClient.interceptors.response.use(
     // Handle forbidden (403) — suppress for endpoints that open their own upgrade modal or error state
     if (error.response?.status === 403 && !suppressGlobalToast) {
       console.error('Forbidden: Insufficient permissions')
-      notifyUser('You do not have permission to perform this action.', 'warning')
+      notifyUser('errors.api.forbidden', 'warning')
     }
 
     // Handle not found (404) — silent in production, debug-only log
@@ -198,7 +204,7 @@ apiClient.interceptors.response.use(
     // Handle server errors (5xx) — suppress for endpoints that surface their own error UI
     if (error.response?.status >= 500 && !suppressGlobalToast) {
       console.error('Server error:', error.response?.status)
-      notifyUser('A server error occurred. Please try again later.', 'error')
+      notifyUser('errors.api.server', 'error')
     }
 
     return Promise.reject(error)

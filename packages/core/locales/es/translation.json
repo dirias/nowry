@@ -752,9 +752,6 @@
         "counter": "{{selected}} de {{max}} seleccionados",
         "primaryStatus": "Tema principal: {{topic}}",
         "limitReached": "Has alcanzado el límite de {{max}} temas. Quita uno para elegir otro.",
-        "aiLimitReached": "Has usado las {{limit}} generaciones con IA de este mes. Más con Plus, o el mes que viene.",
-        "documentTooLong": "Este documento supera el límite de {{limit}} palabras. Divídelo en dos.",
-        "ttsLimitReached": "Has alcanzado la lectura en voz alta disponible este mes.",
         "srSelected": "Seleccionado, posición {{position}} de {{total}}",
         "srPrimary": "Seleccionado, tema principal, posición {{position}} de {{total}}",
         "srBlocked": "No disponible, límite de {{max}} temas alcanzado"
@@ -1801,7 +1798,10 @@
       "aiLimit": "Límite de generación de IA alcanzado.",
       "upgradeToUse": "Mejora tu plan para usar funciones de IA.",
       "genericCreate": "Error al crear el elemento. Inténtalo de nuevo.",
-      "upgradeAdvice": "Por favor mejora tu plan en Configuración."
+      "upgradeAdvice": "Por favor mejora tu plan en Configuración.",
+      "aiLimitReached": "Has usado las {{limit}} generaciones con IA de este mes. Más con Plus, o el mes que viene.",
+      "documentTooLong": "Este documento supera el límite de {{limit}} palabras. Divídelo en dos.",
+      "ttsLimitReached": "Has alcanzado la lectura en voz alta disponible este mes."
     },
     "title": "Subscription & Billing",
     "currentPlan": "Plan actual",
@@ -4231,7 +4231,12 @@
     "settings": "Ajustes"
   },
   "errors": {
-    "offline": "Parece que no tienes conexión. No se perdió nada; inténtalo de nuevo cuando vuelvas a tener señal."
+    "offline": "Parece que no tienes conexión. No se perdió nada; inténtalo de nuevo cuando vuelvas a tener señal.",
+    "api": {
+      "timeout": "La solicitud tardó demasiado. Revisa tu conexión e inténtalo de nuevo.",
+      "forbidden": "No tienes permiso para realizar esta acción.",
+      "server": "Ocurrió un error en el servidor. Inténtalo de nuevo más tarde."
+    }
   },
   "beta": {
     "mark": "Beta",

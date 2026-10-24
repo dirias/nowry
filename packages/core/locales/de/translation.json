@@ -771,9 +771,6 @@
         "counter": "{{selected}} von {{max}} ausgewählt",
         "primaryStatus": "Hauptthema: {{topic}}",
         "limitReached": "Du hast das Limit von {{max}} Themen erreicht. Entferne eines, um ein anderes zu wählen.",
-        "aiLimitReached": "Du hast die {{limit}} KI-Generierungen dieses Monats verbraucht. Mehr mit Plus, oder nächsten Monat.",
-        "documentTooLong": "Dieses Dokument liegt über der Grenze von {{limit}} Wörtern. Teile es in zwei.",
-        "ttsLimitReached": "Du hast das Vorlese-Kontingent dieses Monats erreicht.",
         "srSelected": "Ausgewählt, Position {{position}} von {{total}}",
         "srPrimary": "Ausgewählt, Hauptthema, Position {{position}} von {{total}}",
         "srBlocked": "Nicht verfügbar, Limit von {{max}} Themen erreicht"
@@ -2729,7 +2726,10 @@
     },
     "upgrade": "Jetzt upgraden",
     "errors": {
-      "limitReached": "Limit deines Tarifs erreicht."
+      "limitReached": "Limit deines Tarifs erreicht.",
+      "aiLimitReached": "Du hast die {{limit}} KI-Generierungen dieses Monats verbraucht. Mehr mit Plus, oder nächsten Monat.",
+      "documentTooLong": "Dieses Dokument liegt über der Grenze von {{limit}} Wörtern. Teile es in zwei.",
+      "ttsLimitReached": "Du hast das Vorlese-Kontingent dieses Monats erreicht."
     },
     "usage": {
       "books": "Bücher",
@@ -3784,7 +3784,12 @@
     "settings": "Einstellungen"
   },
   "errors": {
-    "offline": "Du scheinst offline zu sein. Nichts ist verloren — versuch es erneut, sobald du Empfang hast."
+    "offline": "Du scheinst offline zu sein. Nichts ist verloren — versuch es erneut, sobald du Empfang hast.",
+    "api": {
+      "timeout": "Die Anfrage hat zu lange gedauert. Prüfe deine Verbindung und versuch es erneut.",
+      "forbidden": "Du hast keine Berechtigung für diese Aktion.",
+      "server": "Ein Serverfehler ist aufgetreten. Versuch es später noch einmal."
+    }
   },
   "comments": {
     "moreNotesAriaLabel_one": "{{count}} weitere Notiz unten anzeigen",

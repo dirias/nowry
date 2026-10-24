@@ -782,9 +782,6 @@
         "counter": "{{selected}} sur {{max}} sélectionnés",
         "primaryStatus": "Sujet principal : {{topic}}",
         "limitReached": "Vous avez atteint la limite de {{max}} sujets. Retirez-en un pour en choisir un autre.",
-        "aiLimitReached": "Vous avez utilisé les {{limit}} générations par l'IA de ce mois. Plus avec Plus, ou le mois prochain.",
-        "documentTooLong": "Ce document dépasse le plafond de {{limit}} mots. Coupez-le en deux.",
-        "ttsLimitReached": "Vous avez atteint la lecture à voix haute disponible ce mois-ci.",
         "srSelected": "Sélectionné, position {{position}} sur {{total}}",
         "srPrimary": "Sélectionné, sujet principal, position {{position}} sur {{total}}",
         "srBlocked": "Non disponible, limite de {{max}} sujets atteinte"
@@ -2740,7 +2737,10 @@
     },
     "upgrade": "Passer à un forfait supérieur",
     "errors": {
-      "limitReached": "Limite atteinte pour votre forfait."
+      "limitReached": "Limite atteinte pour votre forfait.",
+      "aiLimitReached": "Vous avez utilisé les {{limit}} générations par l'IA de ce mois. Plus avec Plus, ou le mois prochain.",
+      "documentTooLong": "Ce document dépasse le plafond de {{limit}} mots. Coupez-le en deux.",
+      "ttsLimitReached": "Vous avez atteint la lecture à voix haute disponible ce mois-ci."
     },
     "usage": {
       "books": "Livres",
@@ -3795,7 +3795,12 @@
     "settings": "Réglages"
   },
   "errors": {
-    "offline": "Vous semblez hors ligne. Rien n'est perdu : réessayez dès que vous aurez du réseau."
+    "offline": "Vous semblez hors ligne. Rien n'est perdu : réessayez dès que vous aurez du réseau.",
+    "api": {
+      "timeout": "La requête a expiré. Vérifiez votre connexion et réessayez.",
+      "forbidden": "Vous n'avez pas l'autorisation d'effectuer cette action.",
+      "server": "Une erreur serveur s'est produite. Réessayez plus tard."
+    }
   },
   "comments": {
     "moreNotesAriaLabel_one": "Afficher {{count}} note de plus ci-dessous",
