@@ -27,7 +27,10 @@ describe('tasksDueToday', () => {
   })
 
   it('puts a flagged task first within its day, and ignores the legacy level', () => {
-    const pair = [task('high', { deadline: '2026-09-12', priority: 'high' }), task('flagged', { deadline: '2026-09-12', is_priority: true })]
+    const pair = [
+      task('high', { deadline: '2026-09-12', priority: 'high' }),
+      task('flagged', { deadline: '2026-09-12', is_priority: true })
+    ]
     expect(tasksDueToday(pair, { now }).map((t) => t._id)).toEqual(['flagged', 'high'])
   })
 

@@ -68,7 +68,16 @@ describe('leech (SR-004)', () => {
         rest_until: null
       }
       const draft = splitDraft(card)
-      expect(draft).toEqual({ deck_id: 'd1', card_type: 'flashcard', title: 'T', content: 'C', explanation: '', options: [], correct_answer: null, tags: ['a'] })
+      expect(draft).toEqual({
+        deck_id: 'd1',
+        card_type: 'flashcard',
+        title: 'T',
+        content: 'C',
+        explanation: '',
+        options: [],
+        correct_answer: null,
+        tags: ['a']
+      })
       expect(draft).not.toHaveProperty('_id')
       expect(draft.tags).not.toBe(card.tags)
     })
