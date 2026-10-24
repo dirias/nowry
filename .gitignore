@@ -200,3 +200,7 @@ DEBUG_*.md
 
 # Claude Code — personal settings only (CLAUDE.md and .claude/agents/ ARE committed)
 .claude/settings.local.json
+
+# Playwright (QA-010)
+/test-results/
+/playwright-report/

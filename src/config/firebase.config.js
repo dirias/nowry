@@ -3,7 +3,7 @@
 // Copy your config values here
 
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { connectAuthEmulator, getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FB_API_KEY,
@@ -19,5 +19,11 @@ const app = initializeApp(firebaseConfig)
 
 // Initialize Firebase Authentication
 export const auth = getAuth(app)
+
+// The end-to-end run signs up against the local Auth emulator (QA-010), never a
+// real Firebase project. Unset everywhere else, so no deployed build connects.
+if (process.env.REACT_APP_FB_AUTH_EMULATOR_URL) {
+  connectAuthEmulator(auth, process.env.REACT_APP_FB_AUTH_EMULATOR_URL, { disableWarnings: true })
+}
 
 export default app

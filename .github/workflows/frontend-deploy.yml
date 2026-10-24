@@ -106,6 +106,75 @@ jobs:
       - name: Mobile tests
         run: npm test --workspace=nowry-mobile
 
+  e2e:
+    name: End-to-end (golden path)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # QA-010: the real web client and the real API over a throwaway MongoDB,
+    # signing in against the Firebase Auth emulator (a demo- project). No
+    # secrets: nothing in this job can reach a real Firebase project, database,
+    # Stripe, Sentry or model provider.
+    services:
+      mongo:
+        image: mongo:6.0
+        ports:
+          - 27018:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # The API at the same branch (a PR's base branch), so the two halves of a
+      # change are tested together once both are pushed.
+      - name: Checkout the API
+        uses: actions/checkout@v4
+        with:
+          repository: dirias/Nowry-API
+          ref: ${{ github.base_ref || github.ref_name }}
+          path: api
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: api/requirements.lock
+
+      - name: Install the API
+        run: pip install -r api/requirements.lock
+
+      - name: Install the web client
+        run: npm ci --workspace=@nowry/core --include-workspace-root
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Golden path
+        run: npm run e2e
+        env:
+          CI: true
+          E2E_API_DIR: ${{ github.workspace }}/api
+          E2E_PYTHON: python
+          E2E_EXTERNAL_MONGO: '1'
+          E2E_MONGO_URI: mongodb://127.0.0.1:27018/
+
+      - name: Keep the report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
   # Vercel deployment is automatic via GitHub integration.
   # Uncomment this job only if Vercel GitHub integration is NOT configured:
   # deploy:
