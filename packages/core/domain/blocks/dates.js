@@ -26,6 +26,13 @@ export const parseDateKey = (key) => {
   return new Date(y, (m || 1) - 1, d || 1)
 }
 
+/**
+ * A Date for a deadline that may be a date key or a datetime. `new Date` reads
+ * "2026-09-13" as UTC midnight, which west of UTC is the evening before, so a
+ * key is read as local midnight instead (QA-002).
+ */
+export const dateOf = (value) => (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseDateKey(value) : new Date(value))
+
 export const addDaysKey = (key, days) => {
   const date = parseDateKey(key)
   date.setDate(date.getDate() + days)

@@ -13,6 +13,8 @@
  * contract, so the filter matches it.
  */
 
+import { dateOf } from './blocks/dates'
+
 /**
  * Flagged first (ADR-046: a priority is a flag). The legacy `priority` level
  * defaults to "medium" on every task, so it ranks nothing and is not read.
@@ -20,7 +22,7 @@
 const rankOf = (task) => (task?.is_priority ? 0 : 1)
 
 const startOfDay = (value) => {
-  const date = new Date(value)
+  const date = dateOf(value)
   return Number.isNaN(date.getTime()) ? null : new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 }
 

@@ -16,6 +16,8 @@
  *      reason a priority is urgent, so the ones that have one lead.
  */
 
+import { dateOf } from './blocks/dates'
+
 /** How many the section shows when the user has never chosen. */
 export const WATCHED_DEFAULT = 4
 
@@ -32,7 +34,7 @@ const withArea = (priority, goals) => {
  */
 export const watchablePriorities = (priorities, goals) => {
   const open = (priorities ?? []).map((priority) => withArea(priority, goals)).filter((priority) => !priority?.is_completed)
-  const dated = open.filter((priority) => priority.deadline).sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+  const dated = open.filter((priority) => priority.deadline).sort((a, b) => dateOf(a.deadline) - dateOf(b.deadline))
   return [...dated, ...open.filter((priority) => !priority.deadline)]
 }
 
@@ -49,7 +51,7 @@ export const watchedPriorities = (priorities, goals) => watchablePriorities(prio
  */
 export const deadlineReadout = (priority, now = new Date()) => {
   if (!priority?.deadline) return null
-  const due = new Date(priority.deadline)
+  const due = dateOf(priority.deadline)
   if (Number.isNaN(due.getTime())) return null
 
   const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()

@@ -64,6 +64,13 @@ jobs:
       - name: Shared package tests
         run: npm run test:core
 
+      # Again west of UTC (ADR-049): date logic that assumes UTC passes on a
+      # UTC runner and puts a deadline on the wrong day in the US (QA-002).
+      - name: Shared package tests (America/Los_Angeles)
+        run: npm run test:core
+        env:
+          TZ: America/Los_Angeles
+
       - name: Build
         run: npm run build
         env:
