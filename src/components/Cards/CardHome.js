@@ -147,6 +147,10 @@ export default function CardHome() {
   // authoring loop on its first iteration.
   const handleCardSaved = () => {
     reloadCards() // Force a fresh fetch so the new/edited card appears
+    // A card changes its deck's count (and an edit can move it to another
+    // deck): without this the new deck's tile read "0 cards" beside "Cards 2"
+    // until a reload (found by the QA-010 end-to-end run).
+    reloadDecks()
   }
 
   const handleDeckSaved = () => {
