@@ -3,6 +3,8 @@ import { Box, Button, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { identityTile, listRow, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 import { deckType } from './deckTypes'
+import { deckRest } from '@nowry/core/domain/cardRest'
+import { restLabel } from '../Cards/restLabel'
 
 // The archived variant mutes the two parts that carry colour — the tile and
 // the measure — and nothing else, so the row keeps its anatomy and its text
@@ -29,8 +31,9 @@ const archivedOn = (deck) =>
  * in the action slot. Nothing else on the row changes.
  */
 export default function DeckRow({ deck, onStudy, onBrowse, onRestore, formatRelativeDate, trailing = null, archived = false }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const type = deckType(deck.deck_type)
+  const rest = deckRest(deck)
   const due = deck.due_cards || 0
   const fresh = deck.new_cards || 0
   const mastery = deck.mastery || 0
@@ -43,6 +46,8 @@ export default function DeckRow({ deck, onStudy, onBrowse, onRestore, formatRela
   let status
   if (archived) {
     status = <span>{t('study.deck.historyKept')}</span>
+  } else if (rest.resting) {
+    status = <span>{restLabel(t, rest, i18n.language)}</span>
   } else if (asked > 0) {
     status = (
       <>
@@ -57,6 +62,8 @@ export default function DeckRow({ deck, onStudy, onBrowse, onRestore, formatRela
     )
   } else if (deck.is_due_soon && deck.hours_until_due != null) {
     status = <span>{t('study.deck.dueIn', { hours: deck.hours_until_due })}</span>
+  } else if (rest.restingCards > 0) {
+    status = <span>{t('cards.rest.count', { count: rest.restingCards })}</span>
   } else {
     status = <span>{t('study.deck.upToDate')}</span>
   }

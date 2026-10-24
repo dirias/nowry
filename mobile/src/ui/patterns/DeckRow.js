@@ -21,18 +21,20 @@ import { Icon } from '../icons'
 import { IdentityTile } from './IdentityTile'
 import { deckRest } from '@nowry/core/domain/cardRest'
 import { ListRow } from './ListRow'
+import { restLabel } from './RestSheet'
 
 export function DeckRow({ deck, onPress }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const type = deckType(deck?.deck_type)
   const { due, fresh, mastery, asked, allNew, resting } = deckCounts(deck)
-  const deckResting = deckRest(deck).resting
+  const rest = deckRest(deck)
+  const deckResting = rest.resting
 
   const meta = `${t(type.labelKey)} · ${allNew ? t('study.deckPill.new') : `${mastery}%`}`
 
   const readout = deckResting ? (
     <Typography level='body-sm' color='text.tertiary'>
-      {t('study.deck.resting')}
+      {restLabel(t, rest, i18n.language)}
     </Typography>
   ) : asked > 0 ? (
     <Typography level='body-sm' color='text.secondary'>

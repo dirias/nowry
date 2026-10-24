@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { focusRing, identityTile, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 import { deckType } from '../Study/deckTypes'
 import { MOTION } from '@nowry/core/tokens/tokens'
+import { deckRest } from '@nowry/core/domain/cardRest'
+import { restLabel } from './restLabel'
 
 /**
  * The library's grid tile: the deck row's five parts stacked into three lines
@@ -13,8 +15,9 @@ import { MOTION } from '@nowry/core/tokens/tokens'
  * something is due and browses otherwise, the same as the row's action.
  */
 export default function DeckTile({ deck, onStudy, onBrowse, actions }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const type = deckType(deck.deck_type)
+  const rest = deckRest(deck)
   const due = deck.due_cards || 0
   const fresh = deck.new_cards || 0
   const asked = due + fresh
@@ -23,7 +26,9 @@ export default function DeckTile({ deck, onStudy, onBrowse, actions }) {
   const open = () => (asked > 0 ? onStudy(deck) : onBrowse(deck))
 
   let status
-  if (asked > 0) {
+  if (rest.resting) {
+    status = <span>{restLabel(t, rest, i18n.language)}</span>
+  } else if (asked > 0) {
     status = (
       <>
         {due > 0 && (
@@ -35,6 +40,8 @@ export default function DeckTile({ deck, onStudy, onBrowse, actions }) {
         {fresh > 0 && <span>{t('study.deck.newCount', { count: fresh })}</span>}
       </>
     )
+  } else if (rest.restingCards > 0) {
+    status = <span>{t('cards.rest.count', { count: rest.restingCards })}</span>
   } else {
     status = <span>{t('study.deck.upToDate')}</span>
   }

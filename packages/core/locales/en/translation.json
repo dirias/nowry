@@ -2185,6 +2185,7 @@
       "restTag": "Rest this tag",
       "restDeck": "Rest this deck",
       "restDeckHint": "Its cards leave the daily review and the counts. Their schedule is kept.",
+      "restingDeckHint": "Its cards are out of the daily review and the counts. Wake it to bring them back, schedule as it was.",
       "kept": "Keeps its schedule. Wake it any time.",
       "lighten": "Lighten today",
       "count_one": "{{count}} resting",

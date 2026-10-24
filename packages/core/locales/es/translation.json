@@ -1755,6 +1755,7 @@
       "restTag": "Descansar esta etiqueta",
       "restDeck": "Descansar este mazo",
       "restDeckHint": "Sus tarjetas salen del repaso diario y de los conteos. Su calendario se conserva.",
+      "restingDeckHint": "Sus tarjetas están fuera del repaso diario y de los conteos. Despiértalo para traerlas de vuelta, con su calendario intacto.",
       "kept": "Conserva su calendario. Despiértala cuando quieras.",
       "lighten": "Aligerar hoy",
       "count_one": "{{count}} en descanso",

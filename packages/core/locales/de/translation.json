@@ -2482,6 +2482,7 @@
       "restTag": "Dieses Tag ruhen lassen",
       "restDeck": "Diesen Stapel ruhen lassen",
       "restDeckHint": "Seine Karten verlassen die Tageswiederholung und die Zähler. Ihr Zeitplan bleibt erhalten.",
+      "restingDeckHint": "Seine Karten sind aus der Tageswiederholung und den Zählern heraus. Wecke es, um sie zurückzuholen – der Zeitplan bleibt wie er war.",
       "kept": "Behält ihren Zeitplan. Jederzeit wecken.",
       "lighten": "Heute entlasten",
       "count_one": "{{count}} ruht",

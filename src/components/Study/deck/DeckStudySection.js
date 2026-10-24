@@ -117,18 +117,29 @@ const DeckStudySection = ({ loading, config, onChange, deck = null, onRest, onWa
       </FormControl>
 
       {/* The deck rests (SR-003, ADR-043): its cards leave the daily review and
-          the counts, schedule kept, and it stays in the library — unlike archive. */}
+          the counts, schedule kept, and it stays in the library — unlike archive.
+          One control per state: awake offers the lengths, resting reads its
+          date and offers Wake — never both, never an empty picker. */}
       {onRest && (
         <FormControl>
-          <FormLabel sx={formLabel}>{rest.resting ? restLabel(t, rest, i18n.language) : t('cards.rest.restDeck')}</FormLabel>
-          <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap>
+          <FormLabel sx={formLabel}>{t('cards.rest.restDeck')}</FormLabel>
+          {rest.resting ? (
+            <Stack direction='row' spacing={1.5} alignItems='center' flexWrap='wrap' useFlexGap>
+              <Typography level='body-sm' textColor='text.primary' data-testid='deck-rest-status'>
+                {restLabel(t, rest, i18n.language)}
+              </Typography>
+              <Button size='sm' variant='soft' color='neutral' onClick={() => write(() => onWake())} sx={{ ...touchTarget, ...focusRing }}>
+                {t('cards.rest.wake')}
+              </Button>
+            </Stack>
+          ) : (
             <Select
               size='sm'
               placeholder={t('cards.rest.restUntil')}
               value={null}
               onChange={(event, key) => key && write(() => onRest(untilFromPreset(key)))}
               slotProps={{ button: { 'aria-label': t('cards.rest.restDeck') } }}
-              sx={{ minWidth: 180, ...touchTarget, ...focusRing }}
+              sx={{ minWidth: 180, alignSelf: 'flex-start', ...touchTarget, ...focusRing }}
             >
               {REST_PRESETS.map((preset) => (
                 <Option key={preset.key} value={preset.key}>
@@ -136,13 +147,8 @@ const DeckStudySection = ({ loading, config, onChange, deck = null, onRest, onWa
                 </Option>
               ))}
             </Select>
-            {rest.resting && (
-              <Button size='sm' variant='soft' color='neutral' onClick={() => write(() => onWake())} sx={{ ...touchTarget, ...focusRing }}>
-                {t('cards.rest.wake')}
-              </Button>
-            )}
-          </Stack>
-          <FormHelperText>{t('cards.rest.restDeckHint')}</FormHelperText>
+          )}
+          <FormHelperText>{t(rest.resting ? 'cards.rest.restingDeckHint' : 'cards.rest.restDeckHint')}</FormHelperText>
         </FormControl>
       )}
     </Stack>

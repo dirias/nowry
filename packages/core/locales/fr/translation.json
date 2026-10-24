@@ -2493,6 +2493,7 @@
       "restTag": "Mettre ce tag au repos",
       "restDeck": "Mettre ce paquet au repos",
       "restDeckHint": "Ses cartes quittent la révision du jour et les compteurs. Leur planning est conservé.",
+      "restingDeckHint": "Ses cartes sont hors de la révision du jour et des compteurs. Réveillez-le pour les ramener, planning intact.",
       "kept": "Conserve son planning. Réveillez-la quand vous voulez.",
       "lighten": "Alléger aujourd’hui",
       "count_one": "{{count}} au repos",
