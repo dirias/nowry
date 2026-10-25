@@ -131,10 +131,18 @@ export default function TTSControls({
   }, [voiceSettings, allVoices, selectedVoice, onVoiceSettingsChange])
 
   // ── Handlers ───────────────────────────────────────────────────────────────
-  const handlePlay = React.useCallback(async () => {
+  // Which play is current. A card change bumps it, so segments fetched for the
+  // card the learner already left are never spoken over the next one.
+  const playRun = React.useRef(0)
+  // The text last started, by a tap or by auto-play: auto-play skips it, so the
+  // first tap — which is also what unlocks auto-play — speaks once, not twice.
+  const startedText = React.useRef(null)
+
+  /** Speak `text` the one way both Listen and auto-play use (TTS-004). */
+  const playText = React.useCallback(async () => {
     if (!text) return
-    // Mark that the user has initiated playback – this satisfies the user‑gesture requirement on mobile
-    setUserInitiated(true)
+    const run = ++playRun.current
+    startedText.current = text
 
     const playbackCallbacks = {
       rate,
@@ -147,6 +155,7 @@ export default function TTSControls({
       setIsSegmenting(true)
       const segments = await getSegments(text, langHint)
       setIsSegmenting(false)
+      if (run !== playRun.current) return
       if (segments) {
         speakSegments(segments, playbackCallbacks)
         return
@@ -158,6 +167,12 @@ export default function TTSControls({
     ttsService.speak(text, playbackCallbacks)
   }, [text, langHint, rate, mode, getSegments, speakSegments])
 
+  const handlePlay = React.useCallback(() => {
+    // Mark that the user has initiated playback – this satisfies the user‑gesture requirement on mobile
+    setUserInitiated(true)
+    return playText()
+  }, [playText])
+
   const handlePause = () => {
     ttsService.pause()
     setIsPlaying(false)
@@ -168,21 +183,19 @@ export default function TTSControls({
   //   • `isPlaying` is excluded — including it caused the effect to re-run
   //     every time speech ended (setIsPlaying(false)), immediately re-triggering
   //     playback and creating an infinite play loop.
-  //   • `handlePlay` is excluded — it is a useCallback on [text, rate]; including
+  //   • `playText` is excluded — it changes identity with `text`; including
   //     it caused the effect to fire TWICE per card change (once for `text`, once
-  //     for the new handlePlay reference), producing double-play.
-  //   • Cleanup cancels any in-progress speech before starting the next one,
-  //     preventing overlap when the user advances cards mid-utterance.
+  //     for the new reference), producing double-play.
+  //   • Cleanup cancels any in-progress speech, and any segmentation still in
+  //     flight, before the next card starts.
   useEffect(() => {
     // Auto‑play is only allowed after a user interaction (required on iOS/Android)
     if (!autoPlay || !text || allVoices.length === 0 || !userInitiated) return
-    ttsService.speak(text, {
-      rate,
-      onStart: () => setIsPlaying(true),
-      onEnd: () => setIsPlaying(false),
-      onError: () => setIsPlaying(false)
-    })
+    if (startedText.current === text) return
+    playText()
     return () => {
+      playRun.current += 1
+      startedText.current = null
       ttsService.stop()
       setIsPlaying(false)
     }
