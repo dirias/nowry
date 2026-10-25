@@ -54,7 +54,8 @@ export default function TTSControls({
   settingsOpen,
   onSettingsChange,
   voiceSettings,
-  onVoiceSettingsChange
+  onVoiceSettingsChange,
+  langHint = null // the card's language for kanji alone (ADR-050)
 }) {
   const { t } = useTranslation()
   const { getSegments, speakSegments } = useSegmentedSpeech()
@@ -144,7 +145,7 @@ export default function TTSControls({
 
     if (mode === 'auto') {
       setIsSegmenting(true)
-      const segments = await getSegments(text)
+      const segments = await getSegments(text, langHint)
       setIsSegmenting(false)
       if (segments) {
         speakSegments(segments, playbackCallbacks)
@@ -155,7 +156,7 @@ export default function TTSControls({
     }
 
     ttsService.speak(text, playbackCallbacks)
-  }, [text, rate, mode, getSegments, speakSegments])
+  }, [text, langHint, rate, mode, getSegments, speakSegments])
 
   const handlePause = () => {
     ttsService.pause()

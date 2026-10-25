@@ -21,9 +21,10 @@ import ttsService from '../utils/tts.service'
 export function useSegmentedSpeech() {
   /**
    * Returns the segments for `text`, or `null` on ANY failure (network error,
-   * 429, 500, offline). Never throws to the caller.
+   * 429, 500, offline). Never throws to the caller. `hint` is the card's
+   * language for kanji alone (ADR-050).
    */
-  const getSegments = (text) => fetchSegments(text)
+  const getSegments = (text, hint = null) => fetchSegments(text, hint)
 
   /**
    * Speaks each segment in sequence, one `ttsService.speak()` call per

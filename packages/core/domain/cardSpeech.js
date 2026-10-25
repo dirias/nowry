@@ -16,6 +16,8 @@
  * the answer is what makes an audio quiz usable at all.
  */
 
+import { languageBase } from './voiceMatch'
+
 /** The three spellings the question has worn, newest first. */
 export const frontText = (card) => card?.title || card?.question || card?.front || ''
 
@@ -39,6 +41,41 @@ export function speechTextFor(card, { flipped = false } = {}) {
   }
 
   return flipped ? backText(card) : frontText(card)
+}
+
+/** Hiragana, katakana and their phonetic extensions: only Japanese writes them. */
+const KANA = /[\u3040-\u30ff\u31f0-\u31ff]/
+
+/** The two languages that write Han, and so the only hints worth sending. */
+const HAN_LANGUAGES = ['ja', 'zh']
+
+const savedHanLanguage = (side) => {
+  const base = languageBase(side?.voiceLang ?? side?.voice_lang)
+  return HAN_LANGUAGES.includes(base) ? base : null
+}
+
+/**
+ * Which language a card's kanji are, or `null` when the card does not say.
+ *
+ * 学生 is the same three strokes in Japanese and Chinese, so the segmenter
+ * cannot tell them apart and reads kanji-only text as Chinese (ADR-050). The
+ * card can: a language the learner saved for either face, or kana anywhere on
+ * it — a reading on the back is the usual case.
+ *
+ * @param {object} card
+ * @param {{front?: object, back?: object}} [voiceSettings] — the deck's two sides.
+ * @param {{flipped?: boolean}} [options] — whether the answer is showing.
+ * @returns {'ja' | 'zh' | null}
+ */
+export function speechHintFor(card, voiceSettings = null, { flipped = false } = {}) {
+  const showing = flipped ? voiceSettings?.back : voiceSettings?.front
+  const other = flipped ? voiceSettings?.front : voiceSettings?.back
+  const saved = savedHanLanguage(showing) || savedHanLanguage(other)
+  if (saved) return saved
+
+  if (!card) return null
+  const options = Array.isArray(card.options) ? card.options : []
+  return [frontText(card), backText(card), ...options].some((text) => KANA.test(String(text ?? ''))) ? 'ja' : null
 }
 
 export default speechTextFor

@@ -28,7 +28,7 @@
  * otherwise stack utterances, and the fifth card would be hearing the second.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { speechTextFor } from '@nowry/core/domain/cardSpeech'
+import { speechHintFor, speechTextFor } from '@nowry/core/domain/cardSpeech'
 import { fetchSegments, segmentLang, segmentText } from '@nowry/core/domain/speechSegments'
 import { resolveVoice } from '@nowry/core/domain/voiceMatch'
 import { canSpeak, speak, stop, voiceToRequest } from '../platform/speech'
@@ -47,7 +47,7 @@ import { subscribeToDeviceVoices } from '../platform/voices'
  * says the card should; a message that spoke itself on arrival would be the
  * companion raising its voice, which is not a thing any setting asks for.
  */
-export function useSpeech({ text = '', settings = null } = {}) {
+export function useSpeech({ text = '', settings = null, hint = null } = {}) {
   const [voices, setVoices] = useState([])
   const [speaking, setSpeaking] = useState(false)
 
@@ -84,7 +84,7 @@ export function useSpeech({ text = '', settings = null } = {}) {
 
     // Auto-detect (ADR-001) is the default. A failure here is silence from the
     // server, not from the phone: the whole text is still spoken below.
-    const segments = (settings?.mode ?? 'auto') === 'auto' ? await fetchSegments(text) : null
+    const segments = (settings?.mode ?? 'auto') === 'auto' ? await fetchSegments(text, hint) : null
     if (!current()) return
 
     if (!segments) {
@@ -116,7 +116,7 @@ export function useSpeech({ text = '', settings = null } = {}) {
       })
     }
     next(0)
-  }, [text, halt, settings, voiceFor])
+  }, [text, hint, halt, settings, voiceFor])
 
   const toggle = useCallback(() => (speaking ? halt() : play()), [speaking, halt, play])
 
@@ -138,10 +138,14 @@ export function useSpeech({ text = '', settings = null } = {}) {
 
 /**
  * A card, read aloud: the text it sounds like, plus the deck's auto-play.
+ *
+ * `sides` is the deck's front and back settings together: which language a
+ * card's kanji are can be saved on either face (ADR-050).
  */
-export function useCardSpeech({ card, flipped = false, settings = null } = {}) {
+export function useCardSpeech({ card, flipped = false, settings = null, sides = null } = {}) {
   const text = useMemo(() => speechTextFor(card, { flipped }), [card, flipped])
-  const speech = useSpeech({ text, settings })
+  const hint = useMemo(() => speechHintFor(card, sides, { flipped }), [card, sides, flipped])
+  const speech = useSpeech({ text, settings, hint })
   const { play, stop: halt } = speech
 
   /*

@@ -68,8 +68,8 @@ export const ttsService = {
     }
   },
 
-  segmentText: async (text) => {
-    const { data } = await apiClient.post(ENDPOINTS.tts.segment(), { text })
+  segmentText: async (text, hint = null) => {
+    const { data } = await apiClient.post(ENDPOINTS.tts.segment(), hint ? { text, lang_hint: hint } : { text })
     return data.segments
   }
 }

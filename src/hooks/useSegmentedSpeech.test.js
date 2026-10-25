@@ -84,6 +84,27 @@ describe('useSegmentedSpeech: getSegments', () => {
   })
 })
 
+describe('useSegmentedSpeech: the language hint (ADR-050)', () => {
+  beforeEach(() => {
+    queryClient.clear()
+    mockSegmentText.mockReset()
+  })
+
+  it('sends the hint and caches each hint apart', async () => {
+    mockSegmentText.mockResolvedValue([{ text: '学生', lang_code: 'ja' }])
+    const { result } = renderHook(() => useSegmentedSpeech())
+
+    await result.current.getSegments('学生', 'ja')
+    await result.current.getSegments('学生', 'ja')
+    await result.current.getSegments('学生')
+
+    expect(mockSegmentText.mock.calls).toEqual([
+      ['学生', 'ja'],
+      ['学生', null]
+    ])
+  })
+})
+
 describe('useSegmentedSpeech: speakSegments', () => {
   beforeEach(() => {
     mockSpeak.mockReset()

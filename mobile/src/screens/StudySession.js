@@ -356,7 +356,7 @@ export function StudySession() {
    */
   const { voiceSettings, getSettingsForDeck } = useVoiceSettings(id)
   const deckVoices = id === DAILY_REVIEW ? getSettingsForDeck(current?.deck_id?._id ?? current?.deck_id) : voiceSettings
-  const speech = useCardSpeech({ card: current, flipped: revealed, settings: revealed ? deckVoices?.back : deckVoices?.front })
+  const speech = useCardSpeech({ card: current, flipped: revealed, settings: revealed ? deckVoices?.back : deckVoices?.front, sides: deckVoices })
 
   /*
    * The companion, speaking unasked (MOB-088).
