@@ -16,6 +16,7 @@
  */
 
 import { fetchSegments, segmentLang, segmentText } from '@nowry/core/domain/speechSegments'
+import { readsScriptOf, voiceForSegment } from '@nowry/core/domain/voiceMatch'
 import ttsService from '../utils/tts.service'
 
 export function useSegmentedSpeech() {
@@ -44,8 +45,13 @@ export function useSegmentedSpeech() {
       const isFirst = index === 0
       const isLast = index === segments.length - 1
 
+      // The deck's voice for every segment in its script, a voice for the
+      // segment's language for any other script (ADR-050).
+      const lang = segmentLang(segment)
+      const voice = voiceForSegment(ttsService.getVoices(), ttsService.selectedVoice, lang)
       ttsService.speak(segmentText(segment), {
-        lang: segmentLang(segment),
+        lang: voice && readsScriptOf(voice.lang, lang) ? voice.lang : lang,
+        voice,
         rate,
         onStart: () => {
           if (isFirst && onStart) onStart()

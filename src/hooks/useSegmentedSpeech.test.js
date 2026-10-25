@@ -23,7 +23,14 @@ jest.mock('@nowry/core/api/services/tts.ai.service', () => ({
 const mockSpeak = jest.fn()
 jest.mock('../utils/tts.service', () => ({
   __esModule: true,
-  default: { speak: (...args) => mockSpeak(...args) }
+  default: {
+    speak: (...args) => mockSpeak(...args),
+    getVoices: () => [
+      { name: 'Kyoko', lang: 'ja-JP' },
+      { name: 'Samantha', lang: 'en-US' }
+    ],
+    selectedVoice: { name: 'Kyoko', lang: 'ja-JP' }
+  }
 }))
 
 describe('useSegmentedSpeech: getSegments', () => {
@@ -127,6 +134,17 @@ describe('useSegmentedSpeech: speakSegments', () => {
 
     expect(mockSpeak).toHaveBeenCalledTimes(2)
     expect(mockSpeak).toHaveBeenCalledWith('world', expect.objectContaining({ lang: 'en-US' }))
+  })
+
+  it('keeps the selected voice for its own language and finds one for the others (ADR-050)', () => {
+    const { result } = renderHook(() => useSegmentedSpeech())
+    result.current.speakSegments([
+      { text: '学生', lang_code: 'ja' },
+      { text: 'student', lang_code: 'en' }
+    ])
+    expect(mockSpeak.mock.calls[0][1].voice).toEqual({ name: 'Kyoko', lang: 'ja-JP' })
+    mockSpeak.mock.calls[0][1].onEnd()
+    expect(mockSpeak.mock.calls[1][1].voice).toEqual({ name: 'Samantha', lang: 'en-US' })
   })
 
   it('fires the caller onStart only before the first segment, not every segment', () => {

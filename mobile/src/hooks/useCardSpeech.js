@@ -30,7 +30,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { speechHintFor, speechTextFor } from '@nowry/core/domain/cardSpeech'
 import { fetchSegments, segmentLang, segmentText } from '@nowry/core/domain/speechSegments'
-import { resolveVoice } from '@nowry/core/domain/voiceMatch'
+import { readsScriptOf, resolveVoice } from '@nowry/core/domain/voiceMatch'
 import { canSpeak, speak, stop, voiceToRequest } from '../platform/speech'
 import { subscribeToDeviceVoices } from '../platform/voices'
 
@@ -105,10 +105,14 @@ export function useSpeech({ text = '', settings = null, hint = null } = {}) {
     const next = (index) => {
       if (!current()) return
       if (index >= segments.length) return setSpeaking(false)
-      const language = segmentLang(segments[index])
+      // The deck's own language reads every segment in its script; only
+      // another script switches voice (ADR-050). The detector's word on Latin
+      // text is a guess, and "Feliz" read in English is the price of trusting it.
+      const detected = segmentLang(segments[index])
+      const language = readsScriptOf(settings?.voiceLang, detected) ? null : detected
       const voice = voiceFor(language)
       speak(segmentText(segments[index]), {
-        lang: voice?.lang || language,
+        lang: voice?.lang || language || settings?.voiceLang || undefined,
         voice: voiceToRequest(voice, settings),
         rate,
         pitch,
