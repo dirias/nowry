@@ -53,6 +53,11 @@ export default function FloatingToolbarPlugin({
   const [selectedText, setSelectedText] = useState('')
   const [currentBlockType, setCurrentBlockType] = useState('paragraph')
   const menuRef = useRef(null)
+  // The text of the selection an action was just taken on. TextMenu keeps the
+  // selection alive so actions can read it, so the next selection event would
+  // re-show the toolbar over the dialog the action opened; it waits for the
+  // selection to change instead (QA-016).
+  const actedOnRef = useRef(null)
 
   const isReading = mode !== 'edit'
 
@@ -141,6 +146,8 @@ export default function FloatingToolbarPlugin({
       rootElement &&
       rootElement.contains(nativeSelection.anchorNode)
     ) {
+      if (nativeSelection.toString() === actedOnRef.current) return
+      actedOnRef.current = null
       const domRange = nativeSelection.getRangeAt(0)
       const rect = domRange.getBoundingClientRect()
 
@@ -183,6 +190,7 @@ export default function FloatingToolbarPlugin({
 
       setShowMenu(true)
     } else {
+      actedOnRef.current = null
       // Keep the toolbar pinned at its last known position while audio is playing,
       // even if the native selection collapses.
       if (ttsState !== 'idle') return
@@ -218,11 +226,14 @@ export default function FloatingToolbarPlugin({
       rootElement.contains(nativeSelection.anchorNode)
 
     if (!hasUsableSelection) {
+      actedOnRef.current = null
       // Same pinned-while-playing rule as editing mode.
       if (ttsState !== 'idle') return
       setShowMenu(false)
       return
     }
+    if (text === actedOnRef.current) return
+    actedOnRef.current = null
 
     const rect = nativeSelection.getRangeAt(0).getBoundingClientRect()
     setAnchor({ top: rect.top - TOOLBAR_OFFSET_PX, centerX: rect.left + rect.width / 2 })
@@ -400,6 +411,7 @@ export default function FloatingToolbarPlugin({
         ref={menuRef}
         onOptionClick={(opt) => {
           onOptionClick(opt, selectedText)
+          actedOnRef.current = selectedText
           setShowMenu(false)
         }}
         onLinkEdit={(editing) => {

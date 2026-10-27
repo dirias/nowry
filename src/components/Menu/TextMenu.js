@@ -501,7 +501,7 @@ const TextMenu = forwardRef(
               : {
                   // Desktop: identical geometry to the editing toolbar.
                   position: 'fixed',
-                  zIndex: 9999,
+                  zIndex: 'popup',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 0.5,
@@ -539,7 +539,8 @@ const TextMenu = forwardRef(
         variant='elevated'
         sx={{
           position: 'fixed',
-          zIndex: 9999,
+          // A popover over the selection: under the dialogs its actions open (QA-016).
+          zIndex: 'popup',
           display: 'flex',
           alignItems: 'center',
           gap: 0.5,
