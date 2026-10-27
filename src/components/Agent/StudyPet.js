@@ -1328,7 +1328,13 @@ const StudyPet = () => {
           {/* Level-up celebration overlay */}
           <AnimatePresence>
             {justLeveledUp && levelUpData && (
-              <LevelUpCelebration key='level-up' levelUpData={levelUpData} stage={stage} onDismiss={levelUpClear} />
+              <LevelUpCelebration
+                key='level-up'
+                levelUpData={levelUpData}
+                stage={stage}
+                side={isInStudySession ? 'left' : 'right'}
+                onDismiss={levelUpClear}
+              />
             )}
           </AnimatePresence>
 
@@ -1339,6 +1345,7 @@ const StudyPet = () => {
                 key='pet-reveal'
                 species={petSpecies}
                 cardsReviewed={revealData?.cardsReviewed}
+                side={isInStudySession ? 'left' : 'right'}
                 onDismiss={petRevealClear}
               />
             )}

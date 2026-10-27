@@ -43,7 +43,7 @@ const SPECIES_IDLE_EMOJI = {
 // Stage-1 fallback emoji, matching STAGE_CONFIG[1] in StudyPet.js/LevelUpCelebration.
 const STAGE_1_EMOJI = '✨'
 
-const PetRevealCelebration = ({ species, cardsReviewed, onDismiss }) => {
+const PetRevealCelebration = ({ species, cardsReviewed, side = 'right', onDismiss }) => {
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -59,7 +59,9 @@ const PetRevealCelebration = ({ species, cardsReviewed, onDismiss }) => {
       style={{
         position: 'absolute',
         bottom: 68,
-        right: 0,
+        // The orb's side (StudyPet docks left in a study session): the card opens
+        // toward the screen, never past the edge the orb sits on (QA-014).
+        [side]: 0,
         zIndex: 10000,
         cursor: 'pointer',
         pointerEvents: 'auto'

@@ -352,3 +352,37 @@ describe('StudyPet — the chat panel shows the companion', () => {
     expect(document.body.textContent).toContain('🌿')
   })
 })
+
+// QA-014: the celebrations sit above the orb, opening toward the screen. They
+// were pinned `right: 0`, so docked bottom-left in a study session their 220 px
+// card grew leftward out of the viewport.
+describe('celebrations open toward the screen', () => {
+  /** The celebration's outermost element: the absolutely placed motion wrapper. */
+  const celebrationAround = (text) => {
+    let el = screen.getByText(text)
+    while (el && el.style.position !== 'absolute') el = el.parentElement
+    return el
+  }
+
+  it.each([
+    ['the companion reveal', { justRevealed: true, revealData: { cardsReviewed: 3 } }, 'pet.reveal.title'],
+    ['a level-up', { justLeveledUp: true, levelUpData: { newLevel: 2 } }, 'pet.levelUp.dismiss']
+  ])('anchors %s at the left edge while docked left', async (_, state, text) => {
+    withPet({ isInStudySession: true, ...state })
+    render(<StudyPet />)
+    const card = celebrationAround(text)
+    expect(card.style.left).toBe('0px')
+    expect(card.style.right).toBe('')
+  })
+
+  it.each([
+    ['the companion reveal', { justRevealed: true, revealData: { cardsReviewed: 3 } }, 'pet.reveal.title'],
+    ['a level-up', { justLeveledUp: true, levelUpData: { newLevel: 2 } }, 'pet.levelUp.dismiss']
+  ])('anchors %s at the right edge while docked right', async (_, state, text) => {
+    withPet(state)
+    render(<StudyPet />)
+    const card = celebrationAround(text)
+    expect(card.style.right).toBe('0px')
+    expect(card.style.left).toBe('')
+  })
+})
