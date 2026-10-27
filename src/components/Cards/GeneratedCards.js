@@ -31,6 +31,7 @@ import { sourceFieldsFor } from '@nowry/core/domain/books/sectionCards'
 import { useSaveToDeck } from '@nowry/core/hooks/useSaveToDeck'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
+import { useBeta } from '@nowry/core/context/BetaContext'
 import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
 import GeneratedCard from './GeneratedCard'
@@ -83,6 +84,8 @@ export default function GeneratedCards({
   const { t } = useTranslation()
   const { tier, flashcardLimit, flashcardCount } = useSubscription()
   const { upgradeDismissed, dismissUpgrade, isUpgradeModalOpen, openUpgradeModal, closeUpgradeModal } = useSubscriptionContext()
+  // The beta can close upgrades; then nothing here offers one (QA-015), as PlansPage and UpgradePrompt do.
+  const { config: beta } = useBeta()
 
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
   // Which card is open in the in-place editor, and which half the caret landed
@@ -551,7 +554,7 @@ export default function GeneratedCards({
               )}
 
               {/* ── Free tier: dismissible inline upgrade CTA ─────────────── */}
-              {!upgradeDismissed && tier === 'free' && (
+              {!upgradeDismissed && tier === 'free' && beta.upgrades_open && (
                 <Box
                   sx={{
                     p: 2,
