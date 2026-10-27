@@ -100,7 +100,7 @@ beforeEach(() => {
   mockServer.posts = []
 })
 
-it('saves the first plan', async () => {
+it('saves the first plan and lands on it, not back on setup', async () => {
   renderApp()
 
   fireEvent.click(await screen.findByText('annualPlanning.home.createPlan'))
@@ -117,4 +117,8 @@ it('saves the first plan', async () => {
   fireEvent.click(finalize)
 
   await waitFor(() => expect(mockServer.posts.filter((url) => url === '/annual-plan/focus-areas')).toHaveLength(3))
+  expect(await screen.findByText('plan home')).toBeInTheDocument()
+  // Held, not passing through: the layout's no-areas redirect would fire after.
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  expect(screen.getByTestId('where')).toHaveTextContent(/^\/annual-planning$/)
 })

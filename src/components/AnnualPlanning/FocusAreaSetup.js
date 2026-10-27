@@ -52,7 +52,7 @@ const FocusAreaSetup = () => {
   // Always maintain exactly 3 focus areas
   const REQUIRED_AREAS_COUNT = 3
 
-  const { plan, areas: cacheAreas, loading: hookLoading } = useAnnualPlan()
+  const { plan, areas: cacheAreas, loading: hookLoading, reload } = useAnnualPlan()
 
   const fetchPlan = useCallback(async () => {
     try {
@@ -163,6 +163,9 @@ const FocusAreaSetup = () => {
       // updates instead of re-creating (and tripping the 3-area limit).
       setAreas((prev) => prev.map((area, i) => (savedAreas[i] ? { ...area, _id: savedAreas[i]._id || area._id } : area)))
 
+      // Wait for the plan to come back with its areas: the layout reads the cache
+      // on mount, and the plan without them sends it straight back here (QA-013).
+      await reload()
       navigate('/annual-planning')
     } catch (error) {
       console.error('Failed to save focus areas:', error)
