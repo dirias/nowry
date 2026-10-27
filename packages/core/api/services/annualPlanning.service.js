@@ -138,6 +138,9 @@ export const annualPlanningService = {
   },
   async createAnnualPlan(planData) {
     const { data } = await apiClient.post(ENDPOINTS.annualPlan.create, planData)
+    // The cache holds this year's "no plan" answer until now; left in place, the
+    // setup wizard reads a null plan and Finalize has nothing to save to (QA-012).
+    _bustPlanCache()
     return data
   },
   async updateAnnualPlan(id, planUpdate) {

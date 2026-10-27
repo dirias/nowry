@@ -315,7 +315,8 @@ const FocusAreaSetup = () => {
           startDecorator={<CheckIcon />}
           onClick={handleSubmit}
           loading={submitting}
-          disabled={submitting}
+          // No plan id yet means the new plan is still arriving from the server.
+          disabled={submitting || !planId}
           aria-label={
             isEditMode ? t('annualPlanning.focusArea.setup.buttons.saveChanges') : t('annualPlanning.focusArea.setup.buttons.finalizePlan')
           }
