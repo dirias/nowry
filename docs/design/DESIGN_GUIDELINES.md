@@ -2392,6 +2392,7 @@ and ships with the token, helper or lint rule that keeps it true. Read the one y
 |---|---|---|
 | Colour | `COLOR_SYSTEM.md` (ADR-034) | `colorSystem.js` in core; contrast and distance tests over every preset; `paletteParity.test.js` |
 | Brand | `BRAND.md` (ADR-034) | `spiralMark()` in core; `BrandMark`/`BrandLockup` on both clients |
+| The companion | `COMPANION.md` (ADR-051, ADR-052) | `artFill`, `NEAR_EVOLUTION` in `petStages`; `recolorArt` in core; `CompanionArt`; the §7 checklist for a generated set |
 | Buttons & segmented controls | `BUTTONS.md` (ADR-020) | `keyButton`, `keySegment`, `segment`, `segmentedGroup` in `formStyles` |
 | Motion | `MOTION.md` (DS-001) | `MOTION` in `tokens.js`; `--nowry-motion-*`; lint on literal durations |
 | Elevation & layering | `ELEVATION.md` (DS-001) | Joy's `shadow` scale; `Z_INDEX` via `theme.zIndex`; lint on numeric `zIndex` |

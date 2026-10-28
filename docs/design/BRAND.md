@@ -94,6 +94,8 @@ the mark and the icon, the neutrals, the status colours, gold, and the category 
 
 ## The companion
 
+**The full standard is `COMPANION.md` (ADR-052); every companion, default or generated, follows it.**
+
 **On the web, Nowry is the B2 line (ADR-051, 2026-10-29).** Six painted forms, one per stage: an
 egg, a hatchling, a young coil, a finned coil, a coil ringed in gold, a crowned serpent. They ship
 as `src/assets/companion/stage-{1..6}.webp` and are drawn by `src/components/Agent/CompanionArt.js`
