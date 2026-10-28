@@ -29,6 +29,7 @@ import { CompanionArt, CompanionArtDisc } from './CompanionArt'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '@nowry/core/constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
+import EvolutionReveal, { FRAME_PX as EVOLUTION_FRAME_PX } from './EvolutionReveal'
 import PetRevealCelebration from './PetRevealCelebration'
 import CompanionMessage from './CompanionMessage'
 import QuizModeHeader from './QuizModeHeader'
@@ -1331,9 +1332,35 @@ const StudyPet = () => {
             fontFamily: 'Inter, sans-serif'
           }}
         >
+          {/* An evolution gets the screen (EVO-003); a level-up keeps the toast. */}
+          {justLeveledUp && levelUpData?.evolved && (
+            <EvolutionReveal
+              fromStage={levelUpData.fromStage}
+              toStage={levelUpData.newStage}
+              level={levelUpData.newLevel}
+              onClose={levelUpClear}
+              renderForm={(form) =>
+                panelWearsNowry ? (
+                  <CompanionArt stage={form} accent={resolveColor(themeColor, form)} size={EVOLUTION_FRAME_PX} />
+                ) : (
+                  <PetOrb
+                    mood='happy'
+                    stage={form}
+                    level={levelUpData.newLevel}
+                    dominantColor={resolveColor(themeColor, form)}
+                    avatarUrl={form === levelUpData.newStage ? avatarUrl : null}
+                    isDefaultCompanion={isDefaultCompanion}
+                    isCelebrating={false}
+                    preview
+                  />
+                )
+              }
+            />
+          )}
+
           {/* Level-up celebration overlay */}
           <AnimatePresence>
-            {justLeveledUp && levelUpData && (
+            {justLeveledUp && levelUpData && !levelUpData.evolved && (
               <LevelUpCelebration
                 key='level-up'
                 levelUpData={levelUpData}

@@ -1949,6 +1949,12 @@
       "title": "スタディバディに挨拶しよう",
       "subtitle_other": "{{count}}枚のカードを復習しましたね — これからもここでサポートします。",
       "dismiss": "タップして続ける"
+    },
+    "evolution": {
+      "eyebrow": "進化",
+      "evolving": "{{name}}が進化しています…",
+      "became": "{{from}}が{{to}}に進化しました",
+      "continue": "{{name}}に会う"
     }
   },
   "agent": {

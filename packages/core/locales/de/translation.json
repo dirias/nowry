@@ -1842,6 +1842,12 @@
       "subtitle_one": "Du hast gerade {{count}} Karte wiederholt — ich bin hier, um dir weiterzuhelfen.",
       "subtitle_other": "Du hast gerade {{count}} Karten wiederholt — ich bin hier, um dir weiterzuhelfen.",
       "dismiss": "Zum Fortfahren irgendwo tippen"
+    },
+    "evolution": {
+      "eyebrow": "Entwicklung",
+      "evolving": "{{name}} entwickelt sich…",
+      "became": "Aus {{from}} wurde {{to}}",
+      "continue": "{{name}} kennenlernen"
     }
   },
   "agent": {

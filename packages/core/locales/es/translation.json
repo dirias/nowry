@@ -2913,6 +2913,12 @@
       "subtitle_one": "Acabas de repasar {{count}} tarjeta — estaré aquí para ayudarte a seguir adelante.",
       "subtitle_other": "Acabas de repasar {{count}} tarjetas — estaré aquí para ayudarte a seguir adelante.",
       "dismiss": "Toca en cualquier lugar para continuar"
+    },
+    "evolution": {
+      "eyebrow": "Evolución",
+      "evolving": "{{name}} está evolucionando…",
+      "became": "{{from}} se convirtió en {{to}}",
+      "continue": "Conoce a {{name}}"
     }
   },
   "quiz": {

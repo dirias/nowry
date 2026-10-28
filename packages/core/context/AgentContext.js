@@ -50,7 +50,11 @@ const initialState = {
   levelProgress: null,
   /** True immediately after a level-up, triggers the celebration overlay */
   justLeveledUp: false,
-  /** { newLevel: N, newStage: N } while celebrating, null otherwise */
+  /**
+   * { newLevel, newStage, fromStage, evolved } while celebrating, null otherwise.
+   * `evolved` is a stage change, which gets the full reveal rather than the
+   * level-up toast (EVO-003); `fromStage` is the form it evolved from.
+   */
   levelUpData: null,
   /**
    * A level-up earned mid-session, banked until the session summary.
@@ -298,7 +302,16 @@ function agentReducer(state, action) {
       }
 
     case 'LEVEL_UP': {
-      const data = { newLevel: action.payload.newLevel, newStage: action.payload.newStage }
+      // Banked level-ups merge: two evolutions earned in one session reveal
+      // from the form the learner last SAW, not the one in between.
+      const banked = action.payload.defer ? state.pendingLevelUp : null
+      const fromStage = banked?.fromStage ?? action.payload.fromStage ?? action.payload.newStage
+      const data = {
+        newLevel: action.payload.newLevel,
+        newStage: action.payload.newStage,
+        fromStage,
+        evolved: action.payload.newStage > fromStage
+      }
       // The stage/level advance immediately either way — the pet should
       // already look evolved when the celebration finally plays.
       const advanced = { ...state, level: data.newLevel, stage: data.newStage }
@@ -507,6 +520,8 @@ export const AgentProvider = ({ children }) => {
   const applyXpResult = useCallback(
     (response, options = {}) => {
       if (!response) return
+      // Read before the progress below moves the stage on: the form it was.
+      const fromStage = stateRef.current.stage
 
       // Progress first, and unconditionally: the ring should advance on every
       // grant, not only on the rare one that happens to cross a level.
@@ -530,7 +545,7 @@ export const AgentProvider = ({ children }) => {
       const defer = options.defer ?? stateRef.current.isInStudySession
       dispatch({
         type: 'LEVEL_UP',
-        payload: { newLevel: response.new_level, newStage: response.new_stage, defer }
+        payload: { newLevel: response.new_level, newStage: response.new_stage, fromStage, defer }
       })
       if (!response.avatar_regen_pending) return
 

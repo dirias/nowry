@@ -3398,6 +3398,12 @@
       "subtitle_one": "You just reviewed {{count}} card — I'll be here to help you keep going.",
       "subtitle_other": "You just reviewed {{count}} cards — I'll be here to help you keep going.",
       "dismiss": "Tap anywhere to continue"
+    },
+    "evolution": {
+      "eyebrow": "Evolution",
+      "evolving": "{{name}} is evolving…",
+      "became": "{{from}} became {{to}}",
+      "continue": "Meet {{name}}"
     }
   },
   "quiz": {

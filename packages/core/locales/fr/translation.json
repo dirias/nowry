@@ -1853,6 +1853,12 @@
       "subtitle_one": "Vous venez de revoir {{count}} carte — je serai là pour vous aider à continuer.",
       "subtitle_other": "Vous venez de revoir {{count}} cartes — je serai là pour vous aider à continuer.",
       "dismiss": "Appuyez n'importe où pour continuer"
+    },
+    "evolution": {
+      "eyebrow": "Évolution",
+      "evolving": "{{name}} évolue…",
+      "became": "{{from}} est devenu {{to}}",
+      "continue": "Découvrir {{name}}"
     }
   },
   "agent": {

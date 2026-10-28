@@ -378,6 +378,23 @@ describe('StudyPet — the chat panel shows the companion', () => {
   })
 })
 
+// EVO-003: an evolution takes the screen; a level-up keeps the toast.
+describe('evolution and level-up', () => {
+  it('reveals an evolution in a dialog, not the toast', () => {
+    withPet({ stage: 3, justLeveledUp: true, levelUpData: { newLevel: 6, newStage: 3, fromStage: 2, evolved: true } })
+    render(<StudyPet />)
+    expect(screen.getByRole('dialog')).toHaveTextContent('pet.evolution.eyebrow')
+    expect(screen.queryByText('pet.levelUp.dismiss')).not.toBeInTheDocument()
+  })
+
+  it('keeps the toast for a level-up that changes no form', () => {
+    withPet({ stage: 2, justLeveledUp: true, levelUpData: { newLevel: 4, newStage: 2, fromStage: 2, evolved: false } })
+    render(<StudyPet />)
+    expect(screen.getByText('pet.levelUp.dismiss')).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})
+
 // QA-014: the celebrations sit above the orb, opening toward the screen. They
 // were pinned `right: 0`, so docked bottom-left in a study session their 220 px
 // card grew leftward out of the viewport.

@@ -222,7 +222,7 @@ describe('level-up deferral (PET-004)', () => {
     await act(async () => get().flushPendingLevelUp())
 
     expect(get().justLeveledUp).toBe(true)
-    expect(get().levelUpData).toEqual({ newLevel: 4, newStage: 2 })
+    expect(get().levelUpData).toEqual({ newLevel: 4, newStage: 2, fromStage: 1, evolved: true })
   })
 
   test('outside a session a level-up shows immediately', async () => {
@@ -249,7 +249,23 @@ describe('level-up deferral (PET-004)', () => {
     })
 
     expect(get().justLeveledUp).toBe(true)
-    expect(get().levelUpData).toEqual({ newLevel: 4, newStage: 2 })
+    expect(get().levelUpData).toEqual({ newLevel: 4, newStage: 2, fromStage: 1, evolved: true })
+  })
+
+  // EVO-003: an evolution gets the reveal, a level-up the toast.
+  test('a level-up that keeps the stage is not an evolution', async () => {
+    const get = renderCtx()
+    await act(async () => get().applyReviewXp(grant({ new_level: 2, new_stage: 1 })))
+    expect(get().levelUpData).toEqual({ newLevel: 2, newStage: 1, fromStage: 1, evolved: false })
+  })
+
+  test('two evolutions banked in one session reveal from the form last seen', async () => {
+    const get = renderCtx()
+    await act(async () => get().setStudySession(true))
+    await act(async () => get().applyReviewXp(grant({ new_level: 3, new_stage: 2 })))
+    await act(async () => get().applyReviewXp(grant({ new_level: 6, new_stage: 3 })))
+    await act(async () => get().flushPendingLevelUp())
+    expect(get().levelUpData).toEqual({ newLevel: 6, newStage: 3, fromStage: 1, evolved: true })
   })
 
   test('progress advances on a grant that crosses no level', async () => {
