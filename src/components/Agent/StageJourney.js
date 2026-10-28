@@ -23,7 +23,7 @@ import { agentService } from '@nowry/core/api/services/agent.service'
 import { resolveColor } from '@nowry/core/utils/petColor'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { PetOrb } from './StudyPet'
-import { CompanionMark } from './CompanionMark'
+import { CompanionArt } from './CompanionArt'
 import StagePortraits from './StagePortraits'
 
 const STAGE_COUNT = 6
@@ -105,7 +105,7 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
           // A generated portrait is flattened to a silhouette rather than
           // greyed: greyscale on illustrated art reads as "disabled", while a
           // solid fill reads as "locked but real" and preserves the outline.
-          // Nowry's coil draws its own locked state (one flat colour), so it
+          // Nowry's art draws its own locked state (one flat silhouette), so it
           // needs no filter. Reached forms are always full colour, portrait or
           // not — they happened. Only unreached forms are silhouetted.
           filter: reached || isDefaultCompanion ? 'none' : formArt ? LOCKED_SILHOUETTE_FILTER : 'grayscale(0.85)',
@@ -113,9 +113,10 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
         }}
       >
         {isDefaultCompanion ? (
-          // Nowry's form for this rung: the coil one turn further on each
-          // step, in the learner's accent once earned (BRAND-007).
-          <CompanionMark stage={stage} mood='idle' size={84} color={resolveColor(accentColor, stage)} locked={!reached} />
+          // Nowry's form for this rung (ADR-051), in the learner's accent once
+          // earned and a silhouette until then; each form stands bigger than
+          // the last, so the row reads as the line growing up.
+          <CompanionArt stage={stage} size={92} accent={resolveColor(accentColor, stage)} locked={!reached} />
         ) : (
           <PetOrb
             mood='idle'

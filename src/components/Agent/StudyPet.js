@@ -25,7 +25,7 @@ import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '@nowry/core/utils/petColor'
 import { petPortrait } from '@nowry/core/domain/petPortrait'
 import { MOOD_PRESENTATION, alphaHex, companionSpecies, speciesMotion as gaitFor } from '@nowry/core/domain/petMotion'
-import { CompanionDisc, CompanionMark } from './CompanionMark'
+import { CompanionArt, CompanionArtDisc } from './CompanionArt'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { Z_PET_RESTING, Z_PET_FULLSCREEN } from '@nowry/core/constants/zIndex'
 import LevelUpCelebration from './LevelUpCelebration'
@@ -142,7 +142,11 @@ const StageMark = ({ mark, size, color }) => {
     )
   }
 
-  return <span style={wrapperStyle}>{shapes[mark] ?? null}</span>
+  return (
+    <span style={wrapperStyle} data-stage-mark={mark}>
+      {shapes[mark] ?? null}
+    </span>
+  )
 }
 
 /**
@@ -333,7 +337,12 @@ export const PetOrb = ({
     borderRadius: FORM_BORDER_RADIUS[config.form] ?? FORM_BORDER_RADIUS.round,
     border: 'none',
     cursor: preview ? 'default' : 'pointer',
-    background: `radial-gradient(circle at 35% 35%, ${activeColor}, var(--joy-palette-background-body))`,
+    // Nowry's art wears the accent itself, so it stands on paper with an
+    // accent rim; on the accent gradient a generated portrait covers, it would
+    // vanish into its own colour (ADR-051).
+    background: wearsNowry
+      ? `radial-gradient(circle at 50% 45%, var(--joy-palette-background-surface) 58%, ${activeColor}55)`
+      : `radial-gradient(circle at 35% 35%, ${activeColor}, var(--joy-palette-background-body))`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -404,7 +413,9 @@ export const PetOrb = ({
       <ProgressRing progress={levelProgress} size={config.sizePx} color={activeColor} />
       {/* What a stage earns is drawn in gold, the one colour that means earned (ADR-034). */}
       <OrbitLayer count={config.orbitCount} size={config.sizePx} color={earned} reduceMotion={reduceMotion} />
-      <StageMark mark={config.mark} size={config.sizePx} color={earned} />
+      {/* Nowry's art wears each form's adornment itself — the fin, the ring, the
+          crown — so a drawn mark on top would give it a second one (ADR-051). */}
+      <StageMark mark={wearsNowry ? null : config.mark} size={config.sizePx} color={earned} />
     </>
   )
 
@@ -456,9 +467,9 @@ export const PetOrb = ({
             </motion.div>
           </motion.div>
         ) : wearsNowry ? (
-          // Nowry's form for this stage, in whichever of paper or ink reads on
-          // the accent body. Keyed on the stage so a level-up cross-fades the
-          // forms; a mood change turns the head in place.
+          // Nowry's form for this stage (ADR-051), in the learner's accent on
+          // the orb's paper ground, filling more of the orb each stage. Keyed
+          // on the stage so a level-up cross-fades the forms.
           <motion.div
             key={`nowry-${portrait.stage}`}
             initial={{ opacity: 0, scale: 0.88 }}
@@ -468,12 +479,7 @@ export const PetOrb = ({
             style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <motion.div animate={speciesMotion?.animate} transition={speciesMotion?.transition} style={{ display: 'flex' }}>
-              <CompanionMark
-                stage={portrait.stage}
-                mood={mood}
-                size={Math.round(config.sizePx * 0.78)}
-                color={readableTextOn(activeColor)}
-              />
+              <CompanionArt stage={portrait.stage} accent={activeColor} size={config.sizePx} />
             </motion.div>
           </motion.div>
         ) : (
@@ -1415,9 +1421,8 @@ const StudyPet = () => {
                           }}
                         />
                       ) : panelWearsNowry ? (
-                        <CompanionDisc
+                        <CompanionArtDisc
                           stage={stage}
-                          mood={mood}
                           size={28}
                           accent={resolvedColor}
                           sx={{ boxShadow: `0 0 0 2px ${resolvedColor}55` }}
@@ -1535,9 +1540,8 @@ const StudyPet = () => {
                           />
                         </div>
                       ) : panelWearsNowry ? (
-                        <CompanionDisc
+                        <CompanionArtDisc
                           stage={stage}
-                          mood={mood}
                           size={80}
                           accent={resolvedColor}
                           sx={{ boxShadow: `0 0 0 4px ${resolvedColor}55, 0 6px 28px ${resolvedColor}44`, margin: '0 auto 12px' }}

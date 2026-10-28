@@ -94,7 +94,29 @@ the mark and the icon, the neutrals, the status colours, gold, and the category 
 
 ## The companion
 
-Nowry, the companion every learner starts with, is the Spiral grown by stages (BRAND-007). It is
+**On the web, Nowry is the B2 line (ADR-051, 2026-10-29).** Six painted forms, one per stage: an
+egg, a hatchling, a young coil, a finned coil, a coil ringed in gold, a crowned serpent. They ship
+as `src/assets/companion/stage-{1..6}.webp` and are drawn by `src/components/Agent/CompanionArt.js`
+wherever `petPortrait` answers `default`; a generated portrait still wins.
+
+- **The body wears the learner's accent.** `@nowry/core/tokens/recolorArt.js` rotates the body's
+  hue band (140°–290°) onto the accent and moves its median chroma and lightness to the accent's;
+  cream, gold, cheeks and eyes keep their paint. The egg's newborn is cream and stays cream.
+- **Each form stands bigger than the last.** `petStages` carries `artFill` (0.66 → 0.94), the share
+  of its frame a form fills; with the orb's own growth the form goes from 37 px to 75 px.
+- **It stands on paper.** The orb behind the art is `background.surface` with an accent rim, never
+  the accent itself, where the art would vanish into its own colour. The orb's gold rings and motes
+  stay; its drawn crest, halo and crown do not, because the art wears its own.
+- **A rung not yet earned** is the form's silhouette in `text.tertiary`.
+- **The art is illustrated**, so the drawn companion's rules below (no scale texture, the face cut
+  out) do not bind it. They still bind the drawn Spiral and the avatar prompt.
+
+The drawn Spiral below remains the phone's companion until the phone is ported, the landing page's
+companion, and the reference for the mark.
+
+### The drawn Spiral (BRAND-007)
+
+Nowry, as first rebranded, is the Spiral grown by stages (BRAND-007). It is
 drawn, never illustrated: `@nowry/core/tokens/companionMark.js` → `companionMark({ stage, mood })`
 builds it from the same coil as the mark, and each client draws the parts with its own SVG primitive
 (`src/components/Agent/CompanionMark.js` on the web, `mobile/src/ui/patterns/CompanionMark.js` on

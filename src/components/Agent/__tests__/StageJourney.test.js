@@ -171,12 +171,13 @@ describe('StageJourney', () => {
     const { container } = render(<StageJourney />)
 
     await screen.findByText('pet.stage.1.name')
-    // The Spiral at every rung, one turn further each time (BRAND-007) — and
-    // no image: the default companion is geometry the app ships.
-    expect(container.querySelectorAll('img')).toHaveLength(0)
-    const forms = container.querySelectorAll('svg[data-companion-stage]')
+    // The B2 line at every rung (ADR-051): the forms reached are art, the rest
+    // are silhouettes of the form to come.
+    const forms = container.querySelectorAll('[data-companion-art]')
     expect(forms).toHaveLength(6)
-    expect(Array.from(forms).map((svg) => svg.getAttribute('data-companion-stage'))).toEqual(['1', '2', '3', '4', '5', '6'])
+    expect(Array.from(forms).map((el) => el.getAttribute('data-companion-art'))).toEqual(['1', '2', '3', '4', '5', '6'])
+    expect(Array.from(forms).map((el) => el.hasAttribute('data-companion-locked'))).toEqual([false, false, true, true, true, true])
+    expect(container.querySelectorAll('img')).toHaveLength(2)
     // The procedural orb is for personalised pets only.
     expect(screen.queryByTestId('orb-stage-1')).not.toBeInTheDocument()
   })
@@ -187,7 +188,7 @@ describe('StageJourney', () => {
 
     expect(await screen.findByTestId('orb-stage-1')).toBeInTheDocument()
     expect(container.querySelectorAll('img')).toHaveLength(0)
-    expect(container.querySelectorAll('svg[data-companion-stage]')).toHaveLength(0)
+    expect(container.querySelectorAll('[data-companion-art]')).toHaveLength(0)
   })
 
   // A paying user's own portrait was never passed into the ladder, so their

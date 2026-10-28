@@ -248,22 +248,47 @@ describe('StudyPet — the default companion', () => {
   it('shows Nowry when the user has not personalised a pet', () => {
     withPet({ isDefaultCompanion: true, avatarUrl: null, stage: 3 })
     render(<StudyPet />)
-    // The Spiral, drawn — not an image (BRAND-007).
-    expect(orb().querySelector('img')).toBeNull()
-    expect(orb().querySelector('svg[data-companion-stage="3"]')).toBeTruthy()
+    // The B2 line's form for the stage (ADR-051), on its paper ground.
+    const art = orb().querySelector('[data-companion-art="3"]')
+    expect(art).toBeTruthy()
+    expect(art.querySelector('img').getAttribute('src')).toContain('stage-3')
   })
 
   it('prefers the user’s own portrait over Nowry', () => {
     withPet({ isDefaultCompanion: true, avatarUrl: 'https://example.com/mine.png' })
     render(<StudyPet />)
     expect(orb().querySelector('img').getAttribute('src')).toBe('https://example.com/mine.png')
+    expect(orb().querySelector('[data-companion-art]')).toBeNull()
+  })
+
+  it('draws no gold mark over Nowry’s art, which wears its own crown; a portrait still gets one', () => {
+    withPet({ isDefaultCompanion: true, avatarUrl: null, stage: 6 })
+    const { unmount } = render(<StudyPet />)
+    expect(document.querySelector('[data-stage-mark]')).toBeNull()
+    unmount()
+
+    withPet({ isDefaultCompanion: true, avatarUrl: 'https://example.com/mine.png', stage: 6 })
+    render(<StudyPet />)
+    expect(document.querySelector('[data-stage-mark="crown"]')).toBeTruthy()
+  })
+
+  it('stands each form bigger in the orb than the one before', () => {
+    const artSize = (stage) => {
+      withPet({ isDefaultCompanion: true, avatarUrl: null, stage })
+      const { unmount } = render(<StudyPet />)
+      const width = parseFloat(window.getComputedStyle(orb().querySelector('[data-companion-art] img')).width)
+      unmount()
+      return width
+    }
+    const sizes = [1, 2, 3, 4, 5, 6].map(artSize)
+    sizes.slice(1).forEach((size, i) => expect(size).toBeGreaterThan(sizes[i]))
   })
 
   it('falls back to an emoji only when there is no art at all', () => {
     withPet({ isDefaultCompanion: false, avatarUrl: null })
     render(<StudyPet />)
     expect(orb().querySelector('img')).toBeNull()
-    expect(orb().querySelector('svg[data-companion-stage]')).toBeNull()
+    expect(orb().querySelector('[data-companion-art]')).toBeNull()
     expect(orb().textContent).not.toBe('')
   })
 })
@@ -332,7 +357,7 @@ describe('StudyPet — the chat panel shows the companion', () => {
   }
 
   const panelImages = () => Array.from(document.body.querySelectorAll('img')).map((img) => img.getAttribute('src'))
-  const panelNowry = () => document.body.querySelectorAll('svg[data-companion-stage]')
+  const panelNowry = () => document.body.querySelectorAll('[data-companion-art]')
 
   it('shows the user’s own portrait beside its name', () => {
     openPanel({ avatarUrl: 'https://example.com/luna.png', petSpecies: 'leaf' })

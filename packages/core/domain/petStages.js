@@ -16,6 +16,7 @@
  *   rings  0–3                — aura rings
  *   orbit  0–5                — orbiting motes
  *   turns  0.5–2.5            — how far the default companion's coil has grown
+ *   artFill 0.66–0.94         — how much of its frame the default companion's art fills (ADR-051)
  *
  * All five are procedural, so a free-tier pet evolves visibly without ever
  * touching the Plus-gated AI portrait. `turns` is the Spiral companion's own
@@ -33,14 +34,21 @@
  * point of the table.
  */
 export const STAGE_CONFIG = {
-  1: { sizePx: 56, emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0, turns: 0.5 },
-  2: { sizePx: 60, emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0, turns: 0.75 },
-  3: { sizePx: 64, emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0, turns: 1 },
-  4: { sizePx: 68, emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0, turns: 1.5 },
-  5: { sizePx: 72, emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3, turns: 2 },
-  6: { sizePx: 80, emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5, turns: 2.5 }
+  1: { sizePx: 56, emoji: '✨', ringCount: 0, pulseDuration: 2.8, form: 'egg', mark: null, orbitCount: 0, turns: 0.5, artFill: 0.66 },
+  2: { sizePx: 60, emoji: '🌟', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: null, orbitCount: 0, turns: 0.75, artFill: 0.72 },
+  3: { sizePx: 64, emoji: '🔮', ringCount: 1, pulseDuration: 2.2, form: 'round', mark: 'crest', orbitCount: 0, turns: 1, artFill: 0.79 },
+  4: { sizePx: 68, emoji: '🌙', ringCount: 2, pulseDuration: 2.0, form: 'round', mark: 'halo', orbitCount: 0, turns: 1.5, artFill: 0.84 },
+  5: { sizePx: 72, emoji: '🌌', ringCount: 3, pulseDuration: 1.8, form: 'round', mark: 'halo', orbitCount: 3, turns: 2, artFill: 0.88 },
+  6: { sizePx: 80, emoji: '☀️', ringCount: 3, pulseDuration: 1.6, form: 'round', mark: 'crown', orbitCount: 5, turns: 2.5, artFill: 0.94 }
 }
 
+/*
+ * `artFill` is the web's B2 line (ADR-051): each form's art is cropped to a
+ * square, so without it the egg would fill the orb exactly as the crowned form
+ * does. The shares come from the line sized by stage (each form taller and
+ * heavier than the last), square-rooted so the egg is still legible at 56px:
+ * with the orb's own growth the form goes from 37px to 75px.
+ */
 /** A stage outside 1–6 is stage one: an unknown pet has not evolved. */
 export const stageConfig = (stage) => STAGE_CONFIG[stage] ?? STAGE_CONFIG[1]
 
