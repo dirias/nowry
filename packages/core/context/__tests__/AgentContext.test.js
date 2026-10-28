@@ -252,6 +252,16 @@ describe('level-up deferral (PET-004)', () => {
     expect(get().levelUpData).toEqual({ newLevel: 4, newStage: 2, fromStage: 1, evolved: true })
   })
 
+  test('a grant carries how close the next form is, and the last form has none (EVO-004)', async () => {
+    const get = renderCtx()
+    await act(async () => get().applyReviewXp(grant({ level_up: false, stage_progress: 0.82 })))
+    expect(get().stageProgress).toBe(0.82)
+    await act(async () => get().applyReviewXp(grant({ level_up: false })))
+    expect(get().stageProgress).toBe(0.82)
+    await act(async () => get().applyReviewXp(grant({ level_up: false, stage_progress: null })))
+    expect(get().stageProgress).toBeNull()
+  })
+
   // EVO-003: an evolution gets the reveal, a level-up the toast.
   test('a level-up that keeps the stage is not an evolution', async () => {
     const get = renderCtx()

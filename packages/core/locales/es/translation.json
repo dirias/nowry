@@ -2918,7 +2918,8 @@
       "eyebrow": "Evolución",
       "evolving": "{{name}} está evolucionando…",
       "became": "{{from}} se convirtió en {{to}}",
-      "continue": "Conoce a {{name}}"
+      "continue": "Conoce a {{name}}",
+      "almost": "Casi {{name}}"
     }
   },
   "quiz": {

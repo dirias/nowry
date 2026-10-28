@@ -378,6 +378,44 @@ describe('StudyPet — the chat panel shows the companion', () => {
   })
 })
 
+// EVO-004: the learner sees an evolution coming.
+describe('an evolution coming', () => {
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn()
+  })
+  const stirring = () => document.querySelector('[data-stirring]')
+  const hint = () => document.querySelector('[data-evolution-hint]')
+
+  it('stirs the orb from four fifths of the way to the next form', () => {
+    withPet({ stage: 2, stageProgress: 0.85 })
+    render(<StudyPet />)
+    expect(stirring()).toBeTruthy()
+  })
+
+  it('keeps the orb still before that, and at the last form', () => {
+    withPet({ stage: 2, stageProgress: 0.5 })
+    const { unmount } = render(<StudyPet />)
+    expect(stirring()).toBeNull()
+    unmount()
+    withPet({ stage: 6, stageProgress: null })
+    render(<StudyPet />)
+    expect(stirring()).toBeNull()
+  })
+
+  it('names the next form beside its silhouette in the open panel', () => {
+    withPet({ isOpen: true, stage: 2, stageProgress: 0.9 })
+    render(<StudyPet />)
+    expect(hint()).toHaveTextContent('pet.evolution.almost')
+    expect(hint().querySelector('[data-companion-art="3"][data-companion-locked]')).toBeTruthy()
+  })
+
+  it('says nothing in the panel while the next form is far', () => {
+    withPet({ isOpen: true, stage: 2, stageProgress: 0.2 })
+    render(<StudyPet />)
+    expect(hint()).toBeNull()
+  })
+})
+
 // EVO-003: an evolution takes the screen; a level-up keeps the toast.
 describe('evolution and level-up', () => {
   it('reveals an evolution in a dialog, not the toast', () => {

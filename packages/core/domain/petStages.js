@@ -54,3 +54,14 @@ export const stageConfig = (stage) => STAGE_CONFIG[stage] ?? STAGE_CONFIG[1]
 
 /** The stages, in order, for anything that walks them. */
 export const STAGES = Object.keys(STAGE_CONFIG).map(Number)
+
+/**
+ * From this share of the way to the next form, the companion shows it is
+ * about to evolve (EVO-004). The waits between forms run to weeks; the last
+ * fifth is when "almost" is true and worth saying.
+ */
+export const NEAR_EVOLUTION = 0.8
+
+/** True when the next form is close: not at the last stage, and progress known. */
+export const isNearEvolution = (stage, stageProgress) =>
+  stage < STAGES.length && typeof stageProgress === 'number' && stageProgress >= NEAR_EVOLUTION

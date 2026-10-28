@@ -3403,7 +3403,8 @@
       "eyebrow": "Evolution",
       "evolving": "{{name}} is evolving…",
       "became": "{{from}} became {{to}}",
-      "continue": "Meet {{name}}"
+      "continue": "Meet {{name}}",
+      "almost": "Almost {{name}}"
     }
   },
   "quiz": {

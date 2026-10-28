@@ -1847,7 +1847,8 @@
       "eyebrow": "Entwicklung",
       "evolving": "{{name}} entwickelt sich…",
       "became": "Aus {{from}} wurde {{to}}",
-      "continue": "{{name}} kennenlernen"
+      "continue": "{{name}} kennenlernen",
+      "almost": "Fast {{name}}"
     }
   },
   "agent": {

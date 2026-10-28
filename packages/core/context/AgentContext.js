@@ -48,6 +48,8 @@ const initialState = {
   xpForNextLevel: null,
   /** 0–1 fraction toward the next level, computed server-side. null until known. */
   levelProgress: null,
+  /** 0–1 toward the next FORM, from the server (EVO-004); null at the last stage or until known. */
+  stageProgress: null,
   /** True immediately after a level-up, triggers the celebration overlay */
   justLeveledUp: false,
   /**
@@ -160,6 +162,7 @@ function agentReducer(state, action) {
         xp: action.payload.current_xp ?? 0,
         xpForNextLevel: action.payload.xp_for_next_level ?? null,
         levelProgress: action.payload.level_progress ?? null,
+        stageProgress: action.payload.stage_progress ?? null,
         stage: action.payload.current_stage ?? 1,
         preferredName: action.payload.preferred_name,
         tier: action.payload.tier,
@@ -298,7 +301,9 @@ function agentReducer(state, action) {
         level: action.payload.level ?? state.level,
         stage: action.payload.stage ?? state.stage,
         xpForNextLevel: action.payload.xpForNextLevel ?? state.xpForNextLevel,
-        levelProgress: action.payload.levelProgress ?? state.levelProgress
+        levelProgress: action.payload.levelProgress ?? state.levelProgress,
+        // `undefined` means the grant did not say; `null` means the last stage.
+        stageProgress: action.payload.stageProgress === undefined ? state.stageProgress : action.payload.stageProgress
       }
 
     case 'LEVEL_UP': {
@@ -532,6 +537,7 @@ export const AgentProvider = ({ children }) => {
             xp: response.current_xp,
             xpForNextLevel: response.xp_for_next_level,
             levelProgress: response.level_progress,
+            stageProgress: response.stage_progress,
             level: response.new_level > 0 ? response.new_level : undefined,
             stage: response.new_stage > 0 ? response.new_stage : undefined
           }

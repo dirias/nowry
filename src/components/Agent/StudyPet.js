@@ -42,9 +42,10 @@ import { quizService } from '@nowry/core/api/services/quizService'
 import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 // The stage table is shared: the phone draws the same companion, and a stage
 // table inside one client's orb is that client's private pet (MOB-050).
-import { STAGE_CONFIG } from '@nowry/core/domain/petStages'
+import { STAGE_CONFIG, isNearEvolution } from '@nowry/core/domain/petStages'
 import { DEFAULT_ACCENT, readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { earnedGold } from '@nowry/core/tokens/colorSystem'
+import { Box, Typography } from '@mui/joy'
 import { useTheme } from '@mui/joy/styles'
 
 // The egg's asymmetry is what sells stage 1 as "not yet formed"; every later
@@ -102,6 +103,9 @@ const SPECIES_CONFIG = {
  * Drawn as SVG rather than CSS shapes so the strokes stay crisp at every
  * stage's size and scale with the orb instead of being pinned to pixels.
  */
+/** The orb's stir when an evolution is near (EVO-004): one 0.6 s wiggle, then a pause. */
+const STIR_TRANSITION = { duration: 0.6, repeat: Infinity, repeatDelay: 4, ease: 'easeInOut' }
+
 const StageMark = ({ mark, size, color }) => {
   if (!mark) return null
 
@@ -272,7 +276,8 @@ export const PetOrb = ({
   isGenerating,
   levelProgress,
   isDefaultCompanion,
-  blankFace
+  blankFace,
+  stirring = false
 }) => {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion()
@@ -521,8 +526,17 @@ export const PetOrb = ({
     )
   }
 
+  // About to evolve (EVO-004): a short wiggle every few seconds, the egg
+  // rocking before it cracks. Still under reduced motion; the panel says it.
+  const stir = stirring && !reduceMotion
+
   return (
-    <span style={wrapperStyle}>
+    <motion.span
+      style={wrapperStyle}
+      data-stirring={stir || undefined}
+      animate={{ rotate: stir ? [0, -7, 7, -5, 5, 0] : 0 }}
+      transition={stir ? STIR_TRANSITION : { duration: 0 }}
+    >
       {decorations}
 
       <motion.button
@@ -561,7 +575,7 @@ export const PetOrb = ({
       >
         Lv{level}
       </span>
-    </span>
+    </motion.span>
   )
 }
 
@@ -651,6 +665,7 @@ const StudyPet = () => {
     petSpecies,
     isDefaultCompanion,
     levelProgress,
+    stageProgress,
     avatarUrl,
     avatarGenerating,
     avatarRegenPending,
@@ -687,6 +702,8 @@ const StudyPet = () => {
   const panelPortrait = petPortrait({ avatarUrl, isDefaultCompanion, stage })
   const panelPortraitUrl = panelPortrait?.kind === 'generated' ? panelPortrait.url : null
   const panelWearsNowry = panelPortrait?.kind === 'default'
+  // The next form is close (EVO-004): the orb stirs and the panel names it.
+  const nearNextForm = isNearEvolution(stage, stageProgress)
 
   const [input, setInput] = useState('')
   // Tier enforcement state
@@ -1502,6 +1519,14 @@ const StudyPet = () => {
                                 remaining: messagesRemaining
                               })}
                         </div>
+                        {nearNextForm && (
+                          <Box data-evolution-hint sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
+                            <CompanionArt stage={stage + 1} size={18} fill={1} locked />
+                            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                              {t('pet.evolution.almost', { name: t(`pet.stage.${stage + 1}.name`) })}
+                            </Typography>
+                          </Box>
+                        )}
                       </div>
                     </div>
                     <button
@@ -2013,6 +2038,7 @@ const StudyPet = () => {
                   avatarUrl={avatarUrl}
                   onAvatarError={clearAvatarUrl}
                   isGenerating={avatarGenerating}
+                  stirring={nearNextForm}
                 />
               )}
             </motion.div>

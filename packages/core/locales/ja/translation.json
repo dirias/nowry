@@ -1954,7 +1954,8 @@
       "eyebrow": "進化",
       "evolving": "{{name}}が進化しています…",
       "became": "{{from}}が{{to}}に進化しました",
-      "continue": "{{name}}に会う"
+      "continue": "{{name}}に会う",
+      "almost": "もうすぐ{{name}}"
     }
   },
   "agent": {

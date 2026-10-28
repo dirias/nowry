@@ -77,6 +77,7 @@ export function usePetState() {
     xpForNextLevel: data?.xp_for_next_level ?? null,
     /** 0–1 toward the next level, computed server-side. Null until known. */
     levelProgress: data?.level_progress ?? null,
+    stageProgress: data?.stage_progress ?? null,
     /*
      * A companion that has never been revealed is not drawn at all — and the
      * default when the field is ABSENT is revealed, which is what the web's own
