@@ -182,6 +182,19 @@ describe('StageJourney', () => {
     expect(screen.queryByTestId('orb-stage-1')).not.toBeInTheDocument()
   })
 
+  it('keeps a free account’s reveal portrait on its own rung and Nowry on the rest (ADR-052)', async () => {
+    agentService.getJourney.mockResolvedValue(journey(3, {}, true))
+    const withPortrait = await agentService.getJourney()
+    withPortrait.stages[0].art_url = 'https://example.com/first.png'
+    agentService.getJourney.mockResolvedValue(withPortrait)
+    const { container } = render(<StageJourney />)
+
+    await screen.findByText('pet.stage.1.name')
+    const forms = Array.from(container.querySelectorAll('[data-companion-art]')).map((el) => el.getAttribute('data-companion-art'))
+    expect(forms).toEqual(['2', '3', '4', '5', '6'])
+    expect(screen.getByTestId('orb-avatar-1')).toHaveTextContent('https://example.com/first.png')
+  })
+
   it('falls back to the procedural orb once the user has a pet of their own', async () => {
     agentService.getJourney.mockResolvedValue(journey(2, {}, false))
     const { container } = render(<StageJourney />)

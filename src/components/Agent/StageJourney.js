@@ -112,7 +112,10 @@ const StageCard = ({ entry, isNext, accentColor, isDefaultCompanion, avatarUrl, 
           opacity: reached || isDefaultCompanion || formArt ? 1 : 0.45
         }}
       >
-        {isDefaultCompanion ? (
+        {/* A rung with a portrait of its own wears it even on the default line:
+            a free account's one portrait from first reveal is that rung's form
+            (ADR-052), and every other rung is Nowry's. */}
+        {isDefaultCompanion && !formArt ? (
           // Nowry's form for this rung (ADR-051), in the learner's accent once
           // earned and a silhouette until then; each form stands bigger than
           // the last, so the row reads as the line growing up.
