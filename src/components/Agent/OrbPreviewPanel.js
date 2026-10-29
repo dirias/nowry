@@ -14,7 +14,7 @@ import { PetOrb } from './StudyPet'
 
 const OrbPreviewPanel = ({ petSpecies, petName, avatarUrl }) => {
   const { t } = useTranslation()
-  const { stage, level } = usePet()
+  const { stage, level, isDefaultCompanion } = usePet()
   const { themeColor } = useThemePreferences()
   const resolvedColor = resolveColor(themeColor, stage)
 
@@ -52,6 +52,7 @@ const OrbPreviewPanel = ({ petSpecies, petName, avatarUrl }) => {
             isCelebrating={false}
             preview={true}
             avatarUrl={avatarUrl}
+            isDefaultCompanion={isDefaultCompanion}
           />
           {petName && (
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
