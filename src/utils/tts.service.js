@@ -115,8 +115,9 @@ class TTSService {
       const utterance = new SpeechSynthesisUtterance(text)
       this.utterance = utterance
 
-      if (this.selectedVoice) {
-        utterance.voice = this.selectedVoice
+      const voice = options.voice || this.selectedVoice
+      if (voice) {
+        utterance.voice = voice
       }
 
       utterance.lang = options.lang || this.selectedLanguage

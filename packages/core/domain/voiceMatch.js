@@ -69,6 +69,63 @@ export function resolveVoice(voices = [], { targetLang = null, targetName = null
 }
 
 /**
+ * The script each language the segmenter can name is written in. Script is
+ * the one thing about a segment that is never a guess: the server reads it
+ * off the characters, while telling Spanish from Portuguese is a classifier's
+ * opinion, and on two words ("Feliz") a wrong one.
+ */
+const SCRIPT_OF = {
+  ja: 'japanese',
+  zh: 'han',
+  ko: 'hangul',
+  ru: 'cyrillic',
+  uk: 'cyrillic',
+  bg: 'cyrillic',
+  ar: 'arabic',
+  fa: 'arabic',
+  hi: 'devanagari',
+  mr: 'devanagari'
+}
+const NON_LATIN = ['th', 'el', 'he', 'ka', 'hy', 'ta', 'te', 'bn', 'km', 'my']
+const scriptOf = (lang) => {
+  const base = languageBase(lang)
+  if (!base) return null
+  return SCRIPT_OF[base] || (NON_LATIN.includes(base) ? base : 'latin')
+}
+
+/**
+ * Whether a voice for `voiceLang` can read a segment the server labelled
+ * `segmentLang` (ADR-050): same script, or a Japanese voice reading kanji —
+ * kanji-only text with nothing else to go on is labelled Chinese.
+ */
+export function readsScriptOf(voiceLang, segmentLang) {
+  const voice = scriptOf(voiceLang)
+  const segment = scriptOf(segmentLang)
+  if (!voice || !segment) return false
+  return voice === segment || (voice === 'japanese' && segment === 'han')
+}
+
+/**
+ * The voice for one segment of mixed-language text (ADR-050).
+ *
+ * The voice the learner selected, whenever it reads the segment's script — a
+ * Spanish voice reads every Latin segment, so a detector that calls "Feliz"
+ * English cannot hand it to an English voice. A segment in another script
+ * gets the device's best voice for its language: kana on a Spanish side is
+ * read by a Japanese voice. Otherwise the selected voice, because some voice
+ * beats silence.
+ *
+ * @param {Array<{name: string, lang: string}>} voices — what this device has.
+ * @param {{name: string, lang: string} | null} selected — the deck's voice here.
+ * @param {string | null} lang — the segment's language code.
+ */
+export function voiceForSegment(voices = [], selected = null, lang = null) {
+  if (!lang) return selected
+  if (selected && readsScriptOf(selected.lang, lang)) return selected
+  return resolveVoice(voices, { targetLang: lang }) || selected
+}
+
+/**
  * The languages a device can speak, one entry each, alphabetical by code.
  *
  * `label` is deliberately the bare code: naming a language is a locale

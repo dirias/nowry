@@ -36,21 +36,27 @@ export function fnv1aHash(str) {
   return (hash >>> 0).toString(16)
 }
 
-/** The cache key, exported so a client can prime or read it. */
-export const segmentsKey = (text) => ['ttsSegments', fnv1aHash(text)]
+/**
+ * The cache key, exported so a client can prime or read it. The hint is part
+ * of it: 学生 hinted Japanese and 学生 unhinted are different answers.
+ */
+export const segmentsKey = (text, hint = null) => ['ttsSegments', fnv1aHash(text), hint || null]
 
 /**
  * The segments for `text`, or `null` on any failure whatsoever.
  *
+ * @param {string} text
+ * @param {'ja' | 'zh' | null} [hint] — the card's language for kanji alone
+ *   (`cardSpeech.speechHintFor`, ADR-050).
  * @returns {Promise<Array<{text: string, lang_code: string}>|null>}
  */
-export async function fetchSegments(text) {
+export async function fetchSegments(text, hint = null) {
   if (!text) return null
 
   try {
     const segments = await queryClient.fetchQuery({
-      queryKey: segmentsKey(text),
-      queryFn: () => ttsService.segmentText(text),
+      queryKey: segmentsKey(text, hint),
+      queryFn: () => ttsService.segmentText(text, hint),
       staleTime: SEGMENTS_TTL_MS,
       // No retry: a failure here must degrade fast, not add a round trip in
       // front of speech the user is waiting for.

@@ -18,7 +18,7 @@ import { dailyReviewParams } from './dailyReviewParams'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePet } from '@nowry/core/context/AgentContext'
-import { speechTextFor } from '@nowry/core/domain/cardSpeech'
+import { speechHintFor, speechTextFor } from '@nowry/core/domain/cardSpeech'
 import { studyCardContext } from '@nowry/core/domain/screenContext'
 import {
   Container,
@@ -1671,6 +1671,7 @@ export default function StudySession() {
               /* What a card sounds like is a shared rule now: the phone speaks
                  the same cards and had to agree with this line exactly. */
               text={speechTextFor(currentCard, { flipped: isFlipped })}
+              langHint={speechHintFor(currentCard, activeVoiceSettings, { flipped: isFlipped })}
             />
             {isQuiz ? (
               // Quiz Card
