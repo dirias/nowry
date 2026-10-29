@@ -4,7 +4,9 @@
  * Provides:
  *   1. Name — free-text input (max 20 chars), saved on blur.
  *   2. Evolution journey — every form, earned and still ahead.
- *   3. AI portrait generation (Plus and Pro). The AI animation is held (ADR-040).
+ *   3. AI portrait generation — Plus and Pro only (ADR-053). A free account is
+ *      Nowry, the default line, and sees what a portrait would add. The AI
+ *      animation is held (ADR-040).
  *
  * Species appears for paid tiers only, and only as an input to portrait
  * generation — it is not the pet's face. Free users are with Nowry, who is an
@@ -190,8 +192,8 @@ const CompanionTab = ({
           {t('agent.companion.avatarTitle')}
         </Typography>
 
-        {/* FREE TIER — locked once the one free portrait exists (ADR-041) */}
-        {tier === 'free' && !!avatarUrl && (
+        {/* FREE TIER — a portrait is a paid feature (ADR-053) */}
+        {tier === 'free' && (
           <Card
             variant='outlined'
             sx={{
@@ -232,11 +234,11 @@ const CompanionTab = ({
           </Card>
         )}
 
-        {/* No avatar yet — every tier; the first one is free (ADR-041) */}
-        {!avatarUrl && (
+        {/* PLUS/PRO — no avatar yet */}
+        {tier !== 'free' && !avatarUrl && (
           <Stack spacing={2}>
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              {tier === 'free' ? t('agent.companion.avatarFreeOnce') : t('agent.companion.avatarDescription')}
+              {t('agent.companion.avatarDescription')}
             </Typography>
 
             {avatarStatus.visible ? (

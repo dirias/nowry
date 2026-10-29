@@ -2450,14 +2450,7 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": [
-        "Career Growth",
-        "Health & Vitality",
-        "Financial Freedom",
-        "Relationships",
-        "Creative Pursuits",
-        "Learning & Skills"
-      ]
+      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
     },
     "priority": {
       "title": "Yearly Priorities",
@@ -3716,7 +3709,6 @@
       "avatarTitle": "AI Portrait",
       "avatarDescription": "Generate a unique AI portrait of your companion based on your profile.",
       "avatarLockedTitle": "AI Portrait",
-      "avatarFreeOnce": "Your first portrait is free. Later ones, and a new one at every stage, come with Plus.",
       "avatarLockedDescription": "Get a unique AI-generated portrait of your companion.",
       "avatarGenerating": "Creating your companion...",
       "generateAvatar": "Generate your companion",

@@ -161,3 +161,29 @@ describe('CompanionTab — generation progress', () => {
     expect(screen.queryByRole('progressbar', { name: AVATAR_LABEL })).not.toBeInTheDocument()
   })
 })
+
+describe('CompanionTab — a portrait is a paid feature (EVO-009, ADR-053)', () => {
+  const generate = () => screen.queryByText('agent.companion.generateAvatar')
+  const upgrade = () => screen.queryByText('agent.companion.upgradePlus')
+
+  it('offers a free account no way to generate, only the way to Plus', () => {
+    renderTab({ tier: 'free', avatarUrl: null })
+    expect(generate()).not.toBeInTheDocument()
+    expect(upgrade()).toBeInTheDocument()
+  })
+
+  it('keeps it that way for a free account that already holds an old portrait', () => {
+    renderTab({ tier: 'free', avatarUrl: 'https://example.test/old.png' })
+    expect(generate()).not.toBeInTheDocument()
+    expect(screen.queryByText('agent.companion.regenerate')).not.toBeInTheDocument()
+    expect(upgrade()).toBeInTheDocument()
+  })
+
+  it('lets a paid account generate its first portrait', () => {
+    const onGenerateAvatar = jest.fn()
+    renderTab({ tier: 'plus', avatarUrl: null, onGenerateAvatar })
+    expect(upgrade()).not.toBeInTheDocument()
+    fireEvent.click(generate())
+    expect(onGenerateAvatar).toHaveBeenCalledWith('manual')
+  })
+})
