@@ -1863,7 +1863,7 @@
     }
   },
   "agent": {
-    "defaultName": "Compagnon d'études",
+    "defaultName": "Nowry",
     "welcomeMessage": "Salut ! 👋 Je suis {{petName}}.",
     "tabs": {
       "personality": "Personnalité",
@@ -1993,6 +1993,7 @@
       "nameTitle": "Nommez votre compagnon",
       "nameDescription": "Donnez à votre compagnon d'études un nom qui vous convient.",
       "nameLabel": "Nom du compagnon",
+      "nameLocked": "Nommer votre compagnon est inclus dans Plus.",
       "namePlaceholder": "Ex. Hibou, Nova, Étincelle...",
       "nameAriaLabel": "Nommez votre compagnon",
       "speciesTitle": "Choisissez une espèce",

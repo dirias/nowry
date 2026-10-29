@@ -1,4 +1,4 @@
-import { petPortrait } from '../petPortrait'
+import { canCustomizeCompanion, petPortrait } from '../petPortrait'
 
 describe('petPortrait', () => {
   it('wears a generated portrait when the account has one', () => {
@@ -22,5 +22,19 @@ describe('petPortrait', () => {
 
   it('assumes the default companion at stage one when told nothing', () => {
     expect(petPortrait()).toEqual({ kind: 'default', stage: 1 })
+  })
+})
+
+describe('canCustomizeCompanion (ADR-053)', () => {
+  it('lets a paid account change who its companion is', () => {
+    expect(canCustomizeCompanion('plus')).toBe(true)
+    expect(canCustomizeCompanion('pro')).toBe(true)
+  })
+
+  it('keeps a free account, or one whose tier has not loaded, with Nowry', () => {
+    expect(canCustomizeCompanion('free')).toBe(false)
+    expect(canCustomizeCompanion(undefined)).toBe(false)
+    expect(canCustomizeCompanion(null)).toBe(false)
+    expect(canCustomizeCompanion('enterprise')).toBe(false)
   })
 })

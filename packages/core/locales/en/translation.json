@@ -3538,7 +3538,7 @@
       "declineAria": "Dismiss quiz suggestion",
       "declined": "Okay, let me know if you change your mind!"
     },
-    "defaultName": "Study Buddy",
+    "defaultName": "Nowry",
     "settingsSubtitle": "Configure your companion's behavior and personality",
     "welcomeMessage": "Hey there! 👋 I'm {{petName}}.",
     "welcomePrompt": "{{name}}, ask me anything, or tell me what you're studying today.",
@@ -3695,6 +3695,7 @@
       "nameTitle": "Name your companion",
       "nameDescription": "Give your study companion a name that feels right.",
       "nameLabel": "Companion name",
+      "nameLocked": "Naming your companion comes with Plus.",
       "namePlaceholder": "e.g. Hoot, Nova, Spark...",
       "nameAriaLabel": "Name your companion",
       "speciesTitle": "Choose a species",

@@ -1948,7 +1948,7 @@
     }
   },
   "agent": {
-    "defaultName": "学習の友",
+    "defaultName": "Nowry",
     "welcomeMessage": "こんにちは！👋 私は{{petName}}です。",
     "tabs": {
       "personality": "個性",
@@ -2078,6 +2078,7 @@
       "nameTitle": "コンパニオンに名前をつける",
       "nameDescription": "学習コンパニオンにぴったりの名前をつけましょう。",
       "nameLabel": "コンパニオン名",
+      "nameLocked": "コンパニオンの名前を変えるにはPlusが必要です。",
       "namePlaceholder": "例：フクロウ、ノヴァ、スパーク...",
       "nameAriaLabel": "コンパニオンの名前",
       "speciesTitle": "種族を選ぶ",

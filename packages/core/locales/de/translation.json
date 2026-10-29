@@ -1852,7 +1852,7 @@
     }
   },
   "agent": {
-    "defaultName": "Lernbegleiter",
+    "defaultName": "Nowry",
     "welcomeMessage": "Hallo! 👋 Ich bin {{petName}}.",
     "tabs": {
       "personality": "Persönlichkeit",
@@ -1982,6 +1982,7 @@
       "nameTitle": "Gib deinem Begleiter einen Namen",
       "nameDescription": "Wähle einen Namen, der zu deinem Lernbegleiter passt.",
       "nameLabel": "Name des Begleiters",
+      "nameLocked": "Deinem Begleiter einen Namen geben gibt es mit Plus.",
       "namePlaceholder": "z.B. Eule, Nova, Funke...",
       "nameAriaLabel": "Name deines Begleiters",
       "speciesTitle": "Wähle eine Spezies",

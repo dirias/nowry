@@ -467,7 +467,7 @@ const Header = () => {
                       <ListItemDecorator sx={{ minWidth: 'unset' }}>
                         <AutoAwesomeRounded sx={{ fontSize: 18 }} />
                       </ListItemDecorator>
-                      <Typography level='body-sm'>{petName || t('common.studyBuddy')}</Typography>
+                      <Typography level='body-sm'>{petName || t('agent.defaultName')}</Typography>
                     </MenuItem>
 
                     {/* Group 2 — Pomodoro Tool (conditional) */}
@@ -640,7 +640,7 @@ const Header = () => {
                     <ListItemDecorator>
                       <AutoAwesomeRounded />
                     </ListItemDecorator>
-                    {petName || t('common.studyBuddy')}
+                    {petName || t('agent.defaultName')}
                   </ListItemButton>
                 </ListItem>
 

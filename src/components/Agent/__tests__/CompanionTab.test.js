@@ -187,3 +187,34 @@ describe('CompanionTab — a portrait is a paid feature (EVO-009, ADR-053)', () 
     expect(onGenerateAvatar).toHaveBeenCalledWith('manual')
   })
 })
+
+describe('CompanionTab — naming is a paid feature (EVO-010, ADR-053)', () => {
+  const nameField = () => screen.getByLabelText('agent.companion.nameAriaLabel')
+
+  it('shows a free account its companion as Nowry, read-only, with the way to Plus', () => {
+    const onNameBlur = jest.fn()
+    renderTab({ tier: 'free', petName: '', onNameBlur })
+    expect(nameField()).toHaveValue('agent.defaultName')
+    expect(nameField()).toHaveAttribute('readonly')
+    expect(screen.getByText('agent.companion.nameLocked')).toBeInTheDocument()
+    fireEvent.blur(nameField())
+    expect(onNameBlur).not.toHaveBeenCalled()
+  })
+
+  it('keeps a name a free account chose before, without letting it change', () => {
+    const setPetName = jest.fn()
+    renderTab({ tier: 'free', petName: 'Kiwi', setPetName })
+    expect(nameField()).toHaveValue('Kiwi')
+    fireEvent.change(nameField(), { target: { value: 'Mango' } })
+    expect(setPetName).not.toHaveBeenCalled()
+  })
+
+  it('lets a paid account name its companion', () => {
+    const setPetName = jest.fn()
+    renderTab({ tier: 'plus', petName: '', setPetName })
+    expect(nameField()).not.toHaveAttribute('readonly')
+    fireEvent.change(nameField(), { target: { value: 'Mango' } })
+    expect(setPetName).toHaveBeenCalledWith('Mango')
+    expect(screen.queryByText('agent.companion.nameLocked')).not.toBeInTheDocument()
+  })
+})

@@ -30,4 +30,14 @@ export function petPortrait({ avatarUrl = null, isDefaultCompanion = true, stage
   return null
 }
 
+/**
+ * Whether an account may change who its companion is — its name, its species,
+ * its portrait (ADR-053). Customisation is paid; a free account is Nowry. The
+ * API refuses the same writes, so this only decides what a client offers.
+ *
+ * @param {string|null|undefined} tier  'free' | 'plus' | 'pro'; unknown is free
+ * @returns {boolean}
+ */
+export const canCustomizeCompanion = (tier) => tier === 'plus' || tier === 'pro'
+
 export default petPortrait

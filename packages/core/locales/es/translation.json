@@ -3060,7 +3060,7 @@
       "declineAria": "Descartar sugerencia de quiz",
       "declined": "Vale, avísame si cambias de opinión."
     },
-    "defaultName": "Compañero de estudio",
+    "defaultName": "Nowry",
     "settingsSubtitle": "Configura el comportamiento y la personalidad de tu compañero",
     "welcomeMessage": "¡Hola! 👋 Soy {{petName}}.",
     "welcomePrompt": "{{name}}, pregúntame cualquier cosa, o dime qué estás estudiando hoy.",
@@ -3210,6 +3210,7 @@
       "nameTitle": "Nombra a tu compañero",
       "nameDescription": "Dale a tu compañero de estudio un nombre que te guste.",
       "nameLabel": "Nombre del compañero",
+      "nameLocked": "Ponerle nombre a tu compañero viene con Plus.",
       "namePlaceholder": "Ej. Búho, Nova, Chispa...",
       "nameAriaLabel": "Nombre de tu compañero",
       "speciesTitle": "Elige una especie",

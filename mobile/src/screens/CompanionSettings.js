@@ -38,6 +38,8 @@ import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useGeneralPreferences } from '@nowry/core/hooks/useGeneralPreferences'
+import { useSubscription } from '@nowry/core/hooks/useSubscription'
+import { canCustomizeCompanion } from '@nowry/core/domain/petPortrait'
 import {
   AGENT_PREFS,
   CONCISENESS,
@@ -78,6 +80,10 @@ export function CompanionSettings() {
   const theme = useTheme()
   const { accent } = useAppearance()
   const pet = usePetState()
+  const { tier } = useSubscription()
+  // Name and species are customisation, which is paid (ADR-053). A free account
+  // is Nowry, and is not told so (ADR-030).
+  const canCustomize = canCustomizeCompanion(tier)
   const { preferences, loading, save } = useGeneralPreferences()
   const [naming, setNaming] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -136,9 +142,11 @@ export function CompanionSettings() {
             ) : null}
           </Stack>
 
-          <Button size='sm' variant='secondary' onPress={() => setNaming(true)}>
-            {t('common.edit')}
-          </Button>
+          {canCustomize ? (
+            <Button size='sm' variant='secondary' onPress={() => setNaming(true)}>
+              {t('common.edit')}
+            </Button>
+          ) : null}
         </Stack>
 
         {failed ? (
@@ -154,24 +162,28 @@ export function CompanionSettings() {
          * advertising it sideways (ADR-030). MOB-090 gave species a second job
          * that costs nothing: it is the GAIT, so every account can see what it
          * chose. The description says that rather than the other thing.
+         * Since ADR-053 choosing it is customisation, and customisation is paid:
+         * a free account is Nowry and sees no picker.
          */}
-        <Stack spacing={1}>
-          <Typography level='title-md'>{t('agent.companion.speciesTitle')}</Typography>
-          <Typography level='body-sm' color='text.secondary'>
-            {t('agent.companion.speciesMovement')}
-          </Typography>
-          <Stack direction='row' spacing={1} flexWrap='wrap'>
-            {Object.keys(SPECIES_MOTION).map((species) => (
-              <Chip
-                key={species}
-                selected={pet.species === species}
-                onPress={() => pet.save({ pet_species: species }).catch(() => setFailed(true))}
-              >
-                {t(`agent.companion.species.${species}`)}
-              </Chip>
-            ))}
+        {canCustomize ? (
+          <Stack spacing={1}>
+            <Typography level='title-md'>{t('agent.companion.speciesTitle')}</Typography>
+            <Typography level='body-sm' color='text.secondary'>
+              {t('agent.companion.speciesMovement')}
+            </Typography>
+            <Stack direction='row' spacing={1} flexWrap='wrap'>
+              {Object.keys(SPECIES_MOTION).map((species) => (
+                <Chip
+                  key={species}
+                  selected={pet.species === species}
+                  onPress={() => pet.save({ pet_species: species }).catch(() => setFailed(true))}
+                >
+                  {t(`agent.companion.species.${species}`)}
+                </Chip>
+              ))}
+            </Stack>
           </Stack>
-        </Stack>
+        ) : null}
 
         <Divider />
 
@@ -291,7 +303,7 @@ export function CompanionSettings() {
           })}
         </Stack>
 
-        <NameSheet open={naming} current={pet.name} onClose={() => setNaming(false)} onSave={pet.save} />
+        <NameSheet open={naming && canCustomize} current={pet.name} onClose={() => setNaming(false)} onSave={pet.save} />
       </Stack>
     </Screen>
   )

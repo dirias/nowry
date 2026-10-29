@@ -19,6 +19,7 @@ import React from 'react'
 import { Alert, Box, Button, Card, Chip, Divider, FormControl, FormHelperText, FormLabel, Grid, Input, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
+import { canCustomizeCompanion } from '@nowry/core/domain/petPortrait'
 import GenerationProgress from '../Common/GenerationProgress'
 import StageJourney from './StageJourney'
 
@@ -96,23 +97,49 @@ const CompanionTab = ({
         <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
           {t('agent.companion.nameDescription')}
         </Typography>
-        <FormControl>
-          <FormLabel>{t('agent.companion.nameLabel')}</FormLabel>
-          <Input
-            id='pet-name-input'
-            value={petName}
-            onChange={(e) => setPetName(e.target.value)}
-            onBlur={onNameBlur}
-            placeholder={t('agent.companion.namePlaceholder')}
-            aria-label={t('agent.companion.nameAriaLabel')}
-            slotProps={{ input: { maxLength: 20 } }}
-          />
-          <FormHelperText>
-            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-              {(petName || '').length}/20
-            </Typography>
-          </FormHelperText>
-        </FormControl>
+        {/* Naming is customisation, and customisation is paid (ADR-053). A free
+            account sees its companion's name — Nowry, or one it chose before —
+            marked Plus, not a field that would be refused on save. The way to
+            Plus is the portrait card's, once per page. */}
+        {!canCustomizeCompanion(tier) ? (
+          <FormControl disabled>
+            <FormLabel>{t('agent.companion.nameLabel')}</FormLabel>
+            <Input
+              id='pet-name-input'
+              value={petName || t('agent.defaultName')}
+              readOnly
+              aria-label={t('agent.companion.nameAriaLabel')}
+              endDecorator={
+                <Chip size='sm' color='warning' variant='soft'>
+                  Plus
+                </Chip>
+              }
+            />
+            <FormHelperText>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                {t('agent.companion.nameLocked')}
+              </Typography>
+            </FormHelperText>
+          </FormControl>
+        ) : (
+          <FormControl>
+            <FormLabel>{t('agent.companion.nameLabel')}</FormLabel>
+            <Input
+              id='pet-name-input'
+              value={petName}
+              onChange={(e) => setPetName(e.target.value)}
+              onBlur={onNameBlur}
+              placeholder={t('agent.companion.namePlaceholder')}
+              aria-label={t('agent.companion.nameAriaLabel')}
+              slotProps={{ input: { maxLength: 20 } }}
+            />
+            <FormHelperText>
+              <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                {(petName || '').length}/20
+              </Typography>
+            </FormHelperText>
+          </FormControl>
+        )}
       </Box>
 
       <Divider />
