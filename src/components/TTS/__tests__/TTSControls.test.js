@@ -5,6 +5,7 @@
  * and the first Listen tap — the gesture that unlocks auto-play — spoke the
  * card twice. Both now go through one play path, once.
  */
+import React from 'react'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import TTSControls from '../TTSControls'
 
