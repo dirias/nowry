@@ -38,9 +38,11 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { agentService } from '@nowry/core/api/services'
 import { chatFailureKey, chatHistory, parseReply, plainReply, replyText } from '@nowry/core/domain/agentChat'
+import { readyMessage, readyQuestions } from '@nowry/core/domain/readyQuestions'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { takeAskContext } from './askContext'
 import { ChatExample } from './ChatExample'
+import { ReadyQuestions, SubjectHead } from './ChatSubject'
 import { useAppearance, useTheme } from '../theme'
 import { Button, Card, Icon, IconButton, Input, PetOrb, Screen, Stack, Typography, useKeyboardClearance, useKeyboardHeight } from '../ui'
 
@@ -77,6 +79,10 @@ export function AgentChat() {
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [failure, setFailure] = useState(null)
+  // Ready questions already sent on this card, and a move waiting for the
+  // learner's own words — "Check my sentence" (CHAT-005, CHAT-007).
+  const [used, setUsed] = useState([])
+  const [compose, setCompose] = useState(null)
   const scroller = useRef(null)
   // The composer is pinned to the bottom of a screen that does not scroll, so
   // it is exactly where the keyboard opens.
@@ -116,6 +122,8 @@ export function AgentChat() {
         setTurns([])
         setDraft('')
         setFailure(null)
+        setUsed([])
+        setCompose(null)
       }
     }, [context])
   )
@@ -184,7 +192,39 @@ export function AgentChat() {
     [sending, spent, turns, context, i18n, t, pet]
   )
 
-  const send = useCallback(() => sendText(draft), [sendText, draft])
+  /*
+   * A move waiting for the learner's words is sent as that move: the sentence
+   * goes with "Check my sentence", so the companion knows to correct it.
+   */
+  const send = useCallback(() => {
+    if (!compose) return sendText(draft)
+    const key = compose.id === 'check' ? 'agent.ready.checkSend' : 'agent.ready.explainSend'
+    setCompose(null)
+    return sendText(t(key, { text: draft.trim(), subject: context?.front ?? '' }))
+  }, [sendText, draft, compose, t, context])
+
+  const questions = readyQuestions(context, { used })
+
+  /* The field says what it is for: the move's words when one waits for them,
+     the subject when there is one, anything otherwise. */
+  const composerPlaceholder = compose
+    ? t(compose.id === 'check' ? 'agent.ready.checkPlaceholder' : 'agent.ready.explainPlaceholder', { subject: context?.front ?? '' })
+    : context?.front
+      ? t('agent.ready.placeholder', { subject: context.front })
+      : t('agent.inputPlaceholder')
+
+  /** A ready question: sent at once, or, for the learner's own words, the composer opens for them. */
+  const ask = useCallback(
+    (question) => {
+      setUsed((current) => [...current, question.id])
+      if (question.compose) {
+        setCompose(question)
+        return
+      }
+      sendText(readyMessage(t, question, context))
+    },
+    [sendText, t, context]
+  )
 
   /*
    * A handoff can carry a first turn (SR-004): the session asked, on the
@@ -248,7 +288,10 @@ export function AgentChat() {
           onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}
           keyboardShouldPersistTaps='handled'
         >
-          {turns.length === 0 ? (
+          {/* The subject stays in view for the whole conversation (CHAT-005). */}
+          <SubjectHead subject={context} />
+
+          {turns.length === 0 && questions.length === 0 ? (
             <Stack spacing={1} style={{ paddingTop: theme.spacing[3] }}>
               <Typography level='title-sm'>{t('agent.chat.empty.title')}</Typography>
               {/* Said, when there is a card. A chat that is silently grounded
@@ -260,6 +303,14 @@ export function AgentChat() {
           ) : (
             turns.map((turn, index) => <Bubble key={index} turn={turn} hint={context?.language ?? null} />)
           )}
+
+          {!sending && !spent && !compose ? (
+            <ReadyQuestions
+              questions={questions}
+              onAsk={ask}
+              note={turns.length === 0 ? t(context?.isFlipped ? 'agent.ready.backNote' : 'agent.ready.frontNote') : null}
+            />
+          ) : null}
 
           {sending ? (
             <Typography level='body-sm' color='text.tertiary' accessibilityLiveRegion='polite'>
@@ -284,7 +335,7 @@ export function AgentChat() {
             <Input
               value={draft}
               onChangeText={setDraft}
-              placeholder={t('agent.inputPlaceholder')}
+              placeholder={composerPlaceholder}
               accessibilityLabel={t('agent.inputAriaLabel')}
               multiline
               style={{ flex: 1 }}

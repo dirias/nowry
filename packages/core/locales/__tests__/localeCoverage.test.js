@@ -128,6 +128,10 @@ const BETA_MARK = ['beta.mark']
 // the same in every locale, never translated.
 const COMPANION_NAME = ['agent.defaultName']
 
+// A ready question as sent: the question, a dash, the card's front (CHAT-005).
+// Two placeholders and a dash; nothing in it is a word to translate.
+const READY_SEND = ['agent.ready.send']
+
 /*
  * The board's key list prints keys as their caps print them (BOARD-004).
  * "Tab", "Esc" and "Ctrl" are what the keys say on Spanish, French, German
@@ -174,7 +178,8 @@ const IDENTICAL_BY_DESIGN = {
     ...XP_GAINED,
     ...CARD_COUNTER,
     ...CAP('mod', 'tab', 'esc'),
-    ...COMPANION_NAME
+    ...COMPANION_NAME,
+    ...READY_SEND
   ],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
@@ -255,7 +260,8 @@ const IDENTICAL_BY_DESIGN = {
     'boards.tile.notes_one',
     'boards.tile.notes_other',
     ...CAP('mod', 'tab'),
-    ...COMPANION_NAME
+    ...COMPANION_NAME,
+    ...READY_SEND
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
@@ -299,7 +305,8 @@ const IDENTICAL_BY_DESIGN = {
     'boards.title',
     'header.boards',
     ...CAP('tab', 'esc'),
-    ...COMPANION_NAME
+    ...COMPANION_NAME,
+    ...READY_SEND
   ],
   ja: [
     // Boards (BOARD-008/009): file extensions and format names (Mermaid, JSON Canvas) are written in Latin script in Japanese UI.
@@ -310,7 +317,8 @@ const IDENTICAL_BY_DESIGN = {
     'cards.session.xpGained_other',
     ...CARD_COUNTER,
     ...CAP('mod', 'tab', 'esc', 'enter', 'delete'),
-    ...COMPANION_NAME
+    ...COMPANION_NAME,
+    ...READY_SEND
   ]
 }
 
