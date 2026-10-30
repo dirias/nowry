@@ -3070,7 +3070,7 @@
       "connects": "¿Con qué se relaciona?",
       "giveExample": "Dame un ejemplo",
       "whyMissing": "¿Por qué siempre lo fallo?",
-      "send": "{{question}} — {{subject}}",
+      "send": "{{question}} (sobre «{{subject}}»)",
       "placeholder": "Pregunta sobre {{subject}}…",
       "frontNote": "Respuesta oculta. Nada de esto la revela:",
       "backNote": "Respuesta visible. Pregunta lo que quieras, o empieza aquí:",

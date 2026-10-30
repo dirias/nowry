@@ -1933,7 +1933,7 @@
       "connects": "À quoi cela se rattache-t-il ?",
       "giveExample": "Donne-moi un exemple",
       "whyMissing": "Pourquoi je la rate toujours ?",
-      "send": "{{question}} — {{subject}}",
+      "send": "{{question}} (à propos de « {{subject}} »)",
       "placeholder": "Pose une question sur {{subject}}…",
       "frontNote": "Réponse cachée. Rien ici ne la révèle :",
       "backNote": "Réponse visible. Demande ce que tu veux, ou commence ici :",

@@ -2018,7 +2018,7 @@
       "connects": "何とつながっている？",
       "giveExample": "例をちょうだい",
       "whyMissing": "どうしていつも間違えるの？",
-      "send": "{{question}} — {{subject}}",
+      "send": "{{question}}（「{{subject}}」について）",
       "placeholder": "{{subject}}について質問…",
       "frontNote": "答えは隠れています。ここには答えを明かすものはありません：",
       "backNote": "答えが見えています。自由に質問するか、ここから：",

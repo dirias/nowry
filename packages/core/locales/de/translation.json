@@ -1922,7 +1922,7 @@
       "connects": "Womit hängt es zusammen?",
       "giveExample": "Gib mir ein Beispiel",
       "whyMissing": "Warum vergesse ich sie immer?",
-      "send": "{{question}} — {{subject}}",
+      "send": "{{question}} (zu „{{subject}}“)",
       "placeholder": "Frag zu {{subject}}…",
       "frontNote": "Antwort verdeckt. Nichts hier verrät sie:",
       "backNote": "Antwort sichtbar. Frag, was du willst, oder fang hier an:",

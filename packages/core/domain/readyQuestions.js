@@ -10,7 +10,10 @@
  *
  * Each move is an id; its label is `agent.ready.<id>`. What is sent is the
  * label with the subject named (`agent.ready.send`), so the server's memory
- * and the model both see which card the question is about.
+ * and the model both see which card the question is about. The subject is
+ * quoted in the learner's own language — "Give me a hint (about “接する”)" —
+ * because a bare "Give me a hint — 接する" read as Japanese and was answered
+ * in Japanese, as if the learner had chosen immersion (seen live 2026-10-31).
  */
 
 /** The fields a deck can be (CHAT-009); `general` is the fallback. */

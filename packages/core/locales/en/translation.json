@@ -3548,7 +3548,7 @@
       "connects": "What does it connect to?",
       "giveExample": "Give me an example",
       "whyMissing": "Why do I keep missing it?",
-      "send": "{{question}} — {{subject}}",
+      "send": "{{question}} (about “{{subject}}”)",
       "placeholder": "Ask about {{subject}}…",
       "frontNote": "Answer hidden. Nothing here gives it away:",
       "backNote": "Answer showing. Ask anything, or start here:",

@@ -128,10 +128,6 @@ const BETA_MARK = ['beta.mark']
 // the same in every locale, never translated.
 const COMPANION_NAME = ['agent.defaultName']
 
-// A ready question as sent: the question, a dash, the card's front (CHAT-005).
-// Two placeholders and a dash; nothing in it is a word to translate.
-const READY_SEND = ['agent.ready.send']
-
 /*
  * The board's key list prints keys as their caps print them (BOARD-004).
  * "Tab", "Esc" and "Ctrl" are what the keys say on Spanish, French, German
@@ -179,7 +175,6 @@ const IDENTICAL_BY_DESIGN = {
     ...CARD_COUNTER,
     ...CAP('mod', 'tab', 'esc'),
     ...COMPANION_NAME,
-    ...READY_SEND,
     // "General" is the Spanish word for a deck of anything (CHAT-009).
     'agent.ready.field.general',
     // "General" and "Plan" are the Spanish words for the chat subject labels (CHAT-010).
@@ -266,7 +261,6 @@ const IDENTICAL_BY_DESIGN = {
     'boards.tile.notes_other',
     ...CAP('mod', 'tab'),
     ...COMPANION_NAME,
-    ...READY_SEND,
     // "Certification" is the French word too (CHAT-009).
     'agent.ready.field.certification',
     // "Plan" is the French word (CHAT-010).
@@ -315,7 +309,6 @@ const IDENTICAL_BY_DESIGN = {
     'header.boards',
     ...CAP('tab', 'esc'),
     ...COMPANION_NAME,
-    ...READY_SEND,
     // "Board", "Deck" and "Plan" are what German uses in this app (CHAT-010).
     'agent.subject.board',
     'agent.subject.deck',
@@ -330,8 +323,7 @@ const IDENTICAL_BY_DESIGN = {
     'cards.session.xpGained_other',
     ...CARD_COUNTER,
     ...CAP('mod', 'tab', 'esc', 'enter', 'delete'),
-    ...COMPANION_NAME,
-    ...READY_SEND
+    ...COMPANION_NAME
   ]
 }
 
