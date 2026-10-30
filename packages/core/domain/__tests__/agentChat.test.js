@@ -1,4 +1,4 @@
-import { canSend, chatFailureKey, chatHistory, messageBudget, parseReply, plainReply, replyText } from '../agentChat'
+import { canSend, chatFailureKey, chatHistory, keptCard, messageBudget, parseReply, plainReply, replyText } from '../agentChat'
 
 describe('messageBudget', () => {
   it('reads the month as the server reports it', () => {
@@ -146,10 +146,16 @@ describe('chatFailureKey', () => {
 
 describe('parseReply', () => {
   it('turns example tags into rows between the prose', () => {
-    const reply = '効果 (こうか): effect.\n[[EX|この薬はよく効果がある。|Kono kusuri wa yoku kōka ga aru.|This medicine works well.]]\n- [[EX|効果的な勉強法|kōkateki na benkyōhō|an effective way to study]]\nWant more?'
+    const reply =
+      '効果 (こうか): effect.\n[[EX|この薬はよく効果がある。|Kono kusuri wa yoku kōka ga aru.|This medicine works well.]]\n- [[EX|効果的な勉強法|kōkateki na benkyōhō|an effective way to study]]\nWant more?'
     expect(parseReply(reply)).toEqual([
       { type: 'text', text: '効果 (こうか): effect.' },
-      { type: 'example', sentence: 'この薬はよく効果がある。', reading: 'Kono kusuri wa yoku kōka ga aru.', translation: 'This medicine works well.' },
+      {
+        type: 'example',
+        sentence: 'この薬はよく効果がある。',
+        reading: 'Kono kusuri wa yoku kōka ga aru.',
+        translation: 'This medicine works well.'
+      },
       { type: 'example', sentence: '効果的な勉強法', reading: 'kōkateki na benkyōhō', translation: 'an effective way to study' },
       { type: 'text', text: 'Want more?' }
     ])
@@ -173,5 +179,33 @@ describe('parseReply', () => {
   it('is nothing for nothing', () => {
     expect(parseReply('')).toEqual([])
     expect(parseReply(undefined)).toEqual([])
+  })
+})
+
+describe('keptCard (CHAT-006)', () => {
+  const example = {
+    sentence: '運動の効果が出てきた。',
+    reading: 'Undō no kōka ga dete kita.',
+    translation: 'The exercise is starting to pay off.'
+  }
+  const subject = { deckId: 'd1', cardId: 'c1', front: '効果' }
+
+  it('keeps the sentence in the deck of the card it was asked about', () => {
+    expect(keptCard(example, subject)).toEqual({
+      title: '運動の効果が出てきた。',
+      content: 'Undō no kōka ga dete kita.\nThe exercise is starting to pay off.',
+      deck_id: 'd1',
+      source_card_id: 'c1',
+      source_card_title: '効果'
+    })
+  })
+
+  it('has a back of just the translation when there is no reading', () => {
+    expect(keptCard({ sentence: 'La casa', reading: '', translation: 'The house' }, subject).content).toBe('The house')
+  })
+
+  it('cannot keep without a deck, or past the title cap', () => {
+    expect(keptCard(example, { front: '効果' })).toBeNull()
+    expect(keptCard({ sentence: 'x'.repeat(101) }, subject)).toBeNull()
   })
 })

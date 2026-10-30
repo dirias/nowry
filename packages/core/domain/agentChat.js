@@ -142,3 +142,29 @@ export function parseReply(text) {
 
 /** One example tag on a line of its own, after an optional list marker. */
 const EXAMPLE_LINE = /^\s*(?:[-*•]|\d+[.)])?\s*\[\[EX\|([^|\]]*)\|([^|\]]*)\|([^\]]*)\]\]\s*$/
+
+/** The API's cap on a card's title; a longer example is not offered for keeping. */
+export const CARD_TITLE_MAX = 100
+
+/**
+ * A kept example as the card `POST /cards/create` takes (CHAT-006, ADR-055 §5).
+ *
+ * The sentence is the front; its reading and translation are the back. It
+ * goes into the deck of the card it was asked about, and remembers that card
+ * — stored, not shown on the card, whose design this does not change.
+ *
+ * @returns {object|null} null when there is no deck to keep it in, or the
+ *   sentence is longer than a card title may be.
+ */
+export function keptCard(example, subject) {
+  const deckId = subject?.deckId
+  const sentence = example?.sentence?.trim()
+  if (!deckId || !sentence || sentence.length > CARD_TITLE_MAX) return null
+  return {
+    title: sentence,
+    content: [example.reading, example.translation].filter(Boolean).join('\n'),
+    deck_id: deckId,
+    ...(subject.cardId ? { source_card_id: subject.cardId } : {}),
+    ...(subject.front ? { source_card_title: String(subject.front).slice(0, CARD_TITLE_MAX) } : {})
+  }
+}

@@ -36,8 +36,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { BackHandler, ScrollView, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { agentService } from '@nowry/core/api/services'
-import { chatFailureKey, chatHistory, parseReply, plainReply, replyText } from '@nowry/core/domain/agentChat'
+import { agentService, cardsService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
+import { chatFailureKey, chatHistory, keptCard, parseReply, plainReply, replyText } from '@nowry/core/domain/agentChat'
 import { readyMessage, readyQuestions } from '@nowry/core/domain/readyQuestions'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { takeAskContext } from './askContext'
@@ -83,6 +84,8 @@ export function AgentChat() {
   // learner's own words — "Check my sentence" (CHAT-005, CHAT-007).
   const [used, setUsed] = useState([])
   const [compose, setCompose] = useState(null)
+  // Example sentences kept as cards, by sentence: 'saving' or 'kept' (CHAT-006).
+  const [kept, setKept] = useState({})
   const scroller = useRef(null)
   // The composer is pinned to the bottom of a screen that does not scroll, so
   // it is exactly where the keyboard opens.
@@ -124,6 +127,7 @@ export function AgentChat() {
         setFailure(null)
         setUsed([])
         setCompose(null)
+        setKept({})
       }
     }, [context])
   )
@@ -204,6 +208,53 @@ export function AgentChat() {
   }, [sendText, draft, compose, t, context])
 
   const questions = readyQuestions(context, { used })
+
+  /** Keep an example as a card in the deck of the card it was asked about (CHAT-006). */
+  const keep = useCallback(
+    async (example) => {
+      const card = keptCard(example, context)
+      if (!card) return
+      setKept((current) => ({ ...current, [example.sentence]: 'saving' }))
+      try {
+        await cardsService.create(card)
+        setKept((current) => ({ ...current, [example.sentence]: 'kept' }))
+        queryClient.invalidateQueries({ queryKey: ['cards'] })
+        queryClient.invalidateQueries({ queryKey: ['decks'] })
+      } catch {
+        setKept((current) => ({ ...current, [example.sentence]: undefined }))
+        setFailure(t('agent.ready.keepFailed'))
+      }
+    },
+    [context, t]
+  )
+
+  /** Under each example: kept, or the way to keep it — when it can be kept at all. */
+  const keepAction = (example) => {
+    if (!keptCard(example, context)) return null
+    if (kept[example.sentence] === 'kept') {
+      return (
+        <Stack direction='row' spacing={0.5} style={{ alignItems: 'center', paddingTop: 4 }}>
+          <Icon name='Check' size='sm' color='primary.plainColor' />
+          <Typography level='body-sm' color='primary.plainColor'>
+            {t('agent.ready.kept', { deck: context.deckName ?? '', subject: context.front ?? '' })}
+          </Typography>
+        </Stack>
+      )
+    }
+    return (
+      <View style={{ alignItems: 'flex-start', paddingTop: 4 }}>
+        <Button
+          variant='tertiary'
+          size='sm'
+          loading={kept[example.sentence] === 'saving'}
+          onPress={() => keep(example)}
+          accessibilityLabel={t('agent.ready.keepAria')}
+        >
+          {t('agent.ready.keep')}
+        </Button>
+      </View>
+    )
+  }
 
   /* The field says what it is for: the move's words when one waits for them,
      the subject when there is one, anything otherwise. */
@@ -301,7 +352,7 @@ export function AgentChat() {
               </Typography>
             </Stack>
           ) : (
-            turns.map((turn, index) => <Bubble key={index} turn={turn} hint={context?.language ?? null} />)
+            turns.map((turn, index) => <Bubble key={index} turn={turn} hint={context?.language ?? null} renderAction={keepAction} />)
           )}
 
           {!sending && !spent && !compose ? (
@@ -316,6 +367,18 @@ export function AgentChat() {
             <Typography level='body-sm' color='text.tertiary' accessibilityLiveRegion='polite'>
               {t('agent.chat.thinking')}
             </Typography>
+          ) : null}
+
+          {/* The chat is a detour inside the review, not a place to stay (CHAT-006). */}
+          {from && context?.page === 'study_session' && turns.length > 0 && !sending ? (
+            <Button
+              variant='secondary'
+              size='md'
+              onPress={close}
+              accessibilityLabel={t('agent.ready.backToCard', { index: context.cardIndex, total: context.totalCards })}
+            >
+              {t('agent.ready.backToCard', { index: context.cardIndex, total: context.totalCards })}
+            </Button>
           ) : null}
         </ScrollView>
 
@@ -362,7 +425,7 @@ export function AgentChat() {
  * for. Neither is a coloured speech bubble: a hue here would be a grade
  * somewhere else in this app (§15.5).
  */
-function Bubble({ turn, hint }) {
+function Bubble({ turn, hint, renderAction = null }) {
   const mine = turn.from === USER
 
   if (!mine) {
@@ -373,7 +436,7 @@ function Bubble({ turn, hint }) {
       <View accessibilityLiveRegion='polite' style={{ gap: 4 }}>
         {parseReply(turn.text).map((block, index) =>
           block.type === 'example' ? (
-            <ChatExample key={index} example={block} hint={hint} />
+            <ChatExample key={index} example={block} hint={hint} action={renderAction ? renderAction(block) : null} />
           ) : (
             <Typography key={index} level='body-md'>
               {plainReply(block.text)}
