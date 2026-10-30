@@ -15,6 +15,8 @@ import { routineProgress } from '@nowry/core/domain/dailyRoutine'
 import { tasksDueToday } from '@nowry/core/domain/taskQueue'
 import StudyCalendar from './StudyCalendar'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { todayContext } from '@nowry/core/domain/screenContext'
+import useChatSubject from '../../Agent/useChatSubject'
 
 function Home() {
   const { user } = useAuth()
@@ -40,6 +42,13 @@ function Home() {
     [tasks]
   )
   const routineToday = useMemo(() => routineProgress(routine), [routine])
+
+  // The companion, opened from here, is asked about the day (CHAT-010).
+  const chatSubject = useMemo(
+    () => todayContext({ reviewsDue: today.dueToday ?? null, tasksLeft: tasksToday.open }),
+    [today.dueToday, tasksToday.open]
+  )
+  useChatSubject(chatSubject)
 
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, md: 3 } }}>

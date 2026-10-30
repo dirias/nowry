@@ -181,7 +181,10 @@ const IDENTICAL_BY_DESIGN = {
     ...COMPANION_NAME,
     ...READY_SEND,
     // "General" is the Spanish word for a deck of anything (CHAT-009).
-    'agent.ready.field.general'
+    'agent.ready.field.general',
+    // "General" and "Plan" are the Spanish words for the chat subject labels (CHAT-010).
+    'agent.subject.general',
+    'agent.subject.plan'
   ],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
@@ -265,7 +268,9 @@ const IDENTICAL_BY_DESIGN = {
     ...COMPANION_NAME,
     ...READY_SEND,
     // "Certification" is the French word too (CHAT-009).
-    'agent.ready.field.certification'
+    'agent.ready.field.certification',
+    // "Plan" is the French word (CHAT-010).
+    'agent.subject.plan'
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
@@ -310,7 +315,11 @@ const IDENTICAL_BY_DESIGN = {
     'header.boards',
     ...CAP('tab', 'esc'),
     ...COMPANION_NAME,
-    ...READY_SEND
+    ...READY_SEND,
+    // "Board", "Deck" and "Plan" are what German uses in this app (CHAT-010).
+    'agent.subject.board',
+    'agent.subject.deck',
+    'agent.subject.plan'
   ],
   ja: [
     // Boards (BOARD-008/009): file extensions and format names (Mermaid, JSON Canvas) are written in Latin script in Japanese UI.

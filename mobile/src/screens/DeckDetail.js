@@ -21,10 +21,13 @@
  * Edit — two screens that open a card two different ways is how a learner
  * learns not to trust either.
  */
+import { useMemo } from 'react'
 import { View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { deckCounts } from '@nowry/core/domain/deckTypes'
+import { deckContext } from '@nowry/core/domain/screenContext'
+import { useScreenSubject } from './screenSubject'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { Button, Divider, Icon, ListRow, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
 
@@ -47,6 +50,13 @@ export function DeckDetail() {
   const deck = (deckList.decks ?? []).find((row) => String(row._id ?? row.id) === id) ?? null
   const counts = deckCounts(deck)
   const name = deck?.name || ''
+
+  // The companion, opened from here, is asked about this deck (CHAT-010).
+  const subject = useMemo(
+    () => deckContext({ id, name: name || null, due: counts.due, fresh: counts.fresh }),
+    [id, name, counts.due, counts.fresh]
+  )
+  useScreenSubject(subject)
 
   if (deckList.loading && !deck) {
     return (

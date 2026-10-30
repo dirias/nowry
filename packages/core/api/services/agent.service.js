@@ -51,6 +51,16 @@ export const agentService = {
   },
 
   /**
+   * Recent subjects with a saved thread, newest first (CHAT-010). Plus and Pro
+   * keep threads; a free account has none and gets an empty list.
+   * @returns {Promise<{threads: Array<{subject: string, title: string, last_at: string|null}>}>}
+   */
+  getThreads: async () => {
+    const { data } = await apiClient.get('/agent/threads')
+    return data
+  },
+
+  /**
    * Fetch a proactive nudge message from the Study Buddy.
    * Only returns a nudge if the user has enabled proactive nudging
    * and knowledge access in their settings.

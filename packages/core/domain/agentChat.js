@@ -181,7 +181,12 @@ export function subjectKeyOf(context) {
     if (context.cardId) return `card:${context.cardId}`
     if (context.deckId && context.deckId !== 'daily-review') return `deck:${context.deckId}`
   }
-  if (context.page === 'book' && context.bookId) return `book:${context.bookId}`
+  const bookId = context.bookId ?? context.book_id
+  if (context.page === 'book' && bookId) return `book:${bookId}`
+  if (context.page === 'deck' && context.deckId) return `deck:${context.deckId}`
+  if (context.page === 'board' && context.boardId) return `board:${context.boardId}`
+  if (context.page === 'today') return 'today'
+  if (context.page === 'plans' || context.page === 'annual_planning') return 'plan'
   return 'general'
 }
 

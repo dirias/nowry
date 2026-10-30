@@ -35,6 +35,8 @@
  * instead — take it, and it is yours to work with.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { bookContext } from '@nowry/core/domain/screenContext'
+import { useScreenSubject } from './screenSubject'
 import { AppState, Linking, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -84,6 +86,10 @@ export function BookReader() {
   })
 
   const document = useMemo(() => readDocument(data?.full_content), [data])
+
+  // The companion, opened from here, is asked about this document (CHAT-010).
+  const subject = useMemo(() => (isPublic ? null : bookContext({ id, title: data?.title || null })), [isPublic, id, data?.title])
+  useScreenSubject(subject)
   const words = useMemo(() => documentWordCount(document.blocks), [document])
 
   /*

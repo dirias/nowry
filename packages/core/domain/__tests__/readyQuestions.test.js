@@ -47,13 +47,42 @@ describe('readyQuestions (CHAT-005)', () => {
     expect(check.compose).toBe(true)
   })
 
-  it('offers nothing without a card subject', () => {
+  it('offers nothing in General without Knowledge Access', () => {
+    // Other screens have their own questions since CHAT-010 (below).
     expect(readyQuestions(null)).toEqual([])
-    expect(readyQuestions({ page: 'book' })).toEqual([])
   })
 
   it('names the subject in what it sends', () => {
     const t = (key, params) => (key === 'agent.ready.send' ? `${params.question} — ${params.subject}` : 'Give me examples')
     expect(readyMessage(t, { labelKey: 'agent.ready.examples' }, card())).toBe('Give me examples — 効果')
+  })
+})
+
+describe('subjects beyond the card (CHAT-010)', () => {
+  it('offers each screen its own questions', () => {
+    expect(ids({ page: 'deck', deckId: 'd1', deckName: 'JPN N3' })).toEqual(['studyFirst', 'summariseDeck'])
+    expect(ids({ page: 'book', bookId: 'b1' })).toEqual(['summariseSection', 'explainPassage', 'makeCards'])
+    expect(ids({ page: 'today' })).toEqual(['whatNow', 'planToday'])
+    expect(ids({ page: 'plans' })).toEqual(['breakGoal'])
+  })
+
+  it('offers data-reading questions only with Knowledge Access', () => {
+    expect(ids({ page: 'deck', deckId: 'd1' }, { knowledge: true })).toEqual(['studyFirst', 'missing', 'summariseDeck'])
+    expect(ids({ page: 'plans' }, { knowledge: true })).toEqual(['onTrack', 'breakGoal'])
+    expect(ids(null)).toEqual([])
+    expect(ids(null, { knowledge: true })).toEqual(['whatStudy'])
+  })
+
+  it('has nothing to explain on a board with no note selected', () => {
+    expect(ids({ page: 'board', boardId: 'b1' })).toEqual([])
+    expect(ids({ page: 'board', boardId: 'b1', noteText: 'ATP' })).toEqual(['explainNote', 'turnIntoCards'])
+  })
+
+  it('names every kind of subject in what it sends', () => {
+    const t = (key, params) => (key === 'agent.ready.send' ? `${params.question} — ${params.subject}` : 'Summarise this deck')
+    expect(readyMessage(t, { labelKey: 'agent.ready.summariseDeck' }, { page: 'deck', deckName: 'JPN N3' })).toBe(
+      'Summarise this deck — JPN N3'
+    )
+    expect(readyMessage(t, { labelKey: 'x' }, null)).toBe('Summarise this deck')
   })
 })

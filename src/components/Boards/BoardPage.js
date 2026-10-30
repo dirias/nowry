@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import { boardContext } from '@nowry/core/domain/screenContext'
+import useChatSubject from '../Agent/useChatSubject'
 import { Link as RouterLink, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Container, Link, Skeleton, Snackbar, Stack, Typography } from '@mui/joy'
@@ -76,6 +78,11 @@ function BoardView({ id }) {
   const { board, error, status, hasPending, apply, checkpoint, undo, redo, setViewport, rename, reload } = useBoard(id)
   const { duplicate, remove } = useBoards({ enabled: false })
   const { shareId, share, closeShare } = useBoardShare()
+
+  // The companion, opened from here, is asked about this board (CHAT-010).
+  const boardName = board?.name ?? null
+  const chatSubject = useMemo(() => (boardName ? boardContext({ id, title: boardName }) : null), [boardName, id])
+  useChatSubject(chatSubject)
 
   const [isNew] = useState(() => params.get('new') === '1')
   const followRef = useRef(null)

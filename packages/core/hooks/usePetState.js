@@ -78,6 +78,8 @@ export function usePetState() {
     /** 0–1 toward the next level, computed server-side. Null until known. */
     levelProgress: data?.level_progress ?? null,
     stageProgress: data?.stage_progress ?? null,
+    /** Whether the companion may read the learner's library and plan (CHAT-010 gates questions on it). */
+    knowledgeAccess: Boolean(data?.knowledge_access_enabled),
     /*
      * A companion that has never been revealed is not drawn at all — and the
      * default when the field is ABSENT is revealed, which is what the web's own

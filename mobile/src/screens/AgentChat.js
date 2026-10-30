@@ -38,27 +38,32 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { agentService, cardsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
-import { chatFailureKey, chatHistory, keptCard, parseReply, plainReply, replyText } from '@nowry/core/domain/agentChat'
-import { readyMessage, readyQuestions } from '@nowry/core/domain/readyQuestions'
+import { chatFailureKey, chatHistory, keptCard, parseReply, plainReply, replyText, subjectKeyOf } from '@nowry/core/domain/agentChat'
+import { readyMessage, readyQuestions, subjectTitle } from '@nowry/core/domain/readyQuestions'
+import { contextFromThread } from '@nowry/core/domain/screenContext'
+import { useChatThreads } from '@nowry/core/hooks/useChatThreads'
 import { useDeckField } from '@nowry/core/hooks/useDeckField'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { takeAskContext } from './askContext'
 import { ChatExample } from './ChatExample'
-import { ReadyQuestions, SubjectHead } from './ChatSubject'
+import { GeneralHead, ReadyQuestions, SubjectHead } from './ChatSubject'
 import { useAppearance, useTheme } from '../theme'
 import { Button, Card, Icon, IconButton, Input, PetOrb, Screen, Stack, Typography, useKeyboardClearance, useKeyboardHeight } from '../ui'
+
+/** What the first questions are introduced with: the card's side, or any other subject. */
+const readyNoteKey = (context) =>
+  context?.page === 'study_session' ? (context.isFlipped ? 'agent.ready.backNote' : 'agent.ready.frontNote') : 'agent.ready.screenNote'
 
 /** Whose turn a bubble is. `agent` is the server's `model`; see `chatHistory`. */
 const USER = 'user'
 const AGENT = 'agent'
 
 /**
- * Which card a context is about, as a value two contexts can be compared by.
- * The front is what the learner is looking at and what the empty state names;
- * two contexts for the same card differ only in whether it has been turned,
- * which is not a new conversation.
+ * Which thread a context is, as a value two contexts can be compared by
+ * (CHAT-010). Two contexts for the same card differ only in whether it has
+ * been turned, which is not a new conversation; a different subject is.
  */
-const cardOf = (context) => context?.front ?? null
+const threadOf = (context) => subjectKeyOf(context)
 
 export function AgentChat() {
   const { t, i18n } = useTranslation()
@@ -122,7 +127,7 @@ export function AgentChat() {
       setHandoff(next)
       // A different card is a different conversation. The same card reopened is
       // the one you stepped out of, and its turns are still the answer.
-      if (cardOf(next.context) !== cardOf(context)) {
+      if (threadOf(next.context) !== threadOf(context)) {
         setTurns([])
         setDraft('')
         setFailure(null)
@@ -205,7 +210,7 @@ export function AgentChat() {
     if (!compose) return sendText(draft)
     const key = compose.id === 'check' ? 'agent.ready.checkSend' : 'agent.ready.explainSend'
     setCompose(null)
-    return sendText(t(key, { text: draft.trim(), subject: context?.front ?? '' }))
+    return sendText(t(key, { text: draft.trim(), subject: subjectTitle(context) ?? '' }))
   }, [sendText, draft, compose, t, context])
 
   /*
@@ -217,7 +222,24 @@ export function AgentChat() {
     () => (context && deckField.field && deckField.source !== 'default' ? { ...context, field: deckField.field } : context),
     [context, deckField.field, deckField.source]
   )
-  const questions = readyQuestions(subject, { used })
+  const questions = readyQuestions(subject, { used, knowledge: pet.knowledgeAccess })
+
+  /*
+   * General — nothing on screen — lists the threads that can be picked up
+   * again (CHAT-010). Read only there, and kept for a minute.
+   */
+  const threads = useChatThreads(!context)
+
+  /** A new subject — cleared, or a thread picked up — is a new conversation. */
+  const switchTo = useCallback((next) => {
+    setHandoff((current) => ({ ...current, context: next, prompt: null }))
+    setTurns([])
+    setDraft('')
+    setFailure(null)
+    setUsed([])
+    setCompose(null)
+    setKept({})
+  }, [])
 
   /** Keep an example as a card in the deck of the card it was asked about (CHAT-006). */
   const keep = useCallback(
@@ -268,10 +290,11 @@ export function AgentChat() {
 
   /* The field says what it is for: the move's words when one waits for them,
      the subject when there is one, anything otherwise. */
+  const subjectName = subjectTitle(context)
   const composerPlaceholder = compose
-    ? t(compose.id === 'check' ? 'agent.ready.checkPlaceholder' : 'agent.ready.explainPlaceholder', { subject: context?.front ?? '' })
-    : context?.front
-      ? t('agent.ready.placeholder', { subject: context.front })
+    ? t(compose.id === 'check' ? 'agent.ready.checkPlaceholder' : 'agent.ready.explainPlaceholder', { subject: subjectName ?? '' })
+    : subjectName
+      ? t('agent.ready.placeholder', { subject: subjectName })
       : t('agent.inputPlaceholder')
 
   /** A ready question: sent at once, or, for the learner's own words, the composer opens for them. */
@@ -350,9 +373,17 @@ export function AgentChat() {
           keyboardShouldPersistTaps='handled'
         >
           {/* The subject stays in view for the whole conversation (CHAT-005). */}
-          <SubjectHead subject={subject} onChangeField={context?.deckId && context.deckId !== 'daily-review' ? deckField.setField : null} />
+          {context ? (
+            <SubjectHead
+              subject={subject}
+              onChangeField={context.page === 'study_session' && context.deckId ? deckField.setField : null}
+              onClear={() => switchTo(null)}
+            />
+          ) : turns.length === 0 ? (
+            <GeneralHead threads={threads} onContinue={(thread) => switchTo(contextFromThread(thread))} />
+          ) : null}
 
-          {turns.length === 0 && questions.length === 0 ? (
+          {turns.length === 0 && questions.length === 0 && context ? (
             <Stack spacing={1} style={{ paddingTop: theme.spacing[3] }}>
               <Typography level='title-sm'>{t('agent.chat.empty.title')}</Typography>
               {/* Said, when there is a card. A chat that is silently grounded
@@ -366,11 +397,7 @@ export function AgentChat() {
           )}
 
           {!sending && !spent && !compose ? (
-            <ReadyQuestions
-              questions={questions}
-              onAsk={ask}
-              note={turns.length === 0 ? t(context?.isFlipped ? 'agent.ready.backNote' : 'agent.ready.frontNote') : null}
-            />
+            <ReadyQuestions questions={questions} onAsk={ask} note={turns.length === 0 ? t(readyNoteKey(context)) : null} />
           ) : null}
 
           {sending ? (

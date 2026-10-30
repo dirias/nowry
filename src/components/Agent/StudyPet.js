@@ -38,11 +38,13 @@ import QuizFeedbackBubble from './QuizFeedbackBubble'
 import DeckSelector from './DeckSelector'
 import QuizSummaryCard from './QuizSummaryCard'
 import ReplyBlocks from './ReplyBlocks'
-import { ReadyQuestions, SubjectHead } from './ChatSubject'
+import { ContinueThreads, ReadyQuestions, SubjectHead } from './ChatSubject'
 import { cardsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { keptCard, subjectKeyOf } from '@nowry/core/domain/agentChat'
-import { readyMessage, readyQuestions } from '@nowry/core/domain/readyQuestions'
+import { readyMessage, readyQuestions, subjectTitle } from '@nowry/core/domain/readyQuestions'
+import { contextFromThread } from '@nowry/core/domain/screenContext'
+import { useChatThreads } from '@nowry/core/hooks/useChatThreads'
 import { useDeckField } from '@nowry/core/hooks/useDeckField'
 import { quizService } from '@nowry/core/api/services/quizService'
 import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
@@ -663,6 +665,8 @@ const StudyPet = () => {
     isTyping,
     error,
     viewContext,
+    setViewContext,
+    knowledgeAccessEnabled,
     messagesUsed,
     messagesLimit,
     open,
@@ -1037,7 +1041,10 @@ const StudyPet = () => {
   const deckField = useDeckField(viewContext?.deckId ?? null)
   const subject =
     viewContext && deckField.field && deckField.source !== 'default' ? { ...viewContext, field: deckField.field } : viewContext
-  const questions = quizState === 'chat' ? readyQuestions(subject, { used: usedQuestions }) : []
+  const questions = quizState === 'chat' ? readyQuestions(subject, { used: usedQuestions, knowledge: knowledgeAccessEnabled }) : []
+
+  // General — nothing on screen — lists the threads that can be picked up again (CHAT-010).
+  const threads = useChatThreads(isAuthenticated && !viewContext)
 
   useEffect(() => {
     setUsedQuestions([])
@@ -1101,10 +1108,11 @@ const StudyPet = () => {
     )
   }
 
+  const subjectName = subjectTitle(viewContext)
   const composerPlaceholder = compose
-    ? t(compose.id === 'check' ? 'agent.ready.checkPlaceholder' : 'agent.ready.explainPlaceholder', { subject: viewContext?.front ?? '' })
-    : hasCardSubject
-      ? t('agent.ready.placeholder', { subject: viewContext.front })
+    ? t(compose.id === 'check' ? 'agent.ready.checkPlaceholder' : 'agent.ready.explainPlaceholder', { subject: subjectName ?? '' })
+    : subjectName
+      ? t('agent.ready.placeholder', { subject: subjectName })
       : t('agent.inputPlaceholder')
 
   const handleSend = () => {
@@ -1665,11 +1673,19 @@ const StudyPet = () => {
                 >
                   {/* Welcome message if no history */}
                   {/* On a card, the card is the head instead of the welcome (CHAT-008). */}
-                  {quizState === 'chat' && hasCardSubject ? (
-                    <SubjectHead subject={subject} onChangeField={viewContext?.deckId ? deckField.setField : null} />
+                  {quizState === 'chat' && viewContext ? (
+                    <SubjectHead
+                      subject={subject}
+                      onChangeField={hasCardSubject && viewContext?.deckId ? deckField.setField : null}
+                      onClear={() => setViewContext(null)}
+                    />
                   ) : null}
 
-                  {visibleHistory.length === 0 && !isTyping && !hasCardSubject && (
+                  {quizState === 'chat' && !viewContext && visibleHistory.length === 0 ? (
+                    <ContinueThreads threads={threads} onContinue={(thread) => setViewContext(contextFromThread(thread))} />
+                  ) : null}
+
+                  {visibleHistory.length === 0 && !isTyping && !viewContext && (
                     <motion.div
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -1762,7 +1778,15 @@ const StudyPet = () => {
                       questions={questions}
                       onAsk={askReady}
                       note={
-                        visibleHistory.length === 0 ? t(viewContext?.isFlipped ? 'agent.ready.backNote' : 'agent.ready.frontNote') : null
+                        visibleHistory.length === 0
+                          ? t(
+                              !hasCardSubject
+                                ? 'agent.ready.screenNote'
+                                : viewContext?.isFlipped
+                                  ? 'agent.ready.backNote'
+                                  : 'agent.ready.frontNote'
+                            )
+                          : null
                       }
                     />
                   ) : null}

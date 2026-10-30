@@ -909,6 +909,13 @@ export const AgentProvider = ({ children }) => {
   )
 }
 
+/**
+ * The companion's context, or null outside its provider — for a page that only
+ * declares what it is about and must still render where no companion is
+ * mounted (CHAT-010).
+ */
+export const useOptionalPet = () => useContext(AgentContext)
+
 export const usePet = () => {
   const context = useContext(AgentContext)
   if (!context) {

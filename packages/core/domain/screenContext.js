@@ -77,3 +77,84 @@ export function studyCardContext(
 }
 
 export default studyCardContext
+
+/*
+ * Subjects beyond a card (CHAT-010, ADR-055 §1). Each screen declares what is
+ * in front of the learner with one of these; the server keys a thread on it
+ * and names it last in the prompt. None means General.
+ */
+
+/** A deck screen: its name and today's counts. */
+export function deckContext({ id = null, name = null, due = null, fresh = null } = {}) {
+  if (!id) return null
+  return { page: 'deck', deckId: String(id), deckName: name, dueCards: due, newCards: fresh }
+}
+
+/** A book being read: its title and, when known, the section on screen. */
+export function bookContext({ id = null, title = null, chapter = null, visibleText = null } = {}) {
+  if (!id) return null
+  return { page: 'book', bookId: String(id), bookTitle: title, chapterTitle: chapter, visibleText }
+}
+
+/** A board, and the note selected on it if any. */
+export function boardContext({ id = null, title = null, note = null } = {}) {
+  if (!id) return null
+  return { page: 'board', boardId: String(id), boardTitle: title, noteText: note ? String(note).slice(0, 1500) : null }
+}
+
+/** The day: reviews due and tasks left. */
+export function todayContext({ reviewsDue = null, tasksLeft = null } = {}) {
+  return { page: 'today', reviewsDue, tasksLeft }
+}
+
+/** The annual plan, and the goal on screen if any. */
+export function planContext({ goalTitle = null } = {}) {
+  return { page: 'plans', goalTitle }
+}
+
+/** Which kind of subject a context is, for its label: card, deck, book, board, today, plan or general. */
+export function subjectKind(context) {
+  switch (context?.page) {
+    case 'study_session':
+      return 'card'
+    case 'deck':
+    case 'book':
+    case 'board':
+    case 'today':
+      return context.page
+    case 'plans':
+    case 'annual_planning':
+      return 'plan'
+    default:
+      return 'general'
+  }
+}
+
+/**
+ * A subject back from a saved thread, for the General chat's Continue list
+ * (CHAT-010). Enough to key the same thread on the server and name it here: a
+ * card comes back front-side, so a continued chat cannot reveal its answer.
+ */
+export function contextFromThread(thread) {
+  const subject = String(thread?.subject ?? '')
+  const at = subject.indexOf(':')
+  const kind = at === -1 ? subject : subject.slice(0, at)
+  const id = at === -1 ? null : subject.slice(at + 1)
+  const title = thread?.title || null
+  switch (kind) {
+    case 'card':
+      return id ? { page: 'study_session', cardId: id, front: title, isFlipped: false } : null
+    case 'deck':
+      return deckContext({ id, name: title })
+    case 'book':
+      return bookContext({ id, title })
+    case 'board':
+      return boardContext({ id, title })
+    case 'today':
+      return todayContext()
+    case 'plan':
+      return planContext({ goalTitle: title })
+    default:
+      return null
+  }
+}

@@ -30,6 +30,8 @@
  * to a purchase, so the gate does not exist here and neither does the key.
  */
 import { useCallback, useMemo, useState } from 'react'
+import { planContext } from '@nowry/core/domain/screenContext'
+import { useScreenSubject } from './screenSubject'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -67,6 +69,10 @@ export function AnnualPlanning() {
   const year = new Date().getFullYear()
 
   const { plan, areas, goals, priorities, loading, error, reload } = useAnnualPlan(year, user)
+
+  // The companion, opened from here, is asked about the plan (CHAT-010).
+  const subject = useMemo(() => planContext(), [])
+  useScreenSubject(subject)
 
   const [creating, setCreating] = useState(false)
   const [areaSheet, setAreaSheet] = useState(false)

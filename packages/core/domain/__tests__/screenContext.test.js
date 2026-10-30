@@ -97,3 +97,37 @@ describe('studyCardContext', () => {
     })
   })
 })
+
+describe('subjects beyond the card (CHAT-010)', () => {
+  const { deckContext, todayContext, subjectKind, contextFromThread } = require('../screenContext')
+
+  it('builds each screen subject the server keys a thread on', () => {
+    expect(deckContext({ id: 'd1', name: 'JPN N3', due: 24, fresh: 5 })).toEqual({
+      page: 'deck',
+      deckId: 'd1',
+      deckName: 'JPN N3',
+      dueCards: 24,
+      newCards: 5
+    })
+    expect(deckContext({})).toBeNull()
+    expect(todayContext({ reviewsDue: 24, tasksLeft: 3 })).toEqual({ page: 'today', reviewsDue: 24, tasksLeft: 3 })
+  })
+
+  it('names the kind of every subject', () => {
+    expect(subjectKind(studyCardContext(card))).toBe('card')
+    expect(subjectKind({ page: 'annual_planning' })).toBe('plan')
+    expect(subjectKind(null)).toBe('general')
+  })
+
+  it('brings a saved thread back as a subject, a card on its front', () => {
+    expect(contextFromThread({ subject: 'card:c1', title: '効果' })).toEqual({
+      page: 'study_session',
+      cardId: 'c1',
+      front: '効果',
+      isFlipped: false
+    })
+    expect(contextFromThread({ subject: 'book:b1', title: 'Biology' }).bookId).toBe('b1')
+    expect(contextFromThread({ subject: 'today' }).page).toBe('today')
+    expect(contextFromThread({ subject: 'nonsense' })).toBeNull()
+  })
+})

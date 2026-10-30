@@ -60,6 +60,7 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { setAskContext } from '../../src/screens/askContext'
+import { currentScreenSubject } from '../../src/screens/screenSubject'
 import { useTheme } from '../../src/theme'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { FocusScreen } from '../../src/screens/FocusScreen'
@@ -129,11 +130,13 @@ export default function TabsLayout() {
   })
 
   /*
-   * No card, and here is where the chat should put us back (MOB-087). The
-   * bubble is on every tab, so the opener is wherever it was pressed.
+   * What the focused screen is about — a deck, a book, the day, the plan, or
+   * nothing (CHAT-010) — and here is where the chat should put us back
+   * (MOB-087). The bubble is on every tab, so the opener is wherever it was
+   * pressed.
    */
   const openChat = () => {
-    setAskContext(null, pathname)
+    setAskContext(currentScreenSubject(), pathname)
     router.push('/agent')
   }
 

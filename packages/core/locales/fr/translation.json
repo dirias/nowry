@@ -1863,7 +1863,37 @@
     }
   },
   "agent": {
+    "subject": {
+      "card": "Carte",
+      "deck": "Paquet",
+      "book": "Livre",
+      "board": "Tableau",
+      "today": "Aujourd'hui",
+      "plan": "Plan",
+      "general": "Général",
+      "clear": "Retirer",
+      "clearAria": "Ne plus parler de {{subject}}",
+      "continue": "Reprendre",
+      "deckCounts": "{{due}} à revoir · {{fresh}} nouvelles",
+      "todayCounts": "{{reviews}} révisions à faire · {{tasks}} tâches restantes",
+      "todayTitle": "Ta journée",
+      "planTitle": "Ton plan annuel"
+    },
     "ready": {
+      "studyFirst": "Que devrais-je étudier d'abord ?",
+      "missing": "Quelles cartes est-ce que je rate souvent ?",
+      "summariseDeck": "Résume ce paquet",
+      "summariseSection": "Résume cette section",
+      "explainPassage": "Explique ce passage",
+      "makeCards": "Quelles bonnes cartes tirer d'ici ?",
+      "explainNote": "Explique cette note",
+      "turnIntoCards": "Quelles cartes tirer de cette note ?",
+      "whatNow": "Que faire maintenant ?",
+      "planToday": "Planifie mon étude du jour",
+      "onTrack": "Suis-je dans les temps ?",
+      "breakGoal": "Découpe cet objectif en étapes",
+      "whatStudy": "Que devrais-je étudier maintenant ?",
+      "screenNote": "Demande ce que tu veux, ou commence ici :",
       "field": {
         "language": "Langue",
         "math": "Maths",

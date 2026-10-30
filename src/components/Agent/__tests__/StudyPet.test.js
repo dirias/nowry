@@ -51,6 +51,8 @@ const mockUsePet = jest.fn()
 jest.mock('@nowry/core/hooks/useDeckField', () => ({
   useDeckField: () => ({ field: null, source: null, setField: jest.fn() })
 }))
+// General's recent threads are a react-query read too (CHAT-010).
+jest.mock('@nowry/core/hooks/useChatThreads', () => ({ useChatThreads: () => [] }))
 jest.mock('@nowry/core/context/AgentContext', () => ({
   usePet: (...args) => mockUsePet(...args)
 }))

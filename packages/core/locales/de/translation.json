@@ -1852,7 +1852,37 @@
     }
   },
   "agent": {
+    "subject": {
+      "card": "Karte",
+      "deck": "Deck",
+      "book": "Buch",
+      "board": "Board",
+      "today": "Heute",
+      "plan": "Plan",
+      "general": "Allgemein",
+      "clear": "Entfernen",
+      "clearAria": "Nicht mehr nach {{subject}} fragen",
+      "continue": "Weitermachen",
+      "deckCounts": "{{due}} fällig · {{fresh}} neu",
+      "todayCounts": "{{reviews}} Wiederholungen fällig · {{tasks}} Aufgaben offen",
+      "todayTitle": "Dein Tag",
+      "planTitle": "Dein Jahresplan"
+    },
     "ready": {
+      "studyFirst": "Was sollte ich zuerst lernen?",
+      "missing": "Welche Karten vergesse ich oft?",
+      "summariseDeck": "Fass dieses Deck zusammen",
+      "summariseSection": "Fass diesen Abschnitt zusammen",
+      "explainPassage": "Erklär diese Passage",
+      "makeCards": "Welche guten Karten ergeben sich hier?",
+      "explainNote": "Erklär diese Notiz",
+      "turnIntoCards": "Welche Karten ergäbe diese Notiz?",
+      "whatNow": "Was soll ich jetzt tun?",
+      "planToday": "Plan mein Lernen für heute",
+      "onTrack": "Bin ich auf Kurs?",
+      "breakGoal": "Teil dieses Ziel in Schritte",
+      "whatStudy": "Was sollte ich jetzt lernen?",
+      "screenNote": "Frag, was du willst, oder fang hier an:",
       "field": {
         "language": "Sprache",
         "math": "Mathe",

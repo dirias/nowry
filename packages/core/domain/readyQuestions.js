@@ -85,16 +85,43 @@ function movesFor(subject) {
   return set.filter((id) => flipped || !NEEDS_BACK.has(id)).filter((id) => id !== 'breakDown' || HAN.test(String(subject?.front ?? '')))
 }
 
+/** Subjects beyond a card, by screen (CHAT-010). `null` is General. */
+const SCREEN_MOVES = {
+  deck: ['studyFirst', 'missing', 'summariseDeck'],
+  book: ['summariseSection', 'explainPassage', 'makeCards'],
+  board: ['explainNote', 'turnIntoCards'],
+  today: ['whatNow', 'planToday'],
+  plans: ['onTrack', 'breakGoal'],
+  annual_planning: ['onTrack', 'breakGoal'],
+  general: ['whatStudy']
+}
+
+/**
+ * Moves that read the learner's own data through the companion's tools; they
+ * are offered only with AI Knowledge Access on, since without it the answer
+ * would be "I can't see that" (CHAT-010).
+ */
+const NEEDS_KNOWLEDGE = new Set(['missing', 'onTrack', 'whatStudy'])
+
+const screenMovesFor = (subject) => {
+  if (!subject) return SCREEN_MOVES.general
+  const moves = SCREEN_MOVES[subject.page] ?? []
+  // A board with no note selected has nothing to explain.
+  return subject.page === 'board' && !subject.noteText ? [] : moves
+}
+
 /**
  * The questions to offer: three on an empty chat, two follow-ups after.
  *
- * @param {object|null} subject — the chat's context (a `studyCardContext`).
- * @param {{used?: string[]}} [state] — moves already sent in this chat.
+ * @param {object|null} subject — the chat's context: a card (`studyCardContext`),
+ *   another screen's subject (`deckContext`…), or null for General.
+ * @param {{used?: string[], knowledge?: boolean}} [state] — moves already sent in
+ *   this chat; whether AI Knowledge Access is on.
  * @returns {Array<{id: string, labelKey: string, compose: boolean}>}
  */
-export function readyQuestions(subject, { used = [] } = {}) {
-  if (!subject || subject.page !== 'study_session') return []
-  const fresh = movesFor(subject).filter((id) => !used.includes(id))
+export function readyQuestions(subject, { used = [], knowledge = false } = {}) {
+  const moves = subject?.page === 'study_session' ? movesFor(subject) : screenMovesFor(subject)
+  const fresh = moves.filter((id) => !used.includes(id)).filter((id) => knowledge || !NEEDS_KNOWLEDGE.has(id))
   return fresh.slice(0, used.length > 0 ? 2 : 3).map((id) => ({ id, labelKey: `agent.ready.${id}`, compose: COMPOSE_MOVES.has(id) }))
 }
 
@@ -105,8 +132,14 @@ export function readyQuestions(subject, { used = [] } = {}) {
  */
 export function readyMessage(t, question, subject) {
   const label = t(question.labelKey)
-  const name = subject?.front ? String(subject.front).slice(0, 80) : ''
+  const name = String(subjectTitle(subject) ?? '').slice(0, 80)
   return name ? t('agent.ready.send', { question: label, subject: name }) : label
+}
+
+/** What a subject is called: the card's front, the deck's, book's or board's name, the goal. */
+export function subjectTitle(subject) {
+  if (!subject) return null
+  return subject.front || subject.deckName || subject.bookTitle || subject.book_title || subject.boardTitle || subject.goalTitle || null
 }
 
 export default readyQuestions

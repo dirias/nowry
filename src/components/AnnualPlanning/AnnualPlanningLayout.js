@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { planContext } from '@nowry/core/domain/screenContext'
+import useChatSubject from '../Agent/useChatSubject'
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Alert, Box, Button, Container, Stack, Typography } from '@mui/joy'
@@ -28,6 +30,9 @@ import { planMetrics } from '@nowry/core/domain/goalDerivation'
  * loading/error states raced over one cached payload. Children now read
  * everything through useOutletContext().
  */
+/** The plan as the chat's subject; one value, so the page declares it once. */
+const PLAN_SUBJECT = planContext()
+
 const AnnualPlanningLayout = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -35,6 +40,9 @@ const AnnualPlanningLayout = () => {
 
   const year = new Date().getFullYear()
   const { tier } = useSubscription()
+
+  // The companion, opened from here, is asked about the plan (CHAT-010).
+  useChatSubject(PLAN_SUBJECT)
   const { openUpgradeModal } = useSubscriptionContext()
 
   const {

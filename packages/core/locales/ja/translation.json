@@ -1948,7 +1948,37 @@
     }
   },
   "agent": {
+    "subject": {
+      "card": "カード",
+      "deck": "デッキ",
+      "book": "本",
+      "board": "ボード",
+      "today": "今日",
+      "plan": "計画",
+      "general": "一般",
+      "clear": "解除",
+      "clearAria": "{{subject}}についての質問をやめる",
+      "continue": "続きから",
+      "deckCounts": "復習 {{due}} · 新規 {{fresh}}",
+      "todayCounts": "復習 {{reviews}} 件 · 残りのタスク {{tasks}} 件",
+      "todayTitle": "今日の予定",
+      "planTitle": "年間計画"
+    },
     "ready": {
+      "studyFirst": "まず何を勉強すればいい？",
+      "missing": "よく間違えるカードは？",
+      "summariseDeck": "このデッキを要約して",
+      "summariseSection": "このセクションを要約して",
+      "explainPassage": "この部分を説明して",
+      "makeCards": "ここからどんなカードが作れる？",
+      "explainNote": "このノートを説明して",
+      "turnIntoCards": "このノートからどんなカードが作れる？",
+      "whatNow": "今なにをすればいい？",
+      "planToday": "今日の勉強を計画して",
+      "onTrack": "順調に進んでいる？",
+      "breakGoal": "この目標をステップに分けて",
+      "whatStudy": "今なにを勉強すればいい？",
+      "screenNote": "自由に質問するか、ここから：",
       "field": {
         "language": "語学",
         "math": "数学",

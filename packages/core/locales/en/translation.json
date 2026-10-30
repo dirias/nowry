@@ -3478,7 +3478,37 @@
     "cardCount_other": "{{count}} cards"
   },
   "agent": {
+    "subject": {
+      "card": "Card",
+      "deck": "Deck",
+      "book": "Book",
+      "board": "Board",
+      "today": "Today",
+      "plan": "Plan",
+      "general": "General",
+      "clear": "Clear",
+      "clearAria": "Stop asking about {{subject}}",
+      "continue": "Continue",
+      "deckCounts": "{{due}} due · {{fresh}} new",
+      "todayCounts": "{{reviews}} reviews due · {{tasks}} tasks left",
+      "todayTitle": "Your day",
+      "planTitle": "Your annual plan"
+    },
     "ready": {
+      "studyFirst": "What should I study first?",
+      "missing": "Which cards do I keep missing?",
+      "summariseDeck": "Summarise this deck",
+      "summariseSection": "Summarise this section",
+      "explainPassage": "Explain this passage",
+      "makeCards": "What would make good cards here?",
+      "explainNote": "Explain this note",
+      "turnIntoCards": "What cards would this note make?",
+      "whatNow": "What should I do now?",
+      "planToday": "Plan my study for today",
+      "onTrack": "Am I on track?",
+      "breakGoal": "Break this goal into steps",
+      "whatStudy": "What should I study now?",
+      "screenNote": "Ask anything, or start here:",
       "field": {
         "language": "Language",
         "math": "Math",

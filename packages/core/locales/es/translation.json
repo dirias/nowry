@@ -3000,7 +3000,37 @@
     "cardCount_other": "{{count}} tarjetas"
   },
   "agent": {
+    "subject": {
+      "card": "Tarjeta",
+      "deck": "Mazo",
+      "book": "Libro",
+      "board": "Pizarra",
+      "today": "Hoy",
+      "plan": "Plan",
+      "general": "General",
+      "clear": "Quitar",
+      "clearAria": "Dejar de preguntar sobre {{subject}}",
+      "continue": "Continuar",
+      "deckCounts": "{{due}} pendientes · {{fresh}} nuevas",
+      "todayCounts": "{{reviews}} repasos pendientes · {{tasks}} tareas por hacer",
+      "todayTitle": "Tu día",
+      "planTitle": "Tu plan anual"
+    },
     "ready": {
+      "studyFirst": "¿Qué debería estudiar primero?",
+      "missing": "¿Qué tarjetas fallo más?",
+      "summariseDeck": "Resume este mazo",
+      "summariseSection": "Resume esta sección",
+      "explainPassage": "Explica este pasaje",
+      "makeCards": "¿Qué buenas tarjetas saldrían de aquí?",
+      "explainNote": "Explica esta nota",
+      "turnIntoCards": "¿Qué tarjetas saldrían de esta nota?",
+      "whatNow": "¿Qué hago ahora?",
+      "planToday": "Planifica mi estudio de hoy",
+      "onTrack": "¿Voy bien encaminado?",
+      "breakGoal": "Divide esta meta en pasos",
+      "whatStudy": "¿Qué debería estudiar ahora?",
+      "screenNote": "Pregunta lo que quieras, o empieza aquí:",
       "field": {
         "language": "Idioma",
         "math": "Matemáticas",

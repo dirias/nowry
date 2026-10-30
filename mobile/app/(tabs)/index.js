@@ -45,6 +45,8 @@
  * already there while the numbers arrive, so nothing moves when they do.
  */
 import { useCallback, useMemo, useState } from 'react'
+import { todayContext } from '@nowry/core/domain/screenContext'
+import { useScreenSubject } from '../../src/screens/screenSubject'
 import { Image, Linking, Pressable, ScrollView, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
@@ -147,6 +149,11 @@ export default function Home() {
    * state. The tick writes through the same optimistic log.
    */
   const day = useToday({ dueToday: today.due })
+
+  // The companion, opened from here, is asked about the day (CHAT-010).
+  const tasksLeft = (day.occurrences ?? []).filter((occurrence) => !occurrence.log).length
+  const subject = useMemo(() => todayContext({ reviewsDue: today.due, tasksLeft }), [today.due, tasksLeft])
+  useScreenSubject(subject)
   // The day's block rules, so a task with a time opens with it in the sheet (PLAN-020).
   const dayBlocks = useBlocks({ from: day.date, to: day.date })
   const log = useBlockLog()
