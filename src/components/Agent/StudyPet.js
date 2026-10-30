@@ -37,7 +37,7 @@ import QuizQuestionBubble from './QuizQuestionBubble'
 import QuizFeedbackBubble from './QuizFeedbackBubble'
 import DeckSelector from './DeckSelector'
 import QuizSummaryCard from './QuizSummaryCard'
-import PetMarkdown from './PetMarkdown'
+import ReplyBlocks from './ReplyBlocks'
 import { quizService } from '@nowry/core/api/services/quizService'
 import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 // The stage table is shared: the phone draws the same companion, and a stage
@@ -580,7 +580,7 @@ export const PetOrb = ({
 }
 
 /** A single message bubble in the chat history */
-const MessageBubble = ({ role, content, speciesColor }) => {
+const MessageBubble = ({ role, content, speciesColor, hint = null }) => {
   const isUser = role === 'user'
   return (
     <motion.div
@@ -608,7 +608,8 @@ const MessageBubble = ({ role, content, speciesColor }) => {
           wordBreak: 'break-word'
         }}
       >
-        {isUser ? content : <PetMarkdown content={content} />}
+        {/* Example sentences come back as rows (CHAT-004). */}
+        {isUser ? content : <ReplyBlocks content={content} hint={hint} />}
       </div>
     </motion.div>
   )
@@ -655,6 +656,7 @@ const StudyPet = () => {
     history,
     isTyping,
     error,
+    viewContext,
     messagesUsed,
     messagesLimit,
     open,
@@ -1636,7 +1638,15 @@ const StudyPet = () => {
                     if (isLastMsg && msg.role === 'assistant' && quizState === 'quiz-setup') {
                       return null
                     }
-                    return <MessageBubble key={i} role={msg.role} content={msg.content} speciesColor={resolvedColor} />
+                    return (
+                      <MessageBubble
+                        key={i}
+                        role={msg.role}
+                        content={msg.content}
+                        speciesColor={resolvedColor}
+                        hint={viewContext?.language ?? null}
+                      />
+                    )
                   })}
 
                   {(isTyping || (quizLoading && quizState === 'quiz-active' && !quizSession)) && (

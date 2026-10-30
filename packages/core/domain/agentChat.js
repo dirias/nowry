@@ -101,3 +101,44 @@ export function chatFailureKey(error) {
   if (status === 429) return 'agent.chat.busy'
   return 'agent.chat.failed'
 }
+
+/**
+ * A reply as blocks: prose, and example sentences the screen draws as rows
+ * (CHAT-004, ADR-055 §5).
+ *
+ * The companion writes each example on its own line as
+ * `[[EX|sentence|reading|translation]]`, the reading empty when the language
+ * needs none. A row can be heard and kept as a card; a sentence buried in a
+ * bullet with its romaji and translation on the same line could be neither,
+ * and the phone stripped its markdown into one dense run.
+ *
+ * Tolerant on purpose: a list marker before the tag is dropped, a tag with no
+ * sentence stays prose, and a reply with no tags is one text block.
+ *
+ * @returns {Array<{type: 'text', text: string} | {type: 'example', sentence: string, reading: string, translation: string}>}
+ */
+export function parseReply(text) {
+  if (typeof text !== 'string' || !text) return []
+  const blocks = []
+  let prose = []
+  const flush = () => {
+    const joined = prose.join('\n').trim()
+    if (joined) blocks.push({ type: 'text', text: joined })
+    prose = []
+  }
+  for (const line of text.split('\n')) {
+    const match = EXAMPLE_LINE.exec(line)
+    const sentence = match?.[1]?.trim()
+    if (!sentence) {
+      prose.push(line)
+      continue
+    }
+    flush()
+    blocks.push({ type: 'example', sentence, reading: (match[2] ?? '').trim(), translation: (match[3] ?? '').trim() })
+  }
+  flush()
+  return blocks
+}
+
+/** One example tag on a line of its own, after an optional list marker. */
+const EXAMPLE_LINE = /^\s*(?:[-*•]|\d+[.)])?\s*\[\[EX\|([^|\]]*)\|([^|\]]*)\|([^\]]*)\]\]\s*$/

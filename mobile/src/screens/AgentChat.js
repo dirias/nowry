@@ -37,9 +37,10 @@ import { BackHandler, ScrollView, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { agentService } from '@nowry/core/api/services'
-import { chatFailureKey, chatHistory, plainReply, replyText } from '@nowry/core/domain/agentChat'
+import { chatFailureKey, chatHistory, parseReply, plainReply, replyText } from '@nowry/core/domain/agentChat'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { takeAskContext } from './askContext'
+import { ChatExample } from './ChatExample'
 import { useAppearance, useTheme } from '../theme'
 import { Button, Card, Icon, IconButton, Input, PetOrb, Screen, Stack, Typography, useKeyboardClearance, useKeyboardHeight } from '../ui'
 
@@ -164,9 +165,9 @@ export function AgentChat() {
 
       try {
         const response = await agentService.chat(message, chatHistory(turns), context, i18n?.language ?? 'en', 'phone')
-        /* The companion answers in markdown and this client has no renderer for
-           it, so the markers come off rather than onto the screen. */
-        setTurns([...asked, { from: AGENT, text: plainReply(replyText(response)) }])
+        /* Kept as written: the example tags become rows when drawn (CHAT-004),
+           and the markdown comes off there, block by block. */
+        setTurns([...asked, { from: AGENT, text: replyText(response) }])
         // The reply carries the month's count, so the footer is right without a
         // second read of the companion state.
         await pet.reload?.()
@@ -257,7 +258,7 @@ export function AgentChat() {
               </Typography>
             </Stack>
           ) : (
-            turns.map((turn, index) => <Bubble key={index} turn={turn} theme={theme} />)
+            turns.map((turn, index) => <Bubble key={index} turn={turn} hint={context?.language ?? null} />)
           )}
 
           {sending ? (
@@ -310,14 +311,25 @@ export function AgentChat() {
  * for. Neither is a coloured speech bubble: a hue here would be a grade
  * somewhere else in this app (§15.5).
  */
-function Bubble({ turn, theme }) {
+function Bubble({ turn, hint }) {
   const mine = turn.from === USER
 
   if (!mine) {
+    /* The companion answers in markdown and this client has no renderer for
+       it, so the markers come off prose rather than onto the screen; example
+       sentences arrive tagged and are drawn as rows (CHAT-004). */
     return (
-      <Typography level='body-md' accessibilityLiveRegion='polite'>
-        {turn.text}
-      </Typography>
+      <View accessibilityLiveRegion='polite' style={{ gap: 4 }}>
+        {parseReply(turn.text).map((block, index) =>
+          block.type === 'example' ? (
+            <ChatExample key={index} example={block} hint={hint} />
+          ) : (
+            <Typography key={index} level='body-md'>
+              {plainReply(block.text)}
+            </Typography>
+          )
+        )}
+      </View>
     )
   }
 

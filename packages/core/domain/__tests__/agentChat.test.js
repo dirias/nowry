@@ -1,4 +1,4 @@
-import { canSend, chatFailureKey, chatHistory, messageBudget, plainReply, replyText } from '../agentChat'
+import { canSend, chatFailureKey, chatHistory, messageBudget, parseReply, plainReply, replyText } from '../agentChat'
 
 describe('messageBudget', () => {
   it('reads the month as the server reports it', () => {
@@ -141,5 +141,37 @@ describe('chatFailureKey', () => {
   it('never hands the server detail to the screen', () => {
     expect(chatFailureKey(failed(502, 'AI service error. Please try again.'))).toBe('agent.chat.failed')
     expect(chatFailureKey(undefined)).toBe('agent.chat.failed')
+  })
+})
+
+describe('parseReply', () => {
+  it('turns example tags into rows between the prose', () => {
+    const reply = '効果 (こうか): effect.\n[[EX|この薬はよく効果がある。|Kono kusuri wa yoku kōka ga aru.|This medicine works well.]]\n- [[EX|効果的な勉強法|kōkateki na benkyōhō|an effective way to study]]\nWant more?'
+    expect(parseReply(reply)).toEqual([
+      { type: 'text', text: '効果 (こうか): effect.' },
+      { type: 'example', sentence: 'この薬はよく効果がある。', reading: 'Kono kusuri wa yoku kōka ga aru.', translation: 'This medicine works well.' },
+      { type: 'example', sentence: '効果的な勉強法', reading: 'kōkateki na benkyōhō', translation: 'an effective way to study' },
+      { type: 'text', text: 'Want more?' }
+    ])
+  })
+
+  it('keeps an example with no reading', () => {
+    expect(parseReply('[[EX|La casa es grande.||The house is big.]]')).toEqual([
+      { type: 'example', sentence: 'La casa es grande.', reading: '', translation: 'The house is big.' }
+    ])
+  })
+
+  it('leaves a reply with no tags as one block of prose', () => {
+    expect(parseReply('Just an answer.\nTwo lines.')).toEqual([{ type: 'text', text: 'Just an answer.\nTwo lines.' }])
+  })
+
+  it('treats a malformed or empty tag as prose', () => {
+    expect(parseReply('[[EX||x|y]]')).toEqual([{ type: 'text', text: '[[EX||x|y]]' }])
+    expect(parseReply('see [[EX|a|b|c]] inline')).toEqual([{ type: 'text', text: 'see [[EX|a|b|c]] inline' }])
+  })
+
+  it('is nothing for nothing', () => {
+    expect(parseReply('')).toEqual([])
+    expect(parseReply(undefined)).toEqual([])
   })
 })
