@@ -38,6 +38,11 @@ import QuizFeedbackBubble from './QuizFeedbackBubble'
 import DeckSelector from './DeckSelector'
 import QuizSummaryCard from './QuizSummaryCard'
 import ReplyBlocks from './ReplyBlocks'
+import { ReadyQuestions, SubjectHead } from './ChatSubject'
+import { cardsService } from '@nowry/core/api/services'
+import { queryClient } from '@nowry/core/api/queryClient'
+import { keptCard, subjectKeyOf } from '@nowry/core/domain/agentChat'
+import { readyMessage, readyQuestions } from '@nowry/core/domain/readyQuestions'
 import { quizService } from '@nowry/core/api/services/quizService'
 import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 // The stage table is shared: the phone draws the same companion, and a stage
@@ -45,7 +50,7 @@ import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 import { STAGE_CONFIG, isNearEvolution } from '@nowry/core/domain/petStages'
 import { DEFAULT_ACCENT, readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { earnedGold } from '@nowry/core/tokens/colorSystem'
-import { Box, Typography } from '@mui/joy'
+import { Box, Button, Typography } from '@mui/joy'
 import { useTheme } from '@mui/joy/styles'
 
 // The egg's asymmetry is what sells stage 1 as "not yet formed"; every later
@@ -580,7 +585,7 @@ export const PetOrb = ({
 }
 
 /** A single message bubble in the chat history */
-const MessageBubble = ({ role, content, speciesColor, hint = null }) => {
+const MessageBubble = ({ role, content, speciesColor, hint = null, renderAction = null }) => {
   const isUser = role === 'user'
   return (
     <motion.div
@@ -609,7 +614,7 @@ const MessageBubble = ({ role, content, speciesColor, hint = null }) => {
         }}
       >
         {/* Example sentences come back as rows (CHAT-004). */}
-        {isUser ? content : <ReplyBlocks content={content} hint={hint} />}
+        {isUser ? content : <ReplyBlocks content={content} hint={hint} renderAction={renderAction} />}
       </div>
     </motion.div>
   )
@@ -733,6 +738,11 @@ const StudyPet = () => {
   const [answerPending, setAnswerPending] = useState(false)
   // Conversation history for the current card (role/content pairs passed to backend)
   const [cardConversation, setCardConversation] = useState([])
+  // Ready questions sent on this subject, a move waiting for the learner's own
+  // words, and example sentences kept as cards (CHAT-005..008).
+  const [usedQuestions, setUsedQuestions] = useState([])
+  const [compose, setCompose] = useState(null)
+  const [kept, setKept] = useState({})
 
   // Push a quiz-specific message into the chat display list
   const pushQuizMessage = useCallback((msg) => {
@@ -1014,9 +1024,92 @@ const StudyPet = () => {
     setQuizError(null)
   }, [])
 
+  // ---------------------------------------------------------------------------
+  // The subject, kept in place (CHAT-008, ADR-055): the panel shows the thread
+  // of what is on screen, a card head instead of the welcome, and its ready
+  // questions. Turns about another card stay in that card's thread.
+  // ---------------------------------------------------------------------------
+  const subjectKey = subjectKeyOf(viewContext)
+  const visibleHistory = history.filter((turn) => (turn.subject ?? 'general') === subjectKey)
+  const hasCardSubject = Boolean(viewContext?.page === 'study_session' && viewContext?.front)
+  const questions = quizState === 'chat' ? readyQuestions(viewContext, { used: usedQuestions }) : []
+
+  useEffect(() => {
+    setUsedQuestions([])
+    setCompose(null)
+    setKept({})
+  }, [subjectKey])
+
+  /** A ready question: sent at once, or the composer opens for the learner's own words. */
+  const askReady = (question) => {
+    setUsedQuestions((current) => [...current, question.id])
+    if (question.compose) {
+      setCompose(question)
+      inputRef.current?.focus()
+      return
+    }
+    sendMessage(readyMessage(t, question, viewContext))
+  }
+
+  /** Keep an example as a card in the deck of the card it was asked about (CHAT-006). */
+  const keepExample = async (example) => {
+    const card = keptCard(example, viewContext)
+    if (!card) return
+    setKept((current) => ({ ...current, [example.sentence]: 'saving' }))
+    try {
+      await cardsService.create(card)
+      setKept((current) => ({ ...current, [example.sentence]: 'kept' }))
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
+      queryClient.invalidateQueries({ queryKey: ['decks'] })
+    } catch {
+      setKept((current) => ({ ...current, [example.sentence]: 'failed' }))
+    }
+  }
+
+  const keepAction = (example) => {
+    if (!keptCard(example, viewContext)) return null
+    const state = kept[example.sentence]
+    if (state === 'kept') {
+      return (
+        <Typography level='body-xs' sx={{ color: 'primary.plainColor', mt: 0.5 }}>
+          {t('agent.ready.kept', { deck: viewContext.deckName ?? '', subject: viewContext.front ?? '' })}
+        </Typography>
+      )
+    }
+    return (
+      <Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Button
+          variant='plain'
+          size='sm'
+          loading={state === 'saving'}
+          onClick={() => keepExample(example)}
+          aria-label={t('agent.ready.keepAria')}
+        >
+          {t('agent.ready.keep')}
+        </Button>
+        {state === 'failed' ? (
+          <Typography level='body-xs' sx={{ color: 'danger.plainColor' }}>
+            {t('agent.ready.keepFailed')}
+          </Typography>
+        ) : null}
+      </Box>
+    )
+  }
+
+  const composerPlaceholder = compose
+    ? t(compose.id === 'check' ? 'agent.ready.checkPlaceholder' : 'agent.ready.explainPlaceholder', { subject: viewContext?.front ?? '' })
+    : hasCardSubject
+      ? t('agent.ready.placeholder', { subject: viewContext.front })
+      : t('agent.inputPlaceholder')
+
   const handleSend = () => {
     if (!input.trim() || isTyping) return
-    const text = input.trim()
+    const typed = input.trim()
+    // A move waiting for the learner's words is sent as that move (CHAT-007).
+    const text = compose
+      ? t(compose.id === 'check' ? 'agent.ready.checkSend' : 'agent.ready.explainSend', { text: typed, subject: viewContext?.front ?? '' })
+      : typed
+    if (compose) setCompose(null)
     setInput('')
     // Reset textarea height back to single row after send
     if (inputRef.current) {
@@ -1566,7 +1659,10 @@ const StudyPet = () => {
                   }}
                 >
                   {/* Welcome message if no history */}
-                  {history.length === 0 && !isTyping && (
+                  {/* On a card, the card is the head instead of the welcome (CHAT-008). */}
+                  {quizState === 'chat' && hasCardSubject ? <SubjectHead subject={viewContext} /> : null}
+
+                  {visibleHistory.length === 0 && !isTyping && !hasCardSubject && (
                     <motion.div
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -1631,10 +1727,10 @@ const StudyPet = () => {
                     </motion.div>
                   )}
 
-                  {history.map((msg, i) => {
+                  {visibleHistory.map((msg, i) => {
                     // When quiz-setup panel is active, suppress the last assistant
                     // message — the DeckSelector panel IS the visual response.
-                    const isLastMsg = i === history.length - 1
+                    const isLastMsg = i === visibleHistory.length - 1
                     if (isLastMsg && msg.role === 'assistant' && quizState === 'quiz-setup') {
                       return null
                     }
@@ -1645,6 +1741,7 @@ const StudyPet = () => {
                         content={msg.content}
                         speciesColor={resolvedColor}
                         hint={viewContext?.language ?? null}
+                        renderAction={keepAction}
                       />
                     )
                   })}
@@ -1652,6 +1749,16 @@ const StudyPet = () => {
                   {(isTyping || (quizLoading && quizState === 'quiz-active' && !quizSession)) && (
                     <TypingIndicator speciesColor={resolvedColor} />
                   )}
+
+                  {!isTyping && !compose && !messageLimitReached ? (
+                    <ReadyQuestions
+                      questions={questions}
+                      onAsk={askReady}
+                      note={
+                        visibleHistory.length === 0 ? t(viewContext?.isFlipped ? 'agent.ready.backNote' : 'agent.ready.frontNote') : null
+                      }
+                    />
+                  ) : null}
 
                   {error && (
                     <motion.div
@@ -1938,7 +2045,7 @@ const StudyPet = () => {
                           ? t('quiz.input_placeholder')
                           : messagesLimit !== -1 && messagesUsed >= messagesLimit
                             ? t('agent.limitReachedPlaceholder')
-                            : t('agent.inputPlaceholder')
+                            : composerPlaceholder
                       }
                       disabled={
                         isTyping || answerPending || (messagesLimit !== -1 && messagesUsed >= messagesLimit && quizState === 'chat')

@@ -1,4 +1,15 @@
-import { canSend, chatFailureKey, chatHistory, keptCard, messageBudget, parseReply, plainReply, replyText } from '../agentChat'
+import {
+  canSend,
+  chatFailureKey,
+  chatHistory,
+  keptCard,
+  messageBudget,
+  parseReply,
+  plainReply,
+  replyText,
+  subjectKeyOf,
+  threadOf
+} from '../agentChat'
 
 describe('messageBudget', () => {
   it('reads the month as the server reports it', () => {
@@ -207,5 +218,28 @@ describe('keptCard (CHAT-006)', () => {
   it('cannot keep without a deck, or past the title cap', () => {
     expect(keptCard(example, { front: '効果' })).toBeNull()
     expect(keptCard({ sentence: 'x'.repeat(101) }, subject)).toBeNull()
+  })
+})
+
+describe('subjectKeyOf and threadOf (CHAT-008)', () => {
+  it('derives the same thread keys the server does', () => {
+    expect(subjectKeyOf({ page: 'study_session', cardId: 'c1', deckId: 'd1' })).toBe('card:c1')
+    expect(subjectKeyOf({ page: 'study_session', deckId: 'd1' })).toBe('deck:d1')
+    expect(subjectKeyOf({ page: 'book', bookId: 'b1' })).toBe('book:b1')
+    expect(subjectKeyOf(null)).toBe('general')
+  })
+
+  it('sends only the thread of the subject on screen', () => {
+    const history = [
+      { role: 'user', content: 'verbs?' },
+      { role: 'user', content: 'examples', subject: 'card:c1' },
+      { role: 'model', content: 'この薬は…', subject: 'card:c1' },
+      { role: 'user', content: '結果?', subject: 'card:c2' }
+    ]
+    expect(threadOf(history, 'card:c1')).toEqual([
+      { role: 'user', content: 'examples' },
+      { role: 'model', content: 'この薬は…' }
+    ])
+    expect(threadOf(history, 'general')).toEqual([{ role: 'user', content: 'verbs?' }])
   })
 })

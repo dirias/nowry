@@ -21,7 +21,7 @@ import { useAuth } from './AuthContext'
 import { agentService } from '../api/services/agent.service'
 import petService from '../api/services/petService'
 import { allowIntervention, silenceUntil } from '../domain/interventionPolicy'
-import { chatFailureKey } from '../domain/agentChat'
+import { chatFailureKey, subjectKeyOf, threadOf } from '../domain/agentChat'
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -195,7 +195,8 @@ function agentReducer(state, action) {
       return {
         ...state,
         isOpen: true,
-        history: [...state.history, { role: 'model', content: action.payload }]
+        // Said about what is on screen, so it joins that subject's thread.
+        history: [...state.history, { role: 'model', content: action.payload, subject: subjectKeyOf(state.viewContext) }]
       }
     case 'CLOSE':
       return { ...state, isOpen: false }
@@ -212,7 +213,8 @@ function agentReducer(state, action) {
     case 'USER_MESSAGE':
       return {
         ...state,
-        history: [...state.history, { role: 'user', content: action.payload }],
+        // Each turn knows its thread (CHAT-008), so history follows the subject.
+        history: [...state.history, { role: 'user', content: action.payload, subject: action.subject ?? 'general' }],
         isTyping: true,
         mood: 'thinking',
         error: null
@@ -220,7 +222,7 @@ function agentReducer(state, action) {
     case 'AGENT_REPLY':
       return {
         ...state,
-        history: [...state.history, { role: 'model', content: action.payload.reply }],
+        history: [...state.history, { role: 'model', content: action.payload.reply, subject: action.subject ?? 'general' }],
         isTyping: false,
         mood: action.payload.mood || 'speaking',
         messagesUsed: action.payload.messages_used,
@@ -570,14 +572,16 @@ export const AgentProvider = ({ children }) => {
     async (message, context = null) => {
       if (!message.trim()) return
 
-      dispatch({ type: 'USER_MESSAGE', payload: message })
-
       // Use explicit context override, or fall back to the current view context
       const effectiveContext = context || viewContextRef.current
+      // Only this subject's turns go as history: another card's are not about this one (CHAT-008).
+      const subject = subjectKeyOf(effectiveContext)
+
+      dispatch({ type: 'USER_MESSAGE', payload: message, subject })
 
       try {
-        const response = await agentService.chat(message, historyRef.current, effectiveContext, i18n.language)
-        dispatch({ type: 'AGENT_REPLY', payload: response })
+        const response = await agentService.chat(message, threadOf(historyRef.current, subject), effectiveContext, i18n.language)
+        dispatch({ type: 'AGENT_REPLY', payload: response, subject })
         applyXpResult(response)
       } catch (err) {
         // A key, never the server's detail: the panel says it in the learner's language (AI-005).

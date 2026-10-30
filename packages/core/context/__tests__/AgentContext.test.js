@@ -317,3 +317,31 @@ describe('a failed send (AI-005)', () => {
     expect(get().error).toBe('agent.chat.failed')
   })
 })
+
+describe('history follows the subject (CHAT-008)', () => {
+  test("another card's turns are not sent as history", async () => {
+    agentService.chat.mockResolvedValue({ reply: 'ok', messages_used: 1, messages_limit: -1 })
+    let ctx
+    render(
+      <AgentProvider>
+        <TestConsumer
+          onRender={(c) => {
+            ctx = c
+          }}
+        />
+      </AgentProvider>
+    )
+    const cardA = { page: 'study_session', cardId: 'a', front: '効果' }
+    const cardB = { page: 'study_session', cardId: 'b', front: '結果' }
+    await act(async () => ctx.sendMessage('about A', cardA))
+    await act(async () => ctx.sendMessage('about B', cardB))
+
+    const [, historySent] = agentService.chat.mock.calls[1]
+    expect(historySent).toEqual([])
+    await act(async () => ctx.sendMessage('A again', cardA))
+    expect(agentService.chat.mock.calls[2][1]).toEqual([
+      { role: 'user', content: 'about A' },
+      { role: 'model', content: 'ok' }
+    ])
+  })
+})

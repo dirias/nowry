@@ -168,3 +168,23 @@ export function keptCard(example, subject) {
     ...(subject.front ? { source_card_title: String(subject.front).slice(0, CARD_TITLE_MAX) } : {})
   }
 }
+
+/**
+ * The thread a context belongs to, the same key the server derives (CHAT-001):
+ * a card is its own thread, a session without a card id is its deck's, a book
+ * is its own, and anything else is General. The web keeps one conversation per
+ * key, so a turn about one card is never sent as history for another.
+ */
+export function subjectKeyOf(context) {
+  if (!context) return 'general'
+  if (context.page === 'study_session') {
+    if (context.cardId) return `card:${context.cardId}`
+    if (context.deckId && context.deckId !== 'daily-review') return `deck:${context.deckId}`
+  }
+  if (context.page === 'book' && context.bookId) return `book:${context.bookId}`
+  return 'general'
+}
+
+/** The turns of one thread, as the server takes them: `{role, content}` only. */
+export const threadOf = (history = [], subject = 'general') =>
+  history.filter((turn) => (turn.subject ?? 'general') === subject).map(({ role, content }) => ({ role, content }))
