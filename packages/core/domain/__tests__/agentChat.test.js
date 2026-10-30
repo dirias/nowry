@@ -243,3 +243,17 @@ describe('subjectKeyOf and threadOf (CHAT-008)', () => {
     expect(threadOf(history, 'general')).toEqual([{ role: 'user', content: 'verbs?' }])
   })
 })
+
+describe('parseReply cleans a row (CHAT-004, seen live on 2026-10-31)', () => {
+  it('drops the bold a model puts on the target word', () => {
+    const [row] = parseReply(
+      '[[EX|この薬の**効果**がすぐに現れた。|kono kusuri no *kōka* ga sugu ni arawareta.|The **effect** appeared quickly.]]  '
+    )
+    expect(row).toEqual({
+      type: 'example',
+      sentence: 'この薬の効果がすぐに現れた。',
+      reading: 'kono kusuri no kōka ga sugu ni arawareta.',
+      translation: 'The effect appeared quickly.'
+    })
+  })
+})

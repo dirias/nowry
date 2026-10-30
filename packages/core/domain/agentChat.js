@@ -134,11 +134,28 @@ export function parseReply(text) {
       continue
     }
     flush()
-    blocks.push({ type: 'example', sentence, reading: (match[2] ?? '').trim(), translation: (match[3] ?? '').trim() })
+    blocks.push({
+      type: 'example',
+      sentence: unmark(sentence),
+      reading: unmark(match[2] ?? ''),
+      translation: unmark(match[3] ?? '')
+    })
   }
   flush()
   return blocks
 }
+
+/**
+ * A row is plain text: models bold the target word inside the sentence
+ * (`この薬の**効果**`) however the prompt asks, and a row would show the
+ * asterisks and speak them.
+ */
+const unmark = (text) =>
+  String(text)
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1$2')
+    .trim()
 
 /** One example tag on a line of its own, after an optional list marker. */
 const EXAMPLE_LINE = /^\s*(?:[-*•]|\d+[.)])?\s*\[\[EX\|([^|\]]*)\|([^|\]]*)\|([^\]]*)\]\]\s*$/
