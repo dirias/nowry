@@ -19,7 +19,7 @@
  * sends it is asking the model to keep a secret, which is not a thing a model
  * can be relied on to do.
  */
-import { backText, frontText } from './cardSpeech'
+import { backText, frontText, subjectLanguage } from './cardSpeech'
 
 /** The deck's id, from either shape the card carries it in. */
 const deckIdOf = (card, deckId) => {
@@ -38,20 +38,29 @@ const deckNameOf = (card) => {
  * The context for a card in a study session.
  *
  * @param {object} card
- * @param {{deckId?: string, index?: number, total?: number, flipped?: boolean, mode?: string}} where
+ * @param {{deckId?: string, index?: number, total?: number, flipped?: boolean, mode?: string,
+ *   voiceSettings?: object, lastGrade?: 'again'|'hard'|'good'|'easy'}} where
  *   `index` is ZERO-based, as a list is; the payload's `cardIndex` is
  *   one-based, as a person counts. The web's own builder adds the one and a
  *   phone that forgot would tell the model "card 0 of 25".
+ *   `voiceSettings` (the deck's two sides) gives the card's language, and
+ *   `lastGrade` is sent only when the opener knows it (CHAT-003).
  */
-export function studyCardContext(card, { deckId = null, index = 0, total = 0, flipped = false, mode = 'study' } = {}) {
+export function studyCardContext(
+  card,
+  { deckId = null, index = 0, total = 0, flipped = false, mode = 'study', voiceSettings = null, lastGrade = null } = {}
+) {
   if (!card) return null
 
   const dailyReview = deckId === 'daily-review'
+  const lapses = Array.isArray(card.lapses) ? card.lapses.length : 0
 
   return {
     page: 'study_session',
     deckId: deckIdOf(card, deckId),
     deckName: deckNameOf(card),
+    // The key of the card's own memory thread (CHAT-001).
+    cardId: String(card._id ?? card.id ?? '') || null,
     cardIndex: index + 1,
     totalCards: total,
     cardType: card.card_type || 'basic',
@@ -60,7 +69,10 @@ export function studyCardContext(card, { deckId = null, index = 0, total = 0, fl
     // Withheld until the card is turned.
     back: flipped ? backText(card) : null,
     isDailyReview: dailyReview,
-    mode
+    mode,
+    language: subjectLanguage(card, voiceSettings),
+    ...(lapses > 0 ? { lapses } : {}),
+    ...(lastGrade ? { lastGrade } : {})
   }
 }
 

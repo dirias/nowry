@@ -163,7 +163,7 @@ export function AgentChat() {
       setDraft('')
 
       try {
-        const response = await agentService.chat(message, chatHistory(turns), context, i18n?.language ?? 'en')
+        const response = await agentService.chat(message, chatHistory(turns), context, i18n?.language ?? 'en', 'phone')
         /* The companion answers in markdown and this client has no renderer for
            it, so the markers come off rather than onto the screen. */
         setTurns([...asked, { from: AGENT, text: plainReply(replyText(response)) }])

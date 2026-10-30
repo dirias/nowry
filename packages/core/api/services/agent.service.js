@@ -21,16 +21,19 @@ export const agentService = {
    * @param {Array<{role: string, content: string}>} history - Prior conversation turns.
    * @param {Object|null} context - Structured screen context (StudyCardContext, BookPageContext, etc.)
    * @param {string} language - BCP 47 language code (e.g. 'en', 'es', 'fr')
+   * @param {'web'|'phone'} client - which client asks; the phone has no quiz, so the
+   *   server leaves the quiz tool out of its prompt (ADR-055).
    * @returns {Promise<ChatResponse>}
    */
-  chat: async (message, history = [], context = null, language = 'en') => {
+  chat: async (message, history = [], context = null, language = 'en', client = 'web') => {
     const { data } = await apiClient.post(
       '/agent/chat',
       {
         message,
         history,
         context,
-        language
+        language,
+        client
       },
       {
         timeout: 60000, // Extended timeout for AI generation + tool calls

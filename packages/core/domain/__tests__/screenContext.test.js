@@ -14,6 +14,7 @@ describe('studyCardContext', () => {
       page: 'study_session',
       deckId: 'd1',
       deckName: 'JPN',
+      cardId: 'c1',
       cardIndex: 4,
       totalCards: 25,
       cardType: 'basic',
@@ -21,7 +22,9 @@ describe('studyCardContext', () => {
       front: 'ずいぶん',
       back: null,
       isDailyReview: false,
-      mode: 'study'
+      mode: 'study',
+      // Kana on the card says Japanese (CHAT-003).
+      language: 'ja'
     })
   })
 
@@ -57,5 +60,40 @@ describe('studyCardContext', () => {
 
   it('is nothing at all without a card', () => {
     expect(studyCardContext(null, { index: 1 })).toBeNull()
+  })
+
+  describe('what the companion needs to stay on the card (CHAT-003)', () => {
+    const kanjiOnly = { _id: 'k1', title: '効果', content: 'effect', lapses: ['2026-10-01', '2026-10-20'] }
+
+    it('says the language the deck saved for the front', () => {
+      const settings = { front: { voiceLang: 'es-MX' }, back: { voiceLang: 'en-US' } }
+      expect(studyCardContext({ title: 'casa', content: 'house' }, { voiceSettings: settings }).language).toBe('es')
+    })
+
+    it('reads kanji as Japanese when the deck saved Japanese, not Chinese', () => {
+      const settings = { front: { voice_lang: 'ja-JP' } }
+      expect(studyCardContext(kanjiOnly, { voiceSettings: settings }).language).toBe('ja')
+    })
+
+    it('has no language when nothing says one', () => {
+      expect(studyCardContext({ title: 'Mitochondria' }).language).toBeNull()
+    })
+
+    it('counts the lapses and passes a known last grade', () => {
+      const context = studyCardContext(kanjiOnly, { lastGrade: 'again' })
+      expect(context.lapses).toBe(2)
+      expect(context.lastGrade).toBe('again')
+    })
+
+    it('leaves out lapses and grade when there are none', () => {
+      const context = studyCardContext({ title: 'a' })
+      expect(context).not.toHaveProperty('lapses')
+      expect(context).not.toHaveProperty('lastGrade')
+    })
+
+    it('carries the card id for its memory thread', () => {
+      expect(studyCardContext({ id: 'x2', title: 'a' }).cardId).toBe('x2')
+      expect(studyCardContext({ title: 'a' }).cardId).toBeNull()
+    })
   })
 })

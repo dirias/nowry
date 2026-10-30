@@ -446,7 +446,7 @@ export default function StudySession() {
   } = usePet()
 
   const buildStudyContext = React.useCallback(
-    (cardIdx, flipped) =>
+    (cardIdx, flipped, lastGrade = null) =>
       /*
        * The shape is `studyCardContext`'s now, shared with the phone. It was a
        * literal here, and the server declared the same fields in snake_case
@@ -462,9 +462,12 @@ export default function StudySession() {
         index: cardIdx,
         total: visibleCards.length,
         flipped,
-        mode
+        mode,
+        // The card's language and, when the opener knows it, its last grade (CHAT-003).
+        voiceSettings: activeVoiceSettings,
+        lastGrade
       }),
-    [visibleCards, deckId, mode]
+    [visibleCards, deckId, mode, activeVoiceSettings]
   )
 
   // Signal to AgentContext that a study session is active
@@ -1163,7 +1166,7 @@ export default function StudySession() {
       visibleCards.findIndex((card) => (card._id || card.id) === leech.offer.cardId)
     )
     openCompanion()
-    sendMessage(t('cards.leech.prompt'), buildStudyContext(at, true))
+    sendMessage(t('cards.leech.prompt'), buildStudyContext(at, true, 'again'))
     setLeech(null)
   }, [leech, visibleCards, openCompanion, sendMessage, buildStudyContext, t])
 

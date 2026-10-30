@@ -356,7 +356,12 @@ export function StudySession() {
    */
   const { voiceSettings, getSettingsForDeck } = useVoiceSettings(id)
   const deckVoices = id === DAILY_REVIEW ? getSettingsForDeck(current?.deck_id?._id ?? current?.deck_id) : voiceSettings
-  const speech = useCardSpeech({ card: current, flipped: revealed, settings: revealed ? deckVoices?.back : deckVoices?.front, sides: deckVoices })
+  const speech = useCardSpeech({
+    card: current,
+    flipped: revealed,
+    settings: revealed ? deckVoices?.back : deckVoices?.front,
+    sides: deckVoices
+  })
 
   /*
    * The companion, speaking unasked (MOB-088).
@@ -393,9 +398,12 @@ export function StudySession() {
 
   /** Open the companion with the card in hand as what it is being asked about. */
   const openChat = useCallback(() => {
-    setAskContext(studyCardContext(current, { deckId: id, index, total, flipped: revealed, mode: 'study' }), `/study/${id}`)
+    setAskContext(
+      studyCardContext(current, { deckId: id, index, total, flipped: revealed, mode: 'study', voiceSettings: deckVoices }),
+      `/study/${id}`
+    )
     router.push('/agent')
-  }, [current, id, index, total, revealed, router])
+  }, [current, id, index, total, revealed, router, deckVoices])
 
   /** Fire-and-forget, once, when the last card has been graded. */
   useEffect(() => {
@@ -729,13 +737,21 @@ export function StudySession() {
       cards.findIndex((card) => cardKey(card) === leech.offer.cardId)
     )
     setAskContext(
-      studyCardContext(leech.card, { deckId: id, index: at, total, flipped: true, mode: 'study' }),
+      studyCardContext(leech.card, {
+        deckId: id,
+        index: at,
+        total,
+        flipped: true,
+        mode: 'study',
+        voiceSettings: deckVoices,
+        lastGrade: 'again'
+      }),
       `/study/${id}`,
       t('cards.leech.prompt')
     )
     setLeech(null)
     router.push('/agent')
-  }, [leech, cards, id, total, router, t])
+  }, [leech, cards, id, total, router, t, deckVoices])
 
   /** Split: the editor opens with the card's words as a draft; saving creates a second card. */
   const leechSplit = useCallback(() => {

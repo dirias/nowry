@@ -78,4 +78,20 @@ export function speechHintFor(card, voiceSettings = null, { flipped = false } = 
   return [frontText(card), backText(card), ...options].some((text) => KANA.test(String(text ?? ''))) ? 'ja' : null
 }
 
+/**
+ * The language a card is IN, for the companion (CHAT-003, ADR-055).
+ *
+ * The prompt never said the deck was Japanese, so a model reading 効果 alone
+ * answered in Chinese. The kanji rule above decides first; otherwise the
+ * front's saved voice language, which is the side a language deck studies.
+ *
+ * @returns {string | null} a base code such as 'ja', 'es', or null.
+ */
+export function subjectLanguage(card, voiceSettings = null) {
+  const han = speechHintFor(card, voiceSettings)
+  if (han) return han
+  const front = voiceSettings?.front
+  return languageBase(front?.voiceLang ?? front?.voice_lang) || null
+}
+
 export default speechTextFor
