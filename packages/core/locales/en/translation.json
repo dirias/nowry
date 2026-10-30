@@ -3500,6 +3500,8 @@
       "remaining_one": "{{count}} message left this month",
       "remaining_other": "{{count}} messages left this month",
       "failed": "That message did not go through. Your text is still here.",
+      "unavailable": "Your companion can't answer right now. Your text is still here; try again in a minute.",
+      "busy": "That was a lot of messages at once. Wait a moment, then send again.",
       "ask": "Ask",
       "about": "About “{{card}}”."
     },

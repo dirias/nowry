@@ -2094,6 +2094,8 @@
       "remaining_one": "Noch {{count}} Nachricht diesen Monat",
       "remaining_other": "Noch {{count}} Nachrichten diesen Monat",
       "failed": "Diese Nachricht wurde nicht gesendet. Dein Text ist noch da.",
+      "unavailable": "Dein Begleiter kann gerade nicht antworten. Dein Text ist noch da; versuch es in einer Minute noch einmal.",
+      "busy": "Das waren viele Nachrichten auf einmal. Warte einen Moment und sende sie dann erneut.",
       "ask": "Fragen",
       "about": "Zu „{{card}}“."
     },

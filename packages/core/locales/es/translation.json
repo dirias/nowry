@@ -3022,6 +3022,8 @@
       "remaining_one": "Queda {{count}} mensaje este mes",
       "remaining_other": "Quedan {{count}} mensajes este mes",
       "failed": "Ese mensaje no se envió. Tu texto sigue aquí.",
+      "unavailable": "Tu compañero no puede responder ahora. Tu texto sigue aquí; inténtalo de nuevo en un minuto.",
+      "busy": "Fueron muchos mensajes seguidos. Espera un momento y vuelve a enviarlo.",
       "ask": "Preguntar",
       "about": "Sobre «{{card}}»."
     },

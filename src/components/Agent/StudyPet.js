@@ -1661,7 +1661,7 @@ const StudyPet = () => {
                         gap: 8
                       }}
                     >
-                      <span>{error}</span>
+                      <span>{t(error)}</span>
                       <button
                         onClick={clearError}
                         style={{

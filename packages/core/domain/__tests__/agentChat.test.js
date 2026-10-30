@@ -1,4 +1,4 @@
-import { canSend, chatHistory, messageBudget, plainReply, replyText } from '../agentChat'
+import { canSend, chatFailureKey, chatHistory, messageBudget, plainReply, replyText } from '../agentChat'
 
 describe('messageBudget', () => {
   it('reads the month as the server reports it', () => {
@@ -116,5 +116,30 @@ describe('plainReply', () => {
   it('is an empty string for anything that is not one', () => {
     expect(plainReply(null)).toBe('')
     expect(plainReply(undefined)).toBe('')
+  })
+})
+
+describe('chatFailureKey', () => {
+  const failed = (status, detail) => ({ response: { status, data: { detail } } })
+
+  it('says offline when the request never reached a server', () => {
+    expect(chatFailureKey({ code: 'ERR_NETWORK', request: {} })).toBe('errors.offline')
+  })
+
+  it('says the companion cannot answer when no AI provider could', () => {
+    expect(chatFailureKey(failed(503, 'ai_unavailable'))).toBe('agent.chat.unavailable')
+  })
+
+  it('says the month is spent when the budget is', () => {
+    expect(chatFailureKey(failed(429, 'message_limit_reached'))).toBe('agent.chat.budgetSpent')
+  })
+
+  it('says wait a moment for the per-minute limit', () => {
+    expect(chatFailureKey(failed(429, 'Rate limit exceeded: 20 per 1 minute'))).toBe('agent.chat.busy')
+  })
+
+  it('never hands the server detail to the screen', () => {
+    expect(chatFailureKey(failed(502, 'AI service error. Please try again.'))).toBe('agent.chat.failed')
+    expect(chatFailureKey(undefined)).toBe('agent.chat.failed')
   })
 })

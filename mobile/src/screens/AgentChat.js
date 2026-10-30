@@ -37,9 +37,8 @@ import { BackHandler, ScrollView, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { agentService } from '@nowry/core/api/services'
-import { chatHistory, plainReply, replyText } from '@nowry/core/domain/agentChat'
+import { chatFailureKey, chatHistory, plainReply, replyText } from '@nowry/core/domain/agentChat'
 import { usePetState } from '@nowry/core/hooks/usePetState'
-import { isOfflineError } from '@nowry/core/utils/formUtils'
 import { takeAskContext } from './askContext'
 import { useAppearance, useTheme } from '../theme'
 import { Button, Card, Icon, IconButton, Input, PetOrb, Screen, Stack, Typography, useKeyboardClearance, useKeyboardHeight } from '../ui'
@@ -176,7 +175,7 @@ export function AgentChat() {
         // nothing the user wrote is lost to a tunnel.
         setTurns(turns)
         setDraft(message)
-        setFailure(isOfflineError(error) ? t('errors.offline') : t('agent.chat.failed'))
+        setFailure(t(chatFailureKey(error)))
       } finally {
         setSending(false)
       }

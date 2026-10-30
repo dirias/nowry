@@ -12,6 +12,8 @@
  * messages" reaches a screen.
  */
 
+import { isOfflineError } from '../utils/formUtils'
+
 /** The month's budget, or `null` when this account has no limit. */
 export function messageBudget(payload) {
   const limit = Number(payload?.messages_limit)
@@ -76,4 +78,26 @@ export function plainReply(text) {
     .replace(/`([^`\n]+)`/g, '$1')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+/**
+ * The sentence for a chat send that failed, as an i18n key (ADR-054, AI-005).
+ *
+ * Both clients used to say one thing for every failure — the phone "did not go
+ * through", the web the server's English `detail` — so a learner retried a
+ * message the AI could not answer for hours, and was told nothing when the
+ * month was spent. The server says which failure it was; this reads it.
+ *
+ * Never the server's `detail` itself: it is a code, not a sentence, and it is
+ * not in the learner's language.
+ */
+export function chatFailureKey(error) {
+  if (isOfflineError(error)) return 'errors.offline'
+  const status = error?.response?.status
+  const detail = error?.response?.data?.detail
+  if (status === 503 && detail === 'ai_unavailable') return 'agent.chat.unavailable'
+  if (status === 429 && detail === 'message_limit_reached') return 'agent.chat.budgetSpent'
+  // Any other 429 is the per-minute limit, which a moment's wait clears.
+  if (status === 429) return 'agent.chat.busy'
+  return 'agent.chat.failed'
 }

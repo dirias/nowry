@@ -287,3 +287,33 @@ describe('level-up deferral (PET-004)', () => {
     expect(get().levelProgress).toBe(0.44)
   })
 })
+
+describe('a failed send (AI-005)', () => {
+  const renderCtx = () => {
+    let ctx
+    render(
+      <AgentProvider>
+        <TestConsumer
+          onRender={(c) => {
+            ctx = c
+          }}
+        />
+      </AgentProvider>
+    )
+    return () => ctx
+  }
+
+  test('holds a key the panel can translate, never the server detail', async () => {
+    agentService.chat.mockRejectedValue({ response: { status: 503, data: { detail: 'ai_unavailable' } } })
+    const get = renderCtx()
+    await act(async () => get().sendMessage('Give me examples'))
+    expect(get().error).toBe('agent.chat.unavailable')
+  })
+
+  test('a 502 is the generic sentence, not "AI service error"', async () => {
+    agentService.chat.mockRejectedValue({ response: { status: 502, data: { detail: 'AI service error. Please try again.' } } })
+    const get = renderCtx()
+    await act(async () => get().sendMessage('Give me examples'))
+    expect(get().error).toBe('agent.chat.failed')
+  })
+})

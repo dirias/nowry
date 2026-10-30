@@ -2105,6 +2105,8 @@
       "remaining_one": "Il reste {{count}} message ce mois-ci",
       "remaining_other": "Il reste {{count}} messages ce mois-ci",
       "failed": "Ce message n'est pas parti. Votre texte est toujours là.",
+      "unavailable": "Votre compagnon ne peut pas répondre pour l'instant. Votre texte est toujours là ; réessayez dans une minute.",
+      "busy": "Cela fait beaucoup de messages d'un coup. Attendez un instant, puis renvoyez-le.",
       "ask": "Demander",
       "about": "À propos de « {{card}} »."
     },

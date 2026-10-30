@@ -21,6 +21,7 @@ import { useAuth } from './AuthContext'
 import { agentService } from '../api/services/agent.service'
 import petService from '../api/services/petService'
 import { allowIntervention, silenceUntil } from '../domain/interventionPolicy'
+import { chatFailureKey } from '../domain/agentChat'
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -75,7 +76,7 @@ const initialState = {
   history: [],
   /** true while waiting for an API reply */
   isTyping: false,
-  /** Error state */
+  /** The i18n key of the last failed send (`chatFailureKey`), or null */
   error: null,
   /** Whether the initial state has been loaded from the backend */
   initialized: false,
@@ -579,8 +580,8 @@ export const AgentProvider = ({ children }) => {
         dispatch({ type: 'AGENT_REPLY', payload: response })
         applyXpResult(response)
       } catch (err) {
-        const detail = err?.response?.data?.detail || 'agent.errors.resting'
-        dispatch({ type: 'REPLY_ERROR', payload: detail })
+        // A key, never the server's detail: the panel says it in the learner's language (AI-005).
+        dispatch({ type: 'REPLY_ERROR', payload: chatFailureKey(err) })
       }
     },
     [applyXpResult, i18n.language]
