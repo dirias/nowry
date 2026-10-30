@@ -1864,6 +1864,17 @@
   },
   "agent": {
     "ready": {
+      "field": {
+        "language": "Langue",
+        "math": "Maths",
+        "science": "Sciences",
+        "certification": "Certification",
+        "concept": "Notions",
+        "general": "Général",
+        "change": "modifier",
+        "sheetTitle": "Qu'est-ce que ce paquet ?",
+        "changeAria": "Modifier le domaine de ce paquet, actuellement {{field}}"
+      },
       "hint": "Donne-moi un indice",
       "inSentence": "Montre-le dans une phrase",
       "breakDown": "Décompose les kanji",

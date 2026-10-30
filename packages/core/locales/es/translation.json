@@ -3001,6 +3001,17 @@
   },
   "agent": {
     "ready": {
+      "field": {
+        "language": "Idioma",
+        "math": "Matemáticas",
+        "science": "Ciencias",
+        "certification": "Certificación",
+        "concept": "Conceptos",
+        "general": "General",
+        "change": "cambiar",
+        "sheetTitle": "¿Qué es este mazo?",
+        "changeAria": "Cambiar el tipo de este mazo, ahora {{field}}"
+      },
       "hint": "Dame una pista",
       "inSentence": "Muéstramelo en una frase",
       "breakDown": "Descompón los kanji",

@@ -84,6 +84,22 @@ export const decksService = {
   /**
    * Update deck settings (config, voice_settings, is_public, public_metadata)
    */
+  /**
+   * The deck's field for the companion's ready questions (CHAT-009): the
+   * learner's choice, else its voice language, else one saved guess.
+   * @returns {Promise<{field: string, source: 'learner'|'language'|'guess'|'default'}>}
+   */
+  async getField(id) {
+    const { data } = await apiClient.get(`/decks/${id}/field`)
+    return data
+  },
+
+  /** Set the deck's field; `null` hands it back to the voice language and the guess. */
+  async setField(id, field) {
+    const { data } = await apiClient.put(`/decks/${id}/field`, { field })
+    return data
+  },
+
   async updateSettings(id, settings) {
     const { data } = await apiClient.patch(`/decks/${id}/settings`, settings)
     return data

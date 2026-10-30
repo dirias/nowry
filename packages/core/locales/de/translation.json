@@ -1853,6 +1853,17 @@
   },
   "agent": {
     "ready": {
+      "field": {
+        "language": "Sprache",
+        "math": "Mathe",
+        "science": "Naturwissenschaft",
+        "certification": "Zertifizierung",
+        "concept": "Begriffe",
+        "general": "Allgemein",
+        "change": "ändern",
+        "sheetTitle": "Was ist dieses Deck?",
+        "changeAria": "Bereich dieses Decks ändern, jetzt {{field}}"
+      },
       "hint": "Gib mir einen Hinweis",
       "inSentence": "Zeig es in einem Satz",
       "breakDown": "Zerleg die Kanji",

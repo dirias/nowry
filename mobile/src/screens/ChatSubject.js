@@ -12,23 +12,47 @@
  * They are secondary buttons, not chips: a tap sends, and a chip in this app
  * is a filter (BUTTONS.md).
  */
+import { useState } from 'react'
 import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { FIELDS, subjectField } from '@nowry/core/domain/readyQuestions'
 import { useTheme } from '../theme'
 import { Button, Card, Stack, Typography } from '../ui'
+import { ChoiceSheet } from '../ui/patterns'
 
-export function SubjectHead({ subject }) {
+/**
+ * `onChangeField`, when given, makes the field a control: "Math · change"
+ * opens the six fields (CHAT-009). The questions follow the field, so a wrong
+ * guess is one tap from right.
+ */
+export function SubjectHead({ subject, onChangeField = null }) {
   const { t } = useTranslation()
+  const [choosing, setChoosing] = useState(false)
   if (!subject?.front) return null
+  const field = subjectField(subject)
 
   return (
     <Card padding={1.5} radius='md'>
       <Stack spacing={0.5}>
-        {subject.deckName ? (
-          <Typography level='body-xs' color='text.tertiary'>
-            {t('agent.ready.position', { deck: subject.deckName, index: subject.cardIndex, total: subject.totalCards })}
-          </Typography>
-        ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+          {subject.deckName ? (
+            <Typography level='body-xs' color='text.tertiary' style={{ flex: 1 }} numberOfLines={1}>
+              {t('agent.ready.position', { deck: subject.deckName, index: subject.cardIndex, total: subject.totalCards })}
+            </Typography>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
+          {onChangeField ? (
+            <Button
+              variant='tertiary'
+              size='sm'
+              onPress={() => setChoosing(true)}
+              accessibilityLabel={t('agent.ready.field.changeAria', { field: t(`agent.ready.field.${field}`) })}
+            >
+              {`${t(`agent.ready.field.${field}`)} · ${t('agent.ready.field.change')}`}
+            </Button>
+          ) : null}
+        </View>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', columnGap: 12 }}>
           <Typography level='h3'>{subject.front}</Typography>
           <Typography level='body-sm' color={subject.isFlipped ? 'text.secondary' : 'text.tertiary'} numberOfLines={2}>
@@ -36,6 +60,19 @@ export function SubjectHead({ subject }) {
           </Typography>
         </View>
       </Stack>
+      {onChangeField ? (
+        <ChoiceSheet
+          visible={choosing}
+          onClose={() => setChoosing(false)}
+          title={t('agent.ready.field.sheetTitle')}
+          options={FIELDS.map((value) => ({ value, label: t(`agent.ready.field.${value}`) }))}
+          value={field}
+          onChange={(value) => {
+            setChoosing(false)
+            onChangeField(value)
+          }}
+        />
+      ) : null}
     </Card>
   )
 }

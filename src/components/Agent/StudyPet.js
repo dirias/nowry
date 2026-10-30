@@ -43,6 +43,7 @@ import { cardsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { keptCard, subjectKeyOf } from '@nowry/core/domain/agentChat'
 import { readyMessage, readyQuestions } from '@nowry/core/domain/readyQuestions'
+import { useDeckField } from '@nowry/core/hooks/useDeckField'
 import { quizService } from '@nowry/core/api/services/quizService'
 import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 // The stage table is shared: the phone draws the same companion, and a stage
@@ -1032,7 +1033,11 @@ const StudyPet = () => {
   const subjectKey = subjectKeyOf(viewContext)
   const visibleHistory = history.filter((turn) => (turn.subject ?? 'general') === subjectKey)
   const hasCardSubject = Boolean(viewContext?.page === 'study_session' && viewContext?.front)
-  const questions = quizState === 'chat' ? readyQuestions(viewContext, { used: usedQuestions }) : []
+  // The deck's field chooses the questions (CHAT-009); a failed guess is not a field.
+  const deckField = useDeckField(viewContext?.deckId ?? null)
+  const subject =
+    viewContext && deckField.field && deckField.source !== 'default' ? { ...viewContext, field: deckField.field } : viewContext
+  const questions = quizState === 'chat' ? readyQuestions(subject, { used: usedQuestions }) : []
 
   useEffect(() => {
     setUsedQuestions([])
@@ -1048,7 +1053,7 @@ const StudyPet = () => {
       inputRef.current?.focus()
       return
     }
-    sendMessage(readyMessage(t, question, viewContext))
+    sendMessage(readyMessage(t, question, subject))
   }
 
   /** Keep an example as a card in the deck of the card it was asked about (CHAT-006). */
@@ -1660,7 +1665,9 @@ const StudyPet = () => {
                 >
                   {/* Welcome message if no history */}
                   {/* On a card, the card is the head instead of the welcome (CHAT-008). */}
-                  {quizState === 'chat' && hasCardSubject ? <SubjectHead subject={viewContext} /> : null}
+                  {quizState === 'chat' && hasCardSubject ? (
+                    <SubjectHead subject={subject} onChangeField={viewContext?.deckId ? deckField.setField : null} />
+                  ) : null}
 
                   {visibleHistory.length === 0 && !isTyping && !hasCardSubject && (
                     <motion.div

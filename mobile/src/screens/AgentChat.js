@@ -32,7 +32,7 @@
  * nudge. The grounding — asking about the card in front of you — is the next
  * part and is where the value is.
  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BackHandler, ScrollView, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -40,6 +40,7 @@ import { agentService, cardsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { chatFailureKey, chatHistory, keptCard, parseReply, plainReply, replyText } from '@nowry/core/domain/agentChat'
 import { readyMessage, readyQuestions } from '@nowry/core/domain/readyQuestions'
+import { useDeckField } from '@nowry/core/hooks/useDeckField'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { takeAskContext } from './askContext'
 import { ChatExample } from './ChatExample'
@@ -207,7 +208,16 @@ export function AgentChat() {
     return sendText(t(key, { text: draft.trim(), subject: context?.front ?? '' }))
   }, [sendText, draft, compose, t, context])
 
-  const questions = readyQuestions(context, { used })
+  /*
+   * The deck's field chooses the questions (CHAT-009). A failed guess is not
+   * a field: the card's own language or shape decides instead.
+   */
+  const deckField = useDeckField(context?.deckId ?? null)
+  const subject = useMemo(
+    () => (context && deckField.field && deckField.source !== 'default' ? { ...context, field: deckField.field } : context),
+    [context, deckField.field, deckField.source]
+  )
+  const questions = readyQuestions(subject, { used })
 
   /** Keep an example as a card in the deck of the card it was asked about (CHAT-006). */
   const keep = useCallback(
@@ -272,9 +282,9 @@ export function AgentChat() {
         setCompose(question)
         return
       }
-      sendText(readyMessage(t, question, context))
+      sendText(readyMessage(t, question, subject))
     },
-    [sendText, t, context]
+    [sendText, t, subject]
   )
 
   /*
@@ -340,7 +350,7 @@ export function AgentChat() {
           keyboardShouldPersistTaps='handled'
         >
           {/* The subject stays in view for the whole conversation (CHAT-005). */}
-          <SubjectHead subject={context} />
+          <SubjectHead subject={subject} onChangeField={context?.deckId && context.deckId !== 'daily-review' ? deckField.setField : null} />
 
           {turns.length === 0 && questions.length === 0 ? (
             <Stack spacing={1} style={{ paddingTop: theme.spacing[3] }}>

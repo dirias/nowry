@@ -1949,6 +1949,17 @@
   },
   "agent": {
     "ready": {
+      "field": {
+        "language": "語学",
+        "math": "数学",
+        "science": "理科",
+        "certification": "資格試験",
+        "concept": "概念",
+        "general": "一般",
+        "change": "変更",
+        "sheetTitle": "このデッキの分野は？",
+        "changeAria": "このデッキの分野を変更（現在：{{field}}）"
+      },
       "hint": "ヒントをちょうだい",
       "inSentence": "文の中で見せて",
       "breakDown": "漢字を分解して",

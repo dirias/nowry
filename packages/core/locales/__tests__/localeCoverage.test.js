@@ -179,7 +179,9 @@ const IDENTICAL_BY_DESIGN = {
     ...CARD_COUNTER,
     ...CAP('mod', 'tab', 'esc'),
     ...COMPANION_NAME,
-    ...READY_SEND
+    ...READY_SEND,
+    // "General" is the Spanish word for a deck of anything (CHAT-009).
+    'agent.ready.field.general'
   ],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
@@ -261,7 +263,9 @@ const IDENTICAL_BY_DESIGN = {
     'boards.tile.notes_other',
     ...CAP('mod', 'tab'),
     ...COMPANION_NAME,
-    ...READY_SEND
+    ...READY_SEND,
+    // "Certification" is the French word too (CHAT-009).
+    'agent.ready.field.certification'
   ],
   // "Tag" is the word German actually uses for a content tag — the bundle has
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label

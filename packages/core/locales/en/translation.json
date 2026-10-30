@@ -3479,6 +3479,17 @@
   },
   "agent": {
     "ready": {
+      "field": {
+        "language": "Language",
+        "math": "Math",
+        "science": "Science",
+        "certification": "Certification",
+        "concept": "Concepts",
+        "general": "General",
+        "change": "change",
+        "sheetTitle": "What is this deck?",
+        "changeAria": "Change this deck's field, now {{field}}"
+      },
       "hint": "Give me a hint",
       "inSentence": "Show it in a sentence",
       "breakDown": "Break down the kanji",

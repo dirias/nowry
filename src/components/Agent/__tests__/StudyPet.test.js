@@ -47,6 +47,10 @@ jest.mock('../../../theme/DynamicThemeProvider', () => ({
 // mockUsePet factory — every test can override individual fields via
 // mockUsePet.mockReturnValue({ ...base, isInStudySession: true }).
 const mockUsePet = jest.fn()
+// The deck's field is a react-query read (CHAT-009); the panel's mount needs none.
+jest.mock('@nowry/core/hooks/useDeckField', () => ({
+  useDeckField: () => ({ field: null, source: null, setField: jest.fn() })
+}))
 jest.mock('@nowry/core/context/AgentContext', () => ({
   usePet: (...args) => mockUsePet(...args)
 }))

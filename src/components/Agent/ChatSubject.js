@@ -11,12 +11,15 @@
  * and Enter only — keys 1–4 grade the card behind the panel.
  */
 import React from 'react'
-import { Box, Button, Typography } from '@mui/joy'
+import { Box, Button, Option, Select, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+import { FIELDS, subjectField } from '@nowry/core/domain/readyQuestions'
 
-export function SubjectHead({ subject }) {
+/** `onChangeField`, when given, lets the learner correct the deck's field (CHAT-009). */
+export function SubjectHead({ subject, onChangeField = null }) {
   const { t } = useTranslation()
   if (!subject?.front) return null
+  const field = subjectField(subject)
 
   return (
     <Box
@@ -31,11 +34,29 @@ export function SubjectHead({ subject }) {
         gap: 0.5
       }}
     >
-      {subject.deckName ? (
-        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          {t('agent.ready.position', { deck: subject.deckName, index: subject.cardIndex, total: subject.totalCards })}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography level='body-xs' noWrap sx={{ color: 'text.tertiary', flex: 1, minWidth: 0 }}>
+          {subject.deckName
+            ? t('agent.ready.position', { deck: subject.deckName, index: subject.cardIndex, total: subject.totalCards })
+            : ''}
         </Typography>
-      ) : null}
+        {onChangeField ? (
+          <Select
+            size='sm'
+            variant='plain'
+            value={field}
+            onChange={(_, value) => value && onChangeField(value)}
+            aria-label={t('agent.ready.field.changeAria', { field: t(`agent.ready.field.${field}`) })}
+            sx={{ minHeight: 0, fontSize: 'xs', color: 'primary.plainColor' }}
+          >
+            {FIELDS.map((value) => (
+              <Option key={value} value={value}>
+                {t(`agent.ready.field.${value}`)}
+              </Option>
+            ))}
+          </Select>
+        ) : null}
+      </Box>
       <Box sx={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', columnGap: 1.25 }}>
         <Typography level='title-lg' sx={{ color: 'text.primary' }}>
           {subject.front}
