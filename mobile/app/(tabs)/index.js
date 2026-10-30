@@ -150,9 +150,10 @@ export default function Home() {
    */
   const day = useToday({ dueToday: today.due })
 
-  // The companion, opened from here, is asked about the day (CHAT-010).
-  const tasksLeft = (day.occurrences ?? []).filter((occurrence) => !occurrence.log).length
-  const subject = useMemo(() => todayContext({ reviewsDue: today.due, tasksLeft }), [today.due, tasksLeft])
+  // The companion, opened from here, is asked about the day (CHAT-010), with the
+  // numbers this screen shows: the Study key's count and the Tasks tab's.
+  const tasksLeft = dayTasks(taskData.tasks).open.length
+  const subject = useMemo(() => todayContext({ reviewsDue: today.asked, tasksLeft }), [today.asked, tasksLeft])
   useScreenSubject(subject)
   // The day's block rules, so a task with a time opens with it in the sheet (PLAN-020).
   const dayBlocks = useBlocks({ from: day.date, to: day.date })
