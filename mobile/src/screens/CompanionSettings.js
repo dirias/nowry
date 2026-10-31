@@ -45,6 +45,7 @@ import {
   CONCISENESS,
   FREQUENCY,
   INTERVENTION_TYPES,
+  TEACHING_STYLE,
   TONE,
   agentPref,
   interventionEnabled,
@@ -224,6 +225,19 @@ export function CompanionSettings() {
           value={agentPref(preferences, 'tone')}
           loading={loading}
           onChange={(value) => write({ [AGENT_PREFS.tone.key]: value })}
+        />
+
+        <OptionList
+          title={t('agent.settings.personality.teaching.title')}
+          description={t('agent.settings.personality.teaching.desc')}
+          options={TEACHING_STYLE.map((value) => ({
+            value,
+            label: t(`agent.settings.personality.teachingOptions.${value}.label`),
+            description: t(`agent.settings.personality.teachingOptions.${value}.description`)
+          }))}
+          value={agentPref(preferences, 'teachingStyle')}
+          loading={loading}
+          onChange={(value) => write({ [AGENT_PREFS.teachingStyle.key]: value })}
         />
 
         <Typography level='title-sm'>{t('agent.settings.personality.knowledge.title')}</Typography>

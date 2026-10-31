@@ -5,7 +5,8 @@
  *
  * Allows the user to configure every aspect of their Study Buddy's personality:
  *   - Conciseness (Concise / Balanced / Detailed)
- *   - Tone (Friendly / Professional / Strict / Socratic)
+ *   - Tone (Friendly / Professional / Strict)
+ *   - Teaching style (Show me / Let me work it out) — Socratic moved here from Tone (ADR-056)
  *   - Knowledge Access toggle
  *   - Proactive Nudging toggle
  *
@@ -45,6 +46,7 @@ import NotificationsActiveRounded from '@mui/icons-material/NotificationsActiveR
 import PetsRounded from '@mui/icons-material/PetsRounded'
 import FormatSizeRounded from '@mui/icons-material/FormatSizeRounded'
 import RecordVoiceOverRounded from '@mui/icons-material/RecordVoiceOverRounded'
+import SchoolRounded from '@mui/icons-material/SchoolRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import { agentService } from '@nowry/core/api/services/agent.service'
 import { userService } from '@nowry/core/api/services'
@@ -54,6 +56,7 @@ import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import CompanionTab from './CompanionTab'
 import OrbPreviewPanel from './OrbPreviewPanel'
 import petService from '@nowry/core/api/services/petService'
+import { TEACHING_STYLE, agentPref } from '@nowry/core/domain/agentPrefs'
 import { suggestFromInterests } from '@nowry/core/utils/petColor'
 
 // ---------------------------------------------------------------------------
@@ -111,15 +114,17 @@ const TONE_OPTIONS = (t) => [
     icon: '🏋️',
     description: t('agent.settings.personality.toneOptions.strict.description'),
     preview: t('agent.settings.personality.toneOptions.strict.preview')
-  },
-  {
-    key: 'socratic',
-    label: t('agent.settings.personality.toneOptions.socratic.label'),
-    icon: '🦉',
-    description: t('agent.settings.personality.toneOptions.socratic.description'),
-    preview: t('agent.settings.personality.toneOptions.socratic.preview')
   }
 ]
+
+const TEACHING_OPTIONS = (t) =>
+  TEACHING_STYLE.map((key) => ({
+    key,
+    label: t(`agent.settings.personality.teachingOptions.${key}.label`),
+    icon: key === 'show' ? '💡' : '🧭',
+    description: t(`agent.settings.personality.teachingOptions.${key}.description`),
+    preview: t(`agent.settings.personality.teachingOptions.${key}.preview`)
+  }))
 
 const FREQUENCY_OPTIONS = (t) => [
   {
@@ -304,6 +309,7 @@ export default function AgentSettings() {
   // Local state — loaded from backend on mount
   const [conciseness, setConciseness] = useState('balanced')
   const [tone, setTone] = useState('friendly')
+  const [teachingStyle, setTeachingStyle] = useState('show')
   const [knowledgeAccess, setKnowledgeAccess] = useState(knowledgeAccessEnabled)
   const [proactiveNudging, setProactiveNudging] = useState(proactiveNudgingEnabled)
   const [roamingEnabled, setRoamingEnabled] = useState(isRoamingEnabled)
@@ -356,7 +362,8 @@ export default function AgentSettings() {
       try {
         const [prefs, state] = await Promise.all([userService.getGeneralPreferences(), agentService.getState()])
         setConciseness(prefs.agent_conciseness || 'balanced')
-        setTone(prefs.agent_tone || 'friendly')
+        setTone(agentPref(prefs, 'tone'))
+        setTeachingStyle(agentPref(prefs, 'teachingStyle'))
         setKnowledgeAccess(prefs.agent_knowledge_access ?? false)
         setProactiveNudging(prefs.agent_proactive_nudging ?? false)
         setRoamingEnabled(state.agent_roaming_enabled ?? true)
@@ -419,6 +426,7 @@ export default function AgentSettings() {
             isRoamingEnabled: key === 'agent_roaming_enabled' ? value : roamingEnabled
           })
         }
+        if (key === 'agent_teaching_style') updateAgentPrefs({ teachingStyle: value })
         if (key === 'agent_intervention_frequency' || key === 'agent_focus_mode' || key.startsWith('agent_intervention_')) {
           updateAgentPrefs({
             interventionFrequency: key === 'agent_intervention_frequency' ? value : interventionFrequency,
@@ -435,6 +443,7 @@ export default function AgentSettings() {
         // Revert on failure
         if (key === 'agent_conciseness') setConciseness(conciseness)
         if (key === 'agent_tone') setTone(tone)
+        if (key === 'agent_teaching_style') setTeachingStyle(teachingStyle)
         if (key === 'agent_knowledge_access') setKnowledgeAccess(!value)
         if (key === 'agent_proactive_nudging') setProactiveNudging(!value)
         if (key === 'agent_roaming_enabled') setRoamingEnabled(!value)
@@ -445,6 +454,7 @@ export default function AgentSettings() {
     [
       conciseness,
       tone,
+      teachingStyle,
       knowledgeAccess,
       proactiveNudging,
       roamingEnabled,
@@ -463,6 +473,10 @@ export default function AgentSettings() {
   const handleTone = (val) => {
     setTone(val)
     save('agent_tone', val)
+  }
+  const handleTeachingStyle = (val) => {
+    setTeachingStyle(val)
+    save('agent_teaching_style', val)
   }
   const handleKnowledgeAccess = (val) => {
     setKnowledgeAccess(val)
@@ -715,6 +729,36 @@ export default function AgentSettings() {
                     ))}
                   </Grid>
                   {saved === 'agent_tone' && (
+                    <Stack direction='row' spacing={0.5} alignItems='center' sx={{ mt: 1 }}>
+                      <CheckRounded sx={{ fontSize: 14, color: 'success.plainColor' }} />
+                      <Typography level='body-xs' sx={{ color: 'success.plainColor' }}>
+                        {t('agent.settings.personality.saved')}
+                      </Typography>
+                    </Stack>
+                  )}
+                </Box>
+
+                <Divider />
+
+                {/* Section: Teaching style (CHAT-012) */}
+                <Box>
+                  <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.5 }}>
+                    <SchoolRounded sx={{ fontSize: 18, color: 'primary.plainColor' }} />
+                    <Typography level='title-md' fontWeight={700}>
+                      {t('agent.settings.personality.teaching.title')}
+                    </Typography>
+                  </Stack>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
+                    {t('agent.settings.personality.teaching.desc')}
+                  </Typography>
+                  <Grid container spacing={1.5}>
+                    {TEACHING_OPTIONS(t).map((opt) => (
+                      <Grid key={opt.key} xs={12} sm={6}>
+                        <StyleCard option={opt} selected={teachingStyle === opt.key} onSelect={handleTeachingStyle} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                  {saved === 'agent_teaching_style' && (
                     <Stack direction='row' spacing={0.5} alignItems='center' sx={{ mt: 1 }}>
                       <CheckRounded sx={{ fontSize: 14, color: 'success.plainColor' }} />
                       <Typography level='body-xs' sx={{ color: 'success.plainColor' }}>

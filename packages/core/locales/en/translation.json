@@ -3494,6 +3494,26 @@
       "todayTitle": "Your day",
       "planTitle": "Your annual plan"
     },
+    "nudgeLine": {
+      "friendly": {
+        "deck_one": "{{deck}} has {{count}} card waiting. Ready when you are! 🎯",
+        "deck_other": "{{deck}} has {{count}} cards waiting. Ready when you are! 🎯",
+        "total_one": "You have {{count}} card to review. Ready when you are! 💪",
+        "total_other": "You have {{count}} cards to review. Ready when you are! 💪"
+      },
+      "professional": {
+        "deck_one": "{{deck}}: {{count}} card ready for review.",
+        "deck_other": "{{deck}}: {{count}} cards ready for review.",
+        "total_one": "{{count}} card is ready for review.",
+        "total_other": "{{count}} cards are ready for review."
+      },
+      "strict": {
+        "deck_one": "{{deck}} has {{count}} card waiting. Review it now.",
+        "deck_other": "{{deck}} has {{count}} cards waiting. Review them now.",
+        "total_one": "{{count}} card is waiting. Review it now.",
+        "total_other": "{{count}} cards are waiting. Review them now."
+      }
+    },
     "ready": {
       "studyFirst": "What should I study first?",
       "missing": "Which cards do I keep missing?",
@@ -3562,7 +3582,11 @@
       "keep": "+ Card",
       "keepAria": "Keep this sentence as a new card",
       "kept": "Kept in {{deck}} · from {{subject}}",
-      "keepFailed": "Could not keep it. Try again."
+      "keepFailed": "Could not keep it. Try again.",
+      "tryFirst": "Let me try first",
+      "showMe": "Just show me",
+      "showMeaning": "Show meaning",
+      "showMeaningAria": "Show the meaning of this sentence"
     },
     "aria": {
       "openBuddy": "Open Study Buddy",
@@ -3661,6 +3685,10 @@
           "title": "Personality & Tone",
           "desc": "Choose how your buddy should communicate with you."
         },
+        "teaching": {
+          "title": "Teaching style",
+          "desc": "How your buddy helps you learn."
+        },
         "knowledge": {
           "title": "Knowledge Access",
           "desc": "Let your buddy read your library, decks, and goals to give smarter advice. Your data is",
@@ -3703,6 +3731,18 @@
             "label": "Detailed",
             "description": "Thorough explanations with examples.",
             "preview": "Great question! You have 8 cards due today across 2 decks:\n• Organic Chemistry — 5 due, 2 new\n• Linear Algebra — 3 due\n\nI'd recommend tackling Organic Chemistry first since those cards are the most overdue and you're at 62% mastery there. Your study streak is at 4 days — don't break it! 🔥"
+          }
+        },
+        "teachingOptions": {
+          "show": {
+            "label": "Show me",
+            "description": "Examples and explanations, straight away.",
+            "preview": "Here's how photosynthesis works: plants turn light, water and CO₂ into sugar and oxygen. Example: a leaf in the sun."
+          },
+          "guide": {
+            "label": "Let me work it out",
+            "description": "A clue and a question first, then the full answer.",
+            "preview": "Clue: think about what a leaf needs from the sun. What do you think the plant makes with that light?"
           }
         },
         "toneOptions": {

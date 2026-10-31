@@ -1964,6 +1964,26 @@
       "todayTitle": "今日の予定",
       "planTitle": "年間計画"
     },
+    "nudgeLine": {
+      "friendly": {
+        "deck_one": "{{deck}}に{{count}}枚のカードが待っています。準備ができたらどうぞ！🎯",
+        "deck_other": "{{deck}}に{{count}}枚のカードが待っています。準備ができたらどうぞ！🎯",
+        "total_one": "復習するカードが{{count}}枚あります。準備ができたらどうぞ！💪",
+        "total_other": "復習するカードが{{count}}枚あります。準備ができたらどうぞ！💪"
+      },
+      "professional": {
+        "deck_one": "{{deck}}：{{count}}枚が復習できます。",
+        "deck_other": "{{deck}}：{{count}}枚が復習できます。",
+        "total_one": "{{count}}枚のカードが復習できます。",
+        "total_other": "{{count}}枚のカードが復習できます。"
+      },
+      "strict": {
+        "deck_one": "{{deck}}に{{count}}枚のカードが待っています。今すぐ復習しましょう。",
+        "deck_other": "{{deck}}に{{count}}枚のカードが待っています。今すぐ復習しましょう。",
+        "total_one": "{{count}}枚のカードが待っています。今すぐ復習しましょう。",
+        "total_other": "{{count}}枚のカードが待っています。今すぐ復習しましょう。"
+      }
+    },
     "ready": {
       "studyFirst": "まず何を勉強すればいい？",
       "missing": "よく間違えるカードは？",
@@ -2032,7 +2052,11 @@
       "keep": "+ カード",
       "keepAria": "この文を新しいカードとして保存",
       "kept": "{{deck}}に保存 · {{subject}}から",
-      "keepFailed": "保存できませんでした。もう一度お試しください。"
+      "keepFailed": "保存できませんでした。もう一度お試しください。",
+      "tryFirst": "まず自分で考えたい",
+      "showMe": "そのまま教えて",
+      "showMeaning": "意味を見る",
+      "showMeaningAria": "この文の意味を見る"
     },
     "defaultName": "Nowry",
     "welcomeMessage": "こんにちは！👋 私は{{petName}}です。",
@@ -2089,6 +2113,10 @@
           "title": "キャラクターとトーン",
           "desc": "パートナーとのコミュニケーションスタイルを選んでください。"
         },
+        "teaching": {
+          "title": "教え方",
+          "desc": "相棒がどう学習を手伝うかを選びます。"
+        },
         "knowledge": {
           "title": "ナレッジアクセス",
           "desc": "パートナーがライブラリ・デッキ・目標を読み取り、より的確なアドバイスを提供できるようにします。データは外部に送信されません。",
@@ -2126,6 +2154,18 @@
           "detailed": {
             "label": "詳細",
             "description": "例を交えた丁寧な説明。"
+          }
+        },
+        "teachingOptions": {
+          "show": {
+            "label": "教えて",
+            "description": "例と説明をすぐに。",
+            "preview": "光合成の仕組み：植物は光・水・CO₂から糖と酸素を作ります。例：日なたの葉っぱ。"
+          },
+          "guide": {
+            "label": "自分で考える",
+            "description": "まずヒントと質問、そのあと答えを全部。",
+            "preview": "ヒント：葉っぱが太陽から何を必要としているか考えてみて。植物はその光で何を作ると思う？"
           }
         },
         "toneOptions": {

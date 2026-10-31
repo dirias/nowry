@@ -4,6 +4,7 @@ import {
   FREQUENCY,
   INTERVENTION_TYPES,
   TONE,
+  TEACHING_STYLE,
   agentPref,
   interventionEnabled,
   interventionKey,
@@ -12,9 +13,10 @@ import {
 import { INTERVENTION_CAPS, interventionSettings } from '../interventionPolicy'
 
 describe('the option lists', () => {
-  it('offers the three lengths, four tones and three frequencies the server accepts', () => {
+  it('offers the three lengths, three tones and three frequencies the server accepts', () => {
     expect(CONCISENESS).toEqual(['concise', 'balanced', 'detailed'])
-    expect(TONE).toEqual(['friendly', 'professional', 'socratic', 'strict'])
+    expect(TONE).toEqual(['friendly', 'professional', 'strict'])
+    expect(TEACHING_STYLE).toEqual(['show', 'guide'])
     expect(FREQUENCY).toEqual(['conservative', 'balanced', 'frequent'])
   })
 
@@ -84,5 +86,12 @@ describe('knowledgeAccessPatch', () => {
 
   it('sends the keys the table names', () => {
     expect(Object.keys(knowledgeAccessPatch(false))).toContain(AGENT_PREFS.proactiveNudging.key)
+  })
+
+  it('reads Show me by default and an old Socratic tone as Friendly + Let me work it out (CHAT-012)', () => {
+    expect(agentPref({}, 'teachingStyle')).toBe('show')
+    expect(agentPref({ agent_tone: 'socratic' }, 'tone')).toBe('friendly')
+    expect(agentPref({ agent_tone: 'socratic' }, 'teachingStyle')).toBe('guide')
+    expect(agentPref({ agent_tone: 'socratic', agent_teaching_style: 'show' }, 'teachingStyle')).toBe('show')
   })
 })

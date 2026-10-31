@@ -3,6 +3,7 @@ import {
   chatFailureKey,
   chatHistory,
   keptCard,
+  nudgeLine,
   messageBudget,
   parseReply,
   plainReply,
@@ -255,5 +256,22 @@ describe('parseReply cleans a row (CHAT-004, seen live on 2026-10-31)', () => {
       reading: 'kono kusuri no kōka ga sugu ni arawareta.',
       translation: 'The effect appeared quickly.'
     })
+  })
+})
+
+describe('nudgeLine (CHAT-015)', () => {
+  const t = (key, params) => `${key}|${params.deck}|${params.count}`
+
+  it('writes the busiest deck in the learner tone', () => {
+    expect(nudgeLine(t, { deck_name: 'JPN N3', count: 4, tone: 'strict' })).toBe('agent.nudgeLine.strict.deck|JPN N3|4')
+  })
+
+  it('writes the total without a deck, and an unknown tone as Friendly', () => {
+    expect(nudgeLine(t, { count: 12, tone: 'socratic' })).toBe('agent.nudgeLine.friendly.total||12')
+  })
+
+  it("shows an older server's sentence as it is", () => {
+    expect(nudgeLine(t, { nudge: 'Hey! 3 cards.' })).toBe('Hey! 3 cards.')
+    expect(nudgeLine(t, {})).toBeNull()
   })
 })

@@ -1879,6 +1879,26 @@
       "todayTitle": "Ta journée",
       "planTitle": "Ton plan annuel"
     },
+    "nudgeLine": {
+      "friendly": {
+        "deck_one": "{{deck}} a {{count}} carte en attente. Quand vous voulez ! 🎯",
+        "deck_other": "{{deck}} a {{count}} cartes en attente. Quand vous voulez ! 🎯",
+        "total_one": "Vous avez {{count}} carte à réviser. Quand vous voulez ! 💪",
+        "total_other": "Vous avez {{count}} cartes à réviser. Quand vous voulez ! 💪"
+      },
+      "professional": {
+        "deck_one": "{{deck}} : {{count}} carte prête à réviser.",
+        "deck_other": "{{deck}} : {{count}} cartes prêtes à réviser.",
+        "total_one": "{{count}} carte est prête à réviser.",
+        "total_other": "{{count}} cartes sont prêtes à réviser."
+      },
+      "strict": {
+        "deck_one": "{{deck}} a {{count}} carte en attente. Révisez-la maintenant.",
+        "deck_other": "{{deck}} a {{count}} cartes en attente. Révisez-les maintenant.",
+        "total_one": "{{count}} carte en attente. Révisez-la maintenant.",
+        "total_other": "{{count}} cartes en attente. Révisez-les maintenant."
+      }
+    },
     "ready": {
       "studyFirst": "Que devrais-je étudier d'abord ?",
       "missing": "Quelles cartes est-ce que je rate souvent ?",
@@ -1947,7 +1967,11 @@
       "keep": "+ Carte",
       "keepAria": "Garder cette phrase comme nouvelle carte",
       "kept": "Gardée dans {{deck}} · depuis {{subject}}",
-      "keepFailed": "Impossible de la garder. Réessaie."
+      "keepFailed": "Impossible de la garder. Réessaie.",
+      "tryFirst": "Laisse-moi essayer d'abord",
+      "showMe": "Montre-moi simplement",
+      "showMeaning": "Voir le sens",
+      "showMeaningAria": "Voir le sens de cette phrase"
     },
     "defaultName": "Nowry",
     "welcomeMessage": "Salut ! 👋 Je suis {{petName}}.",
@@ -2004,6 +2028,10 @@
           "title": "Personnalité et ton",
           "desc": "Choisis comment ton compagnon doit te parler."
         },
+        "teaching": {
+          "title": "Style d'enseignement",
+          "desc": "Comment votre compagnon vous aide à apprendre."
+        },
         "knowledge": {
           "title": "Accès aux connaissances",
           "desc": "Laisse ton compagnon lire ta bibliothèque, tes paquets et tes objectifs. Tes données ne sont jamais envoyées à l'extérieur.",
@@ -2041,6 +2069,18 @@
           "detailed": {
             "label": "Détaillé",
             "description": "Explications approfondies avec exemples."
+          }
+        },
+        "teachingOptions": {
+          "show": {
+            "label": "Montrez-moi",
+            "description": "Des exemples et des explications, tout de suite.",
+            "preview": "Voici comment fonctionne la photosynthèse : les plantes transforment la lumière, l'eau et le CO₂ en sucre et en oxygène. Exemple : une feuille au soleil."
+          },
+          "guide": {
+            "label": "Laissez-moi chercher",
+            "description": "D'abord un indice et une question, puis la réponse complète.",
+            "preview": "Indice : pensez à ce dont une feuille a besoin du soleil. Selon vous, que fabrique la plante avec cette lumière ?"
           }
         },
         "toneOptions": {

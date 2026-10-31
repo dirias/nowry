@@ -25,6 +25,9 @@ import { useAuth } from '../context/AuthContext'
  * the KEY NAMES are the server's and are written down once — in `agentPrefs`
  * below and in `interventionPolicy` — rather than spelled out at each control.
  */
+/** Preferences the companion's state (`usePetState`) also reports. */
+const PET_STATE_KEYS = ['agent_knowledge_access', 'agent_teaching_style']
+
 export function useGeneralPreferences() {
   const client = useQueryClient()
   const { user } = useAuth()
@@ -52,6 +55,8 @@ export function useGeneralPreferences() {
       client.setQueryData(key, { ...(before ?? {}), ...patch })
       try {
         await userService.updateGeneralPreferences(patch)
+        // The companion's state carries these two, and the chat reads them from there (CHAT-012).
+        if (PET_STATE_KEYS.some((name) => name in patch)) client.invalidateQueries({ queryKey: ['pet', userId] })
         return true
       } catch {
         // Back to what the server last said, rather than to a guess.

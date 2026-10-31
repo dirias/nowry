@@ -80,6 +80,8 @@ export function usePetState() {
     stageProgress: data?.stage_progress ?? null,
     /** Whether the companion may read the learner's library and plan (CHAT-010 gates questions on it). */
     knowledgeAccess: Boolean(data?.knowledge_access_enabled),
+    /** How the companion teaches (CHAT-012); the chat offers the other style per card (CHAT-014). */
+    teachingStyle: data?.teaching_style === 'guide' ? 'guide' : 'show',
     /*
      * A companion that has never been revealed is not drawn at all — and the
      * default when the field is ABSENT is revealed, which is what the web's own

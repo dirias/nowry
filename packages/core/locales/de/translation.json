@@ -1868,6 +1868,26 @@
       "todayTitle": "Dein Tag",
       "planTitle": "Dein Jahresplan"
     },
+    "nudgeLine": {
+      "friendly": {
+        "deck_one": "In {{deck}} wartet {{count}} Karte. Wann immer du bereit bist! 🎯",
+        "deck_other": "In {{deck}} warten {{count}} Karten. Wann immer du bereit bist! 🎯",
+        "total_one": "Du hast {{count}} Karte zu wiederholen. Wann immer du bereit bist! 💪",
+        "total_other": "Du hast {{count}} Karten zu wiederholen. Wann immer du bereit bist! 💪"
+      },
+      "professional": {
+        "deck_one": "{{deck}}: {{count}} Karte bereit zur Wiederholung.",
+        "deck_other": "{{deck}}: {{count}} Karten bereit zur Wiederholung.",
+        "total_one": "{{count}} Karte ist bereit zur Wiederholung.",
+        "total_other": "{{count}} Karten sind bereit zur Wiederholung."
+      },
+      "strict": {
+        "deck_one": "In {{deck}} wartet {{count}} Karte. Wiederhole sie jetzt.",
+        "deck_other": "In {{deck}} warten {{count}} Karten. Wiederhole sie jetzt.",
+        "total_one": "{{count}} Karte wartet. Wiederhole sie jetzt.",
+        "total_other": "{{count}} Karten warten. Wiederhole sie jetzt."
+      }
+    },
     "ready": {
       "studyFirst": "Was sollte ich zuerst lernen?",
       "missing": "Welche Karten vergesse ich oft?",
@@ -1936,7 +1956,11 @@
       "keep": "+ Karte",
       "keepAria": "Diesen Satz als neue Karte behalten",
       "kept": "Behalten in {{deck}} · aus {{subject}}",
-      "keepFailed": "Konnte nicht gespeichert werden. Versuch es noch einmal."
+      "keepFailed": "Konnte nicht gespeichert werden. Versuch es noch einmal.",
+      "tryFirst": "Lass mich zuerst probieren",
+      "showMe": "Zeig es mir einfach",
+      "showMeaning": "Bedeutung zeigen",
+      "showMeaningAria": "Die Bedeutung dieses Satzes zeigen"
     },
     "defaultName": "Nowry",
     "welcomeMessage": "Hallo! 👋 Ich bin {{petName}}.",
@@ -1993,6 +2017,10 @@
           "title": "Persönlichkeit & Ton",
           "desc": "Wähle, wie dein Begleiter mit dir kommunizieren soll."
         },
+        "teaching": {
+          "title": "Lehrstil",
+          "desc": "Wie dein Begleiter dir beim Lernen hilft."
+        },
         "knowledge": {
           "title": "Wissenszugriff",
           "desc": "Lass deinen Begleiter deine Bibliothek, Decks und Ziele lesen. Deine Daten werden nie extern gesendet.",
@@ -2030,6 +2058,18 @@
           "detailed": {
             "label": "Ausführlich",
             "description": "Gründliche Erklärungen mit Beispielen."
+          }
+        },
+        "teachingOptions": {
+          "show": {
+            "label": "Zeig es mir",
+            "description": "Beispiele und Erklärungen, sofort.",
+            "preview": "So funktioniert Photosynthese: Pflanzen machen aus Licht, Wasser und CO₂ Zucker und Sauerstoff. Beispiel: ein Blatt in der Sonne."
+          },
+          "guide": {
+            "label": "Lass mich überlegen",
+            "description": "Erst ein Hinweis und eine Frage, dann die ganze Antwort.",
+            "preview": "Hinweis: Denk daran, was ein Blatt von der Sonne braucht. Was stellt die Pflanze mit diesem Licht her?"
           }
         },
         "toneOptions": {

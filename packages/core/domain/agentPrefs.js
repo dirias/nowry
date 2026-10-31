@@ -23,8 +23,14 @@
 /** How long an answer should be. */
 export const CONCISENESS = ['concise', 'balanced', 'detailed']
 
-/** How it should sound. */
-export const TONE = ['friendly', 'professional', 'socratic', 'strict']
+/** How it should sound. Socratic was a tone until it became a teaching style (ADR-056). */
+export const TONE = ['friendly', 'professional', 'strict']
+
+/** How it should teach (CHAT-012): `show` teaches directly, `guide` gives a clue and a question first. */
+export const TEACHING_STYLE = ['show', 'guide']
+
+/** The tone a learner had before Socratic became a teaching style. */
+const LEGACY_SOCRATIC = 'socratic'
 
 /** How often it may speak unasked. `interventionPolicy` holds what each means. */
 export const FREQUENCY = ['conservative', 'balanced', 'frequent']
@@ -47,6 +53,7 @@ export const interventionKey = (type) => `agent_intervention_${type}`
 export const AGENT_PREFS = {
   conciseness: { key: 'agent_conciseness', fallback: 'balanced' },
   tone: { key: 'agent_tone', fallback: 'friendly' },
+  teachingStyle: { key: 'agent_teaching_style', fallback: 'show' },
   knowledgeAccess: { key: 'agent_knowledge_access', fallback: false },
   proactiveNudging: { key: 'agent_proactive_nudging', fallback: false },
   interventionFrequency: { key: 'agent_intervention_frequency', fallback: 'balanced' },
@@ -63,6 +70,10 @@ export function agentPref(preferences, name) {
   const field = AGENT_PREFS[name]
   if (!field) return null
   const value = preferences?.[field.key]
+  const socratic = preferences?.[AGENT_PREFS.tone.key] === LEGACY_SOCRATIC
+  // An older server may still answer `socratic`: it is Friendly, taught by guiding.
+  if (name === 'tone' && socratic) return field.fallback
+  if (name === 'teachingStyle' && socratic && !value) return 'guide'
   return value === undefined || value === null ? field.fallback : value
 }
 

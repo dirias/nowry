@@ -210,3 +210,25 @@ export function subjectKeyOf(context) {
 /** The turns of one thread, as the server takes them: `{role, content}` only. */
 export const threadOf = (history = [], subject = 'general') =>
   history.filter((turn) => (turn.subject ?? 'general') === subject).map(({ role, content }) => ({ role, content }))
+
+/** The tones a nudge is written in; anything else is Friendly (CHAT-015). */
+const NUDGE_TONES = ['friendly', 'professional', 'strict']
+
+/**
+ * The nudge, in the learner's language and tone (CHAT-015, ADR-056 §6).
+ *
+ * The server sends the facts — the busiest deck's name and how many cards wait
+ * there, or the total — and the tone; the words are the client's, so they come
+ * in the interface language. An older server sends only its English sentence,
+ * which is shown as it is.
+ *
+ * @param {(key: string, params?: object) => string} t
+ * @param {{nudge?: string|null, deck_name?: string|null, count?: number|null, tone?: string|null}} data
+ * @returns {string|null}
+ */
+export function nudgeLine(t, data) {
+  if (data?.count == null) return data?.nudge ?? null
+  const tone = NUDGE_TONES.includes(data.tone) ? data.tone : 'friendly'
+  const kind = data.deck_name ? 'deck' : 'total'
+  return t(`agent.nudgeLine.${tone}.${kind}`, { deck: data.deck_name ?? '', count: data.count })
+}

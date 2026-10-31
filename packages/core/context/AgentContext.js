@@ -21,7 +21,7 @@ import { useAuth } from './AuthContext'
 import { agentService } from '../api/services/agent.service'
 import petService from '../api/services/petService'
 import { allowIntervention, silenceUntil } from '../domain/interventionPolicy'
-import { chatFailureKey, subjectKeyOf, threadOf } from '../domain/agentChat'
+import { chatFailureKey, nudgeLine, subjectKeyOf, threadOf } from '../domain/agentChat'
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -84,6 +84,8 @@ const initialState = {
   knowledgeAccessEnabled: false,
   /** Whether the user enabled proactive nudging in Settings */
   proactiveNudgingEnabled: false,
+  /** How the companion teaches: 'show' or 'guide' (CHAT-012) */
+  teachingStyle: 'show',
   /** Whether the pet roams autonomously around the screen */
   isRoamingEnabled: true,
   /**
@@ -171,6 +173,7 @@ function agentReducer(state, action) {
         messagesLimit: action.payload.messages_limit,
         knowledgeAccessEnabled: action.payload.knowledge_access_enabled ?? false,
         proactiveNudgingEnabled: action.payload.proactive_nudging_enabled ?? false,
+        teachingStyle: action.payload.teaching_style === 'guide' ? 'guide' : 'show',
         isRoamingEnabled: action.payload.agent_roaming_enabled ?? true,
         petName: action.payload.pet_name ?? null,
         isDefaultCompanion: action.payload.is_default_companion ?? true,
@@ -252,6 +255,7 @@ function agentReducer(state, action) {
         ...state,
         knowledgeAccessEnabled: action.payload.knowledgeAccessEnabled ?? state.knowledgeAccessEnabled,
         proactiveNudgingEnabled: action.payload.proactiveNudgingEnabled ?? state.proactiveNudgingEnabled,
+        teachingStyle: action.payload.teachingStyle ?? state.teachingStyle,
         isRoamingEnabled: action.payload.isRoamingEnabled ?? state.isRoamingEnabled,
         interventionFrequency: action.payload.interventionFrequency ?? state.interventionFrequency,
         focusModeEnabled: action.payload.focusModeEnabled ?? state.focusModeEnabled,
@@ -385,7 +389,7 @@ const AgentContext = createContext(null)
 
 export const AgentProvider = ({ children }) => {
   const { user, isAuthenticated } = useAuth()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [state, dispatch] = useReducer(agentReducer, initialState)
   // Keep a stable ref to the full state so companion callbacks are never stale
   const stateRef = useRef(state)
@@ -449,14 +453,13 @@ export const AgentProvider = ({ children }) => {
     agentService
       .getNudge()
       .then((data) => {
-        if (data.has_nudge && data.nudge) {
-          dispatch({ type: 'SET_NUDGE', payload: data.nudge })
-        }
+        const line = data.has_nudge ? nudgeLine(t, data) : null
+        if (line) dispatch({ type: 'SET_NUDGE', payload: line })
       })
       .catch(() => {
         // Non-fatal — nudges are optional
       })
-  }, [state.initialized, state.proactiveNudgingEnabled, state.knowledgeAccessEnabled])
+  }, [state.initialized, state.proactiveNudgingEnabled, state.knowledgeAccessEnabled, t])
 
   const generateAvatar = useCallback(async (trigger = 'manual') => {
     dispatch({ type: 'AVATAR_GENERATING' })

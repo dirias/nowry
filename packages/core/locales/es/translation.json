@@ -3016,6 +3016,26 @@
       "todayTitle": "Tu día",
       "planTitle": "Tu plan anual"
     },
+    "nudgeLine": {
+      "friendly": {
+        "deck_one": "{{deck}} tiene {{count}} tarjeta esperando. ¡Cuando quieras! 🎯",
+        "deck_other": "{{deck}} tiene {{count}} tarjetas esperando. ¡Cuando quieras! 🎯",
+        "total_one": "Tienes {{count}} tarjeta por repasar. ¡Cuando quieras! 💪",
+        "total_other": "Tienes {{count}} tarjetas por repasar. ¡Cuando quieras! 💪"
+      },
+      "professional": {
+        "deck_one": "{{deck}}: {{count}} tarjeta lista para repasar.",
+        "deck_other": "{{deck}}: {{count}} tarjetas listas para repasar.",
+        "total_one": "{{count}} tarjeta está lista para repasar.",
+        "total_other": "{{count}} tarjetas están listas para repasar."
+      },
+      "strict": {
+        "deck_one": "{{deck}} tiene {{count}} tarjeta pendiente. Repásala ahora.",
+        "deck_other": "{{deck}} tiene {{count}} tarjetas pendientes. Repásalas ahora.",
+        "total_one": "{{count}} tarjeta pendiente. Repásala ahora.",
+        "total_other": "{{count}} tarjetas pendientes. Repásalas ahora."
+      }
+    },
     "ready": {
       "studyFirst": "¿Qué debería estudiar primero?",
       "missing": "¿Qué tarjetas fallo más?",
@@ -3084,7 +3104,11 @@
       "keep": "+ Tarjeta",
       "keepAria": "Guardar esta frase como una tarjeta nueva",
       "kept": "Guardada en {{deck}} · de {{subject}}",
-      "keepFailed": "No se pudo guardar. Inténtalo de nuevo."
+      "keepFailed": "No se pudo guardar. Inténtalo de nuevo.",
+      "tryFirst": "Déjame intentarlo primero",
+      "showMe": "Solo muéstramelo",
+      "showMeaning": "Ver significado",
+      "showMeaningAria": "Ver el significado de esta frase"
     },
     "aria": {
       "openBuddy": "Abrir compañero de estudio",
@@ -3183,6 +3207,10 @@
           "title": "Personalidad y tono",
           "desc": "Elige cómo debe comunicarse tu compañero contigo."
         },
+        "teaching": {
+          "title": "Estilo de enseñanza",
+          "desc": "Cómo te ayuda tu compañero a aprender."
+        },
         "knowledge": {
           "title": "Acceso al conocimiento",
           "desc": "Permite que tu compañero lea tu biblioteca, mazos y metas para darte consejos más inteligentes. Tus datos",
@@ -3225,6 +3253,18 @@
             "label": "Detallado",
             "description": "Explicaciones exhaustivas con ejemplos.",
             "preview": "Great question! You have 8 cards due today across 2 decks:\n• Organic Chemistry — 5 due, 2 new\n• Linear Algebra — 3 due\n\nI'd recommend tackling Organic Chemistry first since those cards are the most overdue and you're at 62% mastery there. Your study streak is at 4 days — don't break it! 🔥"
+          }
+        },
+        "teachingOptions": {
+          "show": {
+            "label": "Muéstrame",
+            "description": "Ejemplos y explicaciones, directamente.",
+            "preview": "Así funciona la fotosíntesis: las plantas convierten luz, agua y CO₂ en azúcar y oxígeno. Ejemplo: una hoja al sol."
+          },
+          "guide": {
+            "label": "Déjame pensarlo",
+            "description": "Primero una pista y una pregunta, luego la respuesta completa.",
+            "preview": "Pista: piensa en lo que una hoja necesita del sol. ¿Qué crees que fabrica la planta con esa luz?"
           }
         },
         "toneOptions": {
