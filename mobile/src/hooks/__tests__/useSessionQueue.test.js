@@ -9,16 +9,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const {
-  cardKey,
-  deckKeyOf,
-  countDecks,
-  positionAfter,
-  fullQueueIndex,
-  matchesQueueSearch,
-  narrowQueue,
-  untaggedOf
-} = require('../useSessionQueue')
+const { cardKey, deckKeyOf, countDecks, positionAfter, matchesQueueSearch, narrowQueue, untaggedOf } = require('../useSessionQueue')
 
 const queue = [{ _id: 'a', tags: ['verbs'] }, { _id: 'b', tags: ['nouns'] }, { id: 'c', tags: ['verbs', 'nouns'] }, { _id: 'd' }]
 
@@ -46,25 +37,6 @@ describe('where the card in hand lands after narrowing', () => {
     expect(positionAfter([], 'a')).toBe(0)
     expect(positionAfter(queue, null)).toBe(0)
     expect(positionAfter(null, 'a')).toBe(0)
-  })
-})
-
-describe('what the resume record stores', () => {
-  it('is the full-queue position of the visible card', () => {
-    const visible = [queue[0], queue[2]]
-    expect(fullQueueIndex(queue, visible, 1)).toBe(2)
-  })
-
-  it('is the visible index itself when nothing is narrowed', () => {
-    expect(fullQueueIndex(queue, queue, 3)).toBe(3)
-  })
-
-  it('is past the end when the session is past its last card', () => {
-    expect(fullQueueIndex(queue, [queue[0]], 1)).toBe(queue.length)
-  })
-
-  it('leaves the index alone while the queue is still loading', () => {
-    expect(fullQueueIndex(null, null, 2)).toBe(2)
   })
 })
 

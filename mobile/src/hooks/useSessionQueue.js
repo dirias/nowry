@@ -92,22 +92,6 @@ export function positionAfter(visible, currentKey) {
 }
 
 /**
- * The visible index translated to the full queue, for the resume record.
- *
- * A session resumes with no filter, so the index it stores has to count the
- * whole queue: saving the filtered position would reopen the deck on the wrong
- * card. Past the end of the visible list is past the end of the queue — the
- * completion effect clears the record in that case anyway.
- */
-export function fullQueueIndex(allCards, visible, index) {
-  if (!Array.isArray(allCards)) return index
-  const card = Array.isArray(visible) ? visible[index] : null
-  if (!card) return allCards.length
-  const at = allCards.findIndex((entry) => cardKey(entry) === cardKey(card))
-  return at >= 0 ? at : allCards.length
-}
-
-/**
  * The queue as the learner sees it, from the server's list and the selection.
  *
  * Tags narrow under either scope; the mark narrows under All only (ADR-010).

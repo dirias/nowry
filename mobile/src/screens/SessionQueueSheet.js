@@ -289,7 +289,8 @@ export function SessionQueueSheet({
               const meta = rest.resting ? restLabel(t, rest, i18n.language) : plainMeta
               return (
                 <ListRow
-                  key={String(id ?? name)}
+                  // A practice showing repeats its card's id (ADR-057 §2); its own key keeps the row apart.
+                  key={String(card.practiceKey ?? id ?? name)}
                   tile={<QueueTick current={current} answered={answered} resting={rest.resting} />}
                   name={name}
                   meta={meta}

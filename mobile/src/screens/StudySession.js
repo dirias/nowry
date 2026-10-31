@@ -50,7 +50,8 @@ import { setAskContext } from './askContext'
 import { sourceLineFor } from './cardSource'
 import { useCardSpeech, useSpeech } from '../hooks/useCardSpeech'
 import { useInterventions } from '../hooks/useInterventions'
-import { cardKey, fullQueueIndex, narrowQueue, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
+import { cardKey, narrowQueue, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
+import { localDay, practiceFor, resumeIndex, withPractice } from '@nowry/core/domain/sessionOrder'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -281,7 +282,15 @@ export function StudySession() {
     () => Object.fromEntries((deckList.decks ?? []).map((deck) => [String(deck._id ?? deck.id), deck.name || deck.title || ''])),
     [deckList.decks]
   )
-  const queueView = useSessionQueue(allCards, {
+  /*
+   * A card graded Again comes back after the next five as practice (STUDY-010,
+   * ADR-057 §2). Under Due only: Browse is not a session that schedules.
+   * `served` is the queue with those showings in place; everything that
+   * narrows or counts the session reads it rather than `allCards`.
+   */
+  const [practice, setPractice] = useState([])
+  const served = useMemo(() => (scope === 'due' ? withPractice(allCards, practice) : allCards), [scope, allCards, practice])
+  const queueView = useSessionQueue(served, {
     scope,
     deckNames,
     poolTags: dueQueue.poolTags,
@@ -323,12 +332,14 @@ export function StudySession() {
      * frame later would flash card one and then jump, which reads as a bug even
      * when it lands in the right place.
      *
-     * Over the FULL queue: a session resumes with no filter, and the record
-     * is written in the same terms (see `grade`).
+     * By card, not by number (STUDY-010, ADR-057 §3): graded cards leave the
+     * due list, so a saved number pointed further into a shorter queue and
+     * skipped the cards before it. A record from another day is dropped.
      */
-    const saved = readResume(id, allCards.length)
-    if (!saved) return
-    setIndex(saved.index)
+    const saved = readResume(id)
+    const at = resumeIndex(allCards, saved, localDay())
+    if (at === null) return
+    setIndex(at)
     setGraded(saved.graded)
     startedAt.current = new Date(saved.startedAt)
   }, [allCards, id, scope])
@@ -495,6 +506,22 @@ export function StudySession() {
     (value) => {
       const card = cards[index]
       const cardId = card._id ?? card.id
+      // A miss earns a practice showing later in the session (ADR-057 §2).
+      const repeat = value === 'again' && scope === 'due' ? practiceFor(cards, index, card) : null
+      if (repeat) setPractice((list) => [...list, repeat])
+
+      /*
+       * A practice showing is the learner's, not the schedule's: the first
+       * answer set when the card returns, so this one is not sent, not a second
+       * answer in the summary, and not another miss toward the leech.
+       */
+      if (card.practice) {
+        setIndex(index + 1)
+        setRevealed(false)
+        setHinted(true)
+        setLeech(null)
+        return
+      }
 
       // Re-grading a card the user stepped back to replaces the answer rather
       // than recording two, which would double-count the session and send two
@@ -512,8 +539,7 @@ export function StudySession() {
       setRevealed(false)
       setHinted(true)
       setLandingSeen(true)
-      // In the full queue's terms, because that is how it will be read back.
-      writeResume(id, { index: fullQueueIndex(allCards, cards, next), graded: answers, startedAt: startedAt.current })
+      writeResume(id, { day: localDay(), graded: answers, startedAt: startedAt.current })
 
       /*
        * A grade that cannot be sent is not lost and is not retried in a loop
@@ -556,7 +582,7 @@ export function StudySession() {
         NUDGE_DELAY + Math.random() * NUDGE_JITTER
       )
     },
-    [cards, allCards, index, id, graded, askCompanion]
+    [cards, index, id, graded, askCompanion, scope]
   )
 
   /**
@@ -581,7 +607,8 @@ export function StudySession() {
   }, [])
 
   const cardId = current?._id ?? current?.id ?? null
-  const answered = Boolean(cardId && graded[cardId])
+  // A practice showing is a fresh try, never "already answered".
+  const answered = Boolean(cardId && !current?.practice && graded[cardId])
 
   /**
    * A new selection, and where it leaves the learner (MOB-107). The card in
@@ -601,7 +628,7 @@ export function StudySession() {
         setTagChoice(tags)
         return
       }
-      const next = narrowQueue(allCards, {
+      const next = narrowQueue(served, {
         selectedTags: tags,
         selectedDecks: queueView.selectedDecks,
         markedOnly: queueView.markedOnly,
@@ -612,7 +639,7 @@ export function StudySession() {
       setIndex(at)
       queueView.setSelectedTags(tags)
     },
-    [allCards, cardId, queueView, scope]
+    [served, cardId, queueView, scope]
   )
 
   /**
@@ -649,7 +676,7 @@ export function StudySession() {
   /** Decks, in a mixed queue: the card in hand is followed as with tags (MOB-110). */
   const chooseDecks = useCallback(
     (decks) => {
-      const next = narrowQueue(allCards, {
+      const next = narrowQueue(served, {
         selectedTags: queueView.selectedTags,
         selectedDecks: decks,
         markedOnly: queueView.markedOnly,
@@ -660,13 +687,13 @@ export function StudySession() {
       setIndex(at)
       queueView.setSelectedDecks(decks)
     },
-    [allCards, queueView, scope, cardId]
+    [served, queueView, scope, cardId]
   )
 
   /** Marked, toggled under All: the card in hand is followed as with tags. */
   const chooseMarked = useCallback(
     (on) => {
-      const visible = narrowQueue(allCards, {
+      const visible = narrowQueue(served, {
         selectedTags: queueView.selectedTags,
         selectedDecks: queueView.selectedDecks,
         markedOnly: on,
@@ -677,7 +704,7 @@ export function StudySession() {
       setIndex(at)
       queueView.setMarkedOnly(on)
     },
-    [allCards, queueView, scope, cardId]
+    [served, queueView, scope, cardId]
   )
 
   /**
@@ -806,11 +833,11 @@ export function StudySession() {
    * tag, plus whatever the Decks chip hid of the served queue.
    */
   const dueOutsideFilter = useMemo(() => {
-    if (scope !== 'due' || !allCards) return 0
+    if (scope !== 'due' || !served) return 0
     const base = baseDueQueue.cards
     const hiddenByTags = tagChoice.length > 0 && base ? base.length - narrowQueue(base, { selectedTags: tagChoice, scope }).length : 0
-    return Math.max(0, hiddenByTags) + Math.max(0, allCards.length - total)
-  }, [scope, allCards, baseDueQueue.cards, tagChoice, total])
+    return Math.max(0, hiddenByTags) + Math.max(0, served.length - total)
+  }, [scope, served, baseDueQueue.cards, tagChoice, total])
 
   const counter = useMemo(() => t('cards.session.cardShort', { current: index + 1, total }), [t, index, total])
   const counterSaid = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
@@ -1256,12 +1283,13 @@ export function StudySession() {
 }
 
 /** Storage holds strings, and a half-written or stale record must not resume. */
-function readResume(deckId, total) {
+function readResume(deckId) {
   try {
     const raw = storage.get(resumeKey(deckId))
     if (!raw) return null
     const saved = JSON.parse(raw)
-    if (!Number.isInteger(saved.index) || saved.index <= 0 || saved.index >= total) return null
+    // `resumeIndex` drops another day's record; a record from before STUDY-010 has no day.
+    if (typeof saved.day !== 'string') return null
     if (!saved.graded || typeof saved.graded !== 'object') return null
     return saved
   } catch {
