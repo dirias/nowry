@@ -427,6 +427,7 @@ describe('session completion XP', () => {
     fireEvent.click(await screen.findByText('cards.session.grading.again'))
     fireEvent.click(await screen.findByText('cards.session.grading.hard'))
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // the missed card's practice showing (ADR-057)
 
     await screen.findByText('cards.session.complete.cardsReviewed')
     expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
@@ -567,7 +568,8 @@ describe('needs attention tracking', () => {
 
     fireEvent.click(await screen.findByText('cards.session.grading.again')) // Needs 1 -> again
     fireEvent.click(await screen.findByText('cards.session.grading.hard')) // Needs 2 -> hard
-    fireEvent.click(await screen.findByText('cards.session.grading.good')) // Needs 3 -> good, session complete
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // Needs 3 -> good
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // the missed card's practice showing (ADR-057)
 
     await screen.findByText('cards.session.complete.cardsReviewed')
     expect(screen.getByText('cards.session.complete.needsAttentionLabel')).toBeInTheDocument()
@@ -590,7 +592,8 @@ describe('needs attention tie-break', () => {
     renderSession({ cards })
 
     fireEvent.click(await screen.findByText('cards.session.grading.hard')) // Tie 1 -> hard, missed first
-    fireEvent.click(await screen.findByText('cards.session.grading.again')) // Tie 2 -> again, missed second, session complete
+    fireEvent.click(await screen.findByText('cards.session.grading.again')) // Tie 2 -> again, missed second
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // the missed card's practice showing (ADR-057)
 
     await screen.findByText('cards.session.complete.cardsReviewed')
 
@@ -688,7 +691,8 @@ async function completeSessionWithMixedResults() {
   fireEvent.click(await screen.findByText('cards.session.grading.again')) // Alpha -> again (2)
   await screen.findByText('cards.session.grading.hard') // now on Beta again
   fireEvent.click(screen.getByText('cards.session.grading.hard')) // Beta -> hard
-  fireEvent.click(await screen.findByText('cards.session.grading.good')) // Gamma -> good, session complete
+  fireEvent.click(await screen.findByText('cards.session.grading.good')) // Gamma -> good
+  fireEvent.click(await screen.findByText('cards.session.grading.good')) // Alpha's practice showing (ADR-057)
   await screen.findByText('cards.session.complete.cardsReviewed')
 }
 
@@ -1506,5 +1510,24 @@ describe('TAG-003 — the pool’s tags, and a refetch on a tag choice', () => {
     fireEvent.click(await findTagsSegment())
     expect(await screen.findByRole('menuitemcheckbox', { name: /^verbs/ })).toBeInTheDocument()
     expect(screen.queryByRole('menuitemcheckbox', { name: /^nouns/ })).not.toBeInTheDocument()
+  })
+})
+
+describe('a missed card comes back as practice (STUDY-011, ADR-057)', () => {
+  it('shows a card graded Again once more, and does not send that showing', async () => {
+    const cards = [
+      { _id: 'm1', id: 'm1', title: 'Miss 1', content: 'A' },
+      { _id: 'm2', id: 'm2', title: 'Miss 2', content: 'B' }
+    ]
+    renderSession({ cards })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.again')) // Miss 1 -> again
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // Miss 2 -> good
+    expect((await screen.findAllByText('Miss 1')).length).toBeGreaterThan(0) // back as practice
+    fireEvent.click(await screen.findByText('cards.session.grading.good')) // the practice showing
+
+    await screen.findByText('cards.session.complete.cardsReviewed')
+    await waitFor(() => expect(cardsService.review).toHaveBeenCalledTimes(2))
+    expect(cardsService.review.mock.calls.map(([id]) => id)).toEqual(['m1', 'm2'])
   })
 })

@@ -18,6 +18,7 @@ import { dailyReviewParams } from './dailyReviewParams'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePet } from '@nowry/core/context/AgentContext'
+import { practiceFor, withPractice } from '@nowry/core/domain/sessionOrder'
 import { speechHintFor, speechTextFor } from '@nowry/core/domain/cardSpeech'
 import { studyCardContext } from '@nowry/core/domain/screenContext'
 import {
@@ -363,6 +364,8 @@ export default function StudySession() {
   const [mermaidSvg, setMermaidSvg] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [reviewQueue, setReviewQueue] = useState([])
+  // Cards graded Again, coming back as practice (STUDY-011, ADR-057 §2).
+  const [practice, setPractice] = useState([])
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
   const [isPressing, setIsPressing] = useState(false)
   // Mobile-only, first-card-only swipe-gesture affordance (D-08/D-09).
@@ -390,9 +393,14 @@ export default function StudySession() {
   // deliberate exception, marked at its site: the deck-empty gate reads the
   // FULL array. Nothing assigns an array back to `cards` — every write goes
   // through `patchCardById`, so a filtered view can never overwrite the deck.
+  //
+  // A card graded Again comes back after the next five as practice in a study
+  // session (ADR-057 §2): `servedCards` is the deck with those showings in
+  // place, and the same array as `cards` while there are none.
+  const servedCards = React.useMemo(() => (mode === 'study' ? withPractice(cards, practice) : cards), [mode, cards, practice])
   const { availableTags, selectedTags, markedOnly, markedCount, visibleCards, setTags, clearFilters, toggleMarkedOnly, isFiltering } =
     useSessionFilters({
-      cards,
+      cards: servedCards,
       tagsEnabled: true,
       markEnabled: isReadOnlyMode,
       poolTags: isReadOnlyMode ? null : poolTags
@@ -553,6 +561,7 @@ export default function StudySession() {
         }))
         if (!tagsKey) baseCards.current = processed
         setCards(processed)
+        setPractice([])
       } else {
         if (!tagsKey) baseCards.current = []
         setCards([])
@@ -870,20 +879,23 @@ export default function StudySession() {
     // cards is an empty RESULT, never a finished session.
   }, [selectedTags, markedOnly, visibleCards, currentIndex])
 
+  const goTo = React.useCallback((nextIndex) => {
+    latestStateRef.current = { ...latestStateRef.current, currentIndex: nextIndex }
+    setCurrentIndex(nextIndex)
+    setIsFlipped(false)
+    setSelectedAnswer(null)
+    setShowExplanation(false)
+    setMermaidSvg('')
+  }, [])
+
   const handleNext = React.useCallback(() => {
     const { currentIndex: latestIndex } = latestStateRef.current
     if (latestIndex < visibleCards.length - 1) {
-      const nextIndex = latestIndex + 1
-      latestStateRef.current = { ...latestStateRef.current, currentIndex: nextIndex }
-      setCurrentIndex(nextIndex)
-      setIsFlipped(false)
-      setSelectedAnswer(null)
-      setShowExplanation(false)
-      setMermaidSvg('')
+      goTo(latestIndex + 1)
     } else {
       setSessionComplete(true)
     }
-  }, [visibleCards.length])
+  }, [visibleCards.length, goTo])
 
   const handleGrade = React.useCallback(
     async (grade) => {
@@ -894,6 +906,21 @@ export default function StudySession() {
       // nothing left to grade — no-op rather than crash.
       if (!currentCard) return
       const cardId = currentCard._id || currentCard.id
+
+      // A miss earns a practice showing later in the session (ADR-057 §2). The
+      // queue grows by one, so the session goes on even from its last card.
+      const repeat = mode === 'study' && grade === 'again' ? practiceFor(latestCards, latestIndex, currentCard) : null
+      if (repeat) setPractice((list) => [...list, repeat])
+      const advance = () => (repeat ? goTo(latestIndex + 1) : handleNext())
+
+      // A practice showing is the learner's, not the schedule's: the first
+      // answer set when the card returns, so this one is not sent, not a second
+      // answer in the summary, and not another miss toward the leech.
+      if (currentCard.practice) {
+        setLeech(null)
+        advance()
+        return
+      }
 
       // Record/overwrite this card's last grade for this session — powers the
       // "already graded" affordance rendered below (see gradesByCardId above).
@@ -954,7 +981,7 @@ export default function StudySession() {
       setCards((prev) => patchCardById(prev, cardId, optimisticUpdate))
 
       // Move to next card IMMEDIATELY
-      handleNext()
+      advance()
 
       // HISTORY: accumulate this grade for session-level logging on completion
       const gradeToEval = { again: 'incorrect', hard: 'partial', good: 'correct', easy: 'correct' }
@@ -1076,7 +1103,7 @@ export default function StudySession() {
     // No `cards` here: every read goes through latestStateRef and every write
     // is a functional setCards patch, so the handler holds no closure over the
     // deck that could go stale.
-    [handleNext, mode, queueIntervention, applyReviewXp, cheer]
+    [handleNext, goTo, mode, queueIntervention, applyReviewXp, cheer]
   )
 
   const handlePrev = React.useCallback(() => {
@@ -1448,7 +1475,8 @@ export default function StudySession() {
   // Null unless this exact card was already graded this session (via
   // handleGrade above) — drives the re-grade affordance in SessionFooter.
   const currentCardId = currentCard?._id || currentCard?.id
-  const previousGrade = currentCardId ? (gradesByCardId.current[currentCardId] ?? null) : null
+  // A practice showing is a fresh try, never a re-grade.
+  const previousGrade = currentCardId && !currentCard?.practice ? (gradesByCardId.current[currentCardId] ?? null) : null
   const progress = visibleCards.length > 0 ? ((safeIndex + 1) / visibleCards.length) * 100 : 0
   const isQuiz = currentCard?.card_type === 'quiz'
   const isVisual = currentCard?.card_type === 'visual'
