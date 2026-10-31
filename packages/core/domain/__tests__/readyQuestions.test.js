@@ -5,11 +5,11 @@ const ids = (subject, state) => readyQuestions(subject, state).map((q) => q.id)
 
 describe('readyQuestions (CHAT-005)', () => {
   it('offers three questions on the front of a language card, none that needs the back', () => {
-    expect(ids(card())).toEqual(['hint', 'inSentence', 'breakDown'])
+    expect(ids(card())).toEqual(['hint', 'inSentence', 'tryFirst'])
   })
 
   it('offers the kanji breakdown only when there are kanji', () => {
-    expect(ids(card({ front: 'casa', language: 'es' }))).toEqual(['hint', 'inSentence'])
+    expect(ids(card({ front: 'casa', language: 'es' }))).toEqual(['hint', 'inSentence', 'tryFirst'])
   })
 
   it('offers examples, a hook and similar words once the answer shows', () => {
@@ -39,7 +39,7 @@ describe('readyQuestions (CHAT-005)', () => {
 
   it('lets the deck field win over the card', () => {
     expect(subjectField({ field: 'math', language: 'ja' })).toBe('math')
-    expect(ids(card({ field: 'math', front: 'd/dx x² sin x' }))).toEqual(['whichRule', 'solvedSimilar', 'whereSlip'])
+    expect(ids(card({ field: 'math', front: 'd/dx x² sin x' }))).toEqual(['whichRule', 'solvedSimilar', 'tryFirst'])
   })
 
   it('marks the moves that open the composer', () => {
@@ -84,5 +84,26 @@ describe('subjects beyond the card (CHAT-010)', () => {
       'Summarise this deck — JPN N3'
     )
     expect(readyMessage(t, { labelKey: 'x' }, null)).toBe('Summarise this deck')
+  })
+})
+
+describe('the other teaching style, per card (CHAT-014)', () => {
+  it('offers Let me try first last on every front for a Show me learner', () => {
+    for (const field of ['language', 'math', 'science', 'certification', 'concept', 'general']) {
+      expect(ids(card({ field })).at(-1)).toBe('tryFirst')
+    }
+  })
+
+  it('offers Just show me to a Let me work it out learner', () => {
+    expect(ids(card(), { teaching: 'guide' })).toEqual(['hint', 'inSentence', 'showMe'])
+  })
+
+  it('keeps the kanji breakdown once the switch has been used', () => {
+    expect(ids(card(), { used: ['tryFirst'] })).toEqual(['hint', 'inSentence'])
+  })
+
+  it('offers neither on the back or off a card', () => {
+    expect(ids(card({ isFlipped: true }))).not.toContain('tryFirst')
+    expect(ids({ page: 'deck', deckId: 'd1' })).not.toContain('tryFirst')
   })
 })

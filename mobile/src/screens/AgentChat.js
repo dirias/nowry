@@ -222,7 +222,9 @@ export function AgentChat() {
     () => (context && deckField.field && deckField.source !== 'default' ? { ...context, field: deckField.field } : context),
     [context, deckField.field, deckField.source]
   )
-  const questions = readyQuestions(subject, { used, knowledge: pet.knowledgeAccess })
+  const questions = readyQuestions(subject, { used, knowledge: pet.knowledgeAccess, teaching: pet.teachingStyle })
+  /** While the card's answer is hidden, so is an example's translation (CHAT-013). */
+  const answerHidden = context?.page === 'study_session' && !context?.isFlipped
 
   /*
    * General — nothing on screen — lists the threads that can be picked up
@@ -393,7 +395,9 @@ export function AgentChat() {
               </Typography>
             </Stack>
           ) : (
-            turns.map((turn, index) => <Bubble key={index} turn={turn} hint={context?.language ?? null} renderAction={keepAction} />)
+            turns.map((turn, index) => (
+              <Bubble key={index} turn={turn} hint={context?.language ?? null} renderAction={keepAction} meaningHidden={answerHidden} />
+            ))
           )}
 
           {!sending && !spent && !compose ? (
@@ -462,7 +466,7 @@ export function AgentChat() {
  * for. Neither is a coloured speech bubble: a hue here would be a grade
  * somewhere else in this app (§15.5).
  */
-function Bubble({ turn, hint, renderAction = null }) {
+function Bubble({ turn, hint, renderAction = null, meaningHidden = false }) {
   const mine = turn.from === USER
 
   if (!mine) {
@@ -473,7 +477,13 @@ function Bubble({ turn, hint, renderAction = null }) {
       <View accessibilityLiveRegion='polite' style={{ gap: 4 }}>
         {parseReply(turn.text).map((block, index) =>
           block.type === 'example' ? (
-            <ChatExample key={index} example={block} hint={hint} action={renderAction ? renderAction(block) : null} />
+            <ChatExample
+              key={index}
+              example={block}
+              hint={hint}
+              action={renderAction ? renderAction(block) : null}
+              meaningHidden={meaningHidden}
+            />
           ) : (
             <Typography key={index} level='body-md'>
               {plainReply(block.text)}

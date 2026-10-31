@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import ReplyBlocks from '../ReplyBlocks'
 
 jest.mock(
@@ -37,5 +37,18 @@ describe('ReplyBlocks (CHAT-004)', () => {
     render(<ReplyBlocks content='Just an answer.' />)
     expect(screen.getByText('Just an answer.')).toBeInTheDocument()
     expect(screen.queryByTestId('listen')).not.toBeInTheDocument()
+  })
+
+  it('keeps the translation behind Show meaning while the answer is hidden (CHAT-013)', () => {
+    render(
+      <ReplyBlocks
+        content={'[[EX|会議に資料を持参する。|Kaigi ni shiryō o jisan suru.|Bring the documents to the meeting.]]'}
+        meaningHidden
+      />
+    )
+    expect(screen.getByText('Kaigi ni shiryō o jisan suru.')).toBeInTheDocument()
+    expect(screen.queryByText('Bring the documents to the meeting.')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /showMeaningAria|meaning/i }))
+    expect(screen.getByText('Bring the documents to the meeting.')).toBeInTheDocument()
   })
 })

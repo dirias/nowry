@@ -114,18 +114,31 @@ const screenMovesFor = (subject) => {
 }
 
 /**
+ * The other teaching style, for this card only (CHAT-014, ADR-056 §5): a
+ * learner taught directly can still try a half-known word first, and one who
+ * likes to work things out can ask to be shown a new one.
+ */
+const STYLE_SWITCH = { show: 'tryFirst', guide: 'showMe' }
+
+const isCardFront = (subject) => subject?.page === 'study_session' && !subject?.isFlipped
+
+/**
  * The questions to offer: three on an empty chat, two follow-ups after.
  *
  * @param {object|null} subject — the chat's context: a card (`studyCardContext`),
  *   another screen's subject (`deckContext`…), or null for General.
- * @param {{used?: string[], knowledge?: boolean}} [state] — moves already sent in
- *   this chat; whether AI Knowledge Access is on.
+ * @param {{used?: string[], knowledge?: boolean, teaching?: 'show'|'guide'}} [state] —
+ *   moves already sent in this chat; whether AI Knowledge Access is on; the
+ *   learner's teaching style, whose opposite a card's front offers last.
  * @returns {Array<{id: string, labelKey: string, compose: boolean}>}
  */
-export function readyQuestions(subject, { used = [], knowledge = false } = {}) {
+export function readyQuestions(subject, { used = [], knowledge = false, teaching = 'show' } = {}) {
   const moves = subject?.page === 'study_session' ? movesFor(subject) : screenMovesFor(subject)
   const fresh = moves.filter((id) => !used.includes(id)).filter((id) => knowledge || !NEEDS_KNOWLEDGE.has(id))
-  return fresh.slice(0, used.length > 0 ? 2 : 3).map((id) => ({ id, labelKey: `agent.ready.${id}`, compose: COMPOSE_MOVES.has(id) }))
+  const room = used.length > 0 ? 2 : 3
+  const styleSwitch = STYLE_SWITCH[teaching] ?? STYLE_SWITCH.show
+  const offered = isCardFront(subject) && !used.includes(styleSwitch) ? [...fresh.slice(0, room - 1), styleSwitch] : fresh.slice(0, room)
+  return offered.map((id) => ({ id, labelKey: `agent.ready.${id}`, compose: COMPOSE_MOVES.has(id) }))
 }
 
 /**

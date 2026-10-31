@@ -588,7 +588,7 @@ export const PetOrb = ({
 }
 
 /** A single message bubble in the chat history */
-const MessageBubble = ({ role, content, speciesColor, hint = null, renderAction = null }) => {
+const MessageBubble = ({ role, content, speciesColor, hint = null, renderAction = null, meaningHidden = false }) => {
   const isUser = role === 'user'
   return (
     <motion.div
@@ -617,7 +617,7 @@ const MessageBubble = ({ role, content, speciesColor, hint = null, renderAction 
         }}
       >
         {/* Example sentences come back as rows (CHAT-004). */}
-        {isUser ? content : <ReplyBlocks content={content} hint={hint} renderAction={renderAction} />}
+        {isUser ? content : <ReplyBlocks content={content} hint={hint} renderAction={renderAction} meaningHidden={meaningHidden} />}
       </div>
     </motion.div>
   )
@@ -667,6 +667,7 @@ const StudyPet = () => {
     viewContext,
     setViewContext,
     knowledgeAccessEnabled,
+    teachingStyle,
     messagesUsed,
     messagesLimit,
     open,
@@ -1041,7 +1042,8 @@ const StudyPet = () => {
   const deckField = useDeckField(viewContext?.deckId ?? null)
   const subject =
     viewContext && deckField.field && deckField.source !== 'default' ? { ...viewContext, field: deckField.field } : viewContext
-  const questions = quizState === 'chat' ? readyQuestions(subject, { used: usedQuestions, knowledge: knowledgeAccessEnabled }) : []
+  const questions =
+    quizState === 'chat' ? readyQuestions(subject, { used: usedQuestions, knowledge: knowledgeAccessEnabled, teaching: teachingStyle }) : []
 
   // General — nothing on screen — lists the threads that can be picked up again (CHAT-010).
   const threads = useChatThreads(isAuthenticated && !viewContext)
@@ -1765,6 +1767,7 @@ const StudyPet = () => {
                         speciesColor={resolvedColor}
                         hint={viewContext?.language ?? null}
                         renderAction={keepAction}
+                        meaningHidden={viewContext?.page === 'study_session' && !viewContext?.isFlipped}
                       />
                     )
                   })}
