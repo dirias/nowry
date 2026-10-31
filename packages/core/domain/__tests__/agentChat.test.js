@@ -245,6 +245,25 @@ describe('subjectKeyOf and threadOf (CHAT-008)', () => {
   })
 })
 
+describe('parseReply keeps only the translation in its field (CHAT-017, seen live on 2026-11-01)', () => {
+  it('drops the romaji a model adds as an extra field', () => {
+    const [row] = parseReply(
+      "[[EX|このカフェは落ち着いた雰囲気です。|このカフェは落ち着いたふんいきです。|Kono kafe wa ochitsuita fun'iki desu.|This cafe has a calm vibe.]]"
+    )
+    expect(row.reading).toBe('このカフェは落ち着いたふんいきです。')
+    expect(row.translation).toBe('This cafe has a calm vibe.')
+  })
+
+  it('drops a trailing empty field', () => {
+    const [row] = parseReply('[[EX|灰色の空が広がっている。|はいいろのそらがひろがっている。|The sky is gray.|]]')
+    expect(row.translation).toBe('The sky is gray.')
+  })
+
+  it('leaves an example with no translation without one', () => {
+    expect(parseReply('[[EX|La casa es grande.|la casa|]]')[0].translation).toBe('')
+  })
+})
+
 describe('parseReply cleans a row (CHAT-004, seen live on 2026-10-31)', () => {
   it('drops the bold a model puts on the target word', () => {
     const [row] = parseReply(

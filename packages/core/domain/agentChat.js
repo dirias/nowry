@@ -138,7 +138,7 @@ export function parseReply(text) {
       type: 'example',
       sentence: unmark(sentence),
       reading: unmark(match[2] ?? ''),
-      translation: unmark(match[3] ?? '')
+      translation: unmark(lastField(match[3] ?? ''))
     })
   }
   flush()
@@ -156,6 +156,18 @@ const unmark = (text) =>
     .replace(/__([^_]+)__/g, '$1')
     .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1$2')
     .trim()
+
+/**
+ * The translation is the tag's last field (CHAT-017). Models add a field the
+ * format has no place for, romaji or a trailing `|`, and the row would show it
+ * under Show meaning: `Kono kafe wa… |This cafe has a calm vibe.`
+ */
+const lastField = (rest) =>
+  rest
+    .split('|')
+    .map((field) => field.trim())
+    .filter(Boolean)
+    .pop() ?? ''
 
 /** One example tag on a line of its own, after an optional list marker. */
 const EXAMPLE_LINE = /^\s*(?:[-*•]|\d+[.)])?\s*\[\[EX\|([^|\]]*)\|([^|\]]*)\|([^\]]*)\]\]\s*$/
