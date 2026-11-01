@@ -26,6 +26,7 @@
  * meaningful.
  */
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { apiClient } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { getNewsCategory, DEFAULT_NEWS_CATEGORY } from '../constants/learningTaxonomy'
@@ -111,25 +112,42 @@ const fetchNews = async (language, categories) => {
 }
 
 /**
+ * The feed language: the saved preference, else the language the app is shown
+ * in. A profile with no saved language is common (every account that skipped
+ * onboarding has `preferences: {}`), and waiting for one that will never come
+ * left the carousel on skeletons forever (NEWS-001). The backend serves `en`
+ * for any language it has no feeds for, so a region suffix is simply dropped.
+ *
+ * @param   {string|null|undefined} saved
+ * @param   {string|undefined}      uiLanguage
+ * @returns {string}
+ */
+export const feedLanguage = (saved, uiLanguage) => saved || (uiLanguage || 'en').split('-')[0]
+
+/**
  * The home news feed for a set of preferences.
  *
- * @param   {string|null|undefined}   language  Preferred language; the query stays idle until it exists.
+ * @param   {string|null|undefined}   language  Preferred language; falls back to the UI language.
  * @param   {string[]|null|undefined} interests Selected topic values.
  * @returns {{articles: Array, loading: boolean, error: Error|null, refetch: Function}}
  */
 export function useNews(language, interests) {
   const { user } = useAuth()
+  const { i18n } = useTranslation()
   const userId = user?.id ?? null
   const categories = resolveCategories(interests)
+  const lang = feedLanguage(language, i18n?.resolvedLanguage ?? i18n?.language)
 
   const { data, isPending, error, refetch } = useQuery({
     // categories is a fresh array each render, so join it into a stable
     // primitive — an array literal here would never hit the cache.
-    queryKey: ['news', userId, language, categories.join(',')],
-    queryFn: () => fetchNews(language, categories),
-    // Nothing is requested until preferences have actually loaded. This is what
-    // removes the "general" first-render request that used to race the real one.
-    enabled: !!language,
+    queryKey: ['news', userId, lang, categories.join(',')],
+    queryFn: () => fetchNews(lang, categories),
+    // Nothing is requested until the profile has loaded — preferences arrive
+    // with it. This is what removes the "general" first-render request that
+    // used to race the real one. Gating on the language itself instead never
+    // fired for a profile that has none saved.
+    enabled: !!user,
     staleTime: NEWS_STALE_TIME
   })
 

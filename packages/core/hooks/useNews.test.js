@@ -20,7 +20,7 @@ import React from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-import { useNews, resolveCategories, NEWS_STALE_TIME } from './useNews'
+import { useNews, resolveCategories, feedLanguage, NEWS_STALE_TIME } from './useNews'
 
 const mockGet = jest.fn()
 jest.mock('../api/client', () => ({
@@ -29,8 +29,14 @@ jest.mock('../api/client', () => ({
   }
 }))
 
+let mockUser = { id: 'user-1' }
 jest.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ user: { id: 'user-1' } })
+  useAuth: () => ({ user: mockUser })
+}))
+
+let mockUiLanguage = 'ja'
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ i18n: { resolvedLanguage: mockUiLanguage } })
 }))
 
 /** One article payload shaped like the backend's response entries. */
@@ -59,6 +65,8 @@ const makeWrapper = () => {
 
 beforeEach(() => {
   mockGet.mockReset()
+  mockUser = { id: 'user-1' }
+  mockUiLanguage = 'ja'
 })
 
 // ─── resolveCategories() — the "general even though I set interests" bug ────
@@ -94,10 +102,19 @@ describe('resolveCategories', () => {
   })
 })
 
+describe('feedLanguage', () => {
+  it('prefers the saved language, then the UI language without its region, then English', () => {
+    expect(feedLanguage('es', 'fr')).toBe('es')
+    expect(feedLanguage(undefined, 'fr-CA')).toBe('fr')
+    expect(feedLanguage('', undefined)).toBe('en')
+  })
+})
+
 // ─── the fetch itself ───────────────────────────────────────────────────────
 
 describe('useNews', () => {
-  it('requests nothing until a language exists, so no general request can race the real one', async () => {
+  it('requests nothing until the profile has loaded, so no general request can race the real one', async () => {
+    mockUser = null
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useNews(undefined, ['technology']), { wrapper })
 
@@ -108,6 +125,19 @@ describe('useNews', () => {
     // its "no articles" state while preferences are still in flight.
     expect(result.current.loading).toBe(true)
     expect(result.current.articles).toEqual([])
+  })
+
+  it('fetches in the UI language when the profile has no saved language (NEWS-001)', async () => {
+    // Every account that skipped onboarding has `preferences: {}`. The old gate
+    // waited for a language that never came and the carousel stayed on skeletons.
+    mockGet.mockResolvedValue(ok([article('https://a')]))
+
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => useNews(undefined, undefined), { wrapper })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockGet).toHaveBeenCalledWith('/news/ja/general')
+    expect(result.current.articles.map((a) => a.url)).toEqual(['https://a'])
   })
 
   it('requests one feed per distinct category and tags each article with it', async () => {
