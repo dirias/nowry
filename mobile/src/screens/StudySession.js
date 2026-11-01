@@ -28,7 +28,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pressable, View, useWindowDimensions } from 'react-native'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { usePomodoro } from '@nowry/core/context/PomodoroContext'
 import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
@@ -40,7 +40,7 @@ import { studyCardContext } from '@nowry/core/domain/screenContext'
 import { usePetState } from '@nowry/core/hooks/usePetState'
 import { useVoiceSettings } from '@nowry/core/hooks/useVoiceSettings'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
-import { invalidateCardCaches } from '@nowry/core/api/cardCache'
+import { invalidateCardCaches, invalidateCardCounts } from '@nowry/core/api/cardCache'
 import { REST_WRITE_RESOURCES } from '@nowry/core/hooks/useCardRest'
 import { spreadOf } from '@nowry/core/domain/cardRest'
 import { leechOffer, leechRestUntil } from '@nowry/core/domain/leech'
@@ -221,6 +221,23 @@ export function StudySession() {
   const [queued, setQueued] = useState(0)
   const startedAt = useRef(new Date())
   const logged = useRef(false)
+
+  /*
+   * Leaving after a grade tells every card count the session changed it
+   * (STUDY-012): Home said "Study · 8" with two of the eight graded. On blur,
+   * not unmount — going to Home leaves this screen mounted in the Study tab.
+   */
+  const touched = useRef(false)
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        if (!touched.current) return
+        touched.current = false
+        invalidateCardCounts()
+      },
+      []
+    )
+  )
 
   /*
    * Through the query cache, not a bare fetch. The cache is persisted to disk,
@@ -531,6 +548,7 @@ export function StudySession() {
         [cardId]: { cardId, cardTitle: frontOf(card) || null, grade: value, evaluation: GRADE_TO_EVAL[value] }
       }
       setGraded(answers)
+      touched.current = true
 
       // The next card comes up now. A grade that waits on the network is a
       // grade the user watches, and recall practice does not survive a spinner.
@@ -1288,8 +1306,13 @@ function readResume(deckId) {
     const raw = storage.get(resumeKey(deckId))
     if (!raw) return null
     const saved = JSON.parse(raw)
-    // `resumeIndex` drops another day's record; a record from before STUDY-010 has no day.
-    if (typeof saved.day !== 'string') return null
+    // A record from before STUDY-010 has no day, and another day's is over:
+    // both are deleted rather than skipped, or they sit on the device for good
+    // and an APK without the day rule reads them back (STUDY-012).
+    if (typeof saved.day !== 'string' || saved.day !== localDay()) {
+      storage.remove(resumeKey(deckId))
+      return null
+    }
     if (!saved.graded || typeof saved.graded !== 'object') return null
     return saved
   } catch {

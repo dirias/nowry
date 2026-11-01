@@ -61,3 +61,16 @@ export const CARD_WRITE_RESOURCES = ['cards', 'decks', 'groups', 'tags', 'statis
 export function invalidateCardCaches(resources = CARD_WRITE_RESOURCES) {
   return Promise.all(resources.map((resource) => queryClient.invalidateQueries({ queryKey: [resource] })))
 }
+
+/**
+ * Every count a graded card changes, except a session's own queue (STUDY-012).
+ * The phone keeps a session mounted behind another tab, so its queue is still
+ * observed while Home is on screen; invalidating it there would refetch the
+ * cards under a session the learner means to come back to. An opening always
+ * asks the server for its queue anyway (`useSessionCards`).
+ */
+export function invalidateCardCounts() {
+  return queryClient.invalidateQueries({
+    predicate: ({ queryKey }) => CARD_WRITE_RESOURCES.includes(queryKey[0]) && queryKey[2] !== 'session'
+  })
+}

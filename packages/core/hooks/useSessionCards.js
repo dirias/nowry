@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { cardsService } from '../api/services'
 import { queryClient } from '../api/queryClient'
@@ -5,6 +6,13 @@ import { useAuth } from '../context/AuthContext'
 
 /** The sentinel the deck-id slot carries for "today, across every deck". */
 export const DAILY_REVIEW = 'daily-review'
+
+/**
+ * How long an opening session waits for the server before it settles for the
+ * cards on the device (STUDY-012). Long enough for a normal answer; short
+ * enough that a dead signal still studies from the cache.
+ */
+export const OPEN_WAIT_MS = 3000
 
 /**
  * The cards a session is about to ask (MOB-026, MOB-042).
@@ -60,13 +68,39 @@ export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0, 
      * mid-session would change the cards under the user's thumb, so it stays
      * fresh for as long as a session plausibly lasts.
      */
-    staleTime: 15 * 60 * 1000
+    staleTime: 15 * 60 * 1000,
+    /*
+     * But every OPENING asks the server (STUDY-012, ADR-057 §3). Grading does
+     * not touch this entry, so a deck reopened inside the window was served the
+     * cards just graded — a finished session came back whole, and grading it
+     * again sent a second review for each card.
+     */
+    refetchOnMount: 'always'
   })
+
+  /*
+   * Cards from the device are held back until that opening fetch answers, so
+   * the session never positions itself in a queue about to be replaced: the
+   * phone resumed by card in the cached list, then the fresh one arrived
+   * shorter and the same number pointed past unseen cards. A fetch that does
+   * not answer within OPEN_WAIT_MS gives the cache back — offline study stays.
+   */
+  const [opened, setOpened] = useState(false)
+  useEffect(() => {
+    if (opened) return undefined
+    if (!isFetching) {
+      setOpened(true)
+      return undefined
+    }
+    const timer = setTimeout(() => setOpened(true), OPEN_WAIT_MS)
+    return () => clearTimeout(timer)
+  }, [isFetching, opened])
+  const opening = !opened && isFetching && Boolean(data)
 
   // Every session answer is wrapped now (the cards, the pool's tags, and for
   // the daily review what the day said: the resting count and the landing);
   // a plain list is still read, for an answer shaped before TAG-001.
-  const cards = Array.isArray(data) ? data : (data?.items ?? null)
+  const cards = opening ? null : Array.isArray(data) ? data : (data?.items ?? null)
 
   return {
     cards,
@@ -74,11 +108,11 @@ export function useSessionCards({ deckId, tags = [], group, limit, attempt = 0, 
     spread: Array.isArray(data) ? null : (data?.spread ?? null),
     /** The pool's tags with something waiting (TAG-002); read through `poolTagRows`. */
     poolTags: Array.isArray(data) ? [] : (data?.tags ?? []),
-    loading: isLoading,
+    loading: isLoading || opening,
     /** True only when there is nothing to show: cached cards beat an error. */
     error: data ? null : (error ?? null),
     /** A refetch is happening over cards already on screen. */
-    refreshing: isFetching && Boolean(data),
+    refreshing: isFetching && Boolean(data) && !opening,
     reload: () => queryClient.invalidateQueries({ queryKey: ['cards', userId, 'session'] })
   }
 }

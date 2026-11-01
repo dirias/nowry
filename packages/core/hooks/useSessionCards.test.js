@@ -22,7 +22,7 @@ jest.mock('../api/services', () => ({
 jest.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }))
 jest.mock('../api/queryClient', () => ({ queryClient: { invalidateQueries: jest.fn() } }))
 
-const { DAILY_REVIEW, useSessionCards } = require('./useSessionCards')
+const { DAILY_REVIEW, OPEN_WAIT_MS, useSessionCards } = require('./useSessionCards')
 
 const wrapper = ({ children }) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -144,5 +144,59 @@ describe('a new narrowing of the same deck', () => {
     expect(result.current.cards).toBeNull()
     resolveSecond([{ _id: 'd2-card' }])
     await waitFor(() => expect(result.current.cards).toEqual([{ _id: 'd2-card' }]))
+  })
+})
+
+// STUDY-012 — a reopened deck was served the cards just graded from cache, and
+// the session positioned itself in that list before the fresh one replaced it.
+describe('opening a deck that is already cached', () => {
+  const sharedClient = () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    return ({ children }) => React.createElement(QueryClientProvider, { client }, children)
+  }
+
+  it('asks the server again and shows none of the cached cards until it answers', async () => {
+    const withClient = sharedClient()
+    mockGetDue.mockResolvedValueOnce([{ _id: 'graded' }, { _id: 'next' }])
+    const first = renderHook(() => useSessionCards({ deckId: 'd1' }), { wrapper: withClient })
+    await waitFor(() => expect(first.result.current.cards).toHaveLength(2))
+    first.unmount()
+
+    let answer
+    mockGetDue.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          answer = resolve
+        })
+    )
+    const second = renderHook(() => useSessionCards({ deckId: 'd1' }), { wrapper: withClient })
+
+    // Well inside the 15-minute window, and still a request.
+    expect(mockGetDue).toHaveBeenCalledTimes(2)
+    expect(second.result.current.cards).toBeNull()
+    expect(second.result.current.loading).toBe(true)
+
+    answer([{ _id: 'next' }])
+    await waitFor(() => expect(second.result.current.cards).toEqual([{ _id: 'next' }]))
+    expect(second.result.current.loading).toBe(false)
+  })
+
+  it('gives the cached cards back when the server does not answer in time', async () => {
+    const withClient = sharedClient()
+    const first = renderHook(() => useSessionCards({ deckId: 'd1' }), { wrapper: withClient })
+    await waitFor(() => expect(first.result.current.cards).toEqual([{ _id: 'c1' }]))
+    first.unmount()
+
+    jest.useFakeTimers()
+    try {
+      mockGetDue.mockImplementationOnce(() => new Promise(() => {}))
+      const second = renderHook(() => useSessionCards({ deckId: 'd1' }), { wrapper: withClient })
+      expect(second.result.current.cards).toBeNull()
+
+      React.act(() => jest.advanceTimersByTime(OPEN_WAIT_MS))
+      expect(second.result.current.cards).toEqual([{ _id: 'c1' }])
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })

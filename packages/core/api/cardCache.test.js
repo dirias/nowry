@@ -11,7 +11,7 @@
  * because a card marked under one filter is the same card under the others.
  */
 import { queryClient } from './queryClient'
-import { patchCardInCache } from './cardCache'
+import { invalidateCardCounts, patchCardInCache } from './cardCache'
 
 const page = (...cards) => ({ cards, total: cards.length, has_more: false })
 const card = (id, extra = {}) => ({ _id: id, title: id, marked_at: null, ...extra })
@@ -86,5 +86,28 @@ describe('patchCardInCache', () => {
     queryClient.setQueryData(['cards', 'user-1', 'weird'], { not: 'pages' })
 
     expect(() => patchCardInCache('c1', { marked_at: 'x' })).not.toThrow()
+  })
+})
+
+// STUDY-012 — Home said "Study · 8" after two of the eight were graded.
+describe('invalidateCardCounts', () => {
+  it('marks every count stale but leaves a session queue alone', async () => {
+    const keys = {
+      library: ['cards', 'user-1', { tags: [] }],
+      session: ['cards', 'user-1', 'session', 'd1', { scope: 'due' }],
+      decks: ['decks', 'user-1'],
+      statistics: ['statistics', 'user-1'],
+      pet: ['pet', 'user-1']
+    }
+    Object.values(keys).forEach((key) => queryClient.setQueryData(key, {}))
+
+    await invalidateCardCounts()
+
+    const stale = (key) => queryClient.getQueryState(key).isInvalidated
+    expect(stale(keys.library)).toBe(true)
+    expect(stale(keys.decks)).toBe(true)
+    expect(stale(keys.statistics)).toBe(true)
+    expect(stale(keys.session)).toBe(false)
+    expect(stale(keys.pet)).toBe(false)
   })
 })
