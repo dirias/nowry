@@ -22,6 +22,7 @@ import { ActivityIndicator, Animated, Easing, Pressable, View } from 'react-nati
 import { useTheme, useReduceMotion } from '../theme'
 import { Typography, resolveColor } from './Typography'
 import { BUTTON_RADIUS, BUTTON_SIZES, BUTTON_VARIANTS, DISABLED_OPACITY, EDGE, MIN_TOUCH_TARGET } from './buttonSpec'
+import { KeyEdge } from './KeyEdge'
 
 export function Button({
   children,
@@ -88,13 +89,8 @@ export function Button({
       {...rest}
     >
       {({ pressed }) => (
-        <View
-          style={{
-            backgroundColor: pressed && tone.edge ? 'transparent' : edgeColor,
-            borderRadius: radius,
-            paddingBottom: tone.edge ? EDGE : 0
-          }}
-        >
+        <View style={{ paddingBottom: tone.edge ? EDGE : 0 }}>
+          {tone.edge ? <KeyEdge color={edgeColor} radius={radius} pressed={pressed} /> : null}
           <Animated.View
             style={{
               /*

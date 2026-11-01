@@ -11,6 +11,7 @@ import { Animated, Easing, Pressable, View } from 'react-native'
 import { useTheme, useReduceMotion } from '../theme'
 import { resolveColor } from './Typography'
 import { BUTTON_RADIUS, BUTTON_SIZES, BUTTON_VARIANTS, DISABLED_OPACITY, EDGE, MIN_TOUCH_TARGET } from './buttonSpec'
+import { KeyEdge } from './KeyEdge'
 
 export function IconButton({ children, onPress, variant = 'tertiary', size = 'md', disabled = false, accessibilityLabel, style, ...rest }) {
   const theme = useTheme()
@@ -53,13 +54,8 @@ export function IconButton({ children, onPress, variant = 'tertiary', size = 'md
       {...rest}
     >
       {({ pressed }) => (
-        <View
-          style={{
-            backgroundColor: pressed && tone.edge ? 'transparent' : edgeColor,
-            borderRadius: radius,
-            paddingBottom: tone.edge ? EDGE : 0
-          }}
-        >
+        <View style={{ paddingBottom: tone.edge ? EDGE : 0 }}>
+          {tone.edge ? <KeyEdge color={edgeColor} radius={radius} pressed={pressed} /> : null}
           <Animated.View
             style={{
               // Square, of the row height — never narrower (BUTTONS.md §5).
