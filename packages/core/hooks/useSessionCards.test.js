@@ -152,7 +152,8 @@ describe('a new narrowing of the same deck', () => {
 describe('opening a deck that is already cached', () => {
   const sharedClient = () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-    return ({ children }) => React.createElement(QueryClientProvider, { client }, children)
+    const withClient = ({ children }) => React.createElement(QueryClientProvider, { client }, children)
+    return withClient
   }
 
   it('asks the server again and shows none of the cached cards until it answers', async () => {
