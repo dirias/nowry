@@ -1529,5 +1529,7 @@ describe('a missed card comes back as practice (STUDY-011, ADR-057)', () => {
     await screen.findByText('cards.session.complete.cardsReviewed')
     await waitFor(() => expect(cardsService.review).toHaveBeenCalledTimes(2))
     expect(cardsService.review.mock.calls.map(([id]) => id)).toEqual(['m1', 'm2'])
+    // Two cards reviewed, not three: the practice showing is not counted again.
+    expect(screen.getByText(/cards\.session\.complete\.body.*"count":2/)).toBeInTheDocument()
   })
 })

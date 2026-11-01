@@ -311,6 +311,9 @@ const SwipeHint = React.memo(function SwipeHint() {
  * @param {object} patch
  * @returns {Array<object>}
  */
+/** The session's cards, its practice showings not counted again (ADR-057 §2). */
+const countCards = (list) => list.filter((card) => !card.practice).length
+
 function patchCardById(list, cardId, patch) {
   const index = list.findIndex((c) => (c._id || c.id) === cardId)
   if (index === -1) return list
@@ -719,7 +722,7 @@ export default function StudySession() {
     if (mode === 'study' && visibleCards.length > 0) {
       queueIntervention({
         type: 'session_summary',
-        session_total_cards: visibleCards.length,
+        session_total_cards: countCards(visibleCards),
         session_wrong_count: totalWrong,
         most_missed_card_id: mostMissedCardId,
         most_missed_card_front: mostMissedCardFront
@@ -1381,7 +1384,7 @@ export default function StudySession() {
             <Stack direction='row' justifyContent='center' spacing={4}>
               <Stack alignItems='center'>
                 <Typography level='h2' fontWeight={700}>
-                  {visibleCards.length}
+                  {countCards(visibleCards)}
                 </Typography>
                 <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                   {t('cards.session.complete.cardsReviewed')}
@@ -1427,7 +1430,7 @@ export default function StudySession() {
               {t('cards.session.complete.title')}
             </Typography>
             <Typography level='body-md' sx={{ mb: dueOutsideFilter > 0 ? 1 : 4, color: 'text.secondary' }}>
-              {t('cards.session.complete.body', { count: visibleCards.length })}
+              {t('cards.session.complete.body', { count: countCards(visibleCards) })}
             </Typography>
             {dueOutsideFilter > 0 && (
               <Typography level='body-sm' data-testid='complete-outside-filter' sx={{ mb: 4, color: 'text.tertiary' }}>
