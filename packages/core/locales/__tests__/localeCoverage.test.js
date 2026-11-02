@@ -111,6 +111,10 @@ const STRICT_KEYS = EN_KEYS.filter(isStrict)
 // "+{{count}} XP" is a numeral beside an abbreviation every one of these
 // locales uses verbatim. It is identical by design, not debt to pay down.
 const XP_GAINED = ['cards.session.xpGained_one', 'cards.session.xpGained_other']
+// The session's end says what it earned the same way: "+{{xp}} XP" (END-001).
+const XP_EARNED = ['sessions.end.xpEarned']
+// A session's length is a number and "min" in Spanish and French alike (END-001).
+const END_MINUTES = ['sessions.end.minutes_one', 'sessions.end.minutes_other']
 
 /**
  * The session's compact counter is "{{current}} / {{total}}" in every language:
@@ -172,6 +176,8 @@ const IDENTICAL_BY_DESIGN = {
     'calendarPage.blocks.form.remindMinutes_one',
     'calendarPage.blocks.form.remindMinutes_other',
     ...XP_GAINED,
+    ...XP_EARNED,
+    ...END_MINUTES,
     ...CARD_COUNTER,
     ...CAP('mod', 'tab', 'esc'),
     ...COMPANION_NAME,
@@ -253,6 +259,8 @@ const IDENTICAL_BY_DESIGN = {
     // And "A–Z" is the same two letters here.
     'groups.orderAlpha',
     ...XP_GAINED,
+    ...XP_EARNED,
+    ...END_MINUTES,
     ...CARD_COUNTER,
     // "Note" is the French word for a note, so the Note tool and the tile's
     // count land on English by coincidence (BOARD-003, BOARD-004).
@@ -302,6 +310,7 @@ const IDENTICAL_BY_DESIGN = {
     // "Routine" is the German word for the block form's first source (PLAN-004).
     'calendarPage.blocks.form.source.routine',
     ...XP_GAINED,
+    ...XP_EARNED,
     ...CARD_COUNTER,
     // "Board" is the loanword German product UI uses for a whiteboard, so the
     // page's title and its top-bar link say it as English does (BOARD-003).
@@ -321,6 +330,7 @@ const IDENTICAL_BY_DESIGN = {
     'boards.inOut.source.mermaid',
     'boards.inOut.source.canvas',
     'cards.session.xpGained_other',
+    ...XP_EARNED,
     ...CARD_COUNTER,
     ...CAP('mod', 'tab', 'esc', 'enter', 'delete'),
     ...COMPANION_NAME
