@@ -9,12 +9,14 @@ import { cardsService, studySessionsService } from '@nowry/core/api/services'
 import { drain, enqueue } from './syncQueue'
 
 export const OUTBOX = {
-  review: ({ cardId, grade, mode }) => cardsService.review(cardId, grade, mode),
+  // `attempt` is the row behind the grade (ADR-059); an entry queued before it
+  // existed has none, and the server records what it knows.
+  review: ({ cardId, grade, mode, attempt = null }) => cardsService.review(cardId, grade, mode, attempt),
   // `startedAt` survives JSON as a string, which `log` already accepts.
   session: (payload) => studySessionsService.log(payload)
 }
 
-export const queueReview = (cardId, grade, mode = 'study') => enqueue('review', { cardId, grade, mode })
+export const queueReview = (cardId, grade, mode = 'study', attempt = null) => enqueue('review', { cardId, grade, mode, attempt })
 
 export const queueSession = (payload) => enqueue('session', payload)
 

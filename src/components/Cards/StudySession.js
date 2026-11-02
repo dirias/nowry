@@ -52,6 +52,7 @@ import CreateCardModal from './CreateCardModal'
 import { isResting } from '@nowry/core/domain/cardRest'
 import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
 import { newClientId } from '@nowry/core/utils/clientId'
+import { attemptPayload, attemptTimings, SHOWING } from '@nowry/core/domain/attempt'
 import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -525,6 +526,10 @@ export default function StudySession() {
   const sessionStartTime = useRef(new Date())
   // Minted once per session so a repeated log is the same record (ADR-058 §2).
   const clientSessionId = useRef(newClientId())
+  // The attempt behind the next grade (ADR-059 §1): when this card came up and
+  // when it was turned over. Reset as each card arrives.
+  const shownAt = useRef(Date.now())
+  const flippedAt = useRef(null)
   const gradedCards = useRef([]) // accumulates { cardId, cardTitle, grade, evaluation } per card
   // Guards the session-complete block against re-running when visibleCards'
   // identity changes after completion. See that effect for the full reasoning.
@@ -635,7 +640,7 @@ export default function StudySession() {
         }
 
         try {
-          await cardsService.review(review.cardId, review.grade, review.mode)
+          await cardsService.review(review.cardId, review.grade, review.mode, review.attempt ?? null)
           // Success! Remove from queue
           setReviewQueue((prev) => prev.filter((r) => r !== review))
           console.log('Successfully synced queued review:', review.cardId)
@@ -791,8 +796,15 @@ export default function StudySession() {
   ])
 
   const handleFlip = React.useCallback(() => {
+    // Think time ends at the first turn; turning back does not restart it.
+    if (flippedAt.current == null) flippedAt.current = Date.now()
     setIsFlipped((prev) => !prev)
   }, [])
+
+  useEffect(() => {
+    shownAt.current = Date.now()
+    flippedAt.current = null
+  }, [currentIndex])
 
   const handleQuizAnswer = React.useCallback((option) => {
     setSelectedAnswer(option)
@@ -919,10 +931,25 @@ export default function StudySession() {
       if (repeat) setPractice((list) => [...list, repeat])
       const advance = () => (repeat ? goTo(latestIndex + 1) : handleNext())
 
+      // The row behind this grade (ADR-059 §1), measured before the screen moves on.
+      const attempt = attemptPayload({
+        clientSessionId: clientSessionId.current,
+        showing: currentCard.practice ? SHOWING.practice : SHOWING.scheduled,
+        ...attemptTimings({ shownAt: shownAt.current, flippedAt: flippedAt.current, gradedAt: Date.now() }),
+        position: latestIndex + 1,
+        total: latestCards.length,
+        scope: deckId === 'daily-review' ? 'daily' : mode,
+        client: 'web'
+      })
+
       // A practice showing is the learner's, not the schedule's: the first
-      // answer set when the card returns, so this one is not sent, not a second
-      // answer in the summary, and not another miss toward the leech.
+      // answer set when the card returns, so this one is not a second answer in
+      // the summary and not another miss toward the leech. It IS a row in the
+      // ledger (ADR-059 §1): the server records it and moves nothing.
       if (currentCard.practice) {
+        cardsService.review(cardId, grade, mode, attempt).catch(() => {
+          // A lost practice row is a lost row, never a retried grade.
+        })
         setLeech(null)
         advance()
         return
@@ -1053,7 +1080,7 @@ export default function StudySession() {
 
       // BACKGROUND SYNC: Send to backend (fire-and-forget)
       try {
-        const response = await cardsService.review(cardId, grade, mode)
+        const response = await cardsService.review(cardId, grade, mode, attempt)
 
         // If backend returns different values, update silently.
         // Re-read cards from latestStateRef (not the `cards` closure captured
@@ -1097,6 +1124,7 @@ export default function StudySession() {
             cardId,
             grade,
             mode,
+            attempt,
             timestamp: Date.now(),
             retryCount: 0
           }
@@ -1109,7 +1137,7 @@ export default function StudySession() {
     // No `cards` here: every read goes through latestStateRef and every write
     // is a functional setCards patch, so the handler holds no closure over the
     // deck that could go stale.
-    [handleNext, goTo, mode, queueIntervention, applyReviewXp, cheer]
+    [handleNext, goTo, mode, deckId, queueIntervention, applyReviewXp, cheer]
   )
 
   const handlePrev = React.useCallback(() => {

@@ -546,9 +546,13 @@ export const cardsService = {
    * @param {string} [mode='study'] - Active session mode: 'study' or 'browse'.
    *   Only 'study' may grade/mutate the SM-2 schedule server-side; browse is
    *   rejected with 403 (defense-in-depth, D-06).
+   * @param {object|null} [attempt=null] - the attempt behind the grade, shaped by
+   *   `attemptPayload` (ADR-059). A practice showing travels as one and moves
+   *   nothing on the server. Absent, the server records what it knows.
    */
-  async review(id, grade, mode = 'study') {
-    const { data } = await apiClient.post(`/study-cards/${id}/review?grade=${grade}&mode=${mode}`)
+  async review(id, grade, mode = 'study', attempt = null) {
+    const url = `/study-cards/${id}/review?grade=${grade}&mode=${mode}`
+    const { data } = attempt ? await apiClient.post(url, attempt) : await apiClient.post(url)
     return data
   },
 

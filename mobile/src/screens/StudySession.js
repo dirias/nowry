@@ -53,6 +53,7 @@ import { useInterventions } from '../hooks/useInterventions'
 import { cardKey, narrowQueue, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
 import { localDay, practiceFor, resumeIndex, withPractice } from '@nowry/core/domain/sessionOrder'
 import { newClientId } from '@nowry/core/utils/clientId'
+import { attemptPayload, attemptTimings, SHOWING } from '@nowry/core/domain/attempt'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -224,6 +225,10 @@ export function StudySession() {
   // Minted when the session starts and kept across a resume, so the outbox
   // re-sending a log the server already wrote names the same session (ADR-058 §2).
   const clientSessionId = useRef(newClientId())
+  // The attempt behind the next grade (ADR-059 §1): when this card came up and
+  // when it was turned over. Reset as each card arrives.
+  const shownAt = useRef(Date.now())
+  const flippedAt = useRef(null)
   const logged = useRef(false)
 
   /*
@@ -377,6 +382,17 @@ export function StudySession() {
   }, [cards])
   const current = cards?.[index] ?? null
   const complete = cards !== null && index >= total
+
+  useEffect(() => {
+    shownAt.current = Date.now()
+    flippedAt.current = null
+  }, [index, scope])
+
+  /** Turn the card over, and remember when: think time ends here. */
+  const reveal = useCallback(() => {
+    flippedAt.current = Date.now()
+    setRevealed(true)
+  }, [])
 
   /*
    * Audio (MOB-077). The deck's own voice settings, the same ones the deck
@@ -535,12 +551,26 @@ export function StudySession() {
       const repeat = value === 'again' && scope === 'due' ? practiceFor(cards, index, card) : null
       if (repeat) setPractice((list) => [...list, repeat])
 
+      // The row behind this grade (ADR-059 §1). Measured before the screen
+      // moves on, so the next card's clock cannot leak into this one.
+      const attempt = attemptPayload({
+        clientSessionId: clientSessionId.current,
+        showing: card.practice ? SHOWING.practice : SHOWING.scheduled,
+        ...attemptTimings({ shownAt: shownAt.current, flippedAt: flippedAt.current, gradedAt: Date.now() }),
+        position: index + 1,
+        total,
+        scope: isDaily ? 'daily' : scope,
+        client: 'phone'
+      })
+
       /*
        * A practice showing is the learner's, not the schedule's: the first
-       * answer set when the card returns, so this one is not sent, not a second
-       * answer in the summary, and not another miss toward the leech.
+       * answer set when the card returns, so this one is not a second answer
+       * in the summary and not another miss toward the leech. It IS a row in
+       * the ledger (ADR-059 §1): the server records it and moves nothing.
        */
       if (card.practice) {
+        cardsService.review(cardId, value, 'study', attempt).catch(() => queueReview(cardId, value, 'study', attempt))
         setIndex(index + 1)
         setRevealed(false)
         setHinted(true)
@@ -574,14 +604,14 @@ export function StudySession() {
        * A successful send is also the moment to try anything already waiting.
        */
       cardsService
-        .review(cardId, value, 'study')
+        .review(cardId, value, 'study', attempt)
         .then(() => {
           flushOutbox().then(({ sent, remaining }) => {
             if (sent > 0) setQueued(remaining)
           })
         })
         .catch(() => {
-          queueReview(cardId, value)
+          queueReview(cardId, value, 'study', attempt)
           setQueued((n) => n + 1)
         })
 
@@ -608,7 +638,7 @@ export function StudySession() {
         NUDGE_DELAY + Math.random() * NUDGE_JITTER
       )
     },
-    [cards, index, id, graded, askCompanion, scope]
+    [cards, index, total, id, isDaily, graded, askCompanion, scope]
   )
 
   /**
@@ -1075,7 +1105,7 @@ export function StudySession() {
           resetKey={cardId ?? index}
           onLeft={skip}
           onRight={index > 0 ? back : undefined}
-          onUp={revealed ? undefined : () => setRevealed(true)}
+          onUp={revealed ? undefined : reveal}
         >
           {/*
            * A `Pressable`, not a raw touch handler. `onTouchEnd` fires at the
@@ -1259,7 +1289,7 @@ export function StudySession() {
               ))}
             </Stack>
           ) : (
-            <Button size='lg' onPress={() => setRevealed(true)}>
+            <Button size='lg' onPress={reveal}>
               {t('cards.session.showAnswer')}
             </Button>
           )}

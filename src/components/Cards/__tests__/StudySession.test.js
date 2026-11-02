@@ -1372,7 +1372,14 @@ describe('study mode tag filter (ADR-014)', () => {
     await screen.findByTestId('session-footer')
 
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // tc1 -> good, advance to tc3
-    await waitFor(() => expect(cardsService.review).toHaveBeenCalledWith('tc1', 'good', 'study'))
+    await waitFor(() =>
+      expect(cardsService.review).toHaveBeenCalledWith(
+        'tc1',
+        'good',
+        'study',
+        expect.objectContaining({ showing: 'scheduled', client: 'web', position: 1 })
+      )
+    )
     expect(screen.getByText('Gamma Q')).toBeInTheDocument()
 
     // Drop the filter: tc2, hidden while tc1 was graded, must still be there.
@@ -1514,7 +1521,7 @@ describe('TAG-003 — the pool’s tags, and a refetch on a tag choice', () => {
 })
 
 describe('a missed card comes back as practice (STUDY-011, ADR-057)', () => {
-  it('shows a card graded Again once more, and does not send that showing', async () => {
+  it('shows a card graded Again once more, and sends that showing as practice, not as a grade (ADR-059)', async () => {
     const cards = [
       { _id: 'm1', id: 'm1', title: 'Miss 1', content: 'A' },
       { _id: 'm2', id: 'm2', title: 'Miss 2', content: 'B' }
@@ -1527,8 +1534,10 @@ describe('a missed card comes back as practice (STUDY-011, ADR-057)', () => {
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // the practice showing
 
     await screen.findByText('cards.session.complete.cardsReviewed')
-    await waitFor(() => expect(cardsService.review).toHaveBeenCalledTimes(2))
-    expect(cardsService.review.mock.calls.map(([id]) => id)).toEqual(['m1', 'm2'])
+    await waitFor(() => expect(cardsService.review).toHaveBeenCalledTimes(3))
+    expect(cardsService.review.mock.calls.map(([id]) => id)).toEqual(['m1', 'm2', 'm1'])
+    // The first two are grades; the third is the practice showing's row in the ledger.
+    expect(cardsService.review.mock.calls.map(([, , , attempt]) => attempt.showing)).toEqual(['scheduled', 'scheduled', 'practice'])
     // Two cards reviewed, not three: the practice showing is not counted again.
     expect(screen.getByText(/cards\.session\.complete\.body.*"count":2/)).toBeInTheDocument()
   })
