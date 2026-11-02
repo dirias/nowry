@@ -166,14 +166,28 @@ export function wrongAnswerEvent(card, { index = 0, total = 0, deckName = null }
  *
  * @param {{total?: number, wrong?: number, cardId?: string|null, front?: string|null}} session
  */
-export function sessionSummaryEvent({ total = 0, wrong = 0, cardId = null, front = null, deckName = null } = {}) {
+export function sessionSummaryEvent({
+  total = 0,
+  wrong = 0,
+  cardId = null,
+  front = null,
+  deckName = null,
+  signalLines = [],
+  score = null,
+  daysAway = null
+} = {}) {
   return {
     type: 'session_summary',
     deck_name: deckName || null,
     session_total_cards: total,
     session_wrong_count: wrong,
     most_missed_card_id: cardId,
-    most_missed_card_front: front
+    most_missed_card_front: front,
+    // The signals, not the count (ADR-060 §4): the screen's own rows, at most
+    // eight, in the learner's language; the score and the break as shown.
+    session_signal_lines: signalLines.filter(Boolean).slice(0, 8),
+    session_score: Number.isFinite(score) ? score : null,
+    days_since_last_session: Number.isFinite(daysAway) ? daysAway : null
   }
 }
 

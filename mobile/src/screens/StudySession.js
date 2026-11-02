@@ -58,7 +58,7 @@ import { drillIdsOf, useDrillCards } from '@nowry/core/hooks/useDrillCards'
 import { useSessionAttempts } from '@nowry/core/hooks/useSessionAttempts'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { studySummary } from '@nowry/core/domain/studySummary'
-import { END_KEY, sessionEnd } from '@nowry/core/domain/sessionEnd'
+import { END_KEY, endHasSomethingToSay, endSignalLines, sessionEnd } from '@nowry/core/domain/sessionEnd'
 import { SessionEnd } from './SessionEnd'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
@@ -210,6 +210,9 @@ export function StudySession() {
   // The record's id once the log is written: how the ledger is read (ADR-060 §1).
   const [sessionId, setSessionId] = useState(null)
   const [endedAt, setEndedAt] = useState(null)
+  // Whether the log has answered, so the ending knows when to stop waiting
+  // for a ledger that will not come (ADR-060 §4).
+  const [logState, setLogState] = useState('pending')
   // The account's colour, already resolved for the whole app — the companion
   // is the colour of the app it lives in (MOB-050).
   const { accent } = useAppearance()
@@ -506,6 +509,7 @@ export function StudySession() {
       .then((logged) => {
         // The record exists now; its rows are the ending's reading.
         setSessionId(logged?.sessionId ?? null)
+        setLogState('done')
         // The block's work is done (PRD D8): the study block that opened this
         // review is kept, with the session it produced on its record.
         const timer = timerRef.current
@@ -517,6 +521,7 @@ export function StudySession() {
         // History is a record, not the session — it never interrupts. But it is
         // queued rather than dropped, so a session studied offline still appears.
         queueSession(payload)
+        setLogState('failed')
       })
 
     /*
@@ -551,32 +556,7 @@ export function StudySession() {
        */
       setLevelUp(bestLevelUp(replies))
     })
-
-    /*
-     * And the companion's word on the session (MOB-088). Guarded on cards
-     * actually graded for the reason the web records: an all-caught-up deck
-     * lands here with nothing studied, and the summary it produced said
-     * "1 cards".
-     *
-     * A card is counted as missed if it ENDED on Again or Hard. The web counts
-     * every wrong pass, because it can see a card more than once; this screen
-     * replaces a re-grade rather than appending one, so a card has exactly one
-     * answer and the most-missed card is the first one Again was pressed on.
-     */
-    const missed = answers.filter((answer) => answer.grade === 'again' || answer.grade === 'hard')
-    const worst = missed.find((answer) => answer.grade === 'again') ?? missed[0] ?? null
-    askCompanion(
-      sessionSummaryEvent({
-        total: answers.length,
-        wrong: missed.length,
-        cardId: worst?.cardId ?? null,
-        front: worst?.cardTitle ?? null,
-        // The one fact this screen has and the server had to guess at: it used
-        // to fill the prompt with the words "this deck" (MOB-099).
-        deckName: deckName.current
-      })
-    )
-  }, [complete, id, isDaily, isDrill, deckNames, graded, askCompanion])
+  }, [complete, id, isDaily, isDrill, deckNames, graded])
 
   const grade = useCallback(
     (value) => {
@@ -980,6 +960,38 @@ export function StudySession() {
     deckList.decks,
     statistics
   ])
+
+  /*
+   * The companion's word on the session (MOB-088), fed the signals rather than
+   * the count (ADR-060 §4). Asked once, when the ending has settled: the
+   * ledger answered, or failed, or the log itself never named a record; and
+   * only when the rows give it something to read into. A clean run with
+   * nothing marked gets no note, because the screen has already said it.
+   */
+  const summaryAsked = useRef(false)
+  const ledgerSettled = ledger.attempts != null || ledger.error != null || (logState !== 'pending' && !sessionId)
+  useEffect(() => {
+    if (!complete || !end || summaryAsked.current || !ledgerSettled) return
+    summaryAsked.current = true
+    if (!endHasSomethingToSay(end)) return
+    const answers = Object.values(graded)
+    // A card is counted as missed if it ENDED on Again or Hard; the most-missed
+    // card is the first one Again was pressed on.
+    const missed = answers.filter((answer) => answer.grade === 'again' || answer.grade === 'hard')
+    const worst = missed.find((answer) => answer.grade === 'again') ?? missed[0] ?? null
+    askCompanion(
+      sessionSummaryEvent({
+        total: answers.length,
+        wrong: missed.length,
+        cardId: worst?.cardId ?? null,
+        front: worst?.cardTitle ?? null,
+        deckName: deckName.current,
+        signalLines: endSignalLines(t, end),
+        score: end.score,
+        daysAway: ledger.daysSincePrevious
+      })
+    )
+  }, [complete, end, ledgerSettled, ledger.daysSincePrevious, graded, askCompanion, t])
 
   const counter = useMemo(() => t('cards.session.cardShort', { current: index + 1, total }), [t, index, total])
   const counterSaid = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])

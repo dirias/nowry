@@ -687,6 +687,7 @@ const StudyPet = () => {
     isRoamingEnabled,
     companionMessage,
     companionIsLoading,
+    companionQuiet,
     dismissCompanion,
     openChatFromCompanion,
     pendingQuizConfig,
@@ -2137,7 +2138,8 @@ const StudyPet = () => {
               Anchors to the same edge the pet is docked to (left during an active
               study session, right otherwise) so it never renders off the opposite
               edge, plus a viewport-relative maxWidth as a collision safety net. */}
-          {(companionMessage || companionIsLoading) && (
+          {/* A quiet message is a screen's to draw inside its object (ADR-060 §4). */}
+          {(companionMessage || companionIsLoading) && !companionQuiet && (
             <div
               style={{
                 position: 'absolute',

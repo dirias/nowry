@@ -2,7 +2,18 @@
  * The ending's model (ADR-060 §1): the same object in four states, the keys
  * each state earns, and the state line read from the grants.
  */
-import { END_KEY, END_STATE, endKeyLabel, FAMILY_CAP, latestAnswers, scoreRole, sessionEnd, sessionEndTitle } from './sessionEnd'
+import {
+  END_KEY,
+  END_STATE,
+  endHasSomethingToSay,
+  endKeyLabel,
+  endSignalLines,
+  FAMILY_CAP,
+  latestAnswers,
+  scoreRole,
+  sessionEnd,
+  sessionEndTitle
+} from './sessionEnd'
 
 const t = (key, params) => (params ? `${key}:${JSON.stringify(params)}` : key)
 
@@ -173,5 +184,43 @@ describe('sessionEndTitle and scoreRole', () => {
     expect(scoreRole(54)).toBe('danger')
     expect(scoreRole(null)).toBe('neutral')
     expect(FAMILY_CAP).toBe(3)
+  })
+})
+
+describe('the companion is fed the signals, or not asked (ADR-060 §4)', () => {
+  const attempts = [
+    { card_id: 'a', card_title: '受験', evaluation: 'incorrect', grade: 'again', think_ms: 800, showing: 'scheduled' },
+    { card_id: 'b', card_title: '実験', evaluation: 'incorrect', grade: 'again', think_ms: 700, showing: 'scheduled' },
+    {
+      card_id: 'c',
+      card_title: '果物',
+      evaluation: 'incorrect',
+      grade: 'hard',
+      think_ms: 5000,
+      showing: 'scheduled',
+      before: { interval: 21, repetitions: 5 }
+    },
+    { card_id: 'd', card_title: '猫', evaluation: 'correct', grade: 'good', think_ms: 900, showing: 'scheduled' }
+  ]
+
+  it('writes one line per family with its shared signal, then the singles with their marks', () => {
+    const end = sessionEnd({ answers: mixed, attempts, medianThinkMs: 2000 })
+    expect(endSignalLines(t, end)).toEqual([
+      'sessions.breakdown.family:{"label":"験","count":2} · sessions.signal.misconception',
+      '果物 · sessions.signal.unlearned · sessions.signal.lapse'
+    ])
+  })
+
+  it('asks when something slipped or the learner is back after a break, not after a clean run', () => {
+    expect(endHasSomethingToSay(sessionEnd({ answers: mixed }))).toBe(true)
+    expect(endHasSomethingToSay(sessionEnd({ answers: [answer('a', 'good')] }))).toBe(false)
+    expect(endHasSomethingToSay(sessionEnd({ answers: [answer('a', 'good')], daysSincePrevious: 20 }))).toBe(true)
+    expect(endHasSomethingToSay(sessionEnd({ answers: mixed, kind: 'drill' }))).toBe(false)
+    expect(endHasSomethingToSay(sessionEnd({ answers: [] }))).toBe(false)
+  })
+
+  it('asks about a clean run whose cards were held by effort', () => {
+    const slow = [{ card_id: 'a', card_title: '猫', evaluation: 'correct', grade: 'good', think_ms: 6000, showing: 'scheduled' }]
+    expect(endHasSomethingToSay(sessionEnd({ answers: [answer('a', 'good')], attempts: slow, medianThinkMs: 2000 }))).toBe(true)
   })
 })

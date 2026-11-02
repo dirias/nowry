@@ -95,7 +95,9 @@ jest.mock('@nowry/core/context/AgentContext', () => ({
     awardSessionXp: mockAwardSessionXp,
     applyReviewXp: mockApplyReviewXp,
     flushPendingLevelUp: mockFlushPendingLevelUp,
-    cheer: mockCheer
+    cheer: mockCheer,
+    companionMessage: null,
+    dismissCompanion: jest.fn()
   })
 }))
 
@@ -611,8 +613,9 @@ describe('needs attention tie-break', () => {
 
     await screen.findByTestId('session-end')
 
+    // Asked once the log has answered (ADR-060 §4), so the call lands a tick after the object.
+    await waitFor(() => expect(mockQueueIntervention.mock.calls.some(([payload]) => payload?.type === 'session_summary')).toBe(true))
     const summaryCall = mockQueueIntervention.mock.calls.find(([payload]) => payload?.type === 'session_summary')
-    expect(summaryCall).toBeTruthy()
     expect(summaryCall[0].session_wrong_count).toBe(2)
     expect(summaryCall[0].most_missed_card_id).toBe('t2')
   })
@@ -793,10 +796,14 @@ describe('session_summary intervention payload', () => {
   it('matches the on-screen broadened count and identifies the twice-graded card as most-missed', async () => {
     await completeSessionWithMixedResults()
 
+    await waitFor(() => expect(mockQueueIntervention.mock.calls.some(([payload]) => payload?.type === 'session_summary')).toBe(true))
     const summaryCall = mockQueueIntervention.mock.calls.find(([payload]) => payload?.type === 'session_summary')
-    expect(summaryCall).toBeTruthy()
     expect(summaryCall[0].session_wrong_count).toBe(3)
     expect(summaryCall[0].most_missed_card_id).toBe('alpha')
+    // The signals ride along, and the bubble stays down: the note is the object's (ADR-060 §4).
+    expect(summaryCall[0].session_signal_lines).toEqual(['Alpha Card', 'Beta Card'])
+    expect(summaryCall[0].session_score).toBe(33)
+    expect(summaryCall[1]).toEqual({ quiet: true })
   })
 })
 
@@ -1420,9 +1427,11 @@ describe('study mode tag filter (ADR-014)', () => {
 
     expect(screen.getByTestId('session-end-count')).toHaveTextContent('sessions.cardCount:{"count":2}')
     expect(screen.getByTestId('complete-outside-filter')).toHaveTextContent('cards.session.complete.outsideFilter:{"count":1}')
-    // The session bonus and the summary fired once, for the two cards seen.
+    // The session bonus fired once, for the two cards seen. Both held and nothing
+    // is marked, so the companion is not asked: the screen has already said it (ADR-060 §4).
     expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
-    expect(mockQueueIntervention).toHaveBeenCalledWith(expect.objectContaining({ type: 'session_summary', session_total_cards: 2 }))
+    await waitFor(() => expect(studySessionsService.log).toHaveBeenCalledTimes(1))
+    expect(mockQueueIntervention.mock.calls.some(([payload]) => payload?.type === 'session_summary')).toBe(false)
   })
 
   it('says nothing about cards outside the filter when there is no filter', async () => {

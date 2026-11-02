@@ -191,8 +191,25 @@ describe('sessionSummaryEvent', () => {
       session_total_cards: 25,
       session_wrong_count: 4,
       most_missed_card_id: 'c1',
-      most_missed_card_front: 'ずいぶん'
+      most_missed_card_front: 'ずいぶん',
+      session_signal_lines: [],
+      session_score: null,
+      days_since_last_session: null
     })
+  })
+
+  it('carries the signals the screen reads, capped at eight lines (ADR-060 §4)', () => {
+    const event = sessionSummaryEvent({
+      total: 16,
+      wrong: 8,
+      signalLines: ['験 family · 5 · fast & wrong', null, ...Array.from({ length: 9 }, (_, i) => `line ${i}`)],
+      score: 50,
+      daysAway: 19
+    })
+    expect(event.session_signal_lines).toHaveLength(8)
+    expect(event.session_signal_lines[0]).toBe('験 family · 5 · fast & wrong')
+    expect(event.session_score).toBe(50)
+    expect(event.days_since_last_session).toBe(19)
   })
 
   it('reports no most-missed card rather than omitting the field', () => {

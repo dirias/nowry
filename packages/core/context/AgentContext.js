@@ -126,6 +126,8 @@ const initialState = {
   generationsRemaining: null,
   /** Proactive companion intervention */
   companionMessage: null, // { type, message, card_id? } | null
+  /** The message is a screen's to draw inside its object, not the bubble's (ADR-060 §4). */
+  companionQuiet: false,
   companionIsLoading: false,
   companionInterventionCount: 0, // resets per session
   companionSilentUntil: null, // ms timestamp | null
@@ -348,7 +350,7 @@ function agentReducer(state, action) {
     case 'PET_REVEAL_CLEAR':
       return { ...state, justRevealed: false, revealData: null }
     case 'COMPANION_LOADING':
-      return { ...state, companionIsLoading: true, companionMessage: null }
+      return { ...state, companionIsLoading: true, companionMessage: null, companionQuiet: Boolean(action.payload?.quiet) }
     case 'COMPANION_SUCCESS':
       return {
         ...state,
@@ -361,6 +363,7 @@ function agentReducer(state, action) {
         ...state,
         companionMessage: null,
         companionIsLoading: false,
+        companionQuiet: false,
         companionSilentUntil: silenceUntil(state.interventionFrequency)
       }
     case 'COMPANION_RESET_SESSION':
@@ -369,7 +372,8 @@ function agentReducer(state, action) {
         companionInterventionCount: 0,
         companionSilentUntil: null,
         companionMessage: null,
-        companionIsLoading: false
+        companionIsLoading: false,
+        companionQuiet: false
       }
     case 'UPDATE_PET_CUSTOMIZATION':
       return {
@@ -765,7 +769,7 @@ export const AgentProvider = ({ children }) => {
    * @param {{ type: string, card_id?: string, [key: string]: any }} event
    */
   const queueIntervention = useCallback(
-    async (event) => {
+    async (event, { quiet = false } = {}) => {
       const {
         companionInterventionCount,
         companionSilentUntil,
@@ -789,7 +793,9 @@ export const AgentProvider = ({ children }) => {
       })
       if (!allowed) return
 
-      dispatch({ type: 'COMPANION_LOADING' })
+      // `quiet`: the session's end draws the note inside its object, so the
+      // bubble stays down for this one (ADR-060 §4, ADR-022).
+      dispatch({ type: 'COMPANION_LOADING', payload: { quiet } })
 
       // 12-second timeout — LLM can be slow; if it exceeds this, dismiss silently
       const timeoutId = setTimeout(() => {
@@ -799,7 +805,10 @@ export const AgentProvider = ({ children }) => {
       try {
         const result = await agentService.postIntervention(event, i18n.language)
         clearTimeout(timeoutId)
-        dispatch({ type: 'COMPANION_SUCCESS', payload: result })
+        // An empty message is the server declining to restate the screen
+        // (ADR-060 §4): nothing to show, and nothing spent against the budget.
+        if (!result?.message) dispatch({ type: 'COMPANION_DISMISS' })
+        else dispatch({ type: 'COMPANION_SUCCESS', payload: result })
       } catch {
         clearTimeout(timeoutId)
         dispatch({ type: 'COMPANION_DISMISS' })
@@ -902,6 +911,7 @@ export const AgentProvider = ({ children }) => {
         queueIntervention,
         queuePreSessionIntervention,
         dismissCompanion,
+        companionQuiet: state.companionQuiet,
         openChatFromCompanion,
         resetCompanionSession,
         setStudySession,

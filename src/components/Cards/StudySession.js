@@ -58,8 +58,10 @@ import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
 import { useSessionAttempts } from '@nowry/core/hooks/useSessionAttempts'
 import { studySummary } from '@nowry/core/domain/studySummary'
-import { END_KEY, sessionEnd } from '@nowry/core/domain/sessionEnd'
+import { END_KEY, endHasSomethingToSay, endSignalLines, sessionEnd } from '@nowry/core/domain/sessionEnd'
+import { sessionSummaryEvent } from '@nowry/core/domain/interventionPolicy'
 import SessionEnd from './SessionEnd'
+import SessionEndNote from './SessionEndNote'
 import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -390,17 +392,18 @@ export default function StudySession() {
   // MODE-06/D-06: computed once (in the sessionComplete effect below) and
   // shared by BOTH the on-screen summary stat and the session_summary
   // intervention payload — no second sort lives in the render.
-  const [needsAttentionCount, setNeedsAttentionCount] = useState(0)
   // Transient "+N XP" acknowledgement after a graded card. Keyed by timestamp
   // so consecutive grades restart the animation instead of merging into one.
   const [xpFloater, setXpFloater] = useState(null)
-  const [mostAttentionCardFront, setMostAttentionCardFront] = useState(null)
   // The ending (ADR-060 §1): the grants the two XP calls returned, read into
   // the state line; the record's id once the log is written, which is how the
   // ledger is read; when the last card was graded.
   const [grants, setGrants] = useState(null)
   const [sessionId, setSessionId] = useState(null)
   const [endedAt, setEndedAt] = useState(null)
+  // Whether the log has answered, so the ending knows when to stop waiting
+  // for a ledger that will not come (ADR-060 §4).
+  const [logState, setLogState] = useState('pending')
 
   // Inline view filters over the loaded card list. Two gates, one per
   // dimension (ADR-014):
@@ -473,7 +476,9 @@ export default function StudySession() {
     awardSessionXp,
     applyReviewXp,
     flushPendingLevelUp,
-    cheer
+    cheer,
+    companionMessage,
+    dismissCompanion
   } = usePet()
 
   const buildStudyContext = React.useCallback(
@@ -725,42 +730,7 @@ export default function StudySession() {
     sessionCompleteHandledRef.current = true
     setEndedAt(Date.now())
 
-    const wrongCounts = wrongCountPerCardId.current
-    const againCounts = againCountPerCardId.current
-    // Primary: highest needs-attention count wins. Tie-break: prefer whichever
-    // tied card has more 'again' grades (a full miss is more concerning than
-    // 'hard', which is recalled-with-difficulty) — not just first-encountered.
-    // Any remaining tie (equal count AND equal again-count) falls through to
-    // Array.sort's stable-sort guarantee, i.e. first-encountered wins, same as
-    // before. Single computed source, so the Pet's session_summary payload
-    // (D-06) automatically inherits the same tie-break — no divergent sort.
-    const mostMissedEntry = Object.entries(wrongCounts).sort((a, b) => {
-      if (b[1] !== a[1]) return b[1] - a[1]
-      return (againCounts[b[0]] || 0) - (againCounts[a[0]] || 0)
-    })[0]
-    const mostMissedCardId = mostMissedEntry?.[0] ?? null
-    const totalWrong = Object.values(wrongCounts).reduce((acc, n) => acc + n, 0)
-    const mostMissedCardFront = mostMissedCardId ? (visibleCards.find((c) => (c._id || c.id) === mostMissedCardId)?.title ?? null) : null
-
-    // Single computed source for both the on-screen stat (render below) and
-    // the session_summary payload (D-06) — no divergent second sort.
-    setNeedsAttentionCount(totalWrong)
-    setMostAttentionCardFront(mostMissedCardFront)
-
-    // Guard on cards.length > 0 — an empty/all-caught-up deck lands here with
-    // sessionComplete=true but no actual session occurred, so no session_summary
-    // should fire (review finding WR-01: previously reached the Pet with
-    // session_total_cards: 0, misreported as "1 cards" by the backend's now-fixed
-    // falsy-zero fallback).
     if (mode === 'study' && visibleCards.length > 0) {
-      queueIntervention({
-        type: 'session_summary',
-        session_total_cards: countCards(visibleCards),
-        session_wrong_count: totalWrong,
-        most_missed_card_id: mostMissedCardId,
-        most_missed_card_front: mostMissedCardFront
-      })
-
       // Contextual first-reveal — fires once, the first time a new account
       // completes a real study session with graded cards. Non-fatal on
       // failure (see revealPet in AgentContext), so no guard needed here.
@@ -802,6 +772,7 @@ export default function StudySession() {
         .then((logged) => {
           // The record exists now; its rows are the ending's reading.
           setSessionId(logged?.sessionId ?? null)
+          setLogState('done')
           // The block's work is done (PRD D8): the study block that opened this
           // review is kept, with the session it produced on its record.
           const timer = timerRef.current
@@ -811,6 +782,7 @@ export default function StudySession() {
         })
         .catch(() => {
           // Non-fatal — history logging never interrupts the study experience
+          setLogState('failed')
         })
     }
   }, [
@@ -1433,6 +1405,44 @@ export default function StudySession() {
   ])
 
   /*
+   * The companion's word on the session, fed the signals rather than the
+   * count (ADR-060 §4). Asked once, when the ending has settled: the ledger
+   * answered, or failed, or the log never named a record; and only when the
+   * rows give it something to read into. Quiet: the note is drawn inside the
+   * object below, not in the bubble. The most-missed card is the one with the
+   * most Again+Hard grades, ties broken toward more Agains (D-06).
+   */
+  const summaryAsked = useRef(false)
+  const ledgerSettled = ledger.attempts != null || ledger.error != null || (logState !== 'pending' && !sessionId)
+  useEffect(() => {
+    if (!sessionComplete || !end || summaryAsked.current || !ledgerSettled || mode !== 'study') return
+    summaryAsked.current = true
+    if (!endHasSomethingToSay(end)) return
+    const wrongCounts = wrongCountPerCardId.current
+    const againCounts = againCountPerCardId.current
+    const mostMissedEntry = Object.entries(wrongCounts).sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1]
+      return (againCounts[b[0]] || 0) - (againCounts[a[0]] || 0)
+    })[0]
+    const mostMissedCardId = mostMissedEntry?.[0] ?? null
+    const totalWrong = Object.values(wrongCounts).reduce((acc, n) => acc + n, 0)
+    const mostMissedCardFront = mostMissedCardId ? (cards.find((c) => (c._id || c.id) === mostMissedCardId)?.title ?? null) : null
+    queueIntervention(
+      sessionSummaryEvent({
+        total: end.cards,
+        wrong: totalWrong,
+        cardId: mostMissedCardId,
+        front: mostMissedCardFront,
+        deckName: end.title.text,
+        signalLines: endSignalLines(t, end),
+        score: end.score,
+        daysAway: ledger.daysSincePrevious
+      }),
+      { quiet: true }
+    )
+  }, [sessionComplete, end, ledgerSettled, ledger.daysSincePrevious, mode, cards, queueIntervention, t])
+
+  /*
    * A new session in the same screen: the end's drill key stays on this route
    * with a drill scope, so the session's own record starts over here. Keyed
    * on what names a session, never on a tag filter, which narrows one.
@@ -1453,6 +1463,8 @@ export default function StudySession() {
     setSessionId(null)
     setGrants(null)
     setEndedAt(null)
+    setLogState('pending')
+    summaryAsked.current = false
   }, [sessionKey])
 
   // §7: Use Skeleton placeholders, not a full-page loading gate
@@ -1561,6 +1573,11 @@ export default function StudySession() {
               : null
           ]}
           leech={leechNotice}
+          note={
+            companionMessage?.type === 'session_summary' && companionMessage.message ? (
+              <SessionEndNote message={companionMessage.message} onDismiss={dismissCompanion} />
+            ) : null
+          }
         />
       </Container>
     )

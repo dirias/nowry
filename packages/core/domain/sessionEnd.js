@@ -11,7 +11,7 @@
  * Nothing here draws. The clients draw the same rows (§15.10) at one width or
  * two; this decides what the rows say and which keys the reading has earned.
  */
-import { sessionBreakdown } from './attemptSignals'
+import { familySignal, sessionBreakdown } from './attemptSignals'
 
 /** The endings there are. The same object, in a different state (ADR-060 §5). */
 export const END_STATE = Object.freeze({
@@ -203,6 +203,53 @@ export const sessionEndTitle = (t, end) => {
       ? t('sessions.dailyReview', { count: end.title.deckCount })
       : t('sessions.unknownTopic')
   return end.kind === 'drill' ? t('sessions.end.drillTitle', { name: base }) : base
+}
+
+/** The marks on one attempt, in the learner's words. */
+const marksOf = (t, line) =>
+  [
+    line.signals?.speed ? t(`sessions.signal.${line.signals.speed}`) : null,
+    line.signals?.helped ? t('sessions.signal.asked') : null,
+    line.signals?.lapse === 'lapse' || line.signals?.lapse === 'relearning' ? t(`sessions.signal.${line.signals.lapse}`) : null
+  ].filter(Boolean)
+
+/**
+ * What slipped, as lines for the companion (ADR-060 §4): the screen's own rows
+ * in the learner's language, so the note can only add to what is shown. A
+ * family is one line with its shared signal; a card on its own is its title
+ * with its marks. Families first, at most eight lines.
+ */
+export const endSignalLines = (t, end) => {
+  const lines = []
+  end.slipped.forEach((family) => {
+    if (family.kind === 'single') {
+      const line = family.cards[0]
+      const title = line.title || t('sessions.cardRef', { id: String(line.cardId ?? '').slice(-6) })
+      lines.push([title, ...marksOf(t, line)].join(' · '))
+      return
+    }
+    const head =
+      family.kind === 'character'
+        ? t('sessions.breakdown.family', { label: family.label, count: family.cards.length })
+        : t('sessions.breakdown.tagFamily', { label: family.label, count: family.cards.length })
+    const shared = familySignal(family)
+    lines.push([head, shared ? t(`sessions.signal.${shared}`) : null].filter(Boolean).join(' · '))
+  })
+  return lines.slice(0, 8)
+}
+
+/**
+ * Whether the companion is asked at all. Something slipped, or the learner is
+ * back after a break, or a held card carries a mark: each is a fact the rows
+ * show and a note can read into. A perfect run with nothing marked is not; the
+ * old note said "You reviewed 2 cards and no cards need additional practice",
+ * which the screen had already said.
+ */
+export const endHasSomethingToSay = (end) => {
+  if (!end || end.cards === 0 || end.state === END_STATE.drill) return false
+  if (end.slippedCount > 0) return true
+  if (end.reading?.key === 'sessions.reading.afterBreak') return true
+  return end.held.cards.some((line) => line.signals?.speed === 'fragile' || line.signals?.helped)
 }
 
 /** A key's label, from what it does and how many it does it to. */
