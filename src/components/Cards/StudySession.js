@@ -730,6 +730,9 @@ export default function StudySession() {
     if (sessionCompleteHandledRef.current) return
     sessionCompleteHandledRef.current = true
     setEndedAt(Date.now())
+    // The ending reads what is left today from the deck counts (END-005); the
+    // grades above refreshed every other count, the decks refresh here.
+    if (userId) queryClient.invalidateQueries({ queryKey: ['decks', userId] })
 
     if (mode === 'study' && visibleCards.length > 0) {
       // Contextual first-reveal — fires once, the first time a new account

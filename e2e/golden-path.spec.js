@@ -78,8 +78,9 @@ test('a new user signs up, makes a deck, studies it, and finds it there next tim
       await page.getByText('Click to flip').first().click()
       await page.getByRole('button', { name: 'Good', exact: true }).click()
     }
-    await expect(page.getByText('Session complete!')).toBeVisible()
-    await expect(page.getByText('cards reviewed')).toBeVisible()
+    // The session ends on its reading (ADR-060): the object, and both cards held.
+    await expect(page.getByTestId('session-end')).toBeVisible()
+    await expect(page.getByText('All 2 held.')).toBeVisible()
   })
 
   await test.step('sign in again from a fresh browser and find the deck studied', async () => {
