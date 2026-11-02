@@ -19,19 +19,39 @@ const minutesOf = (seconds) => Math.max(1, Math.round((seconds || 0) / 60))
 
 /**
  * @param {Object} session
- * @returns {{ id: string|null, title: string|null, kindKey: string, cards: number, minutes: number, score: number|null, completedAt: string|null }}
+ * @returns {{ id: string|null, title: string|null, deckCount: number|null, kindKey: string, cards: number, minutes: number, score: number|null, completedAt: string|null }}
  */
 export const sessionLine = (session) => ({
   id: session?.id ?? session?._id ?? null,
-  // A deck quiz names its deck; an AI quiz names its topic. Neither is
-  // guaranteed, so the caller still has a fallback to reach for.
+  // A deck session names its deck; an AI quiz names its topic. A cross-deck
+  // review names neither: it carries how many decks it drew from, and
+  // `sessionTitle` turns that into words (ADR-058 §1).
   title: session?.deck_name || session?.topic || null,
+  deckCount: session?.deck_id ? null : (session?.deck_count ?? null),
   kindKey: KIND_KEYS[session?.session_type] ?? KIND_KEYS.deck_quiz,
   cards: session?.total_cards ?? 0,
   minutes: minutesOf(session?.duration_seconds),
   score: session?.score_percentage ?? null,
   completedAt: session?.completed_at ?? null
 })
+
+/**
+ * The one way a finished session is titled, on either client (ADR-058 §1).
+ *
+ * The deck's name, or the topic; else, for a review across decks, the
+ * translated line built from how many decks it drew from; else the fallback
+ * the clients always had. Every row read "Unknown topic" for months because
+ * each screen reached for a field no route ever sent; one reader, tested,
+ * is how that stops recurring.
+ *
+ * @param {Function} t
+ * @param {ReturnType<typeof sessionLine>} line
+ */
+export const sessionTitle = (t, line) => {
+  if (line?.title) return line.title
+  if (line?.deckCount != null && line.deckCount > 0) return t('sessions.dailyReview', { count: line.deckCount })
+  return t('sessions.unknownTopic')
+}
 
 /**
  * How a card in a finished session judged itself, as a KEY and a colour.

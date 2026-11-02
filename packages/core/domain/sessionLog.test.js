@@ -22,6 +22,7 @@ describe('sessionLine', () => {
     ).toEqual({
       id: 's1',
       title: 'Spanish verbs',
+      deckCount: null,
       kindKey: 'sessions.srsReview',
       cards: 18,
       minutes: 6,
