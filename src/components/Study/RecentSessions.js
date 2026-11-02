@@ -5,7 +5,9 @@
  * date · score as text in its grade colour beside a 36×3 bar. No expansion —
  * a dashboard is overview only (§11); the per-card breakdown lives on
  * /study/history. "History →" is navigation, so it is text on the right rail
- * with no material (§15.2).
+ * with no material (§15.2). Each row is a door to that page with its own
+ * session open (ADR-058 §3): a readout that leads nowhere said only "you did
+ * something yesterday".
  */
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -16,6 +18,7 @@ import StyleRounded from '@mui/icons-material/StyleRounded'
 import QuizRounded from '@mui/icons-material/QuizRounded'
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
 import { studySessionsService } from '@nowry/core/api/services/studySessions.service'
+import { sessionLine, sessionTitle } from '@nowry/core/domain/sessionLog'
 import { listRow, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 
 const PREVIEW_COUNT = 5
@@ -43,13 +46,28 @@ const KIND = {
   deck_quiz: { Icon: QuizRounded, labelKey: 'sessions.deckQuiz' }
 }
 
-const SessionRow = ({ session, formatDate }) => {
+const SessionRow = ({ session, formatDate, onOpen }) => {
   const { t } = useTranslation()
   const kind = KIND[session.session_type] || KIND.deck_quiz
-  const label = session.session_type === 'ai_quiz' ? session.topic : session.deck_name || t(kind.labelKey)
+  const label = sessionTitle(t, sessionLine(session))
   const pct = session.score_percentage ?? 0
   return (
-    <Box data-testid='session-row' sx={{ ...listRow, gap: 1.5 }}>
+    <Box
+      data-testid='session-row'
+      role='button'
+      tabIndex={0}
+      aria-label={t('sessions.openAria', { title: label })}
+      onClick={onOpen}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen()}
+      sx={{
+        ...listRow,
+        gap: 1.5,
+        cursor: 'pointer',
+        borderRadius: 'sm',
+        '&:hover': { bgcolor: 'background.level1' },
+        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+      }}
+    >
       <Box
         aria-hidden='true'
         sx={{
@@ -67,7 +85,7 @@ const SessionRow = ({ session, formatDate }) => {
       </Box>
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
         <Typography level='title-sm' sx={oneLine}>
-          {label || t('sessions.unknownTopic')}
+          {label}
         </Typography>
         <Typography level='body-xs' sx={{ color: 'text.tertiary', ...oneLine }}>
           {t(kind.labelKey)} · {t('sessions.cardCount', { count: session.total_cards })} · {formatDuration(session.duration_seconds)}
@@ -171,7 +189,12 @@ export default function RecentSessions() {
       {!loading && sessions.length > 0 && (
         <Box sx={{ borderTop: '1px solid', borderColor: 'divider' }}>
           {sessions.slice(0, PREVIEW_COUNT).map((session) => (
-            <SessionRow key={session.id} session={session} formatDate={formatDate} />
+            <SessionRow
+              key={session.id}
+              session={session}
+              formatDate={formatDate}
+              onOpen={() => navigate(`/study/history?session=${encodeURIComponent(session.id)}`)}
+            />
           ))}
         </Box>
       )}

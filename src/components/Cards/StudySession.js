@@ -51,6 +51,7 @@ import RestToggle from './RestToggle'
 import CreateCardModal from './CreateCardModal'
 import { isResting } from '@nowry/core/domain/cardRest'
 import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
+import { newClientId } from '@nowry/core/utils/clientId'
 import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -522,6 +523,8 @@ export default function StudySession() {
 
   // Session history tracking
   const sessionStartTime = useRef(new Date())
+  // Minted once per session so a repeated log is the same record (ADR-058 §2).
+  const clientSessionId = useRef(newClientId())
   const gradedCards = useRef([]) // accumulates { cardId, cardTitle, grade, evaluation } per card
   // Guards the session-complete block against re-running when visibleCards'
   // identity changes after completion. See that effect for the full reasoning.
@@ -751,16 +754,16 @@ export default function StudySession() {
 
     // LOG SESSION HISTORY — fire-and-forget, never blocks the UI
     if (gradedCards.current.length > 0) {
-      const firstCard = visibleCards[0]
-      const deckIdValue = deckId === 'daily-review' ? null : deckId
-      const deckNameValue = deckId === 'daily-review' ? 'Daily Review' : firstCard?.deck_id?.name || firstCard?.deck_id?.title || null
-
+      // The server names the record from the deck, or from the cards' decks
+      // for a daily review (ADR-058 §1). Nothing here reads a name off a card:
+      // no route embeds one, which is how every row came to read "Unknown topic".
       studySessionsService
         .log({
-          deckId: deckIdValue,
-          deckName: deckNameValue,
+          deckId: deckId === 'daily-review' ? null : deckId,
+          deckName: null,
           startedAt: sessionStartTime.current,
-          cards: gradedCards.current
+          cards: gradedCards.current,
+          clientSessionId: clientSessionId.current
         })
         .then((logged) => {
           // The block's work is done (PRD D8): the study block that opened this

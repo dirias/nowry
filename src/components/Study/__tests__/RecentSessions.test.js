@@ -39,6 +39,7 @@ it('shows up to five rows with the score as text and a bar, and no per-row expan
   expect(rows[0]).toHaveTextContent('92%')
   expect(rows[0]).toHaveTextContent('sessions.srsReview')
   expect(screen.queryByRole('button', { name: /sessions\.expandAria/ })).not.toBeInTheDocument()
+  expect(rows[0]).toHaveTextContent('Deck a')
   expect(mockList).toHaveBeenCalledWith(5)
   expect(screen.getByText('sessions.ofTotal:{"shown":3,"total":38}')).toBeInTheDocument()
 })
@@ -55,4 +56,17 @@ it('shows one quiet line when there is nothing yet', async () => {
   render(<RecentSessions />)
   expect(await screen.findByText('sessions.emptyHint')).toBeInTheDocument()
   expect(screen.queryByText('sessions.history')).not.toBeInTheDocument()
+})
+
+it('opens History on the row\'s own session when a row is clicked (ADR-058 §3)', async () => {
+  mockList.mockResolvedValue({ sessions: [session('a', 92)], total: 1 })
+  render(<RecentSessions />)
+  fireEvent.click((await screen.findAllByTestId('session-row'))[0])
+  expect(mockNavigate).toHaveBeenCalledWith('/study/history?session=a')
+})
+
+it('titles a review across decks from its deck count, not from a literal (ADR-058 §1)', async () => {
+  mockList.mockResolvedValue({ sessions: [{ ...session('d', 70), deck_id: null, deck_name: null, deck_count: 3 }], total: 1 })
+  render(<RecentSessions />)
+  expect((await screen.findAllByTestId('session-row'))[0]).toHaveTextContent('sessions.dailyReview:{"count":3}')
 })

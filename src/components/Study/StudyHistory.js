@@ -5,7 +5,7 @@
  * study mode (AI quiz, deck quiz, SRS flashcard review).
  */
 import React, { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Chip, Container, Divider, Skeleton, Stack, Typography } from '@mui/joy'
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded'
@@ -18,7 +18,7 @@ import CheckRounded from '@mui/icons-material/CheckRounded'
 import CloseRounded from '@mui/icons-material/CloseRounded'
 import RemoveRounded from '@mui/icons-material/RemoveRounded'
 import { studySessionsService } from '@nowry/core/api/services/studySessions.service'
-import { sessionCardLine } from '@nowry/core/domain/sessionLog'
+import { sessionCardLine, sessionLine, sessionTitle } from '@nowry/core/domain/sessionLog'
 
 // ---------------------------------------------------------------------------
 // Helpers (duplicated here to keep this page self-contained)
@@ -60,13 +60,14 @@ const evalIcon = ({ iconKey, color }) => {
 // SessionRow
 // ---------------------------------------------------------------------------
 
-const SessionRow = ({ session, t }) => {
-  const [expanded, setExpanded] = useState(false)
+const SessionRow = ({ session, t, defaultExpanded = false }) => {
+  // Open on arrival when a Recent row was the way in (ADR-058 §3).
+  const [expanded, setExpanded] = useState(defaultExpanded)
 
   const isAI = session.session_type === 'ai_quiz'
   const isSRS = session.session_type === 'srs_review'
 
-  const label = isAI ? session.topic : session.deck_name || (isSRS ? t('sessions.srsReview') : t('sessions.deckQuiz'))
+  const label = sessionTitle(t, sessionLine(session))
 
   const typeLabel = isAI ? t('sessions.aiQuiz') : isSRS ? t('sessions.srsReview') : t('sessions.deckQuiz')
 
@@ -117,7 +118,7 @@ const SessionRow = ({ session, t }) => {
         {/* Label + meta */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography level='title-sm' fontWeight={600} noWrap>
-            {label || t('sessions.unknownTopic')}
+            {label}
           </Typography>
           <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
             {typeLabel} · {t('sessions.cardCount', { count: session.total_cards })} · {formatDuration(session.duration_seconds)}
@@ -208,6 +209,8 @@ const PAGE_SIZE = 20
 export default function StudyHistory() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const openSession = searchParams.get('session')
 
   const [sessions, setSessions] = useState([])
   const [total, setTotal] = useState(0)
@@ -298,7 +301,7 @@ export default function StudyHistory() {
         <>
           <Stack divider={<Divider />}>
             {sessions.map((session) => (
-              <SessionRow key={session.id} session={session} t={t} />
+              <SessionRow key={session.id} session={session} t={t} defaultExpanded={session.id === openSession} />
             ))}
           </Stack>
 
