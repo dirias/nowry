@@ -11,7 +11,9 @@
 const KIND_KEYS = {
   ai_quiz: 'sessions.aiQuiz',
   srs_review: 'sessions.srsReview',
-  deck_quiz: 'sessions.deckQuiz'
+  deck_quiz: 'sessions.deckQuiz',
+  // A drill over named cards: practice showings only, the schedule untouched (ADR-059 §4).
+  drill: 'sessions.drill'
 }
 
 /** A minute is the smallest unit worth showing; nothing takes zero minutes. */
